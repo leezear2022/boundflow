@@ -321,3 +321,21 @@
 
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase4d_onnx_frontend_matches_torch.py`
+
+---
+
+## 2025-12-17：TVM 后端更新：默认改为 Relax 算子实现（不再手写 TE/TIR）
+
+**动机**
+- TE 已逐步不再作为 TVM 推荐的“上层入口”；希望用 Relax op 表达 kernel 逻辑，由 TVM 自行 legalize/lower（内部仍会生成 TIR，但不需要我们手写）。
+- 当前仓库的 TVM runtime 没有 `tvm.nd`（使用 `tvm.runtime.Tensor`），但 Relax VM 在该 fork 下是可用的，适合做“先不用手写 TIR”的阶段性实现。
+
+**主要改动**
+- 新增 Relax kernel builder：
+  - `boundflow/backends/tvm/relax_interval_linear.py`
+  - `boundflow/backends/tvm/relax_interval_conv2d.py`
+- `TVMTaskExecutor` 默认使用 Relax VM（可通过 `TVMExecutorOptions(kernel_style=\"te\")` 退回旧 TE demo）：
+  - `boundflow/runtime/tvm_executor.py`
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase4c_tvmexecutor_matches_python.py tests/test_phase4c_tvmexecutor_matches_python_cnn.py tests/test_phase4c_tvmexecutor_against_auto_lirpa.py`

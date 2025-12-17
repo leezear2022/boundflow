@@ -10,11 +10,14 @@ from ..ir.task import BFTaskModule, TaskKind
 from ..runtime.task_executor import LinfInputSpec
 from ..backends.tvm.interval_linear import IntervalLinearKey, build_interval_linear_module
 from ..backends.tvm.interval_conv2d import IntervalConv2dKey, build_interval_conv2d_module
+from ..backends.tvm.relax_interval_linear import build_relax_interval_linear_vm_exec
+from ..backends.tvm.relax_interval_conv2d import build_relax_interval_conv2d_vm_exec
 
 
 @dataclass(frozen=True)
 class TVMExecutorOptions:
     target: Optional[str] = None  # e.g. "llvm" or "cuda"
+    kernel_style: str = "relax"  # "relax" (preferred) or "te" (legacy demo)
 
 
 @dataclass
@@ -23,6 +26,7 @@ class TVMRunStats:
     fallback_ops: List[str]
     linear_kernel_cache: Dict[str, int]
     conv2d_kernel_cache: Dict[str, int]
+    kernel_style: str
 
 
 class TVMTaskExecutor:
@@ -87,6 +91,7 @@ class TVMTaskExecutor:
         # v0: only accelerate non-batched linear (2D weight). Other ops run on torch.
         import tvm
         from tvm.runtime import _tensor as rt
+        from tvm import relax
 
         dev = tvm.cpu(0) if target == "llvm" else tvm.cuda(0)
         tvm_ops: List[str] = []
@@ -111,6 +116,32 @@ class TVMTaskExecutor:
                     return [int(value[0])] * dim
             raise ValueError(f"invalid int tuple: {value} (expected dim={dim})")
 
+        def _run_relax_linear(key: IntervalLinearKey, x: IntervalState, w: torch.Tensor, b: torch.Tensor) -> IntervalState:
+            ex = build_relax_interval_linear_vm_exec(key)
+            vm = relax.VirtualMachine(ex, dev)
+            x_l_t = rt.tensor(x.lower.detach().cpu().numpy(), device=dev)
+            x_u_t = rt.tensor(x.upper.detach().cpu().numpy(), device=dev)
+            w_t = rt.tensor(w.detach().cpu().numpy(), device=dev)
+            b_t = rt.tensor(b.detach().cpu().numpy(), device=dev)
+            out = vm["main"](x_l_t, x_u_t, w_t, b_t)
+            y_l_t, y_u_t = out[0], out[1]
+            y_l = torch.from_numpy(y_l_t.numpy()).to(x0.device)
+            y_u = torch.from_numpy(y_u_t.numpy()).to(x0.device)
+            return IntervalState(lower=y_l, upper=y_u)
+
+        def _run_relax_conv2d(key: IntervalConv2dKey, x: IntervalState, w: torch.Tensor, b: torch.Tensor) -> IntervalState:
+            ex = build_relax_interval_conv2d_vm_exec(key)
+            vm = relax.VirtualMachine(ex, dev)
+            x_l_t = rt.tensor(x.lower.detach().cpu().numpy(), device=dev)
+            x_u_t = rt.tensor(x.upper.detach().cpu().numpy(), device=dev)
+            w_t = rt.tensor(w.detach().cpu().numpy(), device=dev)
+            b_t = rt.tensor(b.detach().cpu().numpy(), device=dev)
+            out = vm["main"](x_l_t, x_u_t, w_t, b_t)
+            y_l_t, y_u_t = out[0], out[1]
+            y_l = torch.from_numpy(y_l_t.numpy()).to(x0.device)
+            y_u = torch.from_numpy(y_u_t.numpy()).to(x0.device)
+            return IntervalState(lower=y_l, upper=y_u)
+
         for op in task.ops:
             if op.op_type == "linear":
                 x = get_interval(op.inputs[0])
@@ -134,18 +165,20 @@ class TVMTaskExecutor:
                 O = w.shape[0]
                 dtype = str(x.lower.dtype).replace("torch.", "")
                 key = IntervalLinearKey(batch=int(B), in_features=int(I), out_features=int(O), dtype=dtype, target=target)
-                func = build_interval_linear_module(key)
-
-                x_l_t = rt.tensor(x.lower.detach().cpu().numpy(), device=dev)
-                x_u_t = rt.tensor(x.upper.detach().cpu().numpy(), device=dev)
-                w_t = rt.tensor(w.detach().cpu().numpy(), device=dev)
-                b_t = rt.tensor(b.detach().cpu().numpy(), device=dev)
-                y_l_t = rt.empty((B, O), dtype=dtype, device=dev)
-                y_u_t = rt.empty((B, O), dtype=dtype, device=dev)
-                func(x_l_t, x_u_t, w_t, b_t, y_l_t, y_u_t)
-                y_l = torch.from_numpy(y_l_t.numpy()).to(x0.device)
-                y_u = torch.from_numpy(y_u_t.numpy()).to(x0.device)
-                env[op.outputs[0]] = IntervalState(lower=y_l, upper=y_u)
+                if self.options.kernel_style == "te":
+                    func = build_interval_linear_module(key)
+                    x_l_t = rt.tensor(x.lower.detach().cpu().numpy(), device=dev)
+                    x_u_t = rt.tensor(x.upper.detach().cpu().numpy(), device=dev)
+                    w_t = rt.tensor(w.detach().cpu().numpy(), device=dev)
+                    b_t = rt.tensor(b.detach().cpu().numpy(), device=dev)
+                    y_l_t = rt.empty((B, O), dtype=dtype, device=dev)
+                    y_u_t = rt.empty((B, O), dtype=dtype, device=dev)
+                    func(x_l_t, x_u_t, w_t, b_t, y_l_t, y_u_t)
+                    y_l = torch.from_numpy(y_l_t.numpy()).to(x0.device)
+                    y_u = torch.from_numpy(y_u_t.numpy()).to(x0.device)
+                    env[op.outputs[0]] = IntervalState(lower=y_l, upper=y_u)
+                else:
+                    env[op.outputs[0]] = _run_relax_linear(key, x, w, b)  # type: ignore[assignment]
                 tvm_ops.append("linear")
                 continue
 
@@ -216,21 +249,22 @@ class TVMTaskExecutor:
                     dtype=dtype,
                     target=target,
                 )
-                func = build_interval_conv2d_module(key)
-
-                oh = (int(H) + 2 * int(padding[0]) - int(dilation[0]) * (int(KH) - 1) - 1) // int(stride[0]) + 1
-                ow = (int(W) + 2 * int(padding[1]) - int(dilation[1]) * (int(KW) - 1) - 1) // int(stride[1]) + 1
-
-                x_l_t = rt.tensor(x.lower.detach().cpu().numpy(), device=dev)
-                x_u_t = rt.tensor(x.upper.detach().cpu().numpy(), device=dev)
-                w_t = rt.tensor(w.detach().cpu().numpy(), device=dev)
-                b_t = rt.tensor(b.detach().cpu().numpy(), device=dev)
-                y_l_t = rt.empty((int(N), int(CO), int(oh), int(ow)), dtype=dtype, device=dev)
-                y_u_t = rt.empty((int(N), int(CO), int(oh), int(ow)), dtype=dtype, device=dev)
-                func(x_l_t, x_u_t, w_t, b_t, y_l_t, y_u_t)
-                y_l = torch.from_numpy(y_l_t.numpy()).to(x0.device)
-                y_u = torch.from_numpy(y_u_t.numpy()).to(x0.device)
-                env[op.outputs[0]] = IntervalState(lower=y_l, upper=y_u)
+                if self.options.kernel_style == "te":
+                    func = build_interval_conv2d_module(key)
+                    oh = (int(H) + 2 * int(padding[0]) - int(dilation[0]) * (int(KH) - 1) - 1) // int(stride[0]) + 1
+                    ow = (int(W) + 2 * int(padding[1]) - int(dilation[1]) * (int(KW) - 1) - 1) // int(stride[1]) + 1
+                    x_l_t = rt.tensor(x.lower.detach().cpu().numpy(), device=dev)
+                    x_u_t = rt.tensor(x.upper.detach().cpu().numpy(), device=dev)
+                    w_t = rt.tensor(w.detach().cpu().numpy(), device=dev)
+                    b_t = rt.tensor(b.detach().cpu().numpy(), device=dev)
+                    y_l_t = rt.empty((int(N), int(CO), int(oh), int(ow)), dtype=dtype, device=dev)
+                    y_u_t = rt.empty((int(N), int(CO), int(oh), int(ow)), dtype=dtype, device=dev)
+                    func(x_l_t, x_u_t, w_t, b_t, y_l_t, y_u_t)
+                    y_l = torch.from_numpy(y_l_t.numpy()).to(x0.device)
+                    y_u = torch.from_numpy(y_u_t.numpy()).to(x0.device)
+                    env[op.outputs[0]] = IntervalState(lower=y_l, upper=y_u)
+                else:
+                    env[op.outputs[0]] = _run_relax_conv2d(key, x, w, b)  # type: ignore[assignment]
                 tvm_ops.append("conv2d")
                 continue
 
@@ -305,7 +339,12 @@ class TVMTaskExecutor:
         self.last_stats = TVMRunStats(
             tvm_ops=tvm_ops,
             fallback_ops=fallback_ops,
-            linear_kernel_cache=_cache_info_dict(build_interval_linear_module.cache_info()),
-            conv2d_kernel_cache=_cache_info_dict(build_interval_conv2d_module.cache_info()),
+            linear_kernel_cache=_cache_info_dict(
+                (build_interval_linear_module if self.options.kernel_style == "te" else build_relax_interval_linear_vm_exec).cache_info()
+            ),
+            conv2d_kernel_cache=_cache_info_dict(
+                (build_interval_conv2d_module if self.options.kernel_style == "te" else build_relax_interval_conv2d_vm_exec).cache_info()
+            ),
+            kernel_style=self.options.kernel_style,
         )
         return get_interval(output_value)
