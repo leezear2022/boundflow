@@ -30,6 +30,13 @@ class BufferSpec:
     shape: List[Optional[int]]
     scope: str = "global"  # e.g. global/shared/local/param
 
+    # Placeholders for backend/planner (Phase 4B/5):
+    device: Optional[str] = None  # e.g. "cpu", "cuda"
+    layout: Optional[str] = None  # e.g. "NCHW", "NHWC"
+    strides: Optional[List[int]] = None
+    alignment: Optional[int] = None
+    alias_group: Optional[str] = None  # allow planner to express reuse/aliasing groups
+
 
 @dataclass
 class StoragePlan:

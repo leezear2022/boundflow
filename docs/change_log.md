@@ -154,3 +154,106 @@
 **验证**
 - StoragePlan 单测：`conda run -n boundflow python -m pytest -q tests/test_phase4b_storage_plan.py`
 - Phase 4 对齐回归：`conda run -n boundflow python -m pytest -q tests/test_phase4_task_pipeline_against_auto_lirpa.py tests/test_phase4_task_pipeline_cnn_against_auto_lirpa.py`
+
+---
+
+## 2025-12-17：Phase 4B.2 Spec/Property（C 矩阵）对齐 auto_LiRPA
+
+**动机**
+- Phase 4 的计划要求补齐 Spec/Property，尤其是对齐 auto_LiRPA 的 `compute_bounds(C=..., method=...)` 语义。
+- 注意：对 IBP 来说，`C` 不是简单“把 logits interval 再乘一次 C”就能对齐 auto_LiRPA；auto_LiRPA 会在最后线性层将 `C` 融合进权重/偏置，从而避免对 logits 各维独立化造成的额外松弛。
+
+**主要改动**
+- 新增 SpecIR：`boundflow/ir/spec.py`
+  - `LinearSpec(C)`：C shape `[B,S,O]`，输出 shape `[B,S]`
+- 新增 Planner v1：`boundflow/planner/interval_v1.py`
+  - `plan_interval_ibp_with_linear_spec(program, spec)`：
+    - 优先将 `C` 融合进最后 `linear`（`W' = C@W`, `b' = C@b`）以对齐 auto_LiRPA 的 IBP + C 行为
+    - fallback：无法融合时追加 `spec_linear` op（语义正确但可能更松）
+- Task executor：`boundflow/runtime/task_executor.py`
+  - 支持 batched linear 权重（`w` rank-3 `[B,O,I]`）以执行融合后的 property
+  - 保留 `spec_linear`（直接对 logits 做 C 线性组合）的执行支持
+- 导出：`boundflow/planner/__init__.py`
+
+**测试**
+- 新增对齐测试：`tests/test_phase4b2_margin_c_against_auto_lirpa.py`
+  - 同一模型/输入/eps 下，BoundFlow(task+spec) 输出 == auto_LiRPA `compute_bounds(C=C, method='IBP')`
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase4b2_margin_c_against_auto_lirpa.py`
+
+---
+
+## 2025-12-17：Phase 4C v0 TVMExecutor（Python driver + TVM kernel demo）
+
+**动机**
+- 参考 `docs/phase4_plan.md`：在不引入复杂 Relax orchestration 的前提下，先打通 TVM lowering/执行通路，证明“同一个 Task：Python reference vs TVM backend 输出一致”。
+
+**主要改动**
+- TVM kernel（interval linear）：`boundflow/backends/tvm/interval_linear.py`
+  - 基于 TE → `te.create_prim_func` → `tvm.build` 生成 `interval_linear_ibp`（输入 `x_l/x_u/w/b`，输出 `y_l/y_u`）
+  - 注意：本仓库的 TVM runtime 张量类型是 `tvm.runtime.Tensor`（不是 `tvm.nd.NDArray`），因此 executor 使用 `tvm.runtime._tensor.tensor/empty` 分配与拷贝
+- TVM executor：`boundflow/runtime/tvm_executor.py`
+  - `TVMTaskExecutor`：Python driver 顺序执行 TaskOp，v0 仅加速 `linear`（2D weight），其它 op fallback 到 torch
+- 测试：`tests/test_phase4c_tvmexecutor_matches_python.py`
+  - 验证 MLP 下 `TVMTaskExecutor` 输出与 `PythonTaskExecutor` 完全一致（允许浮点误差）
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase4c_tvmexecutor_matches_python.py`
+
+---
+
+## 2025-12-17：Phase 4B/4C 小修：permute 命名与 StoragePlan 字段占位
+
+**动机**
+- 吸收 `docs/stage_4_critical_review.md` 的建议：`permute` 不应误叫 `transpose`，否则后续 layout 分析/优化容易混淆；同时 StoragePlan 需要尽早预留后端关键字段避免返工。
+
+**主要改动**
+- 前端/规范化：`aten.permute.default` 现在映射为 `permute`（并保留旧 `transpose` 的 backward-compat）
+  - `boundflow/frontends/pytorch/frontend.py`
+  - `boundflow/frontends/normalize.py`
+- Runtime：task executors 对 `permute/transpose` 统一执行真实 `permute(*dims)`
+  - `boundflow/runtime/task_executor.py`
+  - `boundflow/runtime/tvm_executor.py`
+- StoragePlan schema：`BufferSpec` 增加占位字段 `device/layout/strides/alignment/alias_group`
+  - `boundflow/ir/task.py`
+  - 默认 planner 填充 `scope`（param/const/global）与 `layout`
+  - `boundflow/planner/interval_v0.py`
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase4_task_pipeline_against_auto_lirpa.py tests/test_phase4_task_pipeline_cnn_against_auto_lirpa.py tests/test_phase4b_storage_plan.py tests/test_phase4b2_margin_c_against_auto_lirpa.py tests/test_phase4c_tvmexecutor_matches_python.py`
+
+---
+
+## 2025-12-17：Phase 4C 增补：auto_LiRPA vs PythonTaskExecutor vs TVMTaskExecutor 三方对齐测试
+
+**动机**
+- `tests/test_phase4c_tvmexecutor_matches_python.py` 只验证了 TVMExecutor 对齐 Python reference，但没有把 auto_LiRPA 拉进同一条链路里做端到端 sanity check。
+
+**主要改动**
+- 新增测试：`tests/test_phase4c_tvmexecutor_against_auto_lirpa.py`
+  - 断言 `PythonTaskExecutor` 的 IBP 输出与 auto_LiRPA `compute_bounds(method="IBP")` 一致
+  - 断言 `TVMTaskExecutor` 的输出与 `PythonTaskExecutor` 一致（从而形成三方闭环）
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase4c_tvmexecutor_against_auto_lirpa.py`
+
+---
+
+## 2025-12-17：测试体验修复：避免收集 3rdparty 测试 & 修正 test_env.py 的 pytest 行为
+
+**动机**
+- `pytest` 默认会递归收集 `boundflow/3rdparty/*` 下的 upstream 测试，导致大量 collection error（这些不属于 BoundFlow 的回归范围）。
+- `tests/test_env.py` 原先是脚本式写法（import 时 `sys.exit`），会导致 `pytest tests` 直接在 collection 阶段失败。
+
+**主要改动**
+- 新增 `pytest.ini`
+  - 将默认 `testpaths` 限制在 `tests/`
+  - `norecursedirs` 排除 `boundflow/3rdparty`
+- 重写 `tests/test_env.py`
+  - 提供 `test_env_smoke_imports()` 作为 pytest 测试（不再在 import 时退出）
+  - 保留 `python tests/test_env.py` 的脚本用法（通过 `main()` + `__main__`）
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_env.py`
+- `conda run -n boundflow python -m pytest -q`

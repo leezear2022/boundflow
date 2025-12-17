@@ -15,10 +15,13 @@ def normalize_primal_graph(graph: BFPrimalGraph) -> BFPrimalGraph:
     method_map = {
         "view": "reshape",
         "reshape": "reshape",
-        "permute": "transpose",
+        "permute": "permute",
     }
     for node in graph.nodes:
         if node.op_type.startswith("call_method::"):
             method = node.op_type.split("::", 1)[1]
             node.op_type = method_map.get(method, node.op_type)
+        # Backward-compat: older frontend used "transpose" for permute.
+        if node.op_type == "transpose":
+            node.op_type = "permute"
     return graph

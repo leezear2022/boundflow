@@ -249,7 +249,7 @@ def _map_torch_target_to_primitive(target: Any) -> str:
         "aten.flatten.using_ints": "flatten",
         "aten.reshape.default": "reshape",
         "aten.view.default": "reshape",
-        "aten.permute.default": "transpose",
+        "aten.permute.default": "permute",
     }
     return mapping.get(name, name)
 
@@ -280,8 +280,8 @@ def _extract_attrs_for_call_function(op_type: str, fx_node: torch.fx.Node) -> Di
         end_dim = int(args[2]) if len(args) > 2 else -1
         return {"start_dim": start_dim, "end_dim": end_dim}
 
-    if op_type == "transpose":
-        # aten.permute.default(input, dims)
+    if op_type in ("permute", "transpose"):
+        # aten.permute.default(input, dims) -> permute (transpose is kept for backward-compat)
         args = list(fx_node.args)
         dims = args[1] if len(args) > 1 else None
         if not isinstance(dims, (list, tuple)):

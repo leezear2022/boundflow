@@ -73,11 +73,19 @@ def _default_storage_plan(program: BFPrimalProgram) -> StoragePlan:
     value_to_buffer: Dict[str, str] = {}
     for value_name, value in program.graph.values.items():
         buffer_id = f"buf_{value_name}"
+        scope = "global"
+        if getattr(value, "kind", None) is not None:
+            if value.kind.value == "param":
+                scope = "param"
+            elif value.kind.value == "const":
+                scope = "const"
         buffers[buffer_id] = BufferSpec(
             buffer_id=buffer_id,
             dtype=value.type.dtype,
             shape=list(value.type.shape),
-            scope="global",
+            scope=scope,
+            device=None,
+            layout=value.type.layout,
         )
         value_to_buffer[value_name] = buffer_id
     return StoragePlan(buffers=buffers, value_to_buffer=value_to_buffer)

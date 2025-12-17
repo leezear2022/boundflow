@@ -71,12 +71,49 @@ class PythonTaskExecutor:
             raise KeyError(f"missing param tensor: {value_name}")
 
         for op in task.ops:
+            if op.op_type == "spec_linear":
+                # y = C @ logits, where C shape [B,S,O], logits shape [B,O]
+                logits = get_interval(op.inputs[0])
+                C = get_tensor(op.inputs[1])
+                if not torch.is_tensor(C):
+                    C = torch.as_tensor(C, device=x0.device)
+                if C.dim() != 3:
+                    raise ValueError(f"spec_linear expects C rank-3 [B,S,O], got {tuple(C.shape)}")
+                if logits.lower.dim() != 2:
+                    raise ValueError(f"spec_linear expects logits rank-2 [B,O], got {tuple(logits.lower.shape)}")
+                if C.shape[0] != logits.lower.shape[0] or C.shape[2] != logits.lower.shape[1]:
+                    raise ValueError(
+                        f"spec_linear shape mismatch: C={tuple(C.shape)} logits={tuple(logits.lower.shape)}"
+                    )
+                C_pos = torch.clamp(C, min=0.0)
+                C_neg = torch.clamp(C, max=0.0)
+                l = logits.lower.unsqueeze(1)
+                u = logits.upper.unsqueeze(1)
+                lb = (C_pos * l + C_neg * u).sum(dim=-1)
+                ub = (C_pos * u + C_neg * l).sum(dim=-1)
+                env[op.outputs[0]] = IntervalState(lower=lb, upper=ub)  # type: ignore[assignment]
+                continue
+
             if op.op_type == "linear":
                 x = get_interval(op.inputs[0])
                 w = get_tensor(op.inputs[1])
                 b = get_tensor(op.inputs[2]) if len(op.inputs) == 3 else None
-                out = self.domain.affine_transformer(x, w, b, op="linear")
-                env[op.outputs[0]] = out  # type: ignore[assignment]
+                if torch.is_tensor(w) and w.dim() == 3:
+                    # Batched linear: w shape [B, O, I], b shape [B, O] (optional)
+                    if b is None:
+                        b = 0.0
+                    if not torch.is_tensor(b):
+                        b = torch.as_tensor(b, device=x0.device)
+                    mid = (x.lower + x.upper) / 2.0
+                    diff = (x.upper - x.lower) / 2.0
+                    center = torch.bmm(mid.unsqueeze(1), w.transpose(-1, -2)).squeeze(1)
+                    deviation = torch.bmm(diff.unsqueeze(1), w.abs().transpose(-1, -2)).squeeze(1)
+                    lb = center - deviation + b
+                    ub = center + deviation + b
+                    env[op.outputs[0]] = IntervalState(lower=lb, upper=ub)  # type: ignore[assignment]
+                else:
+                    out = self.domain.affine_transformer(x, w, b, op="linear")
+                    env[op.outputs[0]] = out  # type: ignore[assignment]
                 continue
 
             if op.op_type == "conv2d":
@@ -124,7 +161,7 @@ class PythonTaskExecutor:
                 )
                 continue
 
-            if op.op_type == "transpose":
+            if op.op_type in ("permute", "transpose"):
                 x = get_interval(op.inputs[0])
                 dims = op.attrs.get("dims")
                 if not isinstance(dims, (list, tuple)):
