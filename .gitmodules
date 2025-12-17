@@ -1,9 +1,9 @@
 [submodule "boundflow/3rdparty/tvm"]
 	path = boundflow/3rdparty/tvm
-	url = https://github.com/leezear2022/tvm
+	url = git@github.com:leezear2022/tvm.git
 [submodule "boundflow/3rdparty/tvm-ffi"]
 	path = boundflow/3rdparty/tvm-ffi
-	url = https://github.com/leezear2022/tvm-ffi
+	url = git@github.com:leezear2022/tvm-ffi.git
 [submodule "boundflow/3rdparty/auto_LiRPA"]
 	path = boundflow/3rdparty/auto_LiRPA
-	url = https://github.com/leezear2022/auto_LiRPA
+	url = git@github.com:leezear2022/auto_LiRPA.git
