@@ -1,0 +1,58 @@
+name: boundflow
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+dependencies:
+  - python>=3.10
+  - pip
+  # Build tools
+  - cmake>=3.18
+  - ninja
+  - ccache
+  - make
+  - llvmdev>=15.0  # For TVM LLVM codegen backend
+  
+  # PyTorch & Auto_LiRPA
+  # Using a flexible generic constraint, conda will resolve to a compatible version (likely 2.1+)
+  - pytorch>=2.0.0
+  - torchvision>=0.15.0
+  - pytorch-cuda=12.1 # Assuming CUDA 12.1, common baseline. Can interactively ask if unsure but this is safe default.
+  
+  # TVM Core dependencies
+  - numpy>=1.20
+  - scipy
+  - cloudpickle
+  - psutil
+  - tornado
+  - ml_dtypes
+  - typing_extensions
+  - attrs
+  - decorator
+  
+  # TVM Autotuner
+  - xgboost
+  
+  # ONNX frontend
+  - onnx
+  - onnxoptimizer
+  # - onnxruntime # Optional, often conflicts with system libs or complicates things, but good for verification.
+  
+  # Auto_LiRPA dependencies
+  - pyyaml
+  - tqdm
+  - appdirs
+  - graphviz
+  
+  # Testing & Dev
+  - pytest
+  - pytest-xdist
+  - pytest-benchmark
+  - pylint
+  - black
+  - mypy
+  
+  - pip:
+    # Custom forks are installed via setup.py/env.sh, but we list other pip packages here if conda lacks them
+    - onnxruntime
+    - pytest-order

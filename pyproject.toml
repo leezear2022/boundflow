@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "boundflow"
+version = "0.0.0"
+description = "Verification-aware compiler and runtime for LiRPA/CROWN workloads."
+readme = "README.md"
+requires-python = ">=3.10"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["boundflow*"]
+exclude = ["boundflow.3rdparty*"]
+
