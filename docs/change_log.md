@@ -282,3 +282,23 @@
 
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase4c_tvmexecutor_matches_python_cnn.py`
+
+---
+
+## 2025-12-17：Phase 4B.3：layout-only `permute` 简化 pass（合并/消除）
+
+**动机**
+- `permute` 属于 layout-only op，Phase 5 做 transpose sinking/elimination 之前，需要先把“能确定消去的情况”在 planner 层钉住，避免无意义重排在后端固化成 kernel。
+
+**主要改动**
+- 新增 planner pass：`boundflow/planner/passes/layout_only.py`
+  - 连续 `permute` 做组合：`permute(p1) -> permute(p2)` 合成一个 `permute(compose(p1,p2))`
+  - identity `permute` 直接消除，并通过 value alias 重写后续输入/输出
+  - 统一把 `transpose` 视为 `permute`（向后兼容）
+- `plan_interval_ibp_v0` 默认启用该 pass：`boundflow/planner/interval_v0.py`
+
+**测试**
+- 新增：`tests/test_phase4b3_layout_permutes.py`
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase4b3_layout_permutes.py`

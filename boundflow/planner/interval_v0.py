@@ -4,6 +4,7 @@ from typing import Any, Dict
 
 from ..ir.primal import BFPrimalProgram
 from ..ir.task import BFTaskModule, BoundTask, BufferSpec, StoragePlan, TaskKind, TaskLowering, TaskOp
+from .passes.layout_only import simplify_layout_only_ops
 
 
 def plan_interval_ibp_v0(program: BFPrimalProgram) -> BFTaskModule:
@@ -37,12 +38,14 @@ def plan_interval_ibp_v0(program: BFPrimalProgram) -> BFTaskModule:
                 op.attrs = dict(op.attrs)
                 op.attrs.setdefault("shape", [(-1 if d is None else int(d)) for d in value.type.shape])
 
+    ops, output_values = simplify_layout_only_ops(ops, output_values=list(program.graph.outputs))
+
     task = BoundTask(
         task_id="ibp_task0",
         kind=TaskKind.INTERVAL_IBP,
         ops=ops,
         input_values=list(program.graph.inputs),
-        output_values=list(program.graph.outputs),
+        output_values=output_values,
         params=list(program.params.keys()),
         batch_axes={},
         memory_plan={},
