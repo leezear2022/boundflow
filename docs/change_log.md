@@ -302,3 +302,22 @@
 
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase4b3_layout_permutes.py`
+
+---
+
+## 2025-12-17：Phase 4D：ONNX 前端最小闭环（shape_infer + Primal IR 映射）
+
+**动机**
+- Phase 5 之前需要避免“前端分叉”：Torch-export 与 ONNX-import 必须统一到同一套 Primal IR + planner/executor，才能稳定做后续优化与对齐。
+
+**主要改动**
+- ONNX frontend：`boundflow/frontends/onnx/frontend.py`
+  - 支持 `onnx.shape_inference.infer_shapes`
+  - 将 ONNX Graph 映射到 Primal IR（覆盖闭环子集）：`Gemm/MatMul/Conv/Relu/Add/Mul/Flatten/Reshape/Transpose/Identity/Constant`
+  - `Reshape` 的 shape 必须是常量（initializer/Constant），并被固化到 `attrs["shape"]`（避免引入 shape 计算子图）
+  - initializers/Constant 进入 `program.params`，并建立 `Value` meta（shape/dtype）
+- 新增对齐测试：`tests/test_phase4d_onnx_frontend_matches_torch.py`
+  - MLP 与 MNIST-style CNN：`Torch import` 与 `ONNX import` 在 IBP 输出上对齐（allclose）
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase4d_onnx_frontend_matches_torch.py`
