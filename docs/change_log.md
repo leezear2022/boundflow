@@ -257,3 +257,28 @@
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_env.py`
 - `conda run -n boundflow python -m pytest -q`
+
+---
+
+## 2025-12-17：Phase 4C 增补：TVM interval conv2d kernel + CNN 对齐测试 + 运行统计
+
+**动机**
+- 之前 `TVMTaskExecutor` 仅加速 `linear(w:2D)`，无法覆盖 CNN 的主要算子（`conv2d`），也不易判断到底哪些 op 走了 TVM。
+
+**主要改动**
+- TVM kernel：`boundflow/backends/tvm/interval_conv2d.py`
+  - 新增 `interval_conv2d_ibp`（NCHW）用于 IBP：输入 `x_l/x_u/w/b` 输出 `y_l/y_u`
+  - v0 限制：仅支持 `groups==1`（其余走 fallback）
+- TVM executor：`boundflow/runtime/tvm_executor.py`
+  - `conv2d` 优先走 TVM kernel（不满足条件则 fallback 到 `IntervalDomain`）
+  - 新增 `last_stats`（记录本次 run 中走 TVM 的 op、fallback 的 op、以及 kernel 编译缓存命中信息）
+- 导出：`boundflow/backends/tvm/__init__.py`
+
+**测试 / 基准**
+- 新增测试：`tests/test_phase4c_tvmexecutor_matches_python_cnn.py`
+  - MNIST CNN 下 `TVMTaskExecutor` 输出与 `PythonTaskExecutor` 对齐，并断言至少一次 `conv2d` 走 TVM
+- 新增基准脚本：`scripts/bench_phase4c_tvmexecutor.py`
+  - 对比 `PythonTaskExecutor` vs `TVMTaskExecutor` 的运行耗时（以 IBP 为目标）
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase4c_tvmexecutor_matches_python_cnn.py`

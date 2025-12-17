@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import torch
 
@@ -9,11 +9,20 @@ from ..domains.interval import IntervalDomain, IntervalState
 from ..ir.task import BFTaskModule, TaskKind
 from ..runtime.task_executor import LinfInputSpec
 from ..backends.tvm.interval_linear import IntervalLinearKey, build_interval_linear_module
+from ..backends.tvm.interval_conv2d import IntervalConv2dKey, build_interval_conv2d_module
 
 
 @dataclass(frozen=True)
 class TVMExecutorOptions:
     target: Optional[str] = None  # e.g. "llvm" or "cuda"
+
+
+@dataclass
+class TVMRunStats:
+    tvm_ops: List[str]
+    fallback_ops: List[str]
+    linear_kernel_cache: Dict[str, int]
+    conv2d_kernel_cache: Dict[str, int]
 
 
 class TVMTaskExecutor:
@@ -26,6 +35,7 @@ class TVMTaskExecutor:
     def __init__(self, *, options: Optional[TVMExecutorOptions] = None):
         self.options = options or TVMExecutorOptions()
         self.domain = IntervalDomain()
+        self.last_stats: Optional[TVMRunStats] = None
 
     def _select_target(self) -> str:
         import tvm
@@ -79,6 +89,27 @@ class TVMTaskExecutor:
         from tvm.runtime import _tensor as rt
 
         dev = tvm.cpu(0) if target == "llvm" else tvm.cuda(0)
+        tvm_ops: List[str] = []
+        fallback_ops: List[str] = []
+
+        def _cache_info_dict(info: Any) -> Dict[str, int]:
+            # functools._lru_cache_wrapper.cache_info() returns a namedtuple.
+            return {
+                "hits": int(getattr(info, "hits", 0)),
+                "misses": int(getattr(info, "misses", 0)),
+                "maxsize": int(getattr(info, "maxsize", 0) or 0),
+                "currsize": int(getattr(info, "currsize", 0)),
+            }
+
+        def _as_int_tuple(value: Any, *, dim: int) -> List[int]:
+            if isinstance(value, int):
+                return [int(value)] * dim
+            if isinstance(value, (list, tuple)):
+                if len(value) == dim:
+                    return [int(v) for v in value]
+                if len(value) == 1:
+                    return [int(value[0])] * dim
+            raise ValueError(f"invalid int tuple: {value} (expected dim={dim})")
 
         for op in task.ops:
             if op.op_type == "linear":
@@ -94,6 +125,7 @@ class TVMTaskExecutor:
 
                 if w.dim() != 2:
                     # fallback for batched/spec-fused linear (handled by PythonTaskExecutor today)
+                    fallback_ops.append("linear")
                     out = self.domain.affine_transformer(x, w, b, op="linear")
                     env[op.outputs[0]] = out  # type: ignore[assignment]
                     continue
@@ -114,17 +146,105 @@ class TVMTaskExecutor:
                 y_l = torch.from_numpy(y_l_t.numpy()).to(x0.device)
                 y_u = torch.from_numpy(y_u_t.numpy()).to(x0.device)
                 env[op.outputs[0]] = IntervalState(lower=y_l, upper=y_u)
+                tvm_ops.append("linear")
+                continue
+
+            if op.op_type == "conv2d":
+                x = get_interval(op.inputs[0])
+                w = get_tensor(op.inputs[1])
+                b = get_tensor(op.inputs[2]) if len(op.inputs) >= 3 else None
+                if not torch.is_tensor(w):
+                    w = torch.as_tensor(w)
+                if b is None:
+                    b = torch.zeros((w.shape[0],), dtype=w.dtype)
+                if not torch.is_tensor(b):
+                    b = torch.as_tensor(b)
+
+                stride = _as_int_tuple(op.attrs.get("stride", 1), dim=2)
+                padding = _as_int_tuple(op.attrs.get("padding", 0), dim=2)
+                dilation = _as_int_tuple(op.attrs.get("dilation", 1), dim=2)
+                groups = int(op.attrs.get("groups", 1))
+
+                if x.lower.dim() != 4 or w.dim() != 4 or groups != 1:
+                    fallback_ops.append("conv2d")
+                    out = self.domain.affine_transformer(
+                        x,
+                        w,
+                        b,
+                        op="conv2d",
+                        stride=tuple(stride),
+                        padding=tuple(padding),
+                        dilation=tuple(dilation),
+                        groups=groups,
+                    )
+                    env[op.outputs[0]] = out  # type: ignore[assignment]
+                    continue
+
+                N, CI, H, W = x.lower.shape
+                CO, CI_w, KH, KW = w.shape
+                if CI_w != CI:
+                    fallback_ops.append("conv2d")
+                    out = self.domain.affine_transformer(
+                        x,
+                        w,
+                        b,
+                        op="conv2d",
+                        stride=tuple(stride),
+                        padding=tuple(padding),
+                        dilation=tuple(dilation),
+                        groups=groups,
+                    )
+                    env[op.outputs[0]] = out  # type: ignore[assignment]
+                    continue
+
+                dtype = str(x.lower.dtype).replace("torch.", "")
+                key = IntervalConv2dKey(
+                    batch=int(N),
+                    in_channels=int(CI),
+                    in_h=int(H),
+                    in_w=int(W),
+                    out_channels=int(CO),
+                    k_h=int(KH),
+                    k_w=int(KW),
+                    stride_h=int(stride[0]),
+                    stride_w=int(stride[1]),
+                    pad_h=int(padding[0]),
+                    pad_w=int(padding[1]),
+                    dilation_h=int(dilation[0]),
+                    dilation_w=int(dilation[1]),
+                    groups=int(groups),
+                    dtype=dtype,
+                    target=target,
+                )
+                func = build_interval_conv2d_module(key)
+
+                oh = (int(H) + 2 * int(padding[0]) - int(dilation[0]) * (int(KH) - 1) - 1) // int(stride[0]) + 1
+                ow = (int(W) + 2 * int(padding[1]) - int(dilation[1]) * (int(KW) - 1) - 1) // int(stride[1]) + 1
+
+                x_l_t = rt.tensor(x.lower.detach().cpu().numpy(), device=dev)
+                x_u_t = rt.tensor(x.upper.detach().cpu().numpy(), device=dev)
+                w_t = rt.tensor(w.detach().cpu().numpy(), device=dev)
+                b_t = rt.tensor(b.detach().cpu().numpy(), device=dev)
+                y_l_t = rt.empty((int(N), int(CO), int(oh), int(ow)), dtype=dtype, device=dev)
+                y_u_t = rt.empty((int(N), int(CO), int(oh), int(ow)), dtype=dtype, device=dev)
+                func(x_l_t, x_u_t, w_t, b_t, y_l_t, y_u_t)
+                y_l = torch.from_numpy(y_l_t.numpy()).to(x0.device)
+                y_u = torch.from_numpy(y_u_t.numpy()).to(x0.device)
+                env[op.outputs[0]] = IntervalState(lower=y_l, upper=y_u)
+                tvm_ops.append("conv2d")
                 continue
 
             if op.op_type == "relu":
                 x = get_interval(op.inputs[0])
                 env[op.outputs[0]] = self.domain.relu_transformer(x)  # type: ignore[assignment]
+                fallback_ops.append("relu")
                 continue
 
             if op.op_type == "add":
                 a = get_interval(op.inputs[0])
                 b = get_interval(op.inputs[1])
                 env[op.outputs[0]] = self.domain.elementwise_transformer([a, b], op="add")  # type: ignore[assignment]
+                fallback_ops.append("add")
                 continue
 
             # v0: fallback to torch semantics for remaining ops
@@ -136,6 +256,7 @@ class TVMTaskExecutor:
                     lower=torch.flatten(x.lower, start_dim=start_dim, end_dim=end_dim),
                     upper=torch.flatten(x.upper, start_dim=start_dim, end_dim=end_dim),
                 )
+                fallback_ops.append("flatten")
                 continue
 
             if op.op_type == "reshape":
@@ -143,8 +264,10 @@ class TVMTaskExecutor:
                 shape = op.attrs.get("shape")
                 if shape is None:
                     env[op.outputs[0]] = x
+                    fallback_ops.append("reshape")
                     continue
                 env[op.outputs[0]] = IntervalState(lower=x.lower.reshape(shape), upper=x.upper.reshape(shape))
+                fallback_ops.append("reshape")
                 continue
 
             if op.op_type in ("permute", "transpose"):
@@ -154,6 +277,7 @@ class TVMTaskExecutor:
                     raise ValueError(f"transpose missing dims for op '{op.name}': {dims}")
                 dims = [int(d) for d in dims]
                 env[op.outputs[0]] = IntervalState(lower=x.lower.permute(*dims), upper=x.upper.permute(*dims))
+                fallback_ops.append("permute")
                 continue
 
             if op.op_type == "spec_linear":
@@ -169,6 +293,7 @@ class TVMTaskExecutor:
                 lb = (C_pos * l + C_neg * u).sum(dim=-1)
                 ub = (C_pos * u + C_neg * l).sum(dim=-1)
                 env[op.outputs[0]] = IntervalState(lower=lb, upper=ub)
+                fallback_ops.append("spec_linear")
                 continue
 
             raise NotImplementedError(f"unsupported op_type in TVMTaskExecutor: {op.op_type}")
@@ -177,4 +302,10 @@ class TVMTaskExecutor:
             if len(task.output_values) != 1:
                 raise ValueError(f"task has {len(task.output_values)} outputs; specify output_value explicitly")
             output_value = task.output_values[0]
+        self.last_stats = TVMRunStats(
+            tvm_ops=tvm_ops,
+            fallback_ops=fallback_ops,
+            linear_kernel_cache=_cache_info_dict(build_interval_linear_module.cache_info()),
+            conv2d_kernel_cache=_cache_info_dict(build_interval_conv2d_module.cache_info()),
+        )
         return get_interval(output_value)
