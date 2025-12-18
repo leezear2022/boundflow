@@ -600,3 +600,19 @@
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr11a_task_relax_ops_equiv.py`
 - `conda run -n boundflow python -m pytest -q`
+
+---
+
+## 2025-12-18：Phase 5D PR#11B：可控 fusion pipeline + call_tir 数量统计
+
+**动机**
+- 将 “RELAX_OPS → legalize/fuse” 变成可控编译开关，并把 `call_tir` 数量等 IR 结构统计落到 compile_stats，支撑后续论文级消融（调用次数下降 vs runtime）。
+
+**主要改动**
+- `boundflow/backends/tvm/relax_analysis.py`：新增 `call_tir` 计数与 IR stats
+- `boundflow/runtime/tvm_executor.py`：task-level compile 支持 fusion pipeline（LegalizeOps/Annotate/FuseOps/FuseTIR），并在 `compile_stats["ir_stats"]` 记录各阶段统计
+- `tests/test_phase5d_pr11a_task_relax_ops_equiv.py`：开启 fusion pipeline 回归并检查 `call_tir` 单调性（best-effort）
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr11a_task_relax_ops_equiv.py`
+- `conda run -n boundflow python -m pytest -q`

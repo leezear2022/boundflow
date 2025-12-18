@@ -21,10 +21,22 @@ def test_pr11a_tvm_task_relax_ops_matches_python_on_linear_relu():
     py = run_ibp_scheduled(module, input_spec, executor=PythonTaskExecutor())
 
     tvm_exec = TVMTaskExecutor(
-        options=TVMExecutorOptions(target="llvm", kernel_style="relax", enable_task_relax_ops=True)
+        options=TVMExecutorOptions(
+            target="llvm",
+            kernel_style="relax",
+            enable_task_relax_ops=True,
+            enable_task_fusion_pipeline=True,
+            task_fuse_opt_level=2,
+        )
     )
     tvm = run_ibp_scheduled(module, input_spec, executor=tvm_exec)
 
     assert torch.allclose(py.lower, tvm.lower, atol=1e-5, rtol=1e-5)
     assert torch.allclose(py.upper, tvm.upper, atol=1e-5, rtol=1e-5)
 
+    compile_stats = tvm_exec.get_compile_stats()
+    assert compile_stats
+    one = next(iter(compile_stats.values()))
+    ir_stats = one.get("ir_stats") or {}
+    if "after_legalize" in ir_stats and "after_fuse_tir" in ir_stats:
+        assert int(ir_stats["after_fuse_tir"].get("call_tir", 0)) <= int(ir_stats["after_legalize"].get("call_tir", 0))

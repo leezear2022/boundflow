@@ -33,6 +33,9 @@ class TVMExecutorOptions:
     compile_cache_tag: str = ""
     # PR#11A: run whole task as a single Relax function (RELAX_OPS lowering) when possible.
     enable_task_relax_ops: bool = False
+    # PR#11B: fusion pipeline control (RELAX_OPS path).
+    enable_task_fusion_pipeline: bool = False
+    task_fuse_opt_level: int = -1
 
 
 @dataclass
@@ -195,6 +198,8 @@ class TVMTaskExecutor:
             "target": str(target),
             "kernel_style": str(self.options.kernel_style),
             "compile_cache_tag": str(self.options.compile_cache_tag),
+            "enable_task_fusion_pipeline": bool(self.options.enable_task_fusion_pipeline),
+            "task_fuse_opt_level": int(self.options.task_fuse_opt_level),
         }
         cache_key_hash = hashlib.sha256(repr(sig).encode("utf-8")).hexdigest()[:16]
         if cache_key_hash in self._task_exec_cache:
@@ -210,6 +215,9 @@ class TVMTaskExecutor:
 
         import tvm
         from tvm import relax
+        from tvm import transform
+
+        from ..backends.tvm.relax_analysis import collect_relax_ir_stats  # noqa: PLC0415
 
         instruments: List[Any] = []
         timing_inst = None
@@ -226,15 +234,71 @@ class TVMTaskExecutor:
             dump_dir = os.path.join(str(self.options.dump_ir_dir), str(run_id), cache_key_hash)
             instruments.append(DumpIR(dump_dir=dump_dir, refresh=bool(self.options.dump_ir_refresh)))
 
+        # Build a deterministic and controllable Relax pipeline for task-level compilation.
+        # - Always run LegalizeOps (required for VM build).
+        # - Optionally run fusion (AnnotateTIROpPattern/FuseOps/FuseTIR) to reduce call_tir count.
+        #
+        # Note: We still run Normalize/FoldConstant/DCE/LambdaLift as part of the pipeline to keep modules well-formed
+        # for the VM codegen stage.
+        base_passes = [
+            relax.transform.Normalize(),
+            relax.transform.FoldConstant(),
+            relax.transform.LegalizeOps(),
+        ]
+        if self.options.enable_task_fusion_pipeline:
+            base_passes += [
+                relax.transform.AnnotateTIROpPattern(),
+                relax.transform.FuseOps(fuse_opt_level=int(self.options.task_fuse_opt_level)),
+                relax.transform.FuseTIR(),
+            ]
+        base_passes += [
+            relax.transform.DeadCodeElimination(),
+            relax.transform.RemoveUnusedOutputs(),
+            relax.transform.LambdaLift(),
+            relax.transform.Normalize(),
+        ]
+        relax_pipeline = transform.Sequential(base_passes)
+
+        # Collect per-stage IR stats for ablation.
+        stats_ir: Dict[str, Any] = {"before": collect_relax_ir_stats(ir_mod)}
+        try:
+            mod_after_legalize = transform.Sequential(
+                [relax.transform.Normalize(), relax.transform.FoldConstant(), relax.transform.LegalizeOps()]
+            )(ir_mod)
+            stats_ir["after_legalize"] = collect_relax_ir_stats(mod_after_legalize)
+            if self.options.enable_task_fusion_pipeline:
+                mod_after_fuse_ops = transform.Sequential(
+                    [
+                        relax.transform.Normalize(),
+                        relax.transform.FoldConstant(),
+                        relax.transform.LegalizeOps(),
+                        relax.transform.AnnotateTIROpPattern(),
+                        relax.transform.FuseOps(fuse_opt_level=int(self.options.task_fuse_opt_level)),
+                    ]
+                )(ir_mod)
+                stats_ir["after_fuse_ops"] = collect_relax_ir_stats(mod_after_fuse_ops)
+                mod_after_fuse_tir = transform.Sequential(
+                    [
+                        relax.transform.Normalize(),
+                        relax.transform.FoldConstant(),
+                        relax.transform.LegalizeOps(),
+                        relax.transform.AnnotateTIROpPattern(),
+                        relax.transform.FuseOps(fuse_opt_level=int(self.options.task_fuse_opt_level)),
+                        relax.transform.FuseTIR(),
+                    ]
+                )(ir_mod)
+                stats_ir["after_fuse_tir"] = collect_relax_ir_stats(mod_after_fuse_tir)
+        except Exception:
+            # Stats are best-effort; compilation should still proceed.
+            pass
+
         t0 = time.perf_counter_ns()
         if instruments:
-            from tvm import transform  # noqa: PLC0415
-
             with transform.PassContext(instruments=instruments):
-                ex = relax.build(ir_mod, target=target)
+                ex = relax.build(ir_mod, target=target, relax_pipeline=relax_pipeline)
                 rendered = str(timing_inst.render()) if timing_inst is not None else None
         else:
-            ex = relax.build(ir_mod, target=target)
+            ex = relax.build(ir_mod, target=target, relax_pipeline=relax_pipeline)
             rendered = None
         t1 = time.perf_counter_ns()
 
@@ -248,6 +312,7 @@ class TVMTaskExecutor:
             "dump_ir_dir": dump_dir,
             "task_id": str(getattr(task, "task_id", "")),
             "op_types": [str(getattr(op, "op_type", "")) for op in getattr(task, "ops", [])],
+            "ir_stats": stats_ir,
         }
         if timing_inst is not None:
             stats["pass_timing_render"] = rendered
