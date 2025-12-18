@@ -8,7 +8,7 @@
 - **Task pipeline**：`plan_interval_ibp_v0` 将整图降为 TaskOps；有 `StoragePlan` schema（后续可做 liveness/reuse）。
 - **Spec/Property**：`LinearSpec(C)` 已对齐 auto_LiRPA（融合到最后 linear 优先，fallback `spec_linear` 语义正确）。
 - **Layout-only 起步**：已有 `permute` 简化 pass（identity 消除 + 连续 permute 合并）。
-- **TVM demo**：已有 TVM interval `linear` 与 `conv2d` kernel，且在 MLP/CNN 上做到了 `TVMTaskExecutor == PythonTaskExecutor`，并通过三方闭环（auto_LiRPA / Python / TVM）。
+- **TVM demo**：已有 TVM interval `linear` 与 `conv2d` kernel（目前默认用 Relax VM + Relax op 实现，legacy TE demo 仍可选），且在 MLP/CNN 上做到了 `TVMTaskExecutor == PythonTaskExecutor`，并通过三方闭环（auto_LiRPA / Python / TVM）。
 
 因此 Phase 5 的主线可以从“编译系统能力（Planner/调度/内存/缓存）”开始推进，而不是继续补 Phase 4 的 correctness。
 
@@ -27,7 +27,22 @@
 
 ---
 
-## 2. Phase 5 分阶段计划（5A–5E）
+## 2. Phase 5 的“Pass 插槽”（科研/工程共用的稳定接口）
+
+你在 `docs/p5.md` 里新增的思路非常关键：Phase 5 不能只写“要做什么功能”，还要把“未来可能成为论文创新点”的位置做成 **pass pipeline 的插槽**，否则系统跑起来后很难做系统化消融。
+
+建议把 Phase 5 的优化空间显式拆成这些 pass slot（先 baseline，后续逐步启用）：
+
+1. `property_rewrite`：Spec/Property folding（你已做 last-linear C 融合；Phase 5 扩展为多策略可对比）
+2. `domain_assign`：Domain mix（IBP / CROWN-IBP / backward / future zono 等）
+3. `partition_and_fusion`：Task 切分与融合（减少 kernel launch、提升算子密度）
+4. `cache_and_reuse`：CachePlan/ReusePolicy（对齐 auto_LiRPA 的 reuse/cache 语义）
+5. `layout_opt`：layout-only 消除/下推/合并（在 Phase 4B.3 的基础上继续扩展）
+6. `objective_and_search`：cost model + 小规模搜索（用于系统化消融与科研探索）
+
+---
+
+## 3. Phase 5 分阶段计划（5A–5F）
 
 ### 5A：TaskGraph & Scheduler（从“单 task”到“多 task DAG”）
 
@@ -35,6 +50,9 @@
 - Phase 5 的所有优化（reuse/cache/batching/部分 TVM）都需要“图级调度对象”，不能继续用单 task 承载所有语义。
 
 **交付内容**
+- 将 planner 升级为“pass pipeline”，并输出一个可序列化的 `PlanBundle`（推荐命名/结构，便于长期扩展）：
+  - `plan(program, spec, config) -> PlanBundle`
+  - `PlanBundle` 至少包含：`task_graph`、`storage_plan`、（可选）`cache_plan`、（可选）`layout_plan`、`lowering_plan`
 - 新增 IR：`boundflow/ir/task_graph.py`
   - `TaskGraph(tasks, edges)`、`topo_sort()`、`validate()`
 - 扩展 `BFTaskModule`（保持兼容）
@@ -125,6 +143,7 @@
 
 **动机**
 - auto_LiRPA 的 `reuse_ibp/reuse_alpha/cache_bounds` 是核心性能接口；你需要把它升级为“编译系统级能力”。
+- TVM 后端方面：你已明确不再把 TE 当主线，因此 Phase 5 的 baseline 建议以 Relax 为入口（先不要求你手写 TIR）。
 
 **交付内容**
 - Cache：
@@ -133,8 +152,12 @@
 - Batching（建议先做 property batch）：
   - `boundflow/runtime/batch_runner.py`：同图多 `C` 一次跑（先从 `LinearSpec(C)` batch 开始）
 - TVM：
-  - 先把已有 TVM kernel 通过“TaskGraph 调度 + cache/batch”串起来形成端到端收益
-  - （可选）补齐 `batched linear (w:[B,O,I])` 的 TVM kernel：覆盖 spec 融合后的关键路径
+  - **baseline（建议先做）**：沿用当前 `TVMTaskExecutor` 的 Relax VM 路线（用 Relax op 表达 interval kernel，交给 TVM 内部 legalize/lower；工程侧不手写 TE/TIR）
+    - 现状约束：该 TVM fork 没有 `tvm.nd`，运行时需要继续使用 `tvm.runtime._tensor`
+  - **进阶（可选，用于性能/论文）**：引入 `call_tir` 的 mixed module 路线
+    - 方式 A：你自己生成 mixed IRModule（Relax wrapper + PrimFunc），绕开 TE（更利于做 fusion/schedule）
+    - 方式 B：映射到 Relax op，再用 custom legalization 接管（工程复杂度更高）
+  - （可选）补齐 `batched linear (w:[B,O,I])` 的 TVM kernel：覆盖 spec 融合后的关键路径，并为 property batching 做准备
 - Bench：
   - `benchmarks/phase5_end2end.py`（或沿用 `scripts/bench_phase4c_tvmexecutor.py` 扩展）
   - 输出：wall time / cache hit / peak memory（来自 StoragePlan）
@@ -147,7 +170,27 @@
 
 ---
 
-## 3. 推荐的 PR/提交拆分（降低返工风险）
+### 5F（建议新增）：Objective/Cost Model/Search + Ablation Harness（科研交付必备）
+
+**动机**
+- 你在 `docs/p5.md` 里提到 “Planner 创新要系统化”，最关键落点就是：任何 pass 的 on/off 都能自动跑消融并产出数据。
+
+**交付内容**
+- `boundflow/planner/objectives.py`
+  - `Objective = w_time*time + w_mem*peak_mem + w_tight*tightness + w_compile*compile_time`
+- `boundflow/planner/search/`
+  - baseline：`greedy_search.py`
+  - 可选：`beam_search.py`；预留 `cp_sat_search.py`
+- `benchmarks/planner_ablation.py`
+  - 一键跑 N 个 planner config（domain mix / partition 粒度 / cache on-off / layout opt on-off）
+  - 产出 CSV：`time, peak_mem, tightness, #kernels, compile_time`
+
+**测试 & DoD**
+- DoD：任何一个 pass 的开关都能被框架捕获并产出可复现结果；至少对 MLP/CNN 能输出一份可画图的 ablation CSV。
+
+---
+
+## 4. 推荐的 PR/提交拆分（降低返工风险）
 
 1. PR#1：`TaskGraph` + `scheduler`（5A 基础）
 2. PR#2：`interval_v2` partition + 多 task DAG 输出（5A）
@@ -155,15 +198,15 @@
 4. PR#4：domain rule registry（5C）—— 这是 Phase 5“可扩展性”关键钉子
 5. PR#5：CROWN-IBP 最小可跑 + 对齐测试（5D）
 6. PR#6：cache + property batching（5E-1）
-7. PR#7：TVM 端到端闭环（5E-2：batched linear 可选 + benchmark）
+7. PR#7：TVM 端到端闭环（5E-2：Relax baseline + benchmark；batched linear 可选）
+8. PR#8：objective/search/ablation harness（5F）
 
 ---
 
-## 4. Phase 6（预告，不在 Phase 5 实现）
+## 5. Phase 6（预告，不在 Phase 5 实现）
 
 BaB（β-CROWN 风格）作为 Phase 6：
 
 - `SplitState` / `ConstraintStore` IR + runtime 入口
 - “控制流在 runtime、bound propagation 在 compiled kernels” 的执行模型
 - 复用 Phase 5 的 cache/batching/taskgraph/storageplan 能力
-
