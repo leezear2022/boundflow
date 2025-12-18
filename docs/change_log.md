@@ -517,3 +517,23 @@
 
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase5c_pr6_validators.py`
+
+---
+
+## 2025-12-18：Phase 5C PR#7：Determinism + DumpPlanInstrument + 结构化 VerifyError
+
+**动机**
+- 进一步钉住 planner 的可复现性（determinism）与可观测性：避免 topo 顺序/统计在不同运行漂移，并提供 step 级 JSON snapshot 便于定位 verifier 报错与 silent wrong。
+
+**主要改动**
+- `boundflow/ir/task_graph.py`：`topo_sort()` 改为 heapq 驱动的确定性顺序（按 task_id 字典序）
+- `boundflow/planner/passes/buffer_reuse_pass.py`：overlap blocker 选择增加稳定 tie-break（避免 set 迭代顺序影响）
+- `boundflow/planner/verify.py`：`VerifyError` 增加 `where`，关键错误填充定位信息
+- `boundflow/planner/instrument.py`：`PlannerInstrument.should_run()` 预留 + `DumpPlanInstrument`（step 后 dump JSON）+ verify 输出包含 `where`
+- `boundflow/planner/options.py`：`PlannerDebugOptions` 增加 `dump_plan/dump_plan_dir/dump_plan_run_id`
+- `boundflow/planner/pipeline.py`：debug 开启后自动启用 DumpPlanInstrument；hook 调用统一走 should_run
+- `tests/test_phase5c_pr7_determinism_and_dump.py`：新增 determinism 与 dump 回归
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5c_pr7_determinism_and_dump.py`
+- `conda run -n boundflow python -m pytest -q`

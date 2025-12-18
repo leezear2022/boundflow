@@ -43,5 +43,7 @@ class LayoutOptions:
 class PlannerDebugOptions:
     dump_config: bool = True
     validate_after_each_pass: bool = False  # reserved for PR#6 validators
+    dump_plan: bool = False
+    dump_plan_dir: str = ".benchmarks/plans"
+    dump_plan_run_id: Optional[str] = None
     meta: Dict[str, Any] = field(default_factory=dict)
-

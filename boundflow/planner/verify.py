@@ -11,6 +11,7 @@ from ..ir.task import BFTaskModule
 class VerifyError:
     code: str
     message: str
+    where: Dict[str, Any] = field(default_factory=dict)
     context: Dict[str, Any] = field(default_factory=dict)
 
 
@@ -20,8 +21,10 @@ class VerifyReport:
     errors: List[VerifyError] = field(default_factory=list)
     stats: Dict[str, Any] = field(default_factory=dict)
 
-    def add_error(self, code: str, message: str, **context: Any) -> None:
-        self.errors.append(VerifyError(code=code, message=message, context=dict(context)))
+    def add_error(self, code: str, message: str, *, where: Optional[Dict[str, Any]] = None, **context: Any) -> None:
+        self.errors.append(
+            VerifyError(code=code, message=message, where=dict(where or {}), context=dict(context))
+        )
         self.ok = False
 
 
@@ -38,7 +41,7 @@ def verify_task_graph_soundness(module: BFTaskModule) -> VerifyReport:
     try:
         module.validate()
     except Exception as e:  # noqa: BLE001
-        report.add_error("module_validate_failed", str(e))
+        report.add_error("module_validate_failed", str(e), where={"component": "BFTaskModule.validate"})
         return report
 
     g = module.task_graph
@@ -47,7 +50,7 @@ def verify_task_graph_soundness(module: BFTaskModule) -> VerifyReport:
     try:
         _ = g.topo_sort(tasks_by_id=tasks_by_id, entry_task_id=module.entry_task_id)
     except Exception as e:  # noqa: BLE001
-        report.add_error("topo_sort_failed", str(e))
+        report.add_error("topo_sort_failed", str(e), where={"component": "TaskGraph.topo_sort"})
         return report
 
     # Extra check: every cross-task value dependency implied by TaskIO must be covered by an edge dep.
@@ -79,6 +82,7 @@ def verify_task_graph_soundness(module: BFTaskModule) -> VerifyReport:
                 report.add_error(
                     "missing_edge_dep",
                     "cross-task dependency not covered by TaskGraph edge",
+                    where={"src_task_id": src, "dst_task_id": t.task_id, "buffer_id": buf, "value": v},
                     src_task_id=src,
                     dst_task_id=t.task_id,
                     value=v,
@@ -97,7 +101,7 @@ def verify_storage_plan_soundness(module: BFTaskModule) -> VerifyReport:
     try:
         module.storage_plan.validate()
     except Exception as e:  # noqa: BLE001
-        report.add_error("storage_plan_validate_failed", str(e))
+        report.add_error("storage_plan_validate_failed", str(e), where={"component": "StoragePlan.validate"})
         return report
 
     sp = module.storage_plan
@@ -108,6 +112,7 @@ def verify_storage_plan_soundness(module: BFTaskModule) -> VerifyReport:
             report.add_error(
                 "logical_to_physical_not_total",
                 "physical_buffers present but logical_to_physical does not cover all logical buffers",
+                where={"component": "StoragePlan.logical_to_physical"},
                 missing_logical_buffers=missing[:20],
                 missing_count=len(missing),
             )
@@ -120,6 +125,7 @@ def verify_storage_plan_soundness(module: BFTaskModule) -> VerifyReport:
             report.add_error(
                 "physical_buffers_missing_target",
                 "logical_to_physical maps to ids not present in physical_buffers",
+                where={"component": "StoragePlan.physical_buffers"},
                 examples=bad[:20],
                 count=len(bad),
             )
@@ -144,7 +150,7 @@ def verify_liveness_reuse_consistency(module: BFTaskModule) -> VerifyReport:
     try:
         liveness = compute_liveness_task_level(module)
     except Exception as e:  # noqa: BLE001
-        report.add_error("liveness_compute_failed", str(e))
+        report.add_error("liveness_compute_failed", str(e), where={"component": "compute_liveness_task_level"})
         return report
 
     # Interval overlap check per physical buffer.
@@ -163,6 +169,7 @@ def verify_liveness_reuse_consistency(module: BFTaskModule) -> VerifyReport:
                 report.add_error(
                     "physical_lifetime_overlap",
                     "two logical lifetimes overlap on the same physical buffer",
+                    where={"physical_id": phys, "a_logical": a_id, "b_logical": b_id},
                     physical_id=phys,
                     a_logical=a_id,
                     a_window=(a0, a1),
@@ -184,4 +191,3 @@ def verify_all(module: BFTaskModule) -> Dict[str, VerifyReport]:
         "storage_plan": verify_storage_plan_soundness(module),
         "liveness_reuse": verify_liveness_reuse_consistency(module),
     }
-

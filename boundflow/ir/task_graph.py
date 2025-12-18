@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import heapq
 from typing import Dict, List, Optional, Set
 
 from .task import BoundTask
@@ -118,23 +119,25 @@ class TaskGraph:
         if not reachable:
             return [entry_task_id]
 
-        indeg: Dict[str, int] = {t: 0 for t in reachable}
-        succ: Dict[str, List[str]] = {t: [] for t in reachable}
+        reachable_sorted = sorted(reachable)
+        indeg: Dict[str, int] = {t: 0 for t in reachable_sorted}
+        succ: Dict[str, List[str]] = {t: [] for t in reachable_sorted}
         for e in self.edges:
             if e.src_task_id not in reachable or e.dst_task_id not in reachable:
                 continue
             succ[e.src_task_id].append(e.dst_task_id)
             indeg[e.dst_task_id] += 1
 
-        queue: List[str] = [t for t, d in indeg.items() if d == 0]
+        queue: List[str] = [t for t in reachable_sorted if indeg[t] == 0]
+        heapq.heapify(queue)
         out: List[str] = []
         while queue:
-            t = queue.pop()
+            t = heapq.heappop(queue)
             out.append(t)
             for n in succ.get(t, []):
                 indeg[n] -= 1
                 if indeg[n] == 0:
-                    queue.append(n)
+                    heapq.heappush(queue, n)
 
         if len(out) != len(reachable):
             raise ValueError(f"TaskGraph contains a cycle in reachable subgraph: {sorted(reachable)}")

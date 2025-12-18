@@ -193,13 +193,15 @@ def apply_conservative_buffer_reuse(
                     blockers = active_logical_by_key.get(k) or set()
                     best_tid: Optional[str] = None
                     best_last_use = -1
-                    for b in blockers:
+                    for b in sorted(blockers):
                         lt = liveness.lifetimes.get(b)
                         if lt is None:
                             continue
-                        if int(lt.last_use_index) > best_last_use:
-                            best_last_use = int(lt.last_use_index)
-                            best_tid = str(lt.last_use_task_id)
+                        last_use = int(lt.last_use_index)
+                        tid = str(lt.last_use_task_id)
+                        if last_use > best_last_use or (last_use == best_last_use and (best_tid is None or tid < best_tid)):
+                            best_last_use = last_use
+                            best_tid = tid
                     if best_tid is not None:
                         stats.inc_overlap_blocker(best_tid)
                 elif any_free:

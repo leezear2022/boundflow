@@ -7,7 +7,7 @@ from typing import Any, Dict, List
 from ..ir.primal import BFPrimalProgram
 from ..ir.task import BFTaskModule
 from .core import PlanBundle, PlannerConfig
-from .instrument import PlannerInstrument, TimingInstrument, VerifyInstrument
+from .instrument import DumpPlanInstrument, PlannerInstrument, TimingInstrument, VerifyInstrument
 from .interval_v0 import plan_interval_ibp_v0
 from .interval_v2 import IntervalV2PartitionConfig, plan_interval_ibp_v2
 from .options import PartitionPolicy
@@ -44,6 +44,13 @@ def plan(program: BFPrimalProgram, *, config: PlannerConfig) -> PlanBundle:
     instruments.append(timing)
     if config.debug.validate_after_each_pass:
         instruments.append(verifier)
+    dump_plan_run_id: str | None = None
+    if config.debug.dump_plan:
+        import time
+        import os
+
+        dump_plan_run_id = str(config.debug.dump_plan_run_id or f"{int(time.time())}_{os.getpid()}")
+        instruments.append(DumpPlanInstrument(dump_dir=str(config.debug.dump_plan_dir), run_id=dump_plan_run_id))
 
     # Decide lowering shape (single-task vs multi-task).
     use_v2 = False
@@ -72,6 +79,8 @@ def plan(program: BFPrimalProgram, *, config: PlannerConfig) -> PlanBundle:
     if config.debug.dump_config:
         meta["config_dump"] = _to_jsonable(config)
     meta["planner_steps"] = list(planner_steps)
+    if dump_plan_run_id is not None:
+        meta["plan_run_id"] = str(dump_plan_run_id)
 
     bundle = PlanBundle(
         program=program,
@@ -87,14 +96,17 @@ def plan(program: BFPrimalProgram, *, config: PlannerConfig) -> PlanBundle:
     timings = dict(bundle.meta.get("timings_ms", {}))
     timings[lower_step] = (t1 - t0) / 1e6
     bundle.meta["timings_ms"] = timings
-    if config.debug.validate_after_each_pass:
-        verifier.after_step(lower_step, bundle, verify=verify_all(bundle.task_module))
+    verify_reports = verify_all(bundle.task_module) if config.debug.validate_after_each_pass else None
+    for ins in instruments:
+        if ins.should_run(lower_step, bundle):
+            ins.after_step(lower_step, bundle, verify=verify_reports)
 
     # Apply storage reuse as a planner step (keep interval_v2 as a pure partitioner in this pipeline).
     reuse_enabled = bool(config.enable_storage_reuse) or bool(config.storage_reuse.enabled)
     if reuse_enabled and module.task_graph is not None:
         for ins in instruments:
-            ins.before_step("storage_reuse", bundle)
+            if ins.should_run("storage_reuse", bundle):
+                ins.before_step("storage_reuse", bundle)
         opt: StorageReuseOptions = config.storage_reuse
         if not opt.enabled:
             opt = StorageReuseOptions(
@@ -112,7 +124,8 @@ def plan(program: BFPrimalProgram, *, config: PlannerConfig) -> PlanBundle:
         bundle.storage_plan = module.storage_plan
         verify_reports = verify_all(bundle.task_module) if config.debug.validate_after_each_pass else None
         for ins in instruments:
-            ins.after_step("storage_reuse", bundle, verify=verify_reports)
+            if ins.should_run("storage_reuse", bundle):
+                ins.after_step("storage_reuse", bundle, verify=verify_reports)
 
     bundle.validate()
     return bundle
