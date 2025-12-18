@@ -584,3 +584,19 @@
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr10_tvm_compile_instruments.py`
 - `conda run -n boundflow python -m pytest -q`
+
+---
+
+## 2025-12-18：Phase 5D PR#11A：compute task 全 TVM（RELAX_OPS：linear+relu(+add/mul)）
+
+**动机**
+- 减少 task 内 per-op 的 Python↔TVM 往返与解释器开销；为后续 PR#11B（fusion 使 call_tir 数量下降）提供 reference 路径。
+
+**主要改动**
+- `boundflow/backends/tvm/relax_interval_task_ops.py`：新增 task-level RELAX_OPS lowering（lane 拆分契约，输出扁平 tuple）
+- `boundflow/runtime/tvm_executor.py`：新增 `enable_task_relax_ops` 开关（默认 False）；开启后尝试整 task 编译/执行，失败则回退到 per-op 执行
+- `tests/test_phase5d_pr11a_task_relax_ops_equiv.py`：scheduler 下 TVMTaskExecutor(RELAX_OPS) vs Python allclose
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr11a_task_relax_ops_equiv.py`
+- `conda run -n boundflow python -m pytest -q`

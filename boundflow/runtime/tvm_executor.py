@@ -31,6 +31,8 @@ class TVMExecutorOptions:
     dump_ir_refresh: bool = False
     # Optional tag to avoid accidental cache collisions across configs.
     compile_cache_tag: str = ""
+    # PR#11A: run whole task as a single Relax function (RELAX_OPS lowering) when possible.
+    enable_task_relax_ops: bool = False
 
 
 @dataclass
@@ -55,6 +57,8 @@ class TVMTaskExecutor:
         self.last_stats: Optional[TVMRunStats] = None
         # (kernel_style, IntervalLinearKey) -> relax.Executable
         self._linear_exec_cache: Dict[tuple[str, IntervalLinearKey], Any] = {}
+        # task_cache_key_hash -> {"ex": Executable, "spec": IntervalTaskLoweringSpec}
+        self._task_exec_cache: Dict[str, Dict[str, Any]] = {}
         # cache_key -> compile stats (jsonable)
         self._compile_stats: Dict[str, Dict[str, Any]] = {}
 
@@ -173,6 +177,87 @@ class TVMTaskExecutor:
         self._linear_exec_cache[k] = ex
         return ex
 
+    def _compile_interval_task_relax_ops(self, task, *, storage_plan: StoragePlan, target: str) -> tuple[Any, Any, str]:
+        """
+        Compile a whole task into a single Relax function using RELAX_OPS lowering.
+
+        Returns (executable, lowering_spec, cache_key_hash)
+        """
+        from ..backends.tvm.relax_interval_task_ops import build_interval_task_relax_ops_ir_module  # noqa: PLC0415
+
+        # Build a stable signature for caching.
+        sig = {
+            "task_id": str(getattr(task, "task_id", "")),
+            "op_types": [str(getattr(op, "op_type", "")) for op in getattr(task, "ops", [])],
+            "inputs": list(getattr(task, "input_values", [])),
+            "outputs": list(getattr(task, "output_values", [])),
+            "params": sorted(list(getattr(task, "params", []) or [])),
+            "target": str(target),
+            "kernel_style": str(self.options.kernel_style),
+            "compile_cache_tag": str(self.options.compile_cache_tag),
+        }
+        cache_key_hash = hashlib.sha256(repr(sig).encode("utf-8")).hexdigest()[:16]
+        if cache_key_hash in self._task_exec_cache:
+            cached = self._task_exec_cache[cache_key_hash]
+            return cached["ex"], cached["spec"], cache_key_hash
+
+        ir_mod, spec = build_interval_task_relax_ops_ir_module(
+            task,
+            storage_plan=storage_plan,
+            target=target,
+            func_name="main",
+        )
+
+        import tvm
+        from tvm import relax
+
+        instruments: List[Any] = []
+        timing_inst = None
+        dump_dir = None
+        if self.options.enable_pass_timing:
+            from tvm.ir.instrument import PassTimingInstrument  # noqa: PLC0415
+
+            timing_inst = PassTimingInstrument()
+            instruments.append(timing_inst)
+        if self.options.enable_dump_ir:
+            from tvm.ir.instrument import DumpIR  # noqa: PLC0415
+
+            run_id = os.environ.get("BOUNDFLOW_TVM_RUN_ID") or f"{int(time.time())}_{os.getpid()}"
+            dump_dir = os.path.join(str(self.options.dump_ir_dir), str(run_id), cache_key_hash)
+            instruments.append(DumpIR(dump_dir=dump_dir, refresh=bool(self.options.dump_ir_refresh)))
+
+        t0 = time.perf_counter_ns()
+        if instruments:
+            from tvm import transform  # noqa: PLC0415
+
+            with transform.PassContext(instruments=instruments):
+                ex = relax.build(ir_mod, target=target)
+                rendered = str(timing_inst.render()) if timing_inst is not None else None
+        else:
+            ex = relax.build(ir_mod, target=target)
+            rendered = None
+        t1 = time.perf_counter_ns()
+
+        stats: Dict[str, Any] = {
+            "cache_key_hash": cache_key_hash,
+            "kind": "task_relax_ops",
+            "target": str(target),
+            "compile_ms": (t1 - t0) / 1e6,
+            "pass_timing": None,
+            "pass_timing_render": None,
+            "dump_ir_dir": dump_dir,
+            "task_id": str(getattr(task, "task_id", "")),
+            "op_types": [str(getattr(op, "op_type", "")) for op in getattr(task, "ops", [])],
+        }
+        if timing_inst is not None:
+            stats["pass_timing_render"] = rendered
+            stats["pass_timing"] = self._parse_pass_timing_render(rendered or "")
+        self._compile_stats[cache_key_hash] = stats
+
+        self._task_exec_cache[cache_key_hash] = {"ex": ex, "spec": spec}
+        _ = tvm
+        return ex, spec, cache_key_hash
+
     def _buf(self, storage_plan: StoragePlan, value_name: str) -> str:
         logical = storage_plan.value_to_buffer.get(value_name)
         if logical is None:
@@ -230,6 +315,38 @@ class TVMTaskExecutor:
         from tvm import relax
 
         dev = tvm.cpu(0) if target == "llvm" else tvm.cuda(0)
+
+        # PR#11A: try to run the whole task as a single Relax function (RELAX_OPS lowering).
+        if self.options.enable_task_relax_ops and self.options.kernel_style == "relax":
+            try:
+                ex, spec, _cache_key = self._compile_interval_task_relax_ops(task, storage_plan=storage_plan, target=target)
+                vm = relax.VirtualMachine(ex, dev)
+                args: List[Any] = []
+                # Inputs: for each v, pass (v_l, v_u)
+                for v in spec.input_values:
+                    st = get_interval(v)
+                    args.append(rt.tensor(st.lower.detach().cpu().numpy(), device=dev))
+                    args.append(rt.tensor(st.upper.detach().cpu().numpy(), device=dev))
+                # Params
+                for p in spec.param_values:
+                    t = get_tensor(p)
+                    if not torch.is_tensor(t):
+                        t = torch.as_tensor(t, device=device)
+                    args.append(rt.tensor(t.detach().cpu().numpy(), device=dev))
+
+                out = vm[spec.func_name](*args)
+                # Flattened outputs: [o0_l,o0_u,o1_l,o1_u,...]
+                flat = list(out)
+                for i, ov in enumerate(spec.output_values):
+                    y_l_t = flat[2 * i]
+                    y_u_t = flat[2 * i + 1]
+                    y_l = torch.from_numpy(y_l_t.numpy()).to(device)
+                    y_u = torch.from_numpy(y_u_t.numpy()).to(device)
+                    env[self._buf(storage_plan, ov)] = IntervalState(lower=y_l, upper=y_u)  # type: ignore[assignment]
+                return
+            except Exception:
+                # Fallback to per-op execution if the task lowering is not supported yet.
+                pass
 
         def _run_linear(x: IntervalState, w: torch.Tensor, b: torch.Tensor) -> IntervalState:
             B, I = x.lower.shape
