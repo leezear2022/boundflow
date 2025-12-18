@@ -25,6 +25,7 @@
   - `ReuseMissReason.KEY_MISMATCH`
 - 修改：`boundflow/planner/passes/buffer_reuse_pass.py`
   - `miss_reasons` 进一步拆分：`NO_FREE_BUFFER`（pool 为空）、`KEY_MISMATCH`（pool 非空但无同 key）、`LIFETIME_OVERLAP`（存在同 key 但仍活跃未释放）
+  - 对 `LIFETIME_OVERLAP` 记录“阻塞者 task_id”（按 active 同 key buffer 的 last_use 归因），输出 `overlap_blockers_topk`
   - 统计 free pool 碎片度：`max_free_pool_keys/max_free_pool_buffers`
 
 ### 3) bench 脚本支持 text/json/csv 输出
@@ -32,8 +33,9 @@
 - 修改：`scripts/bench_storage_reuse.py`
   - 新增 `--format text|json|csv` 与 `--out <path>`
   - JSON 输出包含 before/after 两个对象；CSV 输出两行（phase=before/after），并扁平化 `miss_reasons`
-  - 输出补齐复现信息：`git_commit`、输入 shape、DAG 规模（num_tasks/num_edges）、reuse 配置
+  - 输出补齐复现信息：`git_commit`、`python/torch/tvm/tvm_ffi` 版本、env vars 白名单、输入 shape、DAG 规模（num_tasks/num_edges）、reuse 配置
   - 额外输出 `why_not_reused_topk`（Top-5 miss reasons）
+  - 额外输出 `reuse_key_topk`（Top-5 key 直方图，用于观察 key 碎片化）
 
 ## 如何验证
 

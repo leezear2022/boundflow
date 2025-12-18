@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import platform
 import sys
 from pathlib import Path
 import subprocess
@@ -40,6 +41,40 @@ def _git_commit() -> str:
     except Exception:
         return "unknown"
 
+def _env_vars_whitelist() -> dict[str, str]:
+    import os
+
+    keys = [
+        "BOUNDFLOW_ROOT",
+        "TVM_HOME",
+        "TVM_FFI_DISABLE_TORCH_C_DLPACK",
+        "TVM_FFI_CACHE_DIR",
+        "TMPDIR",
+        "PYTHONPATH",
+    ]
+    return {k: os.environ.get(k, "") for k in keys if k in os.environ}
+
+
+def _versions() -> dict[str, str]:
+    out = {
+        "python": sys.version.replace("\n", " "),
+        "platform": platform.platform(),
+        "torch": getattr(torch, "__version__", "unknown"),
+    }
+    try:
+        import tvm  # noqa: PLC0415
+
+        out["tvm"] = getattr(tvm, "__version__", "unknown")
+    except Exception:
+        out["tvm"] = "unavailable"
+    try:
+        import tvm_ffi  # noqa: PLC0415
+
+        out["tvm_ffi"] = getattr(tvm_ffi, "__version__", "unknown")
+    except Exception:
+        out["tvm_ffi"] = "unavailable"
+    return out
+
 
 def main() -> int:
     p = argparse.ArgumentParser()
@@ -66,6 +101,8 @@ def main() -> int:
 
     before_saved, _ = estimate_bytes_saved(module.storage_plan)
     commit = _git_commit()
+    versions = _versions()
+    env_vars = _env_vars_whitelist()
     num_edges = int(len(module.task_graph.edges)) if module.task_graph is not None else 0
     before = {
         "phase": "before",
@@ -75,6 +112,8 @@ def main() -> int:
         "policy": args.policy,
         "respect_memory_effect": False,
         "git_commit": commit,
+        "versions": versions,
+        "env_vars": env_vars,
         "input_shape": list(x0.shape),
         "num_tasks": int(len(module.tasks)),
         "num_edges": num_edges,
@@ -93,6 +132,13 @@ def main() -> int:
     after_saved, _ = estimate_bytes_saved(module.storage_plan)
     miss_reasons = {k.value: int(v) for k, v in (stats.miss_reasons or {}).items()}
     why_topk = sorted(miss_reasons.items(), key=lambda kv: (-kv[1], kv[0]))[:5]
+    overlap_blockers = {k: int(v) for k, v in (getattr(stats, "overlap_blockers", {}) or {}).items()}
+    overlap_blockers_topk = sorted(overlap_blockers.items(), key=lambda kv: (-kv[1], kv[0]))[:5]
+    key_hist: dict[str, int] = {}
+    for lt in liveness.lifetimes.values():
+        k = str(lt.key)
+        key_hist[k] = int(key_hist.get(k, 0)) + 1
+    reuse_key_topk = sorted(key_hist.items(), key=lambda kv: (-kv[1], kv[0]))[:5]
     after = {
         "phase": "after",
         "model": args.model,
@@ -101,6 +147,8 @@ def main() -> int:
         "policy": args.policy,
         "respect_memory_effect": bool(opt.respect_memory_effect),
         "git_commit": commit,
+        "versions": versions,
+        "env_vars": env_vars,
         "input_shape": list(x0.shape),
         "num_tasks": int(len(module.tasks)),
         "num_edges": num_edges,
@@ -114,6 +162,8 @@ def main() -> int:
         "max_free_pool_buffers": int(getattr(stats, "max_free_pool_buffers", 0)),
         "miss_reasons": miss_reasons,
         "why_not_reused_topk": why_topk,
+        "reuse_key_topk": reuse_key_topk,
+        "overlap_blockers_topk": overlap_blockers_topk,
     }
 
     fmt = args.format
@@ -135,8 +185,34 @@ def main() -> int:
         else:
             print(s)
     elif fmt == "csv":
-        rows = [before, after]
-        fieldnames = sorted({k for r in rows for k in r.keys() if k not in ("miss_reasons", "why_not_reused_topk")})
+        # Flatten versions/env vars into stable CSV columns.
+        def _flatten_row(r: dict) -> dict:
+            rr = dict(r)
+            versions = rr.pop("versions", {}) or {}
+            env_vars = rr.pop("env_vars", {}) or {}
+            for k, v in versions.items():
+                rr[f"ver_{k}"] = v
+            for k, v in env_vars.items():
+                rr[f"env_{k}"] = v
+            return rr
+
+        before_csv = _flatten_row(before)
+        after_csv = _flatten_row(after)
+        rows = [before_csv, after_csv]
+        fieldnames = sorted(
+            {
+                k
+                for r in rows
+                for k in r.keys()
+                if k
+                not in (
+                    "miss_reasons",
+                    "why_not_reused_topk",
+                    "reuse_key_topk",
+                    "overlap_blockers_topk",
+                )
+            }
+        )
         # Flatten miss_reasons for CSV.
         miss_keys = sorted({k for r in rows for k in (r.get("miss_reasons") or {}).keys()})
         fieldnames += [f"miss_{k}" for k in miss_keys]

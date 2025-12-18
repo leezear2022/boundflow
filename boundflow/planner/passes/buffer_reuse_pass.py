@@ -113,14 +113,17 @@ def apply_conservative_buffer_reuse(
 
     logical_to_physical: Dict[str, str] = {}
     active_by_key: Dict[BufferReuseKey, int] = {}
+    active_logical_by_key: Dict[BufferReuseKey, set[str]] = {}
 
     def _inc_active(k: BufferReuseKey) -> None:
         active_by_key[k] = int(active_by_key.get(k, 0)) + 1
+        active_logical_by_key.setdefault(k, set())
 
     def _dec_active(k: BufferReuseKey) -> None:
         cur = int(active_by_key.get(k, 0))
         if cur <= 1:
             active_by_key.pop(k, None)
+            active_logical_by_key.pop(k, None)
         else:
             active_by_key[k] = cur - 1
 
@@ -186,6 +189,19 @@ def apply_conservative_buffer_reuse(
                 has_active_same_key = int(active_by_key.get(k, 0)) > 0
                 if has_active_same_key:
                     stats.inc(ReuseMissReason.LIFETIME_OVERLAP)
+                    # Attribute this overlap miss to the "latest-free" active buffer's last_use task.
+                    blockers = active_logical_by_key.get(k) or set()
+                    best_tid: Optional[str] = None
+                    best_last_use = -1
+                    for b in blockers:
+                        lt = liveness.lifetimes.get(b)
+                        if lt is None:
+                            continue
+                        if int(lt.last_use_index) > best_last_use:
+                            best_last_use = int(lt.last_use_index)
+                            best_tid = str(lt.last_use_task_id)
+                    if best_tid is not None:
+                        stats.inc_overlap_blocker(best_tid)
                 elif any_free:
                     stats.inc(ReuseMissReason.KEY_MISMATCH)
                 else:
@@ -194,6 +210,7 @@ def apply_conservative_buffer_reuse(
 
             # Mark this buffer as active (regardless of physical choice).
             _inc_active(k)
+            active_logical_by_key.setdefault(k, set()).add(bid)
 
         # Release buffers whose last use is this task.
         for bid in released_by_task.get(idx, []):
@@ -204,6 +221,8 @@ def apply_conservative_buffer_reuse(
             phys = logical_to_physical.get(bid, bid)
             k = _key(bid)
             free_pool.setdefault(k, []).append(phys)
+            if k in active_logical_by_key:
+                active_logical_by_key[k].discard(bid)
             _dec_active(k)
 
         _update_pool_peaks()

@@ -463,8 +463,8 @@
 **主要改动**
 - `boundflow/ir/task.py`：新增 `MemoryEffect` enum，`TaskOp.memory_effect` 改为 `Optional[MemoryEffect]`
 - `boundflow/planner/storage_reuse.py`：新增 `StorageReuseOptions.respect_memory_effect`（占位）与 `ReuseMissReason.KEY_MISMATCH`
-- `boundflow/planner/passes/buffer_reuse_pass.py`：miss reason 更细分（区分 key mismatch vs pool 为空）
-- `scripts/bench_storage_reuse.py`：支持 `--format text|json|csv` 与 `--out`
+- `boundflow/planner/passes/buffer_reuse_pass.py`：miss reason 更细分（NO_FREE/KEY_MISMATCH/LIFETIME_OVERLAP），并记录 overlap 阻塞者 task topK 与 pool 碎片度统计
+- `scripts/bench_storage_reuse.py`：支持 `--format text|json|csv` 与 `--out`，并输出 `git_commit`、版本/env vars 白名单、DAG stats 与 why-not-reused/key 分布 topK
 
 **验证**
 - `conda run -n boundflow python -m pytest -q`

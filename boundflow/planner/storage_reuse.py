@@ -58,10 +58,14 @@ class BufferReuseStats:
     unknown_bytes_buffers: int = 0
     max_free_pool_keys: int = 0
     max_free_pool_buffers: int = 0
+    overlap_blockers: Dict[str, int] = field(default_factory=dict)  # task_id -> count
     miss_reasons: Dict[ReuseMissReason, int] = field(default_factory=dict)
 
     def inc(self, reason: ReuseMissReason) -> None:
         self.miss_reasons[reason] = int(self.miss_reasons.get(reason, 0)) + 1
+
+    def inc_overlap_blocker(self, task_id: str) -> None:
+        self.overlap_blockers[task_id] = int(self.overlap_blockers.get(task_id, 0)) + 1
 
 
 def make_reuse_key_fn(*, mode: ReuseKeyMode) -> Callable[[BufferSpec], BufferReuseKey]:
