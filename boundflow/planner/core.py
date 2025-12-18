@@ -7,6 +7,7 @@ from ..ir.primal import BFPrimalProgram
 from ..ir.task import BFTaskModule, StoragePlan
 from ..ir.task_graph import TaskGraph
 from .storage_reuse import StorageReuseOptions
+from .options import LayoutOptions, LifetimeOptions, PartitionOptions, PlannerDebugOptions
 
 
 @dataclass(frozen=True)
@@ -22,6 +23,10 @@ class PlannerConfig:
     enable_cache: bool = False
     tvm_target: Optional[str] = None
     storage_reuse: StorageReuseOptions = field(default_factory=StorageReuseOptions)
+    partition: PartitionOptions = field(default_factory=PartitionOptions)
+    lifetime: LifetimeOptions = field(default_factory=LifetimeOptions)
+    layout: LayoutOptions = field(default_factory=LayoutOptions)
+    debug: PlannerDebugOptions = field(default_factory=PlannerDebugOptions)
     meta: Dict[str, Any] = field(default_factory=dict)
 
 

@@ -485,3 +485,19 @@
 **验证**
 - `conda activate boundflow && source env.sh && python -c "import tvm; print('tvm_ok')"`
 - `pytest -q`
+
+---
+
+## 2025-12-18：Phase 5C PR#5：Planner Pipeline 统一入口 + config_dump 可复现消融
+
+**动机**
+- Phase 5 的 planner 消融需要“统一入口 + 可序列化配置快照”，否则实验不可比、不可复现。
+
+**主要改动**
+- `boundflow/planner/options.py`：结构化选项（partition/lifetime/layout/debug，占位但稳定）
+- `boundflow/planner/pipeline.py`：`plan()` 统一入口，输出 `PlanBundle.meta["config_dump"]` 与 `planner_steps`
+- `scripts/bench_planner_pipeline.py`：最小 pipeline bench（输出 config_dump）
+- `tests/test_phase5c_pr5_pipeline_config_dump.py`：不同 config 下 task 数变化但输出等价
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5c_pr5_pipeline_config_dump.py`
