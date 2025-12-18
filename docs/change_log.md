@@ -501,3 +501,19 @@
 
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase5c_pr5_pipeline_config_dump.py`
+
+---
+
+## 2025-12-18：Phase 5C PR#6：Invariant Verifiers + Pipeline Instrument（pass contract）
+
+**动机**
+- PR#5 已统一 planner 入口与 config_dump；PR#6 进一步钉住“每一步产物是否仍合法”的 pass contract，避免后续 Relax/cache/CROWN 扩展时出现 silent wrong。
+
+**主要改动**
+- `boundflow/planner/verify.py`：TaskGraph/StoragePlan/Liveness+Reuse 三类核心不变式 verifier
+- `boundflow/planner/instrument.py`：timing + verify instrument（before/after step hooks）
+- `boundflow/planner/pipeline.py`：`validate_after_each_pass=True` 时每步后运行 verifier 并写入 `PlanBundle.meta["verify"]`
+- `tests/test_phase5c_pr6_validators.py`：负例覆盖 broken edge/mapping/overlap + pipeline verify 记录
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5c_pr6_validators.py`
