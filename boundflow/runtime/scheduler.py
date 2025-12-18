@@ -56,6 +56,8 @@ def run_ibp_scheduled(
     if input_logical is None:
         raise KeyError(f"input_spec.value_name not found in storage_plan: {input_spec.value_name}")
     input_phys = module.storage_plan.to_physical(input_logical)
+    if module.storage_plan.physical_buffers and input_phys not in module.storage_plan.physical_buffers:
+        raise KeyError(f"input physical buffer_id not found in storage_plan.physical_buffers: {input_phys}")
     env: Dict[str, IntervalState] = {input_phys: IntervalState(lower=x0 - eps, upper=x0 + eps)}
 
     if module.task_graph is None:
@@ -97,6 +99,8 @@ def run_ibp_scheduled(
     if out_logical is None:
         raise KeyError(f"output_value not found in storage_plan: {output_value}")
     out_phys = module.storage_plan.to_physical(out_logical)
+    if module.storage_plan.physical_buffers and out_phys not in module.storage_plan.physical_buffers:
+        raise KeyError(f"output physical buffer_id not found in storage_plan.physical_buffers: {out_phys}")
 
     if out_phys not in env and output_value in params:
         t = params[output_value]  # type: ignore[index]

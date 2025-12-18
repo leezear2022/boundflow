@@ -209,7 +209,12 @@ class PythonTaskExecutor:
             logical = storage_plan.value_to_buffer.get(value_name)
             if logical is None:
                 raise KeyError(f"value not found in storage_plan: {value_name}")
-            return storage_plan.to_physical(logical)
+            phys = storage_plan.to_physical(logical)
+            if storage_plan.physical_buffers and phys not in storage_plan.physical_buffers:
+                raise KeyError(
+                    f"physical buffer_id not found in storage_plan.physical_buffers: {phys} (value={value_name})"
+                )
+            return phys
 
         def get_interval(value_name: str) -> IntervalState:
             bid = _buf(value_name)

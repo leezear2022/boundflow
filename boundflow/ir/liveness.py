@@ -153,6 +153,14 @@ def compute_liveness_task_level(
                 # If an output is never used, keep it live at least in its producer task.
                 _touch_use(bid, idx=idx)
 
+    # Cross-task uses must be derived from TaskGraph edges (stable contract for multi-task).
+    for e in graph.edges:
+        if e.src_task_id not in t_index or e.dst_task_id not in t_index:
+            continue
+        dst_idx = t_index[e.dst_task_id]
+        for dep in e.deps:
+            _touch_use(dep.src_buffer_id, idx=dst_idx)
+
     # Any used buffer without a producer is an entry/param buffer; treat as producer=ENTRY at index -1.
     for bid in list(last_use_index.keys()):
         if bid not in producer_task:
@@ -255,4 +263,3 @@ def compute_peak_physical_memory_task_level(
         peak_physical_bytes=int(peak_bytes),
         unknown_bytes_buffers=int(peak_unknown),
     )
-

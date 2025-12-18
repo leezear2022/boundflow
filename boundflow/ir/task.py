@@ -120,6 +120,9 @@ class TaskOp:
     inputs: List[str]
     outputs: List[str]
     attrs: Dict[str, Any] = field(default_factory=dict)
+    # Placeholder for future alias/memory-effect modeling (Phase 5B+ / 5C+ / 5E+).
+    # Example values: "read", "write", "readwrite".
+    memory_effect: Optional[str] = None
 
 
 @dataclass

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable, Dict, Iterable, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 from ...ir.liveness import (
     BufferReuseKey,
@@ -25,12 +25,24 @@ class BufferReuseConfig:
     reuse_entry_buffers: bool = False
 
 
+ReuseKeyFn = Callable[[object], BufferReuseKey]
+ReusePolicyFn = Callable[[List[str], str, BufferReuseKey], Optional[str]]
+
+
+def lifo_reuse_policy(pool: List[str], logical_buffer_id: str, key: BufferReuseKey) -> Optional[str]:
+    _ = (logical_buffer_id, key)
+    if not pool:
+        return None
+    return pool.pop()
+
+
 def apply_conservative_buffer_reuse(
     module: BFTaskModule,
     *,
     liveness: Optional[LivenessInfo] = None,
     config: BufferReuseConfig = BufferReuseConfig(),
     reuse_key_fn: Callable = default_reuse_key,
+    reuse_policy_fn: ReusePolicyFn = lifo_reuse_policy,
 ) -> None:
     """
     Mutate `module.storage_plan` in-place by introducing logical->physical buffer aliasing.
@@ -107,8 +119,11 @@ def apply_conservative_buffer_reuse(
             k = _key(bid)
             avail = free_pool.get(k)
             if avail:
-                phys = avail.pop()
-                logical_to_physical[bid] = phys
+                phys = reuse_policy_fn(avail, bid, k)
+                if phys is None:
+                    _alloc_identity(bid)
+                else:
+                    logical_to_physical[bid] = phys
             else:
                 _alloc_identity(bid)
 
