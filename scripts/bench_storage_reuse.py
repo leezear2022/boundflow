@@ -2,6 +2,10 @@
 from __future__ import annotations
 
 import argparse
+import csv
+import json
+import sys
+from pathlib import Path
 
 import torch
 import torch.nn as nn
@@ -35,6 +39,8 @@ def main() -> int:
     p.add_argument("--min-tasks", type=int, default=2)
     p.add_argument("--key-mode", choices=["strict", "ignore_layout"], default="strict")
     p.add_argument("--policy", choices=["lifo", "fifo"], default="lifo")
+    p.add_argument("--format", choices=["text", "json", "csv"], default="text")
+    p.add_argument("--out", type=str, default="")
     args = p.parse_args()
 
     torch.manual_seed(0)
@@ -51,7 +57,16 @@ def main() -> int:
     module.validate()
 
     before_saved, _ = estimate_bytes_saved(module.storage_plan)
-    print(f"[before] logical={module.storage_plan.num_logical_buffers()} physical={module.storage_plan.num_physical_buffers()} bytes_saved_est={before_saved}")
+    before = {
+        "phase": "before",
+        "model": args.model,
+        "min_tasks": int(args.min_tasks),
+        "key_mode": args.key_mode,
+        "policy": args.policy,
+        "logical_buffers": int(module.storage_plan.num_logical_buffers()),
+        "physical_buffers": int(module.storage_plan.num_physical_buffers()),
+        "bytes_saved_est": int(before_saved),
+    }
 
     opt = StorageReuseOptions(
         enabled=True,
@@ -61,12 +76,62 @@ def main() -> int:
     stats = apply_conservative_buffer_reuse(module, options=opt)
     liveness = compute_liveness_task_level(module)
     after_saved, _ = estimate_bytes_saved(module.storage_plan)
-    print(
-        f"[after]  logical={module.storage_plan.num_logical_buffers()} physical={module.storage_plan.num_physical_buffers()} "
-        f"bytes_saved_est={after_saved} pool_hit={stats.pool_hit} pool_miss={stats.pool_miss} tasks={len(liveness.topo_order)}"
-    )
-    if stats.miss_reasons:
-        print("miss_reasons:", {k.value: v for k, v in stats.miss_reasons.items()})
+    after = {
+        "phase": "after",
+        "model": args.model,
+        "min_tasks": int(args.min_tasks),
+        "key_mode": args.key_mode,
+        "policy": args.policy,
+        "logical_buffers": int(module.storage_plan.num_logical_buffers()),
+        "physical_buffers": int(module.storage_plan.num_physical_buffers()),
+        "bytes_saved_est": int(after_saved),
+        "pool_hit": int(stats.pool_hit),
+        "pool_miss": int(stats.pool_miss),
+        "tasks": int(len(liveness.topo_order)),
+        "miss_reasons": {k.value: int(v) for k, v in (stats.miss_reasons or {}).items()},
+    }
+
+    fmt = args.format
+    if fmt == "text":
+        print(
+            f"[before] logical={before['logical_buffers']} physical={before['physical_buffers']} bytes_saved_est={before['bytes_saved_est']}"
+        )
+        print(
+            f"[after]  logical={after['logical_buffers']} physical={after['physical_buffers']} bytes_saved_est={after['bytes_saved_est']} "
+            f"pool_hit={after['pool_hit']} pool_miss={after['pool_miss']} tasks={after['tasks']}"
+        )
+        if after["miss_reasons"]:
+            print("miss_reasons:", after["miss_reasons"])
+    elif fmt == "json":
+        out = {"before": before, "after": after}
+        s = json.dumps(out, ensure_ascii=False)
+        if args.out:
+            Path(args.out).write_text(s + "\n", encoding="utf-8")
+        else:
+            print(s)
+    elif fmt == "csv":
+        rows = [before, after]
+        fieldnames = sorted({k for r in rows for k in r.keys() if k != "miss_reasons"})
+        # Flatten miss_reasons for CSV.
+        miss_keys = sorted({k for r in rows for k in (r.get("miss_reasons") or {}).keys()})
+        fieldnames += [f"miss_{k}" for k in miss_keys]
+
+        output_path = Path(args.out) if args.out else None
+        f = output_path.open("w", newline="", encoding="utf-8") if output_path else None
+        try:
+            writer = csv.DictWriter(f or sys.stdout, fieldnames=fieldnames)
+            writer.writeheader()
+            for r in rows:
+                row = {k: r.get(k, "") for k in fieldnames}
+                miss = r.get("miss_reasons") or {}
+                for k in miss_keys:
+                    row[f"miss_{k}"] = miss.get(k, 0)
+                writer.writerow(row)
+        finally:
+            if f is not None:
+                f.close()
+    else:
+        raise ValueError(f"unsupported format: {fmt}")
     return 0
 
 

@@ -19,6 +19,13 @@ class TaskLowering(Enum):
     TVM_TIR = "tvm_tir"
     CONSTRAINT = "constraint"
 
+class MemoryEffect(Enum):
+    READ = "read"
+    WRITE = "write"
+    READWRITE = "readwrite"
+    ALLOC = "alloc"
+    FREE = "free"
+
 
 @dataclass(frozen=True)
 class BufferSpec:
@@ -121,8 +128,7 @@ class TaskOp:
     outputs: List[str]
     attrs: Dict[str, Any] = field(default_factory=dict)
     # Placeholder for future alias/memory-effect modeling (Phase 5B+ / 5C+ / 5E+).
-    # Example values: "read", "write", "readwrite".
-    memory_effect: Optional[str] = None
+    memory_effect: Optional[MemoryEffect] = None
 
 
 @dataclass

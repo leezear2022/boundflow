@@ -33,6 +33,10 @@ class StorageReuseOptions:
     key_mode: ReuseKeyMode = ReuseKeyMode.STRICT
     policy: ReusePolicy = ReusePolicy.LIFO
 
+    # Reserved for Phase 5B.2+: when enabled, reuse/copy decisions should consider
+    # memory effects (read/write conflicts) and alias groups.
+    respect_memory_effect: bool = False
+
     meta: Dict[str, Any] = field(default_factory=dict)
 
 
@@ -42,6 +46,7 @@ class ReuseMissReason(Enum):
     NOT_IN_STORAGE_PLAN = "not_in_storage_plan"
     NO_FREE_BUFFER = "no_free_buffer"
     POLICY_DECLINED = "policy_declined"
+    KEY_MISMATCH = "key_mismatch"
 
 
 @dataclass
@@ -128,4 +133,3 @@ def estimate_bytes_saved(
             physical_bytes += int(sz)
 
     return max(0, int(logical_bytes - physical_bytes)), int(unknown)
-

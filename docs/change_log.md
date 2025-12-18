@@ -452,3 +452,19 @@
 
 **验证**
 - `conda run -n boundflow python -m pytest -q`
+
+---
+
+## 2025-12-18：Phase 5B PR#4B：memory_effect Enum + bench 输出 + 更细 miss reasons
+
+**动机**
+- 让 `memory_effect` 类型更稳（避免字符串拼写导致的隐式分支爆炸），并把复用统计输出落地到 bench（CSV/JSON），方便后续 5B.2/5F 做消融与画图。
+
+**主要改动**
+- `boundflow/ir/task.py`：新增 `MemoryEffect` enum，`TaskOp.memory_effect` 改为 `Optional[MemoryEffect]`
+- `boundflow/planner/storage_reuse.py`：新增 `StorageReuseOptions.respect_memory_effect`（占位）与 `ReuseMissReason.KEY_MISMATCH`
+- `boundflow/planner/passes/buffer_reuse_pass.py`：miss reason 更细分（区分 key mismatch vs pool 为空）
+- `scripts/bench_storage_reuse.py`：支持 `--format text|json|csv` 与 `--out`
+
+**验证**
+- `conda run -n boundflow python -m pytest -q`

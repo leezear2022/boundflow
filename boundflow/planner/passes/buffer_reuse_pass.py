@@ -165,7 +165,9 @@ def apply_conservative_buffer_reuse(
                     logical_to_physical[bid] = phys
             else:
                 stats.pool_miss += 1
-                stats.inc(ReuseMissReason.NO_FREE_BUFFER)
+                # If some other pool has buffers, this miss is more likely a key mismatch than "nothing freed yet".
+                any_other_free = any(v for v in free_pool.values())
+                stats.inc(ReuseMissReason.KEY_MISMATCH if any_other_free else ReuseMissReason.NO_FREE_BUFFER)
                 _alloc_identity(bid)
 
         # Release buffers whose last use is this task.
