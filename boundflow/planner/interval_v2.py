@@ -16,6 +16,7 @@ class IntervalV2PartitionConfig:
 
     # Default to "no forced splitting"; tests/benchmarks can override.
     min_tasks: int = 1
+    enable_storage_reuse: bool = False
 
 
 def plan_interval_ibp_v2(program, *, config: IntervalV2PartitionConfig | None = None) -> BFTaskModule:
@@ -53,6 +54,12 @@ def plan_interval_ibp_v2(program, *, config: IntervalV2PartitionConfig | None = 
         task_graph=graph,
     )
     module.validate()
+
+    if cfg.enable_storage_reuse:
+        from .passes.buffer_reuse_pass import apply_conservative_buffer_reuse
+
+        apply_conservative_buffer_reuse(module)
+
     return module
 
 

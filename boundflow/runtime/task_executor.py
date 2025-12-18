@@ -206,10 +206,10 @@ class PythonTaskExecutor:
                     break
 
         def _buf(value_name: str) -> str:
-            b = storage_plan.value_to_buffer.get(value_name)
-            if b is None:
+            logical = storage_plan.value_to_buffer.get(value_name)
+            if logical is None:
                 raise KeyError(f"value not found in storage_plan: {value_name}")
-            return b
+            return storage_plan.to_physical(logical)
 
         def get_interval(value_name: str) -> IntervalState:
             bid = _buf(value_name)

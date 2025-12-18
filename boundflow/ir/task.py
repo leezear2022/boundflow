@@ -46,10 +46,66 @@ class StoragePlan:
     buffers: Dict[str, BufferSpec] = field(default_factory=dict)  # buffer_id -> spec
     value_to_buffer: Dict[str, str] = field(default_factory=dict)  # value_name -> buffer_id
 
+    # Phase 5B: logical vs physical storage.
+    #
+    # - `buffers` holds logical buffers (one per value by default).
+    # - `logical_to_physical` optionally maps logical buffer_id -> physical buffer_id
+    # - `physical_buffers` enumerates allocated physical buffers (by id).
+    #
+    # When `logical_to_physical` is empty, the plan is equivalent to "physical == logical".
+    physical_buffers: Dict[str, BufferSpec] = field(default_factory=dict)  # physical_buffer_id -> spec
+    logical_to_physical: Dict[str, str] = field(default_factory=dict)  # logical_buffer_id -> physical_buffer_id
+
+    def to_physical(self, logical_buffer_id: str) -> str:
+        return self.logical_to_physical.get(logical_buffer_id, logical_buffer_id)
+
+    def get_logical_spec(self, logical_buffer_id: str) -> BufferSpec:
+        if logical_buffer_id not in self.buffers:
+            raise KeyError(f"logical buffer_id not found: {logical_buffer_id}")
+        return self.buffers[logical_buffer_id]
+
+    def get_physical_spec(self, logical_buffer_id: str) -> BufferSpec:
+        phys = self.to_physical(logical_buffer_id)
+        if self.physical_buffers:
+            if phys not in self.physical_buffers:
+                raise KeyError(f"physical buffer_id not found: {phys} (from logical {logical_buffer_id})")
+            return self.physical_buffers[phys]
+        return self.get_logical_spec(phys)
+
+    def num_logical_buffers(self) -> int:
+        return len(self.buffers)
+
+    def num_physical_buffers(self) -> int:
+        if self.physical_buffers:
+            return len(self.physical_buffers)
+        # Identity mapping.
+        return len(self.buffers)
+
     def validate(self) -> None:
         for value_name, buffer_id in self.value_to_buffer.items():
             if buffer_id not in self.buffers:
                 raise ValueError(f"storage_plan references missing buffer_id: {buffer_id} (value={value_name})")
+
+        # Validate logical_to_physical only when present.
+        for logical_id, physical_id in self.logical_to_physical.items():
+            if logical_id not in self.buffers:
+                raise ValueError(f"logical_to_physical references missing logical buffer_id: {logical_id}")
+            if self.physical_buffers:
+                if physical_id not in self.physical_buffers:
+                    raise ValueError(
+                        f"logical_to_physical references missing physical buffer_id: {physical_id} (logical={logical_id})"
+                    )
+            else:
+                # If physical_buffers is empty, we treat it as identity physical storage.
+                if physical_id != logical_id:
+                    raise ValueError(
+                        "logical_to_physical is non-identity but physical_buffers is empty; "
+                        f"logical={logical_id} physical={physical_id}"
+                    )
+
+        for bid, spec in self.physical_buffers.items():
+            if spec.buffer_id != bid:
+                raise ValueError(f"physical_buffers spec.buffer_id mismatch: key={bid} spec={spec.buffer_id}")
 
 
 @dataclass

@@ -392,3 +392,30 @@
 
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase5a_pr2_partition_multitask_equivalence.py`
+
+---
+
+## 2025-12-18：Phase 5B PR#3：task 粒度 liveness + physical buffer reuse（v0）
+
+**动机**
+- Phase 5A 已有 multi-task DAG（TaskGraph）与 buffer 级 TaskIO contract；Phase 5B 需要把“生命周期/复用”升级为 planner 产物，为后续 cache/reuse/Relax lowering 签名做地基。
+
+**主要改动**
+- StoragePlan 支持 logical vs physical：
+  - `boundflow/ir/task.py`（新增 `physical_buffers` / `logical_to_physical` / `to_physical()`）
+- Liveness IR + 计算：
+  - `boundflow/ir/liveness.py`（task 粒度、保守）
+- Planner passes（骨架 + 可复用 helper）：
+  - `boundflow/planner/passes/liveness_pass.py`
+  - `boundflow/planner/passes/buffer_reuse_pass.py`
+- Runtime env 改为 physical buffer id：
+  - `boundflow/runtime/scheduler.py`
+  - `boundflow/runtime/task_executor.py`
+- interval_v2 可选开启复用（默认关闭）：
+  - `boundflow/planner/interval_v2.py`（`enable_storage_reuse`）
+
+**测试**
+- `tests/test_phase5b_pr3_buffer_reuse.py`
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5b_pr3_buffer_reuse.py`

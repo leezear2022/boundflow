@@ -52,10 +52,11 @@ def run_ibp_scheduled(
 
     x0 = input_spec.center
     eps = float(input_spec.eps)
-    input_buf = module.storage_plan.value_to_buffer.get(input_spec.value_name)
-    if input_buf is None:
+    input_logical = module.storage_plan.value_to_buffer.get(input_spec.value_name)
+    if input_logical is None:
         raise KeyError(f"input_spec.value_name not found in storage_plan: {input_spec.value_name}")
-    env: Dict[str, IntervalState] = {input_buf: IntervalState(lower=x0 - eps, upper=x0 + eps)}
+    input_phys = module.storage_plan.to_physical(input_logical)
+    env: Dict[str, IntervalState] = {input_phys: IntervalState(lower=x0 - eps, upper=x0 + eps)}
 
     if module.task_graph is None:
         # Fallback: behave like phase-4 single-task execution.
@@ -92,16 +93,17 @@ def run_ibp_scheduled(
             )
         output_value = sink_task.output_values[0]
 
-    out_buf = module.storage_plan.value_to_buffer.get(output_value)
-    if out_buf is None:
+    out_logical = module.storage_plan.value_to_buffer.get(output_value)
+    if out_logical is None:
         raise KeyError(f"output_value not found in storage_plan: {output_value}")
+    out_phys = module.storage_plan.to_physical(out_logical)
 
-    if out_buf not in env and output_value in params:
+    if out_phys not in env and output_value in params:
         t = params[output_value]  # type: ignore[index]
         if not torch.is_tensor(t):
             t = torch.as_tensor(t, device=x0.device)
         return IntervalState(lower=t, upper=t)
 
-    if out_buf not in env:
-        raise KeyError(f"missing output buffer in env: {out_buf} (value={output_value})")
-    return env[out_buf]
+    if out_phys not in env:
+        raise KeyError(f"missing output buffer in env: {out_phys} (value={output_value}, logical={out_logical})")
+    return env[out_phys]
