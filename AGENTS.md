@@ -40,3 +40,6 @@
 - 全程用中文交流
 - 生成的文档放在 gemini_doc中
 - 每次修改都写一个修改文档作为记录
+
+## 关键文档索引
+- TVM 后端优化备忘：`gemini_doc/tvm_backend_optimization_memo.md`
