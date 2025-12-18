@@ -7,6 +7,7 @@ import torch
 
 from ..domains.interval import IntervalDomain, IntervalState
 from ..ir.task import BFTaskModule, TaskKind
+from ..ir.task import StoragePlan
 
 
 @dataclass(frozen=True)
@@ -181,7 +182,9 @@ class PythonTaskExecutor:
             output_value = task.output_values[0]
         return get_interval(output_value)
 
-    def run_ibp_task(self, task, *, env: Dict[str, IntervalState], params: Dict[str, Any]) -> None:
+    def run_ibp_task(
+        self, task, *, env: Dict[str, IntervalState], params: Dict[str, Any], storage_plan: StoragePlan
+    ) -> None:
         """
         Execute a single INTERVAL_IBP task in-place on a shared env.
 
@@ -190,6 +193,7 @@ class PythonTaskExecutor:
         if task.kind != TaskKind.INTERVAL_IBP:
             raise NotImplementedError(f"PythonTaskExecutor only supports INTERVAL_IBP, got {task.kind}")
 
+        # BufferEnv: env maps buffer_id -> IntervalState.
         # Pick a device anchor from existing env or any param tensor.
         device = None
         for v in env.values():
@@ -201,14 +205,23 @@ class PythonTaskExecutor:
                     device = p.device
                     break
 
+        def _buf(value_name: str) -> str:
+            b = storage_plan.value_to_buffer.get(value_name)
+            if b is None:
+                raise KeyError(f"value not found in storage_plan: {value_name}")
+            return b
+
         def get_interval(value_name: str) -> IntervalState:
-            if value_name in env:
-                return env[value_name]
+            bid = _buf(value_name)
+            if bid in env:
+                return env[bid]
             if value_name in params:
                 t = params[value_name]
                 if not torch.is_tensor(t):
                     t = torch.as_tensor(t, device=device)
-                return IntervalState(lower=t, upper=t)
+                s = IntervalState(lower=t, upper=t)
+                env[bid] = s
+                return s
             raise KeyError(f"missing value in env/params: {value_name}")
 
         def get_tensor(value_name: str) -> Any:
@@ -230,7 +243,7 @@ class PythonTaskExecutor:
                 u = logits.upper.unsqueeze(1)
                 lb = (C_pos * l + C_neg * u).sum(dim=-1)
                 ub = (C_pos * u + C_neg * l).sum(dim=-1)
-                env[op.outputs[0]] = IntervalState(lower=lb, upper=ub)  # type: ignore[assignment]
+                env[_buf(op.outputs[0])] = IntervalState(lower=lb, upper=ub)  # type: ignore[assignment]
                 continue
 
             if op.op_type == "linear":
@@ -248,10 +261,10 @@ class PythonTaskExecutor:
                     deviation = torch.bmm(diff.unsqueeze(1), w.abs().transpose(-1, -2)).squeeze(1)
                     lb = center - deviation + b
                     ub = center + deviation + b
-                    env[op.outputs[0]] = IntervalState(lower=lb, upper=ub)  # type: ignore[assignment]
+                    env[_buf(op.outputs[0])] = IntervalState(lower=lb, upper=ub)  # type: ignore[assignment]
                 else:
                     out = self.domain.affine_transformer(x, w, b, op="linear")
-                    env[op.outputs[0]] = out  # type: ignore[assignment]
+                    env[_buf(op.outputs[0])] = out  # type: ignore[assignment]
                 continue
 
             if op.op_type == "conv2d":
@@ -261,18 +274,18 @@ class PythonTaskExecutor:
                 attrs = dict(op.attrs)
                 attrs.setdefault("op", "conv2d")
                 out = self.domain.affine_transformer(x, w, b, **attrs)
-                env[op.outputs[0]] = out  # type: ignore[assignment]
+                env[_buf(op.outputs[0])] = out  # type: ignore[assignment]
                 continue
 
             if op.op_type == "relu":
                 x = get_interval(op.inputs[0])
-                env[op.outputs[0]] = self.domain.relu_transformer(x)  # type: ignore[assignment]
+                env[_buf(op.outputs[0])] = self.domain.relu_transformer(x)  # type: ignore[assignment]
                 continue
 
             if op.op_type in ("add", "mul"):
                 a = get_interval(op.inputs[0])
                 b = get_interval(op.inputs[1])
-                env[op.outputs[0]] = self.domain.elementwise_transformer(  # type: ignore[assignment]
+                env[_buf(op.outputs[0])] = self.domain.elementwise_transformer(  # type: ignore[assignment]
                     [a, b], op=op.op_type
                 )
                 continue
@@ -281,7 +294,7 @@ class PythonTaskExecutor:
                 x = get_interval(op.inputs[0])
                 start_dim = int(op.attrs.get("start_dim", 0))
                 end_dim = int(op.attrs.get("end_dim", -1))
-                env[op.outputs[0]] = IntervalState(  # type: ignore[assignment]
+                env[_buf(op.outputs[0])] = IntervalState(  # type: ignore[assignment]
                     lower=torch.flatten(x.lower, start_dim=start_dim, end_dim=end_dim),
                     upper=torch.flatten(x.upper, start_dim=start_dim, end_dim=end_dim),
                 )
@@ -291,9 +304,9 @@ class PythonTaskExecutor:
                 x = get_interval(op.inputs[0])
                 shape = op.attrs.get("shape")
                 if shape is None:
-                    env[op.outputs[0]] = x
+                    env[_buf(op.outputs[0])] = x
                     continue
-                env[op.outputs[0]] = IntervalState(  # type: ignore[assignment]
+                env[_buf(op.outputs[0])] = IntervalState(  # type: ignore[assignment]
                     lower=x.lower.reshape(shape),
                     upper=x.upper.reshape(shape),
                 )
@@ -305,7 +318,7 @@ class PythonTaskExecutor:
                 if not isinstance(dims, (list, tuple)):
                     raise ValueError(f"transpose missing dims for op '{op.name}': {dims}")
                 dims = [int(d) for d in dims]
-                env[op.outputs[0]] = IntervalState(  # type: ignore[assignment]
+                env[_buf(op.outputs[0])] = IntervalState(  # type: ignore[assignment]
                     lower=x.lower.permute(*dims),
                     upper=x.upper.permute(*dims),
                 )

@@ -46,7 +46,11 @@ class PlanBundle:
         self.task_module.validate()
         if self.task_graph is not None:
             tasks_by_id = {t.task_id: t for t in self.task_module.tasks}
-            self.task_graph.validate(tasks_by_id=tasks_by_id, entry_task_id=self.task_module.entry_task_id)
+            self.task_graph.validate(
+                tasks_by_id=tasks_by_id,
+                entry_task_id=self.task_module.entry_task_id,
+                storage_plan=self.task_module.storage_plan,
+            )
         if self.storage_plan is not None:
             self.storage_plan.validate()
 
@@ -67,4 +71,3 @@ def run_planner_passes(
     for p in passes:
         bundle = p.run(bundle, config=config)
     return bundle
-

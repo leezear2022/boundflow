@@ -140,4 +140,6 @@ class BFTaskModule:
         self.storage_plan.validate()
         if self.task_graph is not None:
             tasks_by_id = {t.task_id: t for t in self.tasks}
-            self.task_graph.validate(tasks_by_id=tasks_by_id, entry_task_id=self.entry_task_id)
+            self.task_graph.validate(
+                tasks_by_id=tasks_by_id, entry_task_id=self.entry_task_id, storage_plan=self.storage_plan
+            )

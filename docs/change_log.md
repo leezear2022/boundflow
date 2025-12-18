@@ -358,6 +358,10 @@
 - PythonTaskExecutor：`boundflow/runtime/task_executor.py`
   - 增加 `run_ibp_task()`（task 级执行单元，为 scheduler 提供基础能力）
 
+**关键调整（避免 Phase5B/5E 返工）**
+- TaskGraph edge 升级为 **buffer 级依赖**（携带 `src/dst value + buffer_id`，并对齐 `StoragePlan.value_to_buffer`）
+- Scheduler/env 升级为 **buffer_id -> IntervalState**（TaskIO contract 明确化）
+
 **测试**
 - `tests/test_phase5a_pr1_taskgraph_and_scheduler.py`
 

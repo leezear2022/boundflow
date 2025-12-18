@@ -12,7 +12,14 @@ from .task_executor import LinfInputSpec, PythonTaskExecutor
 
 
 class IBPTaskStepExecutor(Protocol):
-    def run_ibp_task(self, task: BoundTask, *, env: Dict[str, IntervalState], params: Dict[str, Any]) -> None: ...
+    def run_ibp_task(
+        self,
+        task: BoundTask,
+        *,
+        env: Dict[str, IntervalState],
+        params: Dict[str, Any],
+        storage_plan,
+    ) -> None: ...
 
 
 @dataclass
@@ -45,7 +52,10 @@ def run_ibp_scheduled(
 
     x0 = input_spec.center
     eps = float(input_spec.eps)
-    env: Dict[str, IntervalState] = {input_spec.value_name: IntervalState(lower=x0 - eps, upper=x0 + eps)}
+    input_buf = module.storage_plan.value_to_buffer.get(input_spec.value_name)
+    if input_buf is None:
+        raise KeyError(f"input_spec.value_name not found in storage_plan: {input_spec.value_name}")
+    env: Dict[str, IntervalState] = {input_buf: IntervalState(lower=x0 - eps, upper=x0 + eps)}
 
     if module.task_graph is None:
         # Fallback: behave like phase-4 single-task execution.
@@ -60,20 +70,23 @@ def run_ibp_scheduled(
         task = tasks_by_id[task_id]
         if task.kind != TaskKind.INTERVAL_IBP:
             raise NotImplementedError(f"mixed TaskKind not supported in v0 scheduler: {task.kind}")
-        executor.run_ibp_task(task, env=env, params=params)
+        executor.run_ibp_task(task, env=env, params=params, storage_plan=module.storage_plan)
 
     if output_value is None:
         if len(entry.output_values) != 1:
             raise ValueError(f"entry task has {len(entry.output_values)} outputs; specify output_value explicitly")
         output_value = entry.output_values[0]
 
-    if output_value not in env and output_value in params:
-        t = params[output_value]
+    out_buf = module.storage_plan.value_to_buffer.get(output_value)
+    if out_buf is None:
+        raise KeyError(f"output_value not found in storage_plan: {output_value}")
+
+    if out_buf not in env and output_value in params:
+        t = params[output_value]  # type: ignore[index]
         if not torch.is_tensor(t):
             t = torch.as_tensor(t, device=x0.device)
         return IntervalState(lower=t, upper=t)
 
-    if output_value not in env:
-        raise KeyError(f"missing output_value in env: {output_value}")
-    return env[output_value]
-
+    if out_buf not in env:
+        raise KeyError(f"missing output buffer in env: {out_buf} (value={output_value})")
+    return env[out_buf]

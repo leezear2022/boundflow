@@ -1,23 +1,36 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, Iterable, List, Optional, Set
+from typing import Dict, List, Optional, Set
 
 from .task import BoundTask
+from .task import StoragePlan
+
+
+@dataclass(frozen=True)
+class TaskBufferDep:
+    """
+    A buffer-level dependency (value -> buffer binding is validated against StoragePlan).
+    """
+
+    src_value: str
+    src_buffer_id: str
+    dst_value: str
+    dst_buffer_id: str
 
 
 @dataclass(frozen=True)
 class TaskDepEdge:
     """
-    A dependency edge between tasks, expressed at value granularity.
+    A dependency edge between tasks, expressed at buffer granularity.
 
-    In Phase 5 we will likely switch to buffer-granularity edges (via StoragePlan),
-    but value edges are sufficient to establish a correct topo schedule in v0.
+    Value names are carried for validation/debug, while storage is the stable
+    contract for scheduling/reuse/lowering.
     """
 
     src_task_id: str
     dst_task_id: str
-    values: List[str]
+    deps: List[TaskBufferDep]
 
 
 @dataclass
@@ -31,7 +44,9 @@ class TaskGraph:
     task_ids: List[str]
     edges: List[TaskDepEdge] = field(default_factory=list)
 
-    def validate(self, *, tasks_by_id: Dict[str, BoundTask], entry_task_id: str) -> None:
+    def validate(
+        self, *, tasks_by_id: Dict[str, BoundTask], entry_task_id: str, storage_plan: StoragePlan
+    ) -> None:
         if entry_task_id not in tasks_by_id:
             raise KeyError(f"entry_task_id not found in tasks: {entry_task_id}")
         if not self.task_ids:
@@ -48,11 +63,25 @@ class TaskGraph:
                 raise KeyError(f"edge.dst_task_id missing: {edge.dst_task_id}")
             src = tasks_by_id[edge.src_task_id]
             dst = tasks_by_id[edge.dst_task_id]
-            for v in edge.values:
-                if v not in src.output_values:
-                    raise ValueError(f"edge value '{v}' not in src task outputs: {src.task_id}")
-                if v not in dst.input_values:
-                    raise ValueError(f"edge value '{v}' not in dst task inputs: {dst.task_id}")
+            for dep in edge.deps:
+                if dep.src_value not in src.output_values:
+                    raise ValueError(f"edge src_value '{dep.src_value}' not in src task outputs: {src.task_id}")
+                if dep.dst_value not in dst.input_values:
+                    raise ValueError(f"edge dst_value '{dep.dst_value}' not in dst task inputs: {dst.task_id}")
+                if dep.src_buffer_id not in storage_plan.buffers:
+                    raise ValueError(f"edge src_buffer_id missing in storage_plan: {dep.src_buffer_id}")
+                if dep.dst_buffer_id not in storage_plan.buffers:
+                    raise ValueError(f"edge dst_buffer_id missing in storage_plan: {dep.dst_buffer_id}")
+                if storage_plan.value_to_buffer.get(dep.src_value) != dep.src_buffer_id:
+                    raise ValueError(
+                        f"edge src_value->buffer mismatch: {dep.src_value} -> {storage_plan.value_to_buffer.get(dep.src_value)} "
+                        f"(edge expects {dep.src_buffer_id})"
+                    )
+                if storage_plan.value_to_buffer.get(dep.dst_value) != dep.dst_buffer_id:
+                    raise ValueError(
+                        f"edge dst_value->buffer mismatch: {dep.dst_value} -> {storage_plan.value_to_buffer.get(dep.dst_value)} "
+                        f"(edge expects {dep.dst_buffer_id})"
+                    )
 
         _ = self.topo_sort(tasks_by_id=tasks_by_id, entry_task_id=entry_task_id)
 
@@ -107,16 +136,15 @@ class TaskGraph:
         return out
 
     @staticmethod
-    def chain(*task_ids: str, values: Optional[List[str]] = None) -> "TaskGraph":
+    def chain(*task_ids: str, deps: Optional[List[TaskBufferDep]] = None) -> "TaskGraph":
         """
-        Convenience helper for tests: t0 -> t1 -> ... -> tn with a single value edge list reused.
+        Convenience helper for tests: t0 -> t1 -> ... -> tn with a single dep list reused.
         """
         if len(task_ids) < 1:
             raise ValueError("TaskGraph.chain expects at least one task_id")
         edges: List[TaskDepEdge] = []
-        if values is None:
-            values = []
+        if deps is None:
+            deps = []
         for a, b in zip(task_ids[:-1], task_ids[1:]):
-            edges.append(TaskDepEdge(src_task_id=a, dst_task_id=b, values=list(values)))
+            edges.append(TaskDepEdge(src_task_id=a, dst_task_id=b, deps=list(deps)))
         return TaskGraph(task_ids=list(task_ids), edges=edges)
-

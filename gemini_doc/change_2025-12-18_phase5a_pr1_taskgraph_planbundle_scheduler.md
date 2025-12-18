@@ -11,7 +11,8 @@ Phase 5 的后续工作（task 切分、cache/reuse、batching、部分 TVM、�
 ### 1) TaskGraph IR
 
 - 新增：`boundflow/ir/task_graph.py`
-  - `TaskGraph(task_ids, edges)` + `validate()` + `topo_sort()`（基于 value 级依赖）
+  - `TaskGraph(task_ids, edges)` + `validate()` + `topo_sort()`
+  - edge 为 **buffer 级依赖**（`src/dst value + buffer_id`），并与 `StoragePlan.value_to_buffer` 做一致性校验
 
 ### 2) Planner 输出骨架
 
@@ -32,6 +33,7 @@ Phase 5 的后续工作（task 切分、cache/reuse、batching、部分 TVM、�
 - 新增：`boundflow/runtime/scheduler.py`
   - `run_ibp_scheduled(module, input_spec, executor, output_value)`
   - 如果 `module.task_graph` 为空则回退到旧的单 task 执行（Phase 4 行为不变）
+  - env 使用 **buffer_id -> IntervalState**（TaskIO contract 明确化）
 
 ### 5) PythonTaskExecutor 增加 task 级执行单元
 
@@ -43,6 +45,7 @@ Phase 5 的后续工作（task 切分、cache/reuse、batching、部分 TVM、�
 - 新增：`tests/test_phase5a_pr1_taskgraph_and_scheduler.py`
   - 手工构造 2-task relu chain 的 TaskGraph
   - 断言 scheduler 输出 == 单 task（拼接 ops）输出
+  - 新增分叉+合并（branch+merge）用例：覆盖 DAG 多前驱依赖
 
 ## 如何验证
 
@@ -50,4 +53,3 @@ Phase 5 的后续工作（task 切分、cache/reuse、batching、部分 TVM、�
 conda run -n boundflow python -m pytest -q tests/test_phase5a_pr1_taskgraph_and_scheduler.py
 conda run -n boundflow python -m pytest -q
 ```
-
