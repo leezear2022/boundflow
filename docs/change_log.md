@@ -468,3 +468,20 @@
 
 **验证**
 - `conda run -n boundflow python -m pytest -q`
+
+---
+
+## 2025-12-18：工程环境：默认禁用 TVM-FFI 可选 torch-c-dlpack JIT（避免 tvm import/pytest 卡住）
+
+**动机**
+- `tvm` import 会触发 `tvm-ffi` 的可选 torch-c-dlpack 扩展 JIT 编译；在部分环境下会显著拖慢甚至卡住 import，导致 pytest 超时。该扩展对当前阶段不是必需，因此默认禁用并把 cache/tmp 放入 repo。
+
+**主要改动**
+- `env.sh`
+  - 默认 `TVM_FFI_DISABLE_TORCH_C_DLPACK=1`（可通过设为 0 覆盖）
+  - 默认 `TVM_FFI_CACHE_DIR=$BOUNDFLOW_ROOT/.cache/tvm-ffi`
+  - 默认 `TMPDIR=$BOUNDFLOW_ROOT/.tmp`
+
+**验证**
+- `conda activate boundflow && source env.sh && python -c "import tvm; print('tvm_ok')"`
+- `pytest -q`

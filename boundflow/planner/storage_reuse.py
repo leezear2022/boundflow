@@ -47,6 +47,7 @@ class ReuseMissReason(Enum):
     NO_FREE_BUFFER = "no_free_buffer"
     POLICY_DECLINED = "policy_declined"
     KEY_MISMATCH = "key_mismatch"
+    LIFETIME_OVERLAP = "lifetime_overlap"
 
 
 @dataclass
@@ -55,6 +56,8 @@ class BufferReuseStats:
     pool_miss: int = 0
     bytes_saved_est: int = 0
     unknown_bytes_buffers: int = 0
+    max_free_pool_keys: int = 0
+    max_free_pool_buffers: int = 0
     miss_reasons: Dict[ReuseMissReason, int] = field(default_factory=dict)
 
     def inc(self, reason: ReuseMissReason) -> None:

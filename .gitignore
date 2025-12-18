@@ -9,4 +9,6 @@ coverage.xml
 htmlcov/
 dist/
 build/
-
+.cache/
+.tmp/
+.benchmarks/

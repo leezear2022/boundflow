@@ -22,5 +22,13 @@ add_to_path "${BOUNDFLOW_ROOT}"
 # Set TVM_HOME for compilation
 export TVM_HOME="${BOUNDFLOW_ROOT}/boundflow/3rdparty/tvm"
 
+# TVM-FFI optional torch-c-dlpack JIT may be very slow / undesirable for most workflows.
+# Default to disabling it; users can override by setting TVM_FFI_DISABLE_TORCH_C_DLPACK=0.
+export TVM_FFI_DISABLE_TORCH_C_DLPACK="${TVM_FFI_DISABLE_TORCH_C_DLPACK:-1}"
+# Keep caches/temp files inside the repo by default (useful for sandboxed environments).
+export TVM_FFI_CACHE_DIR="${TVM_FFI_CACHE_DIR:-${BOUNDFLOW_ROOT}/.cache/tvm-ffi}"
+export TMPDIR="${TMPDIR:-${BOUNDFLOW_ROOT}/.tmp}"
+mkdir -p "${TVM_FFI_CACHE_DIR}" "${TMPDIR}" >/dev/null 2>&1 || true
+
 echo "BoundFlow environment configured."
 echo "TVM_HOME=$TVM_HOME"

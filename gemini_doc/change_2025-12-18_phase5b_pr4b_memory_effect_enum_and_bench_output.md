@@ -24,13 +24,16 @@
   - `StorageReuseOptions.respect_memory_effect: bool = False`（占位，后续让复用/插拷贝逻辑尊重 effect 冲突）
   - `ReuseMissReason.KEY_MISMATCH`
 - 修改：`boundflow/planner/passes/buffer_reuse_pass.py`
-  - 当 free pool 里存在其它 key 的 buffer 时，miss reason 更倾向计为 `KEY_MISMATCH`
+  - `miss_reasons` 进一步拆分：`NO_FREE_BUFFER`（pool 为空）、`KEY_MISMATCH`（pool 非空但无同 key）、`LIFETIME_OVERLAP`（存在同 key 但仍活跃未释放）
+  - 统计 free pool 碎片度：`max_free_pool_keys/max_free_pool_buffers`
 
 ### 3) bench 脚本支持 text/json/csv 输出
 
 - 修改：`scripts/bench_storage_reuse.py`
   - 新增 `--format text|json|csv` 与 `--out <path>`
   - JSON 输出包含 before/after 两个对象；CSV 输出两行（phase=before/after），并扁平化 `miss_reasons`
+  - 输出补齐复现信息：`git_commit`、输入 shape、DAG 规模（num_tasks/num_edges）、reuse 配置
+  - 额外输出 `why_not_reused_topk`（Top-5 miss reasons）
 
 ## 如何验证
 
@@ -39,4 +42,3 @@ conda run -n boundflow python -m pytest -q
 conda run -n boundflow python scripts/bench_storage_reuse.py --model mlp --min-tasks 2 --format json
 conda run -n boundflow python scripts/bench_storage_reuse.py --model mlp --min-tasks 2 --format csv
 ```
-

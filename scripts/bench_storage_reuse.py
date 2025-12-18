@@ -6,6 +6,7 @@ import csv
 import json
 import sys
 from pathlib import Path
+import subprocess
 
 import torch
 import torch.nn as nn
@@ -32,6 +33,13 @@ def _mnist_cnn():
         nn.Linear(100, 10),
     )
 
+def _git_commit() -> str:
+    try:
+        out = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=str(Path(__file__).resolve().parent.parent))
+        return out.decode("utf-8").strip()
+    except Exception:
+        return "unknown"
+
 
 def main() -> int:
     p = argparse.ArgumentParser()
@@ -57,12 +65,19 @@ def main() -> int:
     module.validate()
 
     before_saved, _ = estimate_bytes_saved(module.storage_plan)
+    commit = _git_commit()
+    num_edges = int(len(module.task_graph.edges)) if module.task_graph is not None else 0
     before = {
         "phase": "before",
         "model": args.model,
         "min_tasks": int(args.min_tasks),
         "key_mode": args.key_mode,
         "policy": args.policy,
+        "respect_memory_effect": False,
+        "git_commit": commit,
+        "input_shape": list(x0.shape),
+        "num_tasks": int(len(module.tasks)),
+        "num_edges": num_edges,
         "logical_buffers": int(module.storage_plan.num_logical_buffers()),
         "physical_buffers": int(module.storage_plan.num_physical_buffers()),
         "bytes_saved_est": int(before_saved),
@@ -76,19 +91,29 @@ def main() -> int:
     stats = apply_conservative_buffer_reuse(module, options=opt)
     liveness = compute_liveness_task_level(module)
     after_saved, _ = estimate_bytes_saved(module.storage_plan)
+    miss_reasons = {k.value: int(v) for k, v in (stats.miss_reasons or {}).items()}
+    why_topk = sorted(miss_reasons.items(), key=lambda kv: (-kv[1], kv[0]))[:5]
     after = {
         "phase": "after",
         "model": args.model,
         "min_tasks": int(args.min_tasks),
         "key_mode": args.key_mode,
         "policy": args.policy,
+        "respect_memory_effect": bool(opt.respect_memory_effect),
+        "git_commit": commit,
+        "input_shape": list(x0.shape),
+        "num_tasks": int(len(module.tasks)),
+        "num_edges": num_edges,
         "logical_buffers": int(module.storage_plan.num_logical_buffers()),
         "physical_buffers": int(module.storage_plan.num_physical_buffers()),
         "bytes_saved_est": int(after_saved),
         "pool_hit": int(stats.pool_hit),
         "pool_miss": int(stats.pool_miss),
         "tasks": int(len(liveness.topo_order)),
-        "miss_reasons": {k.value: int(v) for k, v in (stats.miss_reasons or {}).items()},
+        "max_free_pool_keys": int(getattr(stats, "max_free_pool_keys", 0)),
+        "max_free_pool_buffers": int(getattr(stats, "max_free_pool_buffers", 0)),
+        "miss_reasons": miss_reasons,
+        "why_not_reused_topk": why_topk,
     }
 
     fmt = args.format
@@ -111,7 +136,7 @@ def main() -> int:
             print(s)
     elif fmt == "csv":
         rows = [before, after]
-        fieldnames = sorted({k for r in rows for k in r.keys() if k != "miss_reasons"})
+        fieldnames = sorted({k for r in rows for k in r.keys() if k not in ("miss_reasons", "why_not_reused_topk")})
         # Flatten miss_reasons for CSV.
         miss_keys = sorted({k for r in rows for k in (r.get("miss_reasons") or {}).keys()})
         fieldnames += [f"miss_{k}" for k in miss_keys]

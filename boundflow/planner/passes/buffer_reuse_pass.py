@@ -112,6 +112,23 @@ def apply_conservative_buffer_reuse(
     free_pool: Dict[BufferReuseKey, List[str]] = {}
 
     logical_to_physical: Dict[str, str] = {}
+    active_by_key: Dict[BufferReuseKey, int] = {}
+
+    def _inc_active(k: BufferReuseKey) -> None:
+        active_by_key[k] = int(active_by_key.get(k, 0)) + 1
+
+    def _dec_active(k: BufferReuseKey) -> None:
+        cur = int(active_by_key.get(k, 0))
+        if cur <= 1:
+            active_by_key.pop(k, None)
+        else:
+            active_by_key[k] = cur - 1
+
+    def _update_pool_peaks() -> None:
+        stats.max_free_pool_keys = max(int(stats.max_free_pool_keys), int(len([k for k, v in free_pool.items() if v])))
+        stats.max_free_pool_buffers = max(
+            int(stats.max_free_pool_buffers), int(sum(len(v) for v in free_pool.values()))
+        )
 
     def _is_reusable(bid: str) -> bool:
         lt = liveness.lifetimes.get(bid)
@@ -165,10 +182,18 @@ def apply_conservative_buffer_reuse(
                     logical_to_physical[bid] = phys
             else:
                 stats.pool_miss += 1
-                # If some other pool has buffers, this miss is more likely a key mismatch than "nothing freed yet".
-                any_other_free = any(v for v in free_pool.values())
-                stats.inc(ReuseMissReason.KEY_MISMATCH if any_other_free else ReuseMissReason.NO_FREE_BUFFER)
+                any_free = any(v for v in free_pool.values())
+                has_active_same_key = int(active_by_key.get(k, 0)) > 0
+                if has_active_same_key:
+                    stats.inc(ReuseMissReason.LIFETIME_OVERLAP)
+                elif any_free:
+                    stats.inc(ReuseMissReason.KEY_MISMATCH)
+                else:
+                    stats.inc(ReuseMissReason.NO_FREE_BUFFER)
                 _alloc_identity(bid)
+
+            # Mark this buffer as active (regardless of physical choice).
+            _inc_active(k)
 
         # Release buffers whose last use is this task.
         for bid in released_by_task.get(idx, []):
@@ -179,6 +204,9 @@ def apply_conservative_buffer_reuse(
             phys = logical_to_physical.get(bid, bid)
             k = _key(bid)
             free_pool.setdefault(k, []).append(phys)
+            _dec_active(k)
+
+        _update_pool_peaks()
 
     # Ensure every logical buffer has a mapping (identity by default).
     for bid, spec in module.storage_plan.buffers.items():
