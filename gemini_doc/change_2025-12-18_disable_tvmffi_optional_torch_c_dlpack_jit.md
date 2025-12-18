@@ -15,6 +15,26 @@
   - 默认设置 `TVM_FFI_CACHE_DIR=$BOUNDFLOW_ROOT/.cache/tvm-ffi`
   - 默认设置 `TMPDIR=$BOUNDFLOW_ROOT/.tmp` 并创建目录
 
+## 说明：这是“受限环境默认策略”，不是唯一推荐路径
+
+上面的默认行为主要面向以下场景：CI/WSL/sandbox 等“编译工具链不完整、网络受限、缓存目录不可写或不可持久化”的环境，目标是保证 `import tvm` 与 `pytest` **可稳定完成**。
+
+如果你希望启用更快的 torch↔DLPack 转换（并且避免每次现场编译/JIT），更“正规”的两条路径是：
+
+1) 安装可选依赖 `torch-c-dlpack-ext`（推荐）
+
+这会让 tvm-ffi 不需要在 import 时现场编译扩展：
+
+```bash
+pip install torch-c-dlpack-ext
+```
+
+2) 设置 `TVM_FFI_CACHE_DIR` 到可写且持久的路径（避免反复编译）
+
+```bash
+export TVM_FFI_CACHE_DIR=~/.cache/tvm-ffi
+```
+
 ## 如何验证
 
 ```bash
@@ -26,7 +46,8 @@ pytest -q
 
 ## 如何启用 torch-c-dlpack JIT（可选）
 
+如果你没有安装 `torch-c-dlpack-ext`，但确实希望启用该路径（可能触发一次性编译/JIT），可以：
+
 ```bash
 export TVM_FFI_DISABLE_TORCH_C_DLPACK=0
 ```
-

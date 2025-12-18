@@ -118,6 +118,14 @@ bash scripts/setup_hooks.sh
 *   **原因**: TVM 编译失败，或者 Python 加载路径不对。
 *   **解决**: 检查 `boundflow/3rdparty/tvm/build/libtvm.so` 是否存在。如果存在，检查 `TVM_HOME` 环境变量是否指向了 `boundflow/3rdparty/tvm`。
 
+### Q4: `import tvm` 很慢/卡住，导致 `pytest` 超时
+*   **原因**: `tvm` import 会经由 `tvm-ffi` 触发一个可选的 torch-c-dlpack 扩展 JIT 编译；在网络受限、编译工具链不完整、缓存目录不可写/不可持久化的环境中，这个 JIT 可能非常慢甚至卡住。
+*   **解决（本仓库默认策略）**: `env.sh` 默认设置 `TVM_FFI_DISABLE_TORCH_C_DLPACK=1`，并把 `TVM_FFI_CACHE_DIR/TMPDIR` 指向 repo 内，优先保证 `import tvm` 与 `pytest` 可稳定完成。
+*   **更正规/更快的路线（推荐）**:
+    1. 安装可选依赖（避免现场编译/JIT）：`pip install torch-c-dlpack-ext`
+    2. 设置持久缓存目录（避免反复编译）：`export TVM_FFI_CACHE_DIR=~/.cache/tvm-ffi`
+    3. 若确实要启用 JIT（可能触发一次性编译）：`export TVM_FFI_DISABLE_TORCH_C_DLPACK=0`
+
 ## 5. 开发指南 (Development Workflow)
 
 ### 修改 TVM C++ 代码后如何重编译？
@@ -131,4 +139,3 @@ bash scripts/setup_hooks.sh
 
 ### 修改 TVM Python 代码？
 由于使用了 `pip install -e` (Editable Mode)，修改 `boundflow/3rdparty/tvm/python` 下的 Python 代码 **不需要重编译/重安装**，修改立即生效。
-
