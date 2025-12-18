@@ -180,3 +180,135 @@ class PythonTaskExecutor:
                 raise ValueError(f"task has {len(task.output_values)} outputs; specify output_value explicitly")
             output_value = task.output_values[0]
         return get_interval(output_value)
+
+    def run_ibp_task(self, task, *, env: Dict[str, IntervalState], params: Dict[str, Any]) -> None:
+        """
+        Execute a single INTERVAL_IBP task in-place on a shared env.
+
+        This is the building block for Phase 5 TaskGraph scheduling.
+        """
+        if task.kind != TaskKind.INTERVAL_IBP:
+            raise NotImplementedError(f"PythonTaskExecutor only supports INTERVAL_IBP, got {task.kind}")
+
+        # Pick a device anchor from existing env or any param tensor.
+        device = None
+        for v in env.values():
+            device = v.lower.device
+            break
+        if device is None:
+            for p in params.values():
+                if torch.is_tensor(p):
+                    device = p.device
+                    break
+
+        def get_interval(value_name: str) -> IntervalState:
+            if value_name in env:
+                return env[value_name]
+            if value_name in params:
+                t = params[value_name]
+                if not torch.is_tensor(t):
+                    t = torch.as_tensor(t, device=device)
+                return IntervalState(lower=t, upper=t)
+            raise KeyError(f"missing value in env/params: {value_name}")
+
+        def get_tensor(value_name: str) -> Any:
+            if value_name in params:
+                return params[value_name]
+            raise KeyError(f"missing param tensor: {value_name}")
+
+        for op in task.ops:
+            if op.op_type == "spec_linear":
+                logits = get_interval(op.inputs[0])
+                C = get_tensor(op.inputs[1])
+                if not torch.is_tensor(C):
+                    C = torch.as_tensor(C, device=device)
+                if C.dim() != 3:
+                    raise ValueError(f"spec_linear expects C rank-3 [B,S,O], got {tuple(C.shape)}")
+                C_pos = torch.clamp(C, min=0.0)
+                C_neg = torch.clamp(C, max=0.0)
+                l = logits.lower.unsqueeze(1)
+                u = logits.upper.unsqueeze(1)
+                lb = (C_pos * l + C_neg * u).sum(dim=-1)
+                ub = (C_pos * u + C_neg * l).sum(dim=-1)
+                env[op.outputs[0]] = IntervalState(lower=lb, upper=ub)  # type: ignore[assignment]
+                continue
+
+            if op.op_type == "linear":
+                x = get_interval(op.inputs[0])
+                w = get_tensor(op.inputs[1])
+                b = get_tensor(op.inputs[2]) if len(op.inputs) == 3 else None
+                if torch.is_tensor(w) and w.dim() == 3:
+                    if b is None:
+                        b = 0.0
+                    if not torch.is_tensor(b):
+                        b = torch.as_tensor(b, device=device)
+                    mid = (x.lower + x.upper) / 2.0
+                    diff = (x.upper - x.lower) / 2.0
+                    center = torch.bmm(mid.unsqueeze(1), w.transpose(-1, -2)).squeeze(1)
+                    deviation = torch.bmm(diff.unsqueeze(1), w.abs().transpose(-1, -2)).squeeze(1)
+                    lb = center - deviation + b
+                    ub = center + deviation + b
+                    env[op.outputs[0]] = IntervalState(lower=lb, upper=ub)  # type: ignore[assignment]
+                else:
+                    out = self.domain.affine_transformer(x, w, b, op="linear")
+                    env[op.outputs[0]] = out  # type: ignore[assignment]
+                continue
+
+            if op.op_type == "conv2d":
+                x = get_interval(op.inputs[0])
+                w = get_tensor(op.inputs[1])
+                b = get_tensor(op.inputs[2]) if len(op.inputs) == 3 else None
+                attrs = dict(op.attrs)
+                attrs.setdefault("op", "conv2d")
+                out = self.domain.affine_transformer(x, w, b, **attrs)
+                env[op.outputs[0]] = out  # type: ignore[assignment]
+                continue
+
+            if op.op_type == "relu":
+                x = get_interval(op.inputs[0])
+                env[op.outputs[0]] = self.domain.relu_transformer(x)  # type: ignore[assignment]
+                continue
+
+            if op.op_type in ("add", "mul"):
+                a = get_interval(op.inputs[0])
+                b = get_interval(op.inputs[1])
+                env[op.outputs[0]] = self.domain.elementwise_transformer(  # type: ignore[assignment]
+                    [a, b], op=op.op_type
+                )
+                continue
+
+            if op.op_type == "flatten":
+                x = get_interval(op.inputs[0])
+                start_dim = int(op.attrs.get("start_dim", 0))
+                end_dim = int(op.attrs.get("end_dim", -1))
+                env[op.outputs[0]] = IntervalState(  # type: ignore[assignment]
+                    lower=torch.flatten(x.lower, start_dim=start_dim, end_dim=end_dim),
+                    upper=torch.flatten(x.upper, start_dim=start_dim, end_dim=end_dim),
+                )
+                continue
+
+            if op.op_type == "reshape":
+                x = get_interval(op.inputs[0])
+                shape = op.attrs.get("shape")
+                if shape is None:
+                    env[op.outputs[0]] = x
+                    continue
+                env[op.outputs[0]] = IntervalState(  # type: ignore[assignment]
+                    lower=x.lower.reshape(shape),
+                    upper=x.upper.reshape(shape),
+                )
+                continue
+
+            if op.op_type in ("permute", "transpose"):
+                x = get_interval(op.inputs[0])
+                dims = op.attrs.get("dims")
+                if not isinstance(dims, (list, tuple)):
+                    raise ValueError(f"transpose missing dims for op '{op.name}': {dims}")
+                dims = [int(d) for d in dims]
+                env[op.outputs[0]] = IntervalState(  # type: ignore[assignment]
+                    lower=x.lower.permute(*dims),
+                    upper=x.upper.permute(*dims),
+                )
+                continue
+
+            raise NotImplementedError(f"unsupported op_type in task executor: {op.op_type}")

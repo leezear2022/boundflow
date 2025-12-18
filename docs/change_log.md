@@ -339,3 +339,27 @@
 
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase4c_tvmexecutor_matches_python.py tests/test_phase4c_tvmexecutor_matches_python_cnn.py tests/test_phase4c_tvmexecutor_against_auto_lirpa.py`
+
+---
+
+## 2025-12-18：Phase 5A PR#1：TaskGraph + PlanBundle/PlannerPass 骨架 + 串行 scheduler
+
+**动机**
+- 进入 Phase 5 需要把 “整图单 task” 的执行模型升级为可调度的 Task DAG（为后续 cache/reuse/batching/部分 TVM 做地基）。
+- 同时需要一个可扩展的 planner 输出容器（PlanBundle）与 pass pipeline 骨架，便于系统化消融与科研迭代。
+
+**主要改动**
+- TaskGraph IR：`boundflow/ir/task_graph.py`
+- Planner skeleton：`boundflow/planner/core.py`（`PlannerConfig` / `PlanBundle` / `PlannerPass`）
+- BFTaskModule 扩展：`boundflow/ir/task.py`
+  - 增加 `task_graph` 字段与 `get_task()`
+- Scheduler：`boundflow/runtime/scheduler.py`
+  - 支持按 TaskGraph topo 顺序串行执行
+- PythonTaskExecutor：`boundflow/runtime/task_executor.py`
+  - 增加 `run_ibp_task()`（task 级执行单元，为 scheduler 提供基础能力）
+
+**测试**
+- `tests/test_phase5a_pr1_taskgraph_and_scheduler.py`
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5a_pr1_taskgraph_and_scheduler.py`

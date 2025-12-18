@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 from enum import Enum
 
 # Placeholder for TVM imports to avoid hard dependency at import time
 # import tvm
 # from tvm import relax, tir
+
+if TYPE_CHECKING:
+    from .task_graph import TaskGraph
 
 class TaskKind(Enum):
     INTERVAL_IBP = "interval_ibp"
@@ -113,11 +116,17 @@ class BFTaskModule:
     # Memory/storage planning (optional in v0.1, but planner should try to fill it).
     storage_plan: StoragePlan = field(default_factory=StoragePlan)
 
-    def get_entry_task(self) -> BoundTask:
+    # Optional: task dependency graph for multi-task scheduling (Phase 5).
+    task_graph: Optional["TaskGraph"] = None
+
+    def get_task(self, task_id: str) -> BoundTask:
         for task in self.tasks:
-            if task.task_id == self.entry_task_id:
+            if task.task_id == task_id:
                 return task
-        raise KeyError(f"entry_task_id not found: {self.entry_task_id}")
+        raise KeyError(f"task_id not found: {task_id}")
+
+    def get_entry_task(self) -> BoundTask:
+        return self.get_task(self.entry_task_id)
 
     def validate(self) -> None:
         if not self.tasks:
@@ -129,3 +138,6 @@ class BFTaskModule:
         for task in self.tasks:
             task.validate()
         self.storage_plan.validate()
+        if self.task_graph is not None:
+            tasks_by_id = {t.task_id: t for t in self.tasks}
+            self.task_graph.validate(tasks_by_id=tasks_by_id, entry_task_id=self.entry_task_id)
