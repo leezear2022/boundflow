@@ -73,9 +73,24 @@ def run_ibp_scheduled(
         executor.run_ibp_task(task, env=env, params=params, storage_plan=module.storage_plan)
 
     if output_value is None:
-        if len(entry.output_values) != 1:
-            raise ValueError(f"entry task has {len(entry.output_values)} outputs; specify output_value explicitly")
-        output_value = entry.output_values[0]
+        # Try to infer a unique "sink output" in the reachable task subgraph.
+        reachable = graph.reachable_from(module.entry_task_id)
+        out_deg: Dict[str, int] = {t: 0 for t in reachable}
+        for e in graph.edges:
+            if e.src_task_id in reachable and e.dst_task_id in reachable:
+                out_deg[e.src_task_id] += 1
+        sinks = [t for t, d in out_deg.items() if d == 0]
+        if len(sinks) != 1:
+            raise ValueError(
+                f"task_graph has {len(sinks)} sink tasks; specify output_value explicitly (sinks={sinks})"
+            )
+        sink_task = tasks_by_id[sinks[0]]
+        if len(sink_task.output_values) != 1:
+            raise ValueError(
+                f"sink task '{sink_task.task_id}' has {len(sink_task.output_values)} outputs; "
+                "specify output_value explicitly"
+            )
+        output_value = sink_task.output_values[0]
 
     out_buf = module.storage_plan.value_to_buffer.get(output_value)
     if out_buf is None:

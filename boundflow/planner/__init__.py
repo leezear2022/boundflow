@@ -1,4 +1,5 @@
 from .interval_v0 import plan_interval_ibp_v0
 from .interval_v1 import plan_interval_ibp_with_linear_spec
+from .interval_v2 import plan_interval_ibp_v2
 
-__all__ = ["plan_interval_ibp_v0", "plan_interval_ibp_with_linear_spec"]
+__all__ = ["plan_interval_ibp_v0", "plan_interval_ibp_with_linear_spec", "plan_interval_ibp_v2"]
