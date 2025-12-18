@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
+import os
+import time
 from typing import Any, Dict, List, Optional
 
 import torch
@@ -21,6 +24,13 @@ from ..backends.tvm.relax_task_lowering import RelaxLoweringMode, build_interval
 class TVMExecutorOptions:
     target: Optional[str] = None  # e.g. "llvm" or "cuda"
     kernel_style: str = "relax"  # "relax" (preferred), "call_tir", or "te" (legacy demo)
+    # PR#10: compile-side observability.
+    enable_pass_timing: bool = False
+    enable_dump_ir: bool = False
+    dump_ir_dir: str = ".benchmarks/tvm_ir"
+    dump_ir_refresh: bool = False
+    # Optional tag to avoid accidental cache collisions across configs.
+    compile_cache_tag: str = ""
 
 
 @dataclass
@@ -45,6 +55,8 @@ class TVMTaskExecutor:
         self.last_stats: Optional[TVMRunStats] = None
         # (kernel_style, IntervalLinearKey) -> relax.Executable
         self._linear_exec_cache: Dict[tuple[str, IntervalLinearKey], Any] = {}
+        # cache_key -> compile stats (jsonable)
+        self._compile_stats: Dict[str, Dict[str, Any]] = {}
 
     def _select_target(self) -> str:
         import tvm
@@ -57,21 +69,106 @@ class TVMTaskExecutor:
             return "cuda"
         return "llvm"
 
+    @staticmethod
+    def _parse_pass_timing_render(text: str) -> List[Dict[str, Any]]:
+        """
+        Best-effort parser for tvm.ir.instrument.PassTimingInstrument.render() output.
+        """
+        rows: List[Dict[str, Any]] = []
+        for line in (text or "").splitlines():
+            s = line.strip()
+            if not s or s.startswith("Name") or s.startswith("---"):
+                continue
+            # Current TVM render format (C++): "<pass_name>: <dur>us [self] (..)"
+            if ":" not in s:
+                continue
+            name, rest = s.split(":", 1)
+            name = name.strip()
+            rest = rest.strip()
+            if not rest.endswith(")") and "us" not in rest:
+                continue
+            # First token is like "123us"
+            tok = rest.split()[0]
+            if not tok.endswith("us"):
+                continue
+            try:
+                us = float(tok[:-2])
+            except Exception:
+                continue
+            rows.append({"pass": name, "time_ms": us / 1e3})
+        return rows
+
+    def get_compile_stats(self) -> Dict[str, Dict[str, Any]]:
+        return dict(self._compile_stats)
+
     def _compile_interval_linear_executable(self, key: IntervalLinearKey):
         import tvm
         from tvm import relax
 
-        k = (str(self.options.kernel_style), key)
+        k = (str(self.options.kernel_style), str(self.options.compile_cache_tag), key)
         if k in self._linear_exec_cache:
             return self._linear_exec_cache[k]
 
         if self.options.kernel_style == "call_tir":
             ir_mod = build_interval_linear_relax_ir_module(key, mode=RelaxLoweringMode.CALL_TIR, relax_func_name="main")
-            ex = relax.build(ir_mod, target=key.target)
+            compile_mode = "call_tir"
         elif self.options.kernel_style == "relax":
-            ex = build_relax_interval_linear_vm_exec(key)
+            ir_mod = build_interval_linear_relax_ir_module(key, mode=RelaxLoweringMode.RELAX_OPS, relax_func_name="main")
+            compile_mode = "relax_ops"
         else:
             raise ValueError(f"unsupported kernel_style for relax executable: {self.options.kernel_style}")
+
+        cache_key_str = repr(k).encode("utf-8")
+        cache_key_hash = hashlib.sha256(cache_key_str).hexdigest()[:16]
+
+        instruments: List[Any] = []
+        timing_inst = None
+        dump_dir = None
+        if self.options.enable_pass_timing:
+            from tvm.ir.instrument import PassTimingInstrument  # noqa: PLC0415
+
+            timing_inst = PassTimingInstrument()
+            instruments.append(timing_inst)
+        if self.options.enable_dump_ir:
+            from tvm.ir.instrument import DumpIR  # noqa: PLC0415
+
+            run_id = os.environ.get("BOUNDFLOW_TVM_RUN_ID") or f"{int(time.time())}_{os.getpid()}"
+            dump_dir = os.path.join(str(self.options.dump_ir_dir), str(run_id), cache_key_hash)
+            instruments.append(DumpIR(dump_dir=dump_dir, refresh=bool(self.options.dump_ir_refresh)))
+
+        t0 = time.perf_counter_ns()
+        if instruments:
+            from tvm import transform  # noqa: PLC0415
+
+            with transform.PassContext(instruments=instruments):
+                ex = relax.build(ir_mod, target=key.target)
+                # PassTimingInstrument clears profiles on exit_pass_ctx, so render before leaving the context.
+                rendered = str(timing_inst.render()) if timing_inst is not None else None
+        else:
+            ex = relax.build(ir_mod, target=key.target)
+            rendered = None
+        t1 = time.perf_counter_ns()
+
+        stats: Dict[str, Any] = {
+            "cache_key_hash": cache_key_hash,
+            "kernel_style": str(self.options.kernel_style),
+            "compile_mode": compile_mode,
+            "target": str(key.target),
+            "key": {
+                "batch": int(key.batch),
+                "in_features": int(key.in_features),
+                "out_features": int(key.out_features),
+                "dtype": str(key.dtype),
+            },
+            "compile_ms": (t1 - t0) / 1e6,
+            "pass_timing": None,
+            "pass_timing_render": None,
+            "dump_ir_dir": dump_dir,
+        }
+        if timing_inst is not None:
+            stats["pass_timing_render"] = rendered
+            stats["pass_timing"] = self._parse_pass_timing_render(rendered or "")
+        self._compile_stats[cache_key_hash] = stats
 
         self._linear_exec_cache[k] = ex
         return ex

@@ -569,3 +569,18 @@
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr9_tvm_executor_linear_equiv.py`
 - `conda run -n boundflow python -m pytest -q`
+
+---
+
+## 2025-12-18：Phase 5D PR#10：TVM 编译侧可观测性（PassTimingInstrument + DumpIR）
+
+**动机**
+- planner 侧已经有 `timings_ms/config_dump/verify`；为了系统消融需要把 TVM compile 侧的 per-pass timing 与 IR dump 也纳入可观测数据，拆清楚 compile vs run 开销。
+
+**主要改动**
+- `boundflow/runtime/tvm_executor.py`：新增 compile-side 选项（pass timing / dump ir / cache tag），并在 `relax.build` 外包 `tvm.transform.PassContext(instruments=[...])`；将 compile stats 暴露为 json-able 数据
+- `tests/test_phase5d_pr10_tvm_compile_instruments.py`：回归测试（timing 与 dump 落盘）
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr10_tvm_compile_instruments.py`
+- `conda run -n boundflow python -m pytest -q`
