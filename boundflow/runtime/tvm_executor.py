@@ -7,17 +7,20 @@ import torch
 
 from ..domains.interval import IntervalDomain, IntervalState
 from ..ir.task import BFTaskModule, TaskKind
+from ..ir.task import StoragePlan
+from ..ir.task import TaskOp
 from ..runtime.task_executor import LinfInputSpec
 from ..backends.tvm.interval_linear import IntervalLinearKey, build_interval_linear_module
 from ..backends.tvm.interval_conv2d import IntervalConv2dKey, build_interval_conv2d_module
 from ..backends.tvm.relax_interval_linear import build_relax_interval_linear_vm_exec
 from ..backends.tvm.relax_interval_conv2d import build_relax_interval_conv2d_vm_exec
+from ..backends.tvm.relax_task_lowering import RelaxLoweringMode, build_interval_linear_relax_ir_module
 
 
 @dataclass(frozen=True)
 class TVMExecutorOptions:
     target: Optional[str] = None  # e.g. "llvm" or "cuda"
-    kernel_style: str = "relax"  # "relax" (preferred) or "te" (legacy demo)
+    kernel_style: str = "relax"  # "relax" (preferred), "call_tir", or "te" (legacy demo)
 
 
 @dataclass
@@ -40,6 +43,8 @@ class TVMTaskExecutor:
         self.options = options or TVMExecutorOptions()
         self.domain = IntervalDomain()
         self.last_stats: Optional[TVMRunStats] = None
+        # (kernel_style, IntervalLinearKey) -> relax.Executable
+        self._linear_exec_cache: Dict[tuple[str, IntervalLinearKey], Any] = {}
 
     def _select_target(self) -> str:
         import tvm
@@ -51,6 +56,137 @@ class TVMTaskExecutor:
         if tvm.runtime.enabled("cuda"):
             return "cuda"
         return "llvm"
+
+    def _compile_interval_linear_executable(self, key: IntervalLinearKey):
+        import tvm
+        from tvm import relax
+
+        k = (str(self.options.kernel_style), key)
+        if k in self._linear_exec_cache:
+            return self._linear_exec_cache[k]
+
+        if self.options.kernel_style == "call_tir":
+            ir_mod = build_interval_linear_relax_ir_module(key, mode=RelaxLoweringMode.CALL_TIR, relax_func_name="main")
+            ex = relax.build(ir_mod, target=key.target)
+        elif self.options.kernel_style == "relax":
+            ex = build_relax_interval_linear_vm_exec(key)
+        else:
+            raise ValueError(f"unsupported kernel_style for relax executable: {self.options.kernel_style}")
+
+        self._linear_exec_cache[k] = ex
+        return ex
+
+    def _buf(self, storage_plan: StoragePlan, value_name: str) -> str:
+        logical = storage_plan.value_to_buffer.get(value_name)
+        if logical is None:
+            raise KeyError(f"value not found in storage_plan: {value_name}")
+        phys = storage_plan.to_physical(logical)
+        if storage_plan.physical_buffers and phys not in storage_plan.physical_buffers:
+            raise KeyError(f"physical buffer_id not found in storage_plan.physical_buffers: {phys} (value={value_name})")
+        return phys
+
+    def run_ibp_task(self, task, *, env: Dict[str, IntervalState], params: Dict[str, Any], storage_plan) -> None:
+        """
+        Execute a single INTERVAL_IBP task in-place on a shared env (BufferEnv: physical_id -> IntervalState).
+
+        v0: accelerate `linear` via TVM Relax (kernel_style=relax/call_tir); other ops fall back to torch.
+        """
+        from ..ir.task import TaskKind  # local import to avoid cycles
+
+        if task.kind != TaskKind.INTERVAL_IBP:
+            raise NotImplementedError(f"TVMTaskExecutor only supports INTERVAL_IBP, got {task.kind}")
+        if not isinstance(storage_plan, StoragePlan):
+            storage_plan = storage_plan  # type: ignore[assignment]
+
+        # Device anchor for param constants.
+        device = None
+        for v in env.values():
+            device = v.lower.device
+            break
+        if device is None:
+            for p in params.values():
+                if torch.is_tensor(p):
+                    device = p.device
+                    break
+
+        def get_interval(value_name: str) -> IntervalState:
+            bid = self._buf(storage_plan, value_name)
+            if bid in env:
+                return env[bid]
+            if value_name in params:
+                t = params[value_name]
+                if not torch.is_tensor(t):
+                    t = torch.as_tensor(t, device=device)
+                s = IntervalState(lower=t, upper=t)
+                env[bid] = s
+                return s
+            raise KeyError(f"missing value in env/params: {value_name}")
+
+        def get_tensor(value_name: str) -> Any:
+            if value_name in params:
+                return params[value_name]
+            raise KeyError(f"missing param tensor: {value_name}")
+
+        target = self._select_target()
+        import tvm
+        from tvm.runtime import _tensor as rt
+        from tvm import relax
+
+        dev = tvm.cpu(0) if target == "llvm" else tvm.cuda(0)
+
+        def _run_linear(x: IntervalState, w: torch.Tensor, b: torch.Tensor) -> IntervalState:
+            B, I = x.lower.shape
+            O = w.shape[0]
+            dtype = str(x.lower.dtype).replace("torch.", "")
+            key = IntervalLinearKey(batch=int(B), in_features=int(I), out_features=int(O), dtype=dtype, target=target)
+            ex = self._compile_interval_linear_executable(key)
+            vm = relax.VirtualMachine(ex, dev)
+            x_l_t = rt.tensor(x.lower.detach().cpu().numpy(), device=dev)
+            x_u_t = rt.tensor(x.upper.detach().cpu().numpy(), device=dev)
+            w_t = rt.tensor(w.detach().cpu().numpy(), device=dev)
+            b_t = rt.tensor(b.detach().cpu().numpy(), device=dev)
+            out = vm["main"](x_l_t, x_u_t, w_t, b_t)
+            y_l_t, y_u_t = out[0], out[1]
+            y_l = torch.from_numpy(y_l_t.numpy()).to(x.lower.device)
+            y_u = torch.from_numpy(y_u_t.numpy()).to(x.lower.device)
+            return IntervalState(lower=y_l, upper=y_u)
+
+        for op in task.ops:
+            if not isinstance(op, TaskOp):
+                raise TypeError(f"unexpected op type: {type(op)}")
+
+            if op.op_type == "linear":
+                x = get_interval(op.inputs[0])
+                w = get_tensor(op.inputs[1])
+                b = get_tensor(op.inputs[2]) if len(op.inputs) == 3 else None
+                if not torch.is_tensor(w):
+                    w = torch.as_tensor(w, device=x.lower.device)
+                if b is None:
+                    b = torch.zeros((w.shape[0],), dtype=w.dtype, device=w.device)
+                if not torch.is_tensor(b):
+                    b = torch.as_tensor(b, device=w.device)
+
+                # Only accelerate 2D weight.
+                if w.dim() == 2 and x.lower.dim() == 2 and self.options.kernel_style in ("relax", "call_tir"):
+                    out = _run_linear(x, w, b)
+                else:
+                    out = self.domain.affine_transformer(x, w, b, op="linear")
+                env[self._buf(storage_plan, op.outputs[0])] = out  # type: ignore[assignment]
+                continue
+
+            if op.op_type == "relu":
+                x = get_interval(op.inputs[0])
+                env[self._buf(storage_plan, op.outputs[0])] = self.domain.relu_transformer(x)  # type: ignore[assignment]
+                continue
+
+            if op.op_type in ("add", "mul"):
+                a = get_interval(op.inputs[0])
+                b = get_interval(op.inputs[1])
+                env[self._buf(storage_plan, op.outputs[0])] = self.domain.elementwise_transformer([a, b], op=op.op_type)  # type: ignore[assignment]
+                continue
+
+            # Fallback: keep behavior consistent with PythonTaskExecutor by delegating to domain for known ops.
+            raise NotImplementedError(f"unsupported op_type in TVMTaskExecutor.run_ibp_task: {op.op_type}")
 
     def run_ibp(
         self, module: BFTaskModule, input_spec: LinfInputSpec, *, output_value: Optional[str] = None

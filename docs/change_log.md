@@ -553,3 +553,19 @@
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr8_relax_lowering_skeleton.py`
 - `conda run -n boundflow python -m pytest -q`
+
+---
+
+## 2025-12-18：Phase 5D PR#9：TVMTaskExecutor：compile cache + run_ibp_task（scheduler 对齐）
+
+**动机**
+- PR#8 已证明 Relax IRModule 可构建/可编译；PR#9 将其接到 runtime，通过 scheduler 的 physical env contract 跑通执行闭环，并与 Python reference allclose 对齐。
+
+**主要改动**
+- `boundflow/backends/tvm/relax_task_lowering.py`：新增 key 驱动的 `build_interval_linear_relax_ir_module()`（并修复 CALL_TIR 下 global_symbol 重复问题）
+- `boundflow/runtime/tvm_executor.py`：实现 `run_ibp_task()`（physical env），并为 interval linear 引入编译缓存（支持 `kernel_style=relax|call_tir`）
+- `tests/test_phase5d_pr9_tvm_executor_linear_equiv.py`：scheduler 下 Python vs TVM allclose 回归
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr9_tvm_executor_linear_equiv.py`
+- `conda run -n boundflow python -m pytest -q`

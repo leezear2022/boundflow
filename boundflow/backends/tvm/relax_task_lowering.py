@@ -27,6 +27,79 @@ class RelaxLoweringResult:
     mode: RelaxLoweringMode
 
 
+def build_interval_linear_relax_ir_module(
+    key: IntervalLinearKey,
+    *,
+    mode: RelaxLoweringMode,
+    relax_func_name: str = "main",
+) -> object:
+    """
+    Build a Relax IRModule for interval-linear IBP from a shape key.
+
+    This helper is intentionally key-driven so runtime (executor) can compile-cache without needing
+    access to BFTaskModule/BoundTask.
+    """
+    import tvm  # noqa: PLC0415
+    from tvm import relax  # noqa: PLC0415
+
+    B, I, O = key.batch, key.in_features, key.out_features
+    dtype = key.dtype
+
+    bb = relax.BlockBuilder()
+
+    x_l = relax.Var("x_l", relax.TensorStructInfo((B, I), dtype))
+    x_u = relax.Var("x_u", relax.TensorStructInfo((B, I), dtype))
+    w = relax.Var("w", relax.TensorStructInfo((O, I), dtype))
+    b = relax.Var("b", relax.TensorStructInfo((O,), dtype))
+
+    if mode == RelaxLoweringMode.CALL_TIR:
+        tir_name = f"{relax_func_name}_interval_linear_tir"
+        primfunc = build_interval_linear_primfunc(key).with_attr("global_symbol", tir_name)
+        tir_gv = bb.add_func(primfunc, tir_name)
+
+        with bb.function(relax_func_name, [x_l, x_u, w, b]):
+            with bb.dataflow():
+                args = relax.Tuple([x_l, x_u, w, b])
+                out = bb.emit(
+                    relax.call_tir(
+                        tir_gv,
+                        args,
+                        out_sinfo=[
+                            relax.TensorStructInfo((B, O), dtype),
+                            relax.TensorStructInfo((B, O), dtype),
+                        ],
+                    )
+                )
+                out = bb.emit_output(out)
+            bb.emit_func_output(out)
+
+        return bb.get()
+
+    if mode == RelaxLoweringMode.RELAX_OPS:
+        with bb.function(relax_func_name, [x_l, x_u, w, b]):
+            with bb.dataflow():
+                zero = relax.const(0, dtype)
+                w_pos = bb.emit(relax.op.maximum(w, zero))
+                w_neg = bb.emit(relax.op.minimum(w, zero))
+                w_pos_t = bb.emit(relax.op.permute_dims(w_pos, axes=[1, 0]))
+                w_neg_t = bb.emit(relax.op.permute_dims(w_neg, axes=[1, 0]))
+
+                mat_l = bb.emit(relax.op.add(relax.op.matmul(x_l, w_pos_t), relax.op.matmul(x_u, w_neg_t)))
+                mat_u = bb.emit(relax.op.add(relax.op.matmul(x_u, w_pos_t), relax.op.matmul(x_l, w_neg_t)))
+
+                b_2d = bb.emit(relax.op.reshape(b, (1, O)))
+                b_b = bb.emit(relax.op.broadcast_to(b_2d, (B, O)))
+                y_l = bb.emit(relax.op.add(mat_l, b_b))
+                y_u = bb.emit(relax.op.add(mat_u, b_b))
+
+                out = bb.emit_output(relax.Tuple([y_l, y_u]))
+            bb.emit_func_output(out)
+
+        return bb.get()
+
+    raise ValueError(f"unsupported RelaxLoweringMode: {mode}")
+
+
 def _torch_dtype_to_str(dtype: str) -> str:
     # StoragePlan/Value dtype strings are typically like "float32".
     # Keep as-is, but normalize "torch.float32" -> "float32" when needed.
@@ -87,65 +160,5 @@ def lower_interval_linear_task_to_relax_ir(
 
     key = _infer_interval_linear_key(module, list(op.inputs), target=target)
 
-    import tvm  # noqa: PLC0415
-    from tvm import relax  # noqa: PLC0415
-
-    B, I, O = key.batch, key.in_features, key.out_features
-    dtype = key.dtype
-
-    bb = relax.BlockBuilder()
-
-    x_l = relax.Var("x_l", relax.TensorStructInfo((B, I), dtype))
-    x_u = relax.Var("x_u", relax.TensorStructInfo((B, I), dtype))
-    w = relax.Var("w", relax.TensorStructInfo((O, I), dtype))
-    b = relax.Var("b", relax.TensorStructInfo((O,), dtype))
-
-    if mode == RelaxLoweringMode.CALL_TIR:
-        primfunc = build_interval_linear_primfunc(key)
-        tir_gv = bb.add_func(primfunc, f"{relax_func_name}_interval_linear_tir")
-
-        with bb.function(relax_func_name, [x_l, x_u, w, b]):
-            with bb.dataflow():
-                args = relax.Tuple([x_l, x_u, w, b])
-                out = bb.emit(
-                    relax.call_tir(
-                        tir_gv,
-                        args,
-                        out_sinfo=[
-                            relax.TensorStructInfo((B, O), dtype),
-                            relax.TensorStructInfo((B, O), dtype),
-                        ],
-                    )
-                )
-                out = bb.emit_output(out)
-            bb.emit_func_output(out)
-
-        mod = bb.get()
-        _ = tvm  # keep for type checkers
-        return RelaxLoweringResult(ir_mod=mod, relax_func_name=relax_func_name, mode=mode)
-
-    if mode == RelaxLoweringMode.RELAX_OPS:
-        with bb.function(relax_func_name, [x_l, x_u, w, b]):
-            with bb.dataflow():
-                zero = relax.const(0, dtype)
-                w_pos = bb.emit(relax.op.maximum(w, zero))
-                w_neg = bb.emit(relax.op.minimum(w, zero))
-                w_pos_t = bb.emit(relax.op.permute_dims(w_pos, axes=[1, 0]))
-                w_neg_t = bb.emit(relax.op.permute_dims(w_neg, axes=[1, 0]))
-
-                mat_l = bb.emit(relax.op.add(relax.op.matmul(x_l, w_pos_t), relax.op.matmul(x_u, w_neg_t)))
-                mat_u = bb.emit(relax.op.add(relax.op.matmul(x_u, w_pos_t), relax.op.matmul(x_l, w_neg_t)))
-
-                b_2d = bb.emit(relax.op.reshape(b, (1, O)))
-                b_b = bb.emit(relax.op.broadcast_to(b_2d, (B, O)))
-                y_l = bb.emit(relax.op.add(mat_l, b_b))
-                y_u = bb.emit(relax.op.add(mat_u, b_b))
-
-                out = bb.emit_output(relax.Tuple([y_l, y_u]))
-            bb.emit_func_output(out)
-
-        mod = bb.get()
-        _ = tvm
-        return RelaxLoweringResult(ir_mod=mod, relax_func_name=relax_func_name, mode=mode)
-
-    raise ValueError(f"unsupported RelaxLoweringMode: {mode}")
+    mod = build_interval_linear_relax_ir_module(key, mode=mode, relax_func_name=relax_func_name)
+    return RelaxLoweringResult(ir_mod=mod, relax_func_name=relax_func_name, mode=mode)
