@@ -537,3 +537,19 @@
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase5c_pr7_determinism_and_dump.py`
 - `conda run -n boundflow python -m pytest -q`
+
+---
+
+## 2025-12-18：Phase 5D PR#8：Task → Relax IRModule lowering skeleton（interval linear）
+
+**动机**
+- 在 5C 的 pipeline contract/determinism/dump 就位后，开始补齐编译后端链路：把 interval-IBP task lower 成 Relax IRModule，为 PR#9（TVMExecutor compile+execute）做准备。
+
+**主要改动**
+- `boundflow/backends/tvm/relax_task_lowering.py`：新增 task-level lowering（`RELAX_OPS` 与 `CALL_TIR` 两种模式），v0 仅支持 single-op `linear`
+- `boundflow/backends/tvm/interval_linear.py`：新增 `build_interval_linear_primfunc()`（给 `relax.call_tir` 使用）
+- `tests/test_phase5d_pr8_relax_lowering_skeleton.py`：IRModule 可构建 + `relax.build(..., target="llvm")` 可编译回归
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr8_relax_lowering_skeleton.py`
+- `conda run -n boundflow python -m pytest -q`
