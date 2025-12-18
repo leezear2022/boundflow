@@ -74,12 +74,17 @@ class BoundTask:
 
     input_values: List[str]
     output_values: List[str]
+
+    # Phase 5 TaskIO contract: buffer-level IO (stable for reuse/lowering).
+    # When BFTaskModule.task_graph is present, planner should populate these.
+    input_buffers: List[str] = field(default_factory=list)
+    output_buffers: List[str] = field(default_factory=list)
     
     # Batching axes info
-    batch_axes: Dict[str, str] # e.g. {"spec": "axis_0", "neuron": "axis_1"}
-    
+    batch_axes: Dict[str, str] = field(default_factory=dict)  # e.g. {"spec": "axis_0", "neuron": "axis_1"}
+
     # Strategy
-    memory_plan: Dict[str, Any] # Which states to cache
+    memory_plan: Dict[str, Any] = field(default_factory=dict)  # Which states to cache
     
     lowering: TaskLowering = TaskLowering.TVM_TIR
     
@@ -97,6 +102,10 @@ class BoundTask:
             raise ValueError(f"task '{self.task_id}' has no inputs")
         if not self.output_values:
             raise ValueError(f"task '{self.task_id}' has no outputs")
+        if len(set(self.input_buffers)) != len(self.input_buffers):
+            raise ValueError(f"task '{self.task_id}' has duplicate input_buffers")
+        if len(set(self.output_buffers)) != len(self.output_buffers):
+            raise ValueError(f"task '{self.task_id}' has duplicate output_buffers")
 
 @dataclass
 class BFTaskModule:
@@ -138,6 +147,27 @@ class BFTaskModule:
         for task in self.tasks:
             task.validate()
         self.storage_plan.validate()
+
+        # Phase 5 contract: when task_graph exists, tasks must have buffer IO populated and consistent.
+        if self.task_graph is not None:
+            for task in self.tasks:
+                if not task.input_buffers:
+                    raise ValueError(f"task '{task.task_id}' missing input_buffers (required when task_graph exists)")
+                if not task.output_buffers:
+                    raise ValueError(f"task '{task.task_id}' missing output_buffers (required when task_graph exists)")
+                for v in task.input_values:
+                    b = self.storage_plan.value_to_buffer.get(v)
+                    if b is None:
+                        raise ValueError(f"task '{task.task_id}' input value missing in storage_plan: {v}")
+                    if b not in task.input_buffers:
+                        raise ValueError(f"task '{task.task_id}' input_buffers missing buffer for value '{v}': {b}")
+                for v in task.output_values:
+                    b = self.storage_plan.value_to_buffer.get(v)
+                    if b is None:
+                        raise ValueError(f"task '{task.task_id}' output value missing in storage_plan: {v}")
+                    if b not in task.output_buffers:
+                        raise ValueError(f"task '{task.task_id}' output_buffers missing buffer for value '{v}': {b}")
+
         if self.task_graph is not None:
             tasks_by_id = {t.task_id: t for t in self.tasks}
             self.task_graph.validate(

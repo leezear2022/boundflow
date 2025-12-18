@@ -18,6 +18,7 @@
     - 其它算子累积成 compute 段
     - 若仍不足 `min_tasks`，按 op 数量做一次确定性的二分
   - 将 segment lowering 成多个 `BoundTask`，并生成 `TaskGraph`（buffer 级依赖）
+  - 为每个 task 明确填充 TaskIO：`input_buffers` / `output_buffers`（对齐 `StoragePlan.value_to_buffer`）
 
 ### 2) planner 导出
 
@@ -38,6 +39,7 @@
     - `plan_interval_ibp_v2 + run_ibp_scheduled(...)`
     - 与 `plan_interval_ibp_v0 + PythonTaskExecutor.run_ibp(...)`
     - 输出上下界 allclose
+  - 新增手工构造的 branch+merge primal graph 回归：确保 cross-segment 依赖在 buffer 级上被正确连边
 
 ## 如何验证
 
@@ -45,4 +47,3 @@
 conda run -n boundflow python -m pytest -q tests/test_phase5a_pr2_partition_multitask_equivalence.py
 conda run -n boundflow python -m pytest -q
 ```
-

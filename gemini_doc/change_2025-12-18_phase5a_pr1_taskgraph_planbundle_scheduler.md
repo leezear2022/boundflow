@@ -38,7 +38,7 @@ Phase 5 的后续工作（task 切分、cache/reuse、batching、部分 TVM、�
 ### 5) PythonTaskExecutor 增加 task 级执行单元
 
 - 修改：`boundflow/runtime/task_executor.py`
-  - 新增 `run_ibp_task(task, env, params)`：在共享 env 上执行单个 task 的 ops
+  - 新增 `run_ibp_task(task, env, params, storage_plan)`：在共享 env 上执行单个 task 的 ops（env 为 `buffer_id -> IntervalState`）
 
 ## 测试
 

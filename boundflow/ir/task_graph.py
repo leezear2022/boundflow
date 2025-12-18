@@ -72,6 +72,14 @@ class TaskGraph:
                     raise ValueError(f"edge src_buffer_id missing in storage_plan: {dep.src_buffer_id}")
                 if dep.dst_buffer_id not in storage_plan.buffers:
                     raise ValueError(f"edge dst_buffer_id missing in storage_plan: {dep.dst_buffer_id}")
+                if src.output_buffers and dep.src_buffer_id not in src.output_buffers:
+                    raise ValueError(
+                        f"edge src_buffer_id '{dep.src_buffer_id}' not in src task output_buffers: {src.task_id}"
+                    )
+                if dst.input_buffers and dep.dst_buffer_id not in dst.input_buffers:
+                    raise ValueError(
+                        f"edge dst_buffer_id '{dep.dst_buffer_id}' not in dst task input_buffers: {dst.task_id}"
+                    )
                 if storage_plan.value_to_buffer.get(dep.src_value) != dep.src_buffer_id:
                     raise ValueError(
                         f"edge src_value->buffer mismatch: {dep.src_value} -> {storage_plan.value_to_buffer.get(dep.src_value)} "

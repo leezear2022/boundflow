@@ -14,7 +14,8 @@ class IntervalV2PartitionConfig:
     v2 baseline partition config.
     """
 
-    min_tasks: int = 2
+    # Default to "no forced splitting"; tests/benchmarks can override.
+    min_tasks: int = 1
 
 
 def plan_interval_ibp_v2(program, *, config: IntervalV2PartitionConfig | None = None) -> BFTaskModule:
@@ -39,6 +40,7 @@ def plan_interval_ibp_v2(program, *, config: IntervalV2PartitionConfig | None = 
         module_inputs=list(full.input_values),
         module_outputs=list(full.output_values),
         params=list(base.bindings.get("params", {}).keys()) if isinstance(base.bindings.get("params"), dict) else [],
+        storage_plan=base.storage_plan,
     )
     graph = _build_task_graph(tasks, storage_plan=base.storage_plan)
 
@@ -65,8 +67,8 @@ def _partition_ops(ops: Sequence[TaskOp], *, min_tasks: int) -> List[List[TaskOp
             current = []
 
     for op in ops:
-        is_layout_only = op.op_type in ("permute", "transpose") or bool(op.attrs.get("layout_only"))
-        if is_layout_only:
+        is_layout_region = op.op_type in ("permute", "transpose") or bool(op.attrs.get("layout_only"))
+        if is_layout_region:
             flush()
             segments.append([op])
             continue
@@ -89,6 +91,7 @@ def _lower_segments_to_tasks(
     module_inputs: List[str],
     module_outputs: List[str],
     params: List[str],
+    storage_plan,
 ) -> List[BoundTask]:
     # Precompute produced/consumed sets for each segment.
     produced: List[set[str]] = []
@@ -139,6 +142,9 @@ def _lower_segments_to_tasks(
 
         task_params = sorted([v for v in params if v in seg_consumed])
 
+        input_buffers = _uniq_buffers(storage_plan, input_values)
+        output_buffers = _uniq_buffers(storage_plan, output_values)
+
         tasks.append(
             BoundTask(
                 task_id=f"ibp_t{i}",
@@ -146,6 +152,8 @@ def _lower_segments_to_tasks(
                 ops=[TaskOp(op_type=o.op_type, name=o.name, inputs=list(o.inputs), outputs=list(o.outputs), attrs=dict(o.attrs)) for o in seg],
                 input_values=input_values,
                 output_values=output_values,
+                input_buffers=input_buffers,
+                output_buffers=output_buffers,
                 params=task_params,
                 batch_axes={},
                 memory_plan={},
@@ -167,7 +175,10 @@ def _build_task_graph(tasks: List[BoundTask], *, storage_plan) -> TaskGraph:
 
     edge_map: Dict[Tuple[str, str], List[TaskBufferDep]] = {}
     for t in tasks:
-        for v in t.input_values:
+        consumed: set[str] = set()
+        for op in t.ops:
+            consumed.update(op.inputs)
+        for v in sorted(consumed):
             src_task = producer.get(v)
             if src_task is None:
                 continue
@@ -199,3 +210,16 @@ def _dedup_deps(deps: List[TaskBufferDep]) -> List[TaskBufferDep]:
         out.append(d)
     return out
 
+
+def _uniq_buffers(storage_plan, values: List[str]) -> List[str]:
+    seen = set()
+    out: List[str] = []
+    for v in values:
+        b = storage_plan.value_to_buffer.get(v)
+        if b is None:
+            continue
+        if b in seen:
+            continue
+        seen.add(b)
+        out.append(b)
+    return out

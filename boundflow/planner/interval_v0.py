@@ -40,12 +40,25 @@ def plan_interval_ibp_v0(program: BFPrimalProgram) -> BFTaskModule:
 
     ops, output_values = simplify_layout_only_ops(ops, output_values=list(program.graph.outputs))
 
+    storage_plan = _default_storage_plan(program)
+    def _uniq(xs):
+        seen = set()
+        out = []
+        for x in xs:
+            if x in seen:
+                continue
+            seen.add(x)
+            out.append(x)
+        return out
+
     task = BoundTask(
         task_id="ibp_task0",
         kind=TaskKind.INTERVAL_IBP,
         ops=ops,
         input_values=list(program.graph.inputs),
         output_values=output_values,
+        input_buffers=_uniq([storage_plan.value_to_buffer[v] for v in list(program.graph.inputs) if v in storage_plan.value_to_buffer]),
+        output_buffers=_uniq([storage_plan.value_to_buffer[v] for v in output_values if v in storage_plan.value_to_buffer]),
         params=list(program.params.keys()),
         batch_axes={},
         memory_plan={},
@@ -56,7 +69,7 @@ def plan_interval_ibp_v0(program: BFPrimalProgram) -> BFTaskModule:
         entry_task_id=task.task_id,
         tvm_mod=None,
         bindings=_default_bindings(program),
-        storage_plan=_default_storage_plan(program),
+        storage_plan=storage_plan,
     )
     module.validate()
     return module

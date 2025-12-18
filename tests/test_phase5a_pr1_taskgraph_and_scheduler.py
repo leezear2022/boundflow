@@ -40,6 +40,10 @@ def _make_two_task_relu_chain_module() -> BFTaskModule:
         lowering=TaskLowering.TVM_TIR,
     )
     storage_plan = _storage_plan_for_values(["input", "h0", "out"])
+    t0.input_buffers = [storage_plan.value_to_buffer["input"]]
+    t0.output_buffers = [storage_plan.value_to_buffer["h0"]]
+    t1.input_buffers = [storage_plan.value_to_buffer["h0"]]
+    t1.output_buffers = [storage_plan.value_to_buffer["out"]]
     g = TaskGraph(
         task_ids=["t0", "t1"],
         edges=[
@@ -81,11 +85,14 @@ def _make_single_task_relu2_module() -> BFTaskModule:
         memory_plan={},
         lowering=TaskLowering.TVM_TIR,
     )
+    sp = _storage_plan_for_values(["input", "h0", "out"])
+    t.input_buffers = [sp.value_to_buffer["input"]]
+    t.output_buffers = [sp.value_to_buffer["out"]]
     return BFTaskModule(
         tasks=[t],
         entry_task_id="t0",
         bindings={"params": {}},
-        storage_plan=_storage_plan_for_values(["input", "h0", "out"]),
+        storage_plan=sp,
     )
 
 
@@ -206,6 +213,14 @@ def test_scheduler_branch_and_merge():
         storage_plan=sp,
         task_graph=g,
     )
+    t0.input_buffers = [sp.value_to_buffer["input"]]
+    t0.output_buffers = [sp.value_to_buffer["h0"]]
+    t1.input_buffers = [sp.value_to_buffer["h0"]]
+    t1.output_buffers = [sp.value_to_buffer["a"]]
+    t2.input_buffers = [sp.value_to_buffer["h0"]]
+    t2.output_buffers = [sp.value_to_buffer["b"]]
+    t3.input_buffers = [sp.value_to_buffer["a"], sp.value_to_buffer["b"]]
+    t3.output_buffers = [sp.value_to_buffer["out"]]
 
     single = BFTaskModule(
         tasks=[
@@ -230,6 +245,8 @@ def test_scheduler_branch_and_merge():
         bindings={"params": {}},
         storage_plan=sp,
     )
+    single.tasks[0].input_buffers = [sp.value_to_buffer["input"]]
+    single.tasks[0].output_buffers = [sp.value_to_buffer["out"]]
 
     torch.manual_seed(0)
     x0 = torch.randn(4, 8)

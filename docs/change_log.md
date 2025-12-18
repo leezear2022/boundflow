@@ -380,6 +380,7 @@
   - 复用 v0 lowering（稳定的 TaskOp + StoragePlan）
   - baseline partition：layout-only（permute）单独成段，其余算子作为 compute 段；若仍不足 `min_tasks` 则按 op 数量二分
   - 生成多 `BoundTask` + `TaskGraph`（buffer 级依赖）
+  - 每个 task 显式填充 TaskIO：`input_buffers` / `output_buffers`（对齐 StoragePlan）
 - planner 导出：`boundflow/planner/__init__.py`
 - scheduler 默认输出推断增强：`boundflow/runtime/scheduler.py`
   - 当 `output_value` 为空时，尝试根据 task_graph 推断唯一 sink task 的唯一输出；否则要求显式指定 `output_value`
@@ -387,6 +388,7 @@
 **测试**
 - 新增：`tests/test_phase5a_pr2_partition_multitask_equivalence.py`
   - MLP/CNN：`plan_interval_ibp_v2 + run_ibp_scheduled` 输出 == `plan_interval_ibp_v0 + PythonTaskExecutor.run_ibp`
+  - 手工构造 branch+merge primal graph：确保 cross-segment use/def 在 buffer 级正确连边
 
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase5a_pr2_partition_multitask_equivalence.py`
