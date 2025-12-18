@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Sequence, Tuple
 from ..ir.task import BFTaskModule, BoundTask, TaskKind, TaskLowering, TaskOp
 from ..ir.task_graph import TaskBufferDep, TaskDepEdge, TaskGraph
 from .interval_v0 import plan_interval_ibp_v0
+from .storage_reuse import ReuseKeyMode, ReusePolicy, StorageReuseOptions
 
 
 @dataclass(frozen=True)
@@ -17,6 +18,8 @@ class IntervalV2PartitionConfig:
     # Default to "no forced splitting"; tests/benchmarks can override.
     min_tasks: int = 1
     enable_storage_reuse: bool = False
+    reuse_key_mode: ReuseKeyMode = ReuseKeyMode.STRICT
+    reuse_policy: ReusePolicy = ReusePolicy.LIFO
 
 
 def plan_interval_ibp_v2(program, *, config: IntervalV2PartitionConfig | None = None) -> BFTaskModule:
@@ -58,7 +61,14 @@ def plan_interval_ibp_v2(program, *, config: IntervalV2PartitionConfig | None = 
     if cfg.enable_storage_reuse:
         from .passes.buffer_reuse_pass import apply_conservative_buffer_reuse
 
-        apply_conservative_buffer_reuse(module)
+        apply_conservative_buffer_reuse(
+            module,
+            options=StorageReuseOptions(
+                enabled=True,
+                key_mode=cfg.reuse_key_mode,
+                policy=cfg.reuse_policy,
+            ),
+        )
 
     return module
 

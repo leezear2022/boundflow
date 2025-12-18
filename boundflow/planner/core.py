@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional, Protocol
 from ..ir.primal import BFPrimalProgram
 from ..ir.task import BFTaskModule, StoragePlan
 from ..ir.task_graph import TaskGraph
+from .storage_reuse import StorageReuseOptions
 
 
 @dataclass(frozen=True)
@@ -20,6 +21,7 @@ class PlannerConfig:
     enable_storage_reuse: bool = False
     enable_cache: bool = False
     tvm_target: Optional[str] = None
+    storage_reuse: StorageReuseOptions = field(default_factory=StorageReuseOptions)
     meta: Dict[str, Any] = field(default_factory=dict)
 
 

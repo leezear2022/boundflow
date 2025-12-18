@@ -7,10 +7,18 @@ from ...ir.liveness import (
     BufferReuseKey,
     LivenessInfo,
     compute_liveness_task_level,
-    default_reuse_key,
 )
 from ...ir.task import BFTaskModule, StoragePlan
 from ..core import PlanBundle, PlannerConfig, PlannerPass
+from ..storage_reuse import (
+    BufferReuseStats,
+    ReuseKeyMode,
+    ReuseMissReason,
+    ReusePolicy,
+    StorageReuseOptions,
+    estimate_bytes_saved,
+    make_reuse_key_fn,
+)
 
 
 @dataclass(frozen=True)
@@ -41,9 +49,10 @@ def apply_conservative_buffer_reuse(
     *,
     liveness: Optional[LivenessInfo] = None,
     config: BufferReuseConfig = BufferReuseConfig(),
-    reuse_key_fn: Callable = default_reuse_key,
+    options: Optional[StorageReuseOptions] = None,
+    reuse_key_fn: Optional[Callable] = None,
     reuse_policy_fn: ReusePolicyFn = lifo_reuse_policy,
-) -> None:
+) -> BufferReuseStats:
     """
     Mutate `module.storage_plan` in-place by introducing logical->physical buffer aliasing.
 
@@ -55,10 +64,34 @@ def apply_conservative_buffer_reuse(
     if module.task_graph is None:
         raise ValueError("apply_conservative_buffer_reuse requires module.task_graph")
 
+    opt = options or StorageReuseOptions(enabled=True)
+    if not opt.enabled:
+        return BufferReuseStats()
+
+    if reuse_key_fn is None:
+        # Safe loosening: IGNORE_LAYOUT keeps strides.
+        reuse_key_fn = make_reuse_key_fn(mode=opt.key_mode)
+
+    # Policy selection hook (v0: only LIFO; FIFO reserved).
+    if opt.policy == ReusePolicy.LIFO:
+        reuse_policy_fn = lifo_reuse_policy
+    elif opt.policy == ReusePolicy.FIFO:
+        def fifo_policy(pool: List[str], logical_buffer_id: str, key: BufferReuseKey) -> Optional[str]:
+            _ = (logical_buffer_id, key)
+            if not pool:
+                return None
+            return pool.pop(0)
+
+        reuse_policy_fn = fifo_policy
+    else:
+        raise ValueError(f"unsupported ReusePolicy: {opt.policy}")
+
+    stats = BufferReuseStats()
+
     if liveness is None:
         liveness = compute_liveness_task_level(module, reuse_key_fn=reuse_key_fn)
 
-    include_scopes = set(config.include_scopes)
+    include_scopes = set(opt.include_scopes or config.include_scopes)
     topo = liveness.topo_order
     tasks_by_id = {t.task_id: t for t in module.tasks}
 
@@ -85,8 +118,10 @@ def apply_conservative_buffer_reuse(
         if lt is None:
             return False
         if lt.scope not in include_scopes:
+            stats.inc(ReuseMissReason.NOT_REUSABLE_SCOPE)
             return False
-        if not config.reuse_entry_buffers and lt.producer_task_id == "ENTRY":
+        if not opt.reuse_entry_buffers and lt.producer_task_id == "ENTRY":
+            stats.inc(ReuseMissReason.ENTRY_BUFFER)
             return False
         # Conservative: only reuse buffers produced inside tasks.
         if lt.producer_task_id == "ENTRY":
@@ -110,6 +145,7 @@ def apply_conservative_buffer_reuse(
             if bid in logical_to_physical:
                 continue
             if bid not in module.storage_plan.buffers:
+                stats.inc(ReuseMissReason.NOT_IN_STORAGE_PLAN)
                 continue
 
             if not _is_reusable(bid):
@@ -121,10 +157,15 @@ def apply_conservative_buffer_reuse(
             if avail:
                 phys = reuse_policy_fn(avail, bid, k)
                 if phys is None:
+                    stats.pool_miss += 1
+                    stats.inc(ReuseMissReason.POLICY_DECLINED)
                     _alloc_identity(bid)
                 else:
+                    stats.pool_hit += 1
                     logical_to_physical[bid] = phys
             else:
+                stats.pool_miss += 1
+                stats.inc(ReuseMissReason.NO_FREE_BUFFER)
                 _alloc_identity(bid)
 
         # Release buffers whose last use is this task.
@@ -157,6 +198,10 @@ def apply_conservative_buffer_reuse(
     new_sp.validate()
     module.storage_plan = new_sp
     module.validate()
+    saved, unknown = estimate_bytes_saved(new_sp, include_scopes=tuple(include_scopes))
+    stats.bytes_saved_est = int(saved)
+    stats.unknown_bytes_buffers = int(unknown)
+    return stats
 
 
 @dataclass(frozen=True)
@@ -171,6 +216,22 @@ class BufferReusePass(PlannerPass):
     reuse_config: BufferReuseConfig = BufferReuseConfig()
 
     def run(self, bundle: PlanBundle, *, config: PlannerConfig) -> PlanBundle:
-        apply_conservative_buffer_reuse(bundle.task_module, config=self.reuse_config)
+        opt = config.storage_reuse
+        if config.enable_storage_reuse and not opt.enabled:
+            opt = StorageReuseOptions(
+                enabled=True,
+                include_scopes=opt.include_scopes,
+                reuse_entry_buffers=opt.reuse_entry_buffers,
+                key_mode=opt.key_mode,
+                policy=opt.policy,
+                meta=dict(opt.meta),
+            )
+        stats = apply_conservative_buffer_reuse(
+            bundle.task_module,
+            config=self.reuse_config,
+            options=opt,
+        )
+        bundle.meta = dict(bundle.meta)
+        bundle.meta["reuse_stats"] = stats
         bundle.storage_plan = bundle.task_module.storage_plan
         return bundle

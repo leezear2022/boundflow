@@ -435,3 +435,20 @@
 
 **验证**
 - `conda run -n boundflow python -m pytest -q`
+
+---
+
+## 2025-12-18：Phase 5B PR#4A：PlannerConfig 复用配置 + ReuseStats 可观测性
+
+**动机**
+- 在进入 5B.2（放宽 key / policy 消融 / bench）前，先把“复用参数与统计”挂到 PlannerConfig/PlanBundle，保证实验可复现并能解释 miss 原因。
+
+**主要改动**
+- `boundflow/planner/storage_reuse.py`：`StorageReuseOptions`、`ReuseKeyMode/ReusePolicy`、`BufferReuseStats`、`estimate_bytes_saved()`
+- `boundflow/planner/core.py`：`PlannerConfig.storage_reuse`
+- `boundflow/planner/passes/buffer_reuse_pass.py`：输出 `reuse_stats` 到 `PlanBundle.meta`
+- `boundflow/planner/interval_v2.py`：透传 `reuse_key_mode/reuse_policy`（默认 STRICT/LIFO，不改变默认行为）
+- `scripts/bench_storage_reuse.py`：bench/统计脚本（不放进 pytest 阈值）
+
+**验证**
+- `conda run -n boundflow python -m pytest -q`
