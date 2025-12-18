@@ -34,9 +34,18 @@ PR#3 已引入 logical/physical 分层与保守复用，但为了避免后续 5B
   - 增加 `ReusePolicyFn` 与默认 `lifo_reuse_policy`（仍保持 v0 行为）
   - 允许未来用 cost model/policy 替换选择策略（不影响当前正确性）
 
+## 评审结论（为什么这两条 hardening 是“必须先钉死的安全边界”）
+
+- **env 只认 physical id + 强校验**：一旦出现 `logical_to_physical` 多对一，如果 env 允许用 logical key 存取，就会出现“旧 logical 名称读到新值”的幽灵别名 bug；把 env 的 key 集合限制在 `physical_buffers` 内，可以从根上切掉这类隐式错误。
+- **last_use 以 TaskGraph edges 驱动**：跨 task 生命周期的根源是“谁消费了这个 buffer”（consumer tasks），这应该来自 `TaskGraph` 的边，而不是扫描 task 的 op list（partition/normalize 变化会让 op 扫描非常脆）。这符合编译器的一般套路：先基于 use-def/依赖图做分析，再改写存储计划。
+
+## 后续工作（进入 5B.2/5C/5E 前的接口建议）
+
+- `TaskOp.memory_effect` 目前是 `Optional[str]` 作为占位字段；为避免拼写错误与分支爆炸，建议在后续 PR（Phase 5B.2）尽早升级为 `Enum`（例如 READ/WRITE/READWRITE/ALLOC/FREE），并逐步让复用/插拷贝逻辑尊重 effect 冲突。
+- `ReusePolicyFn` 是后续接入 cost model / policy 搜索的入口；建议配合 `PlannerConfig` 做配置化，并输出可观测的 `reuse_stats`（hit/miss 与 miss reasons），用于系统化消融与复现。
+
 ## 如何验证
 
 ```bash
 conda run -n boundflow python -m pytest -q
 ```
-
