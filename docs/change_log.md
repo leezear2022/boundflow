@@ -733,3 +733,26 @@
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr13_ablation_matrix_smoke.py`
 - `conda run -n boundflow python -m pytest -q`
+
+---
+
+## 2025-12-20：Phase 5D PR#13B：bench 计时公平性/可解释性增强 + env.sh stdout 清洁
+
+**动机**
+- 系统化消融阶段要求：stdout 可机器解析（JSONL/CSV 不被环境提示污染）、compile vs run 明确拆分、baseline 的 setup/compute 拆分、并记录差异幅度便于 debug。
+
+**主要改动**
+- `env.sh`
+  - 提示信息默认写入 stderr（不污染 stdout），并支持 `BOUNDFLOW_QUIET=1` 静默。
+- `boundflow/runtime/tvm_executor.py`
+  - 增加 task-level compile cache 统计：`get_task_compile_cache_stats()` 返回 hit/miss/fail（用于 bench 公平性解释）。
+- `scripts/bench_ablation_matrix.py`
+  - 增加 `compile_first_run_ms`（首次运行/含编译触发）并保留 steady-state `run_ms_*`
+  - 输出 compile cache stats；auto_LiRPA baseline 增加 `setup_ms`；correctness 增加 max abs diff 指标
+- `tests/test_env_sh_quiet_stdout.py`
+  - 回归：`env.sh` 默认不写 stdout，且可用 `BOUNDFLOW_QUIET=1` 静默
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_env_sh_quiet_stdout.py`
+- `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr13_ablation_matrix_smoke.py`
+- `conda run --no-capture-output -n boundflow python scripts/bench_ablation_matrix.py --matrix small --warmup 1 --iters 1 --no-auto-lirpa --no-check --output /tmp/boundflow_ablation.jsonl`

@@ -30,5 +30,8 @@ export TVM_FFI_CACHE_DIR="${TVM_FFI_CACHE_DIR:-${BOUNDFLOW_ROOT}/.cache/tvm-ffi}
 export TMPDIR="${TMPDIR:-${BOUNDFLOW_ROOT}/.tmp}"
 mkdir -p "${TVM_FFI_CACHE_DIR}" "${TMPDIR}" >/dev/null 2>&1 || true
 
-echo "BoundFlow environment configured."
-echo "TVM_HOME=$TVM_HOME"
+# Avoid polluting stdout (e.g. JSONL/CSV benchmarks). Use stderr unless explicitly silenced.
+if [[ -z "${BOUNDFLOW_QUIET:-}" ]]; then
+    echo "BoundFlow environment configured." >&2
+    echo "TVM_HOME=$TVM_HOME" >&2
+fi

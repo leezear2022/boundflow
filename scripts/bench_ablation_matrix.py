@@ -15,6 +15,14 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 import torch
 import torch.nn as nn
 
+try:
+    import signal
+
+    if hasattr(signal, "SIGPIPE"):
+        signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+except Exception:
+    pass
+
 from boundflow.frontends.pytorch.frontend import import_torch
 from boundflow.planner.core import PlannerConfig
 from boundflow.planner.options import PartitionOptions, PartitionPolicy, PlannerDebugOptions
@@ -194,27 +202,41 @@ def _bench_one(
     def _run_tvm_once() -> None:
         _ = run_ibp_scheduled(module, input_spec, executor=tvm_exec)
 
+    # Trigger compilation once (counted separately from steady-state runtime).
+    t_compile0 = time.perf_counter_ns()
+    _ = _run_tvm_once()
+    t_compile1 = time.perf_counter_ns()
+    compile_first_run_ms = (t_compile1 - t_compile0) / 1e6
+
     run_ms_avg, run_pct = _time_run(_run_tvm_once, warmup=warmup, iters=iters)
     compile_stats = tvm_exec.get_compile_stats()
     compile_agg = _aggregate_task_compile_stats(compile_stats)
+    compile_cache_stats = tvm_exec.get_task_compile_cache_stats()
 
     tvm_out = run_ibp_scheduled(module, input_spec, executor=tvm_exec)
 
     correctness: Dict[str, Any] = {"bounds_allclose_to_python": None, "bounds_allclose_to_auto_lirpa": None}
     if check_correctness:
+        lb_diff = (py_out.lower - tvm_out.lower).abs()
+        ub_diff = (py_out.upper - tvm_out.upper).abs()
         correctness["bounds_allclose_to_python"] = bool(
             torch.allclose(py_out.lower, tvm_out.lower, atol=1e-5, rtol=1e-5)
             and torch.allclose(py_out.upper, tvm_out.upper, atol=1e-5, rtol=1e-5)
         )
+        correctness["python_vs_tvm_max_abs_diff_lb"] = float(lb_diff.max().item())
+        correctness["python_vs_tvm_max_abs_diff_ub"] = float(ub_diff.max().item())
 
     baseline: Dict[str, Any] = {"auto_lirpa": None}
     if include_auto_lirpa:
         lirpa = _try_import_auto_lirpa()
         if lirpa is not None:
             _, BoundedModule, BoundedTensor, PerturbationLpNorm = lirpa
+            t_setup0 = time.perf_counter_ns()
             lirpa_model = BoundedModule(model, torch.empty_like(x0), device=x0.device)
             ptb = PerturbationLpNorm(norm=float("inf"), eps=float(eps))
             bounded_x = BoundedTensor(x0, ptb)
+            t_setup1 = time.perf_counter_ns()
+            setup_ms = (t_setup1 - t_setup0) / 1e6
 
             def _run_lirpa_once() -> None:
                 _ = lirpa_model.compute_bounds(x=(bounded_x,), method="IBP")
@@ -223,6 +245,7 @@ def _bench_one(
             lb, ub = lirpa_model.compute_bounds(x=(bounded_x,), method="IBP")
             baseline["auto_lirpa"] = {
                 "method": "IBP",
+                "setup_ms": float(setup_ms),
                 "compute_bounds_ms_avg": float(lirpa_ms_avg),
                 "compute_bounds_ms_p50": float(lirpa_pct["p50"]),
                 "compute_bounds_ms_p95": float(lirpa_pct["p95"]),
@@ -232,6 +255,12 @@ def _bench_one(
                     torch.allclose(py_out.lower, lb, atol=1e-6, rtol=1e-5)
                     and torch.allclose(py_out.upper, ub, atol=1e-6, rtol=1e-5)
                 )
+                l2 = (py_out.lower - lb).abs()
+                u2 = (py_out.upper - ub).abs()
+                correctness["python_vs_auto_lirpa_max_abs_diff_lb"] = float(l2.max().item())
+                correctness["python_vs_auto_lirpa_max_abs_diff_ub"] = float(u2.max().item())
+        else:
+            baseline["auto_lirpa"] = {"available": False}
 
     out: Dict[str, Any] = {
         "meta": {
@@ -241,7 +270,10 @@ def _bench_one(
             "platform": platform.platform(),
             "python": sys.version.split()[0],
             "torch": getattr(torch, "__version__", ""),
+            "torch_num_threads": int(torch.get_num_threads()),
             "tvm_home": os.environ.get("TVM_HOME", ""),
+            "seed": 0,
+            "tvm": None,
         },
         "workload": {
             "model": workload,
@@ -284,10 +316,12 @@ def _bench_one(
             "tir_var_upper_bound_source": "none",
             "tir_var_upper_bound_scope": "func_signature_only",
             "compile_stats_agg": compile_agg,
+            "compile_cache_stats": compile_cache_stats,
         },
         "runtime": {
             "warmup": int(warmup),
             "iters": int(iters),
+            "compile_first_run_ms": float(compile_first_run_ms),
             "run_ms_avg": float(run_ms_avg),
             "run_ms_p50": float(run_pct["p50"]),
             "run_ms_p95": float(run_pct["p95"]),
@@ -295,6 +329,12 @@ def _bench_one(
         "baseline": baseline,
         "correctness": correctness,
     }
+    try:
+        import tvm  # noqa: PLC0415
+
+        out["meta"]["tvm"] = getattr(tvm, "__version__", None)
+    except Exception:
+        pass
     return out
 
 

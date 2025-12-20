@@ -81,6 +81,10 @@ class TVMTaskExecutor:
         self._vm_cache: Dict[tuple[str, str, int], Dict[str, Any]] = {}
         # cache_key -> compile stats (jsonable)
         self._compile_stats: Dict[str, Dict[str, Any]] = {}
+        # PR#13B: compile cache accounting for fairness in bench.
+        self._task_compile_cache_hit: int = 0
+        self._task_compile_cache_miss: int = 0
+        self._task_compile_fail: int = 0
 
     def _select_target(self) -> str:
         import tvm
@@ -124,6 +128,13 @@ class TVMTaskExecutor:
 
     def get_compile_stats(self) -> Dict[str, Dict[str, Any]]:
         return dict(self._compile_stats)
+
+    def get_task_compile_cache_stats(self) -> Dict[str, int]:
+        return {
+            "task_compile_cache_hit": int(self._task_compile_cache_hit),
+            "task_compile_cache_miss": int(self._task_compile_cache_miss),
+            "task_compile_fail": int(self._task_compile_fail),
+        }
 
     def _get_vm_callable(self, *, cache_key_hash: str, ex: Any, dev: Any, func_name: str) -> tuple[Any, Any]:
         """
@@ -248,6 +259,7 @@ class TVMTaskExecutor:
         }
         cache_key_hash = hashlib.sha256(repr(sig).encode("utf-8")).hexdigest()[:16]
         if cache_key_hash in self._task_exec_cache:
+            self._task_compile_cache_hit += 1
             cached = self._task_exec_cache[cache_key_hash]
             return cached["ex"], cached["spec"], cache_key_hash
 
@@ -395,19 +407,50 @@ class TVMTaskExecutor:
         from ..backends.tvm.relax_analysis import collect_relax_memory_stats  # noqa: PLC0415
 
         t0 = time.perf_counter_ns()
-        if instruments:
-            with transform.PassContext(instruments=instruments):
+        self._task_compile_cache_miss += 1
+        try:
+            if instruments:
+                with transform.PassContext(instruments=instruments):
+                    lowered = relax_pipeline(ir_mod)
+                    # (1) Structured scan stats on the lowered module (post memory planning & LowerAllocTensor).
+                    by_scan = collect_relax_memory_stats(lowered)
+                    # (2) TVM official estimator render (best-effort), usually run on pre-LowerAllocTensor module.
+                    estimator_stage = "pre_static_plan"
+                    estimate_render = None
+                    try:
+                        from tvm.relax import analysis as relax_analysis  # noqa: PLC0415
+                        from tvm.relax import backend as relax_backend  # noqa: PLC0415
+
+                        est_passes: List[Any] = [
+                            relax_backend.DispatchSampling(),
+                            relax_backend.DispatchSortScan(),
+                            relax.transform.LegalizeOps(),
+                            relax.transform.RewriteDataflowReshape(),
+                            relax.transform.ToNonDataflow(),
+                            relax.transform.RemovePurityChecking(),
+                            relax.transform.CallTIRRewrite(),
+                        ]
+                        est_mod = transform.Sequential(est_passes)(ir_mod)
+                        estimate_render = str(relax_analysis.estimate_memory_usage(est_mod))
+                    except Exception:
+                        pass
+                    memory_stats = {
+                        "by_scan": by_scan,
+                        "by_tvm_estimator": estimate_render,
+                        "by_tvm_estimator_stage": estimator_stage,
+                    }
+                    ex = relax.build(lowered, target=target, relax_pipeline=None)
+                    rendered = str(timing_inst.render()) if timing_inst is not None else None
+            else:
                 lowered = relax_pipeline(ir_mod)
-                # (1) Structured scan stats on the lowered module (post memory planning & LowerAllocTensor).
                 by_scan = collect_relax_memory_stats(lowered)
-                # (2) TVM official estimator render (best-effort), usually run on pre-LowerAllocTensor module.
                 estimator_stage = "pre_static_plan"
                 estimate_render = None
                 try:
                     from tvm.relax import analysis as relax_analysis  # noqa: PLC0415
                     from tvm.relax import backend as relax_backend  # noqa: PLC0415
 
-                    est_passes: List[Any] = [
+                    est_passes = [
                         relax_backend.DispatchSampling(),
                         relax_backend.DispatchSortScan(),
                         relax.transform.LegalizeOps(),
@@ -426,36 +469,10 @@ class TVMTaskExecutor:
                     "by_tvm_estimator_stage": estimator_stage,
                 }
                 ex = relax.build(lowered, target=target, relax_pipeline=None)
-                rendered = str(timing_inst.render()) if timing_inst is not None else None
-        else:
-            lowered = relax_pipeline(ir_mod)
-            by_scan = collect_relax_memory_stats(lowered)
-            estimator_stage = "pre_static_plan"
-            estimate_render = None
-            try:
-                from tvm.relax import analysis as relax_analysis  # noqa: PLC0415
-                from tvm.relax import backend as relax_backend  # noqa: PLC0415
-
-                est_passes = [
-                    relax_backend.DispatchSampling(),
-                    relax_backend.DispatchSortScan(),
-                    relax.transform.LegalizeOps(),
-                    relax.transform.RewriteDataflowReshape(),
-                    relax.transform.ToNonDataflow(),
-                    relax.transform.RemovePurityChecking(),
-                    relax.transform.CallTIRRewrite(),
-                ]
-                est_mod = transform.Sequential(est_passes)(ir_mod)
-                estimate_render = str(relax_analysis.estimate_memory_usage(est_mod))
-            except Exception:
-                pass
-            memory_stats = {
-                "by_scan": by_scan,
-                "by_tvm_estimator": estimate_render,
-                "by_tvm_estimator_stage": estimator_stage,
-            }
-            ex = relax.build(lowered, target=target, relax_pipeline=None)
-            rendered = None
+                rendered = None
+        except Exception:
+            self._task_compile_fail += 1
+            raise
         t1 = time.perf_counter_ns()
 
         stats: Dict[str, Any] = {
@@ -474,6 +491,7 @@ class TVMTaskExecutor:
             "ir_stats": stats_ir,
             "pipeline": [str(p) for p in pre_passes],
             "task_vm_opt_passes": list(self.options.task_vm_opt_passes or ()),
+            "compile_cache_event": "miss",
         }
         if timing_inst is not None:
             stats["pass_timing_render"] = rendered
