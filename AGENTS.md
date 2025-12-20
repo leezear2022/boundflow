@@ -43,3 +43,4 @@
 
 ## 关键文档索引
 - TVM 后端优化备忘：`gemini_doc/tvm_backend_optimization_memo.md`
+- 与大模型协作工作流模板：`gemini_doc/llm_collaboration_workflow.md`
