@@ -49,6 +49,8 @@ class TVMExecutorOptions:
     task_vm_opt_passes: tuple[str, ...] = ()
     # PR#12: control Relax static memory planning.
     memory_plan_mode: MemoryPlanMode = MemoryPlanMode.DEFAULT
+    # PR#12 follow-up: reserve dynamic shape upper bounds for StaticPlanBlockMemory (not wired yet).
+    tir_var_upper_bound: Optional[Dict[str, int]] = None
 
 
 @dataclass
@@ -242,6 +244,7 @@ class TVMTaskExecutor:
             "task_fuse_opt_level": int(self.options.task_fuse_opt_level),
             "task_vm_opt_passes": tuple(self.options.task_vm_opt_passes or ()),
             "memory_plan_mode": str(getattr(self.options.memory_plan_mode, "value", self.options.memory_plan_mode)),
+            "tir_var_upper_bound": dict(self.options.tir_var_upper_bound or {}),
         }
         cache_key_hash = hashlib.sha256(repr(sig).encode("utf-8")).hexdigest()[:16]
         if cache_key_hash in self._task_exec_cache:
@@ -306,34 +309,38 @@ class TVMTaskExecutor:
             pre_passes.append(getattr(relax.transform, str(p))())
 
         # Compose with the official default build pipeline (required for VM codegen).
-        from tvm.relax import backend as relax_backend  # noqa: PLC0415
+        # For DEFAULT/FORCE_STATIC_PLAN, use TVM's official default pipeline for clearer behavior boundaries.
+        from tvm.relax import pipeline as relax_pipeline_mod  # noqa: PLC0415
 
-        include_static_plan = self.options.memory_plan_mode != MemoryPlanMode.DISABLE_STATIC_PLAN
-        default_build_passes: List[Any] = [
-            relax_backend.DispatchSampling(),
-            relax_backend.DispatchSortScan(),
-            relax.transform.LegalizeOps(),
-            relax.transform.RewriteDataflowReshape(),
-            relax.transform.ToNonDataflow(),
-            relax.transform.RemovePurityChecking(),
-            relax.transform.CallTIRRewrite(),
-        ]
-        if include_static_plan:
-            default_build_passes.append(relax.transform.StaticPlanBlockMemory())
-        default_build_passes += [
-            relax.transform.RewriteCUDAGraph(),
-            relax.transform.LowerAllocTensor(),
-            relax.transform.KillAfterLastUse(),
-            relax.transform.LowerRuntimeBuiltin(),
-            relax.transform.ComputePrimValue(),
-            relax.transform.VMShapeLower(),
-            relax.transform.AttachGlobalSymbol(),
-        ]
+        if self.options.memory_plan_mode in (MemoryPlanMode.DEFAULT, MemoryPlanMode.FORCE_STATIC_PLAN):
+            build_pipeline_pass = relax_pipeline_mod.default_build_pipeline()
+        else:
+            # DISABLE_STATIC_PLAN: equivalent to default_build_pipeline but with StaticPlanBlockMemory removed.
+            from tvm.relax import backend as relax_backend  # noqa: PLC0415
+
+            default_build_passes: List[Any] = [
+                relax_backend.DispatchSampling(),
+                relax_backend.DispatchSortScan(),
+                relax.transform.LegalizeOps(),
+                relax.transform.RewriteDataflowReshape(),
+                relax.transform.ToNonDataflow(),
+                relax.transform.RemovePurityChecking(),
+                relax.transform.CallTIRRewrite(),
+                # StaticPlanBlockMemory skipped on purpose.
+                relax.transform.RewriteCUDAGraph(),
+                relax.transform.LowerAllocTensor(),
+                relax.transform.KillAfterLastUse(),
+                relax.transform.LowerRuntimeBuiltin(),
+                relax.transform.ComputePrimValue(),
+                relax.transform.VMShapeLower(),
+                relax.transform.AttachGlobalSymbol(),
+            ]
+            build_pipeline_pass = transform.Sequential(default_build_passes)
 
         relax_pipeline = transform.Sequential(
             [
                 transform.Sequential(pre_passes) if pre_passes else transform.Sequential([]),
-                transform.Sequential(default_build_passes),
+                build_pipeline_pass,
             ]
         )
 
@@ -378,12 +385,52 @@ class TVMTaskExecutor:
         if instruments:
             with transform.PassContext(instruments=instruments):
                 lowered = relax_pipeline(ir_mod)
-                memory_stats = collect_relax_memory_stats(lowered)
+                # (1) Structured scan stats on the lowered module (post memory planning & LowerAllocTensor).
+                by_scan = collect_relax_memory_stats(lowered)
+                # (2) TVM official estimator render (best-effort), usually run on pre-LowerAllocTensor module.
+                estimate_render = None
+                try:
+                    from tvm.relax import analysis as relax_analysis  # noqa: PLC0415
+                    from tvm.relax import backend as relax_backend  # noqa: PLC0415
+
+                    est_passes: List[Any] = [
+                        relax_backend.DispatchSampling(),
+                        relax_backend.DispatchSortScan(),
+                        relax.transform.LegalizeOps(),
+                        relax.transform.RewriteDataflowReshape(),
+                        relax.transform.ToNonDataflow(),
+                        relax.transform.RemovePurityChecking(),
+                        relax.transform.CallTIRRewrite(),
+                    ]
+                    est_mod = transform.Sequential(est_passes)(ir_mod)
+                    estimate_render = str(relax_analysis.estimate_memory_usage(est_mod))
+                except Exception:
+                    pass
+                memory_stats = {"by_scan": by_scan, "by_tvm_estimator": estimate_render}
                 ex = relax.build(lowered, target=target, relax_pipeline=None)
                 rendered = str(timing_inst.render()) if timing_inst is not None else None
         else:
             lowered = relax_pipeline(ir_mod)
-            memory_stats = collect_relax_memory_stats(lowered)
+            by_scan = collect_relax_memory_stats(lowered)
+            estimate_render = None
+            try:
+                from tvm.relax import analysis as relax_analysis  # noqa: PLC0415
+                from tvm.relax import backend as relax_backend  # noqa: PLC0415
+
+                est_passes = [
+                    relax_backend.DispatchSampling(),
+                    relax_backend.DispatchSortScan(),
+                    relax.transform.LegalizeOps(),
+                    relax.transform.RewriteDataflowReshape(),
+                    relax.transform.ToNonDataflow(),
+                    relax.transform.RemovePurityChecking(),
+                    relax.transform.CallTIRRewrite(),
+                ]
+                est_mod = transform.Sequential(est_passes)(ir_mod)
+                estimate_render = str(relax_analysis.estimate_memory_usage(est_mod))
+            except Exception:
+                pass
+            memory_stats = {"by_scan": by_scan, "by_tvm_estimator": estimate_render}
             ex = relax.build(lowered, target=target, relax_pipeline=None)
             rendered = None
         t1 = time.perf_counter_ns()
@@ -398,6 +445,7 @@ class TVMTaskExecutor:
             "dump_ir_dir": dump_dir,
             "memory_plan_mode": str(getattr(self.options.memory_plan_mode, "value", self.options.memory_plan_mode)),
             "memory_stats": memory_stats,
+            "tir_var_upper_bound": dict(self.options.tir_var_upper_bound or {}),
             "task_id": str(getattr(task, "task_id", "")),
             "op_types": [str(getattr(op, "op_type", "")) for op in getattr(task, "ops", [])],
             "ir_stats": stats_ir,

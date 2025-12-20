@@ -52,7 +52,7 @@ def _aggregate_task_compile_stats(compile_stats: Dict[str, Dict[str, Any]]) -> D
     entries = [v for v in (compile_stats or {}).values() if isinstance(v, dict) and v.get("kind") == "task_relax_ops"]
     out: Dict[str, Any] = {
         "num_compiled_tasks": int(len(entries)),
-        "compile_ms_sum": float(sum(float(e.get("compile_ms", 0.0)) for e in entries)),
+        "compile_ms_total": float(sum(float(e.get("compile_ms", 0.0)) for e in entries)),
         "call_tir_after_legalize_sum": 0,
         "call_tir_after_fuse_tir_sum": 0,
         "memory_alloc_storage_sum": 0,
@@ -67,7 +67,7 @@ def _aggregate_task_compile_stats(compile_stats: Dict[str, Dict[str, Any]]) -> D
             out["call_tir_after_legalize_sum"] += int((ir_stats["after_legalize"] or {}).get("call_tir", 0))
         if "after_fuse_tir" in ir_stats:
             out["call_tir_after_fuse_tir_sum"] += int((ir_stats["after_fuse_tir"] or {}).get("call_tir", 0))
-        mem = e.get("memory_stats") or {}
+        mem = (e.get("memory_stats") or {}).get("by_scan") or {}
         out["memory_alloc_storage_sum"] += int(mem.get("alloc_storage", 0))
         out["memory_alloc_tensor_sum"] += int(mem.get("alloc_tensor", 0))
         out["memory_alloc_storage_total_bytes_sum"] += int(mem.get("alloc_storage_total_bytes", 0))
@@ -122,6 +122,7 @@ def _run_one(
             enable_task_fusion_pipeline=True,
             task_fuse_opt_level=2,
             memory_plan_mode=mem_mode,
+            tir_var_upper_bound=None,
         )
     )
 
@@ -161,6 +162,7 @@ def _run_one(
         },
         "tvm": {
             "memory_plan_mode": str(mem_mode.value),
+            "tir_var_upper_bound": None,
             "compile_tasks": compile_agg,
         },
         "runtime": {
@@ -206,4 +208,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

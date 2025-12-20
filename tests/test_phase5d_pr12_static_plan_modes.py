@@ -41,5 +41,8 @@ def test_pr12_static_plan_modes_build_and_match_python():
         one = next(iter(compile_stats.values()))
         assert one.get("memory_plan_mode") in ("default", "disable_static_plan")
         mem = one.get("memory_stats") or {}
-        assert "alloc_storage" in mem
-        assert "alloc_storage_total_bytes" in mem
+        assert "by_scan" in mem
+        assert "by_tvm_estimator" in mem
+        by_scan = mem.get("by_scan") or {}
+        assert "alloc_storage" in by_scan
+        assert "alloc_storage_total_bytes" in by_scan

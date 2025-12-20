@@ -679,3 +679,21 @@
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr12_static_plan_modes.py`
 - `conda run -n boundflow python -m pytest -q`
+
+---
+
+## 2025-12-20：Phase 5D PR#12.1：memory estimator 对照 + DEFAULT pipeline 边界 + tir_var_upper_bound 占位
+
+**动机**
+- 为 PR#12 的 memory planning baseline 增加 TVM 官方 `estimate_memory_usage` 口径佐证；同时让 `MemoryPlanMode.DEFAULT` 更贴近 TVM 官方默认 pipeline，并预留 dynamic shape 上界变量（避免后续引入导致历史数据不可比）。
+
+**主要改动**
+- `boundflow/runtime/tvm_executor.py`
+  - `MemoryPlanMode.DEFAULT/FORCE_STATIC_PLAN` 使用 `tvm.relax.pipeline.default_build_pipeline()`；`DISABLE_STATIC_PLAN` 仍用“等价默认但移除 StaticPlanBlockMemory”的自定义 pass 列表
+  - `compile_stats["memory_stats"]` 结构调整为 `{by_scan, by_tvm_estimator}`
+  - 预留 `TVMExecutorOptions.tir_var_upper_bound` 并纳入 cache key 与 compile_stats
+- `tests/test_phase5d_pr12_static_plan_modes.py`：适配 `memory_stats` 新结构
+- `scripts/bench_static_plan_baseline.py`：输出字段增加 `tir_var_upper_bound`，汇总字段使用 `compile_ms_total`
+
+**验证**
+- `conda run -n boundflow python -m pytest -q`
