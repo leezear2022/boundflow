@@ -835,3 +835,19 @@
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr13e_postprocess_jsonl.py`
 - `conda run -n boundflow python -m pytest -q tests/test_postprocess_enum_normalization.py`
+
+---
+
+## 2025-12-20：Phase 5D PR#13F：bench 支持 eps/batch 覆盖（用于分组验证）
+
+**动机**
+- 为了用真实 bench 输出验证 postprocess 的 group key 不混组（eps/input_shape 变化），并为后续消融扩展预留入口，给 `bench_ablation_matrix.py` 增加最小旋钮 `--eps/--batch`。
+
+**主要改动**
+- `scripts/bench_ablation_matrix.py`
+  - 新增 `--eps`（覆盖 Linf eps）与 `--batch`（覆盖输入 batch size；当前仅支持 `workload=mlp`）
+- `docs/bench_jsonl_schema.md`
+  - 增加“Workload 参数化（用于分组验证）”说明
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr13d_bench_jsonl_schema_contract.py`

@@ -82,3 +82,10 @@
 - 如果 bench 使用了 `--no-check` 导致 `correctness` 缺失/为 null，后处理不会把缺失当成 0；
   - `ablation_summary.csv` 中对应 `python_vs_tvm_max_rel_diff_max` 会为空；
   - 并额外输出 `python_vs_tvm_rel_diff_missing` 计数，避免误读为“误差为 0”。
+
+## Workload 参数化（用于分组验证）
+
+- `scripts/bench_ablation_matrix.py` 支持额外参数（当前仅对 `workload=mlp` 生效）：
+  - `--batch <int>`：覆盖输入 batch size（影响 `workload.input_shape`）
+  - `--eps <float>`：覆盖 `workload.eps`
+  - 用途：生成真实 JSONL 中 eps/input_shape 不同的记录，验证 postprocess 的 group key 不混组。

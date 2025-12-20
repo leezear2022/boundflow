@@ -153,6 +153,8 @@ def _time_run(
 def _bench_one(
     *,
     workload: str,
+    batch: Optional[int],
+    eps_override: Optional[float],
     partition_policy: PartitionPolicy,
     min_tasks: int,
     reuse_on: bool,
@@ -164,6 +166,12 @@ def _bench_one(
     check_correctness: bool,
 ) -> Dict[str, Any]:
     model, x0, eps = _build_workload(name=workload)
+    if batch is not None:
+        if workload != "mlp":
+            raise ValueError("--batch only supported for workload=mlp currently")
+        x0 = torch.randn(int(batch), x0.shape[1])
+    if eps_override is not None:
+        eps = float(eps_override)
     model.eval()
     with torch.no_grad():
         program = import_torch(model, (x0,), export_mode="export", normalize=True)
@@ -371,6 +379,8 @@ def iter_default_matrix() -> Iterable[Tuple[PartitionPolicy, bool, MemoryPlanMod
 def main(argv: Optional[List[str]] = None) -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--workload", choices=["mlp"], default="mlp")
+    p.add_argument("--batch", type=int, default=None, help="Override batch size for the workload input (mlp only).")
+    p.add_argument("--eps", type=float, default=None, help="Override Linf eps for the workload.")
     p.add_argument("--matrix", choices=["default", "small"], default="default")
     p.add_argument("--min-tasks", type=int, default=2)
     p.add_argument("--warmup", type=int, default=3)
@@ -393,6 +403,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         runs.append(
             _bench_one(
                 workload=str(args.workload),
+                batch=args.batch,
+                eps_override=args.eps,
                 partition_policy=partition_policy,
                 min_tasks=int(args.min_tasks),
                 reuse_on=bool(reuse_on),
