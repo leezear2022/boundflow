@@ -714,3 +714,22 @@
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr12_2_tir_var_upper_bound_effect.py`
 - `conda run -n boundflow python -m pytest -q`
+
+---
+
+## 2025-12-20：Phase 5D PR#13A：Ablation matrix bench（统一 JSONL schema + 最小矩阵）
+
+**动机**
+- 在 Phase 5D 进入论文/系统化消融阶段前，先钉死统一的实验矩阵与输出 schema（JSONL/一行一条 run），避免后续每次加变量都返工 bench 字段。
+
+**主要改动**
+- `scripts/bench_ablation_matrix.py`
+  - 提供 `partition/reuse/static_plan/fusion` 的 2×2×2×2 默认矩阵输出（JSONL）
+  - 可选 `--matrix small` 跑单点，用于 CI/快速排查
+  - 支持可选 auto_LiRPA baseline timing（默认开启，可用 `--no-auto-lirpa` 关闭）
+- `tests/test_phase5d_pr13_ablation_matrix_smoke.py`
+  - smoke 测试：跑 `--matrix small` 并断言输出 JSONL schema
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr13_ablation_matrix_smoke.py`
+- `conda run -n boundflow python -m pytest -q`
