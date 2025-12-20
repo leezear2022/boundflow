@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import hashlib
 import os
 import time
+from enum import Enum
 from typing import Any, Dict, List, Optional
 
 import torch
@@ -18,6 +19,12 @@ from ..backends.tvm.interval_conv2d import IntervalConv2dKey, build_interval_con
 from ..backends.tvm.relax_interval_linear import build_relax_interval_linear_vm_exec
 from ..backends.tvm.relax_interval_conv2d import build_relax_interval_conv2d_vm_exec
 from ..backends.tvm.relax_task_lowering import RelaxLoweringMode, build_interval_linear_relax_ir_module
+
+
+class MemoryPlanMode(Enum):
+    DEFAULT = "default"
+    DISABLE_STATIC_PLAN = "disable_static_plan"
+    FORCE_STATIC_PLAN = "force_static_plan"
 
 
 @dataclass(frozen=True)
@@ -40,6 +47,8 @@ class TVMExecutorOptions:
     enable_vm_cache: bool = True
     enable_vm_packed_func_cache: bool = True
     task_vm_opt_passes: tuple[str, ...] = ()
+    # PR#12: control Relax static memory planning.
+    memory_plan_mode: MemoryPlanMode = MemoryPlanMode.DEFAULT
 
 
 @dataclass
@@ -232,6 +241,7 @@ class TVMTaskExecutor:
             "enable_task_fusion_pipeline": bool(self.options.enable_task_fusion_pipeline),
             "task_fuse_opt_level": int(self.options.task_fuse_opt_level),
             "task_vm_opt_passes": tuple(self.options.task_vm_opt_passes or ()),
+            "memory_plan_mode": str(getattr(self.options.memory_plan_mode, "value", self.options.memory_plan_mode)),
         }
         cache_key_hash = hashlib.sha256(repr(sig).encode("utf-8")).hexdigest()[:16]
         if cache_key_hash in self._task_exec_cache:
@@ -296,12 +306,34 @@ class TVMTaskExecutor:
             pre_passes.append(getattr(relax.transform, str(p))())
 
         # Compose with the official default build pipeline (required for VM codegen).
-        from tvm.relax import pipeline as relax_pipeline_mod  # noqa: PLC0415
+        from tvm.relax import backend as relax_backend  # noqa: PLC0415
+
+        include_static_plan = self.options.memory_plan_mode != MemoryPlanMode.DISABLE_STATIC_PLAN
+        default_build_passes: List[Any] = [
+            relax_backend.DispatchSampling(),
+            relax_backend.DispatchSortScan(),
+            relax.transform.LegalizeOps(),
+            relax.transform.RewriteDataflowReshape(),
+            relax.transform.ToNonDataflow(),
+            relax.transform.RemovePurityChecking(),
+            relax.transform.CallTIRRewrite(),
+        ]
+        if include_static_plan:
+            default_build_passes.append(relax.transform.StaticPlanBlockMemory())
+        default_build_passes += [
+            relax.transform.RewriteCUDAGraph(),
+            relax.transform.LowerAllocTensor(),
+            relax.transform.KillAfterLastUse(),
+            relax.transform.LowerRuntimeBuiltin(),
+            relax.transform.ComputePrimValue(),
+            relax.transform.VMShapeLower(),
+            relax.transform.AttachGlobalSymbol(),
+        ]
 
         relax_pipeline = transform.Sequential(
             [
                 transform.Sequential(pre_passes) if pre_passes else transform.Sequential([]),
-                relax_pipeline_mod.default_build_pipeline(),
+                transform.Sequential(default_build_passes),
             ]
         )
 
@@ -340,13 +372,19 @@ class TVMTaskExecutor:
             # Stats are best-effort; compilation should still proceed.
             pass
 
+        from ..backends.tvm.relax_analysis import collect_relax_memory_stats  # noqa: PLC0415
+
         t0 = time.perf_counter_ns()
         if instruments:
             with transform.PassContext(instruments=instruments):
-                ex = relax.build(ir_mod, target=target, relax_pipeline=relax_pipeline)
+                lowered = relax_pipeline(ir_mod)
+                memory_stats = collect_relax_memory_stats(lowered)
+                ex = relax.build(lowered, target=target, relax_pipeline=None)
                 rendered = str(timing_inst.render()) if timing_inst is not None else None
         else:
-            ex = relax.build(ir_mod, target=target, relax_pipeline=relax_pipeline)
+            lowered = relax_pipeline(ir_mod)
+            memory_stats = collect_relax_memory_stats(lowered)
+            ex = relax.build(lowered, target=target, relax_pipeline=None)
             rendered = None
         t1 = time.perf_counter_ns()
 
@@ -358,6 +396,8 @@ class TVMTaskExecutor:
             "pass_timing": None,
             "pass_timing_render": None,
             "dump_ir_dir": dump_dir,
+            "memory_plan_mode": str(getattr(self.options.memory_plan_mode, "value", self.options.memory_plan_mode)),
+            "memory_stats": memory_stats,
             "task_id": str(getattr(task, "task_id", "")),
             "op_types": [str(getattr(op, "op_type", "")) for op in getattr(task, "ops", [])],
             "ir_stats": stats_ir,

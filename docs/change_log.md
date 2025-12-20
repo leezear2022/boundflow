@@ -648,3 +648,34 @@
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr11c1_save_function_closure.py`
 - `conda run -n boundflow python -m pytest -q`
+
+---
+
+## 2025-12-20：补充大模型协作工作流摘要
+
+**动机**
+- 将“输入计划 → 修正测试 → 总结 → 下一步计划”的交流流程固定成简明摘要，方便复用与对齐。
+
+**主要改动**
+- 更新 `gemini_doc/llm_collaboration_workflow.md`，新增“快速版：对话工作流摘要”与 6 步流程。
+- 更新 `AGENTS.md` 的关键文档索引，标注工作流摘要入口。
+
+**验证**
+- 无（文档更新）
+
+---
+
+## 2025-12-20：Phase 5D PR#12：StaticPlanBlockMemory baseline × BoundFlow reuse（开关 + memory stats + 四象限 bench）
+
+**动机**
+- 将 TVM Relax 的 `StaticPlanBlockMemory` 作为 “intra-function 静态内存规划” baseline，与 BoundFlow 的 “inter-task logical→physical reuse” 放到同一张四象限表里，支撑后续系统消融与论文叙事。
+
+**主要改动**
+- `boundflow/runtime/tvm_executor.py`：新增 `MemoryPlanMode` 与 `TVMExecutorOptions.memory_plan_mode`，并在 task-level pipeline 中可选择跳过 `StaticPlanBlockMemory`；`compile_stats` 增加 `memory_plan_mode/memory_stats`。
+- `boundflow/backends/tvm/relax_analysis.py`：新增 `collect_relax_memory_stats`，统计 `relax.vm.alloc_storage/alloc_tensor` 以及 `alloc_storage_total_bytes/max_bytes`（IR 侧估算）。
+- `tests/test_phase5d_pr12_static_plan_modes.py`：DEFAULT vs DISABLE_STATIC_PLAN 两种模式下仍与 Python reference allclose。
+- `scripts/bench_static_plan_baseline.py`：四象限 bench（reuse ON/OFF × static plan ON/OFF），输出 JSON 字段用于表格/画图。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr12_static_plan_modes.py`
+- `conda run -n boundflow python -m pytest -q`
