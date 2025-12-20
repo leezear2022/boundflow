@@ -69,3 +69,10 @@
 
 - `schema_version=0.1`：引入 `time_utc`、compile cache delta、max_rel_diff 等字段，用于论文级消融的“口径可解释性”。
 
+## 后处理（JSONL → CSV/表格/图）
+
+- 脚本：`scripts/postprocess_ablation_jsonl.py`
+  - 读入一个或多个 JSONL 文件，输出到 `out/phase5d/`：
+    - `ablation.csv`：扁平化后的逐点记录（适合画图/透视）
+    - `tables/ablation_summary.csv`：按关键旋钮分组的汇总表（当前为最小版本）
+    - `figures/cache_miss_vs_compile_first_run.png`：示例散点图（若安装了 matplotlib）

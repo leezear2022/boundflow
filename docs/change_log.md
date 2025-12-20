@@ -777,3 +777,37 @@
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr13_ablation_matrix_smoke.py`
 - `conda run --no-capture-output -n boundflow python scripts/bench_ablation_matrix.py --matrix small --warmup 1 --iters 1 --no-auto-lirpa --no-check --output /tmp/boundflow_ablation.jsonl`
+
+---
+
+## 2025-12-20：Phase 5D PR#13D：JSONL schema contract test
+
+**动机**
+- 将 JSONL schema 从“约定”升级为 CI 级契约：逐行可解析、关键字段存在且类型/范围合理，防止后续字段漂移导致画图/后处理阶段才发现输出断裂。
+
+**主要改动**
+- `tests/test_phase5d_pr13d_bench_jsonl_schema_contract.py`
+  - 运行 `bench_ablation_matrix --matrix small` 并逐行解析 JSONL，校验 schema_version/time_utc/runtime/correctness/compile cache delta 等关键字段与类型。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr13d_bench_jsonl_schema_contract.py`
+
+---
+
+## 2025-12-20：Phase 5D PR#13E：postprocess 产线（JSONL → CSV/表格/图）
+
+**动机**
+- 将 bench 产物从 JSONL 进一步变成“可直接画图/做表”的数据与产线脚本，面向论文/AE 的复现与后处理。
+
+**主要改动**
+- `scripts/postprocess_ablation_jsonl.py`
+  - JSONL 扁平化导出 `out/phase5d/ablation.csv`
+  - 最小汇总表 `out/phase5d/tables/ablation_summary.csv`
+  -（可选）示例图 `out/phase5d/figures/cache_miss_vs_compile_first_run.png`（若 matplotlib 可用）
+- `tests/test_phase5d_pr13e_postprocess_jsonl.py`
+  - 合成最小 JSONL 样例，验证 postprocess 输出 CSV/表格落盘
+- `docs/bench_jsonl_schema.md`
+  - 增加后处理脚本说明
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr13e_postprocess_jsonl.py`
