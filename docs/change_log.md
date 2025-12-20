@@ -756,3 +756,24 @@
 - `conda run -n boundflow python -m pytest -q tests/test_env_sh_quiet_stdout.py`
 - `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr13_ablation_matrix_smoke.py`
 - `conda run --no-capture-output -n boundflow python scripts/bench_ablation_matrix.py --matrix small --warmup 1 --iters 1 --no-auto-lirpa --no-check --output /tmp/boundflow_ablation.jsonl`
+
+---
+
+## 2025-12-20：Phase 5D PR#13C：JSONL schema 文档 + schema_version/time_utc + cache delta + rel diff
+
+**动机**
+- 系统化消融进入“多人协作 + 论文画图”阶段后，需要固定 bench 的 JSONL schema，并补齐去歧义字段（schema 版本、UTC 时间、cache 增量、相对误差）。
+
+**主要改动**
+- `scripts/bench_ablation_matrix.py`
+  - 顶层增加 `schema_version`；`meta` 增加 `time_utc`
+  - 增加 `compile_cache_stats_delta_compile_first_run`（首次运行/编译触发阶段的 cache 增量）
+  - correctness 增加 `*_max_rel_diff_*`（相对误差）
+- `docs/bench_jsonl_schema.md`
+  - 新增 JSONL 字段/口径说明，固定输出协议（stdout 纯 payload）
+- `AGENTS.md`
+  - 在关键文档索引中注册 `docs/bench_jsonl_schema.md`
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr13_ablation_matrix_smoke.py`
+- `conda run --no-capture-output -n boundflow python scripts/bench_ablation_matrix.py --matrix small --warmup 1 --iters 1 --no-auto-lirpa --no-check --output /tmp/boundflow_ablation.jsonl`

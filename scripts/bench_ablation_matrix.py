@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import dataclasses
+import datetime as _dt
 import json
 import os
 import platform
@@ -40,6 +41,10 @@ def _git_short_sha() -> str:
         return out.decode("utf-8").strip()
     except Exception:
         return ""
+
+
+def _utc_now_iso() -> str:
+    return _dt.datetime.now(tz=_dt.timezone.utc).isoformat()
 
 
 def _try_import_auto_lirpa():
@@ -203,10 +208,16 @@ def _bench_one(
         _ = run_ibp_scheduled(module, input_spec, executor=tvm_exec)
 
     # Trigger compilation once (counted separately from steady-state runtime).
+    cache0 = tvm_exec.get_task_compile_cache_stats()
     t_compile0 = time.perf_counter_ns()
     _ = _run_tvm_once()
     t_compile1 = time.perf_counter_ns()
     compile_first_run_ms = (t_compile1 - t_compile0) / 1e6
+    cache1 = tvm_exec.get_task_compile_cache_stats()
+
+    def _delta(a: Dict[str, int], b: Dict[str, int]) -> Dict[str, int]:
+        keys = set(a.keys()) | set(b.keys())
+        return {k: int(b.get(k, 0)) - int(a.get(k, 0)) for k in sorted(keys)}
 
     run_ms_avg, run_pct = _time_run(_run_tvm_once, warmup=warmup, iters=iters)
     compile_stats = tvm_exec.get_compile_stats()
@@ -219,12 +230,16 @@ def _bench_one(
     if check_correctness:
         lb_diff = (py_out.lower - tvm_out.lower).abs()
         ub_diff = (py_out.upper - tvm_out.upper).abs()
+        lb_rel = lb_diff / py_out.lower.abs().clamp_min(1e-12)
+        ub_rel = ub_diff / py_out.upper.abs().clamp_min(1e-12)
         correctness["bounds_allclose_to_python"] = bool(
             torch.allclose(py_out.lower, tvm_out.lower, atol=1e-5, rtol=1e-5)
             and torch.allclose(py_out.upper, tvm_out.upper, atol=1e-5, rtol=1e-5)
         )
         correctness["python_vs_tvm_max_abs_diff_lb"] = float(lb_diff.max().item())
         correctness["python_vs_tvm_max_abs_diff_ub"] = float(ub_diff.max().item())
+        correctness["python_vs_tvm_max_rel_diff_lb"] = float(lb_rel.max().item())
+        correctness["python_vs_tvm_max_rel_diff_ub"] = float(ub_rel.max().item())
 
     baseline: Dict[str, Any] = {"auto_lirpa": None}
     if include_auto_lirpa:
@@ -257,15 +272,21 @@ def _bench_one(
                 )
                 l2 = (py_out.lower - lb).abs()
                 u2 = (py_out.upper - ub).abs()
+                l2_rel = l2 / py_out.lower.abs().clamp_min(1e-12)
+                u2_rel = u2 / py_out.upper.abs().clamp_min(1e-12)
                 correctness["python_vs_auto_lirpa_max_abs_diff_lb"] = float(l2.max().item())
                 correctness["python_vs_auto_lirpa_max_abs_diff_ub"] = float(u2.max().item())
+                correctness["python_vs_auto_lirpa_max_rel_diff_lb"] = float(l2_rel.max().item())
+                correctness["python_vs_auto_lirpa_max_rel_diff_ub"] = float(u2_rel.max().item())
         else:
             baseline["auto_lirpa"] = {"available": False}
 
     out: Dict[str, Any] = {
+        "schema_version": "0.1",
         "meta": {
             "git_commit": _git_short_sha(),
             "timestamp": int(time.time()),
+            "time_utc": _utc_now_iso(),
             "host": socket.gethostname(),
             "platform": platform.platform(),
             "python": sys.version.split()[0],
@@ -317,6 +338,7 @@ def _bench_one(
             "tir_var_upper_bound_scope": "func_signature_only",
             "compile_stats_agg": compile_agg,
             "compile_cache_stats": compile_cache_stats,
+            "compile_cache_stats_delta_compile_first_run": _delta(cache0, cache1),
         },
         "runtime": {
             "warmup": int(warmup),
