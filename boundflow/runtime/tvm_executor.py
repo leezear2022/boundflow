@@ -36,6 +36,10 @@ class TVMExecutorOptions:
     # PR#11B: fusion pipeline control (RELAX_OPS path).
     enable_task_fusion_pipeline: bool = False
     task_fuse_opt_level: int = -1
+    # PR#11C: reduce VM call overhead and provide optional VM-level optimization passes.
+    enable_vm_cache: bool = True
+    enable_vm_packed_func_cache: bool = True
+    task_vm_opt_passes: tuple[str, ...] = ()
 
 
 @dataclass
@@ -62,6 +66,8 @@ class TVMTaskExecutor:
         self._linear_exec_cache: Dict[tuple[str, IntervalLinearKey], Any] = {}
         # task_cache_key_hash -> {"ex": Executable, "spec": IntervalTaskLoweringSpec}
         self._task_exec_cache: Dict[str, Dict[str, Any]] = {}
+        # (cache_key_hash, dev_type_name, dev_index) -> {"vm": VirtualMachine, "fn": PackedFunc}
+        self._vm_cache: Dict[tuple[str, str, int], Dict[str, Any]] = {}
         # cache_key -> compile stats (jsonable)
         self._compile_stats: Dict[str, Dict[str, Any]] = {}
 
@@ -107,6 +113,31 @@ class TVMTaskExecutor:
 
     def get_compile_stats(self) -> Dict[str, Dict[str, Any]]:
         return dict(self._compile_stats)
+
+    def _get_vm_callable(self, *, cache_key_hash: str, ex: Any, dev: Any, func_name: str) -> tuple[Any, Any]:
+        """
+        Get (vm, callable) for a compiled executable on a specific device.
+
+        callable is either a cached PackedFunc (preferred) or vm[func_name] retrieved on demand.
+        """
+        from tvm import relax  # noqa: PLC0415
+
+        dev_key = (str(cache_key_hash), str(getattr(dev, "type", "unknown")), int(getattr(dev, "index", 0)))
+        if self.options.enable_vm_cache and dev_key in self._vm_cache:
+            entry = self._vm_cache[dev_key]
+            vm = entry.get("vm")
+            fn = entry.get("fn")
+            if vm is not None:
+                if fn is None and self.options.enable_vm_packed_func_cache:
+                    fn = vm[func_name]
+                    entry["fn"] = fn
+                return vm, (fn or vm[func_name])
+
+        vm = relax.VirtualMachine(ex, dev)
+        fn = vm[func_name] if self.options.enable_vm_packed_func_cache else None
+        if self.options.enable_vm_cache:
+            self._vm_cache[dev_key] = {"vm": vm, "fn": fn}
+        return vm, (fn or vm[func_name])
 
     def _compile_interval_linear_executable(self, key: IntervalLinearKey):
         import tvm
@@ -200,6 +231,7 @@ class TVMTaskExecutor:
             "compile_cache_tag": str(self.options.compile_cache_tag),
             "enable_task_fusion_pipeline": bool(self.options.enable_task_fusion_pipeline),
             "task_fuse_opt_level": int(self.options.task_fuse_opt_level),
+            "task_vm_opt_passes": tuple(self.options.task_vm_opt_passes or ()),
         }
         cache_key_hash = hashlib.sha256(repr(sig).encode("utf-8")).hexdigest()[:16]
         if cache_key_hash in self._task_exec_cache:
@@ -254,9 +286,17 @@ class TVMTaskExecutor:
         base_passes += [
             relax.transform.DeadCodeElimination(),
             relax.transform.RemoveUnusedOutputs(),
+            relax.transform.RemoveUnusedParameters(),
             relax.transform.LambdaLift(),
+            relax.transform.InlinePrivateFunctions(),
+            relax.transform.CallTIRRewrite(),
             relax.transform.Normalize(),
         ]
+        # Optional VM-level optimization passes (kept as strings for JSON-ability).
+        for p in (self.options.task_vm_opt_passes or ()):
+            if not hasattr(relax.transform, str(p)):
+                raise ValueError(f"unknown relax pass in task_vm_opt_passes: {p}")
+            base_passes.append(getattr(relax.transform, str(p))())
         relax_pipeline = transform.Sequential(base_passes)
 
         # Collect per-stage IR stats for ablation.
@@ -313,6 +353,8 @@ class TVMTaskExecutor:
             "task_id": str(getattr(task, "task_id", "")),
             "op_types": [str(getattr(op, "op_type", "")) for op in getattr(task, "ops", [])],
             "ir_stats": stats_ir,
+            "pipeline": [getattr(p, "info", None).name if getattr(p, "info", None) is not None else str(p) for p in base_passes],
+            "task_vm_opt_passes": list(self.options.task_vm_opt_passes or ()),
         }
         if timing_inst is not None:
             stats["pass_timing_render"] = rendered
@@ -385,7 +427,7 @@ class TVMTaskExecutor:
         if self.options.enable_task_relax_ops and self.options.kernel_style == "relax":
             try:
                 ex, spec, _cache_key = self._compile_interval_task_relax_ops(task, storage_plan=storage_plan, target=target)
-                vm = relax.VirtualMachine(ex, dev)
+                vm, fn = self._get_vm_callable(cache_key_hash=_cache_key, ex=ex, dev=dev, func_name=spec.func_name)
                 args: List[Any] = []
                 # Inputs: for each v, pass (v_l, v_u)
                 for v in spec.input_values:
@@ -399,7 +441,7 @@ class TVMTaskExecutor:
                         t = torch.as_tensor(t, device=device)
                     args.append(rt.tensor(t.detach().cpu().numpy(), device=dev))
 
-                out = vm[spec.func_name](*args)
+                out = fn(*args)
                 # Flattened outputs: [o0_l,o0_u,o1_l,o1_u,...]
                 flat = list(out)
                 for i, ov in enumerate(spec.output_values):
@@ -419,12 +461,15 @@ class TVMTaskExecutor:
             dtype = str(x.lower.dtype).replace("torch.", "")
             key = IntervalLinearKey(batch=int(B), in_features=int(I), out_features=int(O), dtype=dtype, target=target)
             ex = self._compile_interval_linear_executable(key)
-            vm = relax.VirtualMachine(ex, dev)
+            cache_key_hash = hashlib.sha256(
+                repr((str(self.options.kernel_style), str(self.options.compile_cache_tag), key)).encode("utf-8")
+            ).hexdigest()[:16]
+            vm, fn = self._get_vm_callable(cache_key_hash=cache_key_hash, ex=ex, dev=dev, func_name="main")
             x_l_t = rt.tensor(x.lower.detach().cpu().numpy(), device=dev)
             x_u_t = rt.tensor(x.upper.detach().cpu().numpy(), device=dev)
             w_t = rt.tensor(w.detach().cpu().numpy(), device=dev)
             b_t = rt.tensor(b.detach().cpu().numpy(), device=dev)
-            out = vm["main"](x_l_t, x_u_t, w_t, b_t)
+            out = fn(x_l_t, x_u_t, w_t, b_t)
             y_l_t, y_u_t = out[0], out[1]
             y_l = torch.from_numpy(y_l_t.numpy()).to(x.lower.device)
             y_u = torch.from_numpy(y_u_t.numpy()).to(x.lower.device)

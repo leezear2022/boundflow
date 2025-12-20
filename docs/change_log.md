@@ -616,3 +616,18 @@
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr11a_task_relax_ops_equiv.py`
 - `conda run -n boundflow python -m pytest -q`
+
+---
+
+## 2025-12-18：Phase 5D PR#11C：降低 Relax VM 调用开销（VM/PackedFunc 缓存 + VM-level passes 插槽）
+
+**动机**
+- 在 task-level RELAX_OPS + fusion pipeline 之后，进一步减少 VM/dispatch 开销，并预留可插拔的 VM-level pass 插槽，方便后续做 tuple 展开/删无用参数/inline 等消融而不改架构。
+
+**主要改动**
+- `boundflow/runtime/tvm_executor.py`：新增 VM/PackedFunc 缓存（按 `(cache_key_hash, dev.type, dev.index)`），并加入 `task_vm_opt_passes` 插槽
+- `tests/test_phase5d_pr11c_vm_cache_and_opt_passes.py`：开启缓存与 pass 插槽后仍与 Python reference allclose
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr11c_vm_cache_and_opt_passes.py`
+- `conda run -n boundflow python -m pytest -q`
