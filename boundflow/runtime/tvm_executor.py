@@ -257,6 +257,19 @@ class TVMTaskExecutor:
             target=target,
             func_name="main",
         )
+        # If provided, annotate Relax function with dynamic shape upper bounds for StaticPlanBlockMemory.
+        if self.options.tir_var_upper_bound:
+            try:
+                import tvm  # noqa: PLC0415
+
+                mod2 = tvm.IRModule(ir_mod.functions)
+                main_gv = mod2.get_global_var("main")
+                func = mod2[main_gv]
+                mod2.update_func(main_gv, func.with_attr("tir_var_upper_bound", dict(self.options.tir_var_upper_bound)))
+                ir_mod = mod2
+            except Exception:
+                # Best-effort: do not block compilation if attr update fails.
+                pass
 
         import tvm
         from tvm import relax
@@ -388,6 +401,7 @@ class TVMTaskExecutor:
                 # (1) Structured scan stats on the lowered module (post memory planning & LowerAllocTensor).
                 by_scan = collect_relax_memory_stats(lowered)
                 # (2) TVM official estimator render (best-effort), usually run on pre-LowerAllocTensor module.
+                estimator_stage = "pre_static_plan"
                 estimate_render = None
                 try:
                     from tvm.relax import analysis as relax_analysis  # noqa: PLC0415
@@ -406,12 +420,17 @@ class TVMTaskExecutor:
                     estimate_render = str(relax_analysis.estimate_memory_usage(est_mod))
                 except Exception:
                     pass
-                memory_stats = {"by_scan": by_scan, "by_tvm_estimator": estimate_render}
+                memory_stats = {
+                    "by_scan": by_scan,
+                    "by_tvm_estimator": estimate_render,
+                    "by_tvm_estimator_stage": estimator_stage,
+                }
                 ex = relax.build(lowered, target=target, relax_pipeline=None)
                 rendered = str(timing_inst.render()) if timing_inst is not None else None
         else:
             lowered = relax_pipeline(ir_mod)
             by_scan = collect_relax_memory_stats(lowered)
+            estimator_stage = "pre_static_plan"
             estimate_render = None
             try:
                 from tvm.relax import analysis as relax_analysis  # noqa: PLC0415
@@ -430,7 +449,11 @@ class TVMTaskExecutor:
                 estimate_render = str(relax_analysis.estimate_memory_usage(est_mod))
             except Exception:
                 pass
-            memory_stats = {"by_scan": by_scan, "by_tvm_estimator": estimate_render}
+            memory_stats = {
+                "by_scan": by_scan,
+                "by_tvm_estimator": estimate_render,
+                "by_tvm_estimator_stage": estimator_stage,
+            }
             ex = relax.build(lowered, target=target, relax_pipeline=None)
             rendered = None
         t1 = time.perf_counter_ns()

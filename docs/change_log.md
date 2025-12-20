@@ -697,3 +697,20 @@
 
 **验证**
 - `conda run -n boundflow python -m pytest -q`
+
+---
+
+## 2025-12-20：Phase 5D PR#12.2：estimator_stage 固定 + 写入 tir_var_upper_bound attrs + dynamic 回归用例
+
+**动机**
+- 固定 `estimate_memory_usage` 的调用阶段并记录，避免未来 pipeline 调整导致数据漂移；同时让 `tir_var_upper_bound` 从“仅记录 options”升级为“真实写入 Relax function attrs 并可观测到效果”。
+**主要改动**
+- `boundflow/runtime/tvm_executor.py`
+  - `compile_stats["memory_stats"]` 增加 `by_tvm_estimator_stage`（固定为 `pre_static_plan`）
+  - 当 `TVMExecutorOptions.tir_var_upper_bound` 非空时，把它写入 task-level `main` Relax function 的 `tir_var_upper_bound` attrs（best-effort）
+- `tests/test_phase5d_pr12_2_tir_var_upper_bound_effect.py`
+  - 构造带动态维度 `n` 的 Relax module，使用 TVM `default_build_pipeline()` lowering 后对比 `collect_relax_memory_stats`：有 upper bound 时可折算出常量 bytes 且 nonconst bytes 下降
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr12_2_tir_var_upper_bound_effect.py`
+- `conda run -n boundflow python -m pytest -q`
