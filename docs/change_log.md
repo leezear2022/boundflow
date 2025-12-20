@@ -811,3 +811,27 @@
 
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr13e_postprocess_jsonl.py`
+
+---
+
+## 2025-12-20：Phase 5D PR#13E.1：postprocess hardening（缺失值/分组/流式读取/enum 修复）
+
+**动机**
+- 修复后处理脚本的 4 类静默口径错误：missing correctness 不应当 0、group key 需包含 eps/input_shape/domain/spec、防大 JSONL 内存峰值、修正 enum repr 解析。
+
+**主要改动**
+- `scripts/postprocess_ablation_jsonl.py`
+  - JSONL 流式读取（按行迭代）
+  - 修正 enum 解析正则（`:\s*'value'`）
+  - group key 纳入 `input_shape/eps/domain/spec` 防止混组
+  - summary 不再把缺失 correctness 当 0，并输出 `python_vs_tvm_rel_diff_missing`
+- `tests/test_phase5d_pr13e_postprocess_jsonl.py`
+  - 新增缺失 correctness 与 group key 分组回归
+- `tests/test_postprocess_enum_normalization.py`
+  - 覆盖 enum repr value 解析
+- `docs/bench_jsonl_schema.md`
+  - 补充缺失值约定说明
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr13e_postprocess_jsonl.py`
+- `conda run -n boundflow python -m pytest -q tests/test_postprocess_enum_normalization.py`

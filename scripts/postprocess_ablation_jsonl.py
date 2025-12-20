@@ -15,19 +15,19 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 def _read_jsonl(paths: Sequence[Path]) -> List[Dict[str, Any]]:
     rows: List[Dict[str, Any]] = []
     for p in paths:
-        text = p.read_text(encoding="utf-8")
-        for i, line in enumerate(text.splitlines(), 1):
-            if not line.strip():
-                continue
-            try:
-                obj = json.loads(line)
-            except Exception as e:
-                raise ValueError(f"invalid json at {p}:{i}: {e}") from e
-            if not isinstance(obj, dict):
-                raise ValueError(f"jsonl row is not an object at {p}:{i}")
-            obj["_source_file"] = str(p)
-            obj["_source_line"] = int(i)
-            rows.append(obj)
+        with p.open("r", encoding="utf-8") as f:
+            for i, line in enumerate(f, 1):
+                if not line.strip():
+                    continue
+                try:
+                    obj = json.loads(line)
+                except Exception as e:
+                    raise ValueError(f"invalid json at {p}:{i}: {e}") from e
+                if not isinstance(obj, dict):
+                    raise ValueError(f"jsonl row is not an object at {p}:{i}")
+                obj["_source_file"] = str(p)
+                obj["_source_line"] = int(i)
+                rows.append(obj)
     return rows
 
 
@@ -41,7 +41,7 @@ def _get(d: Any, *keys: str, default: Any = None) -> Any:
 
 
 _ENUM_RE = re.compile(r"MemoryPlanMode\.(?P<name>[A-Z_]+)")
-_ENUM_VALUE_RE = re.compile(r":\\s*'(?P<value>[^']+)'")
+_ENUM_VALUE_RE = re.compile(r":\s*'(?P<value>[^']+)'")
 
 
 def _normalize_enum_repr(x: Any) -> Optional[str]:
@@ -85,6 +85,8 @@ def _flatten_row(row: Dict[str, Any]) -> FlatRow:
         "workload": _get(row, "workload", "model"),
         "input_shape": json.dumps(_get(row, "workload", "input_shape"), ensure_ascii=False),
         "eps": _get(row, "workload", "eps"),
+        "domain": _get(row, "workload", "domain"),
+        "spec": _get(row, "workload", "spec"),
         "partition_policy": partition_policy,
         "reuse_on": bool(reuse_on) if reuse_on is not None else None,
         "memory_plan_mode": memory_plan_mode,
@@ -146,6 +148,10 @@ def _group_key(fr: FlatRow) -> Tuple[Any, ...]:
     d = fr.data
     return (
         d.get("workload"),
+        d.get("input_shape"),
+        d.get("eps"),
+        d.get("domain"),
+        d.get("spec"),
         d.get("partition_policy"),
         d.get("reuse_on"),
         d.get("memory_plan_mode"),
@@ -164,7 +170,7 @@ def _summarize(rows: List[FlatRow]) -> List[Dict[str, Any]]:
 
     out: List[Dict[str, Any]] = []
     for k, rs in sorted(groups.items(), key=lambda kv: str(kv[0])):
-        workload, partition_policy, reuse_on, memory_plan_mode, fusion_on = k
+        workload, input_shape, eps, domain, spec, partition_policy, reuse_on, memory_plan_mode, fusion_on = k
         run_p50 = [float(x.data["run_ms_p50"]) for x in rs if x.data.get("run_ms_p50") is not None]
         compile_first = [float(x.data["compile_first_run_ms"]) for x in rs if x.data.get("compile_first_run_ms") is not None]
         miss_delta = [
@@ -172,13 +178,25 @@ def _summarize(rows: List[FlatRow]) -> List[Dict[str, Any]]:
             for x in rs
             if x.data.get("compile_cache_miss_delta_first_run") is not None
         ]
-        rel_diff = [
-            max(float(x.data.get("python_vs_tvm_max_rel_diff_lb") or 0.0), float(x.data.get("python_vs_tvm_max_rel_diff_ub") or 0.0))
-            for x in rs
-        ]
+
+        def _max_rel_diff(fr: FlatRow) -> Optional[float]:
+            lb = fr.data.get("python_vs_tvm_max_rel_diff_lb")
+            ub = fr.data.get("python_vs_tvm_max_rel_diff_ub")
+            if lb is None and ub is None:
+                return None
+            return max(float(lb or 0.0), float(ub or 0.0))
+
+        rel_vals = [_max_rel_diff(x) for x in rs]
+        rel_present = [v for v in rel_vals if v is not None]
+        rel_missing = int(sum(v is None for v in rel_vals))
+
         out.append(
             {
                 "workload": workload,
+                "input_shape": input_shape,
+                "eps": eps,
+                "domain": domain,
+                "spec": spec,
                 "partition_policy": partition_policy,
                 "reuse_on": reuse_on,
                 "memory_plan_mode": memory_plan_mode,
@@ -187,7 +205,8 @@ def _summarize(rows: List[FlatRow]) -> List[Dict[str, Any]]:
                 "run_ms_p50_mean": _mean(run_p50),
                 "compile_first_run_ms_mean": _mean(compile_first),
                 "compile_cache_miss_delta_first_run_mean": _mean(miss_delta),
-                "python_vs_tvm_max_rel_diff_max": float(max(rel_diff) if rel_diff else 0.0),
+                "python_vs_tvm_max_rel_diff_max": float(max(rel_present)) if rel_present else None,
+                "python_vs_tvm_rel_diff_missing": rel_missing,
             }
         )
     return out
@@ -250,4 +269,3 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

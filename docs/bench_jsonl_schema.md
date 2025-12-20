@@ -76,3 +76,9 @@
     - `ablation.csv`：扁平化后的逐点记录（适合画图/透视）
     - `tables/ablation_summary.csv`：按关键旋钮分组的汇总表（当前为最小版本）
     - `figures/cache_miss_vs_compile_first_run.png`：示例散点图（若安装了 matplotlib）
+
+### 缺失值约定（非常重要）
+
+- 如果 bench 使用了 `--no-check` 导致 `correctness` 缺失/为 null，后处理不会把缺失当成 0；
+  - `ablation_summary.csv` 中对应 `python_vs_tvm_max_rel_diff_max` 会为空；
+  - 并额外输出 `python_vs_tvm_rel_diff_missing` 计数，避免误读为“误差为 0”。
