@@ -631,3 +631,20 @@
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr11c_vm_cache_and_opt_passes.py`
 - `conda run -n boundflow python -m pytest -q`
+
+---
+
+## 2025-12-20：Phase 5D PR#11C.1：save_function bench + task-level pipeline 修复
+
+**动机**
+- 增加 save_function closure micro-bench（对比 VM 调用方式），并修复 task-level 自定义 relax_pipeline：必须组合 TVM 官方 `default_build_pipeline()`，否则可能触发 VM codegen 对 `alloc_tensor` 的不支持错误。
+
+**主要改动**
+- `boundflow/runtime/tvm_executor.py`：task-level compile pipeline 改为 `pre-pass + default_build_pipeline()`；fusion 统计链补上 `ConvertToDataflow`
+- `boundflow/backends/tvm/relax_interval_task_ops.py`：从 StoragePlan.scope 推断 param/const，避免把 param 当作 interval 输入
+- `scripts/bench_relax_vm_overhead.py`：save_function micro-bench（JSON 输出）
+- `tests/test_phase5d_pr11c1_save_function_closure.py`：save_function 输出一致性回归
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr11c1_save_function_closure.py`
+- `conda run -n boundflow python -m pytest -q`

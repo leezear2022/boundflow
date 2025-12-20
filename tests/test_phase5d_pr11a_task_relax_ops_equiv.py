@@ -36,6 +36,7 @@ def test_pr11a_tvm_task_relax_ops_matches_python_on_linear_relu():
 
     compile_stats = tvm_exec.get_compile_stats()
     assert compile_stats
+    assert any((v or {}).get("kind") == "task_relax_ops" for v in compile_stats.values())
     one = next(iter(compile_stats.values()))
     ir_stats = one.get("ir_stats") or {}
     if "after_legalize" in ir_stats and "after_fuse_tir" in ir_stats:

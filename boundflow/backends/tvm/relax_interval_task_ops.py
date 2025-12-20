@@ -69,8 +69,25 @@ def build_interval_task_relax_ops_ir_module(
     from tvm import relax  # noqa: PLC0415
 
     # Inputs (interval lanes) and params (plain tensors).
-    input_values = list(task.input_values)
-    param_values = sorted(list(task.params or []))
+    raw_input_values = list(task.input_values)
+    raw_param_values = list(task.params or [])
+
+    # Treat param/const-scoped values as plain params (not interval inputs),
+    # even if they appear in task.input_values.
+    param_scopes = {"param", "const"}
+    inferred_params: List[str] = []
+    for v in raw_input_values:
+        bid = storage_plan.value_to_buffer.get(v)
+        if bid is None:
+            continue
+        spec = storage_plan.buffers.get(bid)
+        if spec is None:
+            continue
+        if str(spec.scope) in param_scopes:
+            inferred_params.append(v)
+
+    param_values = sorted({*raw_param_values, *inferred_params})
+    input_values = [v for v in raw_input_values if v not in param_values]
     output_values = list(task.output_values)
 
     bb = relax.BlockBuilder()
@@ -202,19 +219,11 @@ def build_interval_task_relax_ops_ir_module(
 
             # Build outputs as a flat tuple.
             out_exprs: List[Any] = []
-            out_sinfo: List[Any] = []
             for ov in output_values:
                 y_l, y_u = get_interval(ov)
                 out_exprs.extend([y_l, y_u])
-                o_shape, o_dtype = _spec_for_value(storage_plan, ov)
-                out_sinfo.extend(
-                    [
-                        relax.TensorStructInfo(tuple(int(d) for d in o_shape), o_dtype),
-                        relax.TensorStructInfo(tuple(int(d) for d in o_shape), o_dtype),
-                    ]
-                )
             out = bb.emit_output(relax.Tuple(out_exprs))
-        bb.emit_func_output(out, out_sinfo=out_sinfo)
+        bb.emit_func_output(out)
 
     mod = bb.get()
     _ = tvm
@@ -226,4 +235,3 @@ def build_interval_task_relax_ops_ir_module(
         output_flattened=True,
     )
     return mod, spec
-

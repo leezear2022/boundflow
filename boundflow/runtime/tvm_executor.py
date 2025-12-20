@@ -267,37 +267,43 @@ class TVMTaskExecutor:
             instruments.append(DumpIR(dump_dir=dump_dir, refresh=bool(self.options.dump_ir_refresh)))
 
         # Build a deterministic and controllable Relax pipeline for task-level compilation.
-        # - Always run LegalizeOps (required for VM build).
-        # - Optionally run fusion (AnnotateTIROpPattern/FuseOps/FuseTIR) to reduce call_tir count.
         #
-        # Note: We still run Normalize/FoldConstant/DCE/LambdaLift as part of the pipeline to keep modules well-formed
-        # for the VM codegen stage.
-        base_passes = [
-            relax.transform.Normalize(),
-            relax.transform.FoldConstant(),
-            relax.transform.LegalizeOps(),
-        ]
+        # Important: the Relax VM codegen requires the default build pipeline passes
+        # (e.g. LowerAllocTensor/LowerRuntimeBuiltin/AttachGlobalSymbol). If we bypass them,
+        # we may hit VM codegen errors like "cannot handle relax.builtin.alloc_tensor".
+        #
+        # Therefore we compose:
+        # - (optional) a fusion pre-pass stage to reduce call_tir count
+        # - the official default build pipeline (lowering+memory planning+runtime lowering)
+        pre_passes: List[Any] = []
         if self.options.enable_task_fusion_pipeline:
-            base_passes += [
+            pre_passes += [
+                relax.transform.Normalize(),
+                relax.transform.FoldConstant(),
+                relax.transform.LegalizeOps(),
+                relax.transform.ConvertToDataflow(),
                 relax.transform.AnnotateTIROpPattern(),
                 relax.transform.FuseOps(fuse_opt_level=int(self.options.task_fuse_opt_level)),
                 relax.transform.FuseTIR(),
+                relax.transform.DeadCodeElimination(),
+                relax.transform.RemoveUnusedOutputs(),
             ]
-        base_passes += [
-            relax.transform.DeadCodeElimination(),
-            relax.transform.RemoveUnusedOutputs(),
-            relax.transform.RemoveUnusedParameters(),
-            relax.transform.LambdaLift(),
-            relax.transform.InlinePrivateFunctions(),
-            relax.transform.CallTIRRewrite(),
-            relax.transform.Normalize(),
-        ]
+
         # Optional VM-level optimization passes (kept as strings for JSON-ability).
         for p in (self.options.task_vm_opt_passes or ()):
             if not hasattr(relax.transform, str(p)):
                 raise ValueError(f"unknown relax pass in task_vm_opt_passes: {p}")
-            base_passes.append(getattr(relax.transform, str(p))())
-        relax_pipeline = transform.Sequential(base_passes)
+            pre_passes.append(getattr(relax.transform, str(p))())
+
+        # Compose with the official default build pipeline (required for VM codegen).
+        from tvm.relax import pipeline as relax_pipeline_mod  # noqa: PLC0415
+
+        relax_pipeline = transform.Sequential(
+            [
+                transform.Sequential(pre_passes) if pre_passes else transform.Sequential([]),
+                relax_pipeline_mod.default_build_pipeline(),
+            ]
+        )
 
         # Collect per-stage IR stats for ablation.
         stats_ir: Dict[str, Any] = {"before": collect_relax_ir_stats(ir_mod)}
@@ -312,6 +318,7 @@ class TVMTaskExecutor:
                         relax.transform.Normalize(),
                         relax.transform.FoldConstant(),
                         relax.transform.LegalizeOps(),
+                        relax.transform.ConvertToDataflow(),
                         relax.transform.AnnotateTIROpPattern(),
                         relax.transform.FuseOps(fuse_opt_level=int(self.options.task_fuse_opt_level)),
                     ]
@@ -322,6 +329,7 @@ class TVMTaskExecutor:
                         relax.transform.Normalize(),
                         relax.transform.FoldConstant(),
                         relax.transform.LegalizeOps(),
+                        relax.transform.ConvertToDataflow(),
                         relax.transform.AnnotateTIROpPattern(),
                         relax.transform.FuseOps(fuse_opt_level=int(self.options.task_fuse_opt_level)),
                         relax.transform.FuseTIR(),
@@ -353,7 +361,7 @@ class TVMTaskExecutor:
             "task_id": str(getattr(task, "task_id", "")),
             "op_types": [str(getattr(op, "op_type", "")) for op in getattr(task, "ops", [])],
             "ir_stats": stats_ir,
-            "pipeline": [getattr(p, "info", None).name if getattr(p, "info", None) is not None else str(p) for p in base_passes],
+            "pipeline": [str(p) for p in pre_passes],
             "task_vm_opt_passes": list(self.options.task_vm_opt_passes or ()),
         }
         if timing_inst is not None:
