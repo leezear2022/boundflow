@@ -234,7 +234,18 @@ def _bench_one(
 
     tvm_out = run_ibp_scheduled(module, input_spec, executor=tvm_exec)
 
-    correctness: Dict[str, Any] = {"bounds_allclose_to_python": None, "bounds_allclose_to_auto_lirpa": None}
+    correctness: Dict[str, Any] = {
+        "bounds_allclose_to_python": None,
+        "bounds_allclose_to_auto_lirpa": None,
+        "python_vs_tvm_max_abs_diff_lb": None,
+        "python_vs_tvm_max_abs_diff_ub": None,
+        "python_vs_tvm_max_rel_diff_lb": None,
+        "python_vs_tvm_max_rel_diff_ub": None,
+        "python_vs_auto_lirpa_max_abs_diff_lb": None,
+        "python_vs_auto_lirpa_max_abs_diff_ub": None,
+        "python_vs_auto_lirpa_max_rel_diff_lb": None,
+        "python_vs_auto_lirpa_max_rel_diff_ub": None,
+    }
     if check_correctness:
         lb_diff = (py_out.lower - tvm_out.lower).abs()
         ub_diff = (py_out.upper - tvm_out.upper).abs()

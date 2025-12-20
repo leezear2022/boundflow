@@ -851,3 +851,26 @@
 
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr13d_bench_jsonl_schema_contract.py`
+
+---
+
+## 2025-12-20：Phase 5D PR#13E.2：MANIFEST 换行修复 + --no-check 结构稳定
+
+**动机**
+- 修复 MANIFEST.txt 的可读性（避免字面量 `\\n`），并让 `--no-check` 时 JSONL 的 correctness diff 字段结构稳定（输出为 null），减少下游处理分支与口径歧义。
+
+**主要改动**
+- `scripts/postprocess_ablation_jsonl.py`
+  - MANIFEST 使用真实换行符写入
+- `scripts/bench_ablation_matrix.py`
+  - `--no-check` 下 diff keys 仍存在（值为 null）
+- `tests/test_phase5d_pr13e_postprocess_jsonl.py`
+  - 回归：MANIFEST 不含字面量 `\\n`
+- `tests/test_phase5d_pr13d_bench_jsonl_schema_contract.py`
+  - 回归：`--no-check` 仍输出 diff keys（为 null）
+- `docs/bench_jsonl_schema.md`
+  - 补充 `--no-check` 的字段口径说明
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr13d_bench_jsonl_schema_contract.py`
+- `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr13e_postprocess_jsonl.py`

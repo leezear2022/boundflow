@@ -79,7 +79,7 @@
 
 ### 缺失值约定（非常重要）
 
-- 如果 bench 使用了 `--no-check` 导致 `correctness` 缺失/为 null，后处理不会把缺失当成 0；
+- 如果 bench 使用了 `--no-check`，`correctness` 中的 diff 字段会输出为 `null`（结构稳定），后处理不会把缺失当成 0；
   - `ablation_summary.csv` 中对应 `python_vs_tvm_max_rel_diff_max` 会为空；
   - 并额外输出 `python_vs_tvm_rel_diff_missing` 计数，避免误读为“误差为 0”。
 

@@ -253,7 +253,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     # Write a small manifest for human inspection.
     (out_dir / "MANIFEST.txt").write_text(
-        "\\n".join(
+        "\n".join(
             [
                 f"inputs: {', '.join(str(p) for p in paths)}",
                 f"rows: {len(rows)}",
@@ -261,7 +261,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 f"table: {out_dir / 'tables' / 'ablation_summary.csv'}" if summary else "table: (none)",
             ]
         )
-        + "\\n",
+        + "\n",
         encoding="utf-8",
     )
     return 0

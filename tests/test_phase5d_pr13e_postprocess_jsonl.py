@@ -47,6 +47,9 @@ def test_postprocess_jsonl_to_csv(tmp_path: Path) -> None:
 
     summary_path = out_dir / "tables" / "ablation_summary.csv"
     assert summary_path.exists()
+    manifest = (out_dir / "MANIFEST.txt").read_text(encoding="utf-8")
+    assert "\\n" not in manifest
+    assert "inputs:" in manifest and "rows:" in manifest
 
 
 def test_postprocess_does_not_treat_missing_correctness_as_zero(tmp_path: Path) -> None:

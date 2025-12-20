@@ -70,3 +70,33 @@ def test_pr13d_bench_jsonl_schema_contract(tmp_path: Path) -> None:
         ):
             assert _is_number(corr.get(k))
             assert float(corr[k]) >= 0.0
+
+
+def test_pr13d_bench_jsonl_schema_contract_no_check_still_has_keys(tmp_path: Path) -> None:
+    out = tmp_path / "ablation.jsonl"
+    rc = bench_main(
+        [
+            "--matrix",
+            "small",
+            "--warmup",
+            "1",
+            "--iters",
+            "1",
+            "--no-auto-lirpa",
+            "--no-check",
+            "--output",
+            str(out),
+        ]
+    )
+    assert rc == 0
+    line = out.read_text(encoding="utf-8").splitlines()[0]
+    row = json.loads(line)
+    corr = row.get("correctness") or {}
+    for k in (
+        "python_vs_tvm_max_abs_diff_lb",
+        "python_vs_tvm_max_abs_diff_ub",
+        "python_vs_tvm_max_rel_diff_lb",
+        "python_vs_tvm_max_rel_diff_ub",
+    ):
+        assert k in corr
+        assert corr[k] is None
