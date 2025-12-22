@@ -874,3 +874,17 @@
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr13d_bench_jsonl_schema_contract.py`
 - `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr13e_postprocess_jsonl.py`
+
+---
+
+## 2025-12-22：忽略 artifacts/out 运行产物目录
+
+**动机**
+- `artifacts/` 与 `out/` 是运行产物目录（JSONL/CSV/图/manifest），体积与内容随实验增长/变化，不适合纳入 git 版本控制；复现应由 runner/bench 重新生成。
+
+**主要改动**
+- `.gitignore`
+  - 新增忽略：`artifacts/`、`out/`
+
+**验证**
+- `git status --porcelain`
