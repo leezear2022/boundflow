@@ -12,7 +12,7 @@
 
 ## 顶层字段
 
-- `schema_version`：字符串；schema 版本号（当前 `0.1`）。
+- `schema_version`：字符串；schema 版本号（当前 `1.0`）。
 - `status`：字符串；`"ok"` 或 `"fail"`。**即使失败也必须写一行**，避免矩阵实验“静默丢点”。
 - `error`：对象或 null；当 `status="fail"` 时包含错误信息（见下）。
 - `meta`：运行环境与可复现信息。
@@ -100,7 +100,7 @@
 
 重要约定：
 
-- baseline **不依赖** partition/reuse/static_plan/fusion 等矩阵旋钮；因此 `scripts/bench_ablation_matrix.py` 会按 `(workload,input_shape,eps,method,warmup,iters,device,dtype,spec)` 做进程内缓存，避免 16 点矩阵重复跑 16 次 baseline。
+- baseline **不依赖** partition/reuse/static_plan/fusion 等矩阵旋钮；因此 `scripts/bench_ablation_matrix.py` 会在进入矩阵循环前先计算一次 baseline，并按 `(workload,input_shape,eps,method,warmup,iters,device,dtype,spec)` 做进程内缓存，避免 16 点矩阵重复跑 16 次 baseline。
 
 字段（最小集合）：
 
@@ -120,9 +120,17 @@
 - `setup_ms ~= init_ms`
 - `compute_bounds_ms_* ~= run_ms_*`
 
+## `config.tvm_options.compile_cache_dir`（可选：跨进程 TVM 编译缓存）
+
+当 bench 使用 `--tvm-cache-dir <dir>` 时，`TVMTaskExecutor` 会尝试将 task-level RELAX_OPS 的编译产物落盘（共享库 + json spec），并在下次运行时直接加载，从而减少重复编译。
+
+- `config.tvm_options.compile_cache_dir`：string；落盘缓存根目录（空字符串表示关闭）。
+- `config.tvm_options.compile_cache_refresh`：bool；是否强制刷新缓存条目。
+
 ## 版本演进
 
 - `schema_version=0.1`：引入 `time_utc`、compile cache delta、max_rel_diff 等字段，用于论文级消融的“口径可解释性”。
+- `schema_version=1.0`：冻结 Phase 5D 的字段集合与计时/分组口径；后续若扩展字段应 bump 版本并保持后处理兼容。
 
 ## 后处理（JSONL → CSV/表格/图）
 

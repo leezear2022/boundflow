@@ -14,7 +14,7 @@ def test_pr14d_postprocess_uses_deduped_baseline_by_key(tmp_path: Path) -> None:
     # Two matrix points, same baseline_key but different per-row baseline fields.
     # Postprocess should de-duplicate by baseline_key and prefer cache_hit=False row.
     base = {
-        "schema_version": "0.1",
+        "schema_version": "1.0",
         "status": "ok",
         "error": None,
         "meta": {"git_commit": "deadbeef", "time_utc": "2025-12-21T00:00:00+00:00"},

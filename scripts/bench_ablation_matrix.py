@@ -363,8 +363,11 @@ def _bench_one_safe(
     warmup: int,
     iters: int,
     include_auto_lirpa: bool,
+    precomputed_auto_lirpa: Optional[Tuple[Dict[str, Any], Optional[torch.Tensor], Optional[torch.Tensor]]],
     check_correctness: bool,
     tvm_enabled: bool,
+    tvm_cache_dir: str,
+    tvm_cache_refresh: bool,
     tol_atol: float,
     tol_rtol: float,
 ) -> Dict[str, Any]:
@@ -379,11 +382,13 @@ def _bench_one_safe(
         "include_auto_lirpa": bool(include_auto_lirpa),
         "check_correctness": bool(check_correctness),
         "tvm_enabled": bool(tvm_enabled),
+        "tvm_cache_dir": str(tvm_cache_dir or ""),
+        "tvm_cache_refresh": bool(tvm_cache_refresh),
         "tol": {"atol": float(tol_atol), "rtol": float(tol_rtol)},
     }
 
     out: Dict[str, Any] = {
-        "schema_version": "0.1",
+        "schema_version": "1.0",
         "status": "ok",
         "error": None,
         "meta": {
@@ -510,16 +515,22 @@ def _bench_one_safe(
 
         # Optional auto_LiRPA baseline.
         if include_auto_lirpa:
-            base, lb, ub = _auto_lirpa_baseline_cached(
-                workload=str(workload),
-                model=model,
-                x0=x0,
-                eps=float(eps),
-                spec=out.get("workload", {}).get("spec"),
-                method="IBP",
-                warmup=warmup,
-                iters=iters,
-            )
+            if precomputed_auto_lirpa is not None:
+                base, lb, ub = precomputed_auto_lirpa
+                base = dict(base)
+                # The baseline is precomputed outside the matrix loop, so this row is effectively a cache hit.
+                base["cache_hit"] = True
+            else:
+                base, lb, ub = _auto_lirpa_baseline_cached(
+                    workload=str(workload),
+                    model=model,
+                    x0=x0,
+                    eps=float(eps),
+                    spec=out.get("workload", {}).get("spec"),
+                    method="IBP",
+                    warmup=warmup,
+                    iters=iters,
+                )
             # Backward-compatible aliases kept for older postprocess/notes.
             if base.get("available") is True:
                 base.setdefault("setup_ms", base.get("init_ms"))
@@ -569,6 +580,9 @@ def _bench_one_safe(
                 task_fuse_opt_level=2,
                 memory_plan_mode=memory_plan_mode,
                 tir_var_upper_bound=None,
+                compile_cache_tag=str(out.get("meta", {}).get("git_commit") or ""),
+                compile_cache_dir=str(tvm_cache_dir or ""),
+                compile_cache_refresh=bool(tvm_cache_refresh),
             )
         )
         out["config"]["tvm_options"] = _jsonable(tvm_exec.options)
@@ -681,6 +695,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     p.add_argument("--iters", type=int, default=20)
     p.add_argument("--no-auto-lirpa", action="store_true")
     p.add_argument("--no-tvm", action="store_true", help="Skip TVM executor (python-only).")
+    p.add_argument("--tvm-cache-dir", type=str, default="", help="Optional on-disk TVM compile cache directory.")
+    p.add_argument("--tvm-cache-refresh", action="store_true", help="Refresh on-disk TVM compile cache entries.")
     p.add_argument("--no-check", action="store_true")
     p.add_argument("--tol-atol", type=float, default=1e-5)
     p.add_argument("--tol-rtol", type=float, default=1e-5)
@@ -699,6 +715,27 @@ def main(argv: Optional[List[str]] = None) -> int:
         ]
     else:
         matrix_iter = iter_default_matrix()
+
+    # PR#15A: precompute auto_LiRPA baseline once per bench invocation (workload/spec/eps/method/warmup/iters),
+    # then attach it to every JSONL row to avoid triggering baseline computation inside the matrix loop.
+    precomputed_auto_lirpa: Optional[Tuple[Dict[str, Any], Optional[torch.Tensor], Optional[torch.Tensor]]] = None
+    if not bool(args.no_auto_lirpa):
+        try:
+            model0, x0, eps0 = _build_workload(name=str(args.workload), batch=args.batch, eps_override=args.eps)
+            model0.eval()
+            base0, lb0, ub0 = _auto_lirpa_baseline_cached(
+                workload=str(args.workload),
+                model=model0,
+                x0=x0,
+                eps=float(eps0),
+                spec="none",
+                method="IBP",
+                warmup=int(args.warmup),
+                iters=int(args.iters),
+            )
+            precomputed_auto_lirpa = (dict(base0), lb0, ub0)
+        except Exception:
+            precomputed_auto_lirpa = None
 
     any_fail = False
     out_f = None
@@ -719,8 +756,11 @@ def main(argv: Optional[List[str]] = None) -> int:
                 warmup=int(args.warmup),
                 iters=int(args.iters),
                 include_auto_lirpa=not bool(args.no_auto_lirpa),
+                precomputed_auto_lirpa=precomputed_auto_lirpa,
                 check_correctness=not bool(args.no_check),
                 tvm_enabled=not bool(args.no_tvm),
+                tvm_cache_dir=str(args.tvm_cache_dir or ""),
+                tvm_cache_refresh=bool(args.tvm_cache_refresh),
                 tol_atol=float(args.tol_atol),
                 tol_rtol=float(args.tol_rtol),
             )

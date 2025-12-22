@@ -41,7 +41,7 @@ def test_pr13d_bench_jsonl_schema_contract(tmp_path: Path) -> None:
         row = json.loads(line)
         assert isinstance(row, dict), f"line {i} is not a JSON object"
 
-        assert row.get("schema_version") == "0.1"
+        assert row.get("schema_version") == "1.0"
         assert row.get("status") == "ok"
         assert row.get("error") is None
 
@@ -144,6 +144,6 @@ def test_pr13d_bench_jsonl_schema_contract_no_tvm_mode_still_writes_rows(tmp_pat
     assert rc == 0
     line = out.read_text(encoding="utf-8").splitlines()[0]
     row = json.loads(line)
-    assert row.get("schema_version") == "0.1"
+    assert row.get("schema_version") == "1.0"
     assert row.get("status") in ("ok", "fail")
     assert row.get("tvm", {}).get("available") is False

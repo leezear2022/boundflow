@@ -888,3 +888,47 @@
 
 **验证**
 - `git status --porcelain`
+
+---
+
+## 2025-12-22：PR#15A/15B：baseline 外提预计算 + schema_version 冻结为 1.0
+
+**动机**
+- auto_LiRPA baseline 不依赖矩阵旋钮；将 baseline 计算外提到矩阵循环外，减少重复开销并避免点内触发带来的边界条件。
+- Phase 5D 的 JSONL 字段与计时/分组口径已稳定，冻结为 `schema_version=1.0`，降低后续 Phase 6 扩展时“口径被冲掉”的风险。
+
+**主要改动**
+- `scripts/bench_ablation_matrix.py`
+  - baseline 在进入矩阵循环前预计算，并在每行 JSONL 直接附加（点内不再触发 compute_bounds）。
+  - `schema_version` 从 `0.1` 升级为 `1.0`。
+- `docs/bench_jsonl_schema.md`
+  - 更新当前版本为 `1.0`，并说明 1.0 为 Phase 5D 冻结口径。
+- `tests/test_phase5d_pr13d_bench_jsonl_schema_contract.py`
+  - 适配 `schema_version=1.0`。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr13d_bench_jsonl_schema_contract.py`
+- `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr13e_postprocess_jsonl.py tests/test_phase5d_pr14d_postprocess_baseline_dedup.py`
+
+---
+
+## 2025-12-22：PR#15C：TVM task-level compile cache 落盘（跨进程复用）
+
+**动机**
+- AE/大矩阵多次运行时，进程内编译缓存无法跨进程复用，可能导致重复编译耗时与算力浪费。
+- 增加可选 `--tvm-cache-dir`：将 task-level RELAX_OPS 的编译产物落盘，并在下次运行直接加载，缩短 cold-start。
+
+**主要改动**
+- `boundflow/runtime/tvm_executor.py`
+  - `TVMExecutorOptions` 新增：`compile_cache_dir`、`compile_cache_refresh`
+  - task-level 编译：支持从磁盘 cache（`task_<hash>.so` + `task_<hash>.spec.json`）加载（best-effort）。
+- `scripts/bench_ablation_matrix.py`
+  - 新增 CLI：`--tvm-cache-dir`、`--tvm-cache-refresh`
+  - TVM executor options 透传上述参数，并默认将 `compile_cache_tag` 设为当前 git commit（降低跨版本误命中风险）。
+- `docs/bench_jsonl_schema.md`
+  - 补充 `compile_cache_dir` 字段说明
+- `tests/test_phase5d_pr15c_tvm_disk_cache.py`
+  - 回归：同一 cache_dir 下二次运行应避免 compile miss（delta miss=0）
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr15c_tvm_disk_cache.py`

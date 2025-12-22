@@ -12,7 +12,7 @@ def test_postprocess_jsonl_to_csv(tmp_path: Path) -> None:
     out_dir = tmp_path / "out"
 
     row = {
-        "schema_version": "0.1",
+        "schema_version": "1.0",
         "meta": {"git_commit": "deadbeef", "time_utc": "2025-12-20T00:00:00+00:00"},
         "workload": {"model": "mlp", "input_shape": [4, 16], "eps": 0.1, "domain": "interval_ibp", "spec": "none"},
         "config": {
@@ -59,7 +59,7 @@ def test_postprocess_does_not_treat_missing_correctness_as_zero(tmp_path: Path) 
     out_dir = tmp_path / "out"
 
     row = {
-        "schema_version": "0.1",
+        "schema_version": "1.0",
         "meta": {"git_commit": "deadbeef", "time_utc": "2025-12-20T00:00:00+00:00"},
         "workload": {"model": "mlp", "input_shape": [4, 16], "eps": 0.1, "domain": "interval_ibp", "spec": "none"},
         "config": {
@@ -94,7 +94,7 @@ def test_postprocess_group_key_includes_eps_and_shape(tmp_path: Path) -> None:
     out_dir = tmp_path / "out"
 
     base = {
-        "schema_version": "0.1",
+        "schema_version": "1.0",
         "meta": {"git_commit": "deadbeef", "time_utc": "2025-12-20T00:00:00+00:00"},
         "workload": {"model": "mlp", "input_shape": [4, 16], "eps": 0.1, "domain": "interval_ibp", "spec": "none"},
         "config": {

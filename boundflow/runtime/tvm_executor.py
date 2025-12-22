@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import hashlib
+import json
 import os
 import time
 from enum import Enum
@@ -38,6 +39,10 @@ class TVMExecutorOptions:
     dump_ir_refresh: bool = False
     # Optional tag to avoid accidental cache collisions across configs.
     compile_cache_tag: str = ""
+    # Optional on-disk compile cache for Relax VM executables (cross-process reuse).
+    # When enabled, task-level RELAX_OPS compilation can load/store a shared library + json spec.
+    compile_cache_dir: str = ""
+    compile_cache_refresh: bool = False
     # PR#11A: run whole task as a single Relax function (RELAX_OPS lowering) when possible.
     enable_task_relax_ops: bool = False
     # PR#11B: fusion pipeline control (RELAX_OPS path).
@@ -262,6 +267,49 @@ class TVMTaskExecutor:
             self._task_compile_cache_hit += 1
             cached = self._task_exec_cache[cache_key_hash]
             return cached["ex"], cached["spec"], cache_key_hash
+
+        # Optional cross-process disk cache: try load a previously compiled executable + lowering spec.
+        cache_dir = str(self.options.compile_cache_dir or "")
+        if cache_dir and (not bool(self.options.compile_cache_refresh)):
+            try:
+                os.makedirs(cache_dir, exist_ok=True)
+                lib_path = os.path.join(cache_dir, f"task_{cache_key_hash}.so")
+                spec_path = os.path.join(cache_dir, f"task_{cache_key_hash}.spec.json")
+                if os.path.exists(lib_path) and os.path.exists(spec_path):
+                    import tvm
+
+                    from ..backends.tvm.relax_interval_task_ops import IntervalTaskLoweringSpec  # noqa: PLC0415
+
+                    with open(spec_path, "r", encoding="utf-8") as f:
+                        spec_dict = json.load(f)
+                    spec = IntervalTaskLoweringSpec(**spec_dict)
+                    ex = tvm.runtime.load_module(lib_path)
+                    stats: Dict[str, Any] = {
+                        "cache_key_hash": cache_key_hash,
+                        "kind": "task_relax_ops",
+                        "target": str(target),
+                        "compile_ms": 0.0,
+                        "pass_timing": None,
+                        "pass_timing_render": None,
+                        "dump_ir_dir": None,
+                        "memory_plan_mode": str(getattr(self.options.memory_plan_mode, "value", self.options.memory_plan_mode)),
+                        "memory_stats": None,
+                        "tir_var_upper_bound": dict(self.options.tir_var_upper_bound or {}),
+                        "task_id": str(getattr(task, "task_id", "")),
+                        "op_types": [str(getattr(op, "op_type", "")) for op in getattr(task, "ops", [])],
+                        "ir_stats": None,
+                        "pipeline": [],
+                        "task_vm_opt_passes": list(self.options.task_vm_opt_passes or ()),
+                        "compile_cache_event": "disk_hit",
+                        "compile_cache_dir": cache_dir,
+                    }
+                    self._compile_stats[cache_key_hash] = stats
+                    self._task_exec_cache[cache_key_hash] = {"ex": ex, "spec": spec}
+                    self._task_compile_cache_hit += 1
+                    return ex, spec, cache_key_hash
+            except Exception:
+                # Best-effort: if disk cache is corrupted/incompatible, fall back to compiling.
+                pass
 
         ir_mod, spec = build_interval_task_relax_ops_ir_module(
             task,
@@ -499,6 +547,35 @@ class TVMTaskExecutor:
         self._compile_stats[cache_key_hash] = stats
 
         self._task_exec_cache[cache_key_hash] = {"ex": ex, "spec": spec}
+        # Best-effort: write disk cache artifact for cross-process reuse.
+        if cache_dir:
+            try:
+                os.makedirs(cache_dir, exist_ok=True)
+                lib_path = os.path.join(cache_dir, f"task_{cache_key_hash}.so")
+                spec_path = os.path.join(cache_dir, f"task_{cache_key_hash}.spec.json")
+                if bool(self.options.compile_cache_refresh):
+                    for p in (lib_path, spec_path):
+                        try:
+                            if os.path.exists(p):
+                                os.remove(p)
+                        except Exception:
+                            pass
+                ex.export_library(lib_path)
+                with open(spec_path, "w", encoding="utf-8") as f:
+                    json.dump(
+                        {
+                            "func_name": str(getattr(spec, "func_name", "main")),
+                            "input_values": list(getattr(spec, "input_values", [])),
+                            "param_values": list(getattr(spec, "param_values", [])),
+                            "output_values": list(getattr(spec, "output_values", [])),
+                            "output_flattened": bool(getattr(spec, "output_flattened", True)),
+                        },
+                        f,
+                        ensure_ascii=False,
+                        sort_keys=True,
+                    )
+            except Exception:
+                pass
         _ = tvm
         return ex, spec, cache_key_hash
 
