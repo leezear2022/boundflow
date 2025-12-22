@@ -932,3 +932,20 @@
 
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase5d_pr15c_tvm_disk_cache.py`
+
+---
+
+## 2025-12-22：Phase 5 完成声明 + 全流程文档更新
+
+**动机**
+- Phase 5 已完成工程收口（schema/产线/基线/可观测性），需要一份面向论文/AE 的“完成声明”与固定复现入口。
+- 同步修订全流程总览文档，避免与最新实现（artifact runner、workload 支持、schema_version=1.0、可选 tvm 落盘 cache）不一致。
+
+**主要改动**
+- 新增：`docs/phase5_done.md`
+  - Phase 5 完成声明（覆盖范围、复现入口、DoD、已知限制、Phase 6 边界）。
+- 更新：`gemini_doc/boundflow_full_pipeline_from_claims_to_ae.md`
+  - 修正 Non-goals/TODO，反映 runner/workload/口径冻结的最新状态。
+
+**验证**
+- 文档变更（无额外运行时验证）。

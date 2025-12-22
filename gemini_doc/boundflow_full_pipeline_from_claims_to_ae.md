@@ -15,8 +15,8 @@
 **Non-goals / 当前实现边界（有明确代码证据）**
 
 - 当前 domain 仅实现 interval IBP：`TaskKind.INTERVAL_IBP` 是唯一 kind（`boundflow/ir/task.py:15`），`IntervalDomain` 为主要域实现（`boundflow/domains/interval.py:13`）。
-- `scripts/bench_ablation_matrix.py` 目前仅支持 `workload=mlp`（`scripts/bench_ablation_matrix.py:124`、`scripts/bench_ablation_matrix.py:392`）。
-- artifact runner 脚本尚未落地（`docs/phase5E.md:54` 仅列为计划，仓库未找到 `scripts/run_phase5d_artifact.sh`）。
+- `scripts/bench_ablation_matrix.py` 当前支持 `workload=mlp/mnist_cnn`，并支持 `--batch/--eps` 参数化（见 `docs/bench_jsonl_schema.md` 的 Workload 参数化小节）。
+- artifact runner 已落地：`scripts/run_phase5d_artifact.py` 与 `scripts/run_phase5d_artifact.sh`，产物目录默认写入 `artifacts/phase5d/<run_id>/`（目录已加入 `.gitignore`，不进入 git）。
 - TVM 侧对算子覆盖有边界（例如 `TVMTaskExecutor` 中非线性/布局类 op 有 fallback 或未支持分支，`boundflow/runtime/tvm_executor.py:514`）。
 
 ---
@@ -37,7 +37,7 @@ graph TD
     G2 --> I
     I --> J[Bench JSONL]
     J --> K[Postprocess: CSV/Tables/Figures]
-    K --> L[Artifact Inputs (TODO Runner)]
+    K --> L[Artifact Runner: run_phase5d_artifact]
 ```
 
 对应实现入口：
@@ -48,6 +48,7 @@ graph TD
 - Scheduler：`boundflow/runtime/scheduler.py:30`
 - Executors：`boundflow/runtime/task_executor.py:26`、`boundflow/runtime/tvm_executor.py:65`
 - Bench/Postprocess：`scripts/bench_ablation_matrix.py:390`、`scripts/postprocess_ablation_jsonl.py:215`
+- Artifact Runner：`scripts/run_phase5d_artifact.py`
 
 ---
 
@@ -244,22 +245,20 @@ sequenceDiagram
 
 ### Phase 5：实验产线与系统化消融
 
-- 5D（已落地）：
-  - JSONL schema：`docs/bench_jsonl_schema.md:1`
-  - Bench 输出：`scripts/bench_ablation_matrix.py:431`
-  - Postprocess：`scripts/postprocess_ablation_jsonl.py:215`
-  - Contract tests：`tests/test_phase5d_pr13d_bench_jsonl_schema_contract.py:14`
-  - Postprocess tests：`tests/test_phase5d_pr13e_postprocess_jsonl.py:10`
-  - Env stdout 清洁：`env.sh:33`、`tests/test_env_sh_quiet_stdout.py:12`
-- 5E（计划中）：
-  - 参考规划：`docs/phase5E.md:11`
-  - TODO：新增真实 workload 矩阵与固定图表输出（仓库暂无对应脚本/产物）。
+- 5D/5E（当前已收口为可交付产线）：
+  - 口径冻结：`schema_version=1.0`（`docs/bench_jsonl_schema.md`）
+  - Bench：`scripts/bench_ablation_matrix.py`
+    - baseline auto_LiRPA：预计算外提 + baseline_key/spec_hash（见 schema 文档）
+    - TVM：compile/run 拆分 + compile_stats/call_tir + 可选落盘 cache（`--tvm-cache-dir`）
+  - Postprocess：`scripts/postprocess_ablation_jsonl.py`
+  - Contract tests：`tests/test_phase5d_pr13d_bench_jsonl_schema_contract.py`、`tests/test_phase5d_pr13e_postprocess_jsonl.py`
+  - Artifact runner：`scripts/run_phase5d_artifact.py`、`scripts/run_phase5d_artifact.sh`
+  - Claims/Appendix：`gemini_doc/artifact_claims_phase5d.md`、`gemini_doc/artifact_appendix_phase5d.md`
 
 ### Phase 6：论文叙事 + Artifact 打包
 
-- 目标：一键复现 + 文档化交付。
-- 现状：`docs/phase5E.md:54` 提及 runner 但脚本未见。
-- TODO：落地 `scripts/run_phase5d_artifact.sh` 或等价入口，并完善 README/appendix。
+- 目标：在 Phase 5 冻结口径基础上扩展更强性质/更大规模实验，不回滚 Phase 5 的 schema/产线。
+- 现状：Phase 5 的 runner/claims/appendix 已具备，Phase 6 主要是扩 domain/算法与论文叙事（例如 CROWN/α-CROWN/BaB、cache/batching、layout 全局优化等）。
 
 ---
 
@@ -334,11 +333,12 @@ sequenceDiagram
 ## TODO 汇总（仓库未发现直接实现的部分）
 
 - Phase 0 claims 文档与明确指标定义：TODO（仓库暂无对应文件）。
-- Phase 5E/6 artifact runner：已新增最小一键 runner `scripts/run_phase5d_artifact.py` 与 shell 封装 `scripts/run_phase5d_artifact.sh`；后续需把“论文图表口径/编号”进一步定稿化（仍属 Phase 5E/6 收口工作）。
-- 大矩阵 workload 扩展与主图主表产线：TODO（目前 bench 仅支持 `mlp`）。
+- 论文图表口径/编号的最终定稿化：TODO（当前已能产出 `table_main.csv` 与 speedup 图，但论文 figure/table 编号映射仍可进一步精炼）。
+- 更大规模 workload/更强 domain：TODO（Phase 6）。
 
 ## 附：Phase 5D/5E 收口入口
 
 - 一键 runner（产 JSONL/CSV/表/图/MANIFEST）：`scripts/run_phase5d_artifact.py`
 - Claims/证据映射（口径源文档）：`gemini_doc/artifact_claims_phase5d.md`
 - AE Appendix（如何运行/如何验证）：`gemini_doc/artifact_appendix_phase5d.md`
+- Phase 5 完成声明（工程收口/口径冻结）：`docs/phase5_done.md`
