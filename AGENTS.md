@@ -45,3 +45,4 @@
 - TVM 后端优化备忘：`gemini_doc/tvm_backend_optimization_memo.md`
 - 与大模型协作工作流模板（输入计划→修正测试→总结→下一步计划）：`gemini_doc/llm_collaboration_workflow.md`
 - Bench JSONL schema（系统化消融输出字段）：`docs/bench_jsonl_schema.md`
+- gemini_doc 总导引（本目录索引/维护规则）：`gemini_doc/README.md`
