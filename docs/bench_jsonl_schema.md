@@ -13,6 +13,8 @@
 ## 顶层字段
 
 - `schema_version`：字符串；schema 版本号（当前 `0.1`）。
+- `status`：字符串；`"ok"` 或 `"fail"`。**即使失败也必须写一行**，避免矩阵实验“静默丢点”。
+- `error`：对象或 null；当 `status="fail"` 时包含错误信息（见下）。
 - `meta`：运行环境与可复现信息。
 - `workload`：工作负载定义（模型、输入形状、eps、domain/spec）。
 - `config`：planner config dump + tvm options（用于复现）。
@@ -21,6 +23,15 @@
 - `runtime`：运行时统计（compile-first-run 与 steady-state run 分离）。
 - `baseline`：可选 baseline（auto_LiRPA）。
 - `correctness`：对齐/误差统计。
+
+## `error`（失败记录）
+
+当 `status="fail"` 时：
+
+- `error.error_type`：字符串；异常类型名（例如 `ModuleNotFoundError`）。
+- `error.error_msg`：字符串；异常消息（简短）。
+- `error.traceback_hash`：字符串；traceback 的 sha256，用于去重与聚合。
+- `error.traceback`：字符串；完整 traceback（JSON 字符串转义，不会污染 JSONL 的单行格式）。
 
 ## `meta`
 
@@ -35,11 +46,17 @@
 - `tvm`：字符串或 null；`tvm.__version__`（best-effort）。
 - `tvm_home`：字符串；`$TVM_HOME`。
 - `seed`：整数；当前固定为 0（便于可复现）。
+- `device`：对象；设备指纹（最小版本）：
+  - `cuda_available`：bool
+  - `cuda_device`：int 或 null
+  - `cuda_name`：string 或 null
+- `env_flags`：对象；关键环境变量快照（用于 AE/复现排障）。
 
 ## `runtime`（计时口径）
 
 - `compile_first_run_ms`：浮点数；第一次 `run_ibp_scheduled` 的 wall time（通常包含编译触发 + 执行）。
   - 用途：区分 cold-start / first-run。
+- `run_ms_cold`：浮点数；**编译触发后**的一次“冷但不含编译”的运行时间（用于解释 VM init / cache miss 抖动）。
 - `run_ms_avg/p50/p95`：浮点数；steady-state 运行时间（warmup 后多次 iters 统计）。
 - `warmup/iters`：整数；计时参数。
 
@@ -57,6 +74,18 @@
 
 - 同 `tvm.compile_cache_stats` 的三项 key，但语义是 **首次运行阶段的增量**。
 
+## `tvm.compile_keyset_*`（公平性：任务集合指纹）
+
+为了避免“看起来变快其实只是复用了不同的编译结果/任务划分变了”的口径争议，每行还会写入本次 run 内实际编译过的 **task cache key 集合摘要**：
+
+- `tvm.compile_keyset_size`：整数；本次 run 编译过的 unique task key 数量（来自 `TVMTaskExecutor.get_compile_stats()` 的 key 集合）。
+- `tvm.compile_keyset_digest`：字符串；对排序后的 key 集合做 sha256 的短摘要（用于跨 run 对比是否是“同一批任务”）。
+
+并额外镜像：
+
+- `tvm.compile_cache_tag`：字符串；compile cache tag（用于人为区分不同实验批次/配置）。
+
+
 ## `correctness`
 
 - `bounds_allclose_to_python`：bool 或 null；TVM vs PythonTaskExecutor 是否 allclose。
@@ -64,6 +93,32 @@
 - `python_vs_tvm_max_abs_diff_lb/ub`：浮点数；max absolute diff（lb/ub）。
 - `python_vs_tvm_max_rel_diff_lb/ub`：浮点数；max relative diff（lb/ub，分母为 `abs(ref).clamp_min(1e-12)`）。
 - `python_vs_auto_lirpa_*`：同上（若 baseline 可用）。
+
+## `baseline.auto_lirpa`（第三方对照：auto_LiRPA）
+
+`baseline.auto_lirpa` 用于把第三方实现（auto_LiRPA）的 **计时口径** 与 **correctness gate** 固化到同一条 JSONL 证据链中。
+
+重要约定：
+
+- baseline **不依赖** partition/reuse/static_plan/fusion 等矩阵旋钮；因此 `scripts/bench_ablation_matrix.py` 会按 `(workload,input_shape,eps,method,warmup,iters,device,dtype,spec)` 做进程内缓存，避免 16 点矩阵重复跑 16 次 baseline。
+
+字段（最小集合）：
+
+- `baseline.auto_lirpa.available`：bool；是否可用（依赖缺失/不支持 op 时为 false）。
+- `baseline.auto_lirpa.reason`：string；不可用原因（best-effort）。
+- `baseline.auto_lirpa.version`：string；auto_LiRPA 版本（best-effort）。
+- `baseline.auto_lirpa.method`：string；当前固定为 `"IBP"`（后续可扩展）。
+- `baseline.auto_lirpa.init_ms`：float；构建 `BoundedModule`/绑定扰动输入的初始化耗时（类比编译/构图开销）。
+- `baseline.auto_lirpa.run_ms_cold`：float；第一次 `compute_bounds` 的 wall time。
+- `baseline.auto_lirpa.run_ms_p50/p95`：float；warmup 后的稳态 `compute_bounds` 计时分位数。
+- `baseline.auto_lirpa.cache_hit`：bool；该行是否复用同一进程内的 baseline 缓存。
+- `baseline.auto_lirpa.baseline_key`：string；baseline 缓存 key 的短摘要（用于后处理去重/避免矩阵点重复计数）。
+- `baseline.auto_lirpa.spec_hash`：string；spec/C 的短摘要（避免未来扩 spec 时缓存误命中）。
+
+兼容字段（历史遗留，等价映射）：
+
+- `setup_ms ~= init_ms`
+- `compute_bounds_ms_* ~= run_ms_*`
 
 ## 版本演进
 
@@ -75,6 +130,7 @@
   - 读入一个或多个 JSONL 文件，输出到 `out/phase5d/`：
     - `ablation.csv`：扁平化后的逐点记录（适合画图/透视）
     - `tables/ablation_summary.csv`：按关键旋钮分组的汇总表（当前为最小版本）
+    - `tables/table_main.csv`：论文主表最小版本（核心分组键 + plan/cold/hot + bytes_est + call_tir）
     - `figures/cache_miss_vs_compile_first_run.png`：示例散点图（若安装了 matplotlib）
 
 ### 缺失值约定（非常重要）
@@ -85,7 +141,11 @@
 
 ## Workload 参数化（用于分组验证）
 
-- `scripts/bench_ablation_matrix.py` 支持额外参数（当前仅对 `workload=mlp` 生效）：
+- `scripts/bench_ablation_matrix.py` 当前支持 `workload`：
+  - `mlp`
+  - `mnist_cnn`
+
+- `scripts/bench_ablation_matrix.py` 支持额外参数（对所有 workload 生效）：
   - `--batch <int>`：覆盖输入 batch size（影响 `workload.input_shape`）
   - `--eps <float>`：覆盖 `workload.eps`
   - 用途：生成真实 JSONL 中 eps/input_shape 不同的记录，验证 postprocess 的 group key 不混组。

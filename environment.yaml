@@ -43,6 +43,9 @@ dependencies:
   - tqdm
   - appdirs
   - graphviz
+
+  # Postprocess & plotting (AE-friendly; runner will still skip plots if missing)
+  - matplotlib
   
   # Testing & Dev
   - pytest

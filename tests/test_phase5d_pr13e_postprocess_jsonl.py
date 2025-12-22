@@ -44,9 +44,11 @@ def test_postprocess_jsonl_to_csv(tmp_path: Path) -> None:
     text = csv_path.read_text(encoding="utf-8")
     assert "schema_version" in text
     assert "compile_first_run_ms" in text
+    assert "auto_lirpa_run_ms_p50" in text
 
     summary_path = out_dir / "tables" / "ablation_summary.csv"
     assert summary_path.exists()
+    assert (out_dir / "tables" / "table_main.csv").exists()
     manifest = (out_dir / "MANIFEST.txt").read_text(encoding="utf-8")
     assert "\\n" not in manifest
     assert "inputs:" in manifest and "rows:" in manifest

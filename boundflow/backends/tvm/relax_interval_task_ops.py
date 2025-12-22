@@ -56,7 +56,7 @@ def build_interval_task_relax_ops_ir_module(
 
     v0 scope:
     - straight-line tasks (no control flow), ops executed in order
-    - supports: linear / relu / add / mul / permute / reshape
+    - supports: linear / conv2d / relu / add / mul / permute / reshape / flatten
     - interval lanes are explicit pairs: each value is represented as (lower, upper)
 
     The produced Relax function signature is:
@@ -167,6 +167,109 @@ def build_interval_task_relax_ops_ir_module(
                     vals[op.outputs[0]] = (y_l, y_u)
                     continue
 
+                if op.op_type == "conv2d":
+                    # NCHW/OIHW only (v0).
+                    x_l, x_u = get_interval(op.inputs[0])
+                    w = get_tensor(op.inputs[1])
+                    if len(op.inputs) < 3:
+                        raise ValueError(f"conv2d expects bias tensor input in v0 relax task lowering: op='{op.name}'")
+                    b = get_tensor(op.inputs[2])
+
+                    def _as_int_tuple(x: Any, *, name: str) -> Tuple[int, ...]:
+                        if isinstance(x, int):
+                            return (int(x),)
+                        if isinstance(x, (list, tuple)):
+                            return tuple(int(d) for d in x)
+                        raise ValueError(f"conv2d attr '{name}' must be int/list/tuple, got {type(x)}: {x}")
+
+                    stride_raw = op.attrs.get("stride", 1)
+                    padding_raw = op.attrs.get("padding", 0)
+                    dilation_raw = op.attrs.get("dilation", 1)
+                    groups = int(op.attrs.get("groups", 1))
+                    if groups != 1:
+                        raise NotImplementedError("conv2d relax task lowering (v0) only supports groups==1")
+
+                    stride_t = _as_int_tuple(stride_raw, name="stride")
+                    dilation_t = _as_int_tuple(dilation_raw, name="dilation")
+                    padding_t = _as_int_tuple(padding_raw, name="padding")
+
+                    if len(stride_t) == 1:
+                        stride_t = (stride_t[0], stride_t[0])
+                    if len(dilation_t) == 1:
+                        dilation_t = (dilation_t[0], dilation_t[0])
+                    if len(padding_t) == 1:
+                        padding_t = (padding_t[0], padding_t[0])
+                    if len(stride_t) != 2 or len(dilation_t) != 2 or len(padding_t) not in (2, 4):
+                        raise ValueError(
+                            f"conv2d attrs shape invalid for op '{op.name}': "
+                            f"stride={stride_t}, padding={padding_t}, dilation={dilation_t}"
+                        )
+
+                    zero_w = relax.const(0, _spec_for_value(storage_plan, op.inputs[1])[1])
+                    w_pos = bb.emit(relax.op.maximum(w, zero_w))
+                    w_neg = bb.emit(relax.op.minimum(w, zero_w))
+
+                    conv = relax.op.nn.conv2d
+                    conv_l = bb.emit(
+                        relax.op.add(
+                            conv(
+                                x_l,
+                                w_pos,
+                                strides=tuple(int(d) for d in stride_t),
+                                padding=tuple(int(d) for d in padding_t),
+                                dilation=tuple(int(d) for d in dilation_t),
+                                groups=1,
+                                data_layout="NCHW",
+                                kernel_layout="OIHW",
+                            ),
+                            conv(
+                                x_u,
+                                w_neg,
+                                strides=tuple(int(d) for d in stride_t),
+                                padding=tuple(int(d) for d in padding_t),
+                                dilation=tuple(int(d) for d in dilation_t),
+                                groups=1,
+                                data_layout="NCHW",
+                                kernel_layout="OIHW",
+                            ),
+                        )
+                    )
+                    conv_u = bb.emit(
+                        relax.op.add(
+                            conv(
+                                x_u,
+                                w_pos,
+                                strides=tuple(int(d) for d in stride_t),
+                                padding=tuple(int(d) for d in padding_t),
+                                dilation=tuple(int(d) for d in dilation_t),
+                                groups=1,
+                                data_layout="NCHW",
+                                kernel_layout="OIHW",
+                            ),
+                            conv(
+                                x_l,
+                                w_neg,
+                                strides=tuple(int(d) for d in stride_t),
+                                padding=tuple(int(d) for d in padding_t),
+                                dilation=tuple(int(d) for d in dilation_t),
+                                groups=1,
+                                data_layout="NCHW",
+                                kernel_layout="OIHW",
+                            ),
+                        )
+                    )
+
+                    out_shape, _dtype = _spec_for_value(storage_plan, op.outputs[0])
+                    _expect_rank(out_shape, 4, what="conv2d output")
+                    N, CO, OH, OW = (int(out_shape[0]), int(out_shape[1]), int(out_shape[2]), int(out_shape[3]))
+                    b_4d = bb.emit(relax.op.reshape(b, (1, CO, 1, 1)))
+                    b_b = bb.emit(relax.op.broadcast_to(b_4d, (N, CO, OH, OW)))
+                    y_l = bb.emit(relax.op.add(conv_l, b_b))
+                    y_u = bb.emit(relax.op.add(conv_u, b_b))
+
+                    vals[op.outputs[0]] = (y_l, y_u)
+                    continue
+
                 if op.op_type == "relu":
                     x_l, x_u = get_interval(op.inputs[0])
                     zero = relax.const(0, _spec_for_value(storage_plan, op.inputs[0])[1])
@@ -212,6 +315,13 @@ def build_interval_task_relax_ops_ir_module(
                         raise ValueError(f"reshape missing shape attr for op '{op.name}': {shape}")
                     # Use static reshape only in v0.
                     shape = tuple(int(d) for d in shape)
+                    vals[op.outputs[0]] = (bb.emit(relax.op.reshape(x_l, shape)), bb.emit(relax.op.reshape(x_u, shape)))
+                    continue
+
+                if op.op_type == "flatten":
+                    x_l, x_u = get_interval(op.inputs[0])
+                    out_shape, _dtype = _spec_for_value(storage_plan, op.outputs[0])
+                    shape = tuple(int(d) for d in out_shape)
                     vals[op.outputs[0]] = (bb.emit(relax.op.reshape(x_l, shape)), bb.emit(relax.op.reshape(x_u, shape)))
                     continue
 
