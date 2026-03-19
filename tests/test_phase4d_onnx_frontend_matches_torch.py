@@ -4,7 +4,6 @@ import pytest
 import torch
 import torch.nn as nn
 
-from boundflow.frontends.onnx.frontend import import_onnx
 from boundflow.frontends.pytorch.frontend import import_torch
 from boundflow.planner import plan_interval_ibp_v0
 from boundflow.runtime.task_executor import LinfInputSpec, PythonTaskExecutor
@@ -34,6 +33,7 @@ def _run_ibp_from_program(program, x0: torch.Tensor, eps: float):
 
 def test_onnx_import_matches_torch_import_on_mlp_ibp():
     pytest.importorskip("onnx")
+    from boundflow.frontends.onnx.frontend import import_onnx
 
     torch.manual_seed(0)
     model = nn.Sequential(nn.Linear(16, 32), nn.ReLU(), nn.Linear(32, 8))
@@ -55,6 +55,7 @@ def test_onnx_import_matches_torch_import_on_mnist_cnn_ibp():
     onnx = pytest.importorskip("onnx")
     auto_LiRPA = pytest.importorskip("auto_LiRPA")
     Flatten = pytest.importorskip("auto_LiRPA.utils").Flatten
+    from boundflow.frontends.onnx.frontend import import_onnx
 
     torch.manual_seed(0)
     model = nn.Sequential(
@@ -82,4 +83,3 @@ def test_onnx_import_matches_torch_import_on_mnist_cnn_ibp():
 
     assert torch.allclose(out_onnx.lower, out_torch.lower, rtol=1e-5, atol=1e-6)
     assert torch.allclose(out_onnx.upper, out_torch.upper, rtol=1e-5, atol=1e-6)
-

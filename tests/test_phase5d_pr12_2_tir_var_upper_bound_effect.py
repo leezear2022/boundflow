@@ -1,4 +1,9 @@
-import tvm
+import pytest
+
+tvm = pytest.importorskip("tvm")
+if not tvm.runtime.enabled("llvm"):
+    pytest.skip("tvm llvm backend not enabled", allow_module_level=True)
+
 from tvm import relax, transform
 
 from boundflow.backends.tvm.relax_analysis import collect_relax_memory_stats

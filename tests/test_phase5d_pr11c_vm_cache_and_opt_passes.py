@@ -1,5 +1,10 @@
+import pytest
 import torch
 import torch.nn as nn
+
+tvm = pytest.importorskip("tvm")
+if not tvm.runtime.enabled("llvm"):
+    pytest.skip("tvm llvm backend not enabled", allow_module_level=True)
 
 from boundflow.frontends.pytorch.frontend import import_torch
 from boundflow.planner.interval_v2 import IntervalV2PartitionConfig, plan_interval_ibp_v2
@@ -39,4 +44,3 @@ def test_pr11c_vm_cache_and_opt_passes_do_not_change_semantics():
     assert torch.allclose(py.upper, tvm1.upper, atol=1e-5, rtol=1e-5)
     assert torch.allclose(tvm1.lower, tvm2.lower, atol=1e-6, rtol=1e-6)
     assert torch.allclose(tvm1.upper, tvm2.upper, atol=1e-6, rtol=1e-6)
-

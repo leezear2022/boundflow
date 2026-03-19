@@ -14,7 +14,8 @@ from ..domains.interval import IntervalDomain, IntervalState
 from ..ir.task import BFTaskModule, TaskKind
 from ..ir.task import StoragePlan
 from ..ir.task import TaskOp
-from ..runtime.task_executor import LinfInputSpec
+from ..runtime.perturbation import LpBallPerturbation
+from ..runtime.task_executor import InputSpec, InputSpecLike, LinfInputSpec
 from ..backends.tvm.interval_linear import IntervalLinearKey, build_interval_linear_module
 from ..backends.tvm.interval_conv2d import IntervalConv2dKey, build_interval_conv2d_module
 from ..backends.tvm.relax_interval_linear import build_relax_interval_linear_vm_exec
@@ -727,8 +728,17 @@ class TVMTaskExecutor:
             raise NotImplementedError(f"unsupported op_type in TVMTaskExecutor.run_ibp_task: {op.op_type}")
 
     def run_ibp(
-        self, module: BFTaskModule, input_spec: LinfInputSpec, *, output_value: Optional[str] = None
+        self, module: BFTaskModule, input_spec: InputSpecLike, *, output_value: Optional[str] = None
     ) -> IntervalState:
+        if isinstance(input_spec, InputSpec):
+            ptb = input_spec.perturbation
+            if not (isinstance(ptb, LpBallPerturbation) and ptb.perturbation_id.startswith("lp(p=inf")):
+                raise NotImplementedError("TVMTaskExecutor currently supports L∞ (box) input perturbation only")
+            input_spec = LinfInputSpec(
+                value_name=input_spec.value_name,
+                center=input_spec.center,
+                eps=float(ptb.eps),
+            )
         module.validate()
         task = module.get_entry_task()
         if task.kind != TaskKind.INTERVAL_IBP:

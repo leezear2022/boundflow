@@ -2,6 +2,10 @@ import pytest
 import torch
 import torch.nn as nn
 
+tvm = pytest.importorskip("tvm")
+if not tvm.runtime.enabled("llvm"):
+    pytest.skip("tvm llvm backend not enabled", allow_module_level=True)
+
 from boundflow.frontends.pytorch.frontend import import_torch
 from boundflow.planner.interval_v2 import IntervalV2PartitionConfig, plan_interval_ibp_v2
 from boundflow.runtime.scheduler import run_ibp_scheduled
@@ -27,4 +31,3 @@ def test_pr9_tvm_executor_run_ibp_task_matches_python_on_single_linear(kernel_st
 
     assert torch.allclose(py.lower, tvm.lower, atol=1e-5, rtol=1e-5)
     assert torch.allclose(py.upper, tvm.upper, atol=1e-5, rtol=1e-5)
-

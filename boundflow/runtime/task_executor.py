@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, Optional, Protocol
+from typing import Any, Dict, Optional, Protocol, Union
 
 import torch
 
 from ..domains.interval import IntervalDomain, IntervalState
 from ..ir.task import BFTaskModule, TaskKind
 from ..ir.task import StoragePlan
+from .perturbation import InputPerturbationState, LpBallPerturbation, PerturbationSet
 
 
 @dataclass(frozen=True)
@@ -17,9 +18,31 @@ class LinfInputSpec:
     eps: float
 
 
+@dataclass(frozen=True)
+class InputSpec:
+    value_name: str
+    center: torch.Tensor
+    perturbation: PerturbationSet
+
+    @staticmethod
+    def linf(*, value_name: str, center: torch.Tensor, eps: float) -> "InputSpec":
+        return InputSpec(value_name=value_name, center=center, perturbation=LpBallPerturbation(p="inf", eps=eps))
+
+    @staticmethod
+    def l2(*, value_name: str, center: torch.Tensor, eps: float) -> "InputSpec":
+        return InputSpec(value_name=value_name, center=center, perturbation=LpBallPerturbation(p=2, eps=eps))
+
+    @staticmethod
+    def l1(*, value_name: str, center: torch.Tensor, eps: float) -> "InputSpec":
+        return InputSpec(value_name=value_name, center=center, perturbation=LpBallPerturbation(p=1, eps=eps))
+
+
+InputSpecLike = Union[LinfInputSpec, InputSpec]
+
+
 class TaskExecutor(Protocol):
     def run_ibp(
-        self, module: BFTaskModule, input_spec: LinfInputSpec, *, output_value: Optional[str] = None
+        self, module: BFTaskModule, input_spec: InputSpecLike, *, output_value: Optional[str] = None
     ) -> IntervalState: ...
 
 
@@ -33,13 +56,14 @@ class PythonTaskExecutor:
         self.domain = domain or IntervalDomain()
 
     def run_ibp(
-        self, module: BFTaskModule, input_spec: LinfInputSpec, *, output_value: Optional[str] = None
+        self, module: BFTaskModule, input_spec: InputSpecLike, *, output_value: Optional[str] = None
     ) -> IntervalState:
         module.validate()
         task = module.get_entry_task()
         if task.kind != TaskKind.INTERVAL_IBP:
             raise NotImplementedError(f"PythonTaskExecutor only supports INTERVAL_IBP, got {task.kind}")
 
+        input_spec = _normalize_input_spec(input_spec)
         if input_spec.value_name not in task.input_values:
             raise ValueError(
                 f"input_spec.value_name '{input_spec.value_name}' not in task.input_values: {task.input_values}"
@@ -51,12 +75,9 @@ class PythonTaskExecutor:
             params.update(raw_params)
 
         x0 = input_spec.center
-        eps = float(input_spec.eps)
-        env: Dict[str, IntervalState] = {
-            input_spec.value_name: IntervalState(lower=x0 - eps, upper=x0 + eps)
-        }
+        env: Dict[str, Any] = {input_spec.value_name: InputPerturbationState(center=x0, perturbation=input_spec.perturbation)}
 
-        def get_interval(value_name: str) -> IntervalState:
+        def get_state(value_name: str) -> Any:
             if value_name in env:
                 return env[value_name]
             if value_name in params:
@@ -66,6 +87,14 @@ class PythonTaskExecutor:
                 return IntervalState(lower=t, upper=t)
             raise KeyError(f"missing value in env/params: {value_name}")
 
+        def ensure_interval(state: Any) -> IntervalState:
+            if isinstance(state, IntervalState):
+                return state
+            if isinstance(state, InputPerturbationState):
+                lb, ub = state.perturbation.bounding_box(state.center)
+                return IntervalState(lower=lb, upper=ub)
+            raise TypeError(f"expected IntervalState or InputPerturbationState, got {type(state)}")
+
         def get_tensor(value_name: str) -> Any:
             if value_name in params:
                 return params[value_name]
@@ -74,7 +103,7 @@ class PythonTaskExecutor:
         for op in task.ops:
             if op.op_type == "spec_linear":
                 # y = C @ logits, where C shape [B,S,O], logits shape [B,O]
-                logits = get_interval(op.inputs[0])
+                logits = ensure_interval(get_state(op.inputs[0]))
                 C = get_tensor(op.inputs[1])
                 if not torch.is_tensor(C):
                     C = torch.as_tensor(C, device=x0.device)
@@ -96,9 +125,19 @@ class PythonTaskExecutor:
                 continue
 
             if op.op_type == "linear":
-                x = get_interval(op.inputs[0])
+                x_state = get_state(op.inputs[0])
                 w = get_tensor(op.inputs[1])
                 b = get_tensor(op.inputs[2]) if len(op.inputs) == 3 else None
+                if isinstance(x_state, InputPerturbationState):
+                    if not torch.is_tensor(w):
+                        w = torch.as_tensor(w, device=x0.device)
+                    if b is not None and not torch.is_tensor(b):
+                        b = torch.as_tensor(b, device=x0.device)
+                    lb, ub = x_state.perturbation.concretize_matmul(center=x_state.center, weight=w, bias=b)
+                    env[op.outputs[0]] = IntervalState(lower=lb, upper=ub)  # type: ignore[assignment]
+                    continue
+
+                x = ensure_interval(x_state)
                 if torch.is_tensor(w) and w.dim() == 3:
                     # Batched linear: w shape [B, O, I], b shape [B, O] (optional)
                     if b is None:
@@ -118,7 +157,7 @@ class PythonTaskExecutor:
                 continue
 
             if op.op_type == "conv2d":
-                x = get_interval(op.inputs[0])
+                x = ensure_interval(get_state(op.inputs[0]))
                 w = get_tensor(op.inputs[1])
                 b = get_tensor(op.inputs[2]) if len(op.inputs) == 3 else None
                 attrs = dict(op.attrs)
@@ -128,20 +167,20 @@ class PythonTaskExecutor:
                 continue
 
             if op.op_type == "relu":
-                x = get_interval(op.inputs[0])
+                x = ensure_interval(get_state(op.inputs[0]))
                 env[op.outputs[0]] = self.domain.relu_transformer(x)  # type: ignore[assignment]
                 continue
 
             if op.op_type in ("add", "mul"):
-                a = get_interval(op.inputs[0])
-                b = get_interval(op.inputs[1])
+                a = ensure_interval(get_state(op.inputs[0]))
+                b = ensure_interval(get_state(op.inputs[1]))
                 env[op.outputs[0]] = self.domain.elementwise_transformer(  # type: ignore[assignment]
                     [a, b], op=op.op_type
                 )
                 continue
 
             if op.op_type == "flatten":
-                x = get_interval(op.inputs[0])
+                x = ensure_interval(get_state(op.inputs[0]))
                 start_dim = int(op.attrs.get("start_dim", 0))
                 end_dim = int(op.attrs.get("end_dim", -1))
                 env[op.outputs[0]] = IntervalState(  # type: ignore[assignment]
@@ -151,7 +190,7 @@ class PythonTaskExecutor:
                 continue
 
             if op.op_type == "reshape":
-                x = get_interval(op.inputs[0])
+                x = ensure_interval(get_state(op.inputs[0]))
                 shape = op.attrs.get("shape")
                 if shape is None:
                     env[op.outputs[0]] = x
@@ -163,7 +202,7 @@ class PythonTaskExecutor:
                 continue
 
             if op.op_type in ("permute", "transpose"):
-                x = get_interval(op.inputs[0])
+                x = ensure_interval(get_state(op.inputs[0]))
                 dims = op.attrs.get("dims")
                 if not isinstance(dims, (list, tuple)):
                     raise ValueError(f"transpose missing dims for op '{op.name}': {dims}")
@@ -180,7 +219,7 @@ class PythonTaskExecutor:
             if len(task.output_values) != 1:
                 raise ValueError(f"task has {len(task.output_values)} outputs; specify output_value explicitly")
             output_value = task.output_values[0]
-        return get_interval(output_value)
+        return ensure_interval(get_state(output_value))
 
     def run_ibp_task(
         self, task, *, env: Dict[str, IntervalState], params: Dict[str, Any], storage_plan: StoragePlan
@@ -330,3 +369,9 @@ class PythonTaskExecutor:
                 continue
 
             raise NotImplementedError(f"unsupported op_type in task executor: {op.op_type}")
+
+
+def _normalize_input_spec(spec: InputSpecLike) -> InputSpec:
+    if isinstance(spec, InputSpec):
+        return spec
+    return InputSpec.linf(value_name=spec.value_name, center=spec.center, eps=float(spec.eps))

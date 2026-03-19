@@ -1,5 +1,10 @@
+import pytest
 import torch
 import torch.nn as nn
+
+tvm = pytest.importorskip("tvm")
+if not tvm.runtime.enabled("llvm"):
+    pytest.skip("tvm llvm backend not enabled", allow_module_level=True)
 
 from boundflow.backends.tvm.relax_interval_task_ops import build_interval_task_relax_ops_ir_module
 from boundflow.frontends.pytorch.frontend import import_torch
@@ -45,4 +50,3 @@ def test_pr11c1_relax_vm_save_function_closure_returns_same_output():
         ta = torch.from_numpy(a.numpy())
         tb = torch.from_numpy(b.numpy())
         assert torch.allclose(ta, tb, atol=1e-6, rtol=1e-6)
-

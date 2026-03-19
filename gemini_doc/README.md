@@ -12,7 +12,7 @@
 
 ## 1) “我应该从哪读起？”
 
-按目的给三条阅读路径：
+按目的给四条阅读路径：
 
 ### A. 论文/AE 视角（最推荐）
 
@@ -30,6 +30,12 @@
 
 - `gemini_doc/llm_collaboration_workflow.md`（输入计划→修正测试→总结→下一步计划）
 
+### D. 研发演化/接手视角
+
+1. `gemini_doc/project_evolution_overview.md`（项目目标、阶段推进、代码落点、未来路线）
+2. `docs/change_log.md`（按时间看每一批修改做了什么）
+3. `gemini_doc/phase6_summary.md`（当前方法族与 E2E 工件链的阶段总览）
+
 ---
 
 ## 2) 本目录文件分类
@@ -38,8 +44,21 @@
 
 - `gemini_doc/artifact_claims_phase5d.md`：Phase 5D artifact claims（证据链/口径映射）
 - `gemini_doc/artifact_appendix_phase5d.md`：Phase 5D artifact appendix（复现说明）
+- `gemini_doc/project_evolution_overview.md`：研发脉络总览（目标、阶段推进、代码落点、未来路线）
+- `gemini_doc/codex_superpowers_global_install.md`：Codex Superpowers 全局安装说明（主机级安装、跨主机复用、自动检测 skills 目录）
 - `gemini_doc/boundflow_full_pipeline_from_claims_to_ae.md`：全流程总览（从研究主张到工程到 AE）
 - `gemini_doc/boundflow_full_pipeline_director_view.md`：指挥视角的工程主线
+- `gemini_doc/why_boundflow_not_auto_lirpa_or_tvm.md`：论文辩护要点（为何不端到端用 auto_LiRPA / 为何不直接用 TVM）
+- `gemini_doc/phase0_summary.md`：Phase 0 总结（工程止血：可编辑安装 + 包结构清理 + 最小 smoke）
+- `gemini_doc/phase1_summary.md`：Phase 1 总结（工程止血 + Primal IR 加固）
+- `gemini_doc/phase2_summary.md`：Phase 2 总结（TorchFrontend：torch.export → Primal IR + 最小 normalize）
+- `gemini_doc/phase3_summary.md`：Phase 3 总结（IBP reference + auto_LiRPA 对齐：MLP/CNN）
+- `gemini_doc/perturbation_support_design.md`：设计文档（支持 L∞/L2/L1/L0 输入扰动与线性算子统一公式）
+- `gemini_doc/bound_methods_and_solvers_design.md`：设计文档（IBP/CROWN/IBP-CROWN/αβ-CROWN/BaB 的三轴解耦与落地路线）
+- `gemini_doc/phase4_summary.md`：Phase 4 总结（Task/Planner/Executor/Spec/TVM/ONNX 的闭环与对齐口径）
+- `gemini_doc/phase5_summary.md`：Phase 5 总结（bench→JSONL→postprocess→artifact 产线 + schema_version=1.0 冻结）
+- `gemini_doc/phase6_summary.md`：Phase 6 总结（语义闭环 + 系统收益归因 + AE/论文工件链）
+- `gemini_doc/quick_restart_ibp.md`：Quick Restart（像 auto_LiRPA 一样跑 IBP 边界）
 - `gemini_doc/tvm_backend_optimization_memo.md`：TVM/Relax 后端优化备忘
 - `gemini_doc/llm_collaboration_workflow.md`：与大模型协作工作流模板
 
@@ -78,4 +97,3 @@
    - `docs/bench_jsonl_schema.md`
    - 对应的 contract tests / postprocess tests
 4. 运行产物目录 `artifacts/`、`out/` 不进入 git（已在 `.gitignore` 忽略）。
-

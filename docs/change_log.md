@@ -2070,3 +2070,27 @@
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr6_alpha_beta_crown_cnn.py`
 - `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr5_alpha_crown_cnn.py tests/test_phase7a_pr4_conv_lazy_norms.py tests/test_phase7a_pr3_crown_ibp_cnn.py tests/test_phase6d_alpha_crown_mlp.py tests/test_phase6f_alpha_beta_crown_pr1.py tests/test_phase6g_alpha_beta_multispec_batch.py tests/test_phase6e_bab_mlp.py`
+
+---
+
+## 2026-03-19：Phase 6G 零 split-state detector 短路修正
+
+**动机**
+- 在清理并验证剩余未提交改动时，`tests/test_phase6g_branch_pick_reuses_forward_trace.py` 暴露出一个回归：root 节点空 split 也会触发 alpha-beta oracle 的 first-layer infeasible detector，导致多跑一次 `_forward_ibp_trace_mlp(...)`。
+
+**主要改动**
+- 更新：`boundflow/runtime/alpha_beta_crown.py`
+  - 新增 `_has_nonzero_split_state(...)`
+  - `_collect_first_layer_split_halfspaces(...)` 在 `relu_split_state` 为空或“全部为 0”时直接返回，不再额外跑 forward trace
+  - `run_alpha_beta_crown_mlp(...)` 的 `do_infeasible_check` 改成只在存在非零 split 时开启
+- 新增文档：
+  - `gemini_doc/change_2026-03-19_phase6g_zero_split_detector_short_circuit.md`
+
+**影响面**
+- root node 的 `ReluSplitState.empty(...)` 不再误触发 detector
+- `branch_choices` 继续复用 alpha-beta oracle 已有的 forward trace
+- Phase 6G 的 branch picking forward reuse 回归恢复通过
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase6g_branch_pick_reuses_forward_trace.py`
+- `conda run -n boundflow python -m pytest -q tests/test_env.py tests/test_phase4d_onnx_frontend_matches_torch.py tests/test_phase5d_pr8_relax_lowering_skeleton.py tests/test_phase5d_pr9_tvm_executor_linear_equiv.py tests/test_phase5d_pr10_tvm_compile_instruments.py tests/test_phase5d_pr11a_task_relax_ops_equiv.py tests/test_phase5d_pr11c1_save_function_closure.py tests/test_phase5d_pr11c_vm_cache_and_opt_passes.py tests/test_phase5d_pr12_2_tir_var_upper_bound_effect.py tests/test_phase5d_pr12_static_plan_modes.py tests/test_phase6c_crown_ibp_multispec_batch.py tests/test_phase6g_bab_node_batch.py tests/test_phase6g_bab_node_eval_cache.py tests/test_phase6g_branch_pick_reuses_forward_trace.py tests/test_phase6g_node_batch_grad_isolation.py tests/test_phase6g_node_batch_partial_infeasible_prune.py tests/test_phase6h_artifact_runner_smoke.py tests/test_phase6h_bench_e2e_schema.py tests/test_phase6h_plot_smoke.py tests/test_phase6h_report_csv_schema.py tests/test_phase6h_workload_suite_smoke.py`

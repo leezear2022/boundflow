@@ -4,13 +4,13 @@ from typing import Optional, Protocol
 
 from ..ir.primal import BFPrimalProgram
 from ..planner.interval_v0 import plan_interval_ibp_v0
-from .task_executor import LinfInputSpec, PythonTaskExecutor
+from .task_executor import InputSpecLike, LinfInputSpec, PythonTaskExecutor
 from ..domains.interval import IntervalState
 
 
 class Executor(Protocol):
     def run_ibp(
-        self, program: BFPrimalProgram, input_spec: LinfInputSpec, *, output_value: Optional[str] = None
+        self, program: BFPrimalProgram, input_spec: InputSpecLike, *, output_value: Optional[str] = None
     ) -> IntervalState: ...
 
 
@@ -23,8 +23,7 @@ class PythonInterpreter:
         self._task_executor = PythonTaskExecutor()
 
     def run_ibp(
-        self, program: BFPrimalProgram, input_spec: LinfInputSpec, *, output_value: Optional[str] = None
+        self, program: BFPrimalProgram, input_spec: InputSpecLike, *, output_value: Optional[str] = None
     ) -> IntervalState:
         task_module = plan_interval_ibp_v0(program)
         return self._task_executor.run_ibp(task_module, input_spec, output_value=output_value)
-

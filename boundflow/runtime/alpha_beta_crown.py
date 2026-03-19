@@ -37,6 +37,16 @@ class AlphaBetaCrownStats:
     branch_choices: Optional[List[Optional[Tuple[str, int]]]] = None
 
 
+def _has_nonzero_split_state(relu_split_state: Dict[str, torch.Tensor]) -> bool:
+    for split in relu_split_state.values():
+        if split is None:
+            continue
+        split_t = split if torch.is_tensor(split) else torch.as_tensor(split)
+        if split_t.numel() > 0 and bool((split_t != 0).any().item()):
+            return True
+    return False
+
+
 def _flatten_param_for_pre(
     value: torch.Tensor,
     *,
@@ -203,6 +213,8 @@ def _collect_first_layer_split_halfspaces(
     *,
     relu_split_state: Dict[str, torch.Tensor],
 ) -> List[Tuple[str, int, torch.Tensor, torch.Tensor]]:
+    if not relu_split_state or not _has_nonzero_split_state(relu_split_state):
+        return []
     spec = _normalize_input_spec(input_spec)
     module.validate()
     task = module.get_entry_task()
@@ -569,7 +581,7 @@ def run_alpha_beta_crown_mlp(
     batch_size = int(spec.center.shape[0])
 
     split_state = relu_split_state or {}
-    do_infeasible_check = batch_size == 1
+    do_infeasible_check = batch_size == 1 and _has_nonzero_split_state(split_state)
     if do_infeasible_check:
         infeasible, reason, certificate = _is_infeasible_split_first_layer_convex_combo(
             module, spec, relu_split_state=split_state

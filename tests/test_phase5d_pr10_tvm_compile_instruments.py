@@ -1,8 +1,13 @@
 import os
 from pathlib import Path
 
+import pytest
 import torch
 import torch.nn as nn
+
+tvm = pytest.importorskip("tvm")
+if not tvm.runtime.enabled("llvm"):
+    pytest.skip("tvm llvm backend not enabled", allow_module_level=True)
 
 from boundflow.frontends.pytorch.frontend import import_torch
 from boundflow.planner.interval_v2 import IntervalV2PartitionConfig, plan_interval_ibp_v2
@@ -40,4 +45,3 @@ def test_pr10_tvm_compile_pass_timing_and_dumpir(tmp_path: Path):
     assert one.get("pass_timing_render")
     assert one.get("dump_ir_dir")
     assert (tmp_path / "pytest_run").exists()
-

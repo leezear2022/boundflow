@@ -8,7 +8,8 @@ import torch
 from ..ir.task import BFTaskModule, BoundTask, TaskKind
 from ..ir.task_graph import TaskGraph
 from ..domains.interval import IntervalState
-from .task_executor import LinfInputSpec, PythonTaskExecutor
+from .perturbation import LpBallPerturbation
+from .task_executor import InputSpec, InputSpecLike, LinfInputSpec, PythonTaskExecutor
 
 
 class IBPTaskStepExecutor(Protocol):
@@ -29,7 +30,7 @@ class ScheduleStats:
 
 def run_ibp_scheduled(
     module: BFTaskModule,
-    input_spec: LinfInputSpec,
+    input_spec: InputSpecLike,
     *,
     executor: Optional[IBPTaskStepExecutor] = None,
     output_value: Optional[str] = None,
@@ -46,6 +47,18 @@ def run_ibp_scheduled(
     entry = module.get_entry_task()
     if entry.kind != TaskKind.INTERVAL_IBP:
         raise NotImplementedError(f"scheduler only supports INTERVAL_IBP, got {entry.kind}")
+
+    if isinstance(input_spec, InputSpec):
+        # Phase 5 scheduler currently assumes box initialization at buffer-level env.
+        # For non-L∞ perturbations, prefer single-task execution (PythonTaskExecutor.run_ibp) for now.
+        ptb = input_spec.perturbation
+        if isinstance(ptb, LpBallPerturbation) and ptb.perturbation_id.startswith("lp(p=inf"):
+            input_spec = LinfInputSpec(value_name=input_spec.value_name, center=input_spec.center, eps=float(ptb.eps))
+        else:
+            raise NotImplementedError(
+                "run_ibp_scheduled currently supports LinfInputSpec (box/L∞) only; "
+                "use PythonTaskExecutor.run_ibp for non-L∞ perturbations"
+            )
 
     raw_params = module.bindings.get("params", {})
     params: Dict[str, Any] = dict(raw_params) if isinstance(raw_params, dict) else {}

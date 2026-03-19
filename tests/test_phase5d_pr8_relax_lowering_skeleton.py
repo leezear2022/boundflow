@@ -2,6 +2,10 @@ import pytest
 import torch
 import torch.nn as nn
 
+tvm = pytest.importorskip("tvm")
+if not tvm.runtime.enabled("llvm"):
+    pytest.skip("tvm llvm backend not enabled", allow_module_level=True)
+
 from boundflow.backends.tvm.relax_task_lowering import (
     RelaxLoweringMode,
     lower_interval_linear_task_to_relax_ir,
@@ -46,4 +50,3 @@ def test_pr8_relax_ir_module_is_buildable():
 
     ex = relax.build(res.ir_mod, target="llvm")
     assert ex is not None
-

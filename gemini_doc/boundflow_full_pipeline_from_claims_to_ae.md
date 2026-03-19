@@ -1,344 +1,176 @@
-# BoundFlow 全流程：从研究主张到工程实现到论文/AE交付
+# BoundFlow 全流程：从研究主张到工程实现到论文/AE交付（Phase 0~6 对齐版）
 
-本文基于仓库已有代码与文档，给出一条“从研究主张到工程实现到论文/AE交付”的完整主线说明。所有结论都附有代码/文档依据；无法在仓库中找到明确证据的部分以 TODO 标注。
+> - **文档版本**：v2.0（覆盖 Phase 0~6；同时对齐 Phase 5 与 Phase 6 的两套工件链）
+> - **最后更新**：2026-01-03
+> - **代码版本**：`c47e434718137ba66620deb03ede348be700b3bc`
+> - **对应状态**：
+>   - Phase 5：完成声明（`docs/phase5_done.md`；bench JSONL `schema_version=1.0`）
+>   - Phase 6：完成声明（`gemini_doc/phase6_summary.md`；E2E JSON `schema_version=phase6h_e2e_v2`）
 
----
+这份文档是“总导览”，把 BoundFlow 从 **研究主张（claims）** → **工程管线（IR/Planner/Runtime/Backends）** → **论文/AE 工件链（bench/sweep/report/plot/runner）** 串成一条可审计主线，并把 Phase 0~6 的真实落点（代码/脚本/文档）对齐到同一叙事里。
 
-## 1. 概览（Goals / Non-goals）
+如果你只想“一键复现主结果”，优先看：
 
-**Goals（已在仓库实现/可定位的目标）**
-
-- 把“边界传播/鲁棒性计算”从脚本流程变成可规划、可编译、可审计的系统化管线：前端导入 → Planner → TaskGraph/StoragePlan → Scheduler → Executor（参考 `boundflow/frontends/pytorch/frontend.py:21`、`boundflow/planner/pipeline.py:33`、`boundflow/runtime/scheduler.py:30`）。
-- 用 Python reference 保证语义正确性、用 auto_LiRPA 作为可选 baseline 对照：`PythonInterpreter` 和 `PythonTaskExecutor` 提供 reference 路径（`boundflow/runtime/executor.py:17`、`boundflow/runtime/task_executor.py:26`），auto_LiRPA 对齐测试与 bench baseline 可选（`tests/test_phase3_ibp_against_auto_lirpa.py:9`、`tests/test_phase4_task_pipeline_against_auto_lirpa.py:10`、`scripts/bench_ablation_matrix.py:50`）。
-- 统一评测输出协议（JSONL）、可流式后处理（CSV/表/图），并有 contract tests：schema 文档与输出位置见 `docs/bench_jsonl_schema.md:1`、`scripts/bench_ablation_matrix.py:431`、`scripts/postprocess_ablation_jsonl.py:215`，contract tests 与 postprocess tests 在 `tests/test_phase5d_pr13d_bench_jsonl_schema_contract.py:14`、`tests/test_phase5d_pr13e_postprocess_jsonl.py:10`、`tests/test_postprocess_enum_normalization.py:6`。
-
-**Non-goals / 当前实现边界（有明确代码证据）**
-
-- 当前 domain 仅实现 interval IBP：`TaskKind.INTERVAL_IBP` 是唯一 kind（`boundflow/ir/task.py:15`），`IntervalDomain` 为主要域实现（`boundflow/domains/interval.py:13`）。
-- `scripts/bench_ablation_matrix.py` 当前支持 `workload=mlp/mnist_cnn`，并支持 `--batch/--eps` 参数化（见 `docs/bench_jsonl_schema.md` 的 Workload 参数化小节）。
-- artifact runner 已落地：`scripts/run_phase5d_artifact.py` 与 `scripts/run_phase5d_artifact.sh`，产物目录默认写入 `artifacts/phase5d/<run_id>/`（目录已加入 `.gitignore`，不进入 git）。
-- TVM 侧对算子覆盖有边界（例如 `TVMTaskExecutor` 中非线性/布局类 op 有 fallback 或未支持分支，`boundflow/runtime/tvm_executor.py:514`）。
+- Phase 5 artifact：`docs/phase5_done.md`
+- Phase 6H artifact（E2E time-to-verify）：`gemini_doc/ae_readme_phase6h.md`
 
 ---
 
-## 2. 系统架构图（模块图）
+## 1) 这份文档覆盖的两条“可复现主线”
 
-```mermaid
-graph TD
-    A[Workload / Model+Input+eps+Spec] --> B[Frontend: import_torch]
-    B --> C[Primal IR: BFPrimalProgram/Graph]
-    C --> D[Planner: plan()]
-    D --> E[Task IR: BFTaskModule + TaskGraph + StoragePlan]
-    E --> F[Scheduler: run_ibp_scheduled]
-    F --> G1[PythonTaskExecutor]
-    F --> G2[TVMTaskExecutor]
-    G2 --> H[TVM Backend Lowering/Compile]
-    G1 --> I[Correctness Metrics]
-    G2 --> I
-    I --> J[Bench JSONL]
-    J --> K[Postprocess: CSV/Tables/Figures]
-    K --> L[Artifact Runner: run_phase5d_artifact]
+BoundFlow 到 Phase 6 形成了两条并行但互相对齐的主线（它们共享“工程分层”思想，但产物与 schema 不同）：
+
+1. **编译/系统主线（Phase 0~5）**：面向 interval IBP（含 conv），核心是“Task IR + Planner + TVM backend + JSONL schema 1.0 + artifact runner”。
+2. **验证器主线（Phase 6）**：面向 LiRPA（CROWN-IBP/α/β）+ BaB（complete 支点回到 β 编码），核心是“oracle + BaB control-flow + E2E time-to-verify 工件链 + AE 交付形态（schema v2）”。
+
+> 重要边界：Phase 6 的 CROWN/αβ/BaB **仅覆盖链式 MLP（Linear+ReLU）子集**，当前未实现 conv（详见 `gemini_doc/phase6_summary.md` 的“已知限制”）。
+
+---
+
+## 2) 一张图看清“从模型到工件”的两条流水线
+
+### 2.1 Phase 5（interval IBP + TVM）工件链（schema 1.0）
+
+> 注：部分 Markdown 渲染器不支持 Mermaid；这里用纯文本图，保证在任意 Markdown 环境可正常显示。
+
+```text
+Workload/Model (torch/onnx)
+  -> Frontend (import_torch / import_onnx)
+  -> Primal IR (BFPrimalProgram/Graph)
+  -> Planner (Task IR + TaskGraph + StoragePlan)
+  -> Scheduler (run_ibp_scheduled)
+      -> PythonTaskExecutor (reference)
+      -> TVMTaskExecutor (compile/cache/run)
+  -> bench_ablation_matrix.py (stdout JSONL, schema_version=1.0)
+  -> postprocess_ablation_jsonl.py (CSV/fig)
+  -> run_phase5d_artifact.py (artifact 目录)
 ```
 
-对应实现入口：
-- Frontend：`boundflow/frontends/pytorch/frontend.py:21`
-- Primal IR：`boundflow/ir/primal.py:62`
-- Planner：`boundflow/planner/pipeline.py:33`
-- Task IR/Graph：`boundflow/ir/task.py:89`、`boundflow/ir/task_graph.py:31`
-- Scheduler：`boundflow/runtime/scheduler.py:30`
-- Executors：`boundflow/runtime/task_executor.py:26`、`boundflow/runtime/tvm_executor.py:65`
-- Bench/Postprocess：`scripts/bench_ablation_matrix.py:390`、`scripts/postprocess_ablation_jsonl.py:215`
-- Artifact Runner：`scripts/run_phase5d_artifact.py`
+**证据链入口**
+- 完成声明与复现命令：`docs/phase5_done.md`
+- claims→字段→文件：`gemini_doc/artifact_claims_phase5d.md`
+- schema 文档：`docs/bench_jsonl_schema.md`（`schema_version=1.0`）
 
----
+### 2.2 Phase 6（αβ oracle + BaB）工件链（schema v2）
 
-## 3. 单次实验点时序（含 compile_first_run vs steady-state）
-
-```mermaid
-sequenceDiagram
-    participant Bench as bench_ablation_matrix.py
-    participant FE as import_torch()
-    participant Planner as plan()
-    participant Sched as run_ibp_scheduled()
-    participant PyExec as PythonTaskExecutor
-    participant TVMExec as TVMTaskExecutor
-    participant Post as JSONL output
-
-    Bench->>FE: 导入模型/输入
-    FE->>Planner: 生成 BFPrimalProgram
-    Planner->>Bench: PlanBundle(BFTaskModule/TaskGraph/StoragePlan)
-    Bench->>Sched: reference run (PythonTaskExecutor)
-    Bench->>TVMExec: 构造 TVMExecutorOptions
-    Bench->>Sched: 第一次 run (触发编译) -> compile_first_run_ms
-    Bench->>Sched: warmup + iters -> run_ms_*（steady-state）
-    Bench->>Post: 输出 JSONL（一行一条）
+```text
+Workload/Model (MLP Linear+ReLU)
+  -> InputSpec + PerturbationSet (LpBall concretize)
+  -> αβ-CROWN oracle (multi-spec + warm-start)
+  -> BaB solver (node-batch + cache + prune)
+  -> bench_phase6h_bab_e2e_time_to_verify.py (stdout JSON, schema_version=phase6h_e2e_v2)
+  -> sweep_phase6h_e2e.py (append JSONL)
+  -> report_phase6h_e2e.py (CSV + summary.md)
+  -> plot_phase6h_e2e.py (figs)
+  -> run_phase6h_artifact.sh (一键产物 + 环境审计)
 ```
 
-时序关键点的代码依据：
-- `compile_first_run_ms` 与 warmup/iters：`scripts/bench_ablation_matrix.py:218`、`scripts/bench_ablation_matrix.py:230`、`scripts/bench_ablation_matrix.py:362`
-- JSONL 输出：`scripts/bench_ablation_matrix.py:431`
-- JSONL schema 解释：`docs/bench_jsonl_schema.md:39`
+**证据链入口**
+- Phase 6 总结（含完成定义/限制）：`gemini_doc/phase6_summary.md`
+- AE/论文复现入口（Kick-the-tires + Claims 映射）：`gemini_doc/ae_readme_phase6h.md`
+- E2E schema：`scripts/bench_phase6h_bab_e2e_time_to_verify.py`（`meta.schema_version=phase6h_e2e_v2`）
 
 ---
 
-## 4. 模块拆解（职责 / 输入输出 / 关键 API / 关键结构）
+## 3) “Claims → 命令 → 产物 → 字段”的对照入口
 
-### 4.1 Frontend + Normalizer（导入/规范化）
+BoundFlow 的“主张”不是写在一个抽象 `claims.md` 里，而是通过 **完成声明 + claims 映射 + 固化 schema + contract tests** 闭环：
 
-- 职责：把 PyTorch 模型导入为 Primal IR，并做最小规范化。
-- 输入/输出：
-  - 输入：`torch.nn.Module` + example inputs
-  - 输出：`BFPrimalProgram`（含 `BFPrimalGraph` 与参数绑定）
-- 关键 API：
-  - `import_torch()`：`boundflow/frontends/pytorch/frontend.py:21`
-  - `normalize_primal_graph()`：`boundflow/frontends/normalize.py:3`
-- 关键结构：
-  - `BFPrimalProgram`、`BFPrimalGraph`、`Node`、`Value`：`boundflow/ir/primal.py:62`
+- Phase 5（系统消融/编译收益）：
+  - 完成声明：`docs/phase5_done.md`
+  - claims 映射：`gemini_doc/artifact_claims_phase5d.md`
+  - schema：`docs/bench_jsonl_schema.md`（`schema_version=1.0`）
+- Phase 6（complete verifier + E2E time-to-verify）：
+  - AE README/claims 映射：`gemini_doc/ae_readme_phase6h.md`
+  - E2E 输出：`scripts/bench_phase6h_bab_e2e_time_to_verify.py`（包含 `comparable/note/run_status/error` 等“可审计字段”）
 
-### 4.2 Primal IR（语义层 IR）
+这两条链路都遵循同一个 AE 友好原则：
 
-- 职责：统一记录节点、输入输出、value 元信息（shape/dtype）。
-- 关键结构：
-  - `BFPrimalGraph.validate()`：`boundflow/ir/primal.py:62`
-  - `ValueKind`（输入/参数/常量/中间）：`boundflow/ir/primal.py:15`
-
-### 4.3 Task IR + TaskGraph + StoragePlan（可执行任务形态）
-
-- 职责：把 Primal Graph 转换为可调度的任务序列与 buffer 级依赖，提供 storage 规划接口。
-- 关键结构：
-  - `TaskOp` / `BoundTask` / `BFTaskModule`：`boundflow/ir/task.py:89`
-  - `StoragePlan`（logical/physical）与 `BufferSpec`：`boundflow/ir/task.py:35`
-  - `TaskGraph`（buffer-level deps）：`boundflow/ir/task_graph.py:31`
-- 输入/输出：
-  - 输入：Primal IR / Planner config
-  - 输出：`BFTaskModule` + `TaskGraph` + `StoragePlan`
-
-### 4.4 Planner（单任务/多任务分区与复用）
-
-- 职责：统一 planner 入口、决定分区策略、触发 storage reuse。
-- 关键 API：
-  - `plan()`（统一入口）：`boundflow/planner/pipeline.py:33`
-  - v0 单任务：`plan_interval_ibp_v0()`：`boundflow/planner/interval_v0.py:10`
-  - v2 分区：`plan_interval_ibp_v2()`：`boundflow/planner/interval_v2.py:25`
-  - Spec 支持：`plan_interval_ibp_with_linear_spec()`：`boundflow/planner/interval_v1.py:13`
-  - Storage reuse：`apply_conservative_buffer_reuse()`：`boundflow/planner/passes/buffer_reuse_pass.py:47`
-- 关键配置：
-  - `PlannerConfig`：`boundflow/planner/core.py:9`
-  - `PartitionPolicy`：`boundflow/planner/options.py:8`
-  - `StorageReuseOptions`：`boundflow/planner/storage_reuse.py:21`
-
-### 4.5 Scheduler（任务调度）
-
-- 职责：按 TaskGraph 拓扑执行任务，维护 buffer-level env。
-- 关键 API：
-  - `run_ibp_scheduled()`：`boundflow/runtime/scheduler.py:30`
-- 输入/输出：
-  - 输入：`BFTaskModule` + `LinfInputSpec` + Executor
-  - 输出：`IntervalState`
-
-### 4.6 Executors（Reference vs TVM）
-
-- Python reference：
-  - `PythonTaskExecutor.run_ibp()`：`boundflow/runtime/task_executor.py:35`
-  - `PythonTaskExecutor.run_ibp_task()`：`boundflow/runtime/task_executor.py:185`
-  - `PythonInterpreter`（兼容 Phase 3 API）：`boundflow/runtime/executor.py:17`
-- TVM executor：
-  - `TVMTaskExecutor` + `TVMExecutorOptions`：`boundflow/runtime/tvm_executor.py:30`
-  - `MemoryPlanMode`：`boundflow/runtime/tvm_executor.py:24`
-  - `get_task_compile_cache_stats()`：`boundflow/runtime/tvm_executor.py:132`
-  - `run_ibp_task()`（任务级 Relax lowering + fallback）：`boundflow/runtime/tvm_executor.py:514`
-
-### 4.7 Domain（Interval IBP）
-
-- 关键实现：`IntervalDomain` / `IntervalState`：`boundflow/domains/interval.py:13`
-- 作用：为 `PythonTaskExecutor` 与 `TVMTaskExecutor` fallback 提供算子语义。
-
-### 4.8 TVM Backend Lowering
-
-- 关键文件与 API：
-  - `RelaxLoweringMode` 与 `build_interval_linear_relax_ir_module()`：`boundflow/backends/tvm/relax_task_lowering.py:11`
-  - `build_interval_task_relax_ops_ir_module()`：`boundflow/backends/tvm/relax_interval_task_ops.py:31`
-- 作用：将 TaskOp 序列或单 op lower 为 Relax IRModule，供 TVM executor 编译与缓存。
-
-### 4.9 Bench + JSONL Schema + Postprocess
-
-- Bench：
-  - `_bench_one()` 与 JSONL 输出：`scripts/bench_ablation_matrix.py:153`、`scripts/bench_ablation_matrix.py:431`
-  - baseline auto_LiRPA（可选）：`scripts/bench_ablation_matrix.py:263`
-- JSONL schema 文档：
-  - `docs/bench_jsonl_schema.md:1`
-- Postprocess：
-  - `_flatten_row()`、`_summarize()`、`main()`：`scripts/postprocess_ablation_jsonl.py:67`、`scripts/postprocess_ablation_jsonl.py:166`、`scripts/postprocess_ablation_jsonl.py:215`
-
-### 4.10 Tests（契约/回归）
-
-- JSONL schema contract：`tests/test_phase5d_pr13d_bench_jsonl_schema_contract.py:14`
-- postprocess pipeline：`tests/test_phase5d_pr13e_postprocess_jsonl.py:10`
-- enum 归一化：`tests/test_postprocess_enum_normalization.py:6`
-- env.sh stdout 不污染：`tests/test_env_sh_quiet_stdout.py:12`
-- auto_LiRPA 语义对齐：
-  - `tests/test_phase3_ibp_against_auto_lirpa.py:9`
-  - `tests/test_phase4_task_pipeline_against_auto_lirpa.py:10`
-
-### 4.11 Env（stdout/stderr 约束）
-
-- `env.sh` 默认仅 stderr 输出提示：`env.sh:33`
-- 对应回归：`tests/test_env_sh_quiet_stdout.py:12`
+1. **stdout 只输出 payload**（JSON/JSONL），日志走 stderr（避免污染后处理）。
+2. **schema contract test 守住字段**（比“跑得更快”更能长期复现）。
+3. **不可比/失败显式记录**（`comparable/note/run_status=error`），禁止 silent failure。
 
 ---
 
-## 5. Phase 0~6 路线图与验收标准
+## 4) 工程分层与关键构件（对照 Phase 4/5/6 的落点）
 
-> 说明：Phase 0/6 在仓库中尚无完整交付实现，已用 TODO 标注。
+这一节用于回答：BoundFlow“到底是怎么从模型走到可执行任务形态”，以及 Phase 6 的 verifier 主线放在分层里的哪里。
 
-### Phase 0：问题定义与论文主张（Claims）
+### 4.1 Frontend / Normalize / Primal IR（模型语义层）
 
-- 目标：形成可测量的研究主张与指标口径。
-- 关键模块：TODO（仓库未发现专门的 claims 文档/脚本）。
-- 验收标准：TODO（建议新增“claims+metrics+threats”文档）。
-- 产物：TODO。
+- Primal IR：`boundflow/ir/primal.py`
+- Torch frontend：`boundflow/frontends/pytorch/frontend.py`
+- ONNX frontend：`boundflow/frontends/onnx/frontend.py`
+- Normalize：`boundflow/frontends/normalize.py`
 
-### Phase 1：语义正确性打底（Reference semantics）
+对应阶段总结：`gemini_doc/phase1_summary.md`、`gemini_doc/phase2_summary.md`、`gemini_doc/phase4_summary.md`。
 
-- 目标：建立 reference 语义与对照基线。
-- 关键模块：
-  - `IntervalDomain` / `IntervalState`：`boundflow/domains/interval.py:13`
-  - `PythonInterpreter` / `PythonTaskExecutor`：`boundflow/runtime/executor.py:17`、`boundflow/runtime/task_executor.py:26`
-- 验收标准（已有测试）：
-  - `tests/test_phase3_ibp_against_auto_lirpa.py`
-- 产物：可对照的 Python reference + auto_LiRPA 对齐测试。
+### 4.2 Task IR + TaskGraph + StoragePlan（可执行任务形态）
 
-### Phase 2：中间表示与任务化（Task Graph）
+这是 Phase 4/5“编译/系统主线”的核心契约层：
 
-- 目标：把 Primal IR 转换为 Task IR 与 TaskGraph，约束 buffer 级契约。
-- 关键模块：
-  - Primal IR：`boundflow/ir/primal.py:62`
-  - Task IR/Graph：`boundflow/ir/task.py:89`、`boundflow/ir/task_graph.py:31`
-  - Planner v0/v2：`boundflow/planner/interval_v0.py:10`、`boundflow/planner/interval_v2.py:25`
-- 验收标准（已有测试/校验）：
-  - `BFPrimalGraph.validate()` 与 `BFTaskModule.validate()` 保证结构一致性
-  - `tests/test_ir_primal_validate.py`（文件存在，未展开）
-- 产物：稳定的任务化数据结构（TaskOp/StoragePlan/TaskGraph）。
+- Task IR：`boundflow/ir/task.py`
+- TaskGraph：`boundflow/ir/task_graph.py`
+- Planner 入口：`boundflow/planner/pipeline.py`
+- Storage/Reuse passes：`boundflow/planner/passes/`
 
-### Phase 3：执行与编译（TVM Executor + caches）
+对应阶段总结：`gemini_doc/phase4_summary.md`、`gemini_doc/phase5_summary.md`。
 
-- 目标：打通 TVM 编译与执行，并提供缓存与可观测性。
-- 关键模块：
-  - `TVMTaskExecutor` + `TVMExecutorOptions`：`boundflow/runtime/tvm_executor.py:30`
-  - Relax lowering：`boundflow/backends/tvm/relax_task_lowering.py:11`
-- 验收标准（已有测试）：
-  - `tests/test_phase4c_tvmexecutor_matches_python.py`
-  - `tests/test_phase4c_tvmexecutor_matches_python_cnn.py`
-- 产物：TVM 编译执行路径 + compile stats / cache stats。
+### 4.3 Runtime：Scheduler/Executor（reference vs TVM）
 
-### Phase 4：系统优化空间（分区/复用/内存规划/融合）
+- Scheduler：`boundflow/runtime/scheduler.py`
+- Reference executor：`boundflow/runtime/task_executor.py`、`boundflow/runtime/executor.py`
+- TVM executor：`boundflow/runtime/tvm_executor.py`
 
-- 目标：落地优化开关并可消融。
-- 关键模块：
-  - 分区策略：`PartitionPolicy`（`boundflow/planner/options.py:8`）
-  - Storage reuse：`StorageReuseOptions`、`apply_conservative_buffer_reuse()`（`boundflow/planner/storage_reuse.py:21`、`boundflow/planner/passes/buffer_reuse_pass.py:47`）
-  - TVM memory plan：`MemoryPlanMode`（`boundflow/runtime/tvm_executor.py:24`）
-  - Fusion pipeline：`TVMExecutorOptions.enable_task_fusion_pipeline`（`boundflow/runtime/tvm_executor.py:41`）
-- 验收标准（已有测试）：
-  - `tests/test_phase5b_pr3_buffer_reuse.py`
-- 产物：可开关的 planner/executor knob。
+对应阶段总结：`gemini_doc/phase5_summary.md`。
 
-### Phase 5：实验产线与系统化消融
+### 4.4 Phase 6 verifier 主线（oracle + solver + 工件链）
 
-- 5D/5E（当前已收口为可交付产线）：
-  - 口径冻结：`schema_version=1.0`（`docs/bench_jsonl_schema.md`）
-  - Bench：`scripts/bench_ablation_matrix.py`
-    - baseline auto_LiRPA：预计算外提 + baseline_key/spec_hash（见 schema 文档）
-    - TVM：compile/run 拆分 + compile_stats/call_tir + 可选落盘 cache（`--tvm-cache-dir`）
-  - Postprocess：`scripts/postprocess_ablation_jsonl.py`
-  - Contract tests：`tests/test_phase5d_pr13d_bench_jsonl_schema_contract.py`、`tests/test_phase5d_pr13e_postprocess_jsonl.py`
-  - Artifact runner：`scripts/run_phase5d_artifact.py`、`scripts/run_phase5d_artifact.sh`
-  - Claims/Appendix：`gemini_doc/artifact_claims_phase5d.md`、`gemini_doc/artifact_appendix_phase5d.md`
+Phase 6 的“验证器主线”当前主要落在 runtime 层（还没完全接入 Task IR/TVM 编译路径），核心文件：
 
-### Phase 6：论文叙事 + Artifact 打包
+- 扰动/输入集合：`boundflow/runtime/perturbation.py`
+- CROWN-IBP：`boundflow/runtime/crown_ibp.py`
+- α-CROWN：`boundflow/runtime/alpha_crown.py`
+- αβ-CROWN：`boundflow/runtime/alpha_beta_crown.py`
+- BaB（控制流）：`boundflow/runtime/bab.py`
+- E2E bench：`scripts/bench_phase6h_bab_e2e_time_to_verify.py`
 
-- 目标：在 Phase 5 冻结口径基础上扩展更强性质/更大规模实验，不回滚 Phase 5 的 schema/产线。
-- 现状：Phase 5 的 runner/claims/appendix 已具备，Phase 6 主要是扩 domain/算法与论文叙事（例如 CROWN/α-CROWN/BaB、cache/batching、layout 全局优化等）。
+对应阶段总结：`gemini_doc/phase6_summary.md`。
 
 ---
 
-## 6. 扩展指南与最佳实践（Checklist）
+## 5) Phase 0~6：阶段目标与“从哪开始读”
 
-### 6.1 新增 workload
+> 每一阶段的详细总结都已落地到 `gemini_doc/phaseX_summary.md`，这里仅提供导航。
 
-1. 在 `scripts/bench_ablation_matrix.py` 中扩展 `_build_workload()` 与 `--workload` choices（`scripts/bench_ablation_matrix.py:124`、`scripts/bench_ablation_matrix.py:392`）。
-2. 若输入形状或 eps 可参数化，沿用 `--batch/--eps` 逻辑，确保 JSONL group key 可区分（`docs/bench_jsonl_schema.md:86`）。
-3. 更新或新增对齐测试（如有 auto_LiRPA baseline），参考 `tests/test_phase4_task_pipeline_against_auto_lirpa.py:10`。
-4. 若新增域或算子，补齐 `IntervalDomain` / executor fallback（`boundflow/domains/interval.py:22`、`boundflow/runtime/task_executor.py:35`）。
+- Phase 0：工程止血与最小可跑基线 → `gemini_doc/phase0_summary.md`
+- Phase 1：Primal IR 加固（Node/Value + validate）→ `gemini_doc/phase1_summary.md`
+- Phase 2：TorchFrontend（torch.export → Primal IR）→ `gemini_doc/phase2_summary.md`
+- Phase 3：IBP reference + auto_LiRPA 对齐（MLP/CNN）→ `gemini_doc/phase3_summary.md`
+- Phase 4：Task/Planner/Executor/Spec/TVM/ONNX 闭环 → `gemini_doc/phase4_summary.md`
+- Phase 5：bench→JSONL→postprocess→artifact 产线（schema 1.0 冻结）→ `gemini_doc/phase5_summary.md`
+- Phase 6：αβ-CROWN + BaB 语义闭环 + 系统收益归因 + AE 工件链（schema v2）→ `gemini_doc/phase6_summary.md`
 
-### 6.2 新增 knob（planner 或 TVM 选项）
-
-1. 在 `PlannerConfig` 或 `TVMExecutorOptions` 添加字段（`boundflow/planner/core.py:9`、`boundflow/runtime/tvm_executor.py:30`）。
-2. 在 `scripts/bench_ablation_matrix.py` 中接入 CLI 参数与 JSONL 输出（`scripts/bench_ablation_matrix.py:390`、`scripts/bench_ablation_matrix.py:303`）。
-3. 视需要更新 `scripts/postprocess_ablation_jsonl.py` 的 `_flatten_row()` / `_group_key()`（`scripts/postprocess_ablation_jsonl.py:67`、`scripts/postprocess_ablation_jsonl.py:147`）。
-4. 更新 `docs/bench_jsonl_schema.md`，并按 `docs/phase5E.md:31` 提示 bump `schema_version`。
-5. 更新契约测试 `tests/test_phase5d_pr13d_bench_jsonl_schema_contract.py`。
-
-### 6.3 新增 schema 字段或升级 schema_version
-
-1. 修改 `scripts/bench_ablation_matrix.py` 输出字段（`scripts/bench_ablation_matrix.py:303`）。
-2. 更新 `docs/bench_jsonl_schema.md` 字段说明（`docs/bench_jsonl_schema.md:13`）。
-3. bump `schema_version` 并同步更新 contract tests（`tests/test_phase5d_pr13d_bench_jsonl_schema_contract.py:41`）。
-4. 更新 `scripts/postprocess_ablation_jsonl.py` 的扁平化/汇总字段（`scripts/postprocess_ablation_jsonl.py:67`）。
-
-### 6.4 更新 postprocess
-
-1. 修改 `_flatten_row()` 与 `_summarize()`（`scripts/postprocess_ablation_jsonl.py:67`、`scripts/postprocess_ablation_jsonl.py:166`）。
-2. 更新 `tests/test_phase5d_pr13e_postprocess_jsonl.py` 的样例断言。
-3. 如新增 enum/字符串格式，更新 `_normalize_enum_repr()` 与测试（`scripts/postprocess_ablation_jsonl.py:47`、`tests/test_postprocess_enum_normalization.py:6`）。
+总账（按时间追踪每次 PR/变更）：`docs/change_log.md`。
 
 ---
 
-## 7. 代码阅读路线（推荐顺序）
+## 6) 快速复现入口（建议在 conda env: boundflow）
 
-1. **Primal IR 与 Value 语义**：先看 `boundflow/ir/primal.py`，建立“Node/Value/Graph”的心智模型。
-2. **Frontend 导入与规范化**：`boundflow/frontends/pytorch/frontend.py`、`boundflow/frontends/normalize.py`，理解算子映射与最小规范化策略。
-3. **Task IR 与 Planner**：`boundflow/ir/task.py`、`boundflow/planner/interval_v0.py`、`boundflow/planner/interval_v2.py`、`boundflow/planner/pipeline.py`，理解任务化与分区策略。
-4. **TaskGraph 与 Scheduler**：`boundflow/ir/task_graph.py`、`boundflow/runtime/scheduler.py`，理解 buffer 级依赖与调度。
-5. **Reference Executor**：`boundflow/runtime/task_executor.py`、`boundflow/runtime/executor.py`，掌握语义正确性路径。
-6. **TVM Backend/Executor**：`boundflow/backends/tvm/relax_task_lowering.py`、`boundflow/backends/tvm/relax_interval_task_ops.py`、`boundflow/runtime/tvm_executor.py`，理解 compile/cache/VM 行为。
-7. **Bench + Schema + Postprocess**：`scripts/bench_ablation_matrix.py`、`docs/bench_jsonl_schema.md`、`scripts/postprocess_ablation_jsonl.py`，掌握实验产线。
-8. **Contract Tests/Env**：`tests/test_phase5d_pr13d_bench_jsonl_schema_contract.py`、`tests/test_phase5d_pr13e_postprocess_jsonl.py`、`tests/test_env_sh_quiet_stdout.py`，理解复现保障。
+### 6.1 Phase 5（schema 1.0）一键产物
 
----
+见 `docs/phase5_done.md`；核心入口是 `scripts/run_phase5d_artifact.py`。
 
-## 8. 关键“为什么”（JSONL / stdout / contract test / warmup 拆分）
+### 6.2 Phase 6H（schema v2）一键产物（E2E time-to-verify）
 
-**为什么 JSONL**
-
-- 项目明确规定 JSONL 作为统一评测输出，并要求“一行一条”以支持流式/增量（`docs/bench_jsonl_schema.md:3`）。
-- bench 脚本以 JSONL 作为唯一标准输出（`scripts/bench_ablation_matrix.py:431`）。
-
-**为什么 stdout 必须纯 payload（stderr 打日志）**
-
-- `env.sh` 明确将提示输出到 stderr，避免污染 stdout（`env.sh:33`）。
-- 对应回归测试保证 stdout 为空（`tests/test_env_sh_quiet_stdout.py:12`）。
-
-**为什么要 schema contract tests**
-
-- JSONL schema 已被固定并文档化（`docs/bench_jsonl_schema.md:5`），contract tests 直接运行 bench 并检查字段与类型（`tests/test_phase5d_pr13d_bench_jsonl_schema_contract.py:14`）。
-
-**为什么要 warmup vs steady-state 拆分**
-
-- bench 逻辑显式区分首次运行（触发编译）与 steady-state（`scripts/bench_ablation_matrix.py:218`、`scripts/bench_ablation_matrix.py:230`），并输出 `compile_first_run_ms` 与 `run_ms_p50/p95`（`scripts/bench_ablation_matrix.py:362`）。
-- schema 文档也将其定义为强约束（`docs/bench_jsonl_schema.md:39`）。
+见 `gemini_doc/ae_readme_phase6h.md`；核心入口是 `scripts/run_phase6h_artifact.sh`。
 
 ---
 
-## TODO 汇总（仓库未发现直接实现的部分）
+## 7) 已知限制（对照 Phase 7 入口）
 
-- Phase 0 claims 文档与明确指标定义：TODO（仓库暂无对应文件）。
-- 论文图表口径/编号的最终定稿化：TODO（当前已能产出 `table_main.csv` 与 speedup 图，但论文 figure/table 编号映射仍可进一步精炼）。
-- 更大规模 workload/更强 domain：TODO（Phase 6）。
+1. **Phase 6 不含 conv**：CROWN/αβ/BaB 仅实现链式 MLP 子集（Linear+ReLU）。
+2. **显式 A 表示**：CROWN/αβ 目前以张量形式传播线性界，`LinearOperator` 路线仍未收敛到 CNN 规模。
+3. **BaB 控制流在 Python**：这是 Phase 6 的刻意选择（控制流不下沉编译），TVM/编译级加速主要在 Phase 5 主线。
 
-## 附：Phase 5D/5E 收口入口
-
-- 一键 runner（产 JSONL/CSV/表/图/MANIFEST）：`scripts/run_phase5d_artifact.py`
-- Claims/证据映射（口径源文档）：`gemini_doc/artifact_claims_phase5d.md`
-- AE Appendix（如何运行/如何验证）：`gemini_doc/artifact_appendix_phase5d.md`
-- Phase 5 完成声明（工程收口/口径冻结）：`docs/phase5_done.md`
+Phase 7 的自然扩展方向通常是：扩图（skip/branch）与扩算子（conv），并逐步把 verifier 主线接入 Task IR / TVM 核下沉。
