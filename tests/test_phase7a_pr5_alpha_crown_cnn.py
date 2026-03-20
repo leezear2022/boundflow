@@ -144,5 +144,5 @@ def test_phase7a_pr5_bab_conv_fail_fast() -> None:
     x0 = torch.zeros((1, 1, 2, 2), dtype=torch.float32)
     spec = InputSpec.linf(value_name="input", center=x0, eps=1.0)
 
-    with pytest.raises(NotImplementedError, match="BaB conv graphs not yet supported"):
+    with pytest.raises(NotImplementedError, match="alpha-only BaB does not yet support conv graphs"):
         solve_bab_mlp(module, spec)

@@ -362,8 +362,15 @@ def _instrument_runtime(counters: _Counters):
             counters.cache_hits += 1
         return v
 
-    def _prune_wrapper(module, input_spec, *, items, cache, cfg):  # type: ignore[no-redef]
-        kept, pruned = orig_prune(module, input_spec, items=items, cache=cache, cfg=cfg)
+    def _prune_wrapper(module, input_spec, *, items, cache_by_example=None, cfg, **kwargs):  # type: ignore[no-redef]
+        kept, pruned = orig_prune(
+            module,
+            input_spec,
+            items=items,
+            cache_by_example=cache_by_example,
+            cfg=cfg,
+            **kwargs,
+        )
         counters.pruned_infeasible_count += len(pruned)
         return kept, pruned
 

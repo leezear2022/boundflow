@@ -247,15 +247,16 @@ def _run_bounding_workload(
     cache: Optional[bab_mod.NodeEvalCache] = None
     if enable_node_eval_cache:
         cache = bab_mod.NodeEvalCache(module=module, input_spec=base_spec, linear_spec_C=C1, cfg=cfg)
+    cache_by_example = None if cache is None else {0: cache}
 
     counters = _Counters()
     restore = _instrument_runtime(counters)
     try:
         if serial:
             for st in split_states:
-                items = [(0, bab_mod._QueueItem(priority=0.0, node_id=0, split_state=st))]
+                items = [(0, bab_mod._QueueItem(priority=0.0, node_id=0, example_idx=0, split_state=st))]
                 kept, pruned = bab_mod.prune_infeasible_first_layer_items(
-                    module, base_spec, items=items, cache=cache, cfg=cfg
+                    module, base_spec, items=items, cache_by_example=cache_by_example, cfg=cfg
                 )
                 counters.pruned_infeasible_count += len(pruned)
                 if not kept:
@@ -291,11 +292,14 @@ def _run_bounding_workload(
         K = int(node_batch_size)
         for off in range(0, len(split_states), K):
             chunk = split_states[off : off + K]
-            items = [(i, bab_mod._QueueItem(priority=0.0, node_id=i, split_state=st)) for i, st in enumerate(chunk)]
+            items = [
+                (i, bab_mod._QueueItem(priority=0.0, node_id=i, example_idx=0, split_state=st))
+                for i, st in enumerate(chunk)
+            ]
 
             # prune infeasible (and write infeasible nodes to cache)
             kept, pruned = bab_mod.prune_infeasible_first_layer_items(
-                module, base_spec, items=items, cache=cache, cfg=cfg
+                module, base_spec, items=items, cache_by_example=cache_by_example, cfg=cfg
             )
             counters.pruned_infeasible_count += len(pruned)
             if not kept:

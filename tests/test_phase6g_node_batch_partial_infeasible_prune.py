@@ -45,18 +45,21 @@ def test_phase6g_batch_prune_mixed_infeasible_and_feasible_nodes() -> None:
     assert st_ok.feasibility == "unknown"
 
     cfg = BabConfig(oracle="alpha_beta", enable_batch_infeasible_prune=True)
-    cache = NodeEvalCache(module=module, input_spec=spec, linear_spec_C=None, cfg=cfg)
+    cache_by_example = {
+        0: NodeEvalCache(module=module, input_spec=spec, linear_spec_C=None, cfg=cfg),
+    }
 
     items = [
-        (0, _QueueItem(priority=0.0, node_id=0, split_state=infeasible)),
-        (1, _QueueItem(priority=0.0, node_id=1, split_state=feasible)),
+        (0, _QueueItem(priority=0.0, node_id=0, example_idx=0, split_state=infeasible)),
+        (1, _QueueItem(priority=0.0, node_id=1, example_idx=0, split_state=feasible)),
     ]
-    kept, pruned = prune_infeasible_first_layer_items(module, spec, items=items, cache=cache, cfg=cfg)
+    kept, pruned = prune_infeasible_first_layer_items(
+        module, spec, items=items, cache_by_example=cache_by_example, cfg=cfg
+    )
     assert pruned == [0]
     assert [i for i, _ in kept] == [1]
 
     # Cache should remember the infeasible node as infeasible.
-    v = cache.get(split_state=infeasible)
+    v = cache_by_example[0].get(split_state=infeasible)
     assert v is not None
     assert getattr(v.stats, "feasibility", None) == "infeasible"
-

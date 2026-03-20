@@ -2094,3 +2094,47 @@
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase6g_branch_pick_reuses_forward_trace.py`
 - `conda run -n boundflow python -m pytest -q tests/test_env.py tests/test_phase4d_onnx_frontend_matches_torch.py tests/test_phase5d_pr8_relax_lowering_skeleton.py tests/test_phase5d_pr9_tvm_executor_linear_equiv.py tests/test_phase5d_pr10_tvm_compile_instruments.py tests/test_phase5d_pr11a_task_relax_ops_equiv.py tests/test_phase5d_pr11c1_save_function_closure.py tests/test_phase5d_pr11c_vm_cache_and_opt_passes.py tests/test_phase5d_pr12_2_tir_var_upper_bound_effect.py tests/test_phase5d_pr12_static_plan_modes.py tests/test_phase6c_crown_ibp_multispec_batch.py tests/test_phase6g_bab_node_batch.py tests/test_phase6g_bab_node_eval_cache.py tests/test_phase6g_branch_pick_reuses_forward_trace.py tests/test_phase6g_node_batch_grad_isolation.py tests/test_phase6g_node_batch_partial_infeasible_prune.py tests/test_phase6h_artifact_runner_smoke.py tests/test_phase6h_bench_e2e_schema.py tests/test_phase6h_plot_smoke.py tests/test_phase6h_report_csv_schema.py tests/test_phase6h_workload_suite_smoke.py`
+
+---
+
+## 2026-03-20：Phase 7A PR-7——BaB on chain CNN（含 node-batch，与真实样本 batch 共存）
+
+**动机**
+- PR-6 已经把 `alpha-beta-CROWN` oracle 扩到 chain CNN，但 `bab.py` 仍然停在 MLP-only：conv 图 fail-fast、`ReluSplitState` 只支持 `[H]`、node-batch 仍假设输入 `B==1`。
+
+**主要改动**
+- 更新：`boundflow/runtime/bab.py`
+  - `solve_bab_mlp(...)` 现在支持 chain CNN 子集 `{conv2d,relu,flatten,linear}`，但仅在 `oracle="alpha_beta"` 时开放。
+  - `oracle="alpha"` 在 conv 图上继续 fail-fast，文案改为：`alpha-only BaB does not yet support conv graphs`。
+  - `ReluSplitState.empty(...)` 新增 `input_spec=`，改为从 forward trace 的 `relu_pre` 推断高维逻辑 shape。
+  - `ReluSplitState.with_split(...)` 继续接收 flat idx，但现在对逻辑 shape 做 flatten 更新后再恢复。
+  - `_QueueItem` 新增 `example_idx`，host 侧改成“每样本独立搜索树 + 全局 heap 调度”。
+  - node-batch 可以混合不同样本的节点进入一次 `alpha-beta` oracle 调用。
+  - `max_nodes` 口径改成每样本独立预算。
+  - 新增 `BabPerExampleResult`，`BabResult` 保留旧聚合字段并增加 `per_example`。
+  - `_pick_branch(...)` 改成 rank-agnostic，对任意 `relu_pre` flatten 成 `[B,I]` 后返回 flat idx。
+  - `prune_infeasible_first_layer_items(...)` 改成按 `item.example_idx` 切样本，并按样本分隔 `NodeEvalCache`。
+- 更新脚本：
+  - `scripts/bench_phase6g_bab_node_batch_throughput.py`
+    - 适配 `_QueueItem.example_idx` 与 `cache_by_example`
+  - `scripts/bench_phase6h_bab_e2e_time_to_verify.py`
+    - 修正 instrumentation 对 `prune_infeasible_first_layer_items(...)` 新签名的兼容
+- 更新测试：
+  - `tests/test_phase6g_node_batch_partial_infeasible_prune.py`
+  - `tests/test_phase7a_pr5_alpha_crown_cnn.py`
+- 新增测试：
+  - `tests/test_phase7a_pr7_bab_chain_cnn.py`
+  - `tests/test_phase7a_pr7_bab_batch_examples.py`
+- 新增文档：
+  - `gemini_doc/change_2026-03-20_phase7a_pr7_bab_chain_cnn.md`
+
+**影响面**
+- BaB 现在支持 chain CNN，但不扩 skip/branch/general DAG。
+- `B>1` 采用混合方案：
+  - host/BaB：每样本独立搜索树
+  - oracle：batch 维表示一批待评估节点/domain
+- 现有 bench/schema 不因为 `BabResult.per_example` bump 版本；旧脚本继续读取聚合字段。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr7_bab_chain_cnn.py tests/test_phase7a_pr7_bab_batch_examples.py tests/test_phase7a_pr5_alpha_crown_cnn.py tests/test_phase6g_node_batch_partial_infeasible_prune.py tests/test_phase6g_bab_node_batch.py tests/test_phase6g_bab_node_eval_cache.py tests/test_phase6g_node_batch_grad_isolation.py tests/test_phase6g_branch_pick_reuses_forward_trace.py tests/test_phase6e_bab_mlp.py tests/test_phase6f_alpha_beta_crown_pr1.py tests/test_phase6g_alpha_beta_multispec_batch.py tests/test_phase6d_alpha_crown_mlp.py tests/test_phase7a_pr6_alpha_beta_crown_cnn.py tests/test_phase7a_pr3_crown_ibp_cnn.py tests/test_phase7a_pr4_conv_lazy_norms.py tests/test_phase6h_bench_e2e_schema.py`
+- 结果：`49 passed in 7.35s`

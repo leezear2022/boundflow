@@ -21,9 +21,9 @@ BabStatus = Literal["proven", "unsafe", "unknown"]
 @dataclass(frozen=True)
 class ReluSplitState:
     """
-    Split constraints for chain-structured MLP ReLU nodes.
+    Split constraints for chain-structured ReLU nodes.
 
-    Mapping: relu_input_name -> split tensor int{-1,0,+1} with shape [H].
+    Mapping: relu_input_name -> split tensor int{-1,0,+1} with logical shape [*S].
     - +1: active (x >= 0)
     - -1: inactive (x <= 0)
     -  0: unsplit
@@ -40,18 +40,37 @@ class ReluSplitState:
         cur = self.by_relu_input.get(relu_input)
         if cur is None:
             raise KeyError(f"unknown relu_input in split state: {relu_input}")
-        cur_i = int(cur[neuron_idx].item())
+        cur_flat = cur.reshape(-1)
+        if int(neuron_idx) < 0 or int(neuron_idx) >= int(cur_flat.numel()):
+            raise IndexError(
+                f"neuron_idx out of range for {relu_input}: idx={int(neuron_idx)} numel={int(cur_flat.numel())}"
+            )
+        cur_i = int(cur_flat[int(neuron_idx)].item())
         if cur_i != 0 and cur_i != int(split_value):
             raise ValueError(f"conflicting split for {relu_input}[{neuron_idx}]: existing={cur_i} new={split_value}")
         new_by = dict(self.by_relu_input)
         new_t = cur.clone()
-        new_t[int(neuron_idx)] = int(split_value)
+        new_t.reshape(-1)[int(neuron_idx)] = int(split_value)
         new_by[relu_input] = new_t
         return ReluSplitState(by_relu_input=new_by)
 
     @staticmethod
-    def empty(module: BFTaskModule, *, device: torch.device) -> "ReluSplitState":
+    def empty(
+        module: BFTaskModule,
+        *,
+        device: torch.device,
+        input_spec: Optional[InputSpecLike] = None,
+    ) -> "ReluSplitState":
         module.validate()
+        if input_spec is not None:
+            spec = _normalize_input_spec(input_spec)
+            _interval_env, relu_pre = _forward_ibp_trace_mlp(module, spec)
+            return ReluSplitState(
+                by_relu_input={
+                    name: torch.zeros(tuple(pre.lower.shape[1:]), device=device, dtype=torch.int8)
+                    for name, pre in relu_pre.items()
+                }
+            )
         task = module.get_entry_task()
         raw_params = module.bindings.get("params", {})
         params: Dict[str, object] = dict(raw_params) if isinstance(raw_params, dict) else {}
@@ -76,7 +95,10 @@ class ReluSplitState:
                 raise KeyError(f"missing weight param tensor: {w_name}")
             w_t = w if torch.is_tensor(w) else torch.as_tensor(w)
             if w_t.dim() != 2:
-                raise NotImplementedError(f"ReluSplitState expects rank-2 weights, got {tuple(w_t.shape)}")
+                raise NotImplementedError(
+                    "ReluSplitState.empty needs input_spec for non-rank-2 ReLU producers; "
+                    f"got producer {prod.op_type} weight shape {tuple(w_t.shape)}"
+                )
             h = int(w_t.shape[0])
             by_relu[x_name] = torch.zeros(h, device=device, dtype=torch.int8)
         return ReluSplitState(by_relu_input=by_relu)
@@ -115,6 +137,18 @@ class BabResult:
     avg_batch_fill_rate: float
     best_lower: float
     best_upper: float
+    per_example: Tuple["BabPerExampleResult", ...] = ()
+
+
+@dataclass(frozen=True)
+class BabPerExampleResult:
+    example_idx: int
+    status: BabStatus
+    nodes_visited: int
+    nodes_evaluated: int
+    nodes_expanded: int
+    best_lower: float
+    best_upper: float
 
 
 @dataclass(order=True)
@@ -122,6 +156,7 @@ class _QueueItem:
     # heap key: smallest lower bound first (hardest node).
     priority: float
     node_id: int
+    example_idx: int
     split_state: ReluSplitState
     warm_start: Optional[AlphaState] = None
     warm_start_beta: Optional[BetaState] = None
@@ -208,12 +243,58 @@ class NodeEvalCache:
         self._store[key] = value
 
 
+def _slice_input_spec(input_spec: InputSpecLike, *, example_idx: int) -> InputSpecLike:
+    spec = _normalize_input_spec(input_spec)
+    center = spec.center[int(example_idx) : int(example_idx) + 1].clone()
+    return type(spec)(value_name=spec.value_name, center=center, perturbation=spec.perturbation)
+
+
+def _gather_input_spec(input_spec: InputSpecLike, *, example_indices: List[int]) -> InputSpecLike:
+    spec = _normalize_input_spec(input_spec)
+    center = torch.cat([spec.center[int(i) : int(i) + 1] for i in example_indices], dim=0).clone()
+    return type(spec)(value_name=spec.value_name, center=center, perturbation=spec.perturbation)
+
+
+def _slice_linear_spec_C(linear_spec_C: Optional[torch.Tensor], *, example_idx: int, device: torch.device) -> Optional[torch.Tensor]:
+    if linear_spec_C is None:
+        return None
+    C = linear_spec_C if torch.is_tensor(linear_spec_C) else torch.as_tensor(linear_spec_C, device=device)
+    C = C.to(device=device)
+    if C.dim() == 2:
+        return C
+    if C.dim() == 3:
+        return C[int(example_idx) : int(example_idx) + 1].clone()
+    raise ValueError(f"linear_spec_C expects rank-2/3, got {tuple(C.shape)}")
+
+
+def _gather_linear_spec_C(
+    linear_spec_C: Optional[torch.Tensor], *, example_indices: List[int], device: torch.device
+) -> Optional[torch.Tensor]:
+    if linear_spec_C is None:
+        return None
+    C = linear_spec_C if torch.is_tensor(linear_spec_C) else torch.as_tensor(linear_spec_C, device=device)
+    C = C.to(device=device)
+    if C.dim() == 2:
+        return C.unsqueeze(0).expand(len(example_indices), int(C.shape[0]), int(C.shape[1])).clone()
+    if C.dim() == 3:
+        return torch.cat([C[int(i) : int(i) + 1] for i in example_indices], dim=0).clone()
+    raise ValueError(f"linear_spec_C expects rank-2/3, got {tuple(C.shape)}")
+
+
+def _aggregate_bab_status(statuses: List[BabStatus]) -> BabStatus:
+    if any(s == "unsafe" for s in statuses):
+        return "unsafe"
+    if all(s == "proven" for s in statuses):
+        return "proven"
+    return "unknown"
+
+
 def prune_infeasible_first_layer_items(
     module: BFTaskModule,
     input_spec: InputSpecLike,
     *,
     items: List[Tuple[int, _QueueItem]],
-    cache: Optional[NodeEvalCache],
+    cache_by_example: Optional[Dict[int, NodeEvalCache]],
     cfg: BabConfig,
 ) -> Tuple[List[Tuple[int, _QueueItem]], List[int]]:
     """
@@ -230,12 +311,14 @@ def prune_infeasible_first_layer_items(
     dtype = spec.center.dtype
 
     for orig_i, it in items:
+        cache = None if cache_by_example is None else cache_by_example.get(int(it.example_idx))
         if cache is not None:
             v = cache.get(split_state=it.split_state)
             if v is not None and getattr(v.stats, "feasibility", None) == "infeasible":
                 pruned.append(orig_i)
                 continue
-        st = check_first_layer_infeasible_split(module, spec, relu_split_state=it.split_state.by_relu_input)
+        node_spec = _slice_input_spec(spec, example_idx=int(it.example_idx))
+        st = check_first_layer_infeasible_split(module, node_spec, relu_split_state=it.split_state.by_relu_input)
         if st.feasibility == "infeasible":
             pruned.append(orig_i)
             if cache is not None:
@@ -313,19 +396,24 @@ def _pick_branch(
     Returns (relu_input_name, neuron_idx) or None if no ambiguous neuron exists.
     """
     input_spec_n = _normalize_input_spec(input_spec)
+    if int(input_spec_n.center.shape[0]) != 1:
+        raise ValueError(
+            f"_pick_branch expects a single-example InputSpec, got batch={int(input_spec_n.center.shape[0])}"
+        )
     relu_split = {k: v for k, v in split_state.by_relu_input.items() if v is not None}
     interval_env, relu_pre = _forward_ibp_trace_mlp(module, input_spec_n, relu_split_state=relu_split)
     _ = interval_env
     best = None
     best_gap = None
     for name, pre in relu_pre.items():
-        l = pre.lower
-        u = pre.upper
+        l = pre.lower.reshape(int(pre.lower.shape[0]), -1)
+        u = pre.upper.reshape(int(pre.upper.shape[0]), -1)
         amb = (l < 0) & (u > 0)
         if not amb.any():
             continue
-        gap = (u - l).mean(dim=0)  # [H]
-        gap = torch.where(amb.any(dim=0), gap, torch.full_like(gap, -1.0))
+        gap = (u - l).clamp_min(0.0)
+        gap = torch.where(amb, gap, torch.full_like(gap, float("-inf")))
+        gap = gap[0]
         idx = int(torch.argmax(gap).item())
         g = float(gap[idx].item())
         if best_gap is None or g > best_gap:
@@ -445,78 +533,203 @@ def solve_bab_mlp(
     config: Optional[BabConfig] = None,
 ) -> BabResult:
     """
-    Minimal BaB loop for chain-structured MLP using alpha-CROWN as a bound oracle.
+    Correctness-first BaB for chain-structured graphs.
 
-    - Prunes nodes when lower >= threshold.
-    - Declares UNSAFE when a fully split (no ambiguous ReLU) node has lower < threshold.
+    Supported subset:
+    - MLP: linear / relu / linear
+    - CNN (alpha-beta oracle only): conv2d / relu / ... / flatten(start_dim=1,end_dim=-1) / linear
 
-    This is intended as a correctness-first skeleton; batching/caching comes later.
+    Host-side semantics keep one independent search tree per input example. Node batching may
+    mix nodes from different examples in a single alpha-beta oracle call.
     """
     cfg = config or BabConfig()
+    if int(cfg.max_nodes) < 1:
+        raise ValueError(f"max_nodes must be >=1, got {cfg.max_nodes}")
     input_spec_n = _normalize_input_spec(input_spec)
     device = input_spec_n.center.device
     module.validate()
     task = module.get_entry_task()
-    if any(op.op_type in {"conv2d", "flatten"} for op in task.ops):
-        raise NotImplementedError("BaB conv graphs not yet supported; PR6 only extends alpha-beta-CROWN oracle")
+    has_conv = any(op.op_type in {"conv2d", "flatten"} for op in task.ops)
+    if has_conv and cfg.oracle != "alpha_beta":
+        raise NotImplementedError("alpha-only BaB does not yet support conv graphs")
 
-    root_split = ReluSplitState.empty(module, device=device)
+    num_examples = int(input_spec_n.center.shape[0])
     heap: List[_QueueItem] = []
-    heapq.heappush(heap, _QueueItem(priority=float("-inf"), node_id=0, split_state=root_split, warm_start=None))
-    node_id = 1
-    visited = 0
-    evaluated = 0
-    expanded = 0
+    live_nodes = [0 for _ in range(num_examples)]
+    visited_by_example = [0 for _ in range(num_examples)]
+    evaluated_by_example = [0 for _ in range(num_examples)]
+    expanded_by_example = [0 for _ in range(num_examples)]
+    best_lower_by_example = [float("-inf") for _ in range(num_examples)]
+    best_upper_by_example = [float("inf") for _ in range(num_examples)]
+    status_by_example: List[Optional[BabStatus]] = [None for _ in range(num_examples)]
+    node_id = 0
+    for example_idx in range(num_examples):
+        root_spec = _slice_input_spec(input_spec_n, example_idx=example_idx)
+        root_split = ReluSplitState.empty(module, device=device, input_spec=root_spec)
+        heapq.heappush(
+            heap,
+            _QueueItem(
+                priority=float("-inf"),
+                node_id=node_id,
+                example_idx=example_idx,
+                split_state=root_split,
+                warm_start=None,
+                warm_start_beta=None,
+            ),
+        )
+        node_id += 1
+        live_nodes[example_idx] = 1
+
     batch_rounds = 0
     batch_popped_total = 0
-    max_q = 1
-    global_best_lower = float("-inf")
-    global_best_upper = float("inf")
+    max_q = len(heap)
 
     if int(cfg.node_batch_size) < 1:
         raise ValueError(f"node_batch_size must be >=1, got {cfg.node_batch_size}")
 
-    node_cache: Optional[NodeEvalCache] = None
+    node_cache_by_example: Dict[int, NodeEvalCache] = {}
     if (
         cfg.oracle == "alpha_beta"
         and bool(cfg.enable_node_eval_cache)
         and not cfg.use_1d_linf_input_restriction_patch
     ):
-        node_cache = NodeEvalCache(module=module, input_spec=input_spec_n, linear_spec_C=linear_spec_C, cfg=cfg)
+        for example_idx in range(num_examples):
+            node_cache_by_example[example_idx] = NodeEvalCache(
+                module=module,
+                input_spec=_slice_input_spec(input_spec_n, example_idx=example_idx),
+                linear_spec_C=_slice_linear_spec_C(linear_spec_C, example_idx=example_idx, device=device),
+                cfg=cfg,
+            )
 
-    while heap and visited < int(cfg.max_nodes):
-        # Batched BaB is currently only implemented for the alpha-beta oracle without the 1D patch.
+    def _mark_proven_if_finished(example_idx: int) -> None:
+        if status_by_example[example_idx] is None and live_nodes[example_idx] == 0:
+            status_by_example[example_idx] = "proven"
+
+    def _decrement_live_node(example_idx: int) -> None:
+        live_nodes[example_idx] = max(0, int(live_nodes[example_idx]) - 1)
+
+    def _process_evaluated_node(
+        item: _QueueItem,
+        *,
+        bounds: IntervalState,
+        best_alpha: AlphaState,
+        best_beta: Optional[BetaState],
+        branch_hint: Optional[Tuple[str, int]],
+    ) -> None:
+        nonlocal node_id, max_q
+        example_idx = int(item.example_idx)
+        evaluated_by_example[example_idx] += 1
+        node_lower = float(bounds.lower.min().item())
+        node_upper = float(bounds.upper.max().item())
+        best_lower_by_example[example_idx] = max(best_lower_by_example[example_idx], node_lower)
+        best_upper_by_example[example_idx] = min(best_upper_by_example[example_idx], node_upper)
+
+        _decrement_live_node(example_idx)
+        if status_by_example[example_idx] is not None:
+            return
+        if node_lower >= float(cfg.threshold) - float(cfg.tol):
+            _mark_proven_if_finished(example_idx)
+            return
+
+        branch = branch_hint if (cfg.oracle == "alpha_beta" and bool(cfg.use_branch_hint)) else None
+        if branch is None:
+            node_spec = _slice_input_spec(input_spec_n, example_idx=example_idx)
+            branch = _pick_branch(module, node_spec, split_state=item.split_state)
+        if branch is None:
+            status_by_example[example_idx] = "unsafe"
+            return
+        if visited_by_example[example_idx] >= int(cfg.max_nodes):
+            status_by_example[example_idx] = "unknown"
+            return
+
+        relu_input, idx = branch
+        left = item.split_state.with_split(relu_input=relu_input, neuron_idx=idx, split_value=-1)
+        right = item.split_state.with_split(relu_input=relu_input, neuron_idx=idx, split_value=+1)
+        beta_warm = None if best_beta is None else best_beta.detach_clone()
+        heapq.heappush(
+            heap,
+            _QueueItem(
+                priority=node_lower,
+                node_id=node_id,
+                example_idx=example_idx,
+                split_state=left,
+                warm_start=best_alpha.detach_clone(),
+                warm_start_beta=beta_warm,
+            ),
+        )
+        node_id += 1
+        heapq.heappush(
+            heap,
+            _QueueItem(
+                priority=node_lower,
+                node_id=node_id,
+                example_idx=example_idx,
+                split_state=right,
+                warm_start=best_alpha.detach_clone(),
+                warm_start_beta=beta_warm,
+            ),
+        )
+        node_id += 1
+        live_nodes[example_idx] += 2
+        expanded_by_example[example_idx] += 1
+        max_q = max(max_q, len(heap))
+
+    while heap and any(status is None for status in status_by_example):
         do_batch = cfg.oracle == "alpha_beta" and int(cfg.node_batch_size) > 1 and not cfg.use_1d_linf_input_restriction_patch
-        if not do_batch:
+        items: List[_QueueItem] = []
+        want = int(cfg.node_batch_size) if do_batch else 1
+        while len(items) < want and heap:
             item = heapq.heappop(heap)
-            visited += 1
-            restricted_spec = input_spec_n
+            example_idx = int(item.example_idx)
+            if status_by_example[example_idx] is not None:
+                continue
+            if visited_by_example[example_idx] >= int(cfg.max_nodes):
+                status_by_example[example_idx] = "unknown"
+                live_nodes[example_idx] = 0
+                continue
+            visited_by_example[example_idx] += 1
+            items.append(item)
+        if not items:
+            break
+        if do_batch:
+            batch_rounds += 1
+            batch_popped_total += len(items)
+
+        if len(items) == 1:
+            item = items[0]
+            example_idx = int(item.example_idx)
+            node_spec = _slice_input_spec(input_spec_n, example_idx=example_idx)
+            restricted_spec = node_spec
             if cfg.use_1d_linf_input_restriction_patch:
                 restricted_spec = _restrict_input_spec_linf_1d_for_first_layer_splits(
-                    module, input_spec_n, split_state=item.split_state
+                    module, node_spec, split_state=item.split_state
                 )
                 if restricted_spec is None:
+                    _decrement_live_node(example_idx)
+                    _mark_proven_if_finished(example_idx)
                     continue
             try:
                 if cfg.oracle == "alpha_beta":
                     bounds, best_alpha, best_beta, stats, branch_hint, _hit = eval_bab_alpha_beta_node(
                         module,
                         restricted_spec,
-                        linear_spec_C=linear_spec_C,
+                        linear_spec_C=_slice_linear_spec_C(linear_spec_C, example_idx=example_idx, device=device),
                         split_state=item.split_state,
                         warm_start_alpha=item.warm_start,
                         warm_start_beta=item.warm_start_beta,
                         cfg=cfg,
-                        cache=node_cache,
+                        cache=node_cache_by_example.get(example_idx),
                     )
                     if getattr(stats, "feasibility", None) == "infeasible":
+                        _decrement_live_node(example_idx)
+                        _mark_proven_if_finished(example_idx)
                         continue
                     best_beta = best_beta.detach_clone()
                 else:
                     bounds, best_alpha, _stats = run_alpha_crown_mlp(
                         module,
                         restricted_spec,
-                        linear_spec_C=linear_spec_C,
+                        linear_spec_C=_slice_linear_spec_C(linear_spec_C, example_idx=example_idx, device=device),
                         steps=int(cfg.alpha_steps),
                         lr=float(cfg.alpha_lr),
                         alpha_init=float(cfg.alpha_init),
@@ -529,170 +742,95 @@ def solve_bab_mlp(
                         relu_split_state=item.split_state.by_relu_input,
                     )
                     best_beta = None
+                    branch_hint = None
             except ValueError:
+                _decrement_live_node(example_idx)
+                _mark_proven_if_finished(example_idx)
                 continue
 
-            evaluated += 1
-            node_lower = float(bounds.lower.min().item())
-            node_upper = float(bounds.upper.max().item())
-            global_best_lower = max(global_best_lower, node_lower)
-            global_best_upper = min(global_best_upper, node_upper)
-
-            if node_lower >= float(cfg.threshold) - float(cfg.tol):
-                continue
-
-            branch = (
-                branch_hint
-                if cfg.oracle == "alpha_beta" and bool(cfg.use_branch_hint)
-                else None
+            _process_evaluated_node(
+                item,
+                bounds=bounds,
+                best_alpha=best_alpha,
+                best_beta=best_beta,
+                branch_hint=branch_hint,
             )
-            if branch is None:
-                branch = _pick_branch(module, input_spec_n, split_state=item.split_state)
-            if branch is None:
-                return BabResult(
-                    status="unsafe",
-                    nodes_visited=visited,
-                    nodes_evaluated=evaluated,
-                    nodes_expanded=expanded,
-                    max_queue=max_q,
-                    batch_rounds=batch_rounds,
-                    avg_batch_fill_rate=0.0,
-                    best_lower=global_best_lower,
-                    best_upper=global_best_upper,
-                )
-
-            relu_input, idx = branch
-            left = item.split_state.with_split(relu_input=relu_input, neuron_idx=idx, split_value=-1)
-            right = item.split_state.with_split(relu_input=relu_input, neuron_idx=idx, split_value=+1)
-
-            heapq.heappush(
-                heap,
-                _QueueItem(
-                    priority=node_lower,
-                    node_id=node_id,
-                    split_state=left,
-                    warm_start=best_alpha,
-                    warm_start_beta=best_beta,
-                ),
-            )
-            node_id += 1
-            heapq.heappush(
-                heap,
-                _QueueItem(
-                    priority=node_lower,
-                    node_id=node_id,
-                    split_state=right,
-                    warm_start=best_alpha,
-                    warm_start_beta=best_beta,
-                ),
-            )
-            node_id += 1
-            expanded += 1
-            max_q = max(max_q, len(heap))
             continue
 
-        # Batch path: pop top-K nodes and evaluate bounds in one oracle call.
-        items: List[_QueueItem] = []
-        for _ in range(min(int(cfg.node_batch_size), len(heap), int(cfg.max_nodes) - visited)):
-            items.append(heapq.heappop(heap))
-        visited += len(items)
-        if not items:
-            break
-        batch_rounds += 1
-        batch_popped_total += len(items)
-
-        if input_spec_n.center.dim() != 2:
-            raise NotImplementedError("batched BaB currently expects input center rank-2 [B,I]")
-        if int(input_spec_n.center.shape[0]) != 1:
-            raise NotImplementedError("batched BaB currently expects input batch B==1 (node-batch uses batch dim)")
-        x0 = input_spec_n.center
-
-        # PR-3A: reuse cached node evaluations when possible.
-        cached_bounds: Dict[int, IntervalState] = {}
-        cached_alpha: Dict[int, AlphaState] = {}
-        cached_beta: Dict[int, BetaState] = {}
+        cached_results: Dict[int, Tuple[IntervalState, AlphaState, BetaState, Optional[Tuple[str, int]]]] = {}
         uncached: List[Tuple[int, _QueueItem]] = []
         pruned_indices: List[int] = []
-        if node_cache is not None:
-            for i, it in enumerate(items):
-                v = node_cache.get(split_state=it.split_state)
-                if v is None:
-                    uncached.append((i, it))
-                else:
-                    if getattr(v.stats, "feasibility", None) == "infeasible":
-                        pruned_indices.append(i)
-                        continue
-                    cached_bounds[i] = v.bounds
-                    cached_alpha[i] = v.best_alpha
-                    cached_beta[i] = v.best_beta
-        else:
-            uncached = list(enumerate(items))
+        for i, item in enumerate(items):
+            cache = node_cache_by_example.get(int(item.example_idx))
+            if cache is None:
+                uncached.append((i, item))
+                continue
+            value = cache.get(split_state=item.split_state)
+            if value is None:
+                uncached.append((i, item))
+                continue
+            if getattr(value.stats, "feasibility", None) == "infeasible":
+                pruned_indices.append(i)
+                continue
+            cached_results[i] = (value.bounds, value.best_alpha, value.best_beta, value.branch)
 
         uncached, pruned_new = prune_infeasible_first_layer_items(
             module,
             input_spec_n,
             items=uncached,
-            cache=node_cache,
+            cache_by_example=node_cache_by_example if node_cache_by_example else None,
             cfg=cfg,
         )
         pruned_indices.extend(pruned_new)
 
-        bounds_b: Optional[IntervalState] = None
-        alpha_b: Optional[AlphaState] = None
-        beta_b: Optional[BetaState] = None
-        stats_var: Any = None
+        for i in pruned_indices:
+            _decrement_live_node(int(items[i].example_idx))
+            _mark_proven_if_finished(int(items[i].example_idx))
+
+        batch_results: Dict[int, Tuple[IntervalState, AlphaState, BetaState, Optional[Tuple[str, int]]]] = {}
         if uncached:
-            center_b = x0.expand(len(uncached), -1).clone()
-            batch_spec = type(input_spec_n)(
-                value_name=input_spec_n.value_name, center=center_b, perturbation=input_spec_n.perturbation
-            )
+            uncached_example_indices = [int(item.example_idx) for _, item in uncached]
+            batch_spec = _gather_input_spec(input_spec_n, example_indices=uncached_example_indices)
+            C_b = _gather_linear_spec_C(linear_spec_C, example_indices=uncached_example_indices, device=device)
 
-            C_b = None
-            if linear_spec_C is not None:
-                C = linear_spec_C
-                if not torch.is_tensor(C):
-                    C = torch.as_tensor(C, device=device)
-                if C.dim() == 2:
-                    C = C.unsqueeze(0)
-                if C.dim() != 3:
-                    raise ValueError(f"linear_spec_C expects rank-2/3, got {tuple(C.shape)}")
-                if int(C.shape[0]) != 1:
-                    raise NotImplementedError("batched BaB currently expects linear_spec_C batch B==1")
-                C_b = C.expand(len(uncached), int(C.shape[1]), int(C.shape[2])).clone()
-
-            # Stack split_state / warm-start alpha,beta along node dimension.
             relu_split_b: Dict[str, torch.Tensor] = {}
             warm_alpha_b: Dict[str, torch.Tensor] = {}
             warm_beta_b: Dict[str, torch.Tensor] = {}
-            for relu_input, base_split in items[0].split_state.by_relu_input.items():
-                _ = base_split
+            for relu_input, base_split in uncached[0][1].split_state.by_relu_input.items():
                 relu_split_b[relu_input] = torch.stack(
-                    [it.split_state.by_relu_input[relu_input] for _i, it in uncached], dim=0
+                    [item.split_state.by_relu_input[relu_input] for _, item in uncached], dim=0
                 )
                 alpha_rows: List[torch.Tensor] = []
                 beta_rows: List[torch.Tensor] = []
-                for _i, it in uncached:
-                    if it.warm_start is not None and relu_input in it.warm_start.alpha_by_relu_input:
-                        a = it.warm_start.alpha_by_relu_input[relu_input]
+                for _, item in uncached:
+                    if item.warm_start is not None and relu_input in item.warm_start.alpha_by_relu_input:
+                        a = item.warm_start.alpha_by_relu_input[relu_input]
                         a_t = a if torch.is_tensor(a) else torch.as_tensor(a, device=device)
-                        alpha_rows.append(a_t.to(device=device, dtype=x0.dtype))
+                        alpha_rows.append(a_t.to(device=device, dtype=input_spec_n.center.dtype))
                     else:
                         alpha_rows.append(
-                            torch.full((int(base_split.shape[0]),), float(cfg.alpha_init), device=device, dtype=x0.dtype)
+                            torch.full(
+                                tuple(base_split.shape),
+                                float(cfg.alpha_init),
+                                device=device,
+                                dtype=input_spec_n.center.dtype,
+                            )
                         )
-                    if it.warm_start_beta is not None and relu_input in it.warm_start_beta.beta_by_relu_input:
-                        b = it.warm_start_beta.beta_by_relu_input[relu_input]
+                    if item.warm_start_beta is not None and relu_input in item.warm_start_beta.beta_by_relu_input:
+                        b = item.warm_start_beta.beta_by_relu_input[relu_input]
                         b_t = b if torch.is_tensor(b) else torch.as_tensor(b, device=device)
-                        beta_rows.append(b_t.to(device=device, dtype=x0.dtype))
+                        beta_rows.append(b_t.to(device=device, dtype=input_spec_n.center.dtype))
                     else:
                         beta_rows.append(
-                            torch.full((int(base_split.shape[0]),), float(cfg.beta_init), device=device, dtype=x0.dtype)
+                            torch.full(
+                                tuple(base_split.shape),
+                                float(cfg.beta_init),
+                                device=device,
+                                dtype=input_spec_n.center.dtype,
+                            )
                         )
                 warm_alpha_b[relu_input] = torch.stack(alpha_rows, dim=0)
                 warm_beta_b[relu_input] = torch.stack(beta_rows, dim=0)
-
-            warm_alpha_state = AlphaState(alpha_by_relu_input=warm_alpha_b)
-            warm_beta_state = BetaState(beta_by_relu_input=warm_beta_b)
 
             try:
                 bounds_b, alpha_b, beta_b, stats_var = run_alpha_beta_crown_mlp(
@@ -704,8 +842,8 @@ def solve_bab_mlp(
                     lr=float(cfg.alpha_lr),
                     alpha_init=float(cfg.alpha_init),
                     beta_init=float(cfg.beta_init),
-                    warm_start_alpha=warm_alpha_state,
-                    warm_start_beta=warm_beta_state,
+                    warm_start_alpha=AlphaState(alpha_by_relu_input=warm_alpha_b),
+                    warm_start_beta=BetaState(beta_by_relu_input=warm_beta_b),
                     objective=cfg.objective,
                     spec_reduce=cfg.spec_reduce,
                     soft_tau=float(cfg.soft_tau),
@@ -714,166 +852,126 @@ def solve_bab_mlp(
                     per_batch_params=True,
                 )
                 if getattr(stats_var, "feasibility", None) == "infeasible":
-                    continue
-            except ValueError:
-                bounds_b = None
-                alpha_b = None
-                beta_b = None
-                for i, it in uncached:
-                    try:
-                        b1, a1, beta1, st1, branch1, _hit = eval_bab_alpha_beta_node(
-                            module,
-                            input_spec_n,
-                            linear_spec_C=linear_spec_C,
-                            split_state=it.split_state,
-                            warm_start_alpha=it.warm_start,
-                            warm_start_beta=it.warm_start_beta,
-                            cfg=cfg,
-                            cache=node_cache,
+                    for _, item in uncached:
+                        _decrement_live_node(int(item.example_idx))
+                        _mark_proven_if_finished(int(item.example_idx))
+                else:
+                    for jj, (orig_i, item) in enumerate(uncached):
+                        node_bounds = IntervalState(
+                            lower=bounds_b.lower[jj : jj + 1].detach().clone(),
+                            upper=bounds_b.upper[jj : jj + 1].detach().clone(),
                         )
-                        if getattr(st1, "feasibility", None) == "infeasible":
-                            continue
-                        cached_bounds[i] = IntervalState(
-                            lower=b1.lower.detach().clone(), upper=b1.upper.detach().clone()
-                        )
-                        cached_alpha[i] = a1.detach_clone()
-                        cached_beta[i] = beta1.detach_clone()
-                        if node_cache is not None:
-                            node_cache.put(
-                                split_state=it.split_state,
+                        alpha_i = AlphaState({k: v[jj].detach().clone() for k, v in alpha_b.alpha_by_relu_input.items()})
+                        beta_i = BetaState({k: v[jj].detach().clone() for k, v in beta_b.beta_by_relu_input.items()})
+                        branch = None
+                        if hasattr(stats_var, "branch_choices") and stats_var.branch_choices:
+                            try:
+                                branch = stats_var.branch_choices[jj]
+                            except Exception:
+                                branch = None
+                        batch_results[orig_i] = (node_bounds, alpha_i, beta_i, branch)
+                        cache = node_cache_by_example.get(int(item.example_idx))
+                        if cache is not None:
+                            cache.put(
+                                split_state=item.split_state,
                                 value=NodeEvalCacheValue(
-                                    bounds=cached_bounds[i],
-                                    best_alpha=cached_alpha[i],
-                                    best_beta=cached_beta[i],
-                                    stats=st1,
-                                    branch=branch1,
+                                    bounds=node_bounds,
+                                    best_alpha=alpha_i.detach_clone(),
+                                    best_beta=beta_i.detach_clone(),
+                                    stats=stats_var,
+                                    branch=branch,
                                 ),
                             )
+            except ValueError:
+                for orig_i, item in uncached:
+                    example_idx = int(item.example_idx)
+                    try:
+                        bounds, best_alpha, best_beta, stats, branch, _hit = eval_bab_alpha_beta_node(
+                            module,
+                            _slice_input_spec(input_spec_n, example_idx=example_idx),
+                            linear_spec_C=_slice_linear_spec_C(linear_spec_C, example_idx=example_idx, device=device),
+                            split_state=item.split_state,
+                            warm_start_alpha=item.warm_start,
+                            warm_start_beta=item.warm_start_beta,
+                            cfg=cfg,
+                            cache=node_cache_by_example.get(example_idx),
+                        )
+                        if getattr(stats, "feasibility", None) == "infeasible":
+                            _consume_live_node(example_idx)
+                            continue
+                        batch_results[orig_i] = (
+                            IntervalState(lower=bounds.lower.detach().clone(), upper=bounds.upper.detach().clone()),
+                            best_alpha.detach_clone(),
+                            best_beta.detach_clone(),
+                            branch,
+                        )
                     except ValueError:
-                        continue
+                        _decrement_live_node(example_idx)
+                        _mark_proven_if_finished(example_idx)
 
-        # Process each node's result.
-        for i, it in enumerate(items):
+        for i, item in enumerate(items):
+            example_idx = int(item.example_idx)
             if i in pruned_indices:
                 continue
-            if i in cached_bounds:
-                node_bounds = cached_bounds[i]
-                alpha_i = cached_alpha[i]
-                beta_i = cached_beta[i]
-                branch = None
-                if node_cache is not None:
-                    cv = node_cache.get(split_state=it.split_state)
-                    if cv is not None:
-                        branch = cv.branch
-            else:
-                if bounds_b is None or alpha_b is None or beta_b is None:
-                    # No evaluation result for this node (e.g. per-node fallback also failed); skip it.
-                    continue
-                # Locate position in uncached list.
-                j = [jj for jj, (orig_i, _it) in enumerate(uncached) if orig_i == i]
-                if not j:
-                    raise RuntimeError("internal error: missing node eval result")
-                jj = int(j[0])
-                node_bounds = IntervalState(lower=bounds_b.lower[jj : jj + 1], upper=bounds_b.upper[jj : jj + 1])
-                alpha_i = AlphaState({k: v[jj].detach().clone() for k, v in alpha_b.alpha_by_relu_input.items()})
-                beta_i = BetaState({k: v[jj].detach().clone() for k, v in beta_b.beta_by_relu_input.items()})
-                if node_cache is not None:
-                    branch = None
-                    if hasattr(stats_var, "branch_choices") and stats_var.branch_choices:
-                        try:
-                            branch = stats_var.branch_choices[jj]
-                        except Exception:
-                            branch = None
-                    node_cache.put(
-                        split_state=it.split_state,
-                        value=NodeEvalCacheValue(
-                            bounds=IntervalState(
-                                lower=node_bounds.lower.detach().clone(),
-                                upper=node_bounds.upper.detach().clone(),
-                            ),
-                            best_alpha=alpha_i.detach_clone(),
-                            best_beta=beta_i.detach_clone(),
-                            stats=stats_var,
-                            branch=branch,
-                        ),
-                    )
-                else:
-                    branch = None
-            node_lower = float(node_bounds.lower.min().item())
-            node_upper = float(node_bounds.upper.max().item())
-            global_best_lower = max(global_best_lower, node_lower)
-            global_best_upper = min(global_best_upper, node_upper)
-
-            evaluated += 1
-            if node_lower >= float(cfg.threshold) - float(cfg.tol):
-                continue
-
-            if not bool(cfg.use_branch_hint):
-                branch = None
-            if branch is None:
-                branch = _pick_branch(module, input_spec_n, split_state=it.split_state)
-            if branch is None:
-                return BabResult(
-                    status="unsafe",
-                    nodes_visited=visited,
-                    nodes_evaluated=evaluated,
-                    nodes_expanded=expanded,
-                    max_queue=max_q,
-                    batch_rounds=batch_rounds,
-                    avg_batch_fill_rate=0.0 if int(cfg.node_batch_size) <= 1 else float(batch_popped_total) / float(batch_rounds * int(cfg.node_batch_size)),
-                    best_lower=global_best_lower,
-                    best_upper=global_best_upper,
+            if i in cached_results:
+                node_bounds, alpha_i, beta_i, branch = cached_results[i]
+                _process_evaluated_node(
+                    item,
+                    bounds=node_bounds,
+                    best_alpha=alpha_i,
+                    best_beta=beta_i,
+                    branch_hint=branch,
                 )
+                continue
+            if i in batch_results:
+                node_bounds, alpha_i, beta_i, branch = batch_results[i]
+                _process_evaluated_node(
+                    item,
+                    bounds=node_bounds,
+                    best_alpha=alpha_i,
+                    best_beta=beta_i,
+                    branch_hint=branch,
+                )
+                continue
+            if status_by_example[example_idx] is None:
+                _decrement_live_node(example_idx)
+                _mark_proven_if_finished(example_idx)
 
-            relu_input, idx = branch
-            left = it.split_state.with_split(relu_input=relu_input, neuron_idx=idx, split_value=-1)
-            right = it.split_state.with_split(relu_input=relu_input, neuron_idx=idx, split_value=+1)
+    for example_idx in range(num_examples):
+        if status_by_example[example_idx] is None:
+            if live_nodes[example_idx] == 0:
+                status_by_example[example_idx] = "proven"
+            else:
+                status_by_example[example_idx] = "unknown"
 
-            heapq.heappush(
-                heap,
-                _QueueItem(
-                    priority=node_lower,
-                    node_id=node_id,
-                    split_state=left,
-                    warm_start=alpha_i,
-                    warm_start_beta=beta_i.detach_clone(),
-                ),
-            )
-            node_id += 1
-            heapq.heappush(
-                heap,
-                _QueueItem(
-                    priority=node_lower,
-                    node_id=node_id,
-                    split_state=right,
-                    warm_start=alpha_i,
-                    warm_start_beta=beta_i.detach_clone(),
-                ),
-            )
-            node_id += 1
-            expanded += 1
-            max_q = max(max_q, len(heap))
-
-    if not heap:
-        return BabResult(
-            status="proven",
-            nodes_visited=visited,
-            nodes_evaluated=evaluated,
-            nodes_expanded=expanded,
-            max_queue=max_q,
-            batch_rounds=batch_rounds,
-            avg_batch_fill_rate=0.0 if int(cfg.node_batch_size) <= 1 or batch_rounds == 0 else float(batch_popped_total) / float(batch_rounds * int(cfg.node_batch_size)),
-            best_lower=global_best_lower,
-            best_upper=global_best_upper,
+    per_example = tuple(
+        BabPerExampleResult(
+            example_idx=example_idx,
+            status=status_by_example[example_idx] or "unknown",
+            nodes_visited=visited_by_example[example_idx],
+            nodes_evaluated=evaluated_by_example[example_idx],
+            nodes_expanded=expanded_by_example[example_idx],
+            best_lower=best_lower_by_example[example_idx],
+            best_upper=best_upper_by_example[example_idx],
         )
+        for example_idx in range(num_examples)
+    )
+    statuses = [r.status for r in per_example]
+    best_lower = min(r.best_lower for r in per_example)
+    best_upper = max(r.best_upper for r in per_example)
     return BabResult(
-        status="unknown",
-        nodes_visited=visited,
-        nodes_evaluated=evaluated,
-        nodes_expanded=expanded,
+        status=_aggregate_bab_status(statuses),
+        nodes_visited=sum(visited_by_example),
+        nodes_evaluated=sum(evaluated_by_example),
+        nodes_expanded=sum(expanded_by_example),
         max_queue=max_q,
         batch_rounds=batch_rounds,
-        avg_batch_fill_rate=0.0 if int(cfg.node_batch_size) <= 1 or batch_rounds == 0 else float(batch_popped_total) / float(batch_rounds * int(cfg.node_batch_size)),
-        best_lower=global_best_lower,
-        best_upper=global_best_upper,
+        avg_batch_fill_rate=(
+            0.0
+            if int(cfg.node_batch_size) <= 1 or batch_rounds == 0
+            else float(batch_popped_total) / float(batch_rounds * int(cfg.node_batch_size))
+        ),
+        best_lower=best_lower,
+        best_upper=best_upper,
+        per_example=per_example,
     )
