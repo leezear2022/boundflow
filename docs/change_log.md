@@ -2197,3 +2197,30 @@
 - 结果：`9 passed, 4 warnings in 2.32s`
 - `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr8_general_dag_runtime.py tests/test_phase7a_pr8_general_dag_frontends.py tests/test_phase7a_pr7_bab_chain_cnn.py tests/test_phase7a_pr7_bab_batch_examples.py tests/test_phase7a_pr6_alpha_beta_crown_cnn.py tests/test_phase7a_pr5_alpha_crown_cnn.py tests/test_phase7a_pr4_conv_lazy_norms.py tests/test_phase7a_pr3_crown_ibp_cnn.py tests/test_phase6b_crown_ibp_mlp.py tests/test_phase6d_alpha_crown_mlp.py tests/test_phase6e_bab_mlp.py tests/test_phase6f_alpha_beta_crown_pr1.py tests/test_phase6g_alpha_beta_multispec_batch.py tests/test_phase6g_bab_node_batch.py tests/test_phase6g_bab_node_eval_cache.py tests/test_phase6g_node_batch_grad_isolation.py tests/test_phase6g_branch_pick_reuses_forward_trace.py tests/test_phase6g_node_batch_partial_infeasible_prune.py tests/test_phase6h_bench_e2e_schema.py tests/test_phase4d_onnx_frontend_matches_torch.py`
 - 结果：`65 passed, 8 warnings in 3.68s`
+
+---
+
+## 2026-03-21：清理旧 worktree 与无效草稿文件
+
+**动机**
+- PR-8 合回主线后，仓库中仍残留一个已过时的 feature worktree，以及两份无关草稿文件，继续保留只会污染工作区状态。
+
+**主要改动**
+- 删除旧 worktree 与分支：
+  - `.worktrees/phase7a-pr6-alpha-beta-crown-chain-cnn`
+  - `phase7a-pr6-alpha-beta-crown-chain-cnn`
+- 删除无效草稿：
+  - `gemini_doc/Untitled-1.md`
+  - `gemini_doc/chatlog.md`
+- 新增文档：
+  - `gemini_doc/change_2026-03-21_cleanup_stale_worktree_and_drafts.md`
+
+**影响面**
+- `git worktree list` 现在只剩主仓库 `main`
+- 工作区不再保留无关草稿文件
+
+**验证**
+- `git rev-list --left-right --count main...phase7a-pr6-alpha-beta-crown-chain-cnn`
+- 结果：`4 0`
+- `git worktree list`
+- 结果：只剩 `/home/lee/Codes/boundflow  e4cd789 [main]`
