@@ -244,6 +244,8 @@ def _map_torch_target_to_primitive(target: Any) -> str:
         "aten.linear.default": "linear",
         "aten.relu.default": "relu",
         "aten.add.Tensor": "add",
+        "aten.cat.default": "concat",
+        "aten.concat.default": "concat",
         "aten.conv2d.default": "conv2d",
         "aten.matmul.default": "matmul",
         "aten.flatten.using_ints": "flatten",
@@ -287,5 +289,14 @@ def _extract_attrs_for_call_function(op_type: str, fx_node: torch.fx.Node) -> Di
         if not isinstance(dims, (list, tuple)):
             raise ValueError(f"permute dims must be list/tuple, got {type(dims)}: {dims}")
         return {"dims": [int(d) for d in dims]}
+
+    if op_type == "concat":
+        args = list(fx_node.args)
+        axis = fx_node.kwargs.get("dim", None)
+        if axis is None and len(args) > 1:
+            axis = args[1]
+        if axis is None:
+            axis = 0
+        return {"axis": int(axis)}
 
     return {}

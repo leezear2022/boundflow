@@ -743,6 +743,8 @@ def run_alpha_beta_crown_mlp(
             break
 
         loss = -metric_b.mean()
+        if not loss.requires_grad:
+            break
         opt.zero_grad(set_to_none=True)
         loss.backward()
         opt.step()

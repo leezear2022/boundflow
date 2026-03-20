@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import torch
 
@@ -121,6 +121,52 @@ def _forward_ibp_trace_mlp(
                 x = _apply_relu_split(x, relu_split_state[x_name], relu_input_name=x_name)
             relu_pre[x_name] = x
             y = domain.relu_transformer(x)
+            env[op.outputs[0]] = y
+            interval_env[op.outputs[0]] = y
+            continue
+
+        if op.op_type == "add":
+            a = _ensure_interval(_get_state(op.inputs[0]))
+            b = _ensure_interval(_get_state(op.inputs[1]))
+            if tuple(a.lower.shape) != tuple(b.lower.shape) or tuple(a.upper.shape) != tuple(b.upper.shape):
+                raise NotImplementedError(
+                    "_forward_ibp_trace_mlp only supports add with exact same-shape inputs; "
+                    f"got {tuple(a.lower.shape)} and {tuple(b.lower.shape)}"
+                )
+            y = IntervalState(lower=a.lower + b.lower, upper=a.upper + b.upper)
+            env[op.outputs[0]] = y
+            interval_env[op.outputs[0]] = y
+            continue
+
+        if op.op_type == "concat":
+            if len(op.inputs) < 2:
+                raise ValueError(f"concat expects at least 2 inputs, got {len(op.inputs)}")
+            parts = [_ensure_interval(_get_state(name)) for name in op.inputs]
+            axis = _normalize_concat_axis(
+                op.attrs.get("axis", 1),
+                rank_with_batch=int(parts[0].lower.dim()),
+                caller="_forward_ibp_trace_mlp",
+            )
+            ref_shape = tuple(int(dim) for dim in parts[0].lower.shape)
+            for idx, part in enumerate(parts[1:], start=1):
+                shape = tuple(int(dim) for dim in part.lower.shape)
+                if len(shape) != len(ref_shape):
+                    raise NotImplementedError(
+                        "_forward_ibp_trace_mlp only supports concat with equal ranks, "
+                        f"got {ref_shape} and {shape} at input {idx}"
+                    )
+                for dim_i, (lhs, rhs) in enumerate(zip(ref_shape, shape)):
+                    if dim_i == axis:
+                        continue
+                    if lhs != rhs:
+                        raise NotImplementedError(
+                            "_forward_ibp_trace_mlp only supports concat with exact same-shape non-axis dims, "
+                            f"got {ref_shape} and {shape}"
+                        )
+            y = IntervalState(
+                lower=torch.cat([part.lower for part in parts], dim=axis),
+                upper=torch.cat([part.upper for part in parts], dim=axis),
+            )
             env[op.outputs[0]] = y
             interval_env[op.outputs[0]] = y
             continue
@@ -351,6 +397,100 @@ def _value_shape(
     if value_name not in interval_env:
         raise KeyError(f"missing interval trace for value shape lookup: {value_name}")
     return tuple(int(dim) for dim in interval_env[value_name].lower.shape[1:])
+
+
+def _normalize_concat_axis(axis_raw: Any, *, rank_with_batch: int, caller: str) -> int:
+    axis = int(axis_raw)
+    if rank_with_batch == 2:
+        if axis in (1, -1):
+            return 1
+        raise NotImplementedError(
+            f"{caller} only supports concat on feature axis for rank-2 [B,F], got axis={axis}"
+        )
+    if rank_with_batch == 4:
+        if axis in (1, -3):
+            return 1
+        raise NotImplementedError(
+            f"{caller} only supports concat on NCHW channel axis for rank-4 [B,C,H,W], got axis={axis}"
+        )
+    raise NotImplementedError(
+        f"{caller} only supports concat on rank-2 [B,F] or rank-4 [B,C,H,W], got rank={rank_with_batch}"
+    )
+
+
+def _align_backward_state_input_shape(
+    state: AffineBackwardState,
+    *,
+    input_shape: Tuple[int, ...],
+) -> AffineBackwardState:
+    A_u = state.A_u if tuple(state.A_u.input_shape) == tuple(input_shape) else state.A_u.reshape_input(input_shape)
+    A_l = state.A_l if tuple(state.A_l.input_shape) == tuple(input_shape) else state.A_l.reshape_input(input_shape)
+    return AffineBackwardState(A_u=A_u, A_l=A_l, b_u=state.b_u, b_l=state.b_l)
+
+
+def _accumulate_backward_state(
+    current: Optional[AffineBackwardState],
+    update: AffineBackwardState,
+    *,
+    input_shape: Tuple[int, ...],
+) -> AffineBackwardState:
+    aligned_update = _align_backward_state_input_shape(update, input_shape=input_shape)
+    if current is None:
+        return aligned_update
+    aligned_current = _align_backward_state_input_shape(current, input_shape=input_shape)
+    return AffineBackwardState(
+        A_u=DenseLinearOperator(
+            aligned_current.A_u.to_dense() + aligned_update.A_u.to_dense(),
+            input_shape=input_shape,
+        ),
+        A_l=DenseLinearOperator(
+            aligned_current.A_l.to_dense() + aligned_update.A_l.to_dense(),
+            input_shape=input_shape,
+        ),
+        b_u=aligned_current.b_u + aligned_update.b_u,
+        b_l=aligned_current.b_l + aligned_update.b_l,
+    )
+
+
+def _dynamic_value_names(
+    *,
+    input_spec: InputSpec,
+    interval_env: Dict[str, IntervalState],
+) -> set[str]:
+    names = set(interval_env.keys())
+    names.add(input_spec.value_name)
+    return names
+
+
+def _split_bias_once(
+    state: AffineBackwardState,
+    *,
+    num_children: int,
+) -> List[Tuple[torch.Tensor, torch.Tensor]]:
+    zero_u = torch.zeros_like(state.b_u)
+    zero_l = torch.zeros_like(state.b_l)
+    out: List[Tuple[torch.Tensor, torch.Tensor]] = []
+    for idx in range(num_children):
+        if idx == 0:
+            out.append((state.b_u, state.b_l))
+        else:
+            out.append((zero_u, zero_l))
+    return out
+
+
+def _slice_concat_operator(
+    op: LinearOperator,
+    *,
+    output_shape: Tuple[int, ...],
+    input_shape: Tuple[int, ...],
+    start: int,
+    stop: int,
+) -> DenseLinearOperator:
+    dense = (
+        op if tuple(op.input_shape) == tuple(output_shape) else op.reshape_input(output_shape)
+    ).to_dense().reshape(int(op.shape[0]), int(op.shape[1]), *output_shape)
+    sliced = dense[:, :, start:stop, ...].contiguous()
+    return DenseLinearOperator(sliced, input_shape=input_shape)
 
 
 def _broadcast_relu_alpha(
@@ -630,17 +770,46 @@ def _run_crown_backward_from_trace(
             raise KeyError(f"missing param tensor: {name}")
         return params[name]
 
+    def _get_state(name: str) -> Any:
+        if name == input_spec.value_name:
+            return InputPerturbationState(center=input_spec.center, perturbation=input_spec.perturbation)
+        if name in interval_env:
+            return interval_env[name]
+        if name in params:
+            t = params[name]
+            if not torch.is_tensor(t):
+                t = torch.as_tensor(t, device=input_spec.center.device, dtype=input_spec.center.dtype)
+            return IntervalState(lower=t, upper=t)
+        raise KeyError(f"missing value in interval_env/params: {name}")
+
+    def _ensure_interval(state_like: Any) -> IntervalState:
+        if isinstance(state_like, IntervalState):
+            return state_like
+        if isinstance(state_like, InputPerturbationState):
+            lb, ub = state_like.perturbation.bounding_box(state_like.center)
+            return IntervalState(lower=lb, upper=ub)
+        raise TypeError(f"expected IntervalState/InputPerturbationState, got {type(state_like)}")
+
     resolved_output = _resolve_output_value(task, output_value, caller=caller)
     _y_out, batch, out_dim, device, dtype = _get_output_meta(
         interval_env=interval_env,
         output_value=resolved_output,
         caller=caller,
     )
-    state = _init_backward_state(batch=batch, out_dim=out_dim, device=device, dtype=dtype, linear_spec_C=linear_spec_C)
+    init_state = _init_backward_state(batch=batch, out_dim=out_dim, device=device, dtype=dtype, linear_spec_C=linear_spec_C)
+    adjoints: Dict[str, AffineBackwardState] = {resolved_output: init_state}
+    dynamic_names = _dynamic_value_names(input_spec=input_spec, interval_env=interval_env)
 
     for op in reversed(task.ops):
+        if len(op.outputs) != 1:
+            raise NotImplementedError(f"{caller} expects single-output ops, got outputs={op.outputs}")
+        out_name = op.outputs[0]
+        state = adjoints.pop(out_name, None)
+        if state is None:
+            continue
+
         if op.op_type == "linear":
-            state = _backprop_linear_step(
+            contrib = _backprop_linear_step(
                 state,
                 weight=_get_tensor(op.inputs[1]),
                 bias=_get_tensor(op.inputs[2]) if len(op.inputs) == 3 else None,
@@ -648,6 +817,9 @@ def _run_crown_backward_from_trace(
                 dtype=dtype,
                 caller=caller,
             )
+            in_name = op.inputs[0]
+            in_shape = _value_shape(input_spec=input_spec, interval_env=interval_env, value_name=in_name)
+            adjoints[in_name] = _accumulate_backward_state(adjoints.get(in_name), contrib, input_shape=in_shape)
             continue
 
         if op.op_type == "flatten":
@@ -657,17 +829,17 @@ def _run_crown_backward_from_trace(
                 raise NotImplementedError(
                     f"{caller} only supports flatten(start_dim=1, end_dim=-1), got attrs={op.attrs}"
                 )
-            state = _backprop_flatten_step(
-                state,
-                pre_shape=_value_shape(input_spec=input_spec, interval_env=interval_env, value_name=op.inputs[0]),
-            )
+            in_name = op.inputs[0]
+            in_shape = _value_shape(input_spec=input_spec, interval_env=interval_env, value_name=in_name)
+            contrib = _backprop_flatten_step(state, pre_shape=in_shape)
+            adjoints[in_name] = _accumulate_backward_state(adjoints.get(in_name), contrib, input_shape=in_shape)
             continue
 
         if op.op_type == "relu":
             x_name = op.inputs[0]
             if x_name not in relu_pre:
                 raise KeyError(f"missing relu pre-activation bounds for value: {x_name}")
-            state = _backprop_relu_step(
+            contrib = _backprop_relu_step(
                 state,
                 pre=relu_pre[x_name],
                 x_name=x_name,
@@ -678,13 +850,18 @@ def _run_crown_backward_from_trace(
                 dtype=dtype,
                 caller=caller,
             )
+            in_shape = _value_shape(input_spec=input_spec, interval_env=interval_env, value_name=x_name)
+            adjoints[x_name] = _accumulate_backward_state(adjoints.get(x_name), contrib, input_shape=in_shape)
             continue
 
         if op.op_type == "conv2d":
-            state = _backprop_conv2d_step(
+            in_name = op.inputs[0]
+            in_shape = _value_shape(input_spec=input_spec, interval_env=interval_env, value_name=in_name)
+            out_shape = _value_shape(input_spec=input_spec, interval_env=interval_env, value_name=out_name)
+            contrib = _backprop_conv2d_step(
                 state,
-                input_shape=_value_shape(input_spec=input_spec, interval_env=interval_env, value_name=op.inputs[0]),
-                output_shape=_value_shape(input_spec=input_spec, interval_env=interval_env, value_name=op.outputs[0]),
+                input_shape=in_shape,
+                output_shape=out_shape,
                 weight=_get_tensor(op.inputs[1]),
                 bias=_get_tensor(op.inputs[2]) if len(op.inputs) == 3 else None,
                 attrs=dict(op.attrs),
@@ -692,13 +869,105 @@ def _run_crown_backward_from_trace(
                 dtype=dtype,
                 caller=caller,
             )
+            adjoints[in_name] = _accumulate_backward_state(adjoints.get(in_name), contrib, input_shape=in_shape)
+            continue
+
+        if op.op_type == "add":
+            out_shape = _value_shape(input_spec=input_spec, interval_env=interval_env, value_name=out_name)
+            base = _align_backward_state_input_shape(state, input_shape=out_shape)
+            a_state = base
+            b_state = base
+            const_bias_u = base.b_u
+            const_bias_l = base.b_l
+            dynamic_inputs: List[str] = []
+            for in_name in op.inputs:
+                val = _ensure_interval(_get_state(in_name))
+                if tuple(int(dim) for dim in val.lower.shape[1:]) != tuple(out_shape):
+                    raise NotImplementedError(
+                        f"{caller} only supports add with exact same-shape non-broadcast inputs; "
+                        f"got output_shape={out_shape} input_shape={tuple(int(dim) for dim in val.lower.shape[1:])}"
+                    )
+                if in_name in dynamic_names:
+                    dynamic_inputs.append(in_name)
+                else:
+                    const_bias_u = const_bias_u + a_state.A_u.contract_input(val.lower)
+                    const_bias_l = const_bias_l + a_state.A_l.contract_input(val.lower)
+            bias_parts = _split_bias_once(
+                AffineBackwardState(A_u=a_state.A_u, A_l=a_state.A_l, b_u=const_bias_u, b_l=const_bias_l),
+                num_children=len(dynamic_inputs),
+            )
+            for idx, in_name in enumerate(dynamic_inputs):
+                in_shape = _value_shape(input_spec=input_spec, interval_env=interval_env, value_name=in_name)
+                contrib = AffineBackwardState(
+                    A_u=a_state.A_u,
+                    A_l=a_state.A_l,
+                    b_u=bias_parts[idx][0],
+                    b_l=bias_parts[idx][1],
+                )
+                adjoints[in_name] = _accumulate_backward_state(adjoints.get(in_name), contrib, input_shape=in_shape)
+            continue
+
+        if op.op_type == "concat":
+            out_shape = _value_shape(input_spec=input_spec, interval_env=interval_env, value_name=out_name)
+            axis = _normalize_concat_axis(op.attrs.get("axis", 1), rank_with_batch=len(out_shape) + 1, caller=caller)
+            if axis != 1:
+                raise AssertionError("supported concat axes must normalize to batch-preserving axis=1")
+            base = _align_backward_state_input_shape(state, input_shape=out_shape)
+            bias_parts = _split_bias_once(base, num_children=len(op.inputs))
+            start = 0
+            for idx, in_name in enumerate(op.inputs):
+                if in_name not in dynamic_names:
+                    raise NotImplementedError(f"{caller} only supports concat over dynamic tensor values, got {in_name}")
+                in_shape = _value_shape(input_spec=input_spec, interval_env=interval_env, value_name=in_name)
+                if len(in_shape) != len(out_shape):
+                    raise NotImplementedError(
+                        f"{caller} only supports concat with equal-rank inputs, got output_shape={out_shape} input_shape={in_shape}"
+                    )
+                for dim_i, (lhs, rhs) in enumerate(zip(out_shape, in_shape)):
+                    if dim_i == 0:
+                        continue
+                    if lhs != rhs:
+                        raise NotImplementedError(
+                            f"{caller} only supports concat with exact same-shape non-axis dims, got {out_shape} and {in_shape}"
+                        )
+                stop = start + int(in_shape[0])
+                contrib = AffineBackwardState(
+                    A_u=_slice_concat_operator(
+                        base.A_u,
+                        output_shape=out_shape,
+                        input_shape=in_shape,
+                        start=start,
+                        stop=stop,
+                    ),
+                    A_l=_slice_concat_operator(
+                        base.A_l,
+                        output_shape=out_shape,
+                        input_shape=in_shape,
+                        start=start,
+                        stop=stop,
+                    ),
+                    b_u=bias_parts[idx][0],
+                    b_l=bias_parts[idx][1],
+                )
+                adjoints[in_name] = _accumulate_backward_state(adjoints.get(in_name), contrib, input_shape=in_shape)
+                start = stop
+            if start != int(out_shape[0]):
+                raise ValueError(
+                    f"{caller} concat backward shape mismatch: sliced={start} but output axis size is {int(out_shape[0])}"
+                )
             continue
 
         raise NotImplementedError(f"run_crown_ibp_mlp unsupported op_type in backward: {op.op_type}")
 
+    if input_spec.value_name not in adjoints:
+        raise RuntimeError(f"{caller} backward did not reach input value {input_spec.value_name}")
+    input_state = _align_backward_state_input_shape(
+        adjoints[input_spec.value_name],
+        input_shape=tuple(int(dim) for dim in input_spec.center.shape[1:]),
+    )
     x0 = input_spec.center
-    _lb_u, ub_u = input_spec.perturbation.concretize_affine(center=x0, A=state.A_u, b=state.b_u)
-    lb_l, _ub_l = input_spec.perturbation.concretize_affine(center=x0, A=state.A_l, b=state.b_l)
+    _lb_u, ub_u = input_spec.perturbation.concretize_affine(center=x0, A=input_state.A_u, b=input_state.b_u)
+    lb_l, _ub_l = input_spec.perturbation.concretize_affine(center=x0, A=input_state.A_l, b=input_state.b_l)
     return IntervalState(lower=lb_l, upper=ub_u)
 
 
@@ -714,15 +983,17 @@ def run_crown_ibp_mlp(
     relu_split_state: Optional[Dict[str, torch.Tensor]] = None,
 ) -> IntervalState:
     """
-    Minimal CROWN-IBP for chain-structured graphs.
+    Minimal CROWN-IBP for a single-task general DAG subset.
 
     - Forward: interval IBP to get pre-activation bounds for ReLU.
     - Backward: CROWN-style linear bound propagation using ReLU relaxations fixed by IBP bounds.
 
     Limitations:
     - Single task only.
-    - Supports chain op_type in {"linear", "relu", "conv2d", "flatten"}.
+    - Supports op_type in {"linear", "relu", "conv2d", "flatten", "add", "concat"}.
     - `flatten` is restricted to `start_dim=1, end_dim=-1`.
+    - `add` only supports exact same-shape inputs (no broadcast).
+    - `concat` only supports feature-axis concat on [B,F] and channel-axis concat on [B,C,H,W].
     - Conv support is plain CROWN-IBP only; alpha/beta/BaB remain MLP-only.
     - Returns bounds for a single output value (rank-2 [B,O]).
     """
@@ -734,19 +1005,6 @@ def run_crown_ibp_mlp(
         raise NotImplementedError("run_crown_ibp_mlp currently supports single-task BFTaskModule only")
     if not task.ops:
         raise ValueError("run_crown_ibp_mlp expects a non-empty task")
-    for i in range(len(task.ops) - 1):
-        cur = task.ops[i]
-        nxt = task.ops[i + 1]
-        if len(cur.outputs) != 1:
-            raise NotImplementedError(f"run_crown_ibp_mlp expects single-output ops, got outputs={cur.outputs}")
-        if not nxt.inputs:
-            raise NotImplementedError("run_crown_ibp_mlp expects each op to have at least one input")
-        if cur.outputs[0] != nxt.inputs[0]:
-            raise NotImplementedError(
-                "run_crown_ibp_mlp currently supports chain-structured graphs only "
-                f"(expected next input {nxt.inputs[0]} to equal prev output {cur.outputs[0]})"
-            )
-
     input_spec = _normalize_input_spec(input_spec)
     if output_value is None:
         if len(task.output_values) != 1:
@@ -819,7 +1077,7 @@ def get_crown_ibp_mlp_stats(module: BFTaskModule) -> CrownIbpStats:
         ops = tuple(op.op_type for op in task.ops)
         if not task.ops:
             return CrownIbpStats(supported=False, reason="empty task", ops_seen=ops)
-        bad = [t for t in ops if t not in {"linear", "relu", "conv2d", "flatten"}]
+        bad = [t for t in ops if t not in {"linear", "relu", "conv2d", "flatten", "add", "concat"}]
         if bad:
             return CrownIbpStats(supported=False, reason=f"unsupported ops: {bad}", ops_seen=ops)
         for i, op in enumerate(task.ops):
@@ -832,27 +1090,32 @@ def get_crown_ibp_mlp_stats(module: BFTaskModule) -> CrownIbpStats:
                         reason=f"unsupported flatten attrs at op {i}: {op.attrs}",
                         ops_seen=ops,
                     )
-        for i in range(len(task.ops) - 1):
-            cur = task.ops[i]
-            nxt = task.ops[i + 1]
-            if len(cur.outputs) != 1:
+            if len(op.outputs) != 1:
                 return CrownIbpStats(
                     supported=False,
-                    reason=f"non-chain: op {i} outputs={cur.outputs}",
+                    reason=f"multi-output op not supported at op {i}: outputs={op.outputs}",
                     ops_seen=ops,
                 )
-            if not nxt.inputs:
+            if op.op_type == "add" and len(op.inputs) != 2:
                 return CrownIbpStats(
                     supported=False,
-                    reason=f"non-chain: op {i+1} has no inputs",
+                    reason=f"add expects 2 inputs at op {i}, got {len(op.inputs)}",
                     ops_seen=ops,
                 )
-            if cur.outputs[0] != nxt.inputs[0]:
-                return CrownIbpStats(
-                    supported=False,
-                    reason=f"non-chain: op {i} -> {i+1} value mismatch ({cur.outputs[0]} != {nxt.inputs[0]})",
-                    ops_seen=ops,
-                )
+            if op.op_type == "concat":
+                if len(op.inputs) < 2:
+                    return CrownIbpStats(
+                        supported=False,
+                        reason=f"concat expects at least 2 inputs at op {i}, got {len(op.inputs)}",
+                        ops_seen=ops,
+                    )
+                axis = int(op.attrs.get("axis", 1))
+                if axis not in (1, -1, -3):
+                    return CrownIbpStats(
+                        supported=False,
+                        reason=f"unsupported concat axis at op {i}: {axis}",
+                        ops_seen=ops,
+                    )
         return CrownIbpStats(supported=True, ops_seen=ops)
     except Exception as e:  # pragma: no cover
         return CrownIbpStats(supported=False, reason=str(e), ops_seen=tuple())

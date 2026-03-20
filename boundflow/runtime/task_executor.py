@@ -11,6 +11,23 @@ from ..ir.task import StoragePlan
 from .perturbation import InputPerturbationState, LpBallPerturbation, PerturbationSet
 
 
+def _normalize_concat_axis(axis_raw: Any, *, rank_with_batch: int, caller: str) -> int:
+    axis = int(axis_raw)
+    if rank_with_batch == 2:
+        if axis in (1, -1):
+            return 1
+        raise NotImplementedError(f"{caller} only supports feature-axis concat for rank-2 [B,F], got axis={axis}")
+    if rank_with_batch == 4:
+        if axis in (1, -3):
+            return 1
+        raise NotImplementedError(
+            f"{caller} only supports NCHW channel-axis concat for rank-4 [B,C,H,W], got axis={axis}"
+        )
+    raise NotImplementedError(
+        f"{caller} only supports concat on rank-2 [B,F] or rank-4 [B,C,H,W], got rank={rank_with_batch}"
+    )
+
+
 @dataclass(frozen=True)
 class LinfInputSpec:
     value_name: str
@@ -171,11 +188,56 @@ class PythonTaskExecutor:
                 env[op.outputs[0]] = self.domain.relu_transformer(x)  # type: ignore[assignment]
                 continue
 
-            if op.op_type in ("add", "mul"):
+            if op.op_type == "add":
+                a = ensure_interval(get_state(op.inputs[0]))
+                b = ensure_interval(get_state(op.inputs[1]))
+                if tuple(a.lower.shape) != tuple(b.lower.shape) or tuple(a.upper.shape) != tuple(b.upper.shape):
+                    raise NotImplementedError(
+                        "PythonTaskExecutor only supports add with exact same-shape inputs; "
+                        f"got {tuple(a.lower.shape)} and {tuple(b.lower.shape)}"
+                    )
+                env[op.outputs[0]] = IntervalState(  # type: ignore[assignment]
+                    lower=a.lower + b.lower,
+                    upper=a.upper + b.upper,
+                )
+                continue
+
+            if op.op_type == "mul":
                 a = ensure_interval(get_state(op.inputs[0]))
                 b = ensure_interval(get_state(op.inputs[1]))
                 env[op.outputs[0]] = self.domain.elementwise_transformer(  # type: ignore[assignment]
                     [a, b], op=op.op_type
+                )
+                continue
+
+            if op.op_type == "concat":
+                if len(op.inputs) < 2:
+                    raise ValueError(f"concat expects at least 2 inputs, got {len(op.inputs)}")
+                parts = [ensure_interval(get_state(name)) for name in op.inputs]
+                axis = _normalize_concat_axis(
+                    op.attrs.get("axis", 1),
+                    rank_with_batch=int(parts[0].lower.dim()),
+                    caller="PythonTaskExecutor.run_ibp",
+                )
+                ref_shape = tuple(int(dim) for dim in parts[0].lower.shape)
+                for idx, part in enumerate(parts[1:], start=1):
+                    shape = tuple(int(dim) for dim in part.lower.shape)
+                    if len(shape) != len(ref_shape):
+                        raise NotImplementedError(
+                            "PythonTaskExecutor only supports concat with equal-rank inputs, "
+                            f"got {ref_shape} and {shape} at input {idx}"
+                        )
+                    for dim_i, (lhs, rhs) in enumerate(zip(ref_shape, shape)):
+                        if dim_i == axis:
+                            continue
+                        if lhs != rhs:
+                            raise NotImplementedError(
+                                "PythonTaskExecutor only supports concat with exact same-shape non-axis dims, "
+                                f"got {ref_shape} and {shape}"
+                            )
+                env[op.outputs[0]] = IntervalState(  # type: ignore[assignment]
+                    lower=torch.cat([part.lower for part in parts], dim=axis),
+                    upper=torch.cat([part.upper for part in parts], dim=axis),
                 )
                 continue
 
@@ -326,11 +388,56 @@ class PythonTaskExecutor:
                 env[_buf(op.outputs[0])] = self.domain.relu_transformer(x)  # type: ignore[assignment]
                 continue
 
-            if op.op_type in ("add", "mul"):
+            if op.op_type == "add":
+                a = get_interval(op.inputs[0])
+                b = get_interval(op.inputs[1])
+                if tuple(a.lower.shape) != tuple(b.lower.shape) or tuple(a.upper.shape) != tuple(b.upper.shape):
+                    raise NotImplementedError(
+                        "PythonTaskExecutor only supports add with exact same-shape inputs; "
+                        f"got {tuple(a.lower.shape)} and {tuple(b.lower.shape)}"
+                    )
+                env[_buf(op.outputs[0])] = IntervalState(  # type: ignore[assignment]
+                    lower=a.lower + b.lower,
+                    upper=a.upper + b.upper,
+                )
+                continue
+
+            if op.op_type == "mul":
                 a = get_interval(op.inputs[0])
                 b = get_interval(op.inputs[1])
                 env[_buf(op.outputs[0])] = self.domain.elementwise_transformer(  # type: ignore[assignment]
                     [a, b], op=op.op_type
+                )
+                continue
+
+            if op.op_type == "concat":
+                if len(op.inputs) < 2:
+                    raise ValueError(f"concat expects at least 2 inputs, got {len(op.inputs)}")
+                parts = [get_interval(name) for name in op.inputs]
+                axis = _normalize_concat_axis(
+                    op.attrs.get("axis", 1),
+                    rank_with_batch=int(parts[0].lower.dim()),
+                    caller="PythonTaskExecutor.run_ibp_task",
+                )
+                ref_shape = tuple(int(dim) for dim in parts[0].lower.shape)
+                for idx, part in enumerate(parts[1:], start=1):
+                    shape = tuple(int(dim) for dim in part.lower.shape)
+                    if len(shape) != len(ref_shape):
+                        raise NotImplementedError(
+                            "PythonTaskExecutor only supports concat with equal-rank inputs, "
+                            f"got {ref_shape} and {shape} at input {idx}"
+                        )
+                    for dim_i, (lhs, rhs) in enumerate(zip(ref_shape, shape)):
+                        if dim_i == axis:
+                            continue
+                        if lhs != rhs:
+                            raise NotImplementedError(
+                                "PythonTaskExecutor only supports concat with exact same-shape non-axis dims, "
+                                f"got {ref_shape} and {shape}"
+                            )
+                env[_buf(op.outputs[0])] = IntervalState(  # type: ignore[assignment]
+                    lower=torch.cat([part.lower for part in parts], dim=axis),
+                    upper=torch.cat([part.upper for part in parts], dim=axis),
                 )
                 continue
 

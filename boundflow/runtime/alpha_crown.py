@@ -224,6 +224,8 @@ def run_alpha_crown_mlp(
             lb_weight=lb_weight,
             ub_weight=ub_weight,
         )
+        if not loss.requires_grad:
+            break
         opt.zero_grad(set_to_none=True)
         loss.backward()
         opt.step()

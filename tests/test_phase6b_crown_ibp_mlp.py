@@ -232,7 +232,7 @@ def test_crown_ibp_mlp_C_broadcast_S_O_matches_batched() -> None:
     assert torch.allclose(out_so.upper, out_bso.upper, atol=1e-6, rtol=1e-6)
 
 
-def test_crown_ibp_mlp_rejects_non_chain_graph() -> None:
+def test_crown_ibp_mlp_supports_general_dag_branch_graph() -> None:
     torch.manual_seed(0)
     device = torch.device("cpu")
     dtype = torch.float32
@@ -248,7 +248,8 @@ def test_crown_ibp_mlp_rejects_non_chain_graph() -> None:
     w2 = torch.randn(out_dim, hidden, device=device, dtype=dtype)
     b2 = torch.randn(out_dim, device=device, dtype=dtype)
 
-    # input -> linear1 -> relu1, and also linear2 takes linear1 output directly (skip), which violates chain structure.
+    # input -> linear1 -> relu1, and also linear2 takes linear1 output directly.
+    # PR-8 generalizes the solver stack from chain to single-task DAG, so this graph should now be supported.
     task = BoundTask(
         task_id="t0",
         kind=TaskKind.INTERVAL_IBP,
@@ -266,8 +267,8 @@ def test_crown_ibp_mlp_rejects_non_chain_graph() -> None:
         bindings={"params": {"W1": w1, "b1": b1, "W2": w2, "b2": b2}},
     )
     stats = get_crown_ibp_mlp_stats(module)
-    assert stats.supported is False
-    assert "non-chain" in stats.reason
+    assert stats.supported is True
 
-    with pytest.raises(NotImplementedError, match="chain-structured"):
-        run_crown_ibp_mlp(module, InputSpec.linf(value_name="input", center=x0, eps=eps))
+    bounds = run_crown_ibp_mlp(module, InputSpec.linf(value_name="input", center=x0, eps=eps))
+    assert bounds.lower.shape == (batch, out_dim)
+    assert bounds.upper.shape == (batch, out_dim)

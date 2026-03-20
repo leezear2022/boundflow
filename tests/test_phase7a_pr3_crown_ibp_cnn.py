@@ -172,7 +172,7 @@ def test_crown_ibp_cnn_multi_spec_matches_serial() -> None:
         assert torch.allclose(serial.upper.squeeze(1), batched.upper[:, idx], atol=1e-5, rtol=1e-5)
 
 
-def test_crown_ibp_stats_supports_chain_cnn_and_rejects_skip_like_graph() -> None:
+def test_crown_ibp_stats_supports_chain_cnn_and_branch_like_cnn_dag() -> None:
     torch.manual_seed(0)
     module = _make_cnn_module(
         w1=torch.randn(2, 1, 3, 3, dtype=torch.float32),
@@ -192,5 +192,4 @@ def test_crown_ibp_stats_supports_chain_cnn_and_rejects_skip_like_graph() -> Non
         b2=torch.randn(4, dtype=torch.float32),
     )
     bad_stats = get_crown_ibp_mlp_stats(bad)
-    assert bad_stats.supported is False
-    assert "non-chain" in bad_stats.reason
+    assert bad_stats.supported is True

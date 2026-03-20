@@ -247,6 +247,27 @@ def _convert_onnx_graph(model: onnx.ModelProto, *, input_shapes: Optional[List[L
             )
             continue
 
+        if op == "Concat":
+            if len(outputs) != 1 or len(inputs) < 2:
+                raise NotImplementedError("Concat expects at least 2 inputs and 1 output")
+            axis = 0
+            for a in node.attribute:
+                if a.name == "axis":
+                    axis = int(a.i)
+            for in_name in inputs:
+                ensure_value(in_name, kind=ValueKind.PARAM if in_name in params else ValueKind.INTERMEDIATE)
+            ensure_value(outputs[0])
+            primal.nodes.append(
+                Node(
+                    op_type="concat",
+                    name=node_name,
+                    inputs=inputs,
+                    outputs=[outputs[0]],
+                    attrs={"axis": int(axis)},
+                )
+            )
+            continue
+
         if op == "Conv":
             if len(outputs) != 1 or len(inputs) < 2:
                 raise NotImplementedError("Conv expects 2 or 3 inputs and 1 output")

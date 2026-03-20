@@ -2138,3 +2138,62 @@
 **验证**
 - `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr7_bab_chain_cnn.py tests/test_phase7a_pr7_bab_batch_examples.py tests/test_phase7a_pr5_alpha_crown_cnn.py tests/test_phase6g_node_batch_partial_infeasible_prune.py tests/test_phase6g_bab_node_batch.py tests/test_phase6g_bab_node_eval_cache.py tests/test_phase6g_node_batch_grad_isolation.py tests/test_phase6g_branch_pick_reuses_forward_trace.py tests/test_phase6e_bab_mlp.py tests/test_phase6f_alpha_beta_crown_pr1.py tests/test_phase6g_alpha_beta_multispec_batch.py tests/test_phase6d_alpha_crown_mlp.py tests/test_phase7a_pr6_alpha_beta_crown_cnn.py tests/test_phase7a_pr3_crown_ibp_cnn.py tests/test_phase7a_pr4_conv_lazy_norms.py tests/test_phase6h_bench_e2e_schema.py`
 - 结果：`49 passed in 7.35s`
+
+---
+
+## 2026-03-21：Phase 7A PR-8——solver 栈从 chain 扩到 residual/general DAG（含 Torch/ONNX 前端）
+
+**动机**
+- PR-7 之前，BoundFlow 的 solver 栈虽然已经覆盖 chain MLP / chain CNN / conv alpha / conv alpha-beta / conv BaB，但 runtime 与前端仍默认“图是链式的”，无法承接最小 ResNet/basic-block 风格 general DAG：
+  - residual add
+  - projection skip
+  - feature/channel concat
+
+**主要改动**
+- 更新：`boundflow/runtime/crown_ibp.py`
+  - `_forward_ibp_trace_mlp(...)` 新增 `add` / `concat`
+  - backward 从链式回扫改成 reverse-topo DAG adjoint 聚合
+  - DAG 汇合点统一走 exact dense barrier
+  - `run_crown_ibp_mlp(...)` 去掉 chain-only 结构限制
+  - `get_crown_ibp_mlp_stats(...)` 改成接受 general DAG 子集 `{linear,conv2d,relu,flatten,add,concat}`
+- 更新：`boundflow/runtime/task_executor.py`
+  - `PythonTaskExecutor.run_ibp(...)` / `run_ibp_task(...)` 新增 `concat`
+  - `add` 改为显式拒绝 broadcast
+- 更新：`boundflow/frontends/pytorch/frontend.py`
+  - 新增 `aten.cat.default` / `aten.concat.default -> concat`
+  - 提取 `concat.axis`
+- 更新：`boundflow/frontends/onnx/frontend.py`
+  - 新增 `Concat` 导入
+- 更新：`boundflow/runtime/alpha_crown.py`
+  - 当所有 ReLU 都已 stable、loss 不依赖 alpha 时，直接把 step-0 结果作为最优返回，不再在 `backward()` 处报无梯度错误
+- 更新：`boundflow/runtime/alpha_beta_crown.py`
+  - 同样处理“所有 split/relaxation 参数都无梯度可学”的情形
+- 新增测试：
+  - `tests/test_phase7a_pr8_general_dag_runtime.py`
+  - `tests/test_phase7a_pr8_general_dag_frontends.py`
+- 更新测试：
+  - `tests/test_phase6b_crown_ibp_mlp.py`
+  - `tests/test_phase7a_pr3_crown_ibp_cnn.py`
+- 新增文档：
+  - `gemini_doc/change_2026-03-21_phase7a_pr8_general_dag_solver_stack.md`
+
+**影响面**
+- solver 栈现在支持单 task、静态 shape 的 general DAG 子集：
+  - `linear`
+  - `conv2d`
+  - `relu`
+  - `flatten`
+  - `add`
+  - `concat`
+- `add` 只支持 exact same-shape，不支持 broadcast
+- `concat` 只支持：
+  - rank-2 `[B,F]` feature axis
+  - rank-4 `NCHW` channel axis
+- infeasible detector 数学边界不扩，仍只对 direct-input first-layer affine producer 生效
+- 公开 API 名字不变；这是行为扩展，不引入 `*_dag` 新函数族
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr8_general_dag_runtime.py tests/test_phase7a_pr8_general_dag_frontends.py tests/test_phase6b_crown_ibp_mlp.py::test_crown_ibp_mlp_supports_general_dag_branch_graph tests/test_phase7a_pr3_crown_ibp_cnn.py::test_crown_ibp_stats_supports_chain_cnn_and_branch_like_cnn_dag`
+- 结果：`9 passed, 4 warnings in 2.32s`
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr8_general_dag_runtime.py tests/test_phase7a_pr8_general_dag_frontends.py tests/test_phase7a_pr7_bab_chain_cnn.py tests/test_phase7a_pr7_bab_batch_examples.py tests/test_phase7a_pr6_alpha_beta_crown_cnn.py tests/test_phase7a_pr5_alpha_crown_cnn.py tests/test_phase7a_pr4_conv_lazy_norms.py tests/test_phase7a_pr3_crown_ibp_cnn.py tests/test_phase6b_crown_ibp_mlp.py tests/test_phase6d_alpha_crown_mlp.py tests/test_phase6e_bab_mlp.py tests/test_phase6f_alpha_beta_crown_pr1.py tests/test_phase6g_alpha_beta_multispec_batch.py tests/test_phase6g_bab_node_batch.py tests/test_phase6g_bab_node_eval_cache.py tests/test_phase6g_node_batch_grad_isolation.py tests/test_phase6g_branch_pick_reuses_forward_trace.py tests/test_phase6g_node_batch_partial_infeasible_prune.py tests/test_phase6h_bench_e2e_schema.py tests/test_phase4d_onnx_frontend_matches_torch.py`
+- 结果：`65 passed, 8 warnings in 3.68s`
