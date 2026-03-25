@@ -2224,3 +2224,43 @@
 - 结果：`4 0`
 - `git worktree list`
 - 结果：只剩 `/home/lee/Codes/boundflow  e4cd789 [main]`
+
+---
+
+## 2026-03-25：刷新 BoundFlow 工作流 skill
+
+**动机**
+- 仓库里已有 `gemini_doc/llm_collaboration_workflow.md` 长版工作流文档，也已有早期版本的 `boundflow-workflow` skill。
+- 但旧 skill 只覆盖了简版入口，还缺少几项已经在实际协作中固定下来的关键动作：
+  - 用户输入模板
+  - 先写 DoD 再实现
+  - 失败时先分流 `contract/pipeline` 与 `shape/dtype/数值语义`
+  - 收尾时明确“已验证/残余风险/下一步 PR”
+
+**主要改动**
+- 更新本机 skill：
+  - `/home/lee/.codex/skills/boundflow-workflow/SKILL.md`
+  - 把 frontmatter 描述收紧成触发条件
+  - 把 `llm_collaboration_workflow.md` 的关键动作压缩进可执行入口
+- 更新：
+  - `gemini_doc/README.md`
+  - 在“研发协作流程”入口里补上本机 skill 路径
+- 新增文档：
+  - `gemini_doc/change_2026-03-25_refresh_boundflow_workflow_skill.md`
+
+**影响面**
+- BoundFlow 仓库现在同时有：
+  - 长版工作流文档：`gemini_doc/llm_collaboration_workflow.md`
+  - 可执行短版入口：`~/.codex/skills/boundflow-workflow/SKILL.md`
+- 以后在仓库内触发该 skill 时，会更接近当前真实使用的 PR-by-PR 工作流，而不是只停留在简版提醒。
+
+**验证**
+- 检查 `~/.codex/skills/boundflow-workflow/SKILL.md` 已更新；
+- 检查 skill 已覆盖：
+  - 触发条件
+  - 仓库硬约束
+  - 默认执行顺序
+  - 用户输入模板
+  - 完成标准
+- 检查 `gemini_doc/README.md` 已补上 skill 路径；
+- 检查仓库侧已写本次变更记录并追加总账。

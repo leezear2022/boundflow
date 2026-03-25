@@ -29,6 +29,7 @@
 ### C. 研发协作流程（人与大模型怎么配合）
 
 - `gemini_doc/llm_collaboration_workflow.md`（输入计划→修正测试→总结→下一步计划）
+- `/home/lee/.codex/skills/boundflow-workflow/SKILL.md`（上述工作流的本机 skill 入口）
 
 ### D. 研发演化/接手视角
 
