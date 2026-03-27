@@ -239,6 +239,12 @@ class LinearOperator(Protocol):
     def reshape_input(self, new_input_shape: Sequence[int]) -> "LinearOperator":
         """View the logical input axis with a different non-batch shape."""
 
+    def slice_input(self, new_input_shape: Sequence[int], *, start: int, stop: int) -> "LinearOperator":
+        """Take a contiguous slice over the first logical input axis."""
+
+    def add(self, other: "LinearOperator") -> "LinearOperator":
+        """Return a lazy operator for self + other."""
+
     def conv2d_right(
         self,
         weight: torch.Tensor,
@@ -253,6 +259,41 @@ class LinearOperator(Protocol):
 
     def to_dense(self) -> torch.Tensor:
         """Materialize as a dense tensor with flat input axis [B, K, I]."""
+
+
+def _validate_slice_input(
+    *,
+    input_shape: Sequence[int],
+    new_input_shape: Sequence[int],
+    start: int,
+    stop: int,
+) -> tuple[tuple[int, ...], tuple[int, ...], int, int]:
+    base_shape = _normalize_input_shape(tuple(input_shape))
+    sliced_shape = _normalize_input_shape(tuple(new_input_shape))
+    start_i = int(start)
+    stop_i = int(stop)
+    if start_i < 0 or stop_i < start_i:
+        raise ValueError(f"slice_input expects 0 <= start <= stop, got start={start_i} stop={stop_i}")
+    if stop_i > int(base_shape[0]):
+        raise ValueError(f"slice_input stop={stop_i} exceeds input_shape[0]={int(base_shape[0])}")
+    expected_shape = (int(stop_i - start_i),) + tuple(int(dim) for dim in base_shape[1:])
+    if tuple(sliced_shape) != tuple(expected_shape):
+        raise ValueError(f"slice_input new_input_shape mismatch: expected {expected_shape}, got {sliced_shape}")
+    return base_shape, sliced_shape, start_i, stop_i
+
+
+def _add_operator_pair(lhs: LinearOperator, rhs: LinearOperator) -> "AddLinearOperator":
+    return AddLinearOperator(lhs=lhs, rhs=rhs)
+
+
+def _slice_rows(op: LinearOperator, *, start: int, stop: int) -> torch.Tensor:
+    batch = int(op.shape[0])
+    spec_dim = int(op.spec_dim)
+    if len(op.input_shape) == 3:
+        rows = _materialize_feature_map_rows(op, expected_input_shape=tuple(int(dim) for dim in op.input_shape))
+        return rows[:, start:stop, ...]
+    dense = op.to_dense().reshape(batch, spec_dim, *op.input_shape)
+    return dense[:, :, start:stop, ...].reshape(batch, spec_dim, -1)
 
 
 @dataclass(frozen=True)
@@ -361,6 +402,20 @@ class DenseLinearOperator:
         if tuple(shape) == tuple(self.input_shape):
             return self
         return ReshapeInputLinearOperator(base=self, input_shape=shape)
+
+    def slice_input(self, new_input_shape: Sequence[int], *, start: int, stop: int) -> LinearOperator:
+        _base_shape, sliced_shape, start_i, stop_i = _validate_slice_input(
+            input_shape=self.input_shape,
+            new_input_shape=new_input_shape,
+            start=start,
+            stop=stop,
+        )
+        dense = self.coeffs.reshape(int(self.shape[0]), int(self.shape[1]), *self.input_shape)
+        sliced = dense[:, :, start_i:stop_i, ...].contiguous()
+        return DenseLinearOperator(sliced, input_shape=sliced_shape)
+
+    def add(self, other: LinearOperator) -> LinearOperator:
+        return _add_operator_pair(self, other)
 
     def conv2d_right(
         self,
@@ -493,6 +548,12 @@ class RightMatmulLinearOperator:
             return self
         return ReshapeInputLinearOperator(base=self, input_shape=shape)
 
+    def slice_input(self, new_input_shape: Sequence[int], *, start: int, stop: int) -> LinearOperator:
+        return SliceInputLinearOperator(base=self, input_shape=tuple(new_input_shape), start=int(start), stop=int(stop))
+
+    def add(self, other: LinearOperator) -> LinearOperator:
+        return _add_operator_pair(self, other)
+
     def conv2d_right(
         self,
         weight: torch.Tensor,
@@ -614,6 +675,12 @@ class ReshapeInputLinearOperator:
         if tuple(shape) == tuple(self.input_shape):
             return self
         return ReshapeInputLinearOperator(base=self.base, input_shape=shape)
+
+    def slice_input(self, new_input_shape: Sequence[int], *, start: int, stop: int) -> LinearOperator:
+        return SliceInputLinearOperator(base=self, input_shape=tuple(new_input_shape), start=int(start), stop=int(stop))
+
+    def add(self, other: LinearOperator) -> LinearOperator:
+        return _add_operator_pair(self, other)
 
     def conv2d_right(
         self,
@@ -772,6 +839,12 @@ class Conv2dLinearOperator:
             return self
         return ReshapeInputLinearOperator(base=self, input_shape=shape)
 
+    def slice_input(self, new_input_shape: Sequence[int], *, start: int, stop: int) -> LinearOperator:
+        return SliceInputLinearOperator(base=self, input_shape=tuple(new_input_shape), start=int(start), stop=int(stop))
+
+    def add(self, other: LinearOperator) -> LinearOperator:
+        return _add_operator_pair(self, other)
+
     def conv2d_right(
         self,
         weight: torch.Tensor,
@@ -833,6 +906,289 @@ class Conv2dLinearOperator:
         return pieces.view(int(self.shape[0]), int(self.spec_dim), -1)
 
 
+@dataclass(frozen=True)
+class AddLinearOperator:
+    lhs: LinearOperator
+    rhs: LinearOperator
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.lhs, LinearOperator):
+            raise TypeError(f"AddLinearOperator.lhs must satisfy LinearOperator, got {type(self.lhs)}")
+        if not isinstance(self.rhs, LinearOperator):
+            raise TypeError(f"AddLinearOperator.rhs must satisfy LinearOperator, got {type(self.rhs)}")
+        if tuple(self.lhs.shape) != tuple(self.rhs.shape):
+            raise ValueError(f"add shape mismatch: lhs={self.lhs.shape} rhs={self.rhs.shape}")
+        if tuple(self.lhs.input_shape) != tuple(self.rhs.input_shape):
+            raise ValueError(f"add input_shape mismatch: lhs={self.lhs.input_shape} rhs={self.rhs.input_shape}")
+        if self.lhs.device != self.rhs.device:
+            raise ValueError(f"add device mismatch: lhs={self.lhs.device} rhs={self.rhs.device}")
+        if self.lhs.dtype != self.rhs.dtype:
+            raise TypeError(f"add dtype mismatch: lhs={self.lhs.dtype} rhs={self.rhs.dtype}")
+
+    @property
+    def shape(self) -> tuple[int, int, int]:
+        return tuple(int(v) for v in self.lhs.shape)
+
+    @property
+    def input_shape(self) -> tuple[int, ...]:
+        return tuple(int(dim) for dim in self.lhs.input_shape)
+
+    @property
+    def input_numel(self) -> int:
+        return int(self.lhs.input_numel)
+
+    @property
+    def spec_dim(self) -> int:
+        return int(self.lhs.spec_dim)
+
+    @property
+    def device(self) -> torch.device:
+        return self.lhs.device
+
+    @property
+    def dtype(self) -> torch.dtype:
+        return self.lhs.dtype
+
+    def center_term(self, center: torch.Tensor) -> torch.Tensor:
+        return self.lhs.center_term(center) + self.rhs.center_term(center)
+
+    def row_abs_sum(self) -> torch.Tensor:
+        if len(self.input_shape) == 3:
+            rows = _materialize_feature_map_rows(self.lhs, expected_input_shape=self.input_shape) + _materialize_feature_map_rows(
+                self.rhs,
+                expected_input_shape=self.input_shape,
+            )
+            return _reduce_feature_map_rows(rows, batch=int(self.shape[0]), spec_dim=self.spec_dim, reduce="l1")
+        dense = self.to_dense()
+        return dense.abs().sum(dim=2)
+
+    def row_l2_norm(self) -> torch.Tensor:
+        if len(self.input_shape) == 3:
+            rows = _materialize_feature_map_rows(self.lhs, expected_input_shape=self.input_shape) + _materialize_feature_map_rows(
+                self.rhs,
+                expected_input_shape=self.input_shape,
+            )
+            return _reduce_feature_map_rows(rows, batch=int(self.shape[0]), spec_dim=self.spec_dim, reduce="l2")
+        dense = self.to_dense()
+        return torch.linalg.vector_norm(dense, ord=2, dim=2)
+
+    def row_abs_max(self) -> torch.Tensor:
+        if len(self.input_shape) == 3:
+            rows = _materialize_feature_map_rows(self.lhs, expected_input_shape=self.input_shape) + _materialize_feature_map_rows(
+                self.rhs,
+                expected_input_shape=self.input_shape,
+            )
+            return _reduce_feature_map_rows(rows, batch=int(self.shape[0]), spec_dim=self.spec_dim, reduce="linf")
+        dense = self.to_dense()
+        return dense.abs().amax(dim=2)
+
+    def contract_input(self, vec: torch.Tensor) -> torch.Tensor:
+        return self.lhs.contract_input(vec) + self.rhs.contract_input(vec)
+
+    def contract_last_dim(self, vec: torch.Tensor) -> torch.Tensor:
+        if len(self.input_shape) != 1:
+            raise NotImplementedError(f"contract_last_dim only supports flat input_shape, got {self.input_shape}")
+        return self.contract_input(vec)
+
+    def matmul_right(self, rhs: torch.Tensor) -> LinearOperator:
+        if len(self.input_shape) != 1:
+            raise NotImplementedError(f"matmul_right only supports flat input_shape, got {self.input_shape}")
+        rr = _ensure_float_matrix(rhs, name="rhs", rows=self.input_numel, device=self.device, dtype=self.dtype)
+        return RightMatmulLinearOperator(base=self, rhs=rr)
+
+    def reshape_input(self, new_input_shape: Sequence[int]) -> LinearOperator:
+        shape = _normalize_input_shape(tuple(new_input_shape))
+        if _prod(shape) != self.input_numel:
+            raise ValueError(f"reshape_input shape mismatch: {shape} does not match input_numel={self.input_numel}")
+        if tuple(shape) == tuple(self.input_shape):
+            return self
+        return ReshapeInputLinearOperator(base=self, input_shape=shape)
+
+    def slice_input(self, new_input_shape: Sequence[int], *, start: int, stop: int) -> LinearOperator:
+        return SliceInputLinearOperator(base=self, input_shape=tuple(new_input_shape), start=int(start), stop=int(stop))
+
+    def add(self, other: LinearOperator) -> LinearOperator:
+        return _add_operator_pair(self, other)
+
+    def conv2d_right(
+        self,
+        weight: torch.Tensor,
+        *,
+        stride: int | Sequence[int] = 1,
+        padding: int | Sequence[int] = 0,
+        dilation: int | Sequence[int] = 1,
+        groups: int = 1,
+        input_shape: Sequence[int],
+    ) -> LinearOperator:
+        in_shape = _normalize_input_shape(tuple(input_shape))
+        w = _normalize_conv_weight(weight, device=self.device, dtype=self.dtype)
+        stride_2 = _normalize_pair(stride, name="stride")
+        padding_2 = _normalize_pair(padding, name="padding")
+        dilation_2 = _normalize_pair(dilation, name="dilation")
+        out_shape = _conv2d_output_shape(in_shape, w, stride=stride_2, padding=padding_2, dilation=dilation_2, groups=int(groups))
+        base: LinearOperator = self
+        if tuple(base.input_shape) != tuple(out_shape):
+            if base.input_numel != _prod(out_shape):
+                raise ValueError(
+                    f"conv2d_right output shape mismatch: base.input_shape={base.input_shape} conv_output_shape={out_shape}"
+                )
+            base = base.reshape_input(out_shape)
+        return Conv2dLinearOperator(
+            base=base,
+            weight=w,
+            stride=stride_2,
+            padding=padding_2,
+            dilation=dilation_2,
+            groups=int(groups),
+            input_shape=in_shape,
+        )
+
+    def to_dense(self) -> torch.Tensor:
+        return self.lhs.to_dense() + self.rhs.to_dense()
+
+
+@dataclass(frozen=True)
+class SliceInputLinearOperator:
+    base: LinearOperator
+    input_shape: tuple[int, ...]
+    start: int
+    stop: int
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.base, LinearOperator):
+            raise TypeError(f"SliceInputLinearOperator.base must satisfy LinearOperator, got {type(self.base)}")
+        _base_shape, sliced_shape, start_i, stop_i = _validate_slice_input(
+            input_shape=self.base.input_shape,
+            new_input_shape=self.input_shape,
+            start=self.start,
+            stop=self.stop,
+        )
+        object.__setattr__(self, "input_shape", sliced_shape)
+        object.__setattr__(self, "start", start_i)
+        object.__setattr__(self, "stop", stop_i)
+
+    @property
+    def shape(self) -> tuple[int, int, int]:
+        return (int(self.base.shape[0]), int(self.base.shape[1]), int(self.input_numel))
+
+    @property
+    def input_numel(self) -> int:
+        return _prod(self.input_shape)
+
+    @property
+    def spec_dim(self) -> int:
+        return int(self.base.spec_dim)
+
+    @property
+    def device(self) -> torch.device:
+        return self.base.device
+
+    @property
+    def dtype(self) -> torch.dtype:
+        return self.base.dtype
+
+    def _embed_input(self, value: torch.Tensor, *, name: str) -> torch.Tensor:
+        flat = _flatten_contract_input(
+            value,
+            name=name,
+            batch=self.shape[0],
+            input_shape=self.input_shape,
+            device=self.device,
+            dtype=self.dtype,
+        )
+        embedded = torch.zeros((int(self.shape[0]), *self.base.input_shape), device=self.device, dtype=self.dtype)
+        embedded[:, self.start:self.stop, ...] = flat.view(int(self.shape[0]), *self.input_shape)
+        return embedded
+
+    def center_term(self, center: torch.Tensor) -> torch.Tensor:
+        return self.base.center_term(self._embed_input(center, name="center"))
+
+    def row_abs_sum(self) -> torch.Tensor:
+        if len(self.base.input_shape) == 3:
+            rows = _slice_rows(self.base, start=self.start, stop=self.stop)
+            return _reduce_feature_map_rows(rows, batch=int(self.shape[0]), spec_dim=self.spec_dim, reduce="l1")
+        dense = self.to_dense()
+        return dense.abs().sum(dim=2)
+
+    def row_l2_norm(self) -> torch.Tensor:
+        if len(self.base.input_shape) == 3:
+            rows = _slice_rows(self.base, start=self.start, stop=self.stop)
+            return _reduce_feature_map_rows(rows, batch=int(self.shape[0]), spec_dim=self.spec_dim, reduce="l2")
+        dense = self.to_dense()
+        return torch.linalg.vector_norm(dense, ord=2, dim=2)
+
+    def row_abs_max(self) -> torch.Tensor:
+        if len(self.base.input_shape) == 3:
+            rows = _slice_rows(self.base, start=self.start, stop=self.stop)
+            return _reduce_feature_map_rows(rows, batch=int(self.shape[0]), spec_dim=self.spec_dim, reduce="linf")
+        dense = self.to_dense()
+        return dense.abs().amax(dim=2)
+
+    def contract_input(self, vec: torch.Tensor) -> torch.Tensor:
+        return self.base.contract_input(self._embed_input(vec, name="vec"))
+
+    def contract_last_dim(self, vec: torch.Tensor) -> torch.Tensor:
+        if len(self.input_shape) != 1:
+            raise NotImplementedError(f"contract_last_dim only supports flat input_shape, got {self.input_shape}")
+        return self.contract_input(vec)
+
+    def matmul_right(self, rhs: torch.Tensor) -> LinearOperator:
+        if len(self.input_shape) != 1:
+            raise NotImplementedError(f"matmul_right only supports flat input_shape, got {self.input_shape}")
+        rr = _ensure_float_matrix(rhs, name="rhs", rows=self.input_numel, device=self.device, dtype=self.dtype)
+        return RightMatmulLinearOperator(base=self, rhs=rr)
+
+    def reshape_input(self, new_input_shape: Sequence[int]) -> LinearOperator:
+        shape = _normalize_input_shape(tuple(new_input_shape))
+        if _prod(shape) != self.input_numel:
+            raise ValueError(f"reshape_input shape mismatch: {shape} does not match input_numel={self.input_numel}")
+        if tuple(shape) == tuple(self.input_shape):
+            return self
+        return ReshapeInputLinearOperator(base=self, input_shape=shape)
+
+    def slice_input(self, new_input_shape: Sequence[int], *, start: int, stop: int) -> LinearOperator:
+        return SliceInputLinearOperator(base=self, input_shape=tuple(new_input_shape), start=int(start), stop=int(stop))
+
+    def add(self, other: LinearOperator) -> LinearOperator:
+        return _add_operator_pair(self, other)
+
+    def conv2d_right(
+        self,
+        weight: torch.Tensor,
+        *,
+        stride: int | Sequence[int] = 1,
+        padding: int | Sequence[int] = 0,
+        dilation: int | Sequence[int] = 1,
+        groups: int = 1,
+        input_shape: Sequence[int],
+    ) -> LinearOperator:
+        in_shape = _normalize_input_shape(tuple(input_shape))
+        w = _normalize_conv_weight(weight, device=self.device, dtype=self.dtype)
+        stride_2 = _normalize_pair(stride, name="stride")
+        padding_2 = _normalize_pair(padding, name="padding")
+        dilation_2 = _normalize_pair(dilation, name="dilation")
+        out_shape = _conv2d_output_shape(in_shape, w, stride=stride_2, padding=padding_2, dilation=dilation_2, groups=int(groups))
+        base: LinearOperator = self
+        if tuple(base.input_shape) != tuple(out_shape):
+            if base.input_numel != _prod(out_shape):
+                raise ValueError(
+                    f"conv2d_right output shape mismatch: base.input_shape={base.input_shape} conv_output_shape={out_shape}"
+                )
+            base = base.reshape_input(out_shape)
+        return Conv2dLinearOperator(
+            base=base,
+            weight=w,
+            stride=stride_2,
+            padding=padding_2,
+            dilation=dilation_2,
+            groups=int(groups),
+            input_shape=in_shape,
+        )
+
+    def to_dense(self) -> torch.Tensor:
+        return _slice_rows(self.base, start=self.start, stop=self.stop).reshape(int(self.shape[0]), int(self.spec_dim), -1)
+
+
 def _materialize_feature_map_rows(
     op: LinearOperator,
     *,
@@ -851,6 +1207,12 @@ def _materialize_feature_map_rows(
     if isinstance(op, DenseLinearOperator):
         return op.coeffs.reshape(batch * spec_dim, *expected_input_shape)
 
+    if isinstance(op, AddLinearOperator):
+        return _materialize_feature_map_rows(op.lhs, expected_input_shape=expected_input_shape) + _materialize_feature_map_rows(
+            op.rhs,
+            expected_input_shape=expected_input_shape,
+        )
+
     if isinstance(op, ReshapeInputLinearOperator):
         if tuple(op.input_shape) != tuple(expected_input_shape):
             raise ValueError(
@@ -863,6 +1225,16 @@ def _materialize_feature_map_rows(
             )
             return base_rows.reshape(batch * spec_dim, *expected_input_shape)
         return op.base.to_dense().reshape(batch * spec_dim, *expected_input_shape)
+
+    if isinstance(op, SliceInputLinearOperator):
+        if tuple(op.input_shape) != tuple(expected_input_shape):
+            raise ValueError(
+                f"slice operator input_shape mismatch: expected={expected_input_shape} actual={op.input_shape}"
+            )
+        if len(op.base.input_shape) != 3:
+            return op.to_dense().reshape(batch * spec_dim, *expected_input_shape)
+        base_rows = _materialize_feature_map_rows(op.base, expected_input_shape=tuple(int(dim) for dim in op.base.input_shape))
+        return base_rows[:, op.start:op.stop, ...]
 
     if isinstance(op, Conv2dLinearOperator):
         output_shape = tuple(int(dim) for dim in op.base.input_shape)

@@ -7,6 +7,7 @@ import torch
 
 from ..domains.interval import IntervalDomain, IntervalState
 from ..ir.task import BFTaskModule, TaskKind
+from .dag_utils import normalize_concat_axis, validate_concat_tensor_shapes, validate_concat_value_shapes
 from .linear_operator import DenseLinearOperator, LinearOperator
 from .perturbation import InputPerturbationState
 from .relu_shape_utils import broadcast_relu_split_like_pre
@@ -142,27 +143,16 @@ def _forward_ibp_trace_mlp(
             if len(op.inputs) < 2:
                 raise ValueError(f"concat expects at least 2 inputs, got {len(op.inputs)}")
             parts = [_ensure_interval(_get_state(name)) for name in op.inputs]
-            axis = _normalize_concat_axis(
+            axis = normalize_concat_axis(
                 op.attrs.get("axis", 1),
                 rank_with_batch=int(parts[0].lower.dim()),
                 caller="_forward_ibp_trace_mlp",
             )
-            ref_shape = tuple(int(dim) for dim in parts[0].lower.shape)
-            for idx, part in enumerate(parts[1:], start=1):
-                shape = tuple(int(dim) for dim in part.lower.shape)
-                if len(shape) != len(ref_shape):
-                    raise NotImplementedError(
-                        "_forward_ibp_trace_mlp only supports concat with equal ranks, "
-                        f"got {ref_shape} and {shape} at input {idx}"
-                    )
-                for dim_i, (lhs, rhs) in enumerate(zip(ref_shape, shape)):
-                    if dim_i == axis:
-                        continue
-                    if lhs != rhs:
-                        raise NotImplementedError(
-                            "_forward_ibp_trace_mlp only supports concat with exact same-shape non-axis dims, "
-                            f"got {ref_shape} and {shape}"
-                        )
+            _ = validate_concat_tensor_shapes(
+                [tuple(int(dim) for dim in part.lower.shape) for part in parts],
+                axis=axis,
+                caller="_forward_ibp_trace_mlp",
+            )
             y = IntervalState(
                 lower=torch.cat([part.lower for part in parts], dim=axis),
                 upper=torch.cat([part.upper for part in parts], dim=axis),
@@ -399,25 +389,6 @@ def _value_shape(
     return tuple(int(dim) for dim in interval_env[value_name].lower.shape[1:])
 
 
-def _normalize_concat_axis(axis_raw: Any, *, rank_with_batch: int, caller: str) -> int:
-    axis = int(axis_raw)
-    if rank_with_batch == 2:
-        if axis in (1, -1):
-            return 1
-        raise NotImplementedError(
-            f"{caller} only supports concat on feature axis for rank-2 [B,F], got axis={axis}"
-        )
-    if rank_with_batch == 4:
-        if axis in (1, -3):
-            return 1
-        raise NotImplementedError(
-            f"{caller} only supports concat on NCHW channel axis for rank-4 [B,C,H,W], got axis={axis}"
-        )
-    raise NotImplementedError(
-        f"{caller} only supports concat on rank-2 [B,F] or rank-4 [B,C,H,W], got rank={rank_with_batch}"
-    )
-
-
 def _align_backward_state_input_shape(
     state: AffineBackwardState,
     *,
@@ -439,14 +410,8 @@ def _accumulate_backward_state(
         return aligned_update
     aligned_current = _align_backward_state_input_shape(current, input_shape=input_shape)
     return AffineBackwardState(
-        A_u=DenseLinearOperator(
-            aligned_current.A_u.to_dense() + aligned_update.A_u.to_dense(),
-            input_shape=input_shape,
-        ),
-        A_l=DenseLinearOperator(
-            aligned_current.A_l.to_dense() + aligned_update.A_l.to_dense(),
-            input_shape=input_shape,
-        ),
+        A_u=aligned_current.A_u.add(aligned_update.A_u),
+        A_l=aligned_current.A_l.add(aligned_update.A_l),
         b_u=aligned_current.b_u + aligned_update.b_u,
         b_l=aligned_current.b_l + aligned_update.b_l,
     )
@@ -467,6 +432,8 @@ def _split_bias_once(
     *,
     num_children: int,
 ) -> List[Tuple[torch.Tensor, torch.Tensor]]:
+    if num_children < 0:
+        raise ValueError(f"num_children must be >= 0, got {num_children}")
     zero_u = torch.zeros_like(state.b_u)
     zero_l = torch.zeros_like(state.b_l)
     out: List[Tuple[torch.Tensor, torch.Tensor]] = []
@@ -476,21 +443,6 @@ def _split_bias_once(
         else:
             out.append((zero_u, zero_l))
     return out
-
-
-def _slice_concat_operator(
-    op: LinearOperator,
-    *,
-    output_shape: Tuple[int, ...],
-    input_shape: Tuple[int, ...],
-    start: int,
-    stop: int,
-) -> DenseLinearOperator:
-    dense = (
-        op if tuple(op.input_shape) == tuple(output_shape) else op.reshape_input(output_shape)
-    ).to_dense().reshape(int(op.shape[0]), int(op.shape[1]), *output_shape)
-    sliced = dense[:, :, start:stop, ...].contiguous()
-    return DenseLinearOperator(sliced, input_shape=input_shape)
 
 
 def _broadcast_relu_alpha(
@@ -909,40 +861,29 @@ def _run_crown_backward_from_trace(
 
         if op.op_type == "concat":
             out_shape = _value_shape(input_spec=input_spec, interval_env=interval_env, value_name=out_name)
-            axis = _normalize_concat_axis(op.attrs.get("axis", 1), rank_with_batch=len(out_shape) + 1, caller=caller)
+            axis = normalize_concat_axis(op.attrs.get("axis", 1), rank_with_batch=len(out_shape) + 1, caller=caller)
             if axis != 1:
                 raise AssertionError("supported concat axes must normalize to batch-preserving axis=1")
             base = _align_backward_state_input_shape(state, input_shape=out_shape)
             bias_parts = _split_bias_once(base, num_children=len(op.inputs))
+            input_shapes = [
+                _value_shape(input_spec=input_spec, interval_env=interval_env, value_name=in_name)
+                for in_name in op.inputs
+            ]
+            total = validate_concat_value_shapes(input_shapes, caller=caller)
             start = 0
-            for idx, in_name in enumerate(op.inputs):
+            for idx, (in_name, in_shape) in enumerate(zip(op.inputs, input_shapes)):
                 if in_name not in dynamic_names:
                     raise NotImplementedError(f"{caller} only supports concat over dynamic tensor values, got {in_name}")
-                in_shape = _value_shape(input_spec=input_spec, interval_env=interval_env, value_name=in_name)
-                if len(in_shape) != len(out_shape):
-                    raise NotImplementedError(
-                        f"{caller} only supports concat with equal-rank inputs, got output_shape={out_shape} input_shape={in_shape}"
-                    )
-                for dim_i, (lhs, rhs) in enumerate(zip(out_shape, in_shape)):
-                    if dim_i == 0:
-                        continue
-                    if lhs != rhs:
-                        raise NotImplementedError(
-                            f"{caller} only supports concat with exact same-shape non-axis dims, got {out_shape} and {in_shape}"
-                        )
                 stop = start + int(in_shape[0])
                 contrib = AffineBackwardState(
-                    A_u=_slice_concat_operator(
-                        base.A_u,
-                        output_shape=out_shape,
-                        input_shape=in_shape,
+                    A_u=(base.A_u if tuple(base.A_u.input_shape) == tuple(out_shape) else base.A_u.reshape_input(out_shape)).slice_input(
+                        in_shape,
                         start=start,
                         stop=stop,
                     ),
-                    A_l=_slice_concat_operator(
-                        base.A_l,
-                        output_shape=out_shape,
-                        input_shape=in_shape,
+                    A_l=(base.A_l if tuple(base.A_l.input_shape) == tuple(out_shape) else base.A_l.reshape_input(out_shape)).slice_input(
+                        in_shape,
                         start=start,
                         stop=stop,
                     ),
@@ -951,9 +892,9 @@ def _run_crown_backward_from_trace(
                 )
                 adjoints[in_name] = _accumulate_backward_state(adjoints.get(in_name), contrib, input_shape=in_shape)
                 start = stop
-            if start != int(out_shape[0]):
+            if start != total or total != int(out_shape[0]):
                 raise ValueError(
-                    f"{caller} concat backward shape mismatch: sliced={start} but output axis size is {int(out_shape[0])}"
+                    f"{caller} concat backward shape mismatch: sliced={start} validated={total} but output axis size is {int(out_shape[0])}"
                 )
             continue
 
@@ -1109,11 +1050,12 @@ def get_crown_ibp_mlp_stats(module: BFTaskModule) -> CrownIbpStats:
                         reason=f"concat expects at least 2 inputs at op {i}, got {len(op.inputs)}",
                         ops_seen=ops,
                     )
-                axis = int(op.attrs.get("axis", 1))
-                if axis not in (1, -1, -3):
+                try:
+                    normalize_concat_axis(op.attrs.get("axis", 1), rank_with_batch=2, caller="get_crown_ibp_mlp_stats")
+                except NotImplementedError:
                     return CrownIbpStats(
                         supported=False,
-                        reason=f"unsupported concat axis at op {i}: {axis}",
+                        reason=f"unsupported concat axis at op {i}: {op.attrs.get('axis', 1)}",
                         ops_seen=ops,
                     )
         return CrownIbpStats(supported=True, ops_seen=ops)

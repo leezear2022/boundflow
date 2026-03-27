@@ -2264,3 +2264,75 @@
   - 完成标准
 - 检查 `gemini_doc/README.md` 已补上 skill 路径；
 - 检查仓库侧已写本次变更记录并追加总账。
+
+---
+
+## 2026-03-25：将 Codex 配置从 collab 切换到 multi_agent
+
+**动机**
+- Codex 已提示 `[features].collab` 废弃，要求使用 `[features].multi_agent`。
+- 继续保留旧字段会产生持续告警，也会增加后续版本兼容风险。
+
+**主要改动**
+- 更新用户级配置：
+  - `~/.codex/config.toml`
+  - 将 `[features]` 段中的 `collab = true` 替换为 `multi_agent = true`
+- 新增文档：
+  - `gemini_doc/change_2026-03-25_replace_codex_collab_with_multi_agent.md`
+
+**影响面**
+- Codex 后续将按新的 `multi_agent` 特性开关工作；
+- 当前仓库代码与测试行为不受影响。
+
+**验证**
+- `sed -n '1,200p' ~/.codex/config.toml`
+- `rg -n '^\[features\]|^(collab|multi_agent) = ' ~/.codex/config.toml`
+- 结果：
+  - `[features]` 段存在
+  - `multi_agent = true` 存在
+  - `collab = true` 不再存在
+
+---
+
+## 2026-03-26：Phase 7A PR-9——operator-preserving DAG backward
+
+**动机**
+- PR-8 已经把 solver 栈扩到最小 residual/general DAG，但 DAG backward 热路径还保留两个 dense barrier：
+  - adjoint merge 通过 `to_dense() + sum`
+  - `concat` backward 通过 dense slice 回落 `DenseLinearOperator`
+- 如果不先去掉这两个热路径 barrier，后续继续扩图/扩 merge 语义会先被显式大张量 `A` 的 materialize 吃掉。
+
+**主要改动**
+- 新增：`boundflow/runtime/dag_utils.py`
+  - 统一 `concat` 的 axis 归一化与 shape 校验
+- 更新：`boundflow/runtime/linear_operator.py`
+  - `LinearOperator` 协议新增 `add(...)` / `slice_input(...)`
+  - 新增 `AddLinearOperator` 与 `SliceInputLinearOperator`
+  - `Dense/RightMatmul/ReshapeInput/Conv2d` 全部补齐组合入口
+  - rank-3 row norms 对新 operator 保持 anti-dense 归约路径
+- 更新：`boundflow/runtime/crown_ibp.py`
+  - `_accumulate_backward_state(...)` 改成 operator `add(...)`
+  - `concat` backward 改成 operator `slice_input(...)`
+  - `_split_bias_once(...)` 增加 guard
+  - `get_crown_ibp_mlp_stats(...)` 复用 concat helper
+- 更新：`boundflow/runtime/task_executor.py`
+  - 复用新的 concat helper，去掉重复 axis/shape 校验逻辑
+- 新增测试：
+  - `tests/test_phase7a_pr9_dag_linear_operator.py`
+  - `tests/test_phase7a_pr9_operator_preserving_dag_backward.py`
+- 新增文档：
+  - `gemini_doc/change_2026-03-26_phase7a_pr9_operator_preserving_dag_backward.md`
+
+**影响面**
+- 不改 public API，不扩 PR-8 已承诺的 general DAG 语义范围。
+- ReLU backward 的 dense barrier 继续保留；PR-9 只去掉 DAG merge / concat backward 的 dense barrier。
+- alpha / alpha-beta / BaB 通过共享的 CROWN backward 自动继承这次改动。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr9_dag_linear_operator.py tests/test_phase7a_pr9_operator_preserving_dag_backward.py tests/test_phase7a_pr8_general_dag_runtime.py tests/test_phase7a_pr8_general_dag_frontends.py tests/test_phase7a_pr4_conv_lazy_norms.py tests/test_phase7a_pr3_crown_ibp_cnn.py tests/test_phase7a_pr5_alpha_crown_cnn.py tests/test_phase7a_pr6_alpha_beta_crown_cnn.py tests/test_phase7a_pr7_bab_chain_cnn.py tests/test_phase7a_pr7_bab_batch_examples.py`
+- 结果：`47 passed, 4 warnings in 2.52s`
+- `conda run -n boundflow python -m pytest -q tests/test_phase6b_crown_ibp_mlp.py tests/test_phase6d_alpha_crown_mlp.py tests/test_phase6e_bab_mlp.py tests/test_phase6f_alpha_beta_crown_pr1.py tests/test_phase6g_alpha_beta_multispec_batch.py`
+- 结果：`21 passed in 1.66s`
+- 新增下一步文档：
+  - `gemini_doc/next_plan_after_phase7a_pr9.md`
+  - 将 PR-10 主线固定为 “ReLU barrier 结构化”，而不是把更强 lazy row-norm 写成并列路线
