@@ -1,3 +1,5 @@
+> **本文档停留在 Phase 4B，已过时。** 请参阅最新版本：[gemini_doc/llm_briefing_boundflow.md](../gemini_doc/llm_briefing_boundflow.md)
+
 # BoundFlow 项目交接摘要（给其它大模型/合作者）
 
 > 本文用于快速让新合作者理解：**现在项目做到哪了、结构是什么、跑通了什么、下一步要做什么**。默认 conda 环境为 `boundflow`。

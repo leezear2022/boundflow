@@ -2440,3 +2440,33 @@
 - 结果：`7 passed in 1.49s`
 - `conda run -n boundflow python -m pytest -q tests/`
 - 结果：`173 passed, 1 skipped in 26.58s`
+
+## 2026-03-29：PR-10 后文档同步与发布准备
+
+**动机**
+- 2026-03-28 的文档整合已经把 `README.md`、`AGENTS.md`、`CLAUDE.md`、`docs/reference.md`、`gemini_doc/llm_briefing_boundflow.md` 等主文档串了起来，但其中部分“当前前沿 / 下一步计划”仍停留在 PR-10 实施前。
+- PR-10 与 shared CROWN layout-only support 已完成并通过全量测试，需要把文档口径同步到当前事实，再统一提交与推送。
+
+**主要改动**
+- 更新：`CLAUDE.md`
+  - 当前前沿改为“已完成 structured ReLU backward + layout-only shared CROWN”
+  - 下一步计划改指向 `gemini_doc/next_plan_after_phase7a_pr10.md`
+- 更新：`AGENTS.md`
+  - “当前计划”索引更新到 `gemini_doc/next_plan_after_phase7a_pr10.md`
+- 更新：`README.md`
+  - 系统特性新增 shared CROWN 的结构化 ReLU/DAG backward 与 layout-only op 支持
+- 更新：`docs/reference.md`
+  - runtime / LinearOperator 描述同步到 PR-10 之后的能力集
+- 更新：`gemini_doc/README.md`
+  - 当前前沿与下一步索引同步到 PR-10 之后
+- 更新：`gemini_doc/llm_briefing_boundflow.md`
+  - 更新时间刷新到 2026-03-29
+  - 当前前沿同步加入 PR-10 与 layout-only support
+  - 已知限制改为“剩余 sign-split dense 点”
+- 新增：`gemini_doc/next_plan_after_phase7a_pr10.md`
+- 新增文档：`gemini_doc/change_2026-03-29_docs_sync_after_pr10.md`
+
+**影响面**
+- 不改代码行为。
+- 统一了根文档、交接文档、Agent 指引中的当前状态口径。
+- 后续协作可直接引用 PR-10 之后的计划文档，而不是继续指向历史计划。

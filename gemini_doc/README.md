@@ -37,12 +37,19 @@
 2. `docs/change_log.md`（按时间看每一批修改做了什么）
 3. `gemini_doc/phase6_summary.md`（当前方法族与 E2E 工件链的阶段总览）
 
+### E. LLM 交接视角
+
+1. `gemini_doc/llm_briefing_boundflow.md`（问题-背景-解决方案-现状，给其他大模型的完整交接）
+2. `docs/reference.md`（统一技术参考手册，所有工具共用的架构/模块/环境/规范）
+
 ---
 
 ## 2) 本目录文件分类
 
-### 2.1 关键交付文档（“长期有效”）
+### 2.1 关键交付文档（”长期有效”）
 
+- `docs/reference.md`：**统一技术参考手册**（架构/模块/环境/命令/规范，CLAUDE.md/AGENTS.md/README.md 共用）
+- `gemini_doc/llm_briefing_boundflow.md`：**LLM 交接文档**（问题-背景-解决方案-现状，替代已过时的 `docs/llm_handoff_summary.md`）
 - `gemini_doc/artifact_claims_phase5d.md`：Phase 5D artifact claims（证据链/口径映射）
 - `gemini_doc/artifact_appendix_phase5d.md`：Phase 5D artifact appendix（复现说明）
 - `gemini_doc/project_evolution_overview.md`：研发脉络总览（目标、阶段推进、代码落点、未来路线）
@@ -77,14 +84,14 @@
 
 ---
 
-## 3) Phase 5（现状）的一句话索引
+## 3) 当前状态（Phase 7A 进行中）的一句话索引
 
-如果你只想知道“Phase 5 到底做完了什么”：
-
-- 完成声明：`docs/phase5_done.md`
-- 口径冻结：`docs/bench_jsonl_schema.md`（`schema_version=1.0`）
-- 一键产线：`scripts/run_phase5d_artifact.py`（产 `results.jsonl/table_main.csv/figures/MANIFEST/CLAIMS/APPENDIX`）
-- 证据链：`gemini_doc/artifact_claims_phase5d.md`
+- **当前前沿**: Phase 7A（已完成 structured ReLU backward + shared CROWN layout-only 支持）
+- **下一步**: `gemini_doc/next_plan_after_phase7a_pr10.md`（benchmark + 继续消除 sign-split dense 点）
+- **统一参考**: `docs/reference.md`（架构/模块/环境/规范）
+- **LLM 交接**: `gemini_doc/llm_briefing_boundflow.md`（给其他大模型的完整交接）
+- **Phase 5 口径**: `docs/phase5_done.md` + `docs/bench_jsonl_schema.md`（`schema_version=1.0`）
+- **Phase 6 总结**: `gemini_doc/phase6_summary.md`
 
 ---
 
