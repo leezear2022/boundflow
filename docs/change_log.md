@@ -2336,3 +2336,107 @@
 - 新增下一步文档：
   - `gemini_doc/next_plan_after_phase7a_pr9.md`
   - 将 PR-10 主线固定为 “ReLU barrier 结构化”，而不是把更强 lazy row-norm 写成并列路线
+
+---
+
+## 2026-03-28：文档整合——统一技术参考 + LLM 交接文档
+
+**动机**
+- CLAUDE.md、AGENTS.md、README.md 内容严重重叠，需消除重复建立单一权威参考。
+- README.md 停留在早期状态，需反映 Phase 7A 现状。
+- 需生成 LLM 交接文档方便与其他大模型协作。
+
+**主要改动**
+- 新建 `docs/reference.md`：统一技术参考手册，合并三文件共性内容（架构/模块/环境/命令/规范/阶段表）。
+- 新建 `gemini_doc/llm_briefing_boundflow.md`：LLM 交接文档（问题-背景-解决方案-现状），替代已过时的 `docs/llm_handoff_summary.md`。
+- 瘦身 `CLAUDE.md`/`AGENTS.md`/`GEMINI.md`：仅保留各工具专属约定 + 指向 reference.md。
+- 重写 `README.md`：反映 Phase 7A（方法族/模型支持/系统特性/阶段进度表/快速开始/最小示例）。
+- 更新 `gemini_doc/README.md`：新增阅读路径 E + 新文档索引 + 现状更新到 Phase 7A。
+- 废弃标记 `docs/llm_handoff_summary.md`。
+
+**验证**
+- 逐条检查 reference.md 覆盖了原 CLAUDE.md 和 AGENTS.md 的全部实质内容。
+- 所有内部文档引用链完整。
+
+---
+
+## 2026-03-28：Phase 7A PR-10——ReLU barrier structured
+
+**动机**
+- PR-9 已去掉 DAG merge / concat backward 的 dense barrier，但 ReLU backward 仍在热路径上通过 `to_dense()` 做 sign-selective relaxation。
+- 若不先结构化 ReLU barrier，plain CROWN / alpha-CROWN / alpha-beta-CROWN / BaB 共享 backward 路径仍会在 ReLU 处退化回显式大张量 `A`。
+
+**主要改动**
+- 更新：`boundflow/runtime/linear_operator.py`
+  - `LinearOperator` 协议新增 `split_pos_neg()`
+  - 为现有 operator 补齐精确正/负系数分解入口
+  - 新增 `ScaledInputLinearOperator`，用于把 ReLU 的 `alpha_u/alpha_l` 结构化乘到输入轴
+  - 新增 `RepeatedRowLinearOperator`，用于结构化承接 `relu_pre_add_coeff_{u,l}`
+- 更新：`boundflow/runtime/crown_ibp.py`
+  - `_backprop_relu_step(...)` 改为 sign-split structured 实现
+  - `b_u/b_l` 的 `beta_u/beta_l` 偏置贡献保持原公式精确更新
+  - ReLU backward 不再回退成普通 `DenseLinearOperator`
+- 更新文档字符串：
+  - `boundflow/runtime/crown_ibp.py`
+  - `boundflow/runtime/alpha_crown.py`
+  - `boundflow/runtime/alpha_beta_crown.py`
+  - `boundflow/runtime/bab.py`
+  - 修正先前关于 chain-only / MLP-only / conv BaB 能力的过期描述
+- 新增测试：`tests/test_phase7a_pr10_relu_barrier_structured.py`
+- 新增文档：`gemini_doc/change_2026-03-28_phase7a_pr10_relu_barrier_structured.md`
+
+**影响面**
+- 不改 public API；对外 solver 函数签名保持不变。
+- `relu_alpha` 梯度继续穿过共享 backward 路径，不因结构化 operator 而断开。
+- 新 operator 的 `row_abs_*` 若无廉价闭式实现，允许精确 dense fallback；不引入额外松弛。
+- first-layer infeasible detector 中的独立 dense 点继续保留，不纳入本次 PR。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr10_relu_barrier_structured.py`
+- 结果：`6 passed in 0.81s`
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr9_operator_preserving_dag_backward.py tests/test_phase7a_pr5_alpha_crown_cnn.py tests/test_phase7a_pr6_alpha_beta_crown_cnn.py tests/test_phase7a_pr7_bab_chain_cnn.py tests/test_phase6d_alpha_crown_mlp.py tests/test_phase6g_alpha_beta_multispec_batch.py`
+- 结果：`27 passed in 1.67s`
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr9_dag_linear_operator.py tests/test_phase7a_pr4_conv_lazy_norms.py`
+- 结果：`12 passed in 0.76s`
+
+---
+
+## 2026-03-28：shared CROWN layout-only 支持（reshape + structured permute）
+
+**动机**
+- PR-10 完成后，`pytest tests/` 仍有 2 个前端回归失败；根因是 Torch frontend 在 residual / concat 用例中产出了 terminal `reshape`，而 shared CROWN 的 forward trace / backward 还不支持 `reshape`。
+- 为避免下一批 layout-only 图继续在 shared CROWN 卡住，这次一并补齐 batch-preserving `permute/transpose` 的结构化支持。
+
+**主要改动**
+- 更新：`boundflow/runtime/crown_ibp.py`
+  - `_forward_ibp_trace_mlp(...)` 新增 `reshape`、`permute`、`transpose` 分支
+  - backward 新增 `_backprop_reshape_step(...)` 与 `_backprop_permute_step(...)`
+  - `reshape` backward 直接走 `reshape_input(...)`
+  - `permute/transpose` backward 改为结构化 reindex，不回退成普通 `DenseLinearOperator`
+  - `get_crown_ibp_mlp_stats(...)` 与 runtime 文档同步扩到 layout-only op
+- 更新：`boundflow/runtime/linear_operator.py`
+  - 新增内部 `ReindexInputLinearOperator`
+  - 使用 gather/scatter index 精确表达输入轴重排
+  - `row_abs_*` 直接复用 base，`split_pos_neg()` 保持结构化
+  - `_materialize_feature_map_rows(...)` 补 reindex 分支
+- 更新：`boundflow/frontends/pytorch/frontend.py`
+  - 将 `aten._unsafe_view.default` 规范化为 `reshape`
+  - 将 `aten.clone.default` 规范化为 no-op `reshape`，并补充注释说明其 identity 意图
+  - 为 `reshape` 提取 shape attrs，覆盖 export 图里的 `reshape/view/_unsafe_view`
+- 更新：`tests/test_phase7a_pr8_general_dag_frontends.py`
+  - 新增 `permute -> reshape -> linear` 的 Torch / ONNX frontends 一致性回归
+- 新增：`tests/test_phase7a_pr10_layout_only_shared_crown.py`
+- 新增文档：`gemini_doc/change_2026-03-28_shared_crown_layout_only_support.md`
+
+**影响面**
+- 不改 public API。
+- shared CROWN 支持集扩到 `reshape` 与 batch-preserving `permute/transpose`。
+- `permute/transpose` 仍只支持 `dims[0] == 0` 的 layout-only 子集，不扩批维重排。
+- layout op 热路径不新增 dense barrier。
+
+**验证**
+- `conda run -n boundflow python -m py_compile boundflow/frontends/pytorch/frontend.py boundflow/runtime/linear_operator.py boundflow/runtime/crown_ibp.py tests/test_phase7a_pr10_layout_only_shared_crown.py tests/test_phase7a_pr8_general_dag_frontends.py`
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr10_layout_only_shared_crown.py tests/test_phase7a_pr8_general_dag_frontends.py`
+- 结果：`7 passed in 1.49s`
+- `conda run -n boundflow python -m pytest -q tests/`
+- 结果：`173 passed, 1 skipped in 26.58s`

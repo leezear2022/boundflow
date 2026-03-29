@@ -533,7 +533,7 @@ def solve_bab_mlp(
     config: Optional[BabConfig] = None,
 ) -> BabResult:
     """
-    Correctness-first BaB for chain-structured graphs.
+    Correctness-first BaB for the currently exposed chain-structured solver subset.
 
     Supported subset:
     - MLP: linear / relu / linear

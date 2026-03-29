@@ -145,14 +145,14 @@ def run_alpha_crown_mlp(
     relu_split_state: Optional[Dict[str, torch.Tensor]] = None,
 ) -> Tuple[IntervalState, AlphaState, AlphaCrownStats]:
     """
-    Minimal alpha-CROWN-style optimization loop for chain-structured graphs.
+    Minimal alpha-CROWN-style optimization loop over the shared single-task CROWN backward path.
 
     This implementation parameterizes unstable ReLU lower relaxation as y >= alpha * x with alpha in [0,1],
     and optimizes alpha with autograd to tighten a chosen objective.
 
     Limitations:
-    - Single-task chain graphs, same as run_crown_ibp_mlp.
-    - Supports the same chain subset as plain CROWN-IBP, including conv2d/flatten.
+    - Single-task graphs only.
+    - Supports the same operator subset as run_crown_ibp_mlp, including conv2d/flatten and the current add/concat DAG path.
     - alpha is stored per ReLU node, shared across batch/spec for each element.
     """
     module.validate()

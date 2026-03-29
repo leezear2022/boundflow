@@ -8,7 +8,7 @@ import torch
 from ..domains.interval import IntervalDomain, IntervalState
 from ..ir.task import BFTaskModule, TaskKind
 from .dag_utils import normalize_concat_axis, validate_concat_tensor_shapes, validate_concat_value_shapes
-from .linear_operator import DenseLinearOperator, LinearOperator
+from .linear_operator import DenseLinearOperator, LinearOperator, ReindexInputLinearOperator, RepeatedRowLinearOperator, ScaledInputLinearOperator
 from .perturbation import InputPerturbationState
 from .relu_shape_utils import broadcast_relu_split_like_pre
 from .task_executor import InputSpec, InputSpecLike, _normalize_input_spec
@@ -182,6 +182,36 @@ def _forward_ibp_trace_mlp(
                 )
                 env[op.outputs[0]] = y
                 interval_env[op.outputs[0]] = y
+            continue
+
+        if op.op_type == "reshape":
+            x = _ensure_interval(_get_state(op.inputs[0]))
+            shape = op.attrs.get("shape")
+            if shape is None:
+                y = x
+            else:
+                target_shape = tuple(int(dim) for dim in shape)
+                y = IntervalState(
+                    lower=x.lower.reshape(target_shape),
+                    upper=x.upper.reshape(target_shape),
+                )
+            env[op.outputs[0]] = y
+            interval_env[op.outputs[0]] = y
+            continue
+
+        if op.op_type in ("permute", "transpose"):
+            x = _ensure_interval(_get_state(op.inputs[0]))
+            dims = _normalize_batch_preserving_permute_dims(
+                op.attrs.get("dims"),
+                rank_with_batch=int(x.lower.dim()),
+                caller="_forward_ibp_trace_mlp",
+            )
+            y = IntervalState(
+                lower=x.lower.permute(*dims),
+                upper=x.upper.permute(*dims),
+            )
+            env[op.outputs[0]] = y
+            interval_env[op.outputs[0]] = y
             continue
 
         raise NotImplementedError(f"_forward_ibp_trace_mlp unsupported op_type: {op.op_type}")
@@ -389,6 +419,48 @@ def _value_shape(
     return tuple(int(dim) for dim in interval_env[value_name].lower.shape[1:])
 
 
+def _normalize_batch_preserving_permute_dims(
+    dims_raw: Any,
+    *,
+    rank_with_batch: int,
+    caller: str,
+) -> Tuple[int, ...]:
+    if not isinstance(dims_raw, (list, tuple)):
+        raise NotImplementedError(f"{caller} expects permute dims list/tuple, got {type(dims_raw)}")
+    dims = tuple(int(dim) for dim in dims_raw)
+    if len(dims) != int(rank_with_batch):
+        raise NotImplementedError(
+            f"{caller} expects permute dims length {rank_with_batch}, got {dims}"
+        )
+    if sorted(dims) != list(range(int(rank_with_batch))):
+        raise NotImplementedError(f"{caller} expects permute dims to be a permutation, got {dims}")
+    if int(dims[0]) != 0:
+        raise NotImplementedError(f"{caller} only supports batch-preserving permute/transpose, got dims={dims}")
+    return dims
+
+
+def _permute_output_shape(
+    *,
+    input_shape: Tuple[int, ...],
+    dims_with_batch: Tuple[int, ...],
+) -> Tuple[int, ...]:
+    return tuple(int(input_shape[int(dim) - 1]) for dim in dims_with_batch[1:])
+
+
+def _make_permute_gather_index(
+    *,
+    input_shape: Tuple[int, ...],
+    dims_with_batch: Tuple[int, ...],
+    device: torch.device,
+) -> torch.Tensor:
+    flat_dim = 1
+    for dim in input_shape:
+        flat_dim *= int(dim)
+    flat = torch.arange(flat_dim, device=device, dtype=torch.long).reshape(input_shape)
+    dims_no_batch = tuple(int(dim) - 1 for dim in dims_with_batch[1:])
+    return flat.permute(*dims_no_batch).reshape(-1)
+
+
 def _align_backward_state_input_shape(
     state: AffineBackwardState,
     *,
@@ -487,10 +559,11 @@ def _broadcast_relu_alpha(
     return out.clamp(0.0, 1.0)
 
 
-def _apply_relu_pre_add_coeff(
-    A: torch.Tensor,
+def _broadcast_relu_pre_add_coeff(
     add_raw: Any,
     *,
+    batch: int,
+    flat_dim: int,
     x_name: str,
     label: str,
     device: torch.device,
@@ -498,8 +571,6 @@ def _apply_relu_pre_add_coeff(
 ) -> torch.Tensor:
     add = add_raw if torch.is_tensor(add_raw) else torch.as_tensor(add_raw, device=device, dtype=dtype)
     add = add.to(device=device, dtype=dtype)
-    flat_dim = int(A.shape[2])
-    batch = int(A.shape[0])
     if add.dim() == 0:
         add = add.expand(flat_dim)
     if add.dim() == 1:
@@ -507,25 +578,54 @@ def _apply_relu_pre_add_coeff(
             raise ValueError(
                 f"{label}[{x_name}] shape {tuple(add.shape)} does not match expected ({flat_dim},)"
             )
-        return A + add.view(1, 1, -1)
+        return add.view(1, flat_dim).expand(batch, flat_dim)
     if add.dim() == 2:
         if int(add.shape[1]) != flat_dim:
             raise ValueError(
                 f"{label}[{x_name}] shape {tuple(add.shape)} does not match expected (*,{flat_dim})"
             )
         if int(add.shape[0]) == 1:
-            add_b = add.expand(batch, -1)
-        elif int(add.shape[0]) == batch:
-            add_b = add
-        else:
-            raise ValueError(f"{label}[{x_name}] shape {tuple(add.shape)} does not match batch {batch}")
-        return A + add_b.unsqueeze(1)
+            return add.expand(batch, -1)
+        if int(add.shape[0]) == batch:
+            return add
+        raise ValueError(f"{label}[{x_name}] shape {tuple(add.shape)} does not match batch {batch}")
     total = int(add.numel())
     if total == flat_dim:
-        return A + add.reshape(1, 1, flat_dim)
+        return add.reshape(1, flat_dim).expand(batch, flat_dim)
     if total == batch * flat_dim and int(add.shape[0]) == batch:
-        return A + add.reshape(batch, flat_dim).unsqueeze(1)
+        return add.reshape(batch, flat_dim)
     raise ValueError(f"{label}[{x_name}] expects shape broadcastable to [B,{flat_dim}], got {tuple(add.shape)}")
+
+
+def _make_repeated_row_operator(
+    add_raw: Any,
+    *,
+    batch: int,
+    spec_dim: int,
+    input_shape: Tuple[int, ...],
+    x_name: str,
+    label: str,
+    device: torch.device,
+    dtype: torch.dtype,
+) -> RepeatedRowLinearOperator:
+    flat_dim = 1
+    for dim in input_shape:
+        flat_dim *= int(dim)
+    coeffs = _broadcast_relu_pre_add_coeff(
+        add_raw,
+        batch=batch,
+        flat_dim=flat_dim,
+        x_name=x_name,
+        label=label,
+        device=device,
+        dtype=dtype,
+    )
+    return RepeatedRowLinearOperator(
+        coeffs=coeffs,
+        spec_dim_size=spec_dim,
+        input_shape=input_shape,
+        batch_size=batch,
+    )
 
 
 def _backprop_linear_step(
@@ -556,6 +656,43 @@ def _backprop_flatten_step(
         A_l=state.A_l.reshape_input(pre_shape),
         b_u=state.b_u,
         b_l=state.b_l,
+    )
+
+
+def _backprop_reshape_step(
+    state: AffineBackwardState,
+    *,
+    pre_shape: Tuple[int, ...],
+) -> AffineBackwardState:
+    return AffineBackwardState(
+        A_u=state.A_u.reshape_input(pre_shape),
+        A_l=state.A_l.reshape_input(pre_shape),
+        b_u=state.b_u,
+        b_l=state.b_l,
+    )
+
+
+def _backprop_permute_step(
+    state: AffineBackwardState,
+    *,
+    input_shape: Tuple[int, ...],
+    dims_with_batch: Tuple[int, ...],
+    device: torch.device,
+    caller: str,
+) -> AffineBackwardState:
+    dims = _normalize_batch_preserving_permute_dims(
+        dims_with_batch,
+        rank_with_batch=len(input_shape) + 1,
+        caller=caller,
+    )
+    output_shape = _permute_output_shape(input_shape=input_shape, dims_with_batch=dims)
+    base = _align_backward_state_input_shape(state, input_shape=output_shape)
+    gather_index = _make_permute_gather_index(input_shape=input_shape, dims_with_batch=dims, device=device)
+    return AffineBackwardState(
+        A_u=ReindexInputLinearOperator(base=base.A_u, input_shape=input_shape, gather_index=gather_index),
+        A_l=ReindexInputLinearOperator(base=base.A_l, input_shape=input_shape, gather_index=gather_index),
+        b_u=base.b_u,
+        b_l=base.b_l,
     )
 
 
@@ -629,10 +766,11 @@ def _backprop_relu_step(
     dtype: torch.dtype,
     caller: str,
 ) -> AffineBackwardState:
+    batch = int(pre.lower.shape[0])
     orig_input_shape = tuple(int(dim) for dim in pre.lower.shape[1:])
     pre_flat = IntervalState(
-        lower=pre.lower.reshape(int(pre.lower.shape[0]), -1),
-        upper=pre.upper.reshape(int(pre.upper.shape[0]), -1),
+        lower=pre.lower.reshape(batch, -1),
+        upper=pre.upper.reshape(batch, -1),
     )
     if pre_flat.lower.shape[1] != state.A_u.input_numel or pre_flat.lower.shape[1] != state.A_l.input_numel:
         raise ValueError(
@@ -645,8 +783,6 @@ def _backprop_relu_step(
                 f"{caller} only supports relu_pre_add_coeff_u on rank-2 pre-activations; got {tuple(pre.lower.shape)} for {x_name}"
             )
 
-    A_u = state.A_u.to_dense()
-    A_l = state.A_l.to_dense()
     b_u = state.b_u
     b_l = state.b_l
 
@@ -664,37 +800,60 @@ def _backprop_relu_step(
         if amb.any():
             alpha_l = torch.where(amb, alpha_broadcast, alpha_l)
 
-    sel_alpha_u = torch.where(A_u >= 0, alpha_u.unsqueeze(1), alpha_l.unsqueeze(1))
-    sel_beta_u = torch.where(A_u >= 0, beta_u.unsqueeze(1), beta_l.unsqueeze(1))
-    b_u = b_u + (A_u * sel_beta_u).sum(dim=2)
-    A_u = A_u * sel_alpha_u
+    def _logical(flat: torch.Tensor) -> torch.Tensor:
+        return flat.reshape(batch, *orig_input_shape)
+
+    A_u_pos, A_u_neg = state.A_u.split_pos_neg()
+    A_l_pos, A_l_neg = state.A_l.split_pos_neg()
+    if tuple(A_u_pos.input_shape) != tuple(orig_input_shape):
+        A_u_pos = A_u_pos.reshape_input(orig_input_shape)
+    if tuple(A_u_neg.input_shape) != tuple(orig_input_shape):
+        A_u_neg = A_u_neg.reshape_input(orig_input_shape)
+    if tuple(A_l_pos.input_shape) != tuple(orig_input_shape):
+        A_l_pos = A_l_pos.reshape_input(orig_input_shape)
+    if tuple(A_l_neg.input_shape) != tuple(orig_input_shape):
+        A_l_neg = A_l_neg.reshape_input(orig_input_shape)
+
+    alpha_u_logical = _logical(alpha_u)
+    alpha_l_logical = _logical(alpha_l)
+    beta_u_logical = _logical(beta_u)
+    beta_l_logical = _logical(beta_l)
+
+    b_u = b_u + A_u_pos.contract_input(beta_u_logical) + A_u_neg.contract_input(beta_l_logical)
+    A_u_op: LinearOperator = ScaledInputLinearOperator(A_u_pos, alpha_u_logical).add(
+        ScaledInputLinearOperator(A_u_neg, alpha_l_logical)
+    )
     if relu_pre_add_coeff_u is not None and x_name in relu_pre_add_coeff_u:
-        A_u = _apply_relu_pre_add_coeff(
-            A_u,
+        A_u_op = A_u_op.add(_make_repeated_row_operator(
             relu_pre_add_coeff_u[x_name],
+            batch=batch,
+            spec_dim=int(state.A_u.spec_dim),
+            input_shape=orig_input_shape,
             x_name=x_name,
             label="relu_pre_add_coeff_u",
             device=device,
             dtype=dtype,
-        )
+        ))
 
-    sel_alpha_l = torch.where(A_l >= 0, alpha_l.unsqueeze(1), alpha_u.unsqueeze(1))
-    sel_beta_l = torch.where(A_l >= 0, beta_l.unsqueeze(1), beta_u.unsqueeze(1))
-    b_l = b_l + (A_l * sel_beta_l).sum(dim=2)
-    A_l = A_l * sel_alpha_l
+    b_l = b_l + A_l_pos.contract_input(beta_l_logical) + A_l_neg.contract_input(beta_u_logical)
+    A_l_op: LinearOperator = ScaledInputLinearOperator(A_l_pos, alpha_l_logical).add(
+        ScaledInputLinearOperator(A_l_neg, alpha_u_logical)
+    )
     if relu_pre_add_coeff_l is not None and x_name in relu_pre_add_coeff_l:
-        A_l = _apply_relu_pre_add_coeff(
-            A_l,
+        A_l_op = A_l_op.add(_make_repeated_row_operator(
             relu_pre_add_coeff_l[x_name],
+            batch=batch,
+            spec_dim=int(state.A_l.spec_dim),
+            input_shape=orig_input_shape,
             x_name=x_name,
             label="relu_pre_add_coeff_l",
             device=device,
             dtype=dtype,
-        )
+        ))
 
     return AffineBackwardState(
-        A_u=DenseLinearOperator(A_u, input_shape=orig_input_shape),
-        A_l=DenseLinearOperator(A_l, input_shape=orig_input_shape),
+        A_u=A_u_op,
+        A_l=A_l_op,
         b_u=b_u,
         b_l=b_l,
     )
@@ -784,6 +943,26 @@ def _run_crown_backward_from_trace(
             in_name = op.inputs[0]
             in_shape = _value_shape(input_spec=input_spec, interval_env=interval_env, value_name=in_name)
             contrib = _backprop_flatten_step(state, pre_shape=in_shape)
+            adjoints[in_name] = _accumulate_backward_state(adjoints.get(in_name), contrib, input_shape=in_shape)
+            continue
+
+        if op.op_type == "reshape":
+            in_name = op.inputs[0]
+            in_shape = _value_shape(input_spec=input_spec, interval_env=interval_env, value_name=in_name)
+            contrib = _backprop_reshape_step(state, pre_shape=in_shape)
+            adjoints[in_name] = _accumulate_backward_state(adjoints.get(in_name), contrib, input_shape=in_shape)
+            continue
+
+        if op.op_type in ("permute", "transpose"):
+            in_name = op.inputs[0]
+            in_shape = _value_shape(input_spec=input_spec, interval_env=interval_env, value_name=in_name)
+            contrib = _backprop_permute_step(
+                state,
+                input_shape=in_shape,
+                dims_with_batch=tuple(int(dim) for dim in op.attrs.get("dims", ())),
+                device=device,
+                caller=caller,
+            )
             adjoints[in_name] = _accumulate_backward_state(adjoints.get(in_name), contrib, input_shape=in_shape)
             continue
 
@@ -931,11 +1110,14 @@ def run_crown_ibp_mlp(
 
     Limitations:
     - Single task only.
-    - Supports op_type in {"linear", "relu", "conv2d", "flatten", "add", "concat"}.
+    - Supports op_type in {"linear", "relu", "conv2d", "flatten", "reshape", "permute", "transpose", "add", "concat"}.
     - `flatten` is restricted to `start_dim=1, end_dim=-1`.
+    - `reshape` follows `torch.reshape` semantics over the full tensor shape stored in attrs.
+    - `permute`/`transpose` are restricted to batch-preserving layout-only reorders (`dims[0] == 0`).
     - `add` only supports exact same-shape inputs (no broadcast).
     - `concat` only supports feature-axis concat on [B,F] and channel-axis concat on [B,C,H,W].
-    - Conv support is plain CROWN-IBP only; alpha/beta/BaB remain MLP-only.
+    - This shared backward path is reused by the plain CROWN / alpha / alpha-beta / BaB stacks.
+    - Higher-level solvers may still impose narrower graph-structure constraints at their own entrypoints.
     - Returns bounds for a single output value (rank-2 [B,O]).
     """
     module.validate()
@@ -1018,7 +1200,7 @@ def get_crown_ibp_mlp_stats(module: BFTaskModule) -> CrownIbpStats:
         ops = tuple(op.op_type for op in task.ops)
         if not task.ops:
             return CrownIbpStats(supported=False, reason="empty task", ops_seen=ops)
-        bad = [t for t in ops if t not in {"linear", "relu", "conv2d", "flatten", "add", "concat"}]
+        bad = [t for t in ops if t not in {"linear", "relu", "conv2d", "flatten", "reshape", "permute", "transpose", "add", "concat"}]
         if bad:
             return CrownIbpStats(supported=False, reason=f"unsupported ops: {bad}", ops_seen=ops)
         for i, op in enumerate(task.ops):
@@ -1029,6 +1211,34 @@ def get_crown_ibp_mlp_stats(module: BFTaskModule) -> CrownIbpStats:
                     return CrownIbpStats(
                         supported=False,
                         reason=f"unsupported flatten attrs at op {i}: {op.attrs}",
+                        ops_seen=ops,
+                    )
+            if op.op_type == "reshape":
+                shape = op.attrs.get("shape")
+                if shape is not None and not isinstance(shape, (list, tuple)):
+                    return CrownIbpStats(
+                        supported=False,
+                        reason=f"unsupported reshape attrs at op {i}: {op.attrs}",
+                        ops_seen=ops,
+                    )
+            if op.op_type in ("permute", "transpose"):
+                dims = op.attrs.get("dims")
+                if not isinstance(dims, (list, tuple)):
+                    return CrownIbpStats(
+                        supported=False,
+                        reason=f"unsupported permute attrs at op {i}: {op.attrs}",
+                        ops_seen=ops,
+                    )
+                try:
+                    _normalize_batch_preserving_permute_dims(
+                        dims,
+                        rank_with_batch=len(dims),
+                        caller="get_crown_ibp_mlp_stats",
+                    )
+                except NotImplementedError as e:
+                    return CrownIbpStats(
+                        supported=False,
+                        reason=str(e),
                         ops_seen=ops,
                     )
             if len(op.outputs) != 1:
