@@ -1,6 +1,6 @@
 # BoundFlow 研发脉络总览
 
-这篇文档回答五个问题：BoundFlow 想解决什么、这条线如何从 Phase 0 推到 Phase 6、各阶段主要改了哪些代码模块、现有记录分别放在哪里、以及下一步自然应该做什么。
+这篇文档回答五个问题：BoundFlow 想解决什么、这条线如何从 Phase 0 推到当前的 Phase 7A、各阶段主要改了哪些代码模块、现有记录分别放在哪里、以及下一步自然应该做什么。
 
 它的定位是“入口层 + 导航层 + 演化视角层”：不替代 [gemini_doc/phase0_summary.md](/home/lee/Codes/boundflow/gemini_doc/phase0_summary.md) 到 [gemini_doc/phase6_summary.md](/home/lee/Codes/boundflow/gemini_doc/phase6_summary.md)，而是把这些阶段文档与总账、全流程文档串成一条可接手的主线。
 
@@ -25,7 +25,7 @@ BoundFlow 的主线可以概括为：先把 Torch/ONNX 模型导入成统一的 
 按当前仓库状态看，可以把项目分成两层理解：
 
 - Phase 0-5 已经在 [docs/change_log.md](/home/lee/Codes/boundflow/docs/change_log.md)、[docs/phase5_done.md](/home/lee/Codes/boundflow/docs/phase5_done.md) 与各阶段总结中形成较稳定的里程碑与证据链。
-- Phase 6 已经在代码、测试和文档层大幅展开，尤其体现在 [boundflow/runtime/perturbation.py](/home/lee/Codes/boundflow/boundflow/runtime/perturbation.py)、[boundflow/runtime/crown_ibp.py](/home/lee/Codes/boundflow/boundflow/runtime/crown_ibp.py)、[boundflow/runtime/alpha_crown.py](/home/lee/Codes/boundflow/boundflow/runtime/alpha_crown.py)、[boundflow/runtime/alpha_beta_crown.py](/home/lee/Codes/boundflow/boundflow/runtime/alpha_beta_crown.py)、[boundflow/runtime/bab.py](/home/lee/Codes/boundflow/boundflow/runtime/bab.py) 与 `scripts/bench_phase6*` 一组脚本中；但如果以 git 历史为准，它和 Phase 0-5 相比更像“正在工作区与文档中落账中的当前主线”。
+- Phase 6 已形成稳定方法族与 E2E 工件链；当前工作区与文档的真实前沿已经推进到 Phase 7A，重点体现在 [boundflow/runtime/linear_operator.py](/home/lee/Codes/boundflow/boundflow/runtime/linear_operator.py)、[boundflow/runtime/crown_ibp.py](/home/lee/Codes/boundflow/boundflow/runtime/crown_ibp.py)、[tests/test_phase7a_pr10_relu_barrier_structured.py](/home/lee/Codes/boundflow/tests/test_phase7a_pr10_relu_barrier_structured.py)、[tests/test_phase7a_pr11_shared_crown_bench.py](/home/lee/Codes/boundflow/tests/test_phase7a_pr11_shared_crown_bench.py) 与 [scripts/bench_phase7a_shared_crown_path_attribution.py](/home/lee/Codes/boundflow/scripts/bench_phase7a_shared_crown_path_attribution.py)。
 
 ---
 
@@ -291,38 +291,43 @@ Phase 6 解决的是“如何在同一个系统框架里接入更强方法族，
 
 ## 7. 当前状态判断
 
-如果按“已经在 git 历史中形成稳定里程碑”的标准看，Phase 0-5 是当前最清晰的一层：
+如果按“已经在 git 历史和阶段总结里形成稳定里程碑”的标准看，Phase 0-6 是当前最清晰的一层：
 
 - 它们在 [docs/change_log.md](/home/lee/Codes/boundflow/docs/change_log.md) 中有连续记录。
-- 它们在 [gemini_doc/phase0_summary.md](/home/lee/Codes/boundflow/gemini_doc/phase0_summary.md) 到 [gemini_doc/phase5_summary.md](/home/lee/Codes/boundflow/gemini_doc/phase5_summary.md) 中已有较完整收官文档。
-- Phase 5 还有 [docs/phase5_done.md](/home/lee/Codes/boundflow/docs/phase5_done.md) 作为冻结口径。
+- 它们在 [gemini_doc/phase0_summary.md](/home/lee/Codes/boundflow/gemini_doc/phase0_summary.md) 到 [gemini_doc/phase6_summary.md](/home/lee/Codes/boundflow/gemini_doc/phase6_summary.md) 中已有较完整收官文档。
+- Phase 5 还有 [docs/phase5_done.md](/home/lee/Codes/boundflow/docs/phase5_done.md) 作为冻结口径，Phase 6 则已有完整方法族与 E2E 工件链。
 
-如果按“当前仓库工作区与文档已经展开到哪里”的标准看，Phase 6 是当前的真实开发重心：
+如果按“当前仓库工作区与文档已经推进到哪里”的标准看，Phase 7A 才是当前真实开发前沿：
 
-- `runtime` 下已经出现 `perturbation`、`crown_ibp`、`alpha_crown`、`alpha_beta_crown`、`bab` 一组核心实现。
-- `scripts` 和 `tests` 下已经形成 `phase6c/6g/6h` 的 benchmark 与 E2E 工具链。
-- [gemini_doc/phase6_summary.md](/home/lee/Codes/boundflow/gemini_doc/phase6_summary.md) 已经把 Phase 6 叙事、DoD、E2E 工件链整理出来。
+- `runtime` 下的 [boundflow/runtime/linear_operator.py](/home/lee/Codes/boundflow/boundflow/runtime/linear_operator.py) 与 [boundflow/runtime/crown_ibp.py](/home/lee/Codes/boundflow/boundflow/runtime/crown_ibp.py) 已经连续完成 PR-8 到 PR-14 的 shared CROWN / DAG backward 扩展。
+- `tests` 下已有 [tests/test_phase7a_pr9_dag_linear_operator.py](/home/lee/Codes/boundflow/tests/test_phase7a_pr9_dag_linear_operator.py)、[tests/test_phase7a_pr10_relu_barrier_structured.py](/home/lee/Codes/boundflow/tests/test_phase7a_pr10_relu_barrier_structured.py)、[tests/test_phase7a_pr11_shared_crown_bench.py](/home/lee/Codes/boundflow/tests/test_phase7a_pr11_shared_crown_bench.py) 三组专项回归。
+- `scripts` 下新增了 [scripts/bench_phase7a_shared_crown_path_attribution.py](/home/lee/Codes/boundflow/scripts/bench_phase7a_shared_crown_path_attribution.py)，把“layout-only 是否已有收益、ReLU 路径热点在哪、PR-14 后 hotspot 是否归零”这些问题都变成了可复现口径。
+- 文档侧已经有 [gemini_doc/phase7a_pr11_shared_crown_benchmark_summary.md](/home/lee/Codes/boundflow/gemini_doc/phase7a_pr11_shared_crown_benchmark_summary.md) 与 PR-11 到 PR-14 的 `change_*.md` 记录。
 
-这里需要客观区分：Phase 6 在“文档与代码结构”层面已经是主线，但它与早期 Phase 0-5 相比，可能仍包含更多工作区中的在途内容与未完全整理成历史提交的改动。这是当前仓库状态的观察，不是阶段价值判断。
+当前更准确的判断不是“Phase 7A 还在做 correctness 收尾”，而是：
+
+- correctness 与 observability 已经闭合；
+- `split_pos_neg_dense` 旧热点已从 ReLU workload 主路径清掉；
+- 剩余性能问题集中到 `relu_relax_pullback()` 内部仍存在的精确 dense materialization 成本。
 
 ---
 
 ## 8. 下一步自然路线
 
-基于 [gemini_doc/phase6_summary.md](/home/lee/Codes/boundflow/gemini_doc/phase6_summary.md) 与 [gemini_doc/phase6_review_three_axis_stage_pipeline.md](/home/lee/Codes/boundflow/gemini_doc/phase6_review_three_axis_stage_pipeline.md)，Phase 7 以后最自然的三条线是：
+基于 [gemini_doc/phase7a_pr11_shared_crown_benchmark_summary.md](/home/lee/Codes/boundflow/gemini_doc/phase7a_pr11_shared_crown_benchmark_summary.md) 与 [gemini_doc/next_plan_after_phase7a_pr14.md](/home/lee/Codes/boundflow/gemini_doc/next_plan_after_phase7a_pr14.md)，Phase 7A 在 PR-14 之后最自然的主线有四条：
 
-### 8.1 扩图：skip/branch/general graph
+### 8.1 继续压缩 ReLU pullback 的 dense materialization 成本
 
-当前 Phase 6 的强语义闭环主要建立在链式 MLP 子集上。下一步需要把这套方法族与运行时推广到更一般的图结构，包括 skip connection、branch 与更一般的 DAG。
+PR-14 清掉的是旧的 `split_pos_neg_dense` hotspot，但 `RightMatmul` / `SliceInput` 的 `relu_relax_pullback()` 仍会内部精确 materialize dense 系数。下一步最值钱的工作，是把这部分成本拆出来并继续下降，而不是再回头重写 `split_pos_neg()` contract。
 
-### 8.2 扩算子：Conv 与更一般 backward 线性界
+### 8.2 继续强化 shared CROWN 的 benchmark / observability
 
-如果要从 MLP 真正走向 CNN 或更大模型，Conv 场景下的 backward/CROWN/alpha-beta 传播是绕不开的。这里不仅是补一个算子，而是要补足更一般的线性界传播接口与 soundness gate。
+现在已经有同进程 baseline、固定 workload、dense fallback 计数。下一步应继续把 ReLU pullback 内部的物化次数、张量尺寸或 timing breakdown 变成可记录字段，让“为什么还慢”不再停留在推测层。
 
-### 8.3 扩表达：`LinearOperator` 替代显式大张量 `A`
+### 8.3 继续做 operator-specific 的 sound 优化，而不是泛化成错误 algebra
 
-这是从“能跑”走向“能扩规模”的关键一步。当前许多 backward 线性形式仍以显式张量表达为主；一旦进入 CNN 或更大图，这会直接碰到内存与构造成本问题。用 `LinearOperator` 风格接口替代显式大张量 `A`，是后续系统化扩展的重要前提。
+PR-12 已经证明 `RightMatmul` 的常见四项 sign split 不能满足当前逐元素 exact contract。后续更自然的方向是继续做 ReLU 专用、operator-specific 的 sound 实现，或引入更合适的中间表示，而不是把一个不 exact 的分解硬塞回 `split_pos_neg()`。
 
-### 8.4 后端方向
+### 8.4 后端方向仍然保持不变
 
-后端的自然原则仍然不变：保持 BaB 控制流在 Python runtime，把真正重的张量计算继续往后端推进。也就是说，下一阶段不是把整个 BaB 逻辑强行 lower 到 TVM，而是继续扩大“哪些重计算块值得编译/融合/缓存/批处理”的覆盖面。
+后端的自然原则仍然不变：保持 BaB 控制流在 Python runtime，把真正重的张量计算继续往后端推进。下一阶段不是把整个 BaB 逻辑强行 lower 到 TVM，而是继续扩大“哪些重计算块值得编译/融合/缓存/批处理”的覆盖面。

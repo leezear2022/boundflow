@@ -2,7 +2,7 @@
 
 > 本文档用于让任何大模型或新合作者快速理解 BoundFlow 项目的全貌：问题、背景、解决方案和现状。
 >
-> 最后更新: 2026-03-29 | 当前前沿: Phase 7A（structured ReLU backward + layout-only shared CROWN）
+> 最后更新: 2026-04-16 | 当前前沿: Phase 7A（shared CROWN benchmark + ReLU pullback 解耦与专用实现）
 
 ---
 
@@ -174,13 +174,13 @@ Research Claim
 | 指标 | 数量 |
 |------|------|
 | 核心模块 | 7 个（ir, planner, backends, frontends, domains, runtime, 3rdparty） |
-| 测试文件 | 68 个 |
-| 脚本 | 21 个（bench/artifact/工具） |
-| 变更记录 | 150+ 份 |
+| 测试文件 | 70+ 个 |
+| 脚本 | 20+ 个（bench/artifact/工具） |
+| 变更记录 | 130+ 份 |
 
 ### 4.3 Phase 7A 当前前沿
 
-已完成 PR-1 到 PR-10，并补齐 shared CROWN 的 layout-only 支持：
+已完成 PR-1 到 PR-14，shared CROWN 主线已经从“正确性闭合”推进到“benchmark 口径建立、dense hotspot 定位并清零、ReLU caller 与 exact sign-split contract 解耦”：
 - PR-2: LinearOperator backward state（消除显式大张量）
 - PR-3: Conv LinearOperator + CNN CROWN-IBP
 - PR-5: Alpha-CROWN for CNN
@@ -190,9 +190,19 @@ Research Claim
 - PR-9: Operator-preserving DAG backward（adjoint merge + concat 不再 to_dense）
 - PR-10: Structured ReLU backward（sign-split + `ScaledInputLinearOperator` + `RepeatedRowLinearOperator`）
 - Layout-only support: shared CROWN 补齐 `reshape` 与 batch-preserving `permute/transpose`
+- PR-11: shared CROWN benchmark 与轻量观测（建立固定 workload、dense fallback 计数与同进程 baseline 对照）
+- PR-12: `SliceInputLinearOperator.split_pos_neg()` 结构化传递，并把 `RightMatmulLinearOperator` 明确收敛为 exact contract blocker
+- PR-13: ReLU backward 改走 `relu_relax_pullback()` 接口，caller 与 `split_pos_neg()` exact contract 解耦
+- PR-14: 为 `RightMatmul` / `SliceInput` 增加 ReLU 专用 pullback，实现 ReLU workload 上 `split_pos_neg_dense` 热点清零
 
-**下一步**: 做性能记录并继续消除 `split_pos_neg()` 在复合 operator 上的剩余 dense 点。
-详见 `gemini_doc/next_plan_after_phase7a_pr10.md`。
+当前可复现结论：
+
+- `permute_reshape_linear` 上，layout-only shared CROWN 相对 dense layout barrier 约为 `1.11x`
+- 三个 ReLU workload 在 PR-14 后已清零 `split_pos_neg_dense` 热点，但相对 dense ReLU barrier 仍约为 `0.53x~0.68x`
+- 下一步的主要性能瓶颈不再是旧的 split hotspot，而是 `relu_relax_pullback()` 内部仍存在的精确 dense materialization 成本
+
+**下一步**: 优先压缩 `relu_relax_pullback()` 内部的 dense materialization 成本，并继续扩 shared CROWN benchmark / observability。
+详见 `gemini_doc/next_plan_after_phase7a_pr14.md`。
 
 ### 4.4 关键 API 入口
 
@@ -237,12 +247,15 @@ bash scripts/rebuild_tvm.sh   # 之后重启 Python
 # Artifact
 python scripts/run_phase5d_artifact.py --mode quick --workload all --run-id test
 bash scripts/run_phase6h_artifact.sh /tmp/phase6h_run
+
+# Phase 7A shared CROWN benchmark
+python scripts/bench_phase7a_shared_crown_path_attribution.py --device cpu --profile smoke --workloads all --warmup 1 --iters 1
 ```
 
 ### 4.6 已知限制
 
 1. **算子覆盖**: CROWN/Alpha-Beta/BaB 目前覆盖 Linear + ReLU + Conv2d 子集；更多算子（BatchNorm, MaxPool 等）待补
-2. **Sign-split dense 点**: `split_pos_neg()` 在部分复合 operator（如 `RightMatmulLinearOperator`）上仍允许内部精确物化，是 shared CROWN 主路径的下一批性能优化点
+2. **ReLU shared CROWN 性能**: PR-14 已清零 ReLU workload 上的 `split_pos_neg_dense` 热点，但 `RightMatmul` / `SliceInput` 的 `relu_relax_pullback()` 仍会内部精确 materialize dense 系数；ReLU-heavy workload 仍低于 dense barrier
 3. **TVM lowering**: TVM 编译路径覆盖 interval IBP 子集；CROWN/BaB 尚未下沉到 TVM
 4. **扰动类型**: L-inf/L2/L1 已支持；semantic perturbation 等未实现
 5. **规模**: 当前以小/中型网络为主（MLP, MNIST CNN）；大规模网络的 scalability 待验证
@@ -256,10 +269,11 @@ bash scripts/run_phase6h_artifact.sh /tmp/phase6h_run
 | 研发脉络 | [gemini_doc/project_evolution_overview.md](project_evolution_overview.md) |
 | Phase 5 完成声明 | [docs/phase5_done.md](../docs/phase5_done.md) |
 | Phase 6 总结 | [gemini_doc/phase6_summary.md](phase6_summary.md) |
+| Phase 7A benchmark 摘要 | [gemini_doc/phase7a_pr11_shared_crown_benchmark_summary.md](phase7a_pr11_shared_crown_benchmark_summary.md) |
 | 方法族设计 | [gemini_doc/bound_methods_and_solvers_design.md](bound_methods_and_solvers_design.md) |
 | JSONL Schema | [docs/bench_jsonl_schema.md](../docs/bench_jsonl_schema.md) |
 | LLM 协作流程 | [gemini_doc/llm_collaboration_workflow.md](llm_collaboration_workflow.md) |
-| 下一步计划 | [gemini_doc/next_plan_after_phase7a_pr10.md](next_plan_after_phase7a_pr10.md) |
+| 下一步计划 | [gemini_doc/next_plan_after_phase7a_pr14.md](next_plan_after_phase7a_pr14.md) |
 
 ---
 

@@ -2470,3 +2470,257 @@
 - 不改代码行为。
 - 统一了根文档、交接文档、Agent 指引中的当前状态口径。
 - 后续协作可直接引用 PR-10 之后的计划文档，而不是继续指向历史计划。
+
+---
+
+## 2026-04-08：Phase 7A PR-11——shared CROWN benchmark 与轻量观测
+
+**动机**
+- PR-10 与 shared CROWN layout-only support 已把正确性与结构化路径打通，但还缺一份最小可复现证据来回答两个问题：
+  - structured ReLU backward 相对旧 dense barrier 是否已有时间收益；
+  - shared CROWN 主路径中 `split_pos_neg()` 还剩哪些 operator 会退回 dense。
+- PR-11 先做 benchmark 与观测，不直接继续扩 `LinearOperator` algebra。
+
+**主要改动**
+- 新增：`scripts/bench_phase7a_shared_crown_path_attribution.py`
+  - 固定 4 个 workload（`relu_heavy_mlp` / `residual_relu_mlp` / `concat_relu_mlp` / `permute_reshape_linear`）
+  - 同进程对比：
+    - structured shared CROWN
+    - dense ReLU / dense layout baseline
+  - stdout 输出 JSON，包含：
+    - `structured_ms_p50`
+    - `baseline_ms_p50`
+    - `speedup`
+    - `counts_structured`
+    - `counts_baseline`
+  - 用脚本侧 monkeypatch 统计：
+    - `_split_pos_neg_dense(...)` 次数与 operator 类型
+    - `_backprop_relu_step(...)`
+    - `_backprop_permute_step(...)`
+- 新增：`tests/test_phase7a_pr11_shared_crown_bench.py`
+  - 锁定 structured/baseline 的 bounds 数值一致性
+  - 锁定计数字段与 stdout JSON schema
+  - 显式验证 `RightMatmulLinearOperator` 仍是 `split_pos_neg_dense` 热点之一
+- 新增：`gemini_doc/phase7a_pr11_shared_crown_benchmark_summary.md`
+- 新增：`gemini_doc/change_2026-04-08_phase7a_pr11_shared_crown_benchmark_and_observability.md`
+
+**结果摘要**
+- CUDA (`RTX 4090`) / `--profile bench --warmup 5 --iters 20` 下：
+  - `permute_reshape_linear`：structured layout-only path 相对 dense layout barrier 为 `1.11x`
+  - `relu_heavy_mlp` / `residual_relu_mlp` / `concat_relu_mlp`：structured ReLU backward 相对 dense ReLU barrier 为 `0.65x~0.66x`
+- 剩余 dense fallback 热点：
+  - `relu_heavy_mlp`、`residual_relu_mlp`：主要是 `RightMatmulLinearOperator`
+  - `concat_relu_mlp`：`RightMatmulLinearOperator` + `SliceInputLinearOperator`
+
+**影响面**
+- 不改 solver public API。
+- benchmark/计数逻辑全部留在脚本层，不向 runtime 增加新的返回值或 debug 开关。
+- 现阶段的主要价值是把 shared CROWN 的剩余 dense 热点定位清楚，为后续 PR-12 提供可复用 benchmark 口径。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr11_shared_crown_bench.py`
+- 结果：`3 passed in 0.76s`
+- `conda run --no-capture-output -n boundflow python scripts/bench_phase7a_shared_crown_path_attribution.py --device cpu --profile smoke --workloads all --warmup 1 --iters 1`
+- 结果：脚本正常输出 4 行 workload JSON
+- `conda run --no-capture-output -n boundflow python scripts/bench_phase7a_shared_crown_path_attribution.py --device cuda --profile bench --workloads all --warmup 5 --iters 20`
+- 结果：
+  - `relu_heavy_mlp`: `3.936 ms` vs `2.610 ms`
+  - `residual_relu_mlp`: `2.406 ms` vs `1.574 ms`
+  - `concat_relu_mlp`: `3.457 ms` vs `2.246 ms`
+  - `permute_reshape_linear`: `1.320 ms` vs `1.471 ms`
+
+---
+
+## 2026-04-08：新增简洁版 AI CLI 更新脚本
+
+新增 `scripts/update_ai_clis_simple.sh`，用于快速执行以下 npm 全局工具更新：
+
+- `@google/gemini-cli@latest`
+- `@anthropic-ai/claude-code@latest`
+- `@openai/codex@latest`
+
+脚本特点：
+
+- 默认不带参数，直接更新三套工具；
+- 包含 `npm` 可执行性检查；
+- 更新完成后输出 `Done.` 确认信息。
+
+关联文档：
+
+- `gemini_doc/change_2026-04-08_add_simple_ai_cli_update_script.md`
+
+---
+
+## 2026-04-09：Phase 7A PR-12 缩小版，清理 `SliceInput` dense fallback 并确认 `RightMatmul` blocker
+
+**改动摘要**
+- 更新：`boundflow/runtime/linear_operator.py`
+  - `SliceInputLinearOperator.split_pos_neg()` 改为结构化传递：
+    - 先对 `base` 做 `split_pos_neg()`
+    - 再用相同 `input_shape/start/stop` 包装成两个 `SliceInputLinearOperator`
+  - `RightMatmulLinearOperator.split_pos_neg()` 保持 dense fallback，不引入不满足 exact contract 的四项拆分
+- 更新：`tests/test_phase7a_pr9_dag_linear_operator.py`
+  - 新增 `SliceInputLinearOperator.split_pos_neg()` 的 exactness 回归测试
+- 更新：`tests/test_phase7a_pr11_shared_crown_bench.py`
+  - 锁定 `SliceInputLinearOperator` 不再出现在 `split_pos_neg_dense_by_op`
+  - 明确 `RightMatmulLinearOperator` 仍是剩余热点
+- 更新：`gemini_doc/phase7a_pr11_shared_crown_benchmark_summary.md`
+  - 追加 PR-12 复跑说明与 blocker 结论
+- 新增：`gemini_doc/change_2026-04-09_phase7a_pr12_slice_split_pos_neg_and_rightmatmul_blocker.md`
+
+**结果摘要**
+- 计数层面：
+  - `concat_relu_mlp` 上 `SliceInputLinearOperator` dense fallback 已归零
+  - 所有 ReLU workload 的 `split_pos_neg_dense_by_op` 现只剩 `RightMatmulLinearOperator`
+- CUDA (`RTX 4090`) / `--profile bench --warmup 5 --iters 20`：
+  - `relu_heavy_mlp`：`3.956 ms` vs `2.612 ms`，`0.66x`
+  - `residual_relu_mlp`：`2.423 ms` vs `1.596 ms`，`0.66x`
+  - `concat_relu_mlp`：`4.406 ms` vs `2.269 ms`，`0.51x`
+  - `permute_reshape_linear`：`1.335 ms` vs `1.478 ms`，`1.11x`
+
+**影响面**
+- 这轮只清掉一个已证实安全的 dense 热点，没有扩大 solver API 或 benchmark schema。
+- `RightMatmulLinearOperator` 现在是 shared CROWN ReLU 路径唯一明确剩余的 `split_pos_neg_dense` 热点。
+- 性能没有整体改善，尤其 `concat_relu_mlp` 仍明显偏慢；后续工作应先解决 `RightMatmul` exact contract 问题，而不是继续堆局部代数改写。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr9_dag_linear_operator.py tests/test_phase7a_pr11_shared_crown_bench.py tests/test_phase7a_pr10_relu_barrier_structured.py::test_backprop_relu_step_preserves_operator_form_and_matches_dense_reference`
+- 结果：`11 passed in 0.80s`
+- `conda run --no-capture-output -n boundflow python scripts/bench_phase7a_shared_crown_path_attribution.py --device cpu --profile smoke --workloads all --warmup 1 --iters 1`
+- 结果：脚本正常输出 4 行 workload JSON
+- `conda run --no-capture-output -n boundflow python scripts/bench_phase7a_shared_crown_path_attribution.py --device cuda --profile bench --workloads all --warmup 5 --iters 20`
+- 结果：见上方表格与 `gemini_doc/phase7a_pr11_shared_crown_benchmark_summary.md`
+
+---
+
+## 2026-04-09：Phase 7A PR-13，引入 ReLU 专用 pullback 接口
+
+**改动摘要**
+- 更新：`boundflow/runtime/linear_operator.py`
+  - 在 `LinearOperator` 协议中新增内部接口 `relu_relax_pullback(...)`
+  - 新增共享 helper `_relu_relax_pullback_via_split(...)`
+  - 现有 operator 默认都委托给该 helper，保持当前 split-based 语义
+  - `RightMatmulLinearOperator` 明确保留 dense fallback 行为，不做新的数学优化
+  - 顺手修复 `Conv2dLinearOperator.split_pos_neg()` 的错位实现
+- 更新：`boundflow/runtime/crown_ibp.py`
+  - `_backprop_relu_step()` 改为调用 `state.A_*.relu_relax_pullback(...)`
+  - 不再直接手写 `split_pos_neg()` + `ScaledInputLinearOperator(...)` 组合
+- 更新：`tests/test_phase7a_pr10_relu_barrier_structured.py`
+  - 新增 `relu_relax_pullback()` 与旧 split-based 参考公式的等价测试
+  - 新增 `_backprop_relu_step()` 使用新接口的调用测试
+- 更新：`gemini_doc/phase7a_pr11_shared_crown_benchmark_summary.md`
+  - 追加 PR-13 接口重构说明
+- 新增：`gemini_doc/change_2026-04-09_phase7a_pr13_relu_pullback_interface.md`
+
+**结果摘要**
+- 单测：
+  - `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr10_relu_barrier_structured.py tests/test_phase7a_pr9_dag_linear_operator.py tests/test_phase7a_pr11_shared_crown_bench.py`
+  - 结果：`18 passed in 0.88s`
+- CPU smoke：
+  - `relu_heavy_mlp`: `0.58x`
+  - `residual_relu_mlp`: `0.49x`
+  - `concat_relu_mlp`: `0.44x`
+  - `permute_reshape_linear`: `0.74x`
+- CUDA (`RTX 4090`) / `--profile bench --warmup 5 --iters 20`：
+  - `relu_heavy_mlp`: `4.864 ms` vs `2.628 ms`，`0.54x`
+  - `residual_relu_mlp`: `2.802 ms` vs `1.589 ms`，`0.57x`
+  - `concat_relu_mlp`: `4.915 ms` vs `2.259 ms`，`0.46x`
+  - `permute_reshape_linear`: `1.335 ms` vs `1.492 ms`，`1.12x`
+- 计数侧保持不变：
+  - 剩余 `split_pos_neg_dense` 热点仍然只有 `RightMatmulLinearOperator`
+
+**影响面**
+- 这轮是接口重构，不是性能 PR。
+- ReLU caller 已经与 exact `split_pos_neg()` contract 解耦，为后续 `RightMatmul.relu_relax_pullback()` 的单独实现腾出了接口位置。
+- solver public API、bench schema 和现有 workload 集合都没有变化。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr10_relu_barrier_structured.py tests/test_phase7a_pr9_dag_linear_operator.py tests/test_phase7a_pr11_shared_crown_bench.py`
+- `conda run --no-capture-output -n boundflow python scripts/bench_phase7a_shared_crown_path_attribution.py --device cpu --profile smoke --workloads all --warmup 1 --iters 1`
+- `conda run --no-capture-output -n boundflow python scripts/bench_phase7a_shared_crown_path_attribution.py --device cuda --profile bench --workloads all --warmup 5 --iters 20`
+
+## 2026-04-10：Phase 7A PR-14，`RightMatmul` ReLU pullback 专用实现
+
+**改动摘要**
+- 更新：`boundflow/runtime/linear_operator.py`
+  - 为 `RightMatmulLinearOperator.relu_relax_pullback()` 增加专用实现
+  - 实现直接按当前 dense 系数精确构造 ReLU pullback，不再通过 `split_pos_neg()` 进入 `_split_pos_neg_dense(self)`
+  - 为 `SliceInputLinearOperator.relu_relax_pullback()` 增加对 `base.relu_relax_pullback()` 的嵌回/切回委托
+  - 把 `RightMatmulLinearOperator` 与 `SliceInputLinearOperator` 从默认 `relu_relax_pullback` 绑定名单中移除
+- 更新：`tests/test_phase7a_pr10_relu_barrier_structured.py`
+  - 新增 `RightMatmul.relu_relax_pullback()` 不再依赖 `_split_pos_neg_dense` 的回归测试
+- 更新：`tests/test_phase7a_pr11_shared_crown_bench.py`
+  - 锁定三个 ReLU workload 的 `split_pos_neg_dense_total == 0`
+- 更新：`gemini_doc/phase7a_pr11_shared_crown_benchmark_summary.md`
+  - 追加 PR-14 复跑说明
+- 新增：`gemini_doc/change_2026-04-10_phase7a_pr14_rightmatmul_relu_pullback.md`
+
+**结果摘要**
+- 单测：
+  - `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr10_relu_barrier_structured.py tests/test_phase7a_pr9_dag_linear_operator.py tests/test_phase7a_pr11_shared_crown_bench.py`
+  - 结果：`19 passed in 0.86s`
+- CPU smoke：
+  - `relu_heavy_mlp`: `0.67x`
+  - `residual_relu_mlp`: `0.71x`
+  - `concat_relu_mlp`: `0.49x`
+  - `permute_reshape_linear`: `0.73x`
+  - `split_pos_neg_dense_total` 对全部 workload 为 `0`
+- CUDA (`RTX 4090`) / `--profile bench --warmup 5 --iters 20`：
+- `relu_heavy_mlp`: `4.037 ms` vs `2.607 ms`，`0.65x`
+- `residual_relu_mlp`: `2.342 ms` vs `1.592 ms`，`0.68x`
+- `concat_relu_mlp`: `4.256 ms` vs `2.255 ms`，`0.53x`
+- `permute_reshape_linear`: `1.315 ms` vs `1.463 ms`，`1.11x`
+- `split_pos_neg_dense_by_op` 对三个 ReLU workload 均为空字典
+
+**影响面**
+- PR-14 清掉的是 ReLU 专用路径上的旧 split hotspot，不是给 `RightMatmul` 增加了通用 structured sign split。
+- `split_pos_neg()` contract 保持不变。
+- solver public API 与 bench schema 均未改动。
+- 相比 PR-13，三个 ReLU workload 都有回升，但仍未超过 dense ReLU barrier。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr10_relu_barrier_structured.py tests/test_phase7a_pr9_dag_linear_operator.py tests/test_phase7a_pr11_shared_crown_bench.py`
+- `conda run --no-capture-output -n boundflow python scripts/bench_phase7a_shared_crown_path_attribution.py --device cpu --profile smoke --workloads all --warmup 1 --iters 1`
+- `conda run --no-capture-output -n boundflow python scripts/bench_phase7a_shared_crown_path_attribution.py --device cuda --profile bench --workloads all --warmup 5 --iters 20`
+
+---
+
+## 2026-04-16：Phase 7A PR-11 到 PR-14 文档同步
+
+**动机**
+- PR-11 到 PR-14 的详细变更记录、benchmark 摘要和总账条目已经存在，但高层工作文档仍容易把读者停在“PR-10 + layout-only support 刚完成”的旧口径。
+- 需要把目录导引、LLM 交接、研发脉络、统一参考和下一步计划同步到 PR-14 之后的真实状态。
+
+**主要改动**
+- 更新：`gemini_doc/llm_briefing_boundflow.md`
+  - 当前前沿从 PR-10 同步到 PR-14
+  - 补入 PR-11 到 PR-14 的主线摘要、当前结论与 Phase 7A benchmark 命令
+  - 已知限制改为 `relu_relax_pullback()` 内部 dense materialization 成本
+- 更新：`gemini_doc/README.md`
+  - 新增 Phase 7A benchmark 摘要与 PR-14 之后下一步计划的索引
+  - “当前前沿 / 下一步”同步到 PR-14 之后
+- 更新：`gemini_doc/project_evolution_overview.md`
+  - 现状判断更新为“Phase 7A 是当前真实前沿”
+  - 下一步自然路线改围绕 shared CROWN benchmark、ReLU pullback 与 operator-specific sound 优化
+- 新增：`gemini_doc/next_plan_after_phase7a_pr14.md`
+  - 固化 PR-14 之后的下一步计划
+- 更新：`docs/reference.md`
+  - 模块说明补充 ReLU pullback 接口
+  - 常用命令补入 Phase 7A shared CROWN benchmark
+  - 阶段演进与导航同步到 PR-14 之后
+- 新增：`gemini_doc/change_2026-04-16_phase7a_pr11_pr14_doc_sync.md`
+
+**结果摘要**
+- 现在从高层入口文档进入，不会再误以为当前还停在 PR-10 状态。
+- Phase 7A 的阅读路径更清楚：
+  - 复跑结果看 `gemini_doc/phase7a_pr11_shared_crown_benchmark_summary.md`
+  - 当前全局状态看 `gemini_doc/llm_briefing_boundflow.md`
+  - 后续路线看 `gemini_doc/next_plan_after_phase7a_pr14.md`
+
+**影响面**
+- 不改 runtime / solver / benchmark 代码行为。
+- 不重写已有 PR-11 到 PR-14 的细节记录，只做高层口径同步。
+
+**验证**
+- `rg -n "next_plan_after_phase7a_pr14|phase7a_pr11_shared_crown_benchmark_summary|PR-14" gemini_doc docs README.md`
+- `git diff --check -- gemini_doc/llm_briefing_boundflow.md gemini_doc/README.md gemini_doc/project_evolution_overview.md gemini_doc/next_plan_after_phase7a_pr14.md docs/reference.md docs/change_log.md gemini_doc/change_2026-04-16_phase7a_pr11_pr14_doc_sync.md`

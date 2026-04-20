@@ -97,7 +97,7 @@ PyTorch/ONNX → BoundFlow IR → Planner → BoundTasks → TVM Backend → GPU
 | `alpha_crown.py` | Alpha-CROWN（可优化 dual variables + warm-start） |
 | `alpha_beta_crown.py` | Alpha-Beta-CROWN（beta 编码 split 约束） |
 | `bab.py` | Branch-and-Bound（ReluSplitState, branching, node-batch, prune） |
-| `linear_operator.py` | LinearOperator 抽象（Dense/Batched/Conv/Reindex/Scaled, 避免显式大张量） |
+| `linear_operator.py` | LinearOperator 抽象（Dense/Batched/Conv/Reindex/Scaled, 避免显式大张量；承载 ReLU pullback 接口） |
 | `dag_utils.py` | DAG 工具（shape 验证、规范化） |
 | `relu_shape_utils.py` | ReLU split broadcasting 与 shape 工具 |
 
@@ -172,6 +172,9 @@ bash scripts/run_phase6h_artifact.sh /tmp/phase6h_run
 # 消融实验
 python scripts/bench_ablation_matrix.py > results.jsonl
 python scripts/postprocess_ablation_jsonl.py results.jsonl
+
+# Phase 7A shared CROWN benchmark
+python scripts/bench_phase7a_shared_crown_path_attribution.py --device cpu --profile smoke --workloads all --warmup 1 --iters 1
 ```
 
 ---
@@ -299,6 +302,10 @@ IBP → CROWN-IBP → Alpha-CROWN → Alpha-Beta-CROWN → BaB
 | Phase 4 | 系统骨架闭环（Task/Planner/Executor, TVM demo, ONNX） | 完成 |
 | Phase 5 | 论文/AE 工件化（JSONL schema, artifact pipeline） | 完成 |
 | Phase 6 | 方法族落地 + 收益归因（CROWN/Alpha/BaB + E2E bench） | 完成 |
-| Phase 7A | CNN/DAG 扩展 + LinearOperator + operator-preserving backward | **进行中** |
+| Phase 7A | CNN/DAG 扩展 + LinearOperator + shared CROWN benchmark / ReLU pullback 主线 | **进行中** |
 
-详见 [gemini_doc/project_evolution_overview.md](../gemini_doc/project_evolution_overview.md)。
+当前前沿与下一步计划详见：
+
+- [gemini_doc/phase7a_pr11_shared_crown_benchmark_summary.md](../gemini_doc/phase7a_pr11_shared_crown_benchmark_summary.md)
+- [gemini_doc/next_plan_after_phase7a_pr14.md](../gemini_doc/next_plan_after_phase7a_pr14.md)
+- [gemini_doc/project_evolution_overview.md](../gemini_doc/project_evolution_overview.md)

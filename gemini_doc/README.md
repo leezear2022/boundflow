@@ -66,6 +66,8 @@
 - `gemini_doc/phase4_summary.md`：Phase 4 总结（Task/Planner/Executor/Spec/TVM/ONNX 的闭环与对齐口径）
 - `gemini_doc/phase5_summary.md`：Phase 5 总结（bench→JSONL→postprocess→artifact 产线 + schema_version=1.0 冻结）
 - `gemini_doc/phase6_summary.md`：Phase 6 总结（语义闭环 + 系统收益归因 + AE/论文工件链）
+- `gemini_doc/phase7a_pr11_shared_crown_benchmark_summary.md`：Phase 7A benchmark 摘要（PR-11 到 PR-14 的复跑口径与结论）
+- `gemini_doc/next_plan_after_phase7a_pr14.md`：PR-14 之后的下一步计划（shared CROWN 的后续性能主线）
 - `gemini_doc/quick_restart_ibp.md`：Quick Restart（像 auto_LiRPA 一样跑 IBP 边界）
 - `gemini_doc/tvm_backend_optimization_memo.md`：TVM/Relax 后端优化备忘
 - `gemini_doc/llm_collaboration_workflow.md`：与大模型协作工作流模板
@@ -86,8 +88,9 @@
 
 ## 3) 当前状态（Phase 7A 进行中）的一句话索引
 
-- **当前前沿**: Phase 7A（已完成 structured ReLU backward + shared CROWN layout-only 支持）
-- **下一步**: `gemini_doc/next_plan_after_phase7a_pr10.md`（benchmark + 继续消除 sign-split dense 点）
+- **当前前沿**: Phase 7A（已完成 PR-11 到 PR-14：benchmark、dense hotspot 清理、ReLU pullback 接口与 `RightMatmul` 专用实现）
+- **Phase 7A 摘要**: `gemini_doc/phase7a_pr11_shared_crown_benchmark_summary.md`（同一口径汇总 PR-11 到 PR-14 的复跑结果）
+- **下一步**: `gemini_doc/next_plan_after_phase7a_pr14.md`（继续压缩 `relu_relax_pullback()` 内部 dense materialization 成本）
 - **统一参考**: `docs/reference.md`（架构/模块/环境/规范）
 - **LLM 交接**: `gemini_doc/llm_briefing_boundflow.md`（给其他大模型的完整交接）
 - **Phase 5 口径**: `docs/phase5_done.md` + `docs/bench_jsonl_schema.md`（`schema_version=1.0`）
