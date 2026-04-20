@@ -1,7 +1,12 @@
 import pytest
 import torch
 
-from boundflow.runtime.linear_operator import Conv2dLinearOperator, DenseLinearOperator, RightMatmulLinearOperator
+from boundflow.runtime.linear_operator import (
+    Conv2dLinearOperator,
+    DenseLinearOperator,
+    RightMatmulLinearOperator,
+    SliceInputLinearOperator,
+)
 
 
 def _make_single_conv_operator() -> Conv2dLinearOperator:
@@ -69,6 +74,27 @@ def test_slice_input_linear_operator_matches_dense_reference_channel_concat() ->
     assert torch.allclose(sliced.row_abs_sum(), dense.abs().sum(dim=2), atol=1e-5, rtol=1e-5)
     assert torch.allclose(sliced.row_l2_norm(), torch.linalg.vector_norm(dense, ord=2, dim=2), atol=1e-5, rtol=1e-5)
     assert torch.allclose(sliced.row_abs_max(), dense.abs().amax(dim=2), atol=1e-5, rtol=1e-5)
+
+
+def test_slice_input_linear_operator_split_pos_neg_matches_dense_reference() -> None:
+    torch.manual_seed(0)
+    coeffs = torch.randn(2, 3, 20, dtype=torch.float32)
+
+    op = DenseLinearOperator(coeffs, input_shape=(20,)).reshape_input((4, 5)).slice_input((2, 5), start=1, stop=3)
+    assert isinstance(op, SliceInputLinearOperator)
+
+    pos, neg = op.split_pos_neg()
+    dense = op.to_dense().reshape(2, 3, *op.input_shape)
+    dense_pos = dense.clamp_min(0.0)
+    dense_neg = dense.clamp_max(0.0)
+
+    assert tuple(pos.input_shape) == tuple(op.input_shape)
+    assert tuple(neg.input_shape) == tuple(op.input_shape)
+    assert torch.allclose(pos.to_dense().reshape(2, 3, *op.input_shape), dense_pos)
+    assert torch.allclose(neg.to_dense().reshape(2, 3, *op.input_shape), dense_neg)
+    assert torch.allclose(pos.to_dense() + neg.to_dense(), op.to_dense())
+    assert (pos.to_dense() >= 0.0).all()
+    assert (neg.to_dense() <= 0.0).all()
 
 
 def test_add_linear_operator_row_norms_do_not_call_conv_to_dense(monkeypatch: pytest.MonkeyPatch) -> None:

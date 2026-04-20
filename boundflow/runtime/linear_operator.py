@@ -260,6 +260,16 @@ class LinearOperator(Protocol):
     def split_pos_neg(self) -> tuple["LinearOperator", "LinearOperator"]:
         """Return exact coefficient-wise positive/negative decomposition."""
 
+    def relu_relax_pullback(
+        self,
+        *,
+        pos_slope: torch.Tensor | float | int,
+        neg_slope: torch.Tensor | float | int,
+        pos_bias: torch.Tensor | float | int,
+        neg_bias: torch.Tensor | float | int,
+    ) -> tuple["LinearOperator", torch.Tensor]:
+        """Return exact ReLU-relaxation pullback `(A_out, delta_b)`."""
+
     def to_dense(self) -> torch.Tensor:
         """Materialize as a dense tensor with flat input axis [B, K, I]."""
 
@@ -304,6 +314,79 @@ def _split_pos_neg_dense(op: LinearOperator) -> tuple["DenseLinearOperator", "De
     return (
         DenseLinearOperator(dense.clamp_min(0.0), input_shape=op.input_shape),
         DenseLinearOperator(dense.clamp_max(0.0), input_shape=op.input_shape),
+    )
+
+
+def _relu_relax_pullback_via_split(
+    op: LinearOperator,
+    *,
+    pos_slope: torch.Tensor | float | int,
+    neg_slope: torch.Tensor | float | int,
+    pos_bias: torch.Tensor | float | int,
+    neg_bias: torch.Tensor | float | int,
+) -> tuple["LinearOperator", torch.Tensor]:
+    batch = int(op.shape[0])
+    input_shape = tuple(int(dim) for dim in op.input_shape)
+    pos_slope_flat = _coerce_per_input_tensor(
+        pos_slope,
+        batch=batch,
+        input_shape=input_shape,
+        device=op.device,
+        dtype=op.dtype,
+        name="pos_slope",
+        require_nonnegative=True,
+    )
+    neg_slope_flat = _coerce_per_input_tensor(
+        neg_slope,
+        batch=batch,
+        input_shape=input_shape,
+        device=op.device,
+        dtype=op.dtype,
+        name="neg_slope",
+        require_nonnegative=True,
+    )
+    pos_bias_flat = _coerce_per_input_tensor(
+        pos_bias,
+        batch=batch,
+        input_shape=input_shape,
+        device=op.device,
+        dtype=op.dtype,
+        name="pos_bias",
+        require_nonnegative=True,
+    )
+    neg_bias_flat = _coerce_per_input_tensor(
+        neg_bias,
+        batch=batch,
+        input_shape=input_shape,
+        device=op.device,
+        dtype=op.dtype,
+        name="neg_bias",
+        require_nonnegative=True,
+    )
+    pos_bias_logical = pos_bias_flat.view(batch, *input_shape)
+    neg_bias_logical = neg_bias_flat.view(batch, *input_shape)
+    A_pos, A_neg = op.split_pos_neg()
+    delta_b = A_pos.contract_input(pos_bias_logical) + A_neg.contract_input(neg_bias_logical)
+    A_out = ScaledInputLinearOperator(A_pos, pos_slope_flat).add(
+        ScaledInputLinearOperator(A_neg, neg_slope_flat)
+    )
+    return A_out, delta_b
+
+
+def _default_relu_relax_pullback(
+    self: LinearOperator,
+    *,
+    pos_slope: torch.Tensor | float | int,
+    neg_slope: torch.Tensor | float | int,
+    pos_bias: torch.Tensor | float | int,
+    neg_bias: torch.Tensor | float | int,
+) -> tuple["LinearOperator", torch.Tensor]:
+    return _relu_relax_pullback_via_split(
+        self,
+        pos_slope=pos_slope,
+        neg_slope=neg_slope,
+        pos_bias=pos_bias,
+        neg_bias=neg_bias,
     )
 
 
@@ -664,6 +747,68 @@ class RightMatmulLinearOperator:
     def split_pos_neg(self) -> tuple[LinearOperator, LinearOperator]:
         return _split_pos_neg_dense(self)
 
+    def relu_relax_pullback(
+        self,
+        *,
+        pos_slope: torch.Tensor | float | int,
+        neg_slope: torch.Tensor | float | int,
+        pos_bias: torch.Tensor | float | int,
+        neg_bias: torch.Tensor | float | int,
+    ) -> tuple[LinearOperator, torch.Tensor]:
+        batch = int(self.shape[0])
+        input_shape = tuple(int(dim) for dim in self.input_shape)
+        pos_slope_flat = _coerce_per_input_tensor(
+            pos_slope,
+            batch=batch,
+            input_shape=input_shape,
+            device=self.device,
+            dtype=self.dtype,
+            name="pos_slope",
+            require_nonnegative=True,
+        )
+        neg_slope_flat = _coerce_per_input_tensor(
+            neg_slope,
+            batch=batch,
+            input_shape=input_shape,
+            device=self.device,
+            dtype=self.dtype,
+            name="neg_slope",
+            require_nonnegative=True,
+        )
+        pos_bias_flat = _coerce_per_input_tensor(
+            pos_bias,
+            batch=batch,
+            input_shape=input_shape,
+            device=self.device,
+            dtype=self.dtype,
+            name="pos_bias",
+            require_nonnegative=True,
+        )
+        neg_bias_flat = _coerce_per_input_tensor(
+            neg_bias,
+            batch=batch,
+            input_shape=input_shape,
+            device=self.device,
+            dtype=self.dtype,
+            name="neg_bias",
+            require_nonnegative=True,
+        )
+        dense = self.to_dense()
+        nonnegative = dense >= 0.0
+        out_dense = torch.where(
+            nonnegative,
+            dense * pos_slope_flat.unsqueeze(1),
+            dense * neg_slope_flat.unsqueeze(1),
+        )
+        delta_b = torch.where(
+            nonnegative,
+            dense * pos_bias_flat.unsqueeze(1),
+            dense * neg_bias_flat.unsqueeze(1),
+        ).sum(dim=2)
+        pos_out = DenseLinearOperator(out_dense.clamp_min(0.0), input_shape=input_shape)
+        neg_out = DenseLinearOperator(out_dense.clamp_max(0.0), input_shape=input_shape)
+        return pos_out.add(neg_out), delta_b
+
     def to_dense(self) -> torch.Tensor:
         return torch.einsum("bko,oi->bki", self.base.to_dense(), self.rhs)
 
@@ -798,7 +943,17 @@ class ReshapeInputLinearOperator:
         )
 
     def split_pos_neg(self) -> tuple[LinearOperator, LinearOperator]:
-        return _split_pos_neg_dense(self)
+        base_pos, base_neg = self.base.split_pos_neg()
+        return (
+            ReshapeInputLinearOperator(
+                base=base_pos,
+                input_shape=self.input_shape,
+            ),
+            ReshapeInputLinearOperator(
+                base=base_neg,
+                input_shape=self.input_shape,
+            ),
+        )
 
     def to_dense(self) -> torch.Tensor:
         return self.base.to_dense()
@@ -1115,7 +1270,27 @@ class Conv2dLinearOperator:
         )
 
     def split_pos_neg(self) -> tuple[LinearOperator, LinearOperator]:
-        return _split_pos_neg_dense(self)
+        base_pos, base_neg = self.base.split_pos_neg()
+        return (
+            Conv2dLinearOperator(
+                base=base_pos,
+                weight=self.weight,
+                stride=self.stride,
+                padding=self.padding,
+                dilation=self.dilation,
+                groups=self.groups,
+                input_shape=self.input_shape,
+            ),
+            Conv2dLinearOperator(
+                base=base_neg,
+                weight=self.weight,
+                stride=self.stride,
+                padding=self.padding,
+                dilation=self.dilation,
+                groups=self.groups,
+                input_shape=self.input_shape,
+            ),
+        )
 
     def to_dense(self) -> torch.Tensor:
         output_shape = tuple(int(dim) for dim in self.base.input_shape)
@@ -1428,7 +1603,44 @@ class SliceInputLinearOperator:
         )
 
     def split_pos_neg(self) -> tuple[LinearOperator, LinearOperator]:
-        return _split_pos_neg_dense(self)
+        base_pos, base_neg = self.base.split_pos_neg()
+        return (
+            SliceInputLinearOperator(
+                base=base_pos,
+                input_shape=self.input_shape,
+                start=self.start,
+                stop=self.stop,
+            ),
+            SliceInputLinearOperator(
+                base=base_neg,
+                input_shape=self.input_shape,
+                start=self.start,
+                stop=self.stop,
+            ),
+        )
+
+    def relu_relax_pullback(
+        self,
+        *,
+        pos_slope: torch.Tensor | float | int,
+        neg_slope: torch.Tensor | float | int,
+        pos_bias: torch.Tensor | float | int,
+        neg_bias: torch.Tensor | float | int,
+    ) -> tuple[LinearOperator, torch.Tensor]:
+        pos_slope_base = self._embed_input(pos_slope, name="pos_slope")
+        neg_slope_base = self._embed_input(neg_slope, name="neg_slope")
+        pos_bias_base = self._embed_input(pos_bias, name="pos_bias")
+        neg_bias_base = self._embed_input(neg_bias, name="neg_bias")
+        base_out, delta_b = self.base.relu_relax_pullback(
+            pos_slope=pos_slope_base,
+            neg_slope=neg_slope_base,
+            pos_bias=pos_bias_base,
+            neg_bias=neg_bias_base,
+        )
+        return (
+            base_out.slice_input(self.input_shape, start=self.start, stop=self.stop),
+            delta_b,
+        )
 
     def to_dense(self) -> torch.Tensor:
         return _slice_rows(self.base, start=self.start, stop=self.stop).reshape(int(self.shape[0]), int(self.spec_dim), -1)
@@ -1766,6 +1978,18 @@ class RepeatedRowLinearOperator:
 
     def to_dense(self) -> torch.Tensor:
         return self.coeffs.unsqueeze(1).expand(int(self.batch_size), int(self.spec_dim_size), int(self.input_numel))
+
+
+for _op_cls in (
+    DenseLinearOperator,
+    ReshapeInputLinearOperator,
+    ReindexInputLinearOperator,
+    Conv2dLinearOperator,
+    AddLinearOperator,
+    ScaledInputLinearOperator,
+    RepeatedRowLinearOperator,
+):
+    _op_cls.relu_relax_pullback = _default_relu_relax_pullback
 
 
 def _materialize_feature_map_rows(

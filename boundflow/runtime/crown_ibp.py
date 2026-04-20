@@ -8,7 +8,7 @@ import torch
 from ..domains.interval import IntervalDomain, IntervalState
 from ..ir.task import BFTaskModule, TaskKind
 from .dag_utils import normalize_concat_axis, validate_concat_tensor_shapes, validate_concat_value_shapes
-from .linear_operator import DenseLinearOperator, LinearOperator, ReindexInputLinearOperator, RepeatedRowLinearOperator, ScaledInputLinearOperator
+from .linear_operator import DenseLinearOperator, LinearOperator, ReindexInputLinearOperator, RepeatedRowLinearOperator
 from .perturbation import InputPerturbationState
 from .relu_shape_utils import broadcast_relu_split_like_pre
 from .task_executor import InputSpec, InputSpecLike, _normalize_input_spec
@@ -803,26 +803,18 @@ def _backprop_relu_step(
     def _logical(flat: torch.Tensor) -> torch.Tensor:
         return flat.reshape(batch, *orig_input_shape)
 
-    A_u_pos, A_u_neg = state.A_u.split_pos_neg()
-    A_l_pos, A_l_neg = state.A_l.split_pos_neg()
-    if tuple(A_u_pos.input_shape) != tuple(orig_input_shape):
-        A_u_pos = A_u_pos.reshape_input(orig_input_shape)
-    if tuple(A_u_neg.input_shape) != tuple(orig_input_shape):
-        A_u_neg = A_u_neg.reshape_input(orig_input_shape)
-    if tuple(A_l_pos.input_shape) != tuple(orig_input_shape):
-        A_l_pos = A_l_pos.reshape_input(orig_input_shape)
-    if tuple(A_l_neg.input_shape) != tuple(orig_input_shape):
-        A_l_neg = A_l_neg.reshape_input(orig_input_shape)
-
     alpha_u_logical = _logical(alpha_u)
     alpha_l_logical = _logical(alpha_l)
     beta_u_logical = _logical(beta_u)
     beta_l_logical = _logical(beta_l)
 
-    b_u = b_u + A_u_pos.contract_input(beta_u_logical) + A_u_neg.contract_input(beta_l_logical)
-    A_u_op: LinearOperator = ScaledInputLinearOperator(A_u_pos, alpha_u_logical).add(
-        ScaledInputLinearOperator(A_u_neg, alpha_l_logical)
+    A_u_op, delta_b_u = state.A_u.relu_relax_pullback(
+        pos_slope=alpha_u_logical,
+        neg_slope=alpha_l_logical,
+        pos_bias=beta_u_logical,
+        neg_bias=beta_l_logical,
     )
+    b_u = b_u + delta_b_u
     if relu_pre_add_coeff_u is not None and x_name in relu_pre_add_coeff_u:
         A_u_op = A_u_op.add(_make_repeated_row_operator(
             relu_pre_add_coeff_u[x_name],
@@ -835,10 +827,13 @@ def _backprop_relu_step(
             dtype=dtype,
         ))
 
-    b_l = b_l + A_l_pos.contract_input(beta_l_logical) + A_l_neg.contract_input(beta_u_logical)
-    A_l_op: LinearOperator = ScaledInputLinearOperator(A_l_pos, alpha_l_logical).add(
-        ScaledInputLinearOperator(A_l_neg, alpha_u_logical)
+    A_l_op, delta_b_l = state.A_l.relu_relax_pullback(
+        pos_slope=alpha_l_logical,
+        neg_slope=alpha_u_logical,
+        pos_bias=beta_l_logical,
+        neg_bias=beta_u_logical,
     )
+    b_l = b_l + delta_b_l
     if relu_pre_add_coeff_l is not None and x_name in relu_pre_add_coeff_l:
         A_l_op = A_l_op.add(_make_repeated_row_operator(
             relu_pre_add_coeff_l[x_name],

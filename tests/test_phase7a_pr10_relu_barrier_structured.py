@@ -1,3 +1,4 @@
+import pytest
 import torch
 
 from boundflow.domains.interval import IntervalState
@@ -7,6 +8,7 @@ from boundflow.runtime.linear_operator import (
     AddLinearOperator,
     DenseLinearOperator,
     RepeatedRowLinearOperator,
+    RightMatmulLinearOperator,
     ScaledInputLinearOperator,
 )
 from boundflow.runtime.task_executor import InputSpec
@@ -87,6 +89,20 @@ def _dense_relu_step_reference(
         b_u=b_u,
         b_l=b_l,
     )
+
+
+def _relu_relax_pullback_reference(
+    op,
+    *,
+    pos_slope: torch.Tensor,
+    neg_slope: torch.Tensor,
+    pos_bias: torch.Tensor,
+    neg_bias: torch.Tensor,
+):
+    pos, neg = op.split_pos_neg()
+    delta_b = pos.contract_input(pos_bias) + neg.contract_input(neg_bias)
+    A_out = ScaledInputLinearOperator(pos, pos_slope).add(ScaledInputLinearOperator(neg, neg_slope))
+    return A_out, delta_b
 
 
 def test_split_pos_neg_dense_matches_reference() -> None:
@@ -172,6 +188,116 @@ def test_backprop_relu_step_preserves_operator_form_and_matches_dense_reference(
     assert torch.allclose(out.A_l.to_dense(), ref.A_l.to_dense(), atol=1e-6, rtol=1e-6)
     assert torch.allclose(out.b_u, ref.b_u, atol=1e-6, rtol=1e-6)
     assert torch.allclose(out.b_l, ref.b_l, atol=1e-6, rtol=1e-6)
+
+
+def test_relu_relax_pullback_matches_split_reference_across_operator_forms() -> None:
+    torch.manual_seed(0)
+    dense = DenseLinearOperator(torch.randn(2, 3, 6, dtype=torch.float32), input_shape=(6,))
+    ops = {
+        "dense": dense,
+        "reshape": dense.reshape_input((2, 3)),
+        "slice": dense.reshape_input((2, 3)).slice_input((1, 3), start=1, stop=2),
+        "add": dense.add(DenseLinearOperator(torch.randn(2, 3, 6, dtype=torch.float32), input_shape=(6,))),
+        "right_matmul": dense.matmul_right(torch.randn(6, 5, dtype=torch.float32)),
+    }
+
+    for name, op in ops.items():
+        pos_slope = torch.rand((2, *op.input_shape), dtype=torch.float32)
+        neg_slope = torch.rand((2, *op.input_shape), dtype=torch.float32)
+        pos_bias = torch.rand((2, *op.input_shape), dtype=torch.float32)
+        neg_bias = torch.rand((2, *op.input_shape), dtype=torch.float32)
+
+        out_op, out_delta_b = op.relu_relax_pullback(
+            pos_slope=pos_slope,
+            neg_slope=neg_slope,
+            pos_bias=pos_bias,
+            neg_bias=neg_bias,
+        )
+        ref_op, ref_delta_b = _relu_relax_pullback_reference(
+            op,
+            pos_slope=pos_slope,
+            neg_slope=neg_slope,
+            pos_bias=pos_bias,
+            neg_bias=neg_bias,
+        )
+
+        assert tuple(out_op.input_shape) == tuple(op.input_shape), name
+        assert tuple(out_delta_b.shape) == (2, 3), name
+        assert torch.allclose(out_op.to_dense(), ref_op.to_dense(), atol=1e-6, rtol=1e-6), name
+        assert torch.allclose(out_delta_b, ref_delta_b, atol=1e-6, rtol=1e-6), name
+
+
+def test_backprop_relu_step_uses_relu_relax_pullback_interface(monkeypatch: pytest.MonkeyPatch) -> None:
+    torch.manual_seed(0)
+    base = DenseLinearOperator(torch.randn(1, 2, 3, dtype=torch.float32))
+    rhs = torch.randn(3, 4, dtype=torch.float32)
+    state = AffineBackwardState(
+        A_u=base.matmul_right(rhs),
+        A_l=base.matmul_right(rhs),
+        b_u=torch.randn(1, 2, dtype=torch.float32),
+        b_l=torch.randn(1, 2, dtype=torch.float32),
+    )
+    pre = IntervalState(
+        lower=torch.tensor([[-1.0, -0.5, -0.2, -0.1]], dtype=torch.float32),
+        upper=torch.tensor([[0.8, 0.6, 1.5, 2.0]], dtype=torch.float32),
+    )
+    calls = {"count": 0}
+    orig_pullback = RightMatmulLinearOperator.relu_relax_pullback
+
+    def wrapped_pullback(self, **kwargs):
+        calls["count"] += 1
+        return orig_pullback(self, **kwargs)
+
+    monkeypatch.setattr(RightMatmulLinearOperator, "relu_relax_pullback", wrapped_pullback)
+
+    _ = _backprop_relu_step(
+        state,
+        pre=pre,
+        x_name="h1",
+        relu_alpha=None,
+        relu_pre_add_coeff_u=None,
+        relu_pre_add_coeff_l=None,
+        device=pre.lower.device,
+        dtype=pre.lower.dtype,
+        caller="test",
+    )
+
+    assert calls["count"] == 2
+
+
+def test_right_matmul_relu_relax_pullback_does_not_use_split_pos_neg_dense(monkeypatch: pytest.MonkeyPatch) -> None:
+    torch.manual_seed(0)
+    base = DenseLinearOperator(torch.randn(2, 3, 4, dtype=torch.float32))
+    op = base.matmul_right(torch.randn(4, 5, dtype=torch.float32))
+    assert isinstance(op, RightMatmulLinearOperator)
+    pos_slope = torch.rand(2, 5, dtype=torch.float32)
+    neg_slope = torch.rand(2, 5, dtype=torch.float32)
+    pos_bias = torch.rand(2, 5, dtype=torch.float32)
+    neg_bias = torch.rand(2, 5, dtype=torch.float32)
+    ref_op, ref_delta_b = _relu_relax_pullback_reference(
+        op,
+        pos_slope=pos_slope,
+        neg_slope=neg_slope,
+        pos_bias=pos_bias,
+        neg_bias=neg_bias,
+    )
+
+    import boundflow.runtime.linear_operator as linear_operator_mod
+
+    def fail(_op):
+        raise AssertionError("_split_pos_neg_dense should not be used by RightMatmulLinearOperator.relu_relax_pullback")
+
+    monkeypatch.setattr(linear_operator_mod, "_split_pos_neg_dense", fail)
+
+    out_op, delta_b = op.relu_relax_pullback(
+        pos_slope=pos_slope,
+        neg_slope=neg_slope,
+        pos_bias=pos_bias,
+        neg_bias=neg_bias,
+    )
+
+    assert torch.allclose(out_op.to_dense(), ref_op.to_dense(), atol=1e-6, rtol=1e-6)
+    assert torch.allclose(delta_b, ref_delta_b, atol=1e-6, rtol=1e-6)
 
 
 
