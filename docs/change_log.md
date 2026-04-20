@@ -2724,3 +2724,31 @@
 **验证**
 - `rg -n "next_plan_after_phase7a_pr14|phase7a_pr11_shared_crown_benchmark_summary|PR-14" gemini_doc docs README.md`
 - `git diff --check -- gemini_doc/llm_briefing_boundflow.md gemini_doc/README.md gemini_doc/project_evolution_overview.md gemini_doc/next_plan_after_phase7a_pr14.md docs/reference.md docs/change_log.md gemini_doc/change_2026-04-16_phase7a_pr11_pr14_doc_sync.md`
+
+---
+
+## 2026-04-20：TVM-FFI 安装脚本加固
+
+**动机**
+- TVM-FFI 的 Python 侧安装依赖若干隐式前提：Cython core module 要被编出来、editable 安装目录里要有可解析的 `apache-tvm-ffi` 元数据。
+- 部分机器上 TVM 顶层构建还会因为系统只提供静态 `gtest` 而在 CMake 配置阶段报错。
+
+**主要改动**
+- 更新：`environment.yaml`
+  - 新增 `cython>=3.0`
+- 更新：`scripts/install_dev.sh`
+  - 显式绑定当前 conda 环境的 `python`
+  - TVM-FFI CMake 配置增加：
+    - `TVM_FFI_BUILD_PYTHON_MODULE=ON`
+    - `Python_EXECUTABLE="${CONDA_PYTHON}"`
+  - 除常规 `.so` 外，再显式复制 `core.abi3.so`
+  - 若缺失 `boundflow/3rdparty/tvm-ffi/python/pyproject.toml`，自动生成最小版本以保证 `importlib.metadata` 可解析 `apache-tvm-ffi`
+  - TVM 顶层构建把 `USE_GTEST` 从 `AUTO` 改为 `OFF`
+- 新增：`gemini_doc/change_2026-04-20_tvm_ffi_install_hardening.md`
+
+**结果摘要**
+- `scripts/install_dev.sh` 对 TVM-FFI Python 模块安装的假设更明确，首次安装和本机重建更稳。
+- 这轮不改 runtime / solver 语义，也不升级 vendored submodule 版本。
+
+**验证**
+- `bash -n scripts/install_dev.sh`

@@ -12,6 +12,7 @@ dependencies:
   - ccache
   - make
   - llvmdev>=15.0  # For TVM LLVM codegen backend
+  - cython>=3.0    # For TVM-FFI Cython core module
   
   # PyTorch & Auto_LiRPA
   # Using a flexible generic constraint, conda will resolve to a compatible version (likely 2.1+)
