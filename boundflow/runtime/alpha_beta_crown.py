@@ -559,17 +559,17 @@ def run_alpha_beta_crown_mlp(
     per_batch_params: bool = False,
 ) -> Tuple[IntervalState, AlphaState, BetaState, AlphaBetaCrownStats]:
     """
-    Phase 7A (PR-6): alpha-beta oracle for single-task chain graphs.
+    Phase 7A (PR-6): alpha-beta oracle over the shared single-task CROWN backward path.
 
     - alpha parameterizes unstable ReLU lower relaxation (Phase 6D).
     - beta encodes split constraints by adding a Lagrangian term on ReLU pre-activations:
         split: s*z >= 0 (s in {-1,+1})  => add beta*(s*z) to the lower-bound dual objective, beta>=0.
 
     Supported subset:
-    - linear / relu / linear
-    - conv2d / relu / ... / flatten(start_dim=1,end_dim=-1) / linear
+    - current run_crown_ibp_mlp operator subset, including conv2d/flatten and the current add/concat DAG path
+    - split-specific helpers remain limited to the cases implemented below
 
-    BaB on conv graphs remains unsupported; this function only extends the alpha-beta oracle.
+    Higher-level BaB entrypoints decide which graph families they expose; this function is the shared alpha-beta oracle.
     """
     module.validate()
     task = module.get_entry_task()

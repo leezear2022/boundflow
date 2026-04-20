@@ -65,6 +65,19 @@ class ConcatNet(nn.Module):
         return self.head(cat.flatten(1))
 
 
+class PermuteReshapeNet(nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.conv = nn.Conv2d(1, 2, 1)
+        self.head = nn.Linear(8, 3)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        feat = torch.relu(self.conv(x))
+        feat = feat.permute(0, 2, 3, 1)
+        flat = feat.reshape(x.shape[0], -1)
+        return self.head(flat)
+
+
 def test_phase7a_pr8_torch_and_onnx_frontends_match_on_residual_add_ibp_and_crown() -> None:
     pytest.importorskip("onnx")
     from boundflow.frontends.onnx.frontend import import_onnx
@@ -95,6 +108,30 @@ def test_phase7a_pr8_torch_and_onnx_frontends_match_on_concat_ibp_and_crown() ->
 
     torch.manual_seed(0)
     model = ConcatNet().eval()
+    x0 = torch.randn(2, 1, 2, 2)
+    eps = 0.05
+
+    program_torch = import_torch(model, (x0,), export_mode="export", normalize=True)
+    onnx_model = _export_to_onnx(model, x0)
+    program_onnx = import_onnx(onnx_model, do_shape_infer=True, normalize=True)
+
+    out_torch = _run_ibp_from_program(program_torch, x0, eps)
+    out_onnx = _run_ibp_from_program(program_onnx, x0, eps)
+    crown_torch = _run_crown_from_program(program_torch, x0, eps)
+    crown_onnx = _run_crown_from_program(program_onnx, x0, eps)
+
+    assert torch.allclose(out_onnx.lower, out_torch.lower, rtol=1e-5, atol=1e-6)
+    assert torch.allclose(out_onnx.upper, out_torch.upper, rtol=1e-5, atol=1e-6)
+    assert torch.allclose(crown_onnx.lower, crown_torch.lower, rtol=1e-5, atol=1e-6)
+    assert torch.allclose(crown_onnx.upper, crown_torch.upper, rtol=1e-5, atol=1e-6)
+
+
+def test_phase7a_pr8_torch_and_onnx_frontends_match_on_permute_reshape_ibp_and_crown() -> None:
+    pytest.importorskip("onnx")
+    from boundflow.frontends.onnx.frontend import import_onnx
+
+    torch.manual_seed(0)
+    model = PermuteReshapeNet().eval()
     x0 = torch.randn(2, 1, 2, 2)
     eps = 0.05
 

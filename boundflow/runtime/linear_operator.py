@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Protocol, Sequence, runtime_checkable
 
 import torch
@@ -257,6 +257,19 @@ class LinearOperator(Protocol):
     ) -> "LinearOperator":
         """Return lazy operator for A @ Conv2d(x)."""
 
+    def split_pos_neg(self) -> tuple["LinearOperator", "LinearOperator"]:
+        """Return exact coefficient-wise positive/negative decomposition."""
+
+    def relu_relax_pullback(
+        self,
+        *,
+        pos_slope: torch.Tensor | float | int,
+        neg_slope: torch.Tensor | float | int,
+        pos_bias: torch.Tensor | float | int,
+        neg_bias: torch.Tensor | float | int,
+    ) -> tuple["LinearOperator", torch.Tensor]:
+        """Return exact ReLU-relaxation pullback `(A_out, delta_b)`."""
+
     def to_dense(self) -> torch.Tensor:
         """Materialize as a dense tensor with flat input axis [B, K, I]."""
 
@@ -294,6 +307,148 @@ def _slice_rows(op: LinearOperator, *, start: int, stop: int) -> torch.Tensor:
         return rows[:, start:stop, ...]
     dense = op.to_dense().reshape(batch, spec_dim, *op.input_shape)
     return dense[:, :, start:stop, ...].reshape(batch, spec_dim, -1)
+
+
+def _split_pos_neg_dense(op: LinearOperator) -> tuple["DenseLinearOperator", "DenseLinearOperator"]:
+    dense = op.to_dense().reshape(int(op.shape[0]), int(op.spec_dim), *op.input_shape)
+    return (
+        DenseLinearOperator(dense.clamp_min(0.0), input_shape=op.input_shape),
+        DenseLinearOperator(dense.clamp_max(0.0), input_shape=op.input_shape),
+    )
+
+
+def _relu_relax_pullback_via_split(
+    op: LinearOperator,
+    *,
+    pos_slope: torch.Tensor | float | int,
+    neg_slope: torch.Tensor | float | int,
+    pos_bias: torch.Tensor | float | int,
+    neg_bias: torch.Tensor | float | int,
+) -> tuple["LinearOperator", torch.Tensor]:
+    batch = int(op.shape[0])
+    input_shape = tuple(int(dim) for dim in op.input_shape)
+    pos_slope_flat = _coerce_per_input_tensor(
+        pos_slope,
+        batch=batch,
+        input_shape=input_shape,
+        device=op.device,
+        dtype=op.dtype,
+        name="pos_slope",
+        require_nonnegative=True,
+    )
+    neg_slope_flat = _coerce_per_input_tensor(
+        neg_slope,
+        batch=batch,
+        input_shape=input_shape,
+        device=op.device,
+        dtype=op.dtype,
+        name="neg_slope",
+        require_nonnegative=True,
+    )
+    pos_bias_flat = _coerce_per_input_tensor(
+        pos_bias,
+        batch=batch,
+        input_shape=input_shape,
+        device=op.device,
+        dtype=op.dtype,
+        name="pos_bias",
+        require_nonnegative=True,
+    )
+    neg_bias_flat = _coerce_per_input_tensor(
+        neg_bias,
+        batch=batch,
+        input_shape=input_shape,
+        device=op.device,
+        dtype=op.dtype,
+        name="neg_bias",
+        require_nonnegative=True,
+    )
+    pos_bias_logical = pos_bias_flat.view(batch, *input_shape)
+    neg_bias_logical = neg_bias_flat.view(batch, *input_shape)
+    A_pos, A_neg = op.split_pos_neg()
+    delta_b = A_pos.contract_input(pos_bias_logical) + A_neg.contract_input(neg_bias_logical)
+    A_out = ScaledInputLinearOperator(A_pos, pos_slope_flat).add(
+        ScaledInputLinearOperator(A_neg, neg_slope_flat)
+    )
+    return A_out, delta_b
+
+
+def _default_relu_relax_pullback(
+    self: LinearOperator,
+    *,
+    pos_slope: torch.Tensor | float | int,
+    neg_slope: torch.Tensor | float | int,
+    pos_bias: torch.Tensor | float | int,
+    neg_bias: torch.Tensor | float | int,
+) -> tuple["LinearOperator", torch.Tensor]:
+    return _relu_relax_pullback_via_split(
+        self,
+        pos_slope=pos_slope,
+        neg_slope=neg_slope,
+        pos_bias=pos_bias,
+        neg_bias=neg_bias,
+    )
+
+
+def _coerce_per_input_tensor(
+    value: torch.Tensor | float | int,
+    *,
+    batch: int,
+    input_shape: tuple[int, ...],
+    device: torch.device,
+    dtype: torch.dtype,
+    name: str,
+    require_nonnegative: bool = False,
+) -> torch.Tensor:
+    tensor = value if torch.is_tensor(value) else torch.as_tensor(value, device=device, dtype=dtype)
+    tensor = tensor.to(device=device, dtype=dtype)
+    flat_dim = _prod(input_shape)
+    target_shape = (int(batch), int(flat_dim))
+
+    if tensor.dim() == 0:
+        out = tensor.reshape(1, 1).expand(target_shape)
+    elif tuple(int(dim) for dim in tensor.shape) == tuple(input_shape):
+        out = tensor.reshape(1, flat_dim).expand(target_shape)
+    elif tensor.dim() == 1 and int(tensor.shape[0]) == flat_dim:
+        out = tensor.reshape(1, flat_dim).expand(target_shape)
+    elif tensor.dim() == len(input_shape) + 1 and int(tensor.shape[0]) == 1 and tuple(int(dim) for dim in tensor.shape[1:]) == tuple(input_shape):
+        out = tensor.reshape(1, flat_dim).expand(target_shape)
+    elif tensor.dim() == 2 and int(tensor.shape[0]) == 1 and int(tensor.shape[1]) == flat_dim:
+        out = tensor.expand(target_shape)
+    elif tensor.dim() == len(input_shape) + 1 and int(tensor.shape[0]) == batch and tuple(int(dim) for dim in tensor.shape[1:]) == tuple(input_shape):
+        out = tensor.reshape(batch, flat_dim)
+    elif tensor.dim() == 2 and int(tensor.shape[0]) == batch and int(tensor.shape[1]) == flat_dim:
+        out = tensor
+    else:
+        raise ValueError(
+            f"{name} shape {tuple(int(dim) for dim in tensor.shape)} cannot broadcast to input_shape={input_shape} with batch={batch}"
+        )
+    if require_nonnegative and bool((out < 0).any().item()):
+        raise ValueError(f"{name} must be nonnegative")
+    return out
+
+
+def _normalize_index_permutation(
+    value: torch.Tensor | Sequence[int],
+    *,
+    length: int,
+    device: torch.device,
+    name: str,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    index = value if torch.is_tensor(value) else torch.as_tensor(value, device=device)
+    if index.dim() != 1:
+        raise ValueError(f"{name} expects rank-1 permutation, got {tuple(index.shape)}")
+    if int(index.shape[0]) != int(length):
+        raise ValueError(f"{name} length mismatch: expected {length}, got {tuple(index.shape)}")
+    if torch.is_floating_point(index):
+        raise TypeError(f"{name} expects integer permutation, got dtype={index.dtype}")
+    index = index.to(device=device, dtype=torch.long)
+    expected = torch.arange(int(length), device=device, dtype=torch.long)
+    if not torch.equal(index.sort().values, expected):
+        raise ValueError(f"{name} must be a permutation of [0, {int(length) - 1}]")
+    inverse = torch.empty_like(index)
+    inverse[index] = expected
+    return index, inverse
 
 
 @dataclass(frozen=True)
@@ -452,6 +607,13 @@ class DenseLinearOperator:
             input_shape=in_shape,
         )
 
+    def split_pos_neg(self) -> tuple[LinearOperator, LinearOperator]:
+        coeffs = self.coeffs.reshape(int(self.shape[0]), int(self.spec_dim), *self.input_shape)
+        return (
+            DenseLinearOperator(coeffs.clamp_min(0.0), input_shape=self.input_shape),
+            DenseLinearOperator(coeffs.clamp_max(0.0), input_shape=self.input_shape),
+        )
+
     def to_dense(self) -> torch.Tensor:
         return self._flat_coeffs()
 
@@ -581,6 +743,71 @@ class RightMatmulLinearOperator:
             groups=groups,
             input_shape=input_shape,
         )
+
+    def split_pos_neg(self) -> tuple[LinearOperator, LinearOperator]:
+        return _split_pos_neg_dense(self)
+
+    def relu_relax_pullback(
+        self,
+        *,
+        pos_slope: torch.Tensor | float | int,
+        neg_slope: torch.Tensor | float | int,
+        pos_bias: torch.Tensor | float | int,
+        neg_bias: torch.Tensor | float | int,
+    ) -> tuple[LinearOperator, torch.Tensor]:
+        batch = int(self.shape[0])
+        input_shape = tuple(int(dim) for dim in self.input_shape)
+        pos_slope_flat = _coerce_per_input_tensor(
+            pos_slope,
+            batch=batch,
+            input_shape=input_shape,
+            device=self.device,
+            dtype=self.dtype,
+            name="pos_slope",
+            require_nonnegative=True,
+        )
+        neg_slope_flat = _coerce_per_input_tensor(
+            neg_slope,
+            batch=batch,
+            input_shape=input_shape,
+            device=self.device,
+            dtype=self.dtype,
+            name="neg_slope",
+            require_nonnegative=True,
+        )
+        pos_bias_flat = _coerce_per_input_tensor(
+            pos_bias,
+            batch=batch,
+            input_shape=input_shape,
+            device=self.device,
+            dtype=self.dtype,
+            name="pos_bias",
+            require_nonnegative=True,
+        )
+        neg_bias_flat = _coerce_per_input_tensor(
+            neg_bias,
+            batch=batch,
+            input_shape=input_shape,
+            device=self.device,
+            dtype=self.dtype,
+            name="neg_bias",
+            require_nonnegative=True,
+        )
+        dense = self.to_dense()
+        nonnegative = dense >= 0.0
+        out_dense = torch.where(
+            nonnegative,
+            dense * pos_slope_flat.unsqueeze(1),
+            dense * neg_slope_flat.unsqueeze(1),
+        )
+        delta_b = torch.where(
+            nonnegative,
+            dense * pos_bias_flat.unsqueeze(1),
+            dense * neg_bias_flat.unsqueeze(1),
+        ).sum(dim=2)
+        pos_out = DenseLinearOperator(out_dense.clamp_min(0.0), input_shape=input_shape)
+        neg_out = DenseLinearOperator(out_dense.clamp_max(0.0), input_shape=input_shape)
+        return pos_out.add(neg_out), delta_b
 
     def to_dense(self) -> torch.Tensor:
         return torch.einsum("bko,oi->bki", self.base.to_dense(), self.rhs)
@@ -715,8 +942,172 @@ class ReshapeInputLinearOperator:
             input_shape=in_shape,
         )
 
+    def split_pos_neg(self) -> tuple[LinearOperator, LinearOperator]:
+        base_pos, base_neg = self.base.split_pos_neg()
+        return (
+            ReshapeInputLinearOperator(
+                base=base_pos,
+                input_shape=self.input_shape,
+            ),
+            ReshapeInputLinearOperator(
+                base=base_neg,
+                input_shape=self.input_shape,
+            ),
+        )
+
     def to_dense(self) -> torch.Tensor:
         return self.base.to_dense()
+
+
+@dataclass(frozen=True)
+class ReindexInputLinearOperator:
+    base: LinearOperator
+    input_shape: tuple[int, ...]
+    gather_index: torch.Tensor
+    scatter_index: torch.Tensor = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.base, LinearOperator):
+            raise TypeError(f"ReindexInputLinearOperator.base must satisfy LinearOperator, got {type(self.base)}")
+        shape = _normalize_input_shape(self.input_shape)
+        if _prod(shape) != self.base.input_numel:
+            raise ValueError(
+                f"ReindexInputLinearOperator input_shape {shape} does not match base.input_numel={self.base.input_numel}"
+            )
+        gather_index, scatter_index = _normalize_index_permutation(
+            self.gather_index,
+            length=int(self.base.input_numel),
+            device=self.base.device,
+            name="gather_index",
+        )
+        object.__setattr__(self, "input_shape", shape)
+        object.__setattr__(self, "gather_index", gather_index)
+        object.__setattr__(self, "scatter_index", scatter_index)
+
+    @property
+    def shape(self) -> tuple[int, int, int]:
+        return tuple(int(v) for v in self.base.shape)
+
+    @property
+    def input_numel(self) -> int:
+        return _prod(self.input_shape)
+
+    @property
+    def spec_dim(self) -> int:
+        return int(self.base.spec_dim)
+
+    @property
+    def device(self) -> torch.device:
+        return self.base.device
+
+    @property
+    def dtype(self) -> torch.dtype:
+        return self.base.dtype
+
+    def _gather_center_for_base(self, center: torch.Tensor) -> torch.Tensor:
+        flat = _flatten_center(
+            center,
+            name="center",
+            batch=self.shape[0],
+            input_shape=self.input_shape,
+            device=self.device,
+            dtype=self.dtype,
+        )
+        return flat.index_select(1, self.gather_index).view(int(self.shape[0]), *self.base.input_shape)
+
+    def _gather_input_for_base(self, value: torch.Tensor, *, name: str) -> torch.Tensor:
+        flat = _flatten_contract_input(
+            value,
+            name=name,
+            batch=self.shape[0],
+            input_shape=self.input_shape,
+            device=self.device,
+            dtype=self.dtype,
+        )
+        return flat.index_select(1, self.gather_index).view(int(self.shape[0]), *self.base.input_shape)
+
+    def center_term(self, center: torch.Tensor) -> torch.Tensor:
+        return self.base.center_term(self._gather_center_for_base(center))
+
+    def row_abs_sum(self) -> torch.Tensor:
+        return self.base.row_abs_sum()
+
+    def row_l2_norm(self) -> torch.Tensor:
+        return self.base.row_l2_norm()
+
+    def row_abs_max(self) -> torch.Tensor:
+        return self.base.row_abs_max()
+
+    def contract_input(self, vec: torch.Tensor) -> torch.Tensor:
+        return self.base.contract_input(self._gather_input_for_base(vec, name="vec"))
+
+    def contract_last_dim(self, vec: torch.Tensor) -> torch.Tensor:
+        if len(self.input_shape) != 1:
+            raise NotImplementedError(f"contract_last_dim only supports flat input_shape, got {self.input_shape}")
+        return self.contract_input(vec)
+
+    def matmul_right(self, rhs: torch.Tensor) -> LinearOperator:
+        if len(self.input_shape) != 1:
+            raise NotImplementedError(f"matmul_right only supports flat input_shape, got {self.input_shape}")
+        rr = _ensure_float_matrix(rhs, name="rhs", rows=self.input_numel, device=self.device, dtype=self.dtype)
+        return RightMatmulLinearOperator(base=self, rhs=rr)
+
+    def reshape_input(self, new_input_shape: Sequence[int]) -> LinearOperator:
+        shape = _normalize_input_shape(tuple(new_input_shape))
+        if _prod(shape) != self.input_numel:
+            raise ValueError(f"reshape_input shape mismatch: {shape} does not match input_numel={self.input_numel}")
+        if tuple(shape) == tuple(self.input_shape):
+            return self
+        return ReshapeInputLinearOperator(base=self, input_shape=shape)
+
+    def slice_input(self, new_input_shape: Sequence[int], *, start: int, stop: int) -> LinearOperator:
+        return SliceInputLinearOperator(base=self, input_shape=tuple(new_input_shape), start=int(start), stop=int(stop))
+
+    def add(self, other: LinearOperator) -> LinearOperator:
+        return _add_operator_pair(self, other)
+
+    def conv2d_right(
+        self,
+        weight: torch.Tensor,
+        *,
+        stride: int | Sequence[int] = 1,
+        padding: int | Sequence[int] = 0,
+        dilation: int | Sequence[int] = 1,
+        groups: int = 1,
+        input_shape: Sequence[int],
+    ) -> LinearOperator:
+        in_shape = _normalize_input_shape(tuple(input_shape))
+        w = _normalize_conv_weight(weight, device=self.device, dtype=self.dtype)
+        stride_2 = _normalize_pair(stride, name="stride")
+        padding_2 = _normalize_pair(padding, name="padding")
+        dilation_2 = _normalize_pair(dilation, name="dilation")
+        out_shape = _conv2d_output_shape(in_shape, w, stride=stride_2, padding=padding_2, dilation=dilation_2, groups=int(groups))
+        base: LinearOperator = self
+        if tuple(base.input_shape) != tuple(out_shape):
+            if base.input_numel != _prod(out_shape):
+                raise ValueError(
+                    f"conv2d_right output shape mismatch: base.input_shape={base.input_shape} conv_output_shape={out_shape}"
+                )
+            base = base.reshape_input(out_shape)
+        return Conv2dLinearOperator(
+            base=base,
+            weight=w,
+            stride=stride_2,
+            padding=padding_2,
+            dilation=dilation_2,
+            groups=int(groups),
+            input_shape=in_shape,
+        )
+
+    def split_pos_neg(self) -> tuple[LinearOperator, LinearOperator]:
+        base_pos, base_neg = self.base.split_pos_neg()
+        return (
+            ReindexInputLinearOperator(base=base_pos, input_shape=self.input_shape, gather_index=self.gather_index),
+            ReindexInputLinearOperator(base=base_neg, input_shape=self.input_shape, gather_index=self.gather_index),
+        )
+
+    def to_dense(self) -> torch.Tensor:
+        return self.base.to_dense().index_select(2, self.scatter_index)
 
 
 @dataclass(frozen=True)
@@ -876,6 +1267,29 @@ class Conv2dLinearOperator:
             dilation=dilation_2,
             groups=int(groups),
             input_shape=in_shape,
+        )
+
+    def split_pos_neg(self) -> tuple[LinearOperator, LinearOperator]:
+        base_pos, base_neg = self.base.split_pos_neg()
+        return (
+            Conv2dLinearOperator(
+                base=base_pos,
+                weight=self.weight,
+                stride=self.stride,
+                padding=self.padding,
+                dilation=self.dilation,
+                groups=self.groups,
+                input_shape=self.input_shape,
+            ),
+            Conv2dLinearOperator(
+                base=base_neg,
+                weight=self.weight,
+                stride=self.stride,
+                padding=self.padding,
+                dilation=self.dilation,
+                groups=self.groups,
+                input_shape=self.input_shape,
+            ),
         )
 
     def to_dense(self) -> torch.Tensor:
@@ -1043,6 +1457,9 @@ class AddLinearOperator:
             input_shape=in_shape,
         )
 
+    def split_pos_neg(self) -> tuple[LinearOperator, LinearOperator]:
+        return _split_pos_neg_dense(self)
+
     def to_dense(self) -> torch.Tensor:
         return self.lhs.to_dense() + self.rhs.to_dense()
 
@@ -1185,8 +1602,394 @@ class SliceInputLinearOperator:
             input_shape=in_shape,
         )
 
+    def split_pos_neg(self) -> tuple[LinearOperator, LinearOperator]:
+        base_pos, base_neg = self.base.split_pos_neg()
+        return (
+            SliceInputLinearOperator(
+                base=base_pos,
+                input_shape=self.input_shape,
+                start=self.start,
+                stop=self.stop,
+            ),
+            SliceInputLinearOperator(
+                base=base_neg,
+                input_shape=self.input_shape,
+                start=self.start,
+                stop=self.stop,
+            ),
+        )
+
+    def relu_relax_pullback(
+        self,
+        *,
+        pos_slope: torch.Tensor | float | int,
+        neg_slope: torch.Tensor | float | int,
+        pos_bias: torch.Tensor | float | int,
+        neg_bias: torch.Tensor | float | int,
+    ) -> tuple[LinearOperator, torch.Tensor]:
+        pos_slope_base = self._embed_input(pos_slope, name="pos_slope")
+        neg_slope_base = self._embed_input(neg_slope, name="neg_slope")
+        pos_bias_base = self._embed_input(pos_bias, name="pos_bias")
+        neg_bias_base = self._embed_input(neg_bias, name="neg_bias")
+        base_out, delta_b = self.base.relu_relax_pullback(
+            pos_slope=pos_slope_base,
+            neg_slope=neg_slope_base,
+            pos_bias=pos_bias_base,
+            neg_bias=neg_bias_base,
+        )
+        return (
+            base_out.slice_input(self.input_shape, start=self.start, stop=self.stop),
+            delta_b,
+        )
+
     def to_dense(self) -> torch.Tensor:
         return _slice_rows(self.base, start=self.start, stop=self.stop).reshape(int(self.shape[0]), int(self.spec_dim), -1)
+
+
+@dataclass(frozen=True)
+class ScaledInputLinearOperator:
+    base: LinearOperator
+    scale: torch.Tensor
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.base, LinearOperator):
+            raise TypeError(f"ScaledInputLinearOperator.base must satisfy LinearOperator, got {type(self.base)}")
+        scale = _coerce_per_input_tensor(
+            self.scale,
+            batch=int(self.base.shape[0]),
+            input_shape=tuple(int(dim) for dim in self.base.input_shape),
+            device=self.base.device,
+            dtype=self.base.dtype,
+            name="scale",
+            require_nonnegative=True,
+        )
+        object.__setattr__(self, "scale", scale)
+
+    @property
+    def shape(self) -> tuple[int, int, int]:
+        return tuple(int(v) for v in self.base.shape)
+
+    @property
+    def input_shape(self) -> tuple[int, ...]:
+        return tuple(int(dim) for dim in self.base.input_shape)
+
+    @property
+    def input_numel(self) -> int:
+        return int(self.base.input_numel)
+
+    @property
+    def spec_dim(self) -> int:
+        return int(self.base.spec_dim)
+
+    @property
+    def device(self) -> torch.device:
+        return self.base.device
+
+    @property
+    def dtype(self) -> torch.dtype:
+        return self.base.dtype
+
+    def _logical_scale(self) -> torch.Tensor:
+        return self.scale.view(int(self.shape[0]), *self.input_shape)
+
+    def _scale_value(self, value: torch.Tensor, *, name: str) -> torch.Tensor:
+        flat = _flatten_contract_input(
+            value,
+            name=name,
+            batch=int(self.shape[0]),
+            input_shape=self.input_shape,
+            device=self.device,
+            dtype=self.dtype,
+        )
+        return (flat * self.scale).view(int(self.shape[0]), *self.input_shape)
+
+    def center_term(self, center: torch.Tensor) -> torch.Tensor:
+        return self.base.center_term(self._scale_value(center, name="center"))
+
+    def row_abs_sum(self) -> torch.Tensor:
+        return self.to_dense().abs().sum(dim=2)
+
+    def row_l2_norm(self) -> torch.Tensor:
+        return torch.linalg.vector_norm(self.to_dense(), ord=2, dim=2)
+
+    def row_abs_max(self) -> torch.Tensor:
+        return self.to_dense().abs().amax(dim=2)
+
+    def contract_input(self, vec: torch.Tensor) -> torch.Tensor:
+        return self.base.contract_input(self._scale_value(vec, name="vec"))
+
+    def contract_last_dim(self, vec: torch.Tensor) -> torch.Tensor:
+        if len(self.input_shape) != 1:
+            raise NotImplementedError(f"contract_last_dim only supports flat input_shape, got {self.input_shape}")
+        return self.contract_input(vec)
+
+    def matmul_right(self, rhs: torch.Tensor) -> LinearOperator:
+        if len(self.input_shape) != 1:
+            raise NotImplementedError(f"matmul_right only supports flat input_shape, got {self.input_shape}")
+        rr = _ensure_float_matrix(rhs, name="rhs", rows=self.input_numel, device=self.device, dtype=self.dtype)
+        return RightMatmulLinearOperator(base=self, rhs=rr)
+
+    def reshape_input(self, new_input_shape: Sequence[int]) -> LinearOperator:
+        shape = _normalize_input_shape(tuple(new_input_shape))
+        if _prod(shape) != self.input_numel:
+            raise ValueError(f"reshape_input shape mismatch: {shape} does not match input_numel={self.input_numel}")
+        if tuple(shape) == tuple(self.input_shape):
+            return self
+        return ScaledInputLinearOperator(base=self.base.reshape_input(shape), scale=self.scale)
+
+    def slice_input(self, new_input_shape: Sequence[int], *, start: int, stop: int) -> LinearOperator:
+        _base_shape, sliced_shape, start_i, stop_i = _validate_slice_input(
+            input_shape=self.input_shape,
+            new_input_shape=new_input_shape,
+            start=start,
+            stop=stop,
+        )
+        logical = self._logical_scale()
+        sliced = logical[:, start_i:stop_i, ...].contiguous()
+        return ScaledInputLinearOperator(
+            base=self.base.slice_input(sliced_shape, start=start_i, stop=stop_i),
+            scale=sliced,
+        )
+
+    def add(self, other: LinearOperator) -> LinearOperator:
+        return _add_operator_pair(self, other)
+
+    def conv2d_right(
+        self,
+        weight: torch.Tensor,
+        *,
+        stride: int | Sequence[int] = 1,
+        padding: int | Sequence[int] = 0,
+        dilation: int | Sequence[int] = 1,
+        groups: int = 1,
+        input_shape: Sequence[int],
+    ) -> LinearOperator:
+        in_shape = _normalize_input_shape(tuple(input_shape))
+        w = _normalize_conv_weight(weight, device=self.device, dtype=self.dtype)
+        stride_2 = _normalize_pair(stride, name="stride")
+        padding_2 = _normalize_pair(padding, name="padding")
+        dilation_2 = _normalize_pair(dilation, name="dilation")
+        out_shape = _conv2d_output_shape(in_shape, w, stride=stride_2, padding=padding_2, dilation=dilation_2, groups=int(groups))
+        base: LinearOperator = self
+        if tuple(base.input_shape) != tuple(out_shape):
+            if base.input_numel != _prod(out_shape):
+                raise ValueError(
+                    f"conv2d_right output shape mismatch: base.input_shape={base.input_shape} conv_output_shape={out_shape}"
+                )
+            base = base.reshape_input(out_shape)
+        return Conv2dLinearOperator(
+            base=base,
+            weight=w,
+            stride=stride_2,
+            padding=padding_2,
+            dilation=dilation_2,
+            groups=int(groups),
+            input_shape=in_shape,
+        )
+
+    def split_pos_neg(self) -> tuple[LinearOperator, LinearOperator]:
+        return _split_pos_neg_dense(self)
+
+    def to_dense(self) -> torch.Tensor:
+        return self.base.to_dense() * self.scale.unsqueeze(1)
+
+
+@dataclass(frozen=True)
+class RepeatedRowLinearOperator:
+    coeffs: torch.Tensor
+    spec_dim_size: int
+    input_shape: tuple[int, ...]
+    batch_size: int
+
+    def __post_init__(self) -> None:
+        input_shape = _normalize_input_shape(self.input_shape)
+        if int(self.batch_size) <= 0:
+            raise ValueError(f"batch_size must be positive, got {self.batch_size}")
+        if int(self.spec_dim_size) <= 0:
+            raise ValueError(f"spec_dim_size must be positive, got {self.spec_dim_size}")
+        coeffs = self.coeffs
+        if not torch.is_tensor(coeffs):
+            coeffs = torch.as_tensor(coeffs)
+        if not torch.is_floating_point(coeffs):
+            raise TypeError(f"RepeatedRowLinearOperator.coeffs expects floating tensor, got dtype={coeffs.dtype}")
+        coeffs = _coerce_per_input_tensor(
+            coeffs,
+            batch=int(self.batch_size),
+            input_shape=input_shape,
+            device=coeffs.device,
+            dtype=coeffs.dtype,
+            name="coeffs",
+        )
+        object.__setattr__(self, "coeffs", coeffs)
+        object.__setattr__(self, "input_shape", input_shape)
+        object.__setattr__(self, "batch_size", int(self.batch_size))
+        object.__setattr__(self, "spec_dim_size", int(self.spec_dim_size))
+
+    @property
+    def shape(self) -> tuple[int, int, int]:
+        return (int(self.batch_size), int(self.spec_dim_size), int(self.input_numel))
+
+    @property
+    def input_numel(self) -> int:
+        return _prod(self.input_shape)
+
+    @property
+    def spec_dim(self) -> int:
+        return int(self.spec_dim_size)
+
+    @property
+    def device(self) -> torch.device:
+        return self.coeffs.device
+
+    @property
+    def dtype(self) -> torch.dtype:
+        return self.coeffs.dtype
+
+    def _logical_coeffs(self) -> torch.Tensor:
+        return self.coeffs.view(int(self.batch_size), *self.input_shape)
+
+    def _row_contract(self, value: torch.Tensor, *, name: str) -> torch.Tensor:
+        flat = _flatten_contract_input(
+            value,
+            name=name,
+            batch=int(self.batch_size),
+            input_shape=self.input_shape,
+            device=self.device,
+            dtype=self.dtype,
+        )
+        return (self.coeffs * flat).sum(dim=1)
+
+    def center_term(self, center: torch.Tensor) -> torch.Tensor:
+        row = self._row_contract(center, name="center")
+        return row.unsqueeze(1).expand(int(self.batch_size), int(self.spec_dim_size))
+
+    def row_abs_sum(self) -> torch.Tensor:
+        row = self.coeffs.abs().sum(dim=1)
+        return row.unsqueeze(1).expand(int(self.batch_size), int(self.spec_dim_size))
+
+    def row_l2_norm(self) -> torch.Tensor:
+        row = torch.linalg.vector_norm(self.coeffs, ord=2, dim=1)
+        return row.unsqueeze(1).expand(int(self.batch_size), int(self.spec_dim_size))
+
+    def row_abs_max(self) -> torch.Tensor:
+        row = self.coeffs.abs().amax(dim=1)
+        return row.unsqueeze(1).expand(int(self.batch_size), int(self.spec_dim_size))
+
+    def contract_input(self, vec: torch.Tensor) -> torch.Tensor:
+        row = self._row_contract(vec, name="vec")
+        return row.unsqueeze(1).expand(int(self.batch_size), int(self.spec_dim_size))
+
+    def contract_last_dim(self, vec: torch.Tensor) -> torch.Tensor:
+        if len(self.input_shape) != 1:
+            raise NotImplementedError(f"contract_last_dim only supports flat input_shape, got {self.input_shape}")
+        return self.contract_input(vec)
+
+    def matmul_right(self, rhs: torch.Tensor) -> LinearOperator:
+        if len(self.input_shape) != 1:
+            raise NotImplementedError(f"matmul_right only supports flat input_shape, got {self.input_shape}")
+        rr = _ensure_float_matrix(rhs, name="rhs", rows=self.input_numel, device=self.device, dtype=self.dtype)
+        return RepeatedRowLinearOperator(
+            coeffs=self.coeffs.matmul(rr),
+            spec_dim_size=self.spec_dim_size,
+            input_shape=(int(rr.shape[1]),),
+            batch_size=self.batch_size,
+        )
+
+    def reshape_input(self, new_input_shape: Sequence[int]) -> LinearOperator:
+        shape = _normalize_input_shape(tuple(new_input_shape))
+        if _prod(shape) != self.input_numel:
+            raise ValueError(f"reshape_input shape mismatch: {shape} does not match input_numel={self.input_numel}")
+        if tuple(shape) == tuple(self.input_shape):
+            return self
+        return RepeatedRowLinearOperator(
+            coeffs=self.coeffs,
+            spec_dim_size=self.spec_dim_size,
+            input_shape=shape,
+            batch_size=self.batch_size,
+        )
+
+    def slice_input(self, new_input_shape: Sequence[int], *, start: int, stop: int) -> LinearOperator:
+        _base_shape, sliced_shape, start_i, stop_i = _validate_slice_input(
+            input_shape=self.input_shape,
+            new_input_shape=new_input_shape,
+            start=start,
+            stop=stop,
+        )
+        logical = self._logical_coeffs()
+        sliced = logical[:, start_i:stop_i, ...].contiguous()
+        return RepeatedRowLinearOperator(
+            coeffs=sliced,
+            spec_dim_size=self.spec_dim_size,
+            input_shape=sliced_shape,
+            batch_size=self.batch_size,
+        )
+
+    def add(self, other: LinearOperator) -> LinearOperator:
+        return _add_operator_pair(self, other)
+
+    def conv2d_right(
+        self,
+        weight: torch.Tensor,
+        *,
+        stride: int | Sequence[int] = 1,
+        padding: int | Sequence[int] = 0,
+        dilation: int | Sequence[int] = 1,
+        groups: int = 1,
+        input_shape: Sequence[int],
+    ) -> LinearOperator:
+        in_shape = _normalize_input_shape(tuple(input_shape))
+        w = _normalize_conv_weight(weight, device=self.device, dtype=self.dtype)
+        stride_2 = _normalize_pair(stride, name="stride")
+        padding_2 = _normalize_pair(padding, name="padding")
+        dilation_2 = _normalize_pair(dilation, name="dilation")
+        out_shape = _conv2d_output_shape(in_shape, w, stride=stride_2, padding=padding_2, dilation=dilation_2, groups=int(groups))
+        base: LinearOperator = self
+        if tuple(base.input_shape) != tuple(out_shape):
+            if base.input_numel != _prod(out_shape):
+                raise ValueError(
+                    f"conv2d_right output shape mismatch: base.input_shape={base.input_shape} conv_output_shape={out_shape}"
+                )
+            base = base.reshape_input(out_shape)
+        return Conv2dLinearOperator(
+            base=base,
+            weight=w,
+            stride=stride_2,
+            padding=padding_2,
+            dilation=dilation_2,
+            groups=int(groups),
+            input_shape=in_shape,
+        )
+
+    def split_pos_neg(self) -> tuple[LinearOperator, LinearOperator]:
+        return (
+            RepeatedRowLinearOperator(
+                coeffs=self.coeffs.clamp_min(0.0),
+                spec_dim_size=self.spec_dim_size,
+                input_shape=self.input_shape,
+                batch_size=self.batch_size,
+            ),
+            RepeatedRowLinearOperator(
+                coeffs=self.coeffs.clamp_max(0.0),
+                spec_dim_size=self.spec_dim_size,
+                input_shape=self.input_shape,
+                batch_size=self.batch_size,
+            ),
+        )
+
+    def to_dense(self) -> torch.Tensor:
+        return self.coeffs.unsqueeze(1).expand(int(self.batch_size), int(self.spec_dim_size), int(self.input_numel))
+
+
+for _op_cls in (
+    DenseLinearOperator,
+    ReshapeInputLinearOperator,
+    ReindexInputLinearOperator,
+    Conv2dLinearOperator,
+    AddLinearOperator,
+    ScaledInputLinearOperator,
+    RepeatedRowLinearOperator,
+):
+    _op_cls.relu_relax_pullback = _default_relu_relax_pullback
 
 
 def _materialize_feature_map_rows(
@@ -1225,6 +2028,20 @@ def _materialize_feature_map_rows(
             )
             return base_rows.reshape(batch * spec_dim, *expected_input_shape)
         return op.base.to_dense().reshape(batch * spec_dim, *expected_input_shape)
+
+    if isinstance(op, ReindexInputLinearOperator):
+        if tuple(op.input_shape) != tuple(expected_input_shape):
+            raise ValueError(
+                f"reindex operator input_shape mismatch: expected={expected_input_shape} actual={op.input_shape}"
+            )
+        if len(op.base.input_shape) == 3:
+            base_rows = _materialize_feature_map_rows(
+                op.base,
+                expected_input_shape=tuple(int(dim) for dim in op.base.input_shape),
+            )
+            flat = base_rows.reshape(batch * spec_dim, -1).index_select(1, op.scatter_index)
+            return flat.reshape(batch * spec_dim, *expected_input_shape)
+        return op.base.to_dense().index_select(2, op.scatter_index).reshape(batch * spec_dim, *expected_input_shape)
 
     if isinstance(op, SliceInputLinearOperator):
         if tuple(op.input_shape) != tuple(expected_input_shape):

@@ -251,6 +251,9 @@ def _map_torch_target_to_primitive(target: Any) -> str:
         "aten.flatten.using_ints": "flatten",
         "aten.reshape.default": "reshape",
         "aten.view.default": "reshape",
+        "aten._unsafe_view.default": "reshape",
+        # clone is layout-preserving identity for bound propagation; runtime treats reshape without shape attrs as identity.
+        "aten.clone.default": "reshape",
         "aten.permute.default": "permute",
     }
     return mapping.get(name, name)
@@ -281,6 +284,17 @@ def _extract_attrs_for_call_function(op_type: str, fx_node: torch.fx.Node) -> Di
         start_dim = int(args[1]) if len(args) > 1 else 0
         end_dim = int(args[2]) if len(args) > 2 else -1
         return {"start_dim": start_dim, "end_dim": end_dim}
+
+    if op_type == "reshape":
+        args = list(fx_node.args)
+        shape = fx_node.kwargs.get("shape", None)
+        if shape is None and len(args) > 1:
+            shape = args[1]
+        if shape is None:
+            return {}
+        if not isinstance(shape, (list, tuple, torch.Size)):
+            raise ValueError(f"reshape shape must be list/tuple/torch.Size, got {type(shape)}: {shape}")
+        return {"shape": [int(dim) for dim in shape]}
 
     if op_type in ("permute", "transpose"):
         # aten.permute.default(input, dims) -> permute (transpose is kept for backward-compat)

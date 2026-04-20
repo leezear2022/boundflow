@@ -39,13 +39,14 @@ else
 fi
 
 # We need to run the rest of the commands inside the conda environment
-# We use a recursive call to this script with a flag if we are not already in it
 if [[ "${CONDA_DEFAULT_ENV}" != "${ENV_NAME}" ]]; then
     echo ">>> Switching to conda environment '${ENV_NAME}' for build steps..."
-    # Execute the build steps in a new shell with the environment activated
     eval "$(conda shell.bash hook)"
     conda activate ${ENV_NAME}
 fi
+
+CONDA_PYTHON=$(which python)
+echo "    Using Python: ${CONDA_PYTHON}"
 
 # -----------------------------------------------------------------------------
 # 3. Build & Install TVM-FFI
@@ -55,12 +56,43 @@ echo ">>> [3/6] Building TVM-FFI..."
 cd ${TVM_FFI_DIR}
 mkdir -p build
 cd build
-# Explicitly build with CMake to ensure .so is generated correctly
-cmake .. -G Ninja
+
+# Build TVM-FFI with Cython Python module (core.abi3.so)
+# -DTVM_FFI_BUILD_PYTHON_MODULE=ON enables the Cython core extension
+cmake .. -G Ninja \
+    -DTVM_FFI_BUILD_PYTHON_MODULE=ON \
+    -DPython_EXECUTABLE="${CONDA_PYTHON}"
 ninja
-# Copy the compiled library to the python package source directory
-# This ensures pip install -e works and finds the library immediately
-find . -name "*.so" -exec cp {} ../python/tvm_ffi/ \;
+
+# Copy compiled .so files to the Python package directory
+find lib/ -name "*.so" -exec cp {} ../python/tvm_ffi/ \;
+# Copy the Cython core module (core.abi3.so)
+if [ -f core.abi3.so ]; then
+    cp core.abi3.so ../python/tvm_ffi/
+    echo "    Copied core.abi3.so to tvm_ffi package"
+fi
+
+# Create minimal pyproject.toml if missing (required for importlib.metadata
+# to resolve the 'apache-tvm-ffi' package name used by tvm_ffi.libinfo)
+if [ ! -f ../python/pyproject.toml ]; then
+    echo "    Creating pyproject.toml for apache-tvm-ffi..."
+    cat > ../python/pyproject.toml <<'PYPROJECT'
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "apache-tvm-ffi"
+version = "0.0.0"
+
+[tool.setuptools.packages.find]
+include = ["tvm_ffi*"]
+
+[tool.setuptools.package-data]
+tvm_ffi = ["*.so", "*.dylib", "*.dll"]
+PYPROJECT
+fi
+
 echo "    Installing TVM-FFI Python package (editable)..."
 cd ../python
 pip install -e .
@@ -75,14 +107,15 @@ mkdir -p build
 cp cmake/config.cmake build/
 cd build
 
-# Modify config.cmake to enable CUDA and LLVM
-# We use sed to enable these options. Adjust based on your system needs.
+# Enable LLVM and CUDA backends
 sed -i 's/set(USE_LLVM OFF)/set(USE_LLVM ON)/g' config.cmake
 sed -i 's/set(USE_CUDA OFF)/set(USE_CUDA ON)/g' config.cmake
-# Optional: Enable CUDNN if needed
-# sed -i 's/set(USE_CUDNN OFF)/set(USE_CUDNN ON)/g' config.cmake
 
-echo "    Configuring CMake (LLVM=ON, CUDA=ON)..."
+# Disable GTest to avoid issues with system-only static libraries
+# (CMake IMPORTED_LOCATION error when only libgtest.a is available)
+sed -i 's/set(USE_GTEST AUTO)/set(USE_GTEST OFF)/g' config.cmake
+
+echo "    Configuring CMake (LLVM=ON, CUDA=ON, GTEST=OFF)..."
 cmake .. -G Ninja
 ninja
 
