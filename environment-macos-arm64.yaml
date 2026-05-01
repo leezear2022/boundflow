@@ -1,0 +1,68 @@
+name: boundflow
+channels:
+  - pytorch
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+
+  # Build tools
+  - cmake>=3.18
+  - ninja
+  - ccache
+  - make
+  # Vendored TVM is not yet compatible with LLVM 22 APIs on macOS arm64.
+  - llvmdev=17.0.6
+  - cython
+  - scikit-build-core
+  - setuptools-scm
+
+  # PyTorch & Auto_LiRPA
+  # Keep this below Auto_LiRPA's upper bound declared in the vendored setup.py.
+  - pytorch>=2.0,<2.9
+  - torchvision>=0.15,<0.24
+
+  # TVM Core dependencies
+  - numpy>=1.20
+  - scipy
+  - cloudpickle
+  - psutil
+  - tornado
+  - ml_dtypes
+  - typing_extensions
+  - attrs
+  - decorator
+  - packaging
+
+  # TVM Autotuner
+  - xgboost
+
+  # ONNX frontend
+  - onnx
+  - future
+
+  # Auto_LiRPA dependencies
+  - pyyaml
+  - tqdm
+  - appdirs
+  - graphviz
+
+  # Postprocess & plotting
+  - matplotlib
+
+  # Testing & Dev
+  - pytest=8.1.1
+  - pytest-xdist
+  - pytest-benchmark
+  - pytest-mock
+  - pylint
+  - black
+  - mypy
+
+  - pip:
+    # Conda-forge currently does not publish onnxoptimizer for osx-arm64.
+    # onnxruntime newer wheels are unavailable for cp310 macOS arm64, so pin
+    # the latest available universal2 wheel observed for this platform.
+    - onnxoptimizer==0.4.2
+    - onnxruntime==1.19.2
+    - pytest-order

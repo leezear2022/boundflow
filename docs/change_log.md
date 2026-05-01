@@ -2752,3 +2752,47 @@
 
 **验证**
 - `bash -n scripts/install_dev.sh`
+
+---
+
+## 2026-05-01：macOS arm64 开发环境启动支持
+
+**动机**
+- 项目迁移到 Apple Silicon Mac 后，原 Linux/CUDA 安装入口不能直接创建 `boundflow` 环境。
+- 需要保留 Linux/CUDA 路径，同时为 macOS arm64 提供可解算、可构建 TVM LLVM CPU 后端的开发环境。
+
+**主要改动**
+- 新增 `environment-macos-arm64.yaml`：
+  - 使用 `python=3.10`；
+  - 约束 `pytorch>=2.0,<2.9`、`torchvision>=0.15,<0.24`；
+  - 固定 `llvmdev=17.0.6`，避开 vendored TVM 与 LLVM 22 API 的不兼容；
+  - 移除 CUDA 依赖；
+  - 通过 pip 安装 `onnxoptimizer==0.4.2`、`onnxruntime==1.19.2`、`pytest-order`。
+- 更新 `scripts/install_dev.sh`：
+  - Darwin/arm64 自动选择 macOS 专用环境文件；
+  - 用 macOS 兼容的 CPU 核心数检测；
+  - 用 CMake override 替代 `sed -i` 修改 TVM 配置；
+  - macOS 默认 `USE_CUDA=OFF`，LLVM 指向 Conda 环境内 `llvm-config`；
+  - TVM 重新配置前清理旧 CMake cache，避免 LLVM 版本切换后沿用旧缓存；
+  - TVM-FFI 从 vendored 根目录执行 editable install；
+  - 同步安装 BoundFlow 根包 editable。
+- 更新 `scripts/rebuild_tvm.sh`：
+  - TVM build 目录不存在时给出明确错误与安装提示。
+- 新增变更记录：
+  - `gemini_doc/change_2026-05-01_macos_arm64_dev_env_bootstrap.md`
+
+**影响面**
+- macOS arm64 首期目标是 LLVM CPU 后端跑通，不默认启用 Metal。
+- Linux/CUDA 环境仍使用原 `environment.yaml`，避免破坏既有 CUDA 路径。
+
+**验证**
+- `conda env create -f environment-macos-arm64.yaml --dry-run`：通过，解到 `llvmdev=17.0.6`。
+- `bash -n scripts/install_dev.sh scripts/rebuild_tvm.sh`：通过。
+- `git diff --check`：通过。
+- `bash scripts/install_dev.sh`：通过，完成 Conda 环境创建/更新、TVM-FFI、TVM、Auto_LiRPA、BoundFlow editable 安装。
+- `conda run -n boundflow python tests/test_env.py`：通过。
+- `conda run -n boundflow python -c "import tvm; print(tvm.runtime.enabled('llvm'), tvm.runtime.enabled('cuda'), tvm.runtime.enabled('metal'))"`：输出 `True False False`。
+- `conda run -n boundflow python -m pytest -q tests/test_env.py tests/test_env_sh_quiet_stdout.py tests/test_torch_frontend_import.py`：`5 passed, 1 warning in 10.64s`。
+- `conda run -n boundflow python -m pytest -q tests/test_phase4c_tvmexecutor_matches_python.py tests/test_phase4c_tvmexecutor_matches_python_cnn.py tests/test_phase4d_onnx_frontend_matches_torch.py`：`4 passed in 23.08s`。
+- `bash scripts/rebuild_tvm.sh`：通过，`ninja: no work to do.`。
+- 首次完整安装发现 LLVM 22 编译 TVM 失败，已将 macOS 环境 pin 到 LLVM 17 后重试通过。

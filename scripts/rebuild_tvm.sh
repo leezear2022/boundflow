@@ -13,11 +13,17 @@ echo ">>> BoundFlow TVM Rebuilder"
 if [[ "${CONDA_DEFAULT_ENV}" != "${ENV_NAME}" ]]; then
     echo ">>> Activating conda environment '${ENV_NAME}'..."
     eval "$(conda shell.bash hook)"
-    conda activate ${ENV_NAME}
+    conda activate "${ENV_NAME}"
+fi
+
+if [[ ! -d "${TVM_DIR}/build" ]]; then
+    echo "Error: TVM build directory does not exist: ${TVM_DIR}/build" >&2
+    echo "Please run: bash scripts/install_dev.sh" >&2
+    exit 1
 fi
 
 echo ">>> Rebuilding TVM..."
-cd ${TVM_DIR}/build
+cd "${TVM_DIR}/build"
 
 # Incremental build using Ninja
 ninja
