@@ -1,0 +1,35 @@
+name: boundflow-mps-aggressive
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+
+  # Minimal runtime for Phase 7B MPS exploration. This lane intentionally does
+  # not install auto_LiRPA because the vendored setup.py currently caps torch
+  # below 2.9. Keep numerical packages in pip wheels so conda-forge does not
+  # pull llvm-openmp/libopenblas-openmp, which conflicts with the PyTorch macOS
+  # wheel during import torch.
+
+  - pip:
+    - torch==2.12.1
+    - torchvision==0.27.1
+    - numpy
+    - scipy
+    - pyyaml
+    - tqdm
+    - appdirs
+    - graphviz
+    - packaging
+    - typing_extensions
+    - attrs
+    - decorator
+    - cloudpickle
+    - psutil
+    - tornado
+    - ml_dtypes
+    - matplotlib
+    - pytest==8.1.1
+    - onnx
+    - onnxoptimizer==0.4.2
+    - pytest-order

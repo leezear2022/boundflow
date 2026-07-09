@@ -1,0 +1,34 @@
+name: boundflow-mps-nightly
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+
+  # Bleeding-edge MPS lane for op coverage and Metal feasibility only. Do not
+  # use this environment for paper-grade reproducible benchmarks.
+  - numpy
+  - scipy
+  - pyyaml
+  - tqdm
+  - appdirs
+  - graphviz
+  - packaging
+  - typing_extensions
+  - attrs
+  - decorator
+  - cloudpickle
+  - psutil
+  - tornado
+  - ml_dtypes
+  - matplotlib
+  - pytest=8.1.1
+
+  - pip:
+    - --pre
+    - --index-url https://download.pytorch.org/whl/nightly/cpu
+    - torch
+    - torchvision
+    - onnx
+    - onnxoptimizer==0.4.2
+    - pytest-order

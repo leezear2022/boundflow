@@ -8,7 +8,13 @@ import torch
 from ..domains.interval import IntervalDomain, IntervalState
 from ..ir.task import BFTaskModule, TaskKind
 from .dag_utils import normalize_concat_axis, validate_concat_tensor_shapes, validate_concat_value_shapes
-from .linear_operator import DenseLinearOperator, LinearOperator, ReindexInputLinearOperator, RepeatedRowLinearOperator
+from .linear_operator import (
+    DenseLinearOperator,
+    LinearOperator,
+    ReindexInputLinearOperator,
+    RepeatedRowLinearOperator,
+    operator_dense_cache,
+)
 from .perturbation import InputPerturbationState
 from .relu_shape_utils import broadcast_relu_split_like_pre
 from .task_executor import InputSpec, InputSpecLike, _normalize_input_spec
@@ -1130,18 +1136,19 @@ def run_crown_ibp_mlp(
         output_value = task.output_values[0]
 
     interval_env, relu_pre = _forward_ibp_trace_mlp(module, input_spec, relu_split_state=relu_split_state)
-    return _run_crown_backward_from_trace(
-        module,
-        input_spec,
-        interval_env=interval_env,
-        relu_pre=relu_pre,
-        linear_spec_C=linear_spec_C,
-        output_value=output_value,
-        relu_alpha=relu_alpha,
-        relu_pre_add_coeff_u=relu_pre_add_coeff_u,
-        relu_pre_add_coeff_l=relu_pre_add_coeff_l,
-        caller="run_crown_ibp_mlp",
-    )
+    with operator_dense_cache(enabled=True):
+        return _run_crown_backward_from_trace(
+            module,
+            input_spec,
+            interval_env=interval_env,
+            relu_pre=relu_pre,
+            linear_spec_C=linear_spec_C,
+            output_value=output_value,
+            relu_alpha=relu_alpha,
+            relu_pre_add_coeff_u=relu_pre_add_coeff_u,
+            relu_pre_add_coeff_l=relu_pre_add_coeff_l,
+            caller="run_crown_ibp_mlp",
+        )
 
 
 def run_crown_ibp_mlp_from_forward_trace(
@@ -1170,18 +1177,19 @@ def run_crown_ibp_mlp_from_forward_trace(
     if module.task_graph is not None or len(module.tasks) != 1:
         raise NotImplementedError("run_crown_ibp_mlp_from_forward_trace currently supports single-task BFTaskModule only")
 
-    return _run_crown_backward_from_trace(
-        module,
-        input_spec,
-        interval_env=interval_env,
-        relu_pre=relu_pre,
-        linear_spec_C=linear_spec_C,
-        output_value=output_value,
-        relu_alpha=relu_alpha,
-        relu_pre_add_coeff_u=relu_pre_add_coeff_u,
-        relu_pre_add_coeff_l=relu_pre_add_coeff_l,
-        caller="run_crown_ibp_mlp_from_forward_trace",
-    )
+    with operator_dense_cache(enabled=True):
+        return _run_crown_backward_from_trace(
+            module,
+            input_spec,
+            interval_env=interval_env,
+            relu_pre=relu_pre,
+            linear_spec_C=linear_spec_C,
+            output_value=output_value,
+            relu_alpha=relu_alpha,
+            relu_pre_add_coeff_u=relu_pre_add_coeff_u,
+            relu_pre_add_coeff_l=relu_pre_add_coeff_l,
+            caller="run_crown_ibp_mlp_from_forward_trace",
+        )
 
 
 def get_crown_ibp_mlp_stats(module: BFTaskModule) -> CrownIbpStats:

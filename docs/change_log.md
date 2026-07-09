@@ -2796,3 +2796,524 @@
 - `conda run -n boundflow python -m pytest -q tests/test_phase4c_tvmexecutor_matches_python.py tests/test_phase4c_tvmexecutor_matches_python_cnn.py tests/test_phase4d_onnx_frontend_matches_torch.py`：`4 passed in 23.08s`。
 - `bash scripts/rebuild_tvm.sh`：通过，`ninja: no work to do.`。
 - 首次完整安装发现 LLVM 22 编译 TVM 失败，已将 macOS 环境 pin 到 LLVM 17 后重试通过。
+
+---
+
+## 2026-05-24：Phase 7A PR-15 opt-in operator attribution
+
+**动机**
+- PR-14 已清零 ReLU workloads 上的 `split_pos_neg_dense` hotspot，但 ReLU structured path 相对 dense ReLU barrier 仍慢。
+- 下一步不能直接假设 `RightMatmul` / `SliceInput` 应该继续局部优化，需要先把 `relu_relax_pullback()` 内部 materialization、wrapper 和 fallback 成本归因清楚。
+- Phase 7A 叙事从“structured 一定更快”收缩为“BoundFlow 能解释 dense / structured / future lowering 的选择边界”。
+
+**主要改动**
+- 更新：`boundflow/runtime/linear_operator.py`
+  - 新增 `collect_operator_attribution(path_kind, phase)` opt-in context。
+  - 使用 `contextvars.ContextVar` 承载 attribution trace，避免全局状态污染。
+  - 记录 ReLU pullback 调用、operator depth、wrapper 计数、materialization op/shape/numel/bytes/phase/reason、fallback reason。
+  - 固定 reason taxonomy：`explicit_split_pos_neg_dense`、`right_matmul_exact_sign_split_required`、`slice_pullback_materialize`、`unsupported_structured_relu_pullback`、`broadcast_materialization`、`dense_reference_check`、`dense_baseline_materialization`、`final_bound_concretization`、`unknown_materialization`。
+- 更新：`scripts/bench_phase7a_shared_crown_path_attribution.py`
+  - `_collect_counts()` 阶段启用 attribution。
+  - timing 阶段不启用 attribution，避免污染 latency。
+  - 顶层 schema version 保持 `phase7a_shared_crown_path_attribution.v1`，新增字段放在 `counts_* .operator_attribution` nested payload 下。
+- 更新：`tests/test_phase7a_pr11_shared_crown_bench.py`
+  - 增加 attribution enabled / disabled side-effect 回归。
+  - 扩展 benchmark schema smoke，验证 nested attribution 字段。
+  - 保持 ReLU workloads 的 `split_pos_neg_dense_total == 0` 回归。
+- 更新：`gemini_doc/next_plan_after_phase7a_pr14.md`
+  - 补入 PR-15 attribution 定位与 PR-16 分叉路线。
+- 新增：`gemini_doc/change_2026-05-24_phase7a_pr15_operator_attribution.md`
+
+**结果摘要**
+- PR-15 是纯 instrumentation PR，不改 bound 语义，不引入 relaxed / over-approx contract。
+- attribution 关闭时保持原路径；开启时只旁路记录真实发生的 pullback / fallback / materialization。
+- 全 workload CPU smoke 中 `unknown_materialization` 已归零；final concretization 与 dense baseline materialization 被拆成明确 reason。
+- 后续 PR-16 将根据 attribution 数据选择 cache、SliceInput exact fast path、RightMatmul cached dense + hybrid planner，或 planner-level fusion / selective lowering。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr11_shared_crown_bench.py`：`5 passed in 0.84s`
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr10_relu_barrier_structured.py tests/test_phase7a_pr9_dag_linear_operator.py`：`16 passed in 0.83s`
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr10_relu_barrier_structured.py tests/test_phase7a_pr9_dag_linear_operator.py tests/test_phase7a_pr11_shared_crown_bench.py`：`21 passed in 1.13s`
+- `conda run --no-capture-output -n boundflow python scripts/bench_phase7a_shared_crown_path_attribution.py --device cpu --profile smoke --workloads all --warmup 1 --iters 1`：通过，`unknown_materialization` 总调用数为 0。
+
+---
+
+## 2026-06-30：Phase 7A PR-16 run-local dense cache
+
+**动机**
+- PR-15 已把 shared CROWN attribution 的 `unknown_materialization` 清零，并确认 ReLU structured path 的主要成本集中在 `right_matmul_exact_sign_split_required` 与 final concretization。
+- 下一步先做语义透明的 run-local dense cache，验证同一次 CROWN backward / final concretization 中是否存在同一 operator identity 的重复 `to_dense()`。
+
+**主要改动**
+- 更新：`boundflow/runtime/linear_operator.py`
+  - 新增 `operator_dense_cache(enabled=True)` context manager。
+  - 使用 `contextvars.ContextVar` 承载 run-local cache，嵌套时复用外层 context。
+  - cache value 持有 `(operator, tensor)`，避免只用 `id(op)` 时发生 Python 对象 id 复用导致语义污染。
+  - 接入 `RightMatmulLinearOperator`、`AddLinearOperator`、`SliceInputLinearOperator`、`ScaledInputLinearOperator` 的 `to_dense()`。
+  - `operator_attribution` nested payload 新增 `cache.hits / misses / by_op / by_reason`。
+- 更新：`boundflow/runtime/crown_ibp.py`
+  - `run_crown_ibp_mlp()` 与 `run_crown_ibp_mlp_from_forward_trace()` 的 backward + final concretization 阶段默认启用 run-local dense cache。
+- 更新：`scripts/bench_phase7a_shared_crown_path_attribution.py`
+  - `_collect_counts(..., use_dense_cache=True)` 可切换 cache enabled / disabled，便于回归比较。
+- 更新：`tests/test_phase7a_pr11_shared_crown_bench.py`
+  - 新增 cache enabled / disabled bounds 等价测试。
+  - 新增直接 `RightMatmul.to_dense()` cache hit/miss 测试。
+  - 新增 `concat_relu_mlp` structured path 下 cache enabled calls/bytes 不高于 disabled 的回归。
+- 新增：`gemini_doc/change_2026-06-30_phase7a_pr16_run_local_dense_cache.md`
+
+**结果摘要**
+- cache 是语义透明优化，不改变 `split_pos_neg()` exact contract，也不引入 relaxed / over-approx path。
+- CPU smoke 中 `unknown_materialization` 继续为 0。
+- `concat_relu_mlp` structured path 出现 `RightMatmulLinearOperator` cache hit；`right_matmul_exact_sign_split_required` 从 disabled cache 的 `10 calls / 98304 bytes` 降到 enabled cache 的 `6 calls / 57344 bytes`。
+- `relu_heavy_mlp` 仍以 cache miss 为主，说明并非所有 ReLU-heavy workload 都存在同一 operator identity 的复用机会。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr11_shared_crown_bench.py`：`8 passed in 0.85s`
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr10_relu_barrier_structured.py tests/test_phase7a_pr9_dag_linear_operator.py`：`16 passed in 0.67s`
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr10_relu_barrier_structured.py tests/test_phase7a_pr9_dag_linear_operator.py tests/test_phase7a_pr11_shared_crown_bench.py`：`24 passed in 0.71s`
+- `conda run --no-capture-output -n boundflow python scripts/bench_phase7a_shared_crown_path_attribution.py --device cpu --profile smoke --workloads all --warmup 1 --iters 1`：通过，见上述 cache 观测。
+
+---
+
+## 2026-06-30：Phase 7A PR-17 final concretization policy
+
+**动机**
+- PR-16 证明 run-local identity cache 语义安全，但只能覆盖部分同 operator identity 的重复 `to_dense()`。
+- 下一步需要把 final concretization 的 structured / dense barrier 选择变成可测 policy，而不是直接改默认路径。
+
+**主要改动**
+- 更新：`boundflow/runtime/perturbation.py`
+  - 新增 `final_concretization_policy(policy)` context manager。
+  - 支持默认 `structured` 与显式 `dense_barrier`。
+  - `dense_barrier` 在 final concretization 起点把 `LinearOperator` materialize 成 `DenseLinearOperator` 后再做 exact concretization。
+- 更新：`boundflow/runtime/linear_operator.py`
+  - 新增 attribution reason：`final_bound_dense_barrier`。
+- 更新：`scripts/bench_phase7a_shared_crown_path_attribution.py`
+  - 新增 `--final-concretization-policy {structured,dense_barrier}`。
+  - 顶层 schema version 保持 `phase7a_shared_crown_path_attribution.v1`，meta 中新增 `final_concretization_policy`。
+- 更新：`tests/test_phase7a_linear_operator_concretize.py`
+  - 新增 dense barrier policy 与 structured policy 的 bounds 等价测试。
+- 更新：`tests/test_phase7a_pr11_shared_crown_bench.py`
+  - schema smoke 锁定默认 `final_concretization_policy == "structured"`。
+- 新增：`gemini_doc/change_2026-06-30_phase7a_pr17_final_concretization_policy.md`
+
+**结果摘要**
+- 默认 final concretization policy 不变，仍为 `structured`。
+- `dense_barrier` 是显式可测 policy，保持 exact 语义。
+- benchmark 可用同一 workload/计时口径比较 final concretization policy。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_linear_operator_concretize.py tests/test_phase7a_pr11_shared_crown_bench.py`：`18 passed, 1 skipped in 0.69s`
+- `conda run --no-capture-output -n boundflow python scripts/bench_phase7a_shared_crown_path_attribution.py --device cpu --profile smoke --workloads relu_heavy_mlp --warmup 1 --iters 1 --final-concretization-policy dense_barrier`：通过，meta 中 `final_concretization_policy=dense_barrier`，counts 中出现 `final_bound_dense_barrier`。
+
+---
+
+## 2026-07-01：Phase 7A PR-18 hybrid planner / capability table
+
+**动机**
+- PR-15 到 PR-17 已经完成 operator attribution、run-local dense cache 与 final concretization policy。
+- Phase 7A 下一步不应继续手改 `RightMatmul` sign split，而应把 dense / structured / final dense barrier 的选择边界固化成 planner 机制。
+
+**主要改动**
+- 新增：`boundflow/runtime/bound_planner.py`
+  - 定义 `BoundOpCapability`、`Phase7APlannerDecision`。
+  - 新增 `PHASE7A_CAPABILITY_TABLE`。
+  - 新增 `plan_phase7a_shared_crown(...)` 与 `phase7a_capability_table_jsonable()`。
+  - 明确 `RightMatmulLinearOperator` 的 `planner_action` 是 `cached_dense_do_not_fake_structured_sign_split`。
+- 更新：`scripts/bench_phase7a_shared_crown_path_attribution.py`
+  - `--final-concretization-policy` 新增 `auto`。
+  - 顶层 schema version 继续保持 `phase7a_shared_crown_path_attribution.v1`。
+  - `meta.capability_table` 输出当前 capability table。
+  - 每个 row 新增 `planner_decision`。
+  - auto planner 当前规则：
+    - `relu_barrier -> structured`
+    - `layout_only -> dense_barrier`
+- 更新：`tests/test_phase7a_pr11_shared_crown_bench.py`
+  - 验证 capability table schema。
+  - 验证 auto planner 决策。
+  - 验证 benchmark JSON 中包含 `planner_decision`。
+- 新增：`gemini_doc/change_2026-07-01_phase7a_pr18_hybrid_planner.md`
+
+**结果摘要**
+- Phase 7A 已从“operator-preserving structured path”推进为：
+  - attribution
+  - cache
+  - final policy
+  - hybrid planner / capability table
+- BoundFlow 的阶段主张收缩为：能解释并规划 dense / structured / future lowering 的边界，而不是宣称 structured 一定更快。
+- `split_pos_neg()` exact contract 未改变，不引入默认 over-approximation，也不做 TVM lowering。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr11_shared_crown_bench.py tests/test_phase7a_linear_operator_concretize.py`：`20 passed, 1 skipped in 0.77s`
+
+---
+
+## 2026-07-01：Phase 7B PR-19 benchmark matrix / crossover study
+
+**动机**
+- Phase 7A 已完成 attribution、cache、final policy 与 hybrid planner。
+- 下一步需要用规模扫描数据判断 structured / dense barrier / auto 何时出现 crossover，作为 Phase 7B cost model 的输入。
+
+**主要改动**
+- 更新：`scripts/bench_phase7a_shared_crown_path_attribution.py`
+  - `--profile` 新增 `small`，作为 `smoke` 与 `bench` 之间的中间规模。
+  - 四个 shared CROWN workload 均支持 `small` profile。
+- 新增：`scripts/bench_phase7b_crossover_matrix.py`
+  - 输出 schema：`phase7b_crossover_matrix.v1`。
+  - 支持 workload × scale × policy 矩阵：
+    - `--workloads`
+    - `--scales smoke,small,bench`
+    - `--policies structured,dense_barrier,auto`
+  - 复用 PR-18 的 `_collect_row()`，避免复制计时、baseline 与 attribution 逻辑。
+  - 每个 row 输出 `planner_decision`、抽取后的 `metrics` 与完整 `raw_row`。
+  - 同一个 `(workload, scale)` 下不同 policy 共享同一个 seed，避免 policy 对比被随机输入/权重污染。
+  - summary 按 `(workload, scale_id)` 给出 `best_policy_by_structured_ms`、`best_policy_by_speedup`、`auto_final_concretization_policy` 与 `dense_barrier_vs_structured_ms_ratio`。
+- 新增：`tests/test_phase7b_crossover_matrix.py`
+  - 验证 `phase7b_crossover_matrix.v1` schema。
+  - 验证 layout-only workload 的 `auto -> dense_barrier` planner decision。
+  - 验证 `unknown_materialization_calls == 0` 与 `split_pos_neg_dense_total == 0`。
+- 新增：`gemini_doc/change_2026-07-01_phase7b_pr19_crossover_matrix.md`
+
+**结果摘要**
+- PR-19 建立了 Phase 7B 的 benchmark matrix 数据入口。
+- smoke 只用于验证 schema 与数据管线，不用于最终性能结论。
+- 后续 PR-20 可基于 CPU/CUDA 多 iter matrix 结果，形成 cost model v1。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase7b_crossover_matrix.py`：`1 passed in 0.68s`
+- `conda run --no-capture-output -n boundflow python scripts/bench_phase7b_crossover_matrix.py --device cpu --workloads relu_heavy_mlp,permute_reshape_linear --scales smoke --policies structured,dense_barrier,auto --warmup 1 --iters 1`：通过，输出 `phase7b_crossover_matrix.v1`。
+
+---
+
+## 2026-07-01：Phase 7B PR-20 cost model v1 evidence postprocess
+
+**动机**
+- PR-19 已建立 workload × scale × policy 的 matrix 数据入口。
+- 下一步需要把 matrix 数据后处理成 cost model v1 的规则证据，但不能把 `iters=1` 的 noisy smoke 直接写进 runtime planner。
+
+**主要改动**
+- 新增：`scripts/postprocess_phase7b_cost_model.py`
+  - 输入 `phase7b_crossover_matrix.v1`。
+  - 输出 `phase7b_cost_model_v1`。
+  - 按 `(workload, scale_id)` 生成 rule：
+    - `recommended_policy_request`
+    - `recommended_final_concretization_policy`
+    - `confidence`
+    - `relative_gap_to_second_best`
+    - `dense_barrier_vs_structured_ms_ratio`
+    - `evidence.policy_ms_p50`
+    - `evidence.materialized_bytes`
+    - `evidence.right_matmul_exact_bytes`
+    - `evidence.cache_hits/cache_misses`
+    - `guardrails.unknown_materialization_calls`
+    - `guardrails.split_pos_neg_dense_total`
+  - confidence 按最终执行策略 `final_concretization_policy` 比较，而不是按 policy request 比较，避免 `auto` 与 `dense_barrier` 指向同一 final policy 时互相稀释证据。
+  - 新增 `--min-iters-for-confidence`，默认 `iters < 3` 时最高 confidence cap 到 `low`。
+- 新增：`tests/test_phase7b_cost_model.py`
+  - 用合成 matrix payload 验证 schema、rule、summary、guardrails。
+- 新增：`gemini_doc/change_2026-07-01_phase7b_pr20_cost_model_v1.md`
+
+**结果摘要**
+- PR-20 产出离线 cost model v1 evidence，不直接改变 runtime planner 默认行为。
+- smoke 后处理可跑通，但会被标为 low confidence，避免误把管线验证当性能结论。
+- 后续需要用 CPU/CUDA 多 iter matrix 数据生成 high-confidence rules，再推进 planner v2。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase7b_cost_model.py`：`2 passed in 0.01s`
+- `conda run --no-capture-output -n boundflow python scripts/postprocess_phase7b_cost_model.py /tmp/phase7b_pr19_matrix_smoke.json --min-relative-margin 0.05`：通过，输出 `phase7b_cost_model_v1`，`max_confidence_from_measurement_reliability=low`。
+
+---
+
+## 2026-07-01：Phase 7B PR-21 formal CPU matrix evidence
+
+**动机**
+- PR-19/PR-20 已建立 matrix 与 cost model 后处理，但此前 smoke 只验证管线。
+- 本轮用 CPU 正式参数跑完整 matrix，生成可用于 planner v2 的证据。
+
+**主要改动**
+- 运行正式 CPU matrix：
+  - `workloads=all`
+  - `scales=smoke,small,bench`
+  - `policies=structured,dense_barrier,auto`
+  - `warmup=5`
+  - `iters=20`
+- 生成：
+  - `out/phase7b/phase7b_pr22_cpu_matrix.json`
+  - `out/phase7b/phase7b_pr22_cpu_cost_model.json`
+- 新增：`gemini_doc/change_2026-07-01_phase7b_pr21_cpu_matrix_evidence.md`
+
+**结果摘要**
+- 当前机器 `torch.cuda.is_available() == False`，因此本轮只形成 CPU evidence。
+- high-confidence rules：
+  - `cpu + permute_reshape_linear + small -> structured`
+  - `cpu + permute_reshape_linear + bench -> structured`
+- 其余规则为 medium / low confidence，不推进 runtime planner。
+- 所有 cost-model rule 的 guardrails 均满足：
+  - `unknown_materialization_calls == 0`
+  - `split_pos_neg_dense_total == 0`
+
+**验证**
+- `conda run --no-capture-output -n boundflow python scripts/bench_phase7b_crossover_matrix.py --device cpu --workloads all --scales smoke,small,bench --policies structured,dense_barrier,auto --warmup 5 --iters 20`：通过。
+- `conda run --no-capture-output -n boundflow python scripts/postprocess_phase7b_cost_model.py out/phase7b/phase7b_pr22_cpu_matrix.json --min-relative-margin 0.05`：通过，输出 `phase7b_cost_model_v1`。
+
+---
+
+## 2026-07-01：Phase 7B PR-22 planner v2 high-confidence promotions
+
+**动机**
+- PR-21 CPU evidence 显示 PR-18 的 `layout_only -> dense_barrier` auto 规则过粗。
+- 只应把 high-confidence、guardrail 通过的规则推进 runtime planner。
+
+**主要改动**
+- 更新：`boundflow/runtime/bound_planner.py`
+  - 新增 `Phase7BCostModelRule`。
+  - 新增 `PHASE7B_COST_MODEL_RULES`。
+  - 新增 `phase7b_cost_model_rules_jsonable()`。
+  - 新增 `plan_phase7b_shared_crown(...)`。
+  - 当前仅提升：
+    - `cpu + permute_reshape_linear + small -> structured`
+    - `cpu + permute_reshape_linear + bench -> structured`
+- 更新：`scripts/bench_phase7a_shared_crown_path_attribution.py`
+  - `_collect_row()` 改用 `plan_phase7b_shared_crown(...)`。
+  - meta 新增 `cost_model_rules`。
+- 新增：`scripts/report_phase7b_planner_v2_candidates.py`
+  - 输入 `phase7b_cost_model_v1`。
+  - 输出 `phase7b_planner_v2_candidates.v1`。
+  - 区分 `promoted_rules`、`missing_promotions`、`held_back_rules`。
+- 更新：`tests/test_phase7a_pr11_shared_crown_bench.py`
+  - 验证 planner v2 high-confidence rule。
+- 新增：`tests/test_phase7b_planner_v2_report.py`
+- 新增：`gemini_doc/change_2026-07-01_phase7b_pr22_planner_v2.md`
+
+**结果摘要**
+- 最终 planner-v2 audit：
+  - `promoted_count = 2`
+  - `missing_promotion_count = 0`
+  - `held_back_count = 10`
+- PR22 没有改变 `split_pos_neg()` exact contract，没有引入 over-approximation，也没有做 TVM lowering。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr11_shared_crown_bench.py tests/test_phase7b_planner_v2_report.py`：`12 passed in 0.75s`
+- `conda run --no-capture-output -n boundflow python scripts/report_phase7b_planner_v2_candidates.py out/phase7b/phase7b_pr22_cpu_cost_model.json --device cpu --min-confidence high`：通过，`promoted_count=2`、`missing_promotion_count=0`。
+
+---
+
+## 2026-07-01：Phase 7B PR-23 Mac MPS / aggressive lane
+
+**动机**
+- 当前分支是 `feat/macos-arm64-dev-env`，稳定环境为 macOS arm64 + PyTorch 2.5.1。
+- 本机 `torch.backends.mps.is_built()` 与 `torch.backends.mps.is_available()` 均为 True。
+- 需要在不破坏 auto_LiRPA-compatible 稳定环境的前提下，探索 MPS / 更新 PyTorch / future Metal path。
+
+**主要改动**
+- 更新：`scripts/bench_phase7a_shared_crown_path_attribution.py`
+  - `--device` 支持 `mps`。
+  - MPS timing 使用 `torch.mps.synchronize()`。
+  - MPS 首版仅允许 `float32`。
+  - 默认禁止 `PYTORCH_ENABLE_MPS_FALLBACK` silent CPU fallback，可用 `--allow-mps-fallback` 显式 debug。
+  - meta 新增 `device_meta`，记录 MPS built/available/fallback 状态。
+- 更新：`scripts/bench_phase7b_crossover_matrix.py`
+  - 继承同一套 MPS device handling 与 meta。
+- 新增：`environment-macos-arm64-mps-aggressive.yaml`
+  - `python=3.11`
+  - `torch==2.12.1`
+  - `torchvision==0.27.1`
+  - 不安装 / 不强依赖 auto_LiRPA。
+- 新增：`environment-macos-arm64-mps-nightly.yaml`
+  - 使用 PyTorch nightly CPU/MPS wheel index。
+  - 仅用于 op coverage / Metal feasibility，不作为论文主 benchmark。
+- 新增：`scripts/report_mps_op_coverage.py`
+  - 输出 `mps_op_coverage.v1`。
+  - 捕获 workload 成功/失败、异常类型、traceback hash、torch/macOS/MPS/fallback meta。
+- 新增：`tests/test_mps_op_coverage_report.py`
+- 更新：`tests/test_phase7a_pr11_shared_crown_bench.py`、`tests/test_phase7b_crossover_matrix.py`
+  - 验证 `device_meta` schema。
+- 新增：`gemini_doc/change_2026-07-01_phase7b_pr23_mps_aggressive_lane.md`
+
+**结果摘要**
+- 当前稳定环境 PyTorch 2.5.1 的 MPS smoke 已跑通：
+  - 四个 Phase 7B workload 均 `ok`。
+  - `PYTORCH_ENABLE_MPS_FALLBACK` 未启用。
+- aggressive / nightly env 文件已新增但未自动创建，避免本轮下载新 torch wheel 并改变本机 conda 环境状态。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_phase7a_pr11_shared_crown_bench.py tests/test_phase7b_crossover_matrix.py tests/test_mps_op_coverage_report.py`：`12 passed in 2.31s`
+- `conda run --no-capture-output -n boundflow python scripts/report_mps_op_coverage.py --workloads all --scales smoke --policy auto --warmup 0 --iters 1`：通过，`ok=4`、`fail=0`。
+- `conda run --no-capture-output -n boundflow python scripts/bench_phase7b_crossover_matrix.py --device mps --dtype float32 --workloads all --scales smoke --policies structured,dense_barrier,auto --warmup 0 --iters 1`：通过。
+
+---
+
+## 2026-07-01：Phase 7B PR-25A MPS env-var sweep
+
+**动机**
+- PR-23 / 本机测试显示 `torch==2.12.1` MPS 相比 `torch==2.5.1` 有明显绝对耗时下降。
+- 需要进一步判断 PyTorch MPS 专项开关是否能带来额外收益，尤其是 `PYTORCH_MPS_PREFER_METAL` 与 `PYTORCH_MPS_FAST_MATH`。
+- 本轮只做 Mac aggressive lane evidence，不提升 CPU planner，也不把 MPS rule 写入默认 planner。
+
+**主要改动**
+- 新增：`scripts/report_mps_env_var_sweep.py`
+  - 输出 `mps_env_var_sweep.v1`。
+  - 子进程调用 `bench_phase7b_crossover_matrix.py`，确保 MPS env vars 在 `import torch` 前生效。
+  - 支持四个 case：`default`、`prefer_metal`、`fast_math`、`both`。
+  - 默认清除 `PYTORCH_ENABLE_MPS_FALLBACK`。
+  - 支持 `--dry-run`，用于无 MPS 依赖的 schema 测试。
+  - 汇总每个 case 相对 default 的 structured / dense baseline geomean gain。
+- 更新：`scripts/bench_phase7a_shared_crown_path_attribution.py`
+  - `device_meta` 新增 `mps_prefer_metal_env` 与 `mps_fast_math_env`。
+- 新增：`tests/test_mps_env_var_sweep_report.py`
+- 新增：`gemini_doc/change_2026-07-01_phase7b_pr25a_mps_env_var_sweep.md`
+
+**结果摘要**
+- aggressive env：`boundflow-mps-aggressive`
+- torch：`2.12.1`
+- workload：all
+- scale：`smoke`
+- policies：`structured,dense_barrier,auto`
+- warmup / iters：`3 / 5`
+- 输出：`out/phase7b/phase7b_pr25a_mps_env_var_sweep_torch212_smoke_w3i5.json`
+- `ok=4`、`fail=0`、fallback disabled。
+- clean aggressive env 下，`prefer_metal` 是小幅正收益：
+  - structured geomean abs gain vs default：`1.021x`
+  - dense baseline geomean abs gain vs default：`1.020x`
+- `fast_math` 单独收益不明显，且不应在缺少 correctness side check 时进入默认 lane。
+- env-var sweep 没有改变大方向：structured path 仍慢于 dense baseline。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_mps_env_var_sweep_report.py tests/test_phase7b_crossover_matrix.py`：`2 passed in 0.86s`
+- `conda run --no-capture-output -n boundflow-mps-aggressive python scripts/report_mps_env_var_sweep.py --cases all --workloads all --scales smoke --policies structured,dense_barrier,auto --warmup 3 --iters 5`：通过，`ok=4`、`fail=0`。
+
+---
+
+## 2026-07-01：Phase 7B PR-25B MPS prefer-metal larger-scale + guardrails
+
+**动机**
+- PR-25A 在 `smoke` 上观察到 `PYTORCH_MPS_PREFER_METAL=1` 小幅收益，但需要确认 larger scale 是否稳定。
+- 需要补充 default vs prefer-metal 的 correctness guardrails，避免把数值变化误当作纯性能收益。
+
+**主要改动**
+- 新增：`scripts/report_mps_prefer_metal_guardrails.py`
+  - 父进程不 import torch。
+  - 子进程分别在 default 与 `PYTORCH_MPS_PREFER_METAL=1` 下计算 structured bounds。
+  - 比较 bounds `allclose`、certified decision match、fallback disabled、`unknown_materialization == 0`。
+  - 输出 `mps_prefer_metal_guardrails.v1`。
+- 新增：`tests/test_mps_prefer_metal_guardrails.py`
+- 新增：`gemini_doc/change_2026-07-01_phase7b_pr25b_mps_prefer_metal_large_guardrails.md`
+
+**结果摘要**
+- 输出：
+  - `out/phase7b/phase7b_pr25b_mps_prefer_metal_small_bench.json`
+  - `out/phase7b/phase7b_pr25b_mps_prefer_metal_guardrails.json`
+- clean aggressive env 下的 `small,bench` sweep：
+  - default structured/dense geomean：`0.642x`
+  - prefer-metal structured abs gain vs default：`0.996x`
+  - prefer-metal baseline abs gain vs default：`1.003x`
+- guardrails：
+  - `ok=24`
+  - `fail=0`
+  - fallback disabled
+  - `unknown_materialization == 0`
+  - certified decision match 全部通过
+- 结论：`prefer_metal` larger-scale 没有稳定收益，不进入默认 planner / 默认 Mac lane。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_mps_prefer_metal_guardrails.py tests/test_mps_env_var_sweep_report.py`：通过。
+- `conda run --no-capture-output -n boundflow-mps-aggressive python scripts/report_mps_env_var_sweep.py --cases default,prefer_metal --workloads all --scales small,bench --policies structured,dense_barrier,auto --warmup 5 --iters 20`：通过。
+- `conda run --no-capture-output -n boundflow-mps-aggressive python scripts/report_mps_prefer_metal_guardrails.py --workloads all --scales small,bench --policies structured,dense_barrier,auto`：通过。
+
+---
+
+## 2026-07-01：Phase 7B PR-25C aggressive MPS env OpenMP cleanup
+
+**动机**
+- 旧 aggressive env clean `import torch` 会因 OpenMP duplicate runtime abort。
+- 原因是 conda-forge `llvm-openmp/libopenblas-openmp` 与 pip PyTorch wheel 组合冲突。
+
+**主要改动**
+- 更新：`environment-macos-arm64-mps-aggressive.yaml`
+  - conda 只保留 `python=3.11` 和 `pip`。
+  - PyTorch、NumPy、SciPy、Matplotlib、pytest、ONNX 等改走 pip wheel。
+  - 避免 conda-forge openmp/openblas 依赖。
+- 新增：`scripts/report_mps_aggressive_env_health.py`
+  - 检查 clean `import torch`。
+  - 检查 prefer-metal clean import。
+  - 检查是否仍需 `KMP_DUPLICATE_LIB_OK`。
+  - 扫描 conda env 中 openmp/openblas/mkl 相关包。
+  - 输出 `mps_aggressive_env_health.v1`。
+- 新增：`tests/test_mps_aggressive_env_health_report.py`
+- 新增：`gemini_doc/change_2026-07-01_phase7b_pr25c_mps_aggressive_env_health.md`
+
+**结果摘要**
+- 已删除并重建 `boundflow-mps-aggressive`。
+- 输出：`out/phase7b/phase7b_pr25c_mps_aggressive_env_health.json`
+- health summary：
+  - `clean_import_ok=true`
+  - `kmp_workaround_needed=false`
+  - `prefer_metal_clean_import_ok=true`
+  - `detected_packages=[]`
+- 干净 env 下 MPS sweep smoke 通过，不再需要 `KMP_DUPLICATE_LIB_OK`。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_mps_aggressive_env_health_report.py tests/test_mps_prefer_metal_guardrails.py`：通过。
+- `python scripts/report_mps_aggressive_env_health.py --conda-env boundflow-mps-aggressive`：通过。
+
+---
+
+## 2026-07-01：Phase 7B PR-26 MPS dispatch/profile report
+
+**动机**
+- PR-25B 表明 MPS env var 不是主要收益来源。
+- 需要解释 structured path 在 MPS 上仍慢于 dense baseline 的 dispatch/materialization/cache 信号。
+
+**主要改动**
+- 新增：`scripts/report_mps_dispatch_profile.py`
+  - 输出 `mps_dispatch_profile.v1`。
+  - 复用 Phase 7B row collection，整理 materialization/cache/fallback/ReLU pullback dispatch payload。
+  - 支持 `--with-mps-signposts` 使用 `torch.mps.profiler.profile()`。
+  - 支持 `--with-torch-profiler` 输出 CPU dispatch/top-op 文本表。
+- 新增：`tests/test_mps_dispatch_profile_report.py`
+- 新增：`gemini_doc/change_2026-07-01_phase7b_pr26_mps_dispatch_profile.md`
+
+**结果摘要**
+- 输出：`out/phase7b/phase7b_pr26_mps_dispatch_profile_smoke.json`
+- MPS smoke auto policy：
+  - rows：4
+  - `unknown_materialization_total=0`
+  - `materialization_bytes_total=591872`
+  - `cache_hits_total=4`
+  - `cache_misses_total=48`
+- 结论：当前 MPS structured path 问题更接近 materialization/cache miss/dispatch overhead，不是 unknown fallback。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_mps_dispatch_profile_report.py tests/test_mps_aggressive_env_health_report.py`：通过。
+- `conda run --no-capture-output -n boundflow-mps-aggressive python scripts/report_mps_dispatch_profile.py --device mps --workloads all --scales smoke --policy auto --warmup 1 --iters 3`：通过。
+
+---
+
+## 2026-07-01：Phase 7B PR-28 MPS custom Metal kernel feasibility
+
+**动机**
+- PR-26 指向 small-kernel / dispatch / signed elementwise 类成本。
+- 需要先验证 PyTorch 2.12 的 `torch.mps.compile_shader()` 是否能作为 selective Metal lowering 的候选后端。
+
+**主要改动**
+- 新增：`scripts/report_mps_metal_kernel_feasibility.py`
+  - 输出 `mps_metal_kernel_feasibility.v1`。
+  - 编译并测试两个 custom Metal kernels：
+    - `axpy`
+    - `signed_weighted`
+  - 对比 PyTorch MPS eager expression 与 custom Metal kernel。
+  - 记录 p50 latency、speedup、`max_abs_diff`、allclose。
+- 新增：`tests/test_mps_metal_kernel_feasibility.py`
+- 新增：`gemini_doc/change_2026-07-01_phase7b_pr28_mps_metal_kernel_feasibility.md`
+
+**结果摘要**
+- 输出：`out/phase7b/phase7b_pr28_mps_metal_kernel_feasibility.json`
+- allclose：true
+- geomean speedup：`1.075x`
+- best speedup：`1.194x`
+- worst speedup：`0.985x`
+- 结论：custom Metal 有温和但不稳定的单 kernel 收益，适合作为 PR-28B end-to-end guarded lowering 候选，不适合直接重写 runtime。
+
+**验证**
+- `conda run -n boundflow python -m pytest -q tests/test_mps_metal_kernel_feasibility.py tests/test_mps_dispatch_profile_report.py`：通过。
+- `conda run --no-capture-output -n boundflow-mps-aggressive python scripts/report_mps_metal_kernel_feasibility.py --sizes 4096,65536,1048576 --warmup 5 --iters 20`：通过。

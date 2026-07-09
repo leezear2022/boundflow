@@ -4,8 +4,8 @@ import torch
 from boundflow.ir.task import BFTaskModule, BoundTask, TaskKind, TaskOp
 from boundflow.runtime.alpha_beta_crown import check_first_layer_infeasible_split
 from boundflow.runtime.crown_ibp import run_crown_ibp_mlp
-from boundflow.runtime.linear_operator import DenseLinearOperator, LinearOperator
-from boundflow.runtime.perturbation import LpBallPerturbation
+from boundflow.runtime.linear_operator import DenseLinearOperator, LinearOperator, collect_operator_attribution
+from boundflow.runtime.perturbation import LpBallPerturbation, final_concretization_policy
 from boundflow.runtime.task_executor import InputSpec
 
 
@@ -72,6 +72,26 @@ def test_dense_linear_operator_round_trip_dense() -> None:
     coeffs = torch.randn(2, 3, 4, dtype=torch.float32)
     op = DenseLinearOperator(coeffs)
     assert torch.equal(op.to_dense(), coeffs)
+
+
+def test_final_concretization_dense_barrier_policy_matches_structured_and_is_attributed() -> None:
+    torch.manual_seed(0)
+    base = DenseLinearOperator(torch.randn(2, 3, 5, dtype=torch.float32))
+    op = base.matmul_right(torch.randn(5, 4, dtype=torch.float32))
+    center = torch.randn(2, 4, dtype=torch.float32)
+    bias = torch.randn(2, 3, dtype=torch.float32)
+    perturbation = LpBallPerturbation(p="inf", eps=0.2)
+
+    lb_structured, ub_structured = perturbation.concretize_affine(center=center, A=op, b=bias)
+    with collect_operator_attribution(path_kind="unit", phase="structured_execution") as trace:
+        with final_concretization_policy("dense_barrier"):
+            lb_dense, ub_dense = perturbation.concretize_affine(center=center, A=op, b=bias)
+
+    assert torch.allclose(lb_dense, lb_structured, atol=1e-5, rtol=1e-5)
+    assert torch.allclose(ub_dense, ub_structured, atol=1e-5, rtol=1e-5)
+    payload = trace.to_jsonable()
+    assert payload["materialization"]["by_reason"]["final_bound_dense_barrier"]["calls"] > 0
+    assert payload["materialization"]["by_reason"].get("unknown_materialization", {}).get("calls", 0) == 0
 
 
 def test_concretize_affine_rejects_center_shape_mismatch() -> None:

@@ -1,12 +1,35 @@
 from __future__ import annotations
 
+import contextlib
+import contextvars
 from dataclasses import dataclass
-from typing import Literal, Protocol, Tuple, Union
+from typing import Iterator, Literal, Protocol, Tuple, Union
 
 import torch
 
 from ..ir.bound import DomainState
-from .linear_operator import LinearOperator, as_linear_operator
+from .linear_operator import DenseLinearOperator, LinearOperator, as_linear_operator, operator_attribution_reason
+
+
+_FINAL_CONCRETIZATION_POLICIES = {"structured", "dense_barrier"}
+_FINAL_CONCRETIZATION_POLICY: contextvars.ContextVar[str] = contextvars.ContextVar(
+    "boundflow_final_concretization_policy",
+    default="structured",
+)
+
+
+@contextlib.contextmanager
+def final_concretization_policy(policy: str = "structured") -> Iterator[None]:
+    """Select the exact final affine concretization strategy for the current context."""
+
+    value = str(policy)
+    if value not in _FINAL_CONCRETIZATION_POLICIES:
+        raise ValueError(f"unsupported final concretization policy: {policy!r}")
+    token = _FINAL_CONCRETIZATION_POLICY.set(value)
+    try:
+        yield
+    finally:
+        _FINAL_CONCRETIZATION_POLICY.reset(token)
 
 
 class PerturbationSet(Protocol):
@@ -158,15 +181,22 @@ class LpBallPerturbation(PerturbationSet):
         p = self._normalize_p()
         eps = float(self.eps)
 
-        out_center = op.center_term(center)
-        if p == "inf":
-            row_norm = op.row_abs_sum()
-        elif p == "2":
-            row_norm = op.row_l2_norm()
-        elif p == "1":
-            row_norm = op.row_abs_max()
-        else:
-            raise AssertionError(f"unreachable p: {p}")
+        with operator_attribution_reason("final_bound_concretization"):
+            effective_op = op
+            if _FINAL_CONCRETIZATION_POLICY.get() == "dense_barrier" and not isinstance(op, DenseLinearOperator):
+                with operator_attribution_reason("final_bound_dense_barrier"):
+                    dense = op.to_dense()
+                effective_op = DenseLinearOperator(dense, input_shape=op.input_shape)
+
+            out_center = effective_op.center_term(center)
+            if p == "inf":
+                row_norm = effective_op.row_abs_sum()
+            elif p == "2":
+                row_norm = effective_op.row_l2_norm()
+            elif p == "1":
+                row_norm = effective_op.row_abs_max()
+            else:
+                raise AssertionError(f"unreachable p: {p}")
         deviation = eps * row_norm
         lb = out_center - deviation
         ub = out_center + deviation

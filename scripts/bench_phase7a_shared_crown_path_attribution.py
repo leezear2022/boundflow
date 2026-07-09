@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import json
+import os
 import subprocess
 import sys
 import time
@@ -13,10 +14,18 @@ import torch
 
 from boundflow.domains.interval import IntervalState
 from boundflow.ir.task import BFTaskModule, BoundTask, TaskKind, TaskOp
+from boundflow.runtime.bound_planner import (
+    FinalConcretizationPolicy,
+    FinalConcretizationRequest,
+    phase7a_capability_table_jsonable,
+    phase7b_cost_model_rules_jsonable,
+    plan_phase7b_shared_crown,
+)
 from boundflow.runtime import crown_ibp as crown_mod
 from boundflow.runtime import linear_operator as linear_op_mod
 from boundflow.runtime.crown_ibp import AffineBackwardState, get_crown_ibp_mlp_stats, run_crown_ibp_mlp
 from boundflow.runtime.linear_operator import DenseLinearOperator
+from boundflow.runtime.perturbation import final_concretization_policy
 from boundflow.runtime.task_executor import InputSpec
 
 _TimerMode = Literal["perf_counter", "torch_benchmark"]
@@ -33,6 +42,7 @@ class Row:
     speedup: float
     counts_structured: Dict[str, Any]
     counts_baseline: Dict[str, Any]
+    planner_decision: Dict[str, Any]
 
 
 @dataclass
@@ -43,9 +53,10 @@ class _Counters:
     split_pos_neg_dense_by_op: Dict[str, int] = field(default_factory=dict)
     dense_relu_barrier_calls: int = 0
     dense_layout_barrier_calls: int = 0
+    operator_attribution: Optional[Dict[str, Any]] = None
 
     def to_jsonable(self) -> Dict[str, Any]:
-        return {
+        out = {
             "relu_backward_calls": int(self.relu_backward_calls),
             "permute_backward_calls": int(self.permute_backward_calls),
             "split_pos_neg_dense_total": int(self.split_pos_neg_dense_total),
@@ -55,6 +66,9 @@ class _Counters:
             "dense_relu_barrier_calls": int(self.dense_relu_barrier_calls),
             "dense_layout_barrier_calls": int(self.dense_layout_barrier_calls),
         }
+        if self.operator_attribution is not None:
+            out["operator_attribution"] = self.operator_attribution
+        return out
 
 
 def _eprint(msg: str) -> None:
@@ -69,29 +83,33 @@ def _percentile_ms(samples_s: Iterable[float], q: float) -> float:
     return float(xs[k]) * 1000.0
 
 
-def _time_call_perf_counter(fn: Callable[[], None], *, warmup: int, iters: int, sync_cuda: bool) -> float:
+def _sync_device(device: torch.device) -> None:
+    if device.type == "cuda":
+        torch.cuda.synchronize()
+    elif device.type == "mps":
+        torch.mps.synchronize()
+
+
+def _time_call_perf_counter(fn: Callable[[], None], *, warmup: int, iters: int, device: torch.device) -> float:
     with torch.inference_mode():
         for _ in range(int(warmup)):
             fn()
-        if sync_cuda:
-            torch.cuda.synchronize()
+        _sync_device(device)
         times: List[float] = []
         for _ in range(int(iters)):
             t0 = time.perf_counter()
             fn()
-            if sync_cuda:
-                torch.cuda.synchronize()
+            _sync_device(device)
             times.append(time.perf_counter() - t0)
     return _percentile_ms(times, 0.5)
 
 
-def _time_call_torch_benchmark(fn: Callable[[], None], *, warmup: int, sync_cuda: bool, min_run_time_s: float) -> float:
+def _time_call_torch_benchmark(fn: Callable[[], None], *, warmup: int, device: torch.device, min_run_time_s: float) -> float:
     import torch.utils.benchmark as benchmark
 
     def wrapped() -> None:
         fn()
-        if sync_cuda:
-            torch.cuda.synchronize()
+        _sync_device(device)
 
     with torch.inference_mode():
         for _ in range(int(warmup)):
@@ -110,16 +128,16 @@ def _time_variant(
     iters: int,
     timer: _TimerMode,
     torch_benchmark_min_run_time_s: float,
-    sync_cuda: bool,
+    device: torch.device,
 ) -> float:
     if timer == "torch_benchmark":
         return _time_call_torch_benchmark(
             fn,
             warmup=warmup,
-            sync_cuda=sync_cuda,
+            device=device,
             min_run_time_s=float(torch_benchmark_min_run_time_s),
         )
-    return _time_call_perf_counter(fn, warmup=warmup, iters=iters, sync_cuda=sync_cuda)
+    return _time_call_perf_counter(fn, warmup=warmup, iters=iters, device=device)
 
 
 def _git_sha() -> str:
@@ -139,7 +157,51 @@ def _git_sha() -> str:
 def _device_name(device: torch.device) -> str:
     if device.type == "cuda":
         return str(torch.cuda.get_device_name(device))
+    if device.type == "mps":
+        return "apple_mps"
     return "cpu"
+
+
+def _mps_built() -> bool:
+    return bool(hasattr(torch.backends, "mps") and torch.backends.mps.is_built())
+
+
+def _mps_available() -> bool:
+    return bool(hasattr(torch.backends, "mps") and torch.backends.mps.is_available())
+
+
+def _mps_fallback_enabled() -> bool:
+    return str(os.environ.get("PYTORCH_ENABLE_MPS_FALLBACK", "")).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _make_device(raw: str, *, dtype_name: str, allow_mps_fallback: bool = False) -> torch.device:
+    device = torch.device(raw)
+    if device.type == "cuda" and not torch.cuda.is_available():
+        raise RuntimeError("CUDA requested but not available")
+    if device.type == "mps":
+        if not _mps_built():
+            raise RuntimeError("MPS requested but this PyTorch build does not include MPS")
+        if not _mps_available():
+            raise RuntimeError("MPS requested but not available on this machine")
+        if str(dtype_name) != "float32":
+            raise RuntimeError("MPS benchmark lane currently supports only --dtype float32")
+        if _mps_fallback_enabled() and not bool(allow_mps_fallback):
+            raise RuntimeError(
+                "PYTORCH_ENABLE_MPS_FALLBACK is enabled; rerun with fallback disabled or pass --allow-mps-fallback"
+            )
+    return device
+
+
+def _device_meta(device: torch.device, *, allow_mps_fallback: bool = False) -> Dict[str, Any]:
+    return {
+        "mps_built": _mps_built(),
+        "mps_available": _mps_available(),
+        "mps_fallback_env": os.environ.get("PYTORCH_ENABLE_MPS_FALLBACK"),
+        "mps_fallback_enabled": _mps_fallback_enabled(),
+        "mps_fallback_allowed": bool(allow_mps_fallback),
+        "mps_prefer_metal_env": os.environ.get("PYTORCH_MPS_PREFER_METAL"),
+        "mps_fast_math_env": os.environ.get("PYTORCH_MPS_FAST_MATH"),
+    }
 
 
 def _dense_relu_barrier_step(
@@ -163,8 +225,9 @@ def _dense_relu_barrier_step(
             f"A_u.input_shape={state.A_u.input_shape} A_l.input_shape={state.A_l.input_shape}"
         )
 
-    A_u = state.A_u.to_dense()
-    A_l = state.A_l.to_dense()
+    with linear_op_mod.operator_attribution_reason("dense_baseline_materialization"):
+        A_u = state.A_u.to_dense()
+        A_l = state.A_l.to_dense()
     b_u = state.b_u.clone()
     b_l = state.b_l.clone()
 
@@ -244,9 +307,12 @@ def _dense_layout_barrier_step(
     )
     scatter_index = torch.empty_like(gather_index)
     scatter_index[gather_index] = torch.arange(int(gather_index.numel()), device=device, dtype=torch.long)
+    with linear_op_mod.operator_attribution_reason("dense_baseline_materialization"):
+        A_u = base.A_u.to_dense().index_select(2, scatter_index)
+        A_l = base.A_l.to_dense().index_select(2, scatter_index)
     return AffineBackwardState(
-        A_u=DenseLinearOperator(base.A_u.to_dense().index_select(2, scatter_index), input_shape=input_shape),
-        A_l=DenseLinearOperator(base.A_l.to_dense().index_select(2, scatter_index), input_shape=input_shape),
+        A_u=DenseLinearOperator(A_u, input_shape=input_shape),
+        A_l=DenseLinearOperator(A_l, input_shape=input_shape),
         b_u=base.b_u,
         b_l=base.b_l,
     )
@@ -301,17 +367,44 @@ def _patch_variant(variant: _Variant, counts: Optional[_Counters] = None):
         crown_mod._backprop_permute_step = orig_permute_step
 
 
-def _run_variant_once(module: BFTaskModule, spec: InputSpec, *, variant: _Variant) -> IntervalState:
-    with _patch_variant(variant):
+def _run_variant_once(
+    module: BFTaskModule,
+    spec: InputSpec,
+    *,
+    variant: _Variant,
+    final_policy: FinalConcretizationPolicy = "structured",
+) -> IntervalState:
+    with final_concretization_policy(final_policy), _patch_variant(variant):
         with torch.inference_mode():
             return run_crown_ibp_mlp(module, spec)
 
 
-def _collect_counts(module: BFTaskModule, spec: InputSpec, *, variant: _Variant) -> Dict[str, Any]:
+def _attribution_path_kind(variant: _Variant) -> str:
+    return "structured" if variant == "structured" else "dense_baseline"
+
+
+def _attribution_phase(variant: _Variant) -> str:
+    return "structured_execution" if variant == "structured" else "benchmark_baseline"
+
+
+def _collect_counts(
+    module: BFTaskModule,
+    spec: InputSpec,
+    *,
+    variant: _Variant,
+    use_dense_cache: bool = True,
+    final_policy: FinalConcretizationPolicy = "structured",
+) -> Dict[str, Any]:
     counts = _Counters()
-    with _patch_variant(variant, counts=counts):
-        with torch.inference_mode():
-            _ = run_crown_ibp_mlp(module, spec)
+    with linear_op_mod.collect_operator_attribution(
+        path_kind=_attribution_path_kind(variant),
+        phase=_attribution_phase(variant),
+    ) as trace:
+        with final_concretization_policy(final_policy), linear_op_mod.operator_dense_cache(enabled=bool(use_dense_cache)):
+            with _patch_variant(variant, counts=counts):
+                with torch.inference_mode():
+                    _ = run_crown_ibp_mlp(module, spec)
+        counts.operator_attribution = trace.to_jsonable()
     return counts.to_jsonable()
 
 
@@ -321,6 +414,8 @@ def _make_relu_heavy_mlp_case(*, device: torch.device, dtype: torch.dtype, profi
         torch.cuda.manual_seed_all(int(seed))
     if profile == "smoke":
         batch, in_dim, hidden_dims, out_dim, eps = 4, 32, (64, 64, 64), 16, 0.05
+    elif profile == "small":
+        batch, in_dim, hidden_dims, out_dim, eps = 8, 64, (128, 128, 128), 32, 0.04
     else:
         batch, in_dim, hidden_dims, out_dim, eps = 32, 256, (512, 512, 512, 512), 128, 0.03
 
@@ -361,6 +456,8 @@ def _make_residual_relu_case(*, device: torch.device, dtype: torch.dtype, profil
         torch.cuda.manual_seed_all(int(seed))
     if profile == "smoke":
         batch, dim, hidden, out_dim, eps = 4, 48, 48, 16, 0.05
+    elif profile == "small":
+        batch, dim, hidden, out_dim, eps = 8, 96, 96, 32, 0.04
     else:
         batch, dim, hidden, out_dim, eps = 32, 256, 256, 128, 0.03
 
@@ -397,6 +494,8 @@ def _make_concat_relu_case(*, device: torch.device, dtype: torch.dtype, profile:
         torch.cuda.manual_seed_all(int(seed))
     if profile == "smoke":
         batch, in_dim, branch_dim, mid_dim, out_dim, eps = 4, 32, 24, 32, 16, 0.05
+    elif profile == "small":
+        batch, in_dim, branch_dim, mid_dim, out_dim, eps = 8, 64, 48, 64, 32, 0.04
     else:
         batch, in_dim, branch_dim, mid_dim, out_dim, eps = 32, 256, 192, 256, 128, 0.03
 
@@ -437,6 +536,8 @@ def _make_permute_reshape_case(*, device: torch.device, dtype: torch.dtype, prof
         torch.cuda.manual_seed_all(int(seed))
     if profile == "smoke":
         batch, channels, height, width, out_dim, eps = 4, 2, 4, 4, 16, 0.05
+    elif profile == "small":
+        batch, channels, height, width, out_dim, eps = 8, 4, 8, 8, 64, 0.04
     else:
         batch, channels, height, width, out_dim, eps = 32, 8, 16, 16, 256, 0.03
     flat_dim = int(channels * height * width)
@@ -523,6 +624,7 @@ def _collect_row(
     iters: int,
     timer: _TimerMode,
     torch_benchmark_min_run_time_s: float,
+    final_policy_request: FinalConcretizationRequest,
 ) -> Row:
     compare_target, module, spec = _build_case(
         workload,
@@ -532,25 +634,44 @@ def _collect_row(
         seed=seed,
     )
     baseline_variant = _baseline_variant(compare_target)
-    structured_counts = _collect_counts(module, spec, variant="structured")
-    baseline_counts = _collect_counts(module, spec, variant=baseline_variant)
+    planner_decision = plan_phase7b_shared_crown(
+        compare_target=compare_target,
+        workload=workload,
+        scale_id=profile,
+        device=str(device),
+        requested_final_concretization_policy=final_policy_request,
+    )
+    resolved_final_policy = planner_decision.final_concretization_policy
+    structured_counts = _collect_counts(
+        module,
+        spec,
+        variant="structured",
+        use_dense_cache=planner_decision.use_dense_cache,
+        final_policy=resolved_final_policy,
+    )
+    baseline_counts = _collect_counts(
+        module,
+        spec,
+        variant=baseline_variant,
+        use_dense_cache=planner_decision.use_dense_cache,
+        final_policy=resolved_final_policy,
+    )
 
-    sync_cuda = device.type == "cuda"
     structured_ms = _time_variant(
-        lambda: _run_variant_once(module, spec, variant="structured"),
+        lambda: _run_variant_once(module, spec, variant="structured", final_policy=resolved_final_policy),
         warmup=warmup,
         iters=iters,
         timer=timer,
         torch_benchmark_min_run_time_s=float(torch_benchmark_min_run_time_s),
-        sync_cuda=sync_cuda,
+        device=device,
     )
     baseline_ms = _time_variant(
-        lambda: _run_variant_once(module, spec, variant=baseline_variant),
+        lambda: _run_variant_once(module, spec, variant=baseline_variant, final_policy=resolved_final_policy),
         warmup=warmup,
         iters=iters,
         timer=timer,
         torch_benchmark_min_run_time_s=float(torch_benchmark_min_run_time_s),
-        sync_cuda=sync_cuda,
+        device=device,
     )
     speedup = float("inf") if structured_ms == 0.0 else float(baseline_ms / structured_ms)
     _eprint(
@@ -565,6 +686,7 @@ def _collect_row(
         speedup=float(speedup),
         counts_structured=structured_counts,
         counts_baseline=baseline_counts,
+        planner_decision=planner_decision.to_jsonable(),
     )
 
 
@@ -572,21 +694,21 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(
         description="Phase 7A PR-11: benchmark structured shared CROWN path attribution."
     )
-    parser.add_argument("--device", type=str, default="cpu", choices=["cpu", "cuda"])
+    parser.add_argument("--device", type=str, default="cpu", choices=["cpu", "cuda", "mps"])
     parser.add_argument("--dtype", type=str, default="float32", choices=["float32", "float64"])
-    parser.add_argument("--profile", type=str, default="bench", choices=["smoke", "bench"])
+    parser.add_argument("--profile", type=str, default="bench", choices=["smoke", "small", "bench"])
     parser.add_argument("--workloads", type=str, default="all")
     parser.add_argument("--warmup", type=int, default=5)
     parser.add_argument("--iters", type=int, default=20)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--timer", type=str, default="perf_counter", choices=["perf_counter", "torch_benchmark"])
     parser.add_argument("--torch-benchmark-min-run-time-s", type=float, default=0.2)
+    parser.add_argument("--final-concretization-policy", type=str, default="structured", choices=["structured", "dense_barrier", "auto"])
+    parser.add_argument("--allow-mps-fallback", action="store_true")
     args = parser.parse_args(argv)
 
-    device = torch.device(args.device)
-    if device.type == "cuda" and not torch.cuda.is_available():
-        raise RuntimeError("CUDA requested but not available")
     dtype = torch.float32 if args.dtype == "float32" else torch.float64
+    device = _make_device(str(args.device), dtype_name=str(args.dtype), allow_mps_fallback=bool(args.allow_mps_fallback))
     workloads = _parse_workloads(args.workloads)
     timer: _TimerMode = args.timer
 
@@ -603,6 +725,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 iters=int(args.iters),
                 timer=timer,
                 torch_benchmark_min_run_time_s=float(args.torch_benchmark_min_run_time_s),
+                final_policy_request=args.final_concretization_policy,
             )
         )
 
@@ -614,10 +737,14 @@ def main(argv: Optional[List[str]] = None) -> int:
             "torch_version": torch.__version__,
             "device": str(device),
             "device_name": _device_name(device),
+            "device_meta": _device_meta(device, allow_mps_fallback=bool(args.allow_mps_fallback)),
             "dtype": str(dtype).replace("torch.", ""),
             "profile": str(args.profile),
             "workloads": workloads,
             "timer": timer,
+            "final_concretization_policy": str(args.final_concretization_policy),
+            "capability_table": phase7a_capability_table_jsonable(),
+            "cost_model_rules": phase7b_cost_model_rules_jsonable(),
             "warmup": int(args.warmup),
             "iters": int(args.iters),
             "seed": int(args.seed),

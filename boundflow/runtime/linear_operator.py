@@ -1,11 +1,302 @@
 from __future__ import annotations
 
+import contextlib
+import contextvars
 import math
 from dataclasses import dataclass, field
-from typing import Protocol, Sequence, runtime_checkable
+from typing import Any, Callable, Iterator, Protocol, Sequence, runtime_checkable
 
 import torch
 import torch.nn.functional as F
+
+
+_ATTRIBUTION_REASONS = {
+    "explicit_split_pos_neg_dense",
+    "right_matmul_exact_sign_split_required",
+    "slice_pullback_materialize",
+    "unsupported_structured_relu_pullback",
+    "broadcast_materialization",
+    "dense_reference_check",
+    "dense_baseline_materialization",
+    "final_bound_dense_barrier",
+    "final_bound_concretization",
+    "unknown_materialization",
+}
+
+
+def _new_counter() -> dict[str, int]:
+    return {
+        "calls": 0,
+        "total_numel": 0,
+        "total_bytes": 0,
+    }
+
+
+@dataclass
+class _OperatorAttributionTrace:
+    path_kind: str
+    relu_pullback_by_op: dict[str, dict[str, Any]] = field(default_factory=dict)
+    materialization_events: list[dict[str, Any]] = field(default_factory=list)
+    materialization_by_phase: dict[str, dict[str, int]] = field(default_factory=dict)
+    materialization_by_op: dict[str, dict[str, int]] = field(default_factory=dict)
+    materialization_by_reason: dict[str, dict[str, int]] = field(default_factory=dict)
+    fallback_by_reason: dict[str, int] = field(default_factory=dict)
+    fallback_by_op: dict[str, dict[str, int]] = field(default_factory=dict)
+    cache_by_op: dict[str, dict[str, int]] = field(default_factory=dict)
+    cache_by_reason: dict[str, dict[str, int]] = field(default_factory=dict)
+
+    def record_relu_pullback(self, op: "LinearOperator", *, wrapper_created: int = 0) -> None:
+        op_name = type(op).__name__
+        item = self.relu_pullback_by_op.setdefault(
+            op_name,
+            {
+                "calls": 0,
+                "wrapper_created": 0,
+                "operator_depth_total": 0,
+                "operator_depth_max": 0,
+            },
+        )
+        depth = _operator_depth(op)
+        item["calls"] += 1
+        item["wrapper_created"] += int(wrapper_created)
+        item["operator_depth_total"] += int(depth)
+        item["operator_depth_max"] = max(int(item["operator_depth_max"]), int(depth))
+
+    def record_materialization(
+        self,
+        op: "LinearOperator",
+        tensor: torch.Tensor,
+        *,
+        phase: str,
+        reason: str,
+    ) -> None:
+        reason = reason if reason in _ATTRIBUTION_REASONS else "unknown_materialization"
+        shape = [int(dim) for dim in tensor.shape]
+        numel = int(tensor.numel())
+        nbytes = int(numel * tensor.element_size())
+        op_name = type(op).__name__
+        event = {
+            "op": op_name,
+            "shape": shape,
+            "numel": numel,
+            "bytes": nbytes,
+            "phase": str(phase),
+            "reason": reason,
+        }
+        self.materialization_events.append(event)
+        for table, key in (
+            (self.materialization_by_phase, str(phase)),
+            (self.materialization_by_op, op_name),
+            (self.materialization_by_reason, reason),
+        ):
+            item = table.setdefault(key, _new_counter())
+            item["calls"] += 1
+            item["total_numel"] += numel
+            item["total_bytes"] += nbytes
+
+    def record_fallback(self, op: "LinearOperator", *, reason: str) -> None:
+        reason = reason if reason in _ATTRIBUTION_REASONS else "unknown_materialization"
+        op_name = type(op).__name__
+        self.fallback_by_reason[reason] = self.fallback_by_reason.get(reason, 0) + 1
+        per_op = self.fallback_by_op.setdefault(op_name, {})
+        per_op[reason] = per_op.get(reason, 0) + 1
+
+    def record_cache(self, op: "LinearOperator", *, hit: bool, reason: str) -> None:
+        reason = reason if reason in _ATTRIBUTION_REASONS else "unknown_materialization"
+        op_name = type(op).__name__
+        field_name = "hits" if bool(hit) else "misses"
+        for table, key in ((self.cache_by_op, op_name), (self.cache_by_reason, reason)):
+            item = table.setdefault(key, {"hits": 0, "misses": 0})
+            item[field_name] += 1
+
+    def to_jsonable(self) -> dict[str, Any]:
+        total_numel = sum(int(item["total_numel"]) for item in self.materialization_by_reason.values())
+        total_bytes = sum(int(item["total_bytes"]) for item in self.materialization_by_reason.values())
+        cache_hits = sum(int(item["hits"]) for item in self.cache_by_op.values())
+        cache_misses = sum(int(item["misses"]) for item in self.cache_by_op.values())
+        return {
+            "schema_version": 1,
+            "path_kind": self.path_kind,
+            "relu_pullback": {
+                "total_calls": sum(int(item["calls"]) for item in self.relu_pullback_by_op.values()),
+                "by_op": {k: dict(v) for k, v in sorted(self.relu_pullback_by_op.items())},
+            },
+            "materialization": {
+                "total_numel": int(total_numel),
+                "total_bytes": int(total_bytes),
+                "events": list(self.materialization_events),
+                "by_phase": {k: dict(v) for k, v in sorted(self.materialization_by_phase.items())},
+                "by_op": {k: dict(v) for k, v in sorted(self.materialization_by_op.items())},
+                "by_reason": {k: dict(v) for k, v in sorted(self.materialization_by_reason.items())},
+            },
+            "fallback": {
+                "by_reason": dict(sorted(self.fallback_by_reason.items())),
+                "by_op": {k: dict(sorted(v.items())) for k, v in sorted(self.fallback_by_op.items())},
+            },
+            "cache": {
+                "hits": int(cache_hits),
+                "misses": int(cache_misses),
+                "by_op": {k: dict(v) for k, v in sorted(self.cache_by_op.items())},
+                "by_reason": {k: dict(v) for k, v in sorted(self.cache_by_reason.items())},
+            },
+        }
+
+
+_ATTRIBUTION_TRACE: contextvars.ContextVar[_OperatorAttributionTrace | None] = contextvars.ContextVar(
+    "boundflow_operator_attribution_trace",
+    default=None,
+)
+_ATTRIBUTION_PHASE: contextvars.ContextVar[str] = contextvars.ContextVar(
+    "boundflow_operator_attribution_phase",
+    default="structured_execution",
+)
+_ATTRIBUTION_REASON: contextvars.ContextVar[str] = contextvars.ContextVar(
+    "boundflow_operator_attribution_reason",
+    default="unknown_materialization",
+)
+_DENSE_CACHE_DISABLED = object()
+_DENSE_CACHE: contextvars.ContextVar[
+    dict[tuple[Any, ...], tuple["LinearOperator", torch.Tensor]] | object | None
+] = contextvars.ContextVar(
+    "boundflow_operator_dense_cache",
+    default=None,
+)
+
+
+@contextlib.contextmanager
+def collect_operator_attribution(
+    *,
+    path_kind: str,
+    phase: str = "structured_execution",
+) -> Iterator[_OperatorAttributionTrace]:
+    """Collect opt-in operator attribution without changing execution semantics."""
+
+    trace = _OperatorAttributionTrace(path_kind=str(path_kind))
+    trace_token = _ATTRIBUTION_TRACE.set(trace)
+    phase_token = _ATTRIBUTION_PHASE.set(str(phase))
+    reason_token = _ATTRIBUTION_REASON.set("unknown_materialization")
+    try:
+        yield trace
+    finally:
+        _ATTRIBUTION_REASON.reset(reason_token)
+        _ATTRIBUTION_PHASE.reset(phase_token)
+        _ATTRIBUTION_TRACE.reset(trace_token)
+
+
+@contextlib.contextmanager
+def _attribution_reason(reason: str) -> Iterator[None]:
+    token = _ATTRIBUTION_REASON.set(reason if reason in _ATTRIBUTION_REASONS else "unknown_materialization")
+    try:
+        yield
+    finally:
+        _ATTRIBUTION_REASON.reset(token)
+
+
+operator_attribution_reason = _attribution_reason
+
+
+@contextlib.contextmanager
+def operator_dense_cache(
+    *,
+    enabled: bool = True,
+) -> Iterator[dict[tuple[Any, ...], tuple["LinearOperator", torch.Tensor]] | None]:
+    """Enable a run-local dense materialization cache for operator `to_dense()` calls."""
+
+    current = _DENSE_CACHE.get()
+    if current is not None:
+        yield current if isinstance(current, dict) else None
+        return
+    if not enabled:
+        token = _DENSE_CACHE.set(_DENSE_CACHE_DISABLED)
+        try:
+            yield None
+        finally:
+            _DENSE_CACHE.reset(token)
+        return
+    cache: dict[tuple[Any, ...], tuple["LinearOperator", torch.Tensor]] = {}
+    token = _DENSE_CACHE.set(cache)
+    try:
+        yield cache
+    finally:
+        _DENSE_CACHE.reset(token)
+
+
+def _current_attribution_trace() -> _OperatorAttributionTrace | None:
+    return _ATTRIBUTION_TRACE.get()
+
+
+def _record_relu_pullback(op: "LinearOperator", *, wrapper_created: int = 0) -> None:
+    trace = _current_attribution_trace()
+    if trace is not None:
+        trace.record_relu_pullback(op, wrapper_created=wrapper_created)
+
+
+def _record_materialization(
+    op: "LinearOperator",
+    tensor: torch.Tensor,
+    *,
+    reason: str | None = None,
+) -> None:
+    trace = _current_attribution_trace()
+    if trace is None:
+        return
+    trace.record_materialization(
+        op,
+        tensor,
+        phase=_ATTRIBUTION_PHASE.get(),
+        reason=reason if reason is not None else _ATTRIBUTION_REASON.get(),
+    )
+
+
+def _record_fallback(op: "LinearOperator", *, reason: str) -> None:
+    trace = _current_attribution_trace()
+    if trace is not None:
+        trace.record_fallback(op, reason=reason)
+
+
+def _record_cache(op: "LinearOperator", *, hit: bool, reason: str) -> None:
+    trace = _current_attribution_trace()
+    if trace is not None:
+        trace.record_cache(op, hit=hit, reason=reason)
+
+
+def _dense_cache_key(op: "LinearOperator") -> tuple[Any, ...]:
+    return (
+        id(op),
+        type(op).__name__,
+        tuple(int(dim) for dim in op.shape),
+        tuple(int(dim) for dim in op.input_shape),
+        str(op.dtype),
+        str(op.device),
+    )
+
+
+def _cached_to_dense(op: "LinearOperator", compute: Callable[[], torch.Tensor]) -> torch.Tensor:
+    cache = _DENSE_CACHE.get()
+    if not isinstance(cache, dict):
+        out = compute()
+        _record_materialization(op, out)
+        return out
+    reason = _ATTRIBUTION_REASON.get()
+    key = _dense_cache_key(op)
+    cached = cache.get(key)
+    if cached is not None:
+        _record_cache(op, hit=True, reason=reason)
+        return cached[1]
+    _record_cache(op, hit=False, reason=reason)
+    out = compute()
+    cache[key] = (op, out)
+    _record_materialization(op, out)
+    return out
+
+
+def _operator_depth(op: "LinearOperator") -> int:
+    if isinstance(op, AddLinearOperator):
+        return 1 + max(_operator_depth(op.lhs), _operator_depth(op.rhs))
+    base = getattr(op, "base", None)
+    if isinstance(base, LinearOperator):
+        return 1 + _operator_depth(base)
+    return 1
 
 
 def _prod(shape: Sequence[int]) -> int:
@@ -310,7 +601,9 @@ def _slice_rows(op: LinearOperator, *, start: int, stop: int) -> torch.Tensor:
 
 
 def _split_pos_neg_dense(op: LinearOperator) -> tuple["DenseLinearOperator", "DenseLinearOperator"]:
-    dense = op.to_dense().reshape(int(op.shape[0]), int(op.spec_dim), *op.input_shape)
+    _record_fallback(op, reason="explicit_split_pos_neg_dense")
+    with _attribution_reason("explicit_split_pos_neg_dense"):
+        dense = op.to_dense().reshape(int(op.shape[0]), int(op.spec_dim), *op.input_shape)
     return (
         DenseLinearOperator(dense.clamp_min(0.0), input_shape=op.input_shape),
         DenseLinearOperator(dense.clamp_max(0.0), input_shape=op.input_shape),
@@ -381,6 +674,7 @@ def _default_relu_relax_pullback(
     pos_bias: torch.Tensor | float | int,
     neg_bias: torch.Tensor | float | int,
 ) -> tuple["LinearOperator", torch.Tensor]:
+    _record_relu_pullback(self, wrapper_created=3)
     return _relu_relax_pullback_via_split(
         self,
         pos_slope=pos_slope,
@@ -755,6 +1049,7 @@ class RightMatmulLinearOperator:
         pos_bias: torch.Tensor | float | int,
         neg_bias: torch.Tensor | float | int,
     ) -> tuple[LinearOperator, torch.Tensor]:
+        _record_relu_pullback(self, wrapper_created=3)
         batch = int(self.shape[0])
         input_shape = tuple(int(dim) for dim in self.input_shape)
         pos_slope_flat = _coerce_per_input_tensor(
@@ -793,7 +1088,9 @@ class RightMatmulLinearOperator:
             name="neg_bias",
             require_nonnegative=True,
         )
-        dense = self.to_dense()
+        _record_fallback(self, reason="right_matmul_exact_sign_split_required")
+        with _attribution_reason("right_matmul_exact_sign_split_required"):
+            dense = self.to_dense()
         nonnegative = dense >= 0.0
         out_dense = torch.where(
             nonnegative,
@@ -810,7 +1107,7 @@ class RightMatmulLinearOperator:
         return pos_out.add(neg_out), delta_b
 
     def to_dense(self) -> torch.Tensor:
-        return torch.einsum("bko,oi->bki", self.base.to_dense(), self.rhs)
+        return _cached_to_dense(self, lambda: torch.einsum("bko,oi->bki", self.base.to_dense(), self.rhs))
 
 
 @dataclass(frozen=True)
@@ -1107,7 +1404,9 @@ class ReindexInputLinearOperator:
         )
 
     def to_dense(self) -> torch.Tensor:
-        return self.base.to_dense().index_select(2, self.scatter_index)
+        out = self.base.to_dense().index_select(2, self.scatter_index)
+        _record_materialization(self, out)
+        return out
 
 
 @dataclass(frozen=True)
@@ -1317,7 +1616,9 @@ class Conv2dLinearOperator:
             dilation=self.dilation,
             groups=self.groups,
         )
-        return pieces.view(int(self.shape[0]), int(self.spec_dim), -1)
+        out = pieces.view(int(self.shape[0]), int(self.spec_dim), -1)
+        _record_materialization(self, out)
+        return out
 
 
 @dataclass(frozen=True)
@@ -1461,7 +1762,7 @@ class AddLinearOperator:
         return _split_pos_neg_dense(self)
 
     def to_dense(self) -> torch.Tensor:
-        return self.lhs.to_dense() + self.rhs.to_dense()
+        return _cached_to_dense(self, lambda: self.lhs.to_dense() + self.rhs.to_dense())
 
 
 @dataclass(frozen=True)
@@ -1515,6 +1816,12 @@ class SliceInputLinearOperator:
         )
         embedded = torch.zeros((int(self.shape[0]), *self.base.input_shape), device=self.device, dtype=self.dtype)
         embedded[:, self.start:self.stop, ...] = flat.view(int(self.shape[0]), *self.input_shape)
+        reason = _ATTRIBUTION_REASON.get()
+        _record_materialization(
+            self,
+            embedded,
+            reason="slice_pullback_materialize" if reason == "unknown_materialization" else reason,
+        )
         return embedded
 
     def center_term(self, center: torch.Tensor) -> torch.Tensor:
@@ -1627,10 +1934,12 @@ class SliceInputLinearOperator:
         pos_bias: torch.Tensor | float | int,
         neg_bias: torch.Tensor | float | int,
     ) -> tuple[LinearOperator, torch.Tensor]:
-        pos_slope_base = self._embed_input(pos_slope, name="pos_slope")
-        neg_slope_base = self._embed_input(neg_slope, name="neg_slope")
-        pos_bias_base = self._embed_input(pos_bias, name="pos_bias")
-        neg_bias_base = self._embed_input(neg_bias, name="neg_bias")
+        _record_relu_pullback(self, wrapper_created=1)
+        with _attribution_reason("slice_pullback_materialize"):
+            pos_slope_base = self._embed_input(pos_slope, name="pos_slope")
+            neg_slope_base = self._embed_input(neg_slope, name="neg_slope")
+            pos_bias_base = self._embed_input(pos_bias, name="pos_bias")
+            neg_bias_base = self._embed_input(neg_bias, name="neg_bias")
         base_out, delta_b = self.base.relu_relax_pullback(
             pos_slope=pos_slope_base,
             neg_slope=neg_slope_base,
@@ -1643,7 +1952,10 @@ class SliceInputLinearOperator:
         )
 
     def to_dense(self) -> torch.Tensor:
-        return _slice_rows(self.base, start=self.start, stop=self.stop).reshape(int(self.shape[0]), int(self.spec_dim), -1)
+        return _cached_to_dense(
+            self,
+            lambda: _slice_rows(self.base, start=self.start, stop=self.stop).reshape(int(self.shape[0]), int(self.spec_dim), -1),
+        )
 
 
 @dataclass(frozen=True)
@@ -1791,7 +2103,7 @@ class ScaledInputLinearOperator:
         return _split_pos_neg_dense(self)
 
     def to_dense(self) -> torch.Tensor:
-        return self.base.to_dense() * self.scale.unsqueeze(1)
+        return _cached_to_dense(self, lambda: self.base.to_dense() * self.scale.unsqueeze(1))
 
 
 @dataclass(frozen=True)
