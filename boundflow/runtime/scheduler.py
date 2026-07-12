@@ -1,12 +1,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, Optional, Protocol
+import math
+from typing import Any, Callable, Dict, Optional, Protocol, Sequence, Tuple, TypeVar
 
 import torch
 
 from ..ir.task import BFTaskModule, BoundTask, TaskKind
 from ..ir.task_graph import TaskGraph
+from ..planner.materialization_placement import (
+    MaterializationPlacementPlan,
+    PlacementRetryCandidate,
+    rank_bounded_placement_retry_candidates,
+)
 from ..domains.interval import IntervalState
 from .perturbation import LpBallPerturbation
 from .task_executor import InputSpec, InputSpecLike, LinfInputSpec, PythonTaskExecutor
@@ -26,6 +32,129 @@ class IBPTaskStepExecutor(Protocol):
 @dataclass
 class ScheduleStats:
     task_order: list[str]
+
+
+RetryResult = TypeVar("RetryResult")
+
+
+@dataclass(frozen=True)
+class PlacementRetryStats:
+    """Observable host feedback for one placement candidate sequence."""
+
+    attempts: int
+    oom_failures: int
+    selected_index: Optional[int]
+    attempted_patterns: Tuple[str, ...]
+
+
+class PlacementRetryExhausted(RuntimeError):
+    """Every placement candidate failed with a real CUDA OOM."""
+
+    def __init__(self, stats: PlacementRetryStats, messages: Tuple[str, ...]) -> None:
+        self.stats = stats
+        self.messages = messages
+        super().__init__(
+            "all materialization placement candidates failed with CUDA OOM: "
+            f"attempts={stats.attempts} patterns={list(stats.attempted_patterns)}"
+        )
+
+
+def _placement_pattern(plan: MaterializationPlacementPlan) -> str:
+    if plan.requires_replan:
+        return "REPLAN"
+    return "".join(
+        "D" if placement.action.value == "dense" else "S"
+        for placement in plan.placements
+    )
+
+
+def execute_placement_candidates_with_retry(
+    plans: Sequence[MaterializationPlacementPlan],
+    execute: Callable[[MaterializationPlacementPlan], RetryResult],
+    *,
+    clear_cuda_cache: bool = True,
+) -> tuple[RetryResult, PlacementRetryStats]:
+    """Try candidates in order, blacklisting only real CUDA OOM failures."""
+
+    if not plans:
+        raise ValueError("placement retry requires at least one candidate plan")
+    if any(plan.requires_replan for plan in plans):
+        raise ValueError("placement retry candidates must be executable plans")
+    attempted: list[str] = []
+    messages: list[str] = []
+    for index, plan in enumerate(plans):
+        attempted.append(_placement_pattern(plan))
+        try:
+            result = execute(plan)
+        except torch.cuda.OutOfMemoryError as error:
+            messages.append(str(error))
+            if clear_cuda_cache and torch.cuda.is_available():
+                torch.cuda.empty_cache()
+            continue
+        stats = PlacementRetryStats(
+            attempts=index + 1,
+            oom_failures=index,
+            selected_index=index,
+            attempted_patterns=tuple(attempted),
+        )
+        return result, stats
+    stats = PlacementRetryStats(
+        attempts=len(plans),
+        oom_failures=len(plans),
+        selected_index=None,
+        attempted_patterns=tuple(attempted),
+    )
+    raise PlacementRetryExhausted(stats, tuple(messages))
+
+
+def execute_bounded_placement_candidates_with_retry(
+    plans: Sequence[MaterializationPlacementPlan],
+    execute: Callable[[MaterializationPlacementPlan], RetryResult],
+    *,
+    memory_budget_bytes: int,
+    max_attempts: int = 6,
+    prediction_budget_factor: float = 1.3,
+    clear_cuda_cache: bool = True,
+) -> tuple[RetryResult, PlacementRetryStats]:
+    """Rank placement plans into a bounded ladder, then apply CUDA OOM retry."""
+
+    if (
+        not math.isfinite(float(prediction_budget_factor))
+        or float(prediction_budget_factor) < 1.0
+    ):
+        raise ValueError("prediction_budget_factor must be finite and >= 1")
+
+    ladder = rank_bounded_placement_retry_candidates(
+        (
+            PlacementRetryCandidate(
+                candidate_id=str(index),
+                predicted_peak_bytes=int(plan.predicted_peak_bytes),
+                predicted_latency_ms=float(plan.predicted_latency_ms),
+                conservative=all(
+                    placement.action.value == "structured"
+                    for placement in plan.placements
+                ),
+                structured_count=sum(
+                    placement.action.value == "structured"
+                    for placement in plan.placements
+                ),
+                barrier_count=len(plan.placements),
+                action_transition_count=sum(
+                    lhs.action != rhs.action
+                    for lhs, rhs in zip(plan.placements, plan.placements[1:])
+                ),
+            )
+            for index, plan in enumerate(plans)
+        ),
+        memory_budget_bytes=int(
+            round(float(memory_budget_bytes) * float(prediction_budget_factor))
+        ),
+        max_attempts=int(max_attempts),
+    )
+    ordered = tuple(plans[int(candidate_id)] for candidate_id in ladder)
+    return execute_placement_candidates_with_retry(
+        ordered, execute, clear_cuda_cache=clear_cuda_cache
+    )
 
 
 def run_ibp_scheduled(
@@ -77,7 +206,7 @@ def run_ibp_scheduled(
         # Fallback: behave like phase-4 single-task execution.
         if not hasattr(executor, "run_ibp"):
             raise TypeError("executor does not support run_ibp and module has no task_graph")
-        return executor.run_ibp(module, input_spec, output_value=output_value)  # type: ignore[attr-defined]
+        return executor.run_ibp(module, input_spec, output_value=output_value)  # type: ignore[union-attr]
 
     graph: TaskGraph = module.task_graph
     tasks_by_id = {t.task_id: t for t in module.tasks}

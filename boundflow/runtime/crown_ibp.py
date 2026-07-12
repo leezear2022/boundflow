@@ -10,11 +10,27 @@ import torch
 
 from ..domains.interval import IntervalDomain, IntervalState
 from ..ir.task import BFTaskModule, TaskKind
+from ..planner.materialization import (
+    BoundMethod,
+    MaterializationAction,
+    MaterializationContext,
+    MaterializationPlan,
+    MaterializationPlannerOptions,
+    OptimizationStage,
+    estimate_operator_tree_summary,
+    plan_materialization,
+)
+from ..planner.materialization_placement import MaterializationPlacementPlan
 from .dag_utils import normalize_concat_axis, validate_concat_tensor_shapes, validate_concat_value_shapes
 from .linear_operator import DenseLinearOperator, LinearOperator, SignSplitLinearOperator
 from .materialization import materialize_linear_operator
 from .perturbation import InputPerturbationState
 from .relu_shape_utils import broadcast_relu_split_like_pre
+from .scheduler import (
+    PlacementRetryStats,
+    execute_bounded_placement_candidates_with_retry,
+    execute_placement_candidates_with_retry,
+)
 from .task_executor import InputSpec, InputSpecLike, _normalize_input_spec
 
 
@@ -246,6 +262,10 @@ _RELU_BACKWARD_MODE: ContextVar[ReluBackwardMode] = ContextVar(
     "boundflow_relu_backward_mode",
     default=_DEFAULT_RELU_BACKWARD_MODE,
 )
+_RELU_BACKWARD_PLACEMENTS: ContextVar[Optional[Dict[str, ReluBackwardMode]]] = ContextVar(
+    "boundflow_relu_backward_placements",
+    default=None,
+)
 
 
 @contextmanager
@@ -259,6 +279,208 @@ def _relu_backward_mode(mode: ReluBackwardMode) -> Iterator[None]:
         yield
     finally:
         _RELU_BACKWARD_MODE.reset(token)
+
+
+class MaterializationReplanRequired(RuntimeError):
+    """The host runtime must shrink and resubmit the current query batch."""
+
+    def __init__(self, plan: MaterializationPlan) -> None:
+        self.plan = plan
+        super().__init__(
+            "materialization plan requires a smaller domain batch: "
+            f"recommended_domain_batch_size={plan.recommended_domain_batch_size} "
+            f"reason={plan.reason}"
+        )
+
+
+class MaterializationPlacementReplanRequired(RuntimeError):
+    """The mixed placement plan requires host-side batch reduction."""
+
+    def __init__(self, plan: MaterializationPlacementPlan) -> None:
+        self.plan = plan
+        super().__init__(
+            "materialization placement requires a smaller domain batch: "
+            f"recommended_domain_batch_size={plan.recommended_domain_batch_size} "
+            f"reason={plan.reason}"
+        )
+
+
+@contextmanager
+def _apply_materialization_plan(plan: Optional[MaterializationPlan]) -> Iterator[None]:
+    """Apply an explicit query-level plan without changing the legacy default path."""
+
+    if plan is None:
+        yield
+        return
+    if plan.action == MaterializationAction.REDUCE_BATCH:
+        raise MaterializationReplanRequired(plan)
+    mode: ReluBackwardMode = "structured" if plan.action == MaterializationAction.STRUCTURED else "dense"
+    with _relu_backward_mode(mode):
+        yield
+
+
+@contextmanager
+def _apply_materialization_placement_plan(
+    plan: Optional[MaterializationPlacementPlan],
+) -> Iterator[None]:
+    """Apply a mixed plan keyed by ReLU pre-activation/source value."""
+
+    if plan is None:
+        yield
+        return
+    if plan.requires_replan:
+        raise MaterializationPlacementReplanRequired(plan)
+    placements: Dict[str, ReluBackwardMode] = {}
+    for placement in plan.placements:
+        if placement.action == MaterializationAction.REDUCE_BATCH:
+            raise ValueError("placement entries cannot use reduce_batch")
+        placements[placement.barrier_id] = (
+            "structured" if placement.action == MaterializationAction.STRUCTURED else "dense"
+        )
+    token = _RELU_BACKWARD_PLACEMENTS.set(placements)
+    try:
+        yield
+    finally:
+        _RELU_BACKWARD_PLACEMENTS.reset(token)
+
+
+@contextmanager
+def _apply_execution_materialization(
+    plan: Optional[MaterializationPlan],
+    placement_plan: Optional[MaterializationPlacementPlan],
+) -> Iterator[None]:
+    """Apply exactly one query-level or mixed materialization plan."""
+
+    if plan is not None and placement_plan is not None:
+        raise ValueError("materialization_plan and materialization_placement_plan are mutually exclusive")
+    with _apply_materialization_plan(plan):
+        with _apply_materialization_placement_plan(placement_plan):
+            yield
+
+
+def validate_optimized_bound_materialization_plan(
+    plan: Optional[MaterializationPlan],
+    *,
+    placement_plan: Optional[MaterializationPlacementPlan] = None,
+    caller: str,
+) -> None:
+    """Reject structured autograd until its backend capability is validated."""
+
+    if plan is not None and plan.action == MaterializationAction.STRUCTURED:
+        raise ValueError(
+            f"{caller} cannot execute structured optimized bounds: "
+            "supports_structured_autograd=false and supports_optimized_bound_structured=false"
+        )
+    if placement_plan is not None and any(
+        placement.action == MaterializationAction.STRUCTURED for placement in placement_plan.placements
+    ):
+        raise ValueError(
+            f"{caller} cannot execute structured optimized-bound placements: "
+            "structured autograd capability is not validated"
+        )
+
+
+def _tensor_dict_bytes(values: Optional[Dict[str, torch.Tensor]]) -> int:
+    if values is None:
+        return 0
+    return sum(int(value.numel()) * int(value.element_size()) for value in values.values())
+
+
+def build_crown_materialization_context(
+    module: BFTaskModule,
+    input_spec: InputSpec,
+    *,
+    interval_env: Dict[str, IntervalState],
+    relu_pre: Dict[str, IntervalState],
+    linear_spec_C: Optional[torch.Tensor],
+    output_value: str,
+    options: MaterializationPlannerOptions,
+    bound_method: BoundMethod = BoundMethod.CROWN,
+    requires_grad: bool = False,
+    optimization_stage: OptimizationStage = OptimizationStage.INFERENCE,
+    alpha_enabled: bool = False,
+    beta_enabled: bool = False,
+    split_state_present: bool = False,
+    relu_alpha: Optional[Dict[str, torch.Tensor]] = None,
+    relu_pre_add_coeff_u: Optional[Dict[str, torch.Tensor]] = None,
+    relu_pre_add_coeff_l: Optional[Dict[str, torch.Tensor]] = None,
+) -> MaterializationContext:
+    """Derive an explainable PR-11 context from one concrete CROWN query."""
+
+    options.validate()
+    task = module.get_entry_task()
+    domain_batch = int(input_spec.center.shape[0])
+    element_size = int(input_spec.center.element_size())
+    if linear_spec_C is None:
+        spec_size = int(interval_env[output_value].lower[0].numel())
+    else:
+        if linear_spec_C.dim() < 2:
+            raise ValueError(
+                "linear_spec_C must have at least two dimensions, "
+                f"got shape={tuple(linear_spec_C.shape)}"
+            )
+        spec_size = int(linear_spec_C.shape[-2])
+    relu_numels = tuple(int(pre.lower[0].numel()) for pre in relu_pre.values())
+    output_numel = int(interval_env[output_value].lower[0].numel())
+    beta_state_bytes = _tensor_dict_bytes(relu_pre_add_coeff_u) + _tensor_dict_bytes(relu_pre_add_coeff_l)
+    available = (
+        int(options.available_memory_bytes)
+        if options.available_memory_bytes is not None
+        else int(options.memory_budget_bytes)
+    )
+    return MaterializationContext(
+        bound_method=bound_method,
+        requires_grad=requires_grad,
+        optimization_stage=optimization_stage,
+        alpha_enabled=alpha_enabled,
+        beta_enabled=beta_enabled,
+        split_state_present=split_state_present,
+        batch_size=domain_batch,
+        spec_size=spec_size,
+        domain_batch_size=domain_batch,
+        operator_summary=estimate_operator_tree_summary(
+            domain_batch_size=domain_batch,
+            spec_size=spec_size,
+            output_numel=output_numel,
+            relu_numels=relu_numels,
+            element_size=element_size,
+            operator_nodes=len(task.ops),
+            alpha_state_bytes=_tensor_dict_bytes(relu_alpha),
+            beta_state_bytes=beta_state_bytes,
+        ),
+        memory_budget_bytes=int(options.memory_budget_bytes),
+        available_memory_bytes=available,
+        safety_margin=float(options.safety_margin),
+        expected_query_reuse=int(options.expected_query_reuse),
+        target=options.target,
+    )
+
+
+def plan_crown_materialization(
+    module: BFTaskModule,
+    input_spec: InputSpecLike,
+    *,
+    options: MaterializationPlannerOptions,
+    linear_spec_C: Optional[torch.Tensor] = None,
+    output_value: Optional[str] = None,
+) -> tuple[MaterializationContext, MaterializationPlan]:
+    """Build and plan one real plain-CROWN query before execution."""
+
+    module.validate()
+    task = module.get_entry_task()
+    spec = _normalize_input_spec(input_spec)
+    resolved_output = _resolve_output_value(task, output_value, caller="plan_crown_materialization")
+    interval_env, relu_pre = _forward_ibp_trace_mlp(module, spec)
+    context = build_crown_materialization_context(
+        module,
+        spec,
+        interval_env=interval_env,
+        relu_pre=relu_pre,
+        linear_spec_C=linear_spec_C,
+        output_value=resolved_output,
+        options=options,
+    )
+    return context, plan_materialization(context, policy=options.policy)
 
 
 def _resolve_output_value(task: Any, output_value: Optional[str], *, caller: str) -> str:
@@ -1030,7 +1252,9 @@ def _backprop_relu_step(
     dtype: torch.dtype,
     caller: str,
 ) -> AffineBackwardState:
-    implementation = _backprop_relu_step_dense if _RELU_BACKWARD_MODE.get() == "dense" else _backprop_relu_step_structured
+    placements = _RELU_BACKWARD_PLACEMENTS.get()
+    mode = placements.get(x_name, _RELU_BACKWARD_MODE.get()) if placements else _RELU_BACKWARD_MODE.get()
+    implementation = _backprop_relu_step_dense if mode == "dense" else _backprop_relu_step_structured
     return implementation(
         state,
         pre=pre,
@@ -1273,6 +1497,8 @@ def run_crown_ibp_mlp(
     relu_pre_add_coeff_u: Optional[Dict[str, torch.Tensor]] = None,
     relu_pre_add_coeff_l: Optional[Dict[str, torch.Tensor]] = None,
     relu_split_state: Optional[Dict[str, torch.Tensor]] = None,
+    materialization_plan: Optional[MaterializationPlan] = None,
+    materialization_placement_plan: Optional[MaterializationPlacementPlan] = None,
 ) -> IntervalState:
     """
     Minimal CROWN-IBP for a single-task general DAG subset.
@@ -1304,18 +1530,19 @@ def run_crown_ibp_mlp(
         output_value = task.output_values[0]
 
     interval_env, relu_pre = _forward_ibp_trace_mlp(module, input_spec, relu_split_state=relu_split_state)
-    return _run_crown_backward_from_trace(
-        module,
-        input_spec,
-        interval_env=interval_env,
-        relu_pre=relu_pre,
-        linear_spec_C=linear_spec_C,
-        output_value=output_value,
-        relu_alpha=relu_alpha,
-        relu_pre_add_coeff_u=relu_pre_add_coeff_u,
-        relu_pre_add_coeff_l=relu_pre_add_coeff_l,
-        caller="run_crown_ibp_mlp",
-    )
+    with _apply_execution_materialization(materialization_plan, materialization_placement_plan):
+        return _run_crown_backward_from_trace(
+            module,
+            input_spec,
+            interval_env=interval_env,
+            relu_pre=relu_pre,
+            linear_spec_C=linear_spec_C,
+            output_value=output_value,
+            relu_alpha=relu_alpha,
+            relu_pre_add_coeff_u=relu_pre_add_coeff_u,
+            relu_pre_add_coeff_l=relu_pre_add_coeff_l,
+            caller="run_crown_ibp_mlp",
+        )
 
 
 def run_crown_ibp_mlp_from_forward_trace(
@@ -1329,6 +1556,8 @@ def run_crown_ibp_mlp_from_forward_trace(
     relu_alpha: Optional[Dict[str, torch.Tensor]] = None,
     relu_pre_add_coeff_u: Optional[Dict[str, torch.Tensor]] = None,
     relu_pre_add_coeff_l: Optional[Dict[str, torch.Tensor]] = None,
+    materialization_plan: Optional[MaterializationPlan] = None,
+    materialization_placement_plan: Optional[MaterializationPlacementPlan] = None,
 ) -> IntervalState:
     """
     Backward-only CROWN-IBP given a precomputed forward trace (interval_env + relu_pre).
@@ -1344,18 +1573,54 @@ def run_crown_ibp_mlp_from_forward_trace(
     if module.task_graph is not None or len(module.tasks) != 1:
         raise NotImplementedError("run_crown_ibp_mlp_from_forward_trace currently supports single-task BFTaskModule only")
 
-    return _run_crown_backward_from_trace(
-        module,
-        input_spec,
-        interval_env=interval_env,
-        relu_pre=relu_pre,
-        linear_spec_C=linear_spec_C,
-        output_value=output_value,
-        relu_alpha=relu_alpha,
-        relu_pre_add_coeff_u=relu_pre_add_coeff_u,
-        relu_pre_add_coeff_l=relu_pre_add_coeff_l,
-        caller="run_crown_ibp_mlp_from_forward_trace",
-    )
+    with _apply_execution_materialization(materialization_plan, materialization_placement_plan):
+        return _run_crown_backward_from_trace(
+            module,
+            input_spec,
+            interval_env=interval_env,
+            relu_pre=relu_pre,
+            linear_spec_C=linear_spec_C,
+            output_value=output_value,
+            relu_alpha=relu_alpha,
+            relu_pre_add_coeff_u=relu_pre_add_coeff_u,
+            relu_pre_add_coeff_l=relu_pre_add_coeff_l,
+            caller="run_crown_ibp_mlp_from_forward_trace",
+        )
+
+
+def run_crown_ibp_mlp_with_placement_retry(
+    module: BFTaskModule,
+    input_spec: InputSpecLike,
+    *,
+    placement_plans: Tuple[MaterializationPlacementPlan, ...],
+    linear_spec_C: Optional[torch.Tensor] = None,
+    output_value: Optional[str] = None,
+    relu_split_state: Optional[Dict[str, torch.Tensor]] = None,
+    memory_budget_bytes: Optional[int] = None,
+    max_attempts: int = 6,
+    prediction_budget_factor: float = 1.3,
+) -> tuple[IntervalState, PlacementRetryStats]:
+    """Execute placement candidates and retry only after real CUDA OOM."""
+
+    def execute(plan: MaterializationPlacementPlan) -> IntervalState:
+        return run_crown_ibp_mlp(
+            module,
+            input_spec,
+            linear_spec_C=linear_spec_C,
+            output_value=output_value,
+            relu_split_state=relu_split_state,
+            materialization_placement_plan=plan,
+        )
+
+    if memory_budget_bytes is not None:
+        return execute_bounded_placement_candidates_with_retry(
+            placement_plans,
+            execute,
+            memory_budget_bytes=int(memory_budget_bytes),
+            max_attempts=int(max_attempts),
+            prediction_budget_factor=float(prediction_budget_factor),
+        )
+    return execute_placement_candidates_with_retry(placement_plans, execute)
 
 
 def get_crown_ibp_mlp_stats(module: BFTaskModule) -> CrownIbpStats:

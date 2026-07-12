@@ -7,8 +7,14 @@ import torch
 
 from ..domains.interval import IntervalState
 from ..ir.task import BFTaskModule, TaskKind
+from ..planner.materialization import MaterializationPlan
+from ..planner.materialization_placement import MaterializationPlacementPlan
 from .alpha_crown import AlphaCrownStats, AlphaObjective, AlphaState, SpecReduce
-from .crown_ibp import _forward_ibp_trace_mlp, run_crown_ibp_mlp_from_forward_trace
+from .crown_ibp import (
+    _forward_ibp_trace_mlp,
+    run_crown_ibp_mlp_from_forward_trace,
+    validate_optimized_bound_materialization_plan,
+)
 from .linear_operator import DenseLinearOperator
 from .relu_shape_utils import broadcast_relu_split_like_pre, coerce_relu_param_shape, relu_input_shapes, shape_numel
 from .task_executor import InputSpecLike, _normalize_input_spec
@@ -559,6 +565,8 @@ def run_alpha_beta_crown_mlp(
     lb_weight: float = 1.0,
     ub_weight: float = 1.0,
     per_batch_params: bool = False,
+    materialization_plan: Optional[MaterializationPlan] = None,
+    materialization_placement_plan: Optional[MaterializationPlacementPlan] = None,
 ) -> Tuple[IntervalState, AlphaState, BetaState, AlphaBetaCrownStats]:
     """
     Phase 7A (PR-6): alpha-beta oracle for single-task chain graphs.
@@ -574,6 +582,11 @@ def run_alpha_beta_crown_mlp(
     BaB on conv graphs remains unsupported; this function only extends the alpha-beta oracle.
     """
     module.validate()
+    validate_optimized_bound_materialization_plan(
+        materialization_plan,
+        placement_plan=materialization_placement_plan,
+        caller="run_alpha_beta_crown_mlp",
+    )
     task = module.get_entry_task()
     spec = _normalize_input_spec(input_spec)
     device = spec.center.device
@@ -657,6 +670,8 @@ def run_alpha_beta_crown_mlp(
                 linear_spec_C=linear_spec_C,
                 relu_alpha=alpha_state.alpha_by_relu_input,
                 relu_pre_add_coeff_l=relu_pre_add,
+                materialization_plan=materialization_plan,
+                materialization_placement_plan=materialization_placement_plan,
             )
         else:
             bounds = run_crown_ibp_mlp_from_forward_trace(
@@ -666,6 +681,8 @@ def run_alpha_beta_crown_mlp(
                 relu_pre=relu_pre,
                 linear_spec_C=linear_spec_C,
                 relu_alpha=alpha_state.alpha_by_relu_input,
+                materialization_plan=materialization_plan,
+                materialization_placement_plan=materialization_placement_plan,
             )
 
         def _reduce_specs(x: torch.Tensor, *, direction: Literal["min", "max"]) -> torch.Tensor:
