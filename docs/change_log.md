@@ -1,5 +1,11 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-07-12：增加精确 SignSplitLinearOperator
+
+- 实现 `A⁺⊙s⁺ + A⁻⊙s⁻`，禁止未经证明将 sign-split 下推穿过 matmul/conv。
+- 覆盖 flat/NCHW、gradient、composition、reduction 与 ephemeral trace。
+- 详细记录：`gemini_doc/change_2026-07-12_add_exact_sign_split_linear_operator.md`。
+
 ## 2026-07-12：冻结 dense ReLU backward reference oracle
 
 - 抽出显式 dense reference，返回 `A_u/A_l/b_u/b_l`，现有路径只调用该 oracle。

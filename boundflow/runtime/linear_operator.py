@@ -720,6 +720,192 @@ class ReshapeInputLinearOperator:
 
 
 @dataclass(frozen=True)
+class SignSplitLinearOperator:
+    """Exact lazy transform ``A+ * positive_scale + A- * negative_scale``."""
+
+    base: LinearOperator
+    positive_scale: torch.Tensor
+    negative_scale: torch.Tensor
+    source_value: str = ""
+    bound_direction: str = ""
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.base, LinearOperator):
+            raise TypeError(f"SignSplitLinearOperator.base must satisfy LinearOperator, got {type(self.base)}")
+        for name, scale in (("positive_scale", self.positive_scale), ("negative_scale", self.negative_scale)):
+            _flatten_contract_input(
+                scale,
+                name=name,
+                batch=self.base.shape[0],
+                input_shape=tuple(self.base.input_shape),
+                device=self.base.device,
+                dtype=self.base.dtype,
+            )
+        if self.bound_direction not in {"", "upper", "lower"}:
+            raise ValueError(f"bound_direction must be upper/lower/empty, got {self.bound_direction!r}")
+
+    @property
+    def shape(self) -> tuple[int, int, int]:
+        return tuple(int(dim) for dim in self.base.shape)
+
+    @property
+    def input_shape(self) -> tuple[int, ...]:
+        return tuple(int(dim) for dim in self.base.input_shape)
+
+    @property
+    def input_numel(self) -> int:
+        return int(self.base.input_numel)
+
+    @property
+    def spec_dim(self) -> int:
+        return int(self.base.spec_dim)
+
+    @property
+    def device(self) -> torch.device:
+        return self.base.device
+
+    @property
+    def dtype(self) -> torch.dtype:
+        return self.base.dtype
+
+    def _scale_flat(self, scale: torch.Tensor, *, name: str) -> torch.Tensor:
+        return _flatten_contract_input(
+            scale,
+            name=name,
+            batch=self.shape[0],
+            input_shape=self.input_shape,
+            device=self.device,
+            dtype=self.dtype,
+        )
+
+    def _materialize_for_reduction(self, reason: str) -> torch.Tensor:
+        # Local import avoids a module cycle: materialization only needs the protocol at type-check time.
+        from .materialization import materialize_linear_operator
+
+        site = f"{self.source_value}:{self.bound_direction}:{reason}"
+        return materialize_linear_operator(
+            self,
+            reason=reason,
+            operator_site=site,
+            source_value=self.source_value,
+            source_primal_op="relu",
+            persistent_or_ephemeral="ephemeral",
+            logical_lifetime_begin=reason,
+            logical_lifetime_end=f"{reason}:return",
+            alpha_related=True,
+        )
+
+    def center_term(self, center: torch.Tensor) -> torch.Tensor:
+        dense = self._materialize_for_reduction("sign_split_center_term")
+        flat = _flatten_center(
+            center,
+            name="center",
+            batch=self.shape[0],
+            input_shape=self.input_shape,
+            device=self.device,
+            dtype=self.dtype,
+        )
+        return (dense * flat.unsqueeze(1)).sum(dim=2)
+
+    def row_abs_sum(self) -> torch.Tensor:
+        return self._materialize_for_reduction("sign_split_row_l1").abs().sum(dim=2)
+
+    def row_l2_norm(self) -> torch.Tensor:
+        return torch.linalg.vector_norm(
+            self._materialize_for_reduction("sign_split_row_l2"),
+            ord=2,
+            dim=2,
+        )
+
+    def row_abs_max(self) -> torch.Tensor:
+        return self._materialize_for_reduction("sign_split_row_linf").abs().amax(dim=2)
+
+    def contract_input(self, vec: torch.Tensor) -> torch.Tensor:
+        dense = self._materialize_for_reduction("sign_split_contract_input")
+        flat = _flatten_contract_input(
+            vec,
+            name="vec",
+            batch=self.shape[0],
+            input_shape=self.input_shape,
+            device=self.device,
+            dtype=self.dtype,
+        )
+        return (dense * flat.unsqueeze(1)).sum(dim=2)
+
+    def contract_last_dim(self, vec: torch.Tensor) -> torch.Tensor:
+        if len(self.input_shape) != 1:
+            raise NotImplementedError(f"contract_last_dim only supports flat input_shape, got {self.input_shape}")
+        return self.contract_input(vec)
+
+    def matmul_right(self, rhs: torch.Tensor) -> LinearOperator:
+        if len(self.input_shape) != 1:
+            raise NotImplementedError(f"matmul_right only supports flat input_shape, got {self.input_shape}")
+        rr = _ensure_float_matrix(rhs, name="rhs", rows=self.input_numel, device=self.device, dtype=self.dtype)
+        return RightMatmulLinearOperator(base=self, rhs=rr)
+
+    def reshape_input(self, new_input_shape: Sequence[int]) -> LinearOperator:
+        shape = _normalize_input_shape(tuple(new_input_shape))
+        if _prod(shape) != self.input_numel:
+            raise ValueError(f"reshape_input shape mismatch: {shape} does not match input_numel={self.input_numel}")
+        if tuple(shape) == tuple(self.input_shape):
+            return self
+        return ReshapeInputLinearOperator(base=self, input_shape=shape)
+
+    def slice_input(self, new_input_shape: Sequence[int], *, start: int, stop: int) -> LinearOperator:
+        return SliceInputLinearOperator(base=self, input_shape=tuple(new_input_shape), start=int(start), stop=int(stop))
+
+    def add(self, other: LinearOperator) -> LinearOperator:
+        return _add_operator_pair(self, other)
+
+    def conv2d_right(
+        self,
+        weight: torch.Tensor,
+        *,
+        stride: int | Sequence[int] = 1,
+        padding: int | Sequence[int] = 0,
+        dilation: int | Sequence[int] = 1,
+        groups: int = 1,
+        input_shape: Sequence[int],
+    ) -> LinearOperator:
+        in_shape = _normalize_input_shape(tuple(input_shape))
+        w = _normalize_conv_weight(weight, device=self.device, dtype=self.dtype)
+        stride_2 = _normalize_pair(stride, name="stride")
+        padding_2 = _normalize_pair(padding, name="padding")
+        dilation_2 = _normalize_pair(dilation, name="dilation")
+        out_shape = _conv2d_output_shape(
+            in_shape,
+            w,
+            stride=stride_2,
+            padding=padding_2,
+            dilation=dilation_2,
+            groups=int(groups),
+        )
+        base: LinearOperator = self
+        if tuple(base.input_shape) != tuple(out_shape):
+            if base.input_numel != _prod(out_shape):
+                raise ValueError(
+                    f"conv2d_right output shape mismatch: base.input_shape={base.input_shape} "
+                    f"conv_output_shape={out_shape}"
+                )
+            base = base.reshape_input(out_shape)
+        return Conv2dLinearOperator(
+            base=base,
+            weight=w,
+            stride=stride_2,
+            padding=padding_2,
+            dilation=dilation_2,
+            groups=int(groups),
+            input_shape=in_shape,
+        )
+
+    def to_dense(self) -> torch.Tensor:
+        dense = self.base.to_dense()
+        positive = self._scale_flat(self.positive_scale, name="positive_scale").unsqueeze(1)
+        negative = self._scale_flat(self.negative_scale, name="negative_scale").unsqueeze(1)
+        return dense.clamp_min(0) * positive + dense.clamp_max(0) * negative
+
+
+@dataclass(frozen=True)
 class Conv2dLinearOperator:
     base: LinearOperator
     weight: torch.Tensor
