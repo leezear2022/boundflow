@@ -52,6 +52,18 @@
 - `gemini_doc/materialization_trace_schema_v1.md`：PR-10 trace JSONL 与内存口径
 - `gemini_doc/pr10_materialization_profile_summary_2026_07_12.md`：PR-10 第一版 clean GPU profile 与 claim 边界
 - `gemini_doc/pr10_dense_structured_comparison_2026_07_12.md`：PR-10 双模式 guardrail 与最终判定
+- `gemini_doc/pr10_review_integration_2026_07_12.md`：PR-10 外部评审意见、PR-11 收敛与本次修改记录
+- `gemini_doc/pr11_materialization_planner_start_2026_07_12.md`：PR-11 第一实现切片、测试证据与剩余 blocker
+- `gemini_doc/materialization_plan_schema_v1.md`：PR-11 plan/context/candidate JSON schema 与 capability 语义
+- `gemini_doc/pr11_heldout_eval_2026_07_12.md`：PR-11 cost model、final held-out 结果与未通过项
+- `gemini_doc/pr11_multi_barrier_placement_start_2026_07_12.md`：非退化 multi-barrier Global placement 与 mixed runtime foundation
+- `gemini_doc/pr11_barrier_evaluator_and_retry_2026_07_12.md`：measured Oracle、Global Retry held-out 结果与真实 OOM handling 边界
+- `gemini_doc/change_2026-07-12_pr11_bounded_stratified_retry.md`：有界分层 retry、双规模 held-out 与真实 CUDA OOM 证据
+- `gemini_doc/change_2026-07-12_pr11_independent_topology_nogo.md`：并行残差 held-out 失败、部署特征审计与 PR-11 No-Go
+- `gemini_doc/change_2026-07-12_pr11_static_topology_cost.md`：静态 topology/liveness feature、LOO retry calibration 与三组 final held-out
+- `gemini_doc/pr11_closure_audit_2026_07_12.md`：PR-11 逐项 closure、replicated final evidence 与 PR-12/PR-13 边界
+- `gemini_doc/pr11_regret_attribution_2026_07_13.md`：高 regret case 的候选覆盖/后端假设归因
+- `gemini_doc/pr12_fused_crown_task_plan_2026_07_13.md`：PR-12 收敛范围、接口、门禁与证据版本
 - `gemini_doc/artifact_claims_phase5d.md`：Phase 5D artifact claims（证据链/口径映射）
 - `gemini_doc/artifact_appendix_phase5d.md`：Phase 5D artifact appendix（复现说明）
 - `gemini_doc/project_evolution_overview.md`：研发脉络总览（目标、阶段推进、代码落点、未来路线）

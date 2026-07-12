@@ -2,7 +2,7 @@
 
 > 状态：**顶层执行计划 v1.0；后续研究工作受本文门禁约束。**  
 > 基线日期：2026-07-12  
-> 当前研究代码基线：`dfcc185`（PR-10 guarded structured ReLU path）
+> 当前研究代码基线：`263ea81`（PR-10 complete, feature-gated）
 > 投稿策略：ASPLOS 2027 September Cycle 为有条件冲刺；ASPLOS 2028 为稳健主目标。
 
 ---
@@ -52,7 +52,7 @@ reason、估算字节数、生命周期、复用关系和 dense reference semant
 row norm、concretization 等允许局部物化，但所有 fallback 必须可观察、可计量并可由 Planner
 选择物化位置、分块与生命周期。
 
-#### C2. Query- and Memory-Aware Materialization Planner
+#### C2. Method-, Autograd- and Memory-Aware Materialization Planner
 
 Planner 不只是普通 graph fusion。它需要在同一代价模型和显存预算下联合决定：
 
@@ -64,20 +64,27 @@ Planner 不只是普通 graph fusion。它需要在同一代价模型和显存�
 - logical buffer 到 physical buffer 的映射；
 - 在峰值显存约束下的调度顺序与 fallback。
 
+PR-10 已否定“structured 应成为统一默认表示”的假设：在代表性 plain CROWN 大点上，
+structured 将峰值显存降低约 29.8%，但慢约 9.17×；在 α/αβ 路径中，structured 的显存
+反而恶化并产生 6 个 OOM。因此 Planner 必须显式区分 `bound_method`、`requires_grad` 和
+`optimization_stage`，不能把它们折叠成单一 method 标签。至少还应观察 alpha/beta enable、
+split state、query reuse、spec/domain batch 与目标设备 capability。
+
 规划问题的输入定义为 `(G, Q, H, B, R)`：operator DAG、查询集合或分布、硬件 profile、
 显存预算和参考 bound 配置。计划定义为 `P=(m, π, f, b, c, r, s)`：materialization、
 partition、fusion、batch layout、cache、recompute、storage/scheduling。
 
-目标是最小化 amortized compile、execute、queue、transfer 与 peak-memory cost：
+PR-11 v1 采用“先可运行、再最快”的字典序目标，而不是用任意权重把时间和显存相加：
 
 ```text
-min_P  T_compile(P)/|Q|
-     + E_q[T_execute(P,q) + T_queue(P,q) + T_transfer(P,q)]
-     + λ M_peak(P)
+1. 过滤不满足 capability/correctness 约束的候选；
+2. 要求 `M_pred(P) <= η * min(B_user, M_available)`，初始 `η` 取 0.85–0.9；
+3. 在可行计划中最小化 amortized compile + execute + queue + transfer latency；
+4. 若无可行计划，减小 spec/domain batch 后重新规划；仍不可行时输出结构化 OOM diagnosis。
 ```
 
-约束为 `M_peak(P) <= B`，并要求 planned path 在相同浮点语义下保持 dense reference
-computation。实现不承诺一次精确联合求解全部变量，而采用：
+所有 planned path 必须在相同浮点语义下保持 dense reference computation。实现不承诺一次
+精确联合求解全部变量，而采用：
 
 ```text
 candidate generation
@@ -214,8 +221,8 @@ Runtime 不能笼统声称相关查询可以共享中间状态。每个缓存对
 | Artifact | JSONL schema、CSV、figure、manifest、quick/full runner | ASPLOS 证据链基础 |
 | 环境 | PyTorch 2.12.1+cu132、LLVM 20.1.8、TVM、单一 tvm-ffi | 可复现实验基础 |
 
-当前提交基线为 Phase 7A PR-9。环境迁移和 PyTorch 2.12 reshape 兼容仍处于未提交工作区，
-必须先整理成独立工程提交，不能与 PR-10 混合。
+Gate 0 与 PR-10 已分别完成并提交；当前远程基线为 `263ea81`，工作区迁移不再是 PR-11 的
+前置 blocker。PR-10 的 structured 路径保留为 opt-in research capability，dense 继续作为默认。
 
 ### 3.2 论文成立前必须补齐的缺口
 
@@ -272,32 +279,53 @@ PR，不要求 Python lazy path 当场变快。
 - 不接受无法解释的严重 runtime 或显存退化；
 - 端到端速度硬门槛放在 PR-12 fused lowering。
 
-### PR-11：Selective Materialization Planner
+### PR-11：Method- and Autograd-Aware Materialization Planner
 
 目标：把“是否/何处物化”从 operator 内部硬编码提升为全局 Planner 决策。
 
 需要新增或明确：
 
-- operator cost summary：shape、estimated FLOPs、bytes、reuse count、batch axes；
-- MaterializationDecision / MaterializationPlan；
-- memory budget 与 spill/recompute policy；
+- `MaterializationContext`：bound method、`requires_grad`、optimization stage、alpha/beta/split
+  state、batch/spec/domain axes、operator summary、memory budget/available memory、reuse 与 target；
+- `OptimizationStage` 至少区分 inference、alpha init/optimize/reuse、final bound、BaB node eval、
+  training；不得只从 `requires_grad` 反推阶段；
+- operator cost summary：shape、estimated FLOPs、dense/structured/temporary bytes、reuse count、
+  batch axes、operator depth/nodes 与 autograd state estimate；
+- `MaterializationDecision` / `MaterializationPlan` 及确定性的 reason/plan dump；
+- v1 候选仅包含 `DENSE`、`STRUCTURED`、`REDUCE_BATCH`；
+- capability constraint：当前 structured autograd 与 optimized-bound structured 未通过门禁，
+  因而 α/αβ optimize 或其他 requires-grad 路径不得选择 structured；
+- memory budget、safety margin 与 deterministic reduce-batch/re-plan/OOM diagnosis；
 - deterministic heuristic baseline；
 - 至少一个 cost-aware 自动策略；
-- plan dump 与 decision reason。
+- 解释性 cost model 优先采用 profile lookup/shape bucket 或 piecewise linear model，不以黑盒
+  预测器作为 v1 前置条件。
 
 必须做的消融：
 
-1. eager dense；
-2. always lazy；
-3. fixed/manual barrier；
-4. local greedy；
-5. global planner；
-6. global planner 在多个显存预算下。
+1. Always Dense；
+2. Always Structured；
+3. Method-Only；
+4. Memory-Threshold；
+5. Local Greedy；
+6. Global Planner；
+7. 每个 case 实测所有合法候选的 Oracle；
+8. Global Planner 在多个显存预算下。
 
-验收：自动策略必须在不同 workload/budget 上做出不同计划，并相对固定策略改善至少一个北极星
-指标且不系统性恶化其余指标。
+数据不得随机拆分相邻 shape；采用 workload-family held-out 或 leave-one-architecture-out，并将
+mini-ResNet 与 unseen memory budgets 保留为最终测试。验收要求：0 bound/gradient correctness
+failure、0 unexpected OOM；任一合法候选可运行时 Planner 应找到可行计划；α/αβ structured
+不得被误选；held-out median latency regret 相对 Oracle 的研发目标不超过 20%，同时报告 p90；
+至少选择过 dense 与 structured，并在至少一个预算下让 Always Dense OOM 的 plain CROWN case
+通过。上述 regret 数值是内部 Go/No-Go 目标，不预写成论文结果。
 
 ### PR-12：Fused TVM CROWN-Task Lowering
+
+执行版进一步收敛为 **Fused CROWN-Task Lowering for Memory-Efficient Plain CROWN**：v1 只支持
+static-shape、FP32、CUDA、`requires_grad=False` 的 plain CROWN，先覆盖 ReLU+Linear，再覆盖
+ReLU+Conv2d；α/αβ autograd、training 与新 BaB scheduling 明确排除。PR-11 高-regret 归因与
+详细门禁见 `gemini_doc/pr11_regret_attribution_2026_07_13.md` 和
+`gemini_doc/pr12_fused_crown_task_plan_2026_07_13.md`。
 
 目标：将 Planner 选择后的 operator region 降到粗粒度 TVM task，而不是逐小算子调用。
 
@@ -311,6 +339,12 @@ PR，不要求 Python lazy path 当场变快。
 
 验收：证明收益来自 BoundFlow region/plan，而非仅来自 TVM 默认 fusion；报告 kernel launch、
 intermediate bytes 和 compile amortization break-even point。
+
+PR-12 分为两项 capability：plain CROWN fused structured path 用于减少 Python dispatch 与重复
+临时物化；differentiable optimized-bound path 必须定义独立的 forward、saved-state、backward
+和 autograd registration contract。在完成 forward/gradient equivalence、gradcheck/opcheck、
+saved-tensor profile、优化收敛和 peak-memory 门禁前，不向 PR-11 暴露
+`FUSED_STRUCTURED_AUTOGRAD` 候选。
 
 ### PR-13：Multi-Domain Runtime 与真实 BaB Adapter
 
@@ -508,6 +542,10 @@ ASPLOS 2027 September Cycle 的 full-paper deadline 为 **2026-09-09 AoE**。从
 - 至少一个非 toy workload；
 - 至少一个 latency–memory Pareto 结果；
 - Planner 在不同显存预算下选择不同计划；
+- 测试矩阵中 0 unexpected OOM；任一合法候选可运行时 Planner 能找到可行计划；
+- α/αβ optimized path 不会错误选择尚无 capability 的 structured action；
+- held-out workload 上报告相对 per-case Oracle 的 median/p90 latency regret；
+- 至少在一个预算下，让 Always Dense OOM 的 plain CROWN case 通过；
 - correctness 与 materialization profile 证据完整；
 - C1/C2 的前两页故事不依赖未来 PR 才成立。
 

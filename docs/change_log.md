@@ -85,6 +85,16 @@
 - 文档当前供多模型/人工评审，尚未标记为最终执行版。
 - 详见 `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`。
 
+## 2026-07-13：PR-11 冻结、regret 归因与 PR-12 入口
+
+- 新增高 regret attribution：9 个 `regret >= 1.5` case 均首先归因为 bounded candidate set
+  未包含 measured oracle；backend gap 仅作为待 PR-12 验证的诊断假设。
+- 新增 content-addressed evidence freeze 工具，固定 schema、split、workload/source hashes、硬件、
+  commit/tag、seeds、oracle 与 regret 定义，不覆盖 PR-11 原始工件。
+- 将 PR-12 收敛为无梯度 plain CROWN 的 ReLU+Linear/Conv fused TIR lowering。
+- 详见 `gemini_doc/pr11_regret_attribution_2026_07_13.md` 与
+  `gemini_doc/pr12_fused_crown_task_plan_2026_07_13.md`。
+
 ## 2026-07-12：Conda activate/deactivate 自动钩子
 
 - 激活 `boundflow` 时自动加载 `env.sh`，反激活时完整恢复之前的路径与变量状态。
@@ -2436,3 +2446,58 @@
 - 新增下一步文档：
   - `gemini_doc/next_plan_after_phase7a_pr9.md`
   - 将 PR-10 主线固定为 “ReLU barrier 结构化”，而不是把更强 lazy row-norm 写成并列路线
+
+---
+
+## 2026-07-12：PR-11 有界分层 placement retry
+
+**动机**
+- 原 Global Retry 在 `spec=128/domain=8` held-out 上最坏需要 56 次预算拒绝 replay，无法作为真实
+  runtime 的有限重试策略。
+
+**主要改动**
+- Planner 新增 `latency_rank_stratified_v1`：两个最快候选、80%/90% latency-rank 候选、最低
+  predicted-peak fallback，默认最多 5 次；
+- scheduler 与 plain CROWN wrapper 接入 bounded ranking + real CUDA OOM retry；
+- evaluator 新增 `global_bounded_retry`，real-OOM runner 改走相同入口；
+- 新增记录：`gemini_doc/change_2026-07-12_pr11_bounded_stratified_retry.md`。
+
+**证据**
+- s32/d8：7/7 feasible、0 unexpected、median/p90 regret 1.159×/1.722×、最多 3 次；
+- s128/d8：7/7 feasible、0 unexpected、median/p90 regret 1.171×/1.221×、最多 5 次；
+- 380 MiB cap 下 dense real OOM → structured success，3/3 独立进程稳定恢复。
+
+---
+
+## 2026-07-12：PR-11 独立 topology held-out No-Go
+
+**主要改动与结论**
+- 新增 7-barrier `branched_resnet`（parallel residual branches + add + concat + fuse）profile workload；
+- 128/128 placement combinations 与 dense reference 对齐；
+- bounded retry 为 9/9 feasible、0 unexpected，但 median/p90 regret 为 1.976×/4.494×，失败；
+- evaluator 仍读取 candidate-specific trace logical bytes，只能定位为 profile-guided replay；
+- 下一切片冻结为 static topology/liveness-aware barrier cost summary。
+
+**记录**
+- `gemini_doc/change_2026-07-12_pr11_independent_topology_nogo.md`
+
+---
+
+## 2026-07-12：PR-11 static topology/liveness cost
+
+**主要改动**
+- 新增 candidate-independent barrier schema：shape/bytes、fanout、live span、depth、merge/branch/path；
+- profile/cost-model/evaluator 分别升级到 v2/v2/v3，禁止再用 held-out candidate trace feature；
+- all-structured 作为显式 conservative fallback；
+- 新增 topology-density-stratified v3、3× replicated profile 聚合与 6-family LOO；冻结
+  ridge=.001、factor=1.30。
+
+**结果**
+- 3 轮共 1,416/1,416 placement executions correctness 通过，聚合为 472 patterns；
+- 三组 held-out 共 23/23 feasible、0 unexpected；median regret 最坏为 1.880×；
+- p90/max 最坏为 2.377×/3.160×；候选上限为 6；
+- static model loader/candidate generator/plain-CROWN runtime 已连通，统一 QueryState/BaB 尚未完成。
+
+**记录**
+- `gemini_doc/change_2026-07-12_pr11_static_topology_cost.md`
+- `gemini_doc/pr11_closure_audit_2026_07_12.md`
