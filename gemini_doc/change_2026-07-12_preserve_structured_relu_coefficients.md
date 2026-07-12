@@ -2,14 +2,14 @@
 
 ## 修改
 
-- 默认 ReLU backward 返回 `SignSplitLinearOperator`，不再把主 coefficient 永久转换为
-  `DenseLinearOperator`。
+- structured mode 的 ReLU backward 返回 `SignSplitLinearOperator`，不再把主 coefficient 永久
+  转换为 `DenseLinearOperator`。
 - ReLU intercept/bias reduction 使用 `relu_bias_sign_reduce` 局部 materialization，标记为
   `ephemeral`，归约到 `[B,S]` 后结束逻辑生命周期。
 - αβ 的 pre-add coefficient 作为 structured SignSplit 与 batch/feature dense addend 的
   `AddLinearOperator`，不物化主 coefficient。
-- `BOUNDFLOW_RELU_BACKWARD_MODE=dense` 保留进程级 reference fallback；测试使用 task-local
-  context 在 dense/structured 间切换，未修改现有 public solver API。
+- guardrail 评估后默认保持 dense；`BOUNDFLOW_RELU_BACKWARD_MODE=structured` 启用研究路径；
+  测试使用 task-local context 切换，未修改现有 public solver API。
 - 增加 deterministic operator-tree dump，稳定编号、记录 shape/metadata，不包含 tensor 值或
   对象地址。
 

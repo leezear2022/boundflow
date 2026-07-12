@@ -185,9 +185,9 @@ def _make_workload(name: str, device: torch.device) -> Workload:
     if name not in builders:
         raise ValueError(f"unknown workload: {name}")
     builder, input_shape, tier = builders[name]
-    return Workload(
-        name=name, model=builder().eval().to(device), input_shape=input_shape, tier=tier
-    )
+    model = builder().eval().to(device)
+    model.requires_grad_(False)
+    return Workload(name=name, model=model, input_shape=input_shape, tier=tier)
 
 
 def _git_value(*args: str) -> str:
@@ -349,6 +349,11 @@ def _profile_query(  # pylint: disable=too-many-arguments,too-many-locals
         "domain_batch": domain_batch,
         "domain_source": "synthetic_fixed_domain_batch",
         "device": str(device),
+        "weights_require_grad": any(
+            bool(value.requires_grad)
+            for value in module.bindings.get("params", {}).values()
+            if torch.is_tensor(value)
+        ),
     }
     try:
         torch.manual_seed(1)

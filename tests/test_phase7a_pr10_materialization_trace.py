@@ -1,7 +1,7 @@
 import torch
 
 from boundflow.ir.task import BFTaskModule, BoundTask, TaskKind, TaskOp
-from boundflow.runtime.crown_ibp import run_crown_ibp_mlp
+from boundflow.runtime.crown_ibp import _relu_backward_mode, run_crown_ibp_mlp
 from boundflow.runtime.materialization import (
     TRACE_SCHEMA_VERSION,
     trace_materializations,
@@ -59,9 +59,10 @@ def test_relu_backward_materialization_trace_records_reason_bytes_and_lifetime()
         spec_batch=3,
         domain_batch=2,
     ) as trace:
-        bounds = run_crown_ibp_mlp(
-            module, InputSpec.linf(value_name="input", center=x0, eps=0.1)
-        )
+        with _relu_backward_mode("structured"):
+            bounds = run_crown_ibp_mlp(
+                module, InputSpec.linf(value_name="input", center=x0, eps=0.1)
+            )
 
     assert tuple(bounds.lower.shape) == (2, 3)
     assert len(trace.events) == 6
@@ -125,9 +126,11 @@ def test_materialization_trace_scope_does_not_leak_between_runs() -> None:
     spec = InputSpec.linf(value_name="input", center=torch.randn(1, 4), eps=0.1)
 
     with trace_materializations() as first:
-        run_crown_ibp_mlp(module, spec)
+        with _relu_backward_mode("structured"):
+            run_crown_ibp_mlp(module, spec)
     with trace_materializations() as second:
-        run_crown_ibp_mlp(module, spec)
+        with _relu_backward_mode("structured"):
+            run_crown_ibp_mlp(module, spec)
 
     assert len(first.events) == 6
     assert len(second.events) == 6

@@ -5,6 +5,8 @@
 - profile runner 新增 `--relu-modes dense,structured`，每条 query 与 CSV 都记录 mode。
 - dense 与 structured 使用相同 workload、method、spec、domain、seed、warmup/repeats 和
   correctness gate。
+- verification profile 显式冻结模型权重并记录 `weights_require_grad=false`；α/β 是唯一需要
+  autograd 的优化状态，避免把 certified-training 权重梯度混入 verifier memory 口径。
 - dense trace 必须包含 persistent `relu_sign_split`；structured trace 不允许 persistent
   materialization，只允许有 reason/site 的 ephemeral bias/concretization reduction。
 - 增加 αβ fixed-split 与真实 `solve_bab_mlp` 搜索的 dense/structured 结果、节点数和界对照。

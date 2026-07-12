@@ -240,7 +240,7 @@ class ReluBackwardRelaxation:
 
 ReluBackwardMode = Literal["dense", "structured"]
 _DEFAULT_RELU_BACKWARD_MODE: ReluBackwardMode = (
-    "dense" if os.environ.get("BOUNDFLOW_RELU_BACKWARD_MODE") == "dense" else "structured"
+    "structured" if os.environ.get("BOUNDFLOW_RELU_BACKWARD_MODE") == "structured" else "dense"
 )
 _RELU_BACKWARD_MODE: ContextVar[ReluBackwardMode] = ContextVar(
     "boundflow_relu_backward_mode",

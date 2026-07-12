@@ -101,22 +101,23 @@ def test_dense_relu_reference_matches_current_wrapper_with_alpha_and_beta_coeffi
         dtype=A_u.dtype,
         caller="test",
     )
-    wrapped = _backprop_relu_step(
-        AffineBackwardState(
-            A_u=DenseLinearOperator(A_u),
-            A_l=DenseLinearOperator(A_l),
-            b_u=b_u,
-            b_l=b_l,
-        ),
-        pre=pre,
-        x_name="h1",
-        relu_alpha={"h1": alpha},
-        relu_pre_add_coeff_u={"h1": add_u},
-        relu_pre_add_coeff_l={"h1": add_l},
-        device=A_u.device,
-        dtype=A_u.dtype,
-        caller="test",
-    )
+    with _relu_backward_mode("structured"):
+        wrapped = _backprop_relu_step(
+            AffineBackwardState(
+                A_u=DenseLinearOperator(A_u),
+                A_l=DenseLinearOperator(A_l),
+                b_u=b_u,
+                b_l=b_l,
+            ),
+            pre=pre,
+            x_name="h1",
+            relu_alpha={"h1": alpha},
+            relu_pre_add_coeff_u={"h1": add_u},
+            relu_pre_add_coeff_l={"h1": add_l},
+            device=A_u.device,
+            dtype=A_u.dtype,
+            caller="test",
+        )
 
     assert torch.equal(wrapped.A_u.to_dense(), reference.A_u)
     assert torch.equal(wrapped.A_l.to_dense(), reference.A_l)
@@ -220,17 +221,18 @@ def test_structured_relu_alpha_gradient_matches_dense_reference_path() -> None:
             dtype=A_u.dtype,
             caller="test",
         )
-    structured = _backprop_relu_step(
-        state,
-        pre=pre,
-        x_name="h1",
-        relu_alpha={"h1": structured_alpha},
-        relu_pre_add_coeff_u=None,
-        relu_pre_add_coeff_l=None,
-        device=A_u.device,
-        dtype=A_u.dtype,
-        caller="test",
-    )
+    with _relu_backward_mode("structured"):
+        structured = _backprop_relu_step(
+            state,
+            pre=pre,
+            x_name="h1",
+            relu_alpha={"h1": structured_alpha},
+            relu_pre_add_coeff_u=None,
+            relu_pre_add_coeff_l=None,
+            device=A_u.device,
+            dtype=A_u.dtype,
+            caller="test",
+        )
     dense_loss = dense.A_l.to_dense().sum() + dense.b_l.sum()
     structured_loss = structured.A_l.to_dense().sum() + structured.b_l.sum()
     dense_loss.backward()
@@ -266,14 +268,15 @@ def test_full_crown_and_multistep_alpha_match_dense_reference_mode() -> None:
             steps=3,
             lr=0.1,
         )
-    structured_crown = run_crown_ibp_mlp(module, spec, linear_spec_C=linear_spec)
-    structured_alpha, structured_state, _ = run_alpha_crown_mlp(
-        module,
-        spec,
-        linear_spec_C=linear_spec,
-        steps=3,
-        lr=0.1,
-    )
+    with _relu_backward_mode("structured"):
+        structured_crown = run_crown_ibp_mlp(module, spec, linear_spec_C=linear_spec)
+        structured_alpha, structured_state, _ = run_alpha_crown_mlp(
+            module,
+            spec,
+            linear_spec_C=linear_spec,
+            steps=3,
+            lr=0.1,
+        )
 
     assert torch.allclose(
         structured_crown.lower, dense_crown.lower, atol=1e-10, rtol=1e-10
@@ -317,14 +320,17 @@ def test_alpha_beta_and_bab_match_dense_reference_mode() -> None:
             lr=0.1,
             beta_init=0.1,
         )
-    structured_bounds, structured_alpha, structured_beta, _ = run_alpha_beta_crown_mlp(
-        module,
-        spec,
-        relu_split_state=split_state,
-        steps=2,
-        lr=0.1,
-        beta_init=0.1,
-    )
+    with _relu_backward_mode("structured"):
+        structured_bounds, structured_alpha, structured_beta, _ = (
+            run_alpha_beta_crown_mlp(
+                module,
+                spec,
+                relu_split_state=split_state,
+                steps=2,
+                lr=0.1,
+                beta_init=0.1,
+            )
+        )
 
     assert torch.allclose(
         structured_bounds.lower, dense_bounds.lower, atol=1e-10, rtol=1e-10
@@ -356,7 +362,8 @@ def test_alpha_beta_and_bab_match_dense_reference_mode() -> None:
     )
     with _relu_backward_mode("dense"):
         dense_bab = solve_bab_mlp(module, spec, config=config)
-    structured_bab = solve_bab_mlp(module, spec, config=config)
+    with _relu_backward_mode("structured"):
+        structured_bab = solve_bab_mlp(module, spec, config=config)
 
     assert structured_bab.status == dense_bab.status
     assert structured_bab.nodes_visited == dense_bab.nodes_visited
