@@ -55,9 +55,9 @@ materialization，但不能把其它状态混入 coefficient bytes。
 - trace-on 会创建 Python 对象并可能重置/读取 CUDA allocator counter，禁止把该延迟作为 headline；
 - profile runner 必须把失败、OOM 和 unsupported 也写入 JSONL。
 
-## 5. 当前 ReLU 事件语义
+## 5. ReLU dense/structured 事件语义
 
-`relu_sign_split` 表示当前 ReLU backward 将主 coefficient 转成 persistent dense state：
+Dense reference mode 的 `relu_sign_split` 表示主 coefficient 转成 persistent dense state：
 
 ```text
 persistent_or_ephemeral = persistent
@@ -65,5 +65,6 @@ logical_lifetime_begin = relu_backward_step
 logical_lifetime_end = backward_end
 ```
 
-未来 bias reduction 若局部展开，必须使用独立 reason `relu_bias_sign_reduce`，并标记为
-`ephemeral`，不能与 persistent coefficient fallback 合并统计。
+Structured mode 使用 `SignSplitLinearOperator` 保存主 coefficient；bias reduction 使用独立
+reason `relu_bias_sign_reduce`，center/norm/contract 使用 `sign_split_*`，全部标记为
+`ephemeral`，不能与 dense reference 的 persistent fallback 合并统计。

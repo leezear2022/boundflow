@@ -5,6 +5,9 @@
 > 硬件：RTX 4060 Laptop GPU，PyTorch 2.12.1+cu132  
 > 结果：180/180 `ok`，无 fail/OOM/unsupported
 
+> 注意：该运行早于 structured 主路径切换，全部是 dense reference baseline。新的双模式结果
+> 由后续 comparison artifact 单独记录，本文件中的数字不能当作 structured 结果。
+
 ## 1. 矩阵与口径
 
 - workload：MLP chain、CNN chain、residual block、add+concat DAG、三 BasicBlock mini-ResNet；

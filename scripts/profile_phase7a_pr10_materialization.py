@@ -32,7 +32,11 @@ from boundflow.frontends.pytorch.frontend import import_torch
 from boundflow.planner import plan_interval_ibp_v0
 from boundflow.runtime.alpha_beta_crown import run_alpha_beta_crown_mlp
 from boundflow.runtime.alpha_crown import run_alpha_crown_mlp
-from boundflow.runtime.crown_ibp import _forward_ibp_trace_mlp, run_crown_ibp_mlp
+from boundflow.runtime.crown_ibp import (
+    _forward_ibp_trace_mlp,
+    _relu_backward_mode,
+    run_crown_ibp_mlp,
+)
 from boundflow.runtime.materialization import (
     TRACE_SCHEMA_VERSION,
     trace_materializations,
@@ -41,6 +45,7 @@ from boundflow.runtime.task_executor import InputSpec
 
 PROFILE_SCHEMA_VERSION = "boundflow.pr10-profile/v1"
 METHODS = ("CROWN", "alpha-CROWN", "alpha-beta-CROWN")
+RELU_MODES = ("dense", "structured")
 WORKLOADS = (
     "mlp_chain",
     "cnn_chain",
@@ -223,7 +228,9 @@ def _fixed_split_state(relu_pre: dict[str, object]) -> dict[str, torch.Tensor]:
         midpoint = (lower + upper) * 0.5
         split = torch.zeros_like(lower, dtype=torch.int8)
         for batch_index in range(int(lower.shape[0])):
-            ambiguous = ((lower[batch_index] < 0) & (upper[batch_index] > 0)).reshape(-1)
+            ambiguous = ((lower[batch_index] < 0) & (upper[batch_index] > 0)).reshape(
+                -1
+            )
             candidates = ambiguous.nonzero()
             if int(candidates.numel()) == 0:
                 continue
@@ -319,6 +326,7 @@ def _profile_query(  # pylint: disable=too-many-arguments,too-many-locals
     module: object,
     *,
     method: str,
+    relu_mode: str,
     spec_size: int,
     domain_batch: int,
     device: torch.device,
@@ -327,7 +335,7 @@ def _profile_query(  # pylint: disable=too-many-arguments,too-many-locals
     repeats: int,
     optimization_steps: int,
 ) -> dict[str, object]:
-    query_id = f"{workload.name}:{method}:s{spec_size}:d{domain_batch}"
+    query_id = f"{workload.name}:{method}:{relu_mode}:s{spec_size}:d{domain_batch}"
     base = {
         "profile_schema_version": PROFILE_SCHEMA_VERSION,
         "status": "ok",
@@ -336,6 +344,7 @@ def _profile_query(  # pylint: disable=too-many-arguments,too-many-locals
         "query_id": query_id,
         "workload": {"name": workload.name, "tier": workload.tier},
         "method": method,
+        "relu_backward_mode": relu_mode,
         "spec_batch": spec_size,
         "domain_batch": domain_batch,
         "domain_source": "synthetic_fixed_domain_batch",
@@ -360,14 +369,15 @@ def _profile_query(  # pylint: disable=too-many-arguments,too-many-locals
         )
 
         def _invoke():
-            return _run_method(
-                method,
-                module,
-                spec,
-                linear_spec,
-                split_state,
-                optimization_steps=optimization_steps,
-            )
+            with _relu_backward_mode(relu_mode):
+                return _run_method(
+                    method,
+                    module,
+                    spec,
+                    linear_spec,
+                    split_state,
+                    optimization_steps=optimization_steps,
+                )
 
         timing = _measure_trace_off(
             _invoke, device=device, warmup=warmup, repeats=repeats
@@ -450,6 +460,7 @@ def _flatten_row(row: dict[str, object]) -> dict[str, object]:
         "workload": workload.get("name"),
         "tier": workload.get("tier"),
         "method": row.get("method"),
+        "relu_backward_mode": row.get("relu_backward_mode"),
         "spec_batch": row.get("spec_batch"),
         "domain_batch": row.get("domain_batch"),
         "event_count": materialization.get("event_count"),
@@ -518,6 +529,7 @@ def main(argv: Sequence[str] | None = None) -> int:  # pylint: disable=too-many-
     parser.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto")
     parser.add_argument("--workloads", default=",".join(WORKLOADS))
     parser.add_argument("--methods", default=",".join(METHODS))
+    parser.add_argument("--relu-modes", default="structured")
     parser.add_argument("--spec-sizes", default="1,9")
     parser.add_argument("--domain-batches", default="1,8")
     parser.add_argument("--optimization-steps", type=int, default=1)
@@ -527,6 +539,7 @@ def main(argv: Sequence[str] | None = None) -> int:  # pylint: disable=too-many-
 
     workloads = _parse_csv_list(args.workloads, allowed=WORKLOADS)
     methods = _parse_csv_list(args.methods, allowed=METHODS)
+    relu_modes = _parse_csv_list(args.relu_modes, allowed=RELU_MODES)
     spec_sizes = _parse_int_list(args.spec_sizes)
     domain_batches = _parse_int_list(args.domain_batches)
     device_name = (
@@ -552,22 +565,24 @@ def main(argv: Sequence[str] | None = None) -> int:  # pylint: disable=too-many-
         )
         module = plan_interval_ibp_v0(program)
         for method in methods:
-            for spec_size in spec_sizes:
-                for domain_batch in domain_batches:
-                    rows.append(
-                        _profile_query(
-                            workload,
-                            module,
-                            method=method,
-                            spec_size=spec_size,
-                            domain_batch=domain_batch,
-                            device=device,
-                            run_id=run_id,
-                            warmup=args.warmup,
-                            repeats=args.repeats,
-                            optimization_steps=args.optimization_steps,
+            for relu_mode in relu_modes:
+                for spec_size in spec_sizes:
+                    for domain_batch in domain_batches:
+                        rows.append(
+                            _profile_query(
+                                workload,
+                                module,
+                                method=method,
+                                relu_mode=relu_mode,
+                                spec_size=spec_size,
+                                domain_batch=domain_batch,
+                                device=device,
+                                run_id=run_id,
+                                warmup=args.warmup,
+                                repeats=args.repeats,
+                                optimization_steps=args.optimization_steps,
+                            )
                         )
-                    )
     out_dir = Path(args.out_root) / run_id
     effective_argv = list(sys.argv if argv is None else [Path(sys.argv[0]).name, *argv])
     _write_outputs(out_dir, rows, effective_argv)

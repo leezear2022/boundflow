@@ -1,5 +1,11 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-07-12：增加 dense/structured ReLU profile 对照
+
+- runner 新增双模式矩阵；严格比较 trace-off latency/peak 与 trace-on lifetime mechanism。
+- 补齐 αβ fixed-split 和真实 solve_bab 搜索的 dense/structured oracle。
+- 详细记录：`gemini_doc/change_2026-07-12_add_dense_structured_profile_comparison.md`。
+
 ## 2026-07-12：ReLU backward 保持 structured coefficient
 
 - 默认返回 SignSplit operator；bias reduction 只做有 reason/site 的 ephemeral materialization。

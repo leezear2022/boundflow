@@ -2,11 +2,14 @@ import torch
 
 from boundflow.domains.interval import IntervalState
 from boundflow.ir.task import BFTaskModule, BoundTask, TaskKind, TaskOp
+from boundflow.runtime.alpha_beta_crown import run_alpha_beta_crown_mlp
 from boundflow.runtime.alpha_crown import run_alpha_crown_mlp
+from boundflow.runtime.bab import BabConfig, solve_bab_mlp
 from boundflow.runtime.crown_ibp import (
     AffineBackwardState,
     _backprop_relu_step,
     _backprop_relu_step_dense_reference,
+    _forward_ibp_trace_mlp,
     _relu_backward_mode,
     run_crown_ibp_mlp,
 )
@@ -290,3 +293,74 @@ def test_full_crown_and_multistep_alpha_match_dense_reference_mode() -> None:
         atol=1e-10,
         rtol=1e-10,
     )
+
+
+def test_alpha_beta_and_bab_match_dense_reference_mode() -> None:
+    module = _make_relu_mlp()
+    spec = InputSpec.linf(
+        value_name="input", center=torch.zeros(1, 4, dtype=torch.float64), eps=1.0
+    )
+    _interval, relu_pre = _forward_ibp_trace_mlp(module, spec)
+    pre = relu_pre["h1"]
+    ambiguous = ((pre.lower[0] < 0) & (pre.upper[0] > 0)).nonzero()
+    assert int(ambiguous.numel()) > 0
+    split = torch.zeros(6, dtype=torch.int8)
+    split[int(ambiguous[0].item())] = 1
+    split_state = {"h1": split}
+
+    with _relu_backward_mode("dense"):
+        dense_bounds, dense_alpha, dense_beta, _ = run_alpha_beta_crown_mlp(
+            module,
+            spec,
+            relu_split_state=split_state,
+            steps=2,
+            lr=0.1,
+            beta_init=0.1,
+        )
+    structured_bounds, structured_alpha, structured_beta, _ = run_alpha_beta_crown_mlp(
+        module,
+        spec,
+        relu_split_state=split_state,
+        steps=2,
+        lr=0.1,
+        beta_init=0.1,
+    )
+
+    assert torch.allclose(
+        structured_bounds.lower, dense_bounds.lower, atol=1e-10, rtol=1e-10
+    )
+    assert torch.allclose(
+        structured_bounds.upper, dense_bounds.upper, atol=1e-10, rtol=1e-10
+    )
+    assert torch.allclose(
+        structured_alpha.alpha_by_relu_input["h1"],
+        dense_alpha.alpha_by_relu_input["h1"],
+        atol=1e-10,
+        rtol=1e-10,
+    )
+    assert torch.allclose(
+        structured_beta.beta_by_relu_input["h1"],
+        dense_beta.beta_by_relu_input["h1"],
+        atol=1e-10,
+        rtol=1e-10,
+    )
+
+    config = BabConfig(
+        max_nodes=8,
+        oracle="alpha_beta",
+        node_batch_size=2,
+        enable_node_eval_cache=False,
+        alpha_steps=2,
+        alpha_lr=0.1,
+        threshold=0.0,
+    )
+    with _relu_backward_mode("dense"):
+        dense_bab = solve_bab_mlp(module, spec, config=config)
+    structured_bab = solve_bab_mlp(module, spec, config=config)
+
+    assert structured_bab.status == dense_bab.status
+    assert structured_bab.nodes_visited == dense_bab.nodes_visited
+    assert structured_bab.nodes_evaluated == dense_bab.nodes_evaluated
+    assert structured_bab.nodes_expanded == dense_bab.nodes_expanded
+    assert abs(structured_bab.best_lower - dense_bab.best_lower) <= 1e-10
+    assert abs(structured_bab.best_upper - dense_bab.best_upper) <= 1e-10

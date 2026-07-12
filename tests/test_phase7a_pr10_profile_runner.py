@@ -37,6 +37,7 @@ def test_pr10_profile_runner_writes_trace_on_and_timing_off_evidence(
     row = json.loads((profile / "raw.jsonl").read_text(encoding="utf-8"))
     assert row["status"] == "ok"
     assert row["domain_source"] == "synthetic_fixed_domain_batch"
+    assert row["relu_backward_mode"] == "structured"
     assert row["timing_trace_off"]["trace_enabled"] is False
     assert row["timing_trace_off"]["peak_measurement_repeats"] == 0
     assert row["timing_trace_off"]["allocator_cache_cleared_before_peak"] is False
@@ -63,6 +64,51 @@ def test_pr10_profile_runner_writes_trace_on_and_timing_off_evidence(
     manifest = json.loads((profile / "manifest.json").read_text(encoding="utf-8"))
     assert manifest["rows"] == 1
     assert manifest["status_counts"]["ok"] == 1
+
+
+def test_pr10_profile_runner_compares_dense_and_structured_modes(
+    tmp_path: Path,
+) -> None:
+    rc = main(
+        [
+            "--run-id",
+            "mode-comparison",
+            "--out-root",
+            str(tmp_path),
+            "--device",
+            "cpu",
+            "--workloads",
+            "mlp_chain",
+            "--methods",
+            "CROWN",
+            "--relu-modes",
+            "dense,structured",
+            "--spec-sizes",
+            "1",
+            "--domain-batches",
+            "1",
+            "--optimization-steps",
+            "0",
+            "--warmup",
+            "0",
+            "--repeats",
+            "1",
+        ]
+    )
+    assert rc == 0
+    raw = tmp_path / "mode-comparison" / "profile" / "raw.jsonl"
+    rows = [json.loads(line) for line in raw.read_text(encoding="utf-8").splitlines()]
+    assert {row["relu_backward_mode"] for row in rows} == {"dense", "structured"}
+    dense = next(row for row in rows if row["relu_backward_mode"] == "dense")
+    structured = next(row for row in rows if row["relu_backward_mode"] == "structured")
+    assert (
+        dense["trace_on"]["materialization"]["by_lifetime_class"]["persistent"]["count"]
+        > 0
+    )
+    assert (
+        structured["trace_on"]["materialization"]["by_lifetime_class"].get("persistent")
+        is None
+    )
 
 
 def test_pr10_profile_runner_alpha_beta_uses_per_domain_split_state(
