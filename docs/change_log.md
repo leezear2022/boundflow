@@ -1,5 +1,17 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-07-12：修复 αβ 多首层 halfspace 的 autograd graph 重用
+
+- certificate optimizer 将固定 halfspace 系数与模型参数计算图分离，避免重复 backward。
+- 新增双首层卷积分支、双 split halfspace 的 detector 与完整 oracle 回归。
+- 详细记录：`gemini_doc/change_2026-07-12_fix_alpha_beta_halfspace_autograd_reuse.md`。
+
+## 2026-07-12：增加 PR-10 materialization profile runner
+
+- 新增机制与 mini-ResNet workload、CROWN/α/αβ、spec/domain fixed-batch replay 扫描。
+- 严格分离 trace-on characterization 与 trace-off latency/CUDA peak。
+- 详细记录：`gemini_doc/change_2026-07-12_add_pr10_materialization_profile_runner.md`。
+
 ## 2026-07-12：冻结 Materialization Trace Schema v1
 
 - 补齐 query/event、operator tree、batch axes、logical lifetime 和 autograd/α/β 字段。

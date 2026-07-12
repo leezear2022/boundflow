@@ -17,7 +17,7 @@
 |---|---|---|
 | PR-10A Materialization instrumentation | validated | `25225e5`；ReLU barrier opt-in trace |
 | PR-10A.1 Trace schema v1 | validated | `boundflow.materialization/v1`、schema contract tests、164 passed |
-| PR-10B 真实 workload profile | next | mechanism + mini-ResNet、method/spec/domain scan |
+| PR-10B 真实 workload profile | in progress | trace-on/off runner；mechanism + mini-ResNet、method/spec/domain scan |
 | PR-10C Dense/gradient reference oracle | planned | local step、full backward、solver、α gradient |
 | PR-10D Structured ReLU transform | planned | exact SignSplit operator；不得错误穿过 matmul/conv |
 | PR-10E 全路径回归与 benchmark | planned | correctness/structural/opportunity gates |

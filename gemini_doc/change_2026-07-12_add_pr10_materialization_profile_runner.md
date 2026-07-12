@@ -1,0 +1,22 @@
+# 变更记录：增加 PR-10 materialization profile runner
+
+## 修改
+
+- 新增 MLP chain、CNN chain、residual block、add+concat DAG 和三 BasicBlock mini-ResNet。
+- 同一 query 分开运行 trace-off timing/peak 与 trace-on mechanism characterization。
+- 覆盖 CROWN、α-CROWN、固定 split αβ-CROWN，以及 spec/domain batch 扫描。
+- fixed split 按域分别从该域 ambiguous ReLU 中选择，禁止把第一个域的 split 广播到其它域；
+  多域 αβ 使用 per-domain 参数。
+- 输出 `raw.jsonl`、`normalized.csv`、`manifest.json`；fail/OOM 不丢弃。
+- 独立记录 coefficient logical bytes 与 α/β/intermediate/weight/operator state bytes。
+
+## 口径
+
+当前 domain batch 是由同一 solver 入口执行的 fixed-batch replay，不等价于完整 BaB 搜索树。
+trace-on latency 不进入性能字段；正式 latency 和 CUDA peak 只来自 trace-off 路径。
+
+## 验证
+
+- CPU 单 query smoke 检查 JSONL、CSV、manifest 和 trace-on/off 隔离；
+- reduced GPU profile 检查全部 workload/method/config 的 status 与证据聚合；
+- 全量 pytest、Pylint 和 diff check。
