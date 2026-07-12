@@ -21,5 +21,7 @@ trace-on latency 不进入性能字段；正式 latency 和 CUDA peak 只来自 
 ## 验证
 
 - CPU 单 query smoke 检查 JSONL、CSV、manifest 和 trace-on/off 隔离；
-- reduced GPU profile 检查全部 workload/method/config 的 status 与证据聚合；
+- clean full GPU profile：5 workload × 3 method × 4 spec × 3 domain，共 180/180 `ok`；
 - 全量 pytest、Pylint 和 diff check。
+
+结果与不可过度声明的边界见 `gemini_doc/pr10_materialization_profile_summary_2026_07_12.md`。
