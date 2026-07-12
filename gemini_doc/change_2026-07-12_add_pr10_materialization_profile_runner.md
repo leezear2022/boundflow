@@ -14,7 +14,8 @@
 
 ## 口径
 
-当前 domain batch 是由同一 solver 入口执行的 fixed-batch replay，不等价于完整 BaB 搜索树。
+当前 domain batch 是合成固定域批 `synthetic_fixed_domain_batch`，不宣称来自真实 BaB 搜索树；
+真实 solver domain replay 仍需后续独立证据。
 trace-on latency 不进入性能字段；正式 latency 和 CUDA peak 只来自 trace-off 路径。
 
 ## 验证

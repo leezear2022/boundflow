@@ -36,7 +36,7 @@ def test_pr10_profile_runner_writes_trace_on_and_timing_off_evidence(
     profile = tmp_path / "smoke" / "profile"
     row = json.loads((profile / "raw.jsonl").read_text(encoding="utf-8"))
     assert row["status"] == "ok"
-    assert row["domain_source"] == "fixed_batch_replay"
+    assert row["domain_source"] == "synthetic_fixed_domain_batch"
     assert row["timing_trace_off"]["trace_enabled"] is False
     assert row["timing_trace_off"]["peak_measurement_repeats"] == 0
     assert row["timing_trace_off"]["allocator_cache_cleared_before_peak"] is False

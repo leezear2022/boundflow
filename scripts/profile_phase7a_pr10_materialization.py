@@ -338,7 +338,7 @@ def _profile_query(  # pylint: disable=too-many-arguments,too-many-locals
         "method": method,
         "spec_batch": spec_size,
         "domain_batch": domain_batch,
-        "domain_source": "fixed_batch_replay",
+        "domain_source": "synthetic_fixed_domain_batch",
         "device": str(device),
     }
     try:
