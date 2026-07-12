@@ -51,6 +51,7 @@
 - `gemini_doc/asplos_claims_map.md`：ASPLOS 三项贡献的动态证据映射
 - `gemini_doc/materialization_trace_schema_v1.md`：PR-10 trace JSONL 与内存口径
 - `gemini_doc/pr10_materialization_profile_summary_2026_07_12.md`：PR-10 第一版 clean GPU profile 与 claim 边界
+- `gemini_doc/pr10_dense_structured_comparison_2026_07_12.md`：PR-10 双模式 guardrail 与最终判定
 - `gemini_doc/artifact_claims_phase5d.md`：Phase 5D artifact claims（证据链/口径映射）
 - `gemini_doc/artifact_appendix_phase5d.md`：Phase 5D artifact appendix（复现说明）
 - `gemini_doc/project_evolution_overview.md`：研发脉络总览（目标、阶段推进、代码落点、未来路线）

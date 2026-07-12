@@ -23,7 +23,7 @@
 | PR-10C.2 Dense/structured 双路径 oracle | validated | local/full/gradient、plain/α/αβ、真实 solve_bab 搜索等价 |
 | PR-10D.1 Exact SignSplit operator | validated | exact dense/gradient；composition 包裹而不下推 sign；26 passed |
 | PR-10D.2 Structured ReLU 主路径 | validated | main coefficient 不永久 dense；ephemeral bias；operator dump；177 passed |
-| PR-10E 全路径回归与 benchmark | in progress | dense/structured clean GPU matrix 与 guardrail |
+| PR-10E 全路径回归与 benchmark | validated（guarded） | 360 rows；354 ok/6 structured OOM；179 passed；dense 默认 |
 
 ## 当前 Gate 0 证据
 
@@ -40,3 +40,12 @@
   trace-off peak allocated；
 - `C2-M1` partial：query axes 会改变 materialization 规模，但尚未证明不同计划各有最优 regime；
 - 详细口径与限制：`gemini_doc/pr10_materialization_profile_summary_2026_07_12.md`。
+
+## PR-10 完成判定
+
+- `C1-E2` validated：structured 成功 query 的 persistent ReLU materialization 为 0；
+- `C1-E3` validated：local/full/gradient、CROWN/α/αβ/solve_bab 与 dense reference 对齐；
+- `C2-M1` validated：plain CROWN structured 常降低 peak，而 α/β structured peak 全面恶化并
+  OOM，证明 method/grad-aware 策略存在不同 regime；
+- PR-10 状态：**complete, feature-gated**；默认 dense，structured 由环境开关启用；
+- 对照证据：`gemini_doc/pr10_dense_structured_comparison_2026_07_12.md`。

@@ -1,5 +1,11 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-07-12：PR-10 以 guarded structured path 完成
+
+- 360-row clean GPU 对照：354 ok、6 structured OOM；全量 179 passed。
+- structured 消除 persistent dense，但 α/β memory guardrail 失败，因此 dense 保持默认。
+- 详细记录：`gemini_doc/change_2026-07-12_complete_pr10_guarded.md`。
+
 ## 2026-07-12：增加 dense/structured ReLU profile 对照
 
 - runner 新增双模式矩阵；严格比较 trace-off latency/peak 与 trace-on lifetime mechanism。

@@ -16,9 +16,11 @@
 两种 mode 的 latency/peak 都来自 trace-off；trace-on 只解释 mechanism。结构化 Python 路径若
 稳定明显变慢或 peak 更高，将保留 dense feature flag，不用 logical bytes 单独证明收益。
 
-## 待验证
+## 验证结果
 
-- clean GPU 双模式矩阵；
-- persistent/ephemeral bytes 对照；
-- peak allocated/reserved 与 latency guardrail；
-- 全量 pytest 与 artifact summary。
+- clean GPU 双模式矩阵：360 rows，354 ok、6 structured OOM、0 correctness failure；
+- structured 成功 query persistent bytes 全为 0；
+- CROWN 60 个 paired points 中 structured peak wins 50，但平均 latency ratio 为 3.079×；
+- α/αβ structured 无 peak wins，并在 mini-ResNet 大点 OOM；
+- 全量 179 passed、1 个预期 skip；
+- 结论见 `gemini_doc/pr10_dense_structured_comparison_2026_07_12.md`。

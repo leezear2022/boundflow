@@ -2,7 +2,7 @@
 
 > 状态：**顶层执行计划 v1.0；后续研究工作受本文门禁约束。**  
 > 基线日期：2026-07-12  
-> 当前代码基线：`ce36a51`（Phase 7A PR-9，operator-preserving DAG backward）  
+> 当前研究代码基线：`dfcc185`（PR-10 guarded structured ReLU path）
 > 投稿策略：ASPLOS 2027 September Cycle 为有条件冲刺；ASPLOS 2028 为稳健主目标。
 
 ---
@@ -206,7 +206,7 @@ Runtime 不能笼统声称相关查询可以共享中间状态。每个缓存对
 |---|---|---|
 | Frontend / Primal IR | Torch、ONNX、normalize、general DAG 子集 | 提供真实图输入与双前端一致性 |
 | Bound/runtime semantics | IBP、CROWN-IBP、α-CROWN、αβ-CROWN、BaB | 作为系统优化的正确性载体，不作为算法贡献 |
-| LinearOperator | dense、right-matmul、conv、reshape/concretize 等基础 | C1 的起点 |
+| LinearOperator | dense、right-matmul、conv、reshape、SignSplit、deterministic dump | C1 已完成 PR-10 基础 |
 | General DAG | residual add、concat；PR-9 去掉 merge/slice dense fallback | 已完成第一批 operator-preserving path |
 | Planner | task graph、partition、liveness、storage reuse、memory stats | C2 的工程基础，但尚未形成 materialization 联合决策 |
 | TVM backend | Relax/TIR、compile cache、fusion、memory-plan 对照 | C2/C3 的执行后端 |
@@ -221,7 +221,7 @@ Runtime 不能笼统声称相关查询可以共享中间状态。每个缓存对
 
 | 缺口 | 当前问题 | 必须达到的证据 |
 |---|---|---|
-| ReLU barrier | backward 仍在公共路径 `to_dense()` | structured ReLU 路径、显式 barrier 与 materialization trace |
+| ReLU barrier | structured mode 已消除 persistent dense；dense 保持默认 | 需 Planner/fused lowering 解决 eager 重算与 α/β OOM |
 | 物化决策 | 现有 Planner 主要做 partition/reuse，缺少 lazy-vs-materialize 选择 | 至少一个预算/shape/query-aware 的自动计划 |
 | fused CROWN task | TVM 后端以 IBP/task 基础设施为主 | CROWN 粗粒度 task lowering 与正确性/性能门禁 |
 | repeated-query abstraction | multi-spec、BaB batch、cache 仍是分散机制 | 统一 QueryBatch/QueryState/PlanCache 或等价接口 |
