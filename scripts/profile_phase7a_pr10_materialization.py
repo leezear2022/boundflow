@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import csv
 import datetime as dt
+import gc
 import hashlib
 import json
 import os
@@ -276,29 +277,40 @@ def _measure_trace_off(
     repeats: int,
 ) -> dict[str, object]:
     for _ in range(warmup):
-        function()
+        warmup_result = function()
+        del warmup_result
     _sync(device)
     timings: list[float] = []
-    peak_allocated: list[int] = []
-    peak_reserved: list[int] = []
     for _ in range(repeats):
-        if device.type == "cuda":
-            torch.cuda.reset_peak_memory_stats(device)
         start = time.perf_counter()
-        function()
+        timing_result = function()
         _sync(device)
         timings.append((time.perf_counter() - start) * 1000.0)
-        if device.type == "cuda":
-            peak_allocated.append(int(torch.cuda.max_memory_allocated(device)))
-            peak_reserved.append(int(torch.cuda.max_memory_reserved(device)))
+        del timing_result
+
+    peak_allocated: int | None = None
+    peak_reserved: int | None = None
+    if device.type == "cuda":
+        gc.collect()
+        torch.cuda.empty_cache()
+        torch.cuda.reset_peak_memory_stats(device)
+        memory_result = function()
+        _sync(device)
+        peak_allocated = int(torch.cuda.max_memory_allocated(device))
+        peak_reserved = int(torch.cuda.max_memory_reserved(device))
+        del memory_result
+        gc.collect()
+        torch.cuda.empty_cache()
     return {
         "trace_enabled": False,
         "warmup": warmup,
         "repeats": repeats,
         "latency_ms_median": statistics.median(timings),
         "latency_ms_p90": _percentile(timings, 0.90),
-        "peak_cuda_allocated_bytes": max(peak_allocated) if peak_allocated else None,
-        "peak_cuda_reserved_bytes": max(peak_reserved) if peak_reserved else None,
+        "peak_cuda_allocated_bytes": peak_allocated,
+        "peak_cuda_reserved_bytes": peak_reserved,
+        "peak_measurement_repeats": 1 if device.type == "cuda" else 0,
+        "allocator_cache_cleared_before_peak": device.type == "cuda",
     }
 
 
