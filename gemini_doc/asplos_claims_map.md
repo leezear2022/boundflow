@@ -19,7 +19,8 @@
 | PR-10A.1 Trace schema v1 | validated | `boundflow.materialization/v1`、schema contract tests、164 passed |
 | PR-10B.1 workload characterization | validated | `8f2c998`；180/180 clean GPU profile；mini-ResNet s128/d32 |
 | PR-10B.2 真实 BaB fixed-domain replay | planned | 当前仅 `synthetic_fixed_domain_batch`，不得描述成 BaB 结果 |
-| PR-10C Dense/gradient reference oracle | planned | local step、full backward、solver、α gradient |
+| PR-10C.1 Dense/gradient reference oracle | validated | 显式 `A_u/A_l/b_u/b_l` oracle；独立 α sign-gradient；170 passed |
+| PR-10C.2 Dense/structured 双路径 oracle | planned | 待 SignSplit operator 后比较 local/full/solver/multi-step gradient |
 | PR-10D Structured ReLU transform | planned | exact SignSplit operator；不得错误穿过 matmul/conv |
 | PR-10E 全路径回归与 benchmark | planned | correctness/structural/opportunity gates |
 

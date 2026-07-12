@@ -1,5 +1,11 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-07-12：冻结 dense ReLU backward reference oracle
+
+- 抽出显式 dense reference，返回 `A_u/A_l/b_u/b_l`，现有路径只调用该 oracle。
+- 增加 flat/NCHW、stable/unstable、α、β coefficient 与 α gradient 回归。
+- 详细记录：`gemini_doc/change_2026-07-12_freeze_dense_relu_reference_oracle.md`。
+
 ## 2026-07-12：修复 αβ 多首层 halfspace 的 autograd graph 重用
 
 - certificate optimizer 将固定 halfspace 系数与模型参数计算图分离，避免重复 backward。

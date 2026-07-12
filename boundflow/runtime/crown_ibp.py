@@ -214,6 +214,16 @@ class AffineBackwardState:
     b_l: torch.Tensor
 
 
+@dataclass(frozen=True)
+class DenseReluBackwardResult:
+    """Dense reference outputs for one ReLU backward transformer step."""
+
+    A_u: torch.Tensor
+    A_l: torch.Tensor
+    b_u: torch.Tensor
+    b_l: torch.Tensor
+
+
 def _resolve_output_value(task: Any, output_value: Optional[str], *, caller: str) -> str:
     if output_value is None:
         if len(task.output_values) != 1:
@@ -634,8 +644,11 @@ def _backprop_conv2d_step(
     )
 
 
-def _backprop_relu_step(
-    state: AffineBackwardState,
+def _backprop_relu_step_dense_reference(
+    A_u: torch.Tensor,
+    A_l: torch.Tensor,
+    b_u: torch.Tensor,
+    b_l: torch.Tensor,
     *,
     pre: IntervalState,
     x_name: str,
@@ -645,55 +658,30 @@ def _backprop_relu_step(
     device: torch.device,
     dtype: torch.dtype,
     caller: str,
-) -> AffineBackwardState:
-    orig_input_shape = tuple(int(dim) for dim in pre.lower.shape[1:])
+) -> DenseReluBackwardResult:
+    """Apply the exact eager dense ReLU backward equations used as PR-10 oracle."""
+
     pre_flat = IntervalState(
         lower=pre.lower.reshape(int(pre.lower.shape[0]), -1),
         upper=pre.upper.reshape(int(pre.upper.shape[0]), -1),
     )
-    if pre_flat.lower.shape[1] != state.A_u.input_numel or pre_flat.lower.shape[1] != state.A_l.input_numel:
+    expected_prefix = (int(pre_flat.lower.shape[0]),)
+    if A_u.dim() != 3 or A_l.dim() != 3:
+        raise ValueError(f"{caller} dense ReLU reference expects rank-3 A tensors")
+    if tuple(A_u.shape[:1]) != expected_prefix or tuple(A_l.shape[:1]) != expected_prefix:
+        raise ValueError(f"{caller} dense ReLU reference batch mismatch")
+    if int(A_u.shape[2]) != int(pre_flat.lower.shape[1]) or int(A_l.shape[2]) != int(pre_flat.lower.shape[1]):
         raise ValueError(
             f"{caller} relu backward shape mismatch: pre={tuple(pre.lower.shape)} "
-            f"A_u.input_shape={state.A_u.input_shape} A_l.input_shape={state.A_l.input_shape}"
+            f"A_u={tuple(A_u.shape)} A_l={tuple(A_l.shape)}"
         )
+    if tuple(b_u.shape) != tuple(A_u.shape[:2]) or tuple(b_l.shape) != tuple(A_l.shape[:2]):
+        raise ValueError(f"{caller} dense ReLU reference bias shape mismatch")
     if pre.lower.dim() != 2:
         if relu_pre_add_coeff_u is not None and x_name in relu_pre_add_coeff_u:
             raise NotImplementedError(
                 f"{caller} only supports relu_pre_add_coeff_u on rank-2 pre-activations; got {tuple(pre.lower.shape)} for {x_name}"
             )
-
-    A_u = materialize_linear_operator(
-        state.A_u,
-        reason="relu_sign_split",
-        operator_site=f"{x_name}:upper",
-        source_value=x_name,
-        source_primal_op="relu",
-        persistent_or_ephemeral="persistent",
-        logical_lifetime_begin="relu_backward_step",
-        logical_lifetime_end="backward_end",
-        alpha_related=relu_alpha is not None and x_name in relu_alpha,
-        beta_related=(
-            (relu_pre_add_coeff_u is not None and x_name in relu_pre_add_coeff_u)
-            or (relu_pre_add_coeff_l is not None and x_name in relu_pre_add_coeff_l)
-        ),
-    )
-    A_l = materialize_linear_operator(
-        state.A_l,
-        reason="relu_sign_split",
-        operator_site=f"{x_name}:lower",
-        source_value=x_name,
-        source_primal_op="relu",
-        persistent_or_ephemeral="persistent",
-        logical_lifetime_begin="relu_backward_step",
-        logical_lifetime_end="backward_end",
-        alpha_related=relu_alpha is not None and x_name in relu_alpha,
-        beta_related=(
-            (relu_pre_add_coeff_u is not None and x_name in relu_pre_add_coeff_u)
-            or (relu_pre_add_coeff_l is not None and x_name in relu_pre_add_coeff_l)
-        ),
-    )
-    b_u = state.b_u
-    b_l = state.b_l
 
     alpha_u, beta_u, alpha_l, beta_l = _relu_relax(pre_flat.lower, pre_flat.upper)
     if relu_alpha is not None and x_name in relu_alpha:
@@ -711,11 +699,11 @@ def _backprop_relu_step(
 
     sel_alpha_u = torch.where(A_u >= 0, alpha_u.unsqueeze(1), alpha_l.unsqueeze(1))
     sel_beta_u = torch.where(A_u >= 0, beta_u.unsqueeze(1), beta_l.unsqueeze(1))
-    b_u = b_u + (A_u * sel_beta_u).sum(dim=2)
-    A_u = A_u * sel_alpha_u
+    out_b_u = b_u + (A_u * sel_beta_u).sum(dim=2)
+    out_A_u = A_u * sel_alpha_u
     if relu_pre_add_coeff_u is not None and x_name in relu_pre_add_coeff_u:
-        A_u = _apply_relu_pre_add_coeff(
-            A_u,
+        out_A_u = _apply_relu_pre_add_coeff(
+            out_A_u,
             relu_pre_add_coeff_u[x_name],
             x_name=x_name,
             label="relu_pre_add_coeff_u",
@@ -725,11 +713,11 @@ def _backprop_relu_step(
 
     sel_alpha_l = torch.where(A_l >= 0, alpha_l.unsqueeze(1), alpha_u.unsqueeze(1))
     sel_beta_l = torch.where(A_l >= 0, beta_l.unsqueeze(1), beta_u.unsqueeze(1))
-    b_l = b_l + (A_l * sel_beta_l).sum(dim=2)
-    A_l = A_l * sel_alpha_l
+    out_b_l = b_l + (A_l * sel_beta_l).sum(dim=2)
+    out_A_l = A_l * sel_alpha_l
     if relu_pre_add_coeff_l is not None and x_name in relu_pre_add_coeff_l:
-        A_l = _apply_relu_pre_add_coeff(
-            A_l,
+        out_A_l = _apply_relu_pre_add_coeff(
+            out_A_l,
             relu_pre_add_coeff_l[x_name],
             x_name=x_name,
             label="relu_pre_add_coeff_l",
@@ -737,11 +725,79 @@ def _backprop_relu_step(
             dtype=dtype,
         )
 
+    return DenseReluBackwardResult(A_u=out_A_u, A_l=out_A_l, b_u=out_b_u, b_l=out_b_l)
+
+
+def _backprop_relu_step(
+    state: AffineBackwardState,
+    *,
+    pre: IntervalState,
+    x_name: str,
+    relu_alpha: Optional[Dict[str, torch.Tensor]],
+    relu_pre_add_coeff_u: Optional[Dict[str, torch.Tensor]],
+    relu_pre_add_coeff_l: Optional[Dict[str, torch.Tensor]],
+    device: torch.device,
+    dtype: torch.dtype,
+    caller: str,
+) -> AffineBackwardState:
+    orig_input_shape = tuple(int(dim) for dim in pre.lower.shape[1:])
+    pre_numel = int(pre.lower[0].numel())
+    if pre_numel != state.A_u.input_numel or pre_numel != state.A_l.input_numel:
+        raise ValueError(
+            f"{caller} relu backward shape mismatch: pre={tuple(pre.lower.shape)} "
+            f"A_u.input_shape={state.A_u.input_shape} A_l.input_shape={state.A_l.input_shape}"
+        )
+
+    dense_A_u = materialize_linear_operator(
+        state.A_u,
+        reason="relu_sign_split",
+        operator_site=f"{x_name}:upper",
+        source_value=x_name,
+        source_primal_op="relu",
+        persistent_or_ephemeral="persistent",
+        logical_lifetime_begin="relu_backward_step",
+        logical_lifetime_end="backward_end",
+        alpha_related=relu_alpha is not None and x_name in relu_alpha,
+        beta_related=(
+            (relu_pre_add_coeff_u is not None and x_name in relu_pre_add_coeff_u)
+            or (relu_pre_add_coeff_l is not None and x_name in relu_pre_add_coeff_l)
+        ),
+    )
+    dense_A_l = materialize_linear_operator(
+        state.A_l,
+        reason="relu_sign_split",
+        operator_site=f"{x_name}:lower",
+        source_value=x_name,
+        source_primal_op="relu",
+        persistent_or_ephemeral="persistent",
+        logical_lifetime_begin="relu_backward_step",
+        logical_lifetime_end="backward_end",
+        alpha_related=relu_alpha is not None and x_name in relu_alpha,
+        beta_related=(
+            (relu_pre_add_coeff_u is not None and x_name in relu_pre_add_coeff_u)
+            or (relu_pre_add_coeff_l is not None and x_name in relu_pre_add_coeff_l)
+        ),
+    )
+    dense = _backprop_relu_step_dense_reference(
+        dense_A_u,
+        dense_A_l,
+        state.b_u,
+        state.b_l,
+        pre=pre,
+        x_name=x_name,
+        relu_alpha=relu_alpha,
+        relu_pre_add_coeff_u=relu_pre_add_coeff_u,
+        relu_pre_add_coeff_l=relu_pre_add_coeff_l,
+        device=device,
+        dtype=dtype,
+        caller=caller,
+    )
+
     return AffineBackwardState(
-        A_u=DenseLinearOperator(A_u, input_shape=orig_input_shape),
-        A_l=DenseLinearOperator(A_l, input_shape=orig_input_shape),
-        b_u=b_u,
-        b_l=b_l,
+        A_u=DenseLinearOperator(dense.A_u, input_shape=orig_input_shape),
+        A_l=DenseLinearOperator(dense.A_l, input_shape=orig_input_shape),
+        b_u=dense.b_u,
+        b_l=dense.b_l,
     )
 
 
