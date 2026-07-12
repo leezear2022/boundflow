@@ -665,14 +665,32 @@ def _backprop_relu_step(
     A_u = materialize_linear_operator(
         state.A_u,
         reason="relu_sign_split",
-        site=f"{x_name}:upper",
-        lifetime="relu_backward_step",
+        operator_site=f"{x_name}:upper",
+        source_value=x_name,
+        source_primal_op="relu",
+        persistent_or_ephemeral="persistent",
+        logical_lifetime_begin="relu_backward_step",
+        logical_lifetime_end="backward_end",
+        alpha_related=relu_alpha is not None and x_name in relu_alpha,
+        beta_related=(
+            (relu_pre_add_coeff_u is not None and x_name in relu_pre_add_coeff_u)
+            or (relu_pre_add_coeff_l is not None and x_name in relu_pre_add_coeff_l)
+        ),
     )
     A_l = materialize_linear_operator(
         state.A_l,
         reason="relu_sign_split",
-        site=f"{x_name}:lower",
-        lifetime="relu_backward_step",
+        operator_site=f"{x_name}:lower",
+        source_value=x_name,
+        source_primal_op="relu",
+        persistent_or_ephemeral="persistent",
+        logical_lifetime_begin="relu_backward_step",
+        logical_lifetime_end="backward_end",
+        alpha_related=relu_alpha is not None and x_name in relu_alpha,
+        beta_related=(
+            (relu_pre_add_coeff_u is not None and x_name in relu_pre_add_coeff_u)
+            or (relu_pre_add_coeff_l is not None and x_name in relu_pre_add_coeff_l)
+        ),
     )
     b_u = state.b_u
     b_l = state.b_l

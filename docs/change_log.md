@@ -1,5 +1,11 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-07-12：冻结 Materialization Trace Schema v1
+
+- 补齐 query/event、operator tree、batch axes、logical lifetime 和 autograd/α/β 字段。
+- 分离 logical bytes、allocator delta 与 CUDA allocated/reserved peak，预留其它 verifier state。
+- 详细记录：`gemini_doc/change_2026-07-12_freeze_materialization_trace_schema_v1.md`。
+
 ## 2026-07-12：启动 PR-10 materialization instrumentation
 
 - 新增 opt-in materialization trace，并标记 ReLU backward upper/lower dense barrier。

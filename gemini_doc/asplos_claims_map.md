@@ -11,6 +11,17 @@
 | TVM 后端执行 Planner 结果而非定义核心抽象 | partial | `boundflow/backends/tvm/`、`runtime/tvm_executor.py` | Python/TVM/unfused/fused 对齐 | compile/cold/warm、launch、bytes |
 | 相同浮点语义下保持 reference bound computation | partial | dense reference + planned paths | allclose、gradient、auto_LiRPA、replay | correctness fields 与失败记录 |
 
+## PR-10 子阶段
+
+| 子阶段 | 状态 | 完成证据 |
+|---|---|---|
+| PR-10A Materialization instrumentation | validated | `25225e5`；ReLU barrier opt-in trace |
+| PR-10A.1 Trace schema v1 | validated | `boundflow.materialization/v1`、schema contract tests、164 passed |
+| PR-10B 真实 workload profile | next | mechanism + mini-ResNet、method/spec/domain scan |
+| PR-10C Dense/gradient reference oracle | planned | local step、full backward、solver、α gradient |
+| PR-10D Structured ReLU transform | planned | exact SignSplit operator；不得错误穿过 matmul/conv |
+| PR-10E 全路径回归与 benchmark | planned | correctness/structural/opportunity gates |
+
 ## 当前 Gate 0 证据
 
 - PyTorch 2.12.1+cu132、CUDA 13.2、LLVM 20.1.8、TVM 与单一内嵌 tvm-ffi 已完成现场验证；
