@@ -354,8 +354,10 @@ def _is_infeasible_split_first_layer_convex_combo(
     m = len(halfspaces)
     input_shape = tuple(int(dim) for dim in spec.center.shape[1:])
 
-    a_mat = torch.stack([h[2].to(device=device, dtype=dtype) for h in halfspaces], dim=0)  # [M,I]
-    c_vec = torch.stack([h[3].to(device=device, dtype=dtype) for h in halfspaces], dim=0)  # [M]
+    # The certificate optimizer only updates simplex logits. Halfspaces are fixed
+    # problem data; detaching avoids repeatedly traversing the model-parameter graph.
+    a_mat = torch.stack([h[2].to(device=device, dtype=dtype) for h in halfspaces], dim=0).detach()  # [M,I]
+    c_vec = torch.stack([h[3].to(device=device, dtype=dtype) for h in halfspaces], dim=0).detach()  # [M]
     if m == 1:
         a = a_mat[0]
         c = c_vec[0]

@@ -107,6 +107,59 @@ def _make_two_conv_module() -> BFTaskModule:
     )
 
 
+def _make_two_first_layer_branch_module() -> BFTaskModule:
+    weight = torch.ones((1, 1, 1, 1), dtype=torch.float32, requires_grad=True)
+    bias = torch.zeros((1,), dtype=torch.float32, requires_grad=True)
+    head = torch.ones((1, 4), dtype=torch.float32, requires_grad=True)
+    task = BoundTask(
+        task_id="t0",
+        kind=TaskKind.INTERVAL_IBP,
+        ops=[
+            TaskOp(
+                op_type="conv2d",
+                name="left",
+                inputs=["input", "W1", "b1"],
+                outputs=["h1"],
+                attrs={"stride": (1, 1), "padding": (0, 0), "dilation": (1, 1), "groups": 1},
+            ),
+            TaskOp(op_type="relu", name="relu1", inputs=["h1"], outputs=["r1"]),
+            TaskOp(
+                op_type="conv2d",
+                name="right",
+                inputs=["input", "W2", "b2"],
+                outputs=["h2"],
+                attrs={"stride": (1, 1), "padding": (0, 0), "dilation": (1, 1), "groups": 1},
+            ),
+            TaskOp(op_type="relu", name="relu2", inputs=["h2"], outputs=["r2"]),
+            TaskOp(op_type="add", name="add", inputs=["r1", "r2"], outputs=["sum"]),
+            TaskOp(
+                op_type="flatten",
+                name="flatten",
+                inputs=["sum"],
+                outputs=["flat"],
+                attrs={"start_dim": 1, "end_dim": -1},
+            ),
+            TaskOp(op_type="linear", name="head", inputs=["flat", "W3", "b3"], outputs=["out"]),
+        ],
+        input_values=["input"],
+        output_values=["out"],
+    )
+    return BFTaskModule(
+        tasks=[task],
+        entry_task_id="t0",
+        bindings={
+            "params": {
+                "W1": weight,
+                "b1": bias,
+                "W2": weight.clone().requires_grad_(True),
+                "b2": bias.clone().requires_grad_(True),
+                "W3": head,
+                "b3": torch.zeros((1,), dtype=torch.float32, requires_grad=True),
+            }
+        },
+    )
+
+
 def _eval_small_cnn(xs: torch.Tensor) -> torch.Tensor:
     flat_x = xs.flatten(0, 1)
     h1 = F.conv2d(flat_x, torch.ones((1, 1, 1, 1), dtype=xs.dtype, device=xs.device), bias=None)
@@ -296,3 +349,26 @@ def test_phase7a_pr6_deeper_conv_split_skips_detector_but_oracle_runs() -> None:
     assert "first-layer split halfspaces" in stats.reason
     assert tuple(bounds.lower.shape) == (1, 1)
     assert oracle_stats.feasibility == "unknown"
+
+
+def test_phase7a_pr6_multiple_first_layer_halfspaces_do_not_reuse_autograd_graph() -> None:
+    module = _make_two_first_layer_branch_module()
+    spec = InputSpec.linf(value_name="input", center=torch.zeros((1, 1, 2, 2)), eps=1.0)
+    split = {
+        "h1": torch.tensor([[[[1, 0], [0, 0]]]], dtype=torch.int8),
+        "h2": torch.tensor([[[[1, 0], [0, 0]]]], dtype=torch.int8),
+    }
+
+    detector = check_first_layer_infeasible_split(module, spec, relu_split_state=split)
+    bounds, _alpha, _beta, stats = run_alpha_beta_crown_mlp(
+        module,
+        spec,
+        relu_split_state=split,
+        steps=1,
+        beta_init=0.1,
+    )
+
+    assert detector.feasibility == "unknown"
+    assert stats.feasibility == "unknown"
+    assert torch.isfinite(bounds.lower).all()
+    assert torch.isfinite(bounds.upper).all()
