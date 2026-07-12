@@ -17,7 +17,7 @@ if [[ "${CONDA_DEFAULT_ENV}" != "${ENV_NAME}" ]]; then
 fi
 
 echo ">>> Rebuilding TVM..."
-cd ${TVM_DIR}/build
+cd "${TVM_DIR}/build-boundflow"
 
 # Incremental build using Ninja
 ninja

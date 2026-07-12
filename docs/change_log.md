@@ -1,5 +1,51 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-07-12：增加 Gate 0 reduced 环境基线
+
+- artifact runner 新增 `reduced` 档（small matrix、warmup 3、iters 10）。
+- 环境 baseline 阶段改用 reduced MLP/CNN 基线，并明确它不替代论文独立重复。
+- 修正 manifest 的完整命令、dirty 状态和最终输出路径。
+- 详细记录：`gemini_doc/change_2026-07-12_add_reduced_environment_baseline.md`。
+
+## 2026-07-12：新增日常构建与运行工作流
+
+- 固定 BoundFlow/TVM/tvm-ffi/LLVM 修改后的编译、运行、验证与禁止操作。
+- 详见 `gemini_doc/boundflow_build_and_run_workflow.md`。
+
+## 2026-07-12：定稿 ASPLOS 执行计划 v1.0
+
+- 收敛 C1/C2/C3、状态有效性、correctness 术语、baseline、workload 与提前后的投稿门禁。
+- 同步仓库指令、文档索引、协作 workflow 和 claims map。
+- 详见 `gemini_doc/change_2026-07-12_finalize_asplos_execution_plan_v1_0.md`。
+
+## 2026-07-12：新增 ASPLOS 执行备忘录 v1.0
+
+- 锁定结构化 Bound Operator IR、query/memory Planner、BaB-oriented runtime 与 Gate 0～PR-13
+  的唯一执行顺序。
+- 详见 `gemini_doc/asplos_execution_memo_v1_0.md`。
+
+## 2026-07-12：新增 ASPLOS 总体计划候选稿
+
+- 以 Phase 7A PR-9 为实际基线，统一论文定位、三项系统贡献、PR-10～PR-15 路线、实验、
+  rapid-review、Go/No-Go 与 artifact 约束。
+- 文档当前供多模型/人工评审，尚未标记为最终执行版。
+- 详见 `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`。
+
+## 2026-07-12：Conda activate/deactivate 自动钩子
+
+- 激活 `boundflow` 时自动加载 `env.sh`，反激活时完整恢复之前的路径与变量状态。
+- 修复 zsh 下间接参数展开触发的 `bad substitution`，同时保留 bash 兼容性。
+- 详见 `gemini_doc/change_2026-07-12_conda_activate_deactivate_hooks.md`。
+
+## 2026-07-12：CachyOS / PyTorch 2.12.1 / CUDA 13.2 环境链路
+
+- 分阶段重写开发安装入口，锁定 Python 3.12、CUDA 13.2、LLVM/Clang 20.1.8。
+- PyTorch 使用官方 cu132 wheel；auto_LiRPA 强制 `--no-deps` 并通过 IBP/CROWN 门禁。
+- TVM/Python 统一使用 TVM 内嵌 tvm-ffi；静态链接并隐藏 LLVM，解决 TVM→Triton abort。
+- 新增 doctor、CUDA/TVM smoke；全量测试 162 passed、1 intentional skip。
+- 修复未激活 shell 执行 `verify` 以及 hook 输出污染工具链路径探测的问题。
+- 详见 `gemini_doc/change_2026-07-12_cachyos_cuda132_environment_bootstrap.md`。
+
 约定：
 - 记录按“自然批次”追加（一次明确目标的修改算一条），每条包含目的、改动点、影响面、验证方式。
 - 默认在 conda 环境 `boundflow` 下验证：`conda activate boundflow`。

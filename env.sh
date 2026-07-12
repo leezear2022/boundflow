@@ -15,12 +15,13 @@ add_to_path() {
 # Note: With pip install -e, explicit PYTHONPATH is less critical but still helpful for some tools
 # Add boundflow root, TVM python package, and auto_LiRPA to PYTHONPATH
 add_to_path "${BOUNDFLOW_ROOT}/boundflow/3rdparty/auto_LiRPA"
-add_to_path "${BOUNDFLOW_ROOT}/boundflow/3rdparty/tvm-ffi/python"
+add_to_path "${BOUNDFLOW_ROOT}/boundflow/3rdparty/tvm/3rdparty/tvm-ffi/python"
 add_to_path "${BOUNDFLOW_ROOT}/boundflow/3rdparty/tvm/python"
 add_to_path "${BOUNDFLOW_ROOT}"
 
 # Set TVM_HOME for compilation
 export TVM_HOME="${BOUNDFLOW_ROOT}/boundflow/3rdparty/tvm"
+export TVM_LIBRARY_PATH="${TVM_HOME}/build-boundflow"
 
 # TVM-FFI optional torch-c-dlpack JIT may be very slow / undesirable for most workflows.
 # Default to disabling it; users can override by setting TVM_FFI_DISABLE_TORCH_C_DLPACK=0.

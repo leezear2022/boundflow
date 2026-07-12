@@ -1,0 +1,638 @@
+# BoundFlow 面向 ASPLOS 的总体研发与论文执行计划 v1.0
+
+> 状态：**顶层执行计划 v1.0；后续研究工作受本文门禁约束。**  
+> 基线日期：2026-07-12  
+> 当前代码基线：`ce36a51`（Phase 7A PR-9，operator-preserving DAG backward）  
+> 投稿策略：ASPLOS 2027 September Cycle 为有条件冲刺；ASPLOS 2028 为稳健主目标。
+
+---
+
+## 0. 执行摘要
+
+BoundFlow 的 ASPLOS 论文不能被定义为“用 TVM 加速几个神经网络验证算子”，也不能把
+“支持 CROWN、一般 DAG、GPU 或 BaB batching”本身作为核心新意。ASPLOS 版本的统一命题是：
+
+> **BoundFlow 是一个面向重复神经网络边界查询的 verification-aware compiler and runtime。它以 operator-preserving 的线性界表示延迟显式系数张量的构造，由全局 Planner 联合决定物化、融合、批处理、缓存、重算与显存布局，并由 host runtime 在 CROWN、αβ-CROWN、BaB 和 certified training 的相关查询之间复用计划与状态。**
+
+论文的系统研究问题不是“某个 bound 算法能否实现”，而是：
+
+> 当验证工作负载反复生成高度相关、形状规则但容易爆炸的线性算子查询时，编译器应保留什么结构、何时物化、如何跨查询调度，才能改善吞吐、尾延迟和峰值显存，同时保持数值 soundness 与 bound tightness？
+
+这一定位符合 ASPLOS 对体系结构、操作系统或程序语言研究“必须有实质推进”的要求；官方
+CFP 明确指出，仅推进其他领域并使用系统技术并不足够，而且 rapid review 只阅读前两页，
+多数投稿可能无法进入完整评审。因此，论文前两页必须把“新系统抽象 + 全局决策 + 端到端
+收益”讲完整，而不能从验证算法背景或 TVM 工程细节开始。
+
+---
+
+## 1. 论文北极星
+
+### 1.1 一句话论文主张
+
+> **Preserving linear-bound operators across repeated verification queries enables a compiler/runtime to jointly optimize materialization, memory, and batching decisions that eager tensor execution cannot coordinate.**
+
+### 1.2 三项核心贡献
+
+#### C1. Structured Bound-Operator IR with Explicit Materialization Semantics
+
+将 CROWN backward 中的系数对象 `A` 表示为带显式物化语义的结构化线性算子 DAG。目标是
+尽可能保留结构，而不是承诺永不生成 dense tensor。ASPLOS 版本至少覆盖：
+
+- `linear` / right-matmul；
+- `conv2d` / transpose-convolution composition；
+- `reshape` / `flatten` / layout-preserving view；
+- `add` merge；
+- `concat` / slice；
+- ReLU sign-split、relaxation slope/intercept 与 α/β 修正；
+- 必要的 row-norm / concretization 接口。
+
+贡献不在于重新定义 CROWN 数学，而在于提供一个既保持参考计算、又暴露系统优化机会的
+编译器表示。IR 必须显式表达：结构、形状、批维、spec/domain 维、materialization barrier、
+reason、估算字节数、生命周期、复用关系和 dense reference semantics。ReLU sign selection、
+row norm、concretization 等允许局部物化，但所有 fallback 必须可观察、可计量并可由 Planner
+选择物化位置、分块与生命周期。
+
+#### C2. Query- and Memory-Aware Materialization Planner
+
+Planner 不只是普通 graph fusion。它需要在同一代价模型和显存预算下联合决定：
+
+- 保持 lazy 还是物化；
+- 在哪个 barrier、哪个 batch 粒度物化；
+- task partition 与 fusion 边界；
+- spec batch、domain/BaB-node batch 的组织方式；
+- 哪些中间状态缓存、复用或重算；
+- logical buffer 到 physical buffer 的映射；
+- 在峰值显存约束下的调度顺序与 fallback。
+
+规划问题的输入定义为 `(G, Q, H, B, R)`：operator DAG、查询集合或分布、硬件 profile、
+显存预算和参考 bound 配置。计划定义为 `P=(m, π, f, b, c, r, s)`：materialization、
+partition、fusion、batch layout、cache、recompute、storage/scheduling。
+
+目标是最小化 amortized compile、execute、queue、transfer 与 peak-memory cost：
+
+```text
+min_P  T_compile(P)/|Q|
+     + E_q[T_execute(P,q) + T_queue(P,q) + T_transfer(P,q)]
+     + λ M_peak(P)
+```
+
+约束为 `M_peak(P) <= B`，并要求 planned path 在相同浮点语义下保持 dense reference
+computation。实现不承诺一次精确联合求解全部变量，而采用：
+
+```text
+candidate generation
+  → staged cost-aware heuristic
+  → local greedy baseline
+  → global heuristic
+  → small-graph exhaustive oracle
+```
+
+必须至少实现一个会根据 shape、batch、reuse count、query distribution 或 memory budget 选择
+不同计划的非平凡 Planner；仅提供手动开关或固定启发式不足以支撑该贡献。
+
+#### C3. BaB-Oriented Repeated-Query Runtime for Multi-Spec and Domain Batches
+
+首篇只将以下场景统一为相关 bound query 流：
+
+- multi-spec verification；
+- BaB node batches；
+- dynamic BaB domain batches。
+
+host runtime 保留搜索、优先队列、超时、分支状态和动态 batching；TVM Relax/TIR 只执行
+粗粒度、批量的 bound tasks。BaB 控制流不写入 Relax。Runtime 必须支持 query compatibility、
+计划/kernel cache、状态版本、parent-to-child warm start、批量合并/拆分、OOM fallback、失败
+隔离和可观测性。certified training 只作为第二客户端；epsilon sweep、checkpoint reuse、
+incremental verification、persistent GPU BaB 与 multi-GPU 属于扩展或未来工作。
+
+### 1.3 北极星指标
+
+主指标按优先级排序：
+
+1. **给定显存预算下的 repeated-query throughput**；
+2. **BaB time-to-verify 与 p90/p99 node latency**；
+3. **峰值 GPU memory / 最大可运行 batch 或网络规模**；
+4. compile、first-run、cold、warm 分离后的端到端时间；
+5. 相同 tightness/soundness 下的速度，或相同时间预算下的 verified instances；
+6. certified training 的 step time、峰值显存和可训练规模。
+
+不能只报告单个 kernel 的平均延迟，也不能以 compile time 被 warm cache 隐藏后的数字作为
+headline result。
+
+---
+
+## 2. 与现有工作的边界
+
+### 2.1 不能作为 BoundFlow 核心新意的内容
+
+- 自动从一般计算图派生 bound；
+- 支持 IBP、CROWN、α-CROWN、β-CROWN 或 GCP-CROWN；
+- 支持一般 DAG、CNN、ResNet 或一般非线性；
+- 在 GPU 上运行 bound propagation；
+- BaB node batching；
+- 将 Python 实现改写为 C++；
+- 将 neuron-level certifier 描述自动变成 tensor implementation。
+
+auto_LiRPA 已覆盖一般计算图上的自动 LiRPA，并作为 α,β-CROWN 的核心库；α,β-CROWN
+已经提供 GPU bound propagation、BaB 和广泛模型支持。2025 年的 tensor-based certifier
+compiler 已针对 neuron-level specification → tensor implementation 提出专用 IR、shape analysis
+和稀疏运行时。2026 年 Luna 又提供了 C++ 的一般图 IBP/CROWN/α-CROWN propagator。
+
+因此 BoundFlow 的差异必须收敛到：
+
+1. **operator representation**：保留而非提前打平线性界结构；
+2. **global materialization planning**：跨算子、跨任务、跨查询联合决策；
+3. **compiler/runtime co-design**：针对 repeated bound queries 的动态批处理与状态复用；
+4. **evidence**：在完整 solver/training 场景而非 toy kernel 上证明收益。
+
+### 2.2 TVM 的角色
+
+TVM 是可替换后端，不是 BoundFlow 的核心抽象：
+
+- Primal IR / Bound IR / Task IR 不得依赖 Relax 的表达边界；
+- Planner 的物化、复用和 batch 决策必须在进入 TVM 前可解释、可测试；
+- TVM 负责粗粒度 task lowering、fusion、TIR/CUDA code generation 与执行；
+- 论文需通过 Python reference backend 与至少一个 TVM backend 证明抽象独立性；
+- “TVM 默认 pass 已有的收益”必须作为 baseline 分离，不能算作 BoundFlow 贡献。
+
+### 2.3 certified training 的位置
+
+certified training 是重要 repeated-query 应用，但不是唯一故事。CROWN-IBP 已说明 tight linear
+relaxation 与 IBP 在稳定性、紧度、时间和显存之间存在关键权衡。BoundFlow 的目标是改善这条
+成本—规模 Pareto frontier，不提出新的训练算法，也不以最终鲁棒准确率单独证明系统贡献。
+
+### 2.4 Query state 与 cache validity
+
+Runtime 不能笼统声称相关查询可以共享中间状态。每个缓存对象必须标记为：
+
+- `EXACT_REUSE`：可直接作为当前查询的有效结果；
+- `CONDITIONAL_REUSE`：只有 key/version/shape 等条件满足时可直接复用；
+- `WARM_START_ONLY`：只能初始化后续求解，不能当作当前查询的精确结果；
+- `INVALIDATE`：必须失效并重算。
+
+| 对象 | Multi-spec | BaB 父→子 | 参数更新后 |
+|---|---|---|---|
+| Primal/Bound 图结构 | EXACT_REUSE | EXACT_REUSE | EXACT_REUSE |
+| Planner 计划模板 | EXACT_REUSE | EXACT_REUSE | CONDITIONAL_REUSE |
+| 编译 kernel | EXACT_REUSE | EXACT_REUSE | shape/dtype 不变时 CONDITIONAL_REUSE |
+| 参数相关常量折叠 | EXACT_REUSE | EXACT_REUSE | INVALIDATE |
+| intermediate bounds | CONDITIONAL_REUSE | WARM_START_ONLY 或 INVALIDATE | INVALIDATE |
+| α 参数 | CONDITIONAL_REUSE | WARM_START_ONLY | 通常 INVALIDATE |
+| β/split state | INVALIDATE | 子节点专属 | INVALIDATE |
+| 最终输出 bounds | INVALIDATE | INVALIDATE | INVALIDATE |
+
+尤其不能把父节点 intermediate bounds 直接视为子节点的有效精确结果；split constraint 会改变
+后续传播语义，父状态最多作为 warm start 或参考。
+
+### 2.5 三层 correctness/soundness 术语
+
+1. **数学 soundness**：由 CROWN/IBP/αβ abstract transformer 与 solver 规则保证；
+2. **编译变换语义保持**：dense、operator、planned、fused path 在相同浮点执行语义下保持
+   reference bound computation；
+3. **实现验证**：通过 dense reference、allclose、gradient comparison、auto_LiRPA
+   comparison、sampled concrete sanity 与 deterministic replay 建立证据。
+
+除非未来加入 outward rounding、误差 envelope 或 proof checker，否则不得宣称 GPU FP32
+编译路径对实数语义具有严格 numerical soundness。论文统一优先使用：
+
+> preserving the reference bound computation under the same floating-point semantics
+
+---
+
+## 3. 当前代码基线与缺口
+
+### 3.1 已完成并可复用的基础
+
+| 层次 | 当前状态 | ASPLOS 价值 |
+|---|---|---|
+| Frontend / Primal IR | Torch、ONNX、normalize、general DAG 子集 | 提供真实图输入与双前端一致性 |
+| Bound/runtime semantics | IBP、CROWN-IBP、α-CROWN、αβ-CROWN、BaB | 作为系统优化的正确性载体，不作为算法贡献 |
+| LinearOperator | dense、right-matmul、conv、reshape/concretize 等基础 | C1 的起点 |
+| General DAG | residual add、concat；PR-9 去掉 merge/slice dense fallback | 已完成第一批 operator-preserving path |
+| Planner | task graph、partition、liveness、storage reuse、memory stats | C2 的工程基础，但尚未形成 materialization 联合决策 |
+| TVM backend | Relax/TIR、compile cache、fusion、memory-plan 对照 | C2/C3 的执行后端 |
+| Runtime | multi-spec、α/β、BaB node batch/cache/prune | C3 的起点，但尚未统一为 query abstraction |
+| Artifact | JSONL schema、CSV、figure、manifest、quick/full runner | ASPLOS 证据链基础 |
+| 环境 | PyTorch 2.12.1+cu132、LLVM 20.1.8、TVM、单一 tvm-ffi | 可复现实验基础 |
+
+当前提交基线为 Phase 7A PR-9。环境迁移和 PyTorch 2.12 reshape 兼容仍处于未提交工作区，
+必须先整理成独立工程提交，不能与 PR-10 混合。
+
+### 3.2 论文成立前必须补齐的缺口
+
+| 缺口 | 当前问题 | 必须达到的证据 |
+|---|---|---|
+| ReLU barrier | backward 仍在公共路径 `to_dense()` | structured ReLU 路径、显式 barrier 与 materialization trace |
+| 物化决策 | 现有 Planner 主要做 partition/reuse，缺少 lazy-vs-materialize 选择 | 至少一个预算/shape/query-aware 的自动计划 |
+| fused CROWN task | TVM 后端以 IBP/task 基础设施为主 | CROWN 粗粒度 task lowering 与正确性/性能门禁 |
+| repeated-query abstraction | multi-spec、BaB batch、cache 仍是分散机制 | 统一 QueryBatch/QueryState/PlanCache 或等价接口 |
+| 真实 workload | 当前 quick baseline 主要是小 MLP/MNIST CNN | ResNet/basic-block、VNN-COMP 代表实例、至少一个训练 workload |
+| headline result | 当前结果证明链路正确，不证明系统主张 | 端到端吞吐/显存/TTVerify 的显著、可解释收益 |
+| baseline 完整性 | 已有 auto_LiRPA/TVM 对照，但缺 Luna/系统竞品定位 | 公平版本、硬件、算法/tightness 和计时口径 |
+
+---
+
+## 4. 研发路线与每个 PR 的论文义务
+
+### Gate 0：冻结环境迁移与基线（开始 PR-10 前）
+
+目标：把当前未提交的 CUDA 13.2/LLVM/TVM/钩子/reshape 工作整理为独立工程提交。
+
+验收：
+
+- 去除 `crown_ibp.py` 全文件格式化噪声，只保留必要兼容改动；
+- 激活/反激活、nvcc、TVM CUDA、TVM↔Triton ABI smoke 全通过；
+- 全量测试重新记录；
+- MLP/CNN reduced baseline 形成稳定多次计时，而非单次 quick；
+- 建立统一 build/run workflow 文档。
+
+论文义务：只作为 artifact foundation，不宣称研究贡献。
+
+### PR-10：Structured ReLU Barrier 与 Materialization Instrumentation
+
+目标：先建立 materialization instrumentation，再保持现有 ReLU/α/β 数学语义，将全局 dense
+fallback 改成结构化 operator transform，必要时仅局部物化。PR-10 是 representation-enabling
+PR，不要求 Python lazy path 当场变快。
+
+实现要点：
+
+- 表达 sign-dependent row scaling 与 bias accumulation；
+- stable/unstable ReLU 分路；
+- α/β 参数与 split constraint 不复制顶层 solver；
+- operator composition 可继续穿过 chain CNN 与 general DAG；
+- 首先增加 materialization reason/count/estimated bytes/lifetime trace；
+- dense reference path 保持可独立运行；
+- 增加 α gradient comparison。
+
+验收指标：
+
+- 数值与当前 dense reference 对齐，α gradient 对齐；
+- chain CNN、residual DAG、α、αβ、BaB 回归全通过；
+- 主 coefficient 不永久退化为 dense；
+- fallback 全部可追踪，并明确减少 dense bytes/materialization count；
+- 不接受无法解释的严重 runtime 或显存退化；
+- 端到端速度硬门槛放在 PR-12 fused lowering。
+
+### PR-11：Selective Materialization Planner
+
+目标：把“是否/何处物化”从 operator 内部硬编码提升为全局 Planner 决策。
+
+需要新增或明确：
+
+- operator cost summary：shape、estimated FLOPs、bytes、reuse count、batch axes；
+- MaterializationDecision / MaterializationPlan；
+- memory budget 与 spill/recompute policy；
+- deterministic heuristic baseline；
+- 至少一个 cost-aware 自动策略；
+- plan dump 与 decision reason。
+
+必须做的消融：
+
+1. eager dense；
+2. always lazy；
+3. fixed/manual barrier；
+4. local greedy；
+5. global planner；
+6. global planner 在多个显存预算下。
+
+验收：自动策略必须在不同 workload/budget 上做出不同计划，并相对固定策略改善至少一个北极星
+指标且不系统性恶化其余指标。
+
+### PR-12：Fused TVM CROWN-Task Lowering
+
+目标：将 Planner 选择后的 operator region 降到粗粒度 TVM task，而不是逐小算子调用。
+
+范围：
+
+- linear/conv/ReLU/view/add/concat 的代表性 fused region；
+- static shape first，dynamic batch 只在必要处引入；
+- compile cache key 包含 operator DAG、shape、dtype、batch axes、materialization plan；
+- Python reference、TVM unfused、TVM fused 三方对齐；
+- compile/cold/warm 分开统计。
+
+验收：证明收益来自 BoundFlow region/plan，而非仅来自 TVM 默认 fusion；报告 kernel launch、
+intermediate bytes 和 compile amortization break-even point。
+
+### PR-13：Multi-Domain Runtime 与真实 BaB Adapter
+
+目标：统一 repeated-query execution，并接入真实 BaB query stream。
+
+最小抽象：
+
+- `QueryState`：输入域、spec、α/β、split、版本；
+- `QueryBatch`：可合批性与 batch-axis metadata；
+- `CompiledPlanKey`：结构与动态状态分离；
+- scheduler：形成/拆分 batch、timeout、OOM fallback；
+- cache：forward bound、operator plan、compiled module、warm-start state；
+- observable counters：cache hit、batch fill、queue wait、compute、prune。
+
+验收：
+
+- 不只使用合成 node list，而是由现有 BaB driver 产生查询；
+- 输出与逐节点 reference 一致；
+- 报告 time-to-verify、verified/timeout 数、p50/p90/p99 node latency、batch utilization；
+- 分离 batching、cache、planner、fusion 各自收益。
+
+### PR-14：Certified Training Adapter
+
+目标：证明同一 compiler/runtime abstraction 能覆盖参数周期性变化的重复查询。
+
+范围控制：
+
+- 不提出新训练目标；
+- 先支持一个 CROWN-IBP/IBP-CROWN 训练配方；
+- 明确参数更新后哪些 plan 可复用、哪些 compiled code 可复用、哪些 bound state 必须失效；
+- 比较 eager auto_LiRPA 或仓库内 reference。
+
+验收：训练 loss/gradient 数值门禁、step time、peak memory、最大 batch/模型规模；最终准确率只作
+sanity check，不作为唯一 headline。
+
+### PR-15：Workload、消融与 Artifact 封箱
+
+目标：形成论文表图、匿名 artifact 和复现实验。
+
+要求：
+
+- 固定 workload/version/hash；
+- 固定 warmup/repetition/timeout/seed；
+- smoke/reduced/full 三档；
+- 所有表图只从原始 JSONL 生成；
+- 失败、OOM、timeout 也写结构化记录；
+- 自动生成 manifest、claims map 和 expected outputs；
+- 独立机器或干净环境复跑 reduced workflow。
+
+---
+
+## 5. 实验设计
+
+### 5.1 Workload 梯度
+
+#### A. 语义与 microbenchmark
+
+- MLP、MNIST CNN；
+- residual basic block；
+- concat/branch DAG；
+- isolated linear/conv/ReLU operator chain；
+- 可控 spec count、domain count、稳定 ReLU 比例与显存预算。
+
+用途：机制解释、代价模型校准、回归，不支撑 headline。
+
+#### B. 中等规模系统 workload
+
+- CIFAR-10 CNN / ResNet-like model；
+- 至少一个 VNN-COMP 风格 ONNX + VNNLIB workload 子集；
+- multi-spec 与 BaB domain scaling；
+- 真实 BaB node stream。
+
+#### C. 两个主应用场景
+
+1. **主场景——完整/限时验证**：当前算子覆盖可支撑的 ReLU CNN/ResNet VNN-COMP
+   representative instances，使用真实 ONNX、VNN-LIB、BaB query stream 和 timeout；
+2. **第二客户端——CROWN-IBP certified training**：一个 CIFAR-10 配方，报告 step time、peak
+   memory、compile amortization、loss/gradient 对齐和 verified-accuracy sanity。
+
+首篇不加入 ViT、Transformer、控制器或大量新非线性；若资源允许，更大 ResNet/TinyImageNet
+只能在主链闭环后作为扩展。
+
+### 5.2 Baseline
+
+必需 baseline：
+
+- PyTorch eager；
+- `torch.compile` / TorchInductor（支持则报告结果，不支持则记录失败原因）；
+- auto_LiRPA eager bound propagation；
+- α,β-CROWN 对应 solver 路径；
+- BoundFlow Python dense reference；
+- BoundFlow always-lazy / always-materialize / fixed barrier；
+- BoundFlow local planner / global planner / small-graph oracle；
+- TVM unfused / default pipeline；
+- BoundFlow planner + fused backend；
+- **相同 α,β-CROWN host solver + original executor 与 BoundFlow executor**；
+- Luna：若其公开实现、模型和方法可公平复现，则作为 general-graph/C++ propagator baseline；
+  否则在 related work 中定性比较并明确不可复现原因。
+
+公平性约束：同一模型、输入域、spec、dtype、device、bound method、优化步数、timeout 与正确性
+容差。算法参数不同的结果不能被解释为系统速度差。
+
+### 5.3 表与图的最小集合
+
+1. 端到端主表：吞吐、peak memory、time-to-verify、verified/timeout；
+2. Planner 消融表：eager/lazy/local/global × memory budget；
+3. 机制图：materialized bytes、operator depth、launch count、cache hit；
+4. repeated-query scaling：spec/domain/node batch size；
+5. compile amortization：query count 对总时间的影响；
+6. Pareto 图：latency/throughput vs peak memory；
+7. training 图：step time/peak memory vs batch/model size；
+8. tightness/soundness 表：确保系统优化不改变算法结果。
+
+### 5.4 统计口径
+
+- 至少 5 次独立重复；长时间 E2E 可按实例集合统计并给置信区间；
+- 报 median、p90，尾延迟场景报告 p99；
+- compile、first-run、cold、warm、queue wait 分离；
+- 明确 CPU/GPU 同步点；
+- GPU peak memory 使用统一采样/allocator 口径；
+- OOM、timeout 不删除，进入结果表；
+- headline 数字必须可从 JSONL 自动追溯到命令、commit、环境和图表。
+
+---
+
+## 6. 论文结构与 rapid-review 约束
+
+### 6.1 前两页必须独立成立
+
+ASPLOS 2027 rapid review 明确只看前两页。前两页建议固定为：
+
+1. **问题与规模证据**：重复边界查询中的 eager `A` materialization、显存和 launch/cache
+   瓶颈，配一张真实 profile 图；
+2. **关键洞察**：`A` 不是普通 dense tensor，而是跨查询可组合、可延迟、可复用的 operator DAG；
+3. **系统方案图**：Bound IR → global planner → repeated-query runtime → TVM task backend；
+4. **三项贡献**：表示、Planner、runtime；
+5. **一个 headline result**：端到端而非 microbenchmark；
+6. **边界声明**：不提出新 verifier 算法，保持 soundness/tightness。
+
+如果前两页需要读者阅读后文才能理解贡献，视为不具备投稿条件。
+
+### 6.2 建议全文结构
+
+1. Introduction；
+2. Background and Motivation；
+3. Repeated Bound Query Model；
+4. Structured Bound-Operator IR；
+5. Query- and Memory-Aware Materialization Planner；
+6. BaB-Oriented Repeated-Query Runtime and TVM Backend；
+7. Implementation；
+8. Evaluation；
+9. Related Work；
+10. Limitations and Conclusion。
+
+### 6.3 必须避免的叙事
+
+- “我们首次支持 general DAG/CROWN/αβ-CROWN”；
+- “TVM 比 Python 快”；
+- 用 toy MLP 的高倍 speedup 作为摘要数字；
+- 将算法参数或 bound tightness 差异包装为系统收益；
+- 只展示平均 kernel time，不展示 compile、memory、E2E；
+- 先写大量神经网络验证背景，第二页才出现系统抽象。
+
+---
+
+## 7. 投稿时间表与 Go/No-Go
+
+ASPLOS 2027 September Cycle 的 full-paper deadline 为 **2026-09-09 AoE**。从本计划基线
+到截止约八周，因此它只能是条件冲刺，不是默认承诺。ASPLOS 2028 截止日期尚未在本计划中
+假设，待官方 CFP 发布后更新。
+
+### 7.1 2027 September 冲刺节奏
+
+| 日期 | 必须完成 |
+|---|---|
+| 7/12–7/16 | Gate 0：环境提交、稳定 baseline、统一 workflow |
+| 7/17–7/26 | PR-10 + materialization instrumentation/profile |
+| 7/27–8/05 | PR-11 + 非 toy workload + 首个 latency–memory Pareto |
+| **8/05** | **第一次硬 Go/No-Go** |
+| 8/06–8/14 | PR-12 fused CROWN task + headline v0 |
+| 8/15 | PR-13 BaB adapter prototype + 两页初稿 |
+| 8/20 | 主实验与核心消融基本冻结 |
+| 8/24 | 最终投稿决定 |
+| 8/25 后 | 禁止新增技术功能，只完成实验、论文和复现 blocker |
+| 9/01–9/05 | 内部评审、匿名化、artifact reduced workflow |
+| 9/06–9/08 | 只修论文与复现 blocker |
+| 9/09 AoE | 仅在全部门禁满足时投稿 |
+
+### 7.2 8 月 5 日硬门禁
+
+以下条件必须全部满足，才继续冲刺 ASPLOS 2027：
+
+- ReLU operator-preserving 主路径可用；
+- 自动 materialization Planner 已经存在且会做非平凡决策；
+- 至少一个非 toy workload；
+- 至少一个 latency–memory Pareto 结果；
+- Planner 在不同显存预算下选择不同计划；
+- correctness 与 materialization profile 证据完整；
+- C1/C2 的前两页故事不依赖未来 PR 才成立。
+
+任一项缺失，即转为 ASPLOS 2028，不以“先投再说”处理。
+
+### 7.3 8 月 24 日最终投稿门禁
+
+必须全部满足：
+
+- 真实 BaB query adapter；
+- 主表和核心消融已出，不再依赖待跑实验；
+- headline result 在重复运行中稳定；
+- 前两页经至少两位外部读者认为是系统/PL贡献；
+- 所有 claim 有 JSONL→table/figure 证据路径；
+- 没有靠隐藏 OOM/timeout 或不公平 baseline 获得的结果。
+
+若失败，停止 2027 投稿，保留完整研发成果并扩展到训练/更多 workload 后投 2028。ASPLOS
+官方对被拒论文的后续周期重投有限制，过早提交会损害稳健版本。
+
+---
+
+## 8. Artifact 与复现计划
+
+### 8.1 三档工作流
+
+- **smoke（≤15 min）**：环境、import、CUDA/TIR、一个 correctness case；
+- **reduced（≤2 h）**：代表性 MLP/CNN/ResNet block、Planner 消融、少量 BaB instances；
+- **full（论文全结果）**：完整 workload、重复、timeout、训练与所有图表。
+
+### 8.2 证据链
+
+```text
+command/config
+  → raw JSONL（含失败记录）
+  → schema validation
+  → normalized CSV
+  → table/figure
+  → MANIFEST + CLAIMS map
+  → Artifact Appendix expected outputs
+```
+
+每条记录至少包含：git commit、submodule commit、dirty flag、Python/PyTorch/CUDA/LLVM/TVM、
+GPU、driver、seed、workload hash、planner config、compile cache key、计时分解、memory、正确性、
+status/error。
+
+### 8.3 提交前工件
+
+- 匿名仓库；
+- build/install/doctor 脚本；
+- 固定输入、模型和预期输出；
+- `docs/genai_usage.md`；
+- Artifact Appendix；
+- 软件、硬件、数据和运行时间说明；
+- 公开归档计划。ASPLOS 2027 AE 要求 Artifact Appendix 描述依赖、关键结果和验证流程；
+  Artifact Available badge 最终需要公共归档仓库及 DOI。
+
+---
+
+## 9. 项目治理规则
+
+从本计划定稿后，每个研究 PR 必须在描述和变更文档中回答：
+
+1. 消除了哪个系统瓶颈？
+2. 改善哪个北极星指标？
+3. 哪个 ASPLOS contribution 获得了新证据？
+4. correctness/soundness 如何验证？
+5. eager、local、TVM-default 等 baseline 是否公平？
+6. 原始 JSONL、表图和 manifest 在哪里？
+7. 如果没有收益，学到了什么，是否应停止该路线？
+
+另外遵循：
+
+- 一项 PR 只推进一个主要研究假设；
+- 算法语义与系统优化分开提交；
+- third-party 修改隔离；
+- 不为漂亮结果删除失败实例；
+- 不在主路径未闭环时扩大量新算子或新模型；
+- 文档中的“已完成”必须有代码、测试和工件三方证据。
+
+---
+
+## 10. 风险登记与止损
+
+| 风险 | 早期信号 | 止损措施 |
+|---|---|---|
+| operator-preserving 无实际收益 | composition 最终总在 ReLU/concretize 打平 | 用 profile 决定局部物化；不宣称全程 lazy |
+| Planner 退化成手工开关 | 所有 workload 选择同一计划 | 增加预算/shape/query 变化；否则降级贡献等级 |
+| TVM compile 开销吞噬收益 | break-even query count 过高 | 加 plan/code cache；明确适用 repeated-query 区间 |
+| BaB batch 不稳定 | 分支异质导致 fill rate 低、尾延迟升高 | bucketing、timeout、拆批和 eager fallback |
+| tightness 漂移 | fused/low precision 与 reference 不一致 | 默认 FP32；每次运行强制 correctness gate |
+| workload 太 toy | 只有 MLP/MNIST CNN 有结果 | 8/05 前必须加入至少一个非 toy 代表负载 |
+| 竞品已覆盖表面贡献 | Luna/新 certifier compiler 提供类似功能 | 始终围绕 representation/planning/repeated-query co-design |
+| 2027 时间不足 | 8/05 前无 Planner/Pareto，8/14 前无 headline v0 | 立即转 ASPLOS 2028，不消耗重投机会 |
+
+---
+
+## 11. 执行版维护检查清单
+
+每次里程碑复审时，需要多模型/人工评审明确回答：
+
+- 三项贡献是否都是系统/PL贡献，而不是验证算法功能列表？
+- C1 与 auto_LiRPA/Luna 的边界是否足够清楚？
+- C2 是否真的需要全局 Planner，还是局部 heuristic 已足够？
+- C3 是否有真实重复查询，而非人工复制 batch？
+- 2027 的时间表是否现实，哪些任务可以删除而不破坏论文？
+- headline result 应优先选择 BaB、multi-spec 还是 memory-constrained CROWN？
+- certified training 是主评估还是扩展评估？
+- 哪个非 toy workload 能在 8/05 前稳定，第二个能否在 8/15 前进入主表？
+- 前两页能否在不解释大量验证术语的情况下成立？
+
+执行中必须同步更新：
+
+- `gemini_doc/README.md` 顶层索引；
+- 当前阶段/下一步计划；
+- PR 模板或协作 workflow；
+- 论文 claims map 与实验 schema（若新增字段）。
+
+---
+
+## 12. 参考来源
+
+- [ASPLOS 2027 Call for Papers](https://www.asplos-conference.org/asplos2027/cfp/)：研究推进标准、rapid review、2026-09-09 AoE deadline 与重投限制。
+- [ASPLOS 2027 Artifact Evaluation](https://www.asplos-conference.org/asplos2027/artifact-evaluation/)：Artifact Appendix、workflow、expected outputs、公共归档与 DOI。
+- [auto_LiRPA](https://github.com/Verified-Intelligence/auto_LiRPA)：一般计算图、自动 LiRPA、α/β/GCP-CROWN 与 GPU 支持边界。
+- [α,β-CROWN](https://github.com/Verified-Intelligence/alpha-beta-CROWN)：GPU bound propagation、BaB 与 verifier 生态。
+- [A Tensor-Based Compiler and a Runtime for Neuron-Level DNN Certifier Specifications](https://arxiv.org/abs/2507.20055)：neuron-level specification 编译、shape analysis 与 g-BCSR runtime。
+- [The Luna Bound Propagator for Formal Analysis of Neural Networks](https://arxiv.org/abs/2603.23878)：C++ general-graph IBP/CROWN/α-CROWN propagator。
+- [Towards Stable and Efficient Training of Verifiably Robust Neural Networks](https://arxiv.org/abs/1906.06316)：CROWN-IBP 的训练稳定性、紧度与成本权衡。

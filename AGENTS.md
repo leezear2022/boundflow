@@ -6,11 +6,11 @@
 - Development scripts sit in `scripts/`; tests are in `tests/` (smoke check in `tests/test_env.py`).
 
 ## Environment & Setup
-- Use Conda env `boundflow`. From repo root run `bash scripts/install_dev.sh` (updates submodules, builds TVM/TVM-FFI, installs Auto_LiRPA editable, sets hooks).  
-- If the env already exists: `conda activate boundflow && source env.sh` or `bash scripts/setup_hooks.sh` to auto-source on activation. `env.sh` exports `BOUNDFLOW_ROOT`, `TVM_HOME`, and augments `PYTHONPATH`.
+- Use Conda env `boundflow`. Do not run the full installer implicitly; use explicit stages such as `bash scripts/install_dev.sh audit|conda|pytorch|tvm|auto-lirpa|verify`.
+- Activation hooks are installed: `conda activate boundflow` loads `env.sh`, and `conda deactivate` restores prior variables. `env.sh` exports `BOUNDFLOW_ROOT`, `TVM_HOME`, `TVM_LIBRARY_PATH`, and augments `PYTHONPATH`.
 
 ## Build, Test, and Development Commands
-- `bash scripts/install_dev.sh` — full bootstrap (idempotent).  
+- `bash scripts/install_dev.sh <stage>` — staged bootstrap/verification; use `all` only when a full rebuild is intended.
 - `bash scripts/rebuild_tvm.sh` — incremental rebuild after C++/TIR changes in `boundflow/3rdparty/tvm`.  
 - `pytest tests/test_env.py` — verify imports and shared libs; run after installs.  
 - `pytest tests` — run the growing suite; add `-q` or `-k <pattern>` as needed.  
@@ -42,6 +42,9 @@
 - 每次修改都写一个修改文档作为记录
 
 ## 关键文档索引
+- ASPLOS 执行备忘录（唯一顺序/门禁）：`gemini_doc/asplos_execution_memo_v1_0.md`
+- ASPLOS 总体执行计划 v1.0：`gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`
+- ASPLOS claims 动态证据映射：`gemini_doc/asplos_claims_map.md`
 - TVM 后端优化备忘：`gemini_doc/tvm_backend_optimization_memo.md`
 - 与大模型协作工作流模板（输入计划→修正测试→总结→下一步计划）：`gemini_doc/llm_collaboration_workflow.md`
 - Bench JSONL schema（系统化消融输出字段）：`docs/bench_jsonl_schema.md`

@@ -42,6 +42,21 @@ def _manifest_claimed_paths(path: Path) -> list[Path]:
     return out
 
 
+def _manifest_output_paths(path: Path) -> list[Path]:
+    lines = path.read_text(encoding="utf-8").splitlines()
+    in_section = False
+    out: list[Path] = []
+    for line in lines:
+        if line.strip() == "outputs:":
+            in_section = True
+            continue
+        if in_section and line.strip() == "paper_facing_outputs:":
+            break
+        if in_section and line.startswith("- "):
+            out.append(Path(line[2:].strip()))
+    return out
+
+
 def test_phase5d_artifact_runner_quick_smoke(tmp_path: Path) -> None:
     pytest.importorskip("tvm")
     out_root = tmp_path / "artifacts"
@@ -79,7 +94,13 @@ def test_phase5d_artifact_runner_quick_smoke(tmp_path: Path) -> None:
     assert (out_dir / "tables" / "table_ablation.csv").exists()
     assert (out_dir / "tables" / "table_main.csv").exists()
     assert (out_dir / "MANIFEST.txt").exists()
-    for p in _manifest_claimed_paths(out_dir / "MANIFEST.txt"):
+    manifest = out_dir / "MANIFEST.txt"
+    manifest_text = manifest.read_text(encoding="utf-8")
+    assert "git_dirty:" in manifest_text
+    assert "--mode quick" in manifest_text
+    for p in _manifest_output_paths(manifest):
+        assert p.exists(), f"manifest lists missing output: {p}"
+    for p in _manifest_claimed_paths(manifest):
         assert p.exists(), f"manifest claims missing path: {p}"
     assert (out_dir / "runs" / "mlp" / "results.jsonl").exists()
     assert (out_dir / "runs" / "mnist_cnn" / "results.jsonl").exists()

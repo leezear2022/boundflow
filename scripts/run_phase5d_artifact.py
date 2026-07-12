@@ -32,6 +32,21 @@ def _git_short_sha() -> str:
         return ""
 
 
+def _git_is_dirty() -> Optional[bool]:
+    try:
+        import subprocess
+
+        result = subprocess.run(
+            ["git", "status", "--porcelain"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return bool(result.stdout.strip())
+    except Exception:
+        return None
+
+
 def _read_jsonl_rows(path: Path) -> List[Dict[str, Any]]:
     rows: List[Dict[str, Any]] = []
     for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
@@ -77,7 +92,6 @@ def _write_manifest(
     postprocess_argv: Sequence[str],
     jsonl_paths: Sequence[Path],
     jsonl_path: Path,
-    post_out_dir: Path,
     claimed_paths: Sequence[Tuple[str, Path]],
 ) -> None:
     sha = _git_short_sha()
@@ -92,6 +106,7 @@ def _write_manifest(
     lines.append(_kv("run_id", run_id))
     lines.append(_kv("time_utc", _utc_now_iso()))
     lines.append(_kv("git_commit", sha))
+    lines.append(_kv("git_dirty", _git_is_dirty()))
     lines.append(_kv("command", " ".join(command_argv)))
     for name, argv in bench_commands:
         lines.append(_kv(f"bench_command.{name}", "python scripts/bench_ablation_matrix.py " + " ".join(argv)))
@@ -104,14 +119,7 @@ def _write_manifest(
 
     lines.append("")
     lines.append("outputs:")
-    outputs = [
-        jsonl_path,
-        *list(jsonl_paths),
-        post_out_dir / "ablation.csv",
-        post_out_dir / "tables" / "ablation_summary.csv",
-        post_out_dir / "tables" / "table_main.csv",
-        post_out_dir / "MANIFEST.txt",
-    ]
+    outputs = [jsonl_path, *list(jsonl_paths), *(path for _, path in claimed_paths)]
     for p in outputs:
         lines.append(f"- {p}")
     lines.append("")
@@ -154,8 +162,9 @@ def _apply_repro_env(*, torch_num_threads: int) -> None:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
+    effective_argv = list(sys.argv[1:] if argv is None else argv)
     p = argparse.ArgumentParser()
-    p.add_argument("--mode", choices=["quick", "full"], default="quick")
+    p.add_argument("--mode", choices=["quick", "reduced", "full"], default="quick")
     p.add_argument("--run-id", type=str, default="")
     p.add_argument("--out-root", type=str, default="artifacts/phase5d")
     p.add_argument("--workload", choices=["mlp", "mnist_cnn", "all"], default="mlp")
@@ -166,7 +175,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         help="Allow generating a python-only artifact when TVM is unavailable (TVM-related claims are not covered).",
     )
     p.add_argument("--keep-intermediate", action="store_true")
-    args = p.parse_args(argv)
+    args = p.parse_args(effective_argv)
 
     run_id = str(args.run_id or f"{int(time.time())}_{os.getpid()}")
     out_dir = Path(args.out_root) / run_id
@@ -195,11 +204,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     from scripts.bench_ablation_matrix import main as bench_main
     from scripts.postprocess_ablation_jsonl import main as post_main
 
-    # Bench args: keep schema stable; only tweak warmup/iters/matrix for quick/full.
+    # Bench args: keep schema stable; only tweak warmup/iters/matrix by workflow tier.
     if args.mode == "quick":
         matrix = "small"
         warmup = "1"
         iters = "1"
+    elif args.mode == "reduced":
+        matrix = "small"
+        warmup = "3"
+        iters = "10"
     else:
         matrix = "default"
         warmup = "3"
@@ -355,12 +368,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     _write_manifest(
         out_dir,
         run_id=run_id,
-        command_argv=[Path(sys.argv[0]).name, *(argv or [])],
+        command_argv=[Path(sys.argv[0]).name, *effective_argv],
         bench_commands=bench_commands,
         postprocess_argv=postprocess_argv,
         jsonl_paths=jsonl_inputs,
         jsonl_path=jsonl_path,
-        post_out_dir=post_out_dir,
         claimed_paths=claimed,
     )
 

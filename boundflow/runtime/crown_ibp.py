@@ -184,6 +184,22 @@ def _forward_ibp_trace_mlp(
                 interval_env[op.outputs[0]] = y
             continue
 
+        if op.op_type == "reshape":
+            shape = tuple(int(dim) for dim in op.attrs.get("shape", ()))
+            if not shape:
+                raise ValueError("reshape requires non-empty attrs['shape']")
+            x_state = _get_state(op.inputs[0])
+            if isinstance(x_state, InputPerturbationState):
+                env[op.outputs[0]] = InputPerturbationState(
+                    center=x_state.center.reshape(shape), perturbation=x_state.perturbation
+                )
+            else:
+                x = _ensure_interval(x_state)
+                y = IntervalState(lower=x.lower.reshape(shape), upper=x.upper.reshape(shape))
+                env[op.outputs[0]] = y
+                interval_env[op.outputs[0]] = y
+            continue
+
         raise NotImplementedError(f"_forward_ibp_trace_mlp unsupported op_type: {op.op_type}")
 
     return interval_env, relu_pre
@@ -787,6 +803,13 @@ def _run_crown_backward_from_trace(
             adjoints[in_name] = _accumulate_backward_state(adjoints.get(in_name), contrib, input_shape=in_shape)
             continue
 
+        if op.op_type == "reshape":
+            in_name = op.inputs[0]
+            in_shape = _value_shape(input_spec=input_spec, interval_env=interval_env, value_name=in_name)
+            contrib = _backprop_flatten_step(state, pre_shape=in_shape)
+            adjoints[in_name] = _accumulate_backward_state(adjoints.get(in_name), contrib, input_shape=in_shape)
+            continue
+
         if op.op_type == "relu":
             x_name = op.inputs[0]
             if x_name not in relu_pre:
@@ -1018,7 +1041,7 @@ def get_crown_ibp_mlp_stats(module: BFTaskModule) -> CrownIbpStats:
         ops = tuple(op.op_type for op in task.ops)
         if not task.ops:
             return CrownIbpStats(supported=False, reason="empty task", ops_seen=ops)
-        bad = [t for t in ops if t not in {"linear", "relu", "conv2d", "flatten", "add", "concat"}]
+        bad = [t for t in ops if t not in {"linear", "relu", "conv2d", "flatten", "reshape", "add", "concat"}]
         if bad:
             return CrownIbpStats(supported=False, reason=f"unsupported ops: {bad}", ops_seen=ops)
         for i, op in enumerate(task.ops):

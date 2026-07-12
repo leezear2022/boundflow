@@ -27,6 +27,10 @@
   - 同步更新 `docs/change_log.md`（时间线总账）。
 - 尽量保持 PR 小步可回滚：一个 PR 对应一个“最小可验证闭环”。
 - 运行时 contract：scheduler 的 env 只认 **physical buffer id**（Phase 5B hardening 的核心前提）。
+- ASPLOS 研究 PR 还必须回答：消除了什么系统瓶颈、改善哪个北极星指标、为 C1/C2/C3
+  增加了什么证据、原始 JSONL/表图/manifest 在哪里。
+- 当前唯一研究顺序由 `gemini_doc/asplos_execution_memo_v1_0.md` 约束；不得并行跳过 Gate 0
+  启动 Planner、fused lowering 或 BaB runtime。
 
 ---
 
@@ -91,10 +95,10 @@
 - 已知坑/注意事项（尤其 TVM pipeline、cache key、env 变量）
 - 下一步计划（可选）
 
-### Step 7：提交并推送（形成可回滚节点）
+### Step 7：提交（形成可回滚节点）
 
 - `git commit`（conventional commit message）
-- `git push origin main`
+- 只有用户明确要求时才 `git push`；默认保留本地提交供复核。
 
 ### Step 8：回合结束：输出“总结 + 下一步 PR 计划”
 

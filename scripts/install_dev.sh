@@ -1,116 +1,150 @@
-#!/bin/bash
-set -e  # Exit on error
-set -o pipefail
+#!/usr/bin/env bash
+set -euo pipefail
 
-# -----------------------------------------------------------------------------
-# Configuration
-# -----------------------------------------------------------------------------
-ENV_NAME="boundflow"
-ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+ENV_NAME="${BOUNDFLOW_ENV_NAME:-boundflow}"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TVM_DIR="${ROOT_DIR}/boundflow/3rdparty/tvm"
-TVM_FFI_DIR="${ROOT_DIR}/boundflow/3rdparty/tvm-ffi"
+TVM_BUILD_DIR="${TVM_DIR}/build-boundflow"
+TVM_FFI_DIR="${TVM_DIR}/3rdparty/tvm-ffi"
 LIRPA_DIR="${ROOT_DIR}/boundflow/3rdparty/auto_LiRPA"
-CORES=$(nproc)
+CONDA_BIN="${CONDA_EXE:-${HOME}/miniconda3/bin/conda}"
+CUDA_ROOT="${BOUNDFLOW_CUDA_ROOT:-}"
+JOBS="${BOUNDFLOW_BUILD_JOBS:-$(nproc)}"
 
-echo ">>> BoundFlow Installer"
-echo ">>> Root Dir: ${ROOT_DIR}"
+usage() {
+  echo "用法: $0 <audit|submodules|conda|pytorch|cuda-smoke|tvm|auto-lirpa|verify|baseline|all>" >&2
+  echo "首次搭建建议逐阶段执行；脚本不使用 sudo，也不修改驱动、内核或系统 CUDA。" >&2
+}
 
-# -----------------------------------------------------------------------------
-# 1. Submodules
-# -----------------------------------------------------------------------------
-echo ""
-echo ">>> [1/6] Updating Git Submodules (Recursive)..."
-git submodule update --init --recursive
-# Also update nested submodules specifically to be safe
-(cd ${TVM_DIR} && git submodule update --init --recursive)
-(cd ${TVM_FFI_DIR} && git submodule update --init --recursive)
+run_env() {
+  local pythonpath="${ROOT_DIR}:${TVM_DIR}/python:${TVM_FFI_DIR}/python:${LIRPA_DIR}"
+  PYTHONPATH="${pythonpath}${PYTHONPATH:+:${PYTHONPATH}}" \
+    TVM_LIBRARY_PATH="${TVM_BUILD_DIR}" \
+    BOUNDFLOW_QUIET=1 \
+    "${CONDA_BIN}" run --no-capture-output -n "${ENV_NAME}" "$@"
+}
 
-# -----------------------------------------------------------------------------
-# 2. Conda Environment
-# -----------------------------------------------------------------------------
-echo ""
-echo ">>> [2/6] Configuring Conda Environment '${ENV_NAME}'..."
-if conda env list | grep -q "${ENV_NAME}"; then
-    echo "    Environment exists. Updating..."
-    conda env update -n ${ENV_NAME} -f environment.yaml
-else
-    echo "    Creating new environment..."
-    conda env create -f environment.yaml
-fi
+run_env_capture() {
+  BOUNDFLOW_QUIET=1 "${CONDA_BIN}" run -n "${ENV_NAME}" "$@"
+}
 
-# We need to run the rest of the commands inside the conda environment
-# We use a recursive call to this script with a flag if we are not already in it
-if [[ "${CONDA_DEFAULT_ENV}" != "${ENV_NAME}" ]]; then
-    echo ">>> Switching to conda environment '${ENV_NAME}' for build steps..."
-    # Execute the build steps in a new shell with the environment activated
-    eval "$(conda shell.bash hook)"
-    conda activate ${ENV_NAME}
-fi
+cuda_root() {
+  if [[ -n "${CUDA_ROOT}" ]]; then
+    printf '%s\n' "${CUDA_ROOT}"
+  else
+    run_env_capture python -c 'import os; print(os.environ["CONDA_PREFIX"])'
+  fi
+}
 
-# -----------------------------------------------------------------------------
-# 3. Build & Install TVM-FFI
-# -----------------------------------------------------------------------------
-echo ""
-echo ">>> [3/6] Building TVM-FFI..."
-cd ${TVM_FFI_DIR}
-mkdir -p build
-cd build
-# Explicitly build with CMake to ensure .so is generated correctly
-cmake .. -G Ninja
-ninja
-# Copy the compiled library to the python package source directory
-# This ensures pip install -e works and finds the library immediately
-find . -name "*.so" -exec cp {} ../python/tvm_ffi/ \;
-echo "    Installing TVM-FFI Python package (editable)..."
-cd ../python
-pip install -e .
+require_conda() {
+  if [[ ! -x "${CONDA_BIN}" ]]; then
+    echo "找不到 conda: ${CONDA_BIN}；请设置 CONDA_EXE。" >&2
+    exit 2
+  fi
+}
 
-# -----------------------------------------------------------------------------
-# 4. Build & Install TVM
-# -----------------------------------------------------------------------------
-echo ""
-echo ">>> [4/6] Building TVM..."
-cd ${TVM_DIR}
-mkdir -p build
-cp cmake/config.cmake build/
-cd build
+stage_audit() {
+  python "${ROOT_DIR}/scripts/env_doctor.py" --json-out "${ROOT_DIR}/artifacts/env/host-doctor.json"
+}
 
-# Modify config.cmake to enable CUDA and LLVM
-# We use sed to enable these options. Adjust based on your system needs.
-sed -i 's/set(USE_LLVM OFF)/set(USE_LLVM ON)/g' config.cmake
-sed -i 's/set(USE_CUDA OFF)/set(USE_CUDA ON)/g' config.cmake
-# Optional: Enable CUDNN if needed
-# sed -i 's/set(USE_CUDNN OFF)/set(USE_CUDNN ON)/g' config.cmake
+stage_submodules() {
+  git -C "${ROOT_DIR}" submodule update --init --recursive
+  test -f "${TVM_FFI_DIR}/pyproject.toml"
+}
 
-echo "    Configuring CMake (LLVM=ON, CUDA=ON)..."
-cmake .. -G Ninja
-ninja
+stage_conda() {
+  require_conda
+  if "${CONDA_BIN}" env list | awk '{print $1}' | grep -Fxq "${ENV_NAME}"; then
+    "${CONDA_BIN}" env update -n "${ENV_NAME}" -f "${ROOT_DIR}/environment.yaml" --prune
+  else
+    "${CONDA_BIN}" env create -f "${ROOT_DIR}/environment.yaml"
+  fi
+}
 
-echo "    Installing TVM Python package (editable)..."
-cd ../python
-pip install -e .
+stage_pytorch() {
+  require_conda
+  run_env python -m pip install -r "${ROOT_DIR}/requirements-pytorch-cu132.txt"
+  run_env python -c 'import torch, torchvision; assert torch.__version__.split("+")[0] == "2.12.1"; assert torchvision.__version__.split("+")[0] == "0.27.1"; assert torch.version.cuda == "13.2", torch.version.cuda'
+}
 
-# -----------------------------------------------------------------------------
-# 5. Install Auto_LiRPA
-# -----------------------------------------------------------------------------
-echo ""
-echo ">>> [5/6] Installing Auto_LiRPA..."
-cd ${LIRPA_DIR}
-echo "    Installing Auto_LiRPA Python package (editable)..."
-pip install -e .
+stage_cuda_smoke() {
+  require_conda
+  CUDA_ROOT="$(cuda_root)" run_env bash "${ROOT_DIR}/scripts/smoke_cuda.sh"
+}
 
-# -----------------------------------------------------------------------------
-# 6. Final Setup
-# -----------------------------------------------------------------------------
-echo ""
-echo ">>> [6/6] Setting up Environment Hooks..."
-cd ${ROOT_DIR}
-bash scripts/setup_hooks.sh
+stage_tvm() {
+  require_conda
+  test -f "${TVM_FFI_DIR}/pyproject.toml" || stage_submodules
+  local llvm_config
+  local selected_cuda_root
+  local clang
+  local clangxx
+  # 静态链接 LLVM 后再由 HIDE_PRIVATE_SYMBOLS 隐藏，避免与 Triton 的 LLVM 冲突。
+  llvm_config="${ROOT_DIR}/scripts/llvm-config-static.sh"
+  selected_cuda_root="$(cuda_root)"
+  clang="$(run_env_capture which clang)"
+  clangxx="$(run_env_capture which clang++)"
+  run_env cmake -S "${TVM_DIR}" -B "${TVM_BUILD_DIR}" -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_C_COMPILER="${clang}" \
+    -DCMAKE_CXX_COMPILER="${clangxx}" \
+    -DCMAKE_CUDA_HOST_COMPILER="${clangxx}" \
+    -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+    -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+    -DUSE_LLVM="${llvm_config}" \
+    -DUSE_CUDA="${selected_cuda_root}" \
+    -DHIDE_PRIVATE_SYMBOLS=ON
+  run_env cmake --build "${TVM_BUILD_DIR}" --parallel "${JOBS}"
+  # Python 与 TVM C++ 构建都来自 TVM 锁定的同一个内嵌 tvm-ffi commit。
+  run_env python -m pip install --no-deps -e "${TVM_FFI_DIR}"
+}
 
-echo ""
-echo "----------------------------------------------------------------"
-echo ">>> Installation Complete!"
-echo ">>> Please verify by running:"
-echo "    conda activate ${ENV_NAME}"
-echo "    python tests/test_env.py"
-echo "----------------------------------------------------------------"
+stage_auto_lirpa() {
+  require_conda
+  test -f "${LIRPA_DIR}/setup.py" || stage_submodules
+  run_env python -m pip install --no-deps -e "${LIRPA_DIR}"
+}
+
+stage_verify() {
+  require_conda
+  run_env bash "${ROOT_DIR}/scripts/setup_hooks.sh"
+  run_env python "${ROOT_DIR}/scripts/env_doctor.py" --strict --json-out "${ROOT_DIR}/artifacts/env/boundflow-doctor.json"
+  run_env python -c 'import tvm; import triton'  # LLVM/符号隔离门禁
+  run_env python "${ROOT_DIR}/scripts/smoke_tvm_cuda.py"
+  run_env python -m pytest -q "${ROOT_DIR}/tests"
+}
+
+stage_baseline() {
+  require_conda
+  run_env python "${ROOT_DIR}/scripts/run_phase5d_artifact.py" \
+    --mode reduced --workload all \
+    --run-id "env-cu132-$(date +%Y%m%d)" \
+    --out-root "${ROOT_DIR}/artifacts/environment-baseline"
+}
+
+stage_all() {
+  stage_audit
+  stage_submodules
+  stage_conda
+  stage_pytorch
+  stage_cuda_smoke
+  stage_tvm
+  stage_auto_lirpa
+  stage_verify
+  stage_baseline
+}
+
+if [[ $# -ne 1 ]]; then usage; exit 2; fi
+case "$1" in
+  audit) stage_audit ;;
+  submodules) stage_submodules ;;
+  conda) stage_conda ;;
+  pytorch) stage_pytorch ;;
+  cuda-smoke) stage_cuda_smoke ;;
+  tvm) stage_tvm ;;
+  auto-lirpa) stage_auto_lirpa ;;
+  verify) stage_verify ;;
+  baseline) stage_baseline ;;
+  all) stage_all ;;
+  *) usage; exit 2 ;;
+esac

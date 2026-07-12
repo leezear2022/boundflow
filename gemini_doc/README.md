@@ -16,10 +16,12 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-1. `docs/phase5_done.md`（Phase 5 完成声明：复现入口、产物结构、DoD、边界）
-2. `gemini_doc/artifact_claims_phase5d.md`（claims→文件/字段→命令 的证据映射）
-3. `gemini_doc/artifact_appendix_phase5d.md`（AE 操作说明：怎么跑、怎么验证、怎么看结果）
-4. `docs/bench_jsonl_schema.md`（JSONL schema=1.0：字段与计时口径）
+1. `gemini_doc/asplos_execution_memo_v1_0.md`（当前唯一执行顺序与硬门禁）
+2. `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`（ASPLOS 顶层执行计划 v1.0）
+3. `gemini_doc/asplos_claims_map.md`（论文主张→代码→实验→工件证据）
+4. `docs/phase5_done.md`（Phase 5 完成声明：复现入口、产物结构、DoD、边界）
+5. `gemini_doc/artifact_claims_phase5d.md`（Phase 5 claims→文件/字段→命令）
+6. `docs/bench_jsonl_schema.md`（JSONL schema=1.0：字段与计时口径）
 
 ### B. 全流程总览（从 claims 到工程到 AE）
 
@@ -28,6 +30,7 @@
 
 ### C. 研发协作流程（人与大模型怎么配合）
 
+- `gemini_doc/boundflow_build_and_run_workflow.md`（按源码类型编译、运行和测试）
 - `gemini_doc/llm_collaboration_workflow.md`（输入计划→修正测试→总结→下一步计划）
 - `/home/lee/.codex/skills/boundflow-workflow/SKILL.md`（上述工作流的本机 skill 入口）
 
@@ -43,6 +46,9 @@
 
 ### 2.1 关键交付文档（“长期有效”）
 
+- `gemini_doc/asplos_execution_memo_v1_0.md`：ASPLOS 研发的短执行入口与门禁
+- `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`：ASPLOS 总体研发、论文与 artifact 执行计划
+- `gemini_doc/asplos_claims_map.md`：ASPLOS 三项贡献的动态证据映射
 - `gemini_doc/artifact_claims_phase5d.md`：Phase 5D artifact claims（证据链/口径映射）
 - `gemini_doc/artifact_appendix_phase5d.md`：Phase 5D artifact appendix（复现说明）
 - `gemini_doc/project_evolution_overview.md`：研发脉络总览（目标、阶段推进、代码落点、未来路线）

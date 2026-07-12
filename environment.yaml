@@ -1,26 +1,20 @@
 name: boundflow
 channels:
-  - pytorch
   - nvidia
   - conda-forge
+  - nodefaults
 dependencies:
-  - python>=3.10
+  - python=3.12
   - pip
-  # Build tools
-  - cmake>=3.18
-  - ninja
+  - cmake>=3.24
+  - ninja>=1.11
   - ccache
   - make
-  - llvmdev>=15.0  # For TVM LLVM codegen backend
-  
-  # PyTorch & Auto_LiRPA
-  # Using a flexible generic constraint, conda will resolve to a compatible version (likely 2.1+)
-  - pytorch>=2.0.0
-  - torchvision>=0.15.0
-  - pytorch-cuda=12.1 # Assuming CUDA 12.1, common baseline. Can interactively ask if unsure but this is safe default.
-  
-  # TVM Core dependencies
-  - numpy>=1.20
+  - llvmdev=20.1.8
+  - clangdev=20.1.8
+  # 提供可锁定的 nvcc/headers；PyTorch 自身仍只从官方 cu132 wheel 安装。
+  - cuda-toolkit=13.2
+  - numpy
   - scipy
   - cloudpickle
   - psutil
@@ -29,33 +23,25 @@ dependencies:
   - typing_extensions
   - attrs
   - decorator
-  
-  # TVM Autotuner
+  - packaging
   - xgboost
-  
-  # ONNX frontend
   - onnx
   - onnxoptimizer
-  # - onnxruntime # Optional, often conflicts with system libs or complicates things, but good for verification.
-  
-  # Auto_LiRPA dependencies
+  - onnxruntime
+  - onnxscript
   - pyyaml
   - tqdm
   - appdirs
   - graphviz
-
-  # Postprocess & plotting (AE-friendly; runner will still skip plots if missing)
+  - python-graphviz
   - matplotlib
-  
-  # Testing & Dev
   - pytest
   - pytest-xdist
   - pytest-benchmark
+  - pytest-order
   - pylint
   - black
   - mypy
-  
-  - pip:
-    # Custom forks are installed via setup.py/env.sh, but we list other pip packages here if conda lacks them
-    - onnxruntime
-    - pytest-order
+
+# PyTorch/CUDA 有意不交给 Conda 求解。创建环境后由 install_dev.sh 的
+# pytorch 阶段从官方 cu132 index 精确安装，防止 solver 改写 CUDA/PyTorch 版本。

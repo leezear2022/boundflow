@@ -1,0 +1,22 @@
+# 人工维护的顶层版本锁；完整传递依赖与构建号见环境 manifest。
+name: boundflow
+channels:
+  - nvidia
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.12
+  - cuda-toolkit=13.2
+  - llvmdev=20.1.8
+  - clangdev=20.1.8
+  - cmake>=3.24
+  - ninja>=1.11
+  - ccache
+  - pip
+  - pip:
+      - --index-url https://download.pytorch.org/whl/cu132
+      - torch==2.12.1
+      - torchvision==0.27.1
+
+# 其余 Python/开发依赖以 environment.yaml 为准。auto_LiRPA 与内嵌
+# tvm-ffi 是源码 editable 安装，commit 由 git submodule 锁定且必须 --no-deps。
