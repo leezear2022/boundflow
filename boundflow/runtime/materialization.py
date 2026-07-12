@@ -258,6 +258,68 @@ def operator_tree_stats(operator: object) -> tuple[int, int]:
     return _visit(operator, frozenset()), len(seen)
 
 
+def dump_operator_tree(operator: object) -> dict[str, object]:
+    """Return a deterministic structural dump without tensor values or object addresses."""
+
+    node_ids: dict[int, int] = {}
+    nodes: list[dict[str, object]] = []
+
+    def _tensor_shape(value: object) -> list[int] | None:
+        if not torch.is_tensor(value):
+            return None
+        return [int(dim) for dim in value.shape]
+
+    def _visit(node: object, ancestors: frozenset[int]) -> int:
+        object_id = id(node)
+        if object_id in ancestors:
+            raise ValueError("cycle detected in LinearOperator graph")
+        if object_id in node_ids:
+            return node_ids[object_id]
+        node_id = len(node_ids)
+        node_ids[object_id] = node_id
+        record: dict[str, object] = {
+            "id": node_id,
+            "operator_type": type(node).__name__,
+            "shape": [int(dim) for dim in getattr(node, "shape")],
+            "input_shape": [int(dim) for dim in getattr(node, "input_shape")],
+            "dtype": str(getattr(node, "dtype")),
+            "device": str(getattr(node, "device")),
+            "metadata": {},
+            "children": [],
+        }
+        nodes.append(record)
+        metadata = record["metadata"]
+        assert isinstance(metadata, dict)
+        for name in ("rhs", "weight", "positive_scale", "negative_scale"):
+            shape = _tensor_shape(getattr(node, name, None))
+            if shape is not None:
+                metadata[f"{name}_shape"] = shape
+        for name in (
+            "stride",
+            "padding",
+            "dilation",
+            "groups",
+            "start",
+            "stop",
+            "source_value",
+            "bound_direction",
+        ):
+            value = getattr(node, name, None)
+            if value is not None:
+                metadata[name] = list(value) if isinstance(value, tuple) else value
+        children = record["children"]
+        assert isinstance(children, list)
+        next_ancestors = ancestors | {object_id}
+        for edge_name in ("base", "lhs", "rhs"):
+            child = getattr(node, edge_name, None)
+            if _is_operator(child):
+                children.append({"edge": edge_name, "node": _visit(child, next_ancestors)})
+        return node_id
+
+    root = _visit(operator, frozenset())
+    return {"root": root, "nodes": nodes}
+
+
 _ACTIVE_TRACE: ContextVar[MaterializationTrace | None] = ContextVar(
     "boundflow_materialization_trace",
     default=None,

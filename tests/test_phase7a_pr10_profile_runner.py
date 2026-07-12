@@ -41,14 +41,24 @@ def test_pr10_profile_runner_writes_trace_on_and_timing_off_evidence(
     assert row["timing_trace_off"]["peak_measurement_repeats"] == 0
     assert row["timing_trace_off"]["allocator_cache_cleared_before_peak"] is False
     assert row["trace_on"]["schema_version"] == "boundflow.materialization/v1"
-    assert row["trace_on"]["materialization"]["event_count"] == 4
+    assert row["trace_on"]["materialization"]["event_count"] > 0
+    assert (
+        row["trace_on"]["materialization"]["by_lifetime_class"].get("persistent")
+        is None
+    )
+    assert (
+        row["trace_on"]["materialization"]["by_reason"]["relu_bias_sign_reduce"][
+            "count"
+        ]
+        == 4
+    )
     assert row["correctness"] == {"finite": True, "lower_le_upper": True}
 
     with (profile / "normalized.csv").open(encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle))
     assert len(rows) == 1
     assert rows[0]["workload"] == "mlp_chain"
-    assert int(rows[0]["event_count"]) == 4
+    assert int(rows[0]["event_count"]) > 0
 
     manifest = json.loads((profile / "manifest.json").read_text(encoding="utf-8"))
     assert manifest["rows"] == 1
@@ -88,4 +98,10 @@ def test_pr10_profile_runner_alpha_beta_uses_per_domain_split_state(
     assert row["status"] == "ok"
     assert row["domain_batch"] == 2
     assert row["trace_on"]["state_bytes"]["beta_state_bytes"] > 0
-    assert all(event["beta_related"] for event in row["trace_on"]["events"])
+    bias_events = [
+        event
+        for event in row["trace_on"]["events"]
+        if event["reason"] == "relu_bias_sign_reduce"
+    ]
+    assert bias_events
+    assert all(event["beta_related"] for event in bias_events)

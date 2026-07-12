@@ -1,14 +1,17 @@
 from __future__ import annotations
 
+import os
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Iterator, List, Literal, Optional, Tuple
 
 import torch
 
 from ..domains.interval import IntervalDomain, IntervalState
 from ..ir.task import BFTaskModule, TaskKind
 from .dag_utils import normalize_concat_axis, validate_concat_tensor_shapes, validate_concat_value_shapes
-from .linear_operator import DenseLinearOperator, LinearOperator
+from .linear_operator import DenseLinearOperator, LinearOperator, SignSplitLinearOperator
 from .materialization import materialize_linear_operator
 from .perturbation import InputPerturbationState
 from .relu_shape_utils import broadcast_relu_split_like_pre
@@ -222,6 +225,40 @@ class DenseReluBackwardResult:
     A_l: torch.Tensor
     b_u: torch.Tensor
     b_l: torch.Tensor
+
+
+@dataclass(frozen=True)
+class ReluBackwardRelaxation:
+    """Broadcast ReLU slopes/intercepts shared by dense and structured paths."""
+
+    pre_flat: IntervalState
+    alpha_u: torch.Tensor
+    beta_u: torch.Tensor
+    alpha_l: torch.Tensor
+    beta_l: torch.Tensor
+
+
+ReluBackwardMode = Literal["dense", "structured"]
+_DEFAULT_RELU_BACKWARD_MODE: ReluBackwardMode = (
+    "dense" if os.environ.get("BOUNDFLOW_RELU_BACKWARD_MODE") == "dense" else "structured"
+)
+_RELU_BACKWARD_MODE: ContextVar[ReluBackwardMode] = ContextVar(
+    "boundflow_relu_backward_mode",
+    default=_DEFAULT_RELU_BACKWARD_MODE,
+)
+
+
+@contextmanager
+def _relu_backward_mode(mode: ReluBackwardMode) -> Iterator[None]:
+    """Temporarily select dense-reference or structured ReLU backward."""
+
+    if mode not in {"dense", "structured"}:
+        raise ValueError(f"unsupported ReLU backward mode: {mode}")
+    token = _RELU_BACKWARD_MODE.set(mode)
+    try:
+        yield
+    finally:
+        _RELU_BACKWARD_MODE.reset(token)
 
 
 def _resolve_output_value(task: Any, output_value: Optional[str], *, caller: str) -> str:
@@ -514,10 +551,11 @@ def _broadcast_relu_alpha(
     return out.clamp(0.0, 1.0)
 
 
-def _apply_relu_pre_add_coeff(
-    A: torch.Tensor,
+def _broadcast_relu_pre_add_coeff(
     add_raw: Any,
     *,
+    batch: int,
+    flat_dim: int,
     x_name: str,
     label: str,
     device: torch.device,
@@ -525,8 +563,6 @@ def _apply_relu_pre_add_coeff(
 ) -> torch.Tensor:
     add = add_raw if torch.is_tensor(add_raw) else torch.as_tensor(add_raw, device=device, dtype=dtype)
     add = add.to(device=device, dtype=dtype)
-    flat_dim = int(A.shape[2])
-    batch = int(A.shape[0])
     if add.dim() == 0:
         add = add.expand(flat_dim)
     if add.dim() == 1:
@@ -534,7 +570,7 @@ def _apply_relu_pre_add_coeff(
             raise ValueError(
                 f"{label}[{x_name}] shape {tuple(add.shape)} does not match expected ({flat_dim},)"
             )
-        return A + add.view(1, 1, -1)
+        return add.view(1, -1).expand(batch, -1)
     if add.dim() == 2:
         if int(add.shape[1]) != flat_dim:
             raise ValueError(
@@ -546,13 +582,34 @@ def _apply_relu_pre_add_coeff(
             add_b = add
         else:
             raise ValueError(f"{label}[{x_name}] shape {tuple(add.shape)} does not match batch {batch}")
-        return A + add_b.unsqueeze(1)
+        return add_b
     total = int(add.numel())
     if total == flat_dim:
-        return A + add.reshape(1, 1, flat_dim)
+        return add.reshape(1, flat_dim).expand(batch, -1)
     if total == batch * flat_dim and int(add.shape[0]) == batch:
-        return A + add.reshape(batch, flat_dim).unsqueeze(1)
+        return add.reshape(batch, flat_dim)
     raise ValueError(f"{label}[{x_name}] expects shape broadcastable to [B,{flat_dim}], got {tuple(add.shape)}")
+
+
+def _apply_relu_pre_add_coeff(
+    A: torch.Tensor,
+    add_raw: Any,
+    *,
+    x_name: str,
+    label: str,
+    device: torch.device,
+    dtype: torch.dtype,
+) -> torch.Tensor:
+    add = _broadcast_relu_pre_add_coeff(
+        add_raw,
+        batch=int(A.shape[0]),
+        flat_dim=int(A.shape[2]),
+        x_name=x_name,
+        label=label,
+        device=device,
+        dtype=dtype,
+    )
+    return A + add.unsqueeze(1)
 
 
 def _backprop_linear_step(
@@ -644,6 +701,41 @@ def _backprop_conv2d_step(
     )
 
 
+def _relu_backward_relaxation(
+    *,
+    pre: IntervalState,
+    x_name: str,
+    relu_alpha: Optional[Dict[str, torch.Tensor]],
+    device: torch.device,
+    dtype: torch.dtype,
+    caller: str,
+) -> ReluBackwardRelaxation:
+    pre_flat = IntervalState(
+        lower=pre.lower.reshape(int(pre.lower.shape[0]), -1),
+        upper=pre.upper.reshape(int(pre.upper.shape[0]), -1),
+    )
+    alpha_u, beta_u, alpha_l, beta_l = _relu_relax(pre_flat.lower, pre_flat.upper)
+    if relu_alpha is not None and x_name in relu_alpha:
+        alpha_broadcast = _broadcast_relu_alpha(
+            relu_alpha[x_name],
+            pre=pre,
+            x_name=x_name,
+            device=device,
+            dtype=dtype,
+            caller=caller,
+        )
+        amb = (pre_flat.lower < 0) & (pre_flat.upper > 0)
+        if amb.any():
+            alpha_l = torch.where(amb, alpha_broadcast, alpha_l)
+    return ReluBackwardRelaxation(
+        pre_flat=pre_flat,
+        alpha_u=alpha_u,
+        beta_u=beta_u,
+        alpha_l=alpha_l,
+        beta_l=beta_l,
+    )
+
+
 def _backprop_relu_step_dense_reference(
     A_u: torch.Tensor,
     A_l: torch.Tensor,
@@ -661,10 +753,15 @@ def _backprop_relu_step_dense_reference(
 ) -> DenseReluBackwardResult:
     """Apply the exact eager dense ReLU backward equations used as PR-10 oracle."""
 
-    pre_flat = IntervalState(
-        lower=pre.lower.reshape(int(pre.lower.shape[0]), -1),
-        upper=pre.upper.reshape(int(pre.upper.shape[0]), -1),
+    relaxation = _relu_backward_relaxation(
+        pre=pre,
+        x_name=x_name,
+        relu_alpha=relu_alpha,
+        device=device,
+        dtype=dtype,
+        caller=caller,
     )
+    pre_flat = relaxation.pre_flat
     expected_prefix = (int(pre_flat.lower.shape[0]),)
     if A_u.dim() != 3 or A_l.dim() != 3:
         raise ValueError(f"{caller} dense ReLU reference expects rank-3 A tensors")
@@ -683,22 +780,8 @@ def _backprop_relu_step_dense_reference(
                 f"{caller} only supports relu_pre_add_coeff_u on rank-2 pre-activations; got {tuple(pre.lower.shape)} for {x_name}"
             )
 
-    alpha_u, beta_u, alpha_l, beta_l = _relu_relax(pre_flat.lower, pre_flat.upper)
-    if relu_alpha is not None and x_name in relu_alpha:
-        alpha_broadcast = _broadcast_relu_alpha(
-            relu_alpha[x_name],
-            pre=pre,
-            x_name=x_name,
-            device=device,
-            dtype=dtype,
-            caller=caller,
-        )
-        amb = (pre_flat.lower < 0) & (pre_flat.upper > 0)
-        if amb.any():
-            alpha_l = torch.where(amb, alpha_broadcast, alpha_l)
-
-    sel_alpha_u = torch.where(A_u >= 0, alpha_u.unsqueeze(1), alpha_l.unsqueeze(1))
-    sel_beta_u = torch.where(A_u >= 0, beta_u.unsqueeze(1), beta_l.unsqueeze(1))
+    sel_alpha_u = torch.where(A_u >= 0, relaxation.alpha_u.unsqueeze(1), relaxation.alpha_l.unsqueeze(1))
+    sel_beta_u = torch.where(A_u >= 0, relaxation.beta_u.unsqueeze(1), relaxation.beta_l.unsqueeze(1))
     out_b_u = b_u + (A_u * sel_beta_u).sum(dim=2)
     out_A_u = A_u * sel_alpha_u
     if relu_pre_add_coeff_u is not None and x_name in relu_pre_add_coeff_u:
@@ -711,8 +794,8 @@ def _backprop_relu_step_dense_reference(
             dtype=dtype,
         )
 
-    sel_alpha_l = torch.where(A_l >= 0, alpha_l.unsqueeze(1), alpha_u.unsqueeze(1))
-    sel_beta_l = torch.where(A_l >= 0, beta_l.unsqueeze(1), beta_u.unsqueeze(1))
+    sel_alpha_l = torch.where(A_l >= 0, relaxation.alpha_l.unsqueeze(1), relaxation.alpha_u.unsqueeze(1))
+    sel_beta_l = torch.where(A_l >= 0, relaxation.beta_l.unsqueeze(1), relaxation.beta_u.unsqueeze(1))
     out_b_l = b_l + (A_l * sel_beta_l).sum(dim=2)
     out_A_l = A_l * sel_alpha_l
     if relu_pre_add_coeff_l is not None and x_name in relu_pre_add_coeff_l:
@@ -728,7 +811,7 @@ def _backprop_relu_step_dense_reference(
     return DenseReluBackwardResult(A_u=out_A_u, A_l=out_A_l, b_u=out_b_u, b_l=out_b_l)
 
 
-def _backprop_relu_step(
+def _backprop_relu_step_dense(
     state: AffineBackwardState,
     *,
     pre: IntervalState,
@@ -798,6 +881,166 @@ def _backprop_relu_step(
         A_l=DenseLinearOperator(dense.A_l, input_shape=orig_input_shape),
         b_u=dense.b_u,
         b_l=dense.b_l,
+    )
+
+
+def _add_structured_relu_pre_coeff(
+    operator: LinearOperator,
+    add_raw: Any,
+    *,
+    x_name: str,
+    label: str,
+    input_shape: Tuple[int, ...],
+    device: torch.device,
+    dtype: torch.dtype,
+) -> LinearOperator:
+    add = _broadcast_relu_pre_add_coeff(
+        add_raw,
+        batch=operator.shape[0],
+        flat_dim=operator.input_numel,
+        x_name=x_name,
+        label=label,
+        device=device,
+        dtype=dtype,
+    )
+    coeffs = add.unsqueeze(1).expand(operator.shape[0], operator.spec_dim, operator.input_numel)
+    return operator.add(DenseLinearOperator(coeffs, input_shape=input_shape))
+
+
+def _backprop_relu_step_structured(
+    state: AffineBackwardState,
+    *,
+    pre: IntervalState,
+    x_name: str,
+    relu_alpha: Optional[Dict[str, torch.Tensor]],
+    relu_pre_add_coeff_u: Optional[Dict[str, torch.Tensor]],
+    relu_pre_add_coeff_l: Optional[Dict[str, torch.Tensor]],
+    device: torch.device,
+    dtype: torch.dtype,
+    caller: str,
+) -> AffineBackwardState:
+    """Keep the main post-ReLU coefficient structured; materialize only bias reduction."""
+
+    input_shape = tuple(int(dim) for dim in pre.lower.shape[1:])
+    pre_numel = int(pre.lower[0].numel())
+    if pre_numel != state.A_u.input_numel or pre_numel != state.A_l.input_numel:
+        raise ValueError(
+            f"{caller} relu backward shape mismatch: pre={tuple(pre.lower.shape)} "
+            f"A_u.input_shape={state.A_u.input_shape} A_l.input_shape={state.A_l.input_shape}"
+        )
+    if pre.lower.dim() != 2 and relu_pre_add_coeff_u is not None and x_name in relu_pre_add_coeff_u:
+        raise NotImplementedError(
+            f"{caller} only supports relu_pre_add_coeff_u on rank-2 pre-activations; "
+            f"got {tuple(pre.lower.shape)} for {x_name}"
+        )
+    relaxation = _relu_backward_relaxation(
+        pre=pre,
+        x_name=x_name,
+        relu_alpha=relu_alpha,
+        device=device,
+        dtype=dtype,
+        caller=caller,
+    )
+    beta_related = (
+        (relu_pre_add_coeff_u is not None and x_name in relu_pre_add_coeff_u)
+        or (relu_pre_add_coeff_l is not None and x_name in relu_pre_add_coeff_l)
+    )
+    bias_A_u = materialize_linear_operator(
+        state.A_u,
+        reason="relu_bias_sign_reduce",
+        operator_site=f"{x_name}:upper:bias",
+        source_value=x_name,
+        source_primal_op="relu",
+        persistent_or_ephemeral="ephemeral",
+        logical_lifetime_begin="relu_bias_reduce",
+        logical_lifetime_end="relu_bias_reduce:return",
+        beta_related=beta_related,
+    )
+    bias_A_l = materialize_linear_operator(
+        state.A_l,
+        reason="relu_bias_sign_reduce",
+        operator_site=f"{x_name}:lower:bias",
+        source_value=x_name,
+        source_primal_op="relu",
+        persistent_or_ephemeral="ephemeral",
+        logical_lifetime_begin="relu_bias_reduce",
+        logical_lifetime_end="relu_bias_reduce:return",
+        beta_related=beta_related,
+    )
+    sel_beta_u = torch.where(
+        bias_A_u >= 0,
+        relaxation.beta_u.unsqueeze(1),
+        relaxation.beta_l.unsqueeze(1),
+    )
+    sel_beta_l = torch.where(
+        bias_A_l >= 0,
+        relaxation.beta_l.unsqueeze(1),
+        relaxation.beta_u.unsqueeze(1),
+    )
+    out_b_u = state.b_u + (bias_A_u * sel_beta_u).sum(dim=2)
+    out_b_l = state.b_l + (bias_A_l * sel_beta_l).sum(dim=2)
+
+    batch = int(pre.lower.shape[0])
+    upper: LinearOperator = SignSplitLinearOperator(
+        base=state.A_u,
+        positive_scale=relaxation.alpha_u.reshape(batch, *input_shape),
+        negative_scale=relaxation.alpha_l.reshape(batch, *input_shape),
+        source_value=x_name,
+        bound_direction="upper",
+    )
+    lower: LinearOperator = SignSplitLinearOperator(
+        base=state.A_l,
+        positive_scale=relaxation.alpha_l.reshape(batch, *input_shape),
+        negative_scale=relaxation.alpha_u.reshape(batch, *input_shape),
+        source_value=x_name,
+        bound_direction="lower",
+    )
+    if relu_pre_add_coeff_u is not None and x_name in relu_pre_add_coeff_u:
+        upper = _add_structured_relu_pre_coeff(
+            upper,
+            relu_pre_add_coeff_u[x_name],
+            x_name=x_name,
+            label="relu_pre_add_coeff_u",
+            input_shape=input_shape,
+            device=device,
+            dtype=dtype,
+        )
+    if relu_pre_add_coeff_l is not None and x_name in relu_pre_add_coeff_l:
+        lower = _add_structured_relu_pre_coeff(
+            lower,
+            relu_pre_add_coeff_l[x_name],
+            x_name=x_name,
+            label="relu_pre_add_coeff_l",
+            input_shape=input_shape,
+            device=device,
+            dtype=dtype,
+        )
+    return AffineBackwardState(A_u=upper, A_l=lower, b_u=out_b_u, b_l=out_b_l)
+
+
+def _backprop_relu_step(
+    state: AffineBackwardState,
+    *,
+    pre: IntervalState,
+    x_name: str,
+    relu_alpha: Optional[Dict[str, torch.Tensor]],
+    relu_pre_add_coeff_u: Optional[Dict[str, torch.Tensor]],
+    relu_pre_add_coeff_l: Optional[Dict[str, torch.Tensor]],
+    device: torch.device,
+    dtype: torch.dtype,
+    caller: str,
+) -> AffineBackwardState:
+    implementation = _backprop_relu_step_dense if _RELU_BACKWARD_MODE.get() == "dense" else _backprop_relu_step_structured
+    return implementation(
+        state,
+        pre=pre,
+        x_name=x_name,
+        relu_alpha=relu_alpha,
+        relu_pre_add_coeff_u=relu_pre_add_coeff_u,
+        relu_pre_add_coeff_l=relu_pre_add_coeff_l,
+        device=device,
+        dtype=dtype,
+        caller=caller,
     )
 
 

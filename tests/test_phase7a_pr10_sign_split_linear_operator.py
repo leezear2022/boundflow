@@ -7,7 +7,7 @@ from boundflow.runtime.linear_operator import (
     RightMatmulLinearOperator,
     SignSplitLinearOperator,
 )
-from boundflow.runtime.materialization import trace_materializations
+from boundflow.runtime.materialization import dump_operator_tree, trace_materializations
 
 
 def _make_flat_operator() -> (
@@ -112,3 +112,26 @@ def test_sign_split_reductions_match_dense_and_trace_ephemeral_materialization()
         "sign_split_row_l2",
         "sign_split_row_linf",
     }
+
+
+def test_sign_split_operator_tree_dump_is_deterministic_and_value_free() -> None:
+    operator, _coeffs, _positive, _negative = _make_flat_operator()
+    composed = operator.matmul_right(torch.randn(5, 4, dtype=torch.float64)).add(
+        operator.matmul_right(torch.randn(5, 4, dtype=torch.float64))
+    )
+
+    first = dump_operator_tree(composed)
+    second = dump_operator_tree(composed)
+
+    assert first == second
+    assert first["root"] == 0
+    assert [node["id"] for node in first["nodes"]] == list(range(len(first["nodes"])))
+    assert {node["operator_type"] for node in first["nodes"]} >= {
+        "AddLinearOperator",
+        "RightMatmulLinearOperator",
+        "SignSplitLinearOperator",
+        "DenseLinearOperator",
+    }
+    rendered = str(first)
+    assert "positive_scale_shape" in rendered
+    assert "tensor(" not in rendered

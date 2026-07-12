@@ -1,5 +1,11 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-07-12：ReLU backward 保持 structured coefficient
+
+- 默认返回 SignSplit operator；bias reduction 只做有 reason/site 的 ephemeral materialization。
+- 保留 dense reference fallback，完成 local/full/gradient 与全量 177 passed 回归。
+- 详细记录：`gemini_doc/change_2026-07-12_preserve_structured_relu_coefficients.md`。
+
 ## 2026-07-12：增加精确 SignSplitLinearOperator
 
 - 实现 `A⁺⊙s⁺ + A⁻⊙s⁻`，禁止未经证明将 sign-split 下推穿过 matmul/conv。

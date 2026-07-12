@@ -20,9 +20,9 @@
 | PR-10B.1 workload characterization | validated | `8f2c998`；180/180 clean GPU profile；mini-ResNet s128/d32 |
 | PR-10B.2 真实 BaB fixed-domain replay | planned | 当前仅 `synthetic_fixed_domain_batch`，不得描述成 BaB 结果 |
 | PR-10C.1 Dense/gradient reference oracle | validated | 显式 `A_u/A_l/b_u/b_l` oracle；独立 α sign-gradient；170 passed |
-| PR-10C.2 Dense/structured 双路径 oracle | planned | 待 SignSplit operator 后比较 local/full/solver/multi-step gradient |
+| PR-10C.2 Dense/structured 双路径 oracle | partial | local A/b、α gradient、plain CROWN、3-step α 已等价；αβ/BaB replay 待补 |
 | PR-10D.1 Exact SignSplit operator | validated | exact dense/gradient；composition 包裹而不下推 sign；26 passed |
-| PR-10D.2 Structured ReLU 主路径 | in progress | ephemeral bias reduction + structured coefficient return |
+| PR-10D.2 Structured ReLU 主路径 | validated | main coefficient 不永久 dense；ephemeral bias；operator dump；177 passed |
 | PR-10E 全路径回归与 benchmark | planned | correctness/structural/opportunity gates |
 
 ## 当前 Gate 0 证据

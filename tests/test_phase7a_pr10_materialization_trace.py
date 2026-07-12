@@ -64,26 +64,29 @@ def test_relu_backward_materialization_trace_records_reason_bytes_and_lifetime()
         )
 
     assert tuple(bounds.lower.shape) == (2, 3)
-    assert len(trace.events) == 2
-    assert {event.operator_site for event in trace.events} == {"h1:upper", "h1:lower"}
-    assert {event.reason for event in trace.events} == {"relu_sign_split"}
-    assert {event.persistent_or_ephemeral for event in trace.events} == {"persistent"}
-    assert {event.logical_lifetime_begin for event in trace.events} == {
-        "relu_backward_step"
+    assert len(trace.events) == 6
+    assert {event.reason for event in trace.events} == {
+        "relu_bias_sign_reduce",
+        "sign_split_center_term",
+        "sign_split_contract_input",
     }
-    assert {event.logical_lifetime_end for event in trace.events} == {"backward_end"}
+    assert {event.persistent_or_ephemeral for event in trace.events} == {"ephemeral"}
     assert {event.shape for event in trace.events} == {(2, 3, 5)}
     assert {event.logical_bytes for event in trace.events} == {2 * 3 * 5 * 4}
-    assert {event.event_id for event in trace.events} == {0, 1}
-    assert {event.operator_tree_depth for event in trace.events} == {2}
-    assert {event.operator_node_count for event in trace.events} == {2}
+    assert {event.event_id for event in trace.events} == set(range(6))
+    assert min(event.operator_tree_depth for event in trace.events) >= 2
+    assert min(event.operator_node_count for event in trace.events) >= 2
+    assert sum(event.reason == "relu_bias_sign_reduce" for event in trace.events) == 2
+    assert sum(event.alpha_related for event in trace.events) == 4
 
     summary = trace.summary()
-    assert summary["event_count"] == 2
-    assert summary["logical_materialized_bytes"] == 2 * 2 * 3 * 5 * 4
+    assert summary["event_count"] == 6
+    assert summary["logical_materialized_bytes"] == 6 * 2 * 3 * 5 * 4
     assert summary["observed_allocation_delta_bytes"] is None
     assert summary["by_reason"] == {
-        "relu_sign_split": {"count": 2, "logical_bytes": 2 * 2 * 3 * 5 * 4}
+        "relu_bias_sign_reduce": {"count": 2, "logical_bytes": 2 * 2 * 3 * 5 * 4},
+        "sign_split_center_term": {"count": 2, "logical_bytes": 2 * 2 * 3 * 5 * 4},
+        "sign_split_contract_input": {"count": 2, "logical_bytes": 2 * 2 * 3 * 5 * 4},
     }
 
     record = trace.to_record()
@@ -126,6 +129,6 @@ def test_materialization_trace_scope_does_not_leak_between_runs() -> None:
     with trace_materializations() as second:
         run_crown_ibp_mlp(module, spec)
 
-    assert len(first.events) == 2
-    assert len(second.events) == 2
+    assert len(first.events) == 6
+    assert len(second.events) == 6
     assert first is not second
