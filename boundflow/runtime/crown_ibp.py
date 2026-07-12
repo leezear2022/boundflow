@@ -9,6 +9,7 @@ from ..domains.interval import IntervalDomain, IntervalState
 from ..ir.task import BFTaskModule, TaskKind
 from .dag_utils import normalize_concat_axis, validate_concat_tensor_shapes, validate_concat_value_shapes
 from .linear_operator import DenseLinearOperator, LinearOperator
+from .materialization import materialize_linear_operator
 from .perturbation import InputPerturbationState
 from .relu_shape_utils import broadcast_relu_split_like_pre
 from .task_executor import InputSpec, InputSpecLike, _normalize_input_spec
@@ -661,8 +662,18 @@ def _backprop_relu_step(
                 f"{caller} only supports relu_pre_add_coeff_u on rank-2 pre-activations; got {tuple(pre.lower.shape)} for {x_name}"
             )
 
-    A_u = state.A_u.to_dense()
-    A_l = state.A_l.to_dense()
+    A_u = materialize_linear_operator(
+        state.A_u,
+        reason="relu_sign_split",
+        site=f"{x_name}:upper",
+        lifetime="relu_backward_step",
+    )
+    A_l = materialize_linear_operator(
+        state.A_l,
+        reason="relu_sign_split",
+        site=f"{x_name}:lower",
+        lifetime="relu_backward_step",
+    )
     b_u = state.b_u
     b_l = state.b_l
 

@@ -14,6 +14,7 @@
 ## 当前 Gate 0 证据
 
 - PyTorch 2.12.1+cu132、CUDA 13.2、LLVM 20.1.8、TVM 与单一内嵌 tvm-ffi 已完成现场验证；
-- MLP/CNN quick artifact 已存在，但仍需多次 reduced baseline；
-- 当前环境/reshape 工作仍在未提交工作区，不能标记为冻结；
-- PR-10 尚未启动。
+- MLP/CNN reduced artifact 已生成：small matrix、warmup 3、iters 10，2 行均通过 correctness；
+  它是 Gate 0 回归，不替代论文要求的至少 5 次独立重复；
+- Gate 0 已冻结在本地提交 `4e0e059`，全量验证为 162 passed、1 个预期 skip；
+- PR-10 已从 opt-in materialization instrumentation 启动，尚未修改 ReLU operator 路径。

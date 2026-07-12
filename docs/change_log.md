@@ -1,5 +1,11 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-07-12：启动 PR-10 materialization instrumentation
+
+- 新增 opt-in materialization trace，并标记 ReLU backward upper/lower dense barrier。
+- 记录 reason/site/operator/shape/bytes/lifetime；未改变 ReLU 数学与 Planner。
+- 详细记录：`gemini_doc/change_2026-07-12_pr10_materialization_instrumentation.md`。
+
 ## 2026-07-12：增加 Gate 0 reduced 环境基线
 
 - artifact runner 新增 `reduced` 档（small matrix、warmup 3、iters 10）。
