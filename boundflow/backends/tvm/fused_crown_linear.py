@@ -21,6 +21,7 @@ class FusedCrownLinearKey:
     previous_features: int
     dtype: str = "float32"
     target: str = "cuda"
+    compute_capability: str = "sm_89"
     schedule_id: str = "serial_reduction_128t_v1"
 
     def validate(self) -> None:
@@ -38,8 +39,16 @@ class FusedCrownLinearKey:
             raise NotImplementedError("fused CROWN Linear v1 only supports float32")
         if not self.target.startswith("cuda"):
             raise NotImplementedError("fused CROWN Linear v1 only supports CUDA")
+        if not self.compute_capability.startswith("sm_"):
+            raise ValueError("compute_capability must use the sm_NN form")
         if self.schedule_id != "serial_reduction_128t_v1":
             raise NotImplementedError(f"unsupported schedule_id: {self.schedule_id}")
+
+    @property
+    def target_string(self) -> str:
+        """Return the CUDA target with the cache-keyed compute capability."""
+
+        return f"{self.target} -arch={self.compute_capability}"
 
 
 def build_fused_crown_linear_primfunc(  # pylint: disable=too-many-locals
@@ -252,7 +261,9 @@ def build_fused_crown_linear_module(key: FusedCrownLinearKey):
     key.validate()
     import tvm  # pylint: disable=import-outside-toplevel
 
-    return tvm.compile(schedule_fused_crown_linear(key), target=key.target)["main"]
+    return tvm.compile(schedule_fused_crown_linear(key), target=key.target_string)[
+        "main"
+    ]
 
 
 __all__ = [

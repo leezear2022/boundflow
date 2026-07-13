@@ -102,6 +102,7 @@ def test_fused_linear_cuda_matches_dense_reference() -> None:
     [
         {"dtype": "float16"},
         {"target": "llvm"},
+        {"compute_capability": "invalid"},
         {"schedule_id": "unknown"},
     ],
 )
@@ -115,5 +116,5 @@ def test_fused_linear_rejects_unsupported_compile_keys(
         "previous_features": 3,
         **updates,
     }
-    with pytest.raises(NotImplementedError):
+    with pytest.raises((NotImplementedError, ValueError)):
         FusedCrownLinearKey(**values).validate()  # type: ignore[arg-type]
