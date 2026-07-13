@@ -182,7 +182,7 @@ def plan_fused_crown_regions(
 ) -> Tuple[FusedCrownExecutionStep, ...]:
     """Match forward Affine->ReLU pairs once and emit an explicit schedule."""
 
-    if backend not in {"tvm_fused_tir", "pytorch_chunked"}:
+    if backend not in {"tvm_fused_tir", "tvm_tir_unfused", "pytorch_chunked"}:
         raise ValueError(f"unsupported fused CROWN backend: {backend}")
 
     steps: list[FusedCrownExecutionStep] = []
@@ -264,7 +264,11 @@ def validate_fused_crown_execution_steps(  # pylint: disable=too-many-branches
             != InternalMaterializationPolicy.ELIDE_RELU_SCALED_A
         ):
             continue
-        if step.backend not in {"tvm_fused_tir", "pytorch_chunked"}:
+        if step.backend not in {
+            "tvm_fused_tir",
+            "tvm_tir_unfused",
+            "pytorch_chunked",
+        }:
             continue
         valid.append(step)
         seen_relu.add(step.relu_op_index)
@@ -729,12 +733,94 @@ class TVMFusedCrownExecutor:
         return FusedReluAffineResult(*outputs)
 
 
+class TVMUnfusedCrownExecutor(TVMFusedCrownExecutor):
+    """TVM baseline exposing full scaled-A workspaces between explicit stages."""
+
+    def run(
+        self,
+        request: FusedReluAffineRequest,
+        *,
+        stream: Optional[torch.cuda.Stream] = None,
+    ) -> FusedReluAffineResult:
+        """Launch scale, affine and bias stages with PyTorch-owned workspaces."""
+
+        import tvm  # pylint: disable=import-outside-toplevel,import-error
+        import tvm_ffi  # pylint: disable=import-outside-toplevel,import-error
+
+        from ..backends.tvm.unfused_crown import (
+            build_unfused_crown_conv2d_module,
+            build_unfused_crown_linear_module,
+        )
+
+        signature = self._compile_signature(request)
+        compiled = (
+            build_unfused_crown_linear_module(signature)
+            if request.kind == "linear"
+            else build_unfused_crown_conv2d_module(signature)
+        )
+        domain, spec = int(request.A_u.shape[0]), int(request.A_u.shape[1])
+        coefficient_shape = (domain, spec, *request.output_shape)
+        scaled_outputs = (
+            torch.empty(
+                coefficient_shape,
+                device=request.A_u.device,
+                dtype=request.A_u.dtype,
+            ),
+            torch.empty(
+                coefficient_shape,
+                device=request.A_u.device,
+                dtype=request.A_u.dtype,
+            ),
+        )
+        previous_shape = (domain, spec, *request.input_shape)
+        final_outputs = (
+            torch.empty(
+                previous_shape, device=request.A_u.device, dtype=request.A_u.dtype
+            ),
+            torch.empty(
+                previous_shape, device=request.A_u.device, dtype=request.A_u.dtype
+            ),
+            torch.empty(
+                (domain, spec), device=request.A_u.device, dtype=request.A_u.dtype
+            ),
+            torch.empty(
+                (domain, spec), device=request.A_u.device, dtype=request.A_u.dtype
+            ),
+        )
+        alpha_shape = (domain, *request.output_shape)
+        inputs = [
+            request.A_u.reshape(coefficient_shape),
+            request.A_l.reshape(coefficient_shape),
+            request.alpha_u.reshape(alpha_shape),
+            request.beta_u.reshape(alpha_shape),
+            request.alpha_l.reshape(alpha_shape),
+            request.beta_l.reshape(alpha_shape),
+            request.weight,
+        ]
+        if request.kind == "linear" or request.bias is not None:
+            inputs.append(
+                request.bias
+                if request.bias is not None
+                else torch.zeros(request.output_shape[0], device=request.A_u.device)
+            )
+        current = stream or torch.cuda.current_stream(request.A_u.device)
+        with tvm_ffi.use_torch_stream(torch.cuda.stream(current)):
+            compiled(
+                *[tvm.runtime.from_dlpack(tensor) for tensor in inputs],
+                *[
+                    tvm.runtime.from_dlpack(tensor)
+                    for tensor in (*scaled_outputs, *final_outputs)
+                ],
+            )
+        return FusedReluAffineResult(*final_outputs)
+
+
 def build_fused_crown_runtime_selection(
     ops: Sequence[Any], *, backend: str, chunk_rows: int = 512
 ) -> FusedCrownRuntimeSelection:
     """Map a Planner backend decision to an executable, auditable runtime plan."""
 
-    if backend == "pytorch_eager":
+    if backend in {"pytorch_eager", "pytorch_structured"}:
         return FusedCrownRuntimeSelection(backend=backend, executor=None, steps=())
     if backend == "pytorch_chunked":
         executor: FusedCrownExecutor = TorchChunkedFusedCrownExecutor(
@@ -742,6 +828,8 @@ def build_fused_crown_runtime_selection(
         )
     elif backend == "tvm_fused_tir":
         executor = TVMFusedCrownExecutor()
+    elif backend == "tvm_tir_unfused":
+        executor = TVMUnfusedCrownExecutor()
     else:
         raise ValueError(f"unsupported fused CROWN runtime backend: {backend}")
     return FusedCrownRuntimeSelection(
@@ -761,6 +849,7 @@ __all__ = [
     "FusedReluAffineResult",
     "InternalMaterializationPolicy",
     "TVMFusedCrownExecutor",
+    "TVMUnfusedCrownExecutor",
     "TorchChunkedFusedCrownExecutor",
     "TorchDenseFusedCrownReference",
     "fused_crown_graph_fingerprint",

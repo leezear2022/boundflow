@@ -74,6 +74,7 @@
 - `gemini_doc/pr12_mid_long_term_completion_plan.md`：PR-12H–N baseline、摊销、profile、Planner 与 closure 执行路线
 - `gemini_doc/pr12_execution_status.md`：PR-12 跨会话唯一恢复入口与当前门禁
 - `gemini_doc/change_2026-07-14_pr12h_benchmark_contract.md`：三层 benchmark contract、历史证据披露与 PR-12G freeze
+- `gemini_doc/change_2026-07-14_pr12i_fair_baselines.md`：structured/TVM-unfused 公平 baseline、条件 torch.compile probe 与正式 Pareto
 - `gemini_doc/artifact_claims_phase5d.md`：Phase 5D artifact claims（证据链/口径映射）
 - `gemini_doc/artifact_appendix_phase5d.md`：Phase 5D artifact appendix（复现说明）
 - `gemini_doc/project_evolution_overview.md`：研发脉络总览（目标、阶段推进、代码落点、未来路线）

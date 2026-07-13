@@ -191,6 +191,14 @@ fused-sanity 的 allocation contract 不公平，旧 PR-12E/G candidate timing �
 region matching/Planner，故统一保留为 `compliant=false` historical evidence，不重写旧数值。
 下一唯一工程阶段是 PR-12I structured eager/TVM-unfused 公平 baseline，仍禁止启动 PR-13。
 
+PR-12I 已在新合同下补齐 structured eager 与显式 scaled-A workspace 的 TVM-unfused 对照：
+正式 v2 为 72 rows（54 ok、18 N/A、0 correctness failure）。complete final-bound 中 TVM fused
+geomean 仅为 eager 的 0.546×，但 median peak ratio 为 0.512 且 3/3 Pareto；TVM-unfused 为
+0.481×、0/3 Pareto，说明 fusion 的主要已验证价值是消除中间物化而非普遍加速。条件
+`torch.compile(fullgraph=True)` 在三类 workload、两种 stream 上均因 `ContextVar.set` 无法
+capture，已保留结构化 N/A，未为迎合 baseline 改写 workload。下一唯一阶段为 PR-12J
+compile/load/cache amortization；PR-12 overall 与 PR-13 状态不变。
+
 ## 7. 投稿门禁
 
 - **7 月 26 日**：PR-10 与真实 materialization profile；

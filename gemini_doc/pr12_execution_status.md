@@ -8,7 +8,8 @@
 branch:                     feat/pr12-fused-crown-task
 PR-12G commit:              44f87ae
 PR-12G tag:                 pr12g-validated-reduced (local annotated tag)
-current phase:              PR-12H complete；next PR-12I baseline
+PR-12H commit:              abc2e2a
+current phase:              PR-12I complete；next PR-12J compile amortization
 PR-12 overall:              IN PROGRESS
 PR-13:                      BLOCKED
 ```
@@ -23,6 +24,9 @@ PR-13:                      BLOCKED
 - PR-12G v2：84/84 candidate rows correct；5/5 budget feasible；0 unsafe；median/p90 regret
   1.000×/1.054×；eager/chunked/TIR 选择 1/2/2；
 - PR-12H 收尾全量：321 passed、1 skipped。
+- PR-12I：正式 v2 为 72 rows（54 ok、18 N/A、0 correctness failure）；structured 与
+  TVM-unfused baseline 已闭合；`torch.compile(fullgraph=True)` 因 `ContextVar.set` 结构性失败；
+  fused E2E geomean 0.546× eager、median peak ratio 0.512，负结果保留。
 
 authoritative PR-12G 工件：
 
@@ -43,10 +47,21 @@ artifacts/phase7a-pr12/pr12g-multibackend-v2-report-canonical3-20260713/
 - [x] PR-12H change doc 与索引；
 - [x] PR-12H 提交（本文件随该提交冻结）。
 
+## PR-12I 当前工作
+
+- [x] dense/structured/chunked/TVM-unfused/TVM-fused 统一合同 runner；
+- [x] TVM-unfused Linear/Conv2d 显式 scaled-A workspace；
+- [x] default/custom stream correctness；
+- [x] 条件 `torch.compile` fullgraph probe 与结构化失败记录；
+- [x] raw JSONL→CSV→Pareto/summary/manifest；
+- [x] PR-12I 收尾：focused 9 passed；全量 327 passed/1 skipped；mypy success；pylint
+  10.00/10；Black/diff check 通过。
+
 ## 下一步
 
-PR-12H 提交后立即进入 PR-12I：先实现统一 region-runtime harness，再加入 structured eager 与
-TVM unfused baseline；不要开始 profiler 或新 TIR schedule。
+PR-12I 提交后立即进入 PR-12J：分离 IR/TIR/schedule/compile/serialization/module-load/first/warm、
+memory cache 与 process-restart disk-cache，生成固定 Q 的 break-even；不要先开始 profiler 或
+新 TIR schedule。
 
 ## 恢复命令
 
@@ -54,7 +69,9 @@ TVM unfused baseline；不要开始 profiler 或新 TIR schedule。
 conda activate boundflow
 source env.sh
 git status --short --branch
-pytest -q tests/test_phase7a_pr12h_benchmark_contract.py
+pytest -q tests/test_phase7a_pr12i_unfused_tvm.py \
+  tests/test_phase7a_pr12i_baseline_runner.py \
+  tests/test_phase7a_pr12i_baseline_postprocess.py
 ```
 
 顶层计划：`gemini_doc/pr12_mid_long_term_completion_plan.md`。合同：

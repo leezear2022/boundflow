@@ -115,6 +115,7 @@ class BenchmarkContract:  # pylint: disable=too-many-instance-attributes
         self.validate()
         payload = asdict(self)
         payload["schema_version"] = BENCHMARK_CONTRACT_SCHEMA_VERSION
+        payload["compliant"] = True
         payload["level"] = self.level.value
         payload["timing"] = {
             "cuda": "events_on_measured_stream",

@@ -156,7 +156,16 @@ PR-12H benchmark contract freeze：
   `compliant=false`，历史数据不得冒充正式三层合同；
 - freeze tag：`pr12g-validated-reduced` → `44f87ae`；规范见
   `docs/pr12_benchmark_contract.md`，持续状态见 `gemini_doc/pr12_execution_status.md`；
-- `C2-E13` pending：structured eager/TVM-unfused 的新合同正式 baseline 留待 PR-12I。
+- `C2-E13` validated baseline：PR-12I 新合同下 72 rows 为 54 ok、18 N/A、0 correctness
+  failure；structured eager 只在 complete final-bound 比较，TVM-unfused 在 region/E2E 都显式
+  物化 scaled-A；default/custom stream 均通过；
+- `C2-E14` validated attribution/limitation：TVM fused E2E geomean speedup 仅 0.546× eager，
+  但 median peak ratio 为 0.512 且 3/3 Pareto；TVM-unfused 为 0.481×、0/3 Pareto，说明显存
+  收益来自 fused materialization elimination，但当前 latency 不能成为 headline；
+- `C2-L6` validated limitation：`torch.compile(fullgraph=True)` 在 3 workloads×2 streams 均因
+  final-bound host path 的 `ContextVar.set` 无法 capture，结构化记录为 N/A，没有改写 workload；
+- PR-12I 工件：`pr12i-baseline-v2-20260714/` →
+  `pr12i-baseline-report-v2-20260714/`；下一门禁为 PR-12J compile/load/cache amortization。
 
 该段 PR-11 early evidence 当时为专项 21 passed、全量 200 passed/1 skipped；其“Global 与
 Memory-Threshold 决策相同”的历史限制已由后续 PR-11E 和 PR-12G 证据分别补充，不能再读作

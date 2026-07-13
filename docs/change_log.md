@@ -2586,3 +2586,27 @@
 **记录**
 - `docs/pr12_benchmark_contract.md`
 - `gemini_doc/change_2026-07-14_pr12h_benchmark_contract.md`
+
+---
+
+## 2026-07-14：PR-12I structured/TVM-unfused 公平 baseline
+
+**主要改动**
+- 新增显式 `scaled_u/scaled_l` workspace 的 TVM-unfused Linear/Conv2d baseline；
+- 在 frozen region-runtime 与 complete final-bound 合同下统一比较 eager、structured、chunked、
+  TVM unfused 与 TVM fused；
+- 对 `torch.compile(fullgraph=True)` 做未改写 workload 的条件 probe，并保留结构化失败；
+- 新增 JSONL→CSV→Pareto/summary/manifest 工具与回归。
+
+**结果与判定**
+- 权威 v2 共 72 rows：54 ok、18 N/A、0 correctness failure；
+- TVM fused E2E geomean 为 eager 的 0.546×，median peak ratio 0.512，3/3 Pareto；
+- TVM unfused E2E 为 0.481×、0/3 Pareto；`torch.compile` 因 `ContextVar.set` 无法 fullgraph
+  capture，未进入性能表；
+- PR-12I baseline/correctness PASS，但不宣称 latency headline；下一阶段为 compile amortization，
+  PR-12 overall 仍 IN PROGRESS，PR-13 blocked。
+- 收尾门禁：focused 9 passed；全量 327 passed、1 skipped；mypy 6 files success；pylint
+  6 files 10.00/10；Black/diff check 通过。
+
+**记录**
+- `gemini_doc/change_2026-07-14_pr12i_fair_baselines.md`
