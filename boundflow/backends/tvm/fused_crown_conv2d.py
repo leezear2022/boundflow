@@ -153,10 +153,8 @@ class FusedCrownConv2dSignature:  # pylint: disable=too-many-instance-attributes
         return f"{self.target} -arch={self.compute_capability}"
 
 
-def _require_stride_one_v0(signature: FusedCrownConv2dSignature) -> None:
+def _require_supported_v1(signature: FusedCrownConv2dSignature) -> None:
     signature.validate()
-    if signature.stride != (1, 1):
-        raise NotImplementedError("fused Conv2d lowering v0 only supports stride=1")
 
 
 def build_fused_crown_conv2d_primfunc(  # pylint: disable=too-many-locals
@@ -164,7 +162,7 @@ def build_fused_crown_conv2d_primfunc(  # pylint: disable=too-many-locals
 ):
     """Build output-gather reductions with sign/slope selection inline."""
 
-    _require_stride_one_v0(signature)
+    _require_supported_v1(signature)
     import tvm  # pylint: disable=import-outside-toplevel
     from tvm import te  # pylint: disable=import-outside-toplevel
 
@@ -354,7 +352,7 @@ def build_fused_crown_conv2d_primfunc(  # pylint: disable=too-many-locals
 def schedule_fused_crown_conv2d(signature: FusedCrownConv2dSignature):
     """Apply the deterministic output-gather CUDA schedule."""
 
-    _require_stride_one_v0(signature)
+    _require_supported_v1(signature)
     import tvm  # pylint: disable=import-outside-toplevel
 
     module = tvm.IRModule({"main": build_fused_crown_conv2d_primfunc(signature)})
@@ -397,7 +395,7 @@ def build_fused_crown_conv2d_relax_ir_module(
 ):
     """Wrap one specialized Conv task in a thin Relax ``call_tir`` function."""
 
-    _require_stride_one_v0(signature)
+    _require_supported_v1(signature)
     from tvm import relax  # pylint: disable=import-outside-toplevel
 
     domain, spec = signature.domain_batch, signature.spec_batch
@@ -477,7 +475,7 @@ def build_fused_crown_conv2d_relax_ir_module(
 def build_fused_crown_conv2d_module(signature: FusedCrownConv2dSignature):
     """Compile and cache one deterministic CUDA task."""
 
-    _require_stride_one_v0(signature)
+    _require_supported_v1(signature)
     import tvm  # pylint: disable=import-outside-toplevel
 
     return tvm.compile(
