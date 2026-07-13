@@ -100,12 +100,14 @@
 
 ## PR-12 当前证据
 
-- `C1-E4` partial foundation：fused ReLU+Linear PrimFunc 在 reduction 中内联 sign/slope/bias，
-  结构检查为 0 个 intermediate allocation，不写回完整 `A_scaled`；
-- `C2-E4` partial foundation：placement 与 backend variant 已拆分，Linear-only fused capability
-  对 grad/α/β/split/Conv/dtype/device/dynamic shape 显式拒绝；
-- `C2-E5` pending：尚无 latency-memory Pareto、Conv、end-to-end 或 final held-out 结果；
-- `C2-L2` validated current limitation：fused 实现当前仅支持 static FP32 CUDA plain-CROWN Linear；
+- `C1-E4` validated kernel foundation：fused ReLU+Linear/Conv PrimFunc 在 reduction 中内联
+  sign/slope/bias，pre/post schedule 0 intermediate allocation，不写回完整 `A_scaled`；
+- `C2-E4` validated foundation：placement/backend 已拆分，Linear/Conv capability 对
+  grad/α/β/split/dtype/device/dynamic shape 和不支持的 Conv 属性显式拒绝；
+- `C2-E5` partial sanity：4 个 calibration 点中 3 个快于 PyTorch dense eager，stride-2 medium
+  为 1.717× slowdown；尚无正式 latency-memory Pareto、end-to-end 或 final held-out；
+- `C2-L2` validated current limitation：只支持 static FP32 CUDA plain CROWN、Linear 与
+  groups=1/dilation=1 的有限 Conv 子集；
 - `C3-M1` pending：compile amortization 与 repeated-query stream 尚未测量。
 
 当前测试：PR-11 专项 21 passed；全量 200 passed、1 skipped。C2 仍为 `partial`：最终 held-out

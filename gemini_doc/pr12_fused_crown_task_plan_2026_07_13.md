@@ -1,12 +1,13 @@
 # PR-12：Fused CROWN-Task Lowering for Memory-Efficient Plain CROWN
 
-> 状态：执行中；起点/candidate/held-out 已冻结，Linear correctness/mechanism foundation 已完成；
-> Conv、端到端接入和性能门禁未完成。不得并行扩展 α/αβ autograd、BaB scheduler 或 training。
+> 状态：执行中；起点/candidate/held-out 已冻结，Linear 与 Conv stride-1/2 kernel-level
+> correctness/mechanism foundation 已完成；端到端接入和正式性能门禁未完成。不得并行扩展
+> α/αβ autograd、BaB scheduler 或 training。
 
 当前分支从只读 tag `pr11-validated-reduced` 创建。起点工件位于
 `artifacts/phase7a-pr12/baseline/`，候选 schema 见
-`gemini_doc/backend_candidate_schema_v1.md`。当前实际 capability 仅开放 Linear；只有 Conv
-实现和正确性通过后才能升级 capability id 并声明 `supports_conv2d=true`。
+`gemini_doc/backend_candidate_schema_v1.md`。Linear 与 Conv 使用不同 capability id；Conv
+signature 额外过滤 kernel/stride/padding/dilation/groups/layout 和 input-shape contract。
 
 ## 假设
 

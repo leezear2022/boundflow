@@ -66,6 +66,7 @@
 - `gemini_doc/pr12_fused_crown_task_plan_2026_07_13.md`：PR-12 收敛范围、接口、门禁与证据版本
 - `gemini_doc/backend_candidate_schema_v1.md`：PR-12 placement/backend 二维候选与 capability 合同
 - `gemini_doc/change_2026-07-13_pr12_start_and_fused_linear.md`：PR-12 起点、held-out 与 Linear TIR 第一切片
+- `gemini_doc/change_2026-07-13_pr12_fused_conv2d.md`：Conv stride-1/2、codegen 与 latency sanity
 - `gemini_doc/artifact_claims_phase5d.md`：Phase 5D artifact claims（证据链/口径映射）
 - `gemini_doc/artifact_appendix_phase5d.md`：Phase 5D artifact appendix（复现说明）
 - `gemini_doc/project_evolution_overview.md`：研发脉络总览（目标、阶段推进、代码落点、未来路线）

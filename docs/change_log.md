@@ -105,6 +105,16 @@
   `A_scaled`；提供 thin Relax `call_tir` wrapper。
 - 详见 `gemini_doc/change_2026-07-13_pr12_start_and_fused_linear.md`。
 
+## 2026-07-13：PR-12 fused ReLU+Conv2d TIR foundation
+
+- 冻结 DSCOHW/OIHW/DSCIHW layout 与显式 input-shape/output-padding contract；
+- 实现 output-centric gather，覆盖 1×1/3×3、stride 1/2、padding 0/1、bias 有/无；
+- CUDA matrix 对齐 upper/lower coefficient 与 bias；pre/post schedule 无 scaled-A/im2col；
+- 三个 codegen 代表点 ptxas 0 stack/spill，最大 40/40/48 registers/thread；
+- calibration sanity 中 stride-2 medium 仍为 1.717× slowdown，保留为 limitation；final held-out
+  未使用，端到端 CROWN 尚未接入。
+- 详见 `gemini_doc/change_2026-07-13_pr12_fused_conv2d.md`。
+
 ## 2026-07-12：Conda activate/deactivate 自动钩子
 
 - 激活 `boundflow` 时自动加载 `env.sh`，反激活时完整恢复之前的路径与变量状态。

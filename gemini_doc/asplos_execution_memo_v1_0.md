@@ -156,6 +156,13 @@ set 未包含 measured oracle，而非已有候选的 cost-model misrank；7 个
 PR-12 待验证假设。PR-12 因此收敛为无梯度 plain CROWN 的 ReLU+Linear/Conv fused TIR，
 不得回写 PR-11 profile，也不得包装成 Planner 修复。
 
+PR-12 kernel foundation 已进一步覆盖 Linear 与 Conv 1×1/3×3、stride 1/2。Conv 使用显式
+DSCOHW/OIHW/DSCIHW layout、原始 input-shape/output-padding contract 与 output-centric gather；
+CUDA matrix 四项输出对齐，三个代表 codegen 点为 0 stack/spill/local-memory 指令。calibration
+sanity 中前三点快于 PyTorch dense eager，但 stride-2 medium 仍慢 1.717×。因此当前状态只能是
+kernel-level correctness/mechanism PASS；end-to-end CROWN、正式 Pareto、final held-out 与
+compile amortization 仍 pending，PR-13 继续阻塞。
+
 ## 7. 投稿门禁
 
 - **7 月 26 日**：PR-10 与真实 materialization profile；

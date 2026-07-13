@@ -31,7 +31,7 @@ placement 当前为 `dense | structured`；backend 当前保留 `pytorch_eager`�
 device、optimization stage 与 static shape。所有不支持项返回稳定 rejection reason，不允许 silent
 fallback 或 silent wrong。
 
-第一实现切片只注册：
+当前注册两个独立 capability id：
 
 ```text
 capability_id = tvm_fused_tir_linear_plain_crown_fp32_static_v1
@@ -41,10 +41,16 @@ grad/alpha/beta/split = false
 operator      = Linear
 device/dtype  = CUDA / float32
 layout/shape  = contiguous / static
+
+capability_id = tvm_fused_tir_conv_plain_crown_fp32_static_v1
+method/stage  = 同上
+operator      = Conv2d
+layout/shape  = NCHW / static
 ```
 
-Conv2d 在实现和正确性门禁完成前明确报告 `conv2d_unsupported`。未来开放 Conv 时必须升级
-capability id；不能修改本 id 的历史含义。
+Conv signature 进一步固定 DSCOHW/OIHW/DSCIHW layout、input/output spatial shape、kernel、
+stride、padding、dilation、groups、bias presence、compute capability 与 schedule id。当前只接受
+1×1/3×3、stride 1/2、padding 0/1、groups=1、dilation=1；其余属性在 lowering 前显式拒绝。
 
 ## 版本隔离
 
