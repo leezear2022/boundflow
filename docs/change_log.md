@@ -95,6 +95,16 @@
 - 详见 `gemini_doc/pr11_regret_attribution_2026_07_13.md` 与
   `gemini_doc/pr12_fused_crown_task_plan_2026_07_13.md`。
 
+## 2026-07-13：PR-12 起点与 fused ReLU+Linear TIR
+
+- 从只读 `pr11-validated-reduced` tag 创建 PR-12 分支，冻结 baseline、Planner reference 和
+  `pr12-final-heldout-v1`，PR-11 的 7 个 backend-gap case 只作为 development set。
+- 新增 placement/backend 二维 candidate schema 与显式 capability rejection；当前只开放
+  static FP32 CUDA plain-CROWN Linear，不提前宣称 Conv 支持。
+- 新增 ReLU+Linear fused TIR：直接产生 upper/lower `A_prev` 与 bias delta，不分配完整
+  `A_scaled`；提供 thin Relax `call_tir` wrapper。
+- 详见 `gemini_doc/change_2026-07-13_pr12_start_and_fused_linear.md`。
+
 ## 2026-07-12：Conda activate/deactivate 自动钩子
 
 - 激活 `boundflow` 时自动加载 `env.sh`，反激活时完整恢复之前的路径与变量状态。

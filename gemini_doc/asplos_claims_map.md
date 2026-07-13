@@ -98,6 +98,16 @@
 归因细节见 `gemini_doc/pr11_regret_attribution_2026_07_13.md`。PR-12 只验证 fused backend
 是否改善 Pareto frontier，不改写 PR-11 历史 Planner/profile 结论。
 
+## PR-12 当前证据
+
+- `C1-E4` partial foundation：fused ReLU+Linear PrimFunc 在 reduction 中内联 sign/slope/bias，
+  结构检查为 0 个 intermediate allocation，不写回完整 `A_scaled`；
+- `C2-E4` partial foundation：placement 与 backend variant 已拆分，Linear-only fused capability
+  对 grad/α/β/split/Conv/dtype/device/dynamic shape 显式拒绝；
+- `C2-E5` pending：尚无 latency-memory Pareto、Conv、end-to-end 或 final held-out 结果；
+- `C2-L2` validated current limitation：fused 实现当前仅支持 static FP32 CUDA plain-CROWN Linear；
+- `C3-M1` pending：compile amortization 与 repeated-query stream 尚未测量。
+
 当前测试：PR-11 专项 21 passed；全量 200 passed、1 skipped。C2 仍为 `partial`：最终 held-out
 feasibility 已成立，但 Global 与 Memory-Threshold 退化为相同决策，尚不能声称 nontrivial
 Global Planner 系统贡献。

@@ -64,6 +64,8 @@
 - `gemini_doc/pr11_closure_audit_2026_07_12.md`：PR-11 逐项 closure、replicated final evidence 与 PR-12/PR-13 边界
 - `gemini_doc/pr11_regret_attribution_2026_07_13.md`：高 regret case 的候选覆盖/后端假设归因
 - `gemini_doc/pr12_fused_crown_task_plan_2026_07_13.md`：PR-12 收敛范围、接口、门禁与证据版本
+- `gemini_doc/backend_candidate_schema_v1.md`：PR-12 placement/backend 二维候选与 capability 合同
+- `gemini_doc/change_2026-07-13_pr12_start_and_fused_linear.md`：PR-12 起点、held-out 与 Linear TIR 第一切片
 - `gemini_doc/artifact_claims_phase5d.md`：Phase 5D artifact claims（证据链/口径映射）
 - `gemini_doc/artifact_appendix_phase5d.md`：Phase 5D artifact appendix（复现说明）
 - `gemini_doc/project_evolution_overview.md`：研发脉络总览（目标、阶段推进、代码落点、未来路线）
