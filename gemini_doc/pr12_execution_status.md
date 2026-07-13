@@ -11,7 +11,8 @@ PR-12G tag:                 pr12g-validated-reduced (local annotated tag)
 PR-12H commit:              abc2e2a
 PR-12I commit:              9627a3c
 PR-12J commit:              cd7bc6b
-current phase:              PR-12K complete；next PR-12L decision freeze
+PR-12K commit:              0428c0e
+current phase:              PR-12L complete；next PR-12M compile-aware Planner
 PR-12 overall:              IN PROGRESS
 PR-13:                      BLOCKED
 ```
@@ -86,11 +87,19 @@ artifacts/phase7a-pr12/pr12g-multibackend-v2-report-canonical3-20260713/
 - [x] PR-12K 收尾：focused 2 passed；全量 332 passed/1 skipped；mypy success；pylint
   10.00/10；Black/diff check 通过。
 
+## PR-12L 当前工作
+
+- [x] 只选择 `E_STOP_OPTIMIZING_TIR`；
+- [x] 拒绝同时扩 Linear tile、CUDA Graph、chunk family 与 Conv capability；
+- [x] 保留 fused backend 为 compile-aware Planner 候选；
+- [x] 冻结 PR-12M 的全新 split、多预算与 expected-reuse 约束；
+- [x] 无 TIR/schedule/runtime 代码修改。
+
 ## 下一步
 
-PR-12K 提交后先以 PR-12L 文档提交冻结分支 E，不做 schedule/code 修改；随后进入 PR-12M
-compile-aware Planner，以全新 split 扫描 16/32/64/128 MiB 与 unbounded，禁止复用旧 final
-held-out 调参。
+PR-12L 提交后进入 PR-12M compile-aware Planner：先创建全新 calibration/final-heldout split，
+再实现 capability→budget→risk→amortized latency 字典序，扫描 16/32/64/128 MiB 与
+unbounded；不得复用旧 final held-out 调参，不得回到 TIR 试参。
 
 ## 恢复命令
 

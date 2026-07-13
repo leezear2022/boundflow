@@ -2658,3 +2658,21 @@
 
 **记录**
 - `gemini_doc/change_2026-07-14_pr12k_cupti_profile.md`
+
+---
+
+## 2026-07-14：PR-12L 冻结停止孤立 TIR 调优
+
+**决策**
+- 唯一选择 `E_STOP_OPTIMIZING_TIR`；
+- 不再扩 Linear tile、CUDA Graph、chunk-size family 或 Conv capability；
+- 不删除 fused backend，由下一阶段的 compile-aware Planner 决定其适用 regime；
+- PR-12M 必须使用全新 split、16/32/64/128 MiB/unbounded 多预算和 expected reuse，禁止回写
+  旧 final held-out 或回到 TIR 试参。
+
+**边界**
+- 本阶段没有 TIR、schedule 或 runtime 代码变化；
+- PR-12 overall 仍 IN PROGRESS，PR-13 blocked。
+
+**记录**
+- `gemini_doc/change_2026-07-14_pr12l_stop_tir_optimization.md`

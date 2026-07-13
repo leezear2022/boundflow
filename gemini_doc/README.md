@@ -77,6 +77,7 @@
 - `gemini_doc/change_2026-07-14_pr12i_fair_baselines.md`：structured/TVM-unfused 公平 baseline、条件 torch.compile probe 与正式 Pareto
 - `gemini_doc/change_2026-07-14_pr12j_compile_amortization.md`：compile/load/cache 阶段拆分、跨进程 disk hit 与 Q-sweep 摊销
 - `gemini_doc/change_2026-07-14_pr12k_cupti_profile.md`：CUPTI activity profile、硬件 counter 权限边界与停止孤立 TIR 调优判定
+- `gemini_doc/change_2026-07-14_pr12l_stop_tir_optimization.md`：冻结停止孤立 TIR 调优、未选分支与 PR-12M 接口约束
 - `gemini_doc/artifact_claims_phase5d.md`：Phase 5D artifact claims（证据链/口径映射）
 - `gemini_doc/artifact_appendix_phase5d.md`：Phase 5D artifact appendix（复现说明）
 - `gemini_doc/project_evolution_overview.md`：研发脉络总览（目标、阶段推进、代码落点、未来路线）

@@ -194,6 +194,15 @@ PR-12K profiler 证据更新：
 - authoritative 工件：`pr12k-cupti-v3-20260714/` →
   `pr12k-cupti-report-v4-20260714/`。
 
+PR-12L 止损决策：
+
+- `C2-D2` validated scope freeze：唯一选择 `E_STOP_OPTIMIZING_TIR`，PR-12 closure 不再增加
+  Linear tile、CUDA Graph、chunk-size family 或 Conv capability；
+- `C2-D3` validated backend boundary：不删除 fused backend；PR-12M 仍可在预算或 amortized
+  latency 合适时选择它，避免把局部负结果误写成后端全面失败；
+- `C2-L8` validated evidence limit：如果未来获得硬件 counter 或新 workload，必须用新假设/
+  新 split 重新开启，不能回写 PR-12K 或消费冻结 final held-out。
+
 该段 PR-11 early evidence 当时为专项 21 passed、全量 200 passed/1 skipped；其“Global 与
 Memory-Threshold 决策相同”的历史限制已由后续 PR-11E 和 PR-12G 证据分别补充，不能再读作
 当前全量状态。PR-12G 收尾全量为 318 passed、1 skipped。

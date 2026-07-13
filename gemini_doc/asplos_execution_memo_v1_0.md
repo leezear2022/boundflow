@@ -214,6 +214,11 @@ launch 降幅仅 1.96%；按 5% 阈值为 3/6 device-time 退化、1/6 改善、
 选择分支 E：停止继续手工调孤立 TIR，保留 fused 作为 Planner 候选；下一工程阶段是全新 split、
 多预算和 expected-reuse 驱动的 PR-12M compile-aware Planner。PR-13 继续阻塞。
 
+PR-12L 已将该结论冻结为唯一分支 `E_STOP_OPTIMIZING_TIR`，且没有 TIR/schedule/runtime 代码
+变化。Linear tiled reduction、CUDA Graph/dispatch、chunk-size family 与 Conv capability 扩展均
+不进入本次 closure；它们若未来重启，必须使用新假设和新 split。PR-12M 只能推进
+capability→budget→risk→amortized latency Planner，并一次性消费全新 final held-out。
+
 ## 7. 投稿门禁
 
 - **7 月 26 日**：PR-10 与真实 materialization profile；
