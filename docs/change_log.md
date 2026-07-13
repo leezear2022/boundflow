@@ -2699,3 +2699,25 @@
 
 **记录**
 - `gemini_doc/change_2026-07-14_pr12m_compile_aware_planner.md`
+
+---
+
+## 2026-07-14：PR-12N closure 与 artifact
+
+**审计与交付**
+- 重算 I/J/K/M primary hash，核对 manifest、负结果、third-party SHA 与无关来源污染；
+- 新增 closure audit 和 reduced Artifact Appendix；
+- 更新 Claims Map、执行 memo、PR-12 状态、长期计划和文档索引；
+- 创建 annotated tag `pr12-validated-reduced`。
+
+**最终判定**
+- PR-12：`VALIDATED-REDUCED`；
+- 不升级 full validated：Q≤1024 compile 0/3 可摊销、counter unavailable、收益为局部、无真实
+  BaB/VNN-COMP；
+- 不降级 mechanism-only：non-toy E2E Pareto、预算价值、自动多 regime selection 与独立
+  held-out 已成立；
+- PR-13：GO/READY，尚未启动。
+
+**记录**
+- `gemini_doc/pr12_closure_audit_2026_07_14.md`
+- `gemini_doc/pr12_artifact_appendix_2026_07_14.md`

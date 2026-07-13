@@ -79,6 +79,8 @@
 - `gemini_doc/change_2026-07-14_pr12k_cupti_profile.md`：CUPTI activity profile、硬件 counter 权限边界与停止孤立 TIR 调优判定
 - `gemini_doc/change_2026-07-14_pr12l_stop_tir_optimization.md`：冻结停止孤立 TIR 调优、未选分支与 PR-12M 接口约束
 - `gemini_doc/change_2026-07-14_pr12m_compile_aware_planner.md`：compile/cache/reuse Planner、v3 split、多预算 held-out 与 regret
+- `gemini_doc/pr12_closure_audit_2026_07_14.md`：PR-12N 最终判定、H–M 证据/限制与 PR-13 Go/No-Go
+- `gemini_doc/pr12_artifact_appendix_2026_07_14.md`：PR-12 reduced artifact 依赖、工作流、expected outputs 与 claims
 - `gemini_doc/artifact_claims_phase5d.md`：Phase 5D artifact claims（证据链/口径映射）
 - `gemini_doc/artifact_appendix_phase5d.md`：Phase 5D artifact appendix（复现说明）
 - `gemini_doc/project_evolution_overview.md`：研发脉络总览（目标、阶段推进、代码落点、未来路线）

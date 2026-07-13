@@ -13,9 +13,11 @@ PR-12I commit:              9627a3c
 PR-12J commit:              cd7bc6b
 PR-12K commit:              0428c0e
 PR-12L commit:              8f6f0d3
-current phase:              PR-12M complete；next PR-12N closure audit
-PR-12 overall:              IN PROGRESS
-PR-13:                      BLOCKED
+PR-12M commit:              fd3cbb4
+current phase:              PR-12N closure complete
+PR-12 overall:              VALIDATED-REDUCED
+closure tag:                pr12-validated-reduced
+PR-13:                      GO / READY；not started
 ```
 
 工作区开始 PR-12H 前为 clean，`44f87ae` 已与远程同分支同步；PR-12G tag 尚未 push。
@@ -109,11 +111,21 @@ artifacts/phase7a-pr12/pr12g-multibackend-v2-report-canonical3-20260713/
 - [x] PR-12M 收尾：focused 9 passed；全量 340 passed/1 skipped；mypy success；pylint
   10.00/10；Black/diff check 通过。
 
+## PR-12N 当前工作
+
+- [x] H–M code/test/artifact/negative-result closure audit；
+- [x] I/J/K/M primary hash 重算与 manifest 交叉核验；
+- [x] third-party SHA 与无关来源污染审计；
+- [x] reduced Artifact Appendix、Claims Map、README/总账；
+- [x] closure 判定 `VALIDATED-REDUCED`；
+- [x] PR-13 硬门禁 GO，但本阶段不启动 PR-13；
+- [x] annotated closure tag `pr12-validated-reduced` 随 closure commit 创建。
+
 ## 下一步
 
-PR-12M 提交后只进入 PR-12N closure audit：核对 H–M claims、工件 hash、失败/限制、full test
-与无关来源污染；根据证据只给 `VALIDATED-REDUCED` 或 `MECHANISM-ONLY`，之后才判断
-PR-13 Go/No-Go。
+PR-12 已关闭。下一次独立工作只能从 PR-13 real multi-domain/BaB adapter 开始，先读取
+`gemini_doc/pr12_closure_audit_2026_07_14.md` 的 scope/禁止事项；不得继续回调 PR-12 TIR 或
+把 reduced closure 扩写成论文级完整结论。
 
 ## 恢复命令
 

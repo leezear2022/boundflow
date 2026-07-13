@@ -226,6 +226,12 @@ Q1/Q32/Q1024 共 75 decisions；72 个存在实测可行 candidate 的机会全�
 eager/chunked/structured/fused 间变化；3 个 16 MiB capacity failure 单列。下一唯一阶段为
 PR-12N closure audit，仍禁止启动 PR-13。
 
+PR-12N 最终判定为 `VALIDATED-REDUCED`，closure tag `pr12-validated-reduced`。它不满足 full
+`VALIDATED`，因为 Q≤1024 compile 摊销为 0/3、硬件 counter 不可用、收益只在部分 regime，
+且尚无真实 BaB/VNN-COMP；但 non-toy E2E Pareto、预算价值、自动选择与独立 held-out 足以避免
+`MECHANISM-ONLY`。PR-13 硬门禁因此 GO/READY，但本 closure 不启动 PR-13；后续只允许推进
+真实 multi-domain/BaB query runtime，不回到 PR-12 TIR 试参。
+
 ## 7. 投稿门禁
 
 - **7 月 26 日**：PR-10 与真实 materialization profile；

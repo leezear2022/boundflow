@@ -1,6 +1,6 @@
 # BoundFlow PR-12 中长期完成规划
 
-> 状态：执行版；从 PR-12H 开始，持续到 PR-12 closure。
+> 状态：已完成；PR-12N closure 为 `VALIDATED-REDUCED`，tag `pr12-validated-reduced`。
 > 起点：`44f87ae` / tag `pr12g-validated-reduced`。
 > 约束：PR-12 closure 前不启动 PR-13，不再无条件增加 kernel/schedule family。
 
@@ -92,3 +92,10 @@ amortization、final held-out、0 unsafe、non-toy repeated-query value，且 cl
 - 不隐藏 OOM/timeout/compile failure；
 - 不以 BaB batching 掩盖 backend 问题；
 - 不把 TVM/DLight/MetaSchedule 本身包装成 BoundFlow 贡献。
+
+## 7. Closure 结果
+
+PR-12H–N 已全部完成。最终 p90 feasible regret 为 1.000×、0 unsafe，compile-aware Planner 在
+全新 v3 held-out 上随 budget/reuse 选择多个 backend；但 compile 摊销、硬件 counter 和真实
+BaB/VNN-COMP 仍有限制。因此 closure 为 `VALIDATED-REDUCED`，PR-13 gate GO/READY，尚未启动。
+完整审计见 `gemini_doc/pr12_closure_audit_2026_07_14.md`。

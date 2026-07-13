@@ -218,6 +218,18 @@ PR-12M compile-aware Planner 证据：
 - authoritative 工件链：`pr12m-compile-aware-v3-freeze-20260714/` → calibration → model-freeze
   → final-heldout → `pr12m-compile-aware-v3-replay-v2-20260714/` → report。
 
+PR-12N closure：
+
+- `C2-CLOSE` validated-reduced：H–M 门禁、hash、失败与限制已审计，closure tag 为
+  `pr12-validated-reduced`；
+- 不能升级 `VALIDATED`：Q≤1024 compile amortization 0/3、硬件 counter unavailable、收益仅限
+  部分 regime、尚无真实 BaB/VNN-COMP；
+- 不降级 `MECHANISM-ONLY`：non-toy mini-ResNet/Conv E2E Pareto、预算可行性、自动多 regime
+  selection 与独立 held-out 已成立；
+- PR-13 gate 为 GO/READY，但尚未启动；closure audit 与 Artifact Appendix 分别见
+  `gemini_doc/pr12_closure_audit_2026_07_14.md`、
+  `gemini_doc/pr12_artifact_appendix_2026_07_14.md`。
+
 该段 PR-11 early evidence 当时为专项 21 passed、全量 200 passed/1 skipped；其“Global 与
 Memory-Threshold 决策相同”的历史限制已由后续 PR-11E 和 PR-12G 证据分别补充，不能再读作
 当前全量状态。PR-12G 收尾全量为 318 passed、1 skipped。
