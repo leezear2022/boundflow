@@ -1,6 +1,7 @@
 """Shape and compile-key contract for fused ReLU-plus-Conv2d CROWN tasks."""
 
-# pylint: disable=too-many-arguments,too-many-positional-arguments
+# pylint: disable=duplicate-code,import-error,too-many-arguments
+# pylint: disable=too-many-positional-arguments
 # pylint: disable=too-many-statements
 
 from __future__ import annotations
@@ -349,13 +350,12 @@ def build_fused_crown_conv2d_primfunc(  # pylint: disable=too-many-locals
     ).with_attr("boundflow.schema_version", FUSED_CROWN_CONV2D_SCHEMA_VERSION)
 
 
-def schedule_fused_crown_conv2d(signature: FusedCrownConv2dSignature):
-    """Apply the deterministic output-gather CUDA schedule."""
+def schedule_fused_crown_conv2d_primfunc(primfunc):
+    """Schedule one already-built Conv2d PrimFunc without rebuilding TIR."""
 
-    _require_supported_v1(signature)
     import tvm  # pylint: disable=import-outside-toplevel
 
-    module = tvm.IRModule({"main": build_fused_crown_conv2d_primfunc(signature)})
+    module = tvm.IRModule({"main": primfunc})
     schedule = tvm.tir.Schedule(module)
     for block_name in ("previous_u", "previous_l", "bias_delta_u", "bias_delta_l"):
         block = schedule.get_block(block_name, func_name="main")
@@ -366,6 +366,15 @@ def schedule_fused_crown_conv2d(signature: FusedCrownConv2dSignature):
         schedule.bind(block_loop, "blockIdx.x")
         schedule.bind(thread_loop, "threadIdx.x")
     return schedule.mod
+
+
+def schedule_fused_crown_conv2d(signature: FusedCrownConv2dSignature):
+    """Apply the deterministic output-gather CUDA schedule."""
+
+    _require_supported_v1(signature)
+    return schedule_fused_crown_conv2d_primfunc(
+        build_fused_crown_conv2d_primfunc(signature)
+    )
 
 
 def allocated_intermediate_buffers(
@@ -494,4 +503,5 @@ __all__ = [
     "build_fused_crown_conv2d_primfunc",
     "build_fused_crown_conv2d_relax_ir_module",
     "schedule_fused_crown_conv2d",
+    "schedule_fused_crown_conv2d_primfunc",
 ]

@@ -560,6 +560,10 @@ class TorchChunkedFusedCrownExecutor(TorchDenseFusedCrownReference):
 class TVMFusedCrownExecutor:
     """Zero-copy DLPack adapter for the specialized CUDA TIR candidates."""
 
+    def __init__(self, *, compile_cache: Optional[Any] = None) -> None:
+        self.compile_cache = compile_cache
+        self.last_cache_event: Optional[Any] = None
+
     def supports_descriptor(
         self,
         descriptor: FusedReluAffineDescriptor,
@@ -680,7 +684,11 @@ class TVMFusedCrownExecutor:
         import tvm_ffi  # pylint: disable=import-outside-toplevel,import-error
 
         signature = self._compile_signature(request)
-        if request.kind == "linear":
+        self.last_cache_event = None
+        compile_cache = getattr(self, "compile_cache", None)
+        if compile_cache is not None:
+            compiled, self.last_cache_event = compile_cache.get(request.kind, signature)
+        elif request.kind == "linear":
             from ..backends.tvm.fused_crown_linear import (
                 build_fused_crown_linear_module,
             )

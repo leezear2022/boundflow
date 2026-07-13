@@ -1,6 +1,7 @@
 """Fused ReLU-plus-Linear backward task for non-differentiable plain CROWN."""
 
 # mypy: disable-error-code=import-untyped
+# pylint: disable=duplicate-code,import-error
 
 from __future__ import annotations
 
@@ -171,13 +172,12 @@ def build_fused_crown_linear_primfunc(  # pylint: disable=too-many-locals
     ).with_attr("boundflow.schema_version", FUSED_CROWN_LINEAR_SCHEMA_VERSION)
 
 
-def schedule_fused_crown_linear(key: FusedCrownLinearKey):
-    """Bind each output element to one CUDA thread with a serial feature reduction."""
+def schedule_fused_crown_linear_primfunc(primfunc):
+    """Schedule one already-built Linear PrimFunc without rebuilding TIR."""
 
-    key.validate()
     import tvm  # pylint: disable=import-outside-toplevel
 
-    module = tvm.IRModule({"main": build_fused_crown_linear_primfunc(key)})
+    module = tvm.IRModule({"main": primfunc})
     schedule = tvm.tir.Schedule(module)
     for block_name in ("previous_u", "previous_l", "bias_delta_u", "bias_delta_l"):
         block = schedule.get_block(block_name, func_name="main")
@@ -188,6 +188,13 @@ def schedule_fused_crown_linear(key: FusedCrownLinearKey):
         schedule.bind(block_loop, "blockIdx.x")
         schedule.bind(thread_loop, "threadIdx.x")
     return schedule.mod
+
+
+def schedule_fused_crown_linear(key: FusedCrownLinearKey):
+    """Bind each output element to one CUDA thread with a serial feature reduction."""
+
+    key.validate()
+    return schedule_fused_crown_linear_primfunc(build_fused_crown_linear_primfunc(key))
 
 
 def allocated_intermediate_buffers(key: FusedCrownLinearKey) -> Tuple[str, ...]:
@@ -274,4 +281,5 @@ __all__ = [
     "build_fused_crown_linear_primfunc",
     "build_fused_crown_linear_relax_ir_module",
     "schedule_fused_crown_linear",
+    "schedule_fused_crown_linear_primfunc",
 ]

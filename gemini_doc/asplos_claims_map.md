@@ -167,6 +167,19 @@ PR-12H benchmark contract freeze：
 - PR-12I 工件：`pr12i-baseline-v2-20260714/` →
   `pr12i-baseline-report-v2-20260714/`；下一门禁为 PR-12J compile/load/cache amortization。
 
+PR-12J compile/cache 证据更新：
+
+- `C3-M1` validated measurement：cache key 覆盖 signature/target/code schema/TVM ABI，`.so` 与
+  manifest SHA 校验；3/3 workload 的 fresh compile、memory hit 与独立进程 disk hit 数值正确，
+  worker 0 hidden recompile；
+- `C3-E1` partial regime：mini-ResNet fused warm 6.847 ms vs eager 7.234 ms，fresh/disk-first/
+  process restart break-even 为 4668/1062/4450 queries；均超过 Q=1024，且不优于 chunked
+  6.513 ms；
+- `C3-L1` validated limitation：Linear/Conv fused warm 分别 8.557/3.301 ms，均慢于 eager 与
+  chunked，因此严格为 `not_amortizable`；3 个 workload 在 Q≤1024 内 0 个可对 eager 摊销；
+- v1 tuple/list manifest bug 与 v2 warm-path SHA 污染保留；authoritative 工件为
+  `pr12j-amortization-v4-20260714/` → `pr12j-amortization-report-v4-20260714/`。
+
 该段 PR-11 early evidence 当时为专项 21 passed、全量 200 passed/1 skipped；其“Global 与
 Memory-Threshold 决策相同”的历史限制已由后续 PR-11E 和 PR-12G 证据分别补充，不能再读作
 当前全量状态。PR-12G 收尾全量为 318 passed、1 skipped。

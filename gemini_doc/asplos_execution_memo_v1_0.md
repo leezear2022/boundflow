@@ -199,6 +199,13 @@ geomean 仅为 eager 的 0.546×，但 median peak ratio 为 0.512 且 3/3 Paret
 capture，已保留结构化 N/A，未为迎合 baseline 改写 workload。下一唯一阶段为 PR-12J
 compile/load/cache amortization；PR-12 overall 与 PR-13 状态不变。
 
+PR-12J 已把 TIR generation、schedule、compile、serialization、module load、memory hit 与独立
+进程 disk hit 分离。authoritative v4 为 3/3 correct、0 hidden recompile。Linear/Conv 因 fused
+warm 本身较慢而不可摊销；mini-ResNet 对 eager 的 fresh/disk-first/process break-even 为
+4668/1062/4450 queries，均超出 Q≤1024，且对 chunked 仍不可摊销。v1 的 Conv tuple/list cache
+验证 bug 和 v2 的 warm-path SHA 污染均保留为失败证据。下一唯一阶段为 PR-12K profiler；不得
+以 module load 仅 0.17–0.60 ms 掩盖 process first query 约 350–419 ms 的事实。
+
 ## 7. 投稿门禁
 
 - **7 月 26 日**：PR-10 与真实 materialization profile；

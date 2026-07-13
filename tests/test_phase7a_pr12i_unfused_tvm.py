@@ -115,6 +115,11 @@ def test_tvm_unfused_honors_custom_stream_without_global_sync() -> None:
     request = _request("linear", torch.device("cuda"))
     expected = TorchDenseFusedCrownReference().run(request)
     stream = torch.cuda.Stream()
+    # Inputs were produced on the current/default stream. The caller must make
+    # this producer dependency explicit before an external runtime consumes
+    # them on a different stream; the executor is responsible for launching on
+    # that stream, not for guessing input provenance.
+    stream.wait_stream(torch.cuda.current_stream())
 
     with torch.cuda.stream(stream):
         actual = TVMUnfusedCrownExecutor().run(request, stream=stream)

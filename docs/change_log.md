@@ -2610,3 +2610,27 @@
 
 **记录**
 - `gemini_doc/change_2026-07-14_pr12i_fair_baselines.md`
+
+---
+
+## 2026-07-14：PR-12J compile/load/cache amortization
+
+**主要改动**
+- 新增带 canonical signature/target/code-schema/TVM-version key 的 fused CROWN `.so + manifest`
+  cache，验证 library SHA；
+- 分离 TIR generation、schedule、compile、serialization、module load、first/warm、memory hit 与
+  独立进程 disk hit；
+- 固定 Q=1..1024，输出 fresh/disk/process/memory-cache 对 eager/chunked 的 break-even 与图表。
+
+**结果与判定**
+- v1 暴露 Conv tuple/list manifest 比较 bug，v2 暴露 warm hit 重复 SHA `.so` 的测量污染；均保留；
+- authoritative v4 为 3/3 correct、0 hidden recompile；
+- Linear/Conv warm 较慢，not amortizable；mini-ResNet 对 eager 的 fresh/disk-first/process
+  break-even 为 4668/1062/4450，均超过 Q=1024，且对 chunked 不可摊销；
+- 阶段拆分/cache correctness PASS，目标区间摊销 FAIL；PR-12 overall 仍 IN PROGRESS，PR-13
+  blocked，下一阶段为 profiler。
+- 收尾门禁：focused/integration 5 passed；全量 330 passed、1 skipped；mypy 6 files success；
+  pylint 6 files 10.00/10；Black/diff check 通过。
+
+**记录**
+- `gemini_doc/change_2026-07-14_pr12j_compile_amortization.md`
