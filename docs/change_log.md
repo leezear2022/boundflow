@@ -2521,3 +2521,26 @@
 **记录**
 - `gemini_doc/change_2026-07-12_pr11_static_topology_cost.md`
 - `gemini_doc/pr11_closure_audit_2026_07_12.md`
+
+---
+
+## 2026-07-13：PR-12E/F runtime Pareto 与 frozen held-out
+
+**主要改动**
+- 新增 calibration-only fused backend Planner，按 family、bytes-per-region、预算和 eligibility
+  选择 PyTorch eager 或 TVM fused TIR；
+- 新增 default/custom-stream runtime benchmark，分离 compile-first/cold/warm、CUDA Events 与
+  allocator peak；
+- 新增 JSONL→CSV→Pareto figure→manifest 后处理和三组 contract tests；
+- 新增 fanout graph-ineligible fallback control，Planner/Oracle 均必须保持 eager。
+
+**结果与判定**
+- calibration 12/12、held-out 24/24 candidate rows correctness 通过；
+- 5/5 held-out 预算可行、0 unsafe，Planner median/p90 regret 1.000×/1.262×；
+- fused 在所有 held-out 降低 peak，但 memory-sensitive Linear、unseen Conv、mini-ResNet latency
+  分别为 eager 的 4.21×、1.26×、1.03×；
+- PR-12E 证据链 PASS、性能目标 FAIL；PR-12F execution PASS、quality guarded/partial；PR-12
+  overall 保持 IN PROGRESS，PR-13 blocked。
+
+**记录**
+- `gemini_doc/change_2026-07-13_pr12ef_runtime_pareto_heldout.md`

@@ -114,6 +114,21 @@
   groups=1/dilation=1 的有限 Conv 子集；
 - `C3-M1` pending：compile amortization 与 repeated-query stream 尚未测量。
 
+PR-12E/F 正式证据更新：
+
+- `C2-E7` validated mechanism/Pareto：calibration 12/12、frozen held-out 24/24 candidate rows
+  correctness 通过；default/custom stream 均用同 stream CUDA Events，无 timed global sync；
+- `C2-E8` validated memory frontier：5 个 held-out 的 fused peak 全部低于 eager；64 MiB
+  memory-sensitive Linear 中 eager 68.599 MiB、fused 29.282 MiB，只有 fused 满足预算；
+- `C2-E9` guarded Planner：5/5 预算可行、0 unsafe、median/p90/max regret
+  1.000×/1.262×/1.262×；fanout fallback 1/1，但 profitable 或 budget-required 仅 3/5；
+- `C2-L3` validated limitation：unseen Conv 与三 block mini-ResNet warm speedup 仅
+  0.792×/0.968×，memory-sensitive Linear 0.238×；当前 schedule 不能作为 latency headline；
+- `C3-M1` partial：warm-faster 点 compile break-even 约 2.2k–7.4k queries；尚未接真实
+  repeated-query runtime/BaB stream；
+- 工件链：`artifacts/phase7a-pr12/pr12e-calibration-v1-20260713/` →
+  `pr12f-final-heldout-v1-canonical-20260713/` → `pr12ef-report-v1-canonical-20260713/`。
+
 当前测试：PR-11 专项 21 passed；全量 200 passed、1 skipped。C2 仍为 `partial`：最终 held-out
 feasibility 已成立，但 Global 与 Memory-Threshold 退化为相同决策，尚不能声称 nontrivial
 Global Planner 系统贡献。

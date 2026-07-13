@@ -1,8 +1,8 @@
 # PR-12：Fused CROWN-Task Lowering for Memory-Efficient Plain CROWN
 
-> 状态：执行中；起点/candidate/held-out 已冻结，Linear 与 Conv stride-1/2 kernel-level
-> correctness/mechanism foundation 已完成；端到端接入和正式性能门禁未完成。不得并行扩展
-> α/αβ autograd、BaB scheduler 或 training。
+> 状态：执行中；PR-12D correctness 已关闭，PR-12E 正式 runtime/Pareto 证据链与 PR-12F
+> frozen held-out 已完成，但性能门禁失败、Planner quality 仅 guarded/partial。不得并行扩展
+> α/αβ autograd、BaB scheduler 或 training，PR-13 继续阻塞。
 
 当前分支从只读 tag `pr11-validated-reduced` 创建。起点工件位于
 `artifacts/phase7a-pr12/baseline/`，候选 schema 见
@@ -62,3 +62,15 @@ weights、bounds 和 α/β 默认是 runtime tensor，不烘焙进 key。
 PR-11 profile/schema/tag 只读。PR-12 新建 `backend_profile_v2`，显式包含 dense eager、
 structured eager、TVM unfused/default 与 structured fused TIR；compile/cold/warm、launch、memory、
 cache 与 correctness 全部写入新 JSONL 和 manifest。
+
+## 2026-07-13 PR-12E/F 实际判定
+
+- calibration 12/12、held-out 24/24 candidate rows correctness 通过；default/custom stream 均测；
+- fused 在 5 个 held-out 上均降低 peak，其中 64 MiB memory-sensitive Linear 从 68.599 MiB
+  降到 29.282 MiB，但 latency 从 2.025 ms 增至 8.516 ms；
+- 另外两个 Linear warm speedup 为 1.088×/1.079×；Conv 与三 block mini-ResNet 分别为
+  0.792×/0.968×；
+- calibration-only Planner 5/5 预算可行、0 unsafe，median/p90/max regret 为
+  1.000×/1.262×/1.262×，3/5 选择更快或为预算唯一可行；fanout fallback 1/1；
+- 因未达到性能目标且缺 structured eager/TVM-unfused 正式对照，PR-12 overall 保持
+  IN PROGRESS。详见 `gemini_doc/change_2026-07-13_pr12ef_runtime_pareto_heldout.md`。

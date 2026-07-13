@@ -69,6 +69,11 @@ from .execution_candidate import (
     fused_tir_linear_v1_capability,
     fused_tir_conv_v1_capability,
 )
+from .fused_crown_backend import (
+    FusedCrownBackendDecision,
+    FusedCrownBackendObservation,
+    FusedCrownBackendPlanner,
+)
 
 __all__ = [
     "BoundMethod",
@@ -82,6 +87,9 @@ __all__ = [
     "COST_MODEL_SCHEMA_VERSION",
     "FEATURE_NAMES",
     "ExecutionCandidate",
+    "FusedCrownBackendDecision",
+    "FusedCrownBackendObservation",
+    "FusedCrownBackendPlanner",
     "ExecutionContext",
     "LATENCY_FEATURE_NAMES",
     "PEAK_FEATURE_NAMES",

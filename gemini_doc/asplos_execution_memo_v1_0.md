@@ -169,8 +169,12 @@ Linear chain、stride-1/2 chain CNN、residual 与 stride-2 downsample mini-ResN
 TVM-FFI custom-stream race；修复后 v1 只 fuse single-consumer Affine→ReLU，fanout/stale plan
 确定性 fallback，并以 `tvm_ffi.use_torch_stream` 桥接 stream。multi-block mini-ResNet、fanout
 soundness 与 adversarial custom-stream 回归通过，全量为 299 passed、1 skipped。PR-12D
-correctness closure 现为 PASS；正式 Pareto、Planner auto-selection、final held-out 与 compile
-amortization 仍 pending，PR-13 继续阻塞。
+correctness closure 现为 PASS。随后 PR-12E/F 建立 calibration-only backend Planner 与
+default/custom-stream runtime Pareto：calibration 12/12、held-out 24/24 candidate rows 正确，
+5/5 held-out 预算可行、0 unsafe，median/p90 regret 为 1.000×/1.262×。fused 在所有 held-out
+降低 peak，但 memory-sensitive Linear 慢 4.21×，unseen Conv/mini-ResNet 也发生 latency reversal；
+仅 3/5 选择更快或为预算唯一可行。故证据链 PASS、性能门禁 FAIL、Planner quality 仅
+guarded/partial，PR-12 overall 继续 IN PROGRESS，PR-13 继续阻塞。
 
 ## 7. 投稿门禁
 

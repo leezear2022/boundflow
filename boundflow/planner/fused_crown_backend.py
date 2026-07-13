@@ -1,0 +1,253 @@
+"""Calibration-only backend selection for fused plain-CROWN regions."""
+
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass
+import math
+from typing import Iterable, Mapping, Tuple
+
+from .execution_candidate import BackendVariant, OperatorFamily
+
+
+@dataclass(frozen=True)
+class FusedCrownBackendObservation:  # pylint: disable=too-many-instance-attributes
+    """One correct calibration measurement used by the PR-12 backend planner."""
+
+    case_id: str
+    family: OperatorFamily
+    backend: BackendVariant
+    boundary_bytes: int
+    region_count: int
+    warm_latency_ms: float
+    peak_allocated_bytes: int
+    eligible: bool
+    correct: bool
+
+    def validate(self) -> None:
+        """Reject incomplete or invalid measurements before model fitting."""
+
+        if not self.case_id:
+            raise ValueError("case_id must be non-empty")
+        if self.boundary_bytes <= 0 or self.region_count <= 0:
+            raise ValueError("boundary_bytes and region_count must be positive")
+        if not math.isfinite(self.warm_latency_ms) or self.warm_latency_ms <= 0:
+            raise ValueError("warm_latency_ms must be finite and positive")
+        if self.peak_allocated_bytes < 0:
+            raise ValueError("peak_allocated_bytes must be non-negative")
+
+
+@dataclass(frozen=True)
+class FusedCrownBackendDecision:  # pylint: disable=too-many-instance-attributes
+    """Explainable selection made without consulting held-out measurements."""
+
+    backend: BackendVariant
+    reason: str
+    calibration_case_id: str | None
+    predicted_fused_over_eager: float | None
+    predicted_eager_peak_bytes: int | None
+    predicted_fused_peak_bytes: int | None
+    budget_bytes: int
+    eligible: bool
+
+    @property
+    def use_fused(self) -> bool:
+        """Return whether the selected runtime should execute fused TIR."""
+
+        return self.backend == BackendVariant.TVM_FUSED_TIR
+
+    def to_dict(self) -> dict[str, object]:
+        """Return a stable JSON-compatible decision dump."""
+
+        payload = asdict(self)
+        payload["backend"] = self.backend.value
+        payload["use_fused"] = self.use_fused
+        return payload
+
+
+@dataclass(frozen=True)
+class _CalibrationPair:  # pylint: disable=too-many-instance-attributes
+    case_id: str
+    family: OperatorFamily
+    boundary_bytes: int
+    region_count: int
+    eager_latency_ms: float
+    fused_latency_ms: float
+    eager_peak_bytes: int
+    fused_peak_bytes: int
+
+    @property
+    def fused_over_eager(self) -> float:
+        """Return the measured warm-latency ratio for this pair."""
+
+        return self.fused_latency_ms / self.eager_latency_ms
+
+
+class FusedCrownBackendPlanner:
+    """Nearest-scale planner fitted exclusively from frozen calibration rows.
+
+    The v1 model intentionally stays explainable: it chooses the same-family
+    calibration pair nearest in log bytes-per-region, scales the two measured
+    peaks linearly with boundary bytes, then selects the faster feasible backend.
+    Eligibility always takes precedence over performance predictions.
+    """
+
+    def __init__(self, pairs: Tuple[_CalibrationPair, ...]) -> None:
+        if not pairs:
+            raise ValueError("at least one paired calibration case is required")
+        self._pairs = pairs
+
+    @classmethod
+    def fit(
+        cls, observations: Iterable[FusedCrownBackendObservation]
+    ) -> "FusedCrownBackendPlanner":
+        """Pair eager/fused correct observations by case without data leakage."""
+
+        grouped: dict[
+            tuple[str, OperatorFamily],
+            dict[BackendVariant, FusedCrownBackendObservation],
+        ] = {}
+        for observation in observations:
+            observation.validate()
+            if not observation.correct or not observation.eligible:
+                continue
+            if observation.backend not in {
+                BackendVariant.PYTORCH_EAGER,
+                BackendVariant.TVM_FUSED_TIR,
+            }:
+                continue
+            grouped.setdefault((observation.case_id, observation.family), {})[
+                observation.backend
+            ] = observation
+
+        pairs: list[_CalibrationPair] = []
+        for (case_id, family), candidates in sorted(
+            grouped.items(), key=lambda item: (item[0][1].value, item[0][0])
+        ):
+            eager = candidates.get(BackendVariant.PYTORCH_EAGER)
+            fused = candidates.get(BackendVariant.TVM_FUSED_TIR)
+            if eager is None or fused is None:
+                continue
+            if (
+                eager.boundary_bytes != fused.boundary_bytes
+                or eager.region_count != fused.region_count
+            ):
+                raise ValueError(f"calibration candidate metadata mismatch: {case_id}")
+            pairs.append(
+                _CalibrationPair(
+                    case_id=case_id,
+                    family=family,
+                    boundary_bytes=eager.boundary_bytes,
+                    region_count=eager.region_count,
+                    eager_latency_ms=eager.warm_latency_ms,
+                    fused_latency_ms=fused.warm_latency_ms,
+                    eager_peak_bytes=eager.peak_allocated_bytes,
+                    fused_peak_bytes=fused.peak_allocated_bytes,
+                )
+            )
+        return cls(tuple(pairs))
+
+    def decide(  # pylint: disable=too-many-locals
+        self,
+        *,
+        family: OperatorFamily,
+        boundary_bytes: int,
+        region_count: int,
+        budget_bytes: int,
+        eligible: bool,
+    ) -> FusedCrownBackendDecision:
+        """Select eager or fused execution using calibration data only."""
+
+        if boundary_bytes <= 0 or region_count <= 0 or budget_bytes <= 0:
+            raise ValueError(
+                "boundary_bytes, region_count and budget_bytes must be positive"
+            )
+        if not eligible:
+            return FusedCrownBackendDecision(
+                backend=BackendVariant.PYTORCH_EAGER,
+                reason="capability_or_graph_ineligible_fallback",
+                calibration_case_id=None,
+                predicted_fused_over_eager=None,
+                predicted_eager_peak_bytes=None,
+                predicted_fused_peak_bytes=None,
+                budget_bytes=budget_bytes,
+                eligible=False,
+            )
+        compatible = tuple(pair for pair in self._pairs if pair.family == family)
+        if not compatible:
+            return FusedCrownBackendDecision(
+                backend=BackendVariant.PYTORCH_EAGER,
+                reason="no_same_family_calibration_fallback",
+                calibration_case_id=None,
+                predicted_fused_over_eager=None,
+                predicted_eager_peak_bytes=None,
+                predicted_fused_peak_bytes=None,
+                budget_bytes=budget_bytes,
+                eligible=True,
+            )
+
+        query_scale = boundary_bytes / region_count
+        nearest = min(
+            compatible,
+            key=lambda pair: abs(
+                math.log(query_scale)
+                - math.log(pair.boundary_bytes / pair.region_count)
+            ),
+        )
+        scale = boundary_bytes / nearest.boundary_bytes
+        eager_peak = int(math.ceil(nearest.eager_peak_bytes * scale))
+        fused_peak = int(math.ceil(nearest.fused_peak_bytes * scale))
+        eager_feasible = eager_peak <= budget_bytes
+        fused_feasible = fused_peak <= budget_bytes
+        ratio = nearest.fused_over_eager
+
+        if fused_feasible and not eager_feasible:
+            backend = BackendVariant.TVM_FUSED_TIR
+            reason = "fused_only_budget_feasible"
+        elif eager_feasible and not fused_feasible:
+            backend = BackendVariant.PYTORCH_EAGER
+            reason = "eager_only_budget_feasible"
+        elif eager_feasible and fused_feasible and ratio < 1.0:
+            backend = BackendVariant.TVM_FUSED_TIR
+            reason = "calibration_predicts_fused_faster"
+        elif eager_feasible and fused_feasible:
+            backend = BackendVariant.PYTORCH_EAGER
+            reason = "calibration_predicts_eager_faster"
+        elif fused_peak < eager_peak:
+            backend = BackendVariant.TVM_FUSED_TIR
+            reason = "budget_violated_choose_lower_predicted_peak"
+        else:
+            backend = BackendVariant.PYTORCH_EAGER
+            reason = "budget_violated_choose_lower_predicted_peak"
+
+        return FusedCrownBackendDecision(
+            backend=backend,
+            reason=reason,
+            calibration_case_id=nearest.case_id,
+            predicted_fused_over_eager=ratio,
+            predicted_eager_peak_bytes=eager_peak,
+            predicted_fused_peak_bytes=fused_peak,
+            budget_bytes=budget_bytes,
+            eligible=True,
+        )
+
+    def to_dict(self) -> Mapping[str, object]:
+        """Dump the frozen calibration pairs used by the planner."""
+
+        return {
+            "model": "same_family_nearest_log_bytes_per_region_v1",
+            "pairs": [
+                {
+                    **asdict(pair),
+                    "family": pair.family.value,
+                    "fused_over_eager": pair.fused_over_eager,
+                }
+                for pair in self._pairs
+            ],
+        }
+
+
+__all__ = [
+    "FusedCrownBackendDecision",
+    "FusedCrownBackendObservation",
+    "FusedCrownBackendPlanner",
+]
