@@ -26,7 +26,9 @@ from .fused_crown import (
     FusedCrownExecutionContext,
     FusedCrownExecutionStep,
     FusedCrownExecutor,
+    FusedReluAffineDescriptor,
     FusedReluAffineRequest,
+    validate_fused_crown_execution_steps,
 )
 from .linear_operator import DenseLinearOperator, LinearOperator, SignSplitLinearOperator
 from .materialization import materialize_linear_operator
@@ -1299,6 +1301,47 @@ def _execute_fused_relu_affine_step(  # pylint: disable=too-many-arguments,too-m
     ):
         return None
 
+    attrs: Dict[str, object] = dict(affine_op.attrs)
+    weight: torch.Tensor
+    bias: Optional[torch.Tensor]
+    if affine_op.op_type == "linear":
+        weight, bias = _normalize_linear_inputs(
+            weight_raw, bias_raw, device=device, dtype=dtype, caller=caller
+        )
+    else:
+        weight, bias, stride, padding, dilation, groups = _normalize_conv2d_inputs(
+            weight_raw,
+            bias_raw,
+            attrs=dict(affine_op.attrs),
+            device=device,
+            dtype=dtype,
+            caller=caller,
+        )
+        attrs.update(stride=stride, padding=padding, dilation=dilation, groups=groups)
+        attrs["output_padding"] = tuple(
+            int(input_shape[axis + 1])
+            - (
+                (int(output_shape[axis + 1]) - 1) * int(stride[axis])
+                - 2 * int(padding[axis])
+                + int(dilation[axis]) * (int(weight.shape[axis + 2]) - 1)
+                + 1
+            )
+            for axis in range(2)
+        )
+    descriptor = FusedReluAffineDescriptor(
+        kind=affine_op.op_type,
+        coefficient_shape=state.A_u.shape,
+        weight=weight,
+        bias=bias,
+        input_shape=input_shape,
+        output_shape=output_shape,
+        attrs=attrs,
+        device=device,
+        dtype=dtype,
+    )
+    if not executor.supports_descriptor(descriptor, context):
+        return None
+
     A_u = materialize_linear_operator(
         state.A_u,
         reason="fused_region_dense_boundary",
@@ -1329,33 +1372,6 @@ def _execute_fused_relu_affine_step(  # pylint: disable=too-many-arguments,too-m
         dtype=dtype,
         caller=caller,
     )
-    attrs: Dict[str, object] = dict(affine_op.attrs)
-    weight: torch.Tensor
-    bias: Optional[torch.Tensor]
-    if affine_op.op_type == "linear":
-        weight, bias = _normalize_linear_inputs(
-            weight_raw, bias_raw, device=device, dtype=dtype, caller=caller
-        )
-    else:
-        weight, bias, stride, padding, dilation, groups = _normalize_conv2d_inputs(
-            weight_raw,
-            bias_raw,
-            attrs=dict(affine_op.attrs),
-            device=device,
-            dtype=dtype,
-            caller=caller,
-        )
-        attrs.update(stride=stride, padding=padding, dilation=dilation, groups=groups)
-        attrs["output_padding"] = tuple(
-            int(input_shape[axis + 1])
-            - (
-                (int(output_shape[axis + 1]) - 1) * int(stride[axis])
-                - 2 * int(padding[axis])
-                + int(dilation[axis]) * (int(weight.shape[axis + 2]) - 1)
-                + 1
-            )
-            for axis in range(2)
-        )
     request = FusedReluAffineRequest(
         kind=affine_op.op_type,
         A_u=A_u,
@@ -1437,7 +1453,8 @@ def _run_crown_backward_from_trace(
     adjoints: Dict[str, AffineBackwardState] = {resolved_output: init_state}
     dynamic_names = _dynamic_value_names(input_spec=input_spec, interval_env=interval_env)
 
-    fused_by_relu = {step.relu_op_index: step for step in fused_crown_steps}
+    validated_fused_steps = validate_fused_crown_execution_steps(task.ops, fused_crown_steps)
+    fused_by_relu = {step.relu_op_index: step for step in validated_fused_steps}
     consumed_affine_indices: set[int] = set()
     for op_index in range(len(task.ops) - 1, -1, -1):
         if op_index in consumed_affine_indices:
@@ -1489,7 +1506,7 @@ def _run_crown_backward_from_trace(
             if x_name not in relu_pre:
                 raise KeyError(f"missing relu pre-activation bounds for value: {x_name}")
             step = fused_by_relu.get(op_index)
-            if fused_crown_executor is not None and step is not None:
+            if fused_crown_executor is not None and step is not None and x_name not in adjoints:
                 if step.affine_op_index != op_index - 1:
                     raise ValueError("fused CROWN v1 requires adjacent Affine->ReLU ops")
                 affine_op = task.ops[step.affine_op_index]

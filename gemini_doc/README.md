@@ -68,6 +68,7 @@
 - `gemini_doc/change_2026-07-13_pr12_start_and_fused_linear.md`：PR-12 起点、held-out 与 Linear TIR 第一切片
 - `gemini_doc/change_2026-07-13_pr12_fused_conv2d.md`：Conv stride-1/2、codegen 与 latency sanity
 - `gemini_doc/change_2026-07-13_pr12_e2e_crown_integration.md`：显式 fused region schedule、TVM/Torch executor、网络级 final-bound 与 zero-copy 门禁
+- `gemini_doc/change_2026-07-13_pr12d_correctness_closure.md`：fanout soundness、完整 step contract、pre-materialization fallback 与 TVM-FFI custom-stream closure
 - `gemini_doc/artifact_claims_phase5d.md`：Phase 5D artifact claims（证据链/口径映射）
 - `gemini_doc/artifact_appendix_phase5d.md`：Phase 5D artifact appendix（复现说明）
 - `gemini_doc/project_evolution_overview.md`：研发脉络总览（目标、阶段推进、代码落点、未来路线）

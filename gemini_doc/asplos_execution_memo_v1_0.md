@@ -165,8 +165,12 @@ kernel-level correctness/mechanism PASS。
 PR-12D 已将 dense-boundary fused region 接入真实 plain-CROWN backward：显式 execution step
 消费 Affine→ReLU，后端无关 executor 可在 Torch dense reference 与 TVM fused TIR 间切换；
 Linear chain、stride-1/2 chain CNN、residual 与 stride-2 downsample mini-ResNet-like block 的
-最终 bounds 对齐，DLPack storage alias 成立，全量为 284 passed、1 skipped。正式 Pareto、
-Planner auto-selection、final held-out 与 compile amortization 仍 pending，PR-13 继续阻塞。
+最终 bounds 对齐，DLPack storage alias 成立。随后复审发现 fanout contribution 丢失与
+TVM-FFI custom-stream race；修复后 v1 只 fuse single-consumer Affine→ReLU，fanout/stale plan
+确定性 fallback，并以 `tvm_ffi.use_torch_stream` 桥接 stream。multi-block mini-ResNet、fanout
+soundness 与 adversarial custom-stream 回归通过，全量为 299 passed、1 skipped。PR-12D
+correctness closure 现为 PASS；正式 Pareto、Planner auto-selection、final held-out 与 compile
+amortization 仍 pending，PR-13 继续阻塞。
 
 ## 7. 投稿门禁
 

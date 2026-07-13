@@ -3,8 +3,10 @@
 ## 目标与阶段结论
 
 将已验证的 fused ReLU+Linear/Conv2d TIR 从孤立 kernel 接入真实 plain-CROWN backward。
-本切片完成 **PR-12D correctness/mechanism foundation**，但没有运行 formal Pareto 或冻结的
-final held-out，因此 PR-12 整体仍为 **IN PROGRESS**，PR-13 继续阻塞。
+本切片最初建立 **PR-12D integration foundation**；后续复审发现 fanout contribution 丢失与
+TVM-FFI custom-stream race，故 `d3b3913` 本身不能标 correctness PASS。两项 blocker 的修复与
+最终 closure 见 `gemini_doc/change_2026-07-13_pr12d_correctness_closure.md`。formal Pareto 和
+final held-out 仍未运行，因此 PR-12 整体仍为 **IN PROGRESS**，PR-13 继续阻塞。
 
 ## 接口与语义边界
 
@@ -73,4 +75,5 @@ Black check / git diff --check：通过
 - frozen `pr12-final-heldout-v1` 与 compile amortization；
 - 至少一项非 toy 系统价值 gate。
 
-因此下一提交应是公平 runtime/network benchmark，而不是扩 kernel、α/β 或启动 PR-13。
+复审后的 correctness 修复已经独立记录；只有该 closure 通过后，下一提交才是公平
+runtime/network benchmark，而不是扩 kernel、α/β 或启动 PR-13。
