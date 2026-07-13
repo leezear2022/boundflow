@@ -67,6 +67,7 @@ from .execution_candidate import (
     PlacementKind,
     capability_rejections,
     fused_tir_linear_v1_capability,
+    fused_tir_conv_v1_capability,
 )
 
 __all__ = [
@@ -118,6 +119,7 @@ __all__ = [
     "fit_materialization_cost_model",
     "fit_placement_interaction_cost_model",
     "fused_tir_linear_v1_capability",
+    "fused_tir_conv_v1_capability",
     "generate_static_placement_candidates",
     "placement_features_from_static",
     "plan_interval_ibp_v0",

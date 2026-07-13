@@ -188,6 +188,29 @@ def fused_tir_linear_v1_capability() -> BackendCapability:
     )
 
 
+def fused_tir_conv_v1_capability() -> BackendCapability:
+    """Return the coarse capability for signatures accepted by Conv validation."""
+
+    return BackendCapability(
+        capability_id="tvm_fused_tir_conv_plain_crown_fp32_static_v1",
+        supported_bound_methods=(BoundMethod.CROWN,),
+        supports_grad=False,
+        supports_alpha=False,
+        supports_beta=False,
+        supports_split_state=False,
+        supports_linear=False,
+        supports_conv2d=True,
+        supported_dtypes=("float32",),
+        supported_layouts=("nchw",),
+        supported_devices=("cuda",),
+        supported_optimization_stages=(
+            OptimizationStage.INFERENCE,
+            OptimizationStage.FINAL_BOUND,
+        ),
+        static_shape_only=True,
+    )
+
+
 __all__ = [
     "BACKEND_CANDIDATE_SCHEMA_VERSION",
     "BACKEND_PROFILE_SCHEMA_VERSION",
@@ -199,4 +222,5 @@ __all__ = [
     "PlacementKind",
     "capability_rejections",
     "fused_tir_linear_v1_capability",
+    "fused_tir_conv_v1_capability",
 ]
