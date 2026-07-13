@@ -12,7 +12,7 @@ FUSED_CROWN_LINEAR_SCHEMA_VERSION = "boundflow.fused_crown_linear/v1"
 
 
 @dataclass(frozen=True)
-class FusedCrownLinearKey:
+class FusedCrownLinearKey:  # pylint: disable=too-many-instance-attributes
     """Static compile key for one fused ReLU-plus-Linear task."""
 
     domain_batch: int
