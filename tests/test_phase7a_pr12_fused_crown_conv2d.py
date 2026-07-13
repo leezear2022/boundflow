@@ -147,6 +147,33 @@ def _signature(
     )
 
 
+def _stride_two_signature(
+    domain: int,
+    spec: int,
+    channels: tuple[int, int],
+    input_spatial: int,
+    kernel: int,
+    padding: int,
+    bias_present: bool,
+) -> FusedCrownConv2dSignature:
+    output = (input_spatial + 2 * padding - kernel) // 2 + 1
+    return FusedCrownConv2dSignature(
+        domain,
+        spec,
+        channels[0],
+        input_spatial,
+        input_spatial,
+        channels[1],
+        output,
+        output,
+        kernel,
+        kernel,
+        (2, 2),
+        (padding, padding),
+        bias_present=bias_present,
+    )
+
+
 def test_conv_primfunc_has_no_scaled_a_or_im2col_allocation() -> None:
     signature = _signature(2, 3, (5, 4), 7, 3, 1, True)
 
@@ -210,8 +237,41 @@ def test_stride_one_fused_conv_cuda_matches_dense_reference(
         torch.testing.assert_close(actual_tensor, reference, rtol=2e-4, atol=2e-4)
 
 
-def test_stride_two_is_not_silently_lowered_by_v0() -> None:
-    signature = FusedCrownConv2dSignature(1, 1, 3, 8, 8, 4, 4, 4, 3, 3, (2, 2), (1, 1))
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA is required")
+@pytest.mark.parametrize(
+    ("signature", "mode", "output_padding"),
+    [
+        (_stride_two_signature(1, 1, (3, 4), 7, 3, 1, True), "mixed", 0),
+        (_stride_two_signature(2, 3, (5, 4), 8, 3, 1, False), "positive", 1),
+        (_stride_two_signature(1, 9, (3, 5), 7, 1, 0, True), "negative", 0),
+        (_stride_two_signature(1, 32, (4, 8), 8, 1, 0, True), "zero", 1),
+    ],
+)
+def test_stride_two_residual_fused_conv_matches_dense_reference(
+    signature: FusedCrownConv2dSignature, mode: str, output_padding: int
+) -> None:
+    import tvm
 
-    with pytest.raises(NotImplementedError, match="stride=1"):
-        build_fused_crown_conv2d_primfunc(signature)
+    assert signature.output_padding() == (output_padding, output_padding)
+    tensors = _inputs(signature, mode)
+    expected = _reference(signature, tensors)
+    device = tvm.cuda(0)
+    inputs = [tvm.runtime.tensor(tensor.numpy(), device=device) for tensor in tensors]
+    outputs = [
+        tvm.runtime.empty(expected[0].shape, "float32", device),
+        tvm.runtime.empty(expected[1].shape, "float32", device),
+        tvm.runtime.empty(
+            (signature.domain_batch, signature.spec_batch), "float32", device
+        ),
+        tvm.runtime.empty(
+            (signature.domain_batch, signature.spec_batch), "float32", device
+        ),
+    ]
+
+    build_fused_crown_conv2d_module(signature)(*inputs, *outputs)
+    device.sync()
+
+    for actual, reference in zip(outputs, expected):
+        torch.testing.assert_close(
+            torch.from_numpy(actual.numpy()), reference, rtol=2e-4, atol=2e-4
+        )
