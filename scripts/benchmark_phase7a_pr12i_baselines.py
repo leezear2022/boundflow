@@ -527,6 +527,12 @@ def main(
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--split-file", type=Path, required=True)
     parser.add_argument("--out-dir", type=Path, required=True)
+    parser.add_argument(
+        "--record-set",
+        choices=("calibration", "final_heldout"),
+        default="calibration",
+        help="split partition to benchmark; PR-12I defaults to consumed calibration",
+    )
     parser.add_argument("--case-ids", default=",".join(DEFAULT_CASE_IDS))
     parser.add_argument(
         "--contracts",
@@ -555,13 +561,15 @@ def main(
     requested_cases = {item for item in args.case_ids.split(",") if item}
     records = [
         record
-        for record in split["calibration"]
+        for record in split[args.record_set]
         if record.get("case_id") in requested_cases
     ]
     missing = requested_cases - {str(record["case_id"]) for record in records}
     if missing:
-        parser.error(f"case ids are not consumed calibration cases: {sorted(missing)}")
-    workloads = [_workload(record, split_role="baseline") for record in records]
+        parser.error(
+            f"case ids are not present in {args.record_set}: {sorted(missing)}"
+        )
+    workloads = [_workload(record, split_role=args.record_set) for record in records]
     try:
         backends = tuple(
             BackendVariant(item) for item in args.backends.split(",") if item
@@ -622,6 +630,7 @@ def main(
     manifest = {
         "schema_version": MANIFEST_SCHEMA_VERSION,
         "split_id": split["split_id"],
+        "record_set": args.record_set,
         "split_sha256": _sha256(args.split_file),
         "environment": _environment(),
         "contracts": {

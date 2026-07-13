@@ -12,7 +12,8 @@ PR-12H commit:              abc2e2a
 PR-12I commit:              9627a3c
 PR-12J commit:              cd7bc6b
 PR-12K commit:              0428c0e
-current phase:              PR-12L complete；next PR-12M compile-aware Planner
+PR-12L commit:              8f6f0d3
+current phase:              PR-12M complete；next PR-12N closure audit
 PR-12 overall:              IN PROGRESS
 PR-13:                      BLOCKED
 ```
@@ -95,11 +96,24 @@ artifacts/phase7a-pr12/pr12g-multibackend-v2-report-canonical3-20260713/
 - [x] 冻结 PR-12M 的全新 split、多预算与 expected-reuse 约束；
 - [x] 无 TIR/schedule/runtime 代码修改。
 
+## PR-12M 当前工作
+
+- [x] capability→budget→risk→amortized latency Planner；
+- [x] expected reuse 与 memory/disk/fresh cache 概率进入决策 dump；
+- [x] v3 split→25/25 calibration→model freeze→25/25 final，无 held-out 泄漏；
+- [x] 16/32/64/128 MiB/unbounded × Q1/Q32/Q1024 共 75 decisions；
+- [x] 72/72 feasible opportunities 选到可行 backend，0 unsafe；
+- [x] feasible median/p90/max regret 1.000×/1.000×/1.016×；
+- [x] 选择 eager/chunked/structured/fused 四类 backend，随 reuse/budget 改变计划；
+- [x] 3 个 16 MiB capacity failure 单独保留，不纳入 feasible regret 门禁。
+- [x] PR-12M 收尾：focused 9 passed；全量 340 passed/1 skipped；mypy success；pylint
+  10.00/10；Black/diff check 通过。
+
 ## 下一步
 
-PR-12L 提交后进入 PR-12M compile-aware Planner：先创建全新 calibration/final-heldout split，
-再实现 capability→budget→risk→amortized latency 字典序，扫描 16/32/64/128 MiB 与
-unbounded；不得复用旧 final held-out 调参，不得回到 TIR 试参。
+PR-12M 提交后只进入 PR-12N closure audit：核对 H–M claims、工件 hash、失败/限制、full test
+与无关来源污染；根据证据只给 `VALIDATED-REDUCED` 或 `MECHANISM-ONLY`，之后才判断
+PR-13 Go/No-Go。
 
 ## 恢复命令
 

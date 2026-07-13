@@ -2676,3 +2676,26 @@
 
 **记录**
 - `gemini_doc/change_2026-07-14_pr12l_stop_tir_optimization.md`
+
+---
+
+## 2026-07-14：PR-12M compile-aware 多预算 Planner
+
+**主要改动**
+- 新增 capability→budget→risk→amortized latency Planner，输入 expected reuse 与 memory/disk
+  cache probability；
+- 新增 v3 split/model 无泄漏冻结、calibration/final runner、replay、CSV/figure/manifest；
+- baseline runner 可显式读取 calibration 或 final-heldout，合同不变。
+
+**结果与判定**
+- calibration/final candidate 各 25/25 correct，冻结/回放 model SHA 一致；
+- 75 decisions，72/72 feasible opportunities 选到可行 backend，0 unsafe；
+- feasible median/p90/max regret 1.000×/1.000×/1.016×；
+- eager/chunked/structured/fused 均被选择，fused 从 cold/mixed 各 1 次增至 warm-Q1024 11 次；
+- 3 个 16 MiB capacity failure 单列；PR-12M validated-reduced PASS，PR-12 overall 仍
+  IN PROGRESS，下一阶段仅 PR-12N closure audit。
+- 收尾门禁：focused 9 passed；全量 340 passed、1 skipped；mypy 7 source files success；
+  pylint 6 core/script files 10.00/10；Black/diff check 通过。
+
+**记录**
+- `gemini_doc/change_2026-07-14_pr12m_compile_aware_planner.md`

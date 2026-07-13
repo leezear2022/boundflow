@@ -203,6 +203,21 @@ PR-12L 止损决策：
 - `C2-L8` validated evidence limit：如果未来获得硬件 counter 或新 workload，必须用新假设/
   新 split 重新开启，不能回写 PR-12K 或消费冻结 final held-out。
 
+PR-12M compile-aware Planner 证据：
+
+- `C2-E17` validated-reduced：capability→budget→risk→amortized latency 决策显式使用 expected
+  reuse、memory/disk cache probability 与 fresh/disk setup；
+- `C2-E18` validated held-out isolation：v3 split 在 final 未消费时冻结，calibration/final 各
+  25/25 correct，fit/replay model SHA 完全一致；
+- `C2-E19` validated multi-regime：75 decisions 中 72 个存在可行 candidate，Planner 72/72
+  选到可行 backend、0 unsafe；feasible median/p90/max regret 1.000×/1.000×/1.016×；
+- `C2-E20` validated nontrivial selection：总选择 eager/chunked/structured/fused 为 47/12/3/13；
+  fused 从 cold/mixed 各 1 次增至 warm Q1024 的 11 次，32 MiB 下四类 backend 都出现；
+- `C2-L9` validated capacity limit：memory-heavy Linear 在 16 MiB 下 3 个 policy 均无实测可行
+  candidate；单独报告，不用不可行区 regret 污染/美化 feasible gate；
+- authoritative 工件链：`pr12m-compile-aware-v3-freeze-20260714/` → calibration → model-freeze
+  → final-heldout → `pr12m-compile-aware-v3-replay-v2-20260714/` → report。
+
 该段 PR-11 early evidence 当时为专项 21 passed、全量 200 passed/1 skipped；其“Global 与
 Memory-Threshold 决策相同”的历史限制已由后续 PR-11E 和 PR-12G 证据分别补充，不能再读作
 当前全量状态。PR-12G 收尾全量为 318 passed、1 skipped。

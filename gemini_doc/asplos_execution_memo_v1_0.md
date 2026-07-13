@@ -219,6 +219,13 @@ PR-12L 已将该结论冻结为唯一分支 `E_STOP_OPTIMIZING_TIR`，且没有 
 不进入本次 closure；它们若未来重启，必须使用新假设和新 split。PR-12M 只能推进
 capability→budget→risk→amortized latency Planner，并一次性消费全新 final held-out。
 
+PR-12M 已完成上述 Planner 与全新 v3 held-out。calibration/final candidate 均 25/25 correct，
+fit 前 manifest 明确 final 未消费且 fit/replay model SHA 一致。16/32/64/128 MiB/unbounded ×
+Q1/Q32/Q1024 共 75 decisions；72 个存在实测可行 candidate 的机会全部选到可行 backend，
+0 unsafe，feasible median/p90/max regret 为 1.000×/1.000×/1.016×。计划随 reuse/budget 在
+eager/chunked/structured/fused 间变化；3 个 16 MiB capacity failure 单列。下一唯一阶段为
+PR-12N closure audit，仍禁止启动 PR-13。
+
 ## 7. 投稿门禁
 
 - **7 月 26 日**：PR-10 与真实 materialization profile；

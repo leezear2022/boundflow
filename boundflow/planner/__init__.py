@@ -70,6 +70,10 @@ from .execution_candidate import (
     fused_tir_conv_v1_capability,
 )
 from .fused_crown_backend import (
+    CompileAwareBackendDecision,
+    CompileAwareBackendObservation,
+    CompileAwareFusedCrownPlanner,
+    CompileAwareQueryPolicy,
     FusedCrownBackendDecision,
     FusedCrownBackendObservation,
     FusedCrownBackendPlanner,
@@ -78,6 +82,10 @@ from .fused_crown_backend import (
 )
 
 __all__ = [
+    "CompileAwareBackendDecision",
+    "CompileAwareBackendObservation",
+    "CompileAwareFusedCrownPlanner",
+    "CompileAwareQueryPolicy",
     "BoundMethod",
     "BACKEND_CANDIDATE_SCHEMA_VERSION",
     "BACKEND_PROFILE_SCHEMA_VERSION",
