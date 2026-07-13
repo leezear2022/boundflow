@@ -4,7 +4,7 @@ import os
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass
-from typing import Any, Dict, Iterator, List, Literal, Optional, Tuple
+from typing import Any, Dict, Iterator, List, Literal, Optional, Sequence, Tuple
 
 import torch
 
@@ -22,6 +22,12 @@ from ..planner.materialization import (
 )
 from ..planner.materialization_placement import MaterializationPlacementPlan
 from .dag_utils import normalize_concat_axis, validate_concat_tensor_shapes, validate_concat_value_shapes
+from .fused_crown import (
+    FusedCrownExecutionContext,
+    FusedCrownExecutionStep,
+    FusedCrownExecutor,
+    FusedReluAffineRequest,
+)
 from .linear_operator import DenseLinearOperator, LinearOperator, SignSplitLinearOperator
 from .materialization import materialize_linear_operator
 from .perturbation import InputPerturbationState
@@ -1268,6 +1274,114 @@ def _backprop_relu_step(
     )
 
 
+def _execute_fused_relu_affine_step(  # pylint: disable=too-many-arguments,too-many-locals
+    state: AffineBackwardState,
+    *,
+    affine_op: Any,
+    pre: IntervalState,
+    input_shape: Tuple[int, ...],
+    output_shape: Tuple[int, ...],
+    weight_raw: Any,
+    bias_raw: Any,
+    executor: FusedCrownExecutor,
+    context: FusedCrownExecutionContext,
+    device: torch.device,
+    dtype: torch.dtype,
+    caller: str,
+) -> Optional[AffineBackwardState]:
+    """Execute one planned dense-boundary region or request deterministic fallback."""
+    if (
+        not context.plain_crown
+        or context.requires_grad
+        or context.alpha_enabled
+        or context.beta_enabled
+        or context.split_state_present
+    ):
+        return None
+
+    A_u = materialize_linear_operator(
+        state.A_u,
+        reason="fused_region_dense_boundary",
+        operator_site=f"{affine_op.outputs[0]}:upper:fused",
+        source_value=affine_op.outputs[0],
+        source_primal_op=affine_op.op_type,
+        persistent_or_ephemeral="ephemeral",
+        logical_lifetime_begin="fused_region",
+        logical_lifetime_end="fused_region:return",
+        beta_related=False,
+    ).contiguous()
+    A_l = materialize_linear_operator(
+        state.A_l,
+        reason="fused_region_dense_boundary",
+        operator_site=f"{affine_op.outputs[0]}:lower:fused",
+        source_value=affine_op.outputs[0],
+        source_primal_op=affine_op.op_type,
+        persistent_or_ephemeral="ephemeral",
+        logical_lifetime_begin="fused_region",
+        logical_lifetime_end="fused_region:return",
+        beta_related=False,
+    ).contiguous()
+    relaxation = _relu_backward_relaxation(
+        pre=pre,
+        x_name=affine_op.outputs[0],
+        relu_alpha=None,
+        device=device,
+        dtype=dtype,
+        caller=caller,
+    )
+    attrs: Dict[str, object] = dict(affine_op.attrs)
+    weight: torch.Tensor
+    bias: Optional[torch.Tensor]
+    if affine_op.op_type == "linear":
+        weight, bias = _normalize_linear_inputs(
+            weight_raw, bias_raw, device=device, dtype=dtype, caller=caller
+        )
+    else:
+        weight, bias, stride, padding, dilation, groups = _normalize_conv2d_inputs(
+            weight_raw,
+            bias_raw,
+            attrs=dict(affine_op.attrs),
+            device=device,
+            dtype=dtype,
+            caller=caller,
+        )
+        attrs.update(stride=stride, padding=padding, dilation=dilation, groups=groups)
+        attrs["output_padding"] = tuple(
+            int(input_shape[axis + 1])
+            - (
+                (int(output_shape[axis + 1]) - 1) * int(stride[axis])
+                - 2 * int(padding[axis])
+                + int(dilation[axis]) * (int(weight.shape[axis + 2]) - 1)
+                + 1
+            )
+            for axis in range(2)
+        )
+    request = FusedReluAffineRequest(
+        kind=affine_op.op_type,
+        A_u=A_u,
+        A_l=A_l,
+        alpha_u=relaxation.alpha_u.contiguous(),
+        alpha_l=relaxation.alpha_l.contiguous(),
+        beta_u=relaxation.beta_u.contiguous(),
+        beta_l=relaxation.beta_l.contiguous(),
+        weight=weight.contiguous(),
+        bias=None if bias is None else bias.contiguous(),
+        input_shape=input_shape,
+        output_shape=output_shape,
+        attrs=attrs,
+    )
+    if not executor.supports(request, context):
+        return None
+    stream = torch.cuda.current_stream(device) if device.type == "cuda" else None
+    result = executor.run(request, stream=stream)
+    return AffineBackwardState(
+        A_u=DenseLinearOperator(result.A_prev_u, input_shape=input_shape),
+        A_l=DenseLinearOperator(result.A_prev_l, input_shape=input_shape),
+        b_u=state.b_u + result.bias_delta_u,
+        b_l=state.b_l + result.bias_delta_l,
+    )
+
+
 def _run_crown_backward_from_trace(
     module: BFTaskModule,
     input_spec: InputSpec,
@@ -1279,6 +1393,9 @@ def _run_crown_backward_from_trace(
     relu_alpha: Optional[Dict[str, torch.Tensor]],
     relu_pre_add_coeff_u: Optional[Dict[str, torch.Tensor]],
     relu_pre_add_coeff_l: Optional[Dict[str, torch.Tensor]],
+    fused_crown_executor: Optional[FusedCrownExecutor],
+    fused_crown_steps: Sequence[FusedCrownExecutionStep],
+    fused_crown_context: FusedCrownExecutionContext,
     caller: str,
 ) -> IntervalState:
     task = module.get_entry_task()
@@ -1320,7 +1437,12 @@ def _run_crown_backward_from_trace(
     adjoints: Dict[str, AffineBackwardState] = {resolved_output: init_state}
     dynamic_names = _dynamic_value_names(input_spec=input_spec, interval_env=interval_env)
 
-    for op in reversed(task.ops):
+    fused_by_relu = {step.relu_op_index: step for step in fused_crown_steps}
+    consumed_affine_indices: set[int] = set()
+    for op_index in range(len(task.ops) - 1, -1, -1):
+        if op_index in consumed_affine_indices:
+            continue
+        op = task.ops[op_index]
         if len(op.outputs) != 1:
             raise NotImplementedError(f"{caller} expects single-output ops, got outputs={op.outputs}")
         out_name = op.outputs[0]
@@ -1366,6 +1488,38 @@ def _run_crown_backward_from_trace(
             x_name = op.inputs[0]
             if x_name not in relu_pre:
                 raise KeyError(f"missing relu pre-activation bounds for value: {x_name}")
+            step = fused_by_relu.get(op_index)
+            if fused_crown_executor is not None and step is not None:
+                if step.affine_op_index != op_index - 1:
+                    raise ValueError("fused CROWN v1 requires adjacent Affine->ReLU ops")
+                affine_op = task.ops[step.affine_op_index]
+                if tuple(step.consumed_outputs) != (out_name, x_name):
+                    raise ValueError("fused CROWN execution step no longer matches the task graph")
+                affine_input = affine_op.inputs[0]
+                fused = _execute_fused_relu_affine_step(
+                    state,
+                    affine_op=affine_op,
+                    pre=relu_pre[x_name],
+                    input_shape=_value_shape(
+                        input_spec=input_spec, interval_env=interval_env, value_name=affine_input
+                    ),
+                    output_shape=_value_shape(
+                        input_spec=input_spec, interval_env=interval_env, value_name=x_name
+                    ),
+                    weight_raw=_get_tensor(affine_op.inputs[1]),
+                    bias_raw=_get_tensor(affine_op.inputs[2]) if len(affine_op.inputs) == 3 else None,
+                    executor=fused_crown_executor,
+                    context=fused_crown_context,
+                    device=device,
+                    dtype=dtype,
+                    caller=caller,
+                )
+                if fused is not None:
+                    adjoints[affine_input] = _accumulate_backward_state(
+                        adjoints.get(affine_input), fused, input_shape=fused.A_u.input_shape
+                    )
+                    consumed_affine_indices.add(step.affine_op_index)
+                    continue
             contrib = _backprop_relu_step(
                 state,
                 pre=relu_pre[x_name],
@@ -1499,6 +1653,8 @@ def run_crown_ibp_mlp(
     relu_split_state: Optional[Dict[str, torch.Tensor]] = None,
     materialization_plan: Optional[MaterializationPlan] = None,
     materialization_placement_plan: Optional[MaterializationPlacementPlan] = None,
+    fused_crown_executor: Optional[FusedCrownExecutor] = None,
+    fused_crown_steps: Sequence[FusedCrownExecutionStep] = (),
 ) -> IntervalState:
     """
     Minimal CROWN-IBP for a single-task general DAG subset.
@@ -1530,6 +1686,12 @@ def run_crown_ibp_mlp(
         output_value = task.output_values[0]
 
     interval_env, relu_pre = _forward_ibp_trace_mlp(module, input_spec, relu_split_state=relu_split_state)
+    fused_context = FusedCrownExecutionContext(
+        requires_grad=input_spec.center.requires_grad,
+        alpha_enabled=relu_alpha is not None,
+        beta_enabled=relu_pre_add_coeff_u is not None or relu_pre_add_coeff_l is not None,
+        split_state_present=relu_split_state is not None,
+    )
     with _apply_execution_materialization(materialization_plan, materialization_placement_plan):
         return _run_crown_backward_from_trace(
             module,
@@ -1541,6 +1703,9 @@ def run_crown_ibp_mlp(
             relu_alpha=relu_alpha,
             relu_pre_add_coeff_u=relu_pre_add_coeff_u,
             relu_pre_add_coeff_l=relu_pre_add_coeff_l,
+            fused_crown_executor=fused_crown_executor,
+            fused_crown_steps=fused_crown_steps,
+            fused_crown_context=fused_context,
             caller="run_crown_ibp_mlp",
         )
 
@@ -1558,6 +1723,9 @@ def run_crown_ibp_mlp_from_forward_trace(
     relu_pre_add_coeff_l: Optional[Dict[str, torch.Tensor]] = None,
     materialization_plan: Optional[MaterializationPlan] = None,
     materialization_placement_plan: Optional[MaterializationPlacementPlan] = None,
+    fused_crown_executor: Optional[FusedCrownExecutor] = None,
+    fused_crown_steps: Sequence[FusedCrownExecutionStep] = (),
+    fused_crown_context: Optional[FusedCrownExecutionContext] = None,
 ) -> IntervalState:
     """
     Backward-only CROWN-IBP given a precomputed forward trace (interval_env + relu_pre).
@@ -1584,6 +1752,17 @@ def run_crown_ibp_mlp_from_forward_trace(
             relu_alpha=relu_alpha,
             relu_pre_add_coeff_u=relu_pre_add_coeff_u,
             relu_pre_add_coeff_l=relu_pre_add_coeff_l,
+            fused_crown_executor=fused_crown_executor,
+            fused_crown_steps=fused_crown_steps,
+            fused_crown_context=(
+                fused_crown_context
+                if fused_crown_context is not None
+                else FusedCrownExecutionContext(
+                    requires_grad=input_spec.center.requires_grad,
+                    alpha_enabled=relu_alpha is not None,
+                    beta_enabled=relu_pre_add_coeff_u is not None or relu_pre_add_coeff_l is not None,
+                )
+            ),
             caller="run_crown_ibp_mlp_from_forward_trace",
         )
 

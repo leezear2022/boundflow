@@ -1,0 +1,18 @@
+{
+  "schema_version": "boundflow.pr12-kernel-foundation/v1",
+  "git_commit": "6e089172e621be5a7d073995ed23d492d5672802",
+  "annotated_tag": "pr12-kernel-foundation",
+  "status": {
+    "backend_candidate_schema": "pass",
+    "fused_relu_linear_foundation": "pass",
+    "fused_relu_conv2d_foundation": "pass",
+    "end_to_end_crown_integration": "next",
+    "formal_performance_pareto": "pending",
+    "planner_heldout_validation": "pending"
+  },
+  "final_heldout_consumed": false,
+  "source_artifacts": {
+    "codegen": "artifacts/phase7a-pr12/codegen-sanity-v1-20260713",
+    "latency_sanity": "artifacts/phase7a-pr12/fused-sanity-v1-20260713"
+  }
+}

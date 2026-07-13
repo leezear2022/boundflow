@@ -106,6 +106,9 @@
   grad/α/β/split/dtype/device/dynamic shape 和不支持的 Conv 属性显式拒绝；
 - `C2-E5` partial sanity：4 个 calibration 点中 3 个快于 PyTorch dense eager，stride-2 medium
   为 1.717× slowdown；尚无正式 latency-memory Pareto、end-to-end 或 final held-out；
+- `C2-E6` validated integration foundation：显式 Affine→ReLU execution step、后端无关 executor、
+  DLPack zero-copy storage alias，以及 chain CNN/residual/stride-2 mini-ResNet-like 最终 bound
+  对齐；尚不等价于正式性能验证；
 - `C2-L2` validated current limitation：只支持 static FP32 CUDA plain CROWN、Linear 与
   groups=1/dilation=1 的有限 Conv 子集；
 - `C3-M1` pending：compile amortization 与 repeated-query stream 尚未测量。

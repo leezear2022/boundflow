@@ -1,0 +1,11 @@
+{
+  "schema_version": "boundflow.pr12-codegen-profile-summary/v1",
+  "record_count": 3,
+  "families": ["linear", "conv2d_stride1", "conv2d_stride2"],
+  "kernels_per_candidate": 4,
+  "explicit_scaled_a_or_im2col_workspace": false,
+  "ptx_local_memory_detected": false,
+  "ptxas_spill_detected": false,
+  "max_registers_per_thread": [40, 40, 48],
+  "raw_sha256": "cd0c88a7d2ba9f63c6e4cfad5c363174c91aed1f9713f5ebb4445526add4f4d9"
+}

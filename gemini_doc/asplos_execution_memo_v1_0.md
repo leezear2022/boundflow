@@ -160,8 +160,13 @@ PR-12 kernel foundation 已进一步覆盖 Linear 与 Conv 1×1/3×3、stride 1/
 DSCOHW/OIHW/DSCIHW layout、原始 input-shape/output-padding contract 与 output-centric gather；
 CUDA matrix 四项输出对齐，三个代表 codegen 点为 0 stack/spill/local-memory 指令。calibration
 sanity 中前三点快于 PyTorch dense eager，但 stride-2 medium 仍慢 1.717×。因此当前状态只能是
-kernel-level correctness/mechanism PASS；end-to-end CROWN、正式 Pareto、final held-out 与
-compile amortization 仍 pending，PR-13 继续阻塞。
+kernel-level correctness/mechanism PASS。
+
+PR-12D 已将 dense-boundary fused region 接入真实 plain-CROWN backward：显式 execution step
+消费 Affine→ReLU，后端无关 executor 可在 Torch dense reference 与 TVM fused TIR 间切换；
+Linear chain、stride-1/2 chain CNN、residual 与 stride-2 downsample mini-ResNet-like block 的
+最终 bounds 对齐，DLPack storage alias 成立，全量为 284 passed、1 skipped。正式 Pareto、
+Planner auto-selection、final held-out 与 compile amortization 仍 pending，PR-13 继续阻塞。
 
 ## 7. 投稿门禁
 
