@@ -71,6 +71,9 @@
 - `gemini_doc/change_2026-07-13_pr12d_correctness_closure.md`：fanout soundness、完整 step contract、pre-materialization fallback 与 TVM-FFI custom-stream closure
 - `gemini_doc/change_2026-07-13_pr12ef_runtime_pareto_heldout.md`：正式 runtime/memory Pareto、calibration-only Planner、frozen held-out 与性能 No-Go
 - `gemini_doc/change_2026-07-13_pr12g_multibackend_planner.md`：chunked-r512 候选、全新 held-out-v2、多后端 Planner 与 canonical 工件
+- `gemini_doc/pr12_mid_long_term_completion_plan.md`：PR-12H–N baseline、摊销、profile、Planner 与 closure 执行路线
+- `gemini_doc/pr12_execution_status.md`：PR-12 跨会话唯一恢复入口与当前门禁
+- `gemini_doc/change_2026-07-14_pr12h_benchmark_contract.md`：三层 benchmark contract、历史证据披露与 PR-12G freeze
 - `gemini_doc/artifact_claims_phase5d.md`：Phase 5D artifact claims（证据链/口径映射）
 - `gemini_doc/artifact_appendix_phase5d.md`：Phase 5D artifact appendix（复现说明）
 - `gemini_doc/project_evolution_overview.md`：研发脉络总览（目标、阶段推进、代码落点、未来路线）

@@ -2,7 +2,7 @@
 """Run a small calibration-only latency sanity for PR-12 fused tasks."""
 
 # mypy: disable-error-code=import-untyped
-# pylint: disable=too-many-locals,too-many-statements,duplicate-code,not-callable
+# pylint: disable=too-many-locals,too-many-statements,duplicate-code,not-callable,import-error
 
 from __future__ import annotations
 
@@ -27,8 +27,22 @@ from boundflow.backends.tvm.fused_crown_linear import (
     FusedCrownLinearKey,
     build_fused_crown_linear_module,
 )
+from boundflow.benchmarks.contracts import (
+    BENCHMARK_CONTRACT_SCHEMA_VERSION,
+    BenchmarkContractLevel,
+)
 
 SANITY_SCHEMA = "boundflow.pr12-fused-sanity/v1"
+LEGACY_KERNEL_DISCLOSURE = {
+    "schema_version": BENCHMARK_CONTRACT_SCHEMA_VERSION,
+    "contract_id": "pr12-legacy-kernel-sanity-v1",
+    "intended_level": BenchmarkContractLevel.KERNEL.value,
+    "compliant": False,
+    "reason": (
+        "TVM outputs are preallocated while the PyTorch dense reference allocates "
+        "intermediates; this is calibration, not a fair kernel-contract baseline"
+    ),
+}
 
 
 def _sha256(path: Path) -> str:
@@ -311,7 +325,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if not torch.cuda.is_available():
         raise RuntimeError("CUDA is required")
     args.out_dir.mkdir(parents=True, exist_ok=False)
-    cases = [
+    measured_cases = [
         _linear_case(
             FusedCrownLinearKey(2, 8, 16, 12), warmup=args.warmup, repeats=args.repeats
         ),
@@ -329,6 +343,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             repeats=args.repeats,
         ),
     ]
+    cases = [
+        {**case, "benchmark_contract": LEGACY_KERNEL_DISCLOSURE}
+        for case in measured_cases
+    ]
     raw_path = args.out_dir / "raw.jsonl"
     raw_path.write_text(
         "".join(json.dumps(case, sort_keys=True) + "\n" for case in cases),
@@ -336,6 +354,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     manifest = {
         "schema_version": "boundflow.pr12-fused-sanity-manifest/v1",
+        "benchmark_contract": LEGACY_KERNEL_DISCLOSURE,
         "final_heldout_consumed": False,
         "warmup": args.warmup,
         "repeats": args.repeats,

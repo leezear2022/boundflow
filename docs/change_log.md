@@ -2566,3 +2566,23 @@
 
 **记录**
 - `gemini_doc/change_2026-07-13_pr12g_multibackend_planner.md`
+
+---
+
+## 2026-07-14：PR-12H benchmark contract freeze
+
+**主要改动**
+- 冻结 `pr12g-validated-reduced` tag；
+- 新增 kernel、region-runtime、end-to-end final-bound 三层机器可读 contract；
+- 历史 fused-sanity 与 runtime-Pareto 明确声明 `compliant=false` 及缺失 inclusion；
+- 新增 PR-12H–N 中长期计划和跨会话执行状态。
+
+**边界**
+- 不修改 canonical3 数值、不增加性能 claim；
+- 下一阶段固定为 structured eager/TVM-unfused baseline；PR-13 继续 blocked。
+- 收尾门禁：focused 7 passed；全量 321 passed、1 skipped；mypy 5 files success；pylint
+  3 files 10.00/10；Black/diff check 通过。
+
+**记录**
+- `docs/pr12_benchmark_contract.md`
+- `gemini_doc/change_2026-07-14_pr12h_benchmark_contract.md`

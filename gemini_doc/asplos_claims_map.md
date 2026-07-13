@@ -147,6 +147,17 @@ PR-12G 多后端证据更新：
   `pr12g-multibackend-v2-planner-replay-canonical3-20260713/` →
   `pr12g-multibackend-v2-report-canonical3-20260713/`。
 
+PR-12H benchmark contract freeze：
+
+- `C2-M2` validated evidence boundary：机器可读合同区分 preallocated kernel、region-runtime 与
+  complete final-bound 三层 inclusion/allocation/synchronization；
+- `C2-L5` validated limitation：PR-12 fused-sanity 的 PyTorch/TVM allocation contract 不同；
+  PR-12E/G candidate timing 又把 region matching/Planner 放在 timed call 外，二者均标记
+  `compliant=false`，历史数据不得冒充正式三层合同；
+- freeze tag：`pr12g-validated-reduced` → `44f87ae`；规范见
+  `docs/pr12_benchmark_contract.md`，持续状态见 `gemini_doc/pr12_execution_status.md`；
+- `C2-E13` pending：structured eager/TVM-unfused 的新合同正式 baseline 留待 PR-12I。
+
 该段 PR-11 early evidence 当时为专项 21 passed、全量 200 passed/1 skipped；其“Global 与
 Memory-Threshold 决策相同”的历史限制已由后续 PR-11E 和 PR-12G 证据分别补充，不能再读作
 当前全量状态。PR-12G 收尾全量为 318 passed、1 skipped。

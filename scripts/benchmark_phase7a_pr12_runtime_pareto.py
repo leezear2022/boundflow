@@ -23,6 +23,10 @@ from typing import Any, Callable, Iterable, Optional, Sequence
 
 import torch
 
+from boundflow.benchmarks.contracts import (
+    BENCHMARK_CONTRACT_SCHEMA_VERSION,
+    BenchmarkContractLevel,
+)
 from boundflow.backends.tvm.fused_crown_conv2d import (
     build_fused_crown_conv2d_module,
 )
@@ -53,6 +57,24 @@ DEFAULT_BACKENDS = (
     BackendVariant.PYTORCH_EAGER,
     BackendVariant.TVM_FUSED_TIR,
 )
+
+# Historical PR-12E/G candidate rows execute a complete final-bound query, but
+# region matching and Planner selection happen outside the timed call.  Keep the
+# evidence, while preventing it from being mistaken for the PR-12H E2E contract.
+LEGACY_CANDIDATE_DISCLOSURE: dict[str, Any] = {
+    "schema_version": BENCHMARK_CONTRACT_SCHEMA_VERSION,
+    "contract_id": "pr12-legacy-candidate-final-bound-v1",
+    "intended_level": BenchmarkContractLevel.END_TO_END_FINAL_BOUND.value,
+    "compliant": False,
+    "included": [
+        "required_output_allocation",
+        "backend_dispatch",
+        "interop_and_stream_management",
+        "concretization",
+    ],
+    "excluded_from_timed_region": ["compile", "region_matching", "planner"],
+    "reason": "candidate backend is pinned and execution steps are built before timing",
+}
 
 
 def _frozen_candidate_backends(split: dict[str, Any]) -> tuple[str, ...]:
@@ -646,6 +668,7 @@ def _benchmark_candidate(  # pylint: disable=too-many-arguments
     correct = finite and ordered and allclose
     return {
         "schema_version": SCHEMA_VERSION,
+        "benchmark_contract": LEGACY_CANDIDATE_DISCLOSURE,
         "status": "ok" if correct else "fail",
         "error": None if correct else {"error_type": "CorrectnessFailure"},
         "split": {
@@ -1002,6 +1025,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
     manifest = {
         "schema_version": MANIFEST_SCHEMA_VERSION,
+        "benchmark_contract": LEGACY_CANDIDATE_DISCLOSURE,
         "split": args.split,
         "split_id": split_id,
         "planner_version": args.planner_version,

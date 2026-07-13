@@ -185,6 +185,12 @@ Linear 同时满足 64 MiB 预算并比 eager 快 1.481×。这使 reduced 多�
 但不能替代 structured-eager/TVM-unfused baseline、真实 profiler 与 2× headline 门禁；PR-12
 overall 和 PR-13 状态不变。
 
+PR-12H 已切换到证据闭环阶段：`44f87ae` 以本地 tag `pr12g-validated-reduced` 冻结；kernel、
+region-runtime、end-to-end final-bound 三层 benchmark contract 有机器可读 schema。审计确认旧
+fused-sanity 的 allocation contract 不公平，旧 PR-12E/G candidate timing 又不包含 timed
+region matching/Planner，故统一保留为 `compliant=false` historical evidence，不重写旧数值。
+下一唯一工程阶段是 PR-12I structured eager/TVM-unfused 公平 baseline，仍禁止启动 PR-13。
+
 ## 7. 投稿门禁
 
 - **7 月 26 日**：PR-10 与真实 materialization profile；
