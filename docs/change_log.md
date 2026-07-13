@@ -2634,3 +2634,27 @@
 
 **记录**
 - `gemini_doc/change_2026-07-14_pr12j_compile_amortization.md`
+
+---
+
+## 2026-07-14：PR-12K CUPTI activity profile
+
+**主要改动**
+- 新增 6 workload×5 backend 的 complete final-bound profiler runner、raw Chrome trace 与
+  JSONL→CSV/图/summary/manifest 后处理；
+- 排除 profiler inclusive annotation range，保留真实 kernel activity；top-kernel raw count
+  使用整数；
+- 审计 Nsight Compute 2026.1.1、CUPTI 与 driver counter 权限，不修改系统配置。
+
+**结果与判定**
+- 30/30 rows correct；fusion 相对 TVM-unfused 最大整体 launch 降幅仅 1.96%；
+- 按 5% device-time 阈值为 3/6 退化、1/6 改善、2/6 中性；
+- ncu 实测 `ERR_NVGPUCTRPERM`，因此禁止 bandwidth/cache、occupancy、stall 等硬件 counter
+  claim；
+- PR-12L 唯一选择 `E_STOP_OPTIMIZING_TIR`；保留 fused candidate，下一阶段转 compile-aware
+  Planner；PR-12 overall 仍 IN PROGRESS，PR-13 blocked。
+- 收尾门禁：focused 2 passed；全量 332 passed、1 skipped；mypy 2 scripts success；pylint
+  2 scripts 10.00/10；Black/diff check 通过。
+
+**记录**
+- `gemini_doc/change_2026-07-14_pr12k_cupti_profile.md`

@@ -10,7 +10,8 @@ PR-12G commit:              44f87ae
 PR-12G tag:                 pr12g-validated-reduced (local annotated tag)
 PR-12H commit:              abc2e2a
 PR-12I commit:              9627a3c
-current phase:              PR-12J complete；next PR-12K profiler
+PR-12J commit:              cd7bc6b
+current phase:              PR-12K complete；next PR-12L decision freeze
 PR-12 overall:              IN PROGRESS
 PR-13:                      BLOCKED
 ```
@@ -31,6 +32,9 @@ PR-13:                      BLOCKED
 - PR-12J：正式 v4 为 3/3 correct、所有 restart 为真实 disk hit；Linear/Conv 不可摊销；
   mini-ResNet 对 eager 的 fresh/disk-first/process break-even 为 4668/1062/4450，均超过 Q=1024，
   且对 chunked 不可摊销。
+- PR-12K：权威 raw v3/report v4 为 30/30 correct；硬件 counter 因 `ERR_NVGPUCTRPERM` 不可用；
+  fusion 对 TVM-unfused 最大 launch 降幅仅 1.96%，按 5% activity 阈值为 3/6 退化、1/6 改善、
+  2/6 中性；唯一选择分支为 `E_STOP_OPTIMIZING_TIR`。
 
 authoritative PR-12G 工件：
 
@@ -71,10 +75,22 @@ artifacts/phase7a-pr12/pr12g-multibackend-v2-report-canonical3-20260713/
 - [x] PR-12J 收尾：focused/integration 5 passed；全量 330 passed/1 skipped；mypy success；
   pylint 10.00/10；Black/diff check 通过。
 
+## PR-12K 当前工作
+
+- [x] 审计 ncu/CUPTI 版本、路径与权限；
+- [x] 实测 `ERR_NVGPUCTRPERM`，明确禁止硬件 counter claim；
+- [x] 6 workload×5 backend complete final-bound CUPTI activity profile；
+- [x] raw trace→CSV/图/summary/manifest；
+- [x] v1 range double-count、v2 count schema、v3/v4 权威工件完整披露；
+- [x] PR-12L 唯一分支选择为 E：停止继续优化 TIR。
+- [x] PR-12K 收尾：focused 2 passed；全量 332 passed/1 skipped；mypy success；pylint
+  10.00/10；Black/diff check 通过。
+
 ## 下一步
 
-PR-12J 提交后立即进入 PR-12K：先审计 Nsight Compute/CUPTI 权限与版本，再按冻结 workload/
-section 采集 profiler；工具不可用时记录依赖并给出明确降级证据，不先修改 schedule。
+PR-12K 提交后先以 PR-12L 文档提交冻结分支 E，不做 schedule/code 修改；随后进入 PR-12M
+compile-aware Planner，以全新 split 扫描 16/32/64/128 MiB 与 unbounded，禁止复用旧 final
+held-out 调参。
 
 ## 恢复命令
 
@@ -82,8 +98,8 @@ section 采集 profiler；工具不可用时记录依赖并给出明确降级证
 conda activate boundflow
 source env.sh
 git status --short --branch
-pytest -q tests/test_phase7a_pr12j_fused_cache.py \
-  tests/test_phase7a_pr12j_amortization_runner.py
+pytest -q tests/test_phase7a_pr12k_cupti_profiler.py \
+  tests/test_phase7a_pr12k_cupti_postprocess.py
 ```
 
 顶层计划：`gemini_doc/pr12_mid_long_term_completion_plan.md`。合同：

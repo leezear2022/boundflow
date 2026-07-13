@@ -180,6 +180,20 @@ PR-12J compile/cache 证据更新：
 - v1 tuple/list manifest bug 与 v2 warm-path SHA 污染保留；authoritative 工件为
   `pr12j-amortization-v4-20260714/` → `pr12j-amortization-report-v4-20260714/`。
 
+PR-12K profiler 证据更新：
+
+- `C2-E15` validated activity profile：6 workload×5 backend 共 30/30 complete final-bound rows
+  correct；raw Chrome trace、kernel/API activity CSV、图与 SHA manifest 闭合；
+- `C2-E16` validated mechanism boundary：fusion 对 TVM-unfused 每个 eligible region 只减少
+  2 launch，六点最大整体 launch 降幅 1.96%；按 5% CUPTI device-time 阈值为 3/6 退化、
+  1/6 改善、2/6 中性；
+- `C2-L7` validated tooling limitation：Nsight Compute 2026.1.1 实测 `ERR_NVGPUCTRPERM`，
+  禁止 SpeedOfLight、bandwidth/cache、occupancy 和 stall claim；不根据缺失 counter 猜测；
+- `C2-D1` validated decision：PR-12L 唯一分支为 `E_STOP_OPTIMIZING_TIR`；保留 fused 为
+  Planner candidate，但停止无 counter 支撑的孤立 schedule 调优；
+- authoritative 工件：`pr12k-cupti-v3-20260714/` →
+  `pr12k-cupti-report-v4-20260714/`。
+
 该段 PR-11 early evidence 当时为专项 21 passed、全量 200 passed/1 skipped；其“Global 与
 Memory-Threshold 决策相同”的历史限制已由后续 PR-11E 和 PR-12G 证据分别补充，不能再读作
 当前全量状态。PR-12G 收尾全量为 318 passed、1 skipped。

@@ -206,6 +206,14 @@ warm 本身较慢而不可摊销；mini-ResNet 对 eager 的 fresh/disk-first/pr
 验证 bug 和 v2 的 warm-path SHA 污染均保留为失败证据。下一唯一阶段为 PR-12K profiler；不得
 以 module load 仅 0.17–0.60 ms 掩盖 process first query 约 350–419 ms 的事实。
 
+PR-12K 在不改 schedule 的前提下完成 6 workload×5 backend 的 complete final-bound CUPTI
+activity profile，30/30 correctness 通过。Nsight Compute 2026.1.1 实测因
+`RmProfilingAdminOnly=1` 返回 `ERR_NVGPUCTRPERM`，因此只报告 kernel/activity time 与 launch，
+禁止 bandwidth/cache、occupancy、stall 等硬件 counter claim。fusion 对 TVM-unfused 最大整体
+launch 降幅仅 1.96%；按 5% 阈值为 3/6 device-time 退化、1/6 改善、2/6 中性。PR-12L 唯一
+选择分支 E：停止继续手工调孤立 TIR，保留 fused 作为 Planner 候选；下一工程阶段是全新 split、
+多预算和 expected-reuse 驱动的 PR-12M compile-aware Planner。PR-13 继续阻塞。
+
 ## 7. 投稿门禁
 
 - **7 月 26 日**：PR-10 与真实 materialization profile；
