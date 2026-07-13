@@ -11,6 +11,15 @@ from .fused_crown_linear import (
     build_fused_crown_linear_relax_ir_module,
     schedule_fused_crown_linear,
 )
+from .fused_crown_conv2d import (
+    FUSED_CROWN_CONV2D_SCHEMA_VERSION,
+    FusedCrownConv2dSignature,
+    allocated_intermediate_buffers as allocated_conv2d_intermediate_buffers,
+    build_fused_crown_conv2d_module,
+    build_fused_crown_conv2d_primfunc,
+    build_fused_crown_conv2d_relax_ir_module,
+    schedule_fused_crown_conv2d,
+)
 
 __all__ = [
     "IntervalLinearKey",
@@ -26,4 +35,11 @@ __all__ = [
     "build_fused_crown_linear_primfunc",
     "build_fused_crown_linear_relax_ir_module",
     "schedule_fused_crown_linear",
+    "FUSED_CROWN_CONV2D_SCHEMA_VERSION",
+    "FusedCrownConv2dSignature",
+    "allocated_conv2d_intermediate_buffers",
+    "build_fused_crown_conv2d_module",
+    "build_fused_crown_conv2d_primfunc",
+    "build_fused_crown_conv2d_relax_ir_module",
+    "schedule_fused_crown_conv2d",
 ]
