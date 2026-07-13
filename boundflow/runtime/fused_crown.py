@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from contextlib import nullcontext
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Literal, Mapping, Optional, Protocol, Sequence, Tuple, cast
@@ -82,6 +83,15 @@ class FusedCrownExecutionStep:  # pylint: disable=too-many-instance-attributes
         InternalMaterializationPolicy.ELIDE_RELU_SCALED_A
     )
     backend: str = "tvm_fused_tir"
+
+
+@dataclass(frozen=True)
+class FusedCrownRuntimeSelection:
+    """Planner-selected executor and graph-current execution steps."""
+
+    backend: str
+    executor: Optional["FusedCrownExecutor"]
+    steps: Tuple[FusedCrownExecutionStep, ...]
 
 
 class FusedCrownExecutor(Protocol):
@@ -167,8 +177,13 @@ def _consumer_indices(ops: Sequence[Any]) -> Mapping[str, Tuple[int, ...]]:
 
 def plan_fused_crown_regions(
     ops: Sequence[Any],
+    *,
+    backend: str = "tvm_fused_tir",
 ) -> Tuple[FusedCrownExecutionStep, ...]:
     """Match forward Affine->ReLU pairs once and emit an explicit schedule."""
+
+    if backend not in {"tvm_fused_tir", "pytorch_chunked"}:
+        raise ValueError(f"unsupported fused CROWN backend: {backend}")
 
     steps: list[FusedCrownExecutionStep] = []
     consumers = _consumer_indices(ops)
@@ -198,6 +213,7 @@ def plan_fused_crown_regions(
                 affine_op_index=affine_index,
                 consumed_outputs=(relu_op.outputs[0], affine_op.outputs[0]),
                 graph_fingerprint=fingerprint,
+                backend=backend,
             )
         )
     return tuple(steps)
@@ -206,7 +222,7 @@ def plan_fused_crown_regions(
 def validate_fused_crown_execution_steps(  # pylint: disable=too-many-branches
     ops: Sequence[Any], steps: Sequence[FusedCrownExecutionStep]
 ) -> Tuple[FusedCrownExecutionStep, ...]:
-    """Keep only graph-current, single-consumer, v1 TVM execution steps."""
+    """Keep only graph-current, single-consumer supported execution steps."""
 
     fingerprint = fused_crown_graph_fingerprint(ops)
     consumers = _consumer_indices(ops)
@@ -248,7 +264,7 @@ def validate_fused_crown_execution_steps(  # pylint: disable=too-many-branches
             != InternalMaterializationPolicy.ELIDE_RELU_SCALED_A
         ):
             continue
-        if step.backend != "tvm_fused_tir":
+        if step.backend not in {"tvm_fused_tir", "pytorch_chunked"}:
             continue
         valid.append(step)
         seen_relu.add(step.relu_op_index)
@@ -378,6 +394,163 @@ class TorchDenseFusedCrownReference:
             delta_u = delta_u + (scaled_u * bias_map).sum(2)
             delta_l = delta_l + (scaled_l * bias_map).sum(2)
         return FusedReluAffineResult(previous_u, previous_l, delta_u, delta_l)
+
+
+class TorchChunkedFusedCrownExecutor(TorchDenseFusedCrownReference):
+    """Budget-oriented eager executor that limits scaled-A query rows.
+
+    The executor keeps the dense region boundary, but never constructs the full
+    ReLU-scaled coefficient tensors.  It flattens domain/spec into query rows,
+    materializes at most ``chunk_rows`` scaled rows, and delegates contractions
+    to PyTorch's cuBLAS/cuDNN paths.
+    """
+
+    def __init__(self, *, chunk_rows: int = 128) -> None:
+        if chunk_rows <= 0:
+            raise ValueError("chunk_rows must be positive")
+        self.chunk_rows = int(chunk_rows)
+
+    def supports_descriptor(
+        self,
+        descriptor: FusedReluAffineDescriptor,
+        context: FusedCrownExecutionContext,
+    ) -> bool:
+        """Apply the same plain/static CUDA contract before A materialization."""
+
+        tensors = [descriptor.weight]
+        if descriptor.bias is not None:
+            tensors.append(descriptor.bias)
+        return bool(
+            context.plain_crown
+            and not context.requires_grad
+            and not context.alpha_enabled
+            and not context.beta_enabled
+            and not context.split_state_present
+            and descriptor.kind in {"linear", "conv2d"}
+            and descriptor.device.type == "cuda"
+            and descriptor.dtype == torch.float32
+            and all(t.device == descriptor.device for t in tensors)
+            and all(t.dtype == descriptor.dtype for t in tensors)
+            and all(t.is_contiguous() for t in tensors)
+            and all(not t.requires_grad for t in tensors)
+        )
+
+    def supports(
+        self,
+        request: FusedReluAffineRequest,
+        context: FusedCrownExecutionContext,
+    ) -> bool:
+        """Accept strict plain-CROWN CUDA requests handled by eager operators."""
+
+        return _plain_static_cuda_fp32(request, context)
+
+    @staticmethod
+    def _row_domains(
+        start: int, stop: int, *, spec: int, device: torch.device
+    ) -> torch.Tensor:
+        return torch.arange(start, stop, device=device, dtype=torch.int64).div(
+            spec, rounding_mode="floor"
+        )
+
+    def run(  # pylint: disable=too-many-locals,too-many-statements
+        self,
+        request: FusedReluAffineRequest,
+        *,
+        stream: Optional[torch.cuda.Stream] = None,
+    ) -> FusedReluAffineResult:
+        """Execute row-chunked sign scaling, contraction, and bias reduction."""
+
+        domain, spec = int(request.A_u.shape[0]), int(request.A_u.shape[1])
+        rows = domain * spec
+        A_u = request.A_u.reshape(rows, -1)
+        A_l = request.A_l.reshape(rows, -1)
+        previous_shape = (domain, spec, *request.input_shape)
+        previous_u = torch.empty(
+            previous_shape, device=request.A_u.device, dtype=request.A_u.dtype
+        )
+        previous_l = torch.empty_like(previous_u)
+        previous_u_rows = previous_u.reshape(rows, -1)
+        previous_l_rows = previous_l.reshape(rows, -1)
+        bias_delta_u = torch.empty(
+            (domain, spec), device=request.A_u.device, dtype=request.A_u.dtype
+        )
+        bias_delta_l = torch.empty_like(bias_delta_u)
+        bias_u_rows = bias_delta_u.reshape(rows)
+        bias_l_rows = bias_delta_l.reshape(rows)
+        stream_context = (
+            torch.cuda.stream(stream)
+            if stream is not None and request.A_u.device.type == "cuda"
+            else nullcontext()
+        )
+        with stream_context:
+            for start in range(0, rows, self.chunk_rows):
+                stop = min(rows, start + self.chunk_rows)
+                row_domains = self._row_domains(
+                    start, stop, spec=spec, device=request.A_u.device
+                )
+                coeff_u = A_u[start:stop]
+                coeff_l = A_l[start:stop]
+                alpha_u = request.alpha_u.index_select(0, row_domains)
+                alpha_l = request.alpha_l.index_select(0, row_domains)
+                beta_u = request.beta_u.index_select(0, row_domains)
+                beta_l = request.beta_l.index_select(0, row_domains)
+                scaled_u = torch.where(
+                    coeff_u >= 0, coeff_u * alpha_u, coeff_u * alpha_l
+                )
+                scaled_l = torch.where(
+                    coeff_l >= 0, coeff_l * alpha_l, coeff_l * alpha_u
+                )
+                delta_u = torch.where(
+                    coeff_u >= 0, coeff_u * beta_u, coeff_u * beta_l
+                ).sum(1)
+                delta_l = torch.where(
+                    coeff_l >= 0, coeff_l * beta_l, coeff_l * beta_u
+                ).sum(1)
+                if request.kind == "linear":
+                    previous_u_rows[start:stop].copy_(scaled_u @ request.weight)
+                    previous_l_rows[start:stop].copy_(scaled_l @ request.weight)
+                    if request.bias is not None:
+                        delta_u = delta_u + (scaled_u * request.bias).sum(1)
+                        delta_l = delta_l + (scaled_l * request.bias).sum(1)
+                else:
+                    stride = _pair_attr(request.attrs, "stride", (1, 1))
+                    padding = _pair_attr(request.attrs, "padding", (0, 0))
+                    dilation = _pair_attr(request.attrs, "dilation", (1, 1))
+                    groups = cast(int, request.attrs.get("groups", 1))
+                    out_pad = _pair_attr(request.attrs, "output_padding", (0, 0))
+                    shaped_u = scaled_u.reshape(stop - start, *request.output_shape)
+                    shaped_l = scaled_l.reshape(stop - start, *request.output_shape)
+                    chunk_u = functional.conv_transpose2d(
+                        shaped_u,
+                        request.weight,
+                        stride=stride,
+                        padding=padding,
+                        output_padding=out_pad,
+                        groups=groups,
+                        dilation=dilation,
+                    )
+                    chunk_l = functional.conv_transpose2d(
+                        shaped_l,
+                        request.weight,
+                        stride=stride,
+                        padding=padding,
+                        output_padding=out_pad,
+                        groups=groups,
+                        dilation=dilation,
+                    )
+                    previous_u_rows[start:stop].copy_(chunk_u.reshape(stop - start, -1))
+                    previous_l_rows[start:stop].copy_(chunk_l.reshape(stop - start, -1))
+                    if request.bias is not None:
+                        bias_map = (
+                            request.bias.view(-1, 1, 1)
+                            .expand(request.output_shape)
+                            .reshape(-1)
+                        )
+                        delta_u = delta_u + (scaled_u * bias_map).sum(1)
+                        delta_l = delta_l + (scaled_l * bias_map).sum(1)
+                bias_u_rows[start:stop].copy_(delta_u)
+                bias_l_rows[start:stop].copy_(delta_l)
+        return FusedReluAffineResult(previous_u, previous_l, bias_delta_u, bias_delta_l)
 
 
 class TVMFusedCrownExecutor:
@@ -556,17 +729,42 @@ class TVMFusedCrownExecutor:
         return FusedReluAffineResult(*outputs)
 
 
+def build_fused_crown_runtime_selection(
+    ops: Sequence[Any], *, backend: str, chunk_rows: int = 512
+) -> FusedCrownRuntimeSelection:
+    """Map a Planner backend decision to an executable, auditable runtime plan."""
+
+    if backend == "pytorch_eager":
+        return FusedCrownRuntimeSelection(backend=backend, executor=None, steps=())
+    if backend == "pytorch_chunked":
+        executor: FusedCrownExecutor = TorchChunkedFusedCrownExecutor(
+            chunk_rows=chunk_rows
+        )
+    elif backend == "tvm_fused_tir":
+        executor = TVMFusedCrownExecutor()
+    else:
+        raise ValueError(f"unsupported fused CROWN runtime backend: {backend}")
+    return FusedCrownRuntimeSelection(
+        backend=backend,
+        executor=executor,
+        steps=plan_fused_crown_regions(ops, backend=backend),
+    )
+
+
 __all__ = [
     "BoundaryRepresentation",
     "FusedCrownExecutionContext",
     "FusedCrownExecutionStep",
+    "FusedCrownRuntimeSelection",
     "FusedCrownExecutor",
     "FusedReluAffineRequest",
     "FusedReluAffineResult",
     "InternalMaterializationPolicy",
     "TVMFusedCrownExecutor",
+    "TorchChunkedFusedCrownExecutor",
     "TorchDenseFusedCrownReference",
     "fused_crown_graph_fingerprint",
+    "build_fused_crown_runtime_selection",
     "plan_fused_crown_regions",
     "validate_fused_crown_execution_steps",
 ]

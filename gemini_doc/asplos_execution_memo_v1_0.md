@@ -176,6 +176,15 @@ default/custom-stream runtime Pareto：calibration 12/12、held-out 24/24 candid
 仅 3/5 选择更快或为预算唯一可行。故证据链 PASS、性能门禁 FAIL、Planner quality 仅
 guarded/partial，PR-12 overall 继续 IN PROGRESS，PR-13 继续阻塞。
 
+PR-12G 随后没有回写 v1 held-out，而是先从 TIR source/schedule 归因 Linear 长 reduction，增加
+`pytorch_chunked_r512` 预算型候选，再冻结全新 multibackend-v2 split。authoritative v2 证据为
+calibration 48/48、held-out 36/36 candidate rows 正确；offline calibration-only Planner 在 5 个
+held-out 上 5/5 预算可行、0 unsafe，exact Oracle 3/5，median/p90 regret 1.000×/1.054×，并分别
+选择 eager/chunked/TIR 1/2/2 次。selected geomean 相对 eager 为 1.081×，memory-sensitive
+Linear 同时满足 64 MiB 预算并比 eager 快 1.481×。这使 reduced 多后端 Planner quality 通过，
+但不能替代 structured-eager/TVM-unfused baseline、真实 profiler 与 2× headline 门禁；PR-12
+overall 和 PR-13 状态不变。
+
 ## 7. 投稿门禁
 
 - **7 月 26 日**：PR-10 与真实 materialization profile；

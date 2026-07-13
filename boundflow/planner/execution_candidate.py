@@ -23,6 +23,7 @@ class BackendVariant(Enum):
     """Execution implementations that can realize a placement."""
 
     PYTORCH_EAGER = "pytorch_eager"
+    PYTORCH_CHUNKED = "pytorch_chunked"
     TORCH_COMPILE = "torch_compile"
     TVM_RELAX_UNFUSED = "tvm_relax_unfused"
     TVM_TIR_DEFAULT = "tvm_tir_default"

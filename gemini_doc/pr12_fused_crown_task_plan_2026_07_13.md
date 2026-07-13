@@ -1,8 +1,8 @@
 # PR-12：Fused CROWN-Task Lowering for Memory-Efficient Plain CROWN
 
-> 状态：执行中；PR-12D correctness 已关闭，PR-12E 正式 runtime/Pareto 证据链与 PR-12F
-> frozen held-out 已完成，但性能门禁失败、Planner quality 仅 guarded/partial。不得并行扩展
-> α/αβ autograd、BaB scheduler 或 training，PR-13 继续阻塞。
+> 状态：执行中；PR-12D correctness 已关闭，PR-12E/F v1 负结果已冻结，PR-12G 新增
+> chunked-r512 候选并在全新 held-out-v2 通过 reduced Planner 门禁。TVM/structured-eager 性能
+> headline 仍失败；不得并行扩展 α/αβ autograd、BaB scheduler 或 training，PR-13 继续阻塞。
 
 当前分支从只读 tag `pr11-validated-reduced` 创建。起点工件位于
 `artifacts/phase7a-pr12/baseline/`，候选 schema 见
@@ -74,3 +74,18 @@ cache 与 correctness 全部写入新 JSONL 和 manifest。
   1.000×/1.262×/1.262×，3/5 选择更快或为预算唯一可行；fanout fallback 1/1；
 - 因未达到性能目标且缺 structured eager/TVM-unfused 正式对照，PR-12 overall 保持
   IN PROGRESS。详见 `gemini_doc/change_2026-07-13_pr12ef_runtime_pareto_heldout.md`。
+
+## 2026-07-13 PR-12G 多后端补充判定
+
+- schedule 审计将 memory-sensitive Linear 退化归因到每 output-thread 的长串行 reduction；
+- 新增 `pytorch_chunked` 候选，冻结 `chunk_rows=512`，在有限 scaled-A workspace 下复用
+  cuBLAS/cuDNN contraction；
+- 全新 v2 split 上 calibration 48/48、held-out 36/36 candidate rows 正确；
+- calibration-only Planner 在 5 个 held-out 上 5/5 预算可行、0 unsafe，exact Oracle 3/5，
+  median/p90 regret 1.000×/1.054×，选择 eager/chunked/TIR 为 1/2/2；
+- memory-sensitive v2 中 chunked 为 1.481× eager latency speedup，peak 54.08 MiB，而 eager
+  65.69 MiB 超 64 MiB budget；全体 selected geomean speedup 为 1.081×；
+- PR-12G reduced Planner quality PASS，但相对 structured eager 2×、TVM-unfused 正式 baseline、
+  profiler counter 与 repeated-query E2E 仍未闭合，故 PR-12 overall 仍为 IN PROGRESS。
+
+详见 `gemini_doc/change_2026-07-13_pr12g_multibackend_planner.md`。

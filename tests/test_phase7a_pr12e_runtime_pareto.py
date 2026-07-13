@@ -111,7 +111,10 @@ def test_fallback_control_excludes_ineligible_fused_label_from_oracle() -> None:
     fused_label["runtime"]["host_group_per_query"]["median_ms"] = 0.9
 
     evaluation = _planner_evaluation(
-        _fallback_control_workload(), [eager, fused_label], planner
+        _fallback_control_workload(),
+        [eager, fused_label],
+        planner,
+        split_id=HELDOUT_SPLIT_ID,
     )
 
     assert evaluation["decision"]["backend"] == "pytorch_eager"

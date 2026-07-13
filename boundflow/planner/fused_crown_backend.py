@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 import math
-from typing import Iterable, Mapping, Tuple
+from typing import Iterable, Mapping, Sequence, Tuple
 
 from .execution_candidate import BackendVariant, OperatorFamily
 
@@ -246,8 +246,202 @@ class FusedCrownBackendPlanner:
         }
 
 
+@dataclass(frozen=True)
+class FusedCrownMultiBackendDecision:  # pylint: disable=too-many-instance-attributes
+    """V2 decision across eager, chunked eager, and fused TIR candidates."""
+
+    backend: BackendVariant
+    reason: str
+    calibration_case_id: str
+    predicted_latency_ratio: float
+    predicted_peak_bytes: int
+    budget_bytes: int
+    eligible_backends: Tuple[BackendVariant, ...]
+    predictions: Mapping[str, Mapping[str, object]]
+
+    def to_dict(self) -> dict[str, object]:
+        """Return a stable JSON-compatible decision dump."""
+
+        return {
+            **asdict(self),
+            "backend": self.backend.value,
+            "eligible_backends": [backend.value for backend in self.eligible_backends],
+            "predictions": dict(self.predictions),
+        }
+
+
+@dataclass(frozen=True)
+class _BackendPair:
+    case_id: str
+    family: OperatorFamily
+    backend: BackendVariant
+    boundary_bytes: int
+    region_count: int
+    latency_ratio: float
+    peak_bytes: int
+
+
+class FusedCrownMultiBackendPlanner:
+    """Nearest-scale v2 planner over all measured runtime candidates."""
+
+    def __init__(self, pairs: Tuple[_BackendPair, ...]) -> None:
+        if not pairs:
+            raise ValueError("at least one multi-backend calibration pair is required")
+        self._pairs = pairs
+
+    @classmethod
+    def fit(
+        cls, observations: Iterable[FusedCrownBackendObservation]
+    ) -> "FusedCrownMultiBackendPlanner":
+        """Pair every correct candidate with eager from the same calibration case."""
+
+        grouped: dict[
+            tuple[str, OperatorFamily],
+            dict[BackendVariant, FusedCrownBackendObservation],
+        ] = {}
+        for observation in observations:
+            observation.validate()
+            if observation.correct and observation.eligible:
+                grouped.setdefault((observation.case_id, observation.family), {})[
+                    observation.backend
+                ] = observation
+        pairs: list[_BackendPair] = []
+        for (case_id, family), candidates in sorted(
+            grouped.items(), key=lambda item: (item[0][1].value, item[0][0])
+        ):
+            eager = candidates.get(BackendVariant.PYTORCH_EAGER)
+            if eager is None:
+                continue
+            for backend, candidate in sorted(
+                candidates.items(), key=lambda item: item[0].value
+            ):
+                if (
+                    eager.boundary_bytes != candidate.boundary_bytes
+                    or eager.region_count != candidate.region_count
+                ):
+                    raise ValueError(
+                        f"calibration candidate metadata mismatch: {case_id}"
+                    )
+                pairs.append(
+                    _BackendPair(
+                        case_id=case_id,
+                        family=family,
+                        backend=backend,
+                        boundary_bytes=eager.boundary_bytes,
+                        region_count=eager.region_count,
+                        latency_ratio=(
+                            candidate.warm_latency_ms / eager.warm_latency_ms
+                        ),
+                        peak_bytes=candidate.peak_allocated_bytes,
+                    )
+                )
+        available = {pair.backend for pair in pairs}
+        if BackendVariant.PYTORCH_EAGER not in available or len(available) < 2:
+            raise ValueError(
+                "multi-backend calibration requires eager and another backend"
+            )
+        return cls(tuple(pairs))
+
+    def decide(  # pylint: disable=too-many-locals
+        self,
+        *,
+        family: OperatorFamily,
+        boundary_bytes: int,
+        region_count: int,
+        budget_bytes: int,
+        eligible_backends: Sequence[BackendVariant],
+    ) -> FusedCrownMultiBackendDecision:
+        """Choose the predicted-fastest budget-feasible eligible backend."""
+
+        if min(boundary_bytes, region_count, budget_bytes) <= 0:
+            raise ValueError(
+                "boundary_bytes, region_count and budget_bytes must be positive"
+            )
+        eligible = tuple(dict.fromkeys(eligible_backends))
+        if BackendVariant.PYTORCH_EAGER not in eligible:
+            raise ValueError("pytorch_eager must remain an eligible fallback")
+        query_scale = boundary_bytes / region_count
+        predictions: dict[BackendVariant, tuple[_BackendPair, int]] = {}
+        for backend in eligible:
+            compatible = tuple(
+                pair
+                for pair in self._pairs
+                if pair.family == family and pair.backend == backend
+            )
+            if not compatible:
+                continue
+            nearest = min(
+                compatible,
+                key=lambda pair: abs(
+                    math.log(query_scale)
+                    - math.log(pair.boundary_bytes / pair.region_count)
+                ),
+            )
+            predicted_peak = int(
+                math.ceil(nearest.peak_bytes * boundary_bytes / nearest.boundary_bytes)
+            )
+            predictions[backend] = nearest, predicted_peak
+        if BackendVariant.PYTORCH_EAGER not in predictions:
+            raise ValueError(f"no eager calibration for family {family.value}")
+        feasible = {
+            backend: prediction
+            for backend, prediction in predictions.items()
+            if prediction[1] <= budget_bytes
+        }
+        pool = feasible or predictions
+        selection_key = (
+            (lambda item: (item[1][0].latency_ratio, item[1][1], item[0].value))
+            if feasible
+            else (lambda item: (item[1][1], item[1][0].latency_ratio, item[0].value))
+        )
+        selected_backend, (selected_pair, selected_peak) = min(
+            pool.items(), key=selection_key
+        )
+        reason = (
+            "predicted_fastest_budget_feasible"
+            if feasible
+            else "budget_violated_predicted_fastest_lower_peak_tiebreak"
+        )
+        payload = {
+            backend.value: {
+                "calibration_case_id": pair.case_id,
+                "predicted_latency_ratio": pair.latency_ratio,
+                "predicted_peak_bytes": peak,
+                "budget_feasible": peak <= budget_bytes,
+            }
+            for backend, (pair, peak) in predictions.items()
+        }
+        return FusedCrownMultiBackendDecision(
+            backend=selected_backend,
+            reason=reason,
+            calibration_case_id=selected_pair.case_id,
+            predicted_latency_ratio=selected_pair.latency_ratio,
+            predicted_peak_bytes=selected_peak,
+            budget_bytes=budget_bytes,
+            eligible_backends=eligible,
+            predictions=payload,
+        )
+
+    def to_dict(self) -> Mapping[str, object]:
+        """Dump all candidate ratios fitted without held-out observations."""
+
+        return {
+            "model": "same_family_nearest_log_bytes_per_region_multibackend_v2",
+            "pairs": [
+                {
+                    **asdict(pair),
+                    "family": pair.family.value,
+                    "backend": pair.backend.value,
+                }
+                for pair in self._pairs
+            ],
+        }
+
+
 __all__ = [
     "FusedCrownBackendDecision",
     "FusedCrownBackendObservation",
     "FusedCrownBackendPlanner",
+    "FusedCrownMultiBackendDecision",
+    "FusedCrownMultiBackendPlanner",
 ]

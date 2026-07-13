@@ -129,9 +129,27 @@ PR-12E/F 正式证据更新：
 - 工件链：`artifacts/phase7a-pr12/pr12e-calibration-v1-20260713/` →
   `pr12f-final-heldout-v1-canonical-20260713/` → `pr12ef-report-v1-canonical-20260713/`。
 
-当前测试：PR-11 专项 21 passed；全量 200 passed、1 skipped。C2 仍为 `partial`：最终 held-out
-feasibility 已成立，但 Global 与 Memory-Threshold 退化为相同决策，尚不能声称 nontrivial
-Global Planner 系统贡献。
+PR-12G 多后端证据更新：
+
+- `C2-E10` validated reduced：新增 `pytorch_chunked_r512`，每次只物化有限 query rows 的
+  scaled-A，并复用 cuBLAS/cuDNN；Linear/Conv、default/custom stream 和真实 CROWN execution
+  step backend contract 均有回归；
+- `C2-E11` validated reduced Planner：全新 v2 split 上 calibration 48/48、held-out 36/36
+  candidate rows 正确；5/5 budget feasible、0 unsafe、exact Oracle 3/5、median/p90 regret
+  1.000×/1.054×，eager/chunked/TIR 各选择 1/2/2 次；
+- `C2-E12` validated budget Pareto：memory-sensitive Linear 中 chunked 2.217 ms / 54.08 MiB，
+  eager 3.284 ms / 65.69 MiB，64 MiB 下只有 selected candidate 可行；
+- `C2-L4` validated limitation：selected geomean 仅为 eager 的 1.081×，尚无 structured eager/
+  TVM-unfused 完整正式对照；TIR long-reduction schedule 仍不是 latency headline；
+- authoritative 工件链：`pr12g-multibackend-v2-freeze-20260713/` →
+  `pr12g-multibackend-v2-calibration-canonical3-20260713/` →
+  `pr12g-multibackend-v2-final-canonical3-20260713/` →
+  `pr12g-multibackend-v2-planner-replay-canonical3-20260713/` →
+  `pr12g-multibackend-v2-report-canonical3-20260713/`。
+
+该段 PR-11 early evidence 当时为专项 21 passed、全量 200 passed/1 skipped；其“Global 与
+Memory-Threshold 决策相同”的历史限制已由后续 PR-11E 和 PR-12G 证据分别补充，不能再读作
+当前全量状态。PR-12G 收尾全量为 318 passed、1 skipped。
 
 第三切片与 profiler 完成后全量为 208 passed、1 skipped。Global 已在 multi-barrier 合成案例中做出非阈值式
 mixed placement，但在真实 held-out workload 上尚无 barrier-level cost/Oracle 证据，C2 状态

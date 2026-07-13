@@ -6,6 +6,7 @@ from boundflow.planner.execution_candidate import BackendVariant, OperatorFamily
 from boundflow.planner.fused_crown_backend import (
     FusedCrownBackendObservation,
     FusedCrownBackendPlanner,
+    FusedCrownMultiBackendPlanner,
 )
 
 
@@ -166,3 +167,90 @@ def test_backend_decision_dump_is_json_compatible() -> None:
     assert _planner().to_dict()["model"] == (
         "same_family_nearest_log_bytes_per_region_v1"
     )
+
+
+def test_multibackend_planner_selects_chunked_memory_rescue_and_eager_conv() -> None:
+    observations: list[FusedCrownBackendObservation] = []
+    for case_id, family, rows in (
+        (
+            "linear-large",
+            OperatorFamily.LINEAR,
+            (
+                (BackendVariant.PYTORCH_EAGER, 1.0, 1000),
+                (BackendVariant.PYTORCH_CHUNKED, 1.2, 600),
+                (BackendVariant.TVM_FUSED_TIR, 4.0, 500),
+            ),
+        ),
+        (
+            "conv",
+            OperatorFamily.CONV2D,
+            (
+                (BackendVariant.PYTORCH_EAGER, 1.0, 1000),
+                (BackendVariant.PYTORCH_CHUNKED, 1.3, 800),
+                (BackendVariant.TVM_FUSED_TIR, 1.5, 500),
+            ),
+        ),
+    ):
+        observations.extend(
+            _observation(
+                case_id,
+                family,
+                backend,
+                latency=latency,
+                peak=peak,
+            )
+            for backend, latency, peak in rows
+        )
+    planner = FusedCrownMultiBackendPlanner.fit(observations)
+
+    linear = planner.decide(
+        family=OperatorFamily.LINEAR,
+        boundary_bytes=1_000,
+        region_count=1,
+        budget_bytes=700,
+        eligible_backends=tuple(BackendVariant),
+    )
+    conv = planner.decide(
+        family=OperatorFamily.CONV2D,
+        boundary_bytes=1_000,
+        region_count=1,
+        budget_bytes=2_000,
+        eligible_backends=tuple(BackendVariant),
+    )
+
+    assert linear.backend == BackendVariant.PYTORCH_CHUNKED
+    assert linear.predicted_peak_bytes == 600
+    assert conv.backend == BackendVariant.PYTORCH_EAGER
+    assert str(planner.to_dict()["model"]).endswith("multibackend_v2")
+
+
+def test_multibackend_planner_never_selects_ineligible_backend() -> None:
+    planner = FusedCrownMultiBackendPlanner.fit(
+        [
+            _observation(
+                "linear",
+                OperatorFamily.LINEAR,
+                BackendVariant.PYTORCH_EAGER,
+                latency=1.0,
+                peak=1000,
+            ),
+            _observation(
+                "linear",
+                OperatorFamily.LINEAR,
+                BackendVariant.PYTORCH_CHUNKED,
+                latency=0.5,
+                peak=500,
+            ),
+        ]
+    )
+
+    decision = planner.decide(
+        family=OperatorFamily.LINEAR,
+        boundary_bytes=1_000,
+        region_count=1,
+        budget_bytes=2_000,
+        eligible_backends=(BackendVariant.PYTORCH_EAGER,),
+    )
+
+    assert decision.backend == BackendVariant.PYTORCH_EAGER
+    assert set(decision.predictions) == {"pytorch_eager"}

@@ -347,11 +347,13 @@ saved-tensor profile、优化收敛和 peak-memory 门禁前，不向 PR-11 暴�
 `FUSED_STRUCTURED_AUTOGRAD` 候选。
 
 截至 2026-07-13，PR-12D single-consumer fusion、general-DAG fallback 与跨 runtime CUDA stream
-correctness 已关闭；PR-12E/F 也已生成 calibration/frozen-held-out 的正式 JSONL→CSV→figure→
-manifest 证据。5 个 held-out 全部预算可行且 unsafe fusion 为 0，但 Planner p90 regret 为
-1.262×，unseen Conv、mini-ResNet 和 memory-sensitive Linear 均存在 latency 退化。因此当前判定
-是“memory Pareto 证据成立、性能 headline 不成立”，PR-12 overall 仍为 IN PROGRESS，PR-13
-继续阻塞。详细数据见 `gemini_doc/change_2026-07-13_pr12ef_runtime_pareto_heldout.md`。
+correctness 已关闭；PR-12E/F v1 的正式证据保留了 memory-sensitive Linear、unseen Conv 与
+mini-ResNet 的 latency 负结果。PR-12G 又增加 budgeted chunked 候选并冻结全新 held-out-v2：
+5/5 预算可行、0 unsafe，Planner median/p90 regret 1.000×/1.054×，在 eager/chunked/TIR 间做出
+1/2/2 的非平凡选择。该结果关闭 reduced Planner quality，但 selected geomean 相对 eager 仅
+1.081×，structured eager/TVM-unfused、profiler 与 2× headline 仍缺失。因此 PR-12 overall 仍为
+IN PROGRESS，PR-13 继续阻塞。详细数据见
+`gemini_doc/change_2026-07-13_pr12g_multibackend_planner.md`。
 
 ### PR-13：Multi-Domain Runtime 与真实 BaB Adapter
 

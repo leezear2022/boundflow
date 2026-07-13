@@ -32,11 +32,14 @@ from boundflow.planner.execution_candidate import BackendVariant, OperatorFamily
 from boundflow.planner.fused_crown_backend import (
     FusedCrownBackendObservation,
     FusedCrownBackendPlanner,
+    FusedCrownMultiBackendPlanner,
 )
 from boundflow.runtime.crown_ibp import run_crown_ibp_mlp
 from boundflow.runtime.fused_crown import (
+    FusedCrownExecutor,
     FusedReluAffineRequest,
     TVMFusedCrownExecutor,
+    build_fused_crown_runtime_selection,
     plan_fused_crown_regions,
 )
 from boundflow.runtime.task_executor import InputSpec
@@ -46,6 +49,19 @@ MANIFEST_SCHEMA_VERSION = "boundflow.pr12-runtime-pareto-manifest/v1"
 PLANNER_SCHEMA_VERSION = "boundflow.pr12-heldout-planner/v1"
 HELDOUT_SPLIT_ID = "pr12-final-heldout-v1"
 DEFAULT_STREAMS = ("default", "custom")
+DEFAULT_BACKENDS = (
+    BackendVariant.PYTORCH_EAGER,
+    BackendVariant.TVM_FUSED_TIR,
+)
+
+
+def _frozen_candidate_backends(split: dict[str, Any]) -> tuple[str, ...]:
+    """Normalize candidate ids stored by a frozen benchmark split."""
+
+    return tuple(
+        "pytorch_chunked" if item.startswith("pytorch_chunked_r") else item
+        for item in map(str, split.get("candidate_set", ()))
+    )
 
 
 @dataclass(frozen=True)
@@ -575,6 +591,8 @@ def _benchmark_candidate(  # pylint: disable=too-many-arguments
     warmup: int,
     groups: int,
     repeats: int,
+    chunk_rows: int,
+    split_id: str,
 ) -> dict[str, Any]:
     device = input_spec.center.device
     stream = (
@@ -582,8 +600,13 @@ def _benchmark_candidate(  # pylint: disable=too-many-arguments
         if stream_name == "default"
         else torch.cuda.Stream(device=device)
     )
-    steps = plan_fused_crown_regions(module.get_entry_task().ops)
-    executor: Optional[CountingTVMFusedCrownExecutor] = None
+    selection = build_fused_crown_runtime_selection(
+        module.get_entry_task().ops,
+        backend=backend.value,
+        chunk_rows=chunk_rows,
+    )
+    steps = selection.steps
+    executor: Optional[FusedCrownExecutor] = selection.executor
     if backend == BackendVariant.TVM_FUSED_TIR:
         executor = CountingTVMFusedCrownExecutor()
         _clear_fused_compile_cache()
@@ -626,7 +649,7 @@ def _benchmark_candidate(  # pylint: disable=too-many-arguments
         "status": "ok" if correct else "fail",
         "error": None if correct else {"error_type": "CorrectnessFailure"},
         "split": {
-            "split_id": HELDOUT_SPLIT_ID,
+            "split_id": split_id,
             "role": workload.split_role,
         },
         "workload": {
@@ -643,11 +666,12 @@ def _benchmark_candidate(  # pylint: disable=too-many-arguments
         "candidate": {
             "backend": backend.value,
             "stream": stream_name,
-            "eligible": (
-                bool(steps) if backend == BackendVariant.TVM_FUSED_TIR else True
-            ),
+            "eligible": bool(steps) if executor is not None else True,
             "planned_fused_regions": len(steps),
             "fused_dispatches_per_query": fused_calls_per_query,
+            "chunk_rows": (
+                chunk_rows if backend == BackendVariant.PYTORCH_CHUNKED else None
+            ),
         },
         "runtime": {
             "compile_first_run_wall_ms": first_wall,
@@ -685,11 +709,6 @@ def _observations_from_rows(
         if row.get("status") != "ok" or row["candidate"]["stream"] != stream:
             continue
         backend = BackendVariant(row["candidate"]["backend"])
-        if backend not in {
-            BackendVariant.PYTORCH_EAGER,
-            BackendVariant.TVM_FUSED_TIR,
-        }:
-            continue
         observations.append(
             FusedCrownBackendObservation(
                 case_id=row["workload"]["case_id"],
@@ -719,16 +738,42 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
 def _planner_evaluation(
     workload: RuntimeWorkload,
     rows: Sequence[dict[str, Any]],
-    planner: FusedCrownBackendPlanner,
+    planner: FusedCrownBackendPlanner | FusedCrownMultiBackendPlanner,
+    *,
+    split_id: str,
 ) -> dict[str, Any]:
     fused_eligible = workload.expected_regions > 0
-    decision = planner.decide(
-        family=workload.planner_family,
-        boundary_bytes=workload.boundary_bytes,
-        region_count=max(1, workload.expected_regions),
-        budget_bytes=workload.budget_bytes,
-        eligible=fused_eligible,
-    )
+    planner_started = time.perf_counter()
+    if isinstance(planner, FusedCrownMultiBackendPlanner):
+        eligible_backends = [BackendVariant.PYTORCH_EAGER]
+        if fused_eligible:
+            eligible_backends.extend(
+                [BackendVariant.PYTORCH_CHUNKED, BackendVariant.TVM_FUSED_TIR]
+            )
+        multi_decision = planner.decide(
+            family=workload.planner_family,
+            boundary_bytes=workload.boundary_bytes,
+            region_count=max(1, workload.expected_regions),
+            budget_bytes=workload.budget_bytes,
+            eligible_backends=eligible_backends,
+        )
+        decision_backend = multi_decision.backend
+        decision_payload = multi_decision.to_dict()
+        use_fused = decision_backend != BackendVariant.PYTORCH_EAGER
+        schema_version = "boundflow.pr12-heldout-planner/v2"
+    else:
+        legacy_decision = planner.decide(
+            family=workload.planner_family,
+            boundary_bytes=workload.boundary_bytes,
+            region_count=max(1, workload.expected_regions),
+            budget_bytes=workload.budget_bytes,
+            eligible=fused_eligible,
+        )
+        decision_backend = legacy_decision.backend
+        decision_payload = legacy_decision.to_dict()
+        use_fused = legacy_decision.use_fused
+        schema_version = PLANNER_SCHEMA_VERSION
+    planner_overhead_ms = (time.perf_counter() - planner_started) * 1000.0
     candidates = {
         BackendVariant(row["candidate"]["backend"]): row
         for row in rows
@@ -751,22 +796,23 @@ def _planner_evaluation(
             oracle_pool[backend]["runtime"]["host_group_per_query"]["median_ms"]
         ),
     )
-    selected = candidates[decision.backend]
+    selected = candidates[decision_backend]
     selected_latency = float(selected["runtime"]["host_group_per_query"]["median_ms"])
     oracle_latency = float(
         candidates[oracle_backend]["runtime"]["host_group_per_query"]["median_ms"]
     )
     return {
-        "schema_version": PLANNER_SCHEMA_VERSION,
-        "split_id": HELDOUT_SPLIT_ID,
+        "schema_version": schema_version,
+        "split_id": split_id,
         "role": workload.split_role,
         "case_id": workload.case_id,
         "family": workload.family,
         "boundary_bytes": workload.boundary_bytes,
         "budget_bytes": workload.budget_bytes,
-        "decision": decision.to_dict(),
+        "decision": decision_payload,
         "oracle_backend": oracle_backend.value,
         "selected_latency_ms": selected_latency,
+        "planner_overhead_ms": planner_overhead_ms,
         "oracle_latency_ms": oracle_latency,
         "latency_regret": selected_latency / oracle_latency,
         "selected_peak_allocated_bytes": int(
@@ -776,7 +822,7 @@ def _planner_evaluation(
             selected["memory"]["peak_allocated_delta_bytes"]
         )
         <= workload.budget_bytes,
-        "unsafe_fusion": bool(decision.use_fused and not fused_eligible),
+        "unsafe_fusion": bool(use_fused and not fused_eligible),
     }
 
 
@@ -809,38 +855,90 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     """Run calibration or frozen final held-out evaluation."""
 
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--split", choices=("calibration", "heldout"), required=True)
+    parser.add_argument(
+        "--split", choices=("calibration", "development", "heldout"), required=True
+    )
     parser.add_argument("--split-file", type=Path, required=True)
     parser.add_argument("--calibration-jsonl", type=Path)
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--warmup", type=int, default=5)
     parser.add_argument("--groups", type=int, default=5)
     parser.add_argument("--repeats", type=int, default=10)
+    parser.add_argument("--chunk-rows", type=int)
+    parser.add_argument("--case-ids", default="")
     parser.add_argument("--streams", default=",".join(DEFAULT_STREAMS))
+    parser.add_argument(
+        "--backends",
+        help="comma-separated candidates; defaults to the frozen split candidate set",
+    )
+    parser.add_argument("--planner-version", choices=("v1", "v2"), default="v1")
     args = parser.parse_args(argv)
     if not torch.cuda.is_available():
         raise RuntimeError("CUDA is required")
     if args.split == "heldout" and args.calibration_jsonl is None:
         parser.error("--calibration-jsonl is required for heldout")
-    if min(args.warmup, args.groups, args.repeats) <= 0:
-        parser.error("warmup/groups/repeats must be positive")
+    split = json.loads(args.split_file.read_text(encoding="utf-8"))
+    chunk_rows = (
+        int(args.chunk_rows)
+        if args.chunk_rows is not None
+        else int(split.get("chunk_rows", 128))
+    )
+    if min(args.warmup, args.groups, args.repeats, chunk_rows) <= 0:
+        parser.error("warmup/groups/repeats/chunk-rows must be positive")
     streams = tuple(item.strip() for item in args.streams.split(",") if item.strip())
     if not streams or any(item not in DEFAULT_STREAMS for item in streams):
         parser.error("streams must be a comma-separated subset of default,custom")
-    split = json.loads(args.split_file.read_text(encoding="utf-8"))
-    if split.get("split_id") != HELDOUT_SPLIT_ID:
-        raise ValueError("unexpected held-out split id")
+    frozen_candidates = _frozen_candidate_backends(split)
+    backend_values = args.backends or ",".join(
+        frozen_candidates or tuple(backend.value for backend in DEFAULT_BACKENDS)
+    )
+    try:
+        backends = tuple(
+            BackendVariant(item.strip())
+            for item in backend_values.split(",")
+            if item.strip()
+        )
+    except ValueError as error:
+        parser.error(str(error))
+    allowed_backends = {
+        BackendVariant.PYTORCH_EAGER,
+        BackendVariant.PYTORCH_CHUNKED,
+        BackendVariant.TVM_FUSED_TIR,
+    }
+    if not backends or any(backend not in allowed_backends for backend in backends):
+        parser.error("unsupported PR-12 runtime backend")
+    if args.split != "development" and frozen_candidates:
+        if tuple(backend.value for backend in backends) != frozen_candidates:
+            parser.error("formal split must use its complete frozen candidate set")
+        if chunk_rows != int(split["chunk_rows"]):
+            parser.error("formal split must use its frozen chunk_rows")
+    split_id = str(split.get("split_id", ""))
+    if not split_id:
+        raise ValueError("held-out split must have a non-empty split_id")
     records = split["calibration" if args.split == "calibration" else "final_heldout"]
     workloads = [_workload(record, split_role=args.split) for record in records]
+    selected_case_ids = {
+        item.strip() for item in args.case_ids.split(",") if item.strip()
+    }
+    if selected_case_ids:
+        workloads = [
+            workload for workload in workloads if workload.case_id in selected_case_ids
+        ]
+        missing = selected_case_ids - {workload.case_id for workload in workloads}
+        if missing:
+            parser.error(f"unknown case ids: {sorted(missing)}")
     if args.split == "heldout":
         workloads.append(_fallback_control_workload())
-    planner: Optional[FusedCrownBackendPlanner] = None
+    planner: Optional[FusedCrownBackendPlanner | FusedCrownMultiBackendPlanner] = None
     calibration_hash: Optional[str] = None
     if args.split == "heldout":
         assert args.calibration_jsonl is not None
         calibration_rows = _read_jsonl(args.calibration_jsonl)
-        planner = FusedCrownBackendPlanner.fit(
-            _observations_from_rows(calibration_rows)
+        observations = _observations_from_rows(calibration_rows)
+        planner = (
+            FusedCrownBackendPlanner.fit(observations)
+            if args.planner_version == "v1"
+            else FusedCrownMultiBackendPlanner.fit(observations)
         )
         calibration_hash = _sha256(args.calibration_jsonl)
 
@@ -861,10 +959,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         torch.cuda.default_stream(device).synchronize()
         case_rows: list[dict[str, Any]] = []
         for stream in streams:
-            for backend in (
-                BackendVariant.PYTORCH_EAGER,
-                BackendVariant.TVM_FUSED_TIR,
-            ):
+            for backend in backends:
                 row = _benchmark_candidate(
                     workload,
                     module,
@@ -875,11 +970,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     warmup=args.warmup,
                     groups=args.groups,
                     repeats=args.repeats,
+                    chunk_rows=chunk_rows,
+                    split_id=split_id,
                 )
                 rows.append(row)
                 case_rows.append(row)
         if planner is not None:
-            planner_rows.append(_planner_evaluation(workload, case_rows, planner))
+            planner_rows.append(
+                _planner_evaluation(workload, case_rows, planner, split_id=split_id)
+            )
         del expected, input_spec, module
         gc.collect()
         torch.cuda.empty_cache()
@@ -904,7 +1003,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     manifest = {
         "schema_version": MANIFEST_SCHEMA_VERSION,
         "split": args.split,
-        "split_id": HELDOUT_SPLIT_ID,
+        "split_id": split_id,
+        "planner_version": args.planner_version,
         "split_file": str(args.split_file),
         "split_file_sha256": _sha256(args.split_file),
         "calibration_jsonl_sha256": calibration_hash,

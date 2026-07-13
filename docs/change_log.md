@@ -2544,3 +2544,25 @@
 
 **记录**
 - `gemini_doc/change_2026-07-13_pr12ef_runtime_pareto_heldout.md`
+
+---
+
+## 2026-07-13：PR-12G budgeted chunked backend 与多后端 Planner
+
+**主要改动**
+- 新增 `pytorch_chunked` backend，限制 scaled-A query-row workspace 并复用 cuBLAS/cuDNN；
+- 新增 eager/chunked/TIR calibration-only Planner、runtime selection/backend step contract；
+- 冻结全新 multibackend-v2 split，并新增 benchmark replay、三候选 CSV/Pareto/manifest 工具；
+- 新增 chunk correctness、custom stream、split 隔离、Planner replay 与 postprocess tests。
+
+**结果与判定**
+- calibration 48/48、held-out 36/36 candidate rows correctness 通过；
+- 5/5 预算可行、0 unsafe，exact Oracle 3/5，median/p90 regret 1.000×/1.054×；
+- Planner 选择 eager/chunked/TIR 为 1/2/2，selected geomean 相对 eager 1.081×；
+- reduced Planner quality PASS，但 structured-eager/TVM-unfused、2× headline 和 repeated-query
+  E2E 未关闭；PR-12 overall 保持 IN PROGRESS，PR-13 blocked。
+- 收尾门禁：focused 41 passed；全量 318 passed、1 skipped；mypy 14 files success；pylint
+  7 files 10.00/10；Black/diff check 通过。
+
+**记录**
+- `gemini_doc/change_2026-07-13_pr12g_multibackend_planner.md`

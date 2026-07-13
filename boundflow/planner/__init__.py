@@ -73,6 +73,8 @@ from .fused_crown_backend import (
     FusedCrownBackendDecision,
     FusedCrownBackendObservation,
     FusedCrownBackendPlanner,
+    FusedCrownMultiBackendDecision,
+    FusedCrownMultiBackendPlanner,
 )
 
 __all__ = [
@@ -90,6 +92,8 @@ __all__ = [
     "FusedCrownBackendDecision",
     "FusedCrownBackendObservation",
     "FusedCrownBackendPlanner",
+    "FusedCrownMultiBackendDecision",
+    "FusedCrownMultiBackendPlanner",
     "ExecutionContext",
     "LATENCY_FEATURE_NAMES",
     "PEAK_FEATURE_NAMES",
