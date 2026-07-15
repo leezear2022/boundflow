@@ -16,7 +16,12 @@ from .crown_ibp import (
     validate_optimized_bound_materialization_plan,
 )
 from .linear_operator import DenseLinearOperator
-from .relu_shape_utils import broadcast_relu_split_like_pre, coerce_relu_param_shape, relu_input_shapes, shape_numel
+from .relu_shape_utils import (
+    broadcast_relu_split_like_pre,
+    coerce_relu_param_shape,
+    relu_input_shapes,
+    shape_numel,
+)
 from .task_executor import InputSpecLike, _normalize_input_spec
 
 
@@ -31,7 +36,9 @@ class BetaState:
     beta_by_relu_input: Dict[str, torch.Tensor]
 
     def detach_clone(self) -> "BetaState":
-        return BetaState({k: v.detach().clone() for k, v in self.beta_by_relu_input.items()})
+        return BetaState(
+            {k: v.detach().clone() for k, v in self.beta_by_relu_input.items()}
+        )
 
 
 @dataclass(frozen=True)
@@ -70,13 +77,29 @@ def _flatten_param_for_pre(
         return value.reshape(1, flat_dim).expand(batch, flat_dim)
     if value.dim() == 1 and int(value.shape[0]) == flat_dim:
         return value.reshape(1, flat_dim).expand(batch, flat_dim)
-    if value.dim() == len(shape) + 1 and int(value.shape[0]) == 1 and tuple(value.shape[1:]) == tuple(shape):
+    if (
+        value.dim() == len(shape) + 1
+        and int(value.shape[0]) == 1
+        and tuple(value.shape[1:]) == tuple(shape)
+    ):
         return value.reshape(1, flat_dim).expand(batch, flat_dim)
-    if value.dim() == 2 and int(value.shape[0]) == 1 and int(value.shape[1]) == flat_dim:
+    if (
+        value.dim() == 2
+        and int(value.shape[0]) == 1
+        and int(value.shape[1]) == flat_dim
+    ):
         return value.expand(batch, flat_dim)
-    if value.dim() == len(shape) + 1 and int(value.shape[0]) == batch and tuple(value.shape[1:]) == tuple(shape):
+    if (
+        value.dim() == len(shape) + 1
+        and int(value.shape[0]) == batch
+        and tuple(value.shape[1:]) == tuple(shape)
+    ):
         return value.reshape(batch, flat_dim)
-    if value.dim() == 2 and int(value.shape[0]) == batch and int(value.shape[1]) == flat_dim:
+    if (
+        value.dim() == 2
+        and int(value.shape[0]) == batch
+        and int(value.shape[1]) == flat_dim
+    ):
         return value
     raise ValueError(
         f"{label}[{name}] shape {tuple(value.shape)} cannot broadcast to logical shape {shape} with batch {batch}"
@@ -119,7 +142,9 @@ def check_first_layer_infeasible_split(
     )
 
 
-def _branch_choices_from_relu_pre(relu_pre: Dict[str, IntervalState]) -> List[Optional[Tuple[str, int]]]:
+def _branch_choices_from_relu_pre(
+    relu_pre: Dict[str, IntervalState],
+) -> List[Optional[Tuple[str, int]]]:
     if not relu_pre:
         return []
     # Infer batch size from any relu pre bound.
@@ -127,7 +152,9 @@ def _branch_choices_from_relu_pre(relu_pre: Dict[str, IntervalState]) -> List[Op
     bsz = int(any_pre.lower.shape[0])
     best_name: List[Optional[str]] = [None] * bsz
     best_idx: List[int] = [0] * bsz
-    best_gap = torch.full((bsz,), float("-inf"), device=any_pre.lower.device, dtype=any_pre.lower.dtype)
+    best_gap = torch.full(
+        (bsz,), float("-inf"), device=any_pre.lower.device, dtype=any_pre.lower.dtype
+    )
 
     for name, pre in relu_pre.items():
         l = pre.lower.reshape(int(pre.lower.shape[0]), -1)
@@ -168,19 +195,27 @@ def _init_alpha_state(
     alpha_by_relu: Dict[str, torch.Tensor] = {}
     for name, shape in shape_by_relu_input.items():
         if warm_start is not None and name in warm_start.alpha_by_relu_input:
-            alpha_by_relu[name] = coerce_relu_param_shape(
-                warm_start.alpha_by_relu_input[name],
-                shape=shape,
-                batch_size=batch_size,
-                per_batch=per_batch_params,
-                name=name,
-                label="warm_start alpha",
-                device=device,
-                dtype=dtype,
-            ).detach().clone()
+            alpha_by_relu[name] = (
+                coerce_relu_param_shape(
+                    warm_start.alpha_by_relu_input[name],
+                    shape=shape,
+                    batch_size=batch_size,
+                    per_batch=per_batch_params,
+                    name=name,
+                    label="warm_start alpha",
+                    device=device,
+                    dtype=dtype,
+                )
+                .detach()
+                .clone()
+            )
         else:
-            target_shape = (int(batch_size),) + tuple(shape) if per_batch_params else tuple(shape)
-            alpha_by_relu[name] = torch.full(target_shape, float(alpha_init), device=device, dtype=dtype)
+            target_shape = (
+                (int(batch_size),) + tuple(shape) if per_batch_params else tuple(shape)
+            )
+            alpha_by_relu[name] = torch.full(
+                target_shape, float(alpha_init), device=device, dtype=dtype
+            )
     return AlphaState(alpha_by_relu_input=alpha_by_relu)
 
 
@@ -197,19 +232,27 @@ def _init_beta_state(
     beta_by_relu: Dict[str, torch.Tensor] = {}
     for name, shape in shape_by_relu_input.items():
         if warm_start is not None and name in warm_start.beta_by_relu_input:
-            beta_by_relu[name] = coerce_relu_param_shape(
-                warm_start.beta_by_relu_input[name],
-                shape=shape,
-                batch_size=batch_size,
-                per_batch=per_batch_params,
-                name=name,
-                label="warm_start beta",
-                device=device,
-                dtype=dtype,
-            ).detach().clone()
+            beta_by_relu[name] = (
+                coerce_relu_param_shape(
+                    warm_start.beta_by_relu_input[name],
+                    shape=shape,
+                    batch_size=batch_size,
+                    per_batch=per_batch_params,
+                    name=name,
+                    label="warm_start beta",
+                    device=device,
+                    dtype=dtype,
+                )
+                .detach()
+                .clone()
+            )
         else:
-            target_shape = (int(batch_size),) + tuple(shape) if per_batch_params else tuple(shape)
-            beta_by_relu[name] = torch.full(target_shape, float(beta_init), device=device, dtype=dtype)
+            target_shape = (
+                (int(batch_size),) + tuple(shape) if per_batch_params else tuple(shape)
+            )
+            beta_by_relu[name] = torch.full(
+                target_shape, float(beta_init), device=device, dtype=dtype
+            )
     return BetaState(beta_by_relu_input=beta_by_relu)
 
 
@@ -237,7 +280,9 @@ def _collect_first_layer_split_halfspaces(
         split = relu_split_state.get(x_name)
         if split is None or x_name not in relu_pre:
             continue
-        split_flat = broadcast_relu_split_like_pre(split, pre=relu_pre[x_name], x_name=x_name, device=spec.center.device)
+        split_flat = broadcast_relu_split_like_pre(
+            split, pre=relu_pre[x_name], x_name=x_name, device=spec.center.device
+        )
 
         prod = producer_by_output.get(x_name)
         if prod is None:
@@ -286,7 +331,13 @@ def _collect_first_layer_split_halfspaces(
         if weight_raw is None:
             continue
         bias_raw = params.get(b_name) if b_name is not None else None
-        weight = weight_raw if torch.is_tensor(weight_raw) else torch.as_tensor(weight_raw, device=spec.center.device, dtype=spec.center.dtype)
+        weight = (
+            weight_raw
+            if torch.is_tensor(weight_raw)
+            else torch.as_tensor(
+                weight_raw, device=spec.center.device, dtype=spec.center.dtype
+            )
+        )
         weight = weight.to(device=spec.center.device, dtype=spec.center.dtype)
         if weight.dim() != 4:
             continue
@@ -296,9 +347,15 @@ def _collect_first_layer_split_halfspaces(
         if len(output_shape) != 3:
             continue
         if b_name is None or bias_raw is None:
-            bias_vec = torch.zeros(int(weight.shape[0]), device=weight.device, dtype=weight.dtype)
+            bias_vec = torch.zeros(
+                int(weight.shape[0]), device=weight.device, dtype=weight.dtype
+            )
         else:
-            bias_vec = bias_raw if torch.is_tensor(bias_raw) else torch.as_tensor(bias_raw, device=weight.device, dtype=weight.dtype)
+            bias_vec = (
+                bias_raw
+                if torch.is_tensor(bias_raw)
+                else torch.as_tensor(bias_raw, device=weight.device, dtype=weight.dtype)
+            )
             bias_vec = bias_vec.to(device=weight.device, dtype=weight.dtype)
             if bias_vec.dim() != 1 or int(bias_vec.shape[0]) != int(weight.shape[0]):
                 continue
@@ -309,9 +366,13 @@ def _collect_first_layer_split_halfspaces(
             s = int(split_vec[flat_idx].item())
             if s == 0:
                 continue
-            one_hot = torch.zeros((1, 1) + output_shape, device=weight.device, dtype=weight.dtype)
+            one_hot = torch.zeros(
+                (1, 1) + output_shape, device=weight.device, dtype=weight.dtype
+            )
             one_hot.view(-1)[flat_idx] = 1.0
-            row_op = DenseLinearOperator(one_hot, input_shape=output_shape).conv2d_right(
+            row_op = DenseLinearOperator(
+                one_hot, input_shape=output_shape
+            ).conv2d_right(
                 weight,
                 stride=prod.attrs.get("stride", 1),
                 padding=prod.attrs.get("padding", 0),
@@ -347,7 +408,9 @@ def _is_infeasible_split_first_layer_convex_combo(
     which is a sound certificate of infeasibility.
     """
     spec = _normalize_input_spec(input_spec)
-    halfspaces = _collect_first_layer_split_halfspaces(module, spec, relu_split_state=relu_split_state)
+    halfspaces = _collect_first_layer_split_halfspaces(
+        module, spec, relu_split_state=relu_split_state
+    )
     if not halfspaces:
         return False, "ok (no first-layer split halfspaces)", None
     if int(spec.center.shape[0]) != 1:
@@ -362,8 +425,12 @@ def _is_infeasible_split_first_layer_convex_combo(
 
     # The certificate optimizer only updates simplex logits. Halfspaces are fixed
     # problem data; detaching avoids repeatedly traversing the model-parameter graph.
-    a_mat = torch.stack([h[2].to(device=device, dtype=dtype) for h in halfspaces], dim=0).detach()  # [M,I]
-    c_vec = torch.stack([h[3].to(device=device, dtype=dtype) for h in halfspaces], dim=0).detach()  # [M]
+    a_mat = torch.stack(
+        [h[2].to(device=device, dtype=dtype) for h in halfspaces], dim=0
+    ).detach()  # [M,I]
+    c_vec = torch.stack(
+        [h[3].to(device=device, dtype=dtype) for h in halfspaces], dim=0
+    ).detach()  # [M]
     if m == 1:
         a = a_mat[0]
         c = c_vec[0]
@@ -387,7 +454,11 @@ def _is_infeasible_split_first_layer_convex_combo(
                     }
                 ],
             }
-            return True, f"infeasible: single halfspace has max<{ -float(tol):.2e}", cert
+            return (
+                True,
+                f"infeasible: single halfspace has max<{ -float(tol):.2e}",
+                cert,
+            )
         return False, "ok", None
 
     logits = torch.zeros(m, device=device, dtype=dtype, requires_grad=True)
@@ -398,7 +469,9 @@ def _is_infeasible_split_first_layer_convex_combo(
         w = torch.softmax(logits, dim=0)  # simplex
         a = (w.unsqueeze(1) * a_mat).sum(dim=0)  # [I]
         c = (w * c_vec).sum()  # []
-        A = DenseLinearOperator(a.view(1, 1, -1), input_shape=input_shape)  # [B=1,K=1,I]
+        A = DenseLinearOperator(
+            a.view(1, 1, -1), input_shape=input_shape
+        )  # [B=1,K=1,I]
         b = c.view(1, 1)
         _lb, ub = spec.perturbation.concretize_affine(center=spec.center, A=A, b=b)
         ub0 = ub.squeeze()
@@ -414,11 +487,20 @@ def _is_infeasible_split_first_layer_convex_combo(
                 "a": a.detach().cpu().tolist(),
                 "c": float(c.detach().cpu().item()),
                 "halfspaces": [
-                    {"relu_input": name, "neuron": int(i), "a": aa.detach().cpu().tolist(), "c": float(cc.detach().cpu().item())}
+                    {
+                        "relu_input": name,
+                        "neuron": int(i),
+                        "a": aa.detach().cpu().tolist(),
+                        "c": float(cc.detach().cpu().item()),
+                    }
                     for (name, i, aa, cc) in halfspaces
                 ],
             }
-            return True, f"infeasible: found convex-combo certificate with max<{ -float(tol):.2e}", cert
+            return (
+                True,
+                f"infeasible: found convex-combo certificate with max<{ -float(tol):.2e}",
+                cert,
+            )
         opt.zero_grad(set_to_none=True)
         ub0.backward()
         opt.step()
@@ -433,11 +515,20 @@ def _is_infeasible_split_first_layer_convex_combo(
             "a": best_a.detach().cpu().tolist(),
             "c": float(best_c.detach().cpu().item()),
             "halfspaces": [
-                {"relu_input": name, "neuron": int(i), "a": a.detach().cpu().tolist(), "c": float(c.detach().cpu().item())}
+                {
+                    "relu_input": name,
+                    "neuron": int(i),
+                    "a": a.detach().cpu().tolist(),
+                    "c": float(c.detach().cpu().item()),
+                }
                 for (name, i, a, c) in halfspaces
             ],
         }
-        return True, f"infeasible: found convex-combo certificate with max<{ -float(tol):.2e}", cert
+        return (
+            True,
+            f"infeasible: found convex-combo certificate with max<{ -float(tol):.2e}",
+            cert,
+        )
     return False, "ok", None
 
 
@@ -535,7 +626,9 @@ def _beta_to_relu_pre_add_coeff(
         pre = relu_pre.get(name)
         if split is None or pre is None:
             continue
-        s_b = broadcast_relu_split_like_pre(split, pre=pre, x_name=name, device=beta.device)
+        s_b = broadcast_relu_split_like_pre(
+            split, pre=pre, x_name=name, device=beta.device
+        )
         beta_b = _flatten_param_for_pre(beta, pre=pre, name=name, label="beta")
         mask = s_b != 0
         if not mask.any():
@@ -592,7 +685,9 @@ def run_alpha_beta_crown_mlp(
     device = spec.center.device
     dtype = spec.center.dtype
     if not torch.is_floating_point(spec.center):
-        raise TypeError(f"alpha-beta-crown expects floating input center, got dtype={spec.center.dtype}")
+        raise TypeError(
+            f"alpha-beta-crown expects floating input center, got dtype={spec.center.dtype}"
+        )
     batch_size = int(spec.center.shape[0])
 
     split_state = relu_split_state or {}
@@ -602,7 +697,9 @@ def run_alpha_beta_crown_mlp(
             module, spec, relu_split_state=split_state
         )
         if infeasible:
-            zeros = torch.zeros((int(spec.center.shape[0]), 1), device=device, dtype=dtype)
+            zeros = torch.zeros(
+                (int(spec.center.shape[0]), 1), device=device, dtype=dtype
+            )
             stats = AlphaBetaCrownStats(
                 feasibility="infeasible",
                 reason=reason,
@@ -616,7 +713,9 @@ def run_alpha_beta_crown_mlp(
                 stats,
             )
 
-    interval_env, relu_pre = _forward_ibp_trace_mlp(module, spec, relu_split_state=relu_split_state)
+    interval_env, relu_pre = _forward_ibp_trace_mlp(
+        module, spec, relu_split_state=relu_split_state
+    )
     shape_by_relu_input = relu_input_shapes(relu_pre)
     alpha_state = _init_alpha_state(
         shape_by_relu_input,
@@ -685,7 +784,9 @@ def run_alpha_beta_crown_mlp(
                 materialization_placement_plan=materialization_placement_plan,
             )
 
-        def _reduce_specs(x: torch.Tensor, *, direction: Literal["min", "max"]) -> torch.Tensor:
+        def _reduce_specs(
+            x: torch.Tensor, *, direction: Literal["min", "max"]
+        ) -> torch.Tensor:
             if x.dim() != 2:
                 return x.mean().expand(batch_size)
             if spec_reduce == "mean":
@@ -710,9 +811,9 @@ def run_alpha_beta_crown_mlp(
         elif objective == "gap":
             metric_b = -_reduce_specs(bounds.upper - bounds.lower, direction="max")
         elif objective == "both":
-            metric_b = float(lb_weight) * _reduce_specs(bounds.lower, direction="min") - float(ub_weight) * _reduce_specs(
-                bounds.upper, direction="max"
-            )
+            metric_b = float(lb_weight) * _reduce_specs(
+                bounds.lower, direction="min"
+            ) - float(ub_weight) * _reduce_specs(bounds.upper, direction="max")
         else:
             raise AssertionError(f"unreachable objective: {objective}")
 
@@ -720,30 +821,59 @@ def run_alpha_beta_crown_mlp(
         if best_metric is None:
             best_metric = metric_b.detach().clone()
             best_metric_scalar = metric.detach().clone()
-            best_bounds = IntervalState(lower=bounds.lower.detach().clone(), upper=bounds.upper.detach().clone())
-            best_alpha = AlphaState({k: v.detach().clone() for k, v in alpha_state.alpha_by_relu_input.items()})
-            best_beta = BetaState({k: v.detach().clone() for k, v in beta_state.beta_by_relu_input.items()})
+            best_bounds = IntervalState(
+                lower=bounds.lower.detach().clone(), upper=bounds.upper.detach().clone()
+            )
+            best_alpha = AlphaState(
+                {
+                    k: v.detach().clone()
+                    for k, v in alpha_state.alpha_by_relu_input.items()
+                }
+            )
+            best_beta = BetaState(
+                {
+                    k: v.detach().clone()
+                    for k, v in beta_state.beta_by_relu_input.items()
+                }
+            )
         else:
-            if per_batch_params and isinstance(best_metric, torch.Tensor) and best_metric.dim() == 1 and metric_b.shape == best_metric.shape:
+            if (
+                per_batch_params
+                and isinstance(best_metric, torch.Tensor)
+                and best_metric.dim() == 1
+                and metric_b.shape == best_metric.shape
+            ):
                 improve = metric_b.detach() > best_metric
                 if improve.any():
                     best_metric = torch.where(improve, metric_b.detach(), best_metric)
                     assert best_bounds is not None
                     best_bounds = IntervalState(
-                        lower=torch.where(improve.unsqueeze(1), bounds.lower.detach(), best_bounds.lower),
-                        upper=torch.where(improve.unsqueeze(1), bounds.upper.detach(), best_bounds.upper),
+                        lower=torch.where(
+                            improve.unsqueeze(1),
+                            bounds.lower.detach(),
+                            best_bounds.lower,
+                        ),
+                        upper=torch.where(
+                            improve.unsqueeze(1),
+                            bounds.upper.detach(),
+                            best_bounds.upper,
+                        ),
                     )
                     assert best_alpha is not None and best_beta is not None
                     for name, cur in alpha_state.alpha_by_relu_input.items():
                         prev = best_alpha.alpha_by_relu_input[name]
                         if cur.shape == prev.shape and int(cur.shape[0]) == batch_size:
                             mask = improve.view(batch_size, *([1] * (cur.dim() - 1)))
-                            best_alpha.alpha_by_relu_input[name] = torch.where(mask, cur.detach(), prev)
+                            best_alpha.alpha_by_relu_input[name] = torch.where(
+                                mask, cur.detach(), prev
+                            )
                     for name, cur in beta_state.beta_by_relu_input.items():
                         prev = best_beta.beta_by_relu_input[name]
                         if cur.shape == prev.shape and int(cur.shape[0]) == batch_size:
                             mask = improve.view(batch_size, *([1] * (cur.dim() - 1)))
-                            best_beta.beta_by_relu_input[name] = torch.where(mask, cur.detach(), prev)
+                            best_beta.beta_by_relu_input[name] = torch.where(
+                                mask, cur.detach(), prev
+                            )
             metric_val = float(metric.detach().cpu().item())
             best_val = (
                 float(best_metric_scalar.detach().cpu().item())
@@ -754,14 +884,33 @@ def run_alpha_beta_crown_mlp(
                 best_metric_scalar = metric.detach().clone()
                 if not per_batch_params:
                     best_metric = metric_b.detach().clone()
-                    best_bounds = IntervalState(lower=bounds.lower.detach().clone(), upper=bounds.upper.detach().clone())
-                    best_alpha = AlphaState({k: v.detach().clone() for k, v in alpha_state.alpha_by_relu_input.items()})
-                    best_beta = BetaState({k: v.detach().clone() for k, v in beta_state.beta_by_relu_input.items()})
+                    best_bounds = IntervalState(
+                        lower=bounds.lower.detach().clone(),
+                        upper=bounds.upper.detach().clone(),
+                    )
+                    best_alpha = AlphaState(
+                        {
+                            k: v.detach().clone()
+                            for k, v in alpha_state.alpha_by_relu_input.items()
+                        }
+                    )
+                    best_beta = BetaState(
+                        {
+                            k: v.detach().clone()
+                            for k, v in beta_state.beta_by_relu_input.items()
+                        }
+                    )
 
         if step == int(steps):
             break
 
-        loss = -metric_b.mean()
+        # With one independent alpha/beta slice per batch element, averaging
+        # scales every slice's gradient by 1/B.  Adam is not exactly invariant
+        # to that scaling because of its epsilon term, so a physical query
+        # batch would otherwise change each query's optimizer trajectory.
+        # Summing preserves the same per-slice gradient as serial execution;
+        # shared-parameter mode keeps the historical mean objective.
+        loss = -metric_b.sum() if per_batch_params else -metric_b.mean()
         if not loss.requires_grad:
             break
         opt.zero_grad(set_to_none=True)
