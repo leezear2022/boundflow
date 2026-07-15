@@ -1,0 +1,24 @@
+{
+  "command": "python /home/lee/Codes/boundflow/scripts/benchmark_phase7a_pr13d_bab_runtime.py --out-dir artifacts/phase7a-pr13/pr13d-bab-runtime-v5-20260714 --device cuda --max-nodes 16 --alpha-steps 1 --batch-size 8 --memory-budget-bytes 1073741824 --warmup 1 --repeats 5",
+  "config": {
+    "alpha_steps": 1,
+    "batch_size": 8,
+    "device": "cuda",
+    "max_nodes": 16,
+    "memory_budget_bytes": 1073741824,
+    "repeats": 5,
+    "seed": 0,
+    "warmup": 1
+  },
+  "device": "cuda",
+  "files": {
+    "raw.jsonl": "8481ab390187eebce576a867e84195d793459003b01b4a8386e7714116d13fa8",
+    "summary.json": "57e4910541f5d4f58befa96bf9078aa17b6bda96f5646fb60851d1efbc44edee"
+  },
+  "git_commit": "fda5b824933b43d8fefecdb9704683a659735ce1",
+  "git_dirty": true,
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "python": "3.12.13",
+  "schema_version": "boundflow.pr13d-bab-runtime-manifest/v2",
+  "torch": "2.12.1+cu132"
+}

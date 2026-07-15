@@ -351,13 +351,23 @@ correctness 已关闭；PR-12E/F v1 的正式证据保留了 memory-sensitive Li
 mini-ResNet 的 latency 负结果。PR-12G 又增加 budgeted chunked 候选并冻结全新 held-out-v2：
 5/5 预算可行、0 unsafe，Planner median/p90 regret 1.000×/1.054×，在 eager/chunked/TIR 间做出
 1/2/2 的非平凡选择。该结果关闭 reduced Planner quality，但 selected geomean 相对 eager 仅
-1.081×，structured eager/TVM-unfused、profiler 与 2× headline 仍缺失。因此 PR-12 overall 仍为
-IN PROGRESS，PR-13 继续阻塞。详细数据见
-`gemini_doc/change_2026-07-13_pr12g_multibackend_planner.md`。
+1.081×，structured eager/TVM-unfused、profiler 与 2× headline 当时仍缺失。PR-12 后续 H–N 已
+完成公平 baseline、compile/cache、CUPTI activity、止损和 compile-aware multi-budget Planner，
+最终以 `VALIDATED-REDUCED` 关闭在 `3492d79` / `pr12-validated-reduced`。PR-13 已获 GO 并进入
+13A；详细 closure 见 `gemini_doc/pr12_closure_audit_2026_07_14.md`。
 
 ### PR-13：Multi-Domain Runtime 与真实 BaB Adapter
 
 目标：统一 repeated-query execution，并接入真实 BaB query stream。
+
+截至 2026-07-14，PR-13A/B 已完成 state-versioned query/compatibility/validity contract、dynamic
+budget/deadline batcher、OOM 二分和 physical αβ dense pack/unpack。真实 BaB driver 的 8-query
+smoke fixed/dynamic replay 均为 8/8、0 mismatch/loss。该证据只标记 validated foundation。
+PR-13C 又把 runtime 作为 optional bound-call adapter 接回同一 solver，αβ smoke 的 query/
+state/branch/status/node counters 7/7 对齐。PR-13D/E 已完成 RTX 4060 reduced fixed/E2E 并以
+`VALIDATED-REDUCED` 关闭：fixed 与 hard E2E 相对 per-node 为 96.52×/9.93×，但 hard 相对公平
+batched original 仅 0.980×，说明收益来自 batching。non-toy multi-backend/TTV 仍未完成。持续状态见
+`gemini_doc/pr13_execution_status.md`。
 
 最小抽象：
 

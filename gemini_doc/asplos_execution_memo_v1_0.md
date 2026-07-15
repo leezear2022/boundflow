@@ -1,7 +1,7 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12  
-> 当前提交基线：`263ea81`（PR-10 complete, feature-gated）
+> 当前 PR-13 代码基线：`fda5b82`；closure tag：`pr13-validated-reduced`
 > 唯一执行顺序：**Gate 0 → PR-10 → PR-11 → PR-12 → PR-13**。  
 > 禁止同时启动 Planner、fused kernel 与 BaB runtime 三条主线。
 
@@ -231,6 +231,27 @@ PR-12N 最终判定为 `VALIDATED-REDUCED`，closure tag `pr12-validated-reduced
 且尚无真实 BaB/VNN-COMP；但 non-toy E2E Pareto、预算价值、自动选择与独立 held-out 足以避免
 `MECHANISM-ONLY`。PR-13 硬门禁因此 GO/READY，但本 closure 不启动 PR-13；后续只允许推进
 真实 multi-domain/BaB query runtime，不回到 PR-12 TIR 试参。
+
+PR-13A 随后正式建立 state-versioned `BoundQuery`、完整 compatibility key、四级 state-validity
+规则和 BaB recorder。现有 host solver 生成的 8-query two-ReLU smoke 固定流为 8/8 replay、
+max abs diff 0、0 loss/duplicate。该结果只关闭 contract/replay foundation；PR-13B dynamic
+BatchManager、same-solver multi-backend、non-toy TTV 与 tail latency 均未完成。
+
+PR-13B 现已补齐 exact-key dynamic buckets、budget first-fit、fill/timeout/deadline、OOM 二分重试、
+结果顺序恢复和 queue/fill/latency counters，并通过现有 αβ dense executor 做真实 physical pack/
+unpack。8-query smoke 动态 3 batches 为 8/8、0 loss；OOM fault 8→4+4→四个 2 后仍 8/8。
+当前仍只称 foundation；下一阶段是 PR-13C same-solver adapter。
+
+PR-13C 已把 query runtime 作为 optional bound-call adapter 接回同一 `solve_bab_mlp`。αβ
+steps=3/batch=4 smoke 中 original/runtime query ID、bounds、branch、αβ state 与 solver
+status/node counters 全部一致（7/7、0 loss）；forged plain capability 在 executor 0 调用时拒绝。
+单次 wall time 不具权威性。
+
+PR-13D/E 随后在 RTX 4060 上完成 5-repeat fixed/E2E reduced 评估并以
+`VALIDATED-REDUCED` 关闭：fixed runtime 相对 per-node 96.52×、相对 batched original 1.024×；
+hard 16-node E2E 分别为 9.93×/0.980×，status/node count 一致。结果证明 runtime 能保留 batching
+收益，但不证明超越普通 batching。αβ/split 对 PR-12 compiled Planner 不兼容，non-toy/VNN-COMP、
+真实 OOM 和完整 TTV 未完成；ASPLOS-ready 仍为 NO。
 
 ## 7. 投稿门禁
 

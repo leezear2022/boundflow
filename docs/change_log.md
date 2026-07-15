@@ -2721,3 +2721,87 @@
 **记录**
 - `gemini_doc/pr12_closure_audit_2026_07_14.md`
 - `gemini_doc/pr12_artifact_appendix_2026_07_14.md`
+
+---
+
+## 2026-07-14：PR-13A Query/State Contract 与真实固定流 Replay
+
+**主要改动**
+- 新增 state-versioned `BoundQuery`、完整 compatibility key、四级 state-validity manager、
+  owned payload/result 和 fixed recorder/replay；
+- 现有 host-side `solve_bab_mlp` 增加可选 observer，保留 parent link 和真实 split/warm-start
+  版本，不改变默认 solver 路径；
+- 新增 contract/replay tests、artifact runner 和生成式 AI 使用记录。
+
+**结果与判定**
+- 真实 solver 生成 8-query two-ReLU smoke：8/8 replay、max abs diff 0、0 loss/duplicate；
+- αβ/split capability 固定为 dense，不会误选 plain-CROWN fused TIR；
+- PR-13A PASS（foundation only），PR-13 overall IN PROGRESS；下一阶段仅 PR-13B dynamic
+  BatchManager，不宣称性能或 non-toy 结果。
+
+**记录**
+- `gemini_doc/change_2026-07-14_pr13a_query_contract_fixed_replay.md`
+- `gemini_doc/pr13_execution_status.md`
+
+---
+
+## 2026-07-14：PR-13B Dynamic BatchManager
+
+**主要改动**
+- 新增 exact-key compatibility buckets、memory first-fit、partial/timeout/deadline flush、host
+  wakeup、确定性 OOM 二分和 queue/fill/latency/no-loss metrics；
+- 新增 physical αβ dense batch executor，pack/unpack center/spec/split/α/β 并按 query ID 恢复；
+- compatibility 加入 input name、perturbation 和 execution-options hash。
+
+**结果与判定**
+- 真实 8-query stream 动态 3 batches：8/8、max diff 0、0 loss/invalid；
+- OOM fault 8→4+4→2+2+2+2：3 split，最终 8/8；
+- PR-13B validated foundation；CPU/逻辑 clock/fault OOM，不是性能或真实 GPU OOM；
+- 下一阶段仅 PR-13C same-solver adapter。
+
+**记录**
+- `gemini_doc/change_2026-07-14_pr13b_dynamic_batch_manager.md`
+
+---
+
+## 2026-07-14：PR-13C Same-Solver Adapter
+
+**主要改动**
+- 新增同步 same-solver query adapter；原 solver 继续拥有 branch/heap/order/termination；
+- single/batched bound calls 可选走 query runtime，返回真实 bounds/α/β/branch；
+- capability dispatch 在 executor 前拒绝不合法 plain-CROWN forged query。
+
+**结果与判定**
+- αβ steps=3/batch=4：original/runtime query IDs 与 per-query bounds/branch/αβ state 7/7，
+  solver status/node counters/best bounds 一致，0 loss；
+- alpha-only serial 也对齐；forged capability 下 physical αβ executor 调用 0；
+- PR-13C validated foundation，下一阶段 PR-13D 双层正式评估；单次 wall time 不作性能 claim。
+
+**记录**
+- `gemini_doc/change_2026-07-14_pr13c_same_solver_adapter.md`
+
+---
+
+## 2026-07-14：PR-13D/E Reduced GPU 与 Closure
+
+**主要改动**
+- 增加 fixed-stream / true-E2E CUDA benchmark、time/query、throughput、p50/p90/p99、peak
+  memory、status/node-count 与公平 baseline 汇总；
+- 修复 per-batch αβ Adam gradient scaling、query split lineage version、GPU state hot-path hash；
+- 增加 dispatch-plan cache counters 与 non-default CUDA stream event-only 回归；
+- 完成 PR-13 closure audit、Artifact Appendix、Claims Map 和状态索引。
+
+**结果与判定**
+- fixed 16-query：runtime / per-node 96.52×，runtime / batched original 1.024×；
+- hard E2E 16-node：9.93× / 0.980×；safe/unsafe/unknown status 与 node count 一致；
+- 0 correctness failure/loss/invalid；custom stream PASS；dispatch cache 1 miss/4 hits；
+- runtime rejected/missing/reordered result 采用 fail-closed，不得把失败节点当作已证明；
+- 收益主要来自 ordinary batching，non-toy、真实 OOM、PR-12 compiled Planner dispatch 未完成；
+- PR-13 以 `VALIDATED-REDUCED` 关闭，不升级 full C3 claim；
+- 收尾：326 passed/30 skipped；custom CUDA stream 1 passed；PR-13 Mypy success、Pylint
+  10.00/10、changed-file 污染扫描 0 match。
+
+**记录**
+- `gemini_doc/change_2026-07-14_pr13d_fixed_e2e_gpu.md`
+- `gemini_doc/pr13_closure_audit_2026_07_14.md`
+- `gemini_doc/pr13_artifact_appendix_2026_07_14.md`

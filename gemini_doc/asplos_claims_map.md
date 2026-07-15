@@ -1,13 +1,14 @@
 # BoundFlow ASPLOS Claims Map
 
 > 本表是动态证据账本。`planned` 不代表已经实现；只有代码、测试和工件均存在时才能改为
-> `validated`。当前执行基线为 PR-10 complete、PR-11 validated-reduced，下一工程切片为 PR-12。
+> `validated`。当前执行基线为 PR-12 validated-reduced；PR-13 已以
+> `VALIDATED-REDUCED` 关闭，完整 C3/non-toy 主张仍未成立。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
 | C1：显式物化语义的 Structured Bound-Operator IR | validated foundation（PR-10 guarded） | `boundflow/runtime/linear_operator.py`、`crown_ibp.py` | dense/operator 数值与 gradient 对齐；materialization trace | count/bytes/reason/lifetime JSONL |
 | C2：Method/Autograd/Memory-Aware Materialization Planner | validated-reduced（PR-11） | static topology/liveness summary、global candidate model、bounded runtime；CROWN/α/αβ capability 接口 | 3× replicated correctness、LOO、held-out/Oracle、真实 OOM | 1,416 executions→472 aggregate patterns；23/23 feasible；manifests |
-| C3：BaB-Oriented Repeated-Query Runtime | partial（现有 node batch/cache） | `boundflow/runtime/bab.py` 等；QueryState 接口待 PR-13 | same-solver executor 对齐、state validity | TTV、solved/timeout、p90/p99、batch fill |
+| C3：BaB-Oriented Repeated-Query Runtime | validated-reduced（PR-13） | query/validity + batcher + physical αβ + same-solver adapter | identity/reuse/budget/deadline/OOM/order/stream/no-loss/same-search | fixed 96.52×、hard E2E 9.93× vs per-node；仅 0.980× vs batched；non-toy 未完成 |
 | TVM 后端执行 Planner 结果而非定义核心抽象 | partial | `boundflow/backends/tvm/`、`runtime/tvm_executor.py` | Python/TVM/unfused/fused 对齐 | compile/cold/warm、launch、bytes |
 | 相同浮点语义下保持 reference bound computation | partial | dense reference + planned paths | allclose、gradient、auto_LiRPA、replay | correctness fields 与失败记录 |
 
@@ -229,6 +230,65 @@ PR-12N closure：
 - PR-13 gate 为 GO/READY，但尚未启动；closure audit 与 Artifact Appendix 分别见
   `gemini_doc/pr12_closure_audit_2026_07_14.md`、
   `gemini_doc/pr12_artifact_appendix_2026_07_14.md`。
+
+## PR-13A Query/State Contract 证据
+
+- `C3-M2` validated foundation：`BoundQuery` 显式覆盖 parent、model/weight/input/spec/split、
+  method/stage、α/β/cuts、dtype/device/numeric policy 与 requested outputs，canonical JSON 确定；
+- `C3-M3` validated foundation：完整 `QueryCompatibilityKey` 分组；αβ/split 强制
+  `alpha_beta_dense_split` capability，不会误选 PR-12 plain-CROWN fused TIR；logical
+  `QueryBatch` 拒绝 mixed key，并验证 pack/unpack order/result restoration；
+- `C3-M4` validated foundation：state validity 对 graph/kernel/planner/intermediate/α/β/cuts/final
+  显式返回 EXACT/CONDITIONAL/WARM_START/INVALIDATE；父 β/final 不可 exact reuse；
+- `C3-E2` validated smoke：真实 `solve_bab_mlp` driver 产生 8-query 父子流，8/8 replay、
+  max abs diff 0、0 query loss、0 duplicate；
+- `C3-L2` validated limitation：工件为 CPU two-ReLU smoke，尚无 dynamic batch、OOM split、
+  same-solver multi-backend、non-toy/TTV/tail-latency，不能作为性能或完整 C3 claim；
+- 工件：`artifacts/phase7a-pr13/pr13a-fixed-replay-v6-20260714/`；持续状态：
+  `gemini_doc/pr13_execution_status.md`。
+
+## PR-13B Dynamic BatchManager 证据
+
+- `C3-M5` validated foundation：exact-key buckets、budget first-fit、fill/timeout/deadline wakeup、
+  deterministic OOM bisection 与 ID-based order restoration；
+- `C3-M6` validated foundation：physical αβ executor pack/unpack center/spec/split/α/β，并继续强制
+  dense split capability；perturbation 与 execution-options 进入 compatibility；
+- `C3-E3` validated smoke：真实 8-query stream 动态形成 3 batches，8/8、max diff 0、0 loss/
+  invalid；deadline flush 与 queue-wait 分位数字段存在；
+- `C3-E4` validated fault path：显式 OOM fault 触发 8→4+4→2+2+2+2，3 events/splits，最终
+  8/8、0 loss；
+- `C3-L3` validated limitation：CPU、逻辑 clock、fault OOM；尚无 same-solver live adapter、真实
+  GPU OOM、non-toy throughput/TTV；
+- 工件：`artifacts/phase7a-pr13/pr13b-dynamic-batch-v7-20260714/`。
+
+## PR-13C Same-Solver Adapter 证据
+
+- `C3-M7` validated foundation：原 `solve_bab_mlp` 继续拥有 branch/heap/node order/termination；
+  optional adapter 只替换 single/batched bound-call execution；
+- `C3-M8` validated foundation：runtime result 携带真实 α/β tensors，solver 可继续 warm
+  start/cache；comparison 强制 state tensor 数值对齐，exact content hash 仅作诊断；
+- `C3-E5` validated smoke：αβ steps=3、batch=4 下 original/runtime query IDs 7/7，per-query
+  bounds/branch/αβ state 7/7，status/node counters/best bounds 一致，0 loss；
+- `C3-E6` validated capability guard：forged plain-CROWN capability 在 αβ physical executor 0 次
+  调用时拒绝；alpha-only serial adapter 也与原 solver 对齐；
+- `C3-L4` validated limitation：toy CPU smoke，单次 wall time non-authoritative；尚无 non-toy
+  fixed-tree/E2E、TTV、真实 GPU OOM/stream、plan/cache ablation；
+- 工件：`artifacts/phase7a-pr13/pr13c-same-solver-v5-20260714/`。
+
+## PR-13D/E Reduced GPU 与 Closure 证据
+
+- `C3-E7` validated-reduced：RTX 4060、5 repeats、16-query fixed stream，runtime 相对 per-node
+  96.52×，相对 batched original 1.024×，16/16 correctness；
+- `C3-E8` validated-reduced：同一 solver hard E2E 16 nodes，runtime 相对 per-node 9.93×，相对
+  batched original 0.980×；三 variant status/node count 一致；
+- `C3-M9` validated foundation：custom CUDA stream event-only test、dispatch cache 1 miss/4 hits、
+  query loss/invalid 为 0；
+- `C3-L5` validated limitation：收益主要来自 ordinary batching；easy root 为负收益；
+  `compiled_plan_cache_applicable=false`、`pr12_planner_dispatches=0`；
+- `C3-L6` validated limitation：chain-CNN 16 nodes，不是 VNN-COMP/non-toy；真实 GPU OOM、
+  branch/prune/GPU-active 分解未完成；
+- 工件：`artifacts/phase7a-pr13/pr13d-bab-runtime-v5-20260714/`；closure：
+  `gemini_doc/pr13_closure_audit_2026_07_14.md`。
 
 该段 PR-11 early evidence 当时为专项 21 passed、全量 200 passed/1 skipped；其“Global 与
 Memory-Threshold 决策相同”的历史限制已由后续 PR-11E 和 PR-12G 证据分别补充，不能再读作

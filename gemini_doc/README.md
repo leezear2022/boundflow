@@ -81,6 +81,13 @@
 - `gemini_doc/change_2026-07-14_pr12m_compile_aware_planner.md`：compile/cache/reuse Planner、v3 split、多预算 held-out 与 regret
 - `gemini_doc/pr12_closure_audit_2026_07_14.md`：PR-12N 最终判定、H–M 证据/限制与 PR-13 Go/No-Go
 - `gemini_doc/pr12_artifact_appendix_2026_07_14.md`：PR-12 reduced artifact 依赖、工作流、expected outputs 与 claims
+- `gemini_doc/pr13_execution_status.md`：PR-13 五切片跨会话状态、冻结边界与恢复命令
+- `gemini_doc/change_2026-07-14_pr13a_query_contract_fixed_replay.md`：state-versioned query contract、真实 BaB 固定流 replay 与 PR-13B 门禁
+- `gemini_doc/change_2026-07-14_pr13b_dynamic_batch_manager.md`：兼容分桶、预算/deadline、OOM 拆批、physical αβ batching 与 PR-13C 门禁
+- `gemini_doc/change_2026-07-14_pr13c_same_solver_adapter.md`：原 host solver 仅替换 bound-call path 的对照与 PR-13D 门禁
+- `gemini_doc/change_2026-07-14_pr13d_fixed_e2e_gpu.md`：RTX 4060 fixed/E2E reduced 评估、batched-original 归因与负收益
+- `gemini_doc/pr13_closure_audit_2026_07_14.md`：PR-13 `VALIDATED-REDUCED` 逐项 closure 与未成立主张
+- `gemini_doc/pr13_artifact_appendix_2026_07_14.md`：PR-13 reduced artifact 命令、expected outputs 与证据链
 - `gemini_doc/artifact_claims_phase5d.md`：Phase 5D artifact claims（证据链/口径映射）
 - `gemini_doc/artifact_appendix_phase5d.md`：Phase 5D artifact appendix（复现说明）
 - `gemini_doc/project_evolution_overview.md`：研发脉络总览（目标、阶段推进、代码落点、未来路线）

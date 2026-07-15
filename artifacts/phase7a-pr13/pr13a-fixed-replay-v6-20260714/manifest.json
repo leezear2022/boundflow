@@ -1,0 +1,14 @@
+{
+  "command": "python scripts/run_phase7a_pr13a_fixed_replay.py --out-dir artifacts/phase7a-pr13/pr13a-fixed-replay-v6-20260714",
+  "device": "cpu",
+  "files": {
+    "query_trace.jsonl": "aeed3c220a7dca3f09124f1df40caf76a75b7ddbf39103c762e56163387ebd67",
+    "replay.jsonl": "ecb39928f1b05faef6a874021a6beb268678541b2dc4c3fb1baa6cae521e73ec",
+    "summary.json": "aa6cecb424df3f207989a98108ff3c05880476f80797af9b0e06b476eb01f1b5"
+  },
+  "git_commit": "fda5b824933b43d8fefecdb9704683a659735ce1",
+  "git_dirty": true,
+  "schema_version": "boundflow.pr13a-fixed-replay-artifact/v1",
+  "seed": 0,
+  "torch_version": "2.12.1+cu132"
+}

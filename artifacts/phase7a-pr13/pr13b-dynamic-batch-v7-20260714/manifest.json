@@ -1,0 +1,12 @@
+{
+  "command": "python scripts/run_phase7a_pr13b_dynamic_batch_replay.py --out-dir artifacts/phase7a-pr13/pr13b-dynamic-batch-v7-20260714",
+  "files": {
+    "raw.jsonl": "0b4f22e0d7b496cfaeaaafa7f8e8b008e43514135ad5746f621d6577072790c1",
+    "summary.json": "a26be2682ef05546d288cba99b697938d0c60b3fa22fa7410a74ffaf1f4c7a58"
+  },
+  "git_commit": "fda5b824933b43d8fefecdb9704683a659735ce1",
+  "git_dirty": true,
+  "schema_version": "boundflow.pr13b-dynamic-batch-artifact/v1",
+  "seed": 0,
+  "torch_version": "2.12.1+cu132"
+}
