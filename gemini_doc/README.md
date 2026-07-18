@@ -54,6 +54,10 @@
 - `gemini_doc/pr14_execution_plan.md`：真实 verifier workload coverage/execution 的切片、门禁与止损
 - `gemini_doc/change_2026-07-19_pr14a_abcrown_query_profile_adapter.md`：外部 αβ-CROWN
   `compute_bounds` → PR-13 `BoundQuery` → coverage profile 的可撤销接入边界
+- `gemini_doc/pr14a_real_query_coverage_2026_07_19.md`：MLP/CNN/VNN-COMP ResNet-2B 的真实
+  method/phase/backend coverage、observer baseline 与 PR-14B 窄化判定
+- `gemini_doc/change_2026-07-19_pr14a_real_query_traces.md`：真实 trace 生成与 fail-closed
+  frontend 审计的变更记录
 - `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`：ASPLOS 总体研发、论文与 artifact 执行计划
 - `gemini_doc/asplos_claims_map.md`：ASPLOS 三项贡献的动态证据映射
 - `gemini_doc/materialization_trace_schema_v1.md`：PR-10 trace JSONL 与内存口径

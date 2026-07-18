@@ -1,10 +1,11 @@
 # PR-14 执行计划：Verification-Aware Execution on Real Verification Workloads
 
-> 状态：批准启动；尚未产生 PR-14 实现或性能证据
+> 状态：PR-14A coverage adapter 已实现并完成三类真实 workload 首轮审计；VALIDATED-PARTIAL
 > 起点：`57a854b` / `pr13-validated-reduced`
 > 分支：`feat/pr14-real-verification`
 > 核心目标：量化并验证 BoundFlow 的 IR、Planner、backend 与 runtime 如何覆盖和执行真实
 > complete-verification workload，而不只是执行 reduced bound-query benchmark。
+> 当前证据与窄化判定：`gemini_doc/pr14a_real_query_coverage_2026_07_19.md`
 
 ## 1. 研究问题
 

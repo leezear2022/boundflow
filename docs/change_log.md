@@ -1,5 +1,13 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-07-19：PR-14A 真实 Query Trace 与 Coverage 判定
+
+- 生成官方 MLP/CNN 与 VNN-COMP ResNet-2B 的 540 个真实 `compute_bounds` profiles；
+- initial phase 143/146 eligible，activation-BaB 0/394 eligible；
+- observer-on/off 三组 status 与 visited-domain count 一致；CNN AveragePool frontend fail closed；
+- PR-14B 仅对 initial plain-CROWN NARROW GO，activation backend replay NO-GO；
+- 详细记录：`gemini_doc/pr14a_real_query_coverage_2026_07_19.md`。
+
 ## 2026-07-19：PR-14A αβ-CROWN Query Profile Adapter
 
 - 新增由现有 `BoundQuery` 派生的 coverage profile 与聚合报告，不复制 query/state schema；

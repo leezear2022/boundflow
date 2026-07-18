@@ -15,7 +15,7 @@ BoundFlow 已经完成从边界表示到 query runtime prototype 的主干：
 | Method/autograd/memory-aware Planner | validated-reduced | 1,416 次执行、472 个聚合 pattern、final held-out 23/23 feasible |
 | Fused/multi-backend CROWN execution | validated-reduced | eager/chunked/structured/TVM fused 多预算选择；收益只在部分 regime |
 | Query runtime | validated-reduced | `BoundQuery`、state validity、dynamic batching、same-solver adapter、reduced GPU E2E |
-| 真实 complete verifier integration | 未完成 | 尚无 VNN-COMP ONNX/VNNLIB 或真实长搜索流 |
+| 真实 complete verifier integration | PR-14A validated-partial | 已有官方 MLP/CNN 与 VNN-COMP ResNet-2B 共 540 个真实调用；尚无 external fixed replay |
 | ASPLOS 最终系统主张 | 未冻结 | C3 必须根据真实 workload 证据决定保留、降级或改写 |
 
 历史 `main@263ea81` 只到 PR-10 closure，不能再作为项目当前状态入口。跨会话恢复必须同时检查
@@ -50,15 +50,13 @@ research branch、annotated tag 与 closure 文档，不能只看 `main`。
 
 ## 3. 当前真正缺口
 
-1. **真实 verifier 接线**：把已有 `BoundQuery`/Planner/backend 接入真实 αβ-CROWN 或等价
-   complete-verification host flow，而不是继续扩仓库内 synthetic driver。
-2. **标准 workload**：至少形成一条 ONNX + VNNLIB 输入到 same-solver execution 的可审计路径，
-   并覆盖 CIFAR CNN、multi-block ResNet 或 VNN-COMP 代表实例。
-3. **真实 query distribution**：报告 method/stage、spec/domain、split depth、shape、memory 和
-   backend eligibility，确认 PR-12 candidate 在实际搜索流中的覆盖率。
-4. **公平端到端对照**：同 solver、property、branch/split、seed、timeout 下，比较 original
+1. **真实 fixed replay**：把 initial plain-CROWN 的 external tensor payload 冻结为可重放工件；
+   当前只有 identity/profile，没有 parent lineage 与 payload。
+2. **Backend phase 闭环**：真实 coverage 已证明 initial phase 143/146 eligible，但
+   activation-BaB 为 0/394；PR-14B 只能窄化到前者，禁止为后者新增 kernel。
+3. **公平端到端对照**：同 solver、property、branch/split、seed、timeout 下，比较 original
    batched executor 与 BoundFlow，而不是逐节点 baseline。
-5. **C3 定位决策**：只有当 query-aware scheduling/cache/multi-backend 相对 batched original
+4. **C3 定位决策**：只有当 query-aware scheduling/cache/multi-backend 相对 batched original
    有可归因收益时，C3 才保留为核心贡献；否则降级为支撑 C1/C2 的执行基础设施。
 
 ## 4. 下一阶段唯一主线

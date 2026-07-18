@@ -157,6 +157,40 @@ def test_coverage_report_keeps_all_rejection_reasons() -> None:
     assert report.rejection_reasons["beta_unsupported"] == 1
 
 
+def test_frontend_precondition_rejects_otherwise_legal_backend_region() -> None:
+    """An unsupported ONNX graph must not be reported as backend eligible."""
+
+    module = _mlp_module()
+    alpha_beta = _alpha_beta_query(module)
+    query = replace(
+        alpha_beta,
+        bound_method=BoundMethod.CROWN,
+        optimization_stage=OptimizationStage.FINAL_BOUND,
+        requires_grad=False,
+        device="cuda",
+        split_signature="empty",
+        compatibility_key=replace(
+            alpha_beta.compatibility_key,
+            bound_method=BoundMethod.CROWN.value,
+            optimization_stage=OptimizationStage.FINAL_BOUND.value,
+            requires_grad=False,
+            split_tensor_shapes=(),
+            device="cuda",
+        ),
+        execution_options={"split_state_present": False},
+    )
+
+    profile = VerificationQueryProfile.from_bound_query(
+        query,
+        solver_phase="final_bound",
+        layer_pattern=module_layer_pattern(module),
+        precondition_rejections=("onnx_frontend_unsupported_op:AveragePool",),
+    )
+
+    assert not profile.backend_eligible
+    assert profile.reason_if_not == ("onnx_frontend_unsupported_op:AveragePool",)
+
+
 class BoundLinear:
     """Fake external node carrying the same class-name convention as auto_LiRPA."""
 
@@ -222,3 +256,25 @@ def test_external_adapter_is_observational_reversible_and_writes_artifacts(
     assert coverage["total_queries"] == 1
     assert (tmp_path / "queries.jsonl").read_text().count("\n") == 1
     assert (tmp_path / "profiles.jsonl").read_text().count("\n") == 1
+
+
+def test_external_instance_instrumentation_removes_temporary_override() -> None:
+    """Instance instrumentation must not leave a shadow method after exit."""
+
+    module = FakeBoundedModule()
+    profiler = ABCrownBoundQueryProfiler(
+        model_structure_hash="model-hash",
+        weight_version="weight-hash",
+        phase_resolver=lambda: "activation_bab_bound",
+    )
+    assert "compute_bounds" not in module.__dict__
+
+    with profiler.instrument(module):
+        module.compute_bounds(
+            x=(torch.ones((1, 4)),),
+            C=torch.ones((1, 1, 2)),
+            method="CROWN-Optimized",
+        )
+
+    assert "compute_bounds" not in module.__dict__
+    assert len(profiler.queries) == 1

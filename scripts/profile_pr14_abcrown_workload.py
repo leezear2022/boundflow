@@ -11,6 +11,7 @@ import subprocess
 import sys
 from typing import Any
 
+from boundflow.frontends.onnx.frontend import import_onnx
 from boundflow.runtime.abcrown_adapter import (
     ABCrownBoundQueryProfiler,
     file_sha256,
@@ -28,6 +29,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--device", choices=("cpu", "cuda"))
     parser.add_argument("--timeout", type=float)
     parser.add_argument("--skip-attack", action="store_true")
+    parser.add_argument("--baseline-first", action="store_true")
     parser.add_argument(
         "--complete-verifier", choices=("auto", "bab", "bab-refine", "input_bab")
     )
@@ -61,7 +63,64 @@ def _json_value(value: Any) -> Any:
     return str(value)
 
 
-def main() -> None:  # pylint: disable=too-many-locals
+def _result_summary(result: Any) -> dict[str, Any]:
+    """Keep solver status and stats while normalizing external objects."""
+
+    return {
+        "status": getattr(result, "status", None),
+        "success": getattr(result, "success", None),
+        "stats": _json_value(getattr(result, "stats", None)),
+    }
+
+
+def _visited_domains(result: Any) -> list[int]:
+    """Extract per-instance BaB counts without comparing wall-clock fields."""
+
+    stats = getattr(result, "stats", None)
+    if not isinstance(stats, dict) or not isinstance(stats.get("bab"), list):
+        return []
+    return [
+        int(row[2])
+        for row in stats["bab"]
+        if isinstance(row, (tuple, list)) and len(row) >= 3
+    ]
+
+
+def _audit_boundflow_import(model: Path) -> dict[str, Any]:
+    """Run the local ONNX frontend and preserve a fail-closed reason."""
+
+    try:
+        program = import_onnx(str(model), do_shape_infer=True, normalize=True)
+    except Exception as error:  # pylint: disable=broad-exception-caught
+        message = str(error)
+        unsupported_prefix = "unsupported ONNX op: "
+        unsupported_op = (
+            message.removeprefix(unsupported_prefix)
+            if message.startswith(unsupported_prefix)
+            else None
+        )
+        reason = (
+            f"onnx_frontend_unsupported_op:{unsupported_op}"
+            if unsupported_op
+            else f"onnx_frontend_import_failed:{type(error).__name__}"
+        )
+        return {
+            "supported": False,
+            "reason": reason,
+            "error_type": type(error).__name__,
+            "error": message,
+            "layer_pattern": [],
+        }
+    return {
+        "supported": True,
+        "reason": None,
+        "error_type": None,
+        "error": None,
+        "layer_pattern": [node.op_type for node in program.graph.nodes],
+    }
+
+
+def main() -> None:  # pylint: disable=too-many-locals,too-many-statements
     """Run one official verifier instance and persist the coverage artifacts."""
 
     args = _parse_args()
@@ -112,13 +171,24 @@ def main() -> None:  # pylint: disable=too-many-locals
         overrides["attack/pgd_order"] = "skip"
 
     model_hash = file_sha256(model)
+    boundflow_import = _audit_boundflow_import(model)
     profiler = ABCrownBoundQueryProfiler(
         model_structure_hash=f"onnx:{model_hash}",
         weight_version=f"onnx:{model_hash}",
         query_prefix=args.workload_name,
+        precondition_rejections=(
+            () if boundflow_import["supported"] else (str(boundflow_import["reason"]),)
+        ),
     )
+    baseline_result = None
+    if args.baseline_first:
+        baseline_solver = abcrown_solver(str(model), config=config.copy())
+        baseline_result = baseline_solver.verify(
+            constraints=io_constraints(vnnlib_path=str(vnnlib))
+        )
+
     constraints = io_constraints(vnnlib_path=str(vnnlib))
-    solver = abcrown_solver(str(model), config=config)
+    solver = abcrown_solver(str(model), config=config.copy())
     with profiler.instrument(bounded_module):
         result = solver.verify(constraints=constraints)
 
@@ -135,12 +205,24 @@ def main() -> None:  # pylint: disable=too-many-locals
         "config": None if config_path is None else str(config_path),
         "config_sha256": None if config_path is None else file_sha256(config_path),
         "config_overrides": overrides,
+        "boundflow_import": boundflow_import,
         "command": sys.argv,
-        "result": {
-            "status": getattr(result, "status", None),
-            "success": getattr(result, "success", None),
-            "stats": _json_value(getattr(result, "stats", None)),
-        },
+        "result": _result_summary(result),
+        "baseline_result": (
+            None if baseline_result is None else _result_summary(baseline_result)
+        ),
+        "baseline_comparison": (
+            None
+            if baseline_result is None
+            else {
+                "status_match": getattr(baseline_result, "status", None)
+                == getattr(result, "status", None),
+                "visited_domains_match": _visited_domains(baseline_result)
+                == _visited_domains(result),
+                "baseline_visited_domains": _visited_domains(baseline_result),
+                "profiled_visited_domains": _visited_domains(result),
+            }
+        ),
         "query_count": len(profiler.queries),
     }
     (output_dir / "manifest.json").write_text(

@@ -209,6 +209,7 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
     weight_version: str
     query_prefix: str = "abcrown"
     phase_resolver: Callable[[], str] = _phase_from_stack
+    precondition_rejections: Tuple[str, ...] = ()
     queries: list[BoundQuery] = field(default_factory=list)
     profiles: list[VerificationQueryProfile] = field(default_factory=list)
 
@@ -333,6 +334,7 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
             solver_phase=solver_phase,
             layer_pattern=pattern,
             source="alpha-beta-CROWN",
+            precondition_rejections=self.precondition_rejections,
         )
         self.queries.append(query)
         self.profiles.append(profile)

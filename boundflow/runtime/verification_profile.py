@@ -157,7 +157,7 @@ class VerificationQueryProfile:  # pylint: disable=too-many-instance-attributes
     schema_version: str = VERIFICATION_QUERY_PROFILE_SCHEMA_VERSION
 
     @classmethod
-    def from_bound_query(
+    def from_bound_query(  # pylint: disable=too-many-arguments
         cls,
         query: BoundQuery,
         *,
@@ -165,6 +165,7 @@ class VerificationQueryProfile:  # pylint: disable=too-many-instance-attributes
         layer_pattern: Sequence[str],
         source: str = "boundflow",
         capabilities: Sequence[BackendCapability] | None = None,
+        precondition_rejections: Sequence[str] = (),
     ) -> "VerificationQueryProfile":
         """Project an existing query onto coverage and capability fields."""
 
@@ -184,6 +185,10 @@ class VerificationQueryProfile:  # pylint: disable=too-many-instance-attributes
         eligible, reasons, capability_ids = _eligibility(
             query, layer_pattern, active_capabilities
         )
+        if precondition_rejections:
+            eligible = False
+            reasons = tuple(dict.fromkeys((*precondition_rejections, *reasons)))
+            capability_ids = ()
         alpha_enabled, beta_enabled, split_state = _query_flags(query)
         profile = cls(
             query_id=query.query_id,
