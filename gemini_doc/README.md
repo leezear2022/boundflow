@@ -16,12 +16,14 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-1. `gemini_doc/asplos_execution_memo_v1_0.md`（当前唯一执行顺序与硬门禁）
-2. `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`（ASPLOS 顶层执行计划 v1.0）
-3. `gemini_doc/asplos_claims_map.md`（论文主张→代码→实验→工件证据）
-4. `docs/phase5_done.md`（Phase 5 完成声明：复现入口、产物结构、DoD、边界）
-5. `gemini_doc/artifact_claims_phase5d.md`（Phase 5 claims→文件/字段→命令）
-6. `docs/bench_jsonl_schema.md`（JSONL schema=1.0：字段与计时口径）
+1. `gemini_doc/current_status_after_pr13.md`（PR-13 后真实状态与当前缺口）
+2. `gemini_doc/pr14_execution_plan.md`（真实 workload coverage 与 execution 的唯一下一路线）
+3. `gemini_doc/asplos_execution_memo_v1_0.md`（当前唯一执行顺序与硬门禁）
+4. `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`（ASPLOS 顶层执行计划 v1.0）
+5. `gemini_doc/asplos_claims_map.md`（论文主张→代码→实验→工件证据）
+6. `docs/phase5_done.md`（Phase 5 完成声明：复现入口、产物结构、DoD、边界）
+7. `gemini_doc/artifact_claims_phase5d.md`（Phase 5 claims→文件/字段→命令）
+8. `docs/bench_jsonl_schema.md`（JSONL schema=1.0：字段与计时口径）
 
 ### B. 全流程总览（从 claims 到工程到 AE）
 
@@ -36,9 +38,10 @@
 
 ### D. 研发演化/接手视角
 
-1. `gemini_doc/project_evolution_overview.md`（项目目标、阶段推进、代码落点、未来路线）
-2. `docs/change_log.md`（按时间看每一批修改做了什么）
-3. `gemini_doc/phase6_summary.md`（当前方法族与 E2E 工件链的阶段总览）
+1. `gemini_doc/current_status_after_pr13.md`（当前冻结状态与下一门禁）
+2. `gemini_doc/project_evolution_overview.md`（项目目标、阶段推进、代码落点、未来路线）
+3. `docs/change_log.md`（按时间看每一批修改做了什么）
+4. `gemini_doc/phase6_summary.md`（当前方法族与 E2E 工件链的阶段总览）
 
 ---
 
@@ -47,6 +50,8 @@
 ### 2.1 关键交付文档（“长期有效”）
 
 - `gemini_doc/asplos_execution_memo_v1_0.md`：ASPLOS 研发的短执行入口与门禁
+- `gemini_doc/current_status_after_pr13.md`：PR-13 closure 后的真实状态、证据边界与当前缺口
+- `gemini_doc/pr14_execution_plan.md`：真实 verifier workload coverage/execution 的切片、门禁与止损
 - `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`：ASPLOS 总体研发、论文与 artifact 执行计划
 - `gemini_doc/asplos_claims_map.md`：ASPLOS 三项贡献的动态证据映射
 - `gemini_doc/materialization_trace_schema_v1.md`：PR-10 trace JSONL 与内存口径

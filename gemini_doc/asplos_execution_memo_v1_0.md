@@ -1,8 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
-> 生效日期：2026-07-12  
-> 当前 PR-13 代码基线：`fda5b82`；closure tag：`pr13-validated-reduced`
-> 唯一执行顺序：**Gate 0 → PR-10 → PR-11 → PR-12 → PR-13**。  
+> 生效日期：2026-07-12
+> 当前冻结基线：`57a854b`；closure tag：`pr13-validated-reduced`
+> 当前研发分支：`feat/pr14-real-verification`
+> 唯一执行顺序：**Gate 0 → PR-10 → PR-11 → PR-12 → PR-13 → PR-14**。
 > 禁止同时启动 Planner、fused kernel 与 BaB runtime 三条主线。
 
 ## 1. 锁定的论文命题
@@ -276,3 +277,21 @@ hard 16-node E2E 分别为 9.93×/0.980×，status/node count 一致。结果证
 
 每个后续 PR 必须回答：消除什么瓶颈、改善哪个北极星指标、为哪项论文贡献增加证据、如何
 验证参考语义、原始 JSONL/表图/manifest 在哪里。
+
+## 9. PR-13 后批准路线：PR-14 Verification-Aware Execution on Real Verification Workloads
+
+PR-13 已以 `VALIDATED-REDUCED` 关闭。其 fixed/E2E 大幅逐节点 speedup 主要来自普通物理
+batching；相对公平 batched original 没有稳定净加速。因此下一阶段不得回到 PR-10B.2、继续
+孤立 TIR 调优或重新设计 BaB 算法。
+
+PR-14 的唯一目标是量化并验证已有 `BoundQuery`、Planner、multi-backend execution 和 same-solver
+adapter 在真实 complete-verification workload 中的 coverage 与作用：
+
+1. PR-14A：真实 verifier/workload adapter、query distribution 与 backend eligibility coverage；
+2. PR-14B：固定真实 query replay、backend eligibility 与公平 original-batched 对照；
+3. PR-14C：只在 Go 后运行 CIFAR CNN、multi-block ResNet、VNN-COMP 代表实例的完整评估。
+
+PR-14 不重新实现 query recorder；PR-13A 的 state-versioned contract、split lineage 和 fixed replay
+是唯一基础。完整门禁见 `gemini_doc/pr14_execution_plan.md`。在真实 workload、0 query loss、
+same-solver correctness 和相对 batched-original 的可归因证据成立前，ASPLOS-ready 继续为 NO，
+C3 不得描述成“更快的 BaB runtime”。

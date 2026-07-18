@@ -2805,3 +2805,40 @@
 - `gemini_doc/change_2026-07-14_pr13d_fixed_e2e_gpu.md`
 - `gemini_doc/pr13_closure_audit_2026_07_14.md`
 - `gemini_doc/pr13_artifact_appendix_2026_07_14.md`
+
+---
+
+## 2026-07-18：启动 PR-14 Verification-Aware Execution on Real Verification Workloads
+
+**状态纠正**
+- 完整审计 research branches 与 annotated tags，确认真实冻结基线为 `57a854b` / tag
+  `pr13-validated-reduced`，不再把 `main@263ea81` 误当项目最新状态；
+- 从该 tag 创建 `feat/pr14-real-verification`，停止历史 PR-10B.2 路线。
+
+**计划冻结**
+- 新增 PR-13 后当前状态文档与 PR-14 执行计划；
+- 下一主线为真实 verifier/workload coverage adapter → fixed real-query replay/eligibility →
+  complete verification evaluation；
+- PR-14 复用已有 `BoundQuery`/recorder/replay，不重写 solver，不恢复孤立 TIR 调优；
+- 公平 baseline 固定为 same-solver original batched executor，C3 是否保留为核心贡献由真实
+  workload 证据决定。
+- PR-13 focused 回归在新分支/当前环境下为 15 passed。
+
+**记录**
+- `gemini_doc/current_status_after_pr13.md`
+- `gemini_doc/pr14_execution_plan.md`
+- `gemini_doc/change_2026-07-18_start_pr14_real_verification.md`
+
+---
+
+## 2026-07-19：冻结 PR-14 Coverage-First 执行模型
+
+**决策**
+- PR-14 正式名称改为 `Verification-Aware Execution on Real Verification Workloads`；
+- 第一门禁从“先接 executor”收紧为 MLP/CNN/ResNet-block 真实 query coverage profile；
+- 新 `VerificationQueryProfile` 只能从 PR-13 `BoundQuery` 派生，禁止创建第二套 query schema；
+- 先报告 method/stage 与 backend eligibility，再进入 fixed replay 和 full E2E；
+- ASPLOS 当前为执行 `CONDITIONAL GO`，但在真实 workload 闭环前仍是 `ASPLOS-ready NO`。
+
+**记录**
+- `gemini_doc/change_2026-07-19_finalize_pr14_coverage_first_plan.md`
