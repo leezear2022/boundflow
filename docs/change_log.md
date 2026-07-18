@@ -1,5 +1,11 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-07-19：修复 tvm-ffi 动态库搜索路径
+
+- 激活环境与 staged installer 同时暴露 `build-boundflow/lib` 和 `build-boundflow`；
+- Conda deactivate 会恢复用户原有 `LD_LIBRARY_PATH`；
+- 新增环境回归门禁，已构建的新环境无需重编 TVM。
+
 ## 2026-07-19：PR-14A 真实 Query Trace 与 Coverage 判定
 
 - 生成官方 MLP/CNN 与 VNN-COMP ResNet-2B 的 540 个真实 `compute_bounds` profiles；

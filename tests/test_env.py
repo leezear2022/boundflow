@@ -86,6 +86,18 @@ def test_env_optional_imports():
     assert ok
 
 
+def test_tvm_ffi_library_search_path_when_configured():
+    """Activation must expose both TVM and standalone tvm-ffi build dirs."""
+
+    tvm_home = os.environ.get("TVM_HOME")
+    if not tvm_home:
+        pytest.skip("TVM_HOME is not configured")
+    library_paths = os.environ.get("LD_LIBRARY_PATH", "").split(":")
+    build_dir = os.path.join(tvm_home, "build-boundflow")
+    assert build_dir in library_paths
+    assert os.path.join(build_dir, "lib") in library_paths
+
+
 def main() -> int:
     # CLI mode: strict check.
     ok, messages = _check_env(

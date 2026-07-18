@@ -20,6 +20,7 @@ run_env() {
   local pythonpath="${ROOT_DIR}:${TVM_DIR}/python:${TVM_FFI_DIR}/python:${LIRPA_DIR}"
   PYTHONPATH="${pythonpath}${PYTHONPATH:+:${PYTHONPATH}}" \
     TVM_LIBRARY_PATH="${TVM_BUILD_DIR}" \
+    LD_LIBRARY_PATH="${TVM_BUILD_DIR}/lib:${TVM_BUILD_DIR}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" \
     BOUNDFLOW_QUIET=1 \
     "${CONDA_BIN}" run --no-capture-output -n "${ENV_NAME}" "$@"
 }
