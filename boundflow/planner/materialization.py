@@ -13,7 +13,10 @@ PLAN_SCHEMA_VERSION = "boundflow.materialization_plan/v1"
 class BoundMethod(Enum):
     """Bound algorithms with materially different execution state."""
 
+    IBP = "IBP"
+    FORWARD = "forward"
     CROWN = "CROWN"
+    ALPHA_FORWARD = "alpha-forward"
     ALPHA_CROWN = "alpha-CROWN"
     ALPHA_BETA_CROWN = "alpha-beta-CROWN"
 

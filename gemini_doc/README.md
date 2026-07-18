@@ -52,6 +52,8 @@
 - `gemini_doc/asplos_execution_memo_v1_0.md`：ASPLOS 研发的短执行入口与门禁
 - `gemini_doc/current_status_after_pr13.md`：PR-13 closure 后的真实状态、证据边界与当前缺口
 - `gemini_doc/pr14_execution_plan.md`：真实 verifier workload coverage/execution 的切片、门禁与止损
+- `gemini_doc/change_2026-07-19_pr14a_abcrown_query_profile_adapter.md`：外部 αβ-CROWN
+  `compute_bounds` → PR-13 `BoundQuery` → coverage profile 的可撤销接入边界
 - `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`：ASPLOS 总体研发、论文与 artifact 执行计划
 - `gemini_doc/asplos_claims_map.md`：ASPLOS 三项贡献的动态证据映射
 - `gemini_doc/materialization_trace_schema_v1.md`：PR-10 trace JSONL 与内存口径

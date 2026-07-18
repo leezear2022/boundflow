@@ -1,5 +1,13 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-07-19：PR-14A αβ-CROWN Query Profile Adapter
+
+- 新增由现有 `BoundQuery` 派生的 coverage profile 与聚合报告，不复制 query/state schema；
+- 新增可撤销的外部 `BoundedModule.compute_bounds` observer 和官方 ONNX+VNNLIB runner；
+- 真实 verifier 方法扩展为 IBP/forward/CROWN/α/αβ，并以 capability reason fail closed；
+- contract 4 passed，PR-13 focused + PR-14A 19 passed，Mypy success，Pylint 10.00/10；
+- 详细记录：`gemini_doc/change_2026-07-19_pr14a_abcrown_query_profile_adapter.md`。
+
 ## 2026-07-12：PR-10 以 guarded structured path 完成
 
 - 360-row clean GPU 对照：354 ok、6 structured OOM；全量 179 passed。
