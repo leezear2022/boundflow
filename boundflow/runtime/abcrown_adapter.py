@@ -201,6 +201,177 @@ def _input_region_digest(input_tensor: torch.Tensor) -> str:
     return digest.hexdigest()
 
 
+@dataclass(frozen=True)
+class CapturedABCrownQuery:  # pylint: disable=too-many-instance-attributes
+    """Owned tensor payload plus a process-local exact-call replay closure."""
+
+    input_lower: torch.Tensor
+    input_upper: torch.Tensor
+    linear_spec_c: torch.Tensor
+    external_lower: torch.Tensor
+    external_upper: torch.Tensor | None
+    method: str
+    solver_phase: str
+    bound_lower_requested: bool
+    bound_upper_requested: bool
+    replay_external: Callable[[], Any] = field(repr=False, compare=False)
+
+
+@dataclass
+class ABCrownInitialCrownCapture:
+    """Capture the first real, split-free plain-CROWN ``compute_bounds`` call."""
+
+    phase_resolver: Callable[[], str] = _phase_from_stack
+    captured: CapturedABCrownQuery | None = None
+
+    def _candidate_payload(
+        self,
+        bounded_module: Any,
+        original: Callable[..., Any],
+        call_args: tuple[Any, ...],
+        call_kwargs: Mapping[str, Any],
+    ) -> (
+        tuple[
+            torch.Tensor,
+            torch.Tensor,
+            torch.Tensor,
+            str,
+            str,
+            bool,
+            bool,
+        ]
+        | None
+    ):
+        if self.captured is not None:
+            return None
+        values = _argument_map(original, call_args, call_kwargs)
+        values.pop("self", None)
+        method = str(values.get("method", call_kwargs.get("method", "backward")))
+        if (
+            _method_kind(method, beta_enabled=_beta_enabled(bounded_module))
+            != BoundMethod.CROWN
+        ):
+            return None
+        solver_phase = self.phase_resolver()
+        if solver_phase not in {
+            "alpha_crown_initialization",
+            "incomplete_verification",
+        }:
+            return None
+        input_tensor = _first_tensor(values.get("x"))
+        linear_spec = _first_tensor(values.get("C"))
+        if input_tensor is None or linear_spec is None:
+            return None
+        lower, upper = _input_bounds(input_tensor)
+        return (
+            lower.detach().clone(),
+            upper.detach().clone(),
+            linear_spec.detach().clone(),
+            method,
+            solver_phase,
+            bool(values.get("bound_lower", True)),
+            bool(values.get("bound_upper", True)),
+        )
+
+    def _finish_capture(
+        self,
+        candidate: tuple[
+            torch.Tensor,
+            torch.Tensor,
+            torch.Tensor,
+            str,
+            str,
+            bool,
+            bool,
+        ],
+        result: Any,
+        replay_external: Callable[[], Any],
+    ) -> None:
+        if self.captured is not None:
+            return
+        if not isinstance(result, (tuple, list)) or not result:
+            raise TypeError("plain-CROWN compute_bounds must return a tuple/list")
+        external_lower = _first_tensor(result[0])
+        external_upper = _first_tensor(result[1]) if len(result) > 1 else None
+        if external_lower is None:
+            raise ValueError("plain-CROWN result does not contain a lower bound")
+        (
+            lower,
+            upper,
+            linear_spec,
+            method,
+            solver_phase,
+            bound_lower_requested,
+            bound_upper_requested,
+        ) = candidate
+        self.captured = CapturedABCrownQuery(
+            input_lower=lower,
+            input_upper=upper,
+            linear_spec_c=linear_spec,
+            external_lower=external_lower.detach().clone(),
+            external_upper=(
+                None if external_upper is None else external_upper.detach().clone()
+            ),
+            method=method,
+            solver_phase=solver_phase,
+            bound_lower_requested=bound_lower_requested,
+            bound_upper_requested=bound_upper_requested,
+            replay_external=replay_external,
+        )
+
+    @contextmanager
+    def instrument(self, target: Any) -> Iterator["ABCrownInitialCrownCapture"]:
+        """Wrap a BoundedModule instance/class and restore it exactly on exit."""
+
+        if not hasattr(target, "compute_bounds"):
+            raise TypeError("instrument target must expose compute_bounds")
+        original = getattr(target, "compute_bounds")
+        had_instance_override = not inspect.isclass(target) and (
+            "compute_bounds" in getattr(target, "__dict__", {})
+        )
+        if inspect.isclass(target):
+
+            def wrapped(instance: Any, *args: Any, **kwargs: Any) -> Any:
+                candidate = self._candidate_payload(
+                    instance, original, (instance, *args), kwargs
+                )
+                result = original(instance, *args, **kwargs)
+                if candidate is not None:
+                    replay_args = tuple(args)
+                    replay_kwargs = dict(kwargs)
+                    self._finish_capture(
+                        candidate,
+                        result,
+                        lambda: original(instance, *replay_args, **replay_kwargs),
+                    )
+                return result
+
+            setattr(target, "compute_bounds", wrapped)
+        else:
+
+            def wrapped_instance(_instance: Any, *args: Any, **kwargs: Any) -> Any:
+                candidate = self._candidate_payload(target, original, args, kwargs)
+                result = original(*args, **kwargs)
+                if candidate is not None:
+                    replay_args = tuple(args)
+                    replay_kwargs = dict(kwargs)
+                    self._finish_capture(
+                        candidate,
+                        result,
+                        lambda: original(*replay_args, **replay_kwargs),
+                    )
+                return result
+
+            setattr(target, "compute_bounds", MethodType(wrapped_instance, target))
+        try:
+            yield self
+        finally:
+            if inspect.isclass(target) or had_instance_override:
+                setattr(target, "compute_bounds", original)
+            else:
+                delattr(target, "compute_bounds")
+
+
 @dataclass
 class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
     """Build PR-13 ``BoundQuery`` records at real ``compute_bounds`` calls."""
@@ -408,5 +579,7 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
 __all__ = [
     "ABCROWN_ADAPTER_SCHEMA_VERSION",
     "ABCrownBoundQueryProfiler",
+    "ABCrownInitialCrownCapture",
+    "CapturedABCrownQuery",
     "file_sha256",
 ]

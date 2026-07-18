@@ -11,6 +11,7 @@ from scripts.benchmark_phase7a_pr12j_compile_amortization import main as run_mai
 from scripts.postprocess_phase7a_pr12j_compile_amortization import (
     main as postprocess_main,
 )
+from tests.pr12_split_fixtures import write_pr12_v2_split
 
 
 def _baseline_row(backend: str, latency_ms: float) -> dict[str, object]:
@@ -37,10 +38,7 @@ def test_pr12j_runner_records_restart_disk_hit_and_report(tmp_path: Path) -> Non
         encoding="utf-8",
     )
     raw_dir = tmp_path / "raw"
-    split = Path(
-        "artifacts/phase7a-pr12/"
-        "pr12g-multibackend-v2-freeze-20260713/heldout_split.json"
-    )
+    split = write_pr12_v2_split(tmp_path)
 
     assert (
         run_main(

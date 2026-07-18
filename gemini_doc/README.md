@@ -60,6 +60,12 @@
   frontend 审计的变更记录
 - `gemini_doc/change_2026-07-19_tvm_ffi_library_search_path.md`：新环境中新版 tvm-ffi
   动态库发现与 Conda hooks 的修复记录
+- `gemini_doc/pr14b_initial_crown_fixed_replay_2026_07_19.md`：exact-box MLP/ResNet fixed
+  replay、requested-output/bound-equivalence 门禁与 PR-14/C3 最终 No-Go
+- `gemini_doc/change_2026-07-19_pr14b_initial_crown_fixed_replay.md`：PR-14B 代码、contract、
+  ignored artifacts 与验证记录
+- `gemini_doc/change_2026-07-19_fresh_clone_test_split_fixtures.md`：完整测试从代码冻结 split
+  重建临时 fixture，不再依赖新环境中不存在的 ignored PR-12 artifacts
 - `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`：ASPLOS 总体研发、论文与 artifact 执行计划
 - `gemini_doc/asplos_claims_map.md`：ASPLOS 三项贡献的动态证据映射
 - `gemini_doc/materialization_trace_schema_v1.md`：PR-10 trace JSONL 与内存口径

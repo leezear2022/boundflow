@@ -1,11 +1,12 @@
 # PR-14 执行计划：Verification-Aware Execution on Real Verification Workloads
 
-> 状态：PR-14A coverage adapter 已实现并完成三类真实 workload 首轮审计；VALIDATED-PARTIAL
+> 状态：PR-14B 已完成并判定 **VALIDATED-NO-GO**；PR-14C 被门禁阻断
 > 起点：`57a854b` / `pr13-validated-reduced`
 > 分支：`feat/pr14-real-verification`
 > 核心目标：量化并验证 BoundFlow 的 IR、Planner、backend 与 runtime 如何覆盖和执行真实
 > complete-verification workload，而不只是执行 reduced bound-query benchmark。
 > 当前证据与窄化判定：`gemini_doc/pr14a_real_query_coverage_2026_07_19.md`
+> 最终 replay/closure 判定：`gemini_doc/pr14b_initial_crown_fixed_replay_2026_07_19.md`
 
 ## 1. 研究问题
 
@@ -100,6 +101,10 @@ PR-14B 完成门禁：
 - original batched 为正式 baseline；
 - 输出是否值得进入 full E2E 的 Go/No-Go，不预设 PR-12 fused 一定进入 αβ/split 查询。
 
+实际结果：payload/replay/manifest 已闭合，但 VNN-COMP ResNet 的 whole-query lower bound 未保持
+external computation（max diff `796.765`，符号 3/9），且唯一等价 MLP 存在 external
+lower-only 与 BoundFlow lower+upper 的 requested-output 不一致。结论为 **NO-GO**。
+
 ### PR-14C：完整 verification evaluation
 
 仅在 PR-14B Go 后启动：
@@ -109,6 +114,8 @@ PR-14B 完成门禁：
 - 至少 5 次独立重复，报告 median 与 tail；
 - 记录 peak memory、真实 GPU OOM、batch fill、queue/compute/branch/prune 分解；
 - 表图只能从原始 JSONL 生成，失败记录不得删除。
+
+当前状态：**BLOCKED BY PR-14B GATE；不启动。**
 
 ## 4. 预期代码与工件边界
 
@@ -157,17 +164,15 @@ PR-14B 后必须做一次显式决策：
   基础设施，论文主线集中到 structured representation 与 multi-backend Planner；
 - 不为保留三项贡献而新增验证算法、TIR family 或不公平 baseline。
 
+PR-14B 已触发第二条：C3 正式降级为支撑 C1/C2 的执行基础设施。
+
 PR-14 的最低成功标准是：BoundFlow 能正确执行并审计真实 verifier query；较强标准是至少一个
 真实 phase/regime 获得可归因收益；最强标准才是 same-solver、same-property、same-timeout 下改善
 time-to-verify、peak memory 或 solved instances。
 
-## 7. 第一实现动作
+## 7. Closure 后动作
 
-第一提交只做 PR-14A integration audit 与最小 contract：
-
-```text
-feat(pr14): add real verification input and query-trace adapter
-```
-
-在修改 runtime 前，先冻结：支持/不支持的 ONNX op、property 语义、首个 workload hash、original
-solver command 与预期 query-trace schema。
+PR-14 不再新增实现切片。closure 后从最终 commit/tag 建立
+`docs/asplos-c1-c2-story-freeze`，更新摘要、前两页、claims 与 artifact 阅读顺序，并以 C1+C2
+重新做 paper-level Go/No-Go。未来若研究 external intermediate-bound-preserving region adapter，
+必须作为新假设、新 split 和新门禁，不能继续挂在本 PR-14 上。

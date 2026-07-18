@@ -1,5 +1,19 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-07-19：完整测试不再依赖 ignored PR-12 split
+
+- 从代码冻结的 v1/v2 builder 确定性重建 test fixture；
+- runner smoke 在 `tmp_path` 写 process-shareable split；
+- 干净 clone 无需历史 raw artifacts 即可运行完整测试。
+
+## 2026-07-19：PR-14B Initial Plain-CROWN Fixed Replay
+
+- 新增 exact Box perturbation、external capture 与 real-query replay runner；
+- MLP lower 等价但 requested outputs 不公平，性能 N/A；
+- ResNet nominal forward 正确，但 whole-query lower max diff `796.765`、符号 3/9；
+- PR-14B `VALIDATED-NO-GO`，PR-14C blocked，C3 降级为 C1/C2 基础设施；
+- 详细记录：`gemini_doc/pr14b_initial_crown_fixed_replay_2026_07_19.md`。
+
 ## 2026-07-19：修复 tvm-ffi 动态库搜索路径
 
 - 激活环境与 staged installer 同时暴露 `build-boundflow/lib` 和 `build-boundflow`；

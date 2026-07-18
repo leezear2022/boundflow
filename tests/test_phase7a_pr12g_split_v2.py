@@ -5,12 +5,11 @@ from pathlib import Path
 
 from scripts.benchmark_phase7a_pr12_runtime_pareto import _frozen_candidate_backends
 from scripts.start_phase7a_pr12_v2 import SCHEMA_VERSION, SPLIT_ID, build_split, main
+from tests.pr12_split_fixtures import pr12_v1_split
 
 
 def _v1() -> dict:
-    return json.loads(
-        Path("artifacts/phase7a-pr12/baseline/heldout_split.json").read_text()
-    )
+    return pr12_v1_split()
 
 
 def test_v2_split_promotes_consumed_v1_without_heldout_overlap() -> None:

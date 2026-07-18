@@ -2,15 +2,16 @@
 
 > 本表是动态证据账本。`planned` 不代表已经实现；只有代码、测试和工件均存在时才能改为
 > `validated`。当前执行基线为 PR-12 validated-reduced；PR-13 已以
-> `VALIDATED-REDUCED` 关闭，完整 C3/non-toy 主张仍未成立。
+> `VALIDATED-REDUCED` 关闭；PR-14B 真实 replay 为 `VALIDATED-NO-GO`，C3 已降级为 C1/C2
+> 基础设施，不再主张 non-toy verifier acceleration。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
 | C1：显式物化语义的 Structured Bound-Operator IR | validated foundation（PR-10 guarded） | `boundflow/runtime/linear_operator.py`、`crown_ibp.py` | dense/operator 数值与 gradient 对齐；materialization trace | count/bytes/reason/lifetime JSONL |
 | C2：Method/Autograd/Memory-Aware Materialization Planner | validated-reduced（PR-11） | static topology/liveness summary、global candidate model、bounded runtime；CROWN/α/αβ capability 接口 | 3× replicated correctness、LOO、held-out/Oracle、真实 OOM | 1,416 executions→472 aggregate patterns；23/23 feasible；manifests |
-| C3：BaB-Oriented Repeated-Query Runtime | validated-reduced（PR-13） | query/validity + batcher + physical αβ + same-solver adapter | identity/reuse/budget/deadline/OOM/order/stream/no-loss/same-search | fixed 96.52×、hard E2E 9.93× vs per-node；仅 0.980× vs batched；non-toy 未完成 |
+| C3：Verification Query Runtime Infrastructure | downgraded after PR-14B | query/validity + batcher + capability routing + real observer | 保留 reduced correctness；真实 coverage/replay 作为 limitation | activation 0/394 eligible；ResNet bound-equivalence fail；不作 acceleration claim |
 | TVM 后端执行 Planner 结果而非定义核心抽象 | partial | `boundflow/backends/tvm/`、`runtime/tvm_executor.py` | Python/TVM/unfused/fused 对齐 | compile/cold/warm、launch、bytes |
-| 相同浮点语义下保持 reference bound computation | partial | dense reference + planned paths | allclose、gradient、auto_LiRPA、replay | correctness fields 与失败记录 |
+| 相同浮点语义下保持 reference bound computation | reduced-only；non-toy fail | dense reference + planned paths | allclose、gradient、auto_LiRPA、replay | MLP pass；ResNet max diff 796.765，PR-14C blocked |
 
 ## PR-10 子阶段
 
@@ -19,7 +20,7 @@
 | PR-10A Materialization instrumentation | validated | `25225e5`；ReLU barrier opt-in trace |
 | PR-10A.1 Trace schema v1 | validated | `boundflow.materialization/v1`、schema contract tests、164 passed |
 | PR-10B.1 workload characterization | validated | `8f2c998`；180/180 clean GPU profile；mini-ResNet s128/d32 |
-| PR-10B.2 真实 BaB fixed-domain replay | planned | 当前仅 `synthetic_fixed_domain_batch`，不得描述成 BaB 结果 |
+| PR-10B.2 真实 BaB fixed-domain replay | superseded | 不再执行；由 PR-14A/B 真实 verifier trace/replay 取代 |
 | PR-10C.1 Dense/gradient reference oracle | validated | 显式 `A_u/A_l/b_u/b_l` oracle；独立 α sign-gradient；170 passed |
 | PR-10C.2 Dense/structured 双路径 oracle | validated | local/full/gradient、plain/α/αβ、真实 solve_bab 搜索等价 |
 | PR-10D.1 Exact SignSplit operator | validated | exact dense/gradient；composition 包裹而不下推 sign；26 passed |
@@ -289,6 +290,22 @@ PR-12N closure：
   branch/prune/GPU-active 分解未完成；
 - 工件：`artifacts/phase7a-pr13/pr13d-bab-runtime-v5-20260714/`；closure：
   `gemini_doc/pr13_closure_audit_2026_07_14.md`。
+
+## PR-14A/B 真实 Verifier Coverage 与 No-Go
+
+- `C3-E9` validated coverage：官方 MLP/CNN 与 VNN-COMP ResNet-2B 共 540 个真实
+  `compute_bounds`；initial 143/146 region-level eligible，activation-BaB 0/394；
+- `C3-M10` validated foundation：external observer 可撤销，on/off status 与 visited domains
+  一致；exact Box perturbation 保留 VNNLIB per-element clipped bounds 与 query identity；
+- `C3-E10` validated narrow equivalence：simple MLP 的 external replay 与 BoundFlow
+  eager/chunked/TVM lower 全部 max diff 0；但 external lower-only、BoundFlow lower+upper，公平
+  performance 为 N/A；
+- `C3-L7` validated non-toy limitation：ResNet nominal forward 对 ONNX max diff `1.67e-6`，但
+  BoundFlow whole-query lower 对 external max diff `796.765`，符号只一致 3/9；
+- `C3-CLOSE` validated-no-go：activation route 与 initial whole-query replacement 均未过门禁，
+  PR-14C blocked；C3 降级为 C1/C2 基础设施，禁止 verifier acceleration claim；
+- 证据：`gemini_doc/pr14a_real_query_coverage_2026_07_19.md`、
+  `gemini_doc/pr14b_initial_crown_fixed_replay_2026_07_19.md`。
 
 该段 PR-11 early evidence 当时为专项 21 passed、全量 200 passed/1 skipped；其“Global 与
 Memory-Threshold 决策相同”的历史限制已由后续 PR-11E 和 PR-12G 证据分别补充，不能再读作

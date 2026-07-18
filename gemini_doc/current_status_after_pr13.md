@@ -1,9 +1,9 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
-> 状态日期：2026-07-18
+> 状态日期：2026-07-19
 > 冻结基线：`57a854b` / annotated tag `pr13-validated-reduced`
 > 当前研发分支：`feat/pr14-real-verification`
-> 总判定：PR-10/11/12/13 已关闭；ASPLOS 执行为 **CONDITIONAL GO**，ASPLOS-ready 仍为 **NO**。
+> 总判定：PR-14B 为 **VALIDATED-NO-GO**，PR-14C 不启动；ASPLOS-ready 仍为 **NO**。
 
 ## 1. 当前真实阶段
 
@@ -15,8 +15,8 @@ BoundFlow 已经完成从边界表示到 query runtime prototype 的主干：
 | Method/autograd/memory-aware Planner | validated-reduced | 1,416 次执行、472 个聚合 pattern、final held-out 23/23 feasible |
 | Fused/multi-backend CROWN execution | validated-reduced | eager/chunked/structured/TVM fused 多预算选择；收益只在部分 regime |
 | Query runtime | validated-reduced | `BoundQuery`、state validity、dynamic batching、same-solver adapter、reduced GPU E2E |
-| 真实 complete verifier integration | PR-14A validated-partial | 已有官方 MLP/CNN 与 VNN-COMP ResNet-2B 共 540 个真实调用；尚无 external fixed replay |
-| ASPLOS 最终系统主张 | 未冻结 | C3 必须根据真实 workload 证据决定保留、降级或改写 |
+| 真实 complete verifier integration | PR-14B validated-no-go | 540-call coverage + MLP/ResNet fixed replay；activation 0/394，ResNet bound-equivalence fail |
+| ASPLOS 最终系统主张 | C3 已降级 | C3 保留为 C1/C2 基础设施；下一步冻结 C1+C2 paper story |
 
 历史 `main@263ea81` 只到 PR-10 closure，不能再作为项目当前状态入口。跨会话恢复必须同时检查
 research branch、annotated tag 与 closure 文档，不能只看 `main`。
@@ -48,24 +48,19 @@ research branch、annotated tag 与 closure 文档，不能只看 `main`。
 
 因此 96×/9.93× 必须归因于物理 batching，不能描述成 runtime abstraction 的独立加速。
 
-## 3. 当前真正缺口
+## 3. PR-14 已关闭的问题
 
-1. **真实 fixed replay**：把 initial plain-CROWN 的 external tensor payload 冻结为可重放工件；
-   当前只有 identity/profile，没有 parent lineage 与 payload。
-2. **Backend phase 闭环**：真实 coverage 已证明 initial phase 143/146 eligible，但
-   activation-BaB 为 0/394；PR-14B 只能窄化到前者，禁止为后者新增 kernel。
-3. **公平端到端对照**：同 solver、property、branch/split、seed、timeout 下，比较 original
-   batched executor 与 BoundFlow，而不是逐节点 baseline。
-4. **C3 定位决策**：只有当 query-aware scheduling/cache/multi-backend 相对 batched original
-   有可归因收益时，C3 才保留为核心贡献；否则降级为支撑 C1/C2 的执行基础设施。
+1. **真实 coverage**：540 calls 中 initial 143/146 region-level eligible；activation-BaB 0/394；
+2. **真实 fixed replay**：MLP lower 等价，但 requested outputs 不同，性能 N/A；
+3. **non-toy bound equivalence**：ResNet nominal forward 正确，whole-query lower max diff
+   `796.765`、符号 3/9，不能接入 same-solver；
+4. **C3 定位**：无公平 batched-original 净收益证据，已降级为支撑 C1/C2 的基础设施。
 
 ## 4. 下一阶段唯一主线
 
-下一阶段为 `PR-14: Verification-Aware Execution on Real Verification Workloads`，详细执行门禁见
-`gemini_doc/pr14_execution_plan.md`。
-
-PR-14 不重新实现 query recorder、BaB 算法、branch heuristic 或 split strategy。它复用 PR-13
-contract，先量化真实 query coverage，再接 executor/replay，最后才做 full verification evaluation。
+PR-14 implementation 到此停止。下一分支为 `docs/asplos-c1-c2-story-freeze`：冻结 C1+C2
+论文主线、C3 limitations 和 PR-14 negative evidence，并重新判断 ASPLOS 2027 是否具备足够
+architecture/PL/systems contribution。不得用 PR-14C E2E 绕过 bound-equivalence gate。
 
 明确禁止：
 
@@ -78,8 +73,8 @@ contract，先量化真实 query coverage，再接 executor/replay，最后才�
 ## 5. 权威阅读顺序
 
 1. 本文；
-2. `gemini_doc/pr14_execution_plan.md`；
-3. `gemini_doc/pr13_closure_audit_2026_07_14.md`；
-4. `gemini_doc/pr13_execution_status.md`；
+2. `gemini_doc/pr14b_initial_crown_fixed_replay_2026_07_19.md`；
+3. `gemini_doc/pr14a_real_query_coverage_2026_07_19.md`；
+4. `gemini_doc/pr14_execution_plan.md`；
 5. `gemini_doc/asplos_claims_map.md`；
 6. `gemini_doc/asplos_execution_memo_v1_0.md`。

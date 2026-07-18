@@ -295,3 +295,26 @@ PR-14 不重新实现 query recorder；PR-13A 的 state-versioned contract、spl
 是唯一基础。完整门禁见 `gemini_doc/pr14_execution_plan.md`。在真实 workload、0 query loss、
 same-solver correctness 和相对 batched-original 的可归因证据成立前，ASPLOS-ready 继续为 NO，
 C3 不得描述成“更快的 BaB runtime”。
+
+## 10. PR-14A/B 最终判定：VALIDATED-NO-GO
+
+PR-14A observer 在官方 MLP/CNN 与 VNN-COMP ResNet-2B 上记录 540 个真实 bound calls；
+initial phase 有 143/146 个 query 含 capability-legal region，但 activation-BaB 为 0/394。
+因此 PR-14B 只允许 replay initial plain-CROWN，不新增 α/β/split kernel。
+
+PR-14B 使用真实 `x_L/x_U/C` 和 exact per-element box。simple MLP 的 external replay 与
+BoundFlow eager/chunked/TVM lower 完全对齐，但 external 请求 lower-only，而当前 BoundFlow
+总是 lower+upper，故不产生公平性能 claim。VNN-COMP ResNet-2B nominal forward 与 ONNX 对齐到
+`1.67e-6`，但 whole-query lower 对 external max diff `796.765`，符号仅 3/9；same-solver
+替换会改变 incomplete-verifier decision。
+
+硬决策：
+
+1. PR-14C 不启动，不用 full E2E 绕过 bound-equivalence gate；
+2. 不继续调 TIR，不新增 α/β/split kernel，不重写 verifier 算法；
+3. C3 降级为支撑 C1/C2 的 query/state/capability infrastructure；
+4. 下一分支是 `docs/asplos-c1-c2-story-freeze`，只做 claims、前两页、artifact 与投稿
+   Go/No-Go 收敛；若未来研究 external-semantics-preserving region adapter，必须另立新假设。
+
+最终证据见 `gemini_doc/pr14b_initial_crown_fixed_replay_2026_07_19.md`。ASPLOS-ready 继续为
+NO，直到 C1+C2 paper-level story 独立通过评审门禁。
