@@ -21,7 +21,7 @@ from ..ir.task import BFTaskModule
 from ..planner.materialization import BoundMethod, OptimizationStage
 from .alpha_beta_crown import BetaState, run_alpha_beta_crown_mlp
 from .alpha_crown import AlphaState, run_alpha_crown_mlp
-from .perturbation import LpBallPerturbation
+from .perturbation import BoxPerturbation, LpBallPerturbation
 from .task_executor import InputSpec, InputSpecLike, _normalize_input_spec
 
 QUERY_SCHEMA_VERSION = "boundflow.bab-query/v1"
@@ -639,6 +639,11 @@ def make_bound_query(  # pylint: disable=too-many-arguments,too-many-locals
             "kind": "lp_ball",
             "id": perturbation.perturbation_id,
             "eps": float(perturbation.eps),
+        }
+    elif isinstance(perturbation, BoxPerturbation):
+        perturbation_payload = {
+            "kind": "box",
+            "id": perturbation.perturbation_id,
         }
     else:
         perturbation_payload = {"kind": type(perturbation).__name__}

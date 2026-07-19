@@ -16,12 +16,16 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-1. `gemini_doc/asplos_execution_memo_v1_0.md`（当前唯一执行顺序与硬门禁）
-2. `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`（ASPLOS 顶层执行计划 v1.0）
-3. `gemini_doc/asplos_claims_map.md`（论文主张→代码→实验→工件证据）
-4. `docs/phase5_done.md`（Phase 5 完成声明：复现入口、产物结构、DoD、边界）
-5. `gemini_doc/artifact_claims_phase5d.md`（Phase 5 claims→文件/字段→命令）
-6. `docs/bench_jsonl_schema.md`（JSONL schema=1.0：字段与计时口径）
+1. `gemini_doc/pr14_external_model_audit_handoff_2026_07_19.md`（从项目起点到 PR-14
+   No-Go 的自包含外部审计入口）
+2. `gemini_doc/current_status_after_pr13.md`（PR-13 后真实状态与当前缺口）
+3. `gemini_doc/pr14_execution_plan.md`（真实 workload coverage 与 execution 的唯一下一路线）
+4. `gemini_doc/asplos_execution_memo_v1_0.md`（当前唯一执行顺序与硬门禁）
+5. `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`（ASPLOS 顶层执行计划 v1.0）
+6. `gemini_doc/asplos_claims_map.md`（论文主张→代码→实验→工件证据）
+7. `docs/phase5_done.md`（Phase 5 完成声明：复现入口、产物结构、DoD、边界）
+8. `gemini_doc/artifact_claims_phase5d.md`（Phase 5 claims→文件/字段→命令）
+9. `docs/bench_jsonl_schema.md`（JSONL schema=1.0：字段与计时口径）
 
 ### B. 全流程总览（从 claims 到工程到 AE）
 
@@ -36,9 +40,10 @@
 
 ### D. 研发演化/接手视角
 
-1. `gemini_doc/project_evolution_overview.md`（项目目标、阶段推进、代码落点、未来路线）
-2. `docs/change_log.md`（按时间看每一批修改做了什么）
-3. `gemini_doc/phase6_summary.md`（当前方法族与 E2E 工件链的阶段总览）
+1. `gemini_doc/current_status_after_pr13.md`（当前冻结状态与下一门禁）
+2. `gemini_doc/project_evolution_overview.md`（项目目标、阶段推进、代码落点、未来路线）
+3. `docs/change_log.md`（按时间看每一批修改做了什么）
+4. `gemini_doc/phase6_summary.md`（当前方法族与 E2E 工件链的阶段总览）
 
 ---
 
@@ -46,7 +51,25 @@
 
 ### 2.1 关键交付文档（“长期有效”）
 
+- `gemini_doc/pr14_external_model_audit_handoff_2026_07_19.md`：项目起点、ASPLOS 路线、
+  PR-14A/B 证据/限制、外部复核命令与下一步的自包含审计交接
 - `gemini_doc/asplos_execution_memo_v1_0.md`：ASPLOS 研发的短执行入口与门禁
+- `gemini_doc/current_status_after_pr13.md`：PR-13 closure 后的真实状态、证据边界与当前缺口
+- `gemini_doc/pr14_execution_plan.md`：真实 verifier workload coverage/execution 的切片、门禁与止损
+- `gemini_doc/change_2026-07-19_pr14a_abcrown_query_profile_adapter.md`：外部 αβ-CROWN
+  `compute_bounds` → PR-13 `BoundQuery` → coverage profile 的可撤销接入边界
+- `gemini_doc/pr14a_real_query_coverage_2026_07_19.md`：MLP/CNN/VNN-COMP ResNet-2B 的真实
+  method/phase/backend coverage、observer baseline 与 PR-14B 窄化判定
+- `gemini_doc/change_2026-07-19_pr14a_real_query_traces.md`：真实 trace 生成与 fail-closed
+  frontend 审计的变更记录
+- `gemini_doc/change_2026-07-19_tvm_ffi_library_search_path.md`：新环境中新版 tvm-ffi
+  动态库发现与 Conda hooks 的修复记录
+- `gemini_doc/pr14b_initial_crown_fixed_replay_2026_07_19.md`：exact-box MLP/ResNet fixed
+  replay、requested-output/bound-equivalence 门禁与 PR-14/C3 最终 No-Go
+- `gemini_doc/change_2026-07-19_pr14b_initial_crown_fixed_replay.md`：PR-14B 代码、contract、
+  ignored artifacts 与验证记录
+- `gemini_doc/change_2026-07-19_fresh_clone_test_split_fixtures.md`：完整测试从代码冻结 split
+  重建临时 fixture，不再依赖新环境中不存在的 ignored PR-12 artifacts
 - `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`：ASPLOS 总体研发、论文与 artifact 执行计划
 - `gemini_doc/asplos_claims_map.md`：ASPLOS 三项贡献的动态证据映射
 - `gemini_doc/materialization_trace_schema_v1.md`：PR-10 trace JSONL 与内存口径

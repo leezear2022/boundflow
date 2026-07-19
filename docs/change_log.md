@@ -1,5 +1,49 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-07-19：新增 PR-14 外部模型审计交接
+
+- 串联项目起点、Phase 0～6、ASPLOS PR-10～14、真实 verifier coverage/replay 与最终 No-Go；
+- 修正 PR-14 实际为 5 个提交，并排除不可由仓库复核的内部执行时长；
+- 区分已独立重算的 PR-14A 与尚未二次重跑的 PR-14B 数值边界；
+- 提供 Git、JSONL、tests、manifest/payload 和可选 replay 的逐项审计清单；
+- 详细记录：`gemini_doc/pr14_external_model_audit_handoff_2026_07_19.md`。
+
+## 2026-07-19：完整测试不再依赖 ignored PR-12 split
+
+- 从代码冻结的 v1/v2 builder 确定性重建 test fixture；
+- runner smoke 在 `tmp_path` 写 process-shareable split；
+- 干净 clone 无需历史 raw artifacts 即可运行完整测试。
+
+## 2026-07-19：PR-14B Initial Plain-CROWN Fixed Replay
+
+- 新增 exact Box perturbation、external capture 与 real-query replay runner；
+- MLP lower 等价但 requested outputs 不公平，性能 N/A；
+- ResNet nominal forward 正确，但 whole-query lower max diff `796.765`、符号 3/9；
+- PR-14B `VALIDATED-NO-GO`，PR-14C blocked，C3 降级为 C1/C2 基础设施；
+- 详细记录：`gemini_doc/pr14b_initial_crown_fixed_replay_2026_07_19.md`。
+
+## 2026-07-19：修复 tvm-ffi 动态库搜索路径
+
+- 激活环境与 staged installer 同时暴露 `build-boundflow/lib` 和 `build-boundflow`；
+- Conda deactivate 会恢复用户原有 `LD_LIBRARY_PATH`；
+- 新增环境回归门禁，已构建的新环境无需重编 TVM。
+
+## 2026-07-19：PR-14A 真实 Query Trace 与 Coverage 判定
+
+- 生成官方 MLP/CNN 与 VNN-COMP ResNet-2B 的 540 个真实 `compute_bounds` profiles；
+- initial phase 143/146 eligible，activation-BaB 0/394 eligible；
+- observer-on/off 三组 status 与 visited-domain count 一致；CNN AveragePool frontend fail closed；
+- PR-14B 仅对 initial plain-CROWN NARROW GO，activation backend replay NO-GO；
+- 详细记录：`gemini_doc/pr14a_real_query_coverage_2026_07_19.md`。
+
+## 2026-07-19：PR-14A αβ-CROWN Query Profile Adapter
+
+- 新增由现有 `BoundQuery` 派生的 coverage profile 与聚合报告，不复制 query/state schema；
+- 新增可撤销的外部 `BoundedModule.compute_bounds` observer 和官方 ONNX+VNNLIB runner；
+- 真实 verifier 方法扩展为 IBP/forward/CROWN/α/αβ，并以 capability reason fail closed；
+- contract 4 passed，PR-13 focused + PR-14A 19 passed，Mypy success，Pylint 10.00/10；
+- 详细记录：`gemini_doc/change_2026-07-19_pr14a_abcrown_query_profile_adapter.md`。
+
 ## 2026-07-12：PR-10 以 guarded structured path 完成
 
 - 360-row clean GPU 对照：354 ok、6 structured OOM；全量 179 passed。
@@ -2805,3 +2849,40 @@
 - `gemini_doc/change_2026-07-14_pr13d_fixed_e2e_gpu.md`
 - `gemini_doc/pr13_closure_audit_2026_07_14.md`
 - `gemini_doc/pr13_artifact_appendix_2026_07_14.md`
+
+---
+
+## 2026-07-18：启动 PR-14 Verification-Aware Execution on Real Verification Workloads
+
+**状态纠正**
+- 完整审计 research branches 与 annotated tags，确认真实冻结基线为 `57a854b` / tag
+  `pr13-validated-reduced`，不再把 `main@263ea81` 误当项目最新状态；
+- 从该 tag 创建 `feat/pr14-real-verification`，停止历史 PR-10B.2 路线。
+
+**计划冻结**
+- 新增 PR-13 后当前状态文档与 PR-14 执行计划；
+- 下一主线为真实 verifier/workload coverage adapter → fixed real-query replay/eligibility →
+  complete verification evaluation；
+- PR-14 复用已有 `BoundQuery`/recorder/replay，不重写 solver，不恢复孤立 TIR 调优；
+- 公平 baseline 固定为 same-solver original batched executor，C3 是否保留为核心贡献由真实
+  workload 证据决定。
+- PR-13 focused 回归在新分支/当前环境下为 15 passed。
+
+**记录**
+- `gemini_doc/current_status_after_pr13.md`
+- `gemini_doc/pr14_execution_plan.md`
+- `gemini_doc/change_2026-07-18_start_pr14_real_verification.md`
+
+---
+
+## 2026-07-19：冻结 PR-14 Coverage-First 执行模型
+
+**决策**
+- PR-14 正式名称改为 `Verification-Aware Execution on Real Verification Workloads`；
+- 第一门禁从“先接 executor”收紧为 MLP/CNN/ResNet-block 真实 query coverage profile；
+- 新 `VerificationQueryProfile` 只能从 PR-13 `BoundQuery` 派生，禁止创建第二套 query schema；
+- 先报告 method/stage 与 backend eligibility，再进入 fixed replay 和 full E2E；
+- ASPLOS 当前为执行 `CONDITIONAL GO`，但在真实 workload 闭环前仍是 `ASPLOS-ready NO`。
+
+**记录**
+- `gemini_doc/change_2026-07-19_finalize_pr14_coverage_first_plan.md`

@@ -1,8 +1,5 @@
 """Non-GPU contracts for the PR-12E runtime Pareto runner."""
 
-import json
-from pathlib import Path
-
 import torch
 
 from boundflow.planner.execution_candidate import BackendVariant, OperatorFamily
@@ -19,11 +16,11 @@ from scripts.benchmark_phase7a_pr12_runtime_pareto import (
     _planner_evaluation,
     _workload,
 )
+from tests.pr12_split_fixtures import pr12_v1_split
 
 
 def _split() -> dict:
-    path = Path("artifacts/phase7a-pr12/baseline/heldout_split.json")
-    return json.loads(path.read_text(encoding="utf-8"))
+    return pr12_v1_split()
 
 
 def test_runtime_workloads_preserve_frozen_split_and_region_counts() -> None:
