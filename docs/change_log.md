@@ -1,5 +1,13 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-07-19：新增 PR-14 外部模型审计交接
+
+- 串联项目起点、Phase 0～6、ASPLOS PR-10～14、真实 verifier coverage/replay 与最终 No-Go；
+- 修正 PR-14 实际为 5 个提交，并排除不可由仓库复核的内部执行时长；
+- 区分已独立重算的 PR-14A 与尚未二次重跑的 PR-14B 数值边界；
+- 提供 Git、JSONL、tests、manifest/payload 和可选 replay 的逐项审计清单；
+- 详细记录：`gemini_doc/pr14_external_model_audit_handoff_2026_07_19.md`。
+
 ## 2026-07-19：完整测试不再依赖 ignored PR-12 split
 
 - 从代码冻结的 v1/v2 builder 确定性重建 test fixture；
