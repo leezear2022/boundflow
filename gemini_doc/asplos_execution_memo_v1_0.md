@@ -13,9 +13,9 @@
 > `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md` 推进。
 
 > **2026-07-28 进度**：IR-1—IR-4 narrow plain-CROWN compiler/runtime 已
-> validated-reduced；IR-5C2 已产出 typed MLP measured CUDA artifact，但因同-family split、
-> fair batching baseline 与 non-toy workload 缺失保持 PARTIAL。下一门禁是 IR-5C3，
-> 不进入 IR-6。不得继续把第 11 节的“尚未实现”历史描述当作当前状态。
+> validated-reduced；IR-5C3 architecture-held-out fair artifact 已完成，但 Global 相对
+> batched-original p90 regret 70.263×且无多预算切换，判定 VALIDATED-NO-GO。
+> IR-6 blocked；如继续只允许 IR-5D prepared execution remediation。
 
 ## 1. 锁定的论文命题
 
@@ -391,3 +391,7 @@ Bound IR v1
   artifact 上得到 Global 8/8 feasible、p50/p90 regret 1.000×/1.00766×；高内存选择
   PyTorch dense，低内存选择 TVM fused。该结果仅为 PARTIAL：同-family split、
   ordinary batching/fair batched-original 与 non-toy workload 尚缺，IR-5 不关闭。
+- IR-5C3 已用 MLP calibration→chain-CNN held-out 和 fair batched-original 补齐关键口径；
+  correctness/feasibility 全通过，但 Global p50/p90 regret 为 68.065×/70.263×，
+  64/512 MiB 均选 chunked且无 Pareto。当前 IR-5 v1 VALIDATED-NO-GO，IR-6 blocked。
+  profile 指向 query hot path 重复 validate/hash；唯一允许补救为 IR-5D prepared execution。

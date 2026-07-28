@@ -3397,3 +3397,22 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_ir5c3b_fair_batching_contract.md`
+
+---
+
+## 2026-07-28：IR-5C3C fair architecture-held-out（VALIDATED-NO-GO）
+
+**正式结果**
+- MLP calibration→chain-CNN held-out，8 compiler rows/2 original/2 batch checks 全 correct；
+- Global 8/8 feasible，但 fair Oracle regret p50/p90/max =
+  68.065×/70.263×/70.263×；
+- batched-original 始终为 Oracle；
+- 64/512 MiB 均选 chunked，无多预算切换，无 memory Pareto。
+
+**归因与判定**
+- profile 指向 query hot path 重复 validate/hash/dispatch-key；
+- 当前 IR-5 v1 VALIDATED-NO-GO，IR-6 blocked；
+- 唯一补救为一次验证、query-time 复用的 prepared execution capsule，并要求新 final split。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5c3c_family_fair_nogo.md`

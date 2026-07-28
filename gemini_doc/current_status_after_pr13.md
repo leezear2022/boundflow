@@ -12,14 +12,16 @@
 > IR-4C TVM fused/unfused、dispatch-namespaced cache 与 semantic fallback 已通过；
 > IR-4D typed plain-CROWN query→Plan/Task/Schedule、精确 state payload 与计算跳过已通过；
 > IR-4E 已把 PR-13 manager 接入 typed compiler，并把 legacy α/β 改为默认关闭的
-> historical opt-in。当前唯一下一阶段为 IR-5C3 independent workload-family +
-> fair batching baseline。
+> historical opt-in。IR-5C3 independent workload-family + fair batching 已完成并给出
+> VALIDATED-NO-GO；如继续，唯一补救是 IR-5D prepared execution capsule。
 > IR-5A 已完成 query-time memory/deadline/cache/distribution context 与 amortized selector；
 > 这只是 mechanism。
 > IR-5B 已完成统一 observation 上的 fixed/local/global/oracle evaluator 与 synthetic
 > contract artifact。IR-5C2 已产出 fresh CUDA typed MLP measured artifact：Global 8/8
 > feasible，p50/p90 regret 1.000×/1.00766×，但同-family split、fair batching baseline
-> 与 non-toy workload 仍缺，因此 IR-5 保持 PARTIAL。
+> 与 non-toy workload 仍缺。IR-5C3 随后用 MLP→CNN architecture-held-out 和 fair
+> batched-original 补齐口径，Global p50/p90 regret 恶化为 68.065×/70.263×，且无多预算
+> 切换/Pareto，因此当前 IR-5 v1 为 VALIDATED-NO-GO。
 
 ## 1. 当前真实阶段
 
@@ -100,9 +102,15 @@ IR-5A 已让 cold/repeated/warm-cache 与 per-query memory/deadline 进入 PlanI
 identity、provenance 和 runtime cache namespace。同一 template 可合法切换不同 plan。
 IR-5B/C2 随后完成四策略 evaluator 与 fresh CUDA typed MLP artifact：Global 在 8/8
 contexts 可行，p50/p90 Oracle regret 为 1.000×/1.00766×，高内存选择 dense、冻结低内存
-选择 TVM fused。但 calibration/held-out 仍是同一 MLP family，ordinary batching/fair
-batched-original、CNN/残差 non-toy 与跨层收益归因未完成。因此当前下一步为 IR-5C3，
-ASPLOS-ready 判定仍为 NO，且不得提前进入 IR-6。
+选择 TVM fused。IR-5C3 随后冻结 MLP calibration→chain-CNN held-out，并加入 fixed-single、
+ordinary typed batching 与 legacy fair batched-original。全部 correctness/feasibility gate
+通过，但 batched-original 约 0.506–0.508 ms/query，Global 约 34.449–35.678 ms/query，
+p50/p90 regret 68.065×/70.263×；64/512 MiB 都选择 chunked，无 memory Pareto。
+
+profile 将主要问题定位到 query hot path 重复 Plan/Bound/Task validate、stable hash、
+canonical JSON 与 dispatch-key 构造。当前 IR-5 v1 以 VALIDATED-NO-GO 关闭；
+ASPLOS-ready 判定仍为 NO，IR-6 明确 blocked。如继续，唯一允许的补救是 IR-5D prepared
+execution capsule，并必须在新 frozen CNN/residual split 上重新过 fair p90≤1.20× 门禁。
 
 明确禁止：
 

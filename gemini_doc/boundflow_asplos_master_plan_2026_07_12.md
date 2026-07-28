@@ -13,9 +13,10 @@
 
 > **2026-07-28 进度修订**：上句是 2026-07-20 当时状态。IR-1—IR-4 narrow
 > plain-CROWN compiler/runtime 已 validated-reduced；external α/β 仍为显式 No-Go。
-> IR-5C2 typed MLP CUDA held-out 为 PARTIAL；下一阶段是 IR-5C3 独立 workload-family
-> 与 fair batching baseline，不提前进入 IR-6。详见
-> `gemini_doc/change_2026-07-28_ir5c2_cuda_heldout_partial.md`。
+> IR-5C3 architecture-held-out fair CUDA artifact 已给出 VALIDATED-NO-GO：Global
+> 相对 batched-original p90 regret 70.263×，无多预算切换/Pareto。IR-6 blocked；
+> 如继续只允许 IR-5D prepared execution remediation。详见
+> `gemini_doc/change_2026-07-28_ir5c3c_family_fair_nogo.md`。
 
 ---
 
