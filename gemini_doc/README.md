@@ -79,6 +79,8 @@
   Plan region lowering、Task↔Schedule launch linkage 与 dispatch trace
 - `gemini_doc/change_2026-07-28_task_schedule_ir_v1_semantic_closure.md`：IR-3D stateful
   Bound stepping、逐 Task 数值执行、shape/transfer 契约补项、artifact v2 与 closure audit
+- `gemini_doc/change_2026-07-28_ir4a_typed_backend_dispatch.md`：IR-4A typed backend
+  dispatch key、PyTorch reference adapter、prepared-task cache 与 stale/capability rejection
 - `gemini_doc/asplos_execution_memo_v1_0.md`：ASPLOS 研发的短执行入口与门禁
 - `gemini_doc/current_status_after_pr13.md`：PR-13 closure 后的真实状态、证据边界与当前缺口
 - `gemini_doc/pr14_execution_plan.md`：真实 verifier workload coverage/execution 的切片、门禁与止损

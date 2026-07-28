@@ -20,6 +20,11 @@ from ..ir.schedule import LaunchAction, ScheduleModule
 from ..ir.task import BFTaskModule
 from ..ir.task_v1 import TaskIRModule
 from .bound_ir_interpreter import PlainCrownBoundIRSession
+from .task_backend_dispatch import (
+    PyTorchReferenceTaskBackend,
+    TypedTaskBackend,
+    build_backend_dispatch_key,
+)
 from .task_executor import InputSpec
 
 
@@ -35,6 +40,7 @@ class TaskExecutionEvent:
     backend_candidate_id: str
     reference_implementation_id: str
     output_value_hashes: Tuple[Tuple[str, str], ...] = ()
+    backend_dispatch_key: str = ""
 
     def validate(self) -> None:
         if (
@@ -51,6 +57,8 @@ class TaskExecutionEvent:
             for value_id, value_hash in self.output_value_hashes
         ):
             raise ValueError("Task IR execution event has invalid output hashes")
+        if len(self.backend_dispatch_key) != 64:
+            raise ValueError("Task IR execution event backend key is not SHA-256")
 
     def to_dict(self) -> dict[str, object]:
         self.validate()
@@ -66,6 +74,7 @@ class TaskExecutionEvent:
                 {"value_id": value_id, "sha256": value_hash}
                 for value_id, value_hash in self.output_value_hashes
             ],
+            "backend_dispatch_key": self.backend_dispatch_key,
         }
 
 
@@ -148,6 +157,13 @@ def execute_task_ir_reference(
                 backend_candidate_id=task.backend.backend_candidate_id,
                 reference_implementation_id=task.backend.reference_implementation_id,
                 output_value_hashes=(),
+                backend_dispatch_key=build_backend_dispatch_key(
+                    task,
+                    task_module,
+                    bound_module=bound_module,
+                    template=template,
+                    instance=instance,
+                ).stable_hash(),
             )
         )
         completed.add(task.task_id)
@@ -181,6 +197,7 @@ def execute_task_ir_semantics(
     input_spec: InputSpec,
     relu_pre: Mapping[str, IntervalState],
     linear_spec_C: Optional[torch.Tensor] = None,
+    backend: Optional[TypedTaskBackend] = None,
 ) -> tuple[IntervalState, TaskExecutionTrace]:
     """Execute each TaskIRUnit's exact Bound op partition in Schedule order."""
 
@@ -197,6 +214,8 @@ def execute_task_ir_semantics(
         relu_pre=relu_pre,
         linear_spec_C=linear_spec_C,
     )
+    if backend is None:
+        backend = PyTorchReferenceTaskBackend()
     task_by_id = {task.task_id: task for task in task_module.tasks}
     launches = tuple(
         action for action in schedule.actions if isinstance(action, LaunchAction)
@@ -207,9 +226,18 @@ def execute_task_ir_semantics(
         task = task_by_id[launch.task_id]
         if any(dependency not in completed for dependency in task.dependency_task_ids):
             raise ValueError("Task IR semantic executor has dependency use-before-task")
-        step = session.execute_task(
-            tuple(op_ref.op_id for op_ref in task.op_refs),
-            output_value_ids=task.output_value_ids,
+        dispatch_key = build_backend_dispatch_key(
+            task,
+            task_module,
+            bound_module=bound_module,
+            template=template,
+            instance=instance,
+        )
+        step = backend.dispatch(
+            task,
+            dispatch_key,
+            session=session,
+            template=template,
         )
         events.append(
             TaskExecutionEvent(
@@ -221,6 +249,7 @@ def execute_task_ir_semantics(
                 backend_candidate_id=task.backend.backend_candidate_id,
                 reference_implementation_id=task.backend.reference_implementation_id,
                 output_value_hashes=step.output_value_hashes,
+                backend_dispatch_key=dispatch_key.stable_hash(),
             )
         )
         completed.add(task.task_id)

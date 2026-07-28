@@ -3141,3 +3141,25 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_task_schedule_ir_v1_semantic_closure.md`
+
+---
+
+## 2026-07-28：IR-4A typed backend dispatch/cache foundation
+
+**主要改动**
+- 新增锁定 Bound/Plan/Instance/Task/backend/capability/artifact 的 canonical dispatch key；
+- 新增只消费 TaskIRUnit 的 PyTorch reference backend adapter；
+- prepared-task cache 使用完整 dispatch SHA-256，hit 时继续核对 typed payload；
+- Task trace/artifact 新增每个 task 的 backend dispatch key；
+- 增加 cache hit、stale hash 与 illegal capability fail-closed 测试。
+
+**证据与边界**
+- Task/Artifact 定向：15 passed；
+- 全量：443 passed、1 skipped、6 warnings；
+- IR-4A foundation validated；chunked/structured/TVM/query-runtime 尚未迁移。
+
+**下一阶段**
+- IR-4B chunked/structured typed backend registry，然后迁移 TVM compile cache。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir4a_typed_backend_dispatch.md`

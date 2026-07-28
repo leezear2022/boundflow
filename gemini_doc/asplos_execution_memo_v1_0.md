@@ -367,3 +367,5 @@ Bound IR v1
   已通过 synchronous reference closure；
 - 下一步进入 IR-4 production backend/runtime migration，C1/C2 在真实 backend/E2E 前仍不得
   升级为 paper-level complete。
+- IR-4A 已新增跨 Bound/Plan/Task/backend 的 typed dispatch key 和 PyTorch reference
+  prepared-task adapter；这只是迁移入口，chunked/structured/TVM/query runtime 仍为 pending。

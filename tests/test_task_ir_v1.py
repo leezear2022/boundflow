@@ -32,6 +32,10 @@ from boundflow.runtime.task_ir_executor import (
     execute_task_ir_reference,
     execute_task_ir_semantics,
 )
+from boundflow.runtime.task_backend_dispatch import (
+    PyTorchReferenceTaskBackend,
+    build_backend_dispatch_key,
+)
 from boundflow.runtime.task_executor import InputSpec
 from scripts.run_plan_ir_v1_reference_artifact import (
     build_reference_smoke_inputs,
@@ -498,3 +502,82 @@ def test_task_schedule_reference_path_does_not_import_legacy_scheduler() -> None
             if isinstance(node, ast.ImportFrom) and node.module is not None
         }
         assert not any(module.endswith("runtime.scheduler") for module in imported)
+
+
+def test_typed_backend_dispatch_key_cache_and_capability_rejection() -> None:
+    workload = build_reference_smoke_workload()
+    module, template, instance, task_module, schedule = _task_fixture()
+    backend = PyTorchReferenceTaskBackend()
+    first_result, first_trace = execute_task_ir_semantics(
+        task_module,
+        schedule,
+        bound_module=module,
+        template=template,
+        instance=instance,
+        legacy_task_module=workload.task_module,
+        input_spec=workload.input_spec,
+        relu_pre=workload.relu_pre,
+        backend=backend,
+    )
+    second_result, second_trace = execute_task_ir_semantics(
+        task_module,
+        schedule,
+        bound_module=module,
+        template=template,
+        instance=instance,
+        legacy_task_module=workload.task_module,
+        input_spec=workload.input_spec,
+        relu_pre=workload.relu_pre,
+        backend=backend,
+    )
+    torch.testing.assert_close(first_result.lower, second_result.lower)
+    torch.testing.assert_close(first_result.upper, second_result.upper)
+    assert first_trace == second_trace
+    assert backend.cache_misses == len(task_module.tasks)
+    assert backend.cache_hits == len(task_module.tasks)
+    assert len({event.backend_dispatch_key for event in first_trace.events}) == len(
+        task_module.tasks
+    )
+
+    task = task_module.tasks[0]
+    key = build_backend_dispatch_key(
+        task,
+        task_module,
+        bound_module=module,
+        template=template,
+        instance=instance,
+    )
+    stale_key = replace(key, bound_module_hash="0" * 64)
+    session = PlainCrownBoundIRSession(
+        module,
+        task_module=workload.task_module,
+        input_spec=workload.input_spec,
+        relu_pre=workload.relu_pre,
+    )
+    with pytest.raises(ValueError, match="does not match typed task"):
+        backend.dispatch(task, stale_key, session=session, template=template)
+
+    candidate_index = next(
+        index
+        for index, candidate in enumerate(template.backend_candidates)
+        if candidate.candidate_id == task.backend.backend_candidate_id
+    )
+    wrong_candidate = replace(
+        template.backend_candidates[candidate_index],
+        static_legal=False,
+        rejection_reasons=("injected_static_rejection",),
+    )
+    wrong_template = replace(
+        template,
+        backend_candidates=(
+            *template.backend_candidates[:candidate_index],
+            wrong_candidate,
+            *template.backend_candidates[candidate_index + 1 :],
+        ),
+    )
+    wrong_key = replace(
+        key,
+        plan_template_hash=wrong_template.stable_hash(bound_module=module),
+    )
+    with pytest.raises(ValueError, match="rejects selected capability"):
+        backend.dispatch(task, wrong_key, session=session, template=wrong_template)
