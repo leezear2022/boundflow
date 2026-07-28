@@ -3232,3 +3232,28 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_ir4d_compiler_query_state_runtime.md`
+
+---
+
+## 2026-07-28：IR-4E PR-13 query migration 与 IR-4 closure
+
+**主要改动**
+- `BoundQuery` 新增唯一 compiler-eligible 的 `plain_crown_typed_ir` capability；
+- 新增 PR-13 query identity 与完整 compiler payload 的交叉验证 adapter；
+- PR-13 DynamicBatchManager 负责 compatibility/deadline/memory/OOM/order，executor
+  只进入 PlanInstance→TaskIR→ScheduleIR→typed backend；
+- legacy α/β SameSolver runtime 默认拒绝，仅历史脚本显式 opt-in；
+- fresh-process query/state artifact 升级 v2。
+
+**证据与边界**
+- IR-4E/PR-13 定向：24 passed；
+- 全量：464 passed、1 skipped、6 warnings；
+- Mypy 0 issues，Pylint 10.00/10；
+- IR-4 narrow plain-CROWN scope validated-reduced closure；
+- α/β/split external integration 仍明确不成立。
+
+**下一阶段**
+- IR-5 adaptive PlanInstance 与公平 held-out 对比；IR-6 继续 gated。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir4e_pr13_query_migration_closure.md`

@@ -6,12 +6,13 @@
 > 总判定：PR-14B 为 **VALIDATED-NO-GO**，PR-14C 不启动；ASPLOS-ready 仍为 **NO**。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
 > 2026-07-28 进度：IR-1 Bound IR、IR-2 Plan IR、IR-3 Task/Schedule IR 的最小
-> synchronous reference contract 已分别关闭；当前唯一下一阶段为 IR-4
-> production backend/runtime migration。IR-4A typed dispatch key + PyTorch reference
+> synchronous reference contract 已分别关闭；IR-4 production backend/runtime migration
+> 已以 validated-reduced 关闭。IR-4A typed dispatch key + PyTorch reference
 > adapter 已完成 foundation；IR-4B dense/structured/chunked typed registry 已通过，
 > IR-4C TVM fused/unfused、dispatch-namespaced cache 与 semantic fallback 已通过；
 > IR-4D typed plain-CROWN query→Plan/Task/Schedule、精确 state payload 与计算跳过已通过；
-> 当前缺口收敛为 IR-4 closure audit 和旧 same-solver α/β 语义路径处理。
+> IR-4E 已把 PR-13 manager 接入 typed compiler，并把 legacy α/β 改为默认关闭的
+> historical opt-in。当前唯一下一阶段为 IR-5 adaptive PlanInstance。
 
 ## 1. 当前真实阶段
 
@@ -19,12 +20,12 @@ BoundFlow 已经完成从边界表示到 query runtime prototype 的主干：
 
 | 层次 | 状态 | 已验证边界 |
 |---|---|---|
-| Structured Bound IR | IR-1 reference closure validated | typed schema/lowering/verifier、dense/structured rewrite/interpreter；生产 backend/runtime 待迁移 |
-| Plan/Task/Schedule IR | IR-2/3 reference closure validated-reduced | typed builder/selector/task lowering/schedule verifier/per-task semantics/artifact v2；production backend/runtime 待迁移 |
+| Structured Bound IR | IR-1 reference + IR-4 backend closure validated-reduced | typed schema/lowering/verifier、dense/structured rewrite/interpreter、PyTorch/TVM typed execution |
+| Plan/Task/Schedule IR | IR-2/3 reference + IR-4 runtime closure validated-reduced | typed builder/selector/task lowering/schedule verifier/per-task semantics/query/state/backend artifacts |
 | Fused/multi-backend CROWN execution | validated-reduced | eager/chunked/structured/TVM fused 多预算选择；收益只在部分 regime |
 | Query runtime | validated-reduced | `BoundQuery`、state validity、dynamic batching、same-solver adapter、reduced GPU E2E |
 | 真实 complete verifier integration | PR-14B validated-no-go | 540-call coverage + MLP/ResNet fixed replay；activation 0/394，ResNet bound-equivalence fail |
-| ASPLOS 最终系统主张 | C1/C2/C3 均不足 | C3 已降级；Bound/Plan reference closure 已有，下一步建立 Schedule/runtime/backend 闭环 |
+| ASPLOS 最终系统主张 | C1/C2/C3 均不足 | C3 已降级；IR-1—4 narrow closure 已有，下一步补 IR-5 自适应与公平 held-out 证据 |
 
 历史 `main@263ea81` 只到 PR-10 closure，不能再作为项目当前状态入口。跨会话恢复必须同时检查
 research branch、annotated tag 与 closure 文档，不能只看 `main`。
@@ -74,7 +75,8 @@ PR-14 implementation 到此停止。原定 `docs/asplos-c1-c2-story-freeze` 已�
 E2E 绕过 bound-equivalence gate。
 
 截至 2026-07-28，Bound IR、Plan IR、Task/Schedule IR 的 synchronous reference closure
-已完成；当前进入 **IR-4 backend/runtime migration**，不回滚重复实现 IR-1/2/3。IR-2
+与 IR-4 backend/runtime validated-reduced closure 均已完成；当前进入
+**IR-5 adaptive PlanInstance**，不回滚重复实现 IR-1/2/3/4。IR-2
 raw historical artifact 缺失边界见
 `gemini_doc/change_2026-07-28_plan_ir_v1_closure_audit.md`；IR-3 closure 证据见
 `gemini_doc/change_2026-07-28_task_schedule_ir_v1_semantic_closure.md`。
@@ -82,8 +84,10 @@ raw historical artifact 缺失边界见
 IR-4D 已证明可验证 plain-CROWN 请求能够通过 typed query 入口完成
 PlanInstance→TaskIR→ScheduleIR→backend，并已实现 exact-version dense state
 load/store/task skip。PR-13 α/β 请求仍因 PR-14 whole-query mismatch 在 compiler 入口显式
-No-Go；旧 `SameSolverQueryRuntime` 仍是待 closure audit 的 legacy 路径，不能据此宣称整个
-IR-4 已关闭。
+No-Go。IR-4E 随后把 `plain_crown_typed_ir` 请求接入 PR-13 DynamicBatchManager，并把旧
+`SameSolverQueryRuntime` 设为默认拒绝、仅 historical replay 显式 opt-in。IR-4 现以
+validated-reduced 关闭；下一工程阶段为 IR-5，不得把此 closure 写成 α/β external
+integration 或 ASPLOS 性能结论。
 
 明确禁止：
 

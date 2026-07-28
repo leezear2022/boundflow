@@ -365,8 +365,8 @@ Bound IR v1
 - 当前 `artifacts/` 不含 PR-11/12 raw planner records，因此不声称历史逐记录迁移；
 - IR-3 typed Task/Schedule schema、逐 Task reference semantics、control trace 与 artifact v2
   已通过 synchronous reference closure；
-- 下一步进入 IR-4 production backend/runtime migration，C1/C2 在真实 backend/E2E 前仍不得
-  升级为 paper-level complete。
+- IR-3 关闭时冻结的下一步曾为 IR-4 production backend/runtime migration；该动作现已由
+  下方 IR-4A—E 完成记录取代，C1/C2 在 IR-5 公平证据前仍不得升级为 paper-level complete。
 - IR-4A 已新增跨 Bound/Plan/Task/backend 的 typed dispatch key 和 PyTorch reference
   prepared-task adapter；这只是迁移入口，chunked/structured/TVM/query runtime 仍为 pending。
 - IR-4B 已把 PyTorch dense/structured/chunked 接入 typed registry；chunked fused Task 在 CUDA
@@ -376,5 +376,8 @@ Bound IR v1
 - IR-4D 已完成 capability-gated typed compiler query、Plan/Task cache、exact-version dense
   state payload、真实 load/store/task skip 与 fresh-process artifact；PR-13 α/β 请求保持
   external No-Go，不降级为 plain CROWN；
-- IR-4 尚需 closure audit：旧 `SameSolverQueryRuntime` α/β executor 仍是 legacy path，
-  在决定 IR-4 closure/进入 IR-5 前必须明确迁移、退役或 validated-reduced 边界。
+- IR-4E 已新增 `plain_crown_typed_ir` BoundQuery capability，并让 PR-13
+  DynamicBatchManager 只通过正式 adapter 调用 typed compiler；旧 `SameSolverQueryRuntime`
+  默认关闭，仅 PR-13 历史回归显式 opt-in，且错误/审计保留 PR-14 No-Go；
+- IR-4 已以 validated-reduced 关闭。下一步进入 IR-5 adaptive PlanInstance；不得提前启动
+  IR-6 cached specialization，也不得把 compiler closure 升级成 α/β external integration。

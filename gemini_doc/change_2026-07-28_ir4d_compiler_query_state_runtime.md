@@ -4,6 +4,8 @@
 > 分支：`feat/compiler-ir-stack-v1`
 > 基线：`e511966`（IR-4C TVM typed backend/cache + semantic fallback）
 > 状态：IR-4D validated；IR-4 closure audit 与 legacy same-solver 路径处理仍待完成
+> 后续：上述待办已由 IR-4E `change_2026-07-28_ir4e_pr13_query_migration_closure.md`
+> 以 historical opt-in + typed PR-13 adapter 关闭。
 
 ## 1. 审计结论与入口边界
 

@@ -23,11 +23,18 @@ from boundflow.runtime.bound_state_store import (
     BoundRuntimeStateStore,
 )
 from boundflow.runtime.compiler_query_runtime import (
+    CompilerBoundQueryRequest,
     CompilerQueryCapabilityError,
     TypedCompilerQueryPayload,
     TypedCompilerQueryRequest,
     TypedCompilerQueryRuntime,
 )
+from boundflow.runtime.bab_query_runtime import (
+    CompilerSameSolverQueryRuntime,
+    SameSolverQueryRuntime,
+    SameSolverRuntimeConfig,
+)
+from boundflow.runtime.task_executor import InputSpec
 from scripts.run_plan_ir_v1_reference_artifact import (
     ReferenceSmokeWorkload,
     build_reference_smoke_workload,
@@ -49,6 +56,33 @@ def _request(
             input_spec=workload.input_spec,
             relu_pre=workload.relu_pre,
         ),
+    )
+
+
+def _compiler_bound_query_request(
+    workload: ReferenceSmokeWorkload,
+    query_id: str,
+    sequence_number: int,
+    *,
+    method: BoundMethod = BoundMethod.CROWN,
+) -> CompilerBoundQueryRequest:
+    query, dynamic_payload = make_bound_query(
+        module=workload.task_module,
+        query_id=query_id,
+        parent_query_id=None,
+        sequence_number=sequence_number,
+        example_idx=0,
+        input_spec=workload.input_spec,
+        linear_spec_c=None,
+        split_by_relu_input={},
+        warm_alpha_by_relu_input={},
+        warm_beta_by_relu_input={},
+        bound_method=method,
+        execution_options={},
+    )
+    return CompilerBoundQueryRequest(
+        query_request=BoundQueryRequest(query=query, payload=dynamic_payload),
+        compiler_payload=_request(workload, query_id, sequence_number).payload,
     )
 
 
@@ -134,6 +168,81 @@ def test_typed_compiler_query_preserves_order_and_reuses_plan() -> None:
     assert runtime.audit()["plan_cache_misses"] == 1
     assert runtime.audit()["plan_cache_hits"] == 1
     assert runtime.audit()["physical_cross_query_batching_claimed"] is False
+
+
+def test_pr13_batch_manager_dispatches_only_typed_compiler_requests() -> None:
+    workload = build_reference_smoke_workload()
+    compiler = TypedCompilerQueryRuntime(
+        available_memory_bytes=1 << 30,
+        memory_budget_bytes=1 << 30,
+    )
+    runtime = CompilerSameSolverQueryRuntime(
+        SameSolverRuntimeConfig(
+            max_batch_size=2,
+            memory_budget_bytes=1 << 20,
+            minimum_fill_ratio=1.0,
+        ),
+        compiler,
+    )
+    requests = (
+        _compiler_bound_query_request(workload, "bound-query:z", 8),
+        _compiler_bound_query_request(workload, "bound-query:a", 1),
+    )
+
+    results = runtime.execute(requests, now_us=100)
+
+    assert [query_id for query_id, _result in results] == [
+        "bound-query:z",
+        "bound-query:a",
+    ]
+    audit = runtime.audit()
+    assert audit["emitted_batches"] == 1
+    assert audit["completed_queries"] == 2
+    assert audit["legacy_executor_dispatches"] == 0
+    assert audit["compiler"]["plan_cache_misses"] == 1
+    assert audit["compiler"]["plan_cache_hits"] == 1
+
+
+def test_pr13_compiler_adapter_rejects_alpha_and_payload_mismatch() -> None:
+    workload = build_reference_smoke_workload()
+    alpha_request = _compiler_bound_query_request(
+        workload,
+        "bound-query:alpha",
+        0,
+        method=BoundMethod.ALPHA_CROWN,
+    )
+    with pytest.raises(CompilerQueryCapabilityError, match="plain_crown_typed_ir"):
+        alpha_request.validate()
+    legacy_runtime = SameSolverQueryRuntime(
+        SameSolverRuntimeConfig(
+            max_batch_size=1,
+            memory_budget_bytes=1 << 20,
+        )
+    )
+    with pytest.raises(
+        CompilerQueryCapabilityError, match="historical opt-in only.*NO-GO"
+    ):
+        legacy_runtime.execute(
+            workload.task_module,
+            (alpha_request.query_request,),
+            now_us=0,
+        )
+
+    plain_request = _compiler_bound_query_request(workload, "bound-query:mismatch", 1)
+    mismatched_input = InputSpec.linf(
+        value_name=workload.input_spec.value_name,
+        center=torch.ones_like(workload.input_spec.center),
+        eps=0.1,
+    )
+    mismatched = replace(
+        plain_request,
+        compiler_payload=replace(
+            plain_request.compiler_payload,
+            input_spec=mismatched_input,
+        ),
+    )
+    with pytest.raises(ValueError, match="input payload differs"):
+        mismatched.validate()
 
 
 def test_runtime_state_cache_then_exact_reuse_skips_middle_task() -> None:

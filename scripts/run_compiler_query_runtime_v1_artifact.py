@@ -6,16 +6,22 @@ import argparse
 from dataclasses import replace
 import json
 from pathlib import Path
-from typing import Sequence
+from typing import cast, Sequence
 
 import torch
 
 from boundflow.frontends.plain_crown_bound_ir import tensor_content_hash
 from boundflow.ir.plan import PlanCost, StateAction, StateCandidate
+from boundflow.planner.materialization import BoundMethod
+from boundflow.runtime.bab_query import BoundQueryRequest, make_bound_query
+from boundflow.runtime.bab_query_runtime import (
+    CompilerSameSolverQueryRuntime,
+    SameSolverRuntimeConfig,
+)
 from boundflow.runtime.bound_state_store import BoundRuntimeStateStore
 from boundflow.runtime.compiler_query_runtime import (
+    CompilerBoundQueryRequest,
     TypedCompilerQueryPayload,
-    TypedCompilerQueryRequest,
     TypedCompilerQueryRuntime,
 )
 from scripts.run_plan_ir_v1_reference_artifact import (
@@ -23,7 +29,7 @@ from scripts.run_plan_ir_v1_reference_artifact import (
     build_reference_smoke_workload,
 )
 
-ARTIFACT_SCHEMA = "boundflow.compiler-query-runtime-artifact/v1"
+ARTIFACT_SCHEMA = "boundflow.compiler-query-runtime-artifact/v2"
 
 
 def _state_cost(latency: float) -> PlanCost:
@@ -48,7 +54,9 @@ def _build_workload() -> ReferenceSmokeWorkload:
             if item.value_id == value_id
         )
         state_id = f"artifact-middle-output:{index}"
-        static_shape = tuple(int(dim) for dim in value.tensor_type.shape)
+        if any(dim is None for dim in value.tensor_type.shape):
+            raise ValueError("IR-4E artifact requires static state shapes")
+        static_shape = cast(tuple[int, ...], value.tensor_type.shape)
         size_bytes = int(torch.empty(static_shape).numel() * 4)
         for action, latency in (
             (StateAction.REUSE, 0.0),
@@ -75,11 +83,24 @@ def _build_workload() -> ReferenceSmokeWorkload:
 
 def _request(
     workload: ReferenceSmokeWorkload, query_id: str, sequence_number: int
-) -> TypedCompilerQueryRequest:
-    return TypedCompilerQueryRequest(
+) -> CompilerBoundQueryRequest:
+    query, dynamic_payload = make_bound_query(
+        module=workload.task_module,
         query_id=query_id,
+        parent_query_id=None,
         sequence_number=sequence_number,
-        payload=TypedCompilerQueryPayload(
+        example_idx=0,
+        input_spec=workload.input_spec,
+        linear_spec_c=None,
+        split_by_relu_input={},
+        warm_alpha_by_relu_input={},
+        warm_beta_by_relu_input={},
+        bound_method=BoundMethod.CROWN,
+        execution_options={},
+    )
+    return CompilerBoundQueryRequest(
+        query_request=BoundQueryRequest(query=query, payload=dynamic_payload),
+        compiler_payload=TypedCompilerQueryPayload(
             legacy_task_module=workload.task_module,
             bound_module=workload.bound_module,
             template=workload.template,
@@ -93,17 +114,29 @@ def build_artifact() -> dict[str, object]:
     """Run cache→reuse in one fresh process and return canonical evidence."""
 
     workload = _build_workload()
-    runtime = TypedCompilerQueryRuntime(
+    compiler = TypedCompilerQueryRuntime(
         available_memory_bytes=1 << 30,
         memory_budget_bytes=1 << 30,
         state_store=BoundRuntimeStateStore(),
     )
-    results = runtime.execute(
+    runtime = CompilerSameSolverQueryRuntime(
+        SameSolverRuntimeConfig(
+            max_batch_size=2,
+            memory_budget_bytes=1 << 20,
+            minimum_fill_ratio=1.0,
+        ),
+        compiler,
+    )
+    paired_results = runtime.execute(
         (
             _request(workload, "artifact:cache", 7),
             _request(workload, "artifact:reuse", 2),
-        )
+        ),
+        now_us=100,
     )
+    results = [result for _query_id, result in paired_results]
+    runtime_audit = runtime.audit()
+    compiler_audit = runtime_audit["compiler"]
     return {
         "schema_version": ARTIFACT_SCHEMA,
         "bound_module_hash": workload.bound_module.stable_hash(),
@@ -124,7 +157,15 @@ def build_artifact() -> dict[str, object]:
             }
             for result in results
         ],
-        "audit": runtime.audit(),
+        "audit": {
+            "submitted_queries": runtime_audit["submitted_queries"],
+            "emitted_queries": runtime_audit["emitted_queries"],
+            "completed_queries": runtime_audit["completed_queries"],
+            "emitted_batches": runtime_audit["emitted_batches"],
+            "compatibility_dispatches": runtime_audit["compatibility_dispatches"],
+            "legacy_executor_dispatches": runtime_audit["legacy_executor_dispatches"],
+            "compiler": compiler_audit,
+        },
     }
 
 
@@ -151,7 +192,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
     expected = args.artifact.read_text(encoding="utf-8")
     if expected != encoded:
-        raise ValueError("IR-4D compiler-query artifact replay mismatch")
+        raise ValueError("IR-4E compiler-query artifact replay mismatch")
     return 0
 
 

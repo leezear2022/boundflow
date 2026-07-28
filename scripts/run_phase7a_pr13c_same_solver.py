@@ -71,6 +71,7 @@ def run(out_dir: Path) -> None:  # pylint: disable=too-many-locals
         SameSolverRuntimeConfig(
             max_batch_size=4,
             memory_budget_bytes=1 << 30,
+            allow_legacy_alpha_beta=True,
         )
     )
     adapted_start = time.perf_counter_ns()

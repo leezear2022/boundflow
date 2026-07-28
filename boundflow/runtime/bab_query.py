@@ -694,17 +694,28 @@ def make_bound_query(  # pylint: disable=too-many-arguments,too-many-locals
     spec_shape = (
         () if linear_spec_c is None else tuple(int(dim) for dim in linear_spec_c.shape)
     )
-    capability = (
-        "alpha_beta_dense_split"
-        if bound_method == BoundMethod.ALPHA_BETA_CROWN
-        else "alpha_dense"
+    if bound_method == BoundMethod.ALPHA_BETA_CROWN:
+        capability = "alpha_beta_dense_split"
+    elif bound_method == BoundMethod.ALPHA_CROWN:
+        capability = "alpha_dense"
+    elif bound_method == BoundMethod.CROWN:
+        capability = "plain_crown_typed_ir"
+    else:
+        raise ValueError(
+            f"PR-13 query contract rejects unsupported method: {bound_method.value}"
+        )
+    plain_crown = bound_method == BoundMethod.CROWN
+    optimization_stage = (
+        OptimizationStage.FINAL_BOUND
+        if plain_crown
+        else OptimizationStage.BAB_NODE_EVAL
     )
     compatibility = QueryCompatibilityKey(
         model_structure_hash=structure_hash,
         weight_version=weight_version,
         bound_method=bound_method.value,
-        optimization_stage=OptimizationStage.BAB_NODE_EVAL.value,
-        requires_grad=True,
+        optimization_stage=optimization_stage.value,
+        requires_grad=not plain_crown,
         input_value_name=spec.value_name,
         input_shape=tuple(int(dim) for dim in spec.center.shape),
         spec_shape=spec_shape,
@@ -733,15 +744,19 @@ def make_bound_query(  # pylint: disable=too-many-arguments,too-many-locals
         output_spec_hash=output_spec_hash,
         split_signature=split_signature,
         bound_method=bound_method,
-        optimization_stage=OptimizationStage.BAB_NODE_EVAL,
-        requires_grad=True,
+        optimization_stage=optimization_stage,
+        requires_grad=not plain_crown,
         alpha_state_version=alpha_version,
         beta_state_version=beta_version,
         cuts_version=None,
         dtype=str(spec.center.dtype),
         device=str(spec.center.device),
         numeric_policy=compatibility.numeric_policy,
-        requested_outputs=("bounds", "alpha_state", "beta_state", "branch_hint"),
+        requested_outputs=(
+            ("bounds",)
+            if plain_crown
+            else ("bounds", "alpha_state", "beta_state", "branch_hint")
+        ),
         compatibility_key=compatibility,
         execution_options=normalized_execution_options,
     )

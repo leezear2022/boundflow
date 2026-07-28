@@ -12,13 +12,15 @@ from typing import Mapping, Optional, Sequence, Tuple
 import torch
 
 from ..domains.interval import IntervalState
+from ..frontends.plain_crown_bound_ir import tensor_content_hash
 from ..ir.bound import BFBoundModule, BoundMethodKind
 from ..ir.plan import PlanInstance, PlanTemplate, StateValidity
 from ..ir.schedule import lower_plan_instance_to_reference_schedule
 from ..ir.task import BFTaskModule
 from ..ir.task_v1 import TaskIRModule, lower_plan_instance_to_task_ir
+from ..planner.materialization import BoundMethod, OptimizationStage
 from ..planner.plan_ir_selector import select_plan_instance
-from .bab_query import BoundQueryRequest
+from .bab_query import BoundQueryRequest, model_versions
 from .bound_state_store import BoundRuntimeStateStore
 from .task_backend_dispatch import TypedTaskBackend, TypedTaskBackendRegistry
 from .task_executor import InputSpec
@@ -102,6 +104,73 @@ class TypedCompilerQueryRequest:
             )
         )
         return hashlib.sha256(identity.encode("utf-8")).hexdigest()
+
+
+@dataclass(frozen=True)
+class CompilerBoundQueryRequest:
+    """PR-13 query identity paired with its complete typed compiler payload."""
+
+    query_request: BoundQueryRequest
+    compiler_payload: TypedCompilerQueryPayload
+
+    def validate(self) -> None:
+        """Prove that PR-13 identity and compiler payload describe one query."""
+
+        query = self.query_request.query
+        query.validate()
+        self.compiler_payload.validate()
+        if (
+            query.bound_method != BoundMethod.CROWN
+            or query.optimization_stage != OptimizationStage.FINAL_BOUND
+            or query.requires_grad
+            or query.compatibility_key.backend_capability_class
+            != "plain_crown_typed_ir"
+            or query.requested_outputs != ("bounds",)
+        ):
+            raise CompilerQueryCapabilityError(
+                "PR-13 query is not the plain_crown_typed_ir compiler capability"
+            )
+        dynamic = self.query_request.payload
+        compiler_input = self.compiler_payload.input_spec
+        if (
+            dynamic.input_spec.value_name != compiler_input.value_name
+            or dynamic.input_spec.perturbation.perturbation_id
+            != compiler_input.perturbation.perturbation_id
+            or tensor_content_hash(dynamic.input_spec.center)
+            != tensor_content_hash(compiler_input.center)
+        ):
+            raise ValueError("PR-13 input payload differs from compiler payload")
+        if not _optional_tensor_equal(
+            dynamic.linear_spec_c, self.compiler_payload.linear_spec_C
+        ):
+            raise ValueError("PR-13 objective payload differs from compiler payload")
+        if (
+            dynamic.split_by_relu_input
+            or dynamic.warm_alpha_by_relu_input
+            or dynamic.warm_beta_by_relu_input
+        ):
+            raise CompilerQueryCapabilityError(
+                "plain-CROWN compiler query cannot carry alpha/beta/split state"
+            )
+        structure_hash, weight_version = model_versions(
+            self.compiler_payload.legacy_task_module
+        )
+        if (
+            query.model_structure_hash != structure_hash
+            or query.weight_version != weight_version
+        ):
+            raise ValueError("PR-13 model identity differs from compiler payload")
+
+    def to_typed_request(self) -> TypedCompilerQueryRequest:
+        """Drop no identity while adapting into the typed compiler runtime."""
+
+        self.validate()
+        query = self.query_request.query
+        return TypedCompilerQueryRequest(
+            query_id=query.query_id,
+            sequence_number=query.sequence_number,
+            payload=self.compiler_payload,
+        )
 
 
 @dataclass(frozen=True)
@@ -202,6 +271,13 @@ class TypedCompilerQueryRuntime:  # pylint: disable=too-many-instance-attributes
             raise AssertionError("typed compiler runtime reordered query results")
         return results
 
+    def execute_bound_queries(
+        self, requests: Sequence[CompilerBoundQueryRequest]
+    ) -> list[TypedCompilerQueryResult]:
+        """Execute compiler-eligible PR-13 requests through typed IR only."""
+
+        return self.execute(tuple(request.to_typed_request() for request in requests))
+
     def reject_legacy_bab_request(self, request: BoundQueryRequest) -> None:
         """Keep PR-14 external α/β/split No-Go explicit at the new entry."""
 
@@ -287,7 +363,16 @@ def _state_validities(
     )
 
 
+def _optional_tensor_equal(
+    left: Optional[torch.Tensor], right: Optional[torch.Tensor]
+) -> bool:
+    if left is None or right is None:
+        return left is right
+    return tensor_content_hash(left) == tensor_content_hash(right)
+
+
 __all__ = [
+    "CompilerBoundQueryRequest",
     "CompilerQueryCapabilityError",
     "TypedCompilerQueryPayload",
     "TypedCompilerQueryRequest",

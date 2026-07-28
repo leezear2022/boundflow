@@ -268,6 +268,7 @@ def _runtime(max_batch_size: int, memory_budget_bytes: int) -> SameSolverQueryRu
         SameSolverRuntimeConfig(
             max_batch_size=max_batch_size,
             memory_budget_bytes=memory_budget_bytes,
+            allow_legacy_alpha_beta=True,
         )
     )
 
