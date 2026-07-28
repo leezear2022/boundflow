@@ -21,7 +21,8 @@
 > final seeds `7401/7402`；首次执行因 fixed-single 输入重采样不等于 batch 第一 query
 > 而 PROTOCOL-INVALID，未形成 manifest。`7401/7402` 已退役，IR-6 继续 blocked。
 > IR-5G 已冻结 exact-input-slice v3 与 fresh `7501/7502`，等待 protocol commit 后
-> 一次性执行；不得按 v2 timing 调整任何性能参数。
+> 一次性执行。IR-5H 已完成 final：Global p90 1.26160×、gray 无 Pareto、无预算切换，
+> 最终 VALIDATED-NO-GO；当前 ASPLOS system-performance 路线停止，IR-6 不启动。
 
 ## 1. 锁定的论文命题
 
@@ -413,3 +414,6 @@ Bound IR v1
   性能结论。只允许显式 slice batched input、升级 schema 并旋转 fresh identities。
 - IR-5G 已实现上述唯一修复：single 输入 exact clone batched query zero，并在 bound
   comparison 前做 tensor identity gate；v3 `7501/7502` 尚未执行。
+- IR-5H v3 final correctness/integrity/semantic replay 全过，但 Global p90 regret
+  `1.26160× > 1.20×`，gray compiler frontier 只有单点且无 multi-budget switch。
+  按冻结止损规则，IR-5 保持 VALIDATED-NO-GO，禁止继续旋转 final 或启动 IR-6。

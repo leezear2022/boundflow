@@ -30,6 +30,9 @@
 > PROTOCOL-INVALID；未生成 manifest，`7401/7402` 已退役。不得将此写成系统性能结果。
 > IR-5G 已用 exact batched-input slice 修复方法学，并冻结未执行的 v3
 > `7501/7502`；backend/budget/shape/阈值均未按 v2 timing 调整。
+> IR-5H v3 final 已完整生成并 replay：correctness 全过，但 Global p90 `1.26160×`
+> 超过 `1.20×`，gray 无 compiler Pareto，且无多预算切换。IR-5 最终
+> VALIDATED-NO-GO；停止当前 ASPLOS system-performance 路线，IR-6 不启动。
 
 ## 1. 当前真实阶段
 
@@ -140,6 +143,12 @@ fresh identities；IR-6 继续 blocked。
 v3 runner 现在先对 fixed-single 与 batched query zero 做 `torch.equal`，再检查 final
 bounds；split 记录 exact-clone contract。fresh `7501/7502` 只能在 v3 protocol commit
 后运行一次，结果无论成败都不得再旋转 final。
+
+v3 正式 artifact 已执行并绑定 `971a317`。Global 8/8 feasible，p50 regret
+`1.00385×`，但 p90 `1.26160×`；失败来自 color warm-cache context 选择 TVM
+（0.53146 ms/query）而 dense 为 0.42577 ms/query。color 有 latency-memory tradeoff，
+gray 的 TVM 同时更快更省内存，只有单点 frontier，故双 workload Pareto 门禁失败。
+IR-5/IR-6 路线按预注册止损规则关闭。
 
 明确禁止：
 

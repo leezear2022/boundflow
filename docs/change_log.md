@@ -3493,3 +3493,25 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_ir5g_exact_input_slice_v3_freeze.md`
+
+---
+
+## 2026-07-28：IR-5H residual-final-v3（VALIDATED-NO-GO）
+
+**正式证据**
+- fresh chain-CNN calibration→residual-CNN final，8+8 measurements、48 outcomes；
+- exact input identity、compiler/baseline correctness、Global 8/8 feasibility 全通过；
+- manifest 绑定 `971a317`，integrity + semantic replay 通过。
+
+**失败门禁**
+- Global p50/p90 regret = `1.00385×/1.26160×`，p90 超过 `1.20×`；
+- color warm-cache 错选 TVM，regret `1.26160×`；
+- gray compiler frontier 只有 TVM 一个点，双 workload Pareto 失败；
+- 64/512 MiB 均选 dense，无 multi-budget switch。
+
+**判定**
+- IR-5 最终保持 VALIDATED-NO-GO，IR-6 不启动；
+- 停止当前 ASPLOS system-performance 路线，不再旋转 final 或按 final 调参。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5h_residual_final_v3_nogo.md`
