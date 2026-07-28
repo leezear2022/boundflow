@@ -1,7 +1,7 @@
 """First-class Schedule IR v1 schema, verifier, and reference lowering."""
 
 # Cross-layer schedule verification intentionally keeps the execution ledger together.
-# pylint: disable=too-many-branches,too-many-instance-attributes,too-many-locals,too-many-statements,missing-class-docstring,missing-function-docstring
+# pylint: disable=too-many-branches,too-many-instance-attributes,too-many-lines,too-many-locals,too-many-statements,missing-class-docstring,missing-function-docstring
 
 from __future__ import annotations
 
@@ -18,6 +18,8 @@ from .plan import (
     PlanInstance,
     PlanTemplate,
     RegionCandidate,
+    StateAction,
+    StateCandidate,
     StorageBinding,
 )
 
@@ -31,6 +33,15 @@ class ScheduleActionKind(Enum):
     ALLOCATE = "allocate"
     MATERIALIZE = "materialize"
     LAUNCH = "launch"
+    BATCH_LOOP = "batch_loop"
+    RECORD_EVENT = "record_event"
+    WAIT_EVENT = "wait_event"
+    STATE_LOAD = "state_load"
+    STATE_STORE = "state_store"
+    STATE_INVALIDATE = "state_invalidate"
+    FALLBACK = "fallback"
+    RETRY = "retry"
+    REQUEST_REPLAN = "request_replan"
     EMIT_RESULT = "emit_result"
     FREE = "free"
 
@@ -231,11 +242,304 @@ class FreeAction:
         }
 
 
+@dataclass(frozen=True)
+class QueryBatchSlice:
+    """One ordered, non-overlapping query slice in a BatchLoop."""
+
+    slice_id: str
+    query_ids: Tuple[str, ...]
+
+    def validate(self) -> None:
+        if not self.slice_id or not self.query_ids:
+            raise ValueError("schedule batch slice is incomplete")
+        if len(self.query_ids) != len(set(self.query_ids)):
+            raise ValueError("schedule batch slice duplicates query IDs")
+
+    def to_dict(self) -> dict[str, object]:
+        self.validate()
+        return {"slice_id": self.slice_id, "query_ids": list(self.query_ids)}
+
+
+@dataclass(frozen=True)
+class BatchLoopAction:
+    """Explicit ordered query partition for one batching axis."""
+
+    action_id: str
+    axis: str
+    slices: Tuple[QueryBatchSlice, ...]
+    kind: ScheduleActionKind = ScheduleActionKind.BATCH_LOOP
+
+    def validate(self) -> None:
+        if not self.action_id or self.axis not in {"domain", "spec", "sample"}:
+            raise ValueError("schedule batch-loop identity/axis is invalid")
+        if not self.slices:
+            raise ValueError("schedule batch-loop requires slices")
+        for item in self.slices:
+            item.validate()
+        if len({item.slice_id for item in self.slices}) != len(self.slices):
+            raise ValueError("schedule batch-loop slice IDs must be unique")
+
+    def to_dict(self) -> dict[str, object]:
+        self.validate()
+        return {
+            "kind": self.kind.value,
+            "action_id": self.action_id,
+            "axis": self.axis,
+            "slices": [item.to_dict() for item in self.slices],
+        }
+
+
+@dataclass(frozen=True)
+class RecordEventAction:
+    """Record one stream event."""
+
+    action_id: str
+    event_id: str
+    stream_id: str
+    kind: ScheduleActionKind = ScheduleActionKind.RECORD_EVENT
+
+    def validate(self) -> None:
+        if not self.action_id or not self.event_id or not self.stream_id:
+            raise ValueError("schedule record-event action is incomplete")
+
+    def to_dict(self) -> dict[str, object]:
+        self.validate()
+        return {
+            "kind": self.kind.value,
+            "action_id": self.action_id,
+            "event_id": self.event_id,
+            "stream_id": self.stream_id,
+        }
+
+
+@dataclass(frozen=True)
+class WaitEventAction:
+    """Wait for one previously recorded stream event."""
+
+    action_id: str
+    event_id: str
+    stream_id: str
+    kind: ScheduleActionKind = ScheduleActionKind.WAIT_EVENT
+
+    def validate(self) -> None:
+        if not self.action_id or not self.event_id or not self.stream_id:
+            raise ValueError("schedule wait-event action is incomplete")
+
+    def to_dict(self) -> dict[str, object]:
+        self.validate()
+        return {
+            "kind": self.kind.value,
+            "action_id": self.action_id,
+            "event_id": self.event_id,
+            "stream_id": self.stream_id,
+        }
+
+
+@dataclass(frozen=True)
+class StateLoadAction:
+    """Load one exact-valid cached state."""
+
+    action_id: str
+    state_id: str
+    source_value_id: str
+    state_version: str
+    kind: ScheduleActionKind = ScheduleActionKind.STATE_LOAD
+
+    def validate(self) -> None:
+        if any(
+            not value
+            for value in (
+                self.action_id,
+                self.state_id,
+                self.source_value_id,
+                self.state_version,
+            )
+        ):
+            raise ValueError("schedule state-load action is incomplete")
+
+    def to_dict(self) -> dict[str, object]:
+        self.validate()
+        return {
+            "kind": self.kind.value,
+            "action_id": self.action_id,
+            "state_id": self.state_id,
+            "source_value_id": self.source_value_id,
+            "state_version": self.state_version,
+        }
+
+
+@dataclass(frozen=True)
+class StateStoreAction:
+    """Store one versioned state after execution."""
+
+    action_id: str
+    state_id: str
+    source_value_id: str
+    state_version: str
+    kind: ScheduleActionKind = ScheduleActionKind.STATE_STORE
+
+    def validate(self) -> None:
+        if any(
+            not value
+            for value in (
+                self.action_id,
+                self.state_id,
+                self.source_value_id,
+                self.state_version,
+            )
+        ):
+            raise ValueError("schedule state-store action is incomplete")
+
+    def to_dict(self) -> dict[str, object]:
+        self.validate()
+        return {
+            "kind": self.kind.value,
+            "action_id": self.action_id,
+            "state_id": self.state_id,
+            "source_value_id": self.source_value_id,
+            "state_version": self.state_version,
+        }
+
+
+@dataclass(frozen=True)
+class StateInvalidateAction:
+    """Invalidate one state with an explicit reason."""
+
+    action_id: str
+    state_id: str
+    reason: str
+    kind: ScheduleActionKind = ScheduleActionKind.STATE_INVALIDATE
+
+    def validate(self) -> None:
+        if not self.action_id or not self.state_id or not self.reason:
+            raise ValueError("schedule state-invalidate action is incomplete")
+
+    def to_dict(self) -> dict[str, object]:
+        self.validate()
+        return {
+            "kind": self.kind.value,
+            "action_id": self.action_id,
+            "state_id": self.state_id,
+            "reason": self.reason,
+        }
+
+
+@dataclass(frozen=True)
+class FallbackAction:
+    """One declared backend fallback for a retry policy."""
+
+    action_id: str
+    retry_action_id: str
+    backend_candidate_id: str
+    reason: str
+    kind: ScheduleActionKind = ScheduleActionKind.FALLBACK
+
+    def validate(self) -> None:
+        if any(
+            not value
+            for value in (
+                self.action_id,
+                self.retry_action_id,
+                self.backend_candidate_id,
+                self.reason,
+            )
+        ):
+            raise ValueError("schedule fallback action is incomplete")
+
+    def to_dict(self) -> dict[str, object]:
+        self.validate()
+        return {
+            "kind": self.kind.value,
+            "action_id": self.action_id,
+            "retry_action_id": self.retry_action_id,
+            "backend_candidate_id": self.backend_candidate_id,
+            "reason": self.reason,
+        }
+
+
+@dataclass(frozen=True)
+class RetryAction:
+    """Bounded retry policy attached to one launch."""
+
+    action_id: str
+    launch_action_id: str
+    fallback_action_ids: Tuple[str, ...]
+    max_attempts: int
+    retry_on: Tuple[str, ...]
+    kind: ScheduleActionKind = ScheduleActionKind.RETRY
+
+    def validate(self) -> None:
+        if not self.action_id or not self.launch_action_id:
+            raise ValueError("schedule retry identity is incomplete")
+        if self.max_attempts <= 0:
+            raise ValueError("schedule retry max_attempts must be positive")
+        if self.max_attempts != 1 + len(self.fallback_action_ids):
+            raise ValueError("schedule retry attempts/fallback ladder mismatch")
+        if not self.retry_on or any(reason != "oom" for reason in self.retry_on):
+            raise ValueError("Schedule IR v1 retry only supports explicit OOM")
+        if len(self.fallback_action_ids) != len(set(self.fallback_action_ids)):
+            raise ValueError("schedule retry duplicates fallback actions")
+
+    def to_dict(self) -> dict[str, object]:
+        self.validate()
+        return {
+            "kind": self.kind.value,
+            "action_id": self.action_id,
+            "launch_action_id": self.launch_action_id,
+            "fallback_action_ids": list(self.fallback_action_ids),
+            "max_attempts": self.max_attempts,
+            "retry_on": list(self.retry_on),
+        }
+
+
+@dataclass(frozen=True)
+class RequestReplanAction:
+    """Constrained runtime re-plan request that cannot alter Bound semantics."""
+
+    action_id: str
+    reason: str
+    preserved_bound_module_hash: str
+    allowed_decision_axes: Tuple[str, ...]
+    kind: ScheduleActionKind = ScheduleActionKind.REQUEST_REPLAN
+
+    def validate(self) -> None:
+        if (
+            not self.action_id
+            or not self.reason
+            or len(self.preserved_bound_module_hash) != 64
+        ):
+            raise ValueError("schedule replan request is incomplete")
+        allowed = {"backend", "representation", "batch", "storage", "state"}
+        if not self.allowed_decision_axes or not set(
+            self.allowed_decision_axes
+        ).issubset(allowed):
+            raise ValueError("schedule replan request changes a forbidden axis")
+
+    def to_dict(self) -> dict[str, object]:
+        self.validate()
+        return {
+            "kind": self.kind.value,
+            "action_id": self.action_id,
+            "reason": self.reason,
+            "preserved_bound_module_hash": self.preserved_bound_module_hash,
+            "allowed_decision_axes": list(self.allowed_decision_axes),
+        }
+
+
 ScheduleAction = (
     CheckBudgetAction
     | AllocateAction
     | MaterializeAction
     | LaunchAction
+    | BatchLoopAction
+    | RecordEventAction
+    | WaitEventAction
+    | StateLoadAction
+    | StateStoreAction
+    | StateInvalidateAction
+    | FallbackAction
+    | RetryAction
+    | RequestReplanAction
     | EmitResultAction
     | FreeAction
 )
@@ -311,13 +615,72 @@ class ScheduleModule:  # pylint: disable=too-many-instance-attributes
         selected_regions = _selected_regions(template, instance)
         backend_by_region = _selected_backends(template, instance)
         selected_transitions = _selected_transitions(template, instance)
+        selected_states = _selected_states(template, instance)
         region_by_op = {
             op_id: region for region in selected_regions for op_id in region.op_ids
         }
+        action_by_id = {action.action_id: action for action in self.actions}
+        fallback_actions = {
+            action.action_id: action
+            for action in self.actions
+            if isinstance(action, FallbackAction)
+        }
+        retry_actions = tuple(
+            action for action in self.actions if isinstance(action, RetryAction)
+        )
+        backend_candidates = {
+            candidate.candidate_id: candidate
+            for candidate in template.backend_candidates
+        }
+        selected_representation_by_region = {
+            decision.region_id: decision.candidate_id
+            for decision in instance.representation_decisions
+        }
+        for retry in retry_actions:
+            launch = action_by_id.get(retry.launch_action_id)
+            if not isinstance(launch, LaunchAction):
+                raise ValueError("Schedule IR retry references a non-launch action")
+            if self.actions.index(retry) > self.actions.index(launch):
+                raise ValueError("Schedule IR retry policy must precede its launch")
+            fallback_backend_ids: list[str] = []
+            for fallback_id in retry.fallback_action_ids:
+                fallback = fallback_actions.get(fallback_id)
+                if fallback is None or fallback.retry_action_id != retry.action_id:
+                    raise ValueError("Schedule IR retry/fallback references mismatch")
+                backend = backend_candidates.get(fallback.backend_candidate_id)
+                if (
+                    backend is None
+                    or not backend.static_legal
+                    or backend.region_id != launch.region_id
+                    or selected_representation_by_region[launch.region_id]
+                    not in backend.compatible_representation_candidate_ids
+                ):
+                    raise ValueError(
+                        "Schedule IR fallback backend is illegal or wrong-region"
+                    )
+                fallback_backend_ids.append(backend.candidate_id)
+            if (
+                len({launch.backend_candidate_id, *fallback_backend_ids})
+                != retry.max_attempts
+            ):
+                raise ValueError("Schedule IR retry ladder repeats a backend")
+        referenced_fallbacks = {
+            fallback_id
+            for retry in retry_actions
+            for fallback_id in retry.fallback_action_ids
+        }
+        if referenced_fallbacks != set(fallback_actions):
+            raise ValueError("Schedule IR contains orphan fallback actions")
+
         allocated: set[str] = set()
         available_values = set(bound_module.graph.inputs)
+        value_stream = {value_id: "external" for value_id in available_values}
         launched_regions: set[str] = set()
         performed_transitions: set[str] = set()
+        recorded_events: dict[str, str] = {}
+        waited_streams: dict[str, set[str]] = {"sync": {"external", "sync"}}
+        batch_accounted = False
+        state_actions: dict[str, ScheduleActionKind] = {}
         emitted = False
         checked_budget = False
         live_bytes = 0
@@ -345,6 +708,76 @@ class ScheduleModule:  # pylint: disable=too-many-instance-attributes
                 allocated.add(action.arena_id)
                 live_bytes += action.size_bytes
                 peak_bytes = max(peak_bytes, live_bytes)
+            elif isinstance(action, BatchLoopAction):
+                if batch_accounted or launched_regions:
+                    raise ValueError(
+                        "Schedule IR batch-loop must occur once before launches"
+                    )
+                flattened = tuple(
+                    query_id for item in action.slices for query_id in item.query_ids
+                )
+                if flattened != self.query_ids:
+                    raise ValueError(
+                        "Schedule IR batch-loop loses, duplicates, or reorders queries"
+                    )
+                batch_accounted = True
+            elif isinstance(action, RecordEventAction):
+                if action.event_id in recorded_events:
+                    raise ValueError("Schedule IR records one event more than once")
+                recorded_events[action.event_id] = action.stream_id
+            elif isinstance(action, WaitEventAction):
+                source_stream = recorded_events.get(action.event_id)
+                if source_stream is None:
+                    raise ValueError("Schedule IR waits before event record")
+                waited_streams.setdefault(
+                    action.stream_id, {"external", action.stream_id}
+                ).add(source_stream)
+            elif isinstance(action, StateLoadAction):
+                candidate = selected_states.get(action.state_id)
+                if (
+                    candidate is None
+                    or candidate.action != StateAction.REUSE
+                    or action.source_value_id != candidate.source_value_id
+                    or action.state_version != candidate.state_version
+                    or launched_regions
+                ):
+                    raise ValueError("Schedule IR state load/Plan decision mismatch")
+                if action.state_id in state_actions:
+                    raise ValueError("Schedule IR duplicates a state action")
+                state_actions[action.state_id] = action.kind
+                available_values.add(action.source_value_id)
+                value_stream[action.source_value_id] = "external"
+            elif isinstance(action, StateStoreAction):
+                candidate = selected_states.get(action.state_id)
+                if (
+                    candidate is None
+                    or candidate.action != StateAction.CACHE
+                    or action.source_value_id != candidate.source_value_id
+                    or action.state_version != candidate.state_version
+                    or action.source_value_id not in available_values
+                ):
+                    raise ValueError("Schedule IR state store/Plan decision mismatch")
+                if action.state_id in state_actions:
+                    raise ValueError("Schedule IR duplicates a state action")
+                state_actions[action.state_id] = action.kind
+            elif isinstance(action, StateInvalidateAction):
+                candidate = selected_states.get(action.state_id)
+                if candidate is None or candidate.action != StateAction.EVICT:
+                    raise ValueError(
+                        "Schedule IR state invalidation/Plan decision mismatch"
+                    )
+                if action.state_id in state_actions:
+                    raise ValueError("Schedule IR duplicates a state action")
+                state_actions[action.state_id] = action.kind
+            elif isinstance(action, (FallbackAction, RetryAction)):
+                pass
+            elif isinstance(action, RequestReplanAction):
+                if action.preserved_bound_module_hash != self.bound_module_hash:
+                    raise ValueError(
+                        "Schedule IR replan may not change Bound semantics"
+                    )
+                if emitted:
+                    raise ValueError("Schedule IR replan request occurs after result")
             elif isinstance(action, MaterializeAction):
                 transition = selected_transitions.get(action.transition_candidate_id)
                 if transition is None or not _transition_matches(action, transition):
@@ -377,12 +810,17 @@ class ScheduleModule:  # pylint: disable=too-many-instance-attributes
                 backend = backend_by_region[region.region_id]
                 if not _launch_matches(action, region=region, backend=backend):
                     raise ValueError("Schedule IR launch differs from PlanInstance")
-                if action.stream_id != "sync":
-                    raise ValueError(
-                        "Schedule IR v1 reference path requires sync stream"
-                    )
                 if not set(action.input_value_ids).issubset(available_values):
                     raise ValueError("Schedule IR launch has use-before-def")
+                synchronized = waited_streams.setdefault(
+                    action.stream_id, {"external", action.stream_id}
+                )
+                for value_id in action.input_value_ids:
+                    producer_stream = value_stream[value_id]
+                    if producer_stream not in synchronized:
+                        raise ValueError(
+                            "Schedule IR cross-stream dependency lacks event wait"
+                        )
                 required = {
                     transition_id
                     for representation in template.representation_candidates
@@ -399,6 +837,8 @@ class ScheduleModule:  # pylint: disable=too-many-instance-attributes
                         "Schedule IR launch omits required materialization"
                     )
                 available_values.update(action.output_value_ids)
+                for value_id in action.output_value_ids:
+                    value_stream[value_id] = action.stream_id
                 launched_regions.add(region.region_id)
             elif isinstance(action, EmitResultAction):
                 if emitted or set(action.output_value_ids) != set(
@@ -419,6 +859,8 @@ class ScheduleModule:  # pylint: disable=too-many-instance-attributes
                 allocated.remove(action.arena_id)
         if not checked_budget or not emitted:
             raise ValueError("Schedule IR omits budget check or result emission")
+        if not batch_accounted:
+            raise ValueError("Schedule IR omits explicit batch query accounting")
         if allocated or live_bytes != 0:
             raise ValueError("Schedule IR leaks allocated arenas")
         if peak_bytes != expected_peak:
@@ -427,6 +869,19 @@ class ScheduleModule:  # pylint: disable=too-many-instance-attributes
             raise ValueError("Schedule IR does not launch every selected region")
         if performed_transitions != set(selected_transitions):
             raise ValueError("Schedule IR does not execute every selected transition")
+        expected_state_actions = {
+            state_id: {
+                StateAction.REUSE: ScheduleActionKind.STATE_LOAD,
+                StateAction.CACHE: ScheduleActionKind.STATE_STORE,
+                StateAction.EVICT: ScheduleActionKind.STATE_INVALIDATE,
+            }[candidate.action]
+            for state_id, candidate in selected_states.items()
+            if candidate.action != StateAction.RECOMPUTE
+        }
+        if state_actions != expected_state_actions:
+            raise ValueError(
+                "Schedule IR does not implement every selected state action"
+            )
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -504,6 +959,50 @@ def lower_plan_instance_to_reference_schedule(
             AllocateAction(f"{index:04d}.allocate:{arena_id}", arena_id, size_bytes)
         )
     action_index = len(actions)
+    batch = next(
+        candidate
+        for candidate in template.batch_candidates
+        if candidate.candidate_id == instance.batch_decision.candidate_id
+    )
+    query_capacity = (
+        batch.domain_batch_size * batch.spec_batch_size * batch.sample_batch_size
+    )
+    slices = tuple(
+        QueryBatchSlice(
+            slice_id=f"slice:{index // query_capacity:04d}",
+            query_ids=query_ids[index : index + query_capacity],
+        )
+        for index in range(0, len(query_ids), query_capacity)
+    )
+    actions.append(
+        BatchLoopAction(
+            action_id=f"{action_index:04d}.batch-loop",
+            axis="domain",
+            slices=slices,
+        )
+    )
+    action_index += 1
+    selected_states = _selected_states(template, instance)
+    for state_id, state in sorted(selected_states.items()):
+        if state.action == StateAction.REUSE:
+            actions.append(
+                StateLoadAction(
+                    action_id=f"{action_index:04d}.state-load",
+                    state_id=state_id,
+                    source_value_id=state.source_value_id,
+                    state_version=state.state_version,
+                )
+            )
+            action_index += 1
+        elif state.action == StateAction.EVICT:
+            actions.append(
+                StateInvalidateAction(
+                    action_id=f"{action_index:04d}.state-invalidate",
+                    state_id=state_id,
+                    reason="selected_plan_evict",
+                )
+            )
+            action_index += 1
     regions = _selected_regions(template, instance)
     backends = _selected_backends(template, instance)
     transitions = _selected_transitions(template, instance)
@@ -545,6 +1044,17 @@ def lower_plan_instance_to_reference_schedule(
             )
         )
         action_index += 1
+    for state_id, state in sorted(selected_states.items()):
+        if state.action == StateAction.CACHE:
+            actions.append(
+                StateStoreAction(
+                    action_id=f"{action_index:04d}.state-store",
+                    state_id=state_id,
+                    source_value_id=state.source_value_id,
+                    state_version=state.state_version,
+                )
+            )
+            action_index += 1
     actions.append(
         EmitResultAction(
             action_id=f"{action_index:04d}.emit-result",
@@ -610,6 +1120,18 @@ def _selected_transitions(
     return {
         item.candidate_id: candidates[item.candidate_id]
         for item in instance.materialization_decisions
+    }
+
+
+def _selected_states(
+    template: PlanTemplate, instance: PlanInstance
+) -> dict[str, StateCandidate]:
+    candidates = {
+        candidate.candidate_id: candidate for candidate in template.state_candidates
+    }
+    return {
+        item.state_id: candidates[item.candidate_id]
+        for item in instance.state_decisions
     }
 
 

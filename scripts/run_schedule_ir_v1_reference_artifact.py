@@ -1,0 +1,98 @@
+"""Generate or replay the Schedule IR v1 reference artifact."""
+
+# The CLI intentionally mirrors artifact hash/replay calls.
+# pylint: disable=duplicate-code,missing-function-docstring
+
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+from typing import Sequence
+
+from boundflow.ir.schedule import lower_plan_instance_to_reference_schedule
+from boundflow.planner.plan_ir_selector import select_plan_instance
+from boundflow.runtime.schedule_ir_artifact import (
+    verify_schedule_ir_artifact,
+    write_schedule_ir_artifact,
+)
+from boundflow.runtime.schedule_ir_executor import execute_schedule_reference
+from scripts.run_plan_ir_v1_reference_artifact import (
+    build_reference_smoke_inputs,
+)
+
+
+def _reconstruct():
+    bound_module, template = build_reference_smoke_inputs()
+    instance = select_plan_instance(
+        template,
+        bound_module=bound_module,
+        query_bucket_id="schedule-reference-smoke",
+        available_memory_bytes=1 << 30,
+        memory_budget_bytes=1 << 30,
+    )
+    schedule = lower_plan_instance_to_reference_schedule(
+        bound_module,
+        template=template,
+        instance=instance,
+        query_ids=("query:0", "query:1"),
+    )
+    return bound_module, template, instance, schedule
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    generate = subparsers.add_parser("generate")
+    generate.add_argument("--out-dir", type=Path, required=True)
+    replay = subparsers.add_parser("replay")
+    replay.add_argument("--artifact-dir", type=Path, required=True)
+    args = parser.parse_args(argv)
+    bound_module, template, instance, schedule = _reconstruct()
+    if args.command == "generate":
+        trace = execute_schedule_reference(
+            schedule,
+            bound_module=bound_module,
+            template=template,
+            instance=instance,
+        )
+        manifest = write_schedule_ir_artifact(
+            args.out_dir,
+            bound_module=bound_module,
+            template=template,
+            instance=instance,
+            schedule=schedule,
+            trace=trace,
+        )
+        status = "generated"
+    else:
+        trace = verify_schedule_ir_artifact(
+            args.artifact_dir,
+            bound_module=bound_module,
+            template=template,
+            instance=instance,
+            schedule=schedule,
+        )
+        manifest = args.artifact_dir / "manifest.json"
+        status = "replayed"
+    print(
+        json.dumps(
+            {
+                "status": status,
+                "manifest": str(manifest),
+                "schedule_hash": schedule.stable_hash(
+                    bound_module=bound_module,
+                    template=template,
+                    instance=instance,
+                ),
+                "trace_hash": trace.stable_hash(),
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

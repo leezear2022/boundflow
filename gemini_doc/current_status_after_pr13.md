@@ -6,7 +6,8 @@
 > 总判定：PR-14B 为 **VALIDATED-NO-GO**，PR-14C 不启动；ASPLOS-ready 仍为 **NO**。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
 > 2026-07-28 进度：IR-1 Bound IR 与 IR-2 Plan IR 的最小 reference contract 已分别关闭；
-> 当前唯一下一阶段为 IR-3 Schedule IR v1，详见 IR-2 closure audit。
+> IR-3B Schedule control/executor/trace foundation 已完成；当前唯一下一阶段为 IR-3C typed
+> Task IR + per-task reference execution，详见最新 Schedule IR 变更记录。
 
 ## 1. 当前真实阶段
 

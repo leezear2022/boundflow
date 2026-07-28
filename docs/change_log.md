@@ -3069,3 +3069,27 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_schedule_ir_v1_schema_lowering.md`
+
+---
+
+## 2026-07-28：Schedule IR control actions、reference executor 与 trace artifact
+
+**主要改动**
+- 新增 typed BatchLoop、Record/WaitEvent、StateLoad/Store/Invalidate、Retry/Fallback、
+  RequestReplan；
+- verifier 检查 query slice 完整性、cross-stream happens-before、state/Plan 一致、bounded
+  OOM ladder 与 replan semantic preservation；
+- 新增同步 reference executor、动态 memory ledger、launch attempt trace、canonical replay；
+- 新增 immutable Schedule/Trace artifact 和 fresh-process generate/replay CLI；
+- Schedule+Bound reference smoke 的 final lower/upper 与直接 Bound interpreter 对齐。
+
+**证据与边界**
+- 专属：10 passed；相邻：107 passed；全量：428 passed、1 skipped；
+- Mypy 0 issues，Pylint 10.00/10，Black clean；
+- IR-3B foundation validated；一等 typed Task IR、逐 Task/backend execution 尚缺，IR-3 未关闭。
+
+**下一阶段**
+- IR-3C Task IR v1 + Plan region lowering + per-task reference executor。
+
+**记录**
+- `gemini_doc/change_2026-07-28_schedule_ir_v1_control_executor.md`
