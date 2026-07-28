@@ -43,3 +43,5 @@ def test_schedule_ir_reference_artifact_generates_and_replays(
     assert replayed["status"] == "replayed"
     assert generated["schedule_hash"] == replayed["schedule_hash"]
     assert generated["trace_hash"] == replayed["trace_hash"]
+    assert generated["task_module_hash"] == replayed["task_module_hash"]
+    assert generated["task_trace_hash"] == replayed["task_trace_hash"]

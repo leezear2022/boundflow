@@ -75,6 +75,8 @@
   ScheduleModule/action schema、PlanInstance lowering、memory/use-def/query verifier foundation
 - `gemini_doc/change_2026-07-28_schedule_ir_v1_control_executor.md`：IR-3B batch/event/state/
   retry/replan actions、reference executor、canonical trace 与 fresh-process artifact
+- `gemini_doc/change_2026-07-28_task_ir_v1_foundation.md`：IR-3C typed TaskIRModule/Unit、
+  Plan region lowering、Task↔Schedule launch linkage 与 dispatch trace
 - `gemini_doc/asplos_execution_memo_v1_0.md`：ASPLOS 研发的短执行入口与门禁
 - `gemini_doc/current_status_after_pr13.md`：PR-13 closure 后的真实状态、证据边界与当前缺口
 - `gemini_doc/pr14_execution_plan.md`：真实 verifier workload coverage/execution 的切片、门禁与止损

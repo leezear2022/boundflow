@@ -12,11 +12,13 @@ from pathlib import Path
 from ..ir.bound import BFBoundModule
 from ..ir.plan import PlanInstance, PlanTemplate
 from ..ir.schedule import ScheduleModule
+from ..ir.task_v1 import TaskIRModule
 from .schedule_ir_executor import (
     ScheduleExecutionTrace,
     execute_schedule_reference,
     replay_schedule_trace,
 )
+from .task_ir_executor import TaskExecutionTrace, execute_task_ir_reference
 
 SCHEDULE_ARTIFACT_SCHEMA_VERSION = "boundflow.schedule-ir-artifact/v1"
 
@@ -27,8 +29,10 @@ def write_schedule_ir_artifact(
     bound_module: BFBoundModule,
     template: PlanTemplate,
     instance: PlanInstance,
+    task_module: TaskIRModule,
     schedule: ScheduleModule,
     trace: ScheduleExecutionTrace,
+    task_trace: TaskExecutionTrace,
 ) -> Path:
     """Write one new immutable schedule/trace evidence directory."""
 
@@ -43,6 +47,15 @@ def write_schedule_ir_artifact(
         raise ValueError(
             "supplied Schedule IR trace is not deterministic reference output"
         )
+    expected_task_trace = execute_task_ir_reference(
+        task_module,
+        schedule,
+        bound_module=bound_module,
+        template=template,
+        instance=instance,
+    )
+    if task_trace != expected_task_trace:
+        raise ValueError("supplied Task IR trace is not deterministic reference output")
     if output_dir.exists() and any(output_dir.iterdir()):
         raise FileExistsError(
             f"refusing to overwrite non-empty Schedule IR artifact: {output_dir}"
@@ -54,12 +67,18 @@ def write_schedule_ir_artifact(
         "plan_instance.json": instance.canonical_json(
             template=template, bound_module=bound_module
         ),
+        "task_module.json": task_module.canonical_json(
+            bound_module=bound_module,
+            template=template,
+            instance=instance,
+        ),
         "schedule.json": schedule.canonical_json(
             bound_module=bound_module,
             template=template,
             instance=instance,
         ),
         "trace.json": trace.canonical_json(),
+        "task_trace.json": task_trace.canonical_json(),
     }
     for filename, payload in payloads.items():
         (output_dir / filename).write_text(payload + "\n", encoding="utf-8")
@@ -76,6 +95,12 @@ def write_schedule_ir_artifact(
             instance=instance,
         ),
         "trace_hash": trace.stable_hash(),
+        "task_module_hash": task_module.stable_hash(
+            bound_module=bound_module,
+            template=template,
+            instance=instance,
+        ),
+        "task_trace_hash": task_trace.stable_hash(),
         "files": {
             filename: _sha256_text(payload + "\n")
             for filename, payload in sorted(payloads.items())
@@ -97,6 +122,7 @@ def verify_schedule_ir_artifact(
     bound_module: BFBoundModule,
     template: PlanTemplate,
     instance: PlanInstance,
+    task_module: TaskIRModule,
     schedule: ScheduleModule,
 ) -> ScheduleExecutionTrace:
     """Verify immutable bytes and independently replay the schedule trace."""
@@ -107,6 +133,11 @@ def verify_schedule_ir_artifact(
         "plan_template.json": template.canonical_json(bound_module=bound_module),
         "plan_instance.json": instance.canonical_json(
             template=template, bound_module=bound_module
+        ),
+        "task_module.json": task_module.canonical_json(
+            bound_module=bound_module,
+            template=template,
+            instance=instance,
         ),
         "schedule.json": schedule.canonical_json(
             bound_module=bound_module,
@@ -124,8 +155,13 @@ def verify_schedule_ir_artifact(
             raise ValueError(f"Schedule IR artifact typed input mismatch: {filename}")
         texts[filename] = text
     trace_path = output_dir / "trace.json"
+    task_trace_path = output_dir / "task_trace.json"
     manifest_path = output_dir / "manifest.json"
-    if not trace_path.is_file() or not manifest_path.is_file():
+    if (
+        not trace_path.is_file()
+        or not task_trace_path.is_file()
+        or not manifest_path.is_file()
+    ):
         raise ValueError("Schedule IR artifact is missing trace or manifest")
     trace_text = trace_path.read_text(encoding="utf-8")
     if not trace_text.endswith("\n"):
@@ -138,6 +174,17 @@ def verify_schedule_ir_artifact(
         template=template,
         instance=instance,
     )
+    task_trace_text = task_trace_path.read_text(encoding="utf-8")
+    expected_task_trace = execute_task_ir_reference(
+        task_module,
+        schedule,
+        bound_module=bound_module,
+        template=template,
+        instance=instance,
+    )
+    if task_trace_text != expected_task_trace.canonical_json() + "\n":
+        raise ValueError("Schedule IR artifact Task trace replay mismatch")
+    texts["task_trace.json"] = task_trace_text
     try:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as error:
@@ -158,6 +205,12 @@ def verify_schedule_ir_artifact(
             instance=instance,
         ),
         "trace_hash": trace.stable_hash(),
+        "task_module_hash": task_module.stable_hash(
+            bound_module=bound_module,
+            template=template,
+            instance=instance,
+        ),
+        "task_trace_hash": expected_task_trace.stable_hash(),
     }
     for key, value in expected_hashes.items():
         if manifest.get(key) != value:

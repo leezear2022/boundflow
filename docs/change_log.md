@@ -3093,3 +3093,28 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_schedule_ir_v1_control_executor.md`
+
+---
+
+## 2026-07-28：Task IR v1 schema/lowering/linkage foundation
+
+**主要改动**
+- 新增不依赖旧 `ir/task.py`/runtime/Any 的 typed TaskIRModule/TaskIRUnit；
+- 每个 selected Plan region lower 为 task，显式 op、parameter、external/state dependency、
+  memory effect、backend capability/artifact/reference implementation；
+- 新增 Task↔Schedule launch 双向逐字段 verifier；
+- 新增 deterministic task dispatch trace；
+- Schedule artifact 加入 TaskModule/TaskTrace payload 与 hash。
+
+**证据与边界**
+- Task IR 专属：4 passed；Task+Schedule：14 passed；相邻：111 passed；
+- 全量：432 passed、1 skipped；
+- Mypy 0 issues，Pylint 10.00/10，Black clean；
+- IR-3C foundation validated；数学语义仍由 whole-Bound oracle 提供，per-task semantic executor
+  与 IR-3 closure 尚缺。
+
+**下一阶段**
+- IR-3D per-task semantic executor + closure audit。
+
+**记录**
+- `gemini_doc/change_2026-07-28_task_ir_v1_foundation.md`

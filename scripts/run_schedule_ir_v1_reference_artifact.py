@@ -11,12 +11,14 @@ from pathlib import Path
 from typing import Sequence
 
 from boundflow.ir.schedule import lower_plan_instance_to_reference_schedule
+from boundflow.ir.task_v1 import lower_plan_instance_to_task_ir
 from boundflow.planner.plan_ir_selector import select_plan_instance
 from boundflow.runtime.schedule_ir_artifact import (
     verify_schedule_ir_artifact,
     write_schedule_ir_artifact,
 )
 from boundflow.runtime.schedule_ir_executor import execute_schedule_reference
+from boundflow.runtime.task_ir_executor import execute_task_ir_reference
 from scripts.run_plan_ir_v1_reference_artifact import (
     build_reference_smoke_inputs,
 )
@@ -37,7 +39,12 @@ def _reconstruct():
         instance=instance,
         query_ids=("query:0", "query:1"),
     )
-    return bound_module, template, instance, schedule
+    task_module = lower_plan_instance_to_task_ir(
+        bound_module,
+        template=template,
+        instance=instance,
+    )
+    return bound_module, template, instance, task_module, schedule
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -48,9 +55,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     replay = subparsers.add_parser("replay")
     replay.add_argument("--artifact-dir", type=Path, required=True)
     args = parser.parse_args(argv)
-    bound_module, template, instance, schedule = _reconstruct()
+    bound_module, template, instance, task_module, schedule = _reconstruct()
     if args.command == "generate":
         trace = execute_schedule_reference(
+            schedule,
+            bound_module=bound_module,
+            template=template,
+            instance=instance,
+        )
+        task_trace = execute_task_ir_reference(
+            task_module,
             schedule,
             bound_module=bound_module,
             template=template,
@@ -61,8 +75,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             bound_module=bound_module,
             template=template,
             instance=instance,
+            task_module=task_module,
             schedule=schedule,
             trace=trace,
+            task_trace=task_trace,
         )
         status = "generated"
     else:
@@ -71,7 +87,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             bound_module=bound_module,
             template=template,
             instance=instance,
+            task_module=task_module,
             schedule=schedule,
+        )
+        task_trace = execute_task_ir_reference(
+            task_module,
+            schedule,
+            bound_module=bound_module,
+            template=template,
+            instance=instance,
         )
         manifest = args.artifact_dir / "manifest.json"
         status = "replayed"
@@ -86,6 +110,12 @@ def main(argv: Sequence[str] | None = None) -> int:
                     instance=instance,
                 ),
                 "trace_hash": trace.stable_hash(),
+                "task_module_hash": task_module.stable_hash(
+                    bound_module=bound_module,
+                    template=template,
+                    instance=instance,
+                ),
+                "task_trace_hash": task_trace.stable_hash(),
             },
             sort_keys=True,
             separators=(",", ":"),
