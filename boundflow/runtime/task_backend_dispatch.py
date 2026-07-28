@@ -164,6 +164,23 @@ class TypedTaskBackend(Protocol):
         """Execute one task or reject its typed capability."""
 
 
+class _StaticTemplateHashCache:
+    """Cache one validated template digest by exact immutable object identity."""
+
+    def __init__(self) -> None:
+        self._hashes: dict[int, tuple[PlanTemplate, BFBoundModule, str]] = {}
+
+    def get(self, template: PlanTemplate, bound_module: BFBoundModule) -> str:
+        """Return a digest only when both exact static objects still match."""
+
+        cached = self._hashes.get(id(template))
+        if cached is not None and cached[0] is template and cached[1] is bound_module:
+            return cached[2]
+        digest = template.stable_hash(bound_module=bound_module)
+        self._hashes[id(template)] = (template, bound_module, digest)
+        return digest
+
+
 @dataclass(frozen=True)
 class _PreparedReferenceTask:
     task_id: str
@@ -176,8 +193,11 @@ class _PreparedReferenceTask:
 class PyTorchReferenceTaskBackend:
     """Hash-keyed PyTorch reference adapter for selected REFERENCE candidates."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self, *, static_hash_cache: Optional[_StaticTemplateHashCache] = None
+    ) -> None:
         self._prepared: dict[str, _PreparedReferenceTask] = {}
+        self._static_hash_cache = static_hash_cache or _StaticTemplateHashCache()
         self.cache_hits = 0
         self.cache_misses = 0
 
@@ -194,9 +214,9 @@ class PyTorchReferenceTaskBackend:
             key.task_id != task.task_id
             or key.backend_candidate_id != task.backend.backend_candidate_id
             or key.capability_id != task.backend.capability_id
-            or key.bound_module_hash != session.bound_module.stable_hash()
+            or key.bound_module_hash != session.bound_module_hash
             or key.plan_template_hash
-            != template.stable_hash(bound_module=session.bound_module)
+            != self._static_hash_cache.get(template, session.bound_module)
         ):
             raise ValueError("backend dispatch key does not match typed task")
         candidates = {
@@ -260,7 +280,10 @@ class PyTorchTaskBackendRegistry:
     """Typed registry for reference, dense, structured, and chunked PyTorch."""
 
     def __init__(self, *, chunk_rows: int = 128) -> None:
-        self._reference = PyTorchReferenceTaskBackend()
+        self._static_hash_cache = _StaticTemplateHashCache()
+        self._reference = PyTorchReferenceTaskBackend(
+            static_hash_cache=self._static_hash_cache
+        )
         self._dense_fused = TorchDenseFusedCrownReference()
         self._chunked = TorchChunkedFusedCrownExecutor(chunk_rows=chunk_rows)
         self._prepared: dict[str, _PreparedPyTorchTask] = {}
@@ -280,6 +303,9 @@ class PyTorchTaskBackendRegistry:
             key,
             session=session,
             template=template,
+            plan_template_hash=self._static_hash_cache.get(
+                template, session.bound_module
+            ),
         )
         if backend == BackendKind.REFERENCE:
             return self._reference.dispatch(
@@ -340,15 +366,15 @@ def _validate_typed_dispatch(
     *,
     session: PlainCrownBoundIRSession,
     template: PlanTemplate,
+    plan_template_hash: str,
 ) -> tuple[BackendCandidate, BackendKind]:
     key.validate()
     if (
         key.task_id != task.task_id
         or key.backend_candidate_id != task.backend.backend_candidate_id
         or key.capability_id != task.backend.capability_id
-        or key.bound_module_hash != session.bound_module.stable_hash()
-        or key.plan_template_hash
-        != template.stable_hash(bound_module=session.bound_module)
+        or key.bound_module_hash != session.bound_module_hash
+        or key.plan_template_hash != plan_template_hash
     ):
         raise ValueError("backend dispatch key does not match typed task")
     candidates = {
@@ -395,7 +421,10 @@ class TVMTaskBackendRegistry:
     """Typed Task IR registry for fused and explicit-workspace TVM CROWN."""
 
     def __init__(self, *, cache_dir: Optional[Path] = None) -> None:
-        self._reference = PyTorchReferenceTaskBackend()
+        self._static_hash_cache = _StaticTemplateHashCache()
+        self._reference = PyTorchReferenceTaskBackend(
+            static_hash_cache=self._static_hash_cache
+        )
         self.cache = None
         if cache_dir is not None:
             self.cache = FusedCrownModuleCache(cache_dir)
@@ -416,6 +445,9 @@ class TVMTaskBackendRegistry:
             key,
             session=session,
             template=template,
+            plan_template_hash=self._static_hash_cache.get(
+                template, session.bound_module
+            ),
         )
         if backend == BackendKind.REFERENCE:
             return self._reference.dispatch(

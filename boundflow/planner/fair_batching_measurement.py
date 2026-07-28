@@ -14,7 +14,11 @@ import torch
 
 from ..frontends.plain_crown_bound_ir import tensor_content_hash
 from ..ir.plan import BackendKind
-from ..runtime.crown_ibp import run_crown_ibp_mlp
+from ..runtime.crown_ibp import (
+    _forward_ibp_trace_mlp,
+    run_crown_ibp_mlp,
+    run_crown_ibp_mlp_from_forward_trace,
+)
 from ..runtime.task_backend_dispatch import TypedTaskBackendRegistry
 from ..runtime.task_ir_executor import execute_task_ir_semantics
 from .adaptive_plan_evaluator import AdaptivePlanObservation
@@ -33,6 +37,7 @@ class BatchedOriginalMeasurement:  # pylint: disable=too-many-instance-attribute
     """Legacy original solver measured at the same physical sample batch."""
 
     schema_version: str
+    variant: str
     workload: TypedCNNWorkloadSpec
     semantic_hash: str
     cold_batch_latency_ms: float
@@ -75,6 +80,11 @@ class BatchedOriginalMeasurement:  # pylint: disable=too-many-instance-attribute
         )
         invalid_identity = (
             self.schema_version != BATCHED_ORIGINAL_SCHEMA_VERSION
+            or self.variant
+            not in {
+                "batched_original",
+                "batched_original_from_forward_trace",
+            }
             or any(len(value) != 64 for value in hashes)
             or not self.warm_batch_latency_ms
         )
@@ -99,7 +109,7 @@ class BatchedOriginalMeasurement:  # pylint: disable=too-many-instance-attribute
         return {
             "schema_version": self.schema_version,
             "workload": self.workload.to_dict(),
-            "variant": "batched_original",
+            "variant": self.variant,
             "physical_batch_size": self.workload.batch,
             "semantic_hash": self.semantic_hash,
             "cold_batch_latency_ms": self.cold_batch_latency_ms,
@@ -129,6 +139,49 @@ def measure_batched_original(
 ) -> BatchedOriginalMeasurement:
     """Measure legacy plain CROWN against the identical typed reference input."""
 
+    return _measure_batched_original(
+        prepared_reference,
+        workload,
+        device=device,
+        warm_samples=warm_samples,
+        rtol=rtol,
+        atol=atol,
+        from_forward_trace=False,
+    )
+
+
+def measure_batched_original_from_forward_trace(
+    prepared_reference: PreparedTypedBenchmark,
+    workload: TypedCNNWorkloadSpec,
+    *,
+    device: str,
+    warm_samples: int,
+    rtol: float = 1e-4,
+    atol: float = 1e-5,
+) -> BatchedOriginalMeasurement:
+    """Measure legacy backward from the same precomputed trace as typed IR."""
+
+    return _measure_batched_original(
+        prepared_reference,
+        workload,
+        device=device,
+        warm_samples=warm_samples,
+        rtol=rtol,
+        atol=atol,
+        from_forward_trace=True,
+    )
+
+
+def _measure_batched_original(
+    prepared_reference: PreparedTypedBenchmark,
+    workload: TypedCNNWorkloadSpec,
+    *,
+    device: str,
+    warm_samples: int,
+    rtol: float,
+    atol: float,
+    from_forward_trace: bool,
+) -> BatchedOriginalMeasurement:
     workload.validate()
     if (
         prepared_reference.backend != BackendKind.REFERENCE
@@ -150,13 +203,31 @@ def measure_batched_original(
         backend=TypedTaskBackendRegistry(),
     )
     _synchronize(device)
+    interval_env = None
+    relu_pre = None
+    if from_forward_trace:
+        interval_env, relu_pre = _forward_ibp_trace_mlp(
+            prepared_reference.legacy_module,
+            prepared_reference.input_spec,
+        )
+
+    def run_original():
+        if interval_env is None or relu_pre is None:
+            return run_crown_ibp_mlp(
+                prepared_reference.legacy_module,
+                prepared_reference.input_spec,
+            )
+        return run_crown_ibp_mlp_from_forward_trace(
+            prepared_reference.legacy_module,
+            prepared_reference.input_spec,
+            interval_env=interval_env,
+            relu_pre=relu_pre,
+        )
+
     baseline = _memory_allocated(device)
     _reset_peak(device)
     cold_started = time.perf_counter_ns()
-    result = run_crown_ibp_mlp(
-        prepared_reference.legacy_module,
-        prepared_reference.input_spec,
-    )
+    result = run_original()
     _synchronize(device)
     cold_ms = _elapsed_ms(cold_started)
     peak = _max_memory_allocated(device)
@@ -164,10 +235,7 @@ def measure_batched_original(
     for _index in range(warm_samples):
         _reset_peak(device)
         started = time.perf_counter_ns()
-        result = run_crown_ibp_mlp(
-            prepared_reference.legacy_module,
-            prepared_reference.input_spec,
-        )
+        result = run_original()
         _synchronize(device)
         warm.append(_elapsed_ms(started))
         peak = max(peak, _max_memory_allocated(device))
@@ -180,8 +248,20 @@ def measure_batched_original(
     incremental = max(0, peak - baseline)
     measurement = BatchedOriginalMeasurement(
         schema_version=BATCHED_ORIGINAL_SCHEMA_VERSION,
+        variant=(
+            "batched_original_from_forward_trace"
+            if from_forward_trace
+            else "batched_original"
+        ),
         workload=workload,
-        semantic_hash=_baseline_semantic_hash(prepared_reference),
+        semantic_hash=_baseline_semantic_hash(
+            prepared_reference,
+            variant=(
+                "batched_original_from_forward_trace"
+                if from_forward_trace
+                else "batched_original"
+            ),
+        ),
         cold_batch_latency_ms=cold_ms,
         warm_batch_latency_ms=tuple(warm),
         resident_baseline_bytes=baseline,
@@ -265,7 +345,7 @@ def batched_original_observation(
     per_query = measurement.warm_per_query_latency_ms
     median = statistics.median(per_query)
     observation = AdaptivePlanObservation(
-        plan_id="batched-original",
+        plan_id=measurement.variant.replace("_", "-"),
         plan_instance_hash=measurement.semantic_hash,
         predicted_latency_ms=median,
         predicted_compile_ms=0.0,
@@ -361,9 +441,9 @@ def _execute_reference(prepared: PreparedTypedBenchmark):
     )
 
 
-def _baseline_semantic_hash(prepared: PreparedTypedBenchmark) -> str:
+def _baseline_semantic_hash(prepared: PreparedTypedBenchmark, *, variant: str) -> str:
     payload = {
-        "kind": "batched-original",
+        "kind": variant,
         "bound_module_hash": prepared.bound_module.stable_hash(),
         "input_shape": list(prepared.input_spec.center.shape),
     }
@@ -401,6 +481,7 @@ __all__ = [
     "compiler_candidate_observation",
     "fixed_single_observation",
     "measure_batched_original",
+    "measure_batched_original_from_forward_trace",
     "ordinary_batching_observation",
     "verify_single_query_matches_batch",
 ]

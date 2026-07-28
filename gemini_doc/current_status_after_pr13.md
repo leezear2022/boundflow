@@ -22,6 +22,9 @@
 > 与 non-toy workload 仍缺。IR-5C3 随后用 MLP→CNN architecture-held-out 和 fair
 > batched-original 补齐口径，Global p50/p90 regret 恶化为 68.065×/70.263×，且无多预算
 > 切换/Pareto，因此当前 IR-5 v1 为 VALIDATED-NO-GO。
+> IR-5D 已把静态 validate/hash/dispatch 移入 prepared execution capsule，并在已消费
+> CNN 上以 from-forward-trace 公平边界得到 `0.880×`/`0.896×` 最快 median 诊断；
+> 该结果仅为 calibration，不撤销 No-Go。新的 frozen residual-CNN final 尚未执行。
 
 ## 1. 当前真实阶段
 
@@ -111,6 +114,13 @@ profile 将主要问题定位到 query hot path 重复 Plan/Bound/Task validate�
 canonical JSON 与 dispatch-key 构造。当前 IR-5 v1 以 VALIDATED-NO-GO 关闭；
 ASPLOS-ready 判定仍为 NO，IR-6 明确 blocked。如继续，唯一允许的补救是 IR-5D prepared
 execution capsule，并必须在新 frozen CNN/residual split 上重新过 fair p90≤1.20× 门禁。
+
+IR-5D remediation 现已实现：prepared Bound/Task program 冻结静态参数与 identity，
+Plan cache 复用预计算 dispatch key，production trace 不在 timed path 生成中间 tensor
+SHA；同时新增 from-forward-trace legacy baseline，使双方都只计 CROWN backward。
+在旧 gray/color CNN 上的 20-sample CUDA calibration 中，最快 typed/legacy median 比值为
+`0.880×`/`0.896×`。这些 workload 已被消费，故只能证明优化方向，不能升级 claim。
+下一步是先冻结新的 residual-CNN final split，再一次性运行完整 fair evaluator 和 replay。
 
 明确禁止：
 

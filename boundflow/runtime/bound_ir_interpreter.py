@@ -365,18 +365,24 @@ class BoundIRTaskStepResult:
     output_value_hashes: Tuple[Tuple[str, str], ...]
 
 
-class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
-    """Stateful reference session that executes contiguous Bound IR task regions."""
+@dataclass(frozen=True)
+class PreparedPlainCrownBoundIRProgram:
+    """One-time validated static program reused by dynamic query sessions."""
 
-    def __init__(
-        self,
+    bound_module: BFBoundModule
+    task_module: BFTaskModule
+    bound_module_hash: str
+    params: Mapping[str, Any]
+    values: Mapping[str, Any]
+
+    @classmethod
+    def prepare(
+        cls,
         bound_module: BFBoundModule,
-        *,
         task_module: BFTaskModule,
-        input_spec: InputSpec,
-        relu_pre: Mapping[str, IntervalState],
-        linear_spec_C: Optional[torch.Tensor] = None,
-    ) -> None:
+    ) -> "PreparedPlainCrownBoundIRProgram":
+        """Validate immutable compiler/model identity and cache static lookups."""
+
         bound_module.validate()
         if bound_module.domain.method != BoundMethodKind.CROWN:
             raise NotImplementedError(
@@ -387,6 +393,43 @@ class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
             raise ValueError(
                 "runtime task/parameter fingerprint does not match Bound IR"
             )
+        return cls(
+            bound_module=bound_module,
+            task_module=task_module,
+            bound_module_hash=bound_module.stable_hash(),
+            params={
+                name: (value.detach().clone() if torch.is_tensor(value) else value)
+                for name, value in _parameter_bindings(task_module).items()
+            },
+            values={value.value_id: value for value in bound_module.graph.values},
+        )
+
+
+class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
+    # The keyword-only inputs make static program/query ownership explicit.
+    # pylint: disable=too-many-arguments
+    """Stateful reference session that executes contiguous Bound IR task regions."""
+
+    def __init__(
+        self,
+        bound_module: BFBoundModule,
+        *,
+        task_module: BFTaskModule,
+        input_spec: InputSpec,
+        relu_pre: Mapping[str, IntervalState],
+        linear_spec_C: Optional[torch.Tensor] = None,
+        prepared_program: Optional[PreparedPlainCrownBoundIRProgram] = None,
+        capture_output_hashes: bool = True,
+    ) -> None:
+        if prepared_program is None:
+            prepared_program = PreparedPlainCrownBoundIRProgram.prepare(
+                bound_module, task_module
+            )
+        elif (
+            prepared_program.bound_module is not bound_module
+            or prepared_program.task_module is not task_module
+        ):
+            raise ValueError("prepared Bound IR program identity differs from session")
         objective_spec = bound_module.spec.objectives[0]
         if objective_spec.payload_hash is None:
             if linear_spec_C is not None:
@@ -397,10 +440,12 @@ class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
         ):
             raise ValueError("runtime objective payload does not match Bound IR")
         self.bound_module = bound_module
+        self.bound_module_hash = prepared_program.bound_module_hash
         self.input_spec = input_spec
         self.relu_pre = relu_pre
-        self.params = _parameter_bindings(task_module)
-        self.values = {value.value_id: value for value in bound_module.graph.values}
+        self.params = prepared_program.params
+        self.values = prepared_program.values
+        self.capture_output_hashes = capture_output_hashes
         self.env: dict[str, RuntimeValue] = {}
         self.next_op_index = 0
         for input_value_id in bound_module.graph.inputs:
@@ -441,10 +486,7 @@ class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
             raise ValueError(f"Bound IR task step omits outputs: {missing}")
         return BoundIRTaskStepResult(
             op_ids=op_ids,
-            output_value_hashes=tuple(
-                (value_id, _runtime_value_hash(self.env[value_id]))
-                for value_id in output_value_ids
-            ),
+            output_value_hashes=self._output_hashes(output_value_ids),
         )
 
     def load_state_value(
@@ -525,10 +567,7 @@ class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
         self.next_op_index = stop
         return BoundIRTaskStepResult(
             op_ids=op_ids,
-            output_value_hashes=tuple(
-                (value_id, _runtime_value_hash(self.env[value_id]))
-                for value_id in output_value_ids
-            ),
+            output_value_hashes=self._output_hashes(output_value_ids),
         )
 
     def execute_fused_relu_affine_task(
@@ -665,10 +704,17 @@ class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
             raise ValueError(f"fused Bound task omits outputs: {missing}")
         return BoundIRTaskStepResult(
             op_ids=op_ids,
-            output_value_hashes=tuple(
-                (value_id, _runtime_value_hash(self.env[value_id]))
-                for value_id in output_value_ids
-            ),
+            output_value_hashes=self._output_hashes(output_value_ids),
+        )
+
+    def _output_hashes(
+        self, output_value_ids: Tuple[str, ...]
+    ) -> Tuple[Tuple[str, str], ...]:
+        if not self.capture_output_hashes:
+            return ()
+        return tuple(
+            (value_id, _runtime_value_hash(self.env[value_id]))
+            for value_id in output_value_ids
         )
 
     def result(self) -> IntervalState:

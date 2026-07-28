@@ -15,7 +15,7 @@ from ..domains.interval import IntervalState
 from ..frontends.plain_crown_bound_ir import tensor_content_hash
 from ..ir.bound import BFBoundModule, BoundMethodKind
 from ..ir.plan import PlanInstance, PlanTemplate, StateValidity
-from ..ir.schedule import lower_plan_instance_to_reference_schedule
+from ..ir.schedule import ScheduleModule, lower_plan_instance_to_reference_schedule
 from ..ir.task import BFTaskModule
 from ..ir.task_v1 import TaskIRModule, lower_plan_instance_to_task_ir
 from ..planner.materialization import BoundMethod, OptimizationStage
@@ -24,7 +24,13 @@ from .bab_query import BoundQueryRequest, model_versions
 from .bound_state_store import BoundRuntimeStateStore
 from .task_backend_dispatch import TypedTaskBackend, TypedTaskBackendRegistry
 from .task_executor import InputSpec
-from .task_ir_executor import TaskExecutionTrace, execute_task_ir_semantics
+from .task_ir_executor import (
+    PreparedTaskIRExecution,
+    TaskExecutionTrace,
+    TaskTraceMode,
+    execute_task_ir_semantics,
+    prepare_task_ir_execution,
+)
 
 
 class CompilerQueryCapabilityError(ValueError):
@@ -216,6 +222,10 @@ class TypedCompilerQueryResult:
 class _CompiledPlan:
     instance: PlanInstance
     task_module: TaskIRModule
+    schedule: ScheduleModule
+    prepared_execution: PreparedTaskIRExecution
+    plan_instance_hash: str
+    task_module_hash: str
 
 
 class TypedCompilerQueryRuntime:  # pylint: disable=too-many-instance-attributes
@@ -228,6 +238,7 @@ class TypedCompilerQueryRuntime:  # pylint: disable=too-many-instance-attributes
         memory_budget_bytes: int,
         backend: Optional[TypedTaskBackend] = None,
         state_store: Optional[BoundRuntimeStateStore] = None,
+        trace_mode: TaskTraceMode = TaskTraceMode.AUDIT,
     ) -> None:
         if available_memory_bytes <= 0 or memory_budget_bytes <= 0:
             raise ValueError("compiler query runtime memory limits must be positive")
@@ -239,10 +250,10 @@ class TypedCompilerQueryRuntime:  # pylint: disable=too-many-instance-attributes
         )
         self.backend = backend or TypedTaskBackendRegistry()
         self.state_store = state_store or BoundRuntimeStateStore()
-        self._plan_cache: dict[
-            tuple[str, CompilerRuntimeContext, Tuple[StateValidity, ...]],
-            _CompiledPlan,
-        ] = {}
+        if not isinstance(trace_mode, TaskTraceMode):
+            raise TypeError("compiler runtime trace mode is invalid")
+        self.trace_mode = trace_mode
+        self._plan_cache: dict[tuple[object, ...], _CompiledPlan] = {}
         self.plan_cache_hits = 0
         self.plan_cache_misses = 0
         self.executed_queries = 0
@@ -280,21 +291,16 @@ class TypedCompilerQueryRuntime:  # pylint: disable=too-many-instance-attributes
                 linear_spec_C=payload.linear_spec_C,
                 backend=self.backend,
                 state_store=self.state_store,
+                prepared=compiled.prepared_execution,
+                trace_mode=self.trace_mode,
             )
             results.append(
                 TypedCompilerQueryResult(
                     query_id=request.query_id,
                     sequence_number=request.sequence_number,
                     bounds=bounds,
-                    plan_instance_hash=compiled.instance.stable_hash(
-                        template=payload.template,
-                        bound_module=payload.bound_module,
-                    ),
-                    task_module_hash=compiled.task_module.stable_hash(
-                        bound_module=payload.bound_module,
-                        template=payload.template,
-                        instance=compiled.instance,
-                    ),
+                    plan_instance_hash=compiled.plan_instance_hash,
+                    task_module_hash=compiled.task_module_hash,
                     trace=trace,
                     plan_instance=compiled.instance,
                 )
@@ -346,7 +352,14 @@ class TypedCompilerQueryRuntime:  # pylint: disable=too-many-instance-attributes
         )
         runtime_context = request.runtime_context or self.default_runtime_context
         runtime_context.validate()
-        key = (request.compatibility_key(), runtime_context, state_validities)
+        key = (
+            request.compatibility_key(),
+            runtime_context,
+            state_validities,
+            id(payload.bound_module),
+            id(payload.template),
+            id(payload.legacy_task_module),
+        )
         cached = self._plan_cache.get(key)
         if cached is not None:
             self.plan_cache_hits += 1
@@ -366,13 +379,35 @@ class TypedCompilerQueryRuntime:  # pylint: disable=too-many-instance-attributes
             state_validities=state_validities,
             selection_context=runtime_context.plan_selection,
         )
+        task_module = lower_plan_instance_to_task_ir(
+            payload.bound_module,
+            template=payload.template,
+            instance=instance,
+        )
+        schedule = lower_plan_instance_to_reference_schedule(
+            payload.bound_module,
+            template=payload.template,
+            instance=instance,
+            query_ids=(request.query_id,),
+        )
+        prepared_execution = prepare_task_ir_execution(
+            task_module,
+            schedule,
+            bound_module=payload.bound_module,
+            template=payload.template,
+            instance=instance,
+            legacy_task_module=payload.legacy_task_module,
+        )
         compiled = _CompiledPlan(
             instance=instance,
-            task_module=lower_plan_instance_to_task_ir(
-                payload.bound_module,
+            task_module=task_module,
+            schedule=schedule,
+            prepared_execution=prepared_execution,
+            plan_instance_hash=instance.stable_hash(
                 template=payload.template,
-                instance=instance,
+                bound_module=payload.bound_module,
             ),
+            task_module_hash=prepared_execution.task_module_hash,
         )
         self._plan_cache[key] = compiled
         return compiled

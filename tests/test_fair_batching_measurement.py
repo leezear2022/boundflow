@@ -12,6 +12,7 @@ from boundflow.planner.fair_batching_measurement import (
     compiler_candidate_observation,
     fixed_single_observation,
     measure_batched_original,
+    measure_batched_original_from_forward_trace,
     ordinary_batching_observation,
     verify_single_query_matches_batch,
 )
@@ -71,6 +72,12 @@ def test_fair_batching_measurements_share_semantics_and_normalize_per_query(
         device="cpu",
         warm_samples=2,
     )
+    original_from_trace = measure_batched_original_from_forward_trace(
+        prepared_reference,
+        workload,
+        device="cpu",
+        warm_samples=2,
+    )
     single = measure_workload(
         TypedCNNWorkloadSpec(
             "cnn-heldout-single",
@@ -103,6 +110,7 @@ def test_fair_batching_measurements_share_semantics_and_normalize_per_query(
 
     ordinary = ordinary_batching_observation(measured[0])
     batched = batched_original_observation(original)
+    batched_from_trace = batched_original_observation(original_from_trace)
     fixed = fixed_single_observation(single)
     compiler = compiler_candidate_observation(
         measured[1], models[BackendKind.PYTORCH_DENSE]
@@ -112,6 +120,8 @@ def test_fair_batching_measurements_share_semantics_and_normalize_per_query(
     assert len(original.warm_per_query_latency_ms) == 2
     assert ordinary.plan_id == "ordinary-batching"
     assert batched.plan_id == "batched-original"
+    assert batched_from_trace.plan_id == "batched-original-from-forward-trace"
+    assert original_from_trace.semantic_allclose
     assert fixed.plan_id == "fixed-single"
     assert compiler.plan_id == "compiler:pytorch_dense"
     assert ordinary.measured_peak_bytes == measured[0].measured_peak_bytes

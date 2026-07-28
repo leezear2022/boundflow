@@ -114,6 +114,9 @@
 - `gemini_doc/change_2026-07-28_ir5c3c_family_fair_nogo.md`：IR-5C3C
   architecture-held-out CUDA fair artifact、Global p90 regret 70.263×、host
   validate/hash hot-path 归因与 IR-5 v1 VALIDATED-NO-GO
+- `gemini_doc/change_2026-07-28_ir5d_prepared_execution_capsule.md`：IR-5D
+  prepared Bound/Task execution、production/audit trace 分离、from-forward-trace 公平基线
+  与 calibration-only CUDA remediation 诊断；新 residual final 尚未执行
 - `gemini_doc/asplos_execution_memo_v1_0.md`：ASPLOS 研发的短执行入口与门禁
 - `gemini_doc/current_status_after_pr13.md`：PR-13 closure 后的真实状态、证据边界与当前缺口
 - `gemini_doc/pr14_execution_plan.md`：真实 verifier workload coverage/execution 的切片、门禁与止损

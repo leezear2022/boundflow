@@ -3416,3 +3416,23 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_ir5c3c_family_fair_nogo.md`
+
+---
+
+## 2026-07-28：IR-5D prepared execution capsule
+
+**主要改动**
+- 静态 Bound/Task/Plan validate、hash 与 primary/fallback dispatch key 移出 query hot path；
+- prepared program 冻结参数快照，动态 Schedule 只允许 query binding 重写；
+- 新增 AUDIT/PRODUCTION trace mode，timed production path 跳过中间 tensor SHA；
+- compiler query cache 和 measured runner 接入 prepared capsule；
+- 新增 from-forward-trace legacy baseline，使双方只计 CROWN backward。
+
+**验证与边界**
+- 全量 `476 passed, 1 skipped`，Mypy 0 issues，Pylint 10.00/10；
+- 已消费 CNN calibration 诊断中最快 typed/legacy median 比值为 `0.880×`/`0.896×`；
+- 诊断不是 fresh artifact，IR-5C3 `70.263×` No-Go 不撤销，IR-6 仍 blocked；
+- 下一步必须冻结并一次性消费新的 residual-CNN final split。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5d_prepared_execution_capsule.md`

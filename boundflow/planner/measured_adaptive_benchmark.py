@@ -19,7 +19,12 @@ import torch
 from ..frontends.plain_crown_bound_ir import tensor_content_hash
 from ..ir.plan import BackendKind
 from ..runtime.task_backend_dispatch import TypedTaskBackendRegistry
-from ..runtime.task_ir_executor import execute_task_ir_semantics
+from ..runtime.task_ir_executor import (
+    PreparedTaskIRExecution,
+    TaskTraceMode,
+    execute_task_ir_semantics,
+    prepare_task_ir_execution,
+)
 from .adaptive_plan_evaluator import AdaptivePlanObservation
 from .typed_benchmark_workloads import (
     PreparedTypedBenchmark,
@@ -293,10 +298,18 @@ def measure_workload(  # pylint: disable=too-many-statements
         registry = TypedTaskBackendRegistry(
             tvm_cache_dir=cache_root / workload.workload_id / backend.value
         )
+        execution = prepare_task_ir_execution(
+            prepared.task_module,
+            prepared.schedule,
+            bound_module=prepared.bound_module,
+            template=prepared.template,
+            instance=prepared.instance,
+            legacy_task_module=prepared.legacy_module,
+        )
         resident_baseline = _memory_allocated(device)
         _reset_peak(device)
         cold_started = time.perf_counter_ns()
-        result, _trace = _execute(prepared, registry)
+        result, _trace = _execute(prepared, registry, execution)
         _synchronize(device)
         cold_ms = _elapsed_ms(cold_started)
         cold_peak = _max_memory_allocated(device)
@@ -305,7 +318,7 @@ def measure_workload(  # pylint: disable=too-many-statements
         for _index in range(warm_samples):
             _reset_peak(device)
             started = time.perf_counter_ns()
-            result, _trace = _execute(prepared, registry)
+            result, _trace = _execute(prepared, registry, execution)
             _synchronize(device)
             warm.append(_elapsed_ms(started))
             peak = max(peak, _max_memory_allocated(device))
@@ -374,7 +387,7 @@ def measure_workload(  # pylint: disable=too-many-statements
         )
         measurement.validate()
         measurements.append(measurement)
-        del prepared, registry, result, lower, upper
+        del prepared, registry, execution, result, lower, upper
         gc.collect()
         if device == "cuda":
             torch.cuda.empty_cache()
@@ -453,6 +466,7 @@ def build_heldout_observations(
 def _execute(
     prepared: PreparedTypedBenchmark,
     registry: TypedTaskBackendRegistry,
+    execution: PreparedTaskIRExecution,
 ):
     return execute_task_ir_semantics(
         prepared.task_module,
@@ -464,6 +478,8 @@ def _execute(
         input_spec=prepared.input_spec,
         relu_pre=prepared.relu_pre,
         backend=registry,
+        prepared=execution,
+        trace_mode=TaskTraceMode.PRODUCTION,
     )
 
 

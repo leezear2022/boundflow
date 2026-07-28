@@ -142,8 +142,10 @@ class BoundRuntimeStateStore:
     ) -> BoundRuntimeStatePayload:
         """Load only an exact module/value/version payload into the session."""
 
+        if session.bound_module is not bound_module:
+            raise ValueError("runtime state load Bound module identity mismatch")
         payload = self._payloads.get(action.state_id)
-        expected_module_hash = bound_module.stable_hash()
+        expected_module_hash = session.bound_module_hash
         if (
             payload is None
             or payload.source_value_id != action.source_value_id
@@ -173,6 +175,8 @@ class BoundRuntimeStateStore:
     ) -> BoundRuntimeStatePayload:
         """Export one computed dense value under the Schedule identity."""
 
+        if session.bound_module is not bound_module:
+            raise ValueError("runtime state store Bound module identity mismatch")
         value = session.export_state_value(
             action.source_value_id,
             state_version=action.state_version,
@@ -181,7 +185,7 @@ class BoundRuntimeStateStore:
             state_id=action.state_id,
             source_value_id=action.source_value_id,
             state_version=action.state_version,
-            bound_module_hash=bound_module.stable_hash(),
+            bound_module_hash=session.bound_module_hash,
             value=value,
         )
         self._payloads[action.state_id] = payload

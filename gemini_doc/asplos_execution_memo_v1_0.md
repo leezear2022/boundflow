@@ -2,7 +2,7 @@
 
 > 生效日期：2026-07-12
 > 当前冻结基线：`57a854b`；closure tag：`pr13-validated-reduced`
-> 当前研发分支：`feat/pr14-real-verification`
+> 当前研发分支：`feat/compiler-ir-stack-v1`
 > 唯一执行顺序：**Gate 0 → PR-10 → PR-11 → PR-12 → PR-13 → PR-14**。
 > 禁止同时启动 Planner、fused kernel 与 BaB runtime 三条主线。
 
@@ -15,7 +15,9 @@
 > **2026-07-28 进度**：IR-1—IR-4 narrow plain-CROWN compiler/runtime 已
 > validated-reduced；IR-5C3 architecture-held-out fair artifact 已完成，但 Global 相对
 > batched-original p90 regret 70.263×且无多预算切换，判定 VALIDATED-NO-GO。
-> IR-6 blocked；如继续只允许 IR-5D prepared execution remediation。
+> IR-5D prepared execution remediation 已实现，并在已消费 CNN 上通过 calibration-only
+> from-forward-trace 诊断；正式 No-Go 不撤销。IR-6 仍 blocked，下一步只允许新的
+> frozen residual-CNN final gate。
 
 ## 1. 锁定的论文命题
 
@@ -394,4 +396,8 @@ Bound IR v1
 - IR-5C3 已用 MLP calibration→chain-CNN held-out 和 fair batched-original 补齐关键口径；
   correctness/feasibility 全通过，但 Global p50/p90 regret 为 68.065×/70.263×，
   64/512 MiB 均选 chunked且无 Pareto。当前 IR-5 v1 VALIDATED-NO-GO，IR-6 blocked。
-  profile 指向 query hot path 重复 validate/hash；唯一允许补救为 IR-5D prepared execution。
+  profile 指向 query hot path 重复 validate/hash。
+- IR-5D 已把静态 validate/hash/dispatch key 移入 prepared capsule，并分离 audit/production
+  trace；在旧 CNN 上使用 from-forward-trace 公平计时的 calibration median 比值最快为
+  0.880×/0.896×。该诊断不撤销 No-Go；只允许在新 frozen residual-CNN split 上做一次
+  final gate，IR-6 在此之前继续 blocked。
