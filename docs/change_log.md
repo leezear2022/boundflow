@@ -3049,3 +3049,23 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_plan_ir_v1_closure_audit.md`
+
+---
+
+## 2026-07-28：Schedule IR v1 schema/lowering/verifier foundation
+
+**主要改动**
+- 新增 typed `ScheduleModule`、`ScheduleBuffer` 与 budget/allocate/materialize/launch/emit/free
+  actions；
+- Schedule 锁定 Bound/Template/Instance 三重 hash，并有 canonical JSON/stable hash；
+- 新增 PlanInstance→同步 Schedule lowering；
+- verifier 检查 storage arena/peak、budget、use-before-def、region/transition 全覆盖、query
+  accounting 和 allocation leak。
+
+**证据与边界**
+- 专属：3 passed；相邻：100 passed；全量：421 passed、1 skipped；
+- Mypy 0 issues，Pylint 10.00/10，Black clean；
+- 只关闭 IR-3A foundation；batch/retry/event/state/reference executor/trace replay 仍未完成。
+
+**记录**
+- `gemini_doc/change_2026-07-28_schedule_ir_v1_schema_lowering.md`
