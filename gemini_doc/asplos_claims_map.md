@@ -7,7 +7,7 @@
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
-| C1：显式物化语义的 Structured Bound-Operator IR | dense semantic closure validated；representation rewrite/production migration pending | typed Bound IR + Task/trace lowering + independent dense interpreter；历史 structured runtime mechanism | 20 个 schema/lowering/interpreter tests；MLP/CNN/residual/concat final bounds 对齐；还需 materialize/structured rewrite 对齐 | deterministic dump/hash 已有；IR-driven E2E artifact 尚缺 |
+| C1：显式物化语义的 Structured Bound-Operator IR | IR-1 reference semantic closure validated；Plan/Schedule integration pending | typed Bound IR + lowering + dense/structured interpreter + explicit cast/materialize rewrite | 25 个 schema/lowering/rewrite/interpreter tests；MLP/CNN/residual/concat final bounds 对齐 | deterministic dump/hash 已有；IR-driven E2E artifact 尚缺 |
 | C2：Method/Autograd/Memory-Aware Materialization Planner | 局部机制 validated-reduced；统一 Plan/Schedule IR pending | static topology/liveness、局部 materialization/placement/backend records、bounded runtime | 历史 held-out/Oracle/OOM 保留；还需跨决策 Plan/Schedule verifier 与 IR-driven E2E | 历史 1,416 executions/23 feasible 保留；新 IR 工件尚缺 |
 | C3：Verification Query Runtime Infrastructure | downgraded after PR-14B | query/validity + batcher + capability routing + real observer | 保留 reduced correctness；真实 coverage/replay 作为 limitation | activation 0/394 eligible；ResNet bound-equivalence fail；不作 acceleration claim |
 | BoundFlow Schedule IR | unimplemented | 现仅 `TaskGraph.topo_sort()`、局部 fused step 和过程式 retry | dependency/lifetime/stream/batch/retry/state verifier；reference executor | deterministic schedule dump/trace 尚缺 |
@@ -58,6 +58,21 @@
 
 实现与门禁边界见
 `gemini_doc/change_2026-07-28_bound_ir_v1_plain_crown_lowering.md`。
+
+### 2026-07-28 IR-1C / IR-1 closure
+
+- affine-state verifier 禁止 Linear/Conv/ReLU/Reshape/route/compose 隐式改变 representation；
+- 新 verified rewrite 在 affine region 入口插入 dense→structured cast，在 ReLU/concretize
+  dense boundary 前插入 materialize；
+- reference interpreter 已执行 structured LinearOperator region 和显式转换；
+- multi-spec MLP、chain CNN、residual/concat fanout 的 dense/structured rewrite final bounds 对齐；
+- 非法隐式转换和重复 rewrite fail closed；
+- 专属测试 25 passed，相邻 47 passed，全量 397 passed、1 skipped；
+- IR-1 契约的最小 reference semantic closure 门禁已通过；
+- 完整 C1 仍需 IR-2/3/4 的 Plan/Schedule/backend integration 和 IR-driven E2E artifact。
+
+实现与门禁边界见
+`gemini_doc/change_2026-07-28_bound_ir_v1_representation_rewrite.md`。
 
 ## PR-10 子阶段
 

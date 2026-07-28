@@ -1,4 +1,4 @@
-"""Independent dense reference interpreter for Bound IR v1 plain CROWN."""
+"""Independent dense/structured reference interpreter for Bound IR v1 CROWN."""
 
 # CROWN literature and the existing runtime use A_u/A_l for affine coefficients.
 # pylint: disable=too-many-locals,invalid-name,duplicate-code,not-callable
@@ -22,16 +22,22 @@ from ..ir.bound import (
     BoundMethodKind,
     BoundOp,
     BoundOpKind,
+    BoundRepresentation,
     ConcatBackwardAttrs,
     ConcretizeAttrs,
     Conv2dBackwardAttrs,
     LinearBackwardAttrs,
     ReluRelaxationAttrs,
+    RepresentationChangeAttrs,
     ReshapeAttrs,
     SpecBindAttrs,
 )
 from ..ir.task import BFTaskModule
+from .linear_operator import DenseLinearOperator, LinearOperator
 from .task_executor import InputSpec
+
+Coefficient = torch.Tensor | LinearOperator
+RuntimeValue = torch.Tensor | LinearOperator
 
 
 def execute_plain_crown_bound_ir(  # pylint: disable=too-many-branches,too-many-statements
@@ -46,7 +52,7 @@ def execute_plain_crown_bound_ir(  # pylint: disable=too-many-branches,too-many-
 
     bound_module.validate()
     if bound_module.domain.method != BoundMethodKind.CROWN:
-        raise NotImplementedError("dense Bound IR interpreter supports CROWN only")
+        raise NotImplementedError("Bound IR reference interpreter supports CROWN only")
     task_module.validate()
     if bound_module.primal_graph_hash != plain_crown_primal_graph_hash(task_module):
         raise ValueError("runtime task/parameter fingerprint does not match Bound IR")
@@ -60,7 +66,7 @@ def execute_plain_crown_bound_ir(  # pylint: disable=too-many-branches,too-many-
         raise ValueError("runtime objective payload does not match Bound IR")
     params = _parameter_bindings(task_module)
     values = {value.value_id: value for value in bound_module.graph.values}
-    env: dict[str, torch.Tensor] = {}
+    env: dict[str, RuntimeValue] = {}
 
     for input_value_id in bound_module.graph.inputs:
         input_value = values[input_value_id]
@@ -78,7 +84,7 @@ def execute_plain_crown_bound_ir(  # pylint: disable=too-many-branches,too-many-
         if op.kind == BoundOpKind.SPEC_BIND:
             attrs = _attrs(op, SpecBindAttrs)
             del attrs
-            objective = _get(env, op.inputs[0])
+            objective = _get_tensor(env, op.inputs[0])
             if len(op.outputs) != 4:
                 raise NotImplementedError(
                     "plain-CROWN interpreter requires affine-state spec binding"
@@ -101,15 +107,44 @@ def execute_plain_crown_bound_ir(  # pylint: disable=too-many-branches,too-many-
             )
             continue
 
+        if op.kind in {
+            BoundOpKind.REPRESENTATION_CAST,
+            BoundOpKind.MATERIALIZE,
+        }:
+            attrs = _attrs(op, RepresentationChangeAttrs)
+            source = _get(env, op.inputs[0])
+            primal_shape = _coefficient_primal_shape(values, op.outputs[0])
+            if attrs.target == BoundRepresentation.STRUCTURED:
+                if not torch.is_tensor(source):
+                    raise ValueError("dense-to-structured cast expects a tensor")
+                env[op.outputs[0]] = cast(
+                    LinearOperator,
+                    DenseLinearOperator(source, input_shape=primal_shape),
+                )
+            elif attrs.target == BoundRepresentation.DENSE:
+                if torch.is_tensor(source):
+                    raise ValueError(
+                        "structured-to-dense transition expects an operator"
+                    )
+                dense = source.to_dense()
+                env[op.outputs[0]] = dense.reshape(
+                    int(dense.shape[0]), int(dense.shape[1]), *primal_shape
+                )
+            else:
+                raise NotImplementedError(
+                    f"interpreter cannot transition to {attrs.target.value}"
+                )
+            continue
+
         if op.kind == BoundOpKind.COEFFICIENT_COMPOSE:
             states = tuple(
                 _load_state(env, op.inputs[index : index + 4])
                 for index in range(0, len(op.inputs), 4)
             )
             result = (
-                sum((state[0] for state in states[1:]), states[0][0]),
+                _coefficient_sum(tuple(state[0] for state in states)),
                 sum((state[1] for state in states[1:]), states[0][1]),
-                sum((state[2] for state in states[1:]), states[0][2]),
+                _coefficient_sum(tuple(state[2] for state in states)),
                 sum((state[3] for state in states[1:]), states[0][3]),
             )
             _store_state(env, op.outputs, result)
@@ -122,7 +157,11 @@ def execute_plain_crown_bound_ir(  # pylint: disable=too-many-branches,too-many-
             if weight.dim() != 2:
                 raise ValueError("linear weight must have rank 2")
             bias = (
-                torch.zeros(int(weight.shape[0]), device=A_u.device, dtype=A_u.dtype)
+                torch.zeros(
+                    int(weight.shape[0]),
+                    device=_coefficient_device(A_u),
+                    dtype=_coefficient_dtype(A_u),
+                )
                 if attrs.bias_primal_value_id is None
                 else _tensor_binding(params, attrs.bias_primal_value_id, like=A_u)
             )
@@ -130,18 +169,16 @@ def execute_plain_crown_bound_ir(  # pylint: disable=too-many-branches,too-many-
                 bias = bias.expand(int(weight.shape[0]))
             if bias.dim() != 1 or int(bias.shape[0]) != int(weight.shape[0]):
                 raise ValueError("linear bias must be scalar or rank 1 [output]")
-            A_u_flat = A_u.reshape(int(A_u.shape[0]), int(A_u.shape[1]), -1)
-            A_l_flat = A_l.reshape(int(A_l.shape[0]), int(A_l.shape[1]), -1)
-            if int(A_u_flat.shape[2]) != int(weight.shape[0]):
+            if _coefficient_input_numel(A_u) != int(weight.shape[0]):
                 raise ValueError("linear coefficient/weight output shape mismatch")
             _store_state(
                 env,
                 op.outputs,
                 (
-                    A_u_flat.matmul(weight),
-                    b_u + (A_u_flat * bias.view(1, 1, -1)).sum(dim=2),
-                    A_l_flat.matmul(weight),
-                    b_l + (A_l_flat * bias.view(1, 1, -1)).sum(dim=2),
+                    _linear_backward_coefficient(A_u, weight),
+                    b_u + _contract(A_u, bias),
+                    _linear_backward_coefficient(A_l, weight),
+                    b_l + _contract(A_l, bias),
                 ),
             )
             continue
@@ -196,6 +233,10 @@ def execute_plain_crown_bound_ir(  # pylint: disable=too-many-branches,too-many-
                 raise KeyError(f"missing ReLU pre-activation binding '{preactivation}'")
             pre = relu_pre[preactivation]
             A_u, b_u, A_l, b_l = _load_state(env, op.inputs)
+            if not torch.is_tensor(A_u) or not torch.is_tensor(A_l):
+                raise ValueError(
+                    "ReLU relaxation requires an explicit dense materialization"
+                )
             result = _relu_backward(A_u, b_u, A_l, b_l, pre=pre)
             output_shape = _coefficient_primal_shape(values, op.outputs[0])
             _store_state(
@@ -222,9 +263,9 @@ def execute_plain_crown_bound_ir(  # pylint: disable=too-many-branches,too-many-
                 env,
                 op.outputs,
                 (
-                    A_u.reshape(int(A_u.shape[0]), int(A_u.shape[1]), *target_shape),
+                    _reshape_coefficient(A_u, target_shape),
                     b_u,
-                    A_l.reshape(int(A_l.shape[0]), int(A_l.shape[1]), *target_shape),
+                    _reshape_coefficient(A_l, target_shape),
                     b_l,
                 ),
             )
@@ -244,7 +285,12 @@ def execute_plain_crown_bound_ir(  # pylint: disable=too-many-branches,too-many-
                 _store_state(
                     env,
                     state.value_ids,
-                    (A_u.clone(), child_b_u, A_l.clone(), child_b_l),
+                    (
+                        _clone_coefficient(A_u),
+                        child_b_u,
+                        _clone_coefficient(A_l),
+                        child_b_l,
+                    ),
                 )
             continue
 
@@ -257,22 +303,24 @@ def execute_plain_crown_bound_ir(  # pylint: disable=too-many-branches,too-many-
                 zip(output_states, attrs.input_shapes)
             ):
                 stop = start + int(shape[attrs.axis])
-                slices = [slice(None)] * A_u.dim()
-                slices[attrs.axis + 2] = slice(start, stop)
                 child_b_u = b_u if index == 0 else torch.zeros_like(b_u)
                 child_b_l = b_l if index == 0 else torch.zeros_like(b_l)
                 _store_state(
                     env,
                     state.value_ids,
                     (
-                        A_u[tuple(slices)].contiguous(),
+                        _slice_coefficient(
+                            A_u, shape=shape, axis=attrs.axis, start=start, stop=stop
+                        ),
                         child_b_u,
-                        A_l[tuple(slices)].contiguous(),
+                        _slice_coefficient(
+                            A_l, shape=shape, axis=attrs.axis, start=start, stop=stop
+                        ),
                         child_b_l,
                     ),
                 )
                 start = stop
-            if start != int(A_u.shape[attrs.axis + 2]):
+            if start != _coefficient_input_shape(A_u)[attrs.axis]:
                 raise ValueError("concat backward slices do not cover source axis")
             continue
 
@@ -292,11 +340,13 @@ def execute_plain_crown_bound_ir(  # pylint: disable=too-many-branches,too-many-
             continue
 
         raise NotImplementedError(
-            f"dense Bound IR interpreter does not support {op.kind.value}"
+            f"Bound IR reference interpreter does not support {op.kind.value}"
         )
 
     lower_id, upper_id = bound_module.graph.outputs
-    return IntervalState(lower=_get(env, lower_id), upper=_get(env, upper_id))
+    return IntervalState(
+        lower=_get_tensor(env, lower_id), upper=_get_tensor(env, upper_id)
+    )
 
 
 def _objective_tensor(
@@ -377,15 +427,24 @@ def _relu_backward(
 
 
 def _conv2d_backward(
-    coefficient: torch.Tensor,
+    coefficient: Coefficient,
     *,
     target_shape: tuple[int, ...],
     source_shape: tuple[int, ...],
     weight: torch.Tensor,
     attrs: Conv2dBackwardAttrs,
-) -> torch.Tensor:
+) -> Coefficient:
     if len(target_shape) != 3 or len(source_shape) != 3:
         raise ValueError("conv2d backward requires CHW coefficient shapes")
+    if not torch.is_tensor(coefficient):
+        return coefficient.conv2d_right(
+            weight,
+            stride=attrs.stride,
+            padding=attrs.padding,
+            dilation=attrs.dilation,
+            groups=attrs.groups,
+            input_shape=target_shape,
+        )
     coefficient = coefficient.reshape(
         int(coefficient.shape[0]), int(coefficient.shape[1]), *source_shape
     )
@@ -422,7 +481,9 @@ def _conv2d_backward(
     )
 
 
-def _contract(coefficient: torch.Tensor, value: torch.Tensor) -> torch.Tensor:
+def _contract(coefficient: Coefficient, value: torch.Tensor) -> torch.Tensor:
+    if not torch.is_tensor(coefficient):
+        return coefficient.contract_input(value)
     flat_coefficient = coefficient.reshape(
         int(coefficient.shape[0]), int(coefficient.shape[1]), -1
     )
@@ -443,9 +504,88 @@ def _coefficient_primal_shape(
     shape = values[value_id].tensor_type.shape[2:]
     if any(dimension is None for dimension in shape):
         raise NotImplementedError(
-            "dense interpreter requires static coefficient shapes"
+            "Bound IR interpreter requires static coefficient shapes"
         )
     return tuple(int(dimension) for dimension in shape)
+
+
+def _coefficient_device(coefficient: Coefficient) -> torch.device:
+    return coefficient.device
+
+
+def _coefficient_dtype(coefficient: Coefficient) -> torch.dtype:
+    return coefficient.dtype
+
+
+def _coefficient_input_shape(coefficient: Coefficient) -> tuple[int, ...]:
+    if torch.is_tensor(coefficient):
+        return tuple(int(dimension) for dimension in coefficient.shape[2:])
+    return tuple(int(dimension) for dimension in coefficient.input_shape)
+
+
+def _coefficient_input_numel(coefficient: Coefficient) -> int:
+    if not torch.is_tensor(coefficient):
+        return int(coefficient.input_numel)
+    result = 1
+    for dimension in coefficient.shape[2:]:
+        result *= int(dimension)
+    return result
+
+
+def _linear_backward_coefficient(
+    coefficient: Coefficient, weight: torch.Tensor
+) -> Coefficient:
+    if not torch.is_tensor(coefficient):
+        return coefficient.matmul_right(weight)
+    flat = coefficient.reshape(int(coefficient.shape[0]), int(coefficient.shape[1]), -1)
+    return flat.matmul(weight)
+
+
+def _reshape_coefficient(
+    coefficient: Coefficient, target_shape: tuple[int, ...]
+) -> Coefficient:
+    if not torch.is_tensor(coefficient):
+        return coefficient.reshape_input(target_shape)
+    return coefficient.reshape(
+        int(coefficient.shape[0]), int(coefficient.shape[1]), *target_shape
+    )
+
+
+def _clone_coefficient(coefficient: Coefficient) -> Coefficient:
+    return coefficient.clone() if torch.is_tensor(coefficient) else coefficient
+
+
+def _slice_coefficient(
+    coefficient: Coefficient,
+    *,
+    shape: tuple[int, ...],
+    axis: int,
+    start: int,
+    stop: int,
+) -> Coefficient:
+    if axis != 0:
+        raise NotImplementedError(
+            "Bound IR v1 structured concat supports the first primal axis"
+        )
+    if not torch.is_tensor(coefficient):
+        return coefficient.slice_input(shape, start=start, stop=stop)
+    slices = [slice(None)] * coefficient.dim()
+    slices[axis + 2] = slice(start, stop)
+    return coefficient[tuple(slices)].contiguous()
+
+
+def _coefficient_sum(coefficients: tuple[Coefficient, ...]) -> Coefficient:
+    if not coefficients:
+        raise ValueError("coefficient sum requires at least one input")
+    result = coefficients[0]
+    for coefficient in coefficients[1:]:
+        if torch.is_tensor(result) and torch.is_tensor(coefficient):
+            result = result + coefficient
+        elif not torch.is_tensor(result) and not torch.is_tensor(coefficient):
+            result = result.add(coefficient)
+        else:
+            raise ValueError("coefficient sum requires one consistent representation")
+    return result
 
 
 def _state_refs(value_ids: tuple[str, ...]) -> tuple[BoundAffineStateRef, ...]:
@@ -461,22 +601,22 @@ def _state_refs(value_ids: tuple[str, ...]) -> tuple[BoundAffineStateRef, ...]:
 
 
 def _load_state(
-    env: Mapping[str, torch.Tensor], value_ids: tuple[str, ...]
-) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    env: Mapping[str, RuntimeValue], value_ids: tuple[str, ...]
+) -> tuple[Coefficient, torch.Tensor, Coefficient, torch.Tensor]:
     if len(value_ids) != 4:
         raise ValueError("affine state must contain four values")
     return (
-        _get(env, value_ids[0]),
-        _get(env, value_ids[1]),
-        _get(env, value_ids[2]),
-        _get(env, value_ids[3]),
+        _get_coefficient(env, value_ids[0]),
+        _get_tensor(env, value_ids[1]),
+        _get_coefficient(env, value_ids[2]),
+        _get_tensor(env, value_ids[3]),
     )
 
 
 def _store_state(
-    env: dict[str, torch.Tensor],
+    env: dict[str, RuntimeValue],
     value_ids: tuple[str, ...],
-    state: tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor],
+    state: tuple[Coefficient, torch.Tensor, Coefficient, torch.Tensor],
 ) -> None:
     if len(value_ids) != 4:
         raise ValueError("affine state output must contain four values")
@@ -484,10 +624,24 @@ def _store_state(
         env[value_id] = tensor
 
 
-def _get(env: Mapping[str, torch.Tensor], value_id: str) -> torch.Tensor:
+def _get(env: Mapping[str, RuntimeValue], value_id: str) -> RuntimeValue:
     if value_id not in env:
         raise KeyError(f"Bound IR value '{value_id}' is not bound")
     return env[value_id]
+
+
+def _get_tensor(env: Mapping[str, RuntimeValue], value_id: str) -> torch.Tensor:
+    value = _get(env, value_id)
+    if not torch.is_tensor(value):
+        raise TypeError(f"Bound IR value '{value_id}' is not a tensor")
+    return value
+
+
+def _get_coefficient(env: Mapping[str, RuntimeValue], value_id: str) -> Coefficient:
+    value = _get(env, value_id)
+    if torch.is_tensor(value) or isinstance(value, LinearOperator):
+        return value
+    raise TypeError(f"Bound IR value '{value_id}' is not a coefficient")
 
 
 def _parameter_bindings(module: BFTaskModule) -> dict[str, Any]:
@@ -498,13 +652,13 @@ def _parameter_bindings(module: BFTaskModule) -> dict[str, Any]:
 
 
 def _tensor_binding(
-    params: Mapping[str, Any], value_id: str, *, like: torch.Tensor
+    params: Mapping[str, Any], value_id: str, *, like: Coefficient
 ) -> torch.Tensor:
     if value_id not in params:
         raise KeyError(f"missing runtime parameter binding '{value_id}'")
     value = params[value_id]
     tensor = value if torch.is_tensor(value) else torch.as_tensor(value)
-    return tensor.to(device=like.device, dtype=like.dtype)
+    return tensor.to(device=_coefficient_device(like), dtype=_coefficient_dtype(like))
 
 
 def _attrs(op: BoundOp, expected_type: type[Any]) -> Any:

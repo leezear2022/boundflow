@@ -1008,6 +1008,7 @@ class BoundOp:
             target_types = tuple(
                 values[value_id].tensor_type for value_id in target.value_ids
             )
+            target_representation = values[target.upper_coefficient].representation
             for source in input_states:
                 source_types = tuple(
                     values[value_id].tensor_type for value_id in source.value_ids
@@ -1015,6 +1016,13 @@ class BoundOp:
                 if source_types != target_types:
                     raise ValueError(
                         "affine-state accumulation requires matching component types"
+                    )
+                if (
+                    values[source.upper_coefficient].representation
+                    != target_representation
+                ):
+                    raise ValueError(
+                        "affine-state accumulation requires matching representations"
                     )
         if self.kind == BoundOpKind.ADD_BACKWARD:
             attrs = self.attrs
@@ -1035,6 +1043,9 @@ class BoundOp:
                 values[input_states[0].upper_bias].tensor_type,
                 values[input_states[0].lower_bias].tensor_type,
             )
+            source_representation = values[
+                input_states[0].upper_coefficient
+            ].representation
             for target in output_states:
                 target_bias_types = (
                     values[target.upper_bias].tensor_type,
@@ -1042,6 +1053,13 @@ class BoundOp:
                 )
                 if target_bias_types != source_bias_types:
                     raise ValueError("concat backward must preserve bias types")
+                if (
+                    values[target.upper_coefficient].representation
+                    != source_representation
+                ):
+                    raise ValueError(
+                        "concat backward must preserve coefficient representation"
+                    )
 
     def _validate_state_transform_types(
         self,
@@ -1063,6 +1081,13 @@ class BoundOp:
             != target_upper_coefficient.tensor_type.dtype
         ):
             raise ValueError(f"{self.kind.value} cannot change coefficient dtype")
+        if (
+            source_upper_coefficient.representation
+            != target_upper_coefficient.representation
+        ):
+            raise ValueError(
+                f"{self.kind.value} requires an explicit representation transition"
+            )
         source_axes = tuple(
             axis.kind for axis in source_upper_coefficient.tensor_type.batch_axes
         )

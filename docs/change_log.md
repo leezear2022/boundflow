@@ -2951,3 +2951,29 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_bound_ir_v1_plain_crown_lowering.md`
+
+---
+
+## 2026-07-28：Bound IR v1 representation rewrite 与 IR-1 closure
+
+**主要改动**
+- verifier 禁止 affine transform/route/compose 隐式改变 coefficient representation；
+- 新增 deterministic structured-region rewrite；
+- affine region 入口显式 dense→structured cast，ReLU/concretize 前显式 materialize；
+- reference interpreter 执行 structured Linear/Conv/Reshape/Add/Concat/Compose；
+- dense/structured rewritten IR 在 MLP、CNN、residual、concat 上 final bounds 对齐。
+
+**证据与边界**
+- 专属：25 passed；
+- 相邻 IR/CROWN/DAG/CNN/LinearOperator/env：47 passed；
+- 全量：397 passed、1 skipped；
+- Mypy 0 issues，Pylint 10.00/10，Black clean；
+- IR-1 最小 reference semantic closure 门禁通过；
+- 完整 C1 仍待 Plan/Schedule IR、backend/runtime migration 和 IR-driven E2E artifact。
+
+**下一阶段**
+- IR-2 Plan IR v1：PlanTemplate/PlanInstance、统一 decision/verifier、旧 PR-11/12 adapter、
+  deterministic plan replay。
+
+**记录**
+- `gemini_doc/change_2026-07-28_bound_ir_v1_representation_rewrite.md`

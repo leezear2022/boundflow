@@ -1,6 +1,6 @@
 """Numerical closure tests for plain-CROWN Bound IR lowering/interpreter."""
 
-# pylint: disable=missing-function-docstring,invalid-name
+# pylint: disable=missing-function-docstring,invalid-name,duplicate-code
 
 from __future__ import annotations
 
@@ -17,7 +17,13 @@ from boundflow.frontends.plain_crown_bound_ir import (
     PlainCrownBoundIRBuild,
     build_plain_crown_bound_ir,
 )
-from boundflow.ir.bound import BoundOpKind
+from boundflow.ir.bound import (
+    BFBoundGraph,
+    BoundOpKind,
+    BoundRepresentation,
+    BoundValueRole,
+)
+from boundflow.ir.bound_rewrite import rewrite_plain_crown_structured_regions
 from boundflow.ir.task import BFTaskModule, BoundTask, TaskKind, TaskOp
 from boundflow.runtime.bound_ir_interpreter import execute_plain_crown_bound_ir
 from boundflow.runtime.crown_ibp import _forward_ibp_trace_mlp, run_crown_ibp_mlp
@@ -291,3 +297,106 @@ def test_bound_ir_interpreter_does_not_import_crown_oracle() -> None:
     }
 
     assert not any(module.endswith("crown_ibp") for module in imported_modules)
+
+
+@pytest.mark.parametrize("case", ["mlp", "residual", "concat", "cnn"])
+def test_structured_region_rewrite_preserves_final_bounds(case: str) -> None:
+    if case == "mlp":
+        module = _mlp()
+        spec = InputSpec.linf(value_name="input", center=torch.randn(2, 3), eps=0.2)
+        C = torch.tensor([[1.0, -1.0], [0.25, 0.75]])
+    elif case == "residual":
+        module = _residual_fanout()
+        spec = InputSpec.l2(value_name="input", center=torch.randn(2, 4), eps=0.15)
+        C = None
+    elif case == "concat":
+        module = _concat_fanout()
+        spec = InputSpec.linf(value_name="input", center=torch.randn(2, 4), eps=0.1)
+        C = None
+    else:
+        module = _chain_cnn()
+        spec = InputSpec.box(
+            value_name="input",
+            lower=torch.full((1, 1, 3, 3), -0.3),
+            upper=torch.full((1, 1, 3, 3), 0.5),
+        )
+        C = None
+
+    interval_env, relu_pre = _forward_ibp_trace_mlp(module, spec)
+    dense = build_plain_crown_bound_ir(
+        module,
+        spec,
+        interval_env=interval_env,
+        relu_pre=relu_pre,
+        linear_spec_C=C,
+    ).module
+    structured = rewrite_plain_crown_structured_regions(dense)
+    dense_result = execute_plain_crown_bound_ir(
+        dense,
+        task_module=module,
+        input_spec=spec,
+        relu_pre=relu_pre,
+        linear_spec_C=C,
+    )
+    structured_result = execute_plain_crown_bound_ir(
+        structured,
+        task_module=module,
+        input_spec=spec,
+        relu_pre=relu_pre,
+        linear_spec_C=C,
+    )
+
+    torch.testing.assert_close(
+        structured_result.lower, dense_result.lower, atol=2e-6, rtol=2e-6
+    )
+    torch.testing.assert_close(
+        structured_result.upper, dense_result.upper, atol=2e-6, rtol=2e-6
+    )
+    kinds = [op.kind for op in structured.graph.ops]
+    assert BoundOpKind.REPRESENTATION_CAST in kinds
+    assert BoundOpKind.MATERIALIZE in kinds
+    assert any(
+        value.role == BoundValueRole.COEFFICIENT
+        and value.representation == BoundRepresentation.STRUCTURED
+        for value in structured.graph.values
+    )
+    repeated = rewrite_plain_crown_structured_regions(dense)
+    assert structured.canonical_json() == repeated.canonical_json()
+    assert structured.stable_hash() == repeated.stable_hash()
+
+
+def test_affine_ops_require_explicit_representation_transitions() -> None:
+    module = _mlp()
+    spec = InputSpec.linf(value_name="input", center=torch.zeros(1, 3), eps=0.1)
+    interval_env, relu_pre = _forward_ibp_trace_mlp(module, spec)
+    dense = build_plain_crown_bound_ir(
+        module, spec, interval_env=interval_env, relu_pre=relu_pre
+    ).module
+    linear = next(
+        op for op in dense.graph.ops if op.kind == BoundOpKind.LINEAR_BACKWARD
+    )
+    output_ids = {linear.outputs[0], linear.outputs[2]}
+    corrupted_values = tuple(
+        (
+            replace(value, representation=BoundRepresentation.STRUCTURED)
+            if value.value_id in output_ids
+            else value
+        )
+        for value in dense.graph.values
+    )
+    corrupted = replace(
+        dense,
+        graph=BFBoundGraph(
+            values=corrupted_values,
+            ops=dense.graph.ops,
+            inputs=dense.graph.inputs,
+            outputs=dense.graph.outputs,
+        ),
+    )
+
+    with pytest.raises(ValueError, match="explicit representation transition"):
+        corrupted.validate()
+
+    structured = rewrite_plain_crown_structured_regions(dense)
+    with pytest.raises(ValueError, match="dense source module"):
+        rewrite_plain_crown_structured_regions(structured)
