@@ -170,9 +170,13 @@ PR-14 的最低成功标准是：BoundFlow 能正确执行并审计真实 verifi
 真实 phase/regime 获得可归因收益；最强标准才是 same-solver、same-property、same-timeout 下改善
 time-to-verify、peak memory 或 solved instances。
 
-## 7. Closure 后动作
+## 7. Closure 后动作（历史计划）
 
-PR-14 不再新增实现切片。closure 后从最终 commit/tag 建立
+> **2026-07-20 路线修订**：PR-14 停止结论继续有效，但下述 story-freeze 分支已被
+> IR-first 代码复审取代，不再是当前执行指令。现行分支为 `feat/compiler-ir-stack-v1`，
+> 详见 `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`。
+
+PR-14 不再新增实现切片。原计划是在 closure 后从最终 commit/tag 建立
 `docs/asplos-c1-c2-story-freeze`，更新摘要、前两页、claims 与 artifact 阅读顺序，并以 C1+C2
 重新做 paper-level Go/No-Go。未来若研究 external intermediate-bound-preserving region adapter，
 必须作为新假设、新 split 和新门禁，不能继续挂在本 PR-14 上。

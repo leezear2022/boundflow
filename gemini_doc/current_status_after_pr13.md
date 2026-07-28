@@ -4,6 +4,7 @@
 > 冻结基线：`57a854b` / annotated tag `pr13-validated-reduced`
 > 当前研发分支：`feat/pr14-real-verification`
 > 总判定：PR-14B 为 **VALIDATED-NO-GO**，PR-14C 不启动；ASPLOS-ready 仍为 **NO**。
+> 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
 
 ## 1. 当前真实阶段
 
@@ -11,12 +12,12 @@ BoundFlow 已经完成从边界表示到 query runtime prototype 的主干：
 
 | 层次 | 状态 | 已验证边界 |
 |---|---|---|
-| Structured bound representation / materialization trace | validated foundation | dense/structured 数值与梯度对齐；barrier、bytes、reason、lifetime 可观测 |
-| Method/autograd/memory-aware Planner | validated-reduced | 1,416 次执行、472 个聚合 pattern、final held-out 23/23 feasible |
+| Structured bound runtime representation / materialization trace | mechanism validated | dense/structured 数值与梯度对齐；一等 Bound IR 仍待实现 |
+| Materialization/backend Planner mechanisms | validated-reduced | 历史 held-out 成立；统一 Plan IR 与 Schedule IR 仍待实现 |
 | Fused/multi-backend CROWN execution | validated-reduced | eager/chunked/structured/TVM fused 多预算选择；收益只在部分 regime |
 | Query runtime | validated-reduced | `BoundQuery`、state validity、dynamic batching、same-solver adapter、reduced GPU E2E |
 | 真实 complete verifier integration | PR-14B validated-no-go | 540-call coverage + MLP/ResNet fixed replay；activation 0/394，ResNet bound-equivalence fail |
-| ASPLOS 最终系统主张 | C3 已降级 | C3 保留为 C1/C2 基础设施；下一步冻结 C1+C2 paper story |
+| ASPLOS 最终系统主张 | C1/C2/C3 均不足 | C3 已降级；下一步建立 Bound/Plan/Schedule IR 闭环 |
 
 历史 `main@263ea81` 只到 PR-10 closure，不能再作为项目当前状态入口。跨会话恢复必须同时检查
 research branch、annotated tag 与 closure 文档，不能只看 `main`。
@@ -58,9 +59,12 @@ research branch、annotated tag 与 closure 文档，不能只看 `main`。
 
 ## 4. 下一阶段唯一主线
 
-PR-14 implementation 到此停止。下一分支为 `docs/asplos-c1-c2-story-freeze`：冻结 C1+C2
-论文主线、C3 limitations 和 PR-14 negative evidence，并重新判断 ASPLOS 2027 是否具备足够
-architecture/PL/systems contribution。不得用 PR-14C E2E 绕过 bound-equivalence gate。
+PR-14 implementation 到此停止。原定 `docs/asplos-c1-c2-story-freeze` 已被代码级复审否定：
+仅整理 story 不能弥补 Bound IR 占位、Plan IR 分散和 Schedule IR 缺失。下一工程分支改为
+`feat/compiler-ir-stack-v1`，按 Bound IR → Plan IR → Task/Schedule IR → runtime/backend
+迁移推进。完整门禁见
+`gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`。仍不得用 PR-14C
+E2E 绕过 bound-equivalence gate。
 
 明确禁止：
 
@@ -72,9 +76,9 @@ architecture/PL/systems contribution。不得用 PR-14C E2E 绕过 bound-equival
 
 ## 5. 权威阅读顺序
 
-1. 本文；
-2. `gemini_doc/pr14b_initial_crown_fixed_replay_2026_07_19.md`；
-3. `gemini_doc/pr14a_real_query_coverage_2026_07_19.md`；
-4. `gemini_doc/pr14_execution_plan.md`；
+1. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`；
+2. 本文（PR-13/14 历史状态）；
+3. `gemini_doc/pr14b_initial_crown_fixed_replay_2026_07_19.md`；
+4. `gemini_doc/pr14a_real_query_coverage_2026_07_19.md`；
 5. `gemini_doc/asplos_claims_map.md`；
 6. `gemini_doc/asplos_execution_memo_v1_0.md`。

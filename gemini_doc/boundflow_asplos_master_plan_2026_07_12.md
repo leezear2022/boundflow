@@ -5,6 +5,12 @@
 > 当前研究代码基线：`263ea81`（PR-10 complete, feature-gated）
 > 投稿策略：ASPLOS 2027 September Cycle 为有条件冲刺；ASPLOS 2028 为稳健主目标。
 
+> **路线修订（2026-07-20）**：本文保留 2026-07-12 的研究问题、历史门禁和 PR-10—13
+> 计划，但其对当前实现完成度的判断已由
+> `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md` 纠正。
+> 当前 Bound IR 仍为占位，统一 Plan IR 与 Schedule IR 尚未实现；不得仅凭 runtime operator、
+> PlanBundle 或 TaskGraph 将 C1/C2 视为 paper-level 完成。
+
 ---
 
 ## 0. 执行摘要

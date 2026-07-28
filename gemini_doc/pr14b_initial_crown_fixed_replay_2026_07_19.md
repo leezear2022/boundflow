@@ -88,9 +88,13 @@ contract 已经可以替换 external executor。
 5. **C3：DOWNGRADED。** 保留 `BoundQuery`、state validity、batching、capability routing 和
    observer 作为 C1/C2 的基础设施，不再作为“真实 verifier runtime acceleration”核心贡献。
 
-## 6. 下一步
+## 6. 下一步（2026-07-19 历史决定）
 
-当前不应继续造 kernel 或扩 verifier 算法。PR-14 closure 后的下一条分支应是
+> **2026-07-20 路线修订**：下述 `docs/asplos-c1-c2-story-freeze` 已被 IR-first 代码复审
+> 取代，不再是当前执行指令。现行分支为 `feat/compiler-ir-stack-v1`，顺序与门禁见
+> `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`。
+
+当时判定不应继续造 kernel 或扩 verifier 算法。PR-14 closure 后原建议的下一条分支是
 `docs/asplos-c1-c2-story-freeze`，任务是：
 
 1. 把摘要、前两页和 claims map 收敛到 C1 structured representation + C2 multi-backend

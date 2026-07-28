@@ -18,14 +18,16 @@
 
 1. `gemini_doc/pr14_external_model_audit_handoff_2026_07_19.md`（从项目起点到 PR-14
    No-Go 的自包含外部审计入口）
-2. `gemini_doc/current_status_after_pr13.md`（PR-13 后真实状态与当前缺口）
-3. `gemini_doc/pr14_execution_plan.md`（真实 workload coverage 与 execution 的唯一下一路线）
-4. `gemini_doc/asplos_execution_memo_v1_0.md`（当前唯一执行顺序与硬门禁）
-5. `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`（ASPLOS 顶层执行计划 v1.0）
-6. `gemini_doc/asplos_claims_map.md`（论文主张→代码→实验→工件证据）
-7. `docs/phase5_done.md`（Phase 5 完成声明：复现入口、产物结构、DoD、边界）
-8. `gemini_doc/artifact_claims_phase5d.md`（Phase 5 claims→文件/字段→命令）
-9. `docs/bench_jsonl_schema.md`（JSONL schema=1.0：字段与计时口径）
+2. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`（PR-14
+   后 IR-first 架构重置、对象协议与实施门禁）
+3. `gemini_doc/current_status_after_pr13.md`（PR-13 后状态；PR-14 结果以后续文档为准）
+4. `gemini_doc/pr14_execution_plan.md`（PR-14 历史执行计划；A/B 已 No-Go，C 未启动）
+5. `gemini_doc/asplos_execution_memo_v1_0.md`（执行历史与 2026-07-20 路线修订）
+6. `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`（ASPLOS 顶层计划；claim 以新契约纠偏）
+7. `gemini_doc/asplos_claims_map.md`（论文主张→代码→实验→工件证据）
+8. `docs/phase5_done.md`（Phase 5 完成声明：复现入口、产物结构、DoD、边界）
+9. `gemini_doc/artifact_claims_phase5d.md`（Phase 5 claims→文件/字段→命令）
+10. `docs/bench_jsonl_schema.md`（JSONL schema=1.0：字段与计时口径）
 
 ### B. 全流程总览（从 claims 到工程到 AE）
 
@@ -53,6 +55,10 @@
 
 - `gemini_doc/pr14_external_model_audit_handoff_2026_07_19.md`：项目起点、ASPLOS 路线、
   PR-14A/B 证据/限制、外部复核命令与下一步的自包含审计交接
+- `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`：复审当前
+  Bound/Plan/Task/Schedule/runtime 实现后冻结的一等 IR 分层、动态规划边界与逐阶段门禁
+- `gemini_doc/change_2026-07-20_ir_planner_schedule_runtime_contract.md`：上述架构重置、
+  Claims Map 降级和权威文档修订记录
 - `gemini_doc/asplos_execution_memo_v1_0.md`：ASPLOS 研发的短执行入口与门禁
 - `gemini_doc/current_status_after_pr13.md`：PR-13 closure 后的真实状态、证据边界与当前缺口
 - `gemini_doc/pr14_execution_plan.md`：真实 verifier workload coverage/execution 的切片、门禁与止损

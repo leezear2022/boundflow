@@ -6,6 +6,12 @@
 > 唯一执行顺序：**Gate 0 → PR-10 → PR-11 → PR-12 → PR-13 → PR-14**。
 > 禁止同时启动 Planner、fused kernel 与 BaB runtime 三条主线。
 
+> **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有
+> `runtime/linear_operator.py`、`PlanBundle` 和拓扑执行循环不能分别等同于完整 Bound IR、
+> Plan IR 和 Schedule IR。第 10 节原定的纯 `docs/asplos-c1-c2-story-freeze` 不再是下一工程
+> 主线；后续按第 11 节和
+> `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md` 推进。
+
 ## 1. 锁定的论文命题
 
 BoundFlow 是面向神经网络验证中相关边界查询的 query- and memory-aware compiler/runtime。
@@ -313,8 +319,36 @@ BoundFlow eager/chunked/TVM lower 完全对齐，但 external 请求 lower-only�
 1. PR-14C 不启动，不用 full E2E 绕过 bound-equivalence gate；
 2. 不继续调 TIR，不新增 α/β/split kernel，不重写 verifier 算法；
 3. C3 降级为支撑 C1/C2 的 query/state/capability infrastructure；
-4. 下一分支是 `docs/asplos-c1-c2-story-freeze`，只做 claims、前两页、artifact 与投稿
-   Go/No-Go 收敛；若未来研究 external-semantics-preserving region adapter，必须另立新假设。
+4. 原判定的下一分支为 `docs/asplos-c1-c2-story-freeze`；该项已被第 11 节的 IR-first 复审
+   取代。若未来研究 external-semantics-preserving region adapter，仍必须另立新假设。
 
 最终证据见 `gemini_doc/pr14b_initial_crown_fixed_replay_2026_07_19.md`。ASPLOS-ready 继续为
 NO，直到 C1+C2 paper-level story 独立通过评审门禁。
+
+## 11. 2026-07-20 IR-first 路线纠正
+
+PR-14 后复审发现，C1/C2 不能只靠整理已有 story 达到 paper level：
+
+1. `boundflow/ir/bound.py` 仍是占位骨架，结构化系数语义主要存在于 runtime Python 对象中；
+2. `PlanBundle` 及 PR-11/12 的局部计划对象尚未汇合为带统一引用、合法性和 replay 的 Plan IR；
+3. 现有 scheduler 只是 TaskGraph 拓扑执行，项目不存在一等 Schedule IR；
+4. PR-13/14 的 query/runtime 结果不能弥补上述编译器核心缺口。
+
+因此下一工程分支修订为 `feat/compiler-ir-stack-v1`，顺序冻结为：
+
+```text
+Bound IR v1
+  -> Plan IR v1
+  -> Task IR + Schedule IR lowering
+  -> reference/backend runtime migration
+  -> adaptive PlanInstance evaluation
+```
+
+在三层 IR 的 typed schema、verifier、deterministic dump/hash 和最小端到端闭环完成前：
+
+- C1 只能称 runtime mechanism foundation；
+- C2 只能称局部 planner/backend mechanism validated-reduced；
+- C3 保持降级，不以普通 batching 或计划中的 JIT 重新包装；
+- 不新增 α/β/split kernel，不重写 BaB，不继续孤立 TIR 调优。
+
+完整对象边界、迁移关系、JIT/状态有效性门禁和逐阶段 DoD 见新的架构契约文档。

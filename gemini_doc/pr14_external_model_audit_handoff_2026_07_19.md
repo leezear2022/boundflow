@@ -3,10 +3,15 @@
 > 文档日期：2026-07-19
 > 文档用途：交给未参与开发的其他大模型或人工审计者，独立判断路线、实现、数字和结论是否成立。
 > 当前分支：`feat/pr14-real-verification`
-> 当前 HEAD：`9bc7c4b`
+> 当前 HEAD（2026-07-20 文档复审前）：`b143717`
 > 冻结基线：annotated tag `pr13-validated-reduced`，解引用 commit 为 `57a854b`
 > 当前判定：PR-14B **VALIDATED-NO-GO**；PR-14C 不启动；C3 降级；下一步冻结 C1+C2 论文主线。
 > 重要说明：本文是导航和审计任务书，不替代 raw artifact、manifest、代码、测试或阶段报告。
+
+> **2026-07-20 审计后修订**：本文的 PR-14 数字和 No-Go 证据继续有效，但“下一步只冻结
+> C1+C2 story”已被代码级 IR 审计推翻。当前有效下一路线是
+> `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`；C1 只能称
+> runtime mechanism foundation，C2 只能称局部 planner mechanism validated-reduced。
 
 ## 1. 给审计者的最短结论
 
@@ -101,12 +106,15 @@ PR-14  Real verification workload execution   NEXT / CURRENT
 
 | 贡献 | 原始目标 | 当前状态 |
 |---|---|---|
-| C1 Structured Bound-Operator IR | 保留 coefficient operator 结构；显式 barrier/reason/bytes/lifetime | validated foundation |
-| C2 Method-/Autograd-/Memory-Aware Planner | 联合选择物化、batch、backend、cache/recompute、storage | validated-reduced |
+| C1 Structured Bound-Operator IR | 保留 coefficient operator 结构；显式 barrier/reason/bytes/lifetime | runtime mechanism validated；first-class IR pending |
+| C2 Method-/Autograd-/Memory-Aware Planner | 联合选择物化、batch、backend、cache/recompute、storage | 局部机制 validated-reduced；统一 Plan/Schedule IR pending |
 | C3 Verification-Aware Query Runtime | query classification、state validity、batching、capability routing、same-solver execution | reduced foundation；真实加速 claim 已降级 |
 
 C3 的目标从未是“普通 batch engine 更快”本身。正式 baseline 必须是成熟 verifier 的公平 batched
 executor，逐节点 baseline 只能用于机制诊断。
+
+2026-07-20 复审还确认项目不存在一等 Schedule IR；因此原始三贡献表只能表示研究假设，不能
+表示三个编译器层次已经实现。
 
 ### 3.3 唯一执行顺序
 
@@ -470,18 +478,25 @@ eligibility 是否被扩大、性能 N/A 是否被偷换成 speedup、PR-14C gat
 
 ## 14. 当前下一步
 
-PR-14 implementation 应停止。下一分支建议为：
+PR-14 implementation 应停止。本文原建议的下一分支为：
 
 ```text
 docs/asplos-c1-c2-story-freeze
 ```
 
-下一阶段只做：
+该建议已于 2026-07-20 被 IR-first 复审取代，不能再作为当前执行入口。新分支为：
 
-1. 将摘要、前两页和 claims 收敛为 C1 structured representation + C2 multi-backend Planner；
-2. 把 C3 reduced positive evidence、PR-14 coverage 和 No-Go limitation 明写；
-3. 用现有证据重新做 ASPLOS 2027 paper-level Go/No-Go；
-4. 不回 PR-10B.2，不继续孤立 TIR 调优，不用 PR-14C E2E 绕过 correctness gate。
+```text
+feat/compiler-ir-stack-v1
+```
+
+下一阶段改为：
+
+1. 实现可验证、可序列化、可解释执行的 Bound IR v1；
+2. 将现有 materialization/placement/backend/storage 决策迁移为统一 Plan IR；
+3. 建立显式 memory/batch/stream/fallback/state 动作的 Schedule IR；
+4. 让现有 Task/backend/query runtime 通过 lowering 消费上述 IR；
+5. 保留 C3 reduced evidence、PR-14 No-Go 和所有禁止绕过的 correctness gate。
 
 未来若要重启真实 verifier execution，必须提出新的研究假设，例如复用 external intermediate-bound
 semantics、只替换 capability-legal region，而不是 current whole-query replacement。那应当是新
@@ -500,6 +515,7 @@ branch、新 split、新门禁，不再属于当前 PR-14。
 7. MLP 为什么不能产生公平 performance claim？
 8. PR-14C 停止是否来自预先声明的门禁，而不是事后挑结果？
 9. C1/C2/C3 当前 claim 强度是否与证据相符？
-10. 下一步冻结 C1+C2 是否比回 PR-10、继续 kernel 或强行做 PR-14C 更合理？
+10. IR-first 路线是否准确反映 Bound/Plan/Schedule 三层当前缺口，并比纯 story freeze、回 PR-10、
+    继续 kernel 或强行做 PR-14C 更合理？
 
 只有以上问题均由代码、raw artifact、manifest、测试和 Git 历史支持，才能接受本文结论。

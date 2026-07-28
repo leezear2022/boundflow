@@ -2886,3 +2886,24 @@
 
 **记录**
 - `gemini_doc/change_2026-07-19_finalize_pr14_coverage_first_plan.md`
+
+---
+
+## 2026-07-20：IR—Planner—Schedule—Runtime 架构重置
+
+**状态纠正**
+- 当前 `Bound IR` 仍为占位骨架，runtime LinearOperator 不能代替一等语义 IR；
+- `PlanBundle` 与 PR-11/12 局部计划不能代替统一 Plan IR；
+- TaskGraph 拓扑循环不能代替 Schedule IR；
+- PR-13 ordinary batching 和计划中的 JIT 不再被提前包装成系统贡献。
+- 独立审计发现的两处旧 story-freeze 入口已补为历史决定，并显式链接 IR-first 现行契约。
+
+**新路线**
+- 冻结 Bound/Plan/Task/Schedule/Query/Runtime 的所有权和数据协议；
+- 下一工程分支改为 `feat/compiler-ir-stack-v1`；
+- 顺序为 Bound IR → Plan IR → Task/Schedule IR → runtime/backend 迁移 → adaptive evaluation；
+- C1/C2 Claims Map 随代码现实降级，PR-10—14 历史数值和负面证据继续保留。
+
+**记录**
+- `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`
+- `gemini_doc/change_2026-07-20_ir_planner_schedule_runtime_contract.md`

@@ -7,11 +7,27 @@
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
-| C1：显式物化语义的 Structured Bound-Operator IR | validated foundation（PR-10 guarded） | `boundflow/runtime/linear_operator.py`、`crown_ibp.py` | dense/operator 数值与 gradient 对齐；materialization trace | count/bytes/reason/lifetime JSONL |
-| C2：Method/Autograd/Memory-Aware Materialization Planner | validated-reduced（PR-11） | static topology/liveness summary、global candidate model、bounded runtime；CROWN/α/αβ capability 接口 | 3× replicated correctness、LOO、held-out/Oracle、真实 OOM | 1,416 executions→472 aggregate patterns；23/23 feasible；manifests |
+| C1：显式物化语义的 Structured Bound-Operator IR | runtime mechanism validated；first-class IR pending | `boundflow/runtime/linear_operator.py`、`crown_ibp.py`；`ir/bound.py` 仍为占位 | 除历史 dense/operator 对齐外，还需 Bound IR verifier/interpreter/lowering | 历史 trace 保留；新 IR dump/hash 尚缺 |
+| C2：Method/Autograd/Memory-Aware Materialization Planner | 局部机制 validated-reduced；统一 Plan/Schedule IR pending | static topology/liveness、局部 materialization/placement/backend records、bounded runtime | 历史 held-out/Oracle/OOM 保留；还需跨决策 Plan/Schedule verifier 与 IR-driven E2E | 历史 1,416 executions/23 feasible 保留；新 IR 工件尚缺 |
 | C3：Verification Query Runtime Infrastructure | downgraded after PR-14B | query/validity + batcher + capability routing + real observer | 保留 reduced correctness；真实 coverage/replay 作为 limitation | activation 0/394 eligible；ResNet bound-equivalence fail；不作 acceleration claim |
+| BoundFlow Schedule IR | unimplemented | 现仅 `TaskGraph.topo_sort()`、局部 fused step 和过程式 retry | dependency/lifetime/stream/batch/retry/state verifier；reference executor | deterministic schedule dump/trace 尚缺 |
 | TVM 后端执行 Planner 结果而非定义核心抽象 | partial | `boundflow/backends/tvm/`、`runtime/tvm_executor.py` | Python/TVM/unfused/fused 对齐 | compile/cold/warm、launch、bytes |
 | 相同浮点语义下保持 reference bound computation | reduced-only；non-toy fail | dense reference + planned paths | allclose、gradient、auto_LiRPA、replay | MLP pass；ResNet max diff 796.765，PR-14C blocked |
+
+### 2026-07-20 IR-first claim 纠偏
+
+历史 PR-10/11/12 的数值、OOM、held-out 和 backend 证据不撤销，但其 claim 范围必须与代码对象
+层级一致：
+
+- runtime `LinearOperator` 证明结构化表示机制，不自动证明一等 Bound IR；
+- `MaterializationPlan`、`MaterializationPlacementPlan` 和 `ExecutionCandidate` 证明局部决策机制，
+  不自动证明统一 Plan IR；
+- TaskGraph 拓扑序和 `FusedCrownExecutionStep` 不自动证明 Schedule IR；
+- PR-13 batching 证明保持 ordinary batching 收益，不自动证明 adaptive runtime 贡献；
+- cached specialization/JIT 在新 break-even 证据出现前只属于 planned hypothesis。
+
+新的升级门禁见
+`gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`。
 
 ## PR-10 子阶段
 
