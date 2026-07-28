@@ -65,6 +65,8 @@
   Task/trace lowering、显式 affine/fanout 语义、独立 dense interpreter 与 final-bound 对齐边界
 - `gemini_doc/change_2026-07-28_bound_ir_v1_representation_rewrite.md`：IR-1C 显式
   dense/structured cast、materialization rewrite、structured reference 执行与 IR-1 closure
+- `gemini_doc/change_2026-07-28_plan_ir_v1_schema_and_legacy_migration.md`：IR-2A typed
+  PlanTemplate/PlanInstance、跨决策 verifier、instance replay 与 PR-11/12 迁移边界
 - `gemini_doc/asplos_execution_memo_v1_0.md`：ASPLOS 研发的短执行入口与门禁
 - `gemini_doc/current_status_after_pr13.md`：PR-13 closure 后的真实状态、证据边界与当前缺口
 - `gemini_doc/pr14_execution_plan.md`：真实 verifier workload coverage/execution 的切片、门禁与止损

@@ -2977,3 +2977,27 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_bound_ir_v1_representation_rewrite.md`
+
+---
+
+## 2026-07-28：Plan IR v1 schema/verifier/replay 与旧计划迁移
+
+**主要改动**
+- 新增 typed `PlanTemplate` 静态候选空间和 `PlanInstance` 动态完整选择；
+- 分离 region、representation、materialization、backend、domain/spec/sample batch、
+  storage/lifetime、state decisions；
+- 新增 Bound hash、partition、capability、memory、state、storage alias/lifetime 跨决策 verifier；
+- 新增 canonical JSON/hash 和 strict instance replay；
+- 为 PR-11/12 的 MaterializationPlan、PlacementPlan、ExecutionCandidate、StoragePlan、
+  FusedStep、PlanBundle.meta 提供 adapter/partial/unsupported 迁移结论。
+
+**证据与边界**
+- 专属 Plan IR/migration：12 passed；
+- 相邻 Bound IR、PR-11/12、storage/env：88 passed；
+- 全量：409 passed、1 skipped；
+- Mypy 0 issues，Pylint 10.00/10，Black clean；
+- 只关闭 IR-2A foundation；reference template builder、query selector、多预算和 artifact
+  仍待 IR-2B/2C。
+
+**记录**
+- `gemini_doc/change_2026-07-28_plan_ir_v1_schema_and_legacy_migration.md`

@@ -8,7 +8,7 @@
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
 | C1：显式物化语义的 Structured Bound-Operator IR | IR-1 reference semantic closure validated；Plan/Schedule integration pending | typed Bound IR + lowering + dense/structured interpreter + explicit cast/materialize rewrite | 25 个 schema/lowering/rewrite/interpreter tests；MLP/CNN/residual/concat final bounds 对齐 | deterministic dump/hash 已有；IR-driven E2E artifact 尚缺 |
-| C2：Method/Autograd/Memory-Aware Materialization Planner | 局部机制 validated-reduced；统一 Plan/Schedule IR pending | static topology/liveness、局部 materialization/placement/backend records、bounded runtime | 历史 held-out/Oracle/OOM 保留；还需跨决策 Plan/Schedule verifier 与 IR-driven E2E | 历史 1,416 executions/23 feasible 保留；新 IR 工件尚缺 |
+| C2：Method/Autograd/Memory-Aware Materialization Planner | Plan IR schema/verifier/replay foundation validated；builder/selector/Schedule pending | typed PlanTemplate/PlanInstance、跨 decision verifier、PR-11/12 migration adapters；历史局部 planner | 12 个 Plan IR/migration tests；还需 reference builder/selector、多预算与 IR-driven E2E | 历史 1,416 executions/23 feasible 保留；Plan IR artifact 尚缺 |
 | C3：Verification Query Runtime Infrastructure | downgraded after PR-14B | query/validity + batcher + capability routing + real observer | 保留 reduced correctness；真实 coverage/replay 作为 limitation | activation 0/394 eligible；ResNet bound-equivalence fail；不作 acceleration claim |
 | BoundFlow Schedule IR | unimplemented | 现仅 `TaskGraph.topo_sort()`、局部 fused step 和过程式 retry | dependency/lifetime/stream/batch/retry/state verifier；reference executor | deterministic schedule dump/trace 尚缺 |
 | TVM 后端执行 Planner 结果而非定义核心抽象 | partial | `boundflow/backends/tvm/`、`runtime/tvm_executor.py` | Python/TVM/unfused/fused 对齐 | compile/cold/warm、launch、bytes |
@@ -73,6 +73,23 @@
 
 实现与门禁边界见
 `gemini_doc/change_2026-07-28_bound_ir_v1_representation_rewrite.md`。
+
+### 2026-07-28 IR-2A 进度
+
+- 新 `boundflow.plan_ir/v1.0` 已区分 `PlanTemplate` 静态候选空间与 `PlanInstance` 动态选择；
+- region/representation/materialization/backend/domain-spec-sample batch/storage/state 成为独立
+  typed candidate/decision；
+- cross verifier 已检查 Bound hash、partition coverage、capability、transition、memory、
+  storage lifetime/alignment/alias、state version 和候选全量记账；
+- template/instance canonical JSON/hash 已有，instance strict JSON replay 已拒绝 noncanonical 和
+  tampered selection；
+- PR-11/12 六类旧对象已有 adapter/partial/unsupported 代码级迁移表；
+- 专属 12 passed，相邻 88 passed，全量 409 passed、1 skipped；
+- reference template builder、query-time selector、多预算选择和 artifact 尚缺，因此 IR-2/C2
+  均不升级为 complete。
+
+实现与门禁边界见
+`gemini_doc/change_2026-07-28_plan_ir_v1_schema_and_legacy_migration.md`。
 
 ## PR-10 子阶段
 
