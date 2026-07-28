@@ -14,6 +14,7 @@ from boundflow.ir.schedule import lower_plan_instance_to_reference_schedule
 from boundflow.planner.typed_benchmark_workloads import (
     build_cnn_candidate,
     build_mlp_candidate,
+    build_residual_cnn_candidate,
 )
 from boundflow.runtime.task_backend_dispatch import PyTorchTaskBackendRegistry
 from boundflow.runtime.task_ir_executor import (
@@ -98,6 +99,45 @@ def test_ir5_cnn_candidate_executes_typed_reference_and_dense() -> None:
     torch.testing.assert_close(results[0].lower, results[1].lower)
     torch.testing.assert_close(results[0].upper, results[1].upper)
     assert "conv2d_backward" in task_kinds[1]
+
+
+def test_ir5_residual_cnn_candidate_executes_typed_reference_and_dense() -> None:
+    results = []
+    task_kinds = []
+    for backend in (BackendKind.REFERENCE, BackendKind.PYTORCH_DENSE):
+        prepared = build_residual_cnn_candidate(
+            workload_id="residual-cnn-contract",
+            backend=backend,
+            device="cpu",
+            batch=2,
+            input_channels=1,
+            image_size=4,
+            block_channels=2,
+            output_dim=2,
+            seed=75,
+        )
+        result, _trace = execute_task_ir_semantics(
+            prepared.task_module,
+            prepared.schedule,
+            bound_module=prepared.bound_module,
+            template=prepared.template,
+            instance=prepared.instance,
+            legacy_task_module=prepared.legacy_module,
+            input_spec=prepared.input_spec,
+            relu_pre=prepared.relu_pre,
+            backend=PyTorchTaskBackendRegistry(),
+        )
+        results.append(result)
+        task_kinds.append(
+            tuple(
+                op_ref.kind.value
+                for task in prepared.task_module.tasks
+                for op_ref in task.op_refs
+            )
+        )
+    torch.testing.assert_close(results[0].lower, results[1].lower)
+    torch.testing.assert_close(results[0].upper, results[1].upper)
+    assert "add_backward" in task_kinds[1]
 
 
 def test_prepared_task_execution_reuses_static_validation_and_rejects_drift() -> None:

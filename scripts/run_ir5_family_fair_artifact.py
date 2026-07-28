@@ -6,10 +6,12 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
 import hashlib
 import json
 from pathlib import Path
 import platform
+import statistics
 import subprocess
 from typing import Any, Iterable, Sequence
 
@@ -29,19 +31,26 @@ from boundflow.planner.fair_batching_measurement import (
     compiler_candidate_observation,
     fixed_single_observation,
     measure_batched_original,
+    measure_batched_original_from_forward_trace,
     ordinary_batching_observation,
     verify_single_query_matches_batch,
 )
 from boundflow.planner.measured_adaptive_benchmark import (
     CandidateMeasurement,
+    MeasuredWorkloadSpec,
     TypedCNNWorkloadSpec,
+    TypedResidualCNNWorkloadSpec,
     TypedWorkloadSpec,
     fit_backend_calibrations,
     measure_workload,
 )
-from boundflow.planner.typed_benchmark_workloads import build_cnn_candidate
+from boundflow.planner.typed_benchmark_workloads import (
+    build_cnn_candidate,
+    build_residual_cnn_candidate,
+)
 
 ARTIFACT_SCHEMA = "boundflow.ir5-family-fair-artifact/v1"
+RESIDUAL_FINAL_ARTIFACT_SCHEMA = "boundflow.ir5-residual-final-artifact/v2"
 CALIBRATION_WORKLOADS = (
     TypedWorkloadSpec("calibration-mlp-small", "calibration", 4, 32, 32, 8, 6101),
     TypedWorkloadSpec("calibration-mlp-wide", "calibration", 4, 96, 96, 10, 6102),
@@ -49,6 +58,22 @@ CALIBRATION_WORKLOADS = (
 HELDOUT_WORKLOADS = (
     TypedCNNWorkloadSpec("heldout-cnn-gray", "heldout", 4, 1, 16, 4, 8, 10, 6201),
     TypedCNNWorkloadSpec("heldout-cnn-color", "heldout", 4, 3, 16, 8, 12, 10, 6202),
+)
+RESIDUAL_CALIBRATION_WORKLOADS = (
+    TypedCNNWorkloadSpec(
+        "calibration-chain-gray", "calibration", 4, 1, 16, 4, 8, 10, 7201
+    ),
+    TypedCNNWorkloadSpec(
+        "calibration-chain-color", "calibration", 4, 3, 16, 8, 12, 10, 7202
+    ),
+)
+RESIDUAL_HELDOUT_WORKLOADS = (
+    TypedResidualCNNWorkloadSpec(
+        "final-residual-gray-v2", "heldout", 4, 1, 14, 5, 12, 7401
+    ),
+    TypedResidualCNNWorkloadSpec(
+        "final-residual-color-v2", "heldout", 4, 3, 18, 7, 12, 7402
+    ),
 )
 BACKENDS = (
     BackendKind.REFERENCE,
@@ -72,14 +97,69 @@ FILES = (
 )
 
 
+@dataclass(frozen=True)
+class ArtifactSuite:  # pylint: disable=too-many-instance-attributes
+    """One immutable calibration→held-out artifact protocol."""
+
+    name: str
+    schema_version: str
+    calibration_family: str
+    heldout_family: str
+    calibration: tuple[MeasuredWorkloadSpec, ...]
+    heldout: tuple[TypedCNNWorkloadSpec | TypedResidualCNNWorkloadSpec, ...]
+    fit_scope: str
+    evidence_scope: str
+    from_forward_trace: bool
+
+    @property
+    def baseline_plan_id(self) -> str:
+        """Return the exact baseline identity required by this suite."""
+
+        return (
+            "batched-original-from-forward-trace"
+            if self.from_forward_trace
+            else "batched-original"
+        )
+
+
+FAMILY_FAIR_V1 = ArtifactSuite(
+    name="family-fair-v1",
+    schema_version=ARTIFACT_SCHEMA,
+    calibration_family="mlp",
+    heldout_family="chain_cnn",
+    calibration=CALIBRATION_WORKLOADS,
+    heldout=HELDOUT_WORKLOADS,
+    fit_scope="mlp_calibration_only_before_cnn_heldout",
+    evidence_scope="mlp_calibration_to_chain_cnn_heldout_with_fair_batching",
+    from_forward_trace=False,
+)
+RESIDUAL_FINAL_V2 = ArtifactSuite(
+    name="residual-final-v2",
+    schema_version=RESIDUAL_FINAL_ARTIFACT_SCHEMA,
+    calibration_family="chain_cnn",
+    heldout_family="residual_cnn",
+    calibration=RESIDUAL_CALIBRATION_WORKLOADS,
+    heldout=RESIDUAL_HELDOUT_WORKLOADS,
+    fit_scope="chain_cnn_calibration_only_before_residual_cnn_final",
+    evidence_scope=(
+        "chain_cnn_calibration_to_residual_cnn_final_with_from_trace_fair_batching"
+    ),
+    from_forward_trace=True,
+)
+SUITES = {item.name: item for item in (FAMILY_FAIR_V1, RESIDUAL_FINAL_V2)}
+
+
 def generate_artifact(
     out_dir: Path,
     *,
     device: str,
     warm_samples: int,
+    suite: ArtifactSuite = FAMILY_FAIR_V1,
 ) -> None:
     """Run calibration, architecture-held-out candidates, and fair baselines."""
 
+    if suite == RESIDUAL_FINAL_V2 and device != "cuda":
+        raise ValueError("IR-5 residual final suite is CUDA-only")
     if out_dir.exists() and any(out_dir.iterdir()):
         raise ValueError(f"artifact output directory is not empty: {out_dir}")
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -87,24 +167,30 @@ def generate_artifact(
     _write_json(
         out_dir / "split.json",
         {
-            "schema_version": ARTIFACT_SCHEMA,
+            "schema_version": suite.schema_version,
+            "suite": suite.name,
             "device": device,
             "warm_samples": warm_samples,
-            "calibration_family": "mlp",
-            "heldout_family": "chain_cnn",
-            "calibration": [item.to_dict() for item in CALIBRATION_WORKLOADS],
-            "heldout": [item.to_dict() for item in HELDOUT_WORKLOADS],
+            "calibration_family": suite.calibration_family,
+            "heldout_family": suite.heldout_family,
+            "calibration": [item.to_dict() for item in suite.calibration],
+            "heldout": [item.to_dict() for item in suite.heldout],
             "backends": [item.value for item in BACKENDS],
             "physical_batch_contract": (
                 "one box is one query; batch latency divided by exact batch size; "
                 "compile/setup is charged once and is never divided"
+            ),
+            "timed_solver_contract": (
+                "CROWN backward from a precomputed forward trace"
+                if suite.from_forward_trace
+                else "full legacy CROWN including forward trace"
             ),
             "context_contract": _context_contract(),
             "freeze_scope": "all constants frozen before artifact generation",
         },
     )
     calibration = _measure_many(
-        CALIBRATION_WORKLOADS,
+        suite.calibration,
         BACKENDS,
         device=device,
         warm_samples=warm_samples,
@@ -115,8 +201,8 @@ def generate_artifact(
     _write_json(
         out_dir / "calibration_models.json",
         {
-            "schema_version": ARTIFACT_SCHEMA,
-            "fit_scope": "mlp_calibration_only_before_cnn_heldout",
+            "schema_version": suite.schema_version,
+            "fit_scope": suite.fit_scope,
             "models": [
                 models[backend].to_dict() for backend in sorted(models, key=str)
             ],
@@ -124,7 +210,7 @@ def generate_artifact(
     )
 
     heldout = _measure_many(
-        HELDOUT_WORKLOADS,
+        suite.heldout,
         BACKENDS,
         device=device,
         warm_samples=warm_samples,
@@ -136,7 +222,7 @@ def generate_artifact(
     semantic_checks = []
     all_outcomes: list[FairAdaptivePolicyOutcome] = []
     context_rows: list[dict[str, object]] = []
-    for workload in HELDOUT_WORKLOADS:
+    for workload in suite.heldout:
         selected = tuple(
             item
             for item in heldout
@@ -145,7 +231,9 @@ def generate_artifact(
         reference = next(
             item for item in selected if item.backend == BackendKind.REFERENCE
         )
-        batched_prepared = _prepared_cnn(workload, batch=workload.batch, device=device)
+        batched_prepared = _prepared_convolutional(
+            workload, batch=workload.batch, device=device
+        )
         single_spec = _single_spec(workload)
         single_measurement = measure_workload(
             single_spec,
@@ -155,18 +243,27 @@ def generate_artifact(
             cache_root=cache_root / "fixed-single",
         )[0]
         fixed_rows.append(single_measurement)
-        single_prepared = _prepared_cnn(single_spec, batch=1, device=device)
+        single_prepared = _prepared_convolutional(single_spec, batch=1, device=device)
         semantic_checks.append(
             {
                 "workload_id": workload.workload_id,
                 **verify_single_query_matches_batch(batched_prepared, single_prepared),
             }
         )
-        original = measure_batched_original(
-            batched_prepared,
-            workload,
-            device=device,
-            warm_samples=warm_samples,
+        original = (
+            measure_batched_original_from_forward_trace(
+                batched_prepared,
+                workload,
+                device=device,
+                warm_samples=warm_samples,
+            )
+            if suite.from_forward_trace
+            else measure_batched_original(
+                batched_prepared,
+                workload,
+                device=device,
+                warm_samples=warm_samples,
+            )
         )
         original_rows.append(original)
         observations = [
@@ -205,7 +302,7 @@ def generate_artifact(
                 baselines=FairBaselinePlanIds(
                     "fixed-single",
                     "ordinary-batching",
-                    "batched-original",
+                    suite.baseline_plan_id,
                 ),
                 selectable_plan_ids=tuple(
                     f"compiler:{backend.value}" for backend in COMPILER_BACKENDS
@@ -232,26 +329,34 @@ def generate_artifact(
             semantic_checks,
             all_outcomes,
             context_rows,
+            suite,
         ),
     )
     _write_json(
         out_dir / "manifest.json",
         {
-            "schema_version": ARTIFACT_SCHEMA,
-            "evidence_scope": (
-                "mlp_calibration_to_chain_cnn_heldout_with_fair_batching"
-            ),
+            "schema_version": suite.schema_version,
+            "suite": suite.name,
+            "evidence_scope": suite.evidence_scope,
             "environment": _environment(device),
             "files": {name: _sha256(out_dir / name) for name in FILES},
         },
     )
 
 
-def replay_artifact(artifact_dir: Path, *, semantic: bool) -> None:
+def replay_artifact(
+    artifact_dir: Path,
+    *,
+    semantic: bool,
+    suite: ArtifactSuite = FAMILY_FAIR_V1,
+) -> None:
     """Verify content addresses, split freeze, and optional batch semantics."""
 
     manifest = _read_json(artifact_dir / "manifest.json")
-    if manifest.get("schema_version") != ARTIFACT_SCHEMA:
+    if (
+        manifest.get("schema_version") != suite.schema_version
+        or manifest.get("suite", FAMILY_FAIR_V1.name) != suite.name
+    ):
         raise ValueError("IR-5 family artifact manifest schema mismatch")
     expected_files = manifest.get("files")
     if not isinstance(expected_files, dict) or set(expected_files) != set(FILES):
@@ -261,24 +366,36 @@ def replay_artifact(artifact_dir: Path, *, semantic: bool) -> None:
             raise ValueError(f"IR-5 family artifact digest mismatch: {name}")
     split = _read_json(artifact_dir / "split.json")
     expected_split = {
-        "calibration": [item.to_dict() for item in CALIBRATION_WORKLOADS],
-        "heldout": [item.to_dict() for item in HELDOUT_WORKLOADS],
+        "calibration": [item.to_dict() for item in suite.calibration],
+        "heldout": [item.to_dict() for item in suite.heldout],
         "context_contract": _context_contract(),
     }
     if any(split.get(key) != value for key, value in expected_split.items()):
         raise ValueError("IR-5 family split/context drift")
     if semantic:
         device = str(split["device"])
-        for workload in HELDOUT_WORKLOADS:
-            batched = _prepared_cnn(workload, batch=workload.batch, device=device)
-            single = _prepared_cnn(_single_spec(workload), batch=1, device=device)
-            verify_single_query_matches_batch(batched, single)
-            measure_batched_original(
-                batched,
-                workload,
-                device=device,
-                warm_samples=1,
+        for workload in suite.heldout:
+            batched = _prepared_convolutional(
+                workload, batch=workload.batch, device=device
             )
+            single = _prepared_convolutional(
+                _single_spec(workload), batch=1, device=device
+            )
+            verify_single_query_matches_batch(batched, single)
+            if suite.from_forward_trace:
+                measure_batched_original_from_forward_trace(
+                    batched,
+                    workload,
+                    device=device,
+                    warm_samples=1,
+                )
+            else:
+                measure_batched_original(
+                    batched,
+                    workload,
+                    device=device,
+                    warm_samples=1,
+                )
 
 
 def _measure_many(
@@ -303,7 +420,20 @@ def _measure_many(
     return tuple(measured)
 
 
-def _single_spec(workload: TypedCNNWorkloadSpec) -> TypedCNNWorkloadSpec:
+def _single_spec(
+    workload: TypedCNNWorkloadSpec | TypedResidualCNNWorkloadSpec,
+) -> TypedCNNWorkloadSpec | TypedResidualCNNWorkloadSpec:
+    if isinstance(workload, TypedResidualCNNWorkloadSpec):
+        return TypedResidualCNNWorkloadSpec(
+            f"{workload.workload_id}:single",
+            "heldout",
+            1,
+            workload.input_channels,
+            workload.image_size,
+            workload.block_channels,
+            workload.output_dim,
+            workload.seed,
+        )
     return TypedCNNWorkloadSpec(
         f"{workload.workload_id}:single",
         "heldout",
@@ -317,12 +447,24 @@ def _single_spec(workload: TypedCNNWorkloadSpec) -> TypedCNNWorkloadSpec:
     )
 
 
-def _prepared_cnn(
-    workload: TypedCNNWorkloadSpec,
+def _prepared_convolutional(
+    workload: TypedCNNWorkloadSpec | TypedResidualCNNWorkloadSpec,
     *,
     batch: int,
     device: str = "cuda",
 ):
+    if isinstance(workload, TypedResidualCNNWorkloadSpec):
+        return build_residual_cnn_candidate(
+            workload_id=workload.workload_id,
+            backend=BackendKind.REFERENCE,
+            device=device,
+            batch=batch,
+            input_channels=workload.input_channels,
+            image_size=workload.image_size,
+            block_channels=workload.block_channels,
+            output_dim=workload.output_dim,
+            seed=workload.seed,
+        )
     return build_cnn_candidate(
         workload_id=workload.workload_id,
         backend=BackendKind.REFERENCE,
@@ -380,6 +522,7 @@ def _summary(
     semantic_checks,
     outcomes,
     contexts,
+    suite: ArtifactSuite,
 ) -> dict[str, object]:
     global_choices = {
         item.context_id: item.selected_plan_id
@@ -387,7 +530,7 @@ def _summary(
         if item.policy == FairAdaptivePlanPolicy.GLOBAL
     }
     switches = {}
-    for workload in HELDOUT_WORKLOADS:
+    for workload in suite.heldout:
         high = global_choices[f"{workload.workload_id}:cold-repeated"]
         low = global_choices[f"{workload.workload_id}:low-memory"]
         switches[workload.workload_id] = {
@@ -396,14 +539,33 @@ def _summary(
             "switched": high != low,
         }
     summary = summarize_fair_adaptive_outcomes(outcomes)
+    global_summary = summary.get("global")
+    if not isinstance(global_summary, dict):
+        raise ValueError("fair summary omits Global policy")
+    global_regret_p90_value = global_summary.get("regret_p90")
+    if not isinstance(global_regret_p90_value, (int, float)):
+        raise ValueError("fair summary omits Global p90 regret")
+    global_regret_p90 = float(global_regret_p90_value)
+    pareto = {
+        workload.workload_id: _compiler_latency_memory_pareto(
+            tuple(
+                item
+                for item in heldout
+                if item.workload.workload_id == workload.workload_id
+                and item.backend in COMPILER_BACKENDS
+            )
+        )
+        for workload in suite.heldout
+    }
     global_feasible = sum(
         item.feasible
         for item in outcomes
         if item.policy == FairAdaptivePlanPolicy.GLOBAL
     )
     return {
-        "schema_version": ARTIFACT_SCHEMA,
-        "evidence_scope": "mlp_calibration_to_chain_cnn_heldout_fair_batching",
+        "schema_version": suite.schema_version,
+        "suite": suite.name,
+        "evidence_scope": suite.evidence_scope,
         "counts": {
             "calibration_measurements": len(calibration),
             "heldout_compiler_measurements": len(heldout),
@@ -430,16 +592,65 @@ def _summary(
             "any_multi_budget_global_switch": any(
                 item["switched"] for item in switches.values()
             ),
+            "global_p90_regret_lte_1_20": global_regret_p90 <= 1.20,
+            "compiler_latency_memory_pareto_all_workloads": all(
+                item["has_tradeoff"] for item in pareto.values()
+            ),
         },
         "policy_summary": summary,
         "multi_budget_global_switches": switches,
+        "compiler_latency_memory_pareto": pareto,
         "contexts": contexts,
         "limitations": [
-            "held-out is a reduced chain-CNN family, not residual/VNN-COMP",
+            (
+                "held-out is a reduced residual-CNN family, not VNN-COMP"
+                if suite.heldout_family == "residual_cnn"
+                else "held-out is a reduced chain-CNN family, not residual/VNN-COMP"
+            ),
             "calibration uses a median one-feature MAC proxy",
             "ordinary batching is typed reference; batched original is legacy plain CROWN",
             "per-query latency is physical batch wall time divided by batch size",
             "wall-clock samples are not exact-replayed",
+        ],
+    }
+
+
+def _compiler_latency_memory_pareto(
+    measurements: tuple[CandidateMeasurement, ...],
+) -> dict[str, object]:
+    """Require at least two non-dominated compiler points with a real tradeoff."""
+
+    points = tuple(
+        (
+            item.backend.value,
+            statistics.median(item.warm_latency_ms) / item.workload.batch,
+            item.measured_peak_bytes,
+        )
+        for item in measurements
+    )
+    frontier = tuple(
+        point
+        for point in points
+        if not any(
+            other[1] <= point[1]
+            and other[2] <= point[2]
+            and (other[1] < point[1] or other[2] < point[2])
+            for other in points
+            if other[0] != point[0]
+        )
+    )
+    has_tradeoff = (
+        len(frontier) >= 2 and len({(point[1], point[2]) for point in frontier}) >= 2
+    )
+    return {
+        "has_tradeoff": has_tradeoff,
+        "frontier": [
+            {
+                "backend": backend,
+                "median_latency_ms_per_query": latency,
+                "measured_peak_bytes": memory,
+            }
+            for backend, latency, memory in frontier
         ],
     }
 
@@ -503,18 +714,22 @@ def main(argv: Sequence[str] | None = None) -> int:
     generate.add_argument("--out-dir", type=Path, required=True)
     generate.add_argument("--device", choices=("cpu", "cuda"), default="cuda")
     generate.add_argument("--warm-samples", type=int, default=9)
+    generate.add_argument("--suite", choices=tuple(SUITES), default=FAMILY_FAIR_V1.name)
     replay = commands.add_parser("replay")
     replay.add_argument("--artifact-dir", type=Path, required=True)
     replay.add_argument("--semantic", action="store_true")
+    replay.add_argument("--suite", choices=tuple(SUITES), default=FAMILY_FAIR_V1.name)
     args = parser.parse_args(argv)
+    suite = SUITES[args.suite]
     if args.command == "generate":
         generate_artifact(
             args.out_dir,
             device=args.device,
             warm_samples=args.warm_samples,
+            suite=suite,
         )
     else:
-        replay_artifact(args.artifact_dir, semantic=args.semantic)
+        replay_artifact(args.artifact_dir, semantic=args.semantic, suite=suite)
     return 0
 
 

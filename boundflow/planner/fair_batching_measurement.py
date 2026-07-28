@@ -9,6 +9,7 @@ import hashlib
 import json
 import statistics
 import time
+from typing import TypeAlias
 
 import torch
 
@@ -26,10 +27,13 @@ from .measured_adaptive_benchmark import (
     BackendCalibration,
     CandidateMeasurement,
     TypedCNNWorkloadSpec,
+    TypedResidualCNNWorkloadSpec,
 )
 from .typed_benchmark_workloads import PreparedTypedBenchmark
 
 BATCHED_ORIGINAL_SCHEMA_VERSION = "boundflow.ir5-batched-original/v1"
+BatchedCnnWorkloadSpec: TypeAlias = TypedCNNWorkloadSpec | TypedResidualCNNWorkloadSpec
+_BATCHED_CNN_TYPES = (TypedCNNWorkloadSpec, TypedResidualCNNWorkloadSpec)
 
 
 @dataclass(frozen=True)
@@ -38,7 +42,7 @@ class BatchedOriginalMeasurement:  # pylint: disable=too-many-instance-attribute
 
     schema_version: str
     variant: str
-    workload: TypedCNNWorkloadSpec
+    workload: BatchedCnnWorkloadSpec
     semantic_hash: str
     cold_batch_latency_ms: float
     warm_batch_latency_ms: tuple[float, ...]
@@ -130,7 +134,7 @@ class BatchedOriginalMeasurement:  # pylint: disable=too-many-instance-attribute
 
 def measure_batched_original(
     prepared_reference: PreparedTypedBenchmark,
-    workload: TypedCNNWorkloadSpec,
+    workload: BatchedCnnWorkloadSpec,
     *,
     device: str,
     warm_samples: int,
@@ -152,7 +156,7 @@ def measure_batched_original(
 
 def measure_batched_original_from_forward_trace(
     prepared_reference: PreparedTypedBenchmark,
-    workload: TypedCNNWorkloadSpec,
+    workload: BatchedCnnWorkloadSpec,
     *,
     device: str,
     warm_samples: int,
@@ -174,7 +178,7 @@ def measure_batched_original_from_forward_trace(
 
 def _measure_batched_original(
     prepared_reference: PreparedTypedBenchmark,
-    workload: TypedCNNWorkloadSpec,
+    workload: BatchedCnnWorkloadSpec,
     *,
     device: str,
     warm_samples: int,
@@ -285,8 +289,10 @@ def compiler_candidate_observation(
 ) -> AdaptivePlanObservation:
     """Normalize a physically batched compiler candidate to per-query latency."""
 
-    if not isinstance(measurement.workload, TypedCNNWorkloadSpec):
-        raise TypeError("fair compiler observation requires CNN held-out workload")
+    if not isinstance(measurement.workload, _BATCHED_CNN_TYPES):
+        raise TypeError(
+            "fair compiler observation requires convolutional held-out workload"
+        )
     if measurement.workload.split != "heldout":
         raise ValueError("fair compiler observation is not held-out")
     predicted_batch, predicted_compile = calibration.predict(measurement.workload)
@@ -314,7 +320,7 @@ def ordinary_batching_observation(
     observation = _normalized_reference(
         reference_measurement,
         plan_id="ordinary-batching",
-        divisor=_cnn_batch(reference_measurement),
+        divisor=_convolutional_batch(reference_measurement),
     )
     observation.validate()
     return observation
@@ -325,7 +331,7 @@ def fixed_single_observation(
 ) -> AdaptivePlanObservation:
     """Expose one-query typed reference repeated by TTV expected query count."""
 
-    if _cnn_batch(single_reference_measurement) != 1:
+    if _convolutional_batch(single_reference_measurement) != 1:
         raise ValueError("fixed-single observation requires physical batch one")
     observation = _normalized_reference(
         single_reference_measurement,
@@ -421,9 +427,9 @@ def _normalized_reference(
     )
 
 
-def _cnn_batch(measurement: CandidateMeasurement) -> int:
-    if not isinstance(measurement.workload, TypedCNNWorkloadSpec):
-        raise TypeError("fair batching baseline requires a CNN workload")
+def _convolutional_batch(measurement: CandidateMeasurement) -> int:
+    if not isinstance(measurement.workload, _BATCHED_CNN_TYPES):
+        raise TypeError("fair batching baseline requires a convolutional workload")
     return measurement.workload.batch
 
 

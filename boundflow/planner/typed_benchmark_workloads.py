@@ -233,6 +233,128 @@ def build_cnn_candidate(  # pylint: disable=too-many-arguments
     )
 
 
+def build_residual_cnn_candidate(  # pylint: disable=too-many-arguments
+    *,
+    workload_id: str,
+    backend: BackendKind,
+    device: str,
+    batch: int,
+    input_channels: int,
+    image_size: int,
+    block_channels: int,
+    output_dim: int,
+    seed: int,
+) -> PreparedTypedBenchmark:
+    """Build a deterministic residual-CNN family under one typed backend."""
+
+    dimensions = (
+        batch,
+        input_channels,
+        image_size,
+        block_channels,
+        output_dim,
+    )
+    if min(dimensions) <= 0:
+        raise ValueError("typed residual-CNN dimensions must be positive")
+    generator = torch.Generator(device="cpu").manual_seed(seed)
+    params = {
+        "W1": torch.randn(
+            block_channels,
+            input_channels,
+            3,
+            3,
+            generator=generator,
+        ),
+        "b1": torch.randn(block_channels, generator=generator),
+        "W2": torch.randn(
+            block_channels,
+            block_channels,
+            3,
+            3,
+            generator=generator,
+        ),
+        "b2": torch.randn(block_channels, generator=generator),
+        "W3": torch.randn(
+            output_dim,
+            block_channels * image_size * image_size,
+            generator=generator,
+        ),
+        "b3": torch.randn(output_dim, generator=generator),
+    }
+    center = torch.randn(
+        batch,
+        input_channels,
+        image_size,
+        image_size,
+        generator=generator,
+    )
+    if device != "cpu":
+        params = {name: value.to(device) for name, value in params.items()}
+        center = center.to(device)
+    conv = {
+        "stride": (1, 1),
+        "padding": (1, 1),
+        "dilation": (1, 1),
+        "groups": 1,
+    }
+    legacy = BFTaskModule(
+        tasks=[
+            BoundTask(
+                task_id=f"ir5:{workload_id}",
+                kind=TaskKind.INTERVAL_IBP,
+                ops=[
+                    TaskOp(
+                        "conv2d",
+                        "stem",
+                        ["input", "W1", "b1"],
+                        ["stem_pre"],
+                        conv,
+                    ),
+                    TaskOp("relu", "stem_relu", ["stem_pre"], ["skip"]),
+                    TaskOp(
+                        "conv2d",
+                        "residual_conv",
+                        ["skip", "W2", "b2"],
+                        ["residual"],
+                        conv,
+                    ),
+                    TaskOp(
+                        "add",
+                        "residual_add",
+                        ["skip", "residual"],
+                        ["merged"],
+                    ),
+                    TaskOp("relu", "merge_relu", ["merged"], ["features"]),
+                    TaskOp(
+                        "flatten",
+                        "flatten",
+                        ["features"],
+                        ["flat"],
+                        {"start_dim": 1, "end_dim": -1},
+                    ),
+                    TaskOp("linear", "head", ["flat", "W3", "b3"], ["out"]),
+                ],
+                input_values=["input"],
+                output_values=["out"],
+            )
+        ],
+        entry_task_id=f"ir5:{workload_id}",
+        bindings={"params": params},
+    )
+    input_spec = InputSpec.linf(
+        value_name="input",
+        center=center,
+        eps=0.1,
+    )
+    return _prepare_candidate(
+        workload_id=workload_id,
+        backend=backend,
+        device=device,
+        legacy=legacy,
+        input_spec=input_spec,
+    )
+
+
 def _prepare_candidate(
     *,
     workload_id: str,
@@ -473,4 +595,5 @@ __all__ = [
     "PreparedTypedBenchmark",
     "build_cnn_candidate",
     "build_mlp_candidate",
+    "build_residual_cnn_candidate",
 ]

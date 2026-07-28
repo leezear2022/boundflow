@@ -25,6 +25,8 @@
 > IR-5D 已把静态 validate/hash/dispatch 移入 prepared execution capsule，并在已消费
 > CNN 上以 from-forward-trace 公平边界得到 `0.880×`/`0.896×` 最快 median 诊断；
 > 该结果仅为 calibration，不撤销 No-Go。新的 frozen residual-CNN final 尚未执行。
+> IR-5E 已冻结 CUDA-only chain-CNN calibration→residual-CNN final v2 协议；正式
+> final IDs/seeds `7401/7402` 尚未执行，必须在 protocol commit 后一次性消费。
 
 ## 1. 当前真实阶段
 
@@ -121,6 +123,11 @@ SHA；同时新增 from-forward-trace legacy baseline，使双方都只计 CROWN
 在旧 gray/color CNN 上的 20-sample CUDA calibration 中，最快 typed/legacy median 比值为
 `0.880×`/`0.896×`。这些 workload 已被消费，故只能证明优化方向，不能升级 claim。
 下一步是先冻结新的 residual-CNN final split，再一次性运行完整 fair evaluator 和 replay。
+
+IR-5E 现已完成该 protocol freeze：新 workload 含真实 residual fanout/`add_backward`，
+baseline 固定为 from-forward-trace，并显式输出 p90≤1.20、双 workload latency-memory
+Pareto 与 multi-budget switch 字段。此时仍没有 final 数字；`7401/7402` 不得在 protocol
+commit 前运行。
 
 明确禁止：
 

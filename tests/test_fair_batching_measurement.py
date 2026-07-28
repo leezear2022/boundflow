@@ -18,11 +18,15 @@ from boundflow.planner.fair_batching_measurement import (
 )
 from boundflow.planner.measured_adaptive_benchmark import (
     TypedCNNWorkloadSpec,
+    TypedResidualCNNWorkloadSpec,
     TypedWorkloadSpec,
     fit_backend_calibrations,
     measure_workload,
 )
-from boundflow.planner.typed_benchmark_workloads import build_cnn_candidate
+from boundflow.planner.typed_benchmark_workloads import (
+    build_cnn_candidate,
+    build_residual_cnn_candidate,
+)
 
 
 def test_fair_batching_measurements_share_semantics_and_normalize_per_query(
@@ -128,3 +132,61 @@ def test_fair_batching_measurements_share_semantics_and_normalize_per_query(
     assert verify_single_query_matches_batch(prepared_reference, prepared_single)[
         "semantic_allclose"
     ]
+
+
+def test_residual_cnn_uses_the_same_from_trace_batching_contract(
+    tmp_path: Path,
+) -> None:
+    workload = TypedResidualCNNWorkloadSpec(
+        "residual-heldout",
+        "heldout",
+        2,
+        1,
+        4,
+        2,
+        2,
+        97,
+    )
+    measured = measure_workload(
+        workload,
+        (BackendKind.REFERENCE, BackendKind.PYTORCH_DENSE),
+        device="cpu",
+        warm_samples=1,
+        cache_root=tmp_path / "residual",
+    )
+    prepared = build_residual_cnn_candidate(
+        workload_id=workload.workload_id,
+        backend=BackendKind.REFERENCE,
+        device="cpu",
+        batch=workload.batch,
+        input_channels=workload.input_channels,
+        image_size=workload.image_size,
+        block_channels=workload.block_channels,
+        output_dim=workload.output_dim,
+        seed=workload.seed,
+    )
+    original = measure_batched_original_from_forward_trace(
+        prepared,
+        workload,
+        device="cpu",
+        warm_samples=1,
+    )
+
+    assert original.semantic_allclose
+    assert original.workload.to_dict()["family"] == "residual_cnn"
+    assert ordinary_batching_observation(measured[0]).plan_id == "ordinary-batching"
+    assert (
+        compiler_candidate_observation(
+            measured[1],
+            fit_backend_calibrations(
+                measure_workload(
+                    TypedWorkloadSpec("residual-cal", "calibration", 1, 4, 4, 2, 98),
+                    (BackendKind.REFERENCE, BackendKind.PYTORCH_DENSE),
+                    device="cpu",
+                    warm_samples=1,
+                    cache_root=tmp_path / "residual-calibration",
+                )
+            )[BackendKind.PYTORCH_DENSE],
+        ).plan_id
+        == "compiler:pytorch_dense"
+    )

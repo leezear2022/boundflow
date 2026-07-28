@@ -17,7 +17,8 @@
 > batched-original p90 regret 70.263×且无多预算切换，判定 VALIDATED-NO-GO。
 > IR-5D prepared execution remediation 已实现，并在已消费 CNN 上通过 calibration-only
 > from-forward-trace 诊断；正式 No-Go 不撤销。IR-6 仍 blocked，下一步只允许新的
-> frozen residual-CNN final gate。
+> frozen residual-CNN final gate。IR-5E 已冻结该 CUDA-only protocol 与未执行的
+> final seeds `7401/7402`，等待 protocol commit 后一次性消费。
 
 ## 1. 锁定的论文命题
 
@@ -401,3 +402,6 @@ Bound IR v1
   trace；在旧 CNN 上使用 from-forward-trace 公平计时的 calibration median 比值最快为
   0.880×/0.896×。该诊断不撤销 No-Go；只允许在新 frozen residual-CNN split 上做一次
   final gate，IR-6 在此之前继续 blocked。
+- IR-5E 已新增 residual fanout/add typed workload，并冻结 chain-CNN calibration →
+  residual-CNN final v2、from-forward-trace baseline、p90≤1.20 与 Pareto 判定字段。
+  final `7401/7402` 尚未执行；protocol commit 后只允许一次正式生成。

@@ -3436,3 +3436,23 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_ir5d_prepared_execution_capsule.md`
+
+---
+
+## 2026-07-28：IR-5E residual final protocol freeze
+
+**主要改动**
+- 新增带真实 fanout/add merge 的 residual-CNN typed workload 与 measured spec；
+- fair batching/measurement 支持 chain-CNN 与 residual-CNN；
+- runner 新增 CUDA-only `residual-final-v2` suite；
+- 冻结 chain-CNN calibration→全新 residual-CNN final 的 shapes/IDs/seeds；
+- final baseline 固定为 from-forward-trace，新增 p90≤1.20 与双 workload Pareto 字段。
+
+**验证与边界**
+- residual CPU reference/dense 与临时 CUDA 四后端语义对齐；
+- 旧 v1 artifact replay 兼容；
+- 临时 smoke 的 `7301/7302` 已废弃，正式 `7401/7402` 未执行；
+- 正式 artifact 必须在 protocol commit 后一次性生成，失败不得按 final 数据继续调参。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5e_residual_final_protocol_freeze.md`

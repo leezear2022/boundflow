@@ -30,6 +30,7 @@ from .typed_benchmark_workloads import (
     PreparedTypedBenchmark,
     build_cnn_candidate,
     build_mlp_candidate,
+    build_residual_cnn_candidate,
 )
 
 MEASURED_BENCHMARK_SCHEMA_VERSION = "boundflow.ir5-measured-candidate/v1"
@@ -130,7 +131,76 @@ class TypedCNNWorkloadSpec:
         return {"family": "chain_cnn", **asdict(self)}
 
 
-MeasuredWorkloadSpec = TypedWorkloadSpec | TypedCNNWorkloadSpec
+@dataclass(frozen=True)
+class TypedResidualCNNWorkloadSpec:
+    """Frozen residual-CNN family reserved for a fresh final evaluation."""
+
+    workload_id: str
+    split: str
+    batch: int
+    input_channels: int
+    image_size: int
+    block_channels: int
+    output_dim: int
+    seed: int
+
+    def validate(self) -> None:
+        """Reject invalid residual shapes or ambiguous split identity."""
+
+        dimensions = (
+            self.batch,
+            self.input_channels,
+            self.image_size,
+            self.block_channels,
+            self.output_dim,
+        )
+        if not self.workload_id or self.split not in {"calibration", "heldout"}:
+            raise ValueError("measured residual-CNN identity/split is invalid")
+        if min(dimensions) <= 0:
+            raise ValueError("measured residual-CNN dimensions must be positive")
+        if self.seed < 0:
+            raise ValueError("measured residual-CNN seed must be nonnegative")
+
+    @property
+    def work_units(self) -> int:
+        """Return a backend-independent residual multiply-accumulate proxy."""
+
+        self.validate()
+        stem = (
+            self.batch
+            * self.block_channels
+            * self.image_size
+            * self.image_size
+            * self.input_channels
+            * 9
+        )
+        residual = (
+            self.batch
+            * self.block_channels
+            * self.image_size
+            * self.image_size
+            * self.block_channels
+            * 9
+        )
+        head = (
+            self.batch
+            * self.output_dim
+            * self.block_channels
+            * self.image_size
+            * self.image_size
+        )
+        return stem + residual + head
+
+    def to_dict(self) -> dict[str, object]:
+        """Return canonical residual architecture-family fields."""
+
+        self.validate()
+        return {"family": "residual_cnn", **asdict(self)}
+
+
+MeasuredWorkloadSpec = (
+    TypedWorkloadSpec | TypedCNNWorkloadSpec | TypedResidualCNNWorkloadSpec
+)
 
 
 @dataclass(frozen=True)
@@ -542,6 +612,7 @@ __all__ = [
     "MEASURED_BENCHMARK_SCHEMA_VERSION",
     "MeasuredWorkloadSpec",
     "TypedCNNWorkloadSpec",
+    "TypedResidualCNNWorkloadSpec",
     "TypedWorkloadSpec",
     "build_heldout_observations",
     "fit_backend_calibrations",
@@ -555,6 +626,18 @@ def _build_candidate(
     backend: BackendKind,
     device: str,
 ) -> PreparedTypedBenchmark:
+    if isinstance(workload, TypedResidualCNNWorkloadSpec):
+        return build_residual_cnn_candidate(
+            workload_id=workload.workload_id,
+            backend=backend,
+            device=device,
+            batch=workload.batch,
+            input_channels=workload.input_channels,
+            image_size=workload.image_size,
+            block_channels=workload.block_channels,
+            output_dim=workload.output_dim,
+            seed=workload.seed,
+        )
     if isinstance(workload, TypedCNNWorkloadSpec):
         return build_cnn_candidate(
             workload_id=workload.workload_id,
