@@ -59,6 +59,8 @@
   Bound/Plan/Task/Schedule/runtime 实现后冻结的一等 IR 分层、动态规划边界与逐阶段门禁
 - `gemini_doc/change_2026-07-20_ir_planner_schedule_runtime_contract.md`：上述架构重置、
   Claims Map 降级和权威文档修订记录
+- `gemini_doc/change_2026-07-28_bound_ir_v1_schema_foundation.md`：IR-1A typed Bound IR
+  schema、verifier、deterministic dump/hash、兼容性与未完成 builder/interpreter 边界
 - `gemini_doc/asplos_execution_memo_v1_0.md`：ASPLOS 研发的短执行入口与门禁
 - `gemini_doc/current_status_after_pr13.md`：PR-13 closure 后的真实状态、证据边界与当前缺口
 - `gemini_doc/pr14_execution_plan.md`：真实 verifier workload coverage/execution 的切片、门禁与止损

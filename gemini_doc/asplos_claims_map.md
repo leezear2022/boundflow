@@ -7,7 +7,7 @@
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
-| C1：显式物化语义的 Structured Bound-Operator IR | runtime mechanism validated；first-class IR pending | `boundflow/runtime/linear_operator.py`、`crown_ibp.py`；`ir/bound.py` 仍为占位 | 除历史 dense/operator 对齐外，还需 Bound IR verifier/interpreter/lowering | 历史 trace 保留；新 IR dump/hash 尚缺 |
+| C1：显式物化语义的 Structured Bound-Operator IR | schema/verifier foundation validated；interpreter/lowering pending | `boundflow/ir/bound.py` typed schema/verifier/dump/hash；历史 runtime operator mechanism | 已有 12 个 Bound IR contract tests；还需 builder/interpreter/runtime lowering 与非 toy 对齐 | 历史 trace 保留；IR v1 deterministic dump/hash 已有，E2E 工件尚缺 |
 | C2：Method/Autograd/Memory-Aware Materialization Planner | 局部机制 validated-reduced；统一 Plan/Schedule IR pending | static topology/liveness、局部 materialization/placement/backend records、bounded runtime | 历史 held-out/Oracle/OOM 保留；还需跨决策 Plan/Schedule verifier 与 IR-driven E2E | 历史 1,416 executions/23 feasible 保留；新 IR 工件尚缺 |
 | C3：Verification Query Runtime Infrastructure | downgraded after PR-14B | query/validity + batcher + capability routing + real observer | 保留 reduced correctness；真实 coverage/replay 作为 limitation | activation 0/394 eligible；ResNet bound-equivalence fail；不作 acceleration claim |
 | BoundFlow Schedule IR | unimplemented | 现仅 `TaskGraph.topo_sort()`、局部 fused step 和过程式 retry | dependency/lifetime/stream/batch/retry/state verifier；reference executor | deterministic schedule dump/trace 尚缺 |
@@ -28,6 +28,19 @@
 
 新的升级门禁见
 `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`。
+
+### 2026-07-28 IR-1A 进度
+
+- `boundflow.bound_ir/v1.0` 已新增 typed value/type/spec/domain/op/graph/module；
+- graph verifier 已覆盖 SSA/use-def、类型/极性、batch axes、representation change、method state；
+- module verifier 会把 input/spec bind 与 concretize ID 交叉解析到 typed VerificationSpec；
+- module 已有 canonical JSON 与 SHA-256 stable hash；
+- Bound IR 源模块不依赖 runtime、backend、PyTorch 或 TVM；
+- 旧 `DomainState` 兼容路径保留；
+- builder、reference interpreter、CROWN lowering 和 IR-driven E2E 尚缺，因此不升级完整 C1。
+
+实现与测试边界见
+`gemini_doc/change_2026-07-28_bound_ir_v1_schema_foundation.md`。
 
 ## PR-10 子阶段
 

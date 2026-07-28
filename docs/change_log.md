@@ -2907,3 +2907,25 @@
 **记录**
 - `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`
 - `gemini_doc/change_2026-07-20_ir_planner_schedule_runtime_contract.md`
+
+---
+
+## 2026-07-28：Bound IR v1 schema/verifier foundation
+
+**主要改动**
+- 将 `ir/bound.py` 从 Any/dict 占位结构升级为 typed value/type/spec/domain/op/graph/module；
+- 增加 sample/spec/domain batch axes、lower/upper polarity、representation 与 state identity；
+- 增加 SSA/use-def、类型/极性、materialization、reshape、method-state verifier；
+- 增加 canonical JSON 与 SHA-256 stable hash；
+- 保留旧 runtime `DomainState` 继承兼容，Bound IR 不依赖 runtime/backend/torch/TVM。
+
+**证据与边界**
+- focused：15 passed；
+- 关键 IBP/CROWN/DAG/PR-14 兼容回归：42 passed；
+- 全量：384 passed、1 skipped；
+- Mypy 0 issues，Pylint 10.00/10，Black clean；
+- 只关闭 IR-1A schema/verifier foundation；builder、reference interpreter、runtime lowering
+  和 IR-driven E2E 仍待 IR-1B。
+
+**记录**
+- `gemini_doc/change_2026-07-28_bound_ir_v1_schema_foundation.md`
