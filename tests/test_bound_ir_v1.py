@@ -15,10 +15,12 @@ import torch
 import boundflow.ir.bound as bound_ir
 from boundflow.domains.interval import IntervalState
 from boundflow.ir.bound import (
+    AddBackwardAttrs,
     BOUND_IR_SCHEMA_VERSION,
     BFBoundGraph,
     BFBoundModule,
     BatchAxisKind,
+    BoundAffineStateRef,
     BoundBatchAxis,
     BoundDomainConfig,
     BoundMethodKind,
@@ -126,6 +128,74 @@ def _materialization_module() -> BFBoundModule:
         domain=BoundDomainConfig(method=BoundMethodKind.CROWN),
         graph=graph,
     )
+
+
+def _affine_state(
+    prefix: str,
+    *,
+    primal_value_id: str,
+) -> tuple[BoundAffineStateRef, tuple[BoundValue, ...]]:
+    coefficient_type = BoundTensorType(
+        shape=(2, 3, 4),
+        dtype="float32",
+        layout="contiguous",
+        device="cuda",
+        batch_axes=(
+            BoundBatchAxis(BatchAxisKind.DOMAIN, 0),
+            BoundBatchAxis(BatchAxisKind.SPEC, 1),
+        ),
+    )
+    bias_type = BoundTensorType(
+        shape=(2, 3),
+        dtype="float32",
+        layout="contiguous",
+        device="cuda",
+        batch_axes=(
+            BoundBatchAxis(BatchAxisKind.DOMAIN, 0),
+            BoundBatchAxis(BatchAxisKind.SPEC, 1),
+        ),
+    )
+    values = (
+        BoundValue(
+            value_id=f"{prefix}.A_u",
+            tensor_type=coefficient_type,
+            role=BoundValueRole.COEFFICIENT,
+            polarity=BoundPolarity.UPPER,
+            representation=BoundRepresentation.DENSE,
+            source_primal_value_id=primal_value_id,
+        ),
+        BoundValue(
+            value_id=f"{prefix}.b_u",
+            tensor_type=bias_type,
+            role=BoundValueRole.BIAS,
+            polarity=BoundPolarity.UPPER,
+            representation=BoundRepresentation.DENSE,
+            source_primal_value_id=primal_value_id,
+        ),
+        BoundValue(
+            value_id=f"{prefix}.A_l",
+            tensor_type=coefficient_type,
+            role=BoundValueRole.COEFFICIENT,
+            polarity=BoundPolarity.LOWER,
+            representation=BoundRepresentation.DENSE,
+            source_primal_value_id=primal_value_id,
+        ),
+        BoundValue(
+            value_id=f"{prefix}.b_l",
+            tensor_type=bias_type,
+            role=BoundValueRole.BIAS,
+            polarity=BoundPolarity.LOWER,
+            representation=BoundRepresentation.DENSE,
+            source_primal_value_id=primal_value_id,
+        ),
+    )
+    state = BoundAffineStateRef(
+        upper_coefficient=values[0].value_id,
+        upper_bias=values[1].value_id,
+        lower_coefficient=values[2].value_id,
+        lower_bias=values[3].value_id,
+    )
+    return state, values
 
 
 def test_bound_ir_v1_dump_and_hash_are_deterministic() -> None:
@@ -269,6 +339,47 @@ def test_bound_ir_v1_accepts_explicit_fanout_and_residual_merge() -> None:
 
     graph.validate()
     assert graph.to_dict()["outputs"] == ["merged"]
+
+
+def test_bound_ir_v1_models_affine_state_residual_routes_explicitly() -> None:
+    source, source_values = _affine_state("source", primal_value_id="sum0")
+    left, left_values = _affine_state("left", primal_value_id="input")
+    right, right_values = _affine_state("right", primal_value_id="h2")
+    route = BoundOp(
+        op_id="add0.backward",
+        kind=BoundOpKind.ADD_BACKWARD,
+        inputs=source.value_ids,
+        outputs=left.value_ids + right.value_ids,
+        attrs=AddBackwardAttrs(
+            primal_node_id="add0",
+            dynamic_input_primal_value_ids=("input", "h2"),
+        ),
+    )
+    graph = BFBoundGraph(
+        values=source_values + left_values + right_values,
+        ops=(route,),
+        inputs=source.value_ids,
+        outputs=left.value_ids + right.value_ids,
+    )
+
+    graph.validate()
+    ops_payload = graph.to_dict()["ops"]
+    assert isinstance(ops_payload, list)
+    first_op = ops_payload[0]
+    assert isinstance(first_op, dict)
+    outputs_payload = first_op["outputs"]
+    assert isinstance(outputs_payload, list)
+    assert len(outputs_payload) == 8
+
+    malformed_lower_bias = replace(
+        right_values[3],
+        role=BoundValueRole.COEFFICIENT,
+    )
+    malformed_values = (
+        source_values + left_values + right_values[:3] + (malformed_lower_bias,)
+    )
+    with pytest.raises(ValueError, match="expects bias/lower"):
+        replace(graph, values=malformed_values).validate()
 
 
 def test_bound_ir_v1_rejects_polarity_and_tensor_type_mismatch() -> None:

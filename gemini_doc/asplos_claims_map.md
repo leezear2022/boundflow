@@ -7,7 +7,7 @@
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
-| C1：显式物化语义的 Structured Bound-Operator IR | schema/verifier foundation validated；interpreter/lowering pending | `boundflow/ir/bound.py` typed schema/verifier/dump/hash；历史 runtime operator mechanism | 已有 12 个 Bound IR contract tests；还需 builder/interpreter/runtime lowering 与非 toy 对齐 | 历史 trace 保留；IR v1 deterministic dump/hash 已有，E2E 工件尚缺 |
+| C1：显式物化语义的 Structured Bound-Operator IR | dense semantic closure validated；representation rewrite/production migration pending | typed Bound IR + Task/trace lowering + independent dense interpreter；历史 structured runtime mechanism | 20 个 schema/lowering/interpreter tests；MLP/CNN/residual/concat final bounds 对齐；还需 materialize/structured rewrite 对齐 | deterministic dump/hash 已有；IR-driven E2E artifact 尚缺 |
 | C2：Method/Autograd/Memory-Aware Materialization Planner | 局部机制 validated-reduced；统一 Plan/Schedule IR pending | static topology/liveness、局部 materialization/placement/backend records、bounded runtime | 历史 held-out/Oracle/OOM 保留；还需跨决策 Plan/Schedule verifier 与 IR-driven E2E | 历史 1,416 executions/23 feasible 保留；新 IR 工件尚缺 |
 | C3：Verification Query Runtime Infrastructure | downgraded after PR-14B | query/validity + batcher + capability routing + real observer | 保留 reduced correctness；真实 coverage/replay 作为 limitation | activation 0/394 eligible；ResNet bound-equivalence fail；不作 acceleration claim |
 | BoundFlow Schedule IR | unimplemented | 现仅 `TaskGraph.topo_sort()`、局部 fused step 和过程式 retry | dependency/lifetime/stream/batch/retry/state verifier；reference executor | deterministic schedule dump/trace 尚缺 |
@@ -41,6 +41,23 @@
 
 实现与测试边界见
 `gemini_doc/change_2026-07-28_bound_ir_v1_schema_foundation.md`。
+
+### 2026-07-28 IR-1B 进度
+
+- `BoundAffineStateRef` 显式表示 `A_u/b_u/A_l/b_l`，不再把真实 CROWN state 压成单值；
+- residual/concat backward route 和 fanout compose 已成为 typed BoundOp，并验证 bias-once 语义；
+- `boundflow/frontends/plain_crown_bound_ir.py` 已把单任务 plain-CROWN Task/trace lower 为
+  validated `BFBoundModule`；
+- `boundflow/runtime/bound_ir_interpreter.py` 已独立执行 dense Bound IR，不 import CROWN oracle；
+- identity/multi-spec MLP、chain CNN、residual/concat fanout 的 final lower/upper 已与现有
+  `run_crown_ibp_mlp` 对齐；
+- stale parameter/objective、缺失 ReLU trace fail closed；
+- 专属测试 20 passed，全量 392 passed、1 skipped；
+- materialize/representation rewrite、structured execution、生产 runtime 迁移和 IR-driven artifact
+  尚缺，因此仍不升级完整 C1。
+
+实现与门禁边界见
+`gemini_doc/change_2026-07-28_bound_ir_v1_plain_crown_lowering.md`。
 
 ## PR-10 子阶段
 

@@ -6,6 +6,8 @@ runtime CROWN implementation. Runtime domain-state classes still inherit from
 part of the serialized Bound IR.
 """
 
+# pylint: disable=too-many-lines
+
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
@@ -178,6 +180,86 @@ class BoundValue:
             "representation": self.representation.value,
             "state_version": self.state_version,
             "source_primal_value_id": self.source_primal_value_id,
+        }
+
+
+@dataclass(frozen=True)
+class BoundAffineStateRef:
+    """Four SSA values forming one upper/lower affine bound state."""
+
+    upper_coefficient: str
+    upper_bias: str
+    lower_coefficient: str
+    lower_bias: str
+
+    @property
+    def value_ids(self) -> Tuple[str, str, str, str]:
+        """Return the canonical state-component order used by BoundOp ports."""
+
+        return (
+            self.upper_coefficient,
+            self.upper_bias,
+            self.lower_coefficient,
+            self.lower_bias,
+        )
+
+    def validate(self, *, values: dict[str, BoundValue]) -> None:
+        """Validate component roles, polarities, and batch metadata."""
+
+        if len(set(self.value_ids)) != 4:
+            raise ValueError("affine state requires four distinct component values")
+        missing = [value_id for value_id in self.value_ids if value_id not in values]
+        if missing:
+            raise ValueError(f"affine state references unknown values: {missing}")
+        upper_coefficient = values[self.upper_coefficient]
+        upper_bias = values[self.upper_bias]
+        lower_coefficient = values[self.lower_coefficient]
+        lower_bias = values[self.lower_bias]
+        expected = (
+            (upper_coefficient, BoundValueRole.COEFFICIENT, BoundPolarity.UPPER),
+            (upper_bias, BoundValueRole.BIAS, BoundPolarity.UPPER),
+            (lower_coefficient, BoundValueRole.COEFFICIENT, BoundPolarity.LOWER),
+            (lower_bias, BoundValueRole.BIAS, BoundPolarity.LOWER),
+        )
+        for value, role, polarity in expected:
+            if value.role != role or value.polarity != polarity:
+                raise ValueError(
+                    f"affine state value '{value.value_id}' expects "
+                    f"{role.value}/{polarity.value}"
+                )
+        if upper_coefficient.tensor_type != lower_coefficient.tensor_type:
+            raise ValueError("affine state upper/lower coefficient types must match")
+        if upper_bias.tensor_type != lower_bias.tensor_type:
+            raise ValueError("affine state upper/lower bias types must match")
+        if upper_coefficient.representation != lower_coefficient.representation:
+            raise ValueError(
+                "affine state upper/lower coefficient representations must match"
+            )
+        coefficient_axes = tuple(
+            axis.kind for axis in upper_coefficient.tensor_type.batch_axes
+        )
+        bias_axes = tuple(axis.kind for axis in upper_bias.tensor_type.batch_axes)
+        if coefficient_axes != bias_axes:
+            raise ValueError("affine state coefficient/bias batch axes must match")
+        coefficient_batch_shape = tuple(
+            upper_coefficient.tensor_type.shape[axis.dimension]
+            for axis in upper_coefficient.tensor_type.batch_axes
+        )
+        bias_batch_shape = tuple(
+            upper_bias.tensor_type.shape[axis.dimension]
+            for axis in upper_bias.tensor_type.batch_axes
+        )
+        if coefficient_batch_shape != bias_batch_shape:
+            raise ValueError("affine state coefficient/bias batch sizes must match")
+
+    def to_dict(self) -> dict[str, object]:
+        """Return stable JSON-compatible component references."""
+
+        return {
+            "upper_coefficient": self.upper_coefficient,
+            "upper_bias": self.upper_bias,
+            "lower_coefficient": self.lower_coefficient,
+            "lower_bias": self.lower_bias,
         }
 
 
@@ -390,6 +472,8 @@ class BoundOpKind(Enum):
     COEFFICIENT_COMPOSE = "coefficient_compose"
     BIAS_ACCUMULATE = "bias_accumulate"
     ADD = "add"
+    ADD_BACKWARD = "add_backward"
+    CONCAT_BACKWARD = "concat_backward"
     RESHAPE = "reshape"
     MATERIALIZE = "materialize"
     REPRESENTATION_CAST = "representation_cast"
@@ -485,12 +569,20 @@ class ReluRelaxationAttrs:
     """Reference the primal ReLU whose relaxation is applied."""
 
     primal_node_id: str
+    preactivation_primal_value_id: Optional[str] = None
 
     def validate(self) -> None:
         """Validate the referenced primal ReLU identity."""
 
         if not self.primal_node_id:
             raise ValueError("ReLU relaxation primal_node_id must be non-empty")
+        if (
+            self.preactivation_primal_value_id is not None
+            and not self.preactivation_primal_value_id
+        ):
+            raise ValueError(
+                "ReLU preactivation primal value ID must be non-empty when present"
+            )
 
 
 @dataclass(frozen=True)
@@ -525,6 +617,60 @@ class RepresentationChangeAttrs:
             )
         if not self.reason:
             raise ValueError("representation change reason must be non-empty")
+
+
+@dataclass(frozen=True)
+class AddBackwardAttrs:
+    """Describe dynamic and constant inputs of a primal residual add."""
+
+    primal_node_id: str
+    dynamic_input_primal_value_ids: Tuple[str, ...]
+    constant_input_primal_value_ids: Tuple[str, ...] = ()
+
+    def validate(self) -> None:
+        """Validate residual-route identities."""
+
+        if not self.primal_node_id:
+            raise ValueError("add backward primal_node_id must be non-empty")
+        if not self.dynamic_input_primal_value_ids:
+            raise ValueError("add backward requires at least one dynamic input")
+        all_inputs = (
+            self.dynamic_input_primal_value_ids + self.constant_input_primal_value_ids
+        )
+        if any(not value_id for value_id in all_inputs):
+            raise ValueError("add backward input IDs must be non-empty")
+
+
+@dataclass(frozen=True)
+class ConcatBackwardAttrs:
+    """Describe slices emitted by a primal concat backward step."""
+
+    primal_node_id: str
+    input_primal_value_ids: Tuple[str, ...]
+    input_shapes: Tuple[Tuple[int, ...], ...]
+    axis: int
+
+    def validate(self) -> None:
+        """Validate concat input/slice metadata."""
+
+        if not self.primal_node_id:
+            raise ValueError("concat backward primal_node_id must be non-empty")
+        if len(self.input_primal_value_ids) < 2:
+            raise ValueError("concat backward requires at least two inputs")
+        if len(self.input_primal_value_ids) != len(self.input_shapes):
+            raise ValueError("concat backward IDs/shapes must have equal length")
+        if any(not value_id for value_id in self.input_primal_value_ids):
+            raise ValueError("concat backward input IDs must be non-empty")
+        if any(
+            not shape or any(dimension <= 0 for dimension in shape)
+            for shape in self.input_shapes
+        ):
+            raise ValueError("concat backward input shapes must be statically positive")
+        rank = len(self.input_shapes[0])
+        if any(len(shape) != rank for shape in self.input_shapes):
+            raise ValueError("concat backward input shapes must have equal rank")
+        if self.axis < 0 or self.axis >= rank:
+            raise ValueError("concat backward axis is outside the value rank")
 
 
 @dataclass(frozen=True)
@@ -574,6 +720,8 @@ BoundOpAttrs: TypeAlias = (
     | ReluRelaxationAttrs
     | ReshapeAttrs
     | RepresentationChangeAttrs
+    | AddBackwardAttrs
+    | ConcatBackwardAttrs
     | ConcretizeAttrs
     | ObjectiveReduceAttrs
 )
@@ -588,6 +736,8 @@ _EXPECTED_ATTRS: dict[BoundOpKind, type[object]] = {
     BoundOpKind.COEFFICIENT_COMPOSE: NoBoundOpAttrs,
     BoundOpKind.BIAS_ACCUMULATE: NoBoundOpAttrs,
     BoundOpKind.ADD: NoBoundOpAttrs,
+    BoundOpKind.ADD_BACKWARD: AddBackwardAttrs,
+    BoundOpKind.CONCAT_BACKWARD: ConcatBackwardAttrs,
     BoundOpKind.RESHAPE: ReshapeAttrs,
     BoundOpKind.MATERIALIZE: RepresentationChangeAttrs,
     BoundOpKind.REPRESENTATION_CAST: RepresentationChangeAttrs,
@@ -629,37 +779,109 @@ class BoundOp:
                 raise ValueError(
                     f"bound op '{self.op_id}' references unknown value '{value_id}'"
                 )
-        if len(self.outputs) != 1:
-            raise ValueError(
-                f"Bound IR v1 op '{self.op_id}' requires exactly one output"
-            )
-        if (
-            self.kind
-            not in {
-                BoundOpKind.COEFFICIENT_COMPOSE,
-                BoundOpKind.BIAS_ACCUMULATE,
-                BoundOpKind.ADD,
-            }
-            and len(self.inputs) != 1
-        ):
-            raise ValueError(f"bound op '{self.op_id}' requires exactly one input")
-        if (
-            self.kind
-            in {
-                BoundOpKind.COEFFICIENT_COMPOSE,
-                BoundOpKind.BIAS_ACCUMULATE,
-                BoundOpKind.ADD,
-            }
-            and len(self.inputs) < 2
-        ):
-            raise ValueError(f"bound op '{self.op_id}' requires at least two inputs")
+        self._validate_arity()
         self._validate_value_contract(values)
+
+    def _validate_arity(self) -> None:  # pylint: disable=too-many-branches
+        """Validate scalar and affine-state port cardinalities."""
+
+        scalar_unary = {
+            BoundOpKind.INPUT_BIND,
+            BoundOpKind.MATERIALIZE,
+            BoundOpKind.REPRESENTATION_CAST,
+            BoundOpKind.OBJECTIVE_REDUCE,
+        }
+        if self.kind in scalar_unary and (
+            len(self.inputs) != 1 or len(self.outputs) != 1
+        ):
+            raise ValueError(f"bound op '{self.op_id}' requires one input/output")
+        if self.kind == BoundOpKind.SPEC_BIND and (
+            len(self.inputs) != 1 or len(self.outputs) not in {1, 4}
+        ):
+            raise ValueError(
+                f"bound op '{self.op_id}' requires one objective input and "
+                "one coefficient or one affine-state output"
+            )
+        if self.kind in {
+            BoundOpKind.LINEAR_BACKWARD,
+            BoundOpKind.CONV2D_BACKWARD,
+        } and (len(self.inputs) != 4 or len(self.outputs) != 4):
+            raise ValueError(
+                f"bound op '{self.op_id}' requires one affine state input/output"
+            )
+        if self.kind in {
+            BoundOpKind.RELU_RELAXATION,
+            BoundOpKind.RESHAPE,
+        } and (
+            len(self.inputs),
+            len(self.outputs),
+        ) not in {(1, 1), (4, 4)}:
+            raise ValueError(
+                f"bound op '{self.op_id}' requires scalar or affine-state input/output"
+            )
+        if self.kind == BoundOpKind.COEFFICIENT_COMPOSE and (
+            len(self.inputs) < 8 or len(self.inputs) % 4 != 0 or len(self.outputs) != 4
+        ):
+            raise ValueError(
+                f"bound op '{self.op_id}' requires multiple affine states -> one"
+            )
+        if self.kind in {
+            BoundOpKind.ADD_BACKWARD,
+            BoundOpKind.CONCAT_BACKWARD,
+        } and (
+            len(self.inputs) != 4 or len(self.outputs) < 4 or len(self.outputs) % 4 != 0
+        ):
+            raise ValueError(
+                f"bound op '{self.op_id}' requires one affine state -> many"
+            )
+        if self.kind == BoundOpKind.CONCRETIZE and (
+            len(self.inputs) != 4 or len(self.outputs) != 2
+        ):
+            raise ValueError(
+                f"bound op '{self.op_id}' requires one affine state -> lower/upper"
+            )
+        if self.kind in {BoundOpKind.BIAS_ACCUMULATE, BoundOpKind.ADD} and (
+            len(self.inputs) < 2 or len(self.outputs) != 1
+        ):
+            raise ValueError(
+                f"bound op '{self.op_id}' requires at least two inputs -> one"
+            )
 
     def _validate_value_contract(  # pylint: disable=too-many-branches,too-many-statements
         self, values: dict[str, BoundValue]
     ) -> None:
         """Validate semantic relationships between input and output values."""
 
+        state_kinds = {
+            BoundOpKind.LINEAR_BACKWARD,
+            BoundOpKind.CONV2D_BACKWARD,
+            BoundOpKind.COEFFICIENT_COMPOSE,
+            BoundOpKind.ADD_BACKWARD,
+            BoundOpKind.CONCAT_BACKWARD,
+            BoundOpKind.CONCRETIZE,
+        }
+        if self.kind in state_kinds or (
+            self.kind in {BoundOpKind.RELU_RELAXATION, BoundOpKind.RESHAPE}
+            and len(self.inputs) == 4
+        ):
+            self._validate_affine_state_contract(values)
+            return
+        if self.kind == BoundOpKind.SPEC_BIND and len(self.outputs) == 4:
+            objective = values[self.inputs[0]]
+            state = _affine_state_refs(self.outputs)[0]
+            state.validate(values=values)
+            if objective.role != BoundValueRole.OBJECTIVE:
+                raise ValueError("spec binding input must be an objective")
+            if objective.polarity != BoundPolarity.BOTH:
+                raise ValueError(
+                    "affine spec binding objective must have BOTH polarity"
+                )
+            upper_coefficient = values[state.upper_coefficient]
+            if objective.tensor_type != upper_coefficient.tensor_type:
+                raise ValueError(
+                    "affine spec binding objective/coefficient types must match"
+                )
+            return
         input_values = tuple(values[value_id] for value_id in self.inputs)
         output = values[self.outputs[0]]
         representation_only = {
@@ -690,7 +912,6 @@ class BoundOp:
                 raise ValueError("materialize must produce a dense representation")
         if self.kind in {
             BoundOpKind.RELU_RELAXATION,
-            BoundOpKind.COEFFICIENT_COMPOSE,
             BoundOpKind.BIAS_ACCUMULATE,
             BoundOpKind.ADD,
             BoundOpKind.RESHAPE,
@@ -701,7 +922,6 @@ class BoundOp:
                 )
         if self.kind in {
             BoundOpKind.RELU_RELAXATION,
-            BoundOpKind.COEFFICIENT_COMPOSE,
             BoundOpKind.BIAS_ACCUMULATE,
             BoundOpKind.ADD,
         }:
@@ -710,7 +930,6 @@ class BoundOp:
                     f"bound op '{self.op_id}' requires matching tensor types"
                 )
         if self.kind in {
-            BoundOpKind.COEFFICIENT_COMPOSE,
             BoundOpKind.ADD,
         } and any(
             value.representation != output.representation for value in input_values
@@ -728,41 +947,148 @@ class BoundOp:
                 raise ValueError("spec binding input must be an objective")
             if output.role != BoundValueRole.COEFFICIENT:
                 raise ValueError("spec binding output must be a coefficient")
-        if self.kind in {
-            BoundOpKind.LINEAR_BACKWARD,
-            BoundOpKind.CONV2D_BACKWARD,
-            BoundOpKind.RELU_RELAXATION,
-        }:
+        if self.kind == BoundOpKind.RELU_RELAXATION:
             if input_values[0].role != BoundValueRole.COEFFICIENT:
                 raise ValueError(f"{self.kind.value} input must be a coefficient")
             if output.role != BoundValueRole.COEFFICIENT:
                 raise ValueError(f"{self.kind.value} output must be a coefficient")
-        if self.kind == BoundOpKind.COEFFICIENT_COMPOSE and any(
-            value.role != BoundValueRole.COEFFICIENT
-            for value in input_values + (output,)
-        ):
-            raise ValueError("coefficient compose accepts only coefficient values")
         if self.kind == BoundOpKind.ADD and any(
             value.role != output.role for value in input_values
         ):
             raise ValueError("add requires matching value roles")
         if self.kind == BoundOpKind.RESHAPE:
             self._validate_reshape(input_values[0], output)
-        if self.kind == BoundOpKind.CONCRETIZE:
-            if input_values[0].role != BoundValueRole.COEFFICIENT:
-                raise ValueError("concretize input must be a coefficient")
-            if output.role not in {
-                BoundValueRole.INTERVAL,
-                BoundValueRole.OBJECTIVE,
-            }:
-                raise ValueError("concretize output must be interval/objective")
-            if input_values[0].polarity != output.polarity:
-                raise ValueError("concretize cannot change polarity")
         if self.kind == BoundOpKind.OBJECTIVE_REDUCE:
             if input_values[0].role != BoundValueRole.OBJECTIVE:
                 raise ValueError("objective reduction input must be an objective")
             if output.role != BoundValueRole.OBJECTIVE:
                 raise ValueError("objective reduction output must be an objective")
+
+    def _validate_affine_state_contract(  # pylint: disable=too-many-branches,too-many-locals,too-many-statements
+        self, values: dict[str, BoundValue]
+    ) -> None:
+        """Validate four-component affine-state transforms and routes."""
+
+        if self.kind == BoundOpKind.CONCRETIZE:
+            input_state = _affine_state_refs(self.inputs)[0]
+            input_state.validate(values=values)
+            lower = values[self.outputs[0]]
+            upper = values[self.outputs[1]]
+            if lower.role != BoundValueRole.OBJECTIVE:
+                raise ValueError("concretize lower output must be an objective")
+            if upper.role != BoundValueRole.OBJECTIVE:
+                raise ValueError("concretize upper output must be an objective")
+            if lower.polarity != BoundPolarity.LOWER:
+                raise ValueError("concretize lower output has wrong polarity")
+            if upper.polarity != BoundPolarity.UPPER:
+                raise ValueError("concretize upper output has wrong polarity")
+            lower_bias = values[input_state.lower_bias]
+            upper_bias = values[input_state.upper_bias]
+            if lower.tensor_type != lower_bias.tensor_type:
+                raise ValueError("concretize lower output/bias types must match")
+            if upper.tensor_type != upper_bias.tensor_type:
+                raise ValueError("concretize upper output/bias types must match")
+            return
+
+        input_states = _affine_state_refs(self.inputs)
+        output_states = _affine_state_refs(self.outputs)
+        for state in input_states + output_states:
+            state.validate(values=values)
+        if self.kind in {
+            BoundOpKind.LINEAR_BACKWARD,
+            BoundOpKind.CONV2D_BACKWARD,
+            BoundOpKind.RELU_RELAXATION,
+            BoundOpKind.RESHAPE,
+        }:
+            source = input_states[0]
+            target = output_states[0]
+            self._validate_state_transform_types(source, target, values=values)
+        if self.kind == BoundOpKind.COEFFICIENT_COMPOSE:
+            target = output_states[0]
+            target_types = tuple(
+                values[value_id].tensor_type for value_id in target.value_ids
+            )
+            for source in input_states:
+                source_types = tuple(
+                    values[value_id].tensor_type for value_id in source.value_ids
+                )
+                if source_types != target_types:
+                    raise ValueError(
+                        "affine-state accumulation requires matching component types"
+                    )
+        if self.kind == BoundOpKind.ADD_BACKWARD:
+            attrs = self.attrs
+            if not isinstance(attrs, AddBackwardAttrs):
+                raise AssertionError("add backward attributes checked above")
+            if len(output_states) != len(attrs.dynamic_input_primal_value_ids):
+                raise ValueError("add backward output count/dynamic inputs mismatch")
+            source = input_states[0]
+            for target in output_states:
+                self._validate_state_transform_types(source, target, values=values)
+        if self.kind == BoundOpKind.CONCAT_BACKWARD:
+            attrs = self.attrs
+            if not isinstance(attrs, ConcatBackwardAttrs):
+                raise AssertionError("concat backward attributes checked above")
+            if len(output_states) != len(attrs.input_primal_value_ids):
+                raise ValueError("concat backward output count/input IDs mismatch")
+            source_bias_types = (
+                values[input_states[0].upper_bias].tensor_type,
+                values[input_states[0].lower_bias].tensor_type,
+            )
+            for target in output_states:
+                target_bias_types = (
+                    values[target.upper_bias].tensor_type,
+                    values[target.lower_bias].tensor_type,
+                )
+                if target_bias_types != source_bias_types:
+                    raise ValueError("concat backward must preserve bias types")
+
+    def _validate_state_transform_types(
+        self,
+        source: BoundAffineStateRef,
+        target: BoundAffineStateRef,
+        *,
+        values: dict[str, BoundValue],
+    ) -> None:
+        """Validate dtype/batch/bias preservation across a state transform."""
+
+        source_upper_coefficient = values[source.upper_coefficient]
+        target_upper_coefficient = values[target.upper_coefficient]
+        source_upper_bias = values[source.upper_bias]
+        target_upper_bias = values[target.upper_bias]
+        if source_upper_bias.tensor_type != target_upper_bias.tensor_type:
+            raise ValueError(f"{self.kind.value} must preserve affine bias type")
+        if (
+            source_upper_coefficient.tensor_type.dtype
+            != target_upper_coefficient.tensor_type.dtype
+        ):
+            raise ValueError(f"{self.kind.value} cannot change coefficient dtype")
+        source_axes = tuple(
+            axis.kind for axis in source_upper_coefficient.tensor_type.batch_axes
+        )
+        target_axes = tuple(
+            axis.kind for axis in target_upper_coefficient.tensor_type.batch_axes
+        )
+        if source_axes != target_axes:
+            raise ValueError(f"{self.kind.value} cannot change coefficient batch axes")
+        if self.kind == BoundOpKind.RELU_RELAXATION and (
+            source_upper_coefficient.tensor_type != target_upper_coefficient.tensor_type
+        ):
+            raise ValueError("ReLU relaxation must preserve coefficient type")
+        if self.kind == BoundOpKind.RESHAPE:
+            attrs = self.attrs
+            if not isinstance(attrs, ReshapeAttrs):
+                raise AssertionError("reshape attributes checked above")
+            if target_upper_coefficient.tensor_type.shape[2:] != attrs.target_shape:
+                raise ValueError("reshape affine-state target shape mismatch")
+            source_numel = _static_numel(source_upper_coefficient.tensor_type.shape[2:])
+            target_numel = _static_numel(target_upper_coefficient.tensor_type.shape[2:])
+            if (
+                source_numel is not None
+                and target_numel is not None
+                and source_numel != target_numel
+            ):
+                raise ValueError("reshape affine state changes static element count")
 
     def _validate_reshape(self, source: BoundValue, target: BoundValue) -> None:
         """Validate reshape semantics when static dimensions are available."""
@@ -968,6 +1294,22 @@ def _static_numel(shape: Tuple[Optional[int], ...]) -> Optional[int]:
             return None
         result *= dimension
     return result
+
+
+def _affine_state_refs(value_ids: Tuple[str, ...]) -> Tuple[BoundAffineStateRef, ...]:
+    """Decode canonical groups of four value IDs into affine-state references."""
+
+    if not value_ids or len(value_ids) % 4 != 0:
+        raise ValueError("affine-state ports must contain groups of four values")
+    return tuple(
+        BoundAffineStateRef(
+            upper_coefficient=value_ids[index],
+            upper_bias=value_ids[index + 1],
+            lower_coefficient=value_ids[index + 2],
+            lower_bias=value_ids[index + 3],
+        )
+        for index in range(0, len(value_ids), 4)
+    )
 
 
 def _strict_jsonable(value: object) -> object:

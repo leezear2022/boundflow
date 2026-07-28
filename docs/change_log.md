@@ -2929,3 +2929,25 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_bound_ir_v1_schema_foundation.md`
+
+---
+
+## 2026-07-28：Bound IR v1 plain-CROWN dense semantic closure
+
+**主要改动**
+- 将真实 CROWN state 明确为 `A_u/b_u/A_l/b_l` 四元 SSA state；
+- 增加 residual/concat backward route、bias-once 与 fanout compose 的 typed op/verifier；
+- 增加 Task/IBP trace → Bound IR lowering、参数/目标 fingerprint 和 deterministic module；
+- 增加不依赖 `crown_ibp.py` 的 dense Bound IR reference interpreter；
+- identity/multi-spec MLP、chain CNN、residual/concat fanout 与旧 oracle final bounds 对齐。
+
+**证据与边界**
+- 专属 schema/lowering/interpreter：20 passed；
+- 相邻 CROWN/DAG/CNN/env：32 passed；
+- 全量：392 passed、1 skipped；
+- Mypy 0 issues，Pylint 10.00/10，Black clean；
+- 关闭 IR-1B dense semantic closure；materialize/structured rewrite、生产 runtime 迁移、
+  IR-driven artifact 和 Plan/Schedule IR 仍未完成。
+
+**记录**
+- `gemini_doc/change_2026-07-28_bound_ir_v1_plain_crown_lowering.md`
