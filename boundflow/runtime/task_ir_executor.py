@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import hashlib
 import json
 from typing import Mapping, Optional, Tuple
@@ -16,9 +16,18 @@ import torch
 from ..domains.interval import IntervalState
 from ..ir.bound import BFBoundModule
 from ..ir.plan import PlanInstance, PlanTemplate
-from ..ir.schedule import LaunchAction, ScheduleModule
+from ..ir.schedule import (
+    FallbackAction,
+    LaunchAction,
+    RetryAction,
+    ScheduleModule,
+)
 from ..ir.task import BFTaskModule
-from ..ir.task_v1 import TaskIRModule
+from ..ir.task_v1 import (
+    TaskBackendBinding,
+    TaskIRModule,
+    task_backend_implementation_id,
+)
 from .bound_ir_interpreter import PlainCrownBoundIRSession
 from .task_backend_dispatch import (
     PyTorchReferenceTaskBackend,
@@ -26,6 +35,10 @@ from .task_backend_dispatch import (
     build_backend_dispatch_key,
 )
 from .task_executor import InputSpec
+from .schedule_ir_executor import (
+    ScheduleOutOfMemoryError,
+    ScheduleRetryExhausted,
+)
 
 
 @dataclass(frozen=True)
@@ -41,6 +54,7 @@ class TaskExecutionEvent:
     reference_implementation_id: str
     output_value_hashes: Tuple[Tuple[str, str], ...] = ()
     backend_dispatch_key: str = ""
+    attempted_backend_candidate_ids: Tuple[str, ...] = ()
 
     def validate(self) -> None:
         if (
@@ -59,6 +73,13 @@ class TaskExecutionEvent:
             raise ValueError("Task IR execution event has invalid output hashes")
         if len(self.backend_dispatch_key) != 64:
             raise ValueError("Task IR execution event backend key is not SHA-256")
+        if (
+            not self.attempted_backend_candidate_ids
+            or len(self.attempted_backend_candidate_ids)
+            != len(set(self.attempted_backend_candidate_ids))
+            or self.backend_candidate_id != self.attempted_backend_candidate_ids[-1]
+        ):
+            raise ValueError("Task IR execution event backend attempts are invalid")
 
     def to_dict(self) -> dict[str, object]:
         self.validate()
@@ -75,6 +96,9 @@ class TaskExecutionEvent:
                 for value_id, value_hash in self.output_value_hashes
             ],
             "backend_dispatch_key": self.backend_dispatch_key,
+            "attempted_backend_candidate_ids": list(
+                self.attempted_backend_candidate_ids
+            ),
         }
 
 
@@ -164,6 +188,7 @@ def execute_task_ir_reference(
                     template=template,
                     instance=instance,
                 ).stable_hash(),
+                attempted_backend_candidate_ids=(task.backend.backend_candidate_id,),
             )
         )
         completed.add(task.task_id)
@@ -220,25 +245,74 @@ def execute_task_ir_semantics(
     launches = tuple(
         action for action in schedule.actions if isinstance(action, LaunchAction)
     )
+    retries = {
+        action.launch_action_id: action
+        for action in schedule.actions
+        if isinstance(action, RetryAction)
+    }
+    fallbacks = {
+        action.action_id: action
+        for action in schedule.actions
+        if isinstance(action, FallbackAction)
+    }
+    backend_candidates = {
+        candidate.candidate_id: candidate for candidate in template.backend_candidates
+    }
     completed: set[str] = set()
     events: list[TaskExecutionEvent] = []
     for launch in launches:
         task = task_by_id[launch.task_id]
         if any(dependency not in completed for dependency in task.dependency_task_ids):
             raise ValueError("Task IR semantic executor has dependency use-before-task")
-        dispatch_key = build_backend_dispatch_key(
-            task,
-            task_module,
-            bound_module=bound_module,
-            template=template,
-            instance=instance,
-        )
-        step = backend.dispatch(
-            task,
-            dispatch_key,
-            session=session,
-            template=template,
-        )
+        retry = retries.get(launch.action_id)
+        candidate_ids = [task.backend.backend_candidate_id]
+        if retry is not None:
+            candidate_ids.extend(
+                fallbacks[fallback_id].backend_candidate_id
+                for fallback_id in retry.fallback_action_ids
+            )
+        attempted: list[str] = []
+        step = None
+        dispatch_key = None
+        executed_task = task
+        for candidate_id in candidate_ids:
+            candidate = backend_candidates[candidate_id]
+            executed_task = (
+                task
+                if candidate_id == task.backend.backend_candidate_id
+                else replace(
+                    task,
+                    backend=TaskBackendBinding(
+                        backend_candidate_id=candidate.candidate_id,
+                        capability_id=candidate.capability_id,
+                        compiled_artifact_key=candidate.compiled_artifact_key,
+                        reference_implementation_id=task_backend_implementation_id(
+                            candidate.backend
+                        ),
+                    ),
+                )
+            )
+            dispatch_key = build_backend_dispatch_key(
+                task,
+                task_module,
+                bound_module=bound_module,
+                template=template,
+                instance=instance,
+                backend_candidate=candidate,
+            )
+            attempted.append(candidate_id)
+            try:
+                step = backend.dispatch(
+                    executed_task,
+                    dispatch_key,
+                    session=session,
+                    template=template,
+                )
+            except (ScheduleOutOfMemoryError, torch.OutOfMemoryError):
+                continue
+            break
+        if step is None or dispatch_key is None:
+            raise ScheduleRetryExhausted(launch.action_id, len(attempted))
         events.append(
             TaskExecutionEvent(
                 sequence=len(events),
@@ -246,10 +320,13 @@ def execute_task_ir_semantics(
                 region_id=task.region_id,
                 op_ids=step.op_ids,
                 dependency_task_ids=task.dependency_task_ids,
-                backend_candidate_id=task.backend.backend_candidate_id,
-                reference_implementation_id=task.backend.reference_implementation_id,
+                backend_candidate_id=executed_task.backend.backend_candidate_id,
+                reference_implementation_id=(
+                    executed_task.backend.reference_implementation_id
+                ),
                 output_value_hashes=step.output_value_hashes,
                 backend_dispatch_key=dispatch_key.stable_hash(),
+                attempted_backend_candidate_ids=tuple(attempted),
             )
         )
         completed.add(task.task_id)

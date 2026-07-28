@@ -3185,3 +3185,25 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_ir4b_pytorch_backend_registry.md`
+
+---
+
+## 2026-07-28：IR-4C TVM typed backend/cache 与 semantic fallback
+
+**主要改动**
+- 新增 TVM fused/unfused typed Task registry 和 PyTorch/TVM composite registry；
+- fused cache schema v2 把完整 backend dispatch key 加入 memory/disk namespace；
+- 增加两个独立 Python 进程的 miss→disk_hit 重放；
+- Schedule Retry/Fallback 现在真实切换 semantic backend；
+- Task trace 记录 attempted backend ladder 与最终成功 backend。
+
+**证据与边界**
+- IR-4C 新增：7 passed；相邻：43 passed；
+- 全量：455 passed、1 skipped、6 warnings；
+- Query Runtime、state payload 和旧 solver-facing entry migration 仍未完成。
+
+**下一阶段**
+- IR-4D Query Runtime + state payload migration，然后执行 IR-4 closure audit。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir4c_tvm_backend_cache_fallback.md`

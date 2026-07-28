@@ -371,3 +371,5 @@ Bound IR v1
   prepared-task adapter；这只是迁移入口，chunked/structured/TVM/query runtime 仍为 pending。
 - IR-4B 已把 PyTorch dense/structured/chunked 接入 typed registry；chunked fused Task 在 CUDA
   上真实调用原 executor。下一门禁是 TVM typed compile/cache，不是孤立 kernel 调优。
+- IR-4C 已完成 TVM fused/unfused typed dispatch、dispatch-key cache v2、跨进程 disk replay
+  与 Schedule semantic OOM fallback；IR-4 仍需 Query Runtime/state payload/旧入口迁移。

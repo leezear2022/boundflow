@@ -2,6 +2,7 @@
 
 # mypy: disable-error-code=import-untyped
 # pylint: disable=import-error,too-few-public-methods,too-many-locals,too-many-statements
+# pylint: disable=unsubscriptable-object
 
 from __future__ import annotations
 
@@ -27,7 +28,7 @@ from .fused_crown_linear import (
     schedule_fused_crown_linear_primfunc,
 )
 
-FUSED_CROWN_CACHE_SCHEMA_VERSION = "boundflow.fused_crown_cache/v1"
+FUSED_CROWN_CACHE_SCHEMA_VERSION = "boundflow.fused_crown_cache/v2"
 FusedCrownKind = Literal["linear", "conv2d"]
 FusedCrownSignature = Union[FusedCrownLinearKey, FusedCrownConv2dSignature]
 
@@ -41,7 +42,10 @@ def _sha256(path: Path) -> str:
 
 
 def _signature_payload(
-    kind: FusedCrownKind, signature: FusedCrownSignature
+    kind: FusedCrownKind,
+    signature: FusedCrownSignature,
+    *,
+    backend_dispatch_key: str | None = None,
 ) -> dict[str, Any]:
     if kind == "linear" and not isinstance(signature, FusedCrownLinearKey):
         raise TypeError("linear cache entries require FusedCrownLinearKey")
@@ -53,6 +57,8 @@ def _signature_payload(
     # Canonicalize tuples to JSON arrays before both hashing and manifest
     # comparison; otherwise Conv signatures compare tuple-in-memory vs list-on-disk.
     signature_json = json.loads(json.dumps(asdict(signature), sort_keys=True))
+    if backend_dispatch_key is not None and len(backend_dispatch_key) != 64:
+        raise ValueError("fused cache backend dispatch key is not SHA-256")
     return {
         "schema_version": FUSED_CROWN_CACHE_SCHEMA_VERSION,
         "kind": kind,
@@ -64,15 +70,23 @@ def _signature_payload(
         ),
         "target": signature.target_string,
         "tvm_version": str(tvm.__version__),
+        "backend_dispatch_key": backend_dispatch_key,
     }
 
 
 def fused_crown_cache_key(
-    kind: FusedCrownKind, signature: FusedCrownSignature
+    kind: FusedCrownKind,
+    signature: FusedCrownSignature,
+    *,
+    backend_dispatch_key: str | None = None,
 ) -> tuple[str, dict[str, Any]]:
     """Return a stable digest covering code schema, signature, target and TVM ABI."""
 
-    payload = _signature_payload(kind, signature)
+    payload = _signature_payload(
+        kind,
+        signature,
+        backend_dispatch_key=backend_dispatch_key,
+    )
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
     return hashlib.sha256(encoded).hexdigest(), payload
 
@@ -107,7 +121,7 @@ class FusedCrownModuleCache:
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self._memory: dict[
-            tuple[FusedCrownKind, FusedCrownSignature],
+            tuple[str | None, FusedCrownKind, FusedCrownSignature],
             tuple[str, Any, int, str],
         ] = {}
         self.events: list[FusedCrownCacheEvent] = []
@@ -156,13 +170,17 @@ class FusedCrownModuleCache:
         return bool(valid), library_sha if valid else ""
 
     def get(
-        self, kind: FusedCrownKind, signature: FusedCrownSignature
+        self,
+        kind: FusedCrownKind,
+        signature: FusedCrownSignature,
+        *,
+        backend_dispatch_key: str | None = None,
     ) -> tuple[Any, FusedCrownCacheEvent]:
         """Return the packed ``main`` function and record miss/disk/memory phases."""
 
         total_started = time.perf_counter_ns()
         lookup_started = time.perf_counter_ns()
-        memory_key = (kind, signature)
+        memory_key = (backend_dispatch_key, kind, signature)
         if memory_key in self._memory:
             digest, packed, library_bytes, library_sha = self._memory[memory_key]
             event = FusedCrownCacheEvent(
@@ -182,7 +200,11 @@ class FusedCrownModuleCache:
             self.events.append(event)
             return packed, event
 
-        digest, payload = fused_crown_cache_key(kind, signature)
+        digest, payload = fused_crown_cache_key(
+            kind,
+            signature,
+            backend_dispatch_key=backend_dispatch_key,
+        )
         library_path, manifest_path = self._paths(digest)
         valid, library_sha = self._valid_disk_entry(
             library_path, manifest_path, digest=digest, payload=payload

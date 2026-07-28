@@ -549,7 +549,9 @@ def lower_plan_instance_to_task_ir(
                 backend_candidate_id=backend.candidate_id,
                 capability_id=backend.capability_id,
                 compiled_artifact_key=backend.compiled_artifact_key,
-                reference_implementation_id=_implementation_id(backend.backend),
+                reference_implementation_id=task_backend_implementation_id(
+                    backend.backend
+                ),
             ),
         )
         tasks.append(task)
@@ -682,11 +684,14 @@ def _backend_matches(binding: TaskBackendBinding, candidate: BackendCandidate) -
         binding.backend_candidate_id == candidate.candidate_id
         and binding.capability_id == candidate.capability_id
         and binding.compiled_artifact_key == candidate.compiled_artifact_key
-        and binding.reference_implementation_id == _implementation_id(candidate.backend)
+        and binding.reference_implementation_id
+        == task_backend_implementation_id(candidate.backend)
     )
 
 
-def _implementation_id(backend: BackendKind) -> str:
+def task_backend_implementation_id(backend: BackendKind) -> str:
+    """Return the stable runtime implementation identity for one backend."""
+
     return {
         BackendKind.REFERENCE: "bound_ir_region_reference/v1",
         BackendKind.PYTORCH_DENSE: "pytorch_dense_bound_region/v1",

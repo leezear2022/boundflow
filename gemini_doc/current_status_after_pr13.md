@@ -9,7 +9,8 @@
 > synchronous reference contract 已分别关闭；当前唯一下一阶段为 IR-4
 > production backend/runtime migration。IR-4A typed dispatch key + PyTorch reference
 > adapter 已完成 foundation；IR-4B dense/structured/chunked typed registry 已通过，
-> 当前缺口为 TVM、semantic fallback、state payload 与 query runtime。
+> IR-4C TVM fused/unfused、dispatch-namespaced cache 与 semantic fallback 已通过；
+> 当前缺口为 state payload、Query Runtime 和旧 solver-facing entry migration。
 
 ## 1. 当前真实阶段
 

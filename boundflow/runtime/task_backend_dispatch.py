@@ -2,7 +2,7 @@
 
 # Compact immutable key objects deliberately expose serialization helpers.
 # pylint: disable=missing-function-docstring,too-many-instance-attributes
-# pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods,too-many-arguments
 
 from __future__ import annotations
 
@@ -10,10 +10,16 @@ from dataclasses import dataclass
 import hashlib
 import json
 from typing import Optional, Protocol
+from pathlib import Path
 
+from ..backends.tvm.fused_crown_cache import FusedCrownModuleCache
 from ..ir.bound import BFBoundModule
 from ..ir.plan import BackendCandidate, BackendKind, PlanInstance, PlanTemplate
-from ..ir.task_v1 import TaskIRModule, TaskIRUnit
+from ..ir.task_v1 import (
+    TaskIRModule,
+    TaskIRUnit,
+    task_backend_implementation_id,
+)
 from .bound_ir_interpreter import (
     BoundIRTaskStepResult,
     PlainCrownBoundIRSession,
@@ -21,6 +27,8 @@ from .bound_ir_interpreter import (
 from .fused_crown import (
     TorchChunkedFusedCrownExecutor,
     TorchDenseFusedCrownReference,
+    TVMFusedCrownExecutor,
+    TVMUnfusedCrownExecutor,
 )
 
 BACKEND_DISPATCH_KEY_SCHEMA_VERSION = "boundflow.backend-dispatch-key/v1"
@@ -96,6 +104,7 @@ def build_backend_dispatch_key(
     bound_module: BFBoundModule,
     template: PlanTemplate,
     instance: PlanInstance,
+    backend_candidate: Optional[BackendCandidate] = None,
 ) -> BackendDispatchKey:
     """Build a key only after all cross-layer typed inputs validate."""
 
@@ -106,6 +115,18 @@ def build_backend_dispatch_key(
     )
     if task not in task_module.tasks:
         raise ValueError("backend dispatch task is not owned by Task IR module")
+    if backend_candidate is None:
+        candidates = {
+            candidate.candidate_id: candidate
+            for candidate in template.backend_candidates
+        }
+        backend_candidate = candidates[task.backend.backend_candidate_id]
+    elif (
+        backend_candidate not in template.backend_candidates
+        or backend_candidate.region_id != task.region_id
+        or not backend_candidate.static_legal
+    ):
+        raise ValueError("backend fallback candidate is illegal or wrong-region")
     key = BackendDispatchKey(
         bound_module_hash=bound_module.stable_hash(),
         plan_template_hash=template.stable_hash(bound_module=bound_module),
@@ -118,10 +139,12 @@ def build_backend_dispatch_key(
             instance=instance,
         ),
         task_id=task.task_id,
-        backend_candidate_id=task.backend.backend_candidate_id,
-        capability_id=task.backend.capability_id,
-        compiled_artifact_key=task.backend.compiled_artifact_key,
-        reference_implementation_id=task.backend.reference_implementation_id,
+        backend_candidate_id=backend_candidate.candidate_id,
+        capability_id=backend_candidate.capability_id,
+        compiled_artifact_key=backend_candidate.compiled_artifact_key,
+        reference_implementation_id=task_backend_implementation_id(
+            backend_candidate.backend
+        ),
     )
     key.validate()
     return key
@@ -351,3 +374,128 @@ def _validate_typed_dispatch(
     ):
         raise ValueError("typed backend registry rejects Task IR op kinds")
     return candidate, candidate.backend
+
+
+class _DispatchNamespacedFusedCache:
+    """Bind the legacy cache interface to one typed backend dispatch key."""
+
+    def __init__(self, cache: object, dispatch_key: str) -> None:
+        self.cache = cache
+        self.dispatch_key = dispatch_key
+
+    def get(self, kind: str, signature: object) -> tuple[object, object]:
+        return self.cache.get(  # type: ignore[attr-defined,no-any-return]
+            kind,
+            signature,
+            backend_dispatch_key=self.dispatch_key,
+        )
+
+
+class TVMTaskBackendRegistry:
+    """Typed Task IR registry for fused and explicit-workspace TVM CROWN."""
+
+    def __init__(self, *, cache_dir: Optional[Path] = None) -> None:
+        self._reference = PyTorchReferenceTaskBackend()
+        self.cache = None
+        if cache_dir is not None:
+            self.cache = FusedCrownModuleCache(cache_dir)
+        self.cache_hits = 0
+        self.cache_misses = 0
+        self._prepared: dict[str, _PreparedPyTorchTask] = {}
+
+    def dispatch(
+        self,
+        task: TaskIRUnit,
+        key: BackendDispatchKey,
+        *,
+        session: PlainCrownBoundIRSession,
+        template: PlanTemplate,
+    ) -> BoundIRTaskStepResult:
+        candidate, backend = _validate_typed_dispatch(
+            task,
+            key,
+            session=session,
+            template=template,
+        )
+        if backend == BackendKind.REFERENCE:
+            return self._reference.dispatch(
+                task, key, session=session, template=template
+            )
+        if backend not in {
+            BackendKind.TVM_FUSED_TIR,
+            BackendKind.TVM_TIR_UNFUSED,
+        }:
+            raise ValueError(f"TVM registry rejects backend: {backend.value}")
+        prepared = _PreparedPyTorchTask(
+            backend=backend,
+            task_id=task.task_id,
+            op_ids=tuple(op_ref.op_id for op_ref in task.op_refs),
+            output_value_ids=task.output_value_ids,
+            capability_id=candidate.capability_id,
+        )
+        if not (
+            len(task.op_refs) == 2
+            and task.op_refs[0].kind.value == "relu_relaxation"
+            and task.op_refs[1].kind.value in {"linear_backward", "conv2d_backward"}
+        ):
+            raise ValueError("TVM CROWN backend requires fused ReLU→Affine Task IR")
+        digest = key.stable_hash()
+        cached = self._prepared.get(digest)
+        if cached is None:
+            self._prepared[digest] = prepared
+            self.cache_misses += 1
+        elif cached != prepared:
+            raise ValueError("TVM backend cache key collision or stale task")
+        else:
+            self.cache_hits += 1
+        if backend == BackendKind.TVM_FUSED_TIR:
+            namespaced = (
+                None
+                if self.cache is None
+                else _DispatchNamespacedFusedCache(self.cache, digest)
+            )
+            executor = TVMFusedCrownExecutor(compile_cache=namespaced)
+        else:
+            executor = TVMUnfusedCrownExecutor()
+        return session.execute_fused_relu_affine_task(
+            prepared.op_ids,
+            output_value_ids=prepared.output_value_ids,
+            executor=executor,
+        )
+
+
+class TypedTaskBackendRegistry:
+    """Composite typed registry used by semantic Schedule fallback."""
+
+    def __init__(
+        self,
+        *,
+        chunk_rows: int = 128,
+        tvm_cache_dir: Optional[Path] = None,
+    ) -> None:
+        self.pytorch = PyTorchTaskBackendRegistry(chunk_rows=chunk_rows)
+        self.tvm = TVMTaskBackendRegistry(cache_dir=tvm_cache_dir)
+
+    def dispatch(
+        self,
+        task: TaskIRUnit,
+        key: BackendDispatchKey,
+        *,
+        session: PlainCrownBoundIRSession,
+        template: PlanTemplate,
+    ) -> BoundIRTaskStepResult:
+        candidates = {
+            candidate.candidate_id: candidate
+            for candidate in template.backend_candidates
+        }
+        candidate = candidates.get(key.backend_candidate_id)
+        if candidate is None:
+            raise ValueError("typed registry dispatch references unknown backend")
+        if candidate.backend in {
+            BackendKind.REFERENCE,
+            BackendKind.PYTORCH_DENSE,
+            BackendKind.PYTORCH_STRUCTURED,
+            BackendKind.PYTORCH_CHUNKED,
+        }:
+            return self.pytorch.dispatch(task, key, session=session, template=template)
+        return self.tvm.dispatch(task, key, session=session, template=template)

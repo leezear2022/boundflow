@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import json
+from pathlib import Path
+import subprocess
+import sys
 
 import pytest
 import torch
@@ -11,6 +15,7 @@ from boundflow.frontends.plain_crown_bound_ir import build_plain_crown_bound_ir
 from boundflow.ir.bound import BoundRepresentation
 from boundflow.ir.bound_rewrite import rewrite_plain_crown_structured_regions
 from boundflow.ir.plan import (
+    BackendCandidate,
     BackendCapabilitySpec,
     BackendKind,
     HardwareProfile,
@@ -18,7 +23,12 @@ from boundflow.ir.plan import (
     PlanProvenance,
     WorkloadProfile,
 )
-from boundflow.ir.schedule import lower_plan_instance_to_reference_schedule
+from boundflow.ir.schedule import (
+    FallbackAction,
+    LaunchAction,
+    RetryAction,
+    lower_plan_instance_to_reference_schedule,
+)
 from boundflow.ir.task_v1 import lower_plan_instance_to_task_ir
 from boundflow.planner.plan_ir_builder import (
     BackendEvidence,
@@ -32,9 +42,14 @@ from boundflow.planner.plan_ir_builder import (
 from boundflow.planner.plan_ir_selector import select_plan_instance
 from boundflow.runtime.bound_ir_interpreter import execute_plain_crown_bound_ir
 from boundflow.runtime.crown_ibp import _forward_ibp_trace_mlp
-from boundflow.runtime.task_backend_dispatch import PyTorchTaskBackendRegistry
+from boundflow.runtime.task_backend_dispatch import (
+    PyTorchTaskBackendRegistry,
+    TVMTaskBackendRegistry,
+    TypedTaskBackendRegistry,
+)
 from boundflow.runtime.task_executor import InputSpec
 from boundflow.runtime.task_ir_executor import execute_task_ir_semantics
+from boundflow.runtime.schedule_ir_executor import ScheduleOutOfMemoryError
 from tests.test_task_ir_v1 import _semantic_case
 
 
@@ -201,6 +216,7 @@ def _execute_typed(
     *,
     backend_kind: BackendKind,
     structured: bool = False,
+    cache_dir: Path | None = None,
 ):
     interval_env, relu_pre = _forward_ibp_trace_mlp(legacy_module, input_spec)
     dense = build_plain_crown_bound_ir(
@@ -213,7 +229,12 @@ def _execute_typed(
         rewrite_plain_crown_structured_regions(dense) if structured else dense
     )
     pair = None
-    if backend_kind in {BackendKind.PYTORCH_DENSE, BackendKind.PYTORCH_CHUNKED}:
+    if backend_kind in {
+        BackendKind.PYTORCH_DENSE,
+        BackendKind.PYTORCH_CHUNKED,
+        BackendKind.TVM_FUSED_TIR,
+        BackendKind.TVM_TIR_UNFUSED,
+    }:
         for index, op in enumerate(bound_module.graph.ops[:-1]):
             next_op = bound_module.graph.ops[index + 1]
             if op.kind.value == "relu_relaxation" and next_op.kind.value in {
@@ -245,7 +266,11 @@ def _execute_typed(
         instance=instance,
         query_ids=("query:0",),
     )
-    registry = PyTorchTaskBackendRegistry(chunk_rows=2)
+    registry = (
+        TVMTaskBackendRegistry(cache_dir=cache_dir)
+        if backend_kind in {BackendKind.TVM_FUSED_TIR, BackendKind.TVM_TIR_UNFUSED}
+        else PyTorchTaskBackendRegistry(chunk_rows=2)
+    )
     actual, trace = execute_task_ir_semantics(
         task_module,
         schedule,
@@ -362,3 +387,287 @@ def test_chunked_registry_rejects_nonfused_task() -> None:
             relu_pre=relu_pre,
             backend=PyTorchTaskBackendRegistry(),
         )
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required for TVM")
+@pytest.mark.parametrize(
+    ("case", "backend_kind"),
+    [
+        ("mlp", BackendKind.TVM_FUSED_TIR),
+        ("cnn", BackendKind.TVM_FUSED_TIR),
+        ("mlp", BackendKind.TVM_TIR_UNFUSED),
+        ("cnn", BackendKind.TVM_TIR_UNFUSED),
+    ],
+)
+def test_typed_tvm_fused_and_unfused_match_whole_bound_cuda(
+    tmp_path: Path, case: str, backend_kind: BackendKind
+) -> None:
+    module, _spec = _semantic_case(case)
+    params = {name: value.cuda() for name, value in module.bindings["params"].items()}
+    if case == "cnn":
+        params["Wc"] = torch.randn(2, 1, 3, 3, device="cuda")
+        params["Wl"] = torch.randn(3, 18, device="cuda")
+    module = replace(module, bindings={"params": params})
+    if case == "mlp":
+        spec = InputSpec.linf(
+            value_name="input",
+            center=torch.randn(2, 4, device="cuda"),
+            eps=0.2,
+        )
+    else:
+        spec = InputSpec.box(
+            value_name="input",
+            lower=torch.full((1, 1, 5, 5), -0.4, device="cuda"),
+            upper=torch.full((1, 1, 5, 5), 0.6, device="cuda"),
+        )
+    actual, expected, task_module, _trace, registry = _execute_typed(
+        module,
+        spec,
+        backend_kind=backend_kind,
+        cache_dir=tmp_path / "cache",
+    )
+    torch.testing.assert_close(actual.lower, expected.lower, atol=2e-4, rtol=2e-4)
+    torch.testing.assert_close(actual.upper, expected.upper, atol=2e-4, rtol=2e-4)
+    fused = [task for task in task_module.tasks if len(task.op_refs) == 2]
+    assert len(fused) == 1
+    assert fused[0].backend.reference_implementation_id.startswith(
+        "tvm_fused_tir"
+        if backend_kind == BackendKind.TVM_FUSED_TIR
+        else "tvm_tir_unfused"
+    )
+    assert registry.cache_misses == 1
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required for TVM")
+def test_typed_tvm_fused_cache_uses_dispatch_namespace_and_disk_replay(
+    tmp_path: Path,
+) -> None:
+    module, _spec = _semantic_case("mlp")
+    params = {name: value.cuda() for name, value in module.bindings["params"].items()}
+    module = replace(module, bindings={"params": params})
+    spec = InputSpec.linf(
+        value_name="input",
+        center=torch.randn(2, 4, device="cuda"),
+        eps=0.2,
+    )
+    cache_dir = tmp_path / "cache"
+    first = _execute_typed(
+        module,
+        spec,
+        backend_kind=BackendKind.TVM_FUSED_TIR,
+        cache_dir=cache_dir,
+    )
+    second = _execute_typed(
+        module,
+        spec,
+        backend_kind=BackendKind.TVM_FUSED_TIR,
+        cache_dir=cache_dir,
+    )
+    first_registry = first[4]
+    second_registry = second[4]
+    assert isinstance(first_registry, TVMTaskBackendRegistry)
+    assert isinstance(second_registry, TVMTaskBackendRegistry)
+    assert first_registry.cache is not None
+    assert second_registry.cache is not None
+    assert first_registry.cache.events[0].event == "miss"
+    assert second_registry.cache.events[0].event == "disk_hit"
+    manifest = next(cache_dir.glob("*.json"))
+    payload = json.loads(manifest.read_text(encoding="utf-8"))
+    dispatch_key = payload["cache_payload"]["backend_dispatch_key"]
+    assert len(dispatch_key) == 64
+    assert payload["schema_version"] == "boundflow.fused_crown_cache/v2"
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required for TVM")
+def test_typed_tvm_cache_replays_from_fresh_python_process(
+    tmp_path: Path,
+) -> None:
+    cache_dir = tmp_path / "cache"
+    program = r"""
+from dataclasses import replace
+import json
+from pathlib import Path
+import sys
+import torch
+from boundflow.ir.plan import BackendKind
+from boundflow.runtime.task_executor import InputSpec
+from tests.test_task_backend_dispatch_v1 import _execute_typed
+from tests.test_task_ir_v1 import _semantic_case
+
+module, _ = _semantic_case("mlp")
+params = {name: value.cuda() for name, value in module.bindings["params"].items()}
+module = replace(module, bindings={"params": params})
+spec = InputSpec.linf(
+    value_name="input",
+    center=torch.randn(2, 4, device="cuda"),
+    eps=0.2,
+)
+result = _execute_typed(
+    module,
+    spec,
+    backend_kind=BackendKind.TVM_FUSED_TIR,
+    cache_dir=Path(sys.argv[1]),
+)
+registry = result[4]
+print(json.dumps({
+    "event": registry.cache.events[0].event,
+    "cache_key": registry.cache.events[0].cache_key,
+}, sort_keys=True))
+"""
+    first = subprocess.run(
+        [sys.executable, "-c", program, str(cache_dir)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    second = subprocess.run(
+        [sys.executable, "-c", program, str(cache_dir)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    first_payload = json.loads(first.stdout.strip().splitlines()[-1])
+    second_payload = json.loads(second.stdout.strip().splitlines()[-1])
+    assert first_payload["event"] == "miss"
+    assert second_payload["event"] == "disk_hit"
+    assert first_payload["cache_key"] == second_payload["cache_key"]
+
+
+class _SelectedBackendOom:
+    def __init__(self, selected_candidate_id: str) -> None:
+        self.selected_candidate_id = selected_candidate_id
+        self.registry = TypedTaskBackendRegistry()
+
+    def dispatch(self, task, key, *, session, template):
+        if key.backend_candidate_id == self.selected_candidate_id:
+            raise ScheduleOutOfMemoryError("injected semantic backend OOM")
+        return self.registry.dispatch(
+            task,
+            key,
+            session=session,
+            template=template,
+        )
+
+
+def test_schedule_retry_executes_typed_semantic_fallback_and_records_attempts() -> None:
+    module, spec = _semantic_case("mlp")
+    interval_env, relu_pre = _forward_ibp_trace_mlp(module, spec)
+    bound_module = build_plain_crown_bound_ir(
+        module, spec, interval_env=interval_env, relu_pre=relu_pre
+    ).module
+    relu_index = next(
+        index
+        for index, op in enumerate(bound_module.graph.ops[:-1])
+        if op.kind.value == "relu_relaxation"
+    )
+    pair = (
+        bound_module.graph.ops[relu_index].op_id,
+        bound_module.graph.ops[relu_index + 1].op_id,
+    )
+    template = _typed_template(
+        bound_module,
+        backend_kind=BackendKind.PYTORCH_DENSE,
+        device="cpu",
+        fused_pair=pair,
+    )
+    selected = next(
+        candidate
+        for candidate in template.backend_candidates
+        if candidate.backend == BackendKind.PYTORCH_DENSE
+    )
+    reference_capability = next(
+        capability
+        for capability in template.capabilities
+        if capability.backend == BackendKind.REFERENCE
+    )
+    fallback_backend = BackendCandidate(
+        candidate_id="backend:reference:fused-fallback",
+        region_id=selected.region_id,
+        backend=BackendKind.REFERENCE,
+        capability_id=reference_capability.capability_id,
+        compatible_representation_candidate_ids=(
+            selected.compatible_representation_candidate_ids
+        ),
+        compiled_artifact_key=None,
+        static_legal=True,
+        rejection_reasons=(),
+        cost=_cost(100.0),
+    )
+    template = replace(
+        template,
+        backend_candidates=(*template.backend_candidates, fallback_backend),
+    )
+    instance = select_plan_instance(
+        template,
+        bound_module=bound_module,
+        query_bucket_id="ir4c-semantic-fallback",
+        available_memory_bytes=1 << 30,
+        memory_budget_bytes=1 << 30,
+    )
+    task_module = lower_plan_instance_to_task_ir(
+        bound_module, template=template, instance=instance
+    )
+    schedule = lower_plan_instance_to_reference_schedule(
+        bound_module,
+        template=template,
+        instance=instance,
+        query_ids=("query:0", "query:1"),
+    )
+    launch_index = next(
+        index
+        for index, action in enumerate(schedule.actions)
+        if isinstance(action, LaunchAction)
+        and action.backend_candidate_id == selected.candidate_id
+    )
+    launch = schedule.actions[launch_index]
+    assert isinstance(launch, LaunchAction)
+    retry = RetryAction(
+        action_id="retry:semantic",
+        launch_action_id=launch.action_id,
+        fallback_action_ids=("fallback:semantic",),
+        max_attempts=2,
+        retry_on=("oom",),
+    )
+    fallback = FallbackAction(
+        action_id="fallback:semantic",
+        retry_action_id=retry.action_id,
+        backend_candidate_id=fallback_backend.candidate_id,
+        reason="selected_backend_oom",
+    )
+    schedule = replace(
+        schedule,
+        actions=(
+            *schedule.actions[:launch_index],
+            retry,
+            fallback,
+            *schedule.actions[launch_index:],
+        ),
+    )
+    actual, trace = execute_task_ir_semantics(
+        task_module,
+        schedule,
+        bound_module=bound_module,
+        template=template,
+        instance=instance,
+        legacy_task_module=module,
+        input_spec=spec,
+        relu_pre=relu_pre,
+        backend=_SelectedBackendOom(selected.candidate_id),
+    )
+    expected = execute_plain_crown_bound_ir(
+        bound_module,
+        task_module=module,
+        input_spec=spec,
+        relu_pre=relu_pre,
+    )
+    torch.testing.assert_close(actual.lower, expected.lower)
+    torch.testing.assert_close(actual.upper, expected.upper)
+    fused_event = next(
+        event
+        for event in trace.events
+        if event.attempted_backend_candidate_ids
+        == (selected.candidate_id, fallback_backend.candidate_id)
+    )
+    assert fused_event.backend_candidate_id == fallback_backend.candidate_id
+    assert fused_event.reference_implementation_id == ("bound_ir_region_reference/v1")
+    assert schedule.query_ids == ("query:0", "query:1")
