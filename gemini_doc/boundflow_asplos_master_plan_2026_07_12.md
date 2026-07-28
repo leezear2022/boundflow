@@ -13,8 +13,9 @@
 
 > **2026-07-28 进度修订**：上句是 2026-07-20 当时状态。IR-1—IR-4 narrow
 > plain-CROWN compiler/runtime 已 validated-reduced；external α/β 仍为显式 No-Go。
-> 当前下一阶段为 IR-5 adaptive PlanInstance 及公平 held-out 证据，不提前进入 IR-6。
-> 详见 `gemini_doc/change_2026-07-28_ir4e_pr13_query_migration_closure.md`。
+> IR-5C2 typed MLP CUDA held-out 为 PARTIAL；下一阶段是 IR-5C3 独立 workload-family
+> 与 fair batching baseline，不提前进入 IR-6。详见
+> `gemini_doc/change_2026-07-28_ir5c2_cuda_heldout_partial.md`。
 
 ---
 

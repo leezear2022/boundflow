@@ -102,6 +102,9 @@
 - `gemini_doc/change_2026-07-28_ir5c1_leakage_free_measurement_runner.md`：IR-5C1
   calibration-only 预测、CUDA cold/warm/peak/TVM phase 测量、冻结 split/resource context
   与目录级 manifest/semantic replay
+- `gemini_doc/change_2026-07-28_ir5c2_cuda_heldout_partial.md`：IR-5C2 fresh CUDA
+  typed MLP artifact、四策略 regret/TTV/tail/peak、低内存切换及 workload-family/batching
+  未闭环的 PARTIAL 判定
 - `gemini_doc/asplos_execution_memo_v1_0.md`：ASPLOS 研发的短执行入口与门禁
 - `gemini_doc/current_status_after_pr13.md`：PR-13 closure 后的真实状态、证据边界与当前缺口
 - `gemini_doc/pr14_execution_plan.md`：真实 verifier workload coverage/execution 的切片、门禁与止损

@@ -3338,3 +3338,26 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_ir5c1_leakage_free_measurement_runner.md`
+
+---
+
+## 2026-07-28：IR-5C2 CUDA typed held-out（PARTIAL）
+
+**主要结果**
+- 16/16 typed CUDA candidate measurements correctness allclose；
+- 8 contexts × 4 policies，Global 8/8 feasible；
+- Global Oracle regret p50/p90/max 为 1.000×/1.00766×/1.00766×；
+- 64 MiB 选择 PyTorch dense，冻结低内存预算选择 TVM fused；
+- artifact manifest 绑定 `1be9c19`，integrity + semantic replay 通过。
+
+**未关闭门禁**
+- calibration/held-out 仍属于同一 MLP family；
+- ordinary batching/fair batched-original 未接入；
+- 低内存切换是 feasibility-driven，尚非多个可行候选间的 Global 优势；
+- CNN/残差/non-toy 与跨层收益归因仍缺。
+
+**下一阶段**
+- IR-5C3 independent workload-family + fair batching baselines；不启动 IR-6。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5c2_cuda_heldout_partial.md`

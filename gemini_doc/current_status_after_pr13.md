@@ -12,11 +12,14 @@
 > IR-4C TVM fused/unfused、dispatch-namespaced cache 与 semantic fallback 已通过；
 > IR-4D typed plain-CROWN query→Plan/Task/Schedule、精确 state payload 与计算跳过已通过；
 > IR-4E 已把 PR-13 manager 接入 typed compiler，并把 legacy α/β 改为默认关闭的
-> historical opt-in。当前唯一下一阶段为 IR-5 adaptive PlanInstance。
+> historical opt-in。当前唯一下一阶段为 IR-5C3 independent workload-family +
+> fair batching baseline。
 > IR-5A 已完成 query-time memory/deadline/cache/distribution context 与 amortized selector；
-> 这只是 mechanism，fixed/local/global/oracle held-out 证据仍 pending。
+> 这只是 mechanism。
 > IR-5B 已完成统一 observation 上的 fixed/local/global/oracle evaluator 与 synthetic
-> contract artifact；真实 typed measured held-out 仍 pending。
+> contract artifact。IR-5C2 已产出 fresh CUDA typed MLP measured artifact：Global 8/8
+> feasible，p50/p90 regret 1.000×/1.00766×，但同-family split、fair batching baseline
+> 与 non-toy workload 仍缺，因此 IR-5 保持 PARTIAL。
 
 ## 1. 当前真实阶段
 
@@ -94,8 +97,12 @@ validated-reduced 关闭；下一工程阶段为 IR-5，不得把此 closure 写
 integration 或 ASPLOS 性能结论。
 
 IR-5A 已让 cold/repeated/warm-cache 与 per-query memory/deadline 进入 PlanInstance
-identity、provenance 和 runtime cache namespace。同一 template 可合法切换不同 plan，但尚未
-完成公平 policy baseline 与全新 held-out artifact，因此 ASPLOS-ready 判定不变。
+identity、provenance 和 runtime cache namespace。同一 template 可合法切换不同 plan。
+IR-5B/C2 随后完成四策略 evaluator 与 fresh CUDA typed MLP artifact：Global 在 8/8
+contexts 可行，p50/p90 Oracle regret 为 1.000×/1.00766×，高内存选择 dense、冻结低内存
+选择 TVM fused。但 calibration/held-out 仍是同一 MLP family，ordinary batching/fair
+batched-original、CNN/残差 non-toy 与跨层收益归因未完成。因此当前下一步为 IR-5C3，
+ASPLOS-ready 判定仍为 NO，且不得提前进入 IR-6。
 
 明确禁止：
 

@@ -12,9 +12,10 @@
 > 主线；后续按第 11 节和
 > `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md` 推进。
 
-> **2026-07-28 进度**：IR-1 Bound IR reference closure 与 IR-2 Plan IR
-> `VALIDATED-REDUCED` closure 已完成；下一实现门禁是 IR-3 Schedule IR v1 + reference
-> executor。不得继续把第 11 节的“尚未实现”历史描述当作当前状态。
+> **2026-07-28 进度**：IR-1—IR-4 narrow plain-CROWN compiler/runtime 已
+> validated-reduced；IR-5C2 已产出 typed MLP measured CUDA artifact，但因同-family split、
+> fair batching baseline 与 non-toy workload 缺失保持 PARTIAL。下一门禁是 IR-5C3，
+> 不进入 IR-6。不得继续把第 11 节的“尚未实现”历史描述当作当前状态。
 
 ## 1. 锁定的论文命题
 
@@ -386,3 +387,7 @@ Bound IR v1
   typed PlanInstance。IR-5 仍需 fixed/local/global/oracle 与 held-out 系统证据。
 - IR-5B 已冻结四策略共享 observation/context 的公平 evaluator，输出 tail/TTV/peak/regret；
   当前 artifact 明确为 synthetic contract，不得写成 held-out 性能结果。
+- IR-5C1/C2 已冻结 calibration-only CUDA runner 和资源 context，并在 fresh typed MLP
+  artifact 上得到 Global 8/8 feasible、p50/p90 regret 1.000×/1.00766×；高内存选择
+  PyTorch dense，低内存选择 TVM fused。该结果仅为 PARTIAL：同-family split、
+  ordinary batching/fair batched-original 与 non-toy workload 尚缺，IR-5 不关闭。
