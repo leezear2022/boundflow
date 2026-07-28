@@ -21,7 +21,11 @@ from ..ir.plan import BackendKind
 from ..runtime.task_backend_dispatch import TypedTaskBackendRegistry
 from ..runtime.task_ir_executor import execute_task_ir_semantics
 from .adaptive_plan_evaluator import AdaptivePlanObservation
-from .typed_benchmark_workloads import PreparedTypedBenchmark, build_mlp_candidate
+from .typed_benchmark_workloads import (
+    PreparedTypedBenchmark,
+    build_cnn_candidate,
+    build_mlp_candidate,
+)
 
 MEASURED_BENCHMARK_SCHEMA_VERSION = "boundflow.ir5-measured-candidate/v1"
 
@@ -63,11 +67,73 @@ class TypedWorkloadSpec:
 
 
 @dataclass(frozen=True)
+class TypedCNNWorkloadSpec:
+    """Frozen chain-CNN family used for architecture-held-out evaluation."""
+
+    workload_id: str
+    split: str
+    batch: int
+    input_channels: int
+    image_size: int
+    conv1_channels: int
+    conv2_channels: int
+    output_dim: int
+    seed: int
+
+    def validate(self) -> None:
+        """Reject invalid CNN shapes or ambiguous split identity."""
+
+        dimensions = (
+            self.batch,
+            self.input_channels,
+            self.image_size,
+            self.conv1_channels,
+            self.conv2_channels,
+            self.output_dim,
+        )
+        if not self.workload_id or self.split not in {"calibration", "heldout"}:
+            raise ValueError("measured CNN workload identity/split is invalid")
+        if min(dimensions) <= 0 or self.image_size % 2:
+            raise ValueError(
+                "measured CNN dimensions must be positive with even image size"
+            )
+        if self.seed < 0:
+            raise ValueError("measured CNN workload seed must be nonnegative")
+
+    @property
+    def work_units(self) -> int:
+        """Return an architecture-independent multiply-accumulate proxy."""
+
+        self.validate()
+        half = self.image_size // 2
+        conv1 = (
+            self.batch
+            * self.conv1_channels
+            * self.image_size
+            * self.image_size
+            * self.input_channels
+            * 9
+        )
+        conv2 = self.batch * self.conv2_channels * half * half * self.conv1_channels * 9
+        head = self.batch * self.output_dim * self.conv2_channels * half * half
+        return conv1 + conv2 + head
+
+    def to_dict(self) -> dict[str, object]:
+        """Return canonical architecture-family fields."""
+
+        self.validate()
+        return {"family": "chain_cnn", **asdict(self)}
+
+
+MeasuredWorkloadSpec = TypedWorkloadSpec | TypedCNNWorkloadSpec
+
+
+@dataclass(frozen=True)
 class CandidateMeasurement:  # pylint: disable=too-many-instance-attributes
     """Raw execution facts for one immutable workload/backend candidate."""
 
     schema_version: str
-    workload: TypedWorkloadSpec
+    workload: MeasuredWorkloadSpec
     backend: BackendKind
     plan_instance_hash: str
     bound_module_hash: str
@@ -178,7 +244,7 @@ class BackendCalibration:
     calibration_workload_ids: tuple[str, ...]
     calibration_measurement_hash: str
 
-    def predict(self, workload: TypedWorkloadSpec) -> tuple[float, float]:
+    def predict(self, workload: MeasuredWorkloadSpec) -> tuple[float, float]:
         """Predict steady latency/setup without reading held-out measurements."""
 
         workload.validate()
@@ -200,7 +266,7 @@ class BackendCalibration:
 
 
 def measure_workload(  # pylint: disable=too-many-statements
-    workload: TypedWorkloadSpec,
+    workload: MeasuredWorkloadSpec,
     backends: Sequence[BackendKind],
     *,
     device: str,
@@ -223,16 +289,7 @@ def measure_workload(  # pylint: disable=too-many-statements
     reference_lower: torch.Tensor | None = None
     reference_upper: torch.Tensor | None = None
     for backend in backends:
-        prepared = build_mlp_candidate(
-            workload_id=workload.workload_id,
-            backend=backend,
-            device=device,
-            batch=workload.batch,
-            input_dim=workload.input_dim,
-            hidden_dim=workload.hidden_dim,
-            output_dim=workload.output_dim,
-            seed=workload.seed,
-        )
+        prepared = _build_candidate(workload, backend=backend, device=device)
         registry = TypedTaskBackendRegistry(
             tvm_cache_dir=cache_root / workload.workload_id / backend.value
         )
@@ -467,8 +524,41 @@ __all__ = [
     "BackendCalibration",
     "CandidateMeasurement",
     "MEASURED_BENCHMARK_SCHEMA_VERSION",
+    "MeasuredWorkloadSpec",
+    "TypedCNNWorkloadSpec",
     "TypedWorkloadSpec",
     "build_heldout_observations",
     "fit_backend_calibrations",
     "measure_workload",
 ]
+
+
+def _build_candidate(
+    workload: MeasuredWorkloadSpec,
+    *,
+    backend: BackendKind,
+    device: str,
+) -> PreparedTypedBenchmark:
+    if isinstance(workload, TypedCNNWorkloadSpec):
+        return build_cnn_candidate(
+            workload_id=workload.workload_id,
+            backend=backend,
+            device=device,
+            batch=workload.batch,
+            input_channels=workload.input_channels,
+            image_size=workload.image_size,
+            conv1_channels=workload.conv1_channels,
+            conv2_channels=workload.conv2_channels,
+            output_dim=workload.output_dim,
+            seed=workload.seed,
+        )
+    return build_mlp_candidate(
+        workload_id=workload.workload_id,
+        backend=backend,
+        device=device,
+        batch=workload.batch,
+        input_dim=workload.input_dim,
+        hidden_dim=workload.hidden_dim,
+        output_dim=workload.output_dim,
+        seed=workload.seed,
+    )

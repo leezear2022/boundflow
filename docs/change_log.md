@@ -3361,3 +3361,21 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_ir5c2_cuda_heldout_partial.md`
+
+---
+
+## 2026-07-28：IR-5C3A independent CNN workload family
+
+**主要改动**
+- 新增 two-convolution chain-CNN typed workload builder；
+- 新增显式 `chain_cnn` measured spec 与 MAC work feature；
+- 支持 MLP calibration→CNN held-out 的同一 measurement/evaluator 接口。
+
+**验证与边界**
+- CPU reference/dense 对齐；
+- CUDA reference/dense/chunked/TVM fused 对齐且 TVM trace 命中 fused；
+- 定向 4 passed，Mypy 0 issues；
+- 尚无 fair batching baseline 或新 held-out artifact。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5c3a_independent_cnn_family.md`

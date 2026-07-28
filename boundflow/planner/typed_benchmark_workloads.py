@@ -104,6 +104,145 @@ def build_mlp_candidate(
         center=center,
         eps=0.2,
     )
+    return _prepare_candidate(
+        workload_id=workload_id,
+        backend=backend,
+        device=device,
+        legacy=legacy,
+        input_spec=input_spec,
+    )
+
+
+def build_cnn_candidate(  # pylint: disable=too-many-arguments
+    *,
+    workload_id: str,
+    backend: BackendKind,
+    device: str,
+    batch: int,
+    input_channels: int,
+    image_size: int,
+    conv1_channels: int,
+    conv2_channels: int,
+    output_dim: int,
+    seed: int,
+) -> PreparedTypedBenchmark:
+    """Build a deterministic two-convolution family under one typed backend."""
+
+    dimensions = (
+        batch,
+        input_channels,
+        image_size,
+        conv1_channels,
+        conv2_channels,
+        output_dim,
+    )
+    if min(dimensions) <= 0 or image_size % 2:
+        raise ValueError("typed CNN dimensions must be positive with even image size")
+    generator = torch.Generator(device="cpu").manual_seed(seed)
+    half = image_size // 2
+    params = {
+        "W1": torch.randn(
+            conv1_channels,
+            input_channels,
+            3,
+            3,
+            generator=generator,
+        ),
+        "b1": torch.randn(conv1_channels, generator=generator),
+        "W2": torch.randn(
+            conv2_channels,
+            conv1_channels,
+            3,
+            3,
+            generator=generator,
+        ),
+        "b2": torch.randn(conv2_channels, generator=generator),
+        "W3": torch.randn(
+            output_dim,
+            conv2_channels * half * half,
+            generator=generator,
+        ),
+        "b3": torch.randn(output_dim, generator=generator),
+    }
+    center = torch.randn(
+        batch,
+        input_channels,
+        image_size,
+        image_size,
+        generator=generator,
+    )
+    if device != "cpu":
+        params = {name: value.to(device) for name, value in params.items()}
+        center = center.to(device)
+    conv = {
+        "stride": (1, 1),
+        "padding": (1, 1),
+        "dilation": (1, 1),
+        "groups": 1,
+    }
+    downsample = {**conv, "stride": (2, 2)}
+    legacy = BFTaskModule(
+        tasks=[
+            BoundTask(
+                task_id=f"ir5:{workload_id}",
+                kind=TaskKind.INTERVAL_IBP,
+                ops=[
+                    TaskOp(
+                        "conv2d",
+                        "conv1",
+                        ["input", "W1", "b1"],
+                        ["h1"],
+                        conv,
+                    ),
+                    TaskOp("relu", "relu1", ["h1"], ["r1"]),
+                    TaskOp(
+                        "conv2d",
+                        "conv2",
+                        ["r1", "W2", "b2"],
+                        ["h2"],
+                        downsample,
+                    ),
+                    TaskOp("relu", "relu2", ["h2"], ["r2"]),
+                    TaskOp(
+                        "flatten",
+                        "flatten",
+                        ["r2"],
+                        ["flat"],
+                        {"start_dim": 1, "end_dim": -1},
+                    ),
+                    TaskOp("linear", "head", ["flat", "W3", "b3"], ["out"]),
+                ],
+                input_values=["input"],
+                output_values=["out"],
+            )
+        ],
+        entry_task_id=f"ir5:{workload_id}",
+        bindings={"params": params},
+    )
+    input_spec = InputSpec.linf(
+        value_name="input",
+        center=center,
+        eps=0.1,
+    )
+    return _prepare_candidate(
+        workload_id=workload_id,
+        backend=backend,
+        device=device,
+        legacy=legacy,
+        input_spec=input_spec,
+    )
+
+
+def _prepare_candidate(
+    *,
+    workload_id: str,
+    backend: BackendKind,
+    device: str,
+    legacy: BFTaskModule,
+    input_spec: InputSpec,
+) -> PreparedTypedBenchmark:
+    """Lower one deterministic legacy workload through every compiler layer."""
+
     interval_env, relu_pre = _forward_ibp_trace_mlp(legacy, input_spec)
     bound_module = build_plain_crown_bound_ir(
         legacy,
@@ -330,4 +469,8 @@ def _backend_template(
     )
 
 
-__all__ = ["PreparedTypedBenchmark", "build_mlp_candidate"]
+__all__ = [
+    "PreparedTypedBenchmark",
+    "build_cnn_candidate",
+    "build_mlp_candidate",
+]
