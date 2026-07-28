@@ -108,6 +108,9 @@
 - `gemini_doc/change_2026-07-28_ir5c3a_independent_cnn_family.md`：IR-5C3A
   deterministic chain-CNN typed workload、跨 architecture calibration feature 与
   PyTorch/TVM fused CUDA semantic probe
+- `gemini_doc/change_2026-07-28_ir5c3b_fair_batching_contract.md`：IR-5C3B
+  fixed-single/ordinary-batching/batched-original 公平 evaluator、physical-batch 归一化、
+  MLP→CNN runner 与 batch 语义门禁
 - `gemini_doc/asplos_execution_memo_v1_0.md`：ASPLOS 研发的短执行入口与门禁
 - `gemini_doc/current_status_after_pr13.md`：PR-13 closure 后的真实状态、证据边界与当前缺口
 - `gemini_doc/pr14_execution_plan.md`：真实 verifier workload coverage/execution 的切片、门禁与止损

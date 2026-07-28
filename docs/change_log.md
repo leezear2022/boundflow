@@ -3379,3 +3379,21 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_ir5c3a_independent_cnn_family.md`
+
+---
+
+## 2026-07-28：IR-5C3B fair batching evaluator/runner contract
+
+**主要改动**
+- v2 evaluator 显式加入 fixed-single、ordinary-batching、batched-original；
+- compiler selection pool 与全方案 Oracle pool 分离；
+- physical batch latency 按 query 数归一，compile/setup 不除；
+- 新增 MLP calibration→CNN held-out runner 与 batch-first-query semantic gate。
+
+**验证与边界**
+- 定向 2 passed，Mypy 0 issues，Pylint 10.00/10；
+- warm=1 pilot 只作 runner smoke，不进入证据链；
+- 正式 9-sample fresh CUDA artifact 仍 pending。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5c3b_fair_batching_contract.md`
