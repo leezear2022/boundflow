@@ -3456,3 +3456,21 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_ir5e_residual_final_protocol_freeze.md`
+
+---
+
+## 2026-07-28：IR-5F residual-final-v2 protocol invalid
+
+**结果**
+- clean protocol commit `b3762bf` 上首次正式生成在 fixed-single semantic gate 中止；
+- 参数完全一致，但同 seed、不同 batch shape 生成的 input center 不是前缀；
+- 两个 workload 的 input max diff 为 `3.73509`/`2.16740`，不是浮点 tolerance 问题；
+- 未生成 summary/manifest，未读取 held-out 性能数字。
+
+**处置**
+- v2 标记 PROTOCOL-INVALID，`7401/7402` 永久退役；
+- 保留 strict semantic gate，只允许显式 slice batched input 的方法学修复；
+- 修复必须升级 suite/schema、旋转 fresh final identity 后重新冻结。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5f_residual_final_v2_protocol_invalid.md`

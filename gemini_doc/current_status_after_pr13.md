@@ -26,7 +26,8 @@
 > CNN 上以 from-forward-trace 公平边界得到 `0.880×`/`0.896×` 最快 median 诊断；
 > 该结果仅为 calibration，不撤销 No-Go。新的 frozen residual-CNN final 尚未执行。
 > IR-5E 已冻结 CUDA-only chain-CNN calibration→residual-CNN final v2 协议；正式
-> final IDs/seeds `7401/7402` 尚未执行，必须在 protocol commit 后一次性消费。
+> v2 首次执行因 fixed-single 重新采样的 input 与 batch 第一 query 不同而
+> PROTOCOL-INVALID；未生成 manifest，`7401/7402` 已退役。不得将此写成系统性能结果。
 
 ## 1. 当前真实阶段
 
@@ -128,6 +129,11 @@ IR-5E 现已完成该 protocol freeze：新 workload 含真实 residual fanout/`
 baseline 固定为 from-forward-trace，并显式输出 p90≤1.20、双 workload latency-memory
 Pareto 与 multi-budget switch 字段。此时仍没有 final 数字；`7401/7402` 不得在 protocol
 commit 前运行。
+
+实际首次运行发现同 seed、不同 batch shape 的 `torch.randn` 不保证前缀一致，导致
+fixed-single 与 batched-first 输入不同。v2 在 semantic gate fail closed，未形成 summary/
+manifest，未进入正式性能判定。下一步只允许修复显式 input slicing、升级 protocol 并旋转
+fresh identities；IR-6 继续 blocked。
 
 明确禁止：
 

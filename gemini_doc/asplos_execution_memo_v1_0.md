@@ -18,7 +18,8 @@
 > IR-5D prepared execution remediation 已实现，并在已消费 CNN 上通过 calibration-only
 > from-forward-trace 诊断；正式 No-Go 不撤销。IR-6 仍 blocked，下一步只允许新的
 > frozen residual-CNN final gate。IR-5E 已冻结该 CUDA-only protocol 与未执行的
-> final seeds `7401/7402`，等待 protocol commit 后一次性消费。
+> final seeds `7401/7402`；首次执行因 fixed-single 输入重采样不等于 batch 第一 query
+> 而 PROTOCOL-INVALID，未形成 manifest。`7401/7402` 已退役，IR-6 继续 blocked。
 
 ## 1. 锁定的论文命题
 
@@ -405,3 +406,6 @@ Bound IR v1
 - IR-5E 已新增 residual fanout/add typed workload，并冻结 chain-CNN calibration →
   residual-CNN final v2、from-forward-trace baseline、p90≤1.20 与 Pareto 判定字段。
   final `7401/7402` 尚未执行；protocol commit 后只允许一次正式生成。
+- IR-5F 首次 v2 生成在 semantic gate 中止：同 seed 不保证不同 batch shape 的随机输入
+  具有前缀关系。参数一致但 input max diff 为 3.735/2.167；无 summary/manifest，不能作
+  性能结论。只允许显式 slice batched input、升级 schema 并旋转 fresh identities。

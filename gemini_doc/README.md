@@ -120,6 +120,9 @@
 - `gemini_doc/change_2026-07-28_ir5e_residual_final_protocol_freeze.md`：IR-5E
   residual-CNN typed workload、chain-CNN calibration→residual final v2 冻结 split、
   from-trace 公平协议及 p90/Pareto 一次性门禁
+- `gemini_doc/change_2026-07-28_ir5f_residual_final_v2_protocol_invalid.md`：IR-5F
+  v2 首次运行在 fixed-single 输入身份门禁失败、shape-dependent RNG 根因与
+  `7401/7402` 永久退役记录
 - `gemini_doc/asplos_execution_memo_v1_0.md`：ASPLOS 研发的短执行入口与门禁
 - `gemini_doc/current_status_after_pr13.md`：PR-13 closure 后的真实状态、证据边界与当前缺口
 - `gemini_doc/pr14_execution_plan.md`：真实 verifier workload coverage/execution 的切片、门禁与止损
