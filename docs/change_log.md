@@ -3320,3 +3320,21 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_ir5c0_typed_measured_workload_foundation.md`
+
+---
+
+## 2026-07-28：IR-5C1 leakage-free measurement runner
+
+**主要改动**
+- 新增 typed candidate cold/warm/CUDA peak/TVM compile-phase 测量；
+- calibration-only latency/setup model 明确拒绝 held-out leakage；
+- 冻结 workload split、resource context 与 query/cache contexts；
+- 新增目录级 artifact manifest、integrity replay 与 reference semantic replay。
+
+**证据与边界**
+- 定向 4 passed，Mypy 0 issues，Pylint 10.00/10；
+- 开发期后验 memory-budget pilot 明确废弃；
+- 本切片不宣称最终 held-out 性能，fresh CUDA v2 artifact 仍 pending。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5c1_leakage_free_measurement_runner.md`
