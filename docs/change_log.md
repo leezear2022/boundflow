@@ -3280,3 +3280,26 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_ir5a_adaptive_plan_context.md`
+
+---
+
+## 2026-07-28：IR-5B 公平 adaptive policy evaluator
+
+**主要改动**
+- 新增 frozen context/plan observation 评估契约；
+- fixed/local/global/oracle 共享 legality、budget、cache 与 measured outcomes；
+- 统一输出 p50/p90/p99、TTV、peak 和 Oracle regret；
+- fixed 不可行时明确记录 infeasible；
+- 新增 fresh-process synthetic contract artifact。
+
+**证据与边界**
+- 定向：25 passed；
+- 全量：468 passed、1 skipped、6 warnings；
+- artifact 明确标注 synthetic contract，不是 held-out 性能证据；
+- IR-5 仍 pending。
+
+**下一阶段**
+- IR-5C typed measured held-out workload/artifact。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5b_fair_policy_evaluator.md`

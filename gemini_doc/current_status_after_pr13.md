@@ -15,6 +15,8 @@
 > historical opt-in。当前唯一下一阶段为 IR-5 adaptive PlanInstance。
 > IR-5A 已完成 query-time memory/deadline/cache/distribution context 与 amortized selector；
 > 这只是 mechanism，fixed/local/global/oracle held-out 证据仍 pending。
+> IR-5B 已完成统一 observation 上的 fixed/local/global/oracle evaluator 与 synthetic
+> contract artifact；真实 typed measured held-out 仍 pending。
 
 ## 1. 当前真实阶段
 

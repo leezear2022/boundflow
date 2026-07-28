@@ -384,3 +384,5 @@ Bound IR v1
 - IR-5A 已新增 query-time memory/deadline/cache/distribution context，并按 uncached
   compile/setup 在 expected query count 上摊销选择；cold/repeated/warm context 可产生不同
   typed PlanInstance。IR-5 仍需 fixed/local/global/oracle 与 held-out 系统证据。
+- IR-5B 已冻结四策略共享 observation/context 的公平 evaluator，输出 tail/TTV/peak/regret；
+  当前 artifact 明确为 synthetic contract，不得写成 held-out 性能结果。
