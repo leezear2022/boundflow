@@ -1,7 +1,7 @@
 """First-class Schedule IR v1 schema, verifier, and reference lowering."""
 
 # Cross-layer schedule verification intentionally keeps the execution ledger together.
-# pylint: disable=too-many-branches,too-many-instance-attributes,too-many-lines,too-many-locals,too-many-statements,missing-class-docstring,missing-function-docstring
+# pylint: disable=too-many-branches,too-many-instance-attributes,too-many-lines,too-many-locals,too-many-statements,missing-class-docstring,missing-function-docstring,duplicate-code
 
 from __future__ import annotations
 
@@ -32,6 +32,7 @@ class ScheduleActionKind(Enum):
     CHECK_BUDGET = "check_budget"
     ALLOCATE = "allocate"
     MATERIALIZE = "materialize"
+    TRANSFER = "transfer"
     LAUNCH = "launch"
     BATCH_LOOP = "batch_loop"
     RECORD_EVENT = "record_event"
@@ -149,6 +150,54 @@ class MaterializeAction:
             "before_op_id": self.before_op_id,
             "source_representation": self.source_representation.value,
             "target_representation": self.target_representation.value,
+        }
+
+
+class TransferDirection(Enum):
+    """Explicit host/device transfer direction."""
+
+    HOST_TO_DEVICE = "host_to_device"
+    DEVICE_TO_HOST = "device_to_host"
+    DEVICE_TO_DEVICE = "device_to_device"
+
+
+@dataclass(frozen=True)
+class TransferAction:
+    """Move one logical value without changing its Bound semantics."""
+
+    action_id: str
+    value_id: str
+    source_device: str
+    target_device: str
+    direction: TransferDirection
+    stream_id: str
+    kind: ScheduleActionKind = ScheduleActionKind.TRANSFER
+
+    def validate(self) -> None:
+        if any(
+            not value
+            for value in (
+                self.action_id,
+                self.value_id,
+                self.source_device,
+                self.target_device,
+                self.stream_id,
+            )
+        ):
+            raise ValueError("schedule transfer action is incomplete")
+        if self.source_device == self.target_device:
+            raise ValueError("schedule transfer must change physical device")
+
+    def to_dict(self) -> dict[str, object]:
+        self.validate()
+        return {
+            "kind": self.kind.value,
+            "action_id": self.action_id,
+            "value_id": self.value_id,
+            "source_device": self.source_device,
+            "target_device": self.target_device,
+            "direction": self.direction.value,
+            "stream_id": self.stream_id,
         }
 
 
@@ -530,6 +579,7 @@ ScheduleAction = (
     CheckBudgetAction
     | AllocateAction
     | MaterializeAction
+    | TransferAction
     | LaunchAction
     | BatchLoopAction
     | RecordEventAction
@@ -794,6 +844,33 @@ class ScheduleModule:  # pylint: disable=too-many-instance-attributes
                         "Schedule IR materializes a value before definition"
                     )
                 performed_transitions.add(action.transition_candidate_id)
+            elif isinstance(action, TransferAction):
+                if action.value_id not in available_values:
+                    raise ValueError("Schedule IR transfers a value before definition")
+                if action.direction == TransferDirection.HOST_TO_DEVICE:
+                    if (
+                        action.source_device != "host"
+                        or action.target_device != template.workload.device
+                    ):
+                        raise ValueError(
+                            "Schedule IR host-to-device transfer targets wrong device"
+                        )
+                elif action.direction == TransferDirection.DEVICE_TO_HOST:
+                    if (
+                        action.source_device != template.workload.device
+                        or action.target_device != "host"
+                    ):
+                        raise ValueError(
+                            "Schedule IR device-to-host transfer uses wrong device"
+                        )
+                elif (
+                    action.source_device != template.workload.device
+                    or action.target_device != template.workload.device
+                ):
+                    raise ValueError(
+                        "Schedule IR device-to-device transfer uses unknown device"
+                    )
+                value_stream[action.value_id] = action.stream_id
             elif isinstance(action, LaunchAction):
                 region = next(
                     (

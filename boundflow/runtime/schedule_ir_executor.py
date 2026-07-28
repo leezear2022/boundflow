@@ -32,6 +32,7 @@ from ..ir.schedule import (
     StateInvalidateAction,
     StateLoadAction,
     StateStoreAction,
+    TransferAction,
     WaitEventAction,
 )
 from ..ir.task import BFTaskModule
@@ -305,6 +306,7 @@ def execute_schedule_reference(
                 StateLoadAction,
                 StateStoreAction,
                 StateInvalidateAction,
+                TransferAction,
                 RequestReplanAction,
             ),
         ):

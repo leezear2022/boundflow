@@ -2,10 +2,12 @@
 
 # CROWN literature and the existing runtime use A_u/A_l for affine coefficients.
 # pylint: disable=too-many-locals,invalid-name,duplicate-code,not-callable
+# pylint: disable=too-many-lines,too-many-return-statements
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, cast
+from dataclasses import dataclass
+from typing import Any, Mapping, Optional, Tuple, cast
 
 import torch
 import torch.nn.functional as torch_functional
@@ -347,6 +349,385 @@ def execute_plain_crown_bound_ir(  # pylint: disable=too-many-branches,too-many-
     return IntervalState(
         lower=_get_tensor(env, lower_id), upper=_get_tensor(env, upper_id)
     )
+
+
+@dataclass(frozen=True)
+class BoundIRTaskStepResult:
+    """Deterministic semantic outputs produced by one task step."""
+
+    op_ids: Tuple[str, ...]
+    output_value_hashes: Tuple[Tuple[str, str], ...]
+
+
+class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
+    """Stateful reference session that executes contiguous Bound IR task regions."""
+
+    def __init__(
+        self,
+        bound_module: BFBoundModule,
+        *,
+        task_module: BFTaskModule,
+        input_spec: InputSpec,
+        relu_pre: Mapping[str, IntervalState],
+        linear_spec_C: Optional[torch.Tensor] = None,
+    ) -> None:
+        bound_module.validate()
+        if bound_module.domain.method != BoundMethodKind.CROWN:
+            raise NotImplementedError(
+                "Bound IR reference interpreter supports CROWN only"
+            )
+        task_module.validate()
+        if bound_module.primal_graph_hash != plain_crown_primal_graph_hash(task_module):
+            raise ValueError(
+                "runtime task/parameter fingerprint does not match Bound IR"
+            )
+        objective_spec = bound_module.spec.objectives[0]
+        if objective_spec.payload_hash is None:
+            if linear_spec_C is not None:
+                raise ValueError("identity Bound IR cannot bind a linear objective")
+        elif (
+            linear_spec_C is None
+            or objective_spec.payload_hash != tensor_content_hash(linear_spec_C)
+        ):
+            raise ValueError("runtime objective payload does not match Bound IR")
+        self.bound_module = bound_module
+        self.input_spec = input_spec
+        self.relu_pre = relu_pre
+        self.params = _parameter_bindings(task_module)
+        self.values = {value.value_id: value for value in bound_module.graph.values}
+        self.env: dict[str, RuntimeValue] = {}
+        self.next_op_index = 0
+        for input_value_id in bound_module.graph.inputs:
+            input_value = self.values[input_value_id]
+            if input_value.role.value != "objective":
+                raise NotImplementedError(
+                    "plain-CROWN interpreter only accepts objective graph inputs"
+                )
+            self.env[input_value_id] = _objective_tensor(
+                input_value.tensor_type.shape,
+                input_spec=input_spec,
+                linear_spec_C=linear_spec_C,
+            )
+
+    def execute_task(
+        self,
+        op_ids: Tuple[str, ...],
+        *,
+        output_value_ids: Tuple[str, ...],
+    ) -> BoundIRTaskStepResult:
+        """Execute exactly the next contiguous task-owned Bound operations."""
+
+        if not op_ids:
+            raise ValueError("Bound IR task step requires op IDs")
+        stop = self.next_op_index + len(op_ids)
+        expected = self.bound_module.graph.ops[self.next_op_index : stop]
+        if tuple(op.op_id for op in expected) != op_ids:
+            raise ValueError(
+                "Bound IR task step is non-contiguous, reordered, or repeated"
+            )
+        for op in expected:
+            self._execute_op(op)
+        self.next_op_index = stop
+        missing = tuple(
+            value_id for value_id in output_value_ids if value_id not in self.env
+        )
+        if missing:
+            raise ValueError(f"Bound IR task step omits outputs: {missing}")
+        return BoundIRTaskStepResult(
+            op_ids=op_ids,
+            output_value_hashes=tuple(
+                (value_id, _runtime_value_hash(self.env[value_id]))
+                for value_id in output_value_ids
+            ),
+        )
+
+    def result(self) -> IntervalState:
+        """Return final bounds only after every Bound operation has executed."""
+
+        if self.next_op_index != len(self.bound_module.graph.ops):
+            raise ValueError("Bound IR session result requested before task completion")
+        lower_id, upper_id = self.bound_module.graph.outputs
+        return IntervalState(
+            lower=_get_tensor(self.env, lower_id),
+            upper=_get_tensor(self.env, upper_id),
+        )
+
+    def _execute_op(  # pylint: disable=too-many-branches,too-many-statements
+        self, op: BoundOp
+    ) -> None:
+        env = self.env
+        values = self.values
+        params = self.params
+        input_spec = self.input_spec
+        relu_pre = self.relu_pre
+
+        if op.kind == BoundOpKind.SPEC_BIND:
+            _attrs(op, SpecBindAttrs)
+            objective = _get_tensor(env, op.inputs[0])
+            if len(op.outputs) != 4:
+                raise NotImplementedError(
+                    "plain-CROWN interpreter requires affine-state spec binding"
+                )
+            bias = torch.zeros(
+                int(objective.shape[0]),
+                int(objective.shape[1]),
+                device=objective.device,
+                dtype=objective.dtype,
+            )
+            _store_state(
+                env,
+                op.outputs,
+                (objective.clone(), bias, objective.clone(), bias.clone()),
+            )
+            return
+
+        if op.kind in {
+            BoundOpKind.REPRESENTATION_CAST,
+            BoundOpKind.MATERIALIZE,
+        }:
+            attrs = _attrs(op, RepresentationChangeAttrs)
+            source = _get(env, op.inputs[0])
+            primal_shape = _coefficient_primal_shape(values, op.outputs[0])
+            if attrs.target == BoundRepresentation.STRUCTURED:
+                if not torch.is_tensor(source):
+                    raise ValueError("dense-to-structured cast expects a tensor")
+                env[op.outputs[0]] = cast(
+                    LinearOperator,
+                    DenseLinearOperator(source, input_shape=primal_shape),
+                )
+            elif attrs.target == BoundRepresentation.DENSE:
+                if torch.is_tensor(source):
+                    raise ValueError(
+                        "structured-to-dense transition expects an operator"
+                    )
+                dense = source.to_dense()
+                env[op.outputs[0]] = dense.reshape(
+                    int(dense.shape[0]), int(dense.shape[1]), *primal_shape
+                )
+            else:
+                raise NotImplementedError(
+                    f"interpreter cannot transition to {attrs.target.value}"
+                )
+            return
+
+        if op.kind == BoundOpKind.COEFFICIENT_COMPOSE:
+            states = tuple(
+                _load_state(env, op.inputs[index : index + 4])
+                for index in range(0, len(op.inputs), 4)
+            )
+            result = (
+                _coefficient_sum(tuple(state[0] for state in states)),
+                sum((state[1] for state in states[1:]), states[0][1]),
+                _coefficient_sum(tuple(state[2] for state in states)),
+                sum((state[3] for state in states[1:]), states[0][3]),
+            )
+            _store_state(env, op.outputs, result)
+            return
+
+        if op.kind == BoundOpKind.LINEAR_BACKWARD:
+            attrs = _attrs(op, LinearBackwardAttrs)
+            A_u, b_u, A_l, b_l = _load_state(env, op.inputs)
+            weight = _tensor_binding(params, attrs.weight_primal_value_id, like=A_u)
+            if weight.dim() != 2:
+                raise ValueError("linear weight must have rank 2")
+            bias = (
+                torch.zeros(
+                    int(weight.shape[0]),
+                    device=_coefficient_device(A_u),
+                    dtype=_coefficient_dtype(A_u),
+                )
+                if attrs.bias_primal_value_id is None
+                else _tensor_binding(params, attrs.bias_primal_value_id, like=A_u)
+            )
+            if bias.dim() == 0:
+                bias = bias.expand(int(weight.shape[0]))
+            if bias.dim() != 1 or int(bias.shape[0]) != int(weight.shape[0]):
+                raise ValueError("linear bias must be scalar or rank 1 [output]")
+            if _coefficient_input_numel(A_u) != int(weight.shape[0]):
+                raise ValueError("linear coefficient/weight output shape mismatch")
+            _store_state(
+                env,
+                op.outputs,
+                (
+                    _linear_backward_coefficient(A_u, weight),
+                    b_u + _contract(A_u, bias),
+                    _linear_backward_coefficient(A_l, weight),
+                    b_l + _contract(A_l, bias),
+                ),
+            )
+            return
+
+        if op.kind == BoundOpKind.CONV2D_BACKWARD:
+            attrs = _attrs(op, Conv2dBackwardAttrs)
+            A_u, b_u, A_l, b_l = _load_state(env, op.inputs)
+            target_shape = _coefficient_primal_shape(values, op.outputs[0])
+            source_shape = _coefficient_primal_shape(values, op.inputs[0])
+            weight = _tensor_binding(params, attrs.weight_primal_value_id, like=A_u)
+            conv_bias: Optional[torch.Tensor] = (
+                None
+                if attrs.bias_primal_value_id is None
+                else _tensor_binding(params, attrs.bias_primal_value_id, like=A_u)
+            )
+            out_b_u = b_u
+            out_b_l = b_l
+            if conv_bias is not None:
+                if conv_bias.dim() != 1 or int(conv_bias.shape[0]) != source_shape[0]:
+                    raise ValueError("conv2d bias must be rank 1 [output_channels]")
+                bias_map = conv_bias.view(-1, 1, 1).expand(source_shape)
+                out_b_u = out_b_u + _contract(A_u, bias_map)
+                out_b_l = out_b_l + _contract(A_l, bias_map)
+            _store_state(
+                env,
+                op.outputs,
+                (
+                    _conv2d_backward(
+                        A_u,
+                        target_shape=target_shape,
+                        source_shape=source_shape,
+                        weight=weight,
+                        attrs=attrs,
+                    ),
+                    out_b_u,
+                    _conv2d_backward(
+                        A_l,
+                        target_shape=target_shape,
+                        source_shape=source_shape,
+                        weight=weight,
+                        attrs=attrs,
+                    ),
+                    out_b_l,
+                ),
+            )
+            return
+
+        if op.kind == BoundOpKind.RELU_RELAXATION:
+            attrs = _attrs(op, ReluRelaxationAttrs)
+            preactivation = attrs.preactivation_primal_value_id
+            if preactivation is None or preactivation not in relu_pre:
+                raise KeyError(f"missing ReLU pre-activation binding '{preactivation}'")
+            A_u, b_u, A_l, b_l = _load_state(env, op.inputs)
+            if not torch.is_tensor(A_u) or not torch.is_tensor(A_l):
+                raise ValueError(
+                    "ReLU relaxation requires an explicit dense materialization"
+                )
+            result = _relu_backward(A_u, b_u, A_l, b_l, pre=relu_pre[preactivation])
+            output_shape = _coefficient_primal_shape(values, op.outputs[0])
+            _store_state(
+                env,
+                op.outputs,
+                (
+                    result[0].reshape(
+                        int(A_u.shape[0]), int(A_u.shape[1]), *output_shape
+                    ),
+                    result[1],
+                    result[2].reshape(
+                        int(A_l.shape[0]), int(A_l.shape[1]), *output_shape
+                    ),
+                    result[3],
+                ),
+            )
+            return
+
+        if op.kind == BoundOpKind.RESHAPE:
+            attrs = _attrs(op, ReshapeAttrs)
+            A_u, b_u, A_l, b_l = _load_state(env, op.inputs)
+            target_shape = tuple(int(dim) for dim in attrs.target_shape)
+            _store_state(
+                env,
+                op.outputs,
+                (
+                    _reshape_coefficient(A_u, target_shape),
+                    b_u,
+                    _reshape_coefficient(A_l, target_shape),
+                    b_l,
+                ),
+            )
+            return
+
+        if op.kind == BoundOpKind.ADD_BACKWARD:
+            attrs = _attrs(op, AddBackwardAttrs)
+            A_u, b_u, A_l, b_l = _load_state(env, op.inputs)
+            for constant_id in attrs.constant_input_primal_value_ids:
+                constant = _tensor_binding(params, constant_id, like=A_u)
+                b_u = b_u + _contract(A_u, constant)
+                b_l = b_l + _contract(A_l, constant)
+            output_states = _state_refs(op.outputs)
+            for index, state in enumerate(output_states):
+                child_b_u = b_u if index == 0 else torch.zeros_like(b_u)
+                child_b_l = b_l if index == 0 else torch.zeros_like(b_l)
+                _store_state(
+                    env,
+                    state.value_ids,
+                    (
+                        _clone_coefficient(A_u),
+                        child_b_u,
+                        _clone_coefficient(A_l),
+                        child_b_l,
+                    ),
+                )
+            return
+
+        if op.kind == BoundOpKind.CONCAT_BACKWARD:
+            attrs = _attrs(op, ConcatBackwardAttrs)
+            A_u, b_u, A_l, b_l = _load_state(env, op.inputs)
+            output_states = _state_refs(op.outputs)
+            start = 0
+            for index, (state, shape) in enumerate(
+                zip(output_states, attrs.input_shapes)
+            ):
+                stop = start + int(shape[attrs.axis])
+                child_b_u = b_u if index == 0 else torch.zeros_like(b_u)
+                child_b_l = b_l if index == 0 else torch.zeros_like(b_l)
+                _store_state(
+                    env,
+                    state.value_ids,
+                    (
+                        _slice_coefficient(
+                            A_u,
+                            shape=shape,
+                            axis=attrs.axis,
+                            start=start,
+                            stop=stop,
+                        ),
+                        child_b_u,
+                        _slice_coefficient(
+                            A_l,
+                            shape=shape,
+                            axis=attrs.axis,
+                            start=start,
+                            stop=stop,
+                        ),
+                        child_b_l,
+                    ),
+                )
+                start = stop
+            if start != _coefficient_input_shape(A_u)[attrs.axis]:
+                raise ValueError("concat backward slices do not cover source axis")
+            return
+
+        if op.kind == BoundOpKind.CONCRETIZE:
+            attrs = _attrs(op, ConcretizeAttrs)
+            if attrs.perturbation_id != input_spec.perturbation.perturbation_id:
+                raise ValueError("runtime perturbation does not match Bound IR")
+            A_u, b_u, A_l, b_l = _load_state(env, op.inputs)
+            _unused_lower, upper = input_spec.perturbation.concretize_affine(
+                center=input_spec.center, A=A_u, b=b_u
+            )
+            lower, _unused_upper = input_spec.perturbation.concretize_affine(
+                center=input_spec.center, A=A_l, b=b_l
+            )
+            env[op.outputs[0]] = lower
+            env[op.outputs[1]] = upper
+            return
+
+        raise NotImplementedError(
+            f"Bound IR reference interpreter does not support {op.kind.value}"
+        )
+
+
+def _runtime_value_hash(value: RuntimeValue) -> str:
+    tensor = value if torch.is_tensor(value) else value.to_dense()
+    return tensor_content_hash(tensor)
 
 
 def _objective_tensor(

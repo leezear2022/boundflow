@@ -1,7 +1,7 @@
 """First-class typed Task IR v1 derived from Bound and Plan IR."""
 
 # Cross-layer task verification deliberately resolves every typed reference.
-# pylint: disable=too-many-branches,too-many-instance-attributes,too-many-locals,too-many-statements,missing-function-docstring
+# pylint: disable=too-many-branches,too-many-instance-attributes,too-many-locals,too-many-statements,missing-function-docstring,duplicate-code
 
 from __future__ import annotations
 
@@ -16,6 +16,7 @@ from .bound import (
     BFBoundModule,
     BoundOp,
     BoundOpKind,
+    BoundTensorType,
     BoundValue,
     ConcretizeAttrs,
     Conv2dBackwardAttrs,
@@ -131,6 +132,26 @@ class TaskExternalDependency:
 
 
 @dataclass(frozen=True)
+class TaskValueConstraint:
+    """Exact tensor/shape contract for one task boundary value."""
+
+    value_id: str
+    tensor_type: BoundTensorType
+
+    def validate(self) -> None:
+        if not self.value_id:
+            raise ValueError("Task IR value constraint ID is empty")
+        self.tensor_type.validate()
+
+    def to_dict(self) -> dict[str, object]:
+        self.validate()
+        return {
+            "value_id": self.value_id,
+            "tensor_type": self.tensor_type.to_dict(),
+        }
+
+
+@dataclass(frozen=True)
 class TaskBackendBinding:
     """Exact Plan backend selected for this task."""
 
@@ -169,6 +190,8 @@ class TaskIRUnit:  # pylint: disable=too-many-instance-attributes
     op_refs: Tuple[TaskOpRef, ...]
     input_value_ids: Tuple[str, ...]
     output_value_ids: Tuple[str, ...]
+    input_constraints: Tuple[TaskValueConstraint, ...]
+    output_constraints: Tuple[TaskValueConstraint, ...]
     parameter_value_ids: Tuple[str, ...]
     external_dependencies: Tuple[TaskExternalDependency, ...]
     state_dependencies: Tuple[TaskStateDependency, ...]
@@ -183,6 +206,8 @@ class TaskIRUnit:  # pylint: disable=too-many-instance-attributes
             raise ValueError("Task IR unit requires ops and boundary values")
         for op_ref in self.op_refs:
             op_ref.validate()
+        for constraint in (*self.input_constraints, *self.output_constraints):
+            constraint.validate()
         for external_dependency in self.external_dependencies:
             external_dependency.validate()
         for state_dependency in self.state_dependencies:
@@ -194,6 +219,14 @@ class TaskIRUnit:  # pylint: disable=too-many-instance-attributes
             ("op refs", tuple(item.op_id for item in self.op_refs)),
             ("inputs", self.input_value_ids),
             ("outputs", self.output_value_ids),
+            (
+                "input constraints",
+                tuple(item.value_id for item in self.input_constraints),
+            ),
+            (
+                "output constraints",
+                tuple(item.value_id for item in self.output_constraints),
+            ),
             ("parameters", self.parameter_value_ids),
             (
                 "external dependencies",
@@ -227,6 +260,8 @@ class TaskIRUnit:  # pylint: disable=too-many-instance-attributes
             "op_refs": [item.to_dict() for item in self.op_refs],
             "input_value_ids": list(self.input_value_ids),
             "output_value_ids": list(self.output_value_ids),
+            "input_constraints": [item.to_dict() for item in self.input_constraints],
+            "output_constraints": [item.to_dict() for item in self.output_constraints],
             "parameter_value_ids": list(self.parameter_value_ids),
             "external_dependencies": [
                 item.to_dict() for item in self.external_dependencies
@@ -313,6 +348,18 @@ class TaskIRModule:
                 raise ValueError("Task IR inputs differ from Plan region boundary")
             if task.output_value_ids != region.output_value_ids:
                 raise ValueError("Task IR outputs differ from Plan region boundary")
+            expected_input_constraints = _value_constraints(
+                region.input_value_ids, values=values
+            )
+            expected_output_constraints = _value_constraints(
+                region.output_value_ids, values=values
+            )
+            if task.input_constraints != expected_input_constraints:
+                raise ValueError("Task IR input shape constraints differ from Bound IR")
+            if task.output_constraints != expected_output_constraints:
+                raise ValueError(
+                    "Task IR output shape constraints differ from Bound IR"
+                )
             expected_parameters, expected_external = _region_dependencies(
                 tuple(ops[op_id] for op_id in region.op_ids)
             )
@@ -473,6 +520,10 @@ def lower_plan_instance_to_task_ir(
             op_refs=tuple(TaskOpRef(op.op_id, op.kind) for op in region_ops),
             input_value_ids=region.input_value_ids,
             output_value_ids=region.output_value_ids,
+            input_constraints=_value_constraints(region.input_value_ids, values=values),
+            output_constraints=_value_constraints(
+                region.output_value_ids, values=values
+            ),
             parameter_value_ids=parameters,
             external_dependencies=external,
             state_dependencies=_state_dependencies(region, values=values),
@@ -614,6 +665,15 @@ def _state_dependencies(
         if state_version is not None:
             result.append(TaskStateDependency(value_id, state_version, access))
     return tuple(result)
+
+
+def _value_constraints(
+    value_ids: Tuple[str, ...], *, values: dict[str, BoundValue]
+) -> Tuple[TaskValueConstraint, ...]:
+    return tuple(
+        TaskValueConstraint(value_id, values[value_id].tensor_type)
+        for value_id in value_ids
+    )
 
 
 def _backend_matches(binding: TaskBackendBinding, candidate: BackendCandidate) -> bool:

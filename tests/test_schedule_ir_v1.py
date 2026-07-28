@@ -18,6 +18,8 @@ from boundflow.ir.schedule import (
     RecordEventAction,
     RetryAction,
     StateLoadAction,
+    TransferAction,
+    TransferDirection,
     WaitEventAction,
     lower_plan_instance_to_reference_schedule,
 )
@@ -199,6 +201,54 @@ def test_schedule_ir_v1_reference_trace_is_deterministic_and_replayable() -> Non
         replay_schedule_trace(
             first.canonical_json().replace("query:0", "query:tampered"),
             schedule,
+            bound_module=module,
+            template=template,
+            instance=instance,
+        )
+
+
+def test_schedule_ir_v1_transfer_is_typed_verified_and_traced() -> None:
+    module, template, instance, schedule = _schedule_fixture()
+    launch_index = next(
+        index
+        for index, action in enumerate(schedule.actions)
+        if isinstance(action, LaunchAction)
+    )
+    transfer = TransferAction(
+        action_id="transfer:input",
+        value_id=module.graph.inputs[0],
+        source_device="host",
+        target_device=template.workload.device,
+        direction=TransferDirection.HOST_TO_DEVICE,
+        stream_id="sync",
+    )
+    transferred = replace(
+        schedule,
+        actions=(
+            *schedule.actions[:launch_index],
+            transfer,
+            *schedule.actions[launch_index:],
+        ),
+    )
+    trace = execute_schedule_reference(
+        transferred,
+        bound_module=module,
+        template=template,
+        instance=instance,
+    )
+    assert any(event.action_id == transfer.action_id for event in trace.events)
+
+    wrong_target = replace(transfer, target_device="wrong-device")
+    wrong_schedule = replace(
+        schedule,
+        actions=(
+            *schedule.actions[:launch_index],
+            wrong_target,
+            *schedule.actions[launch_index:],
+        ),
+    )
+    with pytest.raises(ValueError, match="targets wrong device"):
+        wrong_schedule.validate(
             bound_module=module,
             template=template,
             instance=instance,

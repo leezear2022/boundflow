@@ -363,4 +363,7 @@ Bound IR v1
 - IR-2 typed PlanTemplate/PlanInstance、builder/selector、state-validity、legacy assembly 与
   deterministic artifact replay 已通过 reference closure；
 - 当前 `artifacts/` 不含 PR-11/12 raw planner records，因此不声称历史逐记录迁移；
-- 下一步从 IR-3 Schedule IR 实现继续，C1/C2 在 runtime/backend/E2E 前仍不得升级。
+- IR-3 typed Task/Schedule schema、逐 Task reference semantics、control trace 与 artifact v2
+  已通过 synchronous reference closure；
+- 下一步进入 IR-4 production backend/runtime migration，C1/C2 在真实 backend/E2E 前仍不得
+  升级为 paper-level complete。

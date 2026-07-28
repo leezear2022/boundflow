@@ -3,19 +3,22 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
 import json
 from pathlib import Path
-from typing import Sequence
+from typing import Mapping, Sequence
 
 import torch
 
+from boundflow.domains.interval import IntervalState
 from boundflow.frontends.plain_crown_bound_ir import build_plain_crown_bound_ir
-from boundflow.ir.bound import BoundMethodKind, BoundRepresentation
+from boundflow.ir.bound import BFBoundModule, BoundMethodKind, BoundRepresentation
 from boundflow.ir.plan import (
     BackendCapabilitySpec,
     BackendKind,
     HardwareProfile,
     PlanCost,
+    PlanTemplate,
     PlanProvenance,
     WorkloadProfile,
 )
@@ -38,46 +41,20 @@ from boundflow.runtime.crown_ibp import _forward_ibp_trace_mlp
 from boundflow.runtime.task_executor import InputSpec
 
 
-def build_reference_smoke_inputs():
-    """Reconstruct the exact typed Bound IR and PlanTemplate used by the CLI."""
+@dataclass(frozen=True)
+class ReferenceSmokeWorkload:
+    """All semantic and compiler inputs for the deterministic smoke workload."""
 
-    task_module = BFTaskModule(
-        tasks=[
-            BoundTask(
-                task_id="plan-ir-reference-smoke",
-                kind=TaskKind.INTERVAL_IBP,
-                ops=[
-                    TaskOp(
-                        "linear",
-                        "linear1",
-                        ["input", "weight", "bias"],
-                        ["output"],
-                    )
-                ],
-                input_values=["input"],
-                output_values=["output"],
-            )
-        ],
-        entry_task_id="plan-ir-reference-smoke",
-        bindings={
-            "params": {
-                "weight": torch.tensor([[1.0, -0.5], [0.25, 0.75]]),
-                "bias": torch.tensor([0.1, -0.2]),
-            }
-        },
-    )
-    input_spec = InputSpec.linf(
-        value_name="input",
-        center=torch.zeros(2, 2),
-        eps=0.1,
-    )
-    interval_env, relu_pre = _forward_ibp_trace_mlp(task_module, input_spec)
-    bound_module = build_plain_crown_bound_ir(
-        task_module,
-        input_spec,
-        interval_env=interval_env,
-        relu_pre=relu_pre,
-    ).module
+    task_module: BFTaskModule
+    input_spec: InputSpec
+    relu_pre: Mapping[str, IntervalState]
+    bound_module: BFBoundModule
+    template: PlanTemplate
+
+
+def build_reference_smoke_template(bound_module: BFBoundModule) -> PlanTemplate:
+    """Build the deterministic dense-reference PlanTemplate for a Bound module."""
+
     capability = BackendCapabilitySpec(
         capability_id="reference-dense-cpu-v1",
         backend=BackendKind.REFERENCE,
@@ -178,14 +155,69 @@ def build_reference_smoke_inputs():
         ),
         provenance=(PlanProvenance("artifact_scope", "reference_contract_smoke"),),
     )
-    template = build_reference_plan_template(
+    return build_reference_plan_template(
         bound_module,
         hardware=hardware,
         workload=workload,
         capabilities=(capability,),
         evidence=evidence,
     )
-    return bound_module, template
+
+
+def build_reference_smoke_workload() -> ReferenceSmokeWorkload:
+    """Reconstruct the exact semantic and compiler inputs used by the CLI."""
+
+    task_module = BFTaskModule(
+        tasks=[
+            BoundTask(
+                task_id="plan-ir-reference-smoke",
+                kind=TaskKind.INTERVAL_IBP,
+                ops=[
+                    TaskOp(
+                        "linear",
+                        "linear1",
+                        ["input", "weight", "bias"],
+                        ["output"],
+                    )
+                ],
+                input_values=["input"],
+                output_values=["output"],
+            )
+        ],
+        entry_task_id="plan-ir-reference-smoke",
+        bindings={
+            "params": {
+                "weight": torch.tensor([[1.0, -0.5], [0.25, 0.75]]),
+                "bias": torch.tensor([0.1, -0.2]),
+            }
+        },
+    )
+    input_spec = InputSpec.linf(
+        value_name="input",
+        center=torch.zeros(2, 2),
+        eps=0.1,
+    )
+    interval_env, relu_pre = _forward_ibp_trace_mlp(task_module, input_spec)
+    bound_module = build_plain_crown_bound_ir(
+        task_module,
+        input_spec,
+        interval_env=interval_env,
+        relu_pre=relu_pre,
+    ).module
+    return ReferenceSmokeWorkload(
+        task_module=task_module,
+        input_spec=input_spec,
+        relu_pre=relu_pre,
+        bound_module=bound_module,
+        template=build_reference_smoke_template(bound_module),
+    )
+
+
+def build_reference_smoke_inputs() -> tuple[BFBoundModule, PlanTemplate]:
+    """Return the historical compiler-input pair for existing callers."""
+
+    workload = build_reference_smoke_workload()
+    return workload.bound_module, workload.template
 
 
 def main(argv: Sequence[str] | None = None) -> int:

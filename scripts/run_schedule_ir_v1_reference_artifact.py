@@ -1,7 +1,7 @@
 """Generate or replay the Schedule IR v1 reference artifact."""
 
 # The CLI intentionally mirrors artifact hash/replay calls.
-# pylint: disable=duplicate-code,missing-function-docstring
+# pylint: disable=duplicate-code,missing-function-docstring,too-many-locals
 
 from __future__ import annotations
 
@@ -18,14 +18,16 @@ from boundflow.runtime.schedule_ir_artifact import (
     write_schedule_ir_artifact,
 )
 from boundflow.runtime.schedule_ir_executor import execute_schedule_reference
-from boundflow.runtime.task_ir_executor import execute_task_ir_reference
+from boundflow.runtime.task_ir_executor import execute_task_ir_semantics
 from scripts.run_plan_ir_v1_reference_artifact import (
-    build_reference_smoke_inputs,
+    build_reference_smoke_workload,
 )
 
 
 def _reconstruct():
-    bound_module, template = build_reference_smoke_inputs()
+    workload = build_reference_smoke_workload()
+    bound_module = workload.bound_module
+    template = workload.template
     instance = select_plan_instance(
         template,
         bound_module=bound_module,
@@ -44,7 +46,7 @@ def _reconstruct():
         template=template,
         instance=instance,
     )
-    return bound_module, template, instance, task_module, schedule
+    return workload, instance, task_module, schedule
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -55,7 +57,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     replay = subparsers.add_parser("replay")
     replay.add_argument("--artifact-dir", type=Path, required=True)
     args = parser.parse_args(argv)
-    bound_module, template, instance, task_module, schedule = _reconstruct()
+    workload, instance, task_module, schedule = _reconstruct()
+    bound_module = workload.bound_module
+    template = workload.template
     if args.command == "generate":
         trace = execute_schedule_reference(
             schedule,
@@ -63,12 +67,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             template=template,
             instance=instance,
         )
-        task_trace = execute_task_ir_reference(
+        _result, task_trace = execute_task_ir_semantics(
             task_module,
             schedule,
             bound_module=bound_module,
             template=template,
             instance=instance,
+            legacy_task_module=workload.task_module,
+            input_spec=workload.input_spec,
+            relu_pre=workload.relu_pre,
         )
         manifest = write_schedule_ir_artifact(
             args.out_dir,
@@ -79,6 +86,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             schedule=schedule,
             trace=trace,
             task_trace=task_trace,
+            legacy_task_module=workload.task_module,
+            input_spec=workload.input_spec,
+            relu_pre=workload.relu_pre,
         )
         status = "generated"
     else:
@@ -89,13 +99,19 @@ def main(argv: Sequence[str] | None = None) -> int:
             instance=instance,
             task_module=task_module,
             schedule=schedule,
+            legacy_task_module=workload.task_module,
+            input_spec=workload.input_spec,
+            relu_pre=workload.relu_pre,
         )
-        task_trace = execute_task_ir_reference(
+        _result, task_trace = execute_task_ir_semantics(
             task_module,
             schedule,
             bound_module=bound_module,
             template=template,
             instance=instance,
+            legacy_task_module=workload.task_module,
+            input_spec=workload.input_spec,
+            relu_pre=workload.relu_pre,
         )
         manifest = args.artifact_dir / "manifest.json"
         status = "replayed"

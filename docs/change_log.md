@@ -3118,3 +3118,26 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_task_ir_v1_foundation.md`
+
+---
+
+## 2026-07-28：Task/Schedule IR v1 逐任务语义闭环
+
+**主要改动**
+- 新增 stateful Bound IR session，每个 TaskIRUnit 只执行自己的连续 Bound op partition；
+- Task trace 新增真实 boundary value hashes，覆盖 MLP/CNN/residual/concat/structured materialize；
+- Task IR 新增 typed input/output tensor/shape constraints；
+- Schedule IR 新增 typed Transfer action；
+- fresh-process artifact 升级 v2，重算 Task trace 与 final lower/upper hashes。
+
+**证据与边界**
+- Task/Schedule/Artifact 专属：24 passed；
+- 全量：442 passed、1 skipped、6 warnings；
+- IR-3 synchronous reference closure validated-reduced；
+- production backend/runtime、state payload reuse、多设备/异步执行仍属于 IR-4+。
+
+**下一阶段**
+- IR-4 现有 backend/runtime 迁移，先做 typed PyTorch dense dispatch/cache contract。
+
+**记录**
+- `gemini_doc/change_2026-07-28_task_schedule_ir_v1_semantic_closure.md`

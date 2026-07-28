@@ -5,10 +5,9 @@
 > 当前研发分支：`feat/pr14-real-verification`
 > 总判定：PR-14B 为 **VALIDATED-NO-GO**，PR-14C 不启动；ASPLOS-ready 仍为 **NO**。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
-> 2026-07-28 进度：IR-1 Bound IR 与 IR-2 Plan IR 的最小 reference contract 已分别关闭；
-> IR-3B Schedule control/executor/trace foundation 已完成；当前唯一下一阶段为 IR-3C typed
-> Task IR + per-task reference execution。IR-3C typed Task schema/lowering/linkage 已完成，
-> 当前具体缺口收敛为 IR-3D per-task semantic executor + closure audit。
+> 2026-07-28 进度：IR-1 Bound IR、IR-2 Plan IR、IR-3 Task/Schedule IR 的最小
+> synchronous reference contract 已分别关闭；当前唯一下一阶段为 IR-4
+> production backend/runtime migration。
 
 ## 1. 当前真实阶段
 
@@ -17,7 +16,7 @@ BoundFlow 已经完成从边界表示到 query runtime prototype 的主干：
 | 层次 | 状态 | 已验证边界 |
 |---|---|---|
 | Structured Bound IR | IR-1 reference closure validated | typed schema/lowering/verifier、dense/structured rewrite/interpreter；生产 backend/runtime 待迁移 |
-| Plan IR / Planner | IR-2 reference closure validated-reduced | typed builder/selector/verifier/state-validity/replay；Schedule IR 尚未实现 |
+| Plan/Task/Schedule IR | IR-2/3 reference closure validated-reduced | typed builder/selector/task lowering/schedule verifier/per-task semantics/artifact v2；production backend/runtime 待迁移 |
 | Fused/multi-backend CROWN execution | validated-reduced | eager/chunked/structured/TVM fused 多预算选择；收益只在部分 regime |
 | Query runtime | validated-reduced | `BoundQuery`、state validity、dynamic batching、same-solver adapter、reduced GPU E2E |
 | 真实 complete verifier integration | PR-14B validated-no-go | 540-call coverage + MLP/ResNet fixed replay；activation 0/394，ResNet bound-equivalence fail |
@@ -70,9 +69,11 @@ PR-14 implementation 到此停止。原定 `docs/asplos-c1-c2-story-freeze` 已�
 `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`。仍不得用 PR-14C
 E2E 绕过 bound-equivalence gate。
 
-截至 2026-07-28，Bound IR 与 Plan IR 的 reference closure 已完成；当前从上述顺序的
-**Task/Schedule IR** 开始继续，不回滚重复实现 IR-1/2。IR-2 closure 的 raw historical
-artifact 缺失边界见 `gemini_doc/change_2026-07-28_plan_ir_v1_closure_audit.md`。
+截至 2026-07-28，Bound IR、Plan IR、Task/Schedule IR 的 synchronous reference closure
+已完成；当前进入 **IR-4 backend/runtime migration**，不回滚重复实现 IR-1/2/3。IR-2
+raw historical artifact 缺失边界见
+`gemini_doc/change_2026-07-28_plan_ir_v1_closure_audit.md`；IR-3 closure 证据见
+`gemini_doc/change_2026-07-28_task_schedule_ir_v1_semantic_closure.md`。
 
 明确禁止：
 
