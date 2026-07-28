@@ -51,6 +51,7 @@ from boundflow.planner.typed_benchmark_workloads import (
 
 ARTIFACT_SCHEMA = "boundflow.ir5-family-fair-artifact/v1"
 RESIDUAL_FINAL_ARTIFACT_SCHEMA = "boundflow.ir5-residual-final-artifact/v2"
+RESIDUAL_FINAL_V3_ARTIFACT_SCHEMA = "boundflow.ir5-residual-final-artifact/v3"
 CALIBRATION_WORKLOADS = (
     TypedWorkloadSpec("calibration-mlp-small", "calibration", 4, 32, 32, 8, 6101),
     TypedWorkloadSpec("calibration-mlp-wide", "calibration", 4, 96, 96, 10, 6102),
@@ -73,6 +74,14 @@ RESIDUAL_HELDOUT_WORKLOADS = (
     ),
     TypedResidualCNNWorkloadSpec(
         "final-residual-color-v2", "heldout", 4, 3, 18, 7, 12, 7402
+    ),
+)
+RESIDUAL_V3_HELDOUT_WORKLOADS = (
+    TypedResidualCNNWorkloadSpec(
+        "final-residual-gray-v3", "heldout", 4, 1, 14, 5, 12, 7501
+    ),
+    TypedResidualCNNWorkloadSpec(
+        "final-residual-color-v3", "heldout", 4, 3, 18, 7, 12, 7502
     ),
 )
 BACKENDS = (
@@ -110,6 +119,7 @@ class ArtifactSuite:  # pylint: disable=too-many-instance-attributes
     fit_scope: str
     evidence_scope: str
     from_forward_trace: bool
+    explicit_single_input_slice: bool = False
 
     @property
     def baseline_plan_id(self) -> str:
@@ -146,7 +156,21 @@ RESIDUAL_FINAL_V2 = ArtifactSuite(
     ),
     from_forward_trace=True,
 )
-SUITES = {item.name: item for item in (FAMILY_FAIR_V1, RESIDUAL_FINAL_V2)}
+RESIDUAL_FINAL_V3 = ArtifactSuite(
+    name="residual-final-v3",
+    schema_version=RESIDUAL_FINAL_V3_ARTIFACT_SCHEMA,
+    calibration_family="chain_cnn",
+    heldout_family="residual_cnn",
+    calibration=RESIDUAL_CALIBRATION_WORKLOADS,
+    heldout=RESIDUAL_V3_HELDOUT_WORKLOADS,
+    fit_scope="chain_cnn_calibration_only_before_residual_cnn_final_v3",
+    evidence_scope=(
+        "chain_cnn_calibration_to_residual_cnn_final_v3_with_exact_input_slice"
+    ),
+    from_forward_trace=True,
+    explicit_single_input_slice=True,
+)
+SUITES = {item.name: item for item in (FAMILY_FAIR_V1, RESIDUAL_FINAL_V3)}
 
 
 def generate_artifact(
@@ -158,7 +182,7 @@ def generate_artifact(
 ) -> None:
     """Run calibration, architecture-held-out candidates, and fair baselines."""
 
-    if suite == RESIDUAL_FINAL_V2 and device != "cuda":
+    if suite.heldout_family == "residual_cnn" and device != "cuda":
         raise ValueError("IR-5 residual final suite is CUDA-only")
     if out_dir.exists() and any(out_dir.iterdir()):
         raise ValueError(f"artifact output directory is not empty: {out_dir}")
@@ -184,6 +208,15 @@ def generate_artifact(
                 "CROWN backward from a precomputed forward trace"
                 if suite.from_forward_trace
                 else "full legacy CROWN including forward trace"
+            ),
+            **(
+                {
+                    "single_query_binding_contract": (
+                        "exact_clone_of_batched_input_center_first_query"
+                    )
+                }
+                if suite.explicit_single_input_slice
+                else {}
             ),
             "context_contract": _context_contract(),
             "freeze_scope": "all constants frozen before artifact generation",
@@ -243,10 +276,24 @@ def generate_artifact(
             cache_root=cache_root / "fixed-single",
         )[0]
         fixed_rows.append(single_measurement)
-        single_prepared = _prepared_convolutional(single_spec, batch=1, device=device)
+        single_prepared = _prepared_convolutional(
+            single_spec,
+            batch=1,
+            device=device,
+            input_center=(
+                batched_prepared.input_spec.center[:1].detach().clone()
+                if suite.explicit_single_input_slice
+                else None
+            ),
+        )
         semantic_checks.append(
             {
                 "workload_id": workload.workload_id,
+                **(
+                    _verify_input_slice_identity(batched_prepared, single_prepared)
+                    if suite.explicit_single_input_slice
+                    else {}
+                ),
                 **verify_single_query_matches_batch(batched_prepared, single_prepared),
             }
         )
@@ -370,6 +417,10 @@ def replay_artifact(
         "heldout": [item.to_dict() for item in suite.heldout],
         "context_contract": _context_contract(),
     }
+    if suite.explicit_single_input_slice:
+        expected_split["single_query_binding_contract"] = (
+            "exact_clone_of_batched_input_center_first_query"
+        )
     if any(split.get(key) != value for key, value in expected_split.items()):
         raise ValueError("IR-5 family split/context drift")
     if semantic:
@@ -379,8 +430,17 @@ def replay_artifact(
                 workload, batch=workload.batch, device=device
             )
             single = _prepared_convolutional(
-                _single_spec(workload), batch=1, device=device
+                _single_spec(workload),
+                batch=1,
+                device=device,
+                input_center=(
+                    batched.input_spec.center[:1].detach().clone()
+                    if suite.explicit_single_input_slice
+                    else None
+                ),
             )
+            if suite.explicit_single_input_slice:
+                _verify_input_slice_identity(batched, single)
             verify_single_query_matches_batch(batched, single)
             if suite.from_forward_trace:
                 measure_batched_original_from_forward_trace(
@@ -452,6 +512,7 @@ def _prepared_convolutional(
     *,
     batch: int,
     device: str = "cuda",
+    input_center: torch.Tensor | None = None,
 ):
     if isinstance(workload, TypedResidualCNNWorkloadSpec):
         return build_residual_cnn_candidate(
@@ -464,6 +525,7 @@ def _prepared_convolutional(
             block_channels=workload.block_channels,
             output_dim=workload.output_dim,
             seed=workload.seed,
+            input_center=input_center,
         )
     return build_cnn_candidate(
         workload_id=workload.workload_id,
@@ -476,6 +538,7 @@ def _prepared_convolutional(
         conv2_channels=workload.conv2_channels,
         output_dim=workload.output_dim,
         seed=workload.seed,
+        input_center=input_center,
     )
 
 
@@ -499,6 +562,21 @@ def _contexts(
             f"{workload_id}:low-memory", LOW_MEMORY_BUDGET_BYTES, 16
         ),
     )
+
+
+def _verify_input_slice_identity(batched, single) -> dict[str, object]:
+    """Fail unless fixed-single owns an exact clone of batch query zero."""
+
+    expected = batched.input_spec.center[:1]
+    actual = single.input_spec.center
+    exact = bool(torch.equal(expected, actual))
+    max_diff = float((expected - actual).abs().max().item())
+    if not exact:
+        raise ValueError("fixed-single input is not the exact batched first query")
+    return {
+        "input_center_exact": exact,
+        "input_center_max_abs_diff": max_diff,
+    }
 
 
 def _context_contract() -> dict[str, object]:

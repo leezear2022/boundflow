@@ -140,6 +140,49 @@ def test_ir5_residual_cnn_candidate_executes_typed_reference_and_dense() -> None
     assert "add_backward" in task_kinds[1]
 
 
+def test_residual_single_query_binds_exact_batched_input_slice() -> None:
+    batched = build_residual_cnn_candidate(
+        workload_id="residual-explicit-batch",
+        backend=BackendKind.REFERENCE,
+        device="cpu",
+        batch=3,
+        input_channels=1,
+        image_size=5,
+        block_channels=2,
+        output_dim=3,
+        seed=76,
+    )
+    single = build_residual_cnn_candidate(
+        workload_id="residual-explicit-single",
+        backend=BackendKind.REFERENCE,
+        device="cpu",
+        batch=1,
+        input_channels=1,
+        image_size=5,
+        block_channels=2,
+        output_dim=3,
+        seed=76,
+        input_center=batched.input_spec.center[:1],
+    )
+    assert torch.equal(single.input_spec.center, batched.input_spec.center[:1])
+    results = []
+    for prepared in (batched, single):
+        result, _trace = execute_task_ir_semantics(
+            prepared.task_module,
+            prepared.schedule,
+            bound_module=prepared.bound_module,
+            template=prepared.template,
+            instance=prepared.instance,
+            legacy_task_module=prepared.legacy_module,
+            input_spec=prepared.input_spec,
+            relu_pre=prepared.relu_pre,
+            backend=PyTorchTaskBackendRegistry(),
+        )
+        results.append(result)
+    torch.testing.assert_close(results[0].lower[:1], results[1].lower)
+    torch.testing.assert_close(results[0].upper[:1], results[1].upper)
+
+
 def test_prepared_task_execution_reuses_static_validation_and_rejects_drift() -> None:
     prepared = build_mlp_candidate(
         workload_id="prepared-contract",

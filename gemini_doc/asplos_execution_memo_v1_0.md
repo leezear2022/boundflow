@@ -20,6 +20,8 @@
 > frozen residual-CNN final gate。IR-5E 已冻结该 CUDA-only protocol 与未执行的
 > final seeds `7401/7402`；首次执行因 fixed-single 输入重采样不等于 batch 第一 query
 > 而 PROTOCOL-INVALID，未形成 manifest。`7401/7402` 已退役，IR-6 继续 blocked。
+> IR-5G 已冻结 exact-input-slice v3 与 fresh `7501/7502`，等待 protocol commit 后
+> 一次性执行；不得按 v2 timing 调整任何性能参数。
 
 ## 1. 锁定的论文命题
 
@@ -409,3 +411,5 @@ Bound IR v1
 - IR-5F 首次 v2 生成在 semantic gate 中止：同 seed 不保证不同 batch shape 的随机输入
   具有前缀关系。参数一致但 input max diff 为 3.735/2.167；无 summary/manifest，不能作
   性能结论。只允许显式 slice batched input、升级 schema 并旋转 fresh identities。
+- IR-5G 已实现上述唯一修复：single 输入 exact clone batched query zero，并在 bound
+  comparison 前做 tensor identity gate；v3 `7501/7502` 尚未执行。

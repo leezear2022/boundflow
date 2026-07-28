@@ -123,6 +123,9 @@
 - `gemini_doc/change_2026-07-28_ir5f_residual_final_v2_protocol_invalid.md`：IR-5F
   v2 首次运行在 fixed-single 输入身份门禁失败、shape-dependent RNG 根因与
   `7401/7402` 永久退役记录
+- `gemini_doc/change_2026-07-28_ir5g_exact_input_slice_v3_freeze.md`：IR-5G
+  fixed-single 显式切片 batched input 的方法学修复、v3 schema 与未执行
+  `7501/7502` final freeze
 - `gemini_doc/asplos_execution_memo_v1_0.md`：ASPLOS 研发的短执行入口与门禁
 - `gemini_doc/current_status_after_pr13.md`：PR-13 closure 后的真实状态、证据边界与当前缺口
 - `gemini_doc/pr14_execution_plan.md`：真实 verifier workload coverage/execution 的切片、门禁与止损

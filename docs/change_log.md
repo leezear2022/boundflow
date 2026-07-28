@@ -3474,3 +3474,22 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_ir5f_residual_final_v2_protocol_invalid.md`
+
+---
+
+## 2026-07-28：IR-5G exact-input-slice residual final v3 freeze
+
+**主要改动**
+- convolutional builder 支持显式 `input_center`，严格校验 shape/dtype；
+- fixed-single 从 batched query zero 精确 clone，不再依赖 RNG 前缀假设；
+- semantic gate 前新增 `torch.equal` input identity 门禁并写入 artifact；
+- 冻结 v3 schema 与 fresh `7501/7502` identities。
+
+**边界**
+- 不改 backend、预算、final shape、p90/Pareto 阈值；
+- 未读取 v2 held-out timing；
+- dummy residual test 通过，v3 exact identities 未执行；
+- protocol commit 后只允许一次正式生成。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5g_exact_input_slice_v3_freeze.md`

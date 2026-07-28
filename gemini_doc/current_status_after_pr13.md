@@ -28,6 +28,8 @@
 > IR-5E 已冻结 CUDA-only chain-CNN calibration→residual-CNN final v2 协议；正式
 > v2 首次执行因 fixed-single 重新采样的 input 与 batch 第一 query 不同而
 > PROTOCOL-INVALID；未生成 manifest，`7401/7402` 已退役。不得将此写成系统性能结果。
+> IR-5G 已用 exact batched-input slice 修复方法学，并冻结未执行的 v3
+> `7501/7502`；backend/budget/shape/阈值均未按 v2 timing 调整。
 
 ## 1. 当前真实阶段
 
@@ -134,6 +136,10 @@ commit 前运行。
 fixed-single 与 batched-first 输入不同。v2 在 semantic gate fail closed，未形成 summary/
 manifest，未进入正式性能判定。下一步只允许修复显式 input slicing、升级 protocol 并旋转
 fresh identities；IR-6 继续 blocked。
+
+v3 runner 现在先对 fixed-single 与 batched query zero 做 `torch.equal`，再检查 final
+bounds；split 记录 exact-clone contract。fresh `7501/7502` 只能在 v3 protocol commit
+后运行一次，结果无论成败都不得再旋转 final。
 
 明确禁止：
 

@@ -125,6 +125,7 @@ def build_cnn_candidate(  # pylint: disable=too-many-arguments
     conv2_channels: int,
     output_dim: int,
     seed: int,
+    input_center: torch.Tensor | None = None,
 ) -> PreparedTypedBenchmark:
     """Build a deterministic two-convolution family under one typed backend."""
 
@@ -164,16 +165,14 @@ def build_cnn_candidate(  # pylint: disable=too-many-arguments
         ),
         "b3": torch.randn(output_dim, generator=generator),
     }
-    center = torch.randn(
-        batch,
-        input_channels,
-        image_size,
-        image_size,
+    center = _input_center_or_random(
+        (batch, input_channels, image_size, image_size),
         generator=generator,
+        input_center=input_center,
+        device=device,
     )
     if device != "cpu":
         params = {name: value.to(device) for name, value in params.items()}
-        center = center.to(device)
     conv = {
         "stride": (1, 1),
         "padding": (1, 1),
@@ -244,6 +243,7 @@ def build_residual_cnn_candidate(  # pylint: disable=too-many-arguments
     block_channels: int,
     output_dim: int,
     seed: int,
+    input_center: torch.Tensor | None = None,
 ) -> PreparedTypedBenchmark:
     """Build a deterministic residual-CNN family under one typed backend."""
 
@@ -281,16 +281,14 @@ def build_residual_cnn_candidate(  # pylint: disable=too-many-arguments
         ),
         "b3": torch.randn(output_dim, generator=generator),
     }
-    center = torch.randn(
-        batch,
-        input_channels,
-        image_size,
-        image_size,
+    center = _input_center_or_random(
+        (batch, input_channels, image_size, image_size),
         generator=generator,
+        input_center=input_center,
+        device=device,
     )
     if device != "cpu":
         params = {name: value.to(device) for name, value in params.items()}
-        center = center.to(device)
     conv = {
         "stride": (1, 1),
         "padding": (1, 1),
@@ -410,6 +408,27 @@ def _prepare_candidate(
         task_module=task_module,
         schedule=schedule,
     )
+
+
+def _input_center_or_random(
+    shape: tuple[int, ...],
+    *,
+    generator: torch.Generator,
+    input_center: torch.Tensor | None,
+    device: str,
+) -> torch.Tensor:
+    """Bind an exact input sample or generate the frozen workload input."""
+
+    center = (
+        torch.randn(*shape, generator=generator)
+        if input_center is None
+        else input_center.detach().clone()
+    )
+    if tuple(int(dim) for dim in center.shape) != shape:
+        raise ValueError("typed benchmark input center shape mismatch")
+    if center.dtype != torch.float32:
+        raise ValueError("typed benchmark input center must use float32")
+    return center.to(device)
 
 
 def _cost(
