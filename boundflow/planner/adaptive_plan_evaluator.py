@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
+from functools import partial
 import math
 import statistics
 from typing import Mapping, Optional, Sequence, Tuple
@@ -49,6 +50,7 @@ class AdaptivePlanObservation:  # pylint: disable=too-many-instance-attributes
     plan_id: str
     plan_instance_hash: str
     predicted_latency_ms: float
+    predicted_compile_ms: float
     local_score_ms: float
     measured_latency_ms: Tuple[float, ...]
     measured_compile_ms: float
@@ -63,6 +65,7 @@ class AdaptivePlanObservation:  # pylint: disable=too-many-instance-attributes
             raise ValueError("adaptive plan observation identity is invalid")
         numeric = (
             self.predicted_latency_ms,
+            self.predicted_compile_ms,
             self.local_score_ms,
             self.measured_compile_ms,
             *self.measured_latency_ms,
@@ -109,7 +112,7 @@ class AdaptivePolicyOutcome:  # pylint: disable=too-many-instance-attributes
         }
 
 
-def evaluate_adaptive_plan_policies(
+def evaluate_adaptive_plan_policies(  # pylint: disable=too-many-locals
     contexts: Sequence[AdaptiveEvaluationContext],
     observations: Sequence[AdaptivePlanObservation],
     *,
@@ -140,13 +143,8 @@ def evaluate_adaptive_plan_policies(
             raise ValueError(
                 f"adaptive context has no feasible oracle plan: {context.context_id}"
             )
-        oracle = min(
-            feasible,
-            key=lambda item, current=context: (
-                _measured_ttv(item, current),
-                item.plan_id,
-            ),
-        )
+
+        oracle = min(feasible, key=partial(_policy_key, context=context, measured=True))
         selected = {
             AdaptivePlanPolicy.FIXED: (
                 by_id[fixed_plan_id] if by_id[fixed_plan_id] in feasible else None
@@ -156,10 +154,7 @@ def evaluate_adaptive_plan_policies(
             ),
             AdaptivePlanPolicy.GLOBAL: min(
                 feasible,
-                key=lambda item, current=context: (
-                    _predicted_ttv(item, current),
-                    item.plan_id,
-                ),
+                key=partial(_policy_key, context=context, measured=False),
             ),
             AdaptivePlanPolicy.ORACLE: oracle,
         }
@@ -231,10 +226,32 @@ def _compile_miss_ms(
     return observation.measured_compile_ms
 
 
+def _policy_key(
+    observation: AdaptivePlanObservation,
+    *,
+    context: AdaptiveEvaluationContext,
+    measured: bool,
+) -> tuple[float, str]:
+    score = (
+        _measured_ttv(observation, context)
+        if measured
+        else _predicted_ttv(observation, context)
+    )
+    return score, observation.plan_id
+
+
+def _predicted_compile_miss_ms(
+    observation: AdaptivePlanObservation, context: AdaptiveEvaluationContext
+) -> float:
+    if observation.compiled_artifact_key in set(context.cached_artifact_keys):
+        return 0.0
+    return observation.predicted_compile_ms
+
+
 def _predicted_ttv(
     observation: AdaptivePlanObservation, context: AdaptiveEvaluationContext
 ) -> float:
-    return _compile_miss_ms(observation, context) + (
+    return _predicted_compile_miss_ms(observation, context) + (
         observation.predicted_latency_ms * context.expected_query_count
     )
 

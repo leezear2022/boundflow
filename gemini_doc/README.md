@@ -96,6 +96,9 @@
 - `gemini_doc/change_2026-07-28_ir5b_fair_policy_evaluator.md`：IR-5B
   fixed/local/global/oracle 统一 observation evaluator、tail/TTV/peak/regret 与 synthetic
   contract artifact
+- `gemini_doc/change_2026-07-28_ir5c0_typed_measured_workload_foundation.md`：IR-5C0
+  正式 typed MLP benchmark workload、候选 Plan/Schedule 构造与 predicted/measured compile
+  防泄漏
 - `gemini_doc/asplos_execution_memo_v1_0.md`：ASPLOS 研发的短执行入口与门禁
 - `gemini_doc/current_status_after_pr13.md`：PR-13 closure 后的真实状态、证据边界与当前缺口
 - `gemini_doc/pr14_execution_plan.md`：真实 verifier workload coverage/execution 的切片、门禁与止损

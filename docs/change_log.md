@@ -3303,3 +3303,20 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_ir5b_fair_policy_evaluator.md`
+
+---
+
+## 2026-07-28：IR-5C0 typed measured workload foundation
+
+**主要改动**
+- 新增正式 typed MLP benchmark workload/candidate builder；
+- 同语义生成 reference 与 fused backend 的完整 Plan/Task/Schedule；
+- evaluator 分离 predicted/measured compile，避免 held-out leakage。
+
+**证据与边界**
+- 定向 3 passed；
+- reference/dense final bounds 一致、PlanInstance hash 不同；
+- 尚无 measured held-out 数字，IR-5C 继续。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5c0_typed_measured_workload_foundation.md`
