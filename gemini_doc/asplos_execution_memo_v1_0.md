@@ -369,3 +369,5 @@ Bound IR v1
   升级为 paper-level complete。
 - IR-4A 已新增跨 Bound/Plan/Task/backend 的 typed dispatch key 和 PyTorch reference
   prepared-task adapter；这只是迁移入口，chunked/structured/TVM/query runtime 仍为 pending。
+- IR-4B 已把 PyTorch dense/structured/chunked 接入 typed registry；chunked fused Task 在 CUDA
+  上真实调用原 executor。下一门禁是 TVM typed compile/cache，不是孤立 kernel 调优。

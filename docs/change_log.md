@@ -3163,3 +3163,25 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_ir4a_typed_backend_dispatch.md`
+
+---
+
+## 2026-07-28：IR-4B PyTorch typed backend registry
+
+**主要改动**
+- Task lowering 按 BackendKind 生成并验证独立 implementation ID；
+- Bound session 新增真实 ReLU→Linear/Conv fused task execution；
+- 新增 PyTorch reference/dense/structured/chunked typed registry；
+- chunked selected task 真实调用旧 TorchChunkedFusedCrownExecutor；
+- 增加 MLP/CNN/structured/CUDA chunked 对齐与非法 non-fused rejection。
+
+**证据与边界**
+- IR-4B 专属：5 passed；相邻：42 passed；
+- 全量：448 passed、1 skipped、6 warnings；
+- PyTorch 三类 backend migration validated；TVM/query-runtime/semantic fallback pending。
+
+**下一阶段**
+- IR-4C TVM fused/unfused typed backend 与完整 dispatch-key compile cache。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir4b_pytorch_backend_registry.md`

@@ -36,6 +36,12 @@ from ..ir.bound import (
 )
 from ..ir.task import BFTaskModule
 from .linear_operator import DenseLinearOperator, LinearOperator
+from .fused_crown import (
+    FusedCrownExecutionContext,
+    FusedCrownExecutor,
+    FusedReluAffineDescriptor,
+    FusedReluAffineRequest,
+)
 from .task_executor import InputSpec
 
 Coefficient = torch.Tensor | LinearOperator
@@ -441,6 +447,146 @@ class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
             ),
         )
 
+    def execute_fused_relu_affine_task(
+        self,
+        op_ids: Tuple[str, ...],
+        *,
+        output_value_ids: Tuple[str, ...],
+        executor: FusedCrownExecutor,
+    ) -> BoundIRTaskStepResult:
+        """Execute one exact ReLU→Affine Bound region through a fused backend."""
+
+        if len(op_ids) != 2:
+            raise ValueError("fused Bound task requires exactly two op IDs")
+        expected = self.bound_module.graph.ops[
+            self.next_op_index : self.next_op_index + 2
+        ]
+        if tuple(op.op_id for op in expected) != op_ids:
+            raise ValueError("fused Bound task is non-contiguous or reordered")
+        relu_op, affine_op = expected
+        if relu_op.kind != BoundOpKind.RELU_RELAXATION or affine_op.kind not in {
+            BoundOpKind.LINEAR_BACKWARD,
+            BoundOpKind.CONV2D_BACKWARD,
+        }:
+            raise ValueError("fused Bound task must be ReLU followed by affine")
+        relu_attrs = _attrs(relu_op, ReluRelaxationAttrs)
+        preactivation = relu_attrs.preactivation_primal_value_id
+        if preactivation is None or preactivation not in self.relu_pre:
+            raise KeyError(f"missing ReLU pre-activation binding '{preactivation}'")
+        A_u, b_u, A_l, b_l = _load_state(self.env, relu_op.inputs)
+        if not torch.is_tensor(A_u) or not torch.is_tensor(A_l):
+            raise ValueError("fused Bound task requires dense coefficient inputs")
+        pre = self.relu_pre[preactivation]
+        alpha_u, beta_u, alpha_l, beta_l = _relu_relaxation_parameters(pre)
+        source_shape = _coefficient_primal_shape(self.values, affine_op.inputs[0])
+        target_shape = _coefficient_primal_shape(self.values, affine_op.outputs[0])
+        attrs: dict[str, object] = {}
+        if affine_op.kind == BoundOpKind.LINEAR_BACKWARD:
+            affine_attrs = _attrs(affine_op, LinearBackwardAttrs)
+            kind = "linear"
+            weight = _tensor_binding(
+                self.params, affine_attrs.weight_primal_value_id, like=A_u
+            )
+            bias = (
+                None
+                if affine_attrs.bias_primal_value_id is None
+                else _tensor_binding(
+                    self.params, affine_attrs.bias_primal_value_id, like=A_u
+                )
+            )
+        else:
+            affine_attrs = _attrs(affine_op, Conv2dBackwardAttrs)
+            kind = "conv2d"
+            weight = _tensor_binding(
+                self.params, affine_attrs.weight_primal_value_id, like=A_u
+            )
+            bias = (
+                None
+                if affine_attrs.bias_primal_value_id is None
+                else _tensor_binding(
+                    self.params, affine_attrs.bias_primal_value_id, like=A_u
+                )
+            )
+            attrs.update(
+                stride=affine_attrs.stride,
+                padding=affine_attrs.padding,
+                dilation=affine_attrs.dilation,
+                groups=affine_attrs.groups,
+                output_padding=tuple(
+                    int(target_shape[axis + 1])
+                    - (
+                        (int(source_shape[axis + 1]) - 1)
+                        * int(affine_attrs.stride[axis])
+                        - 2 * int(affine_attrs.padding[axis])
+                        + int(affine_attrs.dilation[axis])
+                        * (int(weight.shape[axis + 2]) - 1)
+                        + 1
+                    )
+                    for axis in range(2)
+                ),
+            )
+        context = FusedCrownExecutionContext()
+        descriptor = FusedReluAffineDescriptor(
+            kind=kind,  # type: ignore[arg-type]
+            coefficient_shape=(
+                int(A_u.shape[0]),
+                int(A_u.shape[1]),
+                int(A_u[0, 0].numel()),
+            ),
+            weight=weight,
+            bias=bias,
+            input_shape=target_shape,
+            output_shape=source_shape,
+            attrs=attrs,
+            device=A_u.device,
+            dtype=A_u.dtype,
+        )
+        if not executor.supports_descriptor(descriptor, context):
+            raise ValueError("selected fused backend rejects Task IR descriptor")
+        request = FusedReluAffineRequest(
+            kind=kind,  # type: ignore[arg-type]
+            A_u=A_u.contiguous(),
+            A_l=A_l.contiguous(),
+            alpha_u=alpha_u.contiguous(),
+            alpha_l=alpha_l.contiguous(),
+            beta_u=beta_u.contiguous(),
+            beta_l=beta_l.contiguous(),
+            weight=weight.contiguous(),
+            bias=None if bias is None else bias.contiguous(),
+            input_shape=target_shape,
+            output_shape=source_shape,
+            attrs=attrs,
+        )
+        if not executor.supports(request, context):
+            raise ValueError("selected fused backend rejects Task IR request")
+        stream = (
+            torch.cuda.current_stream(A_u.device) if A_u.device.type == "cuda" else None
+        )
+        result = executor.run(request, stream=stream)
+        _store_state(
+            self.env,
+            affine_op.outputs,
+            (
+                result.A_prev_u,
+                b_u + result.bias_delta_u,
+                result.A_prev_l,
+                b_l + result.bias_delta_l,
+            ),
+        )
+        self.next_op_index += 2
+        missing = tuple(
+            value_id for value_id in output_value_ids if value_id not in self.env
+        )
+        if missing:
+            raise ValueError(f"fused Bound task omits outputs: {missing}")
+        return BoundIRTaskStepResult(
+            op_ids=op_ids,
+            output_value_hashes=tuple(
+                (value_id, _runtime_value_hash(self.env[value_id]))
+                for value_id in output_value_ids
+            ),
+        )
+
     def result(self) -> IntervalState:
         """Return final bounds only after every Bound operation has executed."""
 
@@ -767,29 +913,11 @@ def _relu_backward(
     *,
     pre: IntervalState,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-    lower = pre.lower.reshape(int(pre.lower.shape[0]), -1)
-    upper = pre.upper.reshape(int(pre.upper.shape[0]), -1)
-    if lower.shape != upper.shape:
-        raise ValueError("ReLU pre-activation lower/upper shapes differ")
+    alpha_u, beta_u, alpha_l, _beta_l = _relu_relaxation_parameters(pre)
     A_u_flat = A_u.reshape(int(A_u.shape[0]), int(A_u.shape[1]), -1)
     A_l_flat = A_l.reshape(int(A_l.shape[0]), int(A_l.shape[1]), -1)
-    if int(A_u_flat.shape[2]) != int(lower.shape[1]):
+    if int(A_u_flat.shape[2]) != int(alpha_u.shape[1]):
         raise ValueError("ReLU coefficient/pre-activation shape mismatch")
-
-    positive = lower >= 0
-    negative = upper <= 0
-    ambiguous = ~(positive | negative)
-    alpha_u = torch.zeros_like(lower)
-    beta_u = torch.zeros_like(lower)
-    alpha_l = torch.zeros_like(lower)
-    alpha_u[positive] = 1
-    alpha_l[positive] = 1
-    if ambiguous.any():
-        denominator = (upper[ambiguous] - lower[ambiguous]).clamp_min(
-            torch.finfo(lower.dtype).eps
-        )
-        alpha_u[ambiguous] = upper[ambiguous] / denominator
-        beta_u[ambiguous] = -lower[ambiguous] * alpha_u[ambiguous]
 
     upper_alpha = torch.where(A_u_flat >= 0, alpha_u.unsqueeze(1), alpha_l.unsqueeze(1))
     upper_beta = torch.where(
@@ -805,6 +933,31 @@ def _relu_backward(
         A_l_flat * lower_alpha,
         b_l + (A_l_flat * lower_beta).sum(dim=2),
     )
+
+
+def _relu_relaxation_parameters(
+    pre: IntervalState,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    lower = pre.lower.reshape(int(pre.lower.shape[0]), -1)
+    upper = pre.upper.reshape(int(pre.upper.shape[0]), -1)
+    if lower.shape != upper.shape:
+        raise ValueError("ReLU pre-activation lower/upper shapes differ")
+    positive = lower >= 0
+    negative = upper <= 0
+    ambiguous = ~(positive | negative)
+    alpha_u = torch.zeros_like(lower)
+    beta_u = torch.zeros_like(lower)
+    alpha_l = torch.zeros_like(lower)
+    beta_l = torch.zeros_like(lower)
+    alpha_u[positive] = 1
+    alpha_l[positive] = 1
+    if ambiguous.any():
+        denominator = (upper[ambiguous] - lower[ambiguous]).clamp_min(
+            torch.finfo(lower.dtype).eps
+        )
+        alpha_u[ambiguous] = upper[ambiguous] / denominator
+        beta_u[ambiguous] = -lower[ambiguous] * alpha_u[ambiguous]
+    return alpha_u, beta_u, alpha_l, beta_l
 
 
 def _conv2d_backward(

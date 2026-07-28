@@ -12,11 +12,15 @@ import json
 from typing import Optional, Protocol
 
 from ..ir.bound import BFBoundModule
-from ..ir.plan import BackendKind, PlanInstance, PlanTemplate
+from ..ir.plan import BackendCandidate, BackendKind, PlanInstance, PlanTemplate
 from ..ir.task_v1 import TaskIRModule, TaskIRUnit
 from .bound_ir_interpreter import (
     BoundIRTaskStepResult,
     PlainCrownBoundIRSession,
+)
+from .fused_crown import (
+    TorchChunkedFusedCrownExecutor,
+    TorchDenseFusedCrownReference,
 )
 
 BACKEND_DISPATCH_KEY_SCHEMA_VERSION = "boundflow.backend-dispatch-key/v1"
@@ -135,7 +139,6 @@ class TypedTaskBackend(Protocol):
         template: PlanTemplate,
     ) -> BoundIRTaskStepResult:
         """Execute one task or reject its typed capability."""
-        ...
 
 
 @dataclass(frozen=True)
@@ -219,3 +222,132 @@ class PyTorchReferenceTaskBackend:
             prepared.op_ids,
             output_value_ids=prepared.output_value_ids,
         )
+
+
+@dataclass(frozen=True)
+class _PreparedPyTorchTask:
+    backend: BackendKind
+    task_id: str
+    op_ids: tuple[str, ...]
+    output_value_ids: tuple[str, ...]
+    capability_id: str
+
+
+class PyTorchTaskBackendRegistry:
+    """Typed registry for reference, dense, structured, and chunked PyTorch."""
+
+    def __init__(self, *, chunk_rows: int = 128) -> None:
+        self._reference = PyTorchReferenceTaskBackend()
+        self._dense_fused = TorchDenseFusedCrownReference()
+        self._chunked = TorchChunkedFusedCrownExecutor(chunk_rows=chunk_rows)
+        self._prepared: dict[str, _PreparedPyTorchTask] = {}
+        self.cache_hits = 0
+        self.cache_misses = 0
+
+    def dispatch(
+        self,
+        task: TaskIRUnit,
+        key: BackendDispatchKey,
+        *,
+        session: PlainCrownBoundIRSession,
+        template: PlanTemplate,
+    ) -> BoundIRTaskStepResult:
+        candidate, backend = _validate_typed_dispatch(
+            task,
+            key,
+            session=session,
+            template=template,
+        )
+        if backend == BackendKind.REFERENCE:
+            return self._reference.dispatch(
+                task, key, session=session, template=template
+            )
+        if backend not in {
+            BackendKind.PYTORCH_DENSE,
+            BackendKind.PYTORCH_STRUCTURED,
+            BackendKind.PYTORCH_CHUNKED,
+        }:
+            raise ValueError(f"PyTorch registry rejects backend: {backend.value}")
+        prepared = _PreparedPyTorchTask(
+            backend=backend,
+            task_id=task.task_id,
+            op_ids=tuple(op_ref.op_id for op_ref in task.op_refs),
+            output_value_ids=task.output_value_ids,
+            capability_id=candidate.capability_id,
+        )
+        digest = key.stable_hash()
+        cached = self._prepared.get(digest)
+        if cached is None:
+            self._prepared[digest] = prepared
+            self.cache_misses += 1
+        elif cached != prepared:
+            raise ValueError("PyTorch backend cache key collision or stale task")
+        else:
+            self.cache_hits += 1
+        fused = (
+            len(task.op_refs) == 2
+            and task.op_refs[0].kind.value == "relu_relaxation"
+            and task.op_refs[1].kind.value in {"linear_backward", "conv2d_backward"}
+        )
+        if backend == BackendKind.PYTORCH_CHUNKED:
+            if not fused:
+                raise ValueError(
+                    "PyTorch chunked backend requires fused ReLU→Affine Task IR"
+                )
+            return session.execute_fused_relu_affine_task(
+                prepared.op_ids,
+                output_value_ids=prepared.output_value_ids,
+                executor=self._chunked,
+            )
+        if backend == BackendKind.PYTORCH_DENSE and fused:
+            return session.execute_fused_relu_affine_task(
+                prepared.op_ids,
+                output_value_ids=prepared.output_value_ids,
+                executor=self._dense_fused,
+            )
+        return session.execute_task(
+            prepared.op_ids,
+            output_value_ids=prepared.output_value_ids,
+        )
+
+
+def _validate_typed_dispatch(
+    task: TaskIRUnit,
+    key: BackendDispatchKey,
+    *,
+    session: PlainCrownBoundIRSession,
+    template: PlanTemplate,
+) -> tuple[BackendCandidate, BackendKind]:
+    key.validate()
+    if (
+        key.task_id != task.task_id
+        or key.backend_candidate_id != task.backend.backend_candidate_id
+        or key.capability_id != task.backend.capability_id
+        or key.bound_module_hash != session.bound_module.stable_hash()
+        or key.plan_template_hash
+        != template.stable_hash(bound_module=session.bound_module)
+    ):
+        raise ValueError("backend dispatch key does not match typed task")
+    candidates = {
+        candidate.candidate_id: candidate for candidate in template.backend_candidates
+    }
+    candidate = candidates.get(task.backend.backend_candidate_id)
+    if (
+        candidate is None
+        or not candidate.static_legal
+        or candidate.capability_id != task.backend.capability_id
+    ):
+        raise ValueError("typed backend registry rejects selected capability")
+    capabilities = {
+        capability.capability_id: capability for capability in template.capabilities
+    }
+    capability = capabilities.get(task.backend.capability_id)
+    if (
+        capability is None
+        or capability.backend != candidate.backend
+        or any(
+            op_ref.kind not in capability.supported_op_kinds for op_ref in task.op_refs
+        )
+    ):
+        raise ValueError("typed backend registry rejects Task IR op kinds")
+    return candidate, candidate.backend

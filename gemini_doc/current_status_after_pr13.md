@@ -8,7 +8,8 @@
 > 2026-07-28 进度：IR-1 Bound IR、IR-2 Plan IR、IR-3 Task/Schedule IR 的最小
 > synchronous reference contract 已分别关闭；当前唯一下一阶段为 IR-4
 > production backend/runtime migration。IR-4A typed dispatch key + PyTorch reference
-> adapter 已完成 foundation；chunked/structured/TVM/query runtime 仍待迁移。
+> adapter 已完成 foundation；IR-4B dense/structured/chunked typed registry 已通过，
+> 当前缺口为 TVM、semantic fallback、state payload 与 query runtime。
 
 ## 1. 当前真实阶段
 
