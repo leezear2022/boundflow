@@ -33,7 +33,7 @@ from .plan import (
     RegionCandidate,
     RegionKind,
 )
-from .schedule import LaunchAction, ScheduleModule
+from .schedule import LaunchAction, ScheduleModule, StateLoadAction
 
 TASK_IR_SCHEMA_VERSION = "boundflow.task_ir/v1.0"
 
@@ -426,7 +426,7 @@ class TaskIRModule:
         template: PlanTemplate,
         instance: PlanInstance,
     ) -> None:
-        """Require every typed task to have exactly one matching launch."""
+        """Require one launch or exact state coverage for every typed task."""
 
         self.validate(bound_module=bound_module, template=template, instance=instance)
         schedule.validate(
@@ -438,10 +438,22 @@ class TaskIRModule:
         launch_by_task = {launch.task_id: launch for launch in launches}
         if len(launch_by_task) != len(launches):
             raise ValueError("Schedule IR launches a Task IR task more than once")
-        if set(launch_by_task) != {task.task_id for task in self.tasks}:
-            raise ValueError("Task/Schedule IR launch sets differ")
+        loaded_value_ids = {
+            action.source_value_id
+            for action in schedule.actions
+            if isinstance(action, StateLoadAction)
+        }
+        task_ids = {task.task_id for task in self.tasks}
+        if not set(launch_by_task).issubset(task_ids):
+            raise ValueError("Schedule IR launches an unknown Task IR task")
         for task in self.tasks:
-            launch = launch_by_task[task.task_id]
+            launch = launch_by_task.get(task.task_id)
+            if launch is None:
+                if not set(task.output_value_ids).issubset(loaded_value_ids):
+                    raise ValueError(
+                        "Task/Schedule IR omits a task without exact state outputs"
+                    )
+                continue
             if (
                 launch.region_id != task.region_id
                 or launch.backend_candidate_id != task.backend.backend_candidate_id

@@ -3207,3 +3207,28 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_ir4c_tvm_backend_cache_fallback.md`
+
+---
+
+## 2026-07-28：IR-4D typed compiler query 与 exact state runtime
+
+**主要改动**
+- 新增只接受已验证 plain-CROWN 子集的 typed compiler query 入口；
+- query 经 PlanInstance→TaskIR→ScheduleIR→typed backend 执行并保持原始 ID 顺序；
+- 新增绑定 Bound module/value/version/content hash 的 dense runtime state store；
+- Schedule StateLoad/Store/Invalidate 具有真实语义，完整 state outputs 可跳过对应 Task；
+- legacy PR-13 α/β capability 在 compiler 入口显式 PR-14 No-Go；
+- 新增 fresh-process query/state artifact generate/replay。
+
+**证据与边界**
+- IR-4D + 相邻定向：42 passed；
+- 全量：462 passed、1 skipped、6 warnings；
+- Mypy 0 issues，Pylint 10.00/10；
+- 不宣称跨 query physical batching；
+- 旧 SameSolverQueryRuntime α/β executor 仍待 IR-4 closure audit。
+
+**下一阶段**
+- 执行 IR-4 closure audit；在旧 α/β 路径迁移/退役/validated-reduced 边界明确前不进入 IR-5。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir4d_compiler_query_state_runtime.md`

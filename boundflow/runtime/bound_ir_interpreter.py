@@ -447,6 +447,90 @@ class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
             ),
         )
 
+    def load_state_value(
+        self,
+        value_id: str,
+        *,
+        state_version: str,
+        value: torch.Tensor,
+    ) -> None:
+        """Bind one exact dense cached value before its producer task runs."""
+
+        bound_value = self.values.get(value_id)
+        if bound_value is None:
+            raise ValueError(f"runtime state references unknown value: {value_id}")
+        if bound_value.state_version != state_version:
+            raise ValueError("runtime state version differs from Bound IR")
+        if bound_value.representation != BoundRepresentation.DENSE:
+            raise NotImplementedError(
+                "runtime state payload v1 supports dense values only"
+            )
+        expected_shape = bound_value.tensor_type.shape
+        if any(dim is None for dim in expected_shape):
+            raise NotImplementedError(
+                "runtime state payload v1 requires static Bound value shapes"
+            )
+        static_shape = cast(Tuple[int, ...], expected_shape)
+        if tuple(int(dim) for dim in value.shape) != tuple(
+            int(dim) for dim in static_shape
+        ):
+            raise ValueError("runtime state tensor shape differs from Bound IR")
+        if str(value.dtype).removeprefix("torch.") != bound_value.tensor_type.dtype:
+            raise ValueError("runtime state tensor dtype differs from Bound IR")
+        if str(value.device) != bound_value.tensor_type.device:
+            raise ValueError("runtime state tensor device differs from Bound IR")
+        existing = self.env.get(value_id)
+        if existing is not None and _runtime_value_hash(
+            existing
+        ) != _runtime_value_hash(value):
+            raise ValueError("runtime state conflicts with an existing value")
+        self.env[value_id] = value.detach().clone()
+
+    def export_state_value(self, value_id: str, *, state_version: str) -> torch.Tensor:
+        """Return an owned dense value only after exact-version validation."""
+
+        bound_value = self.values.get(value_id)
+        if bound_value is None or bound_value.state_version != state_version:
+            raise ValueError("runtime state export identity/version mismatch")
+        value = self.env.get(value_id)
+        if value is None:
+            raise ValueError("runtime state export requested before value definition")
+        if not torch.is_tensor(value):
+            raise NotImplementedError(
+                "runtime state payload v1 does not serialize structured operators"
+            )
+        return value.detach().clone()
+
+    def skip_task_with_loaded_outputs(
+        self,
+        op_ids: Tuple[str, ...],
+        *,
+        output_value_ids: Tuple[str, ...],
+    ) -> BoundIRTaskStepResult:
+        """Advance past a task only when every boundary output was loaded."""
+
+        if not op_ids or not output_value_ids:
+            raise ValueError("state-reused task requires ops and boundary outputs")
+        stop = self.next_op_index + len(op_ids)
+        expected = self.bound_module.graph.ops[self.next_op_index : stop]
+        if tuple(op.op_id for op in expected) != op_ids:
+            raise ValueError("state-reused Bound task is reordered or non-contiguous")
+        missing = tuple(
+            value_id for value_id in output_value_ids if value_id not in self.env
+        )
+        if missing:
+            raise ValueError(
+                f"state reuse cannot skip task with unloaded outputs: {missing}"
+            )
+        self.next_op_index = stop
+        return BoundIRTaskStepResult(
+            op_ids=op_ids,
+            output_value_hashes=tuple(
+                (value_id, _runtime_value_hash(self.env[value_id]))
+                for value_id in output_value_ids
+            ),
+        )
+
     def execute_fused_relu_affine_task(
         self,
         op_ids: Tuple[str, ...],
@@ -874,6 +958,12 @@ class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
 def _runtime_value_hash(value: RuntimeValue) -> str:
     tensor = value if torch.is_tensor(value) else value.to_dense()
     return tensor_content_hash(tensor)
+
+
+def runtime_value_hash(value: RuntimeValue) -> str:
+    """Return the canonical content hash used by runtime state payloads."""
+
+    return _runtime_value_hash(value)
 
 
 def _objective_tensor(

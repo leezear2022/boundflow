@@ -666,6 +666,24 @@ class ScheduleModule:  # pylint: disable=too-many-instance-attributes
         backend_by_region = _selected_backends(template, instance)
         selected_transitions = _selected_transitions(template, instance)
         selected_states = _selected_states(template, instance)
+        reused_value_ids = {
+            candidate.source_value_id
+            for candidate in selected_states.values()
+            if candidate.action == StateAction.REUSE
+        }
+        state_reused_region_ids = {
+            region.region_id
+            for region in selected_regions
+            if set(region.output_value_ids).issubset(reused_value_ids)
+        }
+        required_transition_ids = {
+            candidate_id
+            for representation in template.representation_candidates
+            if representation.region_id not in state_reused_region_ids
+            and representation.candidate_id
+            in {decision.candidate_id for decision in instance.representation_decisions}
+            for candidate_id in representation.required_transition_candidate_ids
+        }
         region_by_op = {
             op_id: region for region in selected_regions for op_id in region.op_ids
         }
@@ -942,9 +960,16 @@ class ScheduleModule:  # pylint: disable=too-many-instance-attributes
             raise ValueError("Schedule IR leaks allocated arenas")
         if peak_bytes != expected_peak:
             raise ValueError("Schedule IR runtime ledger peak mismatch")
-        if launched_regions != {region.region_id for region in selected_regions}:
-            raise ValueError("Schedule IR does not launch every selected region")
-        if performed_transitions != set(selected_transitions):
+        expected_launched_regions = {
+            region.region_id
+            for region in selected_regions
+            if region.region_id not in state_reused_region_ids
+        }
+        if launched_regions != expected_launched_regions:
+            raise ValueError(
+                "Schedule IR launch/state-reuse region coverage is incomplete"
+            )
+        if performed_transitions != required_transition_ids:
             raise ValueError("Schedule IR does not execute every selected transition")
         expected_state_actions = {
             state_id: {
@@ -1087,7 +1112,14 @@ def lower_plan_instance_to_reference_schedule(
     regions = tuple(
         sorted(regions, key=lambda region: min(op_index[op] for op in region.op_ids))
     )
+    reused_value_ids = {
+        state.source_value_id
+        for state in selected_states.values()
+        if state.action == StateAction.REUSE
+    }
     for region in regions:
+        if set(region.output_value_ids).issubset(reused_value_ids):
+            continue
         for transition in sorted(
             (
                 candidate

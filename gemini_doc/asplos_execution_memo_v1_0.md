@@ -372,4 +372,9 @@ Bound IR v1
 - IR-4B 已把 PyTorch dense/structured/chunked 接入 typed registry；chunked fused Task 在 CUDA
   上真实调用原 executor。下一门禁是 TVM typed compile/cache，不是孤立 kernel 调优。
 - IR-4C 已完成 TVM fused/unfused typed dispatch、dispatch-key cache v2、跨进程 disk replay
-  与 Schedule semantic OOM fallback；IR-4 仍需 Query Runtime/state payload/旧入口迁移。
+  与 Schedule semantic OOM fallback；
+- IR-4D 已完成 capability-gated typed compiler query、Plan/Task cache、exact-version dense
+  state payload、真实 load/store/task skip 与 fresh-process artifact；PR-13 α/β 请求保持
+  external No-Go，不降级为 plain CROWN；
+- IR-4 尚需 closure audit：旧 `SameSolverQueryRuntime` α/β executor 仍是 legacy path，
+  在决定 IR-4 closure/进入 IR-5 前必须明确迁移、退役或 validated-reduced 边界。

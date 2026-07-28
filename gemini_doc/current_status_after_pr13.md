@@ -2,7 +2,7 @@
 
 > 状态日期：2026-07-19
 > 冻结基线：`57a854b` / annotated tag `pr13-validated-reduced`
-> 当前研发分支：`feat/pr14-real-verification`
+> 当前研发分支：`feat/compiler-ir-stack-v1`
 > 总判定：PR-14B 为 **VALIDATED-NO-GO**，PR-14C 不启动；ASPLOS-ready 仍为 **NO**。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
 > 2026-07-28 进度：IR-1 Bound IR、IR-2 Plan IR、IR-3 Task/Schedule IR 的最小
@@ -10,7 +10,8 @@
 > production backend/runtime migration。IR-4A typed dispatch key + PyTorch reference
 > adapter 已完成 foundation；IR-4B dense/structured/chunked typed registry 已通过，
 > IR-4C TVM fused/unfused、dispatch-namespaced cache 与 semantic fallback 已通过；
-> 当前缺口为 state payload、Query Runtime 和旧 solver-facing entry migration。
+> IR-4D typed plain-CROWN query→Plan/Task/Schedule、精确 state payload 与计算跳过已通过；
+> 当前缺口收敛为 IR-4 closure audit 和旧 same-solver α/β 语义路径处理。
 
 ## 1. 当前真实阶段
 
@@ -77,6 +78,12 @@ E2E 绕过 bound-equivalence gate。
 raw historical artifact 缺失边界见
 `gemini_doc/change_2026-07-28_plan_ir_v1_closure_audit.md`；IR-3 closure 证据见
 `gemini_doc/change_2026-07-28_task_schedule_ir_v1_semantic_closure.md`。
+
+IR-4D 已证明可验证 plain-CROWN 请求能够通过 typed query 入口完成
+PlanInstance→TaskIR→ScheduleIR→backend，并已实现 exact-version dense state
+load/store/task skip。PR-13 α/β 请求仍因 PR-14 whole-query mismatch 在 compiler 入口显式
+No-Go；旧 `SameSolverQueryRuntime` 仍是待 closure audit 的 legacy 路径，不能据此宣称整个
+IR-4 已关闭。
 
 明确禁止：
 

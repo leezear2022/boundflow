@@ -85,6 +85,9 @@
   Task identity、fused ReLU→Affine stepping 与真实 dense/structured/chunked registry
 - `gemini_doc/change_2026-07-28_ir4c_tvm_backend_cache_fallback.md`：IR-4C typed TVM
   fused/unfused、dispatch-namespaced disk cache、fresh-process replay 与 semantic OOM fallback
+- `gemini_doc/change_2026-07-28_ir4d_compiler_query_state_runtime.md`：IR-4D
+  capability-gated typed query、Plan/Task cache、exact-version state load/store/task skip、
+  fresh-process artifact 与 PR-14 No-Go 保留
 - `gemini_doc/asplos_execution_memo_v1_0.md`：ASPLOS 研发的短执行入口与门禁
 - `gemini_doc/current_status_after_pr13.md`：PR-13 closure 后的真实状态、证据边界与当前缺口
 - `gemini_doc/pr14_execution_plan.md`：真实 verifier workload coverage/execution 的切片、门禁与止损

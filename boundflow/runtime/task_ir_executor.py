@@ -3,6 +3,7 @@
 # Compact trace dataclasses use self-describing method names.
 # pylint: disable=missing-function-docstring,too-many-boolean-expressions
 # pylint: disable=too-many-instance-attributes,too-many-arguments,too-many-locals
+# pylint: disable=too-many-branches,too-many-statements
 
 from __future__ import annotations
 
@@ -21,6 +22,9 @@ from ..ir.schedule import (
     LaunchAction,
     RetryAction,
     ScheduleModule,
+    StateInvalidateAction,
+    StateLoadAction,
+    StateStoreAction,
 )
 from ..ir.task import BFTaskModule
 from ..ir.task_v1 import (
@@ -28,7 +32,11 @@ from ..ir.task_v1 import (
     TaskIRModule,
     task_backend_implementation_id,
 )
-from .bound_ir_interpreter import PlainCrownBoundIRSession
+from .bound_ir_interpreter import BoundIRTaskStepResult, PlainCrownBoundIRSession
+from .bound_state_store import (
+    BoundRuntimeStateStore,
+    validate_state_value_capability,
+)
 from .task_backend_dispatch import (
     PyTorchReferenceTaskBackend,
     TypedTaskBackend,
@@ -160,17 +168,55 @@ def execute_task_ir_reference(
         instance=instance,
     )
     task_by_id = {task.task_id: task for task in task_module.tasks}
-    launches = tuple(
-        action for action in schedule.actions if isinstance(action, LaunchAction)
-    )
+    launch_by_task = {
+        action.task_id: action
+        for action in schedule.actions
+        if isinstance(action, LaunchAction)
+    }
+    loaded_value_ids = {
+        action.source_value_id
+        for action in schedule.actions
+        if isinstance(action, StateLoadAction)
+    }
     completed: set[str] = set()
     events: list[TaskExecutionEvent] = []
-    for launch in launches:
-        task = task_by_id[launch.task_id]
+    for task in task_module.tasks:
         if any(dependency not in completed for dependency in task.dependency_task_ids):
             raise ValueError(
                 "Task IR reference executor has dependency use-before-task"
             )
+        launch = launch_by_task.get(task.task_id)
+        state_reused = launch is None
+        if state_reused and not set(task.output_value_ids).issubset(loaded_value_ids):
+            raise ValueError("Task IR reference state reuse lacks task outputs")
+        backend_candidate_id = (
+            "state-reuse" if state_reused else task.backend.backend_candidate_id
+        )
+        implementation_id = (
+            "boundflow.runtime.state-reuse/v1"
+            if state_reused
+            else task.backend.reference_implementation_id
+        )
+        dispatch_hash = (
+            hashlib.sha256(
+                (
+                    "state-reuse|"
+                    + task.task_id
+                    + "|"
+                    + schedule.schedule_id
+                    + "|"
+                    + "|".join(task.output_value_ids)
+                ).encode("utf-8")
+            ).hexdigest()
+            if state_reused
+            else build_backend_dispatch_key(
+                task,
+                task_module,
+                bound_module=bound_module,
+                template=template,
+                instance=instance,
+            ).stable_hash()
+        )
         events.append(
             TaskExecutionEvent(
                 sequence=len(events),
@@ -178,17 +224,11 @@ def execute_task_ir_reference(
                 region_id=task.region_id,
                 op_ids=tuple(op_ref.op_id for op_ref in task.op_refs),
                 dependency_task_ids=task.dependency_task_ids,
-                backend_candidate_id=task.backend.backend_candidate_id,
-                reference_implementation_id=task.backend.reference_implementation_id,
+                backend_candidate_id=backend_candidate_id,
+                reference_implementation_id=implementation_id,
                 output_value_hashes=(),
-                backend_dispatch_key=build_backend_dispatch_key(
-                    task,
-                    task_module,
-                    bound_module=bound_module,
-                    template=template,
-                    instance=instance,
-                ).stable_hash(),
-                attempted_backend_candidate_ids=(task.backend.backend_candidate_id,),
+                backend_dispatch_key=dispatch_hash,
+                attempted_backend_candidate_ids=(backend_candidate_id,),
             )
         )
         completed.add(task.task_id)
@@ -223,6 +263,7 @@ def execute_task_ir_semantics(
     relu_pre: Mapping[str, IntervalState],
     linear_spec_C: Optional[torch.Tensor] = None,
     backend: Optional[TypedTaskBackend] = None,
+    state_store: Optional[BoundRuntimeStateStore] = None,
 ) -> tuple[IntervalState, TaskExecutionTrace]:
     """Execute each TaskIRUnit's exact Bound op partition in Schedule order."""
 
@@ -241,10 +282,26 @@ def execute_task_ir_semantics(
     )
     if backend is None:
         backend = PyTorchReferenceTaskBackend()
+    if state_store is None:
+        state_store = BoundRuntimeStateStore()
     task_by_id = {task.task_id: task for task in task_module.tasks}
-    launches = tuple(
-        action for action in schedule.actions if isinstance(action, LaunchAction)
-    )
+    launch_by_task = {
+        action.task_id: action
+        for action in schedule.actions
+        if isinstance(action, LaunchAction)
+    }
+    loaded_payload_hash_by_value: dict[str, str] = {}
+    for action in schedule.actions:
+        if isinstance(action, StateLoadAction):
+            validate_state_value_capability(bound_module, action.source_value_id)
+            payload = state_store.load(
+                action,
+                bound_module=bound_module,
+                session=session,
+            )
+            loaded_payload_hash_by_value[action.source_value_id] = payload.stable_hash()
+        elif isinstance(action, StateInvalidateAction):
+            state_store.invalidate(action.state_id)
     retries = {
         action.launch_action_id: action
         for action in schedule.actions
@@ -260,10 +317,45 @@ def execute_task_ir_semantics(
     }
     completed: set[str] = set()
     events: list[TaskExecutionEvent] = []
-    for launch in launches:
-        task = task_by_id[launch.task_id]
+    for task in task_module.tasks:
         if any(dependency not in completed for dependency in task.dependency_task_ids):
             raise ValueError("Task IR semantic executor has dependency use-before-task")
+        launch = launch_by_task.get(task.task_id)
+        if launch is None:
+            if not set(task.output_value_ids).issubset(loaded_payload_hash_by_value):
+                raise ValueError("Task IR state reuse lacks exact runtime outputs")
+            reuse_step = session.skip_task_with_loaded_outputs(
+                tuple(op_ref.op_id for op_ref in task.op_refs),
+                output_value_ids=task.output_value_ids,
+            )
+            state_reuse_key = hashlib.sha256(
+                "|".join(
+                    (
+                        "state-reuse",
+                        task.task_id,
+                        *(
+                            loaded_payload_hash_by_value[value_id]
+                            for value_id in task.output_value_ids
+                        ),
+                    )
+                ).encode("utf-8")
+            ).hexdigest()
+            events.append(
+                TaskExecutionEvent(
+                    sequence=len(events),
+                    task_id=task.task_id,
+                    region_id=task.region_id,
+                    op_ids=reuse_step.op_ids,
+                    dependency_task_ids=task.dependency_task_ids,
+                    backend_candidate_id="state-reuse",
+                    reference_implementation_id=("boundflow.runtime.state-reuse/v1"),
+                    output_value_hashes=reuse_step.output_value_hashes,
+                    backend_dispatch_key=state_reuse_key,
+                    attempted_backend_candidate_ids=("state-reuse",),
+                )
+            )
+            completed.add(task.task_id)
+            continue
         retry = retries.get(launch.action_id)
         candidate_ids = [task.backend.backend_candidate_id]
         if retry is not None:
@@ -272,7 +364,7 @@ def execute_task_ir_semantics(
                 for fallback_id in retry.fallback_action_ids
             )
         attempted: list[str] = []
-        step = None
+        step: Optional[BoundIRTaskStepResult] = None
         dispatch_key = None
         executed_task = task
         for candidate_id in candidate_ids:
@@ -330,6 +422,14 @@ def execute_task_ir_semantics(
             )
         )
         completed.add(task.task_id)
+    for action in schedule.actions:
+        if isinstance(action, StateStoreAction):
+            validate_state_value_capability(bound_module, action.source_value_id)
+            state_store.store(
+                action,
+                bound_module=bound_module,
+                session=session,
+            )
     if completed != set(task_by_id):
         raise ValueError("Task IR semantic executor did not execute every task")
     result = session.result()
