@@ -5,6 +5,8 @@
 > 当前研发分支：`feat/pr14-real-verification`
 > 总判定：PR-14B 为 **VALIDATED-NO-GO**，PR-14C 不启动；ASPLOS-ready 仍为 **NO**。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
+> 2026-07-28 进度：IR-1 Bound IR 与 IR-2 Plan IR 的最小 reference contract 已分别关闭；
+> 当前唯一下一阶段为 IR-3 Schedule IR v1，详见 IR-2 closure audit。
 
 ## 1. 当前真实阶段
 
@@ -12,12 +14,12 @@ BoundFlow 已经完成从边界表示到 query runtime prototype 的主干：
 
 | 层次 | 状态 | 已验证边界 |
 |---|---|---|
-| Structured bound runtime representation / materialization trace | mechanism validated | dense/structured 数值与梯度对齐；一等 Bound IR 仍待实现 |
-| Materialization/backend Planner mechanisms | validated-reduced | 历史 held-out 成立；统一 Plan IR 与 Schedule IR 仍待实现 |
+| Structured Bound IR | IR-1 reference closure validated | typed schema/lowering/verifier、dense/structured rewrite/interpreter；生产 backend/runtime 待迁移 |
+| Plan IR / Planner | IR-2 reference closure validated-reduced | typed builder/selector/verifier/state-validity/replay；Schedule IR 尚未实现 |
 | Fused/multi-backend CROWN execution | validated-reduced | eager/chunked/structured/TVM fused 多预算选择；收益只在部分 regime |
 | Query runtime | validated-reduced | `BoundQuery`、state validity、dynamic batching、same-solver adapter、reduced GPU E2E |
 | 真实 complete verifier integration | PR-14B validated-no-go | 540-call coverage + MLP/ResNet fixed replay；activation 0/394，ResNet bound-equivalence fail |
-| ASPLOS 最终系统主张 | C1/C2/C3 均不足 | C3 已降级；下一步建立 Bound/Plan/Schedule IR 闭环 |
+| ASPLOS 最终系统主张 | C1/C2/C3 均不足 | C3 已降级；Bound/Plan reference closure 已有，下一步建立 Schedule/runtime/backend 闭环 |
 
 历史 `main@263ea81` 只到 PR-10 closure，不能再作为项目当前状态入口。跨会话恢复必须同时检查
 research branch、annotated tag 与 closure 文档，不能只看 `main`。
@@ -65,6 +67,10 @@ PR-14 implementation 到此停止。原定 `docs/asplos-c1-c2-story-freeze` 已�
 迁移推进。完整门禁见
 `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`。仍不得用 PR-14C
 E2E 绕过 bound-equivalence gate。
+
+截至 2026-07-28，Bound IR 与 Plan IR 的 reference closure 已完成；当前从上述顺序的
+**Task/Schedule IR** 开始继续，不回滚重复实现 IR-1/2。IR-2 closure 的 raw historical
+artifact 缺失边界见 `gemini_doc/change_2026-07-28_plan_ir_v1_closure_audit.md`。
 
 明确禁止：
 

@@ -57,6 +57,7 @@ class TransitionKind(Enum):
 class StateAction(Enum):
     """Planner action for reusable runtime state."""
 
+    REUSE = "reuse"
     CACHE = "cache"
     RECOMPUTE = "recompute"
     EVICT = "evict"
@@ -1084,7 +1085,7 @@ class StorageDecision:
 
 @dataclass(frozen=True)
 class StateDecision:
-    """Select one cache/recompute/evict candidate for a state."""
+    """Select one reuse/cache/recompute/evict candidate for a state."""
 
     state_id: str
     candidate_id: str
@@ -1092,6 +1093,30 @@ class StateDecision:
     def validate(self) -> None:
         if not self.state_id or not self.candidate_id:
             raise ValueError("state decision IDs must be non-empty")
+
+
+@dataclass(frozen=True)
+class StateValidity:
+    """Query-time evidence describing one available or invalid cached state."""
+
+    state_id: str
+    source_value_id: str
+    state_version: str
+    valid: bool
+    invalidation_reason: Optional[str] = None
+
+    def validate(self) -> None:
+        for name in ("state_id", "source_value_id", "state_version"):
+            if not getattr(self, name):
+                raise ValueError(f"state validity {name} must be non-empty")
+        if self.valid and self.invalidation_reason is not None:
+            raise ValueError("valid state cannot have an invalidation reason")
+        if not self.valid and not self.invalidation_reason:
+            raise ValueError("invalid state requires an invalidation reason")
+
+    def to_dict(self) -> dict[str, object]:
+        self.validate()
+        return asdict(self)
 
 
 @dataclass(frozen=True)
@@ -1128,6 +1153,7 @@ class PlanInstance:  # pylint: disable=too-many-instance-attributes
     state_decisions: Tuple[StateDecision, ...]
     rejected_candidates: Tuple[RejectedCandidate, ...]
     cost_summary: PlanCost
+    state_validities: Tuple[StateValidity, ...] = ()
     provenance: Tuple[PlanProvenance, ...] = ()
     schema_version: str = PLAN_IR_SCHEMA_VERSION
 
@@ -1158,6 +1184,8 @@ class PlanInstance:  # pylint: disable=too-many-instance-attributes
             backend_decision.validate()
         for state_decision in self.state_decisions:
             state_decision.validate()
+        for state_validity in self.state_validities:
+            state_validity.validate()
         self.batch_decision.validate()
         self.storage_decision.validate()
         for rejection in self.rejected_candidates:
@@ -1300,6 +1328,21 @@ class PlanInstance:  # pylint: disable=too-many-instance-attributes
         if batch.sample_batch_size > template.workload.sample_batch_size:
             raise ValueError("selected sample batch exceeds workload bucket")
 
+        validity_by_state: dict[str, StateValidity] = {}
+        bound_values = {value.value_id: value for value in bound_module.graph.values}
+        template_state_ids = {candidate.state_id for candidate in states.values()}
+        for validity in self.state_validities:
+            if validity.state_id in validity_by_state:
+                raise ValueError("duplicate query-time state validity")
+            if validity.state_id not in template_state_ids:
+                raise ValueError("state validity references an unknown template state")
+            value = bound_values.get(validity.source_value_id)
+            if value is None:
+                raise ValueError("state validity references an unknown Bound IR value")
+            if validity.valid and value.state_version != validity.state_version:
+                raise ValueError("valid cached state has a stale Bound IR version")
+            validity_by_state[validity.state_id] = validity
+
         state_ids: list[str] = []
         for state_decision in self.state_decisions:
             candidate = states.get(state_decision.candidate_id)
@@ -1307,8 +1350,21 @@ class PlanInstance:  # pylint: disable=too-many-instance-attributes
                 raise ValueError("state decision/candidate identity mismatch")
             if not candidate.static_legal:
                 raise ValueError("plan selects illegal state candidate")
+            if candidate.action == StateAction.REUSE:
+                selected_validity = validity_by_state.get(candidate.state_id)
+                if (
+                    selected_validity is None
+                    or not selected_validity.valid
+                    or selected_validity.source_value_id != candidate.source_value_id
+                    or selected_validity.state_version != candidate.state_version
+                ):
+                    raise ValueError(
+                        "plan selects state reuse without exact valid cache evidence"
+                    )
             state_ids.append(state_decision.state_id)
         _require_unique(tuple(state_ids), label="selected state IDs")
+        if set(state_ids) != template_state_ids:
+            raise ValueError("state decisions do not cover every template state")
 
         rejected_ids = tuple(
             rejection.candidate_id for rejection in self.rejected_candidates
@@ -1421,6 +1477,7 @@ class PlanInstance:  # pylint: disable=too-many-instance-attributes
             "batch_decision": asdict(self.batch_decision),
             "storage_decision": asdict(self.storage_decision),
             "state_decisions": [asdict(item) for item in self.state_decisions],
+            "state_validities": [item.to_dict() for item in self.state_validities],
             "rejected_candidates": [
                 {
                     "candidate_id": item.candidate_id,
@@ -1481,6 +1538,7 @@ class PlanInstance:  # pylint: disable=too-many-instance-attributes
                 "batch_decision",
                 "storage_decision",
                 "state_decisions",
+                "state_validities",
                 "rejected_candidates",
                 "cost_summary",
                 "provenance",
@@ -1544,6 +1602,12 @@ class PlanInstance:  # pylint: disable=too-many-instance-attributes
                 _parse_state_decision(item)
                 for item in _expect_list(
                     payload["state_decisions"], label="state_decisions"
+                )
+            ),
+            state_validities=tuple(
+                _parse_state_validity(item)
+                for item in _expect_list(
+                    payload["state_validities"], label="state_validities"
                 )
             ),
             rejected_candidates=tuple(
@@ -1674,6 +1738,36 @@ def _parse_state_decision(value: object) -> StateDecision:
     return StateDecision(
         state_id=_expect_string(payload["state_id"], label="state_id"),
         candidate_id=_expect_string(payload["candidate_id"], label="candidate_id"),
+    )
+
+
+def _parse_state_validity(value: object) -> StateValidity:
+    payload = _expect_object(value, label="StateValidity")
+    _expect_exact_keys(
+        payload,
+        {
+            "state_id",
+            "source_value_id",
+            "state_version",
+            "valid",
+            "invalidation_reason",
+        },
+        label="StateValidity",
+    )
+    invalidation_raw = payload["invalidation_reason"]
+    if invalidation_raw is not None and not isinstance(invalidation_raw, str):
+        raise ValueError("invalidation_reason must be a string or null")
+    valid_raw = payload["valid"]
+    if not isinstance(valid_raw, bool):
+        raise ValueError("state validity valid must be a boolean")
+    return StateValidity(
+        state_id=_expect_string(payload["state_id"], label="state_id"),
+        source_value_id=_expect_string(
+            payload["source_value_id"], label="source_value_id"
+        ),
+        state_version=_expect_string(payload["state_version"], label="state_version"),
+        valid=valid_raw,
+        invalidation_reason=invalidation_raw,
     )
 
 

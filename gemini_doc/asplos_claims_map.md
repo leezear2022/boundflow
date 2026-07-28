@@ -8,7 +8,7 @@
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
 | C1：显式物化语义的 Structured Bound-Operator IR | IR-1 reference semantic closure validated；Plan/Schedule integration pending | typed Bound IR + lowering + dense/structured interpreter + explicit cast/materialize rewrite | 25 个 schema/lowering/rewrite/interpreter tests；MLP/CNN/residual/concat final bounds 对齐 | deterministic dump/hash 已有；IR-driven E2E artifact 尚缺 |
-| C2：Method/Autograd/Memory-Aware Materialization Planner | Plan IR reference builder/selector/artifact API validated；旧 artifact 批量迁移、state-validity、Schedule pending | typed PlanTemplate/PlanInstance、跨 decision verifier、PR-11/12 adapters、typed evidence builder、预算/deadline selector | 16 个 Plan IR/migration tests；多预算选择与 artifact tamper replay；还需真实 migration report 与 IR-driven E2E | 历史 1,416 executions/23 feasible 保留；当前只证明 reference planning path |
+| C2：Method/Autograd/Memory-Aware Materialization Planner | IR-2 Plan IR reference closure validated-reduced；Schedule/runtime integration pending | typed PlanTemplate/PlanInstance、跨 decision verifier、typed builder/selector、state-validity、legacy assembly | 21 个 Plan IR/legacy/artifact/audit tests；多预算、stale-state、fresh-process replay | 历史 1,416 executions/23 feasible 保留；PR-11/12 raw decision records 当前为 0，不能声称逐记录迁移 |
 | C3：Verification Query Runtime Infrastructure | downgraded after PR-14B | query/validity + batcher + capability routing + real observer | 保留 reduced correctness；真实 coverage/replay 作为 limitation | activation 0/394 eligible；ResNet bound-equivalence fail；不作 acceleration claim |
 | BoundFlow Schedule IR | unimplemented | 现仅 `TaskGraph.topo_sort()`、局部 fused step 和过程式 retry | dependency/lifetime/stream/batch/retry/state verifier；reference executor | deterministic schedule dump/trace 尚缺 |
 | TVM 后端执行 Planner 结果而非定义核心抽象 | partial | `boundflow/backends/tvm/`、`runtime/tvm_executor.py` | Python/TVM/unfused/fused 对齐 | compile/cold/warm、launch、bytes |
@@ -106,6 +106,21 @@
 
 实现与门禁边界见
 `gemini_doc/change_2026-07-28_plan_ir_v1_reference_builder_selector.md`。
+
+### 2026-07-28 IR-2C / IR-2 closure
+
+- `PlanInstance.state_validities` 和 `StateAction.REUSE` 已把 query-time exact cache validity 纳入
+  canonical verifier/hash/replay；stale state 转 recompute，伪造 valid stale state fail closed；
+- legacy migrations 可原子组装到同一 template，accepted/unsupported/rejected 形成稳定报告；
+- reference artifact 已有 fresh-process generate/replay CLI；
+- 对当前 `artifacts/` 扫描 58 个 JSON/JSONL、4,911 个 JSON objects，三种 PR-11/12
+  planner raw schema 记录均为 0；因此只关闭对象族级 migration，不声称历史逐记录迁移；
+- 专属 21 passed，相邻 97 passed，全量 418 passed、1 skipped；
+- IR-2 最小 reference contract 关闭为 `VALIDATED-REDUCED`；C2 仍需 IR-3 Schedule IR、
+  runtime/backend migration 和 IR-driven E2E，不能升级为 paper-level complete。
+
+实现与 closure 边界见
+`gemini_doc/change_2026-07-28_plan_ir_v1_closure_audit.md`。
 
 ## PR-10 子阶段
 

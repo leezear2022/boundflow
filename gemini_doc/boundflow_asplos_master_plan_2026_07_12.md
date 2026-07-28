@@ -11,6 +11,11 @@
 > 当前 Bound IR 仍为占位，统一 Plan IR 与 Schedule IR 尚未实现；不得仅凭 runtime operator、
 > PlanBundle 或 TaskGraph 将 C1/C2 视为 paper-level 完成。
 
+> **2026-07-28 进度修订**：上句是 2026-07-20 当时状态。IR-1 Bound IR 与 IR-2 Plan IR
+> 的最小 reference contract 现已关闭；Schedule IR、runtime/backend migration 与 IR-driven
+> E2E 仍未完成，当前下一阶段为 IR-3。详见
+> `gemini_doc/change_2026-07-28_plan_ir_v1_closure_audit.md`。
+
 ---
 
 ## 0. 执行摘要

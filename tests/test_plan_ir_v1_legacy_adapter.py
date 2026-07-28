@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from types import SimpleNamespace
 from typing import cast
 
@@ -40,8 +41,10 @@ from boundflow.planner.materialization_placement import (
     PlacementPolicy,
 )
 from boundflow.planner.plan_ir_legacy import (
+    LegacyMigrationIssue,
     LegacyMigrationStatus,
     LegacyPlanKind,
+    LegacyPlanMigration,
     LegacyStorageLifetime,
     adapt_execution_candidate,
     adapt_materialization_placement_plan,
@@ -50,9 +53,16 @@ from boundflow.planner.plan_ir_legacy import (
     classify_fused_crown_step,
     classify_plan_bundle_meta,
 )
+from boundflow.planner.plan_ir_legacy_assembly import (
+    LegacyAssemblyDisposition,
+    assemble_legacy_migrations,
+)
 from boundflow.runtime.crown_ibp import _forward_ibp_trace_mlp
 from boundflow.runtime.fused_crown import FusedCrownExecutionStep
 from boundflow.runtime.task_executor import InputSpec
+from scripts.run_plan_ir_v1_reference_artifact import (
+    build_reference_smoke_inputs,
+)
 
 
 def _cost(latency: float, peak: int) -> PlanCost:
@@ -336,3 +346,67 @@ def test_ir2_migration_table_classifies_schedule_and_untyped_meta() -> None:
         fused.source_kind,
         bundle.source_kind,
     } == set(LegacyPlanKind)
+
+
+def test_legacy_migrations_assemble_atomically_and_report_rejections() -> None:
+    module, template = build_reference_smoke_inputs()
+    original = template.representation_candidates[0]
+    accepted_candidate = replace(
+        original,
+        candidate_id="legacy:assembled:dense",
+    )
+    accepted = LegacyPlanMigration(
+        source_kind=LegacyPlanKind.MATERIALIZATION_PLAN,
+        source_schema_version="legacy/test-v1",
+        source_hash="1" * 64,
+        status=LegacyMigrationStatus.ADAPTED,
+        representation_candidates=(accepted_candidate,),
+        selected_candidate_ids=(accepted_candidate.candidate_id,),
+    )
+    duplicate = LegacyPlanMigration(
+        source_kind=LegacyPlanKind.MATERIALIZATION_PLACEMENT_PLAN,
+        source_schema_version="legacy/test-v1",
+        source_hash="2" * 64,
+        status=LegacyMigrationStatus.ADAPTED,
+        representation_candidates=(accepted_candidate,),
+        selected_candidate_ids=(accepted_candidate.candidate_id,),
+    )
+    unsupported = LegacyPlanMigration(
+        source_kind=LegacyPlanKind.FUSED_CROWN_EXECUTION_STEP,
+        source_schema_version="legacy/test-v1",
+        source_hash="3" * 64,
+        status=LegacyMigrationStatus.UNSUPPORTED,
+        issues=(
+            LegacyMigrationIssue(
+                "entire_object",
+                "belongs_to_schedule_ir",
+            ),
+        ),
+    )
+    result = assemble_legacy_migrations(
+        template,
+        bound_module=module,
+        migrations=(unsupported, duplicate, accepted),
+    )
+    dispositions = {
+        entry.source_hash: entry.disposition for entry in result.report.entries
+    }
+    assert {
+        dispositions["1" * 64],
+        dispositions["2" * 64],
+    } == {
+        LegacyAssemblyDisposition.ACCEPTED,
+        LegacyAssemblyDisposition.REJECTED,
+    }
+    assert dispositions["3" * 64] == LegacyAssemblyDisposition.CLASSIFIED_UNSUPPORTED
+    assert (
+        len(result.template.representation_candidates)
+        == len(template.representation_candidates) + 1
+    )
+    repeated = assemble_legacy_migrations(
+        template,
+        bound_module=module,
+        migrations=(accepted, duplicate, unsupported),
+    )
+    assert result.report.canonical_json() == repeated.report.canonical_json()
+    assert result.report.stable_hash() == repeated.report.stable_hash()

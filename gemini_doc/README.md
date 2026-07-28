@@ -69,6 +69,8 @@
   PlanTemplate/PlanInstance、跨决策 verifier、instance replay 与 PR-11/12 迁移边界
 - `gemini_doc/change_2026-07-28_plan_ir_v1_reference_builder_selector.md`：IR-2B typed
   evidence→PlanTemplate builder、预算/deadline selector 与不可变 selection artifact
+- `gemini_doc/change_2026-07-28_plan_ir_v1_closure_audit.md`：IR-2C query-time state
+  validity、legacy atomic assembly、raw-record absence audit 与 IR-2 validated-reduced closure
 - `gemini_doc/asplos_execution_memo_v1_0.md`：ASPLOS 研发的短执行入口与门禁
 - `gemini_doc/current_status_after_pr13.md`：PR-13 closure 后的真实状态、证据边界与当前缺口
 - `gemini_doc/pr14_execution_plan.md`：真实 verifier workload coverage/execution 的切片、门禁与止损

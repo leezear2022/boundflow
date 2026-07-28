@@ -12,6 +12,10 @@
 > 主线；后续按第 11 节和
 > `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md` 推进。
 
+> **2026-07-28 进度**：IR-1 Bound IR reference closure 与 IR-2 Plan IR
+> `VALIDATED-REDUCED` closure 已完成；下一实现门禁是 IR-3 Schedule IR v1 + reference
+> executor。不得继续把第 11 节的“尚未实现”历史描述当作当前状态。
+
 ## 1. 锁定的论文命题
 
 BoundFlow 是面向神经网络验证中相关边界查询的 query- and memory-aware compiler/runtime。
@@ -352,3 +356,11 @@ Bound IR v1
 - 不新增 α/β/split kernel，不重写 BaB，不继续孤立 TIR 调优。
 
 完整对象边界、迁移关系、JIT/状态有效性门禁和逐阶段 DoD 见新的架构契约文档。
+
+2026-07-28 状态追加：
+
+- IR-1 typed Bound IR、plain-CROWN lowering、dense/structured interpreter/rewrite 已通过；
+- IR-2 typed PlanTemplate/PlanInstance、builder/selector、state-validity、legacy assembly 与
+  deterministic artifact replay 已通过 reference closure；
+- 当前 `artifacts/` 不含 PR-11/12 raw planner records，因此不声称历史逐记录迁移；
+- 下一步从 IR-3 Schedule IR 实现继续，C1/C2 在 runtime/backend/E2E 前仍不得升级。

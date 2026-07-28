@@ -29,7 +29,9 @@ from ..ir.plan import (
     RepresentationCandidate,
     RepresentationDecision,
     StateCandidate,
+    StateAction,
     StateDecision,
+    StateValidity,
     StorageCandidate,
     StorageDecision,
 )
@@ -93,6 +95,7 @@ def select_plan_instance(  # pylint: disable=too-many-arguments
     available_memory_bytes: int,
     memory_budget_bytes: int,
     deadline_us: Optional[int] = None,
+    state_validities: Tuple[StateValidity, ...] = (),
     max_evaluated_combinations: int = 100_000,
 ) -> PlanInstance:
     """Select the lowest-latency feasible, fully verified PlanInstance."""
@@ -106,6 +109,12 @@ def select_plan_instance(  # pylint: disable=too-many-arguments
         raise ValueError("deadline_us must be positive when present")
     if max_evaluated_combinations <= 0:
         raise ValueError("max_evaluated_combinations must be positive")
+    for validity in state_validities:
+        validity.validate()
+    if len({validity.state_id for validity in state_validities}) != len(
+        state_validities
+    ):
+        raise ValueError("query-time state validities must have unique state IDs")
 
     effective_budget = min(
         available_memory_bytes,
@@ -115,6 +124,14 @@ def select_plan_instance(  # pylint: disable=too-many-arguments
     failures: dict[str, int] = {}
     feasible: list[_Selection] = []
     evaluated = 0
+    state_groups = _state_candidate_groups(
+        template,
+        state_validities=state_validities,
+    )
+    if any(not group for group in state_groups):
+        raise NoFeasiblePlanError(
+            (PlanSelectionFailure("state_without_valid_candidate", 1),)
+        )
     for partition in _exact_region_partitions(template, bound_module=bound_module):
         representation_groups = tuple(
             tuple(
@@ -168,7 +185,6 @@ def select_plan_instance(  # pylint: disable=too-many-arguments
                     ):
                         _increment(failures, "batch_exceeds_workload_bucket")
                         continue
-                    state_groups = _state_candidate_groups(template)
                     for states in _state_products(state_groups):
                         for storage in template.storage_candidates:
                             evaluated += 1
@@ -247,6 +263,7 @@ def select_plan_instance(  # pylint: disable=too-many-arguments
         available_memory_bytes=available_memory_bytes,
         memory_budget_bytes=memory_budget_bytes,
         deadline_us=deadline_us,
+        state_validities=state_validities,
         evaluated_combinations=evaluated,
     )
 
@@ -288,11 +305,25 @@ def _exact_region_partitions(
 
 def _state_candidate_groups(
     template: PlanTemplate,
+    *,
+    state_validities: Tuple[StateValidity, ...],
 ) -> Tuple[Tuple[StateCandidate, ...], ...]:
+    validity_by_state = {validity.state_id: validity for validity in state_validities}
     grouped: dict[str, list[StateCandidate]] = {}
     for candidate in template.state_candidates:
-        if candidate.static_legal:
-            grouped.setdefault(candidate.state_id, []).append(candidate)
+        grouped.setdefault(candidate.state_id, [])
+        if not candidate.static_legal:
+            continue
+        if candidate.action == StateAction.REUSE:
+            validity = validity_by_state.get(candidate.state_id)
+            if (
+                validity is None
+                or not validity.valid
+                or validity.source_value_id != candidate.source_value_id
+                or validity.state_version != candidate.state_version
+            ):
+                continue
+        grouped[candidate.state_id].append(candidate)
     return tuple(
         tuple(sorted(candidates, key=lambda candidate: candidate.candidate_id))
         for _state_id, candidates in sorted(grouped.items())
@@ -334,6 +365,7 @@ def _build_instance(  # pylint: disable=too-many-arguments
     available_memory_bytes: int,
     memory_budget_bytes: int,
     deadline_us: Optional[int],
+    state_validities: Tuple[StateValidity, ...],
     evaluated_combinations: int,
 ) -> PlanInstance:
     selected_ids = set(selected.candidate_ids)
@@ -353,6 +385,18 @@ def _build_instance(  # pylint: disable=too-many-arguments
             str(available_memory_bytes),
             str(memory_budget_bytes),
             str(deadline_us),
+            *(
+                "|".join(
+                    (
+                        validity.state_id,
+                        validity.source_value_id,
+                        validity.state_version,
+                        str(validity.valid),
+                        str(validity.invalidation_reason),
+                    )
+                )
+                for validity in state_validities
+            ),
             *selected.candidate_ids,
         )
     )
@@ -389,6 +433,7 @@ def _build_instance(  # pylint: disable=too-many-arguments
             StateDecision(candidate.state_id, candidate.candidate_id)
             for candidate in selected.states
         ),
+        state_validities=state_validities,
         rejected_candidates=rejected,
         cost_summary=selected.cost,
         provenance=(

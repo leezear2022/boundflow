@@ -38,6 +38,9 @@ from boundflow.ir.plan import (
     StorageBinding,
     StorageCandidate,
     StorageDecision,
+    StateAction,
+    StateCandidate,
+    StateValidity,
     TransitionKind,
     WorkloadProfile,
 )
@@ -1044,4 +1047,81 @@ def test_plan_selection_artifact_is_immutable_and_replays_exactly(
             output_dir,
             bound_module=module,
             template=template,
+        )
+
+
+def test_reference_selector_reuses_only_exact_valid_query_state() -> None:
+    module, template, _manual = _template_and_instance()
+    source = next(
+        value for value in module.graph.values if value.state_version is not None
+    )
+    state_candidates = (
+        StateCandidate(
+            candidate_id="state:reuse:affine",
+            state_id="affine-state",
+            source_value_id=source.value_id,
+            action=StateAction.REUSE,
+            state_version=source.state_version or "",
+            size_bytes=64,
+            static_legal=True,
+            rejection_reasons=(),
+            cost=_cost(latency=0.01, peak=64),
+        ),
+        StateCandidate(
+            candidate_id="state:recompute:affine",
+            state_id="affine-state",
+            source_value_id=source.value_id,
+            action=StateAction.RECOMPUTE,
+            state_version=source.state_version or "",
+            size_bytes=64,
+            static_legal=True,
+            rejection_reasons=(),
+            cost=_cost(latency=5.0, peak=64),
+        ),
+    )
+    stateful_template = replace(template, state_candidates=state_candidates)
+    common = {
+        "bound_module": module,
+        "available_memory_bytes": 1 << 29,
+        "memory_budget_bytes": 1 << 28,
+    }
+    exact = StateValidity(
+        state_id="affine-state",
+        source_value_id=source.value_id,
+        state_version=source.state_version or "",
+        valid=True,
+    )
+    reuse = select_plan_instance(
+        stateful_template,
+        query_bucket_id="state:exact",
+        state_validities=(exact,),
+        **common,
+    )
+    assert reuse.state_decisions[0].candidate_id == "state:reuse:affine"
+    assert reuse.state_validities == (exact,)
+
+    stale = StateValidity(
+        state_id="affine-state",
+        source_value_id=source.value_id,
+        state_version="stale-version",
+        valid=False,
+        invalidation_reason="parent_state_version_mismatch",
+    )
+    recompute = select_plan_instance(
+        stateful_template,
+        query_bucket_id="state:stale",
+        state_validities=(stale,),
+        **common,
+    )
+    assert recompute.state_decisions[0].candidate_id == "state:recompute:affine"
+    assert reuse.stable_hash(
+        template=stateful_template, bound_module=module
+    ) != recompute.stable_hash(template=stateful_template, bound_module=module)
+
+    with pytest.raises(ValueError, match="stale Bound IR version"):
+        select_plan_instance(
+            stateful_template,
+            query_bucket_id="state:false-validity",
+            state_validities=(replace(stale, valid=True, invalidation_reason=None),),
+            **common,
         )

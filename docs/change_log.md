@@ -3025,3 +3025,27 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_plan_ir_v1_reference_builder_selector.md`
+
+---
+
+## 2026-07-28：Plan IR v1 state-validity、legacy assembly 与 IR-2 closure
+
+**主要改动**
+- `PlanInstance` 新增 canonical query-time state validity，`REUSE` 只接受 exact valid version；
+- stale state 选择 recompute，伪造 valid stale state fail closed；
+- legacy migration groups 原子加入同一 template，输出 accepted/unsupported/rejected 稳定报告；
+- 新增 fresh-process reference artifact generate/replay CLI；
+- 新增 legacy record schema inventory；当前 artifacts 扫描 58 文件/4,911 objects，PR-11/12
+  planner raw records 为 0。
+
+**证据与判定**
+- 专属：21 passed；相邻：97 passed；全量：418 passed、1 skipped；
+- Mypy 0 issues，Pylint 10.00/10，Black clean；
+- IR-2 reference closure 判定 `VALIDATED-REDUCED`；
+- raw historical migration 不可审计，C2 仍待 Schedule/runtime/backend/E2E。
+
+**下一阶段**
+- IR-3 Schedule IR v1 + reference executor。
+
+**记录**
+- `gemini_doc/change_2026-07-28_plan_ir_v1_closure_audit.md`
