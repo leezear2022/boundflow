@@ -1,6 +1,6 @@
 """Contracts for Plan IR v1 template/instance and cross-decision verifier."""
 
-# pylint: disable=missing-function-docstring,too-many-locals
+# pylint: disable=missing-function-docstring,too-many-locals,too-many-lines
 
 from __future__ import annotations
 
@@ -64,6 +64,7 @@ from boundflow.planner.plan_ir_builder import (
 )
 from boundflow.planner.plan_ir_selector import (
     NoFeasiblePlanError,
+    PlanSelectionContext,
     select_plan_instance,
 )
 
@@ -744,6 +745,124 @@ def test_reference_selector_changes_plan_across_memory_budgets() -> None:
     )
     high.validate(template=template, bound_module=module)
     low.validate(template=template, bound_module=module)
+
+
+def test_reference_selector_adapts_to_compile_cache_and_query_distribution() -> None:
+    module, template, _manual = _template_and_instance()
+    structured = next(
+        candidate
+        for candidate in template.backend_candidates
+        if candidate.backend == BackendKind.PYTORCH_STRUCTURED
+    )
+    target_region_id = structured.region_id
+    backends = tuple(
+        replace(
+            candidate,
+            cost=replace(
+                candidate.cost,
+                predicted_latency_ms=(
+                    0.0
+                    if candidate.candidate_id == structured.candidate_id
+                    else (2.0 if candidate.region_id == target_region_id else 0.5)
+                ),
+                compile_cost_ms=(
+                    20.0 if candidate.candidate_id == structured.candidate_id else 0.0
+                ),
+            ),
+        )
+        for candidate in template.backend_candidates
+    )
+    representations = tuple(
+        (
+            replace(
+                candidate,
+                cost=replace(candidate.cost, predicted_latency_ms=0.0),
+            )
+            if candidate.region_id == target_region_id
+            else candidate
+        )
+        for candidate in template.representation_candidates
+    )
+    transitions = tuple(
+        replace(
+            candidate,
+            cost=replace(candidate.cost, predicted_latency_ms=0.0),
+        )
+        for candidate in template.materialization_candidates
+    )
+    adaptive_template = replace(
+        template,
+        backend_candidates=backends,
+        representation_candidates=representations,
+        materialization_candidates=transitions,
+    )
+    budget = max(
+        candidate.cost.predicted_peak_bytes
+        for candidate in adaptive_template.storage_candidates
+    )
+
+    cold = select_plan_instance(
+        adaptive_template,
+        bound_module=module,
+        query_bucket_id="adaptive:cold",
+        available_memory_bytes=1 << 30,
+        memory_budget_bytes=budget,
+        selection_context=PlanSelectionContext(
+            query_distribution_id="cold-single",
+            expected_query_count=1,
+        ),
+    )
+    repeated = select_plan_instance(
+        adaptive_template,
+        bound_module=module,
+        query_bucket_id="adaptive:repeated",
+        available_memory_bytes=1 << 30,
+        memory_budget_bytes=budget,
+        selection_context=PlanSelectionContext(
+            query_distribution_id="repeated-100",
+            expected_query_count=100,
+        ),
+    )
+    warm = select_plan_instance(
+        adaptive_template,
+        bound_module=module,
+        query_bucket_id="adaptive:warm",
+        available_memory_bytes=1 << 30,
+        memory_budget_bytes=budget,
+        selection_context=PlanSelectionContext(
+            query_distribution_id="warm-single",
+            expected_query_count=1,
+            cached_artifact_keys=(structured.compiled_artifact_key or "",),
+        ),
+    )
+
+    cold_backend_ids = {decision.candidate_id for decision in cold.backend_decisions}
+    assert structured.candidate_id not in cold_backend_ids
+    assert structured.candidate_id in {
+        decision.candidate_id for decision in repeated.backend_decisions
+    }
+    assert structured.candidate_id in {
+        decision.candidate_id for decision in warm.backend_decisions
+    }
+    assert (
+        len(
+            {
+                cold.stable_hash(
+                    template=adaptive_template,
+                    bound_module=module,
+                ),
+                repeated.stable_hash(
+                    template=adaptive_template,
+                    bound_module=module,
+                ),
+                warm.stable_hash(
+                    template=adaptive_template,
+                    bound_module=module,
+                ),
+            }
+        )
+        == 3
+    )
 
 
 def test_reference_selector_is_deterministic_and_fails_closed() -> None:

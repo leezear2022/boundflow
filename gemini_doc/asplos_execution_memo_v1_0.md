@@ -381,3 +381,6 @@ Bound IR v1
   默认关闭，仅 PR-13 历史回归显式 opt-in，且错误/审计保留 PR-14 No-Go；
 - IR-4 已以 validated-reduced 关闭。下一步进入 IR-5 adaptive PlanInstance；不得提前启动
   IR-6 cached specialization，也不得把 compiler closure 升级成 α/β external integration。
+- IR-5A 已新增 query-time memory/deadline/cache/distribution context，并按 uncached
+  compile/setup 在 expected query count 上摊销选择；cold/repeated/warm context 可产生不同
+  typed PlanInstance。IR-5 仍需 fixed/local/global/oracle 与 held-out 系统证据。

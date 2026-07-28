@@ -16,6 +16,7 @@ import torch
 
 from boundflow.ir.plan import PlanCost, StateAction, StateCandidate
 from boundflow.planner.materialization import BoundMethod
+from boundflow.planner.plan_ir_selector import PlanSelectionContext
 from boundflow.runtime.bab_query import BoundQueryRequest, make_bound_query
 from boundflow.runtime.bound_ir_interpreter import execute_plain_crown_bound_ir
 from boundflow.runtime.bound_state_store import (
@@ -25,6 +26,7 @@ from boundflow.runtime.bound_state_store import (
 from boundflow.runtime.compiler_query_runtime import (
     CompilerBoundQueryRequest,
     CompilerQueryCapabilityError,
+    CompilerRuntimeContext,
     TypedCompilerQueryPayload,
     TypedCompilerQueryRequest,
     TypedCompilerQueryRuntime,
@@ -168,6 +170,50 @@ def test_typed_compiler_query_preserves_order_and_reuses_plan() -> None:
     assert runtime.audit()["plan_cache_misses"] == 1
     assert runtime.audit()["plan_cache_hits"] == 1
     assert runtime.audit()["physical_cross_query_batching_claimed"] is False
+
+
+def test_typed_compiler_query_binds_dynamic_plan_context_to_instance() -> None:
+    workload = build_reference_smoke_workload()
+    runtime = TypedCompilerQueryRuntime(
+        available_memory_bytes=1 << 30,
+        memory_budget_bytes=1 << 30,
+    )
+    cold = replace(
+        _request(workload, "query:cold", 0),
+        runtime_context=CompilerRuntimeContext(
+            available_memory_bytes=1 << 29,
+            memory_budget_bytes=1 << 28,
+            plan_selection=PlanSelectionContext(
+                query_distribution_id="cold-single",
+                expected_query_count=1,
+            ),
+        ),
+    )
+    repeated = replace(
+        _request(workload, "query:repeated", 1),
+        runtime_context=CompilerRuntimeContext(
+            available_memory_bytes=1 << 29,
+            memory_budget_bytes=1 << 28,
+            plan_selection=PlanSelectionContext(
+                query_distribution_id="repeated-64",
+                expected_query_count=64,
+            ),
+        ),
+    )
+
+    cold_result, repeated_result = runtime.execute((cold, repeated))
+
+    torch.testing.assert_close(cold_result.bounds.lower, repeated_result.bounds.lower)
+    torch.testing.assert_close(cold_result.bounds.upper, repeated_result.bounds.upper)
+    assert cold_result.plan_instance_hash != repeated_result.plan_instance_hash
+    assert cold_result.plan_instance.memory_budget_bytes == 1 << 28
+    assert repeated_result.plan_instance.memory_budget_bytes == 1 << 28
+    assert runtime.audit()["plan_cache_misses"] == 2
+    assert {
+        item.value
+        for item in repeated_result.plan_instance.provenance
+        if item.key == "query_distribution_id"
+    } == {"repeated-64"}
 
 
 def test_pr13_batch_manager_dispatches_only_typed_compiler_requests() -> None:

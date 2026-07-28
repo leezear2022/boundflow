@@ -13,6 +13,8 @@
 > IR-4D typed plain-CROWN query→Plan/Task/Schedule、精确 state payload 与计算跳过已通过；
 > IR-4E 已把 PR-13 manager 接入 typed compiler，并把 legacy α/β 改为默认关闭的
 > historical opt-in。当前唯一下一阶段为 IR-5 adaptive PlanInstance。
+> IR-5A 已完成 query-time memory/deadline/cache/distribution context 与 amortized selector；
+> 这只是 mechanism，fixed/local/global/oracle held-out 证据仍 pending。
 
 ## 1. 当前真实阶段
 
@@ -88,6 +90,10 @@ No-Go。IR-4E 随后把 `plain_crown_typed_ir` 请求接入 PR-13 DynamicBatchMa
 `SameSolverQueryRuntime` 设为默认拒绝、仅 historical replay 显式 opt-in。IR-4 现以
 validated-reduced 关闭；下一工程阶段为 IR-5，不得把此 closure 写成 α/β external
 integration 或 ASPLOS 性能结论。
+
+IR-5A 已让 cold/repeated/warm-cache 与 per-query memory/deadline 进入 PlanInstance
+identity、provenance 和 runtime cache namespace。同一 template 可合法切换不同 plan，但尚未
+完成公平 policy baseline 与全新 held-out artifact，因此 ASPLOS-ready 判定不变。
 
 明确禁止：
 

@@ -19,7 +19,7 @@ from ..ir.schedule import lower_plan_instance_to_reference_schedule
 from ..ir.task import BFTaskModule
 from ..ir.task_v1 import TaskIRModule, lower_plan_instance_to_task_ir
 from ..planner.materialization import BoundMethod, OptimizationStage
-from ..planner.plan_ir_selector import select_plan_instance
+from ..planner.plan_ir_selector import PlanSelectionContext, select_plan_instance
 from .bab_query import BoundQueryRequest, model_versions
 from .bound_state_store import BoundRuntimeStateStore
 from .task_backend_dispatch import TypedTaskBackend, TypedTaskBackendRegistry
@@ -74,12 +74,32 @@ class TypedCompilerQueryPayload:
 
 
 @dataclass(frozen=True)
+class CompilerRuntimeContext:
+    """Per-query memory, deadline, cache, and distribution selection facts."""
+
+    available_memory_bytes: int
+    memory_budget_bytes: int
+    deadline_us: Optional[int] = None
+    plan_selection: PlanSelectionContext = PlanSelectionContext()
+
+    def validate(self) -> None:
+        """Reject invalid query-time resource or selection facts."""
+
+        if self.available_memory_bytes <= 0 or self.memory_budget_bytes <= 0:
+            raise ValueError("compiler runtime memory limits must be positive")
+        if self.deadline_us is not None and self.deadline_us <= 0:
+            raise ValueError("compiler runtime deadline must be positive")
+        self.plan_selection.validate()
+
+
+@dataclass(frozen=True)
 class TypedCompilerQueryRequest:
     """One query with explicit order and fully typed compiler payload."""
 
     query_id: str
     sequence_number: int
     payload: TypedCompilerQueryPayload
+    runtime_context: Optional[CompilerRuntimeContext] = None
 
     def validate(self) -> None:
         """Validate query identity and its complete typed payload."""
@@ -87,6 +107,8 @@ class TypedCompilerQueryRequest:
         if not self.query_id or self.sequence_number < 0:
             raise ValueError("typed compiler query identity/order is invalid")
         self.payload.validate()
+        if self.runtime_context is not None:
+            self.runtime_context.validate()
 
     def compatibility_key(self) -> str:
         """Hash only fields that permit exact Plan/Task IR reuse."""
@@ -112,6 +134,7 @@ class CompilerBoundQueryRequest:
 
     query_request: BoundQueryRequest
     compiler_payload: TypedCompilerQueryPayload
+    runtime_context: Optional[CompilerRuntimeContext] = None
 
     def validate(self) -> None:
         """Prove that PR-13 identity and compiler payload describe one query."""
@@ -119,6 +142,8 @@ class CompilerBoundQueryRequest:
         query = self.query_request.query
         query.validate()
         self.compiler_payload.validate()
+        if self.runtime_context is not None:
+            self.runtime_context.validate()
         if (
             query.bound_method != BoundMethod.CROWN
             or query.optimization_stage != OptimizationStage.FINAL_BOUND
@@ -170,6 +195,7 @@ class CompilerBoundQueryRequest:
             query_id=query.query_id,
             sequence_number=query.sequence_number,
             payload=self.compiler_payload,
+            runtime_context=self.runtime_context,
         )
 
 
@@ -183,6 +209,7 @@ class TypedCompilerQueryResult:
     plan_instance_hash: str
     task_module_hash: str
     trace: TaskExecutionTrace
+    plan_instance: PlanInstance
 
 
 @dataclass(frozen=True)
@@ -206,11 +233,16 @@ class TypedCompilerQueryRuntime:  # pylint: disable=too-many-instance-attributes
             raise ValueError("compiler query runtime memory limits must be positive")
         self.available_memory_bytes = available_memory_bytes
         self.memory_budget_bytes = memory_budget_bytes
+        self.default_runtime_context = CompilerRuntimeContext(
+            available_memory_bytes=available_memory_bytes,
+            memory_budget_bytes=memory_budget_bytes,
+        )
         self.backend = backend or TypedTaskBackendRegistry()
         self.state_store = state_store or BoundRuntimeStateStore()
-        self._plan_cache: dict[tuple[str, Tuple[StateValidity, ...]], _CompiledPlan] = (
-            {}
-        )
+        self._plan_cache: dict[
+            tuple[str, CompilerRuntimeContext, Tuple[StateValidity, ...]],
+            _CompiledPlan,
+        ] = {}
         self.plan_cache_hits = 0
         self.plan_cache_misses = 0
         self.executed_queries = 0
@@ -264,6 +296,7 @@ class TypedCompilerQueryRuntime:  # pylint: disable=too-many-instance-attributes
                         instance=compiled.instance,
                     ),
                     trace=trace,
+                    plan_instance=compiled.instance,
                 )
             )
             self.executed_queries += 1
@@ -311,7 +344,9 @@ class TypedCompilerQueryRuntime:  # pylint: disable=too-many-instance-attributes
             bound_module=payload.bound_module,
             state_store=self.state_store,
         )
-        key = (request.compatibility_key(), state_validities)
+        runtime_context = request.runtime_context or self.default_runtime_context
+        runtime_context.validate()
+        key = (request.compatibility_key(), runtime_context, state_validities)
         cached = self._plan_cache.get(key)
         if cached is not None:
             self.plan_cache_hits += 1
@@ -320,10 +355,16 @@ class TypedCompilerQueryRuntime:  # pylint: disable=too-many-instance-attributes
         instance = select_plan_instance(
             payload.template,
             bound_module=payload.bound_module,
-            query_bucket_id=request.compatibility_key(),
-            available_memory_bytes=self.available_memory_bytes,
-            memory_budget_bytes=self.memory_budget_bytes,
+            query_bucket_id=(
+                request.compatibility_key()
+                + ":"
+                + runtime_context.plan_selection.query_distribution_id
+            ),
+            available_memory_bytes=runtime_context.available_memory_bytes,
+            memory_budget_bytes=runtime_context.memory_budget_bytes,
+            deadline_us=runtime_context.deadline_us,
             state_validities=state_validities,
+            selection_context=runtime_context.plan_selection,
         )
         compiled = _CompiledPlan(
             instance=instance,
@@ -374,6 +415,7 @@ def _optional_tensor_equal(
 __all__ = [
     "CompilerBoundQueryRequest",
     "CompilerQueryCapabilityError",
+    "CompilerRuntimeContext",
     "TypedCompilerQueryPayload",
     "TypedCompilerQueryRequest",
     "TypedCompilerQueryResult",

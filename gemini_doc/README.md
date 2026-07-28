@@ -91,6 +91,8 @@
 - `gemini_doc/change_2026-07-28_ir4e_pr13_query_migration_closure.md`：PR-13
   DynamicBatchManager→typed compiler adapter、legacy α/β historical opt-in、artifact v2 与
   IR-4 validated-reduced closure
+- `gemini_doc/change_2026-07-28_ir5a_adaptive_plan_context.md`：IR-5A query-time
+  memory/deadline/cache/distribution context、compile amortization 与 per-query plan cache
 - `gemini_doc/asplos_execution_memo_v1_0.md`：ASPLOS 研发的短执行入口与门禁
 - `gemini_doc/current_status_after_pr13.md`：PR-13 closure 后的真实状态、证据边界与当前缺口
 - `gemini_doc/pr14_execution_plan.md`：真实 verifier workload coverage/execution 的切片、门禁与止损

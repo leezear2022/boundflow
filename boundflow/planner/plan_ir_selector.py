@@ -55,6 +55,29 @@ class NoFeasiblePlanError(ValueError):
 
 
 @dataclass(frozen=True)
+class PlanSelectionContext:
+    """Query-distribution and compile-cache facts used by adaptive selection."""
+
+    query_distribution_id: str = "single-query"
+    expected_query_count: int = 1
+    cached_artifact_keys: Tuple[str, ...] = ()
+
+    def validate(self) -> None:
+        if not self.query_distribution_id:
+            raise ValueError("query distribution ID must be non-empty")
+        if self.expected_query_count <= 0:
+            raise ValueError("expected query count must be positive")
+        if (
+            any(not key for key in self.cached_artifact_keys)
+            or len(self.cached_artifact_keys) != len(set(self.cached_artifact_keys))
+            or self.cached_artifact_keys != tuple(sorted(self.cached_artifact_keys))
+        ):
+            raise ValueError(
+                "cached artifact keys must be sorted, unique, and non-empty"
+            )
+
+
+@dataclass(frozen=True)
 class _Selection:
     regions: Tuple[RegionCandidate, ...]
     representations: Tuple[RepresentationCandidate, ...]
@@ -77,12 +100,36 @@ class _Selection:
             *(candidate.candidate_id for candidate in self.states),
         )
 
-    @property
-    def score(self) -> tuple[object, ...]:
+    def score(
+        self, context: PlanSelectionContext
+    ) -> tuple[float, int, float, Tuple[str, ...]]:
+        """Rank by amortized latency under exact compile-cache facts."""
+
+        cached_keys = set(context.cached_artifact_keys)
+        candidates: tuple[PlanCandidate, ...] = (
+            *self.regions,
+            *self.representations,
+            *self.transitions,
+            *self.backends,
+            self.batch,
+            self.storage,
+            *self.states,
+        )
+        uncached_compile_ms = sum(
+            candidate.cost.compile_cost_ms
+            for candidate in candidates
+            if not (
+                isinstance(candidate, BackendCandidate)
+                and candidate.compiled_artifact_key in cached_keys
+            )
+        )
+        amortized_setup_ms = (uncached_compile_ms + self.cost.setup_cost_ms) / float(
+            context.expected_query_count
+        )
         return (
-            self.cost.predicted_latency_ms,
+            self.cost.predicted_latency_ms + amortized_setup_ms,
             self.cost.predicted_peak_bytes,
-            self.cost.compile_cost_ms + self.cost.setup_cost_ms,
+            uncached_compile_ms,
             self.candidate_ids,
         )
 
@@ -96,6 +143,7 @@ def select_plan_instance(  # pylint: disable=too-many-arguments
     memory_budget_bytes: int,
     deadline_us: Optional[int] = None,
     state_validities: Tuple[StateValidity, ...] = (),
+    selection_context: Optional[PlanSelectionContext] = None,
     max_evaluated_combinations: int = 100_000,
 ) -> PlanInstance:
     """Select the lowest-latency feasible, fully verified PlanInstance."""
@@ -109,6 +157,8 @@ def select_plan_instance(  # pylint: disable=too-many-arguments
         raise ValueError("deadline_us must be positive when present")
     if max_evaluated_combinations <= 0:
         raise ValueError("max_evaluated_combinations must be positive")
+    context = selection_context or PlanSelectionContext()
+    context.validate()
     for validity in state_validities:
         validity.validate()
     if len({validity.state_id for validity in state_validities}) != len(
@@ -227,24 +277,24 @@ def select_plan_instance(  # pylint: disable=too-many-arguments
                                 selected_candidates,
                                 storage_peak=storage.cost.predicted_peak_bytes,
                             )
-                            if (
-                                deadline_us is not None
-                                and cost.predicted_latency_ms * 1_000.0 > deadline_us
-                            ):
-                                _increment(failures, "deadline_exceeded")
-                                continue
-                            feasible.append(
-                                _Selection(
-                                    regions=partition,
-                                    representations=representations,
-                                    transitions=transitions,
-                                    backends=backends,
-                                    batch=batch,
-                                    storage=storage,
-                                    states=states,
-                                    cost=cost,
-                                )
+                            selection = _Selection(
+                                regions=partition,
+                                representations=representations,
+                                transitions=transitions,
+                                backends=backends,
+                                batch=batch,
+                                storage=storage,
+                                states=states,
+                                cost=cost,
                             )
+                            if deadline_us is not None:
+                                amortized_latency_ms = float(
+                                    selection.score(context)[0]
+                                )
+                                if amortized_latency_ms * 1_000.0 > deadline_us:
+                                    _increment(failures, "deadline_exceeded")
+                                    continue
+                            feasible.append(selection)
     if not feasible:
         if not failures:
             failures["no_legal_candidate_combination"] = 1
@@ -254,7 +304,7 @@ def select_plan_instance(  # pylint: disable=too-many-arguments
                 for reason, count in sorted(failures.items())
             )
         )
-    selected = min(feasible, key=lambda choice: choice.score)
+    selected = min(feasible, key=lambda choice: choice.score(context))
     return _build_instance(
         selected,
         template=template,
@@ -264,6 +314,7 @@ def select_plan_instance(  # pylint: disable=too-many-arguments
         memory_budget_bytes=memory_budget_bytes,
         deadline_us=deadline_us,
         state_validities=state_validities,
+        selection_context=context,
         evaluated_combinations=evaluated,
     )
 
@@ -366,6 +417,7 @@ def _build_instance(  # pylint: disable=too-many-arguments
     memory_budget_bytes: int,
     deadline_us: Optional[int],
     state_validities: Tuple[StateValidity, ...],
+    selection_context: PlanSelectionContext,
     evaluated_combinations: int,
 ) -> PlanInstance:
     selected_ids = set(selected.candidate_ids)
@@ -385,6 +437,9 @@ def _build_instance(  # pylint: disable=too-many-arguments
             str(available_memory_bytes),
             str(memory_budget_bytes),
             str(deadline_us),
+            selection_context.query_distribution_id,
+            str(selection_context.expected_query_count),
+            *selection_context.cached_artifact_keys,
             *(
                 "|".join(
                     (
@@ -439,9 +494,29 @@ def _build_instance(  # pylint: disable=too-many-arguments
         provenance=(
             PlanProvenance(
                 "selector",
-                "feasibility_then_latency_peak_compile_lexical_v1",
+                "amortized_latency_then_peak_compile_lexical_v2",
             ),
             PlanProvenance("evaluated_combinations", str(evaluated_combinations)),
+            PlanProvenance(
+                "query_distribution_id",
+                selection_context.query_distribution_id,
+            ),
+            PlanProvenance(
+                "expected_query_count",
+                str(selection_context.expected_query_count),
+            ),
+            PlanProvenance(
+                "cached_artifact_keys",
+                ",".join(selection_context.cached_artifact_keys) or "none",
+            ),
+            PlanProvenance(
+                "amortized_selection_latency_ms",
+                format(float(selected.score(selection_context)[0]), ".12g"),
+            ),
+            PlanProvenance(
+                "uncached_compile_cost_ms",
+                format(float(selected.score(selection_context)[2]), ".12g"),
+            ),
         ),
     )
     instance.validate(template=template, bound_module=bound_module)

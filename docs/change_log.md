@@ -3257,3 +3257,26 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_ir4e_pr13_query_migration_closure.md`
+
+---
+
+## 2026-07-28：IR-5A adaptive PlanInstance query context
+
+**主要改动**
+- selector 新增 query distribution、expected query count 与 exact compile-cache context；
+- 按 runtime + uncached compile/setup amortization 选择 plan；
+- deadline 使用同一 amortized latency；
+- compiler runtime 支持 per-query memory/budget/deadline/selection context；
+- context 进入 PlanInstance identity/provenance 与 Plan/Task cache namespace。
+
+**证据与边界**
+- 定向：29 passed；
+- 全量：466 passed、1 skipped、6 warnings；
+- cold/repeated/warm-cache 可切换不同合法 plan；
+- 尚无 fixed/local/global/oracle 新 held-out 证据，IR-5 不关闭。
+
+**下一阶段**
+- IR-5B 公平策略 evaluator 与 typed held-out artifact。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5a_adaptive_plan_context.md`
