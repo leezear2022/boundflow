@@ -8,7 +8,7 @@
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
 | C1：显式物化语义的 Structured Bound-Operator IR | IR-1 reference semantic closure validated；Plan/Schedule integration pending | typed Bound IR + lowering + dense/structured interpreter + explicit cast/materialize rewrite | 25 个 schema/lowering/rewrite/interpreter tests；MLP/CNN/residual/concat final bounds 对齐 | deterministic dump/hash 已有；IR-driven E2E artifact 尚缺 |
-| C2：Method/Autograd/Memory-Aware Materialization Planner | Plan IR schema/verifier/replay foundation validated；builder/selector/Schedule pending | typed PlanTemplate/PlanInstance、跨 decision verifier、PR-11/12 migration adapters；历史局部 planner | 12 个 Plan IR/migration tests；还需 reference builder/selector、多预算与 IR-driven E2E | 历史 1,416 executions/23 feasible 保留；Plan IR artifact 尚缺 |
+| C2：Method/Autograd/Memory-Aware Materialization Planner | Plan IR reference builder/selector/artifact API validated；旧 artifact 批量迁移、state-validity、Schedule pending | typed PlanTemplate/PlanInstance、跨 decision verifier、PR-11/12 adapters、typed evidence builder、预算/deadline selector | 16 个 Plan IR/migration tests；多预算选择与 artifact tamper replay；还需真实 migration report 与 IR-driven E2E | 历史 1,416 executions/23 feasible 保留；当前只证明 reference planning path |
 | C3：Verification Query Runtime Infrastructure | downgraded after PR-14B | query/validity + batcher + capability routing + real observer | 保留 reduced correctness；真实 coverage/replay 作为 limitation | activation 0/394 eligible；ResNet bound-equivalence fail；不作 acceleration claim |
 | BoundFlow Schedule IR | unimplemented | 现仅 `TaskGraph.topo_sort()`、局部 fused step 和过程式 retry | dependency/lifetime/stream/batch/retry/state verifier；reference executor | deterministic schedule dump/trace 尚缺 |
 | TVM 后端执行 Planner 结果而非定义核心抽象 | partial | `boundflow/backends/tvm/`、`runtime/tvm_executor.py` | Python/TVM/unfused/fused 对齐 | compile/cold/warm、launch、bytes |
@@ -90,6 +90,22 @@
 
 实现与门禁边界见
 `gemini_doc/change_2026-07-28_plan_ir_v1_schema_and_legacy_migration.md`。
+
+### 2026-07-28 IR-2B 进度
+
+- 新增 typed evidence → `PlanTemplate` reference builder，自动推导 Bound IR region boundary、
+  storage lifetime/alignment 和 capability rejection；
+- 新增有界 deterministic selector，memory/deadline 改变时产生不同且完整记账的
+  `PlanInstance`，无可行计划时 fail closed；
+- 新增不可变 Bound/Template/Instance artifact API、逐文件 SHA-256、精确 replay 与 tamper
+  rejection；
+- Plan IR 专属 11 passed，连同 migration 共 16 passed；相邻 92 passed；全量
+  413 passed、1 skipped；
+- 尚缺旧 PR-11/12 真实 artifact 批量 assembly/report、query-time state-validity 和独立 replay
+  CLI，因此 IR-2/C2 仍不能升级为 complete。
+
+实现与门禁边界见
+`gemini_doc/change_2026-07-28_plan_ir_v1_reference_builder_selector.md`。
 
 ## PR-10 子阶段
 

@@ -44,6 +44,25 @@ from boundflow.ir.plan import (
 from boundflow.ir.task import BFTaskModule, BoundTask, TaskKind, TaskOp
 from boundflow.runtime.crown_ibp import _forward_ibp_trace_mlp
 from boundflow.runtime.task_executor import InputSpec
+from boundflow.planner.plan_ir_artifact import (
+    verify_plan_selection_artifact,
+    write_plan_selection_artifact,
+)
+from boundflow.planner.plan_ir_builder import (
+    BackendEvidence,
+    BatchEvidence,
+    ReferencePlanEvidence,
+    RegionEvidence,
+    RepresentationEvidence,
+    StorageEvidence,
+    TransitionEvidence,
+    ValueLayoutEvidence,
+    build_reference_plan_template,
+)
+from boundflow.planner.plan_ir_selector import (
+    NoFeasiblePlanError,
+    select_plan_instance,
+)
 
 
 def _bound_module():
@@ -675,3 +694,354 @@ def test_plan_ir_core_has_no_legacy_planner_runtime_or_torch_dependency() -> Non
     assert "torch" not in direct_imports
     assert not any("runtime" in module for module in imported_modules)
     assert not any("planner" in module for module in imported_modules)
+
+
+def test_reference_selector_changes_plan_across_memory_budgets() -> None:
+    module, template, _manual = _template_and_instance()
+    dense_storage = next(
+        candidate
+        for candidate in template.storage_candidates
+        if candidate.candidate_id == "storage:dense"
+    )
+    structured_storage = next(
+        candidate
+        for candidate in template.storage_candidates
+        if candidate.candidate_id == "storage:structured"
+    )
+    assert structured_storage.cost.predicted_peak_bytes < (
+        dense_storage.cost.predicted_peak_bytes
+    )
+
+    high = select_plan_instance(
+        template,
+        bound_module=module,
+        query_bucket_id="bucket:high-memory",
+        available_memory_bytes=1 << 29,
+        memory_budget_bytes=dense_storage.cost.predicted_peak_bytes,
+    )
+    low = select_plan_instance(
+        template,
+        bound_module=module,
+        query_bucket_id="bucket:low-memory",
+        available_memory_bytes=1 << 29,
+        memory_budget_bytes=structured_storage.cost.predicted_peak_bytes,
+    )
+
+    assert high.storage_decision.candidate_id == "storage:dense"
+    assert low.storage_decision.candidate_id == "storage:structured"
+    assert not high.materialization_decisions
+    assert len(low.materialization_decisions) == 4
+    assert all(
+        "structured" not in decision.candidate_id
+        for decision in high.representation_decisions
+    )
+    assert any(
+        "structured" in decision.candidate_id
+        for decision in low.representation_decisions
+    )
+    high.validate(template=template, bound_module=module)
+    low.validate(template=template, bound_module=module)
+
+
+def test_reference_selector_is_deterministic_and_fails_closed() -> None:
+    module, template, _manual = _template_and_instance()
+    kwargs = {
+        "bound_module": module,
+        "query_bucket_id": "bucket:deterministic",
+        "available_memory_bytes": 1 << 29,
+        "memory_budget_bytes": 1 << 28,
+    }
+    first = select_plan_instance(template, **kwargs)
+    second = select_plan_instance(template, **kwargs)
+    assert first == second
+    assert first.stable_hash(
+        template=template, bound_module=module
+    ) == second.stable_hash(template=template, bound_module=module)
+
+    with pytest.raises(NoFeasiblePlanError) as memory_error:
+        select_plan_instance(
+            template,
+            bound_module=module,
+            query_bucket_id="bucket:impossible-memory",
+            available_memory_bytes=1,
+            memory_budget_bytes=1,
+        )
+    assert any(
+        failure.reason == "memory_budget_exceeded"
+        for failure in memory_error.value.failures
+    )
+
+    with pytest.raises(NoFeasiblePlanError) as deadline_error:
+        select_plan_instance(
+            template,
+            bound_module=module,
+            query_bucket_id="bucket:impossible-deadline",
+            available_memory_bytes=1 << 29,
+            memory_budget_bytes=1 << 28,
+            deadline_us=1,
+        )
+    assert any(
+        failure.reason == "deadline_exceeded"
+        for failure in deadline_error.value.failures
+    )
+
+    with pytest.raises(ValueError, match="max_evaluated_combinations"):
+        select_plan_instance(
+            template,
+            bound_module=module,
+            query_bucket_id="bucket:bounded-search",
+            available_memory_bytes=1 << 29,
+            memory_budget_bytes=1 << 28,
+            max_evaluated_combinations=1,
+        )
+
+
+def test_reference_builder_derives_candidates_and_drives_budgeted_selection() -> None:
+    module, manual_template, _manual_instance = _template_and_instance()
+    target_op = next(
+        op for op in module.graph.ops if op.kind == BoundOpKind.LINEAR_BACKWARD
+    )
+    consumer = next(op for op in module.graph.ops if target_op.outputs[0] in op.inputs)
+    region_evidence = tuple(
+        RegionEvidence(
+            evidence_id=op.op_id,
+            op_ids=(op.op_id,),
+            cost=_cost(latency=0.1),
+        )
+        for op in module.graph.ops
+    )
+    dense_representations = tuple(
+        RepresentationEvidence(
+            evidence_id=f"dense:{op.op_id}",
+            region_evidence_id=op.op_id,
+            representation=BoundRepresentation.DENSE,
+            required_transition_evidence_ids=(),
+            cost=_cost(latency=0.2),
+        )
+        for op in module.graph.ops
+    )
+    transition_evidence = tuple(
+        [
+            TransitionEvidence(
+                evidence_id=f"cast:{value_id}",
+                source_value_id=value_id,
+                before_op_id=target_op.op_id,
+                kind=TransitionKind.CAST,
+                source_representation=BoundRepresentation.DENSE,
+                target_representation=BoundRepresentation.STRUCTURED,
+                cost=_cost(latency=0.05),
+            )
+            for value_id in (target_op.inputs[0], target_op.inputs[2])
+        ]
+        + [
+            TransitionEvidence(
+                evidence_id=f"materialize:{value_id}",
+                source_value_id=value_id,
+                before_op_id=consumer.op_id,
+                kind=TransitionKind.MATERIALIZE,
+                source_representation=BoundRepresentation.STRUCTURED,
+                target_representation=BoundRepresentation.DENSE,
+                cost=_cost(latency=0.1),
+            )
+            for value_id in (target_op.outputs[0], target_op.outputs[2])
+        ]
+    )
+    structured_representation = RepresentationEvidence(
+        evidence_id=f"structured:{target_op.op_id}",
+        region_evidence_id=target_op.op_id,
+        representation=BoundRepresentation.STRUCTURED,
+        required_transition_evidence_ids=tuple(
+            item.evidence_id for item in transition_evidence
+        ),
+        cost=_cost(latency=0.4),
+    )
+    dense_backends = tuple(
+        BackendEvidence(
+            evidence_id=f"reference:{op.op_id}",
+            region_evidence_id=op.op_id,
+            representation_evidence_id=f"dense:{op.op_id}",
+            capability_id="reference-dense-v1",
+            cost=_cost(latency=0.5),
+        )
+        for op in module.graph.ops
+    )
+    structured_backend = BackendEvidence(
+        evidence_id=f"structured:{target_op.op_id}",
+        region_evidence_id=target_op.op_id,
+        representation_evidence_id=structured_representation.evidence_id,
+        capability_id="pytorch-structured-linear-v1",
+        compiled_artifact_key="torch-structured-linear:test",
+        cost=_cost(latency=0.3, compile_ms=0.1),
+    )
+    batches = (
+        BatchEvidence("full", 2, 2, 1, 128, _cost(latency=1.0)),
+        BatchEvidence("reduced", 1, 1, 1, 64, _cost(latency=2.0)),
+    )
+    structured_values = {
+        target_op.inputs[0],
+        target_op.inputs[2],
+        target_op.outputs[0],
+        target_op.outputs[2],
+    }
+    overrides = tuple(
+        ValueLayoutEvidence(
+            value_id=value.value_id,
+            representation=BoundRepresentation.STRUCTURED,
+            physical_size_bytes=max(
+                16,
+                (
+                    (
+                        _logical_bytes(value.tensor_type.shape, value.tensor_type.dtype)
+                        // 2
+                    )
+                    + 15
+                )
+                // 16
+                * 16,
+            ),
+        )
+        for value in module.graph.values
+        if value.value_id in structured_values
+    )
+    dense_ids = tuple(item.evidence_id for item in dense_representations)
+    evidence = ReferencePlanEvidence(
+        evidence_set_id="plain-crown-typed-evidence-v1",
+        regions=region_evidence,
+        transitions=transition_evidence,
+        representations=(*dense_representations, structured_representation),
+        backends=(*dense_backends, structured_backend),
+        batches=batches,
+        storage=(
+            StorageEvidence(
+                evidence_id="dense",
+                compatible_batch_evidence_ids=("full", "reduced"),
+                compatible_representation_evidence_ids=dense_ids,
+                value_layout_overrides=(),
+                arena_id="cpu-main",
+                cost=_cost(latency=0.0),
+            ),
+            StorageEvidence(
+                evidence_id="structured",
+                compatible_batch_evidence_ids=("full", "reduced"),
+                compatible_representation_evidence_ids=(
+                    *(
+                        evidence_id
+                        for evidence_id in dense_ids
+                        if evidence_id != f"dense:{target_op.op_id}"
+                    ),
+                    structured_representation.evidence_id,
+                ),
+                value_layout_overrides=overrides,
+                arena_id="cpu-main",
+                cost=_cost(latency=0.0),
+            ),
+        ),
+        provenance=(PlanProvenance("test_case", "reference_builder"),),
+    )
+    template = build_reference_plan_template(
+        module,
+        hardware=manual_template.hardware,
+        workload=manual_template.workload,
+        capabilities=manual_template.capabilities,
+        evidence=evidence,
+    )
+    repeated = build_reference_plan_template(
+        module,
+        hardware=manual_template.hardware,
+        workload=manual_template.workload,
+        capabilities=manual_template.capabilities,
+        evidence=evidence,
+    )
+    assert template == repeated
+    assert template.stable_hash(bound_module=module) == repeated.stable_hash(
+        bound_module=module
+    )
+    derived_target_region = next(
+        region
+        for region in template.region_candidates
+        if region.op_ids == (target_op.op_id,)
+    )
+    assert set(derived_target_region.input_value_ids) == set(target_op.inputs)
+    assert set(derived_target_region.output_value_ids) == set(target_op.outputs)
+
+    dense_storage = next(
+        candidate
+        for candidate in template.storage_candidates
+        if candidate.candidate_id == "storage:dense"
+    )
+    structured_storage = next(
+        candidate
+        for candidate in template.storage_candidates
+        if candidate.candidate_id == "storage:structured"
+    )
+    assert (
+        structured_storage.cost.predicted_peak_bytes
+        < dense_storage.cost.predicted_peak_bytes
+    )
+    high = select_plan_instance(
+        template,
+        bound_module=module,
+        query_bucket_id="builder:high",
+        available_memory_bytes=1 << 29,
+        memory_budget_bytes=dense_storage.cost.predicted_peak_bytes,
+    )
+    low = select_plan_instance(
+        template,
+        bound_module=module,
+        query_bucket_id="builder:low",
+        available_memory_bytes=1 << 29,
+        memory_budget_bytes=structured_storage.cost.predicted_peak_bytes,
+    )
+    assert high.storage_decision.candidate_id == "storage:dense"
+    assert low.storage_decision.candidate_id == "storage:structured"
+    assert not high.materialization_decisions
+    assert len(low.materialization_decisions) == 4
+
+
+def test_plan_selection_artifact_is_immutable_and_replays_exactly(
+    tmp_path: Path,
+) -> None:
+    module, template, _manual = _template_and_instance()
+    instance = select_plan_instance(
+        template,
+        bound_module=module,
+        query_bucket_id="artifact:exact-replay",
+        available_memory_bytes=1 << 29,
+        memory_budget_bytes=1 << 28,
+    )
+    output_dir = tmp_path / "plan-selection"
+    manifest = write_plan_selection_artifact(
+        output_dir,
+        bound_module=module,
+        template=template,
+        instance=instance,
+    )
+    assert manifest.is_file()
+    replayed = verify_plan_selection_artifact(
+        output_dir,
+        bound_module=module,
+        template=template,
+    )
+    assert replayed == instance
+
+    with pytest.raises(FileExistsError, match="refusing to overwrite"):
+        write_plan_selection_artifact(
+            output_dir,
+            bound_module=module,
+            template=template,
+            instance=instance,
+        )
+
+    instance_path = output_dir / "plan_instance.json"
+    instance_path.write_text(
+        instance_path.read_text(encoding="utf-8").replace(
+            "artifact:exact-replay", "artifact:tampered"
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="file hash mismatch"):
+        verify_plan_selection_artifact(
+            output_dir,
+            bound_module=module,
+            template=template,
+        )
