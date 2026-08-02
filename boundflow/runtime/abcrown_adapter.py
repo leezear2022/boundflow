@@ -22,8 +22,13 @@ from .verification_profile import (
     VerificationQueryProfile,
     write_verification_profiles_jsonl,
 )
+from .verifier_ir_integration import (
+    ExternalVerifierCallSpec,
+    compile_external_verifier_call,
+    execute_external_verifier_call,
+)
 
-ABCROWN_ADAPTER_SCHEMA_VERSION = "boundflow.abcrown-adapter/v1"
+ABCROWN_ADAPTER_SCHEMA_VERSION = "boundflow.abcrown-adapter/v2"
 
 
 def file_sha256(path: Path) -> str:
@@ -521,8 +526,11 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
     query_prefix: str = "abcrown"
     phase_resolver: Callable[[], str] = _phase_from_stack
     precondition_rejections: Tuple[str, ...] = ()
+    typed_ir_enabled: bool = False
     queries: list[BoundQuery] = field(default_factory=list)
     profiles: list[VerificationQueryProfile] = field(default_factory=list)
+    typed_ir_records: list[dict[str, object]] = field(default_factory=list)
+    _active_query_ids: list[str] = field(default_factory=list, init=False, repr=False)
 
     def __post_init__(self) -> None:
         if not self.model_structure_hash or not self.weight_version:
@@ -538,7 +546,7 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
         original: Callable[..., Any],
         call_args: tuple[Any, ...],
         call_kwargs: Mapping[str, Any],
-    ) -> None:
+    ) -> BoundQuery:
         values = _argument_map(original, call_args, call_kwargs)
         values.pop("self", None)
         input_tensor = _first_tensor(values.get("x"))
@@ -582,6 +590,8 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
             "external_method": str(raw_method),
             "solver_phase": solver_phase,
             "split_state_present": split_state_present,
+            "bound_lower_requested": bool(values.get("bound_lower", True)),
+            "bound_upper_requested": bool(values.get("bound_upper", True)),
             "identity_limitations": (
                 []
                 if beta_version is not None or not beta_enabled
@@ -614,9 +624,21 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
             numeric_policy="fp32_strict" if dtype == "torch.float32" else dtype,
         )
         sequence_number = len(self.queries)
+        requested_outputs = tuple(
+            name
+            for name, enabled in (
+                ("lower", source_options["bound_lower_requested"]),
+                ("upper", source_options["bound_upper_requested"]),
+            )
+            if enabled
+        )
+        if not requested_outputs:
+            raise ValueError("compute_bounds call requests neither lower nor upper")
         query = BoundQuery(
             query_id=f"{self.query_prefix}-{sequence_number:08d}",
-            parent_query_id=None,
+            parent_query_id=(
+                self._active_query_ids[-1] if self._active_query_ids else None
+            ),
             sequence_number=sequence_number,
             example_idx=0,
             model_structure_hash=self.model_structure_hash,
@@ -635,7 +657,7 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
             dtype=dtype,
             device=device,
             numeric_policy=compatibility.numeric_policy,
-            requested_outputs=("bounds",),
+            requested_outputs=requested_outputs,
             compatibility_key=compatibility,
             execution_options=source_options,
         )
@@ -649,6 +671,55 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
         )
         self.queries.append(query)
         self.profiles.append(profile)
+        return query
+
+    def _execute(self, query: BoundQuery, exact_call: Callable[[], Any]) -> Any:
+        """Optionally route one exact provider call through typed IR."""
+
+        if not self.typed_ir_enabled:
+            self._active_query_ids.append(query.query_id)
+            try:
+                return exact_call()
+            finally:
+                completed_query_id = self._active_query_ids.pop()
+                if completed_query_id != query.query_id:
+                    raise RuntimeError("external query lineage stack is corrupted")
+        compilation = compile_external_verifier_call(
+            ExternalVerifierCallSpec.from_query_dict(query.to_dict())
+        )
+        record_index = len(self.typed_ir_records)
+        record = {
+            "query_id": query.query_id,
+            "sequence_number": query.sequence_number,
+            "completed": False,
+            "error_type": "in_flight",
+            "result_hash": None,
+            "ir_hashes": compilation.hashes(),
+            "semantics_owner": "external_verifier",
+            "performance_claimed": False,
+        }
+        # Reserve the slot before entering the provider. auto_LiRPA can make a
+        # nested compute_bounds call, so completion order is not call order.
+        self.typed_ir_records.append(record)
+        self._active_query_ids.append(query.query_id)
+        try:
+            execution = execute_external_verifier_call(compilation, exact_call)
+        except BaseException as error:
+            record["error_type"] = type(error).__name__
+            self.typed_ir_records[record_index] = record
+            raise
+        finally:
+            completed_query_id = self._active_query_ids.pop()
+            if completed_query_id != query.query_id:
+                raise RuntimeError("external query lineage stack is corrupted")
+        record.update(
+            completed=True,
+            error_type=None,
+            result_hash=execution.result_hash,
+            ir_hashes=dict(execution.ir_hashes),
+        )
+        self.typed_ir_records[record_index] = record
+        return execution.result
 
     @contextmanager
     def instrument(self, target: Any) -> Iterator["ABCrownBoundQueryProfiler"]:
@@ -663,15 +734,15 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
         if inspect.isclass(target):
 
             def wrapped(instance: Any, *args: Any, **kwargs: Any) -> Any:
-                self._record(instance, original, (instance, *args), kwargs)
-                return original(instance, *args, **kwargs)
+                query = self._record(instance, original, (instance, *args), kwargs)
+                return self._execute(query, lambda: original(instance, *args, **kwargs))
 
             setattr(target, "compute_bounds", wrapped)
         else:
 
             def wrapped_instance(_instance: Any, *args: Any, **kwargs: Any) -> Any:
-                self._record(target, original, args, kwargs)
-                return original(*args, **kwargs)
+                query = self._record(target, original, args, kwargs)
+                return self._execute(query, lambda: original(*args, **kwargs))
 
             setattr(target, "compute_bounds", MethodType(wrapped_instance, target))
         try:
@@ -694,6 +765,14 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
             raise ValueError("external query IDs are not contiguous")
         if [profile.query_id for profile in self.profiles] != expected_ids:
             raise ValueError("external profile IDs do not match queries")
+        if self.typed_ir_enabled:
+            record_ids = [str(record["query_id"]) for record in self.typed_ir_records]
+            if record_ids != expected_ids:
+                raise ValueError(
+                    "typed IR execution records do not match queries: "
+                    f"queries={len(expected_ids)} records={len(record_ids)} "
+                    f"first_mismatch={next(((expected, actual) for expected, actual in zip(expected_ids, record_ids) if expected != actual), None)}"
+                )
 
     def write_artifacts(self, output_dir: Path) -> None:
         """Write identity, coverage rows, and aggregate coverage as separate files."""
@@ -714,6 +793,14 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
             + "\n",
             encoding="utf-8",
         )
+        if self.typed_ir_enabled:
+            typed_lines = [
+                json.dumps(record, sort_keys=True, allow_nan=False) + "\n"
+                for record in self.typed_ir_records
+            ]
+            (output_dir / "typed_ir.jsonl").write_text(
+                "".join(typed_lines), encoding="utf-8"
+            )
 
 
 __all__ = [

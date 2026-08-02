@@ -118,6 +118,12 @@
   prepared Bound/Task execution、production/audit trace 分离、from-forward-trace 公平基线
   与 calibration-only CUDA remediation 诊断；该文档当时尚未执行的 residual final
   已由 IR-5E—H 完成并判定最终 No-Go
+- `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`：IR-5 No-Go 后独立的
+  真实 verifier correctness/integration 路线、所有权与 RVIR-1—4 门禁
+- `gemini_doc/change_2026-08-03_rvir1_external_intermediate_semantics.md`：external
+  intermediate bounds + adaptive slope 的 ResNet initial-CROWN 语义修复
+- `gemini_doc/change_2026-08-03_rvir2_typed_external_calls.md`：activation-BaB external exact
+  call 的 Bound/Plan/Task/Schedule 类型化、真实调度与 lineage closure
 - `gemini_doc/change_2026-07-28_ir5e_residual_final_protocol_freeze.md`：IR-5E
   residual-CNN typed workload、chain-CNN calibration→residual final v2 冻结 split、
   from-trace 公平协议及 p90/Pareto 一次性门禁

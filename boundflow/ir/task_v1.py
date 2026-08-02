@@ -21,6 +21,7 @@ from .bound import (
     ConcretizeAttrs,
     Conv2dBackwardAttrs,
     InputBindAttrs,
+    ExternalVerifierCallAttrs,
     LinearBackwardAttrs,
     ReluRelaxationAttrs,
     SpecBindAttrs,
@@ -45,6 +46,7 @@ class TaskIRKind(Enum):
     PLAIN_CROWN_REGION = "plain_crown_region"
     CONCRETIZATION = "concretization"
     STATE_UPDATE = "state_update"
+    EXTERNAL_VERIFIER_CALL = "external_verifier_call"
 
 
 class TaskMemoryAccess(Enum):
@@ -61,6 +63,7 @@ class TaskExternalDependencyKind(Enum):
     OBJECTIVE = "objective"
     PERTURBATION = "perturbation"
     PREACTIVATION_BOUND = "preactivation_bound"
+    EXTERNAL_VERIFIER_STATE = "external_verifier_state"
 
 
 @dataclass(frozen=True)
@@ -619,6 +622,8 @@ def _task_kind(region_kind: RegionKind) -> TaskIRKind:
         return TaskIRKind.BOUND_BINDING
     if region_kind == RegionKind.CONCRETIZATION:
         return TaskIRKind.CONCRETIZATION
+    if region_kind == RegionKind.EXTERNAL_VERIFIER:
+        return TaskIRKind.EXTERNAL_VERIFIER_CALL
     return TaskIRKind.PLAIN_CROWN_REGION
 
 
@@ -664,6 +669,27 @@ def _region_dependencies(
                         attrs.preactivation_primal_value_id,
                     )
                 )
+        elif isinstance(attrs, ExternalVerifierCallAttrs):
+            external.extend(
+                TaskExternalDependency(
+                    TaskExternalDependencyKind.EXTERNAL_VERIFIER_STATE,
+                    item,
+                )
+                for item in (
+                    attrs.input_region_hash,
+                    attrs.objective_hash,
+                    *(
+                        value
+                        for value in (
+                            attrs.alpha_state_version,
+                            attrs.beta_state_version,
+                            attrs.split_state_version,
+                            attrs.cuts_version,
+                        )
+                        if value is not None
+                    ),
+                )
+            )
     return tuple(dict.fromkeys(parameters)), tuple(dict.fromkeys(external))
 
 
@@ -713,4 +739,5 @@ def task_backend_implementation_id(backend: BackendKind) -> str:
         BackendKind.TVM_RELAX_UNFUSED: "tvm_relax_unfused_bound_region/v1",
         BackendKind.TVM_TIR_UNFUSED: "tvm_tir_unfused_bound_region/v1",
         BackendKind.TVM_FUSED_TIR: "tvm_fused_tir_bound_region/v1",
+        BackendKind.EXTERNAL_ABCROWN: "external_abcrown_exact_call/v1",
     }[backend]

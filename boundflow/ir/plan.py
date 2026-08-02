@@ -32,6 +32,7 @@ class RegionKind(Enum):
     ROUTING = "routing"
     CONCRETIZATION = "concretization"
     MIXED = "mixed"
+    EXTERNAL_VERIFIER = "external_verifier"
 
 
 class BackendKind(Enum):
@@ -45,6 +46,7 @@ class BackendKind(Enum):
     TVM_TIR_UNFUSED = "tvm_tir_unfused"
     TVM_FUSED_TIR = "tvm_fused_tir"
     REFERENCE = "reference"
+    EXTERNAL_ABCROWN = "external_abcrown"
 
 
 class TransitionKind(Enum):

@@ -31,6 +31,11 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--skip-attack", action="store_true")
     parser.add_argument("--baseline-first", action="store_true")
     parser.add_argument(
+        "--typed-ir",
+        action="store_true",
+        help="Compile and dispatch every exact external call through Bound/Plan/Task/Schedule IR",
+    )
+    parser.add_argument(
         "--complete-verifier", choices=("auto", "bab", "bab-refine", "input_bab")
     )
     return parser.parse_args()
@@ -179,6 +184,7 @@ def main() -> None:  # pylint: disable=too-many-locals,too-many-statements
         precondition_rejections=(
             () if boundflow_import["supported"] else (str(boundflow_import["reason"]),)
         ),
+        typed_ir_enabled=args.typed_ir,
     )
     baseline_result = None
     if args.baseline_first:
@@ -224,6 +230,15 @@ def main() -> None:  # pylint: disable=too-many-locals,too-many-statements
             }
         ),
         "query_count": len(profiler.queries),
+        "typed_ir": {
+            "enabled": args.typed_ir,
+            "compiled_and_dispatched": len(profiler.typed_ir_records),
+            "completed": sum(
+                bool(record["completed"]) for record in profiler.typed_ir_records
+            ),
+            "semantics_owner": "external_verifier" if args.typed_ir else None,
+            "performance_claimed": False,
+        },
     }
     (output_dir / "manifest.json").write_text(
         json.dumps(manifest, sort_keys=True, indent=2, allow_nan=False) + "\n",

@@ -3566,3 +3566,17 @@
 
 **记录**
 - `gemini_doc/change_2026-08-03_rvir1_external_intermediate_semantics.md`
+
+---
+
+## 2026-08-03：RVIR-2 Typed External Verifier Calls
+
+- Bound/Plan/Task/Schedule 新增强类型 external αβ-CROWN exact-call 路径；
+- α/β/split identity、requested lower/upper 与 external semantics ownership 显式化；
+- profiler 通过 typed schedule 调用原 provider，并保留嵌套 query parent lineage；
+- 真实 CPU BaB observer on/off 对照均访问 380 domains、final lower 一致；
+- 377/377 调用编译、调度并完成，343 个 activation 调用 effective method 均为 αβ-CROWN；
+- 当前只形成 correctness/integration claim，不形成性能 claim。
+
+**记录**
+- `gemini_doc/change_2026-08-03_rvir2_typed_external_calls.md`

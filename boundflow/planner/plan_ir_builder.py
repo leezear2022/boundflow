@@ -590,6 +590,8 @@ def _region_kind(op_kinds: Tuple[BoundOpKind, ...]) -> RegionKind:
 
 
 def _single_region_kind(op_kind: BoundOpKind) -> RegionKind:
+    if op_kind == BoundOpKind.EXTERNAL_VERIFIER_CALL:
+        return RegionKind.EXTERNAL_VERIFIER
     if op_kind in {BoundOpKind.SPEC_BIND, BoundOpKind.INPUT_BIND}:
         return RegionKind.BINDING
     if op_kind in {BoundOpKind.LINEAR_BACKWARD, BoundOpKind.CONV2D_BACKWARD}:
