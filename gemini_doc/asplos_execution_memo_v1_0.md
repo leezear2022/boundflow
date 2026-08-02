@@ -12,17 +12,10 @@
 > 主线；后续按第 11 节和
 > `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md` 推进。
 
-> **2026-07-28 进度**：IR-1—IR-4 narrow plain-CROWN compiler/runtime 已
-> validated-reduced；IR-5C3 architecture-held-out fair artifact 已完成，但 Global 相对
-> batched-original p90 regret 70.263×且无多预算切换，判定 VALIDATED-NO-GO。
-> IR-5D prepared execution remediation 已实现，并在已消费 CNN 上通过 calibration-only
-> from-forward-trace 诊断；正式 No-Go 不撤销。IR-6 仍 blocked，下一步只允许新的
-> frozen residual-CNN final gate。IR-5E 已冻结该 CUDA-only protocol 与未执行的
-> final seeds `7401/7402`；首次执行因 fixed-single 输入重采样不等于 batch 第一 query
-> 而 PROTOCOL-INVALID，未形成 manifest。`7401/7402` 已退役，IR-6 继续 blocked。
-> IR-5G 已冻结 exact-input-slice v3 与 fresh `7501/7502`，等待 protocol commit 后
-> 一次性执行。IR-5H 已完成 final：Global p90 1.26160×、gray 无 Pareto、无预算切换，
-> 最终 VALIDATED-NO-GO；当前 ASPLOS system-performance 路线停止，IR-6 不启动。
+> **2026-08-03 最终状态**：IR-1—IR-4 narrow plain-CROWN compiler/runtime 已
+> validated-reduced；IR-5D prepared execution remediation 已完成。fresh residual-v3
+> final correctness/replay 全过，但 Global p90 1.26160×、gray 无 Pareto、无预算切换。
+> IR-5 最终 VALIDATED-NO-GO；当前 ASPLOS system-performance 路线停止，IR-6 不启动。
 
 ## 1. 锁定的论文命题
 
@@ -391,29 +384,28 @@ Bound IR v1
   IR-6 cached specialization，也不得把 compiler closure 升级成 α/β external integration。
 - IR-5A 已新增 query-time memory/deadline/cache/distribution context，并按 uncached
   compile/setup 在 expected query count 上摊销选择；cold/repeated/warm context 可产生不同
-  typed PlanInstance。IR-5 仍需 fixed/local/global/oracle 与 held-out 系统证据。
+  typed PlanInstance；在 IR-5A 时点仍需 fixed/local/global/oracle 与 held-out 系统证据。
 - IR-5B 已冻结四策略共享 observation/context 的公平 evaluator，输出 tail/TTV/peak/regret；
   当前 artifact 明确为 synthetic contract，不得写成 held-out 性能结果。
 - IR-5C1/C2 已冻结 calibration-only CUDA runner 和资源 context，并在 fresh typed MLP
   artifact 上得到 Global 8/8 feasible、p50/p90 regret 1.000×/1.00766×；高内存选择
-  PyTorch dense，低内存选择 TVM fused。该结果仅为 PARTIAL：同-family split、
-  ordinary batching/fair batched-original 与 non-toy workload 尚缺，IR-5 不关闭。
+  PyTorch dense，低内存选择 TVM fused。该时点结果仅为 PARTIAL：同-family split、
+  ordinary batching/fair batched-original 与 non-toy workload 尚缺，随后由 IR-5C3 补测。
 - IR-5C3 已用 MLP calibration→chain-CNN held-out 和 fair batched-original 补齐关键口径；
   correctness/feasibility 全通过，但 Global p50/p90 regret 为 68.065×/70.263×，
   64/512 MiB 均选 chunked且无 Pareto。当前 IR-5 v1 VALIDATED-NO-GO，IR-6 blocked。
   profile 指向 query hot path 重复 validate/hash。
 - IR-5D 已把静态 validate/hash/dispatch key 移入 prepared capsule，并分离 audit/production
   trace；在旧 CNN 上使用 from-forward-trace 公平计时的 calibration median 比值最快为
-  0.880×/0.896×。该诊断不撤销 No-Go；只允许在新 frozen residual-CNN split 上做一次
-  final gate，IR-6 在此之前继续 blocked。
+  0.880×/0.896×。该诊断不撤销 No-Go；其后按预注册门禁执行了一次 residual final。
 - IR-5E 已新增 residual fanout/add typed workload，并冻结 chain-CNN calibration →
   residual-CNN final v2、from-forward-trace baseline、p90≤1.20 与 Pareto 判定字段。
-  final `7401/7402` 尚未执行；protocol commit 后只允许一次正式生成。
+  `7401/7402` 随后首次生成时因输入身份协议错误失效并永久退役。
 - IR-5F 首次 v2 生成在 semantic gate 中止：同 seed 不保证不同 batch shape 的随机输入
   具有前缀关系。参数一致但 input max diff 为 3.735/2.167；无 summary/manifest，不能作
   性能结论。只允许显式 slice batched input、升级 schema 并旋转 fresh identities。
 - IR-5G 已实现上述唯一修复：single 输入 exact clone batched query zero，并在 bound
-  comparison 前做 tensor identity gate；v3 `7501/7502` 尚未执行。
+  comparison 前做 tensor identity gate；v3 `7501/7502` 随后按协议运行一次并冻结。
 - IR-5H v3 final correctness/integrity/semantic replay 全过，但 Global p90 regret
   `1.26160× > 1.20×`，gray compiler frontier 只有单点且无 multi-budget switch。
   按冻结止损规则，IR-5 保持 VALIDATED-NO-GO，禁止继续旋转 final 或启动 IR-6。

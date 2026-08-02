@@ -2,7 +2,7 @@
 
 > 状态：**顶层执行计划 v1.0；后续研究工作受本文门禁约束。**  
 > 基线日期：2026-07-12  
-> 当前研究代码基线：`263ea81`（PR-10 complete, feature-gated）
+> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 closure 基线：`5a29a8e`
 > 投稿策略：ASPLOS 2027 September Cycle 为有条件冲刺；ASPLOS 2028 为稳健主目标。
 
 > **路线修订（2026-07-20）**：本文保留 2026-07-12 的研究问题、历史门禁和 PR-10—13
@@ -11,12 +11,13 @@
 > 当前 Bound IR 仍为占位，统一 Plan IR 与 Schedule IR 尚未实现；不得仅凭 runtime operator、
 > PlanBundle 或 TaskGraph 将 C1/C2 视为 paper-level 完成。
 
-> **2026-07-28 进度修订**：上句是 2026-07-20 当时状态。IR-1—IR-4 narrow
+> **2026-08-03 最终修订**：上句是 2026-07-20 当时状态。IR-1—IR-4 narrow
 > plain-CROWN compiler/runtime 已 validated-reduced；external α/β 仍为显式 No-Go。
-> IR-5C3 architecture-held-out fair CUDA artifact 已给出 VALIDATED-NO-GO：Global
-> 相对 batched-original p90 regret 70.263×，无多预算切换/Pareto。IR-6 blocked；
-> 如继续只允许 IR-5D prepared execution remediation。详见
-> `gemini_doc/change_2026-07-28_ir5c3c_family_fair_nogo.md`。
+> IR-5D prepared execution 已把 host overhead 从 70.263× 降到接近公平 baseline，
+> 但 fresh residual-final-v3 的 Global p90 regret 仍为 1.26160×，gray 无 compiler
+> Pareto，且无多预算切换。IR-5 最终 VALIDATED-NO-GO，IR-6 不启动，当前 ASPLOS
+> system-performance 路线停止。最终证据见
+> `gemini_doc/change_2026-07-28_ir5h_residual_final_v3_nogo.md`。
 
 ---
 

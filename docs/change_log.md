@@ -3515,3 +3515,27 @@
 
 **记录**
 - `gemini_doc/change_2026-07-28_ir5h_residual_final_v3_nogo.md`
+
+---
+
+## 2026-08-03：IR-5 路线封存与发布交接
+
+**主要改动**
+- 修复权威当前状态中“下一步补 IR-5 / 当前进入 IR-5 / 只允许 IR-5D”的过期指令；
+- 总体计划置顶最终 residual-v3 No-Go，而不是中间 IR-5C3 状态；
+- 执行备忘录把 IR-5A—H 的中间“待执行”统一为历史完成语义；
+- 新增 closure 范围、外部 replay 命令和新研究路线准入条件。
+
+**最终状态**
+- IR-1—4 validated-reduced 机制保留；
+- IR-5 Global p90/Pareto 门禁失败，最终 VALIDATED-NO-GO；
+- IR-6 不启动，当前 ASPLOS system-performance 路线封存；
+- 后续只允许独立的真实 Verifier IR correctness/integration 研究路线。
+
+**本机复核**
+- residual-final-v3 integrity replay：PASS；
+- 全量回归：`445 passed, 37 skipped`；
+- 当前 NVIDIA 驱动不可通信，semantic replay 未现场复跑，沿用正式 artifact 的历史通过证据并明确该审计边界。
+
+**记录**
+- `gemini_doc/change_2026-08-03_ir5_route_closure_and_publish.md`
