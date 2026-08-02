@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-03
-> 当前冻结基线：`5a29a8e`；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/compiler-ir-stack-v1`
+> 当前冻结代码/工件基线：`e03b3d2`；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/real-verifier-ir-integration-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
@@ -34,6 +34,8 @@
 > IR-5H v3 final 已完整生成并 replay：correctness 全过，但 Global p90 `1.26160×`
 > 超过 `1.20×`，gray 无 compiler Pareto，且无多预算切换。IR-5 最终
 > VALIDATED-NO-GO；停止当前 ASPLOS system-performance 路线，IR-6 不启动。
+> 2026-08-03 RVIR 后续：真实 verifier correctness/integration 已 CPU
+> VALIDATED-REDUCED；这不撤销 IR-5/ASPLOS performance No-Go。
 
 ## 1. 当前真实阶段
 
@@ -45,7 +47,7 @@ BoundFlow 已经完成从边界表示到 query runtime prototype 的主干：
 | Plan/Task/Schedule IR | IR-2/3 reference + IR-4 runtime closure validated-reduced | typed builder/selector/task lowering/schedule verifier/per-task semantics/query/state/backend artifacts |
 | Fused/multi-backend CROWN execution | validated-reduced | eager/chunked/structured/TVM fused 多预算选择；收益只在部分 regime |
 | Query runtime | validated-reduced | `BoundQuery`、state validity、dynamic batching、same-solver adapter、reduced GPU E2E |
-| 真实 complete verifier integration | PR-14B validated-no-go | 540-call coverage + MLP/ResNet fixed replay；activation 0/394，ResNet bound-equivalence fail |
+| 真实 complete verifier integration | RVIR CPU correctness/integration validated-reduced | ResNet external-semantics max diff 3.10e-6、sign 9/9；typed external-call admission 394/394；真实在线 dispatch 377/377 |
 | ASPLOS 最终系统主张 | IR-5 final VALIDATED-NO-GO | IR-1—4 narrow closure 保留；Global p90/Pareto 失败，当前 system-performance 路线已关闭 |
 
 历史 `main@263ea81` 只到 PR-10 closure，不能再作为项目当前状态入口。跨会话恢复必须同时检查
@@ -149,10 +151,9 @@ v3 正式 artifact 已执行并绑定 `971a317`。Global 8/8 feasible，p50 regr
 gray 的 TVM 同时更快更省内存，只有单点 frontier，故双 workload Pareto 门禁失败。
 IR-5/IR-6 路线按预注册止损规则关闭。
 
-若未来重启工程，必须先建立与 `7501/7502` 独立的新研究假设和数据划分。最优先的候选是
-真实 Verifier IR correctness：修复 ResNet whole-query bound equivalence，并让
-activation-BaB 从 `0/394` 提升为可审计的 Plan/Task/Schedule IR coverage；在 correctness
-闭环前不得重新提出性能 claim。
+IR-5 当时冻结的最优先候选是与 `7501/7502` 独立的真实 Verifier IR correctness；该候选现
+已由 RVIR 路线执行并按第 6 节关闭。其完成只解除 correctness/integration blocker，不授权
+重新提出性能 claim。
 
 明确禁止：
 
@@ -164,9 +165,26 @@ activation-BaB 从 `0/394` 提升为可审计的 Plan/Task/Schedule IR coverage�
 
 ## 5. 权威阅读顺序
 
-1. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`；
-2. 本文（PR-13/14 历史状态）；
-3. `gemini_doc/pr14b_initial_crown_fixed_replay_2026_07_19.md`；
-4. `gemini_doc/pr14a_real_query_coverage_2026_07_19.md`；
+1. `gemini_doc/real_verifier_ir_integration_closure_2026_08_03.md`；
+2. `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`；
+3. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`；
+4. 本文（含 PR-13/14 历史状态与第 6 节当前修订）；
 5. `gemini_doc/asplos_claims_map.md`；
 6. `gemini_doc/asplos_execution_memo_v1_0.md`。
+
+## 6. RVIR 关闭后的当前边界
+
+PR-14B 的 `796.765` 与 `0/394` 仍是当时 local whole-query/fused replacement 路径的正确历史
+结论；它们已被新的 correctness 路线分解，而不是被删除：
+
+- external intermediate bounds + adaptive slope 的 ResNet initial-CROWN 已通过，max diff
+  `3.09944e-6`、sign 9/9；
+- fused replacement coverage 仍是 `0/394`；
+- provider-owned typed external-call admission 是 `394/394`；
+- adapter v2 当前 CPU exact-call execution 是 `377/377`，observer on/off 的 status、380
+  domains 与 final lower 一致。
+
+历史 394 行仍缺 split tensor values、requested polarity 与 parent lineage，artifact 已逐行标注；
+当前 377 行补齐 lower-only 与 347 parent links。全量回归为 `452 passed, 37 skipped`。
+当前没有被证据授权的 CUDA/performance claim，下一性能研究必须另立公平 lower-only 合同与
+fresh GPU protocol，不能直接复用本 correctness artifact。

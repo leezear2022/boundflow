@@ -3594,3 +3594,17 @@
 
 **记录**
 - `gemini_doc/change_2026-08-03_rvir3_cpu_correctness_artifact.md`
+
+---
+
+## 2026-08-03：真实 Verifier IR 路线关闭
+
+- RVIR-1—4 在 CPU correctness/integration 范围内全部通过；
+- 全量 `452 passed, 37 skipped`，artifact fresh-process replay 通过；
+- 更新执行备忘录、当前状态、claims map、总体计划与 README 阅读顺序；
+- 最终判定 VALIDATED-REDUCED；历史 fused `0/394`、v1 identity limitation、GPU/性能缺口
+  均保留；
+- IR-5 仍为 VALIDATED-NO-GO，IR-6 不启动，ASPLOS-ready 仍为 NO。
+
+**记录**
+- `gemini_doc/real_verifier_ir_integration_closure_2026_08_03.md`

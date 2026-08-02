@@ -4,6 +4,9 @@
 > 分支：`feat/real-verifier-ir-integration-v1`
 > 基线：`d457b22` / tag `ir5-final-validated-nogo`
 > 性质：correctness/integration 新路线；不继承 IR-5 性能 claim
+> 关闭状态：RVIR-1—4 已在 CPU correctness 范围内 **VALIDATED-REDUCED**；代码/工件
+> 基线 `e03b3d2`，最终审计见
+> `gemini_doc/real_verifier_ir_integration_closure_2026_08_03.md`。
 
 ## 1. 起因与目标
 
@@ -111,3 +114,17 @@ relaxation policy。BoundFlow 构建普通 CROWN Bound IR，并将以下事实�
 5. `docs: close real verifier IR integration route`
 
 每一步都必须有 focused tests 和修改记录；未过 correctness 前不启动任何性能分支。
+
+## 7. 关闭判定（2026-08-03）
+
+- RVIR-1 PASS：ResNet external-semantics lower max diff `3.09944e-6`，sign `9/9`；
+- RVIR-2 PASS：external call 已进入 Bound/Plan/Task/Schedule typed stack，α/β/split 缺失
+  fail closed；
+- RVIR-3 PASS：真实 CPU observer on/off status、380 domains、final lower 一致，377/377
+  exact calls 完成，347 个 parent links 保留；
+- RVIR-4 PASS：394 个历史 activation query 的五层 IR hash 已自包含冻结并 fresh-process
+  replay；全量 `452 passed, 37 skipped`。
+
+关闭等级为 VALIDATED-REDUCED，而不是完整性能 closure：GPU 未现场复核，历史 adapter v1
+仍缺 split tensor values、requested polarity 与 parent lineage，external exact backend 也不属于
+BoundFlow kernel speedup。
