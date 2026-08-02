@@ -132,6 +132,10 @@
   当前 ASPLOS system-performance 路线最终 No-Go
 - `gemini_doc/change_2026-08-03_ir5_route_closure_and_publish.md`：IR-5 路线封存、
   权威状态去过期、外部 replay 命令与真实 Verifier IR 新路线准入条件
+- `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`：真实 verifier
+  intermediate-bound semantics、relaxation policy、activation external-call IR 与门禁
+- `gemini_doc/change_2026-08-03_start_real_verifier_ir_integration.md`：新 correctness/
+  integration 路线启动与 ResNet 根因复核记录
 - `gemini_doc/asplos_execution_memo_v1_0.md`：ASPLOS 研发的短执行入口与门禁
 - `gemini_doc/current_status_after_pr13.md`：PR-13 closure 后的真实状态、证据边界与当前缺口
 - `gemini_doc/pr14_execution_plan.md`：真实 verifier workload coverage/execution 的切片、门禁与止损

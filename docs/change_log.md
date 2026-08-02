@@ -3539,3 +3539,17 @@
 
 **记录**
 - `gemini_doc/change_2026-08-03_ir5_route_closure_and_publish.md`
+
+---
+
+## 2026-08-03：启动真实 Verifier IR 集成路线
+
+- 从 IR-5 closure 新建 `feat/real-verifier-ir-integration-v1`；
+- 冻结 external intermediate bounds、adaptive relaxation policy 与 activation-BaB
+  external exact backend 的 Bound/Plan/Task/Schedule 所有权；
+- 独立复现 ResNet 根因：external pre-activation bounds + adaptive slope 将 max diff
+  从 `796.765` 降到 `2.15e-6`，sign 从 `3/9` 提升到 `9/9`；
+- 本阶段只确立 correctness 契约，不形成性能 claim。
+
+**记录**
+- `gemini_doc/change_2026-08-03_start_real_verifier_ir_integration.md`
