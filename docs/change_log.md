@@ -3553,3 +3553,16 @@
 
 **记录**
 - `gemini_doc/change_2026-08-03_start_real_verifier_ir_integration.md`
+
+---
+
+## 2026-08-03：RVIR-1 External Intermediate-Bound Semantics
+
+- ReLU intermediate-bound source 与 lower-slope policy 成为稳定 Bound IR 字段；
+- PR-14 capture 拥有逐 ReLU external bounds、identity 与 aggregate hash；
+- count/order/shape 失配 fail closed，fixed replay 使用 external bounds + adaptive policy；
+- ResNet-2B prop0 CPU fresh replay 从 max diff `796.765` 修复到 `3.10e-6`，sign `9/9`；
+- focused IR/compiler/PR-14 回归 `89 passed`，不形成 CUDA/性能 claim。
+
+**记录**
+- `gemini_doc/change_2026-08-03_rvir1_external_intermediate_semantics.md`

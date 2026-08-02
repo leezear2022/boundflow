@@ -14,6 +14,7 @@ from typing import Any, Callable, Iterator, Mapping, Sequence, Tuple
 
 import torch
 
+from ..domains.interval import IntervalState
 from ..planner.materialization import BoundMethod, OptimizationStage
 from .bab_query import BoundQuery, QueryCompatibilityKey
 from .verification_profile import (
@@ -202,6 +203,135 @@ def _input_region_digest(input_tensor: torch.Tensor) -> str:
 
 
 @dataclass(frozen=True)
+class CapturedIntermediateBound:
+    """Owned pre-activation interval from one external ReLU in graph order."""
+
+    ordinal: int
+    external_relu_name: str
+    external_preactivation_name: str
+    lower: torch.Tensor
+    upper: torch.Tensor
+
+    def validate(self) -> None:
+        """Reject missing identity, malformed order, or invalid intervals."""
+
+        if self.ordinal < 0:
+            raise ValueError("external intermediate-bound ordinal must be non-negative")
+        if not self.external_relu_name or not self.external_preactivation_name:
+            raise ValueError("external intermediate-bound names must be non-empty")
+        if self.lower.shape != self.upper.shape:
+            raise ValueError("external intermediate lower/upper shapes differ")
+        if (
+            self.lower.dtype != self.upper.dtype
+            or self.lower.device != self.upper.device
+        ):
+            raise ValueError("external intermediate lower/upper tensor types differ")
+        if not torch.is_floating_point(self.lower):
+            raise TypeError("external intermediate bounds must be floating tensors")
+        if not bool(
+            torch.isfinite(self.lower).all() and torch.isfinite(self.upper).all()
+        ):
+            raise ValueError("external intermediate bounds must be finite")
+        if not bool((self.lower <= self.upper).all()):
+            raise ValueError("external intermediate lower exceeds upper")
+
+
+def _external_node_name(node: Any, *, fallback: str) -> str:
+    name = getattr(node, "name", None)
+    return str(name) if name else fallback
+
+
+def _capture_intermediate_bounds(
+    bounded_module: Any,
+) -> tuple[CapturedIntermediateBound, ...]:
+    """Own every available external ReLU pre-activation interval in graph order."""
+
+    nodes_method = getattr(bounded_module, "nodes", None)
+    if not callable(nodes_method):
+        return ()
+    captured: list[CapturedIntermediateBound] = []
+    for node_index, node in enumerate(nodes_method()):
+        if _normalize_external_op(node) != "relu":
+            continue
+        inputs = getattr(node, "inputs", ())
+        if not isinstance(inputs, (tuple, list)) or len(inputs) != 1:
+            continue
+        preactivation = inputs[0]
+        lower = getattr(preactivation, "lower", None)
+        upper = getattr(preactivation, "upper", None)
+        if not torch.is_tensor(lower) or not torch.is_tensor(upper):
+            continue
+        item = CapturedIntermediateBound(
+            ordinal=len(captured),
+            external_relu_name=_external_node_name(
+                node, fallback=f"external-relu-{node_index}"
+            ),
+            external_preactivation_name=_external_node_name(
+                preactivation, fallback=f"external-preactivation-{node_index}"
+            ),
+            lower=lower.detach().clone(),
+            upper=upper.detach().clone(),
+        )
+        item.validate()
+        captured.append(item)
+    return tuple(captured)
+
+
+def intermediate_bounds_sha256(
+    bounds: Sequence[CapturedIntermediateBound],
+) -> str:
+    """Hash ordered external intermediate-bound identity and tensor content."""
+
+    digest = hashlib.sha256()
+    for expected, item in enumerate(bounds):
+        item.validate()
+        if item.ordinal != expected:
+            raise ValueError("external intermediate-bound ordinals are not contiguous")
+        digest.update(str(item.ordinal).encode("utf-8"))
+        digest.update(item.external_relu_name.encode("utf-8"))
+        digest.update(item.external_preactivation_name.encode("utf-8"))
+        digest.update(_tensor_sha256(item.lower).encode("utf-8"))
+        digest.update(_tensor_sha256(item.upper).encode("utf-8"))
+    return digest.hexdigest()
+
+
+def bind_captured_intermediate_bounds(
+    captured: "CapturedABCrownQuery",
+    local_relu_pre: Mapping[str, IntervalState],
+) -> dict[str, IntervalState]:
+    """Map external ReLU intervals onto a local graph by exact order and shape."""
+
+    local_items = tuple(local_relu_pre.items())
+    external_items = captured.intermediate_bounds
+    if len(local_items) != len(external_items):
+        raise ValueError(
+            "external/local ReLU intermediate count mismatch: "
+            f"external={len(external_items)} local={len(local_items)}"
+        )
+    bound: dict[str, IntervalState] = {}
+    for expected, ((local_name, local), external) in enumerate(
+        zip(local_items, external_items)
+    ):
+        external.validate()
+        if external.ordinal != expected:
+            raise ValueError("external intermediate-bound ordinals are not contiguous")
+        if external.lower.shape != local.lower.shape:
+            raise ValueError(
+                "external/local ReLU intermediate shape mismatch at "
+                f"ordinal {expected}: external={tuple(external.lower.shape)} "
+                f"local={tuple(local.lower.shape)}"
+            )
+        lower = external.lower.to(
+            device=local.lower.device, dtype=local.lower.dtype
+        ).contiguous()
+        upper = external.upper.to(
+            device=local.upper.device, dtype=local.upper.dtype
+        ).contiguous()
+        bound[local_name] = IntervalState(lower=lower, upper=upper)
+    return bound
+
+
+@dataclass(frozen=True)
 class CapturedABCrownQuery:  # pylint: disable=too-many-instance-attributes
     """Owned tensor payload plus a process-local exact-call replay closure."""
 
@@ -214,6 +344,9 @@ class CapturedABCrownQuery:  # pylint: disable=too-many-instance-attributes
     solver_phase: str
     bound_lower_requested: bool
     bound_upper_requested: bool
+    intermediate_bounds: tuple[CapturedIntermediateBound, ...]
+    intermediate_bounds_hash: str
+    relu_lower_slope_policy: str
     replay_external: Callable[[], Any] = field(repr=False, compare=False)
 
 
@@ -275,6 +408,7 @@ class ABCrownInitialCrownCapture:
 
     def _finish_capture(
         self,
+        bounded_module: Any,
         candidate: tuple[
             torch.Tensor,
             torch.Tensor,
@@ -304,6 +438,7 @@ class ABCrownInitialCrownCapture:
             bound_lower_requested,
             bound_upper_requested,
         ) = candidate
+        intermediate_bounds = _capture_intermediate_bounds(bounded_module)
         self.captured = CapturedABCrownQuery(
             input_lower=lower,
             input_upper=upper,
@@ -316,6 +451,9 @@ class ABCrownInitialCrownCapture:
             solver_phase=solver_phase,
             bound_lower_requested=bound_lower_requested,
             bound_upper_requested=bound_upper_requested,
+            intermediate_bounds=intermediate_bounds,
+            intermediate_bounds_hash=intermediate_bounds_sha256(intermediate_bounds),
+            relu_lower_slope_policy="adaptive",
             replay_external=replay_external,
         )
 
@@ -340,6 +478,7 @@ class ABCrownInitialCrownCapture:
                     replay_args = tuple(args)
                     replay_kwargs = dict(kwargs)
                     self._finish_capture(
+                        instance,
                         candidate,
                         result,
                         lambda: original(instance, *replay_args, **replay_kwargs),
@@ -356,6 +495,7 @@ class ABCrownInitialCrownCapture:
                     replay_args = tuple(args)
                     replay_kwargs = dict(kwargs)
                     self._finish_capture(
+                        target,
                         candidate,
                         result,
                         lambda: original(*replay_args, **replay_kwargs),
@@ -578,6 +718,9 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
 
 __all__ = [
     "ABCROWN_ADAPTER_SCHEMA_VERSION",
+    "CapturedIntermediateBound",
+    "bind_captured_intermediate_bounds",
+    "intermediate_bounds_sha256",
     "ABCrownBoundQueryProfiler",
     "ABCrownInitialCrownCapture",
     "CapturedABCrownQuery",

@@ -37,6 +37,8 @@ from ..ir.bound import (
     ObjectiveSpec,
     PerturbationKind,
     PerturbationSpec,
+    IntermediateBoundSource,
+    ReluLowerSlopePolicy,
     ReluRelaxationAttrs,
     ReshapeAttrs,
     SpecBindAttrs,
@@ -204,10 +206,18 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
     relu_pre: Mapping[str, IntervalState],
     linear_spec_C: Optional[torch.Tensor] = None,
     output_value: Optional[str] = None,
+    intermediate_bound_source: IntermediateBoundSource = (
+        IntermediateBoundSource.LOCAL_FORWARD
+    ),
+    relu_lower_slope_policy: ReluLowerSlopePolicy = ReluLowerSlopePolicy.ZERO,
 ) -> PlainCrownBoundIRBuild:
     """Lower a validated plain-CROWN query shape into deterministic Bound IR."""
 
     task_module.validate()
+    if not isinstance(intermediate_bound_source, IntermediateBoundSource):
+        raise TypeError("intermediate_bound_source must be an IntermediateBoundSource")
+    if not isinstance(relu_lower_slope_policy, ReluLowerSlopePolicy):
+        raise TypeError("relu_lower_slope_policy must be a ReluLowerSlopePolicy")
     if len(task_module.tasks) != 1 or task_module.task_graph is not None:
         raise NotImplementedError("Bound IR v1 lowering supports one task only")
     task = task_module.get_entry_task()
@@ -391,6 +401,8 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
                 attrs=ReluRelaxationAttrs(
                     primal_node_id=op.name,
                     preactivation_primal_value_id=target_name,
+                    intermediate_bound_source=intermediate_bound_source,
+                    lower_slope_policy=relu_lower_slope_policy,
                 ),
             )
             route(target_name, target)

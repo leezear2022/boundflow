@@ -136,6 +136,8 @@
   intermediate-bound semantics、relaxation policy、activation external-call IR 与门禁
 - `gemini_doc/change_2026-08-03_start_real_verifier_ir_integration.md`：新 correctness/
   integration 路线启动与 ResNet 根因复核记录
+- `gemini_doc/change_2026-08-03_rvir1_external_intermediate_semantics.md`：external ReLU
+  intermediate bounds/adaptive policy 入 IR 与 ResNet CPU correctness closure
 - `gemini_doc/asplos_execution_memo_v1_0.md`：ASPLOS 研发的短执行入口与门禁
 - `gemini_doc/current_status_after_pr13.md`：PR-13 closure 后的真实状态、证据边界与当前缺口
 - `gemini_doc/pr14_execution_plan.md`：真实 verifier workload coverage/execution 的切片、门禁与止损

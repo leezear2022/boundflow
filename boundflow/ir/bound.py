@@ -481,6 +481,20 @@ class BoundOpKind(Enum):
     OBJECTIVE_REDUCE = "objective_reduce"
 
 
+class IntermediateBoundSource(Enum):
+    """Owner of the pre-activation bounds consumed by a relaxation."""
+
+    LOCAL_FORWARD = "local_forward"
+    EXTERNAL_VERIFIER = "external_verifier"
+
+
+class ReluLowerSlopePolicy(Enum):
+    """Deterministic lower-line initialization for an ambiguous ReLU."""
+
+    ZERO = "zero"
+    ADAPTIVE = "adaptive"
+
+
 @dataclass(frozen=True)
 class NoBoundOpAttrs:
     """Explicit empty attribute set for operations without parameters."""
@@ -570,6 +584,10 @@ class ReluRelaxationAttrs:
 
     primal_node_id: str
     preactivation_primal_value_id: Optional[str] = None
+    intermediate_bound_source: IntermediateBoundSource = (
+        IntermediateBoundSource.LOCAL_FORWARD
+    )
+    lower_slope_policy: ReluLowerSlopePolicy = ReluLowerSlopePolicy.ZERO
 
     def validate(self) -> None:
         """Validate the referenced primal ReLU identity."""
@@ -583,6 +601,10 @@ class ReluRelaxationAttrs:
             raise ValueError(
                 "ReLU preactivation primal value ID must be non-empty when present"
             )
+        if not isinstance(self.intermediate_bound_source, IntermediateBoundSource):
+            raise TypeError("ReLU intermediate-bound source is invalid")
+        if not isinstance(self.lower_slope_policy, ReluLowerSlopePolicy):
+            raise TypeError("ReLU lower-slope policy is invalid")
 
 
 @dataclass(frozen=True)

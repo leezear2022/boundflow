@@ -1,8 +1,13 @@
 """Contracts for capturing one process-local external fixed replay."""
 
+import pytest
 import torch
 
-from boundflow.runtime.abcrown_adapter import ABCrownInitialCrownCapture
+from boundflow.domains.interval import IntervalState
+from boundflow.runtime.abcrown_adapter import (
+    ABCrownInitialCrownCapture,
+    bind_captured_intermediate_bounds,
+)
 
 
 class _Box:  # pylint: disable=too-few-public-methods,invalid-name
@@ -22,6 +27,19 @@ def _bounded_input(lower: torch.Tensor, upper: torch.Tensor) -> _BoundedInput:
 
 
 class _FakeBoundedModule:  # pylint: disable=too-few-public-methods
+    def __init__(self) -> None:
+        preactivation = type("ExternalPreactivation", (), {})()
+        preactivation.name = "/pre"
+        preactivation.lower = torch.tensor([[-0.25, 0.1]])
+        preactivation.upper = torch.tensor([[0.75, 0.2]])
+        relu = type("BoundRelu", (), {})()
+        relu.name = "/relu"
+        relu.inputs = [preactivation]
+        self._nodes = [relu]
+
+    def nodes(self):
+        return self._nodes
+
     def compute_bounds(  # pylint: disable=invalid-name
         self,
         *,
@@ -66,6 +84,12 @@ def test_capture_owns_box_spec_and_replays_exact_call() -> None:
     assert torch.equal(capture.captured.linear_spec_c, torch.tensor([[[1.0, -2.0]]]))
     assert capture.captured.bound_lower_requested
     assert not capture.captured.bound_upper_requested
+    assert len(capture.captured.intermediate_bounds) == 1
+    assert capture.captured.relu_lower_slope_policy == "adaptive"
+    assert len(capture.captured.intermediate_bounds_hash) == 64
+    local = {"h1": IntervalState(lower=torch.zeros(1, 2), upper=torch.ones(1, 2))}
+    rebound = bind_captured_intermediate_bounds(capture.captured, local)
+    torch.testing.assert_close(rebound["h1"].lower, torch.tensor([[-0.25, 0.1]]))
     replay_lower, replay_upper = capture.captured.replay_external()
     assert replay_lower.shape == (1, 1)
     assert replay_upper is None
@@ -87,3 +111,22 @@ def test_capture_ignores_optimized_and_activation_phase_calls() -> None:
         module.compute_bounds(x=(value,), C=torch.ones(1, 1, 2), method="CROWN")
 
     assert capture.captured is None
+
+
+def test_capture_intermediate_binding_fails_closed_on_topology_or_shape_drift() -> None:
+    value = _bounded_input(torch.zeros(1, 2), torch.ones(1, 2))
+    capture = ABCrownInitialCrownCapture(
+        phase_resolver=lambda: "alpha_crown_initialization"
+    )
+    module = _FakeBoundedModule()
+    with capture.instrument(module):
+        module.compute_bounds(x=(value,), C=torch.ones(1, 1, 2), method="CROWN")
+    assert capture.captured is not None
+
+    with pytest.raises(ValueError, match="count mismatch"):
+        bind_captured_intermediate_bounds(capture.captured, {})
+    with pytest.raises(ValueError, match="shape mismatch"):
+        bind_captured_intermediate_bounds(
+            capture.captured,
+            {"h1": IntervalState(lower=torch.zeros(1, 3), upper=torch.ones(1, 3))},
+        )

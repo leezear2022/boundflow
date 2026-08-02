@@ -29,6 +29,7 @@ from ..ir.bound import (
     ConcretizeAttrs,
     Conv2dBackwardAttrs,
     LinearBackwardAttrs,
+    ReluLowerSlopePolicy,
     ReluRelaxationAttrs,
     RepresentationChangeAttrs,
     ReshapeAttrs,
@@ -245,7 +246,14 @@ def execute_plain_crown_bound_ir(  # pylint: disable=too-many-branches,too-many-
                 raise ValueError(
                     "ReLU relaxation requires an explicit dense materialization"
                 )
-            result = _relu_backward(A_u, b_u, A_l, b_l, pre=pre)
+            result = _relu_backward(
+                A_u,
+                b_u,
+                A_l,
+                b_l,
+                pre=pre,
+                lower_slope_policy=attrs.lower_slope_policy,
+            )
             output_shape = _coefficient_primal_shape(values, op.outputs[0])
             _store_state(
                 env,
@@ -600,7 +608,9 @@ class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
         if not torch.is_tensor(A_u) or not torch.is_tensor(A_l):
             raise ValueError("fused Bound task requires dense coefficient inputs")
         pre = self.relu_pre[preactivation]
-        alpha_u, beta_u, alpha_l, beta_l = _relu_relaxation_parameters(pre)
+        alpha_u, beta_u, alpha_l, beta_l = _relu_relaxation_parameters(
+            pre, lower_slope_policy=relu_attrs.lower_slope_policy
+        )
         source_shape = _coefficient_primal_shape(self.values, affine_op.inputs[0])
         target_shape = _coefficient_primal_shape(self.values, affine_op.outputs[0])
         attrs: dict[str, object] = {}
@@ -886,7 +896,14 @@ class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
                 raise ValueError(
                     "ReLU relaxation requires an explicit dense materialization"
                 )
-            result = _relu_backward(A_u, b_u, A_l, b_l, pre=relu_pre[preactivation])
+            result = _relu_backward(
+                A_u,
+                b_u,
+                A_l,
+                b_l,
+                pre=relu_pre[preactivation],
+                lower_slope_policy=attrs.lower_slope_policy,
+            )
             output_shape = _coefficient_primal_shape(values, op.outputs[0])
             _store_state(
                 env,
@@ -1048,8 +1065,11 @@ def _relu_backward(
     b_l: torch.Tensor,
     *,
     pre: IntervalState,
+    lower_slope_policy: ReluLowerSlopePolicy,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-    alpha_u, beta_u, alpha_l, _beta_l = _relu_relaxation_parameters(pre)
+    alpha_u, beta_u, alpha_l, _beta_l = _relu_relaxation_parameters(
+        pre, lower_slope_policy=lower_slope_policy
+    )
     A_u_flat = A_u.reshape(int(A_u.shape[0]), int(A_u.shape[1]), -1)
     A_l_flat = A_l.reshape(int(A_l.shape[0]), int(A_l.shape[1]), -1)
     if int(A_u_flat.shape[2]) != int(alpha_u.shape[1]):
@@ -1073,11 +1093,15 @@ def _relu_backward(
 
 def _relu_relaxation_parameters(
     pre: IntervalState,
+    *,
+    lower_slope_policy: ReluLowerSlopePolicy = ReluLowerSlopePolicy.ZERO,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     lower = pre.lower.reshape(int(pre.lower.shape[0]), -1)
     upper = pre.upper.reshape(int(pre.upper.shape[0]), -1)
     if lower.shape != upper.shape:
         raise ValueError("ReLU pre-activation lower/upper shapes differ")
+    if not isinstance(lower_slope_policy, ReluLowerSlopePolicy):
+        raise TypeError("ReLU lower-slope policy is invalid")
     positive = lower >= 0
     negative = upper <= 0
     ambiguous = ~(positive | negative)
@@ -1093,6 +1117,8 @@ def _relu_relaxation_parameters(
         )
         alpha_u[ambiguous] = upper[ambiguous] / denominator
         beta_u[ambiguous] = -lower[ambiguous] * alpha_u[ambiguous]
+        if lower_slope_policy == ReluLowerSlopePolicy.ADAPTIVE:
+            alpha_l[ambiguous] = (alpha_u[ambiguous] > 0.5).to(lower.dtype)
     return alpha_u, beta_u, alpha_l, beta_l
 
 
