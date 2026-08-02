@@ -3580,3 +3580,17 @@
 
 **记录**
 - `gemini_doc/change_2026-08-03_rvir2_typed_external_calls.md`
+
+---
+
+## 2026-08-03：RVIR-3/4 CPU correctness artifact
+
+- 冻结 394/394 历史 activation query 的五层 typed IR admission/hash；
+- 冻结真实 CPU 377/377 exact-call dispatch、347 parent links 与 lower-only identity；
+- observer on/off status、380 domains 与 final lower 一致；
+- 合并 ResNet lower max diff `3.10e-6`、sign `9/9` correctness evidence；
+- artifact 自包含 query identity，可 fresh-process 重算，不形成 CUDA/性能 claim；
+- 历史 split values、requested polarity、parent lineage 缺失均逐行标注，不补写证据。
+
+**记录**
+- `gemini_doc/change_2026-08-03_rvir3_cpu_correctness_artifact.md`
