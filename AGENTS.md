@@ -49,3 +49,19 @@
 - 与大模型协作工作流模板（输入计划→修正测试→总结→下一步计划）：`gemini_doc/llm_collaboration_workflow.md`
 - Bench JSONL schema（系统化消融输出字段）：`docs/bench_jsonl_schema.md`
 - gemini_doc 总导引（本目录索引/维护规则）：`gemini_doc/README.md`
+
+
+## DocOps Logic
+
+Read first:
+- .docops/s.md
+- .docops/c.yaml
+- last 20 lines of .docops/k.jsonl
+
+For every code, documentation, schema, plan, or workflow change:
+- record the change with `dol ch add` after editing;
+- record deterministic validation with `dol va add` (or an explicit deferral);
+- keep `.docops/s.md` aligned with the active topic, stage, blocker, and next action.
+
+Before handoff:
+- dol lint --soft

@@ -3608,3 +3608,15 @@
 
 **记录**
 - `gemini_doc/real_verifier_ir_integration_closure_2026_08_03.md`
+
+---
+
+## 2026-08-03：默认启用 DocOps Logic
+
+- 初始化 `.docops` 低 token 状态、规则、事件与知识卡；
+- 后续每次代码/文档/计划/流程修改必须记录 `ch`，验证后记录 `va`；
+- 交接前必须执行 DocOps soft lint；
+- RVIR PR #4 的 closure/validation 已补录。
+
+**记录**
+- `gemini_doc/change_2026-08-03_adopt_docops_default.md`
