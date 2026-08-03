@@ -1,7 +1,12 @@
 """Typed Bound/Plan/Task/Schedule contracts for external verifier calls."""
 
+# pylint: disable=missing-function-docstring
+
 from __future__ import annotations
 
+from dataclasses import replace
+
+import pytest
 import torch
 
 from boundflow.ir.bound import (
@@ -13,6 +18,7 @@ from boundflow.ir.plan import BackendKind, RegionKind
 from boundflow.ir.schedule import EmitResultAction, LaunchAction
 from boundflow.ir.task_v1 import TaskIRKind
 from boundflow.runtime.verifier_ir_integration import (
+    ExternalVerifierIRCompilation,
     ExternalVerifierCallSpec,
     compile_external_verifier_call,
     execute_external_verifier_call,
@@ -52,6 +58,12 @@ def _activation_query(*, observed_method: str = "CROWN") -> dict[str, object]:
             "identity_limitations": ["split_state_values_unresolved"],
         },
     }
+
+
+def _compiled_activation() -> ExternalVerifierIRCompilation:
+    return compile_external_verifier_call(
+        ExternalVerifierCallSpec.from_query_dict(_activation_query())
+    )
 
 
 def test_activation_query_compiles_through_all_ir_layers() -> None:
@@ -114,3 +126,85 @@ def test_external_schedule_executes_exact_provider_once() -> None:
     assert first.sequence_number == 108
     assert first.result_hash == second.result_hash
     assert first.ir_hashes == second.ir_hashes
+
+
+def test_external_call_rejects_undeclared_backend_before_execution() -> None:
+    compiled = _compiled_activation()
+    task = compiled.task_module.tasks[0]
+    forged_task = replace(
+        task,
+        backend=replace(
+            task.backend,
+            reference_implementation_id="local_fused_kernel/v9",
+        ),
+    )
+    forged = replace(
+        compiled,
+        task_module=replace(compiled.task_module, tasks=(forged_task,)),
+    )
+    called = False
+
+    def exact_call() -> None:
+        nonlocal called
+        called = True
+
+    with pytest.raises(ValueError, match="backend differs"):
+        execute_external_verifier_call(forged, exact_call)
+
+    assert not called
+
+
+def test_external_schedule_rejects_missing_emit() -> None:
+    compiled = _compiled_activation()
+    actions = tuple(
+        action
+        for action in compiled.schedule.actions
+        if not isinstance(action, EmitResultAction)
+    )
+    forged = replace(
+        compiled,
+        schedule=replace(compiled.schedule, actions=actions),
+    )
+
+    with pytest.raises(ValueError, match="result emission|free order"):
+        forged.validate()
+
+
+def test_external_schedule_rejects_duplicate_launch() -> None:
+    compiled = _compiled_activation()
+    launch_index = next(
+        index
+        for index, action in enumerate(compiled.schedule.actions)
+        if isinstance(action, LaunchAction)
+    )
+    launch = compiled.schedule.actions[launch_index]
+    assert isinstance(launch, LaunchAction)
+    duplicate = replace(launch, action_id=f"{launch.action_id}:duplicate")
+    actions = (
+        *compiled.schedule.actions[: launch_index + 1],
+        duplicate,
+        *compiled.schedule.actions[launch_index + 1 :],
+    )
+    forged = replace(
+        compiled,
+        schedule=replace(compiled.schedule, actions=actions),
+    )
+
+    with pytest.raises(ValueError, match="unknown or duplicated|more than once"):
+        forged.validate()
+
+
+def test_external_call_rejects_local_semantics_ownership() -> None:
+    compiled = _compiled_activation()
+    op = compiled.bound_module.graph.ops[0]
+    attrs = op.attrs
+    assert isinstance(attrs, ExternalVerifierCallAttrs)
+    forged_op = replace(op, attrs=replace(attrs, semantics_owner="boundflow"))
+    forged_graph = replace(compiled.bound_module.graph, ops=(forged_op,))
+    forged = replace(
+        compiled,
+        bound_module=replace(compiled.bound_module, graph=forged_graph),
+    )
+
+    with pytest.raises(ValueError, match="retain external ownership"):
+        forged.validate()
