@@ -2,6 +2,8 @@
 
 日期：2026-08-03
 
+GitHub：PR [#7](https://github.com/leezear2022/boundflow/pull/7)
+
 ## 起因
 
 外部审计同意 RVIR 以 VALIDATED-REDUCED 关闭，同时给出 minor M4：v1 artifact 的

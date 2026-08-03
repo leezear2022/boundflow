@@ -5,9 +5,9 @@ rm: v01
 st: s01
 stat: active
 health: green
-pr: []
-last_ch: ev000292
-last_va: ev000299
+pr: [7]
+last_ch: ev000308
+last_va: ev000309
 blk:
-next: publish-rvir-online-raw-replay-v2-pr
-updated: 2026-08-03T13:36:04Z
+next: review-merge-pr7
+updated: 2026-08-03T13:37:11Z
