@@ -54,6 +54,13 @@
 > C1/C2 mechanism 升为 validated-reduced，不形成 compression 或 performance claim。下一工程
 > 路线为 real-network sliced batch execution。
 
+> **2026-08-04 NRIR-5 修订**：spec-axis BatchDecision 已真实驱动 source Schedule
+> `[0,3)/[3,6)/[6,9)`、三个独立 21-op child compiler stack 与结果聚合；full/sliced lower
+> 最大差 `1.90735e-6`，external sign 9/9，artifact generate/replay 通过。该结果仍只为
+> correctness/ownership：domain/sample、representation × batch composition、physical
+> memory/latency/CUDA 均 pending。全量 `508 passed, 37 skipped`，correctness/integration
+> VALIDATED-REDUCED；顶层 performance No-Go 不变。
+
 ---
 
 ## 0. 执行摘要
@@ -269,10 +276,10 @@ Runtime 不能笼统声称相关查询可以共享中间状态。每个缓存对
 | Runtime | multi-spec、α/β、BaB node batch/cache/prune | C3 的起点，但尚未统一为 query abstraction |
 | Artifact | JSONL schema、CSV、figure、manifest、quick/full runner | ASPLOS 证据链基础 |
 | 环境 | PyTorch 2.12.1+cu132、LLVM 20.1.8、TVM、单一 tvm-ffi | 可复现实验基础 |
-| Native real-network compiler | ResNet2B 17 Primal→21 Bound/Task/Schedule；retain/reuse 双 storage 与 runtime last-use | C1/C2 的真实图 correctness/decision 载体；尚无 device-level 性能证据 |
+| Native real-network compiler | ResNet2B 17 Primal→21 Bound/Task/Schedule；retain/reuse、dense/structured binding 与 3-way spec slicing | C1/C2/C3 的真实图 correctness/decision 载体；joint policy 和 device-level 性能证据仍缺 |
 
-Gate 0 与 PR-10 是历史已完成节点；当前 integration base 已推进到 `d21bdee`，NRIR-1/2 已合并，
-NRIR-3 CUDA protocol 已完成但本机 device unavailable。PR-10 的 structured 路径保留为 opt-in research capability，dense
+Gate 0 与 PR-10 是历史已完成节点；当前 integration base 已推进到 `517a97d`，NRIR-1—4 已合并，
+NRIR-5 已 validated-reduced，NRIR-3 CUDA protocol 已完成但本机 device unavailable。PR-10 的 structured 路径保留为 opt-in research capability，dense
 继续作为默认；不得把历史基线 `263ea81` 当作当前工程入口。
 
 ### 3.2 论文成立前必须补齐的缺口
@@ -280,9 +287,9 @@ NRIR-3 CUDA protocol 已完成但本机 device unavailable。PR-10 的 structure
 | 缺口 | 当前问题 | 必须达到的证据 |
 |---|---|---|
 | ReLU barrier | structured mode 已消除 persistent dense；dense 保持默认 | 需 Planner/fused lowering 解决 eager 重算与 α/β OOM |
-| 物化决策 | NRIR-4 已在固定 ResNet 上让 source Plan/Schedule 绑定 28 个显式 execution cast/materialize，并通过 dense/external 语义 replay；当前 structured storage 仍为 dense-equivalent | sliced batch 后在可用 CUDA 设备按冻结协议测物理 memory/latency；无物理证据不升级 Pareto |
+| 物化决策 | NRIR-4 已绑定 28 个真实 execution transitions；NRIR-5 已让 spec batch decision 驱动 child execution；当前两轴尚未联合且 structured storage dense-equivalent | 先完成 representation × batch composition，再在可用 CUDA 设备按冻结协议测物理 memory/latency；无物理证据不升级 Pareto |
 | fused CROWN task | TVM 后端以 IBP/task 基础设施为主 | CROWN 粗粒度 task lowering 与正确性/性能门禁 |
-| repeated-query abstraction | multi-spec、BaB batch、cache 仍是分散机制 | 统一 QueryBatch/QueryState/PlanCache 或等价接口 |
+| repeated-query abstraction | NRIR-5 已有单 query 内 spec slicing/lineage；跨 query/domain batch、cache 仍分散 | 统一 QueryBatch/QueryState/PlanCache 或等价接口，并跑真实 domain/query stream |
 | 真实 workload | VNN-COMP ResNet2B correctness/storage 已进入 native IR；性能仍无真实 device protocol | ResNet/basic-block、更多 VNN-COMP 代表实例、至少一个训练 workload 的公平性能证据 |
 | headline result | 当前结果证明链路正确，不证明系统主张 | 端到端吞吐/显存/TTVerify 的显著、可解释收益 |
 | baseline 完整性 | 已有 auto_LiRPA/TVM 对照，但缺 Luna/系统竞品定位 | 公平版本、硬件、算法/tightness 和计时口径 |

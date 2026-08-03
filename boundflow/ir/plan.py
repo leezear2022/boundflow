@@ -1329,6 +1329,17 @@ class PlanInstance:  # pylint: disable=too-many-instance-attributes
             raise ValueError("selected spec batch exceeds workload bucket")
         if batch.sample_batch_size > template.workload.sample_batch_size:
             raise ValueError("selected sample batch exceeds workload bucket")
+        provenance_by_key = {item.key: item.value for item in self.provenance}
+        for axis, selected_size in (
+            ("domain", batch.domain_batch_size),
+            ("spec", batch.spec_batch_size),
+            ("sample", batch.sample_batch_size),
+        ):
+            limit = provenance_by_key.get(f"max_{axis}_batch_size")
+            if limit is not None and limit != "none" and selected_size > int(limit):
+                raise ValueError(
+                    f"selected {axis} batch exceeds query-time batch limit"
+                )
 
         validity_by_state: dict[str, StateValidity] = {}
         bound_values = {value.value_id: value for value in bound_module.graph.values}

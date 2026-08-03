@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`d21bdee`（NRIR-2 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/native-real-network-cuda-memory-protocol-v1`
+> 当前 integration base：`517a97d`（NRIR-4 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/native-real-network-sliced-batch-execution-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
@@ -54,6 +54,14 @@
 > timing、20% memory 与 1.20× latency 门禁及 raw semantic replay。本机
 > `cuda_available=false`，所以只生成 `environment_unavailable` probe artifact；正式 benchmark
 > 在创建输出目录前 exit 2，`performance_claimed=false`。下一步转 representation semantic bridge。
+> 2026-08-04 NRIR-4 后续：fixed ResNet representation decision 已驱动 21-op dense 与
+> 49-op structured-affine execution stack，14 cast + 14 materialize 与 Task/Launch 一一绑定；
+> dense-equivalent hard limitation 保留，PR #15 已合并。
+> 2026-08-04 NRIR-5 进度：query-time spec batch limit 已切换 full/sliced PlanInstance 与
+> Schedule；sliced path 执行 `[0,3)/[3,6)/[6,9)` 三个各 21-op 的 child stack，full/sliced
+> max diff `1.90735e-6`、external sign 9/9，artifact generate/replay 通过，全量
+> `508 passed, 37 skipped`。状态为 VALIDATED-REDUCED；domain/sample、representation ×
+> batch 联合执行和性能/内存证据仍 pending。
 
 ## 1. 当前真实阶段
 
@@ -70,6 +78,8 @@ BoundFlow 已经完成从边界表示到 query runtime prototype 的主干：
 | Native real-network IR NRIR-1 | correctness/compiler ownership validated-reduced | ResNet2B 17 Primal ops → 21 native Bound/Task regions/launches；五层 hash 绑定 external-bound payload；max diff 7.15e-7、sign 9/9；仍无 memory choice/GPU/performance |
 | Native real-network memory NRIR-2 | storage-plan correctness/ownership validated-reduced | 同一 real graph/template 的 retain-all 1,860,912 B 与 lifetime-reuse 442,656 B；预算决策切换、386 alias pairs、85 early releases、双计划 bitwise equal；无 CUDA allocator/performance claim |
 | Native CUDA memory protocol NRIR-3 | protocol implemented / environment unavailable | fresh worker、5×5×20、allocator/timing/identity/replay 门禁已实现；本机 0 CUDA device，只保留 fail-closed probe，不产生 performance claim |
+| Native representation binding NRIR-4 | correctness/compiler ownership validated-reduced | ResNet source policy 驱动 21-op dense 或 49-op structured execution；28 transitions 绑定 Schedule/Task/Launch；dense-equivalent、无性能 claim |
+| Native spec-sliced execution NRIR-5 | correctness/integration validated-reduced | full 9 specs→1 child；limit=3→3×21-op child 与精确 range/aggregation；CPU semantics/replay 通过；domain/sample/joint representation/performance pending |
 | ASPLOS 最终系统主张 | IR-5 final VALIDATED-NO-GO | IR-1—4 narrow closure 保留；Global p90/Pareto 失败，当前 system-performance 路线已关闭 |
 
 历史 `main@263ea81` 只到 PR-10 closure，不能再作为项目当前状态入口。跨会话恢复必须同时检查
@@ -334,3 +344,22 @@ Pareto 或 speedup；source policy 与 NRIR-2 storage 的耦合仅用于确定�
 下一代码门禁是 real-network sliced batch execution：Plan 的 domain/spec/sample batch decision
 必须改变实际 Task/Schedule slicing 与 query accounting，并保持 dense/structured、single/batched
 语义一致。CUDA NRIR-3 设备实验作为环境可用时的独立待办，不阻塞该代码路线。
+
+## 12. Native Real-Network Sliced Batch Execution v1 进度
+
+NRIR-5 已让 batch decision 进入真实执行，而不再只是 metadata：source template 同时提供 full
+与 spec-size-3 candidate；`PlanSelectionContext.max_spec_batch_size` 选择不同 PlanInstance。
+source Schedule 的 spec loop 冻结连续半开区间，每个区间生成独立 native child
+Bound/Plan/Task/Schedule stack，runtime 校验完整 objective digest 后按 spec 轴聚合结果。
+
+固定 ResNet 的 full path 为 1×21-op child；sliced path 为 3×21-op child，ranges 为
+`[0,3)/[3,6)/[6,9)`，合计 63 Task/Launch。两者共享 source Bound/PlanTemplate，source
+PlanInstance/Schedule 不同；full/sliced lower max diff `1.9073486328125e-06`，二者均匹配
+external oracle、sign 9/9。artifact generate 与 fresh semantic replay 已通过；新旧
+native/Plan/Task/Schedule 聚焦 `89 passed`，全量 `508 passed, 37 skipped`，Black/Mypy/
+Pylint/diff 门禁通过。
+
+该状态不能写成 batching speedup 或 memory reduction：三个 child 顺序执行，source controller
+storage 仍是完整 ledger，未测物理 allocator/latency。v1 只实现 spec axis；domain/sample 与
+NRIR-4 representation × batch 四组合是下一联合门禁。完成联合门禁后，再推进真实 repeated-query/
+domain batching 与 cache accounting；CUDA NRIR-3 仅在设备可用时按冻结协议执行。

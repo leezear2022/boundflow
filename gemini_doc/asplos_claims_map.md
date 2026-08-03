@@ -6,16 +6,17 @@
 > 基础设施，不再主张 non-toy verifier acceleration。2026-08-03 独立 RVIR correctness
 > 路线已 validated-reduced，但不改变 ASPLOS performance No-Go。2026-08-04 production
 > Schedule-memory P0 同样为 `NO_GO`。随后 NRIR-1 已把固定 ResNet main CROWN backward
-> lower 为 native multi-region IR；NRIR-2 进一步在同一 graph/template 上完成两个 storage
-> plan、预算切换与 runtime last-use release。它仍是 CPU correctness/ownership evidence，
-> 没有 CUDA allocator、materialization、batch 或性能结果，故 performance No-Go 不变。
+> lower 为 native multi-region IR；NRIR-2 完成 storage switch/runtime last-use，NRIR-4 完成
+> representation→execution binding，NRIR-5 已产生真实 spec-sliced child execution 与 replay。
+> 这些仍是 CPU correctness/ownership evidence；没有 CUDA allocator、joint policy 或性能结果，
+> 故 performance No-Go 不变。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
-| C1：显式物化语义的 Structured Bound-Operator IR | native ResNet plain-CROWN correctness validated-reduced；真实 storage alternatives 已完成，representation/materialization pending | typed Bound IR + lowering + dense/structured interpreter + explicit cast/materialize rewrite + native ResNet per-task stepping/storage runtime | ResNet 17 Primal→21 Bound/Task/launch，external-call 0，lower max diff 7.15e-7；storage runtime 有 85 early releases，但当前 real graph 未触发 MaterializeAction | NRIR-1/2 artifact + portable oracle payload；structured Plan decision 尚未绑定执行，不能升级完整 C1/performance |
-| C2：Method/Autograd/Memory-Aware Materialization Planner | real-graph storage axis validated-reduced；IR-5 final 仍 VALIDATED-NO-GO | typed Plan/Task/Schedule、NRIR-2 retain/reuse selector/runtime、adaptive/fair evaluator、prepared execution | 同一 ResNet template 在 1,860,912/442,656 B 阈值切换 storage，减 1 byte fail closed；历史 Global p90 1.26160×/gray 无 Pareto仍保留 | NRIR-2 deterministic artifact 证明 budget/storage mechanism；无 CUDA peak/OOM/Pareto，C2 paper performance claim 不成立 |
-| C3：Verification Query Runtime Infrastructure | correctness/integration validated-reduced；performance downgraded | query/validity + batcher + reversible observer + typed external verifier Bound/Plan/Task/Schedule exact-call | ResNet external-semantics 3.10e-6、sign 9/9；在线 377/377 dispatch、380-domain observer equivalence | fused replacement 仍 0/394；typed admission 394/394；CPU artifact/replay 完整；不作 acceleration claim |
-| BoundFlow Schedule IR | real-network storage-plan ownership validated-reduced；production-performance claim 仍 NO-GO | typed ScheduleModule + native ResNet Plan/Task lowering + selected last-use runtime；P0/NRIR audits | 21 native launches；NRIR-2 双 storage、预算 switch、Schedule peak 1,860,912→442,656 B、386 alias pairs；仍 0 materialize | deterministic NRIR-1/2 artifact + semantic replay；尚无 representation bridge、OOM rescue 或 GPU evidence |
+| C1：显式物化语义的 Structured Bound-Operator IR | native ResNet correctness/representation binding validated-reduced | typed Bound IR + lowering + dense/structured interpreter + source Plan/Schedule→execution Bound/Task/Launch binder | ResNet 17 Primal→21 source ops；structured execution 49 ops，含 14 cast + 14 materialize；dense/structured max diff 9.54e-7 | NRIR-1/2/4 artifacts；structured storage 仍 dense-equivalent，不能升级 compression/performance |
+| C2：Method/Autograd/Memory-Aware Materialization Planner | real-graph storage/representation/spec-batch axes individually validated-reduced；IR-5 final 仍 VALIDATED-NO-GO | typed Plan/Task/Schedule、NRIR-2 storage、NRIR-4 representation、NRIR-5 spec-slice selector/runtime | ResNet budget/storage switch；28 transition binding；limit=3→3×21-op child；历史 Global p90 1.26160×/gray 无 Pareto | NRIR-2/4/5 deterministic artifacts；axes 尚未联合、无 CUDA peak/OOM/Pareto，C2 paper performance claim 不成立 |
+| C3：Verification Query Runtime Infrastructure | correctness/integration/spec-slice ownership validated-reduced；performance downgraded | query/validity + batcher + reversible observer + typed exact-call + native spec child execution/aggregation | 在线 377/377；NRIR-5 exact 3-slice lineage、63 Task/Launch、external sign 9/9 | fused replacement 0/394 历史事实保留；domain/repeated-query physical batching pending；不作 acceleration claim |
+| BoundFlow Schedule IR | real-network storage/representation/spec-slice ownership validated-reduced；production-performance claim 仍 NO-GO | typed ScheduleModule + native ResNet storage lifetime、representation transitions、spec range loops 与 child stacks | NRIR-4 28 transition actions；NRIR-5 `[0,3)/[3,6)/[6,9)`、3×21 Task/Launch、full/sliced max diff 1.91e-6 | deterministic NRIR-1/2/4/5 replay；domain/sample、joint policy、OOM rescue/GPU evidence pending |
 | BoundFlow Task IR | IR-3 per-task semantic closure validated-reduced；production backend pending | TaskIRModule/Unit + typed op/shape/parameter/external/state/memory/backend refs + stateful Bound stepping | 12 个 tests（含 4 graph families、structured materialize、skip/reorder rejection） | per-task output hashes 与 final bound hashes 已入 fresh-process artifact v2 |
 | backend 执行 typed Planner/Task 结果而非定义核心抽象 | IR-4 validated-reduced；IR-5 final performance No-Go | composite typed registry + query adapter + real fused/unfused/fallback；prepared capsule 将静态 validate/hash/dispatch 移出 query hot path | residual v3 all backend correctness；ordinary batching p90 regret 1.008×，Global 1.262× | v3 可 replay；backend correctness 成立，但 adaptive production performance claim 失败 |
 | 相同浮点语义下保持 reference bound computation | local-semantics 历史 No-Go；external-semantics initial-CROWN validated-reduced | dense reference + explicit external intermediate-bound source/adaptive policy | allclose、gradient、auto_LiRPA、replay | ResNet historical local max diff 796.765；新 external-semantics max diff 3.10e-6、sign 9/9；CPU only |
@@ -543,3 +544,23 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - 工件：`artifacts/native-real-network-representation-binding/vnncomp21-resnet2b-prop0-cpu-v1/`；
   下一缺口为 real-network sliced batch execution，必须由 batch decision 驱动真实 Task/Schedule
   slicing 与 query accounting。
+
+### 2026-08-04 Native Real-Network Sliced Batch Execution v1
+
+- `C2/C3-M-NRIR5` validated-reduced mechanism：query-time
+  `max_spec_batch_size` 进入 Plan selection/provenance；full 9-spec candidate 与 size-3 candidate
+  选择不同 PlanInstance/Schedule，默认 context 保持历史 identity；
+- `C2/C3-G-NRIR5` ownership gate：source spec Schedule ranges 必须连续、无重叠、完整覆盖；
+  `[0,3)/[3,6)/[6,9)` 分别绑定独立 child Bound/Plan/Task/Schedule hash、query ID 与 execution
+  trace，3 个 child 共 63 Task/Launch；同步修改 range/query/digest 仍被结构门禁拒绝；
+- `C2/C3-E-NRIR5` real-network semantics：full/sliced lower max diff
+  `1.9073486328125e-06`；full/external `7.152557373046875e-07`；sliced/external
+  `1.9073486328125e-06`，均 allclose、sign 9/9；artifact generate/replay exit 0；
+- `C2/C3-L-NRIR5` hard limitation：v1 只实现 spec axis，child 顺序执行，source controller
+  storage 为完整 ledger；domain/sample、representation × batch composition、physical allocator、
+  latency、CUDA/OOM/Pareto/speedup 均未证明，`performance_claimed=false`；
+- 工件：`artifacts/native-real-network-sliced-batch/vnncomp21-resnet2b-prop0-cpu-v1/`；
+  下一缺口是 representation × batch 联合 policy execution，不能把两条独立 mechanism 自动
+  组合成全局 Planner claim。
+- 验证：新旧 native/Plan/Task/Schedule 聚焦 `89 passed`；全量 `508 passed, 37 skipped`；
+  Black/Mypy/Pylint 10.00/10/diff check 通过。

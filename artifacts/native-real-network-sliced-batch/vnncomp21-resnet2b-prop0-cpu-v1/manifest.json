@@ -1,0 +1,8 @@
+{
+  "files": {
+    "sliced_batch.json": "97bff7800de0df0ceba1d7d9134869f8aabaea5d8e45334aff407a6f85f3f8b5"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.native-real-network-sliced-batch-artifact/v1",
+  "status": "ok"
+}
