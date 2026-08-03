@@ -1,5 +1,49 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-07-19：新增 PR-14 外部模型审计交接
+
+- 串联项目起点、Phase 0～6、ASPLOS PR-10～14、真实 verifier coverage/replay 与最终 No-Go；
+- 修正 PR-14 实际为 5 个提交，并排除不可由仓库复核的内部执行时长；
+- 区分已独立重算的 PR-14A 与尚未二次重跑的 PR-14B 数值边界；
+- 提供 Git、JSONL、tests、manifest/payload 和可选 replay 的逐项审计清单；
+- 详细记录：`gemini_doc/pr14_external_model_audit_handoff_2026_07_19.md`。
+
+## 2026-07-19：完整测试不再依赖 ignored PR-12 split
+
+- 从代码冻结的 v1/v2 builder 确定性重建 test fixture；
+- runner smoke 在 `tmp_path` 写 process-shareable split；
+- 干净 clone 无需历史 raw artifacts 即可运行完整测试。
+
+## 2026-07-19：PR-14B Initial Plain-CROWN Fixed Replay
+
+- 新增 exact Box perturbation、external capture 与 real-query replay runner；
+- MLP lower 等价但 requested outputs 不公平，性能 N/A；
+- ResNet nominal forward 正确，但 whole-query lower max diff `796.765`、符号 3/9；
+- PR-14B `VALIDATED-NO-GO`，PR-14C blocked，C3 降级为 C1/C2 基础设施；
+- 详细记录：`gemini_doc/pr14b_initial_crown_fixed_replay_2026_07_19.md`。
+
+## 2026-07-19：修复 tvm-ffi 动态库搜索路径
+
+- 激活环境与 staged installer 同时暴露 `build-boundflow/lib` 和 `build-boundflow`；
+- Conda deactivate 会恢复用户原有 `LD_LIBRARY_PATH`；
+- 新增环境回归门禁，已构建的新环境无需重编 TVM。
+
+## 2026-07-19：PR-14A 真实 Query Trace 与 Coverage 判定
+
+- 生成官方 MLP/CNN 与 VNN-COMP ResNet-2B 的 540 个真实 `compute_bounds` profiles；
+- initial phase 143/146 eligible，activation-BaB 0/394 eligible；
+- observer-on/off 三组 status 与 visited-domain count 一致；CNN AveragePool frontend fail closed；
+- PR-14B 仅对 initial plain-CROWN NARROW GO，activation backend replay NO-GO；
+- 详细记录：`gemini_doc/pr14a_real_query_coverage_2026_07_19.md`。
+
+## 2026-07-19：PR-14A αβ-CROWN Query Profile Adapter
+
+- 新增由现有 `BoundQuery` 派生的 coverage profile 与聚合报告，不复制 query/state schema；
+- 新增可撤销的外部 `BoundedModule.compute_bounds` observer 和官方 ONNX+VNNLIB runner；
+- 真实 verifier 方法扩展为 IBP/forward/CROWN/α/αβ，并以 capability reason fail closed；
+- contract 4 passed，PR-13 focused + PR-14A 19 passed，Mypy success，Pylint 10.00/10；
+- 详细记录：`gemini_doc/change_2026-07-19_pr14a_abcrown_query_profile_adapter.md`。
+
 ## 2026-07-12：PR-10 以 guarded structured path 完成
 
 - 360-row clean GPU 对照：354 ok、6 structured OOM；全量 179 passed。
@@ -84,6 +128,36 @@
   rapid-review、Go/No-Go 与 artifact 约束。
 - 文档当前供多模型/人工评审，尚未标记为最终执行版。
 - 详见 `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`。
+
+## 2026-07-13：PR-11 冻结、regret 归因与 PR-12 入口
+
+- 新增高 regret attribution：9 个 `regret >= 1.5` case 均首先归因为 bounded candidate set
+  未包含 measured oracle；backend gap 仅作为待 PR-12 验证的诊断假设。
+- 新增 content-addressed evidence freeze 工具，固定 schema、split、workload/source hashes、硬件、
+  commit/tag、seeds、oracle 与 regret 定义，不覆盖 PR-11 原始工件。
+- 将 PR-12 收敛为无梯度 plain CROWN 的 ReLU+Linear/Conv fused TIR lowering。
+- 详见 `gemini_doc/pr11_regret_attribution_2026_07_13.md` 与
+  `gemini_doc/pr12_fused_crown_task_plan_2026_07_13.md`。
+
+## 2026-07-13：PR-12 起点与 fused ReLU+Linear TIR
+
+- 从只读 `pr11-validated-reduced` tag 创建 PR-12 分支，冻结 baseline、Planner reference 和
+  `pr12-final-heldout-v1`，PR-11 的 7 个 backend-gap case 只作为 development set。
+- 新增 placement/backend 二维 candidate schema 与显式 capability rejection；当前只开放
+  static FP32 CUDA plain-CROWN Linear，不提前宣称 Conv 支持。
+- 新增 ReLU+Linear fused TIR：直接产生 upper/lower `A_prev` 与 bias delta，不分配完整
+  `A_scaled`；提供 thin Relax `call_tir` wrapper。
+- 详见 `gemini_doc/change_2026-07-13_pr12_start_and_fused_linear.md`。
+
+## 2026-07-13：PR-12 fused ReLU+Conv2d TIR foundation
+
+- 冻结 DSCOHW/OIHW/DSCIHW layout 与显式 input-shape/output-padding contract；
+- 实现 output-centric gather，覆盖 1×1/3×3、stride 1/2、padding 0/1、bias 有/无；
+- CUDA matrix 对齐 upper/lower coefficient 与 bias；pre/post schedule 无 scaled-A/im2col；
+- 三个 codegen 代表点 ptxas 0 stack/spill，最大 40/40/48 registers/thread；
+- calibration sanity 中 stride-2 medium 仍为 1.717× slowdown，保留为 limitation；final held-out
+  未使用，端到端 CROWN 尚未接入。
+- 详见 `gemini_doc/change_2026-07-13_pr12_fused_conv2d.md`。
 
 ## 2026-07-12：Conda activate/deactivate 自动钩子
 
@@ -2436,3 +2510,1032 @@
 - 新增下一步文档：
   - `gemini_doc/next_plan_after_phase7a_pr9.md`
   - 将 PR-10 主线固定为 “ReLU barrier 结构化”，而不是把更强 lazy row-norm 写成并列路线
+
+---
+
+## 2026-07-12：PR-11 有界分层 placement retry
+
+**动机**
+- 原 Global Retry 在 `spec=128/domain=8` held-out 上最坏需要 56 次预算拒绝 replay，无法作为真实
+  runtime 的有限重试策略。
+
+**主要改动**
+- Planner 新增 `latency_rank_stratified_v1`：两个最快候选、80%/90% latency-rank 候选、最低
+  predicted-peak fallback，默认最多 5 次；
+- scheduler 与 plain CROWN wrapper 接入 bounded ranking + real CUDA OOM retry；
+- evaluator 新增 `global_bounded_retry`，real-OOM runner 改走相同入口；
+- 新增记录：`gemini_doc/change_2026-07-12_pr11_bounded_stratified_retry.md`。
+
+**证据**
+- s32/d8：7/7 feasible、0 unexpected、median/p90 regret 1.159×/1.722×、最多 3 次；
+- s128/d8：7/7 feasible、0 unexpected、median/p90 regret 1.171×/1.221×、最多 5 次；
+- 380 MiB cap 下 dense real OOM → structured success，3/3 独立进程稳定恢复。
+
+---
+
+## 2026-07-12：PR-11 独立 topology held-out No-Go
+
+**主要改动与结论**
+- 新增 7-barrier `branched_resnet`（parallel residual branches + add + concat + fuse）profile workload；
+- 128/128 placement combinations 与 dense reference 对齐；
+- bounded retry 为 9/9 feasible、0 unexpected，但 median/p90 regret 为 1.976×/4.494×，失败；
+- evaluator 仍读取 candidate-specific trace logical bytes，只能定位为 profile-guided replay；
+- 下一切片冻结为 static topology/liveness-aware barrier cost summary。
+
+**记录**
+- `gemini_doc/change_2026-07-12_pr11_independent_topology_nogo.md`
+
+---
+
+## 2026-07-12：PR-11 static topology/liveness cost
+
+**主要改动**
+- 新增 candidate-independent barrier schema：shape/bytes、fanout、live span、depth、merge/branch/path；
+- profile/cost-model/evaluator 分别升级到 v2/v2/v3，禁止再用 held-out candidate trace feature；
+- all-structured 作为显式 conservative fallback；
+- 新增 topology-density-stratified v3、3× replicated profile 聚合与 6-family LOO；冻结
+  ridge=.001、factor=1.30。
+
+**结果**
+- 3 轮共 1,416/1,416 placement executions correctness 通过，聚合为 472 patterns；
+- 三组 held-out 共 23/23 feasible、0 unexpected；median regret 最坏为 1.880×；
+- p90/max 最坏为 2.377×/3.160×；候选上限为 6；
+- static model loader/candidate generator/plain-CROWN runtime 已连通，统一 QueryState/BaB 尚未完成。
+
+**记录**
+- `gemini_doc/change_2026-07-12_pr11_static_topology_cost.md`
+- `gemini_doc/pr11_closure_audit_2026_07_12.md`
+
+---
+
+## 2026-07-13：PR-12E/F runtime Pareto 与 frozen held-out
+
+**主要改动**
+- 新增 calibration-only fused backend Planner，按 family、bytes-per-region、预算和 eligibility
+  选择 PyTorch eager 或 TVM fused TIR；
+- 新增 default/custom-stream runtime benchmark，分离 compile-first/cold/warm、CUDA Events 与
+  allocator peak；
+- 新增 JSONL→CSV→Pareto figure→manifest 后处理和三组 contract tests；
+- 新增 fanout graph-ineligible fallback control，Planner/Oracle 均必须保持 eager。
+
+**结果与判定**
+- calibration 12/12、held-out 24/24 candidate rows correctness 通过；
+- 5/5 held-out 预算可行、0 unsafe，Planner median/p90 regret 1.000×/1.262×；
+- fused 在所有 held-out 降低 peak，但 memory-sensitive Linear、unseen Conv、mini-ResNet latency
+  分别为 eager 的 4.21×、1.26×、1.03×；
+- PR-12E 证据链 PASS、性能目标 FAIL；PR-12F execution PASS、quality guarded/partial；PR-12
+  overall 保持 IN PROGRESS，PR-13 blocked。
+
+**记录**
+- `gemini_doc/change_2026-07-13_pr12ef_runtime_pareto_heldout.md`
+
+---
+
+## 2026-07-13：PR-12G budgeted chunked backend 与多后端 Planner
+
+**主要改动**
+- 新增 `pytorch_chunked` backend，限制 scaled-A query-row workspace 并复用 cuBLAS/cuDNN；
+- 新增 eager/chunked/TIR calibration-only Planner、runtime selection/backend step contract；
+- 冻结全新 multibackend-v2 split，并新增 benchmark replay、三候选 CSV/Pareto/manifest 工具；
+- 新增 chunk correctness、custom stream、split 隔离、Planner replay 与 postprocess tests。
+
+**结果与判定**
+- calibration 48/48、held-out 36/36 candidate rows correctness 通过；
+- 5/5 预算可行、0 unsafe，exact Oracle 3/5，median/p90 regret 1.000×/1.054×；
+- Planner 选择 eager/chunked/TIR 为 1/2/2，selected geomean 相对 eager 1.081×；
+- reduced Planner quality PASS，但 structured-eager/TVM-unfused、2× headline 和 repeated-query
+  E2E 未关闭；PR-12 overall 保持 IN PROGRESS，PR-13 blocked。
+- 收尾门禁：focused 41 passed；全量 318 passed、1 skipped；mypy 14 files success；pylint
+  7 files 10.00/10；Black/diff check 通过。
+
+**记录**
+- `gemini_doc/change_2026-07-13_pr12g_multibackend_planner.md`
+
+---
+
+## 2026-07-14：PR-12H benchmark contract freeze
+
+**主要改动**
+- 冻结 `pr12g-validated-reduced` tag；
+- 新增 kernel、region-runtime、end-to-end final-bound 三层机器可读 contract；
+- 历史 fused-sanity 与 runtime-Pareto 明确声明 `compliant=false` 及缺失 inclusion；
+- 新增 PR-12H–N 中长期计划和跨会话执行状态。
+
+**边界**
+- 不修改 canonical3 数值、不增加性能 claim；
+- 下一阶段固定为 structured eager/TVM-unfused baseline；PR-13 继续 blocked。
+- 收尾门禁：focused 7 passed；全量 321 passed、1 skipped；mypy 5 files success；pylint
+  3 files 10.00/10；Black/diff check 通过。
+
+**记录**
+- `docs/pr12_benchmark_contract.md`
+- `gemini_doc/change_2026-07-14_pr12h_benchmark_contract.md`
+
+---
+
+## 2026-07-14：PR-12I structured/TVM-unfused 公平 baseline
+
+**主要改动**
+- 新增显式 `scaled_u/scaled_l` workspace 的 TVM-unfused Linear/Conv2d baseline；
+- 在 frozen region-runtime 与 complete final-bound 合同下统一比较 eager、structured、chunked、
+  TVM unfused 与 TVM fused；
+- 对 `torch.compile(fullgraph=True)` 做未改写 workload 的条件 probe，并保留结构化失败；
+- 新增 JSONL→CSV→Pareto/summary/manifest 工具与回归。
+
+**结果与判定**
+- 权威 v2 共 72 rows：54 ok、18 N/A、0 correctness failure；
+- TVM fused E2E geomean 为 eager 的 0.546×，median peak ratio 0.512，3/3 Pareto；
+- TVM unfused E2E 为 0.481×、0/3 Pareto；`torch.compile` 因 `ContextVar.set` 无法 fullgraph
+  capture，未进入性能表；
+- PR-12I baseline/correctness PASS，但不宣称 latency headline；下一阶段为 compile amortization，
+  PR-12 overall 仍 IN PROGRESS，PR-13 blocked。
+- 收尾门禁：focused 9 passed；全量 327 passed、1 skipped；mypy 6 files success；pylint
+  6 files 10.00/10；Black/diff check 通过。
+
+**记录**
+- `gemini_doc/change_2026-07-14_pr12i_fair_baselines.md`
+
+---
+
+## 2026-07-14：PR-12J compile/load/cache amortization
+
+**主要改动**
+- 新增带 canonical signature/target/code-schema/TVM-version key 的 fused CROWN `.so + manifest`
+  cache，验证 library SHA；
+- 分离 TIR generation、schedule、compile、serialization、module load、first/warm、memory hit 与
+  独立进程 disk hit；
+- 固定 Q=1..1024，输出 fresh/disk/process/memory-cache 对 eager/chunked 的 break-even 与图表。
+
+**结果与判定**
+- v1 暴露 Conv tuple/list manifest 比较 bug，v2 暴露 warm hit 重复 SHA `.so` 的测量污染；均保留；
+- authoritative v4 为 3/3 correct、0 hidden recompile；
+- Linear/Conv warm 较慢，not amortizable；mini-ResNet 对 eager 的 fresh/disk-first/process
+  break-even 为 4668/1062/4450，均超过 Q=1024，且对 chunked 不可摊销；
+- 阶段拆分/cache correctness PASS，目标区间摊销 FAIL；PR-12 overall 仍 IN PROGRESS，PR-13
+  blocked，下一阶段为 profiler。
+- 收尾门禁：focused/integration 5 passed；全量 330 passed、1 skipped；mypy 6 files success；
+  pylint 6 files 10.00/10；Black/diff check 通过。
+
+**记录**
+- `gemini_doc/change_2026-07-14_pr12j_compile_amortization.md`
+
+---
+
+## 2026-07-14：PR-12K CUPTI activity profile
+
+**主要改动**
+- 新增 6 workload×5 backend 的 complete final-bound profiler runner、raw Chrome trace 与
+  JSONL→CSV/图/summary/manifest 后处理；
+- 排除 profiler inclusive annotation range，保留真实 kernel activity；top-kernel raw count
+  使用整数；
+- 审计 Nsight Compute 2026.1.1、CUPTI 与 driver counter 权限，不修改系统配置。
+
+**结果与判定**
+- 30/30 rows correct；fusion 相对 TVM-unfused 最大整体 launch 降幅仅 1.96%；
+- 按 5% device-time 阈值为 3/6 退化、1/6 改善、2/6 中性；
+- ncu 实测 `ERR_NVGPUCTRPERM`，因此禁止 bandwidth/cache、occupancy、stall 等硬件 counter
+  claim；
+- PR-12L 唯一选择 `E_STOP_OPTIMIZING_TIR`；保留 fused candidate，下一阶段转 compile-aware
+  Planner；PR-12 overall 仍 IN PROGRESS，PR-13 blocked。
+- 收尾门禁：focused 2 passed；全量 332 passed、1 skipped；mypy 2 scripts success；pylint
+  2 scripts 10.00/10；Black/diff check 通过。
+
+**记录**
+- `gemini_doc/change_2026-07-14_pr12k_cupti_profile.md`
+
+---
+
+## 2026-07-14：PR-12L 冻结停止孤立 TIR 调优
+
+**决策**
+- 唯一选择 `E_STOP_OPTIMIZING_TIR`；
+- 不再扩 Linear tile、CUDA Graph、chunk-size family 或 Conv capability；
+- 不删除 fused backend，由下一阶段的 compile-aware Planner 决定其适用 regime；
+- PR-12M 必须使用全新 split、16/32/64/128 MiB/unbounded 多预算和 expected reuse，禁止回写
+  旧 final held-out 或回到 TIR 试参。
+
+**边界**
+- 本阶段没有 TIR、schedule 或 runtime 代码变化；
+- PR-12 overall 仍 IN PROGRESS，PR-13 blocked。
+
+**记录**
+- `gemini_doc/change_2026-07-14_pr12l_stop_tir_optimization.md`
+
+---
+
+## 2026-07-14：PR-12M compile-aware 多预算 Planner
+
+**主要改动**
+- 新增 capability→budget→risk→amortized latency Planner，输入 expected reuse 与 memory/disk
+  cache probability；
+- 新增 v3 split/model 无泄漏冻结、calibration/final runner、replay、CSV/figure/manifest；
+- baseline runner 可显式读取 calibration 或 final-heldout，合同不变。
+
+**结果与判定**
+- calibration/final candidate 各 25/25 correct，冻结/回放 model SHA 一致；
+- 75 decisions，72/72 feasible opportunities 选到可行 backend，0 unsafe；
+- feasible median/p90/max regret 1.000×/1.000×/1.016×；
+- eager/chunked/structured/fused 均被选择，fused 从 cold/mixed 各 1 次增至 warm-Q1024 11 次；
+- 3 个 16 MiB capacity failure 单列；PR-12M validated-reduced PASS，PR-12 overall 仍
+  IN PROGRESS，下一阶段仅 PR-12N closure audit。
+- 收尾门禁：focused 9 passed；全量 340 passed、1 skipped；mypy 7 source files success；
+  pylint 6 core/script files 10.00/10；Black/diff check 通过。
+
+**记录**
+- `gemini_doc/change_2026-07-14_pr12m_compile_aware_planner.md`
+
+---
+
+## 2026-07-14：PR-12N closure 与 artifact
+
+**审计与交付**
+- 重算 I/J/K/M primary hash，核对 manifest、负结果、third-party SHA 与无关来源污染；
+- 新增 closure audit 和 reduced Artifact Appendix；
+- 更新 Claims Map、执行 memo、PR-12 状态、长期计划和文档索引；
+- 创建 annotated tag `pr12-validated-reduced`。
+
+**最终判定**
+- PR-12：`VALIDATED-REDUCED`；
+- 不升级 full validated：Q≤1024 compile 0/3 可摊销、counter unavailable、收益为局部、无真实
+  BaB/VNN-COMP；
+- 不降级 mechanism-only：non-toy E2E Pareto、预算价值、自动多 regime selection 与独立
+  held-out 已成立；
+- PR-13：GO/READY，尚未启动。
+
+**记录**
+- `gemini_doc/pr12_closure_audit_2026_07_14.md`
+- `gemini_doc/pr12_artifact_appendix_2026_07_14.md`
+
+---
+
+## 2026-07-14：PR-13A Query/State Contract 与真实固定流 Replay
+
+**主要改动**
+- 新增 state-versioned `BoundQuery`、完整 compatibility key、四级 state-validity manager、
+  owned payload/result 和 fixed recorder/replay；
+- 现有 host-side `solve_bab_mlp` 增加可选 observer，保留 parent link 和真实 split/warm-start
+  版本，不改变默认 solver 路径；
+- 新增 contract/replay tests、artifact runner 和生成式 AI 使用记录。
+
+**结果与判定**
+- 真实 solver 生成 8-query two-ReLU smoke：8/8 replay、max abs diff 0、0 loss/duplicate；
+- αβ/split capability 固定为 dense，不会误选 plain-CROWN fused TIR；
+- PR-13A PASS（foundation only），PR-13 overall IN PROGRESS；下一阶段仅 PR-13B dynamic
+  BatchManager，不宣称性能或 non-toy 结果。
+
+**记录**
+- `gemini_doc/change_2026-07-14_pr13a_query_contract_fixed_replay.md`
+- `gemini_doc/pr13_execution_status.md`
+
+---
+
+## 2026-07-14：PR-13B Dynamic BatchManager
+
+**主要改动**
+- 新增 exact-key compatibility buckets、memory first-fit、partial/timeout/deadline flush、host
+  wakeup、确定性 OOM 二分和 queue/fill/latency/no-loss metrics；
+- 新增 physical αβ dense batch executor，pack/unpack center/spec/split/α/β 并按 query ID 恢复；
+- compatibility 加入 input name、perturbation 和 execution-options hash。
+
+**结果与判定**
+- 真实 8-query stream 动态 3 batches：8/8、max diff 0、0 loss/invalid；
+- OOM fault 8→4+4→2+2+2+2：3 split，最终 8/8；
+- PR-13B validated foundation；CPU/逻辑 clock/fault OOM，不是性能或真实 GPU OOM；
+- 下一阶段仅 PR-13C same-solver adapter。
+
+**记录**
+- `gemini_doc/change_2026-07-14_pr13b_dynamic_batch_manager.md`
+
+---
+
+## 2026-07-14：PR-13C Same-Solver Adapter
+
+**主要改动**
+- 新增同步 same-solver query adapter；原 solver 继续拥有 branch/heap/order/termination；
+- single/batched bound calls 可选走 query runtime，返回真实 bounds/α/β/branch；
+- capability dispatch 在 executor 前拒绝不合法 plain-CROWN forged query。
+
+**结果与判定**
+- αβ steps=3/batch=4：original/runtime query IDs 与 per-query bounds/branch/αβ state 7/7，
+  solver status/node counters/best bounds 一致，0 loss；
+- alpha-only serial 也对齐；forged capability 下 physical αβ executor 调用 0；
+- PR-13C validated foundation，下一阶段 PR-13D 双层正式评估；单次 wall time 不作性能 claim。
+
+**记录**
+- `gemini_doc/change_2026-07-14_pr13c_same_solver_adapter.md`
+
+---
+
+## 2026-07-14：PR-13D/E Reduced GPU 与 Closure
+
+**主要改动**
+- 增加 fixed-stream / true-E2E CUDA benchmark、time/query、throughput、p50/p90/p99、peak
+  memory、status/node-count 与公平 baseline 汇总；
+- 修复 per-batch αβ Adam gradient scaling、query split lineage version、GPU state hot-path hash；
+- 增加 dispatch-plan cache counters 与 non-default CUDA stream event-only 回归；
+- 完成 PR-13 closure audit、Artifact Appendix、Claims Map 和状态索引。
+
+**结果与判定**
+- fixed 16-query：runtime / per-node 96.52×，runtime / batched original 1.024×；
+- hard E2E 16-node：9.93× / 0.980×；safe/unsafe/unknown status 与 node count 一致；
+- 0 correctness failure/loss/invalid；custom stream PASS；dispatch cache 1 miss/4 hits；
+- runtime rejected/missing/reordered result 采用 fail-closed，不得把失败节点当作已证明；
+- 收益主要来自 ordinary batching，non-toy、真实 OOM、PR-12 compiled Planner dispatch 未完成；
+- PR-13 以 `VALIDATED-REDUCED` 关闭，不升级 full C3 claim；
+- 收尾：326 passed/30 skipped；custom CUDA stream 1 passed；PR-13 Mypy success、Pylint
+  10.00/10、changed-file 污染扫描 0 match。
+
+**记录**
+- `gemini_doc/change_2026-07-14_pr13d_fixed_e2e_gpu.md`
+- `gemini_doc/pr13_closure_audit_2026_07_14.md`
+- `gemini_doc/pr13_artifact_appendix_2026_07_14.md`
+
+---
+
+## 2026-07-18：启动 PR-14 Verification-Aware Execution on Real Verification Workloads
+
+**状态纠正**
+- 完整审计 research branches 与 annotated tags，确认真实冻结基线为 `57a854b` / tag
+  `pr13-validated-reduced`，不再把 `main@263ea81` 误当项目最新状态；
+- 从该 tag 创建 `feat/pr14-real-verification`，停止历史 PR-10B.2 路线。
+
+**计划冻结**
+- 新增 PR-13 后当前状态文档与 PR-14 执行计划；
+- 下一主线为真实 verifier/workload coverage adapter → fixed real-query replay/eligibility →
+  complete verification evaluation；
+- PR-14 复用已有 `BoundQuery`/recorder/replay，不重写 solver，不恢复孤立 TIR 调优；
+- 公平 baseline 固定为 same-solver original batched executor，C3 是否保留为核心贡献由真实
+  workload 证据决定。
+- PR-13 focused 回归在新分支/当前环境下为 15 passed。
+
+**记录**
+- `gemini_doc/current_status_after_pr13.md`
+- `gemini_doc/pr14_execution_plan.md`
+- `gemini_doc/change_2026-07-18_start_pr14_real_verification.md`
+
+---
+
+## 2026-07-19：冻结 PR-14 Coverage-First 执行模型
+
+**决策**
+- PR-14 正式名称改为 `Verification-Aware Execution on Real Verification Workloads`；
+- 第一门禁从“先接 executor”收紧为 MLP/CNN/ResNet-block 真实 query coverage profile；
+- 新 `VerificationQueryProfile` 只能从 PR-13 `BoundQuery` 派生，禁止创建第二套 query schema；
+- 先报告 method/stage 与 backend eligibility，再进入 fixed replay 和 full E2E；
+- ASPLOS 当前为执行 `CONDITIONAL GO`，但在真实 workload 闭环前仍是 `ASPLOS-ready NO`。
+
+**记录**
+- `gemini_doc/change_2026-07-19_finalize_pr14_coverage_first_plan.md`
+
+---
+
+## 2026-07-20：IR—Planner—Schedule—Runtime 架构重置
+
+**状态纠正**
+- 当前 `Bound IR` 仍为占位骨架，runtime LinearOperator 不能代替一等语义 IR；
+- `PlanBundle` 与 PR-11/12 局部计划不能代替统一 Plan IR；
+- TaskGraph 拓扑循环不能代替 Schedule IR；
+- PR-13 ordinary batching 和计划中的 JIT 不再被提前包装成系统贡献。
+- 独立审计发现的两处旧 story-freeze 入口已补为历史决定，并显式链接 IR-first 现行契约。
+
+**新路线**
+- 冻结 Bound/Plan/Task/Schedule/Query/Runtime 的所有权和数据协议；
+- 下一工程分支改为 `feat/compiler-ir-stack-v1`；
+- 顺序为 Bound IR → Plan IR → Task/Schedule IR → runtime/backend 迁移 → adaptive evaluation；
+- C1/C2 Claims Map 随代码现实降级，PR-10—14 历史数值和负面证据继续保留。
+
+**记录**
+- `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`
+- `gemini_doc/change_2026-07-20_ir_planner_schedule_runtime_contract.md`
+
+---
+
+## 2026-07-28：Bound IR v1 schema/verifier foundation
+
+**主要改动**
+- 将 `ir/bound.py` 从 Any/dict 占位结构升级为 typed value/type/spec/domain/op/graph/module；
+- 增加 sample/spec/domain batch axes、lower/upper polarity、representation 与 state identity；
+- 增加 SSA/use-def、类型/极性、materialization、reshape、method-state verifier；
+- 增加 canonical JSON 与 SHA-256 stable hash；
+- 保留旧 runtime `DomainState` 继承兼容，Bound IR 不依赖 runtime/backend/torch/TVM。
+
+**证据与边界**
+- focused：15 passed；
+- 关键 IBP/CROWN/DAG/PR-14 兼容回归：42 passed；
+- 全量：384 passed、1 skipped；
+- Mypy 0 issues，Pylint 10.00/10，Black clean；
+- 只关闭 IR-1A schema/verifier foundation；builder、reference interpreter、runtime lowering
+  和 IR-driven E2E 仍待 IR-1B。
+
+**记录**
+- `gemini_doc/change_2026-07-28_bound_ir_v1_schema_foundation.md`
+
+---
+
+## 2026-07-28：Bound IR v1 plain-CROWN dense semantic closure
+
+**主要改动**
+- 将真实 CROWN state 明确为 `A_u/b_u/A_l/b_l` 四元 SSA state；
+- 增加 residual/concat backward route、bias-once 与 fanout compose 的 typed op/verifier；
+- 增加 Task/IBP trace → Bound IR lowering、参数/目标 fingerprint 和 deterministic module；
+- 增加不依赖 `crown_ibp.py` 的 dense Bound IR reference interpreter；
+- identity/multi-spec MLP、chain CNN、residual/concat fanout 与旧 oracle final bounds 对齐。
+
+**证据与边界**
+- 专属 schema/lowering/interpreter：20 passed；
+- 相邻 CROWN/DAG/CNN/env：32 passed；
+- 全量：392 passed、1 skipped；
+- Mypy 0 issues，Pylint 10.00/10，Black clean；
+- 关闭 IR-1B dense semantic closure；materialize/structured rewrite、生产 runtime 迁移、
+  IR-driven artifact 和 Plan/Schedule IR 仍未完成。
+
+**记录**
+- `gemini_doc/change_2026-07-28_bound_ir_v1_plain_crown_lowering.md`
+
+---
+
+## 2026-07-28：Bound IR v1 representation rewrite 与 IR-1 closure
+
+**主要改动**
+- verifier 禁止 affine transform/route/compose 隐式改变 coefficient representation；
+- 新增 deterministic structured-region rewrite；
+- affine region 入口显式 dense→structured cast，ReLU/concretize 前显式 materialize；
+- reference interpreter 执行 structured Linear/Conv/Reshape/Add/Concat/Compose；
+- dense/structured rewritten IR 在 MLP、CNN、residual、concat 上 final bounds 对齐。
+
+**证据与边界**
+- 专属：25 passed；
+- 相邻 IR/CROWN/DAG/CNN/LinearOperator/env：47 passed；
+- 全量：397 passed、1 skipped；
+- Mypy 0 issues，Pylint 10.00/10，Black clean；
+- IR-1 最小 reference semantic closure 门禁通过；
+- 完整 C1 仍待 Plan/Schedule IR、backend/runtime migration 和 IR-driven E2E artifact。
+
+**下一阶段**
+- IR-2 Plan IR v1：PlanTemplate/PlanInstance、统一 decision/verifier、旧 PR-11/12 adapter、
+  deterministic plan replay。
+
+**记录**
+- `gemini_doc/change_2026-07-28_bound_ir_v1_representation_rewrite.md`
+
+---
+
+## 2026-07-28：Plan IR v1 schema/verifier/replay 与旧计划迁移
+
+**主要改动**
+- 新增 typed `PlanTemplate` 静态候选空间和 `PlanInstance` 动态完整选择；
+- 分离 region、representation、materialization、backend、domain/spec/sample batch、
+  storage/lifetime、state decisions；
+- 新增 Bound hash、partition、capability、memory、state、storage alias/lifetime 跨决策 verifier；
+- 新增 canonical JSON/hash 和 strict instance replay；
+- 为 PR-11/12 的 MaterializationPlan、PlacementPlan、ExecutionCandidate、StoragePlan、
+  FusedStep、PlanBundle.meta 提供 adapter/partial/unsupported 迁移结论。
+
+**证据与边界**
+- 专属 Plan IR/migration：12 passed；
+- 相邻 Bound IR、PR-11/12、storage/env：88 passed；
+- 全量：409 passed、1 skipped；
+- Mypy 0 issues，Pylint 10.00/10，Black clean；
+- 只关闭 IR-2A foundation；reference template builder、query selector、多预算和 artifact
+  仍待 IR-2B/2C。
+
+**记录**
+- `gemini_doc/change_2026-07-28_plan_ir_v1_schema_and_legacy_migration.md`
+
+---
+
+## 2026-07-28：Plan IR v1 reference builder、selector 与 artifact
+
+**主要改动**
+- 新增 typed `ReferencePlanEvidence` 及 region/representation/transition/backend/batch/storage/state
+  evidence；
+- 从 Bound IR use-def、tensor type 和 state version 自动推导 region boundary、storage lifetime/
+  size/alignment 与稳定 candidate/template identity；
+- 新增有界 deterministic selector，交叉选择 partition、representation、transition、backend、
+  batch、storage/state，并应用 memory/deadline；
+- 新增不可变 Bound/Template/Instance artifact、逐文件 SHA-256、精确 replay 与 tamper rejection。
+
+**证据与边界**
+- Plan IR 专属：11 passed；连同 legacy migration：16 passed；
+- 相邻 Bound IR、PR-11/12、storage/env：92 passed；
+- 全量：413 passed、1 skipped；
+- Mypy 0 issues，Pylint 10.00/10，Black clean；
+- 关闭 IR-2B reference path；真实旧 artifact 批量 assembly/report、query-time state-validity、
+  独立 replay CLI 和 IR-2 closure audit 仍待 IR-2C。
+
+**记录**
+- `gemini_doc/change_2026-07-28_plan_ir_v1_reference_builder_selector.md`
+
+---
+
+## 2026-07-28：Plan IR v1 state-validity、legacy assembly 与 IR-2 closure
+
+**主要改动**
+- `PlanInstance` 新增 canonical query-time state validity，`REUSE` 只接受 exact valid version；
+- stale state 选择 recompute，伪造 valid stale state fail closed；
+- legacy migration groups 原子加入同一 template，输出 accepted/unsupported/rejected 稳定报告；
+- 新增 fresh-process reference artifact generate/replay CLI；
+- 新增 legacy record schema inventory；当前 artifacts 扫描 58 文件/4,911 objects，PR-11/12
+  planner raw records 为 0。
+
+**证据与判定**
+- 专属：21 passed；相邻：97 passed；全量：418 passed、1 skipped；
+- Mypy 0 issues，Pylint 10.00/10，Black clean；
+- IR-2 reference closure 判定 `VALIDATED-REDUCED`；
+- raw historical migration 不可审计，C2 仍待 Schedule/runtime/backend/E2E。
+
+**下一阶段**
+- IR-3 Schedule IR v1 + reference executor。
+
+**记录**
+- `gemini_doc/change_2026-07-28_plan_ir_v1_closure_audit.md`
+
+---
+
+## 2026-07-28：Schedule IR v1 schema/lowering/verifier foundation
+
+**主要改动**
+- 新增 typed `ScheduleModule`、`ScheduleBuffer` 与 budget/allocate/materialize/launch/emit/free
+  actions；
+- Schedule 锁定 Bound/Template/Instance 三重 hash，并有 canonical JSON/stable hash；
+- 新增 PlanInstance→同步 Schedule lowering；
+- verifier 检查 storage arena/peak、budget、use-before-def、region/transition 全覆盖、query
+  accounting 和 allocation leak。
+
+**证据与边界**
+- 专属：3 passed；相邻：100 passed；全量：421 passed、1 skipped；
+- Mypy 0 issues，Pylint 10.00/10，Black clean；
+- 只关闭 IR-3A foundation；batch/retry/event/state/reference executor/trace replay 仍未完成。
+
+**记录**
+- `gemini_doc/change_2026-07-28_schedule_ir_v1_schema_lowering.md`
+
+---
+
+## 2026-07-28：Schedule IR control actions、reference executor 与 trace artifact
+
+**主要改动**
+- 新增 typed BatchLoop、Record/WaitEvent、StateLoad/Store/Invalidate、Retry/Fallback、
+  RequestReplan；
+- verifier 检查 query slice 完整性、cross-stream happens-before、state/Plan 一致、bounded
+  OOM ladder 与 replan semantic preservation；
+- 新增同步 reference executor、动态 memory ledger、launch attempt trace、canonical replay；
+- 新增 immutable Schedule/Trace artifact 和 fresh-process generate/replay CLI；
+- Schedule+Bound reference smoke 的 final lower/upper 与直接 Bound interpreter 对齐。
+
+**证据与边界**
+- 专属：10 passed；相邻：107 passed；全量：428 passed、1 skipped；
+- Mypy 0 issues，Pylint 10.00/10，Black clean；
+- IR-3B foundation validated；一等 typed Task IR、逐 Task/backend execution 尚缺，IR-3 未关闭。
+
+**下一阶段**
+- IR-3C Task IR v1 + Plan region lowering + per-task reference executor。
+
+**记录**
+- `gemini_doc/change_2026-07-28_schedule_ir_v1_control_executor.md`
+
+---
+
+## 2026-07-28：Task IR v1 schema/lowering/linkage foundation
+
+**主要改动**
+- 新增不依赖旧 `ir/task.py`/runtime/Any 的 typed TaskIRModule/TaskIRUnit；
+- 每个 selected Plan region lower 为 task，显式 op、parameter、external/state dependency、
+  memory effect、backend capability/artifact/reference implementation；
+- 新增 Task↔Schedule launch 双向逐字段 verifier；
+- 新增 deterministic task dispatch trace；
+- Schedule artifact 加入 TaskModule/TaskTrace payload 与 hash。
+
+**证据与边界**
+- Task IR 专属：4 passed；Task+Schedule：14 passed；相邻：111 passed；
+- 全量：432 passed、1 skipped；
+- Mypy 0 issues，Pylint 10.00/10，Black clean；
+- IR-3C foundation validated；数学语义仍由 whole-Bound oracle 提供，per-task semantic executor
+  与 IR-3 closure 尚缺。
+
+**下一阶段**
+- IR-3D per-task semantic executor + closure audit。
+
+**记录**
+- `gemini_doc/change_2026-07-28_task_ir_v1_foundation.md`
+
+---
+
+## 2026-07-28：Task/Schedule IR v1 逐任务语义闭环
+
+**主要改动**
+- 新增 stateful Bound IR session，每个 TaskIRUnit 只执行自己的连续 Bound op partition；
+- Task trace 新增真实 boundary value hashes，覆盖 MLP/CNN/residual/concat/structured materialize；
+- Task IR 新增 typed input/output tensor/shape constraints；
+- Schedule IR 新增 typed Transfer action；
+- fresh-process artifact 升级 v2，重算 Task trace 与 final lower/upper hashes。
+
+**证据与边界**
+- Task/Schedule/Artifact 专属：24 passed；
+- 全量：442 passed、1 skipped、6 warnings；
+- IR-3 synchronous reference closure validated-reduced；
+- production backend/runtime、state payload reuse、多设备/异步执行仍属于 IR-4+。
+
+**下一阶段**
+- IR-4 现有 backend/runtime 迁移，先做 typed PyTorch dense dispatch/cache contract。
+
+**记录**
+- `gemini_doc/change_2026-07-28_task_schedule_ir_v1_semantic_closure.md`
+
+---
+
+## 2026-07-28：IR-4A typed backend dispatch/cache foundation
+
+**主要改动**
+- 新增锁定 Bound/Plan/Instance/Task/backend/capability/artifact 的 canonical dispatch key；
+- 新增只消费 TaskIRUnit 的 PyTorch reference backend adapter；
+- prepared-task cache 使用完整 dispatch SHA-256，hit 时继续核对 typed payload；
+- Task trace/artifact 新增每个 task 的 backend dispatch key；
+- 增加 cache hit、stale hash 与 illegal capability fail-closed 测试。
+
+**证据与边界**
+- Task/Artifact 定向：15 passed；
+- 全量：443 passed、1 skipped、6 warnings；
+- IR-4A foundation validated；chunked/structured/TVM/query-runtime 尚未迁移。
+
+**下一阶段**
+- IR-4B chunked/structured typed backend registry，然后迁移 TVM compile cache。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir4a_typed_backend_dispatch.md`
+
+---
+
+## 2026-07-28：IR-4B PyTorch typed backend registry
+
+**主要改动**
+- Task lowering 按 BackendKind 生成并验证独立 implementation ID；
+- Bound session 新增真实 ReLU→Linear/Conv fused task execution；
+- 新增 PyTorch reference/dense/structured/chunked typed registry；
+- chunked selected task 真实调用旧 TorchChunkedFusedCrownExecutor；
+- 增加 MLP/CNN/structured/CUDA chunked 对齐与非法 non-fused rejection。
+
+**证据与边界**
+- IR-4B 专属：5 passed；相邻：42 passed；
+- 全量：448 passed、1 skipped、6 warnings；
+- PyTorch 三类 backend migration validated；TVM/query-runtime/semantic fallback pending。
+
+**下一阶段**
+- IR-4C TVM fused/unfused typed backend 与完整 dispatch-key compile cache。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir4b_pytorch_backend_registry.md`
+
+---
+
+## 2026-07-28：IR-4C TVM typed backend/cache 与 semantic fallback
+
+**主要改动**
+- 新增 TVM fused/unfused typed Task registry 和 PyTorch/TVM composite registry；
+- fused cache schema v2 把完整 backend dispatch key 加入 memory/disk namespace；
+- 增加两个独立 Python 进程的 miss→disk_hit 重放；
+- Schedule Retry/Fallback 现在真实切换 semantic backend；
+- Task trace 记录 attempted backend ladder 与最终成功 backend。
+
+**证据与边界**
+- IR-4C 新增：7 passed；相邻：43 passed；
+- 全量：455 passed、1 skipped、6 warnings；
+- Query Runtime、state payload 和旧 solver-facing entry migration 仍未完成。
+
+**下一阶段**
+- IR-4D Query Runtime + state payload migration，然后执行 IR-4 closure audit。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir4c_tvm_backend_cache_fallback.md`
+
+---
+
+## 2026-07-28：IR-4D typed compiler query 与 exact state runtime
+
+**主要改动**
+- 新增只接受已验证 plain-CROWN 子集的 typed compiler query 入口；
+- query 经 PlanInstance→TaskIR→ScheduleIR→typed backend 执行并保持原始 ID 顺序；
+- 新增绑定 Bound module/value/version/content hash 的 dense runtime state store；
+- Schedule StateLoad/Store/Invalidate 具有真实语义，完整 state outputs 可跳过对应 Task；
+- legacy PR-13 α/β capability 在 compiler 入口显式 PR-14 No-Go；
+- 新增 fresh-process query/state artifact generate/replay。
+
+**证据与边界**
+- IR-4D + 相邻定向：42 passed；
+- 全量：462 passed、1 skipped、6 warnings；
+- Mypy 0 issues，Pylint 10.00/10；
+- 不宣称跨 query physical batching；
+- 旧 SameSolverQueryRuntime α/β executor 仍待 IR-4 closure audit。
+
+**下一阶段**
+- 执行 IR-4 closure audit；在旧 α/β 路径迁移/退役/validated-reduced 边界明确前不进入 IR-5。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir4d_compiler_query_state_runtime.md`
+
+---
+
+## 2026-07-28：IR-4E PR-13 query migration 与 IR-4 closure
+
+**主要改动**
+- `BoundQuery` 新增唯一 compiler-eligible 的 `plain_crown_typed_ir` capability；
+- 新增 PR-13 query identity 与完整 compiler payload 的交叉验证 adapter；
+- PR-13 DynamicBatchManager 负责 compatibility/deadline/memory/OOM/order，executor
+  只进入 PlanInstance→TaskIR→ScheduleIR→typed backend；
+- legacy α/β SameSolver runtime 默认拒绝，仅历史脚本显式 opt-in；
+- fresh-process query/state artifact 升级 v2。
+
+**证据与边界**
+- IR-4E/PR-13 定向：24 passed；
+- 全量：464 passed、1 skipped、6 warnings；
+- Mypy 0 issues，Pylint 10.00/10；
+- IR-4 narrow plain-CROWN scope validated-reduced closure；
+- α/β/split external integration 仍明确不成立。
+
+**下一阶段**
+- IR-5 adaptive PlanInstance 与公平 held-out 对比；IR-6 继续 gated。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir4e_pr13_query_migration_closure.md`
+
+---
+
+## 2026-07-28：IR-5A adaptive PlanInstance query context
+
+**主要改动**
+- selector 新增 query distribution、expected query count 与 exact compile-cache context；
+- 按 runtime + uncached compile/setup amortization 选择 plan；
+- deadline 使用同一 amortized latency；
+- compiler runtime 支持 per-query memory/budget/deadline/selection context；
+- context 进入 PlanInstance identity/provenance 与 Plan/Task cache namespace。
+
+**证据与边界**
+- 定向：29 passed；
+- 全量：466 passed、1 skipped、6 warnings；
+- cold/repeated/warm-cache 可切换不同合法 plan；
+- 尚无 fixed/local/global/oracle 新 held-out 证据，IR-5 不关闭。
+
+**下一阶段**
+- IR-5B 公平策略 evaluator 与 typed held-out artifact。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5a_adaptive_plan_context.md`
+
+---
+
+## 2026-07-28：IR-5B 公平 adaptive policy evaluator
+
+**主要改动**
+- 新增 frozen context/plan observation 评估契约；
+- fixed/local/global/oracle 共享 legality、budget、cache 与 measured outcomes；
+- 统一输出 p50/p90/p99、TTV、peak 和 Oracle regret；
+- fixed 不可行时明确记录 infeasible；
+- 新增 fresh-process synthetic contract artifact。
+
+**证据与边界**
+- 定向：25 passed；
+- 全量：468 passed、1 skipped、6 warnings；
+- artifact 明确标注 synthetic contract，不是 held-out 性能证据；
+- IR-5 仍 pending。
+
+**下一阶段**
+- IR-5C typed measured held-out workload/artifact。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5b_fair_policy_evaluator.md`
+
+---
+
+## 2026-07-28：IR-5C0 typed measured workload foundation
+
+**主要改动**
+- 新增正式 typed MLP benchmark workload/candidate builder；
+- 同语义生成 reference 与 fused backend 的完整 Plan/Task/Schedule；
+- evaluator 分离 predicted/measured compile，避免 held-out leakage。
+
+**证据与边界**
+- 定向 3 passed；
+- reference/dense final bounds 一致、PlanInstance hash 不同；
+- 尚无 measured held-out 数字，IR-5C 继续。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5c0_typed_measured_workload_foundation.md`
+
+---
+
+## 2026-07-28：IR-5C1 leakage-free measurement runner
+
+**主要改动**
+- 新增 typed candidate cold/warm/CUDA peak/TVM compile-phase 测量；
+- calibration-only latency/setup model 明确拒绝 held-out leakage；
+- 冻结 workload split、resource context 与 query/cache contexts；
+- 新增目录级 artifact manifest、integrity replay 与 reference semantic replay。
+
+**证据与边界**
+- 定向 4 passed，Mypy 0 issues，Pylint 10.00/10；
+- 开发期后验 memory-budget pilot 明确废弃；
+- 本切片不宣称最终 held-out 性能，fresh CUDA v2 artifact 仍 pending。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5c1_leakage_free_measurement_runner.md`
+
+---
+
+## 2026-07-28：IR-5C2 CUDA typed held-out（PARTIAL）
+
+**主要结果**
+- 16/16 typed CUDA candidate measurements correctness allclose；
+- 8 contexts × 4 policies，Global 8/8 feasible；
+- Global Oracle regret p50/p90/max 为 1.000×/1.00766×/1.00766×；
+- 64 MiB 选择 PyTorch dense，冻结低内存预算选择 TVM fused；
+- artifact manifest 绑定 `1be9c19`，integrity + semantic replay 通过。
+
+**未关闭门禁**
+- calibration/held-out 仍属于同一 MLP family；
+- ordinary batching/fair batched-original 未接入；
+- 低内存切换是 feasibility-driven，尚非多个可行候选间的 Global 优势；
+- CNN/残差/non-toy 与跨层收益归因仍缺。
+
+**下一阶段**
+- IR-5C3 independent workload-family + fair batching baselines；不启动 IR-6。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5c2_cuda_heldout_partial.md`
+
+---
+
+## 2026-07-28：IR-5C3A independent CNN workload family
+
+**主要改动**
+- 新增 two-convolution chain-CNN typed workload builder；
+- 新增显式 `chain_cnn` measured spec 与 MAC work feature；
+- 支持 MLP calibration→CNN held-out 的同一 measurement/evaluator 接口。
+
+**验证与边界**
+- CPU reference/dense 对齐；
+- CUDA reference/dense/chunked/TVM fused 对齐且 TVM trace 命中 fused；
+- 定向 4 passed，Mypy 0 issues；
+- 尚无 fair batching baseline 或新 held-out artifact。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5c3a_independent_cnn_family.md`
+
+---
+
+## 2026-07-28：IR-5C3B fair batching evaluator/runner contract
+
+**主要改动**
+- v2 evaluator 显式加入 fixed-single、ordinary-batching、batched-original；
+- compiler selection pool 与全方案 Oracle pool 分离；
+- physical batch latency 按 query 数归一，compile/setup 不除；
+- 新增 MLP calibration→CNN held-out runner 与 batch-first-query semantic gate。
+
+**验证与边界**
+- 定向 2 passed，Mypy 0 issues，Pylint 10.00/10；
+- warm=1 pilot 只作 runner smoke，不进入证据链；
+- 正式 9-sample fresh CUDA artifact 仍 pending。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5c3b_fair_batching_contract.md`
+
+---
+
+## 2026-07-28：IR-5C3C fair architecture-held-out（VALIDATED-NO-GO）
+
+**正式结果**
+- MLP calibration→chain-CNN held-out，8 compiler rows/2 original/2 batch checks 全 correct；
+- Global 8/8 feasible，但 fair Oracle regret p50/p90/max =
+  68.065×/70.263×/70.263×；
+- batched-original 始终为 Oracle；
+- 64/512 MiB 均选 chunked，无多预算切换，无 memory Pareto。
+
+**归因与判定**
+- profile 指向 query hot path 重复 validate/hash/dispatch-key；
+- 当前 IR-5 v1 VALIDATED-NO-GO，IR-6 blocked；
+- 唯一补救为一次验证、query-time 复用的 prepared execution capsule，并要求新 final split。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5c3c_family_fair_nogo.md`
+
+---
+
+## 2026-07-28：IR-5D prepared execution capsule
+
+**主要改动**
+- 静态 Bound/Task/Plan validate、hash 与 primary/fallback dispatch key 移出 query hot path；
+- prepared program 冻结参数快照，动态 Schedule 只允许 query binding 重写；
+- 新增 AUDIT/PRODUCTION trace mode，timed production path 跳过中间 tensor SHA；
+- compiler query cache 和 measured runner 接入 prepared capsule；
+- 新增 from-forward-trace legacy baseline，使双方只计 CROWN backward。
+
+**验证与边界**
+- 全量 `476 passed, 1 skipped`，Mypy 0 issues，Pylint 10.00/10；
+- 已消费 CNN calibration 诊断中最快 typed/legacy median 比值为 `0.880×`/`0.896×`；
+- 诊断不是 fresh artifact，IR-5C3 `70.263×` No-Go 不撤销，IR-6 仍 blocked；
+- 下一步必须冻结并一次性消费新的 residual-CNN final split。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5d_prepared_execution_capsule.md`
+
+---
+
+## 2026-07-28：IR-5E residual final protocol freeze
+
+**主要改动**
+- 新增带真实 fanout/add merge 的 residual-CNN typed workload 与 measured spec；
+- fair batching/measurement 支持 chain-CNN 与 residual-CNN；
+- runner 新增 CUDA-only `residual-final-v2` suite；
+- 冻结 chain-CNN calibration→全新 residual-CNN final 的 shapes/IDs/seeds；
+- final baseline 固定为 from-forward-trace，新增 p90≤1.20 与双 workload Pareto 字段。
+
+**验证与边界**
+- residual CPU reference/dense 与临时 CUDA 四后端语义对齐；
+- 旧 v1 artifact replay 兼容；
+- 临时 smoke 的 `7301/7302` 已废弃，正式 `7401/7402` 未执行；
+- 正式 artifact 必须在 protocol commit 后一次性生成，失败不得按 final 数据继续调参。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5e_residual_final_protocol_freeze.md`
+
+---
+
+## 2026-07-28：IR-5F residual-final-v2 protocol invalid
+
+**结果**
+- clean protocol commit `b3762bf` 上首次正式生成在 fixed-single semantic gate 中止；
+- 参数完全一致，但同 seed、不同 batch shape 生成的 input center 不是前缀；
+- 两个 workload 的 input max diff 为 `3.73509`/`2.16740`，不是浮点 tolerance 问题；
+- 未生成 summary/manifest，未读取 held-out 性能数字。
+
+**处置**
+- v2 标记 PROTOCOL-INVALID，`7401/7402` 永久退役；
+- 保留 strict semantic gate，只允许显式 slice batched input 的方法学修复；
+- 修复必须升级 suite/schema、旋转 fresh final identity 后重新冻结。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5f_residual_final_v2_protocol_invalid.md`
+
+---
+
+## 2026-07-28：IR-5G exact-input-slice residual final v3 freeze
+
+**主要改动**
+- convolutional builder 支持显式 `input_center`，严格校验 shape/dtype；
+- fixed-single 从 batched query zero 精确 clone，不再依赖 RNG 前缀假设；
+- semantic gate 前新增 `torch.equal` input identity 门禁并写入 artifact；
+- 冻结 v3 schema 与 fresh `7501/7502` identities。
+
+**边界**
+- 不改 backend、预算、final shape、p90/Pareto 阈值；
+- 未读取 v2 held-out timing；
+- dummy residual test 通过，v3 exact identities 未执行；
+- protocol commit 后只允许一次正式生成。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5g_exact_input_slice_v3_freeze.md`
+
+---
+
+## 2026-07-28：IR-5H residual-final-v3（VALIDATED-NO-GO）
+
+**正式证据**
+- fresh chain-CNN calibration→residual-CNN final，8+8 measurements、48 outcomes；
+- exact input identity、compiler/baseline correctness、Global 8/8 feasibility 全通过；
+- manifest 绑定 `971a317`，integrity + semantic replay 通过。
+
+**失败门禁**
+- Global p50/p90 regret = `1.00385×/1.26160×`，p90 超过 `1.20×`；
+- color warm-cache 错选 TVM，regret `1.26160×`；
+- gray compiler frontier 只有 TVM 一个点，双 workload Pareto 失败；
+- 64/512 MiB 均选 dense，无 multi-budget switch。
+
+**判定**
+- IR-5 最终保持 VALIDATED-NO-GO，IR-6 不启动；
+- 停止当前 ASPLOS system-performance 路线，不再旋转 final 或按 final 调参。
+
+**记录**
+- `gemini_doc/change_2026-07-28_ir5h_residual_final_v3_nogo.md`
+
+---
+
+## 2026-08-03：IR-5 路线封存与发布交接
+
+**主要改动**
+- 修复权威当前状态中“下一步补 IR-5 / 当前进入 IR-5 / 只允许 IR-5D”的过期指令；
+- 总体计划置顶最终 residual-v3 No-Go，而不是中间 IR-5C3 状态；
+- 执行备忘录把 IR-5A—H 的中间“待执行”统一为历史完成语义；
+- 新增 closure 范围、外部 replay 命令和新研究路线准入条件。
+
+**最终状态**
+- IR-1—4 validated-reduced 机制保留；
+- IR-5 Global p90/Pareto 门禁失败，最终 VALIDATED-NO-GO；
+- IR-6 不启动，当前 ASPLOS system-performance 路线封存；
+- 后续只允许独立的真实 Verifier IR correctness/integration 研究路线。
+
+**本机复核**
+- residual-final-v3 integrity replay：PASS；
+- 全量回归：`445 passed, 37 skipped`；
+- 当前 NVIDIA 驱动不可通信，semantic replay 未现场复跑，沿用正式 artifact 的历史通过证据并明确该审计边界。
+
+**记录**
+- `gemini_doc/change_2026-08-03_ir5_route_closure_and_publish.md`

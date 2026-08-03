@@ -1,5 +1,11 @@
 # BoundFlow 架构评审与扩展性分析
 
+> **历史文档警告（2026-07-20）**：本文基于早期 Phase 5 结构撰写，其中“整体架构优秀”、
+> “验证感知 IR 分层已构成创新”和“只需增加 Bound IR”等评分/论文建议已被当前代码复审否定。
+> 它可用于理解早期设计意图，但不得作为当前架构完成度、ASPLOS 工作量或 claim 的依据。
+> 当前有效判断见
+> `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`。
+
 > **目的**：评估当前工程结构的优劣，总结现有创新点，分析扩展性，并为未来学术创新提供方向建议。
 
 ---
@@ -344,4 +350,3 @@ class PassManager:
    - 主题：可编译的分支定界验证
    - 贡献：BaB 任务抽象 + 分布式调度 + incremental verification
    - 投稿目标：CAV/PLDI/POPL
-

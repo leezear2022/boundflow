@@ -1,0 +1,64 @@
+{
+  "closure_recommendation": "VALIDATED-REDUCED",
+  "comparisons": [
+    {
+      "mode": "fixed_stream",
+      "runtime_speedup_vs_batched_original": 1.0243694648401762,
+      "runtime_speedup_vs_per_node": 96.5209794941523,
+      "workload": "cnn_hard_max_nodes"
+    },
+    {
+      "mode": "true_e2e",
+      "node_counts": {
+        "batched_original": 16,
+        "boundflow_runtime_dense": 16,
+        "per_node_original": 16
+      },
+      "runtime_speedup_vs_batched_original": 0.9802206020025317,
+      "runtime_speedup_vs_per_node": 9.934548587751907,
+      "status_consistent": true,
+      "workload": "cnn_hard_max_nodes"
+    },
+    {
+      "mode": "true_e2e",
+      "node_counts": {
+        "batched_original": 1,
+        "boundflow_runtime_dense": 1,
+        "per_node_original": 1
+      },
+      "runtime_speedup_vs_batched_original": 0.9137866111854744,
+      "runtime_speedup_vs_per_node": 0.9551856457080888,
+      "status_consistent": true,
+      "workload": "cnn_safe_root"
+    },
+    {
+      "mode": "true_e2e",
+      "node_counts": {
+        "batched_original": 1,
+        "boundflow_runtime_dense": 1,
+        "per_node_original": 1
+      },
+      "runtime_speedup_vs_batched_original": 0.8548317804067943,
+      "runtime_speedup_vs_per_node": 0.8593133112895494,
+      "status_consistent": true,
+      "workload": "cnn_unsafe_root"
+    }
+  ],
+  "correctness_failures": 0,
+  "limitations": [
+    "alpha-beta/split queries capability-filter to dense executor",
+    "PR-12 plain-CROWN multi-backend Planner is not eligible",
+    "no compile-time component for PyTorch eager dense executor"
+  ],
+  "research_gate": {
+    "fixed_speedup_vs_per_node_ge_1_3": true,
+    "hard_e2e_speedup_vs_per_node_ge_1_2": true,
+    "hard_runtime_within_10pct_of_batched_original": true,
+    "non_toy_workload": false
+  },
+  "rows": 12,
+  "schema_version": "boundflow.pr13d-bab-runtime/v2",
+  "scope": "reduced chain-CNN; not VNN-COMP/full closure",
+  "status": "ok",
+  "unstable_e2e_rows": 0
+}

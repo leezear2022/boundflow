@@ -80,6 +80,12 @@ spec=32/domain=32、spec=128/domain=8/32 上，α 和 αβ structured 均 OOM，
 最终决策：**PR-10 以 guarded research path 完成**。默认保持 dense；通过
 `BOUNDFLOW_RELU_BACKWARD_MODE=structured` 开启 structured。
 
+正式研究解释为：**PR-10 通过了表示、正确性与研究机会门禁，但否定了“structured 应成为
+统一默认表示”的假设。** plain CROWN、无梯度且显存紧张时，structured 是可能牺牲速度换取
+可运行性的 memory escape path；α/αβ 或其他需要保留梯度图的 optimized-bound regime 中，
+dense 是当前唯一允许自动选择的候选。避免 persistent materialization 不等于更快或更省真实
+峰值显存，这一冲突是 PR-11 的直接动机。
+
 ### 后续
 
 证据已经证明“一个固定策略始终最好”不成立，因此 Planner 有研究动机。但 Planner 必须把
@@ -88,6 +94,10 @@ spec=32/domain=32、spec=128/domain=8/32 上，α 和 αβ structured 均 OOM，
 - plain CROWN、严格显存预算：structured 可能值得；
 - α/β：当前必须 dense，除非先有 fused/custom-autograd/checkpoint lowering；
 - 不得因 persistent bytes 为 0 就选择 structured。
+
+在 saved-tensor、allocator 与 optimization-loop 生命周期完成分解前，文档只能表述为“测量
+结果提示 autograd-retained relaxation state 可能主导 optimized-bound regime”，不得断言
+autograd 是 6 个 OOM 的唯一原因。
 
 真实 BaB domain profile 仍未完成；当前 profile 的 domain 是 synthetic fixed batch，只有
 correctness oracle 使用了真实 `solve_bab_mlp` 搜索。

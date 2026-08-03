@@ -1,0 +1,16 @@
+{"max_abs_diff": 0.0, "mode": "dynamic_batch", "passed": true, "query_id": "bab-e0-n0", "schema_version": "boundflow.pr13b-dynamic-batch-artifact/v1"}
+{"max_abs_diff": 0.0, "mode": "dynamic_batch", "passed": true, "query_id": "bab-e0-n1", "schema_version": "boundflow.pr13b-dynamic-batch-artifact/v1"}
+{"max_abs_diff": 0.0, "mode": "dynamic_batch", "passed": true, "query_id": "bab-e0-n2", "schema_version": "boundflow.pr13b-dynamic-batch-artifact/v1"}
+{"max_abs_diff": 0.0, "mode": "dynamic_batch", "passed": true, "query_id": "bab-e0-n5", "schema_version": "boundflow.pr13b-dynamic-batch-artifact/v1"}
+{"max_abs_diff": 0.0, "mode": "dynamic_batch", "passed": true, "query_id": "bab-e0-n6", "schema_version": "boundflow.pr13b-dynamic-batch-artifact/v1"}
+{"max_abs_diff": 0.0, "mode": "dynamic_batch", "passed": true, "query_id": "bab-e0-n9", "schema_version": "boundflow.pr13b-dynamic-batch-artifact/v1"}
+{"max_abs_diff": 0.0, "mode": "dynamic_batch", "passed": true, "query_id": "bab-e0-n10", "schema_version": "boundflow.pr13b-dynamic-batch-artifact/v1"}
+{"max_abs_diff": 0.0, "mode": "dynamic_batch", "passed": true, "query_id": "bab-e0-n13", "schema_version": "boundflow.pr13b-dynamic-batch-artifact/v1"}
+{"max_abs_diff": 0.0, "mode": "oom_fault_injection", "passed": true, "query_id": "bab-e0-n0", "schema_version": "boundflow.pr13b-dynamic-batch-artifact/v1"}
+{"max_abs_diff": 0.0, "mode": "oom_fault_injection", "passed": true, "query_id": "bab-e0-n1", "schema_version": "boundflow.pr13b-dynamic-batch-artifact/v1"}
+{"max_abs_diff": 0.0, "mode": "oom_fault_injection", "passed": true, "query_id": "bab-e0-n2", "schema_version": "boundflow.pr13b-dynamic-batch-artifact/v1"}
+{"max_abs_diff": 0.0, "mode": "oom_fault_injection", "passed": true, "query_id": "bab-e0-n5", "schema_version": "boundflow.pr13b-dynamic-batch-artifact/v1"}
+{"max_abs_diff": 0.0, "mode": "oom_fault_injection", "passed": true, "query_id": "bab-e0-n6", "schema_version": "boundflow.pr13b-dynamic-batch-artifact/v1"}
+{"max_abs_diff": 0.0, "mode": "oom_fault_injection", "passed": true, "query_id": "bab-e0-n9", "schema_version": "boundflow.pr13b-dynamic-batch-artifact/v1"}
+{"max_abs_diff": 0.0, "mode": "oom_fault_injection", "passed": true, "query_id": "bab-e0-n10", "schema_version": "boundflow.pr13b-dynamic-batch-artifact/v1"}
+{"max_abs_diff": 0.0, "mode": "oom_fault_injection", "passed": true, "query_id": "bab-e0-n13", "schema_version": "boundflow.pr13b-dynamic-batch-artifact/v1"}

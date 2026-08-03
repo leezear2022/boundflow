@@ -1,0 +1,12 @@
+{
+  "command": "python scripts/run_phase7a_pr13c_same_solver.py --out-dir artifacts/phase7a-pr13/pr13c-same-solver-v5-20260714",
+  "files": {
+    "raw.jsonl": "7a6bd1c9ee54fdb4d22c146391a4f1a5344b6fde747cc90f049e0f1547dd17c8",
+    "summary.json": "06a26bdc0e90d8b99b4234388bc91ee90df0b359fdebd66ec00a3f49470ac42b"
+  },
+  "git_commit": "fda5b824933b43d8fefecdb9704683a659735ce1",
+  "git_dirty": true,
+  "schema_version": "boundflow.pr13c-same-solver-artifact/v1",
+  "seed": 0,
+  "torch_version": "2.12.1+cu132"
+}

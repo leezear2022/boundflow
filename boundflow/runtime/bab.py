@@ -3,14 +3,31 @@ from __future__ import annotations
 import hashlib
 import heapq
 from dataclasses import dataclass
-from typing import Any, Dict, List, Literal, Optional, Tuple
+from typing import Any, cast, Dict, List, Literal, Optional, Tuple
 
 import torch
 
 from ..domains.interval import IntervalState
 from ..ir.task import BFTaskModule
-from .alpha_beta_crown import BetaState, check_first_layer_infeasible_split, run_alpha_beta_crown_mlp
+from ..planner.materialization import BoundMethod
+from .alpha_beta_crown import (
+    BetaState,
+    check_first_layer_infeasible_split,
+    run_alpha_beta_crown_mlp,
+)
 from .alpha_crown import AlphaState, SpecReduce, run_alpha_crown_mlp
+from .bab_query import (
+    BabQueryRecorder,
+    BoundQueryRequest,
+    BoundQueryResult,
+    QueryIdentityVersions,
+    input_spec_version,
+    make_bound_query,
+    model_versions,
+    result_from_execution,
+    tensor_version,
+)
+from .bab_query_runtime import SameSolverQueryRuntime
 from .crown_ibp import _forward_ibp_trace_mlp
 from .perturbation import LpBallPerturbation
 from .task_executor import InputSpecLike, _normalize_input_spec
@@ -34,7 +51,9 @@ class ReluSplitState:
     def get(self, relu_input: str) -> Optional[torch.Tensor]:
         return self.by_relu_input.get(relu_input)
 
-    def with_split(self, *, relu_input: str, neuron_idx: int, split_value: int) -> "ReluSplitState":
+    def with_split(
+        self, *, relu_input: str, neuron_idx: int, split_value: int
+    ) -> "ReluSplitState":
         if split_value not in (-1, 0, 1):
             raise ValueError(f"split_value must be in (-1,0,1), got {split_value}")
         cur = self.by_relu_input.get(relu_input)
@@ -47,7 +66,9 @@ class ReluSplitState:
             )
         cur_i = int(cur_flat[int(neuron_idx)].item())
         if cur_i != 0 and cur_i != int(split_value):
-            raise ValueError(f"conflicting split for {relu_input}[{neuron_idx}]: existing={cur_i} new={split_value}")
+            raise ValueError(
+                f"conflicting split for {relu_input}[{neuron_idx}]: existing={cur_i} new={split_value}"
+            )
         new_by = dict(self.by_relu_input)
         new_t = cur.clone()
         new_t.reshape(-1)[int(neuron_idx)] = int(split_value)
@@ -67,13 +88,17 @@ class ReluSplitState:
             _interval_env, relu_pre = _forward_ibp_trace_mlp(module, spec)
             return ReluSplitState(
                 by_relu_input={
-                    name: torch.zeros(tuple(pre.lower.shape[1:]), device=device, dtype=torch.int8)
+                    name: torch.zeros(
+                        tuple(pre.lower.shape[1:]), device=device, dtype=torch.int8
+                    )
                     for name, pre in relu_pre.items()
                 }
             )
         task = module.get_entry_task()
         raw_params = module.bindings.get("params", {})
-        params: Dict[str, object] = dict(raw_params) if isinstance(raw_params, dict) else {}
+        params: Dict[str, object] = (
+            dict(raw_params) if isinstance(raw_params, dict) else {}
+        )
         by_relu: Dict[str, torch.Tensor] = {}
         for op in task.ops:
             if op.op_type != "relu":
@@ -88,7 +113,9 @@ class ReluSplitState:
                     prod = prev
                     break
             if prod is None or prod.op_type != "linear":
-                raise NotImplementedError(f"ReluSplitState only supports relu inputs produced by linear, got {prod}")
+                raise NotImplementedError(
+                    f"ReluSplitState only supports relu inputs produced by linear, got {prod}"
+                )
             w_name = prod.inputs[1]
             w = params.get(w_name)
             if w is None:
@@ -158,6 +185,8 @@ class _QueueItem:
     node_id: int
     example_idx: int
     split_state: ReluSplitState
+    split_signature: str = "unversioned"
+    parent_node_id: Optional[int] = None
     warm_start: Optional[AlphaState] = None
     warm_start_beta: Optional[BetaState] = None
 
@@ -175,6 +204,14 @@ class NodeEvalCacheValue:
     best_beta: BetaState
     stats: Any
     branch: Optional[Tuple[str, int]]
+
+
+@dataclass(frozen=True)
+class _RuntimeNodeStats:
+    """Minimal cache-compatible stats returned by the query adapter."""
+
+    feasibility: str
+    branch_choices: Tuple[Optional[Tuple[str, int]], ...]
 
 
 def _hash_tensor_cpu_bytes(t: torch.Tensor) -> str:
@@ -214,7 +251,11 @@ class NodeEvalCache:
         cfg: BabConfig,
     ) -> None:
         spec = _normalize_input_spec(input_spec)
-        c_hash = "none" if linear_spec_C is None else _hash_tensor_cpu_bytes(torch.as_tensor(linear_spec_C))
+        c_hash = (
+            "none"
+            if linear_spec_C is None
+            else _hash_tensor_cpu_bytes(torch.as_tensor(linear_spec_C))
+        )
         spec_hash = _hash_tensor_cpu_bytes(spec.center)
         pert = spec.perturbation
         pert_hash = f"{type(pert).__name__}:{getattr(pert, '_normalize_p', lambda: 'unknown')()}:{getattr(pert, 'eps', 'unknown')}"
@@ -246,19 +287,46 @@ class NodeEvalCache:
 def _slice_input_spec(input_spec: InputSpecLike, *, example_idx: int) -> InputSpecLike:
     spec = _normalize_input_spec(input_spec)
     center = spec.center[int(example_idx) : int(example_idx) + 1].clone()
-    return type(spec)(value_name=spec.value_name, center=center, perturbation=spec.perturbation)
+    return type(spec)(
+        value_name=spec.value_name, center=center, perturbation=spec.perturbation
+    )
 
 
-def _gather_input_spec(input_spec: InputSpecLike, *, example_indices: List[int]) -> InputSpecLike:
+def _child_split_signature(
+    parent_signature: str,
+    *,
+    relu_input: str,
+    neuron_idx: int,
+    split_value: int,
+) -> str:
+    """Version one split path without reading device tensors on the host."""
+
+    payload = f"{parent_signature}|{relu_input}|{int(neuron_idx)}|{int(split_value)}"
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _gather_input_spec(
+    input_spec: InputSpecLike, *, example_indices: List[int]
+) -> InputSpecLike:
     spec = _normalize_input_spec(input_spec)
-    center = torch.cat([spec.center[int(i) : int(i) + 1] for i in example_indices], dim=0).clone()
-    return type(spec)(value_name=spec.value_name, center=center, perturbation=spec.perturbation)
+    center = torch.cat(
+        [spec.center[int(i) : int(i) + 1] for i in example_indices], dim=0
+    ).clone()
+    return type(spec)(
+        value_name=spec.value_name, center=center, perturbation=spec.perturbation
+    )
 
 
-def _slice_linear_spec_C(linear_spec_C: Optional[torch.Tensor], *, example_idx: int, device: torch.device) -> Optional[torch.Tensor]:
+def _slice_linear_spec_C(
+    linear_spec_C: Optional[torch.Tensor], *, example_idx: int, device: torch.device
+) -> Optional[torch.Tensor]:
     if linear_spec_C is None:
         return None
-    C = linear_spec_C if torch.is_tensor(linear_spec_C) else torch.as_tensor(linear_spec_C, device=device)
+    C = (
+        linear_spec_C
+        if torch.is_tensor(linear_spec_C)
+        else torch.as_tensor(linear_spec_C, device=device)
+    )
     C = C.to(device=device)
     if C.dim() == 2:
         return C
@@ -268,16 +336,29 @@ def _slice_linear_spec_C(linear_spec_C: Optional[torch.Tensor], *, example_idx: 
 
 
 def _gather_linear_spec_C(
-    linear_spec_C: Optional[torch.Tensor], *, example_indices: List[int], device: torch.device
+    linear_spec_C: Optional[torch.Tensor],
+    *,
+    example_indices: List[int],
+    device: torch.device,
 ) -> Optional[torch.Tensor]:
     if linear_spec_C is None:
         return None
-    C = linear_spec_C if torch.is_tensor(linear_spec_C) else torch.as_tensor(linear_spec_C, device=device)
+    C = (
+        linear_spec_C
+        if torch.is_tensor(linear_spec_C)
+        else torch.as_tensor(linear_spec_C, device=device)
+    )
     C = C.to(device=device)
     if C.dim() == 2:
-        return C.unsqueeze(0).expand(len(example_indices), int(C.shape[0]), int(C.shape[1])).clone()
+        return (
+            C.unsqueeze(0)
+            .expand(len(example_indices), int(C.shape[0]), int(C.shape[1]))
+            .clone()
+        )
     if C.dim() == 3:
-        return torch.cat([C[int(i) : int(i) + 1] for i in example_indices], dim=0).clone()
+        return torch.cat(
+            [C[int(i) : int(i) + 1] for i in example_indices], dim=0
+        ).clone()
     raise ValueError(f"linear_spec_C expects rank-2/3, got {tuple(C.shape)}")
 
 
@@ -311,14 +392,20 @@ def prune_infeasible_first_layer_items(
     dtype = spec.center.dtype
 
     for orig_i, it in items:
-        cache = None if cache_by_example is None else cache_by_example.get(int(it.example_idx))
+        cache = (
+            None
+            if cache_by_example is None
+            else cache_by_example.get(int(it.example_idx))
+        )
         if cache is not None:
             v = cache.get(split_state=it.split_state)
             if v is not None and getattr(v.stats, "feasibility", None) == "infeasible":
                 pruned.append(orig_i)
                 continue
         node_spec = _slice_input_spec(spec, example_idx=int(it.example_idx))
-        st = check_first_layer_infeasible_split(module, node_spec, relu_split_state=it.split_state.by_relu_input)
+        st = check_first_layer_infeasible_split(
+            module, node_spec, relu_split_state=it.split_state.by_relu_input
+        )
         if st.feasibility == "infeasible":
             pruned.append(orig_i)
             if cache is not None:
@@ -352,7 +439,14 @@ def eval_bab_alpha_beta_node(
     if cache is not None:
         cached = cache.get(split_state=split_state)
         if cached is not None:
-            return cached.bounds, cached.best_alpha, cached.best_beta, cached.stats, cached.branch, True
+            return (
+                cached.bounds,
+                cached.best_alpha,
+                cached.best_beta,
+                cached.stats,
+                cached.branch,
+                True,
+            )
     bounds, best_alpha, best_beta, stats = run_alpha_beta_crown_mlp(
         module,
         input_spec,
@@ -378,7 +472,10 @@ def eval_bab_alpha_beta_node(
         cache.put(
             split_state=split_state,
             value=NodeEvalCacheValue(
-                bounds=IntervalState(lower=bounds.lower.detach().clone(), upper=bounds.upper.detach().clone()),
+                bounds=IntervalState(
+                    lower=bounds.lower.detach().clone(),
+                    upper=bounds.upper.detach().clone(),
+                ),
                 best_alpha=best_alpha.detach_clone(),
                 best_beta=best_beta.detach_clone(),
                 stats=stats,
@@ -401,7 +498,9 @@ def _pick_branch(
             f"_pick_branch expects a single-example InputSpec, got batch={int(input_spec_n.center.shape[0])}"
         )
     relu_split = {k: v for k, v in split_state.by_relu_input.items() if v is not None}
-    interval_env, relu_pre = _forward_ibp_trace_mlp(module, input_spec_n, relu_split_state=relu_split)
+    interval_env, relu_pre = _forward_ibp_trace_mlp(
+        module, input_spec_n, relu_split_state=relu_split
+    )
     _ = interval_env
     best = None
     best_gap = None
@@ -520,9 +619,13 @@ def _restrict_input_spec_linf_1d_for_first_layer_splits(
             if lo > hi:
                 return None
 
-    center = torch.tensor([[0.5 * (lo + hi)]], device=spec.center.device, dtype=spec.center.dtype)
+    center = torch.tensor(
+        [[0.5 * (lo + hi)]], device=spec.center.device, dtype=spec.center.dtype
+    )
     new_eps = 0.5 * (hi - lo)
-    return type(spec).linf(value_name=spec.value_name, center=center, eps=float(new_eps))
+    return type(spec).linf(
+        value_name=spec.value_name, center=center, eps=float(new_eps)
+    )
 
 
 def solve_bab_mlp(
@@ -531,6 +634,8 @@ def solve_bab_mlp(
     *,
     linear_spec_C: Optional[torch.Tensor] = None,
     config: Optional[BabConfig] = None,
+    query_recorder: Optional[BabQueryRecorder] = None,
+    query_runtime: Optional[SameSolverQueryRuntime] = None,
 ) -> BabResult:
     """
     Correctness-first BaB for chain-structured graphs.
@@ -554,6 +659,39 @@ def solve_bab_mlp(
         raise NotImplementedError("alpha-only BaB does not yet support conv graphs")
 
     num_examples = int(input_spec_n.center.shape[0])
+    query_contract_enabled = query_recorder is not None or query_runtime is not None
+    query_model_versions = (
+        model_versions(module) if query_contract_enabled else ("", "")
+    )
+    query_input_versions = (
+        {
+            example_idx: input_spec_version(
+                _slice_input_spec(input_spec_n, example_idx=example_idx)
+            )
+            for example_idx in range(num_examples)
+        }
+        if query_contract_enabled
+        else {}
+    )
+    query_output_versions = (
+        {
+            example_idx: (
+                "none"
+                if (
+                    node_spec_c := _slice_linear_spec_C(
+                        linear_spec_C,
+                        example_idx=example_idx,
+                        device=device,
+                    )
+                )
+                is None
+                else tensor_version(node_spec_c)
+            )
+            for example_idx in range(num_examples)
+        }
+        if query_contract_enabled
+        else {}
+    )
     heap: List[_QueueItem] = []
     live_nodes = [0 for _ in range(num_examples)]
     visited_by_example = [0 for _ in range(num_examples)]
@@ -572,7 +710,9 @@ def solve_bab_mlp(
                 priority=float("-inf"),
                 node_id=node_id,
                 example_idx=example_idx,
+                parent_node_id=None,
                 split_state=root_split,
+                split_signature="root",
                 warm_start=None,
                 warm_start_beta=None,
             ),
@@ -597,9 +737,128 @@ def solve_bab_mlp(
             node_cache_by_example[example_idx] = NodeEvalCache(
                 module=module,
                 input_spec=_slice_input_spec(input_spec_n, example_idx=example_idx),
-                linear_spec_C=_slice_linear_spec_C(linear_spec_C, example_idx=example_idx, device=device),
+                linear_spec_C=_slice_linear_spec_C(
+                    linear_spec_C, example_idx=example_idx, device=device
+                ),
                 cfg=cfg,
             )
+
+    query_sequence = 0
+    execution_options: Dict[str, object] = {
+        "alpha_steps": int(cfg.alpha_steps),
+        "alpha_lr": float(cfg.alpha_lr),
+        "alpha_init": float(cfg.alpha_init),
+        "beta_init": float(cfg.beta_init),
+        "objective": cfg.objective,
+        "spec_reduce": cfg.spec_reduce,
+        "soft_tau": float(cfg.soft_tau),
+        "lb_weight": float(cfg.lb_weight),
+        "ub_weight": float(cfg.ub_weight),
+    }
+
+    def _submit_query(
+        item: _QueueItem,
+        node_spec: InputSpecLike,
+        node_linear_spec_c: Optional[torch.Tensor],
+    ) -> Optional[BoundQueryRequest]:
+        nonlocal query_sequence
+        if query_recorder is None and query_runtime is None:
+            return None
+        query_id = f"bab-e{int(item.example_idx)}-n{int(item.node_id)}"
+        parent_query_id = (
+            None
+            if item.parent_node_id is None
+            else f"bab-e{int(item.example_idx)}-n{int(item.parent_node_id)}"
+        )
+        warm_alpha = (
+            {} if item.warm_start is None else item.warm_start.alpha_by_relu_input
+        )
+        warm_beta = (
+            {}
+            if item.warm_start_beta is None
+            else item.warm_start_beta.beta_by_relu_input
+        )
+        query, payload = make_bound_query(
+            module=module,
+            query_id=query_id,
+            parent_query_id=parent_query_id,
+            sequence_number=query_sequence,
+            example_idx=int(item.example_idx),
+            input_spec=node_spec,
+            linear_spec_c=node_linear_spec_c,
+            split_by_relu_input=item.split_state.by_relu_input,
+            warm_alpha_by_relu_input=warm_alpha,
+            warm_beta_by_relu_input=warm_beta,
+            bound_method=(
+                BoundMethod.ALPHA_BETA_CROWN
+                if cfg.oracle == "alpha_beta"
+                else BoundMethod.ALPHA_CROWN
+            ),
+            execution_options=execution_options,
+            identity_versions=QueryIdentityVersions(
+                model_structure_hash=query_model_versions[0],
+                weight_version=query_model_versions[1],
+                input_region_hash=query_input_versions[int(item.example_idx)],
+                output_spec_hash=query_output_versions[int(item.example_idx)],
+                split_signature=item.split_signature,
+                alpha_state_version=(
+                    None
+                    if item.parent_node_id is None
+                    else f"bab-alpha:{parent_query_id}"
+                ),
+                beta_state_version=(
+                    None
+                    if item.parent_node_id is None
+                    else f"bab-beta:{parent_query_id}"
+                ),
+            ),
+        )
+        if query_recorder is not None:
+            query_recorder.submit(query, payload)
+        query_sequence += 1
+        return BoundQueryRequest(query=query, payload=payload)
+
+    def _complete_query(
+        request: Optional[BoundQueryRequest],
+        bounds: Optional[IntervalState],
+        best_alpha: Optional[AlphaState],
+        best_beta: Optional[BetaState],
+        branch: Optional[Tuple[str, int]],
+        *,
+        status: str = "ok",
+    ) -> None:
+        if query_recorder is None or request is None:
+            return
+        query_recorder.complete(
+            request.query.query_id,
+            result_from_execution(
+                bounds,
+                best_alpha,
+                best_beta,
+                branch,
+                status=status,
+            ),
+        )
+
+    def _runtime_state(
+        result: BoundQueryResult,
+    ) -> Tuple[
+        Optional[IntervalState],
+        AlphaState,
+        BetaState,
+        Optional[Tuple[str, int]],
+    ]:
+        bounds = (
+            None
+            if result.lower is None or result.upper is None
+            else IntervalState(lower=result.lower, upper=result.upper)
+        )
+        return (
+            bounds,
+            AlphaState(dict(result.alpha_by_relu_input)),
+            BetaState(dict(result.beta_by_relu_input)),
+            result.branch,
+        )
 
     def _mark_proven_if_finished(example_idx: int) -> None:
         if status_by_example[example_idx] is None and live_nodes[example_idx] == 0:
@@ -621,8 +880,12 @@ def solve_bab_mlp(
         evaluated_by_example[example_idx] += 1
         node_lower = float(bounds.lower.min().item())
         node_upper = float(bounds.upper.max().item())
-        best_lower_by_example[example_idx] = max(best_lower_by_example[example_idx], node_lower)
-        best_upper_by_example[example_idx] = min(best_upper_by_example[example_idx], node_upper)
+        best_lower_by_example[example_idx] = max(
+            best_lower_by_example[example_idx], node_lower
+        )
+        best_upper_by_example[example_idx] = min(
+            best_upper_by_example[example_idx], node_upper
+        )
 
         _decrement_live_node(example_idx)
         if status_by_example[example_idx] is not None:
@@ -631,7 +894,11 @@ def solve_bab_mlp(
             _mark_proven_if_finished(example_idx)
             return
 
-        branch = branch_hint if (cfg.oracle == "alpha_beta" and bool(cfg.use_branch_hint)) else None
+        branch = (
+            branch_hint
+            if (cfg.oracle == "alpha_beta" and bool(cfg.use_branch_hint))
+            else None
+        )
         if branch is None:
             node_spec = _slice_input_spec(input_spec_n, example_idx=example_idx)
             branch = _pick_branch(module, node_spec, split_state=item.split_state)
@@ -643,8 +910,12 @@ def solve_bab_mlp(
             return
 
         relu_input, idx = branch
-        left = item.split_state.with_split(relu_input=relu_input, neuron_idx=idx, split_value=-1)
-        right = item.split_state.with_split(relu_input=relu_input, neuron_idx=idx, split_value=+1)
+        left = item.split_state.with_split(
+            relu_input=relu_input, neuron_idx=idx, split_value=-1
+        )
+        right = item.split_state.with_split(
+            relu_input=relu_input, neuron_idx=idx, split_value=+1
+        )
         beta_warm = None if best_beta is None else best_beta.detach_clone()
         heapq.heappush(
             heap,
@@ -652,7 +923,14 @@ def solve_bab_mlp(
                 priority=node_lower,
                 node_id=node_id,
                 example_idx=example_idx,
+                parent_node_id=item.node_id,
                 split_state=left,
+                split_signature=_child_split_signature(
+                    item.split_signature,
+                    relu_input=relu_input,
+                    neuron_idx=idx,
+                    split_value=-1,
+                ),
                 warm_start=best_alpha.detach_clone(),
                 warm_start_beta=beta_warm,
             ),
@@ -664,7 +942,14 @@ def solve_bab_mlp(
                 priority=node_lower,
                 node_id=node_id,
                 example_idx=example_idx,
+                parent_node_id=item.node_id,
                 split_state=right,
+                split_signature=_child_split_signature(
+                    item.split_signature,
+                    relu_input=relu_input,
+                    neuron_idx=idx,
+                    split_value=1,
+                ),
                 warm_start=best_alpha.detach_clone(),
                 warm_start_beta=beta_warm,
             ),
@@ -675,7 +960,11 @@ def solve_bab_mlp(
         max_q = max(max_q, len(heap))
 
     while heap and any(status is None for status in status_by_example):
-        do_batch = cfg.oracle == "alpha_beta" and int(cfg.node_batch_size) > 1 and not cfg.use_1d_linf_input_restriction_patch
+        do_batch = (
+            cfg.oracle == "alpha_beta"
+            and int(cfg.node_batch_size) > 1
+            and not cfg.use_1d_linf_input_restriction_patch
+        )
         items: List[_QueueItem] = []
         want = int(cfg.node_batch_size) if do_batch else 1
         while len(items) < want and heap:
@@ -699,7 +988,7 @@ def solve_bab_mlp(
             item = items[0]
             example_idx = int(item.example_idx)
             node_spec = _slice_input_spec(input_spec_n, example_idx=example_idx)
-            restricted_spec = node_spec
+            restricted_spec: InputSpecLike = node_spec
             if cfg.use_1d_linf_input_restriction_patch:
                 restricted_spec = _restrict_input_spec_linf_1d_for_first_layer_splits(
                     module, node_spec, split_state=item.split_state
@@ -708,19 +997,89 @@ def solve_bab_mlp(
                     _decrement_live_node(example_idx)
                     _mark_proven_if_finished(example_idx)
                     continue
+            node_linear_spec_c = _slice_linear_spec_C(
+                linear_spec_C, example_idx=example_idx, device=device
+            )
+            query_request = _submit_query(item, restricted_spec, node_linear_spec_c)
             try:
-                if cfg.oracle == "alpha_beta":
-                    bounds, best_alpha, best_beta, stats, branch_hint, _hit = eval_bab_alpha_beta_node(
-                        module,
-                        restricted_spec,
-                        linear_spec_C=_slice_linear_spec_C(linear_spec_C, example_idx=example_idx, device=device),
-                        split_state=item.split_state,
-                        warm_start_alpha=item.warm_start,
-                        warm_start_beta=item.warm_start_beta,
-                        cfg=cfg,
-                        cache=node_cache_by_example.get(example_idx),
+                if query_runtime is not None:
+                    assert query_request is not None
+                    try:
+                        runtime_outputs = query_runtime.execute(module, [query_request])
+                    except (ValueError, RuntimeError) as error:
+                        raise RuntimeError(
+                            "query runtime failed closed; solver node was not pruned"
+                        ) from error
+                    if len(runtime_outputs) != 1:
+                        raise RuntimeError(
+                            "query runtime returned the wrong singleton result count"
+                        )
+                    runtime_query_id, runtime_result = runtime_outputs[0]
+                    if runtime_query_id != query_request.query.query_id:
+                        raise RuntimeError(
+                            "query runtime returned a mismatched query ID"
+                        )
+                    bounds_opt, best_alpha, best_beta_runtime, branch_hint = (
+                        _runtime_state(runtime_result)
+                    )
+                    if runtime_result.status == "infeasible":
+                        _complete_query(
+                            query_request,
+                            None,
+                            best_alpha,
+                            best_beta_runtime,
+                            None,
+                            status="infeasible",
+                        )
+                        _decrement_live_node(example_idx)
+                        _mark_proven_if_finished(example_idx)
+                        continue
+                    if runtime_result.status != "ok" or bounds_opt is None:
+                        raise RuntimeError(
+                            f"query runtime rejected node: {runtime_result.status}"
+                        )
+                    bounds = bounds_opt
+                    best_beta = (
+                        best_beta_runtime if cfg.oracle == "alpha_beta" else None
+                    )
+                    if cfg.oracle == "alpha_beta":
+                        cache = node_cache_by_example.get(example_idx)
+                        if cache is not None:
+                            cache.put(
+                                split_state=item.split_state,
+                                value=NodeEvalCacheValue(
+                                    bounds=bounds,
+                                    best_alpha=best_alpha.detach_clone(),
+                                    best_beta=best_beta_runtime.detach_clone(),
+                                    stats=_RuntimeNodeStats(
+                                        feasibility="unknown",
+                                        branch_choices=(branch_hint,),
+                                    ),
+                                    branch=branch_hint,
+                                ),
+                            )
+                elif cfg.oracle == "alpha_beta":
+                    bounds, best_alpha, best_beta, stats, branch_hint, _hit = (
+                        eval_bab_alpha_beta_node(
+                            module,
+                            restricted_spec,
+                            linear_spec_C=node_linear_spec_c,
+                            split_state=item.split_state,
+                            warm_start_alpha=item.warm_start,
+                            warm_start_beta=item.warm_start_beta,
+                            cfg=cfg,
+                            cache=node_cache_by_example.get(example_idx),
+                        )
                     )
                     if getattr(stats, "feasibility", None) == "infeasible":
+                        _complete_query(
+                            query_request,
+                            None,
+                            best_alpha,
+                            best_beta,
+                            None,
+                            status="infeasible",
+                        )
                         _decrement_live_node(example_idx)
                         _mark_proven_if_finished(example_idx)
                         continue
@@ -729,7 +1088,7 @@ def solve_bab_mlp(
                     bounds, best_alpha, _stats = run_alpha_crown_mlp(
                         module,
                         restricted_spec,
-                        linear_spec_C=_slice_linear_spec_C(linear_spec_C, example_idx=example_idx, device=device),
+                        linear_spec_C=node_linear_spec_c,
                         steps=int(cfg.alpha_steps),
                         lr=float(cfg.alpha_lr),
                         alpha_init=float(cfg.alpha_init),
@@ -744,10 +1103,25 @@ def solve_bab_mlp(
                     best_beta = None
                     branch_hint = None
             except ValueError:
+                _complete_query(
+                    query_request,
+                    None,
+                    None,
+                    None,
+                    None,
+                    status="rejected",
+                )
                 _decrement_live_node(example_idx)
                 _mark_proven_if_finished(example_idx)
                 continue
 
+            _complete_query(
+                query_request,
+                bounds,
+                best_alpha,
+                best_beta,
+                branch_hint,
+            )
             _process_evaluated_node(
                 item,
                 bounds=bounds,
@@ -757,7 +1131,9 @@ def solve_bab_mlp(
             )
             continue
 
-        cached_results: Dict[int, Tuple[IntervalState, AlphaState, BetaState, Optional[Tuple[str, int]]]] = {}
+        cached_results: Dict[
+            int, Tuple[IntervalState, AlphaState, BetaState, Optional[Tuple[str, int]]]
+        ] = {}
         uncached: List[Tuple[int, _QueueItem]] = []
         pruned_indices: List[int] = []
         for i, item in enumerate(items):
@@ -772,7 +1148,12 @@ def solve_bab_mlp(
             if getattr(value.stats, "feasibility", None) == "infeasible":
                 pruned_indices.append(i)
                 continue
-            cached_results[i] = (value.bounds, value.best_alpha, value.best_beta, value.branch)
+            cached_results[i] = (
+                value.bounds,
+                value.best_alpha,
+                value.best_beta,
+                value.branch,
+            )
 
         uncached, pruned_new = prune_infeasible_first_layer_items(
             module,
@@ -787,26 +1168,123 @@ def solve_bab_mlp(
             _decrement_live_node(int(items[i].example_idx))
             _mark_proven_if_finished(int(items[i].example_idx))
 
-        batch_results: Dict[int, Tuple[IntervalState, AlphaState, BetaState, Optional[Tuple[str, int]]]] = {}
+        batch_results: Dict[
+            int, Tuple[IntervalState, AlphaState, BetaState, Optional[Tuple[str, int]]]
+        ] = {}
+        query_requests: Dict[int, Optional[BoundQueryRequest]] = {}
         if uncached:
+            for orig_i, item in uncached:
+                example_idx = int(item.example_idx)
+                query_requests[orig_i] = _submit_query(
+                    item,
+                    _slice_input_spec(input_spec_n, example_idx=example_idx),
+                    _slice_linear_spec_C(
+                        linear_spec_C,
+                        example_idx=example_idx,
+                        device=device,
+                    ),
+                )
+        if uncached and query_runtime is not None:
+            runtime_requests = [
+                cast(BoundQueryRequest, query_requests[orig_i])
+                for orig_i, _item in uncached
+                if query_requests[orig_i] is not None
+            ]
+            if len(runtime_requests) != len(uncached):
+                raise AssertionError(
+                    "query runtime did not receive every uncached node"
+                )
+            runtime_results = query_runtime.execute(module, runtime_requests)
+            expected_runtime_ids = [
+                request.query.query_id for request in runtime_requests
+            ]
+            actual_runtime_ids = [query_id for query_id, _result in runtime_results]
+            if actual_runtime_ids != expected_runtime_ids:
+                raise RuntimeError(
+                    "query runtime returned missing, extra, or reordered batch results"
+                )
+            for (orig_i, item), (_query_id, runtime_result) in zip(
+                uncached, runtime_results
+            ):
+                node_bounds, alpha_i, beta_i, branch = _runtime_state(runtime_result)
+                if runtime_result.status == "infeasible":
+                    _complete_query(
+                        query_requests[orig_i],
+                        None,
+                        alpha_i,
+                        beta_i,
+                        None,
+                        status="infeasible",
+                    )
+                    _decrement_live_node(int(item.example_idx))
+                    _mark_proven_if_finished(int(item.example_idx))
+                    continue
+                if runtime_result.status != "ok" or node_bounds is None:
+                    raise RuntimeError(
+                        "query runtime rejected a batch node; solver failed closed: "
+                        f"{runtime_result.status}"
+                    )
+                _complete_query(
+                    query_requests[orig_i],
+                    node_bounds,
+                    alpha_i,
+                    beta_i,
+                    branch,
+                )
+                batch_results[orig_i] = (node_bounds, alpha_i, beta_i, branch)
+                cache = node_cache_by_example.get(int(item.example_idx))
+                if cache is not None:
+                    cache.put(
+                        split_state=item.split_state,
+                        value=NodeEvalCacheValue(
+                            bounds=node_bounds,
+                            best_alpha=alpha_i.detach_clone(),
+                            best_beta=beta_i.detach_clone(),
+                            stats=_RuntimeNodeStats(
+                                feasibility="unknown",
+                                branch_choices=(branch,),
+                            ),
+                            branch=branch,
+                        ),
+                    )
+        if uncached and query_runtime is None:
             uncached_example_indices = [int(item.example_idx) for _, item in uncached]
-            batch_spec = _gather_input_spec(input_spec_n, example_indices=uncached_example_indices)
-            C_b = _gather_linear_spec_C(linear_spec_C, example_indices=uncached_example_indices, device=device)
+            batch_spec = _gather_input_spec(
+                input_spec_n, example_indices=uncached_example_indices
+            )
+            C_b = _gather_linear_spec_C(
+                linear_spec_C, example_indices=uncached_example_indices, device=device
+            )
 
             relu_split_b: Dict[str, torch.Tensor] = {}
             warm_alpha_b: Dict[str, torch.Tensor] = {}
             warm_beta_b: Dict[str, torch.Tensor] = {}
-            for relu_input, base_split in uncached[0][1].split_state.by_relu_input.items():
+            for relu_input, base_split in uncached[0][
+                1
+            ].split_state.by_relu_input.items():
                 relu_split_b[relu_input] = torch.stack(
-                    [item.split_state.by_relu_input[relu_input] for _, item in uncached], dim=0
+                    [
+                        item.split_state.by_relu_input[relu_input]
+                        for _, item in uncached
+                    ],
+                    dim=0,
                 )
                 alpha_rows: List[torch.Tensor] = []
                 beta_rows: List[torch.Tensor] = []
                 for _, item in uncached:
-                    if item.warm_start is not None and relu_input in item.warm_start.alpha_by_relu_input:
+                    if (
+                        item.warm_start is not None
+                        and relu_input in item.warm_start.alpha_by_relu_input
+                    ):
                         a = item.warm_start.alpha_by_relu_input[relu_input]
-                        a_t = a if torch.is_tensor(a) else torch.as_tensor(a, device=device)
-                        alpha_rows.append(a_t.to(device=device, dtype=input_spec_n.center.dtype))
+                        a_t = (
+                            a
+                            if torch.is_tensor(a)
+                            else torch.as_tensor(a, device=device)
+                        )
+                        alpha_rows.append(
+                            a_t.to(device=device, dtype=input_spec_n.center.dtype)
+                        )
                     else:
                         alpha_rows.append(
                             torch.full(
@@ -816,10 +1294,19 @@ def solve_bab_mlp(
                                 dtype=input_spec_n.center.dtype,
                             )
                         )
-                    if item.warm_start_beta is not None and relu_input in item.warm_start_beta.beta_by_relu_input:
+                    if (
+                        item.warm_start_beta is not None
+                        and relu_input in item.warm_start_beta.beta_by_relu_input
+                    ):
                         b = item.warm_start_beta.beta_by_relu_input[relu_input]
-                        b_t = b if torch.is_tensor(b) else torch.as_tensor(b, device=device)
-                        beta_rows.append(b_t.to(device=device, dtype=input_spec_n.center.dtype))
+                        b_t = (
+                            b
+                            if torch.is_tensor(b)
+                            else torch.as_tensor(b, device=device)
+                        )
+                        beta_rows.append(
+                            b_t.to(device=device, dtype=input_spec_n.center.dtype)
+                        )
                     else:
                         beta_rows.append(
                             torch.full(
@@ -852,7 +1339,15 @@ def solve_bab_mlp(
                     per_batch_params=True,
                 )
                 if getattr(stats_var, "feasibility", None) == "infeasible":
-                    for _, item in uncached:
+                    for orig_i, item in uncached:
+                        _complete_query(
+                            query_requests[orig_i],
+                            None,
+                            None,
+                            None,
+                            None,
+                            status="infeasible",
+                        )
                         _decrement_live_node(int(item.example_idx))
                         _mark_proven_if_finished(int(item.example_idx))
                 else:
@@ -861,14 +1356,34 @@ def solve_bab_mlp(
                             lower=bounds_b.lower[jj : jj + 1].detach().clone(),
                             upper=bounds_b.upper[jj : jj + 1].detach().clone(),
                         )
-                        alpha_i = AlphaState({k: v[jj].detach().clone() for k, v in alpha_b.alpha_by_relu_input.items()})
-                        beta_i = BetaState({k: v[jj].detach().clone() for k, v in beta_b.beta_by_relu_input.items()})
+                        alpha_i = AlphaState(
+                            {
+                                k: v[jj].detach().clone()
+                                for k, v in alpha_b.alpha_by_relu_input.items()
+                            }
+                        )
+                        beta_i = BetaState(
+                            {
+                                k: v[jj].detach().clone()
+                                for k, v in beta_b.beta_by_relu_input.items()
+                            }
+                        )
                         branch = None
-                        if hasattr(stats_var, "branch_choices") and stats_var.branch_choices:
+                        if (
+                            hasattr(stats_var, "branch_choices")
+                            and stats_var.branch_choices
+                        ):
                             try:
                                 branch = stats_var.branch_choices[jj]
                             except Exception:
                                 branch = None
+                        _complete_query(
+                            query_requests[orig_i],
+                            node_bounds,
+                            alpha_i,
+                            beta_i,
+                            branch,
+                        )
                         batch_results[orig_i] = (node_bounds, alpha_i, beta_i, branch)
                         cache = node_cache_by_example.get(int(item.example_idx))
                         if cache is not None:
@@ -886,26 +1401,61 @@ def solve_bab_mlp(
                 for orig_i, item in uncached:
                     example_idx = int(item.example_idx)
                     try:
-                        bounds, best_alpha, best_beta, stats, branch, _hit = eval_bab_alpha_beta_node(
-                            module,
-                            _slice_input_spec(input_spec_n, example_idx=example_idx),
-                            linear_spec_C=_slice_linear_spec_C(linear_spec_C, example_idx=example_idx, device=device),
-                            split_state=item.split_state,
-                            warm_start_alpha=item.warm_start,
-                            warm_start_beta=item.warm_start_beta,
-                            cfg=cfg,
-                            cache=node_cache_by_example.get(example_idx),
+                        bounds, best_alpha, best_beta, stats, branch, _hit = (
+                            eval_bab_alpha_beta_node(
+                                module,
+                                _slice_input_spec(
+                                    input_spec_n, example_idx=example_idx
+                                ),
+                                linear_spec_C=_slice_linear_spec_C(
+                                    linear_spec_C,
+                                    example_idx=example_idx,
+                                    device=device,
+                                ),
+                                split_state=item.split_state,
+                                warm_start_alpha=item.warm_start,
+                                warm_start_beta=item.warm_start_beta,
+                                cfg=cfg,
+                                cache=node_cache_by_example.get(example_idx),
+                            )
                         )
                         if getattr(stats, "feasibility", None) == "infeasible":
-                            _consume_live_node(example_idx)
+                            _complete_query(
+                                query_requests[orig_i],
+                                None,
+                                best_alpha,
+                                best_beta,
+                                None,
+                                status="infeasible",
+                            )
+                            _decrement_live_node(example_idx)
+                            _mark_proven_if_finished(example_idx)
                             continue
+                        _complete_query(
+                            query_requests[orig_i],
+                            bounds,
+                            best_alpha,
+                            best_beta,
+                            branch,
+                        )
                         batch_results[orig_i] = (
-                            IntervalState(lower=bounds.lower.detach().clone(), upper=bounds.upper.detach().clone()),
+                            IntervalState(
+                                lower=bounds.lower.detach().clone(),
+                                upper=bounds.upper.detach().clone(),
+                            ),
                             best_alpha.detach_clone(),
                             best_beta.detach_clone(),
                             branch,
                         )
                     except ValueError:
+                        _complete_query(
+                            query_requests[orig_i],
+                            None,
+                            None,
+                            None,
+                            None,
+                            status="rejected",
+                        )
                         _decrement_live_node(example_idx)
                         _mark_proven_if_finished(example_idx)
 
@@ -969,7 +1519,8 @@ def solve_bab_mlp(
         avg_batch_fill_rate=(
             0.0
             if int(cfg.node_batch_size) <= 1 or batch_rounds == 0
-            else float(batch_popped_total) / float(batch_rounds * int(cfg.node_batch_size))
+            else float(batch_popped_total)
+            / float(batch_rounds * int(cfg.node_batch_size))
         ),
         best_lower=best_lower,
         best_upper=best_upper,

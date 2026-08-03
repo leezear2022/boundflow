@@ -1,0 +1,18 @@
+{
+  "duplicate_query_ids": 0,
+  "max_abs_diff": 0.0,
+  "query_count": 8,
+  "query_loss": 0,
+  "replay_failed": 0,
+  "replay_passed": 8,
+  "schema_version": "boundflow.pr13a-fixed-replay-artifact/v1",
+  "scope": "PR-13A contract/replay smoke; not a performance claim",
+  "solver_result": {
+    "nodes_evaluated": 8,
+    "nodes_expanded": 7,
+    "nodes_visited": 8,
+    "status": "unsafe"
+  },
+  "status": "ok",
+  "workload": "deterministic-two-relu-mlp-real-bab-driver"
+}

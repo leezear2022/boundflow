@@ -1,0 +1,14 @@
+{
+  "schema_version": "boundflow.pr12-latency-sanity-summary/v1",
+  "contract": "calibration_only_output_preallocated_tvm_vs_pytorch_dense_eager",
+  "warmup": 5,
+  "repeats": 20,
+  "final_heldout_consumed": false,
+  "fused_over_dense_median": {
+    "linear_tiny": 0.1718,
+    "linear_medium": 0.4700,
+    "conv2d_stride1": 0.7164,
+    "conv2d_stride2_medium": 1.7166
+  },
+  "raw_sha256": "38ce6c5f2fc54676bda60184d5484b490727df5fe6ff5fd5c779105f28bd1510"
+}

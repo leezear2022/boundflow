@@ -1,0 +1,6 @@
+PR-12 focused: 48 passed
+Full suite: 276 passed, 1 skipped
+Mypy: six PR-12 core/script files succeeded
+Pylint: touched PR-12 modules/scripts 10.00/10
+Black check: passed
+git diff --check: passed

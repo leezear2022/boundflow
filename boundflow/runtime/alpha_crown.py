@@ -7,7 +7,13 @@ import torch
 
 from ..domains.interval import IntervalState
 from ..ir.task import BFTaskModule, TaskKind
-from .crown_ibp import _forward_ibp_trace_mlp, run_crown_ibp_mlp_from_forward_trace
+from ..planner.materialization import MaterializationPlan
+from ..planner.materialization_placement import MaterializationPlacementPlan
+from .crown_ibp import (
+    _forward_ibp_trace_mlp,
+    run_crown_ibp_mlp_from_forward_trace,
+    validate_optimized_bound_materialization_plan,
+)
 from .relu_shape_utils import coerce_relu_param_shape, relu_input_shapes
 from .task_executor import InputSpecLike, _normalize_input_spec
 
@@ -143,6 +149,8 @@ def run_alpha_crown_mlp(
     ub_weight: float = 1.0,
     warm_start: Optional[AlphaState] = None,
     relu_split_state: Optional[Dict[str, torch.Tensor]] = None,
+    materialization_plan: Optional[MaterializationPlan] = None,
+    materialization_placement_plan: Optional[MaterializationPlacementPlan] = None,
 ) -> Tuple[IntervalState, AlphaState, AlphaCrownStats]:
     """
     Minimal alpha-CROWN-style optimization loop for chain-structured graphs.
@@ -156,6 +164,11 @@ def run_alpha_crown_mlp(
     - alpha is stored per ReLU node, shared across batch/spec for each element.
     """
     module.validate()
+    validate_optimized_bound_materialization_plan(
+        materialization_plan,
+        placement_plan=materialization_placement_plan,
+        caller="run_alpha_crown_mlp",
+    )
     task = module.get_entry_task()
     if task.kind != TaskKind.INTERVAL_IBP:
         raise NotImplementedError(f"alpha-crown only supports INTERVAL_IBP, got {task.kind}")
@@ -195,6 +208,8 @@ def run_alpha_crown_mlp(
             relu_pre=relu_pre,
             linear_spec_C=linear_spec_C,
             relu_alpha=state.alpha_by_relu_input,
+            materialization_plan=materialization_plan,
+            materialization_placement_plan=materialization_placement_plan,
         )
         metric = _objective_metric(
             bounds,
