@@ -29,6 +29,7 @@ from .verifier_ir_integration import (
 )
 
 ABCROWN_ADAPTER_SCHEMA_VERSION = "boundflow.abcrown-adapter/v2"
+INTERMEDIATE_BOUNDS_PAYLOAD_SCHEMA_VERSION = "boundflow.external-intermediate-bounds/v1"
 
 
 def file_sha256(path: Path) -> str:
@@ -300,14 +301,125 @@ def intermediate_bounds_sha256(
     return digest.hexdigest()
 
 
-def bind_captured_intermediate_bounds(
-    captured: "CapturedABCrownQuery",
+def serialize_intermediate_bounds(
+    bounds: Sequence[CapturedIntermediateBound],
+) -> dict[str, Any]:
+    """Create a portable, ``weights_only=True`` compatible tensor payload."""
+
+    records: list[dict[str, Any]] = []
+    for expected, item in enumerate(bounds):
+        item.validate()
+        if item.ordinal != expected:
+            raise ValueError("external intermediate-bound ordinals are not contiguous")
+        lower = item.lower.detach().cpu().contiguous().clone()
+        upper = item.upper.detach().cpu().contiguous().clone()
+        records.append(
+            {
+                "ordinal": item.ordinal,
+                "external_relu_name": item.external_relu_name,
+                "external_preactivation_name": item.external_preactivation_name,
+                "shape": list(lower.shape),
+                "dtype": str(lower.dtype),
+                "lower": lower,
+                "upper": upper,
+                "lower_sha256": _tensor_sha256(lower),
+                "upper_sha256": _tensor_sha256(upper),
+            }
+        )
+    return {
+        "schema_version": INTERMEDIATE_BOUNDS_PAYLOAD_SCHEMA_VERSION,
+        "count": len(records),
+        "sha256": intermediate_bounds_sha256(bounds),
+        "records": records,
+    }
+
+
+# pylint: disable-next=too-many-locals,too-many-branches
+def deserialize_intermediate_bounds(
+    payload: Mapping[str, Any],
+) -> tuple[CapturedIntermediateBound, ...]:
+    """Load and fully validate a portable external intermediate-bound payload."""
+
+    if payload.get("schema_version") != INTERMEDIATE_BOUNDS_PAYLOAD_SCHEMA_VERSION:
+        raise ValueError("unsupported external intermediate-bound payload schema")
+    raw_count = payload.get("count")
+    raw_records = payload.get("records")
+    if not isinstance(raw_count, int) or isinstance(raw_count, bool):
+        raise TypeError("external intermediate-bound payload count must be an integer")
+    if not isinstance(raw_records, (tuple, list)):
+        raise TypeError(
+            "external intermediate-bound payload records must be a sequence"
+        )
+    if raw_count != len(raw_records):
+        raise ValueError("external intermediate-bound payload count mismatch")
+    bounds: list[CapturedIntermediateBound] = []
+    required_keys = {
+        "ordinal",
+        "external_relu_name",
+        "external_preactivation_name",
+        "shape",
+        "dtype",
+        "lower",
+        "upper",
+        "lower_sha256",
+        "upper_sha256",
+    }
+    for expected, raw in enumerate(raw_records):
+        if not isinstance(raw, Mapping):
+            raise TypeError("external intermediate-bound record must be a mapping")
+        if set(raw) != required_keys:
+            raise ValueError("external intermediate-bound record fields differ")
+        ordinal = raw["ordinal"]
+        relu_name = raw["external_relu_name"]
+        preactivation_name = raw["external_preactivation_name"]
+        shape = raw["shape"]
+        dtype = raw["dtype"]
+        lower = raw["lower"]
+        upper = raw["upper"]
+        if not isinstance(ordinal, int) or isinstance(ordinal, bool):
+            raise TypeError("external intermediate-bound ordinal must be an integer")
+        if ordinal != expected:
+            raise ValueError("external intermediate-bound ordinals are not contiguous")
+        if not isinstance(relu_name, str) or not isinstance(preactivation_name, str):
+            raise TypeError("external intermediate-bound names must be strings")
+        if not isinstance(shape, (tuple, list)) or not all(
+            isinstance(item, int) and not isinstance(item, bool) for item in shape
+        ):
+            raise TypeError("external intermediate-bound shape must be integer-valued")
+        if not isinstance(dtype, str):
+            raise TypeError("external intermediate-bound dtype must be a string")
+        if not torch.is_tensor(lower) or not torch.is_tensor(upper):
+            raise TypeError("external intermediate bounds must be tensors")
+        if list(lower.shape) != list(shape) or list(upper.shape) != list(shape):
+            raise ValueError("external intermediate-bound recorded shape differs")
+        if str(lower.dtype) != dtype or str(upper.dtype) != dtype:
+            raise ValueError("external intermediate-bound recorded dtype differs")
+        if raw["lower_sha256"] != _tensor_sha256(lower):
+            raise ValueError("external intermediate-bound lower digest differs")
+        if raw["upper_sha256"] != _tensor_sha256(upper):
+            raise ValueError("external intermediate-bound upper digest differs")
+        item = CapturedIntermediateBound(
+            ordinal=ordinal,
+            external_relu_name=relu_name,
+            external_preactivation_name=preactivation_name,
+            lower=lower.detach().cpu().contiguous().clone(),
+            upper=upper.detach().cpu().contiguous().clone(),
+        )
+        item.validate()
+        bounds.append(item)
+    frozen = tuple(bounds)
+    if payload.get("sha256") != intermediate_bounds_sha256(frozen):
+        raise ValueError("external intermediate-bound aggregate digest differs")
+    return frozen
+
+
+def bind_intermediate_bounds(
+    external_items: Sequence[CapturedIntermediateBound],
     local_relu_pre: Mapping[str, IntervalState],
 ) -> dict[str, IntervalState]:
     """Map external ReLU intervals onto a local graph by exact order and shape."""
 
     local_items = tuple(local_relu_pre.items())
-    external_items = captured.intermediate_bounds
     if len(local_items) != len(external_items):
         raise ValueError(
             "external/local ReLU intermediate count mismatch: "
@@ -334,6 +446,15 @@ def bind_captured_intermediate_bounds(
         ).contiguous()
         bound[local_name] = IntervalState(lower=lower, upper=upper)
     return bound
+
+
+def bind_captured_intermediate_bounds(
+    captured: "CapturedABCrownQuery",
+    local_relu_pre: Mapping[str, IntervalState],
+) -> dict[str, IntervalState]:
+    """Map process-local captured intervals onto a local graph."""
+
+    return bind_intermediate_bounds(captured.intermediate_bounds, local_relu_pre)
 
 
 @dataclass(frozen=True)
@@ -768,10 +889,18 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
         if self.typed_ir_enabled:
             record_ids = [str(record["query_id"]) for record in self.typed_ir_records]
             if record_ids != expected_ids:
+                first_mismatch = next(
+                    (
+                        (expected, actual)
+                        for expected, actual in zip(expected_ids, record_ids)
+                        if expected != actual
+                    ),
+                    None,
+                )
                 raise ValueError(
                     "typed IR execution records do not match queries: "
                     f"queries={len(expected_ids)} records={len(record_ids)} "
-                    f"first_mismatch={next(((expected, actual) for expected, actual in zip(expected_ids, record_ids) if expected != actual), None)}"
+                    f"first_mismatch={first_mismatch}"
                 )
 
     def write_artifacts(self, output_dir: Path) -> None:
@@ -805,9 +934,13 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
 
 __all__ = [
     "ABCROWN_ADAPTER_SCHEMA_VERSION",
+    "INTERMEDIATE_BOUNDS_PAYLOAD_SCHEMA_VERSION",
     "CapturedIntermediateBound",
+    "bind_intermediate_bounds",
     "bind_captured_intermediate_bounds",
+    "deserialize_intermediate_bounds",
     "intermediate_bounds_sha256",
+    "serialize_intermediate_bounds",
     "ABCrownBoundQueryProfiler",
     "ABCrownInitialCrownCapture",
     "CapturedABCrownQuery",

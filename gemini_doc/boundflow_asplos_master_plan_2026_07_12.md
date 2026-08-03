@@ -29,6 +29,12 @@
 > storage choice 或 budget decision switch；VNN-COMP ResNet 主计算仍是 external opaque call。
 > 下一工作是 `feat/native-real-network-bound-ir-v1`，不是重开 IR-5、IR-6 或孤立 TIR 调优。
 
+> **2026-08-04 NRIR-1 修订**：上述 native correctness 门禁已通过。固定 ResNet2B 的
+> 17-op Primal graph 已 lower/execute 为 21-op native Bound/Task/Schedule path，五层 hash 绑定
+> external-bound payload，final lower max diff `7.15256e-7`、sign 9/9。当前仍是单 dense
+> storage/full batch、0 materialization、CPU only。下一工作收窄为 NRIR-2 real-graph 多计划与
+> budget decision switch；未通过前不得启动性能主张。
+
 ---
 
 ## 0. 执行摘要

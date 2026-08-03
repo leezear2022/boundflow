@@ -127,7 +127,12 @@ class _GraphBuilder:
         return value
 
     def add_state(
-        self, *, label: str, primal_value_id: str, primal_shape: Sequence[int]
+        self,
+        *,
+        label: str,
+        primal_value_id: str,
+        primal_shape: Sequence[int],
+        state_version: str = "plain-crown-v1",
     ) -> BoundAffineStateRef:
         """Create one four-component affine SSA state."""
 
@@ -149,7 +154,7 @@ class _GraphBuilder:
                     role=role,
                     polarity=polarity,
                     representation=BoundRepresentation.DENSE,
-                    state_version="plain-crown-v1",
+                    state_version=state_version,
                     source_primal_value_id=primal_value_id,
                 )
             )
@@ -209,6 +214,7 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
     intermediate_bound_source: IntermediateBoundSource = (
         IntermediateBoundSource.LOCAL_FORWARD
     ),
+    intermediate_bounds_hash: Optional[str] = None,
     relu_lower_slope_policy: ReluLowerSlopePolicy = ReluLowerSlopePolicy.ZERO,
 ) -> PlainCrownBoundIRBuild:
     """Lower a validated plain-CROWN query shape into deterministic Bound IR."""
@@ -218,6 +224,13 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
         raise TypeError("intermediate_bound_source must be an IntermediateBoundSource")
     if not isinstance(relu_lower_slope_policy, ReluLowerSlopePolicy):
         raise TypeError("relu_lower_slope_policy must be a ReluLowerSlopePolicy")
+    if intermediate_bound_source == IntermediateBoundSource.EXTERNAL_VERIFIER:
+        if not _is_sha256(intermediate_bounds_hash):
+            raise ValueError(
+                "external intermediate bounds require an exact SHA-256 identity"
+            )
+    elif intermediate_bounds_hash is not None:
+        raise ValueError("local intermediate bounds cannot declare an external hash")
     if len(task_module.tasks) != 1 or task_module.task_graph is not None:
         raise NotImplementedError("Bound IR v1 lowering supports one task only")
     task = task_module.get_entry_task()
@@ -392,6 +405,11 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
                 label=op.name,
                 primal_value_id=target_name,
                 primal_shape=value_shape(target_name),
+                state_version=(
+                    "plain-crown-v1"
+                    if intermediate_bounds_hash is None
+                    else f"external-intermediate-bounds:{intermediate_bounds_hash}"
+                ),
             )
             builder.add_op(
                 label=op.name,
@@ -758,6 +776,14 @@ def tensor_content_hash(value: torch.Tensor) -> str:
     digest.update(str(tuple(tensor.shape)).encode("utf-8"))
     digest.update(tensor.view(torch.uint8).numpy().tobytes())
     return digest.hexdigest()
+
+
+def _is_sha256(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(char in "0123456789abcdef" for char in value)
+    )
 
 
 def _as_tensor(value: Any) -> torch.Tensor:

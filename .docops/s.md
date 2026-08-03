@@ -5,9 +5,9 @@ rm: v01
 st: s01
 stat: active
 health: green
-pr: [11]
-last_ch: ev000519
-last_va: ev000520
+pr: [12]
+last_ch: ev000655
+last_va: ev000656
 blk:
-next: implement-native-real-network-bound-ir-v1
-updated: 2026-08-03T18:53:00Z
+next: implement-nrir2-real-graph-memory-plans
+updated: 2026-08-03T19:25:32Z

@@ -1,9 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前代码/工件基线：`e03b3d2`；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`8c1b41a`；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`research/production-schedule-memory-p0`
+> 当前研发分支：`feat/native-real-network-bound-ir-v1`
 > 唯一执行顺序：**Gate 0 → PR-10 → PR-11 → PR-12 → PR-13 → PR-14**。
 > 禁止同时启动 Planner、fused kernel 与 BaB runtime 三条主线。
 
@@ -27,6 +27,12 @@
 > Reduced residual path 有 arena/launch ownership，但没有 materialization、storage choice 或
 > budget-driven decision switch；真实 ResNet 仍是单 external opaque call。不得直接重开 IR-5/
 > IR-6，下一分支是 `feat/native-real-network-bound-ir-v1`，详见第 13 节。
+
+> **2026-08-04 NRIR-1 结果**：固定 ResNet2B 的 main initial-CROWN backward 已从 external
+> opaque wrapper 变为 21 个 native Bound/Task regions 和 21 次 Schedule launch；五层 hash
+> 绑定 external-bound payload，CPU lower max diff `7.15256e-7`、sign 9/9。关闭等级只为
+> correctness/compiler ownership VALIDATED-REDUCED；下一步是 NRIR-2 多计划/memory decision，
+> 不是直接宣布性能结果。详见第 14 节。
 
 ## 1. 锁定的论文命题
 
@@ -462,3 +468,28 @@ external-semantics correctness。只有此后存在至少两个合法 storage/ba
 决策切换，且出现 baseline OOM rescue 或可重现 memory Pareto，才允许重开 Schedule-memory
 性能路线。P0 artifact 位于
 `artifacts/schedule-p0/production-schedule-memory-p0-20260804/`。
+
+## 14. Native Real-Network IR v1 与下一门禁
+
+NRIR-1 固定 VNN-COMP 2021 `resnet_2b.onnx`、prop0 VNNLIB、αβ-CROWN commit 和 6 组逐 ReLU
+external preactivation bounds。新的 portable payload 对 identity/tensor tamper fail closed，并让
+aggregate digest 进入 ReLU state version 和 Plan provenance。
+
+执行结果：17 个 Primal ops lower 为 21 个 native Bound ops；PlanInstance 选择 21 个 singleton
+reference regions；Task IR 与 Schedule IR 分别拥有 21 units/launches；Bound/Task external-call
+count 均为 0。五层 hash fresh replay 一致，final lower 对 external oracle max diff
+`7.152557373046875e-07`、sign 9/9。
+
+这只证明真实主 backward 已进入编译器 IR。external intermediate bounds 仍由 αβ-CROWN 提供，
+当前 Plan 只有一个 dense storage/full batch、没有 materialization alternative，也没有 GPU/timing。
+因此唯一获准顺序为：
+
+```text
+NRIR-2 real-graph representation/storage/batch alternatives
+  -> materialization action + budget decision switch + semantic replay
+  -> NRIR-3 native GPU backend and fair lower-only protocol
+  -> only then reconsider Schedule-memory/performance claim
+```
+
+artifact 位于 `artifacts/native-real-network-ir/vnncomp21-resnet2b-prop0-cpu-v1/`；实现与复现命令
+见 `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_BOUND_IR_V1_PLAN_2026_08_04.md`。

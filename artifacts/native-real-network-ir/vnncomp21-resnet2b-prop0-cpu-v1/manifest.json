@@ -1,0 +1,123 @@
+{
+  "inputs": {
+    "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+    "intermediate_bounds_sha256": "d51615b04dfb205afd67d2c21680ece4ca92f693157da1e32c7f8202a8e08cf1",
+    "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+    "source_manifest_sha256": "5352acfb886a0329d9492ca97f90f913006feb3774da7292aa154337467c02fb",
+    "source_payload_sha256": "19ff3e055f329ae0be91f528309a66a523352870b9933cc69387df864c976076",
+    "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf",
+    "vnnlib_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff"
+  },
+  "limitations": [
+    "CPU correctness and compiler-ownership evidence only",
+    "external intermediate bounds remain the calibrated semantic oracle",
+    "one dense storage candidate and one full-query batch candidate",
+    "no materialization alternative, GPU backend, or performance claim"
+  ],
+  "payload": {
+    "schema_version": "boundflow.native-real-network-ir-payload/v1",
+    "sha256": "3ba949de66380c7d16dc44bb934eca8400182521e761c19eaa671cd8cf0eb557",
+    "tensor_sha256": {
+      "external_lower": "f99f8b863e044328e2747aa372f0d25da18257979cb94d60f8391edbf0a761fa",
+      "input_lower": "bed6da6e49f1123b54fe61247615cf0e86f1b4257face7b073428f257607bda6",
+      "input_upper": "955d79bd0824185cad0be1e758e6e492c51aec6c9199f81359b2528b848ec9ab",
+      "linear_spec_c": "380f1c32321ea47967ad48221134d92d494630777eabe10ef31576a0b051e408"
+    }
+  },
+  "performance_claimed": false,
+  "result": {
+    "bound_ir": {
+      "external_verifier_call_count": 0,
+      "op_count": 21,
+      "op_kinds": {
+        "add_backward": 2,
+        "coefficient_compose": 2,
+        "concretize": 1,
+        "conv2d_backward": 6,
+        "linear_backward": 2,
+        "relu_relaxation": 6,
+        "reshape": 1,
+        "spec_bind": 1
+      }
+    },
+    "compiler_version": "boundflow.native-plain-crown-ir/v1",
+    "execution": {
+      "comparison": {
+        "allclose": true,
+        "atol": 0.0002,
+        "external_lower_sha256": "f99f8b863e044328e2747aa372f0d25da18257979cb94d60f8391edbf0a761fa",
+        "max_abs_diff": 7.152557373046875e-07,
+        "native_lower_sha256": "2dce3f71b72c56fc1efb0e291db370daac0531d7b55d84daa1754ab45cc3356d",
+        "rtol": 0.0002,
+        "sign_agreement": 9,
+        "sign_total": 9
+      },
+      "event_count": 21,
+      "finite": true,
+      "ordered": true,
+      "trace_hash": "b4763cd64f507fdfee2c8d80ef91b91d9444b11ae9fa5d5c54bc6fc76d27fb61"
+    },
+    "ir_hashes": {
+      "bound_module_hash": "16e27f318f43be8df7571e16c0dd84657462dcc964bb360a553dc142961080fb",
+      "plan_instance_hash": "5c11675627407ce5e5326f44b0c6ea77c2fb9b85c7dfccc4270612d045384506",
+      "plan_template_hash": "3b5b7e4b5ae4a78f3e97c83554726885b3d23adf7bc8173675d0ba87df539ed1",
+      "schedule_hash": "a8c90b32b73d69ae0cabf26c17310f43d7c68efb22bfb2bd84fae22f351126a8",
+      "task_module_hash": "299bbd6416bc15518b57590365f62614c20e308d43506651a7ed3a1f1c001692"
+    },
+    "plan_ir": {
+      "backend_candidate_count": 21,
+      "batch_candidate_count": 1,
+      "materialization_candidate_count": 0,
+      "region_candidate_count": 21,
+      "selected_region_count": 21,
+      "storage_candidate_count": 1
+    },
+    "primal": {
+      "op_count": 17,
+      "op_kinds": [
+        "conv2d",
+        "relu",
+        "conv2d",
+        "relu",
+        "conv2d",
+        "conv2d",
+        "add",
+        "relu",
+        "conv2d",
+        "relu",
+        "conv2d",
+        "add",
+        "relu",
+        "flatten",
+        "linear",
+        "relu",
+        "linear"
+      ]
+    },
+    "query_id": "vnncomp21-resnet2b-prop0-native-ir1",
+    "schedule_ir": {
+      "action_count": 26,
+      "action_kinds": {
+        "allocate": 1,
+        "batch_loop": 1,
+        "check_budget": 1,
+        "emit_result": 1,
+        "free": 1,
+        "launch": 21
+      },
+      "arena_bytes": 1860912,
+      "buffer_count": 91
+    },
+    "task_ir": {
+      "external_verifier_call_count": 0,
+      "task_count": 21,
+      "task_kinds": {
+        "bound_binding": 1,
+        "concretization": 1,
+        "plain_crown_region": 19
+      }
+    }
+  },
+  "schema_version": "boundflow.native-real-network-ir-artifact/v1",
+  "status": "ok"
+}
