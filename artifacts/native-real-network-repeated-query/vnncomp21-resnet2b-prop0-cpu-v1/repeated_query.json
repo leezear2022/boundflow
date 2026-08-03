@@ -1,0 +1,714 @@
+{
+  "cache": {
+    "first_cache_hit": false,
+    "key_probe": {
+      "all_distinct": true,
+      "objective_tamper_cache_key": "23ba044bcd0e4c9325ee3f89c5ea9a396cd67717095cf79dc2405794433a98dc",
+      "primary_cache_key": "785af02621df5d9d956b9f8de81ac4a2323836f96c08862414520a1894b7ca9a",
+      "reordered_cache_key": "59e88bcf7186d5f4edd2704bae519aa317d8bf18ddc4733da96867073f4f2b8f",
+      "state_tamper_cache_key": "5fe71cd27ab7de6c636eb1c2a20634def85ff1a53c255e0f270fde54fc9af3b7"
+    },
+    "primary": {
+      "entries": 1,
+      "hits": 1,
+      "misses": 1
+    },
+    "second_cache_hit": true
+  },
+  "claim_boundary": "real-network repeated-query formation, packed spec execution, exact cache, lineage, and serial-reference correctness only; child-count reduction is not a latency, memory, CUDA, OOM, Pareto, or speedup claim",
+  "compiler_version": "boundflow.native-repeated-query-runtime/v1",
+  "gates": {
+    "cache_key_tracks_objective_order_and_state": true,
+    "first_compile_misses_second_exact_compile_hits": true,
+    "mechanism_counts_do_not_claim_performance": true,
+    "nine_distinct_property_queries_are_explicit": true,
+    "nine_results_restore_exact_query_lineage": true,
+    "packed_and_serial_inherit_one_source_policy": true,
+    "packed_cached_serial_and_external_semantics_match": true,
+    "packed_three_children_replace_nine_serial_children": true
+  },
+  "layout_trace": {
+    "available_memory_bytes": 1073741824,
+    "batch_candidate_id": "batch:native-spec-sliced-v1:0003",
+    "input_identity_hash": "1558f0d9aac95f84f2e010e9e3099f0d0f6987c6a31eb852b478ae25d182a4b7",
+    "intermediate_bounds_hash": "d51615b04dfb205afd67d2c21680ece4ca92f693157da1e32c7f8202a8e08cf1",
+    "joint_policy_binding_hash": "f5df5144cd77f8412bf1de1253b7fb4e8bcce533b54ce1f4892acac8c56374c5",
+    "max_spec_batch_size": 3,
+    "memory_budget_bytes": 1073741824,
+    "packed_objective_hash": "380f1c32321ea47967ad48221134d92d494630777eabe10ef31576a0b051e408",
+    "query_ranges": [
+      {
+        "objective_hash": "0785a68037a32572ac06fb6f32a6f304254b0c9c64680546f72db8f2d51d28a9",
+        "query_id": "property-00",
+        "start_index": 0,
+        "stop_index": 1
+      },
+      {
+        "objective_hash": "1dc070704cba0d4a6bee1a988044826fb07bdd00f714253eed19c0b3a7bd0e71",
+        "query_id": "property-01",
+        "start_index": 1,
+        "stop_index": 2
+      },
+      {
+        "objective_hash": "fa26d8980f90abe734bbdd8857dfb60909259a0f666bc4708f00d6c7c15ebb06",
+        "query_id": "property-02",
+        "start_index": 2,
+        "stop_index": 3
+      },
+      {
+        "objective_hash": "40c86bb832e8a122c89f4a106bb08b6c1eef89de4110ed48eeb3979ae18f512e",
+        "query_id": "property-03",
+        "start_index": 3,
+        "stop_index": 4
+      },
+      {
+        "objective_hash": "4e53ca48c014ff475c6d0dbb9ac8fcdb8a50833c7a704f2be0efd8c1df6dd629",
+        "query_id": "property-04",
+        "start_index": 4,
+        "stop_index": 5
+      },
+      {
+        "objective_hash": "9d4dc7affe2152e3fb8e80b871cd10e6a2dbea1c2bc28df292ce85742b2b1f48",
+        "query_id": "property-05",
+        "start_index": 5,
+        "stop_index": 6
+      },
+      {
+        "objective_hash": "53fc371457c824abec3029c5fdee85b23d79250e749af3bd3051051742ac8137",
+        "query_id": "property-06",
+        "start_index": 6,
+        "stop_index": 7
+      },
+      {
+        "objective_hash": "8778848eaef762304490620cc62d7c024164bf3d4fa1fbca6c69c56f810267c6",
+        "query_id": "property-07",
+        "start_index": 7,
+        "stop_index": 8
+      },
+      {
+        "objective_hash": "c9cc079410c1c2dc44a586e59322d1f1a72decc7f1a78ba9f0117fc1120b18b3",
+        "query_id": "property-08",
+        "start_index": 8,
+        "stop_index": 9
+      }
+    ],
+    "representation_policy_id": "native-dense-v1",
+    "schema_version": "boundflow.repeated-query-layout/v1",
+    "spec_slice_candidate_size": 3,
+    "state_identity_hash": "7ce6a3bf6e007c1c1bac10db643435a389d55cf99b2a2f97386ae4a2b94e78b7",
+    "storage_candidate_id": "storage:native-retain-all-v1",
+    "stream_id": "vnncomp21-resnet2b-prop0-native-ir7-query-stream",
+    "workload_identity_hash": "f9c4fea8539da60fa50291492b906a9e241820978ed93d36701ee8c97606e68c"
+  },
+  "limitations": [
+    "same input domain with nine distinct property objectives",
+    "BaB parent/child domain state validity remains pending",
+    "cache is exact in-process compilation reuse, not a disk/code cache result",
+    "child-count reduction is a mechanism count, not a timing result",
+    "no memory, latency, CUDA, allocator, OOM, Pareto, or speedup claim"
+  ],
+  "packed": {
+    "execution_trace_hit": {
+      "cache_hit": true,
+      "cache_key": "785af02621df5d9d956b9f8de81ac4a2323836f96c08862414520a1894b7ca9a",
+      "joint_execution_trace_hash": "0f90c10f10cbbc318df794d2f2ba070530737cfa3c28179ddaca5ff0c963f43c",
+      "layout_hash": "d77fee5301dd05ac44a29078ec14d136a9ea01f3d1f1b43d8da3dbf3726165f1",
+      "packed_child_stack_count": 3,
+      "query_results": [
+        {
+          "lower_hash": "d5000de94ca98955a561b4f1b49b40556851935b222b1c9a72516a39987e156d",
+          "query_id": "property-00",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "1327e4f82474449d5f14115a206f5490d0dc6b14e4421ec4783abe0758ca59b4"
+        },
+        {
+          "lower_hash": "3051bddae93cb480ac48be91bceb4a4f5caea0e2cb485b91e0b0db0604aad139",
+          "query_id": "property-01",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "71b4c3b2e53a5c7b95689d21fb1e2268be0a9dd2b61322a18a669d8cae549b01"
+        },
+        {
+          "lower_hash": "69486fa9e8c3ac55123ca45ed6b46984ea23651af6031143dd33694f9bb23aa6",
+          "query_id": "property-02",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "0f75339234302dfa2adc13a6d5dc555b38c805ece95f19b20a935e620d07eb13"
+        },
+        {
+          "lower_hash": "169b6f9afae57574826a4969546d222596c4bb414090e29f1887f8493d38e22b",
+          "query_id": "property-03",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "13b77d0c768c72457e046ea44fb6c88d8bf3847f12893dfaf83c4cd72eb4f35d"
+        },
+        {
+          "lower_hash": "5009b74902a70bf5340f03b9b9c412f0909f7b19cebcada3bedd4d43d9222ae4",
+          "query_id": "property-04",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "f08995e6c5281ffce5def016020ca47eaea4438d18a8782fdac1f58172598e0d"
+        },
+        {
+          "lower_hash": "abad0e6037d99a80725f48a755db7ef34f725298070b2d779f2495c0e7e64072",
+          "query_id": "property-05",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "1dbd98a1fef5a7696e5893181a7b4ed24a882300d5a9347511e6c9255feea97d"
+        },
+        {
+          "lower_hash": "e75612d9dbe0e407d20a4cbfac609c531641a9dc919f01fe3ed1e738c1e0d927",
+          "query_id": "property-06",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "b1902a74e06c23fc058fb858b063235cf164c254297662c4f15af14f9348747c"
+        },
+        {
+          "lower_hash": "c23ca899c4fc6503d3d967986d672b9976863642ea4b4f7bf1ef983223e9774a",
+          "query_id": "property-07",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "c585465e2315b89af32be590ee9e797b7955ef09a45f7a7040deeece663d1ccd"
+        },
+        {
+          "lower_hash": "8e97426b44666604a4ad0b3b932cf4f1fe15cf83cce3249fb0805812d5db1255",
+          "query_id": "property-08",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "0c4ec8edbc646abbdcb0a1c63cb984fc3680d9d243635a305f5ef182c8d5e618"
+        }
+      ],
+      "schema_version": "boundflow.repeated-query-execution-trace/v1"
+    },
+    "execution_trace_miss": {
+      "cache_hit": false,
+      "cache_key": "785af02621df5d9d956b9f8de81ac4a2323836f96c08862414520a1894b7ca9a",
+      "joint_execution_trace_hash": "0f90c10f10cbbc318df794d2f2ba070530737cfa3c28179ddaca5ff0c963f43c",
+      "layout_hash": "d77fee5301dd05ac44a29078ec14d136a9ea01f3d1f1b43d8da3dbf3726165f1",
+      "packed_child_stack_count": 3,
+      "query_results": [
+        {
+          "lower_hash": "d5000de94ca98955a561b4f1b49b40556851935b222b1c9a72516a39987e156d",
+          "query_id": "property-00",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "1327e4f82474449d5f14115a206f5490d0dc6b14e4421ec4783abe0758ca59b4"
+        },
+        {
+          "lower_hash": "3051bddae93cb480ac48be91bceb4a4f5caea0e2cb485b91e0b0db0604aad139",
+          "query_id": "property-01",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "71b4c3b2e53a5c7b95689d21fb1e2268be0a9dd2b61322a18a669d8cae549b01"
+        },
+        {
+          "lower_hash": "69486fa9e8c3ac55123ca45ed6b46984ea23651af6031143dd33694f9bb23aa6",
+          "query_id": "property-02",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "0f75339234302dfa2adc13a6d5dc555b38c805ece95f19b20a935e620d07eb13"
+        },
+        {
+          "lower_hash": "169b6f9afae57574826a4969546d222596c4bb414090e29f1887f8493d38e22b",
+          "query_id": "property-03",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "13b77d0c768c72457e046ea44fb6c88d8bf3847f12893dfaf83c4cd72eb4f35d"
+        },
+        {
+          "lower_hash": "5009b74902a70bf5340f03b9b9c412f0909f7b19cebcada3bedd4d43d9222ae4",
+          "query_id": "property-04",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "f08995e6c5281ffce5def016020ca47eaea4438d18a8782fdac1f58172598e0d"
+        },
+        {
+          "lower_hash": "abad0e6037d99a80725f48a755db7ef34f725298070b2d779f2495c0e7e64072",
+          "query_id": "property-05",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "1dbd98a1fef5a7696e5893181a7b4ed24a882300d5a9347511e6c9255feea97d"
+        },
+        {
+          "lower_hash": "e75612d9dbe0e407d20a4cbfac609c531641a9dc919f01fe3ed1e738c1e0d927",
+          "query_id": "property-06",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "b1902a74e06c23fc058fb858b063235cf164c254297662c4f15af14f9348747c"
+        },
+        {
+          "lower_hash": "c23ca899c4fc6503d3d967986d672b9976863642ea4b4f7bf1ef983223e9774a",
+          "query_id": "property-07",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "c585465e2315b89af32be590ee9e797b7955ef09a45f7a7040deeece663d1ccd"
+        },
+        {
+          "lower_hash": "8e97426b44666604a4ad0b3b932cf4f1fe15cf83cce3249fb0805812d5db1255",
+          "query_id": "property-08",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "0c4ec8edbc646abbdcb0a1c63cb984fc3680d9d243635a305f5ef182c8d5e618"
+        }
+      ],
+      "schema_version": "boundflow.repeated-query-execution-trace/v1"
+    },
+    "lower_hash": "821eb0723f542714ee53032abf57bf39a1ebe774b87857fbb611044b9a916fa8",
+    "results": [
+      {
+        "lower_hash": "d5000de94ca98955a561b4f1b49b40556851935b222b1c9a72516a39987e156d",
+        "query_id": "property-00",
+        "shape": [
+          1,
+          1
+        ],
+        "upper_hash": "1327e4f82474449d5f14115a206f5490d0dc6b14e4421ec4783abe0758ca59b4"
+      },
+      {
+        "lower_hash": "3051bddae93cb480ac48be91bceb4a4f5caea0e2cb485b91e0b0db0604aad139",
+        "query_id": "property-01",
+        "shape": [
+          1,
+          1
+        ],
+        "upper_hash": "71b4c3b2e53a5c7b95689d21fb1e2268be0a9dd2b61322a18a669d8cae549b01"
+      },
+      {
+        "lower_hash": "69486fa9e8c3ac55123ca45ed6b46984ea23651af6031143dd33694f9bb23aa6",
+        "query_id": "property-02",
+        "shape": [
+          1,
+          1
+        ],
+        "upper_hash": "0f75339234302dfa2adc13a6d5dc555b38c805ece95f19b20a935e620d07eb13"
+      },
+      {
+        "lower_hash": "169b6f9afae57574826a4969546d222596c4bb414090e29f1887f8493d38e22b",
+        "query_id": "property-03",
+        "shape": [
+          1,
+          1
+        ],
+        "upper_hash": "13b77d0c768c72457e046ea44fb6c88d8bf3847f12893dfaf83c4cd72eb4f35d"
+      },
+      {
+        "lower_hash": "5009b74902a70bf5340f03b9b9c412f0909f7b19cebcada3bedd4d43d9222ae4",
+        "query_id": "property-04",
+        "shape": [
+          1,
+          1
+        ],
+        "upper_hash": "f08995e6c5281ffce5def016020ca47eaea4438d18a8782fdac1f58172598e0d"
+      },
+      {
+        "lower_hash": "abad0e6037d99a80725f48a755db7ef34f725298070b2d779f2495c0e7e64072",
+        "query_id": "property-05",
+        "shape": [
+          1,
+          1
+        ],
+        "upper_hash": "1dbd98a1fef5a7696e5893181a7b4ed24a882300d5a9347511e6c9255feea97d"
+      },
+      {
+        "lower_hash": "e75612d9dbe0e407d20a4cbfac609c531641a9dc919f01fe3ed1e738c1e0d927",
+        "query_id": "property-06",
+        "shape": [
+          1,
+          1
+        ],
+        "upper_hash": "b1902a74e06c23fc058fb858b063235cf164c254297662c4f15af14f9348747c"
+      },
+      {
+        "lower_hash": "c23ca899c4fc6503d3d967986d672b9976863642ea4b4f7bf1ef983223e9774a",
+        "query_id": "property-07",
+        "shape": [
+          1,
+          1
+        ],
+        "upper_hash": "c585465e2315b89af32be590ee9e797b7955ef09a45f7a7040deeece663d1ccd"
+      },
+      {
+        "lower_hash": "8e97426b44666604a4ad0b3b932cf4f1fe15cf83cce3249fb0805812d5db1255",
+        "query_id": "property-08",
+        "shape": [
+          1,
+          1
+        ],
+        "upper_hash": "0c4ec8edbc646abbdcb0a1c63cb984fc3680d9d243635a305f5ef182c8d5e618"
+      }
+    ],
+    "upper_hash": "586bb7ac1310adc3268c979f322a2fd5ef162b8098a74ed55961912bbb21d040"
+  },
+  "performance_claimed": false,
+  "query_contract": [
+    {
+      "device": "cpu",
+      "dtype": "torch.float32",
+      "objective_hash": "0785a68037a32572ac06fb6f32a6f304254b0c9c64680546f72db8f2d51d28a9",
+      "query_id": "property-00",
+      "shape": [
+        1,
+        1,
+        10
+      ],
+      "spec_count": 1
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.float32",
+      "objective_hash": "1dc070704cba0d4a6bee1a988044826fb07bdd00f714253eed19c0b3a7bd0e71",
+      "query_id": "property-01",
+      "shape": [
+        1,
+        1,
+        10
+      ],
+      "spec_count": 1
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.float32",
+      "objective_hash": "fa26d8980f90abe734bbdd8857dfb60909259a0f666bc4708f00d6c7c15ebb06",
+      "query_id": "property-02",
+      "shape": [
+        1,
+        1,
+        10
+      ],
+      "spec_count": 1
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.float32",
+      "objective_hash": "40c86bb832e8a122c89f4a106bb08b6c1eef89de4110ed48eeb3979ae18f512e",
+      "query_id": "property-03",
+      "shape": [
+        1,
+        1,
+        10
+      ],
+      "spec_count": 1
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.float32",
+      "objective_hash": "4e53ca48c014ff475c6d0dbb9ac8fcdb8a50833c7a704f2be0efd8c1df6dd629",
+      "query_id": "property-04",
+      "shape": [
+        1,
+        1,
+        10
+      ],
+      "spec_count": 1
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.float32",
+      "objective_hash": "9d4dc7affe2152e3fb8e80b871cd10e6a2dbea1c2bc28df292ce85742b2b1f48",
+      "query_id": "property-05",
+      "shape": [
+        1,
+        1,
+        10
+      ],
+      "spec_count": 1
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.float32",
+      "objective_hash": "53fc371457c824abec3029c5fdee85b23d79250e749af3bd3051051742ac8137",
+      "query_id": "property-06",
+      "shape": [
+        1,
+        1,
+        10
+      ],
+      "spec_count": 1
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.float32",
+      "objective_hash": "8778848eaef762304490620cc62d7c024164bf3d4fa1fbca6c69c56f810267c6",
+      "query_id": "property-07",
+      "shape": [
+        1,
+        1,
+        10
+      ],
+      "spec_count": 1
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.float32",
+      "objective_hash": "c9cc079410c1c2dc44a586e59322d1f1a72decc7f1a78ba9f0117fc1120b18b3",
+      "query_id": "property-08",
+      "shape": [
+        1,
+        1,
+        10
+      ],
+      "spec_count": 1
+    }
+  ],
+  "schema_version": "boundflow.native-real-network-repeated-query-evidence/v1",
+  "semantics": {
+    "packed_vs_cached_lower": {
+      "allclose": true,
+      "atol": 0.0002,
+      "max_abs_diff": 0.0,
+      "rtol": 0.0002,
+      "sign_agreement": 9,
+      "sign_total": 9
+    },
+    "packed_vs_external_lower": {
+      "allclose": true,
+      "atol": 0.0002,
+      "max_abs_diff": 1.9073486328125e-06,
+      "rtol": 0.0002,
+      "sign_agreement": 9,
+      "sign_total": 9
+    },
+    "packed_vs_serial_lower": {
+      "allclose": true,
+      "atol": 0.0002,
+      "max_abs_diff": 3.2186508178710938e-06,
+      "rtol": 0.0002,
+      "sign_agreement": 9,
+      "sign_total": 9
+    },
+    "serial_vs_external_lower": {
+      "allclose": true,
+      "atol": 0.0002,
+      "max_abs_diff": 3.2186508178710938e-06,
+      "rtol": 0.0002,
+      "sign_agreement": 9,
+      "sign_total": 9
+    }
+  },
+  "serial": {
+    "lower_hash": "98470345856bdd3e683ba30e36618daafcc19e769350791506690547266779b2",
+    "results": [
+      {
+        "lower_hash": "4f6d3ad3c9335c7add48427de457a44fbe93e478e67e4e13708c3c0b801312f4",
+        "query_id": "property-00",
+        "shape": [
+          1,
+          1
+        ],
+        "upper_hash": "9dacfdb6a9e7ac4ac488a57c70db3183d52862b0934f37cfe0f65b65c7ffabc2"
+      },
+      {
+        "lower_hash": "3051bddae93cb480ac48be91bceb4a4f5caea0e2cb485b91e0b0db0604aad139",
+        "query_id": "property-01",
+        "shape": [
+          1,
+          1
+        ],
+        "upper_hash": "e53e58cc08609fe4a3bc2c3aebbd7b531779d4b4dd35f3fae11dd2e5e2d36bdc"
+      },
+      {
+        "lower_hash": "846e8a6816413b1fbebbcf16bdec1531f32faff1b04ffd41afd12b147232b20f",
+        "query_id": "property-02",
+        "shape": [
+          1,
+          1
+        ],
+        "upper_hash": "51d5818815003758ba801e59aaf9a9bca004c51c9308fb9e53a14a031ba2a053"
+      },
+      {
+        "lower_hash": "9f4b69d0d1c971c1da60e10059e0a223261c59a446ffb2fb4da18a97c33dc01a",
+        "query_id": "property-03",
+        "shape": [
+          1,
+          1
+        ],
+        "upper_hash": "133c9e9bd0b1884a5a5db3a8f9f21713616d9da724ad52ff98206fa619a34531"
+      },
+      {
+        "lower_hash": "f7a37bcff4e75e9afd46a1a47e9064e54e8f0228de0fe6cd78f7b9c36bf20abb",
+        "query_id": "property-04",
+        "shape": [
+          1,
+          1
+        ],
+        "upper_hash": "603e9572a32c1cf27c50177d61fc41cfde59623bc1df2929ec9ce565e2993f6f"
+      },
+      {
+        "lower_hash": "d1d7a5a59f48cbde2877346d3cf65468af4f7f93c34a2d326a9b6422da597f2f",
+        "query_id": "property-05",
+        "shape": [
+          1,
+          1
+        ],
+        "upper_hash": "adab891d65eb40ece967ebd80a9d63b2bba0f39702f3036401d60b0b2dad736d"
+      },
+      {
+        "lower_hash": "792f30bae5b0ca2eee5b8f76be33faf37c2ca7d5f4843b363a239a57fe8ba306",
+        "query_id": "property-06",
+        "shape": [
+          1,
+          1
+        ],
+        "upper_hash": "44703c69f2d4ccc3a77e78097946caf670d4773415d7b11589b287288cd6fc4d"
+      },
+      {
+        "lower_hash": "3788cbbe3eb6baf62810cb733460e25f3c52662123f299edf637bc5f2985b39d",
+        "query_id": "property-07",
+        "shape": [
+          1,
+          1
+        ],
+        "upper_hash": "733241e043773b3ea460cf2e3ef982aa743189af27ba71facb9c3263221f844f"
+      },
+      {
+        "lower_hash": "c5f57b431fce874d1af69e0d011e701cf1d305b316aa975ac11658d65d156c28",
+        "query_id": "property-08",
+        "shape": [
+          1,
+          1
+        ],
+        "upper_hash": "e19981f3921a381bd4f5c1a83d0bbbade0a60505eba348d5c37f68f761982299"
+      }
+    ],
+    "trace": {
+      "query_results": [
+        {
+          "lower_hash": "4f6d3ad3c9335c7add48427de457a44fbe93e478e67e4e13708c3c0b801312f4",
+          "query_id": "property-00",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "9dacfdb6a9e7ac4ac488a57c70db3183d52862b0934f37cfe0f65b65c7ffabc2"
+        },
+        {
+          "lower_hash": "3051bddae93cb480ac48be91bceb4a4f5caea0e2cb485b91e0b0db0604aad139",
+          "query_id": "property-01",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "e53e58cc08609fe4a3bc2c3aebbd7b531779d4b4dd35f3fae11dd2e5e2d36bdc"
+        },
+        {
+          "lower_hash": "846e8a6816413b1fbebbcf16bdec1531f32faff1b04ffd41afd12b147232b20f",
+          "query_id": "property-02",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "51d5818815003758ba801e59aaf9a9bca004c51c9308fb9e53a14a031ba2a053"
+        },
+        {
+          "lower_hash": "9f4b69d0d1c971c1da60e10059e0a223261c59a446ffb2fb4da18a97c33dc01a",
+          "query_id": "property-03",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "133c9e9bd0b1884a5a5db3a8f9f21713616d9da724ad52ff98206fa619a34531"
+        },
+        {
+          "lower_hash": "f7a37bcff4e75e9afd46a1a47e9064e54e8f0228de0fe6cd78f7b9c36bf20abb",
+          "query_id": "property-04",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "603e9572a32c1cf27c50177d61fc41cfde59623bc1df2929ec9ce565e2993f6f"
+        },
+        {
+          "lower_hash": "d1d7a5a59f48cbde2877346d3cf65468af4f7f93c34a2d326a9b6422da597f2f",
+          "query_id": "property-05",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "adab891d65eb40ece967ebd80a9d63b2bba0f39702f3036401d60b0b2dad736d"
+        },
+        {
+          "lower_hash": "792f30bae5b0ca2eee5b8f76be33faf37c2ca7d5f4843b363a239a57fe8ba306",
+          "query_id": "property-06",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "44703c69f2d4ccc3a77e78097946caf670d4773415d7b11589b287288cd6fc4d"
+        },
+        {
+          "lower_hash": "3788cbbe3eb6baf62810cb733460e25f3c52662123f299edf637bc5f2985b39d",
+          "query_id": "property-07",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "733241e043773b3ea460cf2e3ef982aa743189af27ba71facb9c3263221f844f"
+        },
+        {
+          "lower_hash": "c5f57b431fce874d1af69e0d011e701cf1d305b316aa975ac11658d65d156c28",
+          "query_id": "property-08",
+          "shape": [
+            1,
+            1
+          ],
+          "upper_hash": "e19981f3921a381bd4f5c1a83d0bbbade0a60505eba348d5c37f68f761982299"
+        }
+      ],
+      "representation_policy_id": "native-dense-v1",
+      "schema_version": "boundflow.serial-query-reference-trace/v1",
+      "serial_child_stack_count": 9,
+      "storage_candidate_id": "storage:native-retain-all-v1"
+    },
+    "upper_hash": "a30ee3ec780aba1f3a4345b15bbabceaa06926e11ae0cc5b00458cfe062de222"
+  },
+  "source": {
+    "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+    "intermediate_bounds_sha256": "d51615b04dfb205afd67d2c21680ece4ca92f693157da1e32c7f8202a8e08cf1",
+    "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+    "native_ir_artifact_schema": "boundflow.native-real-network-ir-artifact/v1",
+    "native_ir_manifest_sha256": "5d38aa4adcd7b8593b0ca3751106d3a254b72a2698bd445a8dde59d50eb5a676",
+    "native_ir_payload_sha256": "3ba949de66380c7d16dc44bb934eca8400182521e761c19eaa671cd8cf0eb557",
+    "state_identity_hash": "7ce6a3bf6e007c1c1bac10db643435a389d55cf99b2a2f97386ae4a2b94e78b7",
+    "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf",
+    "vnnlib_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+    "workload_identity_hash": "f9c4fea8539da60fa50291492b906a9e241820978ed93d36701ee8c97606e68c"
+  },
+  "status": "ok"
+}

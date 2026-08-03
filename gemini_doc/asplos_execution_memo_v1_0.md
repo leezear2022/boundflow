@@ -1,9 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`3ca2e18`（NRIR-5 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`99ea0bb`（NRIR-6 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/native-representation-batch-composition-v1`
+> 当前研发分支：`feat/native-repeated-query-batching-cache-v1`
 > 唯一执行顺序：**Gate 0 → PR-10 → PR-11 → PR-12 → PR-13 → PR-14**。
 > 禁止同时启动 Planner、fused kernel 与 BaB runtime 三条主线。
 
@@ -51,6 +51,12 @@
 > op/task/launch 为 `21/63/49/147`，且显式继承 source policy。四路径对 external lower
 > max diff 均 ≤`1.90735e-6`、sign 9/9，artifact replay 与全量 `522 passed, 37 skipped`。
 > 只升级 joint compiler ownership；跨 query/domain batching、cache 和性能仍 pending。详见第 19 节。
+
+> **2026-08-04 NRIR-7 结果**：固定 ResNet 的 9 个不同 property objectives 已建模为 9 条
+> query；packed size-3 执行 3 个 child，same-policy serial 执行 9 个，9/9 lineage 恢复。
+> 首次 compile miss、第二次 exact hit，objective/order/state 均进入 cache key。packed/serial
+> max diff `3.21865e-6`、external sign 9/9，全量 `540 passed, 37 skipped`。只证明 query
+> formation/cache/packing correctness；BaB domain state 与性能仍 pending。详见第 20 节。
 
 ## 1. 锁定的论文命题
 
@@ -648,3 +654,26 @@ source selected storage/representation 通过 `required_storage_candidate_id` �
 该结果只关闭 cross-axis compiler/runtime ownership。structured 仍 dense-equivalent，spec child
 仍顺序执行，没有 physical memory/latency/CUDA 证据。下一工程门禁必须进入真实 query stream：
 跨 query/domain batch formation、plan/code cache reuse、per-query lineage/结果恢复和公平 baseline。
+
+## 20. Native Repeated-Query Batching and Cache v1
+
+NRIR-7 将 frozen ResNet property 的 9 行 linear objectives 显式命名为 9 条 query，每条 query
+具有 objective digest 与 `[start, stop)` lineage。packed runtime 将其组成 9-spec source，按
+size-3 执行 3 个 native child stacks；serial reference 在相同 dense/retain policy 下分别编译/
+执行 9 条 query，再按 query ID逐项比较。
+
+compile cache key 覆盖 workload、input、intermediate-bound/state、ordered query content、budget、
+policy 与 batch configuration；首次 lookup miss，完全相同第二次 hit 并返回同一 validated
+compilation。objective 内容、query 顺序或 state identity 变化各产生不同 key/miss。packed
+aggregate 恢复 9/9 query results；packed/cache hit bitwise 相同，packed/serial lower max diff
+`3.2186508178710938e-06`，packed/external `1.9073486328125e-06`，serial/external
+`3.2186508178710938e-06`，均 allclose、sign 9/9。
+
+artifact 位于
+`artifacts/native-real-network-repeated-query/vnncomp21-resnet2b-prop0-cpu-v1/`；聚焦
+`121 passed`，全量 `540 passed, 37 skipped`，静态门禁全过。
+
+本阶段只证明同一 input domain 上的 property-query formation、physical spec packing、exact
+in-process compile cache 和结果 lineage；3 vs 9 是 child-count mechanism，不是 speedup。下一
+工程门禁是 BaB parent/child domain stream：不同 input boxes、state validity/invalidation、
+domain-axis packing/restore 与 same-solver baseline。

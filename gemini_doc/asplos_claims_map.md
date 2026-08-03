@@ -8,15 +8,16 @@
 > Schedule-memory P0 同样为 `NO_GO`。随后 NRIR-1 已把固定 ResNet main CROWN backward
 > lower 为 native multi-region IR；NRIR-2 完成 storage switch/runtime last-use，NRIR-4 完成
 > representation→execution binding，NRIR-5 产生真实 spec-sliced child execution；NRIR-6 已把
-> 两轴联合到同一 template/selector 并执行四组合。这些仍是 CPU correctness/ownership evidence；
-> 没有 CUDA allocator、跨 query/domain batching 或性能结果，
+> 两轴联合到同一 template/selector 并执行四组合；NRIR-7 加入 9 条真实 property query 的
+> packed/serial/cache/lineage。这些仍是 CPU correctness/ownership evidence；没有 BaB domain、
+> CUDA allocator 或性能结果，
 > 故 performance No-Go 不变。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
 | C1：显式物化语义的 Structured Bound-Operator IR | native ResNet correctness/representation binding validated-reduced | typed Bound IR + lowering + dense/structured interpreter + source Plan/Schedule→execution Bound/Task/Launch binder | ResNet 17 Primal→21 source ops；structured execution 49 ops，含 14 cast + 14 materialize；dense/structured max diff 9.54e-7 | NRIR-1/2/4 artifacts；structured storage 仍 dense-equivalent，不能升级 compression/performance |
-| C2：Method/Autograd/Memory-Aware Materialization Planner | real-graph storage × representation × spec-batch joint ownership validated-reduced；IR-5 final 仍 NO-GO | typed Plan/Task/Schedule、NRIR-2/4/5 与 NRIR-6 single-template joint selector/runtime | ResNet 四组合 Plan/Schedule；child ops 21/63/49/147；历史 Global p90 1.26160×/gray 无 Pareto | NRIR-6 deterministic artifact；无跨 query/domain、CUDA peak/OOM/Pareto，paper performance claim 不成立 |
-| C3：Verification Query Runtime Infrastructure | correctness/integration/joint spec-slice ownership validated-reduced；performance downgraded | query/validity + typed exact-call + native joint policy child execution/aggregation | 在线 377/377；NRIR-6 四组合 exact lineage、external sign 9/9 | fused replacement 0/394 历史事实保留；domain/repeated-query physical batching/cache pending；不作 acceleration claim |
+| C2：Method/Autograd/Memory-Aware Materialization Planner | real-graph joint policy + exact repeated-query compile cache validated-reduced；IR-5 final 仍 NO-GO | NRIR-6 joint selector/runtime + NRIR-7 workload/state/query/policy cache key | 四组合 Plan/Schedule；first miss/second hit；objective/order/state invalidate；历史 Global p90 No-Go 保留 | NRIR-6/7 artifacts；无 BaB domain、CUDA peak/OOM/Pareto，paper performance claim 不成立 |
+| C3：Verification Query Runtime Infrastructure | real property-query formation/packing/lineage validated-reduced；performance downgraded | typed query specs/ranges + packed joint execution + serial same-policy restore | 9 queries→packed 3 child vs serial 9；9/9 restore；packed/serial max diff 3.22e-6 | fused replacement 0/394 历史事实保留；BaB parent/child domain validity与公平 timing pending |
 | BoundFlow Schedule IR | real-network storage/representation/spec-slice ownership validated-reduced；production-performance claim 仍 NO-GO | typed ScheduleModule + native ResNet storage lifetime、representation transitions、spec range loops 与 child stacks | NRIR-4 28 transition actions；NRIR-5 `[0,3)/[3,6)/[6,9)`、3×21 Task/Launch、full/sliced max diff 1.91e-6 | deterministic NRIR-1/2/4/5 replay；domain/sample、joint policy、OOM rescue/GPU evidence pending |
 | BoundFlow Task IR | IR-3 per-task semantic closure validated-reduced；production backend pending | TaskIRModule/Unit + typed op/shape/parameter/external/state/memory/backend refs + stateful Bound stepping | 12 个 tests（含 4 graph families、structured materialize、skip/reorder rejection） | per-task output hashes 与 final bound hashes 已入 fresh-process artifact v2 |
 | backend 执行 typed Planner/Task 结果而非定义核心抽象 | IR-4 validated-reduced；IR-5 final performance No-Go | composite typed registry + query adapter + real fused/unfused/fallback；prepared capsule 将静态 validate/hash/dispatch 移出 query hot path | residual v3 all backend correctness；ordinary batching p90 regret 1.008×，Global 1.262× | v3 可 replay；backend correctness 成立，但 adaptive production performance claim 失败 |
@@ -582,3 +583,18 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   domain physical batching/cache baseline；无 memory/latency/CUDA/OOM/Pareto/speedup claim；
 - 工件：`artifacts/native-real-network-joint-policy/vnncomp21-resnet2b-prop0-cpu-v1/`；聚焦
   `103 passed`、全量 `522 passed, 37 skipped`、静态门禁全过；下一缺口为真实 query stream。
+
+### 2026-08-04 Native Repeated-Query Batching and Cache v1
+
+- `C3-M-NRIR7` validated-reduced query mechanism：frozen ResNet 的 9 个不同 property objectives
+  具有独立 query ID/objective digest/range；packed source 按 size-3 实际执行 3 child，serial
+  same-policy baseline 执行 9 child；
+- `C2/C3-G-NRIR7` exact cache gate：workload/input/intermediate-bound/state、ordered query content、
+  budget/policy/batch config 全部进入 key；first miss/second hit，objective/order/state probe 均 miss；
+- `C3-E-NRIR7` lineage/semantics：9/9 per-query restore；packed/cache hit max diff 0；packed/serial
+  `3.2186508178710938e-06`；packed/external `1.9073486328125e-06`；serial/external
+  `3.2186508178710938e-06`；均 allclose、sign 9/9；
+- `C3-L-NRIR7` hard limitation：同一 input domain 的 property queries，不是 BaB parent/child
+  domain stream；3 vs 9 仅机制计数，无 timing/memory/CUDA/OOM/Pareto/speedup claim；
+- 工件：`artifacts/native-real-network-repeated-query/vnncomp21-resnet2b-prop0-cpu-v1/`；聚焦
+  `121 passed`、全量 `540 passed, 37 skipped`、静态门禁全过；下一缺口为 domain state validity。
