@@ -80,3 +80,4 @@ stage: s01
 - changelog: `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_MEMORY_PLANS_V1_CHANGELOG_2026_08_04.md`
 - prior: `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_BOUND_IR_V1_PLAN_2026_08_04.md`
 - roadmap: `gemini_doc/asplos_execution_memo_v1_0.md`
+- PR: `https://github.com/leezear2022/boundflow/pull/13`

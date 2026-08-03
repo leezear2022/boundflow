@@ -68,3 +68,4 @@ stage: s01
 - plan: `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_MEMORY_PLANS_V1_PLAN_2026_08_04.md`
 - artifact: `artifacts/native-real-network-memory-plans/vnncomp21-resnet2b-prop0-cpu-v1/`
 - roadmap: `gemini_doc/asplos_execution_memo_v1_0.md`
+- PR: `https://github.com/leezear2022/boundflow/pull/13`
