@@ -645,3 +645,14 @@
 {"id":"ev000645","ts":"2026-08-03T19:24:06Z","ty":"ch","st":"s01","slug":"native-real-network-artifact-tamper-gate"}
 {"id":"ev000646","ts":"2026-08-03T19:24:06Z","ty":"va","st":"s01","result":"pass"}
 {"id":"ev000647","ts":"2026-08-03T19:24:06Z","ty":"cmd","cmd":"Bash:python3","summary":"PostToolUse"}
+{"id":"ev000648","ts":"2026-08-03T19:24:19Z","ty":"cmd","cmd":"Bash:git","summary":"PostToolUse"}
+{"id":"ev000649","ts":"2026-08-03T19:24:28Z","ty":"cmd","cmd":"Bash:git","summary":"PostToolUse"}
+{"id":"ev000650","ts":"2026-08-03T19:24:32Z","ty":"cmd","cmd":"Bash:git","summary":"PostToolUse"}
+{"id":"ev000651","ts":"2026-08-03T19:24:36Z","ty":"cmd","cmd":"Bash:git","summary":"PostToolUse"}
+{"id":"ev000652","ts":"2026-08-03T19:24:42Z","ty":"cmd","cmd":"Bash:sed","summary":"PostToolUse"}
+{"id":"ev000653","ts":"2026-08-03T19:25:01Z","ty":"cmd","cmd":"Bash:git","summary":"PostToolUse"}
+{"id":"ev000654","ts":"2026-08-03T19:25:17Z","ty":"cmd","cmd":"Bash:gh","summary":"PostToolUse"}
+{"id":"ev000655","ts":"2026-08-03T19:25:32Z","ty":"ch","st":"s01","pr":12,"slug":"publish-native-real-network-bound-ir-v1"}
+{"id":"ev000656","ts":"2026-08-03T19:25:32Z","ty":"va","st":"s01","pr":12,"result":"pass"}
+{"id":"ev000657","ts":"2026-08-03T19:25:34Z","ty":"cmd","cmd":"Bash:python3","summary":"PostToolUse"}
+{"id":"ev000658","ts":"2026-08-03T19:25:44Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}

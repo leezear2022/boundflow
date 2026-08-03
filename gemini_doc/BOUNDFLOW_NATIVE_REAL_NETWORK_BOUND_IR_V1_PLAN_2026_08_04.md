@@ -76,3 +76,4 @@ python scripts/run_native_real_network_ir_artifact.py replay \
 - changelog: `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_BOUND_IR_V1_CHANGELOG_2026_08_04.md`
 - prior gate: `gemini_doc/BOUNDFLOW_PRODUCTION_SCHEDULE_MEMORY_P0_PLAN_2026_08_04.md`
 - artifact: `artifacts/native-real-network-ir/vnncomp21-resnet2b-prop0-cpu-v1/`
+- PR: `https://github.com/leezear2022/boundflow/pull/12`
