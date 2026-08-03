@@ -1,5 +1,7 @@
 """Native plain-CROWN compilation through Bound, Plan, Task, and Schedule IR."""
 
+# pylint: disable=too-many-instance-attributes,duplicate-code
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -16,7 +18,9 @@ from ..ir.bound import (
     BFBoundModule,
     BoundOpKind,
     BoundRepresentation,
+    BoundValueRole,
     IntermediateBoundSource,
+    RepresentationChangeAttrs,
     ReluLowerSlopePolicy,
 )
 from ..ir.plan import (
@@ -44,9 +48,15 @@ from ..planner.plan_ir_builder import (
     RegionEvidence,
     RepresentationEvidence,
     StorageEvidence,
+    ValueLayoutEvidence,
     build_reference_plan_template,
 )
 from ..planner.plan_ir_selector import select_plan_instance
+from ..planner.representation_plan_binding import (
+    BoundRepresentationBinding,
+    bind_native_representation_plan,
+    build_native_representation_plan_variants,
+)
 from ..planner.storage_plan_variants import build_native_storage_plan_variants
 from .task_executor import InputSpec
 from .task_ir_executor import (
@@ -64,6 +74,9 @@ from .task_backend_dispatch import TypedTaskBackend
 
 NATIVE_PLAIN_CROWN_COMPILER_VERSION = "boundflow.native-plain-crown-ir/v1"
 NATIVE_PLAIN_CROWN_MEMORY_COMPILER_VERSION = "boundflow.native-plain-crown-memory-ir/v1"
+NATIVE_PLAIN_CROWN_REPRESENTATION_COMPILER_VERSION = (
+    "boundflow.native-plain-crown-representation-ir/v1"
+)
 
 
 @dataclass(frozen=True)
@@ -178,6 +191,139 @@ class NativePlainCrownIRCompilation:
         }
 
 
+@dataclass(frozen=True)
+class NativePlainCrownRepresentationCompilation:
+    """Source representation Plan bound to a distinct execution IR stack."""
+
+    query_id: str
+    intermediate_bounds_hash: str
+    build: PlainCrownBoundIRBuild
+    source_template: PlanTemplate
+    source_instance: PlanInstance
+    source_schedule: ScheduleModule
+    binding: BoundRepresentationBinding
+    execution_template: PlanTemplate
+    execution_instance: PlanInstance
+    task_module: TaskIRModule
+    schedule: ScheduleModule
+
+    @property
+    def source_bound_module(self) -> BFBoundModule:
+        """Return the dense semantic graph consumed by representation planning."""
+
+        return self.build.module
+
+    @property
+    def bound_module(self) -> BFBoundModule:
+        """Return the Bound graph actually lowered and executed."""
+
+        return self.binding.execution_bound_module
+
+    def validate(self) -> None:  # pylint: disable=too-many-statements
+        """Verify source planning, binding, and execution ownership end to end."""
+
+        if not self.query_id:
+            raise ValueError("native representation query ID must be non-empty")
+        if len(self.intermediate_bounds_hash) != 64:
+            raise ValueError("native representation intermediate hash is invalid")
+        source = self.source_bound_module
+        self.source_instance.validate(
+            template=self.source_template, bound_module=source
+        )
+        self.source_schedule.validate(
+            bound_module=source,
+            template=self.source_template,
+            instance=self.source_instance,
+        )
+        self.binding.validate()
+        trace = self.binding.trace
+        if (
+            trace.source_bound_module_hash != source.stable_hash()
+            or trace.source_plan_template_hash
+            != self.source_template.stable_hash(bound_module=source)
+            or trace.source_plan_instance_hash
+            != self.source_instance.stable_hash(
+                template=self.source_template, bound_module=source
+            )
+            or trace.source_schedule_hash
+            != self.source_schedule.stable_hash(
+                bound_module=source,
+                template=self.source_template,
+                instance=self.source_instance,
+            )
+        ):
+            raise ValueError("native representation source binding identity differs")
+        execution = self.bound_module
+        self.task_module.validate_schedule_linkage(
+            self.schedule,
+            bound_module=execution,
+            template=self.execution_template,
+            instance=self.execution_instance,
+        )
+        if any(
+            op.kind == BoundOpKind.EXTERNAL_VERIFIER_CALL for op in execution.graph.ops
+        ):
+            raise ValueError("native representation execution contains external call")
+        if len(self.task_module.tasks) != len(execution.graph.ops):
+            raise ValueError("native representation execution does not own every op")
+        launches = tuple(
+            action
+            for action in self.schedule.actions
+            if isinstance(action, LaunchAction)
+        )
+        if len(launches) != len(self.task_module.tasks):
+            raise ValueError("native representation schedule omits task launches")
+        task_op_ids = {
+            op_ref.op_id for task in self.task_module.tasks for op_ref in task.op_refs
+        }
+        if any(event.execution_op_id not in task_op_ids for event in trace.events):
+            raise ValueError("native representation transition is not a Task op")
+        if any(
+            task.backend.reference_implementation_id != "bound_ir_region_reference/v1"
+            for task in self.task_module.tasks
+        ):
+            raise ValueError("native representation selected non-reference backend")
+
+    def hashes(self) -> dict[str, str]:
+        """Return both planning and execution compiler-layer identities."""
+
+        self.validate()
+        source = self.source_bound_module
+        execution = self.bound_module
+        return {
+            "source_bound_module_hash": source.stable_hash(),
+            "source_plan_template_hash": self.source_template.stable_hash(
+                bound_module=source
+            ),
+            "source_plan_instance_hash": self.source_instance.stable_hash(
+                template=self.source_template, bound_module=source
+            ),
+            "source_schedule_hash": self.source_schedule.stable_hash(
+                bound_module=source,
+                template=self.source_template,
+                instance=self.source_instance,
+            ),
+            "representation_binding_hash": self.binding.trace.stable_hash(),
+            "execution_bound_module_hash": execution.stable_hash(),
+            "execution_plan_template_hash": self.execution_template.stable_hash(
+                bound_module=execution
+            ),
+            "execution_plan_instance_hash": self.execution_instance.stable_hash(
+                template=self.execution_template, bound_module=execution
+            ),
+            "task_module_hash": self.task_module.stable_hash(
+                bound_module=execution,
+                template=self.execution_template,
+                instance=self.execution_instance,
+            ),
+            "schedule_hash": self.schedule.stable_hash(
+                bound_module=execution,
+                template=self.execution_template,
+                instance=self.execution_instance,
+            ),
+        }
+
+
 def compile_native_plain_crown_query(  # pylint: disable=too-many-arguments
     legacy_task_module: BFTaskModule,
     input_spec: InputSpec,
@@ -233,6 +379,105 @@ def compile_native_plain_crown_memory_query(  # pylint: disable=too-many-argumen
     )
     if len(compilation.template.storage_candidates) != 2:
         raise ValueError("native memory compilation requires two storage plans")
+    return compilation
+
+
+# pylint: disable-next=too-many-arguments,too-many-locals
+def compile_native_plain_crown_representation_query(
+    legacy_task_module: BFTaskModule,
+    input_spec: InputSpec,
+    *,
+    interval_env: Mapping[str, IntervalState],
+    relu_pre: Mapping[str, IntervalState],
+    linear_spec_C: torch.Tensor,
+    intermediate_bounds_hash: str,
+    query_id: str,
+    available_memory_bytes: int,
+    memory_budget_bytes: int,
+) -> NativePlainCrownRepresentationCompilation:
+    """Compile a source representation Plan into a bound execution IR stack."""
+
+    if not query_id:
+        raise ValueError("native representation query ID must be non-empty")
+    if available_memory_bytes <= 0 or memory_budget_bytes <= 0:
+        raise ValueError("native representation memory limits must be positive")
+    build = build_plain_crown_bound_ir(
+        legacy_task_module,
+        input_spec,
+        interval_env=interval_env,
+        relu_pre=relu_pre,
+        linear_spec_C=linear_spec_C,
+        intermediate_bound_source=IntermediateBoundSource.EXTERNAL_VERIFIER,
+        intermediate_bounds_hash=intermediate_bounds_hash,
+        relu_lower_slope_policy=ReluLowerSlopePolicy.ADAPTIVE,
+    )
+    source_template = _build_native_reference_template(
+        build.module,
+        query_id=query_id,
+        intermediate_bounds_hash=intermediate_bounds_hash,
+        available_memory_bytes=available_memory_bytes,
+    )
+    source_template = build_native_representation_plan_variants(
+        source_template, bound_module=build.module
+    )
+    source_instance = select_plan_instance(
+        source_template,
+        bound_module=build.module,
+        query_bucket_id=f"native-representation-source:{query_id}",
+        available_memory_bytes=available_memory_bytes,
+        memory_budget_bytes=memory_budget_bytes,
+    )
+    source_schedule = lower_plan_instance_to_reference_schedule(
+        build.module,
+        template=source_template,
+        instance=source_instance,
+        query_ids=(query_id,),
+    )
+    binding = bind_native_representation_plan(
+        build.module,
+        template=source_template,
+        instance=source_instance,
+        schedule=source_schedule,
+    )
+    execution_module = binding.execution_bound_module
+    execution_template = _build_native_reference_template(
+        execution_module,
+        query_id=f"{query_id}:execution",
+        intermediate_bounds_hash=intermediate_bounds_hash,
+        available_memory_bytes=available_memory_bytes,
+    )
+    execution_instance = select_plan_instance(
+        execution_template,
+        bound_module=execution_module,
+        query_bucket_id=f"native-representation-execution:{query_id}",
+        available_memory_bytes=available_memory_bytes,
+        memory_budget_bytes=available_memory_bytes,
+    )
+    task_module = lower_plan_instance_to_task_ir(
+        execution_module,
+        template=execution_template,
+        instance=execution_instance,
+    )
+    schedule = lower_plan_instance_to_reference_schedule(
+        execution_module,
+        template=execution_template,
+        instance=execution_instance,
+        query_ids=(query_id,),
+    )
+    compilation = NativePlainCrownRepresentationCompilation(
+        query_id=query_id,
+        intermediate_bounds_hash=intermediate_bounds_hash,
+        build=build,
+        source_template=source_template,
+        source_instance=source_instance,
+        source_schedule=source_schedule,
+        binding=binding,
+        execution_template=execution_template,
+        execution_instance=execution_instance,
+        task_module=task_module,
+        schedule=schedule,
+    )
+    compilation.validate()
     return compilation
 
 
@@ -372,6 +617,30 @@ def execute_native_plain_crown_memory_query(
     return result, task_trace, storage_runtime.trace()
 
 
+def execute_native_plain_crown_representation_query(
+    compilation: NativePlainCrownRepresentationCompilation,
+    *,
+    legacy_task_module: BFTaskModule,
+    input_spec: InputSpec,
+    relu_pre: Mapping[str, IntervalState],
+    linear_spec_C: torch.Tensor,
+) -> tuple[IntervalState, TaskExecutionTrace]:
+    """Execute the Bound/Task/Schedule program produced by representation binding."""
+
+    compilation.validate()
+    return execute_task_ir_semantics(
+        compilation.task_module,
+        compilation.schedule,
+        bound_module=compilation.bound_module,
+        template=compilation.execution_template,
+        instance=compilation.execution_instance,
+        legacy_task_module=legacy_task_module,
+        input_spec=input_spec,
+        relu_pre=relu_pre,
+        linear_spec_C=linear_spec_C,
+    )
+
+
 # pylint: disable-next=too-many-locals
 def _build_native_reference_template(
     module: BFBoundModule,
@@ -415,22 +684,26 @@ def _build_native_reference_template(
         )
         for index, op in enumerate(module.graph.ops)
     )
+    region_representations = tuple(
+        _native_execution_region_representation(module, op.op_id)
+        for op in module.graph.ops
+    )
     representations = tuple(
         RepresentationEvidence(
-            evidence_id=f"dense:{region.evidence_id}",
+            evidence_id=f"{representation.value}:{region.evidence_id}",
             region_evidence_id=region.evidence_id,
-            representation=BoundRepresentation.DENSE,
+            representation=representation,
             required_transition_evidence_ids=(),
             cost=cost,
         )
-        for region in regions
+        for region, representation in zip(regions, region_representations)
     )
     capability = BackendCapabilitySpec(
         capability_id="native-plain-crown-reference-v1",
         backend=BackendKind.REFERENCE,
         supported_methods=(module.domain.method,),
         supported_op_kinds=tuple(dict.fromkeys(op.kind for op in module.graph.ops)),
-        supported_representations=(BoundRepresentation.DENSE,),
+        supported_representations=tuple(dict.fromkeys(region_representations)),
         supported_dtypes=(dtype,),
         supported_devices=(device,),
         supports_grad=False,
@@ -441,13 +714,13 @@ def _build_native_reference_template(
     )
     backends = tuple(
         BackendEvidence(
-            evidence_id=f"reference:{region.evidence_id}",
+            evidence_id=f"reference:{representation.evidence_id}",
             region_evidence_id=region.evidence_id,
-            representation_evidence_id=f"dense:{region.evidence_id}",
+            representation_evidence_id=representation.evidence_id,
             capability_id=capability.capability_id,
             cost=cost,
         )
-        for region in regions
+        for region, representation in zip(regions, representations)
     )
     hardware = HardwareProfile(
         profile_id=f"native-plain-crown:{device}",
@@ -495,7 +768,17 @@ def _build_native_reference_template(
                 compatible_representation_evidence_ids=tuple(
                     item.evidence_id for item in representations
                 ),
-                value_layout_overrides=(),
+                value_layout_overrides=tuple(
+                    ValueLayoutEvidence(
+                        value_id=value.value_id,
+                        representation=value.representation,
+                        physical_size_bytes=_native_static_tensor_bytes(
+                            value.tensor_type.shape, value.tensor_type.dtype
+                        ),
+                    )
+                    for value in values
+                    if value.representation != BoundRepresentation.DENSE
+                ),
                 arena_id=f"{device}-native-plain-crown",
                 cost=cost,
             ),
@@ -518,12 +801,58 @@ def _build_native_reference_template(
     )
 
 
+def _native_execution_region_representation(
+    module: BFBoundModule, op_id: str
+) -> BoundRepresentation:
+    ops = {op.op_id: op for op in module.graph.ops}
+    values = {value.value_id: value for value in module.graph.values}
+    op = ops[op_id]
+    if isinstance(op.attrs, RepresentationChangeAttrs):
+        return op.attrs.target
+    coefficient_representations = {
+        values[value_id].representation
+        for value_id in (*op.inputs, *op.outputs)
+        if values[value_id].role == BoundValueRole.COEFFICIENT
+    }
+    if BoundRepresentation.STRUCTURED in coefficient_representations:
+        return BoundRepresentation.STRUCTURED
+    return BoundRepresentation.DENSE
+
+
+def _native_static_tensor_bytes(shape: tuple[int | None, ...], dtype: str) -> int:
+    dtype_bytes = {
+        "bool": 1,
+        "int8": 1,
+        "uint8": 1,
+        "float16": 2,
+        "bfloat16": 2,
+        "int32": 4,
+        "float32": 4,
+        "int64": 8,
+        "float64": 8,
+    }.get(dtype)
+    if dtype_bytes is None:
+        raise ValueError(f"native representation storage does not know dtype '{dtype}'")
+    if any(dimension is None for dimension in shape):
+        raise ValueError("native representation storage requires static shapes")
+    result = dtype_bytes
+    for dimension in shape:
+        if dimension is None:
+            raise ValueError("native representation storage requires static shapes")
+        result *= dimension
+    return result
+
+
 __all__ = [
     "NATIVE_PLAIN_CROWN_COMPILER_VERSION",
     "NATIVE_PLAIN_CROWN_MEMORY_COMPILER_VERSION",
+    "NATIVE_PLAIN_CROWN_REPRESENTATION_COMPILER_VERSION",
     "NativePlainCrownIRCompilation",
+    "NativePlainCrownRepresentationCompilation",
     "compile_native_plain_crown_memory_query",
     "compile_native_plain_crown_query",
+    "compile_native_plain_crown_representation_query",
     "execute_native_plain_crown_memory_query",
     "execute_native_plain_crown_query",
+    "execute_native_plain_crown_representation_query",
 ]

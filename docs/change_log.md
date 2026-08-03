@@ -3711,3 +3711,22 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_CUDA_MEMORY_PROTOCOL_V1_CHANGELOG_2026_08_03.md`
+
+---
+
+## 2026-08-04：Native Representation Semantic Binding v1
+
+- 新增 dense/structured-affine 两个全局 source Plan policy；用 storage-compatible prefix
+  pruning 避免真实 21-region 图的指数混合枚举，同时保持可行 Plan 集合不变；
+- 新增 fail-closed binder，将每个 selected transition 与 source Schedule
+  `MaterializeAction`、rewritten execution Bound op 一一绑定，并为新 Bound hash 重建独立
+  Plan/Task/Schedule stack；
+- 固定 ResNet structured 路径插入 14 cast + 14 materialize，21-op source 变为 49-op execution，
+  49/49 ops 均进入 Task 与 Launch；
+- dense/structured lower 最大差 `9.5367431640625e-07`，均对 external lower allclose、sign
+  9/9；artifact digest、semantic replay 与 tamper tests 通过；
+- 当前 structured operator/storage 仍为 dense-equivalent，明确禁止 compression、memory、
+  latency、CUDA、OOM、Pareto 或 speedup claim；下一路线为 real-network sliced batch execution。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_REPRESENTATION_BINDING_V1_CHANGELOG_2026_08_04.md`

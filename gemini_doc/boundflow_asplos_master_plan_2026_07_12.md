@@ -47,6 +47,13 @@
 > driver/device 不可用，只有 `environment_unavailable` probe，0 measured rows、无 performance
 > claim。下一工程路线为 representation semantic binding，而不是停等 GPU 或调整冻结阈值。
 
+> **2026-08-04 NRIR-4 修订**：representation semantic binding 已在固定 ResNet 上执行。
+> structured-affine source policy 生成 14 cast + 14 materialize 的独立 49-op execution Bound
+> graph；每个 transition 均绑定 source Schedule action、Task 与 Launch。dense/structured lower
+> 最大差 `9.53674e-7`，external sign 9/9。当前 operator/storage 仍是 dense-equivalent，故只把
+> C1/C2 mechanism 升为 validated-reduced，不形成 compression 或 performance claim。下一工程
+> 路线为 real-network sliced batch execution。
+
 ---
 
 ## 0. 执行摘要
@@ -273,7 +280,7 @@ NRIR-3 CUDA protocol 已完成但本机 device unavailable。PR-10 的 structure
 | 缺口 | 当前问题 | 必须达到的证据 |
 |---|---|---|
 | ReLU barrier | structured mode 已消除 persistent dense；dense 保持默认 | 需 Planner/fused lowering 解决 eager 重算与 α/β OOM |
-| 物化决策 | NRIR-2 已有真实 storage reuse 预算切换；NRIR-3 device protocol 已实现但无可用 CUDA；representation/materialization 尚未绑定 runtime semantic conversion | 至少一个真实图上的执行级 materialization alternative；device 可用时按冻结协议补 Pareto |
+| 物化决策 | NRIR-4 已在固定 ResNet 上让 source Plan/Schedule 绑定 28 个显式 execution cast/materialize，并通过 dense/external 语义 replay；当前 structured storage 仍为 dense-equivalent | sliced batch 后在可用 CUDA 设备按冻结协议测物理 memory/latency；无物理证据不升级 Pareto |
 | fused CROWN task | TVM 后端以 IBP/task 基础设施为主 | CROWN 粗粒度 task lowering 与正确性/性能门禁 |
 | repeated-query abstraction | multi-spec、BaB batch、cache 仍是分散机制 | 统一 QueryBatch/QueryState/PlanCache 或等价接口 |
 | 真实 workload | VNN-COMP ResNet2B correctness/storage 已进入 native IR；性能仍无真实 device protocol | ResNet/basic-block、更多 VNN-COMP 代表实例、至少一个训练 workload 的公平性能证据 |

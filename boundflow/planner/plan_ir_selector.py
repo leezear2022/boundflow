@@ -194,7 +194,10 @@ def select_plan_instance(  # pylint: disable=too-many-arguments
         if any(not group for group in representation_groups):
             _increment(failures, "region_without_legal_representation")
             continue
-        for representations in itertools.product(*representation_groups):
+        for representations in _storage_compatible_representation_products(
+            representation_groups,
+            storage_candidates=template.storage_candidates,
+        ):
             transition_ids = {
                 candidate_id
                 for representation in representations
@@ -352,6 +355,51 @@ def _exact_region_partitions(
             yield from visit(covered | candidate_ops, (*chosen, candidate))
 
     yield from visit(frozenset(), ())
+
+
+def _storage_compatible_representation_products(
+    groups: Tuple[Tuple[RepresentationCandidate, ...], ...],
+    *,
+    storage_candidates: Tuple[StorageCandidate, ...],
+) -> Iterator[Tuple[RepresentationCandidate, ...]]:
+    """Enumerate only prefixes that at least one legal storage can complete.
+
+    This is semantically identical to the later whole-plan compatibility check,
+    but avoids exponential mixed-policy enumeration when storage candidates
+    encode globally coherent representation families.
+    """
+
+    compatible_sets = tuple(
+        frozenset(candidate.compatible_representation_candidate_ids)
+        for candidate in storage_candidates
+        if candidate.static_legal
+    )
+    if not compatible_sets:
+        return
+
+    def visit(
+        index: int,
+        selected: Tuple[RepresentationCandidate, ...],
+        possible_storage_sets: Tuple[frozenset[str], ...],
+    ) -> Iterator[Tuple[RepresentationCandidate, ...]]:
+        if index == len(groups):
+            yield selected
+            return
+        for candidate in groups[index]:
+            next_storage_sets = tuple(
+                compatible
+                for compatible in possible_storage_sets
+                if candidate.candidate_id in compatible
+            )
+            if not next_storage_sets:
+                continue
+            yield from visit(
+                index + 1,
+                (*selected, candidate),
+                next_storage_sets,
+            )
+
+    yield from visit(0, (), compatible_sets)
 
 
 def _state_candidate_groups(
