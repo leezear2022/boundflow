@@ -20,6 +20,7 @@ from ..ir.bound import (
     BoundRepresentation,
     BoundValueRole,
     IntermediateBoundSource,
+    OptimizedReluRelaxationAttrs,
     RepresentationChangeAttrs,
     ReluLowerSlopePolicy,
 )
@@ -77,6 +78,7 @@ NATIVE_PLAIN_CROWN_MEMORY_COMPILER_VERSION = "boundflow.native-plain-crown-memor
 NATIVE_PLAIN_CROWN_REPRESENTATION_COMPILER_VERSION = (
     "boundflow.native-plain-crown-representation-ir/v1"
 )
+NATIVE_ALPHA_BETA_STATE_COMPILER_VERSION = "boundflow.native-alpha-beta-state-ir/v1"
 
 
 @dataclass(frozen=True)
@@ -397,6 +399,9 @@ def compile_native_plain_crown_representation_query(
     selection_context: PlanSelectionContext | None = None,
     relu_split_state: Mapping[str, torch.Tensor] | None = None,
     split_state_hash: str | None = None,
+    relu_alpha_state: Mapping[str, torch.Tensor] | None = None,
+    relu_beta_state: Mapping[str, torch.Tensor] | None = None,
+    optimization_state_hash: str | None = None,
     intermediate_bound_source: IntermediateBoundSource = (
         IntermediateBoundSource.EXTERNAL_VERIFIER
     ),
@@ -422,6 +427,9 @@ def compile_native_plain_crown_representation_query(
         relu_lower_slope_policy=ReluLowerSlopePolicy.ADAPTIVE,
         relu_split_state=relu_split_state,
         split_state_hash=split_state_hash,
+        relu_alpha_state=relu_alpha_state,
+        relu_beta_state=relu_beta_state,
+        optimization_state_hash=optimization_state_hash,
     )
     source_template = _build_native_reference_template(
         build.module,
@@ -642,6 +650,8 @@ def execute_native_plain_crown_representation_query(
     relu_pre: Mapping[str, IntervalState],
     linear_spec_C: torch.Tensor,
     relu_split_state: Mapping[str, torch.Tensor] | None = None,
+    relu_alpha_state: Mapping[str, torch.Tensor] | None = None,
+    relu_beta_state: Mapping[str, torch.Tensor] | None = None,
 ) -> tuple[IntervalState, TaskExecutionTrace]:
     """Execute the Bound/Task/Schedule program produced by representation binding."""
 
@@ -657,6 +667,8 @@ def execute_native_plain_crown_representation_query(
         relu_pre=relu_pre,
         linear_spec_C=linear_spec_C,
         relu_split_state=relu_split_state,
+        relu_alpha_state=relu_alpha_state,
+        relu_beta_state=relu_beta_state,
     )
 
 
@@ -672,6 +684,35 @@ def _build_native_reference_template(
     ),
 ) -> PlanTemplate:
     values = module.graph.values
+    optimized_state_hashes = {
+        op.attrs.optimization_state_hash
+        for op in module.graph.ops
+        if isinstance(op.attrs, OptimizedReluRelaxationAttrs)
+    }
+    if module.domain.alpha_enabled and (
+        not module.domain.beta_enabled or len(optimized_state_hashes) != 1
+    ):
+        raise ValueError(
+            "native optimized reference plan requires one alpha/beta state identity"
+        )
+    optimized_state_hash = (
+        next(iter(optimized_state_hashes)) if optimized_state_hashes else None
+    )
+    plan_prefix = (
+        "native-alpha-beta-state"
+        if optimized_state_hash is not None
+        else "native-plain-crown"
+    )
+    compiler_version = (
+        NATIVE_ALPHA_BETA_STATE_COMPILER_VERSION
+        if optimized_state_hash is not None
+        else NATIVE_PLAIN_CROWN_COMPILER_VERSION
+    )
+    semantics_owner = (
+        "boundflow_native_alpha_beta_state"
+        if optimized_state_hash is not None
+        else "boundflow_native_plain_crown"
+    )
     dtypes = tuple(dict.fromkeys(value.tensor_type.dtype for value in values))
     devices = tuple(
         dict.fromkeys(
@@ -721,16 +762,16 @@ def _build_native_reference_template(
         for region, representation in zip(regions, region_representations)
     )
     capability = BackendCapabilitySpec(
-        capability_id="native-plain-crown-reference-v1",
+        capability_id=f"{plan_prefix}-reference-v1",
         backend=BackendKind.REFERENCE,
         supported_methods=(module.domain.method,),
         supported_op_kinds=tuple(dict.fromkeys(op.kind for op in module.graph.ops)),
         supported_representations=tuple(dict.fromkeys(region_representations)),
         supported_dtypes=dtypes,
         supported_devices=(device,),
-        supports_grad=False,
-        supports_alpha=False,
-        supports_beta=False,
+        supports_grad=module.domain.requires_grad,
+        supports_alpha=module.domain.alpha_enabled,
+        supports_beta=module.domain.beta_enabled,
         supports_split_state=module.domain.split_state_present,
         static_shape_only=True,
     )
@@ -745,7 +786,7 @@ def _build_native_reference_template(
         for region, representation in zip(regions, representations)
     )
     hardware = HardwareProfile(
-        profile_id=f"native-plain-crown:{device}",
+        profile_id=f"{plan_prefix}:{device}",
         device=device,
         total_memory_bytes=available_memory_bytes,
         supported_dtypes=dtypes,
@@ -753,11 +794,11 @@ def _build_native_reference_template(
         alignment_bytes=16,
     )
     workload = WorkloadProfile(
-        profile_id=f"native-plain-crown:{query_id}",
+        profile_id=f"{plan_prefix}:{query_id}",
         method=module.domain.method,
-        requires_grad=False,
-        alpha_enabled=False,
-        beta_enabled=False,
+        requires_grad=module.domain.requires_grad,
+        alpha_enabled=module.domain.alpha_enabled,
+        beta_enabled=module.domain.beta_enabled,
         split_state_present=module.domain.split_state_present,
         static_shapes=True,
         domain_batch_size=domain_batch,
@@ -766,23 +807,27 @@ def _build_native_reference_template(
         dtype=dtype,
         device=device,
         numeric_policy=(
-            (
-                "external_intermediate_adaptive_float32_reference"
-                if intermediate_bound_source
-                == IntermediateBoundSource.EXTERNAL_VERIFIER
-                else "local_forward_adaptive_float32_reference"
-            )
-            if not module.domain.split_state_present
+            "local_forward_alpha_beta_state_float32_reference"
+            if module.domain.alpha_enabled and module.domain.beta_enabled
             else (
-                "external_intermediate_adaptive_float32_reference_split_v1"
-                if intermediate_bound_source
-                == IntermediateBoundSource.EXTERNAL_VERIFIER
-                else "local_forward_adaptive_float32_reference_split_v1"
+                (
+                    "external_intermediate_adaptive_float32_reference"
+                    if intermediate_bound_source
+                    == IntermediateBoundSource.EXTERNAL_VERIFIER
+                    else "local_forward_adaptive_float32_reference"
+                )
+                if not module.domain.split_state_present
+                else (
+                    "external_intermediate_adaptive_float32_reference_split_v1"
+                    if intermediate_bound_source
+                    == IntermediateBoundSource.EXTERNAL_VERIFIER
+                    else "local_forward_adaptive_float32_reference_split_v1"
+                )
             )
         ),
     )
     evidence = ReferencePlanEvidence(
-        evidence_set_id=f"native-plain-crown:{query_id}",
+        evidence_set_id=f"{plan_prefix}:{query_id}",
         regions=regions,
         transitions=(),
         representations=representations,
@@ -820,8 +865,8 @@ def _build_native_reference_template(
             ),
         ),
         provenance=(
-            PlanProvenance("compiler", NATIVE_PLAIN_CROWN_COMPILER_VERSION),
-            PlanProvenance("semantics_owner", "boundflow_native_plain_crown"),
+            PlanProvenance("compiler", compiler_version),
+            PlanProvenance("semantics_owner", semantics_owner),
             PlanProvenance(
                 "intermediate_bound_source", intermediate_bound_source.value
             ),
@@ -835,6 +880,14 @@ def _build_native_reference_template(
                 intermediate_bounds_hash,
             ),
             PlanProvenance("relu_lower_slope_policy", "adaptive"),
+            *(
+                (
+                    PlanProvenance("optimization_state_hash", optimized_state_hash),
+                    PlanProvenance("optimizer_control_flow", "runtime_owned"),
+                )
+                if optimized_state_hash is not None
+                else ()
+            ),
             PlanProvenance("performance_claim", "forbidden"),
         ),
     )

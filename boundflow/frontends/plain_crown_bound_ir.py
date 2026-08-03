@@ -1,6 +1,7 @@
 """Lower the existing plain-CROWN task subset into first-class Bound IR."""
 
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name,too-many-lines,too-many-instance-attributes
+# pylint: disable=too-many-arguments,too-many-branches
 
 from __future__ import annotations
 
@@ -35,6 +36,7 @@ from ..ir.bound import (
     NoBoundOpAttrs,
     ObjectiveKind,
     ObjectiveSpec,
+    OptimizedReluRelaxationAttrs,
     PerturbationKind,
     PerturbationSpec,
     IntermediateBoundSource,
@@ -60,6 +62,8 @@ class PlainCrownBoundIRBuild:
     lower_output_value_id: str
     upper_output_value_id: str
     split_input_value_ids: tuple[tuple[str, str], ...] = ()
+    alpha_input_value_ids: tuple[tuple[str, str], ...] = ()
+    beta_input_value_ids: tuple[tuple[str, str], ...] = ()
 
 
 class _GraphBuilder:
@@ -151,6 +155,37 @@ class _GraphBuilder:
             polarity=BoundPolarity.BOTH,
             representation=BoundRepresentation.DENSE,
             state_version=f"native-relu-split:{payload_hash}",
+            source_primal_value_id=primal_value_id,
+        )
+        self.values.append(value)
+        return value
+
+    def add_optimization_input(
+        self,
+        *,
+        value_id: str,
+        primal_value_id: str,
+        primal_shape: Sequence[int],
+        payload_hash: str,
+        kind: str,
+    ) -> BoundValue:
+        """Create one exact per-domain alpha or beta graph input."""
+
+        if kind not in {"alpha", "beta"}:
+            raise ValueError("optimization input kind must be alpha or beta")
+        value = BoundValue(
+            value_id=value_id,
+            tensor_type=BoundTensorType(
+                shape=(self.batch, *(int(dim) for dim in primal_shape)),
+                dtype=self.dtype,
+                layout="contiguous",
+                device=self.device,
+                batch_axes=(BoundBatchAxis(BatchAxisKind.DOMAIN, 0),),
+            ),
+            role=BoundValueRole.RELAXATION,
+            polarity=(BoundPolarity.BOTH if kind == "alpha" else BoundPolarity.LOWER),
+            representation=BoundRepresentation.DENSE,
+            state_version=f"native-relu-{kind}:{payload_hash}",
             source_primal_value_id=primal_value_id,
         )
         self.values.append(value)
@@ -248,6 +283,9 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
     relu_lower_slope_policy: ReluLowerSlopePolicy = ReluLowerSlopePolicy.ZERO,
     relu_split_state: Optional[Mapping[str, torch.Tensor]] = None,
     split_state_hash: Optional[str] = None,
+    relu_alpha_state: Optional[Mapping[str, torch.Tensor]] = None,
+    relu_beta_state: Optional[Mapping[str, torch.Tensor]] = None,
+    optimization_state_hash: Optional[str] = None,
 ) -> PlainCrownBoundIRBuild:
     """Lower a validated plain-CROWN query shape into deterministic Bound IR."""
 
@@ -299,6 +337,38 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
             raise ValueError("ReLU split-state hash differs from exact payload")
     elif split_state_hash is not None:
         raise ValueError("split-state hash cannot be supplied without split inputs")
+    if (relu_alpha_state is None) != (relu_beta_state is None):
+        raise ValueError("native optimized ReLU requires both alpha and beta state")
+    normalized_alpha = _normalize_relu_optimization_state(
+        relu_pre,
+        relu_alpha_state,
+        batch=batch,
+        device=device,
+        dtype=dtype,
+        kind="alpha",
+    )
+    normalized_beta = _normalize_relu_optimization_state(
+        relu_pre,
+        relu_beta_state,
+        batch=batch,
+        device=device,
+        dtype=dtype,
+        kind="beta",
+    )
+    if normalized_alpha:
+        if not normalized_splits:
+            raise ValueError("native alpha/beta state requires exact split inputs")
+        actual_optimization_hash = relu_optimization_state_hash(
+            normalized_splits,
+            normalized_alpha,
+            normalized_beta,
+        )
+        if optimization_state_hash != actual_optimization_hash:
+            raise ValueError("alpha/beta optimization-state hash differs from payload")
+    elif optimization_state_hash is not None:
+        raise ValueError(
+            "optimization-state hash cannot be supplied without alpha/beta inputs"
+        )
 
     objective_id, objective_kind, objective_hash = _objective_identity(linear_spec_C)
     perturbation = _perturbation_spec(input_spec)
@@ -315,9 +385,13 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
         ),
         requested_bounds=(BoundPolarity.BOTH,),
         numeric_policy=(
-            f"{dtype}_dense_reference"
-            if not normalized_splits
-            else f"{dtype}_dense_reference_relu_split_v1"
+            f"{dtype}_dense_reference_alpha_beta_state_v1"
+            if normalized_alpha
+            else (
+                f"{dtype}_dense_reference"
+                if not normalized_splits
+                else f"{dtype}_dense_reference_relu_split_v1"
+            )
         ),
     )
 
@@ -342,6 +416,8 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
     dynamic_names.add(input_spec.value_name)
     adjoints: dict[str, list[BoundAffineStateRef]] = {resolved_output: [seed]}
     split_inputs: list[tuple[str, BoundValue]] = []
+    alpha_inputs: list[tuple[str, BoundValue]] = []
+    beta_inputs: list[tuple[str, BoundValue]] = []
 
     def value_shape(value_id: str) -> tuple[int, ...]:
         if value_id == input_spec.value_name:
@@ -451,6 +527,8 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
                 raise KeyError(f"missing ReLU pre-activation trace for '{target_name}'")
             _validate_trace_tensor_pair(relu_pre[target_name], label=target_name)
             split_tensor = normalized_splits.get(target_name)
+            alpha_tensor = normalized_alpha.get(target_name)
+            beta_tensor = normalized_beta.get(target_name)
             split_payload_hash = (
                 None if split_tensor is None else tensor_content_hash(split_tensor)
             )
@@ -463,6 +541,14 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
                 if split_state_hash is None or split_payload_hash is None:
                     raise AssertionError("validated split identity is unavailable")
                 state_version = f"{state_version}:relu-split:{split_state_hash}"
+            if alpha_tensor is not None:
+                if optimization_state_hash is None:
+                    raise AssertionError(
+                        "validated optimization identity is unavailable"
+                    )
+                state_version = (
+                    f"{state_version}:alpha-beta-state:{optimization_state_hash}"
+                )
             target = builder.add_state(
                 label=op.name,
                 primal_value_id=target_name,
@@ -470,6 +556,8 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
                 state_version=state_version,
             )
             split_value: Optional[BoundValue] = None
+            alpha_value: Optional[BoundValue] = None
+            beta_value: Optional[BoundValue] = None
             if split_tensor is not None:
                 safe_target = "".join(
                     char if char.isalnum() or char in "._-" else "_"
@@ -485,13 +573,45 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
                     payload_hash=cast(str, split_payload_hash),
                 )
                 split_inputs.append((target_name, split_value))
+            if alpha_tensor is not None and beta_tensor is not None:
+                safe_target = "".join(
+                    char if char.isalnum() or char in "._-" else "_"
+                    for char in target_name
+                )
+                alpha_payload_hash = tensor_content_hash(alpha_tensor)
+                beta_payload_hash = tensor_content_hash(beta_tensor)
+                alpha_value = builder.add_optimization_input(
+                    value_id=(f"query.alpha.{alpha_payload_hash[:16]}.{safe_target}"),
+                    primal_value_id=target_name,
+                    primal_shape=value_shape(target_name),
+                    payload_hash=alpha_payload_hash,
+                    kind="alpha",
+                )
+                beta_value = builder.add_optimization_input(
+                    value_id=f"query.beta.{beta_payload_hash[:16]}.{safe_target}",
+                    primal_value_id=target_name,
+                    primal_shape=value_shape(target_name),
+                    payload_hash=beta_payload_hash,
+                    kind="beta",
+                )
+                alpha_inputs.append((target_name, alpha_value))
+                beta_inputs.append((target_name, beta_value))
             builder.add_op(
                 label=op.name,
                 kind=BoundOpKind.RELU_RELAXATION,
                 inputs=(
                     source.value_ids
                     if split_value is None
-                    else (*source.value_ids, split_value.value_id)
+                    else (
+                        (*source.value_ids, split_value.value_id)
+                        if alpha_value is None or beta_value is None
+                        else (
+                            *source.value_ids,
+                            split_value.value_id,
+                            alpha_value.value_id,
+                            beta_value.value_id,
+                        )
+                    )
                 ),
                 outputs=target.value_ids,
                 attrs=(
@@ -502,13 +622,33 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
                         lower_slope_policy=relu_lower_slope_policy,
                     )
                     if split_value is None
-                    else SplitReluRelaxationAttrs(
-                        primal_node_id=op.name,
-                        preactivation_primal_value_id=target_name,
-                        intermediate_bound_source=intermediate_bound_source,
-                        lower_slope_policy=relu_lower_slope_policy,
-                        split_state_value_id=split_value.value_id,
-                        split_state_hash=cast(str, split_payload_hash),
+                    else (
+                        SplitReluRelaxationAttrs(
+                            primal_node_id=op.name,
+                            preactivation_primal_value_id=target_name,
+                            intermediate_bound_source=intermediate_bound_source,
+                            lower_slope_policy=relu_lower_slope_policy,
+                            split_state_value_id=split_value.value_id,
+                            split_state_hash=cast(str, split_payload_hash),
+                        )
+                        if alpha_value is None or beta_value is None
+                        else OptimizedReluRelaxationAttrs(
+                            primal_node_id=op.name,
+                            preactivation_primal_value_id=target_name,
+                            intermediate_bound_source=intermediate_bound_source,
+                            lower_slope_policy=relu_lower_slope_policy,
+                            split_state_value_id=split_value.value_id,
+                            split_state_hash=cast(str, split_payload_hash),
+                            alpha_state_value_id=alpha_value.value_id,
+                            alpha_state_hash=tensor_content_hash(
+                                cast(torch.Tensor, alpha_tensor)
+                            ),
+                            beta_state_value_id=beta_value.value_id,
+                            beta_state_hash=tensor_content_hash(
+                                cast(torch.Tensor, beta_tensor)
+                            ),
+                            optimization_state_hash=cast(str, optimization_state_hash),
+                        )
                     )
                 ),
             )
@@ -644,22 +784,38 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
         attrs=ConcretizeAttrs(perturbation_id=perturbation.perturbation_id),
     )
 
+    state_input_ids = (
+        tuple(
+            value.value_id
+            for values_for_relu in zip(split_inputs, alpha_inputs, beta_inputs)
+            for _name, value in values_for_relu
+        )
+        if normalized_alpha
+        else tuple(value.value_id for _name, value in split_inputs)
+    )
     graph = BFBoundGraph(
         values=tuple(builder.values),
         ops=tuple(builder.ops),
-        inputs=(
-            objective_input.value_id,
-            *(value.value_id for _name, value in split_inputs),
-        ),
+        inputs=(objective_input.value_id, *state_input_ids),
         outputs=(lower.value_id, upper.value_id),
     )
     primal_hash = plain_crown_primal_graph_hash(task_module)
     bound_module = BFBoundModule(
-        module_id=f"plain-crown-{primal_hash[:16]}",
+        module_id=(
+            f"native-alpha-beta-{primal_hash[:16]}"
+            if normalized_alpha
+            else f"plain-crown-{primal_hash[:16]}"
+        ),
         primal_graph_hash=primal_hash,
         spec=verification_spec,
         domain=BoundDomainConfig(
-            method=BoundMethodKind.CROWN,
+            method=(
+                BoundMethodKind.ALPHA_BETA_CROWN
+                if normalized_alpha
+                else BoundMethodKind.CROWN
+            ),
+            alpha_enabled=bool(normalized_alpha),
+            beta_enabled=bool(normalized_beta),
             split_state_present=bool(normalized_splits),
         ),
         graph=graph,
@@ -674,6 +830,12 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
         split_input_value_ids=tuple(
             (name, value.value_id) for name, value in split_inputs
         ),
+        alpha_input_value_ids=tuple(
+            (name, value.value_id) for name, value in alpha_inputs
+        ),
+        beta_input_value_ids=tuple(
+            (name, value.value_id) for name, value in beta_inputs
+        ),
     )
 
 
@@ -685,6 +847,33 @@ def relu_split_state_hash(relu_split_state: Mapping[str, torch.Tensor]) -> str:
     payload = {
         name: tensor_content_hash(tensor)
         for name, tensor in sorted(relu_split_state.items())
+    }
+    encoded = json.dumps(
+        payload, sort_keys=True, separators=(",", ":"), allow_nan=False
+    )
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def relu_optimization_state_hash(
+    relu_split_state: Mapping[str, torch.Tensor],
+    relu_alpha_state: Mapping[str, torch.Tensor],
+    relu_beta_state: Mapping[str, torch.Tensor],
+) -> str:
+    """Fingerprint one exact split/alpha/beta payload."""
+
+    if (
+        not relu_split_state
+        or set(relu_split_state) != set(relu_alpha_state)
+        or set(relu_split_state) != set(relu_beta_state)
+    ):
+        raise ValueError("optimization-state keys must match non-empty split keys")
+    payload = {
+        name: {
+            "split": tensor_content_hash(relu_split_state[name]),
+            "alpha": tensor_content_hash(relu_alpha_state[name]),
+            "beta": tensor_content_hash(relu_beta_state[name]),
+        }
+        for name in sorted(relu_split_state)
     }
     encoded = json.dumps(
         payload, sort_keys=True, separators=(",", ":"), allow_nan=False
@@ -725,6 +914,52 @@ def _normalize_relu_split_state(
             raise ValueError(
                 f"ReLU split state '{name}' contains values outside -1/0/1"
             )
+        normalized[name] = tensor.detach().contiguous().clone()
+    return normalized
+
+
+def _normalize_relu_optimization_state(
+    relu_pre: Mapping[str, IntervalState],
+    state: Optional[Mapping[str, torch.Tensor]],
+    *,
+    batch: int,
+    device: str,
+    dtype: str,
+    kind: str,
+) -> dict[str, torch.Tensor]:
+    """Normalize complete alpha/beta payloads and enforce their value domain."""
+
+    if state is None:
+        return {}
+    if kind not in {"alpha", "beta"}:
+        raise ValueError("optimization-state kind must be alpha or beta")
+    if set(state) != set(relu_pre):
+        raise ValueError(f"ReLU {kind}-state keys must exactly match pre-activations")
+    expected_dtype = getattr(torch, dtype, None)
+    if not isinstance(expected_dtype, torch.dtype):
+        raise ValueError(f"unsupported ReLU optimization dtype: {dtype}")
+    normalized: dict[str, torch.Tensor] = {}
+    for name in sorted(relu_pre):
+        tensor = state[name]
+        if not torch.is_tensor(tensor):
+            raise TypeError(f"ReLU {kind} state '{name}' must be a torch.Tensor")
+        pre = relu_pre[name]
+        expected_shape = tuple(int(dim) for dim in pre.lower.shape)
+        logical_shape = expected_shape[1:]
+        if tuple(int(dim) for dim in tensor.shape) == logical_shape and batch == 1:
+            tensor = tensor.unsqueeze(0)
+        if tuple(int(dim) for dim in tensor.shape) != expected_shape:
+            raise ValueError(f"ReLU {kind} state '{name}' shape differs from trace")
+        if tensor.dtype != expected_dtype or not torch.is_floating_point(tensor):
+            raise TypeError(f"ReLU {kind} state '{name}' must use floating trace dtype")
+        if str(tensor.device) != device or tensor.device != pre.lower.device:
+            raise ValueError(f"ReLU {kind} state '{name}' device differs from trace")
+        if not bool(torch.isfinite(tensor).all().item()):
+            raise ValueError(f"ReLU {kind} state '{name}' contains non-finite values")
+        if kind == "alpha" and not bool(((tensor >= 0) & (tensor <= 1)).all().item()):
+            raise ValueError(f"ReLU alpha state '{name}' lies outside [0,1]")
+        if kind == "beta" and not bool((tensor >= 0).all().item()):
+            raise ValueError(f"ReLU beta state '{name}' contains negative values")
         normalized[name] = tensor.detach().contiguous().clone()
     return normalized
 

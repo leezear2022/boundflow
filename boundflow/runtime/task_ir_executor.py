@@ -507,6 +507,8 @@ def execute_task_ir_semantics(
     relu_pre: Mapping[str, IntervalState],
     linear_spec_C: Optional[torch.Tensor] = None,
     relu_split_state: Optional[Mapping[str, torch.Tensor]] = None,
+    relu_alpha_state: Optional[Mapping[str, torch.Tensor]] = None,
+    relu_beta_state: Optional[Mapping[str, torch.Tensor]] = None,
     backend: Optional[TypedTaskBackend] = None,
     state_store: Optional[BoundRuntimeStateStore] = None,
     prepared: Optional[PreparedTaskIRExecution] = None,
@@ -541,6 +543,8 @@ def execute_task_ir_semantics(
         relu_pre=relu_pre,
         linear_spec_C=linear_spec_C,
         relu_split_state=relu_split_state,
+        relu_alpha_state=relu_alpha_state,
+        relu_beta_state=relu_beta_state,
         prepared_program=prepared.program,
         capture_output_hashes=trace_mode == TaskTraceMode.AUDIT,
     )

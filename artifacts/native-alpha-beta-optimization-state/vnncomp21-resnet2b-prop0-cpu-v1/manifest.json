@@ -1,0 +1,9 @@
+{
+  "evidence_hash": "302f536685885e75248582698589d49f667d7709ca3258c043310e02278e6884",
+  "files": {
+    "alpha_beta_state.json": "a82f396e8665990d863ef45f60e3a6453ab0301e1ef53d16d28365404b4e2b9c"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.native-alpha-beta-state-artifact/v1",
+  "status": "ok"
+}

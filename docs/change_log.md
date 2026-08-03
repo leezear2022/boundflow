@@ -3835,3 +3835,24 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_NATIVE_RELU_SPLIT_BAB_QUEUE_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Native Alpha/Beta Optimization State v1
+
+- optimized ReLU BoundOp 新增 split/alpha/beta typed inputs；每个 fixed ResNet ReLU 使用 7-port
+  contract，state identity 进入 Bound/Plan/Task/Schedule 与 compiler hash；
+- reference interpreter 实际消费 optimized ambiguous lower slope 和 `-beta*split` lower-dual
+  coefficient；key/shape/dtype/device/range/hash/linkage tamper fail closed；
+- 新增 model/input/objective/intermediate/split/policy/payload scope 与 warm-start classifier：exact
+  scope 可 exact reuse，monotonic split refinement 仅 initialization，reversal/removal/drift 拒绝；
+- fixed ResNet 共 19 inputs、6 optimized ReLU ops、21 Task/Launch；native/legacy bounds max diff
+  `0.0/0.0`，beta sum `0.04999999701976776`，对 zero-beta lower 改善 `0.34039306640625`；
+- artifact generate/replay hash
+  `302f536685885e75248582698589d49f667d7709ca3258c043310e02278e6884`；聚焦 `50 passed`，
+  全量 `591 passed, 37 skipped`；Black/Mypy clean、Pylint 10.00/10、diff check 通过；
+- 只关闭 frozen-state/beta/warm-start correctness；Adam loop 尚未编译，无完整 BaB/verdict/
+  performance claim。下一门禁为 native optimizer-step Task/Schedule control v1。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_NATIVE_ALPHA_BETA_OPTIMIZATION_STATE_V1_CHANGELOG_2026_08_04.md`

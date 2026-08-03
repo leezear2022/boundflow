@@ -1,0 +1,299 @@
+{
+  "evidence": {
+    "branch": {
+      "lower": -221.17330932617188,
+      "neuron_index": 93,
+      "relu_input": "31",
+      "upper": 173.5435333251953,
+      "width": 394.7168426513672
+    },
+    "child_state": {
+      "payload_hash": "304c8286dbe7e31e866c7ca268eb828e5a92b309fbfce03938250c2e97351e67",
+      "relu_states": {
+        "17": {
+          "alpha_hash": "1e5d9df4716421e81e9af3fe16dc524f6154890f43d46e000fd1b3b4457a7c41",
+          "beta_hash": "b61a214e7eb2e57d7b9a9580f2b4d2ecec8f6a85f785c2eef212928dd741a5d9",
+          "device": "cpu",
+          "dtype": "float32",
+          "shape": [
+            1,
+            8,
+            16,
+            16
+          ],
+          "split_hash": "123366409ba0c21a9826c019396418909e15f68b727a6335be973c44e055ec10"
+        },
+        "19": {
+          "alpha_hash": "b1eb02fba41cb979cf60e70d800989c7edbec9c3c8ca4e9135c3b30b572d3b31",
+          "beta_hash": "3d11df9d51babf7f0287c11c64d418802a1eb9a13bd82f99f47f115c88dfd9d3",
+          "device": "cpu",
+          "dtype": "float32",
+          "shape": [
+            1,
+            16,
+            8,
+            8
+          ],
+          "split_hash": "a2ca9b0c846613fc243dfa9ddbfb862fe53759a5439f93a69d91d2ee6c2a585e"
+        },
+        "23": {
+          "alpha_hash": "633dfb7610bd5d783fdb0cc93684dcb549b7bc4e7d8a262080a0c52135fe00ab",
+          "beta_hash": "3d11df9d51babf7f0287c11c64d418802a1eb9a13bd82f99f47f115c88dfd9d3",
+          "device": "cpu",
+          "dtype": "float32",
+          "shape": [
+            1,
+            16,
+            8,
+            8
+          ],
+          "split_hash": "a2ca9b0c846613fc243dfa9ddbfb862fe53759a5439f93a69d91d2ee6c2a585e"
+        },
+        "25": {
+          "alpha_hash": "4235ff5c2aeb2d96c2a494ee3835892ae4268fe71d400ba498490e9b41379ba0",
+          "beta_hash": "3d11df9d51babf7f0287c11c64d418802a1eb9a13bd82f99f47f115c88dfd9d3",
+          "device": "cpu",
+          "dtype": "float32",
+          "shape": [
+            1,
+            16,
+            8,
+            8
+          ],
+          "split_hash": "a2ca9b0c846613fc243dfa9ddbfb862fe53759a5439f93a69d91d2ee6c2a585e"
+        },
+        "28": {
+          "alpha_hash": "0798e51dab8b8250a819cb2e1e26dbdd1e528c9fd6b22c5917c2a2cc2492290e",
+          "beta_hash": "3d11df9d51babf7f0287c11c64d418802a1eb9a13bd82f99f47f115c88dfd9d3",
+          "device": "cpu",
+          "dtype": "float32",
+          "shape": [
+            1,
+            16,
+            8,
+            8
+          ],
+          "split_hash": "a2ca9b0c846613fc243dfa9ddbfb862fe53759a5439f93a69d91d2ee6c2a585e"
+        },
+        "31": {
+          "alpha_hash": "ac1fb0c11af609d223f74c2328891d96838954faf2da80b6be45a1bef31cc60f",
+          "beta_hash": "c391b08b47938d3ffe11373eeda86ddfedf66d64c3846d7cc826f060ba8ff4ac",
+          "device": "cpu",
+          "dtype": "float32",
+          "shape": [
+            1,
+            100
+          ],
+          "split_hash": "9e011b86646bb2f25827e360cc92b633c21d133b9c145899117aa3fc38bbb763"
+        }
+      },
+      "schema_version": "boundflow.native-alpha-beta-state/v1",
+      "scope": {
+        "input_region_hash": "709b48940bab1658c835952dea26df3f03c849c79199ab4f6a1198e2bf15717a",
+        "intermediate_bounds_hash": "b7920d65995ca87df47d1ad63b2d85b32d338be60a19f51e73f6054ec1efd8a8",
+        "objective_hash": "0785a68037a32572ac06fb6f32a6f304254b0c9c64680546f72db8f2d51d28a9",
+        "optimizer_policy_hash": "f590e963d4fb9ed8cc4b83e65b28c06a6fcb1c70bf04ffb16b40df94081a6763",
+        "primal_graph_hash": "02636a01e4b5a2d1f759dc7748bf80b3303efff2d5697790966f8e93679213e8",
+        "split_state_hash": "8cb0f1554c3c8d0773f1f0112eb3cc414457fed01a9426a3d95f0fd009c89f79"
+      },
+      "state_hash": "cb3fb6df178c54d974ea2b69cf2665933f87dcef8200ea1e82fbc690e9d71249"
+    },
+    "child_warm_start": {
+      "alpha_initialization_allowed": true,
+      "beta_initialization_allowed": true,
+      "exact_state_reuse_allowed": false,
+      "kind": "monotonic_split_refinement",
+      "reason": "initialization_only_parent_exact_state_invalid_for_child",
+      "source_state_hash": "4efeb174b8b76c5f933e1de7ed7ba706a4cb03de52d8b6b5fdf499607e75b036",
+      "target_scope_hash": "4d025d04bef52f0b06029baf9a8dc4b251b8218848c1a2203aa452bd4631f35a"
+    },
+    "claim_boundary": "fixed-ResNet frozen alpha/beta state ownership, monotonic-refinement warm-start validity, native beta lower-dual execution, and full Bound/Plan/Task/Schedule correctness only; runtime Adam loop is not compiled and there is no complete verifier, latency, memory, CUDA, or speedup claim",
+    "exact_warm_start": {
+      "alpha_initialization_allowed": true,
+      "beta_initialization_allowed": true,
+      "exact_state_reuse_allowed": true,
+      "kind": "exact",
+      "reason": "exact_scope_and_split",
+      "source_state_hash": "4efeb174b8b76c5f933e1de7ed7ba706a4cb03de52d8b6b5fdf499607e75b036",
+      "target_scope_hash": "17bec85d8212d0989be1d223065263c9eadcd244a5eb08dd5a6795945080f69d"
+    },
+    "execution": {
+      "beta_lower_improvement": 0.34039306640625,
+      "beta_sum": 0.04999999701976776,
+      "execution_optimized_relu_op_count": 6,
+      "legacy_lower_hash": "5f506ccc9361518ade1616a0f69df958b3d68385e72886686d7d2ec123e11a78",
+      "legacy_upper_hash": "9601feba94dd04471532c48baa6cc10f9f1525e13ba1b470555248c6c1cad44d",
+      "lower_max_abs_diff": 0.0,
+      "native_lower_hash": "5f506ccc9361518ade1616a0f69df958b3d68385e72886686d7d2ec123e11a78",
+      "native_upper_hash": "9601feba94dd04471532c48baa6cc10f9f1525e13ba1b470555248c6c1cad44d",
+      "schedule_launch_count": 21,
+      "source_graph_input_count": 19,
+      "source_optimized_relu_op_count": 6,
+      "task_count": 21,
+      "task_trace_event_count": 21,
+      "upper_max_abs_diff": 0.0,
+      "zero_beta_lower_hash": "87fe594c901993a4638b56632ec3b5f54c678805f1dd3f934d3ec3950937746a"
+    },
+    "gates": {
+      "all_compiler_hashes_change_with_beta_payload": true,
+      "claims_remain_correctness_only": true,
+      "fixed_resnet_source_is_digest_bound": true,
+      "native_bounds_match_legacy_alpha_beta_oracle": true,
+      "nonzero_beta_changes_native_lower_dual_result": true,
+      "plan_task_schedule_consume_optimized_state": true,
+      "six_relu_split_alpha_beta_inputs_are_first_class": true,
+      "warm_start_is_monotonic_refinement_initialization_only": true
+    },
+    "ir_hashes": {
+      "execution_bound_module_hash": "2be5cbad12a102054ba4ab252b89ac65bf423d51b810ba9372bd242555260e35",
+      "execution_plan_instance_hash": "c11cc98bcc40d598ce65455748dc8eb8ffb10e154a67806f0611b2e36965b350",
+      "execution_plan_template_hash": "9630a1a62bac5b9a0465b75173096b1fe7b567c0846272f1242ea71125642b95",
+      "representation_binding_hash": "3f4362a74bf1357b2156837c1f9c56e1acdac804cb32c8243a2fd621617bb930",
+      "schedule_hash": "24592da3edfc0056aabef6dcea6c948a7b679e9a8505d6f4027254328d4d6999",
+      "source_bound_module_hash": "2be5cbad12a102054ba4ab252b89ac65bf423d51b810ba9372bd242555260e35",
+      "source_plan_instance_hash": "50351e873b34f20e5ba988a17e721b6ec09c86514e006e9eeef73c63dad2f3a1",
+      "source_plan_template_hash": "d251237bfc4817d3696282530e3232dbab72fd77005148f8ee6400caf8ab6d7d",
+      "source_schedule_hash": "bbaa86c783077ebe0611ced1855e11aad5febc2ebc2f6abd29e8a3f36f1ffbd9",
+      "task_module_hash": "d347e1d8eca9b9c099c0158907476e9c8207ebe5dc235366b943b8ff808c0dfd"
+    },
+    "limitations": [
+      "the Adam optimization loop remains runtime-owned and is not a Task/Schedule program",
+      "one parent and one monotonic child are evaluated; this is not a complete BaB search",
+      "property_status remains not_claimed",
+      "CPU correctness only; no latency, memory, CUDA, or speedup evidence"
+    ],
+    "optimizer_policy": {
+      "alpha_init": 0.5,
+      "beta_init": 0.0,
+      "lr": 0.05,
+      "objective": "lower",
+      "optimizer": "torch.optim.Adam",
+      "per_batch_params": true,
+      "soft_tau": 1.0,
+      "spec_reduce": "mean",
+      "steps": 1
+    },
+    "parent_state": {
+      "payload_hash": "a82091383cb47bcc8e392100a5f7766ba070c120e92ef674af761be3b6ade7f9",
+      "relu_states": {
+        "17": {
+          "alpha_hash": "1d8669855e541a1daae524455a3649169e2c677065453a8f4af57bac856082f9",
+          "beta_hash": "b61a214e7eb2e57d7b9a9580f2b4d2ecec8f6a85f785c2eef212928dd741a5d9",
+          "device": "cpu",
+          "dtype": "float32",
+          "shape": [
+            1,
+            8,
+            16,
+            16
+          ],
+          "split_hash": "123366409ba0c21a9826c019396418909e15f68b727a6335be973c44e055ec10"
+        },
+        "19": {
+          "alpha_hash": "72cef65730bfe79b14dfdf676a94a96710bc3e586d798900bfab3f38a99c4cc3",
+          "beta_hash": "3d11df9d51babf7f0287c11c64d418802a1eb9a13bd82f99f47f115c88dfd9d3",
+          "device": "cpu",
+          "dtype": "float32",
+          "shape": [
+            1,
+            16,
+            8,
+            8
+          ],
+          "split_hash": "a2ca9b0c846613fc243dfa9ddbfb862fe53759a5439f93a69d91d2ee6c2a585e"
+        },
+        "23": {
+          "alpha_hash": "60a529baf217a168e675bd5b70d2063ce11fc1f9abe9f6334a2ab8bfedf25416",
+          "beta_hash": "3d11df9d51babf7f0287c11c64d418802a1eb9a13bd82f99f47f115c88dfd9d3",
+          "device": "cpu",
+          "dtype": "float32",
+          "shape": [
+            1,
+            16,
+            8,
+            8
+          ],
+          "split_hash": "a2ca9b0c846613fc243dfa9ddbfb862fe53759a5439f93a69d91d2ee6c2a585e"
+        },
+        "25": {
+          "alpha_hash": "ad89e83497526a5cfeb21599409d1433434f2e226721ea2f459f45098afc6c1f",
+          "beta_hash": "3d11df9d51babf7f0287c11c64d418802a1eb9a13bd82f99f47f115c88dfd9d3",
+          "device": "cpu",
+          "dtype": "float32",
+          "shape": [
+            1,
+            16,
+            8,
+            8
+          ],
+          "split_hash": "a2ca9b0c846613fc243dfa9ddbfb862fe53759a5439f93a69d91d2ee6c2a585e"
+        },
+        "28": {
+          "alpha_hash": "1f830bb72a9ee63fa347bf35b04cf1e9a6242121e42fb82d22cefa315d76c984",
+          "beta_hash": "3d11df9d51babf7f0287c11c64d418802a1eb9a13bd82f99f47f115c88dfd9d3",
+          "device": "cpu",
+          "dtype": "float32",
+          "shape": [
+            1,
+            16,
+            8,
+            8
+          ],
+          "split_hash": "a2ca9b0c846613fc243dfa9ddbfb862fe53759a5439f93a69d91d2ee6c2a585e"
+        },
+        "31": {
+          "alpha_hash": "9413a79aa4e9c6c23080889850302369a9b1aaed2cd547233a7827949169282f",
+          "beta_hash": "b2a74d6a10e27151018cef1b0e2bea2dd95553aa5f9fbe359a63f694589fa069",
+          "device": "cpu",
+          "dtype": "float32",
+          "shape": [
+            1,
+            100
+          ],
+          "split_hash": "39e5afb2bf4bed5d4e442e0d4cbf8675e869e542612726ed158c1114c45e0647"
+        }
+      },
+      "schema_version": "boundflow.native-alpha-beta-state/v1",
+      "scope": {
+        "input_region_hash": "709b48940bab1658c835952dea26df3f03c849c79199ab4f6a1198e2bf15717a",
+        "intermediate_bounds_hash": "89b453a6e2b9871fba7bfcb9dbde29507c3d1445d8c1deb00af8494dcc2ede0e",
+        "objective_hash": "0785a68037a32572ac06fb6f32a6f304254b0c9c64680546f72db8f2d51d28a9",
+        "optimizer_policy_hash": "f590e963d4fb9ed8cc4b83e65b28c06a6fcb1c70bf04ffb16b40df94081a6763",
+        "primal_graph_hash": "02636a01e4b5a2d1f759dc7748bf80b3303efff2d5697790966f8e93679213e8",
+        "split_state_hash": "32ef5aa369eb3b424067ead0f6b4a41a59b7c5753a5e59034bc13372b10bc2be"
+      },
+      "state_hash": "4efeb174b8b76c5f933e1de7ed7ba706a4cb03de52d8b6b5fdf499607e75b036"
+    },
+    "performance_claimed": false,
+    "property_status": "not_claimed",
+    "schema_version": "boundflow.native-alpha-beta-state-evidence/v1",
+    "source": {
+      "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+      "input_lower_hash": "bed6da6e49f1123b54fe61247615cf0e86f1b4257face7b073428f257607bda6",
+      "input_upper_hash": "955d79bd0824185cad0be1e758e6e492c51aec6c9199f81359b2528b848ec9ab",
+      "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+      "native_ir_artifact_schema": "boundflow.native-real-network-ir-artifact/v1",
+      "native_ir_manifest_sha256": "5d38aa4adcd7b8593b0ca3751106d3a254b72a2698bd445a8dde59d50eb5a676",
+      "native_ir_payload_sha256": "3ba949de66380c7d16dc44bb934eca8400182521e761c19eaa671cd8cf0eb557",
+      "objective_hash": "0785a68037a32572ac06fb6f32a6f304254b0c9c64680546f72db8f2d51d28a9",
+      "objective_index": 0,
+      "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf",
+      "vnnlib_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff"
+    },
+    "status": "ok",
+    "zero_beta_ir_hashes": {
+      "execution_bound_module_hash": "87b415d344bb0853bfc28eb26c72cfb50c9852114c6f23450fb78976bec54e13",
+      "execution_plan_instance_hash": "ef794ebdbec38c91eeb690b12398d05d60f87bf1803340974743ea227726f6e2",
+      "execution_plan_template_hash": "053a00598440538036f668ea1cfd01a1f47a79b55900a8088499404488ef05c0",
+      "representation_binding_hash": "11fa024ad9aed75e960568ea503ba9fa4f0f6876366f35a5aa21471ecc20748b",
+      "schedule_hash": "35f50e567b66697c6bb166b65142ad3b8110a792a2632025216f0eb68b84c1a6",
+      "source_bound_module_hash": "87b415d344bb0853bfc28eb26c72cfb50c9852114c6f23450fb78976bec54e13",
+      "source_plan_instance_hash": "e3804a21b4b82ccbd52046950b075178fbcf6b4284aef38a29838f89b28ed148",
+      "source_plan_template_hash": "2a633752044c595e3690bf6ece69374b03f520451e1880d846fffc1ee795b20e",
+      "source_schedule_hash": "698d73045ad0007874c79440b05fe0c01835df3987346e7bb9587f9f7a951596",
+      "task_module_hash": "048b1fc4761214ec0e0f0f6801f0ecab22bfc5e8233613f0476beb12f02ff36d"
+    }
+  },
+  "schema_version": "boundflow.native-alpha-beta-state-artifact/v1",
+  "status": "ok"
+}

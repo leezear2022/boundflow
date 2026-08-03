@@ -736,3 +736,29 @@ Mypy、Pylint 10.00/10 与 diff check 全过。
 升为 `VALIDATED-REDUCED`。它仍是 plain CROWN：没有 α/β optimization、beta constraint、完整
 搜索/verified verdict 或公平 timing。3 vs 7 只是 native-stack mechanism count，不是 latency、
 memory、CUDA 或 speedup。下一工程门禁是 native α/β optimization state 与 warm-start validity v1。
+
+## 23. Native Alpha/Beta Optimization State v1
+
+NRIR-10 将 legacy `AlphaState`/`BetaState` 的冻结结果提升为 native state contract。每个 ReLU
+BoundOp 现在显式消费 split、alpha、beta 三类 graph inputs；固定 ResNet 的 6 个 ReLU 对应 18 个
+state inputs，加 objective 共 19 个。alpha 只替换 ambiguous lower slope，beta 只以
+`-beta * split` 进入 lower dual coefficient。state/scope hash 绑定 primal graph、input region、
+objective、local intermediate bounds、split、optimizer policy 和所有 tensor payload。
+
+warm-start classifier 区分 exact、monotonic split refinement 和 rejected。exact same scope 才允许
+exact state reuse；parent zero-split 到 child active-split 只允许 alpha/beta initialization，明确
+`exact_state_reuse_allowed=false`。split reversal/removal、key/schema 或 model/input/objective/policy
+漂移均 fail closed。
+
+固定 ResNet 首个 widest branch 为 ReLU input `31`/neuron `93`。native 与 legacy αβ oracle 的
+lower/upper max diff 均为 `0.0`；beta sum `0.04999999701976776`，相对 zero-beta lower 提升
+`0.34039306640625`。source/execution optimized ReLU ops 均 6，Task/Launch/trace event 均 21；
+10 个 compiler-layer hash 全部随 beta payload 改变。artifact 位于
+`artifacts/native-alpha-beta-optimization-state/vnncomp21-resnet2b-prop0-cpu-v1/`，generate/replay
+hash 为 `302f536685885e75248582698589d49f667d7709ca3258c043310e02278e6884`。聚焦
+`50 passed`，全量 `591 passed, 37 skipped`，静态门禁全过。
+
+该阶段只把 frozen optimized-state ownership、beta constraint execution 和 warm-start validity
+升为 `VALIDATED-REDUCED`。Adam iteration/gradient/update 仍由 runtime adapter 控制，不是 compiled
+optimizer；也没有完整 BaB/property verdict 或性能证据。下一工程门禁是 native alpha/beta
+optimizer-step Task/Schedule control v1。

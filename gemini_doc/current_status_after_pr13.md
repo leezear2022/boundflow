@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`972eca1`（NRIR-7 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/native-bab-domain-batching-v1`
+> 当前 integration base：`2b3195c`（NRIR-9 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/native-alpha-beta-optimization-state-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
@@ -452,3 +452,18 @@ artifact generate/replay、聚焦 `68 passed`、全量 `577 passed, 37 skipped` 
 `VALIDATED-REDUCED`。固定 run 正确报告 `budget_exhausted`、`property_status=not_claimed`。没有
 α/β optimization、beta constraint、完整搜索/verdict 或性能证据；3 vs 7 不是 speedup。下一代码
 路线为 native α/β optimization state + warm-start validity v1。
+
+## 17. Native Alpha/Beta Optimization State v1 判定
+
+NRIR-10 已关闭 NRIR-9 的“只有 plain-CROWN split queue”缺口。optimized ReLU BoundOp 显式绑定
+split/alpha/beta；Plan workload/capability/provenance、Task 与 Schedule 均消费同一 frozen state。
+fixed ResNet 共有 19 graph inputs、6 optimized ReLU ops、21 Task/Launch。native 与 legacy αβ
+lower/upper max diff 均为 0；非零 beta 相对 zero-beta 将 lower 提升 `0.34039306640625`。
+
+state scope 绑定 model/input/objective/intermediate bounds/split/policy/payload。parent→child 单调新增
+split 只允许 warm initialization，不允许 exact reuse；split reversal/removal 或 semantic drift 均拒绝。
+artifact generate/replay、聚焦 `50 passed`、全量 `591 passed, 37 skipped` 与静态门禁全过。
+
+结论为 frozen alpha/beta state ownership、beta constraint execution、warm-start validity
+`VALIDATED-REDUCED`。Adam iteration/gradient/update 尚未 lower 到 Task/Schedule；没有完整 BaB/
+property verdict 或性能证据。下一代码路线为 native alpha/beta optimizer-step Task/Schedule control v1。
