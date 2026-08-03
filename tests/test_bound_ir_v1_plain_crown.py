@@ -214,9 +214,16 @@ def test_external_adaptive_relu_policy_is_explicit_and_changes_semantics() -> No
         "linear_spec_C": torch.tensor([[1.0, -1.0]]),
     }
     zero = build_plain_crown_bound_ir(**common).module
+    with pytest.raises(ValueError, match="exact SHA-256 identity"):
+        build_plain_crown_bound_ir(
+            **common,
+            intermediate_bound_source=IntermediateBoundSource.EXTERNAL_VERIFIER,
+            relu_lower_slope_policy=ReluLowerSlopePolicy.ADAPTIVE,
+        )
     adaptive = build_plain_crown_bound_ir(
         **common,
         intermediate_bound_source=IntermediateBoundSource.EXTERNAL_VERIFIER,
+        intermediate_bounds_hash="a" * 64,
         relu_lower_slope_policy=ReluLowerSlopePolicy.ADAPTIVE,
     ).module
 
@@ -243,7 +250,22 @@ def test_external_adaptive_relu_policy_is_explicit_and_changes_semantics() -> No
         == IntermediateBoundSource.EXTERNAL_VERIFIER
     )
     assert relu_attrs.lower_slope_policy == ReluLowerSlopePolicy.ADAPTIVE
+    adaptive_values = {value.value_id: value for value in adaptive.graph.values}
+    assert all(
+        adaptive_values[value_id].state_version
+        == f"external-intermediate-bounds:{'a' * 64}"
+        for op in adaptive.graph.ops
+        if op.kind == BoundOpKind.RELU_RELAXATION
+        for value_id in op.outputs
+    )
     assert adaptive.stable_hash() != zero.stable_hash()
+    alternate_external_identity = build_plain_crown_bound_ir(
+        **common,
+        intermediate_bound_source=IntermediateBoundSource.EXTERNAL_VERIFIER,
+        intermediate_bounds_hash="b" * 64,
+        relu_lower_slope_policy=ReluLowerSlopePolicy.ADAPTIVE,
+    ).module
+    assert alternate_external_identity.stable_hash() != adaptive.stable_hash()
     assert adaptive.canonical_json().count('"lower_slope_policy":"adaptive"') == 1
     assert not (
         torch.equal(adaptive_result.lower, zero_result.lower)

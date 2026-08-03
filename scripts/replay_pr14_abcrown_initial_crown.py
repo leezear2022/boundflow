@@ -27,6 +27,7 @@ from boundflow.runtime.abcrown_adapter import (
     CapturedABCrownQuery,
     bind_captured_intermediate_bounds,
     file_sha256,
+    serialize_intermediate_bounds,
 )
 from boundflow.runtime.crown_ibp import (
     _forward_ibp_trace_mlp,
@@ -39,6 +40,7 @@ from boundflow.runtime.fused_crown import (
 from boundflow.runtime.task_executor import InputSpec, PythonTaskExecutor
 
 SCHEMA_VERSION = "boundflow.pr14-initial-crown-replay/v1"
+PAYLOAD_SCHEMA_VERSION = "boundflow.pr14-initial-crown-payload/v2"
 SUPPORTED_BACKENDS = (
     "pytorch_eager",
     "pytorch_chunked",
@@ -419,7 +421,11 @@ def main() -> None:  # pylint: disable=too-many-branches
     )
     backend_rows: dict[str, Any] = {}
     backend_results: dict[str, Any] = {}
+    serialized_intermediate_bounds = serialize_intermediate_bounds(
+        captured.intermediate_bounds
+    )
     tensor_payload: dict[str, Any] = {
+        "schema_version": PAYLOAD_SCHEMA_VERSION,
         "input_lower": _plain_tensor(captured.input_lower).detach().cpu(),
         "input_upper": _plain_tensor(captured.input_upper).detach().cpu(),
         "linear_spec_c": _plain_tensor(captured.linear_spec_c).detach().cpu(),
@@ -431,6 +437,7 @@ def main() -> None:  # pylint: disable=too-many-branches
         ),
         "boundflow_nominal_output": boundflow_nominal.detach().cpu(),
         "onnx_nominal_output": onnx_nominal.detach().cpu(),
+        "external_intermediate_bounds": serialized_intermediate_bounds,
     }
     for backend in backends:
         call, planned_regions = _boundflow_backend_call(
@@ -528,6 +535,7 @@ def main() -> None:  # pylint: disable=too-many-branches
     )
     manifest = {
         "schema_version": SCHEMA_VERSION,
+        "payload_schema_version": PAYLOAD_SCHEMA_VERSION,
         "status": "ok" if all_correct else "bound_equivalence_failure",
         "workload_name": args.workload_name,
         "abcrown_commit": _git_revision(abcrown_root),
@@ -550,6 +558,14 @@ def main() -> None:  # pylint: disable=too-many-branches
             "box_width_unique": int(torch.unique(widths.cpu()).numel()),
             "intermediate_bound_count": len(captured.intermediate_bounds),
             "intermediate_bounds_hash": captured.intermediate_bounds_hash,
+            "intermediate_bounds": [
+                {
+                    key: value
+                    for key, value in record.items()
+                    if key not in {"lower", "upper"}
+                }
+                for record in serialized_intermediate_bounds["records"]
+            ],
             "intermediate_bound_source": "external_verifier",
             "relu_lower_slope_policy": captured.relu_lower_slope_policy,
         },

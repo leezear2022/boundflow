@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前主分支基线：`beda52c`；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`research/production-schedule-memory-p0`
+> 当前 integration base：`8c1b41a`；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/native-real-network-bound-ir-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
@@ -40,6 +40,10 @@
 > 路径有完整 arena/launch ownership，但没有 materialize、storage 选择或预算决策切换；真实
 > ResNet 的 51 个 activation call 仍各自是一个 external opaque launch。下一分支改为
 > `feat/native-real-network-bound-ir-v1`。
+> 2026-08-04 NRIR-1 后续：固定 ResNet2B initial-CROWN 已生成 21-op native Bound graph、
+> 21 Tasks 与 21 launches，Bound/Task external-call count 为 0；五层 hash fresh replay 一致，
+> lower max diff `7.15256e-7`、sign 9/9。该结果只关闭 CPU correctness/compiler ownership；
+> external intermediate bounds、单 storage/batch、0 materialization 与无性能 claim 的边界保留。
 
 ## 1. 当前真实阶段
 
@@ -53,6 +57,7 @@ BoundFlow 已经完成从边界表示到 query runtime prototype 的主干：
 | Query runtime | validated-reduced | `BoundQuery`、state validity、dynamic batching、same-solver adapter、reduced GPU E2E |
 | 真实 complete verifier integration | RVIR CPU correctness/integration validated-reduced | ResNet external-semantics max diff 3.10e-6、sign 9/9；typed external-call admission 394/394；真实在线 dispatch 377/377 |
 | Production Schedule + Memory P0 | NO-GO | residual 8/8 完整 arena ownership，但 0 materialize、单 storage、0 budget decision switch；真实 ResNet 51/51 为单 external launch |
+| Native real-network IR NRIR-1 | correctness/compiler ownership validated-reduced | ResNet2B 17 Primal ops → 21 native Bound/Task regions/launches；五层 hash 绑定 external-bound payload；max diff 7.15e-7、sign 9/9；仍无 memory choice/GPU/performance |
 | ASPLOS 最终系统主张 | IR-5 final VALIDATED-NO-GO | IR-1—4 narrow closure 保留；Global p90/Pareto 失败，当前 system-performance 路线已关闭 |
 
 历史 `main@263ea81` 只到 PR-10 closure，不能再作为项目当前状态入口。跨会话恢复必须同时检查
@@ -129,7 +134,7 @@ p50/p90 regret 68.065×/70.263×；64/512 MiB 都选择 chunked，无 memory Par
 profile 曾将主要问题定位到 query hot path 重复 Plan/Bound/Task validate、stable hash、
 canonical JSON 与 dispatch-key 构造；IR-5D 已完成该补救。随后 fresh residual final 仍以
 Global p90 `1.26160×` 和 gray Pareto 缺失失败。ASPLOS-ready 判定为 NO，IR-6 不启动，
-当前路线不存在仍被证据允许的后续优化切片。
+IR-5 内部不存在仍被证据允许的后续旋转；独立 NRIR 路线按第 8 节推进。
 
 IR-5D remediation 现已实现：prepared Bound/Task program 冻结静态参数与 identity，
 Plan cache 复用预计算 dispatch key，production trace 不在 timed path 生成中间 tensor
@@ -170,13 +175,14 @@ IR-5 当时冻结的最优先候选是与 `7501/7502` 独立的真实 Verifier I
 
 ## 5. 权威阅读顺序
 
-1. `gemini_doc/BOUNDFLOW_PRODUCTION_SCHEDULE_MEMORY_P0_PLAN_2026_08_04.md`；
-2. `gemini_doc/real_verifier_ir_integration_closure_2026_08_03.md`；
-3. `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`；
-4. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`；
-5. 本文（含 PR-13/14 历史状态与第 6/7 节当前修订）；
-6. `gemini_doc/asplos_claims_map.md`；
-7. `gemini_doc/asplos_execution_memo_v1_0.md`。
+1. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_BOUND_IR_V1_PLAN_2026_08_04.md`；
+2. `gemini_doc/BOUNDFLOW_PRODUCTION_SCHEDULE_MEMORY_P0_PLAN_2026_08_04.md`；
+3. `gemini_doc/real_verifier_ir_integration_closure_2026_08_03.md`；
+4. `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`；
+5. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`；
+6. 本文（含 PR-13/14 历史状态与第 6—8 节当前修订）；
+7. `gemini_doc/asplos_claims_map.md`；
+8. `gemini_doc/asplos_execution_memo_v1_0.md`。
 
 ## 6. RVIR 关闭后的当前边界
 
@@ -215,7 +221,29 @@ fresh GPU protocol，不能直接复用本 correctness artifact。
   语义仍由 αβ-CROWN provider 拥有；
 - baseline OOM rescue 没有冻结证据，只能记为 not demonstrated。
 
-因此不能直接启动 `feat/production-schedule-memory-v1`。下一代码路线是
+因此不能直接启动 `feat/production-schedule-memory-v1`。当时批准的下一代码路线是
 `feat/native-real-network-bound-ir-v1`：先把一个冻结真实 residual network 的主计算 lower
 为 native multi-region Bound IR，并通过 external-semantics correctness oracle；之后才允许增加
 多个 storage/batch 候选、重开 memory feasibility 与 GPU 性能门禁。
+
+## 8. Native Real-Network IR v1 判定
+
+NRIR-1 已在固定 VNN-COMP 2021 ResNet2B prop0 上完成 P0 要求的第一步：
+
+- model/VNNLIB/αβ-CROWN commit 与 6 组 external intermediate bounds 均有 digest；portable
+  payload 可由 `torch.load(weights_only=True)` 加载，ordinal/name/shape/dtype/tensor/aggregate
+  identity 任一变化均拒绝；
+- ONNX/Primal topology 为 17 ops（Conv 6、ReLU 6、Add 2、Flatten 1、Linear 2）；native
+  plain-CROWN lowering 生成 21 个 Bound ops、21 个 Task units 与 21 次 Schedule launch；
+- Bound IR 与 Task IR 的 `EXTERNAL_VERIFIER_CALL` 均为 0。external-bound aggregate hash 进入
+  每个 ReLU relaxation state version，并继续进入 Plan provenance，所以五层 hash 对 oracle
+  payload 内容敏感；
+- fresh replay 的 native lower 对 αβ-CROWN final lower max diff
+  `7.152557373046875e-07`，allclose 门限 `2e-4/2e-4`，sign 9/9；
+- artifact 显式 `performance_claimed=false`，当前只有一个 dense storage、一个 full-query batch、
+  0 materialization candidate，external verifier 仍负责 forward intermediate bounds。
+
+结论为 CPU correctness/compiler ownership `VALIDATED-REDUCED`，不是完整 native αβ-CROWN 或
+性能关闭。下一门禁是 NRIR-2：在同一真实 graph 上实现至少两个合法 representation/storage/
+batch plan，产生可重放的 materialization action 和预算 decision switch；只有正确性通过后才允许
+做 native GPU backend 与公平 lower-only 性能协议。

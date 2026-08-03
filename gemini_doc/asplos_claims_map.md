@@ -5,14 +5,16 @@
 > `VALIDATED-REDUCED` 关闭；PR-14B 真实 replay 为 `VALIDATED-NO-GO`，C3 已降级为 C1/C2
 > 基础设施，不再主张 non-toy verifier acceleration。2026-08-03 独立 RVIR correctness
 > 路线已 validated-reduced，但不改变 ASPLOS performance No-Go。2026-08-04 production
-> Schedule-memory P0 同样为 `NO_GO`：真实 ResNet 仍是 external opaque main compute。
+> Schedule-memory P0 同样为 `NO_GO`。随后 NRIR-1 已把固定 ResNet main CROWN backward
+> lower 为 native multi-region IR，但仍只有单 storage/batch、0 materialization 和 CPU
+> correctness，故 performance No-Go 不变。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
-| C1：显式物化语义的 Structured Bound-Operator IR | narrow plain-CROWN backend validated-reduced；真实 verifier native graph pending | typed Bound IR + lowering + dense/structured interpreter + explicit cast/materialize rewrite + per-task stepping | reference graph families 已对齐；P0 residual 8/8 覆盖完整 Bound ops，但 production case 未触发 MaterializeAction | deterministic dump/hash + IR-4 artifacts 已有；VNN-COMP ResNet 仍为 external opaque op |
+| C1：显式物化语义的 Structured Bound-Operator IR | native ResNet plain-CROWN correctness validated-reduced；真实 memory alternatives pending | typed Bound IR + lowering + dense/structured interpreter + explicit cast/materialize rewrite + native ResNet per-task stepping | ResNet 17 Primal→21 Bound/Task/launch，external-call 0，lower max diff 7.15e-7；当前未触发 MaterializeAction | 五层 hash + portable oracle payload artifact；单 dense storage/full batch，不能升级 performance |
 | C2：Method/Autograd/Memory-Aware Materialization Planner | IR-4 closure；IR-5 final VALIDATED-NO-GO | typed Plan/Task/Schedule、adaptive/fair evaluator、prepared execution、exact-input chain→residual CUDA suite | v3 correctness/8 contexts feasible；Global p50/p90 1.00385×/1.26160×，gray 无 Pareto、无预算切换 | v3 artifact + manifest/replay 完整；p90/Pareto 门禁失败，C2 paper performance claim 不成立 |
 | C3：Verification Query Runtime Infrastructure | correctness/integration validated-reduced；performance downgraded | query/validity + batcher + reversible observer + typed external verifier Bound/Plan/Task/Schedule exact-call | ResNet external-semantics 3.10e-6、sign 9/9；在线 377/377 dispatch、380-domain observer equivalence | fused replacement 仍 0/394；typed admission 394/394；CPU artifact/replay 完整；不作 acceleration claim |
-| BoundFlow Schedule IR | IR-3/4 narrow runtime validated-reduced；P0 production-memory claim NO-GO | typed ScheduleModule + memory/batch/transfer/event/state/retry/replan + Task launch linkage；P0 ownership audit | residual 8/8 有 arena/batch/launch/free；但 0 materialize、单 storage、0 budget decision switch；ResNet 51/51 单 external launch | deterministic P0 artifact + semantic replay；尚无 real-network native schedule 或 OOM rescue |
+| BoundFlow Schedule IR | real-network native ownership validated-reduced；production-memory claim 仍 NO-GO | typed ScheduleModule + native ResNet Plan/Task lowering；P0/NRIR ownership audits | NRIR-1 有 21 native launches、arena/batch/emit/free；仍 0 materialize、单 storage、0 budget decision switch | deterministic native artifact + semantic replay；尚无 multi-plan switch、OOM rescue 或 GPU evidence |
 | BoundFlow Task IR | IR-3 per-task semantic closure validated-reduced；production backend pending | TaskIRModule/Unit + typed op/shape/parameter/external/state/memory/backend refs + stateful Bound stepping | 12 个 tests（含 4 graph families、structured materialize、skip/reorder rejection） | per-task output hashes 与 final bound hashes 已入 fresh-process artifact v2 |
 | backend 执行 typed Planner/Task 结果而非定义核心抽象 | IR-4 validated-reduced；IR-5 final performance No-Go | composite typed registry + query adapter + real fused/unfused/fallback；prepared capsule 将静态 validate/hash/dispatch 移出 query hot path | residual v3 all backend correctness；ordinary batching p90 regret 1.008×，Global 1.262× | v3 可 replay；backend correctness 成立，但 adaptive production performance claim 失败 |
 | 相同浮点语义下保持 reference bound computation | local-semantics 历史 No-Go；external-semantics initial-CROWN validated-reduced | dense reference + explicit external intermediate-bound source/adaptive policy | allclose、gradient、auto_LiRPA、replay | ResNet historical local max diff 796.765；新 external-semantics max diff 3.10e-6、sign 9/9；CPU only |
@@ -472,3 +474,16 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   launch，`semantics_owner=external_verifier`；
 - P0 判定 `NO_GO`。下一假设必须先实现 real-network native Bound IR；不得把 typed wrapper、
   hash 变化或 reduced structural coverage 写成 production memory/performance claim。
+
+### 2026-08-04 Native Real-Network IR v1
+
+- 固定 VNN-COMP ResNet2B prop0：17 个 Primal ops lower 为 21 个 native Bound ops、21 个
+  Task units 与 21 次 Schedule launch；Bound/Task external-call count 均为 0；
+- 6 组 external intermediate bounds 可 safe-load，并以 aggregate digest 进入 ReLU state version
+  与 Plan provenance；同形状不同内容会改变全链 IR identity；
+- 五层 hash fresh replay 完全一致；native final lower 对 αβ-CROWN oracle max diff
+  `7.152557373046875e-07`、sign 9/9；
+- 该 evidence 将 C1/Task/Schedule 的 real-network compiler ownership 升为 validated-reduced，
+  但不证明完整 native verifier：forward intermediate bounds 仍来自 external provider；
+- Plan 当前只有 1 storage、1 batch、0 materialization，`performance_claimed=false`。C2/ASPLOS
+  performance No-Go 不变；下一门禁是 real-graph multi-plan + budget switch。

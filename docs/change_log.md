@@ -3659,3 +3659,20 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_PRODUCTION_SCHEDULE_MEMORY_P0_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Native Real-Network Bound IR v1
+
+- 将固定 VNN-COMP ResNet2B 的 17-op Primal graph lower 为 21-op native plain-CROWN
+  Bound graph，并生成 21 个 Task units 和 21 次 Schedule launch；Bound/Task external-call 为 0；
+- external intermediate bounds 新增 portable safe-load payload、逐 tensor/aggregate digest 与
+  tamper rejection；aggregate identity 进入 ReLU state version 和 Plan provenance；
+- 新增 native compiler integration、pinned input fetch、artifact generate/replay 与 tests；
+- real CPU final lower 对 αβ-CROWN oracle max diff `7.152557373046875e-07`、sign 9/9，五层
+  hash fresh replay 一致；
+- 状态为 correctness/compiler ownership VALIDATED-REDUCED；单 storage/batch、0
+  materialization、external forward bounds 与无 GPU/performance claim 的限制保留。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_BOUND_IR_V1_CHANGELOG_2026_08_04.md`

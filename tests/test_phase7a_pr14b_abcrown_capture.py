@@ -6,7 +6,12 @@ import torch
 from boundflow.domains.interval import IntervalState
 from boundflow.runtime.abcrown_adapter import (
     ABCrownInitialCrownCapture,
+    CapturedIntermediateBound,
+    bind_intermediate_bounds,
     bind_captured_intermediate_bounds,
+    deserialize_intermediate_bounds,
+    intermediate_bounds_sha256,
+    serialize_intermediate_bounds,
 )
 
 
@@ -130,3 +135,64 @@ def test_capture_intermediate_binding_fails_closed_on_topology_or_shape_drift() 
             capture.captured,
             {"h1": IntervalState(lower=torch.zeros(1, 3), upper=torch.ones(1, 3))},
         )
+
+
+def test_intermediate_bounds_portable_payload_round_trip(tmp_path) -> None:
+    """Frozen external intervals remain loadable with PyTorch's safe loader."""
+
+    bounds = (
+        CapturedIntermediateBound(
+            ordinal=0,
+            external_relu_name="/relu",
+            external_preactivation_name="/pre",
+            lower=torch.tensor([[-0.25, 0.1]]),
+            upper=torch.tensor([[0.75, 0.2]]),
+        ),
+    )
+    payload = serialize_intermediate_bounds(bounds)
+    artifact = tmp_path / "payload.pt"
+    torch.save({"external_intermediate_bounds": payload}, artifact)
+
+    loaded = torch.load(artifact, map_location="cpu", weights_only=True)
+    restored = deserialize_intermediate_bounds(loaded["external_intermediate_bounds"])
+
+    assert intermediate_bounds_sha256(restored) == intermediate_bounds_sha256(bounds)
+    assert restored[0].external_relu_name == "/relu"
+    assert restored[0].external_preactivation_name == "/pre"
+    torch.testing.assert_close(restored[0].lower, bounds[0].lower)
+    local = {"h1": IntervalState(lower=torch.zeros(1, 2), upper=torch.ones(1, 2))}
+    rebound = bind_intermediate_bounds(restored, local)
+    torch.testing.assert_close(rebound["h1"].upper, bounds[0].upper)
+
+
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    (
+        (lambda payload: payload["records"][0].update({"ordinal": 1}), "ordinals"),
+        (
+            lambda payload: payload["records"][0]["lower"].add_(1.0),
+            "lower digest",
+        ),
+        (
+            lambda payload: payload["records"][0].update({"shape": [1, 3]}),
+            "recorded shape",
+        ),
+    ),
+)
+def test_intermediate_bounds_portable_payload_rejects_tamper(
+    mutation, message: str
+) -> None:
+    bounds = (
+        CapturedIntermediateBound(
+            ordinal=0,
+            external_relu_name="/relu",
+            external_preactivation_name="/pre",
+            lower=torch.tensor([[-0.25, 0.1]]),
+            upper=torch.tensor([[0.75, 0.2]]),
+        ),
+    )
+    payload = serialize_intermediate_bounds(bounds)
+    mutation(payload)
+
+    with pytest.raises(ValueError, match=message):
+        deserialize_intermediate_bounds(payload)
