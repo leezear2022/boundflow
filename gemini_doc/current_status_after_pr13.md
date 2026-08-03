@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`3ca2e18`（NRIR-5 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/native-representation-batch-composition-v1`
+> 当前 integration base：`99ea0bb`（NRIR-6 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/native-repeated-query-batching-cache-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
@@ -66,6 +66,11 @@
 > selector，四组合 child op/task/launch=`21/63/49/147`，source policy 显式传播；四路径
 > external sign 9/9，全量 `522 passed, 37 skipped`。状态为 joint compiler ownership
 > VALIDATED-REDUCED；下一缺口为跨 query/domain batching、cache 与公平性能证据。
+> 2026-08-04 NRIR-7 后续：9 个真实 property objectives 已成为 9 条 explicit queries；packed
+> 3 child vs same-policy serial 9 child，9/9 lineage 恢复；first miss/second exact hit，
+> objective/order/state 均进入 cache key。packed/serial max diff `3.21865e-6`、external sign 9/9，
+> 全量 `540 passed, 37 skipped`。状态为 repeated-query correctness/ownership VALIDATED-REDUCED；
+> BaB domain state 与性能仍 pending。
 
 ## 1. 当前真实阶段
 
@@ -85,6 +90,7 @@ BoundFlow 已经完成从边界表示到 query runtime prototype 的主干：
 | Native representation binding NRIR-4 | correctness/compiler ownership validated-reduced | ResNet source policy 驱动 21-op dense 或 49-op structured execution；28 transitions 绑定 Schedule/Task/Launch；dense-equivalent、无性能 claim |
 | Native spec-sliced execution NRIR-5 | correctness/integration validated-reduced | full 9 specs→1 child；limit=3→3×21-op child 与精确 range/aggregation；CPU semantics/replay 通过；domain/sample/joint representation/performance pending |
 | Native joint policy NRIR-6 | cross-axis correctness/ownership validated-reduced | 同一 template/selector 的 dense/structured × full/sliced 四组合；policy propagation、21/63/49/147 child ownership、external sign 9/9；跨 query/domain/performance pending |
+| Native repeated-query NRIR-7 | query formation/cache/lineage validated-reduced | 9 property queries→packed 3 child vs serial 9；exact cache miss/hit/key invalidation；9/9 restore；BaB domain/performance pending |
 | ASPLOS 最终系统主张 | IR-5 final VALIDATED-NO-GO | IR-1—4 narrow closure 保留；Global p90/Pareto 失败，当前 system-performance 路线已关闭 |
 
 历史 `main@263ea81` 只到 PR-10 closure，不能再作为项目当前状态入口。跨会话恢复必须同时检查
@@ -386,3 +392,20 @@ child 因 shape 变小而改选 policy。固定 ResNet 四组合 child op/task/l
 仍存 dense tensor，spec slices 顺序执行，controller storage 仍是逻辑 ledger。下一分支应实现
 真实 repeated-query/domain stream 的 batch formation、plan/code cache、per-query lineage/结果恢复
 和公平 batched baseline；物理 CUDA protocol 保持环境可用时执行。
+
+## 14. Native Repeated-Query Batching and Cache v1 判定
+
+NRIR-7 已把上一节的“真实 query stream”从计划变成 native execution：9 个不同 property
+objectives 各有 query ID、objective digest 与 range，packed runtime 用三个 size-3 child 执行，
+serial reference 在相同 source representation/storage policy 下分别执行 9 个 child。结果按 range
+恢复到 9 条 query，packed/serial/external 均 allclose、sign 9/9。
+
+cache 是 exact in-process compilation cache：workload/input/state/intermediate-bound、ordered query
+contents、budget/policy/batch config 全部进入 key。first miss/second hit，objective/order/state
+三个 probe 都产生不同 key 与 miss。artifact replay、聚焦 `121 passed`、全量
+`540 passed, 37 skipped` 与静态门禁全过。
+
+结论为 real repeated-query formation/packing/cache/lineage `VALIDATED-REDUCED`。它仍只覆盖同一
+input domain 的 property queries；3 vs 9 child 是机制计数而非 timing。下一路线必须加入不同
+input boxes 的 BaB parent/child domains、state validity/invalidation、domain packing/restore 与
+same-solver baseline，不能把 NRIR-7 自动升级为完整 C3 或 performance claim。

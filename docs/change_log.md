@@ -3771,3 +3771,23 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_NATIVE_REPRESENTATION_BATCH_COMPOSITION_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Native Repeated-Query Batching and Cache v1
+
+- 将 frozen ResNet 的 9 个不同 property objectives 显式建模为 9 条 query，冻结 ID、objective
+  digest、range、workload/input/state identity；
+- packed path 以 size-3 执行 3 child，same-policy serial reference 分别执行 9 child，并按 exact
+  ranges 恢复 9/9 query results；
+- exact in-process compile cache first miss/second hit；objective content、query order、state
+  identity 变化均产生不同 key/miss；
+- packed/cache hit bitwise equal；packed/serial max diff `3.2186508178710938e-06`；二者对
+  external 均 allclose、sign 9/9；
+- artifact generate/replay 与 query/cache/result/semantic/claim tamper tests 通过；聚焦
+  `121 passed`，全量 `540 passed, 37 skipped`；Black/Mypy clean、Pylint 10.00/10、diff 通过；
+- 状态为 repeated-query formation/packing/cache/lineage VALIDATED-REDUCED；3 vs 9 是机制计数，
+  不声称 speedup；BaB parent/child domain state 与性能证据仍 pending。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_NATIVE_REPEATED_QUERY_BATCHING_CACHE_V1_CHANGELOG_2026_08_04.md`

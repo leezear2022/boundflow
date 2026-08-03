@@ -1,0 +1,8 @@
+{
+  "files": {
+    "repeated_query.json": "f2aa2614167a91661e5da9f4c1ec10738481bfd110f49e3eda1062639557c01e"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.native-real-network-repeated-query-artifact/v1",
+  "status": "ok"
+}
