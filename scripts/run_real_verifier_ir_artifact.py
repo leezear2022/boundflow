@@ -8,6 +8,7 @@ from collections import Counter
 import hashlib
 import json
 from pathlib import Path
+import shutil
 from typing import Any, Mapping
 
 from boundflow.runtime.verifier_ir_integration import (
@@ -15,12 +16,17 @@ from boundflow.runtime.verifier_ir_integration import (
     compile_external_verifier_call,
 )
 
-ARTIFACT_SCHEMA = "boundflow.real-verifier-ir-artifact/v1"
+LEGACY_ARTIFACT_SCHEMA = "boundflow.real-verifier-ir-artifact/v1"
+ARTIFACT_SCHEMA = "boundflow.real-verifier-ir-artifact/v2"
 ACTIVATION_PHASE = "activation_bab_bound"
-ARTIFACT_FILES = (
+LEGACY_ARTIFACT_FILES = (
     "activation_calls.jsonl",
     "online_execution.json",
     "resnet_semantics.json",
+)
+ARTIFACT_FILES = LEGACY_ARTIFACT_FILES + (
+    "online_queries.jsonl",
+    "online_typed_ir.jsonl",
 )
 
 
@@ -124,49 +130,60 @@ def _bab_projection(result: Mapping[str, Any]) -> list[dict[str, Any]]:
     return projected
 
 
-def _online_summary(  # pylint: disable=too-many-locals
-    run_dir: Path,
+def _online_row_summary(  # pylint: disable=too-many-locals
+    queries: list[dict[str, Any]],
+    records: list[dict[str, Any]],
+    *,
+    recompile: bool,
 ) -> dict[str, Any]:
-    manifest_path = run_dir / "manifest.json"
-    queries_path = run_dir / "queries.jsonl"
-    records_path = run_dir / "typed_ir.jsonl"
-    manifest = _read_json(manifest_path)
-    queries = _read_jsonl(queries_path)
-    records = _read_jsonl(records_path)
     query_ids = [str(row.get("query_id")) for row in queries]
     record_ids = [str(row.get("query_id")) for row in records]
     if query_ids != record_ids or not all(
         row.get("completed") is True for row in records
     ):
         raise ValueError("online typed-IR query/result accounting is incomplete")
-    typed = manifest.get("typed_ir")
-    comparison = manifest.get("baseline_comparison")
-    if not isinstance(typed, Mapping) or typed.get("enabled") is not True:
-        raise ValueError("online run did not enable typed IR")
-    if not isinstance(comparison, Mapping) or not (
-        comparison.get("status_match") is True
-        and comparison.get("visited_domains_match") is True
-    ):
-        raise ValueError("online observer on/off comparison did not pass")
-    result = manifest.get("result")
-    baseline = manifest.get("baseline_result")
-    if not isinstance(result, Mapping) or not isinstance(baseline, Mapping):
-        raise ValueError("online run lacks result/baseline result")
-    if _bab_projection(result) != _bab_projection(baseline):
-        raise ValueError("online final lower/domain projection differs from baseline")
-    phase_methods = Counter()
-    effective_methods = Counter()
-    requested_outputs = Counter()
+
+    phase_methods: Counter[tuple[str, str]] = Counter()
+    effective_methods: Counter[str] = Counter()
+    requested_outputs: Counter[str] = Counter()
     seen_query_ids: set[str] = set()
     parent_link_count = 0
-    for query in queries:
+    for index, (query, record) in enumerate(zip(queries, records)):
         query_id = str(query.get("query_id"))
+        if query_id in seen_query_ids:
+            raise ValueError("online query IDs are not unique")
+        if (
+            query.get("sequence_number") != index
+            or record.get("sequence_number") != index
+        ):
+            raise ValueError("online query/record sequence is not contiguous")
         parent_query_id = query.get("parent_query_id")
         if parent_query_id is not None:
             if str(parent_query_id) not in seen_query_ids:
                 raise ValueError("online query parent does not precede its child")
             parent_link_count += 1
         seen_query_ids.add(query_id)
+
+        if not (
+            record.get("error_type") is None
+            and record.get("semantics_owner") == "external_verifier"
+            and record.get("performance_claimed") is False
+        ):
+            raise ValueError("online typed-IR record contract is invalid")
+        result_hash = record.get("result_hash")
+        if not (
+            isinstance(result_hash, str)
+            and len(result_hash) == 64
+            and all(character in "0123456789abcdef" for character in result_hash)
+        ):
+            raise ValueError("online typed-IR result hash is invalid")
+        if recompile:
+            compilation = compile_external_verifier_call(
+                ExternalVerifierCallSpec.from_query_dict(query)
+            )
+            if record.get("ir_hashes") != compilation.hashes():
+                raise ValueError(f"online typed-IR replay mismatch at row {index}")
+
         options = query.get("execution_options")
         phase = str(options.get("solver_phase")) if isinstance(options, Mapping) else ""
         method = str(query.get("bound_method"))
@@ -179,13 +196,8 @@ def _online_summary(  # pylint: disable=too-many-locals
                 query
             ).effective_method.value
             effective_methods[effective] += 1
+
     return {
-        "schema_version": str(manifest.get("schema_version")),
-        "workload_name": str(manifest.get("workload_name")),
-        "abcrown_commit": str(manifest.get("abcrown_commit")),
-        "model_sha256": str(manifest.get("model_sha256")),
-        "vnnlib_sha256": str(manifest.get("vnnlib_sha256")),
-        "device": manifest.get("config_overrides", {}).get("general/device"),
         "query_count": len(queries),
         "compiled_and_dispatched": len(records),
         "completed": sum(row.get("completed") is True for row in records),
@@ -197,9 +209,55 @@ def _online_summary(  # pylint: disable=too-many-locals
             for key, count in sorted(phase_methods.items())
         ],
         "activation_effective_method_counts": dict(sorted(effective_methods.items())),
+    }
+
+
+def _online_summary(  # pylint: disable=too-many-locals
+    run_dir: Path,
+) -> dict[str, Any]:
+    manifest_path = run_dir / "manifest.json"
+    queries_path = run_dir / "queries.jsonl"
+    records_path = run_dir / "typed_ir.jsonl"
+    manifest = _read_json(manifest_path)
+    queries = _read_jsonl(queries_path)
+    records = _read_jsonl(records_path)
+    row_summary = _online_row_summary(queries, records, recompile=True)
+    typed = manifest.get("typed_ir")
+    comparison = manifest.get("baseline_comparison")
+    if not isinstance(typed, Mapping) or not (
+        typed.get("enabled") is True
+        and typed.get("compiled_and_dispatched") == len(records)
+        and typed.get("completed") == len(records)
+        and typed.get("semantics_owner") == "external_verifier"
+        and typed.get("performance_claimed") is False
+    ):
+        raise ValueError("online run did not enable typed IR")
+    if not isinstance(comparison, Mapping) or not (
+        comparison.get("status_match") is True
+        and comparison.get("visited_domains_match") is True
+    ):
+        raise ValueError("online observer on/off comparison did not pass")
+    result = manifest.get("result")
+    baseline = manifest.get("baseline_result")
+    if not isinstance(result, Mapping) or not isinstance(baseline, Mapping):
+        raise ValueError("online run lacks result/baseline result")
+    result_projection = _bab_projection(result)
+    baseline_projection = _bab_projection(baseline)
+    if result_projection != baseline_projection:
+        raise ValueError("online final lower/domain projection differs from baseline")
+    return {
+        "schema_version": str(manifest.get("schema_version")),
+        "workload_name": str(manifest.get("workload_name")),
+        "abcrown_commit": str(manifest.get("abcrown_commit")),
+        "model_sha256": str(manifest.get("model_sha256")),
+        "vnnlib_sha256": str(manifest.get("vnnlib_sha256")),
+        "device": manifest.get("config_overrides", {}).get("general/device"),
+        **row_summary,
         "result_status": result.get("status"),
         "baseline_status": baseline.get("status"),
-        "bab_projection": _bab_projection(result),
+        "bab_projection": result_projection,
+        "result_bab_projection": result_projection,
+        "baseline_bab_projection": baseline_projection,
         "observer_comparison": dict(comparison),
         "semantics_owner": "external_verifier",
         "performance_claimed": False,
@@ -209,6 +267,50 @@ def _online_summary(  # pylint: disable=too-many-locals
             "typed_ir.jsonl": _sha256(records_path),
         },
     }
+
+
+def _replay_online_artifact(artifact_dir: Path) -> None:
+    summary = _read_json(artifact_dir / "online_execution.json")
+    queries_path = artifact_dir / "online_queries.jsonl"
+    records_path = artifact_dir / "online_typed_ir.jsonl"
+    queries = _read_jsonl(queries_path)
+    records = _read_jsonl(records_path)
+    replayed = _online_row_summary(queries, records, recompile=True)
+    for key, value in replayed.items():
+        if summary.get(key) != value:
+            raise ValueError(f"online summary mismatch: {key}")
+
+    source_digests = summary.get("source_digests")
+    if not isinstance(source_digests, Mapping) or not (
+        source_digests.get("queries.jsonl") == _sha256(queries_path)
+        and source_digests.get("typed_ir.jsonl") == _sha256(records_path)
+    ):
+        raise ValueError("online raw source digest mismatch")
+
+    result_projection = summary.get("result_bab_projection")
+    baseline_projection = summary.get("baseline_bab_projection")
+    comparison = summary.get("observer_comparison")
+    if not (
+        isinstance(result_projection, list)
+        and isinstance(baseline_projection, list)
+        and isinstance(comparison, Mapping)
+    ) or not (
+        result_projection == baseline_projection == summary.get("bab_projection")
+        and summary.get("result_status") == summary.get("baseline_status")
+        and comparison.get("status_match") is True
+        and comparison.get("visited_domains_match") is True
+    ):
+        raise ValueError("online observer replay mismatch")
+    visited_domains = [
+        int(row["visited_domains"])
+        for row in result_projection
+        if isinstance(row, Mapping) and "visited_domains" in row
+    ]
+    if not (
+        comparison.get("baseline_visited_domains") == visited_domains
+        and comparison.get("profiled_visited_domains") == visited_domains
+    ):
+        raise ValueError("online observer domain projection mismatch")
 
 
 def _resnet_summary(manifest_path: Path) -> dict[str, Any]:
@@ -231,7 +333,7 @@ def _resnet_summary(manifest_path: Path) -> dict[str, Any]:
     ):
         raise ValueError("ResNet RVIR-1 correctness gate did not pass")
     contract = manifest.get("benchmark_contract")
-    return {
+    summary = {
         "schema_version": str(manifest.get("schema_version")),
         "workload_name": str(manifest.get("workload_name")),
         "abcrown_commit": str(manifest.get("abcrown_commit")),
@@ -254,18 +356,34 @@ def _resnet_summary(manifest_path: Path) -> dict[str, Any]:
         "performance_claimed": False,
         "source_manifest_sha256": _sha256(manifest_path),
     }
+    _validate_resnet_summary(summary)
+    return summary
+
+
+def _validate_resnet_summary(summary: Mapping[str, Any]) -> None:
+    if not (
+        int(summary.get("intermediate_bound_count", 0)) == 6
+        and summary.get("intermediate_bound_source") == "external_verifier"
+        and summary.get("relu_lower_slope_policy") == "adaptive"
+        and summary.get("lower_allclose") is True
+        and int(summary.get("sign_agreement", 0)) == int(summary.get("sign_total", -1))
+        and float(summary.get("lower_max_abs_diff", float("inf"))) <= 2e-4
+        and summary.get("performance_claimed") is False
+    ):
+        raise ValueError("frozen ResNet RVIR-1 summary gate did not pass")
 
 
 def _write_json(path: Path, value: object) -> None:
     path.write_text(_canonical(value, indent=2) + "\n", encoding="utf-8")
 
 
-def generate_artifact(
+def generate_artifact(  # pylint: disable=too-many-arguments
     out_dir: Path,
     *,
     query_root: Path,
     online_run_dir: Path,
-    resnet_manifest: Path,
+    resnet_manifest: Path | None,
+    resnet_semantics: Path | None = None,
     expected_activation_calls: int,
 ) -> dict[str, Any]:
     """Freeze historical admission plus online and ResNet correctness evidence."""
@@ -282,7 +400,19 @@ def generate_artifact(
         "".join(_canonical(row) + "\n" for row in rows), encoding="utf-8"
     )
     _write_json(out_dir / "online_execution.json", _online_summary(online_run_dir))
-    _write_json(out_dir / "resnet_semantics.json", _resnet_summary(resnet_manifest))
+    shutil.copyfile(online_run_dir / "queries.jsonl", out_dir / "online_queries.jsonl")
+    shutil.copyfile(
+        online_run_dir / "typed_ir.jsonl", out_dir / "online_typed_ir.jsonl"
+    )
+    if (resnet_manifest is None) == (resnet_semantics is None):
+        raise ValueError("provide exactly one ResNet manifest or frozen semantics file")
+    if resnet_manifest is not None:
+        resnet_summary = _resnet_summary(resnet_manifest)
+    else:
+        assert resnet_semantics is not None
+        resnet_summary = _read_json(resnet_semantics)
+        _validate_resnet_summary(resnet_summary)
+    _write_json(out_dir / "resnet_semantics.json", resnet_summary)
     workloads = Counter(str(row["source_workload"]) for row in rows)
     methods = Counter(str(row["effective_method"]) for row in rows)
     manifest = {
@@ -304,10 +434,14 @@ def replay_artifact(artifact_dir: Path) -> dict[str, Any]:
     """Verify digests and independently recompile every embedded activation query."""
 
     manifest = _read_json(artifact_dir / "manifest.json")
-    if manifest.get("schema_version") != ARTIFACT_SCHEMA:
+    schema = manifest.get("schema_version")
+    if schema not in (LEGACY_ARTIFACT_SCHEMA, ARTIFACT_SCHEMA):
         raise ValueError("real-verifier IR artifact schema mismatch")
     files = manifest.get("files")
-    if not isinstance(files, Mapping) or set(files) != set(ARTIFACT_FILES):
+    expected_files = (
+        LEGACY_ARTIFACT_FILES if schema == LEGACY_ARTIFACT_SCHEMA else ARTIFACT_FILES
+    )
+    if not isinstance(files, Mapping) or set(files) != set(expected_files):
         raise ValueError("real-verifier IR artifact file set mismatch")
     for name, digest in files.items():
         if _sha256(artifact_dir / str(name)) != digest:
@@ -322,6 +456,8 @@ def replay_artifact(artifact_dir: Path) -> dict[str, Any]:
         expected = _activation_row(str(row.get("source_workload")), query)
         if row != expected:
             raise ValueError(f"real-verifier IR replay mismatch at row {index}")
+    if schema == ARTIFACT_SCHEMA:
+        _replay_online_artifact(artifact_dir)
     return manifest
 
 
@@ -332,7 +468,9 @@ def _parse_args() -> argparse.Namespace:
     generate.add_argument("--out-dir", type=Path, required=True)
     generate.add_argument("--query-root", type=Path, required=True)
     generate.add_argument("--online-run-dir", type=Path, required=True)
-    generate.add_argument("--resnet-manifest", type=Path, required=True)
+    resnet_source = generate.add_mutually_exclusive_group(required=True)
+    resnet_source.add_argument("--resnet-manifest", type=Path)
+    resnet_source.add_argument("--resnet-semantics", type=Path)
     generate.add_argument("--expected-activation-calls", type=int, default=394)
     replay = commands.add_parser("replay")
     replay.add_argument("--artifact-dir", type=Path, required=True)
@@ -349,6 +487,7 @@ def main() -> None:
             query_root=args.query_root,
             online_run_dir=args.online_run_dir,
             resnet_manifest=args.resnet_manifest,
+            resnet_semantics=args.resnet_semantics,
             expected_activation_calls=args.expected_activation_calls,
         )
         status = "generated"

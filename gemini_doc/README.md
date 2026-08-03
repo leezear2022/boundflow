@@ -127,6 +127,8 @@
   call 的 Bound/Plan/Task/Schedule 类型化、真实调度与 lineage closure
 - `gemini_doc/change_2026-08-03_rvir3_cpu_correctness_artifact.md`：394 个历史 activation
   typed admission、377 次真实 CPU exact dispatch、ResNet 等价与自包含 replay artifact
+- `gemini_doc/change_2026-08-03_rvir_online_raw_replay_v2.md`：外部审计 M4 后续，冻结
+  377 条在线 query/typed-record 原文并在 fresh replay 中重算 lineage、accounting 与 IR hash
 - `gemini_doc/change_2026-07-28_ir5e_residual_final_protocol_freeze.md`：IR-5E
   residual-CNN typed workload、chain-CNN calibration→residual final v2 冻结 split、
   from-trace 公平协议及 p90/Pareto 一次性门禁

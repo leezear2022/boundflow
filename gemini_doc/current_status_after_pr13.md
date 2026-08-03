@@ -185,6 +185,10 @@ PR-14B 的 `796.765` 与 `0/394` 仍是当时 local whole-query/fused replacemen
   domains 与 final lower 一致。
 
 历史 394 行仍缺 split tensor values、requested polarity 与 parent lineage，artifact 已逐行标注；
-当前 377 行补齐 lower-only 与 347 parent links。全量回归为 `452 passed, 37 skipped`。
+当前 377 行补齐 lower-only 与 347 parent links。v2 artifact 进一步冻结这 377 条在线 query 与
+377 条 typed execution record 原文；fresh replay 会逐条复核 query/record 顺序、parent
+precedes child、完成状态和五层 IR hash，不再只信任生成端摘要。全量回归为
+`452 passed, 37 skipped`（RVIR closure 基线）；在线 raw replay v2 合并前的最新回归为
+`460 passed, 37 skipped`。
 当前没有被证据授权的 CUDA/performance claim，下一性能研究必须另立公平 lower-only 合同与
 fresh GPU protocol，不能直接复用本 correctness artifact。
