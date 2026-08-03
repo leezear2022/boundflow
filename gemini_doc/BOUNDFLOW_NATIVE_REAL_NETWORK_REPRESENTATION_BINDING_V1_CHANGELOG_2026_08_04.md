@@ -49,6 +49,7 @@ stage: s01
 - DocOps automatic-hook collisions at historical IDs `ev000919`/`ev000921`
   were repaired to the missing sequential IDs `ev000920`/`ev000922` without
   dropping events; `dol validate` and `dol lint --soft` both pass.
+- Published as draft PR #15 from commit `6c4119e` against `main`.
 
 ## Decisions
 
