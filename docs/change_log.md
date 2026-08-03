@@ -3632,3 +3632,15 @@
 
 **记录**
 - `gemini_doc/change_2026-08-03_rvir_external_audit_handoff.md`
+
+---
+
+## 2026-08-03：RVIR 在线原始证据 replay v2
+
+- 重建固定 αβ-CROWN commit 与官方 simple-MLP CPU workload；
+- 新运行的 377 条 queries/typed records SHA 与原 RVIR 摘要逐字节一致；
+- v2 artifact 冻结两份原始 JSONL，fresh replay 重算 lineage、accounting 与五层 IR hash；
+- v1 artifact 保持不可变并继续支持 replay；CPU-only、无性能 claim 的边界不变。
+
+**记录**
+- `gemini_doc/change_2026-08-03_rvir_online_raw_replay_v2.md`

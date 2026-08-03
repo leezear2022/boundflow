@@ -431,6 +431,10 @@ PR-12N closure：
 fused kernel coverage 仍为 0/394；历史 adapter v1 identity limitation 与当前 CPU-only 边界
 均已冻结，因此 C3 只升级 correctness/integration，不升级 performance。
 
+外部审计 minor M4 的后续 v2 artifact 已加入 377 条在线 query 与 377 条 typed execution
+record 原文。replay 会独立复核 parent 顺序、query/result accounting、observer projection 与
+五层 IR hash；该证据强化可审计性，不把 CPU correctness 升级为 CUDA 或 performance claim。
+
 该段 PR-11 early evidence 当时为专项 21 passed、全量 200 passed/1 skipped；其“Global 与
 Memory-Threshold 决策相同”的历史限制已由后续 PR-11E 和 PR-12G 证据分别补充，不能再读作
 当前全量状态。PR-12G 收尾全量为 318 passed、1 skipped。
