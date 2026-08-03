@@ -2,6 +2,7 @@
 
 > 日期：2026-08-03
 > 分支：`test/rvir2-fail-closed-hardening`
+> PR：#5
 > 来源：RVIR 外部审计 minor F1
 
 ## 变更内容
