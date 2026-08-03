@@ -1,0 +1,8 @@
+{
+  "files": {
+    "environment.json": "d43d0d940a9b356e6b9a1d872f2d64632134682e1355d6e56adfb08e915c85b0"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.cuda-environment-probe-artifact/v1",
+  "status": "environment_unavailable"
+}

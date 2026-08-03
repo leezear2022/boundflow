@@ -527,3 +527,33 @@ lifetime-reuse；再减 1 byte 以 `memory_budget_exceeded` 拒绝。低内存�
 correctness、重复运行和 baseline OOM/Pareto 门禁，才可进入性能主张；若 CUDA 不可用，则转向
 representation semantic binding bridge，不等待或伪造设备结果。artifact 位于
 `artifacts/native-real-network-memory-plans/vnncomp21-resnet2b-prop0-cpu-v1/`。
+
+## 16. Native CUDA Physical-Memory Protocol v1 与环境边界
+
+NRIR-3 已在任何正式 CUDA 结果产生前冻结并实现双 storage 的设备测量协议：
+
+- 5 个 repeat，每个 plan/repeat 独立 fresh process；偶数 retain→reuse、奇数反向；
+- 每 worker 5 warmup、20 measured，计时只覆盖 prepared lower-only native CROWN execution；
+- 同步采集 baseline/peak allocated 与 reserved delta，保留全部 latency samples；
+- 模型、intermediate-bound、环境、worker PID、Bound/PlanTemplate、result hash 和 raw→summary
+  派生关系全部 fail closed/replay；
+- 只有 reuse median allocated delta 至少降低 20%，且 median latency 不超过 retain 1.20×，
+  才允许 `performance_claimed=true`；reserved 只报告，无实际 OOM 不声明 rescue。
+
+当前主机的 PyTorch CUDA build 为 13.2，但 driver/device 不可用。`probe` 已以 exit 2 生成
+digest-protected `environment_unavailable` artifact，`generate` 在输出目录和 measured row 产生前
+exit 2。因此本阶段只关闭 protocol implementation，不产生 performance No-Go/Go。全量回归
+`484 passed, 37 skipped`，Mypy/Pylint/Black/diff check 均通过。
+
+冻结顺序继续为：
+
+```text
+CUDA protocol implemented; device run pending external availability
+  -> representation semantic binding + executable MaterializeAction
+  -> real-network materialization alternatives
+  -> sliced batch execution
+  -> only then reconsider Schedule-memory/performance claim
+```
+
+下一分支不得只新增 representation metadata/hash；至少一个 Plan decision 必须驱动真实 Bound
+rewrite/backend conversion，并在固定 ResNet 上以 dense reference/external oracle 双重校验。

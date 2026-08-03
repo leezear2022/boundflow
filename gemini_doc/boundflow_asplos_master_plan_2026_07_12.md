@@ -2,7 +2,7 @@
 
 > 状态：**顶层执行计划 v1.0；后续研究工作受本文门禁约束。**  
 > 基线日期：2026-07-12  
-> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`9d55b0a`
+> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`d21bdee`
 > 投稿策略：ASPLOS 2027 September Cycle 为有条件冲刺；ASPLOS 2028 为稳健主目标。
 
 > **路线修订（2026-07-20）**：本文保留 2026-07-12 的研究问题、历史门禁和 PR-10—13
@@ -40,6 +40,12 @@
 >（`442,656` B）；低内存 runtime 提前释放 85 个值，双计划 bitwise equal。该结果仍不包含
 > CUDA allocator peak、OOM rescue、latency、real materialization 或 sliced batching，故顶层
 > performance No-Go 与 ASPLOS-ready=NO 不变。
+
+> **2026-08-04 NRIR-3 修订**：双 storage 的 fresh-process CUDA physical-memory protocol 已
+> 冻结并实现：5 repeats × 5 warmup × 20 measured、prepared lower-only timing、allocator
+> allocated/reserved delta、交替进程顺序、identity/replay 与 20%/1.20× 门禁。本机 CUDA
+> driver/device 不可用，只有 `environment_unavailable` probe，0 measured rows、无 performance
+> claim。下一工程路线为 representation semantic binding，而不是停等 GPU 或调整冻结阈值。
 
 ---
 
@@ -258,8 +264,8 @@ Runtime 不能笼统声称相关查询可以共享中间状态。每个缓存对
 | 环境 | PyTorch 2.12.1+cu132、LLVM 20.1.8、TVM、单一 tvm-ffi | 可复现实验基础 |
 | Native real-network compiler | ResNet2B 17 Primal→21 Bound/Task/Schedule；retain/reuse 双 storage 与 runtime last-use | C1/C2 的真实图 correctness/decision 载体；尚无 device-level 性能证据 |
 
-Gate 0 与 PR-10 是历史已完成节点；当前 integration base 已推进到 `9d55b0a`，NRIR-1 已合并，
-NRIR-2 正在独立分支收口。PR-10 的 structured 路径保留为 opt-in research capability，dense
+Gate 0 与 PR-10 是历史已完成节点；当前 integration base 已推进到 `d21bdee`，NRIR-1/2 已合并，
+NRIR-3 CUDA protocol 已完成但本机 device unavailable。PR-10 的 structured 路径保留为 opt-in research capability，dense
 继续作为默认；不得把历史基线 `263ea81` 当作当前工程入口。
 
 ### 3.2 论文成立前必须补齐的缺口
@@ -267,7 +273,7 @@ NRIR-2 正在独立分支收口。PR-10 的 structured 路径保留为 opt-in re
 | 缺口 | 当前问题 | 必须达到的证据 |
 |---|---|---|
 | ReLU barrier | structured mode 已消除 persistent dense；dense 保持默认 | 需 Planner/fused lowering 解决 eager 重算与 α/β OOM |
-| 物化决策 | NRIR-2 已有真实 storage reuse 预算切换，但 representation/materialization 尚未绑定 runtime semantic conversion | 至少一个真实图上的执行级 materialization alternative 与 device-level Pareto |
+| 物化决策 | NRIR-2 已有真实 storage reuse 预算切换；NRIR-3 device protocol 已实现但无可用 CUDA；representation/materialization 尚未绑定 runtime semantic conversion | 至少一个真实图上的执行级 materialization alternative；device 可用时按冻结协议补 Pareto |
 | fused CROWN task | TVM 后端以 IBP/task 基础设施为主 | CROWN 粗粒度 task lowering 与正确性/性能门禁 |
 | repeated-query abstraction | multi-spec、BaB batch、cache 仍是分散机制 | 统一 QueryBatch/QueryState/PlanCache 或等价接口 |
 | 真实 workload | VNN-COMP ResNet2B correctness/storage 已进入 native IR；性能仍无真实 device protocol | ResNet/basic-block、更多 VNN-COMP 代表实例、至少一个训练 workload 的公平性能证据 |

@@ -9,9 +9,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 import json
+from types import MappingProxyType
+from typing import Mapping
 
 from ..ir.bound import BFBoundModule, BoundRepresentation
-from ..ir.plan import PlanInstance, PlanTemplate, StorageCandidate
+from ..ir.plan import PlanInstance, PlanTemplate, StorageBinding, StorageCandidate
 from ..ir.schedule import ScheduleModule, StateStoreAction
 from ..ir.task_v1 import TaskIRUnit
 from .bound_ir_interpreter import PlainCrownBoundIRSession
@@ -112,17 +114,32 @@ class StorageExecutionTrace:
         return hashlib.sha256(self.canonical_json().encode("utf-8")).hexdigest()
 
 
-class StoragePlanRuntime:
-    """Enforce one dense StorageCandidate's last-use release policy."""
+@dataclass(frozen=True)
+class PreparedStoragePlanRuntime:
+    """Prevalidated immutable storage metadata reused across dynamic queries."""
 
-    def __init__(
-        self,
+    bound_module: BFBoundModule
+    template: PlanTemplate
+    instance: PlanInstance
+    schedule: ScheduleModule
+    selected: StorageCandidate
+    bindings: Mapping[str, StorageBinding]
+    op_index: Mapping[str, int]
+    pinned_value_ids: frozenset[str]
+    plan_template_hash: str
+    plan_instance_hash: str
+
+    @classmethod
+    def prepare(
+        cls,
         *,
         bound_module: BFBoundModule,
         template: PlanTemplate,
         instance: PlanInstance,
         schedule: ScheduleModule,
-    ) -> None:
+    ) -> "PreparedStoragePlanRuntime":
+        """Validate cross-layer identity once and cache static lifetime lookups."""
+
         schedule.validate(
             bound_module=bound_module, template=template, instance=instance
         )
@@ -138,23 +155,90 @@ class StoragePlanRuntime:
             for binding in selected.bindings
         ):
             raise NotImplementedError("storage runtime v1 requires dense bindings")
+        return cls(
+            bound_module=bound_module,
+            template=template,
+            instance=instance,
+            schedule=schedule,
+            selected=selected,
+            bindings=MappingProxyType(
+                {binding.value_id: binding for binding in selected.bindings}
+            ),
+            op_index=MappingProxyType(
+                {op.op_id: index for index, op in enumerate(bound_module.graph.ops)}
+            ),
+            pinned_value_ids=frozenset(
+                {
+                    *bound_module.graph.outputs,
+                    *(
+                        action.source_value_id
+                        for action in schedule.actions
+                        if isinstance(action, StateStoreAction)
+                    ),
+                }
+            ),
+            plan_template_hash=template.stable_hash(bound_module=bound_module),
+            plan_instance_hash=instance.stable_hash(
+                template=template, bound_module=bound_module
+            ),
+        )
+
+    def require_identity(
+        self,
+        *,
+        bound_module: BFBoundModule,
+        template: PlanTemplate,
+        instance: PlanInstance,
+        schedule: ScheduleModule,
+    ) -> None:
+        """Reject reuse with any different static compiler object."""
+
+        if any(
+            left is not right
+            for left, right in zip(
+                (self.bound_module, self.template, self.instance, self.schedule),
+                (bound_module, template, instance, schedule),
+            )
+        ):
+            raise ValueError("prepared storage runtime identity differs")
+
+
+class StoragePlanRuntime:
+    """Enforce one dense StorageCandidate's last-use release policy."""
+
+    def __init__(
+        self,
+        *,
+        bound_module: BFBoundModule,
+        template: PlanTemplate,
+        instance: PlanInstance,
+        schedule: ScheduleModule,
+        prepared: PreparedStoragePlanRuntime | None = None,
+    ) -> None:
+        if prepared is None:
+            prepared = PreparedStoragePlanRuntime.prepare(
+                bound_module=bound_module,
+                template=template,
+                instance=instance,
+                schedule=schedule,
+            )
+        else:
+            prepared.require_identity(
+                bound_module=bound_module,
+                template=template,
+                instance=instance,
+                schedule=schedule,
+            )
         self.bound_module = bound_module
         self.template = template
         self.instance = instance
         self.schedule = schedule
-        self.selected: StorageCandidate = selected
-        self.bindings = {binding.value_id: binding for binding in selected.bindings}
-        self.op_index = {
-            op.op_id: index for index, op in enumerate(bound_module.graph.ops)
-        }
-        self.pinned_value_ids = {
-            *bound_module.graph.outputs,
-            *(
-                action.source_value_id
-                for action in schedule.actions
-                if isinstance(action, StateStoreAction)
-            ),
-        }
+        self.selected = prepared.selected
+        self.bindings = prepared.bindings
+        self.op_index = prepared.op_index
+        self.pinned_value_ids = prepared.pinned_value_ids
+        self.plan_template_hash = prepared.plan_template_hash
+        self.plan_instance_hash = prepared.plan_instance_hash
         self.events: list[StorageExecutionEvent] = []
         self.observed_peak_live_bytes = 0
         self.released_value_count = 0
@@ -226,12 +310,8 @@ class StoragePlanRuntime:
         if not self._finalized:
             raise ValueError("storage runtime trace requested before finalization")
         result = StorageExecutionTrace(
-            plan_template_hash=self.template.stable_hash(
-                bound_module=self.bound_module
-            ),
-            plan_instance_hash=self.instance.stable_hash(
-                template=self.template, bound_module=self.bound_module
-            ),
+            plan_template_hash=self.plan_template_hash,
+            plan_instance_hash=self.plan_instance_hash,
             storage_candidate_id=self.selected.candidate_id,
             planned_peak_bytes=self.selected.cost.predicted_peak_bytes,
             observed_peak_live_bytes=self.observed_peak_live_bytes,
@@ -263,6 +343,7 @@ class StoragePlanRuntime:
 
 
 __all__ = [
+    "PreparedStoragePlanRuntime",
     "STORAGE_EXECUTION_TRACE_SCHEMA_VERSION",
     "StorageExecutionEvent",
     "StorageExecutionTrace",
