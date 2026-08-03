@@ -2,6 +2,8 @@
 
 日期：2026-08-03
 
+GitHub：PR [#6](https://github.com/leezear2022/boundflow/pull/6)
+
 ## 背景
 
 外部审计发现：即使全量测试由 Conda Python 的绝对路径启动，

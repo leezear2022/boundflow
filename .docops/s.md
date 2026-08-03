@@ -5,9 +5,9 @@ rm: v01
 st: s01
 stat: active
 health: green
-pr: []
-last_ch: ev000235
-last_va: ev000236
+pr: [6]
+last_ch: ev000245
+last_va: ev000246
 blk:
-next: publish-phase6h-python-selection-pr
-updated: 2026-08-03T13:18:35Z
+next: review-merge-pr6
+updated: 2026-08-03T13:20:12Z
