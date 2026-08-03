@@ -51,7 +51,7 @@ from ..planner.plan_ir_builder import (
     ValueLayoutEvidence,
     build_reference_plan_template,
 )
-from ..planner.plan_ir_selector import select_plan_instance
+from ..planner.plan_ir_selector import PlanSelectionContext, select_plan_instance
 from ..planner.representation_plan_binding import (
     BoundRepresentationBinding,
     bind_native_representation_plan,
@@ -394,6 +394,7 @@ def compile_native_plain_crown_representation_query(
     query_id: str,
     available_memory_bytes: int,
     memory_budget_bytes: int,
+    selection_context: PlanSelectionContext | None = None,
 ) -> NativePlainCrownRepresentationCompilation:
     """Compile a source representation Plan into a bound execution IR stack."""
 
@@ -426,6 +427,7 @@ def compile_native_plain_crown_representation_query(
         query_bucket_id=f"native-representation-source:{query_id}",
         available_memory_bytes=available_memory_bytes,
         memory_budget_bytes=memory_budget_bytes,
+        selection_context=selection_context,
     )
     source_schedule = lower_plan_instance_to_reference_schedule(
         build.module,

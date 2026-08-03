@@ -1330,6 +1330,12 @@ class PlanInstance:  # pylint: disable=too-many-instance-attributes
         if batch.sample_batch_size > template.workload.sample_batch_size:
             raise ValueError("selected sample batch exceeds workload bucket")
         provenance_by_key = {item.key: item.value for item in self.provenance}
+        required_storage = provenance_by_key.get("required_storage_candidate_id")
+        if (
+            required_storage is not None
+            and self.storage_decision.candidate_id != required_storage
+        ):
+            raise ValueError("selected storage differs from required query policy")
         for axis, selected_size in (
             ("domain", batch.domain_batch_size),
             ("spec", batch.spec_batch_size),

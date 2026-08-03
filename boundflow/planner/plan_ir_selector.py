@@ -64,6 +64,7 @@ class PlanSelectionContext:
     max_domain_batch_size: Optional[int] = None
     max_spec_batch_size: Optional[int] = None
     max_sample_batch_size: Optional[int] = None
+    required_storage_candidate_id: Optional[str] = None
 
     def validate(self) -> None:
         if not self.query_distribution_id:
@@ -78,6 +79,8 @@ class PlanSelectionContext:
             value = getattr(self, name)
             if value is not None and value <= 0:
                 raise ValueError(f"selection {name} must be positive when present")
+        if self.required_storage_candidate_id == "":
+            raise ValueError("required storage candidate ID must be non-empty")
         if (
             any(not key for key in self.cached_artifact_keys)
             or len(self.cached_artifact_keys) != len(set(self.cached_artifact_keys))
@@ -261,6 +264,13 @@ def select_plan_instance(  # pylint: disable=too-many-arguments
                                     "max_evaluated_combinations"
                                 )
                             if not storage.static_legal:
+                                continue
+                            if (
+                                context.required_storage_candidate_id is not None
+                                and storage.candidate_id
+                                != context.required_storage_candidate_id
+                            ):
+                                _increment(failures, "storage_not_required_policy")
                                 continue
                             if (
                                 batch.candidate_id
@@ -512,6 +522,14 @@ def _build_instance(  # pylint: disable=too-many-arguments
                 else ()
             ),
             *(
+                (
+                    "required_storage_candidate_id="
+                    f"{selection_context.required_storage_candidate_id}",
+                )
+                if selection_context.required_storage_candidate_id is not None
+                else ()
+            ),
+            *(
                 "|".join(
                     (
                         validity.state_id,
@@ -596,6 +614,16 @@ def _build_instance(  # pylint: disable=too-many-arguments
                     ),
                 )
                 if _has_batch_limit(selection_context)
+                else ()
+            ),
+            *(
+                (
+                    PlanProvenance(
+                        "required_storage_candidate_id",
+                        selection_context.required_storage_candidate_id,
+                    ),
+                )
+                if selection_context.required_storage_candidate_id is not None
                 else ()
             ),
             PlanProvenance(

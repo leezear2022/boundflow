@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`517a97d`（NRIR-4 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/native-real-network-sliced-batch-execution-v1`
+> 当前 integration base：`3ca2e18`（NRIR-5 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/native-representation-batch-composition-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
@@ -62,6 +62,10 @@
 > max diff `1.90735e-6`、external sign 9/9，artifact generate/replay 通过，全量
 > `508 passed, 37 skipped`。状态为 VALIDATED-REDUCED；domain/sample、representation ×
 > batch 联合执行和性能/内存证据仍 pending。
+> 2026-08-04 NRIR-6 后续：representation/storage × spec-batch 已进入同一 source template/
+> selector，四组合 child op/task/launch=`21/63/49/147`，source policy 显式传播；四路径
+> external sign 9/9，全量 `522 passed, 37 skipped`。状态为 joint compiler ownership
+> VALIDATED-REDUCED；下一缺口为跨 query/domain batching、cache 与公平性能证据。
 
 ## 1. 当前真实阶段
 
@@ -80,6 +84,7 @@ BoundFlow 已经完成从边界表示到 query runtime prototype 的主干：
 | Native CUDA memory protocol NRIR-3 | protocol implemented / environment unavailable | fresh worker、5×5×20、allocator/timing/identity/replay 门禁已实现；本机 0 CUDA device，只保留 fail-closed probe，不产生 performance claim |
 | Native representation binding NRIR-4 | correctness/compiler ownership validated-reduced | ResNet source policy 驱动 21-op dense 或 49-op structured execution；28 transitions 绑定 Schedule/Task/Launch；dense-equivalent、无性能 claim |
 | Native spec-sliced execution NRIR-5 | correctness/integration validated-reduced | full 9 specs→1 child；limit=3→3×21-op child 与精确 range/aggregation；CPU semantics/replay 通过；domain/sample/joint representation/performance pending |
+| Native joint policy NRIR-6 | cross-axis correctness/ownership validated-reduced | 同一 template/selector 的 dense/structured × full/sliced 四组合；policy propagation、21/63/49/147 child ownership、external sign 9/9；跨 query/domain/performance pending |
 | ASPLOS 最终系统主张 | IR-5 final VALIDATED-NO-GO | IR-1—4 narrow closure 保留；Global p90/Pareto 失败，当前 system-performance 路线已关闭 |
 
 历史 `main@263ea81` 只到 PR-10 closure，不能再作为项目当前状态入口。跨会话恢复必须同时检查
@@ -363,3 +368,21 @@ Pylint/diff 门禁通过。
 storage 仍是完整 ledger，未测物理 allocator/latency。v1 只实现 spec axis；domain/sample 与
 NRIR-4 representation × batch 四组合是下一联合门禁。完成联合门禁后，再推进真实 repeated-query/
 domain batching 与 cache accounting；CUDA NRIR-3 仅在设备可用时按冻结协议执行。
+
+## 13. Native Representation × Batch Composition v1 判定
+
+NRIR-6 已关闭上一节的联合门禁：同一 source Bound/PlanTemplate 同时含 dense/structured-affine
+representation/storage policy 和 full/spec-size-3 batch candidate。memory budget 与 query-time
+spec limit 由 generic selector 联合决定四组合，四个 source PlanInstance/Schedule identity 均不同。
+
+source selected storage ID 进入 child selection contract；PlanInstance provenance 与 verifier 防止
+child 因 shape 变小而改选 policy。固定 ResNet 四组合 child op/task/launch 为
+`21/63/49/147`；structured 两组合保留 28 transition 与 49-op execution binding，sliced 两组合
+保留三个 exact ranges。四路径对 external lower max diff 均不超过
+`1.9073486328125e-06`，sign 9/9；artifact generate/replay、聚焦 `103 passed`、全量
+`522 passed, 37 skipped` 与静态门禁全过。
+
+结论为 cross-axis compiler/runtime ownership `VALIDATED-REDUCED`，不是性能关闭：structured
+仍存 dense tensor，spec slices 顺序执行，controller storage 仍是逻辑 ledger。下一分支应实现
+真实 repeated-query/domain stream 的 batch formation、plan/code cache、per-query lineage/结果恢复
+和公平 batched baseline；物理 CUDA protocol 保持环境可用时执行。
