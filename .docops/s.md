@@ -5,9 +5,9 @@ rm: v01
 st: s01
 stat: active
 health: green
-pr: [13]
-last_ch: ev000778
-last_va: ev000779
+pr: [14]
+last_ch: ev000907
+last_va: ev000908
 blk:
-next: merge-pr13-and-freeze-cuda-physical-memory-protocol
-updated: 2026-08-03T19:51:31Z
+next: implement-representation-semantic-binding-bridge
+updated: 2026-08-03T20:21:20Z

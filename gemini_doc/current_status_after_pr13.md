@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`9d55b0a`；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/native-real-network-memory-plans-v1`
+> 当前 integration base：`d21bdee`（NRIR-2 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/native-real-network-cuda-memory-protocol-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
@@ -49,6 +49,11 @@
 > Schedule arena；低内存路径在 Task 边界提前释放 85 个 runtime values，并有 386 对合法
 > physical aliases。两计划 bitwise 相同、external max diff `7.15256e-7`、sign 9/9。该结果只
 > 关闭 CPU storage-plan correctness/ownership；不是 CUDA allocator peak、OOM rescue 或性能证据。
+> 2026-08-04 NRIR-3 后续：fresh-process CUDA protocol 已冻结并实现，包含 5 repeats ×
+> 5 warmup × 20 measured、allocator allocated/reserved delta、交替进程顺序、prepared lower-only
+> timing、20% memory 与 1.20× latency 门禁及 raw semantic replay。本机
+> `cuda_available=false`，所以只生成 `environment_unavailable` probe artifact；正式 benchmark
+> 在创建输出目录前 exit 2，`performance_claimed=false`。下一步转 representation semantic bridge。
 
 ## 1. 当前真实阶段
 
@@ -64,6 +69,7 @@ BoundFlow 已经完成从边界表示到 query runtime prototype 的主干：
 | Production Schedule + Memory P0 | NO-GO | residual 8/8 完整 arena ownership，但 0 materialize、单 storage、0 budget decision switch；真实 ResNet 51/51 为单 external launch |
 | Native real-network IR NRIR-1 | correctness/compiler ownership validated-reduced | ResNet2B 17 Primal ops → 21 native Bound/Task regions/launches；五层 hash 绑定 external-bound payload；max diff 7.15e-7、sign 9/9；仍无 memory choice/GPU/performance |
 | Native real-network memory NRIR-2 | storage-plan correctness/ownership validated-reduced | 同一 real graph/template 的 retain-all 1,860,912 B 与 lifetime-reuse 442,656 B；预算决策切换、386 alias pairs、85 early releases、双计划 bitwise equal；无 CUDA allocator/performance claim |
+| Native CUDA memory protocol NRIR-3 | protocol implemented / environment unavailable | fresh worker、5×5×20、allocator/timing/identity/replay 门禁已实现；本机 0 CUDA device，只保留 fail-closed probe，不产生 performance claim |
 | ASPLOS 最终系统主张 | IR-5 final VALIDATED-NO-GO | IR-1—4 narrow closure 保留；Global p90/Pareto 失败，当前 system-performance 路线已关闭 |
 
 历史 `main@263ea81` 只到 PR-10 closure，不能再作为项目当前状态入口。跨会话恢复必须同时检查
@@ -181,15 +187,16 @@ IR-5 当时冻结的最优先候选是与 `7501/7502` 独立的真实 Verifier I
 
 ## 5. 权威阅读顺序
 
-1. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_MEMORY_PLANS_V1_PLAN_2026_08_04.md`；
-2. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_BOUND_IR_V1_PLAN_2026_08_04.md`；
-3. `gemini_doc/BOUNDFLOW_PRODUCTION_SCHEDULE_MEMORY_P0_PLAN_2026_08_04.md`；
-4. `gemini_doc/real_verifier_ir_integration_closure_2026_08_03.md`；
-5. `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`；
-6. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`；
-7. 本文（含 PR-13/14 历史状态与第 6—9 节当前修订）；
-8. `gemini_doc/asplos_claims_map.md`；
-9. `gemini_doc/asplos_execution_memo_v1_0.md`。
+1. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_CUDA_MEMORY_PROTOCOL_V1_PLAN_2026_08_03.md`；
+2. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_MEMORY_PLANS_V1_PLAN_2026_08_04.md`；
+3. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_BOUND_IR_V1_PLAN_2026_08_04.md`；
+4. `gemini_doc/BOUNDFLOW_PRODUCTION_SCHEDULE_MEMORY_P0_PLAN_2026_08_04.md`；
+5. `gemini_doc/real_verifier_ir_integration_closure_2026_08_03.md`；
+6. `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`；
+7. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`；
+8. 本文（含 PR-13/14 历史状态与第 6—10 节当前修订）；
+9. `gemini_doc/asplos_claims_map.md`；
+10. `gemini_doc/asplos_execution_memo_v1_0.md`。
 
 ## 6. RVIR 关闭后的当前边界
 
@@ -280,3 +287,22 @@ structured 执行依赖另一份 rewritten module，而 Schedule reference execu
 `MaterializeAction`。因此本轮没有加入假的 structured candidate。下一步应先尝试 fresh CUDA
 physical-memory protocol；若 GPU 不可用，则冻结 runner/protocol 并推进 representation semantic
 binding bridge，不得用 metadata/hash 代替执行证据。
+
+## 10. Native CUDA Physical-Memory Protocol v1 判定
+
+NRIR-3 已把 NRIR-2 双 storage 的设备测量方法冻结成可运行实现：每个 plan/repeat 使用独立
+worker process，5 个 repeats 中交替启动 retain/reuse，每 worker 5 warmup、20 measured；计时
+只覆盖 prepared native CROWN backward，并以同步后的 `max_memory_allocated/reserved` baseline
+delta、result hash、Bound/PlanTemplate identity 与原始 latency samples 形成 replay-grade artifact。
+
+本机 PyTorch 为 `2.12.1+cu132`，但 `torch.cuda.is_available=false`、device count 0，
+`nvidia-smi` 无法连接 driver。因此：
+
+- 冻结 probe artifact 为 `environment_unavailable` 且 `performance_claimed=false`；
+- 正式 `generate` 在创建输出目录或 measured row 前 exit 2；
+- 没有 CUDA allocator reduction、latency Pareto、OOM rescue 或 speedup 结论；
+- 协议测试/全量回归为 `17 passed` / `484 passed, 37 skipped`，静态门禁通过。
+
+协议实现已完成，设备实验待可用 CUDA 主机按原参数执行。当前无需停等硬件；下一代码路线为
+representation semantic binding bridge，使 Plan representation 与 `MaterializeAction` 真正改变
+Bound/backend execution，并先通过真实 ResNet 双路径语义一致性。

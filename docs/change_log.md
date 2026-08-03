@@ -3694,3 +3694,20 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_MEMORY_PLANS_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Native CUDA Physical-Memory Protocol v1
+
+- 冻结 retain/reuse 的 5 fresh-process repeats × 5 warmup × 20 measured、alternating order、
+  prepared lower-only timing 与 allocated/reserved counter；
+- 新增模型/intermediate-bound/environment/worker/IR/result identity、20% memory reduction、
+  1.20× latency ratio、raw→summary→manifest replay 门禁；
+- 新增 prepared storage capsule，避免每次 query 重做静态 Schedule/Plan validation/hash；
+- 本机 CUDA driver/device unavailable：probe artifact 为 `performance_claimed=false`，正式
+  benchmark 在创建输出目录前 exit 2，未生成任何 measured row 或性能结论；
+- 聚焦 `17 passed`，全量 `484 passed, 37 skipped`；Mypy clean、Pylint 10.00/10、Black/
+  diff check 通过；下一路线为 representation semantic binding bridge。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_CUDA_MEMORY_PROTOCOL_V1_CHANGELOG_2026_08_03.md`

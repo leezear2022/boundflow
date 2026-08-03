@@ -1,0 +1,15 @@
+{
+  "cuda_available": false,
+  "device_count": 0,
+  "devices": [],
+  "nvidia_smi": {
+    "returncode": 9,
+    "stderr": "",
+    "stdout": "NVIDIA-SMI has failed because it couldn't communicate with the NVIDIA driver. Make sure that the latest NVIDIA driver is installed and running."
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.cuda-environment-probe/v1",
+  "status": "environment_unavailable",
+  "torch_cuda_build": "13.2",
+  "torch_version": "2.12.1+cu132"
+}

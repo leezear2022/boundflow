@@ -505,3 +505,20 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - representation audit 发现 Plan metadata 尚不能驱动 runtime structured rewrite，
   `MaterializeAction` 也尚无数值转换效果；因此 0 real-graph materialization 与单 full batch
   仍是明确缺口。
+
+### 2026-08-04 Native CUDA Memory Protocol v1
+
+- `C2-M-NRIR3` validated mechanism：retain/reuse 的 fresh-process CUDA runner、prepared lower-only
+  timing、5×5×20 重复矩阵、allocated/reserved counter、alternating order、raw/summary/manifest
+  与 semantic replay 已实现；
+- `C2-G-NRIR3` frozen gates：模型/intermediate-bound digest、worker PID 唯一、稳定环境、同一
+  Bound/PlanTemplate、result identity、reuse allocated delta ≥20%、latency ratio ≤1.20×；
+- `C2-E-NRIR3` environment evidence：PyTorch `2.12.1+cu132` / CUDA build 13.2，但
+  `cuda_available=false`、device count 0、`nvidia-smi` driver failure；probe exit 2，replay exit 0，
+  benchmark generate 在创建 artifact 前 exit 2；
+- `C2-L-NRIR3` hard limitation：0 measured worker rows，故没有 CUDA peak-memory、latency、
+  OOM rescue、Pareto 或 speedup claim；`performance_claimed=false`；
+- 工件：`artifacts/native-real-network-cuda-memory-protocol/environment-unavailable-20260804/`；
+  验证：聚焦 17 passed，全量 `484 passed, 37 skipped`，静态门禁全过；
+- 下一缺口是 representation semantic binding：Plan selection 与 Schedule materialization 必须
+  改变实际 Bound/backend execution，不能由 metadata/hash 冒充 C1/C2 系统收益。

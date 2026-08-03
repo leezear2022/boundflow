@@ -13,6 +13,8 @@ from boundflow.runtime.native_verifier_ir_integration import (
     compile_native_plain_crown_memory_query,
     execute_native_plain_crown_memory_query,
 )
+from boundflow.runtime.storage_plan_runtime import PreparedStoragePlanRuntime
+from boundflow.runtime.task_ir_executor import prepare_task_ir_execution
 from tests.test_task_ir_v1 import _semantic_case
 
 
@@ -124,3 +126,43 @@ def test_storage_trace_rejects_observed_residency_above_plan() -> None:
             storage_trace,
             observed_peak_live_bytes=storage_trace.planned_peak_bytes + 1,
         ).validate()
+
+
+def test_prepared_storage_capsule_reuses_exact_static_plan() -> None:
+    compilation, legacy_module, input_spec, relu_pre, linear_spec = _compile(
+        memory_budget_bytes=1 << 30
+    )
+    prepared = prepare_task_ir_execution(
+        compilation.task_module,
+        compilation.schedule,
+        bound_module=compilation.bound_module,
+        template=compilation.template,
+        instance=compilation.instance,
+        legacy_task_module=legacy_module,
+    )
+    prepared_storage = PreparedStoragePlanRuntime.prepare(
+        bound_module=compilation.bound_module,
+        template=compilation.template,
+        instance=compilation.instance,
+        schedule=compilation.schedule,
+    )
+    first, _task_trace, first_storage = execute_native_plain_crown_memory_query(
+        compilation,
+        legacy_task_module=legacy_module,
+        input_spec=input_spec,
+        relu_pre=relu_pre,
+        linear_spec_C=linear_spec,
+        prepared=prepared,
+        prepared_storage=prepared_storage,
+    )
+    second, _task_trace, second_storage = execute_native_plain_crown_memory_query(
+        compilation,
+        legacy_task_module=legacy_module,
+        input_spec=input_spec,
+        relu_pre=relu_pre,
+        linear_spec_C=linear_spec,
+        prepared=prepared,
+        prepared_storage=prepared_storage,
+    )
+    torch.testing.assert_close(first.lower, second.lower)
+    assert first_storage.stable_hash() == second_storage.stable_hash()

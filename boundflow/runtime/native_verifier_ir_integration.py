@@ -49,8 +49,18 @@ from ..planner.plan_ir_builder import (
 from ..planner.plan_ir_selector import select_plan_instance
 from ..planner.storage_plan_variants import build_native_storage_plan_variants
 from .task_executor import InputSpec
-from .task_ir_executor import TaskExecutionTrace, execute_task_ir_semantics
-from .storage_plan_runtime import StorageExecutionTrace, StoragePlanRuntime
+from .task_ir_executor import (
+    PreparedTaskIRExecution,
+    TaskExecutionTrace,
+    TaskTraceMode,
+    execute_task_ir_semantics,
+)
+from .storage_plan_runtime import (
+    PreparedStoragePlanRuntime,
+    StorageExecutionTrace,
+    StoragePlanRuntime,
+)
+from .task_backend_dispatch import TypedTaskBackend
 
 NATIVE_PLAIN_CROWN_COMPILER_VERSION = "boundflow.native-plain-crown-ir/v1"
 NATIVE_PLAIN_CROWN_MEMORY_COMPILER_VERSION = "boundflow.native-plain-crown-memory-ir/v1"
@@ -319,6 +329,7 @@ def execute_native_plain_crown_query(
     )
 
 
+# pylint: disable-next=too-many-arguments
 def execute_native_plain_crown_memory_query(
     compilation: NativePlainCrownIRCompilation,
     *,
@@ -326,6 +337,10 @@ def execute_native_plain_crown_memory_query(
     input_spec: InputSpec,
     relu_pre: Mapping[str, IntervalState],
     linear_spec_C: torch.Tensor,
+    prepared: PreparedTaskIRExecution | None = None,
+    prepared_storage: PreparedStoragePlanRuntime | None = None,
+    trace_mode: TaskTraceMode = TaskTraceMode.AUDIT,
+    backend: TypedTaskBackend | None = None,
 ) -> tuple[IntervalState, TaskExecutionTrace, StorageExecutionTrace]:
     """Execute the selected storage lifetime policy and return its exact trace."""
 
@@ -337,6 +352,7 @@ def execute_native_plain_crown_memory_query(
         template=compilation.template,
         instance=compilation.instance,
         schedule=compilation.schedule,
+        prepared=prepared_storage,
     )
     result, task_trace = execute_task_ir_semantics(
         compilation.task_module,
@@ -348,6 +364,9 @@ def execute_native_plain_crown_memory_query(
         input_spec=input_spec,
         relu_pre=relu_pre,
         linear_spec_C=linear_spec_C,
+        prepared=prepared,
+        trace_mode=trace_mode,
+        backend=backend,
         storage_runtime=storage_runtime,
     )
     return result, task_trace, storage_runtime.trace()
