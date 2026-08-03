@@ -1,6 +1,6 @@
 ---
 status: completed
-updated: 2026-08-04T04:17:00+08:00
+updated: 2026-08-04T04:21:00+08:00
 type: changelog
 topic: boundflow
 slug: BOUNDFLOW_NATIVE_REAL_NETWORK_CUDA_MEMORY_PROTOCOL_V1
@@ -13,6 +13,7 @@ stage: s01
 
 - 协议、runner、validation、replay 与 unavailable-environment artifact 已完成；当前主机 CUDA
   driver/device 不可用，正式测量未执行且没有性能主张。
+- 实现提交 `f67fbfe` 已发布为 GitHub PR `#14`。
 
 ## Changes
 
@@ -57,3 +58,4 @@ stage: s01
 - prior: `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_MEMORY_PLANS_V1_CHANGELOG_2026_08_04.md`
 - roadmap: `gemini_doc/asplos_execution_memo_v1_0.md`
 - artifact: `artifacts/native-real-network-cuda-memory-protocol/environment-unavailable-20260804/`
+- PR: `https://github.com/leezear2022/boundflow/pull/14`

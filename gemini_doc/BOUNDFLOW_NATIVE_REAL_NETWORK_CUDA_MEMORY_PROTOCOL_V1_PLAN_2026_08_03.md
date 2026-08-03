@@ -1,6 +1,6 @@
 ---
 status: completed
-updated: 2026-08-04T04:17:00+08:00
+updated: 2026-08-04T04:21:00+08:00
 type: plan
 topic: boundflow
 slug: BOUNDFLOW_NATIVE_REAL_NETWORK_CUDA_MEMORY_PROTOCOL_V1
@@ -80,3 +80,4 @@ stage: s01
 - changelog: `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_CUDA_MEMORY_PROTOCOL_V1_CHANGELOG_2026_08_03.md`
 - prior: `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_MEMORY_PLANS_V1_PLAN_2026_08_04.md`
 - roadmap: `gemini_doc/asplos_execution_memo_v1_0.md`
+- publication: PR `#14`, head `f67fbfe`
