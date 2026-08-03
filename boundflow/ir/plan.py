@@ -194,8 +194,12 @@ class WorkloadProfile:
                 raise ValueError(f"workload {name} must be positive")
         if self.beta_enabled and not self.alpha_enabled:
             raise ValueError("workload beta state requires alpha state")
-        if self.method in {BoundMethodKind.INTERVAL, BoundMethodKind.CROWN} and (
+        if self.method == BoundMethodKind.INTERVAL and (
             self.alpha_enabled or self.beta_enabled or self.split_state_present
+        ):
+            raise ValueError(f"{self.method.value} workload has invalid state")
+        if self.method == BoundMethodKind.CROWN and (
+            self.alpha_enabled or self.beta_enabled
         ):
             raise ValueError(f"{self.method.value} workload has invalid state")
 

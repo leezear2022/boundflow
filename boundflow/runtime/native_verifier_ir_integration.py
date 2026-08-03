@@ -1,6 +1,6 @@
 """Native plain-CROWN compilation through Bound, Plan, Task, and Schedule IR."""
 
-# pylint: disable=too-many-instance-attributes,duplicate-code
+# pylint: disable=too-many-instance-attributes,duplicate-code,too-many-arguments
 
 from __future__ import annotations
 
@@ -395,6 +395,11 @@ def compile_native_plain_crown_representation_query(
     available_memory_bytes: int,
     memory_budget_bytes: int,
     selection_context: PlanSelectionContext | None = None,
+    relu_split_state: Mapping[str, torch.Tensor] | None = None,
+    split_state_hash: str | None = None,
+    intermediate_bound_source: IntermediateBoundSource = (
+        IntermediateBoundSource.EXTERNAL_VERIFIER
+    ),
 ) -> NativePlainCrownRepresentationCompilation:
     """Compile a source representation Plan into a bound execution IR stack."""
 
@@ -408,15 +413,22 @@ def compile_native_plain_crown_representation_query(
         interval_env=interval_env,
         relu_pre=relu_pre,
         linear_spec_C=linear_spec_C,
-        intermediate_bound_source=IntermediateBoundSource.EXTERNAL_VERIFIER,
-        intermediate_bounds_hash=intermediate_bounds_hash,
+        intermediate_bound_source=intermediate_bound_source,
+        intermediate_bounds_hash=(
+            intermediate_bounds_hash
+            if intermediate_bound_source == IntermediateBoundSource.EXTERNAL_VERIFIER
+            else None
+        ),
         relu_lower_slope_policy=ReluLowerSlopePolicy.ADAPTIVE,
+        relu_split_state=relu_split_state,
+        split_state_hash=split_state_hash,
     )
     source_template = _build_native_reference_template(
         build.module,
         query_id=query_id,
         intermediate_bounds_hash=intermediate_bounds_hash,
         available_memory_bytes=available_memory_bytes,
+        intermediate_bound_source=intermediate_bound_source,
     )
     source_template = build_native_representation_plan_variants(
         source_template, bound_module=build.module
@@ -447,6 +459,7 @@ def compile_native_plain_crown_representation_query(
         query_id=f"{query_id}:execution",
         intermediate_bounds_hash=intermediate_bounds_hash,
         available_memory_bytes=available_memory_bytes,
+        intermediate_bound_source=intermediate_bound_source,
     )
     execution_instance = select_plan_instance(
         execution_template,
@@ -559,6 +572,7 @@ def execute_native_plain_crown_query(
     input_spec: InputSpec,
     relu_pre: Mapping[str, IntervalState],
     linear_spec_C: torch.Tensor,
+    relu_split_state: Mapping[str, torch.Tensor] | None = None,
 ) -> tuple[IntervalState, TaskExecutionTrace]:
     """Execute every native region through the selected Schedule IR."""
 
@@ -573,6 +587,7 @@ def execute_native_plain_crown_query(
         input_spec=input_spec,
         relu_pre=relu_pre,
         linear_spec_C=linear_spec_C,
+        relu_split_state=relu_split_state,
     )
 
 
@@ -626,6 +641,7 @@ def execute_native_plain_crown_representation_query(
     input_spec: InputSpec,
     relu_pre: Mapping[str, IntervalState],
     linear_spec_C: torch.Tensor,
+    relu_split_state: Mapping[str, torch.Tensor] | None = None,
 ) -> tuple[IntervalState, TaskExecutionTrace]:
     """Execute the Bound/Task/Schedule program produced by representation binding."""
 
@@ -640,6 +656,7 @@ def execute_native_plain_crown_representation_query(
         input_spec=input_spec,
         relu_pre=relu_pre,
         linear_spec_C=linear_spec_C,
+        relu_split_state=relu_split_state,
     )
 
 
@@ -650,6 +667,9 @@ def _build_native_reference_template(
     query_id: str,
     intermediate_bounds_hash: str,
     available_memory_bytes: int,
+    intermediate_bound_source: IntermediateBoundSource = (
+        IntermediateBoundSource.EXTERNAL_VERIFIER
+    ),
 ) -> PlanTemplate:
     values = module.graph.values
     dtypes = tuple(dict.fromkeys(value.tensor_type.dtype for value in values))
@@ -660,11 +680,11 @@ def _build_native_reference_template(
             if value.tensor_type.device is not None
         )
     )
-    if len(dtypes) != 1 or len(devices) != 1:
-        raise ValueError("native plain-CROWN reference plan requires one dtype/device")
-    dtype = dtypes[0]
-    device = devices[0]
+    if len(devices) != 1:
+        raise ValueError("native plain-CROWN reference plan requires one device")
     objective = next(value for value in values if value.value_id == "query.objective")
+    dtype = objective.tensor_type.dtype
+    device = devices[0]
     domain_batch = int(objective.tensor_type.shape[0] or 0)
     spec_batch = int(objective.tensor_type.shape[1] or 0)
     if domain_batch <= 0 or spec_batch <= 0:
@@ -706,12 +726,12 @@ def _build_native_reference_template(
         supported_methods=(module.domain.method,),
         supported_op_kinds=tuple(dict.fromkeys(op.kind for op in module.graph.ops)),
         supported_representations=tuple(dict.fromkeys(region_representations)),
-        supported_dtypes=(dtype,),
+        supported_dtypes=dtypes,
         supported_devices=(device,),
         supports_grad=False,
         supports_alpha=False,
         supports_beta=False,
-        supports_split_state=False,
+        supports_split_state=module.domain.split_state_present,
         static_shape_only=True,
     )
     backends = tuple(
@@ -728,7 +748,7 @@ def _build_native_reference_template(
         profile_id=f"native-plain-crown:{device}",
         device=device,
         total_memory_bytes=available_memory_bytes,
-        supported_dtypes=(dtype,),
+        supported_dtypes=dtypes,
         backend_capability_ids=(capability.capability_id,),
         alignment_bytes=16,
     )
@@ -738,14 +758,28 @@ def _build_native_reference_template(
         requires_grad=False,
         alpha_enabled=False,
         beta_enabled=False,
-        split_state_present=False,
+        split_state_present=module.domain.split_state_present,
         static_shapes=True,
         domain_batch_size=domain_batch,
         spec_batch_size=spec_batch,
         sample_batch_size=1,
         dtype=dtype,
         device=device,
-        numeric_policy="external_intermediate_adaptive_float32_reference",
+        numeric_policy=(
+            (
+                "external_intermediate_adaptive_float32_reference"
+                if intermediate_bound_source
+                == IntermediateBoundSource.EXTERNAL_VERIFIER
+                else "local_forward_adaptive_float32_reference"
+            )
+            if not module.domain.split_state_present
+            else (
+                "external_intermediate_adaptive_float32_reference_split_v1"
+                if intermediate_bound_source
+                == IntermediateBoundSource.EXTERNAL_VERIFIER
+                else "local_forward_adaptive_float32_reference_split_v1"
+            )
+        ),
     )
     evidence = ReferencePlanEvidence(
         evidence_set_id=f"native-plain-crown:{query_id}",
@@ -788,8 +822,18 @@ def _build_native_reference_template(
         provenance=(
             PlanProvenance("compiler", NATIVE_PLAIN_CROWN_COMPILER_VERSION),
             PlanProvenance("semantics_owner", "boundflow_native_plain_crown"),
-            PlanProvenance("intermediate_bound_source", "external_verifier"),
-            PlanProvenance("intermediate_bounds_hash", intermediate_bounds_hash),
+            PlanProvenance(
+                "intermediate_bound_source", intermediate_bound_source.value
+            ),
+            PlanProvenance(
+                (
+                    "intermediate_bounds_hash"
+                    if intermediate_bound_source
+                    == IntermediateBoundSource.EXTERNAL_VERIFIER
+                    else "local_forward_state_hash"
+                ),
+                intermediate_bounds_hash,
+            ),
             PlanProvenance("relu_lower_slope_policy", "adaptive"),
             PlanProvenance("performance_claim", "forbidden"),
         ),

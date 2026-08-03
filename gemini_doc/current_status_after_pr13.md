@@ -433,3 +433,22 @@ artifact 的 packed/full/serial lower/upper 均 bitwise equal，8/8 query/parent
 `VALIDATED-REDUCED`。该机制不是完整 BaB：没有 ReLU split、β state、priority queue、bound prune、
 termination 或 property verdict；2 vs 8 也不是性能数据。下一代码路线是 native ReLU-split BaB
 queue/state v1，而不是直接书写 speedup 或提交 ASPLOS。
+
+## 16. Native ReLU-Split BaB Queue v1 判定
+
+NRIR-9 已关闭 NRIR-8 的“只有 input-box branch”缺口。plain-CROWN Bound IR 支持 6 个 ResNet
+ReLU 的 first-class int8 split inputs；split payload 进入 ReLU op、Bound hash、Plan workload/
+capability、Task 和 Schedule。runtime 对 key/shape/dtype/device/range/hash 和 constrained
+preactivation fail closed；local forward provenance 与 external verifier ownership 分开。
+
+best-first bounded queue 冻结 node/parent/depth、widest-ambiguous branch、priority、prune/expand/
+terminal reason与预算。每个 child 只继承 discrete split state，forward IBP 与 native compiler
+stack 重新执行；parent exact state 不可复用。toy 15-node complete tree 的 packed/serial stacks 为
+5/15。固定 ResNet 7-node run 形成三代、3 expand、4 frontier，packed/serial stacks 为 3/7；
+lower/upper max diff 为 `1.8310546875e-04/1.220703125e-04`，queue/branch/split identity 一致。
+artifact generate/replay、聚焦 `68 passed`、全量 `577 passed, 37 skipped` 与静态门禁全过。
+
+结论为 first-class ReLU split、bounded queue/control flow 与 actual node-batch execution
+`VALIDATED-REDUCED`。固定 run 正确报告 `budget_exhausted`、`property_status=not_claimed`。没有
+α/β optimization、beta constraint、完整搜索/verdict 或性能证据；3 vs 7 不是 speedup。下一代码
+路线为 native α/β optimization state + warm-start validity v1。

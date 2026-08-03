@@ -708,3 +708,31 @@ packing 与 restore `VALIDATED-REDUCED`。2 vs 8 只是 child-stack mechanism co
 它也不是完整 BaB：尚无 ReLU split decision、β/split state、priority queue、bound-based prune、
 termination 或 property verdict。下一工程门禁是 native ReLU-split BaB queue/state v1；CUDA
 physical protocol 仍只在设备可用时执行。
+
+## 22. Native ReLU-Split BaB Queue v1
+
+NRIR-9 将 legacy `ReluSplitState` 提升为 native plain-CROWN 的一等 IR 输入。固定 ResNet 的 6 个
+ReLU 各有显式 `int8{-1,0,+1}` domain-batched split value；value/content hash、ReLU attrs 与
+state version 进入 BoundModule，Plan workload/capability 声明 split ownership，Task/Schedule 对
+实际 split-aware Bound program 执行。local split-constrained IBP provenance 不再伪装成 external
+verifier bounds。
+
+runtime 实现 deterministic widest-ambiguous-ReLU branch 与 best-first bounded queue。typed trace
+冻结 node/parent/depth/branch、priority、prune/expand/terminal reason、exact state 与 native 五层 IR
+hash。child 只继承离散 split constraints；每个 child batch 都重新计算 forward IBP 并编译/执行
+新的 representation-bound Bound/Plan/Task/Schedule stack，parent exact state 永不作为 child exact
+input。
+
+toy complete queue 执行 15 个节点，packed/serial stacks 为 5/15，bounds/branch/queue identity
+一致。固定 ResNet 有界运行执行 7 个节点、3 次 expand，保留 4 个已计算 frontier nodes并明确
+`budget_exhausted`、`property_status=not_claimed`。packed-4/serial-1 使用 3/7 个 native stacks；
+lower/upper max diff 为 `1.8310546875e-04/1.220703125e-04`，在 `2e-4` 绝对/相对容差内
+allclose，logical queue 与 split identity 一致。artifact 位于
+`artifacts/native-real-network-relu-split-bab/vnncomp21-resnet2b-prop0-cpu-v1/`。
+聚焦回归为 `68 passed`，全量为 `577 passed, 37 skipped`；artifact generate/replay、Black、
+Mypy、Pylint 10.00/10 与 diff check 全过。
+
+该阶段只把 first-class ReLU split ownership、bounded queue/control flow 与实际 node batching
+升为 `VALIDATED-REDUCED`。它仍是 plain CROWN：没有 α/β optimization、beta constraint、完整
+搜索/verified verdict 或公平 timing。3 vs 7 只是 native-stack mechanism count，不是 latency、
+memory、CUDA 或 speedup。下一工程门禁是 native α/β optimization state 与 warm-start validity v1。

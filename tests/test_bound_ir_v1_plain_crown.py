@@ -16,6 +16,7 @@ from boundflow.domains.interval import IntervalState
 from boundflow.frontends.plain_crown_bound_ir import (
     PlainCrownBoundIRBuild,
     build_plain_crown_bound_ir,
+    relu_split_state_hash,
 )
 from boundflow.ir.bound import (
     BFBoundGraph,
@@ -24,6 +25,7 @@ from boundflow.ir.bound import (
     BoundValueRole,
     IntermediateBoundSource,
     ReluLowerSlopePolicy,
+    SplitReluRelaxationAttrs,
 )
 from boundflow.ir.bound_rewrite import rewrite_plain_crown_structured_regions
 from boundflow.ir.task import BFTaskModule, BoundTask, TaskKind, TaskOp
@@ -313,6 +315,96 @@ def test_plain_crown_bound_ir_matches_chain_cnn() -> None:
     torch.testing.assert_close(actual.lower, expected.lower, atol=2e-6, rtol=2e-6)
     torch.testing.assert_close(actual.upper, expected.upper, atol=2e-6, rtol=2e-6)
     assert BoundOpKind.CONV2D_BACKWARD in {op.kind for op in build.module.graph.ops}
+
+
+def test_relu_split_is_first_class_bound_input_and_matches_reference() -> None:
+    module = _mlp()
+    spec = InputSpec.linf(
+        value_name="input", center=torch.tensor([[0.2, -0.1, 0.4]]), eps=0.5
+    )
+    _root_env, root_pre = _forward_ibp_trace_mlp(module, spec)
+    splits = {
+        name: torch.zeros_like(pre.lower, dtype=torch.int8)
+        for name, pre in root_pre.items()
+    }
+    splits["h1"][0, 0] = 1
+    interval_env, relu_pre = _forward_ibp_trace_mlp(
+        module, spec, relu_split_state=splits
+    )
+    split_hash = relu_split_state_hash(splits)
+    build = build_plain_crown_bound_ir(
+        module,
+        spec,
+        interval_env=interval_env,
+        relu_pre=relu_pre,
+        linear_spec_C=torch.tensor([[1.0, -1.0]]),
+        relu_split_state=splits,
+        split_state_hash=split_hash,
+    )
+    result = execute_plain_crown_bound_ir(
+        build.module,
+        task_module=module,
+        input_spec=spec,
+        relu_pre=relu_pre,
+        linear_spec_C=torch.tensor([[1.0, -1.0]]),
+        relu_split_state=splits,
+    )
+    expected = run_crown_ibp_mlp(
+        module,
+        spec,
+        linear_spec_C=torch.tensor([[1.0, -1.0]]),
+        relu_split_state=splits,
+    )
+
+    torch.testing.assert_close(result.lower, expected.lower, atol=0.0, rtol=0.0)
+    torch.testing.assert_close(result.upper, expected.upper, atol=0.0, rtol=0.0)
+    assert build.module.domain.split_state_present
+    assert build.split_input_value_ids == (("h1", build.module.graph.inputs[1]),)
+    split_value = next(
+        value
+        for value in build.module.graph.values
+        if value.role == BoundValueRole.SPLIT
+    )
+    relu_op = next(
+        op for op in build.module.graph.ops if op.kind == BoundOpKind.RELU_RELAXATION
+    )
+    assert split_value.tensor_type.dtype == "int8"
+    assert split_value.value_id == relu_op.inputs[4]
+    assert isinstance(relu_op.attrs, SplitReluRelaxationAttrs)
+    assert split_hash in next(
+        value.state_version
+        for value in build.module.graph.values
+        if value.value_id == relu_op.outputs[0]
+    )
+
+    with pytest.raises(ValueError, match="requires ReLU split"):
+        execute_plain_crown_bound_ir(
+            build.module,
+            task_module=module,
+            input_spec=spec,
+            relu_pre=relu_pre,
+            linear_spec_C=torch.tensor([[1.0, -1.0]]),
+        )
+    tampered = {name: tensor.clone() for name, tensor in splits.items()}
+    tampered["h1"][0, 1] = -1
+    with pytest.raises(ValueError, match="payload hash"):
+        execute_plain_crown_bound_ir(
+            build.module,
+            task_module=module,
+            input_spec=spec,
+            relu_pre=relu_pre,
+            linear_spec_C=torch.tensor([[1.0, -1.0]]),
+            relu_split_state=tampered,
+        )
+    with pytest.raises(ValueError, match="not enforced"):
+        execute_plain_crown_bound_ir(
+            build.module,
+            task_module=module,
+            input_spec=spec,
+            relu_pre=root_pre,
+            linear_spec_C=torch.tensor([[1.0, -1.0]]),
+            relu_split_state=splits,
+        )
 
 
 def test_plain_crown_bound_ir_fails_closed_on_missing_trace_and_stale_bindings() -> (

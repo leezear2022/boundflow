@@ -7,6 +7,7 @@ from dataclasses import replace
 import pytest
 import torch
 
+from boundflow.frontends.plain_crown_bound_ir import relu_split_state_hash
 from boundflow.ir.bound import BoundOpKind, BoundRepresentation
 from boundflow.ir.schedule import LaunchAction, MaterializeAction
 from boundflow.planner.plan_ir_selector import NoFeasiblePlanError
@@ -16,6 +17,7 @@ from boundflow.planner.representation_plan_binding import (
     BoundRepresentationBinding,
     bind_native_representation_plan,
 )
+from boundflow.runtime.bound_ir_interpreter import execute_plain_crown_bound_ir
 from boundflow.runtime.crown_ibp import _forward_ibp_trace_mlp
 from boundflow.runtime.native_verifier_ir_integration import (
     NativePlainCrownRepresentationCompilation,
@@ -150,6 +152,84 @@ def test_budget_selects_real_dense_or_structured_execution_program() -> None:
     assert {event.execution_op_id for event in structured.binding.trace.events} <= {
         op_id for event in structured_trace.events for op_id in event.op_ids
     }
+
+
+def test_native_stack_executes_first_class_relu_split_input() -> None:
+    legacy_module, input_spec = _semantic_case("cnn")
+    _root_env, root_pre = _forward_ibp_trace_mlp(legacy_module, input_spec)
+    splits = {
+        name: torch.zeros_like(pre.lower, dtype=torch.int8)
+        for name, pre in root_pre.items()
+    }
+    ambiguous = (
+        (root_pre["conv_out"].lower < 0) & (root_pre["conv_out"].upper > 0)
+    ).nonzero()
+    assert int(ambiguous.shape[0]) > 0
+    splits["conv_out"][tuple(ambiguous[0].tolist())] = 1
+    interval_env, relu_pre = _forward_ibp_trace_mlp(
+        legacy_module, input_spec, relu_split_state=splits
+    )
+    linear_spec = torch.tensor([[1.0, -1.0, 0.5]])
+    compilation = compile_native_plain_crown_representation_query(
+        legacy_module,
+        input_spec,
+        interval_env=interval_env,
+        relu_pre=relu_pre,
+        linear_spec_C=linear_spec,
+        intermediate_bounds_hash="d" * 64,
+        query_id="native-representation-split-cnn",
+        available_memory_bytes=1 << 30,
+        memory_budget_bytes=1 << 30,
+        relu_split_state=splits,
+        split_state_hash=relu_split_state_hash(splits),
+    )
+    result, trace = execute_native_plain_crown_representation_query(
+        compilation,
+        legacy_task_module=legacy_module,
+        input_spec=input_spec,
+        relu_pre=relu_pre,
+        linear_spec_C=linear_spec,
+        relu_split_state=splits,
+    )
+    expected = execute_plain_crown_bound_ir(
+        compilation.source_bound_module,
+        task_module=legacy_module,
+        input_spec=input_spec,
+        relu_pre=relu_pre,
+        linear_spec_C=linear_spec,
+        relu_split_state=splits,
+    )
+
+    torch.testing.assert_close(result.lower, expected.lower, atol=0.0, rtol=0.0)
+    torch.testing.assert_close(result.upper, expected.upper, atol=0.0, rtol=0.0)
+    assert compilation.source_bound_module.domain.split_state_present
+    assert compilation.bound_module.domain.split_state_present
+    assert compilation.source_template.workload.split_state_present
+    assert compilation.execution_template.workload.split_state_present
+    assert all(
+        capability.supports_split_state
+        for capability in compilation.execution_template.capabilities
+    )
+    assert any(
+        "int8" in capability.supported_dtypes
+        for capability in (
+            *compilation.source_template.capabilities,
+            *compilation.execution_template.capabilities,
+        )
+    )
+    assert len(trace.events) == len(compilation.task_module.tasks)
+
+    tampered = {name: tensor.clone() for name, tensor in splits.items()}
+    tampered["conv_out"].zero_()
+    with pytest.raises(ValueError, match="payload hash"):
+        execute_native_plain_crown_representation_query(
+            compilation,
+            legacy_task_module=legacy_module,
+            input_spec=input_spec,
+            relu_pre=relu_pre,
+            linear_spec_C=linear_spec,
+            relu_split_state=tampered,
+        )
 
 
 def test_structured_execution_storage_records_dense_equivalent_size() -> None:

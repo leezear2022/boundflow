@@ -1,0 +1,1083 @@
+{
+  "evidence": {
+    "claim_boundary": "fixed-ResNet first-class ReLU split inputs, local split-constrained IBP, plain-CROWN native Bound/Plan/Task/Schedule execution, deterministic best-first bounded queue, pruning/expansion control flow, and packed/serial correctness only; not alpha/beta optimization, complete property verdict, latency, memory, CUDA, or speedup evidence",
+    "comparison": {
+      "atol": 0.0002,
+      "exact_node_state_hashes_same": false,
+      "logical_queue_signature_same": true,
+      "lower_allclose": true,
+      "lower_max_abs_diff": 0.00018310546875,
+      "node_ids_same": true,
+      "rtol": 0.0002,
+      "split_state_hashes_same": true,
+      "upper_allclose": true,
+      "upper_max_abs_diff": 0.0001220703125
+    },
+    "compiler_version": "boundflow.native-relu-split-bab/v1",
+    "gates": {
+      "all_six_relu_splits_are_first_class_bound_inputs": true,
+      "best_first_queue_forms_three_generations_and_four_frontier_nodes": true,
+      "bounded_run_reports_unknown_budget_exhausted_without_performance_claim": true,
+      "every_child_recomputes_exact_state_without_parent_reuse": true,
+      "fixed_resnet_and_property_source_are_digest_bound": true,
+      "packed_and_serial_bounds_and_queue_semantics_match": true,
+      "packed_three_stacks_replace_seven_serial_stacks": true,
+      "split_state_reaches_plan_task_and_schedule_ir": true
+    },
+    "limitations": [
+      "plain CROWN with exact split-constrained local IBP; no alpha/beta optimization",
+      "seven-node bounded run ends budget_exhausted with property_status=not_claimed",
+      "parent exact bounds are never child exact state; only discrete splits inherit",
+      "three versus seven native stacks is a mechanism count, not a timing claim",
+      "CPU correctness/control-flow evidence only; no latency, memory, CUDA, or speedup claim"
+    ],
+    "packed": {
+      "trace": {
+        "compiler_version": "boundflow.native-relu-split-bab/v1",
+        "config": {
+          "available_memory_bytes": 1073741824,
+          "expansion_batch_size": 2,
+          "max_depth": 8,
+          "max_eval_batch_size": 4,
+          "max_nodes": 7,
+          "memory_budget_bytes": 1073741824,
+          "threshold": 0.0
+        },
+        "decisions": [
+          {
+            "branch_candidate": {
+              "lower": -221.17330932617188,
+              "neuron_index": 93,
+              "relu_input": "31",
+              "upper": 173.5435333251953,
+              "width": 394.7168426513672
+            },
+            "child_node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000001",
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000002"
+            ],
+            "decision_index": 0,
+            "kind": "expand",
+            "node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000000",
+            "reason": "widest_unsplit_ambiguous_relu"
+          },
+          {
+            "branch_candidate": {
+              "lower": -217.03172302246094,
+              "neuron_index": 13,
+              "relu_input": "31",
+              "upper": 172.34368896484375,
+              "width": 389.3754119873047
+            },
+            "child_node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000003",
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000004"
+            ],
+            "decision_index": 1,
+            "kind": "expand",
+            "node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000002",
+            "reason": "widest_unsplit_ambiguous_relu"
+          },
+          {
+            "branch_candidate": {
+              "lower": -217.03172302246094,
+              "neuron_index": 13,
+              "relu_input": "31",
+              "upper": 172.34368896484375,
+              "width": 389.3754119873047
+            },
+            "child_node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000005",
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000006"
+            ],
+            "decision_index": 2,
+            "kind": "expand",
+            "node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000001",
+            "reason": "widest_unsplit_ambiguous_relu"
+          }
+        ],
+        "evaluations": [
+          {
+            "branch_candidate": {
+              "lower": -221.17330932617188,
+              "neuron_index": 93,
+              "relu_input": "31",
+              "upper": 173.5435333251953,
+              "width": 394.7168426513672
+            },
+            "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0000",
+            "eval_batch_position": 0,
+            "exact_state_hash": "8b4eee522fa0513c2942b2ac5ae7b534244885e7d6be32b81bf33184246d3b83",
+            "lower": -557.1522216796875,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "8d5e2a017c2cd1841d39166de19a340f9e37fac331ef2b1ca3c98a1023739d17",
+              "execution_plan_instance_hash": "e07749fe27a70574ec18779396d134f22bd2d7a499bafefee82285d9e6ce4059",
+              "execution_plan_template_hash": "f4fae60d1425b4eb1293b93802d4fde1733020744c6df1b4f1f89a95ce04958b",
+              "representation_binding_hash": "5971f14e872a012276c8097d11bf6d9fe4b3ce4dba245eb1c48b8d7efeac5827",
+              "schedule_hash": "8f3e703a6325c7ededfa474cb25b867d02aedb9443fc6d7e4f63ae07f032e7ed",
+              "source_bound_module_hash": "8d5e2a017c2cd1841d39166de19a340f9e37fac331ef2b1ca3c98a1023739d17",
+              "source_plan_instance_hash": "45c6347b26aec77789b9b4e6cfe1f25b976c48dccd30a3a16dcb93573dbd69b9",
+              "source_plan_template_hash": "2cca4974c4d2a4bb1aa3ac3302c37149c6edae4db6be8d800d43f4e4fd39954c",
+              "source_schedule_hash": "9919b2863597217cade98ec0528234184979edfd8a03979c8068ebd963a5ef75",
+              "task_module_hash": "a675a1929d4089edc5ea02b8f63e76ba512cb8543359a27b6a01b5bbb1cfe624"
+            },
+            "node": {
+              "branch_neuron_index": null,
+              "branch_relu_input": null,
+              "branch_value": 0,
+              "depth": 0,
+              "node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000000",
+              "parent_node_id": null,
+              "split_state_hash": "32ef5aa369eb3b424067ead0f6b4a41a59b7c5753a5e59034bc13372b10bc2be"
+            },
+            "parent_exact_state_hash": null,
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "discrete_split_inheritance_only",
+            "priority": -557.1522,
+            "upper": 567.4952392578125
+          },
+          {
+            "branch_candidate": {
+              "lower": -217.03172302246094,
+              "neuron_index": 13,
+              "relu_input": "31",
+              "upper": 172.34368896484375,
+              "width": 389.3754119873047
+            },
+            "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0001",
+            "eval_batch_position": 0,
+            "exact_state_hash": "1f749b0845296b0c7dee28b506752653f9453e89ad062e943041a1d8c48ed2a5",
+            "lower": -557.1522827148438,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "ca8cb636af6a9fc153c234e9b5f1cd36a9f523b02d088fe8964c6664c6728f47",
+              "execution_plan_instance_hash": "60cd29a05baffd664062213aa40ed6eb36977f0dd59761913e4111f0dde26d4e",
+              "execution_plan_template_hash": "4dfc5e2097e7f8d34a139847ab59b9aec460f153e1e95987da20db45f3032057",
+              "representation_binding_hash": "350f60904a2ad641959429c58920767003bbb8ae2cf645297e655a8c1163b645",
+              "schedule_hash": "2fffd058908138e105f672d951ec67cfdbfb6311d8b56f5215ac9fa653cce0a5",
+              "source_bound_module_hash": "ca8cb636af6a9fc153c234e9b5f1cd36a9f523b02d088fe8964c6664c6728f47",
+              "source_plan_instance_hash": "2ae03195166d7e767d36c758b84303c7051d787fa54c3df4f43edebbd7e1252e",
+              "source_plan_template_hash": "798364bbdf09abde90cd2eff365cce7c7f9907ff87dccd2cdbc126731882da40",
+              "source_schedule_hash": "3e5376093a374825c91f558769a20e3df14f979324c63d7e6d17ed0d8284643e",
+              "task_module_hash": "33dc4b2acb8ed6a49cc7e3fb001d37393053070e97aaec7df65db407ef63fa18"
+            },
+            "node": {
+              "branch_neuron_index": 93,
+              "branch_relu_input": "31",
+              "branch_value": -1,
+              "depth": 1,
+              "node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000001",
+              "parent_node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000000",
+              "split_state_hash": "2bcbcb8c25f1f2cfdcb1ab9ffabc546c59e26f9b5cb3652dddb4b36d8d11f74d"
+            },
+            "parent_exact_state_hash": "8b4eee522fa0513c2942b2ac5ae7b534244885e7d6be32b81bf33184246d3b83",
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "discrete_split_inheritance_only",
+            "priority": -557.1523,
+            "upper": 565.5704345703125
+          },
+          {
+            "branch_candidate": {
+              "lower": -217.03172302246094,
+              "neuron_index": 13,
+              "relu_input": "31",
+              "upper": 172.34368896484375,
+              "width": 389.3754119873047
+            },
+            "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0001",
+            "eval_batch_position": 1,
+            "exact_state_hash": "3a97666f9308ac98be117277a09d23a5bf2a45271d0ffed574dfa366cae1f3a8",
+            "lower": -557.6209716796875,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "ca8cb636af6a9fc153c234e9b5f1cd36a9f523b02d088fe8964c6664c6728f47",
+              "execution_plan_instance_hash": "60cd29a05baffd664062213aa40ed6eb36977f0dd59761913e4111f0dde26d4e",
+              "execution_plan_template_hash": "4dfc5e2097e7f8d34a139847ab59b9aec460f153e1e95987da20db45f3032057",
+              "representation_binding_hash": "350f60904a2ad641959429c58920767003bbb8ae2cf645297e655a8c1163b645",
+              "schedule_hash": "2fffd058908138e105f672d951ec67cfdbfb6311d8b56f5215ac9fa653cce0a5",
+              "source_bound_module_hash": "ca8cb636af6a9fc153c234e9b5f1cd36a9f523b02d088fe8964c6664c6728f47",
+              "source_plan_instance_hash": "2ae03195166d7e767d36c758b84303c7051d787fa54c3df4f43edebbd7e1252e",
+              "source_plan_template_hash": "798364bbdf09abde90cd2eff365cce7c7f9907ff87dccd2cdbc126731882da40",
+              "source_schedule_hash": "3e5376093a374825c91f558769a20e3df14f979324c63d7e6d17ed0d8284643e",
+              "task_module_hash": "33dc4b2acb8ed6a49cc7e3fb001d37393053070e97aaec7df65db407ef63fa18"
+            },
+            "node": {
+              "branch_neuron_index": 93,
+              "branch_relu_input": "31",
+              "branch_value": 1,
+              "depth": 1,
+              "node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000002",
+              "parent_node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000000",
+              "split_state_hash": "8cb0f1554c3c8d0773f1f0112eb3cc414457fed01a9426a3d95f0fd009c89f79"
+            },
+            "parent_exact_state_hash": "8b4eee522fa0513c2942b2ac5ae7b534244885e7d6be32b81bf33184246d3b83",
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "discrete_split_inheritance_only",
+            "priority": -557.621,
+            "upper": 565.1362915039062
+          },
+          {
+            "branch_candidate": {
+              "lower": -235.57249450683594,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 153.698486328125,
+              "width": 389.27098083496094
+            },
+            "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0002",
+            "eval_batch_position": 0,
+            "exact_state_hash": "77bb394168a54f1fb32ca5ccd51c033254b6c6a6814c2f2b3283f9d72fa81e6f",
+            "lower": -557.6210327148438,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "5da22803428bd74f44332170e5cbaef89d170ce41496cb1eedacb60b23579d20",
+              "execution_plan_instance_hash": "fd7ec639b24d906618a7e4a2b1ccdd7b0915ed443bc0a5b63c2713be3fe02317",
+              "execution_plan_template_hash": "bb32fcf7cc3c23255b6b93b86eeaba659de19318a1a62a53052755d62b711440",
+              "representation_binding_hash": "9581037aa1f94fb80914d2799f6313cd02ed1bc1140184e90a7a0669d8a36c40",
+              "schedule_hash": "8bbd8f3c6a2470eda387ccb79cfbe6c9237ad70e0a2ae3f55c4b36b34b464821",
+              "source_bound_module_hash": "5da22803428bd74f44332170e5cbaef89d170ce41496cb1eedacb60b23579d20",
+              "source_plan_instance_hash": "664379bb492cc70c5c56b2e1a615546b9a81647f9100e80ef8ab486d6a685e14",
+              "source_plan_template_hash": "7260573c41553edf3df2bda5172bed045fb92b0ddd8c31033571020ee59aa201",
+              "source_schedule_hash": "ba8caa9a8025c6c143804e694f92f6e432ca9ccea3919d700bdb28a75fcfeb61",
+              "task_module_hash": "cdfb445bfcd255efe6c9cec2514805106a4d397144b85cf921c87a8043e33545"
+            },
+            "node": {
+              "branch_neuron_index": 13,
+              "branch_relu_input": "31",
+              "branch_value": -1,
+              "depth": 2,
+              "node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000003",
+              "parent_node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000002",
+              "split_state_hash": "0dfc4b59b5da742a9f41b200e19576b197c70fb75bd1074b2794be5d91c05ab7"
+            },
+            "parent_exact_state_hash": "3a97666f9308ac98be117277a09d23a5bf2a45271d0ffed574dfa366cae1f3a8",
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "discrete_split_inheritance_only",
+            "priority": -557.621,
+            "upper": 562.45947265625
+          },
+          {
+            "branch_candidate": {
+              "lower": -235.57249450683594,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 153.698486328125,
+              "width": 389.27098083496094
+            },
+            "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0002",
+            "eval_batch_position": 1,
+            "exact_state_hash": "3b087945dac37fcb63ca7c16e592ef5ffc63b98edb2d4310b680f3687a14ec9e",
+            "lower": -557.8501586914062,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "5da22803428bd74f44332170e5cbaef89d170ce41496cb1eedacb60b23579d20",
+              "execution_plan_instance_hash": "fd7ec639b24d906618a7e4a2b1ccdd7b0915ed443bc0a5b63c2713be3fe02317",
+              "execution_plan_template_hash": "bb32fcf7cc3c23255b6b93b86eeaba659de19318a1a62a53052755d62b711440",
+              "representation_binding_hash": "9581037aa1f94fb80914d2799f6313cd02ed1bc1140184e90a7a0669d8a36c40",
+              "schedule_hash": "8bbd8f3c6a2470eda387ccb79cfbe6c9237ad70e0a2ae3f55c4b36b34b464821",
+              "source_bound_module_hash": "5da22803428bd74f44332170e5cbaef89d170ce41496cb1eedacb60b23579d20",
+              "source_plan_instance_hash": "664379bb492cc70c5c56b2e1a615546b9a81647f9100e80ef8ab486d6a685e14",
+              "source_plan_template_hash": "7260573c41553edf3df2bda5172bed045fb92b0ddd8c31033571020ee59aa201",
+              "source_schedule_hash": "ba8caa9a8025c6c143804e694f92f6e432ca9ccea3919d700bdb28a75fcfeb61",
+              "task_module_hash": "cdfb445bfcd255efe6c9cec2514805106a4d397144b85cf921c87a8043e33545"
+            },
+            "node": {
+              "branch_neuron_index": 13,
+              "branch_relu_input": "31",
+              "branch_value": 1,
+              "depth": 2,
+              "node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000004",
+              "parent_node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000002",
+              "split_state_hash": "d0a28960da6864a0c0fab7a9c57b47ce9d4eefc3141837f77bfd54feb4b6f237"
+            },
+            "parent_exact_state_hash": "3a97666f9308ac98be117277a09d23a5bf2a45271d0ffed574dfa366cae1f3a8",
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "discrete_split_inheritance_only",
+            "priority": -557.8502,
+            "upper": 561.6998291015625
+          },
+          {
+            "branch_candidate": {
+              "lower": -235.57249450683594,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 153.698486328125,
+              "width": 389.27098083496094
+            },
+            "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0002",
+            "eval_batch_position": 2,
+            "exact_state_hash": "33b77482584c486234ce3fa7a340d9eee54813917133259c9223c882a84d2c2a",
+            "lower": -557.15234375,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "5da22803428bd74f44332170e5cbaef89d170ce41496cb1eedacb60b23579d20",
+              "execution_plan_instance_hash": "fd7ec639b24d906618a7e4a2b1ccdd7b0915ed443bc0a5b63c2713be3fe02317",
+              "execution_plan_template_hash": "bb32fcf7cc3c23255b6b93b86eeaba659de19318a1a62a53052755d62b711440",
+              "representation_binding_hash": "9581037aa1f94fb80914d2799f6313cd02ed1bc1140184e90a7a0669d8a36c40",
+              "schedule_hash": "8bbd8f3c6a2470eda387ccb79cfbe6c9237ad70e0a2ae3f55c4b36b34b464821",
+              "source_bound_module_hash": "5da22803428bd74f44332170e5cbaef89d170ce41496cb1eedacb60b23579d20",
+              "source_plan_instance_hash": "664379bb492cc70c5c56b2e1a615546b9a81647f9100e80ef8ab486d6a685e14",
+              "source_plan_template_hash": "7260573c41553edf3df2bda5172bed045fb92b0ddd8c31033571020ee59aa201",
+              "source_schedule_hash": "ba8caa9a8025c6c143804e694f92f6e432ca9ccea3919d700bdb28a75fcfeb61",
+              "task_module_hash": "cdfb445bfcd255efe6c9cec2514805106a4d397144b85cf921c87a8043e33545"
+            },
+            "node": {
+              "branch_neuron_index": 13,
+              "branch_relu_input": "31",
+              "branch_value": -1,
+              "depth": 2,
+              "node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000005",
+              "parent_node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000001",
+              "split_state_hash": "59bc3801afc084c124883b7c1b64a9a06c52a92cf56b869665db8148af319a15"
+            },
+            "parent_exact_state_hash": "1f749b0845296b0c7dee28b506752653f9453e89ad062e943041a1d8c48ed2a5",
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "discrete_split_inheritance_only",
+            "priority": -557.1523,
+            "upper": 562.898193359375
+          },
+          {
+            "branch_candidate": {
+              "lower": -235.57249450683594,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 153.698486328125,
+              "width": 389.27098083496094
+            },
+            "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0002",
+            "eval_batch_position": 3,
+            "exact_state_hash": "7851be72dd2dcb934d904c960a23301f1db841204cf4f01b729c0dd7b9736577",
+            "lower": -557.4127197265625,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "5da22803428bd74f44332170e5cbaef89d170ce41496cb1eedacb60b23579d20",
+              "execution_plan_instance_hash": "fd7ec639b24d906618a7e4a2b1ccdd7b0915ed443bc0a5b63c2713be3fe02317",
+              "execution_plan_template_hash": "bb32fcf7cc3c23255b6b93b86eeaba659de19318a1a62a53052755d62b711440",
+              "representation_binding_hash": "9581037aa1f94fb80914d2799f6313cd02ed1bc1140184e90a7a0669d8a36c40",
+              "schedule_hash": "8bbd8f3c6a2470eda387ccb79cfbe6c9237ad70e0a2ae3f55c4b36b34b464821",
+              "source_bound_module_hash": "5da22803428bd74f44332170e5cbaef89d170ce41496cb1eedacb60b23579d20",
+              "source_plan_instance_hash": "664379bb492cc70c5c56b2e1a615546b9a81647f9100e80ef8ab486d6a685e14",
+              "source_plan_template_hash": "7260573c41553edf3df2bda5172bed045fb92b0ddd8c31033571020ee59aa201",
+              "source_schedule_hash": "ba8caa9a8025c6c143804e694f92f6e432ca9ccea3919d700bdb28a75fcfeb61",
+              "task_module_hash": "cdfb445bfcd255efe6c9cec2514805106a4d397144b85cf921c87a8043e33545"
+            },
+            "node": {
+              "branch_neuron_index": 13,
+              "branch_relu_input": "31",
+              "branch_value": 1,
+              "depth": 2,
+              "node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000006",
+              "parent_node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000001",
+              "split_state_hash": "887b4f9256b40d4b13eaccc919c8fe2f758d1b91c1f80d4aabd756323bcb9839"
+            },
+            "parent_exact_state_hash": "1f749b0845296b0c7dee28b506752653f9453e89ad062e943041a1d8c48ed2a5",
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "discrete_split_inheritance_only",
+            "priority": -557.4127,
+            "upper": 562.13134765625
+          }
+        ],
+        "final_frontier_node_ids": [
+          "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000004",
+          "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000003",
+          "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000006",
+          "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000005"
+        ],
+        "max_queue_size": 4,
+        "native_stack_count": 3,
+        "native_stacks": [
+          {
+            "bound_local_forward_relu_op_count": 6,
+            "bound_split_input_count": 6,
+            "bound_split_relu_op_count": 6,
+            "domain_batch_size": 1,
+            "execution_plan_split_state_present": true,
+            "local_forward_provenance_count": 2,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "8d5e2a017c2cd1841d39166de19a340f9e37fac331ef2b1ca3c98a1023739d17",
+              "execution_plan_instance_hash": "e07749fe27a70574ec18779396d134f22bd2d7a499bafefee82285d9e6ce4059",
+              "execution_plan_template_hash": "f4fae60d1425b4eb1293b93802d4fde1733020744c6df1b4f1f89a95ce04958b",
+              "representation_binding_hash": "5971f14e872a012276c8097d11bf6d9fe4b3ce4dba245eb1c48b8d7efeac5827",
+              "schedule_hash": "8f3e703a6325c7ededfa474cb25b867d02aedb9443fc6d7e4f63ae07f032e7ed",
+              "source_bound_module_hash": "8d5e2a017c2cd1841d39166de19a340f9e37fac331ef2b1ca3c98a1023739d17",
+              "source_plan_instance_hash": "45c6347b26aec77789b9b4e6cfe1f25b976c48dccd30a3a16dcb93573dbd69b9",
+              "source_plan_template_hash": "2cca4974c4d2a4bb1aa3ac3302c37149c6edae4db6be8d800d43f4e4fd39954c",
+              "source_schedule_hash": "9919b2863597217cade98ec0528234184979edfd8a03979c8068ebd963a5ef75",
+              "task_module_hash": "a675a1929d4089edc5ea02b8f63e76ba512cb8543359a27b6a01b5bbb1cfe624"
+            },
+            "node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000000"
+            ],
+            "representation_policy_id": "native-dense-v1",
+            "schedule_launch_count": 21,
+            "source_plan_split_state_present": true,
+            "split_capability_count": 2,
+            "stack_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0000",
+            "storage_candidate_id": "storage:native-retain-all-v1",
+            "task_count": 21
+          },
+          {
+            "bound_local_forward_relu_op_count": 6,
+            "bound_split_input_count": 6,
+            "bound_split_relu_op_count": 6,
+            "domain_batch_size": 2,
+            "execution_plan_split_state_present": true,
+            "local_forward_provenance_count": 2,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "ca8cb636af6a9fc153c234e9b5f1cd36a9f523b02d088fe8964c6664c6728f47",
+              "execution_plan_instance_hash": "60cd29a05baffd664062213aa40ed6eb36977f0dd59761913e4111f0dde26d4e",
+              "execution_plan_template_hash": "4dfc5e2097e7f8d34a139847ab59b9aec460f153e1e95987da20db45f3032057",
+              "representation_binding_hash": "350f60904a2ad641959429c58920767003bbb8ae2cf645297e655a8c1163b645",
+              "schedule_hash": "2fffd058908138e105f672d951ec67cfdbfb6311d8b56f5215ac9fa653cce0a5",
+              "source_bound_module_hash": "ca8cb636af6a9fc153c234e9b5f1cd36a9f523b02d088fe8964c6664c6728f47",
+              "source_plan_instance_hash": "2ae03195166d7e767d36c758b84303c7051d787fa54c3df4f43edebbd7e1252e",
+              "source_plan_template_hash": "798364bbdf09abde90cd2eff365cce7c7f9907ff87dccd2cdbc126731882da40",
+              "source_schedule_hash": "3e5376093a374825c91f558769a20e3df14f979324c63d7e6d17ed0d8284643e",
+              "task_module_hash": "33dc4b2acb8ed6a49cc7e3fb001d37393053070e97aaec7df65db407ef63fa18"
+            },
+            "node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000001",
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000002"
+            ],
+            "representation_policy_id": "native-dense-v1",
+            "schedule_launch_count": 21,
+            "source_plan_split_state_present": true,
+            "split_capability_count": 2,
+            "stack_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0001",
+            "storage_candidate_id": "storage:native-retain-all-v1",
+            "task_count": 21
+          },
+          {
+            "bound_local_forward_relu_op_count": 6,
+            "bound_split_input_count": 6,
+            "bound_split_relu_op_count": 6,
+            "domain_batch_size": 4,
+            "execution_plan_split_state_present": true,
+            "local_forward_provenance_count": 2,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "5da22803428bd74f44332170e5cbaef89d170ce41496cb1eedacb60b23579d20",
+              "execution_plan_instance_hash": "fd7ec639b24d906618a7e4a2b1ccdd7b0915ed443bc0a5b63c2713be3fe02317",
+              "execution_plan_template_hash": "bb32fcf7cc3c23255b6b93b86eeaba659de19318a1a62a53052755d62b711440",
+              "representation_binding_hash": "9581037aa1f94fb80914d2799f6313cd02ed1bc1140184e90a7a0669d8a36c40",
+              "schedule_hash": "8bbd8f3c6a2470eda387ccb79cfbe6c9237ad70e0a2ae3f55c4b36b34b464821",
+              "source_bound_module_hash": "5da22803428bd74f44332170e5cbaef89d170ce41496cb1eedacb60b23579d20",
+              "source_plan_instance_hash": "664379bb492cc70c5c56b2e1a615546b9a81647f9100e80ef8ab486d6a685e14",
+              "source_plan_template_hash": "7260573c41553edf3df2bda5172bed045fb92b0ddd8c31033571020ee59aa201",
+              "source_schedule_hash": "ba8caa9a8025c6c143804e694f92f6e432ca9ccea3919d700bdb28a75fcfeb61",
+              "task_module_hash": "cdfb445bfcd255efe6c9cec2514805106a4d397144b85cf921c87a8043e33545"
+            },
+            "node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000003",
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000004",
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000005",
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000006"
+            ],
+            "representation_policy_id": "native-dense-v1",
+            "schedule_launch_count": 21,
+            "source_plan_split_state_present": true,
+            "split_capability_count": 2,
+            "stack_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0002",
+            "storage_candidate_id": "storage:native-retain-all-v1",
+            "task_count": 21
+          }
+        ],
+        "objective_hash": "a62146650a0f29762a1467c72007cba1937a5c05b9236ab53a91964308e05dca",
+        "performance_claimed": false,
+        "property_status": "not_claimed",
+        "root_input_lower_hash": "bed6da6e49f1123b54fe61247615cf0e86f1b4257face7b073428f257607bda6",
+        "root_input_upper_hash": "955d79bd0824185cad0be1e758e6e492c51aec6c9199f81359b2528b848ec9ab",
+        "run_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab",
+        "schema_version": "boundflow.relu-split-bab-trace/v1",
+        "status": "budget_exhausted",
+        "termination_reason": "node_budget_exhausted"
+      },
+      "trace_hash": "a72c82953f7bcc110865c5fa64049ada0c48a47f0a95adff1dcbcdd8844733ef"
+    },
+    "performance_claimed": false,
+    "property_status": "not_claimed",
+    "schema_version": "boundflow.native-real-network-relu-split-bab-evidence/v1",
+    "serial": {
+      "trace": {
+        "compiler_version": "boundflow.native-relu-split-bab/v1",
+        "config": {
+          "available_memory_bytes": 1073741824,
+          "expansion_batch_size": 2,
+          "max_depth": 8,
+          "max_eval_batch_size": 1,
+          "max_nodes": 7,
+          "memory_budget_bytes": 1073741824,
+          "threshold": 0.0
+        },
+        "decisions": [
+          {
+            "branch_candidate": {
+              "lower": -221.17330932617188,
+              "neuron_index": 93,
+              "relu_input": "31",
+              "upper": 173.5435333251953,
+              "width": 394.7168426513672
+            },
+            "child_node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000001",
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000002"
+            ],
+            "decision_index": 0,
+            "kind": "expand",
+            "node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000000",
+            "reason": "widest_unsplit_ambiguous_relu"
+          },
+          {
+            "branch_candidate": {
+              "lower": -217.0316619873047,
+              "neuron_index": 13,
+              "relu_input": "31",
+              "upper": 172.34364318847656,
+              "width": 389.37530517578125
+            },
+            "child_node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000003",
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000004"
+            ],
+            "decision_index": 1,
+            "kind": "expand",
+            "node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000002",
+            "reason": "widest_unsplit_ambiguous_relu"
+          },
+          {
+            "branch_candidate": {
+              "lower": -217.0316619873047,
+              "neuron_index": 13,
+              "relu_input": "31",
+              "upper": 172.34364318847656,
+              "width": 389.37530517578125
+            },
+            "child_node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000005",
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000006"
+            ],
+            "decision_index": 2,
+            "kind": "expand",
+            "node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000001",
+            "reason": "widest_unsplit_ambiguous_relu"
+          }
+        ],
+        "evaluations": [
+          {
+            "branch_candidate": {
+              "lower": -221.17330932617188,
+              "neuron_index": 93,
+              "relu_input": "31",
+              "upper": 173.5435333251953,
+              "width": 394.7168426513672
+            },
+            "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0000",
+            "eval_batch_position": 0,
+            "exact_state_hash": "8b4eee522fa0513c2942b2ac5ae7b534244885e7d6be32b81bf33184246d3b83",
+            "lower": -557.1522216796875,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "8d5e2a017c2cd1841d39166de19a340f9e37fac331ef2b1ca3c98a1023739d17",
+              "execution_plan_instance_hash": "e07749fe27a70574ec18779396d134f22bd2d7a499bafefee82285d9e6ce4059",
+              "execution_plan_template_hash": "f4fae60d1425b4eb1293b93802d4fde1733020744c6df1b4f1f89a95ce04958b",
+              "representation_binding_hash": "5971f14e872a012276c8097d11bf6d9fe4b3ce4dba245eb1c48b8d7efeac5827",
+              "schedule_hash": "8f3e703a6325c7ededfa474cb25b867d02aedb9443fc6d7e4f63ae07f032e7ed",
+              "source_bound_module_hash": "8d5e2a017c2cd1841d39166de19a340f9e37fac331ef2b1ca3c98a1023739d17",
+              "source_plan_instance_hash": "45c6347b26aec77789b9b4e6cfe1f25b976c48dccd30a3a16dcb93573dbd69b9",
+              "source_plan_template_hash": "2cca4974c4d2a4bb1aa3ac3302c37149c6edae4db6be8d800d43f4e4fd39954c",
+              "source_schedule_hash": "9919b2863597217cade98ec0528234184979edfd8a03979c8068ebd963a5ef75",
+              "task_module_hash": "a675a1929d4089edc5ea02b8f63e76ba512cb8543359a27b6a01b5bbb1cfe624"
+            },
+            "node": {
+              "branch_neuron_index": null,
+              "branch_relu_input": null,
+              "branch_value": 0,
+              "depth": 0,
+              "node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000000",
+              "parent_node_id": null,
+              "split_state_hash": "32ef5aa369eb3b424067ead0f6b4a41a59b7c5753a5e59034bc13372b10bc2be"
+            },
+            "parent_exact_state_hash": null,
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "discrete_split_inheritance_only",
+            "priority": -557.1522,
+            "upper": 567.4952392578125
+          },
+          {
+            "branch_candidate": {
+              "lower": -217.0316619873047,
+              "neuron_index": 13,
+              "relu_input": "31",
+              "upper": 172.34364318847656,
+              "width": 389.37530517578125
+            },
+            "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0001",
+            "eval_batch_position": 0,
+            "exact_state_hash": "d33d169602351e4a900ced6a3ac537b71b51bc43854e185106696007cf76edbd",
+            "lower": -557.1522216796875,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "9418a240e2a12f37d93fd4dd08e4ad9bffa6deb2498dadb687f227d56c7da570",
+              "execution_plan_instance_hash": "a1ee1faf0ea823747ff3a0abb71d08e63a158398313b8c9ec09286dd87db94e6",
+              "execution_plan_template_hash": "f200bed36077634b2c92cf3cdb2b86f83980996be1c6d7569a4a30c6212378d4",
+              "representation_binding_hash": "6265c76ee5a01562e5e8d699fb13dbd163f2c873e604852e5a0b1f9e6f29b112",
+              "schedule_hash": "5db69e7466088cf97d884c44334d76a19a6baff12003be6e2195b2921555dd7a",
+              "source_bound_module_hash": "9418a240e2a12f37d93fd4dd08e4ad9bffa6deb2498dadb687f227d56c7da570",
+              "source_plan_instance_hash": "4a9a4220ee03e383843e991067ea2a08d055610d2e25567d5f8df5bacc03039d",
+              "source_plan_template_hash": "3df69304929e7cd7574d1f5296b02fb150ffa08c5646b294481b9778a0d61546",
+              "source_schedule_hash": "50f4078df7fafa02ba9a40dcd6e39a0764fddf2dffb3c170477a4ecc6269b337",
+              "task_module_hash": "c0c326186f02e42af41db763e35b37765140adaca4ca0a27a935d2ca6913ac78"
+            },
+            "node": {
+              "branch_neuron_index": 93,
+              "branch_relu_input": "31",
+              "branch_value": -1,
+              "depth": 1,
+              "node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000001",
+              "parent_node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000000",
+              "split_state_hash": "2bcbcb8c25f1f2cfdcb1ab9ffabc546c59e26f9b5cb3652dddb4b36d8d11f74d"
+            },
+            "parent_exact_state_hash": "8b4eee522fa0513c2942b2ac5ae7b534244885e7d6be32b81bf33184246d3b83",
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "discrete_split_inheritance_only",
+            "priority": -557.1522,
+            "upper": 565.5703125
+          },
+          {
+            "branch_candidate": {
+              "lower": -217.0316619873047,
+              "neuron_index": 13,
+              "relu_input": "31",
+              "upper": 172.34364318847656,
+              "width": 389.37530517578125
+            },
+            "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0002",
+            "eval_batch_position": 0,
+            "exact_state_hash": "34ef7a196c99436cfacdca846ab6ced167cc1e4a3182d4beb65e9c1188ec3e49",
+            "lower": -557.6209106445312,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "6a6b217bdb5988728ac66109b10900653785dd77141191f308c46bcf3180eaf5",
+              "execution_plan_instance_hash": "b24fd2c1b5c4d25bd872b3ff0cc75cefda925526dfb3869e87387b2c3a189017",
+              "execution_plan_template_hash": "365949013349d7f15dfbe71ca93bb56ea66ecfa629e46b0bafd8bbc6bbca9d8d",
+              "representation_binding_hash": "73758210b45b360abb3c07876208e72fa8bbcca4f76939186380d2385d0ce351",
+              "schedule_hash": "2d0ee3b63d811e7ef2e886c0a25de15d21bfbbafd93f828fe0b96ec1ad91f3df",
+              "source_bound_module_hash": "6a6b217bdb5988728ac66109b10900653785dd77141191f308c46bcf3180eaf5",
+              "source_plan_instance_hash": "eeda87865895d0ddc6ff6d4c39efdfad674ecb224ba43c206db1be04df02cf38",
+              "source_plan_template_hash": "43358b0f5875db8aeaf473e603bbc058741f91f318ba55e5a5a7d41c323289d0",
+              "source_schedule_hash": "2b634b38667df774268fde3ca2c65dd6e91d8d0962d5f3db822370898bb1fbf0",
+              "task_module_hash": "d4f86b3992a9ecc0c33ba5642b389e3b74d2abc927d84c5e7f856f9e0913f3b2"
+            },
+            "node": {
+              "branch_neuron_index": 93,
+              "branch_relu_input": "31",
+              "branch_value": 1,
+              "depth": 1,
+              "node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000002",
+              "parent_node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000000",
+              "split_state_hash": "8cb0f1554c3c8d0773f1f0112eb3cc414457fed01a9426a3d95f0fd009c89f79"
+            },
+            "parent_exact_state_hash": "8b4eee522fa0513c2942b2ac5ae7b534244885e7d6be32b81bf33184246d3b83",
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "discrete_split_inheritance_only",
+            "priority": -557.6209,
+            "upper": 565.1361694335938
+          },
+          {
+            "branch_candidate": {
+              "lower": -235.57244873046875,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 153.69847106933594,
+              "width": 389.2709197998047
+            },
+            "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0003",
+            "eval_batch_position": 0,
+            "exact_state_hash": "dc46197634342e1d2325d90b566e1bb1eaf7469a63a00b3701fabd2c33d50003",
+            "lower": -557.6209106445312,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "987933634c37b71ae949d92836f02999b1012a274c1ca1a37178eb9d449738a4",
+              "execution_plan_instance_hash": "ed547e863c2d61ecdd7d15606537799a0438a20f5e2090d099788b1756cd3936",
+              "execution_plan_template_hash": "745a074e55c4151e046e345a62d3cddcd3257337fc4c23892a47dcc8766afec9",
+              "representation_binding_hash": "9991d5c88fd3026ed1e961e40068b9e2e82449b159abc7e2c7c0be9ba2887dc1",
+              "schedule_hash": "62383ac1e09d7a481129032778f85d64e59ec076237a22c1cabc617cab18713d",
+              "source_bound_module_hash": "987933634c37b71ae949d92836f02999b1012a274c1ca1a37178eb9d449738a4",
+              "source_plan_instance_hash": "1491f1d248d46d54d35f096b6a0f8c8f153c8705c352bcca57809336b280c96a",
+              "source_plan_template_hash": "4a507ebeb75fa0759eb3c00d6d48127208e1f6384b76c6102a4dca3820be957f",
+              "source_schedule_hash": "d2af7e650d5f4c885a1842a1d0d808dc75451640dd18051898b45ebce2a1b8e0",
+              "task_module_hash": "7bd8813206e1fbcf063b5ad1574906b8320b1a7a2b9c133693b56cb3f31f4920"
+            },
+            "node": {
+              "branch_neuron_index": 13,
+              "branch_relu_input": "31",
+              "branch_value": -1,
+              "depth": 2,
+              "node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000003",
+              "parent_node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000002",
+              "split_state_hash": "0dfc4b59b5da742a9f41b200e19576b197c70fb75bd1074b2794be5d91c05ab7"
+            },
+            "parent_exact_state_hash": "34ef7a196c99436cfacdca846ab6ced167cc1e4a3182d4beb65e9c1188ec3e49",
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "discrete_split_inheritance_only",
+            "priority": -557.6209,
+            "upper": 562.4594116210938
+          },
+          {
+            "branch_candidate": {
+              "lower": -235.57244873046875,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 153.69847106933594,
+              "width": 389.2709197998047
+            },
+            "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0004",
+            "eval_batch_position": 0,
+            "exact_state_hash": "ca4e0a62833f0732ec53523fab280ba9cfa8ad76e1134be9bb7ca4845cc49833",
+            "lower": -557.8499755859375,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "0f5f0a98133f7446b22855c8dd5c2cd4addaa5773968ad0bc7558d8f320df1b1",
+              "execution_plan_instance_hash": "85bf5b780ffc8f20bd05037c363207c429577c5eb0c2e79895adb569450abbd7",
+              "execution_plan_template_hash": "16d960d3f9a257a7e8cb1bfadbf192065857a6f642ec01a25d30691bcea84e81",
+              "representation_binding_hash": "1126e0c749abcf1930f5aa0b408d7dd2ce750897b5f966dd6b00a1a0126e5987",
+              "schedule_hash": "4ea451943c9bda6f31f62cc5d2a88f6882a8a042f64e478798b183aada483329",
+              "source_bound_module_hash": "0f5f0a98133f7446b22855c8dd5c2cd4addaa5773968ad0bc7558d8f320df1b1",
+              "source_plan_instance_hash": "207f71e12fdac33c44700284ccd8d4279b836cef6c2f916b6c05451d8c2e83f7",
+              "source_plan_template_hash": "cc8950e70223dfef7d8f02aac37006dba339ec37be81127a4088d73fe939eb68",
+              "source_schedule_hash": "c81ce5fd73748678c06bf640be8fa6f0f7c6fcb7053a1d8014327f73a3b2edcc",
+              "task_module_hash": "02d796e2592bbf22fc9016b2ea113df9d92ca87f46e8cb68f0821a9279b37a46"
+            },
+            "node": {
+              "branch_neuron_index": 13,
+              "branch_relu_input": "31",
+              "branch_value": 1,
+              "depth": 2,
+              "node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000004",
+              "parent_node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000002",
+              "split_state_hash": "d0a28960da6864a0c0fab7a9c57b47ce9d4eefc3141837f77bfd54feb4b6f237"
+            },
+            "parent_exact_state_hash": "34ef7a196c99436cfacdca846ab6ced167cc1e4a3182d4beb65e9c1188ec3e49",
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "discrete_split_inheritance_only",
+            "priority": -557.85,
+            "upper": 561.6997680664062
+          },
+          {
+            "branch_candidate": {
+              "lower": -235.57244873046875,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 153.69847106933594,
+              "width": 389.2709197998047
+            },
+            "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0005",
+            "eval_batch_position": 0,
+            "exact_state_hash": "baf0216b94fe9789c34c0a518339a41af3660c20a80fcbfb463331d3e5ee4fab",
+            "lower": -557.1522216796875,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "5b8a4b2a8c3e5c88b15c20eb35d504e003b004e26a48a1924b236d0124106665",
+              "execution_plan_instance_hash": "c055fe335e270d41224a52d3a3473fb646d509d2e0f22406aa77baf1e778d3fd",
+              "execution_plan_template_hash": "cc70c7da8777416a8fe1844d0ac03cdd092eb3633bc270f23e80c6cd724225ce",
+              "representation_binding_hash": "ee14c1abca2ef2ee8b7a6f78f9faddff6d8042a2383299b00284c8443ece2aa6",
+              "schedule_hash": "591254c141fb5b3942054ac8f9b33656fc4563919938db5401d0991264cb8f1c",
+              "source_bound_module_hash": "5b8a4b2a8c3e5c88b15c20eb35d504e003b004e26a48a1924b236d0124106665",
+              "source_plan_instance_hash": "3912abdefa7e733deebe4e6358d9c225d3c5e4ef592c29605538c6c8143bffc5",
+              "source_plan_template_hash": "a796c3b2ab700a972aeaaff50fd41013af0185285bd797548973e61fe90937b3",
+              "source_schedule_hash": "b32ea05748e6cdb8c0307bdf722a8975c11aab99b00253be4a93de5ea4393d72",
+              "task_module_hash": "03649cd91e1154dc429a525e4aedcdd352d09e295784f91d10e86e92f65bef96"
+            },
+            "node": {
+              "branch_neuron_index": 13,
+              "branch_relu_input": "31",
+              "branch_value": -1,
+              "depth": 2,
+              "node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000005",
+              "parent_node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000001",
+              "split_state_hash": "59bc3801afc084c124883b7c1b64a9a06c52a92cf56b869665db8148af319a15"
+            },
+            "parent_exact_state_hash": "d33d169602351e4a900ced6a3ac537b71b51bc43854e185106696007cf76edbd",
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "discrete_split_inheritance_only",
+            "priority": -557.1522,
+            "upper": 562.8981323242188
+          },
+          {
+            "branch_candidate": {
+              "lower": -235.57244873046875,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 153.69847106933594,
+              "width": 389.2709197998047
+            },
+            "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0006",
+            "eval_batch_position": 0,
+            "exact_state_hash": "27a91cdf7cd079ade51b7be8023a59d90fd34c2a128d01608e51b47e3b5863e7",
+            "lower": -557.41259765625,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "22813f40dd1e6a55c026789f42aaaece82de9edece31e00eddab15611e187fe2",
+              "execution_plan_instance_hash": "a2b11a72f8c49e4fb77959d1da1828fa364ebaa61d30fd9ad449001d9f6a43dd",
+              "execution_plan_template_hash": "e3d362bc1c853e943b8142e5c3e466527ac2118f9849fdb0a3cdd4b87da0b4f5",
+              "representation_binding_hash": "08123b4735dfd02d43e9f3a002d5cc2ed54b07dedc82f26245e8e76584bde4cb",
+              "schedule_hash": "5e6d40e913cc85825291c88bbe2d9772d79e790632cf496fa08aa9242e508af8",
+              "source_bound_module_hash": "22813f40dd1e6a55c026789f42aaaece82de9edece31e00eddab15611e187fe2",
+              "source_plan_instance_hash": "a677b2d19fdf280023b2e132ea797fcd421e8f520ff0b4438fc14601651251b1",
+              "source_plan_template_hash": "3f81abd26adae16097ce3e6a3484000b299de378c40bc9304ad052a474bbf06c",
+              "source_schedule_hash": "c93bacffb306179015f16ce765918f8b5a5c85a4a7b4d11eb4d49e6829345635",
+              "task_module_hash": "341f94322c71f4471b93b4cd2ed87926353767160c96b6a8a52fd454c5199889"
+            },
+            "node": {
+              "branch_neuron_index": 13,
+              "branch_relu_input": "31",
+              "branch_value": 1,
+              "depth": 2,
+              "node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000006",
+              "parent_node_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000001",
+              "split_state_hash": "887b4f9256b40d4b13eaccc919c8fe2f758d1b91c1f80d4aabd756323bcb9839"
+            },
+            "parent_exact_state_hash": "d33d169602351e4a900ced6a3ac537b71b51bc43854e185106696007cf76edbd",
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "discrete_split_inheritance_only",
+            "priority": -557.4126,
+            "upper": 562.1312866210938
+          }
+        ],
+        "final_frontier_node_ids": [
+          "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000004",
+          "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000003",
+          "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000006",
+          "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000005"
+        ],
+        "max_queue_size": 4,
+        "native_stack_count": 7,
+        "native_stacks": [
+          {
+            "bound_local_forward_relu_op_count": 6,
+            "bound_split_input_count": 6,
+            "bound_split_relu_op_count": 6,
+            "domain_batch_size": 1,
+            "execution_plan_split_state_present": true,
+            "local_forward_provenance_count": 2,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "8d5e2a017c2cd1841d39166de19a340f9e37fac331ef2b1ca3c98a1023739d17",
+              "execution_plan_instance_hash": "e07749fe27a70574ec18779396d134f22bd2d7a499bafefee82285d9e6ce4059",
+              "execution_plan_template_hash": "f4fae60d1425b4eb1293b93802d4fde1733020744c6df1b4f1f89a95ce04958b",
+              "representation_binding_hash": "5971f14e872a012276c8097d11bf6d9fe4b3ce4dba245eb1c48b8d7efeac5827",
+              "schedule_hash": "8f3e703a6325c7ededfa474cb25b867d02aedb9443fc6d7e4f63ae07f032e7ed",
+              "source_bound_module_hash": "8d5e2a017c2cd1841d39166de19a340f9e37fac331ef2b1ca3c98a1023739d17",
+              "source_plan_instance_hash": "45c6347b26aec77789b9b4e6cfe1f25b976c48dccd30a3a16dcb93573dbd69b9",
+              "source_plan_template_hash": "2cca4974c4d2a4bb1aa3ac3302c37149c6edae4db6be8d800d43f4e4fd39954c",
+              "source_schedule_hash": "9919b2863597217cade98ec0528234184979edfd8a03979c8068ebd963a5ef75",
+              "task_module_hash": "a675a1929d4089edc5ea02b8f63e76ba512cb8543359a27b6a01b5bbb1cfe624"
+            },
+            "node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000000"
+            ],
+            "representation_policy_id": "native-dense-v1",
+            "schedule_launch_count": 21,
+            "source_plan_split_state_present": true,
+            "split_capability_count": 2,
+            "stack_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0000",
+            "storage_candidate_id": "storage:native-retain-all-v1",
+            "task_count": 21
+          },
+          {
+            "bound_local_forward_relu_op_count": 6,
+            "bound_split_input_count": 6,
+            "bound_split_relu_op_count": 6,
+            "domain_batch_size": 1,
+            "execution_plan_split_state_present": true,
+            "local_forward_provenance_count": 2,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "9418a240e2a12f37d93fd4dd08e4ad9bffa6deb2498dadb687f227d56c7da570",
+              "execution_plan_instance_hash": "a1ee1faf0ea823747ff3a0abb71d08e63a158398313b8c9ec09286dd87db94e6",
+              "execution_plan_template_hash": "f200bed36077634b2c92cf3cdb2b86f83980996be1c6d7569a4a30c6212378d4",
+              "representation_binding_hash": "6265c76ee5a01562e5e8d699fb13dbd163f2c873e604852e5a0b1f9e6f29b112",
+              "schedule_hash": "5db69e7466088cf97d884c44334d76a19a6baff12003be6e2195b2921555dd7a",
+              "source_bound_module_hash": "9418a240e2a12f37d93fd4dd08e4ad9bffa6deb2498dadb687f227d56c7da570",
+              "source_plan_instance_hash": "4a9a4220ee03e383843e991067ea2a08d055610d2e25567d5f8df5bacc03039d",
+              "source_plan_template_hash": "3df69304929e7cd7574d1f5296b02fb150ffa08c5646b294481b9778a0d61546",
+              "source_schedule_hash": "50f4078df7fafa02ba9a40dcd6e39a0764fddf2dffb3c170477a4ecc6269b337",
+              "task_module_hash": "c0c326186f02e42af41db763e35b37765140adaca4ca0a27a935d2ca6913ac78"
+            },
+            "node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000001"
+            ],
+            "representation_policy_id": "native-dense-v1",
+            "schedule_launch_count": 21,
+            "source_plan_split_state_present": true,
+            "split_capability_count": 2,
+            "stack_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0001",
+            "storage_candidate_id": "storage:native-retain-all-v1",
+            "task_count": 21
+          },
+          {
+            "bound_local_forward_relu_op_count": 6,
+            "bound_split_input_count": 6,
+            "bound_split_relu_op_count": 6,
+            "domain_batch_size": 1,
+            "execution_plan_split_state_present": true,
+            "local_forward_provenance_count": 2,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "6a6b217bdb5988728ac66109b10900653785dd77141191f308c46bcf3180eaf5",
+              "execution_plan_instance_hash": "b24fd2c1b5c4d25bd872b3ff0cc75cefda925526dfb3869e87387b2c3a189017",
+              "execution_plan_template_hash": "365949013349d7f15dfbe71ca93bb56ea66ecfa629e46b0bafd8bbc6bbca9d8d",
+              "representation_binding_hash": "73758210b45b360abb3c07876208e72fa8bbcca4f76939186380d2385d0ce351",
+              "schedule_hash": "2d0ee3b63d811e7ef2e886c0a25de15d21bfbbafd93f828fe0b96ec1ad91f3df",
+              "source_bound_module_hash": "6a6b217bdb5988728ac66109b10900653785dd77141191f308c46bcf3180eaf5",
+              "source_plan_instance_hash": "eeda87865895d0ddc6ff6d4c39efdfad674ecb224ba43c206db1be04df02cf38",
+              "source_plan_template_hash": "43358b0f5875db8aeaf473e603bbc058741f91f318ba55e5a5a7d41c323289d0",
+              "source_schedule_hash": "2b634b38667df774268fde3ca2c65dd6e91d8d0962d5f3db822370898bb1fbf0",
+              "task_module_hash": "d4f86b3992a9ecc0c33ba5642b389e3b74d2abc927d84c5e7f856f9e0913f3b2"
+            },
+            "node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000002"
+            ],
+            "representation_policy_id": "native-dense-v1",
+            "schedule_launch_count": 21,
+            "source_plan_split_state_present": true,
+            "split_capability_count": 2,
+            "stack_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0002",
+            "storage_candidate_id": "storage:native-retain-all-v1",
+            "task_count": 21
+          },
+          {
+            "bound_local_forward_relu_op_count": 6,
+            "bound_split_input_count": 6,
+            "bound_split_relu_op_count": 6,
+            "domain_batch_size": 1,
+            "execution_plan_split_state_present": true,
+            "local_forward_provenance_count": 2,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "987933634c37b71ae949d92836f02999b1012a274c1ca1a37178eb9d449738a4",
+              "execution_plan_instance_hash": "ed547e863c2d61ecdd7d15606537799a0438a20f5e2090d099788b1756cd3936",
+              "execution_plan_template_hash": "745a074e55c4151e046e345a62d3cddcd3257337fc4c23892a47dcc8766afec9",
+              "representation_binding_hash": "9991d5c88fd3026ed1e961e40068b9e2e82449b159abc7e2c7c0be9ba2887dc1",
+              "schedule_hash": "62383ac1e09d7a481129032778f85d64e59ec076237a22c1cabc617cab18713d",
+              "source_bound_module_hash": "987933634c37b71ae949d92836f02999b1012a274c1ca1a37178eb9d449738a4",
+              "source_plan_instance_hash": "1491f1d248d46d54d35f096b6a0f8c8f153c8705c352bcca57809336b280c96a",
+              "source_plan_template_hash": "4a507ebeb75fa0759eb3c00d6d48127208e1f6384b76c6102a4dca3820be957f",
+              "source_schedule_hash": "d2af7e650d5f4c885a1842a1d0d808dc75451640dd18051898b45ebce2a1b8e0",
+              "task_module_hash": "7bd8813206e1fbcf063b5ad1574906b8320b1a7a2b9c133693b56cb3f31f4920"
+            },
+            "node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000003"
+            ],
+            "representation_policy_id": "native-dense-v1",
+            "schedule_launch_count": 21,
+            "source_plan_split_state_present": true,
+            "split_capability_count": 2,
+            "stack_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0003",
+            "storage_candidate_id": "storage:native-retain-all-v1",
+            "task_count": 21
+          },
+          {
+            "bound_local_forward_relu_op_count": 6,
+            "bound_split_input_count": 6,
+            "bound_split_relu_op_count": 6,
+            "domain_batch_size": 1,
+            "execution_plan_split_state_present": true,
+            "local_forward_provenance_count": 2,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "0f5f0a98133f7446b22855c8dd5c2cd4addaa5773968ad0bc7558d8f320df1b1",
+              "execution_plan_instance_hash": "85bf5b780ffc8f20bd05037c363207c429577c5eb0c2e79895adb569450abbd7",
+              "execution_plan_template_hash": "16d960d3f9a257a7e8cb1bfadbf192065857a6f642ec01a25d30691bcea84e81",
+              "representation_binding_hash": "1126e0c749abcf1930f5aa0b408d7dd2ce750897b5f966dd6b00a1a0126e5987",
+              "schedule_hash": "4ea451943c9bda6f31f62cc5d2a88f6882a8a042f64e478798b183aada483329",
+              "source_bound_module_hash": "0f5f0a98133f7446b22855c8dd5c2cd4addaa5773968ad0bc7558d8f320df1b1",
+              "source_plan_instance_hash": "207f71e12fdac33c44700284ccd8d4279b836cef6c2f916b6c05451d8c2e83f7",
+              "source_plan_template_hash": "cc8950e70223dfef7d8f02aac37006dba339ec37be81127a4088d73fe939eb68",
+              "source_schedule_hash": "c81ce5fd73748678c06bf640be8fa6f0f7c6fcb7053a1d8014327f73a3b2edcc",
+              "task_module_hash": "02d796e2592bbf22fc9016b2ea113df9d92ca87f46e8cb68f0821a9279b37a46"
+            },
+            "node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000004"
+            ],
+            "representation_policy_id": "native-dense-v1",
+            "schedule_launch_count": 21,
+            "source_plan_split_state_present": true,
+            "split_capability_count": 2,
+            "stack_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0004",
+            "storage_candidate_id": "storage:native-retain-all-v1",
+            "task_count": 21
+          },
+          {
+            "bound_local_forward_relu_op_count": 6,
+            "bound_split_input_count": 6,
+            "bound_split_relu_op_count": 6,
+            "domain_batch_size": 1,
+            "execution_plan_split_state_present": true,
+            "local_forward_provenance_count": 2,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "5b8a4b2a8c3e5c88b15c20eb35d504e003b004e26a48a1924b236d0124106665",
+              "execution_plan_instance_hash": "c055fe335e270d41224a52d3a3473fb646d509d2e0f22406aa77baf1e778d3fd",
+              "execution_plan_template_hash": "cc70c7da8777416a8fe1844d0ac03cdd092eb3633bc270f23e80c6cd724225ce",
+              "representation_binding_hash": "ee14c1abca2ef2ee8b7a6f78f9faddff6d8042a2383299b00284c8443ece2aa6",
+              "schedule_hash": "591254c141fb5b3942054ac8f9b33656fc4563919938db5401d0991264cb8f1c",
+              "source_bound_module_hash": "5b8a4b2a8c3e5c88b15c20eb35d504e003b004e26a48a1924b236d0124106665",
+              "source_plan_instance_hash": "3912abdefa7e733deebe4e6358d9c225d3c5e4ef592c29605538c6c8143bffc5",
+              "source_plan_template_hash": "a796c3b2ab700a972aeaaff50fd41013af0185285bd797548973e61fe90937b3",
+              "source_schedule_hash": "b32ea05748e6cdb8c0307bdf722a8975c11aab99b00253be4a93de5ea4393d72",
+              "task_module_hash": "03649cd91e1154dc429a525e4aedcdd352d09e295784f91d10e86e92f65bef96"
+            },
+            "node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000005"
+            ],
+            "representation_policy_id": "native-dense-v1",
+            "schedule_launch_count": 21,
+            "source_plan_split_state_present": true,
+            "split_capability_count": 2,
+            "stack_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0005",
+            "storage_candidate_id": "storage:native-retain-all-v1",
+            "task_count": 21
+          },
+          {
+            "bound_local_forward_relu_op_count": 6,
+            "bound_split_input_count": 6,
+            "bound_split_relu_op_count": 6,
+            "domain_batch_size": 1,
+            "execution_plan_split_state_present": true,
+            "local_forward_provenance_count": 2,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "22813f40dd1e6a55c026789f42aaaece82de9edece31e00eddab15611e187fe2",
+              "execution_plan_instance_hash": "a2b11a72f8c49e4fb77959d1da1828fa364ebaa61d30fd9ad449001d9f6a43dd",
+              "execution_plan_template_hash": "e3d362bc1c853e943b8142e5c3e466527ac2118f9849fdb0a3cdd4b87da0b4f5",
+              "representation_binding_hash": "08123b4735dfd02d43e9f3a002d5cc2ed54b07dedc82f26245e8e76584bde4cb",
+              "schedule_hash": "5e6d40e913cc85825291c88bbe2d9772d79e790632cf496fa08aa9242e508af8",
+              "source_bound_module_hash": "22813f40dd1e6a55c026789f42aaaece82de9edece31e00eddab15611e187fe2",
+              "source_plan_instance_hash": "a677b2d19fdf280023b2e132ea797fcd421e8f520ff0b4438fc14601651251b1",
+              "source_plan_template_hash": "3f81abd26adae16097ce3e6a3484000b299de378c40bc9304ad052a474bbf06c",
+              "source_schedule_hash": "c93bacffb306179015f16ce765918f8b5a5c85a4a7b4d11eb4d49e6829345635",
+              "task_module_hash": "341f94322c71f4471b93b4cd2ed87926353767160c96b6a8a52fd454c5199889"
+            },
+            "node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:n000006"
+            ],
+            "representation_policy_id": "native-dense-v1",
+            "schedule_launch_count": 21,
+            "source_plan_split_state_present": true,
+            "split_capability_count": 2,
+            "stack_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab:eval:0006",
+            "storage_candidate_id": "storage:native-retain-all-v1",
+            "task_count": 21
+          }
+        ],
+        "objective_hash": "a62146650a0f29762a1467c72007cba1937a5c05b9236ab53a91964308e05dca",
+        "performance_claimed": false,
+        "property_status": "not_claimed",
+        "root_input_lower_hash": "bed6da6e49f1123b54fe61247615cf0e86f1b4257face7b073428f257607bda6",
+        "root_input_upper_hash": "955d79bd0824185cad0be1e758e6e492c51aec6c9199f81359b2528b848ec9ab",
+        "run_id": "vnncomp21-resnet2b-prop0-native-ir9-relu-split-bab",
+        "schema_version": "boundflow.relu-split-bab-trace/v1",
+        "status": "budget_exhausted",
+        "termination_reason": "node_budget_exhausted"
+      },
+      "trace_hash": "e984cefd2f26b2123c0427a099197959d51c31a6c4b801dfb873d0a304f8d450"
+    },
+    "source": {
+      "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+      "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+      "native_ir_artifact_schema": "boundflow.native-real-network-ir-artifact/v1",
+      "native_ir_manifest_sha256": "5d38aa4adcd7b8593b0ca3751106d3a254b72a2698bd445a8dde59d50eb5a676",
+      "native_ir_payload_sha256": "3ba949de66380c7d16dc44bb934eca8400182521e761c19eaa671cd8cf0eb557",
+      "objective_hash": "a62146650a0f29762a1467c72007cba1937a5c05b9236ab53a91964308e05dca",
+      "objective_index": 0,
+      "root_input_lower_hash": "bed6da6e49f1123b54fe61247615cf0e86f1b4257face7b073428f257607bda6",
+      "root_input_upper_hash": "955d79bd0824185cad0be1e758e6e492c51aec6c9199f81359b2528b848ec9ab",
+      "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf",
+      "vnnlib_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff"
+    },
+    "status": "ok"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.native-real-network-relu-split-bab-artifact/v1",
+  "status": "ok"
+}

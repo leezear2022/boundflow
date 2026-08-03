@@ -7,7 +7,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 import json
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence, cast
 
 import torch
 
@@ -41,6 +41,7 @@ from ..ir.bound import (
     ReluLowerSlopePolicy,
     ReluRelaxationAttrs,
     ReshapeAttrs,
+    SplitReluRelaxationAttrs,
     SpecBindAttrs,
     VerificationSpec,
 )
@@ -58,6 +59,7 @@ class PlainCrownBoundIRBuild:
     input_affine_state: BoundAffineStateRef
     lower_output_value_id: str
     upper_output_value_id: str
+    split_input_value_ids: tuple[tuple[str, str], ...] = ()
 
 
 class _GraphBuilder:
@@ -121,6 +123,34 @@ class _GraphBuilder:
             polarity=BoundPolarity.BOTH,
             representation=BoundRepresentation.DENSE,
             state_version="plain-crown-v1",
+            source_primal_value_id=primal_value_id,
+        )
+        self.values.append(value)
+        return value
+
+    def add_split_input(
+        self,
+        *,
+        value_id: str,
+        primal_value_id: str,
+        primal_shape: Sequence[int],
+        payload_hash: str,
+    ) -> BoundValue:
+        """Create one exact per-domain ReLU split-state graph input."""
+
+        value = BoundValue(
+            value_id=value_id,
+            tensor_type=BoundTensorType(
+                shape=(self.batch, *(int(dim) for dim in primal_shape)),
+                dtype="int8",
+                layout="contiguous",
+                device=self.device,
+                batch_axes=(BoundBatchAxis(BatchAxisKind.DOMAIN, 0),),
+            ),
+            role=BoundValueRole.SPLIT,
+            polarity=BoundPolarity.BOTH,
+            representation=BoundRepresentation.DENSE,
+            state_version=f"native-relu-split:{payload_hash}",
             source_primal_value_id=primal_value_id,
         )
         self.values.append(value)
@@ -216,6 +246,8 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
     ),
     intermediate_bounds_hash: Optional[str] = None,
     relu_lower_slope_policy: ReluLowerSlopePolicy = ReluLowerSlopePolicy.ZERO,
+    relu_split_state: Optional[Mapping[str, torch.Tensor]] = None,
+    split_state_hash: Optional[str] = None,
 ) -> PlainCrownBoundIRBuild:
     """Lower a validated plain-CROWN query shape into deterministic Bound IR."""
 
@@ -255,6 +287,18 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
     dtype = str(output_state.lower.dtype).removeprefix("torch.")
     device = str(output_state.lower.device)
     builder = _GraphBuilder(batch=batch, specs=specs, dtype=dtype, device=device)
+    normalized_splits = _normalize_relu_split_state(
+        relu_pre,
+        relu_split_state,
+        batch=batch,
+        device=device,
+    )
+    if normalized_splits:
+        actual_split_hash = relu_split_state_hash(normalized_splits)
+        if split_state_hash != actual_split_hash:
+            raise ValueError("ReLU split-state hash differs from exact payload")
+    elif split_state_hash is not None:
+        raise ValueError("split-state hash cannot be supplied without split inputs")
 
     objective_id, objective_kind, objective_hash = _objective_identity(linear_spec_C)
     perturbation = _perturbation_spec(input_spec)
@@ -270,7 +314,11 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
             ),
         ),
         requested_bounds=(BoundPolarity.BOTH,),
-        numeric_policy=f"{dtype}_dense_reference",
+        numeric_policy=(
+            f"{dtype}_dense_reference"
+            if not normalized_splits
+            else f"{dtype}_dense_reference_relu_split_v1"
+        ),
     )
 
     objective_input = builder.add_objective_input(
@@ -293,6 +341,7 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
     dynamic_names = set(interval_env)
     dynamic_names.add(input_spec.value_name)
     adjoints: dict[str, list[BoundAffineStateRef]] = {resolved_output: [seed]}
+    split_inputs: list[tuple[str, BoundValue]] = []
 
     def value_shape(value_id: str) -> tuple[int, ...]:
         if value_id == input_spec.value_name:
@@ -401,26 +450,66 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
             if target_name not in relu_pre:
                 raise KeyError(f"missing ReLU pre-activation trace for '{target_name}'")
             _validate_trace_tensor_pair(relu_pre[target_name], label=target_name)
+            split_tensor = normalized_splits.get(target_name)
+            split_payload_hash = (
+                None if split_tensor is None else tensor_content_hash(split_tensor)
+            )
+            state_version = (
+                "plain-crown-v1"
+                if intermediate_bounds_hash is None
+                else f"external-intermediate-bounds:{intermediate_bounds_hash}"
+            )
+            if split_tensor is not None:
+                if split_state_hash is None or split_payload_hash is None:
+                    raise AssertionError("validated split identity is unavailable")
+                state_version = f"{state_version}:relu-split:{split_state_hash}"
             target = builder.add_state(
                 label=op.name,
                 primal_value_id=target_name,
                 primal_shape=value_shape(target_name),
-                state_version=(
-                    "plain-crown-v1"
-                    if intermediate_bounds_hash is None
-                    else f"external-intermediate-bounds:{intermediate_bounds_hash}"
-                ),
+                state_version=state_version,
             )
+            split_value: Optional[BoundValue] = None
+            if split_tensor is not None:
+                safe_target = "".join(
+                    char if char.isalnum() or char in "._-" else "_"
+                    for char in target_name
+                )
+                split_value = builder.add_split_input(
+                    value_id=(
+                        f"query.split.{cast(str, split_payload_hash)[:16]}."
+                        f"{safe_target}"
+                    ),
+                    primal_value_id=target_name,
+                    primal_shape=value_shape(target_name),
+                    payload_hash=cast(str, split_payload_hash),
+                )
+                split_inputs.append((target_name, split_value))
             builder.add_op(
                 label=op.name,
                 kind=BoundOpKind.RELU_RELAXATION,
-                inputs=source.value_ids,
+                inputs=(
+                    source.value_ids
+                    if split_value is None
+                    else (*source.value_ids, split_value.value_id)
+                ),
                 outputs=target.value_ids,
-                attrs=ReluRelaxationAttrs(
-                    primal_node_id=op.name,
-                    preactivation_primal_value_id=target_name,
-                    intermediate_bound_source=intermediate_bound_source,
-                    lower_slope_policy=relu_lower_slope_policy,
+                attrs=(
+                    ReluRelaxationAttrs(
+                        primal_node_id=op.name,
+                        preactivation_primal_value_id=target_name,
+                        intermediate_bound_source=intermediate_bound_source,
+                        lower_slope_policy=relu_lower_slope_policy,
+                    )
+                    if split_value is None
+                    else SplitReluRelaxationAttrs(
+                        primal_node_id=op.name,
+                        preactivation_primal_value_id=target_name,
+                        intermediate_bound_source=intermediate_bound_source,
+                        lower_slope_policy=relu_lower_slope_policy,
+                        split_state_value_id=split_value.value_id,
+                        split_state_hash=cast(str, split_payload_hash),
+                    )
                 ),
             )
             route(target_name, target)
@@ -558,7 +647,10 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
     graph = BFBoundGraph(
         values=tuple(builder.values),
         ops=tuple(builder.ops),
-        inputs=(objective_input.value_id,),
+        inputs=(
+            objective_input.value_id,
+            *(value.value_id for _name, value in split_inputs),
+        ),
         outputs=(lower.value_id, upper.value_id),
     )
     primal_hash = plain_crown_primal_graph_hash(task_module)
@@ -566,7 +658,10 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
         module_id=f"plain-crown-{primal_hash[:16]}",
         primal_graph_hash=primal_hash,
         spec=verification_spec,
-        domain=BoundDomainConfig(method=BoundMethodKind.CROWN),
+        domain=BoundDomainConfig(
+            method=BoundMethodKind.CROWN,
+            split_state_present=bool(normalized_splits),
+        ),
         graph=graph,
     )
     bound_module.validate()
@@ -576,7 +671,62 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
         input_affine_state=input_state,
         lower_output_value_id=lower.value_id,
         upper_output_value_id=upper.value_id,
+        split_input_value_ids=tuple(
+            (name, value.value_id) for name, value in split_inputs
+        ),
     )
+
+
+def relu_split_state_hash(relu_split_state: Mapping[str, torch.Tensor]) -> str:
+    """Fingerprint exact per-ReLU split tensors with stable name ownership."""
+
+    if not relu_split_state:
+        raise ValueError("ReLU split-state hash requires at least one tensor")
+    payload = {
+        name: tensor_content_hash(tensor)
+        for name, tensor in sorted(relu_split_state.items())
+    }
+    encoded = json.dumps(
+        payload, sort_keys=True, separators=(",", ":"), allow_nan=False
+    )
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def _normalize_relu_split_state(
+    relu_pre: Mapping[str, IntervalState],
+    relu_split_state: Optional[Mapping[str, torch.Tensor]],
+    *,
+    batch: int,
+    device: str,
+) -> dict[str, torch.Tensor]:
+    """Normalize and fail closed on the complete native ReLU split payload."""
+
+    if relu_split_state is None:
+        return {}
+    if set(relu_split_state) != set(relu_pre):
+        raise ValueError("ReLU split-state keys must exactly match pre-activations")
+    normalized: dict[str, torch.Tensor] = {}
+    for name in sorted(relu_pre):
+        tensor = relu_split_state[name]
+        if not torch.is_tensor(tensor):
+            raise TypeError(f"ReLU split state '{name}' must be a torch.Tensor")
+        pre = relu_pre[name]
+        expected_shape = tuple(int(dim) for dim in pre.lower.shape)
+        logical_shape = expected_shape[1:]
+        if tuple(int(dim) for dim in tensor.shape) == logical_shape and batch == 1:
+            tensor = tensor.unsqueeze(0)
+        if tuple(int(dim) for dim in tensor.shape) != expected_shape:
+            raise ValueError(f"ReLU split state '{name}' shape differs from trace")
+        if tensor.dtype != torch.int8:
+            raise TypeError(f"ReLU split state '{name}' must use int8")
+        if str(tensor.device) != device or tensor.device != pre.lower.device:
+            raise ValueError(f"ReLU split state '{name}' device differs from trace")
+        if not bool(((tensor >= -1) & (tensor <= 1)).all().item()):
+            raise ValueError(
+                f"ReLU split state '{name}' contains values outside -1/0/1"
+            )
+        normalized[name] = tensor.detach().contiguous().clone()
+    return normalized
 
 
 def _resolve_output(
