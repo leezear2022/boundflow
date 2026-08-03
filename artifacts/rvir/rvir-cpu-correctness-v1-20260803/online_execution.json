@@ -1,0 +1,67 @@
+{
+  "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+  "activation_effective_method_counts": {
+    "alpha_beta_crown": 343
+  },
+  "bab_projection": [
+    {
+      "final_lower": "tensor(-0.18902308)",
+      "instance": 0,
+      "visited_domains": 380
+    }
+  ],
+  "baseline_status": "unknown",
+  "compiled_and_dispatched": 377,
+  "completed": 377,
+  "device": "cpu",
+  "model_sha256": "2c412204928be76ebfc7edc16e76d884dd9b4e354fdbe97ee1e73ce5eb91b01d",
+  "observer_comparison": {
+    "baseline_visited_domains": [
+      380
+    ],
+    "profiled_visited_domains": [
+      380
+    ],
+    "status_match": true,
+    "visited_domains_match": true
+  },
+  "parent_link_count": 347,
+  "performance_claimed": false,
+  "phase_method_counts": [
+    {
+      "count": 336,
+      "method": "CROWN",
+      "phase": "activation_bab_bound"
+    },
+    {
+      "count": 7,
+      "method": "alpha-beta-CROWN",
+      "phase": "activation_bab_bound"
+    },
+    {
+      "count": 33,
+      "method": "CROWN",
+      "phase": "alpha_crown_initialization"
+    },
+    {
+      "count": 1,
+      "method": "alpha-CROWN",
+      "phase": "alpha_crown_initialization"
+    }
+  ],
+  "query_count": 377,
+  "requested_output_counts": {
+    "lower": 377
+  },
+  "result_status": "unknown",
+  "root_query_count": 30,
+  "schema_version": "boundflow.pr14-abcrown-workload/v1",
+  "semantics_owner": "external_verifier",
+  "source_digests": {
+    "manifest.json": "a2dd6fbcdd34c5f6026dd56a909262fb2fffb9d41dbf0a2577399f1d2ea065a7",
+    "queries.jsonl": "d1bd3ee0da380c374180394ab48c34c813eaed07664abe873e09e163d3d6141a",
+    "typed_ir.jsonl": "bee3a69dcee6a0ffeac6ac331973ccd1c5ab86e8bde3c83a84b71db67a9a9cdb"
+  },
+  "vnnlib_sha256": "c6eb6a7ed9d5dab94b3134aafe8158b28258499dfc04cbf9bf20849238985e06",
+  "workload_name": "official-simple-mlp-cpu-rvir2-baseline-v2"
+}

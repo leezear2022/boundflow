@@ -22,6 +22,8 @@ from boundflow.ir.bound import (
     BoundOpKind,
     BoundRepresentation,
     BoundValueRole,
+    IntermediateBoundSource,
+    ReluLowerSlopePolicy,
 )
 from boundflow.ir.bound_rewrite import rewrite_plain_crown_structured_regions
 from boundflow.ir.task import BFTaskModule, BoundTask, TaskKind, TaskOp
@@ -196,6 +198,57 @@ def test_plain_crown_bound_ir_matches_mlp(use_linear_spec: bool) -> None:
     )
     assert build.module.canonical_json() == repeated.module.canonical_json()
     assert build.module.stable_hash() == repeated.module.stable_hash()
+
+
+def test_external_adaptive_relu_policy_is_explicit_and_changes_semantics() -> None:
+    module = _mlp()
+    spec = InputSpec.linf(
+        value_name="input", center=torch.tensor([[0.2, -0.1, 0.4]]), eps=0.25
+    )
+    interval_env, relu_pre = _forward_ibp_trace_mlp(module, spec)
+    common = {
+        "task_module": module,
+        "input_spec": spec,
+        "interval_env": interval_env,
+        "relu_pre": relu_pre,
+        "linear_spec_C": torch.tensor([[1.0, -1.0]]),
+    }
+    zero = build_plain_crown_bound_ir(**common).module
+    adaptive = build_plain_crown_bound_ir(
+        **common,
+        intermediate_bound_source=IntermediateBoundSource.EXTERNAL_VERIFIER,
+        relu_lower_slope_policy=ReluLowerSlopePolicy.ADAPTIVE,
+    ).module
+
+    zero_result = execute_plain_crown_bound_ir(
+        zero,
+        task_module=module,
+        input_spec=spec,
+        relu_pre=relu_pre,
+        linear_spec_C=common["linear_spec_C"],
+    )
+    adaptive_result = execute_plain_crown_bound_ir(
+        adaptive,
+        task_module=module,
+        input_spec=spec,
+        relu_pre=relu_pre,
+        linear_spec_C=common["linear_spec_C"],
+    )
+    relu_attrs = next(
+        op.attrs for op in adaptive.graph.ops if op.kind == BoundOpKind.RELU_RELAXATION
+    )
+
+    assert (
+        relu_attrs.intermediate_bound_source
+        == IntermediateBoundSource.EXTERNAL_VERIFIER
+    )
+    assert relu_attrs.lower_slope_policy == ReluLowerSlopePolicy.ADAPTIVE
+    assert adaptive.stable_hash() != zero.stable_hash()
+    assert adaptive.canonical_json().count('"lower_slope_policy":"adaptive"') == 1
+    assert not (
+        torch.equal(adaptive_result.lower, zero_result.lower)
+        and torch.equal(adaptive_result.upper, zero_result.upper)
+    )
 
 
 @pytest.mark.parametrize(

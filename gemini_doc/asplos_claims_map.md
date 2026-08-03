@@ -3,17 +3,18 @@
 > 本表是动态证据账本。`planned` 不代表已经实现；只有代码、测试和工件均存在时才能改为
 > `validated`。当前执行基线为 PR-12 validated-reduced；PR-13 已以
 > `VALIDATED-REDUCED` 关闭；PR-14B 真实 replay 为 `VALIDATED-NO-GO`，C3 已降级为 C1/C2
-> 基础设施，不再主张 non-toy verifier acceleration。
+> 基础设施，不再主张 non-toy verifier acceleration。2026-08-03 独立 RVIR correctness
+> 路线已 validated-reduced，但不改变 ASPLOS performance No-Go。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
 | C1：显式物化语义的 Structured Bound-Operator IR | IR-1 reference semantic closure + IR-3 Task/Schedule reference integration validated；production backend pending | typed Bound IR + lowering + dense/structured interpreter + explicit cast/materialize rewrite + per-task stepping | 25 个 Bound tests；MLP/CNN/residual/concat final bounds 对齐；structured materialize 进入 Task trace | deterministic dump/hash + synchronous artifact v2 已有；production backend E2E 尚缺 |
 | C2：Method/Autograd/Memory-Aware Materialization Planner | IR-4 closure；IR-5 final VALIDATED-NO-GO | typed Plan/Task/Schedule、adaptive/fair evaluator、prepared execution、exact-input chain→residual CUDA suite | v3 correctness/8 contexts feasible；Global p50/p90 1.00385×/1.26160×，gray 无 Pareto、无预算切换 | v3 artifact + manifest/replay 完整；p90/Pareto 门禁失败，C2 paper performance claim 不成立 |
-| C3：Verification Query Runtime Infrastructure | downgraded after PR-14B | query/validity + batcher + capability routing + real observer | 保留 reduced correctness；真实 coverage/replay 作为 limitation | activation 0/394 eligible；ResNet bound-equivalence fail；不作 acceleration claim |
+| C3：Verification Query Runtime Infrastructure | correctness/integration validated-reduced；performance downgraded | query/validity + batcher + reversible observer + typed external verifier Bound/Plan/Task/Schedule exact-call | ResNet external-semantics 3.10e-6、sign 9/9；在线 377/377 dispatch、380-domain observer equivalence | fused replacement 仍 0/394；typed admission 394/394；CPU artifact/replay 完整；不作 acceleration claim |
 | BoundFlow Schedule IR | IR-3 synchronous reference closure validated-reduced；production driver pending | typed ScheduleModule + memory/batch/transfer/event/state/retry/replan + Task launch linkage；旧 topo loop 仅作历史对照 | 12 个 lowering/control/trace/artifact tests；OOM bounded、stream happens-before、query accounting、tamper rejection | deterministic dump/hash/trace + artifact v2 fresh-process semantic replay 已有 |
 | BoundFlow Task IR | IR-3 per-task semantic closure validated-reduced；production backend pending | TaskIRModule/Unit + typed op/shape/parameter/external/state/memory/backend refs + stateful Bound stepping | 12 个 tests（含 4 graph families、structured materialize、skip/reorder rejection） | per-task output hashes 与 final bound hashes 已入 fresh-process artifact v2 |
 | backend 执行 typed Planner/Task 结果而非定义核心抽象 | IR-4 validated-reduced；IR-5 final performance No-Go | composite typed registry + query adapter + real fused/unfused/fallback；prepared capsule 将静态 validate/hash/dispatch 移出 query hot path | residual v3 all backend correctness；ordinary batching p90 regret 1.008×，Global 1.262× | v3 可 replay；backend correctness 成立，但 adaptive production performance claim 失败 |
-| 相同浮点语义下保持 reference bound computation | reduced-only；non-toy fail | dense reference + planned paths | allclose、gradient、auto_LiRPA、replay | MLP pass；ResNet max diff 796.765，PR-14C blocked |
+| 相同浮点语义下保持 reference bound computation | local-semantics 历史 No-Go；external-semantics initial-CROWN validated-reduced | dense reference + explicit external intermediate-bound source/adaptive policy | allclose、gradient、auto_LiRPA、replay | ResNet historical local max diff 796.765；新 external-semantics max diff 3.10e-6、sign 9/9；CPU only |
 
 ### 2026-07-20 IR-first claim 纠偏
 
@@ -416,6 +417,19 @@ PR-12N closure：
   PR-14C blocked；C3 降级为 C1/C2 基础设施，禁止 verifier acceleration claim；
 - 证据：`gemini_doc/pr14a_real_query_coverage_2026_07_19.md`、
   `gemini_doc/pr14b_initial_crown_fixed_replay_2026_07_19.md`。
+
+### 2026-08-03 RVIR correctness follow-up
+
+上述 `0/394` 与 `796.765` 保留为 PR-14 当时 local/fused 路径的历史结论。独立 RVIR 路线
+新增两条不互相替代的证据：
+
+- external intermediate bounds + adaptive slope 使 ResNet initial-CROWN max diff 降为
+  `3.09944e-6`、sign 9/9；
+- provider-owned external exact-call typed admission 为 394/394，当前 CPU 在线 dispatch 为
+  377/377，observer on/off 均访问 380 domains 且 final lower 一致。
+
+fused kernel coverage 仍为 0/394；历史 adapter v1 identity limitation 与当前 CPU-only 边界
+均已冻结，因此 C3 只升级 correctness/integration，不升级 performance。
 
 该段 PR-11 early evidence 当时为专项 21 passed、全量 200 passed/1 skipped；其“Global 与
 Memory-Threshold 决策相同”的历史限制已由后续 PR-11E 和 PR-12G 证据分别补充，不能再读作

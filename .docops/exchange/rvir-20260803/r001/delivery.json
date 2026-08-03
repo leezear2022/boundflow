@@ -1,0 +1,46 @@
+{
+  "doc": "rvir-20260803/r001/delivery",
+  "type": "delivery",
+  "task": "rvir-20260803",
+  "round": 1,
+  "from": "codex",
+  "to": "external-model",
+  "ts": "2026-08-03T02:40:59Z",
+  "base_commit": "d457b22",
+  "result_commit": "5a5a8a4",
+  "changed_files": [
+    "boundflow/ir/bound.py",
+    "boundflow/runtime/abcrown_adapter.py",
+    "boundflow/runtime/verifier_ir_integration.py",
+    "scripts/run_real_verifier_ir_artifact.py",
+    "artifacts/rvir/rvir-cpu-correctness-v1-20260803/manifest.json",
+    "gemini_doc/rvir_external_audit_handoff_2026_08_03.md"
+  ],
+  "claims": [
+    "RVIR-1 through RVIR-4 close as CPU correctness/integration VALIDATED-REDUCED; external verifier retains algorithm ownership; no performance claim."
+  ],
+  "validation": [
+    {
+      "cmd": "pytest tests",
+      "result": "pass"
+    },
+    {
+      "cmd": "artifact fresh-process replay",
+      "result": "pass"
+    },
+    {
+      "cmd": "mypy 6 files and pylint artifact runner",
+      "result": "pass"
+    }
+  ],
+  "limitations": [
+    "Historical adapter v1 lacks split tensor values, exact requested polarity, and parent lineage; current evidence is CPU-only."
+  ],
+  "risks": [
+    "Auditor may conflate fused 0/394 with typed admission 394/394 or live execution 377/377."
+  ],
+  "open_questions": [
+    "Do the implementation, artifact, and authoritative documents support VALIDATED-REDUCED without claim drift?"
+  ],
+  "md_sha256": "80eb9465fc2ad453001ed0e3094b573fd668437a80129f5b32e1a685244c1cd5"
+}

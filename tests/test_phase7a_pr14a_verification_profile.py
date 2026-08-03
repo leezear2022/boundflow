@@ -248,6 +248,7 @@ def test_external_adapter_is_observational_reversible_and_writes_artifacts(
     profile = profiler.profiles[0]
     assert query.bound_method == BoundMethod.ALPHA_BETA_CROWN
     assert query.execution_options["solver_phase"] == "activation_bab_bound"
+    assert query.requested_outputs == ("lower", "upper")
     assert profile.layer_pattern == ("linear", "relu", "linear")
     assert profile.domain_size == 2 and profile.spec_size == 3
 
@@ -278,3 +279,84 @@ def test_external_instance_instrumentation_removes_temporary_override() -> None:
 
     assert "compute_bounds" not in module.__dict__
     assert len(profiler.queries) == 1
+
+
+def test_external_adapter_executes_exact_call_through_typed_ir(tmp_path) -> None:
+    module = FakeBoundedModule()
+    profiler = ABCrownBoundQueryProfiler(
+        model_structure_hash="model-hash",
+        weight_version="weight-hash",
+        phase_resolver=lambda: "activation_bab_bound",
+        typed_ir_enabled=True,
+    )
+
+    with profiler.instrument(module):
+        expected, _ = module.compute_bounds(
+            x=(torch.ones((2, 4)),),
+            C=torch.ones((2, 3, 2)),
+            method="CROWN-Optimized",
+        )
+
+    profiler.write_artifacts(tmp_path)
+    records = [
+        json.loads(line)
+        for line in (tmp_path / "typed_ir.jsonl").read_text().splitlines()
+    ]
+    assert expected.item() == 20.0
+    assert len(records) == 1
+    assert records[0]["query_id"] == "abcrown-00000000"
+    assert set(records[0]["ir_hashes"]) == {
+        "bound_module_hash",
+        "plan_template_hash",
+        "plan_instance_hash",
+        "task_module_hash",
+        "schedule_hash",
+    }
+    assert records[0]["semantics_owner"] == "external_verifier"
+    assert records[0]["performance_claimed"] is False
+
+
+def test_external_adapter_preserves_call_order_for_nested_typed_ir(tmp_path) -> None:
+    class NestedBoundedModule(FakeBoundedModule):
+        def __init__(self) -> None:
+            super().__init__()
+            self.in_nested_call = False
+
+        def compute_bounds(  # pylint: disable=invalid-name,unused-argument
+            self, x=None, C=None, method="backward", **_kwargs
+        ):
+            if not self.in_nested_call:
+                self.in_nested_call = True
+                try:
+                    self.compute_bounds(x=x, C=C, method=method)
+                finally:
+                    self.in_nested_call = False
+            return x[0].sum() + C.sum(), None
+
+    module = NestedBoundedModule()
+    profiler = ABCrownBoundQueryProfiler(
+        model_structure_hash="model-hash",
+        weight_version="weight-hash",
+        phase_resolver=lambda: "activation_bab_bound",
+        typed_ir_enabled=True,
+    )
+
+    with profiler.instrument(module):
+        module.compute_bounds(
+            x=(torch.ones((2, 4)),),
+            C=torch.ones((2, 3, 2)),
+            method="CROWN-Optimized",
+        )
+
+    profiler.write_artifacts(tmp_path)
+    records = [
+        json.loads(line)
+        for line in (tmp_path / "typed_ir.jsonl").read_text().splitlines()
+    ]
+    assert [record["query_id"] for record in records] == [
+        "abcrown-00000000",
+        "abcrown-00000001",
+    ]
+    assert all(record["completed"] for record in records)
+    assert profiler.queries[0].parent_query_id is None
+    assert profiler.queries[1].parent_query_id == "abcrown-00000000"

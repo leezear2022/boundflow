@@ -1,8 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前冻结基线：`57a854b`；closure tag：`pr13-validated-reduced`
-> 当前研发分支：`feat/compiler-ir-stack-v1`
+> 当前代码/工件基线：`e03b3d2`；历史 closure tag：`pr13-validated-reduced`、
+> `ir5-final-validated-nogo`
+> 当前研发分支：`feat/real-verifier-ir-integration-v1`
 > 唯一执行顺序：**Gate 0 → PR-10 → PR-11 → PR-12 → PR-13 → PR-14**。
 > 禁止同时启动 Planner、fused kernel 与 BaB runtime 三条主线。
 
@@ -16,6 +17,11 @@
 > validated-reduced；IR-5D prepared execution remediation 已完成。fresh residual-v3
 > final correctness/replay 全过，但 Global p90 1.26160×、gray 无 Pareto、无预算切换。
 > IR-5 最终 VALIDATED-NO-GO；当前 ASPLOS system-performance 路线停止，IR-6 不启动。
+
+> **2026-08-03 correctness 后续**：独立 RVIR 路线已以 CPU VALIDATED-REDUCED 关闭。
+> ResNet external-semantics initial-CROWN 等价恢复；activation external exact call 已进入
+> Bound/Plan/Task/Schedule typed stack。该结果不撤销 IR-5 No-Go，也不构成性能 claim；详见
+> 第 12 节。
 
 ## 1. 锁定的论文命题
 
@@ -409,3 +415,24 @@ Bound IR v1
 - IR-5H v3 final correctness/integrity/semantic replay 全过，但 Global p90 regret
   `1.26160× > 1.20×`，gray compiler frontier 只有单点且无 multi-budget switch。
   按冻结止损规则，IR-5 保持 VALIDATED-NO-GO，禁止继续旋转 final 或启动 IR-6。
+
+## 12. 真实 Verifier IR correctness 路线关闭
+
+IR-5 No-Go 后另立的 `feat/real-verifier-ir-integration-v1` 不继续性能调参，只修复并审计
+PR-14 暴露的两个 correctness 缺口：
+
+1. ResNet initial-CROWN 通过显式 external intermediate bounds 与 adaptive ReLU slope，
+   lower max diff 从历史 `796.765` 降为 `3.09944e-6`，sign 从 3/9 恢复为 9/9；
+2. activation-BaB 作为 provider-owned external exact operation 进入 Bound/Plan/Task/Schedule
+   stack。历史 394/394 query 可生成五层 IR hash；当前 CPU 真实运行 377/377 dispatch 完成，
+   observer on/off 均访问 380 domains 且 final lower 一致。
+
+范围必须按三条口径分开：
+
+- fused BoundFlow kernel replacement 仍为历史 `0/394`；
+- typed external-call admission 为 `394/394`，但历史 v1 identity 有明确 limitation；
+- 当前 adapter v2 exact execution 为 `377/377`，external αβ-CROWN 继续拥有算法和 termination。
+
+全量回归 `452 passed, 37 skipped`，artifact fresh-process replay 通过。因本机 CUDA 不可用且
+external lower-only 公平性能合同未建立，关闭等级为 correctness/integration
+VALIDATED-REDUCED，ASPLOS system-performance 总判定仍为 NO。

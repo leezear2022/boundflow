@@ -16,18 +16,19 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-1. `gemini_doc/pr14_external_model_audit_handoff_2026_07_19.md`（从项目起点到 PR-14
+1. `gemini_doc/real_verifier_ir_integration_closure_2026_08_03.md`（当前最新：真实 verifier
+   correctness/integration 关闭审计与不可升级边界）
+2. `gemini_doc/rvir_external_audit_handoff_2026_08_03.md`（可直接交给其他模型的自包含
+   RVIR 审计请求、证据和复核顺序）
+3. `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`（RVIR 所有权与门禁）
+4. `gemini_doc/pr14_external_model_audit_handoff_2026_07_19.md`（从项目起点到 PR-14
    No-Go 的自包含外部审计入口）
-2. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`（PR-14
+5. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`（PR-14
    后 IR-first 架构重置、对象协议与实施门禁）
-3. `gemini_doc/current_status_after_pr13.md`（PR-13 后状态；PR-14 结果以后续文档为准）
-4. `gemini_doc/pr14_execution_plan.md`（PR-14 历史执行计划；A/B 已 No-Go，C 未启动）
-5. `gemini_doc/asplos_execution_memo_v1_0.md`（执行历史与 2026-07-20 路线修订）
-6. `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`（ASPLOS 顶层计划；claim 以新契约纠偏）
+6. `gemini_doc/current_status_after_pr13.md`（全项目当前状态）
 7. `gemini_doc/asplos_claims_map.md`（论文主张→代码→实验→工件证据）
-8. `docs/phase5_done.md`（Phase 5 完成声明：复现入口、产物结构、DoD、边界）
-9. `gemini_doc/artifact_claims_phase5d.md`（Phase 5 claims→文件/字段→命令）
-10. `docs/bench_jsonl_schema.md`（JSONL schema=1.0：字段与计时口径）
+8. `gemini_doc/asplos_execution_memo_v1_0.md`（唯一历史顺序与门禁）
+9. `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`（ASPLOS 顶层计划）
 
 ### B. 全流程总览（从 claims 到工程到 AE）
 
@@ -118,6 +119,14 @@
   prepared Bound/Task execution、production/audit trace 分离、from-forward-trace 公平基线
   与 calibration-only CUDA remediation 诊断；该文档当时尚未执行的 residual final
   已由 IR-5E—H 完成并判定最终 No-Go
+- `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`：IR-5 No-Go 后独立的
+  真实 verifier correctness/integration 路线、所有权与 RVIR-1—4 门禁
+- `gemini_doc/change_2026-08-03_rvir1_external_intermediate_semantics.md`：external
+  intermediate bounds + adaptive slope 的 ResNet initial-CROWN 语义修复
+- `gemini_doc/change_2026-08-03_rvir2_typed_external_calls.md`：activation-BaB external exact
+  call 的 Bound/Plan/Task/Schedule 类型化、真实调度与 lineage closure
+- `gemini_doc/change_2026-08-03_rvir3_cpu_correctness_artifact.md`：394 个历史 activation
+  typed admission、377 次真实 CPU exact dispatch、ResNet 等价与自包含 replay artifact
 - `gemini_doc/change_2026-07-28_ir5e_residual_final_protocol_freeze.md`：IR-5E
   residual-CNN typed workload、chain-CNN calibration→residual final v2 冻结 split、
   from-trace 公平协议及 p90/Pareto 一次性门禁
@@ -132,6 +141,12 @@
   当前 ASPLOS system-performance 路线最终 No-Go
 - `gemini_doc/change_2026-08-03_ir5_route_closure_and_publish.md`：IR-5 路线封存、
   权威状态去过期、外部 replay 命令与真实 Verifier IR 新路线准入条件
+- `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`：真实 verifier
+  intermediate-bound semantics、relaxation policy、activation external-call IR 与门禁
+- `gemini_doc/change_2026-08-03_start_real_verifier_ir_integration.md`：新 correctness/
+  integration 路线启动与 ResNet 根因复核记录
+- `gemini_doc/change_2026-08-03_rvir1_external_intermediate_semantics.md`：external ReLU
+  intermediate bounds/adaptive policy 入 IR 与 ResNet CPU correctness closure
 - `gemini_doc/asplos_execution_memo_v1_0.md`：ASPLOS 研发的短执行入口与门禁
 - `gemini_doc/current_status_after_pr13.md`：PR-13 closure 后的真实状态、证据边界与当前缺口
 - `gemini_doc/pr14_execution_plan.md`：真实 verifier workload coverage/execution 的切片、门禁与止损

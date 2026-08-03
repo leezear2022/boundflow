@@ -2,7 +2,7 @@
 
 > 状态：**顶层执行计划 v1.0；后续研究工作受本文门禁约束。**  
 > 基线日期：2026-07-12  
-> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 closure 基线：`5a29a8e`
+> 原始计划代码基线：`263ea81`（PR-10 complete）；当前代码/工件基线：`e03b3d2`
 > 投稿策略：ASPLOS 2027 September Cycle 为有条件冲刺；ASPLOS 2028 为稳健主目标。
 
 > **路线修订（2026-07-20）**：本文保留 2026-07-12 的研究问题、历史门禁和 PR-10—13
@@ -18,6 +18,11 @@
 > Pareto，且无多预算切换。IR-5 最终 VALIDATED-NO-GO，IR-6 不启动，当前 ASPLOS
 > system-performance 路线停止。最终证据见
 > `gemini_doc/change_2026-07-28_ir5h_residual_final_v3_nogo.md`。
+
+> **2026-08-03 RVIR 修订**：IR-5 后独立 correctness 路线已 CPU
+> VALIDATED-REDUCED：ResNet external-semantics initial-CROWN 等价恢复，activation external
+> exact call 完成 typed IR admission/dispatch artifact。该结果只修复集成语义，不撤销
+> IR-5 performance No-Go，不启动 IR-6，也不形成 verifier acceleration claim。
 
 ---
 

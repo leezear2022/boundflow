@@ -6,6 +6,13 @@
 > 原始工件：`artifacts/phase7a-pr14/pr14b-initial-replay-20260719-v4/`（本地 ignored，按
 > manifest 重生成）。
 
+> **2026-08-03 后续修订**：本报告的 PR-14B No-Go 是当时 whole-query executor 的真实
+> 结论。新分支 `feat/real-verifier-ir-integration-v1` 已定位其根因是丢失 external
+> intermediate bounds 与 adaptive relaxation policy，并在 CPU fresh replay 上将 ResNet
+> lower max diff 修复到 `3.10e-6`、sign `9/9`。新证据见
+> `gemini_doc/change_2026-08-03_rvir1_external_intermediate_semantics.md`；这不追溯改写
+> PR-14B artifact，也不产生性能 claim。
+
 ## 1. 本次回答的问题
 
 PR-14A 已证明当前 backend 在 activation-BaB phase 为 0/394 eligible，只留下 initial

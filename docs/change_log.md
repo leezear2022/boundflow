@@ -3539,3 +3539,96 @@
 
 **记录**
 - `gemini_doc/change_2026-08-03_ir5_route_closure_and_publish.md`
+
+---
+
+## 2026-08-03：启动真实 Verifier IR 集成路线
+
+- 从 IR-5 closure 新建 `feat/real-verifier-ir-integration-v1`；
+- 冻结 external intermediate bounds、adaptive relaxation policy 与 activation-BaB
+  external exact backend 的 Bound/Plan/Task/Schedule 所有权；
+- 独立复现 ResNet 根因：external pre-activation bounds + adaptive slope 将 max diff
+  从 `796.765` 降到 `2.15e-6`，sign 从 `3/9` 提升到 `9/9`；
+- 本阶段只确立 correctness 契约，不形成性能 claim。
+
+**记录**
+- `gemini_doc/change_2026-08-03_start_real_verifier_ir_integration.md`
+
+---
+
+## 2026-08-03：RVIR-1 External Intermediate-Bound Semantics
+
+- ReLU intermediate-bound source 与 lower-slope policy 成为稳定 Bound IR 字段；
+- PR-14 capture 拥有逐 ReLU external bounds、identity 与 aggregate hash；
+- count/order/shape 失配 fail closed，fixed replay 使用 external bounds + adaptive policy；
+- ResNet-2B prop0 CPU fresh replay 从 max diff `796.765` 修复到 `3.10e-6`，sign `9/9`；
+- focused IR/compiler/PR-14 回归 `89 passed`，不形成 CUDA/性能 claim。
+
+**记录**
+- `gemini_doc/change_2026-08-03_rvir1_external_intermediate_semantics.md`
+
+---
+
+## 2026-08-03：RVIR-2 Typed External Verifier Calls
+
+- Bound/Plan/Task/Schedule 新增强类型 external αβ-CROWN exact-call 路径；
+- α/β/split identity、requested lower/upper 与 external semantics ownership 显式化；
+- profiler 通过 typed schedule 调用原 provider，并保留嵌套 query parent lineage；
+- 真实 CPU BaB observer on/off 对照均访问 380 domains、final lower 一致；
+- 377/377 调用编译、调度并完成，343 个 activation 调用 effective method 均为 αβ-CROWN；
+- 当前只形成 correctness/integration claim，不形成性能 claim。
+
+**记录**
+- `gemini_doc/change_2026-08-03_rvir2_typed_external_calls.md`
+
+---
+
+## 2026-08-03：RVIR-3/4 CPU correctness artifact
+
+- 冻结 394/394 历史 activation query 的五层 typed IR admission/hash；
+- 冻结真实 CPU 377/377 exact-call dispatch、347 parent links 与 lower-only identity；
+- observer on/off status、380 domains 与 final lower 一致；
+- 合并 ResNet lower max diff `3.10e-6`、sign `9/9` correctness evidence；
+- artifact 自包含 query identity，可 fresh-process 重算，不形成 CUDA/性能 claim；
+- 历史 split values、requested polarity、parent lineage 缺失均逐行标注，不补写证据。
+
+**记录**
+- `gemini_doc/change_2026-08-03_rvir3_cpu_correctness_artifact.md`
+
+---
+
+## 2026-08-03：真实 Verifier IR 路线关闭
+
+- RVIR-1—4 在 CPU correctness/integration 范围内全部通过；
+- 全量 `452 passed, 37 skipped`，artifact fresh-process replay 通过；
+- 更新执行备忘录、当前状态、claims map、总体计划与 README 阅读顺序；
+- 最终判定 VALIDATED-REDUCED；历史 fused `0/394`、v1 identity limitation、GPU/性能缺口
+  均保留；
+- IR-5 仍为 VALIDATED-NO-GO，IR-6 不启动，ASPLOS-ready 仍为 NO。
+
+**记录**
+- `gemini_doc/real_verifier_ir_integration_closure_2026_08_03.md`
+
+---
+
+## 2026-08-03：默认启用 DocOps Logic
+
+- 初始化 `.docops` 低 token 状态、规则、事件与知识卡；
+- 后续每次代码/文档/计划/流程修改必须记录 `ch`，验证后记录 `va`；
+- 交接前必须执行 DocOps soft lint；
+- RVIR PR #4 的 closure/validation 已补录。
+
+**记录**
+- `gemini_doc/change_2026-08-03_adopt_docops_default.md`
+
+---
+
+## 2026-08-03：RVIR 外部审计交接
+
+- 汇总 RVIR 起点、6-commit 链、实现、artifact、验证与 claim 边界；
+- 明确区分 fused `0/394`、typed admission `394/394`、实时 execution `377/377`；
+- 给出独立审计顺序与审核输出格式；
+- 通过 DocOps exchange/handoff 形成异步审计入口。
+
+**记录**
+- `gemini_doc/change_2026-08-03_rvir_external_audit_handoff.md`

@@ -25,9 +25,13 @@ from boundflow.planner import plan_interval_ibp_v0
 from boundflow.runtime.abcrown_adapter import (
     ABCrownInitialCrownCapture,
     CapturedABCrownQuery,
+    bind_captured_intermediate_bounds,
     file_sha256,
 )
-from boundflow.runtime.crown_ibp import run_crown_ibp_mlp
+from boundflow.runtime.crown_ibp import (
+    _forward_ibp_trace_mlp,
+    run_crown_ibp_mlp_from_forward_trace,
+)
 from boundflow.runtime.fused_crown import (
     TVMFusedCrownExecutor,
     build_fused_crown_runtime_selection,
@@ -227,7 +231,7 @@ def _build_boundflow_query(
     model: Path,
     captured: CapturedABCrownQuery,
     device: torch.device,
-) -> tuple[Any, InputSpec, torch.Tensor]:
+) -> tuple[Any, InputSpec, torch.Tensor, dict[str, Any], dict[str, Any]]:
     program = import_onnx(str(model), do_shape_infer=True, normalize=True)
     if len(program.graph.inputs) != 1:
         raise ValueError("PR-14B replay currently requires exactly one model input")
@@ -237,7 +241,9 @@ def _build_boundflow_query(
     linear_spec = _plain_tensor(captured.linear_spec_c).to(device=device)
     _move_module(module, device, lower.dtype)
     spec = InputSpec.box(value_name=program.graph.inputs[0], lower=lower, upper=upper)
-    return module, spec, linear_spec
+    interval_env, local_relu_pre = _forward_ibp_trace_mlp(module, spec)
+    relu_pre = bind_captured_intermediate_bounds(captured, local_relu_pre)
+    return module, spec, linear_spec, interval_env, relu_pre
 
 
 def _nominal_forward_check(
@@ -279,6 +285,8 @@ def _boundflow_backend_call(
     module: Any,
     spec: InputSpec,
     linear_spec: torch.Tensor,
+    interval_env: dict[str, Any],
+    relu_pre: dict[str, Any],
     *,
     backend: str,
     chunk_rows: int,
@@ -293,10 +301,17 @@ def _boundflow_backend_call(
 
     def call() -> Any:
         with torch.no_grad():
-            return run_crown_ibp_mlp(
+            relu_alpha = {
+                name: (bounds.upper > -bounds.lower).to(bounds.lower.dtype)
+                for name, bounds in relu_pre.items()
+            }
+            return run_crown_ibp_mlp_from_forward_trace(
                 module,
                 spec,
+                interval_env=interval_env,
+                relu_pre=relu_pre,
                 linear_spec_C=linear_spec,
+                relu_alpha=relu_alpha,
                 fused_crown_executor=executor,
                 fused_crown_steps=selection.steps if executor is not None else (),
             )
@@ -392,7 +407,9 @@ def main() -> None:  # pylint: disable=too-many-branches
         "upper_present": external_replay_upper is not None,
     }
 
-    module, spec, linear_spec = _build_boundflow_query(model, captured, device)
+    module, spec, linear_spec, interval_env, relu_pre = _build_boundflow_query(
+        model, captured, device
+    )
     nominal_check, boundflow_nominal, onnx_nominal = _nominal_forward_check(
         model,
         module,
@@ -420,6 +437,8 @@ def main() -> None:  # pylint: disable=too-many-branches
             module,
             spec,
             linear_spec,
+            interval_env,
+            relu_pre,
             backend=backend,
             chunk_rows=args.chunk_rows,
             cache_dir=output_dir / "tvm-cache",
@@ -529,6 +548,10 @@ def main() -> None:  # pylint: disable=too-many-branches
             "box_width_min": float(widths.min().item()),
             "box_width_max": float(widths.max().item()),
             "box_width_unique": int(torch.unique(widths.cpu()).numel()),
+            "intermediate_bound_count": len(captured.intermediate_bounds),
+            "intermediate_bounds_hash": captured.intermediate_bounds_hash,
+            "intermediate_bound_source": "external_verifier",
+            "relu_lower_slope_policy": captured.relu_lower_slope_policy,
         },
         "solver_result": {
             "status": getattr(solver_result, "status", None),

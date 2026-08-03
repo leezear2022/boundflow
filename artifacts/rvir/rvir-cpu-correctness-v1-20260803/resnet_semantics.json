@@ -1,0 +1,19 @@
+{
+  "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+  "device": "cpu",
+  "intermediate_bound_count": 6,
+  "intermediate_bound_source": "external_verifier",
+  "intermediate_bounds_hash": "d51615b04dfb205afd67d2c21680ece4ca92f693157da1e32c7f8202a8e08cf1",
+  "lower_allclose": true,
+  "lower_max_abs_diff": 3.0994415283203125e-06,
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "performance_claimed": false,
+  "performance_compliant": false,
+  "relu_lower_slope_policy": "adaptive",
+  "schema_version": "boundflow.pr14-initial-crown-replay/v1",
+  "sign_agreement": 9,
+  "sign_total": 9,
+  "source_manifest_sha256": "7a3b50a357a083d311d1a1757ee1e97c5ebe18ab350c9dd5356c73544f932c78",
+  "vnnlib_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+  "workload_name": "vnncomp21-resnet2b-prop0-cpu-rvir1"
+}

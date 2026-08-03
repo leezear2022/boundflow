@@ -17,7 +17,7 @@ import json
 import math
 from typing import Optional, Tuple, TypeAlias
 
-BOUND_IR_SCHEMA_VERSION = "boundflow.bound_ir/v1.0"
+BOUND_IR_SCHEMA_VERSION = "boundflow.bound_ir/v1.1"
 
 
 @dataclass
@@ -479,6 +479,21 @@ class BoundOpKind(Enum):
     REPRESENTATION_CAST = "representation_cast"
     CONCRETIZE = "concretize"
     OBJECTIVE_REDUCE = "objective_reduce"
+    EXTERNAL_VERIFIER_CALL = "external_verifier_call"
+
+
+class IntermediateBoundSource(Enum):
+    """Owner of the pre-activation bounds consumed by a relaxation."""
+
+    LOCAL_FORWARD = "local_forward"
+    EXTERNAL_VERIFIER = "external_verifier"
+
+
+class ReluLowerSlopePolicy(Enum):
+    """Deterministic lower-line initialization for an ambiguous ReLU."""
+
+    ZERO = "zero"
+    ADAPTIVE = "adaptive"
 
 
 @dataclass(frozen=True)
@@ -570,6 +585,10 @@ class ReluRelaxationAttrs:
 
     primal_node_id: str
     preactivation_primal_value_id: Optional[str] = None
+    intermediate_bound_source: IntermediateBoundSource = (
+        IntermediateBoundSource.LOCAL_FORWARD
+    )
+    lower_slope_policy: ReluLowerSlopePolicy = ReluLowerSlopePolicy.ZERO
 
     def validate(self) -> None:
         """Validate the referenced primal ReLU identity."""
@@ -583,6 +602,10 @@ class ReluRelaxationAttrs:
             raise ValueError(
                 "ReLU preactivation primal value ID must be non-empty when present"
             )
+        if not isinstance(self.intermediate_bound_source, IntermediateBoundSource):
+            raise TypeError("ReLU intermediate-bound source is invalid")
+        if not isinstance(self.lower_slope_policy, ReluLowerSlopePolicy):
+            raise TypeError("ReLU lower-slope policy is invalid")
 
 
 @dataclass(frozen=True)
@@ -711,6 +734,70 @@ class ObjectiveReduceAttrs:
             raise ValueError("objective reduction dimension must be non-negative")
 
 
+@dataclass(frozen=True)
+class ExternalVerifierCallAttrs:
+    """Exact external solver call whose algorithm remains provider-owned."""
+
+    provider: str
+    solver_phase: str
+    method: BoundMethodKind
+    requested_bounds: Tuple[BoundPolarity, ...]
+    input_region_hash: str
+    objective_hash: str
+    alpha_state_version: Optional[str] = None
+    beta_state_version: Optional[str] = None
+    split_state_version: Optional[str] = None
+    cuts_version: Optional[str] = None
+    semantics_owner: str = "external_verifier"
+
+    def validate(self) -> None:
+        """Require complete identity without claiming local algorithm ownership."""
+
+        for name in (
+            "provider",
+            "solver_phase",
+            "input_region_hash",
+            "objective_hash",
+            "semantics_owner",
+        ):
+            if not getattr(self, name):
+                raise ValueError(f"external verifier {name} must be non-empty")
+        if self.semantics_owner != "external_verifier":
+            raise ValueError("external verifier call must retain external ownership")
+        if not isinstance(self.method, BoundMethodKind):
+            raise TypeError("external verifier bound method is invalid")
+        if not self.requested_bounds:
+            raise ValueError("external verifier call requires requested bounds")
+        if len(self.requested_bounds) != len(set(self.requested_bounds)):
+            raise ValueError("external verifier requested bounds contain duplicates")
+        if (
+            BoundPolarity.BOTH in self.requested_bounds
+            and len(self.requested_bounds) != 1
+        ):
+            raise ValueError("external verifier BOTH cannot combine with LOWER/UPPER")
+        for name in (
+            "alpha_state_version",
+            "beta_state_version",
+            "split_state_version",
+            "cuts_version",
+        ):
+            value = getattr(self, name)
+            if value is not None and not value:
+                raise ValueError(f"external verifier {name} is empty")
+        if self.method == BoundMethodKind.ALPHA_CROWN:
+            if self.alpha_state_version is None or self.beta_state_version is not None:
+                raise ValueError("external alpha-CROWN state versions are inconsistent")
+        if self.method == BoundMethodKind.ALPHA_BETA_CROWN:
+            if (
+                self.alpha_state_version is None
+                or self.beta_state_version is None
+                or self.split_state_version is None
+            ):
+                raise ValueError(
+                    "external alpha-beta-CROWN requires alpha/beta/split versions"
+                )
+
+
 BoundOpAttrs: TypeAlias = (
     NoBoundOpAttrs
     | InputBindAttrs
@@ -724,6 +811,7 @@ BoundOpAttrs: TypeAlias = (
     | ConcatBackwardAttrs
     | ConcretizeAttrs
     | ObjectiveReduceAttrs
+    | ExternalVerifierCallAttrs
 )
 
 
@@ -743,6 +831,7 @@ _EXPECTED_ATTRS: dict[BoundOpKind, type[object]] = {
     BoundOpKind.REPRESENTATION_CAST: RepresentationChangeAttrs,
     BoundOpKind.CONCRETIZE: ConcretizeAttrs,
     BoundOpKind.OBJECTIVE_REDUCE: ObjectiveReduceAttrs,
+    BoundOpKind.EXTERNAL_VERIFIER_CALL: ExternalVerifierCallAttrs,
 }
 
 
@@ -846,11 +935,52 @@ class BoundOp:
             raise ValueError(
                 f"bound op '{self.op_id}' requires at least two inputs -> one"
             )
+        if self.kind == BoundOpKind.EXTERNAL_VERIFIER_CALL and (
+            len(self.inputs) < 2 or len(self.outputs) not in {1, 2}
+        ):
+            raise ValueError(
+                f"bound op '{self.op_id}' requires query/state inputs and one/two bounds"
+            )
 
     def _validate_value_contract(  # pylint: disable=too-many-branches,too-many-statements
         self, values: dict[str, BoundValue]
     ) -> None:
         """Validate semantic relationships between input and output values."""
+
+        if self.kind == BoundOpKind.EXTERNAL_VERIFIER_CALL:
+            attrs = self.attrs
+            if not isinstance(attrs, ExternalVerifierCallAttrs):
+                raise AssertionError("external verifier attributes checked above")
+            inputs = tuple(values[value_id] for value_id in self.inputs)
+            outputs = tuple(values[value_id] for value_id in self.outputs)
+            roles = {value.role for value in inputs}
+            if (
+                BoundValueRole.PERTURBATION not in roles
+                or BoundValueRole.OBJECTIVE not in roles
+            ):
+                raise ValueError(
+                    "external verifier call requires perturbation and objective inputs"
+                )
+            if any(
+                value.role in {BoundValueRole.RELAXATION, BoundValueRole.SPLIT}
+                and value.state_version is None
+                for value in inputs
+            ):
+                raise ValueError("external verifier state inputs require versions")
+            if any(value.role != BoundValueRole.OBJECTIVE for value in outputs):
+                raise ValueError("external verifier outputs must be objectives")
+            expected_polarities = (
+                (BoundPolarity.LOWER, BoundPolarity.UPPER)
+                if attrs.requested_bounds == (BoundPolarity.BOTH,)
+                else attrs.requested_bounds
+            )
+            if tuple(value.polarity for value in outputs) != expected_polarities:
+                raise ValueError(
+                    "external verifier output polarities differ from request"
+                )
+            if len({value.tensor_type for value in outputs}) != 1:
+                raise ValueError("external verifier output tensor types must match")
+            return
 
         state_kinds = {
             BoundOpKind.LINEAR_BACKWARD,

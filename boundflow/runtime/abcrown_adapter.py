@@ -14,6 +14,7 @@ from typing import Any, Callable, Iterator, Mapping, Sequence, Tuple
 
 import torch
 
+from ..domains.interval import IntervalState
 from ..planner.materialization import BoundMethod, OptimizationStage
 from .bab_query import BoundQuery, QueryCompatibilityKey
 from .verification_profile import (
@@ -21,8 +22,13 @@ from .verification_profile import (
     VerificationQueryProfile,
     write_verification_profiles_jsonl,
 )
+from .verifier_ir_integration import (
+    ExternalVerifierCallSpec,
+    compile_external_verifier_call,
+    execute_external_verifier_call,
+)
 
-ABCROWN_ADAPTER_SCHEMA_VERSION = "boundflow.abcrown-adapter/v1"
+ABCROWN_ADAPTER_SCHEMA_VERSION = "boundflow.abcrown-adapter/v2"
 
 
 def file_sha256(path: Path) -> str:
@@ -202,6 +208,135 @@ def _input_region_digest(input_tensor: torch.Tensor) -> str:
 
 
 @dataclass(frozen=True)
+class CapturedIntermediateBound:
+    """Owned pre-activation interval from one external ReLU in graph order."""
+
+    ordinal: int
+    external_relu_name: str
+    external_preactivation_name: str
+    lower: torch.Tensor
+    upper: torch.Tensor
+
+    def validate(self) -> None:
+        """Reject missing identity, malformed order, or invalid intervals."""
+
+        if self.ordinal < 0:
+            raise ValueError("external intermediate-bound ordinal must be non-negative")
+        if not self.external_relu_name or not self.external_preactivation_name:
+            raise ValueError("external intermediate-bound names must be non-empty")
+        if self.lower.shape != self.upper.shape:
+            raise ValueError("external intermediate lower/upper shapes differ")
+        if (
+            self.lower.dtype != self.upper.dtype
+            or self.lower.device != self.upper.device
+        ):
+            raise ValueError("external intermediate lower/upper tensor types differ")
+        if not torch.is_floating_point(self.lower):
+            raise TypeError("external intermediate bounds must be floating tensors")
+        if not bool(
+            torch.isfinite(self.lower).all() and torch.isfinite(self.upper).all()
+        ):
+            raise ValueError("external intermediate bounds must be finite")
+        if not bool((self.lower <= self.upper).all()):
+            raise ValueError("external intermediate lower exceeds upper")
+
+
+def _external_node_name(node: Any, *, fallback: str) -> str:
+    name = getattr(node, "name", None)
+    return str(name) if name else fallback
+
+
+def _capture_intermediate_bounds(
+    bounded_module: Any,
+) -> tuple[CapturedIntermediateBound, ...]:
+    """Own every available external ReLU pre-activation interval in graph order."""
+
+    nodes_method = getattr(bounded_module, "nodes", None)
+    if not callable(nodes_method):
+        return ()
+    captured: list[CapturedIntermediateBound] = []
+    for node_index, node in enumerate(nodes_method()):
+        if _normalize_external_op(node) != "relu":
+            continue
+        inputs = getattr(node, "inputs", ())
+        if not isinstance(inputs, (tuple, list)) or len(inputs) != 1:
+            continue
+        preactivation = inputs[0]
+        lower = getattr(preactivation, "lower", None)
+        upper = getattr(preactivation, "upper", None)
+        if not torch.is_tensor(lower) or not torch.is_tensor(upper):
+            continue
+        item = CapturedIntermediateBound(
+            ordinal=len(captured),
+            external_relu_name=_external_node_name(
+                node, fallback=f"external-relu-{node_index}"
+            ),
+            external_preactivation_name=_external_node_name(
+                preactivation, fallback=f"external-preactivation-{node_index}"
+            ),
+            lower=lower.detach().clone(),
+            upper=upper.detach().clone(),
+        )
+        item.validate()
+        captured.append(item)
+    return tuple(captured)
+
+
+def intermediate_bounds_sha256(
+    bounds: Sequence[CapturedIntermediateBound],
+) -> str:
+    """Hash ordered external intermediate-bound identity and tensor content."""
+
+    digest = hashlib.sha256()
+    for expected, item in enumerate(bounds):
+        item.validate()
+        if item.ordinal != expected:
+            raise ValueError("external intermediate-bound ordinals are not contiguous")
+        digest.update(str(item.ordinal).encode("utf-8"))
+        digest.update(item.external_relu_name.encode("utf-8"))
+        digest.update(item.external_preactivation_name.encode("utf-8"))
+        digest.update(_tensor_sha256(item.lower).encode("utf-8"))
+        digest.update(_tensor_sha256(item.upper).encode("utf-8"))
+    return digest.hexdigest()
+
+
+def bind_captured_intermediate_bounds(
+    captured: "CapturedABCrownQuery",
+    local_relu_pre: Mapping[str, IntervalState],
+) -> dict[str, IntervalState]:
+    """Map external ReLU intervals onto a local graph by exact order and shape."""
+
+    local_items = tuple(local_relu_pre.items())
+    external_items = captured.intermediate_bounds
+    if len(local_items) != len(external_items):
+        raise ValueError(
+            "external/local ReLU intermediate count mismatch: "
+            f"external={len(external_items)} local={len(local_items)}"
+        )
+    bound: dict[str, IntervalState] = {}
+    for expected, ((local_name, local), external) in enumerate(
+        zip(local_items, external_items)
+    ):
+        external.validate()
+        if external.ordinal != expected:
+            raise ValueError("external intermediate-bound ordinals are not contiguous")
+        if external.lower.shape != local.lower.shape:
+            raise ValueError(
+                "external/local ReLU intermediate shape mismatch at "
+                f"ordinal {expected}: external={tuple(external.lower.shape)} "
+                f"local={tuple(local.lower.shape)}"
+            )
+        lower = external.lower.to(
+            device=local.lower.device, dtype=local.lower.dtype
+        ).contiguous()
+        upper = external.upper.to(
+            device=local.upper.device, dtype=local.upper.dtype
+        ).contiguous()
+        bound[local_name] = IntervalState(lower=lower, upper=upper)
+    return bound
+
+
+@dataclass(frozen=True)
 class CapturedABCrownQuery:  # pylint: disable=too-many-instance-attributes
     """Owned tensor payload plus a process-local exact-call replay closure."""
 
@@ -214,6 +349,9 @@ class CapturedABCrownQuery:  # pylint: disable=too-many-instance-attributes
     solver_phase: str
     bound_lower_requested: bool
     bound_upper_requested: bool
+    intermediate_bounds: tuple[CapturedIntermediateBound, ...]
+    intermediate_bounds_hash: str
+    relu_lower_slope_policy: str
     replay_external: Callable[[], Any] = field(repr=False, compare=False)
 
 
@@ -275,6 +413,7 @@ class ABCrownInitialCrownCapture:
 
     def _finish_capture(
         self,
+        bounded_module: Any,
         candidate: tuple[
             torch.Tensor,
             torch.Tensor,
@@ -304,6 +443,7 @@ class ABCrownInitialCrownCapture:
             bound_lower_requested,
             bound_upper_requested,
         ) = candidate
+        intermediate_bounds = _capture_intermediate_bounds(bounded_module)
         self.captured = CapturedABCrownQuery(
             input_lower=lower,
             input_upper=upper,
@@ -316,6 +456,9 @@ class ABCrownInitialCrownCapture:
             solver_phase=solver_phase,
             bound_lower_requested=bound_lower_requested,
             bound_upper_requested=bound_upper_requested,
+            intermediate_bounds=intermediate_bounds,
+            intermediate_bounds_hash=intermediate_bounds_sha256(intermediate_bounds),
+            relu_lower_slope_policy="adaptive",
             replay_external=replay_external,
         )
 
@@ -340,6 +483,7 @@ class ABCrownInitialCrownCapture:
                     replay_args = tuple(args)
                     replay_kwargs = dict(kwargs)
                     self._finish_capture(
+                        instance,
                         candidate,
                         result,
                         lambda: original(instance, *replay_args, **replay_kwargs),
@@ -356,6 +500,7 @@ class ABCrownInitialCrownCapture:
                     replay_args = tuple(args)
                     replay_kwargs = dict(kwargs)
                     self._finish_capture(
+                        target,
                         candidate,
                         result,
                         lambda: original(*replay_args, **replay_kwargs),
@@ -381,8 +526,11 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
     query_prefix: str = "abcrown"
     phase_resolver: Callable[[], str] = _phase_from_stack
     precondition_rejections: Tuple[str, ...] = ()
+    typed_ir_enabled: bool = False
     queries: list[BoundQuery] = field(default_factory=list)
     profiles: list[VerificationQueryProfile] = field(default_factory=list)
+    typed_ir_records: list[dict[str, object]] = field(default_factory=list)
+    _active_query_ids: list[str] = field(default_factory=list, init=False, repr=False)
 
     def __post_init__(self) -> None:
         if not self.model_structure_hash or not self.weight_version:
@@ -398,7 +546,7 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
         original: Callable[..., Any],
         call_args: tuple[Any, ...],
         call_kwargs: Mapping[str, Any],
-    ) -> None:
+    ) -> BoundQuery:
         values = _argument_map(original, call_args, call_kwargs)
         values.pop("self", None)
         input_tensor = _first_tensor(values.get("x"))
@@ -442,6 +590,8 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
             "external_method": str(raw_method),
             "solver_phase": solver_phase,
             "split_state_present": split_state_present,
+            "bound_lower_requested": bool(values.get("bound_lower", True)),
+            "bound_upper_requested": bool(values.get("bound_upper", True)),
             "identity_limitations": (
                 []
                 if beta_version is not None or not beta_enabled
@@ -474,9 +624,21 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
             numeric_policy="fp32_strict" if dtype == "torch.float32" else dtype,
         )
         sequence_number = len(self.queries)
+        requested_outputs = tuple(
+            name
+            for name, enabled in (
+                ("lower", source_options["bound_lower_requested"]),
+                ("upper", source_options["bound_upper_requested"]),
+            )
+            if enabled
+        )
+        if not requested_outputs:
+            raise ValueError("compute_bounds call requests neither lower nor upper")
         query = BoundQuery(
             query_id=f"{self.query_prefix}-{sequence_number:08d}",
-            parent_query_id=None,
+            parent_query_id=(
+                self._active_query_ids[-1] if self._active_query_ids else None
+            ),
             sequence_number=sequence_number,
             example_idx=0,
             model_structure_hash=self.model_structure_hash,
@@ -495,7 +657,7 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
             dtype=dtype,
             device=device,
             numeric_policy=compatibility.numeric_policy,
-            requested_outputs=("bounds",),
+            requested_outputs=requested_outputs,
             compatibility_key=compatibility,
             execution_options=source_options,
         )
@@ -509,6 +671,55 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
         )
         self.queries.append(query)
         self.profiles.append(profile)
+        return query
+
+    def _execute(self, query: BoundQuery, exact_call: Callable[[], Any]) -> Any:
+        """Optionally route one exact provider call through typed IR."""
+
+        if not self.typed_ir_enabled:
+            self._active_query_ids.append(query.query_id)
+            try:
+                return exact_call()
+            finally:
+                completed_query_id = self._active_query_ids.pop()
+                if completed_query_id != query.query_id:
+                    raise RuntimeError("external query lineage stack is corrupted")
+        compilation = compile_external_verifier_call(
+            ExternalVerifierCallSpec.from_query_dict(query.to_dict())
+        )
+        record_index = len(self.typed_ir_records)
+        record = {
+            "query_id": query.query_id,
+            "sequence_number": query.sequence_number,
+            "completed": False,
+            "error_type": "in_flight",
+            "result_hash": None,
+            "ir_hashes": compilation.hashes(),
+            "semantics_owner": "external_verifier",
+            "performance_claimed": False,
+        }
+        # Reserve the slot before entering the provider. auto_LiRPA can make a
+        # nested compute_bounds call, so completion order is not call order.
+        self.typed_ir_records.append(record)
+        self._active_query_ids.append(query.query_id)
+        try:
+            execution = execute_external_verifier_call(compilation, exact_call)
+        except BaseException as error:
+            record["error_type"] = type(error).__name__
+            self.typed_ir_records[record_index] = record
+            raise
+        finally:
+            completed_query_id = self._active_query_ids.pop()
+            if completed_query_id != query.query_id:
+                raise RuntimeError("external query lineage stack is corrupted")
+        record.update(
+            completed=True,
+            error_type=None,
+            result_hash=execution.result_hash,
+            ir_hashes=dict(execution.ir_hashes),
+        )
+        self.typed_ir_records[record_index] = record
+        return execution.result
 
     @contextmanager
     def instrument(self, target: Any) -> Iterator["ABCrownBoundQueryProfiler"]:
@@ -523,15 +734,15 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
         if inspect.isclass(target):
 
             def wrapped(instance: Any, *args: Any, **kwargs: Any) -> Any:
-                self._record(instance, original, (instance, *args), kwargs)
-                return original(instance, *args, **kwargs)
+                query = self._record(instance, original, (instance, *args), kwargs)
+                return self._execute(query, lambda: original(instance, *args, **kwargs))
 
             setattr(target, "compute_bounds", wrapped)
         else:
 
             def wrapped_instance(_instance: Any, *args: Any, **kwargs: Any) -> Any:
-                self._record(target, original, args, kwargs)
-                return original(*args, **kwargs)
+                query = self._record(target, original, args, kwargs)
+                return self._execute(query, lambda: original(*args, **kwargs))
 
             setattr(target, "compute_bounds", MethodType(wrapped_instance, target))
         try:
@@ -554,6 +765,14 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
             raise ValueError("external query IDs are not contiguous")
         if [profile.query_id for profile in self.profiles] != expected_ids:
             raise ValueError("external profile IDs do not match queries")
+        if self.typed_ir_enabled:
+            record_ids = [str(record["query_id"]) for record in self.typed_ir_records]
+            if record_ids != expected_ids:
+                raise ValueError(
+                    "typed IR execution records do not match queries: "
+                    f"queries={len(expected_ids)} records={len(record_ids)} "
+                    f"first_mismatch={next(((expected, actual) for expected, actual in zip(expected_ids, record_ids) if expected != actual), None)}"
+                )
 
     def write_artifacts(self, output_dir: Path) -> None:
         """Write identity, coverage rows, and aggregate coverage as separate files."""
@@ -574,10 +793,21 @@ class ABCrownBoundQueryProfiler:  # pylint: disable=too-many-instance-attributes
             + "\n",
             encoding="utf-8",
         )
+        if self.typed_ir_enabled:
+            typed_lines = [
+                json.dumps(record, sort_keys=True, allow_nan=False) + "\n"
+                for record in self.typed_ir_records
+            ]
+            (output_dir / "typed_ir.jsonl").write_text(
+                "".join(typed_lines), encoding="utf-8"
+            )
 
 
 __all__ = [
     "ABCROWN_ADAPTER_SCHEMA_VERSION",
+    "CapturedIntermediateBound",
+    "bind_captured_intermediate_bounds",
+    "intermediate_bounds_sha256",
     "ABCrownBoundQueryProfiler",
     "ABCrownInitialCrownCapture",
     "CapturedABCrownQuery",
