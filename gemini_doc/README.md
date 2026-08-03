@@ -18,15 +18,17 @@
 
 1. `gemini_doc/real_verifier_ir_integration_closure_2026_08_03.md`（当前最新：真实 verifier
    correctness/integration 关闭审计与不可升级边界）
-2. `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`（RVIR 所有权与门禁）
-3. `gemini_doc/pr14_external_model_audit_handoff_2026_07_19.md`（从项目起点到 PR-14
+2. `gemini_doc/rvir_external_audit_handoff_2026_08_03.md`（可直接交给其他模型的自包含
+   RVIR 审计请求、证据和复核顺序）
+3. `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`（RVIR 所有权与门禁）
+4. `gemini_doc/pr14_external_model_audit_handoff_2026_07_19.md`（从项目起点到 PR-14
    No-Go 的自包含外部审计入口）
-4. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`（PR-14
+5. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`（PR-14
    后 IR-first 架构重置、对象协议与实施门禁）
-5. `gemini_doc/current_status_after_pr13.md`（全项目当前状态）
-6. `gemini_doc/asplos_claims_map.md`（论文主张→代码→实验→工件证据）
-7. `gemini_doc/asplos_execution_memo_v1_0.md`（唯一历史顺序与门禁）
-8. `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`（ASPLOS 顶层计划）
+6. `gemini_doc/current_status_after_pr13.md`（全项目当前状态）
+7. `gemini_doc/asplos_claims_map.md`（论文主张→代码→实验→工件证据）
+8. `gemini_doc/asplos_execution_memo_v1_0.md`（唯一历史顺序与门禁）
+9. `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`（ASPLOS 顶层计划）
 
 ### B. 全流程总览（从 claims 到工程到 AE）
 

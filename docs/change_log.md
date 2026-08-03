@@ -3620,3 +3620,15 @@
 
 **记录**
 - `gemini_doc/change_2026-08-03_adopt_docops_default.md`
+
+---
+
+## 2026-08-03：RVIR 外部审计交接
+
+- 汇总 RVIR 起点、6-commit 链、实现、artifact、验证与 claim 边界；
+- 明确区分 fused `0/394`、typed admission `394/394`、实时 execution `377/377`；
+- 给出独立审计顺序与审核输出格式；
+- 通过 DocOps exchange/handoff 形成异步审计入口。
+
+**记录**
+- `gemini_doc/change_2026-08-03_rvir_external_audit_handoff.md`

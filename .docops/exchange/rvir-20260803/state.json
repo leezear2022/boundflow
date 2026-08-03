@@ -1,0 +1,16 @@
+{
+  "task": "rvir-20260803",
+  "title": "Audit RVIR CPU correctness integration closure",
+  "status": "ready_for_audit",
+  "round": 1,
+  "executor": "codex",
+  "auditor": "external-model",
+  "approved_round": null,
+  "docs": [
+    "rvir-20260803/request",
+    "rvir-20260803/r001/delivery"
+  ],
+  "rev": 3,
+  "created": "2026-08-03T02:40:59Z",
+  "updated": "2026-08-03T02:40:59Z"
+}
