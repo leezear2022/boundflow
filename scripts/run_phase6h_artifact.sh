@@ -17,6 +17,23 @@ fi
 # Default keeps kick-the-tires fast and deterministic.
 WORKLOADS="${2:-${PHASE6H_WORKLOADS:-1d_relu}}"
 
+# Keep every stage on one interpreter.  An explicit override is useful when
+# the caller launches pytest with an absolute Conda Python while PATH still
+# resolves `python` to the system installation.
+if [[ -n "${PHASE6H_PYTHON:-}" ]]; then
+  PYTHON_BIN="${PHASE6H_PYTHON}"
+elif [[ -n "${CONDA_PREFIX:-}" && -x "${CONDA_PREFIX}/bin/python" ]]; then
+  PYTHON_BIN="${CONDA_PREFIX}/bin/python"
+else
+  PYTHON_BIN="python"
+fi
+
+if ! command -v "${PYTHON_BIN}" >/dev/null 2>&1; then
+  echo "[phase6h] error: Python interpreter not found: ${PYTHON_BIN}" >&2
+  echo "[phase6h] set PHASE6H_PYTHON to the boundflow environment interpreter" >&2
+  exit 2
+fi
+
 mkdir -p "${OUT_DIR}"
 JSONL="${OUT_DIR}/phase6h_e2e.jsonl"
 CSV="${OUT_DIR}/phase6h_e2e.csv"
@@ -33,8 +50,8 @@ echo "[phase6h] workloads: ${WORKLOADS}"
   echo "date: $(date -Iseconds)"
   echo "pwd: $(pwd)"
   echo "git_sha: $(git rev-parse HEAD 2>/dev/null || echo unknown)"
-  echo "python: $(command -v python || true)"
-  echo "python_version: $(python -V 2>&1 || true)"
+  echo "python: ${PYTHON_BIN}"
+  echo "python_version: $("${PYTHON_BIN}" -V 2>&1 || true)"
   echo "uname: $(uname -a || true)"
   echo "CONDA_DEFAULT_ENV: ${CONDA_DEFAULT_ENV:-}"
   echo "OMP_NUM_THREADS: ${OMP_NUM_THREADS:-}"
@@ -42,12 +59,12 @@ echo "[phase6h] workloads: ${WORKLOADS}"
   echo "NUMEXPR_NUM_THREADS: ${NUMEXPR_NUM_THREADS:-}"
 } > "${ENV_TXT}"
 
-python -c "import torch; print('torch_version:', torch.__version__); print('torch_num_threads:', torch.get_num_threads())" >> "${ENV_TXT}" 2>/dev/null || true
+"${PYTHON_BIN}" -c "import torch; print('torch_version:', torch.__version__); print('torch_num_threads:', torch.get_num_threads())" >> "${ENV_TXT}" 2>/dev/null || true
 
-python -m pip freeze > "${PIP_FREEZE_TXT}" 2>/dev/null || true
+"${PYTHON_BIN}" -m pip freeze > "${PIP_FREEZE_TXT}" 2>/dev/null || true
 conda list > "${CONDA_LIST_TXT}" 2>/dev/null || true
 
-python scripts/sweep_phase6h_e2e.py \
+"${PYTHON_BIN}" scripts/sweep_phase6h_e2e.py \
   --out-jsonl "${JSONL}" \
   --devices cpu \
   --dtypes float32 \
@@ -64,12 +81,12 @@ python scripts/sweep_phase6h_e2e.py \
   --warmup 1 \
   --iters 3
 
-python scripts/report_phase6h_e2e.py \
+"${PYTHON_BIN}" scripts/report_phase6h_e2e.py \
   --in-jsonl "${JSONL}" \
   --out-csv "${CSV}" \
   --out-summary-md "${MD}"
 
-python scripts/plot_phase6h_e2e.py \
+"${PYTHON_BIN}" scripts/plot_phase6h_e2e.py \
   --in-jsonl "${JSONL}" \
   --out-dir "${FIGS}" || true
 

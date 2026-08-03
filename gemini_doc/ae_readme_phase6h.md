@@ -22,6 +22,17 @@ bash scripts/run_phase6h_artifact.sh
 bash scripts/run_phase6h_artifact.sh /tmp/phase6h_artifact_run
 ```
 
+Runner 会为 sweep、report、plot 和环境记录复用同一个 Python。默认优先使用已激活
+Conda 环境的 `${CONDA_PREFIX}/bin/python`，否则使用 `PATH` 中的 `python`。若调用方通过
+绝对路径启动 Python、但没有同步更新 `PATH`，可显式指定解释器：
+
+```bash
+PHASE6H_PYTHON=/path/to/env/bin/python \
+  bash scripts/run_phase6h_artifact.sh /tmp/phase6h_artifact_run
+```
+
+若显式路径不存在，runner 会在执行 benchmark 前以退出码 2 拒绝运行。
+
 ### 1.2.1 可选：扩展到非 toy workload（仍不改语义）
 
 默认只跑 `1d_relu` 以保证 Kick-the-tires 足够快。若希望把主图扩展到小型非 toy MLP，可传第二个参数（或设置环境变量）：
