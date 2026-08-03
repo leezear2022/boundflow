@@ -1,0 +1,12 @@
+{
+  "doc": "rvir-20260803/closure",
+  "type": "closure",
+  "task": "rvir-20260803",
+  "round": 1,
+  "from": "codex",
+  "ts": "2026-08-03T12:29:07Z",
+  "resolution": "approved",
+  "approved_round": 1,
+  "note": "Closed after external approval of round 1: 0 blocker, 0 major, 5 minor. RVIR-1 through RVIR-4 remain VALIDATED-REDUCED for CPU correctness/integration only. F1 and F2 are separate post-closure hardening/tooling follow-ups; F3 is addressed by the immutable canonical audit; F4 and F5 remain explicit v1 evidence and environment boundaries. No source or artifact was changed after the audited commit.",
+  "md_sha256": "f111480a030271f7082c75592ea276fd6cfe21db194007368c9c15b9d3f65dc6"
+}
