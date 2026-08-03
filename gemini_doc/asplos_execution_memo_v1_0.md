@@ -1,9 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`8c1b41a`；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`9d55b0a`；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/native-real-network-bound-ir-v1`
+> 当前研发分支：`feat/native-real-network-memory-plans-v1`
 > 唯一执行顺序：**Gate 0 → PR-10 → PR-11 → PR-12 → PR-13 → PR-14**。
 > 禁止同时启动 Planner、fused kernel 与 BaB runtime 三条主线。
 
@@ -33,6 +33,12 @@
 > 绑定 external-bound payload，CPU lower max diff `7.15256e-7`、sign 9/9。关闭等级只为
 > correctness/compiler ownership VALIDATED-REDUCED；下一步是 NRIR-2 多计划/memory decision，
 > 不是直接宣布性能结果。详见第 14 节。
+
+> **2026-08-04 NRIR-2 结果**：同一 real ResNet Bound IR/PlanTemplate 已加入 retain-all 与
+> lifetime-reuse 两个 storage plan；预算会切换 PlanInstance/Schedule，runtime 按 selected
+> last-use 提前释放值。logical/observed peak 为 `1,860,912`/`442,656` bytes，两计划
+> bitwise equal。该 closure 仍为 CPU mechanism/correctness，不是 CUDA memory/performance。
+> 详见第 15 节。
 
 ## 1. 锁定的论文命题
 
@@ -481,15 +487,43 @@ count 均为 0。五层 hash fresh replay 一致，final lower 对 external orac
 `7.152557373046875e-07`、sign 9/9。
 
 这只证明真实主 backward 已进入编译器 IR。external intermediate bounds 仍由 αβ-CROWN 提供，
-当前 Plan 只有一个 dense storage/full batch、没有 materialization alternative，也没有 GPU/timing。
-因此唯一获准顺序为：
+NRIR-1 冻结时 Plan 只有一个 dense storage/full batch、没有 materialization alternative，也没有
+GPU/timing。storage-axis 后续已由 NRIR-2 完成；历史获准顺序修订为：
 
 ```text
-NRIR-2 real-graph representation/storage/batch alternatives
-  -> materialization action + budget decision switch + semantic replay
-  -> NRIR-3 native GPU backend and fair lower-only protocol
+NRIR-2 real-graph storage alternatives + runtime last-use (completed)
+  -> fresh CUDA physical-memory/OOM protocol, if device is available
+  -> representation semantic binding + real materialization
+  -> sliced batch execution
   -> only then reconsider Schedule-memory/performance claim
 ```
 
 artifact 位于 `artifacts/native-real-network-ir/vnncomp21-resnet2b-prop0-cpu-v1/`；实现与复现命令
 见 `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_BOUND_IR_V1_PLAN_2026_08_04.md`。
+
+## 15. Native Real-Network Memory Plans v1 与下一门禁
+
+NRIR-2 没有改变 NRIR-1 的 Bound semantics。它从原 dense storage baseline 派生：
+
+1. retain-all：独占对齐 byte ranges，所有 value 保留到 final op；
+2. lifetime-reuse：使用 verified exact last-use，只让 lifetime 不重叠的值复用 arena range，
+   Task runtime 在消费完成后删除对应 tensor/operator reference。
+
+固定真实 ResNet 上，二者共享 Bound hash `16e27f31...80fb` 和 PlanTemplate hash
+`359ee68f...43f3`。高预算选择 retain-all（`1,860,912` bytes）；预算降至 `442,656` 选择
+lifetime-reuse；再减 1 byte 以 `memory_budget_exceeded` 拒绝。低内存计划有 386 对合法 alias、
+85 个 final-task 前释放。两计划 final lower/upper bitwise equal，对 external lower max diff
+`7.152557373046875e-07`、sign 9/9。
+
+该结果关闭 real-graph storage decision mechanism，但不关闭 performance：
+
+- `442,656` 是 Plan/Schedule arena 与 runtime live-value ledger，不是 CUDA allocator counter；
+- runtime release 会删除引用，但当前没有 `torch.cuda.max_memory_allocated/reserved` 或 OOM rescue；
+- `0.001 ms` policy cost 只用于稳定排序，标注 `policy_cost_not_benchmarked`；
+- Plan representation decision 仍未绑定 Bound rewrite/backend semantics，Schedule
+  `MaterializeAction` 仍只记账；full-query batch 也尚未被 slice execution 消费。
+
+下一动作优先尝试 fresh CUDA physical-memory protocol。只有实际 device measurement 同时通过
+correctness、重复运行和 baseline OOM/Pareto 门禁，才可进入性能主张；若 CUDA 不可用，则转向
+representation semantic binding bridge，不等待或伪造设备结果。artifact 位于
+`artifacts/native-real-network-memory-plans/vnncomp21-resnet2b-prop0-cpu-v1/`。

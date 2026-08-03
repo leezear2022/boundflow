@@ -56,6 +56,7 @@ from .schedule_ir_executor import (
     ScheduleOutOfMemoryError,
     ScheduleRetryExhausted,
 )
+from .storage_plan_runtime import StoragePlanRuntime
 
 
 @dataclass(frozen=True)
@@ -500,6 +501,7 @@ def execute_task_ir_semantics(
     state_store: Optional[BoundRuntimeStateStore] = None,
     prepared: Optional[PreparedTaskIRExecution] = None,
     trace_mode: TaskTraceMode = TaskTraceMode.AUDIT,
+    storage_runtime: Optional[StoragePlanRuntime] = None,
 ) -> tuple[IntervalState, TaskExecutionTrace]:
     """Execute each TaskIRUnit's exact Bound op partition in Schedule order."""
 
@@ -535,6 +537,8 @@ def execute_task_ir_semantics(
         backend = PyTorchReferenceTaskBackend()
     if state_store is None:
         state_store = BoundRuntimeStateStore()
+    if storage_runtime is not None:
+        storage_runtime.bind_session(session)
     task_by_id = {task.task_id: task for task in task_module.tasks}
     launch_by_task = {
         action.task_id: action
@@ -572,6 +576,8 @@ def execute_task_ir_semantics(
         if any(dependency not in completed for dependency in task.dependency_task_ids):
             raise ValueError("Task IR semantic executor has dependency use-before-task")
         launch = launch_by_task.get(task.task_id)
+        if storage_runtime is not None:
+            storage_runtime.before_task(task, session)
         if launch is None:
             if not set(task.output_value_ids).issubset(loaded_payload_hash_by_value):
                 raise ValueError("Task IR state reuse lacks exact runtime outputs")
@@ -605,6 +611,8 @@ def execute_task_ir_semantics(
                     attempted_backend_candidate_ids=("state-reuse",),
                 )
             )
+            if storage_runtime is not None:
+                storage_runtime.after_task(task, session)
             completed.add(task.task_id)
             continue
         retry = retries.get(launch.action_id)
@@ -653,6 +661,8 @@ def execute_task_ir_semantics(
                 attempted_backend_candidate_ids=tuple(attempted),
             )
         )
+        if storage_runtime is not None:
+            storage_runtime.after_task(task, session)
         completed.add(task.task_id)
     for action in schedule.actions:
         if isinstance(action, StateStoreAction):
@@ -665,6 +675,8 @@ def execute_task_ir_semantics(
     if completed != set(task_by_id):
         raise ValueError("Task IR semantic executor did not execute every task")
     result = session.result()
+    if storage_runtime is not None:
+        storage_runtime.finalize(session)
     trace = TaskExecutionTrace(
         task_module_hash=prepared.task_module_hash,
         schedule_hash=runtime_schedule_hash,

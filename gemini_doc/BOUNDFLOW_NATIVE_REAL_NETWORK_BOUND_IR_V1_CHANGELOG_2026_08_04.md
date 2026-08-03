@@ -60,10 +60,11 @@ stage: s01
 
 ## Follow-Ups
 
-- NRIR-2：在同一真实 ResNet graph 上增加至少两个合法 representation/storage/batch 计划，
-  让 materialization 与预算驱动的 decision switch 成为实际 Schedule action。
-- NRIR-2 correctness 通过后，才允许 NRIR-3 接入 native GPU backend，并与相同 lower-only
-  语义、相同 forward-bound 输入的公平 baseline 进行 fresh performance protocol。
+- 2026-08-04 更新：NRIR-2 已完成 storage-axis 双计划、预算 decision switch 与 runtime
+  last-use release，详见 memory-plans changelog。它没有声称 representation/materialization 或
+  sliced batch 已完成。
+- 下一门禁是 fresh CUDA physical-memory/OOM protocol；若 device 不可用，则先实现 selected
+  representation→Task/backend semantics 与 runtime materialization bridge。
 
 ## Links
 

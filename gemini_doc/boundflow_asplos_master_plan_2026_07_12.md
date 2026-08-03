@@ -2,7 +2,7 @@
 
 > 状态：**顶层执行计划 v1.0；后续研究工作受本文门禁约束。**  
 > 基线日期：2026-07-12  
-> 原始计划代码基线：`263ea81`（PR-10 complete）；当前代码/工件基线：`e03b3d2`
+> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`9d55b0a`
 > 投稿策略：ASPLOS 2027 September Cycle 为有条件冲刺；ASPLOS 2028 为稳健主目标。
 
 > **路线修订（2026-07-20）**：本文保留 2026-07-12 的研究问题、历史门禁和 PR-10—13
@@ -34,6 +34,12 @@
 > external-bound payload，final lower max diff `7.15256e-7`、sign 9/9。当前仍是单 dense
 > storage/full batch、0 materialization、CPU only。下一工作收窄为 NRIR-2 real-graph 多计划与
 > budget decision switch；未通过前不得启动性能主张。
+
+> **2026-08-04 NRIR-2 修订**：real-graph storage-axis 门禁已通过。同一 ResNet
+> Bound IR/PlanTemplate 在高/低预算下选择 retain-all（`1,860,912` B）与 lifetime-reuse
+>（`442,656` B）；低内存 runtime 提前释放 85 个值，双计划 bitwise equal。该结果仍不包含
+> CUDA allocator peak、OOM rescue、latency、real materialization 或 sliced batching，故顶层
+> performance No-Go 与 ASPLOS-ready=NO 不变。
 
 ---
 
@@ -250,19 +256,21 @@ Runtime 不能笼统声称相关查询可以共享中间状态。每个缓存对
 | Runtime | multi-spec、α/β、BaB node batch/cache/prune | C3 的起点，但尚未统一为 query abstraction |
 | Artifact | JSONL schema、CSV、figure、manifest、quick/full runner | ASPLOS 证据链基础 |
 | 环境 | PyTorch 2.12.1+cu132、LLVM 20.1.8、TVM、单一 tvm-ffi | 可复现实验基础 |
+| Native real-network compiler | ResNet2B 17 Primal→21 Bound/Task/Schedule；retain/reuse 双 storage 与 runtime last-use | C1/C2 的真实图 correctness/decision 载体；尚无 device-level 性能证据 |
 
-Gate 0 与 PR-10 已分别完成并提交；当前远程基线为 `263ea81`，工作区迁移不再是 PR-11 的
-前置 blocker。PR-10 的 structured 路径保留为 opt-in research capability，dense 继续作为默认。
+Gate 0 与 PR-10 是历史已完成节点；当前 integration base 已推进到 `9d55b0a`，NRIR-1 已合并，
+NRIR-2 正在独立分支收口。PR-10 的 structured 路径保留为 opt-in research capability，dense
+继续作为默认；不得把历史基线 `263ea81` 当作当前工程入口。
 
 ### 3.2 论文成立前必须补齐的缺口
 
 | 缺口 | 当前问题 | 必须达到的证据 |
 |---|---|---|
 | ReLU barrier | structured mode 已消除 persistent dense；dense 保持默认 | 需 Planner/fused lowering 解决 eager 重算与 α/β OOM |
-| 物化决策 | 现有 Planner 主要做 partition/reuse，缺少 lazy-vs-materialize 选择 | 至少一个预算/shape/query-aware 的自动计划 |
+| 物化决策 | NRIR-2 已有真实 storage reuse 预算切换，但 representation/materialization 尚未绑定 runtime semantic conversion | 至少一个真实图上的执行级 materialization alternative 与 device-level Pareto |
 | fused CROWN task | TVM 后端以 IBP/task 基础设施为主 | CROWN 粗粒度 task lowering 与正确性/性能门禁 |
 | repeated-query abstraction | multi-spec、BaB batch、cache 仍是分散机制 | 统一 QueryBatch/QueryState/PlanCache 或等价接口 |
-| 真实 workload | 当前 quick baseline 主要是小 MLP/MNIST CNN | ResNet/basic-block、VNN-COMP 代表实例、至少一个训练 workload |
+| 真实 workload | VNN-COMP ResNet2B correctness/storage 已进入 native IR；性能仍无真实 device protocol | ResNet/basic-block、更多 VNN-COMP 代表实例、至少一个训练 workload 的公平性能证据 |
 | headline result | 当前结果证明链路正确，不证明系统主张 | 端到端吞吐/显存/TTVerify 的显著、可解释收益 |
 | baseline 完整性 | 已有 auto_LiRPA/TVM 对照，但缺 Luna/系统竞品定位 | 公平版本、硬件、算法/tightness 和计时口径 |
 
