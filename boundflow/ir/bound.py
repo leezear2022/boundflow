@@ -6,7 +6,8 @@ runtime CROWN implementation. Runtime domain-state classes still inherit from
 part of the serialized Bound IR.
 """
 
-# pylint: disable=too-many-lines
+# pylint: disable=too-many-lines,too-many-instance-attributes,too-many-branches
+# pylint: disable=too-many-locals,too-many-boolean-expressions
 
 from __future__ import annotations
 
@@ -434,10 +435,15 @@ class BoundDomainConfig:
 
         if self.beta_enabled and not self.alpha_enabled:
             raise ValueError("beta state requires alpha state")
-        if self.method in {BoundMethodKind.INTERVAL, BoundMethodKind.CROWN}:
+        if self.method == BoundMethodKind.INTERVAL:
             if self.alpha_enabled or self.beta_enabled or self.split_state_present:
                 raise ValueError(
                     f"{self.method.value} cannot carry alpha/beta/split state"
+                )
+        elif self.method == BoundMethodKind.CROWN:
+            if self.alpha_enabled or self.beta_enabled:
+                raise ValueError(
+                    "crown cannot carry alpha/beta/split optimization state"
                 )
         elif self.method == BoundMethodKind.ALPHA_CROWN:
             if not self.alpha_enabled or self.beta_enabled or self.split_state_present:
@@ -606,6 +612,23 @@ class ReluRelaxationAttrs:
             raise TypeError("ReLU intermediate-bound source is invalid")
         if not isinstance(self.lower_slope_policy, ReluLowerSlopePolicy):
             raise TypeError("ReLU lower-slope policy is invalid")
+
+
+@dataclass(frozen=True)
+class SplitReluRelaxationAttrs(ReluRelaxationAttrs):
+    """Bind one exact discrete ReLU split tensor to a native relaxation."""
+
+    split_state_value_id: str = ""
+    split_state_hash: str = ""
+
+    def validate(self) -> None:
+        """Validate both the base relaxation and exact split payload identity."""
+
+        super().validate()
+        if not self.split_state_value_id:
+            raise ValueError("split ReLU state value ID must be non-empty")
+        if not _is_sha256_text(self.split_state_hash):
+            raise ValueError("split ReLU state hash must be SHA-256")
 
 
 @dataclass(frozen=True)
@@ -805,6 +828,7 @@ BoundOpAttrs: TypeAlias = (
     | LinearBackwardAttrs
     | Conv2dBackwardAttrs
     | ReluRelaxationAttrs
+    | SplitReluRelaxationAttrs
     | ReshapeAttrs
     | RepresentationChangeAttrs
     | AddBackwardAttrs
@@ -901,10 +925,11 @@ class BoundOp:
         if self.kind in {
             BoundOpKind.RELU_RELAXATION,
             BoundOpKind.RESHAPE,
-        } and (
-            len(self.inputs),
-            len(self.outputs),
-        ) not in {(1, 1), (4, 4)}:
+        } and (len(self.inputs), len(self.outputs)) not in (
+            {(1, 1), (4, 4), (5, 4)}
+            if self.kind == BoundOpKind.RELU_RELAXATION
+            else {(1, 1), (4, 4)}
+        ):
             raise ValueError(
                 f"bound op '{self.op_id}' requires scalar or affine-state input/output"
             )
@@ -990,6 +1015,27 @@ class BoundOp:
             BoundOpKind.CONCAT_BACKWARD,
             BoundOpKind.CONCRETIZE,
         }
+        if self.kind == BoundOpKind.RELU_RELAXATION and len(self.inputs) == 5:
+            attrs = self.attrs
+            if not isinstance(attrs, SplitReluRelaxationAttrs):
+                raise ValueError("five-input ReLU requires split relaxation attrs")
+            self._validate_affine_state_contract(values)
+            split = values[self.inputs[4]]
+            coefficient = values[self.inputs[0]]
+            if (
+                attrs.split_state_value_id != split.value_id
+                or split.role != BoundValueRole.SPLIT
+                or split.polarity != BoundPolarity.BOTH
+                or split.representation != BoundRepresentation.DENSE
+                or split.tensor_type.dtype != "int8"
+                or split.state_version != f"native-relu-split:{attrs.split_state_hash}"
+                or split.tensor_type.shape[0] != coefficient.tensor_type.shape[0]
+                or split.tensor_type.shape[1:] != coefficient.tensor_type.shape[2:]
+                or split.tensor_type.batch_axes
+                != (BoundBatchAxis(BatchAxisKind.DOMAIN, 0),)
+            ):
+                raise ValueError("split ReLU input type/version/linkage differs")
+            return
         if self.kind in state_kinds or (
             self.kind in {BoundOpKind.RELU_RELAXATION, BoundOpKind.RESHAPE}
             and len(self.inputs) == 4
@@ -1120,7 +1166,12 @@ class BoundOp:
                 raise ValueError("concretize upper output/bias types must match")
             return
 
-        input_states = _affine_state_refs(self.inputs)
+        input_ids = (
+            self.inputs[:4]
+            if self.kind == BoundOpKind.RELU_RELAXATION and len(self.inputs) == 5
+            else self.inputs
+        )
+        input_states = _affine_state_refs(input_ids)
         output_states = _affine_state_refs(self.outputs)
         for state in input_states + output_states:
             state.validate(values=values)
@@ -1411,6 +1462,31 @@ class BFBoundModule:
                         f"concretize references unknown perturbation "
                         f"'{attrs.perturbation_id}'"
                     )
+            elif isinstance(attrs, SplitReluRelaxationAttrs):
+                if not self.domain.split_state_present:
+                    raise ValueError("split ReLU attrs require split-aware domain")
+                if attrs.split_state_value_id not in op.inputs:
+                    raise ValueError("split ReLU attrs/input linkage differs")
+        split_ops = tuple(
+            op
+            for op in self.graph.ops
+            if isinstance(op.attrs, SplitReluRelaxationAttrs)
+        )
+        split_inputs = tuple(
+            value_id
+            for value_id in self.graph.inputs
+            if next(
+                value for value in self.graph.values if value.value_id == value_id
+            ).role
+            == BoundValueRole.SPLIT
+        )
+        if self.domain.method == BoundMethodKind.CROWN:
+            if self.domain.split_state_present != bool(split_ops):
+                raise ValueError("CROWN domain split flag/relaxation inputs differ")
+            if bool(split_ops) and {op.inputs[4] for op in split_ops} != set(
+                split_inputs
+            ):
+                raise ValueError("CROWN graph split inputs are missing or unused")
 
     def to_dict(self) -> dict[str, object]:
         """Return stable JSON-compatible module fields."""
@@ -1449,6 +1525,16 @@ def _static_numel(shape: Tuple[Optional[int], ...]) -> Optional[int]:
             return None
         result *= dimension
     return result
+
+
+def _is_sha256_text(value: object) -> bool:
+    """Return whether a schema identity is a lowercase SHA-256 digest."""
+
+    return (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(character in "0123456789abcdef" for character in value)
+    )
 
 
 def _affine_state_refs(value_ids: Tuple[str, ...]) -> Tuple[BoundAffineStateRef, ...]:

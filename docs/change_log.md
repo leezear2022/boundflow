@@ -3811,3 +3811,27 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_NATIVE_BAB_DOMAIN_BATCHING_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Native ReLU-Split BaB Queue v1
+
+- CROWN Bound IR 新增 first-class per-ReLU int8 split inputs，内容 identity 进入 ReLU attrs、
+  state version 与 Bound hash；Plan/Task/Schedule 支持 mixed float32/int8、split workload/
+  capability 与 actual execution；
+- runtime exact binding 对 split key/shape/dtype/device/range/hash、active/inactive preactivation
+  fail closed；local split-constrained IBP 与 external verifier provenance 分离；
+- 新增 deterministic widest-ambiguous branch、best-first bounded queue、typed parent/branch/prune/
+  expand/terminal trace 与 node/depth budget；child 仅继承离散 split，exact state 独立重算；
+- queue node batches 实际编译/执行 representation-bound Bound/Plan/Task/Schedule stacks；toy complete
+  queue packed/serial 为 5/15 stacks，固定 ResNet bounded queue 为 3/7 stacks；
+- fixed ResNet 执行 7 nodes、3 expand、4 frontier 并正确报告 budget-exhausted/not-claimed；packed/
+  serial lower/upper max diff `1.8310546875e-04/1.220703125e-04`，queue/split identity 一致；
+- 新增 generate/replay artifact、manifest、runtime/artifact/tamper tests；聚焦 `68 passed`、
+  全量 `577 passed, 37 skipped`；Black/Mypy/Pylint/diff 通过；
+- 只关闭 first-class split/queue/control-flow correctness ownership，不声明 α/β optimization、
+  完整 verdict、memory/latency/CUDA/OOM/Pareto/speedup。下一门禁为 native α/β state 与
+  warm-start validity。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_NATIVE_RELU_SPLIT_BAB_QUEUE_V1_CHANGELOG_2026_08_04.md`

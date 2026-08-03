@@ -69,6 +69,8 @@ def rewrite_plain_crown_structured_regions(module: BFBoundModule) -> BFBoundModu
                 continue
             source = current_values[value_id]
             if source.role != BoundValueRole.COEFFICIENT:
+                if source.role == BoundValueRole.SPLIT:
+                    continue
                 raise ValueError(f"affine port '{value_id}' is not a coefficient value")
             if source.representation == target:
                 continue

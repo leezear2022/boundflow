@@ -1,0 +1,9 @@
+{
+  "evidence_hash": "0296774ac41be8dc2c80a45357c839761945d9a89c2e395e6056016ad0aefcce",
+  "files": {
+    "relu_split_bab.json": "67487d40f5e257a16b68ba134759f0f715aea13c09eeb2de5eea37b71abbef78"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.native-real-network-relu-split-bab-artifact/v1",
+  "status": "ok"
+}

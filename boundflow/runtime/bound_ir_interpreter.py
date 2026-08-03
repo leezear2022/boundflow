@@ -2,7 +2,7 @@
 
 # CROWN literature and the existing runtime use A_u/A_l for affine coefficients.
 # pylint: disable=too-many-locals,invalid-name,duplicate-code,not-callable
-# pylint: disable=too-many-lines,too-many-return-statements
+# pylint: disable=too-many-lines,too-many-return-statements,too-many-arguments
 
 from __future__ import annotations
 
@@ -25,6 +25,8 @@ from ..ir.bound import (
     BoundOp,
     BoundOpKind,
     BoundRepresentation,
+    BoundValue,
+    BoundValueRole,
     ConcatBackwardAttrs,
     ConcretizeAttrs,
     Conv2dBackwardAttrs,
@@ -33,6 +35,7 @@ from ..ir.bound import (
     ReluRelaxationAttrs,
     RepresentationChangeAttrs,
     ReshapeAttrs,
+    SplitReluRelaxationAttrs,
     SpecBindAttrs,
 )
 from ..ir.task import BFTaskModule
@@ -56,6 +59,7 @@ def execute_plain_crown_bound_ir(  # pylint: disable=too-many-branches,too-many-
     input_spec: InputSpec,
     relu_pre: Mapping[str, IntervalState],
     linear_spec_C: Optional[torch.Tensor] = None,
+    relu_split_state: Optional[Mapping[str, torch.Tensor]] = None,
 ) -> IntervalState:
     """Execute only the explicit BoundOp sequence, using query payload as bindings."""
 
@@ -77,17 +81,15 @@ def execute_plain_crown_bound_ir(  # pylint: disable=too-many-branches,too-many-
     values = {value.value_id: value for value in bound_module.graph.values}
     env: dict[str, RuntimeValue] = {}
 
-    for input_value_id in bound_module.graph.inputs:
-        input_value = values[input_value_id]
-        if input_value.role.value != "objective":
-            raise NotImplementedError(
-                "plain-CROWN interpreter only accepts objective graph inputs"
-            )
-        env[input_value_id] = _objective_tensor(
-            input_value.tensor_type.shape,
+    env.update(
+        _bind_graph_inputs(
+            bound_module,
+            values=values,
             input_spec=input_spec,
             linear_spec_C=linear_spec_C,
+            relu_split_state=relu_split_state,
         )
+    )
 
     for op in bound_module.graph.ops:
         if op.kind == BoundOpKind.SPEC_BIND:
@@ -241,7 +243,10 @@ def execute_plain_crown_bound_ir(  # pylint: disable=too-many-branches,too-many-
             if preactivation is None or preactivation not in relu_pre:
                 raise KeyError(f"missing ReLU pre-activation binding '{preactivation}'")
             pre = relu_pre[preactivation]
-            A_u, b_u, A_l, b_l = _load_state(env, op.inputs)
+            if isinstance(attrs, SplitReluRelaxationAttrs):
+                split = _get_tensor(env, attrs.split_state_value_id)
+                _validate_split_constrained_preactivation(split, pre=pre)
+            A_u, b_u, A_l, b_l = _load_state(env, op.inputs[:4])
             if not torch.is_tensor(A_u) or not torch.is_tensor(A_l):
                 raise ValueError(
                     "ReLU relaxation requires an explicit dense materialization"
@@ -426,6 +431,7 @@ class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
         input_spec: InputSpec,
         relu_pre: Mapping[str, IntervalState],
         linear_spec_C: Optional[torch.Tensor] = None,
+        relu_split_state: Optional[Mapping[str, torch.Tensor]] = None,
         prepared_program: Optional[PreparedPlainCrownBoundIRProgram] = None,
         capture_output_hashes: bool = True,
     ) -> None:
@@ -456,17 +462,15 @@ class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
         self.capture_output_hashes = capture_output_hashes
         self.env: dict[str, RuntimeValue] = {}
         self.next_op_index = 0
-        for input_value_id in bound_module.graph.inputs:
-            input_value = self.values[input_value_id]
-            if input_value.role.value != "objective":
-                raise NotImplementedError(
-                    "plain-CROWN interpreter only accepts objective graph inputs"
-                )
-            self.env[input_value_id] = _objective_tensor(
-                input_value.tensor_type.shape,
+        self.env.update(
+            _bind_graph_inputs(
+                bound_module,
+                values=self.values,
                 input_spec=input_spec,
                 linear_spec_C=linear_spec_C,
+                relu_split_state=relu_split_state,
             )
+        )
 
     def execute_task(
         self,
@@ -600,6 +604,8 @@ class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
             BoundOpKind.CONV2D_BACKWARD,
         }:
             raise ValueError("fused Bound task must be ReLU followed by affine")
+        if len(relu_op.inputs) != 4:
+            raise NotImplementedError("fused Bound task does not accept split inputs")
         relu_attrs = _attrs(relu_op, ReluRelaxationAttrs)
         preactivation = relu_attrs.preactivation_primal_value_id
         if preactivation is None or preactivation not in self.relu_pre:
@@ -891,7 +897,11 @@ class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
             preactivation = attrs.preactivation_primal_value_id
             if preactivation is None or preactivation not in relu_pre:
                 raise KeyError(f"missing ReLU pre-activation binding '{preactivation}'")
-            A_u, b_u, A_l, b_l = _load_state(env, op.inputs)
+            pre = relu_pre[preactivation]
+            if isinstance(attrs, SplitReluRelaxationAttrs):
+                split = _get_tensor(env, attrs.split_state_value_id)
+                _validate_split_constrained_preactivation(split, pre=pre)
+            A_u, b_u, A_l, b_l = _load_state(env, op.inputs[:4])
             if not torch.is_tensor(A_u) or not torch.is_tensor(A_l):
                 raise ValueError(
                     "ReLU relaxation requires an explicit dense materialization"
@@ -901,7 +911,7 @@ class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
                 b_u,
                 A_l,
                 b_l,
-                pre=relu_pre[preactivation],
+                pre=pre,
                 lower_slope_policy=attrs.lower_slope_policy,
             )
             output_shape = _coefficient_primal_shape(values, op.outputs[0])
@@ -1027,6 +1037,109 @@ def runtime_value_hash(value: RuntimeValue) -> str:
     """Return the canonical content hash used by runtime state payloads."""
 
     return _runtime_value_hash(value)
+
+
+def _bind_graph_inputs(
+    bound_module: BFBoundModule,
+    *,
+    values: Mapping[str, BoundValue],
+    input_spec: InputSpec,
+    linear_spec_C: Optional[torch.Tensor],
+    relu_split_state: Optional[Mapping[str, torch.Tensor]],
+) -> dict[str, RuntimeValue]:
+    """Bind objective and split inputs with exact schema/content ownership."""
+
+    split_values = tuple(
+        values[value_id]
+        for value_id in bound_module.graph.inputs
+        if values[value_id].role == BoundValueRole.SPLIT
+    )
+    split_names = tuple(value.source_primal_value_id for value in split_values)
+    if any(name is None for name in split_names) or len(split_names) != len(
+        set(split_names)
+    ):
+        raise ValueError("Bound IR split inputs require unique primal ownership")
+    expected_names = {cast(str, name) for name in split_names}
+    if relu_split_state is None:
+        if expected_names:
+            raise ValueError("split-aware Bound IR requires ReLU split payloads")
+        split_payloads: Mapping[str, torch.Tensor] = {}
+    else:
+        if set(relu_split_state) != expected_names:
+            raise ValueError("runtime ReLU split keys differ from Bound IR")
+        split_payloads = relu_split_state
+
+    result: dict[str, RuntimeValue] = {}
+    for input_value_id in bound_module.graph.inputs:
+        input_value = values[input_value_id]
+        if input_value.role == BoundValueRole.OBJECTIVE:
+            result[input_value_id] = _objective_tensor(
+                input_value.tensor_type.shape,
+                input_spec=input_spec,
+                linear_spec_C=linear_spec_C,
+            )
+            continue
+        if input_value.role == BoundValueRole.SPLIT:
+            primal_name = cast(str, input_value.source_primal_value_id)
+            result[input_value_id] = _runtime_split_tensor(
+                input_value, split_payloads[primal_name]
+            )
+            continue
+        raise NotImplementedError(
+            f"plain-CROWN interpreter cannot bind {input_value.role.value} graph input"
+        )
+    return result
+
+
+def _runtime_split_tensor(value: BoundValue, payload: torch.Tensor) -> torch.Tensor:
+    """Normalize one runtime split tensor and verify its exact Bound identity."""
+
+    if not torch.is_tensor(payload):
+        raise TypeError("runtime ReLU split payload must be a torch.Tensor")
+    expected = value.tensor_type.shape
+    if any(dim is None for dim in expected):
+        raise NotImplementedError("runtime ReLU split input requires static shape")
+    expected_shape = cast(Tuple[int, ...], expected)
+    if (
+        tuple(int(dim) for dim in payload.shape) == expected_shape[1:]
+        and int(expected_shape[0]) == 1
+    ):
+        payload = payload.unsqueeze(0)
+    if tuple(int(dim) for dim in payload.shape) != expected_shape:
+        raise ValueError("runtime ReLU split shape differs from Bound IR")
+    if payload.dtype != torch.int8:
+        raise TypeError("runtime ReLU split payload must use int8")
+    if str(payload.device) != value.tensor_type.device:
+        raise ValueError("runtime ReLU split device differs from Bound IR")
+    if not bool(((payload >= -1) & (payload <= 1)).all().item()):
+        raise ValueError("runtime ReLU split payload contains values outside -1/0/1")
+    normalized = payload.detach().contiguous().clone()
+    prefix = "native-relu-split:"
+    state_version = value.state_version
+    if (
+        state_version is None
+        or not state_version.startswith(prefix)
+        or tensor_content_hash(normalized) != state_version.removeprefix(prefix)
+    ):
+        raise ValueError("runtime ReLU split payload hash differs from Bound IR")
+    return normalized
+
+
+def _validate_split_constrained_preactivation(
+    split: torch.Tensor, *, pre: IntervalState
+) -> None:
+    """Require the supplied interval trace to implement every discrete branch."""
+
+    if split.shape != pre.lower.shape or pre.lower.shape != pre.upper.shape:
+        raise ValueError("split ReLU pre-activation shape differs from split input")
+    if split.device != pre.lower.device or pre.lower.device != pre.upper.device:
+        raise ValueError("split ReLU pre-activation device differs from split input")
+    active = split == 1
+    inactive = split == -1
+    if bool((pre.lower[active] < 0).any().item()):
+        raise ValueError("active ReLU split is not enforced by pre-activation lower")
+    if bool((pre.upper[inactive] > 0).any().item()):
+        raise ValueError("inactive ReLU split is not enforced by pre-activation upper")
 
 
 def _objective_tensor(

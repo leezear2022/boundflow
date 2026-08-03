@@ -613,3 +613,23 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - 工件：`artifacts/native-real-network-domain-batch/vnncomp21-resnet2b-prop0-cpu-v1/`；下一缺口
   为 native ReLU-split state/queue/control flow；聚焦 `19 passed`、全量
   `559 passed, 37 skipped`、静态门禁全过。
+
+### 2026-08-04 Native ReLU-Split BaB Queue v1
+
+- `C3-M-NRIR9` validated-reduced split/queue mechanism：每个 ReLU split 是 native Bound graph
+  的 typed int8 input，并进入 Plan workload/capability、Task partition、Schedule launch 与五层 hash；
+- `C3-G-NRIR9` ownership/validity gate：split key/shape/dtype/device/range/content、preactivation
+  active/inactive feasibility、node parent/branch/order、IR stack link与同步重哈希后的 artifact
+  tamper 均 fail closed；local forward 与 external verifier provenance 分离；
+- `C3-E-NRIR9` real-network control flow：固定 ResNet 形成 7 个节点/3 expand/4 frontier 的
+  best-first bounded queue；packed-4/serial-1 实际执行 3/7 个 native stacks，lower/upper max diff
+  `1.8310546875e-04/1.220703125e-04`，queue signature 与 split identity 相同；
+- `C3-S-NRIR9` state rule：child 只继承 discrete split；每个 child batch独立重算 IBP exact state，
+  `parent_state_consumed_as_exact=false`。packed/serial CPU batch layout 的 exact tensor hash 可不同，
+  因此只按冻结数值容差声明语义一致，不伪称 bitwise；
+- `C3-L-NRIR9` hard limitation：plain CROWN bounded run，明确 `budget_exhausted` 与
+  `property_status=not_claimed`；无 α/β optimization、完整 verifier verdict 或 timing/memory/CUDA/
+  OOM/Pareto/speedup claim；
+- 工件：`artifacts/native-real-network-relu-split-bab/vnncomp21-resnet2b-prop0-cpu-v1/`；下一缺口
+  为 native α/β optimization state、beta constraint 与 warm-start validity；聚焦 `68 passed`、
+  全量 `577 passed, 37 skipped`，静态门禁与 fresh replay 全过。
