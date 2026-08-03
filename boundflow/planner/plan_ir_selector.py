@@ -61,12 +61,23 @@ class PlanSelectionContext:
     query_distribution_id: str = "single-query"
     expected_query_count: int = 1
     cached_artifact_keys: Tuple[str, ...] = ()
+    max_domain_batch_size: Optional[int] = None
+    max_spec_batch_size: Optional[int] = None
+    max_sample_batch_size: Optional[int] = None
 
     def validate(self) -> None:
         if not self.query_distribution_id:
             raise ValueError("query distribution ID must be non-empty")
         if self.expected_query_count <= 0:
             raise ValueError("expected query count must be positive")
+        for name in (
+            "max_domain_batch_size",
+            "max_spec_batch_size",
+            "max_sample_batch_size",
+        ):
+            value = getattr(self, name)
+            if value is not None and value <= 0:
+                raise ValueError(f"selection {name} must be positive when present")
         if (
             any(not key for key in self.cached_artifact_keys)
             or len(self.cached_artifact_keys) != len(set(self.cached_artifact_keys))
@@ -230,6 +241,9 @@ def select_plan_instance(  # pylint: disable=too-many-arguments
             for backends in itertools.product(*backend_groups):
                 for batch in template.batch_candidates:
                     if not batch.static_legal:
+                        continue
+                    if _batch_exceeds_selection_limit(batch, context=context):
+                        _increment(failures, "batch_exceeds_runtime_limit")
                         continue
                     if (
                         batch.domain_batch_size > template.workload.domain_batch_size
@@ -489,6 +503,15 @@ def _build_instance(  # pylint: disable=too-many-arguments
             str(selection_context.expected_query_count),
             *selection_context.cached_artifact_keys,
             *(
+                (
+                    f"max_domain_batch_size={selection_context.max_domain_batch_size}",
+                    f"max_spec_batch_size={selection_context.max_spec_batch_size}",
+                    f"max_sample_batch_size={selection_context.max_sample_batch_size}",
+                )
+                if _has_batch_limit(selection_context)
+                else ()
+            ),
+            *(
                 "|".join(
                     (
                         validity.state_id,
@@ -557,6 +580,24 @@ def _build_instance(  # pylint: disable=too-many-arguments
                 "cached_artifact_keys",
                 ",".join(selection_context.cached_artifact_keys) or "none",
             ),
+            *(
+                (
+                    PlanProvenance(
+                        "max_domain_batch_size",
+                        str(selection_context.max_domain_batch_size or "none"),
+                    ),
+                    PlanProvenance(
+                        "max_spec_batch_size",
+                        str(selection_context.max_spec_batch_size or "none"),
+                    ),
+                    PlanProvenance(
+                        "max_sample_batch_size",
+                        str(selection_context.max_sample_batch_size or "none"),
+                    ),
+                )
+                if _has_batch_limit(selection_context)
+                else ()
+            ),
             PlanProvenance(
                 "amortized_selection_latency_ms",
                 format(float(selected.score(selection_context)[0]), ".12g"),
@@ -585,3 +626,27 @@ def _rejection_reasons(candidate: PlanCandidate) -> Tuple[str, ...]:
 
 def _increment(counts: dict[str, int], reason: str) -> None:
     counts[reason] = counts.get(reason, 0) + 1
+
+
+def _has_batch_limit(context: PlanSelectionContext) -> bool:
+    return any(
+        value is not None
+        for value in (
+            context.max_domain_batch_size,
+            context.max_spec_batch_size,
+            context.max_sample_batch_size,
+        )
+    )
+
+
+def _batch_exceeds_selection_limit(
+    batch: BatchCandidate, *, context: PlanSelectionContext
+) -> bool:
+    return any(
+        limit is not None and size > limit
+        for size, limit in (
+            (batch.domain_batch_size, context.max_domain_batch_size),
+            (batch.spec_batch_size, context.max_spec_batch_size),
+            (batch.sample_batch_size, context.max_sample_batch_size),
+        )
+    )

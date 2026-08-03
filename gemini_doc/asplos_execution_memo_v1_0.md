@@ -1,9 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`9d55b0a`；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`517a97d`（NRIR-4 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/native-real-network-memory-plans-v1`
+> 当前研发分支：`feat/native-real-network-sliced-batch-execution-v1`
 > 唯一执行顺序：**Gate 0 → PR-10 → PR-11 → PR-12 → PR-13 → PR-14**。
 > 禁止同时启动 Planner、fused kernel 与 BaB runtime 三条主线。
 
@@ -39,6 +39,12 @@
 > last-use 提前释放值。logical/observed peak 为 `1,860,912`/`442,656` bytes，两计划
 > bitwise equal。该 closure 仍为 CPU mechanism/correctness，不是 CUDA memory/performance。
 > 详见第 15 节。
+
+> **2026-08-04 NRIR-5 结果**：真实 ResNet 的 spec BatchDecision 已驱动 source Schedule
+> `[0,3)/[3,6)/[6,9)` 与三个各 21-op 的 child Bound/Plan/Task/Schedule stack；full/sliced
+> lower max diff `1.90735e-6`、external sign 9/9，artifact generate/replay 已通过。全量
+> `508 passed, 37 skipped`，状态为 correctness/integration VALIDATED-REDUCED；domain/sample、
+> representation × batch 联合执行与任何性能/内存主张仍 pending。详见第 18 节。
 
 ## 1. 锁定的论文命题
 
@@ -585,3 +591,32 @@ NRIR-4 representation binding (completed)
 
 下一分支至少要让一个 domain/spec/sample batch decision 改变实际 Task/Schedule slice 和 query
 accounting；仅新增 batch metadata、hash 或 synthetic loop 不算完成。
+
+## 18. Native Real-Network Sliced Batch Execution v1
+
+NRIR-5 已实现一个真实、可重放的 spec-axis batch execution slice：同一 source BoundModule 与
+PlanTemplate 同时包含 full-query 和 spec-size-3 BatchCandidate；query-time
+`max_spec_batch_size` 进入 selection provenance，并分别生成 full/sliced PlanInstance 与 Schedule。
+sliced source Schedule 明确拥有 `[0,3)`、`[3,6)`、`[6,9)` 三个 objective ranges，每个 range
+编译为独立 21-op Bound、21 Task、21 Launch 的 child stack，执行结果按 spec 轴拼接。
+
+固定 ResNet 上，full path 为 1 个 child，sliced path 为 3 个 child、合计 63 Task/Launch；二者
+共享 source Bound/PlanTemplate，但 source PlanInstance/Schedule identity 不同。full/sliced lower
+最大差 `1.9073486328125e-06`；full/external 为 `7.152557373046875e-07`；sliced/external 为
+`1.9073486328125e-06`，均 allclose、sign 9/9。artifact 位于
+`artifacts/native-real-network-sliced-batch/vnncomp21-resnet2b-prop0-cpu-v1/`，包含 binding、
+child IR、execution trace、digest 与同步重哈希后的结构篡改门禁。
+
+本阶段只关闭 spec-axis actual-execution ownership，不能升级为 batching performance：三个 child
+当前顺序执行，source storage 仍为完整 query ledger，未测 allocator/latency。domain/sample 尚未
+实现；NRIR-4 representation 与 NRIR-5 batch 各自成立，但其联合 cross-product 尚未执行。
+
+后续唯一代码顺序为：
+
+```text
+NRIR-5 spec sliced execution (completed)
+  -> representation × batch policy composition
+  -> real repeated-query/domain batching and cache/accounting
+  -> execute frozen NRIR-3 protocol when CUDA is available
+  -> only with physical end-to-end evidence reconsider ASPLOS performance claim
+```

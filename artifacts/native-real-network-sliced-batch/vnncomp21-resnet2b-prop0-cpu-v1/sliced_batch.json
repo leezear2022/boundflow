@@ -1,0 +1,219 @@
+{
+  "claim_boundary": "real-network spec-axis Plan/Schedule slicing, child compiler-stack ownership, aggregation, and CPU correctness only; source controller storage is unchanged and supports no memory, latency, CUDA, OOM, Pareto, or speedup claim",
+  "compiler_version": "boundflow.native-spec-batch-execution/v1",
+  "full_policy": {
+    "batch_candidate_id": "batch:full-query",
+    "child_ir_hashes": [
+      {
+        "bound_module_hash": "16e27f318f43be8df7571e16c0dd84657462dcc964bb360a553dc142961080fb",
+        "plan_instance_hash": "1858c63a23a9ef43b9e4165a8c821a43b8c044381367500aea7ea4693544344f",
+        "plan_template_hash": "ffb46427453eb5115f48c3f599d92a240e021625f5fe4cb0c6857091ed8ee318",
+        "schedule_hash": "2019f32f16e5d69ac24c443bc13c4f67b2f6ccbc32257be62fac1ce1bf6ef23a",
+        "task_module_hash": "552a709694220a1d4ab16625ac9c5f72e392c96c21262ad608ff67ffbd8808b7"
+      }
+    ],
+    "child_stack_count": 1,
+    "controller_peak_bytes": 1860912,
+    "controller_storage_candidate_id": "storage:dense-arena",
+    "execution_trace": {
+      "binding_hash": "eee0b54f6db30c6d28aef4343a9cb9814e536b9de27e4fab3dd2dd25fa623e98",
+      "child_query_ids": [
+        "vnncomp21-resnet2b-prop0-native-ir5-spec-batch:spec:0000:0009"
+      ],
+      "child_task_trace_hashes": [
+        "cb848be299e568fd5745b1e0dad46c26247b6eabb1c6296e4209d8b272dea909"
+      ],
+      "result_lower_hash": "2dce3f71b72c56fc1efb0e291db370daac0531d7b55d84daa1754ab45cc3356d",
+      "result_upper_hash": "39fd527c73d4d4190e8520a53b7324361eeefd77b11307a5a43546adbdb23de5",
+      "schema_version": "boundflow.native-spec-batch-execution-trace/v1"
+    },
+    "selected_spec_batch_size": 9,
+    "source_ir_hashes": {
+      "source_bound_module_hash": "16e27f318f43be8df7571e16c0dd84657462dcc964bb360a553dc142961080fb",
+      "source_plan_instance_hash": "b7f73769eccca450137e2eb8dce1a6de44a5ea89043e7e0c1003a2a282518035",
+      "source_plan_template_hash": "e33283d040a01e8c1973ac45bf9a49be0b2af9bc8badf74dad055b8e1163abd1",
+      "source_schedule_hash": "1218fe118bd9c6e118d981788a192d2e31edf40423ee0c0f053331526ede9fa3",
+      "spec_batch_binding_hash": "eee0b54f6db30c6d28aef4343a9cb9814e536b9de27e4fab3dd2dd25fa623e98"
+    },
+    "source_schedule_axis": "domain",
+    "source_schedule_slice_count": 1
+  },
+  "gates": {
+    "all_child_bound_ops_are_tasked_and_launched": true,
+    "controller_storage_is_not_claimed_as_slice_memory": true,
+    "each_slice_has_distinct_native_ir_stack": true,
+    "full_and_sliced_match_external_semantics": true,
+    "runtime_limit_switches_batch_decision": true,
+    "same_source_bound_and_template": true,
+    "source_and_child_query_accounting_is_exact": true,
+    "source_schedule_owns_exact_spec_ranges": true
+  },
+  "limitations": [
+    "CPU correctness and compiler/schedule ownership evidence only",
+    "v1 slices the spec axis; domain and sample axes remain independent pending work",
+    "each slice is a static child compiler stack executed sequentially",
+    "source controller storage remains the full-query ledger for both policies",
+    "no memory reduction, latency, CUDA, allocator, OOM, Pareto, or speedup claim"
+  ],
+  "performance_claimed": false,
+  "schema_version": "boundflow.native-real-network-sliced-batch-evidence/v1",
+  "semantics": {
+    "full_lower_sha256": "2dce3f71b72c56fc1efb0e291db370daac0531d7b55d84daa1754ab45cc3356d",
+    "full_upper_sha256": "39fd527c73d4d4190e8520a53b7324361eeefd77b11307a5a43546adbdb23de5",
+    "full_vs_external_lower": {
+      "allclose": true,
+      "atol": 0.0002,
+      "max_abs_diff": 7.152557373046875e-07,
+      "rtol": 0.0002,
+      "sign_agreement": 9,
+      "sign_total": 9
+    },
+    "full_vs_sliced_lower": {
+      "allclose": true,
+      "atol": 0.0002,
+      "max_abs_diff": 1.9073486328125e-06,
+      "rtol": 0.0002,
+      "sign_agreement": 9,
+      "sign_total": 9
+    },
+    "sliced_lower_sha256": "821eb0723f542714ee53032abf57bf39a1ebe774b87857fbb611044b9a916fa8",
+    "sliced_upper_sha256": "586bb7ac1310adc3268c979f322a2fd5ef162b8098a74ed55961912bbb21d040",
+    "sliced_vs_external_lower": {
+      "allclose": true,
+      "atol": 0.0002,
+      "max_abs_diff": 1.9073486328125e-06,
+      "rtol": 0.0002,
+      "sign_agreement": 9,
+      "sign_total": 9
+    }
+  },
+  "sliced_policy": {
+    "batch_candidate_id": "batch:native-spec-sliced-v1:0003",
+    "binding_trace": {
+      "schema_version": "boundflow.native-spec-batch-binding/v1",
+      "selected_batch_candidate_id": "batch:native-spec-sliced-v1:0003",
+      "selected_spec_batch_size": 3,
+      "slices": [
+        {
+          "child_bound_module_hash": "2ac655c92adc93a82a858e528d56070971c3792fda69d40f386d90221efa0b27",
+          "child_plan_instance_hash": "14f07a5e1c9fccd6a85716bbb4fb18d08d7d22153b01ca47ac1f318b4c7b2a52",
+          "child_plan_template_hash": "59797ed47a0fed9f56f7c05d0089e8200895e87b5252dfe62577333d5644c8c2",
+          "child_query_id": "vnncomp21-resnet2b-prop0-native-ir5-spec-batch:spec:0000:0003",
+          "child_schedule_hash": "19ef4867ec53a6216cf8b0dab756e22d1987c8ae132b54ab27501fa4d7140989",
+          "child_task_module_hash": "66d6b4dc31580fb641de85e2d94e9a1ed4aa990e7485e34e732e1d39526f4058",
+          "slice_id": "spec-slice:0000:0003",
+          "start_index": 0,
+          "stop_index": 3
+        },
+        {
+          "child_bound_module_hash": "856a6b61098b714fa413a0c672a315b5165fa0230ceea22d3ffb7eff42b713be",
+          "child_plan_instance_hash": "f01e365f4a40fb536eeb0bb44e426c1a8cadd95da3560b9d0d018de9f867440d",
+          "child_plan_template_hash": "82fac76d083800ebcd835db5e646abcea989d0a6c98af8dcfc3fc544df402daf",
+          "child_query_id": "vnncomp21-resnet2b-prop0-native-ir5-spec-batch:spec:0003:0006",
+          "child_schedule_hash": "852fba360499ea5fa3ea5b8060fd2b4d7156c9471424e48955c154c0d0d37706",
+          "child_task_module_hash": "cdac6d0a0c41a8a2fa98505821581bd4554aa3a91ef562ecaf1fe5fef2a11a6b",
+          "slice_id": "spec-slice:0003:0006",
+          "start_index": 3,
+          "stop_index": 6
+        },
+        {
+          "child_bound_module_hash": "c795b9e5a6470f26295bc1ca0801899f3880335ca8762207d9573f6501b15253",
+          "child_plan_instance_hash": "9e525880016bf428eaf996f6522265959b908a20c76182314bc617151a0f30c3",
+          "child_plan_template_hash": "b443e27c776624333a81fe78acffebb7f235683e87e52afb305483d61f099b58",
+          "child_query_id": "vnncomp21-resnet2b-prop0-native-ir5-spec-batch:spec:0006:0009",
+          "child_schedule_hash": "4f5e2785cf5338d6730e767371e518e44fcea4d4ce2d7756acead8be10363bd7",
+          "child_task_module_hash": "31688d39121bb5ae02f7780370c4e17172f0db0ca1116fc7340da7de0e1a07b4",
+          "slice_id": "spec-slice:0006:0009",
+          "start_index": 6,
+          "stop_index": 9
+        }
+      ],
+      "source_bound_module_hash": "16e27f318f43be8df7571e16c0dd84657462dcc964bb360a553dc142961080fb",
+      "source_linear_spec_hash": "380f1c32321ea47967ad48221134d92d494630777eabe10ef31576a0b051e408",
+      "source_plan_instance_hash": "504490064894fbaf6036d23e8870a4c060ab2e9eb2fd56aecbd3e858a08783fc",
+      "source_plan_template_hash": "e33283d040a01e8c1973ac45bf9a49be0b2af9bc8badf74dad055b8e1163abd1",
+      "source_schedule_hash": "e7b80ff20af98bf836ff022bd9b8f379d0b980965a6823e38ed3be046c344b89",
+      "total_spec_count": 9
+    },
+    "child_ir_hashes": [
+      {
+        "bound_module_hash": "2ac655c92adc93a82a858e528d56070971c3792fda69d40f386d90221efa0b27",
+        "plan_instance_hash": "14f07a5e1c9fccd6a85716bbb4fb18d08d7d22153b01ca47ac1f318b4c7b2a52",
+        "plan_template_hash": "59797ed47a0fed9f56f7c05d0089e8200895e87b5252dfe62577333d5644c8c2",
+        "schedule_hash": "19ef4867ec53a6216cf8b0dab756e22d1987c8ae132b54ab27501fa4d7140989",
+        "task_module_hash": "66d6b4dc31580fb641de85e2d94e9a1ed4aa990e7485e34e732e1d39526f4058"
+      },
+      {
+        "bound_module_hash": "856a6b61098b714fa413a0c672a315b5165fa0230ceea22d3ffb7eff42b713be",
+        "plan_instance_hash": "f01e365f4a40fb536eeb0bb44e426c1a8cadd95da3560b9d0d018de9f867440d",
+        "plan_template_hash": "82fac76d083800ebcd835db5e646abcea989d0a6c98af8dcfc3fc544df402daf",
+        "schedule_hash": "852fba360499ea5fa3ea5b8060fd2b4d7156c9471424e48955c154c0d0d37706",
+        "task_module_hash": "cdac6d0a0c41a8a2fa98505821581bd4554aa3a91ef562ecaf1fe5fef2a11a6b"
+      },
+      {
+        "bound_module_hash": "c795b9e5a6470f26295bc1ca0801899f3880335ca8762207d9573f6501b15253",
+        "plan_instance_hash": "9e525880016bf428eaf996f6522265959b908a20c76182314bc617151a0f30c3",
+        "plan_template_hash": "b443e27c776624333a81fe78acffebb7f235683e87e52afb305483d61f099b58",
+        "schedule_hash": "4f5e2785cf5338d6730e767371e518e44fcea4d4ce2d7756acead8be10363bd7",
+        "task_module_hash": "31688d39121bb5ae02f7780370c4e17172f0db0ca1116fc7340da7de0e1a07b4"
+      }
+    ],
+    "child_launch_count": 63,
+    "child_stack_count": 3,
+    "child_task_count": 63,
+    "controller_peak_bytes": 1860912,
+    "controller_storage_candidate_id": "storage:dense-arena",
+    "execution_trace": {
+      "binding_hash": "03242d1d4f0315ba23a4995e8f940b416b05081245e2461418bfa0a78a5a7e76",
+      "child_query_ids": [
+        "vnncomp21-resnet2b-prop0-native-ir5-spec-batch:spec:0000:0003",
+        "vnncomp21-resnet2b-prop0-native-ir5-spec-batch:spec:0003:0006",
+        "vnncomp21-resnet2b-prop0-native-ir5-spec-batch:spec:0006:0009"
+      ],
+      "child_task_trace_hashes": [
+        "dcaafc7057bcb73e98350542fc979ad1db2afa31164f29f12edbe202de59eb2d",
+        "2a22ebcf146ec35f4292c836ca941b3d30f29806de1d59feaf0d6f62dd5399c4",
+        "fe6a4f5acbf6c8fa4edf27573b05dd158fa9cdef8db8b9dba6e8d0200de094a3"
+      ],
+      "result_lower_hash": "821eb0723f542714ee53032abf57bf39a1ebe774b87857fbb611044b9a916fa8",
+      "result_upper_hash": "586bb7ac1310adc3268c979f322a2fd5ef162b8098a74ed55961912bbb21d040",
+      "schema_version": "boundflow.native-spec-batch-execution-trace/v1"
+    },
+    "selected_spec_batch_size": 3,
+    "slice_ranges": [
+      [
+        0,
+        3
+      ],
+      [
+        3,
+        6
+      ],
+      [
+        6,
+        9
+      ]
+    ],
+    "source_ir_hashes": {
+      "source_bound_module_hash": "16e27f318f43be8df7571e16c0dd84657462dcc964bb360a553dc142961080fb",
+      "source_plan_instance_hash": "504490064894fbaf6036d23e8870a4c060ab2e9eb2fd56aecbd3e858a08783fc",
+      "source_plan_template_hash": "e33283d040a01e8c1973ac45bf9a49be0b2af9bc8badf74dad055b8e1163abd1",
+      "source_schedule_hash": "e7b80ff20af98bf836ff022bd9b8f379d0b980965a6823e38ed3be046c344b89",
+      "spec_batch_binding_hash": "03242d1d4f0315ba23a4995e8f940b416b05081245e2461418bfa0a78a5a7e76"
+    },
+    "source_schedule_axis": "spec",
+    "source_schedule_slice_count": 3
+  },
+  "source": {
+    "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+    "intermediate_bounds_sha256": "d51615b04dfb205afd67d2c21680ece4ca92f693157da1e32c7f8202a8e08cf1",
+    "linear_spec_sha256": "380f1c32321ea47967ad48221134d92d494630777eabe10ef31576a0b051e408",
+    "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+    "native_ir_artifact_schema": "boundflow.native-real-network-ir-artifact/v1",
+    "native_ir_manifest_sha256": "5d38aa4adcd7b8593b0ca3751106d3a254b72a2698bd445a8dde59d50eb5a676",
+    "native_ir_payload_sha256": "3ba949de66380c7d16dc44bb934eca8400182521e761c19eaa671cd8cf0eb557",
+    "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf",
+    "vnnlib_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff"
+  },
+  "status": "ok"
+}

@@ -354,19 +354,28 @@ def _same_schedule_structure(prepared: ScheduleModule, runtime: ScheduleModule) 
         if isinstance(expected, BatchLoopAction):
             if not isinstance(actual, BatchLoopAction):
                 return False
-            flattened = tuple(
-                query_id
-                for batch_slice in actual.slices
-                for query_id in batch_slice.query_ids
+            query_accounting_matches = (
+                all(item.query_ids == runtime.query_ids for item in actual.slices)
+                if actual.axis == "spec"
+                else tuple(
+                    query_id
+                    for batch_slice in actual.slices
+                    for query_id in batch_slice.query_ids
+                )
+                == runtime.query_ids
             )
             if (
                 actual.action_id != expected.action_id
                 or actual.axis != expected.axis
-                or flattened != runtime.query_ids
+                or not query_accounting_matches
                 or tuple(item.slice_id for item in actual.slices)
                 != tuple(item.slice_id for item in expected.slices)
                 or tuple(len(item.query_ids) for item in actual.slices)
                 != tuple(len(item.query_ids) for item in expected.slices)
+                or tuple((item.start_index, item.stop_index) for item in actual.slices)
+                != tuple(
+                    (item.start_index, item.stop_index) for item in expected.slices
+                )
             ):
                 return False
         elif isinstance(expected, EmitResultAction):

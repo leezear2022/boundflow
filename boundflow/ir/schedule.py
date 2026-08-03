@@ -297,16 +297,32 @@ class QueryBatchSlice:
 
     slice_id: str
     query_ids: Tuple[str, ...]
+    start_index: Optional[int] = None
+    stop_index: Optional[int] = None
 
     def validate(self) -> None:
         if not self.slice_id or not self.query_ids:
             raise ValueError("schedule batch slice is incomplete")
         if len(self.query_ids) != len(set(self.query_ids)):
             raise ValueError("schedule batch slice duplicates query IDs")
+        if (self.start_index is None) != (self.stop_index is None):
+            raise ValueError("schedule batch slice range is partially specified")
+        if self.start_index is not None:
+            if self.stop_index is None:
+                raise AssertionError("validated slice range unexpectedly lacks stop")
+            if self.start_index < 0 or self.stop_index <= self.start_index:
+                raise ValueError("schedule batch slice range is invalid")
 
     def to_dict(self) -> dict[str, object]:
         self.validate()
-        return {"slice_id": self.slice_id, "query_ids": list(self.query_ids)}
+        payload: dict[str, object] = {
+            "slice_id": self.slice_id,
+            "query_ids": list(self.query_ids),
+        }
+        if self.start_index is not None:
+            payload["start_index"] = self.start_index
+            payload["stop_index"] = self.stop_index
+        return payload
 
 
 @dataclass(frozen=True)
@@ -661,6 +677,11 @@ class ScheduleModule:  # pylint: disable=too-many-instance-attributes
         expected_peak = sum(arena_sizes.values())
         if expected_peak != instance.cost_summary.predicted_peak_bytes:
             raise ValueError("Schedule IR arena ledger differs from PlanInstance peak")
+        selected_batch = next(
+            candidate
+            for candidate in template.batch_candidates
+            if candidate.candidate_id == instance.batch_decision.candidate_id
+        )
 
         selected_regions = _selected_regions(template, instance)
         backend_by_region = _selected_backends(template, instance)
@@ -781,13 +802,52 @@ class ScheduleModule:  # pylint: disable=too-many-instance-attributes
                     raise ValueError(
                         "Schedule IR batch-loop must occur once before launches"
                     )
-                flattened = tuple(
-                    query_id for item in action.slices for query_id in item.query_ids
-                )
-                if flattened != self.query_ids:
-                    raise ValueError(
-                        "Schedule IR batch-loop loses, duplicates, or reorders queries"
+                if action.axis == "spec":
+                    if (
+                        selected_batch.spec_batch_size
+                        >= template.workload.spec_batch_size
+                        or selected_batch.domain_batch_size
+                        != template.workload.domain_batch_size
+                        or selected_batch.sample_batch_size
+                        != template.workload.sample_batch_size
+                    ):
+                        raise ValueError(
+                            "Schedule IR spec-loop differs from selected batch axes"
+                        )
+                    expected_start = 0
+                    for item in action.slices:
+                        if (
+                            item.query_ids != self.query_ids
+                            or item.start_index != expected_start
+                            or item.stop_index is None
+                            or item.stop_index - expected_start
+                            > selected_batch.spec_batch_size
+                        ):
+                            raise ValueError(
+                                "Schedule IR spec-loop loses or overlaps objective slices"
+                            )
+                        expected_start = item.stop_index
+                    if expected_start != template.workload.spec_batch_size:
+                        raise ValueError(
+                            "Schedule IR spec-loop does not cover every objective"
+                        )
+                else:
+                    flattened = tuple(
+                        query_id
+                        for item in action.slices
+                        for query_id in item.query_ids
                     )
+                    if flattened != self.query_ids:
+                        raise ValueError(
+                            "Schedule IR batch-loop loses, duplicates, or reorders queries"
+                        )
+                    if any(
+                        item.start_index is not None or item.stop_index is not None
+                        for item in action.slices
+                    ):
+                        raise ValueError(
+                            "Schedule IR query-loop unexpectedly carries index slices"
+                        )
                 batch_accounted = True
             elif isinstance(action, RecordEventAction):
                 if action.event_id in recorded_events:
@@ -1066,20 +1126,48 @@ def lower_plan_instance_to_reference_schedule(
         for candidate in template.batch_candidates
         if candidate.candidate_id == instance.batch_decision.candidate_id
     )
-    query_capacity = (
-        batch.domain_batch_size * batch.spec_batch_size * batch.sample_batch_size
-    )
-    slices = tuple(
-        QueryBatchSlice(
-            slice_id=f"slice:{index // query_capacity:04d}",
-            query_ids=query_ids[index : index + query_capacity],
+    if batch.spec_batch_size < template.workload.spec_batch_size:
+        if (
+            batch.domain_batch_size != template.workload.domain_batch_size
+            or batch.sample_batch_size != template.workload.sample_batch_size
+        ):
+            raise NotImplementedError(
+                "Schedule IR v1 spec slicing cannot also reduce domain/sample axes"
+            )
+        slices = tuple(
+            QueryBatchSlice(
+                slice_id=f"spec-slice:{start:04d}:{stop:04d}",
+                query_ids=query_ids,
+                start_index=start,
+                stop_index=stop,
+            )
+            for start in range(
+                0, template.workload.spec_batch_size, batch.spec_batch_size
+            )
+            for stop in (
+                min(
+                    start + batch.spec_batch_size,
+                    template.workload.spec_batch_size,
+                ),
+            )
         )
-        for index in range(0, len(query_ids), query_capacity)
-    )
+        batch_axis = "spec"
+    else:
+        query_capacity = (
+            batch.domain_batch_size * batch.spec_batch_size * batch.sample_batch_size
+        )
+        slices = tuple(
+            QueryBatchSlice(
+                slice_id=f"slice:{index // query_capacity:04d}",
+                query_ids=query_ids[index : index + query_capacity],
+            )
+            for index in range(0, len(query_ids), query_capacity)
+        )
+        batch_axis = "domain"
     actions.append(
         BatchLoopAction(
             action_id=f"{action_index:04d}.batch-loop",
-            axis="domain",
+            axis=batch_axis,
             slices=slices,
         )
     )

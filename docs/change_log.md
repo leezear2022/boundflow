@@ -3730,3 +3730,24 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_REPRESENTATION_BINDING_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Native Real-Network Sliced Batch Execution v1
+
+- `PlanSelectionContext` 新增互相独立的 domain/spec/sample 上限，非默认值进入 PlanInstance
+  provenance/hash；历史默认路径 identity 保持兼容；
+- source Schedule 对 reduced spec candidate 生成连续半开 objective ranges，并由 verifier 强制
+  无重叠、完整覆盖和 width 上限；
+- 每个 selected range 编译独立 native Bound/Plan/Task/Schedule child，runtime 校验完整 objective
+  digest 后顺序执行并沿 spec 轴聚合 lower/upper；
+- 固定 ResNet full=1×21-op，sliced=3×21-op、ranges `0:3/3:6/6:9`、63 Task/Launch；
+  full/sliced max diff `1.9073486328125e-06`，external sign 9/9；
+- 新增 generate/replay artifact 与 rehashed range/query/trace/gate/claim tamper tests；当前只关闭
+  spec-axis correctness/ownership，不声称 memory/latency/CUDA/OOM/Pareto/speedup；
+- domain/sample 与 representation × batch composition 仍 pending，后者为下一联合门禁。
+- 新旧 native/Plan/Task/Schedule 聚焦 `89 passed`；全量 `508 passed, 37 skipped`；Black、
+  Mypy、Pylint 10.00/10、diff check 通过。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_SLICED_BATCH_EXECUTION_V1_CHANGELOG_2026_08_04.md`
