@@ -65,6 +65,11 @@ def rewrite_plain_crown_structured_regions(module: BFBoundModule) -> BFBoundModu
         nonlocal serial
         transitioned = list(inputs)
         for index, value_id in enumerate(inputs):
+            if index >= 4 and current_values[value_id].role in {
+                BoundValueRole.SPLIT,
+                BoundValueRole.RELAXATION,
+            }:
+                continue
             if index % 4 not in {0, 2}:
                 continue
             source = current_values[value_id]

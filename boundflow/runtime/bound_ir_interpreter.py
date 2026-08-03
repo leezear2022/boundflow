@@ -31,6 +31,7 @@ from ..ir.bound import (
     ConcretizeAttrs,
     Conv2dBackwardAttrs,
     LinearBackwardAttrs,
+    OptimizedReluRelaxationAttrs,
     ReluLowerSlopePolicy,
     ReluRelaxationAttrs,
     RepresentationChangeAttrs,
@@ -60,12 +61,19 @@ def execute_plain_crown_bound_ir(  # pylint: disable=too-many-branches,too-many-
     relu_pre: Mapping[str, IntervalState],
     linear_spec_C: Optional[torch.Tensor] = None,
     relu_split_state: Optional[Mapping[str, torch.Tensor]] = None,
+    relu_alpha_state: Optional[Mapping[str, torch.Tensor]] = None,
+    relu_beta_state: Optional[Mapping[str, torch.Tensor]] = None,
 ) -> IntervalState:
     """Execute only the explicit BoundOp sequence, using query payload as bindings."""
 
     bound_module.validate()
-    if bound_module.domain.method != BoundMethodKind.CROWN:
-        raise NotImplementedError("Bound IR reference interpreter supports CROWN only")
+    if bound_module.domain.method not in {
+        BoundMethodKind.CROWN,
+        BoundMethodKind.ALPHA_BETA_CROWN,
+    }:
+        raise NotImplementedError(
+            "Bound IR reference interpreter supports CROWN/alpha-beta-CROWN only"
+        )
     task_module.validate()
     if bound_module.primal_graph_hash != plain_crown_primal_graph_hash(task_module):
         raise ValueError("runtime task/parameter fingerprint does not match Bound IR")
@@ -88,6 +96,8 @@ def execute_plain_crown_bound_ir(  # pylint: disable=too-many-branches,too-many-
             input_spec=input_spec,
             linear_spec_C=linear_spec_C,
             relu_split_state=relu_split_state,
+            relu_alpha_state=relu_alpha_state,
+            relu_beta_state=relu_beta_state,
         )
     )
 
@@ -246,6 +256,18 @@ def execute_plain_crown_bound_ir(  # pylint: disable=too-many-branches,too-many-
             if isinstance(attrs, SplitReluRelaxationAttrs):
                 split = _get_tensor(env, attrs.split_state_value_id)
                 _validate_split_constrained_preactivation(split, pre=pre)
+            else:
+                split = None
+            alpha = (
+                _get_tensor(env, attrs.alpha_state_value_id)
+                if isinstance(attrs, OptimizedReluRelaxationAttrs)
+                else None
+            )
+            beta = (
+                _get_tensor(env, attrs.beta_state_value_id)
+                if isinstance(attrs, OptimizedReluRelaxationAttrs)
+                else None
+            )
             A_u, b_u, A_l, b_l = _load_state(env, op.inputs[:4])
             if not torch.is_tensor(A_u) or not torch.is_tensor(A_l):
                 raise ValueError(
@@ -258,6 +280,9 @@ def execute_plain_crown_bound_ir(  # pylint: disable=too-many-branches,too-many-
                 b_l,
                 pre=pre,
                 lower_slope_policy=attrs.lower_slope_policy,
+                relu_alpha=alpha,
+                relu_beta=beta,
+                relu_split=split,
             )
             output_shape = _coefficient_primal_shape(values, op.outputs[0])
             _store_state(
@@ -397,9 +422,12 @@ class PreparedPlainCrownBoundIRProgram:
         """Validate immutable compiler/model identity and cache static lookups."""
 
         bound_module.validate()
-        if bound_module.domain.method != BoundMethodKind.CROWN:
+        if bound_module.domain.method not in {
+            BoundMethodKind.CROWN,
+            BoundMethodKind.ALPHA_BETA_CROWN,
+        }:
             raise NotImplementedError(
-                "Bound IR reference interpreter supports CROWN only"
+                "Bound IR reference interpreter supports CROWN/alpha-beta-CROWN only"
             )
         task_module.validate()
         if bound_module.primal_graph_hash != plain_crown_primal_graph_hash(task_module):
@@ -432,6 +460,8 @@ class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
         relu_pre: Mapping[str, IntervalState],
         linear_spec_C: Optional[torch.Tensor] = None,
         relu_split_state: Optional[Mapping[str, torch.Tensor]] = None,
+        relu_alpha_state: Optional[Mapping[str, torch.Tensor]] = None,
+        relu_beta_state: Optional[Mapping[str, torch.Tensor]] = None,
         prepared_program: Optional[PreparedPlainCrownBoundIRProgram] = None,
         capture_output_hashes: bool = True,
     ) -> None:
@@ -469,6 +499,8 @@ class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
                 input_spec=input_spec,
                 linear_spec_C=linear_spec_C,
                 relu_split_state=relu_split_state,
+                relu_alpha_state=relu_alpha_state,
+                relu_beta_state=relu_beta_state,
             )
         )
 
@@ -901,6 +933,18 @@ class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
             if isinstance(attrs, SplitReluRelaxationAttrs):
                 split = _get_tensor(env, attrs.split_state_value_id)
                 _validate_split_constrained_preactivation(split, pre=pre)
+            else:
+                split = None
+            alpha = (
+                _get_tensor(env, attrs.alpha_state_value_id)
+                if isinstance(attrs, OptimizedReluRelaxationAttrs)
+                else None
+            )
+            beta = (
+                _get_tensor(env, attrs.beta_state_value_id)
+                if isinstance(attrs, OptimizedReluRelaxationAttrs)
+                else None
+            )
             A_u, b_u, A_l, b_l = _load_state(env, op.inputs[:4])
             if not torch.is_tensor(A_u) or not torch.is_tensor(A_l):
                 raise ValueError(
@@ -913,6 +957,9 @@ class PlainCrownBoundIRSession:  # pylint: disable=too-many-instance-attributes
                 b_l,
                 pre=pre,
                 lower_slope_policy=attrs.lower_slope_policy,
+                relu_alpha=alpha,
+                relu_beta=beta,
+                relu_split=split,
             )
             output_shape = _coefficient_primal_shape(values, op.outputs[0])
             _store_state(
@@ -1046,8 +1093,10 @@ def _bind_graph_inputs(
     input_spec: InputSpec,
     linear_spec_C: Optional[torch.Tensor],
     relu_split_state: Optional[Mapping[str, torch.Tensor]],
+    relu_alpha_state: Optional[Mapping[str, torch.Tensor]],
+    relu_beta_state: Optional[Mapping[str, torch.Tensor]],
 ) -> dict[str, RuntimeValue]:
-    """Bind objective and split inputs with exact schema/content ownership."""
+    """Bind objective, split, alpha, and beta inputs with exact ownership."""
 
     split_values = tuple(
         values[value_id]
@@ -1069,6 +1118,39 @@ def _bind_graph_inputs(
             raise ValueError("runtime ReLU split keys differ from Bound IR")
         split_payloads = relu_split_state
 
+    alpha_values = tuple(
+        values[value_id]
+        for value_id in bound_module.graph.inputs
+        if values[value_id].role == BoundValueRole.RELAXATION
+        and (values[value_id].state_version or "").startswith("native-relu-alpha:")
+    )
+    beta_values = tuple(
+        values[value_id]
+        for value_id in bound_module.graph.inputs
+        if values[value_id].role == BoundValueRole.RELAXATION
+        and (values[value_id].state_version or "").startswith("native-relu-beta:")
+    )
+
+    def bind_optimization_payloads(
+        kind: str,
+        expected_values: tuple[BoundValue, ...],
+        payloads: Optional[Mapping[str, torch.Tensor]],
+    ) -> Mapping[str, torch.Tensor]:
+        names = tuple(value.source_primal_value_id for value in expected_values)
+        if any(name is None for name in names) or len(names) != len(set(names)):
+            raise ValueError(f"Bound IR {kind} inputs require unique primal ownership")
+        expected = {cast(str, name) for name in names}
+        if payloads is None:
+            if expected:
+                raise ValueError(f"optimized Bound IR requires ReLU {kind} payloads")
+            return {}
+        if set(payloads) != expected:
+            raise ValueError(f"runtime ReLU {kind} keys differ from Bound IR")
+        return payloads
+
+    alpha_payloads = bind_optimization_payloads("alpha", alpha_values, relu_alpha_state)
+    beta_payloads = bind_optimization_payloads("beta", beta_values, relu_beta_state)
+
     result: dict[str, RuntimeValue] = {}
     for input_value_id in bound_module.graph.inputs:
         input_value = values[input_value_id]
@@ -1085,10 +1167,65 @@ def _bind_graph_inputs(
                 input_value, split_payloads[primal_name]
             )
             continue
+        if input_value in alpha_values:
+            primal_name = cast(str, input_value.source_primal_value_id)
+            result[input_value_id] = _runtime_optimization_tensor(
+                input_value, alpha_payloads[primal_name], kind="alpha"
+            )
+            continue
+        if input_value in beta_values:
+            primal_name = cast(str, input_value.source_primal_value_id)
+            result[input_value_id] = _runtime_optimization_tensor(
+                input_value, beta_payloads[primal_name], kind="beta"
+            )
+            continue
         raise NotImplementedError(
             f"plain-CROWN interpreter cannot bind {input_value.role.value} graph input"
         )
     return result
+
+
+def _runtime_optimization_tensor(
+    value: BoundValue, payload: torch.Tensor, *, kind: str
+) -> torch.Tensor:
+    """Normalize one alpha/beta tensor and verify exact content identity."""
+
+    if kind not in {"alpha", "beta"}:
+        raise ValueError("runtime optimization kind must be alpha or beta")
+    if not torch.is_tensor(payload):
+        raise TypeError(f"runtime ReLU {kind} payload must be a torch.Tensor")
+    expected = value.tensor_type.shape
+    if any(dim is None for dim in expected):
+        raise NotImplementedError(f"runtime ReLU {kind} input requires static shape")
+    expected_shape = cast(Tuple[int, ...], expected)
+    if (
+        tuple(int(dim) for dim in payload.shape) == expected_shape[1:]
+        and int(expected_shape[0]) == 1
+    ):
+        payload = payload.unsqueeze(0)
+    expected_dtype = getattr(torch, value.tensor_type.dtype, None)
+    if tuple(int(dim) for dim in payload.shape) != expected_shape:
+        raise ValueError(f"runtime ReLU {kind} shape differs from Bound IR")
+    if payload.dtype != expected_dtype or not torch.is_floating_point(payload):
+        raise TypeError(f"runtime ReLU {kind} dtype differs from Bound IR")
+    if str(payload.device) != value.tensor_type.device:
+        raise ValueError(f"runtime ReLU {kind} device differs from Bound IR")
+    if not bool(torch.isfinite(payload).all().item()):
+        raise ValueError(f"runtime ReLU {kind} contains non-finite values")
+    if kind == "alpha" and not bool(((payload >= 0) & (payload <= 1)).all().item()):
+        raise ValueError("runtime ReLU alpha lies outside [0,1]")
+    if kind == "beta" and not bool((payload >= 0).all().item()):
+        raise ValueError("runtime ReLU beta contains negative values")
+    normalized = payload.detach().contiguous().clone()
+    prefix = f"native-relu-{kind}:"
+    state_version = value.state_version
+    if (
+        state_version is None
+        or not state_version.startswith(prefix)
+        or tensor_content_hash(normalized) != state_version.removeprefix(prefix)
+    ):
+        raise ValueError(f"runtime ReLU {kind} payload hash differs from Bound IR")
+    return normalized
 
 
 def _runtime_split_tensor(value: BoundValue, payload: torch.Tensor) -> torch.Tensor:
@@ -1179,10 +1316,21 @@ def _relu_backward(
     *,
     pre: IntervalState,
     lower_slope_policy: ReluLowerSlopePolicy,
+    relu_alpha: Optional[torch.Tensor] = None,
+    relu_beta: Optional[torch.Tensor] = None,
+    relu_split: Optional[torch.Tensor] = None,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     alpha_u, beta_u, alpha_l, _beta_l = _relu_relaxation_parameters(
         pre, lower_slope_policy=lower_slope_policy
     )
+    if relu_alpha is not None:
+        alpha_override = relu_alpha.reshape(int(relu_alpha.shape[0]), -1)
+        if alpha_override.shape != alpha_l.shape:
+            raise ValueError("ReLU alpha/pre-activation shape mismatch")
+        ambiguous = (pre.lower.reshape(alpha_l.shape) < 0) & (
+            pre.upper.reshape(alpha_l.shape) > 0
+        )
+        alpha_l = torch.where(ambiguous, alpha_override, alpha_l)
     A_u_flat = A_u.reshape(int(A_u.shape[0]), int(A_u.shape[1]), -1)
     A_l_flat = A_l.reshape(int(A_l.shape[0]), int(A_l.shape[1]), -1)
     if int(A_u_flat.shape[2]) != int(alpha_u.shape[1]):
@@ -1196,10 +1344,24 @@ def _relu_backward(
     lower_beta = torch.where(
         A_l_flat >= 0, torch.zeros_like(beta_u).unsqueeze(1), beta_u.unsqueeze(1)
     )
+    output_A_l = A_l_flat * lower_alpha
+    if relu_beta is not None and relu_split is None:
+        raise ValueError("ReLU beta constraint requires a split tensor")
+    if relu_beta is not None and relu_split is not None:
+        beta_flat = relu_beta.reshape(int(relu_beta.shape[0]), -1)
+        split_flat = relu_split.reshape(int(relu_split.shape[0]), -1)
+        if beta_flat.shape != alpha_l.shape or split_flat.shape != alpha_l.shape:
+            raise ValueError("ReLU beta/split/pre-activation shape mismatch")
+        beta_constraint = (
+            -beta_flat
+            * split_flat.to(dtype=beta_flat.dtype)
+            * (split_flat != 0).to(dtype=beta_flat.dtype)
+        )
+        output_A_l = output_A_l + beta_constraint.unsqueeze(1)
     return (
         A_u_flat * upper_alpha,
         b_u + (A_u_flat * upper_beta).sum(dim=2),
-        A_l_flat * lower_alpha,
+        output_A_l,
         b_l + (A_l_flat * lower_beta).sum(dim=2),
     )
 

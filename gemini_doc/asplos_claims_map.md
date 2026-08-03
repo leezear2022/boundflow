@@ -633,3 +633,19 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - 工件：`artifacts/native-real-network-relu-split-bab/vnncomp21-resnet2b-prop0-cpu-v1/`；下一缺口
   为 native α/β optimization state、beta constraint 与 warm-start validity；聚焦 `68 passed`、
   全量 `577 passed, 37 skipped`，静态门禁与 fresh replay 全过。
+
+### 2026-08-04 Native Alpha/Beta Optimization State v1
+
+- `C3-M-NRIR10` validated-reduced state mechanism：固定 ResNet 6 个 ReLU 各有 typed split/alpha/
+  beta inputs；19 个 graph inputs、6 optimized ReLU ops 进入 Bound/Plan/Task/Schedule 与五层 hash；
+- `C3-G-NRIR10` state/warm-start gate：scope 绑定 model/input/objective/intermediate/split/policy；
+  exact same scope 可 exact reuse，monotonic split refinement 只能 initialization，reversal/removal 与
+  semantic drift fail closed；
+- `C1/C3-E-NRIR10` beta execution：native lower-dual 实际消费 `-beta*split`，对 legacy αβ oracle
+  lower/upper max diff=`0.0/0.0`；beta sum=`0.04999999701976776`，zero-beta 对照 lower 差
+  `0.34039306640625`，证明不是 metadata-only；
+- `C3-L-NRIR10` hard limitation：冻结 state 已编译/执行，但 Adam iteration/gradient/update 仍
+  runtime-owned；无完整 BaB/property verdict 或 timing/memory/CUDA/OOM/Pareto/speedup claim；
+- 工件：`artifacts/native-alpha-beta-optimization-state/vnncomp21-resnet2b-prop0-cpu-v1/`；聚焦
+  `50 passed`、全量 `591 passed, 37 skipped`、静态门禁与 fresh replay 全过；下一缺口为
+  optimizer-step Task/Schedule control。

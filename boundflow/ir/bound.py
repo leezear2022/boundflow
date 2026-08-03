@@ -632,6 +632,32 @@ class SplitReluRelaxationAttrs(ReluRelaxationAttrs):
 
 
 @dataclass(frozen=True)
+class OptimizedReluRelaxationAttrs(SplitReluRelaxationAttrs):
+    """Bind exact alpha/beta tensors to one split-aware native relaxation."""
+
+    alpha_state_value_id: str = ""
+    alpha_state_hash: str = ""
+    beta_state_value_id: str = ""
+    beta_state_hash: str = ""
+    optimization_state_hash: str = ""
+
+    def validate(self) -> None:
+        """Validate split linkage and every frozen optimization identity."""
+
+        super().validate()
+        for name in ("alpha_state_value_id", "beta_state_value_id"):
+            if not getattr(self, name):
+                raise ValueError(f"optimized ReLU {name} must be non-empty")
+        for name in (
+            "alpha_state_hash",
+            "beta_state_hash",
+            "optimization_state_hash",
+        ):
+            if not _is_sha256_text(getattr(self, name)):
+                raise ValueError(f"optimized ReLU {name} must be SHA-256")
+
+
+@dataclass(frozen=True)
 class ReshapeAttrs:
     """Target shape for a semantic-preserving view change."""
 
@@ -829,6 +855,7 @@ BoundOpAttrs: TypeAlias = (
     | Conv2dBackwardAttrs
     | ReluRelaxationAttrs
     | SplitReluRelaxationAttrs
+    | OptimizedReluRelaxationAttrs
     | ReshapeAttrs
     | RepresentationChangeAttrs
     | AddBackwardAttrs
@@ -926,7 +953,7 @@ class BoundOp:
             BoundOpKind.RELU_RELAXATION,
             BoundOpKind.RESHAPE,
         } and (len(self.inputs), len(self.outputs)) not in (
-            {(1, 1), (4, 4), (5, 4)}
+            {(1, 1), (4, 4), (5, 4), (7, 4)}
             if self.kind == BoundOpKind.RELU_RELAXATION
             else {(1, 1), (4, 4)}
         ):
@@ -1015,10 +1042,10 @@ class BoundOp:
             BoundOpKind.CONCAT_BACKWARD,
             BoundOpKind.CONCRETIZE,
         }
-        if self.kind == BoundOpKind.RELU_RELAXATION and len(self.inputs) == 5:
+        if self.kind == BoundOpKind.RELU_RELAXATION and len(self.inputs) in {5, 7}:
             attrs = self.attrs
             if not isinstance(attrs, SplitReluRelaxationAttrs):
-                raise ValueError("five-input ReLU requires split relaxation attrs")
+                raise ValueError("state-aware ReLU requires split relaxation attrs")
             self._validate_affine_state_contract(values)
             split = values[self.inputs[4]]
             coefficient = values[self.inputs[0]]
@@ -1035,6 +1062,42 @@ class BoundOp:
                 != (BoundBatchAxis(BatchAxisKind.DOMAIN, 0),)
             ):
                 raise ValueError("split ReLU input type/version/linkage differs")
+            if len(self.inputs) == 7:
+                if not isinstance(attrs, OptimizedReluRelaxationAttrs):
+                    raise ValueError(
+                        "seven-input ReLU requires optimized relaxation attrs"
+                    )
+                alpha = values[self.inputs[5]]
+                beta = values[self.inputs[6]]
+                expected_shape = (
+                    coefficient.tensor_type.shape[0],
+                    *coefficient.tensor_type.shape[2:],
+                )
+                expected_axes = (BoundBatchAxis(BatchAxisKind.DOMAIN, 0),)
+                if (
+                    attrs.alpha_state_value_id != alpha.value_id
+                    or attrs.beta_state_value_id != beta.value_id
+                    or alpha.role != BoundValueRole.RELAXATION
+                    or beta.role != BoundValueRole.RELAXATION
+                    or alpha.polarity != BoundPolarity.BOTH
+                    or beta.polarity != BoundPolarity.LOWER
+                    or alpha.representation != BoundRepresentation.DENSE
+                    or beta.representation != BoundRepresentation.DENSE
+                    or alpha.tensor_type.shape != expected_shape
+                    or beta.tensor_type.shape != expected_shape
+                    or alpha.tensor_type.dtype != coefficient.tensor_type.dtype
+                    or beta.tensor_type.dtype != coefficient.tensor_type.dtype
+                    or alpha.tensor_type.device != coefficient.tensor_type.device
+                    or beta.tensor_type.device != coefficient.tensor_type.device
+                    or alpha.tensor_type.batch_axes != expected_axes
+                    or beta.tensor_type.batch_axes != expected_axes
+                    or alpha.state_version
+                    != f"native-relu-alpha:{attrs.alpha_state_hash}"
+                    or beta.state_version != f"native-relu-beta:{attrs.beta_state_hash}"
+                ):
+                    raise ValueError(
+                        "optimized ReLU alpha/beta type/version/linkage differs"
+                    )
             return
         if self.kind in state_kinds or (
             self.kind in {BoundOpKind.RELU_RELAXATION, BoundOpKind.RESHAPE}
@@ -1168,7 +1231,7 @@ class BoundOp:
 
         input_ids = (
             self.inputs[:4]
-            if self.kind == BoundOpKind.RELU_RELAXATION and len(self.inputs) == 5
+            if self.kind == BoundOpKind.RELU_RELAXATION and len(self.inputs) > 4
             else self.inputs
         )
         input_states = _affine_state_refs(input_ids)
@@ -1467,6 +1530,18 @@ class BFBoundModule:
                     raise ValueError("split ReLU attrs require split-aware domain")
                 if attrs.split_state_value_id not in op.inputs:
                     raise ValueError("split ReLU attrs/input linkage differs")
+                if isinstance(attrs, OptimizedReluRelaxationAttrs):
+                    if self.domain.method != BoundMethodKind.ALPHA_BETA_CROWN:
+                        raise ValueError(
+                            "optimized ReLU attrs require alpha-beta-CROWN domain"
+                        )
+                    if (
+                        attrs.alpha_state_value_id not in op.inputs
+                        or attrs.beta_state_value_id not in op.inputs
+                    ):
+                        raise ValueError(
+                            "optimized ReLU alpha/beta input linkage differs"
+                        )
         split_ops = tuple(
             op
             for op in self.graph.ops
@@ -1487,6 +1562,42 @@ class BFBoundModule:
                 split_inputs
             ):
                 raise ValueError("CROWN graph split inputs are missing or unused")
+        if self.domain.method == BoundMethodKind.ALPHA_BETA_CROWN and not any(
+            op.kind == BoundOpKind.EXTERNAL_VERIFIER_CALL for op in self.graph.ops
+        ):
+            optimized_ops = tuple(
+                op
+                for op in self.graph.ops
+                if isinstance(op.attrs, OptimizedReluRelaxationAttrs)
+            )
+            relaxation_inputs = {
+                value_id
+                for value_id in self.graph.inputs
+                if next(
+                    value for value in self.graph.values if value.value_id == value_id
+                ).role
+                == BoundValueRole.RELAXATION
+            }
+            if (
+                not self.domain.alpha_enabled
+                or not self.domain.beta_enabled
+                or not self.domain.split_state_present
+                or not optimized_ops
+            ):
+                raise ValueError(
+                    "native alpha-beta-CROWN requires optimized split ReLU ops"
+                )
+            expected_relaxation_inputs = {
+                value_id
+                for op in optimized_ops
+                for value_id in (op.inputs[5], op.inputs[6])
+            }
+            if relaxation_inputs != expected_relaxation_inputs:
+                raise ValueError(
+                    "alpha-beta graph optimization inputs are missing or unused"
+                )
+            if {op.inputs[4] for op in optimized_ops} != set(split_inputs):
+                raise ValueError("alpha-beta graph split inputs are missing or unused")
 
     def to_dict(self) -> dict[str, object]:
         """Return stable JSON-compatible module fields."""
