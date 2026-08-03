@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`99ea0bb`（NRIR-6 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/native-repeated-query-batching-cache-v1`
+> 当前 integration base：`972eca1`（NRIR-7 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/native-bab-domain-batching-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
@@ -71,6 +71,11 @@
 > objective/order/state 均进入 cache key。packed/serial max diff `3.21865e-6`、external sign 9/9，
 > 全量 `540 passed, 37 skipped`。状态为 repeated-query correctness/ownership VALIDATED-REDUCED；
 > BaB domain state 与性能仍 pending。
+> 2026-08-04 NRIR-8 进度：固定 ResNet root box 已三层二分为 8 个不同 leaves；每个 leaf
+> 独立重算 exact IBP state，parent 仅 `warm_start_only`。domain-size-4 Plan/Schedule 执行
+> 2 child，full-size-8 执行 1 child，same-policy serial 执行 8 child；三路径 lower/upper
+> bitwise equal、8/8 lineage 恢复。状态为 input-domain batching/state ownership
+> VALIDATED-REDUCED；ReLU/β split、BaB queue/prune/termination 与 performance 仍 pending。
 
 ## 1. 当前真实阶段
 
@@ -91,6 +96,7 @@ BoundFlow 已经完成从边界表示到 query runtime prototype 的主干：
 | Native spec-sliced execution NRIR-5 | correctness/integration validated-reduced | full 9 specs→1 child；limit=3→3×21-op child 与精确 range/aggregation；CPU semantics/replay 通过；domain/sample/joint representation/performance pending |
 | Native joint policy NRIR-6 | cross-axis correctness/ownership validated-reduced | 同一 template/selector 的 dense/structured × full/sliced 四组合；policy propagation、21/63/49/147 child ownership、external sign 9/9；跨 query/domain/performance pending |
 | Native repeated-query NRIR-7 | query formation/cache/lineage validated-reduced | 9 property queries→packed 3 child vs serial 9；exact cache miss/hit/key invalidation；9/9 restore；BaB domain/performance pending |
+| Native input-domain batching NRIR-8 | parent/child state + domain execution validated-reduced | 8 different leaf boxes；8 exact child states；full 1 / packed 2 / serial 8 stacks bitwise equal；parent warm-start-only；full BaB/performance pending |
 | ASPLOS 最终系统主张 | IR-5 final VALIDATED-NO-GO | IR-1—4 narrow closure 保留；Global p90/Pareto 失败，当前 system-performance 路线已关闭 |
 
 历史 `main@263ea81` 只到 PR-10 closure，不能再作为项目当前状态入口。跨会话恢复必须同时检查
@@ -409,3 +415,21 @@ contents、budget/policy/batch config 全部进入 key。first miss/second hit�
 input domain 的 property queries；3 vs 9 child 是机制计数而非 timing。下一路线必须加入不同
 input boxes 的 BaB parent/child domains、state validity/invalidation、domain packing/restore 与
 same-solver baseline，不能把 NRIR-7 自动升级为完整 C3 或 performance claim。
+
+## 15. Native BaB Input-Domain Batching v1 判定
+
+NRIR-8 已关闭 NRIR-7 的“同一 input domain”缺口：fixed ResNet root box 按前三个正宽输入坐标
+确定性三层二分为 8 个 leaf queries；每个 leaf/parent box、tree lineage、exact state 与 result
+都有独立 digest。child exact state 由 leaf box 重新运行 forward IBP 得到；parent state 单独记录为
+`warm_start_only`，编译、验证和执行 trace 均禁止将其作为 child exact input。
+
+同一 source Bound/PlanTemplate 提供 full-domain 与 size-4 candidates。max domain=4 产生
+`[0,4)/[4,8)` 两个 Schedule query slices 和两个 child compiler stacks；max domain=8 产生一个
+full child；serial reference 以同一 representation/storage policy 执行 8 个单域 child。固定
+artifact 的 packed/full/serial lower/upper 均 bitwise equal，8/8 query/parent/result 恢复。
+聚焦 `19 passed`，全量 `559 passed, 37 skipped`，fresh replay 与静态门禁全过。
+
+结论为 input-box domain formation、state validity、Plan/Schedule domain-axis execution 与 restore
+`VALIDATED-REDUCED`。该机制不是完整 BaB：没有 ReLU split、β state、priority queue、bound prune、
+termination 或 property verdict；2 vs 8 也不是性能数据。下一代码路线是 native ReLU-split BaB
+queue/state v1，而不是直接书写 speedup 或提交 ASPLOS。

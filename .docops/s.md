@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev001263
-last_va: ev001264
+last_ch: ev001329
+last_va: ev001331
 blk:
-next: implement-bab-parent-child-domain-batching
-updated: 2026-08-03T22:02:50Z
+next: implement-native-relu-split-bab-queue-state-v1
+updated: 2026-08-03T22:28:00Z

@@ -3791,3 +3791,23 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_NATIVE_REPEATED_QUERY_BATCHING_CACHE_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Native BaB Input-Domain Batching v1
+
+- 固定 root box 按前三个正宽输入坐标三层确定性二分，形成 8 个不同 leaf queries 与完整
+  parent/branch lineage；
+- 每个 leaf 独立重算 IBP interval/ReLU state；parent state 只允许 `warm_start_only`，typed
+  compilation/runtime trace 禁止作为 child exact input；
+- source Plan 加入 full-domain 与 size-4 candidates；Schedule 实际形成 `[0,4)/[4,8)`，编译并
+  执行两个 child IR stacks；full 与 same-policy serial 分别执行 1/8 stacks；
+- fixed ResNet packed/full/serial 8×1 lower/upper bitwise equal，8/8 result/parent lineage 恢复；
+  artifact generate/replay 与 lineage/range/state/claim tamper gates 通过；
+- 聚焦 `19 passed`；全量 `559 passed, 37 skipped`；Black/Mypy clean、Pylint 10.00/10、
+  diff check 通过；
+- 只关闭 input-box domain batching/state ownership，不声称 ReLU/β BaB、queue/prune/termination、
+  memory/latency/CUDA/OOM/Pareto/speedup；下一门禁为 native ReLU-split BaB queue/state v1。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_NATIVE_BAB_DOMAIN_BATCHING_V1_CHANGELOG_2026_08_04.md`
