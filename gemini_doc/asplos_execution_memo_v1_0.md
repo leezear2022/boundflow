@@ -549,11 +549,39 @@ exit 2。因此本阶段只关闭 protocol implementation，不产生 performanc
 
 ```text
 CUDA protocol implemented; device run pending external availability
-  -> representation semantic binding + executable MaterializeAction
-  -> real-network materialization alternatives
+  -> representation semantic binding + executable MaterializeAction (completed)
   -> sliced batch execution
   -> only then reconsider Schedule-memory/performance claim
 ```
 
 下一分支不得只新增 representation metadata/hash；至少一个 Plan decision 必须驱动真实 Bound
 rewrite/backend conversion，并在固定 ResNet 上以 dense reference/external oracle 双重校验。
+
+## 17. Native Representation Semantic Binding v1 与下一门禁
+
+NRIR-4 已让 source Plan representation decision 真实决定 execution Bound program，而不是只改变
+candidate ID：dense policy 执行原 21-op graph；structured-affine policy 由 binder 生成另一份
+49-op graph，其中 14 cast + 14 materialize 全部与 selected transition、source Schedule action、
+Task 和 Launch 一一对应。execution graph 使用独立 Plan/Task/Schedule identity。
+
+固定 ResNet fresh replay 中，高预算选择 dense/retain-all，`442,656` bytes 选择
+structured-affine/lifetime-reuse，再减 1 byte fail closed。dense/structured lower 最大差
+`9.5367431640625e-07`，二者均对 external oracle allclose、sign 9/9。artifact 位于
+`artifacts/native-real-network-representation-binding/vnncomp21-resnet2b-prop0-cpu-v1/`。
+
+这只关闭 C1/C2 的 representation semantic binding mechanism：当前 structured operator 仍包装
+dense tensor，storage 仍按 dense-equivalent bytes 记账；policy 与 storage 绑定也不能归因为
+structured compression。`performance_claimed=false`，禁止 memory/latency/CUDA/OOM/Pareto/speedup
+表述。
+
+当前唯一代码顺序修订为：
+
+```text
+NRIR-4 representation binding (completed)
+  -> real-network sliced batch execution
+  -> execute frozen NRIR-3 CUDA protocol when a device becomes available
+  -> only with physical evidence reconsider Schedule-memory/performance claim
+```
+
+下一分支至少要让一个 domain/spec/sample batch decision 改变实际 Task/Schedule slice 和 query
+accounting；仅新增 batch metadata、hash 或 synthetic loop 不算完成。

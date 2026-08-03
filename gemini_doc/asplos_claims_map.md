@@ -522,3 +522,24 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   验证：聚焦 17 passed，全量 `484 passed, 37 skipped`，静态门禁全过；
 - 下一缺口是 representation semantic binding：Plan selection 与 Schedule materialization 必须
   改变实际 Bound/backend execution，不能由 metadata/hash 冒充 C1/C2 系统收益。
+
+### 2026-08-04 Native Representation Semantic Binding v1
+
+- `C1-M-NRIR4` validated mechanism：source Plan 的全局 dense/structured-affine policy 由
+  fail-closed binder 转成实际 execution Bound program；structured 路径在固定 ResNet 上插入
+  14 cast + 14 materialize，并为 rewritten graph 重建独立 Plan/Task/Schedule stack；
+- `C1-G-NRIR4` ownership gate：28/28 selected transitions 与 source Schedule action、execution
+  Bound op 一一对应；49/49 execution Bound ops 均进入 Task 与 Launch，tampered action/hash/event/
+  mixed policy 被拒绝；
+- `C1-E-NRIR4` real-network semantics：dense 与 structured lower 最大差
+  `9.5367431640625e-07`；二者均匹配冻结 external lower，sign 9/9；artifact fresh semantic replay
+  与 digest gate 通过；
+- `C2-M-NRIR4` selector mechanism：storage-compatible prefix pruning 避免 21-region 双 policy 的
+  指数混合枚举；高预算选 dense/retain-all，`442,656` bytes 选
+  structured-affine/lifetime-reuse，`442,655` bytes fail closed；
+- `C1/C2-L-NRIR4` hard limitation：`DenseLinearOperator` 仍存 dense tensor，structured storage
+  binding 至少保留 dense logical bytes；storage coupling 不能写成 representation compression。
+  `performance_claimed=false`，无 memory/latency/CUDA/OOM/Pareto/speedup claim；
+- 工件：`artifacts/native-real-network-representation-binding/vnncomp21-resnet2b-prop0-cpu-v1/`；
+  下一缺口为 real-network sliced batch execution，必须由 batch decision 驱动真实 Task/Schedule
+  slicing 与 query accounting。

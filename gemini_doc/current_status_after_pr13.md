@@ -187,16 +187,17 @@ IR-5 当时冻结的最优先候选是与 `7501/7502` 独立的真实 Verifier I
 
 ## 5. 权威阅读顺序
 
-1. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_CUDA_MEMORY_PROTOCOL_V1_PLAN_2026_08_03.md`；
-2. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_MEMORY_PLANS_V1_PLAN_2026_08_04.md`；
-3. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_BOUND_IR_V1_PLAN_2026_08_04.md`；
-4. `gemini_doc/BOUNDFLOW_PRODUCTION_SCHEDULE_MEMORY_P0_PLAN_2026_08_04.md`；
-5. `gemini_doc/real_verifier_ir_integration_closure_2026_08_03.md`；
-6. `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`；
-7. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`；
-8. 本文（含 PR-13/14 历史状态与第 6—10 节当前修订）；
-9. `gemini_doc/asplos_claims_map.md`；
-10. `gemini_doc/asplos_execution_memo_v1_0.md`。
+1. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_REPRESENTATION_BINDING_V1_PLAN_2026_08_04.md`；
+2. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_CUDA_MEMORY_PROTOCOL_V1_PLAN_2026_08_03.md`；
+3. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_MEMORY_PLANS_V1_PLAN_2026_08_04.md`；
+4. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_BOUND_IR_V1_PLAN_2026_08_04.md`；
+5. `gemini_doc/BOUNDFLOW_PRODUCTION_SCHEDULE_MEMORY_P0_PLAN_2026_08_04.md`；
+6. `gemini_doc/real_verifier_ir_integration_closure_2026_08_03.md`；
+7. `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`；
+8. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`；
+9. 本文（含 PR-13/14 历史状态与第 6—11 节当前修订）；
+10. `gemini_doc/asplos_claims_map.md`；
+11. `gemini_doc/asplos_execution_memo_v1_0.md`。
 
 ## 6. RVIR 关闭后的当前边界
 
@@ -306,3 +307,30 @@ delta、result hash、Bound/PlanTemplate identity 与原始 latency samples 形�
 协议实现已完成，设备实验待可用 CUDA 主机按原参数执行。当前无需停等硬件；下一代码路线为
 representation semantic binding bridge，使 Plan representation 与 `MaterializeAction` 真正改变
 Bound/backend execution，并先通过真实 ResNet 双路径语义一致性。
+
+## 11. Native Representation Semantic Binding v1 判定
+
+NRIR-4 已关闭 NRIR-2/3 明确指出的“表示选择只停留在 metadata”缺口：
+
+- source PlanTemplate 对固定 21-op ResNet Bound graph 提供两个全局一致 policy；高预算选择
+  `native-dense-v1` + retain-all，`442,656` bytes 选择
+  `native-structured-affine-v1` + lifetime-reuse，`442,655` bytes fail closed；
+- structured policy 的每个 selected transition 与 source Schedule `MaterializeAction`、rewritten
+  execution Bound op 一一绑定。真实图插入 14 个 `REPRESENTATION_CAST` 与 14 个
+  `MATERIALIZE`，execution graph 从 21 ops 变为 49 ops；49 个 op 均各自进入 Task 与 Launch；
+- rewritten Bound graph 使用独立 execution PlanTemplate/PlanInstance/Task/Schedule hash；没有把
+  source PlanTemplate 冒充成对另一 Bound hash 仍有效；
+- dense/structured lower 最大差 `9.5367431640625e-07`；二者对 external lower 均 allclose，
+  sign 9/9；artifact digest 与 fresh semantic replay 通过；
+- selector 新增 storage-compatible prefix pruning，在不改变可行解集合的前提下避免真实图
+  dense/structured 全排列的指数枚举。
+
+结论为 representation binding/compiler ownership `VALIDATED-REDUCED`。当前 structured value
+由 `DenseLinearOperator` 包装 dense tensor，execution storage 对每个 structured binding 仍保留
+至少 dense logical bytes。因此不得声明 compression、memory reduction、latency、CUDA、OOM、
+Pareto 或 speedup；source policy 与 NRIR-2 storage 的耦合仅用于确定性预算选择，物理内存收益仍
+没有被 NRIR-4 证明。
+
+下一代码门禁是 real-network sliced batch execution：Plan 的 domain/spec/sample batch decision
+必须改变实际 Task/Schedule slicing 与 query accounting，并保持 dense/structured、single/batched
+语义一致。CUDA NRIR-3 设备实验作为环境可用时的独立待办，不阻塞该代码路线。
