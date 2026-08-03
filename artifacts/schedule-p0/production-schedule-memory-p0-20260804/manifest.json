@@ -1,0 +1,8 @@
+{
+  "files": {
+    "coverage.json": "27bd58877db4ff8d62f6767ad3719de19de95f9b5b86dd9242ea3bb836808fca"
+  },
+  "gate_id": "production-schedule-memory-p0",
+  "schema_version": "boundflow.production-schedule-coverage-audit/v1",
+  "verdict": "NO_GO"
+}

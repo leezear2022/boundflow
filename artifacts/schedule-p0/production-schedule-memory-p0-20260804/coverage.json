@@ -1,0 +1,2377 @@
+{
+  "admission_gate_ids": [
+    "residual_schedule_exercises_materialization_transition",
+    "residual_template_has_storage_choice",
+    "real_resnet_is_native_multi_region_bound_ir",
+    "real_resnet_schedule_owns_main_compute_lifecycle",
+    "frozen_multi_budget_plan_switch_demonstrated",
+    "current_plan_decisions_change_with_budget",
+    "compiler_latency_memory_pareto_all_workloads",
+    "baseline_oom_rescue_demonstrated"
+  ],
+  "claim_boundary": "structural ownership and frozen-evidence audit only; no new latency, memory, correctness, or performance claim",
+  "failed_gate_ids": [
+    "residual_schedule_exercises_materialization_transition",
+    "residual_template_has_storage_choice",
+    "real_resnet_is_native_multi_region_bound_ir",
+    "real_resnet_schedule_owns_main_compute_lifecycle",
+    "frozen_multi_budget_plan_switch_demonstrated",
+    "current_plan_decisions_change_with_budget",
+    "compiler_latency_memory_pareto_all_workloads",
+    "baseline_oom_rescue_demonstrated"
+  ],
+  "gate_id": "production-schedule-memory-p0",
+  "gates": {
+    "baseline_oom_rescue_demonstrated": false,
+    "compiler_latency_memory_pareto_all_workloads": false,
+    "current_plan_decisions_change_with_budget": false,
+    "frozen_multi_budget_plan_switch_demonstrated": false,
+    "frozen_source_digests_verified": true,
+    "prior_ir5_global_regret_gate_passed": false,
+    "real_resnet_is_native_multi_region_bound_ir": false,
+    "real_resnet_schedule_owns_main_compute_lifecycle": false,
+    "residual_schedule_exercises_materialization_transition": false,
+    "residual_schedule_owns_arena_lifecycle": true,
+    "residual_schedule_owns_full_bound_graph": true,
+    "residual_template_has_storage_choice": false
+  },
+  "limitations": [
+    "residual-final-v3 is a reduced synthetic residual CNN and its frozen measurements were produced on CUDA",
+    "current structural regeneration uses CPU because this host exposes no CUDA device; it does not replace the frozen CUDA measurements",
+    "the real ResNet path is audited through 51 frozen VNN-COMP activation calls, but their numerical execution remains externally owned",
+    "absence of an OOM-rescue artifact is reported as not demonstrated, not impossible"
+  ],
+  "next_workstream": {
+    "branch": "feat/native-real-network-bound-ir-v1",
+    "objective": "lower one frozen real residual network into a non-opaque native Bound IR graph before reopening Schedule IR memory optimization",
+    "reopen_memory_workstream_only_if": [
+      "the real-network main compute is a multi-region native Bound IR graph",
+      "Schedule IR owns allocate/free/batch/materialize/launch for that graph",
+      "two legal memory budgets select different batch/storage/region decisions",
+      "a frozen baseline OOM is rescued or a reproducible memory Pareto point exists"
+    ]
+  },
+  "real_resnet_schedule_path": {
+    "activation_call_count": 51,
+    "all_ir_hashes_recompiled_exactly": true,
+    "evidence_scope": "vnncomp21-resnet2b-prop0",
+    "main_compute_is_opaque_external_call": true,
+    "representative": {
+      "backend": "external_abcrown_exact_call/v1",
+      "bound_op_count": 1,
+      "domain_count": 192,
+      "external_bound_op_count": 1,
+      "performance_claimed": false,
+      "predicted_peak_bytes": 2368560,
+      "query_id": "vnncomp21-resnet2b-prop0-00000108",
+      "schedule_action_counts": {
+        "allocate": 1,
+        "batch_loop": 1,
+        "check_budget": 1,
+        "emit_result": 1,
+        "free": 1,
+        "launch": 1
+      },
+      "schedule_buffer_count": 7,
+      "selected_region_count": 1,
+      "semantics_owner": "external_verifier",
+      "spec_count": 1
+    },
+    "schedule_action_profiles": [
+      {
+        "action_counts": {
+          "allocate": 1,
+          "batch_loop": 1,
+          "check_budget": 1,
+          "emit_result": 1,
+          "free": 1,
+          "launch": 1
+        },
+        "call_count": 51
+      }
+    ],
+    "unique_schedule_action_profile_count": 1
+  },
+  "residual_schedule_path": {
+    "all_arena_lifecycle_actions_present": true,
+    "all_bound_ops_schedule_owned": true,
+    "any_alternative_storage_candidate": false,
+    "any_materialization_action_present": false,
+    "any_structural_budget_decision_switch": false,
+    "case_count": 8,
+    "cases": [
+      {
+        "arena_lifecycle_actions_present": true,
+        "backend": "reference",
+        "batch_candidate_count": 1,
+        "bound_op_count": 10,
+        "budget_probe": {
+          "below_peak_budget_bytes": 3096959,
+          "below_peak_rejected": true,
+          "below_peak_rejection_reasons": [
+            "memory_budget_exceeded"
+          ],
+          "both_plan_instances_legal": true,
+          "decisions_switched": false,
+          "high_decisions": {
+            "backends": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "backend:reference:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "backend:reference:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "backend:reference:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "backend:reference:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "backend:reference:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "backend:reference:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "backend:reference:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:single:0017.stem_relu",
+                "backend:reference:single:0017.stem_relu"
+              ],
+              [
+                "logical-region:single:0019.stem",
+                "backend:reference:single:0019.stem"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "backend:reference:single:0022.concretize"
+              ]
+            ],
+            "batch": "batch:full",
+            "materializations": [],
+            "regions": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "region:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "region:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "region:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "region:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "region:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "region:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "region:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:single:0017.stem_relu",
+                "region:single:0017.stem_relu"
+              ],
+              [
+                "logical-region:single:0019.stem",
+                "region:single:0019.stem"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "region:single:0022.concretize"
+              ]
+            ],
+            "representations": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "representation:dense:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "representation:dense:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "representation:dense:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "representation:dense:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "representation:dense:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "representation:dense:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "representation:dense:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:single:0017.stem_relu",
+                "representation:dense:single:0017.stem_relu"
+              ],
+              [
+                "logical-region:single:0019.stem",
+                "representation:dense:single:0019.stem"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "representation:dense:single:0022.concretize"
+              ]
+            ],
+            "states": [],
+            "storage": "storage:all"
+          },
+          "high_memory_budget_bytes": 536870912,
+          "low_decisions": {
+            "backends": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "backend:reference:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "backend:reference:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "backend:reference:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "backend:reference:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "backend:reference:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "backend:reference:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "backend:reference:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:single:0017.stem_relu",
+                "backend:reference:single:0017.stem_relu"
+              ],
+              [
+                "logical-region:single:0019.stem",
+                "backend:reference:single:0019.stem"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "backend:reference:single:0022.concretize"
+              ]
+            ],
+            "batch": "batch:full",
+            "materializations": [],
+            "regions": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "region:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "region:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "region:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "region:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "region:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "region:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "region:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:single:0017.stem_relu",
+                "region:single:0017.stem_relu"
+              ],
+              [
+                "logical-region:single:0019.stem",
+                "region:single:0019.stem"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "region:single:0022.concretize"
+              ]
+            ],
+            "representations": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "representation:dense:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "representation:dense:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "representation:dense:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "representation:dense:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "representation:dense:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "representation:dense:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "representation:dense:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:single:0017.stem_relu",
+                "representation:dense:single:0017.stem_relu"
+              ],
+              [
+                "logical-region:single:0019.stem",
+                "representation:dense:single:0019.stem"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "representation:dense:single:0022.concretize"
+              ]
+            ],
+            "states": [],
+            "storage": "storage:all"
+          },
+          "low_memory_budget_bytes": 67108864,
+          "plan_instance_hashes_differ": true,
+          "schedule_action_profiles_differ": false
+        },
+        "covered_bound_op_count": 10,
+        "external_bound_op_count": 0,
+        "predicted_peak_bytes": 3096960,
+        "schedule_action_counts": {
+          "allocate": 1,
+          "batch_loop": 1,
+          "check_budget": 1,
+          "emit_result": 1,
+          "free": 1,
+          "launch": 10
+        },
+        "schedule_buffer_count": 43,
+        "selected_region_count": 10,
+        "storage_candidate_count": 1,
+        "workload_id": "final-residual-gray-v3"
+      },
+      {
+        "arena_lifecycle_actions_present": true,
+        "backend": "pytorch_dense",
+        "batch_candidate_count": 1,
+        "bound_op_count": 10,
+        "budget_probe": {
+          "below_peak_budget_bytes": 3096959,
+          "below_peak_rejected": true,
+          "below_peak_rejection_reasons": [
+            "memory_budget_exceeded"
+          ],
+          "both_plan_instances_legal": true,
+          "decisions_switched": false,
+          "high_decisions": {
+            "backends": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "backend:reference:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "backend:reference:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "backend:reference:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "backend:reference:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "backend:reference:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "backend:reference:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "backend:reference:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "backend:pytorch_dense:fused"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "backend:reference:single:0022.concretize"
+              ]
+            ],
+            "batch": "batch:full",
+            "materializations": [],
+            "regions": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "region:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "region:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "region:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "region:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "region:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "region:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "region:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "region:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "region:single:0022.concretize"
+              ]
+            ],
+            "representations": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "representation:dense:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "representation:dense:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "representation:dense:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "representation:dense:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "representation:dense:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "representation:dense:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "representation:dense:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "representation:dense:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "representation:dense:single:0022.concretize"
+              ]
+            ],
+            "states": [],
+            "storage": "storage:all"
+          },
+          "high_memory_budget_bytes": 536870912,
+          "low_decisions": {
+            "backends": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "backend:reference:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "backend:reference:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "backend:reference:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "backend:reference:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "backend:reference:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "backend:reference:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "backend:reference:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "backend:pytorch_dense:fused"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "backend:reference:single:0022.concretize"
+              ]
+            ],
+            "batch": "batch:full",
+            "materializations": [],
+            "regions": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "region:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "region:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "region:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "region:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "region:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "region:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "region:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "region:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "region:single:0022.concretize"
+              ]
+            ],
+            "representations": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "representation:dense:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "representation:dense:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "representation:dense:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "representation:dense:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "representation:dense:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "representation:dense:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "representation:dense:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "representation:dense:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "representation:dense:single:0022.concretize"
+              ]
+            ],
+            "states": [],
+            "storage": "storage:all"
+          },
+          "low_memory_budget_bytes": 67108864,
+          "plan_instance_hashes_differ": true,
+          "schedule_action_profiles_differ": false
+        },
+        "covered_bound_op_count": 10,
+        "external_bound_op_count": 0,
+        "predicted_peak_bytes": 3096960,
+        "schedule_action_counts": {
+          "allocate": 1,
+          "batch_loop": 1,
+          "check_budget": 1,
+          "emit_result": 1,
+          "free": 1,
+          "launch": 9
+        },
+        "schedule_buffer_count": 43,
+        "selected_region_count": 9,
+        "storage_candidate_count": 1,
+        "workload_id": "final-residual-gray-v3"
+      },
+      {
+        "arena_lifecycle_actions_present": true,
+        "backend": "pytorch_chunked",
+        "batch_candidate_count": 1,
+        "bound_op_count": 10,
+        "budget_probe": {
+          "below_peak_budget_bytes": 3096959,
+          "below_peak_rejected": true,
+          "below_peak_rejection_reasons": [
+            "memory_budget_exceeded"
+          ],
+          "both_plan_instances_legal": true,
+          "decisions_switched": false,
+          "high_decisions": {
+            "backends": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "backend:reference:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "backend:reference:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "backend:reference:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "backend:reference:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "backend:reference:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "backend:reference:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "backend:reference:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "backend:pytorch_chunked:fused"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "backend:reference:single:0022.concretize"
+              ]
+            ],
+            "batch": "batch:full",
+            "materializations": [],
+            "regions": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "region:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "region:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "region:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "region:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "region:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "region:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "region:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "region:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "region:single:0022.concretize"
+              ]
+            ],
+            "representations": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "representation:dense:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "representation:dense:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "representation:dense:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "representation:dense:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "representation:dense:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "representation:dense:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "representation:dense:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "representation:dense:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "representation:dense:single:0022.concretize"
+              ]
+            ],
+            "states": [],
+            "storage": "storage:all"
+          },
+          "high_memory_budget_bytes": 536870912,
+          "low_decisions": {
+            "backends": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "backend:reference:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "backend:reference:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "backend:reference:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "backend:reference:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "backend:reference:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "backend:reference:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "backend:reference:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "backend:pytorch_chunked:fused"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "backend:reference:single:0022.concretize"
+              ]
+            ],
+            "batch": "batch:full",
+            "materializations": [],
+            "regions": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "region:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "region:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "region:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "region:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "region:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "region:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "region:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "region:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "region:single:0022.concretize"
+              ]
+            ],
+            "representations": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "representation:dense:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "representation:dense:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "representation:dense:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "representation:dense:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "representation:dense:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "representation:dense:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "representation:dense:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "representation:dense:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "representation:dense:single:0022.concretize"
+              ]
+            ],
+            "states": [],
+            "storage": "storage:all"
+          },
+          "low_memory_budget_bytes": 67108864,
+          "plan_instance_hashes_differ": true,
+          "schedule_action_profiles_differ": false
+        },
+        "covered_bound_op_count": 10,
+        "external_bound_op_count": 0,
+        "predicted_peak_bytes": 3096960,
+        "schedule_action_counts": {
+          "allocate": 1,
+          "batch_loop": 1,
+          "check_budget": 1,
+          "emit_result": 1,
+          "free": 1,
+          "launch": 9
+        },
+        "schedule_buffer_count": 43,
+        "selected_region_count": 9,
+        "storage_candidate_count": 1,
+        "workload_id": "final-residual-gray-v3"
+      },
+      {
+        "arena_lifecycle_actions_present": true,
+        "backend": "tvm_fused_tir",
+        "batch_candidate_count": 1,
+        "bound_op_count": 10,
+        "budget_probe": {
+          "below_peak_budget_bytes": 3096959,
+          "below_peak_rejected": true,
+          "below_peak_rejection_reasons": [
+            "memory_budget_exceeded"
+          ],
+          "both_plan_instances_legal": true,
+          "decisions_switched": false,
+          "high_decisions": {
+            "backends": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "backend:reference:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "backend:reference:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "backend:reference:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "backend:reference:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "backend:reference:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "backend:reference:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "backend:reference:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "backend:tvm_fused_tir:fused"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "backend:reference:single:0022.concretize"
+              ]
+            ],
+            "batch": "batch:full",
+            "materializations": [],
+            "regions": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "region:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "region:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "region:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "region:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "region:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "region:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "region:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "region:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "region:single:0022.concretize"
+              ]
+            ],
+            "representations": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "representation:dense:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "representation:dense:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "representation:dense:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "representation:dense:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "representation:dense:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "representation:dense:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "representation:dense:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "representation:dense:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "representation:dense:single:0022.concretize"
+              ]
+            ],
+            "states": [],
+            "storage": "storage:all"
+          },
+          "high_memory_budget_bytes": 536870912,
+          "low_decisions": {
+            "backends": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "backend:reference:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "backend:reference:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "backend:reference:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "backend:reference:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "backend:reference:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "backend:reference:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "backend:reference:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "backend:tvm_fused_tir:fused"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "backend:reference:single:0022.concretize"
+              ]
+            ],
+            "batch": "batch:full",
+            "materializations": [],
+            "regions": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "region:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "region:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "region:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "region:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "region:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "region:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "region:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "region:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "region:single:0022.concretize"
+              ]
+            ],
+            "representations": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "representation:dense:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "representation:dense:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "representation:dense:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "representation:dense:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "representation:dense:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "representation:dense:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "representation:dense:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "representation:dense:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "representation:dense:single:0022.concretize"
+              ]
+            ],
+            "states": [],
+            "storage": "storage:all"
+          },
+          "low_memory_budget_bytes": 67108864,
+          "plan_instance_hashes_differ": true,
+          "schedule_action_profiles_differ": false
+        },
+        "covered_bound_op_count": 10,
+        "external_bound_op_count": 0,
+        "predicted_peak_bytes": 3096960,
+        "schedule_action_counts": {
+          "allocate": 1,
+          "batch_loop": 1,
+          "check_budget": 1,
+          "emit_result": 1,
+          "free": 1,
+          "launch": 9
+        },
+        "schedule_buffer_count": 43,
+        "selected_region_count": 9,
+        "storage_candidate_count": 1,
+        "workload_id": "final-residual-gray-v3"
+      },
+      {
+        "arena_lifecycle_actions_present": true,
+        "backend": "reference",
+        "batch_candidate_count": 1,
+        "bound_op_count": 10,
+        "budget_probe": {
+          "below_peak_budget_bytes": 7351679,
+          "below_peak_rejected": true,
+          "below_peak_rejection_reasons": [
+            "memory_budget_exceeded"
+          ],
+          "both_plan_instances_legal": true,
+          "decisions_switched": false,
+          "high_decisions": {
+            "backends": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "backend:reference:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "backend:reference:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "backend:reference:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "backend:reference:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "backend:reference:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "backend:reference:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "backend:reference:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:single:0017.stem_relu",
+                "backend:reference:single:0017.stem_relu"
+              ],
+              [
+                "logical-region:single:0019.stem",
+                "backend:reference:single:0019.stem"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "backend:reference:single:0022.concretize"
+              ]
+            ],
+            "batch": "batch:full",
+            "materializations": [],
+            "regions": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "region:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "region:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "region:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "region:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "region:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "region:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "region:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:single:0017.stem_relu",
+                "region:single:0017.stem_relu"
+              ],
+              [
+                "logical-region:single:0019.stem",
+                "region:single:0019.stem"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "region:single:0022.concretize"
+              ]
+            ],
+            "representations": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "representation:dense:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "representation:dense:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "representation:dense:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "representation:dense:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "representation:dense:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "representation:dense:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "representation:dense:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:single:0017.stem_relu",
+                "representation:dense:single:0017.stem_relu"
+              ],
+              [
+                "logical-region:single:0019.stem",
+                "representation:dense:single:0019.stem"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "representation:dense:single:0022.concretize"
+              ]
+            ],
+            "states": [],
+            "storage": "storage:all"
+          },
+          "high_memory_budget_bytes": 536870912,
+          "low_decisions": {
+            "backends": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "backend:reference:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "backend:reference:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "backend:reference:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "backend:reference:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "backend:reference:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "backend:reference:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "backend:reference:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:single:0017.stem_relu",
+                "backend:reference:single:0017.stem_relu"
+              ],
+              [
+                "logical-region:single:0019.stem",
+                "backend:reference:single:0019.stem"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "backend:reference:single:0022.concretize"
+              ]
+            ],
+            "batch": "batch:full",
+            "materializations": [],
+            "regions": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "region:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "region:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "region:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "region:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "region:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "region:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "region:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:single:0017.stem_relu",
+                "region:single:0017.stem_relu"
+              ],
+              [
+                "logical-region:single:0019.stem",
+                "region:single:0019.stem"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "region:single:0022.concretize"
+              ]
+            ],
+            "representations": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "representation:dense:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "representation:dense:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "representation:dense:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "representation:dense:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "representation:dense:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "representation:dense:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "representation:dense:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:single:0017.stem_relu",
+                "representation:dense:single:0017.stem_relu"
+              ],
+              [
+                "logical-region:single:0019.stem",
+                "representation:dense:single:0019.stem"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "representation:dense:single:0022.concretize"
+              ]
+            ],
+            "states": [],
+            "storage": "storage:all"
+          },
+          "low_memory_budget_bytes": 67108864,
+          "plan_instance_hashes_differ": true,
+          "schedule_action_profiles_differ": false
+        },
+        "covered_bound_op_count": 10,
+        "external_bound_op_count": 0,
+        "predicted_peak_bytes": 7351680,
+        "schedule_action_counts": {
+          "allocate": 1,
+          "batch_loop": 1,
+          "check_budget": 1,
+          "emit_result": 1,
+          "free": 1,
+          "launch": 10
+        },
+        "schedule_buffer_count": 43,
+        "selected_region_count": 10,
+        "storage_candidate_count": 1,
+        "workload_id": "final-residual-color-v3"
+      },
+      {
+        "arena_lifecycle_actions_present": true,
+        "backend": "pytorch_dense",
+        "batch_candidate_count": 1,
+        "bound_op_count": 10,
+        "budget_probe": {
+          "below_peak_budget_bytes": 7351679,
+          "below_peak_rejected": true,
+          "below_peak_rejection_reasons": [
+            "memory_budget_exceeded"
+          ],
+          "both_plan_instances_legal": true,
+          "decisions_switched": false,
+          "high_decisions": {
+            "backends": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "backend:reference:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "backend:reference:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "backend:reference:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "backend:reference:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "backend:reference:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "backend:reference:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "backend:reference:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "backend:pytorch_dense:fused"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "backend:reference:single:0022.concretize"
+              ]
+            ],
+            "batch": "batch:full",
+            "materializations": [],
+            "regions": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "region:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "region:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "region:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "region:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "region:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "region:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "region:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "region:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "region:single:0022.concretize"
+              ]
+            ],
+            "representations": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "representation:dense:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "representation:dense:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "representation:dense:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "representation:dense:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "representation:dense:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "representation:dense:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "representation:dense:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "representation:dense:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "representation:dense:single:0022.concretize"
+              ]
+            ],
+            "states": [],
+            "storage": "storage:all"
+          },
+          "high_memory_budget_bytes": 536870912,
+          "low_decisions": {
+            "backends": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "backend:reference:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "backend:reference:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "backend:reference:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "backend:reference:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "backend:reference:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "backend:reference:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "backend:reference:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "backend:pytorch_dense:fused"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "backend:reference:single:0022.concretize"
+              ]
+            ],
+            "batch": "batch:full",
+            "materializations": [],
+            "regions": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "region:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "region:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "region:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "region:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "region:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "region:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "region:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "region:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "region:single:0022.concretize"
+              ]
+            ],
+            "representations": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "representation:dense:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "representation:dense:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "representation:dense:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "representation:dense:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "representation:dense:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "representation:dense:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "representation:dense:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "representation:dense:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "representation:dense:single:0022.concretize"
+              ]
+            ],
+            "states": [],
+            "storage": "storage:all"
+          },
+          "low_memory_budget_bytes": 67108864,
+          "plan_instance_hashes_differ": true,
+          "schedule_action_profiles_differ": false
+        },
+        "covered_bound_op_count": 10,
+        "external_bound_op_count": 0,
+        "predicted_peak_bytes": 7351680,
+        "schedule_action_counts": {
+          "allocate": 1,
+          "batch_loop": 1,
+          "check_budget": 1,
+          "emit_result": 1,
+          "free": 1,
+          "launch": 9
+        },
+        "schedule_buffer_count": 43,
+        "selected_region_count": 9,
+        "storage_candidate_count": 1,
+        "workload_id": "final-residual-color-v3"
+      },
+      {
+        "arena_lifecycle_actions_present": true,
+        "backend": "pytorch_chunked",
+        "batch_candidate_count": 1,
+        "bound_op_count": 10,
+        "budget_probe": {
+          "below_peak_budget_bytes": 7351679,
+          "below_peak_rejected": true,
+          "below_peak_rejection_reasons": [
+            "memory_budget_exceeded"
+          ],
+          "both_plan_instances_legal": true,
+          "decisions_switched": false,
+          "high_decisions": {
+            "backends": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "backend:reference:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "backend:reference:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "backend:reference:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "backend:reference:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "backend:reference:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "backend:reference:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "backend:reference:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "backend:pytorch_chunked:fused"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "backend:reference:single:0022.concretize"
+              ]
+            ],
+            "batch": "batch:full",
+            "materializations": [],
+            "regions": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "region:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "region:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "region:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "region:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "region:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "region:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "region:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "region:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "region:single:0022.concretize"
+              ]
+            ],
+            "representations": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "representation:dense:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "representation:dense:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "representation:dense:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "representation:dense:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "representation:dense:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "representation:dense:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "representation:dense:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "representation:dense:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "representation:dense:single:0022.concretize"
+              ]
+            ],
+            "states": [],
+            "storage": "storage:all"
+          },
+          "high_memory_budget_bytes": 536870912,
+          "low_decisions": {
+            "backends": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "backend:reference:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "backend:reference:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "backend:reference:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "backend:reference:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "backend:reference:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "backend:reference:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "backend:reference:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "backend:pytorch_chunked:fused"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "backend:reference:single:0022.concretize"
+              ]
+            ],
+            "batch": "batch:full",
+            "materializations": [],
+            "regions": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "region:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "region:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "region:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "region:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "region:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "region:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "region:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "region:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "region:single:0022.concretize"
+              ]
+            ],
+            "representations": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "representation:dense:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "representation:dense:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "representation:dense:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "representation:dense:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "representation:dense:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "representation:dense:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "representation:dense:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "representation:dense:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "representation:dense:single:0022.concretize"
+              ]
+            ],
+            "states": [],
+            "storage": "storage:all"
+          },
+          "low_memory_budget_bytes": 67108864,
+          "plan_instance_hashes_differ": true,
+          "schedule_action_profiles_differ": false
+        },
+        "covered_bound_op_count": 10,
+        "external_bound_op_count": 0,
+        "predicted_peak_bytes": 7351680,
+        "schedule_action_counts": {
+          "allocate": 1,
+          "batch_loop": 1,
+          "check_budget": 1,
+          "emit_result": 1,
+          "free": 1,
+          "launch": 9
+        },
+        "schedule_buffer_count": 43,
+        "selected_region_count": 9,
+        "storage_candidate_count": 1,
+        "workload_id": "final-residual-color-v3"
+      },
+      {
+        "arena_lifecycle_actions_present": true,
+        "backend": "tvm_fused_tir",
+        "batch_candidate_count": 1,
+        "bound_op_count": 10,
+        "budget_probe": {
+          "below_peak_budget_bytes": 7351679,
+          "below_peak_rejected": true,
+          "below_peak_rejection_reasons": [
+            "memory_budget_exceeded"
+          ],
+          "both_plan_instances_legal": true,
+          "decisions_switched": false,
+          "high_decisions": {
+            "backends": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "backend:reference:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "backend:reference:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "backend:reference:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "backend:reference:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "backend:reference:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "backend:reference:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "backend:reference:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "backend:tvm_fused_tir:fused"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "backend:reference:single:0022.concretize"
+              ]
+            ],
+            "batch": "batch:full",
+            "materializations": [],
+            "regions": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "region:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "region:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "region:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "region:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "region:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "region:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "region:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "region:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "region:single:0022.concretize"
+              ]
+            ],
+            "representations": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "representation:dense:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "representation:dense:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "representation:dense:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "representation:dense:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "representation:dense:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "representation:dense:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "representation:dense:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "representation:dense:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "representation:dense:single:0022.concretize"
+              ]
+            ],
+            "states": [],
+            "storage": "storage:all"
+          },
+          "high_memory_budget_bytes": 536870912,
+          "low_decisions": {
+            "backends": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "backend:reference:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "backend:reference:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "backend:reference:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "backend:reference:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "backend:reference:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "backend:reference:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "backend:reference:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "backend:tvm_fused_tir:fused"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "backend:reference:single:0022.concretize"
+              ]
+            ],
+            "batch": "batch:full",
+            "materializations": [],
+            "regions": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "region:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "region:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "region:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "region:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "region:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "region:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "region:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "region:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "region:single:0022.concretize"
+              ]
+            ],
+            "representations": [
+              [
+                "logical-region:single:0002.spec_bind",
+                "representation:dense:single:0002.spec_bind"
+              ],
+              [
+                "logical-region:single:0004.head",
+                "representation:dense:single:0004.head"
+              ],
+              [
+                "logical-region:single:0006.flatten",
+                "representation:dense:single:0006.flatten"
+              ],
+              [
+                "logical-region:single:0008.merge_relu",
+                "representation:dense:single:0008.merge_relu"
+              ],
+              [
+                "logical-region:single:0011.residual_add",
+                "representation:dense:single:0011.residual_add"
+              ],
+              [
+                "logical-region:single:0013.residual_conv",
+                "representation:dense:single:0013.residual_conv"
+              ],
+              [
+                "logical-region:single:0015.compose_skip",
+                "representation:dense:single:0015.compose_skip"
+              ],
+              [
+                "logical-region:fused:relu-affine",
+                "representation:dense:fused:relu-affine"
+              ],
+              [
+                "logical-region:single:0022.concretize",
+                "representation:dense:single:0022.concretize"
+              ]
+            ],
+            "states": [],
+            "storage": "storage:all"
+          },
+          "low_memory_budget_bytes": 67108864,
+          "plan_instance_hashes_differ": true,
+          "schedule_action_profiles_differ": false
+        },
+        "covered_bound_op_count": 10,
+        "external_bound_op_count": 0,
+        "predicted_peak_bytes": 7351680,
+        "schedule_action_counts": {
+          "allocate": 1,
+          "batch_loop": 1,
+          "check_budget": 1,
+          "emit_result": 1,
+          "free": 1,
+          "launch": 9
+        },
+        "schedule_buffer_count": 43,
+        "selected_region_count": 9,
+        "storage_candidate_count": 1,
+        "workload_id": "final-residual-color-v3"
+      }
+    ],
+    "evidence_scope": "reduced_synthetic_residual_cnn",
+    "frozen_measurement_gates": {
+      "all_compiler_candidates_semantic_allclose": true,
+      "any_multi_budget_global_switch": false,
+      "compiler_latency_memory_pareto_all_workloads": false,
+      "global_p90_regret_lte_1_20": false
+    },
+    "frozen_measurement_schedule_hashes": {
+      "final-residual-color-v3:pytorch_chunked": "8a97c53b1463d8a7105c113e4591ccd84efef98144f9be905c42fef48b55fcb6",
+      "final-residual-color-v3:pytorch_dense": "51396f99a64c2ad5547ea51e9dfd11a912ff008547610d888d1465c2d6d5a647",
+      "final-residual-color-v3:reference": "f9859f2f87b8fbf1a850240f371854f33bd8eb5d66c865fc00566945ff27b882",
+      "final-residual-color-v3:tvm_fused_tir": "4065dfac6a58caf69ba1ae29f195984a2ef898ce2d5528fafc054b64e560b5e5",
+      "final-residual-gray-v3:pytorch_chunked": "7ef678bfb2ad82a65fbdd3c73b2dd13a204261df08a5f8d6ca612e12e038abf6",
+      "final-residual-gray-v3:pytorch_dense": "24fd4b28fe755ba38a961fdcb1999cfdf75fae20e6054396d871733535f6c7b0",
+      "final-residual-gray-v3:reference": "c7079d1cd8e2f0462a30bd7216ef9b6ab2871cd7cf6efa3d2b7b259b7e454b42",
+      "final-residual-gray-v3:tvm_fused_tir": "7aa1cc040cab263504d5bbd24d2fff1e9c7a488dda4b6221d0cfb57e403ce9ca"
+    },
+    "structural_regeneration_device": "cpu"
+  },
+  "schema_version": "boundflow.production-schedule-coverage-audit/v1",
+  "source_artifacts": {
+    "ir5_residual_final_v3": {
+      "manifest_sha256": "6a81f03e52938a7e2049acebf6235d14fa2230e3a41cc78b3f56f00db974509d",
+      "schema_version": "boundflow.ir5-residual-final-artifact/v3",
+      "verified_file_count": 9
+    },
+    "rvir_cpu_correctness_v2": {
+      "manifest_sha256": "0f8927c5b1909b7a0b671f1c2cda28835956ca259ff088c358fd0121f96979f6",
+      "schema_version": "boundflow.real-verifier-ir-artifact/v2",
+      "verified_file_count": 5
+    }
+  },
+  "verdict": "NO_GO"
+}

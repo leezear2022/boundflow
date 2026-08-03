@@ -3,7 +3,7 @@
 > 生效日期：2026-07-12
 > 当前代码/工件基线：`e03b3d2`；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/real-verifier-ir-integration-v1`
+> 当前研发分支：`research/production-schedule-memory-p0`
 > 唯一执行顺序：**Gate 0 → PR-10 → PR-11 → PR-12 → PR-13 → PR-14**。
 > 禁止同时启动 Planner、fused kernel 与 BaB runtime 三条主线。
 
@@ -22,6 +22,11 @@
 > ResNet external-semantics initial-CROWN 等价恢复；activation external exact call 已进入
 > Bound/Plan/Task/Schedule typed stack。该结果不撤销 IR-5 No-Go，也不构成性能 claim；详见
 > 第 12 节。
+
+> **2026-08-04 P0 路线选择**：真实 production Schedule-memory 准入门禁为 `NO_GO`。
+> Reduced residual path 有 arena/launch ownership，但没有 materialization、storage choice 或
+> budget-driven decision switch；真实 ResNet 仍是单 external opaque call。不得直接重开 IR-5/
+> IR-6，下一分支是 `feat/native-real-network-bound-ir-v1`，详见第 13 节。
 
 ## 1. 锁定的论文命题
 
@@ -436,3 +441,24 @@ PR-14 暴露的两个 correctness 缺口：
 全量回归 `452 passed, 37 skipped`，artifact fresh-process replay 通过。因本机 CUDA 不可用且
 external lower-only 公平性能合同未建立，关闭等级为 correctness/integration
 VALIDATED-REDUCED，ASPLOS system-performance 总判定仍为 NO。
+
+## 13. Production Schedule IR + Memory P0 门禁
+
+RVIR closure 后没有凭对象名称直接宣布 Schedule IR 已成为论文主线，而是对当前 production
+控制面做了独立、可重放的 P0 audit：
+
+1. residual-final-v3 的 8 个 workload/backend case 均由 Schedule IR 覆盖完整 10-op Bound
+   graph，并显式拥有 budget check、arena allocate/free、batch loop 与 launch；
+2. 这些 case 没有 `MaterializeAction`，且每个 template 只有一个 batch/storage candidate；
+3. 64/512 MiB 下 PlanInstance hash 会变化，但 region/representation/backend/batch/storage/state
+   决策均不变化；冻结 artifact 同样没有 multi-budget switch，双 workload Pareto 失败；
+4. VNN-COMP ResNet 的 51 个 activation call 五层 IR hash 可逐条复算，但每条主图仍只是一个
+   provider-owned `EXTERNAL_VERIFIER_CALL` 和一个 launch；
+5. 当前没有 production OOM-rescue artifact。
+
+因此 `feat/production-schedule-memory-v1` 不准入。下一唯一工程问题改为：能否把一个冻结真实
+residual network 的 main compute lower 为非 opaque、multi-region native Bound IR，并先通过
+external-semantics correctness。只有此后存在至少两个合法 storage/batch plan、预算触发真实
+决策切换，且出现 baseline OOM rescue 或可重现 memory Pareto，才允许重开 Schedule-memory
+性能路线。P0 artifact 位于
+`artifacts/schedule-p0/production-schedule-memory-p0-20260804/`。
