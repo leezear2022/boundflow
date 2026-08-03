@@ -133,6 +133,8 @@
   αβ-CROWN 与 VNN-COMP commit 上连续两次重跑 ResNet 原始数值，核对冻结摘要与 tensor digest
 - `gemini_doc/change_2026-08-03_rvir_post_hardening_audit_handoff.md`：PR #5—#8
   审计后加固的 AC1—AC6、独立复核命令、claim boundary 与新 DocOps exchange 交接
+- `gemini_doc/change_2026-08-04_rvir_post_hardening_audit_closure.md`：外部复审 approve、
+  AC1—AC6/F1—F5 关闭、正式 exchange closure 与完整审计附件的 Git 固定记录
 - `gemini_doc/change_2026-07-28_ir5e_residual_final_protocol_freeze.md`：IR-5E
   residual-CNN typed workload、chain-CNN calibration→residual final v2 冻结 split、
   from-trace 公平协议及 p90/Pareto 一次性门禁

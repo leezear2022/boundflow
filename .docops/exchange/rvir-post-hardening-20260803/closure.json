@@ -1,0 +1,12 @@
+{
+  "doc": "rvir-post-hardening-20260803/closure",
+  "type": "closure",
+  "task": "rvir-post-hardening-20260803",
+  "round": 1,
+  "from": "codex",
+  "ts": "2026-08-03T18:26:47Z",
+  "resolution": "approved",
+  "approved_round": 1,
+  "note": "Round 1 approved; AC1-AC6 passed, original F1-F5 closed, and the info-level Phase6H fallback observation is non-blocking.",
+  "md_sha256": "8538f11887f8a8895e5db1dfb072a805323dfcfdf4486e7d177b5862d9a10ce3"
+}
