@@ -66,6 +66,12 @@ identity 与五层 IR hash。fresh process 不依赖 ignored 历史目录即可�
 - 全量：`452 passed, 37 skipped`；
 - `git diff --check`：PASS。
 
+外部审计后的 F5/M5 后续又在固定 αβ-CROWN/VNN-COMP commit 上完成两次 fresh ResNet
+CPU 原始数值重跑。两次均与冻结摘要的 12 个关键字段完全相等，8 个非空 tensor 的逐字节
+SHA256 也跨运行完全一致。完整来源、命令与 digest 见
+`gemini_doc/change_2026-08-03_rvir_resnet_raw_rerun.md`。这只关闭可重跑性缺口，不形成性能、
+CUDA 或完整 verifier claim。
+
 ## 4. 不得升级的主张
 
 1. 历史 fused replacement coverage 仍为 `0/394`；394/394 是 external exact-call typed
