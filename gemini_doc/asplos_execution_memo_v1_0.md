@@ -1,9 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`517a97d`（NRIR-4 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`3ca2e18`（NRIR-5 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/native-real-network-sliced-batch-execution-v1`
+> 当前研发分支：`feat/native-representation-batch-composition-v1`
 > 唯一执行顺序：**Gate 0 → PR-10 → PR-11 → PR-12 → PR-13 → PR-14**。
 > 禁止同时启动 Planner、fused kernel 与 BaB runtime 三条主线。
 
@@ -45,6 +45,12 @@
 > lower max diff `1.90735e-6`、external sign 9/9，artifact generate/replay 已通过。全量
 > `508 passed, 37 skipped`，状态为 correctness/integration VALIDATED-REDUCED；domain/sample、
 > representation × batch 联合执行与任何性能/内存主张仍 pending。详见第 18 节。
+
+> **2026-08-04 NRIR-6 结果**：同一 source PlanTemplate 已联合 representation/storage 与
+> spec-batch 两轴；budget × spec limit 选择 dense/structured × full/sliced 四组合，child
+> op/task/launch 为 `21/63/49/147`，且显式继承 source policy。四路径对 external lower
+> max diff 均 ≤`1.90735e-6`、sign 9/9，artifact replay 与全量 `522 passed, 37 skipped`。
+> 只升级 joint compiler ownership；跨 query/domain batching、cache 和性能仍 pending。详见第 19 节。
 
 ## 1. 锁定的论文命题
 
@@ -615,8 +621,30 @@ child IR、execution trace、digest 与同步重哈希后的结构篡改门禁�
 
 ```text
 NRIR-5 spec sliced execution (completed)
-  -> representation × batch policy composition
+  -> representation × batch policy composition (completed)
   -> real repeated-query/domain batching and cache/accounting
   -> execute frozen NRIR-3 protocol when CUDA is available
   -> only with physical end-to-end evidence reconsider ASPLOS performance claim
 ```
+
+## 19. Native Representation × Batch Composition v1
+
+NRIR-6 把 NRIR-4/5 的两个独立 mechanism 放入同一 source template 和 selector。高/低 memory
+budget 决定 dense-retain/structured-reuse；query-time max spec 9/3 决定 full/sliced。因此四个
+组合不是四条硬编码入口，而是同一候选空间的四个可验证 PlanInstance/Schedule。
+
+source selected storage/representation 通过 `required_storage_candidate_id` 显式传播到每个 child；
+即使切片改变 child shape，也不能重新打分并偷偷换 policy。四组合共享 source Bound/PlanTemplate，
+有四个不同 PlanInstance/Schedule。真实 ResNet child op/task/launch 为 `21/63/49/147`；structured
+两条路径继续保留 source 28 transitions/49-op execution ownership，sliced 两条路径继续拥有
+`[0,3)/[3,6)/[6,9)` ranges。
+
+对 frozen external lower 的最大差依次为 `7.152557373046875e-07`、
+`1.9073486328125e-06`、`9.5367431640625e-07`、`1.6689300537109375e-06`，均 allclose、sign
+9/9。artifact 位于
+`artifacts/native-real-network-joint-policy/vnncomp21-resnet2b-prop0-cpu-v1/`；聚焦
+`103 passed`，全量 `522 passed, 37 skipped`，静态门禁全过。
+
+该结果只关闭 cross-axis compiler/runtime ownership。structured 仍 dense-equivalent，spec child
+仍顺序执行，没有 physical memory/latency/CUDA 证据。下一工程门禁必须进入真实 query stream：
+跨 query/domain batch formation、plan/code cache reuse、per-query lineage/结果恢复和公平 baseline。

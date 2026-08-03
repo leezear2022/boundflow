@@ -3751,3 +3751,23 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_SLICED_BATCH_EXECUTION_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Native Representation × Batch Composition v1
+
+- 同一 source template 联合 representation/storage 与 full/spec-size-3 batch candidates；memory
+  budget × max spec 由 generic selector 选择 dense/structured × full/sliced 四组合；
+- 新增 required storage policy context/provenance/verifier，source policy 显式传播到 child，避免
+  child shape 改变后重新打分换 policy；
+- 四组合共享 source Bound/PlanTemplate、拥有四个 PlanInstance/Schedule；真实 ResNet child
+  op/task/launch=`21/63/49/147`，structured 28 transitions 与 sliced exact ranges 同时保留；
+- 四路径 external lower max diff 均 ≤`1.9073486328125e-06`、sign 9/9；artifact generate/replay
+  与 tamper gates 通过；
+- 聚焦 `103 passed`，全量 `522 passed, 37 skipped`；Black/Mypy clean、Pylint 10.00/10、
+  diff check 通过；
+- 状态为 cross-axis correctness/ownership VALIDATED-REDUCED；跨 query/domain batching、cache、
+  memory/latency/CUDA/OOM/Pareto/speedup 仍 pending。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_NATIVE_REPRESENTATION_BATCH_COMPOSITION_V1_CHANGELOG_2026_08_04.md`

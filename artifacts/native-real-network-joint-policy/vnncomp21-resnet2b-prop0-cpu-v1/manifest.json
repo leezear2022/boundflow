@@ -1,0 +1,8 @@
+{
+  "files": {
+    "joint_policy.json": "067de307fe2f7837d425f9f31227996cb6f9f1d0afa918502f7d127441354dd5"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.native-real-network-joint-policy-artifact/v1",
+  "status": "ok"
+}
