@@ -1,0 +1,8 @@
+{
+  "files": {
+    "domain_batch.json": "f9b4485bc2ff43f0a6094af986569ab4eb3564c6a7a4540dcb1a8e372af1efaf"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.native-real-network-domain-batch-artifact/v1",
+  "status": "ok"
+}

@@ -9,16 +9,17 @@
 > lower 为 native multi-region IR；NRIR-2 完成 storage switch/runtime last-use，NRIR-4 完成
 > representation→execution binding，NRIR-5 产生真实 spec-sliced child execution；NRIR-6 已把
 > 两轴联合到同一 template/selector 并执行四组合；NRIR-7 加入 9 条真实 property query 的
-> packed/serial/cache/lineage。这些仍是 CPU correctness/ownership evidence；没有 BaB domain、
+> packed/serial/cache/lineage；NRIR-8 加入 8 个不同 input-box leaf、exact child state 与
+> domain-axis execution。这些仍是 CPU correctness/ownership evidence；没有 ReLU/β BaB queue、
 > CUDA allocator 或性能结果，
 > 故 performance No-Go 不变。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
 | C1：显式物化语义的 Structured Bound-Operator IR | native ResNet correctness/representation binding validated-reduced | typed Bound IR + lowering + dense/structured interpreter + source Plan/Schedule→execution Bound/Task/Launch binder | ResNet 17 Primal→21 source ops；structured execution 49 ops，含 14 cast + 14 materialize；dense/structured max diff 9.54e-7 | NRIR-1/2/4 artifacts；structured storage 仍 dense-equivalent，不能升级 compression/performance |
-| C2：Method/Autograd/Memory-Aware Materialization Planner | real-graph joint policy + exact repeated-query compile cache validated-reduced；IR-5 final 仍 NO-GO | NRIR-6 joint selector/runtime + NRIR-7 workload/state/query/policy cache key | 四组合 Plan/Schedule；first miss/second hit；objective/order/state invalidate；历史 Global p90 No-Go 保留 | NRIR-6/7 artifacts；无 BaB domain、CUDA peak/OOM/Pareto，paper performance claim 不成立 |
-| C3：Verification Query Runtime Infrastructure | real property-query formation/packing/lineage validated-reduced；performance downgraded | typed query specs/ranges + packed joint execution + serial same-policy restore | 9 queries→packed 3 child vs serial 9；9/9 restore；packed/serial max diff 3.22e-6 | fused replacement 0/394 历史事实保留；BaB parent/child domain validity与公平 timing pending |
-| BoundFlow Schedule IR | real-network storage/representation/spec-slice ownership validated-reduced；production-performance claim 仍 NO-GO | typed ScheduleModule + native ResNet storage lifetime、representation transitions、spec range loops 与 child stacks | NRIR-4 28 transition actions；NRIR-5 `[0,3)/[3,6)/[6,9)`、3×21 Task/Launch、full/sliced max diff 1.91e-6 | deterministic NRIR-1/2/4/5 replay；domain/sample、joint policy、OOM rescue/GPU evidence pending |
+| C2：Method/Autograd/Memory-Aware Materialization Planner | real-graph joint policy + exact repeated-query/domain Plan selection validated-reduced；IR-5 final 仍 NO-GO | NRIR-6 joint selector + NRIR-7 cache key + NRIR-8 full/domain-size-4 candidate | 四组合；cache invalidate；8 domains 的 full/packed PlanInstance/Schedule identity 不同；历史 Global p90 No-Go 保留 | NRIR-6/7/8 artifacts；无 physical CUDA peak/OOM/Pareto，paper performance claim 不成立 |
+| C3：Verification Query Runtime Infrastructure | property-query + input-box parent/child domain formation/packing/lineage validated-reduced；performance downgraded | typed query/domain specs、exact child state、packed execution、serial same-policy restore | NRIR-7 9 queries→3 vs 9；NRIR-8 8 leaf domains→2 vs 8；8/8 parent/result restore；packed/full/serial bitwise equal | fused replacement 0/394 历史事实保留；ReLU/β split queue、prune、termination 与公平 timing pending |
+| BoundFlow Schedule IR | real-network storage/representation/spec/domain-slice ownership validated-reduced；production-performance claim 仍 NO-GO | typed ScheduleModule + native ResNet lifetime、transitions、spec/domain loops 与 child stacks | NRIR-5 spec ranges；NRIR-8 domain ranges `[0,4)/[4,8)`、2 child vs serial 8、bitwise equal | deterministic NRIR-1/2/4/5/8 replay；sample axis、full BaB、OOM rescue/GPU evidence pending |
 | BoundFlow Task IR | IR-3 per-task semantic closure validated-reduced；production backend pending | TaskIRModule/Unit + typed op/shape/parameter/external/state/memory/backend refs + stateful Bound stepping | 12 个 tests（含 4 graph families、structured materialize、skip/reorder rejection） | per-task output hashes 与 final bound hashes 已入 fresh-process artifact v2 |
 | backend 执行 typed Planner/Task 结果而非定义核心抽象 | IR-4 validated-reduced；IR-5 final performance No-Go | composite typed registry + query adapter + real fused/unfused/fallback；prepared capsule 将静态 validate/hash/dispatch 移出 query hot path | residual v3 all backend correctness；ordinary batching p90 regret 1.008×，Global 1.262× | v3 可 replay；backend correctness 成立，但 adaptive production performance claim 失败 |
 | 相同浮点语义下保持 reference bound computation | local-semantics 历史 No-Go；external-semantics initial-CROWN validated-reduced | dense reference + explicit external intermediate-bound source/adaptive policy | allclose、gradient、auto_LiRPA、replay | ResNet historical local max diff 796.765；新 external-semantics max diff 3.10e-6、sign 9/9；CPU only |
@@ -598,3 +599,17 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   domain stream；3 vs 9 仅机制计数，无 timing/memory/CUDA/OOM/Pareto/speedup claim；
 - 工件：`artifacts/native-real-network-repeated-query/vnncomp21-resnet2b-prop0-cpu-v1/`；聚焦
   `121 passed`、全量 `540 passed, 37 skipped`、静态门禁全过；下一缺口为 domain state validity。
+
+### 2026-08-04 Native BaB Input-Domain Batching v1
+
+- `C3-M-NRIR8` validated-reduced domain mechanism：固定 ResNet root box 三层确定性二分为 8 个
+  不同 leaf queries；每个 leaf/parent box、tree depth/branch 与 result lineage 显式冻结；
+- `C3-G-NRIR8` state-validity gate：每个 leaf 独立重算 IBP exact state，8 个 state hash 全不同；
+  parent state 只允许 `warm_start_only`，任何 promotion、range/state/lineage 篡改 fail closed；
+- `C2/C3-E-NRIR8` execution：full-domain Plan 执行 1 child，domain-size-4 Plan 执行 2 child，
+  same-policy serial 执行 8 child；packed/full/serial 8×1 lower/upper bitwise equal，8/8 restore；
+- `C3-L-NRIR8` hard limitation：input-box branch 不是 ReLU/β branch-and-bound；无 queue、prune、
+  termination、verified verdict 或 timing/memory/CUDA/OOM/Pareto/speedup claim；
+- 工件：`artifacts/native-real-network-domain-batch/vnncomp21-resnet2b-prop0-cpu-v1/`；下一缺口
+  为 native ReLU-split state/queue/control flow；聚焦 `19 passed`、全量
+  `559 passed, 37 skipped`、静态门禁全过。

@@ -1,9 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`99ea0bb`（NRIR-6 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`972eca1`（NRIR-7 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/native-repeated-query-batching-cache-v1`
+> 当前研发分支：`feat/native-bab-domain-batching-v1`
 > 唯一执行顺序：**Gate 0 → PR-10 → PR-11 → PR-12 → PR-13 → PR-14**。
 > 禁止同时启动 Planner、fused kernel 与 BaB runtime 三条主线。
 
@@ -57,6 +57,13 @@
 > 首次 compile miss、第二次 exact hit，objective/order/state 均进入 cache key。packed/serial
 > max diff `3.21865e-6`、external sign 9/9，全量 `540 passed, 37 skipped`。只证明 query
 > formation/cache/packing correctness；BaB domain state 与性能仍 pending。详见第 20 节。
+
+> **2026-08-04 NRIR-8 结果**：固定 ResNet 原 input box 已确定性三层二分为 8 个不同 leaf
+> domains。每个 leaf 独立重算 IBP intermediate state；parent state 只标记
+> `warm_start_only`，从未作为 child exact execution input。Plan 的 domain-size-4 candidate
+> 实际驱动两个 child IR stacks；full-size-8 为一个，same-policy serial 为八个；三路径
+> lower/upper bitwise 一致。该结果只关闭 input-box domain formation/state validity/packing，
+> 不是 ReLU/β branch-and-bound、pruning、终止或性能证据。详见第 21 节。
 
 ## 1. 锁定的论文命题
 
@@ -677,3 +684,27 @@ artifact 位于
 in-process compile cache 和结果 lineage；3 vs 9 是 child-count mechanism，不是 speedup。下一
 工程门禁是 BaB parent/child domain stream：不同 input boxes、state validity/invalidation、
 domain-axis packing/restore 与 same-solver baseline。
+
+## 21. Native BaB Input-Domain Batching v1
+
+NRIR-8 将 frozen ResNet 原始 VNNLIB box 的前三个正宽坐标逐层二分，形成 8 个确定性 leaf
+query。每个 leaf 都保留 parent query/box identity，并独立运行 forward IBP；exact state hash
+绑定 child box、完整 interval environment 和 ReLU preactivation，8 个 leaf hash 全部不同。
+parent state 另行计算但只能是 `warm_start_only`，typed trace、compiler validation 与 runtime
+trace 都要求 `parent_state_consumed_as_exact=false`。
+
+source PlanTemplate 同时包含 full-domain 与 domain-size-4 candidates。query-time max domain=4
+选择两个连续四域 Schedule slices，并为每个 slice 编译/执行独立 representation-bound
+Bound/Plan/Task/Schedule child；max domain=8 选择一个 full child。same-policy serial reference
+分别编译/执行八个单域 child。固定 ResNet artifact 中 packed/full/serial 的 8×1 lower/upper
+全部 bitwise 一致，8/8 query/parent/result lineage 恢复。artifact 位于
+`artifacts/native-real-network-domain-batch/vnncomp21-resnet2b-prop0-cpu-v1/`。
+
+聚焦 runtime/artifact/tamper tests 为 `19 passed`，全量为 `559 passed, 37 skipped`；
+Black/Mypy/Pylint/diff 与 fresh semantic replay 全过。
+
+该关闭边界是 input-box domain formation、exact child-state ownership、domain Plan/Schedule
+packing 与 restore `VALIDATED-REDUCED`。2 vs 8 只是 child-stack mechanism count，不是 timing。
+它也不是完整 BaB：尚无 ReLU split decision、β/split state、priority queue、bound-based prune、
+termination 或 property verdict。下一工程门禁是 native ReLU-split BaB queue/state v1；CUDA
+physical protocol 仍只在设备可用时执行。
