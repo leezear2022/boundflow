@@ -24,6 +24,11 @@
 > exact call 完成 typed IR admission/dispatch artifact。该结果只修复集成语义，不撤销
 > IR-5 performance No-Go，不启动 IR-6，也不形成 verifier acceleration claim。
 
+> **2026-08-04 P0 修订**：production Schedule-memory ownership audit 为 `NO_GO`。
+> Reduced residual path 能由 Schedule IR 控制 arena 与 region launch，但没有 materialization、
+> storage choice 或 budget decision switch；VNN-COMP ResNet 主计算仍是 external opaque call。
+> 下一工作是 `feat/native-real-network-bound-ir-v1`，不是重开 IR-5、IR-6 或孤立 TIR 调优。
+
 ---
 
 ## 0. 执行摘要

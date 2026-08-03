@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
-> 状态日期：2026-08-03
-> 当前冻结代码/工件基线：`e03b3d2`；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/real-verifier-ir-integration-v1`
+> 状态日期：2026-08-04
+> 当前主分支基线：`beda52c`；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`research/production-schedule-memory-p0`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
@@ -36,6 +36,10 @@
 > VALIDATED-NO-GO；停止当前 ASPLOS system-performance 路线，IR-6 不启动。
 > 2026-08-03 RVIR 后续：真实 verifier correctness/integration 已 CPU
 > VALIDATED-REDUCED；这不撤销 IR-5/ASPLOS performance No-Go。
+> 2026-08-04 P0 后续：production Schedule-memory 准入审计为 `NO_GO`。Residual reduced
+> 路径有完整 arena/launch ownership，但没有 materialize、storage 选择或预算决策切换；真实
+> ResNet 的 51 个 activation call 仍各自是一个 external opaque launch。下一分支改为
+> `feat/native-real-network-bound-ir-v1`。
 
 ## 1. 当前真实阶段
 
@@ -48,6 +52,7 @@ BoundFlow 已经完成从边界表示到 query runtime prototype 的主干：
 | Fused/multi-backend CROWN execution | validated-reduced | eager/chunked/structured/TVM fused 多预算选择；收益只在部分 regime |
 | Query runtime | validated-reduced | `BoundQuery`、state validity、dynamic batching、same-solver adapter、reduced GPU E2E |
 | 真实 complete verifier integration | RVIR CPU correctness/integration validated-reduced | ResNet external-semantics max diff 3.10e-6、sign 9/9；typed external-call admission 394/394；真实在线 dispatch 377/377 |
+| Production Schedule + Memory P0 | NO-GO | residual 8/8 完整 arena ownership，但 0 materialize、单 storage、0 budget decision switch；真实 ResNet 51/51 为单 external launch |
 | ASPLOS 最终系统主张 | IR-5 final VALIDATED-NO-GO | IR-1—4 narrow closure 保留；Global p90/Pareto 失败，当前 system-performance 路线已关闭 |
 
 历史 `main@263ea81` 只到 PR-10 closure，不能再作为项目当前状态入口。跨会话恢复必须同时检查
@@ -165,12 +170,13 @@ IR-5 当时冻结的最优先候选是与 `7501/7502` 独立的真实 Verifier I
 
 ## 5. 权威阅读顺序
 
-1. `gemini_doc/real_verifier_ir_integration_closure_2026_08_03.md`；
-2. `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`；
-3. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`；
-4. 本文（含 PR-13/14 历史状态与第 6 节当前修订）；
-5. `gemini_doc/asplos_claims_map.md`；
-6. `gemini_doc/asplos_execution_memo_v1_0.md`。
+1. `gemini_doc/BOUNDFLOW_PRODUCTION_SCHEDULE_MEMORY_P0_PLAN_2026_08_04.md`；
+2. `gemini_doc/real_verifier_ir_integration_closure_2026_08_03.md`；
+3. `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`；
+4. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`；
+5. 本文（含 PR-13/14 历史状态与第 6/7 节当前修订）；
+6. `gemini_doc/asplos_claims_map.md`；
+7. `gemini_doc/asplos_execution_memo_v1_0.md`。
 
 ## 6. RVIR 关闭后的当前边界
 
@@ -192,3 +198,24 @@ precedes child、完成状态和五层 IR hash，不再只信任生成端摘要�
 `460 passed, 37 skipped`。
 当前没有被证据授权的 CUDA/performance claim，下一性能研究必须另立公平 lower-only 合同与
 fresh GPU protocol，不能直接复用本 correctness artifact。
+
+## 7. Production Schedule IR + Memory P0 判定
+
+`artifacts/schedule-p0/production-schedule-memory-p0-20260804/` 对 IR-5 residual-final-v3
+和 RVIR v2 做了 digest-first、semantic-replay 审计：
+
+- 2 workload × 4 backend 的 8 个 residual structural case 均由 Schedule IR 覆盖 10/10
+  Bound ops，并显式执行 check-budget、arena allocate/free、batch loop 与 9/10 个 region launch；
+- 但 8 个 template 均只有一个 batch 和一个 storage candidate，且没有任何
+  `MaterializeAction`；64/512 MiB 虽生成不同 PlanInstance hash，实际 decision signature
+  8/8 完全相同；
+- 冻结 residual-final-v3 原有结论仍是 no multi-budget switch、双 workload Pareto 失败；
+- VNN-COMP ResNet 51/51 activation call 的五层 IR hash 全部可重编译，但每条 Bound graph
+  只有一个 `EXTERNAL_VERIFIER_CALL`，Schedule 也只有一个 external launch，主计算与数值
+  语义仍由 αβ-CROWN provider 拥有；
+- baseline OOM rescue 没有冻结证据，只能记为 not demonstrated。
+
+因此不能直接启动 `feat/production-schedule-memory-v1`。下一代码路线是
+`feat/native-real-network-bound-ir-v1`：先把一个冻结真实 residual network 的主计算 lower
+为 native multi-region Bound IR，并通过 external-semantics correctness oracle；之后才允许增加
+多个 storage/batch 候选、重开 memory feasibility 与 GPU 性能门禁。

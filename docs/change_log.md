@@ -3644,3 +3644,18 @@
 
 **记录**
 - `gemini_doc/change_2026-08-03_rvir_online_raw_replay_v2.md`
+
+---
+
+## 2026-08-04：Production Schedule IR + Memory P0
+
+- 新增 deterministic production Schedule ownership/memory audit 与 semantic replay；
+- 复算 residual 2 workload × 4 backend：完整 Bound-op/arena/launch coverage 成立，但
+  MaterializeAction、storage choice、预算决策切换均缺失；
+- 复算 VNN-COMP ResNet 51/51 activation call 五层 IR hash，确认主计算仍为单 external op/
+  launch；
+- P0 最终 `NO_GO`，不启动 production schedule-memory headline；下一分支冻结为
+  `feat/native-real-network-bound-ir-v1`。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_PRODUCTION_SCHEDULE_MEMORY_P0_CHANGELOG_2026_08_04.md`

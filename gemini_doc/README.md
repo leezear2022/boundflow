@@ -16,19 +16,21 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-1. `gemini_doc/real_verifier_ir_integration_closure_2026_08_03.md`（当前最新：真实 verifier
+1. `gemini_doc/BOUNDFLOW_PRODUCTION_SCHEDULE_MEMORY_P0_PLAN_2026_08_04.md`（当前最新：
+   production Schedule ownership/memory 门禁、NO-GO 与下一 native real-network 分支）
+2. `gemini_doc/real_verifier_ir_integration_closure_2026_08_03.md`（真实 verifier
    correctness/integration 关闭审计与不可升级边界）
-2. `gemini_doc/rvir_external_audit_handoff_2026_08_03.md`（可直接交给其他模型的自包含
+3. `gemini_doc/rvir_external_audit_handoff_2026_08_03.md`（可直接交给其他模型的自包含
    RVIR 审计请求、证据和复核顺序）
-3. `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`（RVIR 所有权与门禁）
-4. `gemini_doc/pr14_external_model_audit_handoff_2026_07_19.md`（从项目起点到 PR-14
+4. `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`（RVIR 所有权与门禁）
+5. `gemini_doc/pr14_external_model_audit_handoff_2026_07_19.md`（从项目起点到 PR-14
    No-Go 的自包含外部审计入口）
-5. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`（PR-14
+6. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`（PR-14
    后 IR-first 架构重置、对象协议与实施门禁）
-6. `gemini_doc/current_status_after_pr13.md`（全项目当前状态）
-7. `gemini_doc/asplos_claims_map.md`（论文主张→代码→实验→工件证据）
-8. `gemini_doc/asplos_execution_memo_v1_0.md`（唯一历史顺序与门禁）
-9. `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`（ASPLOS 顶层计划）
+7. `gemini_doc/current_status_after_pr13.md`（全项目当前状态）
+8. `gemini_doc/asplos_claims_map.md`（论文主张→代码→实验→工件证据）
+9. `gemini_doc/asplos_execution_memo_v1_0.md`（唯一历史顺序与门禁）
+10. `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`（ASPLOS 顶层计划）
 
 ### B. 全流程总览（从 claims 到工程到 AE）
 
@@ -54,6 +56,11 @@
 
 ### 2.1 关键交付文档（“长期有效”）
 
+- `gemini_doc/BOUNDFLOW_PRODUCTION_SCHEDULE_MEMORY_P0_PLAN_2026_08_04.md`：RVIR 后
+  production Schedule ownership、materialization/storage 与 multi-budget memory 门禁；
+  `NO_GO` 后转向 native real-network Bound IR
+- `gemini_doc/BOUNDFLOW_PRODUCTION_SCHEDULE_MEMORY_P0_CHANGELOG_2026_08_04.md`：上述
+  audit module、runner、artifact、验证与权威文档同步记录
 - `gemini_doc/pr14_external_model_audit_handoff_2026_07_19.md`：项目起点、ASPLOS 路线、
   PR-14A/B 证据/限制、外部复核命令与下一步的自包含审计交接
 - `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`：复审当前
