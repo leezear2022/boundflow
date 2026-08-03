@@ -5,9 +5,9 @@ rm: v01
 st: s01
 stat: active
 health: green
-pr: [12]
-last_ch: ev000655
-last_va: ev000656
+pr: []
+last_ch: ev000765
+last_va: ev000766
 blk:
-next: implement-nrir2-real-graph-memory-plans
-updated: 2026-08-03T19:25:32Z
+next: publish-nrir2-and-freeze-cuda-physical-memory-protocol
+updated: 2026-08-03T19:49:20Z

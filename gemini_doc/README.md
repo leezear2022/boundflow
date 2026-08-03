@@ -16,23 +16,25 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-1. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_BOUND_IR_V1_PLAN_2026_08_04.md`（当前最新：
-   固定 ResNet 的 native Bound/Plan/Task/Schedule correctness 与下一 multi-plan 门禁）
-2. `gemini_doc/BOUNDFLOW_PRODUCTION_SCHEDULE_MEMORY_P0_PLAN_2026_08_04.md`（production
+1. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_MEMORY_PLANS_V1_PLAN_2026_08_04.md`（当前最新：
+   固定 ResNet 双 storage、预算切换、Schedule arena 与 runtime last-use release）
+2. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_BOUND_IR_V1_PLAN_2026_08_04.md`（固定 ResNet
+   native Bound/Plan/Task/Schedule correctness 与 NRIR-1 边界）
+3. `gemini_doc/BOUNDFLOW_PRODUCTION_SCHEDULE_MEMORY_P0_PLAN_2026_08_04.md`（production
    Schedule ownership/memory 门禁、NO-GO 与 native real-network 准入条件）
-3. `gemini_doc/real_verifier_ir_integration_closure_2026_08_03.md`（真实 verifier
+4. `gemini_doc/real_verifier_ir_integration_closure_2026_08_03.md`（真实 verifier
    correctness/integration 关闭审计与不可升级边界）
-4. `gemini_doc/rvir_external_audit_handoff_2026_08_03.md`（可直接交给其他模型的自包含
+5. `gemini_doc/rvir_external_audit_handoff_2026_08_03.md`（可直接交给其他模型的自包含
    RVIR 审计请求、证据和复核顺序）
-5. `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`（RVIR 所有权与门禁）
-6. `gemini_doc/pr14_external_model_audit_handoff_2026_07_19.md`（从项目起点到 PR-14
+6. `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`（RVIR 所有权与门禁）
+7. `gemini_doc/pr14_external_model_audit_handoff_2026_07_19.md`（从项目起点到 PR-14
    No-Go 的自包含外部审计入口）
-7. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`（PR-14
+8. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`（PR-14
    后 IR-first 架构重置、对象协议与实施门禁）
-8. `gemini_doc/current_status_after_pr13.md`（全项目当前状态）
-9. `gemini_doc/asplos_claims_map.md`（论文主张→代码→实验→工件证据）
-10. `gemini_doc/asplos_execution_memo_v1_0.md`（唯一历史顺序与门禁）
-11. `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`（ASPLOS 顶层计划）
+9. `gemini_doc/current_status_after_pr13.md`（全项目当前状态）
+10. `gemini_doc/asplos_claims_map.md`（论文主张→代码→实验→工件证据）
+11. `gemini_doc/asplos_execution_memo_v1_0.md`（唯一历史顺序与门禁）
+12. `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`（ASPLOS 顶层计划）
 
 ### B. 全流程总览（从 claims 到工程到 AE）
 
@@ -58,6 +60,11 @@
 
 ### 2.1 关键交付文档（“长期有效”）
 
+- `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_MEMORY_PLANS_V1_PLAN_2026_08_04.md`：同一
+  real ResNet Bound IR/PlanTemplate 的 retain-all/lifetime-reuse storage plans、预算选择、
+  Schedule arena、runtime last-use trace、artifact 与不可升级边界
+- `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_MEMORY_PLANS_V1_CHANGELOG_2026_08_04.md`：
+  上述 allocator、runtime hook、runner、tests、artifact 与下一 physical-memory 门禁记录
 - `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_BOUND_IR_V1_PLAN_2026_08_04.md`：固定
   VNN-COMP ResNet2B 的 native 21-region Bound/Plan/Task/Schedule correctness、portable
   external-bound payload、五层 hash 与 NRIR-2 multi-plan 门禁

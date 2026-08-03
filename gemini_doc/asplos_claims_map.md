@@ -6,15 +6,16 @@
 > 基础设施，不再主张 non-toy verifier acceleration。2026-08-03 独立 RVIR correctness
 > 路线已 validated-reduced，但不改变 ASPLOS performance No-Go。2026-08-04 production
 > Schedule-memory P0 同样为 `NO_GO`。随后 NRIR-1 已把固定 ResNet main CROWN backward
-> lower 为 native multi-region IR，但仍只有单 storage/batch、0 materialization 和 CPU
-> correctness，故 performance No-Go 不变。
+> lower 为 native multi-region IR；NRIR-2 进一步在同一 graph/template 上完成两个 storage
+> plan、预算切换与 runtime last-use release。它仍是 CPU correctness/ownership evidence，
+> 没有 CUDA allocator、materialization、batch 或性能结果，故 performance No-Go 不变。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
-| C1：显式物化语义的 Structured Bound-Operator IR | native ResNet plain-CROWN correctness validated-reduced；真实 memory alternatives pending | typed Bound IR + lowering + dense/structured interpreter + explicit cast/materialize rewrite + native ResNet per-task stepping | ResNet 17 Primal→21 Bound/Task/launch，external-call 0，lower max diff 7.15e-7；当前未触发 MaterializeAction | 五层 hash + portable oracle payload artifact；单 dense storage/full batch，不能升级 performance |
-| C2：Method/Autograd/Memory-Aware Materialization Planner | IR-4 closure；IR-5 final VALIDATED-NO-GO | typed Plan/Task/Schedule、adaptive/fair evaluator、prepared execution、exact-input chain→residual CUDA suite | v3 correctness/8 contexts feasible；Global p50/p90 1.00385×/1.26160×，gray 无 Pareto、无预算切换 | v3 artifact + manifest/replay 完整；p90/Pareto 门禁失败，C2 paper performance claim 不成立 |
+| C1：显式物化语义的 Structured Bound-Operator IR | native ResNet plain-CROWN correctness validated-reduced；真实 storage alternatives 已完成，representation/materialization pending | typed Bound IR + lowering + dense/structured interpreter + explicit cast/materialize rewrite + native ResNet per-task stepping/storage runtime | ResNet 17 Primal→21 Bound/Task/launch，external-call 0，lower max diff 7.15e-7；storage runtime 有 85 early releases，但当前 real graph 未触发 MaterializeAction | NRIR-1/2 artifact + portable oracle payload；structured Plan decision 尚未绑定执行，不能升级完整 C1/performance |
+| C2：Method/Autograd/Memory-Aware Materialization Planner | real-graph storage axis validated-reduced；IR-5 final 仍 VALIDATED-NO-GO | typed Plan/Task/Schedule、NRIR-2 retain/reuse selector/runtime、adaptive/fair evaluator、prepared execution | 同一 ResNet template 在 1,860,912/442,656 B 阈值切换 storage，减 1 byte fail closed；历史 Global p90 1.26160×/gray 无 Pareto仍保留 | NRIR-2 deterministic artifact 证明 budget/storage mechanism；无 CUDA peak/OOM/Pareto，C2 paper performance claim 不成立 |
 | C3：Verification Query Runtime Infrastructure | correctness/integration validated-reduced；performance downgraded | query/validity + batcher + reversible observer + typed external verifier Bound/Plan/Task/Schedule exact-call | ResNet external-semantics 3.10e-6、sign 9/9；在线 377/377 dispatch、380-domain observer equivalence | fused replacement 仍 0/394；typed admission 394/394；CPU artifact/replay 完整；不作 acceleration claim |
-| BoundFlow Schedule IR | real-network native ownership validated-reduced；production-memory claim 仍 NO-GO | typed ScheduleModule + native ResNet Plan/Task lowering；P0/NRIR ownership audits | NRIR-1 有 21 native launches、arena/batch/emit/free；仍 0 materialize、单 storage、0 budget decision switch | deterministic native artifact + semantic replay；尚无 multi-plan switch、OOM rescue 或 GPU evidence |
+| BoundFlow Schedule IR | real-network storage-plan ownership validated-reduced；production-performance claim 仍 NO-GO | typed ScheduleModule + native ResNet Plan/Task lowering + selected last-use runtime；P0/NRIR audits | 21 native launches；NRIR-2 双 storage、预算 switch、Schedule peak 1,860,912→442,656 B、386 alias pairs；仍 0 materialize | deterministic NRIR-1/2 artifact + semantic replay；尚无 representation bridge、OOM rescue 或 GPU evidence |
 | BoundFlow Task IR | IR-3 per-task semantic closure validated-reduced；production backend pending | TaskIRModule/Unit + typed op/shape/parameter/external/state/memory/backend refs + stateful Bound stepping | 12 个 tests（含 4 graph families、structured materialize、skip/reorder rejection） | per-task output hashes 与 final bound hashes 已入 fresh-process artifact v2 |
 | backend 执行 typed Planner/Task 结果而非定义核心抽象 | IR-4 validated-reduced；IR-5 final performance No-Go | composite typed registry + query adapter + real fused/unfused/fallback；prepared capsule 将静态 validate/hash/dispatch 移出 query hot path | residual v3 all backend correctness；ordinary batching p90 regret 1.008×，Global 1.262× | v3 可 replay；backend correctness 成立，但 adaptive production performance claim 失败 |
 | 相同浮点语义下保持 reference bound computation | local-semantics 历史 No-Go；external-semantics initial-CROWN validated-reduced | dense reference + explicit external intermediate-bound source/adaptive policy | allclose、gradient、auto_LiRPA、replay | ResNet historical local max diff 796.765；新 external-semantics max diff 3.10e-6、sign 9/9；CPU only |
@@ -487,3 +488,20 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   但不证明完整 native verifier：forward intermediate bounds 仍来自 external provider；
 - Plan 当前只有 1 storage、1 batch、0 materialization，`performance_claimed=false`。C2/ASPLOS
   performance No-Go 不变；下一门禁是 real-graph multi-plan + budget switch。
+
+### 2026-08-04 Native Real-Network Memory Plans v1
+
+- 同一固定 ResNet Bound hash `16e27f31...80fb` 与 PlanTemplate hash `359ee68f...43f3`
+  包含 retain-all/lifetime-reuse 两个 storage candidate；高/低预算选择不同 PlanInstance 与
+  Schedule，而不是只改变 query identity；
+- retain-all Schedule/runtime peak 为 `1,860,912` bytes；lifetime-reuse 为 `442,656` bytes，
+  有 386 对 lifetime-safe physical alias、85 个 final-task 前 runtime release；`442,655` bytes
+  以 `memory_budget_exceeded` fail closed；
+- 两计划 lower/upper bitwise 一致，对 external lower max diff
+  `7.152557373046875e-07`、sign 9/9；NRIR-1 原 artifact 五层 hash replay 不变；
+- 该证据把 C2/Schedule 的 real-graph storage decision mechanism 升为 validated-reduced，但
+  logical arena 与 reference release 不能写成 CUDA peak-memory reduction、OOM rescue、latency
+  或 speedup；artifact 明确 `performance_claimed=false`；
+- representation audit 发现 Plan metadata 尚不能驱动 runtime structured rewrite，
+  `MaterializeAction` 也尚无数值转换效果；因此 0 real-graph materialization 与单 full batch
+  仍是明确缺口。

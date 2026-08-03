@@ -3676,3 +3676,21 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_BOUND_IR_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Native Real-Network Memory Plans v1
+
+- 在同一固定 ResNet Bound IR/PlanTemplate 中加入 retain-all 与 lifetime-reuse 两个 storage
+  candidate；预算从 `1,860,912` bytes 降到 `442,656` bytes 时切换 PlanInstance 与 Schedule；
+- lifetime-reuse 使用 verified last-use 做 deterministic physical alias，真实图有 386 对合法
+  alias；Task runtime 按 selected lifetime 删除中间引用，85 个值在最终 Task 前释放；
+- 双计划 lower/upper bitwise equal，对 external lower max diff
+  `7.152557373046875e-07`、sign 9/9；`442,655` bytes 以
+  `memory_budget_exceeded` fail closed；
+- 新增 deterministic generate/replay artifact，并确认 NRIR-1 原 artifact 五层 hash 不变；
+- 状态为 CPU storage-plan correctness/ownership VALIDATED-REDUCED；不声称 CUDA allocator
+  peak、OOM rescue、latency、speedup、real materialization 或 sliced batching。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_MEMORY_PLANS_V1_CHANGELOG_2026_08_04.md`

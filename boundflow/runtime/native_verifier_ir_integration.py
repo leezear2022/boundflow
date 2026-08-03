@@ -47,10 +47,13 @@ from ..planner.plan_ir_builder import (
     build_reference_plan_template,
 )
 from ..planner.plan_ir_selector import select_plan_instance
+from ..planner.storage_plan_variants import build_native_storage_plan_variants
 from .task_executor import InputSpec
 from .task_ir_executor import TaskExecutionTrace, execute_task_ir_semantics
+from .storage_plan_runtime import StorageExecutionTrace, StoragePlanRuntime
 
 NATIVE_PLAIN_CROWN_COMPILER_VERSION = "boundflow.native-plain-crown-ir/v1"
+NATIVE_PLAIN_CROWN_MEMORY_COMPILER_VERSION = "boundflow.native-plain-crown-memory-ir/v1"
 
 
 @dataclass(frozen=True)
@@ -178,10 +181,71 @@ def compile_native_plain_crown_query(  # pylint: disable=too-many-arguments
 ) -> NativePlainCrownIRCompilation:
     """Compile one externally calibrated query into native first-class IR."""
 
+    return _compile_native_plain_crown_query(
+        legacy_task_module,
+        input_spec,
+        interval_env=interval_env,
+        relu_pre=relu_pre,
+        linear_spec_C=linear_spec_C,
+        intermediate_bounds_hash=intermediate_bounds_hash,
+        query_id=query_id,
+        available_memory_bytes=available_memory_bytes,
+        memory_budget_bytes=available_memory_bytes,
+        enable_memory_plans=False,
+    )
+
+
+def compile_native_plain_crown_memory_query(  # pylint: disable=too-many-arguments
+    legacy_task_module: BFTaskModule,
+    input_spec: InputSpec,
+    *,
+    interval_env: Mapping[str, IntervalState],
+    relu_pre: Mapping[str, IntervalState],
+    linear_spec_C: torch.Tensor,
+    intermediate_bounds_hash: str,
+    query_id: str,
+    available_memory_bytes: int,
+    memory_budget_bytes: int,
+) -> NativePlainCrownIRCompilation:
+    """Compile one query with budget-selectable, runtime-enforced storage plans."""
+
+    compilation = _compile_native_plain_crown_query(
+        legacy_task_module,
+        input_spec,
+        interval_env=interval_env,
+        relu_pre=relu_pre,
+        linear_spec_C=linear_spec_C,
+        intermediate_bounds_hash=intermediate_bounds_hash,
+        query_id=query_id,
+        available_memory_bytes=available_memory_bytes,
+        memory_budget_bytes=memory_budget_bytes,
+        enable_memory_plans=True,
+    )
+    if len(compilation.template.storage_candidates) != 2:
+        raise ValueError("native memory compilation requires two storage plans")
+    return compilation
+
+
+# pylint: disable-next=too-many-arguments,too-many-locals
+def _compile_native_plain_crown_query(
+    legacy_task_module: BFTaskModule,
+    input_spec: InputSpec,
+    *,
+    interval_env: Mapping[str, IntervalState],
+    relu_pre: Mapping[str, IntervalState],
+    linear_spec_C: torch.Tensor,
+    intermediate_bounds_hash: str,
+    query_id: str,
+    available_memory_bytes: int,
+    memory_budget_bytes: int,
+    enable_memory_plans: bool,
+) -> NativePlainCrownIRCompilation:
+    """Shared native compilation without changing the frozen v1 entry point."""
+
     if not query_id:
         raise ValueError("native plain-CROWN query ID must be non-empty")
-    if available_memory_bytes <= 0:
-        raise ValueError("native plain-CROWN memory budget must be positive")
+    if available_memory_bytes <= 0 or memory_budget_bytes <= 0:
+        raise ValueError("native plain-CROWN memory limits must be positive")
     build = build_plain_crown_bound_ir(
         legacy_task_module,
         input_spec,
@@ -198,12 +262,16 @@ def compile_native_plain_crown_query(  # pylint: disable=too-many-arguments
         intermediate_bounds_hash=intermediate_bounds_hash,
         available_memory_bytes=available_memory_bytes,
     )
+    if enable_memory_plans:
+        template = build_native_storage_plan_variants(
+            template, bound_module=build.module
+        )
     instance = select_plan_instance(
         template,
         bound_module=build.module,
         query_bucket_id=f"native-plain-crown:{query_id}",
         available_memory_bytes=available_memory_bytes,
-        memory_budget_bytes=available_memory_bytes,
+        memory_budget_bytes=memory_budget_bytes,
     )
     task_module = lower_plan_instance_to_task_ir(
         build.module, template=template, instance=instance
@@ -249,6 +317,40 @@ def execute_native_plain_crown_query(
         relu_pre=relu_pre,
         linear_spec_C=linear_spec_C,
     )
+
+
+def execute_native_plain_crown_memory_query(
+    compilation: NativePlainCrownIRCompilation,
+    *,
+    legacy_task_module: BFTaskModule,
+    input_spec: InputSpec,
+    relu_pre: Mapping[str, IntervalState],
+    linear_spec_C: torch.Tensor,
+) -> tuple[IntervalState, TaskExecutionTrace, StorageExecutionTrace]:
+    """Execute the selected storage lifetime policy and return its exact trace."""
+
+    compilation.validate()
+    if len(compilation.template.storage_candidates) != 2:
+        raise ValueError("native memory execution requires two storage candidates")
+    storage_runtime = StoragePlanRuntime(
+        bound_module=compilation.bound_module,
+        template=compilation.template,
+        instance=compilation.instance,
+        schedule=compilation.schedule,
+    )
+    result, task_trace = execute_task_ir_semantics(
+        compilation.task_module,
+        compilation.schedule,
+        bound_module=compilation.bound_module,
+        template=compilation.template,
+        instance=compilation.instance,
+        legacy_task_module=legacy_task_module,
+        input_spec=input_spec,
+        relu_pre=relu_pre,
+        linear_spec_C=linear_spec_C,
+        storage_runtime=storage_runtime,
+    )
+    return result, task_trace, storage_runtime.trace()
 
 
 # pylint: disable-next=too-many-locals
@@ -399,7 +501,10 @@ def _build_native_reference_template(
 
 __all__ = [
     "NATIVE_PLAIN_CROWN_COMPILER_VERSION",
+    "NATIVE_PLAIN_CROWN_MEMORY_COMPILER_VERSION",
     "NativePlainCrownIRCompilation",
+    "compile_native_plain_crown_memory_query",
     "compile_native_plain_crown_query",
+    "execute_native_plain_crown_memory_query",
     "execute_native_plain_crown_query",
 ]

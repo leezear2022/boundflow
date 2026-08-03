@@ -1,0 +1,727 @@
+{
+  "below_minimum_budget": {
+    "budget_bytes": 442655,
+    "failures": [
+      {
+        "count": 2,
+        "reason": "memory_budget_exceeded"
+      }
+    ]
+  },
+  "claim_boundary": "real-network budget selection, Schedule arena, and runtime last-use release correctness only; no latency, GPU, allocator, or OOM claim",
+  "compiler_version": "boundflow.native-plain-crown-memory-ir/v1",
+  "gates": {
+    "below_minimum_budget_fails_closed": true,
+    "both_plans_match_external_semantics": true,
+    "budget_switches_storage_decision": true,
+    "lifetime_reuse_has_physical_aliases": true,
+    "runtime_peak_residency_reduced": true,
+    "runtime_releases_before_final_task": true,
+    "same_bound_ir_and_plan_template": true,
+    "schedule_arena_changes": true
+  },
+  "graph": {
+    "bound_op_count": 21,
+    "primal_op_count": 17,
+    "task_count": 21
+  },
+  "lifetime_reuse": {
+    "early_release_count": 85,
+    "ir_hashes": {
+      "bound_module_hash": "16e27f318f43be8df7571e16c0dd84657462dcc964bb360a553dc142961080fb",
+      "plan_instance_hash": "faa959cf208e541dc258557b212e205ff51670d6fff0471698fa58c02d774f14",
+      "plan_template_hash": "359ee68fa76e50bf1832682ae841ab675ec53cfec926bb685f2c3887b8a843f3",
+      "schedule_hash": "be4fb1ac587cb1150d7888576f3fe9613f6c5a74c57ae688cd1b7e26a078337f",
+      "task_module_hash": "bf14009c31f113390a3dd1a0a98e24f7ff7ef1a024002c27a52732786984aee3"
+    },
+    "memory_budget_bytes": 442656,
+    "physical_alias_pair_count": 386,
+    "physical_alias_pairs_sample": [
+      [
+        "query.objective",
+        "0003.Gemm_16.b_u"
+      ],
+      [
+        "query.objective",
+        "0003.Gemm_16.b_l"
+      ],
+      [
+        "query.objective",
+        "0005.Relu_15.b_u"
+      ],
+      [
+        "query.objective",
+        "0005.Relu_15.b_l"
+      ],
+      [
+        "query.objective",
+        "0007.Gemm_14.b_u"
+      ],
+      [
+        "query.objective",
+        "0007.Gemm_14.b_l"
+      ],
+      [
+        "query.objective",
+        "0009.Flatten_13.b_u"
+      ],
+      [
+        "query.objective",
+        "0009.Flatten_13.b_l"
+      ],
+      [
+        "query.objective",
+        "0011.Relu_12.A_u"
+      ],
+      [
+        "query.objective",
+        "0011.Relu_12.b_u"
+      ],
+      [
+        "query.objective",
+        "0011.Relu_12.b_l"
+      ],
+      [
+        "query.objective",
+        "0013.Add_11_0.b_u"
+      ],
+      [
+        "query.objective",
+        "0013.Add_11_0.b_l"
+      ],
+      [
+        "query.objective",
+        "0016.Conv_10.A_u"
+      ],
+      [
+        "query.objective",
+        "0016.Conv_10.b_u"
+      ],
+      [
+        "query.objective",
+        "0016.Conv_10.b_l"
+      ]
+    ],
+    "physical_alias_pairs_sha256": "7b41f0d20c61dff19bbb0ef4c93a6f2891cd9704958e9c00130a7487307cd366",
+    "schedule_allocation_count": 1,
+    "schedule_peak_bytes": 442656,
+    "storage_candidate_id": "storage:native-lifetime-reuse-v1",
+    "storage_trace": {
+      "events": [
+        {
+          "completed_op_id": "0002.spec_bind",
+          "evicted_value_ids": [
+            "query.objective"
+          ],
+          "live_bytes_after_release": 832,
+          "live_bytes_before_release": 1200,
+          "sequence": 0,
+          "task_id": "task:logical-region:native-op:0000"
+        },
+        {
+          "completed_op_id": "0004.Gemm_16",
+          "evicted_value_ids": [
+            "0001.spec_seed.A_l",
+            "0001.spec_seed.A_u",
+            "0001.spec_seed.b_l",
+            "0001.spec_seed.b_u"
+          ],
+          "live_bytes_after_release": 7296,
+          "live_bytes_before_release": 8128,
+          "sequence": 1,
+          "task_id": "task:logical-region:native-op:0001"
+        },
+        {
+          "completed_op_id": "0006.Relu_15",
+          "evicted_value_ids": [
+            "0003.Gemm_16.A_l",
+            "0003.Gemm_16.A_u",
+            "0003.Gemm_16.b_l",
+            "0003.Gemm_16.b_u"
+          ],
+          "live_bytes_after_release": 7296,
+          "live_bytes_before_release": 14592,
+          "sequence": 2,
+          "task_id": "task:logical-region:native-op:0002"
+        },
+        {
+          "completed_op_id": "0008.Gemm_14",
+          "evicted_value_ids": [
+            "0005.Relu_15.A_l",
+            "0005.Relu_15.A_u",
+            "0005.Relu_15.b_l",
+            "0005.Relu_15.b_u"
+          ],
+          "live_bytes_after_release": 73824,
+          "live_bytes_before_release": 81120,
+          "sequence": 3,
+          "task_id": "task:logical-region:native-op:0003"
+        },
+        {
+          "completed_op_id": "0010.Flatten_13",
+          "evicted_value_ids": [
+            "0007.Gemm_14.A_l",
+            "0007.Gemm_14.A_u",
+            "0007.Gemm_14.b_l",
+            "0007.Gemm_14.b_u"
+          ],
+          "live_bytes_after_release": 73824,
+          "live_bytes_before_release": 147648,
+          "sequence": 4,
+          "task_id": "task:logical-region:native-op:0004"
+        },
+        {
+          "completed_op_id": "0012.Relu_12",
+          "evicted_value_ids": [
+            "0009.Flatten_13.A_l",
+            "0009.Flatten_13.A_u",
+            "0009.Flatten_13.b_l",
+            "0009.Flatten_13.b_u"
+          ],
+          "live_bytes_after_release": 73824,
+          "live_bytes_before_release": 147648,
+          "sequence": 5,
+          "task_id": "task:logical-region:native-op:0005"
+        },
+        {
+          "completed_op_id": "0015.Add_11",
+          "evicted_value_ids": [
+            "0011.Relu_12.A_l",
+            "0011.Relu_12.A_u",
+            "0011.Relu_12.b_l",
+            "0011.Relu_12.b_u"
+          ],
+          "live_bytes_after_release": 147648,
+          "live_bytes_before_release": 221472,
+          "sequence": 6,
+          "task_id": "task:logical-region:native-op:0006"
+        },
+        {
+          "completed_op_id": "0017.Conv_10",
+          "evicted_value_ids": [
+            "0013.Add_11_0.A_l",
+            "0013.Add_11_0.A_u",
+            "0013.Add_11_0.b_l",
+            "0013.Add_11_0.b_u"
+          ],
+          "live_bytes_after_release": 147648,
+          "live_bytes_before_release": 221472,
+          "sequence": 7,
+          "task_id": "task:logical-region:native-op:0007"
+        },
+        {
+          "completed_op_id": "0019.Relu_9",
+          "evicted_value_ids": [
+            "0016.Conv_10.A_l",
+            "0016.Conv_10.A_u",
+            "0016.Conv_10.b_l",
+            "0016.Conv_10.b_u"
+          ],
+          "live_bytes_after_release": 147648,
+          "live_bytes_before_release": 221472,
+          "sequence": 8,
+          "task_id": "task:logical-region:native-op:0008"
+        },
+        {
+          "completed_op_id": "0021.Conv_8",
+          "evicted_value_ids": [
+            "0018.Relu_9.A_l",
+            "0018.Relu_9.A_u",
+            "0018.Relu_9.b_l",
+            "0018.Relu_9.b_u"
+          ],
+          "live_bytes_after_release": 147648,
+          "live_bytes_before_release": 221472,
+          "sequence": 9,
+          "task_id": "task:logical-region:native-op:0009"
+        },
+        {
+          "completed_op_id": "0023.compose_24",
+          "evicted_value_ids": [
+            "0014.Add_11_1.A_l",
+            "0014.Add_11_1.A_u",
+            "0014.Add_11_1.b_l",
+            "0014.Add_11_1.b_u",
+            "0020.Conv_8.A_l",
+            "0020.Conv_8.A_u",
+            "0020.Conv_8.b_l",
+            "0020.Conv_8.b_u"
+          ],
+          "live_bytes_after_release": 73824,
+          "live_bytes_before_release": 221472,
+          "sequence": 10,
+          "task_id": "task:logical-region:native-op:0010"
+        },
+        {
+          "completed_op_id": "0025.Relu_7",
+          "evicted_value_ids": [
+            "0022.compose_24.A_l",
+            "0022.compose_24.A_u",
+            "0022.compose_24.b_l",
+            "0022.compose_24.b_u"
+          ],
+          "live_bytes_after_release": 73824,
+          "live_bytes_before_release": 147648,
+          "sequence": 11,
+          "task_id": "task:logical-region:native-op:0011"
+        },
+        {
+          "completed_op_id": "0028.Add_6",
+          "evicted_value_ids": [
+            "0024.Relu_7.A_l",
+            "0024.Relu_7.A_u",
+            "0024.Relu_7.b_l",
+            "0024.Relu_7.b_u"
+          ],
+          "live_bytes_after_release": 147648,
+          "live_bytes_before_release": 221472,
+          "sequence": 12,
+          "task_id": "task:logical-region:native-op:0012"
+        },
+        {
+          "completed_op_id": "0030.Conv_5",
+          "evicted_value_ids": [
+            "0027.Add_6_1.A_l",
+            "0027.Add_6_1.A_u",
+            "0027.Add_6_1.b_l",
+            "0027.Add_6_1.b_u"
+          ],
+          "live_bytes_after_release": 221376,
+          "live_bytes_before_release": 295200,
+          "sequence": 13,
+          "task_id": "task:logical-region:native-op:0013"
+        },
+        {
+          "completed_op_id": "0032.Conv_4",
+          "evicted_value_ids": [
+            "0026.Add_6_0.A_l",
+            "0026.Add_6_0.A_u",
+            "0026.Add_6_0.b_l",
+            "0026.Add_6_0.b_u"
+          ],
+          "live_bytes_after_release": 221376,
+          "live_bytes_before_release": 295200,
+          "sequence": 14,
+          "task_id": "task:logical-region:native-op:0014"
+        },
+        {
+          "completed_op_id": "0034.Relu_3",
+          "evicted_value_ids": [
+            "0031.Conv_4.A_l",
+            "0031.Conv_4.A_u",
+            "0031.Conv_4.b_l",
+            "0031.Conv_4.b_u"
+          ],
+          "live_bytes_after_release": 221376,
+          "live_bytes_before_release": 295200,
+          "sequence": 15,
+          "task_id": "task:logical-region:native-op:0015"
+        },
+        {
+          "completed_op_id": "0036.Conv_2",
+          "evicted_value_ids": [
+            "0033.Relu_3.A_l",
+            "0033.Relu_3.A_u",
+            "0033.Relu_3.b_l",
+            "0033.Relu_3.b_u"
+          ],
+          "live_bytes_after_release": 295104,
+          "live_bytes_before_release": 368928,
+          "sequence": 16,
+          "task_id": "task:logical-region:native-op:0016"
+        },
+        {
+          "completed_op_id": "0038.compose_18",
+          "evicted_value_ids": [
+            "0029.Conv_5.A_l",
+            "0029.Conv_5.A_u",
+            "0029.Conv_5.b_l",
+            "0029.Conv_5.b_u",
+            "0035.Conv_2.A_l",
+            "0035.Conv_2.A_u",
+            "0035.Conv_2.b_l",
+            "0035.Conv_2.b_u"
+          ],
+          "live_bytes_after_release": 147552,
+          "live_bytes_before_release": 442656,
+          "sequence": 17,
+          "task_id": "task:logical-region:native-op:0017"
+        },
+        {
+          "completed_op_id": "0040.Relu_1",
+          "evicted_value_ids": [
+            "0037.compose_18.A_l",
+            "0037.compose_18.A_u",
+            "0037.compose_18.b_l",
+            "0037.compose_18.b_u"
+          ],
+          "live_bytes_after_release": 147552,
+          "live_bytes_before_release": 295104,
+          "sequence": 18,
+          "task_id": "task:logical-region:native-op:0018"
+        },
+        {
+          "completed_op_id": "0042.Conv_0",
+          "evicted_value_ids": [
+            "0039.Relu_1.A_l",
+            "0039.Relu_1.A_u",
+            "0039.Relu_1.b_l",
+            "0039.Relu_1.b_u"
+          ],
+          "live_bytes_after_release": 221280,
+          "live_bytes_before_release": 368832,
+          "sequence": 19,
+          "task_id": "task:logical-region:native-op:0019"
+        },
+        {
+          "completed_op_id": "0045.concretize",
+          "evicted_value_ids": [
+            "0041.Conv_0.A_l",
+            "0041.Conv_0.A_u",
+            "0041.Conv_0.b_l",
+            "0041.Conv_0.b_u"
+          ],
+          "live_bytes_after_release": 96,
+          "live_bytes_before_release": 221376,
+          "sequence": 20,
+          "task_id": "task:logical-region:native-op:0020"
+        }
+      ],
+      "observed_peak_live_bytes": 442656,
+      "plan_instance_hash": "faa959cf208e541dc258557b212e205ff51670d6fff0471698fa58c02d774f14",
+      "plan_template_hash": "359ee68fa76e50bf1832682ae841ab675ec53cfec926bb685f2c3887b8a843f3",
+      "planned_peak_bytes": 442656,
+      "released_value_count": 89,
+      "schema_version": "boundflow.storage-execution-trace/v1",
+      "storage_candidate_id": "storage:native-lifetime-reuse-v1"
+    },
+    "task_trace_hash": "3f41eceae45879772fbc506899c2e59ea8ac5e8cd6069c7da059d1f371a5a7d7"
+  },
+  "limitations": [
+    "CPU correctness and compiler/runtime ownership evidence only",
+    "storage arena offsets are enforced as a logical non-aliasing contract",
+    "last-use release deletes runtime tensor/operator references but does not expose a custom torch allocator",
+    "the 0.001 ms reuse policy cost is deterministic ordering metadata, not benchmark evidence",
+    "no latency, speedup, CUDA peak-memory, backend OOM rescue, or performance claim",
+    "representation and batch alternatives remain outside NRIR-2 v1"
+  ],
+  "performance_claimed": false,
+  "retain_all": {
+    "ir_hashes": {
+      "bound_module_hash": "16e27f318f43be8df7571e16c0dd84657462dcc964bb360a553dc142961080fb",
+      "plan_instance_hash": "f7b5c18d32664a4ebf6faf2edfe79a1d4ce2dd86016be067055e3b2cf679a3af",
+      "plan_template_hash": "359ee68fa76e50bf1832682ae841ab675ec53cfec926bb685f2c3887b8a843f3",
+      "schedule_hash": "1f941503b362bcdfc4d55984319a61520cd8fc57cc50eb15c164478ff27b6ce5",
+      "task_module_hash": "f5cf51ad45e69c2340e60df65df646196c75d1411dc95124545f8dfa9dd4ac1e"
+    },
+    "memory_budget_bytes": 1073741824,
+    "schedule_allocation_count": 1,
+    "schedule_peak_bytes": 1860912,
+    "storage_candidate_id": "storage:native-retain-all-v1",
+    "storage_trace": {
+      "events": [
+        {
+          "completed_op_id": "0002.spec_bind",
+          "evicted_value_ids": [],
+          "live_bytes_after_release": 1200,
+          "live_bytes_before_release": 1200,
+          "sequence": 0,
+          "task_id": "task:logical-region:native-op:0000"
+        },
+        {
+          "completed_op_id": "0004.Gemm_16",
+          "evicted_value_ids": [],
+          "live_bytes_after_release": 8496,
+          "live_bytes_before_release": 8496,
+          "sequence": 1,
+          "task_id": "task:logical-region:native-op:0001"
+        },
+        {
+          "completed_op_id": "0006.Relu_15",
+          "evicted_value_ids": [],
+          "live_bytes_after_release": 15792,
+          "live_bytes_before_release": 15792,
+          "sequence": 2,
+          "task_id": "task:logical-region:native-op:0002"
+        },
+        {
+          "completed_op_id": "0008.Gemm_14",
+          "evicted_value_ids": [],
+          "live_bytes_after_release": 89616,
+          "live_bytes_before_release": 89616,
+          "sequence": 3,
+          "task_id": "task:logical-region:native-op:0003"
+        },
+        {
+          "completed_op_id": "0010.Flatten_13",
+          "evicted_value_ids": [],
+          "live_bytes_after_release": 163440,
+          "live_bytes_before_release": 163440,
+          "sequence": 4,
+          "task_id": "task:logical-region:native-op:0004"
+        },
+        {
+          "completed_op_id": "0012.Relu_12",
+          "evicted_value_ids": [],
+          "live_bytes_after_release": 237264,
+          "live_bytes_before_release": 237264,
+          "sequence": 5,
+          "task_id": "task:logical-region:native-op:0005"
+        },
+        {
+          "completed_op_id": "0015.Add_11",
+          "evicted_value_ids": [],
+          "live_bytes_after_release": 384912,
+          "live_bytes_before_release": 384912,
+          "sequence": 6,
+          "task_id": "task:logical-region:native-op:0006"
+        },
+        {
+          "completed_op_id": "0017.Conv_10",
+          "evicted_value_ids": [],
+          "live_bytes_after_release": 458736,
+          "live_bytes_before_release": 458736,
+          "sequence": 7,
+          "task_id": "task:logical-region:native-op:0007"
+        },
+        {
+          "completed_op_id": "0019.Relu_9",
+          "evicted_value_ids": [],
+          "live_bytes_after_release": 532560,
+          "live_bytes_before_release": 532560,
+          "sequence": 8,
+          "task_id": "task:logical-region:native-op:0008"
+        },
+        {
+          "completed_op_id": "0021.Conv_8",
+          "evicted_value_ids": [],
+          "live_bytes_after_release": 606384,
+          "live_bytes_before_release": 606384,
+          "sequence": 9,
+          "task_id": "task:logical-region:native-op:0009"
+        },
+        {
+          "completed_op_id": "0023.compose_24",
+          "evicted_value_ids": [],
+          "live_bytes_after_release": 680208,
+          "live_bytes_before_release": 680208,
+          "sequence": 10,
+          "task_id": "task:logical-region:native-op:0010"
+        },
+        {
+          "completed_op_id": "0025.Relu_7",
+          "evicted_value_ids": [],
+          "live_bytes_after_release": 754032,
+          "live_bytes_before_release": 754032,
+          "sequence": 11,
+          "task_id": "task:logical-region:native-op:0011"
+        },
+        {
+          "completed_op_id": "0028.Add_6",
+          "evicted_value_ids": [],
+          "live_bytes_after_release": 901680,
+          "live_bytes_before_release": 901680,
+          "sequence": 12,
+          "task_id": "task:logical-region:native-op:0012"
+        },
+        {
+          "completed_op_id": "0030.Conv_5",
+          "evicted_value_ids": [],
+          "live_bytes_after_release": 1049232,
+          "live_bytes_before_release": 1049232,
+          "sequence": 13,
+          "task_id": "task:logical-region:native-op:0013"
+        },
+        {
+          "completed_op_id": "0032.Conv_4",
+          "evicted_value_ids": [],
+          "live_bytes_after_release": 1123056,
+          "live_bytes_before_release": 1123056,
+          "sequence": 14,
+          "task_id": "task:logical-region:native-op:0014"
+        },
+        {
+          "completed_op_id": "0034.Relu_3",
+          "evicted_value_ids": [],
+          "live_bytes_after_release": 1196880,
+          "live_bytes_before_release": 1196880,
+          "sequence": 15,
+          "task_id": "task:logical-region:native-op:0015"
+        },
+        {
+          "completed_op_id": "0036.Conv_2",
+          "evicted_value_ids": [],
+          "live_bytes_after_release": 1344432,
+          "live_bytes_before_release": 1344432,
+          "sequence": 16,
+          "task_id": "task:logical-region:native-op:0016"
+        },
+        {
+          "completed_op_id": "0038.compose_18",
+          "evicted_value_ids": [],
+          "live_bytes_after_release": 1491984,
+          "live_bytes_before_release": 1491984,
+          "sequence": 17,
+          "task_id": "task:logical-region:native-op:0017"
+        },
+        {
+          "completed_op_id": "0040.Relu_1",
+          "evicted_value_ids": [],
+          "live_bytes_after_release": 1639536,
+          "live_bytes_before_release": 1639536,
+          "sequence": 18,
+          "task_id": "task:logical-region:native-op:0018"
+        },
+        {
+          "completed_op_id": "0042.Conv_0",
+          "evicted_value_ids": [],
+          "live_bytes_after_release": 1860816,
+          "live_bytes_before_release": 1860816,
+          "sequence": 19,
+          "task_id": "task:logical-region:native-op:0019"
+        },
+        {
+          "completed_op_id": "0045.concretize",
+          "evicted_value_ids": [
+            "0001.spec_seed.A_l",
+            "0001.spec_seed.A_u",
+            "0001.spec_seed.b_l",
+            "0001.spec_seed.b_u",
+            "0003.Gemm_16.A_l",
+            "0003.Gemm_16.A_u",
+            "0003.Gemm_16.b_l",
+            "0003.Gemm_16.b_u",
+            "0005.Relu_15.A_l",
+            "0005.Relu_15.A_u",
+            "0005.Relu_15.b_l",
+            "0005.Relu_15.b_u",
+            "0007.Gemm_14.A_l",
+            "0007.Gemm_14.A_u",
+            "0007.Gemm_14.b_l",
+            "0007.Gemm_14.b_u",
+            "0009.Flatten_13.A_l",
+            "0009.Flatten_13.A_u",
+            "0009.Flatten_13.b_l",
+            "0009.Flatten_13.b_u",
+            "0011.Relu_12.A_l",
+            "0011.Relu_12.A_u",
+            "0011.Relu_12.b_l",
+            "0011.Relu_12.b_u",
+            "0013.Add_11_0.A_l",
+            "0013.Add_11_0.A_u",
+            "0013.Add_11_0.b_l",
+            "0013.Add_11_0.b_u",
+            "0014.Add_11_1.A_l",
+            "0014.Add_11_1.A_u",
+            "0014.Add_11_1.b_l",
+            "0014.Add_11_1.b_u",
+            "0016.Conv_10.A_l",
+            "0016.Conv_10.A_u",
+            "0016.Conv_10.b_l",
+            "0016.Conv_10.b_u",
+            "0018.Relu_9.A_l",
+            "0018.Relu_9.A_u",
+            "0018.Relu_9.b_l",
+            "0018.Relu_9.b_u",
+            "0020.Conv_8.A_l",
+            "0020.Conv_8.A_u",
+            "0020.Conv_8.b_l",
+            "0020.Conv_8.b_u",
+            "0022.compose_24.A_l",
+            "0022.compose_24.A_u",
+            "0022.compose_24.b_l",
+            "0022.compose_24.b_u",
+            "0024.Relu_7.A_l",
+            "0024.Relu_7.A_u",
+            "0024.Relu_7.b_l",
+            "0024.Relu_7.b_u",
+            "0026.Add_6_0.A_l",
+            "0026.Add_6_0.A_u",
+            "0026.Add_6_0.b_l",
+            "0026.Add_6_0.b_u",
+            "0027.Add_6_1.A_l",
+            "0027.Add_6_1.A_u",
+            "0027.Add_6_1.b_l",
+            "0027.Add_6_1.b_u",
+            "0029.Conv_5.A_l",
+            "0029.Conv_5.A_u",
+            "0029.Conv_5.b_l",
+            "0029.Conv_5.b_u",
+            "0031.Conv_4.A_l",
+            "0031.Conv_4.A_u",
+            "0031.Conv_4.b_l",
+            "0031.Conv_4.b_u",
+            "0033.Relu_3.A_l",
+            "0033.Relu_3.A_u",
+            "0033.Relu_3.b_l",
+            "0033.Relu_3.b_u",
+            "0035.Conv_2.A_l",
+            "0035.Conv_2.A_u",
+            "0035.Conv_2.b_l",
+            "0035.Conv_2.b_u",
+            "0037.compose_18.A_l",
+            "0037.compose_18.A_u",
+            "0037.compose_18.b_l",
+            "0037.compose_18.b_u",
+            "0039.Relu_1.A_l",
+            "0039.Relu_1.A_u",
+            "0039.Relu_1.b_l",
+            "0039.Relu_1.b_u",
+            "0041.Conv_0.A_l",
+            "0041.Conv_0.A_u",
+            "0041.Conv_0.b_l",
+            "0041.Conv_0.b_u",
+            "query.objective"
+          ],
+          "live_bytes_after_release": 96,
+          "live_bytes_before_release": 1860912,
+          "sequence": 20,
+          "task_id": "task:logical-region:native-op:0020"
+        }
+      ],
+      "observed_peak_live_bytes": 1860912,
+      "plan_instance_hash": "f7b5c18d32664a4ebf6faf2edfe79a1d4ce2dd86016be067055e3b2cf679a3af",
+      "plan_template_hash": "359ee68fa76e50bf1832682ae841ab675ec53cfec926bb685f2c3887b8a843f3",
+      "planned_peak_bytes": 1860912,
+      "released_value_count": 89,
+      "schema_version": "boundflow.storage-execution-trace/v1",
+      "storage_candidate_id": "storage:native-retain-all-v1"
+    },
+    "task_trace_hash": "9b9718e0eccd78485de3a38d02c228eb758ff2c829bfaa01993f5e7e28f80ac3"
+  },
+  "schema_version": "boundflow.native-real-network-memory-evidence/v1",
+  "semantics": {
+    "lower_sha256": "2dce3f71b72c56fc1efb0e291db370daac0531d7b55d84daa1754ab45cc3356d",
+    "plans_bitwise_equal": true,
+    "retain_vs_external": {
+      "allclose": true,
+      "max_abs_diff": 7.152557373046875e-07,
+      "sign_agreement": 9,
+      "sign_total": 9
+    },
+    "reuse_vs_external": {
+      "allclose": true,
+      "max_abs_diff": 7.152557373046875e-07,
+      "sign_agreement": 9,
+      "sign_total": 9
+    },
+    "upper_sha256": "39fd527c73d4d4190e8520a53b7324361eeefd77b11307a5a43546adbdb23de5"
+  },
+  "source": {
+    "intermediate_bounds_sha256": "d51615b04dfb205afd67d2c21680ece4ca92f693157da1e32c7f8202a8e08cf1",
+    "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+    "native_ir_artifact_schema": "boundflow.native-real-network-ir-artifact/v1",
+    "native_ir_manifest_sha256": "5d38aa4adcd7b8593b0ca3751106d3a254b72a2698bd445a8dde59d50eb5a676",
+    "native_ir_payload_sha256": "3ba949de66380c7d16dc44bb934eca8400182521e761c19eaa671cd8cf0eb557",
+    "vnnlib_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff"
+  },
+  "status": "ok",
+  "template": {
+    "plan_template_hash": "359ee68fa76e50bf1832682ae841ab675ec53cfec926bb685f2c3887b8a843f3",
+    "storage_candidate_count": 2,
+    "storage_candidate_ids": [
+      "storage:native-lifetime-reuse-v1",
+      "storage:native-retain-all-v1"
+    ]
+  }
+}
