@@ -1,15 +1,16 @@
 {
   "task": "rvir-post-hardening-20260803",
   "title": "Audit RVIR post-hardening closure",
-  "status": "in_progress",
-  "round": 0,
+  "status": "ready_for_audit",
+  "round": 1,
   "executor": "codex",
   "auditor": "external-model",
   "approved_round": null,
   "docs": [
-    "rvir-post-hardening-20260803/request"
+    "rvir-post-hardening-20260803/request",
+    "rvir-post-hardening-20260803/r001/delivery"
   ],
-  "rev": 2,
+  "rev": 3,
   "created": "2026-08-03T13:53:44Z",
-  "updated": "2026-08-03T13:53:45Z"
+  "updated": "2026-08-03T13:54:43Z"
 }

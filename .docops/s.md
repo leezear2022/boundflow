@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [9]
-last_ch: ev000385
-last_va: ev000386
+last_ch: ev000394
+last_va: ev000395
 blk:
-next: deliver-rvir-post-hardening-audit
-updated: 2026-08-03T13:54:07Z
+next: external-audit-rvir-post-hardening
+updated: 2026-08-03T13:55:05Z
