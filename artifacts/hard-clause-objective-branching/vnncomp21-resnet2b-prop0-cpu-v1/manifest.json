@@ -1,0 +1,9 @@
+{
+  "evidence_hash": "1193bee8817e4acc9ec33f8ddadc00a671d0ac3c9411f14f62978eb5ab1a95bd",
+  "files": {
+    "objective_branching.json": "73772de76fe23afe4921e7464736272378bd4db47c4a70044008714266e5d5e1"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.hard-clause-objective-branching-artifact/v1",
+  "status": "ok"
+}

@@ -2,7 +2,7 @@
 
 > 状态：**顶层执行计划 v1.0；后续研究工作受本文门禁约束。**  
 > 基线日期：2026-07-12  
-> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`597332d`
+> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`d12f373`
 > 投稿策略：ASPLOS 2027 September Cycle 为有条件冲刺；ASPLOS 2028 为稳健主目标。
 
 > **路线修订（2026-07-20）**：本文保留 2026-07-12 的研究问题、历史门禁和 PR-10—13
@@ -108,6 +108,12 @@
 > candidate/status exact，仍为 6/9。该结果只证明单 workload CPU internal evidence-overhead
 > removal，不是 competitor speedup；下一门禁为 clauses 0/2/4 branching/stronger-bound，顶层
 > ASPLOS-ready=NO 不变。
+
+> **2026-08-04 NRIR-17 修订**：objective-aware branching 已 lower 为 first-class
+> Plan/Task/Schedule。same-budget clauses `0/2/4` worst leaf 相对 widest 分别改善
+> `0.120752/0.071564/0.057901`，但所有 terminal leaves 仍为负，整体只 6/9。该结果为
+> fixed-budget tightness `VALIDATED-REDUCED`，不是完整验证或 performance claim。下一门禁为
+> 多 workload/设备/竞品 E2E 与 stronger-bound；顶层 ASPLOS-ready=NO 不变。
 
 > **2026-08-04 NRIR-11 修订**：fixed-step optimizer control 已进入 typed Plan/Task/Schedule。
 > 固定 ResNet 1-step program 为 8 actions，Schedule/legacy/final native execution max diff 均为 0，

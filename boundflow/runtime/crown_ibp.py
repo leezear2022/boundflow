@@ -4,7 +4,7 @@ import os
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass
-from typing import Any, Dict, Iterator, List, Literal, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterator, List, Literal, Mapping, Optional, Sequence, Tuple
 
 import torch
 
@@ -73,6 +73,7 @@ def _forward_ibp_trace_mlp(
     input_spec: InputSpec,
     *,
     relu_split_state: Optional[Dict[str, torch.Tensor]] = None,
+    relu_pre_constraints: Optional[Mapping[str, IntervalState]] = None,
 ) -> Tuple[Dict[str, IntervalState], Dict[str, IntervalState]]:
     task = module.get_entry_task()
     raw_params = module.bindings.get("params", {})
@@ -146,6 +147,30 @@ def _forward_ibp_trace_mlp(
         if op.op_type == "relu":
             x_name = op.inputs[0]
             x = _ensure_interval(_get_state(x_name))
+            if relu_pre_constraints is not None:
+                constraint = relu_pre_constraints.get(x_name)
+                if (
+                    not isinstance(constraint, IntervalState)
+                    or constraint.lower.shape != x.lower.shape
+                    or constraint.upper.shape != x.upper.shape
+                    or constraint.lower.dtype != x.lower.dtype
+                    or constraint.upper.dtype != x.upper.dtype
+                    or constraint.lower.device != x.lower.device
+                    or constraint.upper.device != x.upper.device
+                    or not bool(torch.isfinite(constraint.lower).all())
+                    or not bool(torch.isfinite(constraint.upper).all())
+                    or not bool((constraint.lower <= constraint.upper).all())
+                ):
+                    raise ValueError(
+                        f"ReLU pre-activation constraint schema differs for {x_name}"
+                    )
+                lower = torch.maximum(x.lower, constraint.lower)
+                upper = torch.minimum(x.upper, constraint.upper)
+                if bool((lower > upper).any().item()):
+                    raise ValueError(
+                        f"infeasible ReLU pre-activation intersection for {x_name}"
+                    )
+                x = IntervalState(lower=lower, upper=upper)
             if relu_split_state is not None and x_name in relu_split_state:
                 x = _apply_relu_split(x, relu_split_state[x_name], relu_input_name=x_name)
             relu_pre[x_name] = x
@@ -230,6 +255,10 @@ def _forward_ibp_trace_mlp(
 
         raise NotImplementedError(f"_forward_ibp_trace_mlp unsupported op_type: {op.op_type}")
 
+    if relu_pre_constraints is not None and tuple(relu_pre_constraints) != tuple(
+        relu_pre
+    ):
+        raise ValueError("ReLU pre-activation constraint identities differ")
     return interval_env, relu_pre
 
 

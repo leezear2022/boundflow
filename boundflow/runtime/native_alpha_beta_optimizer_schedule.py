@@ -576,16 +576,26 @@ def _optimizer_intermediate_semantics(
     relu_split_state: Mapping[str, torch.Tensor],
     relu_pre_override: Optional[Mapping[str, IntervalState]],
     intermediate_bound_source: IntermediateBoundSource,
+    refine_external_constraints: bool = False,
 ) -> tuple[Mapping[str, IntervalState], Mapping[str, IntervalState]]:
-    interval_env, local_relu_pre = _forward_ibp_trace_mlp(
-        module, input_spec, relu_split_state=dict(relu_split_state)
-    )
     if relu_pre_override is None:
         if intermediate_bound_source != IntermediateBoundSource.LOCAL_FORWARD:
             raise ValueError("external optimizer semantics require ReLU bounds")
-        return interval_env, local_relu_pre
+        return _forward_ibp_trace_mlp(
+            module, input_spec, relu_split_state=dict(relu_split_state)
+        )
     if intermediate_bound_source != IntermediateBoundSource.EXTERNAL_VERIFIER:
         raise ValueError("optimizer ReLU override requires external provenance")
+    if refine_external_constraints:
+        return _forward_ibp_trace_mlp(
+            module,
+            input_spec,
+            relu_split_state=dict(relu_split_state),
+            relu_pre_constraints=relu_pre_override,
+        )
+    interval_env, local_relu_pre = _forward_ibp_trace_mlp(
+        module, input_spec, relu_split_state=dict(relu_split_state)
+    )
     if tuple(relu_pre_override) != tuple(local_relu_pre):
         raise ValueError("optimizer external/local ReLU identities differ")
     external: dict[str, IntervalState] = {}
@@ -653,6 +663,7 @@ def compile_native_alpha_beta_optimizer_program(
     intermediate_bound_source: IntermediateBoundSource = (
         IntermediateBoundSource.LOCAL_FORWARD
     ),
+    refine_external_constraints: bool = False,
 ) -> NativeOptimizerProgram:
     """Compile fixed-step optimizer control around one NRIR-10 source stack."""
 
@@ -661,12 +672,19 @@ def compile_native_alpha_beta_optimizer_program(
     policy.validate()
     if not isinstance(intermediate_bound_source, IntermediateBoundSource):
         raise TypeError("native optimizer intermediate-bound source is invalid")
+    if not isinstance(refine_external_constraints, bool):
+        raise TypeError("native optimizer external refinement flag is invalid")
+    if refine_external_constraints and intermediate_bound_source != (
+        IntermediateBoundSource.EXTERNAL_VERIFIER
+    ):
+        raise ValueError("external constraint refinement requires external provenance")
     interval_env, relu_pre = _optimizer_intermediate_semantics(
         module,
         input_spec,
         relu_split_state=relu_split_state,
         relu_pre_override=relu_pre_override,
         intermediate_bound_source=intermediate_bound_source,
+        refine_external_constraints=refine_external_constraints,
     )
     scope = build_native_alpha_beta_scope(
         module,

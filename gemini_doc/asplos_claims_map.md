@@ -767,3 +767,17 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - 工件：`artifacts/prepared-production-fast-path/vnncomp21-resnet2b-prop0-cpu-v1/`；fresh replay
   hash=`e14fcd62b322c0bc60d45c726cf94a7aa6cfb8d7aa3212662d08996db169b6b2`；全量
   `698 passed, 37 skipped`；下一门禁为 hard-clause branching/stronger-bound。
+
+### 2026-08-04 Hard-Clause Objective Branching v1
+
+- `C2/C3-M-NRIR17` branch IR：candidate enumeration、inactive/active child materialization、
+  child-bound evaluation、worst-child reduction、selection 均进入 Plan/Task/Schedule 与 runtime；
+- `C3-G-NRIR17` exact gate：objective/split/selected state/scope/policy/candidate/score/schedule
+  identity 与 argmax selection 均 fail closed；旧 widest 与 NRIR-16 replay 不漂移；
+- `C1/C3-E-NRIR17` tightness：同 7-node/depth-2/25-step 预算下，clauses `0/2/4` 的 objective
+  worst leaf 相对 widest 改善 `0.120752/0.071564/0.057901`；
+- `C3-L-NRIR17` hard limitation：三组 objective terminal leaves 全部仍为负，property status
+  `unknown`，整体仍只 6/9；单 fixed ResNet CPU、single-run audit timing，无 competitor/GPU claim；
+- 工件：`artifacts/hard-clause-objective-branching/vnncomp21-resnet2b-prop0-cpu-v1/`；fresh
+  replay hash=`1193bee8817e4acc9ec33f8ddadc00a671d0ac3c9411f14f62978eb5ab1a95bd`；全量
+  `707 passed, 37 skipped`。下一门禁为 multi-workload/device/competitor E2E 与 stronger-bound。

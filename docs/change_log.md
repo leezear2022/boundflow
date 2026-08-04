@@ -3984,3 +3984,24 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_PREPARED_PRODUCTION_FAST_PATH_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Hard-Clause Objective Branching v1 启动
+
+- clause 0 widest 7-node/depth-2 probe 的最差叶 lower 约 `-0.5168`，相对 root
+  `-0.5357` 改善有限；
+- 48-candidate batched fixed-state probe 约 `14.7 ms`，objective-aware 选择 `31:17`，估计
+  worst-child=`-0.4309`；实际 optimizer children=`-0.4210/-0.4239`；
+- 冻结下一路线为 typed objective branching policy + first-class score Plan/Task/Schedule；校准
+  probe 不作为论文 speedup/完整证明结论。
+- 已实现并接入完整 branch score IR；同预算 clauses `0/2/4` objective-vs-widest worst-leaf
+  改善=`0.120752/0.071564/0.057901`，但三者仍为 unknown；
+- frozen artifact fresh replay hash=
+  `1193bee8817e4acc9ec33f8ddadc00a671d0ac3c9411f14f62978eb5ab1a95bd`；focused
+  `15 passed`、全量 `707 passed, 37 skipped`，静态门禁全过；
+- 关闭等级为 branch IR/control + bounded-tree tightness `VALIDATED-REDUCED`，不声明完整
+  verifier、GPU、竞品或单次 audit timing 性能。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_HARD_CLAUSE_OBJECTIVE_BRANCHING_V1_CHANGELOG_2026_08_04.md`
