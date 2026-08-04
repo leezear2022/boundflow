@@ -23,6 +23,7 @@ from ..frontends.plain_crown_bound_ir import (
     tensor_content_hash,
 )
 from ..ir.refinement import (
+    ExternalIntermediateConstraintSeedIR,
     IntermediateRefinementTaskKind,
     NativeIntermediateRefinementPlanIR,
     NativeIntermediateRefinementPolicyIR,
@@ -115,6 +116,100 @@ def _clone_bounds(values: Mapping[str, IntervalState]) -> dict[str, IntervalStat
         )
         for name, value in values.items()
     }
+
+
+@dataclass(frozen=True)
+class NativeExternalIntermediateConstraintSeed:
+    """Typed external provenance plus constraints bound to the local graph."""
+
+    ir: ExternalIntermediateConstraintSeedIR
+    constraints: Mapping[str, IntervalState]
+
+    def validate_payload(self) -> None:
+        self.ir.validate()
+        if self.ir.bound_intermediate_constraints_hash != intermediate_bounds_hash(
+            self.constraints
+        ):
+            raise ValueError("external intermediate constraint seed content differs")
+
+    def validate(self, module: BFTaskModule, input_spec: InputSpec) -> None:
+        self.validate_payload()
+        if self.ir.primal_graph_hash != plain_crown_primal_graph_hash(
+            module
+        ) or self.ir.input_bounds_hash != _input_bounds_hash(input_spec):
+            raise ValueError("external intermediate constraint seed scope differs")
+        _local_env, local_pre = _forward_ibp_trace_mlp(module, input_spec)
+        _validate_monotonic_bounds(
+            local_pre,
+            self.constraints,
+            caller="external intermediate constraint seed",
+        )
+
+    def stable_hash(self) -> str:
+        self.validate_payload()
+        return self.ir.stable_hash()
+
+
+def build_native_external_intermediate_constraint_seed(
+    module: BFTaskModule,
+    input_spec: InputSpec,
+    *,
+    seed_id: str,
+    provider: str,
+    constraints: Mapping[str, IntervalState],
+    external_intermediate_bounds_hash: str,
+    source_artifact_manifest_hash: str,
+    source_artifact_payload_hash: str,
+    source_model_hash: str,
+    source_property_hash: str,
+    source_objective_set_hash: str,
+) -> NativeExternalIntermediateConstraintSeed:
+    """Build and validate one external-owned seed for an exact local scope."""
+
+    external = _clone_bounds(constraints)
+    _local_env, local = _forward_ibp_trace_mlp(module, input_spec)
+    if tuple(external) != tuple(local):
+        raise ValueError("external intermediate constraint identities differ")
+    effective: dict[str, IntervalState] = {}
+    for name, local_value in local.items():
+        external_value = external[name]
+        if (
+            external_value.lower.shape != local_value.lower.shape
+            or external_value.upper.shape != local_value.upper.shape
+            or external_value.lower.dtype != local_value.lower.dtype
+            or external_value.upper.dtype != local_value.upper.dtype
+            or external_value.lower.device != local_value.lower.device
+            or external_value.upper.device != local_value.upper.device
+        ):
+            raise ValueError("external intermediate constraint schema differs")
+        lower = torch.maximum(local_value.lower, external_value.lower)
+        upper = torch.minimum(local_value.upper, external_value.upper)
+        if bool((lower > upper).any()):
+            raise ValueError(
+                "external intermediate constraint intersection is infeasible"
+            )
+        effective[name] = IntervalState(
+            lower=lower.detach().contiguous().clone(),
+            upper=upper.detach().contiguous().clone(),
+        )
+    seed = NativeExternalIntermediateConstraintSeed(
+        ir=ExternalIntermediateConstraintSeedIR(
+            seed_id=seed_id,
+            provider=provider,
+            primal_graph_hash=plain_crown_primal_graph_hash(module),
+            input_bounds_hash=_input_bounds_hash(input_spec),
+            external_intermediate_bounds_hash=external_intermediate_bounds_hash,
+            bound_intermediate_constraints_hash=intermediate_bounds_hash(effective),
+            source_artifact_manifest_hash=source_artifact_manifest_hash,
+            source_artifact_payload_hash=source_artifact_payload_hash,
+            source_model_hash=source_model_hash,
+            source_property_hash=source_property_hash,
+            source_objective_set_hash=source_objective_set_hash,
+        ),
+        constraints=effective,
+    )
+    seed.validate(module, input_spec)
+    return seed
 
 
 def _zero_split_state(
@@ -256,6 +351,7 @@ class NativeIntermediateRefinementProgram:
     objective: Optional[torch.Tensor] = None
     objective_influence: Optional[Mapping[str, torch.Tensor]] = None
     source_intermediate_constraints: Optional[Mapping[str, IntervalState]] = None
+    external_constraint_seed: Optional[NativeExternalIntermediateConstraintSeed] = None
 
     def validate(self, module: BFTaskModule, input_spec: InputSpec) -> None:
         self.schedule.validate(plan=self.plan, task_module=self.task_module)
@@ -278,11 +374,26 @@ class NativeIntermediateRefinementProgram:
             != intermediate_bounds_hash(self.source_intermediate_constraints)
         ):
             raise ValueError("native refinement source constraints differ")
+        seed_present = self.plan.external_constraint_seed is not None
+        if seed_present != (self.external_constraint_seed is not None):
+            raise ValueError("native refinement external seed presence differs")
+        if self.external_constraint_seed is not None:
+            self.external_constraint_seed.validate(module, input_spec)
+            if (
+                self.plan.external_constraint_seed != self.external_constraint_seed.ir
+                or self.source_intermediate_constraints is not None
+            ):
+                raise ValueError("native refinement external seed identity differs")
+        materialization_constraints = (
+            self.external_constraint_seed.constraints
+            if self.external_constraint_seed is not None
+            else self.source_intermediate_constraints
+        )
         expected_env, expected_pre = _forward_ibp_trace_mlp(
             module,
             input_spec,
             relu_split_state=dict(self.split_state),
-            relu_pre_constraints=self.source_intermediate_constraints,
+            relu_pre_constraints=materialization_constraints,
         )
         if intermediate_bounds_hash(expected_env) != intermediate_bounds_hash(
             self.initial_interval_env
@@ -290,7 +401,7 @@ class NativeIntermediateRefinementProgram:
             self.initial_relu_pre
         ):
             raise ValueError("native refinement materialized forward state differs")
-        if self.source_intermediate_constraints is not None:
+        if materialization_constraints is not None:
             _local_env, local_pre = _forward_ibp_trace_mlp(
                 module,
                 input_spec,
@@ -299,7 +410,7 @@ class NativeIntermediateRefinementProgram:
             _validate_monotonic_bounds(
                 local_pre,
                 self.initial_relu_pre,
-                caller="native refinement source-constraint intersection",
+                caller="native refinement initial-constraint intersection",
             )
         _validate_split_state(self.split_state, self.initial_relu_pre)
         objective_directed = self.plan.objective_hash is not None
@@ -526,6 +637,7 @@ def compile_native_intermediate_refinement_program(
     relu_split_state: Optional[Mapping[str, torch.Tensor]] = None,
     linear_spec_C: Optional[torch.Tensor] = None,
     source_refinement_execution: Optional[NativeIntermediateRefinementExecution] = None,
+    external_constraint_seed: Optional[NativeExternalIntermediateConstraintSeed] = None,
 ) -> NativeIntermediateRefinementProgram:
     """Compile an exact target set and unrolled refinement schedule."""
 
@@ -536,6 +648,19 @@ def compile_native_intermediate_refinement_program(
     source_constraints: Optional[Mapping[str, IntervalState]] = None
     source_refinement_plan_hash: Optional[str] = None
     source_refinement_semantic_trace_hash: Optional[str] = None
+    admitted_external_seed: Optional[NativeExternalIntermediateConstraintSeed] = None
+    if source_refinement_execution is not None and external_constraint_seed is not None:
+        raise ValueError("native refinement external and ancestral sources conflict")
+    if external_constraint_seed is not None:
+        if not isinstance(
+            external_constraint_seed, NativeExternalIntermediateConstraintSeed
+        ):
+            raise TypeError("native refinement external constraint seed is invalid")
+        external_constraint_seed.validate(module, input_spec)
+        admitted_external_seed = NativeExternalIntermediateConstraintSeed(
+            ir=external_constraint_seed.ir,
+            constraints=_clone_bounds(external_constraint_seed.constraints),
+        )
     if source_refinement_execution is not None:
         if not isinstance(
             source_refinement_execution, NativeIntermediateRefinementExecution
@@ -559,12 +684,17 @@ def compile_native_intermediate_refinement_program(
         }
     )
     _validate_split_state(splits, unsplit_pre)
-    if relu_split_state is not None or source_constraints is not None:
+    materialization_constraints = (
+        admitted_external_seed.constraints
+        if admitted_external_seed is not None
+        else source_constraints
+    )
+    if relu_split_state is not None or materialization_constraints is not None:
         initial_env, initial_pre = _forward_ibp_trace_mlp(
             module,
             input_spec,
             relu_split_state=dict(splits),
-            relu_pre_constraints=source_constraints,
+            relu_pre_constraints=materialization_constraints,
         )
     else:
         initial_pre = unsplit_pre
@@ -618,6 +748,9 @@ def compile_native_intermediate_refinement_program(
         ),
         source_refinement_plan_hash=source_refinement_plan_hash,
         source_refinement_semantic_trace_hash=(source_refinement_semantic_trace_hash),
+        external_constraint_seed=(
+            None if admitted_external_seed is None else admitted_external_seed.ir
+        ),
     )
     task_module, schedule = lower_native_intermediate_refinement_ir(plan)
     program = NativeIntermediateRefinementProgram(
@@ -630,6 +763,7 @@ def compile_native_intermediate_refinement_program(
         objective=objective,
         objective_influence=objective_influence,
         source_intermediate_constraints=source_constraints,
+        external_constraint_seed=admitted_external_seed,
     )
     program.validate(module, input_spec)
     return program
@@ -778,6 +912,8 @@ def _pass_trace(
 
 
 def _runtime_value_hash(value: object) -> str:
+    if isinstance(value, NativeExternalIntermediateConstraintSeed):
+        return value.stable_hash()
     if isinstance(value, NativeIntermediateRefinementPolicyIR):
         return value.stable_hash()
     if isinstance(value, BFTaskModule):
@@ -841,6 +977,8 @@ def execute_native_intermediate_refinement_program(
         values["refine.source_intermediate_constraints"] = (
             program.source_intermediate_constraints
         )
+    if program.external_constraint_seed is not None:
+        values["refine.external_constraint_seed"] = program.external_constraint_seed
     if program.objective_influence is not None:
         values["refine.objective_influence"] = program.objective_influence
     action_traces: list[NativeIntermediateRefinementActionTrace] = []
@@ -1003,10 +1141,12 @@ def execute_native_intermediate_refinement_program(
 __all__ = [
     "NATIVE_INTERMEDIATE_REFINEMENT_EXECUTION_SCHEMA_VERSION",
     "NativeIntermediateRefinementActionTrace",
+    "NativeExternalIntermediateConstraintSeed",
     "NativeIntermediateRefinementExecution",
     "NativeIntermediateRefinementExecutionTrace",
     "NativeIntermediateRefinementPassTrace",
     "NativeIntermediateRefinementProgram",
+    "build_native_external_intermediate_constraint_seed",
     "compile_native_intermediate_refinement_program",
     "execute_native_intermediate_refinement_program",
     "intermediate_bounds_hash",

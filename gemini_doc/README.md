@@ -16,9 +16,10 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_ANCESTRAL_CONSTRAINT_REFINEMENT_V1_PLAN_2026_08_04.md`
-（validated parent constraint source、双重单调、ResNet 三模式 bounded-tree tightness）。其直接
-前序为 `gemini_doc/BOUNDFLOW_PER_CHILD_OBJECTIVE_REFINEMENT_V1_PLAN_2026_08_04.md`、
+当前最新入口：`gemini_doc/BOUNDFLOW_EXTERNAL_SEEDED_ANCESTRAL_REFINEMENT_V1_PLAN_2026_08_04.md`
+（typed external seed、root/parent source lineage、ResNet hard-clause bounded-tree tightness）。其
+直接前序为 `gemini_doc/BOUNDFLOW_ANCESTRAL_CONSTRAINT_REFINEMENT_V1_PLAN_2026_08_04.md`、
+`gemini_doc/BOUNDFLOW_PER_CHILD_OBJECTIVE_REFINEMENT_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_OBJECTIVE_DIRECTED_INTERMEDIATE_REFINEMENT_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_NATIVE_INTERMEDIATE_BOUND_REFINEMENT_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_MULTIWORKLOAD_COMPETITOR_E2E_BASELINE_V1_PLAN_2026_08_04.md` 和

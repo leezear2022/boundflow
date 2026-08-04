@@ -748,3 +748,20 @@ fixed clauses `0/1` 的 ancestral worst leaf=`-340.971832/-517.858826`，相对 
 
 下一工程门禁为 hard-clause convergence expansion：扩展 hard clause coverage 与 depth/node budget
 曲线，量化剩余 closure deficit，再决定动态 BaB budget/termination 或公平 GPU E2E 的先后顺序。
+
+## 30. External-Seeded Ancestral Refinement v1 判定
+
+NRIR-23 新增 external-owned typed constraint seed。seed 对 raw external bounds 与 local forward
+求可行交集，并绑定 external ordered digest、effective constraint hash、primal/input 与 source
+artifact/model/property/objective-set；Plan/Task/Schedule/action trace 均显式引用 seed。queue root
+消费 seed，child 只消费 validated parent refinement，二者互斥且逐节点 hash lineage fail closed。
+
+固定 ResNet clauses `0/2/4` 上，external baseline→seeded root-global→seeded ancestral 的 worst
+leaf 分别为 `-0.319799→-0.319110→-0.318287`、
+`-0.426609→-0.425481→-0.425477`、`-0.504676→-0.504142→-0.504142`。三条 ancestral
+均不弱于 root-global，两条严格改善，但全部仍负。
+
+结论为 typed seed/control + fixed-tree tightness `VALIDATED-REDUCED`。artifact generate/replay hash=
+`9f52b99a74dab448626061f5b8f060f3b8c43b6c03f6deb0899d9fe91883d9f7`；全量
+`766 passed, 37 skipped`，静态门禁全过。下一工程动作是冻结 7/15/31 nodes、depth 2/3/4 的
+hard-clause convergence；不得升级 complete property、GPU/performance 或 ASPLOS-ready claim。

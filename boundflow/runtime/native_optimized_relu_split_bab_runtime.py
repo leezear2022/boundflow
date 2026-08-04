@@ -47,6 +47,7 @@ from .native_objective_branch_score import (
     execute_native_objective_branch_program,
 )
 from .native_intermediate_refinement import (
+    NativeExternalIntermediateConstraintSeed,
     NativeIntermediateRefinementExecution,
     compile_native_intermediate_refinement_program,
     execute_native_intermediate_refinement_program,
@@ -108,7 +109,9 @@ _OPTIMIZER_HASH_KEYS = {
     "optimizer_schedule_hash",
 }
 PerChildRefinementStrategy = Literal[
-    "independent_exact_split_v1", "ancestral_constraint_carry_v1"
+    "independent_exact_split_v1",
+    "ancestral_constraint_carry_v1",
+    "external_seeded_ancestral_carry_v1",
 ]
 
 
@@ -143,6 +146,10 @@ class NativePerChildRefinementTrace:
     source_refinement_plan_hash: Optional[str] = None
     source_refinement_semantic_trace_hash: Optional[str] = None
     source_consumption: Optional[str] = None
+    external_constraint_seed_hash: Optional[str] = None
+    external_constraint_seed_constraints_hash: Optional[str] = None
+    external_semantics_owner: Optional[str] = None
+    external_seed_consumption: Optional[str] = None
     parent_refinement_consumed_as_exact: bool = False
     performance_claimed: bool = False
     schema_version: str = NATIVE_PER_CHILD_REFINEMENT_TRACE_SCHEMA_VERSION
@@ -154,6 +161,13 @@ class NativePerChildRefinementTrace:
             self.source_refinement_semantic_trace_hash,
         )
         source_present = self.source_parent_node_id is not None
+        external_values = (
+            self.external_constraint_seed_hash,
+            self.external_constraint_seed_constraints_hash,
+            self.external_semantics_owner,
+            self.external_seed_consumption,
+        )
+        external_present = self.external_constraint_seed_hash is not None
         if (
             self.schema_version != NATIVE_PER_CHILD_REFINEMENT_TRACE_SCHEMA_VERSION
             or not self.node_id
@@ -173,6 +187,8 @@ class NativePerChildRefinementTrace:
             or self.parent_refinement_consumed_as_exact is not False
             or self.performance_claimed is not False
             or source_present != any(value is not None for value in source_hashes)
+            or external_present != any(value is not None for value in external_values)
+            or (source_present and external_present)
             or (
                 source_present
                 and (
@@ -182,6 +198,16 @@ class NativePerChildRefinementTrace:
                 )
             )
             or (not source_present and self.source_consumption is not None)
+            or (
+                external_present
+                and (
+                    not _is_sha256(self.external_constraint_seed_hash)
+                    or not _is_sha256(self.external_constraint_seed_constraints_hash)
+                    or self.external_semantics_owner != "external_verifier"
+                    or self.external_seed_consumption
+                    != "sound_constraint_intersection_only"
+                )
+            )
         ):
             raise ValueError("native per-child refinement trace is invalid")
 
@@ -213,6 +239,15 @@ class NativePerChildRefinementTrace:
                 self.source_refinement_semantic_trace_hash
             )
             payload["source_consumption"] = self.source_consumption
+        if self.external_constraint_seed_hash is not None:
+            payload["external_constraint_seed_hash"] = (
+                self.external_constraint_seed_hash
+            )
+            payload["external_constraint_seed_constraints_hash"] = (
+                self.external_constraint_seed_constraints_hash
+            )
+            payload["external_semantics_owner"] = self.external_semantics_owner
+            payload["external_seed_consumption"] = self.external_seed_consumption
         return payload
 
     def stable_hash(self) -> str:
@@ -529,6 +564,7 @@ class NativeOptimizedReluSplitBabTrace:
                 not in {
                     "independent_exact_split_v1",
                     "ancestral_constraint_carry_v1",
+                    "external_seeded_ancestral_carry_v1",
                 }
                 or len(self.per_child_refinements) != len(self.evaluations)
             ):
@@ -560,15 +596,32 @@ class NativeOptimizedReluSplitBabTrace:
                         "native optimized BaB node/refinement binding differs"
                     )
                 if self.per_child_refinement_strategy == ("independent_exact_split_v1"):
-                    if refinement.source_parent_node_id is not None:
+                    if (
+                        refinement.source_parent_node_id is not None
+                        or refinement.external_constraint_seed_hash is not None
+                    ):
                         raise ValueError(
-                            "independent per-child refinement consumes ancestry"
+                            "independent per-child refinement consumes a source"
                         )
+                elif (
+                    self.per_child_refinement_strategy
+                    == ("external_seeded_ancestral_carry_v1")
+                    and parent is None
+                ):
+                    if (
+                        refinement.source_parent_node_id is not None
+                        or refinement.external_constraint_seed_hash is None
+                    ):
+                        raise ValueError("external-seeded root source differs")
                 elif parent is None:
-                    if refinement.source_parent_node_id is not None:
+                    if (
+                        refinement.source_parent_node_id is not None
+                        or refinement.external_constraint_seed_hash is not None
+                    ):
                         raise ValueError("ancestral refinement root declares a source")
                 elif (
                     parent_refinement is None
+                    or refinement.external_constraint_seed_hash is not None
                     or refinement.source_parent_node_id != parent.node.node_id
                     or refinement.source_intermediate_constraints_hash
                     != parent_refinement.final_intermediate_bounds_hash
@@ -809,6 +862,9 @@ class NativeOptimizedReluSplitBabExecution:
                 refinement.trace.validate(program=program)
                 record = records[node_id]
                 hashes = program.hashes()
+                external_seed_ir = program.plan.external_constraint_seed
+                if program.external_constraint_seed is not None:
+                    program.external_constraint_seed.validate_payload()
                 if (
                     program.plan.policy != self.trace.per_child_refinement_policy
                     or program.plan.objective_hash != self.trace.objective_hash
@@ -826,6 +882,36 @@ class NativeOptimizedReluSplitBabExecution:
                     != record.source_refinement_plan_hash
                     or program.plan.source_refinement_semantic_trace_hash
                     != record.source_refinement_semantic_trace_hash
+                    or (
+                        None
+                        if external_seed_ir is None
+                        else external_seed_ir.stable_hash()
+                    )
+                    != record.external_constraint_seed_hash
+                    or (
+                        None
+                        if external_seed_ir is None
+                        else external_seed_ir.bound_intermediate_constraints_hash
+                    )
+                    != record.external_constraint_seed_constraints_hash
+                    or (
+                        None
+                        if external_seed_ir is None
+                        else external_seed_ir.semantics_owner
+                    )
+                    != record.external_semantics_owner
+                    or (
+                        None
+                        if external_seed_ir is None
+                        else external_seed_ir.consumption
+                    )
+                    != record.external_seed_consumption
+                    or (external_seed_ir is None)
+                    != (program.external_constraint_seed is None)
+                    or (
+                        program.external_constraint_seed is not None
+                        and program.external_constraint_seed.ir != external_seed_ir
+                    )
                     or refinement.trace.final_intermediate_bounds_hash
                     != record.final_intermediate_bounds_hash
                     or intermediate_bounds_hash(refinement.relu_pre)
@@ -1031,6 +1117,7 @@ def _execute_per_child_refinements(
     policy: NativeIntermediateRefinementPolicyIR,
     parent_by_id: Mapping[str, _OptimizedEvaluatedNode],
     strategy: PerChildRefinementStrategy,
+    external_constraint_seed: Optional[NativeExternalIntermediateConstraintSeed],
 ) -> tuple[
     dict[str, IntervalState],
     tuple[tuple[str, NativeIntermediateRefinementExecution], ...],
@@ -1043,11 +1130,23 @@ def _execute_per_child_refinements(
         split = _node_split_mapping(node)
         parent_id = node.node.parent_node_id
         source_execution: Optional[NativeIntermediateRefinementExecution] = None
-        if strategy == "ancestral_constraint_carry_v1" and parent_id is not None:
+        node_external_seed: Optional[NativeExternalIntermediateConstraintSeed] = None
+        if (
+            strategy
+            in {
+                "ancestral_constraint_carry_v1",
+                "external_seeded_ancestral_carry_v1",
+            }
+            and parent_id is not None
+        ):
             parent = parent_by_id.get(parent_id)
             if parent is None or parent.refinement_execution is None:
                 raise ValueError("ancestral refinement child lacks a parent execution")
             source_execution = parent.refinement_execution
+        elif strategy == "external_seeded_ancestral_carry_v1":
+            if external_constraint_seed is None:
+                raise ValueError("external-seeded refinement root lacks a seed")
+            node_external_seed = external_constraint_seed
         program = compile_native_intermediate_refinement_program(
             legacy_task_module,
             single_input,
@@ -1056,6 +1155,7 @@ def _execute_per_child_refinements(
             relu_split_state=split,
             linear_spec_C=objective,
             source_refinement_execution=source_execution,
+            external_constraint_seed=node_external_seed,
         )
         execution = execute_native_intermediate_refinement_program(
             program, legacy_task_module, single_input
@@ -1085,6 +1185,26 @@ def _execute_per_child_refinements(
             ),
             source_consumption=(
                 None if source_execution is None else "sound_constraint_only"
+            ),
+            external_constraint_seed_hash=(
+                None
+                if program.plan.external_constraint_seed is None
+                else program.plan.external_constraint_seed.stable_hash()
+            ),
+            external_constraint_seed_constraints_hash=(
+                None
+                if program.plan.external_constraint_seed is None
+                else program.plan.external_constraint_seed.bound_intermediate_constraints_hash
+            ),
+            external_semantics_owner=(
+                None
+                if program.plan.external_constraint_seed is None
+                else program.plan.external_constraint_seed.semantics_owner
+            ),
+            external_seed_consumption=(
+                None
+                if program.plan.external_constraint_seed is None
+                else program.plan.external_constraint_seed.consumption
             ),
         )
         record.validate()
@@ -1313,6 +1433,7 @@ def _evaluate_optimized_node_batch(
     refine_external_constraints: bool,
     per_child_refinement_policy: Optional[NativeIntermediateRefinementPolicyIR],
     per_child_refinement_strategy: PerChildRefinementStrategy,
+    external_constraint_seed: Optional[NativeExternalIntermediateConstraintSeed],
 ) -> tuple[
     tuple[_OptimizedEvaluatedNode, ...],
     NativeOptimizedBabStackTrace,
@@ -1349,6 +1470,7 @@ def _evaluate_optimized_node_batch(
             policy=per_child_refinement_policy,
             parent_by_id=parent_by_id,
             strategy=per_child_refinement_strategy,
+            external_constraint_seed=external_constraint_seed,
         )
         effective_intermediate_bound_source = IntermediateBoundSource.NATIVE_REFINED
         effective_refine_external_constraints = False
@@ -1562,6 +1684,7 @@ def execute_native_optimized_relu_split_bab(
     per_child_refinement_strategy: PerChildRefinementStrategy = (
         "independent_exact_split_v1"
     ),
+    external_constraint_seed: Optional[NativeExternalIntermediateConstraintSeed] = None,
 ) -> NativeOptimizedReluSplitBabExecution:
     """Run best-first queue with optimizer Schedule-driven native node bounds."""
 
@@ -1582,6 +1705,7 @@ def execute_native_optimized_relu_split_bab(
     if per_child_refinement_strategy not in {
         "independent_exact_split_v1",
         "ancestral_constraint_carry_v1",
+        "external_seeded_ancestral_carry_v1",
     }:
         raise ValueError("optimized queue per-child refinement strategy is invalid")
     if per_child_refinement_policy is None:
@@ -1591,6 +1715,8 @@ def execute_native_optimized_relu_split_bab(
             intermediate_bound_source == IntermediateBoundSource.LOCAL_FORWARD
         ):
             raise ValueError("optimized queue intermediate semantics/provenance differ")
+        if external_constraint_seed is not None:
+            raise ValueError("optimized queue external seed requires refinement")
     else:
         if not isinstance(
             per_child_refinement_policy, NativeIntermediateRefinementPolicyIR
@@ -1612,6 +1738,17 @@ def execute_native_optimized_relu_split_bab(
             raise ValueError(
                 "optimized queue per-child refinement semantics/provenance differ"
             )
+        external_seeded = (
+            per_child_refinement_strategy == "external_seeded_ancestral_carry_v1"
+        )
+        if external_seeded != (external_constraint_seed is not None):
+            raise ValueError("optimized queue external seed strategy differs")
+        if external_constraint_seed is not None:
+            if not isinstance(
+                external_constraint_seed, NativeExternalIntermediateConstraintSeed
+            ):
+                raise TypeError("optimized queue external seed is invalid")
+            external_constraint_seed.validate(legacy_task_module, input_spec)
     legacy_task_module.validate()
     lower, upper = _root_box_bounds(input_spec)
     objective = _normalize_scalar_objective(linear_spec_C)
@@ -1682,6 +1819,7 @@ def execute_native_optimized_relu_split_bab(
                 refine_external_constraints=refine_external_constraints,
                 per_child_refinement_policy=per_child_refinement_policy,
                 per_child_refinement_strategy=per_child_refinement_strategy,
+                external_constraint_seed=external_constraint_seed,
             )
             native_stacks.append(stack)
             objective_branch_executions.extend(branch_executions)
@@ -1850,6 +1988,7 @@ def run_native_optimized_relu_split_bab(
     per_child_refinement_strategy: PerChildRefinementStrategy = (
         "independent_exact_split_v1"
     ),
+    external_constraint_seed: Optional[NativeExternalIntermediateConstraintSeed] = None,
 ) -> NativeOptimizedReluSplitBabTrace:
     """Return the serialized optimized queue trace."""
 
@@ -1866,4 +2005,5 @@ def run_native_optimized_relu_split_bab(
         refine_external_constraints=refine_external_constraints,
         per_child_refinement_policy=per_child_refinement_policy,
         per_child_refinement_strategy=per_child_refinement_strategy,
+        external_constraint_seed=external_constraint_seed,
     ).trace

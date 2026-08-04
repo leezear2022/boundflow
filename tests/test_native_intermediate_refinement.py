@@ -11,6 +11,7 @@ import torch
 
 from boundflow.domains.interval import IntervalState
 from boundflow.ir.refinement import (
+    ExternalIntermediateConstraintSeedIR,
     IntermediateRefinementTaskKind,
     NativeIntermediateRefinementPolicyIR,
 )
@@ -25,6 +26,7 @@ from boundflow.runtime.native_alpha_beta_optimizer_schedule import (
 )
 from boundflow.runtime.crown_ibp import _forward_ibp_trace_mlp
 from boundflow.runtime.native_intermediate_refinement import (
+    NativeExternalIntermediateConstraintSeed,
     NativeIntermediateRefinementProgram,
     compile_native_intermediate_refinement_program,
     execute_native_intermediate_refinement_program,
@@ -112,6 +114,38 @@ def _policy(*, passes: int = 1) -> NativeIntermediateRefinementPolicyIR:
         passes=passes,
         max_neurons_per_relu=2,
         backward_chunk_size=1,
+    )
+
+
+def _external_seed(
+    module: BFTaskModule, spec: InputSpec
+) -> NativeExternalIntermediateConstraintSeed:
+    source_program = compile_native_intermediate_refinement_program(
+        module,
+        spec,
+        policy=_policy(),
+        plan_id="external-seed-source-scope",
+    )
+    source = execute_native_intermediate_refinement_program(
+        source_program, module, spec
+    )
+    return NativeExternalIntermediateConstraintSeed(
+        ir=ExternalIntermediateConstraintSeedIR(
+            seed_id="external-seed:test",
+            provider="test-external-verifier",
+            primal_graph_hash=source_program.plan.primal_graph_hash,
+            input_bounds_hash=source_program.plan.input_bounds_hash,
+            external_intermediate_bounds_hash="a" * 64,
+            bound_intermediate_constraints_hash=intermediate_bounds_hash(
+                source.relu_pre
+            ),
+            source_artifact_manifest_hash="b" * 64,
+            source_artifact_payload_hash="c" * 64,
+            source_model_hash="d" * 64,
+            source_property_hash="e" * 64,
+            source_objective_set_hash="f" * 64,
+        ),
+        constraints=source.relu_pre,
     )
 
 
@@ -253,6 +287,107 @@ def test_ancestral_source_constraint_tampering_fails_closed() -> None:
             policy=_policy(),
             plan_id="ancestral-wrong-source-module",
             source_refinement_execution=root,
+        )
+
+
+def test_external_constraint_seed_is_typed_lowered_and_trace_bound() -> None:
+    module = _dependency_mlp()
+    spec = _input_spec()
+    seed = _external_seed(module, spec)
+    program = compile_native_intermediate_refinement_program(
+        module,
+        spec,
+        policy=_policy(),
+        plan_id="external-seeded-refinement",
+        external_constraint_seed=seed,
+    )
+
+    assert program.plan.external_constraint_seed == seed.ir
+    assert program.plan.source_intermediate_constraints_hash is None
+    assert program.task_module.tasks[0].input_value_ids == (
+        "refine.module",
+        "refine.input",
+        "refine.split_state",
+        "refine.external_constraint_seed",
+    )
+    execution = execute_native_intermediate_refinement_program(program, module, spec)
+    assert (
+        dict(execution.trace.action_traces[0].input_hashes)[
+            "refine.external_constraint_seed"
+        ]
+        == seed.stable_hash()
+    )
+    assert (
+        execution.program.plan.to_dict()["external_constraint_seed"]["semantics_owner"]
+        == "external_verifier"
+    )
+
+
+def test_external_constraint_seed_tamper_scope_and_conflict_fail_closed() -> None:
+    module = _dependency_mlp()
+    spec = _input_spec()
+    seed = _external_seed(module, spec)
+    changed_ir = replace(seed.ir, source_artifact_payload_hash="0" * 64)
+    changed_seed = replace(seed, ir=changed_ir)
+    program = compile_native_intermediate_refinement_program(
+        module,
+        spec,
+        policy=_policy(),
+        plan_id="external-seed-tamper",
+        external_constraint_seed=changed_seed,
+    )
+    assert (
+        program.plan.stable_hash()
+        != compile_native_intermediate_refinement_program(
+            module,
+            spec,
+            policy=_policy(),
+            plan_id="external-seed-tamper",
+            external_constraint_seed=seed,
+        ).plan.stable_hash()
+    )
+
+    invalid_content_ir = replace(seed.ir, bound_intermediate_constraints_hash="0" * 64)
+    with pytest.raises(ValueError, match="seed content differs"):
+        compile_native_intermediate_refinement_program(
+            module,
+            spec,
+            policy=_policy(),
+            plan_id="external-seed-content-tamper",
+            external_constraint_seed=replace(seed, ir=invalid_content_ir),
+        )
+
+    widened = dict(seed.constraints)
+    first_name = next(iter(widened))
+    first = widened[first_name]
+    widened[first_name] = IntervalState(
+        lower=first.lower - 0.1,
+        upper=first.upper,
+    )
+    widened_seed = NativeExternalIntermediateConstraintSeed(
+        ir=replace(
+            seed.ir,
+            bound_intermediate_constraints_hash=intermediate_bounds_hash(widened),
+        ),
+        constraints=widened,
+    )
+    with pytest.raises(ValueError, match="external intermediate constraint seed"):
+        widened_seed.validate(module, spec)
+
+    source_program = compile_native_intermediate_refinement_program(
+        module, spec, policy=_policy(), plan_id="external-seed-conflict-source"
+    )
+    source = execute_native_intermediate_refinement_program(
+        source_program, module, spec
+    )
+    with pytest.raises(ValueError, match="sources conflict"):
+        compile_native_intermediate_refinement_program(
+            module,
+            spec,
+            policy=_policy(),
+            plan_id="external-seed-conflict",
+            source_refinement_execution=source,
+            external_constraint_seed=seed,
         )
 
 

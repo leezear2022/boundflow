@@ -1039,3 +1039,24 @@ ASPLOS-ready/performance claim。
 下一路线从“再改 refinement plumbing”切到 hard-clause convergence expansion：固定更多 hard
 clauses 与 depth/node budget 曲线，判断 ancestral carry 是否能推动 complete closure；CPU timing
 继续只作诊断，公平 E2E 必须等待可用 CUDA 环境并与相同算法能力竞品重测。
+
+## 36. External-Seeded Ancestral Refinement v1
+
+NRIR-23 连接了此前分离的 external intermediate semantics 与 native ancestral refinement。
+`ExternalIntermediateConstraintSeedIR` 保留 `semantics_owner=external_verifier`，同时绑定 primal/input、
+external ordered digest、source artifact/model/property/objective-set 和 local-intersection constraint
+hash。raw external 先与 local forward 求可行交集；refinement Plan/Task/Schedule/action trace 显式消费
+effective seed，且 external seed 与 native parent execution 严格互斥。
+
+queue 的 `external_seeded_ancestral_carry_v1` 只允许 root 消费 typed seed；六个 non-root 节点逐一
+消费已验证 parent refinement final/Plan/semantic trace，alpha/beta 仍为 warm-only。固定 ResNet
+clauses `0/2/4`、objective branch、25-step optimizer、16 targets/ReLU、7-node/depth-2 下，ancestral
+worst leaf 为 `-0.318287/-0.425477/-0.504142`；相对 external baseline 改善
+`+0.001512/+0.001133/+0.000534`，相对 seeded root-global 为
+`+0.000823/+0.000004/0`。
+
+artifact semantic replay hash=
+`9f52b99a74dab448626061f5b8f060f3b8c43b6c03f6deb0899d9fe91883d9f7`；全量
+`766 passed, 37 skipped`。该阶段只关闭 typed seed/control/lineage 与 fixed-budget tightness
+`VALIDATED-REDUCED`；所有 terminal leaves 仍负，无 complete property、performance、CUDA、
+multi-workload 或 ASPLOS-ready claim。下一门禁为 external-seeded depth/node convergence curve。

@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev002858
-last_va: ev002859
+last_ch: ev003031
+last_va: ev003032
 blk:
-next: measure-ancestral-hard-clause-depth-node-convergence-v1
-updated: 2026-08-04T07:33:19Z
+next: measure-external-seeded-depth-node-convergence-v1
+updated: 2026-08-04T08:42:17Z

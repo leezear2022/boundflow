@@ -25,6 +25,10 @@ from boundflow.runtime.native_optimized_relu_split_bab_runtime import (
     execute_native_optimized_relu_split_bab,
     run_native_optimized_relu_split_bab,
 )
+from boundflow.runtime.native_intermediate_refinement import (
+    NativeExternalIntermediateConstraintSeed,
+    build_native_external_intermediate_constraint_seed,
+)
 from boundflow.runtime.native_relu_split_bab_runtime import NativeReluSplitBabConfig
 from boundflow.runtime.task_executor import InputSpec
 
@@ -84,6 +88,25 @@ def _per_child_policy() -> NativeIntermediateRefinementPolicyIR:
     )
 
 
+def _external_constraint_seed() -> NativeExternalIntermediateConstraintSeed:
+    module = _module()
+    spec = _spec()
+    _interval_env, constraints = _forward_ibp_trace_mlp(module, spec)
+    return build_native_external_intermediate_constraint_seed(
+        module,
+        spec,
+        constraints=constraints,
+        seed_id="external-seed:queue-test",
+        provider="test-external-verifier",
+        external_intermediate_bounds_hash="a" * 64,
+        source_artifact_manifest_hash="1" * 64,
+        source_artifact_payload_hash="2" * 64,
+        source_model_hash="3" * 64,
+        source_property_hash="4" * 64,
+        source_objective_set_hash="5" * 64,
+    )
+
+
 def _run_per_child(
     *,
     batch_size: int,
@@ -105,6 +128,27 @@ def _run_per_child(
         intermediate_bound_source=IntermediateBoundSource.NATIVE_REFINED,
         per_child_refinement_policy=_per_child_policy(),
         per_child_refinement_strategy=strategy,
+    )
+
+
+def _run_external_seeded(*, batch_size: int):
+    return execute_native_optimized_relu_split_bab(
+        _module(),
+        _spec(),
+        linear_spec_C=torch.tensor([[1.0, -1.0]]),
+        run_id="native-external-seeded-refinement-toy",
+        config=NativeReluSplitBabConfig(
+            max_nodes=7,
+            max_depth=2,
+            expansion_batch_size=2,
+            max_eval_batch_size=batch_size,
+            threshold=1e6,
+        ),
+        optimizer_policy=_policy(),
+        intermediate_bound_source=IntermediateBoundSource.NATIVE_REFINED,
+        per_child_refinement_policy=_per_child_policy(),
+        per_child_refinement_strategy="external_seeded_ancestral_carry_v1",
+        external_constraint_seed=_external_constraint_seed(),
     )
 
 
@@ -348,6 +392,11 @@ def ancestral_per_child_executions():
         _run_per_child(batch_size=4, strategy="ancestral_constraint_carry_v1"),
         _run_per_child(batch_size=1, strategy="ancestral_constraint_carry_v1"),
     )
+
+
+@pytest.fixture(scope="module")
+def external_seeded_per_child_execution():
+    return _run_external_seeded(batch_size=4)
 
 
 def test_per_child_refinement_packed_and_serial_semantics_match(
@@ -599,3 +648,77 @@ def test_ancestral_constraint_parent_lineage_tampering_fails_closed(
             evaluations=tuple(evaluations),
             per_child_refinements=tuple(records),
         ).validate()
+
+
+def test_external_seeded_root_and_ancestral_children_are_distinct_sources(
+    external_seeded_per_child_execution,
+) -> None:
+    execution = external_seeded_per_child_execution
+    trace = execution.trace
+    records = {item.node_id: item for item in trace.per_child_refinements}
+    programs = dict(execution.per_child_refinement_executions)
+    root_id = trace.evaluations[0].node.node_id
+    root_record = records[root_id]
+    root_program = programs[root_id].program
+
+    assert trace.to_dict()["per_child_refinement_strategy"] == (
+        "external_seeded_ancestral_carry_v1"
+    )
+    assert root_record.source_parent_node_id is None
+    assert root_record.external_semantics_owner == "external_verifier"
+    assert root_record.external_seed_consumption == (
+        "sound_constraint_intersection_only"
+    )
+    assert root_program.plan.external_constraint_seed is not None
+    assert root_record.external_constraint_seed_hash == (
+        root_program.plan.external_constraint_seed.stable_hash()
+    )
+    for evaluation in trace.evaluations[1:]:
+        node_id = evaluation.node.node_id
+        parent_id = evaluation.node.parent_node_id or ""
+        record = records[node_id]
+        assert record.external_constraint_seed_hash is None
+        assert record.source_parent_node_id == parent_id
+        assert record.source_intermediate_constraints_hash == (
+            records[parent_id].final_intermediate_bounds_hash
+        )
+        assert programs[node_id].program.plan.external_constraint_seed is None
+
+
+def test_external_seeded_queue_admission_and_trace_tamper_fail_closed(
+    external_seeded_per_child_execution,
+) -> None:
+    config = NativeReluSplitBabConfig(
+        max_nodes=1,
+        max_depth=0,
+        expansion_batch_size=1,
+        max_eval_batch_size=1,
+    )
+    with pytest.raises(ValueError, match="external seed strategy differs"):
+        execute_native_optimized_relu_split_bab(
+            _module(),
+            _spec(),
+            linear_spec_C=torch.tensor([[1.0, -1.0]]),
+            run_id="external-seed-missing",
+            config=config,
+            optimizer_policy=_policy(),
+            intermediate_bound_source=IntermediateBoundSource.NATIVE_REFINED,
+            per_child_refinement_policy=_per_child_policy(),
+            per_child_refinement_strategy="external_seeded_ancestral_carry_v1",
+        )
+
+    execution = external_seeded_per_child_execution
+    records = list(execution.trace.per_child_refinements)
+    records[0] = replace(records[0], external_constraint_seed_hash="0" * 64)
+    evaluations = list(execution.trace.evaluations)
+    evaluations[0] = replace(
+        evaluations[0],
+        intermediate_refinement_trace_hash=records[0].stable_hash(),
+    )
+    changed_trace = replace(
+        execution.trace,
+        evaluations=tuple(evaluations),
+        per_child_refinements=tuple(records),
+    )
+    with pytest.raises(ValueError, match="execution identity differs"):
+        replace(execution, trace=changed_trace).validate()
