@@ -1,0 +1,15 @@
+{
+  "evidence_hash": "473b287bb88e4c52426b405aeb4164aa72a98d7b1bbd74c00471fe1d1451deb0",
+  "files": {
+    "evidence.json": "ef24ab10eb144de9df97d697d81eee1e8ab3af603b12822aba56c325964c2dcb",
+    "logs/cifar10_resnet-000-boundflow_native.log": "6cf5aa39ae254a804951a0dfbb0708e89d35de2dc843d24bf4d6b37c5b99420f",
+    "logs/cifar10_resnet-000-external_abcrown.log": "4ab0bdba1ccbff3222e3f8eab49b39aa73d5c7a786e216abeac350669e8a2517",
+    "logs/mnistfc-000-boundflow_native.log": "6cf5aa39ae254a804951a0dfbb0708e89d35de2dc843d24bf4d6b37c5b99420f",
+    "logs/mnistfc-000-external_abcrown.log": "8deef32e8fb7571e52b12ea81d980295fe5f16b8739bceef302d9c1cf987d046",
+    "logs/oval21-000-boundflow_native.log": "6cf5aa39ae254a804951a0dfbb0708e89d35de2dc843d24bf4d6b37c5b99420f",
+    "logs/oval21-000-external_abcrown.log": "404faed537d2408b06443b585c64ba97ecc381681c78bd2b4b1cc5b124873a18"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.multiworkload-competitor-e2e-artifact/v1",
+  "status": "ok"
+}

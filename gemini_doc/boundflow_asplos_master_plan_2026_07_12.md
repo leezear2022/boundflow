@@ -2,7 +2,7 @@
 
 > 状态：**顶层执行计划 v1.0；后续研究工作受本文门禁约束。**  
 > 基线日期：2026-07-12  
-> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`d12f373`
+> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`54e565f`
 > 投稿策略：ASPLOS 2027 September Cycle 为有条件冲刺；ASPLOS 2028 为稳健主目标。
 
 > **路线修订（2026-07-20）**：本文保留 2026-07-12 的研究问题、历史门禁和 PR-10—13
@@ -114,6 +114,12 @@
 > `0.120752/0.071564/0.057901`，但所有 terminal leaves 仍为负，整体只 6/9。该结果为
 > fixed-budget tightness `VALIDATED-REDUCED`，不是完整验证或 performance claim。下一门禁为
 > 多 workload/设备/竞品 E2E 与 stronger-bound；顶层 ASPLOS-ready=NO 不变。
+
+> **2026-08-04 NRIR-18 修订**：原生 VNNLIB Query IR 与三 workload Plan/Task/Schedule 已在
+> MNISTFC、ResNet2B、OVAL21 上运行。BoundFlow 为 unknown×3，固定 αβ-CROWN 为
+> verified/unknown/verified；单次 CPU E2E 不形成 speedup。ResNet native local root lower=
+> `-543.717/-789.331`，说明下一优先级是 intermediate-bound refinement，而不是 CUDA timing、
+> 更多 audit overhead removal 或继续堆 fixed-tree depth。顶层 ASPLOS-ready=NO 不变。
 
 > **2026-08-04 NRIR-11 修订**：fixed-step optimizer control 已进入 typed Plan/Task/Schedule。
 > 固定 ResNet 1-step program 为 8 actions，Schedule/legacy/final native execution max diff 均为 0，

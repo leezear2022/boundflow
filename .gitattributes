@@ -1,0 +1,1 @@
+artifacts/multiworkload-competitor-e2e/**/logs/*.log -diff

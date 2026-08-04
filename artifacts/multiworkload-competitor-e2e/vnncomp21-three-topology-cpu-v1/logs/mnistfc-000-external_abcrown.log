@@ -1,0 +1,124 @@
+/home/lee/miniconda3/envs/boundflow/lib/python3.12/site-packages/torch/jit/_script.py:1488: DeprecationWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+W0804 12:38:19.506000 156466 site-packages/torch/utils/cpp_extension.py:140] No CUDA runtime is found, using CUDA_HOME='/opt/cuda'
+Adding complete_verifier to sys.path
+INFO     12:38:19     [tensor_storage.py:70] Hugepage enabled for branch-and-bound domains.
+/home/lee/miniconda3/envs/boundflow/lib/python3.12/site-packages/onnx2pytorch/convert/layer.py:29: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)
+  layer.weight.data = torch.from_numpy(numpy_helper.to_array(weight))
+/home/lee/miniconda3/envs/boundflow/lib/python3.12/site-packages/onnx2pytorch/convert/model.py:151: UserWarning: Using experimental implementation that allows 'batch_size > 1'.Batchnorm layers could potentially produce false outputs.
+  warnings.warn(
+Precompiled vnnlib file found at /tmp/boundflow-nrir8-vnncomp.oSGXiS/benchmarks/mnistfc/prop_0_0.03.vnnlib.compiled
+Loading onnx /tmp/boundflow-nrir8-vnncomp.oSGXiS/benchmarks/mnistfc/mnist-net_256x2.onnx with quirks {}
+Finished onnx model loading in 0.0091 seconds
+Model: BoundedModule(
+  (/0): BoundInput(name=/0, inputs=[], perturbed=True)
+  (/7): BoundParams(name=/7, inputs=[], perturbed=False)
+  (/8): BoundParams(name=/8, inputs=[], perturbed=False)
+  (/9): BoundParams(name=/9, inputs=[], perturbed=False)
+  (/10): BoundParams(name=/10, inputs=[], perturbed=False)
+  (/11): BoundParams(name=/11, inputs=[], perturbed=False)
+  (/12): BoundParams(name=/12, inputs=[], perturbed=False)
+  (/13): BoundFlatten(name=/13, inputs=[/0], perturbed=True)
+  (/input): BoundLinear(name=/input, inputs=[/13, /7, /8], perturbed=True)
+  (/15): BoundRelu(name=/15, inputs=[/input], perturbed=True)
+  (/input-3): BoundLinear(name=/input-3, inputs=[/15, /9, /10], perturbed=True)
+  (/17): BoundRelu(name=/17, inputs=[/input-3], perturbed=True)
+  (/18): BoundLinear(name=/18, inputs=[/17, /11, /12], perturbed=True)
+)
+Original output in the first batch: tensor([[-0.01167344, -0.01593673,  0.02200326, -0.01133767, -0.00607850,
+          0.00676907, -0.00507420, -0.01863921,  1.00991786, -0.01158156]])
+Split layers:
+Nonlinear functions:
+   BoundRelu(name=/15, inputs=[/input], perturbed=True)
+   BoundRelu(name=/17, inputs=[/input-3], perturbed=True)
+build batch [1/1]
+layer /15 using sparse-features alpha with shape [6]; unstable size 6; total size 256 ([1, 256])
+layer /15 start_node /input-3 using sparse-spec alpha [2, 90, 1, 6] with unstable size 89 total_size 256 output_shape torch.Size([256])
+layer /15 start_node /18 using full alpha [2, 9, 1, 6] with unstable size None total_size 9 output_shape 9
+layer /17 using sparse-features alpha with shape [89]; unstable size 89; total size 256 ([1, 256])
+layer /17 start_node /18 using full alpha [2, 9, 1, 89] with unstable size None total_size 9 output_shape 9
+Optimizable variables initialized.
+initial CROWN bounds (first 10 items): [-0.025656819343566895, 0.13599805533885956, -0.007711779326200485, -0.16469430923461914, -0.2500758767127991, -0.04222200810909271, 0.0699133574962616, -0.21342551708221436, -0.8620344400405884]
+prune_after_crown optimization in use
+  original spec size = torch.Size([1, 9])
+  pruned spec size = torch.Size([1, 7])
+Using alpha-CROWN to initialize bounds.
+best_l after optimization: 1.154967188835144
+alpha/beta optimization time: 0.12728476524353027
+initial alpha-crown bounds (first 10 items): [0.30052700638771057, 0.2235688865184784, 0.1552104949951172, 0.22596943378448486, 0.2566596567630768, 0.18196476995944977, -0.18893304467201233]
+Global lower bound: -0.18893304467201233
+8 / 9 OR specs are verified.
+Verified OR indices (first 10 items): [0, 1, 2, 3, 4, 5, 6, 7]
+Verified OR lbs (first 10 items): [[0.30052700638771057], [inf], [0.2235688865184784], [0.1552104949951172], [0.22596943378448486], [0.2566596567630768], [inf], [0.18196476995944977]]
+Unverified OR indices (first 10 items): [8]
+Unverified OR lbs (first 10 items): [[-0.18893304467201233]]
+###### Verifying property Instance 0 ######
+Batch size: 1
+First 10 spec matrices
+C: tensor([[[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  1., -1.]]])
+RHS: tensor([[0.]])
+OR spec sizes: tensor([1], dtype=torch.int32)
+Remaining timeout: 59.65386343002319
+Model prediction is: tensor([-0.01167344, -0.01593673,  0.02200326, -0.01133767, -0.00607850,
+         0.00676907, -0.00507420, -0.01863921,  1.00991786, -0.01158156])
+Activation BaB batch 1/1 
+build_with_refined_bounds batch [1/1]
+Optimizable variables initialized.
+all alpha initialized
+directly get lb and ub from refined bounds
+c shape: torch.Size([1, 1, 10])
+lA shapes: [torch.Size([1, 1, 256]), torch.Size([1, 1, 256])]
+(alpha-)CROWN with fixed intermediate bounds: tensor([[-0.18893304]]) tensor([[inf]])
+Intermediate layers: /input,/input-3
+Keeping alphas for these layers: ['/18']
+Node /15 input 0: size torch.Size([256]) unstable 6
+Node /17 input 0: size torch.Size([256]) unstable 85
+-----------------
+# of unstable neurons: 91
+-----------------
+
+BaB round 1
+batch: 1
+splitting decisions: 
+split level 0: [/input-3, 159] 
+split level 1: [/input-3, 80] 
+best_l after optimization: -0.13638021051883698
+beta sum per layer: [0.0, 0.0]
+alpha/beta optimization time: 0.02077960968017578
+pruning_in_iteration open status: True
+ratio of positive domain = 3 / 4 = 0.75
+pruning-in-iteration extra time: 0.0007560253143310547
+Time: get_branching_decision.update_bounds 0.0045    pickout 0.0002    branching_decision 0.0000    decision 0.0000    set_bounds 0.0003    prepare 0.0002    transfer 0.0000    finalize 0.0001    func 0.0265    
+Accumulated time: get_branching_decision.update_bounds 0.0045    bab_iteration 0.0000    pickout 0.0002    decision 0.0000    branching_decision 0.0000    set_bounds 0.0003    solve 0.0000    func 0.0265    prepare 0.0002    transfer 0.0000    finalize 0.0001    
+max lb 9.999999747378752e-05 min lb -0.1366802155971527
+Number of Verified Splits: 3 of 4
+Current worst splitting domains lb-rhs (depth):
+-0.13668 (2), 
+Current (lb-rhs): -0.1366802155971527
+4 domains visited
+Length of domains: 1
+Cumulative time: 0.03441572189331055
+
+BaB round 2
+batch: 1
+splitting decisions: 
+split level 0: [/input, 93] 
+split level 1: [/input-3, 192] 
+
+all verified at 0th iter
+best_l after optimization: 0.7039802074432373
+beta sum per layer: [0.0, 0.0]
+alpha/beta optimization time: 0.0013401508331298828
+pruning_in_iteration open status: False
+ratio of positive domain = 4 / 4 = 1.0
+pruning-in-iteration extra time: 1.4781951904296875e-05
+Time: get_branching_decision.update_bounds 0.0045    pickout 0.0003    branching_decision 0.0000    decision 0.0000    set_bounds 0.0003    prepare 0.0002    transfer 0.0000    finalize 0.0000    func 0.0024    solve 0.0265    add 0.0002    bab_iteration 0.0274    
+Accumulated time: get_branching_decision.update_bounds 0.0045    bab_iteration 0.0274    pickout 0.0005    decision 0.0001    branching_decision 0.0001    set_bounds 0.0006    solve 0.0265    func 0.0288    prepare 0.0004    transfer 0.0000    finalize 0.0001    add 0.0002    
+max lb 0.2920079827308655 min lb 0.04405193030834198
+Number of Verified Splits: 4 of 4
+Current (lb-rhs): 1.0000000116860974e-07
+8 domains visited
+Length of domains: 0
+Cumulative time: 0.037462472915649414
+
+{"solver_status":"verified","status":"ok"}

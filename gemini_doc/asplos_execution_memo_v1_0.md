@@ -1,12 +1,12 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`d12f373`（NRIR-16 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`54e565f`（NRIR-17 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/hard-clause-branching-stronger-bound-v1`
-> PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-12 optimized queue
-> integration（完成）→ NRIR-13 sound property verdict（完成）→ NRIR-14 complete verifier
-> query（完成）→ end-to-end tightness/performance baseline**。
+> 当前研发分支：`feat/multiworkload-competitor-e2e-baseline-v1`
+> PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
+> NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
+> competitor E2E（完成）→ native intermediate-bound refinement**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有
@@ -72,6 +72,12 @@
 > contract。toy verified/unsafe/unknown/deadline 均闭环；固定 ResNet 九子句全部执行，但
 > native scalarized lower bounds 过松，9/9 unresolved，整体仍 unknown。只关闭 correctness/control
 > VALIDATED-REDUCED；下一步必须先建立端到端 phase/tightness baseline，不能直接宣称性能。
+
+> **2026-08-04 NRIR-18 结果**：三种 VNN-COMP 真实拓扑已进入 native VNNLIB Query IR 与
+> workload Plan/Task/Schedule。BoundFlow 为 unknown×3，固定 αβ-CROWN 为
+> verified/unknown/verified；单次 CPU E2E 只作诊断。ResNet native local root lower 仍达
+> `-543.717/-789.331`，故下一门禁是 intermediate-bound refinement，而不是 GPU timing 或
+> 继续加深同一 branching tree。详见第 31 节。
 
 ## 1. 锁定的论文命题
 
@@ -923,3 +929,24 @@ artifact fresh replay hash=
 `707 passed, 37 skipped`。该阶段只关闭 branch IR/control 与单 workload fixed-budget tightness
 `VALIDATED-REDUCED`；单次 audit timing 不是 performance claim。下一路线为多 workload/设备/
 竞品 E2E 协议与 stronger-bound，而不是把 bounded-tree improvement 写成完整 verifier closure。
+
+## 31. Multiworkload Competitor E2E Baseline v1
+
+NRIR-18 将 VNNLIB input box 与 unsafe output DNF 编译为 immutable Query IR；v1 只接受每个
+unsafe disjunct 恰含一条线性 inequality，缺界、重复界、非连续变量、非线性或多 inequality
+均 fail closed。三份真实 property 的 lower/upper/C/rhs 与固定 αβ-CROWN parser 逐字段一致。
+顶层 workload Plan/Task/Schedule 冻结三项 CSV selection、21 tasks 与 6 个 fresh-process native/
+competitor execution action，并绑定 model/property/CSV/query/compiler/policy/device/timeout hash。
+
+正式 CPU 矩阵结果如下：MNISTFC 的 BoundFlow/αβ-CROWN 为 `unknown/verified`，OVAL21 为
+`unknown/verified`，ResNet2B 为 `unknown/unknown`。BoundFlow 在 MNISTFC 留 3/9 unresolved，
+OVAL21 留 1/9 unresolved；ResNet 只在 deadline 前完成 2/9，root lower=
+`-543.717/-789.331`。fresh-process E2E 为 `38.644/4.312 s`、`31.498/4.527 s` 和
+`66.910/64.198 s`，但算法完整性和运行路径不同且只有单次 CPU observation，禁止计算 speedup。
+
+artifact fresh replay hash=
+`473b287bb88e4c52426b405aeb4164aa72a98d7b1bbd74c00471fe1d1451deb0`，全量
+`723 passed, 37 skipped`。该结果只关闭 ingest、typed IR/control 和真实 workload coverage
+`VALIDATED-REDUCED`；GPU/performance 与 ASPLOS-ready 仍为 NO。下一单一工程门禁是 native
+intermediate-bound refinement Plan/Task/Schedule：先缩小三 workload 的 root/closed-clause gap，
+再讨论 selective policy、prepared execution 或可用 CUDA 主机上的冻结矩阵。

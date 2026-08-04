@@ -16,6 +16,12 @@
 
 ### A. 论文/AE 视角（最推荐）
 
+当前最新入口：`gemini_doc/BOUNDFLOW_MULTIWORKLOAD_COMPETITOR_E2E_BASELINE_V1_PLAN_2026_08_04.md`
+（三真实拓扑、VNNLIB Query IR、workload Plan/Task/Schedule、BoundFlow/αβ-CROWN CPU 诊断与
+intermediate-bound blocker）。其直接前序为
+`gemini_doc/BOUNDFLOW_HARD_CLAUSE_OBJECTIVE_BRANCHING_V1_PLAN_2026_08_04.md` 和
+`gemini_doc/BOUNDFLOW_PREPARED_PRODUCTION_FAST_PATH_V1_PLAN_2026_08_04.md`。
+
 1. `gemini_doc/BOUNDFLOW_COMPLETE_VERIFIER_QUERY_V1_PLAN_2026_08_04.md`
    （当前最新：九子句 query、candidate search、sound aggregation、deadline 与 9/9 unknown blocker）
 2. `gemini_doc/BOUNDFLOW_NATIVE_PROPERTY_TERMINATION_VERDICT_V1_PLAN_2026_08_04.md`
@@ -84,6 +90,10 @@
 
 ### 2.1 关键交付文档（“长期有效”）
 
+- `gemini_doc/BOUNDFLOW_MULTIWORKLOAD_COMPETITOR_E2E_BASELINE_V1_PLAN_2026_08_04.md`：三种
+  VNN-COMP 拓扑、VNNLIB Query IR、21-task/6-worker protocol 与 competitor claim 边界
+- `gemini_doc/BOUNDFLOW_MULTIWORKLOAD_COMPETITOR_E2E_BASELINE_V1_CHANGELOG_2026_08_04.md`：
+  parser parity、fresh CPU 矩阵、artifact/replay/tests 与 intermediate-bound 下一门禁
 - `gemini_doc/BOUNDFLOW_PREPARED_PRODUCTION_FAST_PATH_V1_PLAN_2026_08_04.md`：exact
   prepared optimizer/root-query capsule、cold/warm 公平协议与 identity 门禁
 - `gemini_doc/BOUNDFLOW_PREPARED_PRODUCTION_FAST_PATH_V1_CHANGELOG_2026_08_04.md`：三组
