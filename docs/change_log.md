@@ -3942,3 +3942,24 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_COMPLETE_VERIFIER_QUERY_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：End-to-End Tightness and Performance Baseline v1
+
+- typed external intermediate semantics 接入 optimizer Schedule、selected-native compiler、
+  queue child batches 与 complete query；external bounds/provenance 与 tensor schema fail closed；
+- adaptive α 初始化与 external initial-CROWN policy 对齐，默认 constant canonical hash 保持不变；
+- fixed ResNet 从 local 0/9 提升为 external-adaptive 6/9 verified，仅 clauses 0/2/4 unknown；
+  九个 lower 对 external initial 无退化、最大改善 `0.0072252750`、sign 9/9；
+- 三组轮换 CPU audit queue median 为 `6.7178/6.7969/6.7317 s`，candidate/verdict 约
+  `3.6/3.9 ms`，定位 compile/hash/selected-native re-execution 为主耗时；
+- 新增 generate/replay runner、frozen artifact 与 semantic/timing/claim tamper tests；fresh replay
+  hash=`14c3b9dc2e5376156be1f33f3e8804ec21f60e11096bd3bdc95225b7e1474376`；
+- focused `35 passed`、全量 `684 passed, 37 skipped`；Mypy clean、Pylint 10.00/10、
+  Black/diff check 通过；
+- 只关闭单 workload CPU diagnosis `VALIDATED-REDUCED`；下一门禁是 prepared production fast
+  path，随后处理三个 hard clauses，不声明 CUDA/竞品 speedup 或完整 verifier closure。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_END_TO_END_TIGHTNESS_PERFORMANCE_BASELINE_V1_CHANGELOG_2026_08_04.md`

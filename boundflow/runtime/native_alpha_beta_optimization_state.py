@@ -35,6 +35,7 @@ from .task_ir_executor import TaskExecutionTrace
 
 NATIVE_ALPHA_BETA_STATE_SCHEMA_VERSION = "boundflow.native-alpha-beta-state/v1"
 WarmStartKind = Literal["exact", "monotonic_split_refinement", "rejected"]
+AlphaInitializationMode = Literal["constant", "adaptive"]
 
 
 def _is_sha256(value: object) -> bool:
@@ -63,6 +64,7 @@ class NativeAlphaBetaOptimizerPolicy:
     objective: AlphaObjective = "lower"
     spec_reduce: SpecReduce = "mean"
     soft_tau: float = 1.0
+    alpha_initialization_mode: AlphaInitializationMode = "constant"
 
     def validate(self) -> None:
         if (
@@ -72,6 +74,7 @@ class NativeAlphaBetaOptimizerPolicy:
             or self.beta_init < 0.0
             or self.objective not in {"lower", "upper", "gap", "both"}
             or self.spec_reduce not in {"mean", "min", "softmin"}
+            or self.alpha_initialization_mode not in {"constant", "adaptive"}
             or self.soft_tau <= 0.0
             or not all(
                 torch.isfinite(torch.tensor(value)).item()
@@ -87,7 +90,7 @@ class NativeAlphaBetaOptimizerPolicy:
 
     def to_dict(self) -> dict[str, object]:
         self.validate()
-        return {
+        payload: dict[str, object] = {
             "steps": self.steps,
             "lr": self.lr,
             "alpha_init": self.alpha_init,
@@ -98,6 +101,10 @@ class NativeAlphaBetaOptimizerPolicy:
             "per_batch_params": True,
             "optimizer": "torch.optim.Adam",
         }
+        # Compatibility: the historical constant policy keeps its exact v1 hash.
+        if self.alpha_initialization_mode != "constant":
+            payload["alpha_initialization_mode"] = self.alpha_initialization_mode
+        return payload
 
     def stable_hash(self) -> str:
         return _canonical_hash(self.to_dict())
@@ -516,10 +523,15 @@ def compile_native_alpha_beta_state_query(
     query_id: str,
     available_memory_bytes: int = 1 << 30,
     memory_budget_bytes: int = 1 << 30,
+    intermediate_bound_source: IntermediateBoundSource = (
+        IntermediateBoundSource.LOCAL_FORWARD
+    ),
 ) -> NativePlainCrownRepresentationCompilation:
     """Compile one frozen optimized state through all five native IR layers."""
 
     optimization.validate()
+    if not isinstance(intermediate_bound_source, IntermediateBoundSource):
+        raise TypeError("native alpha/beta intermediate-bound source is invalid")
     state = optimization.state
     if state.scope.primal_graph_hash != plain_crown_primal_graph_hash(
         module
@@ -540,7 +552,7 @@ def compile_native_alpha_beta_state_query(
         relu_alpha_state=state.alphas,
         relu_beta_state=state.betas,
         optimization_state_hash=state.payload_hash(),
-        intermediate_bound_source=IntermediateBoundSource.LOCAL_FORWARD,
+        intermediate_bound_source=intermediate_bound_source,
     )
 
 

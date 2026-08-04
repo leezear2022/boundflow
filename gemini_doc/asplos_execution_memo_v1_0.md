@@ -864,3 +864,23 @@ artifact 位于 `artifacts/complete-verifier-query/vnncomp21-resnet2b-prop0-cpu-
 也没有 latency/memory/CUDA/speedup claim。下一阶段先冻结 end-to-end phase/tightness baseline：
 分别测 candidate、bound optimization、queue、verdict，记录 proof gap、nodes、batch/cache 和
 same-solver/竞品口径；随后才允许按证据选择 dynamic optimizer、branching/tightness 或执行优化。
+
+## 28. End-to-End Tightness and Performance Baseline v1
+
+NRIR-15 将 NRIR-1/RVIR 的 frozen external intermediate semantics 接入 optimizer Schedule、
+selected-state native compiler、optimized queue child batches 与 complete query。external bounds 与
+typed `EXTERNAL_VERIFIER` provenance 必须成对出现；child 的 root external interval 会与 node
+active/inactive split 相交，parent state 仍仅允许 monotonic-refinement initialization。adaptive α
+初始化与 frozen initial-CROWN lower-slope policy 对齐，同时默认 constant policy payload/hash 不变。
+
+固定 ResNet 九子句的 local NRIR-14 reference 为 0/9；external-adaptive 1-step query 直接关闭
+clauses `1/3/5/6/7/8`，变为 6/9 verified、`0/2/4` unknown。九个 lower 相对 frozen external
+initial 没有退化，最大改善 `0.0072252750`、sign `9/9`。artifact fresh replay hash 为
+`14c3b9dc2e5376156be1f33f3e8804ec21f60e11096bd3bdc95225b7e1474376`。
+
+三组轮换 CPU 诊断显示 clause 0 的 audit queue median：local-constant `6.7178 s`、
+external-constant `6.7969 s`、external-adaptive `6.7317 s`；candidate 与 verdict 只有约
+`3.6/3.9 ms`。因此 fixed compile/hash/selected-native re-execution 是当前 wall-time blocker，
+不是搜索或 verdict。该结果是 `VALIDATED-REDUCED` 的单 workload CPU diagnosis，不是 production
+latency、CUDA 或竞品 speedup。下一工程门禁是 prepared production fast path；之后再对三个 hard
+clauses 推进 branching/stronger-bound，不得把 6/9 写成完整 verifier closure。

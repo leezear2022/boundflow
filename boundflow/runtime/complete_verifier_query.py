@@ -2,7 +2,7 @@
 
 # pylint: disable=too-many-arguments,too-many-locals,too-many-instance-attributes
 # pylint: disable=too-many-boolean-expressions,missing-function-docstring
-# pylint: disable=invalid-name,too-many-statements,duplicate-code
+# pylint: disable=invalid-name,too-many-statements,too-many-branches,duplicate-code
 
 from __future__ import annotations
 
@@ -10,11 +10,13 @@ from dataclasses import dataclass, replace
 import hashlib
 import json
 import time
-from typing import Callable, Literal, Optional
+from typing import Callable, Literal, Mapping, Optional
 
 import torch
 
+from ..domains.interval import IntervalState
 from ..frontends.plain_crown_bound_ir import tensor_content_hash
+from ..ir.bound import IntermediateBoundSource
 from ..ir.task import BFTaskModule
 from .native_alpha_beta_optimization_state import NativeAlphaBetaOptimizerPolicy
 from .native_candidate_search import (
@@ -376,6 +378,10 @@ def execute_complete_verifier_query(
     search_policy: NativeProjectedGradientSearchPolicy,
     queue_config: NativeReluSplitBabConfig,
     optimizer_policy: NativeAlphaBetaOptimizerPolicy,
+    relu_pre_override: Optional[Mapping[str, IntervalState]] = None,
+    intermediate_bound_source: IntermediateBoundSource = (
+        IntermediateBoundSource.LOCAL_FORWARD
+    ),
     clock_ns: ClockNs = time.monotonic_ns,
 ) -> CompleteVerifierQueryExecution:
     """Execute conjunction clauses sequentially with sound unsafe short-circuit."""
@@ -387,6 +393,12 @@ def execute_complete_verifier_query(
     search_policy.validate()
     queue_config.validate()
     optimizer_policy.validate()
+    if not isinstance(intermediate_bound_source, IntermediateBoundSource):
+        raise TypeError("complete verifier intermediate-bound source is invalid")
+    if (relu_pre_override is None) != (
+        intermediate_bound_source == IntermediateBoundSource.LOCAL_FORWARD
+    ):
+        raise ValueError("complete verifier intermediate semantics/provenance differ")
     objectives = _normalize_objective_matrix(linear_spec_C)
     if (
         not torch.is_tensor(thresholds)
@@ -440,6 +452,8 @@ def execute_complete_verifier_query(
             run_id=f"{query_id}:clause:{clause_index:04d}",
             config=clause_config,
             optimizer_policy=optimizer_policy,
+            relu_pre_override=relu_pre_override,
+            intermediate_bound_source=intermediate_bound_source,
         )
         if deadline_expired():
             pending = tuple(range(clause_index, clause_count))

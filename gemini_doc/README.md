@@ -84,6 +84,11 @@
 
 ### 2.1 关键交付文档（“长期有效”）
 
+- `gemini_doc/BOUNDFLOW_END_TO_END_TIGHTNESS_PERFORMANCE_BASELINE_V1_PLAN_2026_08_04.md`：
+  external-intermediate optimizer/queue/query bridge、三组 phase/tightness 诊断协议与下一
+  prepared-production 门禁
+- `gemini_doc/BOUNDFLOW_END_TO_END_TIGHTNESS_PERFORMANCE_BASELINE_V1_CHANGELOG_2026_08_04.md`：
+  fixed ResNet 6/9 结果、约 6.7 s audit queue 归因、artifact/replay/tests 与限制
 - `gemini_doc/BOUNDFLOW_COMPLETE_VERIFIER_QUERY_V1_PLAN_2026_08_04.md`：multi-clause
   conjunction、candidate search、sound aggregation/short-circuit、cooperative deadline、固定
   ResNet 9/9 unknown 与下一 tightness/performance baseline 门禁

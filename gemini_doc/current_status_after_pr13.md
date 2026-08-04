@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`597332d`（NRIR-13 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/complete-verifier-query-v1`
+> 当前 integration base：`3b4bb64`（NRIR-14 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/end-to-end-tightness-performance-baseline-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
@@ -93,6 +93,10 @@
 > short-circuit 与 cooperative deadline 已关闭为 control/correctness VALIDATED-REDUCED。固定
 > ResNet 九个真实 clauses 全部执行，但 9/9 native scalarized lower bounds 仍过松并返回 unknown；
 > 下一阶段必须建立端到端 phase/tightness baseline，再攻 dynamic optimization、branching 与执行性能。
+> 2026-08-04 NRIR-15 后续：external intermediate semantics 已贯穿 optimizer/queue child/query，
+> adaptive 1-step 把固定 ResNet 从 0/9 提升到 6/9 verified，仅 0/2/4 unknown；三组 CPU audit
+> queue 均约 6.7 s，而 candidate/verdict 仅约 3.6/3.9 ms。下一门禁确定为 prepared production
+> fast path；6/9 仍不是完整 verifier 或 ASPLOS performance claim。
 
 ## 1. 当前真实阶段
 
@@ -120,6 +124,7 @@ BoundFlow 已经完成从边界表示到 query runtime prototype 的主干：
 | Native optimized split queue NRIR-12 | optimizer × queue integration validated-reduced | 每 node batch 8 optimizer actions + 21 native tasks；7 nodes/3 expands/4 frontier；parent warm-only；仍 budget-exhausted/not-claimed |
 | Native property verdict NRIR-13 | three-state soundness/control validated-reduced | verified 只接受 sound-pruned closure；unsafe 必须 concrete replay；固定 ResNet frontier 保持 unknown |
 | Complete verifier query NRIR-14 | multi-clause query control validated-reduced | conjunction、PGD candidate、witness replay、unsafe short-circuit、cooperative deadline；固定 ResNet 9/9 unresolved，无性能 claim |
+| E2E tightness/performance baseline NRIR-15 | external semantics + CPU diagnosis validated-reduced | fixed ResNet 6/9 verified、3 hard clauses；三组 audit queue 约 6.7 s，candidate/verdict 毫秒级；下一步 prepared production path，无 speedup claim |
 | ASPLOS 最终系统主张 | IR-5 final VALIDATED-NO-GO | IR-1—4 narrow closure 保留；Global p90/Pareto 失败，当前 system-performance 路线已关闭 |
 
 历史 `main@263ea81` 只到 PR-10 closure，不能再作为项目当前状态入口。跨会话恢复必须同时检查
@@ -571,3 +576,19 @@ hash=`d17f7d7e960491ad7ef3f33bad41a4cfbf21a9fd5213df3637584b6a753968f1`。相关
 性能结果。下一工程阶段必须先冻结端到端 phase/tightness baseline，至少分解 candidate、bound
 optimization、queue、verdict 的 wall time、proof gap、nodes 与 batching/cache 行为；在公平
 same-solver/竞品口径下再决定 dynamic optimizer、branching/tightness 和执行优化的优先级。
+
+## 22. End-to-End Tightness and Performance Baseline v1 判定
+
+NRIR-15 修复了 NRIR-14 optimized queue 丢失 external intermediate semantics 的断层。typed
+external provenance、六组 ReLU intervals、adaptive α 初始化与 split-constrained child batches
+已经贯穿 optimizer source/Plan/state/native stack/query；任何来源或 tensor schema错配均 fail closed。
+
+固定 ResNet external-adaptive 1-step lower 对 frozen external initial 无退化，并把
+`1/3/5/6/7/8` 六个 clauses 证明为 verified；`0/2/4` 保持 unknown。fresh semantic replay 与
+artifact hash `14c3b9dc2e5376156be1f33f3e8804ec21f60e11096bd3bdc95225b7e1474376` 一致。
+
+三组轮换 CPU 诊断中，三种 queue variant median 均约 6.7 秒；candidate/verdict 仅约
+3.6/3.9 毫秒。结论是 fixed compiler/hash/selected-native validation re-execution 支配当前耗时。
+因此下一代码路线是 prepared production fast path，并要求与 audit path 数值/状态一致；之后才对
+三个 hard clauses 做 branching/stronger-bound。该阶段只为单 workload CPU
+`VALIDATED-REDUCED` diagnosis，不是 production/CUDA/competitor speedup，也不是 ASPLOS-ready。
