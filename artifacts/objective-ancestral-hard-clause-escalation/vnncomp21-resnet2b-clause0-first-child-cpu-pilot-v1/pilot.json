@@ -1,0 +1,306 @@
+{
+  "children": [
+    {
+      "ancestral": {
+        "branch_candidate": {
+          "lower": -56.2340202331543,
+          "neuron_index": 13,
+          "relu_input": "31",
+          "upper": 46.08847427368164,
+          "width": 102.32249450683594
+        },
+        "lower": -142.7036590576172,
+        "native_ir_hashes": {
+          "execution_bound_module_hash": "e35d3745b5563e3f474d78fbcb617d2fe41e6cdc46779ead217ea8f72bb5cab7",
+          "execution_plan_instance_hash": "92211de079384d59ba9cc317ee37511f0698ef144d8db53ef8a4068402cf066d",
+          "execution_plan_template_hash": "9a8ba1b1df7043cc760eb9a704198c66bd9a91a2ea5f1f2de01339291d6f81c8",
+          "representation_binding_hash": "86a3998a407d8c156ee00d19ab523681a9e78bdf58c22f03d9c70b3f47877933",
+          "schedule_hash": "b96086745e81cf89ff5b58e181ef29fcb1b9938ebea04b8e0aabab7db297e477",
+          "source_bound_module_hash": "e35d3745b5563e3f474d78fbcb617d2fe41e6cdc46779ead217ea8f72bb5cab7",
+          "source_plan_instance_hash": "b4d67c54ac77bf4019660a6e91afd0b07437ccf26b8429a32801c9f834610161",
+          "source_plan_template_hash": "e16b5083b017ecf17c22acb2fe96cb321acda4ebbd01d119538e7769ba060c5d",
+          "source_schedule_hash": "41eac779763c80487acec616362defafe3ad81dad0d5d2d744b393b9649a8685",
+          "task_module_hash": "846745db3d90d7c3c0b05a722cabdcefbe31312f67b1f25eba2b87d5af547596"
+        },
+        "node": {
+          "branch_neuron_index": 66,
+          "branch_relu_input": "31",
+          "branch_value": -1,
+          "depth": 1,
+          "node_id": "nrir32:resnet:clause0:n000001",
+          "parent_node_id": "nrir32:resnet:clause0:n000000",
+          "split_state_hash": "457eb944dcc7f232d9911741b29d9896e48ca6c7ee806350f412cd96563af4c5"
+        },
+        "optimizer_execution_trace_hash": "1d79ac53d9e873565b11e76e1a631c20112ff7c34a3261ce6c175eaae3501241",
+        "optimizer_ir_hashes": {
+          "optimizer_plan_hash": "f79754cba8ea57b5b4efa89d35a68a8fd98c596e1bdbc055a05db037e5847d47",
+          "optimizer_schedule_hash": "a0cca590962226a4bb88a4345eb07fbfb21b2b17e0cf9ba2611ba75bcc21fe3c",
+          "optimizer_task_module_hash": "d66377dfbaec0f6cadaef1626c227c0204e0e93b2c6f0b15cdffe82f8a522095"
+        },
+        "selected_state_hash": "6aab4dbe596aa562a21810166a3a3ed5aebe024c49295bd9ff230f47fbd27a0f",
+        "upper": 151.21844482421875
+      },
+      "branch_value": -1,
+      "child_node_id": "nrir32:resnet:clause0:n000001",
+      "child_refinement": {
+        "program_hashes": {
+          "refinement_plan_hash": "1d11c9beb2cc8c877ab929e70cba21aabc09be984bef38fb8d71370875dee77f",
+          "refinement_schedule_hash": "40746ae04f1b8e9b5c503997be32631d67bc471e107cf9734efa5c3464285044",
+          "refinement_task_module_hash": "6350ef17968055f06307efb5a40618a0a6ed19fe6ddc57b1b0408a9d5e50c835"
+        },
+        "semantic_trace_hash": "ae203c1f46423229b3db77e6319689eb7f43675c845b588e56f6a6ba1edfa5ea",
+        "source_consumption": "sound_constraint_only",
+        "source_intermediate_constraints_hash": "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+        "source_refinement_plan_hash": "852988a69319cb35a6e2f41499749376ceeed6a2d98a90168908245d09466fb3",
+        "source_refinement_semantic_trace_hash": "c97333d84901c4c73f5eb8b02380c039eb888b795df9dbd0fb9b92d30e3bae74"
+      },
+      "child_split_state_hash": "457eb944dcc7f232d9911741b29d9896e48ca6c7ee806350f412cd96563af4c5",
+      "lower_delta": 59.367462158203125,
+      "non_regression_1e_5": true,
+      "root_global": {
+        "branch_candidate": {
+          "lower": -79.62786102294922,
+          "neuron_index": 93,
+          "relu_input": "31",
+          "upper": 64.87014770507812,
+          "width": 144.49800872802734
+        },
+        "lower": -202.0711212158203,
+        "native_ir_hashes": {
+          "execution_bound_module_hash": "cad88cf2e42a0fc2e7d11b7dd40d9d9c6d67020d6aed41479764d6e11f3a4862",
+          "execution_plan_instance_hash": "0857a82405d46a8545cd1f16591afb49186d6860871893ef13ee3ec2a751068e",
+          "execution_plan_template_hash": "76b626de747e11eb2274eb0f37c8770a09e591641426bb833d5314fefac5bcbd",
+          "representation_binding_hash": "23efcead3052520f7209ab60f0e1563ba982f6b811f2bd6b0718ec083031f4ba",
+          "schedule_hash": "1965e0291c1bd00110cae1bbef5ca17445d10c79d3eb8d5e753a606a02942f28",
+          "source_bound_module_hash": "cad88cf2e42a0fc2e7d11b7dd40d9d9c6d67020d6aed41479764d6e11f3a4862",
+          "source_plan_instance_hash": "1cad0d52760ed230dc7a327fe576bbecddf5aa02339fcbadfc23d13fd8e2a8e0",
+          "source_plan_template_hash": "733d60fed7b4d20d6d7f0ad4eea6ce308ac02a6c01f22b5bb66bb59019fc2984",
+          "source_schedule_hash": "36378226b5b636515f3af93e6fcf74558e5f151a7c8ff9f0eddd6aa74d333241",
+          "task_module_hash": "30865abff1d4f74883a82c9adbbfd8524cbab332dadfd2ae0f5dc08ed3860b9e"
+        },
+        "node": {
+          "branch_neuron_index": 66,
+          "branch_relu_input": "31",
+          "branch_value": -1,
+          "depth": 1,
+          "node_id": "nrir32:resnet:clause0:n000001",
+          "parent_node_id": "nrir32:resnet:clause0:n000000",
+          "split_state_hash": "457eb944dcc7f232d9911741b29d9896e48ca6c7ee806350f412cd96563af4c5"
+        },
+        "optimizer_execution_trace_hash": "2d9cd0fa50caf5e87432472f1ce45bc47f02553718a4cb44922988254ef41921",
+        "optimizer_ir_hashes": {
+          "optimizer_plan_hash": "5c9e92de22830451b226bd8478da82bce8edef6c1deee83c54df43bdbf21ba4c",
+          "optimizer_schedule_hash": "1921a6a1da5b3cf8794f018a35e82eba0f506d0cbf8bdb3dfe0df044af469af8",
+          "optimizer_task_module_hash": "4b04c85f2264009d56a166f6451bb7acc75144254964eb6a281fb1cb1dead79d"
+        },
+        "selected_state_hash": "172b8cb78bd996bb69dd0c726276a9fa9172868a7925dd99ea62d6bdf3cb2e3a",
+        "upper": 211.2781219482422
+      }
+    },
+    {
+      "ancestral": {
+        "branch_candidate": {
+          "lower": -56.2340202331543,
+          "neuron_index": 13,
+          "relu_input": "31",
+          "upper": 46.08847427368164,
+          "width": 102.32249450683594
+        },
+        "lower": -142.85464477539062,
+        "native_ir_hashes": {
+          "execution_bound_module_hash": "d9b80328f03393b5ec12c77e5197174fe3e8a6d990b1fd33fcee212244cc1235",
+          "execution_plan_instance_hash": "3779f3abaac8709b69b8ab84af1cca74fa26bb8aea6ac0d8431a23e4c42851a8",
+          "execution_plan_template_hash": "df9672c9bc661a04d9bb97fbf10c893a1e9f73a20b1eb393d7e40a5312c7e66e",
+          "representation_binding_hash": "7a464e75322f5f7209cb4b565e77576e73aaa8a3b076a18ccaff22efdc115729",
+          "schedule_hash": "8394450e7bbda581803ac171c96dcd7ff93b6bd71658ed35bd4391594b793bd2",
+          "source_bound_module_hash": "d9b80328f03393b5ec12c77e5197174fe3e8a6d990b1fd33fcee212244cc1235",
+          "source_plan_instance_hash": "444c41dd92892d8798af1975981b792a27922e5e2b723cfcab902925b15d8db6",
+          "source_plan_template_hash": "335e433db692e86fe30ee43165f9b357446baa51a06d38173f5129ad3073d1df",
+          "source_schedule_hash": "dddfc6776f56cdd69922700917e7e1e4ccb57c8b19eced2e40e0a92ef2e5db89",
+          "task_module_hash": "626b9241ac5f1c54ae35c6c5d7ef7e19118bb201c1dcefdc0a5a446032d22da2"
+        },
+        "node": {
+          "branch_neuron_index": 66,
+          "branch_relu_input": "31",
+          "branch_value": 1,
+          "depth": 1,
+          "node_id": "nrir32:resnet:clause0:n000002",
+          "parent_node_id": "nrir32:resnet:clause0:n000000",
+          "split_state_hash": "28897740ea1859d1dd400537593d9bbfef6ca16eca4c8be5c671a46214a4f6e7"
+        },
+        "optimizer_execution_trace_hash": "ced278dba5a96594b890b374c2cda241d3f5ab17a9debd4c1247c3ab4af4670b",
+        "optimizer_ir_hashes": {
+          "optimizer_plan_hash": "f552a74958f98fa2dccee713dee44ecad27a4350fcaf307b9ee12e6ce4303148",
+          "optimizer_schedule_hash": "ceec538ca896050b2a92d5c8fca485b911db10336ac16f0966ee5bc2033c0f1b",
+          "optimizer_task_module_hash": "48ecb2d0c429ad87efefec23ca3080f36a58880c401a25d14fa8009bbb9fde74"
+        },
+        "selected_state_hash": "cc79ef52a961eacbe8c272b631721a08ff8ccdd41158f74665442486a309b21a",
+        "upper": 150.83197021484375
+      },
+      "branch_value": 1,
+      "child_node_id": "nrir32:resnet:clause0:n000002",
+      "child_refinement": {
+        "program_hashes": {
+          "refinement_plan_hash": "864ebf700b9db7bb98d255a489cd3b8aa5df3c3feaabca49b7a0bc0e517e5161",
+          "refinement_schedule_hash": "7357849221785af88f8b8d0a0aa1ee8a8c17424643d63551f60b498ab5912976",
+          "refinement_task_module_hash": "8f256d1bda94832c357538121f7e9e41f3da8eff73b76c84b692aab1515534bd"
+        },
+        "semantic_trace_hash": "309a0e9daf89696dc0dc181e7dcfab540708629e30a180b0321b602d03910878",
+        "source_consumption": "sound_constraint_only",
+        "source_intermediate_constraints_hash": "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+        "source_refinement_plan_hash": "852988a69319cb35a6e2f41499749376ceeed6a2d98a90168908245d09466fb3",
+        "source_refinement_semantic_trace_hash": "c97333d84901c4c73f5eb8b02380c039eb888b795df9dbd0fb9b92d30e3bae74"
+      },
+      "child_split_state_hash": "28897740ea1859d1dd400537593d9bbfef6ca16eca4c8be5c671a46214a4f6e7",
+      "lower_delta": 59.25347900390625,
+      "non_regression_1e_5": true,
+      "root_global": {
+        "branch_candidate": {
+          "lower": -79.62786102294922,
+          "neuron_index": 93,
+          "relu_input": "31",
+          "upper": 64.87014770507812,
+          "width": 144.49800872802734
+        },
+        "lower": -202.10812377929688,
+        "native_ir_hashes": {
+          "execution_bound_module_hash": "1a49b9b67ad4c71b7ab25ac2bbb090b7b09be51c5381b517680cef02bc17f8f6",
+          "execution_plan_instance_hash": "05d14ac537a5a6c631386987fe3cb4e7643258ea93c4e1e2de49536e0a8798d4",
+          "execution_plan_template_hash": "a4de36b945ea8bebb247318c1dcd6ce6cba72199762e70b536d6491f14190fe1",
+          "representation_binding_hash": "f45e52deaa12be63c12170df12e4e9004bcfd9fc949fa01b790900be4c455841",
+          "schedule_hash": "3acc9897c0acb2bb79b096a390b1eddc2ea8149ef7c5514e65e80ac7a8dfcffd",
+          "source_bound_module_hash": "1a49b9b67ad4c71b7ab25ac2bbb090b7b09be51c5381b517680cef02bc17f8f6",
+          "source_plan_instance_hash": "45358594365127233bc957c92823eec6bd3e07b92a361ca4945a25cdaf21ade1",
+          "source_plan_template_hash": "6e3fdceb0b87c518a8ea97e67a2ab5d67e2325cbfd6eae1711ab826432337a60",
+          "source_schedule_hash": "c2dfeb8e8af1722daa14e3438ca19ff9ccf37fc4b33075282d883ea3b6de5226",
+          "task_module_hash": "4fbbe1d2c41c7aadbe25765513d734677dc7dc168084221f940b03496cc63ab0"
+        },
+        "node": {
+          "branch_neuron_index": 66,
+          "branch_relu_input": "31",
+          "branch_value": 1,
+          "depth": 1,
+          "node_id": "nrir32:resnet:clause0:n000002",
+          "parent_node_id": "nrir32:resnet:clause0:n000000",
+          "split_state_hash": "28897740ea1859d1dd400537593d9bbfef6ca16eca4c8be5c671a46214a4f6e7"
+        },
+        "optimizer_execution_trace_hash": "54df163cf73093c5b12db570334e288229fbbdce5ee65d2f52ebb93908d781e3",
+        "optimizer_ir_hashes": {
+          "optimizer_plan_hash": "84da86fc91b1e7fa108aae78d98c98c96aabc8bcea66b68d88c4e814b9885243",
+          "optimizer_schedule_hash": "a8e04b072d2245e03599f88f93ba12a36e2954c8be0fc344d68d1adb9259fe2d",
+          "optimizer_task_module_hash": "3039a05a01069159228854fedcde1b53a11f7a52f089fc50f0da81be5d18aed6"
+        },
+        "selected_state_hash": "11c1a2b753589f0057ee692226a198d6a2c2fc7e82cb2c52950e86a72b701bfb",
+        "upper": 210.67454528808594
+      }
+    }
+  ],
+  "clause_index": 0,
+  "elapsed_ns": 34772814116,
+  "gate": {
+    "all_children_non_regressing": true,
+    "ancestral_worst_child_lower": -142.85464477539062,
+    "pilot_gate_passed": true,
+    "root_exact_source": true,
+    "root_global_worst_child_lower": -202.10812377929688,
+    "strict_worst_child_improvement_gt_1e_4": true,
+    "worst_child_lower_delta": 59.25347900390625
+  },
+  "objective_root": {
+    "branch": {
+      "lower": -85.59491729736328,
+      "neuron_index": 66,
+      "relu_input": "31",
+      "upper": 60.770511627197266,
+      "width": 146.36542892456055
+    },
+    "evaluation": {
+      "branch_candidate": {
+        "lower": -85.59491729736328,
+        "neuron_index": 66,
+        "relu_input": "31",
+        "upper": 60.770511627197266,
+        "width": 146.36542892456055
+      },
+      "lower": -204.17315673828125,
+      "native_ir_hashes": {
+        "execution_bound_module_hash": "44afea218a25d53c295e50aba7f778c7af1994e7f8063af9ec66f9baaeffff3c",
+        "execution_plan_instance_hash": "10bd0aedabba3d01020008e45e88ef3fe86c93882aa60983d1cd8ad426c19df8",
+        "execution_plan_template_hash": "e16ca920c8f79ecaccfcf8929beb9c6375624f379006f64bc0ca5aac72fca14a",
+        "representation_binding_hash": "8d9ce3c99400e6a1044ca02ac5eef60c5dfa931a6832f0be487775749cd55ac6",
+        "schedule_hash": "0277d590625de64f030cc3f2419a44f210db3c3ec6fbf97c79040bc2f71209af",
+        "source_bound_module_hash": "44afea218a25d53c295e50aba7f778c7af1994e7f8063af9ec66f9baaeffff3c",
+        "source_plan_instance_hash": "5755f660186cfb937a816282ba64b10d2da173ee42f752482f49383dea4449c4",
+        "source_plan_template_hash": "c13c61bc1aabb3c9efcda3f32b1dc99c6d48f78ea84c571513e2b269404b35df",
+        "source_schedule_hash": "7e57793d8452edc0ce78c84edb47ed80332695b69f28497392d19d9ab1fc466b",
+        "task_module_hash": "431ac29b7f0a26baf1d0bd2f3ec08f0ecb358f562c092cf70a6b2e4b64d9b413"
+      },
+      "node": {
+        "branch_neuron_index": null,
+        "branch_relu_input": null,
+        "branch_value": 0,
+        "depth": 0,
+        "node_id": "nrir32:resnet:clause0:n000000",
+        "parent_node_id": null,
+        "split_state_hash": "32ef5aa369eb3b424067ead0f6b4a41a59b7c5753a5e59034bc13372b10bc2be"
+      },
+      "optimizer_execution_trace_hash": "0ccae62b1416cf4e9091e81fd49fcf3b76d6e208790fda7f4810d5068e7e47db",
+      "optimizer_ir_hashes": {
+        "optimizer_plan_hash": "1ee94a2bf185d002577990944c78b06c5c6014501641a92d70733510c723c0f3",
+        "optimizer_schedule_hash": "e62c17eaeacc88c46e1ddd5e53bbab43c15ccab7771fd80b85a2f7dd236fdd57",
+        "optimizer_task_module_hash": "124cef5a64fa2dfaa00139405755edf9eef77a204f1fdf01932d74cf80bbcb04"
+      },
+      "selected_state_hash": "a5c103de37ea474b6232486976ab72c78ece94337187931937d48a2d91543cfc",
+      "upper": 213.74331665039062
+    },
+    "program_hashes": {
+      "refinement_plan_hash": "852988a69319cb35a6e2f41499749376ceeed6a2d98a90168908245d09466fb3",
+      "refinement_schedule_hash": "f089366672fa8987cd6551c4fb7403bf33455a1bf66d0995872f752771a6a09f",
+      "refinement_task_module_hash": "f3dc8acd47e0f2337cb42acc939c91c9b1851c75144575f53b8ef60ba30f1356"
+    },
+    "semantic_trace_hash": "c97333d84901c4c73f5eb8b02380c039eb888b795df9dbd0fb9b92d30e3bae74"
+  },
+  "performance_claimed": false,
+  "protocol": {
+    "child_evaluation_batch_size": 1,
+    "objective_policy": {
+      "backward_chunk_size": 32,
+      "candidate_policy_id": "objective_influence_width_per_relu_v1",
+      "max_neurons_per_relu": 128,
+      "minimum_width": 0.0,
+      "passes": 1,
+      "refinement_method": "selected_plain_crown_v1"
+    },
+    "optimizer_steps": 5,
+    "performance_claimed": false,
+    "search_budget_context": {
+      "max_depth": 2,
+      "max_nodes": 7
+    },
+    "shared_policy": {
+      "backward_chunk_size": 32,
+      "candidate_policy_id": "top_ambiguous_width_per_relu_v1",
+      "max_neurons_per_relu": 128,
+      "minimum_width": 0.0,
+      "passes": 1,
+      "refinement_method": "selected_plain_crown_v1"
+    },
+    "torch_threads": 8
+  },
+  "schema_version": "boundflow.objective-ancestral-hard-clause-pilot/v1",
+  "shared": {
+    "program_hashes": {
+      "refinement_plan_hash": "f21cb0b27cf1f89e7dbe15519a2e247689459cc41380a8168d115781b3094580",
+      "refinement_schedule_hash": "60666e4995bbbe3d7233ac69ceac314b502ced7f868ce86fde44b0ec518aacac",
+      "refinement_task_module_hash": "f33eb152421e7d9a7ca873cba5b7c3fcb1e29fa5344d92470b3a051c02eb89d6"
+    },
+    "semantic_trace_hash": "47631f9607320b7dfd017d714f1bd76b6833e8861c00d916796c7014fd0a6789"
+  },
+  "source": {
+    "code_revision": "20b4d43e5d0c36561635d464c3d6806a8fbcddebfa0939336f61a25d267cfbc8",
+    "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+    "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff"
+  },
+  "status": "ok",
+  "workload_id": "cifar10_resnet:000"
+}

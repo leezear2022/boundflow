@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev003707
-last_va: ev003708
+last_ch: ev003784
+last_va: ev003785
 blk:
-next: publish-nrir31-pr-then-start-nrir32-objective-ancestral-pilot
-updated: 2026-08-04T14:08:00Z
+next: publish-nrir32-pr-then-freeze-nrir33-child-cap-pareto
+updated: 2026-08-04T14:58:16Z

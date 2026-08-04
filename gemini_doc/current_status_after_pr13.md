@@ -925,3 +925,22 @@ artifact/replay evidence hash=
 tightness `VALIDATED-REDUCED`；没有新增 property closure，不声明 performance、GPU、competitor、
 完整 suite 或 ASPLOS-ready。下一工程门禁为 NRIR-32 objective-ancestral hard-clause escalation，
 把 root objective execution 作为动态 child 的 typed ancestral source，验证 frontier/closure 增益。
+
+## 39. Objective-Ancestral Hard-Clause Escalation v1 判定
+
+NRIR-32 新增 additive static Plan、committed dynamic Task IR、1:1 sequential Schedule 与 native
+objective-ancestral queue。root admission 绑定 NRIR-31 typed execution；每个 child compile/refine/eval
+逐项绑定 parent final-bound、Plan、semantic trace 与 split-state hash；emit 显式依赖所有已提交
+evaluation/transition，deadline 后未提交工作不得进入 proof identity。
+
+ResNet clause 0 two-child pilot 先得到 worst-child `+59.253479` 改善。正式三 fresh repeats 固定
+31/depth4/60 s：root lower exact parity=`-204.17315673828125`；ancestral 每次提交 7 nodes、24 tasks、
+max depth 2，worst active lower=`-104.76541137695312`；31-node root-global 对照为
+`-200.46539306640625`，三轮 delta 均为 `+95.69998168945312`。committed queue/Task/refinement
+hash 重复一致，fresh replay 通过。
+
+artifact evidence hash=
+`8fba8deca18dcbf0b4b258aa390c1dd48d250c71ea1a48ddb991388765411bfc`。结论为 typed lineage +
+frontier tightness `VALIDATED-REDUCED`；当前仍是单 ResNet property/clause、CPU serial audit path，
+cooperative deadline 后丢弃 late evaluation。没有新增 closure、performance、GPU、competitor、完整
+suite 或 ASPLOS-ready claim。下一门禁为 fixed-deadline child refinement budget/cap Pareto。

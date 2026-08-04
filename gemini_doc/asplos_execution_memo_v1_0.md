@@ -1231,3 +1231,23 @@ objective root tightness `VALIDATED-REDUCED` 关闭；没有新增 closure，不
 competitor、完整 suite 或 ASPLOS-ready。下一门禁为 objective-ancestral hard-clause escalation：
 把 objective root execution 作为动态 child refinement 的 typed source，使已证实的 root tightening
 进入 frontier；禁止继续追加 root-only pass。
+
+## 45. Objective-Ancestral Hard-Clause Escalation v1
+
+NRIR-32 先在固定 ResNet2B property 0 clause 0 上执行 two-child feasibility：root-global 与
+ancestral 使用 exact root、branch、split、optimizer 与 serial evaluator，只改变 child 是否消费
+parent refinement execution。两个 child lower 分别改善 `+59.367462/+59.253479`，达到预注册 gate，
+随后才新增 first-class objective-ancestral Plan/Task/Schedule 与 cooperative-deadline queue runtime。
+
+正式 `31 nodes/depth 4/60 s` 三 fresh repeats 中，typed queue 每次均提交 7 nodes、24 tasks、到
+depth 2；root 与 root-global 对照 exact parity=`-204.17315673828125`。ancestral worst active lower
+三次均为 `-104.76541137695312`，31-node root-global 为 `-200.46539306640625`，严格改善
+`+95.69998168945312`。committed queue trace、Task IR、node-refinement hash 三轮分别一致；late
+child evaluation 只作为 discarded diagnostic，不进入 proof identity。
+
+artifact evidence hash=
+`8fba8deca18dcbf0b4b258aa390c1dd48d250c71ea1a48ddb991388765411bfc`；全量
+`846 passed, 37 skipped`。本阶段以 typed lineage + committed-frontier tightness
+`VALIDATED-REDUCED` 关闭；没有 property closure、performance、GPU、competitor、multi-clause 或
+ASPLOS-ready claim。下一门禁为固定 60 秒下预注册 child-refinement cap/resource Pareto，把 tighter
+bound 转化为更多 committed nodes；不直接延长 deadline。

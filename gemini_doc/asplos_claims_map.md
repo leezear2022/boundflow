@@ -1043,3 +1043,23 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - 工件：`artifacts/objective-hard-clause-escalation/vnncomp21-three-topology-cpu-v1/`；evidence
   hash=`fb9e503bdf93cb9ce56f52915f1965f1f542e092945d4d7d77d8b8c4bd91764a`。本阶段 root-bound
   tightness `VALIDATED-REDUCED`；下一门禁为 objective-ancestral dynamic-child propagation。
+
+### NRIR-32：Objective-Ancestral Hard-Clause Escalation v1
+
+- `C1/C2-M-NRIR32` dynamic queue compiler ownership：static Plan 绑定 graph/input/objective/threshold、
+  typed root refinement、optimizer、31/depth4、child refinement policy 与 whole deadline；每个已提交
+  root/child/transition/emit 都拥有 exact Task IR 与 1:1 Schedule action，emit 依赖完整 committed proof；
+- `C3-G-NRIR32` ancestral lineage/deadline gate：每个 child 的 source final-bound/Plan/semantic trace
+  必须等于 exact parent execution；split-state 与 parent ordinal fail closed；deadline-crossing child
+  work 被整体丢弃并保留 accepted frontier，parent-lineage/aggregate/committed-hash tamper 被拒绝；
+- `C1/C3-E-NRIR32` repeated frontier tightness：固定 ResNet property 0 clause 0、31/depth4/60 s 下，
+  三轮 root parity exact；ancestral 均提交 7 nodes，worst active lower=`-104.76541137695312`，相对
+  31-node root-global `-200.46539306640625` 改善 `+95.69998168945312`；committed queue/Task/
+  refinement hashes 重复一致；
+- `C3-L-NRIR32` hard limitation：只覆盖单一 property/clause、CPU serial audit evaluator；late stage
+  可使 wall clock 超过 cooperative 60 秒边界，timing 不形成 claim。无 property closure、GPU、
+  competitor、multi-workload、完整 suite 或 ASPLOS-ready；`performance_claimed=false`；
+- 工件：`artifacts/objective-ancestral-hard-clause-escalation/vnncomp21-resnet2b-clause0-cpu-v1/`；
+  evidence hash=`8fba8deca18dcbf0b4b258aa390c1dd48d250c71ea1a48ddb991388765411bfc`。
+  本阶段 committed-frontier tightness `VALIDATED-REDUCED`；下一门禁为 child refinement cap/resource
+  Pareto，使 bound gain 转化为 fixed-deadline node coverage。
