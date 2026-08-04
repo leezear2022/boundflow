@@ -1,15 +1,17 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`f191034`（NRIR-19 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/objective-directed-intermediate-refinement-v1`
+> 当前 integration base：`0fc54ce`（NRIR-20 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/per-child-objective-refinement-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-04 NRIR-19 后续：native selected-CROWN intermediate refinement 已成为一等
 > Plan/Task/Schedule。MNISTFC 关闭 clauses 3/7，OVAL21 从 unknown 变 verified；ResNet 两个 root
 > lower 改善 `+70.496/+160.551` 但状态仍 unknown。下一门禁为 objective-directed intermediate
 > target selection；该门禁现已由 NRIR-20 关闭：同预算 ResNet clauses 0/1 root lower 再改善
-> `+55.928741/+26.228943`，但仍为负。下一门禁为 per-child exact-state refinement；顶层
+> `+55.928741/+26.228943`，但仍为负。NRIR-21 per-child exact-state refinement 已完成并在
+> clauses 0/1 上使最差 depth-2 leaf lower 退化 `-0.847961/-0.936646`，故为 NO-GO；下一门禁为
+> ancestral-constraint carry-forward refinement。顶层
 > ASPLOS-ready 与 performance No-Go 不变。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
 > 2026-07-28 进度：IR-1 Bound IR、IR-2 Plan IR、IR-3 Task/Schedule IR 的最小
@@ -716,3 +718,16 @@ fresh semantic replay hash=
 `VALIDATED-REDUCED`。CPU timing 仅诊断，CUDA/竞品/重复性能/完整验证/ASPLOS-ready 均未关闭。
 下一路线是 per-child objective-directed refinement：child 必须按 exact split state 重算
 intermediate bounds、influence、Plan/Task/Schedule，parent refinement 只能作为 warm-start 提示。
+
+## 28. Per-Child Objective Refinement v1 判定
+
+NRIR-21 已把 child exact split→forward→objective influence→target→selected CROWN→propagation
+完整接入 optimized BaB。每个 evaluation 与 refinement Plan/Task/Schedule、semantic trace、
+initial/final bounds hash 一一对应；packed/serial 的 per-node IR、bounds 与 logical queue 一致，
+parent alpha/beta 仅初始化，旧默认 queue payload 保持无扩展字段。
+
+固定 clauses `0/1`、7-node/depth-2、同 96-target/5-step 预算下，root lower 均与 root-global
+相同；但最差 leaf lower 从 `-413.739044/-591.944275` 退化到
+`-414.587006/-592.880920`。因此 closure=`VALIDATED-NO-GO`，没有 complete property、CUDA、
+competitor parity、重复性能或 ASPLOS-ready claim。下一路线固定为祖先约束单调 carry-forward，
+解决“child 重算时丢失 root refinement tightening”的结构性问题。

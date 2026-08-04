@@ -10,6 +10,7 @@ import pytest
 import torch
 
 from boundflow.ir.bound import IntermediateBoundSource
+from boundflow.ir.refinement import NativeIntermediateRefinementPolicyIR
 from boundflow.ir.task import BFTaskModule, BoundTask, TaskKind, TaskOp
 from boundflow.runtime.crown_ibp import _forward_ibp_trace_mlp
 from boundflow.runtime.native_alpha_beta_optimization_state import (
@@ -19,6 +20,8 @@ from boundflow.runtime.native_optimized_relu_split_bab_runtime import (
     NATIVE_REEXECUTION_ATOL,
     NATIVE_REEXECUTION_TRACE_MAX_ABS_DIFF,
     NativeOptimizedReluSplitBabTrace,
+    compare_native_optimized_bab_states,
+    execute_native_optimized_relu_split_bab,
     run_native_optimized_relu_split_bab,
 )
 from boundflow.runtime.native_relu_split_bab_runtime import NativeReluSplitBabConfig
@@ -68,6 +71,34 @@ def _policy() -> NativeAlphaBetaOptimizerPolicy:
         lr=0.1,
         alpha_init=0.5,
         beta_init=0.0,
+    )
+
+
+def _per_child_policy() -> NativeIntermediateRefinementPolicyIR:
+    return NativeIntermediateRefinementPolicyIR(
+        passes=1,
+        max_neurons_per_relu=2,
+        backward_chunk_size=2,
+        candidate_policy_id="objective_influence_width_per_relu_v1",
+    )
+
+
+def _run_per_child(*, batch_size: int):
+    return execute_native_optimized_relu_split_bab(
+        _module(),
+        _spec(),
+        linear_spec_C=torch.tensor([[1.0, -1.0]]),
+        run_id="native-per-child-refinement-toy",
+        config=NativeReluSplitBabConfig(
+            max_nodes=7,
+            max_depth=2,
+            expansion_batch_size=2,
+            max_eval_batch_size=batch_size,
+            threshold=1e6,
+        ),
+        optimizer_policy=_policy(),
+        intermediate_bound_source=IntermediateBoundSource.NATIVE_REFINED,
+        per_child_refinement_policy=_per_child_policy(),
     )
 
 
@@ -159,6 +190,22 @@ def test_node_budget_preserves_optimized_frontier() -> None:
     assert len(trace.final_frontier_node_ids) == 4
     assert trace.native_stack_count == 3
     trace.validate()
+
+
+def test_default_queue_payload_omits_per_child_extension(
+    complete_traces: tuple[
+        NativeOptimizedReluSplitBabTrace, NativeOptimizedReluSplitBabTrace
+    ],
+) -> None:
+    packed, _serial = complete_traces
+    payload = packed.to_dict()
+
+    assert "per_child_refinement_policy" not in payload
+    assert "per_child_refinements" not in payload
+    assert all(
+        "intermediate_refinement_trace_hash" not in evaluation
+        for evaluation in payload["evaluations"]
+    )
 
 
 def test_trace_rejects_parent_optimizer_and_native_tampering(
@@ -281,4 +328,161 @@ def test_external_intermediate_queue_provenance_mismatch_fails_closed() -> None:
             config=config,
             optimizer_policy=_policy(),
             relu_pre_override=external,
+        )
+
+
+@pytest.fixture(scope="module")
+def per_child_executions():
+    return _run_per_child(batch_size=4), _run_per_child(batch_size=1)
+
+
+def test_per_child_refinement_packed_and_serial_semantics_match(
+    per_child_executions,
+) -> None:
+    packed, serial = per_child_executions
+    packed_trace = packed.trace
+    serial_trace = serial.trace
+
+    assert packed_trace.status == serial_trace.status == "complete"
+    assert len(packed_trace.evaluations) == len(serial_trace.evaluations) == 7
+    assert packed_trace.logical_queue_signature() == (
+        serial_trace.logical_queue_signature()
+    )
+    assert [item.to_dict() for item in packed_trace.per_child_refinements] == [
+        item.to_dict() for item in serial_trace.per_child_refinements
+    ]
+    assert all(
+        actual.lower == pytest.approx(expected.lower, abs=1e-6)
+        and actual.upper == pytest.approx(expected.upper, abs=1e-6)
+        and actual.node.split_state_hash == expected.node.split_state_hash
+        for actual, expected in zip(packed_trace.evaluations, serial_trace.evaluations)
+    )
+    state_comparison = compare_native_optimized_bab_states(packed, serial)
+    assert state_comparison["split_tensors_exact"] is True
+    assert state_comparison["stable_scope_fields_equal"] is True
+    assert state_comparison["intermediate_scope_hashes_equal"] is True
+    assert state_comparison["alpha_max_abs_diff"] <= 1e-6
+    assert state_comparison["beta_max_abs_diff"] <= 1e-6
+
+
+def test_per_child_refinement_lineage_is_exact_and_parent_is_warm_only(
+    per_child_executions,
+) -> None:
+    packed, _serial = per_child_executions
+    trace = packed.trace
+    refinements = dict(packed.per_child_refinement_executions)
+    records = {item.node_id: item for item in trace.per_child_refinements}
+    evaluations = {item.node.node_id: item for item in trace.evaluations}
+
+    assert tuple(refinements) == tuple(evaluations)
+    for node_id, execution in refinements.items():
+        evaluation = evaluations[node_id]
+        record = records[node_id]
+        assert execution.program.plan.split_state_hash == (
+            evaluation.node.split_state_hash
+        )
+        assert execution.program.plan.initial_intermediate_bounds_hash == (
+            record.initial_intermediate_bounds_hash
+        )
+        assert execution.trace.final_intermediate_bounds_hash == (
+            record.final_intermediate_bounds_hash
+        )
+        assert record.parent_refinement_consumed_as_exact is False
+        for name, initial in execution.program.initial_relu_pre.items():
+            refined = execution.relu_pre[name]
+            assert bool((refined.lower >= initial.lower).all())
+            assert bool((refined.upper <= initial.upper).all())
+        if evaluation.node.depth > 0:
+            parent = evaluations[evaluation.node.parent_node_id or ""]
+            assert evaluation.warm_start_kind == "monotonic_split_refinement"
+            assert evaluation.parent_selected_state_hash == parent.selected_state_hash
+            assert evaluation.parent_state_consumed_as_exact is False
+
+    assert any(
+        records[item.node.node_id].initial_intermediate_bounds_hash
+        != records[item.node.parent_node_id or ""].final_intermediate_bounds_hash
+        for item in trace.evaluations
+        if item.node.depth > 0
+    )
+
+
+def test_per_child_root_matches_same_policy_root_global_reuse(
+    per_child_executions,
+) -> None:
+    per_child, _serial = per_child_executions
+    root = per_child.trace.evaluations[0]
+    root_refinement = per_child.per_child_refinement_executions[0][1]
+    root_global = run_native_optimized_relu_split_bab(
+        _module(),
+        _spec(),
+        linear_spec_C=torch.tensor([[1.0, -1.0]]),
+        run_id="native-per-child-refinement-toy",
+        config=NativeReluSplitBabConfig(
+            max_nodes=7,
+            max_depth=2,
+            expansion_batch_size=2,
+            max_eval_batch_size=4,
+            threshold=1e6,
+        ),
+        optimizer_policy=_policy(),
+        relu_pre_override=root_refinement.relu_pre,
+        intermediate_bound_source=IntermediateBoundSource.NATIVE_REFINED,
+    )
+
+    assert root.lower == pytest.approx(root_global.evaluations[0].lower, abs=1e-6)
+    assert root.upper == pytest.approx(root_global.evaluations[0].upper, abs=1e-6)
+    assert root.node.split_state_hash == (
+        root_global.evaluations[0].node.split_state_hash
+    )
+
+
+def test_per_child_refinement_trace_tampering_fails_closed(
+    per_child_executions,
+) -> None:
+    packed, _serial = per_child_executions
+    trace = packed.trace
+    records = list(trace.per_child_refinements)
+    records[1] = replace(records[1], node_split_state_hash="f" * 64)
+    with pytest.raises(ValueError, match="node/refinement binding"):
+        replace(trace, per_child_refinements=tuple(records)).validate()
+
+    evaluations = list(trace.evaluations)
+    evaluations[1] = replace(
+        evaluations[1], intermediate_refinement_trace_hash="f" * 64
+    )
+    with pytest.raises(ValueError, match="node/refinement binding"):
+        replace(trace, evaluations=tuple(evaluations)).validate()
+
+
+def test_per_child_refinement_admission_fails_closed() -> None:
+    config = NativeReluSplitBabConfig(
+        max_nodes=1,
+        max_depth=0,
+        expansion_batch_size=1,
+        max_eval_batch_size=1,
+    )
+    with pytest.raises(ValueError, match="semantics/provenance differ"):
+        execute_native_optimized_relu_split_bab(
+            _module(),
+            _spec(),
+            linear_spec_C=torch.tensor([[1.0, -1.0]]),
+            run_id="per-child-wrong-provenance",
+            config=config,
+            optimizer_policy=_policy(),
+            per_child_refinement_policy=_per_child_policy(),
+        )
+    with pytest.raises(ValueError, match="must be objective-directed"):
+        execute_native_optimized_relu_split_bab(
+            _module(),
+            _spec(),
+            linear_spec_C=torch.tensor([[1.0, -1.0]]),
+            run_id="per-child-wrong-policy",
+            config=config,
+            optimizer_policy=_policy(),
+            intermediate_bound_source=IntermediateBoundSource.NATIVE_REFINED,
+            per_child_refinement_policy=NativeIntermediateRefinementPolicyIR(
+                passes=1,
+                max_neurons_per_relu=2,
+                backward_chunk_size=2,
+            ),
         )

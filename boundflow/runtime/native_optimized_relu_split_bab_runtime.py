@@ -21,6 +21,7 @@ from ..frontends.plain_crown_bound_ir import (
     tensor_content_hash,
 )
 from ..ir.bound import IntermediateBoundSource
+from ..ir.refinement import NativeIntermediateRefinementPolicyIR
 from ..ir.schedule import LaunchAction
 from ..ir.task import BFTaskModule
 from .crown_ibp import _forward_ibp_trace_mlp
@@ -44,6 +45,12 @@ from .native_objective_branch_score import (
     NativeObjectiveBranchPolicy,
     compile_native_objective_branch_program,
     execute_native_objective_branch_program,
+)
+from .native_intermediate_refinement import (
+    NativeIntermediateRefinementExecution,
+    compile_native_intermediate_refinement_program,
+    execute_native_intermediate_refinement_program,
+    intermediate_bounds_hash,
 )
 from .native_relu_split_bab_runtime import (
     BabQueueStatus,
@@ -71,6 +78,9 @@ NATIVE_OPTIMIZED_RELU_SPLIT_BAB_COMPILER_VERSION = (
 )
 NATIVE_OPTIMIZED_RELU_SPLIT_BAB_TRACE_SCHEMA_VERSION = (
     "boundflow.optimized-relu-split-bab-trace/v1"
+)
+NATIVE_PER_CHILD_REFINEMENT_TRACE_SCHEMA_VERSION = (
+    "boundflow.per-child-refinement-trace/v1"
 )
 PARENT_OPTIMIZER_STATE_VALIDITY = "monotonic_refinement_initialization_only"
 NATIVE_REEXECUTION_ATOL = 1e-5
@@ -112,6 +122,68 @@ def _is_sha256(value: object) -> bool:
 
 
 @dataclass(frozen=True)
+class NativePerChildRefinementTrace:
+    """Semantic evidence for one node's exact-split refinement program."""
+
+    node_id: str
+    node_split_state_hash: str
+    refinement_plan_hash: str
+    refinement_task_module_hash: str
+    refinement_schedule_hash: str
+    refinement_semantic_trace_hash: str
+    initial_intermediate_bounds_hash: str
+    final_intermediate_bounds_hash: str
+    selected_target_count: int
+    parent_refinement_consumed_as_exact: bool = False
+    performance_claimed: bool = False
+    schema_version: str = NATIVE_PER_CHILD_REFINEMENT_TRACE_SCHEMA_VERSION
+
+    def validate(self) -> None:
+        if (
+            self.schema_version != NATIVE_PER_CHILD_REFINEMENT_TRACE_SCHEMA_VERSION
+            or not self.node_id
+            or any(
+                not _is_sha256(value)
+                for value in (
+                    self.node_split_state_hash,
+                    self.refinement_plan_hash,
+                    self.refinement_task_module_hash,
+                    self.refinement_schedule_hash,
+                    self.refinement_semantic_trace_hash,
+                    self.initial_intermediate_bounds_hash,
+                    self.final_intermediate_bounds_hash,
+                )
+            )
+            or self.selected_target_count < 1
+            or self.parent_refinement_consumed_as_exact is not False
+            or self.performance_claimed is not False
+        ):
+            raise ValueError("native per-child refinement trace is invalid")
+
+    def to_dict(self) -> dict[str, object]:
+        self.validate()
+        return {
+            "schema_version": self.schema_version,
+            "node_id": self.node_id,
+            "node_split_state_hash": self.node_split_state_hash,
+            "refinement_plan_hash": self.refinement_plan_hash,
+            "refinement_task_module_hash": self.refinement_task_module_hash,
+            "refinement_schedule_hash": self.refinement_schedule_hash,
+            "refinement_semantic_trace_hash": self.refinement_semantic_trace_hash,
+            "initial_intermediate_bounds_hash": (self.initial_intermediate_bounds_hash),
+            "final_intermediate_bounds_hash": self.final_intermediate_bounds_hash,
+            "selected_target_count": self.selected_target_count,
+            "parent_refinement_consumed_as_exact": (
+                self.parent_refinement_consumed_as_exact
+            ),
+            "performance_claimed": self.performance_claimed,
+        }
+
+    def stable_hash(self) -> str:
+        return _canonical_hash(self.to_dict())
+
+
+@dataclass(frozen=True)
 class NativeOptimizedBabEvaluation:
     """One queue node selected by optimizer Schedule and native re-execution."""
 
@@ -128,6 +200,7 @@ class NativeOptimizedBabEvaluation:
     optimizer_execution_trace_hash: str
     native_ir_hashes: tuple[tuple[str, str], ...]
     branch_candidate: Optional[ReluSplitBranch]
+    intermediate_refinement_trace_hash: Optional[str] = None
     parent_state_validity: str = PARENT_OPTIMIZER_STATE_VALIDITY
     parent_state_consumed_as_exact: bool = False
 
@@ -153,6 +226,10 @@ class NativeOptimizedBabEvaluation:
             or self.lower > self.upper
             or self.parent_state_validity != PARENT_OPTIMIZER_STATE_VALIDITY
             or self.parent_state_consumed_as_exact is not False
+            or (
+                self.intermediate_refinement_trace_hash is not None
+                and not _is_sha256(self.intermediate_refinement_trace_hash)
+            )
         ):
             raise ValueError("native optimized BaB evaluation is invalid")
         if self.node.depth == 0:
@@ -172,7 +249,7 @@ class NativeOptimizedBabEvaluation:
 
     def to_dict(self) -> dict[str, object]:
         self.validate()
-        return {
+        payload: dict[str, object] = {
             "node": self.node.to_dict(),
             "lower": self.lower,
             "upper": self.upper,
@@ -193,6 +270,11 @@ class NativeOptimizedBabEvaluation:
                 else self.branch_candidate.to_dict()
             ),
         }
+        if self.intermediate_refinement_trace_hash is not None:
+            payload["intermediate_refinement_trace_hash"] = (
+                self.intermediate_refinement_trace_hash
+            )
+        return payload
 
 
 @dataclass(frozen=True)
@@ -334,6 +416,8 @@ class NativeOptimizedReluSplitBabTrace:
     performance_claimed: bool = False
     property_status: str = "not_claimed"
     schema_version: str = NATIVE_OPTIMIZED_RELU_SPLIT_BAB_TRACE_SCHEMA_VERSION
+    per_child_refinement_policy: Optional[NativeIntermediateRefinementPolicyIR] = None
+    per_child_refinements: tuple[NativePerChildRefinementTrace, ...] = ()
 
     def validate(self) -> None:  # pylint: disable=too-many-statements
         self.config.validate()
@@ -386,6 +470,37 @@ class NativeOptimizedReluSplitBabTrace:
             values != list(range(len(values))) for values in batches.values()
         ):
             raise ValueError("native optimized BaB evaluation batch accounting differs")
+
+        if self.per_child_refinement_policy is None:
+            if self.per_child_refinements or any(
+                item.intermediate_refinement_trace_hash is not None
+                for item in self.evaluations
+            ):
+                raise ValueError("native optimized BaB refinements lack a queue policy")
+        else:
+            self.per_child_refinement_policy.validate()
+            if (
+                self.per_child_refinement_policy.candidate_policy_id
+                != "objective_influence_width_per_relu_v1"
+                or len(self.per_child_refinements) != len(self.evaluations)
+            ):
+                raise ValueError(
+                    "native optimized BaB per-child refinement coverage differs"
+                )
+            for evaluation, refinement in zip(
+                self.evaluations, self.per_child_refinements
+            ):
+                refinement.validate()
+                if (
+                    refinement.node_id != evaluation.node.node_id
+                    or refinement.node_split_state_hash
+                    != evaluation.node.split_state_hash
+                    or evaluation.intermediate_refinement_trace_hash
+                    != refinement.stable_hash()
+                ):
+                    raise ValueError(
+                        "native optimized BaB node/refinement binding differs"
+                    )
 
         stack_by_id: dict[str, NativeOptimizedBabStackTrace] = {}
         for stack in self.native_stacks:
@@ -462,7 +577,7 @@ class NativeOptimizedReluSplitBabTrace:
 
     def to_dict(self) -> dict[str, object]:
         self.validate()
-        return {
+        payload: dict[str, object] = {
             "schema_version": self.schema_version,
             "compiler_version": NATIVE_OPTIMIZED_RELU_SPLIT_BAB_COMPILER_VERSION,
             "run_id": self.run_id,
@@ -485,6 +600,14 @@ class NativeOptimizedReluSplitBabTrace:
             "native_stack_count": self.native_stack_count,
             "max_queue_size": self.max_queue_size,
         }
+        if self.per_child_refinement_policy is not None:
+            payload["per_child_refinement_policy"] = (
+                self.per_child_refinement_policy.to_dict()
+            )
+            payload["per_child_refinements"] = [
+                item.to_dict() for item in self.per_child_refinements
+            ]
+        return payload
 
     def stable_hash(self) -> str:
         return _canonical_hash(self.to_dict())
@@ -532,6 +655,9 @@ class NativeOptimizedReluSplitBabExecution:
         tuple[str, NativeObjectiveBranchExecution], ...
     ] = ()
     objective_branch_policy: Optional[NativeObjectiveBranchPolicy] = None
+    per_child_refinement_executions: tuple[
+        tuple[str, NativeIntermediateRefinementExecution], ...
+    ] = ()
 
     def validate(self) -> None:
         self.trace.validate()
@@ -575,6 +701,54 @@ class NativeOptimizedReluSplitBabExecution:
                 if branch.branch != evaluation.branch_candidate:
                     raise ValueError(
                         "native optimized BaB objective branch selection differs"
+                    )
+        refinements = dict(self.per_child_refinement_executions)
+        if len(refinements) != len(self.per_child_refinement_executions):
+            raise ValueError("native optimized BaB refinement node IDs repeat")
+        if self.trace.per_child_refinement_policy is None:
+            if refinements:
+                raise ValueError(
+                    "native optimized BaB refinement executions lack policy"
+                )
+        else:
+            records = {item.node_id: item for item in self.trace.per_child_refinements}
+            if tuple(refinements) != tuple(
+                item.node.node_id for item in self.trace.evaluations
+            ):
+                raise ValueError(
+                    "native optimized BaB refinement execution coverage differs"
+                )
+            for node_id, refinement in refinements.items():
+                program = refinement.program
+                program.plan.validate()
+                program.task_module.validate(plan=program.plan)
+                program.schedule.validate(
+                    plan=program.plan, task_module=program.task_module
+                )
+                refinement.trace.validate(program=program)
+                record = records[node_id]
+                hashes = program.hashes()
+                if (
+                    program.plan.policy != self.trace.per_child_refinement_policy
+                    or program.plan.objective_hash != self.trace.objective_hash
+                    or program.plan.split_state_hash != record.node_split_state_hash
+                    or hashes["refinement_plan_hash"] != record.refinement_plan_hash
+                    or hashes["refinement_task_module_hash"]
+                    != record.refinement_task_module_hash
+                    or hashes["refinement_schedule_hash"]
+                    != record.refinement_schedule_hash
+                    or program.plan.initial_intermediate_bounds_hash
+                    != record.initial_intermediate_bounds_hash
+                    or refinement.trace.final_intermediate_bounds_hash
+                    != record.final_intermediate_bounds_hash
+                    or intermediate_bounds_hash(refinement.relu_pre)
+                    != record.final_intermediate_bounds_hash
+                    or _refinement_semantic_trace_hash(refinement)
+                    != record.refinement_semantic_trace_hash
+                    or len(program.plan.targets) != record.selected_target_count
+                ):
+                    raise ValueError(
+                        "native optimized BaB refinement execution identity differs"
                     )
 
     def state_map(self) -> dict[str, NativeAlphaBetaOptimizationState]:
@@ -668,6 +842,7 @@ class _OptimizedEvaluatedNode:
     runtime_node: _RuntimeNode
     evaluation: NativeOptimizedBabEvaluation
     selected_state: NativeAlphaBetaOptimizationState
+    relu_pre: Mapping[str, IntervalState]
 
 
 def _batched_split_state(nodes: tuple[_RuntimeNode, ...]) -> dict[str, torch.Tensor]:
@@ -706,6 +881,117 @@ def _repeat_relu_pre_override(
     return repeated
 
 
+def _node_split_mapping(node: _RuntimeNode) -> dict[str, torch.Tensor]:
+    mapping = {
+        name: value.unsqueeze(0).detach().contiguous().clone()
+        for name, value in node.split_state
+    }
+    if relu_split_state_hash(mapping) != node.node.split_state_hash:
+        raise ValueError("native optimized node split payload/hash differs")
+    return mapping
+
+
+def _batch_intermediate_bounds(
+    values: Sequence[Mapping[str, IntervalState]],
+) -> dict[str, IntervalState]:
+    if not values:
+        raise ValueError("native optimized intermediate batch cannot be empty")
+    names = tuple(values[0])
+    if not names or any(tuple(item) != names for item in values):
+        raise ValueError("native optimized intermediate batch schema differs")
+    result: dict[str, IntervalState] = {}
+    for name in names:
+        intervals = tuple(item[name] for item in values)
+        reference = intervals[0]
+        if any(
+            not isinstance(item, IntervalState)
+            or int(item.lower.shape[0]) != 1
+            or item.lower.shape != reference.lower.shape
+            or item.upper.shape != reference.upper.shape
+            or item.lower.dtype != reference.lower.dtype
+            or item.upper.dtype != reference.upper.dtype
+            or item.lower.device != reference.lower.device
+            or item.upper.device != reference.upper.device
+            for item in intervals
+        ):
+            raise ValueError("native optimized intermediate tensor schema differs")
+        result[name] = IntervalState(
+            lower=torch.cat(tuple(item.lower for item in intervals), dim=0)
+            .detach()
+            .contiguous()
+            .clone(),
+            upper=torch.cat(tuple(item.upper for item in intervals), dim=0)
+            .detach()
+            .contiguous()
+            .clone(),
+        )
+    return result
+
+
+def _refinement_semantic_trace_hash(
+    execution: NativeIntermediateRefinementExecution,
+) -> str:
+    payload = execution.trace.to_dict()
+    payload.pop("elapsed_ns")
+    return _canonical_hash(payload)
+
+
+def _execute_per_child_refinements(
+    legacy_task_module: BFTaskModule,
+    root_input_spec: InputSpec,
+    *,
+    objective: torch.Tensor,
+    nodes: tuple[_RuntimeNode, ...],
+    policy: NativeIntermediateRefinementPolicyIR,
+) -> tuple[
+    dict[str, IntervalState],
+    tuple[tuple[str, NativeIntermediateRefinementExecution], ...],
+    tuple[NativePerChildRefinementTrace, ...],
+]:
+    single_input = _repeat_box_input_spec(root_input_spec, count=1)
+    executions: list[tuple[str, NativeIntermediateRefinementExecution]] = []
+    records: list[NativePerChildRefinementTrace] = []
+    for node in nodes:
+        split = _node_split_mapping(node)
+        program = compile_native_intermediate_refinement_program(
+            legacy_task_module,
+            single_input,
+            policy=policy,
+            plan_id=f"per-child-refinement:{node.node.split_state_hash}",
+            relu_split_state=split,
+            linear_spec_C=objective,
+        )
+        execution = execute_native_intermediate_refinement_program(
+            program, legacy_task_module, single_input
+        )
+        hashes = program.hashes()
+        record = NativePerChildRefinementTrace(
+            node_id=node.node.node_id,
+            node_split_state_hash=node.node.split_state_hash,
+            refinement_plan_hash=hashes["refinement_plan_hash"],
+            refinement_task_module_hash=hashes["refinement_task_module_hash"],
+            refinement_schedule_hash=hashes["refinement_schedule_hash"],
+            refinement_semantic_trace_hash=_refinement_semantic_trace_hash(execution),
+            initial_intermediate_bounds_hash=(
+                program.plan.initial_intermediate_bounds_hash
+            ),
+            final_intermediate_bounds_hash=(
+                execution.trace.final_intermediate_bounds_hash
+            ),
+            selected_target_count=len(program.plan.targets),
+        )
+        record.validate()
+        executions.append((node.node.node_id, execution))
+        records.append(record)
+    return (
+        _batch_intermediate_bounds(
+            tuple(execution.relu_pre for _node_id, execution in executions)
+        ),
+        tuple(executions),
+        tuple(records),
+    )
+
+
 def _build_batched_parent_warm_state(
     legacy_task_module: BFTaskModule,
     batch_input: InputSpec,
@@ -717,6 +1003,7 @@ def _build_batched_parent_warm_state(
     relu_pre_override: Optional[Mapping[str, IntervalState]],
     intermediate_bound_source: IntermediateBoundSource,
     refine_external_constraints: bool,
+    use_parent_runtime_bounds: bool = False,
 ) -> NativeAlphaBetaOptimizationState:
     parents: list[_OptimizedEvaluatedNode] = []
     for node in nodes:
@@ -727,14 +1014,20 @@ def _build_batched_parent_warm_state(
         parents.append(parent)
     parent_nodes = tuple(item.runtime_node for item in parents)
     parent_splits = _batched_split_state(parent_nodes)
-    _parent_env, parent_pre = _optimizer_intermediate_semantics(
-        legacy_task_module,
-        batch_input,
-        relu_split_state=parent_splits,
-        relu_pre_override=relu_pre_override,
-        intermediate_bound_source=intermediate_bound_source,
-        refine_external_constraints=refine_external_constraints,
-    )
+    parent_pre: Mapping[str, IntervalState]
+    if use_parent_runtime_bounds:
+        parent_pre = _batch_intermediate_bounds(
+            tuple(item.relu_pre for item in parents)
+        )
+    else:
+        _parent_env, parent_pre = _optimizer_intermediate_semantics(
+            legacy_task_module,
+            batch_input,
+            relu_split_state=parent_splits,
+            relu_pre_override=relu_pre_override,
+            intermediate_bound_source=intermediate_bound_source,
+            refine_external_constraints=refine_external_constraints,
+        )
     scope = build_native_alpha_beta_scope(
         legacy_task_module,
         batch_input,
@@ -911,20 +1204,44 @@ def _evaluate_optimized_node_batch(
     intermediate_bound_source: IntermediateBoundSource,
     objective_branch_policy: Optional[NativeObjectiveBranchPolicy],
     refine_external_constraints: bool,
+    per_child_refinement_policy: Optional[NativeIntermediateRefinementPolicyIR],
 ) -> tuple[
     tuple[_OptimizedEvaluatedNode, ...],
     NativeOptimizedBabStackTrace,
     tuple[tuple[str, NativeObjectiveBranchExecution], ...],
+    tuple[tuple[str, NativeIntermediateRefinementExecution], ...],
+    tuple[NativePerChildRefinementTrace, ...],
 ]:
     if not nodes:
         raise ValueError("native optimized node batch cannot be empty")
     batch_input = _repeat_box_input_spec(root_input_spec, count=len(nodes))
     split_batch = _batched_split_state(nodes)
-    batch_relu_pre_override = (
-        None
-        if relu_pre_override is None
-        else _repeat_relu_pre_override(relu_pre_override, count=len(nodes))
-    )
+    refinement_executions: tuple[
+        tuple[str, NativeIntermediateRefinementExecution], ...
+    ] = ()
+    refinement_records: tuple[NativePerChildRefinementTrace, ...] = ()
+    if per_child_refinement_policy is None:
+        batch_relu_pre_override = (
+            None
+            if relu_pre_override is None
+            else _repeat_relu_pre_override(relu_pre_override, count=len(nodes))
+        )
+        effective_intermediate_bound_source = intermediate_bound_source
+        effective_refine_external_constraints = refine_external_constraints
+    else:
+        (
+            batch_relu_pre_override,
+            refinement_executions,
+            refinement_records,
+        ) = _execute_per_child_refinements(
+            legacy_task_module,
+            root_input_spec,
+            objective=objective,
+            nodes=nodes,
+            policy=per_child_refinement_policy,
+        )
+        effective_intermediate_bound_source = IntermediateBoundSource.NATIVE_REFINED
+        effective_refine_external_constraints = False
     warm_state = (
         None
         if nodes[0].node.depth == 0
@@ -936,8 +1253,9 @@ def _evaluate_optimized_node_batch(
             policy=policy,
             parent_by_id=parent_by_id,
             relu_pre_override=batch_relu_pre_override,
-            intermediate_bound_source=intermediate_bound_source,
-            refine_external_constraints=refine_external_constraints,
+            intermediate_bound_source=effective_intermediate_bound_source,
+            refine_external_constraints=effective_refine_external_constraints,
+            use_parent_runtime_bounds=per_child_refinement_policy is not None,
         )
     )
     if any((node.node.depth == 0) != (warm_state is None) for node in nodes):
@@ -951,8 +1269,8 @@ def _evaluate_optimized_node_batch(
         program_id=f"{batch_id}:optimizer",
         warm_start=warm_state,
         relu_pre_override=batch_relu_pre_override,
-        intermediate_bound_source=intermediate_bound_source,
-        refine_external_constraints=refine_external_constraints,
+        intermediate_bound_source=effective_intermediate_bound_source,
+        refine_external_constraints=effective_refine_external_constraints,
     )
     scheduled = execute_native_alpha_beta_optimizer_program(
         optimizer_program,
@@ -975,7 +1293,7 @@ def _evaluate_optimized_node_batch(
         query_id=f"{batch_id}:selected-native",
         available_memory_bytes=config.available_memory_bytes,
         memory_budget_bytes=config.memory_budget_bytes,
-        intermediate_bound_source=intermediate_bound_source,
+        intermediate_bound_source=effective_intermediate_bound_source,
     )
     native_bounds, native_task_trace = execute_native_alpha_beta_state_query(
         native_compilation,
@@ -1047,8 +1365,8 @@ def _evaluate_optimized_node_batch(
                 selected_state=state,
                 optimizer_policy=policy,
                 branch_policy=objective_branch_policy,
-                intermediate_bound_source=intermediate_bound_source,
-                refine_external_constraints=refine_external_constraints,
+                intermediate_bound_source=effective_intermediate_bound_source,
+                refine_external_constraints=effective_refine_external_constraints,
                 plan_id=f"{batch_id}:node:{index}:objective-branch",
             )
             branch_execution = execute_native_objective_branch_program(
@@ -1075,6 +1393,11 @@ def _evaluate_optimized_node_batch(
             optimizer_execution_trace_hash=optimizer_trace_hash,
             native_ir_hashes=native_hashes,
             branch_candidate=branch,
+            intermediate_refinement_trace_hash=(
+                None
+                if per_child_refinement_policy is None
+                else refinement_records[index].stable_hash()
+            ),
         )
         evaluation.validate()
         evaluated.append(
@@ -1082,6 +1405,7 @@ def _evaluate_optimized_node_batch(
                 runtime_node=runtime_node,
                 evaluation=evaluation,
                 selected_state=state,
+                relu_pre=node_pre,
             )
         )
     stack = _optimizer_stack_trace(
@@ -1096,7 +1420,13 @@ def _evaluate_optimized_node_batch(
         selected_native_lower_max_abs_diff=lower_diff,
         selected_native_upper_max_abs_diff=upper_diff,
     )
-    return tuple(evaluated), stack, tuple(objective_branches)
+    return (
+        tuple(evaluated),
+        stack,
+        tuple(objective_branches),
+        refinement_executions,
+        refinement_records,
+    )
 
 
 def execute_native_optimized_relu_split_bab(
@@ -1113,6 +1443,7 @@ def execute_native_optimized_relu_split_bab(
     ),
     objective_branch_policy: Optional[NativeObjectiveBranchPolicy] = None,
     refine_external_constraints: bool = False,
+    per_child_refinement_policy: Optional[NativeIntermediateRefinementPolicyIR] = None,
 ) -> NativeOptimizedReluSplitBabExecution:
     """Run best-first queue with optimizer Schedule-driven native node bounds."""
 
@@ -1130,10 +1461,32 @@ def execute_native_optimized_relu_split_bab(
         raise ValueError("external constraint refinement requires external provenance")
     if not isinstance(intermediate_bound_source, IntermediateBoundSource):
         raise TypeError("optimized queue intermediate-bound source is invalid")
-    if (relu_pre_override is None) != (
-        intermediate_bound_source == IntermediateBoundSource.LOCAL_FORWARD
-    ):
-        raise ValueError("optimized queue intermediate semantics/provenance differ")
+    if per_child_refinement_policy is None:
+        if (relu_pre_override is None) != (
+            intermediate_bound_source == IntermediateBoundSource.LOCAL_FORWARD
+        ):
+            raise ValueError("optimized queue intermediate semantics/provenance differ")
+    else:
+        if not isinstance(
+            per_child_refinement_policy, NativeIntermediateRefinementPolicyIR
+        ):
+            raise TypeError("optimized queue per-child refinement policy is invalid")
+        per_child_refinement_policy.validate()
+        if (
+            per_child_refinement_policy.candidate_policy_id
+            != "objective_influence_width_per_relu_v1"
+        ):
+            raise ValueError(
+                "optimized queue per-child refinement must be objective-directed"
+            )
+        if (
+            relu_pre_override is not None
+            or intermediate_bound_source != IntermediateBoundSource.NATIVE_REFINED
+            or refine_external_constraints
+        ):
+            raise ValueError(
+                "optimized queue per-child refinement semantics/provenance differ"
+            )
     legacy_task_module.validate()
     lower, upper = _root_box_bounds(input_spec)
     objective = _normalize_scalar_objective(linear_spec_C)
@@ -1170,6 +1523,10 @@ def execute_native_optimized_relu_split_bab(
     native_stacks: list[NativeOptimizedBabStackTrace] = []
     runtime_by_id: dict[str, _OptimizedEvaluatedNode] = {}
     objective_branch_executions: list[tuple[str, NativeObjectiveBranchExecution]] = []
+    per_child_refinement_executions: list[
+        tuple[str, NativeIntermediateRefinementExecution]
+    ] = []
+    per_child_refinement_records: list[NativePerChildRefinementTrace] = []
     batch_serial = 0
     next_node_serial = 1
 
@@ -1179,7 +1536,13 @@ def execute_native_optimized_relu_split_bab(
             chunk = tuple(nodes[start : start + config.max_eval_batch_size])
             batch_id = f"{run_id}:eval:{batch_serial:04d}"
             batch_serial += 1
-            evaluated, stack, branch_executions = _evaluate_optimized_node_batch(
+            (
+                evaluated,
+                stack,
+                branch_executions,
+                refinement_executions,
+                refinement_records,
+            ) = _evaluate_optimized_node_batch(
                 legacy_task_module,
                 input_spec,
                 objective=objective,
@@ -1192,9 +1555,12 @@ def execute_native_optimized_relu_split_bab(
                 intermediate_bound_source=intermediate_bound_source,
                 objective_branch_policy=objective_branch_policy,
                 refine_external_constraints=refine_external_constraints,
+                per_child_refinement_policy=per_child_refinement_policy,
             )
             native_stacks.append(stack)
             objective_branch_executions.extend(branch_executions)
+            per_child_refinement_executions.extend(refinement_executions)
+            per_child_refinement_records.extend(refinement_records)
             evaluations.extend(item.evaluation for item in evaluated)
             runtime_by_id.update(
                 {item.runtime_node.node.node_id: item for item in evaluated}
@@ -1318,6 +1684,8 @@ def execute_native_optimized_relu_split_bab(
         native_stacks=tuple(native_stacks),
         native_stack_count=len(native_stacks),
         max_queue_size=max_queue_size,
+        per_child_refinement_policy=per_child_refinement_policy,
+        per_child_refinements=tuple(per_child_refinement_records),
     )
     trace.validate()
     execution = NativeOptimizedReluSplitBabExecution(
@@ -1331,6 +1699,7 @@ def execute_native_optimized_relu_split_bab(
         ),
         objective_branch_executions=tuple(objective_branch_executions),
         objective_branch_policy=objective_branch_policy,
+        per_child_refinement_executions=tuple(per_child_refinement_executions),
     )
     execution.validate()
     return execution
@@ -1350,6 +1719,7 @@ def run_native_optimized_relu_split_bab(
     ),
     objective_branch_policy: Optional[NativeObjectiveBranchPolicy] = None,
     refine_external_constraints: bool = False,
+    per_child_refinement_policy: Optional[NativeIntermediateRefinementPolicyIR] = None,
 ) -> NativeOptimizedReluSplitBabTrace:
     """Return the serialized optimized queue trace."""
 
@@ -1364,4 +1734,5 @@ def run_native_optimized_relu_split_bab(
         intermediate_bound_source=intermediate_bound_source,
         objective_branch_policy=objective_branch_policy,
         refine_external_constraints=refine_external_constraints,
+        per_child_refinement_policy=per_child_refinement_policy,
     ).trace
