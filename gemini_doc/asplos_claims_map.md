@@ -991,3 +991,21 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - 工件：`artifacts/parametric-dynamic-batch-compiler/vnncomp21-three-topology-cpu-v1/`；evidence
   hash=`117fcecf8e089c16f4275abb97292039790bae75bc4b518ae699bc9ac432ce97`。本阶段
   `VALIDATED-REDUCED`；下一门禁为 fixed-wall-clock parametric BaB search scaling。
+
+### NRIR-29：Wall-Clock Parametric BaB Scaling v1
+
+- `C1/C2-M-NRIR29` experiment compiler ownership：三 budget、三 workload、三 repeat、60 秒
+  deadline 与轮转顺序均进入 search-scaling Plan/Task/Schedule；27 个 fresh-process task 与 source、
+  budget、repeat、order 逐项 hash 绑定；
+- `C3-G-NRIR29` replay/nesting gate：同预算三次 semantic signature 一致；三 workload 全部
+  `domains(7)⊂domains(31)⊂domains(127)`，公共 domain lower 最大漂移 `0.0`；budget/task、
+  compiler template/cache/instance、semantic digest 与同步篡改 fail closed；
+- `C1/C3-E-NRIR29` fixed-deadline search coverage：MNISTFC 三次都由 `6/9` verified 提升到
+  `8/9`，且 31/127 node closure 相同；27/27 workers 均 `completed=9,pending=[]`；
+- `C3-L-NRIR29` saturation boundary：ResNet 在 7/31/127 budget 分别评估 total
+  `63/279/1143` nodes 后仍 `0/9` verified，OVAL21 始终 `8/9`；三类 query 仍 unknown。不同预算
+  不计算 speedup，无 CUDA、competitor、完整 property 或 ASPLOS-ready claim；
+- 工件：`artifacts/wall-clock-parametric-bab-scaling/vnncomp21-three-topology-cpu-v1/`；evidence
+  hash=`e01d35c0afa8501f3d02ffaaa4eeaf609c444ed497c1a2d2efff4e97b3520214`。本阶段
+  search-coverage `VALIDATED-REDUCED`；下一门禁为 unresolved-clause typed hard-clause escalation，
+  而不是继续盲目扩同一 search budget。
