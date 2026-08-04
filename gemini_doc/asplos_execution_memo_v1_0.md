@@ -1325,3 +1325,28 @@ source、deadline reset、baseline omission、non-monotone aggregate、partial-g
 multi-workload 或 ASPLOS-ready claim。下一门禁为 multi-clause anytime priority/time slicing：在同一
 global 60 秒预算内为多个 unresolved clauses 分配 additive work，不得继续让 clause 0 独占余量或
 给每个 clause 重置 deadline。
+
+## 49. Multi-Clause Anytime Priority v1
+
+NRIR-36 保留 frozen NRIR-31 九子句 floor 与 NRIR-34 sibling-packed evaluator，新增一等
+Policy/Plan/Candidate/Decision/8-task Task/Schedule/Slice/Outcome/Aggregate IR。priority 只消费 floor
+sound root lower margin，按降序、ordinal 升序打破平局，固定选 top-2；每次 dispatch 将真实剩余
+global budget 等分给尚未执行的 selected clauses。私有 one-shot clock 只在 slice cutoff 首次向 frozen
+packed queue 暴露 global expiry，完整 sibling pair 才能原子提交；所有 source Plan/semantic/final-bound、
+allocation、packed verdict 与 original ordinal 均 hash-bound。
+
+单次 first-class pilot 通过后，正式三 fresh repeats 的 priority 都为
+`[2,3,4,5,0,8,6,7,1]`、selected 都为 `[2,3]`。floor elapsed=
+`[21.637124,21.604930,21.871310] s`；packed nodes=`[[3,3],[3,3],[3,1]]`。前两轮 clauses 2/3
+各提交 `3 nodes/1 group`；repeat 2 的 clause 3 在 global cutoff 只提交 root，未形成 atomic pair，
+worst active lower 仍为 floor `-152.287033`。whole cooperative elapsed=
+`[67.213556,66.833706,60.228863] s`；三轮 final 都仍为 sound unknown、9/9 unresolved。
+
+formal hash=`2a2081af4c38de3df7a23c62cfcecfeb74d4b15132390a069e04a28bb65bfbf0`；
+replay、wrong rank/selection/source、slice inflation、deadline reset、ordinal omission、non-monotone
+aggregate、partial group、trace binding 篡改、NRIR-31/34/35 predecessor replay 与全量
+`890 passed, 37 skipped` 均通过。由于“两条 selected clauses 三轮均提交 atomic pair”的预注册 gate 失败，本阶段以
+multi-clause allocation `VALIDATED-NO-GO` 关闭，`performance_claimed=false`；IR/control 可保留，
+没有 property closure、GPU、competitor、multi-workload 或 ASPLOS-ready claim。下一门禁转向 shared
+parametric compiler/root/evaluator 与
+stronger candidate/bound，先量化 compile/root/child phase 并冻结复用合同，不继续调 top-k/slice 常数。

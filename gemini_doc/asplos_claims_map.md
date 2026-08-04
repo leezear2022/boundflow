@@ -1123,3 +1123,25 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   `74533c9c211a3007bf5af43c08865febd95c3f9ccf1a268e56738793ec9d14d5`。本阶段 cross-clause
   control/original-ordinal preservation `VALIDATED-REDUCED`，`performance_claimed=false`；下一门禁
   为 multi-clause anytime priority/time slicing。
+
+### NRIR-36：Multi-Clause Anytime Priority v1
+
+- `C1/C2-M-NRIR36` multi-clause compiler ownership：root-lower priority、top-2 selection、dynamic
+  equal-remaining slice、one-shot cutoff、exact source lineage 与 multi-outcome original-ordinal aggregate
+  已 lower 为一等 Plan/8-task TaskModule/Schedule/Slice IR 并进入 canonical hash；
+- `C3-G-NRIR36` replay/tamper gate：validator 从 floor candidates 独立重算 rank、selected ordinals、
+  source lineage 和每次 dispatch allocation；wrong rank/selection/source、slice inflation、deadline reset、
+  ordinal omission、non-monotone aggregate、partial group 与 trace binding 同步重哈希后仍 fail closed；
+- `C1/C3-E-NRIR36` repeated allocation result：三 fresh repeats 的 priority 都为
+  `[2,3,4,5,0,8,6,7,1]`、selected 都为 `[2,3]`；packed nodes=
+  `[[3,3],[3,3],[3,1]]`。repeat 2 的第二条只提交 root，未满足每轮两个 atomic pairs；
+- `C3-L-NRIR36` hard limitation：三轮 final 仍 9/9 unresolved；whole cooperative elapsed=
+  `[67.213556,66.833706,60.228863] s`，不是硬实时或 speedup。预注册 multi-clause coverage gate
+  失败，CPU 单 workload/property，无
+  property closure、GPU、competitor、multi-workload 或 ASPLOS-ready，`performance_claimed=false`；
+- 工件：`artifacts/multi-clause-anytime-priority/`
+  `vnncomp21-resnet2b-property0-three-repeat-cpu-formal-v1/`；formal hash=
+  `2a2081af4c38de3df7a23c62cfcecfeb74d4b15132390a069e04a28bb65bfbf0`；全量
+  `890 passed, 37 skipped`。本阶段
+  `VALIDATED-NO-GO`；IR/control 可保留，下一门禁为 shared parametric compiler/root/evaluator +
+  stronger bound/candidate。

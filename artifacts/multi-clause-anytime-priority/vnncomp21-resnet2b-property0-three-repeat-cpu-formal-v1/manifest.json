@@ -1,0 +1,13 @@
+{
+  "files": {
+    "formal.json": "c8fed19c70ab318020cb85c13f202a6613e1e0e4b9acd98ffac9e93494ce43ea",
+    "logs/repeat-0.log": "7510518ca2e4e7df979d0ac4c53a3fa61475f9f7d143647053bec73c9bf32ccf",
+    "logs/repeat-1.log": "d646cb0e42a842bcc8ef19d6eb5936e5879435a09f867471c78048ec6c9ea6b7",
+    "logs/repeat-2.log": "19d5e1105b849b3e81a6691d16015c58557417157734286baa4eab2bb11622c7",
+    "shards/repeat-0.json": "a968fdf1cf1e9b7b0fc604ef685b48013c6d50573735a0f14c1b7af8f941da22",
+    "shards/repeat-1.json": "f2624ed3a083f5bc7ac90fe813434db13ca5f68788521281871fb997005aa445",
+    "shards/repeat-2.json": "78db9fd58142c1c9e94855e054d7fe8ef7b57387e751bc50d1d71a6922a2b420"
+  },
+  "formal_hash": "2a2081af4c38de3df7a23c62cfcecfeb74d4b15132390a069e04a28bb65bfbf0",
+  "schema_version": "boundflow.multi-clause-anytime-manifest/v1"
+}

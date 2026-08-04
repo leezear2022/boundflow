@@ -1,15 +1,16 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
-> 状态日期：2026-08-04
-> 当前 integration base：`796a64e`（NRIR-34 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/cross-clause-anytime-objective-evaluator-v1`
+> 状态日期：2026-08-05
+> 当前 integration base：`3755667`（NRIR-35 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/multi-clause-anytime-priority-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
-> 2026-08-04 NRIR-35 后续：九子句 NRIR-31 floor 已与 clause-0 NRIR-34 packed queue 通过一等
-> Plan/Decision/6-stage Task/Schedule 串接，并消费同一 global start。三 fresh repeats 均完成
-> `[0..8]` floor，余量内 packed nodes=`[7,7,9]`；final 仍 9/9 unresolved。状态为 cross-clause
-> control/original-ordinal preservation VALIDATED-REDUCED；下一门禁是 multi-clause anytime
-> priority/time slicing，ASPLOS-ready 与 performance No-Go 不变。
+> 2026-08-05 NRIR-36 后续：九子句 NRIR-31 floor 已由 typed root-lower priority 选择 clauses 2/3，
+> dynamic equal-remaining slices 在同一 global start 下执行。三 fresh repeats 都复现
+> rank=`[2,3,4,5,0,8,6,7,1]`，packed nodes=`[[3,3],[3,3],[3,1]]`；repeat 2 第二条未提交
+> atomic pair，预注册 coverage gate 失败，final 仍 9/9 unresolved。状态为 multi-clause allocation
+> VALIDATED-NO-GO；下一门禁转 shared parametric compiler/root/evaluator 与 stronger bound/candidate，
+> ASPLOS-ready 与 performance No-Go 不变。
 > 2026-08-04 NRIR-19 后续：native selected-CROWN intermediate refinement 已成为一等
 > Plan/Task/Schedule。MNISTFC 关闭 clauses 3/7，OVAL21 从 unknown 变 verified；ResNet 两个 root
 > lower 改善 `+70.496/+160.551` 但状态仍 unknown。下一门禁为 objective-directed intermediate
@@ -1005,3 +1006,26 @@ sound unknown、9/9 unresolved，`performance_claimed=false`。没有 property c
 multi-workload 或 ASPLOS-ready claim。下一分支为 `feat/multi-clause-anytime-priority-v1`：在同一
 global 60 秒预算内用 typed priority/time slice 覆盖多个 unresolved clauses，不为每条 clause 重置
 deadline。
+
+## 43. Multi-Clause Anytime Priority v1 判定
+
+NRIR-36 新增 static Policy/Plan/8-task TaskModule/Schedule、ranked Candidate/Decision、每 dispatch
+Slice IR 与 multi-outcome Aggregate。rank 从 NRIR-31 exact floor root lower 独立重算，top-2 固定为
+clauses 2/3；每条 slice 按 dispatch 时真实 remaining global budget 动态等分，私有 one-shot clock
+将 cutoff 传给 frozen NRIR-34，完整 sibling group 才能提交。
+
+单次 first-class pilot 后的三 fresh repeats 均复现 priority=`[2,3,4,5,0,8,6,7,1]` 与
+selected=`[2,3]`。floor elapsed=`[21.637124,21.604930,21.871310] s`，packed nodes=
+`[[3,3],[3,3],[3,1]]`；repeat 2 clause 3 只提交 root，worst active lower 保留 floor
+`-152.287033`。whole cooperative elapsed=`[67.213556,66.833706,60.228863] s`，final 仍为 sound
+unknown、9/9 unresolved。
+
+formal hash=`2a2081af4c38de3df7a23c62cfcecfeb74d4b15132390a069e04a28bb65bfbf0`；
+replay、九类同步重哈希 tamper、16 focused tests、NRIR-31/34/35 predecessor replay、全量
+`890 passed, 37 skipped` 与静态门禁均通过。
+“两条 selected clauses 三轮均至少提交一个 atomic pair”的 acceptance criterion 未成立，结论为
+multi-clause allocation `VALIDATED-NO-GO`，`performance_claimed=false`；IR/control 可保留，没有
+property closure、硬实时、GPU、competitor、multi-workload 或 ASPLOS-ready claim。下一门禁是 shared
+parametric compiler/root/evaluator + stronger
+bound/candidate：先分解两个 selected clause 的 compile/root/child phase，再冻结可复用合同与 tightness
+gate，不继续只调 top-k 或 slice 常数。
