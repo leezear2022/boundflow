@@ -9,6 +9,12 @@ from dataclasses import replace
 import pytest
 import torch
 
+from boundflow.domains.interval import IntervalState
+from boundflow.ir.bound import (
+    BoundOpKind,
+    IntermediateBoundSource,
+    ReluRelaxationAttrs,
+)
 from boundflow.ir.optimizer import OptimizerTaskKind
 from boundflow.ir.task import BFTaskModule, BoundTask, TaskKind, TaskOp
 from boundflow.runtime.native_alpha_beta_optimization_state import (
@@ -247,3 +253,97 @@ def test_zero_step_plan_has_only_evaluate_reduce_select() -> None:
     )
     assert result.state.stable_hash() == program.initial_state.stable_hash()
     assert result.trace.best_iteration_by_domain == (0,)
+
+
+def test_external_intermediate_semantics_and_adaptive_alpha_are_bound() -> None:
+    module = _module()
+    spec = _spec()
+    objective = torch.tensor([[1.0]])
+    split = {"h1": torch.tensor([[0]], dtype=torch.int8)}
+    external = {
+        "h1": IntervalState(
+            lower=torch.tensor([[-0.25]]),
+            upper=torch.tensor([[0.75]]),
+        )
+    }
+    policy = NativeAlphaBetaOptimizerPolicy(
+        steps=0,
+        lr=0.2,
+        alpha_initialization_mode="adaptive",
+    )
+    program = compile_native_alpha_beta_optimizer_program(
+        module,
+        spec,
+        linear_spec_C=objective,
+        relu_split_state=split,
+        policy=policy,
+        program_id="optimizer-external-adaptive",
+        relu_pre_override=external,
+        intermediate_bound_source=IntermediateBoundSource.EXTERNAL_VERIFIER,
+    )
+
+    assert torch.equal(program.relu_pre["h1"].lower, torch.tensor([[-0.25]]))
+    assert torch.equal(program.initial_state.alphas["h1"], torch.tensor([[1.0]]))
+    relu_ops = tuple(
+        op
+        for op in program.source_compilation.build.module.graph.ops
+        if op.kind == BoundOpKind.RELU_RELAXATION
+    )
+    assert relu_ops
+    assert all(
+        isinstance(op.attrs, ReluRelaxationAttrs)
+        and op.attrs.intermediate_bound_source
+        == IntermediateBoundSource.EXTERNAL_VERIFIER
+        for op in relu_ops
+    )
+    assert policy.to_dict()["alpha_initialization_mode"] == "adaptive"
+    assert "alpha_initialization_mode" not in _policy().to_dict()
+
+
+def test_external_intermediate_semantics_mismatch_fails_closed() -> None:
+    module = _module()
+    spec = _spec()
+    objective = torch.tensor([[1.0]])
+    split = {"h1": torch.tensor([[0]], dtype=torch.int8)}
+    policy = _policy(steps=0)
+    with pytest.raises(ValueError, match="require ReLU bounds"):
+        compile_native_alpha_beta_optimizer_program(
+            module,
+            spec,
+            linear_spec_C=objective,
+            relu_split_state=split,
+            policy=policy,
+            program_id="optimizer-external-missing",
+            intermediate_bound_source=IntermediateBoundSource.EXTERNAL_VERIFIER,
+        )
+    with pytest.raises(ValueError, match="requires external provenance"):
+        compile_native_alpha_beta_optimizer_program(
+            module,
+            spec,
+            linear_spec_C=objective,
+            relu_split_state=split,
+            policy=policy,
+            program_id="optimizer-external-provenance",
+            relu_pre_override={
+                "h1": IntervalState(
+                    lower=torch.tensor([[-0.25]]),
+                    upper=torch.tensor([[0.75]]),
+                )
+            },
+        )
+    with pytest.raises(ValueError, match="schema differs"):
+        compile_native_alpha_beta_optimizer_program(
+            module,
+            spec,
+            linear_spec_C=objective,
+            relu_split_state=split,
+            policy=policy,
+            program_id="optimizer-external-shape",
+            relu_pre_override={
+                "h1": IntervalState(
+                    lower=torch.tensor([[-0.25, -0.25]]),
+                    upper=torch.tensor([[0.75, 0.75]]),
+                )
+            },
+            intermediate_bound_source=IntermediateBoundSource.EXTERNAL_VERIFIER,
+        )

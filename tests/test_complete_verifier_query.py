@@ -10,11 +10,13 @@ from dataclasses import replace
 import pytest
 import torch
 
+from boundflow.ir.bound import IntermediateBoundSource
 from boundflow.ir.task import BFTaskModule, BoundTask, TaskKind, TaskOp
 from boundflow.runtime.complete_verifier_query import (
     CompleteVerifierQueryPolicy,
     execute_complete_verifier_query,
 )
+from boundflow.runtime.crown_ibp import _forward_ibp_trace_mlp
 from boundflow.runtime.native_alpha_beta_optimization_state import (
     NativeAlphaBetaOptimizerPolicy,
 )
@@ -238,4 +240,47 @@ def test_query_trace_and_objective_tampering_fail_closed() -> None:
             _module(),
             _spec(),
             linear_spec_C=torch.tensor([[[1.0], [-1.0]]]),
+        )
+
+
+def test_complete_query_binds_external_intermediate_semantics() -> None:
+    module = _module()
+    spec = _spec()
+    _interval_env, external = _forward_ibp_trace_mlp(module, spec)
+    result = execute_complete_verifier_query(
+        module,
+        spec,
+        linear_spec_C=torch.tensor([[[-1.0]]]),
+        thresholds=torch.tensor([-2.0]),
+        query_id="complete-query-external",
+        query_policy=CompleteVerifierQueryPolicy(),
+        search_policy=NativeProjectedGradientSearchPolicy(steps=1, step_size=0.25),
+        queue_config=_queue_config(),
+        optimizer_policy=NativeAlphaBetaOptimizerPolicy(
+            steps=1,
+            lr=0.1,
+            alpha_initialization_mode="adaptive",
+        ),
+        relu_pre_override=external,
+        intermediate_bound_source=IntermediateBoundSource.EXTERNAL_VERIFIER,
+    )
+
+    assert result.trace.status == "verified"
+    assert len(result.clauses) == 1
+    assert result.clauses[0].queue.trace.native_stack_count == 1
+
+
+def test_complete_query_external_provenance_mismatch_fails_closed() -> None:
+    with pytest.raises(ValueError, match="semantics/provenance differ"):
+        execute_complete_verifier_query(
+            _module(),
+            _spec(),
+            linear_spec_C=torch.tensor([[[-1.0]]]),
+            thresholds=torch.tensor([-2.0]),
+            query_id="complete-query-external-missing",
+            query_policy=CompleteVerifierQueryPolicy(),
+            search_policy=NativeProjectedGradientSearchPolicy(steps=1, step_size=0.25),
+            queue_config=_queue_config(),
+            optimizer_policy=_optimizer_policy(),
+            intermediate_bound_source=IntermediateBoundSource.EXTERNAL_VERIFIER,
         )

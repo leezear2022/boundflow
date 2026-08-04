@@ -3,7 +3,7 @@
 # pylint: disable=too-many-arguments,too-many-locals,too-many-statements
 # pylint: disable=too-many-branches,too-many-instance-attributes,too-many-lines
 # pylint: disable=too-many-boolean-expressions,missing-function-docstring
-# pylint: disable=protected-access,invalid-name
+# pylint: disable=protected-access,invalid-name,duplicate-code
 
 from __future__ import annotations
 
@@ -15,13 +15,15 @@ from typing import Mapping, Optional, Sequence
 
 import torch
 
+from ..domains.interval import IntervalState
 from ..frontends.plain_crown_bound_ir import (
     relu_split_state_hash,
     tensor_content_hash,
 )
+from ..ir.bound import IntermediateBoundSource
 from ..ir.schedule import LaunchAction
 from ..ir.task import BFTaskModule
-from .crown_ibp import _forward_ibp_trace_mlp
+from .crown_ibp import _apply_relu_split, _forward_ibp_trace_mlp
 from .native_alpha_beta_optimization_state import (
     NativeAlphaBetaOptimizationResult,
     NativeAlphaBetaOptimizationState,
@@ -645,6 +647,28 @@ def _batched_split_state(nodes: tuple[_RuntimeNode, ...]) -> dict[str, torch.Ten
     }
 
 
+def _repeat_relu_pre_override(
+    relu_pre: Mapping[str, IntervalState], *, count: int
+) -> dict[str, IntervalState]:
+    if count < 1:
+        raise ValueError("external ReLU bound repeat count must be positive")
+    repeated: dict[str, IntervalState] = {}
+    for name, value in relu_pre.items():
+        if (
+            not name
+            or not isinstance(value, IntervalState)
+            or int(value.lower.shape[0]) != 1
+            or int(value.upper.shape[0]) != 1
+        ):
+            raise ValueError("external ReLU bounds require one source domain")
+        repeats = (count, *(1 for _unused in value.lower.shape[1:]))
+        repeated[name] = IntervalState(
+            lower=value.lower.repeat(repeats).contiguous(),
+            upper=value.upper.repeat(repeats).contiguous(),
+        )
+    return repeated
+
+
 def _build_batched_parent_warm_state(
     legacy_task_module: BFTaskModule,
     batch_input: InputSpec,
@@ -653,6 +677,7 @@ def _build_batched_parent_warm_state(
     nodes: tuple[_RuntimeNode, ...],
     policy: NativeAlphaBetaOptimizerPolicy,
     parent_by_id: Mapping[str, _OptimizedEvaluatedNode],
+    relu_pre_override: Optional[Mapping[str, IntervalState]],
 ) -> NativeAlphaBetaOptimizationState:
     parents: list[_OptimizedEvaluatedNode] = []
     for node in nodes:
@@ -663,10 +688,22 @@ def _build_batched_parent_warm_state(
         parents.append(parent)
     parent_nodes = tuple(item.runtime_node for item in parents)
     parent_splits = _batched_split_state(parent_nodes)
-    _parent_env, parent_pre = _forward_ibp_trace_mlp(
+    _parent_env, local_parent_pre = _forward_ibp_trace_mlp(
         legacy_task_module,
         batch_input,
         relu_split_state=parent_splits,
+    )
+    parent_pre = (
+        local_parent_pre
+        if relu_pre_override is None
+        else {
+            name: _apply_relu_split(
+                relu_pre_override[name],
+                parent_splits[name],
+                relu_input_name=name,
+            )
+            for name in local_parent_pre
+        }
     )
     scope = build_native_alpha_beta_scope(
         legacy_task_module,
@@ -840,11 +877,18 @@ def _evaluate_optimized_node_batch(
     config: NativeReluSplitBabConfig,
     policy: NativeAlphaBetaOptimizerPolicy,
     parent_by_id: Mapping[str, _OptimizedEvaluatedNode],
+    relu_pre_override: Optional[Mapping[str, IntervalState]],
+    intermediate_bound_source: IntermediateBoundSource,
 ) -> tuple[tuple[_OptimizedEvaluatedNode, ...], NativeOptimizedBabStackTrace]:
     if not nodes:
         raise ValueError("native optimized node batch cannot be empty")
     batch_input = _repeat_box_input_spec(root_input_spec, count=len(nodes))
     split_batch = _batched_split_state(nodes)
+    batch_relu_pre_override = (
+        None
+        if relu_pre_override is None
+        else _repeat_relu_pre_override(relu_pre_override, count=len(nodes))
+    )
     warm_state = (
         None
         if nodes[0].node.depth == 0
@@ -855,6 +899,7 @@ def _evaluate_optimized_node_batch(
             nodes=nodes,
             policy=policy,
             parent_by_id=parent_by_id,
+            relu_pre_override=batch_relu_pre_override,
         )
     )
     if any((node.node.depth == 0) != (warm_state is None) for node in nodes):
@@ -867,6 +912,8 @@ def _evaluate_optimized_node_batch(
         policy=policy,
         program_id=f"{batch_id}:optimizer",
         warm_start=warm_state,
+        relu_pre_override=batch_relu_pre_override,
+        intermediate_bound_source=intermediate_bound_source,
     )
     scheduled = execute_native_alpha_beta_optimizer_program(
         optimizer_program,
@@ -889,6 +936,7 @@ def _evaluate_optimized_node_batch(
         query_id=f"{batch_id}:selected-native",
         available_memory_bytes=config.available_memory_bytes,
         memory_budget_bytes=config.memory_budget_bytes,
+        intermediate_bound_source=intermediate_bound_source,
     )
     native_bounds, native_task_trace = execute_native_alpha_beta_state_query(
         native_compilation,
@@ -1000,6 +1048,10 @@ def execute_native_optimized_relu_split_bab(
     run_id: str,
     config: NativeReluSplitBabConfig,
     optimizer_policy: NativeAlphaBetaOptimizerPolicy,
+    relu_pre_override: Optional[Mapping[str, IntervalState]] = None,
+    intermediate_bound_source: IntermediateBoundSource = (
+        IntermediateBoundSource.LOCAL_FORWARD
+    ),
 ) -> NativeOptimizedReluSplitBabExecution:
     """Run best-first queue with optimizer Schedule-driven native node bounds."""
 
@@ -1007,6 +1059,12 @@ def execute_native_optimized_relu_split_bab(
         raise ValueError("native optimized BaB run ID must be non-empty")
     config.validate()
     optimizer_policy.validate()
+    if not isinstance(intermediate_bound_source, IntermediateBoundSource):
+        raise TypeError("optimized queue intermediate-bound source is invalid")
+    if (relu_pre_override is None) != (
+        intermediate_bound_source == IntermediateBoundSource.LOCAL_FORWARD
+    ):
+        raise ValueError("optimized queue intermediate semantics/provenance differ")
     legacy_task_module.validate()
     lower, upper = _root_box_bounds(input_spec)
     objective = _normalize_scalar_objective(linear_spec_C)
@@ -1060,6 +1118,8 @@ def execute_native_optimized_relu_split_bab(
                 config=config,
                 policy=optimizer_policy,
                 parent_by_id=runtime_by_id,
+                relu_pre_override=relu_pre_override,
+                intermediate_bound_source=intermediate_bound_source,
             )
             native_stacks.append(stack)
             evaluations.extend(item.evaluation for item in evaluated)
@@ -1205,6 +1265,10 @@ def run_native_optimized_relu_split_bab(
     run_id: str,
     config: NativeReluSplitBabConfig,
     optimizer_policy: NativeAlphaBetaOptimizerPolicy,
+    relu_pre_override: Optional[Mapping[str, IntervalState]] = None,
+    intermediate_bound_source: IntermediateBoundSource = (
+        IntermediateBoundSource.LOCAL_FORWARD
+    ),
 ) -> NativeOptimizedReluSplitBabTrace:
     """Return the serialized optimized queue trace."""
 
@@ -1215,4 +1279,6 @@ def run_native_optimized_relu_split_bab(
         run_id=run_id,
         config=config,
         optimizer_policy=optimizer_policy,
+        relu_pre_override=relu_pre_override,
+        intermediate_bound_source=intermediate_bound_source,
     ).trace

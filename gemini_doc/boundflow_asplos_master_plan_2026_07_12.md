@@ -95,6 +95,13 @@
 > VALIDATED-REDUCED。下一阶段是公平 end-to-end phase/tightness baseline，不能从这些 artifact
 > 推导 speedup 或 ASPLOS-ready。
 
+> **2026-08-04 NRIR-15 修订**：external intermediate semantics 与 adaptive α 已贯穿 optimized
+> queue/query。固定 ResNet 从 local 0/9 提升为 6/9 verified，仅 clauses 0/2/4 unknown；九个
+> lower 对 frozen external initial 无退化。三组 CPU audit queue 均约 6.7 s，candidate/verdict
+> 只有约 3.6/3.9 ms，定位 fixed compile/hash/selected-native re-execution 为主耗时。下一工程
+> 门禁为 prepared production fast path，之后再推进 hard-clause branching；顶层 performance
+> No-Go 与 ASPLOS-ready=NO 不变。
+
 > **2026-08-04 NRIR-11 修订**：fixed-step optimizer control 已进入 typed Plan/Task/Schedule。
 > 固定 ResNet 1-step program 为 8 actions，Schedule/legacy/final native execution max diff 均为 0，
 > alpha/beta gradient 均非零。该结果只关闭 optimizer control ownership；dynamic early stop、

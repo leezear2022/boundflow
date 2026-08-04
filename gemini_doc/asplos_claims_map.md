@@ -728,3 +728,23 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   hash=`d17f7d7e960491ad7ef3f33bad41a4cfbf21a9fd5213df3637584b6a753968f1`；相关
   `39 passed`、全量 `670 passed, 37 skipped`；下一缺口为公平 end-to-end phase/tightness
   baseline，再按证据推进 bound strength 与执行优化。
+
+### 2026-08-04 End-to-End Tightness and Performance Baseline v1
+
+- `C3-M-NRIR15` external-semantics mechanism：external intermediate ReLU intervals 与 typed
+  provenance 进入 optimizer Plan/source compiler/state scope/selected native stack/queue child；
+  child external interval 叠加 per-node split，parent state 保持 initialization-only；
+- `C3-G-NRIR15` fail-closed gate：missing/wrong provenance、key/order/shape/dtype/device/finite/
+  lower≤upper、未施加 split 的 child preactivation 与 artifact semantic/timing/claim tamper 均拒绝；
+  默认 constant policy canonical hash 不漂移；
+- `C1/C3-E-NRIR15` tightness：fixed ResNet local 为 0/9；external-adaptive 为 6/9 verified，
+  仅 clauses `0/2/4` unknown。九个 lower 对 external initial 无退化，最大改善
+  `0.0072252750`、sign `9/9`；
+- `C3-D-NRIR15` phase diagnosis：三组轮换 clause-0 audit queue median 为 local/external-
+  constant/external-adaptive `6.7178/6.7969/6.7317 s`，candidate/verdict 约 `3.6/3.9 ms`；
+  只定位 fixed compile/hash/re-execution blocker，不声称 production latency 或 speedup；
+- `C3-L-NRIR15` hard limitation：单 fixed ResNet、CPU audit path、6/9 而非完整证明；CUDA、
+  multi-workload、production path 与竞品 E2E 均 pending；
+- 工件：`artifacts/end-to-end-tightness-performance/vnncomp21-resnet2b-prop0-cpu-v1/`；fresh
+  replay hash=`14c3b9dc2e5376156be1f33f3e8804ec21f60e11096bd3bdc95225b7e1474376`；下一门禁为
+  prepared production fast path，随后才处理 hard clauses 的 branching/tightness。

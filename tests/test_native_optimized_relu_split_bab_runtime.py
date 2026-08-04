@@ -9,7 +9,9 @@ from dataclasses import replace
 import pytest
 import torch
 
+from boundflow.ir.bound import IntermediateBoundSource
 from boundflow.ir.task import BFTaskModule, BoundTask, TaskKind, TaskOp
+from boundflow.runtime.crown_ibp import _forward_ibp_trace_mlp
 from boundflow.runtime.native_alpha_beta_optimization_state import (
     NativeAlphaBetaOptimizerPolicy,
 )
@@ -208,4 +210,75 @@ def test_invalid_policy_and_input_fail_closed() -> None:
                 max_eval_batch_size=1,
             ),
             optimizer_policy=NativeAlphaBetaOptimizerPolicy(steps=1, lr=0.0),
+        )
+
+
+def test_external_intermediate_semantics_survive_child_batches() -> None:
+    module = _module()
+    spec = _spec()
+    _interval_env, external = _forward_ibp_trace_mlp(module, spec)
+    trace = run_native_optimized_relu_split_bab(
+        module,
+        spec,
+        linear_spec_C=torch.tensor([[1.0, -1.0]]),
+        run_id="native-optimized-bab-external",
+        config=NativeReluSplitBabConfig(
+            max_nodes=7,
+            max_depth=2,
+            expansion_batch_size=1,
+            max_eval_batch_size=4,
+            threshold=1e6,
+        ),
+        optimizer_policy=NativeAlphaBetaOptimizerPolicy(
+            steps=1,
+            lr=0.1,
+            alpha_initialization_mode="adaptive",
+        ),
+        relu_pre_override=external,
+        intermediate_bound_source=IntermediateBoundSource.EXTERNAL_VERIFIER,
+    )
+
+    assert len(trace.evaluations) == 7
+    assert trace.native_stacks[0].warm_start_kind == "none"
+    assert all(
+        stack.warm_start_kind == "monotonic_split_refinement"
+        for stack in trace.native_stacks[1:]
+    )
+    assert all(
+        stack.selected_native_lower_max_abs_diff <= NATIVE_REEXECUTION_ATOL
+        and stack.selected_native_upper_max_abs_diff <= NATIVE_REEXECUTION_ATOL
+        for stack in trace.native_stacks
+    )
+    trace.validate()
+
+
+def test_external_intermediate_queue_provenance_mismatch_fails_closed() -> None:
+    module = _module()
+    spec = _spec()
+    _interval_env, external = _forward_ibp_trace_mlp(module, spec)
+    config = NativeReluSplitBabConfig(
+        max_nodes=1,
+        max_depth=0,
+        expansion_batch_size=1,
+        max_eval_batch_size=1,
+    )
+    with pytest.raises(ValueError, match="semantics/provenance differ"):
+        run_native_optimized_relu_split_bab(
+            module,
+            spec,
+            linear_spec_C=torch.tensor([[1.0, -1.0]]),
+            run_id="native-optimized-bab-external-missing",
+            config=config,
+            optimizer_policy=_policy(),
+            intermediate_bound_source=IntermediateBoundSource.EXTERNAL_VERIFIER,
+        )
+    with pytest.raises(ValueError, match="semantics/provenance differ"):
+        run_native_optimized_relu_split_bab(
+            module,
+            spec,
+            linear_spec_C=torch.tensor([[1.0, -1.0]]),
+            run_id="native-optimized-bab-external-wrong-owner",
+            config=config,
+            optimizer_policy=_policy(),
+            relu_pre_override=external,
         )

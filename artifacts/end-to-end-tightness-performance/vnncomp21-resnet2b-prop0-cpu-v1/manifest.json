@@ -1,0 +1,9 @@
+{
+  "evidence_hash": "14c3b9dc2e5376156be1f33f3e8804ec21f60e11096bd3bdc95225b7e1474376",
+  "files": {
+    "baseline.json": "bf326b8bac1941279ca2cd4289a3f49f7ad57995371b0b54f4db727fdbc46318"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.end-to-end-tightness-performance-artifact/v1",
+  "status": "ok"
+}

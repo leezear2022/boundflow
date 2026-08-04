@@ -3,7 +3,7 @@
 # pylint: disable=too-many-arguments,too-many-locals,too-many-statements
 # pylint: disable=too-many-instance-attributes,too-many-branches
 # pylint: disable=missing-function-docstring,protected-access,invalid-name
-# pylint: disable=too-many-boolean-expressions
+# pylint: disable=too-many-boolean-expressions,duplicate-code
 
 from __future__ import annotations
 
@@ -16,6 +16,7 @@ import torch
 
 from ..domains.interval import IntervalState
 from ..frontends.plain_crown_bound_ir import tensor_content_hash
+from ..ir.bound import IntermediateBoundSource
 from ..ir.optimizer import (
     NativeOptimizerPlanIR,
     NativeOptimizerScheduleIR,
@@ -27,6 +28,7 @@ from ..ir.task import BFTaskModule
 from .alpha_beta_crown import BetaState, _beta_to_relu_pre_add_coeff
 from .alpha_crown import AlphaObjective, SpecReduce
 from .crown_ibp import (
+    _apply_relu_split,
     _forward_ibp_trace_mlp,
     run_crown_ibp_mlp_from_forward_trace,
 )
@@ -461,6 +463,77 @@ def _evaluate_state(
     )
 
 
+def _optimizer_intermediate_semantics(
+    module: BFTaskModule,
+    input_spec: InputSpec,
+    *,
+    relu_split_state: Mapping[str, torch.Tensor],
+    relu_pre_override: Optional[Mapping[str, IntervalState]],
+    intermediate_bound_source: IntermediateBoundSource,
+) -> tuple[Mapping[str, IntervalState], Mapping[str, IntervalState]]:
+    interval_env, local_relu_pre = _forward_ibp_trace_mlp(
+        module, input_spec, relu_split_state=dict(relu_split_state)
+    )
+    if relu_pre_override is None:
+        if intermediate_bound_source != IntermediateBoundSource.LOCAL_FORWARD:
+            raise ValueError("external optimizer semantics require ReLU bounds")
+        return interval_env, local_relu_pre
+    if intermediate_bound_source != IntermediateBoundSource.EXTERNAL_VERIFIER:
+        raise ValueError("optimizer ReLU override requires external provenance")
+    if tuple(relu_pre_override) != tuple(local_relu_pre):
+        raise ValueError("optimizer external/local ReLU identities differ")
+    external: dict[str, IntervalState] = {}
+    for name, local in local_relu_pre.items():
+        value = relu_pre_override[name]
+        if not isinstance(value, IntervalState):
+            raise TypeError("optimizer external ReLU bound must be an interval")
+        if (
+            value.lower.shape != local.lower.shape
+            or value.upper.shape != local.upper.shape
+            or value.lower.dtype != local.lower.dtype
+            or value.upper.dtype != local.upper.dtype
+            or value.lower.device != local.lower.device
+            or value.upper.device != local.upper.device
+            or not bool(torch.isfinite(value.lower).all())
+            or not bool(torch.isfinite(value.upper).all())
+            or not bool((value.lower <= value.upper).all())
+        ):
+            raise ValueError("optimizer external ReLU bound schema differs")
+        external[name] = _apply_relu_split(
+            IntervalState(
+                lower=value.lower.detach().contiguous().clone(),
+                upper=value.upper.detach().contiguous().clone(),
+            ),
+            relu_split_state[name],
+            relu_input_name=name,
+        )
+    return interval_env, external
+
+
+def _initial_alpha_state(
+    relu_pre: Mapping[str, IntervalState],
+    *,
+    policy: NativeAlphaBetaOptimizerPolicy,
+) -> dict[str, torch.Tensor]:
+    if policy.alpha_initialization_mode == "constant":
+        return {
+            name: torch.full_like(value.lower, policy.alpha_init)
+            for name, value in relu_pre.items()
+        }
+    initialized: dict[str, torch.Tensor] = {}
+    for name, value in relu_pre.items():
+        positive = value.lower >= 0
+        negative = value.upper <= 0
+        ambiguous = ~(positive | negative)
+        alpha = torch.zeros_like(value.lower)
+        alpha[positive] = 1.0
+        alpha[ambiguous] = (value.upper[ambiguous] > -value.lower[ambiguous]).to(
+            dtype=value.lower.dtype
+        )
+        initialized[name] = alpha
+    return initialized
+
+
 def compile_native_alpha_beta_optimizer_program(
     module: BFTaskModule,
     input_spec: InputSpec,
@@ -470,14 +543,24 @@ def compile_native_alpha_beta_optimizer_program(
     policy: NativeAlphaBetaOptimizerPolicy,
     program_id: str,
     warm_start: Optional[NativeAlphaBetaOptimizationState] = None,
+    relu_pre_override: Optional[Mapping[str, IntervalState]] = None,
+    intermediate_bound_source: IntermediateBoundSource = (
+        IntermediateBoundSource.LOCAL_FORWARD
+    ),
 ) -> NativeOptimizerProgram:
     """Compile fixed-step optimizer control around one NRIR-10 source stack."""
 
     if not program_id:
         raise ValueError("native optimizer program ID must be non-empty")
     policy.validate()
-    interval_env, relu_pre = _forward_ibp_trace_mlp(
-        module, input_spec, relu_split_state=dict(relu_split_state)
+    if not isinstance(intermediate_bound_source, IntermediateBoundSource):
+        raise TypeError("native optimizer intermediate-bound source is invalid")
+    interval_env, relu_pre = _optimizer_intermediate_semantics(
+        module,
+        input_spec,
+        relu_split_state=relu_split_state,
+        relu_pre_override=relu_pre_override,
+        intermediate_bound_source=intermediate_bound_source,
     )
     scope = build_native_alpha_beta_scope(
         module,
@@ -503,15 +586,7 @@ def compile_native_alpha_beta_optimizer_program(
         alpha = warm_start.alphas
         beta = warm_start.betas
     else:
-        alpha = {
-            name: torch.full(
-                (batch, *shape),
-                policy.alpha_init,
-                device=input_spec.center.device,
-                dtype=input_spec.center.dtype,
-            )
-            for name, shape in shapes.items()
-        }
+        alpha = _initial_alpha_state(relu_pre, policy=policy)
         beta = {
             name: torch.full(
                 (batch, *shape),
@@ -565,6 +640,7 @@ def compile_native_alpha_beta_optimizer_program(
         linear_spec_C=linear_spec_C,
         optimization=initial_result,
         query_id=f"{program_id}:source",
+        intermediate_bound_source=intermediate_bound_source,
     )
     plan = NativeOptimizerPlanIR(
         plan_id=program_id,
