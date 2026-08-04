@@ -2,7 +2,7 @@
 
 > 状态：**顶层执行计划 v1.0；后续研究工作受本文门禁约束。**  
 > 基线日期：2026-07-12  
-> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`c6a7998`
+> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`34ca6c6`
 > 投稿策略：ASPLOS 2027 September Cycle 为有条件冲刺；ASPLOS 2028 为稳健主目标。
 
 > **路线修订（2026-07-20）**：本文保留 2026-07-12 的研究问题、历史门禁和 PR-10—13
@@ -43,6 +43,12 @@
 > `[31,31]` nodes，whole=`57.175184/57.697757/58.114412 s`，production admission
 > `VALIDATED-REDUCED`。final property 仍 unknown，且没有 GPU/multi-workload/fair competitor speedup；
 > ASPLOS-ready=NO 不变。下一单变量为 cross-clause/node/candidate batch Schedule。
+
+> **2026-08-05 NRIR-43 预注册**：只允许把 NRIR-42 已 ready 的 clause/node/candidate lower work
+> 改为 typed ragged batch Schedule，不改变算法、queue、预算、deadline、dtype 或 workload。先以
+> sibling-node scorer pack 的 exact parity、launch `62→<=32` 和 paired queue ratio `<=0.85` 过
+> Phase A；再以 two-clause ready-set 的 optimizer/scorer launch `<=16`、three-repeat whole
+> `<=45 s` 且 median ratio `<=0.80` 过 Phase B。当前没有新 claim，ASPLOS-ready=NO。
 
 > **2026-08-04 NRIR-21 修订**：per-child exact-split objective refinement 的 IR/control、lineage
 > 与 replay 已实现，但固定 ResNet clauses 0/1 的最差 depth-2 leaf lower 相对 root-global 分别

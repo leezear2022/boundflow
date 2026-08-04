@@ -4494,3 +4494,17 @@
 
 **记录**
 - `gemini_doc/change_2026-08-05_nrir42_publication.md`
+
+---
+
+## 2026-08-05：NRIR-43 Cross-Axis Verification Batch Schedule v1 预注册
+
+- 从 `main@34ca6c6` 创建 `feat/cross-axis-verification-batch-schedule-v1`；
+- 唯一变量冻结为 ready clause/node/candidate work 的 typed ragged batch Schedule；
+- Phase A/B 的 exact semantics、launch count、paired timing、global deadline 与 NO-GO 条件已预注册；
+- 当前尚无代码、artifact 或性能 claim。
+
+**记录**
+- `gemini_doc/change_2026-08-05_nrir43_preregistration.md`
+- `gemini_doc/BOUNDFLOW_CROSS_AXIS_VERIFICATION_BATCH_SCHEDULE_V1_PLAN_2026_08_05.md`
+- `gemini_doc/BOUNDFLOW_CROSS_AXIS_VERIFICATION_BATCH_SCHEDULE_V1_CHANGELOG_2026_08_05.md`

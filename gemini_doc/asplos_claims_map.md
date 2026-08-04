@@ -1279,3 +1279,14 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   `0d310c2ffc96844648a83f9921bc7f353ec8425986bccb36f75e6d1cd2b25b58` /
   `7274e834b3bf08a9e138fa3284b70222620cf3c571395331e1a87ed5fee7d759`；targeted `10 passed`，
   全量 `958 passed, 37 skipped`，静态门禁通过。本阶段 `VALIDATED-REDUCED`。
+
+### NRIR-43：Cross-Axis Verification Batch Schedule v1（预注册）
+
+- `C1/C2-M-NRIR43-PENDING`：计划新增 typed ragged Plan/Instance/Task/Schedule/Trace，使已 ready 的
+  clause/node/candidate lower work 由编译器显式装箱并按 segment 归还原 owner；尚未实现；
+- `C3-G-NRIR43-PENDING`：预注册 exact semantics、segment ownership、launch count、paired timing、
+  global deadline 与 synchronized tamper 门禁；尚无 artifact；
+- `C3-E-NRIR43-PENDING`：Phase A 要求 queue ratio `<=0.85`，Phase B 要求每轮 whole `<=45 s` 且
+  median ratio `<=0.80`；这些是 acceptance criteria，不是已观测结果；
+- `C3-L-NRIR43`：即使门禁通过，也仅允许 fixed ResNet2B property 0 CPU8 internal admission；
+  `performance_claimed=false`，不得外推公平竞品、GPU、多工作负载、property closure 或 ASPLOS-ready。
