@@ -16,9 +16,11 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_EXTERNAL_SEEDED_ANCESTRAL_REFINEMENT_V1_PLAN_2026_08_04.md`
-（typed external seed、root/parent source lineage、ResNet hard-clause bounded-tree tightness）。其
-直接前序为 `gemini_doc/BOUNDFLOW_ANCESTRAL_CONSTRAINT_REFINEMENT_V1_PLAN_2026_08_04.md`、
+当前最新入口：`gemini_doc/BOUNDFLOW_EXTERNAL_SEEDED_DEPTH_NODE_CONVERGENCE_V1_PLAN_2026_08_04.md`
+（typed external-seeded ancestral 的 7/15/31-node 收敛曲线、logical-domain nesting 与剩余
+proof deficit）。其直接前序为
+`gemini_doc/BOUNDFLOW_EXTERNAL_SEEDED_ANCESTRAL_REFINEMENT_V1_PLAN_2026_08_04.md`、
+`gemini_doc/BOUNDFLOW_ANCESTRAL_CONSTRAINT_REFINEMENT_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_PER_CHILD_OBJECTIVE_REFINEMENT_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_OBJECTIVE_DIRECTED_INTERMEDIATE_REFINEMENT_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_NATIVE_INTERMEDIATE_BOUND_REFINEMENT_V1_PLAN_2026_08_04.md`、

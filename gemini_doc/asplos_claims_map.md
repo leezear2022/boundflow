@@ -895,3 +895,24 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   semantic replay hash=
   `9f52b99a74dab448626061f5b8f060f3b8c43b6c03f6deb0899d9fe91883d9f7`；全量
   `766 passed, 37 skipped`。下一门禁为 external-seeded hard-clause depth/node convergence。
+
+### NRIR-24：External-Seeded Depth/Node Convergence v1
+
+- `C1/C3-E-NRIR24` convergence：固定 external seed、ancestral carry、objective branch、25-step
+  optimizer 与 16-target/ReLU 单 pass refinement，只增加 `7/15/31 nodes × depth 2/3/4`；clauses
+  `0/2/4` worst terminal lower 曲线为
+  `-0.318287→-0.299506→-0.282360`、
+  `-0.425477→-0.413456→-0.401845`、
+  `-0.504142→-0.479104→-0.459939`；
+- `C3-G-NRIR24` replay/nesting gate：九个 fresh-process checkpoint shards 全部 semantic replay；
+  `7⊂15⊂31` 按 split-state logical domain、parent lineage、branch selection 与 normalized
+  refinement semantics 校验，最大公共 lower 漂移 `1.13249e-6 ≤ 1e-5`；
+- `C3-L-NRIR24` hard limitation：depth-4 proof deficits 仍为
+  `0.282360/0.401845/0.459939`，无 fixed-tree closure；单 ResNet/三 clause/CPU，无 complete
+  property、CUDA、multi-workload、competitor parity、repeated performance 或 ASPLOS-ready，
+  `performance_claimed=false`；
+- 工件：
+  `artifacts/external-seeded-depth-node-convergence/vnncomp21-resnet2b-prop0-hard3-cpu-v1/`；
+  semantic replay hash=
+  `db0401bef0d938773fed04a173e49cae0ad0b4fdc4ffdd49450cc86fae7f0db6`。本阶段
+  `VALIDATED-REDUCED`；下一门禁为 dynamic ancestral refinement budget/multi-pass。

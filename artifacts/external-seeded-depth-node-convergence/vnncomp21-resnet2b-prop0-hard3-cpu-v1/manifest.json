@@ -1,0 +1,18 @@
+{
+  "evidence_hash": "db0401bef0d938773fed04a173e49cae0ad0b4fdc4ffdd49450cc86fae7f0db6",
+  "files": {
+    "external_seeded_convergence.json": "302c6886df0fe5ab1351dc8ef276aeebb72ec9620075bb0d3419911cb0ed36f1",
+    "shards/clause0_n15_d3.json": "843f2edaf777c997c429eff9c2772600bbcf5b178f3c43aeed2155a0f9ce6d52",
+    "shards/clause0_n31_d4.json": "c083ca6991a240d3ef9ffb718572556c5b83bd229e31f6e036986a2e2960fc3a",
+    "shards/clause0_n7_d2.json": "59de36ef7f8b569878e501e7ea66aafb3595af185c40510c04be70e626795b22",
+    "shards/clause2_n15_d3.json": "83172a306dc735a198a3020ead07948e96f3ba6230847e4dd4198004fe66f9ea",
+    "shards/clause2_n31_d4.json": "dac07008af4df49dc0e80be7d2f41924393357acc34cd22f0a4d2c6fa7eb10bb",
+    "shards/clause2_n7_d2.json": "87991122d738a15e7cfd8ce53db587459e3a2236640899513d5c1e7f49dee22a",
+    "shards/clause4_n15_d3.json": "0f5ea20aa9a11d423111bfb1497c75ff665143f6ebb369615e687dbe0408857e",
+    "shards/clause4_n31_d4.json": "fb1adcc006b39ed31ebeba18fbd6aaabfbe1dade0f7b4a88ab6400e481c43e59",
+    "shards/clause4_n7_d2.json": "23bde1df774c231917073c4caf1109cb8f03a7243fe02fa1351e4708d106b472"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.external-seeded-convergence-artifact/v1",
+  "status": "validated_reduced"
+}

@@ -2,7 +2,7 @@
 
 > 状态：**顶层执行计划 v1.0；后续研究工作受本文门禁约束。**  
 > 基线日期：2026-07-12  
-> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`abe37e8`
+> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`c6a7998`
 > 投稿策略：ASPLOS 2027 September Cycle 为有条件冲刺；ASPLOS 2028 为稳健主目标。
 
 > **路线修订（2026-07-20）**：本文保留 2026-07-12 的研究问题、历史门禁和 PR-10—13
@@ -47,6 +47,12 @@
 > `0.001512/0.001133/0.000534`，相对 seeded root-global 为
 > `0.000823/0.000004/0`；全部 terminal leaves 仍负。本阶段 `VALIDATED-REDUCED`，下一门禁为
 > external-seeded depth/node convergence，不形成 property/performance/CUDA/ASPLOS-ready claim。
+
+> **2026-08-04 NRIR-24 修订**：固定 `7/15/31 nodes × depth 2/3/4` 的九单元 fresh-process
+> convergence matrix 已完成。clauses `0/2/4` worst terminal lower 均随预算严格改善，depth-4 为
+> `-0.282360/-0.401845/-0.459939`，但仍无 bounded-tree closure。结论只为 convergence trend
+> `VALIDATED-REDUCED`；下一方法门禁是 dynamic ancestral refinement budget/multi-pass，不把继续
+> 堆 fixed depth 当作 complete-verifier 或性能证据。
 
 > **2026-08-04 NRIR-1 修订**：上述 native correctness 门禁已通过。固定 ResNet2B 的
 > 17-op Primal graph 已 lower/execute 为 21-op native Bound/Task/Schedule path，五层 hash 绑定
