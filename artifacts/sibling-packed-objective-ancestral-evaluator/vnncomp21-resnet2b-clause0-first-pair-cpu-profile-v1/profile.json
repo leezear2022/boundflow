@@ -1,0 +1,267 @@
+{
+  "comparison": {
+    "alpha_max_abs_diff": 1.3768672943115234e-05,
+    "beta_max_abs_diff": 4.470348358154297e-08,
+    "bounds_parity_1e_5": true,
+    "lower_max_abs_diff": 0.0,
+    "mechanism_gate_passed": true,
+    "packed_child_elapsed_strictly_lower": true,
+    "packed_native_groups": 1,
+    "packed_optimizer_groups": 1,
+    "refinement_semantics_equal": true,
+    "serial_native_groups": 2,
+    "serial_optimizer_groups": 2,
+    "split_tensors_exact": true,
+    "stable_scope_fields_equal": true,
+    "upper_max_abs_diff": 0.0
+  },
+  "packed": {
+    "child_elapsed_ns": 7018038079,
+    "phases": {
+      "optimizer_compile": {
+        "calls": 1,
+        "elapsed_ns": 951061330
+      },
+      "optimizer_execute": {
+        "calls": 1,
+        "elapsed_ns": 1346513205
+      },
+      "refinement_compile": {
+        "calls": 2,
+        "elapsed_ns": 233355590
+      },
+      "refinement_execute": {
+        "calls": 2,
+        "elapsed_ns": 363989091
+      },
+      "selected_native_compile": {
+        "calls": 1,
+        "elapsed_ns": 408447586
+      },
+      "selected_native_execute": {
+        "calls": 1,
+        "elapsed_ns": 1259085066
+      }
+    },
+    "semantics": {
+      "nodes": [
+        {
+          "branch_candidate": {
+            "lower": -56.2340202331543,
+            "neuron_index": 13,
+            "relu_input": "31",
+            "upper": 46.08847427368164,
+            "width": 102.32249450683594
+          },
+          "lower": -142.7036590576172,
+          "node": {
+            "branch_neuron_index": 66,
+            "branch_relu_input": "31",
+            "branch_value": -1,
+            "depth": 1,
+            "node_id": "nrir34:cifar10_resnet:000:clause0:n000001",
+            "parent_node_id": "nrir34:cifar10_resnet:000:clause0:n000000",
+            "split_state_hash": "457eb944dcc7f232d9911741b29d9896e48ca6c7ee806350f412cd96563af4c5"
+          },
+          "selected_state_hash": "4a9f71d2ecdf5c98d9511329648bc41e0defadd805b26190234f49b0a66081c5",
+          "upper": 151.21844482421875
+        },
+        {
+          "branch_candidate": {
+            "lower": -56.2340202331543,
+            "neuron_index": 13,
+            "relu_input": "31",
+            "upper": 46.08847427368164,
+            "width": 102.32249450683594
+          },
+          "lower": -142.85464477539062,
+          "node": {
+            "branch_neuron_index": 66,
+            "branch_relu_input": "31",
+            "branch_value": 1,
+            "depth": 1,
+            "node_id": "nrir34:cifar10_resnet:000:clause0:n000002",
+            "parent_node_id": "nrir34:cifar10_resnet:000:clause0:n000000",
+            "split_state_hash": "28897740ea1859d1dd400537593d9bbfef6ca16eca4c8be5c671a46214a4f6e7"
+          },
+          "selected_state_hash": "9397338c9212fbe9f7330ba107c911e187b4d5fba5eb1fa98b07d30f17cec324",
+          "upper": 150.83197021484375
+        }
+      ],
+      "refinements": [
+        {
+          "plan_hash": "b68c3ab41f027e5315157296ac4033ab6815cbaafd773ee9e3f92590838e00c4",
+          "semantic_trace_hash": "a99751168040bbb9c41f6932cc9f1d672600e2441b70ab258c77a8498fa0ae54",
+          "source_constraints_hash": "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+          "source_plan_hash": "711f4112b90e54a79c6fca4239d025240c1285a8b808ba14dc25402748ad3506",
+          "source_semantic_trace_hash": "18ebb5b14578102c09eb59f4fb301284233214c9e2a14ccabe4ec740ada2a9c4"
+        },
+        {
+          "plan_hash": "a4a369a5fc3a86b147d49c3dd56c311c3b2560ce5b084c4a049053beb881cf70",
+          "semantic_trace_hash": "dea3534d768b9eaf110cfec464610310f19c697a210d771f9cf6b70b2dde0aa9",
+          "source_constraints_hash": "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+          "source_plan_hash": "711f4112b90e54a79c6fca4239d025240c1285a8b808ba14dc25402748ad3506",
+          "source_semantic_trace_hash": "18ebb5b14578102c09eb59f4fb301284233214c9e2a14ccabe4ec740ada2a9c4"
+        }
+      ]
+    }
+  },
+  "performance_claimed": false,
+  "protocol": {
+    "child_cap": 128,
+    "clause_index": 0,
+    "evaluator_objective_shape": [
+      1,
+      10
+    ],
+    "objective_projection": "drop_singleton_domain_axis_v1",
+    "optimizer_steps": 5,
+    "order": [
+      "serial",
+      "packed"
+    ],
+    "performance_claimed": false,
+    "root_source_objective_shape": [
+      1,
+      1,
+      10
+    ],
+    "torch_threads": 8
+  },
+  "root": {
+    "branch": {
+      "lower": -85.59491729736328,
+      "neuron_index": 66,
+      "relu_input": "31",
+      "upper": 60.770511627197266,
+      "width": 146.36542892456055
+    },
+    "evaluation_elapsed_ns": 7731003903,
+    "lower": -204.17315673828125,
+    "source_elapsed_ns": 537826908,
+    "upper": 213.74331665039062
+  },
+  "schema_version": "boundflow.sibling-packed-objective-ancestral-profile/v1",
+  "serial": {
+    "child_elapsed_ns": 13291550232,
+    "phases": {
+      "optimizer_compile": {
+        "calls": 2,
+        "elapsed_ns": 1883735910
+      },
+      "optimizer_execute": {
+        "calls": 2,
+        "elapsed_ns": 2659153915
+      },
+      "refinement_compile": {
+        "calls": 2,
+        "elapsed_ns": 233496282
+      },
+      "refinement_execute": {
+        "calls": 2,
+        "elapsed_ns": 366075648
+      },
+      "selected_native_compile": {
+        "calls": 2,
+        "elapsed_ns": 802379618
+      },
+      "selected_native_execute": {
+        "calls": 2,
+        "elapsed_ns": 2488389457
+      }
+    },
+    "semantics": {
+      "nodes": [
+        {
+          "branch_candidate": {
+            "lower": -56.2340202331543,
+            "neuron_index": 13,
+            "relu_input": "31",
+            "upper": 46.08847427368164,
+            "width": 102.32249450683594
+          },
+          "lower": -142.7036590576172,
+          "node": {
+            "branch_neuron_index": 66,
+            "branch_relu_input": "31",
+            "branch_value": -1,
+            "depth": 1,
+            "node_id": "nrir34:cifar10_resnet:000:clause0:n000001",
+            "parent_node_id": "nrir34:cifar10_resnet:000:clause0:n000000",
+            "split_state_hash": "457eb944dcc7f232d9911741b29d9896e48ca6c7ee806350f412cd96563af4c5"
+          },
+          "selected_state_hash": "aa4ba7849aff06b8e8fd5b93bccb3f0de6acce920f74f1b3624a08e6428c4b37",
+          "upper": 151.21844482421875
+        },
+        {
+          "branch_candidate": {
+            "lower": -56.2340202331543,
+            "neuron_index": 13,
+            "relu_input": "31",
+            "upper": 46.08847427368164,
+            "width": 102.32249450683594
+          },
+          "lower": -142.85464477539062,
+          "node": {
+            "branch_neuron_index": 66,
+            "branch_relu_input": "31",
+            "branch_value": 1,
+            "depth": 1,
+            "node_id": "nrir34:cifar10_resnet:000:clause0:n000002",
+            "parent_node_id": "nrir34:cifar10_resnet:000:clause0:n000000",
+            "split_state_hash": "28897740ea1859d1dd400537593d9bbfef6ca16eca4c8be5c671a46214a4f6e7"
+          },
+          "selected_state_hash": "1825661c2873b455c4c03e5cae9cf6637c3c7bf944b099a7d1de824d7e844b72",
+          "upper": 150.83197021484375
+        }
+      ],
+      "refinements": [
+        {
+          "plan_hash": "b68c3ab41f027e5315157296ac4033ab6815cbaafd773ee9e3f92590838e00c4",
+          "semantic_trace_hash": "a99751168040bbb9c41f6932cc9f1d672600e2441b70ab258c77a8498fa0ae54",
+          "source_constraints_hash": "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+          "source_plan_hash": "711f4112b90e54a79c6fca4239d025240c1285a8b808ba14dc25402748ad3506",
+          "source_semantic_trace_hash": "18ebb5b14578102c09eb59f4fb301284233214c9e2a14ccabe4ec740ada2a9c4"
+        },
+        {
+          "plan_hash": "a4a369a5fc3a86b147d49c3dd56c311c3b2560ce5b084c4a049053beb881cf70",
+          "semantic_trace_hash": "dea3534d768b9eaf110cfec464610310f19c697a210d771f9cf6b70b2dde0aa9",
+          "source_constraints_hash": "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+          "source_plan_hash": "711f4112b90e54a79c6fca4239d025240c1285a8b808ba14dc25402748ad3506",
+          "source_semantic_trace_hash": "18ebb5b14578102c09eb59f4fb301284233214c9e2a14ccabe4ec740ada2a9c4"
+        }
+      ]
+    }
+  },
+  "source": {
+    "native_code_revision": "846eef1cbdae8953aacd091421a8a56dd7f430c595ba2a70662162628c56737a"
+  },
+  "status": "ok",
+  "whole_elapsed_ns": 28735975103,
+  "workload": {
+    "category": "cifar10_resnet",
+    "csv_ordinal": 0,
+    "csv_relative_path": "benchmarks/cifar10_resnet/cifar10_resnet_instances.csv",
+    "csv_sha256": "d0be77761016f65d044918e5f95332cf32bf848e5eef28c5465dfbf287ba984f",
+    "model_input_shape": [
+      1,
+      3,
+      32,
+      32
+    ],
+    "model_output_dim": 10,
+    "model_relative_path": "benchmarks/cifar10_resnet/onnx/resnet_2b.onnx",
+    "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+    "onnx_ops": [
+      "Add",
+      "Conv",
+      "Flatten",
+      "Gemm",
+      "Relu"
+    ],
+    "property_relative_path": "benchmarks/cifar10_resnet/vnnlib_properties_pgd_filtered/resnet2b_pgd_filtered/prop_0_eps_0.008.vnnlib",
+    "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+    "query_ir_hash": "f2151936ce0d9f8d8bcabd7bc3fc0224a71d7907da4ac614d7216e7a0919201b",
+    "workload_id": "cifar10_resnet:000"
+  }
+}

@@ -1,9 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`6306a34`（NRIR-30 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`45d2ea6`（NRIR-33 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/objective-directed-hard-clause-escalation-v1`
+> 当前研发分支：`feat/sibling-packed-objective-ancestral-evaluator-v1`
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed
@@ -11,7 +11,8 @@
 > ancestral-constraint carry-forward refinement（完成）→ external-seeded hard-clause convergence
 >（完成）→ dynamic ancestral refinement budget（完成）→ typed multi-pass refinement（NO-GO）→
 > production prepared verifier（完成）→ parametric compiler（完成）→ wall-clock scaling（完成）→
-> typed hard-clause escalation（完成）→ objective-directed hard-clause escalation（完成）**。
+> typed hard-clause escalation（完成）→ objective-directed hard-clause escalation（完成）→
+> objective-ancestral queue（完成）→ child-budget Pareto（NO-GO）→ sibling-packed evaluator（完成）**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有
@@ -1268,3 +1269,28 @@ pilot hash=`db9b406eebebad0c1c4d6f39e8088667935f10e3d54f38cb848dce792dd757eb`。
 本路线以 cap-only coverage `VALIDATED-NO-GO` 关闭；timing 只作诊断，无 performance/property/GPU/
 competitor/ASPLOS-ready claim。下一门禁固定为 cap128 sibling packed refinement/evaluation 与
 parametric evaluator，目标是在同一 60 秒内严格增加 committed nodes。
+
+## 47. Sibling-Packed Objective-Ancestral Evaluator v1
+
+NRIR-34 保持 cap128 objective-ancestral refinement、31/depth4 和 60 秒 cooperative deadline，新增
+source `(1,1,10)`→evaluator `(1,10)` typed projection与 same-parent `(-1,+1)` SiblingGroup IR。
+两个 child 的 refinement Plan/execution/final bounds 仍独立；optimizer 与 selected-native compiler
+execution 合并为 domain-batch 2。Task/Schedule 显式包含 root admission/projection/evaluation、parent
+transition、两条 child refinement、packed compile/execute 与 emit；late complete group 原子丢弃。
+
+first-pair feasibility 的 serial/packed child elapsed 为 `13.291550/7.018038 s`，optimizer/native
+execution group 都由 `2→1`，bounds exact。随后三 fresh-process 交替 formal repeat 中，serial
+accepted nodes=`[7,7,7]`，packed=`[15,15,15]`，minimum gain=`+8`；common 7 domains 的
+lower/upper max diff 均为 `7.62939453125e-06`，split/branch/final refinement exact，alpha/beta max diff
+为 `1.0728836e-04/8.9406967e-08`。packed 到 depth 3，worst active lower 从 serial
+`-104.765411` 改善到 `-76.077194`。formal hash=
+`9678f9624abd547b76326ad2a1b916c3944d14fc96b2fbe0e81cf61849a777b4`。
+
+九子句 global-60s adapter 保持 search、sound verdict 与 original ordinal accounting；一次 integration
+完成 clause 0 的 13 nodes/6 groups 后，总体 `unknown`、unresolved=`[0]`、pending=`[1..8]`。artifact
+hash=`dcd0dc89fa7e4eb503e8a8b29438e16d215da10e66cd045cc76eb19a30037bf5`。本阶段以 single-hard-clause
+same-algorithm deadline coverage `VALIDATED-REDUCED` 关闭；cooperative atomic completion wall time
+约 `64.5—66.2 s`，不是 60 秒硬实时或 wall-clock speedup。无 property closure、GPU、competitor、
+multi-workload 或 ASPLOS-ready claim。下一门禁为 NRIR-35 cross-clause objective/root/compiler sharing
+与 anytime budget，必须在同一全局 60 秒内增加 completed original clauses，不得给每 clause 独立延长
+deadline。

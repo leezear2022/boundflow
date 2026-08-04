@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`6306a34`（NRIR-30 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/objective-directed-hard-clause-escalation-v1`
+> 当前 integration base：`45d2ea6`（NRIR-33 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/sibling-packed-objective-ancestral-evaluator-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-04 NRIR-19 后续：native selected-CROWN intermediate refinement 已成为一等
@@ -958,3 +958,24 @@ root-global `-200.465393` 的 cap128 gain 为 `+95.699982`，预注册规则只�
 `db9b406eebebad0c1c4d6f39e8088667935f10e3d54f38cb848dce792dd757eb`。没有新 property 或
 performance claim。下一工程门禁为 sibling packed refinement/evaluation + parametric evaluator，
 保持 cap128、typed ancestral lineage 与 60 秒 deadline。
+
+## 41. Sibling-Packed Objective-Ancestral Evaluator v1 判定
+
+NRIR-34 把已有 packed node helper 提升为一等 source/evaluator projection、SiblingGroup
+Plan/Task/Schedule 与 atomic queue runtime。每个 child 仍独立执行 cap128 objective-ancestral
+refinement；同一 parent 的 `(-1,+1)` pair 只共享 optimizer 与 selected-native compiler execution。
+
+first-pair profiler 的 serial→packed child elapsed 为 `13.291550→7.018038 s`，optimizer/native group
+均 `2→1`，bounds exact。正式三 fresh repeats 固定 31/depth4/60 s，serial accepted nodes
+`[7,7,7]`，packed `[15,15,15]`；common lower/upper max diff 都是
+`7.62939453125e-06`，minimum node gain=`+8`。packed max depth=`3`、worst active lower=
+`-76.07719421386719`，serial 为 depth `2`/`-104.76541137695312`。formal hash=
+`9678f9624abd547b76326ad2a1b916c3944d14fc96b2fbe0e81cf61849a777b4`。
+
+ResNet property 0 的 9-clause global-60s integration 保持 sound `unknown` 与 original ordinal：完成
+clause 0 的 13 nodes/6 atomic groups，unresolved `[0]`，pending `[1..8]`。evidence hash=
+`dcd0dc89fa7e4eb503e8a8b29438e16d215da10e66cd045cc76eb19a30037bf5`。结论为 single-hard-clause
+same-algorithm deadline coverage `VALIDATED-REDUCED`；atomic cooperative wall time 会到
+`64.5—66.2 s`，不声明硬实时/wall-clock speedup、property、GPU、competitor 或 ASPLOS-ready。
+下一门禁是 NRIR-35 cross-clause objective/root/compiler sharing + anytime global budget，目标是在同一
+60 秒内增加 completed original clauses。
