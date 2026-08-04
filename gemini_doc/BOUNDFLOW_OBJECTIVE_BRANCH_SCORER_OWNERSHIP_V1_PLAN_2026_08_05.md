@@ -1,6 +1,6 @@
 ---
-status: active
-updated: 2026-08-04T22:16:52Z
+status: completed
+updated: 2026-08-05T07:18:00+08:00
 type: plan
 topic: boundflow
 slug: BOUNDFLOW_OBJECTIVE_BRANCH_SCORER_OWNERSHIP_V1
@@ -32,15 +32,15 @@ stage: s01
 
 ## Tasks
 
-- [ ] 新增 capsule Plan/Task/Schedule binding：绑定 objective、split、selected optimizer state、policy、
+- [x] 新增 capsule Plan/Task/Schedule binding：绑定 objective、split、selected optimizer state、policy、
   candidate table、task/schedule 与 immutable tensor-content token；任一漂移 fail closed。
-- [ ] 新增 prevalidated scorer runtime：执行五阶段 schedule 时 ENUMERATE task 读取 Plan-owned candidates，
+- [x] 新增 prevalidated scorer runtime：执行五阶段 schedule 时 ENUMERATE task 读取 Plan-owned candidates，
   materialize/evaluate/reduce/select 语义不变；禁止调用 historical `_enumerate_candidates`。
-- [ ] 接入 additive shared production queue；对 clauses 2/3 的 31 nodes 与 NRIR-39 historical execution
+- [x] 接入 additive shared production queue；对 clauses 2/3 的 31 nodes 与 NRIR-39 historical execution
   逐节点比较 selected branch、全 score rows、child-lower hash、queue lower/upper、split、α/β、refinement。
-- [ ] Phase A 做 3 fresh counterbalanced old/new fixed-31 paired runs；只有 parity/call-count/wall gate 全过
+- [x] Phase A 做 3 fresh counterbalanced old/new fixed-31 paired runs；只有 parity/call-count/wall gate 全过
   才运行 Phase B three fresh whole-query/global-60s formal。
-- [ ] artifact replay 重算 capsule/parity/call/timing/global gates；同步重哈希 capsule/candidate/score/call/
+- [x] artifact replay 重算 capsule/parity/call/timing/global gates；同步重哈希 capsule/candidate/score/call/
   deadline tamper 仍 fail closed。
 
 ## Validation
@@ -55,6 +55,20 @@ stage: s01
   clauses 2/3 各 31 nodes/15 groups，worst-active lower 相对 NRIR-37 widest 各 `>=+1.0`，whole cooperative
   `<=70s`，无 partial/reset/recompile/evidence omission。否则保留 correctness 但 production NO-GO。
 - targeted/full pytest、Black、mypy、Pylint、`dol validate`、`dol lint --soft`。
+
+实际结果：Phase A clauses 2/3 new/old queue median ratio=`0.706888/0.698486`，median 节省
+`5.468696/5.680614 s`，均大于两侧 MAD；每轮 old/new 都为 `341→31` enumeration，new
+compile=`31`、execute=`0`，六组 31-node exact parity 全过。Phase-A formal hash=
+`0d310c2ffc96844648a83f9921bc7f353ec8425986bccb36f75e6d1cd2b25b58`。
+
+条件 Phase B 三 fresh whole-query 均 selected `[2,3]`、accepted `[[31,31],[31,31],[31,31]]`，
+whole=`[57.175184,57.697757,58.114412] s`，worst active lower 固定为
+`-35.530926/-30.258448`，相对 NRIR-37 widest 改善 `+2.043362/+5.641768`；formal hash=
+`7274e834b3bf08a9e138fa3284b70222620cf3c571395331e1a87ed5fee7d759`。targeted `10 passed`，
+全量 `958 passed, 37 skipped`；Black/mypy/Pylint 通过，Pylint `10.00/10`。
+
+本阶段以 fixed ResNet2B property 0、CPU8、global-60s production admission
+`VALIDATED-REDUCED` 关闭；final 仍 unknown，且不形成 competitor/GPU/multi-workload/ASPLOS-ready claim。
 
 ## Rollback
 

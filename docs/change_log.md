@@ -4464,3 +4464,22 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_PRODUCTION_COST_ATTRIBUTION_V1_CHANGELOG_2026_08_05.md`
+
+---
+
+## 2026-08-05：Objective Branch Scorer Ownership v1
+
+- 新增 typed validated capsule、Plan-owned candidate scorer Task/Schedule、prevalidated executor、additive
+  production queue 与 global multi-clause composition；NRIR-39/40 frozen 文件保持不变；
+- Phase A 六组 exact parity；31-node enumeration `341→31`，clauses 2/3 new/old median ratio=
+  `0.706888/0.698486`，formal hash=`0d310c2f…25b58`；
+- Phase B 三 fresh global-60s queries 均 selected `[2,3]`、accepted `[31,31]`，whole=
+  `57.175184/57.697757/58.114412 s`，formal hash=`7274e834…7d759`；
+- typed replay 与 synchronized capsule/score/call/deadline tamper 通过；targeted `10 passed`，全量
+  `958 passed, 37 skipped`，Black/mypy/Pylint 通过；
+- 以固定 ResNet2B property 0 CPU production admission `VALIDATED-REDUCED` 关闭；final unknown、
+  `performance_claimed=false`、ASPLOS-ready=NO。
+
+**记录**
+- `gemini_doc/change_2026-08-05_objective_branch_scorer_ownership.md`
+- `gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_SCORER_OWNERSHIP_V1_CHANGELOG_2026_08_05.md`

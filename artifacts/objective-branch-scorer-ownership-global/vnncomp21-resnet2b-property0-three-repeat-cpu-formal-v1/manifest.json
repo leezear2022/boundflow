@@ -1,0 +1,14 @@
+{
+  "files": {
+    "formal.json": "22930eec75c4969de7507b7f656caa7f5effcd0389f7fd6c71741e9af2406940",
+    "logs/repeat-0.log": "565a2c8d546282b70e8e12b4eda58de1894132e0580d6aa8ad6a7b2f151ffeb7",
+    "logs/repeat-1.log": "3b8b16696e3d9085a56c42a41134b65cdcc23add66744ccf000deec81f3bc2cf",
+    "logs/repeat-2.log": "88116d674c86d5e4a46c5a30802318cb135ad60d0b0a0ba8a8799325de7e4e36",
+    "shards/repeat-0.json": "727cdbed2c27098d8b5d4f8e9cd8e796e5a2a564b91adfc0796599189b6a2745",
+    "shards/repeat-1.json": "b717d0823566814462cafe44cc359472e9bda82f5ac08ea01a631ee8914be01c",
+    "shards/repeat-2.json": "3ef4ba7b63aa104cdc309e3e21f104fd5c89d17b882c8381f5d3e9b3553cf91c"
+  },
+  "formal_hash": "e4cb0d384cb1ca617a02a6122403d742424561d16e1b3ce9801a5bcb22d80e84",
+  "performance_claimed": false,
+  "schema_version": "boundflow.objective-branch-scorer-ownership-global-manifest/v1"
+}
