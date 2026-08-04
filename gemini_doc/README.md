@@ -16,10 +16,11 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_MULTI_CLAUSE_ANYTIME_PRIORITY_V1_PLAN_2026_08_04.md`
-（九子句 NRIR-31 floor、typed root-lower priority、同一 global start 的 top-2 dynamic slices、八阶段
-IR、三重复 original-ordinal preservation 与 atomic-pair coverage NO-GO）。
-其直接前序为
+当前最新入口：`gemini_doc/BOUNDFLOW_FULL_FRONTIER_TIGHTNESS_ATTRIBUTION_V1_PLAN_2026_08_05.md`
+（NRIR-38：完整 depth-4 frontier 的 first-class Plan/Task/Schedule 归因；optimizer steps `5→15`
+虽改善 32/32 nodes，但 worst gain 未过门禁，以 `VALIDATED-NO-GO` 冻结该轴）。其直接前序为
+`gemini_doc/BOUNDFLOW_SHARED_PARAMETRIC_OBJECTIVE_EVALUATOR_V1_PLAN_2026_08_05.md`、
+`gemini_doc/BOUNDFLOW_MULTI_CLAUSE_ANYTIME_PRIORITY_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_CROSS_CLAUSE_ANYTIME_OBJECTIVE_EVALUATOR_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_SIBLING_PACKED_OBJECTIVE_ANCESTRAL_EVALUATOR_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_OBJECTIVE_ANCESTRAL_CHILD_BUDGET_PARETO_V1_PLAN_2026_08_04.md`、

@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-05
-> 当前 integration base：`c5ce3e6`（NRIR-36 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/shared-parametric-objective-evaluator-v1`
+> 当前 integration base：`813006b`（NRIR-37 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/full-frontier-tightness-attribution-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
@@ -14,6 +14,10 @@
 > fixed-deadline coverage `VALIDATED-REDUCED` 关闭；final 仍 9/9 unresolved，ASPLOS-ready 与 performance
 > No-Go 不变。下一门禁转向 full-depth frontier tightness attribution 与单变量 stronger-bound/candidate，
 > 不继续调 top-k/slice/cache。
+> 2026-08-05 NRIR-38 已关闭：两条 clause 均覆盖 31 evaluations / 16 active depth-4 nodes，baseline
+> replay lower/upper max diff=0。optimizer `steps=5→15` 虽改善 32/32 nodes，但 worst-active lower 只
+> 改善 `+0.055496/+0.028557`，未过预注册 `+1.0` 门禁，以 `VALIDATED-NO-GO` 冻结 optimizer-step
+> 轴。下一单变量为已有 objective branch IR 接入 shared ancestral evaluator。
 > 2026-08-05 NRIR-36 后续：九子句 NRIR-31 floor 已由 typed root-lower priority 选择 clauses 2/3，
 > dynamic equal-remaining slices 在同一 global start 下执行。三 fresh repeats 都复现
 > rank=`[2,3,4,5,0,8,6,7,1]`，packed nodes=`[[3,3],[3,3],[3,1]]`；repeat 2 第二条未提交
@@ -1068,3 +1072,24 @@ control/compiler 同步重哈希 tamper、Task/Batch commit binding tamper、27 
 fixed-deadline coverage `VALIDATED-REDUCED` 关闭。这不把内部 audit→production timing 写成 speedup，
 也没有 property closure、硬实时、GPU、competitor、multi-workload 或 ASPLOS-ready claim。下一门禁
 先解释完整 depth-4 frontier 的剩余 gap，再只改变一个 stronger-bound/candidate 变量。
+
+## 45. Full Frontier Tightness Attribution v1 判定
+
+NRIR-38 新增一等 `FrontierTightnessAttribution` Plan/Task/Schedule。Plan 绑定 source execution/Plan/
+queue、objective/threshold、exact active node/split、baseline/candidate policy 与预注册门禁；七阶段 Task/
+Schedule 固定 source admission、frontier enumeration、source summary、baseline replay、candidate evaluate、
+decision 与 emit。runtime 从 source 独立枚举 active frontier，并按 source commit 恢复八个完整 sibling
+pair；steps5/steps15 分别使用独立单-template cache。
+
+真实 clauses 2/3 均为 31 evaluations、16 active depth-4 nodes。baseline replay lower/upper max diff
+全部为 0，split、parent、sibling grouping 与 refinement final-bound hashes exact。steps15 对两条 clause
+均改善 16/16 nodes、无退化；median delta=`+0.107208/+0.132715`，但 worst-active lower 只由
+`-37.574287→-37.518791`、`-35.900215→-35.871658`，改善 `+0.055496/+0.028557`，远低于冻结
+`+1.0` gate。depth-4 alpha interior fraction 也只有 `2.164%/2.518%`，支持 optimizer 已近饱和的归因。
+
+pilot hash=`2719347a8e1c5c49c418b3a396ff405a004b0f4ace96af94d335e4026f7a24a2`；replay、8 类同步
+tamper、13 focused tests、全量 `930 passed, 37 skipped`、mypy/Pylint 均通过。本阶段以 fixed-frontier
+optimizer-step tightness `VALIDATED-NO-GO` 关闭；不启动 steps15 full-queue formal，不形成 property、
+performance、GPU、competitor、multi-workload 或 ASPLOS-ready claim。下一单变量固定为把已有
+objective-bound-impact branch Plan/Task/Schedule 接入 shared ancestral evaluator，与 widest branch 做
+exact fixed-tree 对照。

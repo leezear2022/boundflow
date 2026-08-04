@@ -5,9 +5,9 @@ rm: v01
 st: s01
 stat: active
 health: green
-pr: [48]
-last_ch: ev004330
-last_va: ev004331
+pr: [49]
+last_ch: ev004406
+last_va: ev004407
 blk:
-next: preregister-nrir38-full-frontier-tightness-attribution
-updated: 2026-08-04T19:37:35Z
+next: publish-nrir38-then-preregister-nrir39-objective-branch-shared-evaluator
+updated: 2026-08-04T20:07:40Z
