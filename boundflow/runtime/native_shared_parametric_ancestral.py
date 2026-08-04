@@ -211,6 +211,21 @@ class NativeSharedParametricAncestralExecution:
             or not self.batch_commits
         ):
             raise ValueError("shared-parametric batch/compiler coverage differs")
+        commit_tasks = tuple(
+            task
+            for task in self.task_ir.tasks
+            if task.kind
+            in {
+                NativeSharedParametricAncestralTaskKind.COMMIT_ROOT,
+                NativeSharedParametricAncestralTaskKind.COMMIT_SIBLING_PAIR,
+            }
+        )
+        if self.task_ir.batch_hashes != tuple(
+            item.stable_hash() for item in self.batch_commits
+        ) or tuple(task.output_hash for task in commit_tasks) != tuple(
+            _canonical_hash(item.to_dict()) for item in self.batch_commits
+        ):
+            raise ValueError("shared-parametric Task/Batch commit binding differs")
         evaluations_by_id = {
             item.node.node_id: item for item in self.queue.trace.evaluations
         }

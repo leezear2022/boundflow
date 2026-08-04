@@ -10,7 +10,7 @@
 > owner。真实 ResNet clause 2 root+pair 与 frozen audit lower/branch/split/α/β/refinement exact，upper
 > max diff=`1.52587890625e-5` 且既有 allclose guard 通过。三 fresh repeats 的 rank/selected 均固定为
 > `[2,3,4,5,0,8,6,7,1]`/`[2,3]`，两条每轮均提交 `31 nodes/15 groups`，whole=
-> `[52.032317,52.268473,51.926746] s`，每轮恰好一次模板编译。NRIR-37 以 shared compiler ownership +
+> `[51.996191,52.251681,52.695640] s`，每轮恰好一次模板编译。NRIR-37 以 shared compiler ownership +
 > fixed-deadline coverage `VALIDATED-REDUCED` 关闭；final 仍 9/9 unresolved，ASPLOS-ready 与 performance
 > No-Go 不变。下一门禁转向 full-depth frontier tightness attribution 与单变量 stronger-bound/candidate，
 > 不继续调 top-k/slice/cache。
@@ -1048,21 +1048,21 @@ objective shape/dtype/device、ReLU layout、optimizer policy 与 provenance；o
 intermediate bounds、warm state、refinement lineage 和 batch size 都属于 exact instance。生产 batch
 显式 `selected_native_reexecution=false`，root 或完整 sibling pair 才形成 commit。
 
-真实 clause 2 first-class parity 中，frozen audit root+pair=`14.096428 s`、shared evaluator=
-`1.211498 s`；lower、branch、split、α、β、refinement final-bound hashes exact，upper max diff=
+真实 clause 2 first-class parity 中，frozen audit root+pair=`14.073795 s`、shared evaluator=
+`1.198798 s`；lower、branch、split、α、β、refinement final-bound hashes exact，upper max diff=
 `1.52587890625e-5`，满足 frozen `allclose(atol=1e-5,rtol=1e-5)`。单轮 top-2 pilot 的 floor/whole=
-`20.615271/51.083770 s`，clauses 2/3 均完整提交 31 nodes，32 个 cache events 只有一次 miss。
+`20.291832/50.548707 s`，clauses 2/3 均完整提交 31 nodes，32 个 cache events 只有一次 miss。
 
-正式三 fresh processes 的 floor elapsed=`[21.704740,21.802033,21.784891] s`，whole elapsed=
-`[52.032317,52.268473,51.926746] s`；三轮 priority 都为
+正式三 fresh processes 的 floor elapsed=`[21.733539,21.941763,21.925033] s`，whole elapsed=
+`[51.996191,52.251681,52.695640] s`；三轮 priority 都为
 `[2,3,4,5,0,8,6,7,1]`、selected 都为 `[2,3]`、packed nodes 都为 `[31,31]`，每轮
 cache miss count=1。clauses 2/3 depth-4 worst active lower 稳定为
 `-37.574287/-35.900215`，verdict 仍 unknown。
 
-pilot hash=`5c79bcc6e744ed1d29520a76331c9823b2ccfa144332e96c401271241616bf86`；formal hash=
-`7ff6aef76f6fe2b8778faba2e599e440c2dbf14ac4808bfb0c7e07f72fb74238`。artifact replay、11 类
-control/compiler 同步重哈希 tamper、26 focused tests、全量 `916 passed, 37 skipped`、mypy clean、
-Pylint `10.00/10` 均通过。
+pilot hash=`c96fff3fa2bc2563b4d46886d69b33f51ac985b19ad80d916309db57fe6cfefa`；formal hash=
+`9234dcbe77803e0e7d7e62ca88c62e1b859c95af4ad8e3a19b85c0ab87294b83`。artifact replay、11 类
+control/compiler 同步重哈希 tamper、Task/Batch commit binding tamper、27 focused tests、全量
+`917 passed, 37 skipped`、mypy clean、Pylint `10.00/10` 均通过。
 
 预注册 multi-clause coverage gate 成立，因此 NRIR-37 以 same-algorithm shared compiler ownership +
 fixed-deadline coverage `VALIDATED-REDUCED` 关闭。这不把内部 audit→production timing 写成 speedup，

@@ -4,7 +4,7 @@
     "cache_event_count": 32,
     "cache_hit_count": 31,
     "cache_miss_count": 1,
-    "floor_elapsed_ns": 20615270688,
+    "floor_elapsed_ns": 20291832047,
     "passed": true,
     "ranked_original_clause_indices": [
       2,
@@ -24,7 +24,7 @@
     "slices": [
       {
         "accepted_nodes": 31,
-        "allocated_slice_ns": 18661888111,
+        "allocated_slice_ns": 18821859459,
         "cache_outcomes": [
           "miss_compiled",
           "hit_exact_contract",
@@ -45,17 +45,17 @@
         ],
         "cutoff_signaled": false,
         "discarded_attempt_stage": null,
-        "dispatch_started_elapsed_ns": 22676223778,
-        "execution_trace_hash": "62da7ef17a1aa43818ae2a3122c185a0f1e9a8d097def455aa0fbbd2cee6789b",
+        "dispatch_started_elapsed_ns": 22356281082,
+        "execution_trace_hash": "6cf184e2507e4e028202f4a9fd642c68867d8cfe25a9ed755f5c07f4690cd596",
         "original_clause_index": 2,
         "plan_hash": "1ac66c9a60dacc1db731ef357de0328fb77b6951b5700105a7d752d878061bf1",
         "priority_position": 0,
-        "queue_trace_hash": "304df053dc7ef730f804d3a03e2a0132a871839389e871484fd19bcd2db2b12d",
-        "remaining_before_ns": 37323776222,
+        "queue_trace_hash": "a8929a7c8dcea4a627196d18ae024a72aac45c9454efc451fbc1658ebcb8475a",
+        "remaining_before_ns": 37643718918,
         "remaining_selected_count": 2,
         "selected_native_reexecution": false,
         "sibling_group_count": 15,
-        "slice_cutoff_elapsed_ns": 41338111889,
+        "slice_cutoff_elapsed_ns": 41178140541,
         "template_hashes": [
           "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
           "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
@@ -78,7 +78,7 @@
       },
       {
         "accepted_nodes": 31,
-        "allocated_slice_ns": 23082371723,
+        "allocated_slice_ns": 23532252903,
         "cache_outcomes": [
           "hit_exact_contract",
           "hit_exact_contract",
@@ -99,13 +99,13 @@
         ],
         "cutoff_signaled": false,
         "discarded_attempt_stage": null,
-        "dispatch_started_elapsed_ns": 36917628277,
-        "execution_trace_hash": "02661c61da4bcc13cfaac0bf4e72d9064d82fd6c72fae31cbae8643af1a7f156",
+        "dispatch_started_elapsed_ns": 36467747097,
+        "execution_trace_hash": "1f32d322465cbefabd2f06b4c7aae4cb099e15849772f7126b9e7741cb6fbb39",
         "original_clause_index": 3,
         "plan_hash": "b251dda78a17a09f4e20aa2574d71f9c5765d37a13011a2c88c555c40b401a2d",
         "priority_position": 1,
-        "queue_trace_hash": "079edc9d341ee507e97fecac82ca7301dbbaeab25507f712c08d246c1d0ddd40",
-        "remaining_before_ns": 23082371723,
+        "queue_trace_hash": "491f2f8495c497c6a77b72b8c01b810dca57c7c7913e1db986b6a4d86b362480",
+        "remaining_before_ns": 23532252903,
         "remaining_selected_count": 1,
         "selected_native_reexecution": false,
         "sibling_group_count": 15,
@@ -132,10 +132,10 @@
       }
     ],
     "template_count": 1,
-    "whole_elapsed_ns": 51083770254
+    "whole_elapsed_ns": 50548706920
   },
   "parity": {
-    "audit_elapsed_ns": 14096427922,
+    "audit_elapsed_ns": 14073794823,
     "bounds_allclose_atol_1e_5_rtol_1e_5": true,
     "branches_exact": true,
     "cache_outcomes": [
@@ -148,7 +148,7 @@
     "passed": true,
     "refinement_final_bounds_hashes_exact": true,
     "selected_native_reexecution": false,
-    "shared_elapsed_ns": 1211497984,
+    "shared_elapsed_ns": 1198797694,
     "state": {
       "alpha_max_abs_diff": 0.0,
       "alpha_within_1_1e_4": true,
@@ -163,7 +163,7 @@
     "upper_max_abs_diff": 1.52587890625e-05
   },
   "performance_claimed": false,
-  "pilot_hash": "5c79bcc6e744ed1d29520a76331c9823b2ccfa144332e96c401271241616bf86",
+  "pilot_hash": "c96fff3fa2bc2563b4d46886d69b33f51ac985b19ad80d916309db57fe6cfefa",
   "protocol": {
     "allocation": "dynamic_equal_remaining_selected_v1",
     "child_refinement_cap": 128,
@@ -179,7 +179,7 @@
   },
   "schema_version": "boundflow.shared-parametric-objective-evaluator-pilot/v1",
   "source": {
-    "native_code_revision": "4d81362d3a408a26764b5405483d887a137dd2f1d24ad8fcdd152395d245ac97"
+    "native_code_revision": "03731f68719510cb82131a0ae7ab3137c894f62f824ad2e471b620fe89fd915a"
   },
   "status": "ok",
   "workload": {

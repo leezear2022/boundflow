@@ -42,17 +42,18 @@ stage: s01
   `6.672017→0.033680 s`、child pair=`7.324277→0.677186 s`，cache 首次 miss、随后 exact hit。
   lower/split/alpha/beta 与两个 refinement hashes exact；upper max diff=`1.5258789e-5`，满足既有
   `allclose(atol=1e-5,rtol=1e-5)`。据此在 formal pilot 前修正计划中误写的纯绝对容差。
-- first-class parity 复核：frozen audit root+pair=`14.096428 s`，shared evaluator=`1.211498 s`；
+- first-class parity 复核：frozen audit root+pair=`14.073795 s`，shared evaluator=`1.198798 s`；
   lower/branch/split/α/β/refinement hash exact，upper max diff=`1.52587890625e-5` 且 allclose 通过。
-- 单轮 coverage：floor=`20.615271 s`、whole=`51.083770 s`，selected `[2,3]` 均 `31 nodes/15 groups`，
+- 单轮 coverage：floor=`20.291832 s`、whole=`50.548707 s`，selected `[2,3]` 均 `31 nodes/15 groups`，
   cache 1 miss + 31 hits；pilot hash=
-  `5c79bcc6e744ed1d29520a76331c9823b2ccfa144332e96c401271241616bf86`。
-- 三 fresh processes：floor=`[21.704740,21.802033,21.784891] s`，whole=
-  `[52.032317,52.268473,51.926746] s`；三轮 packed nodes 均 `[[31,31]]`、每轮只编译一次，
-  formal hash=`7ff6aef76f6fe2b8778faba2e599e440c2dbf14ac4808bfb0c7e07f72fb74238`。
+  `c96fff3fa2bc2563b4d46886d69b33f51ac985b19ad80d916309db57fe6cfefa`。
+- 三 fresh processes：floor=`[21.733539,21.941763,21.925033] s`，whole=
+  `[51.996191,52.251681,52.695640] s`；三轮 packed nodes 均 `[[31,31]]`、每轮只编译一次，
+  formal hash=`9234dcbe77803e0e7d7e62ca88c62e1b859c95af4ad8e3a19b85c0ab87294b83`。
 - replay、wrong rank/selection/source、slice inflation、partial group、ordinal omission、second miss、
-  template count、event ordinal、native-reexecution 与 compiler coverage tamper 均 fail closed；26 focused
-  tests、全量 `916 passed, 37 skipped`、mypy clean、Pylint `10.00/10`。
+  template count、event ordinal、native-reexecution 与 compiler coverage tamper 均 fail closed；self-review
+  另补 TaskIR/Batch commit 双向绑定及专用 tamper；27 focused tests、全量 `917 passed, 37 skipped`、
+  mypy clean、Pylint `10.00/10`。
 
 ## Decisions
 

@@ -11,6 +11,7 @@ from boundflow.ir.refinement import NativeIntermediateRefinementPolicyIR
 from boundflow.ir.shared_parametric_ancestral import (
     NativeSharedParametricAncestralBatchIR,
     NativeSharedParametricAncestralTaskKind,
+    _canonical_hash,
     lower_native_shared_parametric_ancestral_schedule,
 )
 from boundflow.ir.task import BFTaskModule, BoundTask, TaskKind, TaskOp
@@ -248,6 +249,29 @@ def test_shared_parametric_ancestral_partial_pair_fails_closed(
         ).validate()
 
 
+def test_shared_parametric_ancestral_task_batch_binding_fails_closed(
+    execution_bundle,
+) -> None:
+    module, spec, objective, threshold, root, policy, _cache, execution = (
+        execution_bundle
+    )
+    task_ir = replace(
+        execution.task_ir,
+        batch_hashes=(execution.task_ir.batch_hashes[0], "0" * 64),
+    )
+    schedule = replace(execution.schedule, task_ir_hash=task_ir.stable_hash())
+
+    with pytest.raises(ValueError, match="Task/Batch commit binding differs"):
+        replace(execution, task_ir=task_ir, schedule=schedule).validate_against(
+            module,
+            spec,
+            linear_spec_C=objective,
+            threshold=threshold,
+            root_refinement=root,
+            optimizer_policy=policy,
+        )
+
+
 def test_shared_parametric_ancestral_instance_tamper_fails_closed(
     execution_bundle,
 ) -> None:
@@ -274,6 +298,7 @@ def test_shared_parametric_ancestral_instance_tamper_fails_closed(
         )
 
 
+# pylint: disable-next=too-many-locals
 def test_shared_parametric_ancestral_recompile_event_fails_closed(
     execution_bundle,
 ) -> None:
@@ -298,10 +323,32 @@ def test_shared_parametric_ancestral_recompile_event_fails_closed(
     values["compiler_batch_trace_hash"] = tampered.stable_hash()
     values["cache_event_hash"] = tampered.cache_event.stable_hash()
     tampered_commit = NativeSharedParametricAncestralBatchIR.committed(**values)
+    tasks = tuple(
+        (
+            replace(
+                task,
+                output_hash=_canonical_hash(tampered_commit.to_dict()),
+            )
+            if task.kind == NativeSharedParametricAncestralTaskKind.COMMIT_SIBLING_PAIR
+            else task
+        )
+        for task in execution.task_ir.tasks
+    )
+    task_ir = replace(
+        execution.task_ir,
+        tasks=tasks,
+        batch_hashes=(
+            execution.task_ir.batch_hashes[0],
+            tampered_commit.stable_hash(),
+        ),
+    )
+    schedule = replace(execution.schedule, task_ir_hash=task_ir.stable_hash())
 
     with pytest.raises(ValueError, match="recompiled after first batch"):
         replace(
             execution,
+            task_ir=task_ir,
+            schedule=schedule,
             compiler_batches=(execution.compiler_batches[0], tampered),
             batch_commits=(execution.batch_commits[0], tampered_commit),
         ).validate_against(

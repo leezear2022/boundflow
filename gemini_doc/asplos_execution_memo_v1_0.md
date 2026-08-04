@@ -1371,19 +1371,19 @@ top-2/dynamic equal-remaining slice、NRIR-34 cap128 ancestral refinement/siblin
 3. cache：一个 query owner，第一次 `miss_compiled`，其余跨 batch/跨 clause 必须 exact hit；
 4. production batch：不构造 audit hash chain，不做 selected-native re-execution，root/完整 pair 才 commit。
 
-first-class clause-2 root+pair parity：audit/shared elapsed=`14.096428/1.211498 s`；lower、branch、split、
+first-class clause-2 root+pair parity：audit/shared elapsed=`14.073795/1.198798 s`；lower、branch、split、
 α、β 与 refinement final-bound hashes exact；upper max diff=`1.52587890625e-5`，既有 relative+absolute
 allclose guard 通过。该 timing 只用于内部 phase 归因，`performance_claimed=false`。
 
 单轮 top-2 pilot 已得到 `[31,31]`，随后三 fresh processes 均复现 rank=
 `[2,3,4,5,0,8,6,7,1]`、selected=`[2,3]`、packed nodes=`[31,31]`、cache miss=1。floor elapsed=
-`[21.704740,21.802033,21.784891] s`，whole elapsed=
-`[52.032317,52.268473,51.926746] s`。pilot/formal hashes 分别为
-`5c79bcc6e744ed1d29520a76331c9823b2ccfa144332e96c401271241616bf86`、
-`7ff6aef76f6fe2b8778faba2e599e440c2dbf14ac4808bfb0c7e07f72fb74238`。
+`[21.733539,21.941763,21.925033] s`，whole elapsed=
+`[51.996191,52.251681,52.695640] s`。pilot/formal hashes 分别为
+`c96fff3fa2bc2563b4d46886d69b33f51ac985b19ad80d916309db57fe6cfefa`、
+`9234dcbe77803e0e7d7e62ca88c62e1b859c95af4ad8e3a19b85c0ab87294b83`。
 
-replay、rank/source/allocation/group/cache/event/native-reexecution/compiler-coverage tamper、26 focused tests、
-全量 `916 passed, 37 skipped` 与静态门禁通过。NRIR-37 以 shared compiler ownership + fixed-deadline
+replay、rank/source/allocation/group/cache/event/native-reexecution/compiler-coverage 与 Task/Batch binding
+tamper、27 focused tests、全量 `917 passed, 37 skipped` 与静态门禁通过。NRIR-37 以 shared compiler ownership + fixed-deadline
 coverage `VALIDATED-REDUCED` 关闭；三轮 final 仍 9/9 unresolved，depth-4 worst active lower 为
 clauses 2/3 的 `-37.574287/-35.900215`。下一门禁只做 frontier tightness attribution，再预注册一个
 单变量 stronger-bound/candidate 实验；不得继续调 top-k、slice、cache 或把 CPU 内部 timing 升级为

@@ -1159,13 +1159,13 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   branch、split、α、β 与 refinement hashes exact，upper max diff=`1.52587890625e-5` 且 allclose 通过；
   三 fresh repeats 均 rank=`[2,3,4,5,0,8,6,7,1]`、selected=`[2,3]`、packed nodes=`[31,31]`，
   每轮恰好 1 miss + 31 hits；
-- `C3-L-NRIR37` hard limitation：whole elapsed=`[52.032317,52.268473,51.926746] s` 只证明固定
+- `C3-L-NRIR37` hard limitation：whole elapsed=`[51.996191,52.251681,52.695640] s` 只证明固定
   global deadline coverage，不是 competitor speedup；final 仍 9/9 unresolved，clauses 2/3 depth-4
   worst active lower=`-37.574287/-35.900215`，无 GPU、multi-workload、property closure 或 ASPLOS-ready；
 - 工件：`artifacts/shared-parametric-objective-evaluator/`
   `vnncomp21-resnet2b-property0-cpu-pilot-v1/` 与
   `vnncomp21-resnet2b-property0-three-repeat-cpu-formal-v1/`；pilot/formal hash=
-  `5c79bcc6e744ed1d29520a76331c9823b2ccfa144332e96c401271241616bf86` /
-  `7ff6aef76f6fe2b8778faba2e599e440c2dbf14ac4808bfb0c7e07f72fb74238`；全量
-  `916 passed, 37 skipped`。本阶段 `VALIDATED-REDUCED`；下一门禁为 full-depth frontier tightness
+  `c96fff3fa2bc2563b4d46886d69b33f51ac985b19ad80d916309db57fe6cfefa` /
+  `9234dcbe77803e0e7d7e62ca88c62e1b859c95af4ad8e3a19b85c0ab87294b83`；全量
+  `917 passed, 37 skipped`。本阶段 `VALIDATED-REDUCED`；下一门禁为 full-depth frontier tightness
   attribution + 单变量 stronger-bound/candidate，不再调 control/cache 常数。

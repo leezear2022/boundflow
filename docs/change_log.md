@@ -4373,11 +4373,12 @@
   clauses 2/3 共享同一 template，仍保持 frozen floor、rank、slice、cap、node/depth 与 deadline；
 - 真实 clause-2 root+pair parity 通过；单轮 pilot clauses 2/3 均 31 nodes，随后三 fresh processes
   继续稳定为 `[[31,31],[31,31],[31,31]]`，每轮 cache miss=1，whole=
-  `[52.032317,52.268473,51.926746] s`；
-- pilot/formal replay、11 类 artifact tamper、26 focused tests、全量 `916 passed, 37 skipped`、mypy
+  `[51.996191,52.251681,52.695640] s`；
+- pilot/formal replay、11 类 artifact tamper、Task/Batch commit binding tamper、27 focused tests、全量
+  `917 passed, 37 skipped`、mypy
   clean、Pylint `10.00/10` 通过；pilot/formal hash=
-  `5c79bcc6e744ed1d29520a76331c9823b2ccfa144332e96c401271241616bf86` /
-  `7ff6aef76f6fe2b8778faba2e599e440c2dbf14ac4808bfb0c7e07f72fb74238`；
+  `c96fff3fa2bc2563b4d46886d69b33f51ac985b19ad80d916309db57fe6cfefa` /
+  `9234dcbe77803e0e7d7e62ca88c62e1b859c95af4ad8e3a19b85c0ab87294b83`；
 - 以 shared compiler ownership + fixed-deadline coverage `VALIDATED-REDUCED` 关闭；final 仍 9/9
   unresolved，`performance_claimed=false`，下一门禁为 depth-4 frontier tightness attribution 与单变量
   stronger-bound/candidate。
