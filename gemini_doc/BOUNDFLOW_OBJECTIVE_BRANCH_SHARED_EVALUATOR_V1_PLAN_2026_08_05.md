@@ -75,6 +75,7 @@ predecessors 的 40 tests、全量 `940 passed, 37 skipped`、mypy/Pylint 与 Do
 
 ## Links
 
+- pull request: `https://github.com/leezear2022/boundflow/pull/50`
 - changelog: `gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_SHARED_EVALUATOR_V1_CHANGELOG_2026_08_05.md`
 - predecessor: `gemini_doc/BOUNDFLOW_FULL_FRONTIER_TIGHTNESS_ATTRIBUTION_V1_PLAN_2026_08_05.md`
 - roadmap: `gemini_doc/asplos_execution_memo_v1_0.md`

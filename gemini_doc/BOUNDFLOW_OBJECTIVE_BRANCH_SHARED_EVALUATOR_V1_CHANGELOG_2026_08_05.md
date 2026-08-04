@@ -17,6 +17,7 @@ stage: s01
 ## Changes
 
 - 合并并同步 PR #49，建立 `feat/objective-branch-shared-evaluator-v1`。
+- 实现与验证提交 `aefbc3e` 已推送，draft PR #50 以 `main` 为 base 创建。
 - 预注册 clauses 2/3、31/depth4、历史 NRIR-17 branch policy 和 `+1.0` worst-active 门禁；冻结 control/
   candidate 的其余 optimizer、refinement、cache、queue 与 sibling commit 语义。
 - 新增 composite Plan/6-task TaskModule/Schedule、objective-aware shared queue、每节点 branch execution
@@ -46,5 +47,6 @@ stage: s01
 
 ## Links
 
+- pull request: `https://github.com/leezear2022/boundflow/pull/50`
 - plan: `gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_SHARED_EVALUATOR_V1_PLAN_2026_08_05.md`
 - roadmap: `gemini_doc/asplos_execution_memo_v1_0.md`
