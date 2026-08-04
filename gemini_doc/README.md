@@ -84,6 +84,10 @@
 
 ### 2.1 关键交付文档（“长期有效”）
 
+- `gemini_doc/BOUNDFLOW_PREPARED_PRODUCTION_FAST_PATH_V1_PLAN_2026_08_04.md`：exact
+  prepared optimizer/root-query capsule、cold/warm 公平协议与 identity 门禁
+- `gemini_doc/BOUNDFLOW_PREPARED_PRODUCTION_FAST_PATH_V1_CHANGELOG_2026_08_04.md`：三组
+  59.078 s→110.950 ms 内部 overhead 诊断、cold/payload、artifact/replay/tests 与限制
 - `gemini_doc/BOUNDFLOW_END_TO_END_TIGHTNESS_PERFORMANCE_BASELINE_V1_PLAN_2026_08_04.md`：
   external-intermediate optimizer/queue/query bridge、三组 phase/tightness 诊断协议与下一
   prepared-production 门禁

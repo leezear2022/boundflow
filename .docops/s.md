@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev002114
-last_va: ev002122
+last_ch: ev002186
+last_va: ev002187
 blk:
-next: implement-prepared-production-fast-path-v1
-updated: 2026-08-04T02:48:30Z
+next: implement-hard-clause-branching-stronger-bound-v1
+updated: 2026-08-04T03:19:15Z

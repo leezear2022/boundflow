@@ -748,3 +748,22 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - 工件：`artifacts/end-to-end-tightness-performance/vnncomp21-resnet2b-prop0-cpu-v1/`；fresh
   replay hash=`14c3b9dc2e5376156be1f33f3e8804ec21f60e11096bd3bdc95225b7e1474376`；下一门禁为
   prepared production fast path，随后才处理 hard clauses 的 branching/tightness。
+
+### 2026-08-04 Prepared Production Fast Path v1
+
+- `C2/C3-M-NRIR16` prepared mechanism：九个 root objectives 各自冻结 exact optimizer
+  Plan/Task/Schedule、source compiler hashes 与 semantic scope；steady-state 仍消费全部 optimizer
+  actions，但不重做静态 validation、audit hash chain 或 selected-native validation execution；
+- `C3-G-NRIR16` identity gate：program/module/input/objective/intermediate source/scope 任一漂移
+  fail closed；production trace 明示 `audit_hash_chain_constructed=false` 与
+  `selected_native_reexecution=false`，不能冒充 audit evidence；
+- `C1/C3-E-NRIR16` semantics：prepared/audit lower max diff=`1.90735e-6`、candidate exact、
+  status exact，fixed ResNet 仍为 6 verified / clauses `0/2/4` unknown；
+- `C2/C3-D-NRIR16` three-group CPU diagnosis：audit median=`59.078 s`，prepared warm median=
+  `110.950 ms`，内部 evidence-overhead ratio=`532.47×`；cold prepare+first=`16.139 s`，
+  retained payload=`2,076,372 B`，两项成本均显式披露；
+- `C3-L-NRIR16` hard limitation：root-only exact capsules、单 fixed ResNet CPU；audit-removal ratio
+  不是 competitor/verifier speedup，无 child queue、CUDA、多 workload 或 complete closure；
+- 工件：`artifacts/prepared-production-fast-path/vnncomp21-resnet2b-prop0-cpu-v1/`；fresh replay
+  hash=`e14fcd62b322c0bc60d45c726cf94a7aa6cfb8d7aa3212662d08996db169b6b2`；全量
+  `698 passed, 37 skipped`；下一门禁为 hard-clause branching/stronger-bound。

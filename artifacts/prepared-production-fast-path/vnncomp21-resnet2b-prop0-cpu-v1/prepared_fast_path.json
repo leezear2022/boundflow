@@ -1,0 +1,686 @@
+{
+  "evidence": {
+    "claim_boundary": "fixed ResNet CPU prepared-production mechanism and three-group internal audit-overhead diagnosis; not competitor speedup, CUDA, multi-workload, branching, or complete verification evidence",
+    "compiler_version": "boundflow.native-prepared-complete-query/v1",
+    "gates": {
+      "cold_preparation_and_first_execution_are_exposed": true,
+      "prepared_and_audit_bounds_are_allclose": true,
+      "prepared_and_audit_clause_statuses_match": true,
+      "production_omits_audit_hash_chain_and_selected_native_reexecution": true,
+      "source_model_property_and_intermediates_are_digest_bound": true,
+      "three_group_warm_diagnostic_reduction_exceeds_ten_x": true
+    },
+    "limitations": [
+      "only one fixed ResNet/VNNLIB pair is measured on CPU",
+      "prepared capsules are exact-scope root-only and do not cover child split queues",
+      "cold preparation and retained prepared tensor payload are material costs",
+      "audit-versus-production ratio measures internal evidence overhead, not competitor speedup",
+      "clauses 0, 2, and 4 remain unknown and complete verification is not claimed"
+    ],
+    "performance_claimed": false,
+    "property_status": "validated_reduced",
+    "protocol": {
+      "audit_query_id": "vnncomp21-resnet2b-prop0-native-ir16-audit-control",
+      "groups": 3,
+      "intermediate_bound_source": "external_verifier",
+      "minimum_warm_diagnostic_reduction": 10.0,
+      "optimizer_policy": {
+        "alpha_init": 0.5,
+        "alpha_initialization_mode": "adaptive",
+        "beta_init": 0.0,
+        "lr": 0.05,
+        "objective": "lower",
+        "optimizer": "torch.optim.Adam",
+        "per_batch_params": true,
+        "soft_tau": 1.0,
+        "spec_reduce": "mean",
+        "steps": 1
+      },
+      "orders": [
+        [
+          "audit",
+          "prepared_production"
+        ],
+        [
+          "prepared_production",
+          "audit"
+        ],
+        [
+          "audit",
+          "prepared_production"
+        ]
+      ],
+      "query_id": "vnncomp21-resnet2b-prop0-native-ir16-prepared-production",
+      "queue_config": {
+        "available_memory_bytes": 1073741824,
+        "expansion_batch_size": 1,
+        "max_depth": 0,
+        "max_eval_batch_size": 1,
+        "max_nodes": 1,
+        "memory_budget_bytes": 1073741824,
+        "threshold": 0.0
+      },
+      "search_policy": {
+        "early_stop": true,
+        "projection": "exact_box_clamp",
+        "start": "input_box_center",
+        "step_size": 0.002,
+        "steps": 4,
+        "update": "sign_gradient_descent"
+      },
+      "warmups": 1
+    },
+    "schema_version": "boundflow.prepared-production-fast-path-evidence/v1",
+    "semantic": {
+      "baseline_reference": {
+        "artifact_sha256": "bf326b8bac1941279ca2cd4289a3f49f7ad57995371b0b54f4db727fdbc46318",
+        "evidence_hash": "14c3b9dc2e5376156be1f33f3e8804ec21f60e11096bd3bdc95225b7e1474376",
+        "manifest_sha256": "dbdfad5d2c27443c6848b88f6528e68d79ccc4c8850fc50e08e7ef649065e0f1",
+        "query_trace_hash": "eade28f0596dd644c3a272bed13b2662753dd69783dad615a8db862075e83125",
+        "rows": [
+          {
+            "candidate_best": 0.6944422721862793,
+            "clause_index": 0,
+            "external_initial_lower": -0.5429365634918213,
+            "improvement_over_external_initial": 0.0072252750396728516,
+            "lower": -0.5357112884521484,
+            "proof_deficit": 0.5357112884521484,
+            "queue_trace_hash": "79e4dbfef09ab61ef4a0de43c30196d447b5799b391acd2fd116a7fca19b00f3",
+            "selected_state_hash": "db5585cf7796587203d6cdcf6c83b908be692a540583eecad70f113e7cc99ac4",
+            "status": "unknown",
+            "threshold": 0.0
+          },
+          {
+            "candidate_best": 5.920941352844238,
+            "clause_index": 1,
+            "external_initial_lower": 4.325179100036621,
+            "improvement_over_external_initial": 0.002143383026123047,
+            "lower": 4.327322483062744,
+            "proof_deficit": 0.0,
+            "queue_trace_hash": "b1ddf598c7db9ce9e0dbc41c5c0adebda564ebe17e3635efd35c7bc6cfcf622b",
+            "selected_state_hash": "966d4c418b4ea1cbac0766558b9b5915879722385028015e78891a8a8a5f0fc1",
+            "status": "verified",
+            "threshold": 0.0
+          },
+          {
+            "candidate_best": 0.4761037826538086,
+            "clause_index": 2,
+            "external_initial_lower": -0.5281871557235718,
+            "improvement_over_external_initial": 0.0021837949752807617,
+            "lower": -0.526003360748291,
+            "proof_deficit": 0.526003360748291,
+            "queue_trace_hash": "02f59ca95f56fbd0b7e26aa0e7a5affd91eddf82903f13bc4f1a8e9265d086f6",
+            "selected_state_hash": "31ff072a5b57765b22f38609602019fb6901312395717d9be92460927893246d",
+            "status": "unknown",
+            "threshold": 0.0
+          },
+          {
+            "candidate_best": 1.9662235975265503,
+            "clause_index": 3,
+            "external_initial_lower": 0.8300086259841919,
+            "improvement_over_external_initial": 0.0012964606285095215,
+            "lower": 0.8313050866127014,
+            "proof_deficit": 0.0,
+            "queue_trace_hash": "772c6aafee2c72ab0be2a2432b5a9a296f4867a0005ba40a7edc4af7cfb13540",
+            "selected_state_hash": "52a9d2d9b2f7cdcb33febca5e679d4483ec6df001def0b2a77f53d6bc638b74f",
+            "status": "verified",
+            "threshold": 0.0
+          },
+          {
+            "candidate_best": 0.5178918838500977,
+            "clause_index": 4,
+            "external_initial_lower": -0.5984487533569336,
+            "improvement_over_external_initial": 0.0021413564682006836,
+            "lower": -0.5963073968887329,
+            "proof_deficit": 0.5963073968887329,
+            "queue_trace_hash": "f124b8fe5c89cd88e167635aee855731da238991c334b5690eae0bdf5eaf7d3d",
+            "selected_state_hash": "b3102dc97459facd120a9351a1ddd4af2aac741203e9714e1ecd5d5a3589abe2",
+            "status": "unknown",
+            "threshold": 0.0
+          },
+          {
+            "candidate_best": 1.1114262342453003,
+            "clause_index": 5,
+            "external_initial_lower": 0.10806775093078613,
+            "improvement_over_external_initial": 0.005004286766052246,
+            "lower": 0.11307203769683838,
+            "proof_deficit": 0.0,
+            "queue_trace_hash": "de8e0d2d53580f36f83c2648caf1d61eb40b84d479274aa9b4ee0ed2a64f4eae",
+            "selected_state_hash": "bc47792a7acb10fd9a472a6e25050f39b58db45559618a12cc763a48e6196614",
+            "status": "verified",
+            "threshold": 0.0
+          },
+          {
+            "candidate_best": 2.248816967010498,
+            "clause_index": 6,
+            "external_initial_lower": 0.6772157549858093,
+            "improvement_over_external_initial": 0.0018282532691955566,
+            "lower": 0.6790440082550049,
+            "proof_deficit": 0.0,
+            "queue_trace_hash": "eb6e9ca43284c11b7f537d72502bbc03af96f911f88dcd5cf7fc3350bc578bdb",
+            "selected_state_hash": "acdbe2919ae18ac3dfa8a9697457ec79c3dd857293a6e571c09a93fbb38e9709",
+            "status": "verified",
+            "threshold": 0.0
+          },
+          {
+            "candidate_best": 4.279739856719971,
+            "clause_index": 7,
+            "external_initial_lower": 2.7271907329559326,
+            "improvement_over_external_initial": 0.0016033649444580078,
+            "lower": 2.7287940979003906,
+            "proof_deficit": 0.0,
+            "queue_trace_hash": "e0f64b893a0964ce04da5cc99dd3d820565b28994783604a35e5e9497c5d7768",
+            "selected_state_hash": "015aa04fddac59c641347fd094afd0f316e60788e911c3be430184dff8c0c206",
+            "status": "verified",
+            "threshold": 0.0
+          },
+          {
+            "candidate_best": 4.841380596160889,
+            "clause_index": 8,
+            "external_initial_lower": 3.105266809463501,
+            "improvement_over_external_initial": 0.0019958019256591797,
+            "lower": 3.10726261138916,
+            "proof_deficit": 0.0,
+            "queue_trace_hash": "975baec4aa94f8a822bbdd783956b3b6ab844881635d905159fe0ebb7649ddba",
+            "selected_state_hash": "49895f6a342d4916653339810513876700304f85a585b8d7bffead5f8ef2dbf4",
+            "status": "verified",
+            "threshold": 0.0
+          }
+        ],
+        "unresolved_clause_indices": [
+          0,
+          2,
+          4
+        ],
+        "verified_clause_indices": [
+          1,
+          3,
+          5,
+          6,
+          7,
+          8
+        ]
+      },
+      "comparison": {
+        "atol": 0.0002,
+        "candidate_exact": true,
+        "candidate_max_abs_diff": 0.0,
+        "clause_order_same": true,
+        "lower_allclose": true,
+        "lower_max_abs_diff": 1.9073486328125e-06,
+        "rtol": 0.0002,
+        "statuses_same": true
+      },
+      "prepared_production": {
+        "rows": [
+          {
+            "best_iteration": 1,
+            "candidate_best": 0.6944422721862793,
+            "clause_index": 0,
+            "lower": -0.5357108116149902,
+            "lower_hash": "7231b2b260f6364b43a1890943a19c81f48c2228094e219a8a4fda3db2b030f5",
+            "status": "unknown",
+            "upper": 2.2969064712524414,
+            "upper_hash": "f52167f5809818d6db89c2d83bd6e4b8362860df9ed5d15ecbbe16eca5815ea2"
+          },
+          {
+            "best_iteration": 1,
+            "candidate_best": 5.920941352844238,
+            "clause_index": 1,
+            "lower": 4.327320575714111,
+            "lower_hash": "ff41f5c32fcddecca573a81538bf757c91e513010bb4fe00180de37d1cb7c8f1",
+            "status": "verified",
+            "upper": 7.714799880981445,
+            "upper_hash": "56607f74781abcae77862581db1fdb44df622526f3f0725e8e0ee86d4827ce06"
+          },
+          {
+            "best_iteration": 1,
+            "candidate_best": 0.4761037826538086,
+            "clause_index": 2,
+            "lower": -0.5260035991668701,
+            "lower_hash": "c696225f99459748605c9a4ae2dadc059162f19293b15aaf3c322f6daf879baa",
+            "status": "unknown",
+            "upper": 1.817054033279419,
+            "upper_hash": "2252ea5d1270a2946e4fba83b6ab7bb70c14b89fa2affd5713d7df1284694bf9"
+          },
+          {
+            "best_iteration": 1,
+            "candidate_best": 1.9662235975265503,
+            "clause_index": 3,
+            "lower": 0.8313043713569641,
+            "lower_hash": "24129ee7b67a0efa12c084d6dde3c21c27d2867011476a34e9244dd689beb148",
+            "status": "verified",
+            "upper": 3.28647518157959,
+            "upper_hash": "1c99073162b1588187a82ea79703363074c851d190c898648500acc7e7eec168"
+          },
+          {
+            "best_iteration": 1,
+            "candidate_best": 0.5178918838500977,
+            "clause_index": 4,
+            "lower": -0.5963081121444702,
+            "lower_hash": "fcb284bb6ec70d0600aff3f2455e18ddd8dceced86f7819742f785783e98d205",
+            "status": "unknown",
+            "upper": 1.9737908840179443,
+            "upper_hash": "321e7c6591d5321a99b619bd6407816d96b9959d9b0aaea1d72e1089dbd5b2a4"
+          },
+          {
+            "best_iteration": 1,
+            "candidate_best": 1.1114262342453003,
+            "clause_index": 5,
+            "lower": 0.11307263374328613,
+            "lower_hash": "e5eefbe5928ed111a1f7c9bfce64b34b9125bde0d92110ce3259e7d972f2716b",
+            "status": "verified",
+            "upper": 2.6526687145233154,
+            "upper_hash": "fbdcbce46a9a92f5459117e17721ab7725f19cf5cd4bd6f8a3ac16126c8872f1"
+          },
+          {
+            "best_iteration": 1,
+            "candidate_best": 2.248816967010498,
+            "clause_index": 6,
+            "lower": 0.6790432333946228,
+            "lower_hash": "217c66ad45b28926e7b20f78022c8281b0983c6936c895601d1245ab5044c2d1",
+            "status": "verified",
+            "upper": 4.091947078704834,
+            "upper_hash": "7bad126da01ba2f456897f367bfd3c941ba14ff7fcfb519045406e534f3db400"
+          },
+          {
+            "best_iteration": 1,
+            "candidate_best": 4.279739856719971,
+            "clause_index": 7,
+            "lower": 2.7287938594818115,
+            "lower_hash": "e73a7bf30c6ed808e34965e3da3ddde430e0a89ec989dd0b7ef007ee477aae5d",
+            "status": "verified",
+            "upper": 6.294136047363281,
+            "upper_hash": "b23a105e6364a7f6e4fbfe8c84c58e903082f576dee40655962be05b7b535c84"
+          },
+          {
+            "best_iteration": 1,
+            "candidate_best": 4.841380596160889,
+            "clause_index": 8,
+            "lower": 3.1072616577148438,
+            "lower_hash": "289648d4faff63e201285d8c2904e34ad3a5534d9f2811e0984910d2dac013b4",
+            "status": "verified",
+            "upper": 6.965079307556152,
+            "upper_hash": "ce5a26cd9261530d9207e3e76a428a895c2d78f4d5962b08aee36fe345fe2a7a"
+          }
+        ],
+        "trace": {
+          "audit_hash_chain_constructed": false,
+          "compiler_version": "boundflow.native-prepared-complete-query/v1",
+          "completed_clauses": [
+            {
+              "audit_hash_chain_constructed": false,
+              "best_iteration": 1,
+              "candidate_best": 0.6944422721862793,
+              "clause_index": 0,
+              "counterexample_input_hash": null,
+              "lower": -0.5357108116149902,
+              "lower_hash": "7231b2b260f6364b43a1890943a19c81f48c2228094e219a8a4fda3db2b030f5",
+              "objective_hash": "a62146650a0f29762a1467c72007cba1937a5c05b9236ab53a91964308e05dca",
+              "prepared_program_hashes": {
+                "optimizer_plan_hash": "5c3da581d951994b2632bfd3d16f85e5eef0dfc2fe9dab72850e026b3bc8f6ed",
+                "optimizer_schedule_hash": "bf79aee54a1b4ff1d96a146503343995bf69e84e983c4e019f125889182692ad",
+                "optimizer_task_module_hash": "100824f6b885ebd5c9037413c6433376bbb6e52c48c3dd5af9fa039abb4ff546"
+              },
+              "search_trace_hash": "11073b50fa14e03783ee2ec54127b57ca3e4857b70cca8b3c8a7a14d26c4aa98",
+              "selected_native_reexecution": false,
+              "status": "unknown",
+              "threshold": 0.0,
+              "upper": 2.2969064712524414,
+              "upper_hash": "f52167f5809818d6db89c2d83bd6e4b8362860df9ed5d15ecbbe16eca5815ea2"
+            },
+            {
+              "audit_hash_chain_constructed": false,
+              "best_iteration": 1,
+              "candidate_best": 5.920941352844238,
+              "clause_index": 1,
+              "counterexample_input_hash": null,
+              "lower": 4.327320575714111,
+              "lower_hash": "ff41f5c32fcddecca573a81538bf757c91e513010bb4fe00180de37d1cb7c8f1",
+              "objective_hash": "5e13e14a90641a8177787823b373b0bbb3a0d8fe7606afcf1b184e948bce7f92",
+              "prepared_program_hashes": {
+                "optimizer_plan_hash": "688e4a016d109b7d6c0ecce9d0cd9130125e95c873c2263241e0f11be1eed76b",
+                "optimizer_schedule_hash": "7dcc91fdfb10830882e69072c03770e62bef877d49b82aa040d590e9bdc592d4",
+                "optimizer_task_module_hash": "46de64f34849f2a6ee24ae4936ef95f61d61e34aa9e144c4d87cc9f4de40ce55"
+              },
+              "search_trace_hash": "f3b7a1e2c1279d9678c3966812352c899efe7d98e1948a8e79d1b6589cceed40",
+              "selected_native_reexecution": false,
+              "status": "verified",
+              "threshold": 0.0,
+              "upper": 7.714799880981445,
+              "upper_hash": "56607f74781abcae77862581db1fdb44df622526f3f0725e8e0ee86d4827ce06"
+            },
+            {
+              "audit_hash_chain_constructed": false,
+              "best_iteration": 1,
+              "candidate_best": 0.4761037826538086,
+              "clause_index": 2,
+              "counterexample_input_hash": null,
+              "lower": -0.5260035991668701,
+              "lower_hash": "c696225f99459748605c9a4ae2dadc059162f19293b15aaf3c322f6daf879baa",
+              "objective_hash": "4b65cdffa3afd9d34d2bb3abf3fd69d383105fcf6d7d05649c5e95cff97b88c7",
+              "prepared_program_hashes": {
+                "optimizer_plan_hash": "0b0f834e5cd5d7da324e75bf77fbf22731078d7317bcd8829686f8d94edf867e",
+                "optimizer_schedule_hash": "72a4b600ecac62d35c8c3a7779f45fd4ffd6821f881ed05494fae6aee0eff14f",
+                "optimizer_task_module_hash": "da2a9370cf6ec0e93216e55e476a40a3cfe9b172535490b42f26dd9a56b57bb2"
+              },
+              "search_trace_hash": "daae2c580b4b68156d77e6db9d81adfb2992918dc8985264139eb50cbaba1c72",
+              "selected_native_reexecution": false,
+              "status": "unknown",
+              "threshold": 0.0,
+              "upper": 1.817054033279419,
+              "upper_hash": "2252ea5d1270a2946e4fba83b6ab7bb70c14b89fa2affd5713d7df1284694bf9"
+            },
+            {
+              "audit_hash_chain_constructed": false,
+              "best_iteration": 1,
+              "candidate_best": 1.9662235975265503,
+              "clause_index": 3,
+              "counterexample_input_hash": null,
+              "lower": 0.8313043713569641,
+              "lower_hash": "24129ee7b67a0efa12c084d6dde3c21c27d2867011476a34e9244dd689beb148",
+              "objective_hash": "cc7a31d202b56353ad0b9fb2e076a7eb490e1877a6e5fa5b596f66e802e72a24",
+              "prepared_program_hashes": {
+                "optimizer_plan_hash": "656a4a76516b24294ef6835bff0b89e0ab8788e4bdf1400a6a5a5f59df24a588",
+                "optimizer_schedule_hash": "4603acc1bda3d72310030ec50d33fa7e00ff19681a41baca5e42fdcfcda73923",
+                "optimizer_task_module_hash": "79ff022ed2e6d68c69b84e8179c8d5da7c44f847a5305faa56a274741570f2f7"
+              },
+              "search_trace_hash": "8a6d9adfe3ae5a7517ad5f4f73d3b7e600acdabe0d3e24ac2870445e3b3f5326",
+              "selected_native_reexecution": false,
+              "status": "verified",
+              "threshold": 0.0,
+              "upper": 3.28647518157959,
+              "upper_hash": "1c99073162b1588187a82ea79703363074c851d190c898648500acc7e7eec168"
+            },
+            {
+              "audit_hash_chain_constructed": false,
+              "best_iteration": 1,
+              "candidate_best": 0.5178918838500977,
+              "clause_index": 4,
+              "counterexample_input_hash": null,
+              "lower": -0.5963081121444702,
+              "lower_hash": "fcb284bb6ec70d0600aff3f2455e18ddd8dceced86f7819742f785783e98d205",
+              "objective_hash": "f270922f3e4d6cfee433b3ab7c60d46e98a66fc62f018ec48cfb99eefe842a98",
+              "prepared_program_hashes": {
+                "optimizer_plan_hash": "32d5ea8cc06df2bd4f1c5b606a3b53f034def8c3cc0bd0b0b561aab94145d971",
+                "optimizer_schedule_hash": "f296562794aa3916a6997d4866727547bf3aafc114b5e1b63fc45a3322a9a992",
+                "optimizer_task_module_hash": "0cc2230ea9748824c487d3925fe5a1b9ea957b9975c234f8c159c384b3fed1c9"
+              },
+              "search_trace_hash": "6a69d62aef0694620e58f850296fdbbb86237ada91b1f4f3d1c72e4bbb5af4e0",
+              "selected_native_reexecution": false,
+              "status": "unknown",
+              "threshold": 0.0,
+              "upper": 1.9737908840179443,
+              "upper_hash": "321e7c6591d5321a99b619bd6407816d96b9959d9b0aaea1d72e1089dbd5b2a4"
+            },
+            {
+              "audit_hash_chain_constructed": false,
+              "best_iteration": 1,
+              "candidate_best": 1.1114262342453003,
+              "clause_index": 5,
+              "counterexample_input_hash": null,
+              "lower": 0.11307263374328613,
+              "lower_hash": "e5eefbe5928ed111a1f7c9bfce64b34b9125bde0d92110ce3259e7d972f2716b",
+              "objective_hash": "95772c71f4830ef00b8fb897cdea241e468fe513f8b3950946f42e98917c5c7f",
+              "prepared_program_hashes": {
+                "optimizer_plan_hash": "15784ba9670dc66e33c8f30db0a9cc3885b4b46f7b55fa97f2a1074f4cd87112",
+                "optimizer_schedule_hash": "11539e4d68afc0fe5be0efa6ed3ce60f012bf4c30482d6f5c51768bbfe8d565d",
+                "optimizer_task_module_hash": "4e45c493471c54b5586d8507b99a28d0bb68b74de4be42b9c3a50b9f91e88172"
+              },
+              "search_trace_hash": "70db3a96081f5d39be45d8df624023ce2e37b21f0c0fdb5331eb225d9e628b2c",
+              "selected_native_reexecution": false,
+              "status": "verified",
+              "threshold": 0.0,
+              "upper": 2.6526687145233154,
+              "upper_hash": "fbdcbce46a9a92f5459117e17721ab7725f19cf5cd4bd6f8a3ac16126c8872f1"
+            },
+            {
+              "audit_hash_chain_constructed": false,
+              "best_iteration": 1,
+              "candidate_best": 2.248816967010498,
+              "clause_index": 6,
+              "counterexample_input_hash": null,
+              "lower": 0.6790432333946228,
+              "lower_hash": "217c66ad45b28926e7b20f78022c8281b0983c6936c895601d1245ab5044c2d1",
+              "objective_hash": "0b854bdc5525bb37436b81e944659f2c81a83311d2592e0e418b59c1f2099000",
+              "prepared_program_hashes": {
+                "optimizer_plan_hash": "e26d799e1a7e87d11193e7c4abb2790f05ae4966e70090595946c8c3ddc3f3b5",
+                "optimizer_schedule_hash": "751055d045d6fb2e5ed734cb9cabe8566c3a104a245cc9782ee314e1ab632563",
+                "optimizer_task_module_hash": "9e402fb2cdc3b39439745d19685b2f197a686be5432f819971250fe15a9e283f"
+              },
+              "search_trace_hash": "0c5ee9aac4515bdadd924ac154147c09940e9a94dbfbc9eddaf2a62fad66a037",
+              "selected_native_reexecution": false,
+              "status": "verified",
+              "threshold": 0.0,
+              "upper": 4.091947078704834,
+              "upper_hash": "7bad126da01ba2f456897f367bfd3c941ba14ff7fcfb519045406e534f3db400"
+            },
+            {
+              "audit_hash_chain_constructed": false,
+              "best_iteration": 1,
+              "candidate_best": 4.279739856719971,
+              "clause_index": 7,
+              "counterexample_input_hash": null,
+              "lower": 2.7287938594818115,
+              "lower_hash": "e73a7bf30c6ed808e34965e3da3ddde430e0a89ec989dd0b7ef007ee477aae5d",
+              "objective_hash": "af8ba93a2af36a8e42350d4e7264cf2d4c1b89a93a12257647fbdfc54cc4d36e",
+              "prepared_program_hashes": {
+                "optimizer_plan_hash": "a132f3b79a898fe7319819532a397d53726ab4fd67082be21125a06400b94444",
+                "optimizer_schedule_hash": "725839760ca625f461aa7f3043561a1b80e9477c7f2366d2a55de75bb98a5230",
+                "optimizer_task_module_hash": "19c5c097cbe5da608e00e70aae526bc9ed68f5c7395bf570a3d91b708e7bcfd1"
+              },
+              "search_trace_hash": "91b8588375f73a03333ce8d17184c146f83e041dff9537b23dcfa75fb5ea5602",
+              "selected_native_reexecution": false,
+              "status": "verified",
+              "threshold": 0.0,
+              "upper": 6.294136047363281,
+              "upper_hash": "b23a105e6364a7f6e4fbfe8c84c58e903082f576dee40655962be05b7b535c84"
+            },
+            {
+              "audit_hash_chain_constructed": false,
+              "best_iteration": 1,
+              "candidate_best": 4.841380596160889,
+              "clause_index": 8,
+              "counterexample_input_hash": null,
+              "lower": 3.1072616577148438,
+              "lower_hash": "289648d4faff63e201285d8c2904e34ad3a5534d9f2811e0984910d2dac013b4",
+              "objective_hash": "c20fb78f6a3d24c8648e0beb9692f554fd8ae89420c262183c8fd8f5b2257f5c",
+              "prepared_program_hashes": {
+                "optimizer_plan_hash": "7efe0e015301f010cfd4795dfb840bdf53bc8d2b5e34c2e3215cf492c7790284",
+                "optimizer_schedule_hash": "3678dec6cb2ab1d9ad92539f6e7d1e3ec385a134376e672f5a661fe2899308e9",
+                "optimizer_task_module_hash": "aa01baca325c34309cd89bb4ce77b9a178501152048a11f2989e07ad9c6e41d1"
+              },
+              "search_trace_hash": "2a8002c8f5f47b51db30603c00e811888ba2cac73975b0df355de2bd0eb628c0",
+              "selected_native_reexecution": false,
+              "status": "verified",
+              "threshold": 0.0,
+              "upper": 6.965079307556152,
+              "upper_hash": "ce5a26cd9261530d9207e3e76a428a895c2d78f4d5962b08aee36fe345fe2a7a"
+            }
+          ],
+          "execution_mode": "prepared_production_root_only",
+          "intermediate_bound_source": "external_verifier",
+          "objective_matrix_hash": "380f1c32321ea47967ad48221134d92d494630777eabe10ef31576a0b051e408",
+          "optimizer_policy_hash": "2ca989d210a9f6c8f57fde5e72722833a73e17101e6a4ceb170ca8c8ac9bdf81",
+          "performance_claimed": false,
+          "query_id": "vnncomp21-resnet2b-prop0-native-ir16-prepared-production",
+          "reason": "one_or_more_root_clauses_unresolved",
+          "schema_version": "boundflow.native-prepared-complete-query/v1",
+          "search_policy_hash": "5af8d73cb494d692fabc9895621f343ec31b142d3819accb8d040447421d0140",
+          "selected_native_reexecution": false,
+          "skipped_after_unsafe_clause_indices": [],
+          "status": "unknown",
+          "thresholds": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "unresolved_clause_indices": [
+            0,
+            2,
+            4
+          ],
+          "unsafe_clause_index": null
+        },
+        "trace_hash": "ffed458622d2424502321a605cbe63960f0456e2473497f33ec25a6aca536f3d"
+      }
+    },
+    "source": {
+      "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+      "baseline_artifact_sha256": "bf326b8bac1941279ca2cd4289a3f49f7ad57995371b0b54f4db727fdbc46318",
+      "baseline_evidence_hash": "14c3b9dc2e5376156be1f33f3e8804ec21f60e11096bd3bdc95225b7e1474376",
+      "baseline_manifest_sha256": "dbdfad5d2c27443c6848b88f6528e68d79ccc4c8850fc50e08e7ef649065e0f1",
+      "baseline_query_trace_hash": "eade28f0596dd644c3a272bed13b2662753dd69783dad615a8db862075e83125",
+      "external_oracle_lower_hash": "f99f8b863e044328e2747aa372f0d25da18257979cb94d60f8391edbf0a761fa",
+      "input_lower_hash": "bed6da6e49f1123b54fe61247615cf0e86f1b4257face7b073428f257607bda6",
+      "input_upper_hash": "955d79bd0824185cad0be1e758e6e492c51aec6c9199f81359b2528b848ec9ab",
+      "intermediate_bounds_sha256": "d51615b04dfb205afd67d2c21680ece4ca92f693157da1e32c7f8202a8e08cf1",
+      "local_complete_query_artifact_sha256": "9c490bf33edab555f14e4d4c354f6d6055c1fe627102473fc2e506e29fdbaaf8",
+      "local_complete_query_manifest_sha256": "d76595fba9318c7dc70fd79fb9ebd28594b83c59202426f33a45c58486a409b3",
+      "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+      "native_ir_artifact_schema": "boundflow.native-real-network-ir-artifact/v1",
+      "native_ir_manifest_sha256": "5d38aa4adcd7b8593b0ca3751106d3a254b72a2698bd445a8dde59d50eb5a676",
+      "native_ir_payload_sha256": "3ba949de66380c7d16dc44bb934eca8400182521e761c19eaa671cd8cf0eb557",
+      "objective_matrix_hash": "380f1c32321ea47967ad48221134d92d494630777eabe10ef31576a0b051e408",
+      "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf",
+      "vnnlib_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff"
+    },
+    "status": "ok",
+    "timing": {
+      "cold_first_execution_ns": 1415352893,
+      "cold_prepare_plus_first_execution_ns": 16139278456,
+      "diagnostic_audit_median_to_cold_total_ratio": 3.6604979062144514,
+      "diagnostic_audit_to_warm_median_ratio": 532.4720957353504,
+      "groups": 3,
+      "measurement_kind": "fixed-ResNet CPU internal audit-overhead diagnostic; not competitor speedup",
+      "orders": [
+        [
+          "audit",
+          "prepared_production"
+        ],
+        [
+          "prepared_production",
+          "audit"
+        ],
+        [
+          "audit",
+          "prepared_production"
+        ]
+      ],
+      "performance_claimed": false,
+      "preparation_ns": 14723925563,
+      "prepared_payload_unique_bytes": 2076372,
+      "samples": [
+        {
+          "elapsed_ns": 58712587488,
+          "group": 0,
+          "position": 0,
+          "semantic_hash": "96934ed9dbab1e2f503ab6edd499322630dbef75e40f8932e2ab91371564c8c1",
+          "status": "unknown",
+          "unresolved_clause_indices": [
+            0,
+            2,
+            4
+          ],
+          "variant": "audit"
+        },
+        {
+          "elapsed_ns": 111166251,
+          "group": 0,
+          "position": 1,
+          "semantic_hash": "ffed458622d2424502321a605cbe63960f0456e2473497f33ec25a6aca536f3d",
+          "status": "unknown",
+          "unresolved_clause_indices": [
+            0,
+            2,
+            4
+          ],
+          "variant": "prepared_production"
+        },
+        {
+          "elapsed_ns": 110261597,
+          "group": 1,
+          "position": 0,
+          "semantic_hash": "ffed458622d2424502321a605cbe63960f0456e2473497f33ec25a6aca536f3d",
+          "status": "unknown",
+          "unresolved_clause_indices": [
+            0,
+            2,
+            4
+          ],
+          "variant": "prepared_production"
+        },
+        {
+          "elapsed_ns": 59077794996,
+          "group": 1,
+          "position": 1,
+          "semantic_hash": "96934ed9dbab1e2f503ab6edd499322630dbef75e40f8932e2ab91371564c8c1",
+          "status": "unknown",
+          "unresolved_clause_indices": [
+            0,
+            2,
+            4
+          ],
+          "variant": "audit"
+        },
+        {
+          "elapsed_ns": 59587161225,
+          "group": 2,
+          "position": 0,
+          "semantic_hash": "96934ed9dbab1e2f503ab6edd499322630dbef75e40f8932e2ab91371564c8c1",
+          "status": "unknown",
+          "unresolved_clause_indices": [
+            0,
+            2,
+            4
+          ],
+          "variant": "audit"
+        },
+        {
+          "elapsed_ns": 110950030,
+          "group": 2,
+          "position": 1,
+          "semantic_hash": "ffed458622d2424502321a605cbe63960f0456e2473497f33ec25a6aca536f3d",
+          "status": "unknown",
+          "unresolved_clause_indices": [
+            0,
+            2,
+            4
+          ],
+          "variant": "prepared_production"
+        }
+      ],
+      "summary": {
+        "audit": {
+          "median_ns": 59077794996,
+          "p90_ns": 59587161225,
+          "raw_ns": [
+            58712587488,
+            59077794996,
+            59587161225
+          ],
+          "runs": 3
+        },
+        "prepared_production": {
+          "median_ns": 110950030,
+          "p90_ns": 111166251,
+          "raw_ns": [
+            111166251,
+            110261597,
+            110950030
+          ],
+          "runs": 3
+        }
+      },
+      "warmups": 1
+    }
+  },
+  "schema_version": "boundflow.prepared-production-fast-path-artifact/v1",
+  "status": "ok"
+}
