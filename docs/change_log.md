@@ -4404,3 +4404,23 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_FULL_FRONTIER_TIGHTNESS_ATTRIBUTION_V1_CHANGELOG_2026_08_05.md`
+
+---
+
+## 2026-08-05：Objective Branch Shared Evaluator v1
+
+- 新增 composite Plan/6-task TaskModule/Schedule 与 objective-aware shared queue；每个仍有候选的 node
+  evaluation 都绑定 exact objective branch program/score/selection，底层 NRIR-37 shared runtime 保持不动；
+- 修复大尺度 float32 candidate width、child mean 与 materialized branch 的跨表示 1e-6 绝对误差假拒绝，
+  统一为 `rel_tol=1e-6,abs_tol=1e-6`，同时保留 `+0.1` tamper fail closed；
+- 真实 clauses 2/3 control/candidate 均 31 evaluations、16 depth-4 active nodes，root exact；worst-active
+  improvement=`+2.043362/+5.641768`、median delta=`+2.537640/+5.885233`，两条通过 `+1.0` gate；
+- artifact generate/replay 与 policy/coverage/selection/Task/claim/control tamper 通过；pilot hash=
+  `dde1cc4076ea766e7b4859e75ec9ff214d61f3cf245385285274b47f541a72cc`；
+- 16 focused、40 predecessor-inclusive tests、全量 `940 passed, 37 skipped`、mypy clean、Pylint
+  `10.00/10` 通过；
+- 以 fixed-budget branch selection `VALIDATED-REDUCED` 关闭，`performance_claimed=false`；下一门禁为
+  three-repeat whole-query/global-deadline formal，ASPLOS-ready 仍为 NO。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_SHARED_EVALUATOR_V1_CHANGELOG_2026_08_05.md`

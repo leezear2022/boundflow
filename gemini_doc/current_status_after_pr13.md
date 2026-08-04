@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-05
-> 当前 integration base：`813006b`（NRIR-37 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/full-frontier-tightness-attribution-v1`
+> 当前 integration base：`20a8ac3`（NRIR-38 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/objective-branch-shared-evaluator-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
@@ -18,6 +18,12 @@
 > replay lower/upper max diff=0。optimizer `steps=5→15` 虽改善 32/32 nodes，但 worst-active lower 只
 > 改善 `+0.055496/+0.028557`，未过预注册 `+1.0` 门禁，以 `VALIDATED-NO-GO` 冻结 optimizer-step
 > 轴。下一单变量为已有 objective branch IR 接入 shared ancestral evaluator。
+> 2026-08-05 NRIR-39 fixed-budget pilot 已通过：新增 composite Plan/6-task TaskModule/Schedule，将既有
+> objective branch 五阶段程序接入 shared ancestral queue，并为每条 clause 的 31/31 evaluations 绑定
+> branch execution。clauses 2/3 worst-active lower 由 `-37.574287/-35.900215` 提升为
+> `-35.530926/-30.258448`，改善 `+2.043362/+5.641768`，两条均过 `+1.0` 门禁；median 亦提升
+> `+2.537640/+5.885233`。状态为 fixed-budget branch selection `VALIDATED-REDUCED`，下一门禁是
+> three-repeat whole-query/global-deadline formal；performance/property/ASPLOS-ready 尚未升级。
 > 2026-08-05 NRIR-36 后续：九子句 NRIR-31 floor 已由 typed root-lower priority 选择 clauses 2/3，
 > dynamic equal-remaining slices 在同一 global start 下执行。三 fresh repeats 都复现
 > rank=`[2,3,4,5,0,8,6,7,1]`，packed nodes=`[[3,3],[3,3],[3,1]]`；repeat 2 第二条未提交
@@ -1093,3 +1099,21 @@ optimizer-step tightness `VALIDATED-NO-GO` 关闭；不启动 steps15 full-queue
 performance、GPU、competitor、multi-workload 或 ASPLOS-ready claim。下一单变量固定为把已有
 objective-bound-impact branch Plan/Task/Schedule 接入 shared ancestral evaluator，与 widest branch 做
 exact fixed-tree 对照。
+
+## 46. Objective Branch Shared Evaluator v1 判定
+
+NRIR-39 保持 NRIR-37 shared template、steps5、cap128 ancestral refinement、parent warm state、best-first
+queue、31/depth4 与 sibling atomic commit 不变，只把 branch candidate 从 widest 改为历史 NRIR-17
+objective-bound-impact policy（8 candidates/ReLU、batch64、cap256）。新增 composite Plan、6-task
+TaskModule/Schedule；每个有候选的 evaluation 都绑定 exact branch Plan/Task/Schedule/score trace 与 selected
+candidate，queue decision/child split 逐项 fail closed。
+
+真实 clauses 2/3 两侧 root exact，control/candidate 均为 31 evaluations、16 个 depth-4 active nodes。
+worst-active lower 从 `-37.574287/-35.900215` 提升到 `-35.530926/-30.258448`，改善
+`+2.043362/+5.641768`；median 改善 `+2.537640/+5.885233`，两条都通过预注册 `+1.0` gate。
+pilot hash=`dde1cc4076ea766e7b4859e75ec9ff214d61f3cf245385285274b47f541a72cc`。
+
+本阶段以 fixed-budget branch selection `VALIDATED-REDUCED` 关闭，只证明 branch tightness 与 IR/runtime
+ownership；logical fixed-budget clock 不承载墙钟结论，尚无 full-query/global deadline、property closure、
+GPU、competitor、multi-workload 或 ASPLOS-ready claim。下一阶段为 objective-branch whole-query three-repeat
+formal，必须同时报告 branch scoring 成本、committed coverage 与最终九子句 verdict。

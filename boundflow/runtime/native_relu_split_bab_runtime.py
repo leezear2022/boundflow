@@ -11,6 +11,7 @@ from dataclasses import dataclass
 import hashlib
 import heapq
 import json
+import math
 from typing import Literal, Mapping, Optional, Sequence
 
 import torch
@@ -111,7 +112,12 @@ class ReluSplitBranch:
             or self.neuron_index < 0
             or not self.lower < 0.0 < self.upper
             or self.width <= 0.0
-            or abs(self.width - (self.upper - self.lower)) > 1e-6
+            or not math.isclose(
+                self.width,
+                self.upper - self.lower,
+                rel_tol=1e-6,
+                abs_tol=1e-6,
+            )
         ):
             raise ValueError("native ReLU branch candidate is invalid")
 
