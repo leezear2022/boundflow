@@ -3963,3 +3963,24 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_END_TO_END_TIGHTNESS_PERFORMANCE_BASELINE_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Prepared Production Fast Path v1
+
+- 新增 exact prepared optimizer program 与 root conjunction capsule；cold phase 冻结/验证
+  Plan/Task/Schedule/source compiler/scope/hash，warm phase 保持 Schedule action 数值执行；
+- production 明确省略逐 action audit hash chain 与 selected-native validation re-execution，任何
+  program/module/input/objective/intermediate source/scope drift fail closed；
+- fixed ResNet 三组 audit raw=`58.713/59.078/59.587 s`，prepared warm raw=
+  `111.166/110.262/110.950 ms`，median ratio=`532.47×`；
+- cold prepare=`14.724 s`、first=`1.415 s`、合计=`16.139 s`；retained payload=
+  `2,076,372 B`，不隐藏 cold/memory 成本；
+- prepared/audit lower max diff=`1.90735e-6`、candidate/status exact，仍为 6/9 verified；
+  artifact replay hash=`e14fcd62b322c0bc60d45c726cf94a7aa6cfb8d7aa3212662d08996db169b6b2`；
+- focused `25 passed`、全量 `698 passed, 37 skipped`；Black/Mypy/Pylint/diff 通过；
+- 只关闭单 workload CPU internal-overhead diagnosis；不是 competitor speedup 或完整 verifier。
+  下一门禁为 clauses 0/2/4 branching/stronger-bound。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_PREPARED_PRODUCTION_FAST_PATH_V1_CHANGELOG_2026_08_04.md`

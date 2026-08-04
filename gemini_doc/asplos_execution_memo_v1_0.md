@@ -884,3 +884,23 @@ external-constant `6.7969 s`、external-adaptive `6.7317 s`；candidate 与 verd
 不是搜索或 verdict。该结果是 `VALIDATED-REDUCED` 的单 workload CPU diagnosis，不是 production
 latency、CUDA 或竞品 speedup。下一工程门禁是 prepared production fast path；之后再对三个 hard
 clauses 推进 branching/stronger-bound，不得把 6/9 写成完整 verifier closure。
+
+## 29. Prepared Production Fast Path v1
+
+NRIR-16 把 exact optimizer program validation、compiler/hash construction 与 dynamic execution
+分离。preparation 为九个 root objectives 各自冻结 optimizer Plan/Task/Schedule、native source
+compiler hashes、input/objective/intermediate/split/policy scope；steady-state 仍逐 action 执行
+evaluate/reduce/backward/Adam/project/select-best，但不构造 audit tensor hash chain，也不做
+selected-native validation re-execution。任何 program/module/input/objective/source/scope 漂移均拒绝。
+
+fixed ResNet 三组轮换中，audit complete-query raw=`58.713/59.078/59.587 s`，prepared warm
+raw=`111.166/110.262/110.950 ms`；median `59.078 s` 对 `110.950 ms`，内部 audit-overhead
+diagnostic ratio=`532.47×`。cold preparation=`14.724 s`、首次执行=`1.415 s`，合计
+`16.139 s`，相对 audit median=`3.660×`；retained prepared tensor payload=`2,076,372 B`。
+
+production lower 对 audit max diff=`1.90735e-6`、candidate exact、status exact，仍为 6/9
+verified、clauses `0/2/4` unknown。artifact fresh replay hash=
+`e14fcd62b322c0bc60d45c726cf94a7aa6cfb8d7aa3212662d08996db169b6b2`，全量
+`698 passed, 37 skipped`。该结果只关闭 root-only repeated-query prepared mechanism 与单 workload
+CPU internal-overhead diagnosis `VALIDATED-REDUCED`；不是 competitor speedup、CUDA 或完整
+verification。下一工程门禁转为三个 hard clauses 的 branching/stronger-bound。

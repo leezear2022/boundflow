@@ -1,6 +1,6 @@
 """Schedule-driven native alpha/beta optimizer execution and trace."""
 
-# pylint: disable=too-many-arguments,too-many-locals,too-many-statements
+# pylint: disable=too-many-arguments,too-many-locals,too-many-statements,too-many-lines
 # pylint: disable=too-many-instance-attributes,too-many-branches
 # pylint: disable=missing-function-docstring,protected-access,invalid-name
 # pylint: disable=too-many-boolean-expressions,duplicate-code
@@ -49,6 +49,9 @@ from .task_executor import InputSpec
 
 NATIVE_OPTIMIZER_EXECUTION_TRACE_SCHEMA_VERSION = (
     "boundflow.native-alpha-beta-optimizer-execution/v1"
+)
+NATIVE_PREPARED_OPTIMIZER_PROGRAM_SCHEMA_VERSION = (
+    "boundflow.native-prepared-optimizer-program/v1"
 )
 
 
@@ -359,6 +362,109 @@ class NativeScheduledOptimizerResult:
             raise ValueError("scheduled optimizer result/trace state differs")
         if self.bounds.lower.shape != self.bounds.upper.shape:
             raise ValueError("scheduled optimizer result bounds shape differs")
+
+
+@dataclass(frozen=True)
+class NativePreparedOptimizerProgram:
+    """Prevalidated exact optimizer program for production-mode reuse."""
+
+    program: NativeOptimizerProgram
+    module: BFTaskModule
+    objective_hash: str
+    intermediate_bound_source: IntermediateBoundSource
+    program_hashes: tuple[tuple[str, str], ...]
+    schema_version: str = NATIVE_PREPARED_OPTIMIZER_PROGRAM_SCHEMA_VERSION
+
+    @classmethod
+    def prepare(
+        cls,
+        program: NativeOptimizerProgram,
+        module: BFTaskModule,
+        input_spec: InputSpec,
+        *,
+        linear_spec_C: torch.Tensor,
+        intermediate_bound_source: IntermediateBoundSource,
+    ) -> "NativePreparedOptimizerProgram":
+        if not isinstance(intermediate_bound_source, IntermediateBoundSource):
+            raise TypeError("prepared optimizer intermediate-bound source is invalid")
+        program.validate()
+        runtime_scope = build_native_alpha_beta_scope(
+            module,
+            input_spec,
+            linear_spec_C=linear_spec_C,
+            relu_pre=program.relu_pre,
+            relu_split_state=program.initial_state.splits,
+            policy=program.policy,
+        )
+        if runtime_scope != program.initial_state.scope:
+            raise ValueError("prepared optimizer semantic scope differs")
+        prepared = cls(
+            program=program,
+            module=module,
+            objective_hash=tensor_content_hash(linear_spec_C),
+            intermediate_bound_source=intermediate_bound_source,
+            program_hashes=tuple(sorted(program.hashes().items())),
+        )
+        prepared.require_identity(
+            program,
+            module,
+            input_spec,
+            linear_spec_C=linear_spec_C,
+            intermediate_bound_source=intermediate_bound_source,
+        )
+        return prepared
+
+    def require_identity(
+        self,
+        program: NativeOptimizerProgram,
+        module: BFTaskModule,
+        input_spec: InputSpec,
+        *,
+        linear_spec_C: torch.Tensor,
+        intermediate_bound_source: IntermediateBoundSource,
+    ) -> None:
+        if (
+            self.schema_version != NATIVE_PREPARED_OPTIMIZER_PROGRAM_SCHEMA_VERSION
+            or program is not self.program
+            or module is not self.module
+            or intermediate_bound_source != self.intermediate_bound_source
+            or tensor_content_hash(linear_spec_C) != self.objective_hash
+        ):
+            raise ValueError("prepared optimizer exact identity differs")
+        runtime_scope = build_native_alpha_beta_scope(
+            module,
+            input_spec,
+            linear_spec_C=linear_spec_C,
+            relu_pre=program.relu_pre,
+            relu_split_state=program.initial_state.splits,
+            policy=program.policy,
+        )
+        if runtime_scope != program.initial_state.scope:
+            raise ValueError("prepared optimizer runtime scope differs")
+
+
+@dataclass(frozen=True)
+class NativeProductionOptimizerResult:
+    """Selected production bounds/state without audit hash-chain construction."""
+
+    bounds: IntervalState
+    state: NativeAlphaBetaOptimizationState
+    best_iteration_by_domain: tuple[int, ...]
+
+    def validate(self, *, prepared: NativePreparedOptimizerProgram) -> None:
+        self.state.validate()
+        if (
+            self.state.scope != prepared.program.initial_state.scope
+            or self.bounds.lower.shape != self.bounds.upper.shape
+            or int(self.bounds.lower.shape[0]) != len(self.best_iteration_by_domain)
+            or not bool(torch.isfinite(self.bounds.lower).all())
+            or not bool(torch.isfinite(self.bounds.upper).all())
+            or any(
+                iteration < 0 or iteration > prepared.program.policy.steps
+                for iteration in self.best_iteration_by_domain
+            )
+        ):
+            raise ValueError("production optimizer result differs")
 
 
 def _metric_by_domain(
@@ -906,4 +1012,154 @@ def execute_native_alpha_beta_optimizer_program(
         trace=trace,
     )
     result.validate(program=program)
+    return result
+
+
+def execute_prepared_native_alpha_beta_optimizer_program(
+    prepared: NativePreparedOptimizerProgram,
+    module: BFTaskModule,
+    input_spec: InputSpec,
+    *,
+    linear_spec_C: torch.Tensor,
+    intermediate_bound_source: IntermediateBoundSource,
+) -> NativeProductionOptimizerResult:
+    """Execute prevalidated optimizer Task/Schedule without audit hash chains."""
+
+    program = prepared.program
+    prepared.require_identity(
+        program,
+        module,
+        input_spec,
+        linear_spec_C=linear_spec_C,
+        intermediate_bound_source=intermediate_bound_source,
+    )
+    alpha = {
+        name: value.detach().clone().requires_grad_(True)
+        for name, value in program.initial_state.alphas.items()
+    }
+    beta = {
+        name: value.detach().clone().requires_grad_(True)
+        for name, value in program.initial_state.betas.items()
+    }
+    optimizer = torch.optim.Adam(
+        [*alpha.values(), *beta.values()], lr=program.policy.lr
+    )
+    bounds_by_iteration: dict[int, IntervalState] = {}
+    metric_by_iteration: dict[int, torch.Tensor] = {}
+    best_metric: Optional[torch.Tensor] = None
+    best_bounds: Optional[IntervalState] = None
+    best_alpha: Optional[dict[str, torch.Tensor]] = None
+    best_beta: Optional[dict[str, torch.Tensor]] = None
+    best_iteration: Optional[torch.Tensor] = None
+
+    for action, task in zip(program.schedule.actions, program.task_module.tasks):
+        if action.task_id != task.task_id:
+            raise ValueError("prepared optimizer Schedule/Task identity differs")
+        iteration = task.iteration
+        if task.kind == OptimizerTaskKind.EVALUATE_BOUND:
+            assert iteration is not None
+            bounds_by_iteration[iteration] = _evaluate_state(
+                module,
+                input_spec,
+                linear_spec_C,
+                alpha,
+                beta,
+                interval_env=program.interval_env,
+                relu_pre=program.relu_pre,
+                relu_split_state=program.initial_state.splits,
+                objective=program.policy.objective,
+            )
+        elif task.kind == OptimizerTaskKind.REDUCE_METRIC:
+            assert iteration is not None
+            bounds = bounds_by_iteration[iteration]
+            metric = _metric_by_domain(
+                bounds,
+                objective=program.policy.objective,
+                spec_reduce=program.policy.spec_reduce,
+                soft_tau=program.policy.soft_tau,
+            )
+            metric_by_iteration[iteration] = metric
+            detached = metric.detach()
+            if best_metric is None:
+                improve = torch.ones_like(detached, dtype=torch.bool)
+                best_metric = detached.clone()
+                best_bounds = IntervalState(
+                    lower=bounds.lower.detach().clone(),
+                    upper=bounds.upper.detach().clone(),
+                )
+                best_alpha = {
+                    name: value.detach().clone() for name, value in alpha.items()
+                }
+                best_beta = {
+                    name: value.detach().clone() for name, value in beta.items()
+                }
+                best_iteration = torch.full(
+                    detached.shape,
+                    iteration,
+                    dtype=torch.int64,
+                    device=detached.device,
+                )
+            else:
+                improve = detached > best_metric
+                if bool(improve.any().item()):
+                    best_metric = torch.where(improve, detached, best_metric)
+                    assert best_bounds is not None
+                    best_bounds = IntervalState(
+                        lower=torch.where(
+                            improve.unsqueeze(1),
+                            bounds.lower.detach(),
+                            best_bounds.lower,
+                        ),
+                        upper=torch.where(
+                            improve.unsqueeze(1),
+                            bounds.upper.detach(),
+                            best_bounds.upper,
+                        ),
+                    )
+                    assert best_alpha is not None and best_beta is not None
+                    best_alpha = _select_improved_state_slices(
+                        alpha, best_alpha, improve
+                    )
+                    best_beta = _select_improved_state_slices(beta, best_beta, improve)
+                    assert best_iteration is not None
+                    best_iteration = torch.where(
+                        improve,
+                        torch.full_like(best_iteration, iteration),
+                        best_iteration,
+                    )
+        elif task.kind == OptimizerTaskKind.BACKWARD:
+            assert iteration is not None
+            optimizer.zero_grad(set_to_none=True)
+            (-metric_by_iteration[iteration].sum()).backward()
+        elif task.kind == OptimizerTaskKind.ADAM_UPDATE:
+            optimizer.step()
+        elif task.kind == OptimizerTaskKind.PROJECT_STATE:
+            with torch.no_grad():
+                for value in alpha.values():
+                    value.clamp_(0.0, 1.0)
+                for value in beta.values():
+                    value.clamp_(0.0)
+        elif task.kind == OptimizerTaskKind.SELECT_BEST:
+            if best_bounds is None or best_alpha is None or best_beta is None:
+                raise ValueError("prepared optimizer selected before evaluation")
+        else:
+            raise AssertionError("unreachable optimizer task kind")
+
+    assert best_bounds is not None
+    assert best_alpha is not None and best_beta is not None
+    assert best_iteration is not None
+    selected_state = _state_from_tensors(program, best_alpha, best_beta)
+    result = NativeProductionOptimizerResult(
+        bounds=best_bounds,
+        state=selected_state,
+        best_iteration_by_domain=tuple(
+            int(value) for value in best_iteration.detach().cpu()
+        ),
+    )
+    if (
+        result.bounds.lower.shape != result.bounds.upper.shape
+        or not bool(torch.isfinite(result.bounds.lower).all())
+        or not bool(torch.isfinite(result.bounds.upper).all())
+    ):
+        raise ValueError("prepared optimizer produced invalid bounds")
     return result

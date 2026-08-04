@@ -1,0 +1,9 @@
+{
+  "evidence_hash": "e14fcd62b322c0bc60d45c726cf94a7aa6cfb8d7aa3212662d08996db169b6b2",
+  "files": {
+    "prepared_fast_path.json": "3d1dc6befa833339945d4ba39620201ddb13fa021c5da81ebef8408999bde6e3"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.prepared-production-fast-path-artifact/v1",
+  "status": "ok"
+}

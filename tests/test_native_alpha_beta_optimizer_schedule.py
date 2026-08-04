@@ -25,8 +25,10 @@ from boundflow.runtime.native_alpha_beta_optimization_state import (
     optimize_native_alpha_beta_state,
 )
 from boundflow.runtime.native_alpha_beta_optimizer_schedule import (
+    NativePreparedOptimizerProgram,
     compile_native_alpha_beta_optimizer_program,
     execute_native_alpha_beta_optimizer_program,
+    execute_prepared_native_alpha_beta_optimizer_program,
 )
 from boundflow.runtime.task_executor import InputSpec
 
@@ -345,5 +347,59 @@ def test_external_intermediate_semantics_mismatch_fails_closed() -> None:
                     upper=torch.tensor([[0.75, 0.75]]),
                 )
             },
+            intermediate_bound_source=IntermediateBoundSource.EXTERNAL_VERIFIER,
+        )
+
+
+def test_prepared_production_optimizer_matches_audit_without_hash_chain() -> None:
+    module, spec, objective, _split, program = _compile()
+    audit = execute_native_alpha_beta_optimizer_program(
+        program, module, spec, linear_spec_C=objective
+    )
+    prepared = NativePreparedOptimizerProgram.prepare(
+        program,
+        module,
+        spec,
+        linear_spec_C=objective,
+        intermediate_bound_source=IntermediateBoundSource.LOCAL_FORWARD,
+    )
+    production = execute_prepared_native_alpha_beta_optimizer_program(
+        prepared,
+        module,
+        spec,
+        linear_spec_C=objective,
+        intermediate_bound_source=IntermediateBoundSource.LOCAL_FORWARD,
+    )
+
+    production.validate(prepared=prepared)
+    assert torch.equal(production.bounds.lower, audit.bounds.lower)
+    assert torch.equal(production.bounds.upper, audit.bounds.upper)
+    assert production.state.stable_hash() == audit.state.stable_hash()
+    assert production.best_iteration_by_domain == audit.trace.best_iteration_by_domain
+
+
+def test_prepared_production_optimizer_rejects_semantic_drift() -> None:
+    module, spec, objective, _split, program = _compile()
+    prepared = NativePreparedOptimizerProgram.prepare(
+        program,
+        module,
+        spec,
+        linear_spec_C=objective,
+        intermediate_bound_source=IntermediateBoundSource.LOCAL_FORWARD,
+    )
+    with pytest.raises(ValueError, match="exact identity differs"):
+        execute_prepared_native_alpha_beta_optimizer_program(
+            prepared,
+            module,
+            spec,
+            linear_spec_C=-objective,
+            intermediate_bound_source=IntermediateBoundSource.LOCAL_FORWARD,
+        )
+    with pytest.raises(ValueError, match="exact identity differs"):
+        execute_prepared_native_alpha_beta_optimizer_program(
+            prepared,
+            module,
+            spec,
+            linear_spec_C=objective,
             intermediate_bound_source=IntermediateBoundSource.EXTERNAL_VERIFIER,
         )

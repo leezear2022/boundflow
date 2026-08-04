@@ -102,6 +102,13 @@
 > 门禁为 prepared production fast path，之后再推进 hard-clause branching；顶层 performance
 > No-Go 与 ASPLOS-ready=NO 不变。
 
+> **2026-08-04 NRIR-16 修订**：root-only exact prepared capsules 将 fixed ResNet 三组
+> complete-query warm median 从 audit `59.078 s` 降至 `110.950 ms`；cold prepare+first=
+> `16.139 s`，retained payload=`2.076 MB`。production/audit lower max diff=`1.90735e-6`、
+> candidate/status exact，仍为 6/9。该结果只证明单 workload CPU internal evidence-overhead
+> removal，不是 competitor speedup；下一门禁为 clauses 0/2/4 branching/stronger-bound，顶层
+> ASPLOS-ready=NO 不变。
+
 > **2026-08-04 NRIR-11 修订**：fixed-step optimizer control 已进入 typed Plan/Task/Schedule。
 > 固定 ResNet 1-step program 为 8 actions，Schedule/legacy/final native execution max diff 均为 0，
 > alpha/beta gradient 均非零。该结果只关闭 optimizer control ownership；dynamic early stop、
