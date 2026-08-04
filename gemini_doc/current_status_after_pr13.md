@@ -1,10 +1,19 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-05
-> 当前 integration base：`3755667`（NRIR-35 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/multi-clause-anytime-priority-v1`
+> 当前 integration base：`c5ce3e6`（NRIR-36 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/shared-parametric-objective-evaluator-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
+> 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
+> objective-ancestral sibling evaluator，并新增独立 Plan/Batch/Task/Schedule IR 与跨 clause 单一 cache
+> owner。真实 ResNet clause 2 root+pair 与 frozen audit lower/branch/split/α/β/refinement exact，upper
+> max diff=`1.52587890625e-5` 且既有 allclose guard 通过。三 fresh repeats 的 rank/selected 均固定为
+> `[2,3,4,5,0,8,6,7,1]`/`[2,3]`，两条每轮均提交 `31 nodes/15 groups`，whole=
+> `[52.032317,52.268473,51.926746] s`，每轮恰好一次模板编译。NRIR-37 以 shared compiler ownership +
+> fixed-deadline coverage `VALIDATED-REDUCED` 关闭；final 仍 9/9 unresolved，ASPLOS-ready 与 performance
+> No-Go 不变。下一门禁转向 full-depth frontier tightness attribution 与单变量 stronger-bound/candidate，
+> 不继续调 top-k/slice/cache。
 > 2026-08-05 NRIR-36 后续：九子句 NRIR-31 floor 已由 typed root-lower priority 选择 clauses 2/3，
 > dynamic equal-remaining slices 在同一 global start 下执行。三 fresh repeats 都复现
 > rank=`[2,3,4,5,0,8,6,7,1]`，packed nodes=`[[3,3],[3,3],[3,1]]`；repeat 2 第二条未提交
@@ -1029,3 +1038,33 @@ property closure、硬实时、GPU、competitor、multi-workload 或 ASPLOS-read
 parametric compiler/root/evaluator + stronger
 bound/candidate：先分解两个 selected clause 的 compile/root/child phase，再冻结可复用合同与 tightness
 gate，不继续只调 top-k 或 slice 常数。
+
+## 44. Shared Parametric Objective Evaluator v1 判定
+
+NRIR-37 保持 frozen NRIR-31 floor、NRIR-36 root-lower priority/top-2/dynamic equal-remaining slices、
+NRIR-34 cap128 ancestral refinement/sibling atomic commit 与 31/depth4/60 秒不变。新增
+`SharedParametricAncestral` Plan/Batch/Task/Schedule：template 只拥有 graph、input non-batch shape、
+objective shape/dtype/device、ReLU layout、optimizer policy 与 provenance；objective content、split、
+intermediate bounds、warm state、refinement lineage 和 batch size 都属于 exact instance。生产 batch
+显式 `selected_native_reexecution=false`，root 或完整 sibling pair 才形成 commit。
+
+真实 clause 2 first-class parity 中，frozen audit root+pair=`14.096428 s`、shared evaluator=
+`1.211498 s`；lower、branch、split、α、β、refinement final-bound hashes exact，upper max diff=
+`1.52587890625e-5`，满足 frozen `allclose(atol=1e-5,rtol=1e-5)`。单轮 top-2 pilot 的 floor/whole=
+`20.615271/51.083770 s`，clauses 2/3 均完整提交 31 nodes，32 个 cache events 只有一次 miss。
+
+正式三 fresh processes 的 floor elapsed=`[21.704740,21.802033,21.784891] s`，whole elapsed=
+`[52.032317,52.268473,51.926746] s`；三轮 priority 都为
+`[2,3,4,5,0,8,6,7,1]`、selected 都为 `[2,3]`、packed nodes 都为 `[31,31]`，每轮
+cache miss count=1。clauses 2/3 depth-4 worst active lower 稳定为
+`-37.574287/-35.900215`，verdict 仍 unknown。
+
+pilot hash=`5c79bcc6e744ed1d29520a76331c9823b2ccfa144332e96c401271241616bf86`；formal hash=
+`7ff6aef76f6fe2b8778faba2e599e440c2dbf14ac4808bfb0c7e07f72fb74238`。artifact replay、11 类
+control/compiler 同步重哈希 tamper、26 focused tests、全量 `916 passed, 37 skipped`、mypy clean、
+Pylint `10.00/10` 均通过。
+
+预注册 multi-clause coverage gate 成立，因此 NRIR-37 以 same-algorithm shared compiler ownership +
+fixed-deadline coverage `VALIDATED-REDUCED` 关闭。这不把内部 audit→production timing 写成 speedup，
+也没有 property closure、硬实时、GPU、competitor、multi-workload 或 ASPLOS-ready claim。下一门禁
+先解释完整 depth-4 frontier 的剩余 gap，再只改变一个 stronger-bound/candidate 变量。

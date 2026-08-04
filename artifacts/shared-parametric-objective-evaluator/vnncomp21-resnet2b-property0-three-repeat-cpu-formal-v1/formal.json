@@ -1,0 +1,2827 @@
+{
+  "claim": "shared_parametric_compiler_reuse_and_fixed_deadline_coverage",
+  "formal_payload": {
+    "all_worker_gates_passed": true,
+    "cache_miss_counts": [
+      1,
+      1,
+      1
+    ],
+    "floor_elapsed_ns": [
+      21704739807,
+      21802033460,
+      21784891060
+    ],
+    "packed_accepted_nodes": [
+      [
+        31,
+        31
+      ],
+      [
+        31,
+        31
+      ],
+      [
+        31,
+        31
+      ]
+    ],
+    "protocol": {
+      "fresh_process_repeats": 3,
+      "original_clause_count": 9,
+      "selected_clause_count": 2,
+      "torch_threads": 8,
+      "whole_query_timeout_seconds": 60
+    },
+    "repeat_results": [
+      {
+        "aggregate": {
+          "aggregation": "floor_monotone_multi_clause_packed_outcomes",
+          "decision_hash": "5b706468742f066d09197bff65f6ad9bfb6a27aa97b543fbe606d9f6c4d9c2b4",
+          "final_status": "unknown",
+          "final_unresolved_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "final_unsafe_clause_index": null,
+          "final_verified_clause_indices": [],
+          "floor_status": "unknown",
+          "floor_trace_hash": "32a49840c8884eed4afc22a3a56ec0ef284f65411852be6deb0da0c6bb8244cb",
+          "floor_unresolved_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "floor_unsafe_clause_index": null,
+          "floor_verified_clause_indices": [],
+          "original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "outcomes": [
+            {
+              "original_clause_index": 2,
+              "packed_queue_trace_hash": "20b6461438ec9ed5edb6763a454ec7085e6cb856e853f0fdef8ff4c510f67f86",
+              "packed_verdict_trace_hash": "ed09375382962907ba7ed8ba7a4f2db2666a2519ca17142f4cc2bc0db1db66cf",
+              "schema_version": "boundflow.multi-clause-anytime-outcome/v1",
+              "status": "unknown"
+            },
+            {
+              "original_clause_index": 3,
+              "packed_queue_trace_hash": "fd6e03f5edc87367ec11568f65deb5a8f2ec23549508de034d76889c4ae9ffb2",
+              "packed_verdict_trace_hash": "72f2f3f5cfb58f1f33f04e14bd45d021f1c322843b8f95fb0c5ea01e97d42af7",
+              "schema_version": "boundflow.multi-clause-anytime-outcome/v1",
+              "status": "unknown"
+            }
+          ],
+          "plan_hash": "8405910fff5c18f4f99ec9f210ad9fbda35334301a912d7cedb395b2e296d498",
+          "schema_version": "boundflow.multi-clause-anytime-aggregate/v1",
+          "slice_hashes": [
+            "41dfa29611ccd011c7bf57f12e9353e51bf1bddaafd1eea5dc0a8558933a5c00",
+            "314fee38829807e7984d9296155087cb48d9aece05ada5595baf80d1a7ccacb2"
+          ]
+        },
+        "cache": {
+          "events": [
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0002:priority:0:eval:0000",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 2705913,
+              "event_index": 0,
+              "outcome": "miss_compiled",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0002:priority:0:eval:0001",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 1,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0002:priority:0:eval:0002",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 2,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0002:priority:0:eval:0003",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 3,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0002:priority:0:eval:0004",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 4,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0002:priority:0:eval:0005",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 5,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0002:priority:0:eval:0006",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 6,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0002:priority:0:eval:0007",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 7,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0002:priority:0:eval:0008",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 8,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0002:priority:0:eval:0009",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 9,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0002:priority:0:eval:0010",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 10,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0002:priority:0:eval:0011",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 11,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0002:priority:0:eval:0012",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 12,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0002:priority:0:eval:0013",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 13,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0002:priority:0:eval:0014",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 14,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0002:priority:0:eval:0015",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 15,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0003:priority:1:eval:0000",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 16,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0003:priority:1:eval:0001",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 17,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0003:priority:1:eval:0002",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 18,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0003:priority:1:eval:0003",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 19,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0003:priority:1:eval:0004",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 20,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0003:priority:1:eval:0005",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 21,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0003:priority:1:eval:0006",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 22,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0003:priority:1:eval:0007",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 23,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0003:priority:1:eval:0008",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 24,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0003:priority:1:eval:0009",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 25,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0003:priority:1:eval:0010",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 26,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0003:priority:1:eval:0011",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 27,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0003:priority:1:eval:0012",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 28,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0003:priority:1:eval:0013",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 29,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0003:priority:1:eval:0014",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 30,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat0:clause:0003:priority:1:eval:0015",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 31,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+            }
+          ],
+          "hit_count": 31,
+          "miss_count": 1,
+          "scope": "one_query_cross_batch_cross_clause_v1",
+          "template_count": 1,
+          "template_hashes": [
+            "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+          ]
+        },
+        "checks": {
+          "all_runtime_validators_passed": true,
+          "atomic_sibling_accounting": true,
+          "dynamic_allocations_recomputed": true,
+          "exact_floor_sources": true,
+          "no_selected_native_reexecution": true,
+          "rank_recomputed_from_floor": true,
+          "single_query_cache_owner": true
+        },
+        "claim_boundary": "shared_compiler_reuse_and_fixed_deadline_coverage_only",
+        "decision": {
+          "candidates": [
+            {
+              "original_clause_index": 0,
+              "root_final_intermediate_bounds_hash": "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+              "root_lower": -204.17315673828125,
+              "root_lower_margin": -204.17315673828125,
+              "root_refinement_plan_hash": "e2482e123e7e1b462705ece2fca920c52e6acc31cb5f4c73bc4c9e43dcc2f9b6",
+              "root_refinement_semantic_trace_hash": "c28d1a8e0f79f68e0c2ce1701a1aae3242205adac4d0a365ee2274459bc8003a",
+              "root_upper": 213.74331665039062,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 1,
+              "root_final_intermediate_bounds_hash": "be9e73e0b8f85accdac31986f2582a2ff8be5aadf6cd83af3811d8f259b888a4",
+              "root_lower": -298.47283935546875,
+              "root_lower_margin": -298.47283935546875,
+              "root_refinement_plan_hash": "02a37000f93831360bafd3964ecf3244771672f1aba5c13bdea0edc705959f40",
+              "root_refinement_semantic_trace_hash": "464fecd4fdb7701abdd004427fca5b509370c7e73dc5e731636f26129f54ea2f",
+              "root_upper": 308.8791809082031,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 2,
+              "root_final_intermediate_bounds_hash": "e3c67400210e9d0cd09276a5156e855e6815232124a479c670a5bafe7f00f019",
+              "root_lower": -139.10787963867188,
+              "root_lower_margin": -139.10787963867188,
+              "root_refinement_plan_hash": "0b7bd5c3dfaed50d0abc5da5a930702f93dd65b54db272910028a8d20a70e8c6",
+              "root_refinement_semantic_trace_hash": "4909e0c763f38351b63ea57a884e18dcb07621b079488a705f71c9c046d26c57",
+              "root_upper": 192.68186950683594,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 3,
+              "root_final_intermediate_bounds_hash": "adebcbf3d114518944962a5fe0efef0facfda995ca0a10149440c12e879d896b",
+              "root_lower": -152.2870330810547,
+              "root_lower_margin": -152.2870330810547,
+              "root_refinement_plan_hash": "1f68116410b2561bb963dea04b822beb523aadd77fd78d6ea021ca12b4e26396",
+              "root_refinement_semantic_trace_hash": "acec584a19b90b830d5219e82804332a5fef17bdc19f2738c55e36dbfd126f01",
+              "root_upper": 191.56068420410156,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 4,
+              "root_final_intermediate_bounds_hash": "dc120b11d34e5924b000e6803b1060d1afafaf6805ed42fc4f0cb0726dc50ffa",
+              "root_lower": -163.16854858398438,
+              "root_lower_margin": -163.16854858398438,
+              "root_refinement_plan_hash": "adefe2d0813b908a1bc948cc1ad5470363d88b7942b3821cddaba2b3d38e7323",
+              "root_refinement_semantic_trace_hash": "5cebe14ed24c22ecef5107b222fdec67a9ac6a41a9cafc410164b69cd8fdbee6",
+              "root_upper": 218.8386993408203,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 5,
+              "root_final_intermediate_bounds_hash": "4dc3283ce92380d4d5f47134e3d16ffd492c73c63bf18698b2cb0cbb9e5d1e25",
+              "root_lower": -164.7825164794922,
+              "root_lower_margin": -164.7825164794922,
+              "root_refinement_plan_hash": "9f198f824e8ff410bd9d73cba84ac5ae2d314ca92a20ba20bcd0cf2bf4bb9247",
+              "root_refinement_semantic_trace_hash": "bd71cf6d8a5af8fcce002b9f8b59107f10af9cdd50da1505ee1fa6e2ca92eae4",
+              "root_upper": 228.7563018798828,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 6,
+              "root_final_intermediate_bounds_hash": "d8c50ff3749fe5adda02ee0b809eb94a368d46dc017ea072b84730680d3cdf8c",
+              "root_lower": -246.59263610839844,
+              "root_lower_margin": -246.59263610839844,
+              "root_refinement_plan_hash": "531d90869b30cb63a024120bd33cab6edd07eb8118762a4bdb1ea6ecbede6c44",
+              "root_refinement_semantic_trace_hash": "e93685e9d8527e42b29bec75f376825055985ddc2df91ba1bb55ce7aad40ffac",
+              "root_upper": 260.082275390625,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 7,
+              "root_final_intermediate_bounds_hash": "d315870587deaae775682c4e5aa32fec9d7d222a8cb9eaacd6bdb35cbc2f51c1",
+              "root_lower": -268.6291809082031,
+              "root_lower_margin": -268.6291809082031,
+              "root_refinement_plan_hash": "d1f95eb0fa01a48f6c0140ac3a66da5f60220ab14435d095988cc50c0f226b94",
+              "root_refinement_semantic_trace_hash": "fb1a406fd92dacafe72673339567377772742f5ee02035b617905992f679eeb1",
+              "root_upper": 313.94207763671875,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 8,
+              "root_final_intermediate_bounds_hash": "d3e3d99d670d3e0daa7ff4e315bac74956a4e18c7043782468a89a509a91a948",
+              "root_lower": -235.29153442382812,
+              "root_lower_margin": -235.29153442382812,
+              "root_refinement_plan_hash": "35e1f3e5cde1d17ae219214207c7f95eb56d951c3699a7c4aeb07136a985ce5e",
+              "root_refinement_semantic_trace_hash": "b3ef3eaab1569c9c5dc642750d32ff17b0dfccec12c025795ed847da3837dac0",
+              "root_upper": 327.22052001953125,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            }
+          ],
+          "floor_completed_original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "floor_status": "unknown",
+          "floor_trace_hash": "32a49840c8884eed4afc22a3a56ec0ef284f65411852be6deb0da0c6bb8244cb",
+          "floor_unresolved_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "floor_unsafe_clause_index": null,
+          "floor_verified_clause_indices": [],
+          "plan_hash": "8405910fff5c18f4f99ec9f210ad9fbda35334301a912d7cedb395b2e296d498",
+          "ranked_original_clause_indices": [
+            2,
+            3,
+            4,
+            5,
+            0,
+            8,
+            6,
+            7,
+            1
+          ],
+          "reason": "ranked_unresolved_candidates_selected",
+          "schema_version": "boundflow.multi-clause-anytime-decision/v1",
+          "selected_original_clause_indices": [
+            2,
+            3
+          ]
+        },
+        "floor": {
+          "completed_original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "elapsed_ns": 21704739807,
+          "sources": [
+            {
+              "final_intermediate_bounds_hash": "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+              "original_clause_index": 0,
+              "plan_hash": "e2482e123e7e1b462705ece2fca920c52e6acc31cb5f4c73bc4c9e43dcc2f9b6",
+              "semantic_trace_hash": "c28d1a8e0f79f68e0c2ce1701a1aae3242205adac4d0a365ee2274459bc8003a"
+            },
+            {
+              "final_intermediate_bounds_hash": "be9e73e0b8f85accdac31986f2582a2ff8be5aadf6cd83af3811d8f259b888a4",
+              "original_clause_index": 1,
+              "plan_hash": "02a37000f93831360bafd3964ecf3244771672f1aba5c13bdea0edc705959f40",
+              "semantic_trace_hash": "464fecd4fdb7701abdd004427fca5b509370c7e73dc5e731636f26129f54ea2f"
+            },
+            {
+              "final_intermediate_bounds_hash": "e3c67400210e9d0cd09276a5156e855e6815232124a479c670a5bafe7f00f019",
+              "original_clause_index": 2,
+              "plan_hash": "0b7bd5c3dfaed50d0abc5da5a930702f93dd65b54db272910028a8d20a70e8c6",
+              "semantic_trace_hash": "4909e0c763f38351b63ea57a884e18dcb07621b079488a705f71c9c046d26c57"
+            },
+            {
+              "final_intermediate_bounds_hash": "adebcbf3d114518944962a5fe0efef0facfda995ca0a10149440c12e879d896b",
+              "original_clause_index": 3,
+              "plan_hash": "1f68116410b2561bb963dea04b822beb523aadd77fd78d6ea021ca12b4e26396",
+              "semantic_trace_hash": "acec584a19b90b830d5219e82804332a5fef17bdc19f2738c55e36dbfd126f01"
+            },
+            {
+              "final_intermediate_bounds_hash": "dc120b11d34e5924b000e6803b1060d1afafaf6805ed42fc4f0cb0726dc50ffa",
+              "original_clause_index": 4,
+              "plan_hash": "adefe2d0813b908a1bc948cc1ad5470363d88b7942b3821cddaba2b3d38e7323",
+              "semantic_trace_hash": "5cebe14ed24c22ecef5107b222fdec67a9ac6a41a9cafc410164b69cd8fdbee6"
+            },
+            {
+              "final_intermediate_bounds_hash": "4dc3283ce92380d4d5f47134e3d16ffd492c73c63bf18698b2cb0cbb9e5d1e25",
+              "original_clause_index": 5,
+              "plan_hash": "9f198f824e8ff410bd9d73cba84ac5ae2d314ca92a20ba20bcd0cf2bf4bb9247",
+              "semantic_trace_hash": "bd71cf6d8a5af8fcce002b9f8b59107f10af9cdd50da1505ee1fa6e2ca92eae4"
+            },
+            {
+              "final_intermediate_bounds_hash": "d8c50ff3749fe5adda02ee0b809eb94a368d46dc017ea072b84730680d3cdf8c",
+              "original_clause_index": 6,
+              "plan_hash": "531d90869b30cb63a024120bd33cab6edd07eb8118762a4bdb1ea6ecbede6c44",
+              "semantic_trace_hash": "e93685e9d8527e42b29bec75f376825055985ddc2df91ba1bb55ce7aad40ffac"
+            },
+            {
+              "final_intermediate_bounds_hash": "d315870587deaae775682c4e5aa32fec9d7d222a8cb9eaacd6bdb35cbc2f51c1",
+              "original_clause_index": 7,
+              "plan_hash": "d1f95eb0fa01a48f6c0140ac3a66da5f60220ab14435d095988cc50c0f226b94",
+              "semantic_trace_hash": "fb1a406fd92dacafe72673339567377772742f5ee02035b617905992f679eeb1"
+            },
+            {
+              "final_intermediate_bounds_hash": "d3e3d99d670d3e0daa7ff4e315bac74956a4e18c7043782468a89a509a91a948",
+              "original_clause_index": 8,
+              "plan_hash": "35e1f3e5cde1d17ae219214207c7f95eb56d951c3699a7c4aeb07136a985ce5e",
+              "semantic_trace_hash": "b3ef3eaab1569c9c5dc642750d32ff17b0dfccec12c025795ed847da3837dac0"
+            }
+          ],
+          "status": "unknown",
+          "trace_hash": "32a49840c8884eed4afc22a3a56ec0ef284f65411852be6deb0da0c6bb8244cb",
+          "unresolved_original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "unsafe_original_clause_index": null,
+          "verified_original_clause_indices": []
+        },
+        "performance_claimed": false,
+        "program": {
+          "plan_hash": "8405910fff5c18f4f99ec9f210ad9fbda35334301a912d7cedb395b2e296d498",
+          "schedule_hash": "52316b0e9cb7701dffe15d43c182292bf0ee194a05ff00c0752e8f9198695328",
+          "task_ir_hash": "8c2ff97202d7975392b4395ba82d49affd9b62f7692592345b92f4eb6d908e5a"
+        },
+        "protocol": {
+          "allocation": "dynamic_equal_remaining_selected_v1",
+          "child_cap": 128,
+          "evaluator": "nrir37_shared_parametric_ancestral",
+          "floor": "nrir31_objective_hard_clause_escalation",
+          "original_clause_count": 9,
+          "priority": "root_lower_margin_desc_ordinal_asc",
+          "search_budget": {
+            "max_depth": 4,
+            "max_nodes": 31
+          },
+          "selected_clause_count": 2,
+          "torch_threads": 8,
+          "whole_query_timeout_seconds": 60
+        },
+        "repeat_index": 0,
+        "result_hash": "39c938421af7e767f3934b650f3852ec65a23febab4503c1c328bdb6c2e83bf5",
+        "runtime_trace": {
+          "actions": [
+            {
+              "action_id": "multi-clause-anytime.launch.0000",
+              "elapsed_ns": 23738909714,
+              "executed": true,
+              "guard": "always",
+              "kind": "execute_floor",
+              "output_hash": "7b179d18461dd93a960639c72dd328667c7f68bb14b1bb0586546146146ba07b",
+              "priority_position": null,
+              "reason": "nrir31_floor_completed",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 0,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat0:execute_floor:00"
+            },
+            {
+              "action_id": "multi-clause-anytime.launch.0001",
+              "elapsed_ns": 25107559,
+              "executed": true,
+              "guard": "always",
+              "kind": "rank_candidates",
+              "output_hash": "5b706468742f066d09197bff65f6ad9bfb6a27aa97b543fbe606d9f6c4d9c2b4",
+              "priority_position": null,
+              "reason": "ranked_unresolved_candidates_selected",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 1,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat0:rank_candidates:01"
+            },
+            {
+              "action_id": "multi-clause-anytime.launch.0002",
+              "elapsed_ns": 147344883,
+              "executed": true,
+              "guard": "selected_slot_available_before_deadline",
+              "kind": "compile_packed_plan",
+              "output_hash": "0330027e8343d94d2078dbf34c3bf75b824ce47aa2cf36dbcd27d2bd842fa3d3",
+              "priority_position": 0,
+              "reason": "shared_parametric_plan_compiled",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 2,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat0:compile_packed_plan:02"
+            },
+            {
+              "action_id": "multi-clause-anytime.launch.0003",
+              "elapsed_ns": 13812461542,
+              "executed": true,
+              "guard": "selected_slot_available_before_deadline",
+              "kind": "execute_packed_slice",
+              "output_hash": "4bb045c9b6683d9bdeaff7de147c2330eaf998d026b3b47f5d4017a29a273797",
+              "priority_position": 0,
+              "reason": "packed_slice_unknown",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 3,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat0:execute_packed_slice:03"
+            },
+            {
+              "action_id": "multi-clause-anytime.launch.0004",
+              "elapsed_ns": 147022256,
+              "executed": true,
+              "guard": "selected_slot_available_before_deadline",
+              "kind": "compile_packed_plan",
+              "output_hash": "838e19a1f5554b3e409d015cd2047ef5f954c12610384ebcedf82965cda54341",
+              "priority_position": 1,
+              "reason": "shared_parametric_plan_compiled",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 4,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat0:compile_packed_plan:04"
+            },
+            {
+              "action_id": "multi-clause-anytime.launch.0005",
+              "elapsed_ns": 13843975355,
+              "executed": true,
+              "guard": "selected_slot_available_before_deadline",
+              "kind": "execute_packed_slice",
+              "output_hash": "2791b23a6c1f9cc7e46380b21c3b025ad6ec768348889468d8ad945f0f74ec3f",
+              "priority_position": 1,
+              "reason": "packed_slice_unknown",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 5,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat0:execute_packed_slice:05"
+            },
+            {
+              "action_id": "multi-clause-anytime.launch.0006",
+              "elapsed_ns": 0,
+              "executed": true,
+              "guard": "always",
+              "kind": "aggregate_original_ordinals",
+              "output_hash": "899758926cab70dafc66d7967870ae4084d64785a154543bb3781b7c54d58e29",
+              "priority_position": null,
+              "reason": "original_ordinals_aggregated_monotonically",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 6,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat0:aggregate_original_ordinals:06"
+            },
+            {
+              "action_id": "multi-clause-anytime.launch.0007",
+              "elapsed_ns": 0,
+              "executed": true,
+              "guard": "always",
+              "kind": "emit_result",
+              "output_hash": "1c3d9a0215285e17c801c41b3797e4b81243d4bc45209e77ba9411c05e5ef1e1",
+              "priority_position": null,
+              "reason": "result_emitted",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 7,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat0:emit_result:07"
+            }
+          ],
+          "elapsed_ns": 52032317355,
+          "fallback_reasons": [
+            "packed_slice_unknown",
+            "packed_slice_unknown"
+          ],
+          "measured_elapsed_ns": 59945504851,
+          "trace_hash": "a7567928a65a9cacab44fcf1dbf8d688a230a48e5be5ded0cec22b8ce9f68cfd"
+        },
+        "schema_version": "boundflow.shared-parametric-objective-evaluator-worker/v1",
+        "slices": [
+          {
+            "batch_commit_count": 16,
+            "compiler": {
+              "all_same_template": true,
+              "cache_outcomes": [
+                "miss_compiled",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract"
+              ],
+              "selected_native_reexecution": false,
+              "template_hashes": [
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+              ]
+            },
+            "compiler_batch_count": 16,
+            "discarded_attempt_stage": null,
+            "execution_trace_hash": "b0cab4842b69afd97de24a4caefbd0fed216076d32f9f5fd17948ad7c3901cc1",
+            "fallback_reason": "none",
+            "maximum_depth": 4,
+            "plan_hash": "9da068aa71642db43a6df164d40ca4c3528af50938290e05c420351e886759ea",
+            "queue_trace_hash": "20b6461438ec9ed5edb6763a454ec7085e6cb856e853f0fdef8ff4c510f67f86",
+            "schedule_hash": "a2669fde96c528c1c3c915db50f847036ef3df738316c10856d5ce07ab0a4be9",
+            "slice": {
+              "accepted_nodes": 31,
+              "allocated_slice_ns": 18117889787,
+              "cutoff_signaled": false,
+              "decision_hash": "5b706468742f066d09197bff65f6ad9bfb6a27aa97b543fbe606d9f6c4d9c2b4",
+              "dispatch_started_elapsed_ns": 23764220425,
+              "finished_elapsed_ns": 37839900376,
+              "original_clause_index": 2,
+              "packed_plan_hash": "9da068aa71642db43a6df164d40ca4c3528af50938290e05c420351e886759ea",
+              "packed_queue_trace_hash": "20b6461438ec9ed5edb6763a454ec7085e6cb856e853f0fdef8ff4c510f67f86",
+              "packed_status": "unknown",
+              "packed_verdict_trace_hash": "ed09375382962907ba7ed8ba7a4f2db2666a2519ca17142f4cc2bc0db1db66cf",
+              "plan_hash": "8405910fff5c18f4f99ec9f210ad9fbda35334301a912d7cedb395b2e296d498",
+              "priority_position": 0,
+              "reason": "packed_slice_unknown",
+              "remaining_before_ns": 36235779575,
+              "remaining_selected_count": 2,
+              "schema_version": "boundflow.multi-clause-anytime-slice/v1",
+              "sibling_group_count": 15,
+              "slice_cutoff_elapsed_ns": 41882110212,
+              "source_final_intermediate_bounds_hash": "e3c67400210e9d0cd09276a5156e855e6815232124a479c670a5bafe7f00f019",
+              "source_refinement_plan_hash": "0b7bd5c3dfaed50d0abc5da5a930702f93dd65b54db272910028a8d20a70e8c6",
+              "source_refinement_semantic_trace_hash": "4909e0c763f38351b63ea57a884e18dcb07621b079488a705f71c9c046d26c57"
+            },
+            "task_ir_hash": "4015903856975ce4a4f8c13676855dc365c817f832f17c0a08b32b1a8f8dbf2b",
+            "verdict_reason": "configured_depth_terminal_open",
+            "verdict_trace_hash": "ed09375382962907ba7ed8ba7a4f2db2666a2519ca17142f4cc2bc0db1db66cf",
+            "worst_active_lower": -37.57428741455078
+          },
+          {
+            "batch_commit_count": 16,
+            "compiler": {
+              "all_same_template": true,
+              "cache_outcomes": [
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract"
+              ],
+              "selected_native_reexecution": false,
+              "template_hashes": [
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063",
+                "d57a54fd4661b221655785e4f203459a5c974831787d17d4cc7662021dc5c063"
+              ]
+            },
+            "compiler_batch_count": 16,
+            "discarded_attempt_stage": null,
+            "execution_trace_hash": "02a75ff4f572a43416a5f8ecde3d44cc7636ec3a9fcdf418a76fb569f6e87355",
+            "fallback_reason": "none",
+            "maximum_depth": 4,
+            "plan_hash": "d744f96fdf6d1d10047f34d3151f70af4127c95d1141a0d2ed7adbc768f9b274",
+            "queue_trace_hash": "fd6e03f5edc87367ec11568f65deb5a8f2ec23549508de034d76889c4ae9ffb2",
+            "schedule_hash": "3551cf43eaf37e70155e2843fee93a74bdcc8ba272377b80e1617c26b7ec68fb",
+            "slice": {
+              "accepted_nodes": 31,
+              "allocated_slice_ns": 22119893214,
+              "cutoff_signaled": false,
+              "decision_hash": "5b706468742f066d09197bff65f6ad9bfb6a27aa97b543fbe606d9f6c4d9c2b4",
+              "dispatch_started_elapsed_ns": 37880106786,
+              "finished_elapsed_ns": 51986679181,
+              "original_clause_index": 3,
+              "packed_plan_hash": "d744f96fdf6d1d10047f34d3151f70af4127c95d1141a0d2ed7adbc768f9b274",
+              "packed_queue_trace_hash": "fd6e03f5edc87367ec11568f65deb5a8f2ec23549508de034d76889c4ae9ffb2",
+              "packed_status": "unknown",
+              "packed_verdict_trace_hash": "72f2f3f5cfb58f1f33f04e14bd45d021f1c322843b8f95fb0c5ea01e97d42af7",
+              "plan_hash": "8405910fff5c18f4f99ec9f210ad9fbda35334301a912d7cedb395b2e296d498",
+              "priority_position": 1,
+              "reason": "packed_slice_unknown",
+              "remaining_before_ns": 22119893214,
+              "remaining_selected_count": 1,
+              "schema_version": "boundflow.multi-clause-anytime-slice/v1",
+              "sibling_group_count": 15,
+              "slice_cutoff_elapsed_ns": 60000000000,
+              "source_final_intermediate_bounds_hash": "adebcbf3d114518944962a5fe0efef0facfda995ca0a10149440c12e879d896b",
+              "source_refinement_plan_hash": "1f68116410b2561bb963dea04b822beb523aadd77fd78d6ea021ca12b4e26396",
+              "source_refinement_semantic_trace_hash": "acec584a19b90b830d5219e82804332a5fef17bdc19f2738c55e36dbfd126f01"
+            },
+            "task_ir_hash": "7798feb11431ea997630fbd3b15cd8f6e094c336b72fedc6db07187f95d7a6aa",
+            "verdict_reason": "configured_depth_terminal_open",
+            "verdict_trace_hash": "72f2f3f5cfb58f1f33f04e14bd45d021f1c322843b8f95fb0c5ea01e97d42af7",
+            "worst_active_lower": -35.90021514892578
+          }
+        ],
+        "source": {
+          "native_code_revision": "3bd1bbff67d47cdedf429e16a89a56dc851c28f3784e438c6e0f5cf349b10ebf"
+        },
+        "worker_gate_passed": true
+      },
+      {
+        "aggregate": {
+          "aggregation": "floor_monotone_multi_clause_packed_outcomes",
+          "decision_hash": "f20434a1f328f9b102023bcd5023eca96b4313b9e44e9351d83f7de23ebc4923",
+          "final_status": "unknown",
+          "final_unresolved_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "final_unsafe_clause_index": null,
+          "final_verified_clause_indices": [],
+          "floor_status": "unknown",
+          "floor_trace_hash": "fbaaeb1a862537f5214d04f6d5852ce26f07793ccf1669082d1f32e012634cd0",
+          "floor_unresolved_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "floor_unsafe_clause_index": null,
+          "floor_verified_clause_indices": [],
+          "original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "outcomes": [
+            {
+              "original_clause_index": 2,
+              "packed_queue_trace_hash": "807fdce38fb826e7c7e500e60ff82817311539a74fcdf0a5075be7e069da3799",
+              "packed_verdict_trace_hash": "91b18f0c383247d066760a61dcc16a8f6d1964ae77c7202b19e8978ebb7b0d8e",
+              "schema_version": "boundflow.multi-clause-anytime-outcome/v1",
+              "status": "unknown"
+            },
+            {
+              "original_clause_index": 3,
+              "packed_queue_trace_hash": "a405e6ca7c2a2945ba73e705a310d316714fb066c7ec7afacd09b9d8aa2c8265",
+              "packed_verdict_trace_hash": "46ddba307f2b290a42304563320854dfbaf26ea82341a77b17d58c80d2fab59b",
+              "schema_version": "boundflow.multi-clause-anytime-outcome/v1",
+              "status": "unknown"
+            }
+          ],
+          "plan_hash": "9e1a039bbcd249de74624046800e2cca0947f69d7196eae2b918d3a1770ae3c0",
+          "schema_version": "boundflow.multi-clause-anytime-aggregate/v1",
+          "slice_hashes": [
+            "802d34589bc553e25811320c70d2dfb3fa412c1a8c9c1486e54e7f7735c4e5cf",
+            "8b07232fffe30660152a03a272448f4d884ec033ea49e7183083fdd5606701f8"
+          ]
+        },
+        "cache": {
+          "events": [
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0002:priority:0:eval:0000",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 2366384,
+              "event_index": 0,
+              "outcome": "miss_compiled",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0002:priority:0:eval:0001",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 1,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0002:priority:0:eval:0002",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 2,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0002:priority:0:eval:0003",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 3,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0002:priority:0:eval:0004",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 4,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0002:priority:0:eval:0005",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 5,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0002:priority:0:eval:0006",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 6,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0002:priority:0:eval:0007",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 7,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0002:priority:0:eval:0008",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 8,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0002:priority:0:eval:0009",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 9,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0002:priority:0:eval:0010",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 10,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0002:priority:0:eval:0011",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 11,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0002:priority:0:eval:0012",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 12,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0002:priority:0:eval:0013",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 13,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0002:priority:0:eval:0014",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 14,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0002:priority:0:eval:0015",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 15,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0003:priority:1:eval:0000",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 16,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0003:priority:1:eval:0001",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 17,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0003:priority:1:eval:0002",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 18,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0003:priority:1:eval:0003",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 19,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0003:priority:1:eval:0004",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 20,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0003:priority:1:eval:0005",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 21,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0003:priority:1:eval:0006",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 22,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0003:priority:1:eval:0007",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 23,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0003:priority:1:eval:0008",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 24,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0003:priority:1:eval:0009",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 25,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0003:priority:1:eval:0010",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 26,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0003:priority:1:eval:0011",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 27,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0003:priority:1:eval:0012",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 28,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0003:priority:1:eval:0013",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 29,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0003:priority:1:eval:0014",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 30,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat1:clause:0003:priority:1:eval:0015",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 31,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+            }
+          ],
+          "hit_count": 31,
+          "miss_count": 1,
+          "scope": "one_query_cross_batch_cross_clause_v1",
+          "template_count": 1,
+          "template_hashes": [
+            "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+          ]
+        },
+        "checks": {
+          "all_runtime_validators_passed": true,
+          "atomic_sibling_accounting": true,
+          "dynamic_allocations_recomputed": true,
+          "exact_floor_sources": true,
+          "no_selected_native_reexecution": true,
+          "rank_recomputed_from_floor": true,
+          "single_query_cache_owner": true
+        },
+        "claim_boundary": "shared_compiler_reuse_and_fixed_deadline_coverage_only",
+        "decision": {
+          "candidates": [
+            {
+              "original_clause_index": 0,
+              "root_final_intermediate_bounds_hash": "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+              "root_lower": -204.17315673828125,
+              "root_lower_margin": -204.17315673828125,
+              "root_refinement_plan_hash": "9aadbc878d11abd1ac6cea723ece9f553a43fdf84a823bad0208f573bab73097",
+              "root_refinement_semantic_trace_hash": "1145c6d537bc613487feee9ad818b0d8dbf947493f9eeef7bddbea575760895a",
+              "root_upper": 213.74331665039062,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 1,
+              "root_final_intermediate_bounds_hash": "be9e73e0b8f85accdac31986f2582a2ff8be5aadf6cd83af3811d8f259b888a4",
+              "root_lower": -298.47283935546875,
+              "root_lower_margin": -298.47283935546875,
+              "root_refinement_plan_hash": "d0ff4ba391383835c011883bb1fb2ac8ee511f8316ea3e03980495710dfbd83e",
+              "root_refinement_semantic_trace_hash": "75bd7e5bb06fb9fe12cf661fc5c37ada5bddd06bbee7834c7757142012c4c126",
+              "root_upper": 308.8791809082031,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 2,
+              "root_final_intermediate_bounds_hash": "e3c67400210e9d0cd09276a5156e855e6815232124a479c670a5bafe7f00f019",
+              "root_lower": -139.10787963867188,
+              "root_lower_margin": -139.10787963867188,
+              "root_refinement_plan_hash": "7ab0bf25ec03a95da342192d76293f8b915b0565f5504642ae5c90821609908a",
+              "root_refinement_semantic_trace_hash": "df7882bb25354162a9e67f9ddbbade0f1b81374f94cfb414863c05dd960b7f4e",
+              "root_upper": 192.68186950683594,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 3,
+              "root_final_intermediate_bounds_hash": "adebcbf3d114518944962a5fe0efef0facfda995ca0a10149440c12e879d896b",
+              "root_lower": -152.2870330810547,
+              "root_lower_margin": -152.2870330810547,
+              "root_refinement_plan_hash": "e69b8237e828c5ef1e9a087e00828ca7e6e7cf2f4def4cc2a427da9aa19b79f0",
+              "root_refinement_semantic_trace_hash": "0fc35ff977ecc098fe3e46d3425798743de9de26b808142c38d2f26b751b9063",
+              "root_upper": 191.56068420410156,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 4,
+              "root_final_intermediate_bounds_hash": "dc120b11d34e5924b000e6803b1060d1afafaf6805ed42fc4f0cb0726dc50ffa",
+              "root_lower": -163.16854858398438,
+              "root_lower_margin": -163.16854858398438,
+              "root_refinement_plan_hash": "d7f64d51347f1d9370c8b8eb1ff1fa4b58fe1dd7efa176b3041af8bf1d654dbc",
+              "root_refinement_semantic_trace_hash": "e7135b893a98206ba6e285ded8a8e3ae28646b064cff6af790c66627b96d7236",
+              "root_upper": 218.8386993408203,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 5,
+              "root_final_intermediate_bounds_hash": "4dc3283ce92380d4d5f47134e3d16ffd492c73c63bf18698b2cb0cbb9e5d1e25",
+              "root_lower": -164.7825164794922,
+              "root_lower_margin": -164.7825164794922,
+              "root_refinement_plan_hash": "575e7bc442dcff185cb454ada9ae958668b1c7494616206f4fa816229cdd8e26",
+              "root_refinement_semantic_trace_hash": "ee687c3ac1cc67da9057c7893c9fb2487b5db25369ea921ab13c096fb0ab99af",
+              "root_upper": 228.7563018798828,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 6,
+              "root_final_intermediate_bounds_hash": "d8c50ff3749fe5adda02ee0b809eb94a368d46dc017ea072b84730680d3cdf8c",
+              "root_lower": -246.59263610839844,
+              "root_lower_margin": -246.59263610839844,
+              "root_refinement_plan_hash": "a79c465f439544beed25152eeec526023a7a60057609bfd22fbb797ee51d0769",
+              "root_refinement_semantic_trace_hash": "b689951bf9524da3561b5ec1b77f27acd8a7ffb7b7aa9b3a3a3906c1d8923b8b",
+              "root_upper": 260.082275390625,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 7,
+              "root_final_intermediate_bounds_hash": "d315870587deaae775682c4e5aa32fec9d7d222a8cb9eaacd6bdb35cbc2f51c1",
+              "root_lower": -268.6291809082031,
+              "root_lower_margin": -268.6291809082031,
+              "root_refinement_plan_hash": "dc659dce9577c60d2c3846f265430b81d40faf9af3adcf6177c5fd05eef132bd",
+              "root_refinement_semantic_trace_hash": "4df88f34107c2aace56442d36a14600bd94e24134d1fe42204102a5cddeab901",
+              "root_upper": 313.94207763671875,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 8,
+              "root_final_intermediate_bounds_hash": "d3e3d99d670d3e0daa7ff4e315bac74956a4e18c7043782468a89a509a91a948",
+              "root_lower": -235.29153442382812,
+              "root_lower_margin": -235.29153442382812,
+              "root_refinement_plan_hash": "4f15df2bf2dfbf9245d3b9e48098d465e0256d7fa25b7e3d0d051e522fca78be",
+              "root_refinement_semantic_trace_hash": "f9267946610699d3da7a5e58aeb9db45438d6525c6dd8692acc1174b3d9a76a1",
+              "root_upper": 327.22052001953125,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            }
+          ],
+          "floor_completed_original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "floor_status": "unknown",
+          "floor_trace_hash": "fbaaeb1a862537f5214d04f6d5852ce26f07793ccf1669082d1f32e012634cd0",
+          "floor_unresolved_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "floor_unsafe_clause_index": null,
+          "floor_verified_clause_indices": [],
+          "plan_hash": "9e1a039bbcd249de74624046800e2cca0947f69d7196eae2b918d3a1770ae3c0",
+          "ranked_original_clause_indices": [
+            2,
+            3,
+            4,
+            5,
+            0,
+            8,
+            6,
+            7,
+            1
+          ],
+          "reason": "ranked_unresolved_candidates_selected",
+          "schema_version": "boundflow.multi-clause-anytime-decision/v1",
+          "selected_original_clause_indices": [
+            2,
+            3
+          ]
+        },
+        "floor": {
+          "completed_original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "elapsed_ns": 21802033460,
+          "sources": [
+            {
+              "final_intermediate_bounds_hash": "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+              "original_clause_index": 0,
+              "plan_hash": "9aadbc878d11abd1ac6cea723ece9f553a43fdf84a823bad0208f573bab73097",
+              "semantic_trace_hash": "1145c6d537bc613487feee9ad818b0d8dbf947493f9eeef7bddbea575760895a"
+            },
+            {
+              "final_intermediate_bounds_hash": "be9e73e0b8f85accdac31986f2582a2ff8be5aadf6cd83af3811d8f259b888a4",
+              "original_clause_index": 1,
+              "plan_hash": "d0ff4ba391383835c011883bb1fb2ac8ee511f8316ea3e03980495710dfbd83e",
+              "semantic_trace_hash": "75bd7e5bb06fb9fe12cf661fc5c37ada5bddd06bbee7834c7757142012c4c126"
+            },
+            {
+              "final_intermediate_bounds_hash": "e3c67400210e9d0cd09276a5156e855e6815232124a479c670a5bafe7f00f019",
+              "original_clause_index": 2,
+              "plan_hash": "7ab0bf25ec03a95da342192d76293f8b915b0565f5504642ae5c90821609908a",
+              "semantic_trace_hash": "df7882bb25354162a9e67f9ddbbade0f1b81374f94cfb414863c05dd960b7f4e"
+            },
+            {
+              "final_intermediate_bounds_hash": "adebcbf3d114518944962a5fe0efef0facfda995ca0a10149440c12e879d896b",
+              "original_clause_index": 3,
+              "plan_hash": "e69b8237e828c5ef1e9a087e00828ca7e6e7cf2f4def4cc2a427da9aa19b79f0",
+              "semantic_trace_hash": "0fc35ff977ecc098fe3e46d3425798743de9de26b808142c38d2f26b751b9063"
+            },
+            {
+              "final_intermediate_bounds_hash": "dc120b11d34e5924b000e6803b1060d1afafaf6805ed42fc4f0cb0726dc50ffa",
+              "original_clause_index": 4,
+              "plan_hash": "d7f64d51347f1d9370c8b8eb1ff1fa4b58fe1dd7efa176b3041af8bf1d654dbc",
+              "semantic_trace_hash": "e7135b893a98206ba6e285ded8a8e3ae28646b064cff6af790c66627b96d7236"
+            },
+            {
+              "final_intermediate_bounds_hash": "4dc3283ce92380d4d5f47134e3d16ffd492c73c63bf18698b2cb0cbb9e5d1e25",
+              "original_clause_index": 5,
+              "plan_hash": "575e7bc442dcff185cb454ada9ae958668b1c7494616206f4fa816229cdd8e26",
+              "semantic_trace_hash": "ee687c3ac1cc67da9057c7893c9fb2487b5db25369ea921ab13c096fb0ab99af"
+            },
+            {
+              "final_intermediate_bounds_hash": "d8c50ff3749fe5adda02ee0b809eb94a368d46dc017ea072b84730680d3cdf8c",
+              "original_clause_index": 6,
+              "plan_hash": "a79c465f439544beed25152eeec526023a7a60057609bfd22fbb797ee51d0769",
+              "semantic_trace_hash": "b689951bf9524da3561b5ec1b77f27acd8a7ffb7b7aa9b3a3a3906c1d8923b8b"
+            },
+            {
+              "final_intermediate_bounds_hash": "d315870587deaae775682c4e5aa32fec9d7d222a8cb9eaacd6bdb35cbc2f51c1",
+              "original_clause_index": 7,
+              "plan_hash": "dc659dce9577c60d2c3846f265430b81d40faf9af3adcf6177c5fd05eef132bd",
+              "semantic_trace_hash": "4df88f34107c2aace56442d36a14600bd94e24134d1fe42204102a5cddeab901"
+            },
+            {
+              "final_intermediate_bounds_hash": "d3e3d99d670d3e0daa7ff4e315bac74956a4e18c7043782468a89a509a91a948",
+              "original_clause_index": 8,
+              "plan_hash": "4f15df2bf2dfbf9245d3b9e48098d465e0256d7fa25b7e3d0d051e522fca78be",
+              "semantic_trace_hash": "f9267946610699d3da7a5e58aeb9db45438d6525c6dd8692acc1174b3d9a76a1"
+            }
+          ],
+          "status": "unknown",
+          "trace_hash": "fbaaeb1a862537f5214d04f6d5852ce26f07793ccf1669082d1f32e012634cd0",
+          "unresolved_original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "unsafe_original_clause_index": null,
+          "verified_original_clause_indices": []
+        },
+        "performance_claimed": false,
+        "program": {
+          "plan_hash": "9e1a039bbcd249de74624046800e2cca0947f69d7196eae2b918d3a1770ae3c0",
+          "schedule_hash": "ade3073f0218991899cf5988efda4adff0db48b2dc708f6ebfe5c0b087817b92",
+          "task_ir_hash": "3ccb5beccca10cacbd9726b8e207bf85d8be344635b756fcea28039d94cf19c2"
+        },
+        "protocol": {
+          "allocation": "dynamic_equal_remaining_selected_v1",
+          "child_cap": 128,
+          "evaluator": "nrir37_shared_parametric_ancestral",
+          "floor": "nrir31_objective_hard_clause_escalation",
+          "original_clause_count": 9,
+          "priority": "root_lower_margin_desc_ordinal_asc",
+          "search_budget": {
+            "max_depth": 4,
+            "max_nodes": 31
+          },
+          "selected_clause_count": 2,
+          "torch_threads": 8,
+          "whole_query_timeout_seconds": 60
+        },
+        "repeat_index": 1,
+        "result_hash": "8123d09bebfc3b463a3fd5b88f09e4d2583cae752001c09d11652324537af59a",
+        "runtime_trace": {
+          "actions": [
+            {
+              "action_id": "multi-clause-anytime.launch.0000",
+              "elapsed_ns": 23859600477,
+              "executed": true,
+              "guard": "always",
+              "kind": "execute_floor",
+              "output_hash": "c43dbd5f912310a2dd45f7cb986f6db016892eba0fd4f870b6e90d73856df1aa",
+              "priority_position": null,
+              "reason": "nrir31_floor_completed",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 0,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat1:execute_floor:00"
+            },
+            {
+              "action_id": "multi-clause-anytime.launch.0001",
+              "elapsed_ns": 26501544,
+              "executed": true,
+              "guard": "always",
+              "kind": "rank_candidates",
+              "output_hash": "f20434a1f328f9b102023bcd5023eca96b4313b9e44e9351d83f7de23ebc4923",
+              "priority_position": null,
+              "reason": "ranked_unresolved_candidates_selected",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 1,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat1:rank_candidates:01"
+            },
+            {
+              "action_id": "multi-clause-anytime.launch.0002",
+              "elapsed_ns": 148056135,
+              "executed": true,
+              "guard": "selected_slot_available_before_deadline",
+              "kind": "compile_packed_plan",
+              "output_hash": "0491c6c13494f495a05f71e7a8fcb7a92d78c3d43f74cafc9bf1d8e6c02208f7",
+              "priority_position": 0,
+              "reason": "shared_parametric_plan_compiled",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 2,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat1:compile_packed_plan:02"
+            },
+            {
+              "action_id": "multi-clause-anytime.launch.0003",
+              "elapsed_ns": 13898144881,
+              "executed": true,
+              "guard": "selected_slot_available_before_deadline",
+              "kind": "execute_packed_slice",
+              "output_hash": "76b27bbc36b44e8c70b0c867c17f93ce32e9364e0fcc4d2443bff7b1ee6c5d2c",
+              "priority_position": 0,
+              "reason": "packed_slice_unknown",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 3,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat1:execute_packed_slice:03"
+            },
+            {
+              "action_id": "multi-clause-anytime.launch.0004",
+              "elapsed_ns": 154018820,
+              "executed": true,
+              "guard": "selected_slot_available_before_deadline",
+              "kind": "compile_packed_plan",
+              "output_hash": "1b15ddd20c59658fc4600003ba6b8572eb68e2f09dad71550f18bf9faafc9040",
+              "priority_position": 1,
+              "reason": "shared_parametric_plan_compiled",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 4,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat1:compile_packed_plan:04"
+            },
+            {
+              "action_id": "multi-clause-anytime.launch.0005",
+              "elapsed_ns": 13866328268,
+              "executed": true,
+              "guard": "selected_slot_available_before_deadline",
+              "kind": "execute_packed_slice",
+              "output_hash": "0eb8d5cd0f5d787af0cf669a14da90bc7c47b6900ba5b36ce761da15cd5a8ae4",
+              "priority_position": 1,
+              "reason": "packed_slice_unknown",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 5,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat1:execute_packed_slice:05"
+            },
+            {
+              "action_id": "multi-clause-anytime.launch.0006",
+              "elapsed_ns": 0,
+              "executed": true,
+              "guard": "always",
+              "kind": "aggregate_original_ordinals",
+              "output_hash": "c5c2bd6f6799c1c470fd301a2855271231e39804e1588ce4b444cff93ae91ec9",
+              "priority_position": null,
+              "reason": "original_ordinals_aggregated_monotonically",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 6,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat1:aggregate_original_ordinals:06"
+            },
+            {
+              "action_id": "multi-clause-anytime.launch.0007",
+              "elapsed_ns": 0,
+              "executed": true,
+              "guard": "always",
+              "kind": "emit_result",
+              "output_hash": "6794edb187a2de46a5f33f82bbd915f8eb3cc65185cce42f748b98d0caf9a730",
+              "priority_position": null,
+              "reason": "result_emitted",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 7,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat1:emit_result:07"
+            }
+          ],
+          "elapsed_ns": 52268473361,
+          "fallback_reasons": [
+            "packed_slice_unknown",
+            "packed_slice_unknown"
+          ],
+          "measured_elapsed_ns": 60104420213,
+          "trace_hash": "44bb2928159c4667cbbcd8280e03a4599f1e6209fc6eea73ef010ce8f08389e3"
+        },
+        "schema_version": "boundflow.shared-parametric-objective-evaluator-worker/v1",
+        "slices": [
+          {
+            "batch_commit_count": 16,
+            "compiler": {
+              "all_same_template": true,
+              "cache_outcomes": [
+                "miss_compiled",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract"
+              ],
+              "selected_native_reexecution": false,
+              "template_hashes": [
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+              ]
+            },
+            "compiler_batch_count": 16,
+            "discarded_attempt_stage": null,
+            "execution_trace_hash": "c64a29bed6d6c8e118eb18d42d018cf839874010a4c6cb365f0f907fe57a3903",
+            "fallback_reason": "none",
+            "maximum_depth": 4,
+            "plan_hash": "2831bb7250984b33199badc6c4bd1560504ee5b4d19e78ec2cd8d451f7017c88",
+            "queue_trace_hash": "807fdce38fb826e7c7e500e60ff82817311539a74fcdf0a5075be7e069da3799",
+            "schedule_hash": "574b0b71c8f487cae8138d6cedcdbb7f3df415b8b78aedbb45e900536be8320f",
+            "slice": {
+              "accepted_nodes": 31,
+              "allocated_slice_ns": 18056847613,
+              "cutoff_signaled": false,
+              "decision_hash": "f20434a1f328f9b102023bcd5023eca96b4313b9e44e9351d83f7de23ebc4923",
+              "dispatch_started_elapsed_ns": 23886304773,
+              "finished_elapsed_ns": 38048743785,
+              "original_clause_index": 2,
+              "packed_plan_hash": "2831bb7250984b33199badc6c4bd1560504ee5b4d19e78ec2cd8d451f7017c88",
+              "packed_queue_trace_hash": "807fdce38fb826e7c7e500e60ff82817311539a74fcdf0a5075be7e069da3799",
+              "packed_status": "unknown",
+              "packed_verdict_trace_hash": "91b18f0c383247d066760a61dcc16a8f6d1964ae77c7202b19e8978ebb7b0d8e",
+              "plan_hash": "9e1a039bbcd249de74624046800e2cca0947f69d7196eae2b918d3a1770ae3c0",
+              "priority_position": 0,
+              "reason": "packed_slice_unknown",
+              "remaining_before_ns": 36113695227,
+              "remaining_selected_count": 2,
+              "schema_version": "boundflow.multi-clause-anytime-slice/v1",
+              "sibling_group_count": 15,
+              "slice_cutoff_elapsed_ns": 41943152386,
+              "source_final_intermediate_bounds_hash": "e3c67400210e9d0cd09276a5156e855e6815232124a479c670a5bafe7f00f019",
+              "source_refinement_plan_hash": "7ab0bf25ec03a95da342192d76293f8b915b0565f5504642ae5c90821609908a",
+              "source_refinement_semantic_trace_hash": "df7882bb25354162a9e67f9ddbbade0f1b81374f94cfb414863c05dd960b7f4e"
+            },
+            "task_ir_hash": "95ed08f038767ed2d7e35bc939fa6e13f9d2c8bafebcbf9002d22ab13cad0a33",
+            "verdict_reason": "configured_depth_terminal_open",
+            "verdict_trace_hash": "91b18f0c383247d066760a61dcc16a8f6d1964ae77c7202b19e8978ebb7b0d8e",
+            "worst_active_lower": -37.57428741455078
+          },
+          {
+            "batch_commit_count": 16,
+            "compiler": {
+              "all_same_template": true,
+              "cache_outcomes": [
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract"
+              ],
+              "selected_native_reexecution": false,
+              "template_hashes": [
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d",
+                "fab2c7143d3666a9d3f62e088d0c52bc54f6374435a0d0e337a2a9b4f0d32b3d"
+              ]
+            },
+            "compiler_batch_count": 16,
+            "discarded_attempt_stage": null,
+            "execution_trace_hash": "c32cd3fbbaaa3e1f67c7d6d303ea64982d19c830b37e2424074f7fdaed4e3e89",
+            "fallback_reason": "none",
+            "maximum_depth": 4,
+            "plan_hash": "4db98a598000587211527aeea0e19287ddebb2849bc16a6eb27031852be7be98",
+            "queue_trace_hash": "a405e6ca7c2a2945ba73e705a310d316714fb066c7ec7afacd09b9d8aa2c8265",
+            "schedule_hash": "e5838bd4fb5b9bdbceb6fcf9d5ce319c3d5d0ba799f8553cb7b70f5bb00ba569",
+            "slice": {
+              "accepted_nodes": 31,
+              "allocated_slice_ns": 21911314894,
+              "cutoff_signaled": false,
+              "decision_hash": "f20434a1f328f9b102023bcd5023eca96b4313b9e44e9351d83f7de23ebc4923",
+              "dispatch_started_elapsed_ns": 38088685106,
+              "finished_elapsed_ns": 52223774474,
+              "original_clause_index": 3,
+              "packed_plan_hash": "4db98a598000587211527aeea0e19287ddebb2849bc16a6eb27031852be7be98",
+              "packed_queue_trace_hash": "a405e6ca7c2a2945ba73e705a310d316714fb066c7ec7afacd09b9d8aa2c8265",
+              "packed_status": "unknown",
+              "packed_verdict_trace_hash": "46ddba307f2b290a42304563320854dfbaf26ea82341a77b17d58c80d2fab59b",
+              "plan_hash": "9e1a039bbcd249de74624046800e2cca0947f69d7196eae2b918d3a1770ae3c0",
+              "priority_position": 1,
+              "reason": "packed_slice_unknown",
+              "remaining_before_ns": 21911314894,
+              "remaining_selected_count": 1,
+              "schema_version": "boundflow.multi-clause-anytime-slice/v1",
+              "sibling_group_count": 15,
+              "slice_cutoff_elapsed_ns": 60000000000,
+              "source_final_intermediate_bounds_hash": "adebcbf3d114518944962a5fe0efef0facfda995ca0a10149440c12e879d896b",
+              "source_refinement_plan_hash": "e69b8237e828c5ef1e9a087e00828ca7e6e7cf2f4def4cc2a427da9aa19b79f0",
+              "source_refinement_semantic_trace_hash": "0fc35ff977ecc098fe3e46d3425798743de9de26b808142c38d2f26b751b9063"
+            },
+            "task_ir_hash": "418f4e68f0dbda995c0e03e4a3618b4e8789168c5e8b17cba145fc57dc500370",
+            "verdict_reason": "configured_depth_terminal_open",
+            "verdict_trace_hash": "46ddba307f2b290a42304563320854dfbaf26ea82341a77b17d58c80d2fab59b",
+            "worst_active_lower": -35.90021514892578
+          }
+        ],
+        "source": {
+          "native_code_revision": "3bd1bbff67d47cdedf429e16a89a56dc851c28f3784e438c6e0f5cf349b10ebf"
+        },
+        "worker_gate_passed": true
+      },
+      {
+        "aggregate": {
+          "aggregation": "floor_monotone_multi_clause_packed_outcomes",
+          "decision_hash": "04233749adae2d0bd55bfe7a4fbb790fcfc1faa3e3cefa5537fcb01ed2a86c31",
+          "final_status": "unknown",
+          "final_unresolved_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "final_unsafe_clause_index": null,
+          "final_verified_clause_indices": [],
+          "floor_status": "unknown",
+          "floor_trace_hash": "1a9374530062c039b35ef385be81581dd0207bcc3c50efe774fb495a01e790ba",
+          "floor_unresolved_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "floor_unsafe_clause_index": null,
+          "floor_verified_clause_indices": [],
+          "original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "outcomes": [
+            {
+              "original_clause_index": 2,
+              "packed_queue_trace_hash": "edf611ab88916765a9d06a8b7ed98dfd20d37bd76a5fc5d11326b027be71dbf0",
+              "packed_verdict_trace_hash": "84c1e8708a5641fbf36c616754f7fe8c16a26aeff896a897cf9e9672373470e0",
+              "schema_version": "boundflow.multi-clause-anytime-outcome/v1",
+              "status": "unknown"
+            },
+            {
+              "original_clause_index": 3,
+              "packed_queue_trace_hash": "6ce3074155db42a88c7890f7caef6473ca15909b0ffabb8ddc0c50f61e3a0c36",
+              "packed_verdict_trace_hash": "6c498642e434cb8855c21232e236ba9941a600a9caee54467e7bcf58ab6ba472",
+              "schema_version": "boundflow.multi-clause-anytime-outcome/v1",
+              "status": "unknown"
+            }
+          ],
+          "plan_hash": "1509ff0078ef9131b11aebb7b3a836de3a3153e1d63aa24c0c50cb2ef1da6eb1",
+          "schema_version": "boundflow.multi-clause-anytime-aggregate/v1",
+          "slice_hashes": [
+            "b85f84234d661f2ae6701c1788a9865f5591a04eb12009ba6ebce21906b42a52",
+            "94d536f716777695291aabf3825d909df5e214c9b20c8f92adc0de3e6dbae7c8"
+          ]
+        },
+        "cache": {
+          "events": [
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0002:priority:0:eval:0000",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 2360664,
+              "event_index": 0,
+              "outcome": "miss_compiled",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0002:priority:0:eval:0001",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 1,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0002:priority:0:eval:0002",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 2,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0002:priority:0:eval:0003",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 3,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0002:priority:0:eval:0004",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 4,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0002:priority:0:eval:0005",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 5,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0002:priority:0:eval:0006",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 6,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0002:priority:0:eval:0007",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 7,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0002:priority:0:eval:0008",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 8,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0002:priority:0:eval:0009",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 9,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0002:priority:0:eval:0010",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 10,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0002:priority:0:eval:0011",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 11,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0002:priority:0:eval:0012",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 12,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0002:priority:0:eval:0013",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 13,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0002:priority:0:eval:0014",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 14,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0002:priority:0:eval:0015",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 15,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0003:priority:1:eval:0000",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 16,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0003:priority:1:eval:0001",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 17,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0003:priority:1:eval:0002",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 18,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0003:priority:1:eval:0003",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 19,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0003:priority:1:eval:0004",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 20,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0003:priority:1:eval:0005",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 21,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0003:priority:1:eval:0006",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 22,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0003:priority:1:eval:0007",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 23,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0003:priority:1:eval:0008",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 24,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0003:priority:1:eval:0009",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 25,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0003:priority:1:eval:0010",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 26,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0003:priority:1:eval:0011",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 27,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0003:priority:1:eval:0012",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 28,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0003:priority:1:eval:0013",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 29,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0003:priority:1:eval:0014",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 30,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            },
+            {
+              "batch_id": "nrir37:cifar10_resnet:000:property0:repeat2:clause:0003:priority:1:eval:0015",
+              "cache_key": "2ca9753bc37ec5e8c0a4ac32913a05dd2395d5e2819d7ca175c8064ca1eeef3c",
+              "compile_elapsed_ns": 0,
+              "event_index": 31,
+              "outcome": "hit_exact_contract",
+              "schema_version": "boundflow.parametric-optimizer-cache-event-ir/v1",
+              "template_hash": "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+            }
+          ],
+          "hit_count": 31,
+          "miss_count": 1,
+          "scope": "one_query_cross_batch_cross_clause_v1",
+          "template_count": 1,
+          "template_hashes": [
+            "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+          ]
+        },
+        "checks": {
+          "all_runtime_validators_passed": true,
+          "atomic_sibling_accounting": true,
+          "dynamic_allocations_recomputed": true,
+          "exact_floor_sources": true,
+          "no_selected_native_reexecution": true,
+          "rank_recomputed_from_floor": true,
+          "single_query_cache_owner": true
+        },
+        "claim_boundary": "shared_compiler_reuse_and_fixed_deadline_coverage_only",
+        "decision": {
+          "candidates": [
+            {
+              "original_clause_index": 0,
+              "root_final_intermediate_bounds_hash": "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+              "root_lower": -204.17315673828125,
+              "root_lower_margin": -204.17315673828125,
+              "root_refinement_plan_hash": "b732cc70a89a104c6ffb357b984f78a8f3d9ff8f89c0e72192d05dc3ef317882",
+              "root_refinement_semantic_trace_hash": "93d5b58725387a4d09cf79bd85810403d46f5229ac5b60b9bdd1c0801cefbfaa",
+              "root_upper": 213.74331665039062,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 1,
+              "root_final_intermediate_bounds_hash": "be9e73e0b8f85accdac31986f2582a2ff8be5aadf6cd83af3811d8f259b888a4",
+              "root_lower": -298.47283935546875,
+              "root_lower_margin": -298.47283935546875,
+              "root_refinement_plan_hash": "1167b0a35090faf5ceea6dbdac62db6c4986cc86895309b8947bc10fe723b86a",
+              "root_refinement_semantic_trace_hash": "40488da992c74c86d3f2a80ec754535713611445f4bfbee312ecd6b7f6078095",
+              "root_upper": 308.8791809082031,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 2,
+              "root_final_intermediate_bounds_hash": "e3c67400210e9d0cd09276a5156e855e6815232124a479c670a5bafe7f00f019",
+              "root_lower": -139.10787963867188,
+              "root_lower_margin": -139.10787963867188,
+              "root_refinement_plan_hash": "3bf3dec4784b7285b4aff74376937b0d2ee38c151666e9b29e8618a997a248f9",
+              "root_refinement_semantic_trace_hash": "6b9b8db8a1a247d0359d9b325ef251df164e12197d621a897246745587842cd2",
+              "root_upper": 192.68186950683594,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 3,
+              "root_final_intermediate_bounds_hash": "adebcbf3d114518944962a5fe0efef0facfda995ca0a10149440c12e879d896b",
+              "root_lower": -152.2870330810547,
+              "root_lower_margin": -152.2870330810547,
+              "root_refinement_plan_hash": "3b74df919e0ff60d78e75320ca986bcc7f46c9c58a54f34f967976bbc1772c76",
+              "root_refinement_semantic_trace_hash": "3453deaa0f87ffb6265076a3a0eb35404e1c2b5dc7f021de86090288d56f5638",
+              "root_upper": 191.56068420410156,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 4,
+              "root_final_intermediate_bounds_hash": "dc120b11d34e5924b000e6803b1060d1afafaf6805ed42fc4f0cb0726dc50ffa",
+              "root_lower": -163.16854858398438,
+              "root_lower_margin": -163.16854858398438,
+              "root_refinement_plan_hash": "c51bc325f2a1cd88026749aab11e7f825ad25e5cb759ffdcd958a035b0675027",
+              "root_refinement_semantic_trace_hash": "c55c5246db13318370cd560f8c817b5ae4dbdc3168f73988c56ee3d38eb7a3f3",
+              "root_upper": 218.8386993408203,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 5,
+              "root_final_intermediate_bounds_hash": "4dc3283ce92380d4d5f47134e3d16ffd492c73c63bf18698b2cb0cbb9e5d1e25",
+              "root_lower": -164.7825164794922,
+              "root_lower_margin": -164.7825164794922,
+              "root_refinement_plan_hash": "fbe4a6a9657e2c10710af22f5804c13b8c5a4726b70ffc358aac7cfe7a90da61",
+              "root_refinement_semantic_trace_hash": "148e723cc4b5cd7c082649a0bc8870bff2508f5f40b16ce90a6405fd89e95d07",
+              "root_upper": 228.7563018798828,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 6,
+              "root_final_intermediate_bounds_hash": "d8c50ff3749fe5adda02ee0b809eb94a368d46dc017ea072b84730680d3cdf8c",
+              "root_lower": -246.59263610839844,
+              "root_lower_margin": -246.59263610839844,
+              "root_refinement_plan_hash": "32042a793e8efe2d822365db522fcc0e1e74c1dc0bb0cb43e364637de0290ed0",
+              "root_refinement_semantic_trace_hash": "7485f5e388b35abe2c358901b7bb312d3e1346138e8fb45aa48a1a6de107effe",
+              "root_upper": 260.082275390625,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 7,
+              "root_final_intermediate_bounds_hash": "d315870587deaae775682c4e5aa32fec9d7d222a8cb9eaacd6bdb35cbc2f51c1",
+              "root_lower": -268.6291809082031,
+              "root_lower_margin": -268.6291809082031,
+              "root_refinement_plan_hash": "5d6dad226ac8bdda4f7b777b042a2497d83ba3578b8320ee5ff234cd3aa12f89",
+              "root_refinement_semantic_trace_hash": "574f7b61fa867df9d27a24f14e8b16c43a5fd0a98a0d32dfde95614999d9a804",
+              "root_upper": 313.94207763671875,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            },
+            {
+              "original_clause_index": 8,
+              "root_final_intermediate_bounds_hash": "d3e3d99d670d3e0daa7ff4e315bac74956a4e18c7043782468a89a509a91a948",
+              "root_lower": -235.29153442382812,
+              "root_lower_margin": -235.29153442382812,
+              "root_refinement_plan_hash": "17d4072de9f817071e120b4dd0517f5e9b411a981bfa15aae750e76d4370fef4",
+              "root_refinement_semantic_trace_hash": "77a9d2d86002c4b2eb452a410f537526ff1dc9f92747a2c41b43aed1875b8a59",
+              "root_upper": 327.22052001953125,
+              "schema_version": "boundflow.multi-clause-anytime-candidate/v1",
+              "threshold": -0.0
+            }
+          ],
+          "floor_completed_original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "floor_status": "unknown",
+          "floor_trace_hash": "1a9374530062c039b35ef385be81581dd0207bcc3c50efe774fb495a01e790ba",
+          "floor_unresolved_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "floor_unsafe_clause_index": null,
+          "floor_verified_clause_indices": [],
+          "plan_hash": "1509ff0078ef9131b11aebb7b3a836de3a3153e1d63aa24c0c50cb2ef1da6eb1",
+          "ranked_original_clause_indices": [
+            2,
+            3,
+            4,
+            5,
+            0,
+            8,
+            6,
+            7,
+            1
+          ],
+          "reason": "ranked_unresolved_candidates_selected",
+          "schema_version": "boundflow.multi-clause-anytime-decision/v1",
+          "selected_original_clause_indices": [
+            2,
+            3
+          ]
+        },
+        "floor": {
+          "completed_original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "elapsed_ns": 21784891060,
+          "sources": [
+            {
+              "final_intermediate_bounds_hash": "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+              "original_clause_index": 0,
+              "plan_hash": "b732cc70a89a104c6ffb357b984f78a8f3d9ff8f89c0e72192d05dc3ef317882",
+              "semantic_trace_hash": "93d5b58725387a4d09cf79bd85810403d46f5229ac5b60b9bdd1c0801cefbfaa"
+            },
+            {
+              "final_intermediate_bounds_hash": "be9e73e0b8f85accdac31986f2582a2ff8be5aadf6cd83af3811d8f259b888a4",
+              "original_clause_index": 1,
+              "plan_hash": "1167b0a35090faf5ceea6dbdac62db6c4986cc86895309b8947bc10fe723b86a",
+              "semantic_trace_hash": "40488da992c74c86d3f2a80ec754535713611445f4bfbee312ecd6b7f6078095"
+            },
+            {
+              "final_intermediate_bounds_hash": "e3c67400210e9d0cd09276a5156e855e6815232124a479c670a5bafe7f00f019",
+              "original_clause_index": 2,
+              "plan_hash": "3bf3dec4784b7285b4aff74376937b0d2ee38c151666e9b29e8618a997a248f9",
+              "semantic_trace_hash": "6b9b8db8a1a247d0359d9b325ef251df164e12197d621a897246745587842cd2"
+            },
+            {
+              "final_intermediate_bounds_hash": "adebcbf3d114518944962a5fe0efef0facfda995ca0a10149440c12e879d896b",
+              "original_clause_index": 3,
+              "plan_hash": "3b74df919e0ff60d78e75320ca986bcc7f46c9c58a54f34f967976bbc1772c76",
+              "semantic_trace_hash": "3453deaa0f87ffb6265076a3a0eb35404e1c2b5dc7f021de86090288d56f5638"
+            },
+            {
+              "final_intermediate_bounds_hash": "dc120b11d34e5924b000e6803b1060d1afafaf6805ed42fc4f0cb0726dc50ffa",
+              "original_clause_index": 4,
+              "plan_hash": "c51bc325f2a1cd88026749aab11e7f825ad25e5cb759ffdcd958a035b0675027",
+              "semantic_trace_hash": "c55c5246db13318370cd560f8c817b5ae4dbdc3168f73988c56ee3d38eb7a3f3"
+            },
+            {
+              "final_intermediate_bounds_hash": "4dc3283ce92380d4d5f47134e3d16ffd492c73c63bf18698b2cb0cbb9e5d1e25",
+              "original_clause_index": 5,
+              "plan_hash": "fbe4a6a9657e2c10710af22f5804c13b8c5a4726b70ffc358aac7cfe7a90da61",
+              "semantic_trace_hash": "148e723cc4b5cd7c082649a0bc8870bff2508f5f40b16ce90a6405fd89e95d07"
+            },
+            {
+              "final_intermediate_bounds_hash": "d8c50ff3749fe5adda02ee0b809eb94a368d46dc017ea072b84730680d3cdf8c",
+              "original_clause_index": 6,
+              "plan_hash": "32042a793e8efe2d822365db522fcc0e1e74c1dc0bb0cb43e364637de0290ed0",
+              "semantic_trace_hash": "7485f5e388b35abe2c358901b7bb312d3e1346138e8fb45aa48a1a6de107effe"
+            },
+            {
+              "final_intermediate_bounds_hash": "d315870587deaae775682c4e5aa32fec9d7d222a8cb9eaacd6bdb35cbc2f51c1",
+              "original_clause_index": 7,
+              "plan_hash": "5d6dad226ac8bdda4f7b777b042a2497d83ba3578b8320ee5ff234cd3aa12f89",
+              "semantic_trace_hash": "574f7b61fa867df9d27a24f14e8b16c43a5fd0a98a0d32dfde95614999d9a804"
+            },
+            {
+              "final_intermediate_bounds_hash": "d3e3d99d670d3e0daa7ff4e315bac74956a4e18c7043782468a89a509a91a948",
+              "original_clause_index": 8,
+              "plan_hash": "17d4072de9f817071e120b4dd0517f5e9b411a981bfa15aae750e76d4370fef4",
+              "semantic_trace_hash": "77a9d2d86002c4b2eb452a410f537526ff1dc9f92747a2c41b43aed1875b8a59"
+            }
+          ],
+          "status": "unknown",
+          "trace_hash": "1a9374530062c039b35ef385be81581dd0207bcc3c50efe774fb495a01e790ba",
+          "unresolved_original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "unsafe_original_clause_index": null,
+          "verified_original_clause_indices": []
+        },
+        "performance_claimed": false,
+        "program": {
+          "plan_hash": "1509ff0078ef9131b11aebb7b3a836de3a3153e1d63aa24c0c50cb2ef1da6eb1",
+          "schedule_hash": "c1b09670477aad58e729f16aa81a8ef253a099dceae43031a440430efb747149",
+          "task_ir_hash": "97fd954bbf81a7fef04f1ef59f6983cf10bac53530d6d725db5b79a037db1104"
+        },
+        "protocol": {
+          "allocation": "dynamic_equal_remaining_selected_v1",
+          "child_cap": 128,
+          "evaluator": "nrir37_shared_parametric_ancestral",
+          "floor": "nrir31_objective_hard_clause_escalation",
+          "original_clause_count": 9,
+          "priority": "root_lower_margin_desc_ordinal_asc",
+          "search_budget": {
+            "max_depth": 4,
+            "max_nodes": 31
+          },
+          "selected_clause_count": 2,
+          "torch_threads": 8,
+          "whole_query_timeout_seconds": 60
+        },
+        "repeat_index": 2,
+        "result_hash": "86a4146a3bdb27cd174b4c276093487edeaabf80305af8c3a179bca3971c21f5",
+        "runtime_trace": {
+          "actions": [
+            {
+              "action_id": "multi-clause-anytime.launch.0000",
+              "elapsed_ns": 23857250324,
+              "executed": true,
+              "guard": "always",
+              "kind": "execute_floor",
+              "output_hash": "9d9256ab0b7e817d75ee48de0b79fdec5ea431fe0133c4c7c1675fce395801ad",
+              "priority_position": null,
+              "reason": "nrir31_floor_completed",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 0,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat2:execute_floor:00"
+            },
+            {
+              "action_id": "multi-clause-anytime.launch.0001",
+              "elapsed_ns": 25409358,
+              "executed": true,
+              "guard": "always",
+              "kind": "rank_candidates",
+              "output_hash": "04233749adae2d0bd55bfe7a4fbb790fcfc1faa3e3cefa5537fcb01ed2a86c31",
+              "priority_position": null,
+              "reason": "ranked_unresolved_candidates_selected",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 1,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat2:rank_candidates:01"
+            },
+            {
+              "action_id": "multi-clause-anytime.launch.0002",
+              "elapsed_ns": 144169854,
+              "executed": true,
+              "guard": "selected_slot_available_before_deadline",
+              "kind": "compile_packed_plan",
+              "output_hash": "528f7ab6c358059748c1a9a3e15978f2d741f8a9aa22964012ba8b91157e8371",
+              "priority_position": 0,
+              "reason": "shared_parametric_plan_compiled",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 2,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat2:compile_packed_plan:02"
+            },
+            {
+              "action_id": "multi-clause-anytime.launch.0003",
+              "elapsed_ns": 13704016352,
+              "executed": true,
+              "guard": "selected_slot_available_before_deadline",
+              "kind": "execute_packed_slice",
+              "output_hash": "0b3c081302f6b2264643731b183892f17de9b74d53a984caacf0f16305c1dcaf",
+              "priority_position": 0,
+              "reason": "packed_slice_unknown",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 3,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat2:execute_packed_slice:03"
+            },
+            {
+              "action_id": "multi-clause-anytime.launch.0004",
+              "elapsed_ns": 144793349,
+              "executed": true,
+              "guard": "selected_slot_available_before_deadline",
+              "kind": "compile_packed_plan",
+              "output_hash": "b6400a5dbbf837235eb3cda17cb00708e39926f4370e565d849e64b75cde512d",
+              "priority_position": 1,
+              "reason": "shared_parametric_plan_compiled",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 4,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat2:compile_packed_plan:04"
+            },
+            {
+              "action_id": "multi-clause-anytime.launch.0005",
+              "elapsed_ns": 13724902320,
+              "executed": true,
+              "guard": "selected_slot_available_before_deadline",
+              "kind": "execute_packed_slice",
+              "output_hash": "6340641ddb1b91f13bbc3bb77b64fff10f5ada4d833c908e270a194e4adead8b",
+              "priority_position": 1,
+              "reason": "packed_slice_unknown",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 5,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat2:execute_packed_slice:05"
+            },
+            {
+              "action_id": "multi-clause-anytime.launch.0006",
+              "elapsed_ns": 0,
+              "executed": true,
+              "guard": "always",
+              "kind": "aggregate_original_ordinals",
+              "output_hash": "a407f6d9a593c357909d752d6e747b1cf830afc93b4d9de0c62636155ab9fdde",
+              "priority_position": null,
+              "reason": "original_ordinals_aggregated_monotonically",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 6,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat2:aggregate_original_ordinals:06"
+            },
+            {
+              "action_id": "multi-clause-anytime.launch.0007",
+              "elapsed_ns": 0,
+              "executed": true,
+              "guard": "always",
+              "kind": "emit_result",
+              "output_hash": "1a39fb0d31dc5fb931836947faab5491cb6bb4ec7da0f20437921605736ad643",
+              "priority_position": null,
+              "reason": "result_emitted",
+              "schema_version": "boundflow.native-multi-clause-anytime-action-trace/v1",
+              "sequence": 7,
+              "task_id": "nrir37:cifar10_resnet:000:property0:repeat2:emit_result:07"
+            }
+          ],
+          "elapsed_ns": 51926746170,
+          "fallback_reasons": [
+            "packed_slice_unknown",
+            "packed_slice_unknown"
+          ],
+          "measured_elapsed_ns": 59921066744,
+          "trace_hash": "9717f974deab04ae170a47e0298a9de3247a8887c503bea8fe8ac43975fff503"
+        },
+        "schema_version": "boundflow.shared-parametric-objective-evaluator-worker/v1",
+        "slices": [
+          {
+            "batch_commit_count": 16,
+            "compiler": {
+              "all_same_template": true,
+              "cache_outcomes": [
+                "miss_compiled",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract"
+              ],
+              "selected_native_reexecution": false,
+              "template_hashes": [
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+              ]
+            },
+            "compiler_batch_count": 16,
+            "discarded_attempt_stage": null,
+            "execution_trace_hash": "2689a315b8c79c3b4d42d3c31c256a878a2a6bf0d90e2048d37ec09f2d64b0ed",
+            "fallback_reason": "none",
+            "maximum_depth": 4,
+            "plan_hash": "818040f42acb4a827278279b165bdad600a4042a48d6c25e572e0abb22164bbd",
+            "queue_trace_hash": "edf611ab88916765a9d06a8b7ed98dfd20d37bd76a5fc5d11326b027be71dbf0",
+            "schedule_hash": "8b07f1c937ec3fa78c1254c7a345ba9f3a81bf273d1f52e9e369b59fbb7cee3b",
+            "slice": {
+              "accepted_nodes": 31,
+              "allocated_slice_ns": 18058552146,
+              "cutoff_signaled": false,
+              "decision_hash": "04233749adae2d0bd55bfe7a4fbb790fcfc1faa3e3cefa5537fcb01ed2a86c31",
+              "dispatch_started_elapsed_ns": 23882895707,
+              "finished_elapsed_ns": 37850558837,
+              "original_clause_index": 2,
+              "packed_plan_hash": "818040f42acb4a827278279b165bdad600a4042a48d6c25e572e0abb22164bbd",
+              "packed_queue_trace_hash": "edf611ab88916765a9d06a8b7ed98dfd20d37bd76a5fc5d11326b027be71dbf0",
+              "packed_status": "unknown",
+              "packed_verdict_trace_hash": "84c1e8708a5641fbf36c616754f7fe8c16a26aeff896a897cf9e9672373470e0",
+              "plan_hash": "1509ff0078ef9131b11aebb7b3a836de3a3153e1d63aa24c0c50cb2ef1da6eb1",
+              "priority_position": 0,
+              "reason": "packed_slice_unknown",
+              "remaining_before_ns": 36117104293,
+              "remaining_selected_count": 2,
+              "schema_version": "boundflow.multi-clause-anytime-slice/v1",
+              "sibling_group_count": 15,
+              "slice_cutoff_elapsed_ns": 41941447853,
+              "source_final_intermediate_bounds_hash": "e3c67400210e9d0cd09276a5156e855e6815232124a479c670a5bafe7f00f019",
+              "source_refinement_plan_hash": "3bf3dec4784b7285b4aff74376937b0d2ee38c151666e9b29e8618a997a248f9",
+              "source_refinement_semantic_trace_hash": "6b9b8db8a1a247d0359d9b325ef251df164e12197d621a897246745587842cd2"
+            },
+            "task_ir_hash": "c415bc65a5c7576a9e0626a82369b3a00608cf57586eace2038d238eea781f6c",
+            "verdict_reason": "configured_depth_terminal_open",
+            "verdict_trace_hash": "84c1e8708a5641fbf36c616754f7fe8c16a26aeff896a897cf9e9672373470e0",
+            "worst_active_lower": -37.57428741455078
+          },
+          {
+            "batch_commit_count": 16,
+            "compiler": {
+              "all_same_template": true,
+              "cache_outcomes": [
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract",
+                "hit_exact_contract"
+              ],
+              "selected_native_reexecution": false,
+              "template_hashes": [
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745",
+                "1544046cb1263bd9455fe4206b8994bf2d4f8abbfd8d05df88e51de552650745"
+              ]
+            },
+            "compiler_batch_count": 16,
+            "discarded_attempt_stage": null,
+            "execution_trace_hash": "d514ec685aaf2558abcc73142a579a3ec3a3d151b844144730f23bdb0e3aa9cf",
+            "fallback_reason": "none",
+            "maximum_depth": 4,
+            "plan_hash": "b539d3ffa82b04b223cd8f221832fa977e550e276ca159d0131cd323b948889a",
+            "queue_trace_hash": "6ce3074155db42a88c7890f7caef6473ca15909b0ffabb8ddc0c50f61e3a0c36",
+            "schedule_hash": "6c5672cffd174a9b7e331344584071768b83e6bebb7e9c3f36438ee3e3a5a652",
+            "slice": {
+              "accepted_nodes": 31,
+              "allocated_slice_ns": 22108364624,
+              "cutoff_signaled": false,
+              "decision_hash": "04233749adae2d0bd55bfe7a4fbb790fcfc1faa3e3cefa5537fcb01ed2a86c31",
+              "dispatch_started_elapsed_ns": 37891635376,
+              "finished_elapsed_ns": 51880442762,
+              "original_clause_index": 3,
+              "packed_plan_hash": "b539d3ffa82b04b223cd8f221832fa977e550e276ca159d0131cd323b948889a",
+              "packed_queue_trace_hash": "6ce3074155db42a88c7890f7caef6473ca15909b0ffabb8ddc0c50f61e3a0c36",
+              "packed_status": "unknown",
+              "packed_verdict_trace_hash": "6c498642e434cb8855c21232e236ba9941a600a9caee54467e7bcf58ab6ba472",
+              "plan_hash": "1509ff0078ef9131b11aebb7b3a836de3a3153e1d63aa24c0c50cb2ef1da6eb1",
+              "priority_position": 1,
+              "reason": "packed_slice_unknown",
+              "remaining_before_ns": 22108364624,
+              "remaining_selected_count": 1,
+              "schema_version": "boundflow.multi-clause-anytime-slice/v1",
+              "sibling_group_count": 15,
+              "slice_cutoff_elapsed_ns": 60000000000,
+              "source_final_intermediate_bounds_hash": "adebcbf3d114518944962a5fe0efef0facfda995ca0a10149440c12e879d896b",
+              "source_refinement_plan_hash": "3b74df919e0ff60d78e75320ca986bcc7f46c9c58a54f34f967976bbc1772c76",
+              "source_refinement_semantic_trace_hash": "3453deaa0f87ffb6265076a3a0eb35404e1c2b5dc7f021de86090288d56f5638"
+            },
+            "task_ir_hash": "327c976e3fad5df0630ec7ed0b7b2f1581eee8ce7440fc0ee7ed1ab74a44a2dc",
+            "verdict_reason": "configured_depth_terminal_open",
+            "verdict_trace_hash": "6c498642e434cb8855c21232e236ba9941a600a9caee54467e7bcf58ab6ba472",
+            "worst_active_lower": -35.90021514892578
+          }
+        ],
+        "source": {
+          "native_code_revision": "3bd1bbff67d47cdedf429e16a89a56dc851c28f3784e438c6e0f5cf349b10ebf"
+        },
+        "worker_gate_passed": true
+      }
+    ],
+    "selected_original_clause_indices": [
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        3
+      ]
+    ],
+    "whole_elapsed_ns": [
+      52032317355,
+      52268473361,
+      51926746170
+    ],
+    "workload": {
+      "category": "cifar10_resnet",
+      "csv_ordinal": 0,
+      "csv_relative_path": "benchmarks/cifar10_resnet/cifar10_resnet_instances.csv",
+      "csv_sha256": "d0be77761016f65d044918e5f95332cf32bf848e5eef28c5465dfbf287ba984f",
+      "model_input_shape": [
+        1,
+        3,
+        32,
+        32
+      ],
+      "model_output_dim": 10,
+      "model_relative_path": "benchmarks/cifar10_resnet/onnx/resnet_2b.onnx",
+      "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+      "onnx_ops": [
+        "Add",
+        "Conv",
+        "Flatten",
+        "Gemm",
+        "Relu"
+      ],
+      "property_relative_path": "benchmarks/cifar10_resnet/vnnlib_properties_pgd_filtered/resnet2b_pgd_filtered/prop_0_eps_0.008.vnnlib",
+      "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+      "query_ir_hash": "f2151936ce0d9f8d8bcabd7bc3fc0224a71d7907da4ac614d7216e7a0919201b",
+      "workload_id": "cifar10_resnet:000"
+    }
+  },
+  "formal_payload_hash": "57b462aa16d2894073b5f824e68186b0c5c8186d25407ca96cc4b086a3b670cb",
+  "performance_claimed": false,
+  "schema_version": "boundflow.shared-parametric-objective-evaluator-formal/v1",
+  "source": {
+    "native_code_revision": "3bd1bbff67d47cdedf429e16a89a56dc851c28f3784e438c6e0f5cf349b10ebf"
+  },
+  "status": "validated-reduced"
+}

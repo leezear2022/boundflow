@@ -1,9 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`796a64e`（NRIR-34 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`c5ce3e6`（NRIR-36 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/cross-clause-anytime-objective-evaluator-v1`
+> 当前研发分支：`feat/shared-parametric-objective-evaluator-v1`
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed
@@ -13,7 +13,8 @@
 > production prepared verifier（完成）→ parametric compiler（完成）→ wall-clock scaling（完成）→
 > typed hard-clause escalation（完成）→ objective-directed hard-clause escalation（完成）→
 > objective-ancestral queue（完成）→ child-budget Pareto（NO-GO）→ sibling-packed evaluator（完成）→
-> cross-clause anytime evaluator（完成）**。
+> cross-clause anytime evaluator（完成）→ multi-clause anytime priority（NO-GO）→ shared parametric
+> objective evaluator（完成）**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有
@@ -98,6 +99,13 @@
 > `[0..8]`，余量内 packed nodes=`[7,7,9]`；final 仍为 9/9 unresolved。该结果只关闭 cross-clause
 > control/original-ordinal preservation `VALIDATED-REDUCED`，不形成 property/performance claim。
 > 下一门禁为 multi-clause anytime priority/time slicing。详见第 48 节。
+
+> **2026-08-05 NRIR-36/37 结果**：NRIR-36 的 typed top-2/equal-remaining control 三轮 coverage=
+> `[[3,3],[3,3],[3,1]]`，因一轮第二条未提交 atomic pair 而 NO-GO。NRIR-37 随后保持控制、预算、
+> cap 与 workload 不变，把逐 batch optimizer compile + selected-native audit replay 替换为 query-shared
+> parametric Template/Instance。真实 parity 通过；三 fresh repeats 均 selected `[2,3]`、packed
+> `[31,31]`、每轮仅一次 compile、whole `51.93—52.27 s`。只关闭 compiler ownership/fixed-deadline
+> coverage `VALIDATED-REDUCED`；final 仍 9/9 unresolved，无 performance/ASPLOS-ready 升级。详见第 50 节。
 
 ## 1. 锁定的论文命题
 
@@ -1350,3 +1358,33 @@ multi-clause allocation `VALIDATED-NO-GO` 关闭，`performance_claimed=false`�
 没有 property closure、GPU、competitor、multi-workload 或 ASPLOS-ready claim。下一门禁转向 shared
 parametric compiler/root/evaluator 与
 stronger candidate/bound，先量化 compile/root/child phase 并冻结复用合同，不继续调 top-k/slice 常数。
+
+## 50. Shared Parametric Objective Evaluator v1
+
+NRIR-37 的因果变量只有 evaluator compiler ownership。frozen NRIR-31 exact floor、NRIR-36 priority/
+top-2/dynamic equal-remaining slice、NRIR-34 cap128 ancestral refinement/sibling atomic commit、31/depth4
+与 global 60 秒全部不变。新增的 shared-parametric Plan/Batch/Task/Schedule 明确区分：
+
+1. template：graph、input non-batch shape、objective shape/dtype/device、ReLU layout、optimizer policy、
+   intermediate-bound provenance；
+2. instance：objective content、split state、intermediate bounds、warm state、refinement lineage、batch size；
+3. cache：一个 query owner，第一次 `miss_compiled`，其余跨 batch/跨 clause 必须 exact hit；
+4. production batch：不构造 audit hash chain，不做 selected-native re-execution，root/完整 pair 才 commit。
+
+first-class clause-2 root+pair parity：audit/shared elapsed=`14.096428/1.211498 s`；lower、branch、split、
+α、β 与 refinement final-bound hashes exact；upper max diff=`1.52587890625e-5`，既有 relative+absolute
+allclose guard 通过。该 timing 只用于内部 phase 归因，`performance_claimed=false`。
+
+单轮 top-2 pilot 已得到 `[31,31]`，随后三 fresh processes 均复现 rank=
+`[2,3,4,5,0,8,6,7,1]`、selected=`[2,3]`、packed nodes=`[31,31]`、cache miss=1。floor elapsed=
+`[21.704740,21.802033,21.784891] s`，whole elapsed=
+`[52.032317,52.268473,51.926746] s`。pilot/formal hashes 分别为
+`5c79bcc6e744ed1d29520a76331c9823b2ccfa144332e96c401271241616bf86`、
+`7ff6aef76f6fe2b8778faba2e599e440c2dbf14ac4808bfb0c7e07f72fb74238`。
+
+replay、rank/source/allocation/group/cache/event/native-reexecution/compiler-coverage tamper、26 focused tests、
+全量 `916 passed, 37 skipped` 与静态门禁通过。NRIR-37 以 shared compiler ownership + fixed-deadline
+coverage `VALIDATED-REDUCED` 关闭；三轮 final 仍 9/9 unresolved，depth-4 worst active lower 为
+clauses 2/3 的 `-37.574287/-35.900215`。下一门禁只做 frontier tightness attribution，再预注册一个
+单变量 stronger-bound/candidate 实验；不得继续调 top-k、slice、cache 或把 CPU 内部 timing 升级为
+competitor speedup。

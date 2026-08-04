@@ -1145,3 +1145,27 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   `890 passed, 37 skipped`。本阶段
   `VALIDATED-NO-GO`；IR/control 可保留，下一门禁为 shared parametric compiler/root/evaluator +
   stronger bound/candidate。
+
+### NRIR-37：Shared Parametric Objective Evaluator v1
+
+- `C1/C2-M-NRIR37` compiler ownership：新增 shared-parametric ancestral Plan/Batch/Task/Schedule；
+  frozen NRIR-28 Template 只拥有静态 graph/input/objective-shape/ReLU-layout/policy/provenance，exact
+  Instance 拥有 objective content、split、intermediate bounds、warm state、refinement lineage 与 batch；
+  一个 query cache owner 跨 batch/跨 clauses 2/3 复用同一 template；
+- `C3-G-NRIR37` fail-closed gate：cache key/contract/instance/event、source lineage、batch ordinal、partial
+  sibling group、bound drift、selected-native reexecution、deadline reset、rank/selection/source/allocation、
+  template count 与 compiler coverage tamper 均被 runtime 或 artifact validator 拒绝；
+- `C1/C3-E-NRIR37` same-algorithm parity/coverage：真实 clause 2 frozen audit vs shared root+pair 的 lower、
+  branch、split、α、β 与 refinement hashes exact，upper max diff=`1.52587890625e-5` 且 allclose 通过；
+  三 fresh repeats 均 rank=`[2,3,4,5,0,8,6,7,1]`、selected=`[2,3]`、packed nodes=`[31,31]`，
+  每轮恰好 1 miss + 31 hits；
+- `C3-L-NRIR37` hard limitation：whole elapsed=`[52.032317,52.268473,51.926746] s` 只证明固定
+  global deadline coverage，不是 competitor speedup；final 仍 9/9 unresolved，clauses 2/3 depth-4
+  worst active lower=`-37.574287/-35.900215`，无 GPU、multi-workload、property closure 或 ASPLOS-ready；
+- 工件：`artifacts/shared-parametric-objective-evaluator/`
+  `vnncomp21-resnet2b-property0-cpu-pilot-v1/` 与
+  `vnncomp21-resnet2b-property0-three-repeat-cpu-formal-v1/`；pilot/formal hash=
+  `5c79bcc6e744ed1d29520a76331c9823b2ccfa144332e96c401271241616bf86` /
+  `7ff6aef76f6fe2b8778faba2e599e440c2dbf14ac4808bfb0c7e07f72fb74238`；全量
+  `916 passed, 37 skipped`。本阶段 `VALIDATED-REDUCED`；下一门禁为 full-depth frontier tightness
+  attribution + 单变量 stronger-bound/candidate，不再调 control/cache 常数。

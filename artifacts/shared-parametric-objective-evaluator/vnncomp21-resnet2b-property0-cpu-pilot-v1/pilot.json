@@ -1,0 +1,211 @@
+{
+  "claim_boundary": "same_algorithm_shared_compiler_and_fixed_deadline_coverage_only",
+  "coverage": {
+    "cache_event_count": 32,
+    "cache_hit_count": 31,
+    "cache_miss_count": 1,
+    "floor_elapsed_ns": 20615270688,
+    "passed": true,
+    "ranked_original_clause_indices": [
+      2,
+      3,
+      4,
+      5,
+      0,
+      8,
+      6,
+      7,
+      1
+    ],
+    "selected_original_clause_indices": [
+      2,
+      3
+    ],
+    "slices": [
+      {
+        "accepted_nodes": 31,
+        "allocated_slice_ns": 18661888111,
+        "cache_outcomes": [
+          "miss_compiled",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract"
+        ],
+        "cutoff_signaled": false,
+        "discarded_attempt_stage": null,
+        "dispatch_started_elapsed_ns": 22676223778,
+        "execution_trace_hash": "62da7ef17a1aa43818ae2a3122c185a0f1e9a8d097def455aa0fbbd2cee6789b",
+        "original_clause_index": 2,
+        "plan_hash": "1ac66c9a60dacc1db731ef357de0328fb77b6951b5700105a7d752d878061bf1",
+        "priority_position": 0,
+        "queue_trace_hash": "304df053dc7ef730f804d3a03e2a0132a871839389e871484fd19bcd2db2b12d",
+        "remaining_before_ns": 37323776222,
+        "remaining_selected_count": 2,
+        "selected_native_reexecution": false,
+        "sibling_group_count": 15,
+        "slice_cutoff_elapsed_ns": 41338111889,
+        "template_hashes": [
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516"
+        ],
+        "verdict": "unknown"
+      },
+      {
+        "accepted_nodes": 31,
+        "allocated_slice_ns": 23082371723,
+        "cache_outcomes": [
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract",
+          "hit_exact_contract"
+        ],
+        "cutoff_signaled": false,
+        "discarded_attempt_stage": null,
+        "dispatch_started_elapsed_ns": 36917628277,
+        "execution_trace_hash": "02661c61da4bcc13cfaac0bf4e72d9064d82fd6c72fae31cbae8643af1a7f156",
+        "original_clause_index": 3,
+        "plan_hash": "b251dda78a17a09f4e20aa2574d71f9c5765d37a13011a2c88c555c40b401a2d",
+        "priority_position": 1,
+        "queue_trace_hash": "079edc9d341ee507e97fecac82ca7301dbbaeab25507f712c08d246c1d0ddd40",
+        "remaining_before_ns": 23082371723,
+        "remaining_selected_count": 1,
+        "selected_native_reexecution": false,
+        "sibling_group_count": 15,
+        "slice_cutoff_elapsed_ns": 60000000000,
+        "template_hashes": [
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516",
+          "65eff65a4b9bc2f44710ffe602322a35146d124a074e8edaeea46c08ef9db516"
+        ],
+        "verdict": "unknown"
+      }
+    ],
+    "template_count": 1,
+    "whole_elapsed_ns": 51083770254
+  },
+  "parity": {
+    "audit_elapsed_ns": 14096427922,
+    "bounds_allclose_atol_1e_5_rtol_1e_5": true,
+    "branches_exact": true,
+    "cache_outcomes": [
+      "miss_compiled",
+      "hit_exact_contract"
+    ],
+    "lower_max_abs_diff": 0.0,
+    "node_count": 3,
+    "original_clause_index": 2,
+    "passed": true,
+    "refinement_final_bounds_hashes_exact": true,
+    "selected_native_reexecution": false,
+    "shared_elapsed_ns": 1211497984,
+    "state": {
+      "alpha_max_abs_diff": 0.0,
+      "alpha_within_1_1e_4": true,
+      "beta_max_abs_diff": 0.0,
+      "beta_within_1e_7": true,
+      "split_exact": true
+    },
+    "template_hashes": [
+      "2dd23388d08a5032e6aaa3344e0e4694114ec982ce1170d18db6a2178461e352",
+      "2dd23388d08a5032e6aaa3344e0e4694114ec982ce1170d18db6a2178461e352"
+    ],
+    "upper_max_abs_diff": 1.52587890625e-05
+  },
+  "performance_claimed": false,
+  "pilot_hash": "5c79bcc6e744ed1d29520a76331c9823b2ccfa144332e96c401271241616bf86",
+  "protocol": {
+    "allocation": "dynamic_equal_remaining_selected_v1",
+    "child_refinement_cap": 128,
+    "priority": "root_lower_margin_desc_ordinal_asc",
+    "search_budget": {
+      "max_depth": 4,
+      "max_nodes": 31
+    },
+    "selected_clause_count": 2,
+    "shared_cache_scope": "one_query_cross_batch_cross_clause_v1",
+    "torch_threads": 8,
+    "whole_query_timeout_seconds": 60
+  },
+  "schema_version": "boundflow.shared-parametric-objective-evaluator-pilot/v1",
+  "source": {
+    "native_code_revision": "4d81362d3a408a26764b5405483d887a137dd2f1d24ad8fcdd152395d245ac97"
+  },
+  "status": "ok",
+  "workload": {
+    "category": "cifar10_resnet",
+    "csv_ordinal": 0,
+    "csv_relative_path": "benchmarks/cifar10_resnet/cifar10_resnet_instances.csv",
+    "csv_sha256": "d0be77761016f65d044918e5f95332cf32bf848e5eef28c5465dfbf287ba984f",
+    "model_input_shape": [
+      1,
+      3,
+      32,
+      32
+    ],
+    "model_output_dim": 10,
+    "model_relative_path": "benchmarks/cifar10_resnet/onnx/resnet_2b.onnx",
+    "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+    "onnx_ops": [
+      "Add",
+      "Conv",
+      "Flatten",
+      "Gemm",
+      "Relu"
+    ],
+    "property_relative_path": "benchmarks/cifar10_resnet/vnnlib_properties_pgd_filtered/resnet2b_pgd_filtered/prop_0_eps_0.008.vnnlib",
+    "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+    "query_ir_hash": "f2151936ce0d9f8d8bcabd7bc3fc0224a71d7907da4ac614d7216e7a0919201b",
+    "workload_id": "cifar10_resnet:000"
+  }
+}
