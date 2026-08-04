@@ -13,6 +13,7 @@ from boundflow.domains.interval import IntervalState
 from boundflow.ir.refinement import (
     ExternalIntermediateConstraintSeedIR,
     IntermediateRefinementTaskKind,
+    NativeIntermediateRefinementMultiPassPolicyIR,
     NativeIntermediateRefinementPolicyIR,
 )
 from boundflow.ir.bound import IntermediateBoundSource, ReluRelaxationAttrs
@@ -167,6 +168,82 @@ def test_refinement_ir_is_unrolled_and_cross_linked() -> None:
     ) == 2
     assert program.hashes() == program.hashes()
     program.validate(module, spec)
+
+
+def test_typed_multi_pass_reselects_disjoint_targets_and_is_schedule_visible() -> None:
+    module = _dependency_mlp()
+    spec = _input_spec()
+    multi_pass = NativeIntermediateRefinementMultiPassPolicyIR()
+    program = compile_native_intermediate_refinement_program(
+        module,
+        spec,
+        policy=_policy(passes=2),
+        plan_id="test-typed-multi-pass",
+        multi_pass_policy=multi_pass,
+    )
+    execution = execute_native_intermediate_refinement_program(program, module, spec)
+
+    assert program.plan.multi_pass_policy == multi_pass
+    assert len(program.task_module.tasks) == len(program.schedule.actions) == 12
+    assert [
+        task.pass_index
+        for task in program.task_module.tasks
+        if task.kind == IntermediateRefinementTaskKind.SELECT_TARGETS
+    ] == [0, 1]
+    decisions = [trace.selection_decision for trace in execution.trace.pass_traces]
+    assert all(decision is not None for decision in decisions)
+    assert [
+        decision.pass_target_cap_per_relu for decision in decisions if decision
+    ] == [
+        1,
+        1,
+    ]
+    assert decisions[0].prior_selected_target_count == 0
+    assert (
+        decisions[1].prior_selected_target_count == decisions[0].selected_target_count
+    )
+    assert decisions[1].prior_target_ledger_hash == (
+        decisions[0].result_target_ledger_hash
+    )
+    assert decisions[1].cumulative_selected_target_count > (
+        decisions[0].cumulative_selected_target_count
+    )
+    execution.validate(module, spec)
+
+
+def test_typed_multi_pass_stops_when_no_unseen_target_and_tamper_fails_closed() -> None:
+    module = _competing_width_influence_mlp()
+    spec = _two_dimensional_input_spec()
+    multi_pass = NativeIntermediateRefinementMultiPassPolicyIR()
+    policy = NativeIntermediateRefinementPolicyIR(
+        passes=2,
+        max_neurons_per_relu=4,
+        backward_chunk_size=2,
+    )
+    program = compile_native_intermediate_refinement_program(
+        module,
+        spec,
+        policy=policy,
+        plan_id="test-typed-multi-pass-stop",
+        multi_pass_policy=multi_pass,
+    )
+    execution = execute_native_intermediate_refinement_program(program, module, spec)
+    stopped = execution.trace.pass_traces[1]
+    decision = stopped.selection_decision
+
+    assert decision is not None
+    assert decision.continuation is False
+    assert decision.termination_reason == "no_unseen_eligible_targets"
+    assert decision.selected_target_count == 0
+    assert stopped.input_bounds_hash == stopped.output_bounds_hash
+
+    changed_decision = replace(decision, result_target_ledger_hash="f" * 64)
+    changed_passes = list(execution.trace.pass_traces)
+    changed_passes[1] = replace(stopped, selection_decision=changed_decision)
+    with pytest.raises(ValueError, match="selection lineage differs"):
+        replace(execution.trace, pass_traces=tuple(changed_passes)).validate(
+            program=program
+        )
 
 
 def test_selected_intermediate_crown_tightens_and_is_sound() -> None:

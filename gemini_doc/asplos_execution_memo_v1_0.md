@@ -1,15 +1,15 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`47ca159`（NRIR-24 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`78ffa6b`（NRIR-25 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/dynamic-ancestral-refinement-budget-v1`
+> 当前研发分支：`feat/typed-multipass-refinement-v1`
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed
 > intermediate target selection（完成）→ per-child intermediate refinement（NO-GO）→
 > ancestral-constraint carry-forward refinement（完成）→ external-seeded hard-clause convergence
->（完成）→ dynamic ancestral refinement budget（完成）→ typed multi-pass refinement**。
+>（完成）→ dynamic ancestral refinement budget（完成）→ typed multi-pass refinement（NO-GO）**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有
@@ -1107,3 +1107,22 @@ refinement Plan policy，Task/Schedule/execution/queue trace 逐层交叉校验�
 `85d9f274c6e17614bcbf318bdbfea18219b03876024be16aea3329ee4d3c56bd`。三条树仍 unknown，不能
 升级 complete property、performance、CUDA、multi-workload、competitor 或 ASPLOS-ready。
 下一门禁为 typed multi-pass refinement/termination 与 pass-to-pass lineage，不回到盲目固定树扩展。
+
+## 39. Typed Multi-Pass Refinement v1
+
+NRIR-26 修正了历史 `passes=2` 仅重复相同 targets、未拥有 pass control IR 的问题。新 policy 将每
+node 的 dynamic assigned total cap 等分两 pass；每个 pass 的 enumerate、updated-width selection、
+prior-target exclusion/ledger、continue/stop、backward、intersection 与 propagation 都是一等
+Task/Schedule action。pass decision 绑定 Plan/policy、input bounds、ledger、target、cap 与 termination；
+无 unseen target 时执行 sound passthrough。legacy lowering/hash 条件兼容。
+
+固定 ResNet clauses `0/2/4`、31 nodes/depth 4 下，single-pass 与 split-two-pass 的 worst terminal
+lower 都分别为 `-0.2819737196/-0.4016119838/-0.4596676826`，三条 delta=`0.0`；logical tree
+均 `31/31` 重合。每 mode planned total cap=`496`、actual targets=`2976`；split 没有 stopped pass，
+证明第二 pass 确实执行并选满，但没有改善 worst domain。
+
+因此按预注册门禁以 `VALIDATED-NO-GO` 关闭；artifact evidence hash=
+`38992cace70214ffcbd670f03dcfca182e0925bee31eb4df885dab4dab03494d`。first-class multi-pass
+IR/control 可保留，但不能形成 tightness/property/performance/ASPLOS-ready claim。停止继续同一静态
+influence 拆 pass；后续必须先验证 pass-local influence recomputation 或 branch/cut 新信息能改变
+target/critical domain，再立正式路线。

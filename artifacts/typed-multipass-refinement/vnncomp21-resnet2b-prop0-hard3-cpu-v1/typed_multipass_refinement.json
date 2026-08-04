@@ -1,0 +1,250 @@
+{
+  "evidence": {
+    "claim_boundary": "fixed ResNet property 0 clauses 0/2/4, CPU, 31-node depth-four single-pass versus disjoint split-two-pass at equal dynamic total caps",
+    "comparisons": [
+      {
+        "clause_index": 0,
+        "logical_domain_overlap": 31,
+        "logical_domain_union": 31,
+        "performance_claimed": false,
+        "same_planned_total_target_cap": true,
+        "single_pass_dynamic8_24": {
+          "actual_selected_target_count": 2976,
+          "allocation_rank_counts": {
+            "base": 2,
+            "high_risk": 14,
+            "low_risk": 14,
+            "root": 1
+          },
+          "best_terminal_lower": -0.26213181018829346,
+          "bounded_tree_status": "unknown",
+          "evaluated_nodes": 31,
+          "planned_total_target_cap_per_relu": 496,
+          "proof_deficit": 0.2819737195968628,
+          "stopped_pass_count": 0,
+          "worst_terminal_lower": -0.2819737195968628
+        },
+        "split_not_weaker": true,
+        "split_strictly_better": false,
+        "split_two_pass_dynamic8_24": {
+          "actual_selected_target_count": 2976,
+          "allocation_rank_counts": {
+            "base": 2,
+            "high_risk": 14,
+            "low_risk": 14,
+            "root": 1
+          },
+          "best_terminal_lower": -0.26213181018829346,
+          "bounded_tree_status": "unknown",
+          "evaluated_nodes": 31,
+          "planned_total_target_cap_per_relu": 496,
+          "proof_deficit": 0.2819737195968628,
+          "stopped_pass_count": 0,
+          "worst_terminal_lower": -0.2819737195968628
+        },
+        "split_worst_lower_delta": 0.0
+      },
+      {
+        "clause_index": 2,
+        "logical_domain_overlap": 31,
+        "logical_domain_union": 31,
+        "performance_claimed": false,
+        "same_planned_total_target_cap": true,
+        "single_pass_dynamic8_24": {
+          "actual_selected_target_count": 2976,
+          "allocation_rank_counts": {
+            "base": 10,
+            "high_risk": 10,
+            "low_risk": 10,
+            "root": 1
+          },
+          "best_terminal_lower": -0.31923121213912964,
+          "bounded_tree_status": "unknown",
+          "evaluated_nodes": 31,
+          "planned_total_target_cap_per_relu": 496,
+          "proof_deficit": 0.40161198377609253,
+          "stopped_pass_count": 0,
+          "worst_terminal_lower": -0.40161198377609253
+        },
+        "split_not_weaker": true,
+        "split_strictly_better": false,
+        "split_two_pass_dynamic8_24": {
+          "actual_selected_target_count": 2976,
+          "allocation_rank_counts": {
+            "base": 10,
+            "high_risk": 10,
+            "low_risk": 10,
+            "root": 1
+          },
+          "best_terminal_lower": -0.31923121213912964,
+          "bounded_tree_status": "unknown",
+          "evaluated_nodes": 31,
+          "planned_total_target_cap_per_relu": 496,
+          "proof_deficit": 0.40161198377609253,
+          "stopped_pass_count": 0,
+          "worst_terminal_lower": -0.40161198377609253
+        },
+        "split_worst_lower_delta": 0.0
+      },
+      {
+        "clause_index": 4,
+        "logical_domain_overlap": 31,
+        "logical_domain_union": 31,
+        "performance_claimed": false,
+        "same_planned_total_target_cap": true,
+        "single_pass_dynamic8_24": {
+          "actual_selected_target_count": 2976,
+          "allocation_rank_counts": {
+            "base": 6,
+            "high_risk": 12,
+            "low_risk": 12,
+            "root": 1
+          },
+          "best_terminal_lower": -0.11560201644897461,
+          "bounded_tree_status": "unknown",
+          "evaluated_nodes": 31,
+          "planned_total_target_cap_per_relu": 496,
+          "proof_deficit": 0.4596676826477051,
+          "stopped_pass_count": 0,
+          "worst_terminal_lower": -0.4596676826477051
+        },
+        "split_not_weaker": true,
+        "split_strictly_better": false,
+        "split_two_pass_dynamic8_24": {
+          "actual_selected_target_count": 2976,
+          "allocation_rank_counts": {
+            "base": 6,
+            "high_risk": 12,
+            "low_risk": 12,
+            "root": 1
+          },
+          "best_terminal_lower": -0.11560201644897461,
+          "bounded_tree_status": "unknown",
+          "evaluated_nodes": 31,
+          "planned_total_target_cap_per_relu": 496,
+          "proof_deficit": 0.4596676826477051,
+          "stopped_pass_count": 0,
+          "worst_terminal_lower": -0.4596676826477051
+        },
+        "split_worst_lower_delta": 0.0
+      }
+    ],
+    "gates": {
+      "all_six_units_present": true,
+      "all_tree_total_caps_conserved": true,
+      "any_bounded_tree_closed": false,
+      "split_not_weaker_on_all_hard_clauses": true,
+      "split_strictly_improves_at_least_one_hard_clause": false
+    },
+    "limitations": [
+      "fixed ResNet property 0 clauses 0, 2, and 4 on CPU only",
+      "objective influence is node-initial while pass width is updated",
+      "equal planned target caps are not equal latency",
+      "bounded trees do not imply complete property or verifier closure",
+      "GPU, multi-workload, cuts, performance, and adaptive pass counts remain pending"
+    ],
+    "performance_claimed": false,
+    "protocol": {
+      "branch_policy": {
+        "candidate_batch_size": 64,
+        "candidate_policy_id": "top_width_per_relu_v1",
+        "candidates_per_relu": 8,
+        "max_candidates": 256,
+        "reduce_policy": "maximize_worst_child_then_mean"
+      },
+      "dynamic_budget_policy": {
+        "allocation_mode": "parent_lower_generated_batch_v1",
+        "base_max_neurons_per_relu": 16,
+        "conservation": "exact_group_target_cap_sum",
+        "high_max_neurons_per_relu": 24,
+        "low_max_neurons_per_relu": 8,
+        "parent_lower_tie_tolerance": 1e-06,
+        "semantics_owner": "boundflow_native_refinement_budget"
+      },
+      "execution_isolation": "fresh_python_process_per_clause_mode",
+      "hard_clause_indices": [
+        0,
+        2,
+        4
+      ],
+      "modes": [
+        "single_pass_dynamic8_24",
+        "split_two_pass_dynamic8_24"
+      ],
+      "multi_pass_policy": {
+        "maximum_passes": 2,
+        "reselection": "updated_width_excluding_prior_targets_v1",
+        "semantics_owner": "boundflow_native_multipass_refinement",
+        "termination": "no_unseen_eligible_targets_v1",
+        "total_cap_partition": "equal_two_pass_v1"
+      },
+      "optimizer_policy": {
+        "alpha_init": 0.5,
+        "alpha_initialization_mode": "adaptive",
+        "beta_init": 0.0,
+        "lr": 0.2,
+        "objective": "lower",
+        "optimizer": "torch.optim.Adam",
+        "per_batch_params": true,
+        "soft_tau": 1.0,
+        "spec_reduce": "mean",
+        "steps": 25
+      },
+      "queue_config": {
+        "available_memory_bytes": 1073741824,
+        "expansion_batch_size": 2,
+        "max_depth": 4,
+        "max_eval_batch_size": 4,
+        "max_nodes": 31,
+        "memory_budget_bytes": 1073741824,
+        "threshold": 0.0
+      },
+      "single_pass_policy": {
+        "backward_chunk_size": 4,
+        "candidate_policy_id": "objective_influence_width_per_relu_v1",
+        "max_neurons_per_relu": 16,
+        "minimum_width": 0.0,
+        "passes": 1,
+        "refinement_method": "selected_plain_crown_v1"
+      },
+      "strategy": "external_seeded_ancestral_carry_v1",
+      "two_pass_policy": {
+        "backward_chunk_size": 4,
+        "candidate_policy_id": "objective_influence_width_per_relu_v1",
+        "max_neurons_per_relu": 16,
+        "minimum_width": 0.0,
+        "passes": 2,
+        "refinement_method": "selected_plain_crown_v1"
+      }
+    },
+    "schema_version": "boundflow.typed-multipass-refinement-evidence/v1",
+    "shard_semantic_hashes": {
+      "clause0_single_pass_dynamic8_24.json": "1633beeac90d5db7d137c93e3f5ca48ee7d771478c1b027495ff6e1c33b27680",
+      "clause0_split_two_pass_dynamic8_24.json": "5e37fa435d709f4f84a02d1250e1fcf1fc9d4ee71465f71ff6b488e5b8237c4a",
+      "clause2_single_pass_dynamic8_24.json": "433bb66ebb028e97924aa117c7dc855d74dbaeb69fe3d95168a22824458953c2",
+      "clause2_split_two_pass_dynamic8_24.json": "fdd0bfd7f0a0739a6c2c114de54da39bb263e55bef98b66a3688d33ddcb86600",
+      "clause4_single_pass_dynamic8_24.json": "5bb1246da2bec0221fb7edb892ced2b02c100b607b52158b25ed6fde2dfae2b2",
+      "clause4_split_two_pass_dynamic8_24.json": "cccb5402993675e3b62147c58b8568c9c392b401914154b7535e600b0573fb1c"
+    },
+    "source": {
+      "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+      "external_oracle_lower_hash": "f99f8b863e044328e2747aa372f0d25da18257979cb94d60f8391edbf0a761fa",
+      "input_lower_hash": "bed6da6e49f1123b54fe61247615cf0e86f1b4257face7b073428f257607bda6",
+      "input_upper_hash": "955d79bd0824185cad0be1e758e6e492c51aec6c9199f81359b2528b848ec9ab",
+      "intermediate_bounds_sha256": "d51615b04dfb205afd67d2c21680ece4ca92f693157da1e32c7f8202a8e08cf1",
+      "local_complete_query_artifact_sha256": "9c490bf33edab555f14e4d4c354f6d6055c1fe627102473fc2e506e29fdbaaf8",
+      "local_complete_query_manifest_sha256": "d76595fba9318c7dc70fd79fb9ebd28594b83c59202426f33a45c58486a409b3",
+      "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+      "native_ir_artifact_schema": "boundflow.native-real-network-ir-artifact/v1",
+      "native_ir_manifest_sha256": "5d38aa4adcd7b8593b0ca3751106d3a254b72a2698bd445a8dde59d50eb5a676",
+      "native_ir_payload_sha256": "3ba949de66380c7d16dc44bb934eca8400182521e761c19eaa671cd8cf0eb557",
+      "objective_matrix_hash": "380f1c32321ea47967ad48221134d92d494630777eabe10ef31576a0b051e408",
+      "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf",
+      "vnnlib_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff"
+    },
+    "status": "validated_no_go"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.typed-multipass-refinement-artifact/v1",
+  "status": "validated_no_go"
+}

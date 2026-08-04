@@ -1,7 +1,7 @@
 """Typed Plan, Task, and Schedule IR for native intermediate refinement."""
 
 # pylint: disable=too-many-instance-attributes,too-many-boolean-expressions
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-locals,too-many-lines,too-many-branches
 # pylint: disable=missing-function-docstring
 
 from __future__ import annotations
@@ -161,6 +161,53 @@ class NativeIntermediateRefinementPolicyIR:
 
 
 @dataclass(frozen=True)
+class NativeIntermediateRefinementMultiPassPolicyIR:
+    """Typed total-cap partition, reselection, and termination semantics."""
+
+    maximum_passes: int = 2
+    total_cap_partition: str = "equal_two_pass_v1"
+    reselection: str = "updated_width_excluding_prior_targets_v1"
+    termination: str = "no_unseen_eligible_targets_v1"
+    semantics_owner: str = "boundflow_native_multipass_refinement"
+
+    def validate(self) -> None:
+        if (
+            self.maximum_passes != 2
+            or self.total_cap_partition != "equal_two_pass_v1"
+            or self.reselection != "updated_width_excluding_prior_targets_v1"
+            or self.termination != "no_unseen_eligible_targets_v1"
+            or self.semantics_owner != "boundflow_native_multipass_refinement"
+        ):
+            raise ValueError(
+                "native intermediate refinement multi-pass policy is invalid"
+            )
+
+    def pass_target_cap(self, *, total_target_cap: int, pass_index: int) -> int:
+        self.validate()
+        if (
+            total_target_cap < self.maximum_passes
+            or total_target_cap % self.maximum_passes != 0
+            or pass_index < 0
+            or pass_index >= self.maximum_passes
+        ):
+            raise ValueError("native multi-pass target-cap partition is invalid")
+        return total_target_cap // self.maximum_passes
+
+    def to_dict(self) -> dict[str, object]:
+        self.validate()
+        return {
+            "maximum_passes": self.maximum_passes,
+            "total_cap_partition": self.total_cap_partition,
+            "reselection": self.reselection,
+            "termination": self.termination,
+            "semantics_owner": self.semantics_owner,
+        }
+
+    def stable_hash(self) -> str:
+        return _canonical_hash(self.to_dict())
+
+
+@dataclass(frozen=True)
 class NativeIntermediateRefinementBudgetPolicyIR:
     """Conserved dynamic target-cap allocation across one evaluation group."""
 
@@ -298,6 +345,82 @@ class NativeIntermediateRefinementBudgetDecisionIR:
 
 
 @dataclass(frozen=True)
+class NativeIntermediateRefinementPassDecisionIR:
+    """One runtime selection/termination decision in a typed multi-pass Plan."""
+
+    plan_hash: str
+    multi_pass_policy_hash: str
+    pass_index: int
+    total_target_cap_per_relu: int
+    pass_target_cap_per_relu: int
+    input_bounds_hash: str
+    prior_target_ledger_hash: str
+    selected_targets_hash: str
+    result_target_ledger_hash: str
+    prior_selected_target_count: int
+    selected_target_count: int
+    cumulative_selected_target_count: int
+    continuation: bool
+    termination_reason: str
+    semantics_owner: str = "boundflow_native_multipass_refinement"
+
+    def validate(self) -> None:
+        if (
+            any(
+                not _is_sha256(value)
+                for value in (
+                    self.plan_hash,
+                    self.multi_pass_policy_hash,
+                    self.input_bounds_hash,
+                    self.prior_target_ledger_hash,
+                    self.selected_targets_hash,
+                    self.result_target_ledger_hash,
+                )
+            )
+            or self.pass_index not in {0, 1}
+            or self.total_target_cap_per_relu < 2
+            or self.total_target_cap_per_relu % 2 != 0
+            or self.pass_target_cap_per_relu != self.total_target_cap_per_relu // 2
+            or self.prior_selected_target_count < 0
+            or self.selected_target_count < 0
+            or self.cumulative_selected_target_count
+            != self.prior_selected_target_count + self.selected_target_count
+            or self.continuation != (self.selected_target_count > 0)
+            or self.termination_reason
+            != (
+                "selected_unseen_targets"
+                if self.continuation
+                else "no_unseen_eligible_targets"
+            )
+            or self.semantics_owner != "boundflow_native_multipass_refinement"
+        ):
+            raise ValueError("native intermediate refinement pass decision is invalid")
+
+    def to_dict(self) -> dict[str, object]:
+        self.validate()
+        return {
+            "plan_hash": self.plan_hash,
+            "multi_pass_policy_hash": self.multi_pass_policy_hash,
+            "pass_index": self.pass_index,
+            "total_target_cap_per_relu": self.total_target_cap_per_relu,
+            "pass_target_cap_per_relu": self.pass_target_cap_per_relu,
+            "input_bounds_hash": self.input_bounds_hash,
+            "prior_target_ledger_hash": self.prior_target_ledger_hash,
+            "selected_targets_hash": self.selected_targets_hash,
+            "result_target_ledger_hash": self.result_target_ledger_hash,
+            "prior_selected_target_count": self.prior_selected_target_count,
+            "selected_target_count": self.selected_target_count,
+            "cumulative_selected_target_count": self.cumulative_selected_target_count,
+            "continuation": self.continuation,
+            "termination_reason": self.termination_reason,
+            "semantics_owner": self.semantics_owner,
+        }
+
+    def stable_hash(self) -> str:
+        return _canonical_hash(self.to_dict())
+
+
+@dataclass(frozen=True)
 class NativeIntermediateRefinementTargetIR:
     """One selected unstable pre-activation neuron."""
 
@@ -372,6 +495,7 @@ class NativeIntermediateRefinementPlanIR:
     initial_intermediate_bounds_hash: str
     policy: NativeIntermediateRefinementPolicyIR
     targets: Tuple[NativeIntermediateRefinementTargetIR, ...]
+    multi_pass_policy: Optional[NativeIntermediateRefinementMultiPassPolicyIR] = None
     objective_hash: Optional[str] = None
     source_intermediate_constraints_hash: Optional[str] = None
     source_refinement_plan_hash: Optional[str] = None
@@ -419,6 +543,17 @@ class NativeIntermediateRefinementPlanIR:
             ):
                 raise ValueError("native refinement external seed identity differs")
         self.policy.validate()
+        target_cap = self.policy.max_neurons_per_relu
+        if self.multi_pass_policy is not None:
+            self.multi_pass_policy.validate()
+            if self.policy.passes != self.multi_pass_policy.maximum_passes:
+                raise ValueError("native refinement multi-pass count differs")
+            target_cap = self.multi_pass_policy.pass_target_cap(
+                total_target_cap=self.policy.max_neurons_per_relu,
+                pass_index=0,
+            )
+            if self.policy.backward_chunk_size > target_cap:
+                raise ValueError("native refinement multi-pass chunk exceeds pass cap")
         objective_directed = (
             self.policy.candidate_policy_id == "objective_influence_width_per_relu_v1"
         )
@@ -434,7 +569,7 @@ class NativeIntermediateRefinementPlanIR:
             if objective_directed != (target.objective_influence is not None):
                 raise ValueError("native refinement target scoring semantics differ")
             per_relu[target.relu_input] = per_relu.get(target.relu_input, 0) + 1
-        if any(count > self.policy.max_neurons_per_relu for count in per_relu.values()):
+        if any(count > target_cap for count in per_relu.values()):
             raise ValueError("native refinement target count exceeds policy")
 
     def to_dict(self) -> dict[str, object]:
@@ -451,6 +586,8 @@ class NativeIntermediateRefinementPlanIR:
             "semantics_owner": "boundflow_native_intermediate_refinement",
             "performance_claimed": False,
         }
+        if self.multi_pass_policy is not None:
+            payload["multi_pass_policy"] = self.multi_pass_policy.to_dict()
         if self.objective_hash is not None:
             payload["objective_hash"] = self.objective_hash
         if self.source_intermediate_constraints_hash is not None:
@@ -487,14 +624,23 @@ class NativeIntermediateRefinementTaskIRUnit:
     semantics_owner: str = "boundflow_native_intermediate_refinement"
 
     def validate(self) -> None:
-        pass_kind = self.kind in {
+        required_pass_kind = self.kind in {
             IntermediateRefinementTaskKind.BACKWARD_SELECTED,
             IntermediateRefinementTaskKind.INTERSECT_SELECTED,
             IntermediateRefinementTaskKind.PROPAGATE_FORWARD,
         }
+        optional_pass_kind = self.kind in {
+            IntermediateRefinementTaskKind.ENUMERATE_AMBIGUOUS,
+            IntermediateRefinementTaskKind.SELECT_TARGETS,
+        }
         if (
             not self.task_id
-            or pass_kind != (self.pass_index is not None)
+            or (required_pass_kind and self.pass_index is None)
+            or (
+                not required_pass_kind
+                and not optional_pass_kind
+                and self.pass_index is not None
+            )
             or (self.pass_index is not None and self.pass_index < 0)
             or not self.input_value_ids
             or not self.output_value_ids
@@ -530,19 +676,33 @@ class NativeIntermediateRefinementTaskIRModule:
 
     def validate(self, *, plan: NativeIntermediateRefinementPlanIR) -> None:
         plan.validate()
-        expected_kinds = [
-            IntermediateRefinementTaskKind.MATERIALIZE_FORWARD,
-            IntermediateRefinementTaskKind.ENUMERATE_AMBIGUOUS,
-            IntermediateRefinementTaskKind.SELECT_TARGETS,
-        ]
-        for _unused in range(plan.policy.passes):
+        expected_kinds = [IntermediateRefinementTaskKind.MATERIALIZE_FORWARD]
+        if plan.multi_pass_policy is None:
             expected_kinds.extend(
                 (
-                    IntermediateRefinementTaskKind.BACKWARD_SELECTED,
-                    IntermediateRefinementTaskKind.INTERSECT_SELECTED,
-                    IntermediateRefinementTaskKind.PROPAGATE_FORWARD,
+                    IntermediateRefinementTaskKind.ENUMERATE_AMBIGUOUS,
+                    IntermediateRefinementTaskKind.SELECT_TARGETS,
                 )
             )
+            for _unused in range(plan.policy.passes):
+                expected_kinds.extend(
+                    (
+                        IntermediateRefinementTaskKind.BACKWARD_SELECTED,
+                        IntermediateRefinementTaskKind.INTERSECT_SELECTED,
+                        IntermediateRefinementTaskKind.PROPAGATE_FORWARD,
+                    )
+                )
+        else:
+            for _unused in range(plan.multi_pass_policy.maximum_passes):
+                expected_kinds.extend(
+                    (
+                        IntermediateRefinementTaskKind.ENUMERATE_AMBIGUOUS,
+                        IntermediateRefinementTaskKind.SELECT_TARGETS,
+                        IntermediateRefinementTaskKind.BACKWARD_SELECTED,
+                        IntermediateRefinementTaskKind.INTERSECT_SELECTED,
+                        IntermediateRefinementTaskKind.PROPAGATE_FORWARD,
+                    )
+                )
         expected_kinds.append(IntermediateRefinementTaskKind.EMIT_REFINED)
         if (
             self.schema_version != INTERMEDIATE_REFINEMENT_TASK_IR_SCHEMA_VERSION
@@ -566,6 +726,8 @@ class NativeIntermediateRefinementTaskIRModule:
             available.add("refine.external_constraint_seed")
         if plan.objective_hash is not None:
             available.add("refine.objective_influence")
+        if plan.multi_pass_policy is not None:
+            available.add("refine.multi_pass_policy")
         for task in self.tasks:
             task.validate()
             if any(item not in completed for item in task.dependency_task_ids):
@@ -704,7 +866,14 @@ def lower_native_intermediate_refinement_ir(
             Tuple[str, ...],
             Tuple[str, ...],
         ]
-    ] = [
+    ] = []
+    materialize_outputs: Tuple[str, ...] = (
+        "refine.forward_env.p0",
+        "refine.bounds.p0",
+    )
+    if plan.multi_pass_policy is not None:
+        materialize_outputs = (*materialize_outputs, "refine.target_ledger.p0")
+    definitions.append(
         (
             IntermediateRefinementTaskKind.MATERIALIZE_FORWARD,
             None,
@@ -723,35 +892,78 @@ def lower_native_intermediate_refinement_ir(
                     else ()
                 ),
             ),
-            ("refine.forward_env.p0", "refine.bounds.p0"),
-        ),
-        (
-            IntermediateRefinementTaskKind.ENUMERATE_AMBIGUOUS,
-            None,
-            ("refine.bounds.p0",),
-            ("refine.candidates",),
-        ),
-        (
-            IntermediateRefinementTaskKind.SELECT_TARGETS,
-            None,
+            materialize_outputs,
+        )
+    )
+    if plan.multi_pass_policy is None:
+        definitions.extend(
             (
-                *(
-                    (
-                        "refine.bounds.p0",
-                        "refine.candidates",
-                        "refine.policy",
-                        "refine.objective_influence",
-                    )
-                    if plan.objective_hash is not None
-                    else ("refine.candidates", "refine.policy")
+                (
+                    IntermediateRefinementTaskKind.ENUMERATE_AMBIGUOUS,
+                    None,
+                    ("refine.bounds.p0",),
+                    ("refine.candidates",),
                 ),
-            ),
-            ("refine.selected_targets",),
-        ),
-    ]
+                (
+                    IntermediateRefinementTaskKind.SELECT_TARGETS,
+                    None,
+                    (
+                        *(
+                            (
+                                "refine.bounds.p0",
+                                "refine.candidates",
+                                "refine.policy",
+                                "refine.objective_influence",
+                            )
+                            if plan.objective_hash is not None
+                            else ("refine.candidates", "refine.policy")
+                        ),
+                    ),
+                    ("refine.selected_targets",),
+                ),
+            )
+        )
     for pass_index in range(plan.policy.passes):
         current = pass_index
         next_index = pass_index + 1
+        selected_targets = "refine.selected_targets"
+        decision_inputs: Tuple[str, ...] = ()
+        if plan.multi_pass_policy is not None:
+            candidates = f"refine.candidates.p{current}"
+            selected_targets = f"refine.selected_targets.p{current}"
+            pass_decision = f"refine.pass_decision.p{current}"
+            definitions.extend(
+                (
+                    (
+                        IntermediateRefinementTaskKind.ENUMERATE_AMBIGUOUS,
+                        pass_index,
+                        (f"refine.bounds.p{current}",),
+                        (candidates,),
+                    ),
+                    (
+                        IntermediateRefinementTaskKind.SELECT_TARGETS,
+                        pass_index,
+                        (
+                            f"refine.bounds.p{current}",
+                            candidates,
+                            "refine.policy",
+                            "refine.multi_pass_policy",
+                            f"refine.target_ledger.p{current}",
+                            *(
+                                ("refine.objective_influence",)
+                                if plan.objective_hash is not None
+                                else ()
+                            ),
+                        ),
+                        (
+                            selected_targets,
+                            f"refine.target_ledger.p{next_index}",
+                            pass_decision,
+                        ),
+                    ),
+                )
+            )
+            decision_inputs = (pass_decision,)
         definitions.extend(
             (
                 (
@@ -760,7 +972,8 @@ def lower_native_intermediate_refinement_ir(
                     (
                         f"refine.forward_env.p{current}",
                         f"refine.bounds.p{current}",
-                        "refine.selected_targets",
+                        selected_targets,
+                        *decision_inputs,
                     ),
                     (f"refine.crown_candidates.p{next_index}",),
                 ),
@@ -770,6 +983,7 @@ def lower_native_intermediate_refinement_ir(
                     (
                         f"refine.bounds.p{current}",
                         f"refine.crown_candidates.p{next_index}",
+                        *decision_inputs,
                     ),
                     (f"refine.intersected_bounds.p{next_index}",),
                 ),
@@ -781,6 +995,7 @@ def lower_native_intermediate_refinement_ir(
                         "refine.input",
                         "refine.split_state",
                         f"refine.intersected_bounds.p{next_index}",
+                        *decision_inputs,
                     ),
                     (
                         f"refine.forward_env.p{next_index}",

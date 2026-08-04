@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`47ca159`（NRIR-24 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/dynamic-ancestral-refinement-budget-v1`
+> 当前 integration base：`78ffa6b`（NRIR-25 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/typed-multipass-refinement-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-04 NRIR-19 后续：native selected-CROWN intermediate refinement 已成为一等
@@ -16,7 +16,8 @@
 > `+73.615173/+75.022095`。NRIR-23 随后连接 external typed seed；NRIR-24 已完成
 > `7/15/31 nodes × depth 2/3/4` convergence，三条 hard clause 持续改善但仍无 closure。
 > NRIR-25 已进一步完成 same-planned-cap dynamic ancestral budget：三条 hard clause 均有小幅
-> 正向 tightness，但仍无 closure。下一门禁为 typed multi-pass refinement/termination。顶层
+> 正向 tightness，但仍无 closure。NRIR-26 typed split-two-pass 在同总 cap 下三条 worst lower
+> delta 全为 `0.0`，按预注册门禁 NO-GO。顶层
 > ASPLOS-ready 与 performance No-Go 不变。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
 > 2026-07-28 进度：IR-1 Bound IR、IR-2 Plan IR、IR-3 Task/Schedule IR 的最小
@@ -800,3 +801,18 @@ actual selected targets 均为 `2976`。按预注册门禁为 `VALIDATED-REDUCED
 artifact evidence hash=`85d9f274c6e17614bcbf318bdbfea18219b03876024be16aea3329ee4d3c56bd`。
 三条 bounded tree 仍 unknown；不声明 complete property、performance、CUDA、multi-workload、
 competitor 或 ASPLOS-ready。下一工程动作是 typed multi-pass refinement/termination 与 pass lineage。
+
+## 33. Typed Multi-Pass Refinement v1 判定
+
+NRIR-26 将 multi-pass 总 cap partition、updated-width target reselection、prior-target ledger 与
+no-unseen termination 编译为一等 Plan/Task/Schedule/decision trace；旧路径保持条件兼容。dynamic
+8/16/24 assigned cap 分别拆为 4+4/8+8/12+12，逐 node/树总 cap 守恒。
+
+固定 clauses `0/2/4` 上，single 与 split-two-pass worst lower 完全相同：
+`-0.2819737196/-0.4016119838/-0.4596676826`；planned cap 均 `496`、actual targets 均
+`2976`，三棵 logical tree 均 `31/31` 重合，没有 stopped pass。因此 mechanism/control 可保留，
+但方法按预注册门禁为 `VALIDATED-NO-GO`。
+
+artifact evidence hash=`38992cace70214ffcbd670f03dcfca182e0925bee31eb4df885dab4dab03494d`。
+不声明 tightness、complete property、performance、CUDA、multi-workload、competitor 或
+ASPLOS-ready；停止 node-initial static influence 的同总 cap 拆 pass。

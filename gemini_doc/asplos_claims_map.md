@@ -936,3 +936,21 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   `artifacts/dynamic-ancestral-refinement-budget/vnncomp21-resnet2b-prop0-hard3-cpu-v1/`；
   evidence hash=`85d9f274c6e17614bcbf318bdbfea18219b03876024be16aea3329ee4d3c56bd`。
   本阶段 `VALIDATED-REDUCED`；下一门禁为 typed multi-pass refinement/termination。
+
+### NRIR-26：Typed Multi-Pass Refinement v1
+
+- `C1/C2-M-NRIR26` typed pass control：新增 total-cap partition/reselection/termination policy 与逐
+  pass decision；Plan/Task/Schedule 显式包含两组 enumerate/select/decide/backward/intersect/
+  propagate，execution/queue trace 绑定 bounds、target ledger、decision 与 action hash；
+- `C3-G-NRIR26` compatibility/replay gate：legacy lowering/hash 条件不变；4/4、8/8、12/12
+  per-node cap partition、disjoint ledger、no-target passthrough、program/decision/claim tamper 与六分片
+  fresh replay fail closed；
+- `C1/C3-E-NRIR26` same-total-cap result：clauses `0/2/4` 的 single/split worst lower 完全相同，
+  均为 `-0.2819737196/-0.4016119838/-0.4596676826`；三条 delta=`0.0`，logical-domain
+  overlap/union=`31/31`；planned cap=`496`、actual targets=`2976`；
+- `C3-L-NRIR26` closure=`VALIDATED-NO-GO`：没有任何严格改善，三条 bounded tree 仍 unknown；
+  仅单 ResNet/三 clause/CPU，node-initial influence 固定，无 complete property、CUDA、multi-workload、
+  competitor、performance 或 ASPLOS-ready，`performance_claimed=false`；
+- 工件：`artifacts/typed-multipass-refinement/vnncomp21-resnet2b-prop0-hard3-cpu-v1/`；evidence
+  hash=`38992cace70214ffcbd670f03dcfca182e0925bee31eb4df885dab4dab03494d`。typed mechanism
+  保留；停止静态 influence 的同总 cap 拆 pass 路线。

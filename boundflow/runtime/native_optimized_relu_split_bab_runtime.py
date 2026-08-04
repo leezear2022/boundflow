@@ -24,6 +24,8 @@ from ..ir.bound import IntermediateBoundSource
 from ..ir.refinement import (
     NativeIntermediateRefinementBudgetDecisionIR,
     NativeIntermediateRefinementBudgetPolicyIR,
+    NativeIntermediateRefinementMultiPassPolicyIR,
+    NativeIntermediateRefinementPassDecisionIR,
     NativeIntermediateRefinementPolicyIR,
 )
 from ..ir.schedule import LaunchAction
@@ -156,6 +158,8 @@ class NativePerChildRefinementTrace:
     external_seed_consumption: Optional[str] = None
     budget_decision: Optional[NativeIntermediateRefinementBudgetDecisionIR] = None
     budget_policy: Optional[NativeIntermediateRefinementBudgetPolicyIR] = None
+    multi_pass_policy: Optional[NativeIntermediateRefinementMultiPassPolicyIR] = None
+    multi_pass_decisions: tuple[NativeIntermediateRefinementPassDecisionIR, ...] = ()
     parent_refinement_consumed_as_exact: bool = False
     performance_claimed: bool = False
     schema_version: str = NATIVE_PER_CHILD_REFINEMENT_TRACE_SCHEMA_VERSION
@@ -185,6 +189,25 @@ class NativePerChildRefinementTrace:
                 != self.node_split_state_hash
             ):
                 raise ValueError("native per-child refinement budget node differs")
+        multi_pass_present = self.multi_pass_policy is not None
+        if multi_pass_present != bool(self.multi_pass_decisions):
+            raise ValueError("native per-child multi-pass presence differs")
+        if self.multi_pass_policy is not None:
+            self.multi_pass_policy.validate()
+            if len(self.multi_pass_decisions) != self.multi_pass_policy.maximum_passes:
+                raise ValueError("native per-child multi-pass coverage differs")
+            previous_ledger_hash = _canonical_hash([])
+            for index, decision in enumerate(self.multi_pass_decisions):
+                decision.validate()
+                if (
+                    decision.pass_index != index
+                    or decision.plan_hash != self.refinement_plan_hash
+                    or decision.multi_pass_policy_hash
+                    != self.multi_pass_policy.stable_hash()
+                    or decision.prior_target_ledger_hash != previous_ledger_hash
+                ):
+                    raise ValueError("native per-child multi-pass order differs")
+                previous_ledger_hash = decision.result_target_ledger_hash
         if (
             self.schema_version != NATIVE_PER_CHILD_REFINEMENT_TRACE_SCHEMA_VERSION
             or not self.node_id
@@ -272,6 +295,14 @@ class NativePerChildRefinementTrace:
             payload["budget_decision_hash"] = self.budget_decision.stable_hash(
                 policy=self.budget_policy
             )
+        if self.multi_pass_policy is not None:
+            payload["multi_pass_policy"] = self.multi_pass_policy.to_dict()
+            payload["multi_pass_decisions"] = [
+                item.to_dict() for item in self.multi_pass_decisions
+            ]
+            payload["multi_pass_decision_hashes"] = [
+                item.stable_hash() for item in self.multi_pass_decisions
+            ]
         return payload
 
     def stable_hash(self) -> str:
@@ -515,6 +546,9 @@ class NativeOptimizedReluSplitBabTrace:
     per_child_refinement_budget_policy: Optional[
         NativeIntermediateRefinementBudgetPolicyIR
     ] = None
+    per_child_refinement_multi_pass_policy: Optional[
+        NativeIntermediateRefinementMultiPassPolicyIR
+    ] = None
     per_child_refinements: tuple[NativePerChildRefinementTrace, ...] = ()
     per_child_refinement_strategy: PerChildRefinementStrategy = (
         "independent_exact_split_v1"
@@ -576,6 +610,7 @@ class NativeOptimizedReluSplitBabTrace:
             if (
                 self.per_child_refinement_strategy != "independent_exact_split_v1"
                 or self.per_child_refinement_budget_policy is not None
+                or self.per_child_refinement_multi_pass_policy is not None
                 or self.per_child_refinements
                 or any(
                     item.intermediate_refinement_trace_hash is not None
@@ -597,6 +632,15 @@ class NativeOptimizedReluSplitBabTrace:
                 ):
                     raise ValueError(
                         "native optimized BaB refinement budget policy differs"
+                    )
+            if self.per_child_refinement_multi_pass_policy is not None:
+                self.per_child_refinement_multi_pass_policy.validate()
+                if (
+                    self.per_child_refinement_policy.passes
+                    != self.per_child_refinement_multi_pass_policy.maximum_passes
+                ):
+                    raise ValueError(
+                        "native optimized BaB multi-pass refinement policy differs"
                     )
             if (
                 self.per_child_refinement_policy.candidate_policy_id
@@ -621,6 +665,12 @@ class NativeOptimizedReluSplitBabTrace:
                 ) or refinement.budget_policy != self.per_child_refinement_budget_policy:
                     raise ValueError(
                         "native optimized BaB refinement budget coverage differs"
+                    )
+                if refinement.multi_pass_policy != (
+                    self.per_child_refinement_multi_pass_policy
+                ):
+                    raise ValueError(
+                        "native optimized BaB multi-pass refinement coverage differs"
                     )
                 parent = (
                     None
@@ -837,6 +887,10 @@ class NativeOptimizedReluSplitBabTrace:
                 payload["per_child_refinement_budget_policy"] = (
                     self.per_child_refinement_budget_policy.to_dict()
                 )
+            if self.per_child_refinement_multi_pass_policy is not None:
+                payload["per_child_refinement_multi_pass_policy"] = (
+                    self.per_child_refinement_multi_pass_policy.to_dict()
+                )
             payload["per_child_refinements"] = [
                 item.to_dict() for item in self.per_child_refinements
             ]
@@ -978,6 +1032,8 @@ class NativeOptimizedReluSplitBabExecution:
                     program.external_constraint_seed.validate_payload()
                 if (
                     program.plan.policy != expected_refinement_policy
+                    or program.plan.multi_pass_policy
+                    != self.trace.per_child_refinement_multi_pass_policy
                     or program.plan.objective_hash != self.trace.objective_hash
                     or program.plan.split_state_hash != record.node_split_state_hash
                     or hashes["refinement_plan_hash"] != record.refinement_plan_hash
@@ -1033,6 +1089,15 @@ class NativeOptimizedReluSplitBabExecution:
                 ):
                     raise ValueError(
                         "native optimized BaB refinement execution identity differs"
+                    )
+                execution_decisions = tuple(
+                    item.selection_decision
+                    for item in refinement.trace.pass_traces
+                    if item.selection_decision is not None
+                )
+                if execution_decisions != record.multi_pass_decisions:
+                    raise ValueError(
+                        "native optimized BaB multi-pass execution linkage differs"
                     )
 
     def state_map(self) -> dict[str, NativeAlphaBetaOptimizationState]:
@@ -1331,6 +1396,7 @@ def _execute_per_child_refinements(
     nodes: tuple[_RuntimeNode, ...],
     policy: NativeIntermediateRefinementPolicyIR,
     budget_policy: Optional[NativeIntermediateRefinementBudgetPolicyIR],
+    multi_pass_policy: Optional[NativeIntermediateRefinementMultiPassPolicyIR],
     budget_group_id: str,
     parent_by_id: Mapping[str, _OptimizedEvaluatedNode],
     strategy: PerChildRefinementStrategy,
@@ -1385,6 +1451,7 @@ def _execute_per_child_refinements(
                 )
             ),
             plan_id=f"per-child-refinement:{node.node.split_state_hash}",
+            multi_pass_policy=multi_pass_policy,
             relu_split_state=split,
             linear_spec_C=objective,
             source_refinement_execution=source_execution,
@@ -1441,6 +1508,12 @@ def _execute_per_child_refinements(
             ),
             budget_decision=budget_decision,
             budget_policy=budget_policy,
+            multi_pass_policy=multi_pass_policy,
+            multi_pass_decisions=tuple(
+                item.selection_decision
+                for item in execution.trace.pass_traces
+                if item.selection_decision is not None
+            ),
         )
         record.validate()
         executions.append((node.node.node_id, execution))
@@ -1670,6 +1743,9 @@ def _evaluate_optimized_node_batch(
     per_child_refinement_budget_policy: Optional[
         NativeIntermediateRefinementBudgetPolicyIR
     ],
+    per_child_refinement_multi_pass_policy: Optional[
+        NativeIntermediateRefinementMultiPassPolicyIR
+    ],
     per_child_refinement_strategy: PerChildRefinementStrategy,
     external_constraint_seed: Optional[NativeExternalIntermediateConstraintSeed],
 ) -> tuple[
@@ -1707,6 +1783,7 @@ def _evaluate_optimized_node_batch(
             nodes=nodes,
             policy=per_child_refinement_policy,
             budget_policy=per_child_refinement_budget_policy,
+            multi_pass_policy=per_child_refinement_multi_pass_policy,
             budget_group_id=batch_id,
             parent_by_id=parent_by_id,
             strategy=per_child_refinement_strategy,
@@ -1924,6 +2001,9 @@ def execute_native_optimized_relu_split_bab(
     per_child_refinement_budget_policy: Optional[
         NativeIntermediateRefinementBudgetPolicyIR
     ] = None,
+    per_child_refinement_multi_pass_policy: Optional[
+        NativeIntermediateRefinementMultiPassPolicyIR
+    ] = None,
     per_child_refinement_strategy: PerChildRefinementStrategy = (
         "independent_exact_split_v1"
     ),
@@ -1962,6 +2042,8 @@ def execute_native_optimized_relu_split_bab(
             raise ValueError("optimized queue external seed requires refinement")
         if per_child_refinement_budget_policy is not None:
             raise ValueError("optimized queue refinement budget requires refinement")
+        if per_child_refinement_multi_pass_policy is not None:
+            raise ValueError("optimized queue multi-pass policy requires refinement")
     else:
         if not isinstance(
             per_child_refinement_policy, NativeIntermediateRefinementPolicyIR
@@ -1983,6 +2065,34 @@ def execute_native_optimized_relu_split_bab(
                 > per_child_refinement_budget_policy.low_max_neurons_per_relu
             ):
                 raise ValueError("optimized queue refinement budget policy differs")
+        if per_child_refinement_multi_pass_policy is not None:
+            if not isinstance(
+                per_child_refinement_multi_pass_policy,
+                NativeIntermediateRefinementMultiPassPolicyIR,
+            ):
+                raise TypeError("optimized queue multi-pass policy is invalid")
+            per_child_refinement_multi_pass_policy.validate()
+            if (
+                per_child_refinement_policy.passes
+                != per_child_refinement_multi_pass_policy.maximum_passes
+            ):
+                raise ValueError("optimized queue multi-pass policy differs")
+            base_pass_cap = per_child_refinement_multi_pass_policy.pass_target_cap(
+                total_target_cap=(per_child_refinement_policy.max_neurons_per_relu),
+                pass_index=0,
+            )
+            low_pass_cap = (
+                base_pass_cap
+                if per_child_refinement_budget_policy is None
+                else per_child_refinement_multi_pass_policy.pass_target_cap(
+                    total_target_cap=(
+                        per_child_refinement_budget_policy.low_max_neurons_per_relu
+                    ),
+                    pass_index=0,
+                )
+            )
+            if per_child_refinement_policy.backward_chunk_size > low_pass_cap:
+                raise ValueError("optimized queue multi-pass chunk exceeds pass cap")
         if (
             per_child_refinement_policy.candidate_policy_id
             != "objective_influence_width_per_relu_v1"
@@ -2079,6 +2189,9 @@ def execute_native_optimized_relu_split_bab(
                 refine_external_constraints=refine_external_constraints,
                 per_child_refinement_policy=per_child_refinement_policy,
                 per_child_refinement_budget_policy=(per_child_refinement_budget_policy),
+                per_child_refinement_multi_pass_policy=(
+                    per_child_refinement_multi_pass_policy
+                ),
                 per_child_refinement_strategy=per_child_refinement_strategy,
                 external_constraint_seed=external_constraint_seed,
             )
@@ -2211,6 +2324,7 @@ def execute_native_optimized_relu_split_bab(
         max_queue_size=max_queue_size,
         per_child_refinement_policy=per_child_refinement_policy,
         per_child_refinement_budget_policy=per_child_refinement_budget_policy,
+        per_child_refinement_multi_pass_policy=(per_child_refinement_multi_pass_policy),
         per_child_refinements=tuple(per_child_refinement_records),
         per_child_refinement_strategy=per_child_refinement_strategy,
     )
@@ -2250,6 +2364,9 @@ def run_native_optimized_relu_split_bab(
     per_child_refinement_budget_policy: Optional[
         NativeIntermediateRefinementBudgetPolicyIR
     ] = None,
+    per_child_refinement_multi_pass_policy: Optional[
+        NativeIntermediateRefinementMultiPassPolicyIR
+    ] = None,
     per_child_refinement_strategy: PerChildRefinementStrategy = (
         "independent_exact_split_v1"
     ),
@@ -2270,6 +2387,7 @@ def run_native_optimized_relu_split_bab(
         refine_external_constraints=refine_external_constraints,
         per_child_refinement_policy=per_child_refinement_policy,
         per_child_refinement_budget_policy=per_child_refinement_budget_policy,
+        per_child_refinement_multi_pass_policy=(per_child_refinement_multi_pass_policy),
         per_child_refinement_strategy=per_child_refinement_strategy,
         external_constraint_seed=external_constraint_seed,
     ).trace
