@@ -859,3 +859,19 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - 工件：
   `artifacts/per-child-objective-refinement/vnncomp21-resnet2b-two-clause-cpu-v1/`；fresh replay、
   focused/full/static 的最终 hash/count 见 NRIR-21 changelog。
+
+### 2026-08-04 Ancestral-Constraint Refinement v1
+
+- `C1/C2-M-NRIR22` typed source ownership：child refinement Plan 绑定 parent final/Plan/semantic
+  trace，materialize Task/Schedule 显式消费 source constraint；compiler 只接受 validated parent
+  execution，不接受裸 mapping；
+- `C3-G-NRIR22` sound lineage gate：local exact-split→constrained initial→final 双重单调；root 无
+  source、child source 一一指向已完成 parent；consumption=`sound_constraint_only`，exact reuse=false；
+  source/task/queue/tamper fail closed；
+- `C1/C3-E-NRIR22` fixed-tree tightness：clauses `0/1` ancestral worst leaf 相对 independent
+  提升 `+73.615173/+75.022095`，相对 root-global 提升 `+72.767212/+74.085449`，root exact；
+- `C3-L-NRIR22` hard limitation：所有 worst leaf 仍为负，单 ResNet/两 clause/CPU/7 nodes/depth 2；
+  无 complete closure、CUDA、competitor parity、重复性能或 ASPLOS-ready，`performance_claimed=false`；
+- 工件：`artifacts/ancestral-constraint-refinement/vnncomp21-resnet2b-two-clause-cpu-v1/`；
+  generate hash=`72c0c2a66b82cea425bf7486817c0ce39ae186ef2961cc1271acb31cb7a31b6f`；
+  最终 replay/full/static 见 NRIR-22 changelog。下一门禁为 hard-clause convergence expansion。

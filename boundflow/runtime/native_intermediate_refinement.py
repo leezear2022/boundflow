@@ -3,6 +3,7 @@
 # pylint: disable=too-many-instance-attributes,too-many-locals,too-many-statements
 # pylint: disable=too-many-arguments,too-many-branches,missing-function-docstring
 # pylint: disable=too-many-boolean-expressions,too-many-return-statements
+# pylint: disable=too-many-lines
 
 from __future__ import annotations
 
@@ -254,6 +255,7 @@ class NativeIntermediateRefinementProgram:
     split_state: Mapping[str, torch.Tensor]
     objective: Optional[torch.Tensor] = None
     objective_influence: Optional[Mapping[str, torch.Tensor]] = None
+    source_intermediate_constraints: Optional[Mapping[str, IntervalState]] = None
 
     def validate(self, module: BFTaskModule, input_spec: InputSpec) -> None:
         self.schedule.validate(plan=self.plan, task_module=self.task_module)
@@ -265,6 +267,40 @@ class NativeIntermediateRefinementProgram:
             != intermediate_bounds_hash(self.initial_relu_pre)
         ):
             raise ValueError("native intermediate refinement program identity differs")
+        source_hashes_present = (
+            self.plan.source_intermediate_constraints_hash is not None
+        )
+        if source_hashes_present != (
+            self.source_intermediate_constraints is not None
+        ) or (
+            self.source_intermediate_constraints is not None
+            and self.plan.source_intermediate_constraints_hash
+            != intermediate_bounds_hash(self.source_intermediate_constraints)
+        ):
+            raise ValueError("native refinement source constraints differ")
+        expected_env, expected_pre = _forward_ibp_trace_mlp(
+            module,
+            input_spec,
+            relu_split_state=dict(self.split_state),
+            relu_pre_constraints=self.source_intermediate_constraints,
+        )
+        if intermediate_bounds_hash(expected_env) != intermediate_bounds_hash(
+            self.initial_interval_env
+        ) or intermediate_bounds_hash(expected_pre) != intermediate_bounds_hash(
+            self.initial_relu_pre
+        ):
+            raise ValueError("native refinement materialized forward state differs")
+        if self.source_intermediate_constraints is not None:
+            _local_env, local_pre = _forward_ibp_trace_mlp(
+                module,
+                input_spec,
+                relu_split_state=dict(self.split_state),
+            )
+            _validate_monotonic_bounds(
+                local_pre,
+                self.initial_relu_pre,
+                caller="native refinement source-constraint intersection",
+            )
         _validate_split_state(self.split_state, self.initial_relu_pre)
         objective_directed = self.plan.objective_hash is not None
         if objective_directed != (self.objective is not None) or objective_directed != (
@@ -471,6 +507,16 @@ class NativeIntermediateRefinementExecution:
         )
 
 
+def intermediate_refinement_semantic_trace_hash(
+    execution: NativeIntermediateRefinementExecution,
+) -> str:
+    """Hash replay semantics while excluding diagnostic wall-clock timing."""
+
+    payload = execution.trace.to_dict()
+    payload.pop("elapsed_ns")
+    return _canonical_hash(payload)
+
+
 def compile_native_intermediate_refinement_program(
     module: BFTaskModule,
     input_spec: InputSpec,
@@ -479,6 +525,7 @@ def compile_native_intermediate_refinement_program(
     plan_id: str,
     relu_split_state: Optional[Mapping[str, torch.Tensor]] = None,
     linear_spec_C: Optional[torch.Tensor] = None,
+    source_refinement_execution: Optional[NativeIntermediateRefinementExecution] = None,
 ) -> NativeIntermediateRefinementProgram:
     """Compile an exact target set and unrolled refinement schedule."""
 
@@ -486,6 +533,22 @@ def compile_native_intermediate_refinement_program(
         raise ValueError("native intermediate refinement plan ID must be non-empty")
     module.validate()
     policy.validate()
+    source_constraints: Optional[Mapping[str, IntervalState]] = None
+    source_refinement_plan_hash: Optional[str] = None
+    source_refinement_semantic_trace_hash: Optional[str] = None
+    if source_refinement_execution is not None:
+        if not isinstance(
+            source_refinement_execution, NativeIntermediateRefinementExecution
+        ):
+            raise TypeError("native refinement source execution is invalid")
+        source_refinement_execution.validate(module, input_spec)
+        source_constraints = _clone_bounds(source_refinement_execution.relu_pre)
+        source_refinement_plan_hash = (
+            source_refinement_execution.program.plan.stable_hash()
+        )
+        source_refinement_semantic_trace_hash = (
+            intermediate_refinement_semantic_trace_hash(source_refinement_execution)
+        )
     initial_env, unsplit_pre = _forward_ibp_trace_mlp(module, input_spec)
     splits = (
         _zero_split_state(unsplit_pre)
@@ -496,9 +559,12 @@ def compile_native_intermediate_refinement_program(
         }
     )
     _validate_split_state(splits, unsplit_pre)
-    if relu_split_state is not None:
+    if relu_split_state is not None or source_constraints is not None:
         initial_env, initial_pre = _forward_ibp_trace_mlp(
-            module, input_spec, relu_split_state=dict(splits)
+            module,
+            input_spec,
+            relu_split_state=dict(splits),
+            relu_pre_constraints=source_constraints,
         )
     else:
         initial_pre = unsplit_pre
@@ -545,6 +611,13 @@ def compile_native_intermediate_refinement_program(
         policy=policy,
         targets=targets,
         objective_hash=objective_hash,
+        source_intermediate_constraints_hash=(
+            None
+            if source_constraints is None
+            else intermediate_bounds_hash(source_constraints)
+        ),
+        source_refinement_plan_hash=source_refinement_plan_hash,
+        source_refinement_semantic_trace_hash=(source_refinement_semantic_trace_hash),
     )
     task_module, schedule = lower_native_intermediate_refinement_ir(plan)
     program = NativeIntermediateRefinementProgram(
@@ -556,6 +629,7 @@ def compile_native_intermediate_refinement_program(
         split_state=splits,
         objective=objective,
         objective_influence=objective_influence,
+        source_intermediate_constraints=source_constraints,
     )
     program.validate(module, input_spec)
     return program
@@ -763,6 +837,10 @@ def execute_native_intermediate_refinement_program(
         "refine.split_state": program.split_state,
         "refine.policy": program.plan.policy,
     }
+    if program.source_intermediate_constraints is not None:
+        values["refine.source_intermediate_constraints"] = (
+            program.source_intermediate_constraints
+        )
     if program.objective_influence is not None:
         values["refine.objective_influence"] = program.objective_influence
     action_traces: list[NativeIntermediateRefinementActionTrace] = []
@@ -932,4 +1010,5 @@ __all__ = [
     "compile_native_intermediate_refinement_program",
     "execute_native_intermediate_refinement_program",
     "intermediate_bounds_hash",
+    "intermediate_refinement_semantic_trace_hash",
 ]

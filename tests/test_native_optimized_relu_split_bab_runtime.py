@@ -1,6 +1,6 @@
 """Optimizer Schedule integration with native ReLU-split BaB queue."""
 
-# pylint: disable=missing-function-docstring,redefined-outer-name
+# pylint: disable=missing-function-docstring,redefined-outer-name,too-many-locals
 
 from __future__ import annotations
 
@@ -20,6 +20,7 @@ from boundflow.runtime.native_optimized_relu_split_bab_runtime import (
     NATIVE_REEXECUTION_ATOL,
     NATIVE_REEXECUTION_TRACE_MAX_ABS_DIFF,
     NativeOptimizedReluSplitBabTrace,
+    PerChildRefinementStrategy,
     compare_native_optimized_bab_states,
     execute_native_optimized_relu_split_bab,
     run_native_optimized_relu_split_bab,
@@ -83,7 +84,11 @@ def _per_child_policy() -> NativeIntermediateRefinementPolicyIR:
     )
 
 
-def _run_per_child(*, batch_size: int):
+def _run_per_child(
+    *,
+    batch_size: int,
+    strategy: PerChildRefinementStrategy = "independent_exact_split_v1",
+):
     return execute_native_optimized_relu_split_bab(
         _module(),
         _spec(),
@@ -99,6 +104,7 @@ def _run_per_child(*, batch_size: int):
         optimizer_policy=_policy(),
         intermediate_bound_source=IntermediateBoundSource.NATIVE_REFINED,
         per_child_refinement_policy=_per_child_policy(),
+        per_child_refinement_strategy=strategy,
     )
 
 
@@ -336,6 +342,14 @@ def per_child_executions():
     return _run_per_child(batch_size=4), _run_per_child(batch_size=1)
 
 
+@pytest.fixture(scope="module")
+def ancestral_per_child_executions():
+    return (
+        _run_per_child(batch_size=4, strategy="ancestral_constraint_carry_v1"),
+        _run_per_child(batch_size=1, strategy="ancestral_constraint_carry_v1"),
+    )
+
+
 def test_per_child_refinement_packed_and_serial_semantics_match(
     per_child_executions,
 ) -> None:
@@ -486,3 +500,102 @@ def test_per_child_refinement_admission_fails_closed() -> None:
                 backward_chunk_size=2,
             ),
         )
+    with pytest.raises(ValueError, match="strategy requires a policy"):
+        execute_native_optimized_relu_split_bab(
+            _module(),
+            _spec(),
+            linear_spec_C=torch.tensor([[1.0, -1.0]]),
+            run_id="ancestral-missing-policy",
+            config=config,
+            optimizer_policy=_policy(),
+            per_child_refinement_strategy="ancestral_constraint_carry_v1",
+        )
+
+
+def test_ancestral_constraint_packed_and_serial_semantics_match(
+    ancestral_per_child_executions,
+) -> None:
+    packed, serial = ancestral_per_child_executions
+
+    assert packed.trace.logical_queue_signature() == (
+        serial.trace.logical_queue_signature()
+    )
+    assert [item.to_dict() for item in packed.trace.per_child_refinements] == [
+        item.to_dict() for item in serial.trace.per_child_refinements
+    ]
+    assert packed.trace.to_dict()["per_child_refinement_strategy"] == (
+        "ancestral_constraint_carry_v1"
+    )
+    state_comparison = compare_native_optimized_bab_states(packed, serial)
+    assert state_comparison["split_tensors_exact"] is True
+    assert state_comparison["stable_scope_fields_equal"] is True
+    assert state_comparison["intermediate_scope_hashes_equal"] is True
+    assert state_comparison["alpha_max_abs_diff"] <= 1e-6
+    assert state_comparison["beta_max_abs_diff"] <= 1e-6
+
+
+def test_ancestral_constraint_lineage_and_double_monotonicity(
+    ancestral_per_child_executions,
+) -> None:
+    packed, _serial = ancestral_per_child_executions
+    records = {item.node_id: item for item in packed.trace.per_child_refinements}
+    executions = dict(packed.per_child_refinement_executions)
+    evaluations = {item.node.node_id: item for item in packed.trace.evaluations}
+
+    for node_id, execution in executions.items():
+        evaluation = evaluations[node_id]
+        record = records[node_id]
+        _local_env, local_pre = _forward_ibp_trace_mlp(
+            _module(),
+            _spec(),
+            relu_split_state=dict(execution.program.split_state),
+        )
+        for name, local in local_pre.items():
+            initial = execution.program.initial_relu_pre[name]
+            final = execution.relu_pre[name]
+            assert bool((initial.lower >= local.lower).all())
+            assert bool((initial.upper <= local.upper).all())
+            assert bool((final.lower >= initial.lower).all())
+            assert bool((final.upper <= initial.upper).all())
+        if evaluation.node.depth == 0:
+            assert record.source_parent_node_id is None
+            continue
+        parent_id = evaluation.node.parent_node_id or ""
+        parent_record = records[parent_id]
+        assert record.source_parent_node_id == parent_id
+        assert record.source_consumption == "sound_constraint_only"
+        assert record.source_intermediate_constraints_hash == (
+            parent_record.final_intermediate_bounds_hash
+        )
+        assert record.source_refinement_plan_hash == (
+            parent_record.refinement_plan_hash
+        )
+        assert record.source_refinement_semantic_trace_hash == (
+            parent_record.refinement_semantic_trace_hash
+        )
+        assert record.parent_refinement_consumed_as_exact is False
+
+
+def test_ancestral_constraint_parent_lineage_tampering_fails_closed(
+    ancestral_per_child_executions,
+) -> None:
+    packed, _serial = ancestral_per_child_executions
+    trace = packed.trace
+    records = list(trace.per_child_refinements)
+    child_index = next(
+        index for index, item in enumerate(trace.evaluations) if item.node.depth == 1
+    )
+    records[child_index] = replace(
+        records[child_index], source_intermediate_constraints_hash="f" * 64
+    )
+    evaluations = list(trace.evaluations)
+    evaluations[child_index] = replace(
+        evaluations[child_index],
+        intermediate_refinement_trace_hash=records[child_index].stable_hash(),
+    )
+    with pytest.raises(ValueError, match="parent lineage differs"):
+        replace(
+            trace,
+            evaluations=tuple(evaluations),
+            per_child_refinements=tuple(records),
+        ).validate()

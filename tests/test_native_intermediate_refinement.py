@@ -9,6 +9,7 @@ from dataclasses import replace
 import pytest
 import torch
 
+from boundflow.domains.interval import IntervalState
 from boundflow.ir.refinement import (
     IntermediateRefinementTaskKind,
     NativeIntermediateRefinementPolicyIR,
@@ -27,6 +28,7 @@ from boundflow.runtime.native_intermediate_refinement import (
     NativeIntermediateRefinementProgram,
     compile_native_intermediate_refinement_program,
     execute_native_intermediate_refinement_program,
+    intermediate_bounds_hash,
 )
 from boundflow.runtime.task_executor import InputSpec
 
@@ -158,6 +160,100 @@ def test_selected_intermediate_crown_tightens_and_is_sound() -> None:
         h2 = torch.abs(x_value) - 1.0
         assert execution.relu_pre["h2"].lower.item() <= h2.item()
         assert h2.item() <= execution.relu_pre["h2"].upper.item() + 1e-7
+
+
+def test_ancestral_source_execution_is_first_class_and_monotonic() -> None:
+    module = _dependency_mlp()
+    spec = _input_spec()
+    root_program = compile_native_intermediate_refinement_program(
+        module,
+        spec,
+        policy=_policy(),
+        plan_id="ancestral-root",
+    )
+    root = execute_native_intermediate_refinement_program(root_program, module, spec)
+    child_split = {
+        name: value.detach().clone() for name, value in root_program.split_state.items()
+    }
+    child_split["h1"][0, 0] = 1
+    child_program = compile_native_intermediate_refinement_program(
+        module,
+        spec,
+        policy=_policy(),
+        plan_id="ancestral-child",
+        relu_split_state=child_split,
+        source_refinement_execution=root,
+    )
+
+    assert child_program.plan.source_intermediate_constraints_hash == (
+        intermediate_bounds_hash(root.relu_pre)
+    )
+    assert child_program.plan.source_refinement_plan_hash == (
+        root.program.plan.stable_hash()
+    )
+    assert child_program.plan.source_refinement_semantic_trace_hash is not None
+    assert child_program.task_module.tasks[0].input_value_ids == (
+        "refine.module",
+        "refine.input",
+        "refine.split_state",
+        "refine.source_intermediate_constraints",
+    )
+    _local_env, local_pre = _forward_ibp_trace_mlp(
+        module, spec, relu_split_state=child_split
+    )
+    for name, local in local_pre.items():
+        initial = child_program.initial_relu_pre[name]
+        assert bool((initial.lower >= local.lower).all())
+        assert bool((initial.upper <= local.upper).all())
+
+    child = execute_native_intermediate_refinement_program(child_program, module, spec)
+    first_action_inputs = dict(child.trace.action_traces[0].input_hashes)
+    assert first_action_inputs["refine.source_intermediate_constraints"] == (
+        child_program.plan.source_intermediate_constraints_hash
+    )
+    for name, initial in child_program.initial_relu_pre.items():
+        final = child.relu_pre[name]
+        assert bool((final.lower >= initial.lower).all())
+        assert bool((final.upper <= initial.upper).all())
+
+
+def test_ancestral_source_constraint_tampering_fails_closed() -> None:
+    module = _dependency_mlp()
+    spec = _input_spec()
+    root_program = compile_native_intermediate_refinement_program(
+        module,
+        spec,
+        policy=_policy(),
+        plan_id="ancestral-tamper-root",
+    )
+    root = execute_native_intermediate_refinement_program(root_program, module, spec)
+    child = compile_native_intermediate_refinement_program(
+        module,
+        spec,
+        policy=_policy(),
+        plan_id="ancestral-tamper-child",
+        source_refinement_execution=root,
+    )
+    assert child.source_intermediate_constraints is not None
+    changed_constraints = dict(child.source_intermediate_constraints)
+    h2 = changed_constraints["h2"]
+    changed_constraints["h2"] = IntervalState(
+        lower=h2.lower,
+        upper=h2.upper - 0.1,
+    )
+    with pytest.raises(ValueError, match="source constraints differ"):
+        replace(child, source_intermediate_constraints=changed_constraints).validate(
+            module, spec
+        )
+
+    with pytest.raises(ValueError, match="program identity|source execution"):
+        compile_native_intermediate_refinement_program(
+            _competing_width_influence_mlp(),
+            _two_dimensional_input_spec(),
+            policy=_policy(),
+            plan_id="ancestral-wrong-source-module",
+            source_refinement_execution=root,
+        )
 
 
 def test_refinement_rejects_source_and_schedule_tamper() -> None:

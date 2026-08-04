@@ -2,7 +2,7 @@
 
 > 状态：**顶层执行计划 v1.0；后续研究工作受本文门禁约束。**  
 > 基线日期：2026-07-12  
-> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`0fc54ce`
+> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`abe37e8`
 > 投稿策略：ASPLOS 2027 September Cycle 为有条件冲刺；ASPLOS 2028 为稳健主目标。
 
 > **路线修订（2026-07-20）**：本文保留 2026-07-12 的研究问题、历史门禁和 PR-10—13
@@ -34,6 +34,12 @@
 > 退化 `0.847961/0.936646`，故该策略 `VALIDATED-NO-GO`。下一方法门禁是把祖先已证明 refined
 > constraints 与 child exact split-forward 单调合并后再 refinement；不得靠扩大树或单次 timing
 > 掩盖当前 tightness 退化。
+
+> **2026-08-04 NRIR-22 修订**：祖先 refinement execution 已成为 child Plan/Task/Schedule 的
+> typed constraint source。固定 clauses 0/1 的 worst leaf 相对 independent 提升
+> `73.615173/75.022095`，相对 root-global 提升 `72.767212/74.085449`；fixed-tree tightness
+> `VALIDATED-REDUCED`。所有 worst leaf 仍负，下一门禁是 hard-clause/depth/node convergence
+> 曲线，不得升级 complete verifier 或 performance/ASPLOS-ready claim。
 
 > **2026-08-04 NRIR-1 修订**：上述 native correctness 门禁已通过。固定 ResNet2B 的
 > 17-op Primal graph 已 lower/execute 为 21-op native Bound/Task/Schedule path，五层 hash 绑定

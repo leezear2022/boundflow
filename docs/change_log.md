@@ -4083,3 +4083,21 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_PER_CHILD_OBJECTIVE_REFINEMENT_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Ancestral-Constraint Refinement v1
+
+- child refinement Plan/Task/Schedule 显式绑定并消费 validated parent refinement execution 的
+  final bounds、Plan 与 semantic trace；不接受裸 mapping，source 只作 sound constraint；
+- local exact-split forward→constrained initial→final refinement 双重单调，queue parent lineage、
+  Task dependency、source hash 与 tamper 全 fail closed；
+- fixed ResNet clauses 0/1、同 96-target/5-step、7-node/depth-2 预算下，ancestral worst leaf 相对
+  independent 提升 `+73.615173/+75.022095`，相对 root-global 提升
+  `+72.767212/+74.085449`，root exact；
+- 以 fixed bounded-tree tightness `VALIDATED-REDUCED` 关闭；叶 lower 仍负，不声明 complete
+  property、CUDA、competitor speedup、repeated performance 或 ASPLOS-ready；下一路线为
+  hard-clause convergence expansion。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_ANCESTRAL_CONSTRAINT_REFINEMENT_V1_CHANGELOG_2026_08_04.md`
