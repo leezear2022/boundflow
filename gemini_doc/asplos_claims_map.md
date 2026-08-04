@@ -1230,3 +1230,26 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   `d69b56d4d82ad5bf8d30883258c15a39e5a45f1fac9dbc8eb35e91fda9f6a492`；whole cooperative elapsed=
   `[63.357098,63.161128,62.485366] s`；全量 `944 passed, 37 skipped`。下一步只做 scoring/queue
   cost 与 frontier-order 因果归因，不事后扫 policy 常数。
+
+### NRIR-41：Objective Branch Production Cost Attribution v1
+
+- `C1/C2-M-NRIR41` attribution ownership：新增 Plan/6-task TaskModule/Schedule、16 条 prefix IR、12 条
+  unprofiled wall IR、8 条 cProfile phase IR 与 causal Decision；source admission→prefix reconstruction→
+  paired execution→profile→decision→emit 全部 hash-bound，NRIR-39/40 frozen 文件未改；
+- `C3-G-NRIR41` fail-closed gate：replay 从 NRIR-39 ordered evaluations 按 parent lineage 独立重建
+  active sets 与 worst/median，重算三轮 median/MAD、queue ratio、profile share、Decision 和 Task/Schedule；
+  formal/manifest 同步重哈希 prefix tamper 仍被拒绝；
+- `C1/C3-E-NRIR41` frontier result：clauses 2/3 在 `21/23/29/31` same-node prefix 的 objective-widest
+  worst improvement 分别为 `[+2.171364,+2.416264,+2.947929,+2.043362]` 与
+  `[+4.988102,+6.255299,+6.350922,+5.641768]`，`frontier_order_retained=true`；
+- `C1/C3-E-NRIR41` cost result：widest/objective queue median 为 clauses 2
+  `10.515292/18.387675 s`、clause 3 `10.619606/18.591097 s`，ratio=
+  `1.748660/1.750639`；branch-program share=`21.9371%/21.9139%`，31 次 branch program 对应 341 次
+  candidate enumeration，`scoring_cost_dominant=true`；
+- `C3-L-NRIR41` claim boundary：本结果只准入下一 scorer ownership/validation reuse 单变量，不是
+  production/system speedup，也没有 property/GPU/competitor/multi-workload/ASPLOS-ready claim；NRIR-40
+  global-budget `VALIDATED-NO-GO` 不变，`performance_claimed=false`；
+- 工件：`artifacts/objective-branch-production-cost-attribution/`
+  `vnncomp21-resnet2b-property0-three-repeat-cpu-v1/`；formal hash=
+  `fe67b77197905a8a4d7f92ad5eac686892243dfb0e7d7b7c7434861aaa794834`。本阶段 attribution
+  `VALIDATED-REDUCED`，全量 `948 passed, 37 skipped`，Decision=`optimize_scorer_ownership`。

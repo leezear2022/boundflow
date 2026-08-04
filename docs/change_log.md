@@ -4444,3 +4444,23 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_WHOLE_QUERY_FORMAL_V1_CHANGELOG_2026_08_05.md`
+
+---
+
+## 2026-08-05：Objective Branch Production Cost Attribution v1
+
+- 新增 attribution Plan/6-task TaskModule/Schedule、prefix/wall/profile/Decision IR，不修改 NRIR-39/40
+  frozen runtime 与 artifact；
+- 从 frozen 31-node rows 重建 clauses 2/3 的 `21/23/29/31` active frontier，objective 相对 widest
+  worst-active improvement 全部为正，frontier-order gate 成立；
+- 三 fresh counterbalanced paired runs 的 objective/widest queue median ratio=
+  `1.748660/1.750639`，cProfile branch-program share=`21.9371%/21.9139%`；31 次 branch program
+  实际触发 341 次 candidate enumeration；
+- formal replay、median/MAD 重算与同步重哈希 prefix tamper fail closed；formal hash=
+  `fe67b77197905a8a4d7f92ad5eac686892243dfb0e7d7b7c7434861aaa794834`；
+- focused `4 passed`、predecessor-inclusive `12 passed`、全量 `948 passed, 37 skipped`，静态门禁通过；
+- 以 internal causal attribution `VALIDATED-REDUCED` 关闭，`performance_claimed=false`；下一单变量
+  限定为 scorer ownership/validation reuse，不撤销 NRIR-40 production NO-GO。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_PRODUCTION_COST_ATTRIBUTION_V1_CHANGELOG_2026_08_05.md`

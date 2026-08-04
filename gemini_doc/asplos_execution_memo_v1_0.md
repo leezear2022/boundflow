@@ -1455,3 +1455,36 @@ NRIR-39 fixed-budget `VALIDATED-REDUCED` 仍只证明在相同 31-node frontier 
 不能推导真实 deadline 下的 production 收益。下一阶段若继续，必须先做 objective scoring/queue phase
 wall-time 与 frontier-order 因果归因，再预注册一个单变量；不得事后调 top-k、slice、node cap、optimizer
 或门槛，也不得形成 property/GPU/competitor/multi-workload/ASPLOS-ready claim。
+
+## 54. Objective Branch Production Cost Attribution v1
+
+NRIR-41 不修改 NRIR-39/40 frozen 文件，也不直接优化 policy。它先把 NO-GO 拆成两个可证伪问题：
+一是在相同 `21/23/29/31` accepted-node 前缀上 objective branch 的 worst frontier 是否仍不弱于
+widest；二是 objective scoring 的真实 queue wall 成本是否足以解释 global deadline 下缺失最后一个
+sibling pair。prefix 只从 NRIR-39 frozen evaluations 按 parent lineage 独立重建。
+
+成本实验固定 clauses 2/3、CPU 8 threads、31/depth4、fresh cache，使用 3 fresh paired subprocesses 并
+按 `W→O/O→W/W→O` counterbalance；另设 1 个 cProfile diagnostic，profiled timing 不进入 unprofiled
+median。新增 attribution Plan/Task/Schedule/Decision 拥有 source admission、prefix reconstruction、paired
+execution、phase profile、causal decision 和 emit；`performance_claimed=false`。
+
+只有 `frontier_order_retained`（两 clause 四 prefix 均不弱且 31-node `>=+1.0`）与
+`scoring_cost_dominant`（两 clause objective/widest queue median ratio 均 `>=1.20` 且 branch-program
+cumulative share `>=20%`）同时成立，下一阶段才允许优化 scorer ownership/复用。前者失败则冻结
+objective branch production 路线；前者成立但后者失败则转查 deadline/atomic-tail scheduling，不扫
+top-k、slice、node cap、optimizer 或门槛。
+
+正式结果中，same-prefix worst-active improvement 对 clauses 2/3 分别为
+`[+2.171364,+2.416264,+2.947929,+2.043362]` 与
+`[+4.988102,+6.255299,+6.350922,+5.641768]`，故 frontier gate 成立。三 fresh paired runs 的
+widest/objective queue median 为 `10.515292/18.387675 s` 与 `10.619606/18.591097 s`，ratio=
+`1.748660/1.750639`；MAD 分别为 `0.020595/0.266792 s` 与 `0.002217/0.242127 s`。
+cProfile branch-program share=`21.9371%/21.9139%`，并显示 31 次 branch program 触发 341 次
+candidate enumeration。两个方向门禁均成立，Decision 为 `optimize_scorer_ownership`。
+
+formal hash=`fe67b77197905a8a4d7f92ad5eac686892243dfb0e7d7b7c7434861aaa794834`；replay 与同步重哈希
+prefix tamper、focused `4 passed`、predecessor-inclusive `12 passed`、全量
+`948 passed, 37 skipped` 与静态门禁通过。本阶段以 internal causal attribution
+`VALIDATED-REDUCED` 关闭，但不构成
+system speedup/property/GPU/competitor/multi-workload/ASPLOS-ready claim，也不撤销 NRIR-40
+global-budget NO-GO。下一阶段只能消除 scorer ownership/validation 重复并保持 exact branch semantics。

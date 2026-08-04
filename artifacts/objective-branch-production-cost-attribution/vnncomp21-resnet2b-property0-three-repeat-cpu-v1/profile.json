@@ -1,0 +1,79 @@
+{
+  "performance_claimed": false,
+  "profile_hash": "10ed6e40fba8282212db2c862950ce681d5e38b024662e8bc9e0682f4de6c707",
+  "profile_rows": [
+    {
+      "cumulative_ns": 5836731336,
+      "original_clause_index": 2,
+      "phase_id": "branch_program",
+      "plan_hash": "7ad801a73b0eea2247f1565cc5d40f595f2edca041135423196efb35a7e1c327",
+      "primitive_calls": 31,
+      "profile_queue_elapsed_ns": 26606675436,
+      "total_ns": 4517232
+    },
+    {
+      "cumulative_ns": 8035565113,
+      "original_clause_index": 2,
+      "phase_id": "enumerate_candidates",
+      "plan_hash": "7ad801a73b0eea2247f1565cc5d40f595f2edca041135423196efb35a7e1c327",
+      "primitive_calls": 341,
+      "profile_queue_elapsed_ns": 26606675436,
+      "total_ns": 6301042072
+    },
+    {
+      "cumulative_ns": 21783094,
+      "original_clause_index": 2,
+      "phase_id": "materialize_children",
+      "plan_hash": "7ad801a73b0eea2247f1565cc5d40f595f2edca041135423196efb35a7e1c327",
+      "primitive_calls": 31,
+      "profile_queue_elapsed_ns": 26606675436,
+      "total_ns": 13301684
+    },
+    {
+      "cumulative_ns": 724303541,
+      "original_clause_index": 2,
+      "phase_id": "evaluate_child_bounds",
+      "plan_hash": "7ad801a73b0eea2247f1565cc5d40f595f2edca041135423196efb35a7e1c327",
+      "primitive_calls": 31,
+      "profile_queue_elapsed_ns": 26606675436,
+      "total_ns": 2553514
+    },
+    {
+      "cumulative_ns": 5890091979,
+      "original_clause_index": 3,
+      "phase_id": "branch_program",
+      "plan_hash": "7ad801a73b0eea2247f1565cc5d40f595f2edca041135423196efb35a7e1c327",
+      "primitive_calls": 31,
+      "profile_queue_elapsed_ns": 26878380208,
+      "total_ns": 9430323
+    },
+    {
+      "cumulative_ns": 8049286090,
+      "original_clause_index": 3,
+      "phase_id": "enumerate_candidates",
+      "plan_hash": "7ad801a73b0eea2247f1565cc5d40f595f2edca041135423196efb35a7e1c327",
+      "primitive_calls": 341,
+      "profile_queue_elapsed_ns": 26878380208,
+      "total_ns": 6311406768
+    },
+    {
+      "cumulative_ns": 21227161,
+      "original_clause_index": 3,
+      "phase_id": "materialize_children",
+      "plan_hash": "7ad801a73b0eea2247f1565cc5d40f595f2edca041135423196efb35a7e1c327",
+      "primitive_calls": 31,
+      "profile_queue_elapsed_ns": 26878380208,
+      "total_ns": 12648883
+    },
+    {
+      "cumulative_ns": 762073637,
+      "original_clause_index": 3,
+      "phase_id": "evaluate_child_bounds",
+      "plan_hash": "7ad801a73b0eea2247f1565cc5d40f595f2edca041135423196efb35a7e1c327",
+      "primitive_calls": 31,
+      "profile_queue_elapsed_ns": 26878380208,
+      "total_ns": 3090164
+    }
+  ],
+  "schema_version": "boundflow.objective-branch-cost-attribution-profile/v1"
+}
