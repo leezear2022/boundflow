@@ -649,3 +649,21 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - 工件：`artifacts/native-alpha-beta-optimization-state/vnncomp21-resnet2b-prop0-cpu-v1/`；聚焦
   `50 passed`、全量 `591 passed, 37 skipped`、静态门禁与 fresh replay 全过；下一缺口为
   optimizer-step Task/Schedule control。
+
+### 2026-08-04 Native Alpha/Beta Optimizer-Step Schedule v1
+
+- `C3-M-NRIR11` validated-reduced control mechanism：Optimizer Plan 绑定 NRIR-10 的 10 个 source
+  compiler hash、state/scope/policy/ReLU keys；固定 step 被 lower 为 evaluate/reduce/backward/
+  Adam/project/select-best Task 与一一对应 Schedule actions；
+- `C3-G-NRIR11` control/trace gate：task dependency、state version、action order、逐 value hash chain、
+  evaluation bound/metric/state、gradient、projection、best iteration 与 runtime scope 篡改均
+  fail closed；warm start 复用 NRIR-10 exact/refinement/rejected classifier；
+- `C3-E-NRIR11` fixed ResNet execution：1-step program 为 8 Task/Action、2 evaluations、1 backward/
+  update/project；alpha/beta gradient L1=`169.23175295069814/12.862210273742676`。Schedule/legacy/
+  selected-state native compiler lower/upper max diff 均为 `0.0`，state hash 与 legacy 相同；
+- `C3-L-NRIR11` hard limitation：fixed-step static unroll，不含 dynamic early stop；尚未接入多节点
+  ReLU-split queue，也无完整 termination/property verdict 或 timing/memory/CUDA/OOM/Pareto/speedup；
+- 工件：`artifacts/native-alpha-beta-optimizer-schedule/vnncomp21-resnet2b-prop0-cpu-v1/`；replay
+  hash=`31261b63d80a7b11dc14484ddab2fe37bbafcc86866aaeaaa53d6af70ea40a19`；聚焦 `35 passed`、
+  全量 `612 passed, 37 skipped`、静态门禁全过；下一缺口为 optimizer Schedule × ReLU-split
+  BaB queue integration。

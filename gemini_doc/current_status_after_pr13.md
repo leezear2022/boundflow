@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`2b3195c`（NRIR-9 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/native-alpha-beta-optimization-state-v1`
+> 当前 integration base：`8dba95c`（NRIR-10 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/native-alpha-beta-optimizer-step-schedule-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
@@ -76,6 +76,13 @@
 > 2 child，full-size-8 执行 1 child，same-policy serial 执行 8 child；三路径 lower/upper
 > bitwise equal、8/8 lineage 恢复。状态为 input-domain batching/state ownership
 > VALIDATED-REDUCED；ReLU/β split、BaB queue/prune/termination 与 performance 仍 pending。
+> 2026-08-04 NRIR-9/10 后续：first-class ReLU split queue 与 frozen alpha/beta state 已分别合并；
+> split/alpha/beta 均进入 native Bound/Plan/Task/Schedule，warm-start 只允许 exact 或 monotonic
+> refinement initialization。完整搜索/verdict 与性能仍未关闭。
+> 2026-08-04 NRIR-11 进度：fixed-step optimizer 已 lower 为 typed Plan/Task/Schedule。固定 ResNet
+> 1-step program 执行 8 actions，alpha/beta gradient L1=`169.23175295069814/12.862210273742676`；
+> Schedule/legacy/final native execution max diff 均为 `0.0`。状态为 optimizer control ownership
+> VALIDATED-REDUCED；下一缺口为接回 multi-node ReLU-split BaB queue。
 
 ## 1. 当前真实阶段
 
@@ -97,6 +104,9 @@ BoundFlow 已经完成从边界表示到 query runtime prototype 的主干：
 | Native joint policy NRIR-6 | cross-axis correctness/ownership validated-reduced | 同一 template/selector 的 dense/structured × full/sliced 四组合；policy propagation、21/63/49/147 child ownership、external sign 9/9；跨 query/domain/performance pending |
 | Native repeated-query NRIR-7 | query formation/cache/lineage validated-reduced | 9 property queries→packed 3 child vs serial 9；exact cache miss/hit/key invalidation；9/9 restore；BaB domain/performance pending |
 | Native input-domain batching NRIR-8 | parent/child state + domain execution validated-reduced | 8 different leaf boxes；8 exact child states；full 1 / packed 2 / serial 8 stacks bitwise equal；parent warm-start-only；full BaB/performance pending |
+| Native ReLU-split queue NRIR-9 | split state + bounded control flow validated-reduced | first-class int8 split；toy complete queue；fixed ResNet 7 nodes/3 expands/4 frontier；plain CROWN、budget-exhausted、无完整 verdict/performance |
+| Native alpha/beta state NRIR-10 | frozen optimized-state ownership validated-reduced | 6 ReLU split/alpha/beta inputs；beta lower dual；exact/refinement warm-start；runtime optimizer control 当时仍缺 |
+| Native optimizer Schedule NRIR-11 | fixed-step control ownership validated-reduced | typed optimizer Plan/Task/Schedule；fixed ResNet 8 actions、正 alpha/beta gradient、legacy/native 0 diff；尚未接回 multi-node queue，无 verdict/performance |
 | ASPLOS 最终系统主张 | IR-5 final VALIDATED-NO-GO | IR-1—4 narrow closure 保留；Global p90/Pareto 失败，当前 system-performance 路线已关闭 |
 
 历史 `main@263ea81` 只到 PR-10 closure，不能再作为项目当前状态入口。跨会话恢复必须同时检查
@@ -467,3 +477,22 @@ artifact generate/replay、聚焦 `50 passed`、全量 `591 passed, 37 skipped` 
 结论为 frozen alpha/beta state ownership、beta constraint execution、warm-start validity
 `VALIDATED-REDUCED`。Adam iteration/gradient/update 尚未 lower 到 Task/Schedule；没有完整 BaB/
 property verdict 或性能证据。下一代码路线为 native alpha/beta optimizer-step Task/Schedule control v1。
+
+## 18. Native Alpha/Beta Optimizer-Step Schedule v1 判定
+
+NRIR-11 已关闭 NRIR-10 的“Adam iteration/gradient/update 仍 opaque”缺口。Optimizer Plan 绑定
+NRIR-10 source compiler 的 10 个 hash、initial state/scope、policy、ReLU keys 与 warm-start；固定
+steps 被静态 lower 为 evaluate/reduce/backward/Adam/project/select-best Task 与同步 Schedule。
+runtime 只按 action 顺序执行，并记录完整 value hash chain、gradient、projection、evaluation 和
+per-domain best selection。
+
+2-step toy 为 13 actions，与 legacy bounds/alpha/beta 逐张量一致。固定 ResNet 1-step child 为
+8 actions；alpha/beta gradient L1=`169.23175295069814/12.862210273742676`，Schedule 对 legacy 与
+selected-state native compiler 的 lower/upper max diff 全为 `0.0`。artifact replay hash 为
+`31261b63d80a7b11dc14484ddab2fe37bbafcc86866aaeaaa53d6af70ea40a19`；聚焦 `35 passed`、
+全量 `612 passed, 37 skipped`，静态门禁全过。
+
+结论为 fixed-step optimizer control ownership `VALIDATED-REDUCED`。这不是 dynamic optimizer，也
+尚未进入 multi-node BaB queue；没有完整 termination/property verdict 或性能证据。下一代码路线
+是 native optimized ReLU-split BaB integration v1：每个 node 由 optimizer Schedule 产生 selected
+state，再经 native Bound stack 执行，parent 只能作为 monotonic-refinement initialization。

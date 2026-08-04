@@ -1,0 +1,9 @@
+{
+  "evidence_hash": "31261b63d80a7b11dc14484ddab2fe37bbafcc86866aaeaaa53d6af70ea40a19",
+  "files": {
+    "optimizer_schedule.json": "8ca73a3eee24221b9f746ec8f545b0f384f19cccea475db71adde9e7ba779d43"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.native-alpha-beta-optimizer-schedule-artifact/v1",
+  "status": "ok"
+}
