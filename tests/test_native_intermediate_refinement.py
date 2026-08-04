@@ -70,6 +70,41 @@ def _input_spec() -> InputSpec:
     )
 
 
+def _competing_width_influence_mlp() -> BFTaskModule:
+    return BFTaskModule(
+        tasks=[
+            BoundTask(
+                task_id="objective-refinement-test",
+                kind=TaskKind.INTERVAL_IBP,
+                ops=[
+                    TaskOp("linear", "scaled", ["input", "W1", "b1"], ["h1"]),
+                    TaskOp("relu", "relu1", ["h1"], ["r1"]),
+                    TaskOp("linear", "output", ["r1", "W2", "b2"], ["out"]),
+                ],
+                input_values=["input"],
+                output_values=["out"],
+            )
+        ],
+        entry_task_id="objective-refinement-test",
+        bindings={
+            "params": {
+                "W1": torch.tensor([[2.0, 0.0], [0.0, 1.0]]),
+                "b1": torch.zeros(2),
+                "W2": torch.tensor([[0.01, 1.0]]),
+                "b2": torch.zeros(1),
+            }
+        },
+    )
+
+
+def _two_dimensional_input_spec() -> InputSpec:
+    return InputSpec.box(
+        value_name="input",
+        lower=torch.tensor([[-1.0, -1.0]]),
+        upper=torch.tensor([[1.0, 1.0]]),
+    )
+
+
 def _policy(*, passes: int = 1) -> NativeIntermediateRefinementPolicyIR:
     return NativeIntermediateRefinementPolicyIR(
         passes=passes,
@@ -202,6 +237,99 @@ def test_native_refined_provenance_reaches_optimizer_and_bound_ir() -> None:
         attrs.intermediate_bound_source == IntermediateBoundSource.NATIVE_REFINED
         for attrs in relu_attrs
     )
+
+
+def test_objective_directed_policy_changes_target_and_has_exact_ir_dependency() -> None:
+    module = _competing_width_influence_mlp()
+    spec = _two_dimensional_input_spec()
+    width_program = compile_native_intermediate_refinement_program(
+        module,
+        spec,
+        policy=NativeIntermediateRefinementPolicyIR(
+            passes=1,
+            max_neurons_per_relu=1,
+            backward_chunk_size=1,
+        ),
+        plan_id="width-directed",
+    )
+    objective_program = compile_native_intermediate_refinement_program(
+        module,
+        spec,
+        policy=NativeIntermediateRefinementPolicyIR(
+            passes=1,
+            max_neurons_per_relu=1,
+            backward_chunk_size=1,
+            candidate_policy_id="objective_influence_width_per_relu_v1",
+        ),
+        plan_id="objective-directed",
+        linear_spec_C=torch.ones(1, 1),
+    )
+
+    assert width_program.plan.targets[0].neuron_index == 0
+    target = objective_program.plan.targets[0]
+    assert target.neuron_index == 1
+    assert target.objective_influence == pytest.approx(1.0)
+    assert target.selection_score == pytest.approx(2.0)
+    assert objective_program.plan.objective_hash is not None
+    assert objective_program.task_module.tasks[2].input_value_ids == (
+        "refine.bounds.p0",
+        "refine.candidates",
+        "refine.policy",
+        "refine.objective_influence",
+    )
+    execution = execute_native_intermediate_refinement_program(
+        objective_program, module, spec
+    )
+    assert len(execution.trace.action_traces) == len(objective_program.schedule.actions)
+
+
+def test_objective_directed_policy_fails_closed_on_admission_and_tamper() -> None:
+    module = _competing_width_influence_mlp()
+    spec = _two_dimensional_input_spec()
+    objective_policy = NativeIntermediateRefinementPolicyIR(
+        passes=1,
+        max_neurons_per_relu=1,
+        backward_chunk_size=1,
+        candidate_policy_id="objective_influence_width_per_relu_v1",
+    )
+    with pytest.raises(ValueError, match="policy/objective admission"):
+        compile_native_intermediate_refinement_program(
+            module,
+            spec,
+            policy=objective_policy,
+            plan_id="missing-objective",
+        )
+    with pytest.raises(ValueError, match="policy/objective admission"):
+        compile_native_intermediate_refinement_program(
+            module,
+            spec,
+            policy=NativeIntermediateRefinementPolicyIR(
+                passes=1,
+                max_neurons_per_relu=1,
+                backward_chunk_size=1,
+            ),
+            plan_id="unexpected-objective",
+            linear_spec_C=torch.ones(1, 1),
+        )
+    with pytest.raises(ValueError, match="one finite scalar clause"):
+        compile_native_intermediate_refinement_program(
+            module,
+            spec,
+            policy=objective_policy,
+            plan_id="multi-clause-objective",
+            linear_spec_C=torch.ones(2, 1),
+        )
+
+    program = compile_native_intermediate_refinement_program(
+        module,
+        spec,
+        policy=objective_policy,
+        plan_id="tampered-objective",
+        linear_spec_C=torch.ones(1, 1),
+    )
+    changed = replace(program, objective=torch.full((1, 1), 2.0))
+    with pytest.raises(ValueError, match="objective hash differs"):
+        changed.validate(module, spec)
 
 
 def test_refinement_policy_rejects_unbounded_or_inconsistent_cost() -> None:

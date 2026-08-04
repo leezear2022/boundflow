@@ -34,6 +34,7 @@ from ..ir.task import BFTaskModule
 from .crown_ibp import (
     _forward_ibp_trace_mlp,
     run_crown_ibp_mlp_from_forward_trace,
+    run_crown_ibp_mlp_with_relu_influence_from_forward_trace,
 )
 from .task_executor import InputSpec
 
@@ -141,23 +142,70 @@ def _validate_split_state(
             raise ValueError("native refinement split state schema differs")
 
 
+def _enumerate_ambiguous(
+    relu_pre: Mapping[str, IntervalState],
+) -> dict[str, tuple[int, ...]]:
+    candidates: dict[str, tuple[int, ...]] = {}
+    for name, value in relu_pre.items():
+        if int(value.lower.shape[0]) != 1:
+            raise ValueError("native refinement v1 requires one source domain")
+        lower = value.lower.reshape(-1)
+        upper = value.upper.reshape(-1)
+        candidates[name] = tuple(
+            int(index)
+            for index in torch.nonzero((lower < 0.0) & (upper > 0.0), as_tuple=False)
+            .reshape(-1)
+            .tolist()
+        )
+    return candidates
+
+
 def _select_targets(
     relu_pre: Mapping[str, IntervalState],
     policy: NativeIntermediateRefinementPolicyIR,
+    *,
+    objective_influence: Optional[Mapping[str, torch.Tensor]] = None,
 ) -> tuple[NativeIntermediateRefinementTargetIR, ...]:
     policy.validate()
+    objective_directed = (
+        policy.candidate_policy_id == "objective_influence_width_per_relu_v1"
+    )
+    if objective_directed != (objective_influence is not None):
+        raise ValueError("native refinement target policy/influence differs")
+    if objective_influence is not None and tuple(objective_influence) != tuple(
+        relu_pre
+    ):
+        raise ValueError("native refinement influence identities differ")
     targets: list[NativeIntermediateRefinementTargetIR] = []
     for name, value in relu_pre.items():
         if int(value.lower.shape[0]) != 1:
             raise ValueError("native refinement v1 requires one source domain")
         lower = value.lower.reshape(-1)
         upper = value.upper.reshape(-1)
-        ambiguous = (lower < 0.0) & (upper > 0.0)
-        indices = torch.nonzero(ambiguous, as_tuple=False).reshape(-1).tolist()
+        influence = (
+            None
+            if objective_influence is None
+            else objective_influence[name].reshape(-1)
+        )
+        if influence is not None and (
+            influence.shape != lower.shape
+            or influence.dtype != lower.dtype
+            or influence.device != lower.device
+            or not bool(torch.isfinite(influence).all())
+            or bool((influence < 0.0).any())
+        ):
+            raise ValueError("native refinement influence tensor schema differs")
+        indices = _enumerate_ambiguous({name: value})[name]
         ranked = sorted(
             (
                 (
-                    -float((upper[index] - lower[index]).item()),
+                    -float(
+                        (
+                            (upper[index] - lower[index])
+                            if influence is None
+                            else (upper[index] - lower[index]) * influence[index]
+                        ).item()
+                    ),
                     int(index),
                 )
                 for index in indices
@@ -167,6 +215,9 @@ def _select_targets(
         for _negative_width, index in ranked:
             initial_lower = float(lower[index].item())
             initial_upper = float(upper[index].item())
+            objective_influence_value = (
+                None if influence is None else float(influence[index].item())
+            )
             targets.append(
                 NativeIntermediateRefinementTargetIR(
                     ordinal=len(targets),
@@ -175,6 +226,12 @@ def _select_targets(
                     initial_lower=initial_lower,
                     initial_upper=initial_upper,
                     initial_width=initial_upper - initial_lower,
+                    objective_influence=objective_influence_value,
+                    selection_score=(
+                        None
+                        if objective_influence_value is None
+                        else objective_influence_value * (initial_upper - initial_lower)
+                    ),
                 )
             )
     if not targets:
@@ -195,6 +252,8 @@ class NativeIntermediateRefinementProgram:
     initial_interval_env: Mapping[str, IntervalState]
     initial_relu_pre: Mapping[str, IntervalState]
     split_state: Mapping[str, torch.Tensor]
+    objective: Optional[torch.Tensor] = None
+    objective_influence: Optional[Mapping[str, torch.Tensor]] = None
 
     def validate(self, module: BFTaskModule, input_spec: InputSpec) -> None:
         self.schedule.validate(plan=self.plan, task_module=self.task_module)
@@ -207,8 +266,20 @@ class NativeIntermediateRefinementProgram:
         ):
             raise ValueError("native intermediate refinement program identity differs")
         _validate_split_state(self.split_state, self.initial_relu_pre)
+        objective_directed = self.plan.objective_hash is not None
+        if objective_directed != (self.objective is not None) or objective_directed != (
+            self.objective_influence is not None
+        ):
+            raise ValueError("native refinement program objective semantics differ")
+        if (
+            self.objective is not None
+            and self.plan.objective_hash != tensor_content_hash(self.objective)
+        ):
+            raise ValueError("native refinement program objective hash differs")
         if self.plan.targets != _select_targets(
-            self.initial_relu_pre, self.plan.policy
+            self.initial_relu_pre,
+            self.plan.policy,
+            objective_influence=self.objective_influence,
         ):
             raise ValueError("native intermediate refinement target selection differs")
 
@@ -407,6 +478,7 @@ def compile_native_intermediate_refinement_program(
     policy: NativeIntermediateRefinementPolicyIR,
     plan_id: str,
     relu_split_state: Optional[Mapping[str, torch.Tensor]] = None,
+    linear_spec_C: Optional[torch.Tensor] = None,
 ) -> NativeIntermediateRefinementProgram:
     """Compile an exact target set and unrolled refinement schedule."""
 
@@ -430,7 +502,40 @@ def compile_native_intermediate_refinement_program(
         )
     else:
         initial_pre = unsplit_pre
-    targets = _select_targets(initial_pre, policy)
+    objective_directed = (
+        policy.candidate_policy_id == "objective_influence_width_per_relu_v1"
+    )
+    if objective_directed != (linear_spec_C is not None):
+        raise ValueError("native refinement policy/objective admission differs")
+    objective = None
+    objective_influence = None
+    objective_hash = None
+    if linear_spec_C is not None:
+        if (
+            not torch.is_tensor(linear_spec_C)
+            or not torch.is_floating_point(linear_spec_C)
+            or linear_spec_C.dim() not in {2, 3}
+            or int(linear_spec_C.shape[-2]) != 1
+            or (linear_spec_C.dim() == 3 and int(linear_spec_C.shape[0]) != 1)
+            or not bool(torch.isfinite(linear_spec_C).all())
+        ):
+            raise ValueError(
+                "native objective-directed refinement requires one finite scalar clause"
+            )
+        objective = linear_spec_C.detach().contiguous().clone()
+        _objective_bounds, objective_influence = (
+            run_crown_ibp_mlp_with_relu_influence_from_forward_trace(
+                module,
+                input_spec,
+                interval_env=dict(initial_env),
+                relu_pre=dict(initial_pre),
+                linear_spec_C=objective,
+            )
+        )
+        objective_hash = tensor_content_hash(objective)
+    targets = _select_targets(
+        initial_pre, policy, objective_influence=objective_influence
+    )
     plan = NativeIntermediateRefinementPlanIR(
         plan_id=plan_id,
         primal_graph_hash=plain_crown_primal_graph_hash(module),
@@ -439,6 +544,7 @@ def compile_native_intermediate_refinement_program(
         initial_intermediate_bounds_hash=intermediate_bounds_hash(initial_pre),
         policy=policy,
         targets=targets,
+        objective_hash=objective_hash,
     )
     task_module, schedule = lower_native_intermediate_refinement_ir(plan)
     program = NativeIntermediateRefinementProgram(
@@ -448,6 +554,8 @@ def compile_native_intermediate_refinement_program(
         initial_interval_env=initial_env,
         initial_relu_pre=initial_pre,
         split_state=splits,
+        objective=objective,
+        objective_influence=objective_influence,
     )
     program.validate(module, input_spec)
     return program
@@ -606,7 +714,25 @@ def _runtime_value_hash(value: object) -> str:
         if value and all(isinstance(item, IntervalState) for item in value.values()):
             return intermediate_bounds_hash(value)  # type: ignore[arg-type]
         if value and all(torch.is_tensor(item) for item in value.values()):
-            return relu_split_state_hash(value)  # type: ignore[arg-type]
+            tensors = value  # type: ignore[assignment]
+            if all(item.dtype == torch.int8 for item in tensors.values()):
+                return relu_split_state_hash(tensors)  # type: ignore[arg-type]
+            return _canonical_hash(
+                [
+                    {"relu_input": name, "influence": _tensor_schema(item)}
+                    for name, item in tensors.items()
+                ]
+            )
+        if value and all(
+            isinstance(item, tuple) and all(isinstance(index, int) for index in item)
+            for item in value.values()
+        ):
+            return _canonical_hash(
+                [
+                    {"relu_input": name, "ambiguous_indices": list(indices)}
+                    for name, indices in value.items()
+                ]
+            )
         if value and all(
             isinstance(item, tuple) and len(item) == 3 for item in value.values()
         ):
@@ -637,6 +763,8 @@ def execute_native_intermediate_refinement_program(
         "refine.split_state": program.split_state,
         "refine.policy": program.plan.policy,
     }
+    if program.objective_influence is not None:
+        values["refine.objective_influence"] = program.objective_influence
     action_traces: list[NativeIntermediateRefinementActionTrace] = []
     pass_traces: list[NativeIntermediateRefinementPassTrace] = []
     for action, task in zip(program.schedule.actions, program.task_module.tasks):
@@ -650,14 +778,46 @@ def execute_native_intermediate_refinement_program(
             source = values[action.input_value_ids[0]]
             if not isinstance(source, Mapping):
                 raise TypeError("native refinement enumeration input differs")
-            values[action.output_value_ids[0]] = _select_targets(
-                source, program.plan.policy  # type: ignore[arg-type]
-            )
+            if program.plan.objective_hash is not None:
+                values[action.output_value_ids[0]] = _enumerate_ambiguous(
+                    source  # type: ignore[arg-type]
+                )
+            else:
+                values[action.output_value_ids[0]] = _select_targets(
+                    source, program.plan.policy  # type: ignore[arg-type]
+                )
         elif task.kind == IntermediateRefinementTaskKind.SELECT_TARGETS:
-            candidates = values[action.input_value_ids[0]]
-            if candidates != program.plan.targets:
-                raise ValueError("native refinement runtime targets differ from Plan")
-            values[action.output_value_ids[0]] = program.plan.targets
+            if program.plan.objective_hash is not None:
+                source = values[action.input_value_ids[0]]
+                candidates = values[action.input_value_ids[1]]
+                policy = values[action.input_value_ids[2]]
+                influence = values[action.input_value_ids[3]]
+                if (
+                    not isinstance(source, Mapping)
+                    or not isinstance(candidates, Mapping)
+                    or not isinstance(policy, NativeIntermediateRefinementPolicyIR)
+                    or not isinstance(influence, Mapping)
+                    or candidates
+                    != _enumerate_ambiguous(source)  # type: ignore[arg-type]
+                ):
+                    raise ValueError("native refinement runtime candidates differ")
+                selected = _select_targets(
+                    source,  # type: ignore[arg-type]
+                    policy,
+                    objective_influence=influence,  # type: ignore[arg-type]
+                )
+                if selected != program.plan.targets:
+                    raise ValueError(
+                        "native refinement runtime targets differ from Plan"
+                    )
+                values[action.output_value_ids[0]] = selected
+            else:
+                candidates = values[action.input_value_ids[0]]
+                if candidates != program.plan.targets:
+                    raise ValueError(
+                        "native refinement runtime targets differ from Plan"
+                    )
+                values[action.output_value_ids[0]] = program.plan.targets
         elif task.kind == IntermediateRefinementTaskKind.BACKWARD_SELECTED:
             interval_env = values[action.input_value_ids[0]]
             relu_pre = values[action.input_value_ids[1]]
@@ -678,11 +838,13 @@ def execute_native_intermediate_refinement_program(
             )
         elif task.kind == IntermediateRefinementTaskKind.INTERSECT_SELECTED:
             current = values[action.input_value_ids[0]]
-            selected = values[action.input_value_ids[1]]
-            if not isinstance(current, Mapping) or not isinstance(selected, Mapping):
+            selected_crown = values[action.input_value_ids[1]]
+            if not isinstance(current, Mapping) or not isinstance(
+                selected_crown, Mapping
+            ):
                 raise TypeError("native refinement intersection inputs differ")
             values[action.output_value_ids[0]] = _intersect_selected(
-                current, selected  # type: ignore[arg-type]
+                current, selected_crown  # type: ignore[arg-type]
             )
         elif task.kind == IntermediateRefinementTaskKind.PROPAGATE_FORWARD:
             constraints = values[action.input_value_ids[3]]
@@ -699,14 +861,16 @@ def execute_native_intermediate_refinement_program(
                 relu_pre_constraints=constraints,  # type: ignore[arg-type]
             )
             before = values[before_key]
-            selected = values[selected_key]
-            if not isinstance(before, Mapping) or not isinstance(selected, Mapping):
+            selected_crown = values[selected_key]
+            if not isinstance(before, Mapping) or not isinstance(
+                selected_crown, Mapping
+            ):
                 raise TypeError("native refinement pass trace inputs differ")
             pass_traces.append(
                 _pass_trace(
                     task.pass_index,
                     before,  # type: ignore[arg-type]
-                    selected,  # type: ignore[arg-type]
+                    selected_crown,  # type: ignore[arg-type]
                     next_pre,
                     selected_target_count=len(program.plan.targets),
                 )

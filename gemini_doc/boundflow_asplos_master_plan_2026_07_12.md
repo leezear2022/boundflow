@@ -2,7 +2,7 @@
 
 > 状态：**顶层执行计划 v1.0；后续研究工作受本文门禁约束。**  
 > 基线日期：2026-07-12  
-> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`3ed367c`
+> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`f191034`
 > 投稿策略：ASPLOS 2027 September Cycle 为有条件冲刺；ASPLOS 2028 为稳健主目标。
 
 > **路线修订（2026-07-20）**：本文保留 2026-07-12 的研究问题、历史门禁和 PR-10—13
@@ -125,7 +125,13 @@
 > Plan/Task/Schedule，并在同 policy 下令 MNISTFC unresolved `3→1`、OVAL21
 > `unknown→verified`；ResNet root lower 改善 `+70.496/+160.551` 但仍 unknown。该结果为
 > multiworkload tightness `VALIDATED-REDUCED`，不是性能或 3/3 closure。下一路线只推进
-> objective-directed target selection；顶层 ASPLOS-ready=NO 不变。
+> objective-directed target selection（已由下段 NRIR-20 完成）；顶层 ASPLOS-ready=NO 不变。
+
+> **2026-08-04 NRIR-20 修订**：clause-sensitive CROWN influence×width selection 已成为
+> refinement Plan/Task/Schedule 的显式语义。固定 ResNet clauses 0/1 在相同 96-target 预算下，
+> root lower 相对 width policy 再改善 `+55.928741/+26.228943`，但仍为负，未关闭 property。
+> 该结果只为 fixed-root tightness `VALIDATED-REDUCED`；下一门禁是 per-child exact-state
+> refinement，顶层 performance No-Go 与 ASPLOS-ready=NO 不变。
 
 > **2026-08-04 NRIR-11 修订**：fixed-step optimizer control 已进入 typed Plan/Task/Schedule。
 > 固定 ResNet 1-step program 为 8 actions，Schedule/legacy/final native execution max diff 均为 0，
@@ -355,8 +361,8 @@ Runtime 不能笼统声称相关查询可以共享中间状态。每个缓存对
 | 环境 | PyTorch 2.12.1+cu132、LLVM 20.1.8、TVM、单一 tvm-ffi | 可复现实验基础 |
 | Native real-network compiler | ResNet2B native IR；joint policy；query/domain batching；optimized ReLU-split queue；frozen α/β state；optimizer Schedule；sound verdict；complete query control | C1/C2/C3 的真实图 correctness/decision/query/control-flow 载体；real proof tightness 与 device-level 性能仍缺 |
 
-Gate 0 与 PR-10 是历史已完成节点；当前 integration base 已推进到 `597332d`，NRIR-1—13 已合并，
-NRIR-14 已 validated-reduced，NRIR-3 CUDA protocol 已完成但本机 device unavailable。PR-10 的 structured 路径保留为 opt-in research capability，dense
+Gate 0 与 PR-10 是历史已完成节点；当前 integration base 已推进到 `f191034`，NRIR-1—19 已合并，
+NRIR-20 在当前 feature branch 完成验证，NRIR-3 CUDA protocol 已完成但本机 device unavailable。PR-10 的 structured 路径保留为 opt-in research capability，dense
 继续作为默认；不得把历史基线 `263ea81` 当作当前工程入口。
 
 ### 3.2 论文成立前必须补齐的缺口

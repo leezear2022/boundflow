@@ -821,4 +821,24 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   性能矩阵未执行，`performance_claimed=false`；
 - 工件：`artifacts/native-intermediate-refinement/vnncomp21-three-topology-cpu-v1/`；fresh replay
   hash=`f6e6996608abacefb929ee88b05b45b3a16043cfca10f7a5d393e83bcd8bf14b`；focused
-  `9 passed`、全量 `732 passed, 37 skipped`。下一门禁为 objective-directed target selection。
+  `9 passed`、全量 `732 passed, 37 skipped`。当时的下一门禁 objective-directed target
+  selection 已由下节 NRIR-20 完成。
+
+### 2026-08-04 Objective-Directed Intermediate Refinement v1
+
+- `C1/C2-M-NRIR20` objective-aware refinement IR：single-clause objective hash、逐 ReLU
+  CROWN coefficient influence、influence×width target score 与真实 selection dependency 已进入
+  Plan/Task/Schedule；默认 width payload/hash 保持兼容；
+- `C3-G-NRIR20` fail-closed gate：objective policy 与 scalar objective 必须同时出现；多子句、
+  nonfinite、shape/dtype/device/influence/score/task dependency 漂移均拒绝；selection heuristic
+  不改变 selected-CROWN/intersection soundness；
+- `C1/C3-E-NRIR20` fixed root tightness：ResNet clauses `0/1` same-budget 96-target 对照的
+  target overlap=`16/96`、`27/96`，objective 相对 width 的 root lower 改善
+  `+55.928741/+26.228943`；
+- `C3-L-NRIR20` hard limitation：最终 root lower 仍为 `-417.292480/-602.551392`，没有 property
+  closure；root-global、CPU 单次、无 per-child/CUDA/竞品/重复性能，`performance_claimed=false`；
+- 工件：
+  `artifacts/objective-directed-intermediate-refinement/vnncomp21-resnet2b-two-clause-cpu-v1/`；
+  fresh semantic replay hash=
+  `8fce1c7c3e5c63adb14a7ab5b9f23407e4a7a1406353750e4f150ee745b4e88e`；focused
+  `16 passed`、全量 `739 passed, 37 skipped`。下一门禁为 per-child exact-state refinement。

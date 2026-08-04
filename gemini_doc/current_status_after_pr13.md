@@ -1,14 +1,16 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`3ed367c`（NRIR-18 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/native-intermediate-bound-refinement-v1`
+> 当前 integration base：`f191034`（NRIR-19 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/objective-directed-intermediate-refinement-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-04 NRIR-19 后续：native selected-CROWN intermediate refinement 已成为一等
 > Plan/Task/Schedule。MNISTFC 关闭 clauses 3/7，OVAL21 从 unknown 变 verified；ResNet 两个 root
 > lower 改善 `+70.496/+160.551` 但状态仍 unknown。下一门禁为 objective-directed intermediate
-> target selection；顶层 ASPLOS-ready 与 performance No-Go 不变。
+> target selection；该门禁现已由 NRIR-20 关闭：同预算 ResNet clauses 0/1 root lower 再改善
+> `+55.928741/+26.228943`，但仍为负。下一门禁为 per-child exact-state refinement；顶层
+> ASPLOS-ready 与 performance No-Go 不变。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
 > 2026-07-28 进度：IR-1 Bound IR、IR-2 Plan IR、IR-3 Task/Schedule IR 的最小
 > synchronous reference contract 已分别关闭；IR-4 production backend/runtime migration
@@ -690,3 +692,27 @@ source-to-IR replay hash=
 ASPLOS-ready 仍为 NO。ResNet 表明纯 width shortlist 不足；下一路线是 objective-directed
 intermediate target selection，以 clause-sensitive influence 选择有限 targets，再评估 per-child
 recomputation，而不是先扩大树深或做 CUDA timing。
+
+## 27. Objective-Directed Intermediate Refinement v1 判定
+
+NRIR-20 将当前 scalar clause 的 CROWN backward coefficient influence 加入 target selection。
+新 policy 以 `ambiguous_width * max(abs(A_u), abs(A_l))` 排序；Plan 绑定 objective hash 和每个
+target 的 influence/score，Task/Schedule 显式声明 objective influence dependency。只允许一个
+finite scalar clause，旧 width policy payload/hash 保持兼容；selection heuristic 不参与
+soundness，最终 bounds 仍来自 selected plain-CROWN 与单调 intersection。
+
+固定 ResNet2B property 0 clauses `0/1` 的 same-budget fresh-process 对照中，两种 policy 均为
+96 targets。target overlap=`16/96`、`27/96`；width/objective root lower 分别为
+`-473.221222/-417.292480` 与 `-628.780334/-602.551392`，objective 改善
+`+55.928741/+26.228943`。结果仍远低于 threshold，没有声称 property closure。
+
+artifact 位于
+`artifacts/objective-directed-intermediate-refinement/vnncomp21-resnet2b-two-clause-cpu-v1/`，
+fresh semantic replay hash=
+`8fce1c7c3e5c63adb14a7ab5b9f23407e4a7a1406353750e4f150ee745b4e88e`；focused
+`16 passed`、全量 `739 passed, 37 skipped`，Black、targeted Mypy、Pylint 10.00/10 通过。
+
+结论为 objective-directed refinement IR/control + fixed-root tightness
+`VALIDATED-REDUCED`。CPU timing 仅诊断，CUDA/竞品/重复性能/完整验证/ASPLOS-ready 均未关闭。
+下一路线是 per-child objective-directed refinement：child 必须按 exact split state 重算
+intermediate bounds、influence、Plan/Task/Schedule，parent refinement 只能作为 warm-start 提示。

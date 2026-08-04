@@ -69,7 +69,11 @@ class NativeIntermediateRefinementPolicyIR:
             or self.backward_chunk_size > self.max_neurons_per_relu
             or not math.isfinite(self.minimum_width)
             or self.minimum_width < 0.0
-            or self.candidate_policy_id != "top_ambiguous_width_per_relu_v1"
+            or self.candidate_policy_id
+            not in {
+                "top_ambiguous_width_per_relu_v1",
+                "objective_influence_width_per_relu_v1",
+            }
             or self.refinement_method != "selected_plain_crown_v1"
         ):
             raise ValueError("native intermediate refinement policy IR is invalid")
@@ -99,8 +103,12 @@ class NativeIntermediateRefinementTargetIR:
     initial_lower: float
     initial_upper: float
     initial_width: float
+    objective_influence: Optional[float] = None
+    selection_score: Optional[float] = None
 
     def validate(self) -> None:
+        objective_influence = self.objective_influence
+        selection_score = self.selection_score
         if (
             self.ordinal < 0
             or not self.relu_input
@@ -117,12 +125,25 @@ class NativeIntermediateRefinementTargetIR:
             or self.initial_width <= 0.0
             or abs(self.initial_width - (self.initial_upper - self.initial_lower))
             > 1e-5
+            or (objective_influence is None) != (selection_score is None)
+            or (
+                objective_influence is not None
+                and selection_score is not None
+                and (
+                    not math.isfinite(objective_influence)
+                    or objective_influence < 0.0
+                    or not math.isfinite(selection_score)
+                    or selection_score < 0.0
+                    or abs(selection_score - objective_influence * self.initial_width)
+                    > max(1e-7, 1e-6 * selection_score)
+                )
+            )
         ):
             raise ValueError("native intermediate refinement target IR is invalid")
 
     def to_dict(self) -> dict[str, object]:
         self.validate()
-        return {
+        payload: dict[str, object] = {
             "ordinal": self.ordinal,
             "relu_input": self.relu_input,
             "neuron_index": self.neuron_index,
@@ -130,6 +151,10 @@ class NativeIntermediateRefinementTargetIR:
             "initial_upper": self.initial_upper,
             "initial_width": self.initial_width,
         }
+        if self.objective_influence is not None:
+            payload["objective_influence"] = self.objective_influence
+            payload["selection_score"] = self.selection_score
+        return payload
 
 
 @dataclass(frozen=True)
@@ -143,6 +168,7 @@ class NativeIntermediateRefinementPlanIR:
     initial_intermediate_bounds_hash: str
     policy: NativeIntermediateRefinementPolicyIR
     targets: Tuple[NativeIntermediateRefinementTargetIR, ...]
+    objective_hash: Optional[str] = None
     schema_version: str = INTERMEDIATE_REFINEMENT_PLAN_IR_SCHEMA_VERSION
 
     def validate(self) -> None:
@@ -166,18 +192,27 @@ class NativeIntermediateRefinementPlanIR:
         ):
             raise ValueError("native intermediate refinement Plan IR is invalid")
         self.policy.validate()
+        objective_directed = (
+            self.policy.candidate_policy_id == "objective_influence_width_per_relu_v1"
+        )
+        if objective_directed != (self.objective_hash is not None) or (
+            self.objective_hash is not None and not _is_sha256(self.objective_hash)
+        ):
+            raise ValueError("native refinement objective identity differs")
         per_relu: dict[str, int] = {}
         for ordinal, target in enumerate(self.targets):
             target.validate()
             if target.ordinal != ordinal:
                 raise ValueError("native refinement target ordinal differs")
+            if objective_directed != (target.objective_influence is not None):
+                raise ValueError("native refinement target scoring semantics differ")
             per_relu[target.relu_input] = per_relu.get(target.relu_input, 0) + 1
         if any(count > self.policy.max_neurons_per_relu for count in per_relu.values()):
             raise ValueError("native refinement target count exceeds policy")
 
     def to_dict(self) -> dict[str, object]:
         self.validate()
-        return {
+        payload: dict[str, object] = {
             "schema_version": self.schema_version,
             "plan_id": self.plan_id,
             "primal_graph_hash": self.primal_graph_hash,
@@ -189,6 +224,9 @@ class NativeIntermediateRefinementPlanIR:
             "semantics_owner": "boundflow_native_intermediate_refinement",
             "performance_claimed": False,
         }
+        if self.objective_hash is not None:
+            payload["objective_hash"] = self.objective_hash
+        return payload
 
     def stable_hash(self) -> str:
         return _canonical_hash(self.to_dict())
@@ -280,6 +318,8 @@ class NativeIntermediateRefinementTaskIRModule:
             "refine.split_state",
             "refine.policy",
         }
+        if plan.objective_hash is not None:
+            available.add("refine.objective_influence")
         for task in self.tasks:
             task.validate()
             if any(item not in completed for item in task.dependency_task_ids):
@@ -434,7 +474,18 @@ def lower_native_intermediate_refinement_ir(
         (
             IntermediateRefinementTaskKind.SELECT_TARGETS,
             None,
-            ("refine.candidates", "refine.policy"),
+            (
+                *(
+                    (
+                        "refine.bounds.p0",
+                        "refine.candidates",
+                        "refine.policy",
+                        "refine.objective_influence",
+                    )
+                    if plan.objective_hash is not None
+                    else ("refine.candidates", "refine.policy")
+                ),
+            ),
             ("refine.selected_targets",),
         ),
     ]

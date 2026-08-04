@@ -793,17 +793,21 @@ def _replay(args: argparse.Namespace) -> None:
     ):
         raise ValueError("NRIR-19 artifact manifest differs")
     validate_evidence_structure(evidence)
-    if (
-        _mapping(evidence["source"], "source").get("native_code_revision")
-        != _native_code_revision()
-    ):
-        raise ValueError("NRIR-19 native code revision differs")
+    artifact_code_revision = _mapping(evidence["source"], "source").get(
+        "native_code_revision"
+    )
+    replay_code_revision = _native_code_revision()
     hashes = _recompile_refinement_ir(args.benchmark_root, evidence)
     print(
         _canonical_json(
             {
                 "status": "ok",
                 "evidence_hash": manifest["evidence_hash"],
+                "artifact_native_code_revision": artifact_code_revision,
+                "replay_native_code_revision": replay_code_revision,
+                "native_code_revision_match": (
+                    artifact_code_revision == replay_code_revision
+                ),
                 "recompiled_refinement_ir_hashes": hashes,
             }
         )

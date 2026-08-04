@@ -1,0 +1,13 @@
+{
+  "evidence_hash": "8fce1c7c3e5c63adb14a7ab5b9f23407e4a7a1406353750e4f150ee745b4e88e",
+  "files": {
+    "evidence.json": "3f77326a33319caa979bc645b3d28c9d23befc265e1b5000e471ed2e15d407e8",
+    "logs/clause-0-objective.log": "16425ec0deb76420c2989771a4bc0f50a4eba50da4b9ccbb1ad470de8e63474c",
+    "logs/clause-0-width.log": "c61fac4daef9712ded63b23211b1e15ee0a0fe180a6ebed5b0acc0521c8c6706",
+    "logs/clause-1-objective.log": "4689735e4210d2f537156a20469ab53cddf1a61eb6a8258d756fb158af962f9d",
+    "logs/clause-1-width.log": "a5657aa0cec41daa00ae61d18782303a66f44b87be1479704cae92cee59ebbb3"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.objective-directed-intermediate-refinement-artifact/v1",
+  "status": "ok"
+}

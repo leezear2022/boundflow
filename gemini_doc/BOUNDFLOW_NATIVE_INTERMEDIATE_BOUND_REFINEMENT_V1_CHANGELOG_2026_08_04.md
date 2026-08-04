@@ -49,8 +49,8 @@ stage: s01
 
 ## Follow-Ups
 
-- ResNet 仍是主 blocker；下一路线为 objective-directed intermediate target selection，使用
-  clause-sensitive backward influence 替代纯 width shortlist，再决定是否需要 per-child refinement。
+- ResNet 仍是主 blocker；当时冻结的 objective-directed intermediate target selection 已由
+  NRIR-20 完成，same-budget root tightness 改善但未闭合；当前下一路线为 per-child refinement。
 
 ## Links
 

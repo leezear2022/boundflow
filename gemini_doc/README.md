@@ -16,9 +16,10 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_NATIVE_INTERMEDIATE_BOUND_REFINEMENT_V1_PLAN_2026_08_04.md`
-（native-refined provenance、selected CROWN Plan/Task/Schedule、三真实 workload
-baseline/refined closure）。其直接前序为
+当前最新入口：`gemini_doc/BOUNDFLOW_OBJECTIVE_DIRECTED_INTERMEDIATE_REFINEMENT_V1_PLAN_2026_08_04.md`
+（clause-sensitive influence×width selection、objective-aware Plan/Task/Schedule、ResNet
+same-budget root-tightness artifact）。其直接前序为
+`gemini_doc/BOUNDFLOW_NATIVE_INTERMEDIATE_BOUND_REFINEMENT_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_MULTIWORKLOAD_COMPETITOR_E2E_BASELINE_V1_PLAN_2026_08_04.md` 和
 `gemini_doc/BOUNDFLOW_HARD_CLAUSE_OBJECTIVE_BRANCHING_V1_PLAN_2026_08_04.md`。
 
@@ -90,6 +91,11 @@ baseline/refined closure）。其直接前序为
 
 ### 2.1 关键交付文档（“长期有效”）
 
+- `gemini_doc/BOUNDFLOW_OBJECTIVE_DIRECTED_INTERMEDIATE_REFINEMENT_V1_PLAN_2026_08_04.md`：
+  single-clause objective influence、score/identity/dependency IR、same-budget ResNet artifact 与
+  per-child 下一门禁
+- `gemini_doc/BOUNDFLOW_OBJECTIVE_DIRECTED_INTERMEDIATE_REFINEMENT_V1_CHANGELOG_2026_08_04.md`：
+  objective policy/runtime/tests、root-tightness 数值、replay 与 claim boundary
 - `gemini_doc/BOUNDFLOW_MULTIWORKLOAD_COMPETITOR_E2E_BASELINE_V1_PLAN_2026_08_04.md`：三种
   VNN-COMP 拓扑、VNNLIB Query IR、21-task/6-worker protocol 与 competitor claim 边界
 - `gemini_doc/BOUNDFLOW_MULTIWORKLOAD_COMPETITOR_E2E_BASELINE_V1_CHANGELOG_2026_08_04.md`：

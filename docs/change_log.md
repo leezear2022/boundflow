@@ -4041,7 +4041,29 @@
   `f6e6996608abacefb929ee88b05b45b3a16043cfca10f7a5d393e83bcd8bf14b`；focused
   `9 passed`、全量 `732 passed, 37 skipped`；Black/Mypy/Pylint 10.00/10 全过；
 - 以 native refinement IR/control 与 multiworkload tightness `VALIDATED-REDUCED` 关闭；
-  `performance_claimed=false`、ASPLOS-ready=NO。下一门禁为 objective-directed target selection。
+  `performance_claimed=false`、ASPLOS-ready=NO。当时的下一门禁 objective-directed target
+  selection 已由下节 NRIR-20 完成。
 
 **记录**
 - `gemini_doc/BOUNDFLOW_NATIVE_INTERMEDIATE_BOUND_REFINEMENT_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Objective-Directed Intermediate Refinement v1
+
+- 新增 single-clause `objective_influence_width_per_relu_v1`：从 CROWN backward state 捕获
+  逐 ReLU influence，并以 influence×ambiguous width 选择固定预算 targets；
+- objective hash、target influence/score 与 selection 输入进入 refinement Plan/Task/Schedule；
+  多子句、schema、score、dependency 和 objective tamper 均 fail closed，旧 width hash 兼容；
+- 旧 NRIR-19 runner 改为披露 code-revision mismatch 后执行 source-to-IR semantic replay，
+  三 workload 的旧 width Plan/Task/Schedule 均精确恢复；
+- fixed ResNet clauses 0/1 各以相同 96-target 预算对照，objective 相对 width root lower 改善
+  `+55.928741/+26.228943`，但最终仍负，不声称 property closure；
+- artifact fresh semantic replay hash=
+  `8fce1c7c3e5c63adb14a7ab5b9f23407e4a7a1406353750e4f150ee745b4e88e`；focused
+  `16 passed`、全量 `739 passed, 37 skipped`；Black、targeted Mypy、Pylint 10.00/10 通过；
+- 关闭 objective-directed IR/control + fixed-root tightness `VALIDATED-REDUCED`；下一门禁为
+  per-child exact-state refinement，`performance_claimed=false`、ASPLOS-ready=NO。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_OBJECTIVE_DIRECTED_INTERMEDIATE_REFINEMENT_V1_CHANGELOG_2026_08_04.md`

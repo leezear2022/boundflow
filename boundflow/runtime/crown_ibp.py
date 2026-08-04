@@ -1680,6 +1680,7 @@ def _run_crown_backward_from_trace(
     fused_crown_executor: Optional[FusedCrownExecutor],
     fused_crown_steps: Sequence[FusedCrownExecutionStep],
     fused_crown_context: FusedCrownExecutionContext,
+    relu_objective_influence_out: Optional[Dict[str, torch.Tensor]],
     caller: str,
 ) -> IntervalState:
     task = module.get_entry_task()
@@ -1805,6 +1806,31 @@ def _run_crown_backward_from_trace(
             if x_name not in relu_pre:
                 raise KeyError(
                     f"missing relu pre-activation bounds for value: {x_name}"
+                )
+            if relu_objective_influence_out is not None:
+                if x_name in relu_objective_influence_out:
+                    raise ValueError(
+                        f"duplicate ReLU objective influence identity: {x_name}"
+                    )
+                input_shape = tuple(
+                    int(dimension) for dimension in relu_pre[x_name].lower.shape[1:]
+                )
+                aligned = _align_backward_state_input_shape(
+                    state, input_shape=input_shape
+                )
+                upper_coefficients = aligned.A_u.to_dense().reshape(
+                    batch, aligned.A_u.spec_dim, *input_shape
+                )
+                lower_coefficients = aligned.A_l.to_dense().reshape(
+                    batch, aligned.A_l.spec_dim, *input_shape
+                )
+                relu_objective_influence_out[x_name] = (
+                    torch.maximum(
+                        upper_coefficients.abs().amax(dim=1),
+                        lower_coefficients.abs().amax(dim=1),
+                    )
+                    .detach()
+                    .contiguous()
                 )
             step = fused_by_relu.get(op_index)
             if (
@@ -2102,6 +2128,7 @@ def run_crown_ibp_mlp(
             fused_crown_executor=fused_crown_executor,
             fused_crown_steps=fused_crown_steps,
             fused_crown_context=fused_context,
+            relu_objective_influence_out=None,
             caller="run_crown_ibp_mlp",
         )
 
@@ -2166,8 +2193,52 @@ def run_crown_ibp_mlp_from_forward_trace(
                     or relu_pre_add_coeff_l is not None,
                 )
             ),
+            relu_objective_influence_out=None,
             caller="run_crown_ibp_mlp_from_forward_trace",
         )
+
+
+def run_crown_ibp_mlp_with_relu_influence_from_forward_trace(
+    module: BFTaskModule,
+    input_spec: InputSpec,
+    *,
+    interval_env: Dict[str, IntervalState],
+    relu_pre: Dict[str, IntervalState],
+    linear_spec_C: torch.Tensor,
+    output_value: Optional[str] = None,
+) -> tuple[IntervalState, Dict[str, torch.Tensor]]:
+    """Return sound objective bounds and per-ReLU backward coefficient influence."""
+
+    module.validate()
+    task = module.get_entry_task()
+    if task.kind != TaskKind.INTERVAL_IBP:
+        raise NotImplementedError(
+            "ReLU influence extraction only supports INTERVAL_IBP tasks"
+        )
+    if module.task_graph is not None or len(module.tasks) != 1:
+        raise NotImplementedError(
+            "ReLU influence extraction currently supports one task only"
+        )
+    influence: Dict[str, torch.Tensor] = {}
+    bounds = _run_crown_backward_from_trace(
+        module,
+        input_spec,
+        interval_env=interval_env,
+        relu_pre=relu_pre,
+        linear_spec_C=linear_spec_C,
+        output_value=output_value,
+        relu_alpha=None,
+        relu_pre_add_coeff_u=None,
+        relu_pre_add_coeff_l=None,
+        fused_crown_executor=None,
+        fused_crown_steps=(),
+        fused_crown_context=FusedCrownExecutionContext(),
+        relu_objective_influence_out=influence,
+        caller="run_crown_ibp_mlp_with_relu_influence_from_forward_trace",
+    )
+    if set(influence) != set(relu_pre):
+        raise ValueError("ReLU objective influence coverage differs")
+    return bounds, {name: influence[name] for name in relu_pre}
 
 
 def run_crown_ibp_mlp_with_placement_retry(
