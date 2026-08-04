@@ -195,12 +195,18 @@ class NativeObjectiveBranchScore:
         if (
             self.candidate_ordinal < 0
             or not all(math.isfinite(value) for value in values)
-            or abs(self.worst_child_lower - min(self.inactive_lower, self.active_lower))
-            > 1e-6
-            or abs(
-                self.mean_child_lower - (self.inactive_lower + self.active_lower) / 2.0
+            or not math.isclose(
+                self.worst_child_lower,
+                min(self.inactive_lower, self.active_lower),
+                rel_tol=1e-6,
+                abs_tol=1e-6,
             )
-            > 1e-6
+            or not math.isclose(
+                self.mean_child_lower,
+                (self.inactive_lower + self.active_lower) / 2.0,
+                rel_tol=1e-6,
+                abs_tol=1e-6,
+            )
         ):
             raise ValueError("native objective branch score is invalid")
 

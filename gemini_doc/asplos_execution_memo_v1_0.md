@@ -1,9 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`813006b`（NRIR-37 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`20a8ac3`（NRIR-38 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/full-frontier-tightness-attribution-v1`
+> 当前研发分支：`feat/objective-branch-shared-evaluator-v1`
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed
@@ -14,7 +14,8 @@
 > typed hard-clause escalation（完成）→ objective-directed hard-clause escalation（完成）→
 > objective-ancestral queue（完成）→ child-budget Pareto（NO-GO）→ sibling-packed evaluator（完成）→
 > cross-clause anytime evaluator（完成）→ multi-clause anytime priority（NO-GO）→ shared parametric
-> objective evaluator（完成）→ full-frontier tightness attribution（NO-GO）**。
+> objective evaluator（完成）→ full-frontier tightness attribution（NO-GO）→ objective-branch shared
+> evaluator（完成）**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有
@@ -1407,3 +1408,21 @@ pilot hash=`2719347a8e1c5c49c418b3a396ff405a004b0f4ace96af94d335e4026f7a24a2`；
 `930 passed, 37 skipped` 与静态门禁通过。下一阶段只改变 branch candidate：复用仓库已有 objective
 branch Plan/Task/Schedule，把 objective-bound-impact selection 接入 shared ancestral evaluator，并与
 widest branch 做 exact fixed-tree 对照；不得重新打开 optimizer/cap/multipass/control 常数。
+
+## 52. Objective Branch Shared Evaluator v1
+
+NRIR-39 只改变 branch candidate selection。frozen shared plan、steps5、cap128 ancestral refinement、
+parent warm、query-owned cross-clause cache、best-first queue、31/depth4 和 sibling atomic commit 都不变；
+candidate 固定使用历史 `top_width_per_relu_v1`（8/ReLU、batch64、cap256）及
+`maximize_worst_child_then_mean`。composite Plan/6-task TaskModule/Schedule 绑定底层 shared execution 和
+31/31 objective branch Plan/Task/Schedule/score traces。
+
+真实 clauses 2/3 control/candidate 都达到 31 evaluations、16 depth-4 active nodes，root lower exact。
+worst-active improvement=`+2.043362/+5.641768`、median delta=`+2.537640/+5.885233`，两条均过预注册
+`+1.0` gate。pilot hash=`dde1cc4076ea766e7b4859e75ec9ff214d61f3cf245385285274b47f541a72cc`，
+结论为 fixed-budget branch selection `VALIDATED-REDUCED`。
+
+这不构成 wall-clock speedup 或 property closure：pilot 使用 logical fixed-budget clock，objective scoring
+会增加实际工作量。下一门禁必须做 three fresh whole-query/global-deadline repeats，同时报告 floor、branch
+scoring/queue、committed nodes、cache 与 final 9-clause verdict；不得把本阶段 tightness 直接写成
+performance、GPU、competitor、multi-workload 或 ASPLOS-ready。

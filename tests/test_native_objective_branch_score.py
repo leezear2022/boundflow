@@ -21,14 +21,19 @@ from boundflow.runtime.native_alpha_beta_optimizer_schedule import (
     execute_native_alpha_beta_optimizer_program,
 )
 from boundflow.runtime.native_objective_branch_score import (
+    NativeObjectiveBranchScore,
     NativeObjectiveBranchPolicy,
     compile_native_objective_branch_program,
     execute_native_objective_branch_program,
 )
+from boundflow.ir.branch import NativeObjectiveBranchCandidateIR
 from boundflow.runtime.native_optimized_relu_split_bab_runtime import (
     execute_native_optimized_relu_split_bab,
 )
-from boundflow.runtime.native_relu_split_bab_runtime import NativeReluSplitBabConfig
+from boundflow.runtime.native_relu_split_bab_runtime import (
+    NativeReluSplitBabConfig,
+    ReluSplitBranch,
+)
 from boundflow.runtime.task_executor import InputSpec
 
 
@@ -177,6 +182,52 @@ def test_candidate_cap_and_semantic_scope_fail_closed() -> None:
         )
     with pytest.raises(ValueError, match="program identity"):
         replace(program, objective=objective + 1.0).validate()
+
+
+def test_objective_branch_candidate_width_accepts_float32_scale_rounding() -> None:
+    lower = float(torch.tensor(-137.12346, dtype=torch.float32).item())
+    upper = float(torch.tensor(281.76544, dtype=torch.float32).item())
+    width = float(
+        (
+            torch.tensor(upper, dtype=torch.float32)
+            - torch.tensor(lower, dtype=torch.float32)
+        ).item()
+    )
+    candidate = NativeObjectiveBranchCandidateIR(
+        ordinal=0,
+        relu_input="large_relu",
+        neuron_index=3,
+        lower=lower,
+        upper=upper,
+        width=width,
+    )
+
+    candidate.validate()
+    ReluSplitBranch(
+        relu_input=candidate.relu_input,
+        neuron_index=candidate.neuron_index,
+        lower=candidate.lower,
+        upper=candidate.upper,
+        width=candidate.width,
+    ).validate()
+    with pytest.raises(ValueError, match="candidate IR is invalid"):
+        replace(candidate, width=width + 0.1).validate()
+
+
+def test_objective_branch_score_accepts_float32_scale_rounding() -> None:
+    inactive = torch.tensor(-137.12346, dtype=torch.float32)
+    active = torch.tensor(-281.76544, dtype=torch.float32)
+    score = NativeObjectiveBranchScore(
+        candidate_ordinal=0,
+        inactive_lower=float(inactive.item()),
+        active_lower=float(active.item()),
+        worst_child_lower=float(torch.minimum(inactive, active).item()),
+        mean_child_lower=float(((inactive + active) / 2.0).item()),
+    )
+
+    score.validate()
+    with pytest.raises(ValueError, match="branch score is invalid"):
+        replace(score, mean_child_lower=score.mean_child_lower + 0.1).validate()
 
 
 def test_objective_branch_policy_drives_queue_and_is_not_erasable() -> None:

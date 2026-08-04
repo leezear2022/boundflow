@@ -1187,3 +1187,23 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   `vnncomp21-resnet2b-property0-cpu-pilot-v1/`；pilot hash=
   `2719347a8e1c5c49c418b3a396ff405a004b0f4ace96af94d335e4026f7a24a2`；全量
   `930 passed, 37 skipped`。下一单变量为已有 objective branch IR 的 shared-evaluator 接入。
+
+### NRIR-39：Objective Branch Shared Evaluator v1
+
+- `C1/C2-M-NRIR39` composite ownership：frozen shared Plan 与 historical objective branch policy 已组合为
+  一等 Plan/6-task TaskModule/Schedule；31/31 node evaluations 各自绑定 exact branch Plan/Task/Schedule、
+  score trace、selected candidate、queue evaluation 与 child split；
+- `C3-G-NRIR39` fail-closed gate：policy/source/coverage/selected ordinal/trace score/Task/claim/control tamper
+  即使同步重算外层 hash 仍被拒绝；large-scale float32 width/mean equality 使用
+  `rel_tol=1e-6,abs_tol=1e-6`，`+0.1` drift 专用测试仍拒绝；
+- `C1/C3-E-NRIR39` fixed-budget tightness：clauses 2/3 root exact，control/candidate 均 31 evaluations、
+  16 depth-4 active nodes；worst-active lower 从 `-37.574287/-35.900215` 到
+  `-35.530926/-30.258448`，改善 `+2.043362/+5.641768`；median 改善
+  `+2.537640/+5.885233`，两条均通过 `+1.0` 门禁；
+- `C3-L-NRIR39` hard limitation：logical fixed-budget evidence 不证明墙钟速度或 global-deadline coverage，
+  也没有 property/GPU/competitor/multi-workload/ASPLOS-ready claim；
+- 工件：`artifacts/objective-branch-shared-evaluator/`
+  `vnncomp21-resnet2b-property0-cpu-pilot-v1/`；pilot hash=
+  `dde1cc4076ea766e7b4859e75ec9ff214d61f3cf245385285274b47f541a72cc`。本阶段 fixed-budget branch
+  selection `VALIDATED-REDUCED`；16 focused、40 predecessor-inclusive tests、全量
+  `940 passed, 37 skipped` 与静态门禁通过；下一门禁为 three-repeat whole-query/global-deadline formal。

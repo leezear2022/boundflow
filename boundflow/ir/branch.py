@@ -63,7 +63,12 @@ class NativeObjectiveBranchCandidateIR:
             or not all(math.isfinite(value) for value in (self.lower, self.upper))
             or not self.lower < 0.0 < self.upper
             or self.width <= 0.0
-            or abs(self.width - (self.upper - self.lower)) > 1e-6
+            or not math.isclose(
+                self.width,
+                self.upper - self.lower,
+                rel_tol=1e-6,
+                abs_tol=1e-6,
+            )
         ):
             raise ValueError("objective branch candidate IR is invalid")
 
