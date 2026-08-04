@@ -1,15 +1,17 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`78ffa6b`（NRIR-25 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`6306a34`（NRIR-30 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/typed-multipass-refinement-v1`
+> 当前研发分支：`feat/objective-directed-hard-clause-escalation-v1`
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed
 > intermediate target selection（完成）→ per-child intermediate refinement（NO-GO）→
 > ancestral-constraint carry-forward refinement（完成）→ external-seeded hard-clause convergence
->（完成）→ dynamic ancestral refinement budget（完成）→ typed multi-pass refinement（NO-GO）**。
+>（完成）→ dynamic ancestral refinement budget（完成）→ typed multi-pass refinement（NO-GO）→
+> production prepared verifier（完成）→ parametric compiler（完成）→ wall-clock scaling（完成）→
+> typed hard-clause escalation（完成）→ objective-directed hard-clause escalation（完成）**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有
@@ -1209,3 +1211,23 @@ artifact evidence hash=
 staged control + property coverage `VALIDATED-REDUCED` 关闭；无 GPU、competitor、完整 suite 或
 ASPLOS-ready claim。下一门禁在相同 admission/budget/deadline 下把 shared top-width refinement
 替换为 per-clause objective-influence Plan，隔离检验 MNIST clause 8 与 ResNet hard clauses。
+
+## 44. Objective-Directed Hard-Clause Escalation v1
+
+NRIR-31 保留 NRIR-30 的 baseline、exact admission、shared selected-CROWN source、31/depth4 budget、
+batching 和 60 秒 whole deadline，只为每个 admitted original clause 新增 objective-influence
+128-target/ReLU、chunk32 refinement。九子句 workload 被 lower 为 33-task 静态 TaskModule；每条
+objective child 显式绑定 shared execution 的 Plan hash、semantic trace hash、scalar objective hash
+与 original ordinal，未 admitted 或 deadline 后任务走 guarded skip。
+
+单次 pilot 因 ResNet 9/9 common root 全部严格改善而通过预注册 gate，随后才运行三 fresh repeats。
+MNIST 三次保持 8/9，OVAL 三次保持 9/9；ResNet 仍 0/9，但九条 root lower delta 三轮逐值一致，
+范围 `+81.522583—+179.970459`。9/9 run 都 `fallback=none`；median execution 为
+`3.143/24.188/2.255 s`，仅用于 deadline accounting。
+
+artifact evidence hash=
+`fb9e503bdf93cb9ce56f52915f1965f1f542e092945d4d7d77d8b8c4bd91764a`。本阶段以 per-clause
+objective root tightness `VALIDATED-REDUCED` 关闭；没有新增 closure，不声明 performance、GPU、
+competitor、完整 suite 或 ASPLOS-ready。下一门禁为 objective-ancestral hard-clause escalation：
+把 objective root execution 作为动态 child refinement 的 typed source，使已证实的 root tightening
+进入 frontier；禁止继续追加 root-only pass。

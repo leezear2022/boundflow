@@ -4253,3 +4253,22 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_TYPED_HARD_CLAUSE_ESCALATION_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Objective-Directed Hard-Clause Escalation v1
+
+- 新增 additive objective escalation Plan/33-task TaskModule/Schedule；每个 original clause 静态拥有
+  guarded compile/refine/query，并绑定 exact shared-source lineage、objective hash 与 ordinal；
+- runtime 在一个 60 秒 deadline 内执行 baseline→admit→shared→per-clause objective refinement→
+  scalar query→aggregate；deadline 后 proof 丢弃，NRIR-30 final coverage 不回退；
+- 单次 pilot 通过后执行三 workload × 三 fresh repeats。MNIST/ResNet/OVAL final verified 保持
+  8/9、0/9、9/9；ResNet 九条 root lower 三轮逐值一致改善 `+81.522583—+179.970459`；
+- artifact fresh replay、focused `8 passed`、全量 `838 passed, 37 skipped`、Black/Mypy/Pylint
+  `10.00/10` 与 diff gate 通过；evidence hash=
+  `fb9e503bdf93cb9ce56f52915f1965f1f542e092945d4d7d77d8b8c4bd91764a`；
+- 以 objective-root tightness `VALIDATED-REDUCED` 关闭，不升级 property/performance/ASPLOS-ready。
+  下一门禁为 objective-ancestral dynamic-child propagation。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_OBJECTIVE_DIRECTED_HARD_CLAUSE_ESCALATION_V1_CHANGELOG_2026_08_04.md`

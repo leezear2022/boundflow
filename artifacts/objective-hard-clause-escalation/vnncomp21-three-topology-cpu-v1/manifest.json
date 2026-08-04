@@ -1,0 +1,16 @@
+{
+  "evidence_hash": "fb9e503bdf93cb9ce56f52915f1965f1f542e092945d4d7d77d8b8c4bd91764a",
+  "files": {
+    "evidence.json": "87b7f25ae2f3b36f1449b91fb30b584a150ffe97688c5d690edbbadff187a2bd",
+    "logs/cifar10_resnet-000-r0.log": "95e5740161f02eec2853e81133b529026fdc59cc137be90ee3f1d65b44bdf967",
+    "logs/cifar10_resnet-000-r1.log": "e14cd4dab44d30bfb5829820e7032307b633cac9ba19f11ab8d912728545f057",
+    "logs/cifar10_resnet-000-r2.log": "723e1113bcd84eb6f47a9802df25bfab7ea8c6091c383f0a490215a9d2c2a3f1",
+    "logs/mnistfc-000-r0.log": "63c0473340b7dd85df62fe682e980d4f756573bb73bab9a9aaacbfdb5ee8dfcc",
+    "logs/mnistfc-000-r1.log": "7722fa609a51821e8d2ae4e3cb8122026d6f5cff0fc626a7d9d640f54470895a",
+    "logs/mnistfc-000-r2.log": "729ac6f1ad27b1cd908581a0f65af32d7a424ee98cffdc09bfb4aa12540d437f",
+    "logs/oval21-000-r0.log": "f78f2dc35d23c22a6fd042633184f7d5d743fe7e2ed9668f92b90475f346aad7",
+    "logs/oval21-000-r1.log": "f35fe7c73e2059b2f585daa486ae0176d65dca7c53b5abdb0883bb72a558e15a",
+    "logs/oval21-000-r2.log": "3c6014ff2fc6901a9e86f6236ca7666c6455f230d7a3c0d9ea29d1911638a5a9"
+  },
+  "schema_version": "boundflow.objective-hard-clause-escalation-artifact/v1"
+}
