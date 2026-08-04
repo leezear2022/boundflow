@@ -4344,3 +4344,21 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_CROSS_CLAUSE_ANYTIME_OBJECTIVE_EVALUATOR_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-05：Multi-Clause Anytime Priority v1
+
+- 新增 root-lower priority、top-2 selection、dynamic equal-remaining slice 与 one-shot cutoff 的
+  Policy/Plan/Candidate/Decision/8-task Task/Schedule/Slice/Outcome/Aggregate IR 和 native runtime；
+- 三 fresh repeats 都复现 priority=`[2,3,4,5,0,8,6,7,1]`、selected=`[2,3]`；packed nodes=
+  `[[3,3],[3,3],[3,1]]`，repeat 2 第二条未提交 atomic pair，final 仍 9/9 unresolved；
+- formal replay、九类同步重哈希 tamper、NRIR-31/34/35 predecessor replay、16 focused tests 与
+  全量 `890 passed, 37 skipped`、Black/mypy/Pylint `10.00/10` 通过；formal hash=
+  `2a2081af4c38de3df7a23c62cfcecfeb74d4b15132390a069e04a28bb65bfbf0`；
+- 预注册 multi-clause coverage gate 失败，以 `VALIDATED-NO-GO` 关闭，`performance_claimed=false`；
+  IR/control 可保留，下一门禁为 shared parametric compiler/root/evaluator + stronger bound/candidate，
+  ASPLOS-ready 仍为 NO。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_MULTI_CLAUSE_ANYTIME_PRIORITY_V1_CHANGELOG_2026_08_04.md`

@@ -29,6 +29,13 @@
 > storage choice 或 budget decision switch；VNN-COMP ResNet 主计算仍是 external opaque call。
 > 下一工作是 `feat/native-real-network-bound-ir-v1`，不是重开 IR-5、IR-6 或孤立 TIR 调优。
 
+> **2026-08-05 NRIR-36 修订**：NRIR-31 九子句 floor 已由 typed root-lower priority 在同一 global
+> 60 秒预算内选择 top-2 clauses 2/3；三 fresh repeats 都复现相同 rank/selection，但 packed nodes=
+> `[[3,3],[3,3],[3,1]]`，repeat 2 第二条未提交 atomic sibling group，final 仍 9/9 unresolved。
+> 预注册 multi-clause coverage gate 失败，本阶段 `VALIDATED-NO-GO`；IR/control 可保留，但不是
+> property、硬实时或 performance claim。下一门禁为 shared parametric compiler/root/evaluator 与
+> stronger bound/candidate，不继续调 top-k/slice 常数；ASPLOS-ready=NO 不变。
+
 > **2026-08-04 NRIR-21 修订**：per-child exact-split objective refinement 的 IR/control、lineage
 > 与 replay 已实现，但固定 ResNet clauses 0/1 的最差 depth-2 leaf lower 相对 root-global 分别
 > 退化 `0.847961/0.936646`，故该策略 `VALIDATED-NO-GO`。下一方法门禁是把祖先已证明 refined
