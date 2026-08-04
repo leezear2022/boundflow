@@ -3898,3 +3898,24 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_NATIVE_OPTIMIZED_RELU_SPLIT_BAB_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Native Property Termination and Verdict v1
+
+- 新增独立 three-state verdict runtime：verified 必须所有 leaf sound-pruned，任何
+  frontier/depth/unproven prune 保持 unknown；
+- 新增 concrete primal Task IR executor，覆盖 ResNet 所需 conv2d/ReLU/residual/flatten/linear
+  语义并保留 intermediate value trace；
+- unsafe 只能由重执行通过的 concrete witness 产生；input box、ReLU split path、
+  output/objective 与 tensor/value-trace hashes 全部绑定；
+- toy verified/unsafe/unknown 与非 root split witness 通过；固定 ResNet center objective=
+  `0.8564349412918091`，7-node/4-frontier 仍为 explicit unknown；
+- artifact generate/replay hash=
+  `9e3dceed23c8759c910938ba7c9f84caaeb949c8f19b72fab104ce4e1b733405`；聚焦
+  `19 passed`、全量 `649 passed, 37 skipped`；Black/Mypy/Pylint/diff 全过；
+- 只关闭 verdict soundness/control ownership；candidate search、multi-clause property、timeout/
+  dynamic early stop、real complete closure 和性能证据仍 pending。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_NATIVE_PROPERTY_TERMINATION_VERDICT_V1_CHANGELOG_2026_08_04.md`

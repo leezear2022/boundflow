@@ -520,3 +520,22 @@ artifact replay hash=`e813826c8fe74161505ab2379b37fa67247fd40c3bd0cb8f82b77880ce
 hash 不相等且已披露；fixed run 仍是 `budget_exhausted/property_status=not_claimed`，所以不是完整
 verifier。下一代码路线是 native property termination/verdict v1：verified/unsafe 必须有闭合 proof
 或 concrete witness，任何未闭合 budget/depth/timeout 都保持 unknown。
+
+## 20. Native Property Termination and Verdict v1 判定
+
+NRIR-13 已将 NRIR-12 的 `property_status=not_claimed` 边界升级为独立、可重放且
+fail-closed 的 `verified / unsafe / unknown` 证明层。verified 要求 complete queue 且所有
+leaf 都有 `lower >= threshold` 的 sound prune；任何 frontier、depth terminal 或无法证明的
+prune 都会成为 unresolved leaf 并返回 unknown。
+
+unsafe 不信任序列化数字：新 concrete Task IR executor 重执行 primal graph，检查 input box、
+node ReLU split path 和严格的 objective violation，再绑定 input/output/value-trace hash。toy
+verified/unsafe/unknown matrix 与非 root split witness 均已通过。固定 ResNet 中心点 objective
+为 `0.8564349412918091`，不是反例；7-node 运行仍有 4 frontier，因此正确返回
+`unknown/node_budget_frontier_open`，没有伪造 verified。
+
+结论为 three-state verdict soundness `VALIDATED-REDUCED`。artifact replay hash 为
+`9e3dceed23c8759c910938ba7c9f84caaeb949c8f19b72fab104ce4e1b733405`，聚焦 `19 passed`，
+全量 `649 passed, 37 skipped`，静态门禁全过。
+它仍缺 candidate discovery、multi-clause property、timeout/dynamic early stop 与 real complete closure；
+下一路线是 complete verifier query v1，不能直接将本轮升级为端到端验证器或性能 claim。

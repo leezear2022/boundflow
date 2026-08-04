@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev001830
-last_va: ev001831
+last_ch: ev001915
+last_va: ev001916
 blk:
-next: implement-native-property-termination-and-verdict-v1
-updated: 2026-08-04T00:42:51Z
+next: implement-complete-verifier-query-v1
+updated: 2026-08-04T01:12:42Z

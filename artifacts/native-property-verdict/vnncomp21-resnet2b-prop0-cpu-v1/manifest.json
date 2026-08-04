@@ -1,0 +1,9 @@
+{
+  "evidence_hash": "9e3dceed23c8759c910938ba7c9f84caaeb949c8f19b72fab104ce4e1b733405",
+  "files": {
+    "property_verdicts.json": "c34b07896ea9e76eafe3837f61869213f437f8eec3cfca21f81fff82f3b84eef"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.native-property-verdict-artifact/v1",
+  "status": "ok"
+}
