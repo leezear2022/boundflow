@@ -842,3 +842,20 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   fresh semantic replay hash=
   `8fce1c7c3e5c63adb14a7ab5b9f23407e4a7a1406353750e4f150ee745b4e88e`；focused
   `16 passed`、全量 `739 passed, 37 skipped`。下一门禁为 per-child exact-state refinement。
+
+### 2026-08-04 Per-Child Objective Refinement v1
+
+- `C1/C2-M-NRIR21` per-node refinement ownership：每个 queue node 依据 exact split 独立编译/
+  执行 objective-directed refinement Plan/Task/Schedule，再拼接为 optimizer batch；默认关闭的
+  旧 payload/hash 结构不增加字段；
+- `C3-G-NRIR21` lineage gate：node/evaluation/refinement 一一绑定 split、Plan/Task/Schedule、
+  semantic trace、initial/final intermediate hash 与 target count；parent alpha/beta 只作 warm
+  initialization，parent refinement 不作为 child exact result；tamper fail closed；
+- `C1/C3-E-NRIR21` fixed bounded-tree result：clauses `0/1` root lower exact matching，但
+  per-child worst depth-2 leaf 相对 root-global 退化 `-0.847961/-0.936646`；
+- `C3-L-NRIR21` closure=`VALIDATED-NO-GO`：该 shortlist recomputation 不形成 tightness claim；
+  单模型、两 clause、CPU、7 nodes，无 property closure/CUDA/competitor/repeated-performance，
+  `performance_claimed=false`；下一门禁为 ancestral-constraint carry-forward refinement；
+- 工件：
+  `artifacts/per-child-objective-refinement/vnncomp21-resnet2b-two-clause-cpu-v1/`；fresh replay、
+  focused/full/static 的最终 hash/count 见 NRIR-21 changelog。

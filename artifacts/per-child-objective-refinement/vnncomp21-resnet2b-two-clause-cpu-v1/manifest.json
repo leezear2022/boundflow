@@ -1,0 +1,13 @@
+{
+  "evidence_hash": "976adc4a50c53592ce5bc011b36d0ee4d1e09927c6c0bccf662aee8eded3d310",
+  "files": {
+    "evidence.json": "148837e1888972db9449f1eef95be4b75b2eb6645f0bcbc552024f04ad6f1ff6",
+    "logs/clause-0-per_child.log": "0c84bfc061b384de8ee032035316dd71a4d735aab6778dd26091c4c7675fe8ea",
+    "logs/clause-0-root_global.log": "d288eea9745dfc83ecf344e0a31ef147611816d1ec00859cf6fde2812b7c8d0d",
+    "logs/clause-1-per_child.log": "2c5fd64f719172657304897ac3b15ac5dcb3bfd027f73af2e8d4250c51a229c6",
+    "logs/clause-1-root_global.log": "65a4b4cf09d2522462f3de4868fc0ed7c7645fedd47f9b31056a2444a8969379"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.per-child-objective-refinement-artifact/v1",
+  "status": "validated_no_go"
+}

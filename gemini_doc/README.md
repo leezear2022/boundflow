@@ -16,9 +16,9 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_OBJECTIVE_DIRECTED_INTERMEDIATE_REFINEMENT_V1_PLAN_2026_08_04.md`
-（clause-sensitive influence×width selection、objective-aware Plan/Task/Schedule、ResNet
-same-budget root-tightness artifact）。其直接前序为
+当前最新入口：`gemini_doc/BOUNDFLOW_PER_CHILD_OBJECTIVE_REFINEMENT_V1_PLAN_2026_08_04.md`
+（per-node exact-split refinement、queue lineage、ResNet same-budget bounded-tree NO-GO）。其直接
+前序为 `gemini_doc/BOUNDFLOW_OBJECTIVE_DIRECTED_INTERMEDIATE_REFINEMENT_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_NATIVE_INTERMEDIATE_BOUND_REFINEMENT_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_MULTIWORKLOAD_COMPETITOR_E2E_BASELINE_V1_PLAN_2026_08_04.md` 和
 `gemini_doc/BOUNDFLOW_HARD_CLAUSE_OBJECTIVE_BRANCHING_V1_PLAN_2026_08_04.md`。

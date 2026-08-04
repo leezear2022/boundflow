@@ -2,7 +2,7 @@
 
 > 状态：**顶层执行计划 v1.0；后续研究工作受本文门禁约束。**  
 > 基线日期：2026-07-12  
-> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`f191034`
+> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`0fc54ce`
 > 投稿策略：ASPLOS 2027 September Cycle 为有条件冲刺；ASPLOS 2028 为稳健主目标。
 
 > **路线修订（2026-07-20）**：本文保留 2026-07-12 的研究问题、历史门禁和 PR-10—13
@@ -28,6 +28,12 @@
 > Reduced residual path 能由 Schedule IR 控制 arena 与 region launch，但没有 materialization、
 > storage choice 或 budget decision switch；VNN-COMP ResNet 主计算仍是 external opaque call。
 > 下一工作是 `feat/native-real-network-bound-ir-v1`，不是重开 IR-5、IR-6 或孤立 TIR 调优。
+
+> **2026-08-04 NRIR-21 修订**：per-child exact-split objective refinement 的 IR/control、lineage
+> 与 replay 已实现，但固定 ResNet clauses 0/1 的最差 depth-2 leaf lower 相对 root-global 分别
+> 退化 `0.847961/0.936646`，故该策略 `VALIDATED-NO-GO`。下一方法门禁是把祖先已证明 refined
+> constraints 与 child exact split-forward 单调合并后再 refinement；不得靠扩大树或单次 timing
+> 掩盖当前 tightness 退化。
 
 > **2026-08-04 NRIR-1 修订**：上述 native correctness 门禁已通过。固定 ResNet2B 的
 > 17-op Primal graph 已 lower/execute 为 21-op native Bound/Task/Schedule path，五层 hash 绑定

@@ -1,13 +1,14 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`f191034`（NRIR-19 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`0fc54ce`（NRIR-20 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/objective-directed-intermediate-refinement-v1`
+> 当前研发分支：`feat/per-child-objective-refinement-v1`
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed
-> intermediate target selection（完成）→ per-child intermediate refinement**。
+> intermediate target selection（完成）→ per-child intermediate refinement（NO-GO）→
+> ancestral-constraint carry-forward refinement**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有
@@ -1000,3 +1001,23 @@ fresh source-to-IR semantic replay hash=
 `VALIDATED-REDUCED` 关闭；没有 complete closure、CUDA、重复性能或 ASPLOS-ready claim。下一
 单一路线是让 ReLU-split child 依据其 exact split state 重算 clause-sensitive refinement，禁止把
 parent refined bounds 当作 child exact state。
+
+## 34. Per-Child Objective Refinement v1
+
+NRIR-21 将每个 optimized ReLU-split queue node 的 exact split state 编译成独立 refinement
+Plan/Task/Schedule：逐 node 重跑 split-forward IBP、clause-sensitive influence、target selection、
+selected CROWN、intersection 与 propagation，再把 child-specific bounds 拼成 optimizer batch。
+queue trace 一一绑定 node split、三层 refinement IR hash、去 timing semantic trace、initial/final
+intermediate hash 与 target count；parent alpha/beta 仅作 monotonic warm initialization，parent
+refined bounds 从未当作 child exact result。默认关闭时旧 queue payload 不增加字段。
+
+固定 ResNet2B property 0 clauses `0/1` 使用同一 96-target policy、5-step optimizer、7-node/
+depth-2 tree。root-global 与 per-child root lower 完全一致，分别为
+`-417.292480/-602.551392`；但 per-child 最差 depth-limit leaf lower 为
+`-414.587006/-592.880920`，弱于 root-global 的 `-413.739044/-591.944275`，delta=
+`-0.847961/-0.936646`。因此该策略按预设门禁以 `VALIDATED-NO-GO` 关闭，不升级 tightness、
+property、performance 或 ASPLOS-ready claim。
+
+下一单一路线是 ancestral-constraint carry-forward：child 必须从 exact split-forward 与祖先已证明
+refined constraints 的单调交集出发再重选 targets，避免当前 per-child recomputation 丢失 root
+selected-CROWN tightening；该方法仍须进入一等 Plan/Task/Schedule 后才能比较。

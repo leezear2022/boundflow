@@ -4067,3 +4067,19 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_OBJECTIVE_DIRECTED_INTERMEDIATE_REFINEMENT_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Per-Child Objective Refinement v1
+
+- 每个 optimized BaB node 依据 exact split state 独立执行 objective-directed refinement
+  Plan/Task/Schedule，再把 child-specific intermediate bounds 拼为 optimizer batch；
+- queue/evaluation trace 绑定 split、三层 refinement IR、semantic trace、initial/final bounds 与
+  target count；parent alpha/beta 只作 warm initialization，旧默认 payload 条件兼容；
+- fixed ResNet clauses 0/1、同 96-target/5-step、7-node/depth-2 预算下，root lower 完全一致，
+  但 per-child worst leaf lower 相对 root-global 退化 `-0.847961/-0.936646`；
+- 按预设门禁以 `VALIDATED-NO-GO` 关闭，不声明 property closure、CUDA、competitor speedup、
+  repeated performance 或 ASPLOS-ready；下一路线为 ancestral-constraint carry-forward refinement。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_PER_CHILD_OBJECTIVE_REFINEMENT_V1_CHANGELOG_2026_08_04.md`
