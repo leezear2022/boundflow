@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`abe37e8`（NRIR-21 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/ancestral-constraint-refinement-v1`
+> 当前 integration base：`c6a7998`（NRIR-23 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/external-seeded-depth-node-convergence-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-04 NRIR-19 后续：native selected-CROWN intermediate refinement 已成为一等
@@ -13,7 +13,9 @@
 > clauses 0/1 上使最差 depth-2 leaf lower 退化 `-0.847961/-0.936646`，故为 NO-GO；下一门禁为
 > ancestral-constraint carry-forward refinement；该门禁已由 NRIR-22 以 fixed-tree
 > `VALIDATED-REDUCED` 关闭，clauses 0/1 worst leaf 相对 independent 提升
-> `+73.615173/+75.022095`。下一门禁为 hard-clause convergence expansion。顶层
+> `+73.615173/+75.022095`。NRIR-23 随后连接 external typed seed；NRIR-24 已完成
+> `7/15/31 nodes × depth 2/3/4` convergence，三条 hard clause 持续改善但仍无 closure。
+> 下一门禁为 dynamic ancestral refinement budget/multi-pass。顶层
 > ASPLOS-ready 与 performance No-Go 不变。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
 > 2026-07-28 进度：IR-1 Bound IR、IR-2 Plan IR、IR-3 Task/Schedule IR 的最小
@@ -765,3 +767,21 @@ leaf 分别为 `-0.319799→-0.319110→-0.318287`、
 `9f52b99a74dab448626061f5b8f060f3b8c43b6c03f6deb0899d9fe91883d9f7`；全量
 `766 passed, 37 skipped`，静态门禁全过。下一工程动作是冻结 7/15/31 nodes、depth 2/3/4 的
 hard-clause convergence；不得升级 complete property、GPU/performance 或 ASPLOS-ready claim。
+
+## 31. External-Seeded Depth/Node Convergence v1 判定
+
+NRIR-24 固定 NRIR-23 的 external seed、ancestral carry、objective branch、25-step optimizer、
+16-target/ReLU 单 pass refinement 与 batching，只改变 `7/15/31 nodes × depth 2/3/4`。九个
+clause/budget 均由 fresh process 生成 checkpoint shard，并在 replay 中逐对象重算。
+
+clauses `0/2/4` worst terminal lower 分别从
+`-0.318287/-0.425477/-0.504142` 改善到 depth-3 的
+`-0.299506/-0.413456/-0.479104`，再改善到 depth-4 的
+`-0.282360/-0.401845/-0.459939`。三条曲线单调且未饱和；logical domains 按
+`split_state_hash` 嵌套，lineage/branch/refinement semantics 通过。所有 deepest terminals 仍负，
+三条 bounded-tree status 均为 unknown。
+
+结论为 fixed-hard-clause convergence trend `VALIDATED-REDUCED`。artifact/replay hash=
+`db0401bef0d938773fed04a173e49cae0ad0b4fdc4ffdd49450cc86fae7f0db6`。不升级 complete
+property、GPU/performance、multi-workload、competitor 或 ASPLOS-ready；下一工程动作是冻结
+dynamic ancestral refinement budget/multi-pass 对照，不再以纯 fixed-depth 扩展为主路线。

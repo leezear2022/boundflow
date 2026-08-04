@@ -4121,3 +4121,20 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_EXTERNAL_SEEDED_ANCESTRAL_REFINEMENT_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：External-Seeded Depth/Node Convergence v1
+
+- 固定 ResNet clauses `0/2/4`，只把 external-seeded ancestral 完整树从 7/depth2 扩为
+  15/depth3 与 31/depth4；每单元 fresh process、原子 checkpoint、严格 resume；
+- 九个 shard 冻结 source/seed/policy、queue、refinement lineage 与 objective-branch IR hash；
+  aggregate 按 split-state logical domains 校验嵌套，避免把 best-first execution order 冒充语义；
+- 三条 worst terminal lower 均持续改善到 `-0.282360/-0.401845/-0.459939`，但仍无 fixed-tree
+  closure；关闭为 convergence `VALIDATED-REDUCED`，不升级 property/performance/ASPLOS-ready；
+- fresh semantic replay hash=
+  `db0401bef0d938773fed04a173e49cae0ad0b4fdc4ffdd49450cc86fae7f0db6`；下一门禁为 dynamic
+  ancestral refinement budget/multi-pass。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_EXTERNAL_SEEDED_DEPTH_NODE_CONVERGENCE_V1_CHANGELOG_2026_08_04.md`

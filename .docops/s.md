@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev003031
-last_va: ev003032
+last_ch: ev003103
+last_va: ev003104
 blk:
-next: measure-external-seeded-depth-node-convergence-v1
-updated: 2026-08-04T08:42:17Z
+next: publish-and-merge-nrir24-then-freeze-dynamic-refinement-budget-v1
+updated: 2026-08-04T09:26:56Z

@@ -1,14 +1,15 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`abe37e8`（NRIR-21 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`c6a7998`（NRIR-23 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/ancestral-constraint-refinement-v1`
+> 当前研发分支：`feat/external-seeded-depth-node-convergence-v1`
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed
 > intermediate target selection（完成）→ per-child intermediate refinement（NO-GO）→
-> ancestral-constraint carry-forward refinement（完成）→ hard-clause convergence expansion**。
+> ancestral-constraint carry-forward refinement（完成）→ external-seeded hard-clause convergence
+>（完成）→ dynamic ancestral refinement budget**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有
@@ -1060,3 +1061,29 @@ artifact semantic replay hash=
 `766 passed, 37 skipped`。该阶段只关闭 typed seed/control/lineage 与 fixed-budget tightness
 `VALIDATED-REDUCED`；所有 terminal leaves 仍负，无 complete property、performance、CUDA、
 multi-workload 或 ASPLOS-ready claim。下一门禁为 external-seeded depth/node convergence curve。
+
+## 37. External-Seeded Depth/Node Convergence v1
+
+NRIR-24 在不改变 source、typed seed、objective branch、25-step optimizer、16-target/ReLU 单 pass
+refinement 或 batching 的前提下，只把完整树预算从 `7/depth2` 扩为 `15/depth3` 和
+`31/depth4`。每个 clause/budget 由 fresh Python process 独立执行并原子写 shard；九个 shard
+全部完成 semantic replay。
+
+clauses `0/2/4` 的 worst terminal lower 曲线分别为：
+
+- `-0.318287 → -0.299506 → -0.282360`；
+- `-0.425477 → -0.413456 → -0.401845`；
+- `-0.504142 → -0.479104 → -0.459939`。
+
+三条均单调严格改善，15→31 nodes delta 为 `+0.017146/+0.011611/+0.019165`，未触发冻结的
+`1e-6` 饱和门禁；但三条仍为负，无 fixed bounded-tree closure。best-first 跨预算的 node/batch
+序号不是稳定逻辑身份；artifact 以 `split_state_hash` 校验 `7⊂15⊂31` logical domains、parent
+split lineage、branch selection 与去执行序号的 refinement semantics，公共域最大 lower 漂移
+`1.13249e-6`，低于 runtime `1e-5` tolerance。
+
+最终 semantic replay hash=
+`db0401bef0d938773fed04a173e49cae0ad0b4fdc4ffdd49450cc86fae7f0db6`。本阶段只关闭
+external-seeded fixed-hard-clause convergence trend `VALIDATED-REDUCED`；不声明 complete
+property、performance、CUDA、multi-workload、competitor parity 或 ASPLOS-ready。proof deficit
+仍为 `0.282360/0.401845/0.459939`，下一门禁转向 dynamic ancestral refinement budget/multi-pass，
+而不是继续盲目增加固定树深。

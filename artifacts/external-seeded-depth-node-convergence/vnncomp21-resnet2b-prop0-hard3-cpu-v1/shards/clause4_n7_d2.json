@@ -1,0 +1,712 @@
+{
+  "budget_key": "n7_d2",
+  "clause_index": 4,
+  "external_seed_hash": "c350d3464eb25f675013c373d6e0b825deba979b3dd1504b282fbe8e80b77a9b",
+  "external_seed_ir": {
+    "bound_intermediate_constraints_hash": "47cac6cdb465c627ae57fcabdb62dd29aad38f5504d9e1824a1c13b5857bf5ec",
+    "consumption": "sound_constraint_intersection_only",
+    "external_intermediate_bounds_hash": "d51615b04dfb205afd67d2c21680ece4ca92f693157da1e32c7f8202a8e08cf1",
+    "input_bounds_hash": "742690d00e48f051c47b6eed941884d7759fcf3a97dda3dcf7b50e96e0cdf3d4",
+    "primal_graph_hash": "02636a01e4b5a2d1f759dc7748bf80b3303efff2d5697790966f8e93679213e8",
+    "provider": "alpha-beta-CROWN",
+    "seed_id": "nrir24:resnet2b:property0:clause4:external-seed",
+    "semantics_owner": "external_verifier",
+    "source_artifact_manifest_hash": "5d38aa4adcd7b8593b0ca3751106d3a254b72a2698bd445a8dde59d50eb5a676",
+    "source_artifact_payload_hash": "3ba949de66380c7d16dc44bb934eca8400182521e761c19eaa671cd8cf0eb557",
+    "source_model_hash": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+    "source_objective_set_hash": "380f1c32321ea47967ad48221134d92d494630777eabe10ef31576a0b051e408",
+    "source_property_hash": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff"
+  },
+  "performance_claimed": false,
+  "protocol": {
+    "branch_policy": {
+      "candidate_batch_size": 64,
+      "candidate_policy_id": "top_width_per_relu_v1",
+      "candidates_per_relu": 8,
+      "max_candidates": 256,
+      "reduce_policy": "maximize_worst_child_then_mean"
+    },
+    "optimizer_policy": {
+      "alpha_init": 0.5,
+      "alpha_initialization_mode": "adaptive",
+      "beta_init": 0.0,
+      "lr": 0.2,
+      "objective": "lower",
+      "optimizer": "torch.optim.Adam",
+      "per_batch_params": true,
+      "soft_tau": 1.0,
+      "spec_reduce": "mean",
+      "steps": 25
+    },
+    "queue_config": {
+      "available_memory_bytes": 1073741824,
+      "expansion_batch_size": 2,
+      "max_depth": 2,
+      "max_eval_batch_size": 4,
+      "max_nodes": 7,
+      "memory_budget_bytes": 1073741824,
+      "threshold": 0.0
+    },
+    "refinement_policy": {
+      "backward_chunk_size": 8,
+      "candidate_policy_id": "objective_influence_width_per_relu_v1",
+      "max_neurons_per_relu": 16,
+      "minimum_width": 0.0,
+      "passes": 1,
+      "refinement_method": "selected_plain_crown_v1"
+    },
+    "strategy": "external_seeded_ancestral_carry_v1"
+  },
+  "queue": {
+    "decisions": [
+      {
+        "branch_candidate": {
+          "lower": -0.9899145364761353,
+          "neuron_index": 17,
+          "relu_input": "31",
+          "upper": 0.7325634956359863,
+          "width": 1.7224780321121216
+        },
+        "child_node_ids": [
+          "nrir24:c4:external-seeded-ancestral:n000001",
+          "nrir24:c4:external-seeded-ancestral:n000002"
+        ],
+        "decision_index": 0,
+        "kind": "expand",
+        "node_id": "nrir24:c4:external-seeded-ancestral:n000000",
+        "reason": "objective_bound_impact"
+      },
+      {
+        "branch_candidate": {
+          "lower": -0.5478697419166565,
+          "neuron_index": 548,
+          "relu_input": "28",
+          "upper": 0.36118191480636597,
+          "width": 0.9090516567230225
+        },
+        "child_node_ids": [
+          "nrir24:c4:external-seeded-ancestral:n000003",
+          "nrir24:c4:external-seeded-ancestral:n000004"
+        ],
+        "decision_index": 1,
+        "kind": "expand",
+        "node_id": "nrir24:c4:external-seeded-ancestral:n000001",
+        "reason": "objective_bound_impact"
+      },
+      {
+        "branch_candidate": {
+          "lower": -0.5478697419166565,
+          "neuron_index": 548,
+          "relu_input": "28",
+          "upper": 0.36118191480636597,
+          "width": 0.9090516567230225
+        },
+        "child_node_ids": [
+          "nrir24:c4:external-seeded-ancestral:n000005",
+          "nrir24:c4:external-seeded-ancestral:n000006"
+        ],
+        "decision_index": 2,
+        "kind": "expand",
+        "node_id": "nrir24:c4:external-seeded-ancestral:n000002",
+        "reason": "objective_bound_impact"
+      },
+      {
+        "branch_candidate": null,
+        "child_node_ids": [],
+        "decision_index": 3,
+        "kind": "terminal",
+        "node_id": "nrir24:c4:external-seeded-ancestral:n000003",
+        "reason": "configured_depth_limit"
+      },
+      {
+        "branch_candidate": null,
+        "child_node_ids": [],
+        "decision_index": 4,
+        "kind": "terminal",
+        "node_id": "nrir24:c4:external-seeded-ancestral:n000004",
+        "reason": "configured_depth_limit"
+      },
+      {
+        "branch_candidate": null,
+        "child_node_ids": [],
+        "decision_index": 5,
+        "kind": "terminal",
+        "node_id": "nrir24:c4:external-seeded-ancestral:n000006",
+        "reason": "configured_depth_limit"
+      },
+      {
+        "branch_candidate": null,
+        "child_node_ids": [],
+        "decision_index": 6,
+        "kind": "terminal",
+        "node_id": "nrir24:c4:external-seeded-ancestral:n000005",
+        "reason": "configured_depth_limit"
+      }
+    ],
+    "evaluations": [
+      {
+        "branch_candidate": {
+          "lower": -0.9899145364761353,
+          "neuron_index": 17,
+          "relu_input": "31",
+          "upper": 0.7325634956359863,
+          "width": 1.7224780321121216
+        },
+        "eval_batch_id": "nrir24:c4:external-seeded-ancestral:eval:0000",
+        "eval_batch_position": 0,
+        "intermediate_refinement_trace_hash": "cffe4c9784b6e61e419fca2d13df10ff708b5d36981c2c768eb12bb283e37588",
+        "lower": -0.5696250200271606,
+        "native_ir_hashes": {
+          "execution_bound_module_hash": "4262749de546f2394ea95a9a963d943ea23eb3625c6dfe2e3a0eee0c37be8010",
+          "execution_plan_instance_hash": "1104d777845411c72888cd61d3b3fe1362de04fd15e07c5c6984a873fe6d9610",
+          "execution_plan_template_hash": "1a74d73401930af892d77289c1872a072faac830ef9a403bfc7767bc8f40358f",
+          "representation_binding_hash": "691328bba45584772ecc9c8ad4bd58de965b58d1fdc9df0126e5249cbd168635",
+          "schedule_hash": "4e9450af8a0a152253578cb7c35440b851431f4588a6694f4a7e6c0d782785f3",
+          "source_bound_module_hash": "4262749de546f2394ea95a9a963d943ea23eb3625c6dfe2e3a0eee0c37be8010",
+          "source_plan_instance_hash": "1f9aaf01937e3218610ce2c00f254eb785406d71ba7756562c4c9567873e13ea",
+          "source_plan_template_hash": "59dd981b274043716d456795b4992fde82bd2e1fd3123b4e6e59500180718191",
+          "source_schedule_hash": "23287d815d99205c10eff52c0152256017c87400b0dd628411550719c6e8b2f9",
+          "task_module_hash": "60d16795ed904f044d698d595cb94d9a26122a0f28d9b7ecf0f7580b7bda378c"
+        },
+        "node": {
+          "branch_neuron_index": null,
+          "branch_relu_input": null,
+          "branch_value": 0,
+          "depth": 0,
+          "node_id": "nrir24:c4:external-seeded-ancestral:n000000",
+          "parent_node_id": null,
+          "split_state_hash": "32ef5aa369eb3b424067ead0f6b4a41a59b7c5753a5e59034bc13372b10bc2be"
+        },
+        "optimizer_execution_trace_hash": "73bc99b57b0570b439d4d7f5bd9e01a4d7294dea5af10fae5b6b4eedb2bac972",
+        "optimizer_ir_hashes": {
+          "optimizer_plan_hash": "5fd3c238621f9c9e6df22c56236ac51bf86f64f63b98ce9b4933c8441cb1ad2e",
+          "optimizer_schedule_hash": "0712bcf29cad080889e93fc42b61d667f06bd0bd9a04c4b9993818e3f2e9b53c",
+          "optimizer_task_module_hash": "f1ad5a297b644c7670a0f2097257960f1fddc4fc2e5a743445f93ac43a389af8"
+        },
+        "parent_selected_state_hash": null,
+        "parent_state_consumed_as_exact": false,
+        "parent_state_validity": "monotonic_refinement_initialization_only",
+        "priority": -0.569625,
+        "selected_state_hash": "4855d298b6a0e027b3ffacd406ecda87e4359109c603c7301ac7415556b2312a",
+        "upper": 1.9710032939910889,
+        "warm_start_kind": "none"
+      },
+      {
+        "branch_candidate": {
+          "lower": -0.5478697419166565,
+          "neuron_index": 548,
+          "relu_input": "28",
+          "upper": 0.36118191480636597,
+          "width": 0.9090516567230225
+        },
+        "eval_batch_id": "nrir24:c4:external-seeded-ancestral:eval:0001",
+        "eval_batch_position": 0,
+        "intermediate_refinement_trace_hash": "7f78bd7f13747c04b581d89f9a672a81d18d12a8025e5667e5ca7be4b4939880",
+        "lower": -0.5360157489776611,
+        "native_ir_hashes": {
+          "execution_bound_module_hash": "c93a1329dd2403aba3a9c08e9510449731963c6834d13399011f0f1823b847ea",
+          "execution_plan_instance_hash": "f3f666180a0453180e05a71bc18acb0149adacb95ff9aa9d85199a1a9053d06a",
+          "execution_plan_template_hash": "97cec0251b7c0f311085619074fb6fa2c1f22b39a3fe6965679982b8061928ae",
+          "representation_binding_hash": "49723f132dbd67f61d8a68d9a3fa2843f8d571785ed819a0364d6558044d2cb6",
+          "schedule_hash": "ee34b4799919ae4d569c4f9dc1c4fcd9657329a0a718f492a2ad56e5789eb5e6",
+          "source_bound_module_hash": "c93a1329dd2403aba3a9c08e9510449731963c6834d13399011f0f1823b847ea",
+          "source_plan_instance_hash": "eac8404191f9f3b75feafa5e8b166460cf9105bcf06a55a600990b04c4cdfbea",
+          "source_plan_template_hash": "3a13f0445d7ee97b10f525ff9df00f87199df66889c4c875cd7fd5047dee0859",
+          "source_schedule_hash": "daf0318440e82fcadaa16c7a9317229e07907d5f8cb8718f49cf2bcecba66017",
+          "task_module_hash": "fffd7a3725af1118879562748db6c63d1972757cfac17e5693290b6d6ad23c93"
+        },
+        "node": {
+          "branch_neuron_index": 17,
+          "branch_relu_input": "31",
+          "branch_value": -1,
+          "depth": 1,
+          "node_id": "nrir24:c4:external-seeded-ancestral:n000001",
+          "parent_node_id": "nrir24:c4:external-seeded-ancestral:n000000",
+          "split_state_hash": "481fae899b281d4d499661a770ac15e38d6d16a723e3aca68edadb08cc875048"
+        },
+        "optimizer_execution_trace_hash": "5daa75342665d923f00d99e76c3063bf38f3edebe0b00fe06517c8e464c595bf",
+        "optimizer_ir_hashes": {
+          "optimizer_plan_hash": "4077ac5759bf3e804fdb35d1e0fe6dbb7403843adc39fc5d7419c7d5011d7c2e",
+          "optimizer_schedule_hash": "25f1e08bc9fbdfd9cf71cb4c1273ec8d50a7ac5db0b5dcbb9264846238177e50",
+          "optimizer_task_module_hash": "ad37f4fe7bdb444f26aac39e9cd8eca33dec9d8a784702e073d54e536c11adf2"
+        },
+        "parent_selected_state_hash": "4855d298b6a0e027b3ffacd406ecda87e4359109c603c7301ac7415556b2312a",
+        "parent_state_consumed_as_exact": false,
+        "parent_state_validity": "monotonic_refinement_initialization_only",
+        "priority": -0.5360157,
+        "selected_state_hash": "d799f50af304c704f63a4ccf8d759453abfca9b8fb084481fa6dac1b3401362e",
+        "upper": 1.9709992408752441,
+        "warm_start_kind": "monotonic_split_refinement"
+      },
+      {
+        "branch_candidate": {
+          "lower": -0.5478697419166565,
+          "neuron_index": 548,
+          "relu_input": "28",
+          "upper": 0.36118191480636597,
+          "width": 0.9090516567230225
+        },
+        "eval_batch_id": "nrir24:c4:external-seeded-ancestral:eval:0001",
+        "eval_batch_position": 1,
+        "intermediate_refinement_trace_hash": "ee95524d97ff726565a37b8d0646fa767dfae61d0a478a7a33ef276e747900f4",
+        "lower": -0.498468279838562,
+        "native_ir_hashes": {
+          "execution_bound_module_hash": "c93a1329dd2403aba3a9c08e9510449731963c6834d13399011f0f1823b847ea",
+          "execution_plan_instance_hash": "f3f666180a0453180e05a71bc18acb0149adacb95ff9aa9d85199a1a9053d06a",
+          "execution_plan_template_hash": "97cec0251b7c0f311085619074fb6fa2c1f22b39a3fe6965679982b8061928ae",
+          "representation_binding_hash": "49723f132dbd67f61d8a68d9a3fa2843f8d571785ed819a0364d6558044d2cb6",
+          "schedule_hash": "ee34b4799919ae4d569c4f9dc1c4fcd9657329a0a718f492a2ad56e5789eb5e6",
+          "source_bound_module_hash": "c93a1329dd2403aba3a9c08e9510449731963c6834d13399011f0f1823b847ea",
+          "source_plan_instance_hash": "eac8404191f9f3b75feafa5e8b166460cf9105bcf06a55a600990b04c4cdfbea",
+          "source_plan_template_hash": "3a13f0445d7ee97b10f525ff9df00f87199df66889c4c875cd7fd5047dee0859",
+          "source_schedule_hash": "daf0318440e82fcadaa16c7a9317229e07907d5f8cb8718f49cf2bcecba66017",
+          "task_module_hash": "fffd7a3725af1118879562748db6c63d1972757cfac17e5693290b6d6ad23c93"
+        },
+        "node": {
+          "branch_neuron_index": 17,
+          "branch_relu_input": "31",
+          "branch_value": 1,
+          "depth": 1,
+          "node_id": "nrir24:c4:external-seeded-ancestral:n000002",
+          "parent_node_id": "nrir24:c4:external-seeded-ancestral:n000000",
+          "split_state_hash": "b07c81bbdd8121001030d13af20b474dd639782e103b1271eaef42211ef561fc"
+        },
+        "optimizer_execution_trace_hash": "5daa75342665d923f00d99e76c3063bf38f3edebe0b00fe06517c8e464c595bf",
+        "optimizer_ir_hashes": {
+          "optimizer_plan_hash": "4077ac5759bf3e804fdb35d1e0fe6dbb7403843adc39fc5d7419c7d5011d7c2e",
+          "optimizer_schedule_hash": "25f1e08bc9fbdfd9cf71cb4c1273ec8d50a7ac5db0b5dcbb9264846238177e50",
+          "optimizer_task_module_hash": "ad37f4fe7bdb444f26aac39e9cd8eca33dec9d8a784702e073d54e536c11adf2"
+        },
+        "parent_selected_state_hash": "4855d298b6a0e027b3ffacd406ecda87e4359109c603c7301ac7415556b2312a",
+        "parent_state_consumed_as_exact": false,
+        "parent_state_validity": "monotonic_refinement_initialization_only",
+        "priority": -0.4984683,
+        "selected_state_hash": "4e16e72a0100ad86cc0e024211989e5bad3bee71d5426288ebc3c364438e3bf3",
+        "upper": 1.9750618934631348,
+        "warm_start_kind": "monotonic_split_refinement"
+      },
+      {
+        "branch_candidate": {
+          "lower": -1.5144786834716797,
+          "neuron_index": 13,
+          "relu_input": "31",
+          "upper": 0.3036274313926697,
+          "width": 1.8181061744689941
+        },
+        "eval_batch_id": "nrir24:c4:external-seeded-ancestral:eval:0002",
+        "eval_batch_position": 0,
+        "intermediate_refinement_trace_hash": "2b482c7501257795b227fd981456c7c459956d48930036ade336e3912b8c57ec",
+        "lower": -0.5041420459747314,
+        "native_ir_hashes": {
+          "execution_bound_module_hash": "dcf3c33678058b099ee1a56b0974c9f9c9e3d63e6c13c42662f169d439ceddb9",
+          "execution_plan_instance_hash": "98cf6d6a094f0a12caf8e5e0a04f35b7b30bd9e919da2176bd44d7d38506b0fe",
+          "execution_plan_template_hash": "80688cf1e3c86ce7ac6fa6a314468f5aa89f879dbd811b16dcb6b5d786935e3f",
+          "representation_binding_hash": "ff9088566c386ae69120e90fa67f75d13f14452d6fd13200d73f5958881b251f",
+          "schedule_hash": "8b28d49a52924106f561bfee510d56174ffd44ddac1263b5cc3fc66950e03b95",
+          "source_bound_module_hash": "dcf3c33678058b099ee1a56b0974c9f9c9e3d63e6c13c42662f169d439ceddb9",
+          "source_plan_instance_hash": "5525cb7dbbccb255642f40eb9d836e179b5f62a471c149bad6589a75f2893e7d",
+          "source_plan_template_hash": "216cbbbfa134a93189696a8869057281296f2b578fb1509b3ee68981fc6fed25",
+          "source_schedule_hash": "4c972ab2973e88a0c672643e11c3a9ba723de3e4f9d23907f1592420bbf06145",
+          "task_module_hash": "afef2b15f866e3ab75adb4eaabcc0b2d654dc6d73231029d3506589f2715a2af"
+        },
+        "node": {
+          "branch_neuron_index": 548,
+          "branch_relu_input": "28",
+          "branch_value": -1,
+          "depth": 2,
+          "node_id": "nrir24:c4:external-seeded-ancestral:n000003",
+          "parent_node_id": "nrir24:c4:external-seeded-ancestral:n000001",
+          "split_state_hash": "e81fa5a37477ee23f0e884ff100ffd7a069b62f1e4cfebdd83217064ad8962f0"
+        },
+        "optimizer_execution_trace_hash": "83c6e4bc6e8448a715dfc537a7938db224741b0713fea6e41ef04b95c90334d7",
+        "optimizer_ir_hashes": {
+          "optimizer_plan_hash": "5edea494fcc2ae9b9243e04021a8f1ee5d78f657458035ea5e764ce81d0b2e8e",
+          "optimizer_schedule_hash": "63ea13876102cc2f7016da64193aaf5cd7d206d8c166febf5fe0d55b856a0b79",
+          "optimizer_task_module_hash": "89e7f950ad67c17180505719db6028b10b23fc7e5fc7bb8f72b3eab2a8369376"
+        },
+        "parent_selected_state_hash": "d799f50af304c704f63a4ccf8d759453abfca9b8fb084481fa6dac1b3401362e",
+        "parent_state_consumed_as_exact": false,
+        "parent_state_validity": "monotonic_refinement_initialization_only",
+        "priority": -0.504142,
+        "selected_state_hash": "7082f89d9eff8b3aa153bcf080818e60f7c43da45818fa4b9fb23f95d7b4e7d3",
+        "upper": 1.971328854560852,
+        "warm_start_kind": "monotonic_split_refinement"
+      },
+      {
+        "branch_candidate": {
+          "lower": -1.5144786834716797,
+          "neuron_index": 13,
+          "relu_input": "31",
+          "upper": 0.3036274313926697,
+          "width": 1.8181061744689941
+        },
+        "eval_batch_id": "nrir24:c4:external-seeded-ancestral:eval:0002",
+        "eval_batch_position": 1,
+        "intermediate_refinement_trace_hash": "a135f0635f3b8a2e2704a148d205f771e2a84ff2fa1540ce1ce770ef9140fa38",
+        "lower": -0.5040255784988403,
+        "native_ir_hashes": {
+          "execution_bound_module_hash": "dcf3c33678058b099ee1a56b0974c9f9c9e3d63e6c13c42662f169d439ceddb9",
+          "execution_plan_instance_hash": "98cf6d6a094f0a12caf8e5e0a04f35b7b30bd9e919da2176bd44d7d38506b0fe",
+          "execution_plan_template_hash": "80688cf1e3c86ce7ac6fa6a314468f5aa89f879dbd811b16dcb6b5d786935e3f",
+          "representation_binding_hash": "ff9088566c386ae69120e90fa67f75d13f14452d6fd13200d73f5958881b251f",
+          "schedule_hash": "8b28d49a52924106f561bfee510d56174ffd44ddac1263b5cc3fc66950e03b95",
+          "source_bound_module_hash": "dcf3c33678058b099ee1a56b0974c9f9c9e3d63e6c13c42662f169d439ceddb9",
+          "source_plan_instance_hash": "5525cb7dbbccb255642f40eb9d836e179b5f62a471c149bad6589a75f2893e7d",
+          "source_plan_template_hash": "216cbbbfa134a93189696a8869057281296f2b578fb1509b3ee68981fc6fed25",
+          "source_schedule_hash": "4c972ab2973e88a0c672643e11c3a9ba723de3e4f9d23907f1592420bbf06145",
+          "task_module_hash": "afef2b15f866e3ab75adb4eaabcc0b2d654dc6d73231029d3506589f2715a2af"
+        },
+        "node": {
+          "branch_neuron_index": 548,
+          "branch_relu_input": "28",
+          "branch_value": 1,
+          "depth": 2,
+          "node_id": "nrir24:c4:external-seeded-ancestral:n000004",
+          "parent_node_id": "nrir24:c4:external-seeded-ancestral:n000001",
+          "split_state_hash": "4929fbd62c7d2a17870a7adbd8ae0db2e71e1642a82888430881de61b40f002d"
+        },
+        "optimizer_execution_trace_hash": "83c6e4bc6e8448a715dfc537a7938db224741b0713fea6e41ef04b95c90334d7",
+        "optimizer_ir_hashes": {
+          "optimizer_plan_hash": "5edea494fcc2ae9b9243e04021a8f1ee5d78f657458035ea5e764ce81d0b2e8e",
+          "optimizer_schedule_hash": "63ea13876102cc2f7016da64193aaf5cd7d206d8c166febf5fe0d55b856a0b79",
+          "optimizer_task_module_hash": "89e7f950ad67c17180505719db6028b10b23fc7e5fc7bb8f72b3eab2a8369376"
+        },
+        "parent_selected_state_hash": "d799f50af304c704f63a4ccf8d759453abfca9b8fb084481fa6dac1b3401362e",
+        "parent_state_consumed_as_exact": false,
+        "parent_state_validity": "monotonic_refinement_initialization_only",
+        "priority": -0.5040256,
+        "selected_state_hash": "90bd5396adafb398348078c0198a0e0706fdab6526b1863931941d0a62d000e1",
+        "upper": 1.9885869026184082,
+        "warm_start_kind": "monotonic_split_refinement"
+      },
+      {
+        "branch_candidate": {
+          "lower": -1.5144786834716797,
+          "neuron_index": 13,
+          "relu_input": "31",
+          "upper": 0.3036274313926697,
+          "width": 1.8181061744689941
+        },
+        "eval_batch_id": "nrir24:c4:external-seeded-ancestral:eval:0002",
+        "eval_batch_position": 2,
+        "intermediate_refinement_trace_hash": "374f2712c5fc4a18efd9912218d6b62f7b20f345f03604bf552c7b54c7102708",
+        "lower": -0.4679605960845947,
+        "native_ir_hashes": {
+          "execution_bound_module_hash": "dcf3c33678058b099ee1a56b0974c9f9c9e3d63e6c13c42662f169d439ceddb9",
+          "execution_plan_instance_hash": "98cf6d6a094f0a12caf8e5e0a04f35b7b30bd9e919da2176bd44d7d38506b0fe",
+          "execution_plan_template_hash": "80688cf1e3c86ce7ac6fa6a314468f5aa89f879dbd811b16dcb6b5d786935e3f",
+          "representation_binding_hash": "ff9088566c386ae69120e90fa67f75d13f14452d6fd13200d73f5958881b251f",
+          "schedule_hash": "8b28d49a52924106f561bfee510d56174ffd44ddac1263b5cc3fc66950e03b95",
+          "source_bound_module_hash": "dcf3c33678058b099ee1a56b0974c9f9c9e3d63e6c13c42662f169d439ceddb9",
+          "source_plan_instance_hash": "5525cb7dbbccb255642f40eb9d836e179b5f62a471c149bad6589a75f2893e7d",
+          "source_plan_template_hash": "216cbbbfa134a93189696a8869057281296f2b578fb1509b3ee68981fc6fed25",
+          "source_schedule_hash": "4c972ab2973e88a0c672643e11c3a9ba723de3e4f9d23907f1592420bbf06145",
+          "task_module_hash": "afef2b15f866e3ab75adb4eaabcc0b2d654dc6d73231029d3506589f2715a2af"
+        },
+        "node": {
+          "branch_neuron_index": 548,
+          "branch_relu_input": "28",
+          "branch_value": -1,
+          "depth": 2,
+          "node_id": "nrir24:c4:external-seeded-ancestral:n000005",
+          "parent_node_id": "nrir24:c4:external-seeded-ancestral:n000002",
+          "split_state_hash": "e14468c2659080c688640a4f3b6c53f1d1347521d7051cd75edb54029e31f71a"
+        },
+        "optimizer_execution_trace_hash": "83c6e4bc6e8448a715dfc537a7938db224741b0713fea6e41ef04b95c90334d7",
+        "optimizer_ir_hashes": {
+          "optimizer_plan_hash": "5edea494fcc2ae9b9243e04021a8f1ee5d78f657458035ea5e764ce81d0b2e8e",
+          "optimizer_schedule_hash": "63ea13876102cc2f7016da64193aaf5cd7d206d8c166febf5fe0d55b856a0b79",
+          "optimizer_task_module_hash": "89e7f950ad67c17180505719db6028b10b23fc7e5fc7bb8f72b3eab2a8369376"
+        },
+        "parent_selected_state_hash": "4e16e72a0100ad86cc0e024211989e5bad3bee71d5426288ebc3c364438e3bf3",
+        "parent_state_consumed_as_exact": false,
+        "parent_state_validity": "monotonic_refinement_initialization_only",
+        "priority": -0.4679606,
+        "selected_state_hash": "37e1b3cd1a905ab36b2ca814188a63636ce830b1dc93f7b6ebf4f89a3fc9a4f2",
+        "upper": 1.975062608718872,
+        "warm_start_kind": "monotonic_split_refinement"
+      },
+      {
+        "branch_candidate": {
+          "lower": -1.5144786834716797,
+          "neuron_index": 13,
+          "relu_input": "31",
+          "upper": 0.3036274313926697,
+          "width": 1.8181061744689941
+        },
+        "eval_batch_id": "nrir24:c4:external-seeded-ancestral:eval:0002",
+        "eval_batch_position": 3,
+        "intermediate_refinement_trace_hash": "1a59978da7b38fa5ada2bafba62078e8bb0b7e00e51b20ff36cdc532467dfb64",
+        "lower": -0.4691486358642578,
+        "native_ir_hashes": {
+          "execution_bound_module_hash": "dcf3c33678058b099ee1a56b0974c9f9c9e3d63e6c13c42662f169d439ceddb9",
+          "execution_plan_instance_hash": "98cf6d6a094f0a12caf8e5e0a04f35b7b30bd9e919da2176bd44d7d38506b0fe",
+          "execution_plan_template_hash": "80688cf1e3c86ce7ac6fa6a314468f5aa89f879dbd811b16dcb6b5d786935e3f",
+          "representation_binding_hash": "ff9088566c386ae69120e90fa67f75d13f14452d6fd13200d73f5958881b251f",
+          "schedule_hash": "8b28d49a52924106f561bfee510d56174ffd44ddac1263b5cc3fc66950e03b95",
+          "source_bound_module_hash": "dcf3c33678058b099ee1a56b0974c9f9c9e3d63e6c13c42662f169d439ceddb9",
+          "source_plan_instance_hash": "5525cb7dbbccb255642f40eb9d836e179b5f62a471c149bad6589a75f2893e7d",
+          "source_plan_template_hash": "216cbbbfa134a93189696a8869057281296f2b578fb1509b3ee68981fc6fed25",
+          "source_schedule_hash": "4c972ab2973e88a0c672643e11c3a9ba723de3e4f9d23907f1592420bbf06145",
+          "task_module_hash": "afef2b15f866e3ab75adb4eaabcc0b2d654dc6d73231029d3506589f2715a2af"
+        },
+        "node": {
+          "branch_neuron_index": 548,
+          "branch_relu_input": "28",
+          "branch_value": 1,
+          "depth": 2,
+          "node_id": "nrir24:c4:external-seeded-ancestral:n000006",
+          "parent_node_id": "nrir24:c4:external-seeded-ancestral:n000002",
+          "split_state_hash": "38d7a42df2b29ecb019858c83d1d2032a2fb928288cdb3922b64121a634cc9b5"
+        },
+        "optimizer_execution_trace_hash": "83c6e4bc6e8448a715dfc537a7938db224741b0713fea6e41ef04b95c90334d7",
+        "optimizer_ir_hashes": {
+          "optimizer_plan_hash": "5edea494fcc2ae9b9243e04021a8f1ee5d78f657458035ea5e764ce81d0b2e8e",
+          "optimizer_schedule_hash": "63ea13876102cc2f7016da64193aaf5cd7d206d8c166febf5fe0d55b856a0b79",
+          "optimizer_task_module_hash": "89e7f950ad67c17180505719db6028b10b23fc7e5fc7bb8f72b3eab2a8369376"
+        },
+        "parent_selected_state_hash": "4e16e72a0100ad86cc0e024211989e5bad3bee71d5426288ebc3c364438e3bf3",
+        "parent_state_consumed_as_exact": false,
+        "parent_state_validity": "monotonic_refinement_initialization_only",
+        "priority": -0.4691486,
+        "selected_state_hash": "a8ba202bfd0ca0824c7ba4af973c8f69f8e0e3550597e8a32859eb83a72932a8",
+        "upper": 1.9929150342941284,
+        "warm_start_kind": "monotonic_split_refinement"
+      }
+    ],
+    "final_frontier_node_ids": [],
+    "max_queue_size": 4,
+    "objective_branch_hashes": [
+      {
+        "node_id": "nrir24:c4:external-seeded-ancestral:n000000",
+        "plan_hash": "95a6e48396cfc8ab0cf205be0802927e19f5df142405fd6460c7ae32d1198f8c",
+        "schedule_hash": "273963c3a5d11c119ad1bc606eef14de55fb0d9df4359df324d76d02ec46f7a7",
+        "task_module_hash": "9e0d5056924e9a24be4d469e4b382cb1c6b8e9279b44faef9af9d6415692fd1b",
+        "trace_hash": "e905ca7d8100c4dc53ac732b6f47157feeff6d6609ad38e00b4b7a0ab888a84a"
+      },
+      {
+        "node_id": "nrir24:c4:external-seeded-ancestral:n000001",
+        "plan_hash": "70533ff690f0c3785aa7cd2880390f6291a86db5c164f40bece7fa19fea006dc",
+        "schedule_hash": "bc0dd98c8c3ea38cfc2c1e1230d2968ff2f0b08fa40e5dde099301a9009cf9db",
+        "task_module_hash": "e5356c7c5bf23d42d1362e79c9cec0ab9978a7f7bedf35e8e47cf30a7a71f4f7",
+        "trace_hash": "7b884bf1ee6c8e762a1507c4246e1d9329e17ec208e50a3b33b45889a7ac97a2"
+      },
+      {
+        "node_id": "nrir24:c4:external-seeded-ancestral:n000002",
+        "plan_hash": "0490c6b5076fca81128b141bf11ca309b62018cee065245a80429b3f2ebfbd1d",
+        "schedule_hash": "445d8fdce25bfc5a76aae8ee59b38923a95764f23ec08b6a27af17463a8c3b9b",
+        "task_module_hash": "eb7400b3ec702aa9887156bddbc4eeecbf201a6c442b861a258ef7fc00f28bc4",
+        "trace_hash": "e22e9d5a30f457697240aceb88dbbd99248cb7a3acd4f0046d45f76b10231215"
+      },
+      {
+        "node_id": "nrir24:c4:external-seeded-ancestral:n000003",
+        "plan_hash": "d41c16789637a1c548fdb89dc406d5d6e7bfaf9b5323e86c53cab862a63dd1ee",
+        "schedule_hash": "a14fce127a3e82a97cc691e2662487759afa6c18c0f75acfaa30b73b722a623a",
+        "task_module_hash": "1b274a67e67e9efe866dc407ece1780ac1997ff276a66b0ab9b96b73aa01c4b2",
+        "trace_hash": "daee3b190ee49bf89cdeaf47f03443835209e647d71e98da8abf5163d86251aa"
+      },
+      {
+        "node_id": "nrir24:c4:external-seeded-ancestral:n000004",
+        "plan_hash": "26cc82fb74e9b640f181484fc307df01763cce6883f7c4ebe69a45bff13889fb",
+        "schedule_hash": "1e579406c01877213606dd88a4181b88c5e4fd8a4b9394ae668bb7760f3725ef",
+        "task_module_hash": "dc35870e293df7016cebb013e7dd2f0c3356dd55cb30533f1faf77d4e76be673",
+        "trace_hash": "531f6a7fb4c5491827772e673db88e05d061b89761f9eff0878177b745498975"
+      },
+      {
+        "node_id": "nrir24:c4:external-seeded-ancestral:n000005",
+        "plan_hash": "7da9b5f94fdc85a495b93087ac9e222e23b84207acff51c91812bc42a974a7aa",
+        "schedule_hash": "6191767e1fba52d54bb7ac021fcadfe306c2f9a64aa3d43d65b63099adaaa9d8",
+        "task_module_hash": "1cd62ce6088ba6deb3772c60409e7c2adb1487fa93351b48f8c05ce69e76c595",
+        "trace_hash": "d62f48789cb3a7a228bfb41e887a5716b0ef1d85689ed06b5fca3454c30a2b3c"
+      },
+      {
+        "node_id": "nrir24:c4:external-seeded-ancestral:n000006",
+        "plan_hash": "88b5e174b69a78d2d9d2efdd62244491b074ab535422afe4bee19140334dd626",
+        "schedule_hash": "37f69e52926bc4fb4ac8c731979b7e9928a2723e1e747289863f54985ab34a86",
+        "task_module_hash": "22999e8de0a9c0ad790dc8dd7482cc138f18e13d0c0d3969933de5596aad1f94",
+        "trace_hash": "1523e30e9415726c46661fed628b03ada10a683c66bcf6c7afb97e99cdc3a61b"
+      }
+    ],
+    "objective_hash": "f270922f3e4d6cfee433b3ab7c60d46e98a66fc62f018ec48cfb99eefe842a98",
+    "queue_trace_hash": "b715acce057308f8f76ebf4f9dd68de04901c413316263be367331701bd31484",
+    "refinements": [
+      {
+        "external_constraint_seed_constraints_hash": "47cac6cdb465c627ae57fcabdb62dd29aad38f5504d9e1824a1c13b5857bf5ec",
+        "external_constraint_seed_hash": "c350d3464eb25f675013c373d6e0b825deba979b3dd1504b282fbe8e80b77a9b",
+        "external_seed_consumption": "sound_constraint_intersection_only",
+        "external_semantics_owner": "external_verifier",
+        "final_intermediate_bounds_hash": "f2dca73c939ba20544e25cad4c646da6b9377cd8315a01eab0c2440449133070",
+        "initial_intermediate_bounds_hash": "4f35e1b4136e576913ad63ca272588b1023254482abfb4574f099fdfdc5771ae",
+        "node_id": "nrir24:c4:external-seeded-ancestral:n000000",
+        "node_split_state_hash": "32ef5aa369eb3b424067ead0f6b4a41a59b7c5753a5e59034bc13372b10bc2be",
+        "parent_refinement_consumed_as_exact": false,
+        "performance_claimed": false,
+        "refinement_plan_hash": "43843dbb59258e10f48004b76f99117a47fc32decf348b7ff1acf337e3f2ff05",
+        "refinement_schedule_hash": "2f6257d8d3fac6e44d9e360138eb3b7a64287c5dab4cefd48e9349117f7e938a",
+        "refinement_semantic_trace_hash": "2ff72842e40914e580378eeddaa89def8115ce0241ce93f61994f31e6324e3d7",
+        "refinement_task_module_hash": "1bc05cbdc2ea35e1646dca2120643a01f729fe7e150babfc444d6f9ebecd42cb",
+        "schema_version": "boundflow.per-child-refinement-trace/v1",
+        "selected_target_count": 96
+      },
+      {
+        "final_intermediate_bounds_hash": "fd498307a667758c0f43352287f5652cd82d7fdaf6be6389f484c7d32cf86546",
+        "initial_intermediate_bounds_hash": "30a9298e00262b90619ca04532b4ea123ac636a784a05817eb719119014cf8ab",
+        "node_id": "nrir24:c4:external-seeded-ancestral:n000001",
+        "node_split_state_hash": "481fae899b281d4d499661a770ac15e38d6d16a723e3aca68edadb08cc875048",
+        "parent_refinement_consumed_as_exact": false,
+        "performance_claimed": false,
+        "refinement_plan_hash": "b3fda6d661993af22bcdbe94655d069b1356e20ac371b74c325ee85a30fe5eb9",
+        "refinement_schedule_hash": "74609fcabea854e471a2dcea8833c90623d04066ed59ebee31307c0464a8546d",
+        "refinement_semantic_trace_hash": "b47bbfb5c047428c64bd881644fa0922e42687360f96582af75b28f32e49d9da",
+        "refinement_task_module_hash": "5e35fc9d5fbb1462fa6da966268c1ea01126d94e9347c53f75a581029166826c",
+        "schema_version": "boundflow.per-child-refinement-trace/v1",
+        "selected_target_count": 96,
+        "source_consumption": "sound_constraint_only",
+        "source_intermediate_constraints_hash": "f2dca73c939ba20544e25cad4c646da6b9377cd8315a01eab0c2440449133070",
+        "source_parent_node_id": "nrir24:c4:external-seeded-ancestral:n000000",
+        "source_refinement_plan_hash": "43843dbb59258e10f48004b76f99117a47fc32decf348b7ff1acf337e3f2ff05",
+        "source_refinement_semantic_trace_hash": "2ff72842e40914e580378eeddaa89def8115ce0241ce93f61994f31e6324e3d7"
+      },
+      {
+        "final_intermediate_bounds_hash": "d9ee08fb000b7b3e375d9f0acc4dcc1b71c0c1b3e8a429493c4253d9302fea13",
+        "initial_intermediate_bounds_hash": "e17fa3fbea32dde3ce0a020669f6c70629f0a081ef21140ff1e7a4db55c85c6e",
+        "node_id": "nrir24:c4:external-seeded-ancestral:n000002",
+        "node_split_state_hash": "b07c81bbdd8121001030d13af20b474dd639782e103b1271eaef42211ef561fc",
+        "parent_refinement_consumed_as_exact": false,
+        "performance_claimed": false,
+        "refinement_plan_hash": "9ff25ef44e4ab875fb0d50092edf45b62641b9c75513e5149358038b38609a61",
+        "refinement_schedule_hash": "3355f7611f9fb411bd61e97ebc7d7c1d7e622348498c341a324601fcf067c414",
+        "refinement_semantic_trace_hash": "b1f56d4bc3cb799135dfdc0b82cf21bb68f70bb3efaa0aff2013e1cdd81678c7",
+        "refinement_task_module_hash": "ea835ac9fceb9eb4222614b2e4d3c0e9db565a299fa882754e150181564e542d",
+        "schema_version": "boundflow.per-child-refinement-trace/v1",
+        "selected_target_count": 96,
+        "source_consumption": "sound_constraint_only",
+        "source_intermediate_constraints_hash": "f2dca73c939ba20544e25cad4c646da6b9377cd8315a01eab0c2440449133070",
+        "source_parent_node_id": "nrir24:c4:external-seeded-ancestral:n000000",
+        "source_refinement_plan_hash": "43843dbb59258e10f48004b76f99117a47fc32decf348b7ff1acf337e3f2ff05",
+        "source_refinement_semantic_trace_hash": "2ff72842e40914e580378eeddaa89def8115ce0241ce93f61994f31e6324e3d7"
+      },
+      {
+        "final_intermediate_bounds_hash": "21fa931b33746b5e2cde55138275a7bcc0e7b86fd816f9651ac537b7daeb3fbb",
+        "initial_intermediate_bounds_hash": "21fa931b33746b5e2cde55138275a7bcc0e7b86fd816f9651ac537b7daeb3fbb",
+        "node_id": "nrir24:c4:external-seeded-ancestral:n000003",
+        "node_split_state_hash": "e81fa5a37477ee23f0e884ff100ffd7a069b62f1e4cfebdd83217064ad8962f0",
+        "parent_refinement_consumed_as_exact": false,
+        "performance_claimed": false,
+        "refinement_plan_hash": "bd4260626950a6811c5ef76f1fb587ddd442985d0555c1c558722999f1efe14d",
+        "refinement_schedule_hash": "da41164f84f64d13138306e320c860f84609c92ed5ad4d0cdc5424b2679ad0a3",
+        "refinement_semantic_trace_hash": "86a58a6e42fb96953fa48aa7054aac6431f136335b6495db2b4bb27221165ca7",
+        "refinement_task_module_hash": "18fa5411fd14adc920005de540e8641a57ef3d20e9ead777cc9cb06e71e8ce79",
+        "schema_version": "boundflow.per-child-refinement-trace/v1",
+        "selected_target_count": 96,
+        "source_consumption": "sound_constraint_only",
+        "source_intermediate_constraints_hash": "fd498307a667758c0f43352287f5652cd82d7fdaf6be6389f484c7d32cf86546",
+        "source_parent_node_id": "nrir24:c4:external-seeded-ancestral:n000001",
+        "source_refinement_plan_hash": "b3fda6d661993af22bcdbe94655d069b1356e20ac371b74c325ee85a30fe5eb9",
+        "source_refinement_semantic_trace_hash": "b47bbfb5c047428c64bd881644fa0922e42687360f96582af75b28f32e49d9da"
+      },
+      {
+        "final_intermediate_bounds_hash": "81c465272ac94d9cd899f4a8ee7343b824d8fca1b97b16c57e6d6535ad971a5b",
+        "initial_intermediate_bounds_hash": "36bcb2b37266df40681fc098016a18414ed1656f96aad18f7dde1b41620ce5a0",
+        "node_id": "nrir24:c4:external-seeded-ancestral:n000004",
+        "node_split_state_hash": "4929fbd62c7d2a17870a7adbd8ae0db2e71e1642a82888430881de61b40f002d",
+        "parent_refinement_consumed_as_exact": false,
+        "performance_claimed": false,
+        "refinement_plan_hash": "afdf28ba10a2cb8fb053d8752a0752bd34a1e45389e47a859f9a9bb9b0aaf8d9",
+        "refinement_schedule_hash": "bf7a996f2b06d4ffb534b360e8826d1cc408a3dced2604e6e714c0f9a5c9fe82",
+        "refinement_semantic_trace_hash": "9478fc792937fdaced8236dc82699e820e4a4b2bb18937862af7c65f087f11d7",
+        "refinement_task_module_hash": "896889e2d3e4394643ce6252fb60955f0ba9666683f92bc5efdb1b025573b903",
+        "schema_version": "boundflow.per-child-refinement-trace/v1",
+        "selected_target_count": 96,
+        "source_consumption": "sound_constraint_only",
+        "source_intermediate_constraints_hash": "fd498307a667758c0f43352287f5652cd82d7fdaf6be6389f484c7d32cf86546",
+        "source_parent_node_id": "nrir24:c4:external-seeded-ancestral:n000001",
+        "source_refinement_plan_hash": "b3fda6d661993af22bcdbe94655d069b1356e20ac371b74c325ee85a30fe5eb9",
+        "source_refinement_semantic_trace_hash": "b47bbfb5c047428c64bd881644fa0922e42687360f96582af75b28f32e49d9da"
+      },
+      {
+        "final_intermediate_bounds_hash": "2ea10df89535e3960ad7bc65b30b7f31fc845fcbdf4c9696513e9ea5632948ac",
+        "initial_intermediate_bounds_hash": "2ea10df89535e3960ad7bc65b30b7f31fc845fcbdf4c9696513e9ea5632948ac",
+        "node_id": "nrir24:c4:external-seeded-ancestral:n000005",
+        "node_split_state_hash": "e14468c2659080c688640a4f3b6c53f1d1347521d7051cd75edb54029e31f71a",
+        "parent_refinement_consumed_as_exact": false,
+        "performance_claimed": false,
+        "refinement_plan_hash": "b1e1fa804498d257da020215a295494e081e1ad9ab89b84e4dd8545521e37b2b",
+        "refinement_schedule_hash": "6feda0b294337526d35228fe2596a77f3e6f9b423a369484d0629c392add9a85",
+        "refinement_semantic_trace_hash": "12ce88edfa6c594e47521c5faab6dcde0e16a9c308e871e69ee264dca2eb49a5",
+        "refinement_task_module_hash": "7995226d9e670b5af105644805bd3db93b740e0bdf30c6423fbd6998723b20f7",
+        "schema_version": "boundflow.per-child-refinement-trace/v1",
+        "selected_target_count": 96,
+        "source_consumption": "sound_constraint_only",
+        "source_intermediate_constraints_hash": "d9ee08fb000b7b3e375d9f0acc4dcc1b71c0c1b3e8a429493c4253d9302fea13",
+        "source_parent_node_id": "nrir24:c4:external-seeded-ancestral:n000002",
+        "source_refinement_plan_hash": "9ff25ef44e4ab875fb0d50092edf45b62641b9c75513e5149358038b38609a61",
+        "source_refinement_semantic_trace_hash": "b1f56d4bc3cb799135dfdc0b82cf21bb68f70bb3efaa0aff2013e1cdd81678c7"
+      },
+      {
+        "final_intermediate_bounds_hash": "569c5a39d3a965891f6b09aa34d1e5f286c3e52b40876d39e5a68e276eff96da",
+        "initial_intermediate_bounds_hash": "6f1eba5a5dfd058218e4b37116065a062b1721c2ff9a2d5ba9ee940ab43a9ea7",
+        "node_id": "nrir24:c4:external-seeded-ancestral:n000006",
+        "node_split_state_hash": "38d7a42df2b29ecb019858c83d1d2032a2fb928288cdb3922b64121a634cc9b5",
+        "parent_refinement_consumed_as_exact": false,
+        "performance_claimed": false,
+        "refinement_plan_hash": "a09d0f8050ecfc6821f6bb28992cca4f8718ec14517dd547ce508fb4722aa93e",
+        "refinement_schedule_hash": "dd526d11d8892999a7b57c489817b423833bf8147b852416e0cf69d445334db3",
+        "refinement_semantic_trace_hash": "069f550cadfa8ddb78c1ce7188282f0d3918da781bbb47b89057f36b37fc7b0b",
+        "refinement_task_module_hash": "2c00408c8c3de95e2472def958b8aafef9433939b7d2b551a078b3bfb7cb7cb0",
+        "schema_version": "boundflow.per-child-refinement-trace/v1",
+        "selected_target_count": 96,
+        "source_consumption": "sound_constraint_only",
+        "source_intermediate_constraints_hash": "d9ee08fb000b7b3e375d9f0acc4dcc1b71c0c1b3e8a429493c4253d9302fea13",
+        "source_parent_node_id": "nrir24:c4:external-seeded-ancestral:n000002",
+        "source_refinement_plan_hash": "9ff25ef44e4ab875fb0d50092edf45b62641b9c75513e5149358038b38609a61",
+        "source_refinement_semantic_trace_hash": "b1f56d4bc3cb799135dfdc0b82cf21bb68f70bb3efaa0aff2013e1cdd81678c7"
+      }
+    ],
+    "root_input_lower_hash": "bed6da6e49f1123b54fe61247615cf0e86f1b4257face7b073428f257607bda6",
+    "root_input_upper_hash": "955d79bd0824185cad0be1e758e6e492c51aec6c9199f81359b2528b848ec9ab",
+    "run_id": "nrir24:c4:external-seeded-ancestral",
+    "status": "complete",
+    "termination_reason": "configured_bounded_tree_exhausted"
+  },
+  "schema_version": "boundflow.external-seeded-convergence-shard/v1",
+  "semantic_hash": "aad84c9a55f366c9250840889acc9ad8d29299313d80858b4104dd836be744a1",
+  "source": {
+    "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+    "external_oracle_lower_hash": "f99f8b863e044328e2747aa372f0d25da18257979cb94d60f8391edbf0a761fa",
+    "input_lower_hash": "bed6da6e49f1123b54fe61247615cf0e86f1b4257face7b073428f257607bda6",
+    "input_upper_hash": "955d79bd0824185cad0be1e758e6e492c51aec6c9199f81359b2528b848ec9ab",
+    "intermediate_bounds_sha256": "d51615b04dfb205afd67d2c21680ece4ca92f693157da1e32c7f8202a8e08cf1",
+    "local_complete_query_artifact_sha256": "9c490bf33edab555f14e4d4c354f6d6055c1fe627102473fc2e506e29fdbaaf8",
+    "local_complete_query_manifest_sha256": "d76595fba9318c7dc70fd79fb9ebd28594b83c59202426f33a45c58486a409b3",
+    "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+    "native_ir_artifact_schema": "boundflow.native-real-network-ir-artifact/v1",
+    "native_ir_manifest_sha256": "5d38aa4adcd7b8593b0ca3751106d3a254b72a2698bd445a8dde59d50eb5a676",
+    "native_ir_payload_sha256": "3ba949de66380c7d16dc44bb934eca8400182521e761c19eaa671cd8cf0eb557",
+    "objective_matrix_hash": "380f1c32321ea47967ad48221134d92d494630777eabe10ef31576a0b051e408",
+    "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf",
+    "vnnlib_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff"
+  },
+  "summary": {
+    "best_terminal_lower": -0.4679605960845947,
+    "bounded_tree_status": "unknown",
+    "evaluated_nodes": 7,
+    "max_evaluated_depth": 2,
+    "proof_deficit": 0.5041420459747314,
+    "root_lower": -0.5696250200271606,
+    "terminal_domains": 4,
+    "terminal_lowers": [
+      -0.5041420459747314,
+      -0.5040255784988403,
+      -0.4691486358642578,
+      -0.4679605960845947
+    ],
+    "terminal_node_ids": [
+      "nrir24:c4:external-seeded-ancestral:n000003",
+      "nrir24:c4:external-seeded-ancestral:n000004",
+      "nrir24:c4:external-seeded-ancestral:n000006",
+      "nrir24:c4:external-seeded-ancestral:n000005"
+    ],
+    "worst_terminal_lower": -0.5041420459747314
+  }
+}

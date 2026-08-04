@@ -1,0 +1,350 @@
+{
+  "evidence": {
+    "claim_boundary": "fixed ResNet property 0 clauses 0/2/4, CPU, external-seeded ancestral strategy, nested 7/15/31-node depth-2/3/4 bounded trees",
+    "curves": [
+      {
+        "clause_index": 0,
+        "deepest_bounded_tree_status": "unknown",
+        "depth_four_saturated": false,
+        "monotonic_non_decreasing": true,
+        "points": [
+          {
+            "best_terminal_lower": -0.3101527690887451,
+            "bounded_tree_status": "unknown",
+            "budget_key": "n7_d2",
+            "deficit_reduction_per_added_node": null,
+            "evaluated_nodes": 7,
+            "max_depth": 2,
+            "max_nodes": 7,
+            "proof_deficit": 0.3182867765426636,
+            "terminal_domains": 4,
+            "worst_lower_delta_from_previous": null,
+            "worst_terminal_lower": -0.3182867765426636
+          },
+          {
+            "best_terminal_lower": -0.28942763805389404,
+            "bounded_tree_status": "unknown",
+            "budget_key": "n15_d3",
+            "deficit_reduction_per_added_node": 0.0023475736379623413,
+            "evaluated_nodes": 15,
+            "max_depth": 3,
+            "max_nodes": 15,
+            "proof_deficit": 0.29950618743896484,
+            "terminal_domains": 8,
+            "worst_lower_delta_from_previous": 0.01878058910369873,
+            "worst_terminal_lower": -0.29950618743896484
+          },
+          {
+            "best_terminal_lower": -0.26209163665771484,
+            "bounded_tree_status": "unknown",
+            "budget_key": "n31_d4",
+            "deficit_reduction_per_added_node": 0.0010716542601585388,
+            "evaluated_nodes": 31,
+            "max_depth": 4,
+            "max_nodes": 31,
+            "proof_deficit": 0.2823597192764282,
+            "terminal_domains": 16,
+            "worst_lower_delta_from_previous": 0.01714646816253662,
+            "worst_terminal_lower": -0.2823597192764282
+          }
+        ],
+        "strict_improvement_after_depth_two": true
+      },
+      {
+        "clause_index": 2,
+        "deepest_bounded_tree_status": "unknown",
+        "depth_four_saturated": false,
+        "monotonic_non_decreasing": true,
+        "points": [
+          {
+            "best_terminal_lower": -0.4057440161705017,
+            "bounded_tree_status": "unknown",
+            "budget_key": "n7_d2",
+            "deficit_reduction_per_added_node": null,
+            "evaluated_nodes": 7,
+            "max_depth": 2,
+            "max_nodes": 7,
+            "proof_deficit": 0.425476610660553,
+            "terminal_domains": 4,
+            "worst_lower_delta_from_previous": null,
+            "worst_terminal_lower": -0.425476610660553
+          },
+          {
+            "best_terminal_lower": -0.3667513132095337,
+            "bounded_tree_status": "unknown",
+            "budget_key": "n15_d3",
+            "deficit_reduction_per_added_node": 0.0015025213360786438,
+            "evaluated_nodes": 15,
+            "max_depth": 3,
+            "max_nodes": 15,
+            "proof_deficit": 0.41345643997192383,
+            "terminal_domains": 8,
+            "worst_lower_delta_from_previous": 0.01202017068862915,
+            "worst_terminal_lower": -0.41345643997192383
+          },
+          {
+            "best_terminal_lower": -0.31933462619781494,
+            "bounded_tree_status": "unknown",
+            "budget_key": "n31_d4",
+            "deficit_reduction_per_added_node": 0.0007257163524627686,
+            "evaluated_nodes": 31,
+            "max_depth": 4,
+            "max_nodes": 31,
+            "proof_deficit": 0.40184497833251953,
+            "terminal_domains": 16,
+            "worst_lower_delta_from_previous": 0.011611461639404297,
+            "worst_terminal_lower": -0.40184497833251953
+          }
+        ],
+        "strict_improvement_after_depth_two": true
+      },
+      {
+        "clause_index": 4,
+        "deepest_bounded_tree_status": "unknown",
+        "depth_four_saturated": false,
+        "monotonic_non_decreasing": true,
+        "points": [
+          {
+            "best_terminal_lower": -0.4679605960845947,
+            "bounded_tree_status": "unknown",
+            "budget_key": "n7_d2",
+            "deficit_reduction_per_added_node": null,
+            "evaluated_nodes": 7,
+            "max_depth": 2,
+            "max_nodes": 7,
+            "proof_deficit": 0.5041420459747314,
+            "terminal_domains": 4,
+            "worst_lower_delta_from_previous": null,
+            "worst_terminal_lower": -0.5041420459747314
+          },
+          {
+            "best_terminal_lower": -0.14281541109085083,
+            "bounded_tree_status": "unknown",
+            "budget_key": "n15_d3",
+            "deficit_reduction_per_added_node": 0.0031297504901885986,
+            "evaluated_nodes": 15,
+            "max_depth": 3,
+            "max_nodes": 15,
+            "proof_deficit": 0.47910404205322266,
+            "terminal_domains": 8,
+            "worst_lower_delta_from_previous": 0.02503800392150879,
+            "worst_terminal_lower": -0.47910404205322266
+          },
+          {
+            "best_terminal_lower": -0.11560201644897461,
+            "bounded_tree_status": "unknown",
+            "budget_key": "n31_d4",
+            "deficit_reduction_per_added_node": 0.0011977851390838623,
+            "evaluated_nodes": 31,
+            "max_depth": 4,
+            "max_nodes": 31,
+            "proof_deficit": 0.45993947982788086,
+            "terminal_domains": 16,
+            "worst_lower_delta_from_previous": 0.019164562225341797,
+            "worst_terminal_lower": -0.45993947982788086
+          }
+        ],
+        "strict_improvement_after_depth_two": true
+      }
+    ],
+    "gates": {
+      "all_clauses_depth_four_saturated": false,
+      "all_clauses_monotonic_non_decreasing": true,
+      "all_nested_logical_domains_match": true,
+      "all_nine_units_present": true,
+      "any_fixed_clause_bounded_tree_closed": false,
+      "strict_improvement_after_depth_two": true
+    },
+    "limitations": [
+      "fixed ResNet property 0 clauses 0, 2, and 4 on CPU only",
+      "external seed generation remains owned by alpha-beta-CROWN",
+      "bounded trees do not imply complete property or verifier closure",
+      "single executions are convergence evidence, not a performance claim",
+      "GPU, multi-workload, cuts, and full activation-BaB remain pending"
+    ],
+    "logical_domain_nesting": {
+      "clause0:n15_d3->n31_d4": {
+        "all_smaller_domains_present": true,
+        "larger_domain_count": 31,
+        "logical_lineage_matches": true,
+        "max_common_lower_abs_diff": 0.0,
+        "max_common_priority_abs_diff": 0.0,
+        "max_common_upper_abs_diff": 0.0,
+        "numeric_tolerance": 1e-05,
+        "numerical_semantics_match": true,
+        "passed": true,
+        "refinement_semantics_match": true,
+        "selected_branch_matches": true,
+        "smaller_domain_count": 15
+      },
+      "clause0:n7_d2->n15_d3": {
+        "all_smaller_domains_present": true,
+        "larger_domain_count": 15,
+        "logical_lineage_matches": true,
+        "max_common_lower_abs_diff": 0.0,
+        "max_common_priority_abs_diff": 0.0,
+        "max_common_upper_abs_diff": 0.0,
+        "numeric_tolerance": 1e-05,
+        "numerical_semantics_match": true,
+        "passed": true,
+        "refinement_semantics_match": true,
+        "selected_branch_matches": true,
+        "smaller_domain_count": 7
+      },
+      "clause2:n15_d3->n31_d4": {
+        "all_smaller_domains_present": true,
+        "larger_domain_count": 31,
+        "logical_lineage_matches": true,
+        "max_common_lower_abs_diff": 1.1324882507324219e-06,
+        "max_common_priority_abs_diff": 1.2000000000345068e-06,
+        "max_common_upper_abs_diff": 7.152557373046875e-07,
+        "numeric_tolerance": 1e-05,
+        "numerical_semantics_match": true,
+        "passed": true,
+        "refinement_semantics_match": true,
+        "selected_branch_matches": true,
+        "smaller_domain_count": 15
+      },
+      "clause2:n7_d2->n15_d3": {
+        "all_smaller_domains_present": true,
+        "larger_domain_count": 15,
+        "logical_lineage_matches": true,
+        "max_common_lower_abs_diff": 0.0,
+        "max_common_priority_abs_diff": 0.0,
+        "max_common_upper_abs_diff": 0.0,
+        "numeric_tolerance": 1e-05,
+        "numerical_semantics_match": true,
+        "passed": true,
+        "refinement_semantics_match": true,
+        "selected_branch_matches": true,
+        "smaller_domain_count": 7
+      },
+      "clause4:n15_d3->n31_d4": {
+        "all_smaller_domains_present": true,
+        "larger_domain_count": 31,
+        "logical_lineage_matches": true,
+        "max_common_lower_abs_diff": 0.0,
+        "max_common_priority_abs_diff": 0.0,
+        "max_common_upper_abs_diff": 0.0,
+        "numeric_tolerance": 1e-05,
+        "numerical_semantics_match": true,
+        "passed": true,
+        "refinement_semantics_match": true,
+        "selected_branch_matches": true,
+        "smaller_domain_count": 15
+      },
+      "clause4:n7_d2->n15_d3": {
+        "all_smaller_domains_present": true,
+        "larger_domain_count": 15,
+        "logical_lineage_matches": true,
+        "max_common_lower_abs_diff": 0.0,
+        "max_common_priority_abs_diff": 0.0,
+        "max_common_upper_abs_diff": 0.0,
+        "numeric_tolerance": 1e-05,
+        "numerical_semantics_match": true,
+        "passed": true,
+        "refinement_semantics_match": true,
+        "selected_branch_matches": true,
+        "smaller_domain_count": 7
+      }
+    },
+    "performance_claimed": false,
+    "protocol": {
+      "branch_policy": {
+        "candidate_batch_size": 64,
+        "candidate_policy_id": "top_width_per_relu_v1",
+        "candidates_per_relu": 8,
+        "max_candidates": 256,
+        "reduce_policy": "maximize_worst_child_then_mean"
+      },
+      "budgets": [
+        {
+          "available_memory_bytes": 1073741824,
+          "expansion_batch_size": 2,
+          "max_depth": 2,
+          "max_eval_batch_size": 4,
+          "max_nodes": 7,
+          "memory_budget_bytes": 1073741824,
+          "threshold": 0.0
+        },
+        {
+          "available_memory_bytes": 1073741824,
+          "expansion_batch_size": 2,
+          "max_depth": 3,
+          "max_eval_batch_size": 4,
+          "max_nodes": 15,
+          "memory_budget_bytes": 1073741824,
+          "threshold": 0.0
+        },
+        {
+          "available_memory_bytes": 1073741824,
+          "expansion_batch_size": 2,
+          "max_depth": 4,
+          "max_eval_batch_size": 4,
+          "max_nodes": 31,
+          "memory_budget_bytes": 1073741824,
+          "threshold": 0.0
+        }
+      ],
+      "execution_isolation": "fresh_python_process_per_clause_budget",
+      "hard_clause_indices": [
+        0,
+        2,
+        4
+      ],
+      "optimizer_policy": {
+        "alpha_init": 0.5,
+        "alpha_initialization_mode": "adaptive",
+        "beta_init": 0.0,
+        "lr": 0.2,
+        "objective": "lower",
+        "optimizer": "torch.optim.Adam",
+        "per_batch_params": true,
+        "soft_tau": 1.0,
+        "spec_reduce": "mean",
+        "steps": 25
+      },
+      "refinement_policy": {
+        "backward_chunk_size": 8,
+        "candidate_policy_id": "objective_influence_width_per_relu_v1",
+        "max_neurons_per_relu": 16,
+        "minimum_width": 0.0,
+        "passes": 1,
+        "refinement_method": "selected_plain_crown_v1"
+      },
+      "strategy": "external_seeded_ancestral_carry_v1"
+    },
+    "schema_version": "boundflow.external-seeded-convergence-evidence/v1",
+    "shard_semantic_hashes": {
+      "clause0_n15_d3.json": "201dc267526fa802799608c6dd876ab18bcaedbccffe9fc7da144218e2028c8e",
+      "clause0_n31_d4.json": "0ee95b4f50c4a0861e42b22a17b844c415a63fdd7fe336ee930d3bd3779b7678",
+      "clause0_n7_d2.json": "80ac273993350fa7f26b0ba40a831e37492d69fe577ae4463fbfa32c1dae701f",
+      "clause2_n15_d3.json": "71bf5437b28149fca88a045f0031521deca17d3058470a1d4ebdacd7b39c1b13",
+      "clause2_n31_d4.json": "8848694fb8c460d7446ed503970b2c5e34c025b475a71c3041c0782b201acb14",
+      "clause2_n7_d2.json": "677b62bda7a749a4ad939cc3313bbe951fe1224cf24a94d12651ef8745ce5220",
+      "clause4_n15_d3.json": "156cc19c843ebc146b7eaec975ac628f59bb5265dea6264e238c9e82fc1754b6",
+      "clause4_n31_d4.json": "75b9f4aa8165bd3e23a120b821375af829500adc75a49a42d9ed9c748e9a7c83",
+      "clause4_n7_d2.json": "aad84c9a55f366c9250840889acc9ad8d29299313d80858b4104dd836be744a1"
+    },
+    "source": {
+      "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+      "external_oracle_lower_hash": "f99f8b863e044328e2747aa372f0d25da18257979cb94d60f8391edbf0a761fa",
+      "input_lower_hash": "bed6da6e49f1123b54fe61247615cf0e86f1b4257face7b073428f257607bda6",
+      "input_upper_hash": "955d79bd0824185cad0be1e758e6e492c51aec6c9199f81359b2528b848ec9ab",
+      "intermediate_bounds_sha256": "d51615b04dfb205afd67d2c21680ece4ca92f693157da1e32c7f8202a8e08cf1",
+      "local_complete_query_artifact_sha256": "9c490bf33edab555f14e4d4c354f6d6055c1fe627102473fc2e506e29fdbaaf8",
+      "local_complete_query_manifest_sha256": "d76595fba9318c7dc70fd79fb9ebd28594b83c59202426f33a45c58486a409b3",
+      "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+      "native_ir_artifact_schema": "boundflow.native-real-network-ir-artifact/v1",
+      "native_ir_manifest_sha256": "5d38aa4adcd7b8593b0ca3751106d3a254b72a2698bd445a8dde59d50eb5a676",
+      "native_ir_payload_sha256": "3ba949de66380c7d16dc44bb934eca8400182521e761c19eaa671cd8cf0eb557",
+      "objective_matrix_hash": "380f1c32321ea47967ad48221134d92d494630777eabe10ef31576a0b051e408",
+      "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf",
+      "vnnlib_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff"
+    },
+    "status": "validated_reduced"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.external-seeded-convergence-artifact/v1",
+  "status": "validated_reduced"
+}
