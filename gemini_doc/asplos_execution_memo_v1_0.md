@@ -1525,3 +1525,6 @@ NRIR-42 因此以 fixed ResNet2B property 0、CPU8、global-60s objective-branch
 不改。final property 仍 unknown，且没有 GPU、multi-workload、fair competitor speedup 或
 ASPLOS-ready claim。下一单变量应把当前顺序的 cross-clause/node/candidate work lower 为联合 batch
 Schedule，并以 exact semantics + fresh paired timing 判定；不再优化 scorer validation 常数。
+
+发布状态：功能提交 `264365f` 已由 PR #53 合入 `main@8969064`。后续实验必须以该 merge commit
+为 integration base，不能在旧 NRIR-41 基线上继续分叉。

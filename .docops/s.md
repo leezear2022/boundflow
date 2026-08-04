@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev004805
-last_va: ev004806
+last_ch: ev004822
+last_va: ev004823
 blk:
-next: publish-nrir42-and-preregister-nrir43-cross-axis-batching
-updated: 2026-08-04T23:21:43Z
+next: preregister-nrir43-cross-axis-verification-batch-schedule
+updated: 2026-08-04T23:25:34Z

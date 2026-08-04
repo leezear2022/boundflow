@@ -4483,3 +4483,14 @@
 **记录**
 - `gemini_doc/change_2026-08-05_objective_branch_scorer_ownership.md`
 - `gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_SCORER_OWNERSHIP_V1_CHANGELOG_2026_08_05.md`
+
+---
+
+## 2026-08-05：NRIR-42 发布
+
+- 功能提交 `264365f` 已由 PR #53 合入 `main@8969064`；
+- 当前状态、执行备忘与文档索引均已切换到该 integration base；
+- 下一工程轴固定为 NRIR-43 cross-axis verification batch Schedule，尚未形成性能 claim。
+
+**记录**
+- `gemini_doc/change_2026-08-05_nrir42_publication.md`

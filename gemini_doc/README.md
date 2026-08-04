@@ -21,7 +21,7 @@
 enumeration 从 341 次收敛到 compile-only 31 次；Phase A new/old median ratio=
 `0.706888/0.698486`，Phase B 三轮均完成 clauses 2/3 的 `[31,31]` nodes，whole=
 `57.175184/57.697757/58.114412 s`。该结论仅为固定 ResNet2B property 0 CPU production admission，
-ASPLOS-ready 仍为 NO）。其直接前序为
+ASPLOS-ready 仍为 NO；功能提交 `264365f` 已由 PR #53 合入 `main@8969064`）。其直接前序为
 `gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_PRODUCTION_COST_ATTRIBUTION_V1_PLAN_2026_08_05.md`。
 其直接前序为 `gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_WHOLE_QUERY_FORMAL_V1_PLAN_2026_08_05.md`、
 `gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_SHARED_EVALUATOR_V1_PLAN_2026_08_05.md`、
