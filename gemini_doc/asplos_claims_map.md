@@ -781,3 +781,27 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - 工件：`artifacts/hard-clause-objective-branching/vnncomp21-resnet2b-prop0-cpu-v1/`；fresh
   replay hash=`1193bee8817e4acc9ec33f8ddadc00a671d0ac3c9411f14f62978eb5ab1a95bd`；全量
   `707 passed, 37 skipped`。下一门禁为 multi-workload/device/competitor E2E 与 stronger-bound。
+
+### 2026-08-04 Multiworkload Competitor E2E Baseline v1
+
+- `C1/C3-M-NRIR18` ingest/control mechanism：原生 VNNLIB box + single-linear-unsafe-disjunct
+  frontend 编译 immutable Query IR；三 workload selection 再编译为 21-task、6-fresh-process 的
+  workload Plan/Task/Schedule；source/policy/device/timeout/hash 全显式；
+- `C3-G-NRIR18` fail-closed gate：source digest、CSV ordinal、ONNX shape/op inventory、完整 input
+  box、连续 X/Y identity、single inequality DNF、Plan/Task/Schedule linkage、worker result/log digest
+  和六组合 coverage 任一漂移均拒绝；
+- `C1-E-NRIR18` parser parity：MNISTFC 784-input、ResNet2B/OVAL21 3072-input 的 lower/upper、
+  九条 C/rhs 与固定 αβ-CROWN parser 逐字段一致；同时修复 flatten/reshape-first BoxPerturbation
+  shape-transform/trace 缺口；
+- `C3-E-NRIR18` real execution：BoundFlow 对 MNISTFC/ResNet2B/OVAL21 均 sound unknown；
+  αβ-CROWN 为 verified/unknown/verified。BoundFlow unresolved/pending 分别为 `3/0`、`2/7`、
+  `1/0`；ResNet 两个 native root lower=`-543.717/-789.331`；
+- `C3-D-NRIR18` CPU diagnosis：fresh-process E2E native/competitor 分别为
+  `38.644/4.312 s`、`66.910/64.198 s`、`31.498/4.527 s`；算法能力不同且均为单次，
+  `performance_claimed=false`，不得计算 speedup；
+- `C3-L-NRIR18` hard limitation：三 workload 仍不足以形成完整 benchmark suite；BoundFlow
+  0/3 complete verified，CUDA driver/device 不可用，未做 5-repeat 公平性能矩阵；VNNLIB v1
+  不支持 general multi-inequality disjunct；
+- 工件：`artifacts/multiworkload-competitor-e2e/vnncomp21-three-topology-cpu-v1/`；fresh replay
+  hash=`473b287bb88e4c52426b405aeb4164aa72a98d7b1bbd74c00471fe1d1451deb0`；focused
+  `16 passed`、全量 `723 passed, 37 skipped`。下一门禁为 native intermediate-bound refinement。

@@ -4005,3 +4005,24 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_HARD_CLAUSE_OBJECTIVE_BRANCHING_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Multiworkload Competitor E2E Baseline v1
+
+- 新增 fail-closed VNNLIB box/property frontend 与 Query IR；三份真实 VNN-COMP property 的
+  lower/upper/C/rhs 与固定 αβ-CROWN parser parity；
+- 新增三 workload Plan/Task/Schedule：MNISTFC、CIFAR ResNet2B、OVAL21，21 tasks、6 个
+  fresh-process native/competitor execution action；
+- 修复 flatten/reshape-first BoxPerturbation bounds/shape trace 未随 shape op 变换的问题；
+- 新增双后端 generate/replay runner与 448 KiB 完整 worker logs；artifact evidence hash=
+  `473b287bb88e4c52426b405aeb4164aa72a98d7b1bbd74c00471fe1d1451deb0`；
+- BoundFlow 状态为 `unknown/unknown/unknown`，αβ-CROWN 为 `verified/unknown/verified`；
+  CPU 单次 E2E 只作诊断，`performance_claimed=false`；
+- focused `16 passed`、全量 `723 passed, 37 skipped`；Black、targeted Mypy、Pylint 10.00/10、
+  source-to-IR fresh replay 与 diff check 通过；
+- 关闭 ingest/control/workload coverage `VALIDATED-REDUCED`；下一门禁是 native
+  intermediate-bound refinement，不声明 GPU/speedup/ASPLOS-ready。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_MULTIWORKLOAD_COMPETITOR_E2E_BASELINE_V1_CHANGELOG_2026_08_04.md`

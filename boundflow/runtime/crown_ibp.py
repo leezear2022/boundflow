@@ -32,7 +32,7 @@ from .fused_crown import (
 )
 from .linear_operator import DenseLinearOperator, LinearOperator, SignSplitLinearOperator
 from .materialization import materialize_linear_operator
-from .perturbation import InputPerturbationState
+from .perturbation import BoxPerturbation, InputPerturbationState
 from .relu_shape_utils import broadcast_relu_split_like_pre
 from .scheduler import (
     PlacementRetryStats,
@@ -223,10 +223,32 @@ def _forward_ibp_trace_mlp(
                 )
             x_state = _get_state(op.inputs[0])
             if isinstance(x_state, InputPerturbationState):
-                env[op.outputs[0]] = InputPerturbationState(
-                    center=torch.flatten(x_state.center, start_dim=start_dim, end_dim=end_dim),
-                    perturbation=x_state.perturbation,
+                perturbation = x_state.perturbation
+                if isinstance(perturbation, BoxPerturbation):
+                    perturbation = BoxPerturbation(
+                        lower=torch.flatten(
+                            perturbation.lower,
+                            start_dim=start_dim,
+                            end_dim=end_dim,
+                        ),
+                        upper=torch.flatten(
+                            perturbation.upper,
+                            start_dim=start_dim,
+                            end_dim=end_dim,
+                        ),
+                    )
+                shaped_state = InputPerturbationState(
+                    center=torch.flatten(
+                        x_state.center, start_dim=start_dim, end_dim=end_dim
+                    ),
+                    perturbation=perturbation,
                 )
+                env[op.outputs[0]] = shaped_state
+                if isinstance(perturbation, BoxPerturbation):
+                    interval_env[op.outputs[0]] = IntervalState(
+                        lower=perturbation.lower,
+                        upper=perturbation.upper,
+                    )
             else:
                 x = _ensure_interval(x_state)
                 y = IntervalState(
@@ -243,9 +265,21 @@ def _forward_ibp_trace_mlp(
                 raise ValueError("reshape requires non-empty attrs['shape']")
             x_state = _get_state(op.inputs[0])
             if isinstance(x_state, InputPerturbationState):
-                env[op.outputs[0]] = InputPerturbationState(
-                    center=x_state.center.reshape(shape), perturbation=x_state.perturbation
+                perturbation = x_state.perturbation
+                if isinstance(perturbation, BoxPerturbation):
+                    perturbation = BoxPerturbation(
+                        lower=perturbation.lower.reshape(shape),
+                        upper=perturbation.upper.reshape(shape),
+                    )
+                shaped_state = InputPerturbationState(
+                    center=x_state.center.reshape(shape), perturbation=perturbation
                 )
+                env[op.outputs[0]] = shaped_state
+                if isinstance(perturbation, BoxPerturbation):
+                    interval_env[op.outputs[0]] = IntervalState(
+                        lower=perturbation.lower,
+                        upper=perturbation.upper,
+                    )
             else:
                 x = _ensure_interval(x_state)
                 y = IntervalState(lower=x.lower.reshape(shape), upper=x.upper.reshape(shape))

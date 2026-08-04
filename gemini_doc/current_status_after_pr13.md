@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`d12f373`（NRIR-16 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/hard-clause-branching-stronger-bound-v1`
+> 当前 integration base：`54e565f`（NRIR-17 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/multiworkload-competitor-e2e-baseline-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
@@ -105,6 +105,11 @@
 > hard-clause worst leaf 相对 widest 改善 `0.120752/0.071564/0.057901`，但全部 terminal
 > leaves 仍为负，6/9 与 ASPLOS-ready=NO 均不变。下一门禁是多 workload/设备/竞品协议与
 > stronger-bound，不再把继续增加 widest depth 当作主路线。
+> 2026-08-04 NRIR-18 后续：MNISTFC、CIFAR ResNet2B、OVAL21 三种拓扑已经由原生
+> VNNLIB Query IR 和 21-task/6-fresh-process workload Plan/Task/Schedule 驱动。BoundFlow
+> 状态为 `unknown/unknown/unknown`，固定 αβ-CROWN 为 `verified/unknown/verified`；ResNet
+> native local root lower 达 `-543.717/-789.331`，明确暴露 intermediate-bound strength 缺口。
+> CPU 单次 E2E 仅为诊断，不计算 speedup；下一门禁转为 native intermediate-bound refinement。
 
 ## 1. 当前真实阶段
 
@@ -135,6 +140,7 @@ BoundFlow 已经完成从边界表示到 query runtime prototype 的主干：
 | E2E tightness/performance baseline NRIR-15 | external semantics + CPU diagnosis validated-reduced | fixed ResNet 6/9 verified、3 hard clauses；三组 audit queue 约 6.7 s，candidate/verdict 毫秒级；下一步 prepared production path，无 speedup claim |
 | Prepared production path NRIR-16 | root-only repeated-query mechanism validated-reduced | audit/prepared warm median 59.078 s/110.950 ms；cold total 16.139 s、payload 2.076 MB；semantic 6/9 不变，仅内部 overhead diagnosis |
 | Objective branching NRIR-17 | branch IR/control + fixed-budget tightness validated-reduced | three hard-clause worst-leaf improvements 0.120752/0.071564/0.057901；all remain unknown；单 workload CPU、无 speedup claim |
+| Multiworkload competitor E2E NRIR-18 | ingest/control/coverage validated-reduced | MNISTFC/ResNet2B/OVAL21 原生 VNNLIB→Query/Plan/Task/Schedule；BoundFlow unknown×3，αβ-CROWN verified/unknown/verified；CPU diagnostic only、GPU pending |
 | ASPLOS 最终系统主张 | IR-5 final VALIDATED-NO-GO | IR-1—4 narrow closure 保留；Global p90/Pareto 失败，当前 system-performance 路线已关闭 |
 
 历史 `main@263ea81` 只到 PR-10 closure，不能再作为项目当前状态入口。跨会话恢复必须同时检查
@@ -635,3 +641,24 @@ fixed ResNet clauses `0/2/4` 的 same-budget widest→objective worst leaf 分�
 unknown，不能升级 complete verifier；20–22 秒 audit timing 不是 production 或 competitor
 performance。下一阶段必须扩展多 workload/设备/竞品 E2E，并研究能实质缩小剩余 frontier
 deficit 的 stronger-bound mechanism。
+
+## 25. Multiworkload Competitor E2E Baseline v1 判定
+
+NRIR-18 新增原生 VNNLIB box/property frontend 与 typed Query IR。首批固定 VNN-COMP 2021
+CSV ordinal 0 的 MNISTFC 256x2、CIFAR10 ResNet2B、OVAL21 base CNN；三份 property 的 input
+lower/upper、九条 C 与 rhs 均与固定 αβ-CROWN parser 一致。workload Plan/Task/Schedule 明确包含
+3 source locks、21 tasks 和 6 个 fresh-process native/competitor execution action，source、policy、
+timeout、device、thread 与所有 IR hash 均可 replay。
+
+正式 CPU 矩阵中，BoundFlow 对三项均返回 sound `unknown`：MNISTFC 9 clauses 中 3 unresolved，
+ResNet 在 deadline 后完成 2 clauses、7 pending，OVAL21 仅 clause 8 unresolved。固定
+αβ-CROWN 对 MNISTFC/OVAL21 返回 verified，对 ResNet timeout 后 unknown。对应 fresh-process
+E2E 分别为 `38.644/4.312 s`、`66.910/64.198 s`、`31.498/4.527 s`；由于算法、complete
+能力和单次样本不同，这些数字只作诊断，禁止计算 speedup。
+
+artifact 位于 `artifacts/multiworkload-competitor-e2e/vnncomp21-three-topology-cpu-v1/`，fresh
+replay hash=`473b287bb88e4c52426b405aeb4164aa72a98d7b1bbd74c00471fe1d1451deb0`；全量
+`723 passed, 37 skipped`。该阶段关闭 ingest/IR/control/workload coverage
+`VALIDATED-REDUCED`，不关闭 verifier parity、GPU/performance 或 ASPLOS-ready。ResNet native
+local root lower=`-543.717/-789.331`，下一门禁明确为 native intermediate-bound refinement
+Plan/Task/Schedule，再对三 workload 重测 closed clauses 与成本。
