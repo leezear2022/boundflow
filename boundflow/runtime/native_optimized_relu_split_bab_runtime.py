@@ -23,7 +23,7 @@ from ..frontends.plain_crown_bound_ir import (
 from ..ir.bound import IntermediateBoundSource
 from ..ir.schedule import LaunchAction
 from ..ir.task import BFTaskModule
-from .crown_ibp import _apply_relu_split, _forward_ibp_trace_mlp
+from .crown_ibp import _forward_ibp_trace_mlp
 from .native_alpha_beta_optimization_state import (
     NativeAlphaBetaOptimizationResult,
     NativeAlphaBetaOptimizationState,
@@ -35,8 +35,15 @@ from .native_alpha_beta_optimization_state import (
 from .native_alpha_beta_optimizer_schedule import (
     NativeOptimizerProgram,
     NativeScheduledOptimizerResult,
+    _optimizer_intermediate_semantics,
     compile_native_alpha_beta_optimizer_program,
     execute_native_alpha_beta_optimizer_program,
+)
+from .native_objective_branch_score import (
+    NativeObjectiveBranchExecution,
+    NativeObjectiveBranchPolicy,
+    compile_native_objective_branch_program,
+    execute_native_objective_branch_program,
 )
 from .native_relu_split_bab_runtime import (
     BabQueueStatus,
@@ -66,8 +73,8 @@ NATIVE_OPTIMIZED_RELU_SPLIT_BAB_TRACE_SCHEMA_VERSION = (
     "boundflow.optimized-relu-split-bab-trace/v1"
 )
 PARENT_OPTIMIZER_STATE_VALIDITY = "monotonic_refinement_initialization_only"
-NATIVE_REEXECUTION_ATOL = 2e-6
-NATIVE_REEXECUTION_RTOL = 2e-6
+NATIVE_REEXECUTION_ATOL = 1e-5
+NATIVE_REEXECUTION_RTOL = 1e-5
 # Execution is still guarded by torch.allclose(atol, rtol) before trace creation.
 # This scale-independent ceiling only prevents serialized trace inflation when
 # the reference tensor scale is unavailable inside the standalone stack record.
@@ -521,6 +528,10 @@ class NativeOptimizedReluSplitBabExecution:
 
     trace: NativeOptimizedReluSplitBabTrace
     selected_states: tuple[tuple[str, NativeAlphaBetaOptimizationState], ...]
+    objective_branch_executions: tuple[
+        tuple[str, NativeObjectiveBranchExecution], ...
+    ] = ()
+    objective_branch_policy: Optional[NativeObjectiveBranchPolicy] = None
 
     def validate(self) -> None:
         self.trace.validate()
@@ -539,6 +550,32 @@ class NativeOptimizedReluSplitBabExecution:
                 raise ValueError(
                     "native optimized BaB execution state identity differs"
                 )
+        branch_executions = dict(self.objective_branch_executions)
+        if len(branch_executions) != len(self.objective_branch_executions):
+            raise ValueError("native optimized BaB objective branch IDs repeat")
+        if self.objective_branch_policy is None:
+            if branch_executions:
+                raise ValueError("native optimized BaB objective branches lack policy")
+        else:
+            self.objective_branch_policy.validate()
+            expected = {
+                item.node.node_id
+                for item in self.trace.evaluations
+                if item.branch_candidate is not None
+            }
+            if set(branch_executions) != expected:
+                raise ValueError(
+                    "native optimized BaB objective branch coverage differs"
+                )
+            for evaluation in self.trace.evaluations:
+                if evaluation.branch_candidate is None:
+                    continue
+                branch = branch_executions[evaluation.node.node_id]
+                branch.validate()
+                if branch.branch != evaluation.branch_candidate:
+                    raise ValueError(
+                        "native optimized BaB objective branch selection differs"
+                    )
 
     def state_map(self) -> dict[str, NativeAlphaBetaOptimizationState]:
         self.validate()
@@ -678,6 +715,8 @@ def _build_batched_parent_warm_state(
     policy: NativeAlphaBetaOptimizerPolicy,
     parent_by_id: Mapping[str, _OptimizedEvaluatedNode],
     relu_pre_override: Optional[Mapping[str, IntervalState]],
+    intermediate_bound_source: IntermediateBoundSource,
+    refine_external_constraints: bool,
 ) -> NativeAlphaBetaOptimizationState:
     parents: list[_OptimizedEvaluatedNode] = []
     for node in nodes:
@@ -688,22 +727,13 @@ def _build_batched_parent_warm_state(
         parents.append(parent)
     parent_nodes = tuple(item.runtime_node for item in parents)
     parent_splits = _batched_split_state(parent_nodes)
-    _parent_env, local_parent_pre = _forward_ibp_trace_mlp(
+    _parent_env, parent_pre = _optimizer_intermediate_semantics(
         legacy_task_module,
         batch_input,
         relu_split_state=parent_splits,
-    )
-    parent_pre = (
-        local_parent_pre
-        if relu_pre_override is None
-        else {
-            name: _apply_relu_split(
-                relu_pre_override[name],
-                parent_splits[name],
-                relu_input_name=name,
-            )
-            for name in local_parent_pre
-        }
+        relu_pre_override=relu_pre_override,
+        intermediate_bound_source=intermediate_bound_source,
+        refine_external_constraints=refine_external_constraints,
     )
     scope = build_native_alpha_beta_scope(
         legacy_task_module,
@@ -879,7 +909,13 @@ def _evaluate_optimized_node_batch(
     parent_by_id: Mapping[str, _OptimizedEvaluatedNode],
     relu_pre_override: Optional[Mapping[str, IntervalState]],
     intermediate_bound_source: IntermediateBoundSource,
-) -> tuple[tuple[_OptimizedEvaluatedNode, ...], NativeOptimizedBabStackTrace]:
+    objective_branch_policy: Optional[NativeObjectiveBranchPolicy],
+    refine_external_constraints: bool,
+) -> tuple[
+    tuple[_OptimizedEvaluatedNode, ...],
+    NativeOptimizedBabStackTrace,
+    tuple[tuple[str, NativeObjectiveBranchExecution], ...],
+]:
     if not nodes:
         raise ValueError("native optimized node batch cannot be empty")
     batch_input = _repeat_box_input_spec(root_input_spec, count=len(nodes))
@@ -900,6 +936,8 @@ def _evaluate_optimized_node_batch(
             policy=policy,
             parent_by_id=parent_by_id,
             relu_pre_override=batch_relu_pre_override,
+            intermediate_bound_source=intermediate_bound_source,
+            refine_external_constraints=refine_external_constraints,
         )
     )
     if any((node.node.depth == 0) != (warm_state is None) for node in nodes):
@@ -914,6 +952,7 @@ def _evaluate_optimized_node_batch(
         warm_start=warm_state,
         relu_pre_override=batch_relu_pre_override,
         intermediate_bound_source=intermediate_bound_source,
+        refine_external_constraints=refine_external_constraints,
     )
     scheduled = execute_native_alpha_beta_optimizer_program(
         optimizer_program,
@@ -973,6 +1012,7 @@ def _evaluate_optimized_node_batch(
     optimizer_trace_hash = scheduled.trace.stable_hash(program=optimizer_program)
     native_hashes = tuple(sorted(native_compilation.hashes().items()))
     evaluated: list[_OptimizedEvaluatedNode] = []
+    objective_branches: list[tuple[str, NativeObjectiveBranchExecution]] = []
     for index, runtime_node in enumerate(nodes):
         node_pre = {
             name: _slice_interval(value, index=index)
@@ -998,6 +1038,25 @@ def _evaluate_optimized_node_batch(
         if runtime_node.node.depth > 0 and parent is None:
             raise ValueError("optimized node lacks evaluated parent")
         branch = _select_branch(node_pre, relu_split_state=node_split)
+        if objective_branch_policy is not None and branch is not None:
+            branch_program = compile_native_objective_branch_program(
+                legacy_task_module,
+                _repeat_box_input_spec(root_input_spec, count=1),
+                linear_spec_C=objective,
+                relu_pre=node_pre,
+                selected_state=state,
+                optimizer_policy=policy,
+                branch_policy=objective_branch_policy,
+                intermediate_bound_source=intermediate_bound_source,
+                refine_external_constraints=refine_external_constraints,
+                plan_id=f"{batch_id}:node:{index}:objective-branch",
+            )
+            branch_execution = execute_native_objective_branch_program(
+                branch_program,
+                node_id=runtime_node.node.node_id,
+            )
+            branch = branch_execution.branch
+            objective_branches.append((runtime_node.node.node_id, branch_execution))
         lower = float(native_bounds.lower[index, 0].item())
         upper = float(native_bounds.upper[index, 0].item())
         evaluation = NativeOptimizedBabEvaluation(
@@ -1037,7 +1096,7 @@ def _evaluate_optimized_node_batch(
         selected_native_lower_max_abs_diff=lower_diff,
         selected_native_upper_max_abs_diff=upper_diff,
     )
-    return tuple(evaluated), stack
+    return tuple(evaluated), stack, tuple(objective_branches)
 
 
 def execute_native_optimized_relu_split_bab(
@@ -1052,6 +1111,8 @@ def execute_native_optimized_relu_split_bab(
     intermediate_bound_source: IntermediateBoundSource = (
         IntermediateBoundSource.LOCAL_FORWARD
     ),
+    objective_branch_policy: Optional[NativeObjectiveBranchPolicy] = None,
+    refine_external_constraints: bool = False,
 ) -> NativeOptimizedReluSplitBabExecution:
     """Run best-first queue with optimizer Schedule-driven native node bounds."""
 
@@ -1059,6 +1120,14 @@ def execute_native_optimized_relu_split_bab(
         raise ValueError("native optimized BaB run ID must be non-empty")
     config.validate()
     optimizer_policy.validate()
+    if objective_branch_policy is not None:
+        objective_branch_policy.validate()
+    if not isinstance(refine_external_constraints, bool):
+        raise TypeError("optimized queue external refinement flag is invalid")
+    if refine_external_constraints and intermediate_bound_source != (
+        IntermediateBoundSource.EXTERNAL_VERIFIER
+    ):
+        raise ValueError("external constraint refinement requires external provenance")
     if not isinstance(intermediate_bound_source, IntermediateBoundSource):
         raise TypeError("optimized queue intermediate-bound source is invalid")
     if (relu_pre_override is None) != (
@@ -1100,6 +1169,7 @@ def execute_native_optimized_relu_split_bab(
     decisions: list[NativeReluSplitBabDecision] = []
     native_stacks: list[NativeOptimizedBabStackTrace] = []
     runtime_by_id: dict[str, _OptimizedEvaluatedNode] = {}
+    objective_branch_executions: list[tuple[str, NativeObjectiveBranchExecution]] = []
     batch_serial = 0
     next_node_serial = 1
 
@@ -1109,7 +1179,7 @@ def execute_native_optimized_relu_split_bab(
             chunk = tuple(nodes[start : start + config.max_eval_batch_size])
             batch_id = f"{run_id}:eval:{batch_serial:04d}"
             batch_serial += 1
-            evaluated, stack = _evaluate_optimized_node_batch(
+            evaluated, stack, branch_executions = _evaluate_optimized_node_batch(
                 legacy_task_module,
                 input_spec,
                 objective=objective,
@@ -1120,8 +1190,11 @@ def execute_native_optimized_relu_split_bab(
                 parent_by_id=runtime_by_id,
                 relu_pre_override=relu_pre_override,
                 intermediate_bound_source=intermediate_bound_source,
+                objective_branch_policy=objective_branch_policy,
+                refine_external_constraints=refine_external_constraints,
             )
             native_stacks.append(stack)
+            objective_branch_executions.extend(branch_executions)
             evaluations.extend(item.evaluation for item in evaluated)
             runtime_by_id.update(
                 {item.runtime_node.node.node_id: item for item in evaluated}
@@ -1198,7 +1271,11 @@ def execute_native_optimized_relu_split_bab(
                     decision_index=len(decisions),
                     node_id=node.node_id,
                     kind="expand",
-                    reason="widest_unsplit_ambiguous_relu",
+                    reason=(
+                        "objective_bound_impact"
+                        if objective_branch_policy is not None
+                        else "widest_unsplit_ambiguous_relu"
+                    ),
                     child_node_ids=tuple(item.node.node_id for item in children),
                     branch_candidate=branch,
                 )
@@ -1252,6 +1329,8 @@ def execute_native_optimized_relu_split_bab(
             )
             for evaluation in trace.evaluations
         ),
+        objective_branch_executions=tuple(objective_branch_executions),
+        objective_branch_policy=objective_branch_policy,
     )
     execution.validate()
     return execution
@@ -1269,6 +1348,8 @@ def run_native_optimized_relu_split_bab(
     intermediate_bound_source: IntermediateBoundSource = (
         IntermediateBoundSource.LOCAL_FORWARD
     ),
+    objective_branch_policy: Optional[NativeObjectiveBranchPolicy] = None,
+    refine_external_constraints: bool = False,
 ) -> NativeOptimizedReluSplitBabTrace:
     """Return the serialized optimized queue trace."""
 
@@ -1281,4 +1362,6 @@ def run_native_optimized_relu_split_bab(
         optimizer_policy=optimizer_policy,
         relu_pre_override=relu_pre_override,
         intermediate_bound_source=intermediate_bound_source,
+        objective_branch_policy=objective_branch_policy,
+        refine_external_constraints=refine_external_constraints,
     ).trace

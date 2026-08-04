@@ -1,9 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`597332d`（NRIR-13 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`d12f373`（NRIR-16 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/complete-verifier-query-v1`
+> 当前研发分支：`feat/hard-clause-branching-stronger-bound-v1`
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-12 optimized queue
 > integration（完成）→ NRIR-13 sound property verdict（完成）→ NRIR-14 complete verifier
 > query（完成）→ end-to-end tightness/performance baseline**。
@@ -904,3 +904,22 @@ verified、clauses `0/2/4` unknown。artifact fresh replay hash=
 `698 passed, 37 skipped`。该结果只关闭 root-only repeated-query prepared mechanism 与单 workload
 CPU internal-overhead diagnosis `VALIDATED-REDUCED`；不是 competitor speedup、CUDA 或完整
 verification。下一工程门禁转为三个 hard clauses 的 branching/stronger-bound。
+
+## 30. Hard-Clause Objective Branching v1
+
+NRIR-17 将 objective-aware ReLU branch scoring lower 为独立 Plan/Task/Schedule IR。每个节点的
+candidate enumeration、双子域 materialization、fixed selected-state child-bound evaluation、
+worst-child reduction 与 deterministic selection 均有 exact hash；objective、split、selected
+alpha/beta state、semantic scope、policy 与 candidate identity 任一漂移 fail closed。原 widest
+路径与 NRIR-15/16 frozen replay 保持不变。
+
+fixed ResNet clauses `0/2/4` 使用相同 7-node/depth-2、25-step adaptive optimizer 预算。widest
+worst leaf 为 `-0.440550/-0.498173/-0.562577`；objective path 为
+`-0.319799/-0.426609/-0.504676`，分别改善 `0.120752/0.071564/0.057901`。三棵 objective
+tree 的所有 terminal leaves 仍为负，因此 property status 保持 unknown，6/9 总体语义不升级。
+
+artifact fresh replay hash=
+`1193bee8817e4acc9ec33f8ddadc00a671d0ac3c9411f14f62978eb5ab1a95bd`，全量
+`707 passed, 37 skipped`。该阶段只关闭 branch IR/control 与单 workload fixed-budget tightness
+`VALIDATED-REDUCED`；单次 audit timing 不是 performance claim。下一路线为多 workload/设备/
+竞品 E2E 协议与 stronger-bound，而不是把 bounded-tree improvement 写成完整 verifier closure。

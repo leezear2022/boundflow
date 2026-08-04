@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`b39c0ea`（NRIR-15 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/prepared-production-fast-path-v1`
+> 当前 integration base：`d12f373`（NRIR-16 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/hard-clause-branching-stronger-bound-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
@@ -101,6 +101,10 @@
 > complete-query median 从 audit `59.078 s` 降为 `110.950 ms`；cold prepare+first=`16.139 s`，
 > payload=`2.076 MB`，semantic/status 不变。该比值只归因内部 audit evidence overhead；下一门禁
 > 为 clauses 0/2/4 branching/stronger-bound，ASPLOS-ready 仍为 NO。
+> 2026-08-04 NRIR-17 后续：objective branch score 已成为 first-class Plan/Task/Schedule；同预算
+> hard-clause worst leaf 相对 widest 改善 `0.120752/0.071564/0.057901`，但全部 terminal
+> leaves 仍为负，6/9 与 ASPLOS-ready=NO 均不变。下一门禁是多 workload/设备/竞品协议与
+> stronger-bound，不再把继续增加 widest depth 当作主路线。
 
 ## 1. 当前真实阶段
 
@@ -130,6 +134,7 @@ BoundFlow 已经完成从边界表示到 query runtime prototype 的主干：
 | Complete verifier query NRIR-14 | multi-clause query control validated-reduced | conjunction、PGD candidate、witness replay、unsafe short-circuit、cooperative deadline；固定 ResNet 9/9 unresolved，无性能 claim |
 | E2E tightness/performance baseline NRIR-15 | external semantics + CPU diagnosis validated-reduced | fixed ResNet 6/9 verified、3 hard clauses；三组 audit queue 约 6.7 s，candidate/verdict 毫秒级；下一步 prepared production path，无 speedup claim |
 | Prepared production path NRIR-16 | root-only repeated-query mechanism validated-reduced | audit/prepared warm median 59.078 s/110.950 ms；cold total 16.139 s、payload 2.076 MB；semantic 6/9 不变，仅内部 overhead diagnosis |
+| Objective branching NRIR-17 | branch IR/control + fixed-budget tightness validated-reduced | three hard-clause worst-leaf improvements 0.120752/0.071564/0.057901；all remain unknown；单 workload CPU、无 speedup claim |
 | ASPLOS 最终系统主张 | IR-5 final VALIDATED-NO-GO | IR-1—4 narrow closure 保留；Global p90/Pareto 失败，当前 system-performance 路线已关闭 |
 
 历史 `main@263ea81` 只到 PR-10 closure，不能再作为项目当前状态入口。跨会话恢复必须同时检查
@@ -614,3 +619,19 @@ production lower 对 audit max diff=`1.90735e-6`、candidate/status exact，仍�
 结论为 root-only repeated-query preparation 与单 workload CPU overhead removal
 `VALIDATED-REDUCED`。这不是 competitor speedup、child BaB、CUDA 或完整性质闭合；下一代码路线
 是 hard-clause branching/stronger-bound v1。
+
+## 24. Hard-Clause Objective Branching v1 判定
+
+NRIR-17 新增 objective branch Plan/Task/Schedule 与 exact score runtime。top-width-per-ReLU
+shortlist 中每个 candidate 的 inactive/active child lower 都由同一 selected alpha/beta state 批量
+计算，再按 worst-child、mean-child、stable identity 选择；所有输入与选择结果进入 stable hash。
+
+fixed ResNet clauses `0/2/4` 的 same-budget widest→objective worst leaf 分别为
+`-0.440550→-0.319799`、`-0.498173→-0.426609`、`-0.562577→-0.504676`。fresh replay hash=
+`1193bee8817e4acc9ec33f8ddadc00a671d0ac3c9411f14f62978eb5ab1a95bd`，全量
+`707 passed, 37 skipped`。
+
+结论为 branch IR/control 与 bounded-tree tightness `VALIDATED-REDUCED`。三个 hard clauses 仍
+unknown，不能升级 complete verifier；20–22 秒 audit timing 不是 production 或 competitor
+performance。下一阶段必须扩展多 workload/设备/竞品 E2E，并研究能实质缩小剩余 frontier
+deficit 的 stronger-bound mechanism。
