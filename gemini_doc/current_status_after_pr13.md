@@ -944,3 +944,17 @@ artifact evidence hash=
 frontier tightness `VALIDATED-REDUCED`；当前仍是单 ResNet property/clause、CPU serial audit path，
 cooperative deadline 后丢弃 late evaluation。没有新增 closure、performance、GPU、competitor、完整
 suite 或 ASPLOS-ready claim。下一门禁为 fixed-deadline child refinement budget/cap Pareto。
+
+## 40. Objective-Ancestral Child Budget Pareto v1 判定
+
+NRIR-33 以 additive Plan 协议复用 NRIR-32 queue engine，selected cap、five-cap calibration、90%
+retention selection 与 evidence hash 全部一等化；旧 cap128 source/artifact 未修改且可 replay。
+
+固定 ResNet clause 0 的 cap `8/16/32/64/128` fresh-process pilot 全部只提交 7 nodes、到 depth 2；
+worst active lower 从 `-173.078613` 单调改善到 `-104.765411`，但没有任何 coverage 变化。相对
+root-global `-200.465393` 的 cap128 gain 为 `+95.699982`，预注册规则只能选择 cap128。
+
+结论为 cap-only coverage `VALIDATED-NO-GO`；pilot hash=
+`db9b406eebebad0c1c4d6f39e8088667935f10e3d54f38cb848dce792dd757eb`。没有新 property 或
+performance claim。下一工程门禁为 sibling packed refinement/evaluation + parametric evaluator，
+保持 cap128、typed ancestral lineage 与 60 秒 deadline。

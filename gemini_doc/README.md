@@ -16,9 +16,10 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_OBJECTIVE_ANCESTRAL_HARD_CLAUSE_ESCALATION_V1_PLAN_2026_08_04.md`
-（typed objective root→dynamic child lineage、first-class committed queue、固定 ResNet clause 0 ×
-三 fresh repeats 与 frontier tightness）。其直接前序为
+当前最新入口：`gemini_doc/BOUNDFLOW_OBJECTIVE_ANCESTRAL_CHILD_BUDGET_PARETO_V1_PLAN_2026_08_04.md`
+（five-cap first-class calibration/Decision、cap-only coverage NO-GO 与 sibling-packed 下一门禁）。
+其直接前序为
+`gemini_doc/BOUNDFLOW_OBJECTIVE_ANCESTRAL_HARD_CLAUSE_ESCALATION_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_OBJECTIVE_DIRECTED_HARD_CLAUSE_ESCALATION_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_TYPED_HARD_CLAUSE_ESCALATION_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_WALL_CLOCK_PARAMETRIC_BAB_SCALING_V1_PLAN_2026_08_04.md`、
@@ -103,6 +104,10 @@
 
 ### 2.1 关键交付文档（“长期有效”）
 
+- `gemini_doc/BOUNDFLOW_OBJECTIVE_ANCESTRAL_CHILD_BUDGET_PARETO_V1_PLAN_2026_08_04.md`：
+  five-cap Policy/Decision、90% retention gate、cap-only NO-GO 与 sibling-packed 下一路线
+- `gemini_doc/BOUNDFLOW_OBJECTIVE_ANCESTRAL_CHILD_BUDGET_PARETO_V1_CHANGELOG_2026_08_04.md`：
+  additive IR/runtime、fresh-process pilot/replay、精确 cap 曲线与 claim boundary
 - `gemini_doc/BOUNDFLOW_OBJECTIVE_ANCESTRAL_HARD_CLAUSE_ESCALATION_V1_PLAN_2026_08_04.md`：
   typed root admission、dynamic child refinement、committed queue Task/Schedule、三重复 frontier
   tightness 与下一 child-budget 门禁

@@ -1251,3 +1251,20 @@ artifact evidence hash=
 `VALIDATED-REDUCED` 关闭；没有 property closure、performance、GPU、competitor、multi-clause 或
 ASPLOS-ready claim。下一门禁为固定 60 秒下预注册 child-refinement cap/resource Pareto，把 tighter
 bound 转化为更多 committed nodes；不直接延长 deadline。
+
+## 46. Objective-Ancestral Child Budget Pareto v1
+
+NRIR-33 在不修改 frozen NRIR-32 engine/artifact 的前提下，新增 child-budget Policy、Calibration、
+Decision 与 Plan IR；five-cap `[8,16,32,64,128]`、pilot order 和“选择最小且保留 cap128 至少 90%
+gain 的 cap”在运行前冻结。每个 candidate 由 fresh process 重建 root，并执行相同 31/depth4/60 s
+queue 与独立 root-global 对照。
+
+五档 accepted nodes 全部为 7、max depth 全部为 2；worst active lower 依次为
+`-173.078613/-162.253326/-148.134460/-126.962929/-104.765411`，而 root-global 为
+`-200.465393`。cap128 gain=`+95.699982`；90% retention rule 只能选择 cap128。较小 cap 同时降低
+tightness 且没有增加 coverage，说明当前瓶颈在 serial child evaluator/optimizer，不在 target cap。
+
+pilot hash=`db9b406eebebad0c1c4d6f39e8088667935f10e3d54f38cb848dce792dd757eb`。
+本路线以 cap-only coverage `VALIDATED-NO-GO` 关闭；timing 只作诊断，无 performance/property/GPU/
+competitor/ASPLOS-ready claim。下一门禁固定为 cap128 sibling packed refinement/evaluation 与
+parametric evaluator，目标是在同一 60 秒内严格增加 committed nodes。

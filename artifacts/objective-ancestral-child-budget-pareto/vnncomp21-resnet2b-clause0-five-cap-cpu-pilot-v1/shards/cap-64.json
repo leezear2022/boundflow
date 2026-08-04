@@ -1,0 +1,134 @@
+{
+  "accepted_nodes": 7,
+  "cap": 64,
+  "discarded_attempt_stage": "after_child_evaluation",
+  "fallback_reason": "deadline_preserve_accepted_frontier",
+  "frontier": {
+    "active_domains": [
+      {
+        "depth": 2,
+        "lower": -126.96292877197266,
+        "node_id": "nrir33:cifar10_resnet:000:clause0:cap64:n000005",
+        "split_state_hash": "f1631ce76b5e3b35c27b8a9b532bae205227f70f6eafaf7339418e8b478bfc49",
+        "upper": 136.03500366210938
+      },
+      {
+        "depth": 2,
+        "lower": -126.92191314697266,
+        "node_id": "nrir33:cifar10_resnet:000:clause0:cap64:n000006",
+        "split_state_hash": "4617074f523ab90bd23f2b3a0bf1cb75d771c7dd6904bdba359cae08c2802ef7",
+        "upper": 136.05810546875
+      },
+      {
+        "depth": 2,
+        "lower": -125.92425537109375,
+        "node_id": "nrir33:cifar10_resnet:000:clause0:cap64:n000003",
+        "split_state_hash": "e006152333f4cf45af703321e5fd22010eff08857bc7b69611d52fa064906e18",
+        "upper": 134.62193298339844
+      },
+      {
+        "depth": 2,
+        "lower": -125.848388671875,
+        "node_id": "nrir33:cifar10_resnet:000:clause0:cap64:n000004",
+        "split_state_hash": "b6e781665d761183c12a1946b38d0afb937538e26f253fe3e67b6472ce9c6c61",
+        "upper": 134.61782836914062
+      }
+    ],
+    "decision_count": 3,
+    "evaluated_nodes": 7,
+    "frontier_count": 4,
+    "maximum_depth": 2,
+    "minimum_active_upper": 134.61782836914062,
+    "root_lower": -204.17315673828125,
+    "root_upper": 213.74331665039062,
+    "worst_active_lower": -126.96292877197266
+  },
+  "lineage_valid": true,
+  "maximum_depth": 2,
+  "node_refinement_hash": "f7e6e9c17a3891d16a03e8519f84fccdb5c8134b0e74844de9c96ffeebe7e6d6",
+  "performance_claimed": false,
+  "plan": {
+    "child_budget_decision": {
+      "calibration_evidence_hash": null,
+      "calibration_rows": [],
+      "policy_hash": "53af9879a37e6378cdafd06da806c55decab33c9fd556b213d103be7f569f2ef",
+      "reference_gain": null,
+      "root_global_worst_active_lower": null,
+      "schema_version": "boundflow.objective-ancestral-child-budget-decision-ir/v1",
+      "selected_cap": 64,
+      "selected_gain_retention": null,
+      "selection_mode": "calibration_candidate"
+    },
+    "child_budget_policy": {
+      "candidate_caps": [
+        8,
+        16,
+        32,
+        64,
+        128
+      ],
+      "minimum_gain_retention": 0.9,
+      "pilot_order": [
+        32,
+        8,
+        128,
+        16,
+        64
+      ],
+      "reference_cap": 128,
+      "root_parity_tolerance": 1e-05,
+      "schema_version": "boundflow.objective-ancestral-child-budget-policy-ir/v1",
+      "selection_rule": "minimum_cap_meeting_reference_gain_retention_v1"
+    },
+    "child_refinement_policy": {
+      "backward_chunk_size": 32,
+      "candidate_policy_id": "objective_influence_width_per_relu_v1",
+      "max_neurons_per_relu": 64,
+      "minimum_width": 0.0,
+      "passes": 1,
+      "refinement_method": "selected_plain_crown_v1"
+    },
+    "deadline_enforcement": "whole_query_cooperative_stage_boundaries",
+    "input_bounds_hash": "742690d00e48f051c47b6eed941884d7759fcf3a97dda3dcf7b50e96e0cdf3d4",
+    "node_dispatch": "serial_dynamic_parent_before_child",
+    "objective_hash": "0785a68037a32572ac06fb6f32a6f304254b0c9c64680546f72db8f2d51d28a9",
+    "optimizer_policy_hash": "44905b261cc5fbace70cec8c35135956e155e4d7c82b4897a42950dc5d67bebc",
+    "performance_claimed": false,
+    "plan_id": "nrir33:cifar10_resnet:000:clause0:cap64",
+    "primal_graph_hash": "02636a01e4b5a2d1f759dc7748bf80b3303efff2d5697790966f8e93679213e8",
+    "root_intermediate_bounds_hash": "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+    "root_refinement_plan_hash": "711f4112b90e54a79c6fca4239d025240c1285a8b808ba14dc25402748ad3506",
+    "root_refinement_semantic_trace_hash": "18ebb5b14578102c09eb59f4fb301284233214c9e2a14ccabe4ec740ada2a9c4",
+    "schema_version": "boundflow.objective-ancestral-child-budget-plan-ir/v1",
+    "search_budget": {
+      "budget_id": "objective-ancestral-n31d4",
+      "max_depth": 4,
+      "max_nodes": 31
+    },
+    "semantics_owner": "boundflow_native_objective_ancestral_child_budget",
+    "source_consumption": "sound_constraint_only",
+    "task_template": [
+      "admit_root_source",
+      "evaluate_root",
+      "compile_child_refinement",
+      "execute_child_refinement",
+      "evaluate_child",
+      "transition_queue",
+      "emit_result"
+    ],
+    "threshold_hash": "73a4805528e56683112bc0717f199ea77cfbb118c59b0f0843bbfe01fc8687b0",
+    "whole_query_timeout_ns": 60000000000
+  },
+  "plan_hash": "02a13b1c9669e4ea61de57c842e2ad6e8f1a28a0bf72aa5ad026a5d0cfa5c992",
+  "queue_trace_hash": "050f76a55738bbd607730199724263cf983e1b47fe137d9d84fa82269972dd37",
+  "result_hash": "c37a39e7d5ba7d5c6224530ba5e7f0add03b65b6bb63a1daf2037343dec222fe",
+  "root_global_queue_trace_hash": "7275b73f30a6af1e573fd5e2923a20a97b252e5b47f8080daa252785d327a4be",
+  "root_global_root_lower": -204.17315673828125,
+  "root_global_worst_active_lower": -200.46539306640625,
+  "root_lower": -204.17315673828125,
+  "schedule_hash": "2db63e2b3f69611d6e5314a79d05c3ff46456e0c1bb32ef2723791bde7203b26",
+  "schema_version": "boundflow.objective-ancestral-child-budget-worker/v1",
+  "task_ir_hash": "59913588ebbd8824dc1d41f5203b57429ce478a175cc516a598cba223601fcc6",
+  "worker_elapsed_ns": 67146003506,
+  "worst_active_lower": -126.96292877197266
+}

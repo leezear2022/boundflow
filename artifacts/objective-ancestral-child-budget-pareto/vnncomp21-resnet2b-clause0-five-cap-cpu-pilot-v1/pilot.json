@@ -1,0 +1,200 @@
+{
+  "calibration_evidence_hash": "208acc9a767d7b244d2238840ee47f9bef215356a75ec9141b4c070c04503651",
+  "calibration_payload": {
+    "candidate_results": [
+      {
+        "accepted_nodes": 7,
+        "cap": 8,
+        "discarded_attempt_stage": "after_child_evaluation",
+        "fallback_reason": "deadline_preserve_accepted_frontier",
+        "lineage_valid": true,
+        "maximum_depth": 2,
+        "performance_claimed": false,
+        "result_hash": "13af62dca23dbcacb7a85067d8d715ee08411323b227db056353a438cb9df2d7",
+        "root_lower": -204.17315673828125,
+        "worker_elapsed_ns": 65493957734,
+        "worst_active_lower": -173.07861328125
+      },
+      {
+        "accepted_nodes": 7,
+        "cap": 16,
+        "discarded_attempt_stage": "after_child_evaluation",
+        "fallback_reason": "deadline_preserve_accepted_frontier",
+        "lineage_valid": true,
+        "maximum_depth": 2,
+        "performance_claimed": false,
+        "result_hash": "128320cfa768688d998087d5058a8ec10879d916d2212484b3375af483b01a55",
+        "root_lower": -204.17315673828125,
+        "worker_elapsed_ns": 65688716283,
+        "worst_active_lower": -162.25332641601562
+      },
+      {
+        "accepted_nodes": 7,
+        "cap": 32,
+        "discarded_attempt_stage": "after_child_evaluation",
+        "fallback_reason": "deadline_preserve_accepted_frontier",
+        "lineage_valid": true,
+        "maximum_depth": 2,
+        "performance_claimed": false,
+        "result_hash": "9f58048888ce47ded9bb0cf2855d85e83628706dea4c4e03b4af1a3059ae2419",
+        "root_lower": -204.17315673828125,
+        "worker_elapsed_ns": 65654792509,
+        "worst_active_lower": -148.13446044921875
+      },
+      {
+        "accepted_nodes": 7,
+        "cap": 64,
+        "discarded_attempt_stage": "after_child_evaluation",
+        "fallback_reason": "deadline_preserve_accepted_frontier",
+        "lineage_valid": true,
+        "maximum_depth": 2,
+        "performance_claimed": false,
+        "result_hash": "c37a39e7d5ba7d5c6224530ba5e7f0add03b65b6bb63a1daf2037343dec222fe",
+        "root_lower": -204.17315673828125,
+        "worker_elapsed_ns": 67146003506,
+        "worst_active_lower": -126.96292877197266
+      },
+      {
+        "accepted_nodes": 7,
+        "cap": 128,
+        "discarded_attempt_stage": "after_child_evaluation",
+        "fallback_reason": "deadline_preserve_accepted_frontier",
+        "lineage_valid": true,
+        "maximum_depth": 2,
+        "performance_claimed": false,
+        "result_hash": "9b2aa348127352c267df8ab0902a91538004226ccb45fd246b596874e832d6a1",
+        "root_lower": -204.17315673828125,
+        "worker_elapsed_ns": 67936541018,
+        "worst_active_lower": -104.76541137695312
+      }
+    ],
+    "performance_claimed": false,
+    "policy": {
+      "candidate_caps": [
+        8,
+        16,
+        32,
+        64,
+        128
+      ],
+      "minimum_gain_retention": 0.9,
+      "pilot_order": [
+        32,
+        8,
+        128,
+        16,
+        64
+      ],
+      "reference_cap": 128,
+      "root_parity_tolerance": 1e-05,
+      "schema_version": "boundflow.objective-ancestral-child-budget-policy-ir/v1",
+      "selection_rule": "minimum_cap_meeting_reference_gain_retention_v1"
+    },
+    "root_global_root_lower": -204.17315673828125,
+    "root_global_worst_active_lower": -200.46539306640625,
+    "workload": {
+      "category": "cifar10_resnet",
+      "csv_ordinal": 0,
+      "csv_relative_path": "benchmarks/cifar10_resnet/cifar10_resnet_instances.csv",
+      "csv_sha256": "d0be77761016f65d044918e5f95332cf32bf848e5eef28c5465dfbf287ba984f",
+      "model_input_shape": [
+        1,
+        3,
+        32,
+        32
+      ],
+      "model_output_dim": 10,
+      "model_relative_path": "benchmarks/cifar10_resnet/onnx/resnet_2b.onnx",
+      "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+      "onnx_ops": [
+        "Add",
+        "Conv",
+        "Flatten",
+        "Gemm",
+        "Relu"
+      ],
+      "property_relative_path": "benchmarks/cifar10_resnet/vnnlib_properties_pgd_filtered/resnet2b_pgd_filtered/prop_0_eps_0.008.vnnlib",
+      "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+      "query_ir_hash": "f2151936ce0d9f8d8bcabd7bc3fc0224a71d7907da4ac614d7216e7a0919201b",
+      "workload_id": "cifar10_resnet:000"
+    }
+  },
+  "claim_boundary": "calibration_only_no_formal_performance_or_property_claim",
+  "decision": {
+    "calibration_evidence_hash": "208acc9a767d7b244d2238840ee47f9bef215356a75ec9141b4c070c04503651",
+    "calibration_rows": [
+      {
+        "accepted_nodes": 7,
+        "cap": 8,
+        "lineage_valid": true,
+        "result_hash": "13af62dca23dbcacb7a85067d8d715ee08411323b227db056353a438cb9df2d7",
+        "root_lower": -204.17315673828125,
+        "worst_active_lower": -173.07861328125
+      },
+      {
+        "accepted_nodes": 7,
+        "cap": 16,
+        "lineage_valid": true,
+        "result_hash": "128320cfa768688d998087d5058a8ec10879d916d2212484b3375af483b01a55",
+        "root_lower": -204.17315673828125,
+        "worst_active_lower": -162.25332641601562
+      },
+      {
+        "accepted_nodes": 7,
+        "cap": 32,
+        "lineage_valid": true,
+        "result_hash": "9f58048888ce47ded9bb0cf2855d85e83628706dea4c4e03b4af1a3059ae2419",
+        "root_lower": -204.17315673828125,
+        "worst_active_lower": -148.13446044921875
+      },
+      {
+        "accepted_nodes": 7,
+        "cap": 64,
+        "lineage_valid": true,
+        "result_hash": "c37a39e7d5ba7d5c6224530ba5e7f0add03b65b6bb63a1daf2037343dec222fe",
+        "root_lower": -204.17315673828125,
+        "worst_active_lower": -126.96292877197266
+      },
+      {
+        "accepted_nodes": 7,
+        "cap": 128,
+        "lineage_valid": true,
+        "result_hash": "9b2aa348127352c267df8ab0902a91538004226ccb45fd246b596874e832d6a1",
+        "root_lower": -204.17315673828125,
+        "worst_active_lower": -104.76541137695312
+      }
+    ],
+    "policy_hash": "53af9879a37e6378cdafd06da806c55decab33c9fd556b213d103be7f569f2ef",
+    "reference_gain": 95.69998168945312,
+    "root_global_worst_active_lower": -200.46539306640625,
+    "schema_version": "boundflow.objective-ancestral-child-budget-decision-ir/v1",
+    "selected_cap": 128,
+    "selected_gain_retention": 1.0,
+    "selection_mode": "frozen_pareto_selection"
+  },
+  "decision_hash": "334349e55f3147e24644453b57cb4669de30745f7fda17501acff84681b708c5",
+  "performance_claimed": false,
+  "protocol": {
+    "formal_repeats": 3,
+    "fresh_process_per_cap": true,
+    "pilot_order": [
+      32,
+      8,
+      128,
+      16,
+      64
+    ],
+    "search_budget": {
+      "max_depth": 4,
+      "max_nodes": 31
+    },
+    "torch_threads": 8,
+    "whole_query_timeout_seconds": 60
+  },
+  "schema_version": "boundflow.objective-ancestral-child-budget-pilot/v1",
+  "selected_cap": 128,
+  "source": {
+    "native_code_revision": "fcfd2b2462c182c947f09cbb17aa01fd903dcdfefe32ae5ae38d596b5fb4d971"
+  },
+  "status": "ok"
+}

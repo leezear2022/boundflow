@@ -1063,3 +1063,19 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   evidence hash=`8fba8deca18dcbf0b4b258aa390c1dd48d250c71ea1a48ddb991388765411bfc`。
   本阶段 committed-frontier tightness `VALIDATED-REDUCED`；下一门禁为 child refinement cap/resource
   Pareto，使 bound gain 转化为 fixed-deadline node coverage。
+
+### NRIR-33：Objective-Ancestral Child Budget Pareto v1
+
+- `C1/C2-M-NRIR33` budget compiler ownership：candidate caps/order、90% gain-retention rule、
+  calibration rows/evidence、winner 与 exact child refinement policy 进入 Policy/Decision/Plan hash；
+  Plan 通过结构协议复用 frozen NRIR-32 Task/Schedule/queue engine；
+- `C3-G-NRIR33` selection/replay gate：root parity 与 parent lineage valid；winner 必须由 rows 重算，
+  winner/decision/source/digest tamper fail closed；cap128 frozen replay 保持有效；
+- `C1/C3-E-NRIR33` cap curve：cap `8/16/32/64/128` 的 worst active lower 为
+  `-173.078613/-162.253326/-148.134460/-126.962929/-104.765411`，但 accepted nodes 全为 7；
+- `C3-L-NRIR33` closure=`VALIDATED-NO-GO`：90% retention winner=cap128，较小 cap 没有 node
+  coverage 收益。pilot timing 不形成 performance claim；无 property/GPU/competitor/multi-workload/
+  ASPLOS-ready claim；
+- 工件：`artifacts/objective-ancestral-child-budget-pareto/vnncomp21-resnet2b-clause0-five-cap-cpu-pilot-v1/`；
+  pilot hash=`db9b406eebebad0c1c4d6f39e8088667935f10e3d54f38cb848dce792dd757eb`。
+  下一门禁为 cap128 sibling packed/parametric evaluator。
