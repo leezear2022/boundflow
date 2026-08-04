@@ -4291,3 +4291,19 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_OBJECTIVE_ANCESTRAL_HARD_CLAUSE_ESCALATION_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Objective-Ancestral Child Budget Pareto v1
+
+- 新增 five-cap Policy/Calibration/Decision/Plan IR 与 thin runtime wrapper；selected cap、90%
+  retention rule 和 calibration evidence 全部 hash-bound，NRIR-32 frozen engine/artifact 未修改；
+- ResNet clause 0 caps `8/16/32/64/128` fresh-process pilot 全部仅提交 7 nodes；worst lower 从
+  `-173.078613` 改善到 `-104.765411`，预注册规则只能选择 cap128；
+- pilot replay、5 个 focused tests、全量 `851 passed, 37 skipped` 与静态门禁通过；pilot hash=
+  `db9b406eebebad0c1c4d6f39e8088667935f10e3d54f38cb848dce792dd757eb`；
+- cap-only coverage 以 `VALIDATED-NO-GO` 关闭；下一门禁为 sibling packed refinement/evaluation +
+  parametric evaluator，ASPLOS-ready 仍为 NO。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_OBJECTIVE_ANCESTRAL_CHILD_BUDGET_PARETO_V1_CHANGELOG_2026_08_04.md`

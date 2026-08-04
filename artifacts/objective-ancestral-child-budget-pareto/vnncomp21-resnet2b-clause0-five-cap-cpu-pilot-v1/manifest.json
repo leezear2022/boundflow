@@ -1,0 +1,17 @@
+{
+  "files": {
+    "logs/order-0-cap-32.log": "4790ea015321736e0c56fb8e4cb89609d261963f70fdf00d6aad696b3ec4a6c2",
+    "logs/order-1-cap-8.log": "e8a286f9703abc101d7523f302bc60b49e3e8703e8d90cb4d39283a5461065ff",
+    "logs/order-2-cap-128.log": "c81978c86b56eabfe174f8e1682bbe97f644a0ab0d6b873b1e544ceec88a4de3",
+    "logs/order-3-cap-16.log": "9319343fcd64307d43e099851b446041c379054de9c66d9e3222ebdf931cc00f",
+    "logs/order-4-cap-64.log": "1848387815d09ed49e079dfb6ca1bb48f8e3869d063a2623ed14bcb4dcbbe4db",
+    "pilot.json": "3781cbf294611c1059d88ab863cbf4c70f3fdfe0c395fee9660557f5bf2193a7",
+    "shards/cap-128.json": "0204cfcc4c4bb8b5f52b3a5c121005f542cf09f93e1f14a6b8cd5cfe8b72b1b0",
+    "shards/cap-16.json": "d1818325f00690364c12962a4faf6611ceed337e1118dd62f6a3845da8299cd0",
+    "shards/cap-32.json": "2e58d5711c2cb46bb4a23e9106acfa182b7bfea82abf754859c87c91250574d9",
+    "shards/cap-64.json": "614b15ba2397be57dd610ae45f237ce6a55b938bd04433b3dc03da637dfc403a",
+    "shards/cap-8.json": "a0a3e224c0c7a335e0dd6a94b1d3ae2aaff9690b3bc14e04dae12acbcf4a8959"
+  },
+  "pilot_hash": "db9b406eebebad0c1c4d6f39e8088667935f10e3d54f38cb848dce792dd757eb",
+  "schema_version": "boundflow.objective-ancestral-child-budget-manifest/v1"
+}
