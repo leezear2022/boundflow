@@ -1,13 +1,13 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`3ed367c`（NRIR-18 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`f191034`（NRIR-19 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/native-intermediate-bound-refinement-v1`
+> 当前研发分支：`feat/objective-directed-intermediate-refinement-v1`
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed
-> intermediate target selection**。
+> intermediate target selection（完成）→ per-child intermediate refinement**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有
@@ -79,6 +79,13 @@
 > verified/unknown/verified；单次 CPU E2E 只作诊断。ResNet native local root lower 仍达
 > `-543.717/-789.331`，故下一门禁是 intermediate-bound refinement，而不是 GPU timing 或
 > 继续加深同一 branching tree。详见第 31 节。
+
+> **2026-08-04 NRIR-20 结果**：当前 scalar clause 的 CROWN coefficient influence 已成为
+> refinement Plan/Task/Schedule 的显式输入；objective hash 与每个 target 的
+> influence×width score 均冻结。固定 ResNet 前两个 hard clauses 在相同 96-target 预算下，相对
+> width policy 的 root lower 再改善 `+55.928741/+26.228943`，但仍为
+> `-417.292480/-602.551392`。该阶段只关闭 objective-directed IR/control 与 fixed root
+> tightness `VALIDATED-REDUCED`；下一路线为 per-child refinement，不是性能或 closure claim。
 
 ## 1. 锁定的论文命题
 
@@ -969,4 +976,27 @@ artifact replay hash=
 `732 passed, 37 skipped`。该阶段以 native refinement IR/control + multiworkload tightness
 `VALIDATED-REDUCED` 关闭；只 1/3 complete verified，ASPLOS-ready 仍为 NO。下一单一路线是
 objective-directed intermediate target selection，优先解决 ResNet，而不是扩大 tree budget、
-先做 CUDA timing 或把单次 CPU E2E 写成 speedup。
+先做 CUDA timing 或把单次 CPU E2E 写成 speedup。该历史下一路线已由第 33 节 NRIR-20 完成。
+
+## 33. Objective-Directed Intermediate Refinement v1
+
+NRIR-20 新增 `objective_influence_width_per_relu_v1`。当前单个 scalar property clause 的 plain
+CROWN backward coefficients 在每个 ReLU 处转为 `max(abs(A_u), abs(A_l))` influence，并与
+ambiguous pre-activation width 相乘排序。Plan 冻结 objective hash 和 target score；Task/Schedule
+显式消费 `refine.objective_influence`，多子句 objective、shape/dtype/device/finite 漂移均 fail
+closed。排序只影响计算预算，soundness 仍由 selected CROWN 与 interval intersection 保证。
+
+固定 VNN-COMP 2021 ResNet2B property 0 的 clauses `0/1` 上，width 与 objective policy 都选
+`96` targets。目标重合仅 `16/96`、`27/96`；root lower 从
+`-473.221222/-628.780334` 改为 `-417.292480/-602.551392`，改善
+`+55.928741/+26.228943`。32/64-target 和第二 pass 的开发敏感性探针仍保持负 lower，说明
+单纯扩大 root shortlist 有收益但不足以闭合，不纳入冻结 performance claim。
+
+artifact 位于
+`artifacts/objective-directed-intermediate-refinement/vnncomp21-resnet2b-two-clause-cpu-v1/`，
+fresh source-to-IR semantic replay hash=
+`8fce1c7c3e5c63adb14a7ab5b9f23407e4a7a1406353750e4f150ee745b4e88e`；focused
+`16 passed`、全量 `739 passed, 37 skipped`。本阶段以 fixed-root tightness
+`VALIDATED-REDUCED` 关闭；没有 complete closure、CUDA、重复性能或 ASPLOS-ready claim。下一
+单一路线是让 ReLU-split child 依据其 exact split state 重算 clause-sensitive refinement，禁止把
+parent refined bounds 当作 child exact state。
