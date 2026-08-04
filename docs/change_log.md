@@ -4272,3 +4272,22 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_OBJECTIVE_DIRECTED_HARD_CLAUSE_ESCALATION_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Objective-Ancestral Hard-Clause Escalation v1
+
+- 新增 static Plan、committed dynamic Task IR、1:1 Schedule 与 native queue；typed root admission 和
+  每个 child 的 parent final-bound/Plan/semantic lineage 均 fail closed，emit 依赖完整 committed proof；
+- feasibility two-child gate 改善 `+59.367462/+59.253479` 后才进入正式实现；
+- 固定 ResNet property 0 clause 0、31/depth4/60 s 三 fresh repeats：ancestral 均提交 7 nodes、24
+  tasks，worst active lower `-104.7654114`，相对 31-node root-global `-200.4653931` 改善
+  `+95.6999817`；无 property closure；
+- artifact fresh replay、focused `8 passed`、全量 `846 passed, 37 skipped`、Black/mypy/Pylint/diff
+  gate 通过；evidence hash=
+  `8fba8deca18dcbf0b4b258aa390c1dd48d250c71ea1a48ddb991388765411bfc`；
+- 以 typed lineage + committed-frontier tightness `VALIDATED-REDUCED` 关闭；下一门禁为 fixed-deadline
+  child refinement cap/resource Pareto，ASPLOS-ready 仍为 NO。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_OBJECTIVE_ANCESTRAL_HARD_CLAUSE_ESCALATION_V1_CHANGELOG_2026_08_04.md`

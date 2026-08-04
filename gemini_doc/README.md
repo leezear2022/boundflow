@@ -16,9 +16,10 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_OBJECTIVE_DIRECTED_HARD_CLAUSE_ESCALATION_V1_PLAN_2026_08_04.md`
-（shared-source per-clause objective refinement、33-task guarded Schedule、三真实拓扑 × 三 fresh
-repeats 与 ResNet repeatable root tightness）。其直接前序为
+当前最新入口：`gemini_doc/BOUNDFLOW_OBJECTIVE_ANCESTRAL_HARD_CLAUSE_ESCALATION_V1_PLAN_2026_08_04.md`
+（typed objective root→dynamic child lineage、first-class committed queue、固定 ResNet clause 0 ×
+三 fresh repeats 与 frontier tightness）。其直接前序为
+`gemini_doc/BOUNDFLOW_OBJECTIVE_DIRECTED_HARD_CLAUSE_ESCALATION_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_TYPED_HARD_CLAUSE_ESCALATION_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_WALL_CLOCK_PARAMETRIC_BAB_SCALING_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_PARAMETRIC_DYNAMIC_BATCH_COMPILER_V1_PLAN_2026_08_04.md`、
@@ -102,6 +103,11 @@ repeats 与 ResNet repeatable root tightness）。其直接前序为
 
 ### 2.1 关键交付文档（“长期有效”）
 
+- `gemini_doc/BOUNDFLOW_OBJECTIVE_ANCESTRAL_HARD_CLAUSE_ESCALATION_V1_PLAN_2026_08_04.md`：
+  typed root admission、dynamic child refinement、committed queue Task/Schedule、三重复 frontier
+  tightness 与下一 child-budget 门禁
+- `gemini_doc/BOUNDFLOW_OBJECTIVE_ANCESTRAL_HARD_CLAUSE_ESCALATION_V1_CHANGELOG_2026_08_04.md`：
+  feasibility、IR/runtime/tests、正式 artifact/replay、精确下界与 claim boundary
 - `gemini_doc/BOUNDFLOW_OBJECTIVE_DIRECTED_HARD_CLAUSE_ESCALATION_V1_PLAN_2026_08_04.md`：
   shared-source per-clause objective Plan/Task/Schedule、whole deadline、三重复 tightness 门禁与
   objective-ancestral 下一路线

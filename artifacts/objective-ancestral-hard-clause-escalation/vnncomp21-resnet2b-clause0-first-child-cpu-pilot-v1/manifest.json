@@ -1,0 +1,7 @@
+{
+  "evidence_hash": "832eabf00f7c4fee3c497cb1bc032d9daf282b43b06f4d8f02d00ffd11ece04e",
+  "files": {
+    "pilot.json": "ad2442cb768217ac5e9043a330c1547db3cccdf102d147c32ccb1540f6450b8f"
+  },
+  "schema_version": "boundflow.objective-ancestral-hard-clause-pilot-manifest/v1"
+}
