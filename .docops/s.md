@@ -5,9 +5,9 @@ rm: v01
 st: s01
 stat: active
 health: green
-pr: [51]
-last_ch: ev004599
-last_va: ev004600
+pr: [52]
+last_ch: ev004676
+last_va: ev004677
 blk:
-next: merge-nrir40-pr51-after-local-gates
-updated: 2026-08-04T21:27:08Z
+next: merge-nrir41-pr52-after-local-gates
+updated: 2026-08-04T22:14:52Z

@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-05
-> 当前 integration base：`331086d`（NRIR-39 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/objective-branch-whole-query-formal-v1`
+> 当前 integration base：`9befc51`（NRIR-40 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/objective-branch-production-cost-attribution-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
@@ -33,6 +33,14 @@
 > `VALIDATED-NO-GO` 关闭。NRIR-39 fixed-budget
 > 机制结论不撤销，但不得升级为 production/performance/property/ASPLOS-ready claim。下一步只允许先做
 > scoring 成本与 frontier-order 因果归因，再冻结新的单变量。
+> 2026-08-05 NRIR-41 已完成上述归因：objective 在 clauses 2/3 的 `21/23/29/31` same-node prefix
+> worst lower 全部优于 widest，frontier-order gate 成立；三 fresh counterbalanced paired runs 的
+> objective/widest queue median ratio=`1.748660/1.750639`，cProfile branch-program share=
+> `21.9371%/21.9139%`，且 31 次 branch program 实际触发 341 次 candidate enumeration。
+> attribution 以 `VALIDATED-REDUCED` 关闭、`performance_claimed=false`；NRIR-40 production NO-GO 和
+> ASPLOS-ready NO 不变；全量 `948 passed, 37 skipped`。下一单变量已限定为 scorer
+> ownership/validation reuse，不允许同时改 policy、
+> node/depth、slice、optimizer、refinement、cache 或 deadline。
 > 2026-08-05 NRIR-36 后续：九子句 NRIR-31 floor 已由 typed root-lower priority 选择 clauses 2/3，
 > dynamic equal-remaining slices 在同一 global start 下执行。三 fresh repeats 都复现
 > rank=`[2,3,4,5,0,8,6,7,1]`，packed nodes=`[[3,3],[3,3],[3,1]]`；repeat 2 第二条未提交

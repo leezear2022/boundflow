@@ -1,0 +1,16 @@
+{
+  "files": {
+    "formal.json": "f28faa8007458aebc5b58111ba41b1e1a2d578d0f8941f3f6cb2694b72f3c400",
+    "logs/profile.log": "12db6d64e61ddfa2c2dfc02dd77c322ff242ef7e6008014d1050dfbd0add6584",
+    "logs/repeat-0.log": "7aa90e50689d303efe38e13c9537ddef3a7f221d3305eb90e7ef990d1f805f15",
+    "logs/repeat-1.log": "34b9a31be9d3b5e2d5b182a2fe1e4aa89c46986b71f2cd438657da78709b4ada",
+    "logs/repeat-2.log": "35b095af45d8f48d487f8a8745301bdee24885fac4d3b300daa7c7e7d2eeccf4",
+    "profile.json": "5d26bf9378901e9b4566c95f4af532b14c8f29d6a1b0cff7b999b33c9350f60d",
+    "shards/repeat-0.json": "0223dc1606bdf6fde4653b538555cf2cae9fa9de49f468d70522f3bfa0024561",
+    "shards/repeat-1.json": "bde907e6cbb3bc4a4c85885522a1d66072dbf434e62380e1074a302a12f17008",
+    "shards/repeat-2.json": "2d4fb4e65fb789630f77554e183aad7a616d6e00f4dc08762ca0947178ac59d1"
+  },
+  "formal_hash": "dd7a92286cb7608ac2dcd37b8f634a2bab93c9bb7ccd8af6db73c2469352893d",
+  "performance_claimed": false,
+  "schema_version": "boundflow.objective-branch-cost-attribution-manifest/v1"
+}
