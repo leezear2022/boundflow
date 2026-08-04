@@ -1,11 +1,12 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`972eca1`（NRIR-7 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`8dba95c`（NRIR-10 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/native-bab-domain-batching-v1`
-> 唯一执行顺序：**Gate 0 → PR-10 → PR-11 → PR-12 → PR-13 → PR-14**。
-> 禁止同时启动 Planner、fused kernel 与 BaB runtime 三条主线。
+> 当前研发分支：`feat/native-alpha-beta-optimizer-step-schedule-v1`
+> PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-11 fixed-step optimizer
+> Schedule（完成）→ NRIR-12 optimizer Schedule × ReLU-split queue integration**。
+> 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有
 > `runtime/linear_operator.py`、`PlanBundle` 和拓扑执行循环不能分别等同于完整 Bound IR、
@@ -762,3 +763,26 @@ hash 为 `302f536685885e75248582698589d49f667d7709ca3258c043310e02278e6884`。�
 升为 `VALIDATED-REDUCED`。Adam iteration/gradient/update 仍由 runtime adapter 控制，不是 compiled
 optimizer；也没有完整 BaB/property verdict 或性能证据。下一工程门禁是 native alpha/beta
 optimizer-step Task/Schedule control v1。
+
+## 24. Native Alpha/Beta Optimizer-Step Schedule v1
+
+NRIR-11 将 NRIR-10 的 runtime-owned optimizer loop lower 为 first-class control IR。Optimizer Plan
+绑定 10 个 NRIR-10 source compiler hash、initial state/scope、policy、ReLU keys、warm-start kind 与
+固定 step budget；Task/Schedule 静态展开 evaluate、metric reduction、backward、Adam update、
+projection 和 select-best。execution trace 对每个 action 的输入/输出 hash、gradient、projection、
+evaluation 与 best iteration 建立可重放链。
+
+2-step toy 生成 13 个 Task/Action，并与 legacy optimizer 的 bounds/alpha/beta 逐张量一致。固定
+ResNet 1-step child 生成 8 个 Task/Action、2 次 evaluation、1 次 backward/Adam/project；alpha/beta
+gradient L1 为 `169.23175295069814/12.862210273742676`。Schedule 对 legacy optimizer、最终 selected
+state 的 native Bound/Plan/Task/Schedule re-execution 的 lower/upper max diff 全为 `0.0`。
+
+artifact 位于
+`artifacts/native-alpha-beta-optimizer-schedule/vnncomp21-resnet2b-prop0-cpu-v1/`，generate/replay
+hash 为 `31261b63d80a7b11dc14484ddab2fe37bbafcc86866aaeaaa53d6af70ea40a19`。聚焦
+`35 passed`，全量 `612 passed, 37 skipped`，静态门禁全过。
+
+该阶段只关闭 fixed-step optimizer control ownership `VALIDATED-REDUCED`。dynamic early stop、
+multi-node BaB integration、complete termination/property verdict 与 CUDA/performance 都未关闭。
+下一工程门禁是将 optimizer Schedule 接回 native ReLU-split BaB queue 的逐节点 evaluation，同时
+维持 parent→child initialization-only 与最终 state native execution。

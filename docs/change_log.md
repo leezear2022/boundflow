@@ -3856,3 +3856,24 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_NATIVE_ALPHA_BETA_OPTIMIZATION_STATE_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Native Alpha/Beta Optimizer-Step Schedule v1
+
+- 新增 typed optimizer Plan/Task/Schedule IR；Plan 绑定 NRIR-10 10 个 source compiler hashes、
+  initial state/scope、policy、ReLU keys、warm-start kind 与固定 step budget；
+- 固定步数 lower 为 evaluate/reduce/backward/Adam/project/select-best Task/Action；executor 严格按
+  Schedule 执行，并记录逐 value hash chain、alpha/beta gradient、projection、evaluation 与 best state；
+- toy 2-step 为 13 actions，与 legacy bounds/alpha/beta 逐张量一致，selected state 再经 NRIR-10
+  native compiler stack 执行一致；order/linkage/hash/scope/warm-start tamper fail closed；
+- fixed ResNet 1-step 为 8 actions；alpha/beta gradient L1=
+  `169.23175295069814/12.862210273742676`，Schedule/legacy/final native max diff 均为 `0.0`；
+- artifact generate/replay hash
+  `31261b63d80a7b11dc14484ddab2fe37bbafcc86866aaeaaa53d6af70ea40a19`；聚焦 `35 passed`，
+  全量 `612 passed, 37 skipped`；Black/Mypy/Pylint/diff 全过；
+- 只关闭 fixed-step optimizer control ownership；dynamic early stop、multi-node BaB integration、
+  complete verdict 与 performance 仍 pending。下一门禁为 optimizer Schedule × ReLU-split queue。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_NATIVE_ALPHA_BETA_OPTIMIZER_STEP_SCHEDULE_V1_CHANGELOG_2026_08_04.md`
