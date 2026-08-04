@@ -1,0 +1,1114 @@
+{
+  "evidence": {
+    "claim_boundary": "sound three-state verdict derivation over immutable optimized queue traces; verified requires closed lower-bound pruning, unsafe requires primal Task IR counterexample replay, and open budget/depth remains unknown; correctness only",
+    "compiler_version": "boundflow.native-property-verdict/v1",
+    "fixed_resnet": {
+      "center_input_hash": "e402e6fb61cb8d0adc5390d845c4c388673e1d8523c4f2e3c518c587d1717832",
+      "center_objective_value": 0.8564349412918091,
+      "center_output_hash": "088525503da8de908b512f8b2a3cdc7846b9d28aca120623d3ba3b3514801d63",
+      "counterexample_input_hash": null,
+      "queue_trace": {
+        "compiler_version": "boundflow.native-optimized-relu-split-bab/v1",
+        "config": {
+          "available_memory_bytes": 1073741824,
+          "expansion_batch_size": 2,
+          "max_depth": 8,
+          "max_eval_batch_size": 4,
+          "max_nodes": 7,
+          "memory_budget_bytes": 1073741824,
+          "threshold": 0.0
+        },
+        "decisions": [
+          {
+            "branch_candidate": {
+              "lower": -221.17330932617188,
+              "neuron_index": 93,
+              "relu_input": "31",
+              "upper": 173.5435333251953,
+              "width": 394.7168426513672
+            },
+            "child_node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000001",
+              "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000002"
+            ],
+            "decision_index": 0,
+            "kind": "expand",
+            "node_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000000",
+            "reason": "widest_unsplit_ambiguous_relu"
+          },
+          {
+            "branch_candidate": {
+              "lower": -217.03172302246094,
+              "neuron_index": 13,
+              "relu_input": "31",
+              "upper": 172.34368896484375,
+              "width": 389.3754119873047
+            },
+            "child_node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000003",
+              "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000004"
+            ],
+            "decision_index": 1,
+            "kind": "expand",
+            "node_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000001",
+            "reason": "widest_unsplit_ambiguous_relu"
+          },
+          {
+            "branch_candidate": {
+              "lower": -217.03172302246094,
+              "neuron_index": 13,
+              "relu_input": "31",
+              "upper": 172.34368896484375,
+              "width": 389.3754119873047
+            },
+            "child_node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000005",
+              "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000006"
+            ],
+            "decision_index": 2,
+            "kind": "expand",
+            "node_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000002",
+            "reason": "widest_unsplit_ambiguous_relu"
+          }
+        ],
+        "evaluations": [
+          {
+            "branch_candidate": {
+              "lower": -221.17330932617188,
+              "neuron_index": 93,
+              "relu_input": "31",
+              "upper": 173.5435333251953,
+              "width": 394.7168426513672
+            },
+            "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:eval:0000",
+            "eval_batch_position": 0,
+            "lower": -596.8829956054688,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "710a4a0124b8dd4b720ca99d150a432741b8779a75ee20441d4c830a2823a214",
+              "execution_plan_instance_hash": "a70179905982ac581f2ab6e56eaf2c8bc7356b81d4600b2b73fc2bf5641e9e1d",
+              "execution_plan_template_hash": "4bec7e5fdb4104f273daa6154fa902532b83401357d07ea4461b5d34d6d29f04",
+              "representation_binding_hash": "328c7967a580bca71ada79aa331b1fa9d3462623e1765cca312ecec45fede419",
+              "schedule_hash": "f7b147daf3104eb44f69cd3726a7ed2e1f51432f439ba8625f4fbf25ea11b459",
+              "source_bound_module_hash": "710a4a0124b8dd4b720ca99d150a432741b8779a75ee20441d4c830a2823a214",
+              "source_plan_instance_hash": "3864bf3faca6c8623e44ac94e0d1e9df98cc2e089f1cedb4e4182865f5c62631",
+              "source_plan_template_hash": "aeeb77904c11c574aed13fddb08b440f45d5107724691662dbd0591d29fdf577",
+              "source_schedule_hash": "8be4925c57ff2d2093c5e95bb98eeb42fe33f4a0a5fb4c4356a0c9ae2ea9eb23",
+              "task_module_hash": "4579ce6fa682fc4f1b669beefe52cf7d911d5635b92ae55f315d6ad14043e3e6"
+            },
+            "node": {
+              "branch_neuron_index": null,
+              "branch_relu_input": null,
+              "branch_value": 0,
+              "depth": 0,
+              "node_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000000",
+              "parent_node_id": null,
+              "split_state_hash": "32ef5aa369eb3b424067ead0f6b4a41a59b7c5753a5e59034bc13372b10bc2be"
+            },
+            "optimizer_execution_trace_hash": "abe31392e564f208454027122e88fe3ccf3e9d6dda1a8ffbe3251ec5d613718d",
+            "optimizer_ir_hashes": {
+              "optimizer_plan_hash": "79e56c9ec574f33f84fbce6daaf78310b70788d8ebb9421275012239750ac467",
+              "optimizer_schedule_hash": "c5ed5042766ee84667880497c74f075e3f019419ccbea365b7400316bb0e3b8e",
+              "optimizer_task_module_hash": "c8118777583114893f5982df1c52b30ce3f145ea4a64bc1714225c996d8df12e"
+            },
+            "parent_selected_state_hash": null,
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "monotonic_refinement_initialization_only",
+            "priority": -596.883,
+            "selected_state_hash": "87d4a21b63b6987af69b65ea3fa93055e146f6cd49353a0854b82d54420635d8",
+            "upper": 627.3671875,
+            "warm_start_kind": "none"
+          },
+          {
+            "branch_candidate": {
+              "lower": -217.03172302246094,
+              "neuron_index": 13,
+              "relu_input": "31",
+              "upper": 172.34368896484375,
+              "width": 389.3754119873047
+            },
+            "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:eval:0001",
+            "eval_batch_position": 0,
+            "lower": -588.6286010742188,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "331167ae1bd3fdffe04f0d84d5f309847ab74bac0711296fc08d9fc9e252f2df",
+              "execution_plan_instance_hash": "bb00bba5af14029e2090df3543f1f3dc2f6f8102bf22e3f699d7ed674f10f645",
+              "execution_plan_template_hash": "7c7dd8fd7e02362cbd39e290057d57955891a86e34a859d14a6ca8cf859f6751",
+              "representation_binding_hash": "a44faccf7dacf21f2bebcb25f4f56986e978e0ce5d328c6015d1333631a48ced",
+              "schedule_hash": "a4b65d1d529eecb283cc09cde111b7ed0a1f45e2b65b74ca22c2ee62e03466c7",
+              "source_bound_module_hash": "331167ae1bd3fdffe04f0d84d5f309847ab74bac0711296fc08d9fc9e252f2df",
+              "source_plan_instance_hash": "50a899f88cef9fdc528ba77d49ffdee2c21c3eae76d69cf32ac0339ee5a5ca50",
+              "source_plan_template_hash": "3abfaf52dfad00ad668bfac37d371d658890608ee6fcf3cb1a2d8dc4f6fb19e0",
+              "source_schedule_hash": "a62254977b67869ff6a508a80e284fb663ac40e4dbbc52562d6a59825e0f0c46",
+              "task_module_hash": "3ae20ece593ef699c95e1ea087356d08e5b8117590735de8920fda1d232cdee5"
+            },
+            "node": {
+              "branch_neuron_index": 93,
+              "branch_relu_input": "31",
+              "branch_value": -1,
+              "depth": 1,
+              "node_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000001",
+              "parent_node_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000000",
+              "split_state_hash": "2bcbcb8c25f1f2cfdcb1ab9ffabc546c59e26f9b5cb3652dddb4b36d8d11f74d"
+            },
+            "optimizer_execution_trace_hash": "8c55c3ca87faafaee3421f5e76bc47d10583a9a033111e95b0e95cdde1317497",
+            "optimizer_ir_hashes": {
+              "optimizer_plan_hash": "f04099699ca78388da6cb6f78262a65539954305ef57f3662480629c7f8faa7d",
+              "optimizer_schedule_hash": "b17cdf968bfce16be919318700c7795039bc9788953ae762b734db55f24b3174",
+              "optimizer_task_module_hash": "15c97db80a0c43199cdc8914d6984803a42907eff78d298c85e21b0d9430af1f"
+            },
+            "parent_selected_state_hash": "87d4a21b63b6987af69b65ea3fa93055e146f6cd49353a0854b82d54420635d8",
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "monotonic_refinement_initialization_only",
+            "priority": -588.6286,
+            "selected_state_hash": "c52f00e1c5bffde697b44ccc36517787b2db251fd7825832f9710af7ec7fdc62",
+            "upper": 625.3914184570312,
+            "warm_start_kind": "monotonic_split_refinement"
+          },
+          {
+            "branch_candidate": {
+              "lower": -217.03172302246094,
+              "neuron_index": 13,
+              "relu_input": "31",
+              "upper": 172.34368896484375,
+              "width": 389.3754119873047
+            },
+            "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:eval:0001",
+            "eval_batch_position": 1,
+            "lower": -588.5465087890625,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "331167ae1bd3fdffe04f0d84d5f309847ab74bac0711296fc08d9fc9e252f2df",
+              "execution_plan_instance_hash": "bb00bba5af14029e2090df3543f1f3dc2f6f8102bf22e3f699d7ed674f10f645",
+              "execution_plan_template_hash": "7c7dd8fd7e02362cbd39e290057d57955891a86e34a859d14a6ca8cf859f6751",
+              "representation_binding_hash": "a44faccf7dacf21f2bebcb25f4f56986e978e0ce5d328c6015d1333631a48ced",
+              "schedule_hash": "a4b65d1d529eecb283cc09cde111b7ed0a1f45e2b65b74ca22c2ee62e03466c7",
+              "source_bound_module_hash": "331167ae1bd3fdffe04f0d84d5f309847ab74bac0711296fc08d9fc9e252f2df",
+              "source_plan_instance_hash": "50a899f88cef9fdc528ba77d49ffdee2c21c3eae76d69cf32ac0339ee5a5ca50",
+              "source_plan_template_hash": "3abfaf52dfad00ad668bfac37d371d658890608ee6fcf3cb1a2d8dc4f6fb19e0",
+              "source_schedule_hash": "a62254977b67869ff6a508a80e284fb663ac40e4dbbc52562d6a59825e0f0c46",
+              "task_module_hash": "3ae20ece593ef699c95e1ea087356d08e5b8117590735de8920fda1d232cdee5"
+            },
+            "node": {
+              "branch_neuron_index": 93,
+              "branch_relu_input": "31",
+              "branch_value": 1,
+              "depth": 1,
+              "node_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000002",
+              "parent_node_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000000",
+              "split_state_hash": "8cb0f1554c3c8d0773f1f0112eb3cc414457fed01a9426a3d95f0fd009c89f79"
+            },
+            "optimizer_execution_trace_hash": "8c55c3ca87faafaee3421f5e76bc47d10583a9a033111e95b0e95cdde1317497",
+            "optimizer_ir_hashes": {
+              "optimizer_plan_hash": "f04099699ca78388da6cb6f78262a65539954305ef57f3662480629c7f8faa7d",
+              "optimizer_schedule_hash": "b17cdf968bfce16be919318700c7795039bc9788953ae762b734db55f24b3174",
+              "optimizer_task_module_hash": "15c97db80a0c43199cdc8914d6984803a42907eff78d298c85e21b0d9430af1f"
+            },
+            "parent_selected_state_hash": "87d4a21b63b6987af69b65ea3fa93055e146f6cd49353a0854b82d54420635d8",
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "monotonic_refinement_initialization_only",
+            "priority": -588.5465,
+            "selected_state_hash": "f3eea29a8d410d4d246040ff8ea60f95d4ef0e6af1a55b02be094e80d05b0dbf",
+            "upper": 625.0967407226562,
+            "warm_start_kind": "monotonic_split_refinement"
+          },
+          {
+            "branch_candidate": {
+              "lower": -235.57249450683594,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 153.698486328125,
+              "width": 389.27098083496094
+            },
+            "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:eval:0002",
+            "eval_batch_position": 0,
+            "lower": -580.9497680664062,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "cab729dcad011d62beebb23535dc2e43d3de0e06ebba77e74a5b2dc159f50b3a",
+              "execution_plan_instance_hash": "66dfcc97d8877b1fef58c843d2d3e295d06d0fc608e28ecd90529a4263856fc6",
+              "execution_plan_template_hash": "9dcd254af9aac59a655f20961392dd1b9883fc0b5ccc3a7f7666d706edfc0498",
+              "representation_binding_hash": "9071c88097f2b8ff70cc98c2b35fc8e07f1325f2da19485b4ad4437f5352c79a",
+              "schedule_hash": "641059ee4fed5c177146519f2e4936193bed80cedec3e74f2faec92becfe8463",
+              "source_bound_module_hash": "cab729dcad011d62beebb23535dc2e43d3de0e06ebba77e74a5b2dc159f50b3a",
+              "source_plan_instance_hash": "e5d455dddb70d82fe0c6d30b94317c4515eeb5c9aeea8a2f3734f84b18c1f172",
+              "source_plan_template_hash": "487cd8d42948e3a28e836934f030a370442ba677950dd7eb588bb73b54bf57be",
+              "source_schedule_hash": "2da5a3fe450ddd237bb35f6fce9f70abc0382d12f287664b95cedf23d2cf3c11",
+              "task_module_hash": "b5b99e98c086fcc88d02f2757d1f87dcf0d85bbefefb921f7837595cfd626f08"
+            },
+            "node": {
+              "branch_neuron_index": 13,
+              "branch_relu_input": "31",
+              "branch_value": -1,
+              "depth": 2,
+              "node_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000003",
+              "parent_node_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000001",
+              "split_state_hash": "59bc3801afc084c124883b7c1b64a9a06c52a92cf56b869665db8148af319a15"
+            },
+            "optimizer_execution_trace_hash": "849bd25a5ff4194416fa557875c0b6b93478f9ff615650775c30458b75b88ad6",
+            "optimizer_ir_hashes": {
+              "optimizer_plan_hash": "1f6f8865c2d737116a2c8596420322b1b27af50d201b8d5b96669e4578d1839c",
+              "optimizer_schedule_hash": "482372a779f0c941767aacd362dc99fc2b0a9ff9fae00d830e11bf9aecec355f",
+              "optimizer_task_module_hash": "edb029e4dd8dbc5b4ba82391a989d6e98cfd841aee91854ed9913feb396a0929"
+            },
+            "parent_selected_state_hash": "c52f00e1c5bffde697b44ccc36517787b2db251fd7825832f9710af7ec7fdc62",
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "monotonic_refinement_initialization_only",
+            "priority": -580.9498,
+            "selected_state_hash": "c611d386d61dcfe9b92726c18cb798b54dd83760d3042ce3a22314d576130cc9",
+            "upper": 622.54833984375,
+            "warm_start_kind": "monotonic_split_refinement"
+          },
+          {
+            "branch_candidate": {
+              "lower": -235.57249450683594,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 153.698486328125,
+              "width": 389.27098083496094
+            },
+            "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:eval:0002",
+            "eval_batch_position": 1,
+            "lower": -580.96337890625,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "cab729dcad011d62beebb23535dc2e43d3de0e06ebba77e74a5b2dc159f50b3a",
+              "execution_plan_instance_hash": "66dfcc97d8877b1fef58c843d2d3e295d06d0fc608e28ecd90529a4263856fc6",
+              "execution_plan_template_hash": "9dcd254af9aac59a655f20961392dd1b9883fc0b5ccc3a7f7666d706edfc0498",
+              "representation_binding_hash": "9071c88097f2b8ff70cc98c2b35fc8e07f1325f2da19485b4ad4437f5352c79a",
+              "schedule_hash": "641059ee4fed5c177146519f2e4936193bed80cedec3e74f2faec92becfe8463",
+              "source_bound_module_hash": "cab729dcad011d62beebb23535dc2e43d3de0e06ebba77e74a5b2dc159f50b3a",
+              "source_plan_instance_hash": "e5d455dddb70d82fe0c6d30b94317c4515eeb5c9aeea8a2f3734f84b18c1f172",
+              "source_plan_template_hash": "487cd8d42948e3a28e836934f030a370442ba677950dd7eb588bb73b54bf57be",
+              "source_schedule_hash": "2da5a3fe450ddd237bb35f6fce9f70abc0382d12f287664b95cedf23d2cf3c11",
+              "task_module_hash": "b5b99e98c086fcc88d02f2757d1f87dcf0d85bbefefb921f7837595cfd626f08"
+            },
+            "node": {
+              "branch_neuron_index": 13,
+              "branch_relu_input": "31",
+              "branch_value": 1,
+              "depth": 2,
+              "node_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000004",
+              "parent_node_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000001",
+              "split_state_hash": "887b4f9256b40d4b13eaccc919c8fe2f758d1b91c1f80d4aabd756323bcb9839"
+            },
+            "optimizer_execution_trace_hash": "849bd25a5ff4194416fa557875c0b6b93478f9ff615650775c30458b75b88ad6",
+            "optimizer_ir_hashes": {
+              "optimizer_plan_hash": "1f6f8865c2d737116a2c8596420322b1b27af50d201b8d5b96669e4578d1839c",
+              "optimizer_schedule_hash": "482372a779f0c941767aacd362dc99fc2b0a9ff9fae00d830e11bf9aecec355f",
+              "optimizer_task_module_hash": "edb029e4dd8dbc5b4ba82391a989d6e98cfd841aee91854ed9913feb396a0929"
+            },
+            "parent_selected_state_hash": "c52f00e1c5bffde697b44ccc36517787b2db251fd7825832f9710af7ec7fdc62",
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "monotonic_refinement_initialization_only",
+            "priority": -580.9634,
+            "selected_state_hash": "dd9bc33329c29d41ea3bdec43bc3a37400a7b3e4663fa2ca44d64482e5697800",
+            "upper": 622.13427734375,
+            "warm_start_kind": "monotonic_split_refinement"
+          },
+          {
+            "branch_candidate": {
+              "lower": -235.57249450683594,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 153.698486328125,
+              "width": 389.27098083496094
+            },
+            "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:eval:0002",
+            "eval_batch_position": 2,
+            "lower": -580.9414672851562,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "cab729dcad011d62beebb23535dc2e43d3de0e06ebba77e74a5b2dc159f50b3a",
+              "execution_plan_instance_hash": "66dfcc97d8877b1fef58c843d2d3e295d06d0fc608e28ecd90529a4263856fc6",
+              "execution_plan_template_hash": "9dcd254af9aac59a655f20961392dd1b9883fc0b5ccc3a7f7666d706edfc0498",
+              "representation_binding_hash": "9071c88097f2b8ff70cc98c2b35fc8e07f1325f2da19485b4ad4437f5352c79a",
+              "schedule_hash": "641059ee4fed5c177146519f2e4936193bed80cedec3e74f2faec92becfe8463",
+              "source_bound_module_hash": "cab729dcad011d62beebb23535dc2e43d3de0e06ebba77e74a5b2dc159f50b3a",
+              "source_plan_instance_hash": "e5d455dddb70d82fe0c6d30b94317c4515eeb5c9aeea8a2f3734f84b18c1f172",
+              "source_plan_template_hash": "487cd8d42948e3a28e836934f030a370442ba677950dd7eb588bb73b54bf57be",
+              "source_schedule_hash": "2da5a3fe450ddd237bb35f6fce9f70abc0382d12f287664b95cedf23d2cf3c11",
+              "task_module_hash": "b5b99e98c086fcc88d02f2757d1f87dcf0d85bbefefb921f7837595cfd626f08"
+            },
+            "node": {
+              "branch_neuron_index": 13,
+              "branch_relu_input": "31",
+              "branch_value": -1,
+              "depth": 2,
+              "node_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000005",
+              "parent_node_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000002",
+              "split_state_hash": "0dfc4b59b5da742a9f41b200e19576b197c70fb75bd1074b2794be5d91c05ab7"
+            },
+            "optimizer_execution_trace_hash": "849bd25a5ff4194416fa557875c0b6b93478f9ff615650775c30458b75b88ad6",
+            "optimizer_ir_hashes": {
+              "optimizer_plan_hash": "1f6f8865c2d737116a2c8596420322b1b27af50d201b8d5b96669e4578d1839c",
+              "optimizer_schedule_hash": "482372a779f0c941767aacd362dc99fc2b0a9ff9fae00d830e11bf9aecec355f",
+              "optimizer_task_module_hash": "edb029e4dd8dbc5b4ba82391a989d6e98cfd841aee91854ed9913feb396a0929"
+            },
+            "parent_selected_state_hash": "f3eea29a8d410d4d246040ff8ea60f95d4ef0e6af1a55b02be094e80d05b0dbf",
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "monotonic_refinement_initialization_only",
+            "priority": -580.9415,
+            "selected_state_hash": "587136efb425729197e1256d9bfa5295d3e2dbcd378fe65aff2f350289900c2d",
+            "upper": 622.2409057617188,
+            "warm_start_kind": "monotonic_split_refinement"
+          },
+          {
+            "branch_candidate": {
+              "lower": -235.57249450683594,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 153.698486328125,
+              "width": 389.27098083496094
+            },
+            "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:eval:0002",
+            "eval_batch_position": 3,
+            "lower": -580.9629516601562,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "cab729dcad011d62beebb23535dc2e43d3de0e06ebba77e74a5b2dc159f50b3a",
+              "execution_plan_instance_hash": "66dfcc97d8877b1fef58c843d2d3e295d06d0fc608e28ecd90529a4263856fc6",
+              "execution_plan_template_hash": "9dcd254af9aac59a655f20961392dd1b9883fc0b5ccc3a7f7666d706edfc0498",
+              "representation_binding_hash": "9071c88097f2b8ff70cc98c2b35fc8e07f1325f2da19485b4ad4437f5352c79a",
+              "schedule_hash": "641059ee4fed5c177146519f2e4936193bed80cedec3e74f2faec92becfe8463",
+              "source_bound_module_hash": "cab729dcad011d62beebb23535dc2e43d3de0e06ebba77e74a5b2dc159f50b3a",
+              "source_plan_instance_hash": "e5d455dddb70d82fe0c6d30b94317c4515eeb5c9aeea8a2f3734f84b18c1f172",
+              "source_plan_template_hash": "487cd8d42948e3a28e836934f030a370442ba677950dd7eb588bb73b54bf57be",
+              "source_schedule_hash": "2da5a3fe450ddd237bb35f6fce9f70abc0382d12f287664b95cedf23d2cf3c11",
+              "task_module_hash": "b5b99e98c086fcc88d02f2757d1f87dcf0d85bbefefb921f7837595cfd626f08"
+            },
+            "node": {
+              "branch_neuron_index": 13,
+              "branch_relu_input": "31",
+              "branch_value": 1,
+              "depth": 2,
+              "node_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000006",
+              "parent_node_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000002",
+              "split_state_hash": "d0a28960da6864a0c0fab7a9c57b47ce9d4eefc3141837f77bfd54feb4b6f237"
+            },
+            "optimizer_execution_trace_hash": "849bd25a5ff4194416fa557875c0b6b93478f9ff615650775c30458b75b88ad6",
+            "optimizer_ir_hashes": {
+              "optimizer_plan_hash": "1f6f8865c2d737116a2c8596420322b1b27af50d201b8d5b96669e4578d1839c",
+              "optimizer_schedule_hash": "482372a779f0c941767aacd362dc99fc2b0a9ff9fae00d830e11bf9aecec355f",
+              "optimizer_task_module_hash": "edb029e4dd8dbc5b4ba82391a989d6e98cfd841aee91854ed9913feb396a0929"
+            },
+            "parent_selected_state_hash": "f3eea29a8d410d4d246040ff8ea60f95d4ef0e6af1a55b02be094e80d05b0dbf",
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "monotonic_refinement_initialization_only",
+            "priority": -580.963,
+            "selected_state_hash": "93a5ad8883b2202563953ec950aa8b79b94c3363844cd6a6eeefa9cfd14a70e4",
+            "upper": 621.8658447265625,
+            "warm_start_kind": "monotonic_split_refinement"
+          }
+        ],
+        "final_frontier_node_ids": [
+          "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000004",
+          "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000006",
+          "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000003",
+          "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000005"
+        ],
+        "max_queue_size": 4,
+        "native_stack_count": 3,
+        "native_stacks": [
+          {
+            "active_split_count": 0,
+            "alpha_gradient_l1": 180.2803225927055,
+            "beta_gradient_l1": 0.0,
+            "domain_batch_size": 1,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "710a4a0124b8dd4b720ca99d150a432741b8779a75ee20441d4c830a2823a214",
+              "execution_plan_instance_hash": "a70179905982ac581f2ab6e56eaf2c8bc7356b81d4600b2b73fc2bf5641e9e1d",
+              "execution_plan_template_hash": "4bec7e5fdb4104f273daa6154fa902532b83401357d07ea4461b5d34d6d29f04",
+              "representation_binding_hash": "328c7967a580bca71ada79aa331b1fa9d3462623e1765cca312ecec45fede419",
+              "schedule_hash": "f7b147daf3104eb44f69cd3726a7ed2e1f51432f439ba8625f4fbf25ea11b459",
+              "source_bound_module_hash": "710a4a0124b8dd4b720ca99d150a432741b8779a75ee20441d4c830a2823a214",
+              "source_plan_instance_hash": "3864bf3faca6c8623e44ac94e0d1e9df98cc2e089f1cedb4e4182865f5c62631",
+              "source_plan_template_hash": "aeeb77904c11c574aed13fddb08b440f45d5107724691662dbd0591d29fdf577",
+              "source_schedule_hash": "8be4925c57ff2d2093c5e95bb98eeb42fe33f4a0a5fb4c4356a0c9ae2ea9eb23",
+              "task_module_hash": "4579ce6fa682fc4f1b669beefe52cf7d911d5635b92ae55f315d6ad14043e3e6"
+            },
+            "native_schedule_launch_count": 21,
+            "native_task_count": 21,
+            "native_task_trace_event_count": 21,
+            "node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000000"
+            ],
+            "optimizer_action_count": 8,
+            "optimizer_backward_count": 1,
+            "optimizer_evaluation_count": 2,
+            "optimizer_execution_trace_hash": "abe31392e564f208454027122e88fe3ccf3e9d6dda1a8ffbe3251ec5d613718d",
+            "optimizer_ir_hashes": {
+              "optimizer_plan_hash": "79e56c9ec574f33f84fbce6daaf78310b70788d8ebb9421275012239750ac467",
+              "optimizer_schedule_hash": "c5ed5042766ee84667880497c74f075e3f019419ccbea365b7400316bb0e3b8e",
+              "optimizer_task_module_hash": "c8118777583114893f5982df1c52b30ce3f145ea4a64bc1714225c996d8df12e"
+            },
+            "optimizer_projection_count": 1,
+            "optimizer_selected_batch_state_hash": "87d4a21b63b6987af69b65ea3fa93055e146f6cd49353a0854b82d54420635d8",
+            "parent_selected_state_hashes": [
+              null
+            ],
+            "selected_native_lower_max_abs_diff": 0.0,
+            "selected_native_upper_max_abs_diff": 0.0,
+            "stack_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:eval:0000",
+            "warm_source_state_hash": null,
+            "warm_start_kind": "none"
+          },
+          {
+            "active_split_count": 2,
+            "alpha_gradient_l1": 338.43710628151894,
+            "beta_gradient_l1": 20.047863006591797,
+            "domain_batch_size": 2,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "331167ae1bd3fdffe04f0d84d5f309847ab74bac0711296fc08d9fc9e252f2df",
+              "execution_plan_instance_hash": "bb00bba5af14029e2090df3543f1f3dc2f6f8102bf22e3f699d7ed674f10f645",
+              "execution_plan_template_hash": "7c7dd8fd7e02362cbd39e290057d57955891a86e34a859d14a6ca8cf859f6751",
+              "representation_binding_hash": "a44faccf7dacf21f2bebcb25f4f56986e978e0ce5d328c6015d1333631a48ced",
+              "schedule_hash": "a4b65d1d529eecb283cc09cde111b7ed0a1f45e2b65b74ca22c2ee62e03466c7",
+              "source_bound_module_hash": "331167ae1bd3fdffe04f0d84d5f309847ab74bac0711296fc08d9fc9e252f2df",
+              "source_plan_instance_hash": "50a899f88cef9fdc528ba77d49ffdee2c21c3eae76d69cf32ac0339ee5a5ca50",
+              "source_plan_template_hash": "3abfaf52dfad00ad668bfac37d371d658890608ee6fcf3cb1a2d8dc4f6fb19e0",
+              "source_schedule_hash": "a62254977b67869ff6a508a80e284fb663ac40e4dbbc52562d6a59825e0f0c46",
+              "task_module_hash": "3ae20ece593ef699c95e1ea087356d08e5b8117590735de8920fda1d232cdee5"
+            },
+            "native_schedule_launch_count": 21,
+            "native_task_count": 21,
+            "native_task_trace_event_count": 21,
+            "node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000001",
+              "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000002"
+            ],
+            "optimizer_action_count": 8,
+            "optimizer_backward_count": 1,
+            "optimizer_evaluation_count": 2,
+            "optimizer_execution_trace_hash": "8c55c3ca87faafaee3421f5e76bc47d10583a9a033111e95b0e95cdde1317497",
+            "optimizer_ir_hashes": {
+              "optimizer_plan_hash": "f04099699ca78388da6cb6f78262a65539954305ef57f3662480629c7f8faa7d",
+              "optimizer_schedule_hash": "b17cdf968bfce16be919318700c7795039bc9788953ae762b734db55f24b3174",
+              "optimizer_task_module_hash": "15c97db80a0c43199cdc8914d6984803a42907eff78d298c85e21b0d9430af1f"
+            },
+            "optimizer_projection_count": 1,
+            "optimizer_selected_batch_state_hash": "37ab5c2d91789b81fb310af4f68a4c7debecc3138da1303c58da6be7f4ae7ad9",
+            "parent_selected_state_hashes": [
+              "87d4a21b63b6987af69b65ea3fa93055e146f6cd49353a0854b82d54420635d8",
+              "87d4a21b63b6987af69b65ea3fa93055e146f6cd49353a0854b82d54420635d8"
+            ],
+            "selected_native_lower_max_abs_diff": 0.0,
+            "selected_native_upper_max_abs_diff": 0.0,
+            "stack_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:eval:0001",
+            "warm_source_state_hash": "b40877ded148868fc337e861362920c8bbafec31a3f142549aaa2ebb1d36392b",
+            "warm_start_kind": "monotonic_split_refinement"
+          },
+          {
+            "active_split_count": 8,
+            "alpha_gradient_l1": 630.9921717792749,
+            "beta_gradient_l1": 42.26581954956055,
+            "domain_batch_size": 4,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "cab729dcad011d62beebb23535dc2e43d3de0e06ebba77e74a5b2dc159f50b3a",
+              "execution_plan_instance_hash": "66dfcc97d8877b1fef58c843d2d3e295d06d0fc608e28ecd90529a4263856fc6",
+              "execution_plan_template_hash": "9dcd254af9aac59a655f20961392dd1b9883fc0b5ccc3a7f7666d706edfc0498",
+              "representation_binding_hash": "9071c88097f2b8ff70cc98c2b35fc8e07f1325f2da19485b4ad4437f5352c79a",
+              "schedule_hash": "641059ee4fed5c177146519f2e4936193bed80cedec3e74f2faec92becfe8463",
+              "source_bound_module_hash": "cab729dcad011d62beebb23535dc2e43d3de0e06ebba77e74a5b2dc159f50b3a",
+              "source_plan_instance_hash": "e5d455dddb70d82fe0c6d30b94317c4515eeb5c9aeea8a2f3734f84b18c1f172",
+              "source_plan_template_hash": "487cd8d42948e3a28e836934f030a370442ba677950dd7eb588bb73b54bf57be",
+              "source_schedule_hash": "2da5a3fe450ddd237bb35f6fce9f70abc0382d12f287664b95cedf23d2cf3c11",
+              "task_module_hash": "b5b99e98c086fcc88d02f2757d1f87dcf0d85bbefefb921f7837595cfd626f08"
+            },
+            "native_schedule_launch_count": 21,
+            "native_task_count": 21,
+            "native_task_trace_event_count": 21,
+            "node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000003",
+              "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000004",
+              "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000005",
+              "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000006"
+            ],
+            "optimizer_action_count": 8,
+            "optimizer_backward_count": 1,
+            "optimizer_evaluation_count": 2,
+            "optimizer_execution_trace_hash": "849bd25a5ff4194416fa557875c0b6b93478f9ff615650775c30458b75b88ad6",
+            "optimizer_ir_hashes": {
+              "optimizer_plan_hash": "1f6f8865c2d737116a2c8596420322b1b27af50d201b8d5b96669e4578d1839c",
+              "optimizer_schedule_hash": "482372a779f0c941767aacd362dc99fc2b0a9ff9fae00d830e11bf9aecec355f",
+              "optimizer_task_module_hash": "edb029e4dd8dbc5b4ba82391a989d6e98cfd841aee91854ed9913feb396a0929"
+            },
+            "optimizer_projection_count": 1,
+            "optimizer_selected_batch_state_hash": "9d6dbceb82fb9f64afab37559c8b2dfef132feede35882970c2088f81935334a",
+            "parent_selected_state_hashes": [
+              "c52f00e1c5bffde697b44ccc36517787b2db251fd7825832f9710af7ec7fdc62",
+              "c52f00e1c5bffde697b44ccc36517787b2db251fd7825832f9710af7ec7fdc62",
+              "f3eea29a8d410d4d246040ff8ea60f95d4ef0e6af1a55b02be094e80d05b0dbf",
+              "f3eea29a8d410d4d246040ff8ea60f95d4ef0e6af1a55b02be094e80d05b0dbf"
+            ],
+            "selected_native_lower_max_abs_diff": 0.0,
+            "selected_native_upper_max_abs_diff": 0.0,
+            "stack_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:eval:0002",
+            "warm_source_state_hash": "8a88385ff0b3a84f771e2d0722858071c089746e33da5d613e2c521d1ffca0d5",
+            "warm_start_kind": "monotonic_split_refinement"
+          }
+        ],
+        "objective_hash": "a62146650a0f29762a1467c72007cba1937a5c05b9236ab53a91964308e05dca",
+        "optimizer_policy": {
+          "alpha_init": 0.5,
+          "beta_init": 0.0,
+          "lr": 0.05,
+          "objective": "lower",
+          "optimizer": "torch.optim.Adam",
+          "per_batch_params": true,
+          "soft_tau": 1.0,
+          "spec_reduce": "mean",
+          "steps": 1
+        },
+        "performance_claimed": false,
+        "property_status": "not_claimed",
+        "root_input_lower_hash": "bed6da6e49f1123b54fe61247615cf0e86f1b4257face7b073428f257607bda6",
+        "root_input_upper_hash": "955d79bd0824185cad0be1e758e6e492c51aec6c9199f81359b2528b848ec9ab",
+        "run_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict",
+        "schema_version": "boundflow.optimized-relu-split-bab-trace/v1",
+        "status": "budget_exhausted",
+        "termination_reason": "node_budget_exhausted"
+      },
+      "queue_trace_hash": "32d2c94ddffb63e679d77863feeb33dcabc77686493484527c0f5da73f894637",
+      "verdict_trace": {
+        "compiler_version": "boundflow.native-property-verdict/v1",
+        "counterexample": null,
+        "objective_hash": "a62146650a0f29762a1467c72007cba1937a5c05b9236ab53a91964308e05dca",
+        "performance_claimed": false,
+        "queue_trace_hash": "32d2c94ddffb63e679d77863feeb33dcabc77686493484527c0f5da73f894637",
+        "reason": "node_budget_frontier_open",
+        "run_id": "vnncomp21-resnet2b-prop0-native-ir13-property-verdict",
+        "schema_version": "boundflow.native-property-verdict/v1",
+        "sound_pruned_leaf_node_ids": [],
+        "status": "unknown",
+        "threshold": 0.0,
+        "unresolved_leaf_node_ids": [
+          "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000003",
+          "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000004",
+          "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000005",
+          "vnncomp21-resnet2b-prop0-native-ir13-property-verdict:n000006"
+        ]
+      },
+      "verdict_trace_hash": "3a4e81c58eb93f2ad140346d43c46e824af263cd0701047a0740df946c85b2bf"
+    },
+    "gates": {
+      "all_verdicts_are_correctness_only": true,
+      "fixed_resnet_center_reexecutes_primal_task_ir_without_counterexample": true,
+      "fixed_resnet_frontier_remains_explicit_unknown": true,
+      "fixed_source_and_property_are_digest_bound": true,
+      "open_budget_and_depth_never_inflate_to_verified": true,
+      "unsafe_requires_reexecuted_concrete_witness": true,
+      "verified_requires_closed_sound_prune_leaves": true
+    },
+    "limitations": [
+      "candidate discovery is supplied by the caller; adversarial attack integration is pending",
+      "fixed ResNet remains a seven-node budget-bounded unknown, not a complete verdict",
+      "single scalar lower-bound property only",
+      "CPU correctness evidence only; no latency, memory, CUDA, or speedup claim",
+      "timeout and dynamic optimizer early-stop policies are not implemented"
+    ],
+    "performance_claimed": false,
+    "property_status": "verified_unsafe_unknown_contract_matrix",
+    "schema_version": "boundflow.native-property-verdict-evidence/v1",
+    "source": {
+      "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+      "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+      "native_ir_manifest_sha256": "5d38aa4adcd7b8593b0ca3751106d3a254b72a2698bd445a8dde59d50eb5a676",
+      "native_ir_payload_sha256": "3ba949de66380c7d16dc44bb934eca8400182521e761c19eaa671cd8cf0eb557",
+      "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf",
+      "vnnlib_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff"
+    },
+    "status": "ok",
+    "toy_unknown": {
+      "counterexample_input_hash": null,
+      "queue_trace": {
+        "compiler_version": "boundflow.native-optimized-relu-split-bab/v1",
+        "config": {
+          "available_memory_bytes": 1073741824,
+          "expansion_batch_size": 1,
+          "max_depth": 0,
+          "max_eval_batch_size": 1,
+          "max_nodes": 1,
+          "memory_budget_bytes": 1073741824,
+          "threshold": 0.5
+        },
+        "decisions": [
+          {
+            "branch_candidate": null,
+            "child_node_ids": [],
+            "decision_index": 0,
+            "kind": "terminal",
+            "node_id": "native-property-unresolved-toy:n000000",
+            "reason": "configured_depth_limit"
+          }
+        ],
+        "evaluations": [
+          {
+            "branch_candidate": {
+              "lower": -1.0,
+              "neuron_index": 0,
+              "relu_input": "h1",
+              "upper": 1.0,
+              "width": 2.0
+            },
+            "eval_batch_id": "native-property-unresolved-toy:eval:0000",
+            "eval_batch_position": 0,
+            "lower": -0.4000000059604645,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "21f7829b171b405ba8ea2efdebacf2717d3abfb7b1b6977484988114189f1f01",
+              "execution_plan_instance_hash": "defd7323c7140259c67aef49444f533218f74fcfd004a027fd170b13cdb1ee63",
+              "execution_plan_template_hash": "a20b3face28402bfd48185ca3c2ac26f96baa9777a6892295215b89271c17eee",
+              "representation_binding_hash": "74b64667dd52a7859a070ed4a7e3e3dc10175b0c327097a17168dc1b2a28538f",
+              "schedule_hash": "08a9350a4830b2d488ac045c29b8e14cef83e717690e701b4b91193b730a6a14",
+              "source_bound_module_hash": "21f7829b171b405ba8ea2efdebacf2717d3abfb7b1b6977484988114189f1f01",
+              "source_plan_instance_hash": "ac07b6574344a5217b8afc3d8ecb6e73fdc4a8e932bdf1ebc5f19a365524ed5f",
+              "source_plan_template_hash": "ef9d45f6f4128588f5d72b7acb448f43cdd055acc69ab547fda48260d7483b63",
+              "source_schedule_hash": "889346e025342499bcf9e299c8d055af170ed2160a1aad57abe032996a183c8a",
+              "task_module_hash": "d46544e6ccff406d75500e15ffff457bdf9ae3bd6bcf0643b6de6d014f848c40"
+            },
+            "node": {
+              "branch_neuron_index": null,
+              "branch_relu_input": null,
+              "branch_value": 0,
+              "depth": 0,
+              "node_id": "native-property-unresolved-toy:n000000",
+              "parent_node_id": null,
+              "split_state_hash": "3734aae96f6d0b28c6d0429d2b671edc3ef47acb22616bd433f47a83f3b5243d"
+            },
+            "optimizer_execution_trace_hash": "37e353682cfbd7f077a848dfee3779df2c1fbad896a4160604f926c254050e66",
+            "optimizer_ir_hashes": {
+              "optimizer_plan_hash": "bd8c47b288a0cab1889d68698744c8ea7d970e47793c0742dd331d9692c0988b",
+              "optimizer_schedule_hash": "4a99c2b6c1c3e150792682aca5d59fdaf48973f5ed809c9da5ca938cca1931be",
+              "optimizer_task_module_hash": "4c8e34b794d69fb15e28818b27d55476a9905050b2883052af6d72710ca8afd8"
+            },
+            "parent_selected_state_hash": null,
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "monotonic_refinement_initialization_only",
+            "priority": -0.4,
+            "selected_state_hash": "187a77682ade47f621bf0bf8615c7f4209ea4fd2fa938b070f5b766643eb18a3",
+            "upper": 1.0,
+            "warm_start_kind": "none"
+          }
+        ],
+        "final_frontier_node_ids": [],
+        "max_queue_size": 1,
+        "native_stack_count": 1,
+        "native_stacks": [
+          {
+            "active_split_count": 0,
+            "alpha_gradient_l1": 1.0,
+            "beta_gradient_l1": 0.0,
+            "domain_batch_size": 1,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "21f7829b171b405ba8ea2efdebacf2717d3abfb7b1b6977484988114189f1f01",
+              "execution_plan_instance_hash": "defd7323c7140259c67aef49444f533218f74fcfd004a027fd170b13cdb1ee63",
+              "execution_plan_template_hash": "a20b3face28402bfd48185ca3c2ac26f96baa9777a6892295215b89271c17eee",
+              "representation_binding_hash": "74b64667dd52a7859a070ed4a7e3e3dc10175b0c327097a17168dc1b2a28538f",
+              "schedule_hash": "08a9350a4830b2d488ac045c29b8e14cef83e717690e701b4b91193b730a6a14",
+              "source_bound_module_hash": "21f7829b171b405ba8ea2efdebacf2717d3abfb7b1b6977484988114189f1f01",
+              "source_plan_instance_hash": "ac07b6574344a5217b8afc3d8ecb6e73fdc4a8e932bdf1ebc5f19a365524ed5f",
+              "source_plan_template_hash": "ef9d45f6f4128588f5d72b7acb448f43cdd055acc69ab547fda48260d7483b63",
+              "source_schedule_hash": "889346e025342499bcf9e299c8d055af170ed2160a1aad57abe032996a183c8a",
+              "task_module_hash": "d46544e6ccff406d75500e15ffff457bdf9ae3bd6bcf0643b6de6d014f848c40"
+            },
+            "native_schedule_launch_count": 5,
+            "native_task_count": 5,
+            "native_task_trace_event_count": 5,
+            "node_ids": [
+              "native-property-unresolved-toy:n000000"
+            ],
+            "optimizer_action_count": 8,
+            "optimizer_backward_count": 1,
+            "optimizer_evaluation_count": 2,
+            "optimizer_execution_trace_hash": "37e353682cfbd7f077a848dfee3779df2c1fbad896a4160604f926c254050e66",
+            "optimizer_ir_hashes": {
+              "optimizer_plan_hash": "bd8c47b288a0cab1889d68698744c8ea7d970e47793c0742dd331d9692c0988b",
+              "optimizer_schedule_hash": "4a99c2b6c1c3e150792682aca5d59fdaf48973f5ed809c9da5ca938cca1931be",
+              "optimizer_task_module_hash": "4c8e34b794d69fb15e28818b27d55476a9905050b2883052af6d72710ca8afd8"
+            },
+            "optimizer_projection_count": 1,
+            "optimizer_selected_batch_state_hash": "187a77682ade47f621bf0bf8615c7f4209ea4fd2fa938b070f5b766643eb18a3",
+            "parent_selected_state_hashes": [
+              null
+            ],
+            "selected_native_lower_max_abs_diff": 0.0,
+            "selected_native_upper_max_abs_diff": 0.0,
+            "stack_id": "native-property-unresolved-toy:eval:0000",
+            "warm_source_state_hash": null,
+            "warm_start_kind": "none"
+          }
+        ],
+        "objective_hash": "1bb1faadd28e57d8e14fcaefc934281209d0e8d575f36585631ee166ee46a57c",
+        "optimizer_policy": {
+          "alpha_init": 0.5,
+          "beta_init": 0.0,
+          "lr": 0.1,
+          "objective": "lower",
+          "optimizer": "torch.optim.Adam",
+          "per_batch_params": true,
+          "soft_tau": 1.0,
+          "spec_reduce": "mean",
+          "steps": 1
+        },
+        "performance_claimed": false,
+        "property_status": "not_claimed",
+        "root_input_lower_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+        "root_input_upper_hash": "1bb1faadd28e57d8e14fcaefc934281209d0e8d575f36585631ee166ee46a57c",
+        "run_id": "native-property-unresolved-toy",
+        "schema_version": "boundflow.optimized-relu-split-bab-trace/v1",
+        "status": "complete",
+        "termination_reason": "configured_bounded_tree_exhausted"
+      },
+      "queue_trace_hash": "bef00cf9a1282413af13357b4565f01e54ed63f4ea690a4ae112a2534e5ef73f",
+      "verdict_trace": {
+        "compiler_version": "boundflow.native-property-verdict/v1",
+        "counterexample": null,
+        "objective_hash": "1bb1faadd28e57d8e14fcaefc934281209d0e8d575f36585631ee166ee46a57c",
+        "performance_claimed": false,
+        "queue_trace_hash": "bef00cf9a1282413af13357b4565f01e54ed63f4ea690a4ae112a2534e5ef73f",
+        "reason": "configured_depth_terminal_open",
+        "run_id": "native-property-unresolved-toy",
+        "schema_version": "boundflow.native-property-verdict/v1",
+        "sound_pruned_leaf_node_ids": [],
+        "status": "unknown",
+        "threshold": 0.5,
+        "unresolved_leaf_node_ids": [
+          "native-property-unresolved-toy:n000000"
+        ]
+      },
+      "verdict_trace_hash": "4081006a1aa2453c86b7b38ace019b9fb4dada541c4e0606ec89b643e84dcf26"
+    },
+    "toy_unsafe": {
+      "counterexample_input_hash": "9868f626baed13b75b2c1ff64afdbc0f48647f27b500566941f5fff9810dd860",
+      "queue_trace": {
+        "compiler_version": "boundflow.native-optimized-relu-split-bab/v1",
+        "config": {
+          "available_memory_bytes": 1073741824,
+          "expansion_batch_size": 1,
+          "max_depth": 0,
+          "max_eval_batch_size": 1,
+          "max_nodes": 1,
+          "memory_budget_bytes": 1073741824,
+          "threshold": 0.5
+        },
+        "decisions": [
+          {
+            "branch_candidate": null,
+            "child_node_ids": [],
+            "decision_index": 0,
+            "kind": "terminal",
+            "node_id": "native-property-unresolved-toy:n000000",
+            "reason": "configured_depth_limit"
+          }
+        ],
+        "evaluations": [
+          {
+            "branch_candidate": {
+              "lower": -1.0,
+              "neuron_index": 0,
+              "relu_input": "h1",
+              "upper": 1.0,
+              "width": 2.0
+            },
+            "eval_batch_id": "native-property-unresolved-toy:eval:0000",
+            "eval_batch_position": 0,
+            "lower": -0.4000000059604645,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "21f7829b171b405ba8ea2efdebacf2717d3abfb7b1b6977484988114189f1f01",
+              "execution_plan_instance_hash": "defd7323c7140259c67aef49444f533218f74fcfd004a027fd170b13cdb1ee63",
+              "execution_plan_template_hash": "a20b3face28402bfd48185ca3c2ac26f96baa9777a6892295215b89271c17eee",
+              "representation_binding_hash": "74b64667dd52a7859a070ed4a7e3e3dc10175b0c327097a17168dc1b2a28538f",
+              "schedule_hash": "08a9350a4830b2d488ac045c29b8e14cef83e717690e701b4b91193b730a6a14",
+              "source_bound_module_hash": "21f7829b171b405ba8ea2efdebacf2717d3abfb7b1b6977484988114189f1f01",
+              "source_plan_instance_hash": "ac07b6574344a5217b8afc3d8ecb6e73fdc4a8e932bdf1ebc5f19a365524ed5f",
+              "source_plan_template_hash": "ef9d45f6f4128588f5d72b7acb448f43cdd055acc69ab547fda48260d7483b63",
+              "source_schedule_hash": "889346e025342499bcf9e299c8d055af170ed2160a1aad57abe032996a183c8a",
+              "task_module_hash": "d46544e6ccff406d75500e15ffff457bdf9ae3bd6bcf0643b6de6d014f848c40"
+            },
+            "node": {
+              "branch_neuron_index": null,
+              "branch_relu_input": null,
+              "branch_value": 0,
+              "depth": 0,
+              "node_id": "native-property-unresolved-toy:n000000",
+              "parent_node_id": null,
+              "split_state_hash": "3734aae96f6d0b28c6d0429d2b671edc3ef47acb22616bd433f47a83f3b5243d"
+            },
+            "optimizer_execution_trace_hash": "37e353682cfbd7f077a848dfee3779df2c1fbad896a4160604f926c254050e66",
+            "optimizer_ir_hashes": {
+              "optimizer_plan_hash": "bd8c47b288a0cab1889d68698744c8ea7d970e47793c0742dd331d9692c0988b",
+              "optimizer_schedule_hash": "4a99c2b6c1c3e150792682aca5d59fdaf48973f5ed809c9da5ca938cca1931be",
+              "optimizer_task_module_hash": "4c8e34b794d69fb15e28818b27d55476a9905050b2883052af6d72710ca8afd8"
+            },
+            "parent_selected_state_hash": null,
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "monotonic_refinement_initialization_only",
+            "priority": -0.4,
+            "selected_state_hash": "187a77682ade47f621bf0bf8615c7f4209ea4fd2fa938b070f5b766643eb18a3",
+            "upper": 1.0,
+            "warm_start_kind": "none"
+          }
+        ],
+        "final_frontier_node_ids": [],
+        "max_queue_size": 1,
+        "native_stack_count": 1,
+        "native_stacks": [
+          {
+            "active_split_count": 0,
+            "alpha_gradient_l1": 1.0,
+            "beta_gradient_l1": 0.0,
+            "domain_batch_size": 1,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "21f7829b171b405ba8ea2efdebacf2717d3abfb7b1b6977484988114189f1f01",
+              "execution_plan_instance_hash": "defd7323c7140259c67aef49444f533218f74fcfd004a027fd170b13cdb1ee63",
+              "execution_plan_template_hash": "a20b3face28402bfd48185ca3c2ac26f96baa9777a6892295215b89271c17eee",
+              "representation_binding_hash": "74b64667dd52a7859a070ed4a7e3e3dc10175b0c327097a17168dc1b2a28538f",
+              "schedule_hash": "08a9350a4830b2d488ac045c29b8e14cef83e717690e701b4b91193b730a6a14",
+              "source_bound_module_hash": "21f7829b171b405ba8ea2efdebacf2717d3abfb7b1b6977484988114189f1f01",
+              "source_plan_instance_hash": "ac07b6574344a5217b8afc3d8ecb6e73fdc4a8e932bdf1ebc5f19a365524ed5f",
+              "source_plan_template_hash": "ef9d45f6f4128588f5d72b7acb448f43cdd055acc69ab547fda48260d7483b63",
+              "source_schedule_hash": "889346e025342499bcf9e299c8d055af170ed2160a1aad57abe032996a183c8a",
+              "task_module_hash": "d46544e6ccff406d75500e15ffff457bdf9ae3bd6bcf0643b6de6d014f848c40"
+            },
+            "native_schedule_launch_count": 5,
+            "native_task_count": 5,
+            "native_task_trace_event_count": 5,
+            "node_ids": [
+              "native-property-unresolved-toy:n000000"
+            ],
+            "optimizer_action_count": 8,
+            "optimizer_backward_count": 1,
+            "optimizer_evaluation_count": 2,
+            "optimizer_execution_trace_hash": "37e353682cfbd7f077a848dfee3779df2c1fbad896a4160604f926c254050e66",
+            "optimizer_ir_hashes": {
+              "optimizer_plan_hash": "bd8c47b288a0cab1889d68698744c8ea7d970e47793c0742dd331d9692c0988b",
+              "optimizer_schedule_hash": "4a99c2b6c1c3e150792682aca5d59fdaf48973f5ed809c9da5ca938cca1931be",
+              "optimizer_task_module_hash": "4c8e34b794d69fb15e28818b27d55476a9905050b2883052af6d72710ca8afd8"
+            },
+            "optimizer_projection_count": 1,
+            "optimizer_selected_batch_state_hash": "187a77682ade47f621bf0bf8615c7f4209ea4fd2fa938b070f5b766643eb18a3",
+            "parent_selected_state_hashes": [
+              null
+            ],
+            "selected_native_lower_max_abs_diff": 0.0,
+            "selected_native_upper_max_abs_diff": 0.0,
+            "stack_id": "native-property-unresolved-toy:eval:0000",
+            "warm_source_state_hash": null,
+            "warm_start_kind": "none"
+          }
+        ],
+        "objective_hash": "1bb1faadd28e57d8e14fcaefc934281209d0e8d575f36585631ee166ee46a57c",
+        "optimizer_policy": {
+          "alpha_init": 0.5,
+          "beta_init": 0.0,
+          "lr": 0.1,
+          "objective": "lower",
+          "optimizer": "torch.optim.Adam",
+          "per_batch_params": true,
+          "soft_tau": 1.0,
+          "spec_reduce": "mean",
+          "steps": 1
+        },
+        "performance_claimed": false,
+        "property_status": "not_claimed",
+        "root_input_lower_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+        "root_input_upper_hash": "1bb1faadd28e57d8e14fcaefc934281209d0e8d575f36585631ee166ee46a57c",
+        "run_id": "native-property-unresolved-toy",
+        "schema_version": "boundflow.optimized-relu-split-bab-trace/v1",
+        "status": "complete",
+        "termination_reason": "configured_bounded_tree_exhausted"
+      },
+      "queue_trace_hash": "bef00cf9a1282413af13357b4565f01e54ed63f4ea690a4ae112a2534e5ef73f",
+      "verdict_trace": {
+        "compiler_version": "boundflow.native-property-verdict/v1",
+        "counterexample": {
+          "input_box_max_violation": 0.0,
+          "input_dtype": "float32",
+          "input_hash": "9868f626baed13b75b2c1ff64afdbc0f48647f27b500566941f5fff9810dd860",
+          "input_shape": [
+            1,
+            1
+          ],
+          "node_id": "native-property-unresolved-toy:n000000",
+          "objective_margin": -0.5,
+          "objective_value": 0.0,
+          "output_hash": "9868f626baed13b75b2c1ff64afdbc0f48647f27b500566941f5fff9810dd860",
+          "satisfied_split_count": 0,
+          "split_constraint_min_margin": null,
+          "split_state_hash": "3734aae96f6d0b28c6d0429d2b671edc3ef47acb22616bd433f47a83f3b5243d",
+          "split_tolerance": 1e-06,
+          "threshold": 0.5,
+          "value_trace_hash": "fe124c0ae12f1b183035b7d18df66f86c78c2a12ebe344cc346b43a52db782da"
+        },
+        "objective_hash": "1bb1faadd28e57d8e14fcaefc934281209d0e8d575f36585631ee166ee46a57c",
+        "performance_claimed": false,
+        "queue_trace_hash": "bef00cf9a1282413af13357b4565f01e54ed63f4ea690a4ae112a2534e5ef73f",
+        "reason": "concrete_counterexample_reexecuted",
+        "run_id": "native-property-unresolved-toy",
+        "schema_version": "boundflow.native-property-verdict/v1",
+        "sound_pruned_leaf_node_ids": [],
+        "status": "unsafe",
+        "threshold": 0.5,
+        "unresolved_leaf_node_ids": [
+          "native-property-unresolved-toy:n000000"
+        ]
+      },
+      "verdict_trace_hash": "7e87473af9a4f3bbaff65294e5e0ed140cacfccb27eb59efad565a65ee6d6b7e"
+    },
+    "toy_verified": {
+      "counterexample_input_hash": null,
+      "queue_trace": {
+        "compiler_version": "boundflow.native-optimized-relu-split-bab/v1",
+        "config": {
+          "available_memory_bytes": 1073741824,
+          "expansion_batch_size": 1,
+          "max_depth": 0,
+          "max_eval_batch_size": 1,
+          "max_nodes": 1,
+          "memory_budget_bytes": 1073741824,
+          "threshold": -2.0
+        },
+        "decisions": [
+          {
+            "branch_candidate": null,
+            "child_node_ids": [],
+            "decision_index": 0,
+            "kind": "prune",
+            "node_id": "native-property-verified-toy:n000000",
+            "reason": "lower_bound_meets_threshold"
+          }
+        ],
+        "evaluations": [
+          {
+            "branch_candidate": {
+              "lower": -1.0,
+              "neuron_index": 0,
+              "relu_input": "h1",
+              "upper": 1.0,
+              "width": 2.0
+            },
+            "eval_batch_id": "native-property-verified-toy:eval:0000",
+            "eval_batch_position": 0,
+            "lower": -0.4000000059604645,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "21f7829b171b405ba8ea2efdebacf2717d3abfb7b1b6977484988114189f1f01",
+              "execution_plan_instance_hash": "491b20c89721e97379a3be7595d4d39fe44dabf88d2e6870fec6875d4ada5206",
+              "execution_plan_template_hash": "bfee45c65c04b5d46f7dd66d45db1adb75b2674fad81f20c5f8948f15257efa4",
+              "representation_binding_hash": "d4ca32f28de9448112f641af785fa8a599aa1a57e67b6503ecd8534f04a76210",
+              "schedule_hash": "7efdb1baf0bb8357922cb8b0b57882d1d3780e0171f3571aaf8dd593783415f1",
+              "source_bound_module_hash": "21f7829b171b405ba8ea2efdebacf2717d3abfb7b1b6977484988114189f1f01",
+              "source_plan_instance_hash": "2682d2bfd43e4c05af6a54e3ce1b4f047e9ef137cd340f3d383e2235d5ad2be7",
+              "source_plan_template_hash": "59ea71b061da53a28f05c80e64394e0bc87b2fd62b0f474bf44faef3e3cd1b12",
+              "source_schedule_hash": "215600b4e90642d3fab69d60ea336f1ede865f955ef6afbf78acdb402f5473d6",
+              "task_module_hash": "f4a0d0ee11af1b0c01b9a0a8554380c204359d204723e124750e213071506eac"
+            },
+            "node": {
+              "branch_neuron_index": null,
+              "branch_relu_input": null,
+              "branch_value": 0,
+              "depth": 0,
+              "node_id": "native-property-verified-toy:n000000",
+              "parent_node_id": null,
+              "split_state_hash": "3734aae96f6d0b28c6d0429d2b671edc3ef47acb22616bd433f47a83f3b5243d"
+            },
+            "optimizer_execution_trace_hash": "839ad026a0f0a6fede3da29e84b6085cee82551635863589c0ed2bc3200284eb",
+            "optimizer_ir_hashes": {
+              "optimizer_plan_hash": "b0a8c8c1fb32669eca1106cd8441fc1ff0a1cb7900bfa4de57247695a2ae7dcd",
+              "optimizer_schedule_hash": "7e529d4ed3fa4640072def2b2bb6b5de07ec5644060b219d2aaa763e9e78a301",
+              "optimizer_task_module_hash": "9d52f1b29bb09886cbb1311ced63783739d924affe10da670d76b69ddc3664e0"
+            },
+            "parent_selected_state_hash": null,
+            "parent_state_consumed_as_exact": false,
+            "parent_state_validity": "monotonic_refinement_initialization_only",
+            "priority": -0.4,
+            "selected_state_hash": "187a77682ade47f621bf0bf8615c7f4209ea4fd2fa938b070f5b766643eb18a3",
+            "upper": 1.0,
+            "warm_start_kind": "none"
+          }
+        ],
+        "final_frontier_node_ids": [],
+        "max_queue_size": 1,
+        "native_stack_count": 1,
+        "native_stacks": [
+          {
+            "active_split_count": 0,
+            "alpha_gradient_l1": 1.0,
+            "beta_gradient_l1": 0.0,
+            "domain_batch_size": 1,
+            "native_ir_hashes": {
+              "execution_bound_module_hash": "21f7829b171b405ba8ea2efdebacf2717d3abfb7b1b6977484988114189f1f01",
+              "execution_plan_instance_hash": "491b20c89721e97379a3be7595d4d39fe44dabf88d2e6870fec6875d4ada5206",
+              "execution_plan_template_hash": "bfee45c65c04b5d46f7dd66d45db1adb75b2674fad81f20c5f8948f15257efa4",
+              "representation_binding_hash": "d4ca32f28de9448112f641af785fa8a599aa1a57e67b6503ecd8534f04a76210",
+              "schedule_hash": "7efdb1baf0bb8357922cb8b0b57882d1d3780e0171f3571aaf8dd593783415f1",
+              "source_bound_module_hash": "21f7829b171b405ba8ea2efdebacf2717d3abfb7b1b6977484988114189f1f01",
+              "source_plan_instance_hash": "2682d2bfd43e4c05af6a54e3ce1b4f047e9ef137cd340f3d383e2235d5ad2be7",
+              "source_plan_template_hash": "59ea71b061da53a28f05c80e64394e0bc87b2fd62b0f474bf44faef3e3cd1b12",
+              "source_schedule_hash": "215600b4e90642d3fab69d60ea336f1ede865f955ef6afbf78acdb402f5473d6",
+              "task_module_hash": "f4a0d0ee11af1b0c01b9a0a8554380c204359d204723e124750e213071506eac"
+            },
+            "native_schedule_launch_count": 5,
+            "native_task_count": 5,
+            "native_task_trace_event_count": 5,
+            "node_ids": [
+              "native-property-verified-toy:n000000"
+            ],
+            "optimizer_action_count": 8,
+            "optimizer_backward_count": 1,
+            "optimizer_evaluation_count": 2,
+            "optimizer_execution_trace_hash": "839ad026a0f0a6fede3da29e84b6085cee82551635863589c0ed2bc3200284eb",
+            "optimizer_ir_hashes": {
+              "optimizer_plan_hash": "b0a8c8c1fb32669eca1106cd8441fc1ff0a1cb7900bfa4de57247695a2ae7dcd",
+              "optimizer_schedule_hash": "7e529d4ed3fa4640072def2b2bb6b5de07ec5644060b219d2aaa763e9e78a301",
+              "optimizer_task_module_hash": "9d52f1b29bb09886cbb1311ced63783739d924affe10da670d76b69ddc3664e0"
+            },
+            "optimizer_projection_count": 1,
+            "optimizer_selected_batch_state_hash": "187a77682ade47f621bf0bf8615c7f4209ea4fd2fa938b070f5b766643eb18a3",
+            "parent_selected_state_hashes": [
+              null
+            ],
+            "selected_native_lower_max_abs_diff": 0.0,
+            "selected_native_upper_max_abs_diff": 0.0,
+            "stack_id": "native-property-verified-toy:eval:0000",
+            "warm_source_state_hash": null,
+            "warm_start_kind": "none"
+          }
+        ],
+        "objective_hash": "1bb1faadd28e57d8e14fcaefc934281209d0e8d575f36585631ee166ee46a57c",
+        "optimizer_policy": {
+          "alpha_init": 0.5,
+          "beta_init": 0.0,
+          "lr": 0.1,
+          "objective": "lower",
+          "optimizer": "torch.optim.Adam",
+          "per_batch_params": true,
+          "soft_tau": 1.0,
+          "spec_reduce": "mean",
+          "steps": 1
+        },
+        "performance_claimed": false,
+        "property_status": "not_claimed",
+        "root_input_lower_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+        "root_input_upper_hash": "1bb1faadd28e57d8e14fcaefc934281209d0e8d575f36585631ee166ee46a57c",
+        "run_id": "native-property-verified-toy",
+        "schema_version": "boundflow.optimized-relu-split-bab-trace/v1",
+        "status": "complete",
+        "termination_reason": "configured_bounded_tree_exhausted"
+      },
+      "queue_trace_hash": "e16dac12bc095d4bbcc27621f311ce29f7f60e9897096de5e168bd9ed60ce3f5",
+      "verdict_trace": {
+        "compiler_version": "boundflow.native-property-verdict/v1",
+        "counterexample": null,
+        "objective_hash": "1bb1faadd28e57d8e14fcaefc934281209d0e8d575f36585631ee166ee46a57c",
+        "performance_claimed": false,
+        "queue_trace_hash": "e16dac12bc095d4bbcc27621f311ce29f7f60e9897096de5e168bd9ed60ce3f5",
+        "reason": "all_leaves_soundly_pruned",
+        "run_id": "native-property-verified-toy",
+        "schema_version": "boundflow.native-property-verdict/v1",
+        "sound_pruned_leaf_node_ids": [
+          "native-property-verified-toy:n000000"
+        ],
+        "status": "verified",
+        "threshold": -2.0,
+        "unresolved_leaf_node_ids": []
+      },
+      "verdict_trace_hash": "73048d2c16d2a05627203f3a16e5f27f6d05e63ed69730db7dead0be9bbf55b6"
+    }
+  },
+  "schema_version": "boundflow.native-property-verdict-artifact/v1",
+  "status": "ok"
+}

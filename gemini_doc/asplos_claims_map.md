@@ -688,3 +688,21 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - 工件：`artifacts/native-optimized-relu-split-bab/vnncomp21-resnet2b-prop0-cpu-v1/`；replay
   hash=`e813826c8fe74161505ab2379b37fa67247fd40c3bd0cb8f82b77880ce403787`；聚焦 `18 passed`、
   全量 `630 passed, 37 skipped`；下一缺口为 sound property termination/verdict。
+
+### 2026-08-04 Native Property Termination and Verdict v1
+
+- `C3-M-NRIR13` three-state mechanism：单标量 `C f(x) >= threshold` 有独立
+  verified/unsafe/unknown trace，绑定 immutable optimized queue hash、objective、threshold 与
+  resolved/unresolved leaf sets；
+- `C3-G-NRIR13` soundness gate：verified 仅接受 `lower >= threshold` 的 sound prune
+  closure；budget/depth/unproven prune 一律 unknown；unsafe 必须重执行 input-box、ReLU split
+  path、primal Task IR 和 strict objective violation；同步重哈希篡改 fail closed；
+- `C1/C3-E-NRIR13` concrete execution：toy 分别产生 verified/unsafe/unknown；非 root
+  witness 实际检查 active ReLU margin。固定 ResNet 完整 primal center objective=
+  `0.8564349412918091`，7 nodes/4 frontier 输出 `unknown/node_budget_frontier_open`；
+- `C3-L-NRIR13` hard limitation：candidate discovery 由 caller 提供；只支持单标量 property；
+  无 timeout/dynamic early stop、real complete closure 或 timing/memory/CUDA/OOM/Pareto/speedup claim；
+- 工件：`artifacts/native-property-verdict/vnncomp21-resnet2b-prop0-cpu-v1/`；replay
+  hash=`9e3dceed23c8759c910938ba7c9f84caaeb949c8f19b72fab104ce4e1b733405`；聚焦 `19 passed`、
+  全量 `649 passed, 37 skipped`；下一缺口为 complete verifier query，其后才进入端到端
+  性能基线。

@@ -1,11 +1,11 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`7bc49f5`（NRIR-11 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`a03db4e`（NRIR-12 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/native-optimized-relu-split-bab-v1`
-> PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-11 fixed-step optimizer
-> Schedule（完成）→ NRIR-12 optimized queue integration（完成）→ sound property verdict**。
+> 当前研发分支：`feat/native-property-termination-verdict-v1`
+> PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-12 optimized queue
+> integration（完成）→ NRIR-13 sound property verdict（完成）→ complete verifier query**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有
@@ -809,3 +809,28 @@ artifact 位于
 该阶段只关闭 optimized queue integration/control ownership `VALIDATED-REDUCED`。固定 ResNet 仍是
 `budget_exhausted/property_status=not_claimed`；没有 complete termination/verdict 或性能证据。下一
 工程门禁是 sound property termination/verdict v1，任何未闭合 frontier 必须保持 unknown。
+
+## 26. Native Property Termination and Verdict v1
+
+NRIR-13 在不修改 NRIR-12 queue schema/hash 的前提下新增独立证明层。性质语义为单标量
+`C f(x) >= threshold`：`verified` 必须 queue complete、frontier 为空、且所有 leaf 都有
+`lower >= threshold` 的 sound prune；任何 budget/depth/unproven terminal 均进入 unknown。
+
+新 concrete Task IR executor 独立执行 linear/conv2d/ReLU/residual/reshape 等 primal ops 并保留
+intermediate value trace。`unsafe` 只能由 concrete input 产生：input box、node ReLU split path、
+primal output 与严格 `objective < threshold` 全部重执行通过，并将 tensor/value-trace hash
+绑入 counterexample trace。toy matrix 独立覆盖 verified/unsafe/unknown；同步重哈希后的
+verdict/witness/claim 篡改均 fail closed。
+
+固定 ResNet 仍执行 7 nodes/3 expands/4 frontier，显式输出
+`unknown/node_budget_frontier_open`。其中心点经完整 primal Task IR 重执行的 objective 为
+`0.8564349412918091`，不是 counterexample。artifact 位于
+`artifacts/native-property-verdict/vnncomp21-resnet2b-prop0-cpu-v1/`，generate/replay hash 为
+`9e3dceed23c8759c910938ba7c9f84caaeb949c8f19b72fab104ce4e1b733405`；聚焦 `19 passed`，
+全量 `649 passed, 37 skipped`，静态门禁全过。
+
+该阶段关闭 three-state verdict soundness/control ownership `VALIDATED-REDUCED`，但仍不是完整
+verifier：counterexample discovery 仍由 caller 提供，只支持单标量性质，timeout/dynamic
+optimizer early-stop 未接入，固定 ResNet 也未闭合。下一代码路线是 complete verifier query v1：
+接入可执行 candidate search、multi-clause property aggregation、timeout 与 real verified/unsafe closure；
+完成后再建立与最快竞品的端到端性能基线。

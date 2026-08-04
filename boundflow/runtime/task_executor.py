@@ -1,9 +1,16 @@
+"""Reference abstract and concrete executors for legacy BFTaskModule programs."""
+
+# pylint: disable=missing-class-docstring,missing-function-docstring
+# pylint: disable=too-few-public-methods,too-many-locals,too-many-branches
+# pylint: disable=too-many-statements,invalid-name,line-too-long,not-callable
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any, Dict, Optional, Protocol, Union
 
 import torch
+import torch.nn.functional as F
 
 from ..domains.interval import IntervalDomain, IntervalState
 from ..ir.task import BFTaskModule, TaskKind
@@ -64,6 +71,36 @@ class InputSpec:
 
 
 InputSpecLike = Union[LinfInputSpec, InputSpec]
+
+
+@dataclass(frozen=True)
+class ConcreteTaskExecution:
+    """Deterministic primal Task IR result with intermediate value tensors."""
+
+    output_value: str
+    output: torch.Tensor
+    values: tuple[tuple[str, torch.Tensor], ...]
+
+    def validate(self) -> None:
+        value_map = dict(self.values)
+        if (
+            not self.output_value
+            or len(value_map) != len(self.values)
+            or self.output_value not in value_map
+            or not torch.equal(self.output, value_map[self.output_value])
+        ):
+            raise ValueError("concrete Task IR execution result is invalid")
+        if any(
+            not name
+            or not torch.is_tensor(value)
+            or not bool(torch.isfinite(value).all())
+            for name, value in self.values
+        ):
+            raise ValueError("concrete Task IR execution values are invalid")
+
+    def value_map(self) -> dict[str, torch.Tensor]:
+        self.validate()
+        return dict(self.values)
 
 
 class TaskExecutor(Protocol):
@@ -530,3 +567,205 @@ def _normalize_input_spec(spec: InputSpecLike) -> InputSpec:
     return InputSpec.linf(
         value_name=spec.value_name, center=spec.center, eps=float(spec.eps)
     )
+
+
+def execute_task_module_concrete(
+    module: BFTaskModule,
+    input_value: torch.Tensor,
+    *,
+    input_value_name: Optional[str] = None,
+    output_value: Optional[str] = None,
+) -> ConcreteTaskExecution:
+    """Execute the entry task as a concrete primal program.
+
+    This path intentionally does not consume abstract bounds.  It is used for
+    independently replaying property witnesses against the primal Task IR.
+    """
+
+    module.validate()
+    task = module.get_entry_task()
+    if (
+        not torch.is_tensor(input_value)
+        or not torch.is_floating_point(input_value)
+        or not bool(torch.isfinite(input_value).all())
+    ):
+        raise ValueError("concrete Task IR input must be a finite floating tensor")
+    if input_value_name is None:
+        if len(task.input_values) != 1:
+            raise ValueError("concrete Task IR requires an explicit input value name")
+        input_value_name = task.input_values[0]
+    if input_value_name not in task.input_values:
+        raise ValueError("concrete Task IR input value is not an entry-task input")
+
+    raw_params = module.bindings.get("params", {})
+    if not isinstance(raw_params, dict):
+        raise TypeError("concrete Task IR parameter binding must be a mapping")
+    params: Dict[str, Any] = dict(raw_params)
+    env: Dict[str, torch.Tensor] = {
+        input_value_name: input_value.detach().contiguous().clone()
+    }
+
+    def get_value(name: str) -> torch.Tensor:
+        if name in env:
+            return env[name]
+        if name not in params:
+            raise KeyError(f"missing concrete Task IR value: {name}")
+        value = params[name]
+        if not torch.is_tensor(value):
+            value = torch.as_tensor(value, device=input_value.device)
+        if value.device != input_value.device:
+            raise ValueError("concrete Task IR parameter device differs from input")
+        return value
+
+    def bind(op_name: str, outputs: list[str], value: torch.Tensor) -> None:
+        if len(outputs) != 1 or not outputs[0] or outputs[0] in env:
+            raise ValueError(
+                f"concrete Task IR op '{op_name}' must define one fresh output"
+            )
+        if not bool(torch.isfinite(value).all()):
+            raise ValueError(
+                f"concrete Task IR op '{op_name}' produced non-finite data"
+            )
+        env[outputs[0]] = value
+
+    with torch.no_grad():
+        for op in task.ops:
+            if op.op_type == "spec_linear":
+                logits = get_value(op.inputs[0])
+                objective = get_value(op.inputs[1])
+                if (
+                    objective.dim() != 3
+                    or logits.dim() != 2
+                    or (
+                        int(objective.shape[0]) != int(logits.shape[0])
+                        or int(objective.shape[2]) != int(logits.shape[1])
+                    )
+                ):
+                    raise ValueError("concrete spec_linear shape mismatch")
+                bind(
+                    op.name,
+                    op.outputs,
+                    torch.einsum("bso,bo->bs", objective, logits),
+                )
+                continue
+
+            if op.op_type == "linear":
+                value = get_value(op.inputs[0])
+                weight = get_value(op.inputs[1])
+                bias = get_value(op.inputs[2]) if len(op.inputs) == 3 else None
+                if weight.dim() == 2:
+                    result = F.linear(value, weight, bias)
+                elif weight.dim() == 3 and value.dim() == 2:
+                    result = torch.bmm(weight, value.unsqueeze(-1)).squeeze(-1)
+                    if bias is not None:
+                        result = result + bias
+                else:
+                    raise ValueError("concrete linear shape is unsupported")
+                bind(op.name, op.outputs, result)
+                continue
+
+            if op.op_type == "conv2d":
+                value = get_value(op.inputs[0])
+                weight = get_value(op.inputs[1])
+                bias = get_value(op.inputs[2]) if len(op.inputs) == 3 else None
+                bind(
+                    op.name,
+                    op.outputs,
+                    F.conv2d(
+                        value,
+                        weight,
+                        bias=bias,
+                        stride=op.attrs.get("stride", 1),
+                        padding=op.attrs.get("padding", 0),
+                        dilation=op.attrs.get("dilation", 1),
+                        groups=int(op.attrs.get("groups", 1)),
+                    ),
+                )
+                continue
+
+            if op.op_type == "relu":
+                bind(op.name, op.outputs, torch.relu(get_value(op.inputs[0])))
+                continue
+
+            if op.op_type == "add":
+                bind(
+                    op.name,
+                    op.outputs,
+                    get_value(op.inputs[0]) + get_value(op.inputs[1]),
+                )
+                continue
+
+            if op.op_type == "mul":
+                bind(
+                    op.name,
+                    op.outputs,
+                    get_value(op.inputs[0]) * get_value(op.inputs[1]),
+                )
+                continue
+
+            if op.op_type == "concat":
+                parts = [get_value(name) for name in op.inputs]
+                if len(parts) < 2:
+                    raise ValueError("concrete concat requires at least two inputs")
+                axis = normalize_concat_axis(
+                    op.attrs.get("axis", 1),
+                    rank_with_batch=int(parts[0].dim()),
+                    caller="execute_task_module_concrete",
+                )
+                _ = validate_concat_tensor_shapes(
+                    [tuple(int(dim) for dim in part.shape) for part in parts],
+                    axis=axis,
+                    caller="execute_task_module_concrete",
+                )
+                bind(op.name, op.outputs, torch.cat(parts, dim=axis))
+                continue
+
+            if op.op_type == "flatten":
+                bind(
+                    op.name,
+                    op.outputs,
+                    torch.flatten(
+                        get_value(op.inputs[0]),
+                        start_dim=int(op.attrs.get("start_dim", 0)),
+                        end_dim=int(op.attrs.get("end_dim", -1)),
+                    ),
+                )
+                continue
+
+            if op.op_type == "reshape":
+                shape = op.attrs.get("shape")
+                if shape is None:
+                    raise ValueError("concrete reshape requires attrs['shape']")
+                bind(op.name, op.outputs, get_value(op.inputs[0]).reshape(shape))
+                continue
+
+            if op.op_type in {"permute", "transpose"}:
+                dims = op.attrs.get("dims")
+                if not isinstance(dims, (list, tuple)):
+                    raise ValueError("concrete transpose requires attrs['dims']")
+                bind(
+                    op.name,
+                    op.outputs,
+                    get_value(op.inputs[0]).permute(*(int(dim) for dim in dims)),
+                )
+                continue
+
+            raise NotImplementedError(
+                f"unsupported concrete Task IR op_type: {op.op_type}"
+            )
+
+    if output_value is None:
+        if len(task.output_values) != 1:
+            raise ValueError("concrete Task IR requires an explicit output value")
+        output_value = task.output_values[0]
+    if output_value not in env:
+        raise KeyError(f"concrete Task IR output is unavailable: {output_value}")
+    execution = ConcreteTaskExecution(
+        output_value=output_value,
+        output=env[output_value].detach().contiguous().clone(),
+        values=tuple(
+            (name, value.detach().contiguous().clone()) for name, value in env.items()
+        ),
+    )
+    execution.validate()
+    return execution

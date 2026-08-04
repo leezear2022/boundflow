@@ -16,45 +16,47 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-1. `gemini_doc/BOUNDFLOW_NATIVE_OPTIMIZED_RELU_SPLIT_BAB_V1_PLAN_2026_08_04.md`
-   （当前最新：optimizer Schedule × ReLU-split queue、parent warm-only与 selected native execution）
-2. `gemini_doc/BOUNDFLOW_NATIVE_ALPHA_BETA_OPTIMIZER_STEP_SCHEDULE_V1_PLAN_2026_08_04.md`
+1. `gemini_doc/BOUNDFLOW_NATIVE_PROPERTY_TERMINATION_VERDICT_V1_PLAN_2026_08_04.md`
+   （当前最新：verified/unsafe/unknown soundness、concrete witness replay 与 ResNet unknown）
+2. `gemini_doc/BOUNDFLOW_NATIVE_OPTIMIZED_RELU_SPLIT_BAB_V1_PLAN_2026_08_04.md`
+   （optimizer Schedule × ReLU-split queue、parent warm-only与 selected native execution）
+3. `gemini_doc/BOUNDFLOW_NATIVE_ALPHA_BETA_OPTIMIZER_STEP_SCHEDULE_V1_PLAN_2026_08_04.md`
    （fixed-step optimizer Plan/Task/Schedule、action hash chain与固定 ResNet replay）
-3. `gemini_doc/BOUNDFLOW_NATIVE_ALPHA_BETA_OPTIMIZATION_STATE_V1_PLAN_2026_08_04.md`
+4. `gemini_doc/BOUNDFLOW_NATIVE_ALPHA_BETA_OPTIMIZATION_STATE_V1_PLAN_2026_08_04.md`
    （frozen alpha/beta state、beta lower-dual execution、warm-start validity与五层 IR）
-4. `gemini_doc/BOUNDFLOW_NATIVE_RELU_SPLIT_BAB_QUEUE_V1_PLAN_2026_08_04.md`
+5. `gemini_doc/BOUNDFLOW_NATIVE_RELU_SPLIT_BAB_QUEUE_V1_PLAN_2026_08_04.md`
    （first-class ReLU split IR、best-first bounded queue、真实 ResNet packed/serial node stacks）
-5. `gemini_doc/BOUNDFLOW_NATIVE_BAB_DOMAIN_BATCHING_V1_PLAN_2026_08_04.md`
+6. `gemini_doc/BOUNDFLOW_NATIVE_BAB_DOMAIN_BATCHING_V1_PLAN_2026_08_04.md`
    （8 个不同 input-box leaves、exact child state、domain Plan/Schedule 与 serial reference）
-6. `gemini_doc/BOUNDFLOW_NATIVE_REPEATED_QUERY_BATCHING_CACHE_V1_PLAN_2026_08_04.md`
+7. `gemini_doc/BOUNDFLOW_NATIVE_REPEATED_QUERY_BATCHING_CACHE_V1_PLAN_2026_08_04.md`
    （9 条真实 property query 的 packed/serial execution、exact cache 与 lineage）
-7. `gemini_doc/BOUNDFLOW_NATIVE_REPRESENTATION_BATCH_COMPOSITION_V1_PLAN_2026_08_04.md`
+8. `gemini_doc/BOUNDFLOW_NATIVE_REPRESENTATION_BATCH_COMPOSITION_V1_PLAN_2026_08_04.md`
    （同一 ResNet template/selector 的 dense/structured × full/sliced 联合执行）
-8. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_SLICED_BATCH_EXECUTION_V1_PLAN_2026_08_04.md`
+9. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_SLICED_BATCH_EXECUTION_V1_PLAN_2026_08_04.md`
    （真实 ResNet spec BatchDecision → exact Schedule ranges → child stacks → aggregation）
-9. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_REPRESENTATION_BINDING_V1_PLAN_2026_08_04.md`
+10. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_REPRESENTATION_BINDING_V1_PLAN_2026_08_04.md`
    （Plan/Schedule representation → execution Bound/Task/Launch 语义绑定与 ResNet replay）
-10. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_CUDA_MEMORY_PROTOCOL_V1_PLAN_2026_08_03.md`
+11. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_CUDA_MEMORY_PROTOCOL_V1_PLAN_2026_08_03.md`
    （双 storage fresh CUDA 测量协议与 fail-closed unavailable evidence）
-11. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_MEMORY_PLANS_V1_PLAN_2026_08_04.md`（固定
+12. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_MEMORY_PLANS_V1_PLAN_2026_08_04.md`（固定
    ResNet 双 storage、预算切换、Schedule arena 与 runtime last-use release）
-12. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_BOUND_IR_V1_PLAN_2026_08_04.md`（固定 ResNet
+13. `gemini_doc/BOUNDFLOW_NATIVE_REAL_NETWORK_BOUND_IR_V1_PLAN_2026_08_04.md`（固定 ResNet
    native Bound/Plan/Task/Schedule correctness 与 NRIR-1 边界）
-13. `gemini_doc/BOUNDFLOW_PRODUCTION_SCHEDULE_MEMORY_P0_PLAN_2026_08_04.md`（production
+14. `gemini_doc/BOUNDFLOW_PRODUCTION_SCHEDULE_MEMORY_P0_PLAN_2026_08_04.md`（production
    Schedule ownership/memory 门禁、NO-GO 与 native real-network 准入条件）
-14. `gemini_doc/real_verifier_ir_integration_closure_2026_08_03.md`（真实 verifier
+15. `gemini_doc/real_verifier_ir_integration_closure_2026_08_03.md`（真实 verifier
    correctness/integration 关闭审计与不可升级边界）
-15. `gemini_doc/rvir_external_audit_handoff_2026_08_03.md`（可直接交给其他模型的自包含
+16. `gemini_doc/rvir_external_audit_handoff_2026_08_03.md`（可直接交给其他模型的自包含
    RVIR 审计请求、证据和复核顺序）
-16. `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`（RVIR 所有权与门禁）
-17. `gemini_doc/pr14_external_model_audit_handoff_2026_07_19.md`（从项目起点到 PR-14
+17. `gemini_doc/real_verifier_ir_integration_contract_v1_2026_08_03.md`（RVIR 所有权与门禁）
+18. `gemini_doc/pr14_external_model_audit_handoff_2026_07_19.md`（从项目起点到 PR-14
    No-Go 的自包含外部审计入口）
-18. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`（PR-14
+19. `gemini_doc/boundflow_ir_planner_schedule_runtime_contract_v1_2026_07_20.md`（PR-14
    后 IR-first 架构重置、对象协议与实施门禁）
-19. `gemini_doc/current_status_after_pr13.md`（全项目当前状态）
-20. `gemini_doc/asplos_claims_map.md`（论文主张→代码→实验→工件证据）
-21. `gemini_doc/asplos_execution_memo_v1_0.md`（唯一历史顺序与门禁）
-22. `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`（ASPLOS 顶层计划）
+20. `gemini_doc/current_status_after_pr13.md`（全项目当前状态）
+21. `gemini_doc/asplos_claims_map.md`（论文主张→代码→实验→工件证据）
+22. `gemini_doc/asplos_execution_memo_v1_0.md`（唯一历史顺序与门禁）
+23. `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`（ASPLOS 顶层计划）
 
 ### B. 全流程总览（从 claims 到工程到 AE）
 
@@ -80,6 +82,11 @@
 
 ### 2.1 关键交付文档（“长期有效”）
 
+- `gemini_doc/BOUNDFLOW_NATIVE_PROPERTY_TERMINATION_VERDICT_V1_PLAN_2026_08_04.md`：
+  verified/unsafe/unknown soundness、concrete witness replay、fixed ResNet explicit unknown 与
+  complete-verifier/performance 后续边界
+- `gemini_doc/BOUNDFLOW_NATIVE_PROPERTY_TERMINATION_VERDICT_V1_CHANGELOG_2026_08_04.md`：
+  concrete executor、verdict/proof/witness runtime、artifact/tests 与验证数字
 - `gemini_doc/BOUNDFLOW_NATIVE_OPTIMIZED_RELU_SPLIT_BAB_V1_PLAN_2026_08_04.md`：
   optimizer Schedule × ReLU-split queue、parent warm-only、per-node selected state、fixed ResNet
   packed/serial artifact 与 sound verdict 下一门禁
