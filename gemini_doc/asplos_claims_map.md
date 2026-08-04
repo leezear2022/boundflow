@@ -973,3 +973,21 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - 工件：`artifacts/production-prepared-verifier/vnncomp21-three-topology-cpu-v1/`；evidence
   hash=`7b650dce529d47c54eeadb168b2311e83a4346b47ffc341d5293b6468c6ac08b`。本阶段
   `VALIDATED-REDUCED`；phase evidence 将下一门禁冻结为 parametric dynamic-batch compiler/cache。
+
+### NRIR-28：Parametric Dynamic Batch Compiler v1
+
+- `C1/C2-M-NRIR28` template/instance ownership：静态 PlanTemplate 绑定 graph、tensor contract、
+  ReLU layout、policy/provenance 与 reusable Task/Schedule；动态 PlanInstance 绑定 input/objective/
+  intermediate/split/scope/initial-state、batch 与 warm-start，query cache event 显式记录 miss/hit；
+- `C3-G-NRIR28` exact cache/replay gate：每 query 只有一个 miss，后续 instances 必须 exact
+  contract hit；contract/runtime tensor/event/instance/IR digest tamper fail closed。NRIR-27 frozen
+  artifact 在新增 v2 后仍 fresh replay；
+- `C1/C3-E-NRIR28` repeated full-query CPU result：MNISTFC、ResNet2B、OVAL21 的三组交替
+  production-v1→v2 median speedup 分别为 `4.2849×/9.8630×/3.5024×`；instances/miss/hit=
+  `19/1/18`、`27/1/26`、`11/1/10`，语义逐 clause/queue/state 对齐；
+- `C3-L-NRIR28` hard limitation：三类 solver status 仍全部 unknown；这是相同 BoundFlow 算法的
+  CPU internal speedup，不是 αβ-CROWN 或 GPU speedup。无 complete-property、跨进程 cache、CUDA
+  Pareto 或 ASPLOS-ready claim；
+- 工件：`artifacts/parametric-dynamic-batch-compiler/vnncomp21-three-topology-cpu-v1/`；evidence
+  hash=`117fcecf8e089c16f4275abb97292039790bae75bc4b518ae699bc9ac432ce97`。本阶段
+  `VALIDATED-REDUCED`；下一门禁为 fixed-wall-clock parametric BaB search scaling。

@@ -1,0 +1,27 @@
+{
+  "evidence_hash": "117fcecf8e089c16f4275abb97292039790bae75bc4b518ae699bc9ac432ce97",
+  "files": {
+    "evidence.json": "09167faf477dce843e6112e349aad41b546ea4d22361605c3fbdfd6bde651e4e",
+    "logs/cifar10_resnet-000-g0-parametric_v2.log": "2a301b22bc535789154d52ef3040118319e774a5492a644958a88c63ad634e20",
+    "logs/cifar10_resnet-000-g0-production_v1.log": "9f91725bc9699545e7e4f9b138cb5543b84af33a38a174ae02ab5136a6c0f396",
+    "logs/cifar10_resnet-000-g1-parametric_v2.log": "2a301b22bc535789154d52ef3040118319e774a5492a644958a88c63ad634e20",
+    "logs/cifar10_resnet-000-g1-production_v1.log": "9f91725bc9699545e7e4f9b138cb5543b84af33a38a174ae02ab5136a6c0f396",
+    "logs/cifar10_resnet-000-g2-parametric_v2.log": "2a301b22bc535789154d52ef3040118319e774a5492a644958a88c63ad634e20",
+    "logs/cifar10_resnet-000-g2-production_v1.log": "9f91725bc9699545e7e4f9b138cb5543b84af33a38a174ae02ab5136a6c0f396",
+    "logs/mnistfc-000-g0-parametric_v2.log": "2a301b22bc535789154d52ef3040118319e774a5492a644958a88c63ad634e20",
+    "logs/mnistfc-000-g0-production_v1.log": "9f91725bc9699545e7e4f9b138cb5543b84af33a38a174ae02ab5136a6c0f396",
+    "logs/mnistfc-000-g1-parametric_v2.log": "2a301b22bc535789154d52ef3040118319e774a5492a644958a88c63ad634e20",
+    "logs/mnistfc-000-g1-production_v1.log": "9f91725bc9699545e7e4f9b138cb5543b84af33a38a174ae02ab5136a6c0f396",
+    "logs/mnistfc-000-g2-parametric_v2.log": "2a301b22bc535789154d52ef3040118319e774a5492a644958a88c63ad634e20",
+    "logs/mnistfc-000-g2-production_v1.log": "9f91725bc9699545e7e4f9b138cb5543b84af33a38a174ae02ab5136a6c0f396",
+    "logs/oval21-000-g0-parametric_v2.log": "2a301b22bc535789154d52ef3040118319e774a5492a644958a88c63ad634e20",
+    "logs/oval21-000-g0-production_v1.log": "9f91725bc9699545e7e4f9b138cb5543b84af33a38a174ae02ab5136a6c0f396",
+    "logs/oval21-000-g1-parametric_v2.log": "2a301b22bc535789154d52ef3040118319e774a5492a644958a88c63ad634e20",
+    "logs/oval21-000-g1-production_v1.log": "9f91725bc9699545e7e4f9b138cb5543b84af33a38a174ae02ab5136a6c0f396",
+    "logs/oval21-000-g2-parametric_v2.log": "2a301b22bc535789154d52ef3040118319e774a5492a644958a88c63ad634e20",
+    "logs/oval21-000-g2-production_v1.log": "9f91725bc9699545e7e4f9b138cb5543b84af33a38a174ae02ab5136a6c0f396"
+  },
+  "performance_claimed": true,
+  "schema_version": "boundflow.parametric-compiler-artifact/v1",
+  "status": "ok"
+}

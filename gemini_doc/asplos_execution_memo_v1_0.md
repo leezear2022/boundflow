@@ -1148,3 +1148,24 @@ artifact evidence hash=
 full-query execution 仍有约 `59%–65%` 位于四个 production action 之外，下一门禁为 parametric
 dynamic-batch PlanTemplate/PlanInstance 与 compile cache；GPU、complete property、公平 competitor
 与 ASPLOS-ready 均保持 pending。
+
+## 41. Parametric Dynamic Batch Compiler v1
+
+NRIR-28 将逐 dynamic batch 的 optimizer 编译拆为静态 PlanTemplate 与 exact PlanInstance。
+graph、input/objective contract、ReLU layout、policy、provenance 和 reusable Task/Schedule 只编译
+一次；input/objective/split/intermediate/parent warm-state content 全部进入 instance hash。query-local
+cache 只接受 exact contract hit，任何 contract、event、instance 或 runtime tensor 漂移 fail closed。
+NRIR-27 frozen 路径保持未修改并继续 artifact replay。
+
+三类真实拓扑各三组交替 fresh-process full-query production-v1→parametric-v2：MNISTFC median
+`14.807→3.456 s`（`4.2849×`）、ResNet2B `61.239→6.209 s`（`9.8630×`）、OVAL21
+`13.021→3.718 s`（`3.5024×`）。每次 query 只有一个 template miss；其余
+`18/26/10` 个 instances 均 exact hit。所有 solver status、clause accounting、logical queue、node
+coverage、selected-state hash 和 root bounds 保持一致。
+
+artifact evidence hash=
+`117fcecf8e089c16f4275abb97292039790bae75bc4b518ae699bc9ac432ce97`；全量
+`818 passed, 37 skipped`。本阶段以 same-algorithm full-query internal CPU performance
+`VALIDATED-REDUCED` 关闭。三类 query 仍为 unknown；无 CUDA、external competitor speedup、
+complete-property 或 ASPLOS-ready claim。下一门禁为 fixed-wall-clock typed BaB search scaling，
+判断 compiler/runtime 收益能否转化为更多节点、更深覆盖与 property closure。
