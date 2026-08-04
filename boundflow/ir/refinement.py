@@ -161,6 +161,143 @@ class NativeIntermediateRefinementPolicyIR:
 
 
 @dataclass(frozen=True)
+class NativeIntermediateRefinementBudgetPolicyIR:
+    """Conserved dynamic target-cap allocation across one evaluation group."""
+
+    base_max_neurons_per_relu: int
+    high_max_neurons_per_relu: int
+    low_max_neurons_per_relu: int
+    parent_lower_tie_tolerance: float = 1e-6
+    allocation_mode: str = "parent_lower_generated_batch_v1"
+    conservation: str = "exact_group_target_cap_sum"
+    semantics_owner: str = "boundflow_native_refinement_budget"
+
+    def validate(self) -> None:
+        if (
+            self.allocation_mode != "parent_lower_generated_batch_v1"
+            or self.conservation != "exact_group_target_cap_sum"
+            or self.semantics_owner != "boundflow_native_refinement_budget"
+            or self.base_max_neurons_per_relu < 1
+            or self.low_max_neurons_per_relu < 1
+            or self.high_max_neurons_per_relu <= self.base_max_neurons_per_relu
+            or self.low_max_neurons_per_relu >= self.base_max_neurons_per_relu
+            or self.high_max_neurons_per_relu + self.low_max_neurons_per_relu
+            != 2 * self.base_max_neurons_per_relu
+            or not math.isfinite(self.parent_lower_tie_tolerance)
+            or self.parent_lower_tie_tolerance < 0.0
+        ):
+            raise ValueError("native refinement budget policy IR is invalid")
+
+    def to_dict(self) -> dict[str, object]:
+        self.validate()
+        return {
+            "base_max_neurons_per_relu": self.base_max_neurons_per_relu,
+            "high_max_neurons_per_relu": self.high_max_neurons_per_relu,
+            "low_max_neurons_per_relu": self.low_max_neurons_per_relu,
+            "parent_lower_tie_tolerance": self.parent_lower_tie_tolerance,
+            "allocation_mode": self.allocation_mode,
+            "conservation": self.conservation,
+            "semantics_owner": self.semantics_owner,
+        }
+
+    def stable_hash(self) -> str:
+        return _canonical_hash(self.to_dict())
+
+
+@dataclass(frozen=True)
+class NativeIntermediateRefinementBudgetDecisionIR:
+    """One node's target cap bound to its conserved evaluation group."""
+
+    decision_id: str
+    budget_policy_hash: str
+    group_id: str
+    group_semantic_hash: str
+    group_size: int
+    group_base_cap_total: int
+    group_assigned_cap_total: int
+    node_id: str
+    node_split_state_hash: str
+    node_depth: int
+    assigned_max_neurons_per_relu: int
+    allocation_rank: str
+    parent_node_id: Optional[str] = None
+    parent_lower: Optional[float] = None
+    semantics_owner: str = "boundflow_native_refinement_budget"
+
+    def validate(self, *, policy: NativeIntermediateRefinementBudgetPolicyIR) -> None:
+        policy.validate()
+        parent_present = self.parent_node_id is not None
+        if (
+            not self.decision_id
+            or self.budget_policy_hash != policy.stable_hash()
+            or not self.group_id
+            or not _is_sha256(self.group_semantic_hash)
+            or self.group_size < 1
+            or self.group_base_cap_total
+            != self.group_size * policy.base_max_neurons_per_relu
+            or self.group_assigned_cap_total != self.group_base_cap_total
+            or not self.node_id
+            or not _is_sha256(self.node_split_state_hash)
+            or self.node_depth < 0
+            or self.assigned_max_neurons_per_relu
+            not in {
+                policy.low_max_neurons_per_relu,
+                policy.base_max_neurons_per_relu,
+                policy.high_max_neurons_per_relu,
+            }
+            or self.allocation_rank not in {"root", "base", "high_risk", "low_risk"}
+            or self.semantics_owner != policy.semantics_owner
+            or parent_present != (self.parent_lower is not None)
+            or (self.parent_lower is not None and not math.isfinite(self.parent_lower))
+            or (self.node_depth == 0) != (not parent_present)
+            or (self.node_depth == 0) != (self.allocation_rank == "root")
+            or (
+                self.allocation_rank in {"root", "base"}
+                and self.assigned_max_neurons_per_relu
+                != policy.base_max_neurons_per_relu
+            )
+            or (
+                self.allocation_rank == "high_risk"
+                and self.assigned_max_neurons_per_relu
+                != policy.high_max_neurons_per_relu
+            )
+            or (
+                self.allocation_rank == "low_risk"
+                and self.assigned_max_neurons_per_relu
+                != policy.low_max_neurons_per_relu
+            )
+        ):
+            raise ValueError("native refinement budget decision IR is invalid")
+
+    def to_dict(
+        self, *, policy: NativeIntermediateRefinementBudgetPolicyIR
+    ) -> dict[str, object]:
+        self.validate(policy=policy)
+        payload: dict[str, object] = {
+            "decision_id": self.decision_id,
+            "budget_policy_hash": self.budget_policy_hash,
+            "group_id": self.group_id,
+            "group_semantic_hash": self.group_semantic_hash,
+            "group_size": self.group_size,
+            "group_base_cap_total": self.group_base_cap_total,
+            "group_assigned_cap_total": self.group_assigned_cap_total,
+            "node_id": self.node_id,
+            "node_split_state_hash": self.node_split_state_hash,
+            "node_depth": self.node_depth,
+            "assigned_max_neurons_per_relu": (self.assigned_max_neurons_per_relu),
+            "allocation_rank": self.allocation_rank,
+            "semantics_owner": self.semantics_owner,
+        }
+        if self.parent_node_id is not None:
+            payload["parent_node_id"] = self.parent_node_id
+            payload["parent_lower"] = self.parent_lower
+        return payload
+
+    def stable_hash(self, *, policy: NativeIntermediateRefinementBudgetPolicyIR) -> str:
+        return _canonical_hash(self.to_dict(policy=policy))
+
+
+@dataclass(frozen=True)
 class NativeIntermediateRefinementTargetIR:
     """One selected unstable pre-activation neuron."""
 

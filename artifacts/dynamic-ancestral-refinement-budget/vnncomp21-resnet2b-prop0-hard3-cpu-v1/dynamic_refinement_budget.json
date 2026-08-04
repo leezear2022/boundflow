@@ -1,0 +1,220 @@
+{
+  "evidence": {
+    "claim_boundary": "fixed ResNet property 0 clauses 0/2/4, CPU, 31-node depth-four fixed16 versus conserved parent-lower dynamic8_24 target caps",
+    "comparisons": [
+      {
+        "clause_index": 0,
+        "dynamic8_24": {
+          "actual_selected_target_count": 2976,
+          "allocation_rank_counts": {
+            "base": 2,
+            "high_risk": 14,
+            "low_risk": 14,
+            "root": 1
+          },
+          "best_terminal_lower": -0.26213181018829346,
+          "bounded_tree_status": "unknown",
+          "evaluated_nodes": 31,
+          "planned_target_cap_per_relu": 496,
+          "proof_deficit": 0.2819737195968628,
+          "worst_terminal_lower": -0.2819737195968628
+        },
+        "dynamic_not_weaker": true,
+        "dynamic_strictly_better": true,
+        "dynamic_worst_lower_delta": 0.0003859996795654297,
+        "fixed16": {
+          "actual_selected_target_count": 2976,
+          "allocation_rank_counts": {
+            "fixed": 31
+          },
+          "best_terminal_lower": -0.26209163665771484,
+          "bounded_tree_status": "unknown",
+          "evaluated_nodes": 31,
+          "planned_target_cap_per_relu": 496,
+          "proof_deficit": 0.2823597192764282,
+          "worst_terminal_lower": -0.2823597192764282
+        },
+        "logical_domain_overlap": 29,
+        "logical_domain_union": 33,
+        "performance_claimed": false,
+        "same_planned_target_cap": true
+      },
+      {
+        "clause_index": 2,
+        "dynamic8_24": {
+          "actual_selected_target_count": 2976,
+          "allocation_rank_counts": {
+            "base": 10,
+            "high_risk": 10,
+            "low_risk": 10,
+            "root": 1
+          },
+          "best_terminal_lower": -0.31923121213912964,
+          "bounded_tree_status": "unknown",
+          "evaluated_nodes": 31,
+          "planned_target_cap_per_relu": 496,
+          "proof_deficit": 0.40161198377609253,
+          "worst_terminal_lower": -0.40161198377609253
+        },
+        "dynamic_not_weaker": true,
+        "dynamic_strictly_better": true,
+        "dynamic_worst_lower_delta": 0.00023299455642700195,
+        "fixed16": {
+          "actual_selected_target_count": 2976,
+          "allocation_rank_counts": {
+            "fixed": 31
+          },
+          "best_terminal_lower": -0.31933462619781494,
+          "bounded_tree_status": "unknown",
+          "evaluated_nodes": 31,
+          "planned_target_cap_per_relu": 496,
+          "proof_deficit": 0.40184497833251953,
+          "worst_terminal_lower": -0.40184497833251953
+        },
+        "logical_domain_overlap": 31,
+        "logical_domain_union": 31,
+        "performance_claimed": false,
+        "same_planned_target_cap": true
+      },
+      {
+        "clause_index": 4,
+        "dynamic8_24": {
+          "actual_selected_target_count": 2976,
+          "allocation_rank_counts": {
+            "base": 6,
+            "high_risk": 12,
+            "low_risk": 12,
+            "root": 1
+          },
+          "best_terminal_lower": -0.11560201644897461,
+          "bounded_tree_status": "unknown",
+          "evaluated_nodes": 31,
+          "planned_target_cap_per_relu": 496,
+          "proof_deficit": 0.4596676826477051,
+          "worst_terminal_lower": -0.4596676826477051
+        },
+        "dynamic_not_weaker": true,
+        "dynamic_strictly_better": true,
+        "dynamic_worst_lower_delta": 0.00027179718017578125,
+        "fixed16": {
+          "actual_selected_target_count": 2976,
+          "allocation_rank_counts": {
+            "fixed": 31
+          },
+          "best_terminal_lower": -0.11560201644897461,
+          "bounded_tree_status": "unknown",
+          "evaluated_nodes": 31,
+          "planned_target_cap_per_relu": 496,
+          "proof_deficit": 0.45993947982788086,
+          "worst_terminal_lower": -0.45993947982788086
+        },
+        "logical_domain_overlap": 31,
+        "logical_domain_union": 31,
+        "performance_claimed": false,
+        "same_planned_target_cap": true
+      }
+    ],
+    "gates": {
+      "all_six_units_present": true,
+      "all_tree_planned_caps_conserved": true,
+      "any_fixed_clause_bounded_tree_closed": false,
+      "dynamic_not_weaker_on_all_hard_clauses": true,
+      "dynamic_strictly_improves_at_least_one_hard_clause": true
+    },
+    "limitations": [
+      "fixed ResNet property 0 clauses 0, 2, and 4 on CPU only",
+      "external seed generation remains owned by alpha-beta-CROWN",
+      "equal planned target caps are not equal latency or actual selected targets",
+      "bounded trees do not imply complete property or verifier closure",
+      "GPU, multi-workload, cuts, multi-pass, and performance remain pending"
+    ],
+    "performance_claimed": false,
+    "protocol": {
+      "base_refinement_policy": {
+        "backward_chunk_size": 8,
+        "candidate_policy_id": "objective_influence_width_per_relu_v1",
+        "max_neurons_per_relu": 16,
+        "minimum_width": 0.0,
+        "passes": 1,
+        "refinement_method": "selected_plain_crown_v1"
+      },
+      "branch_policy": {
+        "candidate_batch_size": 64,
+        "candidate_policy_id": "top_width_per_relu_v1",
+        "candidates_per_relu": 8,
+        "max_candidates": 256,
+        "reduce_policy": "maximize_worst_child_then_mean"
+      },
+      "dynamic_budget_policy": {
+        "allocation_mode": "parent_lower_generated_batch_v1",
+        "base_max_neurons_per_relu": 16,
+        "conservation": "exact_group_target_cap_sum",
+        "high_max_neurons_per_relu": 24,
+        "low_max_neurons_per_relu": 8,
+        "parent_lower_tie_tolerance": 1e-06,
+        "semantics_owner": "boundflow_native_refinement_budget"
+      },
+      "execution_isolation": "fresh_python_process_per_clause_mode",
+      "hard_clause_indices": [
+        0,
+        2,
+        4
+      ],
+      "modes": [
+        "fixed16",
+        "dynamic8_24"
+      ],
+      "optimizer_policy": {
+        "alpha_init": 0.5,
+        "alpha_initialization_mode": "adaptive",
+        "beta_init": 0.0,
+        "lr": 0.2,
+        "objective": "lower",
+        "optimizer": "torch.optim.Adam",
+        "per_batch_params": true,
+        "soft_tau": 1.0,
+        "spec_reduce": "mean",
+        "steps": 25
+      },
+      "queue_config": {
+        "available_memory_bytes": 1073741824,
+        "expansion_batch_size": 2,
+        "max_depth": 4,
+        "max_eval_batch_size": 4,
+        "max_nodes": 31,
+        "memory_budget_bytes": 1073741824,
+        "threshold": 0.0
+      },
+      "strategy": "external_seeded_ancestral_carry_v1"
+    },
+    "schema_version": "boundflow.dynamic-refinement-budget-evidence/v1",
+    "shard_semantic_hashes": {
+      "clause0_dynamic8_24.json": "05f074f576b335ab00459cfc0c71ff00c9907d002655c74fc84418c7da4dec6e",
+      "clause0_fixed16.json": "17990bc1cb84850c16498a2f1060ba0ed10de7c3d3f4bd1194c88349ccb90ab7",
+      "clause2_dynamic8_24.json": "881c6807668b3471113cb36e888b6c8805596fe43da29cf77f908fcfd2aebf0a",
+      "clause2_fixed16.json": "f0add20706ec015855dfc23ede1361a14ce0a428640527cf9ef5264ebdb9a40c",
+      "clause4_dynamic8_24.json": "4ccccc807fe348ca4a7f4ba7ddd78fb560fad46a3b436577193fdeb9dff29e01",
+      "clause4_fixed16.json": "ba746cb91f7ee81a64377de42164b064fc7f3b7fd159480183c4f6332bf2a4ee"
+    },
+    "source": {
+      "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+      "external_oracle_lower_hash": "f99f8b863e044328e2747aa372f0d25da18257979cb94d60f8391edbf0a761fa",
+      "input_lower_hash": "bed6da6e49f1123b54fe61247615cf0e86f1b4257face7b073428f257607bda6",
+      "input_upper_hash": "955d79bd0824185cad0be1e758e6e492c51aec6c9199f81359b2528b848ec9ab",
+      "intermediate_bounds_sha256": "d51615b04dfb205afd67d2c21680ece4ca92f693157da1e32c7f8202a8e08cf1",
+      "local_complete_query_artifact_sha256": "9c490bf33edab555f14e4d4c354f6d6055c1fe627102473fc2e506e29fdbaaf8",
+      "local_complete_query_manifest_sha256": "d76595fba9318c7dc70fd79fb9ebd28594b83c59202426f33a45c58486a409b3",
+      "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+      "native_ir_artifact_schema": "boundflow.native-real-network-ir-artifact/v1",
+      "native_ir_manifest_sha256": "5d38aa4adcd7b8593b0ca3751106d3a254b72a2698bd445a8dde59d50eb5a676",
+      "native_ir_payload_sha256": "3ba949de66380c7d16dc44bb934eca8400182521e761c19eaa671cd8cf0eb557",
+      "objective_matrix_hash": "380f1c32321ea47967ad48221134d92d494630777eabe10ef31576a0b051e408",
+      "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf",
+      "vnnlib_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff"
+    },
+    "status": "validated_reduced"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.dynamic-refinement-budget-artifact/v1",
+  "status": "validated_reduced"
+}

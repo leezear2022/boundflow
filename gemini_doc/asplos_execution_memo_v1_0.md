@@ -1,15 +1,15 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`c6a7998`（NRIR-23 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`47ca159`（NRIR-24 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/external-seeded-depth-node-convergence-v1`
+> 当前研发分支：`feat/dynamic-ancestral-refinement-budget-v1`
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed
 > intermediate target selection（完成）→ per-child intermediate refinement（NO-GO）→
 > ancestral-constraint carry-forward refinement（完成）→ external-seeded hard-clause convergence
->（完成）→ dynamic ancestral refinement budget**。
+>（完成）→ dynamic ancestral refinement budget（完成）→ typed multi-pass refinement**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有
@@ -1087,3 +1087,23 @@ external-seeded fixed-hard-clause convergence trend `VALIDATED-REDUCED`；不声
 property、performance、CUDA、multi-workload、competitor parity 或 ASPLOS-ready。proof deficit
 仍为 `0.282360/0.401845/0.459939`，下一门禁转向 dynamic ancestral refinement budget/multi-pass，
 而不是继续盲目增加固定树深。
+
+## 38. Dynamic Ancestral Refinement Budget v1
+
+NRIR-25 新增 first-class refinement-budget policy/decision。每个 evaluation-generated group 依据
+parent lower 分配 24/8 targets/ReLU；root、single-parent 或 `1e-6` tie 使用 base 16。decision
+绑定 policy/group/node/split/depth/parent 与 exact conservation totals，assigned cap 派生为实际
+refinement Plan policy，Task/Schedule/execution/queue trace 逐层交叉校验；旧 fixed16 路径条件兼容。
+
+固定 ResNet clauses `0/2/4`、31 nodes/depth 4、external seed、ancestral carry、objective branch、
+25-step optimizer 与单 pass 下，fixed16→dynamic8_24 的 worst terminal lower 为：
+
+- `-0.2823597193 → -0.2819737196`（delta `+0.0003859997`）；
+- `-0.4018449783 → -0.4016119838`（delta `+0.0002329946`）；
+- `-0.4599394798 → -0.4596676826`（delta `+0.0002717972`）。
+
+两 mode 的 planned cap 都是 `496`，实际 selected targets 都是 `2976`；三条 dynamic 均不弱且严格
+改善，因此按预注册门禁为 `VALIDATED-REDUCED`。artifact evidence hash=
+`85d9f274c6e17614bcbf318bdbfea18219b03876024be16aea3329ee4d3c56bd`。三条树仍 unknown，不能
+升级 complete property、performance、CUDA、multi-workload、competitor 或 ASPLOS-ready。
+下一门禁为 typed multi-pass refinement/termination 与 pass-to-pass lineage，不回到盲目固定树扩展。

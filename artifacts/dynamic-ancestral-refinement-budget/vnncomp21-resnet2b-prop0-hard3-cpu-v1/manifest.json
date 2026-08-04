@@ -1,0 +1,15 @@
+{
+  "evidence_hash": "85d9f274c6e17614bcbf318bdbfea18219b03876024be16aea3329ee4d3c56bd",
+  "files": {
+    "dynamic_refinement_budget.json": "880c0b975eeb0167c77cf21e3028c57fe8efad378d216f74e9ed54e087444c0a",
+    "shards/clause0_dynamic8_24.json": "1578245605244205da8d3e762386d8d669b153af5365d2f1d36b36c9e03ea5f8",
+    "shards/clause0_fixed16.json": "7a3626ba3a804b3bf789003f43df668c45ac972d0f5c6fd1e75e849c464784cc",
+    "shards/clause2_dynamic8_24.json": "b326c0276dfa6ed36f9ee7a8d0e75fe269209df583070c361f30fe443ec87cab",
+    "shards/clause2_fixed16.json": "697a0656db4819ba2d7c62d4b5aec9ab4c38ff0de277bf739e95d54c18cda66c",
+    "shards/clause4_dynamic8_24.json": "58cde385ba060305d6f2436f0527c5e69cb5c4868743fb9108833050bd065b1e",
+    "shards/clause4_fixed16.json": "04fd3be6403d7350ab90ded76482dab8504376da45c229b6ddff6cd890737a68"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.dynamic-refinement-budget-artifact/v1",
+  "status": "validated_reduced"
+}

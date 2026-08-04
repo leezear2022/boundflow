@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev003103
-last_va: ev003104
+last_ch: ev003192
+last_va: ev003193
 blk:
-next: publish-and-merge-nrir24-then-freeze-dynamic-refinement-budget-v1
-updated: 2026-08-04T09:26:56Z
+next: finalize-nrir25-commit-push-pr
+updated: 2026-08-04T10:10:28Z
