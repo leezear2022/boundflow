@@ -11,8 +11,9 @@
 > 两轴联合到同一 template/selector 并执行四组合；NRIR-7 加入 9 条真实 property query 的
 > packed/serial/cache/lineage；NRIR-8 加入 8 个不同 input-box leaf、exact child state 与
 > domain-axis execution。NRIR-34 已进一步加入 same-parent sibling-group Plan/Task/Schedule 与 packed
-> dynamic queue，在固定 ResNet hard clause 上形成三重复 committed-node coverage 结果；完整九子句
-> 仍只有 clause 0 被执行，故 ASPLOS-ready No-Go 不变。
+> dynamic queue；NRIR-35 又以一等六阶段 IR 先执行九子句 floor，再用相同 global start 对 clause 0
+> 做 additive packed work。三轮均保留 9/9 original-ordinal accounting，但仍 9/9 unresolved，故
+> ASPLOS-ready No-Go 不变。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
@@ -1101,3 +1102,24 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   full-query evidence hash=`dcd0dc89fa7e4eb503e8a8b29438e16d215da10e66cd045cc76eb19a30037bf5`。
   本阶段 `VALIDATED-REDUCED`；下一门禁为 cross-clause shared root/parametric evaluator + anytime
   global-budget allocation。
+
+### NRIR-35：Cross-Clause Anytime Objective Evaluator v1
+
+- `C1/C2-M-NRIR35` cross-clause compiler ownership：NRIR-31 floor、Decision、guarded NRIR-34 packed
+  compile/execute、monotone original-ordinal aggregate 与 emit 被 lower 为一等 Plan/6-task
+  TaskModule/Schedule；objective/threshold/policy、exact clause-0 source 与 single global deadline
+  逐项 hash-bound；
+- `C3-G-NRIR35` admission/fallback gate：只有 floor completed `[0..8]` 且 clause 0 unresolved 才
+  admit；packed unknown 保留 exact floor。wrong ordinal/source、deadline reset、baseline omission、
+  non-monotone aggregate、partial sibling group 即使同步重算 worker hash 也 fail closed；
+- `C1/C3-E-NRIR35` repeated additive coverage：三 fresh repeats 的 NRIR-31 floor elapsed=
+  `[22.227251,21.622773,21.834220] s`，每轮完成 9/9 ordinals；剩余预算内 packed accepted nodes=
+  `[7,7,9]`，所有 group 均为 atomic pairs；
+- `C3-L-NRIR35` hard limitation：三轮 floor/packed/final 均为 sound unknown、9/9 unresolved；whole
+  cooperative elapsed=`[61.991720,62.598928,68.042604] s`，不是 60 秒硬实时或 wall-clock speedup。
+  CPU 单 workload、只 escalation clause 0，无 property/GPU/competitor/multi-workload/ASPLOS-ready；
+- 工件：`artifacts/cross-clause-anytime-objective-evaluator/`
+  `vnncomp21-resnet2b-property0-three-repeat-cpu-formal-v1/`；formal hash=
+  `74533c9c211a3007bf5af43c08865febd95c3f9ccf1a268e56738793ec9d14d5`。本阶段 cross-clause
+  control/original-ordinal preservation `VALIDATED-REDUCED`，`performance_claimed=false`；下一门禁
+  为 multi-clause anytime priority/time slicing。

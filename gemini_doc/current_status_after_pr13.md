@@ -1,10 +1,15 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`45d2ea6`（NRIR-33 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/sibling-packed-objective-ancestral-evaluator-v1`
+> 当前 integration base：`796a64e`（NRIR-34 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/cross-clause-anytime-objective-evaluator-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
+> 2026-08-04 NRIR-35 后续：九子句 NRIR-31 floor 已与 clause-0 NRIR-34 packed queue 通过一等
+> Plan/Decision/6-stage Task/Schedule 串接，并消费同一 global start。三 fresh repeats 均完成
+> `[0..8]` floor，余量内 packed nodes=`[7,7,9]`；final 仍 9/9 unresolved。状态为 cross-clause
+> control/original-ordinal preservation VALIDATED-REDUCED；下一门禁是 multi-clause anytime
+> priority/time slicing，ASPLOS-ready 与 performance No-Go 不变。
 > 2026-08-04 NRIR-19 后续：native selected-CROWN intermediate refinement 已成为一等
 > Plan/Task/Schedule。MNISTFC 关闭 clauses 3/7，OVAL21 从 unknown 变 verified；ResNet 两个 root
 > lower 改善 `+70.496/+160.551` 但状态仍 unknown。下一门禁为 objective-directed intermediate
@@ -979,3 +984,24 @@ same-algorithm deadline coverage `VALIDATED-REDUCED`；atomic cooperative wall t
 `64.5—66.2 s`，不声明硬实时/wall-clock speedup、property、GPU、competitor 或 ASPLOS-ready。
 下一门禁是 NRIR-35 cross-clause objective/root/compiler sharing + anytime global budget，目标是在同一
 60 秒内增加 completed original clauses。
+
+## 42. Cross-Clause Anytime Objective Evaluator v1 判定
+
+NRIR-35 用 static Plan/Decision/6-task TaskModule/Schedule 把 frozen NRIR-31 all-clause floor 与
+NRIR-34 clause-0 packed queue 串接。Decision 只有在 floor completed `[0..8]`、final unknown、
+clause 0 unresolved 且 exact accepted child refinement 存在时才 admit；root Plan/semantic/final-bound
+hash、original ordinal 与 global deadline 都 fail closed。Aggregate 始终保留九个 original ordinals，
+packed unknown 只能留下 exact floor。
+
+feasibility 先以 floor `22.180303 s`、packed 7 nodes 通过。正式 runtime 三 fresh repeats 的 floor
+elapsed=`[22.227251,21.622773,21.834220] s`，每轮 completed/unresolved=`[0..8]`；packed accepted
+nodes=`[7,7,9]`。whole elapsed=`[61.991720,62.598928,68.042604] s`，是 cooperative atomic
+sibling-group completion，不是硬实时或 speedup。formal hash=
+`74533c9c211a3007bf5af43c08865febd95c3f9ccf1a268e56738793ec9d14d5`；replay、六类同步重哈希
+tamper、关联 29 tests、全量 `874 passed, 37 skipped` 与静态门禁均通过。
+
+结论为 cross-clause control/original-ordinal preservation `VALIDATED-REDUCED`；三轮 final 仍为
+sound unknown、9/9 unresolved，`performance_claimed=false`。没有 property closure、GPU、competitor、
+multi-workload 或 ASPLOS-ready claim。下一分支为 `feat/multi-clause-anytime-priority-v1`：在同一
+global 60 秒预算内用 typed priority/time slice 覆盖多个 unresolved clauses，不为每条 clause 重置
+deadline。

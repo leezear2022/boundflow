@@ -4326,3 +4326,21 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_SIBLING_PACKED_OBJECTIVE_ANCESTRAL_EVALUATOR_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Cross-Clause Anytime Objective Evaluator v1
+
+- 新增 NRIR-31 floor + guarded NRIR-34 packed escalation 的 Plan/Decision/6-stage Task/Schedule 与
+  native runtime；exact clause-0 source lineage、original ordinal、single global start 和 monotone
+  aggregate 均 fail closed；
+- 三 fresh repeats 的 floor elapsed=`[22.227251,21.622773,21.834220] s`，均完成 9/9 original
+  ordinals；剩余预算内 packed accepted nodes=`[7,7,9]`，但 final 仍 9/9 unresolved；
+- formal replay、六类同步重哈希 tamper、关联 `29 passed`、全量 `874 passed, 37 skipped` 与静态门禁
+  通过；formal hash=`74533c9c211a3007bf5af43c08865febd95c3f9ccf1a268e56738793ec9d14d5`；
+- 以 cross-clause control/original-ordinal preservation `VALIDATED-REDUCED` 关闭；whole cooperative
+  elapsed 约 `62.09—67.72 s`，不声明硬实时、performance/property/GPU/competitor/ASPLOS-ready。
+  下一门禁为 multi-clause anytime priority/time slicing。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_CROSS_CLAUSE_ANYTIME_OBJECTIVE_EVALUATOR_V1_CHANGELOG_2026_08_04.md`

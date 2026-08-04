@@ -16,10 +16,11 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_SIBLING_PACKED_OBJECTIVE_ANCESTRAL_EVALUATOR_V1_PLAN_2026_08_04.md`
-（same-parent atomic packed evaluator、三重复 15-vs-7 node coverage 与 9-clause global-deadline
-integration）。
+当前最新入口：`gemini_doc/BOUNDFLOW_CROSS_CLAUSE_ANYTIME_OBJECTIVE_EVALUATOR_V1_PLAN_2026_08_04.md`
+（九子句 NRIR-31 floor、同一 global start 的 clause-0 packed escalation、六阶段 IR 与三重复
+original-ordinal preservation）。
 其直接前序为
+`gemini_doc/BOUNDFLOW_SIBLING_PACKED_OBJECTIVE_ANCESTRAL_EVALUATOR_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_OBJECTIVE_ANCESTRAL_CHILD_BUDGET_PARETO_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_OBJECTIVE_ANCESTRAL_HARD_CLAUSE_ESCALATION_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_OBJECTIVE_DIRECTED_HARD_CLAUSE_ESCALATION_V1_PLAN_2026_08_04.md`、
@@ -106,6 +107,11 @@ integration）。
 
 ### 2.1 关键交付文档（“长期有效”）
 
+- `gemini_doc/BOUNDFLOW_CROSS_CLAUSE_ANYTIME_OBJECTIVE_EVALUATOR_V1_PLAN_2026_08_04.md`：
+  NRIR-31 floor + guarded NRIR-34 escalation 的 Plan/Decision/Task/Schedule、单 global deadline、
+  monotone aggregate、三重复门禁与 multi-clause priority 下一路线
+- `gemini_doc/BOUNDFLOW_CROSS_CLAUSE_ANYTIME_OBJECTIVE_EVALUATOR_V1_CHANGELOG_2026_08_04.md`：
+  feasibility、runtime/tests、formal artifact/replay、精确三重复数字与 claim boundary
 - `gemini_doc/BOUNDFLOW_SIBLING_PACKED_OBJECTIVE_ANCESTRAL_EVALUATOR_V1_PLAN_2026_08_04.md`：
   sibling-group IR、atomic deadline、三重复 coverage 门禁与 cross-clause 下一路线
 - `gemini_doc/BOUNDFLOW_SIBLING_PACKED_OBJECTIVE_ANCESTRAL_EVALUATOR_V1_CHANGELOG_2026_08_04.md`：
