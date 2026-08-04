@@ -50,6 +50,73 @@ class IntermediateRefinementTaskKind(Enum):
 
 
 @dataclass(frozen=True)
+class ExternalIntermediateConstraintSeedIR:
+    """External-owned intermediate constraints admitted into native refinement."""
+
+    seed_id: str
+    provider: str
+    primal_graph_hash: str
+    input_bounds_hash: str
+    external_intermediate_bounds_hash: str
+    bound_intermediate_constraints_hash: str
+    source_artifact_manifest_hash: str
+    source_artifact_payload_hash: str
+    source_model_hash: str
+    source_property_hash: str
+    source_objective_set_hash: str
+    consumption: str = "sound_constraint_intersection_only"
+    semantics_owner: str = "external_verifier"
+
+    def validate(self) -> None:
+        if (
+            not self.seed_id
+            or not self.provider
+            or self.semantics_owner != "external_verifier"
+            or self.consumption != "sound_constraint_intersection_only"
+            or any(
+                not _is_sha256(value)
+                for value in (
+                    self.primal_graph_hash,
+                    self.input_bounds_hash,
+                    self.external_intermediate_bounds_hash,
+                    self.bound_intermediate_constraints_hash,
+                    self.source_artifact_manifest_hash,
+                    self.source_artifact_payload_hash,
+                    self.source_model_hash,
+                    self.source_property_hash,
+                    self.source_objective_set_hash,
+                )
+            )
+        ):
+            raise ValueError("external intermediate constraint seed IR is invalid")
+
+    def to_dict(self) -> dict[str, object]:
+        self.validate()
+        return {
+            "seed_id": self.seed_id,
+            "provider": self.provider,
+            "primal_graph_hash": self.primal_graph_hash,
+            "input_bounds_hash": self.input_bounds_hash,
+            "external_intermediate_bounds_hash": (
+                self.external_intermediate_bounds_hash
+            ),
+            "bound_intermediate_constraints_hash": (
+                self.bound_intermediate_constraints_hash
+            ),
+            "source_artifact_manifest_hash": self.source_artifact_manifest_hash,
+            "source_artifact_payload_hash": self.source_artifact_payload_hash,
+            "source_model_hash": self.source_model_hash,
+            "source_property_hash": self.source_property_hash,
+            "source_objective_set_hash": self.source_objective_set_hash,
+            "consumption": self.consumption,
+            "semantics_owner": self.semantics_owner,
+        }
+
+    def stable_hash(self) -> str:
+        return _canonical_hash(self.to_dict())
+
+
+@dataclass(frozen=True)
 class NativeIntermediateRefinementPolicyIR:
     """Bounded-cost policy for selecting and refining ReLU inputs."""
 
@@ -172,6 +239,7 @@ class NativeIntermediateRefinementPlanIR:
     source_intermediate_constraints_hash: Optional[str] = None
     source_refinement_plan_hash: Optional[str] = None
     source_refinement_semantic_trace_hash: Optional[str] = None
+    external_constraint_seed: Optional[ExternalIntermediateConstraintSeedIR] = None
     schema_version: str = INTERMEDIATE_REFINEMENT_PLAN_IR_SCHEMA_VERSION
 
     def validate(self) -> None:
@@ -203,6 +271,16 @@ class NativeIntermediateRefinementPlanIR:
             any(not _is_sha256(value) for value in source_hashes)
         ):
             raise ValueError("native refinement source constraint identity differs")
+        if self.external_constraint_seed is not None:
+            self.external_constraint_seed.validate()
+            if (
+                any(value is not None for value in source_hashes)
+                or self.external_constraint_seed.primal_graph_hash
+                != self.primal_graph_hash
+                or self.external_constraint_seed.input_bounds_hash
+                != self.input_bounds_hash
+            ):
+                raise ValueError("native refinement external seed identity differs")
         self.policy.validate()
         objective_directed = (
             self.policy.candidate_policy_id == "objective_influence_width_per_relu_v1"
@@ -245,6 +323,13 @@ class NativeIntermediateRefinementPlanIR:
             payload["source_refinement_plan_hash"] = self.source_refinement_plan_hash
             payload["source_refinement_semantic_trace_hash"] = (
                 self.source_refinement_semantic_trace_hash
+            )
+        if self.external_constraint_seed is not None:
+            payload["external_constraint_seed"] = (
+                self.external_constraint_seed.to_dict()
+            )
+            payload["external_constraint_seed_hash"] = (
+                self.external_constraint_seed.stable_hash()
             )
         return payload
 
@@ -340,6 +425,8 @@ class NativeIntermediateRefinementTaskIRModule:
         }
         if plan.source_intermediate_constraints_hash is not None:
             available.add("refine.source_intermediate_constraints")
+        if plan.external_constraint_seed is not None:
+            available.add("refine.external_constraint_seed")
         if plan.objective_hash is not None:
             available.add("refine.objective_influence")
         for task in self.tasks:
@@ -493,6 +580,11 @@ def lower_native_intermediate_refinement_ir(
                     if plan.source_intermediate_constraints_hash is not None
                     else ()
                 ),
+                *(
+                    ("refine.external_constraint_seed",)
+                    if plan.external_constraint_seed is not None
+                    else ()
+                ),
             ),
             ("refine.forward_env.p0", "refine.bounds.p0"),
         ),
@@ -616,6 +708,7 @@ __all__ = [
     "INTERMEDIATE_REFINEMENT_PLAN_IR_SCHEMA_VERSION",
     "INTERMEDIATE_REFINEMENT_SCHEDULE_IR_SCHEMA_VERSION",
     "INTERMEDIATE_REFINEMENT_TASK_IR_SCHEMA_VERSION",
+    "ExternalIntermediateConstraintSeedIR",
     "IntermediateRefinementTaskKind",
     "NativeIntermediateRefinementPlanIR",
     "NativeIntermediateRefinementPolicyIR",

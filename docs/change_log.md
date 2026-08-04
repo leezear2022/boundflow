@@ -4101,3 +4101,23 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_ANCESTRAL_CONSTRAINT_REFINEMENT_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：External-Seeded Ancestral Refinement v1
+
+- 新增 external-owned typed constraint seed IR；绑定图/输入、external/effective constraints 与
+  source artifact/model/property/objective-set，raw external 先与 local forward 求可行交集；
+- refinement Plan/Task/Schedule/action trace 显式消费 seed；queue root seed 与 child validated
+  parent execution 严格互斥，逐节点 provenance/Plan/semantic/final hash tamper fail closed；
+- fixed ResNet clauses `0/2/4` 的 seeded ancestral worst leaf 相对 external baseline 改善
+  `+0.001512/+0.001133/+0.000534`，相对 seeded root-global 为
+  `+0.000823/+0.000004/0`；三条仍 unknown；
+- artifact semantic replay hash=
+  `9f52b99a74dab448626061f5b8f060f3b8c43b6c03f6deb0899d9fe91883d9f7`；focused
+  `33 passed`、全量 `766 passed, 37 skipped`，Black/Mypy/Pylint 10.00/10 通过；
+- 以 typed seed/control + fixed-tree tightness `VALIDATED-REDUCED` 关闭；不声明 complete
+  property、CUDA、performance、multi-workload 或 ASPLOS-ready。下一门禁为 depth/node convergence。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_EXTERNAL_SEEDED_ANCESTRAL_REFINEMENT_V1_CHANGELOG_2026_08_04.md`

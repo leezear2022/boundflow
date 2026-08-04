@@ -875,3 +875,23 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - 工件：`artifacts/ancestral-constraint-refinement/vnncomp21-resnet2b-two-clause-cpu-v1/`；
   generate hash=`72c0c2a66b82cea425bf7486817c0ce39ae186ef2961cc1271acb31cb7a31b6f`；
   最终 replay/full/static 见 NRIR-22 changelog。下一门禁为 hard-clause convergence expansion。
+
+### 2026-08-04 External-Seeded Ancestral Refinement v1
+
+- `C1/C2-M-NRIR23` typed external seed：external provider/ownership、primal/input、ordered bounds、
+  effective local-intersection constraints 与 source artifact/model/property/objective-set 均进入 seed
+  IR；refinement Plan/Task/Schedule/action trace 显式消费 seed；
+- `C3-G-NRIR23` source gate：raw external 与 local forward 必须可行相交；root seed 与 native
+  parent source 互斥；child parent final/Plan/semantic trace、queue record 与 execution 逐项一致，
+  provenance/content/lineage tamper fail closed；
+- `C1/C3-E-NRIR23` fixed hard-clause tightness：clauses `0/2/4` ancestral worst leaf 相对 external
+  baseline 改善 `+0.001512/+0.001133/+0.000534`，相对 seeded root-global 为
+  `+0.000823/+0.000004/0`；
+- `C3-L-NRIR23` hard limitation：三条 terminal worst leaf 仍为
+  `-0.318287/-0.425477/-0.504142`；单 ResNet、CPU、7 nodes/depth 2、无 complete closure、
+  CUDA、multi-workload、competitor parity、重复性能或 ASPLOS-ready，`performance_claimed=false`；
+- 工件：
+  `artifacts/external-seeded-ancestral-refinement/vnncomp21-resnet2b-prop0-hard3-cpu-v1/`；
+  semantic replay hash=
+  `9f52b99a74dab448626061f5b8f060f3b8c43b6c03f6deb0899d9fe91883d9f7`；全量
+  `766 passed, 37 skipped`。下一门禁为 external-seeded hard-clause depth/node convergence。

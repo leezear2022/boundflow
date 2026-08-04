@@ -41,6 +41,13 @@
 > `VALIDATED-REDUCED`。所有 worst leaf 仍负，下一门禁是 hard-clause/depth/node convergence
 > 曲线，不得升级 complete verifier 或 performance/ASPLOS-ready claim。
 
+> **2026-08-04 NRIR-23 修订**：external-owned intermediate constraints 已通过 typed seed
+> IR 接入 native root refinement，再由 validated parent execution 逐节点传递。固定 clauses
+> `0/2/4` 的 ancestral worst leaf 相对 external baseline 改善
+> `0.001512/0.001133/0.000534`，相对 seeded root-global 为
+> `0.000823/0.000004/0`；全部 terminal leaves 仍负。本阶段 `VALIDATED-REDUCED`，下一门禁为
+> external-seeded depth/node convergence，不形成 property/performance/CUDA/ASPLOS-ready claim。
+
 > **2026-08-04 NRIR-1 修订**：上述 native correctness 门禁已通过。固定 ResNet2B 的
 > 17-op Primal graph 已 lower/execute 为 21-op native Bound/Task/Schedule path，五层 hash 绑定
 > external-bound payload，final lower max diff `7.15256e-7`、sign 9/9。当前仍是单 dense

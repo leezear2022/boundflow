@@ -1,0 +1,9 @@
+{
+  "evidence_hash": "9f52b99a74dab448626061f5b8f060f3b8c43b6c03f6deb0899d9fe91883d9f7",
+  "files": {
+    "external_seeded_ancestral.json": "f00ffcc4d77990355ed63aa042f50f2a1aaa3e79bb94e86fdac08555bf1e2a3c"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.external-seeded-ancestral-refinement-artifact/v1",
+  "status": "validated_reduced"
+}
