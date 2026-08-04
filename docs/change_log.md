@@ -4217,3 +4217,21 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_PARAMETRIC_DYNAMIC_BATCH_COMPILER_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Wall-Clock Parametric BaB Scaling v1
+
+- 新增 first-class search budget/Plan/Task/Schedule，将 `7/2、31/4、127/6 × 3 workload × 3
+  repeats` 编译为 27 个 source/budget/order hash 绑定的 fresh-process tasks；
+- artifact 导出逐 clause logical domains、leaf verdict、compiler template/cache/instance 与 raw
+  timing；fresh replay 重建 experiment IR 并重算 repeat、nesting 与 closure 门禁；
+- 27/27 均完成 9 clauses，公共 domain lower 漂移 0；MNISTFC verified `6/9→8/9`，ResNet
+  `0/9→0/9`，OVAL21 `8/9→8/9`；
+- n127d6 median execution=`2.515/58.566/2.287 s`；不计算跨预算 speedup。evidence hash=
+  `e01d35c0afa8501f3d02ffaaa4eeaf609c444ed497c1a2d2efff4e97b3520214`；
+- 以 search-coverage `VALIDATED-REDUCED` 关闭；下一门禁是 unresolved-clause typed hard-clause
+  escalation/stronger-bound integration，ASPLOS-ready 仍为 NO。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_WALL_CLOCK_PARAMETRIC_BAB_SCALING_V1_CHANGELOG_2026_08_04.md`

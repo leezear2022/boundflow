@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`e72cc28`（NRIR-27 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/parametric-dynamic-batch-compiler-v1`
+> 当前 integration base：`f129c31`（NRIR-28 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/wall-clock-parametric-bab-scaling-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-04 NRIR-19 后续：native selected-CROWN intermediate refinement 已成为一等
@@ -21,8 +21,10 @@
 > prepared queue，并在三真实拓扑相同算法 clause-0 上获得 `1.3663×/2.4723×/1.4511×`
 > repeated CPU internal speedup；full query 仍全部 unknown。NRIR-28 随后把 optimizer 编译拆为
 > parametric PlanTemplate/PlanInstance，并在相同 full query 上把 v1→v2 median 降至
-> `14.807→3.456/61.239→6.209/13.021→3.718 s`；下一门禁是把节省的 wall-clock 投入 typed
-> search scaling。
+> `14.807→3.456/61.239→6.209/13.021→3.718 s`。NRIR-29 已把搜索预算冻结为
+> `7/depth2→31/depth4→127/depth6`，27/27 fresh workers 完成且 domain nesting 成立；MNISTFC
+> verified `6/9→8/9`，ResNet 保持 `0/9`，OVAL21 保持 `8/9`。下一门禁转为只对 remaining
+> clauses 使用更强 bound/branch 的 typed hard-clause escalation，不继续单轴堆节点。
 > 顶层
 > ASPLOS-ready 与 performance No-Go 不变。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
@@ -861,3 +863,23 @@ artifact evidence hash=
 `818 passed, 37 skipped`。本阶段以 same-algorithm full-query internal CPU performance
 `VALIDATED-REDUCED` 关闭；三类 property 仍 unknown，无 CUDA、竞品 speedup、complete-property 或
 ASPLOS-ready claim。下一工程门禁为 fixed-wall-clock parametric BaB depth/node scaling。
+
+## 36. Wall-Clock Parametric BaB Scaling v1 判定
+
+NRIR-29 将三档 search budget、三真实 workload、三 fresh repeats 与轮转次序编译成一等
+Plan/Task/Schedule；每个 worker 保存逐 clause split-state logical domains、leaf verdict、compiler
+template/cache/instance 与 raw timing。artifact replay 重建 experiment IR，并重新校验 27 个
+Task/record、同预算 repeat semantics、跨预算 nesting 与 closure gate。
+
+27/27 worker 都是 `completed=9,pending=[]`；三次重复的 semantic signature 一致，所有 workload
+均满足 `domains(7)⊂domains(31)⊂domains(127)`，公共 lower 最大漂移 `0.0`。MNISTFC verified
+从 `6/9` 严格提升为 `8/9`，31 nodes 已与 127 nodes 相同；ResNet 三档始终 `0/9`，OVAL21
+三档始终 `8/9`。n127d6 median execution 分别为 `2.515/58.566/2.287 s`，只作为固定协议资源
+曲线，不计算不同预算之间的 speedup。
+
+artifact evidence hash=
+`e01d35c0afa8501f3d02ffaaa4eeaf609c444ed497c1a2d2efff4e97b3520214`。按预注册门禁以
+search-coverage `VALIDATED-REDUCED` 关闭；三类完整 query 仍全部 unknown，ASPLOS-ready 仍为 NO。
+ResNet 在 1143 total nodes 后仍 0/9、OVAL/MNIST 的最后 clause 也未随纯扩树关闭，所以下一工程
+门禁为 typed hard-clause escalation：只对 unresolved clauses 编译更强 native intermediate
+refinement/branch policy，并继续保持 fixed total deadline、sound fallback 与 artifact replay。

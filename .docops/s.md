@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev003516
-last_va: ev003518
+last_ch: ev003580
+last_va: ev003581
 blk:
-next: commit-push-pr-nrir28-then-freeze-wall-clock-parametric-bab-scaling
-updated: 2026-08-04T12:35:00Z
+next: commit-push-pr-merge-nrir29-then-freeze-hard-clause-escalation
+updated: 2026-08-04T13:05:25Z

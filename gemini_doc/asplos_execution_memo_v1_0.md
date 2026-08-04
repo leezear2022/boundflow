@@ -1169,3 +1169,24 @@ artifact evidence hash=
 `VALIDATED-REDUCED` 关闭。三类 query 仍为 unknown；无 CUDA、external competitor speedup、
 complete-property 或 ASPLOS-ready claim。下一门禁为 fixed-wall-clock typed BaB search scaling，
 判断 compiler/runtime 收益能否转化为更多节点、更深覆盖与 property closure。
+
+## 42. Wall-Clock Parametric BaB Scaling v1
+
+NRIR-29 把 `7/depth2`、`31/depth4`、`127/depth6` 三档搜索预算和三真实 workload × 三 fresh
+repeats 编译成一等 Plan/Task/Schedule。budget 之外的 model/property、parametric runtime、5-step
+optimizer、4-step candidate search、batching、threads 与 60 秒 query deadline 全部固定；budget
+顺序按 repeat 轮转。worker 保存 logical split-state domains、leaf verdict、compiler cache/instance
+和 raw timing，replay 重建 source-to-experiment IR 并重算门禁。
+
+27/27 worker 完成 `9/9` clauses、无 pending；同预算三次 semantic signature 一致，三 workload
+全部满足 `7⊂31⊂127` logical domain nesting，公共 lower 漂移为 `0.0`。MNISTFC verified 从
+`6/9` 提升到 `8/9`，31/127 nodes 相同；ResNet 三档均 `0/9`，OVAL21 三档均 `8/9`。127-node
+median execution 为 `2.515/58.566/2.287 s`，ResNet p90=`58.939 s`；这是 fixed-protocol
+resource/coverage 曲线，不是跨预算 speedup。
+
+artifact evidence hash=
+`e01d35c0afa8501f3d02ffaaa4eeaf609c444ed497c1a2d2efff4e97b3520214`。按预注册门禁以
+search-coverage `VALIDATED-REDUCED` 关闭；完整 query 仍全部 unknown，无 GPU、competitor、完整
+property 或 ASPLOS-ready claim。单轴扩大同一搜索已出现明确饱和：下一门禁必须是 typed
+hard-clause escalation，在固定总 deadline 下只为 unresolved clauses 编译更强 native
+intermediate-refinement/branch Plan，并验证 sound fallback 与新增 closure。
