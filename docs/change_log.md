@@ -4362,3 +4362,26 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_MULTI_CLAUSE_ANYTIME_PRIORITY_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-05：Shared Parametric Objective Evaluator v1
+
+- 新增 shared-parametric ancestral Plan/Batch/Task/Schedule 与 production queue；template/instance/cache
+  边界显式化，root/完整 sibling pair 原子提交，生产路径不再做 selected-native audit re-execution；
+- 新增 NRIR-36 control × NRIR-37 evaluator 的 multi-clause runtime，一个 cache owner 跨 batch/跨
+  clauses 2/3 共享同一 template，仍保持 frozen floor、rank、slice、cap、node/depth 与 deadline；
+- 真实 clause-2 root+pair parity 通过；单轮 pilot clauses 2/3 均 31 nodes，随后三 fresh processes
+  继续稳定为 `[[31,31],[31,31],[31,31]]`，每轮 cache miss=1，whole=
+  `[51.996191,52.251681,52.695640] s`；
+- pilot/formal replay、11 类 artifact tamper、Task/Batch commit binding tamper、27 focused tests、全量
+  `917 passed, 37 skipped`、mypy
+  clean、Pylint `10.00/10` 通过；pilot/formal hash=
+  `c96fff3fa2bc2563b4d46886d69b33f51ac985b19ad80d916309db57fe6cfefa` /
+  `9234dcbe77803e0e7d7e62ca88c62e1b859c95af4ad8e3a19b85c0ab87294b83`；
+- 以 shared compiler ownership + fixed-deadline coverage `VALIDATED-REDUCED` 关闭；final 仍 9/9
+  unresolved，`performance_claimed=false`，下一门禁为 depth-4 frontier tightness attribution 与单变量
+  stronger-bound/candidate。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_SHARED_PARAMETRIC_OBJECTIVE_EVALUATOR_V1_CHANGELOG_2026_08_05.md`

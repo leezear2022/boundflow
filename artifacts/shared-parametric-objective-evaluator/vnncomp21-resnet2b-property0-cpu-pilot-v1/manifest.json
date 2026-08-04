@@ -1,0 +1,7 @@
+{
+  "files": {
+    "pilot.json": "4bc34373a3c3f5d8c5c6555d5b2737710761311ff440cf12111c48742e38276c"
+  },
+  "pilot_hash": "aa3c79c967021e038a825b47d3a734c0cd71a1c2b6e4dad415b4484e71feb2dc",
+  "schema_version": "boundflow.shared-parametric-objective-evaluator-pilot-manifest/v1"
+}

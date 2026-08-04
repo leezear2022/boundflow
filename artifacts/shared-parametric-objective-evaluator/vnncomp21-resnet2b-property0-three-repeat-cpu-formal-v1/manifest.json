@@ -1,0 +1,13 @@
+{
+  "files": {
+    "formal.json": "9f687277b448f5e880daeaaa069ed72719e426900a90de8f5c5beabc6e08a5a5",
+    "logs/repeat-0.log": "39d72f927e794eceaa0190ef05ab03fadfba3ece8c6a8117f6e065273e01b197",
+    "logs/repeat-1.log": "1afdf9b9bcf3bb7458abf02503df3ce2a525ca0a18ec91f02608db4f56543a49",
+    "logs/repeat-2.log": "50b5de33818eaceb01dee528f948c40bc4e3f626ecc8ab2d3123725ee3a0c094",
+    "shards/repeat-0.json": "39303e3ebcbc7803b286b60f0c0cbec936e243391ef69aa169a2f9e67e20bd50",
+    "shards/repeat-1.json": "942820c12cb3affdf4a9e235b8370e444dd4ce957088c2e03a53786112bc528d",
+    "shards/repeat-2.json": "f519eb27825c81582a9f5b59eac41c24d899432cfc56a6c4b288fe49f1df7c74"
+  },
+  "formal_hash": "9234dcbe77803e0e7d7e62ca88c62e1b859c95af4ad8e3a19b85c0ab87294b83",
+  "schema_version": "boundflow.shared-parametric-objective-evaluator-manifest/v1"
+}

@@ -108,6 +108,11 @@ IR、三重复 original-ordinal preservation 与 atomic-pair coverage NO-GO）�
 
 ### 2.1 关键交付文档（“长期有效”）
 
+- `gemini_doc/BOUNDFLOW_SHARED_PARAMETRIC_OBJECTIVE_EVALUATOR_V1_PLAN_2026_08_05.md`：
+  NRIR-28 template/instance/cache × NRIR-34 ancestral sibling evaluator 的静动态边界、first-class
+  Plan/Batch/Task/Schedule、parity/top-2/三重复门禁与下一 tightness attribution 路线
+- `gemini_doc/BOUNDFLOW_SHARED_PARAMETRIC_OBJECTIVE_EVALUATOR_V1_CHANGELOG_2026_08_05.md`：
+  phase profile、实现/负向测试、真实 parity、`[31,31]×3` formal artifact/replay 与 claim boundary
 - `gemini_doc/BOUNDFLOW_MULTI_CLAUSE_ANYTIME_PRIORITY_V1_PLAN_2026_08_04.md`：
   root-lower priority、top-2 selection、dynamic equal-remaining slice、single global clock、三重复门禁与
   atomic-pair coverage NO-GO、shared parametric evaluator 下一路线

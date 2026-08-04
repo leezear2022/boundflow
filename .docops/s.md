@@ -5,9 +5,9 @@ rm: v01
 st: s01
 stat: active
 health: green
-pr: [47]
-last_ch: ev004165
-last_va: ev004166
+pr: [48]
+last_ch: ev004330
+last_va: ev004331
 blk:
-next: merge-pr47-then-profile-shared-parametric-evaluator
-updated: 2026-08-04T18:24:00Z
+next: preregister-nrir38-full-frontier-tightness-attribution
+updated: 2026-08-04T19:37:35Z
