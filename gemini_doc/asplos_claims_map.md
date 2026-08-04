@@ -1253,3 +1253,29 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   `vnncomp21-resnet2b-property0-three-repeat-cpu-v1/`；formal hash=
   `fe67b77197905a8a4d7f92ad5eac686892243dfb0e7d7b7c7434861aaa794834`。本阶段 attribution
   `VALIDATED-REDUCED`，全量 `948 passed, 37 skipped`，Decision=`optimize_scorer_ownership`。
+
+### NRIR-42：Objective Branch Scorer Ownership v1
+
+- `C1/C2-M-NRIR42` compiler ownership：新增 typed validated capsule、Plan-owned candidate scorer
+  Task/Schedule、prevalidated executor、additive production queue 与 multi-clause composition；候选表只在
+  branch Plan compile 生成一次，execute/validation 消费 immutable table/token，historical NRIR-39/40
+  文件不改；
+- `C3-G-NRIR42` fail-closed gate：replay 将 JSON candidate Plan、scorer Task、Schedule 与 capsule
+  重建成类型对象，并重算 candidate width/table hash、score reduce/hash、selection、branch binding、
+  enumeration ownership、Phase-A median/MAD 与 Phase-B global deadline；同步 token/score/call/deadline
+  tamper 被拒绝；
+- `C1/C3-E-NRIR42` Phase-A exact/cost：clauses 2/3 六组 old/new 31-node execution 的 branch、全部
+  score、child lower、queue lower/upper、split、α/β、refinement exact；enumeration `341→31`，new
+  compile=`31`、execute=`0`；new/old median ratio=`0.706888/0.698486`，节省严格大于 MAD；
+- `C1/C3-E-NRIR42` Phase-B production：three fresh global-60s queries 均 selected `[2,3]`，accepted
+  nodes=`[[31,31],[31,31],[31,31]]`、每条 15 groups/31 capsules，whole=
+  `[57.175184,57.697757,58.114412] s`；worst active lower=`-35.530926/-30.258448`，相对 widest
+  `+2.043362/+5.641768`；
+- `C3-L-NRIR42` claim boundary：只在固定 ResNet2B property 0、CPU8、内部 global-60s 协议下恢复
+  objective-branch production admission；final 仍 unknown，不是 property closure、GPU、multi-workload、
+  fair competitor speedup 或 ASPLOS-ready，`performance_claimed=false`；
+- 工件：`artifacts/objective-branch-scorer-ownership/` 与
+  `artifacts/objective-branch-scorer-ownership-global/`；Phase-A/Phase-B formal hash=
+  `0d310c2ffc96844648a83f9921bc7f353ec8425986bccb36f75e6d1cd2b25b58` /
+  `7274e834b3bf08a9e138fa3284b70222620cf3c571395331e1a87ed5fee7d759`；targeted `10 passed`，
+  全量 `958 passed, 37 skipped`，静态门禁通过。本阶段 `VALIDATED-REDUCED`。

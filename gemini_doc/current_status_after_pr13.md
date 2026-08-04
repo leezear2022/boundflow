@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-05
-> 当前 integration base：`9befc51`（NRIR-40 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/objective-branch-production-cost-attribution-v1`
+> 当前 integration base：`355e80b`（NRIR-41 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/objective-branch-scorer-ownership-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
@@ -41,6 +41,16 @@
 > ASPLOS-ready NO 不变；全量 `948 passed, 37 skipped`。下一单变量已限定为 scorer
 > ownership/validation reuse，不允许同时改 policy、
 > node/depth、slice、optimizer、refinement、cache 或 deadline。
+> 2026-08-05 NRIR-42 已完成：typed validated capsule 使每个 node 的 candidate table 只在 Plan compile
+> 枚举一次，scorer Task/Schedule 的第一阶段显式读取 `branch.plan.candidates`，execute 与下游 validation
+> 不再重建候选。Phase A 三 fresh paired runs 中 clauses 2/3 enumeration 都从 `341→31`，new/old
+> queue median ratio=`0.706888/0.698486`，六组 31-node branch/score/child-bound/queue/state/refinement
+> exact。Phase B 三轮 whole=`57.175184/57.697757/58.114412 s`，selected 均 `[2,3]`，两条每轮均
+> `31 nodes/15 groups/31 capsules`，worst-active lower=`-35.530926/-30.258448`。Phase A/B formal hash=
+> `0d310c2f…25b58` / `7274e834…7d759`；全量 `958 passed, 37 skipped`。本阶段以固定
+> ResNet2B property 0 CPU production admission `VALIDATED-REDUCED` 关闭；final 仍 unknown，
+> performance/GPU/multi-workload/competitor/ASPLOS-ready 均未升级。下一单变量是
+> cross-clause/node/candidate batch Schedule，而不是继续调 scorer validation。
 > 2026-08-05 NRIR-36 后续：九子句 NRIR-31 floor 已由 typed root-lower priority 选择 clauses 2/3，
 > dynamic equal-remaining slices 在同一 global start 下执行。三 fresh repeats 都复现
 > rank=`[2,3,4,5,0,8,6,7,1]`，packed nodes=`[[3,3],[3,3],[3,1]]`；repeat 2 第二条未提交

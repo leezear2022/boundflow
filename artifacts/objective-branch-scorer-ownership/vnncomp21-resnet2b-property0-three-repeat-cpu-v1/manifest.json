@@ -1,0 +1,46 @@
+{
+  "files": {
+    "formal.json": "d01c6a5901100314bbee8930d67ab73c76d2e2b35225386250f8de1f97dc1114",
+    "logs/repeat-0.log": "b32691cd5fac316be67d31756337731fa76d199ee7580b400edf8c1020e070e4",
+    "logs/repeat-1.log": "d847891c4fa22ecc79a88efc5d65a7df1e0316b9aa695410dd5f2857f2b8ebc3",
+    "logs/repeat-2.log": "37d7faa8894d3648dd9d6c1efc8fe9b193610306d2d8159412ec678984e5f88c",
+    "shards/repeat-0.json": "8d835bfcd5760a2d230fa1549e6086047b063d2b4cdba5180c86a8f09677a0f1",
+    "shards/repeat-1.json": "bed19b8220436fd2df9c5121e955ec69bb456f15029c5bbdfb66135ecd25a856",
+    "shards/repeat-2.json": "89d03dfc71e3c63c647e9ee72e1bb39dff35cc09773e7da3bb68c8bb5173bc1c"
+  },
+  "formal_hash": "0d310c2ffc96844648a83f9921bc7f353ec8425986bccb36f75e6d1cd2b25b58",
+  "manifest_hash": "d0b6b19762fa2e696729ac1e200970fb0b6328a67872657b95da2fc1abba6ebf",
+  "performance_claimed": false,
+  "plan_hash": "f8ca482acf8f64542ab7d4be12d058fcf6e152a8b3725f9c23f9bb0063102680",
+  "schema_version": "boundflow.objective-branch-scorer-ownership-manifest/v1",
+  "source": {
+    "native_code_revision": "8961110cd51bb2136d55a1148dd3b0323238bb7f68028217c8acb00982d14bbc",
+    "source_cost_formal_hash": "fe67b77197905a8a4d7f92ad5eac686892243dfb0e7d7b7c7434861aaa794834",
+    "workload": {
+      "category": "cifar10_resnet",
+      "csv_ordinal": 0,
+      "csv_relative_path": "benchmarks/cifar10_resnet/cifar10_resnet_instances.csv",
+      "csv_sha256": "d0be77761016f65d044918e5f95332cf32bf848e5eef28c5465dfbf287ba984f",
+      "model_input_shape": [
+        1,
+        3,
+        32,
+        32
+      ],
+      "model_output_dim": 10,
+      "model_relative_path": "benchmarks/cifar10_resnet/onnx/resnet_2b.onnx",
+      "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+      "onnx_ops": [
+        "Add",
+        "Conv",
+        "Flatten",
+        "Gemm",
+        "Relu"
+      ],
+      "property_relative_path": "benchmarks/cifar10_resnet/vnnlib_properties_pgd_filtered/resnet2b_pgd_filtered/prop_0_eps_0.008.vnnlib",
+      "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+      "query_ir_hash": "f2151936ce0d9f8d8bcabd7bc3fc0224a71d7907da4ac614d7216e7a0919201b",
+      "workload_id": "cifar10_resnet:000"
+    }
+  }
+}

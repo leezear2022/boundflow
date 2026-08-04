@@ -5,9 +5,9 @@ rm: v01
 st: s01
 stat: active
 health: green
-pr: [52]
-last_ch: ev004676
-last_va: ev004677
+pr: []
+last_ch: ev004805
+last_va: ev004806
 blk:
-next: merge-nrir41-pr52-after-local-gates
-updated: 2026-08-04T22:14:52Z
+next: publish-nrir42-and-preregister-nrir43-cross-axis-batching
+updated: 2026-08-04T23:21:43Z

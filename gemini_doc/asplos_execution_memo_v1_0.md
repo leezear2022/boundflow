@@ -1488,3 +1488,40 @@ prefix tamper、focused `4 passed`、predecessor-inclusive `12 passed`、全量
 `VALIDATED-REDUCED` 关闭，但不构成
 system speedup/property/GPU/competitor/multi-workload/ASPLOS-ready claim，也不撤销 NRIR-40
 global-budget NO-GO。下一阶段只能消除 scorer ownership/validation 重复并保持 exact branch semantics。
+
+## 55. Objective Branch Scorer Ownership v1
+
+NRIR-42 只改变 scorer candidate-table/validation ownership。新增 typed validated capsule，使每个 node 的
+candidate enumeration 由 branch Plan compile 恰好拥有一次，执行和下游验证只消费 immutable
+candidate table 与 semantic token；historical scorer 和 NRIR-39/40 frozen 文件不改。objective policy、
+optimizer/refinement、31/depth4、queue、cache、slice 与 deadline 全部冻结。
+
+Phase A 必须证明 clauses 2/3 old/new 31-node 的 selected branch、所有 score rows、child lower、queue
+lower/upper、split、α/β、refinement exact；enumeration calls 从 `341` 变为 compile=`31`、execute=`0`；
+三 fresh counterbalanced new/old queue median ratio 两条均 `<=0.75` 且改善大于 MAD。任一失败即
+scorer optimization NO-GO。
+
+只有 Phase A 全过才运行 three fresh whole-query/global-60s Phase B：两条每轮 `31 nodes/15 groups`、
+相对 widest worst lower 各 `>=+1.0`、whole `<=70s` 且无 partial/reset/recompile/evidence omission 才能
+恢复 objective-branch production `VALIDATED-REDUCED`。否则 NRIR-40 production NO-GO 保持不变；所有
+timing 仍为内部准入，`performance_claimed=false`。
+
+Phase A 正式结果：clauses 2/3 三 fresh counterbalanced new/old queue median ratio=
+`0.706888/0.698486`，median 节省=`5.468696/5.680614 s`，均严格大于历史/新路径 MAD；每条
+31-node queue 都由 historical `341` 次 enumeration 降为 prevalidated compile=`31`、execute=`0`。
+六组 old/new selected branch、全部 score、child-lower、queue lower/upper、split、α/β 与 refinement
+exact。typed replay 会重新构造 Plan/Task/Schedule/capsule；同步 token/score/call tamper fail closed。
+Phase-A formal hash=`0d310c2ffc96844648a83f9921bc7f353ec8425986bccb36f75e6d1cd2b25b58`。
+
+Phase B 随后按门禁执行。三 fresh whole-query 都选择 `[2,3]`，两条每轮均提交
+`31 nodes/15 groups/31 capsules`，whole elapsed=`[57.175184,57.697757,58.114412] s`；worst active
+lower 固定为 `-35.530926/-30.258448`，相对 NRIR-37 widest 改善 `+2.043362/+5.641768`，无
+partial/reset/recompile/evidence omission。Phase-B formal hash=
+`7274e834b3bf08a9e138fa3284b70222620cf3c571395331e1a87ed5fee7d759`；targeted `10 passed`，
+全量 `958 passed, 37 skipped`，静态门禁通过。
+
+NRIR-42 因此以 fixed ResNet2B property 0、CPU8、global-60s objective-branch production admission
+`VALIDATED-REDUCED` 关闭，并在该窄范围内取代 NRIR-40 的 production NO-GO；NRIR-40 frozen 证据本身
+不改。final property 仍 unknown，且没有 GPU、multi-workload、fair competitor speedup 或
+ASPLOS-ready claim。下一单变量应把当前顺序的 cross-clause/node/candidate work lower 为联合 batch
+Schedule，并以 exact semantics + fresh paired timing 判定；不再优化 scorer validation 常数。

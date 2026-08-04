@@ -36,6 +36,14 @@
 > property、硬实时或 performance claim。下一门禁为 shared parametric compiler/root/evaluator 与
 > stronger bound/candidate，不继续调 top-k/slice 常数；ASPLOS-ready=NO 不变。
 
+> **2026-08-05 NRIR-42 修订**：NRIR-41 定位的 scorer ownership 重复已由 typed validated capsule
+> 消除；每条 31-node queue 的 candidate enumeration 从 341 次降至 compile-only 31 次，old/new
+> branch/score/child-bound/queue/state/refinement exact。Phase-A new/old median ratio=
+> `0.706888/0.698486`。条件 Phase B 三 fresh global-60s queries 都完成 selected clauses 2/3 的
+> `[31,31]` nodes，whole=`57.175184/57.697757/58.114412 s`，production admission
+> `VALIDATED-REDUCED`。final property 仍 unknown，且没有 GPU/multi-workload/fair competitor speedup；
+> ASPLOS-ready=NO 不变。下一单变量为 cross-clause/node/candidate batch Schedule。
+
 > **2026-08-04 NRIR-21 修订**：per-child exact-split objective refinement 的 IR/control、lineage
 > 与 replay 已实现，但固定 ResNet clauses 0/1 的最差 depth-2 leaf lower 相对 root-global 分别
 > 退化 `0.847961/0.936646`，故该策略 `VALIDATED-NO-GO`。下一方法门禁是把祖先已证明 refined
