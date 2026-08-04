@@ -16,9 +16,10 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_TYPED_HARD_CLAUSE_ESCALATION_V1_PLAN_2026_08_04.md`
-（baseline-derived admission、guarded refinement/projection/escalation/aggregate IR，三真实拓扑 ×
-三 fresh repeats 与 OVAL21 完整 verified closure）。其直接前序为
+当前最新入口：`gemini_doc/BOUNDFLOW_OBJECTIVE_DIRECTED_HARD_CLAUSE_ESCALATION_V1_PLAN_2026_08_04.md`
+（shared-source per-clause objective refinement、33-task guarded Schedule、三真实拓扑 × 三 fresh
+repeats 与 ResNet repeatable root tightness）。其直接前序为
+`gemini_doc/BOUNDFLOW_TYPED_HARD_CLAUSE_ESCALATION_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_WALL_CLOCK_PARAMETRIC_BAB_SCALING_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_PARAMETRIC_DYNAMIC_BATCH_COMPILER_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_PRODUCTION_PREPARED_VERIFIER_V1_PLAN_2026_08_04.md`、
@@ -101,6 +102,11 @@
 
 ### 2.1 关键交付文档（“长期有效”）
 
+- `gemini_doc/BOUNDFLOW_OBJECTIVE_DIRECTED_HARD_CLAUSE_ESCALATION_V1_PLAN_2026_08_04.md`：
+  shared-source per-clause objective Plan/Task/Schedule、whole deadline、三重复 tightness 门禁与
+  objective-ancestral 下一路线
+- `gemini_doc/BOUNDFLOW_OBJECTIVE_DIRECTED_HARD_CLAUSE_ESCALATION_V1_CHANGELOG_2026_08_04.md`：
+  runtime/tests/pilot/artifact/replay、ResNet 九子句 root delta 与 claim boundary
 - `gemini_doc/BOUNDFLOW_OBJECTIVE_DIRECTED_INTERMEDIATE_REFINEMENT_V1_PLAN_2026_08_04.md`：
   single-clause objective influence、score/identity/dependency IR、same-budget ResNet artifact 与
   per-child 下一门禁

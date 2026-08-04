@@ -1,0 +1,10 @@
+{
+  "evidence_hash": "d14a86a8dea925c55b42bbeeb0cf9f4736d608f1b61f56f60b5470c77032489e",
+  "files": {
+    "logs/cifar10_resnet-000.log": "d562004451435ca499869bdc876f8e8efe9cbc2aa8921cbcf68ea3411830f848",
+    "logs/mnistfc-000.log": "cd14d122449b33bc64ef7c30be2a0edef41d9a7eebc02269499306eb37a37a3e",
+    "logs/oval21-000.log": "15d1f358ecbe5d38c78a9852e23f7bbad192e507bc04c00bbbc46432f837c952",
+    "pilot.json": "a5aa2dad3f5cf3f9cf7f17eee554909a1ce29551a30884622cf4d39f100ef64d"
+  },
+  "schema_version": "boundflow.objective-hard-clause-escalation-pilot-manifest/v1"
+}

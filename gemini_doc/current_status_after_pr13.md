@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`a170429`（NRIR-29 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/typed-hard-clause-escalation-v1`
+> 当前 integration base：`6306a34`（NRIR-30 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/objective-directed-hard-clause-escalation-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-04 NRIR-19 后续：native selected-CROWN intermediate refinement 已成为一等
@@ -907,3 +907,21 @@ control + fixed-deadline property coverage `VALIDATED-REDUCED` 关闭；只覆�
 无 GPU、competitor、完整 benchmark suite 或 ASPLOS-ready claim。下一工程门禁只改变 hard-clause
 refinement selection：per scalar objective 编译 influence/target Plan，在相同 admission、31-node 与
 deadline 下检验 MNIST clause 8/ResNet root 或 closure 的严格改善。
+
+## 38. Objective-Directed Hard-Clause Escalation v1 判定
+
+NRIR-31 在 NRIR-30 shared refinement 的 validated final bounds 上，为每个 admitted scalar clause
+单独编译 objective-influence refinement，再执行 31/depth4 parametric query。全九子句静态展开为
+33 个 guarded Task/Schedule action；source Plan/semantic trace、objective hash、original ordinal、
+deadline discard 与 aggregate 都 fail closed。NRIR-30 frozen files 未修改。
+
+pilot 先行并因 ResNet root tightness 通过。三 fresh repeats 中，MNIST 保持 8/9、OVAL 保持 9/9；
+ResNet 仍 0/9，但九条 root lower 相对 shared top-width 全部严格改善，三轮 delta 逐值一致，最小
+`+81.522583`、最大 `+179.970459`。9/9 run 都 `fallback=none`，所有 final verified 都是
+NRIR-30 的 superset。
+
+artifact/replay evidence hash=
+`fb9e503bdf93cb9ce56f52915f1965f1f542e092945d4d7d77d8b8c4bd91764a`。结论为 objective-root
+tightness `VALIDATED-REDUCED`；没有新增 property closure，不声明 performance、GPU、competitor、
+完整 suite 或 ASPLOS-ready。下一工程门禁为 NRIR-32 objective-ancestral hard-clause escalation，
+把 root objective execution 作为动态 child 的 typed ancestral source，验证 frontier/closure 增益。

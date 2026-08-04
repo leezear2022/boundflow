@@ -1026,3 +1026,20 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - 工件：`artifacts/typed-hard-clause-escalation/vnncomp21-three-topology-cpu-v1/`；evidence
   hash=`df096e70d6126d585132e14dc9796038855b37bf4d9ef76528b9feb6a1330205`。本阶段
   property-coverage `VALIDATED-REDUCED`；下一门禁为 per-clause objective-directed escalation。
+
+### NRIR-31：Objective-Directed Hard-Clause Escalation v1
+
+- `C1/C2-M-NRIR31` per-clause compiler ownership：保留 NRIR-30 base program，九子句静态展开为
+  33-task TaskModule/Schedule；每个 original clause 独占 guarded objective compile/refine/query，
+  并绑定 shared source Plan/semantic trace、scalar objective hash 与 ordinal；
+- `C3-G-NRIR31` sound-source/fallback gate：objective child 只能消费 validated shared execution；
+  final verified 必须包含 baseline/NRIR-30 coverage，deadline 后 child proof 丢弃；source lineage、
+  aggregate 与同步 gate tamper fail closed；
+- `C1/C3-E-NRIR31` repeated root tightness：ResNet 9 条 root lower delta 三 fresh repeats 逐值一致，
+  为 `+123.842712/+179.970459/+81.522583/+89.696289/+96.595642/+98.525497/`
+  `+147.607101/+162.138519/+142.715607`；OVAL clause 8 额外改善 `+0.0018788278`；
+- `C3-L-NRIR31` hard limitation：MNIST/ResNet/OVAL final coverage 仍为 8/9、0/9、9/9，没有新增
+  closure；CPU 三 workload，无 performance、GPU、competitor、完整 suite 或 ASPLOS-ready claim；
+- 工件：`artifacts/objective-hard-clause-escalation/vnncomp21-three-topology-cpu-v1/`；evidence
+  hash=`fb9e503bdf93cb9ce56f52915f1965f1f542e092945d4d7d77d8b8c4bd91764a`。本阶段 root-bound
+  tightness `VALIDATED-REDUCED`；下一门禁为 objective-ancestral dynamic-child propagation。
