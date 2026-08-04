@@ -7,7 +7,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import hashlib
 import json
 import math
@@ -26,6 +26,8 @@ from ..ir.refinement import (
     ExternalIntermediateConstraintSeedIR,
     IntermediateRefinementTaskKind,
     NativeIntermediateRefinementPlanIR,
+    NativeIntermediateRefinementMultiPassPolicyIR,
+    NativeIntermediateRefinementPassDecisionIR,
     NativeIntermediateRefinementPolicyIR,
     NativeIntermediateRefinementScheduleIR,
     NativeIntermediateRefinementTargetIR,
@@ -261,6 +263,8 @@ def _select_targets(
     policy: NativeIntermediateRefinementPolicyIR,
     *,
     objective_influence: Optional[Mapping[str, torch.Tensor]] = None,
+    excluded_target_identities: frozenset[tuple[str, int]] = frozenset(),
+    allow_empty: bool = False,
 ) -> tuple[NativeIntermediateRefinementTargetIR, ...]:
     policy.validate()
     objective_directed = (
@@ -305,6 +309,7 @@ def _select_targets(
                     int(index),
                 )
                 for index in indices
+                if (name, int(index)) not in excluded_target_identities
                 if float((upper[index] - lower[index]).item()) >= policy.minimum_width
             )
         )[: policy.max_neurons_per_relu]
@@ -330,12 +335,48 @@ def _select_targets(
                     ),
                 )
             )
-    if not targets:
+    if not targets and not allow_empty:
         raise ValueError("native refinement found no eligible ambiguous ReLU")
     result = tuple(targets)
     for target in result:
         target.validate()
     return result
+
+
+def _multi_pass_selection_policy(
+    policy: NativeIntermediateRefinementPolicyIR,
+    multi_pass_policy: NativeIntermediateRefinementMultiPassPolicyIR,
+    *,
+    pass_index: int,
+) -> NativeIntermediateRefinementPolicyIR:
+    pass_cap = multi_pass_policy.pass_target_cap(
+        total_target_cap=policy.max_neurons_per_relu,
+        pass_index=pass_index,
+    )
+    selected = replace(policy, max_neurons_per_relu=pass_cap)
+    selected.validate()
+    return selected
+
+
+def _target_identities(
+    targets: tuple[NativeIntermediateRefinementTargetIR, ...],
+) -> tuple[tuple[str, int], ...]:
+    return tuple((target.relu_input, target.neuron_index) for target in targets)
+
+
+def _target_ledger_hash(ledger: tuple[tuple[str, int], ...]) -> str:
+    return _canonical_hash(
+        [
+            {"relu_input": relu_input, "neuron_index": neuron_index}
+            for relu_input, neuron_index in ledger
+        ]
+    )
+
+
+def _targets_hash(
+    targets: tuple[NativeIntermediateRefinementTargetIR, ...],
+) -> str:
+    return _canonical_hash([target.to_dict() for target in targets])
 
 
 @dataclass(frozen=True)
@@ -423,9 +464,14 @@ class NativeIntermediateRefinementProgram:
             and self.plan.objective_hash != tensor_content_hash(self.objective)
         ):
             raise ValueError("native refinement program objective hash differs")
+        selection_policy = self.plan.policy
+        if self.plan.multi_pass_policy is not None:
+            selection_policy = _multi_pass_selection_policy(
+                self.plan.policy, self.plan.multi_pass_policy, pass_index=0
+            )
         if self.plan.targets != _select_targets(
             self.initial_relu_pre,
-            self.plan.policy,
+            selection_policy,
             objective_influence=self.objective_influence,
         ):
             raise ValueError("native intermediate refinement target selection differs")
@@ -453,11 +499,25 @@ class NativeIntermediateRefinementPassTrace:
     input_bounds_hash: str
     selected_crown_hash: str
     output_bounds_hash: str
+    selection_decision: Optional[NativeIntermediateRefinementPassDecisionIR] = None
 
     def validate(self) -> None:
+        if self.selection_decision is not None:
+            self.selection_decision.validate()
         if (
             self.pass_index < 0
-            or self.selected_target_count < 1
+            or self.selected_target_count < 0
+            or (self.selection_decision is None and self.selected_target_count < 1)
+            or (
+                self.selection_decision is not None
+                and (
+                    self.selection_decision.pass_index != self.pass_index
+                    or self.selection_decision.selected_target_count
+                    != self.selected_target_count
+                    or self.selection_decision.input_bounds_hash
+                    != self.input_bounds_hash
+                )
+            )
             or self.tightened_neuron_count < 0
             or not all(
                 math.isfinite(value) and value >= 0.0
@@ -475,12 +535,22 @@ class NativeIntermediateRefinementPassTrace:
                     self.output_bounds_hash,
                 )
             )
+            or (
+                self.selected_target_count == 0
+                and (
+                    self.tightened_neuron_count != 0
+                    or self.lower_improvement_max != 0.0
+                    or self.upper_improvement_max != 0.0
+                    or self.width_reduction_sum != 0.0
+                    or self.input_bounds_hash != self.output_bounds_hash
+                )
+            )
         ):
             raise ValueError("native intermediate refinement pass trace is invalid")
 
     def to_dict(self) -> dict[str, object]:
         self.validate()
-        return {
+        payload: dict[str, object] = {
             "pass_index": self.pass_index,
             "selected_target_count": self.selected_target_count,
             "tightened_neuron_count": self.tightened_neuron_count,
@@ -491,6 +561,10 @@ class NativeIntermediateRefinementPassTrace:
             "selected_crown_hash": self.selected_crown_hash,
             "output_bounds_hash": self.output_bounds_hash,
         }
+        if self.selection_decision is not None:
+            payload["selection_decision"] = self.selection_decision.to_dict()
+            payload["selection_decision_hash"] = self.selection_decision.stable_hash()
+        return payload
 
 
 @dataclass(frozen=True)
@@ -577,6 +651,53 @@ class NativeIntermediateRefinementExecutionTrace:
             pass_trace.validate()
             if pass_trace.pass_index != pass_index:
                 raise ValueError("native refinement pass trace order differs")
+        multi_pass_policy = program.plan.multi_pass_policy
+        if multi_pass_policy is None:
+            if any(trace.selection_decision is not None for trace in self.pass_traces):
+                raise ValueError("native refinement legacy pass has a decision")
+        else:
+            select_traces = {
+                trace.pass_index: trace
+                for trace in self.action_traces
+                if trace.kind == IntermediateRefinementTaskKind.SELECT_TARGETS
+            }
+            if set(select_traces) != set(range(multi_pass_policy.maximum_passes)):
+                raise ValueError("native multi-pass selection trace coverage differs")
+            previous_ledger_hash = _target_ledger_hash(())
+            for pass_index, pass_trace in enumerate(self.pass_traces):
+                decision = pass_trace.selection_decision
+                select_trace = select_traces[pass_index]
+                if decision is None:
+                    raise ValueError("native multi-pass selection decision is absent")
+                decision.validate()
+                input_hashes = dict(select_trace.input_hashes)
+                output_hashes = dict(select_trace.output_hashes)
+                if (
+                    decision.plan_hash != program.plan.stable_hash()
+                    or decision.multi_pass_policy_hash
+                    != multi_pass_policy.stable_hash()
+                    or decision.pass_index != pass_index
+                    or decision.total_target_cap_per_relu
+                    != program.plan.policy.max_neurons_per_relu
+                    or decision.pass_target_cap_per_relu
+                    != multi_pass_policy.pass_target_cap(
+                        total_target_cap=program.plan.policy.max_neurons_per_relu,
+                        pass_index=pass_index,
+                    )
+                    or decision.prior_target_ledger_hash != previous_ledger_hash
+                    or input_hashes.get(f"refine.bounds.p{pass_index}")
+                    != decision.input_bounds_hash
+                    or input_hashes.get(f"refine.target_ledger.p{pass_index}")
+                    != decision.prior_target_ledger_hash
+                    or output_hashes.get(f"refine.selected_targets.p{pass_index}")
+                    != decision.selected_targets_hash
+                    or output_hashes.get(f"refine.target_ledger.p{pass_index + 1}")
+                    != decision.result_target_ledger_hash
+                    or output_hashes.get(f"refine.pass_decision.p{pass_index}")
+                    != decision.stable_hash()
+                ):
+                    raise ValueError("native multi-pass selection lineage differs")
+                previous_ledger_hash = decision.result_target_ledger_hash
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -634,6 +755,7 @@ def compile_native_intermediate_refinement_program(
     *,
     policy: NativeIntermediateRefinementPolicyIR,
     plan_id: str,
+    multi_pass_policy: Optional[NativeIntermediateRefinementMultiPassPolicyIR] = None,
     relu_split_state: Optional[Mapping[str, torch.Tensor]] = None,
     linear_spec_C: Optional[torch.Tensor] = None,
     source_refinement_execution: Optional[NativeIntermediateRefinementExecution] = None,
@@ -645,6 +767,18 @@ def compile_native_intermediate_refinement_program(
         raise ValueError("native intermediate refinement plan ID must be non-empty")
     module.validate()
     policy.validate()
+    selection_policy = policy
+    if multi_pass_policy is not None:
+        if not isinstance(
+            multi_pass_policy, NativeIntermediateRefinementMultiPassPolicyIR
+        ):
+            raise TypeError("native refinement multi-pass policy is invalid")
+        multi_pass_policy.validate()
+        if policy.passes != multi_pass_policy.maximum_passes:
+            raise ValueError("native refinement multi-pass count differs")
+        selection_policy = _multi_pass_selection_policy(
+            policy, multi_pass_policy, pass_index=0
+        )
     source_constraints: Optional[Mapping[str, IntervalState]] = None
     source_refinement_plan_hash: Optional[str] = None
     source_refinement_semantic_trace_hash: Optional[str] = None
@@ -730,7 +864,7 @@ def compile_native_intermediate_refinement_program(
         )
         objective_hash = tensor_content_hash(objective)
     targets = _select_targets(
-        initial_pre, policy, objective_influence=objective_influence
+        initial_pre, selection_policy, objective_influence=objective_influence
     )
     plan = NativeIntermediateRefinementPlanIR(
         plan_id=plan_id,
@@ -740,6 +874,7 @@ def compile_native_intermediate_refinement_program(
         initial_intermediate_bounds_hash=intermediate_bounds_hash(initial_pre),
         policy=policy,
         targets=targets,
+        multi_pass_policy=multi_pass_policy,
         objective_hash=objective_hash,
         source_intermediate_constraints_hash=(
             None
@@ -881,6 +1016,7 @@ def _pass_trace(
     after: Mapping[str, IntervalState],
     *,
     selected_target_count: int,
+    selection_decision: Optional[NativeIntermediateRefinementPassDecisionIR] = None,
 ) -> NativeIntermediateRefinementPassTrace:
     _validate_monotonic_bounds(before, after, caller="native refinement pass")
     lower_max = 0.0
@@ -906,6 +1042,7 @@ def _pass_trace(
         input_bounds_hash=intermediate_bounds_hash(before),
         selected_crown_hash=_selected_crown_hash(selected),
         output_bounds_hash=intermediate_bounds_hash(after),
+        selection_decision=selection_decision,
     )
     trace.validate()
     return trace
@@ -916,11 +1053,17 @@ def _runtime_value_hash(value: object) -> str:
         return value.stable_hash()
     if isinstance(value, NativeIntermediateRefinementPolicyIR):
         return value.stable_hash()
+    if isinstance(value, NativeIntermediateRefinementMultiPassPolicyIR):
+        return value.stable_hash()
+    if isinstance(value, NativeIntermediateRefinementPassDecisionIR):
+        return value.stable_hash()
     if isinstance(value, BFTaskModule):
         return plain_crown_primal_graph_hash(value)
     if isinstance(value, InputSpec):
         return _input_bounds_hash(value)
     if isinstance(value, Mapping):
+        if not value:
+            return _canonical_hash([])
         if value and all(isinstance(item, IntervalState) for item in value.values()):
             return intermediate_bounds_hash(value)  # type: ignore[arg-type]
         if value and all(torch.is_tensor(item) for item in value.values()):
@@ -955,6 +1098,16 @@ def _runtime_value_hash(value: object) -> str:
         )
     ):
         return _canonical_hash([item.to_dict() for item in value])
+    if isinstance(value, tuple) and all(
+        isinstance(item, tuple)
+        and len(item) == 2
+        and isinstance(item[0], str)
+        and isinstance(item[1], int)
+        for item in value
+    ):
+        return _target_ledger_hash(value)  # type: ignore[arg-type]
+    if isinstance(value, tuple) and not value:
+        return _canonical_hash([])
     raise TypeError(f"unsupported native refinement runtime value: {type(value)}")
 
 
@@ -981,6 +1134,8 @@ def execute_native_intermediate_refinement_program(
         values["refine.external_constraint_seed"] = program.external_constraint_seed
     if program.objective_influence is not None:
         values["refine.objective_influence"] = program.objective_influence
+    if program.plan.multi_pass_policy is not None:
+        values["refine.multi_pass_policy"] = program.plan.multi_pass_policy
     action_traces: list[NativeIntermediateRefinementActionTrace] = []
     pass_traces: list[NativeIntermediateRefinementPassTrace] = []
     for action, task in zip(program.schedule.actions, program.task_module.tasks):
@@ -990,11 +1145,13 @@ def execute_native_intermediate_refinement_program(
         if task.kind == IntermediateRefinementTaskKind.MATERIALIZE_FORWARD:
             values[action.output_value_ids[0]] = program.initial_interval_env
             values[action.output_value_ids[1]] = program.initial_relu_pre
+            if program.plan.multi_pass_policy is not None:
+                values[action.output_value_ids[2]] = ()
         elif task.kind == IntermediateRefinementTaskKind.ENUMERATE_AMBIGUOUS:
             source = values[action.input_value_ids[0]]
             if not isinstance(source, Mapping):
                 raise TypeError("native refinement enumeration input differs")
-            if program.plan.objective_hash is not None:
+            if task.pass_index is not None or program.plan.objective_hash is not None:
                 values[action.output_value_ids[0]] = _enumerate_ambiguous(
                     source  # type: ignore[arg-type]
                 )
@@ -1003,7 +1160,83 @@ def execute_native_intermediate_refinement_program(
                     source, program.plan.policy  # type: ignore[arg-type]
                 )
         elif task.kind == IntermediateRefinementTaskKind.SELECT_TARGETS:
-            if program.plan.objective_hash is not None:
+            if task.pass_index is not None:
+                source = values[action.input_value_ids[0]]
+                candidates = values[action.input_value_ids[1]]
+                policy = values[action.input_value_ids[2]]
+                multi_pass_policy = values[action.input_value_ids[3]]
+                prior_ledger = values[action.input_value_ids[4]]
+                influence = (
+                    None
+                    if program.plan.objective_hash is None
+                    else values[action.input_value_ids[5]]
+                )
+                if (
+                    not isinstance(source, Mapping)
+                    or not isinstance(candidates, Mapping)
+                    or not isinstance(policy, NativeIntermediateRefinementPolicyIR)
+                    or not isinstance(
+                        multi_pass_policy,
+                        NativeIntermediateRefinementMultiPassPolicyIR,
+                    )
+                    or not isinstance(prior_ledger, tuple)
+                    or any(
+                        not isinstance(item, tuple)
+                        or len(item) != 2
+                        or not isinstance(item[0], str)
+                        or not isinstance(item[1], int)
+                        for item in prior_ledger
+                    )
+                    or candidates
+                    != _enumerate_ambiguous(source)  # type: ignore[arg-type]
+                    or (influence is not None and not isinstance(influence, Mapping))
+                ):
+                    raise ValueError("native multi-pass target inputs differ")
+                pass_policy = _multi_pass_selection_policy(
+                    policy, multi_pass_policy, pass_index=task.pass_index
+                )
+                selected = _select_targets(
+                    source,  # type: ignore[arg-type]
+                    pass_policy,
+                    objective_influence=influence,  # type: ignore[arg-type]
+                    excluded_target_identities=frozenset(prior_ledger),
+                    allow_empty=True,
+                )
+                if task.pass_index == 0 and selected != program.plan.targets:
+                    raise ValueError(
+                        "native multi-pass initial targets differ from Plan"
+                    )
+                selected_identities = _target_identities(selected)
+                result_ledger = (*prior_ledger, *selected_identities)
+                if len(result_ledger) != len(set(result_ledger)):
+                    raise ValueError("native multi-pass target ledger repeats")
+                decision = NativeIntermediateRefinementPassDecisionIR(
+                    plan_hash=program.plan.stable_hash(),
+                    multi_pass_policy_hash=multi_pass_policy.stable_hash(),
+                    pass_index=task.pass_index,
+                    total_target_cap_per_relu=policy.max_neurons_per_relu,
+                    pass_target_cap_per_relu=pass_policy.max_neurons_per_relu,
+                    input_bounds_hash=intermediate_bounds_hash(
+                        source  # type: ignore[arg-type]
+                    ),
+                    prior_target_ledger_hash=_target_ledger_hash(prior_ledger),
+                    selected_targets_hash=_targets_hash(selected),
+                    result_target_ledger_hash=_target_ledger_hash(result_ledger),
+                    prior_selected_target_count=len(prior_ledger),
+                    selected_target_count=len(selected),
+                    cumulative_selected_target_count=len(result_ledger),
+                    continuation=bool(selected),
+                    termination_reason=(
+                        "selected_unseen_targets"
+                        if selected
+                        else "no_unseen_eligible_targets"
+                    ),
+                )
+                decision.validate()
+                values[action.output_value_ids[0]] = selected
+                values[action.output_value_ids[1]] = result_ledger
+                values[action.output_value_ids[2]] = decision
+            elif program.plan.objective_hash is not None:
                 source = values[action.input_value_ids[0]]
                 candidates = values[action.input_value_ids[1]]
                 policy = values[action.input_value_ids[2]]
@@ -1082,13 +1315,31 @@ def execute_native_intermediate_refinement_program(
                 selected_crown, Mapping
             ):
                 raise TypeError("native refinement pass trace inputs differ")
+            selection_decision = (
+                None
+                if program.plan.multi_pass_policy is None
+                else values[action.input_value_ids[4]]
+            )
+            if selection_decision is not None and not isinstance(
+                selection_decision, NativeIntermediateRefinementPassDecisionIR
+            ):
+                raise TypeError("native refinement pass decision differs")
+            selected_targets_key = (
+                "refine.selected_targets"
+                if program.plan.multi_pass_policy is None
+                else f"refine.selected_targets.p{task.pass_index}"
+            )
+            selected_targets = values[selected_targets_key]
+            if not isinstance(selected_targets, tuple):
+                raise TypeError("native refinement selected targets differ")
             pass_traces.append(
                 _pass_trace(
                     task.pass_index,
                     before,  # type: ignore[arg-type]
                     selected_crown,  # type: ignore[arg-type]
                     next_pre,
-                    selected_target_count=len(program.plan.targets),
+                    selected_target_count=len(selected_targets),
+                    selection_decision=selection_decision,
                 )
             )
             values[action.output_value_ids[0]] = next_env

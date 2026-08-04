@@ -16,9 +16,10 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_DYNAMIC_ANCESTRAL_REFINEMENT_BUDGET_V1_PLAN_2026_08_04.md`
-（同 31-node/depth-4 planned cap 下的 fixed16 与 typed dynamic8_24 预算对照、逐组守恒、
-Plan/Task/Schedule lowering 与 hard-clause 证据）。其直接前序为
+当前最新入口：`gemini_doc/BOUNDFLOW_TYPED_MULTIPASS_REFINEMENT_V1_PLAN_2026_08_04.md`
+（同总 target cap 下的 typed split-two-pass Plan/Task/Schedule、target ledger/termination 与
+hard-clause NO-GO 证据）。其直接前序为
+`gemini_doc/BOUNDFLOW_DYNAMIC_ANCESTRAL_REFINEMENT_BUDGET_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_EXTERNAL_SEEDED_DEPTH_NODE_CONVERGENCE_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_EXTERNAL_SEEDED_ANCESTRAL_REFINEMENT_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_ANCESTRAL_CONSTRAINT_REFINEMENT_V1_PLAN_2026_08_04.md`、

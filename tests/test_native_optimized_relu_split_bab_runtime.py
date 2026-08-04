@@ -12,6 +12,7 @@ import torch
 from boundflow.ir.bound import IntermediateBoundSource
 from boundflow.ir.refinement import (
     NativeIntermediateRefinementBudgetPolicyIR,
+    NativeIntermediateRefinementMultiPassPolicyIR,
     NativeIntermediateRefinementPolicyIR,
 )
 from boundflow.ir.task import BFTaskModule, BoundTask, TaskKind, TaskOp
@@ -108,6 +109,10 @@ def _dynamic_budget_policy() -> NativeIntermediateRefinementBudgetPolicyIR:
     )
 
 
+def _dynamic_multi_pass_policy() -> NativeIntermediateRefinementMultiPassPolicyIR:
+    return NativeIntermediateRefinementMultiPassPolicyIR()
+
+
 def _external_constraint_seed() -> NativeExternalIntermediateConstraintSeed:
     module = _module()
     spec = _spec()
@@ -189,6 +194,34 @@ def _run_dynamic_external_seeded():
         intermediate_bound_source=IntermediateBoundSource.NATIVE_REFINED,
         per_child_refinement_policy=_dynamic_per_child_policy(),
         per_child_refinement_budget_policy=_dynamic_budget_policy(),
+        per_child_refinement_strategy="external_seeded_ancestral_carry_v1",
+        external_constraint_seed=_external_constraint_seed(),
+    )
+
+
+def _run_dynamic_multi_pass_external_seeded():
+    return execute_native_optimized_relu_split_bab(
+        _module(),
+        _spec(),
+        linear_spec_C=torch.tensor([[1.0, -1.0]]),
+        run_id="native-dynamic-multi-pass-refinement-toy",
+        config=NativeReluSplitBabConfig(
+            max_nodes=7,
+            max_depth=2,
+            expansion_batch_size=2,
+            max_eval_batch_size=4,
+            threshold=1e6,
+        ),
+        optimizer_policy=_policy(),
+        intermediate_bound_source=IntermediateBoundSource.NATIVE_REFINED,
+        per_child_refinement_policy=NativeIntermediateRefinementPolicyIR(
+            passes=2,
+            max_neurons_per_relu=4,
+            backward_chunk_size=1,
+            candidate_policy_id="objective_influence_width_per_relu_v1",
+        ),
+        per_child_refinement_budget_policy=_dynamic_budget_policy(),
+        per_child_refinement_multi_pass_policy=_dynamic_multi_pass_policy(),
         per_child_refinement_strategy="external_seeded_ancestral_carry_v1",
         external_constraint_seed=_external_constraint_seed(),
     )
@@ -444,6 +477,11 @@ def external_seeded_per_child_execution():
 @pytest.fixture(scope="module")
 def dynamic_external_seeded_execution():
     return _run_dynamic_external_seeded()
+
+
+@pytest.fixture(scope="module")
+def dynamic_multi_pass_external_seeded_execution():
+    return _run_dynamic_multi_pass_external_seeded()
 
 
 def test_per_child_refinement_packed_and_serial_semantics_match(
@@ -855,3 +893,81 @@ def test_dynamic_refinement_budget_admission_and_tamper_fail_closed(
             evaluations=tuple(evaluations),
             per_child_refinements=tuple(records),
         ).validate()
+
+
+def test_dynamic_multi_pass_is_lowered_per_node_and_budget_partitioned(
+    dynamic_multi_pass_external_seeded_execution,
+) -> None:
+    execution = dynamic_multi_pass_external_seeded_execution
+    trace = execution.trace
+    multi_pass = _dynamic_multi_pass_policy()
+    programs = dict(execution.per_child_refinement_executions)
+
+    assert trace.per_child_refinement_multi_pass_policy == multi_pass
+    assert len(trace.per_child_refinements) == 7
+    for record in trace.per_child_refinements:
+        assert record.multi_pass_policy == multi_pass
+        assert len(record.multi_pass_decisions) == 2
+        first, second = record.multi_pass_decisions
+        assigned = (
+            record.budget_decision.assigned_max_neurons_per_relu
+            if record.budget_decision is not None
+            else 4
+        )
+        assert (
+            first.pass_target_cap_per_relu
+            == second.pass_target_cap_per_relu
+            == (assigned // 2)
+        )
+        assert first.result_target_ledger_hash == second.prior_target_ledger_hash
+        assert first.cumulative_selected_target_count <= (
+            second.cumulative_selected_target_count
+        )
+        program = programs[record.node_id].program
+        assert program.plan.multi_pass_policy == multi_pass
+        assert [
+            task.pass_index
+            for task in program.task_module.tasks
+            if task.kind.value == "select_targets"
+        ] == [0, 1]
+    execution.validate()
+
+
+def test_dynamic_multi_pass_admission_and_trace_tamper_fail_closed(
+    dynamic_multi_pass_external_seeded_execution,
+) -> None:
+    with pytest.raises(ValueError, match="multi-pass chunk exceeds pass cap"):
+        execute_native_optimized_relu_split_bab(
+            _module(),
+            _spec(),
+            linear_spec_C=torch.tensor([[1.0, -1.0]]),
+            run_id="dynamic-multi-pass-wrong-chunk",
+            config=NativeReluSplitBabConfig(
+                max_nodes=1,
+                max_depth=0,
+                expansion_batch_size=1,
+                max_eval_batch_size=1,
+            ),
+            optimizer_policy=_policy(),
+            intermediate_bound_source=IntermediateBoundSource.NATIVE_REFINED,
+            per_child_refinement_policy=NativeIntermediateRefinementPolicyIR(
+                passes=2,
+                max_neurons_per_relu=4,
+                backward_chunk_size=2,
+                candidate_policy_id="objective_influence_width_per_relu_v1",
+            ),
+            per_child_refinement_budget_policy=_dynamic_budget_policy(),
+            per_child_refinement_multi_pass_policy=_dynamic_multi_pass_policy(),
+            per_child_refinement_strategy="external_seeded_ancestral_carry_v1",
+            external_constraint_seed=_external_constraint_seed(),
+        )
+
+    execution = dynamic_multi_pass_external_seeded_execution
+    records = list(execution.trace.per_child_refinements)
+    changed_decisions = list(records[0].multi_pass_decisions)
+    changed_decisions[1] = replace(
+        changed_decisions[1], prior_target_ledger_hash="f" * 64
+    )
+    records[0] = replace(records[0], multi_pass_decisions=tuple(changed_decisions))
+    with pytest.raises(ValueError, match="multi-pass order differs"):
+        records[0].validate()

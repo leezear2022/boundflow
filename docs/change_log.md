@@ -4157,3 +4157,21 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_DYNAMIC_ANCESTRAL_REFINEMENT_BUDGET_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Typed Multi-Pass Refinement v1
+
+- 新增 total-cap partition/reselection/termination policy 与逐 pass decision；每 pass 的
+  enumerate/select/stop/backward/intersect/propagate 显式进入 Plan/Task/Schedule 与 action trace；
+- dynamic 8/16/24 per-node cap 拆为 4+4/8+8/12+12，prior-target ledger 保证 disjoint selection，
+  no-unseen target 走 sound passthrough；legacy lowering/hash 条件兼容；
+- fixed ResNet clauses `0/2/4` 上，single 与 split-two-pass 的 worst lower delta 全为 `0.0`；总
+  planned cap=`496`、actual targets=`2976`、logical tree=`31/31` 均相同；
+- fresh replay 6/6、focused `50 passed`、全量 `787 passed, 37 skipped`、Black/Mypy/Pylint
+  `10.00/10` 通过；
+- 按预注册门禁以 `VALIDATED-NO-GO` 关闭；typed mechanism 保留，不升级 tightness/property/
+  performance/ASPLOS-ready；停止 static-influence same-total-cap 拆 pass 路线。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_TYPED_MULTIPASS_REFINEMENT_V1_CHANGELOG_2026_08_04.md`

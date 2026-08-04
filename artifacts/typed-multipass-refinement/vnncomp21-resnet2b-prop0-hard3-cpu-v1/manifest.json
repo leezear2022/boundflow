@@ -1,0 +1,15 @@
+{
+  "evidence_hash": "38992cace70214ffcbd670f03dcfca182e0925bee31eb4df885dab4dab03494d",
+  "files": {
+    "shards/clause0_single_pass_dynamic8_24.json": "36e6e7f0b6cb8c1cc6f29f6985f54cffb9fbd75ffacc358f121b024760168ff6",
+    "shards/clause0_split_two_pass_dynamic8_24.json": "b5c5a5a59289fc449873232dcd8eddcb11073ed0185e0ab06e4cbe554876cf74",
+    "shards/clause2_single_pass_dynamic8_24.json": "e16a4d71c7f512961a4a33b8675fbc7f77a4c88b2aaef45eee4e004337ff53f0",
+    "shards/clause2_split_two_pass_dynamic8_24.json": "60456c5eb24d650117aeace364df6d2f46d5b5856050c8197bd0a16b41f31c42",
+    "shards/clause4_single_pass_dynamic8_24.json": "63f7bf935518b8beb15b4d09882f8703ec0ae899b4e29068cafa6f2b661adddf",
+    "shards/clause4_split_two_pass_dynamic8_24.json": "9f76a8cb32650265a399f507625229391dd5d7f9ee63511bd74cb30b30d60002",
+    "typed_multipass_refinement.json": "0c1e8848548aa1affbd3cc3b43b08a21665efbc8d97da2839586c899b99227ee"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.typed-multipass-refinement-artifact/v1",
+  "status": "validated_no_go"
+}
