@@ -4385,3 +4385,22 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_SHARED_PARAMETRIC_OBJECTIVE_EVALUATOR_V1_CHANGELOG_2026_08_05.md`
+
+---
+
+## 2026-08-05：Full Frontier Tightness Attribution v1
+
+- 新增 exact-frontier attribution Plan/七阶段 Task/Schedule 与 runtime，完整覆盖 selected clauses 2/3
+  的 31-node source、16-node depth-4 active frontier、path/refinement/alpha-beta state；
+- 按预注册只比较 optimizer `steps=5→15`，保持 split、ancestral refinement、parent warm、sibling batch、
+  dtype/device 不变；baseline replay lower/upper max diff=0、refinement hashes exact；
+- steps15 改善 32/32 nodes，但 clauses 2/3 worst-active lower 仅改善 `+0.055496/+0.028557`，未过
+  `+1.0` gate，以 `VALIDATED-NO-GO` 冻结 optimizer-step 轴；
+- replay、8 类同步 tamper、13 focused tests、全量 `930 passed, 37 skipped`、mypy clean、Pylint
+  `10.00/10` 通过；pilot hash=
+  `2719347a8e1c5c49c418b3a396ff405a004b0f4ace96af94d335e4026f7a24a2`；
+- 下一单变量为把已有 objective-bound-impact branch IR 接入 shared ancestral evaluator；
+  `performance_claimed=false`，ASPLOS-ready 仍为 NO。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FULL_FRONTIER_TIGHTNESS_ATTRIBUTION_V1_CHANGELOG_2026_08_05.md`

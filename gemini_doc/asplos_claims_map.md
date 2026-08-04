@@ -1169,3 +1169,21 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   `9234dcbe77803e0e7d7e62ca88c62e1b859c95af4ad8e3a19b85c0ab87294b83`；全量
   `917 passed, 37 skipped`。本阶段 `VALIDATED-REDUCED`；下一门禁为 full-depth frontier tightness
   attribution + 单变量 stronger-bound/candidate，不再调 control/cache 常数。
+
+### NRIR-38：Full Frontier Tightness Attribution v1
+
+- `C1/C2-M-NRIR38` attribution ownership：source/active nodes、metric contract、baseline/candidate policy、
+  exact sibling batches、Decision 与 emit 已 lower 为一等 Plan/7-task TaskModule/Schedule；两个 policy
+  只允许 `steps=5→15`，objective/threshold/split/refinement/parent warm/dtype/device 全部冻结；
+- `C3-G-NRIR38` fail-closed gate：validator 独立重算 31-node source 与 16-node active frontier、parent
+  path、refinement/state metrics、baseline replay、candidate Decision 和 Task/Schedule；active omission、
+  policy/delta/decision/Task/cache/sibling/evidence tamper 均被拒绝；
+- `C1/C3-E-NRIR38` exact-frontier result：clauses 2/3 baseline lower/upper max diff=0；steps15 改善
+  32/32 nodes、0 regressions，median delta=`+0.107208/+0.132715`，但 worst-active improvement 只有
+  `+0.055496/+0.028557`，未过两条均 `>=+1.0` 的预注册门禁；
+- `C3-L-NRIR38` hard limitation：本阶段 `VALIDATED-NO-GO`，只排除当前 fixed frontier 的 optimizer
+  steps 单轴；不形成 full-query/property/performance/GPU/competitor/multi-workload/ASPLOS-ready claim；
+- 工件：`artifacts/full-frontier-tightness-attribution/`
+  `vnncomp21-resnet2b-property0-cpu-pilot-v1/`；pilot hash=
+  `2719347a8e1c5c49c418b3a396ff405a004b0f4ace96af94d335e4026f7a24a2`；全量
+  `930 passed, 37 skipped`。下一单变量为已有 objective branch IR 的 shared-evaluator 接入。

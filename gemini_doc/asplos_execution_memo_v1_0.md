@@ -1,9 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`c5ce3e6`（NRIR-36 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`813006b`（NRIR-37 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/shared-parametric-objective-evaluator-v1`
+> 当前研发分支：`feat/full-frontier-tightness-attribution-v1`
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed
@@ -14,7 +14,7 @@
 > typed hard-clause escalation（完成）→ objective-directed hard-clause escalation（完成）→
 > objective-ancestral queue（完成）→ child-budget Pareto（NO-GO）→ sibling-packed evaluator（完成）→
 > cross-clause anytime evaluator（完成）→ multi-clause anytime priority（NO-GO）→ shared parametric
-> objective evaluator（完成）**。
+> objective evaluator（完成）→ full-frontier tightness attribution（NO-GO）**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有
@@ -1388,3 +1388,22 @@ coverage `VALIDATED-REDUCED` 关闭；三轮 final 仍 9/9 unresolved，depth-4 
 clauses 2/3 的 `-37.574287/-35.900215`。下一门禁只做 frontier tightness attribution，再预注册一个
 单变量 stronger-bound/candidate 实验；不得继续调 top-k、slice、cache 或把 CPU 内部 timing 升级为
 competitor speedup。
+
+## 51. Full Frontier Tightness Attribution v1
+
+NRIR-38 保持 NRIR-37 的 source execution、31/depth4、cap128、widest branch、ancestral refinement、
+sibling grouping、parent warm state 与 dtype/device 不变，只预注册 optimizer `steps=5→15`。新增
+first-class attribution Plan 与七阶段 Task/Schedule；source 31 nodes 的 depth/path、refinement pass、
+alpha/beta state 和 16-node active frontier 全量进入 typed evidence，candidate 按原八个 sibling pair
+重放，baseline/candidate 各有独立 exact template cache。
+
+clauses 2/3 baseline replay lower/upper max diff=0，refinement hashes exact。steps15 的 32/32 active
+nodes 都严格改善，median delta=`+0.107208/+0.132715`，但 worst-active lower 仅改善
+`+0.055496/+0.028557`；depth-4 alpha interior fraction 仅 `2.164%/2.518%`。由于预注册门禁要求两条
+clause worst improvement 均至少 `+1.0`，本轴以 `VALIDATED-NO-GO` 关闭，不运行 steps15 full-query
+formal，也不补试其他 step 数。
+
+pilot hash=`2719347a8e1c5c49c418b3a396ff405a004b0f4ace96af94d335e4026f7a24a2`；13 focused、全量
+`930 passed, 37 skipped` 与静态门禁通过。下一阶段只改变 branch candidate：复用仓库已有 objective
+branch Plan/Task/Schedule，把 objective-bound-impact selection 接入 shared ancestral evaluator，并与
+widest branch 做 exact fixed-tree 对照；不得重新打开 optimizer/cap/multipass/control 常数。
