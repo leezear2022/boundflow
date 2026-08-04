@@ -3877,3 +3877,24 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_NATIVE_ALPHA_BETA_OPTIMIZER_STEP_SCHEDULE_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Native Optimized ReLU-Split BaB v1
+
+- 新增独立 optimized queue runtime：每个 node batch 执行 8-action optimizer Schedule，selected
+  alpha/beta state 再执行 21-task native Bound/Plan/Task/Schedule stack；
+- parent per-node selected states 按 child batch layout 重组并重建 scope，只允许 monotonic-refinement
+  initialization；parent exact state 永不作为 child exact input；
+- toy complete queue 为 15 nodes，packed/serial 5/15 stacks，queue/bounds/state hash 一致；
+- fixed ResNet 为 7 nodes/3 expands/4 frontier，packed/serial 3/7 stacks；bounds max diff=
+  `1.220703125e-04/1.8310546875e-04`，alpha/beta tensor max diff=
+  `4.172325134277344e-07/7.450580596923828e-09`；exact batch-layout state hash 不伪称相等；
+- active child beta gradients 非零，每个 selected state 对 native re-execution diff 为 0；artifact
+  replay hash=`e813826c8fe74161505ab2379b37fa67247fd40c3bd0cb8f82b77880ce403787`；
+- 聚焦 `18 passed`、全量 `630 passed, 37 skipped`；Black/Mypy/Pylint/diff 全过；
+- 只关闭 optimized queue integration；fixed run 仍 budget-exhausted/not-claimed。下一门禁为 sound
+  property termination/verdict，不启动性能路线。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_NATIVE_OPTIMIZED_RELU_SPLIT_BAB_V1_CHANGELOG_2026_08_04.md`

@@ -1,11 +1,11 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`8dba95c`（NRIR-10 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`7bc49f5`（NRIR-11 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/native-alpha-beta-optimizer-step-schedule-v1`
+> 当前研发分支：`feat/native-optimized-relu-split-bab-v1`
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-11 fixed-step optimizer
-> Schedule（完成）→ NRIR-12 optimizer Schedule × ReLU-split queue integration**。
+> Schedule（完成）→ NRIR-12 optimized queue integration（完成）→ sound property verdict**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有
@@ -786,3 +786,26 @@ hash 为 `31261b63d80a7b11dc14484ddab2fe37bbafcc86866aaeaaa53d6af70ea40a19`。�
 multi-node BaB integration、complete termination/property verdict 与 CUDA/performance 都未关闭。
 下一工程门禁是将 optimizer Schedule 接回 native ReLU-split BaB queue 的逐节点 evaluation，同时
 维持 parent→child initialization-only 与最终 state native execution。
+
+## 25. Native Optimized ReLU-Split BaB v1
+
+NRIR-12 将 NRIR-9 queue、NRIR-11 optimizer Schedule 和 NRIR-10 selected-state native compiler
+连接为连续执行链。每个 node batch 先运行固定 1-step 的 8 个 optimizer Task/Action，再把 selected
+alpha/beta state 编译并执行为 21-task native Bound stack。child 的 parent state 只经重建 batch scope
+后作为 monotonic-refinement initialization，`parent_state_consumed_as_exact=false`。
+
+toy complete tree 执行 15 nodes，packed/serial stacks 为 5/15，queue/branch/bounds/selected-state hash
+一致。固定 ResNet bounded run 执行 7 nodes、3 expands、4 frontier，packed/serial stacks 为 3/7；
+lower/upper max diff=`1.220703125e-04/1.8310546875e-04`，alpha/beta tensor max diff=
+`4.172325134277344e-07/7.450580596923828e-09`。exact state hash 因 batch-layout intermediate 数值
+不同而不相等，已明确披露。所有 active child stacks 有非零 beta gradient；selected-state native
+re-execution max diff 为 0。
+
+artifact 位于
+`artifacts/native-optimized-relu-split-bab/vnncomp21-resnet2b-prop0-cpu-v1/`，replay hash 为
+`e813826c8fe74161505ab2379b37fa67247fd40c3bd0cb8f82b77880ce403787`。聚焦 `18 passed`，
+全量 `630 passed, 37 skipped`，静态门禁全过。
+
+该阶段只关闭 optimized queue integration/control ownership `VALIDATED-REDUCED`。固定 ResNet 仍是
+`budget_exhausted/property_status=not_claimed`；没有 complete termination/verdict 或性能证据。下一
+工程门禁是 sound property termination/verdict v1，任何未闭合 frontier 必须保持 unknown。
