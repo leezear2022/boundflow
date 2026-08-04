@@ -10,9 +10,9 @@
 > representation→execution binding，NRIR-5 产生真实 spec-sliced child execution；NRIR-6 已把
 > 两轴联合到同一 template/selector 并执行四组合；NRIR-7 加入 9 条真实 property query 的
 > packed/serial/cache/lineage；NRIR-8 加入 8 个不同 input-box leaf、exact child state 与
-> domain-axis execution。这些仍是 CPU correctness/ownership evidence；没有 ReLU/β BaB queue、
-> CUDA allocator 或性能结果，
-> 故 performance No-Go 不变。
+> domain-axis execution。NRIR-34 已进一步加入 same-parent sibling-group Plan/Task/Schedule 与 packed
+> dynamic queue，在固定 ResNet hard clause 上形成三重复 committed-node coverage 结果；完整九子句
+> 仍只有 clause 0 被执行，故 ASPLOS-ready No-Go 不变。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
@@ -1079,3 +1079,25 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - 工件：`artifacts/objective-ancestral-child-budget-pareto/vnncomp21-resnet2b-clause0-five-cap-cpu-pilot-v1/`；
   pilot hash=`db9b406eebebad0c1c4d6f39e8088667935f10e3d54f38cb848dce792dd757eb`。
   下一门禁为 cap128 sibling packed/parametric evaluator。
+
+### NRIR-34：Sibling-Packed Objective-Ancestral Evaluator v1
+
+- `C1/C2-M-NRIR34` compiler ownership：显式 source/evaluator objective projection、same-parent
+  `(-1,+1)` SiblingGroup、每 child refinement lineage、packed optimizer/native IR 与 atomic commit
+  已进入 Plan/Task/Schedule/Group hash；late pair 不得半提交；
+- `C3-G-NRIR34` semantics gate：first-pair bounds exact；formal common 7 domains lower/upper max diff
+  均 `7.62939453125e-06`，split/branch/final refinement bounds exact，alpha/beta max diff
+  `1.0728836e-04/8.9406967e-08`；projection、dependency、group commit、ordinal accounting tamper
+  fail closed；
+- `C1/C3-E-NRIR34` repeated same-algorithm coverage：31/depth4/60 s 三 fresh repeats 的 serial
+  accepted nodes=`[7,7,7]`，packed=`[15,15,15]`，minimum gain=`+8`；packed depth `3`、worst active
+  lower=`-76.077194`，优于 serial depth `2`/`-104.765411`；该项只主张 cooperative-deadline
+  committed-node coverage improvement；
+- `C3-L-NRIR34` hard limitation：formal wall time 为约 `64.5—66.2 s`，不是硬实时 speedup；九子句
+  global-60s integration 只完成 clause 0，unresolved `[0]`、pending `[1..8]`、property unknown。
+  CPU 单 workload/单 hard clause，无 GPU、competitor、property closure 或 ASPLOS-ready；
+- 工件：profile hash=`7bece7f04459df37dad115622fe3bab5bc16145a4b82190ab003950317117ce9`；
+  formal hash=`9678f9624abd547b76326ad2a1b916c3944d14fc96b2fbe0e81cf61849a777b4`；
+  full-query evidence hash=`dcd0dc89fa7e4eb503e8a8b29438e16d215da10e66cd045cc76eb19a30037bf5`。
+  本阶段 `VALIDATED-REDUCED`；下一门禁为 cross-clause shared root/parametric evaluator + anytime
+  global-budget allocation。

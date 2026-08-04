@@ -1,0 +1,127 @@
+{
+  "claim_boundary": "sound_full_query_integration_only_no_property_or_performance_upgrade",
+  "clause_summaries": [
+    {
+      "accepted_nodes": 13,
+      "aggregate_trace_hash": "058367b76118591ae78ec73a7c972b5c4f8875957ef7d62e22e26d85262be0af",
+      "all_groups_atomic_pairs": true,
+      "clause_index": 0,
+      "discarded_attempt_stage": "after_complete_sibling_group",
+      "fallback_reason": "deadline_preserve_atomic_sibling_frontier",
+      "frontier_count": 7,
+      "maximum_depth": 3,
+      "performance_claimed": false,
+      "queue_trace_hash": "5c9e9335e686b8593cb50a9d1658c3a44ce5812b5a08d35a4f424fd122460edb",
+      "sibling_group_count": 6,
+      "verdict_status": "unknown"
+    }
+  ],
+  "evidence_hash": "dcd0dc89fa7e4eb503e8a8b29438e16d215da10e66cd045cc76eb19a30037bf5",
+  "original_ordinal_accounting_valid": true,
+  "performance_claimed": false,
+  "protocol": {
+    "child_cap": 128,
+    "global_timeout_seconds": 60,
+    "original_clause_count": 9,
+    "original_clause_order": "ascending_index",
+    "search_before_each_admitted_clause": true,
+    "search_budget": {
+      "max_depth": 4,
+      "max_nodes": 31
+    },
+    "sibling_group_size": 2,
+    "torch_threads": 8
+  },
+  "query_trace": {
+    "compiler_version": "boundflow.complete-verifier-query/v1",
+    "completed_clauses": [
+      {
+        "clause_index": 0,
+        "objective_hash": "0785a68037a32572ac06fb6f32a6f304254b0c9c64680546f72db8f2d51d28a9",
+        "queue_trace_hash": "5c9e9335e686b8593cb50a9d1658c3a44ce5812b5a08d35a4f424fd122460edb",
+        "search_counterexample_found": false,
+        "search_trace_hash": "db705279b98683905f96811eff631cf995d869057d4a4c413ad576b8e8dda171",
+        "status": "unknown",
+        "threshold": -0.0,
+        "verdict_trace_hash": "757fe7e0f804b000d7044c64dc2efda325bb3c5486f88f4cb8339a2011c0818e"
+      }
+    ],
+    "deadline_is_cooperative": true,
+    "elapsed_ns": 63076767264,
+    "objective_matrix_hash": "380f1c32321ea47967ad48221134d92d494630777eabe10ef31576a0b051e408",
+    "optimizer_policy_hash": "44905b261cc5fbace70cec8c35135956e155e4d7c82b4897a42950dc5d67bebc",
+    "pending_clause_indices": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "performance_claimed": false,
+    "query_id": "nrir34:cifar10_resnet:000:property0:full-query",
+    "query_policy": {
+      "clause_order": "ascending_index",
+      "deadline_enforcement": "cooperative_stage_boundaries",
+      "property_aggregation": "conjunction",
+      "timeout_ns": 60000000000,
+      "unsafe_short_circuit": true
+    },
+    "queue_config_hash": "def8d4672fee3d5c721ffd49dba50abca57ce45b9d2a94291318f5f058ebfcfa",
+    "reason": "query_deadline_exhausted",
+    "schema_version": "boundflow.complete-verifier-query/v1",
+    "search_policy_hash": "5af8d73cb494d692fabc9895621f343ec31b142d3819accb8d040447421d0140",
+    "skipped_after_unsafe_clause_indices": [],
+    "status": "unknown",
+    "thresholds": [
+      -0.0,
+      -0.0,
+      -0.0,
+      -0.0,
+      -0.0,
+      -0.0,
+      -0.0,
+      -0.0,
+      -0.0
+    ],
+    "unresolved_clause_indices": [
+      0
+    ],
+    "unsafe_clause_index": null
+  },
+  "query_trace_hash": "e3fc261f3c312a6fb080a8750838a1b4aa64012ca1da8455db40754066194e9d",
+  "schema_version": "boundflow.sibling-pack-objective-ancestral-full-query/v1",
+  "sound_status": "unknown",
+  "source": {
+    "native_code_revision": "9a46a7146bcdab54e4eb181ec8b1a7a24b357f684b3d2aed77743a7077f1dcfd"
+  },
+  "status": "ok",
+  "workload": {
+    "category": "cifar10_resnet",
+    "csv_ordinal": 0,
+    "csv_relative_path": "benchmarks/cifar10_resnet/cifar10_resnet_instances.csv",
+    "csv_sha256": "d0be77761016f65d044918e5f95332cf32bf848e5eef28c5465dfbf287ba984f",
+    "model_input_shape": [
+      1,
+      3,
+      32,
+      32
+    ],
+    "model_output_dim": 10,
+    "model_relative_path": "benchmarks/cifar10_resnet/onnx/resnet_2b.onnx",
+    "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+    "onnx_ops": [
+      "Add",
+      "Conv",
+      "Flatten",
+      "Gemm",
+      "Relu"
+    ],
+    "property_relative_path": "benchmarks/cifar10_resnet/vnnlib_properties_pgd_filtered/resnet2b_pgd_filtered/prop_0_eps_0.008.vnnlib",
+    "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+    "query_ir_hash": "f2151936ce0d9f8d8bcabd7bc3fc0224a71d7907da4ac614d7216e7a0919201b",
+    "workload_id": "cifar10_resnet:000"
+  }
+}

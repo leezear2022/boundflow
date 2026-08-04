@@ -4307,3 +4307,22 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_OBJECTIVE_ANCESTRAL_CHILD_BUDGET_PARETO_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Sibling-Packed Objective-Ancestral Evaluator v1
+
+- 新增 source/evaluator objective projection、same-parent SiblingGroup、child lineage、packed
+  optimizer/native 与 atomic commit 的 Plan/Task/Schedule/Group IR；
+- first-pair profiler 中 optimizer/native groups 均 `2→1`，child elapsed
+  `13.291550→7.018038 s`，bounds exact；
+- 31/depth4/60 s 三 fresh repeats 的 serial accepted nodes=`[7,7,7]`，packed=`[15,15,15]`，
+  common lower/upper max diff=`7.6293945e-06`，formal hash=
+  `9678f9624abd547b76326ad2a1b916c3944d14fc96b2fbe0e81cf61849a777b4`；
+- 9-clause global-60s integration sound `unknown`：completed/unresolved=`[0]`，pending=`[1..8]`，
+  evidence hash=`dcd0dc89fa7e4eb503e8a8b29438e16d215da10e66cd045cc76eb19a30037bf5`；
+- 以 single-hard-clause same-algorithm deadline coverage `VALIDATED-REDUCED` 关闭；无 property/GPU/
+  competitor/ASPLOS-ready 升级。下一门禁为 cross-clause shared evaluator + anytime global budget。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_SIBLING_PACKED_OBJECTIVE_ANCESTRAL_EVALUATOR_V1_CHANGELOG_2026_08_04.md`

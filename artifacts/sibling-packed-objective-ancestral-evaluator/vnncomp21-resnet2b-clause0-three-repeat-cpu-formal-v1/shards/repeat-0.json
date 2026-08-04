@@ -1,0 +1,476 @@
+{
+  "comparison": {
+    "alpha_max_abs_diff": 0.00010728836059570312,
+    "beta_max_abs_diff": 8.940696716308594e-08,
+    "branch_candidates_exact": true,
+    "common_node_count": 7,
+    "lower_max_abs_diff": 7.62939453125e-06,
+    "objective_projection_exact": true,
+    "refinement_final_bounds_exact": true,
+    "serial_node_ids_are_packed_prefix": true,
+    "split_tensors_exact": true,
+    "stable_scope_fields_equal_excluding_projected_objective": true,
+    "upper_max_abs_diff": 7.62939453125e-06
+  },
+  "order": [
+    "serial",
+    "packed"
+  ],
+  "packed": {
+    "accepted_nodes": 15,
+    "all_groups_atomic_pairs": true,
+    "discarded_attempt_stage": "after_complete_sibling_group",
+    "fallback_reason": "deadline_preserve_atomic_sibling_frontier",
+    "frontier_count": 8,
+    "maximum_depth": 3,
+    "measured_elapsed_ns": 66148267343,
+    "mode": "packed",
+    "native_stack_domain_batch_sizes": [
+      1,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "node_refinement_final_hashes": {
+      "nrir34:cifar10_resnet:000:clause0:r0:n000000": "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+      "nrir34:cifar10_resnet:000:clause0:r0:n000001": "87d6b6ec9745c8ac51abc79b4a9e3e2c68040ee55428bed52babd7a4dbc1a947",
+      "nrir34:cifar10_resnet:000:clause0:r0:n000002": "b27b97506734e12691318a0315d65e369c46cbd1a899a4f3b7683890afdcceb1",
+      "nrir34:cifar10_resnet:000:clause0:r0:n000003": "ad26501f05fddba82b44dca58fe51db6dac930cd4c3d861cc391e735fcb4b30c",
+      "nrir34:cifar10_resnet:000:clause0:r0:n000004": "77f6975b52c50f93df5d57239434fb29e139cb68f5ccfe88416c29bab3186116",
+      "nrir34:cifar10_resnet:000:clause0:r0:n000005": "d8b237f59d9d6110f4544e7bed36a0466ba8473ef14978e64aefd0765045d7c0",
+      "nrir34:cifar10_resnet:000:clause0:r0:n000006": "191e2c8cb92dc198a1c8632ec1f1bbeee7f35886eec80f3efdb011aa06902677",
+      "nrir34:cifar10_resnet:000:clause0:r0:n000007": "9e64cd66d4c274ff4fa9e70f0608268ae6604238a44e0dc62bd20053317de34d",
+      "nrir34:cifar10_resnet:000:clause0:r0:n000008": "f4307eabd53de6409957ef3f2e7f1a264d30d3f403f053b55b1a0210e371bb08",
+      "nrir34:cifar10_resnet:000:clause0:r0:n000009": "ae2f769482dbff440aeff9bf1cf29c4402a20612aace78ef5b67f8f9de72c5a4",
+      "nrir34:cifar10_resnet:000:clause0:r0:n000010": "c40b0348b93899bf005548964d3c717b4e93adc8f400eb1f2afc2a66e540d97f",
+      "nrir34:cifar10_resnet:000:clause0:r0:n000011": "ad8363a0b884af7643de0d5e9baf8ec06cacfae05cbf297b846f815c873f25e3",
+      "nrir34:cifar10_resnet:000:clause0:r0:n000012": "632afe5aef4b559a418003429631a7e61b84a8995a647bd251ad5b7418fa4fe2",
+      "nrir34:cifar10_resnet:000:clause0:r0:n000013": "0e9acef65d20fe60a161a18355e7ff5af5a5524442d22fa1946f01d98cf0303d",
+      "nrir34:cifar10_resnet:000:clause0:r0:n000014": "5aca748ad4d4d7083a02ad61a50fcbba125c83a50d0cd1f620901195d8144026"
+    },
+    "nodes": [
+      {
+        "branch_candidate": {
+          "lower": -85.59491729736328,
+          "neuron_index": 66,
+          "relu_input": "31",
+          "upper": 60.770511627197266,
+          "width": 146.36542892456055
+        },
+        "branch_value": 0,
+        "depth": 0,
+        "lower": -204.17315673828125,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000000",
+        "parent_node_id": null,
+        "split_state_hash": "32ef5aa369eb3b424067ead0f6b4a41a59b7c5753a5e59034bc13372b10bc2be",
+        "upper": 213.74331665039062
+      },
+      {
+        "branch_candidate": {
+          "lower": -56.2340202331543,
+          "neuron_index": 13,
+          "relu_input": "31",
+          "upper": 46.08847427368164,
+          "width": 102.32249450683594
+        },
+        "branch_value": -1,
+        "depth": 1,
+        "lower": -142.7036590576172,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000001",
+        "parent_node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000000",
+        "split_state_hash": "457eb944dcc7f232d9911741b29d9896e48ca6c7ee806350f412cd96563af4c5",
+        "upper": 151.21844482421875
+      },
+      {
+        "branch_candidate": {
+          "lower": -56.2340202331543,
+          "neuron_index": 13,
+          "relu_input": "31",
+          "upper": 46.08847427368164,
+          "width": 102.32249450683594
+        },
+        "branch_value": 1,
+        "depth": 1,
+        "lower": -142.85464477539062,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000002",
+        "parent_node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000000",
+        "split_state_hash": "28897740ea1859d1dd400537593d9bbfef6ca16eca4c8be5c671a46214a4f6e7",
+        "upper": 150.83197021484375
+      },
+      {
+        "branch_candidate": {
+          "lower": -40.451072692871094,
+          "neuron_index": 93,
+          "relu_input": "31",
+          "upper": 34.81917190551758,
+          "width": 75.27024459838867
+        },
+        "branch_value": -1,
+        "depth": 2,
+        "lower": -104.76541137695312,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000003",
+        "parent_node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000002",
+        "split_state_hash": "40141c469f5bded1a4729ebe99b476b6b1fcc8b85108904d88bc3754a5efa220",
+        "upper": 110.91078186035156
+      },
+      {
+        "branch_candidate": {
+          "lower": -40.451072692871094,
+          "neuron_index": 93,
+          "relu_input": "31",
+          "upper": 34.81917190551758,
+          "width": 75.27024459838867
+        },
+        "branch_value": 1,
+        "depth": 2,
+        "lower": -104.69891357421875,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000004",
+        "parent_node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000002",
+        "split_state_hash": "b149687b867083e36af54930121d44a9cafc0e7538b58cc14ade19c280e36260",
+        "upper": 110.78592681884766
+      },
+      {
+        "branch_candidate": {
+          "lower": -39.999595642089844,
+          "neuron_index": 93,
+          "relu_input": "31",
+          "upper": 34.8366813659668,
+          "width": 74.83627700805664
+        },
+        "branch_value": -1,
+        "depth": 2,
+        "lower": -104.29739379882812,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000005",
+        "parent_node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000001",
+        "split_state_hash": "70b319d5e95a0cf069022b6954be51bd2ae088bb5b1e44df1122d8c830b9c45c",
+        "upper": 110.8807601928711
+      },
+      {
+        "branch_candidate": {
+          "lower": -39.999595642089844,
+          "neuron_index": 93,
+          "relu_input": "31",
+          "upper": 34.8366813659668,
+          "width": 74.83627700805664
+        },
+        "branch_value": 1,
+        "depth": 2,
+        "lower": -104.36183166503906,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000006",
+        "parent_node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000001",
+        "split_state_hash": "fceddd17648f55d04e76c419846e7df700d8e39432f510555495ef7bbb29f2ee",
+        "upper": 110.76953125
+      },
+      {
+        "branch_candidate": {
+          "lower": -31.583553314208984,
+          "neuron_index": 54,
+          "relu_input": "31",
+          "upper": 23.584909439086914,
+          "width": 55.1684627532959
+        },
+        "branch_value": -1,
+        "depth": 3,
+        "lower": -76.07719421386719,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000007",
+        "parent_node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000003",
+        "split_state_hash": "ab337beefb1589b8dd5a19b2d11f3fcce886611dd2de9395b92a93a7d7e3815c",
+        "upper": 81.24148559570312
+      },
+      {
+        "branch_candidate": {
+          "lower": -31.583553314208984,
+          "neuron_index": 54,
+          "relu_input": "31",
+          "upper": 23.584909439086914,
+          "width": 55.1684627532959
+        },
+        "branch_value": 1,
+        "depth": 3,
+        "lower": -76.0268325805664,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000008",
+        "parent_node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000003",
+        "split_state_hash": "c97dd7e37c3965e8c802c316d5a3ddb5b80e2d96e8e61145f2a907d9a5d9575c",
+        "upper": 81.1075210571289
+      },
+      {
+        "branch_candidate": {
+          "lower": -31.289993286132812,
+          "neuron_index": 54,
+          "relu_input": "31",
+          "upper": 23.3858699798584,
+          "width": 54.67586326599121
+        },
+        "branch_value": -1,
+        "depth": 3,
+        "lower": -75.54977416992188,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000009",
+        "parent_node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000004",
+        "split_state_hash": "32ad0dabee12a4bda55fbc01f542d16db3011e2e6f180f89f47ad51cde7f00e7",
+        "upper": 80.81084442138672
+      },
+      {
+        "branch_candidate": {
+          "lower": -31.289993286132812,
+          "neuron_index": 54,
+          "relu_input": "31",
+          "upper": 23.3858699798584,
+          "width": 54.67586326599121
+        },
+        "branch_value": 1,
+        "depth": 3,
+        "lower": -75.52404022216797,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000010",
+        "parent_node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000004",
+        "split_state_hash": "6271d25a25bb77cce57958da43cf0a9c5bf06c5c333651cb6f03412ce426605a",
+        "upper": 80.58937072753906
+      },
+      {
+        "branch_candidate": {
+          "lower": -31.321334838867188,
+          "neuron_index": 54,
+          "relu_input": "31",
+          "upper": 23.454078674316406,
+          "width": 54.775413513183594
+        },
+        "branch_value": -1,
+        "depth": 3,
+        "lower": -75.82439422607422,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000011",
+        "parent_node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000006",
+        "split_state_hash": "eb5592ad51b99bc12c465121ea76db6cec57ef83210d230a40845f7b7c0b6ac9",
+        "upper": 81.4422836303711
+      },
+      {
+        "branch_candidate": {
+          "lower": -31.321334838867188,
+          "neuron_index": 54,
+          "relu_input": "31",
+          "upper": 23.454078674316406,
+          "width": 54.775413513183594
+        },
+        "branch_value": 1,
+        "depth": 3,
+        "lower": -75.69437408447266,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000012",
+        "parent_node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000006",
+        "split_state_hash": "5588312461dbe4e92b277fe46f8eab382831369545c909daf3ce591355ac9e31",
+        "upper": 81.3230209350586
+      },
+      {
+        "branch_candidate": {
+          "lower": -31.231861114501953,
+          "neuron_index": 54,
+          "relu_input": "31",
+          "upper": 23.489673614501953,
+          "width": 54.721534729003906
+        },
+        "branch_value": -1,
+        "depth": 3,
+        "lower": -75.90416717529297,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000013",
+        "parent_node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000005",
+        "split_state_hash": "184553d863d03e71e08cf40e054cb70a25ca467063428eba6d14ceae11075c9a",
+        "upper": 81.49867248535156
+      },
+      {
+        "branch_candidate": {
+          "lower": -31.231861114501953,
+          "neuron_index": 54,
+          "relu_input": "31",
+          "upper": 23.489673614501953,
+          "width": 54.721534729003906
+        },
+        "branch_value": 1,
+        "depth": 3,
+        "lower": -75.77584838867188,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000014",
+        "parent_node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000005",
+        "split_state_hash": "258d508de31a7ea263e771d1dd25c4e3cdb28e892d45d4cc8bf706a88bbad584",
+        "upper": 81.4409408569336
+      }
+    ],
+    "performance_claimed": false,
+    "plan_hash": "54433ac20b928335191d364f97a0fafbb797113248deef5734574a174f63167a",
+    "queue_elapsed_ns": 63822833348,
+    "queue_trace_hash": "1bc22f3d1e16b0df0da441d881bed8abc5771f1b280d2f896896e85050ff1664",
+    "root_lower": -204.17315673828125,
+    "root_upper": 213.74331665039062,
+    "schedule_hash": "732f5a6789f8fb7dc8a7a471ce81f466a20371109e3756d3cc07334595b80e81",
+    "sibling_group_count": 7,
+    "sibling_group_hashes": [
+      "40ebdfb8a8eda77227724f9d1867f372b2cd7e2dad0f459f46ae91240ecef6b0",
+      "aa40f3fd5b732b317d33373f251c8d15f49ccf7f39144eb77c9aaf603f70e06d",
+      "efdbcca2788db6f0bee76a0a082dcd21369884a64ea1456b44b0be0388446144",
+      "1b964ee12ffbd5e2657e449d1c2ad519dbddf9dac4cc88a2a0ea585c9b1baac5",
+      "4d734b8c788a4fe7c0ee8ceb00afb9357abbf185b82b56f7ddacb5c534469e88",
+      "449c977fe6775aaecd0e31c7846349faa789429299d293068501ba939597f981",
+      "a63f22bd835560148a664e250cb84867fa083dcc78c5f772309b8a9feffb0cd6"
+    ],
+    "source_elapsed_ns": 702316549,
+    "task_ir_hash": "47e05c6d672d6327ecb4db254720614cf6a11a854f7d36e544ceacfa1b895afc",
+    "whole_elapsed_ns": 64525149897,
+    "worst_active_lower": -76.07719421386719
+  },
+  "performance_claimed": false,
+  "repeat_index": 0,
+  "result_hash": "280630338d9b482bcc3d12609c353b0dd75b5263ed3795db8449dce8512d477d",
+  "schema_version": "boundflow.sibling-pack-objective-ancestral-worker/v1",
+  "serial": {
+    "accepted_nodes": 7,
+    "discarded_attempt_stage": "after_child_evaluation",
+    "fallback_reason": "deadline_preserve_accepted_frontier",
+    "frontier_count": 4,
+    "maximum_depth": 2,
+    "measured_elapsed_ns": 63348151504,
+    "mode": "serial",
+    "native_stack_domain_batch_sizes": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "node_refinement_final_hashes": {
+      "nrir34:cifar10_resnet:000:clause0:r0:n000000": "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+      "nrir34:cifar10_resnet:000:clause0:r0:n000001": "87d6b6ec9745c8ac51abc79b4a9e3e2c68040ee55428bed52babd7a4dbc1a947",
+      "nrir34:cifar10_resnet:000:clause0:r0:n000002": "b27b97506734e12691318a0315d65e369c46cbd1a899a4f3b7683890afdcceb1",
+      "nrir34:cifar10_resnet:000:clause0:r0:n000003": "ad26501f05fddba82b44dca58fe51db6dac930cd4c3d861cc391e735fcb4b30c",
+      "nrir34:cifar10_resnet:000:clause0:r0:n000004": "77f6975b52c50f93df5d57239434fb29e139cb68f5ccfe88416c29bab3186116",
+      "nrir34:cifar10_resnet:000:clause0:r0:n000005": "d8b237f59d9d6110f4544e7bed36a0466ba8473ef14978e64aefd0765045d7c0",
+      "nrir34:cifar10_resnet:000:clause0:r0:n000006": "191e2c8cb92dc198a1c8632ec1f1bbeee7f35886eec80f3efdb011aa06902677"
+    },
+    "nodes": [
+      {
+        "branch_candidate": {
+          "lower": -85.59491729736328,
+          "neuron_index": 66,
+          "relu_input": "31",
+          "upper": 60.770511627197266,
+          "width": 146.36542892456055
+        },
+        "branch_value": 0,
+        "depth": 0,
+        "lower": -204.17315673828125,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000000",
+        "parent_node_id": null,
+        "split_state_hash": "32ef5aa369eb3b424067ead0f6b4a41a59b7c5753a5e59034bc13372b10bc2be",
+        "upper": 213.74331665039062
+      },
+      {
+        "branch_candidate": {
+          "lower": -56.2340202331543,
+          "neuron_index": 13,
+          "relu_input": "31",
+          "upper": 46.08847427368164,
+          "width": 102.32249450683594
+        },
+        "branch_value": -1,
+        "depth": 1,
+        "lower": -142.7036590576172,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000001",
+        "parent_node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000000",
+        "split_state_hash": "457eb944dcc7f232d9911741b29d9896e48ca6c7ee806350f412cd96563af4c5",
+        "upper": 151.21844482421875
+      },
+      {
+        "branch_candidate": {
+          "lower": -56.2340202331543,
+          "neuron_index": 13,
+          "relu_input": "31",
+          "upper": 46.08847427368164,
+          "width": 102.32249450683594
+        },
+        "branch_value": 1,
+        "depth": 1,
+        "lower": -142.85464477539062,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000002",
+        "parent_node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000000",
+        "split_state_hash": "28897740ea1859d1dd400537593d9bbfef6ca16eca4c8be5c671a46214a4f6e7",
+        "upper": 150.83197021484375
+      },
+      {
+        "branch_candidate": {
+          "lower": -40.451072692871094,
+          "neuron_index": 93,
+          "relu_input": "31",
+          "upper": 34.81917190551758,
+          "width": 75.27024459838867
+        },
+        "branch_value": -1,
+        "depth": 2,
+        "lower": -104.76541137695312,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000003",
+        "parent_node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000002",
+        "split_state_hash": "40141c469f5bded1a4729ebe99b476b6b1fcc8b85108904d88bc3754a5efa220",
+        "upper": 110.91077423095703
+      },
+      {
+        "branch_candidate": {
+          "lower": -40.451072692871094,
+          "neuron_index": 93,
+          "relu_input": "31",
+          "upper": 34.81917190551758,
+          "width": 75.27024459838867
+        },
+        "branch_value": 1,
+        "depth": 2,
+        "lower": -104.69891357421875,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000004",
+        "parent_node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000002",
+        "split_state_hash": "b149687b867083e36af54930121d44a9cafc0e7538b58cc14ade19c280e36260",
+        "upper": 110.78592681884766
+      },
+      {
+        "branch_candidate": {
+          "lower": -39.999595642089844,
+          "neuron_index": 93,
+          "relu_input": "31",
+          "upper": 34.8366813659668,
+          "width": 74.83627700805664
+        },
+        "branch_value": -1,
+        "depth": 2,
+        "lower": -104.29739379882812,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000005",
+        "parent_node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000001",
+        "split_state_hash": "70b319d5e95a0cf069022b6954be51bd2ae088bb5b1e44df1122d8c830b9c45c",
+        "upper": 110.8807601928711
+      },
+      {
+        "branch_candidate": {
+          "lower": -39.999595642089844,
+          "neuron_index": 93,
+          "relu_input": "31",
+          "upper": 34.8366813659668,
+          "width": 74.83627700805664
+        },
+        "branch_value": 1,
+        "depth": 2,
+        "lower": -104.36182403564453,
+        "node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000006",
+        "parent_node_id": "nrir34:cifar10_resnet:000:clause0:r0:n000001",
+        "split_state_hash": "fceddd17648f55d04e76c419846e7df700d8e39432f510555495ef7bbb29f2ee",
+        "upper": 110.76953887939453
+      }
+    ],
+    "performance_claimed": false,
+    "plan_hash": "f04fcac3b3777acdfb7662ffb8aa6fd7807452d5bd6762f660794a9347e8504f",
+    "queue_elapsed_ns": 61897332623,
+    "queue_trace_hash": "72d28edd9ffee5284f2f90eb894ddd784c253fbff4e6e46c222999a61bfadbdc",
+    "root_lower": -204.17315673828125,
+    "root_upper": 213.74331665039062,
+    "schedule_hash": "b48c286f0a5be1ad6e7db20968b6b82b58b8d069df9771bd4f86e9358ae407db",
+    "source_elapsed_ns": 673634690,
+    "task_ir_hash": "98e32eaea5a6049bdeb146d612330cd549c0a522ce5a6dbdc327c808a51fb549",
+    "whole_elapsed_ns": 62570967313,
+    "worst_active_lower": -104.76541137695312
+  },
+  "worker_gate_passed": true
+}

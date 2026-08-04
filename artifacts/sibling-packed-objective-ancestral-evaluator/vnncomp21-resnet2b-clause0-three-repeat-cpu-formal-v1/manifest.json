@@ -1,0 +1,13 @@
+{
+  "files": {
+    "formal.json": "028548db861a80055b4b2a6b86e0e537a76b6a52c8cf528c7c346da681387f15",
+    "logs/repeat-0.log": "c83421f4eba38bca4f70adf09edeb706d023dd76cb1688ae757e73f6fc7493ba",
+    "logs/repeat-1.log": "76bc5f538ab31c6675b8f784f500929c2ea99333d262e5817c325000db3d425d",
+    "logs/repeat-2.log": "d69860f9d9bde6d02d70d9caa03d661e0a5eac8f91b932cda5dc883d2e29f520",
+    "shards/repeat-0.json": "b4ba760823baea0ed046085fb2f62e6bb04dbab67b45c86e15426c79a971c1b9",
+    "shards/repeat-1.json": "7e6538aaece0fbb781417361dcea55abc9761cdfd3e5e427d8514999b2332246",
+    "shards/repeat-2.json": "85ee193e3191c3a3cde6710b9f74f27e5e8718013052e72ad07e647e36497494"
+  },
+  "formal_hash": "9678f9624abd547b76326ad2a1b916c3944d14fc96b2fbe0e81cf61849a777b4",
+  "schema_version": "boundflow.sibling-pack-objective-ancestral-manifest/v1"
+}

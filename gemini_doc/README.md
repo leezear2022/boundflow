@@ -16,9 +16,11 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_OBJECTIVE_ANCESTRAL_CHILD_BUDGET_PARETO_V1_PLAN_2026_08_04.md`
-（five-cap first-class calibration/Decision、cap-only coverage NO-GO 与 sibling-packed 下一门禁）。
+当前最新入口：`gemini_doc/BOUNDFLOW_SIBLING_PACKED_OBJECTIVE_ANCESTRAL_EVALUATOR_V1_PLAN_2026_08_04.md`
+（same-parent atomic packed evaluator、三重复 15-vs-7 node coverage 与 9-clause global-deadline
+integration）。
 其直接前序为
+`gemini_doc/BOUNDFLOW_OBJECTIVE_ANCESTRAL_CHILD_BUDGET_PARETO_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_OBJECTIVE_ANCESTRAL_HARD_CLAUSE_ESCALATION_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_OBJECTIVE_DIRECTED_HARD_CLAUSE_ESCALATION_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_TYPED_HARD_CLAUSE_ESCALATION_V1_PLAN_2026_08_04.md`、
@@ -104,6 +106,10 @@
 
 ### 2.1 关键交付文档（“长期有效”）
 
+- `gemini_doc/BOUNDFLOW_SIBLING_PACKED_OBJECTIVE_ANCESTRAL_EVALUATOR_V1_PLAN_2026_08_04.md`：
+  sibling-group IR、atomic deadline、三重复 coverage 门禁与 cross-clause 下一路线
+- `gemini_doc/BOUNDFLOW_SIBLING_PACKED_OBJECTIVE_ANCESTRAL_EVALUATOR_V1_CHANGELOG_2026_08_04.md`：
+  profiler/runtime/tests/formal/full-query artifact 的精确结果与 claim boundary
 - `gemini_doc/BOUNDFLOW_OBJECTIVE_ANCESTRAL_CHILD_BUDGET_PARETO_V1_PLAN_2026_08_04.md`：
   five-cap Policy/Decision、90% retention gate、cap-only NO-GO 与 sibling-packed 下一路线
 - `gemini_doc/BOUNDFLOW_OBJECTIVE_ANCESTRAL_CHILD_BUDGET_PARETO_V1_CHANGELOG_2026_08_04.md`：

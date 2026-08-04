@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev003819
-last_va: ev003820
+last_ch: ev003929
+last_va: ev003939
 blk:
-next: close-nrir33-no-go-then-start-nrir34-sibling-packed-evaluator
-updated: 2026-08-04T15:28:21Z
+next: publish-and-merge-nrir34-pr
+updated: 2026-08-04T16:24:30Z
