@@ -4424,3 +4424,23 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_SHARED_EVALUATOR_V1_CHANGELOG_2026_08_05.md`
+
+---
+
+## 2026-08-05：Objective Branch Whole Query Formal v1
+
+- 新增 raw objective-branch shared production queue 和 multi-clause anytime composition；objective
+  scoring 被纳入 single-global-60s monotonic deadline，冻结其余 floor/rank/slice/refinement/cache/queue；
+- 三 fresh processes 的 correctness、rank/selected、typed branch coverage、cache 与 nine-ordinal
+  aggregate 全过；accepted nodes=`[[29,23],[29,21],[29,21]]`，branch counts exact；
+- clauses 2/3 worst-active lower 为 `-48.315041` 与 `-43.299690/-44.731468`，既未达到 `31/15`
+  coverage，也未达到相对 frozen widest `+1.0`；final 仍 9/9 unresolved；
+- whole cooperative elapsed=`[63.357098,63.161128,62.485366] s`；artifact replay 与 formal+shard+
+  manifest 同步重哈希 branch-coverage tamper fail closed；formal hash=
+  `d69b56d4d82ad5bf8d30883258c15a39e5a45f1fac9dbc8eb35e91fda9f6a492`；
+- focused `8 passed`、predecessor-inclusive `55 passed`、全量 `944 passed, 37 skipped`，静态门禁通过；
+- 以 objective-branch global-budget `VALIDATED-NO-GO` 关闭，`performance_claimed=false`；NRIR-39
+  fixed-budget 机制结论保留，但不得升级为 production 或 ASPLOS-ready claim。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_WHOLE_QUERY_FORMAL_V1_CHANGELOG_2026_08_05.md`

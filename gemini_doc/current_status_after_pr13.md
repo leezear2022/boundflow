@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-05
-> 当前 integration base：`20a8ac3`（NRIR-38 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/objective-branch-shared-evaluator-v1`
+> 当前 integration base：`331086d`（NRIR-39 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/objective-branch-whole-query-formal-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
@@ -24,6 +24,15 @@
 > `-35.530926/-30.258448`，改善 `+2.043362/+5.641768`，两条均过 `+1.0` 门禁；median 亦提升
 > `+2.537640/+5.885233`。状态为 fixed-budget branch selection `VALIDATED-REDUCED`，下一门禁是
 > three-repeat whole-query/global-deadline formal；performance/property/ASPLOS-ready 尚未升级。
+> 2026-08-05 NRIR-40 已完成：objective branch 进入原始 production queue 和 single-global-60s
+> multi-clause runtime，三 fresh repeats 的 correctness、rank/selected、typed branch coverage、cache 与
+> original-ordinal aggregate 全过；但 accepted nodes 只有 `[[29,23],[29,21],[29,21]]`，clauses 2/3
+> worst-active lower 为 `-48.315041` 与 `-43.299690/-44.731468`，相对 NRIR-37 widest formal 更差。
+> whole cooperative elapsed=`[63.357098,63.161128,62.485366] s`；production coverage/tightness gate
+> 三轮均失败；全量 `944 passed, 37 skipped`。按预注册以 objective-branch global-budget
+> `VALIDATED-NO-GO` 关闭。NRIR-39 fixed-budget
+> 机制结论不撤销，但不得升级为 production/performance/property/ASPLOS-ready claim。下一步只允许先做
+> scoring 成本与 frontier-order 因果归因，再冻结新的单变量。
 > 2026-08-05 NRIR-36 后续：九子句 NRIR-31 floor 已由 typed root-lower priority 选择 clauses 2/3，
 > dynamic equal-remaining slices 在同一 global start 下执行。三 fresh repeats 都复现
 > rank=`[2,3,4,5,0,8,6,7,1]`，packed nodes=`[[3,3],[3,3],[3,1]]`；repeat 2 第二条未提交

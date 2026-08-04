@@ -16,9 +16,11 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_SHARED_EVALUATOR_V1_PLAN_2026_08_05.md`
-（NRIR-39：objective branch 已接入 shared ancestral evaluator；clauses 2/3 worst-active lower 改善
-`+2.043362/+5.641768`，通过预注册门禁，以 fixed-budget `VALIDATED-REDUCED` 关闭）。其直接前序为
+当前最新入口：`gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_WHOLE_QUERY_FORMAL_V1_PLAN_2026_08_05.md`
+（NRIR-40 closed：three fresh whole-query correctness 全过，但 coverage/tightness production gate
+三轮均失败，以 global-budget `VALIDATED-NO-GO` 关闭；下一门禁先做 scoring/queue cost 与
+frontier-order 因果归因）。其直接前序为
+`gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_SHARED_EVALUATOR_V1_PLAN_2026_08_05.md`、
 `gemini_doc/BOUNDFLOW_FULL_FRONTIER_TIGHTNESS_ATTRIBUTION_V1_PLAN_2026_08_05.md`、
 `gemini_doc/BOUNDFLOW_SHARED_PARAMETRIC_OBJECTIVE_EVALUATOR_V1_PLAN_2026_08_05.md`、
 `gemini_doc/BOUNDFLOW_MULTI_CLAUSE_ANYTIME_PRIORITY_V1_PLAN_2026_08_04.md`、

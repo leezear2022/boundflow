@@ -5,9 +5,9 @@ rm: v01
 st: s01
 stat: active
 health: green
-pr: [50]
-last_ch: ev004506
-last_va: ev004507
+pr: [51]
+last_ch: ev004599
+last_va: ev004600
 blk:
-next: review-and-merge-pr50-then-preregister-objective-branch-whole-query-formal-v1
-updated: 2026-08-04T20:46:21Z
+next: merge-nrir40-pr51-after-local-gates
+updated: 2026-08-04T21:27:08Z
