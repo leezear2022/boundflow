@@ -55,3 +55,5 @@ stage: s01
 
 - plan: `gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_WHOLE_QUERY_FORMAL_V1_PLAN_2026_08_05.md`
 - roadmap: `gemini_doc/asplos_execution_memo_v1_0.md`
+- implementation commit: `fcb1edc`
+- publication: GitHub PR #51（base `main`，head `feat/objective-branch-whole-query-formal-v1`）
