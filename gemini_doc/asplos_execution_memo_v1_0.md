@@ -1,9 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`20a8ac3`（NRIR-38 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`331086d`（NRIR-39 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/objective-branch-shared-evaluator-v1`
+> 当前研发分支：`feat/objective-branch-whole-query-formal-v1`
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed
@@ -1426,3 +1426,32 @@ worst-active improvement=`+2.043362/+5.641768`、median delta=`+2.537640/+5.8852
 会增加实际工作量。下一门禁必须做 three fresh whole-query/global-deadline repeats，同时报告 floor、branch
 scoring/queue、committed nodes、cache 与 final 9-clause verdict；不得把本阶段 tightness 直接写成
 performance、GPU、competitor、multi-workload 或 ASPLOS-ready。
+
+## 53. Objective Branch Whole Query Formal v1
+
+NRIR-40 将 NRIR-39 frozen objective-bound-impact branch 接入 raw shared production queue，并与
+NRIR-36/37 nine-clause anytime runtime 组合。floor、rank/top-2、dynamic equal-remaining allocation、
+steps5、cap128 ancestral refinement、query-owned cache、best-first、31/depth4 与 global 60 秒均不变；
+objective scoring 在真实 slice/global monotonic deadline 内执行，不额外重放 widest control。新增 runner
+冻结 three fresh workers、worker/formal/manifest schema、逐轮 shards/logs，并将 shard 与 formal 内嵌结果
+交叉绑定。
+
+三轮 correctness gate 全过：floor 9/9、rank=`[2,3,4,5,0,8,6,7,1]`、selected=`[2,3]`、branch
+executions 与 accepted nodes 一一对应、每轮 cache 恰好 `1 miss`，original ordinals 和 sound aggregate
+完整。floor elapsed=`[21.636507,22.057062,22.088135] s`；whole cooperative elapsed=
+`[63.357098,63.161128,62.485366] s`。
+
+production gate 三轮均失败：nodes/groups 仅为
+`[[29/14,23/11],[29/14,21/10],[29/14,21/10]]`，没有达到 clauses 2/3 各 `31/15`；worst-active
+lower 分别为 `[-48.315041,-43.299690]`、`[-48.315041,-44.731468]`、
+`[-48.315041,-44.731468]`，相对 frozen widest `-37.574287/-35.900215` 也未达到 `+1.0`。
+formal hash=`d69b56d4d82ad5bf8d30883258c15a39e5a45f1fac9dbc8eb35e91fda9f6a492`；原样 replay 与
+formal+shard+manifest 同步重哈希 branch-coverage tamper 均通过预期门禁。
+focused `8 passed`、predecessor-inclusive `55 passed`、全量 `944 passed, 37 skipped` 与 Black/mypy/
+Pylint `10.00/10` 通过。
+
+本阶段以 objective-branch global-budget `VALIDATED-NO-GO` 关闭，`performance_claimed=false`。
+NRIR-39 fixed-budget `VALIDATED-REDUCED` 仍只证明在相同 31-node frontier 上 branch policy 可改善 lower，
+不能推导真实 deadline 下的 production 收益。下一阶段若继续，必须先做 objective scoring/queue phase
+wall-time 与 frontier-order 因果归因，再预注册一个单变量；不得事后调 top-k、slice、node cap、optimizer
+或门槛，也不得形成 property/GPU/competitor/multi-workload/ASPLOS-ready claim。

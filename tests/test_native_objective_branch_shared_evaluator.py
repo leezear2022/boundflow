@@ -16,6 +16,9 @@ from boundflow.ir.task import BFTaskModule, BoundTask, TaskKind, TaskOp
 from boundflow.runtime.native_alpha_beta_optimization_state import (
     NativeAlphaBetaOptimizerPolicy,
 )
+from boundflow.runtime.native_candidate_search import (
+    NativeProjectedGradientSearchPolicy,
+)
 from boundflow.runtime.native_intermediate_refinement import (
     compile_native_intermediate_refinement_program,
     execute_native_intermediate_refinement_program,
@@ -26,6 +29,15 @@ from boundflow.runtime.native_objective_branch_score import (
 from boundflow.runtime.native_objective_branch_shared_evaluator import (
     compile_native_objective_branch_shared_plan,
     execute_native_objective_branch_shared_queue,
+)
+from boundflow.runtime.native_objective_branch_shared_production_queue import (
+    execute_native_objective_branch_shared_production_queue,
+)
+from boundflow.runtime.native_objective_branch_shared_multi_clause_anytime import (
+    execute_native_objective_branch_shared_multi_clause_anytime_program,
+)
+from boundflow.runtime.native_multi_clause_anytime import (
+    compile_native_multi_clause_anytime_program,
 )
 from boundflow.runtime.native_parametric_optimizer import (
     NativeParametricOptimizerTemplateCache,
@@ -282,3 +294,77 @@ def test_objective_branch_shared_rejects_schedule_task_drift(
     )
     with pytest.raises(ValueError, match="Schedule/Task binding differs"):
         schedule.validate_against(candidate.task_ir)
+
+
+def test_objective_branch_shared_production_needs_no_widest_control(
+    execution_bundle,
+) -> None:
+    (
+        module,
+        spec,
+        objective,
+        threshold,
+        root,
+        optimizer_policy,
+        branch_policy,
+        _control,
+        candidate,
+    ) = execution_bundle
+
+    production = execute_native_objective_branch_shared_production_queue(
+        candidate.plan,
+        module,
+        spec,
+        linear_spec_C=objective,
+        threshold=threshold,
+        root_refinement=root,
+        optimizer_policy=optimizer_policy,
+        branch_policy=branch_policy,
+        compiler_cache=NativeParametricOptimizerTemplateCache(),
+        query_id="objective-branch-shared-production",
+        clock_ns=lambda: 0,
+    )
+
+    assert len(production.queue.trace.evaluations) == 31
+    assert len(production.queue.objective_branch_executions) == 31
+    assert production.queue.objective_branch_policy == branch_policy
+    assert all(
+        decision.reason != "widest_unsplit_ambiguous_relu"
+        for decision in production.queue.trace.decisions
+    )
+
+
+def test_objective_branch_multi_clause_preserves_floor_only_result() -> None:
+    module = _module()
+    spec = _spec()
+    objectives = torch.tensor([[[1.0, -1.0]]]).repeat(1, 9, 1)
+    thresholds = torch.full((9,), -1e6)
+    search = NativeProjectedGradientSearchPolicy(steps=1, step_size=0.01)
+    optimizer = NativeAlphaBetaOptimizerPolicy(steps=1, lr=0.1)
+    branch = NativeObjectiveBranchPolicy()
+    program = compile_native_multi_clause_anytime_program(
+        module,
+        spec,
+        linear_spec_C=objectives,
+        thresholds=thresholds,
+        plan_id="objective-branch-multi-clause-floor-only",
+        search_policy=search,
+        optimizer_policy=optimizer,
+    )
+
+    execution = execute_native_objective_branch_shared_multi_clause_anytime_program(
+        program,
+        module,
+        spec,
+        linear_spec_C=objectives,
+        thresholds=thresholds,
+        query_id="objective-branch-multi-clause-floor-only",
+        search_policy=search,
+        optimizer_policy=optimizer,
+        branch_policy=branch,
+    )
+
+    assert execution.floor.trace.final_status == "verified"
+    assert not execution.packed_executions
+    assert not execution.cache_events
+    assert execution.aggregate.final_status == "verified"

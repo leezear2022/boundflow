@@ -1207,3 +1207,26 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   `dde1cc4076ea766e7b4859e75ec9ff214d61f3cf245385285274b47f541a72cc`。本阶段 fixed-budget branch
   selection `VALIDATED-REDUCED`；16 focused、40 predecessor-inclusive tests、全量
   `940 passed, 37 skipped` 与静态门禁通过；下一门禁为 three-repeat whole-query/global-deadline formal。
+
+### NRIR-40：Objective Branch Whole Query Formal v1
+
+- `C1/C2-M-NRIR40` production composition：新增 raw objective-branch shared production queue 与
+  multi-clause anytime composition；objective scoring 消费真实 slice/global monotonic deadline，仍由
+  composite branch Plan/Task/Schedule 和 exact per-node binding 拥有语义；
+- `C3-G-NRIR40` fail-closed gate：worker 从 floor 重算 rank/selected/allocation，验证 atomic groups、
+  branch-node coverage、policy hash、source lineage、cache ownership 与 nine-ordinal aggregate；formal
+  重算三轮 gate 并交叉绑定 shard。重复 branch node 即使同步改 formal/shard 并重算 worker/formal/
+  manifest hashes 仍被拒绝；
+- `C1/C3-E-NRIR40` repeated correctness：三 fresh processes 都完成 9/9 floor，rank=
+  `[2,3,4,5,0,8,6,7,1]`、selected=`[2,3]`；accepted nodes=
+  `[[29,23],[29,21],[29,21]]`，每个 accepted node 均有 branch execution，每轮 cache miss=1，无
+  partial sibling commit；
+- `C3-L-NRIR40` hard limitation：三轮均未达到两条 clause 各 `31 nodes/15 groups`，worst-active lower=
+  `[[-48.315041,-43.299690],[-48.315041,-44.731468],[-48.315041,-44.731468]]`，相对 frozen widest
+  更差；final 仍 9/9 unresolved。状态为 objective-branch global-budget `VALIDATED-NO-GO`，不形成
+  property/performance/GPU/competitor/multi-workload/ASPLOS-ready claim；
+- 工件：`artifacts/objective-branch-whole-query/`
+  `vnncomp21-resnet2b-property0-three-repeat-cpu-formal-v1/`；formal hash=
+  `d69b56d4d82ad5bf8d30883258c15a39e5a45f1fac9dbc8eb35e91fda9f6a492`；whole cooperative elapsed=
+  `[63.357098,63.161128,62.485366] s`；全量 `944 passed, 37 skipped`。下一步只做 scoring/queue
+  cost 与 frontier-order 因果归因，不事后扫 policy 常数。
