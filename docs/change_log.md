@@ -4196,3 +4196,24 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_PRODUCTION_PREPARED_VERIFIER_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Parametric Dynamic Batch Compiler v1
+
+- 新增 optimizer PlanTemplate/PlanInstance、reusable Task/Schedule、query-scoped exact cache 和
+  additive parametric production queue/query；动态 tensor content 全部绑定 instance，contract 或
+  runtime tensor 漂移 fail closed；
+- 三 workload 各三组交替 fresh-process full-query production-v1→v2 median：MNISTFC
+  `14.807→3.456 s`（`4.2849×`）、ResNet2B `61.239→6.209 s`（`9.8630×`）、OVAL21
+  `13.021→3.718 s`（`3.5024×`）；语义逐 clause/queue/state 对齐；
+- 每 query 只编译一个 template，instances/miss/hit=`19/1/18`、`27/1/26`、`11/1/10`；
+- artifact fresh replay、NRIR-27 historical replay、focused `22 passed`、全量
+  `818 passed, 37 skipped`、Black/Mypy/Pylint 通过；evidence hash=
+  `117fcecf8e089c16f4275abb97292039790bae75bc4b518ae699bc9ac432ce97`；
+- 以 internal full-query CPU performance `VALIDATED-REDUCED` 关闭；property 仍 unknown，不升级
+  CUDA、竞品 speedup、complete-property 或 ASPLOS-ready。下一门禁为 fixed-wall-clock typed BaB
+  depth/node scaling。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_PARAMETRIC_DYNAMIC_BATCH_COMPILER_V1_CHANGELOG_2026_08_04.md`

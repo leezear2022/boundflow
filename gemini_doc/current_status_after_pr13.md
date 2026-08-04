@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`6c0ae1c`（NRIR-26 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/production-prepared-verifier-v1`
+> 当前 integration base：`e72cc28`（NRIR-27 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/parametric-dynamic-batch-compiler-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-04 NRIR-19 后续：native selected-CROWN intermediate refinement 已成为一等
@@ -19,7 +19,10 @@
 > 正向 tightness，但仍无 closure。NRIR-26 typed split-two-pass 在同总 cap 下三条 worst lower
 > delta 全为 `0.0`，按预注册门禁 NO-GO。NRIR-27 已把 audit verifier 转为显式 production
 > prepared queue，并在三真实拓扑相同算法 clause-0 上获得 `1.3663×/2.4723×/1.4511×`
-> repeated CPU internal speedup；full query 仍全部 unknown，下一瓶颈为逐 dynamic-batch compile。
+> repeated CPU internal speedup；full query 仍全部 unknown。NRIR-28 随后把 optimizer 编译拆为
+> parametric PlanTemplate/PlanInstance，并在相同 full query 上把 v1→v2 median 降至
+> `14.807→3.456/61.239→6.209/13.021→3.718 s`；下一门禁是把节省的 wall-clock 投入 typed
+> search scaling。
 > 顶层
 > ASPLOS-ready 与 performance No-Go 不变。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
@@ -838,3 +841,23 @@ runtime + internal CPU overhead `VALIDATED-REDUCED`；竞品参考仅是不同�
 诊断，不得计算 speedup。GPU、公平 complete competitor、verified/unsafe closure 与 ASPLOS-ready
 仍未成立。phase evidence 显示 full-query execution 的约 `59%–65%` 尚在四类 action 之外；下一
 工程门禁为 parametric dynamic-batch `PlanTemplate/PlanInstance` 与 compile-cache ownership。
+
+## 35. Parametric Dynamic Batch Compiler v1 判定
+
+NRIR-28 新增静态 optimizer PlanTemplate、动态 PlanInstance、可复用 Task/Schedule、query-scoped
+exact cache 和 additive parametric queue/query。template 绑定 graph、tensor contract、ReLU layout、
+policy 与 provenance；instance 绑定 input/objective/intermediate/split/scope/initial-state content。
+contract 或 exact runtime tensor 漂移在执行前 fail closed；NRIR-27 frozen 文件零修改且 artifact
+继续 replay。
+
+三组交替 fresh-process full-query production-v1→v2 median 为：MNISTFC
+`14.807→3.456 s`（`4.2849×`）、ResNet2B `61.239→6.209 s`（`9.8630×`）、OVAL21
+`13.021→3.718 s`（`3.5024×`）。每次 query 只编译 1 个 template；instances/miss/hit 分别为
+`19/1/18`、`27/1/26`、`11/1/10`。v1/v2 的 clause accounting、logical queue、selected state 与
+root bounds 逐项一致。
+
+artifact evidence hash=
+`117fcecf8e089c16f4275abb97292039790bae75bc4b518ae699bc9ac432ce97`；全量
+`818 passed, 37 skipped`。本阶段以 same-algorithm full-query internal CPU performance
+`VALIDATED-REDUCED` 关闭；三类 property 仍 unknown，无 CUDA、竞品 speedup、complete-property 或
+ASPLOS-ready claim。下一工程门禁为 fixed-wall-clock parametric BaB depth/node scaling。

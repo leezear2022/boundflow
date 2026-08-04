@@ -16,9 +16,10 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_PRODUCTION_PREPARED_VERIFIER_V1_PLAN_2026_08_04.md`
-（production complete-verifier Plan/Task/Schedule、三真实拓扑重复 CPU E2E 与 compiler-phase
-瓶颈证据）。其直接前序为
+当前最新入口：`gemini_doc/BOUNDFLOW_PARAMETRIC_DYNAMIC_BATCH_COMPILER_V1_PLAN_2026_08_04.md`
+（parametric optimizer PlanTemplate/PlanInstance、query-scoped cache 与三真实拓扑 full-query
+production-v1/v2 重复 CPU E2E）。其直接前序为
+`gemini_doc/BOUNDFLOW_PRODUCTION_PREPARED_VERIFIER_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_TYPED_MULTIPASS_REFINEMENT_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_DYNAMIC_ANCESTRAL_REFINEMENT_BUDGET_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_EXTERNAL_SEEDED_DEPTH_NODE_CONVERGENCE_V1_PLAN_2026_08_04.md`、
