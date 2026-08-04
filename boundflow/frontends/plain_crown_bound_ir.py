@@ -294,13 +294,13 @@ def build_plain_crown_bound_ir(  # pylint: disable=too-many-arguments,too-many-l
         raise TypeError("intermediate_bound_source must be an IntermediateBoundSource")
     if not isinstance(relu_lower_slope_policy, ReluLowerSlopePolicy):
         raise TypeError("relu_lower_slope_policy must be a ReluLowerSlopePolicy")
-    if intermediate_bound_source == IntermediateBoundSource.EXTERNAL_VERIFIER:
+    if intermediate_bound_source != IntermediateBoundSource.LOCAL_FORWARD:
         if not _is_sha256(intermediate_bounds_hash):
             raise ValueError(
-                "external intermediate bounds require an exact SHA-256 identity"
+                "non-local intermediate bounds require an exact SHA-256 identity"
             )
     elif intermediate_bounds_hash is not None:
-        raise ValueError("local intermediate bounds cannot declare an external hash")
+        raise ValueError("local intermediate bounds cannot declare an override hash")
     if len(task_module.tasks) != 1 or task_module.task_graph is not None:
         raise NotImplementedError("Bound IR v1 lowering supports one task only")
     task = task_module.get_entry_task()

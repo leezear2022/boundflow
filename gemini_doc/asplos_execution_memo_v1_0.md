@@ -1,12 +1,13 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`54e565f`（NRIR-17 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`3ed367c`（NRIR-18 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/multiworkload-competitor-e2e-baseline-v1`
+> 当前研发分支：`feat/native-intermediate-bound-refinement-v1`
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
-> competitor E2E（完成）→ native intermediate-bound refinement**。
+> competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed
+> intermediate target selection**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有
@@ -950,3 +951,22 @@ artifact fresh replay hash=
 `VALIDATED-REDUCED`；GPU/performance 与 ASPLOS-ready 仍为 NO。下一单一工程门禁是 native
 intermediate-bound refinement Plan/Task/Schedule：先缩小三 workload 的 root/closed-clause gap，
 再讨论 selective policy、prepared execution 或可用 CUDA 主机上的冻结矩阵。
+
+## 32. Native Intermediate-Bound Refinement v1
+
+NRIR-19 把任意中间张量 selected-row plain CROWN、top-width target selection、分块 backward、
+intersection 和 forward propagation lower 为可哈希 Plan/Task/Schedule。`native_refined` provenance
+独立于 `external_verifier`，并进入 optimizer/Bound IR/BaB child path；source、input、split、初始
+bounds、policy、target、action trace 任一漂移均拒绝。
+
+正式 CPU same-policy fresh-process 结果：MNISTFC 关闭 clauses `3/7`，unresolved `3→1`、nodes
+`31→21`；OVAL21 关闭 clause `8`，`unknown→verified`、nodes `15→11`；ResNet 仍 unknown，但
+两个 root lower 改善 `+70.496/+160.551`。refinement 本身约 `21.8/114.3/32.1 ms`，只用于
+方法成本诊断，不是性能 claim。
+
+artifact replay hash=
+`f6e6996608abacefb929ee88b05b45b3a16043cfca10f7a5d393e83bcd8bf14b`；全量
+`732 passed, 37 skipped`。该阶段以 native refinement IR/control + multiworkload tightness
+`VALIDATED-REDUCED` 关闭；只 1/3 complete verified，ASPLOS-ready 仍为 NO。下一单一路线是
+objective-directed intermediate target selection，优先解决 ResNet，而不是扩大 tree budget、
+先做 CUDA timing 或把单次 CPU E2E 写成 speedup。

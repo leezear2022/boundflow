@@ -1,10 +1,14 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`54e565f`（NRIR-17 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/multiworkload-competitor-e2e-baseline-v1`
+> 当前 integration base：`3ed367c`（NRIR-18 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/native-intermediate-bound-refinement-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
+> 2026-08-04 NRIR-19 后续：native selected-CROWN intermediate refinement 已成为一等
+> Plan/Task/Schedule。MNISTFC 关闭 clauses 3/7，OVAL21 从 unknown 变 verified；ResNet 两个 root
+> lower 改善 `+70.496/+160.551` 但状态仍 unknown。下一门禁为 objective-directed intermediate
+> target selection；顶层 ASPLOS-ready 与 performance No-Go 不变。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
 > 2026-07-28 进度：IR-1 Bound IR、IR-2 Plan IR、IR-3 Task/Schedule IR 的最小
 > synchronous reference contract 已分别关闭；IR-4 production backend/runtime migration
@@ -662,3 +666,27 @@ replay hash=`473b287bb88e4c52426b405aeb4164aa72a98d7b1bbd74c00471fe1d1451deb0`�
 `VALIDATED-REDUCED`，不关闭 verifier parity、GPU/performance 或 ASPLOS-ready。ResNet native
 local root lower=`-543.717/-789.331`，下一门禁明确为 native intermediate-bound refinement
 Plan/Task/Schedule，再对三 workload 重测 closed clauses 与成本。
+
+## 26. Native Intermediate-Bound Refinement v1 判定
+
+NRIR-19 将 top ambiguous-width target selection、selected plain-CROWN backward、sound
+intersection、forward propagation 与最终 emit lower 为独立 Plan/Task/Schedule。Plan 绑定 primal
+graph、input box、split state、初始 intermediate bounds、policy 和每个 neuron target；runtime 必须
+逐 action 消费 Schedule，任何 source/schema/hash/target/order 漂移均 fail closed。新增
+`native_refined` provenance，不能冒充 external verifier bounds。
+
+同一 7-node/depth-2/5-step CPU policy 的正式 fresh-process 对照中，MNISTFC unresolved 从
+`{3,7,8}` 降为 `{8}`，关闭 clauses `3/7`，nodes `31→21`；OVAL21 从 unknown 变 verified，
+关闭 clause `8`，nodes `15→11`。ResNet 仍为 unknown 且只完成前两个 clauses，但 root lower 从
+`-543.717/-789.331` 改为 `-473.221/-628.780`，改善 `+70.496/+160.551`，没有隐藏失败。
+
+artifact 位于 `artifacts/native-intermediate-refinement/vnncomp21-three-topology-cpu-v1/`，fresh
+source-to-IR replay hash=
+`f6e6996608abacefb929ee88b05b45b3a16043cfca10f7a5d393e83bcd8bf14b`；focused
+`9 passed`、全量 `732 passed, 37 skipped`，Black/Mypy/Pylint 全过。
+
+结论为 native refinement IR/control 与 multiworkload tightness `VALIDATED-REDUCED`。BoundFlow
+只在 1/3 workload complete verified，CUDA/重复性能矩阵仍缺，单次 CPU timing 不形成 speedup，
+ASPLOS-ready 仍为 NO。ResNet 表明纯 width shortlist 不足；下一路线是 objective-directed
+intermediate target selection，以 clause-sensitive influence 选择有限 targets，再评估 per-child
+recomputation，而不是先扩大树深或做 CUDA timing。

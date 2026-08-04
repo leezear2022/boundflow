@@ -805,3 +805,20 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - 工件：`artifacts/multiworkload-competitor-e2e/vnncomp21-three-topology-cpu-v1/`；fresh replay
   hash=`473b287bb88e4c52426b405aeb4164aa72a98d7b1bbd74c00471fe1d1451deb0`；focused
   `16 passed`、全量 `723 passed, 37 skipped`。下一门禁为 native intermediate-bound refinement。
+
+### 2026-08-04 Native Intermediate-Bound Refinement v1
+
+- `C1/C2-M-NRIR19` refinement IR：top ambiguous-width target、selected plain-CROWN backward、
+  intersection、forward propagation 和 emit 均进入 Plan/Task/Schedule；任意中间 rank 与
+  flattened selected objective 受支持；
+- `C3-G-NRIR19` native provenance gate：primal/input/split/initial bounds/policy/target/action trace
+  全哈希绑定，`native_refined` 与 `external_verifier` 分离，schema/order/tamper fail closed；
+- `C1/C3-E-NRIR19` real tightness：MNISTFC unresolved `3→1`、关闭 `3/7`、nodes `31→21`；
+  OVAL21 `unknown→verified`、关闭 `8`、nodes `15→11`；ResNet 两 root lower 改善
+  `+70.496/+160.551`，但状态仍 unknown；
+- `C3-L-NRIR19` hard limitation：仅 OVAL21 1/3 complete verified；ResNet 仍有 2 unresolved +
+  7 pending，root-global width policy 不是 objective-directed/per-child refinement；CUDA 和公平重复
+  性能矩阵未执行，`performance_claimed=false`；
+- 工件：`artifacts/native-intermediate-refinement/vnncomp21-three-topology-cpu-v1/`；fresh replay
+  hash=`f6e6996608abacefb929ee88b05b45b3a16043cfca10f7a5d393e83bcd8bf14b`；focused
+  `9 passed`、全量 `732 passed, 37 skipped`。下一门禁为 objective-directed target selection。

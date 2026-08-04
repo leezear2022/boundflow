@@ -492,6 +492,7 @@ class IntermediateBoundSource(Enum):
     """Owner of the pre-activation bounds consumed by a relaxation."""
 
     LOCAL_FORWARD = "local_forward"
+    NATIVE_REFINED = "native_refined"
     EXTERNAL_VERIFIER = "external_verifier"
 
 
