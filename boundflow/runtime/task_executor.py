@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+from contextlib import nullcontext
 from dataclasses import dataclass
 from typing import Any, Dict, Optional, Protocol, Union
 
@@ -80,6 +81,7 @@ class ConcreteTaskExecution:
     output_value: str
     output: torch.Tensor
     values: tuple[tuple[str, torch.Tensor], ...]
+    gradients_preserved: bool = False
 
     def validate(self) -> None:
         value_map = dict(self.values)
@@ -575,11 +577,13 @@ def execute_task_module_concrete(
     *,
     input_value_name: Optional[str] = None,
     output_value: Optional[str] = None,
+    preserve_gradients: bool = False,
 ) -> ConcreteTaskExecution:
     """Execute the entry task as a concrete primal program.
 
     This path intentionally does not consume abstract bounds.  It is used for
     independently replaying property witnesses against the primal Task IR.
+    Candidate search may opt into autograd without changing operator semantics.
     """
 
     module.validate()
@@ -602,7 +606,11 @@ def execute_task_module_concrete(
         raise TypeError("concrete Task IR parameter binding must be a mapping")
     params: Dict[str, Any] = dict(raw_params)
     env: Dict[str, torch.Tensor] = {
-        input_value_name: input_value.detach().contiguous().clone()
+        input_value_name: (
+            input_value.contiguous()
+            if preserve_gradients
+            else input_value.detach().contiguous().clone()
+        )
     }
 
     def get_value(name: str) -> torch.Tensor:
@@ -628,7 +636,7 @@ def execute_task_module_concrete(
             )
         env[outputs[0]] = value
 
-    with torch.no_grad():
+    with nullcontext() if preserve_gradients else torch.no_grad():
         for op in task.ops:
             if op.op_type == "spec_linear":
                 logits = get_value(op.inputs[0])
@@ -760,12 +768,17 @@ def execute_task_module_concrete(
         output_value = task.output_values[0]
     if output_value not in env:
         raise KeyError(f"concrete Task IR output is unavailable: {output_value}")
+
+    def result_value(value: torch.Tensor) -> torch.Tensor:
+        if preserve_gradients:
+            return value
+        return value.detach().contiguous().clone()
+
     execution = ConcreteTaskExecution(
         output_value=output_value,
-        output=env[output_value].detach().contiguous().clone(),
-        values=tuple(
-            (name, value.detach().contiguous().clone()) for name, value in env.items()
-        ),
+        output=result_value(env[output_value]),
+        values=tuple((name, result_value(value)) for name, value in env.items()),
+        gradients_preserved=preserve_gradients,
     )
     execution.validate()
     return execution

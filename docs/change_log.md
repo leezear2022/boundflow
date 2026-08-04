@@ -3919,3 +3919,26 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_NATIVE_PROPERTY_TERMINATION_VERDICT_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Complete Verifier Query v1
+
+- concrete Task IR executor 新增可选 autograd-preserving path；新增 deterministic center-start
+  projected-gradient candidate search，search failure 明确不是 proof，found candidate 必须 concrete replay；
+- 新增 multi-clause complete query：conjunction aggregation、ascending clause order、verified 全闭合、
+  unsafe short-circuit、unresolved/pending unknown 与 cooperative deadline；
+- query/clause trace 绑定 objective、threshold、search/optimizer/queue policy 与 search/queue/verdict
+  hashes；claim、status、pipeline 与 numeric tamper 均 fail closed；
+- 修复 optimized native re-execution trace 的 scale-aware 容差不一致：execution 继续使用
+  `allclose(atol=2e-6, rtol=2e-6)`，serialized trace 使用 `2e-3` 独立 ceiling 并拒绝 non-finite；
+- toy verified/unsafe/unknown/deadline 全闭环；固定 ResNet 九个真实 clauses 全部执行，但 native
+  scalarized lower bounds 过松，9/9 unresolved，整体为 sound unknown；
+- artifact generate/replay hash=
+  `d17f7d7e960491ad7ef3f33bad41a4cfbf21a9fd5213df3637584b6a753968f1`；相关
+  `39 passed`、全量 `670 passed, 37 skipped`；Black/Mypy/Pylint 全过；
+- 只关闭 complete-query correctness/control `VALIDATED-REDUCED`，无 performance claim。下一阶段
+  先冻结 end-to-end phase/tightness baseline，再按证据推进 bound strength 与执行优化。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_COMPLETE_VERIFIER_QUERY_V1_CHANGELOG_2026_08_04.md`

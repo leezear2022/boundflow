@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`7bc49f5`（NRIR-11 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/native-optimized-relu-split-bab-v1`
+> 当前 integration base：`597332d`（NRIR-13 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/complete-verifier-query-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
@@ -87,6 +87,12 @@
 > 为 7 nodes/3 expands/4 frontier、packed/serial 3/7 stacks。bounds/state tensors 在冻结容差内，
 > active child beta gradients 非零，selected native re-execution diff=0。状态为 integration
 > VALIDATED-REDUCED；fixed run 仍 budget-exhausted/not-claimed，下一缺口为 sound verdict。
+> 2026-08-04 NRIR-13 后续：three-state sound verdict 与 concrete witness replay 已关闭；固定
+> ResNet 7-node frontier 正确返回 unknown，未把开放 frontier 伪装为 verified。
+> 2026-08-04 NRIR-14 后续：multi-clause complete query、deterministic candidate search、unsafe
+> short-circuit 与 cooperative deadline 已关闭为 control/correctness VALIDATED-REDUCED。固定
+> ResNet 九个真实 clauses 全部执行，但 9/9 native scalarized lower bounds 仍过松并返回 unknown；
+> 下一阶段必须建立端到端 phase/tightness baseline，再攻 dynamic optimization、branching 与执行性能。
 
 ## 1. 当前真实阶段
 
@@ -112,6 +118,8 @@ BoundFlow 已经完成从边界表示到 query runtime prototype 的主干：
 | Native alpha/beta state NRIR-10 | frozen optimized-state ownership validated-reduced | 6 ReLU split/alpha/beta inputs；beta lower dual；exact/refinement warm-start；runtime optimizer control 当时仍缺 |
 | Native optimizer Schedule NRIR-11 | fixed-step control ownership validated-reduced | typed optimizer Plan/Task/Schedule；fixed ResNet 8 actions、正 alpha/beta gradient、legacy/native 0 diff；尚未接回 multi-node queue，无 verdict/performance |
 | Native optimized split queue NRIR-12 | optimizer × queue integration validated-reduced | 每 node batch 8 optimizer actions + 21 native tasks；7 nodes/3 expands/4 frontier；parent warm-only；仍 budget-exhausted/not-claimed |
+| Native property verdict NRIR-13 | three-state soundness/control validated-reduced | verified 只接受 sound-pruned closure；unsafe 必须 concrete replay；固定 ResNet frontier 保持 unknown |
+| Complete verifier query NRIR-14 | multi-clause query control validated-reduced | conjunction、PGD candidate、witness replay、unsafe short-circuit、cooperative deadline；固定 ResNet 9/9 unresolved，无性能 claim |
 | ASPLOS 最终系统主张 | IR-5 final VALIDATED-NO-GO | IR-1—4 narrow closure 保留；Global p90/Pareto 失败，当前 system-performance 路线已关闭 |
 
 历史 `main@263ea81` 只到 PR-10 closure，不能再作为项目当前状态入口。跨会话恢复必须同时检查
@@ -537,5 +545,29 @@ verified/unsafe/unknown matrix 与非 root split witness 均已通过。固定 R
 结论为 three-state verdict soundness `VALIDATED-REDUCED`。artifact replay hash 为
 `9e3dceed23c8759c910938ba7c9f84caaeb949c8f19b72fab104ce4e1b733405`，聚焦 `19 passed`，
 全量 `649 passed, 37 skipped`，静态门禁全过。
-它仍缺 candidate discovery、multi-clause property、timeout/dynamic early stop 与 real complete closure；
-下一路线是 complete verifier query v1，不能直接将本轮升级为端到端验证器或性能 claim。
+NRIR-13 closure 当时仍缺 candidate discovery、multi-clause property、timeout/dynamic early stop
+与 real complete closure；该下一路线现已由第 21 节 NRIR-14 执行。不能把 NRIR-13 单独升级为
+端到端验证器或性能 claim。
+
+## 21. Complete Verifier Query v1 判定
+
+NRIR-14 把 NRIR-13 的单 clause/caller-candidate 边界扩展为可直接执行的 conjunction query。
+每个 clause 按 ascending index 顺序执行 deterministic center-start box-projected gradient search、
+optimized ReLU-split queue 和 sound verdict；candidate search 的 `not_found` 永远不构成 proof，
+found candidate 仍必须经过 concrete primal Task IR replay。任一 replayed violation 立即返回 unsafe
+并显式标记后缀 clauses skipped；deadline 只在 stage 边界 cooperative 检查，到期 clauses 显式 pending。
+
+toy matrix 独立产生 verified、unsafe、attack-not-found unknown 与 deadline unknown。固定 ResNet
+使用九个真实 property objectives；九个 candidate best objective 均为正，未发现反例，但九个
+native scalarized lower bounds 均为负，因此总体正确返回
+`unknown/one_or_more_clauses_unresolved`，unresolved 为 9/9。该结果说明 query control 已闭环，
+同时也把真正 blocker 定位为 bound tightness，而不是继续增加包装层。
+
+artifact 位于 `artifacts/complete-verifier-query/vnncomp21-resnet2b-prop0-cpu-v1/`，generate/replay
+hash=`d17f7d7e960491ad7ef3f33bad41a4cfbf21a9fd5213df3637584b6a753968f1`。相关回归
+`39 passed`，全量 `670 passed, 37 skipped`，静态门禁全过。
+
+结论为 complete-query correctness/control `VALIDATED-REDUCED`，不是 real-property closure 或
+性能结果。下一工程阶段必须先冻结端到端 phase/tightness baseline，至少分解 candidate、bound
+optimization、queue、verdict 的 wall time、proof gap、nodes 与 batching/cache 行为；在公平
+same-solver/竞品口径下再决定 dynamic optimizer、branching/tightness 和执行优化的优先级。

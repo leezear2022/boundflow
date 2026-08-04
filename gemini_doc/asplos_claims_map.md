@@ -704,5 +704,27 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   无 timeout/dynamic early stop、real complete closure 或 timing/memory/CUDA/OOM/Pareto/speedup claim；
 - 工件：`artifacts/native-property-verdict/vnncomp21-resnet2b-prop0-cpu-v1/`；replay
   hash=`9e3dceed23c8759c910938ba7c9f84caaeb949c8f19b72fab104ce4e1b733405`；聚焦 `19 passed`、
-  全量 `649 passed, 37 skipped`；下一缺口为 complete verifier query，其后才进入端到端
-  性能基线。
+  全量 `649 passed, 37 skipped`；该阶段当时的 complete verifier query 缺口已由 NRIR-14
+  执行，但 NRIR-13 单独 claim 不升级。
+
+### 2026-08-04 Complete Verifier Query v1
+
+- `C3-M-NRIR14` multi-clause mechanism：conjunction query 按 ascending clause index 串联
+  deterministic PGD candidate search、optimized native queue 与 sound verdict；全部 verified
+  才 verified，replayed violation 立即 unsafe，其余 unresolved/pending 为 unknown；
+- `C3-G-NRIR14` sound control gate：candidate `not_found` 明确不是 proof；found candidate
+  必须 concrete primal replay；unsafe suffix、deadline pending、objective/policy/config 与三层
+  trace hash 全部 fail closed；
+- `C1/C3-E-NRIR14` real/toy execution：toy 分别闭合 verified/unsafe/attack-not-found unknown/
+  deadline unknown。固定 ResNet 九个真实 clauses 全部执行，candidate best objectives 均为正，
+  但 scalarized lower bounds 均为负，故 9/9 unresolved、整体 sound unknown；
+- `C3-S-NRIR14` scale-aware replay：execution 仍以 `allclose(atol=2e-6, rtol=2e-6)` 守护；
+  serialized diff 另设 `2e-3` ceiling 并拒绝 non-finite。固定 clause 6 合法 max diff=
+  `6.103515625e-05`；
+- `C3-L-NRIR14` hard limitation：center-start single-restart search、cooperative deadline、
+  single box/conjunction；固定真实 property 未闭合，无 dynamic optimizer/branch heuristic，
+  无 timing/memory/CUDA/OOM/Pareto/speedup claim；
+- 工件：`artifacts/complete-verifier-query/vnncomp21-resnet2b-prop0-cpu-v1/`；replay
+  hash=`d17f7d7e960491ad7ef3f33bad41a4cfbf21a9fd5213df3637584b6a753968f1`；相关
+  `39 passed`、全量 `670 passed, 37 skipped`；下一缺口为公平 end-to-end phase/tightness
+  baseline，再按证据推进 bound strength 与执行优化。

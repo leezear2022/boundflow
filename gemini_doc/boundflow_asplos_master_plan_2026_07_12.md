@@ -2,7 +2,7 @@
 
 > 状态：**顶层执行计划 v1.0；后续研究工作受本文门禁约束。**  
 > 基线日期：2026-07-12  
-> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`7bc49f5`
+> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`597332d`
 > 投稿策略：ASPLOS 2027 September Cycle 为有条件冲刺；ASPLOS 2028 为稳健主目标。
 
 > **路线修订（2026-07-20）**：本文保留 2026-07-12 的研究问题、历史门禁和 PR-10—13
@@ -87,6 +87,13 @@
 > 相同，非零 beta 对 zero-beta lower 改善 `0.34039306640625`；parent→child monotonic split 只允许
 > initialization。Adam loop 仍 runtime-owned，无完整 verdict/performance；下一门禁为 native
 > optimizer-step Task/Schedule control。
+
+> **2026-08-04 NRIR-11—14 修订**：fixed-step optimizer Schedule 已接回 multi-node queue，
+> three-state verdict、concrete witness replay、九子句 conjunction、deterministic candidate search、
+> unsafe short-circuit 与 cooperative deadline 均形成 typed/replayable control contract。固定
+> ResNet 九子句仍因 native scalarized bounds 过松而 9/9 unknown；因此只关闭 correctness/control
+> VALIDATED-REDUCED。下一阶段是公平 end-to-end phase/tightness baseline，不能从这些 artifact
+> 推导 speedup 或 ASPLOS-ready。
 
 > **2026-08-04 NRIR-11 修订**：fixed-step optimizer control 已进入 typed Plan/Task/Schedule。
 > 固定 ResNet 1-step program 为 8 actions，Schedule/legacy/final native execution max diff 均为 0，
@@ -314,10 +321,10 @@ Runtime 不能笼统声称相关查询可以共享中间状态。每个缓存对
 | Runtime | multi-spec、α/β、BaB node batch/cache/prune | C3 的起点，但尚未统一为 query abstraction |
 | Artifact | JSONL schema、CSV、figure、manifest、quick/full runner | ASPLOS 证据链基础 |
 | 环境 | PyTorch 2.12.1+cu132、LLVM 20.1.8、TVM、单一 tvm-ffi | 可复现实验基础 |
-| Native real-network compiler | ResNet2B native IR；joint policy；query/domain batching；optimized ReLU-split queue；frozen α/β state；fixed-step optimizer Schedule | C1/C2/C3 的真实图 correctness/decision/query/control-flow 载体；complete verdict 与 device-level 性能仍缺 |
+| Native real-network compiler | ResNet2B native IR；joint policy；query/domain batching；optimized ReLU-split queue；frozen α/β state；optimizer Schedule；sound verdict；complete query control | C1/C2/C3 的真实图 correctness/decision/query/control-flow 载体；real proof tightness 与 device-level 性能仍缺 |
 
-Gate 0 与 PR-10 是历史已完成节点；当前 integration base 已推进到 `7bc49f5`，NRIR-1—11 已合并，
-NRIR-12 已 validated-reduced，NRIR-3 CUDA protocol 已完成但本机 device unavailable。PR-10 的 structured 路径保留为 opt-in research capability，dense
+Gate 0 与 PR-10 是历史已完成节点；当前 integration base 已推进到 `597332d`，NRIR-1—13 已合并，
+NRIR-14 已 validated-reduced，NRIR-3 CUDA protocol 已完成但本机 device unavailable。PR-10 的 structured 路径保留为 opt-in research capability，dense
 继续作为默认；不得把历史基线 `263ea81` 当作当前工程入口。
 
 ### 3.2 论文成立前必须补齐的缺口
@@ -327,7 +334,7 @@ NRIR-12 已 validated-reduced，NRIR-3 CUDA protocol 已完成但本机 device u
 | ReLU barrier | structured mode 已消除 persistent dense；dense 保持默认 | 需 Planner/fused lowering 解决 eager 重算与 α/β OOM |
 | 物化决策 | NRIR-6 已联合 NRIR-4 的 28 transitions 与 NRIR-5 的 spec child execution；structured storage 仍 dense-equivalent | 在真实 repeated-query/domain stream 后，于可用 CUDA 设备按冻结协议测物理 memory/latency；无物理证据不升级 Pareto |
 | fused CROWN task | TVM 后端以 IBP/task 基础设施为主 | CROWN 粗粒度 task lowering 与正确性/性能门禁 |
-| repeated-query abstraction | NRIR-7/8 有 property/domain batching；NRIR-9—12 已形成 optimized split queue | 完成 sound termination/verdict，再建立公平 same-solver timing baseline |
+| repeated-query abstraction | NRIR-7/8 有 property/domain batching；NRIR-9—14 已形成 optimized split queue、sound verdict 与 complete query control | 先量化 fixed real query 的 proof gap 与 phase timing，再提升 tightness/closure 并建立公平 same-solver/竞品 baseline |
 | 真实 workload | VNN-COMP ResNet2B correctness/storage 已进入 native IR；性能仍无真实 device protocol | ResNet/basic-block、更多 VNN-COMP 代表实例、至少一个训练 workload 的公平性能证据 |
 | headline result | 当前结果证明链路正确，不证明系统主张 | 端到端吞吐/显存/TTVerify 的显著、可解释收益 |
 | baseline 完整性 | 已有 auto_LiRPA/TVM 对照，但缺 Luna/系统竞品定位 | 公平版本、硬件、算法/tightness 和计时口径 |
