@@ -1,1 +1,2 @@
 artifacts/multiworkload-competitor-e2e/**/logs/*.log -diff
+artifacts/native-intermediate-refinement/**/logs/*.log -diff

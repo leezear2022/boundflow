@@ -124,6 +124,7 @@ class NativeObjectiveBranchPlanIR:
             or self.intermediate_bound_source
             not in {
                 "local_forward",
+                "native_refined",
                 "external_verifier",
                 "external_verifier_refined",
             }

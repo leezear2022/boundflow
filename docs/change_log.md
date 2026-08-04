@@ -4026,3 +4026,22 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_MULTIWORKLOAD_COMPETITOR_E2E_BASELINE_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Native Intermediate-Bound Refinement v1
+
+- plain CROWN 支持任意已产生中间值的 selected-row bound；新增 refinement
+  Plan/Task/Schedule、top-width target、分块 backward、单调 intersection/propagation 与 trace；
+- 新增独立 `native_refined` provenance，接入 optimizer、Bound IR 和 BaB child batches，禁止
+  冒充 external verifier bounds；
+- 正式 same-policy 结果：MNISTFC unresolved `3→1`、nodes `31→21`；OVAL21
+  `unknown→verified`、nodes `15→11`；ResNet 两 root lower 改善 `+70.496/+160.551` 但仍 unknown；
+- artifact fresh replay hash=
+  `f6e6996608abacefb929ee88b05b45b3a16043cfca10f7a5d393e83bcd8bf14b`；focused
+  `9 passed`、全量 `732 passed, 37 skipped`；Black/Mypy/Pylint 10.00/10 全过；
+- 以 native refinement IR/control 与 multiworkload tightness `VALIDATED-REDUCED` 关闭；
+  `performance_claimed=false`、ASPLOS-ready=NO。下一门禁为 objective-directed target selection。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_NATIVE_INTERMEDIATE_BOUND_REFINEMENT_V1_CHANGELOG_2026_08_04.md`

@@ -516,10 +516,7 @@ def _evaluate_child_lowers(
         }
         batch_input = _repeat_box_input_spec(program.input_spec, count=size)
         override: Optional[Mapping[str, IntervalState]] = None
-        if (
-            program.intermediate_bound_source
-            == IntermediateBoundSource.EXTERNAL_VERIFIER
-        ):
+        if program.intermediate_bound_source != IntermediateBoundSource.LOCAL_FORWARD:
             override = _repeat_intervals(program.relu_pre, count=size)
         interval_env, child_pre = _optimizer_intermediate_semantics(
             program.module,

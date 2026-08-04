@@ -2,7 +2,7 @@
 
 > 状态：**顶层执行计划 v1.0；后续研究工作受本文门禁约束。**  
 > 基线日期：2026-07-12  
-> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`54e565f`
+> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`3ed367c`
 > 投稿策略：ASPLOS 2027 September Cycle 为有条件冲刺；ASPLOS 2028 为稳健主目标。
 
 > **路线修订（2026-07-20）**：本文保留 2026-07-12 的研究问题、历史门禁和 PR-10—13
@@ -120,6 +120,12 @@
 > verified/unknown/verified；单次 CPU E2E 不形成 speedup。ResNet native local root lower=
 > `-543.717/-789.331`，说明下一优先级是 intermediate-bound refinement，而不是 CUDA timing、
 > 更多 audit overhead removal 或继续堆 fixed-tree depth。顶层 ASPLOS-ready=NO 不变。
+
+> **2026-08-04 NRIR-19 修订**：native selected-CROWN intermediate refinement 已进入
+> Plan/Task/Schedule，并在同 policy 下令 MNISTFC unresolved `3→1`、OVAL21
+> `unknown→verified`；ResNet root lower 改善 `+70.496/+160.551` 但仍 unknown。该结果为
+> multiworkload tightness `VALIDATED-REDUCED`，不是性能或 3/3 closure。下一路线只推进
+> objective-directed target selection；顶层 ASPLOS-ready=NO 不变。
 
 > **2026-08-04 NRIR-11 修订**：fixed-step optimizer control 已进入 typed Plan/Task/Schedule。
 > 固定 ResNet 1-step program 为 8 actions，Schedule/legacy/final native execution max diff 均为 0，

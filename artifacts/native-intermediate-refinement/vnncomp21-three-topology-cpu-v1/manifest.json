@@ -1,0 +1,15 @@
+{
+  "evidence_hash": "f6e6996608abacefb929ee88b05b45b3a16043cfca10f7a5d393e83bcd8bf14b",
+  "files": {
+    "evidence.json": "c0b82362739c48f4d131449d2368c0110439dcfd6d3a4d2f4cbb09dc4efd43f6",
+    "logs/cifar10_resnet-000-baseline.log": "ad2c8b3a6ad264810809fbb86aa3a41e4d960373ebda55ed8d96956764c45cca",
+    "logs/cifar10_resnet-000-native_refined.log": "df64c218bcb280369d020bbae796593e69aca1db4fea3c22de0ac2949aec44b9",
+    "logs/mnistfc-000-baseline.log": "12467dd0ff4effcab52c763b498502e7a4f9e1fc280d110109b021a590b0a340",
+    "logs/mnistfc-000-native_refined.log": "fc3dff8cf508ea29824a50d47a09be5680827b75c3b920d285f4fe4cd7684d40",
+    "logs/oval21-000-baseline.log": "994dc72d31dd5ce7ba1a91bbddfb02de3c8972d8f2e10af957264cba2db09a78",
+    "logs/oval21-000-native_refined.log": "c08953c4f1114ed18056b14f38bf4b589c3a9f7eeb75912d62aa13f5dc73fb1c"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.native-intermediate-refinement-artifact/v1",
+  "status": "ok"
+}

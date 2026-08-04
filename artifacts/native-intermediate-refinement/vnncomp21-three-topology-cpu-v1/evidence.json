@@ -1,0 +1,4476 @@
+{
+  "claim_boundary": "native selected-CROWN intermediate refinement on three real VNN-COMP CPU workloads; same-policy baseline/refined comparison; diagnostic timings only; no speedup claim; ASPLOS-ready remains evidence-dependent",
+  "comparisons": [
+    {
+      "baseline_evaluated_node_count": 31,
+      "baseline_pending_clause_indices": [],
+      "baseline_status": "unknown",
+      "baseline_unresolved_clause_indices": [
+        3,
+        7,
+        8
+      ],
+      "closed_clause_indices": [
+        3,
+        7
+      ],
+      "performance_claimed": false,
+      "refined_evaluated_node_count": 21,
+      "refined_pending_clause_indices": [],
+      "refined_status": "unknown",
+      "refined_unresolved_clause_indices": [
+        8
+      ],
+      "root_lower_deltas": [
+        {
+          "baseline_root_lower": 0.06884285807609558,
+          "clause_index": 0,
+          "refined_root_lower": 0.16554898023605347,
+          "root_lower_delta": 0.09670612215995789
+        },
+        {
+          "baseline_root_lower": 0.12958183884620667,
+          "clause_index": 1,
+          "refined_root_lower": 0.22800539433956146,
+          "root_lower_delta": 0.0984235554933548
+        },
+        {
+          "baseline_root_lower": -0.033553630113601685,
+          "clause_index": 2,
+          "refined_root_lower": 0.0734061598777771,
+          "root_lower_delta": 0.10695978999137878
+        },
+        {
+          "baseline_root_lower": -0.12675350904464722,
+          "clause_index": 3,
+          "refined_root_lower": -0.01541968248784542,
+          "root_lower_delta": 0.1113338265568018
+        },
+        {
+          "baseline_root_lower": -0.009825684130191803,
+          "clause_index": 4,
+          "refined_root_lower": 0.09984957426786423,
+          "root_lower_delta": 0.10967525839805603
+        },
+        {
+          "baseline_root_lower": 5.7855620980262756e-05,
+          "clause_index": 5,
+          "refined_root_lower": 0.11378423124551773,
+          "root_lower_delta": 0.11372637562453747
+        },
+        {
+          "baseline_root_lower": 0.07774318009614944,
+          "clause_index": 6,
+          "refined_root_lower": 0.18267759680747986,
+          "root_lower_delta": 0.10493441671133041
+        },
+        {
+          "baseline_root_lower": -0.09500010311603546,
+          "clause_index": 7,
+          "refined_root_lower": 0.017449703067541122,
+          "root_lower_delta": 0.11244980618357658
+        },
+        {
+          "baseline_root_lower": -0.5536201000213623,
+          "clause_index": 8,
+          "refined_root_lower": -0.4276467561721802,
+          "root_lower_delta": 0.12597334384918213
+        }
+      ],
+      "workload_id": "mnistfc:000"
+    },
+    {
+      "baseline_evaluated_node_count": 14,
+      "baseline_pending_clause_indices": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "baseline_status": "unknown",
+      "baseline_unresolved_clause_indices": [
+        0,
+        1
+      ],
+      "closed_clause_indices": [],
+      "performance_claimed": false,
+      "refined_evaluated_node_count": 14,
+      "refined_pending_clause_indices": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "refined_status": "unknown",
+      "refined_unresolved_clause_indices": [
+        0,
+        1
+      ],
+      "root_lower_deltas": [
+        {
+          "baseline_root_lower": -543.7172241210938,
+          "clause_index": 0,
+          "refined_root_lower": -473.2212219238281,
+          "root_lower_delta": 70.49600219726562
+        },
+        {
+          "baseline_root_lower": -789.3314208984375,
+          "clause_index": 1,
+          "refined_root_lower": -628.7803344726562,
+          "root_lower_delta": 160.55108642578125
+        }
+      ],
+      "workload_id": "cifar10_resnet:000"
+    },
+    {
+      "baseline_evaluated_node_count": 15,
+      "baseline_pending_clause_indices": [],
+      "baseline_status": "unknown",
+      "baseline_unresolved_clause_indices": [
+        8
+      ],
+      "closed_clause_indices": [
+        8
+      ],
+      "performance_claimed": false,
+      "refined_evaluated_node_count": 11,
+      "refined_pending_clause_indices": [],
+      "refined_status": "verified",
+      "refined_unresolved_clause_indices": [],
+      "root_lower_deltas": [
+        {
+          "baseline_root_lower": 1.1862316131591797,
+          "clause_index": 0,
+          "refined_root_lower": 1.5454237461090088,
+          "root_lower_delta": 0.3591921329498291
+        },
+        {
+          "baseline_root_lower": 3.549759864807129,
+          "clause_index": 1,
+          "refined_root_lower": 3.8459742069244385,
+          "root_lower_delta": 0.29621434211730957
+        },
+        {
+          "baseline_root_lower": 3.267439842224121,
+          "clause_index": 2,
+          "refined_root_lower": 3.380074977874756,
+          "root_lower_delta": 0.11263513565063477
+        },
+        {
+          "baseline_root_lower": 3.2530033588409424,
+          "clause_index": 3,
+          "refined_root_lower": 3.5301711559295654,
+          "root_lower_delta": 0.27716779708862305
+        },
+        {
+          "baseline_root_lower": 4.355360507965088,
+          "clause_index": 4,
+          "refined_root_lower": 4.544527053833008,
+          "root_lower_delta": 0.18916654586791992
+        },
+        {
+          "baseline_root_lower": 4.028467178344727,
+          "clause_index": 5,
+          "refined_root_lower": 4.285346031188965,
+          "root_lower_delta": 0.2568788528442383
+        },
+        {
+          "baseline_root_lower": 4.110269546508789,
+          "clause_index": 6,
+          "refined_root_lower": 4.498884201049805,
+          "root_lower_delta": 0.3886146545410156
+        },
+        {
+          "baseline_root_lower": 2.9874186515808105,
+          "clause_index": 7,
+          "refined_root_lower": 3.754641056060791,
+          "root_lower_delta": 0.7672224044799805
+        },
+        {
+          "baseline_root_lower": -0.17343902587890625,
+          "clause_index": 8,
+          "refined_root_lower": -0.002876490354537964,
+          "root_lower_delta": 0.1705625355243683
+        }
+      ],
+      "workload_id": "oval21:000"
+    }
+  ],
+  "environment": {
+    "device": "cpu",
+    "platform": "Linux-7.1.5-arch1-2-x86_64-with-glibc2.44",
+    "python": "3.12.12",
+    "torch_threads": 8
+  },
+  "limitations": [
+    "CPU timings are one fresh-process observation per workload/mode and are not performance claims.",
+    "Refinement is root-global and reused soundly in child domains; per-child recomputation is not implemented.",
+    "The fixed 7-node/depth-2 complete-verifier budget may still return unknown or hit the query deadline.",
+    "Target count is workload-bounded; unselected ambiguous neurons retain sound forward bounds.",
+    "CUDA execution and timing remain pending because the generating host has no usable driver/device."
+  ],
+  "performance_claimed": false,
+  "policy": {
+    "alpha_steps": 5,
+    "baseline_intermediate_bound_source": "local_forward",
+    "device": "cpu",
+    "expansion_batch_size": 2,
+    "max_depth": 2,
+    "max_eval_batch_size": 4,
+    "max_nodes": 7,
+    "performance_claimed": false,
+    "query_timeout_seconds": 60,
+    "refined_intermediate_bound_source": "native_refined",
+    "refinement_by_workload": {
+      "cifar10_resnet:000": {
+        "backward_chunk_size": 8,
+        "max_neurons_per_relu": 16,
+        "passes": 1
+      },
+      "mnistfc:000": {
+        "backward_chunk_size": 32,
+        "max_neurons_per_relu": 128,
+        "passes": 1
+      },
+      "oval21:000": {
+        "backward_chunk_size": 32,
+        "max_neurons_per_relu": 128,
+        "passes": 1
+      }
+    },
+    "search_steps": 4,
+    "torch_threads": 8
+  },
+  "records": [
+    {
+      "e2e_elapsed_ns": 37113820656,
+      "log_path": "logs/mnistfc-000-baseline.log",
+      "log_sha256": "12467dd0ff4effcab52c763b498502e7a4f9e1fc280d110109b021a590b0a340",
+      "mode": "baseline",
+      "process_returncode": 0,
+      "result": {
+        "execution_state": "completed",
+        "intermediate_bound_source": "local_forward",
+        "mode": "baseline",
+        "performance_claimed": false,
+        "query": {
+          "clauses": [
+            {
+              "clause_index": 0,
+              "clause_trace_hash": "b16bf638f644de1f39894a2f37ff107598f055b2228294830a19d610de2c1eff",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "91c07d521f6fbde09459823ad315d2830b1c5e6e66c03f45c703b6bf67ffe084",
+              "root_lower": 0.06884285807609558,
+              "root_upper": 1.536337971687317,
+              "status": "verified"
+            },
+            {
+              "clause_index": 1,
+              "clause_trace_hash": "799c07664dcbea44e3517a340c8c38241867e1d839b170951002abc0c3209ee2",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "41c30d3947d23c78bb34135c6a0a9278071c4a1d1d44ee542b1a17f89fe8bedd",
+              "root_lower": 0.12958183884620667,
+              "root_upper": 1.2300119400024414,
+              "status": "verified"
+            },
+            {
+              "clause_index": 2,
+              "clause_trace_hash": "ebc9f3259be929a8a6e46cd87f271f9389f2ebf7eb1daaf00b8d6b91d785b41c",
+              "evaluated_nodes": 5,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "ca8902c256af960cc93a520c0464d00a506300cf47a2987618ef90a387892db7",
+              "root_lower": -0.033553630113601685,
+              "root_upper": 1.386083722114563,
+              "status": "verified"
+            },
+            {
+              "clause_index": 3,
+              "clause_trace_hash": "308aba087427dd3df0f02aa3ec2fe6d41d77b0cc570cd69044aa73214c8c5c9e",
+              "evaluated_nodes": 5,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "009ad65ce5bf9392a861eb4eb4ba231beeaafcd60bcbf11d0257982cdfaad84a",
+              "root_lower": -0.12675350904464722,
+              "root_upper": 1.458257794380188,
+              "status": "unknown"
+            },
+            {
+              "clause_index": 4,
+              "clause_trace_hash": "9b15bd8a12e5b46e7ff57a9caef0b9b34126bef4877c6a7b19c5dd605942ee56",
+              "evaluated_nodes": 5,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "a9bc1076932ce79e59df928ecdb302dd2d3c9a2cde98876d36eb1f0070092735",
+              "root_lower": -0.009825684130191803,
+              "root_upper": 1.6179388761520386,
+              "status": "verified"
+            },
+            {
+              "clause_index": 5,
+              "clause_trace_hash": "d05a1b63d929425e236371a9618ae4f8bd3c1cc130650f064998e6fa01e4f36c",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "a31bd0142131ee1ce3dd694c421da84b2377c4fa02af223f86de06fcbab668e8",
+              "root_lower": 5.7855620980262756e-05,
+              "root_upper": 1.4630271196365356,
+              "status": "verified"
+            },
+            {
+              "clause_index": 6,
+              "clause_trace_hash": "dc9d26f31498cf9b2a9cc73a8e79872910747b0742d343487f8b8ae25dce3b6d",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "3e3751a191005fbad1d576c9df7cb3d90fc721c2e6200f3f445633f81282ea37",
+              "root_lower": 0.07774318009614944,
+              "root_upper": 1.3260579109191895,
+              "status": "verified"
+            },
+            {
+              "clause_index": 7,
+              "clause_trace_hash": "a2f0ed6f9728cab22a0b63799b90521926765664a08d23da01954fe1f360a61a",
+              "evaluated_nodes": 5,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "96601a132ca8ec5d290708aa2726bf3e58979b71d88d2ccf1e5b84e5ab051131",
+              "root_lower": -0.09500010311603546,
+              "root_upper": 1.6194484233856201,
+              "status": "unknown"
+            },
+            {
+              "clause_index": 8,
+              "clause_trace_hash": "5197318e3017b416ccacf91dc8dd89c8b3d965610a7cfce9898e3180b63aa0d4",
+              "evaluated_nodes": 7,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "29a244590a7d19856f30c7ce18e7822f20c60f89f5530299c85e9c33c2d5e878",
+              "root_lower": -0.5536201000213623,
+              "root_upper": 1.8161568641662598,
+              "status": "unknown"
+            }
+          ],
+          "completed_clause_count": 9,
+          "evaluated_node_count": 31,
+          "pending_clause_indices": [],
+          "query_trace_hash": "1ea4036c9860cba5af6307ce908cfb54a23bc30eeda1bf3ab226cea5734c25f6",
+          "solver_status": "unknown",
+          "unresolved_clause_indices": [
+            3,
+            7,
+            8
+          ]
+        },
+        "query_ir_hash": "37b8bcb674411837b404e993922245829dcfa94ce8f5791aca473b69913e85cc",
+        "query_ns": 35759082768,
+        "refinement": null,
+        "refinement_ns": 0,
+        "schema_version": "boundflow.native-intermediate-refinement-worker/v1",
+        "setup_ns": 17304702,
+        "worker_elapsed_ns": 35776908140,
+        "workload_id": "mnistfc:000"
+      },
+      "workload_id": "mnistfc:000"
+    },
+    {
+      "e2e_elapsed_ns": 26362760438,
+      "log_path": "logs/mnistfc-000-native_refined.log",
+      "log_sha256": "fc3dff8cf508ea29824a50d47a09be5680827b75c3b920d285f4fe4cd7684d40",
+      "mode": "native_refined",
+      "process_returncode": 0,
+      "result": {
+        "execution_state": "completed",
+        "intermediate_bound_source": "native_refined",
+        "mode": "native_refined",
+        "performance_claimed": false,
+        "query": {
+          "clauses": [
+            {
+              "clause_index": 0,
+              "clause_trace_hash": "e0836a3ed958b36313f05e250755d9a60a3eda6417f55f0019bdd790474e41a7",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "d40d236b76f3dd02b503b16ff222ccc23530a1e75c7ce218d840fecf6ea6e34b",
+              "root_lower": 0.16554898023605347,
+              "root_upper": 1.4738705158233643,
+              "status": "verified"
+            },
+            {
+              "clause_index": 1,
+              "clause_trace_hash": "ec0843ad67148ff1191d1cdd5228412e6c713f8f33bfc2649f939eba119dbc7d",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "21b248b94785f42aff2606fe2a6a1367dac450f193086192d6fd5f66b113867e",
+              "root_lower": 0.22800539433956146,
+              "root_upper": 1.2246639728546143,
+              "status": "verified"
+            },
+            {
+              "clause_index": 2,
+              "clause_trace_hash": "b4adcf6d0deb2df726d2aafb66eeee0a3542b6f656de1d36a6583854617b1513",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "3c01e0d8ec687ce89b7a7a156257eafe0efded1272871b9a67089f6ff237847f",
+              "root_lower": 0.0734061598777771,
+              "root_upper": 1.351596713066101,
+              "status": "verified"
+            },
+            {
+              "clause_index": 3,
+              "clause_trace_hash": "e3158b4cfd47b6ccd4bd2e1914b58ad84d8b47a47d91036081de0c28600cc7e9",
+              "evaluated_nodes": 7,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "b5dd30e98fee9fbced071894ae2f0fc4ab84dd5c218d5a847a018122babf7481",
+              "root_lower": -0.01541968248784542,
+              "root_upper": 1.4508205652236938,
+              "status": "verified"
+            },
+            {
+              "clause_index": 4,
+              "clause_trace_hash": "f25e033aadac547f357632cc26cda9f5716f5b77dae778d5197f7cbf5139421b",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "23ba0dbb7a474d4f985c29b9cd3baad9e27798512abb6a18d32f53519a8895a7",
+              "root_lower": 0.09984957426786423,
+              "root_upper": 1.6020138263702393,
+              "status": "verified"
+            },
+            {
+              "clause_index": 5,
+              "clause_trace_hash": "dfc1ba8860c0aabfcf4b5b6b827fd7681ab4c9453b982ca98178da9f489216fb",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "ed2ddf2899acdf3c9131c3e4b81714a2f986fcab52b6d83fccb86a8d05955dab",
+              "root_lower": 0.11378423124551773,
+              "root_upper": 1.4506430625915527,
+              "status": "verified"
+            },
+            {
+              "clause_index": 6,
+              "clause_trace_hash": "49d09b898d957d37b5101abb697e591327f413c9b69a70d64f1018ceeb0bc386",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "6815f203b297b6a75827811fe7645993d7dcccffd88c366bd52dbc8de8756c35",
+              "root_lower": 0.18267759680747986,
+              "root_upper": 1.3229202032089233,
+              "status": "verified"
+            },
+            {
+              "clause_index": 7,
+              "clause_trace_hash": "bb7e3d6b01a53a4e8864b7f770c815345ee582cbe42367ace6a42b5d6394fe7b",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "faccf1bd96e42f70777a6e0453cdb0e1c62427071ea219bd39fb22060dda84b5",
+              "root_lower": 0.017449703067541122,
+              "root_upper": 1.5890297889709473,
+              "status": "verified"
+            },
+            {
+              "clause_index": 8,
+              "clause_trace_hash": "8d41785e93221c9d3f9ae4c7da9bca8d1e914a14759f45d4962a909024219191",
+              "evaluated_nodes": 7,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "451da19706fc83051ae8f29012b49753c9a0f912b87d42522f7c9393ac0bee9c",
+              "root_lower": -0.4276467561721802,
+              "root_upper": 1.7984586954116821,
+              "status": "unknown"
+            }
+          ],
+          "completed_clause_count": 9,
+          "evaluated_node_count": 21,
+          "pending_clause_indices": [],
+          "query_trace_hash": "a6ad0b58da37910e592a335104d4e9f6fe37d1b236257b628bd7f42122124ec2",
+          "solver_status": "unknown",
+          "unresolved_clause_indices": [
+            8
+          ]
+        },
+        "query_ir_hash": "37b8bcb674411837b404e993922245829dcfa94ce8f5791aca473b69913e85cc",
+        "query_ns": 24927199997,
+        "refinement": {
+          "execution_trace": {
+            "action_traces": [
+              {
+                "action_id": "launch.0000.materialize_forward",
+                "input_hashes": {
+                  "refine.input": "53c49bdfb4090abfdad5ec828613ddfdc23ab4bd1a7566b9953f9468cac833d4",
+                  "refine.module": "be29a9e36a754ba3ec83bdbe945b6b7e9abc815a07d156d33d9abbeea64dbb60",
+                  "refine.split_state": "7ea7ece30f7de1f4b31a1c9ecefcec4074b211b932689c53108f9bccfb6fc0ef"
+                },
+                "kind": "materialize_forward",
+                "output_hashes": {
+                  "refine.bounds.p0": "f00bfda0a036db4671ac50e6ff1b67ffa9dc5d51643801fedc4c918ab0d04544",
+                  "refine.forward_env.p0": "7ff65198e6f4dd652eb02e34a0fd2438a028550dce40e315ba8d04256f88ca38"
+                },
+                "pass_index": null,
+                "sequence": 0,
+                "task_id": "intermediate_refinement.0000.materialize_forward"
+              },
+              {
+                "action_id": "launch.0001.enumerate_ambiguous",
+                "input_hashes": {
+                  "refine.bounds.p0": "f00bfda0a036db4671ac50e6ff1b67ffa9dc5d51643801fedc4c918ab0d04544"
+                },
+                "kind": "enumerate_ambiguous",
+                "output_hashes": {
+                  "refine.candidates": "f1be22bb9751f1caf6fab6422137113967bad73786119dd6e069ee0e2e67f640"
+                },
+                "pass_index": null,
+                "sequence": 1,
+                "task_id": "intermediate_refinement.0001.enumerate_ambiguous"
+              },
+              {
+                "action_id": "launch.0002.select_targets",
+                "input_hashes": {
+                  "refine.candidates": "f1be22bb9751f1caf6fab6422137113967bad73786119dd6e069ee0e2e67f640",
+                  "refine.policy": "1bb1c7bb58e31bbc240d8a208402cd12b235404877ef63666da2e7fc65f1cee1"
+                },
+                "kind": "select_targets",
+                "output_hashes": {
+                  "refine.selected_targets": "f1be22bb9751f1caf6fab6422137113967bad73786119dd6e069ee0e2e67f640"
+                },
+                "pass_index": null,
+                "sequence": 2,
+                "task_id": "intermediate_refinement.0002.select_targets"
+              },
+              {
+                "action_id": "launch.0003.backward_selected",
+                "input_hashes": {
+                  "refine.bounds.p0": "f00bfda0a036db4671ac50e6ff1b67ffa9dc5d51643801fedc4c918ab0d04544",
+                  "refine.forward_env.p0": "7ff65198e6f4dd652eb02e34a0fd2438a028550dce40e315ba8d04256f88ca38",
+                  "refine.selected_targets": "f1be22bb9751f1caf6fab6422137113967bad73786119dd6e069ee0e2e67f640"
+                },
+                "kind": "backward_selected",
+                "output_hashes": {
+                  "refine.crown_candidates.p1": "40c072dde1edb362e46dabb39004e370d93a3d6d97f43b8afa0f3913b9d6277b"
+                },
+                "pass_index": 0,
+                "sequence": 3,
+                "task_id": "intermediate_refinement.0003.backward_selected"
+              },
+              {
+                "action_id": "launch.0004.intersect_selected",
+                "input_hashes": {
+                  "refine.bounds.p0": "f00bfda0a036db4671ac50e6ff1b67ffa9dc5d51643801fedc4c918ab0d04544",
+                  "refine.crown_candidates.p1": "40c072dde1edb362e46dabb39004e370d93a3d6d97f43b8afa0f3913b9d6277b"
+                },
+                "kind": "intersect_selected",
+                "output_hashes": {
+                  "refine.intersected_bounds.p1": "7f51e6a2395c73f0546ed19f2939edb31054afc47fbf9e170144d16178a4be2f"
+                },
+                "pass_index": 0,
+                "sequence": 4,
+                "task_id": "intermediate_refinement.0004.intersect_selected"
+              },
+              {
+                "action_id": "launch.0005.propagate_forward",
+                "input_hashes": {
+                  "refine.input": "53c49bdfb4090abfdad5ec828613ddfdc23ab4bd1a7566b9953f9468cac833d4",
+                  "refine.intersected_bounds.p1": "7f51e6a2395c73f0546ed19f2939edb31054afc47fbf9e170144d16178a4be2f",
+                  "refine.module": "be29a9e36a754ba3ec83bdbe945b6b7e9abc815a07d156d33d9abbeea64dbb60",
+                  "refine.split_state": "7ea7ece30f7de1f4b31a1c9ecefcec4074b211b932689c53108f9bccfb6fc0ef"
+                },
+                "kind": "propagate_forward",
+                "output_hashes": {
+                  "refine.bounds.p1": "56d5a1e37df0197b38151ff7bad250643c043176aada38a11f6fb0d033712575",
+                  "refine.forward_env.p1": "5365f83036a4bd459e0fde4f646d6b77187f75fc06a7ca63c2d71d93f93d893c"
+                },
+                "pass_index": 0,
+                "sequence": 5,
+                "task_id": "intermediate_refinement.0005.propagate_forward"
+              },
+              {
+                "action_id": "launch.0006.emit_refined",
+                "input_hashes": {
+                  "refine.bounds.p1": "56d5a1e37df0197b38151ff7bad250643c043176aada38a11f6fb0d033712575"
+                },
+                "kind": "emit_refined",
+                "output_hashes": {
+                  "refine.refined_bounds": "56d5a1e37df0197b38151ff7bad250643c043176aada38a11f6fb0d033712575"
+                },
+                "pass_index": null,
+                "sequence": 6,
+                "task_id": "intermediate_refinement.0006.emit_refined"
+              }
+            ],
+            "elapsed_ns": 9801346,
+            "final_intermediate_bounds_hash": "56d5a1e37df0197b38151ff7bad250643c043176aada38a11f6fb0d033712575",
+            "pass_traces": [
+              {
+                "input_bounds_hash": "f00bfda0a036db4671ac50e6ff1b67ffa9dc5d51643801fedc4c918ab0d04544",
+                "lower_improvement_max": 0.6135051250457764,
+                "output_bounds_hash": "56d5a1e37df0197b38151ff7bad250643c043176aada38a11f6fb0d033712575",
+                "pass_index": 0,
+                "selected_crown_hash": "40c072dde1edb362e46dabb39004e370d93a3d6d97f43b8afa0f3913b9d6277b",
+                "selected_target_count": 99,
+                "tightened_neuron_count": 137,
+                "upper_improvement_max": 0.20857775211334229,
+                "width_reduction_sum": 23.654905915260315
+              }
+            ],
+            "performance_claimed": false,
+            "plan_hash": "4d576287f516db0040d80897f2305b1f960852e337ea19e269ee960ede940a29",
+            "schedule_hash": "b4278b0c22f93b10b9a9d81b1c90bcc03ed7d1724e0910bbfa37a2e07bd0175e",
+            "schema_version": "boundflow.native-intermediate-refinement-execution/v1",
+            "task_module_hash": "9865a6155bfed15aa90a399622589133487de71b0b0d47a46a2f367e3a745b92"
+          },
+          "execution_trace_hash": "b2d39a5abbcaa0e5e1242ac468ac738494a19b0a540c8f0458abbd625eecb59e",
+          "hashes": {
+            "refinement_plan_hash": "4d576287f516db0040d80897f2305b1f960852e337ea19e269ee960ede940a29",
+            "refinement_schedule_hash": "b4278b0c22f93b10b9a9d81b1c90bcc03ed7d1724e0910bbfa37a2e07bd0175e",
+            "refinement_task_module_hash": "9865a6155bfed15aa90a399622589133487de71b0b0d47a46a2f367e3a745b92"
+          },
+          "plan": {
+            "initial_intermediate_bounds_hash": "f00bfda0a036db4671ac50e6ff1b67ffa9dc5d51643801fedc4c918ab0d04544",
+            "input_bounds_hash": "53c49bdfb4090abfdad5ec828613ddfdc23ab4bd1a7566b9953f9468cac833d4",
+            "performance_claimed": false,
+            "plan_id": "nrir19:mnistfc:000",
+            "policy": {
+              "backward_chunk_size": 32,
+              "candidate_policy_id": "top_ambiguous_width_per_relu_v1",
+              "max_neurons_per_relu": 128,
+              "minimum_width": 0.0,
+              "passes": 1,
+              "refinement_method": "selected_plain_crown_v1"
+            },
+            "primal_graph_hash": "be29a9e36a754ba3ec83bdbe945b6b7e9abc815a07d156d33d9abbeea64dbb60",
+            "schema_version": "boundflow.intermediate_refinement_plan_ir/v1",
+            "semantics_owner": "boundflow_native_intermediate_refinement",
+            "split_state_hash": "7ea7ece30f7de1f4b31a1c9ecefcec4074b211b932689c53108f9bccfb6fc0ef",
+            "targets": [
+              {
+                "initial_lower": -0.6231183409690857,
+                "initial_upper": 3.666240692138672,
+                "initial_width": 4.289359033107758,
+                "neuron_index": 198,
+                "ordinal": 0,
+                "relu_input": "8"
+              },
+              {
+                "initial_lower": -2.3562660217285156,
+                "initial_upper": 1.5372390747070312,
+                "initial_width": 3.893505096435547,
+                "neuron_index": 93,
+                "ordinal": 1,
+                "relu_input": "8"
+              },
+              {
+                "initial_lower": -3.253906488418579,
+                "initial_upper": 0.4310150742530823,
+                "initial_width": 3.6849215626716614,
+                "neuron_index": 18,
+                "ordinal": 2,
+                "relu_input": "8"
+              },
+              {
+                "initial_lower": -2.387739419937134,
+                "initial_upper": 1.229206919670105,
+                "initial_width": 3.6169463396072388,
+                "neuron_index": 131,
+                "ordinal": 3,
+                "relu_input": "8"
+              },
+              {
+                "initial_lower": -0.9157313704490662,
+                "initial_upper": 2.6704399585723877,
+                "initial_width": 3.586171329021454,
+                "neuron_index": 245,
+                "ordinal": 4,
+                "relu_input": "8"
+              },
+              {
+                "initial_lower": -1.9222462177276611,
+                "initial_upper": 1.638892650604248,
+                "initial_width": 3.561138868331909,
+                "neuron_index": 188,
+                "ordinal": 5,
+                "relu_input": "8"
+              },
+              {
+                "initial_lower": -3.0087640285491943,
+                "initial_upper": 0.12723781168460846,
+                "initial_width": 3.136001840233803,
+                "neuron_index": 86,
+                "ordinal": 6,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -2.2441742420196533,
+                "initial_upper": 0.888310968875885,
+                "initial_width": 3.1324852108955383,
+                "neuron_index": 80,
+                "ordinal": 7,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -3.0054354667663574,
+                "initial_upper": 0.12361368536949158,
+                "initial_width": 3.129049152135849,
+                "neuron_index": 149,
+                "ordinal": 8,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -2.7030389308929443,
+                "initial_upper": 0.05268382653594017,
+                "initial_width": 2.7557227574288845,
+                "neuron_index": 110,
+                "ordinal": 9,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -2.4279932975769043,
+                "initial_upper": 0.24970737099647522,
+                "initial_width": 2.6777006685733795,
+                "neuron_index": 23,
+                "ordinal": 10,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.8201282620429993,
+                "initial_upper": 1.8064342737197876,
+                "initial_width": 2.626562535762787,
+                "neuron_index": 192,
+                "ordinal": 11,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -2.319037675857544,
+                "initial_upper": 0.2237187922000885,
+                "initial_width": 2.5427564680576324,
+                "neuron_index": 18,
+                "ordinal": 12,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -2.2057840824127197,
+                "initial_upper": 0.20590202510356903,
+                "initial_width": 2.4116861075162888,
+                "neuron_index": 22,
+                "ordinal": 13,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -2.1326024532318115,
+                "initial_upper": 0.21455547213554382,
+                "initial_width": 2.3471579253673553,
+                "neuron_index": 187,
+                "ordinal": 14,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -2.2074012756347656,
+                "initial_upper": 0.09855806827545166,
+                "initial_width": 2.3059593439102173,
+                "neuron_index": 123,
+                "ordinal": 15,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -2.298527956008911,
+                "initial_upper": 0.0011594727402552962,
+                "initial_width": 2.2996874287491664,
+                "neuron_index": 254,
+                "ordinal": 16,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.9412981271743774,
+                "initial_upper": 0.33613598346710205,
+                "initial_width": 2.2774341106414795,
+                "neuron_index": 234,
+                "ordinal": 17,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.9119923114776611,
+                "initial_upper": 0.3523847162723541,
+                "initial_width": 2.2643770277500153,
+                "neuron_index": 151,
+                "ordinal": 18,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -2.1736130714416504,
+                "initial_upper": 0.047349411994218826,
+                "initial_width": 2.220962483435869,
+                "neuron_index": 113,
+                "ordinal": 19,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.4560890197753906,
+                "initial_upper": 0.7136490941047668,
+                "initial_width": 2.1697381138801575,
+                "neuron_index": 159,
+                "ordinal": 20,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.906563639640808,
+                "initial_upper": 0.2343035638332367,
+                "initial_width": 2.140867203474045,
+                "neuron_index": 244,
+                "ordinal": 21,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.9648634195327759,
+                "initial_upper": 0.17146587371826172,
+                "initial_width": 2.1363292932510376,
+                "neuron_index": 15,
+                "ordinal": 22,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.9718650579452515,
+                "initial_upper": 0.16130927205085754,
+                "initial_width": 2.133174329996109,
+                "neuron_index": 97,
+                "ordinal": 23,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -2.0730931758880615,
+                "initial_upper": 0.04273596405982971,
+                "initial_width": 2.1158291399478912,
+                "neuron_index": 54,
+                "ordinal": 24,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.5184764862060547,
+                "initial_upper": 0.5882141590118408,
+                "initial_width": 2.1066906452178955,
+                "neuron_index": 26,
+                "ordinal": 25,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.8809294700622559,
+                "initial_upper": 0.14761504530906677,
+                "initial_width": 2.0285445153713226,
+                "neuron_index": 19,
+                "ordinal": 26,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.41359108686447144,
+                "initial_upper": 1.5915721654891968,
+                "initial_width": 2.005163252353668,
+                "neuron_index": 37,
+                "ordinal": 27,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.7734731435775757,
+                "initial_upper": 0.21021774411201477,
+                "initial_width": 1.9836908876895905,
+                "neuron_index": 183,
+                "ordinal": 28,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.672139286994934,
+                "initial_upper": 0.3008674681186676,
+                "initial_width": 1.9730067551136017,
+                "neuron_index": 104,
+                "ordinal": 29,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.9390143156051636,
+                "initial_upper": 0.025876151397824287,
+                "initial_width": 1.9648904670029879,
+                "neuron_index": 227,
+                "ordinal": 30,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.9540798664093018,
+                "initial_upper": 0.0011996924877166748,
+                "initial_width": 1.9552795588970184,
+                "neuron_index": 38,
+                "ordinal": 31,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.8168914318084717,
+                "initial_upper": 0.009382419288158417,
+                "initial_width": 1.82627385109663,
+                "neuron_index": 185,
+                "ordinal": 32,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.6240044832229614,
+                "initial_upper": 0.20015518367290497,
+                "initial_width": 1.8241596668958664,
+                "neuron_index": 74,
+                "ordinal": 33,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.7649847269058228,
+                "initial_upper": 0.013248344883322716,
+                "initial_width": 1.7782330717891455,
+                "neuron_index": 119,
+                "ordinal": 34,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.619541883468628,
+                "initial_upper": 0.15458588302135468,
+                "initial_width": 1.7741277664899826,
+                "neuron_index": 121,
+                "ordinal": 35,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.6160292625427246,
+                "initial_upper": 0.133159801363945,
+                "initial_width": 1.7491890639066696,
+                "neuron_index": 138,
+                "ordinal": 36,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.4678516387939453,
+                "initial_upper": 0.26933974027633667,
+                "initial_width": 1.737191379070282,
+                "neuron_index": 85,
+                "ordinal": 37,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.6478075981140137,
+                "initial_upper": 0.05722473934292793,
+                "initial_width": 1.7050323374569416,
+                "neuron_index": 66,
+                "ordinal": 38,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.989632248878479,
+                "initial_upper": 0.702297031879425,
+                "initial_width": 1.691929280757904,
+                "neuron_index": 3,
+                "ordinal": 39,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.30849289894104,
+                "initial_upper": 0.36904212832450867,
+                "initial_width": 1.6775350272655487,
+                "neuron_index": 153,
+                "ordinal": 40,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.3889974355697632,
+                "initial_upper": 0.2836976945400238,
+                "initial_width": 1.672695130109787,
+                "neuron_index": 197,
+                "ordinal": 41,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.5211831331253052,
+                "initial_upper": 0.14594995975494385,
+                "initial_width": 1.667133092880249,
+                "neuron_index": 65,
+                "ordinal": 42,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.5730693340301514,
+                "initial_upper": 0.06775350123643875,
+                "initial_width": 1.6408228352665901,
+                "neuron_index": 214,
+                "ordinal": 43,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.2689595222473145,
+                "initial_upper": 0.3573955297470093,
+                "initial_width": 1.6263550519943237,
+                "neuron_index": 53,
+                "ordinal": 44,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.4572248458862305,
+                "initial_upper": 0.10849127173423767,
+                "initial_width": 1.5657161176204681,
+                "neuron_index": 5,
+                "ordinal": 45,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.480763554573059,
+                "initial_upper": 0.03916425630450249,
+                "initial_width": 1.5199278108775616,
+                "neuron_index": 24,
+                "ordinal": 46,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.0824557542800903,
+                "initial_upper": 0.43439874053001404,
+                "initial_width": 1.5168544948101044,
+                "neuron_index": 230,
+                "ordinal": 47,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.4563558101654053,
+                "initial_upper": 0.059399623423814774,
+                "initial_width": 1.51575543358922,
+                "neuron_index": 83,
+                "ordinal": 48,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.4947751760482788,
+                "initial_upper": 0.00836222618818283,
+                "initial_width": 1.5031374022364616,
+                "neuron_index": 33,
+                "ordinal": 49,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.4625098705291748,
+                "initial_upper": 0.040526654571294785,
+                "initial_width": 1.5030365251004696,
+                "neuron_index": 215,
+                "ordinal": 50,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.4037563800811768,
+                "initial_upper": 0.06719255447387695,
+                "initial_width": 1.4709489345550537,
+                "neuron_index": 64,
+                "ordinal": 51,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.2772940397262573,
+                "initial_upper": 0.15451839566230774,
+                "initial_width": 1.431812435388565,
+                "neuron_index": 249,
+                "ordinal": 52,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.262690782546997,
+                "initial_upper": 0.16800838708877563,
+                "initial_width": 1.4306991696357727,
+                "neuron_index": 48,
+                "ordinal": 53,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.1678531169891357,
+                "initial_upper": 0.25965702533721924,
+                "initial_width": 1.427510142326355,
+                "neuron_index": 206,
+                "ordinal": 54,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.8122248649597168,
+                "initial_upper": 0.6033942103385925,
+                "initial_width": 1.4156190752983093,
+                "neuron_index": 13,
+                "ordinal": 55,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.1690412759780884,
+                "initial_upper": 0.22413545846939087,
+                "initial_width": 1.3931767344474792,
+                "neuron_index": 27,
+                "ordinal": 56,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.2819405794143677,
+                "initial_upper": 0.10741077363491058,
+                "initial_width": 1.3893513530492783,
+                "neuron_index": 237,
+                "ordinal": 57,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.2769535779953003,
+                "initial_upper": 0.08573809266090393,
+                "initial_width": 1.3626916706562042,
+                "neuron_index": 49,
+                "ordinal": 58,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.0677392482757568,
+                "initial_upper": 0.25648263096809387,
+                "initial_width": 1.3242218792438507,
+                "neuron_index": 156,
+                "ordinal": 59,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.2314704656600952,
+                "initial_upper": 0.055044375360012054,
+                "initial_width": 1.2865148410201073,
+                "neuron_index": 46,
+                "ordinal": 60,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.0196229219436646,
+                "initial_upper": 0.2547726333141327,
+                "initial_width": 1.2743955552577972,
+                "neuron_index": 181,
+                "ordinal": 61,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.9661706686019897,
+                "initial_upper": 0.29614776372909546,
+                "initial_width": 1.2623184323310852,
+                "neuron_index": 200,
+                "ordinal": 62,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.252236008644104,
+                "initial_upper": 0.0060850754380226135,
+                "initial_width": 1.2583210840821266,
+                "neuron_index": 99,
+                "ordinal": 63,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.1375043392181396,
+                "initial_upper": 0.12018386274576187,
+                "initial_width": 1.2576882019639015,
+                "neuron_index": 163,
+                "ordinal": 64,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.9027042388916016,
+                "initial_upper": 0.27888035774230957,
+                "initial_width": 1.1815845966339111,
+                "neuron_index": 0,
+                "ordinal": 65,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.8640397787094116,
+                "initial_upper": 0.3131163716316223,
+                "initial_width": 1.177156150341034,
+                "neuron_index": 236,
+                "ordinal": 66,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.8337697982788086,
+                "initial_upper": 0.3014335036277771,
+                "initial_width": 1.1352033019065857,
+                "neuron_index": 124,
+                "ordinal": 67,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.399658739566803,
+                "initial_upper": 0.7288936376571655,
+                "initial_width": 1.1285523772239685,
+                "neuron_index": 220,
+                "ordinal": 68,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.713635265827179,
+                "initial_upper": 0.3897366225719452,
+                "initial_width": 1.1033718883991241,
+                "neuron_index": 133,
+                "ordinal": 69,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -1.0530120134353638,
+                "initial_upper": 0.018414407968521118,
+                "initial_width": 1.0714264214038849,
+                "neuron_index": 44,
+                "ordinal": 70,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.8194717168807983,
+                "initial_upper": 0.22795937955379486,
+                "initial_width": 1.0474310964345932,
+                "neuron_index": 152,
+                "ordinal": 71,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.7435962557792664,
+                "initial_upper": 0.28686437010765076,
+                "initial_width": 1.0304606258869171,
+                "neuron_index": 69,
+                "ordinal": 72,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.7810215353965759,
+                "initial_upper": 0.2309930920600891,
+                "initial_width": 1.012014627456665,
+                "neuron_index": 195,
+                "ordinal": 73,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.9517116546630859,
+                "initial_upper": 0.03831246495246887,
+                "initial_width": 0.9900241196155548,
+                "neuron_index": 93,
+                "ordinal": 74,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.6083666086196899,
+                "initial_upper": 0.373868465423584,
+                "initial_width": 0.9822350740432739,
+                "neuron_index": 28,
+                "ordinal": 75,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.881841778755188,
+                "initial_upper": 0.06422694027423859,
+                "initial_width": 0.9460687190294266,
+                "neuron_index": 126,
+                "ordinal": 76,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.36784300208091736,
+                "initial_upper": 0.5683579444885254,
+                "initial_width": 0.9362009465694427,
+                "neuron_index": 175,
+                "ordinal": 77,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.6237200498580933,
+                "initial_upper": 0.3123553991317749,
+                "initial_width": 0.9360754489898682,
+                "neuron_index": 102,
+                "ordinal": 78,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.5440115332603455,
+                "initial_upper": 0.3723127543926239,
+                "initial_width": 0.9163242876529694,
+                "neuron_index": 166,
+                "ordinal": 79,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.6119438409805298,
+                "initial_upper": 0.2975466847419739,
+                "initial_width": 0.9094905257225037,
+                "neuron_index": 240,
+                "ordinal": 80,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.5773511528968811,
+                "initial_upper": 0.3153352737426758,
+                "initial_width": 0.8926864266395569,
+                "neuron_index": 114,
+                "ordinal": 81,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.7454811334609985,
+                "initial_upper": 0.1457902193069458,
+                "initial_width": 0.8912713527679443,
+                "neuron_index": 194,
+                "ordinal": 82,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.47727012634277344,
+                "initial_upper": 0.3615649342536926,
+                "initial_width": 0.8388350605964661,
+                "neuron_index": 116,
+                "ordinal": 83,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.5727490186691284,
+                "initial_upper": 0.26321104168891907,
+                "initial_width": 0.8359600603580475,
+                "neuron_index": 115,
+                "ordinal": 84,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.6372889876365662,
+                "initial_upper": 0.19358383119106293,
+                "initial_width": 0.8308728188276291,
+                "neuron_index": 165,
+                "ordinal": 85,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.4117324948310852,
+                "initial_upper": 0.41302356123924255,
+                "initial_width": 0.8247560560703278,
+                "neuron_index": 232,
+                "ordinal": 86,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.6904869675636292,
+                "initial_upper": 0.1190183237195015,
+                "initial_width": 0.8095052912831306,
+                "neuron_index": 75,
+                "ordinal": 87,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.4127752184867859,
+                "initial_upper": 0.37943604588508606,
+                "initial_width": 0.792211264371872,
+                "neuron_index": 140,
+                "ordinal": 88,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.7395806908607483,
+                "initial_upper": 0.026005471125245094,
+                "initial_width": 0.7655861619859934,
+                "neuron_index": 17,
+                "ordinal": 89,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.18487536907196045,
+                "initial_upper": 0.5033502578735352,
+                "initial_width": 0.6882256269454956,
+                "neuron_index": 169,
+                "ordinal": 90,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.38709259033203125,
+                "initial_upper": 0.29551681876182556,
+                "initial_width": 0.6826094090938568,
+                "neuron_index": 137,
+                "ordinal": 91,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.11103332042694092,
+                "initial_upper": 0.5677541494369507,
+                "initial_width": 0.6787874698638916,
+                "neuron_index": 55,
+                "ordinal": 92,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.5838174819946289,
+                "initial_upper": 0.04892979562282562,
+                "initial_width": 0.6327472776174545,
+                "neuron_index": 111,
+                "ordinal": 93,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.3087274432182312,
+                "initial_upper": 0.2958036959171295,
+                "initial_width": 0.6045311391353607,
+                "neuron_index": 95,
+                "ordinal": 94,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.5596067905426025,
+                "initial_upper": 0.041992902755737305,
+                "initial_width": 0.6015996932983398,
+                "neuron_index": 173,
+                "ordinal": 95,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.2524431347846985,
+                "initial_upper": 0.29950031638145447,
+                "initial_width": 0.551943451166153,
+                "neuron_index": 29,
+                "ordinal": 96,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.03933718800544739,
+                "initial_upper": 0.40447986125946045,
+                "initial_width": 0.44381704926490784,
+                "neuron_index": 45,
+                "ordinal": 97,
+                "relu_input": "10"
+              },
+              {
+                "initial_lower": -0.015513449907302856,
+                "initial_upper": 0.3948432207107544,
+                "initial_width": 0.41035667061805725,
+                "neuron_index": 61,
+                "ordinal": 98,
+                "relu_input": "10"
+              }
+            ]
+          },
+          "schedule": {
+            "actions": [
+              {
+                "action_id": "launch.0000.materialize_forward",
+                "input_value_ids": [
+                  "refine.module",
+                  "refine.input",
+                  "refine.split_state"
+                ],
+                "output_value_ids": [
+                  "refine.forward_env.p0",
+                  "refine.bounds.p0"
+                ],
+                "sequence": 0,
+                "task_id": "intermediate_refinement.0000.materialize_forward"
+              },
+              {
+                "action_id": "launch.0001.enumerate_ambiguous",
+                "input_value_ids": [
+                  "refine.bounds.p0"
+                ],
+                "output_value_ids": [
+                  "refine.candidates"
+                ],
+                "sequence": 1,
+                "task_id": "intermediate_refinement.0001.enumerate_ambiguous"
+              },
+              {
+                "action_id": "launch.0002.select_targets",
+                "input_value_ids": [
+                  "refine.candidates",
+                  "refine.policy"
+                ],
+                "output_value_ids": [
+                  "refine.selected_targets"
+                ],
+                "sequence": 2,
+                "task_id": "intermediate_refinement.0002.select_targets"
+              },
+              {
+                "action_id": "launch.0003.backward_selected",
+                "input_value_ids": [
+                  "refine.forward_env.p0",
+                  "refine.bounds.p0",
+                  "refine.selected_targets"
+                ],
+                "output_value_ids": [
+                  "refine.crown_candidates.p1"
+                ],
+                "sequence": 3,
+                "task_id": "intermediate_refinement.0003.backward_selected"
+              },
+              {
+                "action_id": "launch.0004.intersect_selected",
+                "input_value_ids": [
+                  "refine.bounds.p0",
+                  "refine.crown_candidates.p1"
+                ],
+                "output_value_ids": [
+                  "refine.intersected_bounds.p1"
+                ],
+                "sequence": 4,
+                "task_id": "intermediate_refinement.0004.intersect_selected"
+              },
+              {
+                "action_id": "launch.0005.propagate_forward",
+                "input_value_ids": [
+                  "refine.module",
+                  "refine.input",
+                  "refine.split_state",
+                  "refine.intersected_bounds.p1"
+                ],
+                "output_value_ids": [
+                  "refine.forward_env.p1",
+                  "refine.bounds.p1"
+                ],
+                "sequence": 5,
+                "task_id": "intermediate_refinement.0005.propagate_forward"
+              },
+              {
+                "action_id": "launch.0006.emit_refined",
+                "input_value_ids": [
+                  "refine.bounds.p1"
+                ],
+                "output_value_ids": [
+                  "refine.refined_bounds"
+                ],
+                "sequence": 6,
+                "task_id": "intermediate_refinement.0006.emit_refined"
+              }
+            ],
+            "refined_bounds_value_id": "refine.refined_bounds",
+            "refinement_plan_hash": "4d576287f516db0040d80897f2305b1f960852e337ea19e269ee960ede940a29",
+            "refinement_task_module_hash": "9865a6155bfed15aa90a399622589133487de71b0b0d47a46a2f367e3a745b92",
+            "schedule_id": "nrir19:mnistfc:000.schedule",
+            "schema_version": "boundflow.intermediate_refinement_schedule_ir/v1"
+          },
+          "task": {
+            "module_id": "nrir19:mnistfc:000.tasks",
+            "output_task_id": "intermediate_refinement.0006.emit_refined",
+            "refinement_plan_hash": "4d576287f516db0040d80897f2305b1f960852e337ea19e269ee960ede940a29",
+            "schema_version": "boundflow.intermediate_refinement_task_ir/v1",
+            "tasks": [
+              {
+                "dependency_task_ids": [],
+                "input_value_ids": [
+                  "refine.module",
+                  "refine.input",
+                  "refine.split_state"
+                ],
+                "kind": "materialize_forward",
+                "output_value_ids": [
+                  "refine.forward_env.p0",
+                  "refine.bounds.p0"
+                ],
+                "pass_index": null,
+                "semantics_owner": "boundflow_native_intermediate_refinement",
+                "task_id": "intermediate_refinement.0000.materialize_forward"
+              },
+              {
+                "dependency_task_ids": [
+                  "intermediate_refinement.0000.materialize_forward"
+                ],
+                "input_value_ids": [
+                  "refine.bounds.p0"
+                ],
+                "kind": "enumerate_ambiguous",
+                "output_value_ids": [
+                  "refine.candidates"
+                ],
+                "pass_index": null,
+                "semantics_owner": "boundflow_native_intermediate_refinement",
+                "task_id": "intermediate_refinement.0001.enumerate_ambiguous"
+              },
+              {
+                "dependency_task_ids": [
+                  "intermediate_refinement.0001.enumerate_ambiguous"
+                ],
+                "input_value_ids": [
+                  "refine.candidates",
+                  "refine.policy"
+                ],
+                "kind": "select_targets",
+                "output_value_ids": [
+                  "refine.selected_targets"
+                ],
+                "pass_index": null,
+                "semantics_owner": "boundflow_native_intermediate_refinement",
+                "task_id": "intermediate_refinement.0002.select_targets"
+              },
+              {
+                "dependency_task_ids": [
+                  "intermediate_refinement.0002.select_targets"
+                ],
+                "input_value_ids": [
+                  "refine.forward_env.p0",
+                  "refine.bounds.p0",
+                  "refine.selected_targets"
+                ],
+                "kind": "backward_selected",
+                "output_value_ids": [
+                  "refine.crown_candidates.p1"
+                ],
+                "pass_index": 0,
+                "semantics_owner": "boundflow_native_intermediate_refinement",
+                "task_id": "intermediate_refinement.0003.backward_selected"
+              },
+              {
+                "dependency_task_ids": [
+                  "intermediate_refinement.0003.backward_selected"
+                ],
+                "input_value_ids": [
+                  "refine.bounds.p0",
+                  "refine.crown_candidates.p1"
+                ],
+                "kind": "intersect_selected",
+                "output_value_ids": [
+                  "refine.intersected_bounds.p1"
+                ],
+                "pass_index": 0,
+                "semantics_owner": "boundflow_native_intermediate_refinement",
+                "task_id": "intermediate_refinement.0004.intersect_selected"
+              },
+              {
+                "dependency_task_ids": [
+                  "intermediate_refinement.0004.intersect_selected"
+                ],
+                "input_value_ids": [
+                  "refine.module",
+                  "refine.input",
+                  "refine.split_state",
+                  "refine.intersected_bounds.p1"
+                ],
+                "kind": "propagate_forward",
+                "output_value_ids": [
+                  "refine.forward_env.p1",
+                  "refine.bounds.p1"
+                ],
+                "pass_index": 0,
+                "semantics_owner": "boundflow_native_intermediate_refinement",
+                "task_id": "intermediate_refinement.0005.propagate_forward"
+              },
+              {
+                "dependency_task_ids": [
+                  "intermediate_refinement.0005.propagate_forward"
+                ],
+                "input_value_ids": [
+                  "refine.bounds.p1"
+                ],
+                "kind": "emit_refined",
+                "output_value_ids": [
+                  "refine.refined_bounds"
+                ],
+                "pass_index": null,
+                "semantics_owner": "boundflow_native_intermediate_refinement",
+                "task_id": "intermediate_refinement.0006.emit_refined"
+              }
+            ]
+          }
+        },
+        "refinement_ns": 21760601,
+        "schema_version": "boundflow.native-intermediate-refinement-worker/v1",
+        "setup_ns": 17405841,
+        "worker_elapsed_ns": 25017891941,
+        "workload_id": "mnistfc:000"
+      },
+      "workload_id": "mnistfc:000"
+    },
+    {
+      "e2e_elapsed_ns": 62879006353,
+      "log_path": "logs/cifar10_resnet-000-baseline.log",
+      "log_sha256": "ad2c8b3a6ad264810809fbb86aa3a41e4d960373ebda55ed8d96956764c45cca",
+      "mode": "baseline",
+      "process_returncode": 0,
+      "result": {
+        "execution_state": "completed",
+        "intermediate_bound_source": "local_forward",
+        "mode": "baseline",
+        "performance_claimed": false,
+        "query": {
+          "clauses": [
+            {
+              "clause_index": 0,
+              "clause_trace_hash": "4846d25400768000169d5d3cfe13d51285706b3e222e7f39576e687721012d78",
+              "evaluated_nodes": 7,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "7c7680d4038d3a4058ea85061ba04e1f1d6ec72e583ae7c3edf5c29aa202ff87",
+              "root_lower": -543.7172241210938,
+              "root_upper": 566.6599731445312,
+              "status": "unknown"
+            },
+            {
+              "clause_index": 1,
+              "clause_trace_hash": "3fd4002f2909f38b27109be3343ff6c1b48966f7730134451e048522f22d4d0c",
+              "evaluated_nodes": 7,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "405b3e8bb51b54e19fc25d8cd0eaabb0b5a0b0ab9f8177bec0b4e61e178ceb73",
+              "root_lower": -789.3314208984375,
+              "root_upper": 826.3755493164062,
+              "status": "unknown"
+            }
+          ],
+          "completed_clause_count": 2,
+          "evaluated_node_count": 14,
+          "pending_clause_indices": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "query_trace_hash": "d4a9e3b95d654277fdf1e20b27676bfff63ee313720ffad6dbeaedaf36bb391c",
+          "solver_status": "unknown",
+          "unresolved_clause_indices": [
+            0,
+            1
+          ]
+        },
+        "query_ir_hash": "f2151936ce0d9f8d8bcabd7bc3fc0224a71d7907da4ac614d7216e7a0919201b",
+        "query_ns": 61452223844,
+        "refinement": null,
+        "refinement_ns": 0,
+        "schema_version": "boundflow.native-intermediate-refinement-worker/v1",
+        "setup_ns": 86771658,
+        "worker_elapsed_ns": 61541283786,
+        "workload_id": "cifar10_resnet:000"
+      },
+      "workload_id": "cifar10_resnet:000"
+    },
+    {
+      "e2e_elapsed_ns": 63400951608,
+      "log_path": "logs/cifar10_resnet-000-native_refined.log",
+      "log_sha256": "df64c218bcb280369d020bbae796593e69aca1db4fea3c22de0ac2949aec44b9",
+      "mode": "native_refined",
+      "process_returncode": 0,
+      "result": {
+        "execution_state": "completed",
+        "intermediate_bound_source": "native_refined",
+        "mode": "native_refined",
+        "performance_claimed": false,
+        "query": {
+          "clauses": [
+            {
+              "clause_index": 0,
+              "clause_trace_hash": "d76f578b237576ae6d61dc1cf09c346d9a6f9df451c430fe9c80480ff637555e",
+              "evaluated_nodes": 7,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "f4db32c4ce5157bac5e866a7271a133f894e62279559dc090bd1d3b4cc9db4bb",
+              "root_lower": -473.2212219238281,
+              "root_upper": 508.6931457519531,
+              "status": "unknown"
+            },
+            {
+              "clause_index": 1,
+              "clause_trace_hash": "2f1d55fa853190c71e4de3795ead9b1781f2f9b5b63c111dd914edfcf23c9a4e",
+              "evaluated_nodes": 7,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "bf1fa918ba6bd9b2d46b3c11f2a588b83f6262e5d616804ff155a350d548aa69",
+              "root_lower": -628.7803344726562,
+              "root_upper": 733.4066162109375,
+              "status": "unknown"
+            }
+          ],
+          "completed_clause_count": 2,
+          "evaluated_node_count": 14,
+          "pending_clause_indices": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "query_trace_hash": "71c6684c70ff9ca78b9c4e646df10a437f7007a696b46c0420f82d5e684070c4",
+          "solver_status": "unknown",
+          "unresolved_clause_indices": [
+            0,
+            1
+          ]
+        },
+        "query_ir_hash": "f2151936ce0d9f8d8bcabd7bc3fc0224a71d7907da4ac614d7216e7a0919201b",
+        "query_ns": 61816863530,
+        "refinement": {
+          "execution_trace": {
+            "action_traces": [
+              {
+                "action_id": "launch.0000.materialize_forward",
+                "input_hashes": {
+                  "refine.input": "742690d00e48f051c47b6eed941884d7759fcf3a97dda3dcf7b50e96e0cdf3d4",
+                  "refine.module": "02636a01e4b5a2d1f759dc7748bf80b3303efff2d5697790966f8e93679213e8",
+                  "refine.split_state": "32ef5aa369eb3b424067ead0f6b4a41a59b7c5753a5e59034bc13372b10bc2be"
+                },
+                "kind": "materialize_forward",
+                "output_hashes": {
+                  "refine.bounds.p0": "f79cd79088138fc9c9711a4314b51b951b234816d8b19eec81fedda7bed5be6d",
+                  "refine.forward_env.p0": "ee47f0351244f3b2de2d70ad979eae2175172a29d2f39133a5582acbc999b491"
+                },
+                "pass_index": null,
+                "sequence": 0,
+                "task_id": "intermediate_refinement.0000.materialize_forward"
+              },
+              {
+                "action_id": "launch.0001.enumerate_ambiguous",
+                "input_hashes": {
+                  "refine.bounds.p0": "f79cd79088138fc9c9711a4314b51b951b234816d8b19eec81fedda7bed5be6d"
+                },
+                "kind": "enumerate_ambiguous",
+                "output_hashes": {
+                  "refine.candidates": "7c0c5446e1adc66d9cb955167babe44ae309b3f14cfa659de225d183e0b3af74"
+                },
+                "pass_index": null,
+                "sequence": 1,
+                "task_id": "intermediate_refinement.0001.enumerate_ambiguous"
+              },
+              {
+                "action_id": "launch.0002.select_targets",
+                "input_hashes": {
+                  "refine.candidates": "7c0c5446e1adc66d9cb955167babe44ae309b3f14cfa659de225d183e0b3af74",
+                  "refine.policy": "96441c1b9fd5992a0099b6b19e62386d969d16ec525dd236e92c942b38b856d0"
+                },
+                "kind": "select_targets",
+                "output_hashes": {
+                  "refine.selected_targets": "7c0c5446e1adc66d9cb955167babe44ae309b3f14cfa659de225d183e0b3af74"
+                },
+                "pass_index": null,
+                "sequence": 2,
+                "task_id": "intermediate_refinement.0002.select_targets"
+              },
+              {
+                "action_id": "launch.0003.backward_selected",
+                "input_hashes": {
+                  "refine.bounds.p0": "f79cd79088138fc9c9711a4314b51b951b234816d8b19eec81fedda7bed5be6d",
+                  "refine.forward_env.p0": "ee47f0351244f3b2de2d70ad979eae2175172a29d2f39133a5582acbc999b491",
+                  "refine.selected_targets": "7c0c5446e1adc66d9cb955167babe44ae309b3f14cfa659de225d183e0b3af74"
+                },
+                "kind": "backward_selected",
+                "output_hashes": {
+                  "refine.crown_candidates.p1": "a44434e32d5bfd18b6ce6cd660b0a55ecb2c1f0f4f2858444aa47c99a2b3a7ab"
+                },
+                "pass_index": 0,
+                "sequence": 3,
+                "task_id": "intermediate_refinement.0003.backward_selected"
+              },
+              {
+                "action_id": "launch.0004.intersect_selected",
+                "input_hashes": {
+                  "refine.bounds.p0": "f79cd79088138fc9c9711a4314b51b951b234816d8b19eec81fedda7bed5be6d",
+                  "refine.crown_candidates.p1": "a44434e32d5bfd18b6ce6cd660b0a55ecb2c1f0f4f2858444aa47c99a2b3a7ab"
+                },
+                "kind": "intersect_selected",
+                "output_hashes": {
+                  "refine.intersected_bounds.p1": "0bf0e720db13ba0638aaa96b5e398b1335e418e4bdfe8958eda8bc6ef36c1c2f"
+                },
+                "pass_index": 0,
+                "sequence": 4,
+                "task_id": "intermediate_refinement.0004.intersect_selected"
+              },
+              {
+                "action_id": "launch.0005.propagate_forward",
+                "input_hashes": {
+                  "refine.input": "742690d00e48f051c47b6eed941884d7759fcf3a97dda3dcf7b50e96e0cdf3d4",
+                  "refine.intersected_bounds.p1": "0bf0e720db13ba0638aaa96b5e398b1335e418e4bdfe8958eda8bc6ef36c1c2f",
+                  "refine.module": "02636a01e4b5a2d1f759dc7748bf80b3303efff2d5697790966f8e93679213e8",
+                  "refine.split_state": "32ef5aa369eb3b424067ead0f6b4a41a59b7c5753a5e59034bc13372b10bc2be"
+                },
+                "kind": "propagate_forward",
+                "output_hashes": {
+                  "refine.bounds.p1": "5ae31f1575848b312be4f0809a675f667ae63fbfe31421d1960969e1ca5d8151",
+                  "refine.forward_env.p1": "6172aa12c4e8750ec9bfee0c7974402218ea11687e3892939721aec4efee1d01"
+                },
+                "pass_index": 0,
+                "sequence": 5,
+                "task_id": "intermediate_refinement.0005.propagate_forward"
+              },
+              {
+                "action_id": "launch.0006.emit_refined",
+                "input_hashes": {
+                  "refine.bounds.p1": "5ae31f1575848b312be4f0809a675f667ae63fbfe31421d1960969e1ca5d8151"
+                },
+                "kind": "emit_refined",
+                "output_hashes": {
+                  "refine.refined_bounds": "5ae31f1575848b312be4f0809a675f667ae63fbfe31421d1960969e1ca5d8151"
+                },
+                "pass_index": null,
+                "sequence": 6,
+                "task_id": "intermediate_refinement.0006.emit_refined"
+              }
+            ],
+            "elapsed_ns": 50821506,
+            "final_intermediate_bounds_hash": "5ae31f1575848b312be4f0809a675f667ae63fbfe31421d1960969e1ca5d8151",
+            "pass_traces": [
+              {
+                "input_bounds_hash": "f79cd79088138fc9c9711a4314b51b951b234816d8b19eec81fedda7bed5be6d",
+                "lower_improvement_max": 94.41629028320312,
+                "output_bounds_hash": "5ae31f1575848b312be4f0809a675f667ae63fbfe31421d1960969e1ca5d8151",
+                "pass_index": 0,
+                "selected_crown_hash": "a44434e32d5bfd18b6ce6cd660b0a55ecb2c1f0f4f2858444aa47c99a2b3a7ab",
+                "selected_target_count": 96,
+                "tightened_neuron_count": 2591,
+                "upper_improvement_max": 72.57006072998047,
+                "width_reduction_sum": 7223.864087596536
+              }
+            ],
+            "performance_claimed": false,
+            "plan_hash": "928f30383ab4bdb3069562ec24b1495a8b9667dbde6ae954715870dd1cbd8af8",
+            "schedule_hash": "d7cf4e27560a3404d368dd0d9158530f6cb9701745b112d272263d2b052317e1",
+            "schema_version": "boundflow.native-intermediate-refinement-execution/v1",
+            "task_module_hash": "91b444aeb88f681c7cba77f0d145c55851f1ca26046395d1e30ef49d1518ad70"
+          },
+          "execution_trace_hash": "145d1ed81b6f28531473a3179cc4d50432de14ff8d013835e8fb68a86fdc8b24",
+          "hashes": {
+            "refinement_plan_hash": "928f30383ab4bdb3069562ec24b1495a8b9667dbde6ae954715870dd1cbd8af8",
+            "refinement_schedule_hash": "d7cf4e27560a3404d368dd0d9158530f6cb9701745b112d272263d2b052317e1",
+            "refinement_task_module_hash": "91b444aeb88f681c7cba77f0d145c55851f1ca26046395d1e30ef49d1518ad70"
+          },
+          "plan": {
+            "initial_intermediate_bounds_hash": "f79cd79088138fc9c9711a4314b51b951b234816d8b19eec81fedda7bed5be6d",
+            "input_bounds_hash": "742690d00e48f051c47b6eed941884d7759fcf3a97dda3dcf7b50e96e0cdf3d4",
+            "performance_claimed": false,
+            "plan_id": "nrir19:cifar10_resnet:000",
+            "policy": {
+              "backward_chunk_size": 8,
+              "candidate_policy_id": "top_ambiguous_width_per_relu_v1",
+              "max_neurons_per_relu": 16,
+              "minimum_width": 0.0,
+              "passes": 1,
+              "refinement_method": "selected_plain_crown_v1"
+            },
+            "primal_graph_hash": "02636a01e4b5a2d1f759dc7748bf80b3303efff2d5697790966f8e93679213e8",
+            "schema_version": "boundflow.intermediate_refinement_plan_ir/v1",
+            "semantics_owner": "boundflow_native_intermediate_refinement",
+            "split_state_hash": "32ef5aa369eb3b424067ead0f6b4a41a59b7c5753a5e59034bc13372b10bc2be",
+            "targets": [
+              {
+                "initial_lower": -0.20421285927295685,
+                "initial_upper": 0.03070215880870819,
+                "initial_width": 0.23491501808166504,
+                "neuron_index": 1714,
+                "ordinal": 0,
+                "relu_input": "17"
+              },
+              {
+                "initial_lower": -0.23390813171863556,
+                "initial_upper": 0.00100688636302948,
+                "initial_width": 0.23491501808166504,
+                "neuron_index": 1738,
+                "ordinal": 1,
+                "relu_input": "17"
+              },
+              {
+                "initial_lower": -0.21153636276721954,
+                "initial_upper": 0.023378655314445496,
+                "initial_width": 0.23491501808166504,
+                "neuron_index": 1766,
+                "ordinal": 2,
+                "relu_input": "17"
+              },
+              {
+                "initial_lower": -0.21013589203357697,
+                "initial_upper": 0.024778887629508972,
+                "initial_width": 0.23491477966308594,
+                "neuron_index": 1561,
+                "ordinal": 3,
+                "relu_input": "17"
+              },
+              {
+                "initial_lower": -0.14956064522266388,
+                "initial_upper": 0.08535413444042206,
+                "initial_width": 0.23491477966308594,
+                "neuron_index": 1562,
+                "ordinal": 4,
+                "relu_input": "17"
+              },
+              {
+                "initial_lower": -0.17425508797168732,
+                "initial_upper": 0.06065969169139862,
+                "initial_width": 0.23491477966308594,
+                "neuron_index": 1647,
+                "ordinal": 5,
+                "relu_input": "17"
+              },
+              {
+                "initial_lower": -0.16089601814746857,
+                "initial_upper": 0.07401876151561737,
+                "initial_width": 0.23491477966308594,
+                "neuron_index": 1722,
+                "ordinal": 6,
+                "relu_input": "17"
+              },
+              {
+                "initial_lower": -0.2276732474565506,
+                "initial_upper": 0.007241532206535339,
+                "initial_width": 0.23491477966308594,
+                "neuron_index": 1756,
+                "ordinal": 7,
+                "relu_input": "17"
+              },
+              {
+                "initial_lower": -0.21825022995471954,
+                "initial_upper": 0.016664549708366394,
+                "initial_width": 0.23491477966308594,
+                "neuron_index": 1769,
+                "ordinal": 8,
+                "relu_input": "17"
+              },
+              {
+                "initial_lower": -0.21980686485767365,
+                "initial_upper": 0.015107914805412292,
+                "initial_width": 0.23491477966308594,
+                "neuron_index": 1785,
+                "ordinal": 9,
+                "relu_input": "17"
+              },
+              {
+                "initial_lower": -0.04128552973270416,
+                "initial_upper": 0.19362907111644745,
+                "initial_width": 0.2349146008491516,
+                "neuron_index": 1626,
+                "ordinal": 10,
+                "relu_input": "17"
+              },
+              {
+                "initial_lower": -0.13252951204776764,
+                "initial_upper": 0.10238508880138397,
+                "initial_width": 0.2349146008491516,
+                "neuron_index": 1688,
+                "ordinal": 11,
+                "relu_input": "17"
+              },
+              {
+                "initial_lower": -0.12305183708667755,
+                "initial_upper": 0.11186270415782928,
+                "initial_width": 0.23491454124450684,
+                "neuron_index": 1576,
+                "ordinal": 12,
+                "relu_input": "17"
+              },
+              {
+                "initial_lower": -0.11414752900600433,
+                "initial_upper": 0.1207670122385025,
+                "initial_width": 0.23491454124450684,
+                "neuron_index": 1595,
+                "ordinal": 13,
+                "relu_input": "17"
+              },
+              {
+                "initial_lower": -0.22357697784900665,
+                "initial_upper": 0.011337563395500183,
+                "initial_width": 0.23491454124450684,
+                "neuron_index": 1661,
+                "ordinal": 14,
+                "relu_input": "17"
+              },
+              {
+                "initial_lower": -0.22514910995960236,
+                "initial_upper": 0.00976543128490448,
+                "initial_width": 0.23491454124450684,
+                "neuron_index": 1737,
+                "ordinal": 15,
+                "relu_input": "17"
+              },
+              {
+                "initial_lower": -0.12641984224319458,
+                "initial_upper": 0.6303669810295105,
+                "initial_width": 0.7567868232727051,
+                "neuron_index": 277,
+                "ordinal": 16,
+                "relu_input": "19"
+              },
+              {
+                "initial_lower": -0.482307493686676,
+                "initial_upper": 0.2414705455303192,
+                "initial_width": 0.7237780392169952,
+                "neuron_index": 668,
+                "ordinal": 17,
+                "relu_input": "19"
+              },
+              {
+                "initial_lower": -0.7050132155418396,
+                "initial_upper": 0.014222092926502228,
+                "initial_width": 0.7192353084683418,
+                "neuron_index": 347,
+                "ordinal": 18,
+                "relu_input": "19"
+              },
+              {
+                "initial_lower": -0.6094945073127747,
+                "initial_upper": 0.09403867274522781,
+                "initial_width": 0.7035331800580025,
+                "neuron_index": 138,
+                "ordinal": 19,
+                "relu_input": "19"
+              },
+              {
+                "initial_lower": -0.18198150396347046,
+                "initial_upper": 0.5116644501686096,
+                "initial_width": 0.6936459541320801,
+                "neuron_index": 276,
+                "ordinal": 20,
+                "relu_input": "19"
+              },
+              {
+                "initial_lower": -0.6317291855812073,
+                "initial_upper": 0.060942716896533966,
+                "initial_width": 0.6926719024777412,
+                "neuron_index": 155,
+                "ordinal": 21,
+                "relu_input": "19"
+              },
+              {
+                "initial_lower": -0.5186128616333008,
+                "initial_upper": 0.172582745552063,
+                "initial_width": 0.6911956071853638,
+                "neuron_index": 675,
+                "ordinal": 22,
+                "relu_input": "19"
+              },
+              {
+                "initial_lower": -0.412277489900589,
+                "initial_upper": 0.2764929234981537,
+                "initial_width": 0.6887704133987427,
+                "neuron_index": 676,
+                "ordinal": 23,
+                "relu_input": "19"
+              },
+              {
+                "initial_lower": -0.5519430041313171,
+                "initial_upper": 0.13368386030197144,
+                "initial_width": 0.6856268644332886,
+                "neuron_index": 273,
+                "ordinal": 24,
+                "relu_input": "19"
+              },
+              {
+                "initial_lower": -0.33976495265960693,
+                "initial_upper": 0.3445866107940674,
+                "initial_width": 0.6843515634536743,
+                "neuron_index": 650,
+                "ordinal": 25,
+                "relu_input": "19"
+              },
+              {
+                "initial_lower": -0.4109575152397156,
+                "initial_upper": 0.2707001566886902,
+                "initial_width": 0.6816576719284058,
+                "neuron_index": 405,
+                "ordinal": 26,
+                "relu_input": "19"
+              },
+              {
+                "initial_lower": -0.029205376282334328,
+                "initial_upper": 0.6494835019111633,
+                "initial_width": 0.6786888781934977,
+                "neuron_index": 285,
+                "ordinal": 27,
+                "relu_input": "19"
+              },
+              {
+                "initial_lower": -0.18905451893806458,
+                "initial_upper": 0.48694297671318054,
+                "initial_width": 0.6759974956512451,
+                "neuron_index": 20,
+                "ordinal": 28,
+                "relu_input": "19"
+              },
+              {
+                "initial_lower": -0.3459708094596863,
+                "initial_upper": 0.3259240984916687,
+                "initial_width": 0.671894907951355,
+                "neuron_index": 148,
+                "ordinal": 29,
+                "relu_input": "19"
+              },
+              {
+                "initial_lower": -0.611870288848877,
+                "initial_upper": 0.05902230739593506,
+                "initial_width": 0.670892596244812,
+                "neuron_index": 669,
+                "ordinal": 30,
+                "relu_input": "19"
+              },
+              {
+                "initial_lower": -0.5778738260269165,
+                "initial_upper": 0.09299798309803009,
+                "initial_width": 0.6708718091249466,
+                "neuron_index": 419,
+                "ordinal": 31,
+                "relu_input": "19"
+              },
+              {
+                "initial_lower": -0.5691214203834534,
+                "initial_upper": 3.843193531036377,
+                "initial_width": 4.41231495141983,
+                "neuron_index": 419,
+                "ordinal": 32,
+                "relu_input": "23"
+              },
+              {
+                "initial_lower": -2.0261807441711426,
+                "initial_upper": 2.2864413261413574,
+                "initial_width": 4.3126220703125,
+                "neuron_index": 404,
+                "ordinal": 33,
+                "relu_input": "23"
+              },
+              {
+                "initial_lower": -0.9228702783584595,
+                "initial_upper": 3.3305351734161377,
+                "initial_width": 4.253405451774597,
+                "neuron_index": 402,
+                "ordinal": 34,
+                "relu_input": "23"
+              },
+              {
+                "initial_lower": -1.350352168083191,
+                "initial_upper": 2.8256516456604004,
+                "initial_width": 4.176003813743591,
+                "neuron_index": 675,
+                "ordinal": 35,
+                "relu_input": "23"
+              },
+              {
+                "initial_lower": -0.7644056081771851,
+                "initial_upper": 3.3964595794677734,
+                "initial_width": 4.1608651876449585,
+                "neuron_index": 403,
+                "ordinal": 36,
+                "relu_input": "23"
+              },
+              {
+                "initial_lower": -1.006047010421753,
+                "initial_upper": 3.0917131900787354,
+                "initial_width": 4.097760200500488,
+                "neuron_index": 410,
+                "ordinal": 37,
+                "relu_input": "23"
+              },
+              {
+                "initial_lower": -2.0511858463287354,
+                "initial_upper": 1.9336674213409424,
+                "initial_width": 3.9848532676696777,
+                "neuron_index": 411,
+                "ordinal": 38,
+                "relu_input": "23"
+              },
+              {
+                "initial_lower": -1.896186113357544,
+                "initial_upper": 2.0233654975891113,
+                "initial_width": 3.9195516109466553,
+                "neuron_index": 412,
+                "ordinal": 39,
+                "relu_input": "23"
+              },
+              {
+                "initial_lower": -2.0165767669677734,
+                "initial_upper": 1.8472528457641602,
+                "initial_width": 3.8638296127319336,
+                "neuron_index": 683,
+                "ordinal": 40,
+                "relu_input": "23"
+              },
+              {
+                "initial_lower": -1.1012650728225708,
+                "initial_upper": 2.757845640182495,
+                "initial_width": 3.859110713005066,
+                "neuron_index": 394,
+                "ordinal": 41,
+                "relu_input": "23"
+              },
+              {
+                "initial_lower": -0.04672627151012421,
+                "initial_upper": 3.8102643489837646,
+                "initial_width": 3.856990620493889,
+                "neuron_index": 668,
+                "ordinal": 42,
+                "relu_input": "23"
+              },
+              {
+                "initial_lower": -1.026048183441162,
+                "initial_upper": 2.8155269622802734,
+                "initial_width": 3.8415751457214355,
+                "neuron_index": 420,
+                "ordinal": 43,
+                "relu_input": "23"
+              },
+              {
+                "initial_lower": -2.582315683364868,
+                "initial_upper": 1.149571180343628,
+                "initial_width": 3.731886863708496,
+                "neuron_index": 427,
+                "ordinal": 44,
+                "relu_input": "23"
+              },
+              {
+                "initial_lower": -1.3849689960479736,
+                "initial_upper": 2.273670196533203,
+                "initial_width": 3.6586391925811768,
+                "neuron_index": 939,
+                "ordinal": 45,
+                "relu_input": "23"
+              },
+              {
+                "initial_lower": -0.17964684963226318,
+                "initial_upper": 3.471771001815796,
+                "initial_width": 3.651417851448059,
+                "neuron_index": 932,
+                "ordinal": 46,
+                "relu_input": "23"
+              },
+              {
+                "initial_lower": -2.539369583129883,
+                "initial_upper": 1.1069068908691406,
+                "initial_width": 3.6462764739990234,
+                "neuron_index": 405,
+                "ordinal": 47,
+                "relu_input": "23"
+              },
+              {
+                "initial_lower": -13.429866790771484,
+                "initial_upper": 7.3461151123046875,
+                "initial_width": 20.775981903076172,
+                "neuron_index": 219,
+                "ordinal": 48,
+                "relu_input": "25"
+              },
+              {
+                "initial_lower": -11.978166580200195,
+                "initial_upper": 8.066388130187988,
+                "initial_width": 20.044554710388184,
+                "neuron_index": 220,
+                "ordinal": 49,
+                "relu_input": "25"
+              },
+              {
+                "initial_lower": -11.533838272094727,
+                "initial_upper": 7.92364501953125,
+                "initial_width": 19.457483291625977,
+                "neuron_index": 227,
+                "ordinal": 50,
+                "relu_input": "25"
+              },
+              {
+                "initial_lower": -11.721445083618164,
+                "initial_upper": 7.039677619934082,
+                "initial_width": 18.761122703552246,
+                "neuron_index": 218,
+                "ordinal": 51,
+                "relu_input": "25"
+              },
+              {
+                "initial_lower": -7.951738357543945,
+                "initial_upper": 10.496991157531738,
+                "initial_width": 18.448729515075684,
+                "neuron_index": 235,
+                "ordinal": 52,
+                "relu_input": "25"
+              },
+              {
+                "initial_lower": -11.470256805419922,
+                "initial_upper": 6.890783309936523,
+                "initial_width": 18.361040115356445,
+                "neuron_index": 211,
+                "ordinal": 53,
+                "relu_input": "25"
+              },
+              {
+                "initial_lower": -11.93844985961914,
+                "initial_upper": 6.418595314025879,
+                "initial_width": 18.35704517364502,
+                "neuron_index": 540,
+                "ordinal": 54,
+                "relu_input": "25"
+              },
+              {
+                "initial_lower": -13.565276145935059,
+                "initial_upper": 4.747646331787109,
+                "initial_width": 18.312922477722168,
+                "neuron_index": 212,
+                "ordinal": 55,
+                "relu_input": "25"
+              },
+              {
+                "initial_lower": -11.697515487670898,
+                "initial_upper": 6.533037185668945,
+                "initial_width": 18.230552673339844,
+                "neuron_index": 539,
+                "ordinal": 56,
+                "relu_input": "25"
+              },
+              {
+                "initial_lower": -9.906883239746094,
+                "initial_upper": 8.296910285949707,
+                "initial_width": 18.2037935256958,
+                "neuron_index": 538,
+                "ordinal": 57,
+                "relu_input": "25"
+              },
+              {
+                "initial_lower": -9.970389366149902,
+                "initial_upper": 8.178565979003906,
+                "initial_width": 18.14895534515381,
+                "neuron_index": 228,
+                "ordinal": 58,
+                "relu_input": "25"
+              },
+              {
+                "initial_lower": -12.346318244934082,
+                "initial_upper": 5.5186591148376465,
+                "initial_width": 17.86497735977173,
+                "neuron_index": 547,
+                "ordinal": 59,
+                "relu_input": "25"
+              },
+              {
+                "initial_lower": -8.553901672363281,
+                "initial_upper": 9.152558326721191,
+                "initial_width": 17.706459999084473,
+                "neuron_index": 931,
+                "ordinal": 60,
+                "relu_input": "25"
+              },
+              {
+                "initial_lower": -11.278423309326172,
+                "initial_upper": 6.327006816864014,
+                "initial_width": 17.605430126190186,
+                "neuron_index": 548,
+                "ordinal": 61,
+                "relu_input": "25"
+              },
+              {
+                "initial_lower": -12.554957389831543,
+                "initial_upper": 4.999123573303223,
+                "initial_width": 17.554080963134766,
+                "neuron_index": 530,
+                "ordinal": 62,
+                "relu_input": "25"
+              },
+              {
+                "initial_lower": -13.00693130493164,
+                "initial_upper": 4.409727096557617,
+                "initial_width": 17.416658401489258,
+                "neuron_index": 531,
+                "ordinal": 63,
+                "relu_input": "25"
+              },
+              {
+                "initial_lower": -36.08545684814453,
+                "initial_upper": 27.300819396972656,
+                "initial_width": 63.38627624511719,
+                "neuron_index": 347,
+                "ordinal": 64,
+                "relu_input": "28"
+              },
+              {
+                "initial_lower": -33.62539291381836,
+                "initial_upper": 29.03363609313965,
+                "initial_width": 62.65902900695801,
+                "neuron_index": 348,
+                "ordinal": 65,
+                "relu_input": "28"
+              },
+              {
+                "initial_lower": -35.58320236206055,
+                "initial_upper": 26.755123138427734,
+                "initial_width": 62.33832550048828,
+                "neuron_index": 355,
+                "ordinal": 66,
+                "relu_input": "28"
+              },
+              {
+                "initial_lower": -33.82285690307617,
+                "initial_upper": 28.34903335571289,
+                "initial_width": 62.17189025878906,
+                "neuron_index": 356,
+                "ordinal": 67,
+                "relu_input": "28"
+              },
+              {
+                "initial_lower": -31.070598602294922,
+                "initial_upper": 29.687837600708008,
+                "initial_width": 60.75843620300293,
+                "neuron_index": 354,
+                "ordinal": 68,
+                "relu_input": "28"
+              },
+              {
+                "initial_lower": -31.595705032348633,
+                "initial_upper": 28.363019943237305,
+                "initial_width": 59.95872497558594,
+                "neuron_index": 346,
+                "ordinal": 69,
+                "relu_input": "28"
+              },
+              {
+                "initial_lower": -22.118762969970703,
+                "initial_upper": 35.033966064453125,
+                "initial_width": 57.15272903442383,
+                "neuron_index": 988,
+                "ordinal": 70,
+                "relu_input": "28"
+              },
+              {
+                "initial_lower": -24.5390625,
+                "initial_upper": 32.2607421875,
+                "initial_width": 56.7998046875,
+                "neuron_index": 987,
+                "ordinal": 71,
+                "relu_input": "28"
+              },
+              {
+                "initial_lower": -27.946962356567383,
+                "initial_upper": 28.487464904785156,
+                "initial_width": 56.43442726135254,
+                "neuron_index": 349,
+                "ordinal": 72,
+                "relu_input": "28"
+              },
+              {
+                "initial_lower": -39.167999267578125,
+                "initial_upper": 16.332300186157227,
+                "initial_width": 55.50029945373535,
+                "neuron_index": 603,
+                "ordinal": 73,
+                "relu_input": "28"
+              },
+              {
+                "initial_lower": -31.13776206970215,
+                "initial_upper": 24.116300582885742,
+                "initial_width": 55.25406265258789,
+                "neuron_index": 340,
+                "ordinal": 74,
+                "relu_input": "28"
+              },
+              {
+                "initial_lower": -28.598173141479492,
+                "initial_upper": 26.573362350463867,
+                "initial_width": 55.17153549194336,
+                "neuron_index": 91,
+                "ordinal": 75,
+                "relu_input": "28"
+              },
+              {
+                "initial_lower": -27.080720901489258,
+                "initial_upper": 28.035991668701172,
+                "initial_width": 55.11671257019043,
+                "neuron_index": 362,
+                "ordinal": 76,
+                "relu_input": "28"
+              },
+              {
+                "initial_lower": -30.575672149658203,
+                "initial_upper": 24.457794189453125,
+                "initial_width": 55.03346633911133,
+                "neuron_index": 667,
+                "ordinal": 77,
+                "relu_input": "28"
+              },
+              {
+                "initial_lower": -27.3223934173584,
+                "initial_upper": 27.63399314880371,
+                "initial_width": 54.95638656616211,
+                "neuron_index": 338,
+                "ordinal": 78,
+                "relu_input": "28"
+              },
+              {
+                "initial_lower": -30.795398712158203,
+                "initial_upper": 24.121524810791016,
+                "initial_width": 54.91692352294922,
+                "neuron_index": 363,
+                "ordinal": 79,
+                "relu_input": "28"
+              },
+              {
+                "initial_lower": -221.17330932617188,
+                "initial_upper": 173.5435333251953,
+                "initial_width": 394.7168426513672,
+                "neuron_index": 93,
+                "ordinal": 80,
+                "relu_input": "31"
+              },
+              {
+                "initial_lower": -217.0316619873047,
+                "initial_upper": 172.34364318847656,
+                "initial_width": 389.37530517578125,
+                "neuron_index": 13,
+                "ordinal": 81,
+                "relu_input": "31"
+              },
+              {
+                "initial_lower": -235.57244873046875,
+                "initial_upper": 153.69847106933594,
+                "initial_width": 389.2709197998047,
+                "neuron_index": 66,
+                "ordinal": 82,
+                "relu_input": "31"
+              },
+              {
+                "initial_lower": -219.04261779785156,
+                "initial_upper": 169.72540283203125,
+                "initial_width": 388.7680206298828,
+                "neuron_index": 9,
+                "ordinal": 83,
+                "relu_input": "31"
+              },
+              {
+                "initial_lower": -195.70553588867188,
+                "initial_upper": 189.46287536621094,
+                "initial_width": 385.1684112548828,
+                "neuron_index": 68,
+                "ordinal": 84,
+                "relu_input": "31"
+              },
+              {
+                "initial_lower": -216.91201782226562,
+                "initial_upper": 158.8137969970703,
+                "initial_width": 375.72581481933594,
+                "neuron_index": 54,
+                "ordinal": 85,
+                "relu_input": "31"
+              },
+              {
+                "initial_lower": -217.39488220214844,
+                "initial_upper": 157.10325622558594,
+                "initial_width": 374.4981384277344,
+                "neuron_index": 15,
+                "ordinal": 86,
+                "relu_input": "31"
+              },
+              {
+                "initial_lower": -195.0594482421875,
+                "initial_upper": 168.17489624023438,
+                "initial_width": 363.2343444824219,
+                "neuron_index": 87,
+                "ordinal": 87,
+                "relu_input": "31"
+              },
+              {
+                "initial_lower": -182.6114959716797,
+                "initial_upper": 179.64418029785156,
+                "initial_width": 362.25567626953125,
+                "neuron_index": 63,
+                "ordinal": 88,
+                "relu_input": "31"
+              },
+              {
+                "initial_lower": -213.0551300048828,
+                "initial_upper": 144.22654724121094,
+                "initial_width": 357.28167724609375,
+                "neuron_index": 72,
+                "ordinal": 89,
+                "relu_input": "31"
+              },
+              {
+                "initial_lower": -203.06307983398438,
+                "initial_upper": 152.9995574951172,
+                "initial_width": 356.06263732910156,
+                "neuron_index": 52,
+                "ordinal": 90,
+                "relu_input": "31"
+              },
+              {
+                "initial_lower": -191.8065643310547,
+                "initial_upper": 160.02040100097656,
+                "initial_width": 351.82696533203125,
+                "neuron_index": 0,
+                "ordinal": 91,
+                "relu_input": "31"
+              },
+              {
+                "initial_lower": -179.0660400390625,
+                "initial_upper": 171.0513916015625,
+                "initial_width": 350.117431640625,
+                "neuron_index": 61,
+                "ordinal": 92,
+                "relu_input": "31"
+              },
+              {
+                "initial_lower": -195.2156982421875,
+                "initial_upper": 152.97682189941406,
+                "initial_width": 348.19252014160156,
+                "neuron_index": 91,
+                "ordinal": 93,
+                "relu_input": "31"
+              },
+              {
+                "initial_lower": -198.10110473632812,
+                "initial_upper": 145.03204345703125,
+                "initial_width": 343.1331481933594,
+                "neuron_index": 56,
+                "ordinal": 94,
+                "relu_input": "31"
+              },
+              {
+                "initial_lower": -192.35662841796875,
+                "initial_upper": 148.80934143066406,
+                "initial_width": 341.1659698486328,
+                "neuron_index": 29,
+                "ordinal": 95,
+                "relu_input": "31"
+              }
+            ]
+          },
+          "schedule": {
+            "actions": [
+              {
+                "action_id": "launch.0000.materialize_forward",
+                "input_value_ids": [
+                  "refine.module",
+                  "refine.input",
+                  "refine.split_state"
+                ],
+                "output_value_ids": [
+                  "refine.forward_env.p0",
+                  "refine.bounds.p0"
+                ],
+                "sequence": 0,
+                "task_id": "intermediate_refinement.0000.materialize_forward"
+              },
+              {
+                "action_id": "launch.0001.enumerate_ambiguous",
+                "input_value_ids": [
+                  "refine.bounds.p0"
+                ],
+                "output_value_ids": [
+                  "refine.candidates"
+                ],
+                "sequence": 1,
+                "task_id": "intermediate_refinement.0001.enumerate_ambiguous"
+              },
+              {
+                "action_id": "launch.0002.select_targets",
+                "input_value_ids": [
+                  "refine.candidates",
+                  "refine.policy"
+                ],
+                "output_value_ids": [
+                  "refine.selected_targets"
+                ],
+                "sequence": 2,
+                "task_id": "intermediate_refinement.0002.select_targets"
+              },
+              {
+                "action_id": "launch.0003.backward_selected",
+                "input_value_ids": [
+                  "refine.forward_env.p0",
+                  "refine.bounds.p0",
+                  "refine.selected_targets"
+                ],
+                "output_value_ids": [
+                  "refine.crown_candidates.p1"
+                ],
+                "sequence": 3,
+                "task_id": "intermediate_refinement.0003.backward_selected"
+              },
+              {
+                "action_id": "launch.0004.intersect_selected",
+                "input_value_ids": [
+                  "refine.bounds.p0",
+                  "refine.crown_candidates.p1"
+                ],
+                "output_value_ids": [
+                  "refine.intersected_bounds.p1"
+                ],
+                "sequence": 4,
+                "task_id": "intermediate_refinement.0004.intersect_selected"
+              },
+              {
+                "action_id": "launch.0005.propagate_forward",
+                "input_value_ids": [
+                  "refine.module",
+                  "refine.input",
+                  "refine.split_state",
+                  "refine.intersected_bounds.p1"
+                ],
+                "output_value_ids": [
+                  "refine.forward_env.p1",
+                  "refine.bounds.p1"
+                ],
+                "sequence": 5,
+                "task_id": "intermediate_refinement.0005.propagate_forward"
+              },
+              {
+                "action_id": "launch.0006.emit_refined",
+                "input_value_ids": [
+                  "refine.bounds.p1"
+                ],
+                "output_value_ids": [
+                  "refine.refined_bounds"
+                ],
+                "sequence": 6,
+                "task_id": "intermediate_refinement.0006.emit_refined"
+              }
+            ],
+            "refined_bounds_value_id": "refine.refined_bounds",
+            "refinement_plan_hash": "928f30383ab4bdb3069562ec24b1495a8b9667dbde6ae954715870dd1cbd8af8",
+            "refinement_task_module_hash": "91b444aeb88f681c7cba77f0d145c55851f1ca26046395d1e30ef49d1518ad70",
+            "schedule_id": "nrir19:cifar10_resnet:000.schedule",
+            "schema_version": "boundflow.intermediate_refinement_schedule_ir/v1"
+          },
+          "task": {
+            "module_id": "nrir19:cifar10_resnet:000.tasks",
+            "output_task_id": "intermediate_refinement.0006.emit_refined",
+            "refinement_plan_hash": "928f30383ab4bdb3069562ec24b1495a8b9667dbde6ae954715870dd1cbd8af8",
+            "schema_version": "boundflow.intermediate_refinement_task_ir/v1",
+            "tasks": [
+              {
+                "dependency_task_ids": [],
+                "input_value_ids": [
+                  "refine.module",
+                  "refine.input",
+                  "refine.split_state"
+                ],
+                "kind": "materialize_forward",
+                "output_value_ids": [
+                  "refine.forward_env.p0",
+                  "refine.bounds.p0"
+                ],
+                "pass_index": null,
+                "semantics_owner": "boundflow_native_intermediate_refinement",
+                "task_id": "intermediate_refinement.0000.materialize_forward"
+              },
+              {
+                "dependency_task_ids": [
+                  "intermediate_refinement.0000.materialize_forward"
+                ],
+                "input_value_ids": [
+                  "refine.bounds.p0"
+                ],
+                "kind": "enumerate_ambiguous",
+                "output_value_ids": [
+                  "refine.candidates"
+                ],
+                "pass_index": null,
+                "semantics_owner": "boundflow_native_intermediate_refinement",
+                "task_id": "intermediate_refinement.0001.enumerate_ambiguous"
+              },
+              {
+                "dependency_task_ids": [
+                  "intermediate_refinement.0001.enumerate_ambiguous"
+                ],
+                "input_value_ids": [
+                  "refine.candidates",
+                  "refine.policy"
+                ],
+                "kind": "select_targets",
+                "output_value_ids": [
+                  "refine.selected_targets"
+                ],
+                "pass_index": null,
+                "semantics_owner": "boundflow_native_intermediate_refinement",
+                "task_id": "intermediate_refinement.0002.select_targets"
+              },
+              {
+                "dependency_task_ids": [
+                  "intermediate_refinement.0002.select_targets"
+                ],
+                "input_value_ids": [
+                  "refine.forward_env.p0",
+                  "refine.bounds.p0",
+                  "refine.selected_targets"
+                ],
+                "kind": "backward_selected",
+                "output_value_ids": [
+                  "refine.crown_candidates.p1"
+                ],
+                "pass_index": 0,
+                "semantics_owner": "boundflow_native_intermediate_refinement",
+                "task_id": "intermediate_refinement.0003.backward_selected"
+              },
+              {
+                "dependency_task_ids": [
+                  "intermediate_refinement.0003.backward_selected"
+                ],
+                "input_value_ids": [
+                  "refine.bounds.p0",
+                  "refine.crown_candidates.p1"
+                ],
+                "kind": "intersect_selected",
+                "output_value_ids": [
+                  "refine.intersected_bounds.p1"
+                ],
+                "pass_index": 0,
+                "semantics_owner": "boundflow_native_intermediate_refinement",
+                "task_id": "intermediate_refinement.0004.intersect_selected"
+              },
+              {
+                "dependency_task_ids": [
+                  "intermediate_refinement.0004.intersect_selected"
+                ],
+                "input_value_ids": [
+                  "refine.module",
+                  "refine.input",
+                  "refine.split_state",
+                  "refine.intersected_bounds.p1"
+                ],
+                "kind": "propagate_forward",
+                "output_value_ids": [
+                  "refine.forward_env.p1",
+                  "refine.bounds.p1"
+                ],
+                "pass_index": 0,
+                "semantics_owner": "boundflow_native_intermediate_refinement",
+                "task_id": "intermediate_refinement.0005.propagate_forward"
+              },
+              {
+                "dependency_task_ids": [
+                  "intermediate_refinement.0005.propagate_forward"
+                ],
+                "input_value_ids": [
+                  "refine.bounds.p1"
+                ],
+                "kind": "emit_refined",
+                "output_value_ids": [
+                  "refine.refined_bounds"
+                ],
+                "pass_index": null,
+                "semantics_owner": "boundflow_native_intermediate_refinement",
+                "task_id": "intermediate_refinement.0006.emit_refined"
+              }
+            ]
+          }
+        },
+        "refinement_ns": 114312406,
+        "schema_version": "boundflow.native-intermediate-refinement-worker/v1",
+        "setup_ns": 86934237,
+        "worker_elapsed_ns": 62072767010,
+        "workload_id": "cifar10_resnet:000"
+      },
+      "workload_id": "cifar10_resnet:000"
+    },
+    {
+      "e2e_elapsed_ns": 29304497719,
+      "log_path": "logs/oval21-000-baseline.log",
+      "log_sha256": "994dc72d31dd5ce7ba1a91bbddfb02de3c8972d8f2e10af957264cba2db09a78",
+      "mode": "baseline",
+      "process_returncode": 0,
+      "result": {
+        "execution_state": "completed",
+        "intermediate_bound_source": "local_forward",
+        "mode": "baseline",
+        "performance_claimed": false,
+        "query": {
+          "clauses": [
+            {
+              "clause_index": 0,
+              "clause_trace_hash": "414bab68a43d4b8107208b7a7e7f88f92f1a6727718e512c08cb04d7b638592c",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "5b7a8482b682940b4a770ff8bff819031f051d2d4b0dabe3731efa65e24a3f32",
+              "root_lower": 1.1862316131591797,
+              "root_upper": 2.4769363403320312,
+              "status": "verified"
+            },
+            {
+              "clause_index": 1,
+              "clause_trace_hash": "f38cd3b0393611c7474e8e7b3cba888c5beca6949ae9307f5c92fe99bea751bd",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "273c7853a820693caada1bff0edb9a8de41542f6e7b7e9c0104227f4e924e557",
+              "root_lower": 3.549759864807129,
+              "root_upper": 4.861239910125732,
+              "status": "verified"
+            },
+            {
+              "clause_index": 2,
+              "clause_trace_hash": "5b79d8353c7cb462cf141774e033ec25955c98f5c1ab36b3181bb55f2b6f42c6",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "3c8186a0be7ab12438ea81dbfe02737ab7e2c7d62752eaeb9779cfa408028aea",
+              "root_lower": 3.267439842224121,
+              "root_upper": 4.349109649658203,
+              "status": "verified"
+            },
+            {
+              "clause_index": 3,
+              "clause_trace_hash": "78ecbd875dc78ed0c00b5c3859ef09055d9232e3cb20e4f57224ba65135bbe38",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "44b4dab45e8607e706d71be230046e0e0727eab434fe3bc62ac9140a7fca4743",
+              "root_lower": 3.2530033588409424,
+              "root_upper": 4.614368915557861,
+              "status": "verified"
+            },
+            {
+              "clause_index": 4,
+              "clause_trace_hash": "799647c2c053b499418b6f4f5bd696cab5d900b04735d5a84c8c1bcc573107b9",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "7e0b2dbe3e48ddc59999e324a810ac710139b82bdc0ab95901337d6187f37baa",
+              "root_lower": 4.355360507965088,
+              "root_upper": 5.5758957862854,
+              "status": "verified"
+            },
+            {
+              "clause_index": 5,
+              "clause_trace_hash": "a6220264c21f614070e159f6a4799d01c22245c776ef6c5f0f76b013536ca341",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "f66367c1a41e59cb92dba0e3b418d905cff5aaa80d2bd597a72c5568b4e86617",
+              "root_lower": 4.028467178344727,
+              "root_upper": 5.315459728240967,
+              "status": "verified"
+            },
+            {
+              "clause_index": 6,
+              "clause_trace_hash": "2afe6f00488c3ab3a2f9aa4c44ee44754e491df0e1911e8261e0a387378cfd01",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "40f138a95e7bfd00f7af4226b588ec75899639a6fb74e01f0b7fa61272d7b09c",
+              "root_lower": 4.110269546508789,
+              "root_upper": 5.610971450805664,
+              "status": "verified"
+            },
+            {
+              "clause_index": 7,
+              "clause_trace_hash": "0689ca4a7183abdd68f2fba3e0b1536361c0367144ee5c7e27fae0b8fbef4c5b",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "ce7b266d0a641b0757aed30d20e32afecb6f4e4cc7f5891c8f6d0c64169fed09",
+              "root_lower": 2.9874186515808105,
+              "root_upper": 4.689414978027344,
+              "status": "verified"
+            },
+            {
+              "clause_index": 8,
+              "clause_trace_hash": "08ce605ef10cbbd1d8db38aefe7e2c00a9c0a7ca5d81742c4fc6198e12fa01cd",
+              "evaluated_nodes": 7,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "8aec9ffacc96c69e348b802f3bb0c2e7c46ffca83a2fa1f768225410c6f69630",
+              "root_lower": -0.17343902587890625,
+              "root_upper": 0.515166699886322,
+              "status": "unknown"
+            }
+          ],
+          "completed_clause_count": 9,
+          "evaluated_node_count": 15,
+          "pending_clause_indices": [],
+          "query_trace_hash": "b40b09978c9b5cf46fe983552f5f3a2bd235c88e39b40e1f302c497546bf3a33",
+          "solver_status": "unknown",
+          "unresolved_clause_indices": [
+            8
+          ]
+        },
+        "query_ir_hash": "1f8ce94582425199263edaed5e961f560435149c12aa3b1febd953bc70820c54",
+        "query_ns": 27869444244,
+        "refinement": null,
+        "refinement_ns": 0,
+        "schema_version": "boundflow.native-intermediate-refinement-worker/v1",
+        "setup_ns": 85990935,
+        "worker_elapsed_ns": 27957733396,
+        "workload_id": "oval21:000"
+      },
+      "workload_id": "oval21:000"
+    },
+    {
+      "e2e_elapsed_ns": 27550946579,
+      "log_path": "logs/oval21-000-native_refined.log",
+      "log_sha256": "c08953c4f1114ed18056b14f38bf4b589c3a9f7eeb75912d62aa13f5dc73fb1c",
+      "mode": "native_refined",
+      "process_returncode": 0,
+      "result": {
+        "execution_state": "completed",
+        "intermediate_bound_source": "native_refined",
+        "mode": "native_refined",
+        "performance_claimed": false,
+        "query": {
+          "clauses": [
+            {
+              "clause_index": 0,
+              "clause_trace_hash": "301aa152be51d7025ee33df2a8b3269c1768b4e14bfab36960d1ae7dae1f486c",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "00881c67f1534615cff67e710a28be8c705fec3f3cf0c900992264902ca3f208",
+              "root_lower": 1.5454237461090088,
+              "root_upper": 2.041268825531006,
+              "status": "verified"
+            },
+            {
+              "clause_index": 1,
+              "clause_trace_hash": "6ace24663c4c37eeb4add4ccf6204fb6abad22b1abbcf23a106358cc602f1926",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "ea4d7c90172949c7957c09c55b709223a8800a635c0d7ef4b4e749020ab59d24",
+              "root_lower": 3.8459742069244385,
+              "root_upper": 4.405122756958008,
+              "status": "verified"
+            },
+            {
+              "clause_index": 2,
+              "clause_trace_hash": "be617dc88f73fbd99d522ae4d1d5ef244324dce7a84f26a92830b00bab284174",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "a2d9c0f2706e3774d0cbc6f1745d525940e63615d31614c594b92bd924e98fea",
+              "root_lower": 3.380074977874756,
+              "root_upper": 3.932725429534912,
+              "status": "verified"
+            },
+            {
+              "clause_index": 3,
+              "clause_trace_hash": "6f49e328fe3f2fd79881454e554a98827f2ced883c089d6baab97026455e88da",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "25e6b10bbd06c11abcb7d9fb8f09ea748b8491dcc328e4b8e8f1e6132a439401",
+              "root_lower": 3.5301711559295654,
+              "root_upper": 4.103658199310303,
+              "status": "verified"
+            },
+            {
+              "clause_index": 4,
+              "clause_trace_hash": "48ef3da83e599cbcf10d962ba53d80a4dc8f600cb1ced663b17a77c9ee008d5d",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "b2ad05354e1ce632c4793a33e07c3a471f281588efc02bd356e742dc145aaa56",
+              "root_lower": 4.544527053833008,
+              "root_upper": 5.131779670715332,
+              "status": "verified"
+            },
+            {
+              "clause_index": 5,
+              "clause_trace_hash": "2525f75fe18d857699db7488a5ffd1bcbe79eff354e474390f8345b533e19bfb",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "4c6735b9c6615c475e038e62e1d8fe8b8d1d04a271ff9dcb8f14b540c1557d60",
+              "root_lower": 4.285346031188965,
+              "root_upper": 4.858942031860352,
+              "status": "verified"
+            },
+            {
+              "clause_index": 6,
+              "clause_trace_hash": "da961c1e95d71dfb47304416bbd82729355a72a5f7407ce7287fda5ba361c5ae",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "bc29e91fd5871a965a2dd62ac8669c79ff78c5df297b7ea63a6876bdf3fb1880",
+              "root_lower": 4.498884201049805,
+              "root_upper": 5.145114898681641,
+              "status": "verified"
+            },
+            {
+              "clause_index": 7,
+              "clause_trace_hash": "6ccfdd8e52978d81dfbae7472d1028a984a44ac2d828cba257db70f6f7021551",
+              "evaluated_nodes": 1,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "69e508c1be0e5bd40a56392d5d7394b08d515cfcf5a7173d332da2065cd6cf63",
+              "root_lower": 3.754641056060791,
+              "root_upper": 4.2460036277771,
+              "status": "verified"
+            },
+            {
+              "clause_index": 8,
+              "clause_trace_hash": "74c20eeb93164fd88c6f4b2b483922b2e0a9fc6d80f0521900955f0673da3262",
+              "evaluated_nodes": 3,
+              "final_frontier_nodes": 0,
+              "queue_trace_hash": "6a76efe658fdcd490216f2064c91c1bdb269ae648e48b63b612829faaa6cca62",
+              "root_lower": -0.002876490354537964,
+              "root_upper": 0.2384338676929474,
+              "status": "verified"
+            }
+          ],
+          "completed_clause_count": 9,
+          "evaluated_node_count": 11,
+          "pending_clause_indices": [],
+          "query_trace_hash": "01da54b8420377a28b9fda554ea9e35040345c26a274b056c3e370d02a73df41",
+          "solver_status": "verified",
+          "unresolved_clause_indices": []
+        },
+        "query_ir_hash": "1f8ce94582425199263edaed5e961f560435149c12aa3b1febd953bc70820c54",
+        "query_ns": 26017528931,
+        "refinement": {
+          "execution_trace": {
+            "action_traces": [
+              {
+                "action_id": "launch.0000.materialize_forward",
+                "input_hashes": {
+                  "refine.input": "889b28a591220dc38a23c18295a9526f63bc62e5641a37710fe919e5e67fa8ad",
+                  "refine.module": "32902542e5cdd8f0f151ac816903fe148a0411fdcd2e166d089b070a7dde96ae",
+                  "refine.split_state": "3bb5ae356dd3070eaac4983befa9b49294259149d1123e2d0ca13f08ae841182"
+                },
+                "kind": "materialize_forward",
+                "output_hashes": {
+                  "refine.bounds.p0": "7ae7bf93acd326745b430360a694d40cc35ed0b8b87e1766bd6a2c7d71ea9b81",
+                  "refine.forward_env.p0": "0ad3fce2980758f18c7241f3865ca376bcb447b4369ffc05913b6fa1dd97af2f"
+                },
+                "pass_index": null,
+                "sequence": 0,
+                "task_id": "intermediate_refinement.0000.materialize_forward"
+              },
+              {
+                "action_id": "launch.0001.enumerate_ambiguous",
+                "input_hashes": {
+                  "refine.bounds.p0": "7ae7bf93acd326745b430360a694d40cc35ed0b8b87e1766bd6a2c7d71ea9b81"
+                },
+                "kind": "enumerate_ambiguous",
+                "output_hashes": {
+                  "refine.candidates": "54ddcb443e1189e48834dca8ab2ef8f869b71fbf458b566cce1989498d87093d"
+                },
+                "pass_index": null,
+                "sequence": 1,
+                "task_id": "intermediate_refinement.0001.enumerate_ambiguous"
+              },
+              {
+                "action_id": "launch.0002.select_targets",
+                "input_hashes": {
+                  "refine.candidates": "54ddcb443e1189e48834dca8ab2ef8f869b71fbf458b566cce1989498d87093d",
+                  "refine.policy": "1bb1c7bb58e31bbc240d8a208402cd12b235404877ef63666da2e7fc65f1cee1"
+                },
+                "kind": "select_targets",
+                "output_hashes": {
+                  "refine.selected_targets": "54ddcb443e1189e48834dca8ab2ef8f869b71fbf458b566cce1989498d87093d"
+                },
+                "pass_index": null,
+                "sequence": 2,
+                "task_id": "intermediate_refinement.0002.select_targets"
+              },
+              {
+                "action_id": "launch.0003.backward_selected",
+                "input_hashes": {
+                  "refine.bounds.p0": "7ae7bf93acd326745b430360a694d40cc35ed0b8b87e1766bd6a2c7d71ea9b81",
+                  "refine.forward_env.p0": "0ad3fce2980758f18c7241f3865ca376bcb447b4369ffc05913b6fa1dd97af2f",
+                  "refine.selected_targets": "54ddcb443e1189e48834dca8ab2ef8f869b71fbf458b566cce1989498d87093d"
+                },
+                "kind": "backward_selected",
+                "output_hashes": {
+                  "refine.crown_candidates.p1": "5759f968e695c23847c98263596aad0b8c3136b482b4701f3fc69696abd447e9"
+                },
+                "pass_index": 0,
+                "sequence": 3,
+                "task_id": "intermediate_refinement.0003.backward_selected"
+              },
+              {
+                "action_id": "launch.0004.intersect_selected",
+                "input_hashes": {
+                  "refine.bounds.p0": "7ae7bf93acd326745b430360a694d40cc35ed0b8b87e1766bd6a2c7d71ea9b81",
+                  "refine.crown_candidates.p1": "5759f968e695c23847c98263596aad0b8c3136b482b4701f3fc69696abd447e9"
+                },
+                "kind": "intersect_selected",
+                "output_hashes": {
+                  "refine.intersected_bounds.p1": "ae00ea436a9c645cfb3d700bc447c551ab4ef612c239c93444623543fb32faba"
+                },
+                "pass_index": 0,
+                "sequence": 4,
+                "task_id": "intermediate_refinement.0004.intersect_selected"
+              },
+              {
+                "action_id": "launch.0005.propagate_forward",
+                "input_hashes": {
+                  "refine.input": "889b28a591220dc38a23c18295a9526f63bc62e5641a37710fe919e5e67fa8ad",
+                  "refine.intersected_bounds.p1": "ae00ea436a9c645cfb3d700bc447c551ab4ef612c239c93444623543fb32faba",
+                  "refine.module": "32902542e5cdd8f0f151ac816903fe148a0411fdcd2e166d089b070a7dde96ae",
+                  "refine.split_state": "3bb5ae356dd3070eaac4983befa9b49294259149d1123e2d0ca13f08ae841182"
+                },
+                "kind": "propagate_forward",
+                "output_hashes": {
+                  "refine.bounds.p1": "1046977aec06cda2d37ed8dd30ded9d62977f317c4cf8469f804ef60830f8521",
+                  "refine.forward_env.p1": "de409adb92251f53fd2054587a8fba67b0bd888f31dca5b5689815a9f612e153"
+                },
+                "pass_index": 0,
+                "sequence": 5,
+                "task_id": "intermediate_refinement.0005.propagate_forward"
+              },
+              {
+                "action_id": "launch.0006.emit_refined",
+                "input_hashes": {
+                  "refine.bounds.p1": "1046977aec06cda2d37ed8dd30ded9d62977f317c4cf8469f804ef60830f8521"
+                },
+                "kind": "emit_refined",
+                "output_hashes": {
+                  "refine.refined_bounds": "1046977aec06cda2d37ed8dd30ded9d62977f317c4cf8469f804ef60830f8521"
+                },
+                "pass_index": null,
+                "sequence": 6,
+                "task_id": "intermediate_refinement.0006.emit_refined"
+              }
+            ],
+            "elapsed_ns": 18995056,
+            "final_intermediate_bounds_hash": "1046977aec06cda2d37ed8dd30ded9d62977f317c4cf8469f804ef60830f8521",
+            "pass_traces": [
+              {
+                "input_bounds_hash": "7ae7bf93acd326745b430360a694d40cc35ed0b8b87e1766bd6a2c7d71ea9b81",
+                "lower_improvement_max": 0.7207703590393066,
+                "output_bounds_hash": "1046977aec06cda2d37ed8dd30ded9d62977f317c4cf8469f804ef60830f8521",
+                "pass_index": 0,
+                "selected_crown_hash": "5759f968e695c23847c98263596aad0b8c3136b482b4701f3fc69696abd447e9",
+                "selected_target_count": 107,
+                "tightened_neuron_count": 217,
+                "upper_improvement_max": 0.7356325387954712,
+                "width_reduction_sum": 35.05844644457102
+              }
+            ],
+            "performance_claimed": false,
+            "plan_hash": "8a154dd0a7cb7beffacae2374c1b9f541b01245982b00377c3b86ad3915a64da",
+            "schedule_hash": "d7fa53c3cd466fcc215fe699ae62c4356e8a88aafa742798c1adf39f9e7d3200",
+            "schema_version": "boundflow.native-intermediate-refinement-execution/v1",
+            "task_module_hash": "3749388a686ae718f7b9dad147040fecf89fef51dcce345aedb221061dfb7639"
+          },
+          "execution_trace_hash": "b1684598a4c9c960bc1d2f6cc00d5cbe25e1afa6639bcaba62e4de9caf5c68ec",
+          "hashes": {
+            "refinement_plan_hash": "8a154dd0a7cb7beffacae2374c1b9f541b01245982b00377c3b86ad3915a64da",
+            "refinement_schedule_hash": "d7fa53c3cd466fcc215fe699ae62c4356e8a88aafa742798c1adf39f9e7d3200",
+            "refinement_task_module_hash": "3749388a686ae718f7b9dad147040fecf89fef51dcce345aedb221061dfb7639"
+          },
+          "plan": {
+            "initial_intermediate_bounds_hash": "7ae7bf93acd326745b430360a694d40cc35ed0b8b87e1766bd6a2c7d71ea9b81",
+            "input_bounds_hash": "889b28a591220dc38a23c18295a9526f63bc62e5641a37710fe919e5e67fa8ad",
+            "performance_claimed": false,
+            "plan_id": "nrir19:oval21:000",
+            "policy": {
+              "backward_chunk_size": 32,
+              "candidate_policy_id": "top_ambiguous_width_per_relu_v1",
+              "max_neurons_per_relu": 128,
+              "minimum_width": 0.0,
+              "passes": 1,
+              "refinement_method": "selected_plain_crown_v1"
+            },
+            "primal_graph_hash": "32902542e5cdd8f0f151ac816903fe148a0411fdcd2e166d089b070a7dde96ae",
+            "schema_version": "boundflow.intermediate_refinement_plan_ir/v1",
+            "semantics_owner": "boundflow_native_intermediate_refinement",
+            "split_state_hash": "3bb5ae356dd3070eaac4983befa9b49294259149d1123e2d0ca13f08ae841182",
+            "targets": [
+              {
+                "initial_lower": -0.06159964203834534,
+                "initial_upper": 0.04856964945793152,
+                "initial_width": 0.11016929149627686,
+                "neuron_index": 1225,
+                "ordinal": 0,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.10347405076026917,
+                "initial_upper": 0.00669512152671814,
+                "initial_width": 0.1101691722869873,
+                "neuron_index": 1251,
+                "ordinal": 1,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.10262361168861389,
+                "initial_upper": 0.007545441389083862,
+                "initial_width": 0.11016905307769775,
+                "neuron_index": 1159,
+                "ordinal": 2,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.02529546618461609,
+                "initial_upper": 0.08487352728843689,
+                "initial_width": 0.11016899347305298,
+                "neuron_index": 1220,
+                "ordinal": 3,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.033176809549331665,
+                "initial_upper": 0.07699212431907654,
+                "initial_width": 0.1101689338684082,
+                "neuron_index": 1250,
+                "ordinal": 4,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.002124100923538208,
+                "initial_upper": 0.1080445945262909,
+                "initial_width": 0.1101686954498291,
+                "neuron_index": 1252,
+                "ordinal": 5,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.052749067544937134,
+                "initial_upper": 0.057419151067733765,
+                "initial_width": 0.1101682186126709,
+                "neuron_index": 1249,
+                "ordinal": 6,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.046585142612457275,
+                "initial_upper": 0.05090200901031494,
+                "initial_width": 0.09748715162277222,
+                "neuron_index": 162,
+                "ordinal": 7,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.02596941590309143,
+                "initial_upper": 0.07151752710342407,
+                "initial_width": 0.0974869430065155,
+                "neuron_index": 43,
+                "ordinal": 8,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.09334209561347961,
+                "initial_upper": 0.004144787788391113,
+                "initial_width": 0.09748688340187073,
+                "neuron_index": 152,
+                "ordinal": 9,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.07249754667282104,
+                "initial_upper": 0.024989306926727295,
+                "initial_width": 0.09748685359954834,
+                "neuron_index": 42,
+                "ordinal": 10,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.013607144355773926,
+                "initial_upper": 0.08387970924377441,
+                "initial_width": 0.09748685359954834,
+                "neuron_index": 91,
+                "ordinal": 11,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.06716716289520264,
+                "initial_upper": 0.030319690704345703,
+                "initial_width": 0.09748685359954834,
+                "neuron_index": 238,
+                "ordinal": 12,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.06935840845108032,
+                "initial_upper": 0.028128325939178467,
+                "initial_width": 0.09748673439025879,
+                "neuron_index": 92,
+                "ordinal": 13,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.047445058822631836,
+                "initial_upper": 0.0500415563583374,
+                "initial_width": 0.09748661518096924,
+                "neuron_index": 171,
+                "ordinal": 14,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.023047327995300293,
+                "initial_upper": 0.07443928718566895,
+                "initial_width": 0.09748661518096924,
+                "neuron_index": 173,
+                "ordinal": 15,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.060468316078186035,
+                "initial_upper": 0.03701817989349365,
+                "initial_width": 0.09748649597167969,
+                "neuron_index": 166,
+                "ordinal": 16,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.04663980007171631,
+                "initial_upper": 0.05072185397148132,
+                "initial_width": 0.09736165404319763,
+                "neuron_index": 144,
+                "ordinal": 17,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.01312345266342163,
+                "initial_upper": 0.07585769891738892,
+                "initial_width": 0.08898115158081055,
+                "neuron_index": 874,
+                "ordinal": 18,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.07281321287155151,
+                "initial_upper": 0.014056980609893799,
+                "initial_width": 0.08687019348144531,
+                "neuron_index": 111,
+                "ordinal": 19,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.03588438034057617,
+                "initial_upper": 0.04933500289916992,
+                "initial_width": 0.0852193832397461,
+                "neuron_index": 445,
+                "ordinal": 20,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.059651076793670654,
+                "initial_upper": 0.025568008422851562,
+                "initial_width": 0.08521908521652222,
+                "neuron_index": 378,
+                "ordinal": 21,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.03847765922546387,
+                "initial_upper": 0.0467413067817688,
+                "initial_width": 0.08521896600723267,
+                "neuron_index": 488,
+                "ordinal": 22,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.026618242263793945,
+                "initial_upper": 0.058600544929504395,
+                "initial_width": 0.08521878719329834,
+                "neuron_index": 420,
+                "ordinal": 23,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.05825066566467285,
+                "initial_upper": 0.02696812152862549,
+                "initial_width": 0.08521878719329834,
+                "neuron_index": 444,
+                "ordinal": 24,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.025929570198059082,
+                "initial_upper": 0.05602771043777466,
+                "initial_width": 0.08195728063583374,
+                "neuron_index": 1765,
+                "ordinal": 25,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.06202191114425659,
+                "initial_upper": 0.019908517599105835,
+                "initial_width": 0.08193042874336243,
+                "neuron_index": 1696,
+                "ordinal": 26,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.03371378779411316,
+                "initial_upper": 0.04422321915626526,
+                "initial_width": 0.07793700695037842,
+                "neuron_index": 1418,
+                "ordinal": 27,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.04948978126049042,
+                "initial_upper": 0.025891318917274475,
+                "initial_width": 0.07538110017776489,
+                "neuron_index": 537,
+                "ordinal": 28,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.07095406949520111,
+                "initial_upper": 0.004426971077919006,
+                "initial_width": 0.07538104057312012,
+                "neuron_index": 710,
+                "ordinal": 29,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.033793553709983826,
+                "initial_upper": 0.041587427258491516,
+                "initial_width": 0.07538098096847534,
+                "neuron_index": 723,
+                "ordinal": 30,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.011611387133598328,
+                "initial_upper": 0.06376953423023224,
+                "initial_width": 0.07538092136383057,
+                "neuron_index": 531,
+                "ordinal": 31,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.02565060555934906,
+                "initial_upper": 0.049730315804481506,
+                "initial_width": 0.07538092136383057,
+                "neuron_index": 564,
+                "ordinal": 32,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.03959278762340546,
+                "initial_upper": 0.03578810393810272,
+                "initial_width": 0.07538089156150818,
+                "neuron_index": 726,
+                "ordinal": 33,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.018212243914604187,
+                "initial_upper": 0.05716855823993683,
+                "initial_width": 0.07538080215454102,
+                "neuron_index": 610,
+                "ordinal": 34,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.016572460532188416,
+                "initial_upper": 0.0588083416223526,
+                "initial_width": 0.07538080215454102,
+                "neuron_index": 693,
+                "ordinal": 35,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.030650421977043152,
+                "initial_upper": 0.04435785114765167,
+                "initial_width": 0.07500827312469482,
+                "neuron_index": 640,
+                "ordinal": 36,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.031375765800476074,
+                "initial_upper": 0.011974811553955078,
+                "initial_width": 0.04335057735443115,
+                "neuron_index": 1982,
+                "ordinal": 37,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.03287220001220703,
+                "initial_upper": 0.01047813892364502,
+                "initial_width": 0.04335033893585205,
+                "neuron_index": 1934,
+                "ordinal": 38,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.025090813636779785,
+                "initial_upper": 0.018259525299072266,
+                "initial_width": 0.04335033893585205,
+                "neuron_index": 1950,
+                "ordinal": 39,
+                "relu_input": "9"
+              },
+              {
+                "initial_lower": -0.3468104600906372,
+                "initial_upper": 0.15501105785369873,
+                "initial_width": 0.5018215179443359,
+                "neuron_index": 601,
+                "ordinal": 40,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.2522798180580139,
+                "initial_upper": 0.13436836004257202,
+                "initial_width": 0.38664817810058594,
+                "neuron_index": 859,
+                "ordinal": 41,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.09411036223173141,
+                "initial_upper": 0.27894914150238037,
+                "initial_width": 0.3730595037341118,
+                "neuron_index": 604,
+                "ordinal": 42,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.2024555653333664,
+                "initial_upper": 0.16330738365650177,
+                "initial_width": 0.36576294898986816,
+                "neuron_index": 790,
+                "ordinal": 43,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.3332107663154602,
+                "initial_upper": 0.027924947440624237,
+                "initial_width": 0.36113571375608444,
+                "neuron_index": 868,
+                "ordinal": 44,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.10021105408668518,
+                "initial_upper": 0.25354036688804626,
+                "initial_width": 0.35375142097473145,
+                "neuron_index": 730,
+                "ordinal": 45,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.30600854754447937,
+                "initial_upper": 0.03581169992685318,
+                "initial_width": 0.34182024747133255,
+                "neuron_index": 459,
+                "ordinal": 46,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.2585698664188385,
+                "initial_upper": 0.057210057973861694,
+                "initial_width": 0.3157799243927002,
+                "neuron_index": 739,
+                "ordinal": 47,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.16221684217453003,
+                "initial_upper": 0.14927440881729126,
+                "initial_width": 0.3114912509918213,
+                "neuron_index": 281,
+                "ordinal": 48,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.05672435462474823,
+                "initial_upper": 0.254268616437912,
+                "initial_width": 0.3109929710626602,
+                "neuron_index": 826,
+                "ordinal": 49,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.17138490080833435,
+                "initial_upper": 0.13919416069984436,
+                "initial_width": 0.3105790615081787,
+                "neuron_index": 474,
+                "ordinal": 50,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.26372048258781433,
+                "initial_upper": 0.04291144758462906,
+                "initial_width": 0.3066319301724434,
+                "neuron_index": 473,
+                "ordinal": 51,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.13377487659454346,
+                "initial_upper": 0.16713273525238037,
+                "initial_width": 0.30090761184692383,
+                "neuron_index": 638,
+                "ordinal": 52,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.2888353765010834,
+                "initial_upper": 0.011883653700351715,
+                "initial_width": 0.3007190302014351,
+                "neuron_index": 460,
+                "ordinal": 53,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.1956980675458908,
+                "initial_upper": 0.09762687981128693,
+                "initial_width": 0.29332494735717773,
+                "neuron_index": 824,
+                "ordinal": 54,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.1766914576292038,
+                "initial_upper": 0.1119883805513382,
+                "initial_width": 0.288679838180542,
+                "neuron_index": 530,
+                "ordinal": 55,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.2832966148853302,
+                "initial_upper": 0.00525626540184021,
+                "initial_width": 0.2885528802871704,
+                "neuron_index": 725,
+                "ordinal": 56,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.2754915654659271,
+                "initial_upper": 0.005734361708164215,
+                "initial_width": 0.28122592717409134,
+                "neuron_index": 496,
+                "ordinal": 57,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.22033089399337769,
+                "initial_upper": 0.05692535266280174,
+                "initial_width": 0.27725624665617943,
+                "neuron_index": 308,
+                "ordinal": 58,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.09284892678260803,
+                "initial_upper": 0.18136867880821228,
+                "initial_width": 0.2742176055908203,
+                "neuron_index": 765,
+                "ordinal": 59,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.23825687170028687,
+                "initial_upper": 0.03551822528243065,
+                "initial_width": 0.2737750969827175,
+                "neuron_index": 296,
+                "ordinal": 60,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.11101691424846649,
+                "initial_upper": 0.15391536056995392,
+                "initial_width": 0.2649322748184204,
+                "neuron_index": 539,
+                "ordinal": 61,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.2502714991569519,
+                "initial_upper": 0.013071611523628235,
+                "initial_width": 0.26334311068058014,
+                "neuron_index": 544,
+                "ordinal": 62,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.06610118597745895,
+                "initial_upper": 0.19622671604156494,
+                "initial_width": 0.2623279020190239,
+                "neuron_index": 629,
+                "ordinal": 63,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.20353296399116516,
+                "initial_upper": 0.04975435137748718,
+                "initial_width": 0.25328731536865234,
+                "neuron_index": 733,
+                "ordinal": 64,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.22683990001678467,
+                "initial_upper": 0.017219185829162598,
+                "initial_width": 0.24405908584594727,
+                "neuron_index": 411,
+                "ordinal": 65,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.13413187861442566,
+                "initial_upper": 0.09939686208963394,
+                "initial_width": 0.2335287407040596,
+                "neuron_index": 488,
+                "ordinal": 66,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.16586212813854218,
+                "initial_upper": 0.05816979706287384,
+                "initial_width": 0.22403192520141602,
+                "neuron_index": 829,
+                "ordinal": 67,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.21940474212169647,
+                "initial_upper": 0.0014948397874832153,
+                "initial_width": 0.2208995819091797,
+                "neuron_index": 535,
+                "ordinal": 68,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.17929482460021973,
+                "initial_upper": 0.04074883460998535,
+                "initial_width": 0.22004365921020508,
+                "neuron_index": 403,
+                "ordinal": 69,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.004543662071228027,
+                "initial_upper": 0.1790698766708374,
+                "initial_width": 0.18361353874206543,
+                "neuron_index": 1015,
+                "ordinal": 70,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.16022685170173645,
+                "initial_upper": 0.022055543959140778,
+                "initial_width": 0.18228239566087723,
+                "neuron_index": 487,
+                "ordinal": 71,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.11466372013092041,
+                "initial_upper": 0.05562388896942139,
+                "initial_width": 0.1702876091003418,
+                "neuron_index": 445,
+                "ordinal": 72,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.12504439055919647,
+                "initial_upper": 0.03357316553592682,
+                "initial_width": 0.1586175560951233,
+                "neuron_index": 809,
+                "ordinal": 73,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.02189481258392334,
+                "initial_upper": 0.13618040084838867,
+                "initial_width": 0.158075213432312,
+                "neuron_index": 914,
+                "ordinal": 74,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.037136077880859375,
+                "initial_upper": 0.10102376341819763,
+                "initial_width": 0.138159841299057,
+                "neuron_index": 362,
+                "ordinal": 75,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.031350135803222656,
+                "initial_upper": 0.0964912474155426,
+                "initial_width": 0.12784138321876526,
+                "neuron_index": 405,
+                "ordinal": 76,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.05487644672393799,
+                "initial_upper": 0.04271888732910156,
+                "initial_width": 0.09759533405303955,
+                "neuron_index": 919,
+                "ordinal": 77,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.08288513869047165,
+                "initial_upper": 0.013313479721546173,
+                "initial_width": 0.09619861841201782,
+                "neuron_index": 877,
+                "ordinal": 78,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.04059985280036926,
+                "initial_upper": 0.02588626742362976,
+                "initial_width": 0.06648612022399902,
+                "neuron_index": 27,
+                "ordinal": 79,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.020154297351837158,
+                "initial_upper": 0.030535027384757996,
+                "initial_width": 0.050689324736595154,
+                "neuron_index": 38,
+                "ordinal": 80,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.018533796072006226,
+                "initial_upper": 0.028868496417999268,
+                "initial_width": 0.04740229249000549,
+                "neuron_index": 40,
+                "ordinal": 81,
+                "relu_input": "11"
+              },
+              {
+                "initial_lower": -0.555416464805603,
+                "initial_upper": 1.3002105951309204,
+                "initial_width": 1.8556270599365234,
+                "neuron_index": 1,
+                "ordinal": 82,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -1.556443691253662,
+                "initial_upper": 0.2621302306652069,
+                "initial_width": 1.818573921918869,
+                "neuron_index": 74,
+                "ordinal": 83,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -1.4993207454681396,
+                "initial_upper": 0.30602383613586426,
+                "initial_width": 1.805344581604004,
+                "neuron_index": 28,
+                "ordinal": 84,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -1.1424288749694824,
+                "initial_upper": 0.64150470495224,
+                "initial_width": 1.7839335799217224,
+                "neuron_index": 16,
+                "ordinal": 85,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -1.3144856691360474,
+                "initial_upper": 0.451890766620636,
+                "initial_width": 1.7663764357566833,
+                "neuron_index": 73,
+                "ordinal": 86,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -0.7415727972984314,
+                "initial_upper": 0.9020557999610901,
+                "initial_width": 1.6436285972595215,
+                "neuron_index": 75,
+                "ordinal": 87,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -0.8582936525344849,
+                "initial_upper": 0.7800124883651733,
+                "initial_width": 1.6383061408996582,
+                "neuron_index": 37,
+                "ordinal": 88,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -0.004159055650234222,
+                "initial_upper": 1.5828865766525269,
+                "initial_width": 1.587045632302761,
+                "neuron_index": 39,
+                "ordinal": 89,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -0.21251989901065826,
+                "initial_upper": 1.3544743061065674,
+                "initial_width": 1.5669942051172256,
+                "neuron_index": 64,
+                "ordinal": 90,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -1.4528610706329346,
+                "initial_upper": 0.10877012461423874,
+                "initial_width": 1.5616311952471733,
+                "neuron_index": 61,
+                "ordinal": 91,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -1.3445100784301758,
+                "initial_upper": 0.21410894393920898,
+                "initial_width": 1.5586190223693848,
+                "neuron_index": 60,
+                "ordinal": 92,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -0.3586922883987427,
+                "initial_upper": 1.1928552389144897,
+                "initial_width": 1.5515475273132324,
+                "neuron_index": 31,
+                "ordinal": 93,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -1.1963114738464355,
+                "initial_upper": 0.3016784191131592,
+                "initial_width": 1.4979898929595947,
+                "neuron_index": 5,
+                "ordinal": 94,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -1.1599470376968384,
+                "initial_upper": 0.3190110921859741,
+                "initial_width": 1.4789581298828125,
+                "neuron_index": 7,
+                "ordinal": 95,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -0.2073768973350525,
+                "initial_upper": 1.13554048538208,
+                "initial_width": 1.3429173827171326,
+                "neuron_index": 30,
+                "ordinal": 96,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -1.243757724761963,
+                "initial_upper": 0.07457593828439713,
+                "initial_width": 1.31833366304636,
+                "neuron_index": 88,
+                "ordinal": 97,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -1.2934348583221436,
+                "initial_upper": 0.024602599442005157,
+                "initial_width": 1.3180374577641487,
+                "neuron_index": 49,
+                "ordinal": 98,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -0.4225037395954132,
+                "initial_upper": 0.8518433570861816,
+                "initial_width": 1.2743470966815948,
+                "neuron_index": 98,
+                "ordinal": 99,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -0.7438847422599792,
+                "initial_upper": 0.5284000039100647,
+                "initial_width": 1.272284746170044,
+                "neuron_index": 77,
+                "ordinal": 100,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -0.7706813812255859,
+                "initial_upper": 0.4864042103290558,
+                "initial_width": 1.2570855915546417,
+                "neuron_index": 95,
+                "ordinal": 101,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -0.9438931345939636,
+                "initial_upper": 0.3093145191669464,
+                "initial_width": 1.25320765376091,
+                "neuron_index": 42,
+                "ordinal": 102,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -0.19861643016338348,
+                "initial_upper": 1.0532397031784058,
+                "initial_width": 1.2518561333417892,
+                "neuron_index": 89,
+                "ordinal": 103,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -0.8804854154586792,
+                "initial_upper": 0.34451135993003845,
+                "initial_width": 1.2249967753887177,
+                "neuron_index": 56,
+                "ordinal": 104,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -0.8095213770866394,
+                "initial_upper": 0.3701077103614807,
+                "initial_width": 1.1796290874481201,
+                "neuron_index": 35,
+                "ordinal": 105,
+                "relu_input": "14"
+              },
+              {
+                "initial_lower": -0.9440509676933289,
+                "initial_upper": 0.18789654970169067,
+                "initial_width": 1.1319475173950195,
+                "neuron_index": 57,
+                "ordinal": 106,
+                "relu_input": "14"
+              }
+            ]
+          },
+          "schedule": {
+            "actions": [
+              {
+                "action_id": "launch.0000.materialize_forward",
+                "input_value_ids": [
+                  "refine.module",
+                  "refine.input",
+                  "refine.split_state"
+                ],
+                "output_value_ids": [
+                  "refine.forward_env.p0",
+                  "refine.bounds.p0"
+                ],
+                "sequence": 0,
+                "task_id": "intermediate_refinement.0000.materialize_forward"
+              },
+              {
+                "action_id": "launch.0001.enumerate_ambiguous",
+                "input_value_ids": [
+                  "refine.bounds.p0"
+                ],
+                "output_value_ids": [
+                  "refine.candidates"
+                ],
+                "sequence": 1,
+                "task_id": "intermediate_refinement.0001.enumerate_ambiguous"
+              },
+              {
+                "action_id": "launch.0002.select_targets",
+                "input_value_ids": [
+                  "refine.candidates",
+                  "refine.policy"
+                ],
+                "output_value_ids": [
+                  "refine.selected_targets"
+                ],
+                "sequence": 2,
+                "task_id": "intermediate_refinement.0002.select_targets"
+              },
+              {
+                "action_id": "launch.0003.backward_selected",
+                "input_value_ids": [
+                  "refine.forward_env.p0",
+                  "refine.bounds.p0",
+                  "refine.selected_targets"
+                ],
+                "output_value_ids": [
+                  "refine.crown_candidates.p1"
+                ],
+                "sequence": 3,
+                "task_id": "intermediate_refinement.0003.backward_selected"
+              },
+              {
+                "action_id": "launch.0004.intersect_selected",
+                "input_value_ids": [
+                  "refine.bounds.p0",
+                  "refine.crown_candidates.p1"
+                ],
+                "output_value_ids": [
+                  "refine.intersected_bounds.p1"
+                ],
+                "sequence": 4,
+                "task_id": "intermediate_refinement.0004.intersect_selected"
+              },
+              {
+                "action_id": "launch.0005.propagate_forward",
+                "input_value_ids": [
+                  "refine.module",
+                  "refine.input",
+                  "refine.split_state",
+                  "refine.intersected_bounds.p1"
+                ],
+                "output_value_ids": [
+                  "refine.forward_env.p1",
+                  "refine.bounds.p1"
+                ],
+                "sequence": 5,
+                "task_id": "intermediate_refinement.0005.propagate_forward"
+              },
+              {
+                "action_id": "launch.0006.emit_refined",
+                "input_value_ids": [
+                  "refine.bounds.p1"
+                ],
+                "output_value_ids": [
+                  "refine.refined_bounds"
+                ],
+                "sequence": 6,
+                "task_id": "intermediate_refinement.0006.emit_refined"
+              }
+            ],
+            "refined_bounds_value_id": "refine.refined_bounds",
+            "refinement_plan_hash": "8a154dd0a7cb7beffacae2374c1b9f541b01245982b00377c3b86ad3915a64da",
+            "refinement_task_module_hash": "3749388a686ae718f7b9dad147040fecf89fef51dcce345aedb221061dfb7639",
+            "schedule_id": "nrir19:oval21:000.schedule",
+            "schema_version": "boundflow.intermediate_refinement_schedule_ir/v1"
+          },
+          "task": {
+            "module_id": "nrir19:oval21:000.tasks",
+            "output_task_id": "intermediate_refinement.0006.emit_refined",
+            "refinement_plan_hash": "8a154dd0a7cb7beffacae2374c1b9f541b01245982b00377c3b86ad3915a64da",
+            "schema_version": "boundflow.intermediate_refinement_task_ir/v1",
+            "tasks": [
+              {
+                "dependency_task_ids": [],
+                "input_value_ids": [
+                  "refine.module",
+                  "refine.input",
+                  "refine.split_state"
+                ],
+                "kind": "materialize_forward",
+                "output_value_ids": [
+                  "refine.forward_env.p0",
+                  "refine.bounds.p0"
+                ],
+                "pass_index": null,
+                "semantics_owner": "boundflow_native_intermediate_refinement",
+                "task_id": "intermediate_refinement.0000.materialize_forward"
+              },
+              {
+                "dependency_task_ids": [
+                  "intermediate_refinement.0000.materialize_forward"
+                ],
+                "input_value_ids": [
+                  "refine.bounds.p0"
+                ],
+                "kind": "enumerate_ambiguous",
+                "output_value_ids": [
+                  "refine.candidates"
+                ],
+                "pass_index": null,
+                "semantics_owner": "boundflow_native_intermediate_refinement",
+                "task_id": "intermediate_refinement.0001.enumerate_ambiguous"
+              },
+              {
+                "dependency_task_ids": [
+                  "intermediate_refinement.0001.enumerate_ambiguous"
+                ],
+                "input_value_ids": [
+                  "refine.candidates",
+                  "refine.policy"
+                ],
+                "kind": "select_targets",
+                "output_value_ids": [
+                  "refine.selected_targets"
+                ],
+                "pass_index": null,
+                "semantics_owner": "boundflow_native_intermediate_refinement",
+                "task_id": "intermediate_refinement.0002.select_targets"
+              },
+              {
+                "dependency_task_ids": [
+                  "intermediate_refinement.0002.select_targets"
+                ],
+                "input_value_ids": [
+                  "refine.forward_env.p0",
+                  "refine.bounds.p0",
+                  "refine.selected_targets"
+                ],
+                "kind": "backward_selected",
+                "output_value_ids": [
+                  "refine.crown_candidates.p1"
+                ],
+                "pass_index": 0,
+                "semantics_owner": "boundflow_native_intermediate_refinement",
+                "task_id": "intermediate_refinement.0003.backward_selected"
+              },
+              {
+                "dependency_task_ids": [
+                  "intermediate_refinement.0003.backward_selected"
+                ],
+                "input_value_ids": [
+                  "refine.bounds.p0",
+                  "refine.crown_candidates.p1"
+                ],
+                "kind": "intersect_selected",
+                "output_value_ids": [
+                  "refine.intersected_bounds.p1"
+                ],
+                "pass_index": 0,
+                "semantics_owner": "boundflow_native_intermediate_refinement",
+                "task_id": "intermediate_refinement.0004.intersect_selected"
+              },
+              {
+                "dependency_task_ids": [
+                  "intermediate_refinement.0004.intersect_selected"
+                ],
+                "input_value_ids": [
+                  "refine.module",
+                  "refine.input",
+                  "refine.split_state",
+                  "refine.intersected_bounds.p1"
+                ],
+                "kind": "propagate_forward",
+                "output_value_ids": [
+                  "refine.forward_env.p1",
+                  "refine.bounds.p1"
+                ],
+                "pass_index": 0,
+                "semantics_owner": "boundflow_native_intermediate_refinement",
+                "task_id": "intermediate_refinement.0005.propagate_forward"
+              },
+              {
+                "dependency_task_ids": [
+                  "intermediate_refinement.0005.propagate_forward"
+                ],
+                "input_value_ids": [
+                  "refine.bounds.p1"
+                ],
+                "kind": "emit_refined",
+                "output_value_ids": [
+                  "refine.refined_bounds"
+                ],
+                "pass_index": null,
+                "semantics_owner": "boundflow_native_intermediate_refinement",
+                "task_id": "intermediate_refinement.0006.emit_refined"
+              }
+            ]
+          }
+        },
+        "refinement_ns": 32060804,
+        "schema_version": "boundflow.native-intermediate-refinement-worker/v1",
+        "setup_ns": 99656642,
+        "worker_elapsed_ns": 26205868859,
+        "workload_id": "oval21:000"
+      },
+      "workload_id": "oval21:000"
+    }
+  ],
+  "schema_version": "boundflow.native-intermediate-refinement-evidence/v1",
+  "source": {
+    "native_code_revision": "4fa54be6acf67d528d32b5848503dfe564f707e131f7517f1a66134e2cbc3c94",
+    "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf",
+    "workloads": [
+      {
+        "category": "mnistfc",
+        "csv_sha256": "016ba17fc7f5efbf7ab9baa784b36e53c7ec175d4b4acfb86c17e8685898ccce",
+        "input_shape": [
+          1,
+          784,
+          1
+        ],
+        "model_sha256": "3a5c9730d60bbf1f9b030e731b438436581efd7c00a28ab683c1ec4b6d3449c4",
+        "onnx_ops": [
+          "Flatten",
+          "Gemm",
+          "Relu"
+        ],
+        "output_dim": 10,
+        "property_sha256": "d1e5e66ed29d41443b56d61ff8f6cf7c3c15a98c1cafc927957218d37fe9291f",
+        "query_hash": "37b8bcb674411837b404e993922245829dcfa94ce8f5791aca473b69913e85cc",
+        "workload_id": "mnistfc:000"
+      },
+      {
+        "category": "cifar10_resnet",
+        "csv_sha256": "d0be77761016f65d044918e5f95332cf32bf848e5eef28c5465dfbf287ba984f",
+        "input_shape": [
+          1,
+          3,
+          32,
+          32
+        ],
+        "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+        "onnx_ops": [
+          "Add",
+          "Conv",
+          "Flatten",
+          "Gemm",
+          "Relu"
+        ],
+        "output_dim": 10,
+        "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+        "query_hash": "f2151936ce0d9f8d8bcabd7bc3fc0224a71d7907da4ac614d7216e7a0919201b",
+        "workload_id": "cifar10_resnet:000"
+      },
+      {
+        "category": "oval21",
+        "csv_sha256": "4cf251a1c9d08e69a6d727798919f98605280e6f385c8a0f292578ba1fb64b47",
+        "input_shape": [
+          1,
+          3,
+          32,
+          32
+        ],
+        "model_sha256": "e39711edc5284e173d169359d4b0ac2a5f5b39fffc8cf4af15d54615b867bf3f",
+        "onnx_ops": [
+          "Conv",
+          "Flatten",
+          "Gemm",
+          "Relu"
+        ],
+        "output_dim": 10,
+        "property_sha256": "01f5ae3916e4ec71abc9467e80e3975a4ccf550e61935f1dac38d4e77620acfe",
+        "query_hash": "1f8ce94582425199263edaed5e961f560435149c12aa3b1febd953bc70820c54",
+        "workload_id": "oval21:000"
+      }
+    ]
+  },
+  "status": "ok"
+}

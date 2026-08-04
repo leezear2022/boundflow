@@ -584,8 +584,14 @@ def _optimizer_intermediate_semantics(
         return _forward_ibp_trace_mlp(
             module, input_spec, relu_split_state=dict(relu_split_state)
         )
-    if intermediate_bound_source != IntermediateBoundSource.EXTERNAL_VERIFIER:
-        raise ValueError("optimizer ReLU override requires external provenance")
+    if intermediate_bound_source not in {
+        IntermediateBoundSource.NATIVE_REFINED,
+        IntermediateBoundSource.EXTERNAL_VERIFIER,
+    }:
+        raise ValueError(
+            "optimizer ReLU override requires external provenance or native "
+            "refinement provenance"
+        )
     if refine_external_constraints:
         return _forward_ibp_trace_mlp(
             module,

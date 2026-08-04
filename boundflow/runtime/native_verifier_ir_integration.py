@@ -421,7 +421,7 @@ def compile_native_plain_crown_representation_query(
         intermediate_bound_source=intermediate_bound_source,
         intermediate_bounds_hash=(
             intermediate_bounds_hash
-            if intermediate_bound_source == IntermediateBoundSource.EXTERNAL_VERIFIER
+            if intermediate_bound_source != IntermediateBoundSource.LOCAL_FORWARD
             else None
         ),
         relu_lower_slope_policy=ReluLowerSlopePolicy.ADAPTIVE,
@@ -811,17 +811,21 @@ def _build_native_reference_template(
             if module.domain.alpha_enabled and module.domain.beta_enabled
             else (
                 (
-                    "external_intermediate_adaptive_float32_reference"
-                    if intermediate_bound_source
-                    == IntermediateBoundSource.EXTERNAL_VERIFIER
-                    else "local_forward_adaptive_float32_reference"
+                    (
+                        "external_intermediate_adaptive_float32_reference"
+                        if intermediate_bound_source
+                        == IntermediateBoundSource.EXTERNAL_VERIFIER
+                        else f"{intermediate_bound_source.value}_adaptive_float32_reference"
+                    )
                 )
                 if not module.domain.split_state_present
                 else (
-                    "external_intermediate_adaptive_float32_reference_split_v1"
-                    if intermediate_bound_source
-                    == IntermediateBoundSource.EXTERNAL_VERIFIER
-                    else "local_forward_adaptive_float32_reference_split_v1"
+                    (
+                        "external_intermediate_adaptive_float32_reference_split_v1"
+                        if intermediate_bound_source
+                        == IntermediateBoundSource.EXTERNAL_VERIFIER
+                        else f"{intermediate_bound_source.value}_adaptive_float32_reference_split_v1"
+                    )
                 )
             )
         ),
@@ -874,7 +878,7 @@ def _build_native_reference_template(
                 (
                     "intermediate_bounds_hash"
                     if intermediate_bound_source
-                    == IntermediateBoundSource.EXTERNAL_VERIFIER
+                    != IntermediateBoundSource.LOCAL_FORWARD
                     else "local_forward_state_hash"
                 ),
                 intermediate_bounds_hash,

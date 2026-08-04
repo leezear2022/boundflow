@@ -16,11 +16,11 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_MULTIWORKLOAD_COMPETITOR_E2E_BASELINE_V1_PLAN_2026_08_04.md`
-（三真实拓扑、VNNLIB Query IR、workload Plan/Task/Schedule、BoundFlow/αβ-CROWN CPU 诊断与
-intermediate-bound blocker）。其直接前序为
-`gemini_doc/BOUNDFLOW_HARD_CLAUSE_OBJECTIVE_BRANCHING_V1_PLAN_2026_08_04.md` 和
-`gemini_doc/BOUNDFLOW_PREPARED_PRODUCTION_FAST_PATH_V1_PLAN_2026_08_04.md`。
+当前最新入口：`gemini_doc/BOUNDFLOW_NATIVE_INTERMEDIATE_BOUND_REFINEMENT_V1_PLAN_2026_08_04.md`
+（native-refined provenance、selected CROWN Plan/Task/Schedule、三真实 workload
+baseline/refined closure）。其直接前序为
+`gemini_doc/BOUNDFLOW_MULTIWORKLOAD_COMPETITOR_E2E_BASELINE_V1_PLAN_2026_08_04.md` 和
+`gemini_doc/BOUNDFLOW_HARD_CLAUSE_OBJECTIVE_BRANCHING_V1_PLAN_2026_08_04.md`。
 
 1. `gemini_doc/BOUNDFLOW_COMPLETE_VERIFIER_QUERY_V1_PLAN_2026_08_04.md`
    （当前最新：九子句 query、candidate search、sound aggregation、deadline 与 9/9 unknown blocker）
