@@ -53,3 +53,6 @@ stage: s01
 
 - plan: `gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_PRODUCTION_COST_ATTRIBUTION_V1_PLAN_2026_08_05.md`
 - roadmap: `gemini_doc/asplos_execution_memo_v1_0.md`
+- implementation commit: `991c75e`
+- publication: GitHub PR #52（base `main`，head
+  `feat/objective-branch-production-cost-attribution-v1`）
