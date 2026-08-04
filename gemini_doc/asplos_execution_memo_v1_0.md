@@ -1126,3 +1126,25 @@ lower 都分别为 `-0.2819737196/-0.4016119838/-0.4596676826`，三条 delta=`0
 IR/control 可保留，但不能形成 tightness/property/performance/ASPLOS-ready claim。停止继续同一静态
 influence 拆 pass；后续必须先验证 pass-local influence recomputation 或 branch/cut 新信息能改变
 target/critical domain，再立正式路线。
+
+## 40. Production Prepared Verifier v1
+
+NRIR-27 把已验证的 prepared optimizer、ReLU-split queue、property verdict 与 conjunction query
+接成 production complete-verifier 路径。每个动态 node batch 均拥有 first-class
+Plan/Task/Schedule，并按 validate program→execute optimizer→materialize results→commit queue 的
+真实次序执行；production 模式明确不生成 audit tensor hash chain，也不重复 selected-native
+compiler/oracle execution。旧 audit 默认行为、payload 与 hash 条件兼容。
+
+MNISTFC、CIFAR10 ResNet2B、OVAL21 各执行三组交替次序的 fresh-process clause-0 对照；相同算法
+audit→production median 为 `4.510→3.301 s`、`22.509→9.104 s`、`5.192→3.578 s`，内部
+speedup 分别 `1.3663×/2.4723×/1.4511×`，semantic parity 全过。full production median 为
+`14.834/60.754/11.964 s`，三类 query 仍为 unknown；ResNet 三次均完成 `9/9` clauses，而历史
+deadline-bound audit 只完成 `2/9`。
+
+artifact evidence hash=
+`7b650dce529d47c54eeadb168b2311e83a4346b47ffc341d5293b6468c6ac08b`；全量
+`800 passed, 37 skipped`。本阶段以 production runtime/internal CPU overhead
+`VALIDATED-REDUCED` 关闭；历史 αβ-CROWN 数字只作不同完整性协议的单次诊断，不是竞品 speedup。
+full-query execution 仍有约 `59%–65%` 位于四个 production action 之外，下一门禁为 parametric
+dynamic-batch PlanTemplate/PlanInstance 与 compile cache；GPU、complete property、公平 competitor
+与 ASPLOS-ready 均保持 pending。

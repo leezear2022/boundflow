@@ -1,7 +1,7 @@
 """Typed Plan, Task, and Schedule IR for multi-workload verifier evaluation."""
 
 # pylint: disable=too-many-instance-attributes,too-many-boolean-expressions
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,too-many-locals
 
 from __future__ import annotations
 
@@ -47,6 +47,7 @@ class VerifierBackendKind(Enum):
     """Backends admitted by the frozen multi-workload protocol."""
 
     BOUNDFLOW_NATIVE = "boundflow_native"
+    BOUNDFLOW_PRODUCTION = "boundflow_production"
     EXTERNAL_ABCROWN = "external_abcrown"
 
 
@@ -58,6 +59,7 @@ class MultiWorkloadTaskKind(Enum):
     IMPORT_ONNX = "import_onnx"
     COMPILE_NATIVE = "compile_native"
     EXECUTE_NATIVE = "execute_native"
+    EXECUTE_PRODUCTION = "execute_production"
     EXECUTE_COMPETITOR = "execute_competitor"
     EMIT_RESULT = "emit_result"
 
@@ -167,13 +169,21 @@ class VerifierExecutionPolicyIR:
             or not self.complete_verifier
         ):
             raise ValueError("verifier execution policy IR is invalid")
-        if self.backend == VerifierBackendKind.BOUNDFLOW_NATIVE:
+        if self.backend in {
+            VerifierBackendKind.BOUNDFLOW_NATIVE,
+            VerifierBackendKind.BOUNDFLOW_PRODUCTION,
+        }:
+            expected_complete_verifier = (
+                "bounded_relu_bab"
+                if self.backend == VerifierBackendKind.BOUNDFLOW_NATIVE
+                else "production_prepared_bounded_relu_bab"
+            )
             if (
                 self.attack_policy != "native_projected_gradient"
-                or self.complete_verifier != "bounded_relu_bab"
+                or self.complete_verifier != expected_complete_verifier
                 or self.max_nodes < 1
             ):
-                raise ValueError("BoundFlow native execution policy differs")
+                raise ValueError("BoundFlow execution policy differs")
         elif self.backend == VerifierBackendKind.EXTERNAL_ABCROWN:
             if (
                 self.attack_policy != "skip"
@@ -218,22 +228,48 @@ class MultiWorkloadPlanIR:
     def validate(self) -> None:
         workload_ids = tuple(item.workload_id for item in self.workloads)
         backends = tuple(item.backend for item in self.policies)
+        baseline_backends = {
+            VerifierBackendKind.BOUNDFLOW_NATIVE,
+            VerifierBackendKind.EXTERNAL_ABCROWN,
+        }
+        production_backends = {
+            *baseline_backends,
+            VerifierBackendKind.BOUNDFLOW_PRODUCTION,
+        }
+        internal_backends = {
+            VerifierBackendKind.BOUNDFLOW_NATIVE,
+            VerifierBackendKind.BOUNDFLOW_PRODUCTION,
+        }
+        backend_set = set(backends)
         if (
             self.schema_version != MULTIWORKLOAD_PLAN_IR_SCHEMA_VERSION
             or not self.plan_id
             or not _is_revision(self.benchmark_commit)
             or len(self.workloads) < 3
             or len(workload_ids) != len(set(workload_ids))
-            or set(backends)
-            != {
-                VerifierBackendKind.BOUNDFLOW_NATIVE,
-                VerifierBackendKind.EXTERNAL_ABCROWN,
-            }
+            or backend_set
+            not in (baseline_backends, production_backends, internal_backends)
             or len(backends) != len(set(backends))
             or self.timing_boundary != "fresh_process_start_to_structured_result"
-            or self.claim_boundary != "cpu_diagnostic_no_speedup"
+            or self.claim_boundary
+            not in {
+                "cpu_diagnostic_no_speedup",
+                "cpu_audit_production_repeated_diagnostic_no_competitor_speedup",
+                "cpu_audit_production_repeated_internal_speedup",
+            }
         ):
             raise ValueError("multi-workload Plan IR is invalid")
+        expected_claim = {
+            frozenset(baseline_backends): "cpu_diagnostic_no_speedup",
+            frozenset(production_backends): (
+                "cpu_audit_production_repeated_diagnostic_no_competitor_speedup"
+            ),
+            frozenset(internal_backends): (
+                "cpu_audit_production_repeated_internal_speedup"
+            ),
+        }[frozenset(backend_set)]
+        if self.claim_boundary != expected_claim:
+            raise ValueError("multi-workload Plan/backend claim boundary differs")
         for workload in self.workloads:
             workload.validate()
         for policy in self.policies:
@@ -276,6 +312,7 @@ class MultiWorkloadTaskIRUnit:
             not in {
                 "shared",
                 VerifierBackendKind.BOUNDFLOW_NATIVE.value,
+                VerifierBackendKind.BOUNDFLOW_PRODUCTION.value,
                 VerifierBackendKind.EXTERNAL_ABCROWN.value,
             }
             or len(self.dependency_task_ids) != len(set(self.dependency_task_ids))
@@ -359,6 +396,7 @@ class MultiWorkloadScheduleIR:
                 task_by_id[task_id].kind
                 not in {
                     MultiWorkloadTaskKind.EXECUTE_NATIVE,
+                    MultiWorkloadTaskKind.EXECUTE_PRODUCTION,
                     MultiWorkloadTaskKind.EXECUTE_COMPETITOR,
                 }
                 for task_id in self.fresh_process_task_ids
@@ -371,6 +409,7 @@ class MultiWorkloadScheduleIR:
             if task.kind
             in {
                 MultiWorkloadTaskKind.EXECUTE_NATIVE,
+                MultiWorkloadTaskKind.EXECUTE_PRODUCTION,
                 MultiWorkloadTaskKind.EXECUTE_COMPETITOR,
             }
         )
@@ -396,6 +435,14 @@ class MultiWorkloadScheduleIR:
 def compile_multiworkload_task_ir(plan: MultiWorkloadPlanIR) -> MultiWorkloadTaskIR:
     plan.validate()
     tasks: list[MultiWorkloadTaskIRUnit] = []
+    production_enabled = any(
+        policy.backend == VerifierBackendKind.BOUNDFLOW_PRODUCTION
+        for policy in plan.policies
+    )
+    competitor_enabled = any(
+        policy.backend == VerifierBackendKind.EXTERNAL_ABCROWN
+        for policy in plan.policies
+    )
     for workload in plan.workloads:
         prefix = workload.workload_id
         acquire = f"{prefix}:acquire"
@@ -403,49 +450,63 @@ def compile_multiworkload_task_ir(plan: MultiWorkloadPlanIR) -> MultiWorkloadTas
         import_model = f"{prefix}:import-onnx"
         compile_native = f"{prefix}:compile-native"
         execute_native = f"{prefix}:execute-native"
+        execute_production = f"{prefix}:execute-production"
         execute_competitor = f"{prefix}:execute-abcrown"
-        tasks.extend(
-            (
+        workload_tasks = [
+            MultiWorkloadTaskIRUnit(
+                acquire,
+                prefix,
+                MultiWorkloadTaskKind.ACQUIRE_SOURCES,
+                "shared",
+                (),
+                (f"{prefix}:source-lock",),
+            ),
+            MultiWorkloadTaskIRUnit(
+                parse,
+                prefix,
+                MultiWorkloadTaskKind.PARSE_QUERY,
+                "shared",
+                (acquire,),
+                (f"{prefix}:query-ir",),
+            ),
+            MultiWorkloadTaskIRUnit(
+                import_model,
+                prefix,
+                MultiWorkloadTaskKind.IMPORT_ONNX,
+                "shared",
+                (acquire,),
+                (f"{prefix}:primal-ir",),
+            ),
+            MultiWorkloadTaskIRUnit(
+                compile_native,
+                prefix,
+                MultiWorkloadTaskKind.COMPILE_NATIVE,
+                VerifierBackendKind.BOUNDFLOW_NATIVE.value,
+                (parse, import_model),
+                (f"{prefix}:bound-plan-task-schedule",),
+            ),
+            MultiWorkloadTaskIRUnit(
+                execute_native,
+                prefix,
+                MultiWorkloadTaskKind.EXECUTE_NATIVE,
+                VerifierBackendKind.BOUNDFLOW_NATIVE.value,
+                (compile_native,),
+                (f"{prefix}:native-result",),
+            ),
+        ]
+        if production_enabled:
+            workload_tasks.append(
                 MultiWorkloadTaskIRUnit(
-                    acquire,
+                    execute_production,
                     prefix,
-                    MultiWorkloadTaskKind.ACQUIRE_SOURCES,
-                    "shared",
-                    (),
-                    (f"{prefix}:source-lock",),
-                ),
-                MultiWorkloadTaskIRUnit(
-                    parse,
-                    prefix,
-                    MultiWorkloadTaskKind.PARSE_QUERY,
-                    "shared",
-                    (acquire,),
-                    (f"{prefix}:query-ir",),
-                ),
-                MultiWorkloadTaskIRUnit(
-                    import_model,
-                    prefix,
-                    MultiWorkloadTaskKind.IMPORT_ONNX,
-                    "shared",
-                    (acquire,),
-                    (f"{prefix}:primal-ir",),
-                ),
-                MultiWorkloadTaskIRUnit(
-                    compile_native,
-                    prefix,
-                    MultiWorkloadTaskKind.COMPILE_NATIVE,
-                    VerifierBackendKind.BOUNDFLOW_NATIVE.value,
-                    (parse, import_model),
-                    (f"{prefix}:bound-plan-task-schedule",),
-                ),
-                MultiWorkloadTaskIRUnit(
-                    execute_native,
-                    prefix,
-                    MultiWorkloadTaskKind.EXECUTE_NATIVE,
-                    VerifierBackendKind.BOUNDFLOW_NATIVE.value,
+                    MultiWorkloadTaskKind.EXECUTE_PRODUCTION,
+                    VerifierBackendKind.BOUNDFLOW_PRODUCTION.value,
                     (compile_native,),
-                    (f"{prefix}:native-result",),
-                ),
+                    (f"{prefix}:production-result",),
+                )
+            )
+        if competitor_enabled:
+            workload_tasks.append(
                 MultiWorkloadTaskIRUnit(
                     execute_competitor,
                     prefix,
@@ -453,17 +514,24 @@ def compile_multiworkload_task_ir(plan: MultiWorkloadPlanIR) -> MultiWorkloadTas
                     VerifierBackendKind.EXTERNAL_ABCROWN.value,
                     (acquire,),
                     (f"{prefix}:abcrown-result",),
-                ),
-                MultiWorkloadTaskIRUnit(
-                    f"{prefix}:emit",
-                    prefix,
-                    MultiWorkloadTaskKind.EMIT_RESULT,
-                    "shared",
-                    (execute_native, execute_competitor),
-                    (f"{prefix}:comparison-record",),
-                ),
+                )
+            )
+        emit_dependencies = [execute_native]
+        if production_enabled:
+            emit_dependencies.append(execute_production)
+        if competitor_enabled:
+            emit_dependencies.append(execute_competitor)
+        workload_tasks.append(
+            MultiWorkloadTaskIRUnit(
+                f"{prefix}:emit",
+                prefix,
+                MultiWorkloadTaskKind.EMIT_RESULT,
+                "shared",
+                tuple(emit_dependencies),
+                (f"{prefix}:comparison-record",),
             )
         )
+        tasks.extend(workload_tasks)
     task_ir = MultiWorkloadTaskIR(plan_hash=plan.stable_hash(), tasks=tuple(tasks))
     task_ir.validate()
     return task_ir
@@ -482,6 +550,7 @@ def compile_multiworkload_schedule_ir(
         if task.kind
         in {
             MultiWorkloadTaskKind.EXECUTE_NATIVE,
+            MultiWorkloadTaskKind.EXECUTE_PRODUCTION,
             MultiWorkloadTaskKind.EXECUTE_COMPETITOR,
         }
     )

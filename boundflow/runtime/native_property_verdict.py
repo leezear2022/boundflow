@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 import json
-from typing import Literal, Optional, Sequence
+from typing import Literal, Optional, Sequence, Union
 
 import torch
 
@@ -17,6 +17,10 @@ from ..ir.task import BFTaskModule
 from .native_optimized_relu_split_bab_runtime import (
     NativeOptimizedReluSplitBabExecution,
     NativeOptimizedReluSplitBabTrace,
+)
+from .native_production_verifier import (
+    NativeProductionReluSplitBabExecution,
+    NativeProductionReluSplitBabTrace,
 )
 from .native_relu_split_bab_runtime import (
     _normalize_scalar_objective,
@@ -28,6 +32,12 @@ NATIVE_PROPERTY_VERDICT_SCHEMA_VERSION = "boundflow.native-property-verdict/v1"
 NATIVE_PROPERTY_VERDICT_COMPILER_VERSION = "boundflow.native-property-verdict/v1"
 WITNESS_SPLIT_TOLERANCE = 1e-6
 PropertyVerdictStatus = Literal["verified", "unsafe", "unknown"]
+NativeVerifierQueueTrace = Union[
+    NativeOptimizedReluSplitBabTrace, NativeProductionReluSplitBabTrace
+]
+NativeVerifierQueueExecution = Union[
+    NativeOptimizedReluSplitBabExecution, NativeProductionReluSplitBabExecution
+]
 
 
 def _canonical_hash(value: object) -> str:
@@ -44,7 +54,7 @@ def _is_sha256(value: object) -> bool:
 
 
 def _leaf_accounting(
-    queue: NativeOptimizedReluSplitBabTrace,
+    queue: NativeVerifierQueueTrace,
 ) -> tuple[tuple[str, ...], tuple[str, ...]]:
     decision_by_id = {item.node_id: item for item in queue.decisions}
     evaluation_by_id = {item.node.node_id: item for item in queue.evaluations}
@@ -76,7 +86,7 @@ def _leaf_accounting(
     return sound_pruned, unresolved
 
 
-def _unknown_reason(queue: NativeOptimizedReluSplitBabTrace) -> str:
+def _unknown_reason(queue: NativeVerifierQueueTrace) -> str:
     if queue.final_frontier_node_ids:
         return "node_budget_frontier_open"
     terminal_reasons = {
@@ -181,7 +191,7 @@ class NativePropertyVerdictTrace:
     performance_claimed: bool = False
     schema_version: str = NATIVE_PROPERTY_VERDICT_SCHEMA_VERSION
 
-    def validate(self, queue: NativeOptimizedReluSplitBabTrace) -> None:
+    def validate(self, queue: NativeVerifierQueueTrace) -> None:
         queue.validate()
         expected_pruned, expected_unresolved = _leaf_accounting(queue)
         if (
@@ -256,7 +266,7 @@ class NativePropertyVerdictTrace:
             ),
         }
 
-    def stable_hash(self, queue: NativeOptimizedReluSplitBabTrace) -> str:
+    def stable_hash(self, queue: NativeVerifierQueueTrace) -> str:
         self.validate(queue)
         return _canonical_hash(self.to_dict())
 
@@ -274,7 +284,7 @@ class NativePropertyVerdictExecution:
         input_spec: InputSpec,
         *,
         linear_spec_C: torch.Tensor,
-        queue_execution: NativeOptimizedReluSplitBabExecution,
+        queue_execution: NativeVerifierQueueExecution,
     ) -> None:
         queue_execution.validate()
         self.trace.validate(queue_execution.trace)
@@ -305,7 +315,7 @@ def _validate_semantic_identity(
     input_spec: InputSpec,
     *,
     linear_spec_C: torch.Tensor,
-    queue: NativeOptimizedReluSplitBabTrace,
+    queue: NativeVerifierQueueTrace,
 ) -> torch.Tensor:
     lower, upper = _root_box_bounds(input_spec)
     objective = _normalize_scalar_objective(linear_spec_C)
@@ -323,7 +333,7 @@ def _reexecute_counterexample(
     input_spec: InputSpec,
     *,
     objective: torch.Tensor,
-    queue_execution: NativeOptimizedReluSplitBabExecution,
+    queue_execution: NativeVerifierQueueExecution,
     node_id: str,
     candidate: torch.Tensor,
 ) -> NativeConcreteCounterexampleTrace:
@@ -432,7 +442,7 @@ def derive_native_property_verdict(
     input_spec: InputSpec,
     *,
     linear_spec_C: torch.Tensor,
-    queue_execution: NativeOptimizedReluSplitBabExecution,
+    queue_execution: NativeVerifierQueueExecution,
     candidate_counterexamples: Sequence[tuple[str, torch.Tensor]] = (),
 ) -> NativePropertyVerdictExecution:
     """Derive a sound verdict; supplied candidates are never trusted without replay."""
@@ -511,6 +521,8 @@ __all__ = [
     "NATIVE_PROPERTY_VERDICT_COMPILER_VERSION",
     "NATIVE_PROPERTY_VERDICT_SCHEMA_VERSION",
     "NativeConcreteCounterexampleTrace",
+    "NativeVerifierQueueExecution",
+    "NativeVerifierQueueTrace",
     "NativePropertyVerdictExecution",
     "NativePropertyVerdictTrace",
     "PropertyVerdictStatus",

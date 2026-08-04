@@ -16,9 +16,10 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_TYPED_MULTIPASS_REFINEMENT_V1_PLAN_2026_08_04.md`
-（同总 target cap 下的 typed split-two-pass Plan/Task/Schedule、target ledger/termination 与
-hard-clause NO-GO 证据）。其直接前序为
+当前最新入口：`gemini_doc/BOUNDFLOW_PRODUCTION_PREPARED_VERIFIER_V1_PLAN_2026_08_04.md`
+（production complete-verifier Plan/Task/Schedule、三真实拓扑重复 CPU E2E 与 compiler-phase
+瓶颈证据）。其直接前序为
+`gemini_doc/BOUNDFLOW_TYPED_MULTIPASS_REFINEMENT_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_DYNAMIC_ANCESTRAL_REFINEMENT_BUDGET_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_EXTERNAL_SEEDED_DEPTH_NODE_CONVERGENCE_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_EXTERNAL_SEEDED_ANCESTRAL_REFINEMENT_V1_PLAN_2026_08_04.md`、
