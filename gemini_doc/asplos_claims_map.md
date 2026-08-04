@@ -667,3 +667,24 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   hash=`31261b63d80a7b11dc14484ddab2fe37bbafcc86866aaeaaa53d6af70ea40a19`；聚焦 `35 passed`、
   全量 `612 passed, 37 skipped`、静态门禁全过；下一缺口为 optimizer Schedule × ReLU-split
   BaB queue integration。
+
+### 2026-08-04 Native Optimized ReLU-Split BaB v1
+
+- `C3-M-NRIR12` validated-reduced integrated mechanism：每个 queue node batch 执行 NRIR-11
+  optimizer Plan/Task/Schedule，再执行 NRIR-10 selected-state native Bound/Plan/Task/Schedule；fixed
+  ResNet 每 stack 为 8 optimizer actions + 21 native tasks；
+- `C3-G-NRIR12` parent/state gate：child parent states 按 batch layout 重组并重建 scope，只允许
+  monotonic-refinement initialization；parent/selected hash、optimizer/native IR hash、action count、
+  gradient、projection、re-execution 与 queue lineage 篡改 fail closed；
+- `C3-E-NRIR12` real-network control：7 nodes/3 expands/4 frontier，packed/serial 3/7 stacks；bounds
+  max diff=`1.220703125e-04/1.8310546875e-04`，alpha/beta tensor max diff=
+  `4.172325134277344e-07/7.450580596923828e-09`；active child beta gradients 非零，selected native
+  re-execution diff 为 0；
+- `C3-S-NRIR12` numeric disclosure：packed/serial stable scope fields 与 split tensors 相同，但
+  batch-layout intermediate hash 与 exact selected state hash 不相等；只按冻结 tensor/bound tolerance
+  声明一致，不伪称 bitwise；
+- `C3-L-NRIR12` hard limitation：fixed-step、7-node bounded run，明确 budget-exhausted/not-claimed；
+  无 complete termination/property verdict 或 timing/memory/CUDA/OOM/Pareto/speedup；
+- 工件：`artifacts/native-optimized-relu-split-bab/vnncomp21-resnet2b-prop0-cpu-v1/`；replay
+  hash=`e813826c8fe74161505ab2379b37fa67247fd40c3bd0cb8f82b77880ce403787`；聚焦 `18 passed`、
+  全量 `630 passed, 37 skipped`；下一缺口为 sound property termination/verdict。

@@ -1,0 +1,9 @@
+{
+  "evidence_hash": "e813826c8fe74161505ab2379b37fa67247fd40c3bd0cb8f82b77880ce403787",
+  "files": {
+    "optimized_bab.json": "5f906c028e45a74e1cd6c82b692c46c67eb21e3997517730ec95ca3c76b99674"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.native-optimized-relu-split-bab-artifact/v1",
+  "status": "ok"
+}

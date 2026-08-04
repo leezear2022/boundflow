@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`8dba95c`（NRIR-10 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/native-alpha-beta-optimizer-step-schedule-v1`
+> 当前 integration base：`7bc49f5`（NRIR-11 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/native-optimized-relu-split-bab-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
@@ -83,6 +83,10 @@
 > 1-step program 执行 8 actions，alpha/beta gradient L1=`169.23175295069814/12.862210273742676`；
 > Schedule/legacy/final native execution max diff 均为 `0.0`。状态为 optimizer control ownership
 > VALIDATED-REDUCED；下一缺口为接回 multi-node ReLU-split BaB queue。
+> 2026-08-04 NRIR-12 进度：optimizer Schedule 已接入每个 ReLU-split queue node batch；固定 ResNet
+> 为 7 nodes/3 expands/4 frontier、packed/serial 3/7 stacks。bounds/state tensors 在冻结容差内，
+> active child beta gradients 非零，selected native re-execution diff=0。状态为 integration
+> VALIDATED-REDUCED；fixed run 仍 budget-exhausted/not-claimed，下一缺口为 sound verdict。
 
 ## 1. 当前真实阶段
 
@@ -107,6 +111,7 @@ BoundFlow 已经完成从边界表示到 query runtime prototype 的主干：
 | Native ReLU-split queue NRIR-9 | split state + bounded control flow validated-reduced | first-class int8 split；toy complete queue；fixed ResNet 7 nodes/3 expands/4 frontier；plain CROWN、budget-exhausted、无完整 verdict/performance |
 | Native alpha/beta state NRIR-10 | frozen optimized-state ownership validated-reduced | 6 ReLU split/alpha/beta inputs；beta lower dual；exact/refinement warm-start；runtime optimizer control 当时仍缺 |
 | Native optimizer Schedule NRIR-11 | fixed-step control ownership validated-reduced | typed optimizer Plan/Task/Schedule；fixed ResNet 8 actions、正 alpha/beta gradient、legacy/native 0 diff；尚未接回 multi-node queue，无 verdict/performance |
+| Native optimized split queue NRIR-12 | optimizer × queue integration validated-reduced | 每 node batch 8 optimizer actions + 21 native tasks；7 nodes/3 expands/4 frontier；parent warm-only；仍 budget-exhausted/not-claimed |
 | ASPLOS 最终系统主张 | IR-5 final VALIDATED-NO-GO | IR-1—4 narrow closure 保留；Global p90/Pareto 失败，当前 system-performance 路线已关闭 |
 
 历史 `main@263ea81` 只到 PR-10 closure，不能再作为项目当前状态入口。跨会话恢复必须同时检查
@@ -496,3 +501,22 @@ selected-state native compiler 的 lower/upper max diff 全为 `0.0`。artifact 
 尚未进入 multi-node BaB queue；没有完整 termination/property verdict 或性能证据。下一代码路线
 是 native optimized ReLU-split BaB integration v1：每个 node 由 optimizer Schedule 产生 selected
 state，再经 native Bound stack 执行，parent 只能作为 monotonic-refinement initialization。
+
+## 19. Native Optimized ReLU-Split BaB v1 判定
+
+NRIR-12 已关闭 NRIR-11 的 single-node 边界。每个 best-first queue node batch 都执行固定 1-step
+optimizer Schedule（8 actions），selected alpha/beta state 随后进入 native compiler（21 tasks）。
+child parent state 按目标 batch layout 重组并重建 scope，NRIR-10 classifier 必须判为 monotonic
+refinement；parent exact state 不被 child exact execution 消费。
+
+toy complete queue 为 15 nodes，packed/serial 5/15 stacks，selected state hash 与 bounds 均一致。
+固定 ResNet bounded queue 为 7 nodes/3 expands/4 frontier，packed/serial 3/7 stacks；lower/upper
+max diff=`1.220703125e-04/1.8310546875e-04`，alpha/beta tensor max diff=
+`4.172325134277344e-07/7.450580596923828e-09`，selected native re-execution max diff 为 0。
+artifact replay hash=`e813826c8fe74161505ab2379b37fa67247fd40c3bd0cb8f82b77880ce403787`；
+聚焦 `18 passed`、全量 `630 passed, 37 skipped`，静态门禁全过。
+
+结论为 optimized queue integration/control ownership `VALIDATED-REDUCED`。exact batch-layout state
+hash 不相等且已披露；fixed run 仍是 `budget_exhausted/property_status=not_claimed`，所以不是完整
+verifier。下一代码路线是 native property termination/verdict v1：verified/unsafe 必须有闭合 proof
+或 concrete witness，任何未闭合 budget/depth/timeout 都保持 unknown。
