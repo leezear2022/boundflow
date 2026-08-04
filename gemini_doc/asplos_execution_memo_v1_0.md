@@ -1488,3 +1488,20 @@ prefix tamper、focused `4 passed`、predecessor-inclusive `12 passed`、全量
 `VALIDATED-REDUCED` 关闭，但不构成
 system speedup/property/GPU/competitor/multi-workload/ASPLOS-ready claim，也不撤销 NRIR-40
 global-budget NO-GO。下一阶段只能消除 scorer ownership/validation 重复并保持 exact branch semantics。
+
+## 55. Objective Branch Scorer Ownership v1（active）
+
+NRIR-42 只改变 scorer candidate-table/validation ownership。新增 typed validated capsule，使每个 node 的
+candidate enumeration 由 branch Plan compile 恰好拥有一次，执行和下游验证只消费 immutable
+candidate table 与 semantic token；historical scorer 和 NRIR-39/40 frozen 文件不改。objective policy、
+optimizer/refinement、31/depth4、queue、cache、slice 与 deadline 全部冻结。
+
+Phase A 必须证明 clauses 2/3 old/new 31-node 的 selected branch、所有 score rows、child lower、queue
+lower/upper、split、α/β、refinement exact；enumeration calls 从 `341` 变为 compile=`31`、execute=`0`；
+三 fresh counterbalanced new/old queue median ratio 两条均 `<=0.75` 且改善大于 MAD。任一失败即
+scorer optimization NO-GO。
+
+只有 Phase A 全过才运行 three fresh whole-query/global-60s Phase B：两条每轮 `31 nodes/15 groups`、
+相对 widest worst lower 各 `>=+1.0`、whole `<=70s` 且无 partial/reset/recompile/evidence omission 才能
+恢复 objective-branch production `VALIDATED-REDUCED`。否则 NRIR-40 production NO-GO 保持不变；所有
+timing 仍为内部准入，`performance_claimed=false`。

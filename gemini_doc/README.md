@@ -16,10 +16,11 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_PRODUCTION_COST_ATTRIBUTION_V1_PLAN_2026_08_05.md`
-（NRIR-41 closed：same-prefix frontier 与 scoring-cost 两门禁均成立，以内部归因
-`VALIDATED-REDUCED` 关闭；下一单变量为 scorer ownership/validation reuse，NRIR-40 production NO-GO
-与 ASPLOS-ready NO 不变）。
+当前最新入口：`gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_SCORER_OWNERSHIP_V1_PLAN_2026_08_05.md`
+（NRIR-42 active：以 typed validated capsule 把 candidate enumeration 从 341 次收敛到 compile-only 31 次，
+先过 exact parity/cost gate，再有条件复测 whole-query production；NRIR-40 production NO-GO 与
+ASPLOS-ready NO 在新 formal 通过前保持不变）。其直接前序为
+`gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_PRODUCTION_COST_ATTRIBUTION_V1_PLAN_2026_08_05.md`。
 其直接前序为 `gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_WHOLE_QUERY_FORMAL_V1_PLAN_2026_08_05.md`、
 `gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_SHARED_EVALUATOR_V1_PLAN_2026_08_05.md`、
 `gemini_doc/BOUNDFLOW_FULL_FRONTIER_TIGHTNESS_ATTRIBUTION_V1_PLAN_2026_08_05.md`、
