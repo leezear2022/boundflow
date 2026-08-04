@@ -1,0 +1,3523 @@
+{
+  "evidence": {
+    "claim_boundary": "multi-clause conjunction control with deterministic candidate search, sound witness replay, unsafe short-circuit, and cooperative deadline; fixed ResNet remains unresolved and no performance is claimed",
+    "compiler_version": "boundflow.complete-verifier-query/v1",
+    "fixed_resnet": {
+      "best_objective_values": [
+        0.6944422721862793,
+        5.920941352844238,
+        0.4761037826538086,
+        1.9662235975265503,
+        0.5178918838500977,
+        1.1114262342453003,
+        2.248816967010498,
+        4.279739856719971,
+        4.841380596160889
+      ],
+      "clauses": [
+        {
+          "best_input_hash": "07bcfbb9bb3d73e00354d6976c551858375dd70a6def480fcd0c775f9e0f5be2",
+          "clause_trace": {
+            "clause_index": 0,
+            "objective_hash": "a62146650a0f29762a1467c72007cba1937a5c05b9236ab53a91964308e05dca",
+            "queue_trace_hash": "9d3f471769bb535e233e939035165bb1b56015177a4d8f9ea3b65ee29e89ea2c",
+            "search_counterexample_found": false,
+            "search_trace_hash": "11073b50fa14e03783ee2ec54127b57ca3e4857b70cca8b3c8a7a14d26c4aa98",
+            "status": "unknown",
+            "threshold": 0.0,
+            "verdict_trace_hash": "52654d1cb32954798a32d3202d6bd0194c94ce195a1c16393e8431f91d5d1173"
+          },
+          "counterexample_input_hash": null,
+          "queue_trace": {
+            "compiler_version": "boundflow.native-optimized-relu-split-bab/v1",
+            "config": {
+              "available_memory_bytes": 1073741824,
+              "expansion_batch_size": 1,
+              "max_depth": 0,
+              "max_eval_batch_size": 1,
+              "max_nodes": 1,
+              "memory_budget_bytes": 1073741824,
+              "threshold": 0.0
+            },
+            "decisions": [
+              {
+                "branch_candidate": null,
+                "child_node_ids": [],
+                "decision_index": 0,
+                "kind": "terminal",
+                "node_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0000:n000000",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0000:eval:0000",
+                "eval_batch_position": 0,
+                "lower": -596.8829956054688,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "710a4a0124b8dd4b720ca99d150a432741b8779a75ee20441d4c830a2823a214",
+                  "execution_plan_instance_hash": "9864d558c3feb986b497ca3e4805a5604ba78e8e53dff319b607118ffed0665e",
+                  "execution_plan_template_hash": "71d4c1a7d04623fb7e78d963745b52abe6141c7e7aa772627742ae6be19cba7d",
+                  "representation_binding_hash": "6446e1c1d75491a9d005467a70c450ac2cc60d717d1b63743ba01fb475206d4c",
+                  "schedule_hash": "7d865d52025486b38fb490be707a173f16e2d5d9de9e097f235f4e964a0b62ce",
+                  "source_bound_module_hash": "710a4a0124b8dd4b720ca99d150a432741b8779a75ee20441d4c830a2823a214",
+                  "source_plan_instance_hash": "ba4fb061ff0aa0c297e7c4c0d5bccb2ab8bd9c7f2c7319de2b455ae7672e5a30",
+                  "source_plan_template_hash": "7271d0fdfccf922b0c966d2309a054032e336f02486a2c9ffe667eb6b2c8c08f",
+                  "source_schedule_hash": "7357c8fe6c30ca91f9a52f49ad0e5c3762c5b07b71cb25f926e2281ddd41de7b",
+                  "task_module_hash": "8bc5a4ec855ff78d4ec3f6fb3ce09e7f41531a2233efc2d166e74da00143d10f"
+                },
+                "node": {
+                  "branch_neuron_index": null,
+                  "branch_relu_input": null,
+                  "branch_value": 0,
+                  "depth": 0,
+                  "node_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0000:n000000",
+                  "parent_node_id": null,
+                  "split_state_hash": "32ef5aa369eb3b424067ead0f6b4a41a59b7c5753a5e59034bc13372b10bc2be"
+                },
+                "optimizer_execution_trace_hash": "24ba7ba56a8ad094257553f4712e9801f0e88f011d75c4b0ff80b7c3bd966a54",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "fcd556c0549ebbe19cd25b561831451575c2f15d9ef262b9651a8afe8d9a822d",
+                  "optimizer_schedule_hash": "88839ca805fd7ef6ea122942bab43f23a86bcbce58f1306a70d0da15389a7bcb",
+                  "optimizer_task_module_hash": "74e16137d4f88691ff0c3fdb5d452cbda44edf28130b25acf52cc629cf6c6736"
+                },
+                "parent_selected_state_hash": null,
+                "parent_state_consumed_as_exact": false,
+                "parent_state_validity": "monotonic_refinement_initialization_only",
+                "priority": -596.883,
+                "selected_state_hash": "87d4a21b63b6987af69b65ea3fa93055e146f6cd49353a0854b82d54420635d8",
+                "upper": 627.3671875,
+                "warm_start_kind": "none"
+              }
+            ],
+            "final_frontier_node_ids": [],
+            "max_queue_size": 1,
+            "native_stack_count": 1,
+            "native_stacks": [
+              {
+                "active_split_count": 0,
+                "alpha_gradient_l1": 180.2803225927055,
+                "beta_gradient_l1": 0.0,
+                "domain_batch_size": 1,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "710a4a0124b8dd4b720ca99d150a432741b8779a75ee20441d4c830a2823a214",
+                  "execution_plan_instance_hash": "9864d558c3feb986b497ca3e4805a5604ba78e8e53dff319b607118ffed0665e",
+                  "execution_plan_template_hash": "71d4c1a7d04623fb7e78d963745b52abe6141c7e7aa772627742ae6be19cba7d",
+                  "representation_binding_hash": "6446e1c1d75491a9d005467a70c450ac2cc60d717d1b63743ba01fb475206d4c",
+                  "schedule_hash": "7d865d52025486b38fb490be707a173f16e2d5d9de9e097f235f4e964a0b62ce",
+                  "source_bound_module_hash": "710a4a0124b8dd4b720ca99d150a432741b8779a75ee20441d4c830a2823a214",
+                  "source_plan_instance_hash": "ba4fb061ff0aa0c297e7c4c0d5bccb2ab8bd9c7f2c7319de2b455ae7672e5a30",
+                  "source_plan_template_hash": "7271d0fdfccf922b0c966d2309a054032e336f02486a2c9ffe667eb6b2c8c08f",
+                  "source_schedule_hash": "7357c8fe6c30ca91f9a52f49ad0e5c3762c5b07b71cb25f926e2281ddd41de7b",
+                  "task_module_hash": "8bc5a4ec855ff78d4ec3f6fb3ce09e7f41531a2233efc2d166e74da00143d10f"
+                },
+                "native_schedule_launch_count": 21,
+                "native_task_count": 21,
+                "native_task_trace_event_count": 21,
+                "node_ids": [
+                  "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0000:n000000"
+                ],
+                "optimizer_action_count": 8,
+                "optimizer_backward_count": 1,
+                "optimizer_evaluation_count": 2,
+                "optimizer_execution_trace_hash": "24ba7ba56a8ad094257553f4712e9801f0e88f011d75c4b0ff80b7c3bd966a54",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "fcd556c0549ebbe19cd25b561831451575c2f15d9ef262b9651a8afe8d9a822d",
+                  "optimizer_schedule_hash": "88839ca805fd7ef6ea122942bab43f23a86bcbce58f1306a70d0da15389a7bcb",
+                  "optimizer_task_module_hash": "74e16137d4f88691ff0c3fdb5d452cbda44edf28130b25acf52cc629cf6c6736"
+                },
+                "optimizer_projection_count": 1,
+                "optimizer_selected_batch_state_hash": "87d4a21b63b6987af69b65ea3fa93055e146f6cd49353a0854b82d54420635d8",
+                "parent_selected_state_hashes": [
+                  null
+                ],
+                "selected_native_lower_max_abs_diff": 0.0,
+                "selected_native_upper_max_abs_diff": 0.0,
+                "stack_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0000:eval:0000",
+                "warm_source_state_hash": null,
+                "warm_start_kind": "none"
+              }
+            ],
+            "objective_hash": "a62146650a0f29762a1467c72007cba1937a5c05b9236ab53a91964308e05dca",
+            "optimizer_policy": {
+              "alpha_init": 0.5,
+              "beta_init": 0.0,
+              "lr": 0.05,
+              "objective": "lower",
+              "optimizer": "torch.optim.Adam",
+              "per_batch_params": true,
+              "soft_tau": 1.0,
+              "spec_reduce": "mean",
+              "steps": 1
+            },
+            "performance_claimed": false,
+            "property_status": "not_claimed",
+            "root_input_lower_hash": "bed6da6e49f1123b54fe61247615cf0e86f1b4257face7b073428f257607bda6",
+            "root_input_upper_hash": "955d79bd0824185cad0be1e758e6e492c51aec6c9199f81359b2528b848ec9ab",
+            "run_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0000",
+            "schema_version": "boundflow.optimized-relu-split-bab-trace/v1",
+            "status": "complete",
+            "termination_reason": "configured_bounded_tree_exhausted"
+          },
+          "queue_trace_hash": "9d3f471769bb535e233e939035165bb1b56015177a4d8f9ea3b65ee29e89ea2c",
+          "search_trace": {
+            "best_input_hash": "07bcfbb9bb3d73e00354d6976c551858375dd70a6def480fcd0c775f9e0f5be2",
+            "best_iteration": 4,
+            "best_objective_value": 0.6944422721862793,
+            "compiler_version": "boundflow.native-candidate-search/v1",
+            "counterexample_found": false,
+            "early_stopped": false,
+            "gradient_l1_values": [
+              20.280553817749023,
+              20.21489715576172,
+              20.279306411743164,
+              20.282712936401367
+            ],
+            "initial_input_hash": "e402e6fb61cb8d0adc5390d845c4c388673e1d8523c4f2e3c518c587d1717832",
+            "objective_hash": "a62146650a0f29762a1467c72007cba1937a5c05b9236ab53a91964308e05dca",
+            "objective_values": [
+              0.8564349412918091,
+              0.816016435623169,
+              0.7755331993103027,
+              0.7349752187728882,
+              0.6944422721862793
+            ],
+            "performance_claimed": false,
+            "policy": {
+              "early_stop": true,
+              "projection": "exact_box_clamp",
+              "start": "input_box_center",
+              "step_size": 0.002,
+              "steps": 4,
+              "update": "sign_gradient_descent"
+            },
+            "projected_update_count": 4,
+            "proof_claimed": false,
+            "schema_version": "boundflow.native-candidate-search/v1",
+            "steps_executed": 4,
+            "threshold": 0.0
+          },
+          "search_trace_hash": "11073b50fa14e03783ee2ec54127b57ca3e4857b70cca8b3c8a7a14d26c4aa98",
+          "verdict_trace": {
+            "compiler_version": "boundflow.native-property-verdict/v1",
+            "counterexample": null,
+            "objective_hash": "a62146650a0f29762a1467c72007cba1937a5c05b9236ab53a91964308e05dca",
+            "performance_claimed": false,
+            "queue_trace_hash": "9d3f471769bb535e233e939035165bb1b56015177a4d8f9ea3b65ee29e89ea2c",
+            "reason": "configured_depth_terminal_open",
+            "run_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0000",
+            "schema_version": "boundflow.native-property-verdict/v1",
+            "sound_pruned_leaf_node_ids": [],
+            "status": "unknown",
+            "threshold": 0.0,
+            "unresolved_leaf_node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0000:n000000"
+            ]
+          },
+          "verdict_trace_hash": "52654d1cb32954798a32d3202d6bd0194c94ce195a1c16393e8431f91d5d1173"
+        },
+        {
+          "best_input_hash": "685822312a12a874fc6ba7d22c0a4821f7de8f05d012a8bdcffc2fd9caefd8a5",
+          "clause_trace": {
+            "clause_index": 1,
+            "objective_hash": "5e13e14a90641a8177787823b373b0bbb3a0d8fe7606afcf1b184e948bce7f92",
+            "queue_trace_hash": "e4369ec7871f901f736673baf7990dc69f230e5724f482397ea365dc97d1546a",
+            "search_counterexample_found": false,
+            "search_trace_hash": "f3b7a1e2c1279d9678c3966812352c899efe7d98e1948a8e79d1b6589cceed40",
+            "status": "unknown",
+            "threshold": 0.0,
+            "verdict_trace_hash": "35d957ad96ca025a78fbbbe84c5c4eb8936e70bd45988e40250503e15e771894"
+          },
+          "counterexample_input_hash": null,
+          "queue_trace": {
+            "compiler_version": "boundflow.native-optimized-relu-split-bab/v1",
+            "config": {
+              "available_memory_bytes": 1073741824,
+              "expansion_batch_size": 1,
+              "max_depth": 0,
+              "max_eval_batch_size": 1,
+              "max_nodes": 1,
+              "memory_budget_bytes": 1073741824,
+              "threshold": 0.0
+            },
+            "decisions": [
+              {
+                "branch_candidate": null,
+                "child_node_ids": [],
+                "decision_index": 0,
+                "kind": "terminal",
+                "node_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0001:n000000",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0001:eval:0000",
+                "eval_batch_position": 0,
+                "lower": -863.1871337890625,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "0dd3311f0e3aafdac69c24b2e742a8f53e199799f21804083be5c3a170464ac4",
+                  "execution_plan_instance_hash": "c00b97f5a88666339432a57d4f95e311417502150b8c7ef82b4612130f8a2307",
+                  "execution_plan_template_hash": "91959021d7cd46d0a1d06a4e328593e3a06cd8c381eaedf2ca107b660235f4ec",
+                  "representation_binding_hash": "eee053f9b67769c04806f6284acbd661413158fc8f4b64db2b3fff42eeb60109",
+                  "schedule_hash": "c4b71b9d69c829bc2ffe512befab66c991ae5c2a4d531a717c1b4fd7c8fc8ece",
+                  "source_bound_module_hash": "0dd3311f0e3aafdac69c24b2e742a8f53e199799f21804083be5c3a170464ac4",
+                  "source_plan_instance_hash": "1645ab7d5c64af0851a3993ea43467ece65139687299c8c4f2f02e61b3da0ab1",
+                  "source_plan_template_hash": "6865c7a0e6a10b832d87bdedf471ddadc03310286b36a1d8e699c7277f5e3f7b",
+                  "source_schedule_hash": "f661498590203ec78aef030d1fb8c293e8159949f13409be2249b2753930d949",
+                  "task_module_hash": "e496222160176b17c31620f8d8d8d765ec701313e2aa9abc4f6ac4bb55a76114"
+                },
+                "node": {
+                  "branch_neuron_index": null,
+                  "branch_relu_input": null,
+                  "branch_value": 0,
+                  "depth": 0,
+                  "node_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0001:n000000",
+                  "parent_node_id": null,
+                  "split_state_hash": "32ef5aa369eb3b424067ead0f6b4a41a59b7c5753a5e59034bc13372b10bc2be"
+                },
+                "optimizer_execution_trace_hash": "75e51265627db0d7b41ade60455f3de925f9bfcd54af440aa346f2236da83d18",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "562112f2e0aed24a631bd73c43c52d686b6c812f3d4b34efe6e82e10829ddfa6",
+                  "optimizer_schedule_hash": "35602b76ea450fc038eff973d39946057c6a8794edfb6ca6b01c3e8ea4ee3b1a",
+                  "optimizer_task_module_hash": "1bd29e7692f912745b62caf905e9adf360a1af7470ebc58b407a0ef3bfd1c598"
+                },
+                "parent_selected_state_hash": null,
+                "parent_state_consumed_as_exact": false,
+                "parent_state_validity": "monotonic_refinement_initialization_only",
+                "priority": -863.1871,
+                "selected_state_hash": "3b2f724fbd031c102326441692dab4272a633f019f936f1f9464d5c8f75593f3",
+                "upper": 936.6478271484375,
+                "warm_start_kind": "none"
+              }
+            ],
+            "final_frontier_node_ids": [],
+            "max_queue_size": 1,
+            "native_stack_count": 1,
+            "native_stacks": [
+              {
+                "active_split_count": 0,
+                "alpha_gradient_l1": 261.99227763712406,
+                "beta_gradient_l1": 0.0,
+                "domain_batch_size": 1,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "0dd3311f0e3aafdac69c24b2e742a8f53e199799f21804083be5c3a170464ac4",
+                  "execution_plan_instance_hash": "c00b97f5a88666339432a57d4f95e311417502150b8c7ef82b4612130f8a2307",
+                  "execution_plan_template_hash": "91959021d7cd46d0a1d06a4e328593e3a06cd8c381eaedf2ca107b660235f4ec",
+                  "representation_binding_hash": "eee053f9b67769c04806f6284acbd661413158fc8f4b64db2b3fff42eeb60109",
+                  "schedule_hash": "c4b71b9d69c829bc2ffe512befab66c991ae5c2a4d531a717c1b4fd7c8fc8ece",
+                  "source_bound_module_hash": "0dd3311f0e3aafdac69c24b2e742a8f53e199799f21804083be5c3a170464ac4",
+                  "source_plan_instance_hash": "1645ab7d5c64af0851a3993ea43467ece65139687299c8c4f2f02e61b3da0ab1",
+                  "source_plan_template_hash": "6865c7a0e6a10b832d87bdedf471ddadc03310286b36a1d8e699c7277f5e3f7b",
+                  "source_schedule_hash": "f661498590203ec78aef030d1fb8c293e8159949f13409be2249b2753930d949",
+                  "task_module_hash": "e496222160176b17c31620f8d8d8d765ec701313e2aa9abc4f6ac4bb55a76114"
+                },
+                "native_schedule_launch_count": 21,
+                "native_task_count": 21,
+                "native_task_trace_event_count": 21,
+                "node_ids": [
+                  "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0001:n000000"
+                ],
+                "optimizer_action_count": 8,
+                "optimizer_backward_count": 1,
+                "optimizer_evaluation_count": 2,
+                "optimizer_execution_trace_hash": "75e51265627db0d7b41ade60455f3de925f9bfcd54af440aa346f2236da83d18",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "562112f2e0aed24a631bd73c43c52d686b6c812f3d4b34efe6e82e10829ddfa6",
+                  "optimizer_schedule_hash": "35602b76ea450fc038eff973d39946057c6a8794edfb6ca6b01c3e8ea4ee3b1a",
+                  "optimizer_task_module_hash": "1bd29e7692f912745b62caf905e9adf360a1af7470ebc58b407a0ef3bfd1c598"
+                },
+                "optimizer_projection_count": 1,
+                "optimizer_selected_batch_state_hash": "3b2f724fbd031c102326441692dab4272a633f019f936f1f9464d5c8f75593f3",
+                "parent_selected_state_hashes": [
+                  null
+                ],
+                "selected_native_lower_max_abs_diff": 0.0,
+                "selected_native_upper_max_abs_diff": 0.0,
+                "stack_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0001:eval:0000",
+                "warm_source_state_hash": null,
+                "warm_start_kind": "none"
+              }
+            ],
+            "objective_hash": "5e13e14a90641a8177787823b373b0bbb3a0d8fe7606afcf1b184e948bce7f92",
+            "optimizer_policy": {
+              "alpha_init": 0.5,
+              "beta_init": 0.0,
+              "lr": 0.05,
+              "objective": "lower",
+              "optimizer": "torch.optim.Adam",
+              "per_batch_params": true,
+              "soft_tau": 1.0,
+              "spec_reduce": "mean",
+              "steps": 1
+            },
+            "performance_claimed": false,
+            "property_status": "not_claimed",
+            "root_input_lower_hash": "bed6da6e49f1123b54fe61247615cf0e86f1b4257face7b073428f257607bda6",
+            "root_input_upper_hash": "955d79bd0824185cad0be1e758e6e492c51aec6c9199f81359b2528b848ec9ab",
+            "run_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0001",
+            "schema_version": "boundflow.optimized-relu-split-bab-trace/v1",
+            "status": "complete",
+            "termination_reason": "configured_bounded_tree_exhausted"
+          },
+          "queue_trace_hash": "e4369ec7871f901f736673baf7990dc69f230e5724f482397ea365dc97d1546a",
+          "search_trace": {
+            "best_input_hash": "685822312a12a874fc6ba7d22c0a4821f7de8f05d012a8bdcffc2fd9caefd8a5",
+            "best_iteration": 4,
+            "best_objective_value": 5.920941352844238,
+            "compiler_version": "boundflow.native-candidate-search/v1",
+            "counterexample_found": false,
+            "early_stopped": false,
+            "gradient_l1_values": [
+              23.29621124267578,
+              23.602678298950195,
+              23.63349151611328,
+              23.686511993408203
+            ],
+            "initial_input_hash": "e402e6fb61cb8d0adc5390d845c4c388673e1d8523c4f2e3c518c587d1717832",
+            "objective_hash": "5e13e14a90641a8177787823b373b0bbb3a0d8fe7606afcf1b184e948bce7f92",
+            "objective_values": [
+              6.109412670135498,
+              6.06275749206543,
+              6.015361785888672,
+              5.968083381652832,
+              5.920941352844238
+            ],
+            "performance_claimed": false,
+            "policy": {
+              "early_stop": true,
+              "projection": "exact_box_clamp",
+              "start": "input_box_center",
+              "step_size": 0.002,
+              "steps": 4,
+              "update": "sign_gradient_descent"
+            },
+            "projected_update_count": 4,
+            "proof_claimed": false,
+            "schema_version": "boundflow.native-candidate-search/v1",
+            "steps_executed": 4,
+            "threshold": 0.0
+          },
+          "search_trace_hash": "f3b7a1e2c1279d9678c3966812352c899efe7d98e1948a8e79d1b6589cceed40",
+          "verdict_trace": {
+            "compiler_version": "boundflow.native-property-verdict/v1",
+            "counterexample": null,
+            "objective_hash": "5e13e14a90641a8177787823b373b0bbb3a0d8fe7606afcf1b184e948bce7f92",
+            "performance_claimed": false,
+            "queue_trace_hash": "e4369ec7871f901f736673baf7990dc69f230e5724f482397ea365dc97d1546a",
+            "reason": "configured_depth_terminal_open",
+            "run_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0001",
+            "schema_version": "boundflow.native-property-verdict/v1",
+            "sound_pruned_leaf_node_ids": [],
+            "status": "unknown",
+            "threshold": 0.0,
+            "unresolved_leaf_node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0001:n000000"
+            ]
+          },
+          "verdict_trace_hash": "35d957ad96ca025a78fbbbe84c5c4eb8936e70bd45988e40250503e15e771894"
+        },
+        {
+          "best_input_hash": "f620a7cba71d411e7eb75984cb87c30835f8a2762ae5b8500e7053f77cb8cbe7",
+          "clause_trace": {
+            "clause_index": 2,
+            "objective_hash": "4b65cdffa3afd9d34d2bb3abf3fd69d383105fcf6d7d05649c5e95cff97b88c7",
+            "queue_trace_hash": "2cb99cf178dd5afcb63a2d44a26a539790cb65d874fda8577e1d91e4e7d7f1b9",
+            "search_counterexample_found": false,
+            "search_trace_hash": "daae2c580b4b68156d77e6db9d81adfb2992918dc8985264139eb50cbaba1c72",
+            "status": "unknown",
+            "threshold": 0.0,
+            "verdict_trace_hash": "1019171e54d03c4dec06399b2b2f10c79f9f8cf8edfb0c169466767e99b2fe9c"
+          },
+          "counterexample_input_hash": null,
+          "queue_trace": {
+            "compiler_version": "boundflow.native-optimized-relu-split-bab/v1",
+            "config": {
+              "available_memory_bytes": 1073741824,
+              "expansion_batch_size": 1,
+              "max_depth": 0,
+              "max_eval_batch_size": 1,
+              "max_nodes": 1,
+              "memory_budget_bytes": 1073741824,
+              "threshold": 0.0
+            },
+            "decisions": [
+              {
+                "branch_candidate": null,
+                "child_node_ids": [],
+                "decision_index": 0,
+                "kind": "terminal",
+                "node_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0002:n000000",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0002:eval:0000",
+                "eval_batch_position": 0,
+                "lower": -408.01116943359375,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "2914b419750c7899253428dbd6a5d7a4aaa68fabf1df1cadac471e8c29b90a90",
+                  "execution_plan_instance_hash": "4851481ff1a109aba07ba3b6baeb93732b9ff031242b13a9ecf7264c896a25f1",
+                  "execution_plan_template_hash": "334df3e18d2a32d91bef739937b14352b42f8e34d9e8cfe72f42bf4c8df080d6",
+                  "representation_binding_hash": "177c50af747fc7cbb726822e6782d51c069e04a8a41f29d9f016d79ec4456e30",
+                  "schedule_hash": "1ae52b31c95e49ed687e2dd46ab5348826650a5aa1506e638316ead5ae63c629",
+                  "source_bound_module_hash": "2914b419750c7899253428dbd6a5d7a4aaa68fabf1df1cadac471e8c29b90a90",
+                  "source_plan_instance_hash": "b1a582cb2500e4bebcd75116f8ecbbf56690eeffd7161c611d944c78c4c1335a",
+                  "source_plan_template_hash": "c2432d9e00ac71abb9c206c8d244de6b2e474c42700c17b99b94f239e8fbf5aa",
+                  "source_schedule_hash": "8bbc50f6ebbc65ccce0d20cfb725cdd04649b1c5ebf1d924586aaea4a6a627be",
+                  "task_module_hash": "a08334b4bc8f84cb1383744c50a32d7d9516dfff2f3c7f2dffa93092204e8ce9"
+                },
+                "node": {
+                  "branch_neuron_index": null,
+                  "branch_relu_input": null,
+                  "branch_value": 0,
+                  "depth": 0,
+                  "node_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0002:n000000",
+                  "parent_node_id": null,
+                  "split_state_hash": "32ef5aa369eb3b424067ead0f6b4a41a59b7c5753a5e59034bc13372b10bc2be"
+                },
+                "optimizer_execution_trace_hash": "aad41082fcff5f02007a66f046cb82ed4d0fc38e5e08410894a10c6e3e01d8e6",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "b6b56c01f56351dfb65ab12d4c2053070b8bb07d93def462400cdc16ea270e96",
+                  "optimizer_schedule_hash": "ac319d4a9041ee09cec0b17b567043603baab65d03dab5d956b3692e2fd0e1c6",
+                  "optimizer_task_module_hash": "a37810de2240ebc0cfbc91d39eb4728394fc8095767d9538b49154ef19f03951"
+                },
+                "parent_selected_state_hash": null,
+                "parent_state_consumed_as_exact": false,
+                "parent_state_validity": "monotonic_refinement_initialization_only",
+                "priority": -408.0112,
+                "selected_state_hash": "d26a9965721b658f142cedd43a49dd33842752a3114d20e4fb12f2d22e75b4fa",
+                "upper": 559.677734375,
+                "warm_start_kind": "none"
+              }
+            ],
+            "final_frontier_node_ids": [],
+            "max_queue_size": 1,
+            "native_stack_count": 1,
+            "native_stacks": [
+              {
+                "active_split_count": 0,
+                "alpha_gradient_l1": 186.07158255204558,
+                "beta_gradient_l1": 0.0,
+                "domain_batch_size": 1,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "2914b419750c7899253428dbd6a5d7a4aaa68fabf1df1cadac471e8c29b90a90",
+                  "execution_plan_instance_hash": "4851481ff1a109aba07ba3b6baeb93732b9ff031242b13a9ecf7264c896a25f1",
+                  "execution_plan_template_hash": "334df3e18d2a32d91bef739937b14352b42f8e34d9e8cfe72f42bf4c8df080d6",
+                  "representation_binding_hash": "177c50af747fc7cbb726822e6782d51c069e04a8a41f29d9f016d79ec4456e30",
+                  "schedule_hash": "1ae52b31c95e49ed687e2dd46ab5348826650a5aa1506e638316ead5ae63c629",
+                  "source_bound_module_hash": "2914b419750c7899253428dbd6a5d7a4aaa68fabf1df1cadac471e8c29b90a90",
+                  "source_plan_instance_hash": "b1a582cb2500e4bebcd75116f8ecbbf56690eeffd7161c611d944c78c4c1335a",
+                  "source_plan_template_hash": "c2432d9e00ac71abb9c206c8d244de6b2e474c42700c17b99b94f239e8fbf5aa",
+                  "source_schedule_hash": "8bbc50f6ebbc65ccce0d20cfb725cdd04649b1c5ebf1d924586aaea4a6a627be",
+                  "task_module_hash": "a08334b4bc8f84cb1383744c50a32d7d9516dfff2f3c7f2dffa93092204e8ce9"
+                },
+                "native_schedule_launch_count": 21,
+                "native_task_count": 21,
+                "native_task_trace_event_count": 21,
+                "node_ids": [
+                  "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0002:n000000"
+                ],
+                "optimizer_action_count": 8,
+                "optimizer_backward_count": 1,
+                "optimizer_evaluation_count": 2,
+                "optimizer_execution_trace_hash": "aad41082fcff5f02007a66f046cb82ed4d0fc38e5e08410894a10c6e3e01d8e6",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "b6b56c01f56351dfb65ab12d4c2053070b8bb07d93def462400cdc16ea270e96",
+                  "optimizer_schedule_hash": "ac319d4a9041ee09cec0b17b567043603baab65d03dab5d956b3692e2fd0e1c6",
+                  "optimizer_task_module_hash": "a37810de2240ebc0cfbc91d39eb4728394fc8095767d9538b49154ef19f03951"
+                },
+                "optimizer_projection_count": 1,
+                "optimizer_selected_batch_state_hash": "d26a9965721b658f142cedd43a49dd33842752a3114d20e4fb12f2d22e75b4fa",
+                "parent_selected_state_hashes": [
+                  null
+                ],
+                "selected_native_lower_max_abs_diff": 0.0,
+                "selected_native_upper_max_abs_diff": 0.0,
+                "stack_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0002:eval:0000",
+                "warm_source_state_hash": null,
+                "warm_start_kind": "none"
+              }
+            ],
+            "objective_hash": "4b65cdffa3afd9d34d2bb3abf3fd69d383105fcf6d7d05649c5e95cff97b88c7",
+            "optimizer_policy": {
+              "alpha_init": 0.5,
+              "beta_init": 0.0,
+              "lr": 0.05,
+              "objective": "lower",
+              "optimizer": "torch.optim.Adam",
+              "per_batch_params": true,
+              "soft_tau": 1.0,
+              "spec_reduce": "mean",
+              "steps": 1
+            },
+            "performance_claimed": false,
+            "property_status": "not_claimed",
+            "root_input_lower_hash": "bed6da6e49f1123b54fe61247615cf0e86f1b4257face7b073428f257607bda6",
+            "root_input_upper_hash": "955d79bd0824185cad0be1e758e6e492c51aec6c9199f81359b2528b848ec9ab",
+            "run_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0002",
+            "schema_version": "boundflow.optimized-relu-split-bab-trace/v1",
+            "status": "complete",
+            "termination_reason": "configured_bounded_tree_exhausted"
+          },
+          "queue_trace_hash": "2cb99cf178dd5afcb63a2d44a26a539790cb65d874fda8577e1d91e4e7d7f1b9",
+          "search_trace": {
+            "best_input_hash": "f620a7cba71d411e7eb75984cb87c30835f8a2762ae5b8500e7053f77cb8cbe7",
+            "best_iteration": 4,
+            "best_objective_value": 0.4761037826538086,
+            "compiler_version": "boundflow.native-candidate-search/v1",
+            "counterexample_found": false,
+            "early_stopped": false,
+            "gradient_l1_values": [
+              16.466625213623047,
+              16.642547607421875,
+              16.464927673339844,
+              16.32021713256836
+            ],
+            "initial_input_hash": "e402e6fb61cb8d0adc5390d845c4c388673e1d8523c4f2e3c518c587d1717832",
+            "objective_hash": "4b65cdffa3afd9d34d2bb3abf3fd69d383105fcf6d7d05649c5e95cff97b88c7",
+            "objective_values": [
+              0.607013463973999,
+              0.5739219188690186,
+              0.5411198139190674,
+              0.5085687637329102,
+              0.4761037826538086
+            ],
+            "performance_claimed": false,
+            "policy": {
+              "early_stop": true,
+              "projection": "exact_box_clamp",
+              "start": "input_box_center",
+              "step_size": 0.002,
+              "steps": 4,
+              "update": "sign_gradient_descent"
+            },
+            "projected_update_count": 4,
+            "proof_claimed": false,
+            "schema_version": "boundflow.native-candidate-search/v1",
+            "steps_executed": 4,
+            "threshold": 0.0
+          },
+          "search_trace_hash": "daae2c580b4b68156d77e6db9d81adfb2992918dc8985264139eb50cbaba1c72",
+          "verdict_trace": {
+            "compiler_version": "boundflow.native-property-verdict/v1",
+            "counterexample": null,
+            "objective_hash": "4b65cdffa3afd9d34d2bb3abf3fd69d383105fcf6d7d05649c5e95cff97b88c7",
+            "performance_claimed": false,
+            "queue_trace_hash": "2cb99cf178dd5afcb63a2d44a26a539790cb65d874fda8577e1d91e4e7d7f1b9",
+            "reason": "configured_depth_terminal_open",
+            "run_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0002",
+            "schema_version": "boundflow.native-property-verdict/v1",
+            "sound_pruned_leaf_node_ids": [],
+            "status": "unknown",
+            "threshold": 0.0,
+            "unresolved_leaf_node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0002:n000000"
+            ]
+          },
+          "verdict_trace_hash": "1019171e54d03c4dec06399b2b2f10c79f9f8cf8edfb0c169466767e99b2fe9c"
+        },
+        {
+          "best_input_hash": "a3c3e11410219ad8662d51eaea82bac4eb1930846a4b93109c6c4303db624df1",
+          "clause_trace": {
+            "clause_index": 3,
+            "objective_hash": "cc7a31d202b56353ad0b9fb2e076a7eb490e1877a6e5fa5b596f66e802e72a24",
+            "queue_trace_hash": "4914f27e2cb5b7040c8e4f3fd829964b3ccb379f4e3f5b49e5e45efb7238cbeb",
+            "search_counterexample_found": false,
+            "search_trace_hash": "8a6d9adfe3ae5a7517ad5f4f73d3b7e600acdabe0d3e24ac2870445e3b3f5326",
+            "status": "unknown",
+            "threshold": 0.0,
+            "verdict_trace_hash": "2092de8c0cecf8f2ad0301c1caa14eb85328e6f05458233fcb49e5e9bed125b5"
+          },
+          "counterexample_input_hash": null,
+          "queue_trace": {
+            "compiler_version": "boundflow.native-optimized-relu-split-bab/v1",
+            "config": {
+              "available_memory_bytes": 1073741824,
+              "expansion_batch_size": 1,
+              "max_depth": 0,
+              "max_eval_batch_size": 1,
+              "max_nodes": 1,
+              "memory_budget_bytes": 1073741824,
+              "threshold": 0.0
+            },
+            "decisions": [
+              {
+                "branch_candidate": null,
+                "child_node_ids": [],
+                "decision_index": 0,
+                "kind": "terminal",
+                "node_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0003:n000000",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0003:eval:0000",
+                "eval_batch_position": 0,
+                "lower": -436.09442138671875,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "f3005709e6b3f0a5052da9d67c4f7926265be0c64b8e96ff837a6fa50f50312c",
+                  "execution_plan_instance_hash": "34ddce7b3968d4e4ccb760d713517b38696c16f4a50356b8e5f7f2817a66a908",
+                  "execution_plan_template_hash": "b28d73382b9ffafe0836b42fea437795c6997e4a7c721b99a35ead2b884331f7",
+                  "representation_binding_hash": "4b2468d03b7b7664187dc4833e79deb493814ef8102e913e62c617eccd7d7d1d",
+                  "schedule_hash": "18b679e80af4b7e03f75113dfa13f399f110194f3bb1d7832d7db73b343f6c5b",
+                  "source_bound_module_hash": "f3005709e6b3f0a5052da9d67c4f7926265be0c64b8e96ff837a6fa50f50312c",
+                  "source_plan_instance_hash": "1281199dab3719f6daa2490f254e2739651683d1f8dc11ec281c32593953d626",
+                  "source_plan_template_hash": "e985a1339f2b8806747a37aaaa9ffaf7d0fc768fc04719e11f7f2cadaade3326",
+                  "source_schedule_hash": "4fd1a9b3729056044254a46d2741856ccf7fc77a5b71fd832f5495d3aa5f9b43",
+                  "task_module_hash": "a3a8d50d72e5043b5e5f7d123f2da31632473d2e67480baa7ea0c4925c633864"
+                },
+                "node": {
+                  "branch_neuron_index": null,
+                  "branch_relu_input": null,
+                  "branch_value": 0,
+                  "depth": 0,
+                  "node_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0003:n000000",
+                  "parent_node_id": null,
+                  "split_state_hash": "32ef5aa369eb3b424067ead0f6b4a41a59b7c5753a5e59034bc13372b10bc2be"
+                },
+                "optimizer_execution_trace_hash": "b91a61bbee7c1109e4bab6edc56cb357f43ebf31cf16e4f0bee6ef44e5f088ca",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "01551d3b62dcab116e90f08f9b6bbac3f918120600bf3d4e89d5757642a57aa3",
+                  "optimizer_schedule_hash": "1458f984302dc3d1843fb384d7bc81d91b10271dc1eccb3e5845701f4038259a",
+                  "optimizer_task_module_hash": "7ba05e13b8fd8fc79d838fc599083eca9135f9116e95b80f50530877401da73d"
+                },
+                "parent_selected_state_hash": null,
+                "parent_state_consumed_as_exact": false,
+                "parent_state_validity": "monotonic_refinement_initialization_only",
+                "priority": -436.0944,
+                "selected_state_hash": "4f9a3e171a61c9b982c6075180cb4150457ecd4af73e510ab917b9f46ea019ef",
+                "upper": 574.160888671875,
+                "warm_start_kind": "none"
+              }
+            ],
+            "final_frontier_node_ids": [],
+            "max_queue_size": 1,
+            "native_stack_count": 1,
+            "native_stacks": [
+              {
+                "active_split_count": 0,
+                "alpha_gradient_l1": 179.58626632392406,
+                "beta_gradient_l1": 0.0,
+                "domain_batch_size": 1,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "f3005709e6b3f0a5052da9d67c4f7926265be0c64b8e96ff837a6fa50f50312c",
+                  "execution_plan_instance_hash": "34ddce7b3968d4e4ccb760d713517b38696c16f4a50356b8e5f7f2817a66a908",
+                  "execution_plan_template_hash": "b28d73382b9ffafe0836b42fea437795c6997e4a7c721b99a35ead2b884331f7",
+                  "representation_binding_hash": "4b2468d03b7b7664187dc4833e79deb493814ef8102e913e62c617eccd7d7d1d",
+                  "schedule_hash": "18b679e80af4b7e03f75113dfa13f399f110194f3bb1d7832d7db73b343f6c5b",
+                  "source_bound_module_hash": "f3005709e6b3f0a5052da9d67c4f7926265be0c64b8e96ff837a6fa50f50312c",
+                  "source_plan_instance_hash": "1281199dab3719f6daa2490f254e2739651683d1f8dc11ec281c32593953d626",
+                  "source_plan_template_hash": "e985a1339f2b8806747a37aaaa9ffaf7d0fc768fc04719e11f7f2cadaade3326",
+                  "source_schedule_hash": "4fd1a9b3729056044254a46d2741856ccf7fc77a5b71fd832f5495d3aa5f9b43",
+                  "task_module_hash": "a3a8d50d72e5043b5e5f7d123f2da31632473d2e67480baa7ea0c4925c633864"
+                },
+                "native_schedule_launch_count": 21,
+                "native_task_count": 21,
+                "native_task_trace_event_count": 21,
+                "node_ids": [
+                  "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0003:n000000"
+                ],
+                "optimizer_action_count": 8,
+                "optimizer_backward_count": 1,
+                "optimizer_evaluation_count": 2,
+                "optimizer_execution_trace_hash": "b91a61bbee7c1109e4bab6edc56cb357f43ebf31cf16e4f0bee6ef44e5f088ca",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "01551d3b62dcab116e90f08f9b6bbac3f918120600bf3d4e89d5757642a57aa3",
+                  "optimizer_schedule_hash": "1458f984302dc3d1843fb384d7bc81d91b10271dc1eccb3e5845701f4038259a",
+                  "optimizer_task_module_hash": "7ba05e13b8fd8fc79d838fc599083eca9135f9116e95b80f50530877401da73d"
+                },
+                "optimizer_projection_count": 1,
+                "optimizer_selected_batch_state_hash": "4f9a3e171a61c9b982c6075180cb4150457ecd4af73e510ab917b9f46ea019ef",
+                "parent_selected_state_hashes": [
+                  null
+                ],
+                "selected_native_lower_max_abs_diff": 0.0,
+                "selected_native_upper_max_abs_diff": 0.0,
+                "stack_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0003:eval:0000",
+                "warm_source_state_hash": null,
+                "warm_start_kind": "none"
+              }
+            ],
+            "objective_hash": "cc7a31d202b56353ad0b9fb2e076a7eb490e1877a6e5fa5b596f66e802e72a24",
+            "optimizer_policy": {
+              "alpha_init": 0.5,
+              "beta_init": 0.0,
+              "lr": 0.05,
+              "objective": "lower",
+              "optimizer": "torch.optim.Adam",
+              "per_batch_params": true,
+              "soft_tau": 1.0,
+              "spec_reduce": "mean",
+              "steps": 1
+            },
+            "performance_claimed": false,
+            "property_status": "not_claimed",
+            "root_input_lower_hash": "bed6da6e49f1123b54fe61247615cf0e86f1b4257face7b073428f257607bda6",
+            "root_input_upper_hash": "955d79bd0824185cad0be1e758e6e492c51aec6c9199f81359b2528b848ec9ab",
+            "run_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0003",
+            "schema_version": "boundflow.optimized-relu-split-bab-trace/v1",
+            "status": "complete",
+            "termination_reason": "configured_bounded_tree_exhausted"
+          },
+          "queue_trace_hash": "4914f27e2cb5b7040c8e4f3fd829964b3ccb379f4e3f5b49e5e45efb7238cbeb",
+          "search_trace": {
+            "best_input_hash": "a3c3e11410219ad8662d51eaea82bac4eb1930846a4b93109c6c4303db624df1",
+            "best_iteration": 4,
+            "best_objective_value": 1.9662235975265503,
+            "compiler_version": "boundflow.native-candidate-search/v1",
+            "counterexample_found": false,
+            "early_stopped": false,
+            "gradient_l1_values": [
+              19.221521377563477,
+              19.313796997070312,
+              19.268522262573242,
+              19.20944595336914
+            ],
+            "initial_input_hash": "e402e6fb61cb8d0adc5390d845c4c388673e1d8523c4f2e3c518c587d1717832",
+            "objective_hash": "cc7a31d202b56353ad0b9fb2e076a7eb490e1877a6e5fa5b596f66e802e72a24",
+            "objective_values": [
+              2.120255947113037,
+              2.081749677658081,
+              2.043123960494995,
+              2.0046751499176025,
+              1.9662235975265503
+            ],
+            "performance_claimed": false,
+            "policy": {
+              "early_stop": true,
+              "projection": "exact_box_clamp",
+              "start": "input_box_center",
+              "step_size": 0.002,
+              "steps": 4,
+              "update": "sign_gradient_descent"
+            },
+            "projected_update_count": 4,
+            "proof_claimed": false,
+            "schema_version": "boundflow.native-candidate-search/v1",
+            "steps_executed": 4,
+            "threshold": 0.0
+          },
+          "search_trace_hash": "8a6d9adfe3ae5a7517ad5f4f73d3b7e600acdabe0d3e24ac2870445e3b3f5326",
+          "verdict_trace": {
+            "compiler_version": "boundflow.native-property-verdict/v1",
+            "counterexample": null,
+            "objective_hash": "cc7a31d202b56353ad0b9fb2e076a7eb490e1877a6e5fa5b596f66e802e72a24",
+            "performance_claimed": false,
+            "queue_trace_hash": "4914f27e2cb5b7040c8e4f3fd829964b3ccb379f4e3f5b49e5e45efb7238cbeb",
+            "reason": "configured_depth_terminal_open",
+            "run_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0003",
+            "schema_version": "boundflow.native-property-verdict/v1",
+            "sound_pruned_leaf_node_ids": [],
+            "status": "unknown",
+            "threshold": 0.0,
+            "unresolved_leaf_node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0003:n000000"
+            ]
+          },
+          "verdict_trace_hash": "2092de8c0cecf8f2ad0301c1caa14eb85328e6f05458233fcb49e5e9bed125b5"
+        },
+        {
+          "best_input_hash": "b0ed8c092676c13de19b6b07433e99bb9c0ec3136e4c0411330d2ccebd3df2a5",
+          "clause_trace": {
+            "clause_index": 4,
+            "objective_hash": "f270922f3e4d6cfee433b3ab7c60d46e98a66fc62f018ec48cfb99eefe842a98",
+            "queue_trace_hash": "c9bdd0bc70b7c0af477ccc46f883e05bbade83879ce3dbd131cfdf321a171076",
+            "search_counterexample_found": false,
+            "search_trace_hash": "6a69d62aef0694620e58f850296fdbbb86237ada91b1f4f3d1c72e4bbb5af4e0",
+            "status": "unknown",
+            "threshold": 0.0,
+            "verdict_trace_hash": "508148e8af338ace897f3e0e5ff4585f08d525214749254e55666ffa07a3908b"
+          },
+          "counterexample_input_hash": null,
+          "queue_trace": {
+            "compiler_version": "boundflow.native-optimized-relu-split-bab/v1",
+            "config": {
+              "available_memory_bytes": 1073741824,
+              "expansion_batch_size": 1,
+              "max_depth": 0,
+              "max_eval_batch_size": 1,
+              "max_nodes": 1,
+              "memory_budget_bytes": 1073741824,
+              "threshold": 0.0
+            },
+            "decisions": [
+              {
+                "branch_candidate": null,
+                "child_node_ids": [],
+                "decision_index": 0,
+                "kind": "terminal",
+                "node_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0004:n000000",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0004:eval:0000",
+                "eval_batch_position": 0,
+                "lower": -485.39892578125,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "c1e1fe006e85d4c3000643ddfe6796851ab8124278c2f1c935dbc688f9d67f31",
+                  "execution_plan_instance_hash": "2deebbd21e0ee5275c209fd5cc7eab1acc04978ca39b86de434f55c8082903a2",
+                  "execution_plan_template_hash": "b748a568f44d972882d3ae8683164c96efe61f8df6fca265298c2af11977349e",
+                  "representation_binding_hash": "a997224763e0015771cf8cf380ddf6114e13e5cc57da7f3751e5e581f33cb3c0",
+                  "schedule_hash": "00c56ef0b8c52700e0cb1f9cee98bc41b896cbf9a806dc47aad807bc31f88314",
+                  "source_bound_module_hash": "c1e1fe006e85d4c3000643ddfe6796851ab8124278c2f1c935dbc688f9d67f31",
+                  "source_plan_instance_hash": "eefd98d84a5984e8cb563fa3deae2fbf22584190ea756692a2830dc78a9e1d76",
+                  "source_plan_template_hash": "262c848a10822c17fed5971dd45cd7803c0f69ac25c6be2d67774270a9220b6c",
+                  "source_schedule_hash": "547b4fe59a96a7f573352f164f1a9c76954f2913811de12d4162c17b4e0a8775",
+                  "task_module_hash": "c75c87cdc731c3fbe97b9ebb994591990733e80650453f1456dd7fa465038f13"
+                },
+                "node": {
+                  "branch_neuron_index": null,
+                  "branch_relu_input": null,
+                  "branch_value": 0,
+                  "depth": 0,
+                  "node_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0004:n000000",
+                  "parent_node_id": null,
+                  "split_state_hash": "32ef5aa369eb3b424067ead0f6b4a41a59b7c5753a5e59034bc13372b10bc2be"
+                },
+                "optimizer_execution_trace_hash": "f10bb2c56832241499c85f9bed34360fd7ca4e371b50ea552a1cc3f9e04d0ed1",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "f945ba89ad54988afd72e203cf00334a7d1a3b33646057a73f0b750ac0060f7e",
+                  "optimizer_schedule_hash": "e312b430b0c9f183e51a63700d4ca8d0a8b94020bc550c9669cddb6c213a612f",
+                  "optimizer_task_module_hash": "6149e3378127bd4df73015d502adc3e751e3771341624bef36c5fb088e76dc9a"
+                },
+                "parent_selected_state_hash": null,
+                "parent_state_consumed_as_exact": false,
+                "parent_state_validity": "monotonic_refinement_initialization_only",
+                "priority": -485.3989,
+                "selected_state_hash": "ed890f83e98658688fce53537709ad95acb5fdee6c69fd47c535f878a1970222",
+                "upper": 626.1048583984375,
+                "warm_start_kind": "none"
+              }
+            ],
+            "final_frontier_node_ids": [],
+            "max_queue_size": 1,
+            "native_stack_count": 1,
+            "native_stacks": [
+              {
+                "active_split_count": 0,
+                "alpha_gradient_l1": 206.42329982295632,
+                "beta_gradient_l1": 0.0,
+                "domain_batch_size": 1,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "c1e1fe006e85d4c3000643ddfe6796851ab8124278c2f1c935dbc688f9d67f31",
+                  "execution_plan_instance_hash": "2deebbd21e0ee5275c209fd5cc7eab1acc04978ca39b86de434f55c8082903a2",
+                  "execution_plan_template_hash": "b748a568f44d972882d3ae8683164c96efe61f8df6fca265298c2af11977349e",
+                  "representation_binding_hash": "a997224763e0015771cf8cf380ddf6114e13e5cc57da7f3751e5e581f33cb3c0",
+                  "schedule_hash": "00c56ef0b8c52700e0cb1f9cee98bc41b896cbf9a806dc47aad807bc31f88314",
+                  "source_bound_module_hash": "c1e1fe006e85d4c3000643ddfe6796851ab8124278c2f1c935dbc688f9d67f31",
+                  "source_plan_instance_hash": "eefd98d84a5984e8cb563fa3deae2fbf22584190ea756692a2830dc78a9e1d76",
+                  "source_plan_template_hash": "262c848a10822c17fed5971dd45cd7803c0f69ac25c6be2d67774270a9220b6c",
+                  "source_schedule_hash": "547b4fe59a96a7f573352f164f1a9c76954f2913811de12d4162c17b4e0a8775",
+                  "task_module_hash": "c75c87cdc731c3fbe97b9ebb994591990733e80650453f1456dd7fa465038f13"
+                },
+                "native_schedule_launch_count": 21,
+                "native_task_count": 21,
+                "native_task_trace_event_count": 21,
+                "node_ids": [
+                  "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0004:n000000"
+                ],
+                "optimizer_action_count": 8,
+                "optimizer_backward_count": 1,
+                "optimizer_evaluation_count": 2,
+                "optimizer_execution_trace_hash": "f10bb2c56832241499c85f9bed34360fd7ca4e371b50ea552a1cc3f9e04d0ed1",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "f945ba89ad54988afd72e203cf00334a7d1a3b33646057a73f0b750ac0060f7e",
+                  "optimizer_schedule_hash": "e312b430b0c9f183e51a63700d4ca8d0a8b94020bc550c9669cddb6c213a612f",
+                  "optimizer_task_module_hash": "6149e3378127bd4df73015d502adc3e751e3771341624bef36c5fb088e76dc9a"
+                },
+                "optimizer_projection_count": 1,
+                "optimizer_selected_batch_state_hash": "ed890f83e98658688fce53537709ad95acb5fdee6c69fd47c535f878a1970222",
+                "parent_selected_state_hashes": [
+                  null
+                ],
+                "selected_native_lower_max_abs_diff": 0.0,
+                "selected_native_upper_max_abs_diff": 0.0,
+                "stack_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0004:eval:0000",
+                "warm_source_state_hash": null,
+                "warm_start_kind": "none"
+              }
+            ],
+            "objective_hash": "f270922f3e4d6cfee433b3ab7c60d46e98a66fc62f018ec48cfb99eefe842a98",
+            "optimizer_policy": {
+              "alpha_init": 0.5,
+              "beta_init": 0.0,
+              "lr": 0.05,
+              "objective": "lower",
+              "optimizer": "torch.optim.Adam",
+              "per_batch_params": true,
+              "soft_tau": 1.0,
+              "spec_reduce": "mean",
+              "steps": 1
+            },
+            "performance_claimed": false,
+            "property_status": "not_claimed",
+            "root_input_lower_hash": "bed6da6e49f1123b54fe61247615cf0e86f1b4257face7b073428f257607bda6",
+            "root_input_upper_hash": "955d79bd0824185cad0be1e758e6e492c51aec6c9199f81359b2528b848ec9ab",
+            "run_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0004",
+            "schema_version": "boundflow.optimized-relu-split-bab-trace/v1",
+            "status": "complete",
+            "termination_reason": "configured_bounded_tree_exhausted"
+          },
+          "queue_trace_hash": "c9bdd0bc70b7c0af477ccc46f883e05bbade83879ce3dbd131cfdf321a171076",
+          "search_trace": {
+            "best_input_hash": "b0ed8c092676c13de19b6b07433e99bb9c0ec3136e4c0411330d2ccebd3df2a5",
+            "best_iteration": 4,
+            "best_objective_value": 0.5178918838500977,
+            "compiler_version": "boundflow.native-candidate-search/v1",
+            "counterexample_found": false,
+            "early_stopped": false,
+            "gradient_l1_values": [
+              17.704845428466797,
+              17.681194305419922,
+              17.69464874267578,
+              17.711456298828125
+            ],
+            "initial_input_hash": "e402e6fb61cb8d0adc5390d845c4c388673e1d8523c4f2e3c518c587d1717832",
+            "objective_hash": "f270922f3e4d6cfee433b3ab7c60d46e98a66fc62f018ec48cfb99eefe842a98",
+            "objective_values": [
+              0.6592833995819092,
+              0.6238470077514648,
+              0.5884807109832764,
+              0.5531976222991943,
+              0.5178918838500977
+            ],
+            "performance_claimed": false,
+            "policy": {
+              "early_stop": true,
+              "projection": "exact_box_clamp",
+              "start": "input_box_center",
+              "step_size": 0.002,
+              "steps": 4,
+              "update": "sign_gradient_descent"
+            },
+            "projected_update_count": 4,
+            "proof_claimed": false,
+            "schema_version": "boundflow.native-candidate-search/v1",
+            "steps_executed": 4,
+            "threshold": 0.0
+          },
+          "search_trace_hash": "6a69d62aef0694620e58f850296fdbbb86237ada91b1f4f3d1c72e4bbb5af4e0",
+          "verdict_trace": {
+            "compiler_version": "boundflow.native-property-verdict/v1",
+            "counterexample": null,
+            "objective_hash": "f270922f3e4d6cfee433b3ab7c60d46e98a66fc62f018ec48cfb99eefe842a98",
+            "performance_claimed": false,
+            "queue_trace_hash": "c9bdd0bc70b7c0af477ccc46f883e05bbade83879ce3dbd131cfdf321a171076",
+            "reason": "configured_depth_terminal_open",
+            "run_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0004",
+            "schema_version": "boundflow.native-property-verdict/v1",
+            "sound_pruned_leaf_node_ids": [],
+            "status": "unknown",
+            "threshold": 0.0,
+            "unresolved_leaf_node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0004:n000000"
+            ]
+          },
+          "verdict_trace_hash": "508148e8af338ace897f3e0e5ff4585f08d525214749254e55666ffa07a3908b"
+        },
+        {
+          "best_input_hash": "68bf30fa625a9e7fb6e8e17746d0de2781fa16b3d57220cd6e0cb987e30745c7",
+          "clause_trace": {
+            "clause_index": 5,
+            "objective_hash": "95772c71f4830ef00b8fb897cdea241e468fe513f8b3950946f42e98917c5c7f",
+            "queue_trace_hash": "313973286b618d63ccb5356b023a45128c43ab97dd8ca2f5371613abebd9dd60",
+            "search_counterexample_found": false,
+            "search_trace_hash": "70db3a96081f5d39be45d8df624023ce2e37b21f0c0fdb5331eb225d9e628b2c",
+            "status": "unknown",
+            "threshold": 0.0,
+            "verdict_trace_hash": "0143d005538a19eb5fa85ad70e418e5fcae31fb4d40924e9212586054834573b"
+          },
+          "counterexample_input_hash": null,
+          "queue_trace": {
+            "compiler_version": "boundflow.native-optimized-relu-split-bab/v1",
+            "config": {
+              "available_memory_bytes": 1073741824,
+              "expansion_batch_size": 1,
+              "max_depth": 0,
+              "max_eval_batch_size": 1,
+              "max_nodes": 1,
+              "memory_budget_bytes": 1073741824,
+              "threshold": 0.0
+            },
+            "decisions": [
+              {
+                "branch_candidate": null,
+                "child_node_ids": [],
+                "decision_index": 0,
+                "kind": "terminal",
+                "node_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0005:n000000",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0005:eval:0000",
+                "eval_batch_position": 0,
+                "lower": -473.5163269042969,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "48715967fc837cc049689f8f0fdb05e90abc2903388a82b799b4575a97ecbd2e",
+                  "execution_plan_instance_hash": "bf5ee065337abea588dbc9da0d7ee81ff759c5c63d25d842b39af9ea806a1e6e",
+                  "execution_plan_template_hash": "91b2264b68a2033a49e851f23ad07045737572df0c1fb1948ef082256e0c8549",
+                  "representation_binding_hash": "5a3b9991fd0a4ede4d1b50847fe22449cc96e1d402e519c884f144e6ef0d500b",
+                  "schedule_hash": "4eb04b42dd10496eba3bd1c117487d4a57068b22542568a497417da8d687b786",
+                  "source_bound_module_hash": "48715967fc837cc049689f8f0fdb05e90abc2903388a82b799b4575a97ecbd2e",
+                  "source_plan_instance_hash": "68fd0add6139b6ffa185d41ff853c2ca6b532574586fe854591c9b66a133ae65",
+                  "source_plan_template_hash": "461bdf23bbbfee6a71405552681079a79c69ee2a7483cd37331cfe4dd353fb6a",
+                  "source_schedule_hash": "a305494a18e0f030078d603b9dd55d737818fa123be11dbd23f30eaabca92e35",
+                  "task_module_hash": "a1b8157329c7fcae9478ecd0b5b1b879c8bacc93d0620b28a281006e7aa676ae"
+                },
+                "node": {
+                  "branch_neuron_index": null,
+                  "branch_relu_input": null,
+                  "branch_value": 0,
+                  "depth": 0,
+                  "node_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0005:n000000",
+                  "parent_node_id": null,
+                  "split_state_hash": "32ef5aa369eb3b424067ead0f6b4a41a59b7c5753a5e59034bc13372b10bc2be"
+                },
+                "optimizer_execution_trace_hash": "8c3e4d0db5770f26b3d64147ce4c62269679cc76237a53c8d7c5ad4b944ba8b1",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "d6550097324670dcb5b4fc6db888928674c883701374f35d154fde5c50f7b422",
+                  "optimizer_schedule_hash": "e58a040881d5e62276e0cd09ff23e9dfad74b929ec2a1ac5fb11b9561630467f",
+                  "optimizer_task_module_hash": "708a59ab695603027798f974882f766dd65525c8213d747cead53e2687733230"
+                },
+                "parent_selected_state_hash": null,
+                "parent_state_consumed_as_exact": false,
+                "parent_state_validity": "monotonic_refinement_initialization_only",
+                "priority": -473.5163,
+                "selected_state_hash": "1373542bc9cbb1fd0991497968151a8d01cb1c43e77f940895738fc00f47f442",
+                "upper": 682.0864868164062,
+                "warm_start_kind": "none"
+              }
+            ],
+            "final_frontier_node_ids": [],
+            "max_queue_size": 1,
+            "native_stack_count": 1,
+            "native_stacks": [
+              {
+                "active_split_count": 0,
+                "alpha_gradient_l1": 176.71337865293026,
+                "beta_gradient_l1": 0.0,
+                "domain_batch_size": 1,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "48715967fc837cc049689f8f0fdb05e90abc2903388a82b799b4575a97ecbd2e",
+                  "execution_plan_instance_hash": "bf5ee065337abea588dbc9da0d7ee81ff759c5c63d25d842b39af9ea806a1e6e",
+                  "execution_plan_template_hash": "91b2264b68a2033a49e851f23ad07045737572df0c1fb1948ef082256e0c8549",
+                  "representation_binding_hash": "5a3b9991fd0a4ede4d1b50847fe22449cc96e1d402e519c884f144e6ef0d500b",
+                  "schedule_hash": "4eb04b42dd10496eba3bd1c117487d4a57068b22542568a497417da8d687b786",
+                  "source_bound_module_hash": "48715967fc837cc049689f8f0fdb05e90abc2903388a82b799b4575a97ecbd2e",
+                  "source_plan_instance_hash": "68fd0add6139b6ffa185d41ff853c2ca6b532574586fe854591c9b66a133ae65",
+                  "source_plan_template_hash": "461bdf23bbbfee6a71405552681079a79c69ee2a7483cd37331cfe4dd353fb6a",
+                  "source_schedule_hash": "a305494a18e0f030078d603b9dd55d737818fa123be11dbd23f30eaabca92e35",
+                  "task_module_hash": "a1b8157329c7fcae9478ecd0b5b1b879c8bacc93d0620b28a281006e7aa676ae"
+                },
+                "native_schedule_launch_count": 21,
+                "native_task_count": 21,
+                "native_task_trace_event_count": 21,
+                "node_ids": [
+                  "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0005:n000000"
+                ],
+                "optimizer_action_count": 8,
+                "optimizer_backward_count": 1,
+                "optimizer_evaluation_count": 2,
+                "optimizer_execution_trace_hash": "8c3e4d0db5770f26b3d64147ce4c62269679cc76237a53c8d7c5ad4b944ba8b1",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "d6550097324670dcb5b4fc6db888928674c883701374f35d154fde5c50f7b422",
+                  "optimizer_schedule_hash": "e58a040881d5e62276e0cd09ff23e9dfad74b929ec2a1ac5fb11b9561630467f",
+                  "optimizer_task_module_hash": "708a59ab695603027798f974882f766dd65525c8213d747cead53e2687733230"
+                },
+                "optimizer_projection_count": 1,
+                "optimizer_selected_batch_state_hash": "1373542bc9cbb1fd0991497968151a8d01cb1c43e77f940895738fc00f47f442",
+                "parent_selected_state_hashes": [
+                  null
+                ],
+                "selected_native_lower_max_abs_diff": 0.0,
+                "selected_native_upper_max_abs_diff": 0.0,
+                "stack_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0005:eval:0000",
+                "warm_source_state_hash": null,
+                "warm_start_kind": "none"
+              }
+            ],
+            "objective_hash": "95772c71f4830ef00b8fb897cdea241e468fe513f8b3950946f42e98917c5c7f",
+            "optimizer_policy": {
+              "alpha_init": 0.5,
+              "beta_init": 0.0,
+              "lr": 0.05,
+              "objective": "lower",
+              "optimizer": "torch.optim.Adam",
+              "per_batch_params": true,
+              "soft_tau": 1.0,
+              "spec_reduce": "mean",
+              "steps": 1
+            },
+            "performance_claimed": false,
+            "property_status": "not_claimed",
+            "root_input_lower_hash": "bed6da6e49f1123b54fe61247615cf0e86f1b4257face7b073428f257607bda6",
+            "root_input_upper_hash": "955d79bd0824185cad0be1e758e6e492c51aec6c9199f81359b2528b848ec9ab",
+            "run_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0005",
+            "schema_version": "boundflow.optimized-relu-split-bab-trace/v1",
+            "status": "complete",
+            "termination_reason": "configured_bounded_tree_exhausted"
+          },
+          "queue_trace_hash": "313973286b618d63ccb5356b023a45128c43ab97dd8ca2f5371613abebd9dd60",
+          "search_trace": {
+            "best_input_hash": "68bf30fa625a9e7fb6e8e17746d0de2781fa16b3d57220cd6e0cb987e30745c7",
+            "best_iteration": 4,
+            "best_objective_value": 1.1114262342453003,
+            "compiler_version": "boundflow.native-candidate-search/v1",
+            "counterexample_found": false,
+            "early_stopped": false,
+            "gradient_l1_values": [
+              17.371631622314453,
+              17.587324142456055,
+              17.584396362304688,
+              17.586565017700195
+            ],
+            "initial_input_hash": "e402e6fb61cb8d0adc5390d845c4c388673e1d8523c4f2e3c518c587d1717832",
+            "objective_hash": "95772c71f4830ef00b8fb897cdea241e468fe513f8b3950946f42e98917c5c7f",
+            "objective_values": [
+              1.2516788244247437,
+              1.2167463302612305,
+              1.1815625429153442,
+              1.1463849544525146,
+              1.1114262342453003
+            ],
+            "performance_claimed": false,
+            "policy": {
+              "early_stop": true,
+              "projection": "exact_box_clamp",
+              "start": "input_box_center",
+              "step_size": 0.002,
+              "steps": 4,
+              "update": "sign_gradient_descent"
+            },
+            "projected_update_count": 4,
+            "proof_claimed": false,
+            "schema_version": "boundflow.native-candidate-search/v1",
+            "steps_executed": 4,
+            "threshold": 0.0
+          },
+          "search_trace_hash": "70db3a96081f5d39be45d8df624023ce2e37b21f0c0fdb5331eb225d9e628b2c",
+          "verdict_trace": {
+            "compiler_version": "boundflow.native-property-verdict/v1",
+            "counterexample": null,
+            "objective_hash": "95772c71f4830ef00b8fb897cdea241e468fe513f8b3950946f42e98917c5c7f",
+            "performance_claimed": false,
+            "queue_trace_hash": "313973286b618d63ccb5356b023a45128c43ab97dd8ca2f5371613abebd9dd60",
+            "reason": "configured_depth_terminal_open",
+            "run_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0005",
+            "schema_version": "boundflow.native-property-verdict/v1",
+            "sound_pruned_leaf_node_ids": [],
+            "status": "unknown",
+            "threshold": 0.0,
+            "unresolved_leaf_node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0005:n000000"
+            ]
+          },
+          "verdict_trace_hash": "0143d005538a19eb5fa85ad70e418e5fcae31fb4d40924e9212586054834573b"
+        },
+        {
+          "best_input_hash": "4e7d765b07e714945460fbde56976253791820f1513023c9e06c6007d1f254cb",
+          "clause_trace": {
+            "clause_index": 6,
+            "objective_hash": "0b854bdc5525bb37436b81e944659f2c81a83311d2592e0e418b59c1f2099000",
+            "queue_trace_hash": "03b4432f416aaa3236b19076df4dca2743f63aa891bc79c6780a94d052399868",
+            "search_counterexample_found": false,
+            "search_trace_hash": "0c5ee9aac4515bdadd924ac154147c09940e9a94dbfbc9eddaf2a62fad66a037",
+            "status": "unknown",
+            "threshold": 0.0,
+            "verdict_trace_hash": "ec40116155f2707ad0ce5ef06e711e804f2285ced816551109109dc1e8650e7e"
+          },
+          "counterexample_input_hash": null,
+          "queue_trace": {
+            "compiler_version": "boundflow.native-optimized-relu-split-bab/v1",
+            "config": {
+              "available_memory_bytes": 1073741824,
+              "expansion_batch_size": 1,
+              "max_depth": 0,
+              "max_eval_batch_size": 1,
+              "max_nodes": 1,
+              "memory_budget_bytes": 1073741824,
+              "threshold": 0.0
+            },
+            "decisions": [
+              {
+                "branch_candidate": null,
+                "child_node_ids": [],
+                "decision_index": 0,
+                "kind": "terminal",
+                "node_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0006:n000000",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0006:eval:0000",
+                "eval_batch_position": 0,
+                "lower": -715.2163696289062,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "20a3ddfe60cfbb76a4eccaa58af94a28ac573ea5f8a8b1dfd9b6776a6af83992",
+                  "execution_plan_instance_hash": "237f23f4f843cc4a717de2f39546dc7dc5b43085137b561e9663612a1e0e5a47",
+                  "execution_plan_template_hash": "8239d5dba29c1083ca22db8d6520f7adb8b8b626b4a907943d726df8ad2ad5b3",
+                  "representation_binding_hash": "bf877e7f3d778e01416ddae95ea9a3b8b7788aeac65f8ba9acf4b795f3e54a9e",
+                  "schedule_hash": "48e97dcde56e84c606405e6697117fd5595325a4326662cee00d853656941878",
+                  "source_bound_module_hash": "20a3ddfe60cfbb76a4eccaa58af94a28ac573ea5f8a8b1dfd9b6776a6af83992",
+                  "source_plan_instance_hash": "14abc174c6359436c63448e5c82f62f6f14694f1d0c968693312ccd6e98a1c65",
+                  "source_plan_template_hash": "dfcdb5a0ee8540a3d04db72477dbbd5d3717ad333dda577e6be226803004e3c6",
+                  "source_schedule_hash": "b4e5afa9d521ca5f657c02e03114660f90678d6642cfeefe81b1158b71a31856",
+                  "task_module_hash": "21bcdc7c9ef56d5865d25f7de175ce1ea441216a074f1f889e25765fff87f976"
+                },
+                "node": {
+                  "branch_neuron_index": null,
+                  "branch_relu_input": null,
+                  "branch_value": 0,
+                  "depth": 0,
+                  "node_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0006:n000000",
+                  "parent_node_id": null,
+                  "split_state_hash": "32ef5aa369eb3b424067ead0f6b4a41a59b7c5753a5e59034bc13372b10bc2be"
+                },
+                "optimizer_execution_trace_hash": "b0cb7dca43e87008b3fa5942e90eaa1f0bc02b09732082e5e9d3cce525b9971f",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "13c0d2c3cec3afa7525c0c3194e0c4bebd27ac6d29fb209ef5b68f3bfc0081fa",
+                  "optimizer_schedule_hash": "90c6f6703506ff9f7a9fe2f8cb3ccf002664e9bb233de060451a2ce48f3a4dfb",
+                  "optimizer_task_module_hash": "9f6a3e842eea1002c71ea68c3d54c59dae0b3736ca87a5e983a43f6d7463e525"
+                },
+                "parent_selected_state_hash": null,
+                "parent_state_consumed_as_exact": false,
+                "parent_state_validity": "monotonic_refinement_initialization_only",
+                "priority": -715.2164,
+                "selected_state_hash": "57b0911822e3d4e7c9f7cdaa33d0528e86a330610975b71ed7942d04d60df97d",
+                "upper": 780.4906616210938,
+                "warm_start_kind": "none"
+              }
+            ],
+            "final_frontier_node_ids": [],
+            "max_queue_size": 1,
+            "native_stack_count": 1,
+            "native_stacks": [
+              {
+                "active_split_count": 0,
+                "alpha_gradient_l1": 221.66943886131048,
+                "beta_gradient_l1": 0.0,
+                "domain_batch_size": 1,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "20a3ddfe60cfbb76a4eccaa58af94a28ac573ea5f8a8b1dfd9b6776a6af83992",
+                  "execution_plan_instance_hash": "237f23f4f843cc4a717de2f39546dc7dc5b43085137b561e9663612a1e0e5a47",
+                  "execution_plan_template_hash": "8239d5dba29c1083ca22db8d6520f7adb8b8b626b4a907943d726df8ad2ad5b3",
+                  "representation_binding_hash": "bf877e7f3d778e01416ddae95ea9a3b8b7788aeac65f8ba9acf4b795f3e54a9e",
+                  "schedule_hash": "48e97dcde56e84c606405e6697117fd5595325a4326662cee00d853656941878",
+                  "source_bound_module_hash": "20a3ddfe60cfbb76a4eccaa58af94a28ac573ea5f8a8b1dfd9b6776a6af83992",
+                  "source_plan_instance_hash": "14abc174c6359436c63448e5c82f62f6f14694f1d0c968693312ccd6e98a1c65",
+                  "source_plan_template_hash": "dfcdb5a0ee8540a3d04db72477dbbd5d3717ad333dda577e6be226803004e3c6",
+                  "source_schedule_hash": "b4e5afa9d521ca5f657c02e03114660f90678d6642cfeefe81b1158b71a31856",
+                  "task_module_hash": "21bcdc7c9ef56d5865d25f7de175ce1ea441216a074f1f889e25765fff87f976"
+                },
+                "native_schedule_launch_count": 21,
+                "native_task_count": 21,
+                "native_task_trace_event_count": 21,
+                "node_ids": [
+                  "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0006:n000000"
+                ],
+                "optimizer_action_count": 8,
+                "optimizer_backward_count": 1,
+                "optimizer_evaluation_count": 2,
+                "optimizer_execution_trace_hash": "b0cb7dca43e87008b3fa5942e90eaa1f0bc02b09732082e5e9d3cce525b9971f",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "13c0d2c3cec3afa7525c0c3194e0c4bebd27ac6d29fb209ef5b68f3bfc0081fa",
+                  "optimizer_schedule_hash": "90c6f6703506ff9f7a9fe2f8cb3ccf002664e9bb233de060451a2ce48f3a4dfb",
+                  "optimizer_task_module_hash": "9f6a3e842eea1002c71ea68c3d54c59dae0b3736ca87a5e983a43f6d7463e525"
+                },
+                "optimizer_projection_count": 1,
+                "optimizer_selected_batch_state_hash": "57b0911822e3d4e7c9f7cdaa33d0528e86a330610975b71ed7942d04d60df97d",
+                "parent_selected_state_hashes": [
+                  null
+                ],
+                "selected_native_lower_max_abs_diff": 6.103515625e-05,
+                "selected_native_upper_max_abs_diff": 0.0,
+                "stack_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0006:eval:0000",
+                "warm_source_state_hash": null,
+                "warm_start_kind": "none"
+              }
+            ],
+            "objective_hash": "0b854bdc5525bb37436b81e944659f2c81a83311d2592e0e418b59c1f2099000",
+            "optimizer_policy": {
+              "alpha_init": 0.5,
+              "beta_init": 0.0,
+              "lr": 0.05,
+              "objective": "lower",
+              "optimizer": "torch.optim.Adam",
+              "per_batch_params": true,
+              "soft_tau": 1.0,
+              "spec_reduce": "mean",
+              "steps": 1
+            },
+            "performance_claimed": false,
+            "property_status": "not_claimed",
+            "root_input_lower_hash": "bed6da6e49f1123b54fe61247615cf0e86f1b4257face7b073428f257607bda6",
+            "root_input_upper_hash": "955d79bd0824185cad0be1e758e6e492c51aec6c9199f81359b2528b848ec9ab",
+            "run_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0006",
+            "schema_version": "boundflow.optimized-relu-split-bab-trace/v1",
+            "status": "complete",
+            "termination_reason": "configured_bounded_tree_exhausted"
+          },
+          "queue_trace_hash": "03b4432f416aaa3236b19076df4dca2743f63aa891bc79c6780a94d052399868",
+          "search_trace": {
+            "best_input_hash": "4e7d765b07e714945460fbde56976253791820f1513023c9e06c6007d1f254cb",
+            "best_iteration": 4,
+            "best_objective_value": 2.248816967010498,
+            "compiler_version": "boundflow.native-candidate-search/v1",
+            "counterexample_found": false,
+            "early_stopped": false,
+            "gradient_l1_values": [
+              25.035720825195312,
+              25.083454132080078,
+              25.07717514038086,
+              25.034942626953125
+            ],
+            "initial_input_hash": "e402e6fb61cb8d0adc5390d845c4c388673e1d8523c4f2e3c518c587d1717832",
+            "objective_hash": "0b854bdc5525bb37436b81e944659f2c81a83311d2592e0e418b59c1f2099000",
+            "objective_values": [
+              2.4489824771881104,
+              2.3988583087921143,
+              2.3486955165863037,
+              2.2989003658294678,
+              2.248816967010498
+            ],
+            "performance_claimed": false,
+            "policy": {
+              "early_stop": true,
+              "projection": "exact_box_clamp",
+              "start": "input_box_center",
+              "step_size": 0.002,
+              "steps": 4,
+              "update": "sign_gradient_descent"
+            },
+            "projected_update_count": 4,
+            "proof_claimed": false,
+            "schema_version": "boundflow.native-candidate-search/v1",
+            "steps_executed": 4,
+            "threshold": 0.0
+          },
+          "search_trace_hash": "0c5ee9aac4515bdadd924ac154147c09940e9a94dbfbc9eddaf2a62fad66a037",
+          "verdict_trace": {
+            "compiler_version": "boundflow.native-property-verdict/v1",
+            "counterexample": null,
+            "objective_hash": "0b854bdc5525bb37436b81e944659f2c81a83311d2592e0e418b59c1f2099000",
+            "performance_claimed": false,
+            "queue_trace_hash": "03b4432f416aaa3236b19076df4dca2743f63aa891bc79c6780a94d052399868",
+            "reason": "configured_depth_terminal_open",
+            "run_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0006",
+            "schema_version": "boundflow.native-property-verdict/v1",
+            "sound_pruned_leaf_node_ids": [],
+            "status": "unknown",
+            "threshold": 0.0,
+            "unresolved_leaf_node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0006:n000000"
+            ]
+          },
+          "verdict_trace_hash": "ec40116155f2707ad0ce5ef06e711e804f2285ced816551109109dc1e8650e7e"
+        },
+        {
+          "best_input_hash": "8b475b7b61b37e2a9a3defbbdc98114e41e93fa5ac9bf5b5c0498079497039c7",
+          "clause_trace": {
+            "clause_index": 7,
+            "objective_hash": "af8ba93a2af36a8e42350d4e7264cf2d4c1b89a93a12257647fbdfc54cc4d36e",
+            "queue_trace_hash": "5ea9ae0cbd656d525debad06c936b3b942f178bdf70ea2eb2b770cd1728a7b24",
+            "search_counterexample_found": false,
+            "search_trace_hash": "91b8588375f73a03333ce8d17184c146f83e041dff9537b23dcfa75fb5ea5602",
+            "status": "unknown",
+            "threshold": 0.0,
+            "verdict_trace_hash": "65716113ce17287c4fba884d1d11984a6c77fcd6b82b1c4f783eb0ba62ad9bc0"
+          },
+          "counterexample_input_hash": null,
+          "queue_trace": {
+            "compiler_version": "boundflow.native-optimized-relu-split-bab/v1",
+            "config": {
+              "available_memory_bytes": 1073741824,
+              "expansion_batch_size": 1,
+              "max_depth": 0,
+              "max_eval_batch_size": 1,
+              "max_nodes": 1,
+              "memory_budget_bytes": 1073741824,
+              "threshold": 0.0
+            },
+            "decisions": [
+              {
+                "branch_candidate": null,
+                "child_node_ids": [],
+                "decision_index": 0,
+                "kind": "terminal",
+                "node_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0007:n000000",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0007:eval:0000",
+                "eval_batch_position": 0,
+                "lower": -761.7550659179688,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "acc1e5be7c84a2ac10c1b6c9024015dec467f3c0a277cb17e59e69f3c312a192",
+                  "execution_plan_instance_hash": "8cdfb4945f378d079a5d54e44c93a657ac277c592349bd4a24cff3fae42ddb99",
+                  "execution_plan_template_hash": "72a1d2dfd99dfca74c1ea238654c5bf2db86eabd88778e7d54a58806ea2719a1",
+                  "representation_binding_hash": "10f9f0d88841e37d4c4f1febbae80b395d2ef9ed638538a77870f08d56fda0f6",
+                  "schedule_hash": "626e2a32356b10cf4a5a42db95f28e697abde276ddb226cca117e652f292b59b",
+                  "source_bound_module_hash": "acc1e5be7c84a2ac10c1b6c9024015dec467f3c0a277cb17e59e69f3c312a192",
+                  "source_plan_instance_hash": "3d1bf8049b421b07a66ecde1d8176eb0c27d96c1139b555006295ff228ddfcfd",
+                  "source_plan_template_hash": "25dcb0b54c82b49a532cecd446985e6604d09e4f1ed735f30e5f514cdeeb5e45",
+                  "source_schedule_hash": "727ca697da977890aeb3f751d3c42f2d2035729bc725139a5de0d6c3ec3b3890",
+                  "task_module_hash": "b5deba5cdf6379c8be05a3d7de2b15f9f11298c917a90e2b9f2fd2ff89e9eac2"
+                },
+                "node": {
+                  "branch_neuron_index": null,
+                  "branch_relu_input": null,
+                  "branch_value": 0,
+                  "depth": 0,
+                  "node_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0007:n000000",
+                  "parent_node_id": null,
+                  "split_state_hash": "32ef5aa369eb3b424067ead0f6b4a41a59b7c5753a5e59034bc13372b10bc2be"
+                },
+                "optimizer_execution_trace_hash": "1b0cb3d1da6bacd5a0e49a63bf5c0cd3d97206e03699d2fe0f5d8387c31d9d3d",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "2c50ec6b6ff8e203bd14ba859a204017da5552785333f08c5e46b1ad9f61c76b",
+                  "optimizer_schedule_hash": "276a89828d7440eefac47f460459d53f129c93396ddf4a7e9e2d7f85f34eb178",
+                  "optimizer_task_module_hash": "badd614f3a397f0666248c5b72155951605444e38ca8d0fb36bbbff6079be374"
+                },
+                "parent_selected_state_hash": null,
+                "parent_state_consumed_as_exact": false,
+                "parent_state_validity": "monotonic_refinement_initialization_only",
+                "priority": -761.7551,
+                "selected_state_hash": "5ace5b25250f9e73012962632c14c363a43e5d87b96601bc4a810f45d46a0e2b",
+                "upper": 916.4132080078125,
+                "warm_start_kind": "none"
+              }
+            ],
+            "final_frontier_node_ids": [],
+            "max_queue_size": 1,
+            "native_stack_count": 1,
+            "native_stacks": [
+              {
+                "active_split_count": 0,
+                "alpha_gradient_l1": 231.69925564527512,
+                "beta_gradient_l1": 0.0,
+                "domain_batch_size": 1,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "acc1e5be7c84a2ac10c1b6c9024015dec467f3c0a277cb17e59e69f3c312a192",
+                  "execution_plan_instance_hash": "8cdfb4945f378d079a5d54e44c93a657ac277c592349bd4a24cff3fae42ddb99",
+                  "execution_plan_template_hash": "72a1d2dfd99dfca74c1ea238654c5bf2db86eabd88778e7d54a58806ea2719a1",
+                  "representation_binding_hash": "10f9f0d88841e37d4c4f1febbae80b395d2ef9ed638538a77870f08d56fda0f6",
+                  "schedule_hash": "626e2a32356b10cf4a5a42db95f28e697abde276ddb226cca117e652f292b59b",
+                  "source_bound_module_hash": "acc1e5be7c84a2ac10c1b6c9024015dec467f3c0a277cb17e59e69f3c312a192",
+                  "source_plan_instance_hash": "3d1bf8049b421b07a66ecde1d8176eb0c27d96c1139b555006295ff228ddfcfd",
+                  "source_plan_template_hash": "25dcb0b54c82b49a532cecd446985e6604d09e4f1ed735f30e5f514cdeeb5e45",
+                  "source_schedule_hash": "727ca697da977890aeb3f751d3c42f2d2035729bc725139a5de0d6c3ec3b3890",
+                  "task_module_hash": "b5deba5cdf6379c8be05a3d7de2b15f9f11298c917a90e2b9f2fd2ff89e9eac2"
+                },
+                "native_schedule_launch_count": 21,
+                "native_task_count": 21,
+                "native_task_trace_event_count": 21,
+                "node_ids": [
+                  "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0007:n000000"
+                ],
+                "optimizer_action_count": 8,
+                "optimizer_backward_count": 1,
+                "optimizer_evaluation_count": 2,
+                "optimizer_execution_trace_hash": "1b0cb3d1da6bacd5a0e49a63bf5c0cd3d97206e03699d2fe0f5d8387c31d9d3d",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "2c50ec6b6ff8e203bd14ba859a204017da5552785333f08c5e46b1ad9f61c76b",
+                  "optimizer_schedule_hash": "276a89828d7440eefac47f460459d53f129c93396ddf4a7e9e2d7f85f34eb178",
+                  "optimizer_task_module_hash": "badd614f3a397f0666248c5b72155951605444e38ca8d0fb36bbbff6079be374"
+                },
+                "optimizer_projection_count": 1,
+                "optimizer_selected_batch_state_hash": "5ace5b25250f9e73012962632c14c363a43e5d87b96601bc4a810f45d46a0e2b",
+                "parent_selected_state_hashes": [
+                  null
+                ],
+                "selected_native_lower_max_abs_diff": 0.0,
+                "selected_native_upper_max_abs_diff": 0.0,
+                "stack_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0007:eval:0000",
+                "warm_source_state_hash": null,
+                "warm_start_kind": "none"
+              }
+            ],
+            "objective_hash": "af8ba93a2af36a8e42350d4e7264cf2d4c1b89a93a12257647fbdfc54cc4d36e",
+            "optimizer_policy": {
+              "alpha_init": 0.5,
+              "beta_init": 0.0,
+              "lr": 0.05,
+              "objective": "lower",
+              "optimizer": "torch.optim.Adam",
+              "per_batch_params": true,
+              "soft_tau": 1.0,
+              "spec_reduce": "mean",
+              "steps": 1
+            },
+            "performance_claimed": false,
+            "property_status": "not_claimed",
+            "root_input_lower_hash": "bed6da6e49f1123b54fe61247615cf0e86f1b4257face7b073428f257607bda6",
+            "root_input_upper_hash": "955d79bd0824185cad0be1e758e6e492c51aec6c9199f81359b2528b848ec9ab",
+            "run_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0007",
+            "schema_version": "boundflow.optimized-relu-split-bab-trace/v1",
+            "status": "complete",
+            "termination_reason": "configured_bounded_tree_exhausted"
+          },
+          "queue_trace_hash": "5ea9ae0cbd656d525debad06c936b3b942f178bdf70ea2eb2b770cd1728a7b24",
+          "search_trace": {
+            "best_input_hash": "8b475b7b61b37e2a9a3defbbdc98114e41e93fa5ac9bf5b5c0498079497039c7",
+            "best_iteration": 4,
+            "best_objective_value": 4.279739856719971,
+            "compiler_version": "boundflow.native-candidate-search/v1",
+            "counterexample_found": false,
+            "early_stopped": false,
+            "gradient_l1_values": [
+              25.80252456665039,
+              25.66731071472168,
+              25.681032180786133,
+              26.03415298461914
+            ],
+            "initial_input_hash": "e402e6fb61cb8d0adc5390d845c4c388673e1d8523c4f2e3c518c587d1717832",
+            "objective_hash": "af8ba93a2af36a8e42350d4e7264cf2d4c1b89a93a12257647fbdfc54cc4d36e",
+            "objective_values": [
+              4.4864091873168945,
+              4.434937953948975,
+              4.383584022521973,
+              4.3319597244262695,
+              4.279739856719971
+            ],
+            "performance_claimed": false,
+            "policy": {
+              "early_stop": true,
+              "projection": "exact_box_clamp",
+              "start": "input_box_center",
+              "step_size": 0.002,
+              "steps": 4,
+              "update": "sign_gradient_descent"
+            },
+            "projected_update_count": 4,
+            "proof_claimed": false,
+            "schema_version": "boundflow.native-candidate-search/v1",
+            "steps_executed": 4,
+            "threshold": 0.0
+          },
+          "search_trace_hash": "91b8588375f73a03333ce8d17184c146f83e041dff9537b23dcfa75fb5ea5602",
+          "verdict_trace": {
+            "compiler_version": "boundflow.native-property-verdict/v1",
+            "counterexample": null,
+            "objective_hash": "af8ba93a2af36a8e42350d4e7264cf2d4c1b89a93a12257647fbdfc54cc4d36e",
+            "performance_claimed": false,
+            "queue_trace_hash": "5ea9ae0cbd656d525debad06c936b3b942f178bdf70ea2eb2b770cd1728a7b24",
+            "reason": "configured_depth_terminal_open",
+            "run_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0007",
+            "schema_version": "boundflow.native-property-verdict/v1",
+            "sound_pruned_leaf_node_ids": [],
+            "status": "unknown",
+            "threshold": 0.0,
+            "unresolved_leaf_node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0007:n000000"
+            ]
+          },
+          "verdict_trace_hash": "65716113ce17287c4fba884d1d11984a6c77fcd6b82b1c4f783eb0ba62ad9bc0"
+        },
+        {
+          "best_input_hash": "4cdf1427d6e4cccd34336a8d709075c29c1d532231eea213046fcfc2829a5365",
+          "clause_trace": {
+            "clause_index": 8,
+            "objective_hash": "c20fb78f6a3d24c8648e0beb9692f554fd8ae89420c262183c8fd8f5b2257f5c",
+            "queue_trace_hash": "9c14b71517c801058e2a8a2becf56e5033ba6418b9e33b0d5c637343a1fb46da",
+            "search_counterexample_found": false,
+            "search_trace_hash": "2a8002c8f5f47b51db30603c00e811888ba2cac73975b0df355de2bd0eb628c0",
+            "status": "unknown",
+            "threshold": 0.0,
+            "verdict_trace_hash": "e9cb489130f8f523ab5cdffdacb4916d95044fd212623884ce028f08438bc0a2"
+          },
+          "counterexample_input_hash": null,
+          "queue_trace": {
+            "compiler_version": "boundflow.native-optimized-relu-split-bab/v1",
+            "config": {
+              "available_memory_bytes": 1073741824,
+              "expansion_batch_size": 1,
+              "max_depth": 0,
+              "max_eval_batch_size": 1,
+              "max_nodes": 1,
+              "memory_budget_bytes": 1073741824,
+              "threshold": 0.0
+            },
+            "decisions": [
+              {
+                "branch_candidate": null,
+                "child_node_ids": [],
+                "decision_index": 0,
+                "kind": "terminal",
+                "node_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0008:n000000",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "eval_batch_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0008:eval:0000",
+                "eval_batch_position": 0,
+                "lower": -695.2923583984375,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "45e1fbe56e166dfb9e56760aab23c00e5a93b05dc565d3bca44c3e1c469db6c4",
+                  "execution_plan_instance_hash": "dfcfe129b33a5e23d4d5d038acee437a5b5ec112ea2ee66f65abc26c483cde19",
+                  "execution_plan_template_hash": "8b028a73645c7cf6449d5b2f672d924c2f51e33f3b4679be994492e21bd0e65e",
+                  "representation_binding_hash": "9f89fa9e7c13609cb298d01433034da06b62ba9b1e5d57f12318894c90f42243",
+                  "schedule_hash": "6f94aa83ea7f12db9245442e050a74e72a97c458cae8eec4c0f3355a19dc3d9d",
+                  "source_bound_module_hash": "45e1fbe56e166dfb9e56760aab23c00e5a93b05dc565d3bca44c3e1c469db6c4",
+                  "source_plan_instance_hash": "7e62d96eba21e233212d42189c26a0c65879b4cd0be72dae6f37641dea0cea57",
+                  "source_plan_template_hash": "283971ac8d803cb8f138a5d426fd0116fef0ac3007a20264d2aed4b49c3b5f24",
+                  "source_schedule_hash": "0c5bd6182c16f09cbe3e9742aa5b81fdda99937f0b350a24db0082b83584fe96",
+                  "task_module_hash": "ec957ea6569b0bcd7def7bc03c712a377661b5c45b7e42fb3f28a82bbbc7b2ed"
+                },
+                "node": {
+                  "branch_neuron_index": null,
+                  "branch_relu_input": null,
+                  "branch_value": 0,
+                  "depth": 0,
+                  "node_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0008:n000000",
+                  "parent_node_id": null,
+                  "split_state_hash": "32ef5aa369eb3b424067ead0f6b4a41a59b7c5753a5e59034bc13372b10bc2be"
+                },
+                "optimizer_execution_trace_hash": "4d0aa5a639b207da33fa1af60875cc0197a6ff5126cb72a4a4bf268b5d1cef99",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "8f4b69b6b9bfcfea39ada72eb390294823d1b140fb15c403004653984a4a4b77",
+                  "optimizer_schedule_hash": "2b9bdcc8a0e4ffe61f28f3a79b26c3b55277e508e482eb9c2cf9ef58d0e0a2ee",
+                  "optimizer_task_module_hash": "daa5af52a52679b5138d9d2cfd9de89734ce805f64618c3d7f3adf710c0c34b2"
+                },
+                "parent_selected_state_hash": null,
+                "parent_state_consumed_as_exact": false,
+                "parent_state_validity": "monotonic_refinement_initialization_only",
+                "priority": -695.2924,
+                "selected_state_hash": "43b384c01cf991582963d72c1eae3287cebef6a8dda7273f1a9a187c235c36b6",
+                "upper": 907.055419921875,
+                "warm_start_kind": "none"
+              }
+            ],
+            "final_frontier_node_ids": [],
+            "max_queue_size": 1,
+            "native_stack_count": 1,
+            "native_stacks": [
+              {
+                "active_split_count": 0,
+                "alpha_gradient_l1": 262.564994584769,
+                "beta_gradient_l1": 0.0,
+                "domain_batch_size": 1,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "45e1fbe56e166dfb9e56760aab23c00e5a93b05dc565d3bca44c3e1c469db6c4",
+                  "execution_plan_instance_hash": "dfcfe129b33a5e23d4d5d038acee437a5b5ec112ea2ee66f65abc26c483cde19",
+                  "execution_plan_template_hash": "8b028a73645c7cf6449d5b2f672d924c2f51e33f3b4679be994492e21bd0e65e",
+                  "representation_binding_hash": "9f89fa9e7c13609cb298d01433034da06b62ba9b1e5d57f12318894c90f42243",
+                  "schedule_hash": "6f94aa83ea7f12db9245442e050a74e72a97c458cae8eec4c0f3355a19dc3d9d",
+                  "source_bound_module_hash": "45e1fbe56e166dfb9e56760aab23c00e5a93b05dc565d3bca44c3e1c469db6c4",
+                  "source_plan_instance_hash": "7e62d96eba21e233212d42189c26a0c65879b4cd0be72dae6f37641dea0cea57",
+                  "source_plan_template_hash": "283971ac8d803cb8f138a5d426fd0116fef0ac3007a20264d2aed4b49c3b5f24",
+                  "source_schedule_hash": "0c5bd6182c16f09cbe3e9742aa5b81fdda99937f0b350a24db0082b83584fe96",
+                  "task_module_hash": "ec957ea6569b0bcd7def7bc03c712a377661b5c45b7e42fb3f28a82bbbc7b2ed"
+                },
+                "native_schedule_launch_count": 21,
+                "native_task_count": 21,
+                "native_task_trace_event_count": 21,
+                "node_ids": [
+                  "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0008:n000000"
+                ],
+                "optimizer_action_count": 8,
+                "optimizer_backward_count": 1,
+                "optimizer_evaluation_count": 2,
+                "optimizer_execution_trace_hash": "4d0aa5a639b207da33fa1af60875cc0197a6ff5126cb72a4a4bf268b5d1cef99",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "8f4b69b6b9bfcfea39ada72eb390294823d1b140fb15c403004653984a4a4b77",
+                  "optimizer_schedule_hash": "2b9bdcc8a0e4ffe61f28f3a79b26c3b55277e508e482eb9c2cf9ef58d0e0a2ee",
+                  "optimizer_task_module_hash": "daa5af52a52679b5138d9d2cfd9de89734ce805f64618c3d7f3adf710c0c34b2"
+                },
+                "optimizer_projection_count": 1,
+                "optimizer_selected_batch_state_hash": "43b384c01cf991582963d72c1eae3287cebef6a8dda7273f1a9a187c235c36b6",
+                "parent_selected_state_hashes": [
+                  null
+                ],
+                "selected_native_lower_max_abs_diff": 0.0,
+                "selected_native_upper_max_abs_diff": 0.0,
+                "stack_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0008:eval:0000",
+                "warm_source_state_hash": null,
+                "warm_start_kind": "none"
+              }
+            ],
+            "objective_hash": "c20fb78f6a3d24c8648e0beb9692f554fd8ae89420c262183c8fd8f5b2257f5c",
+            "optimizer_policy": {
+              "alpha_init": 0.5,
+              "beta_init": 0.0,
+              "lr": 0.05,
+              "objective": "lower",
+              "optimizer": "torch.optim.Adam",
+              "per_batch_params": true,
+              "soft_tau": 1.0,
+              "spec_reduce": "mean",
+              "steps": 1
+            },
+            "performance_claimed": false,
+            "property_status": "not_claimed",
+            "root_input_lower_hash": "bed6da6e49f1123b54fe61247615cf0e86f1b4257face7b073428f257607bda6",
+            "root_input_upper_hash": "955d79bd0824185cad0be1e758e6e492c51aec6c9199f81359b2528b848ec9ab",
+            "run_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0008",
+            "schema_version": "boundflow.optimized-relu-split-bab-trace/v1",
+            "status": "complete",
+            "termination_reason": "configured_bounded_tree_exhausted"
+          },
+          "queue_trace_hash": "9c14b71517c801058e2a8a2becf56e5033ba6418b9e33b0d5c637343a1fb46da",
+          "search_trace": {
+            "best_input_hash": "4cdf1427d6e4cccd34336a8d709075c29c1d532231eea213046fcfc2829a5365",
+            "best_iteration": 4,
+            "best_objective_value": 4.841380596160889,
+            "compiler_version": "boundflow.native-candidate-search/v1",
+            "counterexample_found": false,
+            "early_stopped": false,
+            "gradient_l1_values": [
+              29.13043975830078,
+              28.953125,
+              29.149890899658203,
+              29.51763916015625
+            ],
+            "initial_input_hash": "e402e6fb61cb8d0adc5390d845c4c388673e1d8523c4f2e3c518c587d1717832",
+            "objective_hash": "c20fb78f6a3d24c8648e0beb9692f554fd8ae89420c262183c8fd8f5b2257f5c",
+            "objective_values": [
+              5.075136661529541,
+              5.016921043395996,
+              4.958686828613281,
+              4.900365829467773,
+              4.841380596160889
+            ],
+            "performance_claimed": false,
+            "policy": {
+              "early_stop": true,
+              "projection": "exact_box_clamp",
+              "start": "input_box_center",
+              "step_size": 0.002,
+              "steps": 4,
+              "update": "sign_gradient_descent"
+            },
+            "projected_update_count": 4,
+            "proof_claimed": false,
+            "schema_version": "boundflow.native-candidate-search/v1",
+            "steps_executed": 4,
+            "threshold": 0.0
+          },
+          "search_trace_hash": "2a8002c8f5f47b51db30603c00e811888ba2cac73975b0df355de2bd0eb628c0",
+          "verdict_trace": {
+            "compiler_version": "boundflow.native-property-verdict/v1",
+            "counterexample": null,
+            "objective_hash": "c20fb78f6a3d24c8648e0beb9692f554fd8ae89420c262183c8fd8f5b2257f5c",
+            "performance_claimed": false,
+            "queue_trace_hash": "9c14b71517c801058e2a8a2becf56e5033ba6418b9e33b0d5c637343a1fb46da",
+            "reason": "configured_depth_terminal_open",
+            "run_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0008",
+            "schema_version": "boundflow.native-property-verdict/v1",
+            "sound_pruned_leaf_node_ids": [],
+            "status": "unknown",
+            "threshold": 0.0,
+            "unresolved_leaf_node_ids": [
+              "vnncomp21-resnet2b-prop0-native-ir14-complete-query:clause:0008:n000000"
+            ]
+          },
+          "verdict_trace_hash": "e9cb489130f8f523ab5cdffdacb4916d95044fd212623884ce028f08438bc0a2"
+        }
+      ],
+      "native_lower_max_abs_diffs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        6.103515625e-05,
+        0.0,
+        0.0
+      ],
+      "query_trace": {
+        "compiler_version": "boundflow.complete-verifier-query/v1",
+        "completed_clauses": [
+          {
+            "clause_index": 0,
+            "objective_hash": "a62146650a0f29762a1467c72007cba1937a5c05b9236ab53a91964308e05dca",
+            "queue_trace_hash": "9d3f471769bb535e233e939035165bb1b56015177a4d8f9ea3b65ee29e89ea2c",
+            "search_counterexample_found": false,
+            "search_trace_hash": "11073b50fa14e03783ee2ec54127b57ca3e4857b70cca8b3c8a7a14d26c4aa98",
+            "status": "unknown",
+            "threshold": 0.0,
+            "verdict_trace_hash": "52654d1cb32954798a32d3202d6bd0194c94ce195a1c16393e8431f91d5d1173"
+          },
+          {
+            "clause_index": 1,
+            "objective_hash": "5e13e14a90641a8177787823b373b0bbb3a0d8fe7606afcf1b184e948bce7f92",
+            "queue_trace_hash": "e4369ec7871f901f736673baf7990dc69f230e5724f482397ea365dc97d1546a",
+            "search_counterexample_found": false,
+            "search_trace_hash": "f3b7a1e2c1279d9678c3966812352c899efe7d98e1948a8e79d1b6589cceed40",
+            "status": "unknown",
+            "threshold": 0.0,
+            "verdict_trace_hash": "35d957ad96ca025a78fbbbe84c5c4eb8936e70bd45988e40250503e15e771894"
+          },
+          {
+            "clause_index": 2,
+            "objective_hash": "4b65cdffa3afd9d34d2bb3abf3fd69d383105fcf6d7d05649c5e95cff97b88c7",
+            "queue_trace_hash": "2cb99cf178dd5afcb63a2d44a26a539790cb65d874fda8577e1d91e4e7d7f1b9",
+            "search_counterexample_found": false,
+            "search_trace_hash": "daae2c580b4b68156d77e6db9d81adfb2992918dc8985264139eb50cbaba1c72",
+            "status": "unknown",
+            "threshold": 0.0,
+            "verdict_trace_hash": "1019171e54d03c4dec06399b2b2f10c79f9f8cf8edfb0c169466767e99b2fe9c"
+          },
+          {
+            "clause_index": 3,
+            "objective_hash": "cc7a31d202b56353ad0b9fb2e076a7eb490e1877a6e5fa5b596f66e802e72a24",
+            "queue_trace_hash": "4914f27e2cb5b7040c8e4f3fd829964b3ccb379f4e3f5b49e5e45efb7238cbeb",
+            "search_counterexample_found": false,
+            "search_trace_hash": "8a6d9adfe3ae5a7517ad5f4f73d3b7e600acdabe0d3e24ac2870445e3b3f5326",
+            "status": "unknown",
+            "threshold": 0.0,
+            "verdict_trace_hash": "2092de8c0cecf8f2ad0301c1caa14eb85328e6f05458233fcb49e5e9bed125b5"
+          },
+          {
+            "clause_index": 4,
+            "objective_hash": "f270922f3e4d6cfee433b3ab7c60d46e98a66fc62f018ec48cfb99eefe842a98",
+            "queue_trace_hash": "c9bdd0bc70b7c0af477ccc46f883e05bbade83879ce3dbd131cfdf321a171076",
+            "search_counterexample_found": false,
+            "search_trace_hash": "6a69d62aef0694620e58f850296fdbbb86237ada91b1f4f3d1c72e4bbb5af4e0",
+            "status": "unknown",
+            "threshold": 0.0,
+            "verdict_trace_hash": "508148e8af338ace897f3e0e5ff4585f08d525214749254e55666ffa07a3908b"
+          },
+          {
+            "clause_index": 5,
+            "objective_hash": "95772c71f4830ef00b8fb897cdea241e468fe513f8b3950946f42e98917c5c7f",
+            "queue_trace_hash": "313973286b618d63ccb5356b023a45128c43ab97dd8ca2f5371613abebd9dd60",
+            "search_counterexample_found": false,
+            "search_trace_hash": "70db3a96081f5d39be45d8df624023ce2e37b21f0c0fdb5331eb225d9e628b2c",
+            "status": "unknown",
+            "threshold": 0.0,
+            "verdict_trace_hash": "0143d005538a19eb5fa85ad70e418e5fcae31fb4d40924e9212586054834573b"
+          },
+          {
+            "clause_index": 6,
+            "objective_hash": "0b854bdc5525bb37436b81e944659f2c81a83311d2592e0e418b59c1f2099000",
+            "queue_trace_hash": "03b4432f416aaa3236b19076df4dca2743f63aa891bc79c6780a94d052399868",
+            "search_counterexample_found": false,
+            "search_trace_hash": "0c5ee9aac4515bdadd924ac154147c09940e9a94dbfbc9eddaf2a62fad66a037",
+            "status": "unknown",
+            "threshold": 0.0,
+            "verdict_trace_hash": "ec40116155f2707ad0ce5ef06e711e804f2285ced816551109109dc1e8650e7e"
+          },
+          {
+            "clause_index": 7,
+            "objective_hash": "af8ba93a2af36a8e42350d4e7264cf2d4c1b89a93a12257647fbdfc54cc4d36e",
+            "queue_trace_hash": "5ea9ae0cbd656d525debad06c936b3b942f178bdf70ea2eb2b770cd1728a7b24",
+            "search_counterexample_found": false,
+            "search_trace_hash": "91b8588375f73a03333ce8d17184c146f83e041dff9537b23dcfa75fb5ea5602",
+            "status": "unknown",
+            "threshold": 0.0,
+            "verdict_trace_hash": "65716113ce17287c4fba884d1d11984a6c77fcd6b82b1c4f783eb0ba62ad9bc0"
+          },
+          {
+            "clause_index": 8,
+            "objective_hash": "c20fb78f6a3d24c8648e0beb9692f554fd8ae89420c262183c8fd8f5b2257f5c",
+            "queue_trace_hash": "9c14b71517c801058e2a8a2becf56e5033ba6418b9e33b0d5c637343a1fb46da",
+            "search_counterexample_found": false,
+            "search_trace_hash": "2a8002c8f5f47b51db30603c00e811888ba2cac73975b0df355de2bd0eb628c0",
+            "status": "unknown",
+            "threshold": 0.0,
+            "verdict_trace_hash": "e9cb489130f8f523ab5cdffdacb4916d95044fd212623884ce028f08438bc0a2"
+          }
+        ],
+        "deadline_is_cooperative": false,
+        "elapsed_ns": 0,
+        "objective_matrix_hash": "380f1c32321ea47967ad48221134d92d494630777eabe10ef31576a0b051e408",
+        "optimizer_policy_hash": "f590e963d4fb9ed8cc4b83e65b28c06a6fcb1c70bf04ffb16b40df94081a6763",
+        "pending_clause_indices": [],
+        "performance_claimed": false,
+        "query_id": "vnncomp21-resnet2b-prop0-native-ir14-complete-query",
+        "query_policy": {
+          "clause_order": "ascending_index",
+          "deadline_enforcement": "cooperative_stage_boundaries",
+          "property_aggregation": "conjunction",
+          "timeout_ns": null,
+          "unsafe_short_circuit": true
+        },
+        "queue_config_hash": "67d4d23a27885927e4193585936e74d05a3dbbcad46bc594c8ca3a43c551c83e",
+        "reason": "one_or_more_clauses_unresolved",
+        "schema_version": "boundflow.complete-verifier-query/v1",
+        "search_policy_hash": "5af8d73cb494d692fabc9895621f343ec31b142d3819accb8d040447421d0140",
+        "skipped_after_unsafe_clause_indices": [],
+        "status": "unknown",
+        "thresholds": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "unresolved_clause_indices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "unsafe_clause_index": null
+      },
+      "query_trace_hash": "9bc934017af71f6dfb54805a104d97a8f5284fedd3395e355852fb4366d17b0c"
+    },
+    "gates": {
+      "all_complete_queries_are_correctness_only": true,
+      "attack_not_found_never_upgrades_unknown_to_verified": true,
+      "cooperative_deadline_exposes_all_pending_clauses": true,
+      "fixed_resnet_executes_nine_real_property_clauses": true,
+      "fixed_resnet_pgd_search_finds_no_false_counterexample": true,
+      "fixed_source_and_property_are_digest_bound": true,
+      "multi_clause_conjunction_requires_every_clause_verified": true,
+      "pgd_candidate_is_replayed_before_unsafe_short_circuit": true,
+      "scale_aware_execution_accepts_only_runtime_allclose_traces": true
+    },
+    "limitations": [
+      "fixed ResNet scalarized native bounds remain too loose and all nine clauses are unknown",
+      "candidate search is deterministic center-start single-restart PGD",
+      "deadline enforcement is cooperative between stages and cannot preempt an active kernel",
+      "single input box and conjunction aggregation only",
+      "CPU correctness/control evidence only; no latency, memory, CUDA, or speedup claim"
+    ],
+    "performance_claimed": false,
+    "property_status": "complete_query_control_validated_reduced",
+    "schema_version": "boundflow.complete-verifier-query-evidence/v1",
+    "source": {
+      "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+      "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+      "native_ir_manifest_sha256": "5d38aa4adcd7b8593b0ca3751106d3a254b72a2698bd445a8dde59d50eb5a676",
+      "native_ir_payload_sha256": "3ba949de66380c7d16dc44bb934eca8400182521e761c19eaa671cd8cf0eb557",
+      "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf",
+      "vnnlib_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff"
+    },
+    "status": "ok",
+    "toy_deadline": {
+      "clauses": [],
+      "query_trace": {
+        "compiler_version": "boundflow.complete-verifier-query/v1",
+        "completed_clauses": [],
+        "deadline_is_cooperative": true,
+        "elapsed_ns": 10,
+        "objective_matrix_hash": "1329ba53b8384e09aa9d6552875a9336dbe6a2b840051c5ed359af50c9d68876",
+        "optimizer_policy_hash": "562a4073c844f972babe413f8e68d452a3a8187e82b835cc93791686a07332f5",
+        "pending_clause_indices": [
+          0,
+          1
+        ],
+        "performance_claimed": false,
+        "query_id": "complete-query-deadline-toy",
+        "query_policy": {
+          "clause_order": "ascending_index",
+          "deadline_enforcement": "cooperative_stage_boundaries",
+          "property_aggregation": "conjunction",
+          "timeout_ns": 5,
+          "unsafe_short_circuit": true
+        },
+        "queue_config_hash": "67d4d23a27885927e4193585936e74d05a3dbbcad46bc594c8ca3a43c551c83e",
+        "reason": "query_deadline_exhausted",
+        "schema_version": "boundflow.complete-verifier-query/v1",
+        "search_policy_hash": "8dc9eb628d5ba04ab268981055fba4b7900af8df7d5c3c842ffb0243a21dbc12",
+        "skipped_after_unsafe_clause_indices": [],
+        "status": "unknown",
+        "thresholds": [
+          -2.0,
+          -2.0
+        ],
+        "unresolved_clause_indices": [],
+        "unsafe_clause_index": null
+      },
+      "query_trace_hash": "c8eb77c50fc8e309afe371afdcaf0521b2afa2dab915ad92492b6e7657bb123f"
+    },
+    "toy_unknown": {
+      "clauses": [
+        {
+          "best_input_hash": "21ce56fc58d4020b1856f0e19cc9044d3ea776968b0d9115b39e37bcb3e5aa07",
+          "clause_trace": {
+            "clause_index": 0,
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "queue_trace_hash": "ec285e392be96b962fedefcf1b5e595bc53007a872aa26a326186fd647e0c8c0",
+            "search_counterexample_found": false,
+            "search_trace_hash": "d737e66d53e966b53f81d865f39336391a12f7201b563fbb537bfff746fb49d8",
+            "status": "verified",
+            "threshold": -2.0,
+            "verdict_trace_hash": "32d5dbe3e1e947ceb927039cc391e694f4a8ee0513bedcad944fc05442380488"
+          },
+          "counterexample_input_hash": null,
+          "queue_trace": {
+            "compiler_version": "boundflow.native-optimized-relu-split-bab/v1",
+            "config": {
+              "available_memory_bytes": 1073741824,
+              "expansion_batch_size": 1,
+              "max_depth": 0,
+              "max_eval_batch_size": 1,
+              "max_nodes": 1,
+              "memory_budget_bytes": 1073741824,
+              "threshold": -2.0
+            },
+            "decisions": [
+              {
+                "branch_candidate": null,
+                "child_node_ids": [],
+                "decision_index": 0,
+                "kind": "prune",
+                "node_id": "complete-query-unknown-toy:clause:0000:n000000",
+                "reason": "lower_bound_meets_threshold"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -0.8999999761581421,
+                  "neuron_index": 0,
+                  "relu_input": "h1",
+                  "upper": 1.100000023841858,
+                  "width": 2.0
+                },
+                "eval_batch_id": "complete-query-unknown-toy:clause:0000:eval:0000",
+                "eval_batch_position": 0,
+                "lower": -1.100000023841858,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "execution_plan_instance_hash": "7e539cee9ea56c63b7e925097586738ce4607e5a60765b3c1b2aa8974bc632f3",
+                  "execution_plan_template_hash": "2a7bc69fe1fa004e67a2d607bbe7877d66d77d2210cb1afe5a1ec8731f0d74ce",
+                  "representation_binding_hash": "357a8cda46a2d2db9e243649ef51381c21fed203c4fcd32fcd6c7167a964c816",
+                  "schedule_hash": "6d7b895603e97f8801cfd4479d82a180b879abfa98571cfdc60799215691d335",
+                  "source_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "source_plan_instance_hash": "34618e5a5809be2a028e62c206a073669fe79fa7096f26df0aa1774afe203c10",
+                  "source_plan_template_hash": "2d03e7acafff2265adba6122e41695c217657ec9bfb9673b41dc29b4aa75c924",
+                  "source_schedule_hash": "aacefd53cc713836b57bfa4e6a71889177ba89864e2fab524a66e77e2bac7351",
+                  "task_module_hash": "56af632516af496d1b7e7a94ce0cbf0de4002d97f4a9573cb580cf7a1da65e45"
+                },
+                "node": {
+                  "branch_neuron_index": null,
+                  "branch_relu_input": null,
+                  "branch_value": 0,
+                  "depth": 0,
+                  "node_id": "complete-query-unknown-toy:clause:0000:n000000",
+                  "parent_node_id": null,
+                  "split_state_hash": "3734aae96f6d0b28c6d0429d2b671edc3ef47acb22616bd433f47a83f3b5243d"
+                },
+                "optimizer_execution_trace_hash": "dda58c1592bc443584025458aae64bb3bf8606471e95631ba43af9abce2026b3",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "514d31aa95bc79cfefa25eb309c8a429e4e7492f2184c581d452f7aa5d66c1d0",
+                  "optimizer_schedule_hash": "df40631fbfb8024206f10df3fa841f1fc665c5ddb54683efe800d9f2b5f8033c",
+                  "optimizer_task_module_hash": "f71ee38584449a85d58510556f12c2b9c698b8b738d5f0beed221b2fb0dca821"
+                },
+                "parent_selected_state_hash": null,
+                "parent_state_consumed_as_exact": false,
+                "parent_state_validity": "monotonic_refinement_initialization_only",
+                "priority": -1.1,
+                "selected_state_hash": "a0c1d9d11ddc64713eccc25c405785f824cdfae3c88c9aaa3fcb8615a2d9ca4e",
+                "upper": 0.44999998807907104,
+                "warm_start_kind": "none"
+              }
+            ],
+            "final_frontier_node_ids": [],
+            "max_queue_size": 1,
+            "native_stack_count": 1,
+            "native_stacks": [
+              {
+                "active_split_count": 0,
+                "alpha_gradient_l1": 0.0,
+                "beta_gradient_l1": 0.0,
+                "domain_batch_size": 1,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "execution_plan_instance_hash": "7e539cee9ea56c63b7e925097586738ce4607e5a60765b3c1b2aa8974bc632f3",
+                  "execution_plan_template_hash": "2a7bc69fe1fa004e67a2d607bbe7877d66d77d2210cb1afe5a1ec8731f0d74ce",
+                  "representation_binding_hash": "357a8cda46a2d2db9e243649ef51381c21fed203c4fcd32fcd6c7167a964c816",
+                  "schedule_hash": "6d7b895603e97f8801cfd4479d82a180b879abfa98571cfdc60799215691d335",
+                  "source_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "source_plan_instance_hash": "34618e5a5809be2a028e62c206a073669fe79fa7096f26df0aa1774afe203c10",
+                  "source_plan_template_hash": "2d03e7acafff2265adba6122e41695c217657ec9bfb9673b41dc29b4aa75c924",
+                  "source_schedule_hash": "aacefd53cc713836b57bfa4e6a71889177ba89864e2fab524a66e77e2bac7351",
+                  "task_module_hash": "56af632516af496d1b7e7a94ce0cbf0de4002d97f4a9573cb580cf7a1da65e45"
+                },
+                "native_schedule_launch_count": 5,
+                "native_task_count": 5,
+                "native_task_trace_event_count": 5,
+                "node_ids": [
+                  "complete-query-unknown-toy:clause:0000:n000000"
+                ],
+                "optimizer_action_count": 8,
+                "optimizer_backward_count": 1,
+                "optimizer_evaluation_count": 2,
+                "optimizer_execution_trace_hash": "dda58c1592bc443584025458aae64bb3bf8606471e95631ba43af9abce2026b3",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "514d31aa95bc79cfefa25eb309c8a429e4e7492f2184c581d452f7aa5d66c1d0",
+                  "optimizer_schedule_hash": "df40631fbfb8024206f10df3fa841f1fc665c5ddb54683efe800d9f2b5f8033c",
+                  "optimizer_task_module_hash": "f71ee38584449a85d58510556f12c2b9c698b8b738d5f0beed221b2fb0dca821"
+                },
+                "optimizer_projection_count": 1,
+                "optimizer_selected_batch_state_hash": "a0c1d9d11ddc64713eccc25c405785f824cdfae3c88c9aaa3fcb8615a2d9ca4e",
+                "parent_selected_state_hashes": [
+                  null
+                ],
+                "selected_native_lower_max_abs_diff": 0.0,
+                "selected_native_upper_max_abs_diff": 0.0,
+                "stack_id": "complete-query-unknown-toy:clause:0000:eval:0000",
+                "warm_source_state_hash": null,
+                "warm_start_kind": "none"
+              }
+            ],
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "optimizer_policy": {
+              "alpha_init": 0.5,
+              "beta_init": 0.0,
+              "lr": 0.1,
+              "objective": "lower",
+              "optimizer": "torch.optim.Adam",
+              "per_batch_params": true,
+              "soft_tau": 1.0,
+              "spec_reduce": "mean",
+              "steps": 1
+            },
+            "performance_claimed": false,
+            "property_status": "not_claimed",
+            "root_input_lower_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "root_input_upper_hash": "1bb1faadd28e57d8e14fcaefc934281209d0e8d575f36585631ee166ee46a57c",
+            "run_id": "complete-query-unknown-toy:clause:0000",
+            "schema_version": "boundflow.optimized-relu-split-bab-trace/v1",
+            "status": "complete",
+            "termination_reason": "configured_bounded_tree_exhausted"
+          },
+          "queue_trace_hash": "ec285e392be96b962fedefcf1b5e595bc53007a872aa26a326186fd647e0c8c0",
+          "search_trace": {
+            "best_input_hash": "21ce56fc58d4020b1856f0e19cc9044d3ea776968b0d9115b39e37bcb3e5aa07",
+            "best_iteration": 1,
+            "best_objective_value": -0.3499999940395355,
+            "compiler_version": "boundflow.native-candidate-search/v1",
+            "counterexample_found": false,
+            "early_stopped": false,
+            "gradient_l1_values": [
+              1.0
+            ],
+            "initial_input_hash": "9868f626baed13b75b2c1ff64afdbc0f48647f27b500566941f5fff9810dd860",
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "objective_values": [
+              -0.10000000149011612,
+              -0.3499999940395355
+            ],
+            "performance_claimed": false,
+            "policy": {
+              "early_stop": true,
+              "projection": "exact_box_clamp",
+              "start": "input_box_center",
+              "step_size": 0.25,
+              "steps": 1,
+              "update": "sign_gradient_descent"
+            },
+            "projected_update_count": 1,
+            "proof_claimed": false,
+            "schema_version": "boundflow.native-candidate-search/v1",
+            "steps_executed": 1,
+            "threshold": -2.0
+          },
+          "search_trace_hash": "d737e66d53e966b53f81d865f39336391a12f7201b563fbb537bfff746fb49d8",
+          "verdict_trace": {
+            "compiler_version": "boundflow.native-property-verdict/v1",
+            "counterexample": null,
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "performance_claimed": false,
+            "queue_trace_hash": "ec285e392be96b962fedefcf1b5e595bc53007a872aa26a326186fd647e0c8c0",
+            "reason": "all_leaves_soundly_pruned",
+            "run_id": "complete-query-unknown-toy:clause:0000",
+            "schema_version": "boundflow.native-property-verdict/v1",
+            "sound_pruned_leaf_node_ids": [
+              "complete-query-unknown-toy:clause:0000:n000000"
+            ],
+            "status": "verified",
+            "threshold": -2.0,
+            "unresolved_leaf_node_ids": []
+          },
+          "verdict_trace_hash": "32d5dbe3e1e947ceb927039cc391e694f4a8ee0513bedcad944fc05442380488"
+        },
+        {
+          "best_input_hash": "21ce56fc58d4020b1856f0e19cc9044d3ea776968b0d9115b39e37bcb3e5aa07",
+          "clause_trace": {
+            "clause_index": 1,
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "queue_trace_hash": "66d0bc9b43863ef93cd981d60e91fb06985f6dbadb5a711f2af2cb38e84bc949",
+            "search_counterexample_found": false,
+            "search_trace_hash": "df80009aa3f270ab9ea90082b41e619d0aa6378e48488ceb13d3f5c6734b62c6",
+            "status": "unknown",
+            "threshold": -0.949999988079071,
+            "verdict_trace_hash": "fb33705ad97dfa7d6b3051296ac7bffab7403f44ded2b59f41d3597463912c1b"
+          },
+          "counterexample_input_hash": null,
+          "queue_trace": {
+            "compiler_version": "boundflow.native-optimized-relu-split-bab/v1",
+            "config": {
+              "available_memory_bytes": 1073741824,
+              "expansion_batch_size": 1,
+              "max_depth": 0,
+              "max_eval_batch_size": 1,
+              "max_nodes": 1,
+              "memory_budget_bytes": 1073741824,
+              "threshold": -0.949999988079071
+            },
+            "decisions": [
+              {
+                "branch_candidate": null,
+                "child_node_ids": [],
+                "decision_index": 0,
+                "kind": "terminal",
+                "node_id": "complete-query-unknown-toy:clause:0001:n000000",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -0.8999999761581421,
+                  "neuron_index": 0,
+                  "relu_input": "h1",
+                  "upper": 1.100000023841858,
+                  "width": 2.0
+                },
+                "eval_batch_id": "complete-query-unknown-toy:clause:0001:eval:0000",
+                "eval_batch_position": 0,
+                "lower": -1.100000023841858,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "execution_plan_instance_hash": "128e700b398e3cf9eef82a6ce28e03d7ed3b2c1eff0a7c35871c2097aa93e659",
+                  "execution_plan_template_hash": "78c51356bc7fa011a04134790a8af454967d19db355e38bf7d4166a27e033586",
+                  "representation_binding_hash": "9712d07b4410d3b098b829bf068f2afcf1502baf31a403bbb5a28a8b7f82acd9",
+                  "schedule_hash": "c12aaf0a08d99bc3247a134b3e7fef7f02c0ace6688451271eb154964c02854a",
+                  "source_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "source_plan_instance_hash": "b6dba1adafcb004a33906499121c67c62ccdac5af628a6d0b2cf34b2b91f8704",
+                  "source_plan_template_hash": "0e1ecb16f9b845df37ccc534127b9a26cf1b4a2585dd46c093a2c83238d220d6",
+                  "source_schedule_hash": "b7f21ed3235df86b85268c2f092ed0973d9737965bdaf086f54fb74e5e6610ec",
+                  "task_module_hash": "29b7b88d3f86144fa182332c57a635380ef2c771167e1ad5ca9892470c80c2e3"
+                },
+                "node": {
+                  "branch_neuron_index": null,
+                  "branch_relu_input": null,
+                  "branch_value": 0,
+                  "depth": 0,
+                  "node_id": "complete-query-unknown-toy:clause:0001:n000000",
+                  "parent_node_id": null,
+                  "split_state_hash": "3734aae96f6d0b28c6d0429d2b671edc3ef47acb22616bd433f47a83f3b5243d"
+                },
+                "optimizer_execution_trace_hash": "d31b0a2e8b267200a57b490e45db94cb905a260c6aa7a5246b550eb3e90b72fc",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "720e275188dba65ea9d19d06f3cc335bbed92f4edd9a9c2728f994cd4d9bc7ca",
+                  "optimizer_schedule_hash": "e10dd44c963d03a6e1316714a12bcc9c091ee7d8b6c1a632c95e385c4b6e38f5",
+                  "optimizer_task_module_hash": "59da807f4031e8285cd46620ad00c67232cc3e13a981b6393a3015cdb02e012a"
+                },
+                "parent_selected_state_hash": null,
+                "parent_state_consumed_as_exact": false,
+                "parent_state_validity": "monotonic_refinement_initialization_only",
+                "priority": -1.1,
+                "selected_state_hash": "a0c1d9d11ddc64713eccc25c405785f824cdfae3c88c9aaa3fcb8615a2d9ca4e",
+                "upper": 0.44999998807907104,
+                "warm_start_kind": "none"
+              }
+            ],
+            "final_frontier_node_ids": [],
+            "max_queue_size": 1,
+            "native_stack_count": 1,
+            "native_stacks": [
+              {
+                "active_split_count": 0,
+                "alpha_gradient_l1": 0.0,
+                "beta_gradient_l1": 0.0,
+                "domain_batch_size": 1,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "execution_plan_instance_hash": "128e700b398e3cf9eef82a6ce28e03d7ed3b2c1eff0a7c35871c2097aa93e659",
+                  "execution_plan_template_hash": "78c51356bc7fa011a04134790a8af454967d19db355e38bf7d4166a27e033586",
+                  "representation_binding_hash": "9712d07b4410d3b098b829bf068f2afcf1502baf31a403bbb5a28a8b7f82acd9",
+                  "schedule_hash": "c12aaf0a08d99bc3247a134b3e7fef7f02c0ace6688451271eb154964c02854a",
+                  "source_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "source_plan_instance_hash": "b6dba1adafcb004a33906499121c67c62ccdac5af628a6d0b2cf34b2b91f8704",
+                  "source_plan_template_hash": "0e1ecb16f9b845df37ccc534127b9a26cf1b4a2585dd46c093a2c83238d220d6",
+                  "source_schedule_hash": "b7f21ed3235df86b85268c2f092ed0973d9737965bdaf086f54fb74e5e6610ec",
+                  "task_module_hash": "29b7b88d3f86144fa182332c57a635380ef2c771167e1ad5ca9892470c80c2e3"
+                },
+                "native_schedule_launch_count": 5,
+                "native_task_count": 5,
+                "native_task_trace_event_count": 5,
+                "node_ids": [
+                  "complete-query-unknown-toy:clause:0001:n000000"
+                ],
+                "optimizer_action_count": 8,
+                "optimizer_backward_count": 1,
+                "optimizer_evaluation_count": 2,
+                "optimizer_execution_trace_hash": "d31b0a2e8b267200a57b490e45db94cb905a260c6aa7a5246b550eb3e90b72fc",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "720e275188dba65ea9d19d06f3cc335bbed92f4edd9a9c2728f994cd4d9bc7ca",
+                  "optimizer_schedule_hash": "e10dd44c963d03a6e1316714a12bcc9c091ee7d8b6c1a632c95e385c4b6e38f5",
+                  "optimizer_task_module_hash": "59da807f4031e8285cd46620ad00c67232cc3e13a981b6393a3015cdb02e012a"
+                },
+                "optimizer_projection_count": 1,
+                "optimizer_selected_batch_state_hash": "a0c1d9d11ddc64713eccc25c405785f824cdfae3c88c9aaa3fcb8615a2d9ca4e",
+                "parent_selected_state_hashes": [
+                  null
+                ],
+                "selected_native_lower_max_abs_diff": 0.0,
+                "selected_native_upper_max_abs_diff": 0.0,
+                "stack_id": "complete-query-unknown-toy:clause:0001:eval:0000",
+                "warm_source_state_hash": null,
+                "warm_start_kind": "none"
+              }
+            ],
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "optimizer_policy": {
+              "alpha_init": 0.5,
+              "beta_init": 0.0,
+              "lr": 0.1,
+              "objective": "lower",
+              "optimizer": "torch.optim.Adam",
+              "per_batch_params": true,
+              "soft_tau": 1.0,
+              "spec_reduce": "mean",
+              "steps": 1
+            },
+            "performance_claimed": false,
+            "property_status": "not_claimed",
+            "root_input_lower_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "root_input_upper_hash": "1bb1faadd28e57d8e14fcaefc934281209d0e8d575f36585631ee166ee46a57c",
+            "run_id": "complete-query-unknown-toy:clause:0001",
+            "schema_version": "boundflow.optimized-relu-split-bab-trace/v1",
+            "status": "complete",
+            "termination_reason": "configured_bounded_tree_exhausted"
+          },
+          "queue_trace_hash": "66d0bc9b43863ef93cd981d60e91fb06985f6dbadb5a711f2af2cb38e84bc949",
+          "search_trace": {
+            "best_input_hash": "21ce56fc58d4020b1856f0e19cc9044d3ea776968b0d9115b39e37bcb3e5aa07",
+            "best_iteration": 1,
+            "best_objective_value": -0.3499999940395355,
+            "compiler_version": "boundflow.native-candidate-search/v1",
+            "counterexample_found": false,
+            "early_stopped": false,
+            "gradient_l1_values": [
+              1.0
+            ],
+            "initial_input_hash": "9868f626baed13b75b2c1ff64afdbc0f48647f27b500566941f5fff9810dd860",
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "objective_values": [
+              -0.10000000149011612,
+              -0.3499999940395355
+            ],
+            "performance_claimed": false,
+            "policy": {
+              "early_stop": true,
+              "projection": "exact_box_clamp",
+              "start": "input_box_center",
+              "step_size": 0.25,
+              "steps": 1,
+              "update": "sign_gradient_descent"
+            },
+            "projected_update_count": 1,
+            "proof_claimed": false,
+            "schema_version": "boundflow.native-candidate-search/v1",
+            "steps_executed": 1,
+            "threshold": -0.949999988079071
+          },
+          "search_trace_hash": "df80009aa3f270ab9ea90082b41e619d0aa6378e48488ceb13d3f5c6734b62c6",
+          "verdict_trace": {
+            "compiler_version": "boundflow.native-property-verdict/v1",
+            "counterexample": null,
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "performance_claimed": false,
+            "queue_trace_hash": "66d0bc9b43863ef93cd981d60e91fb06985f6dbadb5a711f2af2cb38e84bc949",
+            "reason": "configured_depth_terminal_open",
+            "run_id": "complete-query-unknown-toy:clause:0001",
+            "schema_version": "boundflow.native-property-verdict/v1",
+            "sound_pruned_leaf_node_ids": [],
+            "status": "unknown",
+            "threshold": -0.949999988079071,
+            "unresolved_leaf_node_ids": [
+              "complete-query-unknown-toy:clause:0001:n000000"
+            ]
+          },
+          "verdict_trace_hash": "fb33705ad97dfa7d6b3051296ac7bffab7403f44ded2b59f41d3597463912c1b"
+        }
+      ],
+      "query_trace": {
+        "compiler_version": "boundflow.complete-verifier-query/v1",
+        "completed_clauses": [
+          {
+            "clause_index": 0,
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "queue_trace_hash": "ec285e392be96b962fedefcf1b5e595bc53007a872aa26a326186fd647e0c8c0",
+            "search_counterexample_found": false,
+            "search_trace_hash": "d737e66d53e966b53f81d865f39336391a12f7201b563fbb537bfff746fb49d8",
+            "status": "verified",
+            "threshold": -2.0,
+            "verdict_trace_hash": "32d5dbe3e1e947ceb927039cc391e694f4a8ee0513bedcad944fc05442380488"
+          },
+          {
+            "clause_index": 1,
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "queue_trace_hash": "66d0bc9b43863ef93cd981d60e91fb06985f6dbadb5a711f2af2cb38e84bc949",
+            "search_counterexample_found": false,
+            "search_trace_hash": "df80009aa3f270ab9ea90082b41e619d0aa6378e48488ceb13d3f5c6734b62c6",
+            "status": "unknown",
+            "threshold": -0.949999988079071,
+            "verdict_trace_hash": "fb33705ad97dfa7d6b3051296ac7bffab7403f44ded2b59f41d3597463912c1b"
+          }
+        ],
+        "deadline_is_cooperative": false,
+        "elapsed_ns": 0,
+        "objective_matrix_hash": "1329ba53b8384e09aa9d6552875a9336dbe6a2b840051c5ed359af50c9d68876",
+        "optimizer_policy_hash": "562a4073c844f972babe413f8e68d452a3a8187e82b835cc93791686a07332f5",
+        "pending_clause_indices": [],
+        "performance_claimed": false,
+        "query_id": "complete-query-unknown-toy",
+        "query_policy": {
+          "clause_order": "ascending_index",
+          "deadline_enforcement": "cooperative_stage_boundaries",
+          "property_aggregation": "conjunction",
+          "timeout_ns": null,
+          "unsafe_short_circuit": true
+        },
+        "queue_config_hash": "67d4d23a27885927e4193585936e74d05a3dbbcad46bc594c8ca3a43c551c83e",
+        "reason": "one_or_more_clauses_unresolved",
+        "schema_version": "boundflow.complete-verifier-query/v1",
+        "search_policy_hash": "520a4cfd921069cd4876adc3a3d7cac7fba9566359eb1d184a0ce673b6b12b85",
+        "skipped_after_unsafe_clause_indices": [],
+        "status": "unknown",
+        "thresholds": [
+          -2.0,
+          -0.949999988079071
+        ],
+        "unresolved_clause_indices": [
+          1
+        ],
+        "unsafe_clause_index": null
+      },
+      "query_trace_hash": "66d245913f73a4d8cf5b56bdd967c56778404c132ac1030473bc6b9a2f2c2d8b"
+    },
+    "toy_unsafe": {
+      "clauses": [
+        {
+          "best_input_hash": "1bb1faadd28e57d8e14fcaefc934281209d0e8d575f36585631ee166ee46a57c",
+          "clause_trace": {
+            "clause_index": 0,
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "queue_trace_hash": "38881ba7063eeff56cf311fcc4908edd0bd9c442d3cabc365cd65763e3645075",
+            "search_counterexample_found": false,
+            "search_trace_hash": "7655a9db1a72a9d1d51db8377274a718745bebfd1ab4076561681d6ecb062555",
+            "status": "verified",
+            "threshold": -2.0,
+            "verdict_trace_hash": "6685dcda5fa63e05bede8b1bc766fb851ff04732d2de9251506972451c9ad1c8"
+          },
+          "counterexample_input_hash": null,
+          "queue_trace": {
+            "compiler_version": "boundflow.native-optimized-relu-split-bab/v1",
+            "config": {
+              "available_memory_bytes": 1073741824,
+              "expansion_batch_size": 1,
+              "max_depth": 0,
+              "max_eval_batch_size": 1,
+              "max_nodes": 1,
+              "memory_budget_bytes": 1073741824,
+              "threshold": -2.0
+            },
+            "decisions": [
+              {
+                "branch_candidate": null,
+                "child_node_ids": [],
+                "decision_index": 0,
+                "kind": "prune",
+                "node_id": "complete-query-unsafe-toy:clause:0000:n000000",
+                "reason": "lower_bound_meets_threshold"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -0.8999999761581421,
+                  "neuron_index": 0,
+                  "relu_input": "h1",
+                  "upper": 1.100000023841858,
+                  "width": 2.0
+                },
+                "eval_batch_id": "complete-query-unsafe-toy:clause:0000:eval:0000",
+                "eval_batch_position": 0,
+                "lower": -1.100000023841858,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "execution_plan_instance_hash": "906f0ff23976ba67d7129453eff280793f29366d0bf622d26607830896a1af07",
+                  "execution_plan_template_hash": "4211224f124448c165fc0592e56661367f71cc6b81c174c679c6dbc1da870586",
+                  "representation_binding_hash": "dd8ffe50075a647d0fb97897f988ebf98581ff08f2bf8df3d6e4de2bba608c17",
+                  "schedule_hash": "d01f1b6d8374aa68ae72b90adb521bd9ff735916e610867e15f916d6d73960e4",
+                  "source_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "source_plan_instance_hash": "00e71fe8f7659923c9f910989c6c7669ac8fbed50fc8806017a0527a7cbffed2",
+                  "source_plan_template_hash": "5aef9fc560687b73fe9bcff5cb099c16a48efe635cad923be4522237211e7523",
+                  "source_schedule_hash": "109ab7aa751cd03ecb2c9e616918b07abcc8105992a76489e2060ce9372351e2",
+                  "task_module_hash": "1ff089c76cd9895fe8aedd7ed87fd64bd9c8e8a3f0f215976af149f7d0ece2da"
+                },
+                "node": {
+                  "branch_neuron_index": null,
+                  "branch_relu_input": null,
+                  "branch_value": 0,
+                  "depth": 0,
+                  "node_id": "complete-query-unsafe-toy:clause:0000:n000000",
+                  "parent_node_id": null,
+                  "split_state_hash": "3734aae96f6d0b28c6d0429d2b671edc3ef47acb22616bd433f47a83f3b5243d"
+                },
+                "optimizer_execution_trace_hash": "1aa6e5a9119e961a8ccf3a8688996a4557979ef683a7b25a677a5b175a0f42b8",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "2d0013768a2e73f42ac8436454047a4138d7b9866a6a6a6b8db7282170a75936",
+                  "optimizer_schedule_hash": "bf3dacd4dd65c78ed8612ef1f3ae06a24e279fab4b535cf2e510915eb5172f1f",
+                  "optimizer_task_module_hash": "ae85b2c56251e3286caea196300cc83bfc869af3753bc71bec118e24c6350c63"
+                },
+                "parent_selected_state_hash": null,
+                "parent_state_consumed_as_exact": false,
+                "parent_state_validity": "monotonic_refinement_initialization_only",
+                "priority": -1.1,
+                "selected_state_hash": "a0c1d9d11ddc64713eccc25c405785f824cdfae3c88c9aaa3fcb8615a2d9ca4e",
+                "upper": 0.44999998807907104,
+                "warm_start_kind": "none"
+              }
+            ],
+            "final_frontier_node_ids": [],
+            "max_queue_size": 1,
+            "native_stack_count": 1,
+            "native_stacks": [
+              {
+                "active_split_count": 0,
+                "alpha_gradient_l1": 0.0,
+                "beta_gradient_l1": 0.0,
+                "domain_batch_size": 1,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "execution_plan_instance_hash": "906f0ff23976ba67d7129453eff280793f29366d0bf622d26607830896a1af07",
+                  "execution_plan_template_hash": "4211224f124448c165fc0592e56661367f71cc6b81c174c679c6dbc1da870586",
+                  "representation_binding_hash": "dd8ffe50075a647d0fb97897f988ebf98581ff08f2bf8df3d6e4de2bba608c17",
+                  "schedule_hash": "d01f1b6d8374aa68ae72b90adb521bd9ff735916e610867e15f916d6d73960e4",
+                  "source_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "source_plan_instance_hash": "00e71fe8f7659923c9f910989c6c7669ac8fbed50fc8806017a0527a7cbffed2",
+                  "source_plan_template_hash": "5aef9fc560687b73fe9bcff5cb099c16a48efe635cad923be4522237211e7523",
+                  "source_schedule_hash": "109ab7aa751cd03ecb2c9e616918b07abcc8105992a76489e2060ce9372351e2",
+                  "task_module_hash": "1ff089c76cd9895fe8aedd7ed87fd64bd9c8e8a3f0f215976af149f7d0ece2da"
+                },
+                "native_schedule_launch_count": 5,
+                "native_task_count": 5,
+                "native_task_trace_event_count": 5,
+                "node_ids": [
+                  "complete-query-unsafe-toy:clause:0000:n000000"
+                ],
+                "optimizer_action_count": 8,
+                "optimizer_backward_count": 1,
+                "optimizer_evaluation_count": 2,
+                "optimizer_execution_trace_hash": "1aa6e5a9119e961a8ccf3a8688996a4557979ef683a7b25a677a5b175a0f42b8",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "2d0013768a2e73f42ac8436454047a4138d7b9866a6a6a6b8db7282170a75936",
+                  "optimizer_schedule_hash": "bf3dacd4dd65c78ed8612ef1f3ae06a24e279fab4b535cf2e510915eb5172f1f",
+                  "optimizer_task_module_hash": "ae85b2c56251e3286caea196300cc83bfc869af3753bc71bec118e24c6350c63"
+                },
+                "optimizer_projection_count": 1,
+                "optimizer_selected_batch_state_hash": "a0c1d9d11ddc64713eccc25c405785f824cdfae3c88c9aaa3fcb8615a2d9ca4e",
+                "parent_selected_state_hashes": [
+                  null
+                ],
+                "selected_native_lower_max_abs_diff": 0.0,
+                "selected_native_upper_max_abs_diff": 0.0,
+                "stack_id": "complete-query-unsafe-toy:clause:0000:eval:0000",
+                "warm_source_state_hash": null,
+                "warm_start_kind": "none"
+              }
+            ],
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "optimizer_policy": {
+              "alpha_init": 0.5,
+              "beta_init": 0.0,
+              "lr": 0.1,
+              "objective": "lower",
+              "optimizer": "torch.optim.Adam",
+              "per_batch_params": true,
+              "soft_tau": 1.0,
+              "spec_reduce": "mean",
+              "steps": 1
+            },
+            "performance_claimed": false,
+            "property_status": "not_claimed",
+            "root_input_lower_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "root_input_upper_hash": "1bb1faadd28e57d8e14fcaefc934281209d0e8d575f36585631ee166ee46a57c",
+            "run_id": "complete-query-unsafe-toy:clause:0000",
+            "schema_version": "boundflow.optimized-relu-split-bab-trace/v1",
+            "status": "complete",
+            "termination_reason": "configured_bounded_tree_exhausted"
+          },
+          "queue_trace_hash": "38881ba7063eeff56cf311fcc4908edd0bd9c442d3cabc365cd65763e3645075",
+          "search_trace": {
+            "best_input_hash": "1bb1faadd28e57d8e14fcaefc934281209d0e8d575f36585631ee166ee46a57c",
+            "best_iteration": 4,
+            "best_objective_value": -1.100000023841858,
+            "compiler_version": "boundflow.native-candidate-search/v1",
+            "counterexample_found": false,
+            "early_stopped": false,
+            "gradient_l1_values": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "initial_input_hash": "9868f626baed13b75b2c1ff64afdbc0f48647f27b500566941f5fff9810dd860",
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "objective_values": [
+              -0.10000000149011612,
+              -0.3499999940395355,
+              -0.6000000238418579,
+              -0.8500000238418579,
+              -1.100000023841858
+            ],
+            "performance_claimed": false,
+            "policy": {
+              "early_stop": true,
+              "projection": "exact_box_clamp",
+              "start": "input_box_center",
+              "step_size": 0.25,
+              "steps": 4,
+              "update": "sign_gradient_descent"
+            },
+            "projected_update_count": 4,
+            "proof_claimed": false,
+            "schema_version": "boundflow.native-candidate-search/v1",
+            "steps_executed": 4,
+            "threshold": -2.0
+          },
+          "search_trace_hash": "7655a9db1a72a9d1d51db8377274a718745bebfd1ab4076561681d6ecb062555",
+          "verdict_trace": {
+            "compiler_version": "boundflow.native-property-verdict/v1",
+            "counterexample": null,
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "performance_claimed": false,
+            "queue_trace_hash": "38881ba7063eeff56cf311fcc4908edd0bd9c442d3cabc365cd65763e3645075",
+            "reason": "all_leaves_soundly_pruned",
+            "run_id": "complete-query-unsafe-toy:clause:0000",
+            "schema_version": "boundflow.native-property-verdict/v1",
+            "sound_pruned_leaf_node_ids": [
+              "complete-query-unsafe-toy:clause:0000:n000000"
+            ],
+            "status": "verified",
+            "threshold": -2.0,
+            "unresolved_leaf_node_ids": []
+          },
+          "verdict_trace_hash": "6685dcda5fa63e05bede8b1bc766fb851ff04732d2de9251506972451c9ad1c8"
+        },
+        {
+          "best_input_hash": "74d8a425a0a8e75fff7c2b854bc0356fce980100058a8712afe4e03925db08ea",
+          "clause_trace": {
+            "clause_index": 1,
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "queue_trace_hash": "fdf762a389d60b105d34402fa10ca626a6d9fd91011b2010dcf2878bae025596",
+            "search_counterexample_found": true,
+            "search_trace_hash": "789c89dece786106fa45d32184e554e3e8a1b57a8ae3c44ab054b0bd7cc138b4",
+            "status": "unsafe",
+            "threshold": -0.5,
+            "verdict_trace_hash": "5e00dae0fcd58c8f54e3ed81a31e7f346c9806d2e7cd34ecd4739fb42313c422"
+          },
+          "counterexample_input_hash": "74d8a425a0a8e75fff7c2b854bc0356fce980100058a8712afe4e03925db08ea",
+          "queue_trace": {
+            "compiler_version": "boundflow.native-optimized-relu-split-bab/v1",
+            "config": {
+              "available_memory_bytes": 1073741824,
+              "expansion_batch_size": 1,
+              "max_depth": 0,
+              "max_eval_batch_size": 1,
+              "max_nodes": 1,
+              "memory_budget_bytes": 1073741824,
+              "threshold": -0.5
+            },
+            "decisions": [
+              {
+                "branch_candidate": null,
+                "child_node_ids": [],
+                "decision_index": 0,
+                "kind": "terminal",
+                "node_id": "complete-query-unsafe-toy:clause:0001:n000000",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -0.8999999761581421,
+                  "neuron_index": 0,
+                  "relu_input": "h1",
+                  "upper": 1.100000023841858,
+                  "width": 2.0
+                },
+                "eval_batch_id": "complete-query-unsafe-toy:clause:0001:eval:0000",
+                "eval_batch_position": 0,
+                "lower": -1.100000023841858,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "execution_plan_instance_hash": "2903be05ca821e7c0d0255c6c41a3950428d15b2641e183b9da7c1a641785535",
+                  "execution_plan_template_hash": "f33339b733c4825f34e5ba92b7c72f00232d9f07d3c99e0f5570e5aea495a4de",
+                  "representation_binding_hash": "f19ec4effb867acc583d82cfb6cfc606623d2042c8c21d4d3e86cce95de3538f",
+                  "schedule_hash": "e503d91396586d2a7210866c1f06d9df2f9d8306c65a237817c8a0449ae100e9",
+                  "source_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "source_plan_instance_hash": "b001395acdadfc88a8af48c25dd9f90edf346f94ae9719402e48d1cfc2bd8166",
+                  "source_plan_template_hash": "457a77b4c9cbabd5be111c64b7ff678bb1748b65d869f0d3a15e44fac6a54a8d",
+                  "source_schedule_hash": "e18c65f36e537b0bf0a046870728515e800387f901307cee02728ecd9ad4125f",
+                  "task_module_hash": "f56058bf87d4babf004816d68f6ae754f3742290c918a56f92c48e0cf7016b64"
+                },
+                "node": {
+                  "branch_neuron_index": null,
+                  "branch_relu_input": null,
+                  "branch_value": 0,
+                  "depth": 0,
+                  "node_id": "complete-query-unsafe-toy:clause:0001:n000000",
+                  "parent_node_id": null,
+                  "split_state_hash": "3734aae96f6d0b28c6d0429d2b671edc3ef47acb22616bd433f47a83f3b5243d"
+                },
+                "optimizer_execution_trace_hash": "b887bd54e22e467ba1b9f088f845088fc34325eae51ce806b6eea26910b3f65a",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "67ae7f2927ab0007d78d8f6474fcf7e33182b854e486df759ff411c64a40c46b",
+                  "optimizer_schedule_hash": "ae2824d2357cae01d42744b914ffacf6bc675031dfe0cab43ab2cfb98b9cd5b0",
+                  "optimizer_task_module_hash": "9643e8b103d8edcf6e687ee3b4a87068b53af62bc6d623f1efc3fef7769992d5"
+                },
+                "parent_selected_state_hash": null,
+                "parent_state_consumed_as_exact": false,
+                "parent_state_validity": "monotonic_refinement_initialization_only",
+                "priority": -1.1,
+                "selected_state_hash": "a0c1d9d11ddc64713eccc25c405785f824cdfae3c88c9aaa3fcb8615a2d9ca4e",
+                "upper": 0.44999998807907104,
+                "warm_start_kind": "none"
+              }
+            ],
+            "final_frontier_node_ids": [],
+            "max_queue_size": 1,
+            "native_stack_count": 1,
+            "native_stacks": [
+              {
+                "active_split_count": 0,
+                "alpha_gradient_l1": 0.0,
+                "beta_gradient_l1": 0.0,
+                "domain_batch_size": 1,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "execution_plan_instance_hash": "2903be05ca821e7c0d0255c6c41a3950428d15b2641e183b9da7c1a641785535",
+                  "execution_plan_template_hash": "f33339b733c4825f34e5ba92b7c72f00232d9f07d3c99e0f5570e5aea495a4de",
+                  "representation_binding_hash": "f19ec4effb867acc583d82cfb6cfc606623d2042c8c21d4d3e86cce95de3538f",
+                  "schedule_hash": "e503d91396586d2a7210866c1f06d9df2f9d8306c65a237817c8a0449ae100e9",
+                  "source_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "source_plan_instance_hash": "b001395acdadfc88a8af48c25dd9f90edf346f94ae9719402e48d1cfc2bd8166",
+                  "source_plan_template_hash": "457a77b4c9cbabd5be111c64b7ff678bb1748b65d869f0d3a15e44fac6a54a8d",
+                  "source_schedule_hash": "e18c65f36e537b0bf0a046870728515e800387f901307cee02728ecd9ad4125f",
+                  "task_module_hash": "f56058bf87d4babf004816d68f6ae754f3742290c918a56f92c48e0cf7016b64"
+                },
+                "native_schedule_launch_count": 5,
+                "native_task_count": 5,
+                "native_task_trace_event_count": 5,
+                "node_ids": [
+                  "complete-query-unsafe-toy:clause:0001:n000000"
+                ],
+                "optimizer_action_count": 8,
+                "optimizer_backward_count": 1,
+                "optimizer_evaluation_count": 2,
+                "optimizer_execution_trace_hash": "b887bd54e22e467ba1b9f088f845088fc34325eae51ce806b6eea26910b3f65a",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "67ae7f2927ab0007d78d8f6474fcf7e33182b854e486df759ff411c64a40c46b",
+                  "optimizer_schedule_hash": "ae2824d2357cae01d42744b914ffacf6bc675031dfe0cab43ab2cfb98b9cd5b0",
+                  "optimizer_task_module_hash": "9643e8b103d8edcf6e687ee3b4a87068b53af62bc6d623f1efc3fef7769992d5"
+                },
+                "optimizer_projection_count": 1,
+                "optimizer_selected_batch_state_hash": "a0c1d9d11ddc64713eccc25c405785f824cdfae3c88c9aaa3fcb8615a2d9ca4e",
+                "parent_selected_state_hashes": [
+                  null
+                ],
+                "selected_native_lower_max_abs_diff": 0.0,
+                "selected_native_upper_max_abs_diff": 0.0,
+                "stack_id": "complete-query-unsafe-toy:clause:0001:eval:0000",
+                "warm_source_state_hash": null,
+                "warm_start_kind": "none"
+              }
+            ],
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "optimizer_policy": {
+              "alpha_init": 0.5,
+              "beta_init": 0.0,
+              "lr": 0.1,
+              "objective": "lower",
+              "optimizer": "torch.optim.Adam",
+              "per_batch_params": true,
+              "soft_tau": 1.0,
+              "spec_reduce": "mean",
+              "steps": 1
+            },
+            "performance_claimed": false,
+            "property_status": "not_claimed",
+            "root_input_lower_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "root_input_upper_hash": "1bb1faadd28e57d8e14fcaefc934281209d0e8d575f36585631ee166ee46a57c",
+            "run_id": "complete-query-unsafe-toy:clause:0001",
+            "schema_version": "boundflow.optimized-relu-split-bab-trace/v1",
+            "status": "complete",
+            "termination_reason": "configured_bounded_tree_exhausted"
+          },
+          "queue_trace_hash": "fdf762a389d60b105d34402fa10ca626a6d9fd91011b2010dcf2878bae025596",
+          "search_trace": {
+            "best_input_hash": "74d8a425a0a8e75fff7c2b854bc0356fce980100058a8712afe4e03925db08ea",
+            "best_iteration": 2,
+            "best_objective_value": -0.6000000238418579,
+            "compiler_version": "boundflow.native-candidate-search/v1",
+            "counterexample_found": true,
+            "early_stopped": true,
+            "gradient_l1_values": [
+              1.0,
+              1.0
+            ],
+            "initial_input_hash": "9868f626baed13b75b2c1ff64afdbc0f48647f27b500566941f5fff9810dd860",
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "objective_values": [
+              -0.10000000149011612,
+              -0.3499999940395355,
+              -0.6000000238418579
+            ],
+            "performance_claimed": false,
+            "policy": {
+              "early_stop": true,
+              "projection": "exact_box_clamp",
+              "start": "input_box_center",
+              "step_size": 0.25,
+              "steps": 4,
+              "update": "sign_gradient_descent"
+            },
+            "projected_update_count": 2,
+            "proof_claimed": false,
+            "schema_version": "boundflow.native-candidate-search/v1",
+            "steps_executed": 2,
+            "threshold": -0.5
+          },
+          "search_trace_hash": "789c89dece786106fa45d32184e554e3e8a1b57a8ae3c44ab054b0bd7cc138b4",
+          "verdict_trace": {
+            "compiler_version": "boundflow.native-property-verdict/v1",
+            "counterexample": {
+              "input_box_max_violation": 0.0,
+              "input_dtype": "float32",
+              "input_hash": "74d8a425a0a8e75fff7c2b854bc0356fce980100058a8712afe4e03925db08ea",
+              "input_shape": [
+                1,
+                1
+              ],
+              "node_id": "complete-query-unsafe-toy:clause:0001:n000000",
+              "objective_margin": -0.10000002384185791,
+              "objective_value": -0.6000000238418579,
+              "output_hash": "214c58735629172df7a94e21f91118c3100555fe12a18865623b5279736350b7",
+              "satisfied_split_count": 0,
+              "split_constraint_min_margin": null,
+              "split_state_hash": "3734aae96f6d0b28c6d0429d2b671edc3ef47acb22616bd433f47a83f3b5243d",
+              "split_tolerance": 1e-06,
+              "threshold": -0.5,
+              "value_trace_hash": "ee5a027686fd0575acc399c400a2422e21a599f7f26beb3dd43642a17e0cdef9"
+            },
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "performance_claimed": false,
+            "queue_trace_hash": "fdf762a389d60b105d34402fa10ca626a6d9fd91011b2010dcf2878bae025596",
+            "reason": "concrete_counterexample_reexecuted",
+            "run_id": "complete-query-unsafe-toy:clause:0001",
+            "schema_version": "boundflow.native-property-verdict/v1",
+            "sound_pruned_leaf_node_ids": [],
+            "status": "unsafe",
+            "threshold": -0.5,
+            "unresolved_leaf_node_ids": [
+              "complete-query-unsafe-toy:clause:0001:n000000"
+            ]
+          },
+          "verdict_trace_hash": "5e00dae0fcd58c8f54e3ed81a31e7f346c9806d2e7cd34ecd4739fb42313c422"
+        }
+      ],
+      "query_trace": {
+        "compiler_version": "boundflow.complete-verifier-query/v1",
+        "completed_clauses": [
+          {
+            "clause_index": 0,
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "queue_trace_hash": "38881ba7063eeff56cf311fcc4908edd0bd9c442d3cabc365cd65763e3645075",
+            "search_counterexample_found": false,
+            "search_trace_hash": "7655a9db1a72a9d1d51db8377274a718745bebfd1ab4076561681d6ecb062555",
+            "status": "verified",
+            "threshold": -2.0,
+            "verdict_trace_hash": "6685dcda5fa63e05bede8b1bc766fb851ff04732d2de9251506972451c9ad1c8"
+          },
+          {
+            "clause_index": 1,
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "queue_trace_hash": "fdf762a389d60b105d34402fa10ca626a6d9fd91011b2010dcf2878bae025596",
+            "search_counterexample_found": true,
+            "search_trace_hash": "789c89dece786106fa45d32184e554e3e8a1b57a8ae3c44ab054b0bd7cc138b4",
+            "status": "unsafe",
+            "threshold": -0.5,
+            "verdict_trace_hash": "5e00dae0fcd58c8f54e3ed81a31e7f346c9806d2e7cd34ecd4739fb42313c422"
+          }
+        ],
+        "deadline_is_cooperative": false,
+        "elapsed_ns": 0,
+        "objective_matrix_hash": "ca852abbfb9b79bdeb3da912ec5f492031e83cb94ed4f6bfe36876fb69bcc2c7",
+        "optimizer_policy_hash": "562a4073c844f972babe413f8e68d452a3a8187e82b835cc93791686a07332f5",
+        "pending_clause_indices": [],
+        "performance_claimed": false,
+        "query_id": "complete-query-unsafe-toy",
+        "query_policy": {
+          "clause_order": "ascending_index",
+          "deadline_enforcement": "cooperative_stage_boundaries",
+          "property_aggregation": "conjunction",
+          "timeout_ns": null,
+          "unsafe_short_circuit": true
+        },
+        "queue_config_hash": "67d4d23a27885927e4193585936e74d05a3dbbcad46bc594c8ca3a43c551c83e",
+        "reason": "concrete_counterexample_clause",
+        "schema_version": "boundflow.complete-verifier-query/v1",
+        "search_policy_hash": "5eaec1631e70e3f589370b4ac6360de5b0b0e75425ba73bc771231d4a98502de",
+        "skipped_after_unsafe_clause_indices": [
+          2
+        ],
+        "status": "unsafe",
+        "thresholds": [
+          -2.0,
+          -0.5,
+          -2.0
+        ],
+        "unresolved_clause_indices": [],
+        "unsafe_clause_index": 1
+      },
+      "query_trace_hash": "bd9863726af860057e419841202908df8a5683b090ffae8a2d219f8c9a660ad4"
+    },
+    "toy_verified": {
+      "clauses": [
+        {
+          "best_input_hash": "21ce56fc58d4020b1856f0e19cc9044d3ea776968b0d9115b39e37bcb3e5aa07",
+          "clause_trace": {
+            "clause_index": 0,
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "queue_trace_hash": "fce400348bbe59645000b9f8e41c5fb2198810331b607b59dbb63d302c9ef91a",
+            "search_counterexample_found": false,
+            "search_trace_hash": "d737e66d53e966b53f81d865f39336391a12f7201b563fbb537bfff746fb49d8",
+            "status": "verified",
+            "threshold": -2.0,
+            "verdict_trace_hash": "758f56f0cbf46ae4522a739a16ee511bd8157b51291e60659464b3b597bf57a7"
+          },
+          "counterexample_input_hash": null,
+          "queue_trace": {
+            "compiler_version": "boundflow.native-optimized-relu-split-bab/v1",
+            "config": {
+              "available_memory_bytes": 1073741824,
+              "expansion_batch_size": 1,
+              "max_depth": 0,
+              "max_eval_batch_size": 1,
+              "max_nodes": 1,
+              "memory_budget_bytes": 1073741824,
+              "threshold": -2.0
+            },
+            "decisions": [
+              {
+                "branch_candidate": null,
+                "child_node_ids": [],
+                "decision_index": 0,
+                "kind": "prune",
+                "node_id": "complete-query-verified-toy:clause:0000:n000000",
+                "reason": "lower_bound_meets_threshold"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -0.8999999761581421,
+                  "neuron_index": 0,
+                  "relu_input": "h1",
+                  "upper": 1.100000023841858,
+                  "width": 2.0
+                },
+                "eval_batch_id": "complete-query-verified-toy:clause:0000:eval:0000",
+                "eval_batch_position": 0,
+                "lower": -1.100000023841858,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "execution_plan_instance_hash": "58f4925222f7fffe70300fa2b4455dbc53f2e5cb56e33200a34a8c9065745fc2",
+                  "execution_plan_template_hash": "5c687968ea76f36e13b8e516c06f23b4715b328f6f6317283818976fc0e789dc",
+                  "representation_binding_hash": "1c0a4f70bd45374bc4d0a0e616f29ee093c8c7df80dcab9d2355d76db9dcdf7f",
+                  "schedule_hash": "6f82b0920d57b36662b479364a1b9373bc660b776ab9974dbf3f4794fa086398",
+                  "source_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "source_plan_instance_hash": "2c6863abfac4111a1bcbc5362d05e7c5339175abdfdd449040a31764c8b575c4",
+                  "source_plan_template_hash": "2865dccbfb5fa9655b3af1780b613ca6b57600798f73e407842635980067b7bb",
+                  "source_schedule_hash": "35073777ae14366fb0b45286bbbacfa49a0e5f0785bdde2d6044054923c1abf9",
+                  "task_module_hash": "02a5bba31be32838ec2782115bb6db93398c8c595e895c08085f2618bb130f87"
+                },
+                "node": {
+                  "branch_neuron_index": null,
+                  "branch_relu_input": null,
+                  "branch_value": 0,
+                  "depth": 0,
+                  "node_id": "complete-query-verified-toy:clause:0000:n000000",
+                  "parent_node_id": null,
+                  "split_state_hash": "3734aae96f6d0b28c6d0429d2b671edc3ef47acb22616bd433f47a83f3b5243d"
+                },
+                "optimizer_execution_trace_hash": "300826f223e67543ca52fad7e3554531b70d2fac32e9efbc20cf6d2aea92fe79",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "50ca997dabdd46217ec4af1636a217b979f54d1e63c69147a322e72034341cd2",
+                  "optimizer_schedule_hash": "9372e50c09eb5f62ad78af34208620c6419dd3302e53187e15e380b5a0beea47",
+                  "optimizer_task_module_hash": "aae7bc682ad5bc8d3c2383d1deef57440b800b58f49babb7f704d3b2b610733c"
+                },
+                "parent_selected_state_hash": null,
+                "parent_state_consumed_as_exact": false,
+                "parent_state_validity": "monotonic_refinement_initialization_only",
+                "priority": -1.1,
+                "selected_state_hash": "a0c1d9d11ddc64713eccc25c405785f824cdfae3c88c9aaa3fcb8615a2d9ca4e",
+                "upper": 0.44999998807907104,
+                "warm_start_kind": "none"
+              }
+            ],
+            "final_frontier_node_ids": [],
+            "max_queue_size": 1,
+            "native_stack_count": 1,
+            "native_stacks": [
+              {
+                "active_split_count": 0,
+                "alpha_gradient_l1": 0.0,
+                "beta_gradient_l1": 0.0,
+                "domain_batch_size": 1,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "execution_plan_instance_hash": "58f4925222f7fffe70300fa2b4455dbc53f2e5cb56e33200a34a8c9065745fc2",
+                  "execution_plan_template_hash": "5c687968ea76f36e13b8e516c06f23b4715b328f6f6317283818976fc0e789dc",
+                  "representation_binding_hash": "1c0a4f70bd45374bc4d0a0e616f29ee093c8c7df80dcab9d2355d76db9dcdf7f",
+                  "schedule_hash": "6f82b0920d57b36662b479364a1b9373bc660b776ab9974dbf3f4794fa086398",
+                  "source_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "source_plan_instance_hash": "2c6863abfac4111a1bcbc5362d05e7c5339175abdfdd449040a31764c8b575c4",
+                  "source_plan_template_hash": "2865dccbfb5fa9655b3af1780b613ca6b57600798f73e407842635980067b7bb",
+                  "source_schedule_hash": "35073777ae14366fb0b45286bbbacfa49a0e5f0785bdde2d6044054923c1abf9",
+                  "task_module_hash": "02a5bba31be32838ec2782115bb6db93398c8c595e895c08085f2618bb130f87"
+                },
+                "native_schedule_launch_count": 5,
+                "native_task_count": 5,
+                "native_task_trace_event_count": 5,
+                "node_ids": [
+                  "complete-query-verified-toy:clause:0000:n000000"
+                ],
+                "optimizer_action_count": 8,
+                "optimizer_backward_count": 1,
+                "optimizer_evaluation_count": 2,
+                "optimizer_execution_trace_hash": "300826f223e67543ca52fad7e3554531b70d2fac32e9efbc20cf6d2aea92fe79",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "50ca997dabdd46217ec4af1636a217b979f54d1e63c69147a322e72034341cd2",
+                  "optimizer_schedule_hash": "9372e50c09eb5f62ad78af34208620c6419dd3302e53187e15e380b5a0beea47",
+                  "optimizer_task_module_hash": "aae7bc682ad5bc8d3c2383d1deef57440b800b58f49babb7f704d3b2b610733c"
+                },
+                "optimizer_projection_count": 1,
+                "optimizer_selected_batch_state_hash": "a0c1d9d11ddc64713eccc25c405785f824cdfae3c88c9aaa3fcb8615a2d9ca4e",
+                "parent_selected_state_hashes": [
+                  null
+                ],
+                "selected_native_lower_max_abs_diff": 0.0,
+                "selected_native_upper_max_abs_diff": 0.0,
+                "stack_id": "complete-query-verified-toy:clause:0000:eval:0000",
+                "warm_source_state_hash": null,
+                "warm_start_kind": "none"
+              }
+            ],
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "optimizer_policy": {
+              "alpha_init": 0.5,
+              "beta_init": 0.0,
+              "lr": 0.1,
+              "objective": "lower",
+              "optimizer": "torch.optim.Adam",
+              "per_batch_params": true,
+              "soft_tau": 1.0,
+              "spec_reduce": "mean",
+              "steps": 1
+            },
+            "performance_claimed": false,
+            "property_status": "not_claimed",
+            "root_input_lower_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "root_input_upper_hash": "1bb1faadd28e57d8e14fcaefc934281209d0e8d575f36585631ee166ee46a57c",
+            "run_id": "complete-query-verified-toy:clause:0000",
+            "schema_version": "boundflow.optimized-relu-split-bab-trace/v1",
+            "status": "complete",
+            "termination_reason": "configured_bounded_tree_exhausted"
+          },
+          "queue_trace_hash": "fce400348bbe59645000b9f8e41c5fb2198810331b607b59dbb63d302c9ef91a",
+          "search_trace": {
+            "best_input_hash": "21ce56fc58d4020b1856f0e19cc9044d3ea776968b0d9115b39e37bcb3e5aa07",
+            "best_iteration": 1,
+            "best_objective_value": -0.3499999940395355,
+            "compiler_version": "boundflow.native-candidate-search/v1",
+            "counterexample_found": false,
+            "early_stopped": false,
+            "gradient_l1_values": [
+              1.0
+            ],
+            "initial_input_hash": "9868f626baed13b75b2c1ff64afdbc0f48647f27b500566941f5fff9810dd860",
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "objective_values": [
+              -0.10000000149011612,
+              -0.3499999940395355
+            ],
+            "performance_claimed": false,
+            "policy": {
+              "early_stop": true,
+              "projection": "exact_box_clamp",
+              "start": "input_box_center",
+              "step_size": 0.25,
+              "steps": 1,
+              "update": "sign_gradient_descent"
+            },
+            "projected_update_count": 1,
+            "proof_claimed": false,
+            "schema_version": "boundflow.native-candidate-search/v1",
+            "steps_executed": 1,
+            "threshold": -2.0
+          },
+          "search_trace_hash": "d737e66d53e966b53f81d865f39336391a12f7201b563fbb537bfff746fb49d8",
+          "verdict_trace": {
+            "compiler_version": "boundflow.native-property-verdict/v1",
+            "counterexample": null,
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "performance_claimed": false,
+            "queue_trace_hash": "fce400348bbe59645000b9f8e41c5fb2198810331b607b59dbb63d302c9ef91a",
+            "reason": "all_leaves_soundly_pruned",
+            "run_id": "complete-query-verified-toy:clause:0000",
+            "schema_version": "boundflow.native-property-verdict/v1",
+            "sound_pruned_leaf_node_ids": [
+              "complete-query-verified-toy:clause:0000:n000000"
+            ],
+            "status": "verified",
+            "threshold": -2.0,
+            "unresolved_leaf_node_ids": []
+          },
+          "verdict_trace_hash": "758f56f0cbf46ae4522a739a16ee511bd8157b51291e60659464b3b597bf57a7"
+        },
+        {
+          "best_input_hash": "21ce56fc58d4020b1856f0e19cc9044d3ea776968b0d9115b39e37bcb3e5aa07",
+          "clause_trace": {
+            "clause_index": 1,
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "queue_trace_hash": "3c77ed9e07ff9ba1af6238c1f15bb26990c314632b8da55144e1d183d8d21878",
+            "search_counterexample_found": false,
+            "search_trace_hash": "d737e66d53e966b53f81d865f39336391a12f7201b563fbb537bfff746fb49d8",
+            "status": "verified",
+            "threshold": -2.0,
+            "verdict_trace_hash": "06bc919f7064a04767c1ff06d9f6e60c87685fa9de4df96663962f3cc691da80"
+          },
+          "counterexample_input_hash": null,
+          "queue_trace": {
+            "compiler_version": "boundflow.native-optimized-relu-split-bab/v1",
+            "config": {
+              "available_memory_bytes": 1073741824,
+              "expansion_batch_size": 1,
+              "max_depth": 0,
+              "max_eval_batch_size": 1,
+              "max_nodes": 1,
+              "memory_budget_bytes": 1073741824,
+              "threshold": -2.0
+            },
+            "decisions": [
+              {
+                "branch_candidate": null,
+                "child_node_ids": [],
+                "decision_index": 0,
+                "kind": "prune",
+                "node_id": "complete-query-verified-toy:clause:0001:n000000",
+                "reason": "lower_bound_meets_threshold"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -0.8999999761581421,
+                  "neuron_index": 0,
+                  "relu_input": "h1",
+                  "upper": 1.100000023841858,
+                  "width": 2.0
+                },
+                "eval_batch_id": "complete-query-verified-toy:clause:0001:eval:0000",
+                "eval_batch_position": 0,
+                "lower": -1.100000023841858,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "execution_plan_instance_hash": "66eb8c440598279c23fe76147be58b4e452604474be25206a34fee9f5bdf0c91",
+                  "execution_plan_template_hash": "d27541b2a74a361e15a4d3d03b42d7dec3510dc0ca04481c8c69137032a19389",
+                  "representation_binding_hash": "62788dcbda077b46c0f042a873eff3220e71b3b2ddc783dc50d0c3519c94cca7",
+                  "schedule_hash": "17a465c99d875013347208cbe510640c8d057625a74d2c14ab0b436b11314126",
+                  "source_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "source_plan_instance_hash": "6b0b8cdab842f70b9b428b439a9601da0c28eecb8fda321b592ba5f38a0d3c88",
+                  "source_plan_template_hash": "e541bd97ea5829d1e41b0d26e4fa43d1822a8da062d72db34592e42245d5adc6",
+                  "source_schedule_hash": "6b41a1e24c9fef899e91ea78d7dd5f8bf5e804bd7acd08c8f8547a478f28ae3c",
+                  "task_module_hash": "462c73095178212f21039175b04f8212d1b08443d489914dd00225e1e41e07e9"
+                },
+                "node": {
+                  "branch_neuron_index": null,
+                  "branch_relu_input": null,
+                  "branch_value": 0,
+                  "depth": 0,
+                  "node_id": "complete-query-verified-toy:clause:0001:n000000",
+                  "parent_node_id": null,
+                  "split_state_hash": "3734aae96f6d0b28c6d0429d2b671edc3ef47acb22616bd433f47a83f3b5243d"
+                },
+                "optimizer_execution_trace_hash": "75ec0408b35d3ff3eaf0907ddaae6502266da60fb13eb71b8af2bf3086d94c79",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "5ae3b987cd977be4b77912ee8d388760f1bd553aed098297e0667a5b3b0bf14b",
+                  "optimizer_schedule_hash": "495615f0adde1df27faf98c7b59ea89a8f2ee49ab019c3516388c395f2576b4d",
+                  "optimizer_task_module_hash": "494c1e5405ba1d6d733dbd1d90b537db623f3a1a39e52f48dad2d9946c67e14b"
+                },
+                "parent_selected_state_hash": null,
+                "parent_state_consumed_as_exact": false,
+                "parent_state_validity": "monotonic_refinement_initialization_only",
+                "priority": -1.1,
+                "selected_state_hash": "a0c1d9d11ddc64713eccc25c405785f824cdfae3c88c9aaa3fcb8615a2d9ca4e",
+                "upper": 0.44999998807907104,
+                "warm_start_kind": "none"
+              }
+            ],
+            "final_frontier_node_ids": [],
+            "max_queue_size": 1,
+            "native_stack_count": 1,
+            "native_stacks": [
+              {
+                "active_split_count": 0,
+                "alpha_gradient_l1": 0.0,
+                "beta_gradient_l1": 0.0,
+                "domain_batch_size": 1,
+                "native_ir_hashes": {
+                  "execution_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "execution_plan_instance_hash": "66eb8c440598279c23fe76147be58b4e452604474be25206a34fee9f5bdf0c91",
+                  "execution_plan_template_hash": "d27541b2a74a361e15a4d3d03b42d7dec3510dc0ca04481c8c69137032a19389",
+                  "representation_binding_hash": "62788dcbda077b46c0f042a873eff3220e71b3b2ddc783dc50d0c3519c94cca7",
+                  "schedule_hash": "17a465c99d875013347208cbe510640c8d057625a74d2c14ab0b436b11314126",
+                  "source_bound_module_hash": "690281e72cd587ff6ca2729df10c89d41d6bd57f1ae712c333982b2687ea90b6",
+                  "source_plan_instance_hash": "6b0b8cdab842f70b9b428b439a9601da0c28eecb8fda321b592ba5f38a0d3c88",
+                  "source_plan_template_hash": "e541bd97ea5829d1e41b0d26e4fa43d1822a8da062d72db34592e42245d5adc6",
+                  "source_schedule_hash": "6b41a1e24c9fef899e91ea78d7dd5f8bf5e804bd7acd08c8f8547a478f28ae3c",
+                  "task_module_hash": "462c73095178212f21039175b04f8212d1b08443d489914dd00225e1e41e07e9"
+                },
+                "native_schedule_launch_count": 5,
+                "native_task_count": 5,
+                "native_task_trace_event_count": 5,
+                "node_ids": [
+                  "complete-query-verified-toy:clause:0001:n000000"
+                ],
+                "optimizer_action_count": 8,
+                "optimizer_backward_count": 1,
+                "optimizer_evaluation_count": 2,
+                "optimizer_execution_trace_hash": "75ec0408b35d3ff3eaf0907ddaae6502266da60fb13eb71b8af2bf3086d94c79",
+                "optimizer_ir_hashes": {
+                  "optimizer_plan_hash": "5ae3b987cd977be4b77912ee8d388760f1bd553aed098297e0667a5b3b0bf14b",
+                  "optimizer_schedule_hash": "495615f0adde1df27faf98c7b59ea89a8f2ee49ab019c3516388c395f2576b4d",
+                  "optimizer_task_module_hash": "494c1e5405ba1d6d733dbd1d90b537db623f3a1a39e52f48dad2d9946c67e14b"
+                },
+                "optimizer_projection_count": 1,
+                "optimizer_selected_batch_state_hash": "a0c1d9d11ddc64713eccc25c405785f824cdfae3c88c9aaa3fcb8615a2d9ca4e",
+                "parent_selected_state_hashes": [
+                  null
+                ],
+                "selected_native_lower_max_abs_diff": 0.0,
+                "selected_native_upper_max_abs_diff": 0.0,
+                "stack_id": "complete-query-verified-toy:clause:0001:eval:0000",
+                "warm_source_state_hash": null,
+                "warm_start_kind": "none"
+              }
+            ],
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "optimizer_policy": {
+              "alpha_init": 0.5,
+              "beta_init": 0.0,
+              "lr": 0.1,
+              "objective": "lower",
+              "optimizer": "torch.optim.Adam",
+              "per_batch_params": true,
+              "soft_tau": 1.0,
+              "spec_reduce": "mean",
+              "steps": 1
+            },
+            "performance_claimed": false,
+            "property_status": "not_claimed",
+            "root_input_lower_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "root_input_upper_hash": "1bb1faadd28e57d8e14fcaefc934281209d0e8d575f36585631ee166ee46a57c",
+            "run_id": "complete-query-verified-toy:clause:0001",
+            "schema_version": "boundflow.optimized-relu-split-bab-trace/v1",
+            "status": "complete",
+            "termination_reason": "configured_bounded_tree_exhausted"
+          },
+          "queue_trace_hash": "3c77ed9e07ff9ba1af6238c1f15bb26990c314632b8da55144e1d183d8d21878",
+          "search_trace": {
+            "best_input_hash": "21ce56fc58d4020b1856f0e19cc9044d3ea776968b0d9115b39e37bcb3e5aa07",
+            "best_iteration": 1,
+            "best_objective_value": -0.3499999940395355,
+            "compiler_version": "boundflow.native-candidate-search/v1",
+            "counterexample_found": false,
+            "early_stopped": false,
+            "gradient_l1_values": [
+              1.0
+            ],
+            "initial_input_hash": "9868f626baed13b75b2c1ff64afdbc0f48647f27b500566941f5fff9810dd860",
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "objective_values": [
+              -0.10000000149011612,
+              -0.3499999940395355
+            ],
+            "performance_claimed": false,
+            "policy": {
+              "early_stop": true,
+              "projection": "exact_box_clamp",
+              "start": "input_box_center",
+              "step_size": 0.25,
+              "steps": 1,
+              "update": "sign_gradient_descent"
+            },
+            "projected_update_count": 1,
+            "proof_claimed": false,
+            "schema_version": "boundflow.native-candidate-search/v1",
+            "steps_executed": 1,
+            "threshold": -2.0
+          },
+          "search_trace_hash": "d737e66d53e966b53f81d865f39336391a12f7201b563fbb537bfff746fb49d8",
+          "verdict_trace": {
+            "compiler_version": "boundflow.native-property-verdict/v1",
+            "counterexample": null,
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "performance_claimed": false,
+            "queue_trace_hash": "3c77ed9e07ff9ba1af6238c1f15bb26990c314632b8da55144e1d183d8d21878",
+            "reason": "all_leaves_soundly_pruned",
+            "run_id": "complete-query-verified-toy:clause:0001",
+            "schema_version": "boundflow.native-property-verdict/v1",
+            "sound_pruned_leaf_node_ids": [
+              "complete-query-verified-toy:clause:0001:n000000"
+            ],
+            "status": "verified",
+            "threshold": -2.0,
+            "unresolved_leaf_node_ids": []
+          },
+          "verdict_trace_hash": "06bc919f7064a04767c1ff06d9f6e60c87685fa9de4df96663962f3cc691da80"
+        }
+      ],
+      "query_trace": {
+        "compiler_version": "boundflow.complete-verifier-query/v1",
+        "completed_clauses": [
+          {
+            "clause_index": 0,
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "queue_trace_hash": "fce400348bbe59645000b9f8e41c5fb2198810331b607b59dbb63d302c9ef91a",
+            "search_counterexample_found": false,
+            "search_trace_hash": "d737e66d53e966b53f81d865f39336391a12f7201b563fbb537bfff746fb49d8",
+            "status": "verified",
+            "threshold": -2.0,
+            "verdict_trace_hash": "758f56f0cbf46ae4522a739a16ee511bd8157b51291e60659464b3b597bf57a7"
+          },
+          {
+            "clause_index": 1,
+            "objective_hash": "20585477d1db43bb4c81a71d10379ae22ec23549cba565defcd2d4d072f7041f",
+            "queue_trace_hash": "3c77ed9e07ff9ba1af6238c1f15bb26990c314632b8da55144e1d183d8d21878",
+            "search_counterexample_found": false,
+            "search_trace_hash": "d737e66d53e966b53f81d865f39336391a12f7201b563fbb537bfff746fb49d8",
+            "status": "verified",
+            "threshold": -2.0,
+            "verdict_trace_hash": "06bc919f7064a04767c1ff06d9f6e60c87685fa9de4df96663962f3cc691da80"
+          }
+        ],
+        "deadline_is_cooperative": false,
+        "elapsed_ns": 0,
+        "objective_matrix_hash": "1329ba53b8384e09aa9d6552875a9336dbe6a2b840051c5ed359af50c9d68876",
+        "optimizer_policy_hash": "562a4073c844f972babe413f8e68d452a3a8187e82b835cc93791686a07332f5",
+        "pending_clause_indices": [],
+        "performance_claimed": false,
+        "query_id": "complete-query-verified-toy",
+        "query_policy": {
+          "clause_order": "ascending_index",
+          "deadline_enforcement": "cooperative_stage_boundaries",
+          "property_aggregation": "conjunction",
+          "timeout_ns": null,
+          "unsafe_short_circuit": true
+        },
+        "queue_config_hash": "67d4d23a27885927e4193585936e74d05a3dbbcad46bc594c8ca3a43c551c83e",
+        "reason": "all_clauses_verified",
+        "schema_version": "boundflow.complete-verifier-query/v1",
+        "search_policy_hash": "520a4cfd921069cd4876adc3a3d7cac7fba9566359eb1d184a0ce673b6b12b85",
+        "skipped_after_unsafe_clause_indices": [],
+        "status": "verified",
+        "thresholds": [
+          -2.0,
+          -2.0
+        ],
+        "unresolved_clause_indices": [],
+        "unsafe_clause_index": null
+      },
+      "query_trace_hash": "da3cec5f5ef92f226d81b23a917a9a29f78de13bb03ac40744928bf6c004a0be"
+    }
+  },
+  "schema_version": "boundflow.complete-verifier-query-artifact/v1",
+  "status": "ok"
+}

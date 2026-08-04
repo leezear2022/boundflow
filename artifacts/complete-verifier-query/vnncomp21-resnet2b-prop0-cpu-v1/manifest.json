@@ -1,0 +1,9 @@
+{
+  "evidence_hash": "d17f7d7e960491ad7ef3f33bad41a4cfbf21a9fd5213df3637584b6a753968f1",
+  "files": {
+    "complete_query.json": "9c490bf33edab555f14e4d4c354f6d6055c1fe627102473fc2e506e29fdbaaf8"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.complete-verifier-query-artifact/v1",
+  "status": "ok"
+}

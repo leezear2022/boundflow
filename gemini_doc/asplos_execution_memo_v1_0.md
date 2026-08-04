@@ -1,11 +1,12 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`a03db4e`（NRIR-12 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`597332d`（NRIR-13 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/native-property-termination-verdict-v1`
+> 当前研发分支：`feat/complete-verifier-query-v1`
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-12 optimized queue
-> integration（完成）→ NRIR-13 sound property verdict（完成）→ complete verifier query**。
+> integration（完成）→ NRIR-13 sound property verdict（完成）→ NRIR-14 complete verifier
+> query（完成）→ end-to-end tightness/performance baseline**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有
@@ -65,6 +66,12 @@
 > 实际驱动两个 child IR stacks；full-size-8 为一个，same-policy serial 为八个；三路径
 > lower/upper bitwise 一致。该结果只关闭 input-box domain formation/state validity/packing，
 > 不是 ReLU/β branch-and-bound、pruning、终止或性能证据。详见第 21 节。
+
+> **2026-08-04 NRIR-14 结果**：九子句 conjunction、deterministic PGD candidate search、
+> concrete witness replay、unsafe short-circuit 与 cooperative deadline 已形成可执行 query
+> contract。toy verified/unsafe/unknown/deadline 均闭环；固定 ResNet 九子句全部执行，但
+> native scalarized lower bounds 过松，9/9 unresolved，整体仍 unknown。只关闭 correctness/control
+> VALIDATED-REDUCED；下一步必须先建立端到端 phase/tightness baseline，不能直接宣称性能。
 
 ## 1. 锁定的论文命题
 
@@ -831,6 +838,29 @@ verdict/witness/claim 篡改均 fail closed。
 
 该阶段关闭 three-state verdict soundness/control ownership `VALIDATED-REDUCED`，但仍不是完整
 verifier：counterexample discovery 仍由 caller 提供，只支持单标量性质，timeout/dynamic
-optimizer early-stop 未接入，固定 ResNet 也未闭合。下一代码路线是 complete verifier query v1：
-接入可执行 candidate search、multi-clause property aggregation、timeout 与 real verified/unsafe closure；
-完成后再建立与最快竞品的端到端性能基线。
+optimizer early-stop 未接入，固定 ResNet 也未闭合。这里冻结的 complete verifier query 下一路线
+已由第 27 节执行；NRIR-13 本身仍不得升级为端到端或性能 claim。
+
+## 27. Complete Verifier Query v1
+
+NRIR-14 新增 typed candidate-search 与 multi-clause query control。性质固定为 conjunction：
+全部 clause 的 sound verdict 为 verified 才返回 verified；任何 concrete-replayed violation 立即
+unsafe，并把后续 clauses 标为 skipped；其余 unresolved/pending 均返回 unknown。candidate
+search 使用 deterministic center-start sign-gradient descent 与 exact box projection，明确
+`proof_claimed=false`；deadline 在 clause/search/queue stage 边界 cooperative 检查，不声称
+可抢占 active kernel。
+
+toy evidence 覆盖两子句 verified、第二子句 unsafe short-circuit、attack-not-found unknown 与
+deadline pending unknown。固定 ResNet 使用九个真实 objectives；九个 candidate best objective
+均大于 0，但 native lower bounds 约为 `-408.01` 至 `-863.19`，因此九个 clauses 全部 unresolved，
+总体是 sound unknown。该数值差距明确表明下一 blocker 是 bound tightness/optimizer/branching，
+不是 query API 或 trace 包装。
+
+artifact 位于 `artifacts/complete-verifier-query/vnncomp21-resnet2b-prop0-cpu-v1/`，replay hash=
+`d17f7d7e960491ad7ef3f33bad41a4cfbf21a9fd5213df3637584b6a753968f1`；相关 `39 passed`，
+全量 `670 passed, 37 skipped`，Black/Mypy/Pylint 全过。
+
+该阶段只关闭 complete-query correctness/control `VALIDATED-REDUCED`，不关闭 fixed real property，
+也没有 latency/memory/CUDA/speedup claim。下一阶段先冻结 end-to-end phase/tightness baseline：
+分别测 candidate、bound optimization、queue、verdict，记录 proof gap、nodes、batch/cache 和
+same-solver/竞品口径；随后才允许按证据选择 dynamic optimizer、branching/tightness 或执行优化。

@@ -66,6 +66,10 @@ NATIVE_OPTIMIZED_RELU_SPLIT_BAB_TRACE_SCHEMA_VERSION = (
 PARENT_OPTIMIZER_STATE_VALIDITY = "monotonic_refinement_initialization_only"
 NATIVE_REEXECUTION_ATOL = 2e-6
 NATIVE_REEXECUTION_RTOL = 2e-6
+# Execution is still guarded by torch.allclose(atol, rtol) before trace creation.
+# This scale-independent ceiling only prevents serialized trace inflation when
+# the reference tensor scale is unavailable inside the standalone stack record.
+NATIVE_REEXECUTION_TRACE_MAX_ABS_DIFF = 2e-3
 _IR_HASH_KEYS = {
     "source_bound_module_hash",
     "source_plan_template_hash",
@@ -228,6 +232,15 @@ class NativeOptimizedBabStackTrace:
             or self.optimizer_evaluation_count != policy.steps + 1
             or self.optimizer_backward_count != policy.steps
             or self.optimizer_projection_count != policy.steps
+            or not all(
+                torch.isfinite(torch.tensor(value)).item()
+                for value in (
+                    self.alpha_gradient_l1,
+                    self.beta_gradient_l1,
+                    self.selected_native_lower_max_abs_diff,
+                    self.selected_native_upper_max_abs_diff,
+                )
+            )
             or self.alpha_gradient_l1 < 0.0
             or self.beta_gradient_l1 < 0.0
             or self.active_split_count < 0
@@ -235,8 +248,10 @@ class NativeOptimizedBabStackTrace:
             or not _is_sha256(self.optimizer_selected_batch_state_hash)
             or self.selected_native_lower_max_abs_diff < 0.0
             or self.selected_native_upper_max_abs_diff < 0.0
-            or self.selected_native_lower_max_abs_diff > NATIVE_REEXECUTION_ATOL
-            or self.selected_native_upper_max_abs_diff > NATIVE_REEXECUTION_ATOL
+            or self.selected_native_lower_max_abs_diff
+            > NATIVE_REEXECUTION_TRACE_MAX_ABS_DIFF
+            or self.selected_native_upper_max_abs_diff
+            > NATIVE_REEXECUTION_TRACE_MAX_ABS_DIFF
             or set(native_hashes) != _IR_HASH_KEYS
             or len(native_hashes) != len(self.native_ir_hashes)
             or any(not _is_sha256(value) for value in native_hashes.values())

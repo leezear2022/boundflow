@@ -15,6 +15,7 @@ from boundflow.runtime.native_alpha_beta_optimization_state import (
 )
 from boundflow.runtime.native_optimized_relu_split_bab_runtime import (
     NATIVE_REEXECUTION_ATOL,
+    NATIVE_REEXECUTION_TRACE_MAX_ABS_DIFF,
     NativeOptimizedReluSplitBabTrace,
     run_native_optimized_relu_split_bab,
 )
@@ -179,9 +180,15 @@ def test_trace_rejects_parent_optimizer_and_native_tampering(
     with pytest.raises(ValueError, match="stack trace"):
         replace(packed, native_stacks=tuple(stacks)).validate()
 
+    stacks[1] = replace(stack, selected_native_lower_max_abs_diff=float("nan"))
+    with pytest.raises(ValueError, match="stack trace"):
+        replace(packed, native_stacks=tuple(stacks)).validate()
+
     stacks[1] = replace(
         stack,
-        selected_native_lower_max_abs_diff=NATIVE_REEXECUTION_ATOL * 2.0,
+        selected_native_lower_max_abs_diff=(
+            NATIVE_REEXECUTION_TRACE_MAX_ABS_DIFF * 2.0
+        ),
     )
     with pytest.raises(ValueError, match="stack trace"):
         replace(packed, native_stacks=tuple(stacks)).validate()
