@@ -169,6 +169,9 @@ class NativeIntermediateRefinementPlanIR:
     policy: NativeIntermediateRefinementPolicyIR
     targets: Tuple[NativeIntermediateRefinementTargetIR, ...]
     objective_hash: Optional[str] = None
+    source_intermediate_constraints_hash: Optional[str] = None
+    source_refinement_plan_hash: Optional[str] = None
+    source_refinement_semantic_trace_hash: Optional[str] = None
     schema_version: str = INTERMEDIATE_REFINEMENT_PLAN_IR_SCHEMA_VERSION
 
     def validate(self) -> None:
@@ -191,6 +194,15 @@ class NativeIntermediateRefinementPlanIR:
             or len(identities) != len(set(identities))
         ):
             raise ValueError("native intermediate refinement Plan IR is invalid")
+        source_hashes = (
+            self.source_intermediate_constraints_hash,
+            self.source_refinement_plan_hash,
+            self.source_refinement_semantic_trace_hash,
+        )
+        if any(value is not None for value in source_hashes) and (
+            any(not _is_sha256(value) for value in source_hashes)
+        ):
+            raise ValueError("native refinement source constraint identity differs")
         self.policy.validate()
         objective_directed = (
             self.policy.candidate_policy_id == "objective_influence_width_per_relu_v1"
@@ -226,6 +238,14 @@ class NativeIntermediateRefinementPlanIR:
         }
         if self.objective_hash is not None:
             payload["objective_hash"] = self.objective_hash
+        if self.source_intermediate_constraints_hash is not None:
+            payload["source_intermediate_constraints_hash"] = (
+                self.source_intermediate_constraints_hash
+            )
+            payload["source_refinement_plan_hash"] = self.source_refinement_plan_hash
+            payload["source_refinement_semantic_trace_hash"] = (
+                self.source_refinement_semantic_trace_hash
+            )
         return payload
 
     def stable_hash(self) -> str:
@@ -318,6 +338,8 @@ class NativeIntermediateRefinementTaskIRModule:
             "refine.split_state",
             "refine.policy",
         }
+        if plan.source_intermediate_constraints_hash is not None:
+            available.add("refine.source_intermediate_constraints")
         if plan.objective_hash is not None:
             available.add("refine.objective_influence")
         for task in self.tasks:
@@ -462,7 +484,16 @@ def lower_native_intermediate_refinement_ir(
         (
             IntermediateRefinementTaskKind.MATERIALIZE_FORWARD,
             None,
-            ("refine.module", "refine.input", "refine.split_state"),
+            (
+                "refine.module",
+                "refine.input",
+                "refine.split_state",
+                *(
+                    ("refine.source_intermediate_constraints",)
+                    if plan.source_intermediate_constraints_hash is not None
+                    else ()
+                ),
+            ),
             ("refine.forward_env.p0", "refine.bounds.p0"),
         ),
         (

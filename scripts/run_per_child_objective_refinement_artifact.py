@@ -47,6 +47,10 @@ EVIDENCE_FILE = "evidence.json"
 WORKLOAD_ID = "cifar10_resnet:000"
 CLAUSE_INDICES = (0, 1)
 MODES = ("root_global", "per_child")
+PER_CHILD_STRATEGIES = (
+    "independent_exact_split_v1",
+    "ancestral_constraint_carry_v1",
+)
 TORCH_THREADS = 8
 WORKER_TIMEOUT_SECONDS = 180
 ALPHA_STEPS = 5
@@ -70,6 +74,11 @@ def _parse_args() -> argparse.Namespace:
     worker.add_argument("--property", type=Path, required=True)
     worker.add_argument("--input-shape", type=int, nargs="+", required=True)
     worker.add_argument("--result-json", type=Path, required=True)
+    worker.add_argument(
+        "--per-child-strategy",
+        choices=PER_CHILD_STRATEGIES,
+        default="independent_exact_split_v1",
+    )
     return parser.parse_args()
 
 
@@ -141,7 +150,12 @@ def _policy_payload() -> dict[str, object]:
 
 
 def _worker_command(
-    *, mode: str, clause_index: int, source: Mapping[str, object], result: Path
+    *,
+    mode: str,
+    clause_index: int,
+    source: Mapping[str, object],
+    result: Path,
+    per_child_strategy: str = "independent_exact_split_v1",
 ) -> list[str]:
     input_shape = cast(tuple[int, ...], source["input_shape"])
     return [
@@ -160,16 +174,27 @@ def _worker_command(
         *(str(value) for value in input_shape[1:]),
         "--result-json",
         str(result),
+        "--per-child-strategy",
+        per_child_strategy,
     ]
 
 
 def _run_worker(
-    *, mode: str, clause_index: int, source: Mapping[str, object], result: Path
+    *,
+    mode: str,
+    clause_index: int,
+    source: Mapping[str, object],
+    result: Path,
+    per_child_strategy: str = "independent_exact_split_v1",
 ) -> tuple[dict[str, Any], str, int, int]:
     started_ns = time.perf_counter_ns()
     completed = subprocess.run(
         _worker_command(
-            mode=mode, clause_index=clause_index, source=source, result=result
+            mode=mode,
+            clause_index=clause_index,
+            source=source,
+            result=result,
+            per_child_strategy=per_child_strategy,
         ),
         cwd=REPO_ROOT,
         env=os.environ.copy(),
@@ -305,6 +330,7 @@ def _worker(args: argparse.Namespace) -> None:
             optimizer_policy=optimizer_policy,
             intermediate_bound_source=IntermediateBoundSource.NATIVE_REFINED,
             per_child_refinement_policy=_refinement_policy(),
+            per_child_refinement_strategy=args.per_child_strategy,
         )
         refinements = [
             _serialize_refinement(node_id, execution)

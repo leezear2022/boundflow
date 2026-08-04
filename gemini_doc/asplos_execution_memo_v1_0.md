@@ -1,14 +1,14 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`0fc54ce`（NRIR-20 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`abe37e8`（NRIR-21 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/per-child-objective-refinement-v1`
+> 当前研发分支：`feat/ancestral-constraint-refinement-v1`
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed
 > intermediate target selection（完成）→ per-child intermediate refinement（NO-GO）→
-> ancestral-constraint carry-forward refinement**。
+> ancestral-constraint carry-forward refinement（完成）→ hard-clause convergence expansion**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有
@@ -1021,3 +1021,21 @@ property、performance 或 ASPLOS-ready claim。
 下一单一路线是 ancestral-constraint carry-forward：child 必须从 exact split-forward 与祖先已证明
 refined constraints 的单调交集出发再重选 targets，避免当前 per-child recomputation 丢失 root
 selected-CROWN tightening；该方法仍须进入一等 Plan/Task/Schedule 后才能比较。
+
+## 35. Ancestral-Constraint Refinement v1
+
+NRIR-22 不接受裸 intermediate mapping，只接受已通过自身 IR/trace 验证的 parent refinement
+execution。child Plan 同时绑定 parent final bounds、parent Plan 和去 timing semantic trace；
+materialize-forward Task/Schedule 显式消费 source constraints。运行时重算 local exact-split forward，
+与 source 单调交集/propagation 后再执行 child influence/selection/CROWN，source consumption 只标记
+为 `sound_constraint_only`，从未升级为 child exact reuse。
+
+固定 ResNet clauses `0/1`、同 96-target/5-step、7-node/depth-2 预算下，ancestral carry worst leaf
+为 `-340.971832/-517.858826`；相对 independent 提升 `+73.615173/+75.022095`，相对
+root-global 提升 `+72.767212/+74.085449`，root lower 完全不变。该阶段以 IR/control + fixed
+bounded-tree tightness `VALIDATED-REDUCED` 关闭；叶 lower 仍负，不能形成 complete property 或
+ASPLOS-ready/performance claim。
+
+下一路线从“再改 refinement plumbing”切到 hard-clause convergence expansion：固定更多 hard
+clauses 与 depth/node budget 曲线，判断 ancestral carry 是否能推动 complete closure；CPU timing
+继续只作诊断，公平 E2E 必须等待可用 CUDA 环境并与相同算法能力竞品重测。

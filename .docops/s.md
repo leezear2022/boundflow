@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev002785
-last_va: ev002786
+last_ch: ev002858
+last_va: ev002859
 blk:
-next: implement-ancestral-constraint-carry-forward-refinement-v1
-updated: 2026-08-04T07:03:15Z
+next: measure-ancestral-hard-clause-depth-node-convergence-v1
+updated: 2026-08-04T07:33:19Z

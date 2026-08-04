@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`0fc54ce`（NRIR-20 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/per-child-objective-refinement-v1`
+> 当前 integration base：`abe37e8`（NRIR-21 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/ancestral-constraint-refinement-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-04 NRIR-19 后续：native selected-CROWN intermediate refinement 已成为一等
@@ -11,7 +11,9 @@
 > target selection；该门禁现已由 NRIR-20 关闭：同预算 ResNet clauses 0/1 root lower 再改善
 > `+55.928741/+26.228943`，但仍为负。NRIR-21 per-child exact-state refinement 已完成并在
 > clauses 0/1 上使最差 depth-2 leaf lower 退化 `-0.847961/-0.936646`，故为 NO-GO；下一门禁为
-> ancestral-constraint carry-forward refinement。顶层
+> ancestral-constraint carry-forward refinement；该门禁已由 NRIR-22 以 fixed-tree
+> `VALIDATED-REDUCED` 关闭，clauses 0/1 worst leaf 相对 independent 提升
+> `+73.615173/+75.022095`。下一门禁为 hard-clause convergence expansion。顶层
 > ASPLOS-ready 与 performance No-Go 不变。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
 > 2026-07-28 进度：IR-1 Bound IR、IR-2 Plan IR、IR-3 Task/Schedule IR 的最小
@@ -731,3 +733,18 @@ parent alpha/beta 仅初始化，旧默认 queue payload 保持无扩展字段�
 `-414.587006/-592.880920`。因此 closure=`VALIDATED-NO-GO`，没有 complete property、CUDA、
 competitor parity、重复性能或 ASPLOS-ready claim。下一路线固定为祖先约束单调 carry-forward，
 解决“child 重算时丢失 root refinement tightening”的结构性问题。
+
+## 29. Ancestral-Constraint Refinement v1 判定
+
+NRIR-22 将 parent refinement execution 作为 child Plan/Task/Schedule 的 typed source：source
+final/Plan/semantic trace 三哈希绑定，materialize Task 显式输入，local→constrained initial→final
+双重单调，queue parent lineage 与 `sound_constraint_only` consumption fail closed。默认、root-global
+与 NRIR-21 independent payload 均条件兼容。
+
+fixed clauses `0/1` 的 ancestral worst leaf=`-340.971832/-517.858826`，相对 independent
+提升 `+73.615173/+75.022095`，相对 root-global 提升 `+72.767212/+74.085449`；root lower
+仍为 `-417.292480/-602.551392`。结论为 fixed bounded-tree tightness
+`VALIDATED-REDUCED`，不是 property closure、CUDA/competitor speedup 或 ASPLOS-ready。
+
+下一工程门禁为 hard-clause convergence expansion：扩展 hard clause coverage 与 depth/node budget
+曲线，量化剩余 closure deficit，再决定动态 BaB budget/termination 或公平 GPU E2E 的先后顺序。

@@ -1,0 +1,15 @@
+{
+  "evidence_hash": "72c0c2a66b82cea425bf7486817c0ce39ae186ef2961cc1271acb31cb7a31b6f",
+  "files": {
+    "evidence.json": "b3d62e607751db31c63c0111fb87e75bf4682f9cf9782053bff8e12484a1bc68",
+    "logs/clause-0-ancestral_carry.log": "63727e073c24ea73f2afe483aa32fb0531ddad36479ba5e3d756a51860c42705",
+    "logs/clause-0-independent_per_child.log": "0c84bfc061b384de8ee032035316dd71a4d735aab6778dd26091c4c7675fe8ea",
+    "logs/clause-0-root_global.log": "d288eea9745dfc83ecf344e0a31ef147611816d1ec00859cf6fde2812b7c8d0d",
+    "logs/clause-1-ancestral_carry.log": "cf9af70830943408d317f2bc79d26daee00c3c0e3b374ea78ff11e496557e2cc",
+    "logs/clause-1-independent_per_child.log": "2c5fd64f719172657304897ac3b15ac5dcb3bfd027f73af2e8d4250c51a229c6",
+    "logs/clause-1-root_global.log": "65a4b4cf09d2522462f3de4868fc0ed7c7645fedd47f9b31056a2444a8969379"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.ancestral-constraint-refinement-artifact/v1",
+  "status": "validated_reduced"
+}
