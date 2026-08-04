@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev003929
-last_va: ev003939
+last_ch: ev004054
+last_va: ev004055
 blk:
-next: publish-and-merge-nrir34-pr
-updated: 2026-08-04T16:24:30Z
+next: start-nrir36-multi-clause-anytime-priority-v1
+updated: 2026-08-04T17:23:21Z

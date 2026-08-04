@@ -1,0 +1,13 @@
+{
+  "files": {
+    "formal.json": "07a5d9315caba9757005e13f6c5180655135af86bfbfe9e174b255e553effd47",
+    "logs/repeat-0.log": "11102258b7fbb4c39e5efd9207e782ec98196e0b35b38b95a8276a1961108a71",
+    "logs/repeat-1.log": "6768d66d5396cad87cffd86c1637c057cdce116dc75c4006e9ebee91c7d34d08",
+    "logs/repeat-2.log": "c6db4c983229a7ecf7296aec5fcbdb6d9f2af9734b239c389e7b1512885deab6",
+    "shards/repeat-0.json": "19c69963a1322d0f4353344e7fff22da6b71adab91a7739bbd8b5b37fab852a7",
+    "shards/repeat-1.json": "a9beccf304fd8f63e2d1e8723bbb332de87c080666d7a5f2c5fae646e02f8235",
+    "shards/repeat-2.json": "6d7fa1b265f1c33be26a3b1a3c6f72bf6f9b9c1b879bca649720f5e6e76fa3d6"
+  },
+  "formal_hash": "74533c9c211a3007bf5af43c08865febd95c3f9ccf1a268e56738793ec9d14d5",
+  "schema_version": "boundflow.cross-clause-anytime-manifest/v1"
+}

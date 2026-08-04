@@ -1,9 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
 > 生效日期：2026-07-12
-> 当前 integration base：`45d2ea6`（NRIR-33 merge）；历史 closure tag：`pr13-validated-reduced`、
+> 当前 integration base：`796a64e`（NRIR-34 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/sibling-packed-objective-ancestral-evaluator-v1`
+> 当前研发分支：`feat/cross-clause-anytime-objective-evaluator-v1`
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed
@@ -12,7 +12,8 @@
 >（完成）→ dynamic ancestral refinement budget（完成）→ typed multi-pass refinement（NO-GO）→
 > production prepared verifier（完成）→ parametric compiler（完成）→ wall-clock scaling（完成）→
 > typed hard-clause escalation（完成）→ objective-directed hard-clause escalation（完成）→
-> objective-ancestral queue（完成）→ child-budget Pareto（NO-GO）→ sibling-packed evaluator（完成）**。
+> objective-ancestral queue（完成）→ child-budget Pareto（NO-GO）→ sibling-packed evaluator（完成）→
+> cross-clause anytime evaluator（完成）**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有
@@ -91,6 +92,12 @@
 > width policy 的 root lower 再改善 `+55.928741/+26.228943`，但仍为
 > `-417.292480/-602.551392`。该阶段只关闭 objective-directed IR/control 与 fixed root
 > tightness `VALIDATED-REDUCED`；下一路线为 per-child refinement，不是性能或 closure claim。
+
+> **2026-08-04 NRIR-35 结果**：NRIR-31 all-clause floor 与 NRIR-34 clause-0 packed queue 已由
+> 一等 Plan/Decision/6-stage Task/Schedule 串接，并消费同一 global start。三轮 floor 均完成
+> `[0..8]`，余量内 packed nodes=`[7,7,9]`；final 仍为 9/9 unresolved。该结果只关闭 cross-clause
+> control/original-ordinal preservation `VALIDATED-REDUCED`，不形成 property/performance claim。
+> 下一门禁为 multi-clause anytime priority/time slicing。详见第 48 节。
 
 ## 1. 锁定的论文命题
 
@@ -1294,3 +1301,27 @@ same-algorithm deadline coverage `VALIDATED-REDUCED` 关闭；cooperative atomic
 multi-workload 或 ASPLOS-ready claim。下一门禁为 NRIR-35 cross-clause objective/root/compiler sharing
 与 anytime budget，必须在同一全局 60 秒内增加 completed original clauses，不得给每 clause 独立延长
 deadline。
+
+## 48. Cross-Clause Anytime Objective Evaluator v1
+
+NRIR-35 先执行 frozen NRIR-31 objective-hard-clause program，使固定 ResNet property 0 的九个
+original clauses 都获得 sound floor；只有 floor completed `[0..8]`、final unknown、clause 0
+unresolved 且 exact accepted child source 存在时，Decision 才 admit NRIR-34 packed queue。static
+Task/Schedule 固定为 floor、decision、guarded packed compile、guarded packed execute、monotone
+original-ordinal aggregate、emit 六阶段；source Plan/semantic/final-bound、objective/threshold、policy
+与单一 global deadline 全部 hash-bound。
+
+单次 feasibility 先以 floor `22.180303 s`、packed 7 nodes/3 groups 通过。正式一等 runtime pilot
+同样通过；兼容性修复后重生成的三 fresh repeats，floor elapsed 为
+`22.227251/21.622773/21.834220 s`，每轮都 completed/unresolved=`[0..8]`；packed accepted
+nodes=`[7,7,9]`。whole cooperative elapsed 为 `61.991720/62.598928/68.042604 s`，来自 deadline
+前开始的完整 sibling group 原子收尾，不是
+60 秒硬实时或 wall-clock speedup。三轮 packed verdict 与最终 query 都仍是 sound `unknown`。
+
+formal hash=`74533c9c211a3007bf5af43c08865febd95c3f9ccf1a268e56738793ec9d14d5`；replay、wrong ordinal/
+source、deadline reset、baseline omission、non-monotone aggregate、partial-group 篡改与全量
+`874 passed, 37 skipped` 均通过。本阶段以 cross-clause control/original-ordinal preservation
+`VALIDATED-REDUCED` 关闭，`performance_claimed=false`；没有 property closure、GPU、competitor、
+multi-workload 或 ASPLOS-ready claim。下一门禁为 multi-clause anytime priority/time slicing：在同一
+global 60 秒预算内为多个 unresolved clauses 分配 additive work，不得继续让 clause 0 独占余量或
+给每个 clause 重置 deadline。

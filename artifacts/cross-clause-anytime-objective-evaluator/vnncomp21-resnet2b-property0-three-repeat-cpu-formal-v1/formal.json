@@ -1,0 +1,826 @@
+{
+  "claim": "cross_clause_preservation_and_additive_work_only",
+  "formal_payload": {
+    "all_original_ordinals_preserved": true,
+    "all_worker_gates_passed": true,
+    "floor_elapsed_ns": [
+      22227251381,
+      21622772755,
+      21834220445
+    ],
+    "packed_accepted_nodes": [
+      7,
+      7,
+      9
+    ],
+    "protocol": {
+      "fresh_process_repeats": 3,
+      "original_clause_count": 9,
+      "packed_original_clause_index": 0,
+      "torch_threads": 8,
+      "whole_query_timeout_seconds": 60
+    },
+    "repeat_results": [
+      {
+        "aggregate": {
+          "aggregation": "floor_monotone_optional_packed_upgrade",
+          "decision_hash": "b8eb883cdd4df374cbd4bda7858ce9174c346293efcbcbac73ee2c7002c787a3",
+          "final_status": "unknown",
+          "final_unresolved_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "final_unsafe_clause_index": null,
+          "final_verified_clause_indices": [],
+          "floor_status": "unknown",
+          "floor_trace_hash": "27eed8449e7911e1b7b608ee3df436083640f2b9208ac05ccca874e8b37c623c",
+          "floor_unresolved_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "floor_unsafe_clause_index": null,
+          "floor_verified_clause_indices": [],
+          "original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "packed_queue_trace_hash": "735f637f7a943503e29837fdb528fe64721918aabc88926f4170b0822b496dda",
+          "packed_status": "unknown",
+          "plan_hash": "5a9b6ff86447a4367db46ba2c040c5a9e40c1686e0b79615b5193b2b90aabfa1",
+          "schema_version": "boundflow.cross-clause-anytime-aggregate/v1"
+        },
+        "checks": {
+          "all_runtime_validators_passed": true,
+          "exact_floor_clause_source": true,
+          "floor_accounting_preserved": true,
+          "single_global_start_consumed": true,
+          "six_stage_schedule_executed": true
+        },
+        "claim_boundary": "cross_clause_preservation_and_additive_work_no_performance_claim",
+        "decision": {
+          "admitted": true,
+          "admitted_original_clause_index": 0,
+          "floor_completed_original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "floor_status": "unknown",
+          "floor_trace_hash": "27eed8449e7911e1b7b608ee3df436083640f2b9208ac05ccca874e8b37c623c",
+          "floor_unresolved_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "floor_unsafe_clause_index": null,
+          "floor_verified_clause_indices": [],
+          "plan_hash": "5a9b6ff86447a4367db46ba2c040c5a9e40c1686e0b79615b5193b2b90aabfa1",
+          "reason": "floor_complete_unresolved_clause_admitted",
+          "root_final_intermediate_bounds_hash": "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+          "root_refinement_plan_hash": "0de9339e52652645e871c4e361a83a020d57d7145f0f3d11c5e168d70ca2e6d7",
+          "root_refinement_semantic_trace_hash": "84b9716078c59299c046322286a9fc6ed1a82eb2d1afd6996ccdd36a42912825",
+          "schema_version": "boundflow.cross-clause-anytime-decision/v1"
+        },
+        "floor": {
+          "completed_original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "elapsed_ns": 22227251381,
+          "fallback_reason": "none",
+          "packed_clause_source": {
+            "final_intermediate_bounds_hash": "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+            "plan_hash": "0de9339e52652645e871c4e361a83a020d57d7145f0f3d11c5e168d70ca2e6d7",
+            "semantic_trace_hash": "84b9716078c59299c046322286a9fc6ed1a82eb2d1afd6996ccdd36a42912825"
+          },
+          "status": "unknown",
+          "trace_hash": "27eed8449e7911e1b7b608ee3df436083640f2b9208ac05ccca874e8b37c623c",
+          "unresolved_original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "unsafe_original_clause_index": null,
+          "verified_original_clause_indices": []
+        },
+        "packed": {
+          "accepted_nodes": 7,
+          "aggregate_trace_hash": "4900fd5617e6c8527fdd2c99d5b27e536752b4ef895033fd041aab6817f7f6e4",
+          "all_groups_atomic_pairs": true,
+          "discarded_attempt_stage": "after_complete_sibling_group",
+          "fallback_reason": "deadline_preserve_atomic_sibling_frontier",
+          "maximum_depth": 2,
+          "plan_hash": "780072fdf4816e8356eb8fbdba11cb6062f94bb71684aac5af803f975809ddc8",
+          "queue_elapsed_ns": 36588079505,
+          "queue_trace_hash": "735f637f7a943503e29837fdb528fe64721918aabc88926f4170b0822b496dda",
+          "schedule_hash": "f70cae96fec3b9ed27e74357137e92fb99dd9a7a96241ef650ba2125d20e62cc",
+          "sibling_group_count": 3,
+          "source_elapsed_ns": 24573041954,
+          "task_ir_hash": "65e10e498b5ebd9fa90510629cbb6c8baa72e26687788d06bbafdbb26b6db902",
+          "verdict_reason": "node_budget_frontier_open",
+          "verdict_status": "unknown",
+          "whole_elapsed_ns": 61161121459,
+          "worst_active_lower": -104.76541137695312
+        },
+        "performance_claimed": false,
+        "program": {
+          "plan_hash": "5a9b6ff86447a4367db46ba2c040c5a9e40c1686e0b79615b5193b2b90aabfa1",
+          "schedule_hash": "de3066a9a845c3fd61304d6909fb823078ae511266911a13e4209875681e2e1a",
+          "task_ir_hash": "bad3499e53f4d3f2dbdb62a2b56efabc0fe898fbd5020c9b7902c51c09eca137"
+        },
+        "protocol": {
+          "anytime": "nrir34_sibling_packed_clause0",
+          "child_cap": 128,
+          "floor": "nrir31_objective_hard_clause_escalation",
+          "original_clause_count": 9,
+          "packed_original_clause_index": 0,
+          "search_budget": {
+            "max_depth": 4,
+            "max_nodes": 31
+          },
+          "torch_threads": 8,
+          "whole_query_timeout_seconds": 60
+        },
+        "repeat_index": 0,
+        "result_hash": "8f1084a3fb72148573c094cb38fb6f58cd1791ac9119cc2005db5cc39d18bd0b",
+        "runtime_trace": {
+          "actions": [
+            {
+              "action_id": "cross-clause-anytime.launch.0000",
+              "elapsed_ns": 24372036020,
+              "executed": true,
+              "guard": "always",
+              "kind": "execute_floor",
+              "output_hash": "052bf13b5cee6b97dec31260b6f2dfb280fed7c17b3eecaaf93ca708daba8e13",
+              "reason": "nrir31_floor_completed",
+              "schema_version": "boundflow.native-cross-clause-anytime-action-trace/v1",
+              "sequence": 0,
+              "task_id": "nrir35:cifar10_resnet:000:property0:repeat0:execute_floor"
+            },
+            {
+              "action_id": "cross-clause-anytime.launch.0001",
+              "elapsed_ns": 3011871,
+              "executed": true,
+              "guard": "always",
+              "kind": "decide_anytime",
+              "output_hash": "b8eb883cdd4df374cbd4bda7858ce9174c346293efcbcbac73ee2c7002c787a3",
+              "reason": "floor_complete_unresolved_clause_admitted",
+              "schema_version": "boundflow.native-cross-clause-anytime-action-trace/v1",
+              "sequence": 1,
+              "task_id": "nrir35:cifar10_resnet:000:property0:repeat0:decide_anytime"
+            },
+            {
+              "action_id": "cross-clause-anytime.launch.0002",
+              "elapsed_ns": 148235791,
+              "executed": true,
+              "guard": "decision_admitted_before_deadline",
+              "kind": "compile_packed_plan",
+              "output_hash": "db61dab597338e4fe7e1a81c5ea0bb949c0e531b6efd9b10a0c3408fc846b683",
+              "reason": "packed_plan_compiled",
+              "schema_version": "boundflow.native-cross-clause-anytime-action-trace/v1",
+              "sequence": 2,
+              "task_id": "nrir35:cifar10_resnet:000:property0:repeat0:compile_packed_plan"
+            },
+            {
+              "action_id": "cross-clause-anytime.launch.0003",
+              "elapsed_ns": 37447416347,
+              "executed": true,
+              "guard": "decision_admitted_before_deadline",
+              "kind": "execute_packed_queue",
+              "output_hash": "a2eb977d0624074eac9eb60fafe5079f41d85b4b8214088e3e599da24dc24897",
+              "reason": "packed_queue_unknown",
+              "schema_version": "boundflow.native-cross-clause-anytime-action-trace/v1",
+              "sequence": 3,
+              "task_id": "nrir35:cifar10_resnet:000:property0:repeat0:execute_packed_queue"
+            },
+            {
+              "action_id": "cross-clause-anytime.launch.0004",
+              "elapsed_ns": 0,
+              "executed": true,
+              "guard": "always",
+              "kind": "aggregate_original_ordinals",
+              "output_hash": "a7cedd0dfaa09f8b3bc5ff31c92df4436ca70ef7299fe38e66b025262c4b560b",
+              "reason": "original_ordinals_aggregated_monotonically",
+              "schema_version": "boundflow.native-cross-clause-anytime-action-trace/v1",
+              "sequence": 4,
+              "task_id": "nrir35:cifar10_resnet:000:property0:repeat0:aggregate_original_ordinals"
+            },
+            {
+              "action_id": "cross-clause-anytime.launch.0005",
+              "elapsed_ns": 0,
+              "executed": true,
+              "guard": "always",
+              "kind": "emit_result",
+              "output_hash": "da0dba7ed9c0f6961bdd5a5852d396202cd4ae9ef7ebe7456201888c5d2e1b96",
+              "reason": "result_emitted",
+              "schema_version": "boundflow.native-cross-clause-anytime-action-trace/v1",
+              "sequence": 5,
+              "task_id": "nrir35:cifar10_resnet:000:property0:repeat0:emit_result"
+            }
+          ],
+          "elapsed_ns": 61991719594,
+          "fallback_reason": "node_budget_frontier_open",
+          "measured_elapsed_ns": 64884013065,
+          "trace_hash": "51ab119fb8da87f4b10f4700e62bdd1291f6458884028b9fbdc5f4d95b9f3021"
+        },
+        "schema_version": "boundflow.cross-clause-anytime-worker/v1",
+        "source": {
+          "native_code_revision": "63aec623a8019029734287a8848876ec0eafb4ae6375fda8132c7c072e7337fa"
+        },
+        "worker_gate_passed": true
+      },
+      {
+        "aggregate": {
+          "aggregation": "floor_monotone_optional_packed_upgrade",
+          "decision_hash": "6e074d0f6485f4e73c01dd6e0434c3e5d06e26ffcbb50470cb8c6baf1f0476b0",
+          "final_status": "unknown",
+          "final_unresolved_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "final_unsafe_clause_index": null,
+          "final_verified_clause_indices": [],
+          "floor_status": "unknown",
+          "floor_trace_hash": "26e715da259d6cedda6c78b798528c59bc8f48462b847593ba26aa44aa81aa37",
+          "floor_unresolved_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "floor_unsafe_clause_index": null,
+          "floor_verified_clause_indices": [],
+          "original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "packed_queue_trace_hash": "2d3d135f7f8ebbbfcb56afd9087f102f493e5769d2b7dafe26f0fa69fef8a9ad",
+          "packed_status": "unknown",
+          "plan_hash": "51edec78510d60d40702a1d2a163afc181e048335683550713aa2a9d94c2d6d9",
+          "schema_version": "boundflow.cross-clause-anytime-aggregate/v1"
+        },
+        "checks": {
+          "all_runtime_validators_passed": true,
+          "exact_floor_clause_source": true,
+          "floor_accounting_preserved": true,
+          "single_global_start_consumed": true,
+          "six_stage_schedule_executed": true
+        },
+        "claim_boundary": "cross_clause_preservation_and_additive_work_no_performance_claim",
+        "decision": {
+          "admitted": true,
+          "admitted_original_clause_index": 0,
+          "floor_completed_original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "floor_status": "unknown",
+          "floor_trace_hash": "26e715da259d6cedda6c78b798528c59bc8f48462b847593ba26aa44aa81aa37",
+          "floor_unresolved_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "floor_unsafe_clause_index": null,
+          "floor_verified_clause_indices": [],
+          "plan_hash": "51edec78510d60d40702a1d2a163afc181e048335683550713aa2a9d94c2d6d9",
+          "reason": "floor_complete_unresolved_clause_admitted",
+          "root_final_intermediate_bounds_hash": "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+          "root_refinement_plan_hash": "6a7086b5f82e4347f3368227986a112a45d29a7eeda70c1b2b0329b835e19346",
+          "root_refinement_semantic_trace_hash": "03651bae0b6b4c390bc66eb8813f0b1965bc658804ad698384b255581aa9a31a",
+          "schema_version": "boundflow.cross-clause-anytime-decision/v1"
+        },
+        "floor": {
+          "completed_original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "elapsed_ns": 21622772755,
+          "fallback_reason": "none",
+          "packed_clause_source": {
+            "final_intermediate_bounds_hash": "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+            "plan_hash": "6a7086b5f82e4347f3368227986a112a45d29a7eeda70c1b2b0329b835e19346",
+            "semantic_trace_hash": "03651bae0b6b4c390bc66eb8813f0b1965bc658804ad698384b255581aa9a31a"
+          },
+          "status": "unknown",
+          "trace_hash": "26e715da259d6cedda6c78b798528c59bc8f48462b847593ba26aa44aa81aa37",
+          "unresolved_original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "unsafe_original_clause_index": null,
+          "verified_original_clause_indices": []
+        },
+        "packed": {
+          "accepted_nodes": 7,
+          "aggregate_trace_hash": "86876a7484a71ffcc26709bacd5b4361b1e7aff429e0aadbba697d9b27c54c08",
+          "all_groups_atomic_pairs": true,
+          "discarded_attempt_stage": "after_complete_sibling_group",
+          "fallback_reason": "deadline_preserve_atomic_sibling_frontier",
+          "maximum_depth": 2,
+          "plan_hash": "9d0b17bfdf124e0c36695305069d788ac346ec97ac0c2ef7353ad244e859e4fb",
+          "queue_elapsed_ns": 37963835507,
+          "queue_trace_hash": "2d3d135f7f8ebbbfcb56afd9087f102f493e5769d2b7dafe26f0fa69fef8a9ad",
+          "schedule_hash": "ecd2597f5e638a8f3a9d363a8417984c6f8a5c6091fb98db3542793cc181cf7a",
+          "sibling_group_count": 3,
+          "source_elapsed_ns": 23832999626,
+          "task_ir_hash": "8fda15547d473cc2445ad68d38a12396b78ea90369a70d8a9ea3204b466394c0",
+          "verdict_reason": "node_budget_frontier_open",
+          "verdict_status": "unknown",
+          "whole_elapsed_ns": 61796835133,
+          "worst_active_lower": -104.76541137695312
+        },
+        "performance_claimed": false,
+        "program": {
+          "plan_hash": "51edec78510d60d40702a1d2a163afc181e048335683550713aa2a9d94c2d6d9",
+          "schedule_hash": "4c6894e0cbefd51877d72de30efad1361fd7cabfab8ebf7705c30d3b9fd0c7aa",
+          "task_ir_hash": "e3c879daee373f9110d75d819a5ec59b07f13d4d197198dfb339b42ec60fbe29"
+        },
+        "protocol": {
+          "anytime": "nrir34_sibling_packed_clause0",
+          "child_cap": 128,
+          "floor": "nrir31_objective_hard_clause_escalation",
+          "original_clause_count": 9,
+          "packed_original_clause_index": 0,
+          "search_budget": {
+            "max_depth": 4,
+            "max_nodes": 31
+          },
+          "torch_threads": 8,
+          "whole_query_timeout_seconds": 60
+        },
+        "repeat_index": 1,
+        "result_hash": "e91852c6beb31983e4ed8cbbc3de6b7c5eb9b75f9dd6f1ebc8ac0b94d54b1e50",
+        "runtime_trace": {
+          "actions": [
+            {
+              "action_id": "cross-clause-anytime.launch.0000",
+              "elapsed_ns": 23638172818,
+              "executed": true,
+              "guard": "always",
+              "kind": "execute_floor",
+              "output_hash": "a3de06e40c4012ae9c6417569de4ce1fe6e380691e56cb6389599c3cda94dfa9",
+              "reason": "nrir31_floor_completed",
+              "schema_version": "boundflow.native-cross-clause-anytime-action-trace/v1",
+              "sequence": 0,
+              "task_id": "nrir35:cifar10_resnet:000:property0:repeat1:execute_floor"
+            },
+            {
+              "action_id": "cross-clause-anytime.launch.0001",
+              "elapsed_ns": 2867521,
+              "executed": true,
+              "guard": "always",
+              "kind": "decide_anytime",
+              "output_hash": "6e074d0f6485f4e73c01dd6e0434c3e5d06e26ffcbb50470cb8c6baf1f0476b0",
+              "reason": "floor_complete_unresolved_clause_admitted",
+              "schema_version": "boundflow.native-cross-clause-anytime-action-trace/v1",
+              "sequence": 1,
+              "task_id": "nrir35:cifar10_resnet:000:property0:repeat1:decide_anytime"
+            },
+            {
+              "action_id": "cross-clause-anytime.launch.0002",
+              "elapsed_ns": 143710975,
+              "executed": true,
+              "guard": "decision_admitted_before_deadline",
+              "kind": "compile_packed_plan",
+              "output_hash": "a3a412b9d6053ed6433bc8a65bf80fecedb939c6399cdf77fa2e4e283cbd572d",
+              "reason": "packed_plan_compiled",
+              "schema_version": "boundflow.native-cross-clause-anytime-action-trace/v1",
+              "sequence": 2,
+              "task_id": "nrir35:cifar10_resnet:000:property0:repeat1:compile_packed_plan"
+            },
+            {
+              "action_id": "cross-clause-anytime.launch.0003",
+              "elapsed_ns": 38795296032,
+              "executed": true,
+              "guard": "decision_admitted_before_deadline",
+              "kind": "execute_packed_queue",
+              "output_hash": "dabd6e4c95b2987a80881aa26f7c26cbfe322f2f77d3da1ff0120eab2672ffb0",
+              "reason": "packed_queue_unknown",
+              "schema_version": "boundflow.native-cross-clause-anytime-action-trace/v1",
+              "sequence": 3,
+              "task_id": "nrir35:cifar10_resnet:000:property0:repeat1:execute_packed_queue"
+            },
+            {
+              "action_id": "cross-clause-anytime.launch.0004",
+              "elapsed_ns": 0,
+              "executed": true,
+              "guard": "always",
+              "kind": "aggregate_original_ordinals",
+              "output_hash": "b0109fcb861edf81181ede256045d91128bc3a8a7bca1a45c0bdc1beafad44fd",
+              "reason": "original_ordinals_aggregated_monotonically",
+              "schema_version": "boundflow.native-cross-clause-anytime-action-trace/v1",
+              "sequence": 4,
+              "task_id": "nrir35:cifar10_resnet:000:property0:repeat1:aggregate_original_ordinals"
+            },
+            {
+              "action_id": "cross-clause-anytime.launch.0005",
+              "elapsed_ns": 0,
+              "executed": true,
+              "guard": "always",
+              "kind": "emit_result",
+              "output_hash": "b87db02b7e45daf48174c3ede2d98e2b384466024ad99ebf3ba16864acdc4f49",
+              "reason": "result_emitted",
+              "schema_version": "boundflow.native-cross-clause-anytime-action-trace/v1",
+              "sequence": 5,
+              "task_id": "nrir35:cifar10_resnet:000:property0:repeat1:emit_result"
+            }
+          ],
+          "elapsed_ns": 62598927669,
+          "fallback_reason": "node_budget_frontier_open",
+          "measured_elapsed_ns": 65332621633,
+          "trace_hash": "a77a83d4721065ba9933369f501fb8d159cad403bda5e0c31e1799a2559c782c"
+        },
+        "schema_version": "boundflow.cross-clause-anytime-worker/v1",
+        "source": {
+          "native_code_revision": "63aec623a8019029734287a8848876ec0eafb4ae6375fda8132c7c072e7337fa"
+        },
+        "worker_gate_passed": true
+      },
+      {
+        "aggregate": {
+          "aggregation": "floor_monotone_optional_packed_upgrade",
+          "decision_hash": "9d58563868caed99a207728d29a3c36277580663daac94fef4853b01ccaef6e7",
+          "final_status": "unknown",
+          "final_unresolved_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "final_unsafe_clause_index": null,
+          "final_verified_clause_indices": [],
+          "floor_status": "unknown",
+          "floor_trace_hash": "af26a629ecefcdfc1311d6db22e807cfebe3b31de931eae4c6c5f9454a8386aa",
+          "floor_unresolved_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "floor_unsafe_clause_index": null,
+          "floor_verified_clause_indices": [],
+          "original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "packed_queue_trace_hash": "41d2aa93d6f84d54b03e5d7fe93622700e5f82e9dfbcf6e0cf1c8ac1a38d8b91",
+          "packed_status": "unknown",
+          "plan_hash": "f079cfe0f9dec20151b9365f4a6a1d6f25e1a8466343e7d613f14f5fe572d1cc",
+          "schema_version": "boundflow.cross-clause-anytime-aggregate/v1"
+        },
+        "checks": {
+          "all_runtime_validators_passed": true,
+          "exact_floor_clause_source": true,
+          "floor_accounting_preserved": true,
+          "single_global_start_consumed": true,
+          "six_stage_schedule_executed": true
+        },
+        "claim_boundary": "cross_clause_preservation_and_additive_work_no_performance_claim",
+        "decision": {
+          "admitted": true,
+          "admitted_original_clause_index": 0,
+          "floor_completed_original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "floor_status": "unknown",
+          "floor_trace_hash": "af26a629ecefcdfc1311d6db22e807cfebe3b31de931eae4c6c5f9454a8386aa",
+          "floor_unresolved_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "floor_unsafe_clause_index": null,
+          "floor_verified_clause_indices": [],
+          "plan_hash": "f079cfe0f9dec20151b9365f4a6a1d6f25e1a8466343e7d613f14f5fe572d1cc",
+          "reason": "floor_complete_unresolved_clause_admitted",
+          "root_final_intermediate_bounds_hash": "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+          "root_refinement_plan_hash": "aa0508f1cfdba1eb89931429c166bcc32b323810134c8f225d09ab7189be5dd2",
+          "root_refinement_semantic_trace_hash": "3b95939db0a83625964e674c7c5f1e8b026d622c25537edbc288ec06b1f6a018",
+          "schema_version": "boundflow.cross-clause-anytime-decision/v1"
+        },
+        "floor": {
+          "completed_original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "elapsed_ns": 21834220445,
+          "fallback_reason": "none",
+          "packed_clause_source": {
+            "final_intermediate_bounds_hash": "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+            "plan_hash": "aa0508f1cfdba1eb89931429c166bcc32b323810134c8f225d09ab7189be5dd2",
+            "semantic_trace_hash": "3b95939db0a83625964e674c7c5f1e8b026d622c25537edbc288ec06b1f6a018"
+          },
+          "status": "unknown",
+          "trace_hash": "af26a629ecefcdfc1311d6db22e807cfebe3b31de931eae4c6c5f9454a8386aa",
+          "unresolved_original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "unsafe_original_clause_index": null,
+          "verified_original_clause_indices": []
+        },
+        "packed": {
+          "accepted_nodes": 9,
+          "aggregate_trace_hash": "e40bf0fbc5935488e9243f2a559049894e43814894c8c11bf888cf91a42abe39",
+          "all_groups_atomic_pairs": true,
+          "discarded_attempt_stage": "after_complete_sibling_group",
+          "fallback_reason": "deadline_preserve_atomic_sibling_frontier",
+          "maximum_depth": 3,
+          "plan_hash": "8aa731122c0fd276bcac291deeb79e1b3333dc7f2a3b6aace4ec9b3fb1728faf",
+          "queue_elapsed_ns": 42944546937,
+          "queue_trace_hash": "41d2aa93d6f84d54b03e5d7fe93622700e5f82e9dfbcf6e0cf1c8ac1a38d8b91",
+          "schedule_hash": "42766f4db84ae25e81af4e15148490389ea57b8f82b1bdac666b7dc3d10e50f5",
+          "sibling_group_count": 4,
+          "source_elapsed_ns": 24099586632,
+          "task_ir_hash": "3d1b01feeee8105b09ecb70d303f662989e86519c127639d8e0ba8dcff87f1a5",
+          "verdict_reason": "node_budget_frontier_open",
+          "verdict_status": "unknown",
+          "whole_elapsed_ns": 67044133569,
+          "worst_active_lower": -104.69891357421875
+        },
+        "performance_claimed": false,
+        "program": {
+          "plan_hash": "f079cfe0f9dec20151b9365f4a6a1d6f25e1a8466343e7d613f14f5fe572d1cc",
+          "schedule_hash": "51ca4caf9c34e004263c673c72c1e2cad4e3c9d0e6d360444f0dd01f4a2866d2",
+          "task_ir_hash": "b9550c2e5c237a8cf838636444b28a6e159e6f940fe7f6cd59b0233e993ee6ea"
+        },
+        "protocol": {
+          "anytime": "nrir34_sibling_packed_clause0",
+          "child_cap": 128,
+          "floor": "nrir31_objective_hard_clause_escalation",
+          "original_clause_count": 9,
+          "packed_original_clause_index": 0,
+          "search_budget": {
+            "max_depth": 4,
+            "max_nodes": 31
+          },
+          "torch_threads": 8,
+          "whole_query_timeout_seconds": 60
+        },
+        "repeat_index": 2,
+        "result_hash": "b91221ecffab3257997d7e9ee5ded3cbb3786bdd39fe6db1fb51fc6d18ee3e1f",
+        "runtime_trace": {
+          "actions": [
+            {
+              "action_id": "cross-clause-anytime.launch.0000",
+              "elapsed_ns": 23903751819,
+              "executed": true,
+              "guard": "always",
+              "kind": "execute_floor",
+              "output_hash": "e63e48f9ea36027ab23fc73589eb4dac907f7521e6b4efa0aed17a64be38cf3e",
+              "reason": "nrir31_floor_completed",
+              "schema_version": "boundflow.native-cross-clause-anytime-action-trace/v1",
+              "sequence": 0,
+              "task_id": "nrir35:cifar10_resnet:000:property0:repeat2:execute_floor"
+            },
+            {
+              "action_id": "cross-clause-anytime.launch.0001",
+              "elapsed_ns": 2886917,
+              "executed": true,
+              "guard": "always",
+              "kind": "decide_anytime",
+              "output_hash": "9d58563868caed99a207728d29a3c36277580663daac94fef4853b01ccaef6e7",
+              "reason": "floor_complete_unresolved_clause_admitted",
+              "schema_version": "boundflow.native-cross-clause-anytime-action-trace/v1",
+              "sequence": 1,
+              "task_id": "nrir35:cifar10_resnet:000:property0:repeat2:decide_anytime"
+            },
+            {
+              "action_id": "cross-clause-anytime.launch.0002",
+              "elapsed_ns": 144600237,
+              "executed": true,
+              "guard": "decision_admitted_before_deadline",
+              "kind": "compile_packed_plan",
+              "output_hash": "9e351c63433fed3de0ea52c6996fe3866287b7a775e9e52f4314dc730c67d662",
+              "reason": "packed_plan_compiled",
+              "schema_version": "boundflow.native-cross-clause-anytime-action-trace/v1",
+              "sequence": 2,
+              "task_id": "nrir35:cifar10_resnet:000:property0:repeat2:compile_packed_plan"
+            },
+            {
+              "action_id": "cross-clause-anytime.launch.0003",
+              "elapsed_ns": 43967133792,
+              "executed": true,
+              "guard": "decision_admitted_before_deadline",
+              "kind": "execute_packed_queue",
+              "output_hash": "9c0af3a320b3ac88902c8f50ee3e777a8eee25174bf03b17793c5f1fbaa74921",
+              "reason": "packed_queue_unknown",
+              "schema_version": "boundflow.native-cross-clause-anytime-action-trace/v1",
+              "sequence": 3,
+              "task_id": "nrir35:cifar10_resnet:000:property0:repeat2:execute_packed_queue"
+            },
+            {
+              "action_id": "cross-clause-anytime.launch.0004",
+              "elapsed_ns": 0,
+              "executed": true,
+              "guard": "always",
+              "kind": "aggregate_original_ordinals",
+              "output_hash": "45cec723b716ac1d5ee76d53a0e83fa6406f3c7a98ca02fbb0996dbb0c084065",
+              "reason": "original_ordinals_aggregated_monotonically",
+              "schema_version": "boundflow.native-cross-clause-anytime-action-trace/v1",
+              "sequence": 4,
+              "task_id": "nrir35:cifar10_resnet:000:property0:repeat2:aggregate_original_ordinals"
+            },
+            {
+              "action_id": "cross-clause-anytime.launch.0005",
+              "elapsed_ns": 0,
+              "executed": true,
+              "guard": "always",
+              "kind": "emit_result",
+              "output_hash": "3496668dce944388a324e5612283a5b0f2522f934f9a841f25934aa8466bd046",
+              "reason": "result_emitted",
+              "schema_version": "boundflow.native-cross-clause-anytime-action-trace/v1",
+              "sequence": 5,
+              "task_id": "nrir35:cifar10_resnet:000:property0:repeat2:emit_result"
+            }
+          ],
+          "elapsed_ns": 68042604489,
+          "fallback_reason": "node_budget_frontier_open",
+          "measured_elapsed_ns": 70949543245,
+          "trace_hash": "a59c43a0a337903e83d1f55427aa0ed2b897ec3d1c409c90228aaa3d1be92ed4"
+        },
+        "schema_version": "boundflow.cross-clause-anytime-worker/v1",
+        "source": {
+          "native_code_revision": "63aec623a8019029734287a8848876ec0eafb4ae6375fda8132c7c072e7337fa"
+        },
+        "worker_gate_passed": true
+      }
+    ],
+    "whole_elapsed_ns": [
+      61991719594,
+      62598927669,
+      68042604489
+    ],
+    "workload": {
+      "category": "cifar10_resnet",
+      "csv_ordinal": 0,
+      "csv_relative_path": "benchmarks/cifar10_resnet/cifar10_resnet_instances.csv",
+      "csv_sha256": "d0be77761016f65d044918e5f95332cf32bf848e5eef28c5465dfbf287ba984f",
+      "model_input_shape": [
+        1,
+        3,
+        32,
+        32
+      ],
+      "model_output_dim": 10,
+      "model_relative_path": "benchmarks/cifar10_resnet/onnx/resnet_2b.onnx",
+      "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+      "onnx_ops": [
+        "Add",
+        "Conv",
+        "Flatten",
+        "Gemm",
+        "Relu"
+      ],
+      "property_relative_path": "benchmarks/cifar10_resnet/vnnlib_properties_pgd_filtered/resnet2b_pgd_filtered/prop_0_eps_0.008.vnnlib",
+      "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+      "query_ir_hash": "f2151936ce0d9f8d8bcabd7bc3fc0224a71d7907da4ac614d7216e7a0919201b",
+      "workload_id": "cifar10_resnet:000"
+    }
+  },
+  "formal_payload_hash": "3905dc3aa68e7d335b9f7f6cc5f796b99cd6c92896170206705fde765023854c",
+  "performance_claimed": false,
+  "schema_version": "boundflow.cross-clause-anytime-formal/v1",
+  "source": {
+    "native_code_revision": "63aec623a8019029734287a8848876ec0eafb4ae6375fda8132c7c072e7337fa"
+  },
+  "status": "validated-reduced"
+}
