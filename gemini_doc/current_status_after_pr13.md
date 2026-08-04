@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`f129c31`（NRIR-28 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/wall-clock-parametric-bab-scaling-v1`
+> 当前 integration base：`a170429`（NRIR-29 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/typed-hard-clause-escalation-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-04 NRIR-19 后续：native selected-CROWN intermediate refinement 已成为一等
@@ -25,6 +25,10 @@
 > `7/depth2→31/depth4→127/depth6`，27/27 fresh workers 完成且 domain nesting 成立；MNISTFC
 > verified `6/9→8/9`，ResNet 保持 `0/9`，OVAL21 保持 `8/9`。下一门禁转为只对 remaining
 > clauses 使用更强 bound/branch 的 typed hard-clause escalation，不继续单轴堆节点。
+> NRIR-30 已完成该门禁：baseline unresolved 被 exact ordinal 投影到 shared native-refined 31-node
+> stage；OVAL21 三次由 `8/9 unknown→9/9 verified`，MNIST `6/9→8/9`，ResNet 仍 `0/9`，全部
+> 在 60 秒 whole deadline 内且无 fallback。下一门禁是 per-clause objective-directed refinement，
+> 不改 admission/search budget 来混淆因果。
 > 顶层
 > ASPLOS-ready 与 performance No-Go 不变。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
@@ -883,3 +887,23 @@ search-coverage `VALIDATED-REDUCED` 关闭；三类完整 query 仍全部 unknow
 ResNet 在 1143 total nodes 后仍 0/9、OVAL/MNIST 的最后 clause 也未随纯扩树关闭，所以下一工程
 门禁为 typed hard-clause escalation：只对 unresolved clauses 编译更强 native intermediate
 refinement/branch policy，并继续保持 fixed total deadline、sound fallback 与 artifact replay。
+
+## 37. Typed Hard-Clause Escalation v1 判定
+
+NRIR-30 将 baseline local-forward `7/depth2`、exact unresolved admission、shared native selected-CROWN
+refinement、projected `31/depth4` parametric query、original-ordinal aggregate 与 fail-closed fallback
+编译为一等 Plan/Decision/8-task TaskModule/Schedule。whole deadline 只有 60 秒；baseline
+verified/unsafe 不重跑，over-deadline escalation proof 丢弃而不是升级结果。
+
+三 workload 各三次 fresh process，baseline 与 NRIR-29 n7d2 accounting/root/evaluated nodes 对齐。
+MNISTFC admit `[3,7,8]` 后 final verified 稳定为 `[0..7]`；ResNet admit `[0..8]` 后仍 0/9；
+OVAL21 只 admit clause 8，并三次都从 unknown 变为完整 query `verified`。median whole-stage
+execution 为 MNIST `2.974 s`、ResNet `20.146 s`、OVAL `2.208 s`；9/9 run 都
+`fallback=none`，但不形成 speedup claim。
+
+artifact evidence hash=
+`df096e70d6126d585132e14dc9796038855b37bf4d9ef76528b9feb6a1330205`。本阶段以 typed staged
+control + fixed-deadline property coverage `VALIDATED-REDUCED` 关闭；只覆盖三个 CPU workload，
+无 GPU、competitor、完整 benchmark suite 或 ASPLOS-ready claim。下一工程门禁只改变 hard-clause
+refinement selection：per scalar objective 编译 influence/target Plan，在相同 admission、31-node 与
+deadline 下检验 MNIST clause 8/ResNet root 或 closure 的严格改善。

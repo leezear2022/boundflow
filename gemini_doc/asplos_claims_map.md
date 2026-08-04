@@ -1009,3 +1009,20 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   hash=`e01d35c0afa8501f3d02ffaaa4eeaf609c444ed497c1a2d2efff4e97b3520214`。本阶段
   search-coverage `VALIDATED-REDUCED`；下一门禁为 unresolved-clause typed hard-clause escalation，
   而不是继续盲目扩同一 search budget。
+
+### NRIR-30：Typed Hard-Clause Escalation v1
+
+- `C1/C2-M-NRIR30` staged compiler ownership：baseline、Decision admission、shared refinement、
+  hard-clause projection、parametric escalation、original-ordinal aggregate 与 emit 编译为一等
+  Plan/Decision/Task/Schedule；八 action 与 exact query/source/policy/budget/deadline hash 绑定；
+- `C3-G-NRIR30` admission/fallback gate：escalated ordinals 恰等于 baseline unresolved；verified/
+  unsafe 不重跑，projected↔original 双射；child aggregate、deadline discard、compiler cache/instance、
+  refinement semantic trace 和同步 digest 篡改 fail closed；
+- `C1/C3-E-NRIR30` repeated property coverage：OVAL21 三次都由 `[0..7]` 提升到 `[0..8]` 且
+  query status=`verified`；MNISTFC 三次 `6/9→8/9`；baseline 与 NRIR-29 n7d2 semantics 对齐；
+- `C3-L-NRIR30` hard limitation：ResNet 三次仍 `0/9`；统一 shared top-width refinement 不是
+  per-clause objective-directed/ancestral/external-seeded bound。仅三个 CPU workload，无 performance、
+  GPU、competitor、complete suite 或 ASPLOS-ready claim；
+- 工件：`artifacts/typed-hard-clause-escalation/vnncomp21-three-topology-cpu-v1/`；evidence
+  hash=`df096e70d6126d585132e14dc9796038855b37bf4d9ef76528b9feb6a1330205`。本阶段
+  property-coverage `VALIDATED-REDUCED`；下一门禁为 per-clause objective-directed escalation。
