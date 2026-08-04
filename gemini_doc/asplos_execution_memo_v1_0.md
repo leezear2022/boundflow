@@ -1190,3 +1190,22 @@ search-coverage `VALIDATED-REDUCED` 关闭；完整 query 仍全部 unknown，�
 property 或 ASPLOS-ready claim。单轴扩大同一搜索已出现明确饱和：下一门禁必须是 typed
 hard-clause escalation，在固定总 deadline 下只为 unresolved clauses 编译更强 native
 intermediate-refinement/branch Plan，并验证 sound fallback 与新增 closure。
+
+## 43. Typed Hard-Clause Escalation v1
+
+NRIR-30 把 NRIR-29 饱和结果编译成 staged verifier：先运行 local-forward parametric `7/depth2`
+baseline，Decision 只 admit exact unresolved original ordinals；随后共享一份 1-pass、128-target/ReLU、
+chunk32 native selected-CROWN refinement，把 hard objective/threshold 双射投影到 `31/depth4`
+parametric query，最后恢复原 ordinal 聚合。八类 Task/Schedule action 和 60 秒 whole deadline 均由
+Plan 所有；deadline/refinement/escalation 失败只能保留 baseline verdict。
+
+三 fresh repeats 中，MNISTFC 都从 6/9 提升到 8/9；ResNet2B 都保持 0/9；OVAL21 都只 admit
+clause 8 并从 8/9 unknown 变为 9/9 query verified。median whole-stage execution 分别为
+`2.974/20.146/2.208 s`（MNIST/ResNet/OVAL），全部 `fallback=none`；timing 只作 deadline
+accounting，`performance_claimed=false`。
+
+artifact evidence hash=
+`df096e70d6126d585132e14dc9796038855b37bf4d9ef76528b9feb6a1330205`。本阶段以 first-class
+staged control + property coverage `VALIDATED-REDUCED` 关闭；无 GPU、competitor、完整 suite 或
+ASPLOS-ready claim。下一门禁在相同 admission/budget/deadline 下把 shared top-width refinement
+替换为 per-clause objective-influence Plan，隔离检验 MNIST clause 8 与 ResNet hard clauses。

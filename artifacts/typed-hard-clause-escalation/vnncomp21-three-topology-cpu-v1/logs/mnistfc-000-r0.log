@@ -1,0 +1,1 @@
+{"baseline_verified":[0,1,2,4,5,6],"escalated":[3,7,8],"execution_ns":3002725076,"fallback":"none","final_status":"unknown","final_verified":[0,1,2,3,4,5,6,7],"status":"ok","workload_id":"mnistfc:000"}

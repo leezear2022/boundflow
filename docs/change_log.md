@@ -4235,3 +4235,21 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_WALL_CLOCK_PARAMETRIC_BAB_SCALING_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Typed Hard-Clause Escalation v1
+
+- 新增 exact-query escalation Plan、baseline-derived Decision、8-task guarded TaskModule/Schedule，
+  以及 baseline→shared native refinement→hard ordinal projection→parametric query→aggregate runtime；
+- whole deadline 固定 60 秒，admission 只能是 baseline unresolved；verified/unsafe 不重跑，超时或
+  child proof 篡改只能保留 baseline verdict；
+- 三 workload × 三 fresh repeats 全部无 fallback：MNIST `6/9→8/9`，ResNet `0/9→0/9`，OVAL
+  `8/9 unknown→9/9 verified`；
+- artifact source-to-program、NRIR-29 baseline、refinement、compiler/cache/instance 与 aggregate fresh
+  replay；evidence hash=`df096e70d6126d585132e14dc9796038855b37bf4d9ef76528b9feb6a1330205`；
+- 以 property-coverage `VALIDATED-REDUCED` 关闭；下一门禁为相同预算/deadline 下的 per-clause
+  objective-directed refinement，ASPLOS-ready 仍为 NO。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_TYPED_HARD_CLAUSE_ESCALATION_V1_CHANGELOG_2026_08_04.md`

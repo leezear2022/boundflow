@@ -16,9 +16,10 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_WALL_CLOCK_PARAMETRIC_BAB_SCALING_V1_PLAN_2026_08_04.md`
-（first-class search-scaling Plan/Task/Schedule、三真实拓扑 × 三预算 × 三 fresh repeats、logical-domain
-nesting 与 fixed-deadline verified-clause coverage）。其直接前序为
+当前最新入口：`gemini_doc/BOUNDFLOW_TYPED_HARD_CLAUSE_ESCALATION_V1_PLAN_2026_08_04.md`
+（baseline-derived admission、guarded refinement/projection/escalation/aggregate IR，三真实拓扑 ×
+三 fresh repeats 与 OVAL21 完整 verified closure）。其直接前序为
+`gemini_doc/BOUNDFLOW_WALL_CLOCK_PARAMETRIC_BAB_SCALING_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_PARAMETRIC_DYNAMIC_BATCH_COMPILER_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_PRODUCTION_PREPARED_VERIFIER_V1_PLAN_2026_08_04.md`、
 `gemini_doc/BOUNDFLOW_TYPED_MULTIPASS_REFINEMENT_V1_PLAN_2026_08_04.md`、
