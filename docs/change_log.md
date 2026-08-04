@@ -4175,3 +4175,24 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_TYPED_MULTIPASS_REFINEMENT_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Production Prepared Verifier v1
+
+- 新增 production verifier Plan/Task/Schedule、production ReLU-split queue 与 complete-query 集成；
+  每个动态 batch 执行 validate/optimizer/materialize/commit，跳过 audit tensor hash chain 和
+  selected-native 双执行；旧 audit payload/hash/default behavior 条件兼容；
+- MNISTFC、ResNet2B、OVAL21 各三组交替 fresh-process clause-0 audit/production 对照，semantic
+  parity 全过，median internal speedup=`1.3663×/2.4723×/1.4511×`；
+- full production median=`14.834/60.754/11.964 s`，三类 query 仍 unknown；竞品历史单次只作
+  diagnostic，不形成 speedup claim；
+- fresh replay、focused `19 passed`、全量 `800 passed, 37 skipped`、Black/Mypy/Pylint 与 diff
+  gate 通过；evidence hash=
+  `7b650dce529d47c54eeadb168b2311e83a4346b47ffc341d5293b6468c6ac08b`；
+- 以 production runtime/internal CPU overhead `VALIDATED-REDUCED` 关闭。下一门禁为 parametric
+  dynamic-batch PlanTemplate/PlanInstance 与 compile cache；GPU、complete property、公平
+  competitor 和 ASPLOS-ready 仍 pending。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_PRODUCTION_PREPARED_VERIFIER_V1_CHANGELOG_2026_08_04.md`

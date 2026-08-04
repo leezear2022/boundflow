@@ -87,6 +87,7 @@ class CompleteVerifierClauseTrace:
     verdict_trace_hash: str
     status: CompleteQueryStatus
     search_counterexample_found: bool
+    queue_execution_mode: str = "audit_validation"
 
     def validate(self) -> None:
         if (
@@ -96,6 +97,8 @@ class CompleteVerifierClauseTrace:
             or not _is_sha256(self.queue_trace_hash)
             or not _is_sha256(self.verdict_trace_hash)
             or self.status not in {"verified", "unsafe", "unknown"}
+            or self.queue_execution_mode
+            not in {"audit_validation", "production_prepared"}
             or not torch.isfinite(torch.tensor(self.threshold)).item()
             or self.search_counterexample_found != (self.status == "unsafe")
         ):
@@ -103,7 +106,7 @@ class CompleteVerifierClauseTrace:
 
     def to_dict(self) -> dict[str, object]:
         self.validate()
-        return {
+        payload: dict[str, object] = {
             "clause_index": self.clause_index,
             "objective_hash": self.objective_hash,
             "threshold": self.threshold,
@@ -113,6 +116,9 @@ class CompleteVerifierClauseTrace:
             "status": self.status,
             "search_counterexample_found": self.search_counterexample_found,
         }
+        if self.queue_execution_mode != "audit_validation":
+            payload["queue_execution_mode"] = self.queue_execution_mode
+        return payload
 
 
 @dataclass(frozen=True)
@@ -179,6 +185,7 @@ class CompleteVerifierQueryTrace:
     elapsed_ns: int
     performance_claimed: bool = False
     schema_version: str = COMPLETE_VERIFIER_QUERY_SCHEMA_VERSION
+    execution_mode: str = "audit_validation"
 
     def validate(self) -> None:  # pylint: disable=too-many-statements
         self.query_policy.validate()
@@ -216,6 +223,11 @@ class CompleteVerifierQueryTrace:
             or self.elapsed_ns < 0
             or (self.query_policy.timeout_ns is None and self.elapsed_ns != 0)
             or self.performance_claimed is not False
+            or self.execution_mode not in {"audit_validation", "production_prepared"}
+            or any(
+                item.queue_execution_mode != self.execution_mode
+                for item in self.completed_clauses
+            )
         ):
             raise ValueError(
                 "complete verifier query trace header/accounting is invalid"
@@ -267,7 +279,7 @@ class CompleteVerifierQueryTrace:
 
     def to_dict(self) -> dict[str, object]:
         self.validate()
-        return {
+        payload: dict[str, object] = {
             "schema_version": self.schema_version,
             "compiler_version": COMPLETE_VERIFIER_QUERY_COMPILER_VERSION,
             "query_id": self.query_id,
@@ -290,6 +302,9 @@ class CompleteVerifierQueryTrace:
             "elapsed_ns": self.elapsed_ns,
             "deadline_is_cooperative": self.query_policy.timeout_ns is not None,
         }
+        if self.execution_mode != "audit_validation":
+            payload["execution_mode"] = self.execution_mode
+        return payload
 
     def stable_hash(self) -> str:
         self.validate()

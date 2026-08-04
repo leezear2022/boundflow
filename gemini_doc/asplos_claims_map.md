@@ -954,3 +954,22 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - 工件：`artifacts/typed-multipass-refinement/vnncomp21-resnet2b-prop0-hard3-cpu-v1/`；evidence
   hash=`38992cace70214ffcbd670f03dcfca182e0925bee31eb4df885dab4dab03494d`。typed mechanism
   保留；停止静态 influence 的同总 cap 拆 pass 路线。
+
+### NRIR-27：Production Prepared Verifier v1
+
+- `C1/C2-M-NRIR27` production execution ownership：每个 dynamic node batch 编译为一等 verifier
+  Plan、四任务 TaskModule 与 sequential Schedule；runtime action trace 与 node/split/parent、optimizer
+  IR、input/intermediate/objective/policy identity 逐项绑定；
+- `C3-G-NRIR27` parity/compatibility gate：production 明确
+  `audit_hash_chain_constructed=false`、`selected_native_reexecution=false`；旧 audit 默认
+  query/hash 条件兼容，production/audit clause lower/upper、status、logical queue 与 selected state
+  exact/allclose，identity/tamper/action order fail closed；
+- `C1/C3-E-NRIR27` repeated internal CPU result：三组交替 fresh-process clause-0
+  audit→production median speedup 为 MNISTFC `1.3663×`、ResNet2B `2.4723×`、OVAL21
+  `1.4511×`；该 claim 只比较 BoundFlow 同算法 execution mode；
+- `C3-L-NRIR27` hard limitation：full production median=`14.834/60.754/11.964 s` 且三类
+  query 全部 unknown；竞品仅历史单次、完整性不同，`performance_claimed=false`。无 GPU、complete
+  property、公平 competitor 或 ASPLOS-ready claim；
+- 工件：`artifacts/production-prepared-verifier/vnncomp21-three-topology-cpu-v1/`；evidence
+  hash=`7b650dce529d47c54eeadb168b2311e83a4346b47ffc341d5293b6468c6ac08b`。本阶段
+  `VALIDATED-REDUCED`；phase evidence 将下一门禁冻结为 parametric dynamic-batch compiler/cache。

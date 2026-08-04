@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`78ffa6b`（NRIR-25 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/typed-multipass-refinement-v1`
+> 当前 integration base：`6c0ae1c`（NRIR-26 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/production-prepared-verifier-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-04 NRIR-19 后续：native selected-CROWN intermediate refinement 已成为一等
@@ -17,7 +17,10 @@
 > `7/15/31 nodes × depth 2/3/4` convergence，三条 hard clause 持续改善但仍无 closure。
 > NRIR-25 已进一步完成 same-planned-cap dynamic ancestral budget：三条 hard clause 均有小幅
 > 正向 tightness，但仍无 closure。NRIR-26 typed split-two-pass 在同总 cap 下三条 worst lower
-> delta 全为 `0.0`，按预注册门禁 NO-GO。顶层
+> delta 全为 `0.0`，按预注册门禁 NO-GO。NRIR-27 已把 audit verifier 转为显式 production
+> prepared queue，并在三真实拓扑相同算法 clause-0 上获得 `1.3663×/2.4723×/1.4511×`
+> repeated CPU internal speedup；full query 仍全部 unknown，下一瓶颈为逐 dynamic-batch compile。
+> 顶层
 > ASPLOS-ready 与 performance No-Go 不变。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
 > 2026-07-28 进度：IR-1 Bound IR、IR-2 Plan IR、IR-3 Task/Schedule IR 的最小
@@ -816,3 +819,22 @@ no-unseen termination 编译为一等 Plan/Task/Schedule/decision trace；旧路
 artifact evidence hash=`38992cace70214ffcbd670f03dcfca182e0925bee31eb4df885dab4dab03494d`。
 不声明 tightness、complete property、performance、CUDA、multi-workload、competitor 或
 ASPLOS-ready；停止 node-initial static influence 的同总 cap 拆 pass。
+
+## 34. Production Prepared Verifier v1 判定
+
+NRIR-27 新增 production verifier Plan/Task/Schedule 与 complete-query 路径。每个 dynamic batch
+显式执行 validate、optimizer、materialize、commit 四类 action；production 不构造 audit tensor
+hash chain，也不再次运行 selected-native oracle。旧 audit query/hash 与默认行为保持兼容。
+
+三种真实拓扑的 clause-0 相同算法 fresh-process median audit→production 为：MNISTFC
+`4.510→3.301 s`（`1.3663×`）、ResNet2B `22.509→9.104 s`（`2.4723×`）、OVAL21
+`5.192→3.578 s`（`1.4511×`）；每个 workload 三组交替次序，semantic parity 全过。full
+production median 为 `14.834/60.754/11.964 s`，状态仍全部 unknown；ResNet 三次完成 `9/9`
+clauses，只说明 deadline/accounting 改善，不形成 property closure。
+
+artifact evidence hash=
+`7b650dce529d47c54eeadb168b2311e83a4346b47ffc341d5293b6468c6ac08b`。结论为 production
+runtime + internal CPU overhead `VALIDATED-REDUCED`；竞品参考仅是不同完整性协议下的历史单次
+诊断，不得计算 speedup。GPU、公平 complete competitor、verified/unsafe closure 与 ASPLOS-ready
+仍未成立。phase evidence 显示 full-query execution 的约 `59%–65%` 尚在四类 action 之外；下一
+工程门禁为 parametric dynamic-batch `PlanTemplate/PlanInstance` 与 compile-cache ownership。

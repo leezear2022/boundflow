@@ -82,6 +82,32 @@ def _plan() -> MultiWorkloadPlanIR:
     )
 
 
+def _production_plan() -> MultiWorkloadPlanIR:
+    baseline = _plan()
+    production = VerifierExecutionPolicyIR(
+        backend=VerifierBackendKind.BOUNDFLOW_PRODUCTION,
+        implementation_id="boundflow-production-complete-query-v1",
+        implementation_revision=_sha("f"),
+        device="cpu",
+        torch_threads=8,
+        timeout_seconds=60,
+        alpha_steps=5,
+        beta_steps=5,
+        search_steps=4,
+        max_nodes=7,
+        attack_policy="native_projected_gradient",
+        complete_verifier="production_prepared_bounded_relu_bab",
+    )
+    return replace(
+        baseline,
+        plan_id="vnncomp21-three-topology-production-cpu-v1",
+        policies=(baseline.policies[0], production, baseline.policies[1]),
+        claim_boundary=(
+            "cpu_audit_production_repeated_diagnostic_no_competitor_speedup"
+        ),
+    )
+
+
 def test_multiworkload_plan_compiles_complete_task_and_schedule_ir() -> None:
     plan = _plan()
     task_ir = compile_multiworkload_task_ir(plan)
@@ -119,6 +145,51 @@ def test_multiworkload_ir_rejects_source_policy_and_schedule_tamper() -> None:
         replace(
             schedule, fresh_process_task_ids=schedule.fresh_process_task_ids[:-1]
         ).validate_against(task_ir)
+
+
+def test_multiworkload_production_plan_adds_typed_execution_path() -> None:
+    plan = _production_plan()
+    task_ir = compile_multiworkload_task_ir(plan)
+    schedule = compile_multiworkload_schedule_ir(plan, task_ir)
+
+    assert len(task_ir.tasks) == 24
+    assert tuple(task.kind for task in task_ir.tasks[:8]) == (
+        MultiWorkloadTaskKind.ACQUIRE_SOURCES,
+        MultiWorkloadTaskKind.PARSE_QUERY,
+        MultiWorkloadTaskKind.IMPORT_ONNX,
+        MultiWorkloadTaskKind.COMPILE_NATIVE,
+        MultiWorkloadTaskKind.EXECUTE_NATIVE,
+        MultiWorkloadTaskKind.EXECUTE_PRODUCTION,
+        MultiWorkloadTaskKind.EXECUTE_COMPETITOR,
+        MultiWorkloadTaskKind.EMIT_RESULT,
+    )
+    assert len(schedule.fresh_process_task_ids) == 9
+    emit = task_ir.tasks[7]
+    assert emit.dependency_task_ids == (
+        "mnistfc:000:execute-native",
+        "mnistfc:000:execute-production",
+        "mnistfc:000:execute-abcrown",
+    )
+    schedule.validate_against(task_ir)
+
+    with pytest.raises(ValueError, match="BoundFlow execution policy differs"):
+        replace(plan.policies[1], complete_verifier="bounded_relu_bab").validate()
+    with pytest.raises(ValueError, match="claim boundary differs"):
+        replace(plan, claim_boundary="cpu_diagnostic_no_speedup").validate()
+
+    internal = replace(
+        plan,
+        policies=plan.policies[:2],
+        claim_boundary="cpu_audit_production_repeated_internal_speedup",
+    )
+    internal_tasks = compile_multiworkload_task_ir(internal)
+    internal_schedule = compile_multiworkload_schedule_ir(internal, internal_tasks)
+    assert len(internal_tasks.tasks) == 21
+    assert len(internal_schedule.fresh_process_task_ids) == 6
+    assert internal_tasks.tasks[6].dependency_task_ids == (
+        "mnistfc:000:execute-native",
+        "mnistfc:000:execute-production",
+    )
 
 
 def test_multiworkload_task_ir_rejects_dependency_reordering() -> None:

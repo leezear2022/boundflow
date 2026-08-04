@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev003285
-last_va: ev003286
+last_ch: ev003403
+last_va: ev003405
 blk:
-next: finalize-nrir26-commit-push-pr
-updated: 2026-08-04T10:59:27Z
+next: commit-push-pr-nrir27-then-freeze-nrir28-parametric-dynamic-batch-compiler
+updated: 2026-08-04T11:52:00Z
