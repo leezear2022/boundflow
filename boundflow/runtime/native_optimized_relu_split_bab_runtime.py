@@ -7,7 +7,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import hashlib
 import heapq
 import json
@@ -21,7 +21,11 @@ from ..frontends.plain_crown_bound_ir import (
     tensor_content_hash,
 )
 from ..ir.bound import IntermediateBoundSource
-from ..ir.refinement import NativeIntermediateRefinementPolicyIR
+from ..ir.refinement import (
+    NativeIntermediateRefinementBudgetDecisionIR,
+    NativeIntermediateRefinementBudgetPolicyIR,
+    NativeIntermediateRefinementPolicyIR,
+)
 from ..ir.schedule import LaunchAction
 from ..ir.task import BFTaskModule
 from .crown_ibp import _forward_ibp_trace_mlp
@@ -150,6 +154,8 @@ class NativePerChildRefinementTrace:
     external_constraint_seed_constraints_hash: Optional[str] = None
     external_semantics_owner: Optional[str] = None
     external_seed_consumption: Optional[str] = None
+    budget_decision: Optional[NativeIntermediateRefinementBudgetDecisionIR] = None
+    budget_policy: Optional[NativeIntermediateRefinementBudgetPolicyIR] = None
     parent_refinement_consumed_as_exact: bool = False
     performance_claimed: bool = False
     schema_version: str = NATIVE_PER_CHILD_REFINEMENT_TRACE_SCHEMA_VERSION
@@ -168,6 +174,17 @@ class NativePerChildRefinementTrace:
             self.external_seed_consumption,
         )
         external_present = self.external_constraint_seed_hash is not None
+        budget_present = self.budget_decision is not None
+        if budget_present != (self.budget_policy is not None):
+            raise ValueError("native per-child refinement budget presence differs")
+        if self.budget_decision is not None and self.budget_policy is not None:
+            self.budget_decision.validate(policy=self.budget_policy)
+            if (
+                self.budget_decision.node_id != self.node_id
+                or self.budget_decision.node_split_state_hash
+                != self.node_split_state_hash
+            ):
+                raise ValueError("native per-child refinement budget node differs")
         if (
             self.schema_version != NATIVE_PER_CHILD_REFINEMENT_TRACE_SCHEMA_VERSION
             or not self.node_id
@@ -248,6 +265,13 @@ class NativePerChildRefinementTrace:
             )
             payload["external_semantics_owner"] = self.external_semantics_owner
             payload["external_seed_consumption"] = self.external_seed_consumption
+        if self.budget_decision is not None and self.budget_policy is not None:
+            payload["budget_decision"] = self.budget_decision.to_dict(
+                policy=self.budget_policy
+            )
+            payload["budget_decision_hash"] = self.budget_decision.stable_hash(
+                policy=self.budget_policy
+            )
         return payload
 
     def stable_hash(self) -> str:
@@ -488,6 +512,9 @@ class NativeOptimizedReluSplitBabTrace:
     property_status: str = "not_claimed"
     schema_version: str = NATIVE_OPTIMIZED_RELU_SPLIT_BAB_TRACE_SCHEMA_VERSION
     per_child_refinement_policy: Optional[NativeIntermediateRefinementPolicyIR] = None
+    per_child_refinement_budget_policy: Optional[
+        NativeIntermediateRefinementBudgetPolicyIR
+    ] = None
     per_child_refinements: tuple[NativePerChildRefinementTrace, ...] = ()
     per_child_refinement_strategy: PerChildRefinementStrategy = (
         "independent_exact_split_v1"
@@ -548,6 +575,7 @@ class NativeOptimizedReluSplitBabTrace:
         if self.per_child_refinement_policy is None:
             if (
                 self.per_child_refinement_strategy != "independent_exact_split_v1"
+                or self.per_child_refinement_budget_policy is not None
                 or self.per_child_refinements
                 or any(
                     item.intermediate_refinement_trace_hash is not None
@@ -557,6 +585,19 @@ class NativeOptimizedReluSplitBabTrace:
                 raise ValueError("native optimized BaB refinements lack a queue policy")
         else:
             self.per_child_refinement_policy.validate()
+            if self.per_child_refinement_budget_policy is not None:
+                self.per_child_refinement_budget_policy.validate()
+                if (
+                    self.per_child_refinement_strategy
+                    != "external_seeded_ancestral_carry_v1"
+                    or self.per_child_refinement_policy.max_neurons_per_relu
+                    != self.per_child_refinement_budget_policy.base_max_neurons_per_relu
+                    or self.per_child_refinement_policy.backward_chunk_size
+                    > self.per_child_refinement_budget_policy.low_max_neurons_per_relu
+                ):
+                    raise ValueError(
+                        "native optimized BaB refinement budget policy differs"
+                    )
             if (
                 self.per_child_refinement_policy.candidate_policy_id
                 != "objective_influence_width_per_relu_v1"
@@ -575,6 +616,12 @@ class NativeOptimizedReluSplitBabTrace:
                 self.evaluations, self.per_child_refinements
             ):
                 refinement.validate()
+                if (refinement.budget_decision is None) != (
+                    self.per_child_refinement_budget_policy is None
+                ) or refinement.budget_policy != self.per_child_refinement_budget_policy:
+                    raise ValueError(
+                        "native optimized BaB refinement budget coverage differs"
+                    )
                 parent = (
                     None
                     if evaluation.node.parent_node_id is None
@@ -631,6 +678,58 @@ class NativeOptimizedReluSplitBabTrace:
                     != parent_refinement.refinement_semantic_trace_hash
                 ):
                     raise ValueError("ancestral refinement parent lineage differs")
+            if self.per_child_refinement_budget_policy is not None:
+                groups: dict[
+                    str, list[NativeIntermediateRefinementBudgetDecisionIR]
+                ] = {}
+                for refinement in self.per_child_refinements:
+                    budget_decision = refinement.budget_decision
+                    if budget_decision is None:
+                        raise ValueError(
+                            "native optimized BaB refinement budget decision is absent"
+                        )
+                    groups.setdefault(budget_decision.group_id, []).append(
+                        budget_decision
+                    )
+                for decisions in groups.values():
+                    first = decisions[0]
+                    group_semantics = {
+                        "group_id": first.group_id,
+                        "budget_policy_hash": first.budget_policy_hash,
+                        "base_cap_total": first.group_base_cap_total,
+                        "assigned_cap_total": first.group_assigned_cap_total,
+                        "nodes": [
+                            {
+                                "node_id": item.node_id,
+                                "node_split_state_hash": (item.node_split_state_hash),
+                                "node_depth": item.node_depth,
+                                "parent_node_id": item.parent_node_id,
+                                "parent_lower": item.parent_lower,
+                                "assigned_max_neurons_per_relu": (
+                                    item.assigned_max_neurons_per_relu
+                                ),
+                                "allocation_rank": item.allocation_rank,
+                            }
+                            for item in decisions
+                        ],
+                    }
+                    if (
+                        len(decisions) != first.group_size
+                        or _canonical_hash(group_semantics) != first.group_semantic_hash
+                        or any(
+                            item.group_semantic_hash != first.group_semantic_hash
+                            or item.group_size != first.group_size
+                            or item.group_base_cap_total != first.group_base_cap_total
+                            or item.group_assigned_cap_total
+                            != first.group_assigned_cap_total
+                            for item in decisions
+                        )
+                        or sum(item.assigned_max_neurons_per_relu for item in decisions)
+                        != first.group_assigned_cap_total
+                    ):
+                        raise ValueError(
+                            "native optimized BaB refinement budget group differs"
+                        )
 
         stack_by_id: dict[str, NativeOptimizedBabStackTrace] = {}
         for stack in self.native_stacks:
@@ -734,6 +833,10 @@ class NativeOptimizedReluSplitBabTrace:
             payload["per_child_refinement_policy"] = (
                 self.per_child_refinement_policy.to_dict()
             )
+            if self.per_child_refinement_budget_policy is not None:
+                payload["per_child_refinement_budget_policy"] = (
+                    self.per_child_refinement_budget_policy.to_dict()
+                )
             payload["per_child_refinements"] = [
                 item.to_dict() for item in self.per_child_refinements
             ]
@@ -861,12 +964,20 @@ class NativeOptimizedReluSplitBabExecution:
                 )
                 refinement.trace.validate(program=program)
                 record = records[node_id]
+                expected_refinement_policy = self.trace.per_child_refinement_policy
+                if record.budget_decision is not None:
+                    expected_refinement_policy = replace(
+                        expected_refinement_policy,
+                        max_neurons_per_relu=(
+                            record.budget_decision.assigned_max_neurons_per_relu
+                        ),
+                    )
                 hashes = program.hashes()
                 external_seed_ir = program.plan.external_constraint_seed
                 if program.external_constraint_seed is not None:
                     program.external_constraint_seed.validate_payload()
                 if (
-                    program.plan.policy != self.trace.per_child_refinement_policy
+                    program.plan.policy != expected_refinement_policy
                     or program.plan.objective_hash != self.trace.objective_hash
                     or program.plan.split_state_hash != record.node_split_state_hash
                     or hashes["refinement_plan_hash"] != record.refinement_plan_hash
@@ -1108,6 +1219,110 @@ def _refinement_semantic_trace_hash(
     return intermediate_refinement_semantic_trace_hash(execution)
 
 
+def _refinement_budget_decisions(
+    nodes: tuple[_RuntimeNode, ...],
+    *,
+    base_policy: NativeIntermediateRefinementPolicyIR,
+    budget_policy: Optional[NativeIntermediateRefinementBudgetPolicyIR],
+    parent_by_id: Mapping[str, _OptimizedEvaluatedNode],
+    group_id: str,
+) -> tuple[Optional[NativeIntermediateRefinementBudgetDecisionIR], ...]:
+    if budget_policy is None:
+        return tuple(None for _node in nodes)
+    budget_policy.validate()
+    if (
+        not nodes
+        or base_policy.max_neurons_per_relu != budget_policy.base_max_neurons_per_relu
+        or base_policy.backward_chunk_size > budget_policy.low_max_neurons_per_relu
+    ):
+        raise ValueError("native refinement budget base policy differs")
+    parent_lowers: dict[str, float] = {}
+    for node in nodes:
+        parent_id = node.node.parent_node_id
+        if parent_id is None:
+            if len(nodes) != 1 or node.node.depth != 0:
+                raise ValueError("native refinement budget root group differs")
+            continue
+        parent = parent_by_id.get(parent_id)
+        if parent is None:
+            raise ValueError("native refinement budget parent is absent")
+        parent_lowers[parent_id] = parent.evaluation.lower
+    assignments: list[tuple[int, str]] = []
+    if not parent_lowers:
+        assignments = [(budget_policy.base_max_neurons_per_relu, "root")]
+    elif len(parent_lowers) == 2:
+        ordered = sorted(parent_lowers.items(), key=lambda item: (item[1], item[0]))
+        separated = (
+            abs(ordered[0][1] - ordered[1][1])
+            > budget_policy.parent_lower_tie_tolerance
+        )
+        for node in nodes:
+            parent_id = str(node.node.parent_node_id)
+            if not separated:
+                assignments.append((budget_policy.base_max_neurons_per_relu, "base"))
+            elif parent_id == ordered[0][0]:
+                assignments.append(
+                    (budget_policy.high_max_neurons_per_relu, "high_risk")
+                )
+            else:
+                assignments.append((budget_policy.low_max_neurons_per_relu, "low_risk"))
+    elif len(parent_lowers) == 1:
+        assignments = [
+            (budget_policy.base_max_neurons_per_relu, "base") for _node in nodes
+        ]
+    else:
+        raise ValueError("native refinement budget group has too many parents")
+    base_total = len(nodes) * budget_policy.base_max_neurons_per_relu
+    assigned_total = sum(value for value, _rank in assignments)
+    if assigned_total != base_total:
+        raise ValueError("native refinement budget group is not conserved")
+    group_semantics = {
+        "group_id": group_id,
+        "budget_policy_hash": budget_policy.stable_hash(),
+        "base_cap_total": base_total,
+        "assigned_cap_total": assigned_total,
+        "nodes": [
+            {
+                "node_id": node.node.node_id,
+                "node_split_state_hash": node.node.split_state_hash,
+                "node_depth": node.node.depth,
+                "parent_node_id": node.node.parent_node_id,
+                "parent_lower": (
+                    None
+                    if node.node.parent_node_id is None
+                    else parent_lowers[node.node.parent_node_id]
+                ),
+                "assigned_max_neurons_per_relu": assignment[0],
+                "allocation_rank": assignment[1],
+            }
+            for node, assignment in zip(nodes, assignments)
+        ],
+    }
+    group_hash = _canonical_hash(group_semantics)
+    decisions: list[Optional[NativeIntermediateRefinementBudgetDecisionIR]] = []
+    for index, (node, assignment) in enumerate(zip(nodes, assignments)):
+        parent_id = node.node.parent_node_id
+        decision = NativeIntermediateRefinementBudgetDecisionIR(
+            decision_id=f"{group_id}:budget:{index:04d}",
+            budget_policy_hash=budget_policy.stable_hash(),
+            group_id=group_id,
+            group_semantic_hash=group_hash,
+            group_size=len(nodes),
+            group_base_cap_total=base_total,
+            group_assigned_cap_total=assigned_total,
+            node_id=node.node.node_id,
+            node_split_state_hash=node.node.split_state_hash,
+            node_depth=node.node.depth,
+            assigned_max_neurons_per_relu=assignment[0],
+            allocation_rank=assignment[1],
+            parent_node_id=parent_id,
+            parent_lower=(None if parent_id is None else parent_lowers[parent_id]),
+        )
+        decision.validate(policy=budget_policy)
+        decisions.append(decision)
+    return tuple(decisions)
+
+
 def _execute_per_child_refinements(
     legacy_task_module: BFTaskModule,
     root_input_spec: InputSpec,
@@ -1115,6 +1330,8 @@ def _execute_per_child_refinements(
     objective: torch.Tensor,
     nodes: tuple[_RuntimeNode, ...],
     policy: NativeIntermediateRefinementPolicyIR,
+    budget_policy: Optional[NativeIntermediateRefinementBudgetPolicyIR],
+    budget_group_id: str,
     parent_by_id: Mapping[str, _OptimizedEvaluatedNode],
     strategy: PerChildRefinementStrategy,
     external_constraint_seed: Optional[NativeExternalIntermediateConstraintSeed],
@@ -1126,7 +1343,14 @@ def _execute_per_child_refinements(
     single_input = _repeat_box_input_spec(root_input_spec, count=1)
     executions: list[tuple[str, NativeIntermediateRefinementExecution]] = []
     records: list[NativePerChildRefinementTrace] = []
-    for node in nodes:
+    budget_decisions = _refinement_budget_decisions(
+        nodes,
+        base_policy=policy,
+        budget_policy=budget_policy,
+        parent_by_id=parent_by_id,
+        group_id=budget_group_id,
+    )
+    for node, budget_decision in zip(nodes, budget_decisions):
         split = _node_split_mapping(node)
         parent_id = node.node.parent_node_id
         source_execution: Optional[NativeIntermediateRefinementExecution] = None
@@ -1150,7 +1374,16 @@ def _execute_per_child_refinements(
         program = compile_native_intermediate_refinement_program(
             legacy_task_module,
             single_input,
-            policy=policy,
+            policy=(
+                policy
+                if budget_decision is None
+                else replace(
+                    policy,
+                    max_neurons_per_relu=(
+                        budget_decision.assigned_max_neurons_per_relu
+                    ),
+                )
+            ),
             plan_id=f"per-child-refinement:{node.node.split_state_hash}",
             relu_split_state=split,
             linear_spec_C=objective,
@@ -1206,6 +1439,8 @@ def _execute_per_child_refinements(
                 if program.plan.external_constraint_seed is None
                 else program.plan.external_constraint_seed.consumption
             ),
+            budget_decision=budget_decision,
+            budget_policy=budget_policy,
         )
         record.validate()
         executions.append((node.node.node_id, execution))
@@ -1432,6 +1667,9 @@ def _evaluate_optimized_node_batch(
     objective_branch_policy: Optional[NativeObjectiveBranchPolicy],
     refine_external_constraints: bool,
     per_child_refinement_policy: Optional[NativeIntermediateRefinementPolicyIR],
+    per_child_refinement_budget_policy: Optional[
+        NativeIntermediateRefinementBudgetPolicyIR
+    ],
     per_child_refinement_strategy: PerChildRefinementStrategy,
     external_constraint_seed: Optional[NativeExternalIntermediateConstraintSeed],
 ) -> tuple[
@@ -1468,6 +1706,8 @@ def _evaluate_optimized_node_batch(
             objective=objective,
             nodes=nodes,
             policy=per_child_refinement_policy,
+            budget_policy=per_child_refinement_budget_policy,
+            budget_group_id=batch_id,
             parent_by_id=parent_by_id,
             strategy=per_child_refinement_strategy,
             external_constraint_seed=external_constraint_seed,
@@ -1681,6 +1921,9 @@ def execute_native_optimized_relu_split_bab(
     objective_branch_policy: Optional[NativeObjectiveBranchPolicy] = None,
     refine_external_constraints: bool = False,
     per_child_refinement_policy: Optional[NativeIntermediateRefinementPolicyIR] = None,
+    per_child_refinement_budget_policy: Optional[
+        NativeIntermediateRefinementBudgetPolicyIR
+    ] = None,
     per_child_refinement_strategy: PerChildRefinementStrategy = (
         "independent_exact_split_v1"
     ),
@@ -1717,12 +1960,29 @@ def execute_native_optimized_relu_split_bab(
             raise ValueError("optimized queue intermediate semantics/provenance differ")
         if external_constraint_seed is not None:
             raise ValueError("optimized queue external seed requires refinement")
+        if per_child_refinement_budget_policy is not None:
+            raise ValueError("optimized queue refinement budget requires refinement")
     else:
         if not isinstance(
             per_child_refinement_policy, NativeIntermediateRefinementPolicyIR
         ):
             raise TypeError("optimized queue per-child refinement policy is invalid")
         per_child_refinement_policy.validate()
+        if per_child_refinement_budget_policy is not None:
+            if not isinstance(
+                per_child_refinement_budget_policy,
+                NativeIntermediateRefinementBudgetPolicyIR,
+            ):
+                raise TypeError("optimized queue refinement budget policy is invalid")
+            per_child_refinement_budget_policy.validate()
+            if (
+                per_child_refinement_strategy != "external_seeded_ancestral_carry_v1"
+                or per_child_refinement_policy.max_neurons_per_relu
+                != per_child_refinement_budget_policy.base_max_neurons_per_relu
+                or per_child_refinement_policy.backward_chunk_size
+                > per_child_refinement_budget_policy.low_max_neurons_per_relu
+            ):
+                raise ValueError("optimized queue refinement budget policy differs")
         if (
             per_child_refinement_policy.candidate_policy_id
             != "objective_influence_width_per_relu_v1"
@@ -1818,6 +2078,7 @@ def execute_native_optimized_relu_split_bab(
                 objective_branch_policy=objective_branch_policy,
                 refine_external_constraints=refine_external_constraints,
                 per_child_refinement_policy=per_child_refinement_policy,
+                per_child_refinement_budget_policy=(per_child_refinement_budget_policy),
                 per_child_refinement_strategy=per_child_refinement_strategy,
                 external_constraint_seed=external_constraint_seed,
             )
@@ -1949,6 +2210,7 @@ def execute_native_optimized_relu_split_bab(
         native_stack_count=len(native_stacks),
         max_queue_size=max_queue_size,
         per_child_refinement_policy=per_child_refinement_policy,
+        per_child_refinement_budget_policy=per_child_refinement_budget_policy,
         per_child_refinements=tuple(per_child_refinement_records),
         per_child_refinement_strategy=per_child_refinement_strategy,
     )
@@ -1985,6 +2247,9 @@ def run_native_optimized_relu_split_bab(
     objective_branch_policy: Optional[NativeObjectiveBranchPolicy] = None,
     refine_external_constraints: bool = False,
     per_child_refinement_policy: Optional[NativeIntermediateRefinementPolicyIR] = None,
+    per_child_refinement_budget_policy: Optional[
+        NativeIntermediateRefinementBudgetPolicyIR
+    ] = None,
     per_child_refinement_strategy: PerChildRefinementStrategy = (
         "independent_exact_split_v1"
     ),
@@ -2004,6 +2269,7 @@ def run_native_optimized_relu_split_bab(
         objective_branch_policy=objective_branch_policy,
         refine_external_constraints=refine_external_constraints,
         per_child_refinement_policy=per_child_refinement_policy,
+        per_child_refinement_budget_policy=per_child_refinement_budget_policy,
         per_child_refinement_strategy=per_child_refinement_strategy,
         external_constraint_seed=external_constraint_seed,
     ).trace

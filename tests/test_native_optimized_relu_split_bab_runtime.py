@@ -10,7 +10,10 @@ import pytest
 import torch
 
 from boundflow.ir.bound import IntermediateBoundSource
-from boundflow.ir.refinement import NativeIntermediateRefinementPolicyIR
+from boundflow.ir.refinement import (
+    NativeIntermediateRefinementBudgetPolicyIR,
+    NativeIntermediateRefinementPolicyIR,
+)
 from boundflow.ir.task import BFTaskModule, BoundTask, TaskKind, TaskOp
 from boundflow.runtime.crown_ibp import _forward_ibp_trace_mlp
 from boundflow.runtime.native_alpha_beta_optimization_state import (
@@ -88,6 +91,23 @@ def _per_child_policy() -> NativeIntermediateRefinementPolicyIR:
     )
 
 
+def _dynamic_per_child_policy() -> NativeIntermediateRefinementPolicyIR:
+    return NativeIntermediateRefinementPolicyIR(
+        passes=1,
+        max_neurons_per_relu=4,
+        backward_chunk_size=2,
+        candidate_policy_id="objective_influence_width_per_relu_v1",
+    )
+
+
+def _dynamic_budget_policy() -> NativeIntermediateRefinementBudgetPolicyIR:
+    return NativeIntermediateRefinementBudgetPolicyIR(
+        base_max_neurons_per_relu=4,
+        high_max_neurons_per_relu=6,
+        low_max_neurons_per_relu=2,
+    )
+
+
 def _external_constraint_seed() -> NativeExternalIntermediateConstraintSeed:
     module = _module()
     spec = _spec()
@@ -147,6 +167,28 @@ def _run_external_seeded(*, batch_size: int):
         optimizer_policy=_policy(),
         intermediate_bound_source=IntermediateBoundSource.NATIVE_REFINED,
         per_child_refinement_policy=_per_child_policy(),
+        per_child_refinement_strategy="external_seeded_ancestral_carry_v1",
+        external_constraint_seed=_external_constraint_seed(),
+    )
+
+
+def _run_dynamic_external_seeded():
+    return execute_native_optimized_relu_split_bab(
+        _module(),
+        _spec(),
+        linear_spec_C=torch.tensor([[1.0, -1.0]]),
+        run_id="native-dynamic-refinement-budget-toy",
+        config=NativeReluSplitBabConfig(
+            max_nodes=7,
+            max_depth=2,
+            expansion_batch_size=2,
+            max_eval_batch_size=4,
+            threshold=1e6,
+        ),
+        optimizer_policy=_policy(),
+        intermediate_bound_source=IntermediateBoundSource.NATIVE_REFINED,
+        per_child_refinement_policy=_dynamic_per_child_policy(),
+        per_child_refinement_budget_policy=_dynamic_budget_policy(),
         per_child_refinement_strategy="external_seeded_ancestral_carry_v1",
         external_constraint_seed=_external_constraint_seed(),
     )
@@ -397,6 +439,11 @@ def ancestral_per_child_executions():
 @pytest.fixture(scope="module")
 def external_seeded_per_child_execution():
     return _run_external_seeded(batch_size=4)
+
+
+@pytest.fixture(scope="module")
+def dynamic_external_seeded_execution():
+    return _run_dynamic_external_seeded()
 
 
 def test_per_child_refinement_packed_and_serial_semantics_match(
@@ -722,3 +769,89 @@ def test_external_seeded_queue_admission_and_trace_tamper_fail_closed(
     )
     with pytest.raises(ValueError, match="execution identity differs"):
         replace(execution, trace=changed_trace).validate()
+
+
+def test_dynamic_refinement_budget_is_conserved_and_lowered_into_each_plan(
+    dynamic_external_seeded_execution,
+) -> None:
+    execution = dynamic_external_seeded_execution
+    trace = execution.trace
+    policy = _dynamic_budget_policy()
+    records = trace.per_child_refinements
+    programs = dict(execution.per_child_refinement_executions)
+    decisions = [record.budget_decision for record in records]
+
+    assert trace.per_child_refinement_budget_policy == policy
+    assert trace.to_dict()["per_child_refinement_budget_policy"] == policy.to_dict()
+    assert len(records) == len(trace.evaluations) == 7
+    assert all(decision is not None for decision in decisions)
+    assert (
+        sum(
+            decision.assigned_max_neurons_per_relu
+            for decision in decisions
+            if decision is not None
+        )
+        == 7 * policy.base_max_neurons_per_relu
+    )
+    assert {decision.allocation_rank for decision in decisions if decision} >= {
+        "root",
+        "base",
+        "high_risk",
+        "low_risk",
+    }
+    for evaluation, record in zip(trace.evaluations, records):
+        decision = record.budget_decision
+        assert decision is not None
+        program = programs[evaluation.node.node_id].program
+        assert program.plan.policy.max_neurons_per_relu == (
+            decision.assigned_max_neurons_per_relu
+        )
+        assert record.selected_target_count <= (decision.assigned_max_neurons_per_relu)
+        serialized = record.to_dict()
+        assert serialized["budget_decision_hash"] == decision.stable_hash(policy=policy)
+        assert evaluation.intermediate_refinement_trace_hash == record.stable_hash()
+
+
+def test_dynamic_refinement_budget_admission_and_tamper_fail_closed(
+    dynamic_external_seeded_execution,
+) -> None:
+    policy = _dynamic_budget_policy()
+    with pytest.raises(ValueError, match="budget policy differs"):
+        execute_native_optimized_relu_split_bab(
+            _module(),
+            _spec(),
+            linear_spec_C=torch.tensor([[1.0, -1.0]]),
+            run_id="dynamic-budget-wrong-base",
+            config=NativeReluSplitBabConfig(
+                max_nodes=1,
+                max_depth=0,
+                expansion_batch_size=1,
+                max_eval_batch_size=1,
+            ),
+            optimizer_policy=_policy(),
+            intermediate_bound_source=IntermediateBoundSource.NATIVE_REFINED,
+            per_child_refinement_policy=_per_child_policy(),
+            per_child_refinement_budget_policy=policy,
+            per_child_refinement_strategy="external_seeded_ancestral_carry_v1",
+            external_constraint_seed=_external_constraint_seed(),
+        )
+
+    execution = dynamic_external_seeded_execution
+    records = list(execution.trace.per_child_refinements)
+    changed = records[0].budget_decision
+    assert changed is not None
+    records[0] = replace(
+        records[0],
+        budget_decision=replace(changed, group_semantic_hash="f" * 64),
+    )
+    evaluations = list(execution.trace.evaluations)
+    evaluations[0] = replace(
+        evaluations[0],
+        intermediate_refinement_trace_hash=records[0].stable_hash(),
+    )
+    with pytest.raises(ValueError, match="budget group differs"):
+        replace(
+            execution.trace,
+            evaluations=tuple(evaluations),
+            per_child_refinements=tuple(records),
+        ).validate()

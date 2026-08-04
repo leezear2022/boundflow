@@ -4138,3 +4138,22 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_EXTERNAL_SEEDED_DEPTH_NODE_CONVERGENCE_V1_CHANGELOG_2026_08_04.md`
+
+---
+
+## 2026-08-04：Dynamic Ancestral Refinement Budget v1
+
+- 新增 first-class parent-lower generated-group budget policy/decision，冻结 16/24/8 cap、tie、
+  group/node/split/parent identity 与 exact conservation；assigned cap 进入实际 refinement
+  Plan/Task/Schedule/execution，不是旁路调参日志；
+- fixed16 与 dynamic8_24 在相同 31-node/depth-4、planned cap=`496` 下执行三 hard clauses；dynamic
+  worst lower 分别改善 `+0.0003859997/+0.0002329946/+0.0002717972`；
+- 六分片 artifact 固定 source、budget/decision、逐 node refinement IR、queue/branch/lower，支持 atomic
+  checkpoint、strict resume、aggregate 和 fresh-process semantic replay；
+- fresh replay 6/6、focused `34 passed`、全量 `778 passed, 37 skipped`、Black/Mypy/Pylint
+  `10.00/10` 通过；
+- 以 same-planned-cap dynamic tightness `VALIDATED-REDUCED` 关闭；所有树仍 unknown，不升级
+  complete property/performance/ASPLOS-ready。下一门禁为 typed multi-pass refinement/termination。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_DYNAMIC_ANCESTRAL_REFINEMENT_BUDGET_V1_CHANGELOG_2026_08_04.md`

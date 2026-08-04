@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-04
-> 当前 integration base：`c6a7998`（NRIR-23 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/external-seeded-depth-node-convergence-v1`
+> 当前 integration base：`47ca159`（NRIR-24 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/dynamic-ancestral-refinement-budget-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-04 NRIR-19 后续：native selected-CROWN intermediate refinement 已成为一等
@@ -15,7 +15,8 @@
 > `VALIDATED-REDUCED` 关闭，clauses 0/1 worst leaf 相对 independent 提升
 > `+73.615173/+75.022095`。NRIR-23 随后连接 external typed seed；NRIR-24 已完成
 > `7/15/31 nodes × depth 2/3/4` convergence，三条 hard clause 持续改善但仍无 closure。
-> 下一门禁为 dynamic ancestral refinement budget/multi-pass。顶层
+> NRIR-25 已进一步完成 same-planned-cap dynamic ancestral budget：三条 hard clause 均有小幅
+> 正向 tightness，但仍无 closure。下一门禁为 typed multi-pass refinement/termination。顶层
 > ASPLOS-ready 与 performance No-Go 不变。
 > 2026-07-20 修订：本文保留 PR-13/14 历史证据，但第 4 节下一路线已由 IR-first 复审取代。
 > 2026-07-28 进度：IR-1 Bound IR、IR-2 Plan IR、IR-3 Task/Schedule IR 的最小
@@ -785,3 +786,17 @@ clauses `0/2/4` worst terminal lower 分别从
 `db0401bef0d938773fed04a173e49cae0ad0b4fdc4ffdd49450cc86fae7f0db6`。不升级 complete
 property、GPU/performance、multi-workload、competitor 或 ASPLOS-ready；下一工程动作是冻结
 dynamic ancestral refinement budget/multi-pass 对照，不再以纯 fixed-depth 扩展为主路线。
+
+## 32. Dynamic Ancestral Refinement Budget v1 判定
+
+NRIR-25 把 parent-lower risk allocation 冻结成一等 policy/decision IR，并把 24/8/base16 assigned
+cap 精确 lower 到逐 node refinement Plan，Task/Schedule/execution/queue trace 与 group conservation
+全部 fail closed。旧 fixed16 路径条件兼容。
+
+固定 clauses `0/2/4`、31 nodes/depth 4、单 pass 下，dynamic8_24 相对 fixed16 的 worst lower
+分别改善 `+0.0003859997/+0.0002329946/+0.0002717972`；两 mode 的 planned cap 均为 `496`，
+actual selected targets 均为 `2976`。按预注册门禁为 `VALIDATED-REDUCED`。
+
+artifact evidence hash=`85d9f274c6e17614bcbf318bdbfea18219b03876024be16aea3329ee4d3c56bd`。
+三条 bounded tree 仍 unknown；不声明 complete property、performance、CUDA、multi-workload、
+competitor 或 ASPLOS-ready。下一工程动作是 typed multi-pass refinement/termination 与 pass lineage。

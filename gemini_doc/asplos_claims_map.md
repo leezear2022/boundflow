@@ -916,3 +916,23 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   semantic replay hash=
   `db0401bef0d938773fed04a173e49cae0ad0b4fdc4ffdd49450cc86fae7f0db6`。本阶段
   `VALIDATED-REDUCED`；下一门禁为 dynamic ancestral refinement budget/multi-pass。
+
+### NRIR-25：Dynamic Ancestral Refinement Budget v1
+
+- `C1/C2-M-NRIR25` typed budget ownership：新增 parent-lower generated-group budget policy/decision；
+  policy、group、node/split/depth、parent risk、assigned cap 与 conservation totals stable-hashed；派生
+  cap 精确进入逐 node refinement Plan policy，Task/Schedule/execution/queue trace 交叉绑定；
+- `C3-G-NRIR25` conservation/replay gate：root/single/tie 使用 16，two-parent risk group 使用 24/8，
+  每组与全树 planned cap 精确守恒；六个 fresh-process shards、decision→Plan linkage、aggregate
+  comparison 与 source-to-semantics replay fail closed；
+- `C1/C3-E-NRIR25` same-planned-cap tightness：clauses `0/2/4` 的 fixed16→dynamic8_24 worst lower
+  delta=`+0.0003859997/+0.0002329946/+0.0002717972`，三条均不弱且严格改善；每 mode planned
+  cap=`496`、actual selected=`2976`；
+- `C3-L-NRIR25` hard limitation：dynamic proof deficits 仍为
+  `0.2819737196/0.4016119838/0.4596676826`，三条 bounded tree 均 unknown；单 ResNet/三 clause/
+  CPU/单 pass，无 complete property、CUDA、multi-workload、competitor、performance 或
+  ASPLOS-ready，`performance_claimed=false`；
+- 工件：
+  `artifacts/dynamic-ancestral-refinement-budget/vnncomp21-resnet2b-prop0-hard3-cpu-v1/`；
+  evidence hash=`85d9f274c6e17614bcbf318bdbfea18219b03876024be16aea3329ee4d3c56bd`。
+  本阶段 `VALIDATED-REDUCED`；下一门禁为 typed multi-pass refinement/termination。
