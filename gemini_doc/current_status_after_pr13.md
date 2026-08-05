@@ -1195,3 +1195,19 @@ selected `[2,3]`、两条 `[31,31]` nodes、worst lower 与 final 9/9 unknown �
 unknown，`performance_claimed=false`，公平竞品、GPU、多 workload、property closure 与 ASPLOS-ready
 仍未成立。下一动作不是直接声明“够投”，而是对最终约 31.3 秒 trace 做 residual phase attribution，
 再预注册一个 IR/Plan/Schedule 单变量；不得重开 NRIR-43 CPU batching 或事后降低 cap/nodes/depth。
+
+## 48. 2026-08-05 NRIR-46 Template/Instance 预注册
+
+residual attribution 已把 NRIR45 whole trace 拆为 floor action median=`10.818262 s`、packed slice
+median=`9.932808 s`、packed-plan compile median=`0.146457 s` 与 rank median=`0.024966 s`。一次
+diagnostic repeat0 的 60 child prepared compile/execute=`5.300590/5.659414 s`、per-child total=
+`10.975123 s`、optimizer execute=`1.156098 s`。这些不是 formal claim。
+
+下一 stacked branch 为 `feat/intermediate-refinement-template-instance-v1`。唯一变量是把静态 graph/
+policy/selection recipe/Task/Schedule topology 冻结到 PlanTemplate/ScheduleTemplate，把逐 child split/
+source/objective/bounds/exact target ledger 绑定到 PlanInstance/InstanceSchedule。NRIR46 不做跨节点数值
+batching，不改 cap/nodes/depth/policy/deadline；Phase 0 ceiling、Phase A exact+timing、Phase B whole-query
+按顺序门禁。
+
+PR #56 外部审计批准并合入 main 前不启动实现。当前无 NRIR46 artifact 或性能 claim；即使理想消除
+全部已测 compile，trace 仍约 26 秒，因此公平竞品、10x、property closure 与 ASPLOS-ready 仍为 NO。

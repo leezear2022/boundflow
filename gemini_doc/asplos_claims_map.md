@@ -1333,3 +1333,17 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   `be1ccb4229d8b88970c9f9f5bae9d6ff8156d4e9b53c84a218a2a1dd6005d439` /
   `4ae71919b5c4d6e8d6162df8bb7d14143a705f60a599f8e4bfa30d084c1a01f8`；全量
   `984 passed, 37 skipped`，Pylint `10.00/10`。
+
+### NRIR-46（预注册）：Intermediate Refinement Template/Instance v1
+
+- `C1/C2-M-NRIR46-PENDING`：拟把静态 primal graph/policy/selection recipe/Task/Schedule topology
+  归 `PlanTemplate/ScheduleTemplate`，node-specific split/source/objective/bounds/target ledger 归
+  `PlanInstance/InstanceSchedule`；当前尚未实现；
+- `C3-D-NRIR46`：raw trace floor median=`10.818262 s`、packed slice median=`9.932808 s`；一次
+  diagnostic repeat0 的 60 child prepared compile/execute=`5.300590/5.659414 s`，只用于选路线；
+- `C3-G-NRIR46-PENDING`：Phase 0 先证明 static-shareable ceiling，Phase A 要求 Template
+  compile/lower/full-admit 每 queue=`1`、Instance bind/full replay=`30/30`、exact target ledger 与 queue
+  ratio `<=0.90`；通过后才允许 Phase B；
+- `C3-L-NRIR46`：依赖 PR #56 审计批准/合并；当前无代码、artifact 或性能 claim。即使消除全部
+  5.30 秒 compile，理论 trace 仍约 26 秒，不构成 10x、公平竞品、GPU、多 workload、property closure
+  或 ASPLOS-ready。

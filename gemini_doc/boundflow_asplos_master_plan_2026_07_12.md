@@ -77,6 +77,12 @@
 > ResNet2B property 0 CPU8 `VALIDATED-REDUCED`，final 仍 unknown、ASPLOS-ready=NO；下一步先做
 > residual phase attribution，再冻结新的单变量。
 
+> **2026-08-05 NRIR-46 预注册**：NRIR45 residual attribution 将 trace 拆为 floor median
+> `10.818262 s` 与两条各约 `9.932808 s` packed slice；diagnostic repeat0 中 60 child prepared
+> compile/execute=`5.300590/5.659414 s`。下一单变量是 first-class Plan/Schedule Template 与
+> node-specific Instance 分层，dynamic target ledger 不共享，不改 batching/policy/budget。PR #56
+> 审计/合并前不实现；当前无新 claim，理论上全消 compile 后 trace 仍约 26 秒，ASPLOS-ready=NO。
+
 > **2026-08-04 NRIR-21 修订**：per-child exact-split objective refinement 的 IR/control、lineage
 > 与 replay 已实现，但固定 ResNet clauses 0/1 的最差 depth-2 leaf lower 相对 root-global 分别
 > 退化 `0.847961/0.936646`，故该策略 `VALIDATED-NO-GO`。下一方法门禁是把祖先已证明 refined

@@ -1,5 +1,15 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-05：预注册 NRIR46 Template/Instance compiler IR
+
+- Phase-B raw shards 将约 31.3 秒 trace 拆为 floor median 约 10.82 秒、两条 packed slice 各约
+  9.93 秒，plan compile/rank 仅约 0.146/0.025 秒；
+- diagnostic repeat0 定位 60 child prepared compile/execute 约 5.30/5.66 秒，per-child total 约
+  10.98 秒；以上只用于路线选择，不是 formal claim；
+- 新分支冻结 first-class `PlanTemplate/ScheduleTemplate + PlanInstance/InstanceSchedule`，不共享动态
+  target ledger，不改 policy/budget/batching；
+- PR #56 已在用户豁免外部 review 后合入 main；NRIR46 从最新 main 重定基后进入 Phase 0。
+
 ## 2026-08-05：用户豁免 NRIR45 外部 review
 
 - 用户明确要求后续不再调用其他模型 review，由当前执行方持续自检推进；

@@ -1628,3 +1628,24 @@ NRIR-45 以 fixed ResNet2B property 0 CPU8 internal production admission `VALIDA
 final 仍 9/9 unknown，`performance_claimed=false`，没有公平竞品、GPU、multi-workload、property closure
 或 ASPLOS-ready claim。下一步先做最终约 31.3 秒路径的 residual phase attribution，再冻结 NRIR-46
 单变量；不重开 NRIR-43 CPU scorer batching，也不事后降低 cap/nodes/depth。
+
+## 59. Intermediate Refinement Template/Instance v1 预注册
+
+NRIR-45 raw Phase-B trace 的 residual attribution 已完成：floor action median=`10.818262 s`，两条
+packed slice 六样本 median=`9.932808 s`，packed-plan compile/rank median 仅
+`0.146457/0.024966 s`。一次 diagnostic repeat0 进一步测得 60 child prepared compile/execute=
+`5.300590/5.659414 s`、per-child total=`10.975123 s`、optimizer execute=`1.156098 s`。这些数字只用于
+冻结路线，不是新的 formal performance claim。
+
+NRIR-46 的唯一变量是 first-class compiler IR 静态/动态分层：PlanTemplate/TaskTemplate/
+ScheduleTemplate 拥有 graph、policy、selection recipe 与拓扑；PlanInstance/InstanceSchedule 逐 child
+拥有 split、source lineage、objective、bounds 与 exact target ledger。NRIR-46 不引入跨节点数值
+batching，也不改 refinement/optimizer/branch/queue/policy/budget/deadline。
+
+Phase 0 必须先证明 static-shareable whole-query median 至少 `1.5 s` 且 ceiling 改善超过 pooled MAD；
+否则直接 NO-GO。Phase A 要求每 queue Template full admit=`1`、Instance full replay=`30/30`、全部语义
+exact、clauses 2/3 median ratio 均 `<=0.90`；只有全过才运行 Phase B，其 trace median ratio vs NRIR45
+也须 `<=0.90` 且超过 pooled MAD。PR #56 审计/合并是实现门禁；当前只有预注册，没有新 claim。
+
+即使理想消除已测全部 `5.30 s` compile，约 31.3 秒 trace 仍约 26 秒。因此 NRIR-46 是 compiler
+IR/ownership 的必要增量，不是公平竞品、10x 或 ASPLOS-ready 终点。
