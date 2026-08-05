@@ -15,7 +15,7 @@ stage: s01
 
 ## Changes
 
-- 冻结 stacked base=`a2d8f96`、NRIR45 formal/payload hashes 与 PR #56 外部审计依赖；
+- 冻结 integration base=`main@6cd229a`、NRIR45 formal/payload hashes 与用户 review 豁免边界；
 - 将剩余 trace 拆为 floor、packed slice、plan compile、rank 与 trace 外证据校验；
 - 冻结 `PlanTemplate/ScheduleTemplate + PlanInstance/InstanceSchedule` first-class compiler IR；
 - 明确 dynamic target ledger 不能跨 child 共享，NRIR46 不改变数值 batching、policy 或 budget；
@@ -33,13 +33,13 @@ stage: s01
 
 - 下一单变量是 static/dynamic compiler IR ownership，不重开 NRIR43 CPU scorer batching；
 - Template 只共享静态图/策略/拓扑，Instance 继续拥有 exact split/source/objective/targets；
-- PR #56 未审计关闭前不实现；static-shareable ceiling 不足即 NO-GO；
+- PR #56 已由 executor deterministic gates 自检后合入；static-shareable ceiling 不足即 NO-GO；
 - 即使 NRIR46 消除全部已测 compile，约 31.3 秒也只降至理论约 26 秒，不能声称 10x 或 ASPLOS-ready。
 
 ## Follow-Ups
 
-- 等待 `nrir45-20260805` 外部审计；批准后由 executor close 并合并 PR #56；
-- 从审计后的 main 重定基/确认 base，先实现 Phase 0 细粒度 attribution，再按门禁决定是否编码 IR。
+- 已重定基到 `main@6cd229a`；先实现 Phase 0 细粒度 attribution，再按门禁决定是否编码 IR；
+- `nrir45-20260805` exchange 保留 ready-for-audit 历史状态，不伪造外部批准。
 
 ## Links
 

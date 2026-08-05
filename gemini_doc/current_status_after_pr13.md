@@ -1209,5 +1209,6 @@ source/objective/bounds/exact target ledger 绑定到 PlanInstance/InstanceSched
 batching，不改 cap/nodes/depth/policy/deadline；Phase 0 ceiling、Phase A exact+timing、Phase B whole-query
 按顺序门禁。
 
-PR #56 外部审计批准并合入 main 前不启动实现。当前无 NRIR46 artifact 或性能 claim；即使理想消除
-全部已测 compile，trace 仍约 26 秒，因此公平竞品、10x、property closure 与 ASPLOS-ready 仍为 NO。
+PR #56 已按用户豁免外部 review 的决定完成 executor deterministic gates 并合入 `main@6cd229a`，
+NRIR46 进入 Phase 0。当前仍无 NRIR46 artifact 或性能 claim；即使理想消除全部已测 compile，trace
+仍约 26 秒，因此公平竞品、10x、property closure 与 ASPLOS-ready 仍为 NO。

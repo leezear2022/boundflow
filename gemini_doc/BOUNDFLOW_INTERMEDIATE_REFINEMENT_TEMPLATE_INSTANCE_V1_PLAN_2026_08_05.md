@@ -24,8 +24,9 @@ stage: s01
 ### 依赖与基线
 
 - preregistration branch=`feat/intermediate-refinement-template-instance-v1`；
-- stacked documentation base=`a2d8f96`，依赖 NRIR45 draft PR #56；
-- 正式实现/计时只有在 `nrir45-20260805` 外部审计 approve 且 PR #56 合入 main 后启动；
+- integration base=`main@6cd229a`（PR #56 merge）；
+- 用户已明确豁免外部模型 review；NRIR45 通过 executor deterministic replay/tamper/tests/static/DocOps
+  门禁后合入，未声称获得独立 auditor approval；
 - frozen NRIR45 feature=`8b8766e`，Phase A formal hash=
   `be1ccb4229d8b88970c9f9f5bae9d6ff8156d4e9b53c84a218a2a1dd6005d439`，Phase B payload hash=
   `4ae71919b5c4d6e8d6162df8bb7d14143a705f60a599f8e4bfa30d084c1a01f8`；
@@ -84,9 +85,9 @@ workload、threshold、global deadline、aggregation 与 `performance_claimed=fa
 
 ## Tasks
 
-### 0. 审计与归因门禁
+### 0. 合并与归因门禁
 
-- [ ] NRIR45 exchange approve，executor close，PR #56 合入 main；
+- [x] 用户豁免外部 review；NRIR45 executor 自检通过，PR #56 合入 `main@6cd229a`；
 - [ ] 在无 cProfile 扰动下把 `5.300590 s` compile 进一步拆为 forward materialization、objective
   influence、target selection、Plan construction、lowering、full validation/hash；
 - [ ] 明确 static-shareable 与 dynamic-required 成本；若 static-shareable whole-query median `<1.5 s`
@@ -136,15 +137,15 @@ ASPLOS-ready claim。理论上即使把已测 `5.30 s` prepared compile 全部�
 
 ## Rollback
 
-- 所有实现 additive；失败时继续使用 audited NRIR45 prepared path；
+- 所有实现 additive；失败时继续使用 self-validated NRIR45 prepared path；
 - 不以降低 target cap/pass、node/depth、跳过 target selection、共享动态 targets、放宽 validation、
   减少 clauses 或更改 deadline 换取收益；
 - CPU 上若只减少 launch/compile count 但 timing 不过，机制可保留为 correctness/compiler ownership
   evidence，production 默认保持 NRIR45；
-- PR #56 审计未批准前，本分支只允许预注册文档，不实现或生成正式结果。
+- 当前已从 PR #56 merge main 重定基，可以执行 Phase 0；Phase 0 ceiling 不过则禁止实现。
 
 ## Links
 
 - changelog: `gemini_doc/BOUNDFLOW_INTERMEDIATE_REFINEMENT_TEMPLATE_INSTANCE_V1_CHANGELOG_2026_08_05.md`
 - roadmap: `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`
-- dependency audit: `gemini_doc/BOUNDFLOW_NRIR45_EXTERNAL_AUDIT_HANDOFF_2026_08_05.md`
+- review-waiver record: `gemini_doc/change_2026-08-05_nrir45_external_review_waiver.md`

@@ -1645,7 +1645,8 @@ batching，也不改 refinement/optimizer/branch/queue/policy/budget/deadline。
 Phase 0 必须先证明 static-shareable whole-query median 至少 `1.5 s` 且 ceiling 改善超过 pooled MAD；
 否则直接 NO-GO。Phase A 要求每 queue Template full admit=`1`、Instance full replay=`30/30`、全部语义
 exact、clauses 2/3 median ratio 均 `<=0.90`；只有全过才运行 Phase B，其 trace median ratio vs NRIR45
-也须 `<=0.90` 且超过 pooled MAD。PR #56 审计/合并是实现门禁；当前只有预注册，没有新 claim。
+也须 `<=0.90` 且超过 pooled MAD。PR #56 已按用户豁免外部 review 的决定完成 executor deterministic
+gates 并合入 `main@6cd229a`；当前开始 Phase 0，仍没有 NRIR46 新 claim。
 
 即使理想消除已测全部 `5.30 s` compile，约 31.3 秒 trace 仍约 26 秒。因此 NRIR-46 是 compiler
 IR/ownership 的必要增量，不是公平竞品、10x 或 ASPLOS-ready 终点。

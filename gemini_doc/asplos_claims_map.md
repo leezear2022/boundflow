@@ -1344,6 +1344,7 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - `C3-G-NRIR46-PENDING`：Phase 0 先证明 static-shareable ceiling，Phase A 要求 Template
   compile/lower/full-admit 每 queue=`1`、Instance bind/full replay=`30/30`、exact target ledger 与 queue
   ratio `<=0.90`；通过后才允许 Phase B；
-- `C3-L-NRIR46`：依赖 PR #56 审计批准/合并；当前无代码、artifact 或性能 claim。即使消除全部
+- `C3-L-NRIR46`：PR #56 已按用户外部-review豁免决定自检并合入；当前无代码、artifact 或性能
+  claim。即使消除全部
   5.30 秒 compile，理论 trace 仍约 26 秒，不构成 10x、公平竞品、GPU、多 workload、property closure
   或 ASPLOS-ready。

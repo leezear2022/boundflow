@@ -27,8 +27,8 @@ Phase 0，尚无新性能 claim）。
 
 当前最新预注册入口：
 `gemini_doc/BOUNDFLOW_INTERMEDIATE_REFINEMENT_TEMPLATE_INSTANCE_V1_PLAN_2026_08_05.md`（NRIR46；
-当前只完成 residual attribution 和 PlanTemplate/PlanInstance 单变量冻结，依赖 NRIR45 审计/合并，
-没有实现或正式性能结果）。其直接基线为
+当前只完成 residual attribution 和 PlanTemplate/PlanInstance 单变量冻结，NRIR45 已合入，正在进入
+Phase 0；还没有 NRIR46 正式性能结果）。其直接基线为
 `gemini_doc/BOUNDFLOW_PREPARED_INTERMEDIATE_REFINEMENT_CAPSULE_V1_PLAN_2026_08_05.md`
 （NRIR-45 已 `VALIDATED-REDUCED`：typed prepare-once capsule/receipt 将每条 queue 的 target selection
 `246→98`、full validation `186→38`；clauses 2/3 median ratio=`0.727519/0.736603`。Phase B

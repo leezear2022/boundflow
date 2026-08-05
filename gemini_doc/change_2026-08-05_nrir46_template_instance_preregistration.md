@@ -13,7 +13,7 @@ per-child compiler ownership，不泛化为“继续优化 CROWN”。
 ## 预注册决策
 
 - 新分支：`feat/intermediate-refinement-template-instance-v1`；
-- stacked base：`a2d8f96`，依赖 PR #56 外部审计批准与合并；
+- integration base：`main@6cd229a`；PR #56 已按用户豁免外部 review 的决定自检并合入；
 - 唯一变量：把静态 `PlanTemplate/TaskTemplate/ScheduleTemplate` 与动态
   `PlanInstance/InstanceSchedule` 分开；
 - dynamic target ledger、split、source lineage、objective 与 bounds 继续逐 child exact-owned；
