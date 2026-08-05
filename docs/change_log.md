@@ -1,5 +1,27 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-06：根据评审收紧 GPU 编译器计划的可证伪门禁
+
+- G1新增精确Amdahl反解；任一scope不可达或required region speedup `>10x`时，不启动latency G3；
+- benchmark矩阵硬性要求至少一个双方可solve的公开held-out workload，并在G1预判
+  `B80_alloc/B80_reserved/B_OOM` physical-memory可达性；
+- G8主比较冻结为RVIR exact-call合同内同一alpha-beta-CROWN host solver A/B，Planner claim缩为
+  GPU-context selector；
+- 增加GPU恢复/备用资源、frontend逐op覆盖和G2 qualification timebox；G1 chunk sweep保持只读；
+- 修正外部审计指出的PR-12J compile phase归属，不启动TIR实现。
+
+## 2026-08-05：新增 GPU 编译器加速诊断与执行计划
+
+- 基于当前 IR/runtime、PR-12/13 与 NRIR43/46/47/48 证据，确认 GPU 路线值得以新的
+  selected-CROWN production hypothesis 重开，但不覆盖历史 NO-GO；
+- 将 selected-objective/BoundConv TIR、流程级融合、physical arena、ragged batching、multi-stream
+  和条件 JIT/CUDA Graph 收敛为 G0—G8 依赖链；
+- 明确本会话无法访问 NVIDIA driver/GPU，用户报告的 BoundConv `40x` 尚未由当前分支独立复现；
+  40x源码缺失时禁止传播该claim但不阻塞独立GPU profiling，下一步只做环境/证据恢复和公平baseline；
+- 冻结 kernel→region→child→queue→complete-query 的评估层级、benchmark matrix、artifact/replay
+  合同、预注册 kill gate 和外部模型审计模板；
+- 详细记录：`gemini_doc/BOUNDFLOW_GPU_COMPILER_ACCELERATION_RESEARCH_V1_PLAN_2026_08_05.md`。
+
 ## 2026-08-05：预注册 NRIR46 Template/Instance compiler IR
 
 - Phase-B raw shards 将约 31.3 秒 trace 拆为 floor median 约 10.82 秒、两条 packed slice 各约
@@ -4720,3 +4742,20 @@
 **记录**
 - `gemini_doc/change_2026-08-05_nrir48_execution_cost_attribution.md`
 - `gemini_doc/BOUNDFLOW_TOP2_PRODUCTION_EXECUTION_COST_ATTRIBUTION_V1_CHANGELOG_2026_08_05.md`
+
+---
+
+## 2026-08-06：NRIR49 G0 GPU Opportunity Admission pre-reboot
+
+- 新增 fail-closed G0 admission runner/test/artifact，GPU 不可用时禁止生成 memory/Amdahl/performance
+  数值；
+- 当前 CUDA/PyTorch/TVM/FFI 软件栈存在，根因收敛为 ASUS `dgpu_disable=1`；enable 已 queued，需重启；
+- 独立 αβ-CROWN 官方锁定环境已建成，commit=`e5c7e17`、auto_LiRPA=`5a098e8`，import smoke PASS；
+- VNN-COMP 2021 `mnistfc:2` 在双方 30 秒 CPU qualification 中均整题 `verified`，solveability 门禁通过；
+- 正式 v7 artifact replay PASS，当前唯一 blocker=`gpu_infrastructure_ready`；`g1_ready=false`；
+- targeted `13 passed`、全量 `1006 passed, 37 skipped`、mypy clean、Pylint `10.00/10`；
+- 未修改 bound math/TIR/kernel/default policy，未产生性能 claim。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_NRIR49_G0_GPU_OPPORTUNITY_ADMISSION_V1_PLAN_2026_08_06.md`
+- `gemini_doc/BOUNDFLOW_NRIR49_G0_GPU_OPPORTUNITY_ADMISSION_V1_CHANGELOG_2026_08_06.md`
