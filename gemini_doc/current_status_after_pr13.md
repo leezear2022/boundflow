@@ -1242,3 +1242,14 @@ formal hash=`a7561e5187a6e396905d261e739280e39f2c3480e83ba2af0fbe6e3b1ec042ce`�
 全量 `992 passed, 37 skipped`。candidate 不默认启用；final 9/9 unknown、
 `performance_claimed=false`、公平竞品/10x/property closure/ASPLOS-ready=NO 不变。下一步转 top-2
 production execution math/queue phase attribution。
+
+## 50. 2026-08-05 NRIR-48 Top-2 Production Execution Cost Attribution 预注册
+
+NRIR47 已由 PR #58 合入 `main@1e44949`。新分支
+`feat/top2-production-execution-cost-attribution-v1` 只测 NRIR45 default production route，不启用
+NRIR47 candidate，也不修改算法/IR/runtime。clauses 2/3 各运行 three fresh paired control/profile，
+把 queue wall time 闭合到七个互斥顶层类别，并对子 refinement execute 做五类内部诊断。
+
+预注册要求 correctness exact、category closure error `<=1%`、instrumentation median ratio `<=1.05`；
+同一 dominant category 必须在两条 clause 各 3/3 排第一、median share 均 `>=20%`、range `<=10`
+percentage points 且稳定超过 pooled MAD。当前没有 runner、artifact、dominant 根因或 performance claim。

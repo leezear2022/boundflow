@@ -1680,3 +1680,17 @@ queue ratio=`1.011205/1.019338 > 0.97`，且 queue 改善未超过 pooled MAD。
 `a7561e5187a6e396905d261e739280e39f2c3480e83ba2af0fbe6e3b1ec042ce`；全量
 `992 passed, 37 skipped`，Pylint `10.00/10`。receipt candidate 不默认启用，不形成 performance claim；
 下一门禁转向 top-2 production execution math/queue phase attribution。
+
+## 61. Top-2 Production Execution Cost Attribution v1 预注册
+
+NRIR47 已由 PR #58 合入 `main@1e44949`。NRIR48 不实现优化，只测 frozen NRIR45 default
+production route 的 clauses 2/3 31-node queues；NRIR47 candidate 保持禁用。七个互斥顶层类别为
+child refinement compile/execute、optimizer prepare/execute、branch bind/score、materialize/commit 与
+queue-control residual；child execute 再分 fast validate、runtime target select、selected-CROWN、
+propagate-forward 与 hash/trace residual。
+
+正式协议为 clauses 2/3 各 three fresh counterbalanced control/profile。要求 6/6 semantics exact、
+category closure error `<=1%`、profile/control median ratio `<=1.05`。只有同一 category 在两条 clause
+各 3/3 repeats 排第一、median share 均 `>=20%`、share range `<=10` percentage points 且 exclusive
+ns 改善尺度超过 pooled MAD，才允许成为 NRIR49 来源。当前只有预注册，无 runner、artifact、dominant
+category 或性能 claim。

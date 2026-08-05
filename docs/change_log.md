@@ -4687,3 +4687,20 @@
 **记录**
 - `gemini_doc/change_2026-08-05_nrir47_phase_a_nogo.md`
 - `gemini_doc/BOUNDFLOW_SINGLE_PASS_TARGET_ADMISSION_RECEIPT_V1_CHANGELOG_2026_08_05.md`
+
+---
+
+## 2026-08-05：NRIR-47 发布与 NRIR-48 Execution Cost Attribution 预注册
+
+- NRIR47 `351f5ce` 已由 PR #58 合入 `main@1e44949`；NO-GO、Phase B gated off 与 candidate disabled
+  边界不变；
+- 新分支 `feat/top2-production-execution-cost-attribution-v1` 只测 frozen NRIR45 default route；
+- clauses 2/3 three-fresh paired control/profile、七个互斥类别、child-execute 子类、closure、
+  perturbation、dominance 与稳定性门禁已冻结；
+- 当前没有 NRIR48 runner、artifact、dominant category 或性能 claim。
+
+**记录**
+- `gemini_doc/change_2026-08-05_nrir47_publication.md`
+- `gemini_doc/change_2026-08-05_nrir48_preregistration.md`
+- `gemini_doc/BOUNDFLOW_TOP2_PRODUCTION_EXECUTION_COST_ATTRIBUTION_V1_PLAN_2026_08_05.md`
+- `gemini_doc/BOUNDFLOW_TOP2_PRODUCTION_EXECUTION_COST_ATTRIBUTION_V1_CHANGELOG_2026_08_05.md`

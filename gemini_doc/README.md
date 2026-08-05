@@ -10,7 +10,10 @@
 
 ---
 
-当前最新关闭入口：
+当前下一分支预注册入口：
+`gemini_doc/BOUNDFLOW_TOP2_PRODUCTION_EXECUTION_COST_ATTRIBUTION_V1_PLAN_2026_08_05.md`（NRIR48；
+只测 frozen NRIR45 default production clauses 2/3 的七类互斥 execution cost，three fresh paired
+control/profile 与 dominance 门禁已冻结；当前无 runner/artifact/result）。其前序
 `gemini_doc/BOUNDFLOW_SINGLE_PASS_TARGET_ADMISSION_RECEIPT_V1_PLAN_2026_08_05.md`（NRIR47；
 typed receipt 已把每 child compile selector/reselection 收敛为 `30/0`，60 个动态 target ledger 不共享，
 显式 full replay 仍重选；但 compiler ratio=`0.936003 > 0.85`、两条 queue ratio=
@@ -27,7 +30,9 @@ production execution math/queue attribution。其前序 NRIR46 已由 PR #57 合
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新关闭入口：
+当前最新预注册入口：
+`gemini_doc/BOUNDFLOW_TOP2_PRODUCTION_EXECUTION_COST_ATTRIBUTION_V1_PLAN_2026_08_05.md`（NRIR48；
+NRIR45 default production top-2 queue execution-cost attribution，当前无正式结果）。其前序
 `gemini_doc/BOUNDFLOW_SINGLE_PASS_TARGET_ADMISSION_RECEIPT_V1_PLAN_2026_08_05.md`（NRIR47；
 single-pass exact target admission receipt correctness/ownership 已实现并通过；Phase A compiler/queue
 timing 未过，formal hash=`a7561e51…042ce`，状态 `VALIDATED-NO-GO`，下一步做 execution-cost

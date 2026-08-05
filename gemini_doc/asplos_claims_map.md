@@ -1365,3 +1365,13 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - `C3-L-NRIR47`：formal hash=`a7561e5187a6e396905d261e739280e39f2c3480e83ba2af0fbe6e3b1ec042ce`；
   全量 `992 passed, 37 skipped`。candidate 不默认启用，`performance_claimed=false`，不构成 10x、
   公平竞品、GPU、多 workload、property closure 或 ASPLOS-ready。
+
+### NRIR-48（预注册）：Top-2 Production Execution Cost Attribution v1
+
+- `C3-D-NRIR48-PENDING`：拟把 frozen NRIR45 clauses 2/3 production queue 分为七个互斥顶层类别，
+  并细分 child refinement execute；NRIR47 candidate 禁用，本轮不实现优化；
+- `C3-G-NRIR48-PENDING`：three fresh paired control/profile 要求 semantics exact、closure error
+  `<=1%`、profile/control median ratio `<=1.05`；
+- `C3-R-NRIR48-PENDING`：只有同一 category 在两条 clause 各 3/3 排第一、median share 均
+  `>=20%`、range `<=10` percentage points 且稳定超过 pooled MAD，才允许选择 NRIR49；
+- `C3-L-NRIR48`：当前无 runner、artifact、dominant category 或 performance claim。
