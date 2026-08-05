@@ -1629,7 +1629,7 @@ final 仍 9/9 unknown，`performance_claimed=false`，没有公平竞品、GPU�
 或 ASPLOS-ready claim。下一步先做最终约 31.3 秒路径的 residual phase attribution，再冻结 NRIR-46
 单变量；不重开 NRIR-43 CPU scorer batching，也不事后降低 cap/nodes/depth。
 
-## 59. Intermediate Refinement Template/Instance v1 预注册
+## 59. Intermediate Refinement Template/Instance v1 Phase 0 NO-GO
 
 NRIR-45 raw Phase-B trace 的 residual attribution 已完成：floor action median=`10.818262 s`，两条
 packed slice 六样本 median=`9.932808 s`，packed-plan compile/rank median 仅
@@ -1637,16 +1637,22 @@ packed slice 六样本 median=`9.932808 s`，packed-plan compile/rank median 仅
 `5.300590/5.659414 s`、per-child total=`10.975123 s`、optimizer execute=`1.156098 s`。这些数字只用于
 冻结路线，不是新的 formal performance claim。
 
-NRIR-46 的唯一变量是 first-class compiler IR 静态/动态分层：PlanTemplate/TaskTemplate/
+NRIR-46 的唯一变量原定为 first-class compiler IR 静态/动态分层：PlanTemplate/TaskTemplate/
 ScheduleTemplate 拥有 graph、policy、selection recipe 与拓扑；PlanInstance/InstanceSchedule 逐 child
 拥有 split、source lineage、objective、bounds 与 exact target ledger。NRIR-46 不引入跨节点数值
 batching，也不改 refinement/optimizer/branch/queue/policy/budget/deadline。
 
-Phase 0 必须先证明 static-shareable whole-query median 至少 `1.5 s` 且 ceiling 改善超过 pooled MAD；
-否则直接 NO-GO。Phase A 要求每 queue Template full admit=`1`、Instance full replay=`30/30`、全部语义
-exact、clauses 2/3 median ratio 均 `<=0.90`；只有全过才运行 Phase B，其 trace median ratio vs NRIR45
-也须 `<=0.90` 且超过 pooled MAD。PR #56 已按用户豁免外部 review 的决定完成 executor deterministic
-gates 并合入 `main@6cd229a`；当前开始 Phase 0，仍没有 NRIR46 新 claim。
+Phase 0 三 fresh processes 的 compile total=`5.356892/5.366369/5.452290 s`；strict static topology=
+`1.071197/1.062492/1.071704 s`，median=`1.071197 s`；ownership-convertible ceiling=
+`2.097255/2.102134/2.109857 s`。预注册 static-shareable gate 要求 median 至少 `1.5 s`，故门禁失败，
+NRIR46 `VALIDATED-NO-GO`，Template/Instance 未实现，Phase A/B gated off。
 
-即使理想消除已测全部 `5.30 s` compile，约 31.3 秒 trace 仍约 26 秒。因此 NRIR-46 是 compiler
-IR/ownership 的必要增量，不是公平竞品、10x 或 ASPLOS-ready 终点。
+三轮 60 个 target identity/table hash 全部互异，但 primal graph、Task/Schedule topology 各只有一种；
+target selection observed/semantic=`124/60`，64 次冗余 selection 估计耗时=
+`1.026058/1.039642/1.038153 s`。formal hash=
+`712ce359501a010a197797909ab71fb127ebda43329dd3a7a8e21b6dbb4cf846`；replay/tamper 通过，
+`performance_claimed=false`。
+
+下一路线不能共享动态 target ledger，而应作为 NRIR47 独立预注册 single-pass exact target admission
+receipt：production compile 只选择一次，显式 full replay 仍从源输入重算。它不是公平竞品、10x 或
+ASPLOS-ready 终点。

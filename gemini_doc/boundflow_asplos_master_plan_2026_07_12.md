@@ -77,12 +77,13 @@
 > ResNet2B property 0 CPU8 `VALIDATED-REDUCED`，final 仍 unknown、ASPLOS-ready=NO；下一步先做
 > residual phase attribution，再冻结新的单变量。
 
-> **2026-08-05 NRIR-46 预注册**：NRIR45 residual attribution 将 trace 拆为 floor median
+> **2026-08-05 NRIR-46 Phase 0 NO-GO**：NRIR45 residual attribution 将 trace 拆为 floor median
 > `10.818262 s` 与两条各约 `9.932808 s` packed slice；diagnostic repeat0 中 60 child prepared
-> compile/execute=`5.300590/5.659414 s`。下一单变量是 first-class Plan/Schedule Template 与
-> node-specific Instance 分层，dynamic target ledger 不共享，不改 batching/policy/budget。PR #56 已按
-> 用户 review 豁免决定自检并合入 `main@6cd229a`，当前进入 Phase 0；尚无新 claim，理论上全消
-> compile 后 trace 仍约 26 秒，ASPLOS-ready=NO。
+> compile/execute=`5.300590/5.659414 s`。正式 Phase 0 strict static topology median=
+> `1.071197 s`，低于预注册 `1.5 s` 门槛；60/60 target ledgers 全部互异。因此不实现
+> Plan/Schedule Template/Instance，Phase A/B gated off，状态为 `VALIDATED-NO-GO`。formal hash=
+> `712ce359…cf846`，replay/tamper 通过，`performance_claimed=false`。下一候选路线是独立预注册
+> single-pass exact target admission receipt；ASPLOS-ready=NO。
 
 > **2026-08-04 NRIR-21 修订**：per-child exact-split objective refinement 的 IR/control、lineage
 > 与 replay 已实现，但固定 ResNet clauses 0/1 的最差 depth-2 leaf lower 相对 root-global 分别

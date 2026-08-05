@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev005253
-last_va: ev005254
+last_ch: ev005318
+last_va: ev005319
 blk:
-next: run-nrir46-phase0-compile-attribution
-updated: 2026-08-05T10:47:17Z
+next: publish-nrir46-and-preregister-nrir47
+updated: 2026-08-05T11:24:00Z

@@ -1,0 +1,2 @@
+{"accepted_nodes":[31,31],"correctness":true,"floor_seconds":8.650570541,"production":true,"repeat":2,"result_hash":"8079535f8925dfef9ab24517b5deaf14ea66d972ba96d79264623df2bbb3ccaa","selected":[2,3],"whole_seconds":31.514945376}
+{"compile_seconds":5.452289939,"correctness":true,"ownership_convertible_seconds":2.109856708,"repeat":2,"static_topology_seconds":1.071704105}

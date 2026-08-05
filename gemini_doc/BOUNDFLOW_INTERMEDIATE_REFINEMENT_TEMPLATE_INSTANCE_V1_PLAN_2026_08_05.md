@@ -1,6 +1,6 @@
 ---
-status: preregistered
-updated: 2026-08-05T02:44:32Z
+status: validated-no-go
+updated: 2026-08-05T11:10:00Z
 type: plan
 topic: boundflow
 slug: intermediate-refinement-template-instance-v1
@@ -88,38 +88,29 @@ workload、threshold、global deadline、aggregation 与 `performance_claimed=fa
 ### 0. 合并与归因门禁
 
 - [x] 用户豁免外部 review；NRIR45 executor 自检通过，PR #56 合入 `main@6cd229a`；
-- [ ] 在无 cProfile 扰动下把 `5.300590 s` compile 进一步拆为 forward materialization、objective
+- [x] 在无 cProfile 扰动下把 `5.300590 s` compile 进一步拆为 forward materialization、objective
   influence、target selection、Plan construction、lowering、full validation/hash；
-- [ ] 明确 static-shareable 与 dynamic-required 成本；若 static-shareable whole-query median `<1.5 s`
+- [x] 明确 static-shareable 与 dynamic-required 成本；若 static-shareable whole-query median `<1.5 s`
   或 ceiling gain 不大于 pooled MAD，本路线直接 `VALIDATED-NO-GO`。
+
+Phase 0 三个 fresh process 的 compile total=`5.356892/5.366369/5.452290 s`，strict static
+topology=`1.071197/1.062492/1.071704 s`，Template/Instance ownership-convertible ceiling=
+`2.097255/2.102134/2.109857 s`。strict static median=`1.071197 s < 1.5 s`，预注册门禁失败；
+因此 NRIR46 在 Phase 0 以 `VALIDATED-NO-GO` 关闭。
 
 ### A. Template/Instance IR
 
-- [ ] 新增 versioned PlanTemplate、PlanInstance、TaskTemplate、ScheduleTemplate、InstanceSchedule 与
-  receipt dataclasses；
-- [ ] 固定 static/dynamic field ownership 和 deterministic canonical hashes；
-- [ ] 用一个 Template 绑定 30 个 exact child Instances，禁止共享动态 target ledger；
-- [ ] wrong template/instance/module/policy/chunk/split/source/objective/target、stale Tensor 与 mutation
-  全部在 selected-CROWN 前 fail closed；
-- [ ] additive 接入 prepared per-child/shared queue，frozen NRIR42/44/45 文件不做破坏性改写。
+- [x] **GATED OFF**：Phase 0 strict static gate 失败，未实现 PlanTemplate/PlanInstance；
+- [x] **GATED OFF**：未改 frozen NRIR42/44/45 production path，也未制造虚假的共享 target ledger。
 
 ### B. Phase A compiler/queue formal
 
-- [ ] clauses 2/3 各做 three fresh counterbalanced NRIR45-control / NRIR46-template 31-node queues；
-- [ ] 每条 candidate queue Template compile/lower/full-admit=`1`，Instance bind/full-replay=`30/30`；
-- [ ] target selection 与 selected-CROWN semantic launches 仍为 30，target ledger 逐 node exact；
-- [ ] branch/score/state/ancestry/refinement/bounds/worst lower/31 nodes 全 exact；
-- [ ] 两条 queue candidate/control median ratio 均 `<=0.90` 且改善大于 pooled MAD；
-- [ ] typed reconstruction 与 synchronized outer-rehash Template/Instance cross-bind tamper fail closed。
+- [x] **GATED OFF**：按预注册规则未启动 Phase A，不存在 NRIR46 queue timing claim。
 
 ### C. Phase B whole query
 
-- [ ] 只有 Phase A correctness、ownership、timing 全过才启动；
-- [ ] three fresh CPU8 global queries，floor/rank/selected `[2,3]`、`[31,31]` nodes 与 worst lower exact；
-- [ ] trace median ratio vs frozen NRIR45 `<=0.90` 且改善大于 pooled MAD；
-- [ ] measured wall 同向改善且改善大于 pooled MAD，不设事后放宽门槛；
-- [ ] final 9/9 unknown、60/60 Instance full replay、artifact/tamper/full suite/Black/mypy/Pylint/DocOps
-  全过。
+- [x] **GATED OFF**：Phase A 未启动，故 Phase B 也未启动；NRIR45 的 final 9/9 unknown 与
+  `performance_claimed=false` 保持不变。
 
 ## Validation
 
@@ -130,6 +121,13 @@ CPU8 compiler ownership `VALIDATED-REDUCED`。
 正式 artifact 必须记录 Template compile、Instance bind、target selection、selected-CROWN、full replay
 计数和 action timing；replay 必须先验验证全部 digest，再重建完整 IR。所有 artifact 继续
 `performance_claimed=false`。
+
+实际 Phase 0 artifact 位于
+`artifacts/intermediate-refinement-template-instance/vnncomp21-resnet2b-property0-three-repeat-cpu-phase0-v1/`，
+formal hash=`712ce359501a010a197797909ab71fb127ebda43329dd3a7a8e21b6dbb4cf846`。
+replay 逐项验证 source/artifact digest，并在同步更新外层 hash 后仍拒绝改变 distinct target identity
+count 的篡改。三轮均保持 selected `[2,3]`、nodes `[31,31]`、60/60 capsules/full replay；每轮
+60 个 target identity/table hash 均互异，而 primal graph、Task/Schedule topology 各只有 1 种。
 
 本阶段即使通过，也不形成公平竞品、10x、GPU、多 workload、property closure、完整 verifier E2E 或
 ASPLOS-ready claim。理论上即使把已测 `5.30 s` prepared compile 全部消除，当前约 `31.3 s` trace
@@ -142,7 +140,8 @@ ASPLOS-ready claim。理论上即使把已测 `5.30 s` prepared compile 全部�
   减少 clauses 或更改 deadline 换取收益；
 - CPU 上若只减少 launch/compile count 但 timing 不过，机制可保留为 correctness/compiler ownership
   evidence，production 默认保持 NRIR45；
-- 当前已从 PR #56 merge main 重定基，可以执行 Phase 0；Phase 0 ceiling 不过则禁止实现。
+- Phase 0 strict static ceiling 已失败，NRIR46 禁止实现；下一路线只能针对已测的 64 次冗余 target
+  reselection 建立更窄的单次 admission receipt，且必须另行预注册，不能把它冒充 NRIR46 通过。
 
 ## Links
 
