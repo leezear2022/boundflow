@@ -1,0 +1,15 @@
+{
+  "files": {
+    "formal.json": "082102addc81d51568adcdb83d60d1855646b2b0901ce79ac363d4de06bcd1f7",
+    "logs/repeat-0.log": "fff37885374e5546898c128adfece2823a457b4a70e4b4c7a90fd4b92bd23ce3",
+    "logs/repeat-1.log": "cb69c7c07d8ce020da78898a1e8a7c2c6de4007dd7a94f06f5816ca1fbc15f8a",
+    "logs/repeat-2.log": "ddb1a79bf1db99090a3e2ac4396e0b498b7399c863f1a2afbfa83dfb99864b20",
+    "shards/repeat-0.json": "147a016417fa72163925e736444b0f8a861bf35e58ae3be040bf2fd86304fe9d",
+    "shards/repeat-1.json": "65050b6b9bc8abc559b8fbe72d425902d9dbed9690d54ca4f597bd737e1f5a59",
+    "shards/repeat-2.json": "d0641eb63705008b3242513c4443da3ba946fc502997313ed5afc700e8217a9f"
+  },
+  "formal_hash": "ecb553d88be065054abb0a480b79086ae12cec55a84e5c0ba537572e904ff0fe",
+  "manifest_hash": "f4d0ce7ec632aae62b7028f5ebb973833352a127c291cf9f0050feb184e12236",
+  "performance_claimed": false,
+  "schema_version": "boundflow.root-projection-floor-manifest/v1"
+}

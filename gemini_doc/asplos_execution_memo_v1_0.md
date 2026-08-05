@@ -1559,3 +1559,33 @@ objective queries 合计约 13.88 秒，而 ranking consumer 只读取每条 roo
 contract 消除非 top-2 的深层 queue work，不继续扩大 CPU domain batch。
 
 发布状态：NRIR-43 提交 `00b82c2` 已由 PR #54 合入 `main@2d245d6`；production 默认仍为 NRIR-42。
+
+## 57. Root-Projection Floor Schedule v1（预注册）
+
+NRIR-44 解决 floor 的 consumer/liveness 冗余。单次分解显示 21.77 秒 floor 中 baseline 约
+4.82 秒，9 条顺序 objective queries 合计约 13.88 秒；而 multi-clause ranking 后续只读取每条
+accepted child 的 root lower。路线冻结前用同一 objective refinement 做 n1d0 probe，9 条合计
+`0.789371 s`，root lower/upper/branch 9/9 与 n31d4 root exact。
+
+唯一变量是将 floor child query 从 `9×n31d4` 投影为 `9×n1d0`。baseline、shared/objective
+refinement、search/optimizer、root semantics、rank/tie-break/top-2、NRIR-42 31-node production、dtype
+与 global-60s deadline 均冻结。该 specialization 是 sound-but-less-complete：非 top-2 clause 在 floor
+阶段不再尝试深层证明，必须显式由 ranking-only consumer contract 启用。
+
+Phase A 要求 baseline/refinement/root/rank/selected exact、objective evaluations `279→9`、three paired
+floor 每轮 `<=11 s` 且 median ratio `<=0.50`。只有全过才运行 Phase B，其要求 three fresh whole
+每轮 `<=48 s`、ratio `<=0.82`，并保持 selected `[2,3]`、两条 `[31,31]` nodes 与 NRIR-42
+branch/score/queue/state/refinement exact。
+
+Phase A 正式结果三轮 exact，old/projected floor elapsed=
+`[24.235039,22.859521,24.252771]/[9.739498,10.740998,9.876515] s`，median ratio=`0.407530`，
+evaluations=`279→9`，formal hash=`ecb553d88be065054abb0a480b79086ae12cec55a84e5c0ba537572e904ff0fe`。
+Phase B 随后按门禁执行，floor=`[8.538814,8.622447,8.648849] s`，whole=
+`[43.571040,44.144990,44.095736] s`，相对 frozen NRIR-42 median ratio=`0.764254`；每轮 selected
+`[2,3]`、nodes=`[31,31]`、worst active lower=`-35.530926/-30.258448`，formal payload hash=
+`2f22d44fe9f57f233c8a853b66f67f404b03a087d097451e10f663ee257272d9`。
+
+NRIR-44 以 fixed ResNet2B property 0 CPU8 ranking-floor + production admission
+`VALIDATED-REDUCED` 关闭，`performance_claimed=false`；final 仍 9/9 unknown，没有公平竞品、GPU、
+multi-workload、property closure 或 ASPLOS-ready claim；全量 `979 passed, 37 skipped`。下一单变量必须来自剩余约 35 秒 top-2
+production queue 的成本归因，不回退 NRIR-43 已否决的 CPU scorer batching。

@@ -4533,3 +4533,36 @@
 
 **记录**
 - `gemini_doc/change_2026-08-05_nrir43_publication.md`
+
+---
+
+## 2026-08-05：NRIR-44 Root-Projection Floor Schedule v1 预注册
+
+- 从 `main@d9d76da` 创建 `feat/root-projection-floor-schedule-v1`；
+- 唯一变量冻结为 ranking floor objective child query 的 `n31d4→n1d0` consumer projection；
+- baseline/refinement/root/rank/top-2/production 不改，sound-but-less-complete 边界显式；
+- Phase A/B correctness、work reduction、timing 与 NO-GO 条件已冻结；当前无代码或正式 claim。
+
+**记录**
+- `gemini_doc/change_2026-08-05_nrir44_preregistration.md`
+- `gemini_doc/BOUNDFLOW_ROOT_PROJECTION_FLOOR_SCHEDULE_V1_PLAN_2026_08_05.md`
+- `gemini_doc/BOUNDFLOW_ROOT_PROJECTION_FLOOR_SCHEDULE_V1_CHANGELOG_2026_08_05.md`
+
+---
+
+## 2026-08-05：NRIR-44 Root-Projection Floor Schedule v1 关闭
+
+- 新增 typed consumer/liveness Plan/Instance/Task/Schedule/Trace 与 additive projected floor/global
+  composition，frozen NRIR-31/42/43 文件不改；
+- Phase A 三轮 exact，objective evaluations=`279→9`，old/projected floor median ratio=`0.407530`，
+  formal hash=`ecb553d8…ff0fe`；
+- Phase B floor=`8.538814/8.622447/8.648849 s`，whole=
+  `43.571040/44.144990/44.095736 s`，相对 NRIR-42 median ratio=`0.764254`；每轮 production
+  nodes=`[31,31]`、worst lower exact；
+- Phase B formal payload hash=`2f22d44f…7272d9`；replay 与同步外层重哈希 tamper fail closed；
+- 以 fixed ResNet2B property 0 CPU8 `VALIDATED-REDUCED` 关闭，final unknown、
+  `performance_claimed=false`、ASPLOS-ready=NO；全量 `979 passed, 37 skipped`。
+
+**记录**
+- `gemini_doc/change_2026-08-05_nrir44_root_projection_floor.md`
+- `gemini_doc/BOUNDFLOW_ROOT_PROJECTION_FLOOR_SCHEDULE_V1_CHANGELOG_2026_08_05.md`

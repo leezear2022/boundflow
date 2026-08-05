@@ -16,10 +16,16 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_CROSS_AXIS_VERIFICATION_BATCH_SCHEDULE_V1_PLAN_2026_08_05.md`
+当前最新入口：`gemini_doc/BOUNDFLOW_ROOT_PROJECTION_FLOOR_SCHEDULE_V1_PLAN_2026_08_05.md`
+（NRIR-44 已 `VALIDATED-REDUCED`：typed consumer/liveness contract 将 ranking floor 的
+`9×n31d4` 投影为 `9×n1d0`，Phase A evaluation `279→9`、floor median ratio=`0.407530`；Phase B
+whole=`43.571040/44.144990/44.095736 s`，相对 NRIR-42 median ratio=`0.764254`，两条 production
+queue 仍各 31 nodes。该结论只适用于固定 ResNet2B property 0 CPU8，final unknown，ASPLOS-ready
+仍为 NO）。其直接前序为
+`gemini_doc/BOUNDFLOW_CROSS_AXIS_VERIFICATION_BATCH_SCHEDULE_V1_PLAN_2026_08_05.md`
 （NRIR-43 已 `VALIDATED-NO-GO`：typed ragged batch 保持 6/6 exact 并将每条 scorer launch
 `31→16`，但 clauses 2/3 median ratio=`1.051134/1.044573`，CPU 墙钟退化；Phase B 按门禁未启动，
-formal hash=`692b9e27…30390`）。下一路线为 NRIR-44 Root-Projection Floor Schedule。
+formal hash=`692b9e27…30390`）。下一路线为剩余 top-2 production queue 的单变量成本归因与优化。
 NRIR-43 提交 `00b82c2` 已由 PR #54 合入 `main@2d245d6`。
 其直接前序为 `gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_SCORER_OWNERSHIP_V1_PLAN_2026_08_05.md`
 （NRIR-42 已 `VALIDATED-REDUCED`：typed validated capsule 把每条 31-node queue 的 candidate
