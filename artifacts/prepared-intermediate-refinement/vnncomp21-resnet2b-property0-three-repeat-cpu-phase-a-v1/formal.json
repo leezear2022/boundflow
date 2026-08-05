@@ -1,0 +1,127 @@
+{
+  "contract": {
+    "clauses": [
+      2,
+      3
+    ],
+    "maximum_queue_median_ratio": 0.8,
+    "paired_orders": [
+      [
+        "control",
+        "prepared"
+      ],
+      [
+        "prepared",
+        "control"
+      ],
+      [
+        "control",
+        "prepared"
+      ]
+    ],
+    "repeat_count": 3,
+    "required_nodes": 31,
+    "required_sibling_groups": 15,
+    "torch_threads": 8
+  },
+  "decision": {
+    "next_route": "run_nrir45_phase_b",
+    "ownership_passed": true,
+    "parity_passed": true,
+    "phase_a_go": true,
+    "reason": "exact semantics, prepared ownership, and timing gates passed",
+    "timing_passed": true
+  },
+  "decision_hash": "0eada538337f4b5e6a2bd28630de5ff55a6087bd09f87c6699263c6a92bbcdf3",
+  "formal_hash": "be1ccb4229d8b88970c9f9f5bae9d6ff8156d4e9b53c84a218a2a1dd6005d439",
+  "metrics": [
+    {
+      "control_mad_ns": 50670115,
+      "control_median_ns": 12981239077,
+      "control_queue_elapsed_ns": [
+        12981239077,
+        13110735799,
+        12930568962
+      ],
+      "improvement_exceeds_pooled_mad": true,
+      "median_improvement_ns": 3537136140,
+      "original_clause_index": 2,
+      "prepared_mad_ns": 122642357,
+      "prepared_median_ns": 9444102937,
+      "prepared_queue_elapsed_ns": [
+        9585429099,
+        9321460580,
+        9444102937
+      ],
+      "prepared_to_control_median_ratio": 0.7275193747670009
+    },
+    {
+      "control_mad_ns": 78469208,
+      "control_median_ns": 13122778401,
+      "control_queue_elapsed_ns": [
+        13248911319,
+        13044309193,
+        13122778401
+      ],
+      "improvement_exceeds_pooled_mad": true,
+      "median_improvement_ns": 3456495397,
+      "original_clause_index": 3,
+      "prepared_mad_ns": 8254166,
+      "prepared_median_ns": 9666283004,
+      "prepared_queue_elapsed_ns": [
+        9666283004,
+        9354060680,
+        9674537170
+      ],
+      "prepared_to_control_median_ratio": 0.7366033860072952
+    }
+  ],
+  "performance_claimed": false,
+  "schema_version": "boundflow.prepared-refinement-formal/v1",
+  "source": {
+    "base_revision": "b6eb697",
+    "native_code_revision": "aae74ca9045147e4889f50a59603e7d3ec291c28dacc49beaba336c6d3d784d9",
+    "source_nrir44_hash": "2f22d44fe9f57f233c8a853b66f67f404b03a087d097451e10f663ee257272d9",
+    "workload": {
+      "category": "cifar10_resnet",
+      "csv_ordinal": 0,
+      "csv_relative_path": "benchmarks/cifar10_resnet/cifar10_resnet_instances.csv",
+      "csv_sha256": "d0be77761016f65d044918e5f95332cf32bf848e5eef28c5465dfbf287ba984f",
+      "model_input_shape": [
+        1,
+        3,
+        32,
+        32
+      ],
+      "model_output_dim": 10,
+      "model_relative_path": "benchmarks/cifar10_resnet/onnx/resnet_2b.onnx",
+      "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+      "onnx_ops": [
+        "Add",
+        "Conv",
+        "Flatten",
+        "Gemm",
+        "Relu"
+      ],
+      "property_relative_path": "benchmarks/cifar10_resnet/vnnlib_properties_pgd_filtered/resnet2b_pgd_filtered/prop_0_eps_0.008.vnnlib",
+      "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+      "query_ir_hash": "f2151936ce0d9f8d8bcabd7bc3fc0224a71d7907da4ac614d7216e7a0919201b",
+      "workload_id": "cifar10_resnet:000"
+    }
+  },
+  "status": "validated-reduced",
+  "workers": [
+    {
+      "repeat_index": 0,
+      "worker_hash": "8d8193397b575c4674e2fd37b545c3c695652a1fdd723c4f5775edf2e2cde9cc"
+    },
+    {
+      "repeat_index": 1,
+      "worker_hash": "cfaf0d6ecd3c764fc392c7e0ce0c5edd4883bcf875b5d60df1328f846d337390"
+    },
+    {
+      "repeat_index": 2,
+      "worker_hash": "6a387888e40e8dde51370bbc349ecc6de2158e31bcbafc7f5e9576eb64604e68"
+    }
+  ]
+}

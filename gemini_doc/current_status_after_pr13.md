@@ -1171,3 +1171,27 @@ pilot hash=`dde1cc4076ea766e7b4859e75ec9ff214d61f3cf245385285274b47f541a72cc`。
 ownership；logical fixed-budget clock 不承载墙钟结论，尚无 full-query/global deadline、property closure、
 GPU、competitor、multi-workload 或 ASPLOS-ready claim。下一阶段为 objective-branch whole-query three-repeat
 formal，必须同时报告 branch scoring 成本、committed coverage 与最终九子句 verdict。
+
+## 47. 2026-08-05 当前生产路线补录：NRIR-42—45
+
+NRIR-42 先以 compile-owned scorer capsule 将每条 31-node queue 的 candidate enumeration 从 341 次
+收敛到 31 次，并恢复 fixed ResNet2B property 0 CPU8 objective-branch production admission；NRIR-43
+跨节点 scorer batching 虽将 launch `31→16`，CPU wall time 却退化，因此 `VALIDATED-NO-GO`。
+
+NRIR-44 随后用 typed ranking-only consumer/liveness contract 将九子句 floor objective evaluations
+`279→9`，whole trace 中位数降到约 44.10 秒。NRIR-45 再把 per-child intermediate refinement 的完整
+validation/hash ownership 收敛为 prepare-once capsule：target selection=`246→98`、full Program
+validation=`186→38`、full hash=`217→39`；clauses 2/3 queue median ratio=
+`0.727519/0.736603`。
+
+NRIR-45 Phase B 三轮 whole trace=`31.262521/31.319772/31.470078 s`，measured wall=
+`36.396631/36.513683/36.611709 s`，相对 NRIR-44 median ratio=`0.710268/0.615738`；floor、rank、
+selected `[2,3]`、两条 `[31,31]` nodes、worst lower 与 final 9/9 unknown 均保持。Phase A/B hash=
+`be1ccb4229d8b88970c9f9f5bae9d6ff8156d4e9b53c84a218a2a1dd6005d439` /
+`4ae71919b5c4d6e8d6162df8bb7d14143a705f60a599f8e4bfa30d084c1a01f8`；全量
+`984 passed, 37 skipped`。
+
+当前状态为 fixed ResNet2B property 0 CPU8 internal production `VALIDATED-REDUCED`，但 final 仍
+unknown，`performance_claimed=false`，公平竞品、GPU、多 workload、property closure 与 ASPLOS-ready
+仍未成立。下一动作不是直接声明“够投”，而是对最终约 31.3 秒 trace 做 residual phase attribution，
+再预注册一个 IR/Plan/Schedule 单变量；不得重开 NRIR-43 CPU batching 或事后降低 cap/nodes/depth。

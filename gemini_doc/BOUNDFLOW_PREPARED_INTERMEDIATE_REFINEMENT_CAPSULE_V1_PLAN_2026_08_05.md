@@ -1,6 +1,6 @@
 ---
-status: preregistered
-updated: 2026-08-05T00:59:47Z
+status: validated-reduced
+updated: 2026-08-05T02:24:45Z
 type: plan
 topic: boundflow
 slug: prepared-intermediate-refinement-capsule-v1
@@ -44,8 +44,9 @@ stage: s01
 
 - prepare：完整验证 Program/Task/Schedule、source lineage、split/objective/input/intermediate hashes、
   target table 与 execution result，生成 typed immutable capsule；
-- runtime：Schedule 显式消费 capsule/Plan-owned targets 和 semantic token，不再为同一 exact object
-  递归重跑 forward、target selection、JSON serialization 与 stable hash；
+- runtime：Schedule 显式消费 capsule/Plan-owned targets 和 semantic token；保留每次 execute 恰好一次
+  target confirmation，但不再为同一 exact object 递归重跑 forward、target selection、JSON
+  serialization 与 stable hash；
 - replay/audit：仍能从 artifact 重建 capsule 并重新执行完整验证，不能只核对外层 token；
 - mutation/stale source/wrong target/wrong split/wrong result 必须 fail closed。
 
@@ -66,26 +67,26 @@ workload、threshold、global deadline 与 final aggregation。
 
 ### A. Prepared refinement IR/runtime
 
-- [ ] 实现 capsule/receipt Plan、Task、Schedule 与 deterministic hash；
-- [ ] 首次完整 validate 后封装 exact Program/Execution；
-- [ ] prepared execute 消费 Plan-owned targets，不重复 `_select_targets`；
-- [ ] stale/mutation/source/split/objective/target/result tamper fail closed。
+- [x] 实现 capsule/receipt Plan、Task、Schedule 与 deterministic hash；
+- [x] 首次完整 validate 后封装 exact Program/Execution；
+- [x] prepared execute 每次只保留一次 target confirmation，不因 validate/hash 再次 `_select_targets`；
+- [x] stale/mutation/source/split/objective/target/result tamper fail closed。
 
 ### B. Phase A per-clause formal
 
-- [ ] clauses 2/3 three fresh counterbalanced control/prepared 31-node queues；
-- [ ] queue/branch/score/state/refinement/selected-CROWN/worst lower exact；
-- [ ] full Program validation 与 `_select_targets` 调用按 ownership 收敛，无隐藏重算；
-- [ ] 两条 prepared/control queue median ratio 均 `<=0.80` 且改善大于 pooled MAD；
-- [ ] typed replay 与 synchronized outer-rehash tamper 通过。
+- [x] clauses 2/3 three fresh counterbalanced control/prepared 31-node queues；
+- [x] queue/branch/score/state/refinement/selected-CROWN/worst lower exact；
+- [x] full Program validation 与 `_select_targets` 调用按 ownership 收敛，无隐藏重算；
+- [x] 两条 prepared/control queue median ratio 均 `<=0.80` 且改善大于 pooled MAD；
+- [x] typed replay 与 synchronized outer-rehash tamper 通过。
 
 ### C. Phase B whole query
 
-- [ ] 仅 Phase A 全过后接 NRIR-44 projected global runtime；
-- [ ] three fresh global-60s queries，floor/rank/selected 与 `[31,31]` nodes exact；
-- [ ] 每轮 execution trace `<=40 s`、measured wall `<=50 s`；
-- [ ] trace median ratio vs NRIR-44 `<=0.90`、measured median ratio `<=0.85`，改善大于 pooled MAD；
-- [ ] final 9/9 unresolved、replay/tamper/full pytest/Black/mypy/Pylint/DocOps 全过。
+- [x] 仅 Phase A 全过后接 NRIR-44 projected global runtime；
+- [x] three fresh global-60s queries，floor/rank/selected 与 `[31,31]` nodes exact；
+- [x] 每轮 execution trace `<=40 s`、measured wall `<=50 s`；
+- [x] trace median ratio vs NRIR-44 `<=0.90`、measured median ratio `<=0.85`，改善大于 pooled MAD；
+- [x] final 9/9 unresolved、replay/tamper/full pytest/Black/mypy/Pylint 全过；DocOps 随关闭提交记录。
 
 ## Validation
 
@@ -93,6 +94,10 @@ Phase A 任一 correctness/ownership/timing gate 失败即 `VALIDATED-NO-GO`，�
 只有全部门禁通过才允许 fixed ResNet2B property 0 CPU8 prepared-refinement production admission
 `VALIDATED-REDUCED`；`performance_claimed=false`。本阶段不构成公平竞品 speedup、GPU、多 workload、
 property closure 或 ASPLOS-ready。
+
+正式判定：Phase A/B 全部门禁通过，以 fixed ResNet2B property 0 CPU8 internal admission
+`VALIDATED-REDUCED` 关闭；精确结果与 hash 见配套 changelog。final 仍为 9/9 unknown，且
+`performance_claimed=false`，不升级为公平竞品、GPU、多 workload、property closure 或 ASPLOS-ready。
 
 ## Rollback
 

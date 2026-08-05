@@ -1314,13 +1314,22 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   `2f22d44fe9f57f233c8a853b66f67f404b03a087d097451e10f663ee257272d9`；本阶段
   `VALIDATED-REDUCED`；全量 `979 passed, 37 skipped`。
 
-### NRIR-45：Prepared Intermediate Refinement Capsule v1（预注册）
+### NRIR-45：Prepared Intermediate Refinement Capsule v1
 
-- `C1/C2-M-NRIR45-PENDING`：计划新增 typed prepared refinement capsule/receipt 与专用 Task/Schedule，
-  将同一 exact Program/Execution 的完整 validation 从多处递归重算收敛到 prepare-once；尚未实现；
-- `C3-G-NRIR45-PENDING`：首次完整准入、Plan-owned targets、source/split/objective/result binding、
-  mutation/stale/tamper fail-closed 和 artifact full replay 已预注册；尚无 artifact；
-- `C3-E-NRIR45-PENDING`：Phase A queue ratio `<=0.80`、Phase B whole trace/measured `<=40/50 s` 与
-  ratio `<=0.90/0.85` 是 acceptance criteria，不是已观测正式结果；
-- `C3-L-NRIR45`：路线前 validation-cache probe 只用于选路线；即使正式通过也仅允许 fixed ResNet2B
-  property 0 CPU8 internal admission，`performance_claimed=false`，不得外推 ASPLOS-ready。
+- `C1/C2-M-NRIR45`：typed capsule/receipt、5-stage Task/Schedule/Trace 与 additive prepared
+  Program/Execution/shared queue/global composition 已实现；每个 exact child 首次完整准入，runtime 用
+  owner/container/Tensor-version receipt 与 cached admitted hashes，显式 full replay 仍调用原始 validator；
+- `C3-G-NRIR45`：mutation、wrong input/capsule、source/target/result binding fail closed；Phase A 每条
+  prepared queue 的 30 capsules 与 Phase B 每轮 60 capsules 均 full replay，typed artifact reconstruction
+  与 synchronized outer-rehash tamper probe 通过；
+- `C3-E-NRIR45`：target selection=`246→98`、full Program validation=`186→38`、full hash=`217→39`；
+  clauses 2/3 prepared/control median ratio=`0.727519/0.736603`。Phase B trace=
+  `31.262521/31.319772/31.470078 s`、measured=`36.396631/36.513683/36.611709 s`，相对 NRIR-44
+  median ratio=`0.710268/0.615738`，每轮 `[31,31]` nodes 与 worst lower exact；
+- `C3-L-NRIR45`：仅 fixed ResNet2B property 0 CPU8 internal production admission
+  `VALIDATED-REDUCED`；final 9/9 unknown，`performance_claimed=false`，不得外推 fair competitor、GPU、
+  multi-workload、property closure 或 ASPLOS-ready；
+- 工件：`artifacts/prepared-intermediate-refinement/` Phase A/B；formal/payload hash=
+  `be1ccb4229d8b88970c9f9f5bae9d6ff8156d4e9b53c84a218a2a1dd6005d439` /
+  `4ae71919b5c4d6e8d6162df8bb7d14143a705f60a599f8e4bfa30d084c1a01f8`；全量
+  `984 passed, 37 skipped`，Pylint `10.00/10`。

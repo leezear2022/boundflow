@@ -4591,3 +4591,21 @@
 - `gemini_doc/change_2026-08-05_nrir45_preregistration.md`
 - `gemini_doc/BOUNDFLOW_PREPARED_INTERMEDIATE_REFINEMENT_CAPSULE_V1_PLAN_2026_08_05.md`
 - `gemini_doc/BOUNDFLOW_PREPARED_INTERMEDIATE_REFINEMENT_CAPSULE_V1_CHANGELOG_2026_08_05.md`
+
+---
+
+## 2026-08-05：NRIR-45 Prepared Intermediate Refinement Capsule v1 关闭
+
+- 新增 typed capsule/receipt、5-stage Task/Schedule/Trace、prepared Program/Execution、additive
+  per-child/shared queue 与 projected-floor global composition；
+- Phase A 六组 exact，target selection=`246→98`、full validation=`186→38`、full hash=`217→39`；
+  clauses 2/3 median ratio=`0.727519/0.736603`，formal hash=`be1ccb42…05d439`；
+- Phase B whole trace=`31.262521/31.319772/31.470078 s`，measured=
+  `36.396631/36.513683/36.611709 s`，相对 NRIR-44 median ratio=`0.710268/0.615738`；
+- 每轮 `[31,31]` nodes、60/60 capsule full replay；payload hash=`4ae71919…1a01f8`；
+- 两阶段 replay/tamper、全量 `984 passed, 37 skipped`、Pylint `10.00/10` 通过；以 fixed
+  ResNet2B property 0 CPU8 `VALIDATED-REDUCED` 关闭，final unknown、ASPLOS-ready=NO。
+
+**记录**
+- `gemini_doc/change_2026-08-05_nrir45_prepared_refinement.md`
+- `gemini_doc/BOUNDFLOW_PREPARED_INTERMEDIATE_REFINEMENT_CAPSULE_V1_CHANGELOG_2026_08_05.md`

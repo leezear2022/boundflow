@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev005059
-last_va: ev005060
+last_ch: ev005204
+last_va: ev005205
 blk:
-next: implement-nrir45-phase-a-prepared-refinement-capsule
-updated: 2026-08-05T01:03:20Z
+next: publish-nrir45-then-profile-residual-31s-path
+updated: 2026-08-05T02:24:45Z

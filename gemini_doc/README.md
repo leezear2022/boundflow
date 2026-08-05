@@ -17,8 +17,10 @@
 ### A. 论文/AE 视角（最推荐）
 
 当前最新入口：`gemini_doc/BOUNDFLOW_PREPARED_INTERMEDIATE_REFINEMENT_CAPSULE_V1_PLAN_2026_08_05.md`
-（NRIR-45 已预注册：只改变 per-child refinement 的 prepare-once validation ownership；路线前
-ceiling probe 将 clause 3 queue trace 约 `12.85→9.761678 s`，正式 Phase A/B 尚未运行）。其直接
+（NRIR-45 已 `VALIDATED-REDUCED`：typed prepare-once capsule/receipt 将每条 queue 的 target selection
+`246→98`、full validation `186→38`；clauses 2/3 median ratio=`0.727519/0.736603`。Phase B
+whole trace=`31.262521/31.319772/31.470078 s`、measured median ratio vs NRIR-44=`0.615738`，
+每轮 `[31,31]` nodes 与 60/60 full replay exact；final 仍 unknown，ASPLOS-ready=NO）。其直接
 前序为 `gemini_doc/BOUNDFLOW_ROOT_PROJECTION_FLOOR_SCHEDULE_V1_PLAN_2026_08_05.md`
 （NRIR-44 已 `VALIDATED-REDUCED`：typed consumer/liveness contract 将 ranking floor 的
 `9×n31d4` 投影为 `9×n1d0`，Phase A evaluation `279→9`、floor median ratio=`0.407530`；Phase B
@@ -130,6 +132,11 @@ ASPLOS-ready 仍为 NO；功能提交 `264365f` 已由 PR #53 合入 `main@89690
 
 ### 2.1 关键交付文档（“长期有效”）
 
+- `gemini_doc/BOUNDFLOW_PREPARED_INTERMEDIATE_REFINEMENT_CAPSULE_V1_PLAN_2026_08_05.md`：
+  prepare-once validation/hash ownership、typed capsule/receipt、Phase A/B 门禁与 fixed ResNet
+  `VALIDATED-REDUCED` 边界
+- `gemini_doc/BOUNDFLOW_PREPARED_INTERMEDIATE_REFINEMENT_CAPSULE_V1_CHANGELOG_2026_08_05.md`：
+  `246→98` target-selection、`186→38` full-validation、31.3 秒 whole trace、artifacts/replay 与限制
 - `gemini_doc/BOUNDFLOW_SHARED_PARAMETRIC_OBJECTIVE_EVALUATOR_V1_PLAN_2026_08_05.md`：
   NRIR-28 template/instance/cache × NRIR-34 ancestral sibling evaluator 的静动态边界、first-class
   Plan/Batch/Task/Schedule、parity/top-2/三重复门禁与下一 tightness attribution 路线

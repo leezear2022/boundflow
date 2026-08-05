@@ -1,5 +1,8 @@
 # NRIR-45 Prepared Intermediate Refinement Capsule v1 预注册记录
 
+> 历史预注册记录：NRIR-45 已按冻结门禁完成并以 `VALIDATED-REDUCED` 关闭；正式结果见
+> `gemini_doc/change_2026-08-05_nrir45_prepared_refinement.md`。下文保留开工前合同，不再代表当前状态。
+
 ## 起因
 
 NRIR-44 已把 floor 从约 24.2 秒降到约 9.9 秒，但 whole trace 仍约 44.1 秒。对单条 31-node
