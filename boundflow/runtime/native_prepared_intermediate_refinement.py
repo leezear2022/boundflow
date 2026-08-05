@@ -25,6 +25,11 @@ from ..ir.refinement import (
     NativeIntermediateRefinementMultiPassPolicyIR,
     NativeIntermediateRefinementPolicyIR,
 )
+from ..ir.target_admission import (
+    NativeTargetAdmissionReceiptIR,
+    NativeTargetAdmissionScheduleIR,
+    NativeTargetAdmissionTaskIRModule,
+)
 from ..ir.task import BFTaskModule
 from .native_intermediate_refinement import (
     NativeExternalIntermediateConstraintSeed,
@@ -33,6 +38,10 @@ from .native_intermediate_refinement import (
     compile_native_intermediate_refinement_program,
     execute_native_intermediate_refinement_program,
     intermediate_refinement_semantic_trace_hash,
+)
+from .native_target_admission import (
+    compile_native_single_pass_target_admission_program,
+    validate_native_target_admission_structure,
 )
 from .task_executor import InputSpec
 
@@ -218,6 +227,9 @@ def _program_runtime_roots(
         getattr(program, "prepared_task_module", None),
         getattr(program, "prepared_schedule", None),
         getattr(program, "admitted_input_spec", None),
+        getattr(program, "target_admission_receipt", None),
+        getattr(program, "target_admission_task_module", None),
+        getattr(program, "target_admission_schedule", None),
     )
     mutable_roots = (
         program.initial_interval_env,
@@ -293,6 +305,49 @@ class NativePreparedIntermediateRefinementProgram(NativeIntermediateRefinementPr
 
 
 @dataclass(frozen=True)
+class NativeSinglePassPreparedIntermediateRefinementProgram(
+    NativePreparedIntermediateRefinementProgram
+):
+    """Prepared Program whose exact targets are admitted once by typed receipt."""
+
+    target_admission_receipt: NativeTargetAdmissionReceiptIR = None  # type: ignore[assignment]
+    target_admission_task_module: NativeTargetAdmissionTaskIRModule = None  # type: ignore[assignment]
+    target_admission_schedule: NativeTargetAdmissionScheduleIR = None  # type: ignore[assignment]
+
+    def _validate_single_pass_binding(self) -> None:
+        if (
+            not isinstance(
+                self.target_admission_receipt, NativeTargetAdmissionReceiptIR
+            )
+            or not isinstance(
+                self.target_admission_task_module, NativeTargetAdmissionTaskIRModule
+            )
+            or not isinstance(
+                self.target_admission_schedule, NativeTargetAdmissionScheduleIR
+            )
+            or self.capsule.target_admission_receipt_hash
+            != self.target_admission_receipt.stable_hash()
+        ):
+            raise ValueError("single-pass prepared target admission differs")
+        validate_native_target_admission_structure(
+            self,
+            receipt=self.target_admission_receipt,
+            task_module=self.target_admission_task_module,
+            schedule=self.target_admission_schedule,
+        )
+
+    def validate(self, module: BFTaskModule, input_spec: InputSpec) -> None:
+        NativePreparedIntermediateRefinementProgram.validate(self, module, input_spec)
+        self._validate_single_pass_binding()
+
+    def validate_full(self, module: BFTaskModule, input_spec: InputSpec) -> None:
+        NativePreparedIntermediateRefinementProgram.validate_full(
+            self, module, input_spec
+        )
+        self._validate_single_pass_binding()
+
+
+@dataclass(frozen=True)
 class NativePreparedIntermediateRefinementExecution(
     NativeIntermediateRefinementExecution
 ):
@@ -324,6 +379,8 @@ class NativePreparedIntermediateRefinementExecution(
 
 def _prepared_capsule(
     source: NativeIntermediateRefinementProgram,
+    *,
+    target_admission_receipt_hash: Optional[str] = None,
 ) -> NativePreparedIntermediateRefinementCapsuleIR:
     hashes = source.hashes()
     capsule = NativePreparedIntermediateRefinementCapsuleIR(
@@ -345,6 +402,12 @@ def _prepared_capsule(
         ),
         target_count=len(source.plan.targets),
         full_validation_receipt="0" * 64,
+        target_admission_receipt_hash=target_admission_receipt_hash,
+        schema_version=(
+            "boundflow.prepared-intermediate-refinement-capsule/v2"
+            if target_admission_receipt_hash is not None
+            else "boundflow.prepared-intermediate-refinement-capsule/v1"
+        ),
     )
     capsule = replace(
         capsule, full_validation_receipt=_canonical_hash(capsule.receipt_dict())
@@ -397,6 +460,68 @@ def compile_native_prepared_intermediate_refinement_program(
         prepared_task_module=prepared_task_module,
         prepared_schedule=prepared_schedule,
         admitted_input_spec=input_spec,
+    )
+    shallow_roots, deep_roots = _program_runtime_roots(program, module)
+    program = replace(
+        program,
+        runtime_receipt=_build_runtime_receipt(
+            shallow_roots=shallow_roots, deep_roots=deep_roots
+        ),
+    )
+    program.validate(module, input_spec)
+    return program
+
+
+def compile_native_single_pass_prepared_intermediate_refinement_program(
+    module: BFTaskModule,
+    input_spec: InputSpec,
+    *,
+    policy: NativeIntermediateRefinementPolicyIR,
+    plan_id: str,
+    multi_pass_policy: Optional[NativeIntermediateRefinementMultiPassPolicyIR] = None,
+    relu_split_state: Optional[Mapping[str, torch.Tensor]] = None,
+    linear_spec_C: Optional[torch.Tensor] = None,
+    source_refinement_execution: Optional[NativeIntermediateRefinementExecution] = None,
+    external_constraint_seed: Optional[NativeExternalIntermediateConstraintSeed] = None,
+) -> NativeSinglePassPreparedIntermediateRefinementProgram:
+    """Compile prepared refinement with one production target-selection launch."""
+
+    source = compile_native_single_pass_target_admission_program(
+        module,
+        input_spec,
+        policy=policy,
+        plan_id=plan_id,
+        multi_pass_policy=multi_pass_policy,
+        relu_split_state=relu_split_state,
+        linear_spec_C=linear_spec_C,
+        source_refinement_execution=source_refinement_execution,
+        external_constraint_seed=external_constraint_seed,
+    )
+    receipt = source.target_admission_receipt
+    capsule = _prepared_capsule(
+        source, target_admission_receipt_hash=receipt.stable_hash()
+    )
+    prepared_task_module, prepared_schedule = lower_native_prepared_refinement_ir(
+        capsule
+    )
+    program = NativeSinglePassPreparedIntermediateRefinementProgram(
+        plan=source.plan,
+        task_module=source.task_module,
+        schedule=source.schedule,
+        initial_interval_env=source.initial_interval_env,
+        initial_relu_pre=source.initial_relu_pre,
+        split_state=source.split_state,
+        objective=source.objective,
+        objective_influence=source.objective_influence,
+        source_intermediate_constraints=source.source_intermediate_constraints,
+        external_constraint_seed=source.external_constraint_seed,
+        capsule=capsule,
+        prepared_task_module=prepared_task_module,
+        prepared_schedule=prepared_schedule,
+        admitted_input_spec=input_spec,
+        target_admission_receipt=receipt,
+        target_admission_task_module=source.target_admission_task_module,
+        target_admission_schedule=source.target_admission_schedule,
     )
     shallow_roots, deep_roots = _program_runtime_roots(program, module)
     program = replace(
@@ -473,7 +598,9 @@ def validate_native_prepared_intermediate_refinement_full(
 __all__ = [
     "NativePreparedIntermediateRefinementExecution",
     "NativePreparedIntermediateRefinementProgram",
+    "NativeSinglePassPreparedIntermediateRefinementProgram",
     "compile_native_prepared_intermediate_refinement_program",
+    "compile_native_single_pass_prepared_intermediate_refinement_program",
     "execute_native_prepared_intermediate_refinement_program",
     "validate_native_prepared_intermediate_refinement_full",
 ]

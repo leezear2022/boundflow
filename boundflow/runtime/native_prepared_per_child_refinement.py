@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from typing import Mapping, Optional
+from typing import Callable, Mapping, Optional
 
 import torch
 
@@ -31,17 +31,20 @@ from .native_optimized_relu_split_bab_runtime import (
     _refinement_semantic_trace_hash,
 )
 from .native_prepared_intermediate_refinement import (
+    NativePreparedIntermediateRefinementProgram,
     compile_native_prepared_intermediate_refinement_program,
+    compile_native_single_pass_prepared_intermediate_refinement_program,
     execute_native_prepared_intermediate_refinement_program,
 )
 from .native_relu_split_bab_runtime import _RuntimeNode, _repeat_box_input_spec
 from .task_executor import InputSpec
 
 
-def _execute_prepared_per_child_refinements(
+def _execute_prepared_per_child_refinements_with_compiler(
     legacy_task_module: BFTaskModule,
     root_input_spec: InputSpec,
     *,
+    program_compiler: Callable[..., NativePreparedIntermediateRefinementProgram],
     objective: torch.Tensor,
     nodes: tuple[_RuntimeNode, ...],
     policy: NativeIntermediateRefinementPolicyIR,
@@ -87,7 +90,7 @@ def _execute_prepared_per_child_refinements(
             if external_constraint_seed is None:
                 raise ValueError("external-seeded refinement root lacks a seed")
             node_external_seed = external_constraint_seed
-        program = compile_native_prepared_intermediate_refinement_program(
+        program = program_compiler(
             legacy_task_module,
             single_input,
             policy=(
@@ -177,4 +180,77 @@ def _execute_prepared_per_child_refinements(
     )
 
 
-__all__ = ["_execute_prepared_per_child_refinements"]
+def _execute_prepared_per_child_refinements(
+    legacy_task_module: BFTaskModule,
+    root_input_spec: InputSpec,
+    *,
+    objective: torch.Tensor,
+    nodes: tuple[_RuntimeNode, ...],
+    policy: NativeIntermediateRefinementPolicyIR,
+    budget_policy: Optional[NativeIntermediateRefinementBudgetPolicyIR],
+    multi_pass_policy: Optional[NativeIntermediateRefinementMultiPassPolicyIR],
+    budget_group_id: str,
+    parent_by_id: Mapping[str, _OptimizedEvaluatedNode],
+    strategy: PerChildRefinementStrategy,
+    external_constraint_seed: Optional[NativeExternalIntermediateConstraintSeed],
+) -> tuple[
+    dict[str, IntervalState],
+    tuple[tuple[str, NativeIntermediateRefinementExecution], ...],
+    tuple[NativePerChildRefinementTrace, ...],
+]:
+    return _execute_prepared_per_child_refinements_with_compiler(
+        legacy_task_module,
+        root_input_spec,
+        program_compiler=compile_native_prepared_intermediate_refinement_program,
+        objective=objective,
+        nodes=nodes,
+        policy=policy,
+        budget_policy=budget_policy,
+        multi_pass_policy=multi_pass_policy,
+        budget_group_id=budget_group_id,
+        parent_by_id=parent_by_id,
+        strategy=strategy,
+        external_constraint_seed=external_constraint_seed,
+    )
+
+
+def _execute_single_pass_prepared_per_child_refinements(
+    legacy_task_module: BFTaskModule,
+    root_input_spec: InputSpec,
+    *,
+    objective: torch.Tensor,
+    nodes: tuple[_RuntimeNode, ...],
+    policy: NativeIntermediateRefinementPolicyIR,
+    budget_policy: Optional[NativeIntermediateRefinementBudgetPolicyIR],
+    multi_pass_policy: Optional[NativeIntermediateRefinementMultiPassPolicyIR],
+    budget_group_id: str,
+    parent_by_id: Mapping[str, _OptimizedEvaluatedNode],
+    strategy: PerChildRefinementStrategy,
+    external_constraint_seed: Optional[NativeExternalIntermediateConstraintSeed],
+) -> tuple[
+    dict[str, IntervalState],
+    tuple[tuple[str, NativeIntermediateRefinementExecution], ...],
+    tuple[NativePerChildRefinementTrace, ...],
+]:
+    return _execute_prepared_per_child_refinements_with_compiler(
+        legacy_task_module,
+        root_input_spec,
+        program_compiler=(
+            compile_native_single_pass_prepared_intermediate_refinement_program
+        ),
+        objective=objective,
+        nodes=nodes,
+        policy=policy,
+        budget_policy=budget_policy,
+        multi_pass_policy=multi_pass_policy,
+        budget_group_id=budget_group_id,
+        parent_by_id=parent_by_id,
+        strategy=strategy,
+        external_constraint_seed=external_constraint_seed,
+    )
+
+
+__all__ = [
+    "_execute_prepared_per_child_refinements",
+    "_execute_single_pass_prepared_per_child_refinements",
+]

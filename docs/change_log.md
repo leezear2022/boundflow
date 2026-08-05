@@ -4652,3 +4652,38 @@
 **记录**
 - `gemini_doc/change_2026-08-05_nrir46_phase0_nogo.md`
 - `gemini_doc/BOUNDFLOW_INTERMEDIATE_REFINEMENT_TEMPLATE_INSTANCE_V1_CHANGELOG_2026_08_05.md`
+
+---
+
+## 2026-08-05：NRIR-46 发布与 NRIR-47 预注册
+
+- NRIR46 功能/证据提交 `765be8f` 已由 PR #57 合入 `main@ca0bcf3`；
+- 下一分支 `feat/single-pass-target-admission-receipt-v1` 只消除 production compile/validate 的
+  target reselection，不共享 60 个动态 target ledger；
+- explicit full replay 仍从 exact source 重选；
+- Phase A compiler/queue ratio 门槛=`0.85/0.97`；Phase B trace/measured ratio=`0.98/0.98`；
+- 当前无 NRIR47 实现、artifact 或新性能 claim。
+
+**记录**
+- `gemini_doc/change_2026-08-05_nrir46_publication.md`
+- `gemini_doc/change_2026-08-05_nrir47_preregistration.md`
+- `gemini_doc/BOUNDFLOW_SINGLE_PASS_TARGET_ADMISSION_RECEIPT_V1_PLAN_2026_08_05.md`
+- `gemini_doc/BOUNDFLOW_SINGLE_PASS_TARGET_ADMISSION_RECEIPT_V1_CHANGELOG_2026_08_05.md`
+
+---
+
+## 2026-08-05：NRIR-47 Single-Pass Target Admission Receipt Phase A NO-GO
+
+- 新增 typed receipt/Task/Schedule、additive single-pass compiler、prepared binding、candidate production
+  route 与 explicit full replay；legacy compiler 文件保持冻结；
+- 每条 candidate queue compile selector/reselection=`30/0`、runtime selector=`30`、receipt/full
+  replay=`31/31`；correctness/ownership 与 186 receipt replay/tamper 门禁通过；
+- compiler ratio=`0.936003 > 0.85`，clauses 2/3 queue ratio=
+  `1.011205/1.019338 > 0.97`；Phase A timing 失败，Phase B gated off；
+- formal hash=`a7561e51…042ce`；全量 `992 passed, 37 skipped`，Pylint `10.00/10`；
+- 以 `VALIDATED-NO-GO` 关闭，candidate 不默认启用；下一门禁转 top-2 production execution
+  math/queue phase attribution。
+
+**记录**
+- `gemini_doc/change_2026-08-05_nrir47_phase_a_nogo.md`
+- `gemini_doc/BOUNDFLOW_SINGLE_PASS_TARGET_ADMISSION_RECEIPT_V1_CHANGELOG_2026_08_05.md`

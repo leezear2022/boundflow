@@ -38,7 +38,9 @@ from .native_prevalidated_objective_branch_shared_evaluator import (
     bind_prevalidated_objective_branches,
 )
 from .native_parametric_optimizer import NativeParametricOptimizerTemplateCache
+from .native_parametric_production_verifier import NativeParametricCompilerBatchTrace
 from .native_production_verifier import (
+    NativeProductionVerifierBatchTrace,
     NativeProductionReluSplitBabExecution,
     NativeProductionReluSplitBabTrace,
 )
@@ -55,16 +57,30 @@ from .native_relu_split_bab_runtime import (
 from .native_shared_parametric_ancestral import (
     NativeSharedParametricAncestralExecution,
     NativeSharedParametricAncestralTrace,
+    _SharedEvaluatedNode,
     _append_batch_tasks,
     _make_batch_commit,
     _task,
 )
+from .native_target_admission import (
+    admit_native_intermediate_refinement_execution_targets,
+)
 from .native_prepared_shared_parametric_ancestral import (
     _evaluate_prepared_shared_parametric_batch,
+    _evaluate_single_pass_prepared_shared_parametric_batch,
 )
 from .task_executor import InputSpec
 
 ClockNs = Callable[[], int]
+PreparedBatchEvaluator = Callable[
+    ...,
+    tuple[
+        tuple[_SharedEvaluatedNode, ...],
+        NativeProductionVerifierBatchTrace,
+        NativeParametricCompilerBatchTrace,
+        tuple[tuple[str, NativeIntermediateRefinementExecution], ...],
+    ],
+]
 
 
 def _canonical_hash(value: object) -> str:
@@ -72,11 +88,12 @@ def _canonical_hash(value: object) -> str:
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
-def execute_native_prepared_objective_branch_shared_production_queue(  # pylint: disable=too-many-statements
+def _execute_native_prepared_objective_branch_shared_production_queue_with_evaluator(  # pylint: disable=too-many-statements
     plan: NativeObjectiveBranchSharedPlanIR,
     module: BFTaskModule,
     input_spec: InputSpec,
     *,
+    batch_evaluator: PreparedBatchEvaluator,
     linear_spec_C: torch.Tensor,
     threshold: torch.Tensor,
     root_refinement: NativeIntermediateRefinementExecution,
@@ -161,19 +178,17 @@ def execute_native_prepared_objective_branch_shared_production_queue(  # pylint:
         inputs={"sibling_pack_plan": sibling_plan.stable_hash()},
         output=plan.shared_plan.to_dict(),
     )
-    raw_root, root_batch, root_compiler, root_refinements = (
-        _evaluate_prepared_shared_parametric_batch(
-            module,
-            input_spec,
-            objective=objective,
-            nodes=(root,),
-            batch_id=f"{query_id}:eval:0000",
-            policy=optimizer_policy,
-            parent_by_id={},
-            root_refinement=root_refinement,
-            child_refinement_policy=sibling_plan.child_refinement_policy,
-            compiler_cache=compiler_cache,
-        )
+    raw_root, root_batch, root_compiler, root_refinements = batch_evaluator(
+        module,
+        input_spec,
+        objective=objective,
+        nodes=(root,),
+        batch_id=f"{query_id}:eval:0000",
+        policy=optimizer_policy,
+        parent_by_id={},
+        root_refinement=root_refinement,
+        child_refinement_policy=sibling_plan.child_refinement_policy,
+        compiler_cache=compiler_cache,
     )
     root_values, root_branches = bind_prevalidated_objective_branches(
         raw_root,
@@ -305,7 +320,7 @@ def execute_native_prepared_objective_branch_shared_production_queue(  # pylint:
             discarded_stage = "before_sibling_pair"
             break
         raw_children, child_batch, child_compiler, child_refinement_values = (
-            _evaluate_prepared_shared_parametric_batch(
+            batch_evaluator(
                 module,
                 input_spec,
                 objective=objective,
@@ -510,4 +525,78 @@ def execute_native_prepared_objective_branch_shared_production_queue(  # pylint:
     return execution
 
 
-__all__ = ["execute_native_prepared_objective_branch_shared_production_queue"]
+def execute_native_prepared_objective_branch_shared_production_queue(
+    plan: NativeObjectiveBranchSharedPlanIR,
+    module: BFTaskModule,
+    input_spec: InputSpec,
+    *,
+    linear_spec_C: torch.Tensor,
+    threshold: torch.Tensor,
+    root_refinement: NativeIntermediateRefinementExecution,
+    optimizer_policy: NativeAlphaBetaOptimizerPolicy,
+    branch_policy: NativeObjectiveBranchPolicy,
+    compiler_cache: NativeParametricOptimizerTemplateCache,
+    query_id: str,
+    whole_query_started_ns: Optional[int] = None,
+    clock_ns: ClockNs = time.monotonic_ns,
+) -> NativeSharedParametricAncestralExecution:
+    """Execute the frozen NRIR45 queue with full compile-time reselection."""
+
+    return _execute_native_prepared_objective_branch_shared_production_queue_with_evaluator(
+        plan,
+        module,
+        input_spec,
+        batch_evaluator=_evaluate_prepared_shared_parametric_batch,
+        linear_spec_C=linear_spec_C,
+        threshold=threshold,
+        root_refinement=root_refinement,
+        optimizer_policy=optimizer_policy,
+        branch_policy=branch_policy,
+        compiler_cache=compiler_cache,
+        query_id=query_id,
+        whole_query_started_ns=whole_query_started_ns,
+        clock_ns=clock_ns,
+    )
+
+
+def execute_native_single_pass_prepared_objective_branch_shared_production_queue(
+    plan: NativeObjectiveBranchSharedPlanIR,
+    module: BFTaskModule,
+    input_spec: InputSpec,
+    *,
+    linear_spec_C: torch.Tensor,
+    threshold: torch.Tensor,
+    root_refinement: NativeIntermediateRefinementExecution,
+    optimizer_policy: NativeAlphaBetaOptimizerPolicy,
+    branch_policy: NativeObjectiveBranchPolicy,
+    compiler_cache: NativeParametricOptimizerTemplateCache,
+    query_id: str,
+    whole_query_started_ns: Optional[int] = None,
+    clock_ns: ClockNs = time.monotonic_ns,
+) -> NativeSharedParametricAncestralExecution:
+    """Execute NRIR47 with receipt-admitted per-child target selection."""
+
+    admitted_root_refinement = admit_native_intermediate_refinement_execution_targets(
+        root_refinement, module, input_spec
+    )
+    return _execute_native_prepared_objective_branch_shared_production_queue_with_evaluator(
+        plan,
+        module,
+        input_spec,
+        batch_evaluator=_evaluate_single_pass_prepared_shared_parametric_batch,
+        linear_spec_C=linear_spec_C,
+        threshold=threshold,
+        root_refinement=admitted_root_refinement,
+        optimizer_policy=optimizer_policy,
+        branch_policy=branch_policy,
+        compiler_cache=compiler_cache,
+        query_id=query_id,
+        whole_query_started_ns=whole_query_started_ns,
+        clock_ns=clock_ns,
+    )
+
+
+__all__ = [
+    "execute_native_prepared_objective_branch_shared_production_queue",
+    "execute_native_single_pass_prepared_objective_branch_shared_production_queue",
+]
