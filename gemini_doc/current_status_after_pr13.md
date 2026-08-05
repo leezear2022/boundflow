@@ -1219,3 +1219,16 @@ observed/semantic=`124/60`、冗余=`64`，60 个 target ledger 全部互异。f
 `712ce359501a010a197797909ab71fb127ebda43329dd3a7a8e21b6dbb4cf846`，replay/tamper 通过，
 `performance_claimed=false`。下一独立变量只能是 single-pass target admission receipt；公平竞品、
 10x、property closure 与 ASPLOS-ready 仍为 NO。
+
+## 49. 2026-08-05 NRIR-47 Single-Pass Target Admission Receipt 预注册
+
+NRIR46 已由 PR #57 合入 `main@ca0bcf3`。下一分支为
+`feat/single-pass-target-admission-receipt-v1`，唯一变量是把每个 child 的 exact target selection 从
+compile + validation 两次收敛为一次 selection 加 typed admission receipt。60 个 target ledger 仍
+node-specific 且互异；production 不重选，显式 full replay 必须从 exact bounds/objective/policy 重选。
+
+NRIR46 已测 target reselection ceiling median=`1.038153 s`，只约占 frozen NRIR45 whole trace 3.3%。
+Phase A 预注册 compiler ratio `<=0.85`、clauses 2/3 queue ratio 均 `<=0.97`；只有 correctness、
+ownership、timing 全过才启动 Phase B，其 trace/measured ratio 均须 `<=0.98` 且改善大于 pooled MAD。
+当前没有 NRIR47 实现、artifact 或性能 claim；final 9/9 unknown、`performance_claimed=false`、
+公平竞品/10x/property closure/ASPLOS-ready=NO 不变。

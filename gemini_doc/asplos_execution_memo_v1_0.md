@@ -1656,3 +1656,16 @@ target selection observed/semantic=`124/60`，64 次冗余 selection 估计耗�
 下一路线不能共享动态 target ledger，而应作为 NRIR47 独立预注册 single-pass exact target admission
 receipt：production compile 只选择一次，显式 full replay 仍从源输入重算。它不是公平竞品、10x 或
 ASPLOS-ready 终点。
+
+## 60. Single-Pass Target Admission Receipt v1 预注册
+
+PR #57 已将 NRIR46 Phase 0 NO-GO 合入 `main@ca0bcf3`。NRIR47 只处理已观测的 target reselection：
+每 child 从 exact bounds/effective policy/objective influence 选择一次并生成 typed receipt；receipt
+绑定 ordered target table 及全部语义输入，production validator 消费 receipt 而不重调 selector；
+显式 `validate_full` 仍重调 selector并逐项比较。
+
+NRIR46 三轮 observed/semantic target selection=`124/60`，64 次冗余耗时估计 median=`1.038153 s`；
+60/60 target ledger 互异。因此 NRIR47 禁止跨 child 缓存 targets，也不恢复已 NO-GO 的
+Template/Instance。Phase A compiler ratio 门槛=`0.85`、clauses 2/3 queue ratio=`0.97`；Phase B
+trace/measured ratio=`0.98`，所有改善必须大于 pooled MAD。当前只完成预注册，没有代码、artifact
+或新 claim。

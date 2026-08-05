@@ -1349,3 +1349,15 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - `C3-L-NRIR46`：formal hash=`712ce359501a010a197797909ab71fb127ebda43329dd3a7a8e21b6dbb4cf846`，
   replay/tamper 通过，`performance_claimed=false`。未实现 Template/Instance，也不构成 10x、公平竞品、
   GPU、多 workload、property closure 或 ASPLOS-ready。
+
+### NRIR-47（预注册）：Single-Pass Target Admission Receipt v1
+
+- `C1/C2-M-NRIR47-PENDING`：拟新增 typed target admission receipt，将 exact bounds/policy/objective/
+  influence 与 ordered target table 绑定到 prepared Plan/Task/Schedule；production admission 不重选，
+  explicit full replay 仍重选；当前尚未实现；
+- `C3-D-NRIR47`：NRIR46 target selection observed/semantic=`124/60`，64 次冗余 selection 估计
+  median=`1.038153 s`；60/60 target ledger 互异，不允许跨 child 共享；
+- `C3-G-NRIR47-PENDING`：Phase A compiler median ratio `<=0.85`、clauses 2/3 queue ratio 均
+  `<=0.97`；全过才启动 Phase B，trace/measured ratio 均 `<=0.98`，改善均须大于 pooled MAD；
+- `C3-L-NRIR47`：当前无代码、artifact 或性能 claim。即使兑现全部 ceiling，也只约为 NRIR45
+  trace 的 3.3%，不构成 10x、公平竞品、GPU、多 workload、property closure 或 ASPLOS-ready。

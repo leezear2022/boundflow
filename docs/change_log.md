@@ -4652,3 +4652,20 @@
 **记录**
 - `gemini_doc/change_2026-08-05_nrir46_phase0_nogo.md`
 - `gemini_doc/BOUNDFLOW_INTERMEDIATE_REFINEMENT_TEMPLATE_INSTANCE_V1_CHANGELOG_2026_08_05.md`
+
+---
+
+## 2026-08-05：NRIR-46 发布与 NRIR-47 预注册
+
+- NRIR46 功能/证据提交 `765be8f` 已由 PR #57 合入 `main@ca0bcf3`；
+- 下一分支 `feat/single-pass-target-admission-receipt-v1` 只消除 production compile/validate 的
+  target reselection，不共享 60 个动态 target ledger；
+- explicit full replay 仍从 exact source 重选；
+- Phase A compiler/queue ratio 门槛=`0.85/0.97`；Phase B trace/measured ratio=`0.98/0.98`；
+- 当前无 NRIR47 实现、artifact 或新性能 claim。
+
+**记录**
+- `gemini_doc/change_2026-08-05_nrir46_publication.md`
+- `gemini_doc/change_2026-08-05_nrir47_preregistration.md`
+- `gemini_doc/BOUNDFLOW_SINGLE_PASS_TARGET_ADMISSION_RECEIPT_V1_PLAN_2026_08_05.md`
+- `gemini_doc/BOUNDFLOW_SINGLE_PASS_TARGET_ADMISSION_RECEIPT_V1_CHANGELOG_2026_08_05.md`

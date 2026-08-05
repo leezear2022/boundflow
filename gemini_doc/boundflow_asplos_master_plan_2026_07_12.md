@@ -85,6 +85,12 @@
 > `712ce359…cf846`，replay/tamper 通过，`performance_claimed=false`。下一候选路线是独立预注册
 > single-pass exact target admission receipt；ASPLOS-ready=NO。
 
+> **2026-08-05 NRIR-47 预注册**：PR #57 已将 NRIR46 NO-GO 合入 `main@ca0bcf3`。NRIR47 只把
+> 每 child exact target selection 从 compile + validation 两次收敛为一次 typed admission receipt；
+> 60 个动态 target ledger 不共享，explicit full replay 仍从 exact source 重选。Phase A compiler/
+> queue ratio 门槛=`0.85/0.97`，Phase B trace/measured ratio=`0.98/0.98`，改善均须大于 pooled MAD。
+> 当前无实现或新 claim，ASPLOS-ready=NO。
+
 > **2026-08-04 NRIR-21 修订**：per-child exact-split objective refinement 的 IR/control、lineage
 > 与 replay 已实现，但固定 ResNet clauses 0/1 的最差 depth-2 leaf lower 相对 root-global 分别
 > 退化 `0.847961/0.936646`，故该策略 `VALIDATED-NO-GO`。下一方法门禁是把祖先已证明 refined

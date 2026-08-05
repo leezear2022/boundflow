@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev005318
-last_va: ev005319
+last_ch: ev005352
+last_va: ev005353
 blk:
-next: publish-nrir46-and-preregister-nrir47
-updated: 2026-08-05T11:24:00Z
+next: implement-nrir47-receipt-ir-and-phase-a
+updated: 2026-08-05T11:31:30Z
