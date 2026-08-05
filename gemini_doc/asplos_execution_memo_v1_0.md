@@ -1557,3 +1557,5 @@ targeted `10 passed`、全量 `968 passed, 37 skipped` 与静态门禁通过。
 Root-Projection Floor Schedule：当前 floor 约 21.77 秒，其中 baseline 约 4.82 秒、九条顺序
 objective queries 合计约 13.88 秒，而 ranking consumer 只读取每条 root lower；应以 typed consumer
 contract 消除非 top-2 的深层 queue work，不继续扩大 CPU domain batch。
+
+发布状态：NRIR-43 提交 `00b82c2` 已由 PR #54 合入 `main@2d245d6`；production 默认仍为 NRIR-42。

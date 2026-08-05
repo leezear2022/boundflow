@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-05
-> 当前 integration base：`34ca6c6`（NRIR-42 发布记录；功能 merge `8969064`）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/cross-axis-verification-batch-schedule-v1`
+> 当前 integration base：`2d245d6`（NRIR-43 / PR #54 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`main`；下一预注册分支：`feat/root-projection-floor-schedule-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
@@ -62,6 +62,7 @@
 > clauses 2/3 median ratio=`1.051134/1.044573`，墙钟分别退化 `0.655621/0.579665 s`；formal hash=
 > `692b9e27…30390`，全量 `968 passed, 37 skipped`。状态为 `VALIDATED-NO-GO`，Phase B 不启动，
 > NRIR-42 production admission 保持。下一变量是 NRIR-44 root-projection floor Schedule。
+> NRIR-43 功能/负结果提交 `00b82c2` 已由 PR #54 合入 `main@2d245d6`。
 > 2026-08-05 NRIR-36 后续：九子句 NRIR-31 floor 已由 typed root-lower priority 选择 clauses 2/3，
 > dynamic equal-remaining slices 在同一 global start 下执行。三 fresh repeats 都复现
 > rank=`[2,3,4,5,0,8,6,7,1]`，packed nodes=`[[3,3],[3,3],[3,1]]`；repeat 2 第二条未提交

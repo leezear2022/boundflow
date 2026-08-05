@@ -4522,3 +4522,14 @@
 
 **记录**
 - `gemini_doc/change_2026-08-05_nrir43_cross_axis_batch_nogo.md`
+
+---
+
+## 2026-08-05：NRIR-43 发布
+
+- 提交 `00b82c2` 已由 PR #54 合入 `main@2d245d6`；
+- 发布不改变 NRIR-42 production 默认，也不升级性能 claim；
+- 下一预注册路线为 NRIR-44 Root-Projection Floor Schedule。
+
+**记录**
+- `gemini_doc/change_2026-08-05_nrir43_publication.md`
