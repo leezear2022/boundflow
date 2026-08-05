@@ -1,0 +1,15 @@
+{
+  "files": {
+    "formal.json": "70e61044f06511cdeef58af944da087b185e99f171fc677e2dc1636e9ca9a09b",
+    "logs/repeat-0.log": "4aa660f11377cccb9213d496224c7901f9764fea260beb7bf16fb4b17be47f31",
+    "logs/repeat-1.log": "1899737399fd9104d19aa9d69d1d5415436128299e0011215eb90174653634c0",
+    "logs/repeat-2.log": "1323169410ca591f4dce39a9f56359368d6cbfa732ce3f4b3e566635e8ca08d5",
+    "shards/repeat-0.json": "82eb77d96eafed0a4239ec54717974c494dad08ebeb2570f68ef02a2fba563e3",
+    "shards/repeat-1.json": "bf243b7dc50fcbfceef1ce98e261e115f0bfea1b5336d0da56661e81f177a9ea",
+    "shards/repeat-2.json": "e8124e2f3364ef00bb4025cc2b6889864646d981c6e64b2a09807721df8cf48c"
+  },
+  "formal_hash": "692b9e273661fce9f12129e134550547afa4023361e2a79d751c437c92f30390",
+  "manifest_hash": "d49bebacad0991295a2d5a0511b65df561926452659b190173f8a4a8744dda65",
+  "performance_claimed": false,
+  "schema_version": "boundflow.cross-axis-verification-batch-manifest/v1"
+}

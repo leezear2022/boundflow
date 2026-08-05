@@ -1528,3 +1528,32 @@ Schedule，并以 exact semantics + fresh paired timing 判定；不再优化 sc
 
 发布状态：功能提交 `264365f` 已由 PR #53 合入 `main@8969064`。后续实验必须以该 merge commit
 为 integration base，不能在旧 NRIR-41 基线上继续分叉。
+
+## 56. Cross-Axis Verification Batch Schedule v1（预注册）
+
+NRIR-43 的唯一变量是 ready-work Schedule。NRIR-42 每条 selected clause 由 1 个 root 与 15 个
+sibling groups 组成；每节点 48 candidates 对应 96 child domains。现实现按 clause 串行，并在每个
+sibling group 内按 node 串行 scorer，因此两 clause 合计发射 32 次 optimizer batch 和 62 次 scorer
+lower batch。NRIR-43 只把这些已经独立且 ready 的工作沿 clause/node/candidate 轴联合装箱，再用
+typed ragged segments 还原到原 queue；不得改变任何算法或数值 policy。
+
+Phase A 先验证单 queue sibling-node scorer pack：逐节点 candidate/score/branch/child lower/queue/
+split/α/β/refinement 等价，scorer launch `62→<=32`，三 paired repeats 每条 queue ratio `<=0.85` 且
+改善大于 pooled MAD。任一失败即 `VALIDATED-NO-GO`，不进入全局运行。
+
+Phase B 才允许 two-clause ready-set coordinator：两个 queue 的状态与提交顺序互相隔离，只联合
+同 round 的 root 或 sibling tensor work。门禁为 optimizer launch `32→<=16`、scorer launch
+`62→<=16`、两条均 `31 nodes/15 groups/31 capsules`、three fresh whole 每轮 `<=45 s` 且 median
+ratio `<=0.80`。即使通过也仅是 fixed ResNet2B property 0 CPU8 internal admission，
+`performance_claimed=false`；公平竞品、多 workload、GPU 与 ASPLOS-ready 仍需后续独立门禁。
+
+Phase A 正式结果：6 个 clause-repeat 组的 queue/branch/48-entry score/child lower/state/split/α/β/
+refinement 全部 exact；每条 scorer launches `31→16`。但是 clauses 2/3 的 NRIR-42/cross-axis median=
+`12.821506/13.477127 s` 与 `13.004753/13.584418 s`，ratio=`1.051134/1.044573`，两条 timing gate
+均失败。formal hash=`692b9e273661fce9f12129e134550547afa4023361e2a79d751c437c92f30390`；
+targeted `10 passed`、全量 `968 passed, 37 skipped` 与静态门禁通过。
+
+因此 NRIR-43 以 `VALIDATED-NO-GO` 关闭，Phase B 按预注册不得启动。下一单变量转 NRIR-44
+Root-Projection Floor Schedule：当前 floor 约 21.77 秒，其中 baseline 约 4.82 秒、九条顺序
+objective queries 合计约 13.88 秒，而 ranking consumer 只读取每条 root lower；应以 typed consumer
+contract 消除非 top-2 的深层 queue work，不继续扩大 CPU domain batch。

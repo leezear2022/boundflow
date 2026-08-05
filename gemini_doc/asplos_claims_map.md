@@ -1279,3 +1279,18 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   `0d310c2ffc96844648a83f9921bc7f353ec8425986bccb36f75e6d1cd2b25b58` /
   `7274e834b3bf08a9e138fa3284b70222620cf3c571395331e1a87ed5fee7d759`；targeted `10 passed`，
   全量 `958 passed, 37 skipped`，静态门禁通过。本阶段 `VALIDATED-REDUCED`。
+
+### NRIR-43：Cross-Axis Verification Batch Schedule v1
+
+- `C1/C2-M-NRIR43`：typed ragged Plan/Instance/Task/Schedule/Trace 显式拥有 clause/node/candidate
+  segments；一个 lower launch 后按 owner 还原 legacy-compatible trace，NRIR-42 frozen 文件不改；
+- `C3-G-NRIR43`：6/6 组 queue/branch/score/child-bound/state/refinement exact，segment/launch/objective
+  owner synchronized outer-rehash tamper fail closed；每条 physical scorer launch `31→16`；
+- `C3-E-NRIR43-NOGO`：clauses 2/3 NRIR-42/cross-axis median ratio=`1.051134/1.044573`，两条预注册
+  `<=0.85` timing gate 均失败；减少 launch 在 CPU 上没有转化为加速；
+- `C3-L-NRIR43`：Phase B gated off，production 仍使用 NRIR-42；`performance_claimed=false`，不得外推
+  公平竞品、GPU、多工作负载、property closure 或 ASPLOS-ready；
+- 工件：`artifacts/cross-axis-verification-batch/`
+  `vnncomp21-resnet2b-property0-three-repeat-cpu-phase-a-v1/`；formal hash=
+  `692b9e273661fce9f12129e134550547afa4023361e2a79d751c437c92f30390`；全量
+  `968 passed, 37 skipped`。本阶段 `VALIDATED-NO-GO`。

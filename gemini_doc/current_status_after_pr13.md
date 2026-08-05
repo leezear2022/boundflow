@@ -1,8 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-05
-> 当前 integration base：`8969064`（NRIR-42 / PR #53 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`main`；下一预注册分支：`feat/cross-axis-verification-batch-schedule-v1`
+> 当前 integration base：`34ca6c6`（NRIR-42 发布记录；功能 merge `8969064`）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前研发分支：`feat/cross-axis-verification-batch-schedule-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
@@ -52,6 +52,16 @@
 > performance/GPU/multi-workload/competitor/ASPLOS-ready 均未升级。下一单变量是
 > cross-clause/node/candidate batch Schedule，而不是继续调 scorer validation。
 > NRIR-42 已由 PR #53 合入 `main@8969064`；功能提交为 `264365f`。
+> 2026-08-05 NRIR-43 已预注册：唯一变量是把已经 ready 的 clause/node/candidate child-lower
+> 计算降为 typed ragged batch Schedule；policy、optimizer/refinement、queue、31/depth4、dtype、
+> workload 与 global-60s deadline 全部冻结。Phase A 要求 exact ownership/semantics、scorer launch
+> `62→<=32` 且每条 queue ratio `<=0.85`；只有 Phase A 全过才进入 two-clause ready-set Phase B，
+> 其门禁为 optimizer launch `32→<=16`、scorer launch `62→<=16`、每轮 whole `<=45 s` 且 median
+> ratio `<=0.80`。以上为预注册时门禁，不是已实现或性能结论。
+> 2026-08-05 NRIR-43 Phase A 已正式关闭：6/6 组 exact，per-clause scorer launches `31→16`，但
+> clauses 2/3 median ratio=`1.051134/1.044573`，墙钟分别退化 `0.655621/0.579665 s`；formal hash=
+> `692b9e27…30390`，全量 `968 passed, 37 skipped`。状态为 `VALIDATED-NO-GO`，Phase B 不启动，
+> NRIR-42 production admission 保持。下一变量是 NRIR-44 root-projection floor Schedule。
 > 2026-08-05 NRIR-36 后续：九子句 NRIR-31 floor 已由 typed root-lower priority 选择 clauses 2/3，
 > dynamic equal-remaining slices 在同一 global start 下执行。三 fresh repeats 都复现
 > rank=`[2,3,4,5,0,8,6,7,1]`，packed nodes=`[[3,3],[3,3],[3,1]]`；repeat 2 第二条未提交

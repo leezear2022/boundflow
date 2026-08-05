@@ -16,7 +16,11 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_SCORER_OWNERSHIP_V1_PLAN_2026_08_05.md`
+当前最新入口：`gemini_doc/BOUNDFLOW_CROSS_AXIS_VERIFICATION_BATCH_SCHEDULE_V1_PLAN_2026_08_05.md`
+（NRIR-43 已 `VALIDATED-NO-GO`：typed ragged batch 保持 6/6 exact 并将每条 scorer launch
+`31→16`，但 clauses 2/3 median ratio=`1.051134/1.044573`，CPU 墙钟退化；Phase B 按门禁未启动，
+formal hash=`692b9e27…30390`）。下一路线为 NRIR-44 Root-Projection Floor Schedule。
+其直接前序为 `gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_SCORER_OWNERSHIP_V1_PLAN_2026_08_05.md`
 （NRIR-42 已 `VALIDATED-REDUCED`：typed validated capsule 把每条 31-node queue 的 candidate
 enumeration 从 341 次收敛到 compile-only 31 次；Phase A new/old median ratio=
 `0.706888/0.698486`，Phase B 三轮均完成 clauses 2/3 的 `[31,31]` nodes，whole=
