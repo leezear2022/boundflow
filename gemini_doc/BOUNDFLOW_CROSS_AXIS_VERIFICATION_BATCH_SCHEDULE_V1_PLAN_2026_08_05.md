@@ -1,6 +1,6 @@
 ---
-status: preregistered
-updated: 2026-08-04T23:28:03Z
+status: validated-no-go
+updated: 2026-08-05T00:05:57Z
 type: plan
 topic: boundflow
 slug: cross-axis-verification-batch-schedule-v1
@@ -58,10 +58,10 @@ optimizer steps/α/β、intermediate refinement、queue priority、`31 nodes/dep
 
 ### A. Typed IR 与 sibling scorer pack
 
-- [ ] 新增 cross-axis Plan/Instance/Task/Schedule/Trace IR 及 stable hash、fail-closed validate；
-- [ ] 编译每节点 NRIR-42 capsule 后，按 ragged segment 合并 child splits、relu-pre、α、β、objective；
-- [ ] 一次 `_evaluate_state` 后按 segment 还原每节点 child lower、score 与 selected branch；
-- [ ] root 单节点和 sibling 双节点都走同一 Schedule，不保留未记录的旁路。
+- [x] 新增 cross-axis Plan/Instance/Task/Schedule/Trace IR 及 stable hash、fail-closed validate；
+- [x] 编译每节点 NRIR-42 capsule 后，按 ragged segment 合并 child splits、relu-pre、α、β、objective；
+- [x] 一次 `_evaluate_state` 后按 segment 还原每节点 child lower、score 与 selected branch；
+- [x] root 单节点和 sibling 双节点都走同一 Schedule，不保留未记录的旁路。
 
 ### B. 两 clause ready-set coordinator
 
@@ -71,14 +71,17 @@ optimizer steps/α/β、intermediate refinement、queue priority、`31 nodes/dep
 - [ ] 任一 clause prune/terminal/budget/deadline 后允许 ragged 缩窄，但不得改变另一 clause 的 queue 次序；
 - [ ] 原 ordinal aggregate、verdict、deadline 和 evidence owner 保持 NRIR-42 语义。
 
+Phase B 因 Phase A timing gate 失败而按预注册整体 gated off；以上项目未实现、未运行。
+
 ### C. 正式证据
 
-- [ ] Phase A：三次 counterbalanced NRIR-42/new paired scorer/queue 运行；
-- [ ] Phase B：只有 Phase A 全过才执行三次 fresh global-60s whole query；
-- [ ] generate/replay 必须重建 typed Plan/Instance/Task/Schedule/Trace，并逐段重算语义；
-- [ ] 加入 synchronized rehash tamper：segment offset、objective owner、capsule owner、node order、
-  launch count、partial commit、deadline；
-- [ ] targeted、predecessor-inclusive、全量 pytest、Black、mypy、Pylint 与 DocOps 门禁。
+- [x] Phase A：三次 counterbalanced NRIR-42/new paired scorer/queue 运行；
+- [x] Phase B：只有 Phase A 全过才执行三次 fresh global-60s whole query；本轮条件不成立，未启动；
+- [x] generate/replay 必须重建 typed Plan/Instance/Task/Schedule/Trace，并逐段重算语义；
+- [x] 加入 Phase-A synchronized outer-rehash segment offset/objective owner/launch count 与 typed
+  capsule/node owner tamper；
+- [ ] Phase-B partial commit/deadline tamper：Phase A 未过，按门禁未实现；
+- [x] targeted、predecessor-inclusive、全量 pytest、Black、mypy、Pylint 与 DocOps 门禁。
 
 ## Validation
 
@@ -110,6 +113,28 @@ optimizer steps/α/β、intermediate refinement、queue priority、`31 nodes/dep
 通过后仅能声明：fixed ResNet2B property 0 CPU8 cross-axis production admission
 `VALIDATED-REDUCED`、`performance_claimed=false`。不得声明 property closure、GPU/multi-workload、
 公平竞品数量级领先或 ASPLOS-ready。
+
+## Phase A 正式结果
+
+- 6 个 clause-repeat old/new 组的 queue、branch、48-entry scores、child lower、selected state、split、
+  α/β 与 refinement 全部 exact；typed segment/capsule owner 和连续覆盖门禁通过；
+- 每条 31-node queue 的 scorer physical launches 从 `31→16`，node widths 固定为
+  `[1,2,…,2]`，launch gate 通过；
+- clause 2：NRIR-42/cross-axis median=`12.821506/13.477127 s`，ratio=`1.051134`，
+  median delta=`-0.655621 s`；
+- clause 3：NRIR-42/cross-axis median=`13.004753/13.584418 s`，ratio=`1.044573`，
+  median delta=`-0.579665 s`；
+- 两条 timing gate 均失败；减少发射没有转化为 CPU 加速，192-domain scorer batch 比两个
+  96-domain launches 更慢；
+- formal hash=`692b9e273661fce9f12129e134550547afa4023361e2a79d751c437c92f30390`，
+  decision hash=`1054192454234aa151db494c98e399f1ad44cf6a93e4790f7ce0590da45142bb`；
+- targeted `10 passed`，全量 `968 passed, 37 skipped`，Black/mypy/Pylint `10.00/10` 通过。
+
+## 决定
+
+NRIR-43 以 `VALIDATED-NO-GO` 关闭，`performance_claimed=false`。Phase B 不启动，NRIR-42
+production 路径不被替换。下一变量转为 NRIR-44 Root-Projection Floor Schedule：消除 floor 中
+ranking consumer 不需要的九条深层 queue work，而不是继续扩大 CPU domain batch。
 
 ## Rollback
 

@@ -50,6 +50,11 @@
 > Phase A；再以 two-clause ready-set 的 optimizer/scorer launch `<=16`、three-repeat whole
 > `<=45 s` 且 median ratio `<=0.80` 过 Phase B。当前没有新 claim，ASPLOS-ready=NO。
 
+> **2026-08-05 NRIR-43 关闭**：typed ragged scorer batch 的 6/6 semantic groups exact，每条 launch
+> `31→16`，但 clauses 2/3 median ratio=`1.051134/1.044573`，CPU wall time 退化，故 Phase A
+> `VALIDATED-NO-GO`、Phase B gated off。下一单变量为 root-projection floor Schedule；不把 launch
+> reduction 当性能结果，ASPLOS-ready=NO 不变。
+
 > **2026-08-04 NRIR-21 修订**：per-child exact-split objective refinement 的 IR/control、lineage
 > 与 replay 已实现，但固定 ResNet clauses 0/1 的最差 depth-2 leaf lower 相对 root-global 分别
 > 退化 `0.847961/0.936646`，故该策略 `VALIDATED-NO-GO`。下一方法门禁是把祖先已证明 refined

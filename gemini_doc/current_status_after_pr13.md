@@ -57,7 +57,11 @@
 > workload 与 global-60s deadline 全部冻结。Phase A 要求 exact ownership/semantics、scorer launch
 > `62→<=32` 且每条 queue ratio `<=0.85`；只有 Phase A 全过才进入 two-clause ready-set Phase B，
 > 其门禁为 optimizer launch `32→<=16`、scorer launch `62→<=16`、每轮 whole `<=45 s` 且 median
-> ratio `<=0.80`。当前仅为计划，不得写成已实现或性能结论。
+> ratio `<=0.80`。以上为预注册时门禁，不是已实现或性能结论。
+> 2026-08-05 NRIR-43 Phase A 已正式关闭：6/6 组 exact，per-clause scorer launches `31→16`，但
+> clauses 2/3 median ratio=`1.051134/1.044573`，墙钟分别退化 `0.655621/0.579665 s`；formal hash=
+> `692b9e27…30390`，全量 `968 passed, 37 skipped`。状态为 `VALIDATED-NO-GO`，Phase B 不启动，
+> NRIR-42 production admission 保持。下一变量是 NRIR-44 root-projection floor Schedule。
 > 2026-08-05 NRIR-36 后续：九子句 NRIR-31 floor 已由 typed root-lower priority 选择 clauses 2/3，
 > dynamic equal-remaining slices 在同一 global start 下执行。三 fresh repeats 都复现
 > rank=`[2,3,4,5,0,8,6,7,1]`，packed nodes=`[[3,3],[3,3],[3,1]]`；repeat 2 第二条未提交

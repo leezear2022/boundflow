@@ -4508,3 +4508,17 @@
 - `gemini_doc/change_2026-08-05_nrir43_preregistration.md`
 - `gemini_doc/BOUNDFLOW_CROSS_AXIS_VERIFICATION_BATCH_SCHEDULE_V1_PLAN_2026_08_05.md`
 - `gemini_doc/BOUNDFLOW_CROSS_AXIS_VERIFICATION_BATCH_SCHEDULE_V1_CHANGELOG_2026_08_05.md`
+
+---
+
+## 2026-08-05：NRIR-43 Cross-Axis Verification Batch Schedule Phase A NO-GO
+
+- 新增 typed ragged Plan/Instance/Task/Schedule/Trace、联合 scorer runtime、additive queue 与 formal replay；
+- 6/6 exact，per-clause scorer launch `31→16`；
+- clauses 2/3 median ratio=`1.051134/1.044573`，预注册 timing gate 失败，Phase B gated off；
+- formal hash=`692b9e273661fce9f12129e134550547afa4023361e2a79d751c437c92f30390`；
+- targeted `10 passed`、全量 `968 passed, 37 skipped`、静态门禁通过；
+- 下一变量为 NRIR-44 Root-Projection Floor Schedule。
+
+**记录**
+- `gemini_doc/change_2026-08-05_nrir43_cross_axis_batch_nogo.md`

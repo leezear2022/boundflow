@@ -1546,3 +1546,14 @@ Phase B 才允许 two-clause ready-set coordinator：两个 queue 的状态与�
 `62→<=16`、两条均 `31 nodes/15 groups/31 capsules`、three fresh whole 每轮 `<=45 s` 且 median
 ratio `<=0.80`。即使通过也仅是 fixed ResNet2B property 0 CPU8 internal admission，
 `performance_claimed=false`；公平竞品、多 workload、GPU 与 ASPLOS-ready 仍需后续独立门禁。
+
+Phase A 正式结果：6 个 clause-repeat 组的 queue/branch/48-entry score/child lower/state/split/α/β/
+refinement 全部 exact；每条 scorer launches `31→16`。但是 clauses 2/3 的 NRIR-42/cross-axis median=
+`12.821506/13.477127 s` 与 `13.004753/13.584418 s`，ratio=`1.051134/1.044573`，两条 timing gate
+均失败。formal hash=`692b9e273661fce9f12129e134550547afa4023361e2a79d751c437c92f30390`；
+targeted `10 passed`、全量 `968 passed, 37 skipped` 与静态门禁通过。
+
+因此 NRIR-43 以 `VALIDATED-NO-GO` 关闭，Phase B 按预注册不得启动。下一单变量转 NRIR-44
+Root-Projection Floor Schedule：当前 floor 约 21.77 秒，其中 baseline 约 4.82 秒、九条顺序
+objective queries 合计约 13.88 秒，而 ranking consumer 只读取每条 root lower；应以 typed consumer
+contract 消除非 top-2 的深层 queue work，不继续扩大 CPU domain batch。

@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev004841
-last_va: ev004842
+last_ch: ev004923
+last_va: ev004924
 blk:
-next: implement-nrir43-phase-a-typed-sibling-scorer-pack
-updated: 2026-08-04T23:31:31Z
+next: publish-nrir43-and-preregister-nrir44-root-projection-floor
+updated: 2026-08-05T00:08:57Z
