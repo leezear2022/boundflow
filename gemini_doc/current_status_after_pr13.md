@@ -1243,7 +1243,7 @@ formal hash=`a7561e5187a6e396905d261e739280e39f2c3480e83ba2af0fbe6e3b1ec042ce`�
 `performance_claimed=false`、公平竞品/10x/property closure/ASPLOS-ready=NO 不变。下一步转 top-2
 production execution math/queue phase attribution。
 
-## 50. 2026-08-05 NRIR-48 Top-2 Production Execution Cost Attribution 预注册
+## 50. 2026-08-05 NRIR-48 Top-2 Production Execution Cost Attribution 判定
 
 NRIR47 已由 PR #58 合入 `main@1e44949`。新分支
 `feat/top2-production-execution-cost-attribution-v1` 只测 NRIR45 default production route，不启用
@@ -1252,4 +1252,14 @@ NRIR47 candidate，也不修改算法/IR/runtime。clauses 2/3 各运行 three f
 
 预注册要求 correctness exact、category closure error `<=1%`、instrumentation median ratio `<=1.05`；
 同一 dominant category 必须在两条 clause 各 3/3 排第一、median share 均 `>=20%`、range `<=10`
-percentage points 且稳定超过 pooled MAD。当前没有 runner、artifact、dominant 根因或 performance claim。
+percentage points 且稳定超过 pooled MAD。
+
+正式 6/6 semantic exact，clauses 2/3 profile/control ratio=`1.023199/1.020221`。两条 3/3 winner
+均为 child refinement execute：median=`3.816002/3.704755 s`，queue share=
+`32.1966%/31.1640%`。内部 selected-CROWN median=`2.663321/2.694436 s`，占 parent=
+`71.7725%/72.7291%`，为唯一过 `>=30%` 的子类。formal hash=
+`571c2e47c0c8906d2486e5e19e8152eb1ef0d3024b08cf561e25ed4f71d177a4`；replay/tamper 与全量
+`996 passed, 37 skipped` 通过。
+
+NRIR48 attribution `VALIDATED-REDUCED`；未实现优化、没有 speedup claim。下一步只允许另立 NRIR49
+selected-CROWN execution 单变量。

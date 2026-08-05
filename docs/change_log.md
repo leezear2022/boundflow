@@ -4704,3 +4704,19 @@
 - `gemini_doc/change_2026-08-05_nrir48_preregistration.md`
 - `gemini_doc/BOUNDFLOW_TOP2_PRODUCTION_EXECUTION_COST_ATTRIBUTION_V1_PLAN_2026_08_05.md`
 - `gemini_doc/BOUNDFLOW_TOP2_PRODUCTION_EXECUTION_COST_ATTRIBUTION_V1_CHANGELOG_2026_08_05.md`
+
+---
+
+## 2026-08-05：NRIR-48 Top-2 Production Execution Cost Attribution 关闭
+
+- 新增 additive paired attribution runner 与七类顶层/五类 child-execute 互斥闭合；
+- 6/6 semantics exact，profile/control ratio=`1.023199/1.020221`；
+- child execute 两条 3/3 dominant，queue share=`32.1966%/31.1640%`；selected-CROWN 占 parent=
+  `71.7725%/72.7291%`，按预注册规则成为唯一 NRIR-49 来源；
+- formal hash=`571c2e47…d177a4`；replay/tamper、focused `4 passed`、全量
+  `996 passed, 37 skipped`、静态门禁通过；
+- 状态为 attribution `VALIDATED-REDUCED`，不是 speedup；下一路线只做 selected-CROWN execution。
+
+**记录**
+- `gemini_doc/change_2026-08-05_nrir48_execution_cost_attribution.md`
+- `gemini_doc/BOUNDFLOW_TOP2_PRODUCTION_EXECUTION_COST_ATTRIBUTION_V1_CHANGELOG_2026_08_05.md`

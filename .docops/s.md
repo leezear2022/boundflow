@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev005531
-last_va: ev005532
+last_ch: ev005562
+last_va: ev005563
 blk:
-next: implement-nrir48-additive-attribution-runner-and-phase0
-updated: 2026-08-05T12:42:40Z
+next: publish-nrir48-then-preregister-nrir49-selected-crown-execution
+updated: 2026-08-05T13:15:50Z

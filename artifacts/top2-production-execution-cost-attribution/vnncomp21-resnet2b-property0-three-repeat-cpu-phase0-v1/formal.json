@@ -1,0 +1,587 @@
+{
+  "category_metrics": [
+    {
+      "category": "child_refinement_compile_ns",
+      "mad_ns": 55827774,
+      "median_ns": 3044739330,
+      "median_share": 0.25689287469485844,
+      "original_clause_index": 2,
+      "share_range": 0.01608305654055059,
+      "shares": [
+        0.24932995255796614,
+        0.26541300909851673,
+        0.25689287469485844
+      ],
+      "values_ns": [
+        3100567104,
+        2982646115,
+        3044739330
+      ]
+    },
+    {
+      "category": "child_refinement_execute_ns",
+      "mad_ns": 348415525,
+      "median_ns": 3816002413,
+      "median_share": 0.3219664225633682,
+      "original_clause_index": 2,
+      "share_range": 0.028559428823235256,
+      "shares": [
+        0.33487877929607396,
+        0.3063193504728387,
+        0.3219664225633682
+      ],
+      "values_ns": [
+        4164417938,
+        3442341518,
+        3816002413
+      ]
+    },
+    {
+      "category": "optimizer_prepare_ns",
+      "mad_ns": 3885340,
+      "median_ns": 130660432,
+      "median_share": 0.010819404910268612,
+      "original_clause_index": 2,
+      "share_range": 0.00031448231219701785,
+      "shares": [
+        0.010819404910268612,
+        0.010709690974043572,
+        0.01102417328624059
+      ],
+      "values_ns": [
+        134545772,
+        120352873,
+        130660432
+      ]
+    },
+    {
+      "category": "optimizer_execute_ns",
+      "mad_ns": 95418964,
+      "median_ns": 965765121,
+      "median_share": 0.08148420975457292,
+      "original_clause_index": 2,
+      "share_range": 0.00871686886828639,
+      "shares": [
+        0.08616527661769184,
+        0.07744840774940545,
+        0.08148420975457292
+      ],
+      "values_ns": [
+        1071516757,
+        870346157,
+        965765121
+      ]
+    },
+    {
+      "category": "branch_bind_score_ns",
+      "mad_ns": 47987325,
+      "median_ns": 2963570369,
+      "median_share": 0.2500444303890253,
+      "original_clause_index": 2,
+      "share_range": 0.015941081546802294,
+      "shares": [
+        0.24350426971125438,
+        0.2594453512580567,
+        0.2500444303890253
+      ],
+      "values_ns": [
+        3028121253,
+        2915583044,
+        2963570369
+      ]
+    },
+    {
+      "category": "materialize_commit_ns",
+      "mad_ns": 12061945,
+      "median_ns": 793976863,
+      "median_share": 0.0669899707891499,
+      "original_clause_index": 2,
+      "share_range": 0.004536895733150456,
+      "shares": [
+        0.06481705153204115,
+        0.0693539472651916,
+        0.0669899707891499
+      ],
+      "values_ns": [
+        806038808,
+        779382601,
+        793976863
+      ]
+    },
+    {
+      "category": "queue_control_residual_ns",
+      "mad_ns": 3288816,
+      "median_ns": 130390547,
+      "median_share": 0.011310243181947257,
+      "original_clause_index": 2,
+      "share_range": 0.001112653148080723,
+      "shares": [
+        0.010485265374703935,
+        0.011310243181947257,
+        0.011597918522784658
+      ],
+      "values_ns": [
+        130390547,
+        127101731,
+        137460561
+      ]
+    },
+    {
+      "category": "child_refinement_compile_ns",
+      "mad_ns": 20194249,
+      "median_ns": 3133016607,
+      "median_share": 0.26190218981817515,
+      "original_clause_index": 3,
+      "share_range": 0.005400453636677571,
+      "shares": [
+        0.26190218981817515,
+        0.2631585560720834,
+        0.2577581024354058
+      ],
+      "values_ns": [
+        3153210856,
+        3103148140,
+        3133016607
+      ]
+    },
+    {
+      "category": "child_refinement_execute_ns",
+      "mad_ns": 29914408,
+      "median_ns": 3704755257,
+      "median_share": 0.3116402337200534,
+      "original_clause_index": 3,
+      "share_range": 0.004757801634919512,
+      "shares": [
+        0.3077128548832753,
+        0.3116402337200534,
+        0.31247065651819483
+      ],
+      "values_ns": [
+        3704755257,
+        3674840849,
+        3798040670
+      ]
+    },
+    {
+      "category": "optimizer_prepare_ns",
+      "mad_ns": 1297679,
+      "median_ns": 129600156,
+      "median_share": 0.010830139449793214,
+      "original_clause_index": 3,
+      "share_range": 0.00020982424658691837,
+      "shares": [
+        0.010872228720044142,
+        0.010830139449793214,
+        0.010662404473457223
+      ],
+      "values_ns": [
+        130897835,
+        127708282,
+        129600156
+      ]
+    },
+    {
+      "category": "optimizer_execute_ns",
+      "mad_ns": 48800455,
+      "median_ns": 1078867335,
+      "median_share": 0.08960952199633007,
+      "original_clause_index": 3,
+      "share_range": 0.015534556054936088,
+      "shares": [
+        0.08960952199633007,
+        0.07724041011616652,
+        0.0927749661711026
+      ],
+      "values_ns": [
+        1078867335,
+        910813764,
+        1127667790
+      ]
+    },
+    {
+      "category": "branch_bind_score_ns",
+      "mad_ns": 430735,
+      "median_ns": 3043832773,
+      "median_share": 0.2528531441567382,
+      "original_clause_index": 3,
+      "share_range": 0.009677186326093379,
+      "shares": [
+        0.2528531441567382,
+        0.25812839133988796,
+        0.24845120501379458
+      ],
+      "values_ns": [
+        3044263508,
+        3043832773,
+        3019892465
+      ]
+    },
+    {
+      "category": "materialize_commit_ns",
+      "mad_ns": 3578346,
+      "median_ns": 798695446,
+      "median_share": 0.06631200828338565,
+      "original_clause_index": 3,
+      "share_range": 0.0016908150763963181,
+      "shares": [
+        0.06604154278348615,
+        0.06773235785988246,
+        0.06631200828338565
+      ],
+      "values_ns": [
+        795117100,
+        798695446,
+        806013938
+      ]
+    },
+    {
+      "category": "queue_control_residual_ns",
+      "mad_ns": 355338,
+      "median_ns": 132894044,
+      "median_share": 0.011269911442133058,
+      "original_clause_index": 3,
+      "share_range": 0.0005621394627083262,
+      "shares": [
+        0.011008517641950967,
+        0.011269911442133058,
+        0.011570657104659293
+      ],
+      "values_ns": [
+        132538706,
+        132894044,
+        140639850
+      ]
+    }
+  ],
+  "child_subcategory_metrics": [
+    {
+      "category": "fast_validate_ns",
+      "mad_ns": 501365,
+      "median_ns": 15261291,
+      "median_share_of_parent": 0.00428775759837319,
+      "original_clause_index": 2,
+      "share_range": 0.00029799341510310367,
+      "shares": [
+        0.00429728098054312,
+        0.00428775759837319,
+        0.003999287565440017
+      ],
+      "values_ns": [
+        17895674,
+        14759926,
+        15261291
+      ]
+    },
+    {
+      "category": "fast_validate_ns",
+      "mad_ns": 307738,
+      "median_ns": 15900799,
+      "median_share_of_parent": 0.004326935411183027,
+      "original_clause_index": 3,
+      "share_range": 0.000405453044719231,
+      "shares": [
+        0.004511007027636428,
+        0.004326935411183027,
+        0.004105553982917197
+      ],
+      "values_ns": [
+        16712177,
+        15900799,
+        15593061
+      ]
+    },
+    {
+      "category": "propagate_forward_ns",
+      "mad_ns": 1590221,
+      "median_ns": 34014818,
+      "median_share_of_parent": 0.008780711280954315,
+      "original_clause_index": 2,
+      "share_range": 0.00036390708062710234,
+      "shares": [
+        0.008549823656052074,
+        0.008780711280954315,
+        0.008913730736679176
+      ],
+      "values_ns": [
+        35605039,
+        30226207,
+        34014818
+      ]
+    },
+    {
+      "category": "propagate_forward_ns",
+      "mad_ns": 1207638,
+      "median_ns": 33905142,
+      "median_share_of_parent": 0.00922628853688352,
+      "original_clause_index": 3,
+      "share_range": 0.0005472183930359115,
+      "shares": [
+        0.008825820258495959,
+        0.00922628853688352,
+        0.00937303865153187
+      ],
+      "values_ns": [
+        32697504,
+        33905142,
+        35599182
+      ]
+    },
+    {
+      "category": "refinement_hash_trace_residual_ns",
+      "mad_ns": 15696914,
+      "median_ns": 449878856,
+      "median_share_of_parent": 0.11789270742266693,
+      "original_clause_index": 2,
+      "share_range": 0.013874929266401798,
+      "shares": [
+        0.11225489827385332,
+        0.12612982754025512,
+        0.11789270742266693
+      ],
+      "values_ns": [
+        467476312,
+        434181942,
+        449878856
+      ]
+    },
+    {
+      "category": "refinement_hash_trace_residual_ns",
+      "mad_ns": 1663331,
+      "median_ns": 461293237,
+      "median_share_of_parent": 0.12336722912051204,
+      "original_clause_index": 3,
+      "share_range": 0.003507212798724735,
+      "shares": [
+        0.12496279399975489,
+        0.12336722912051204,
+        0.12145558120103016
+      ],
+      "values_ns": [
+        462956568,
+        453354933,
+        461293237
+      ]
+    },
+    {
+      "category": "runtime_target_select_ns",
+      "mad_ns": 4680008,
+      "median_ns": 648846284,
+      "median_share_of_parent": 0.15580719650622157,
+      "original_clause_index": 2,
+      "share_range": 0.02818266461762059,
+      "shares": [
+        0.15580719650622157,
+        0.143076737570813,
+        0.17125940218843358
+      ],
+      "values_ns": [
+        648846284,
+        492518994,
+        653526292
+      ]
+    },
+    {
+      "category": "runtime_target_select_ns",
+      "mad_ns": 4578629,
+      "median_ns": 502531927,
+      "median_share_of_parent": 0.13468563831887562,
+      "original_clause_index": 3,
+      "share_range": 0.002340074542225512,
+      "shares": [
+        0.13440922907367103,
+        0.13674930361589654,
+        0.13468563831887562
+      ],
+      "values_ns": [
+        497953298,
+        502531927,
+        511541532
+      ]
+    },
+    {
+      "category": "selected_crown_ns",
+      "mad_ns": 192666707,
+      "median_ns": 2663321156,
+      "median_share_of_parent": 0.7177249660096044,
+      "original_clause_index": 2,
+      "share_range": 0.02115592849654968,
+      "shares": [
+        0.71909080058333,
+        0.7177249660096044,
+        0.6979348720867803
+      ],
+      "values_ns": [
+        2994594629,
+        2470654449,
+        2663321156
+      ]
+    },
+    {
+      "category": "selected_crown_ns",
+      "mad_ns": 25287662,
+      "median_ns": 2694435710,
+      "median_share_of_parent": 0.7272911496404417,
+      "original_clause_index": 3,
+      "share_range": 0.0040499445301203085,
+      "shares": [
+        0.7272911496404417,
+        0.7263302433155249,
+        0.7303801878456452
+      ],
+      "values_ns": [
+        2694435710,
+        2669148048,
+        2774013658
+      ]
+    }
+  ],
+  "contract": {
+    "clauses": [
+      2,
+      3
+    ],
+    "maximum_closure_error_ratio": 0.01,
+    "maximum_dominant_share_range": 0.1,
+    "maximum_profile_median_ratio": 1.05,
+    "minimum_child_subcategory_share": 0.3,
+    "minimum_dominant_median_share": 0.2,
+    "paired_orders": [
+      [
+        "control",
+        "prepared"
+      ],
+      [
+        "prepared",
+        "control"
+      ],
+      [
+        "control",
+        "prepared"
+      ]
+    ],
+    "repeat_count": 3,
+    "required_nodes": 31,
+    "required_sibling_groups": 15,
+    "top_categories": [
+      "child_refinement_compile_ns",
+      "child_refinement_execute_ns",
+      "optimizer_prepare_ns",
+      "optimizer_execute_ns",
+      "branch_bind_score_ns",
+      "materialize_commit_ns",
+      "queue_control_residual_ns"
+    ],
+    "torch_threads": 8
+  },
+  "decision": {
+    "child_subcategory_passed": true,
+    "closure_passed": true,
+    "dominance_passed": true,
+    "dominant_category": "child_refinement_execute_ns",
+    "dominant_child_subcategory": "selected_crown_ns",
+    "next_route": "preregister-nrir49:selected_crown_ns",
+    "parity_passed": true,
+    "perturbation_passed": true,
+    "route_selected": true
+  },
+  "decision_hash": "131502bb5724ccb6e085ca977fa4c881b8abda53f6b2949e6c13a1d137afe42a",
+  "formal_hash": "571c2e47c0c8906d2486e5e19e8152eb1ef0d3024b08cf561e25ed4f71d177a4",
+  "performance_claimed": false,
+  "perturbation_metrics": [
+    {
+      "control_mad_ns": 272559336,
+      "control_median_ns": 11583446551,
+      "control_ns": [
+        12920355785,
+        11583446551,
+        11310887215
+      ],
+      "original_clause_index": 2,
+      "profile_mad_ns": 583423090,
+      "profile_median_ns": 11852175089,
+      "profile_ns": [
+        12435598179,
+        11237754039,
+        11852175089
+      ],
+      "profile_to_control_median_ratio": 1.0231993592595117
+    },
+    {
+      "control_mad_ns": 151207156,
+      "control_median_ns": 11801025069,
+      "control_ns": [
+        12093459175,
+        11649817913,
+        11801025069
+      ],
+      "original_clause_index": 3,
+      "profile_mad_ns": 115220879,
+      "profile_median_ns": 12039650597,
+      "profile_ns": [
+        12039650597,
+        11791933298,
+        12154871476
+      ],
+      "profile_to_control_median_ratio": 1.0202207457915535
+    }
+  ],
+  "schema_version": "boundflow.top2-production-cost-attribution-formal/v1",
+  "source": {
+    "base_revision": "1e44949c1eff9ae9127a59be07b2d3caf28544cc",
+    "native_code_revision": "a356bb18ceab783d85ddda92bec9f07de5c4a5575241d55e8fd712681376a397",
+    "source_nrir45_phase_b_hash": "4ae71919b5c4d6e8d6162df8bb7d14143a705f60a599f8e4bfa30d084c1a01f8",
+    "workload": {
+      "category": "cifar10_resnet",
+      "csv_ordinal": 0,
+      "csv_relative_path": "benchmarks/cifar10_resnet/cifar10_resnet_instances.csv",
+      "csv_sha256": "d0be77761016f65d044918e5f95332cf32bf848e5eef28c5465dfbf287ba984f",
+      "model_input_shape": [
+        1,
+        3,
+        32,
+        32
+      ],
+      "model_output_dim": 10,
+      "model_relative_path": "benchmarks/cifar10_resnet/onnx/resnet_2b.onnx",
+      "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+      "onnx_ops": [
+        "Add",
+        "Conv",
+        "Flatten",
+        "Gemm",
+        "Relu"
+      ],
+      "property_relative_path": "benchmarks/cifar10_resnet/vnnlib_properties_pgd_filtered/resnet2b_pgd_filtered/prop_0_eps_0.008.vnnlib",
+      "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+      "query_ir_hash": "f2151936ce0d9f8d8bcabd7bc3fc0224a71d7907da4ac614d7216e7a0919201b",
+      "workload_id": "cifar10_resnet:000"
+    }
+  },
+  "status": "validated-reduced",
+  "winners": {
+    "2": [
+      "child_refinement_execute_ns",
+      "child_refinement_execute_ns",
+      "child_refinement_execute_ns"
+    ],
+    "3": [
+      "child_refinement_execute_ns",
+      "child_refinement_execute_ns",
+      "child_refinement_execute_ns"
+    ]
+  },
+  "workers": [
+    {
+      "repeat_index": 0,
+      "worker_hash": "191a8ea910e42bdf5cec92a03e138797bc824cbed1d07c250b4ecdafc5be8f57"
+    },
+    {
+      "repeat_index": 1,
+      "worker_hash": "ee3aa2c6d2d23b969bb38c68e01f61e0e2bf03d2b69395dfbce89441db08222c"
+    },
+    {
+      "repeat_index": 2,
+      "worker_hash": "c09663e7f1fd0b8047c2fd1ec100f20c718e80f91d077f5d941821c0febb05a7"
+    }
+  ]
+}

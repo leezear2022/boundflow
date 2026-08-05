@@ -1,0 +1,15 @@
+{
+  "files": {
+    "formal.json": "e099af89da3ea45959e603b2b3784212d302ccaaf5484a5185ba4ca0d2f603fa",
+    "logs/repeat-0.log": "c43ec52963bdd6cf2bbbf87930251fce951e079993a237d913951b255e76d4ed",
+    "logs/repeat-1.log": "8913931fa6a8d212604da38e0166d8413d59da92fac5e621b4fe03f8fe66ca64",
+    "logs/repeat-2.log": "501e0762a75318a2afa416946469034e1a753d7847f947c9cdf540aca91f3bbf",
+    "shards/repeat-0.json": "c15dee5be13867fdf47ea57d2b789bb53fa02052dac5ae6b68a2052a65e8c241",
+    "shards/repeat-1.json": "a78618faf659cf00d298164b73e43bbdab4ccc56b930c42958f7e3e58d260021",
+    "shards/repeat-2.json": "c0021b6401c932ee84100d8ee7beb6ca458922331b2fe8bee5e8fe44b38e9b45"
+  },
+  "formal_hash": "571c2e47c0c8906d2486e5e19e8152eb1ef0d3024b08cf561e25ed4f71d177a4",
+  "manifest_hash": "dfcf79d52d9c4e907b9b3ddc2c0a3dcce8eacdbbd7021165f6ccc9afafa6ad45",
+  "performance_claimed": false,
+  "schema_version": "boundflow.top2-production-cost-attribution-manifest/v1"
+}

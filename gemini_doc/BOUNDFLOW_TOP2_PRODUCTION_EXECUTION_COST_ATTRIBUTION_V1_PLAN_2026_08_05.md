@@ -1,6 +1,6 @@
 ---
-status: preregistered
-updated: 2026-08-05T12:39:58Z
+status: validated-reduced
+updated: 2026-08-05T13:03:00Z
 type: plan
 topic: boundflow
 slug: top2-production-execution-cost-attribution-v1
@@ -55,12 +55,12 @@ control/profile counterbalanced；原始 inclusive/exclusive/call count 和 pare
 
 ## Tasks
 
-- [ ] 新增只读 attribution runner，不修改 frozen production runtime 文件；
-- [ ] clauses 2/3 各运行 three fresh counterbalanced control/profile 31-node queues；
-- [ ] 记录每个 wrapper 的 calls、inclusive/exclusive ns、顶层互斥 category、residual 与 total closure；
-- [ ] 保持 branch/score/state/ancestry/refinement/bounds/worst lower/31 nodes exact；
-- [ ] typed artifact reconstruction、source/input digest 与同步外层重哈希 category/timer tamper fail closed；
-- [ ] 根据预注册路由规则只选择一个 NRIR-49 方向，或明确 attribution inconclusive。
+- [x] 新增只读 attribution runner，未修改 frozen production runtime 文件；
+- [x] clauses 2/3 各运行 three fresh counterbalanced control/profile 31-node queues；
+- [x] 记录每个 wrapper 的 calls、inclusive ns、顶层互斥 category、residual 与 total closure；
+- [x] 保持 branch/score/state/ancestry/refinement/bounds/worst lower/31 nodes exact；
+- [x] typed artifact reconstruction、source/input digest 与同步外层重哈希 category/timer tamper fail closed；
+- [x] 按预注册规则唯一选择 NRIR-49 `selected_crown` execution 路线。
 
 ## Validation
 
@@ -80,6 +80,21 @@ control/profile counterbalanced；原始 inclusive/exclusive/call count 和 pare
 - 本轮只有 attribution claim，不产生 speedup、property closure、GPU、competitor、multi-workload 或
   ASPLOS-ready claim。
 
+### Phase 0 最终判定
+
+- 6/6 control/profile semantic parity、31 nodes/15 sibling groups 与 frozen worst lower exact；
+- clauses 2/3 profile/control queue median ratio=`1.023199/1.020221 <=1.05`，插桩扰动门禁通过；
+- 顶层 category 逐行精确闭合；两条 clause 的 3/3 winner 均为 `child_refinement_execute_ns`；
+- child execute median=`3.816002/3.704755 s`，queue median share=`32.1966%/31.1640%`，share
+  range=`2.8559/0.4758` percentage points，均过预注册 dominance/stability gate；
+- 内部唯一过 `>=30%` 门禁的子类为 `selected_crown_ns`：median=`2.663321/2.694436 s`，占
+  child execute=`71.7725%/72.7291%`；
+- formal hash=`571c2e47c0c8906d2486e5e19e8152eb1ef0d3024b08cf561e25ed4f71d177a4`；
+  6 profile rows replay 与 synchronized category tamper 拒绝通过；
+- focused `4 passed`、全量 `996 passed, 37 skipped`，Black/mypy/Pylint `10.00/10` 通过；
+- 结论=`VALIDATED-REDUCED` 仅表示 dominant cost 已被可靠缩小到 selected-CROWN execution；不是
+  speedup。下一路线只允许预注册 NRIR-49 selected-CROWN execution 单变量。
+
 ## Rollback
 
 - runner/instrumentation 全部 additive；不修改 frozen runtime 或 artifact；
@@ -91,3 +106,4 @@ control/profile counterbalanced；原始 inclusive/exclusive/call count 和 pare
 - changelog: `gemini_doc/BOUNDFLOW_TOP2_PRODUCTION_EXECUTION_COST_ATTRIBUTION_V1_CHANGELOG_2026_08_05.md`
 - roadmap: `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`
 - predecessor: `gemini_doc/BOUNDFLOW_SINGLE_PASS_TARGET_ADMISSION_RECEIPT_V1_PLAN_2026_08_05.md`
+- closure: `gemini_doc/change_2026-08-05_nrir48_execution_cost_attribution.md`
