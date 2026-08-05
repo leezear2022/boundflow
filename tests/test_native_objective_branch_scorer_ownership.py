@@ -45,6 +45,9 @@ from boundflow.runtime.native_prevalidated_objective_branch_score import (
 from boundflow.runtime.native_prevalidated_objective_branch_shared_production_queue import (
     execute_native_prevalidated_objective_branch_shared_production_queue,
 )
+from boundflow.runtime.native_prepared_objective_branch_shared_production_queue import (
+    execute_native_prepared_objective_branch_shared_production_queue,
+)
 from boundflow.runtime.native_intermediate_refinement import (
     compile_native_intermediate_refinement_program,
     execute_native_intermediate_refinement_program,
@@ -430,3 +433,55 @@ def test_production_queue_has_exact_parity_and_one_enumeration_per_node(
         assert execution.trace.child_lower_hash == historical.trace.child_lower_hash
         assert execution.program.capsule.compile_enumeration_count == 1
         assert execution.program.capsule.execute_enumeration_count == 0
+
+
+def test_prepared_refinement_queue_preserves_exact_31_node_semantics() -> None:
+    (
+        module,
+        spec,
+        objective,
+        threshold,
+        root,
+        optimizer_policy,
+        branch_policy,
+        plan,
+    ) = _production_plan()
+    common = {
+        "linear_spec_C": objective,
+        "threshold": threshold,
+        "root_refinement": root,
+        "optimizer_policy": optimizer_policy,
+        "branch_policy": branch_policy,
+        "query_id": "prepared-refinement:production",
+        "clock_ns": lambda: 0,
+    }
+    control = execute_native_prevalidated_objective_branch_shared_production_queue(
+        plan,
+        module,
+        spec,
+        compiler_cache=NativeParametricOptimizerTemplateCache(),
+        **common,
+    )
+    candidate = execute_native_prepared_objective_branch_shared_production_queue(
+        plan,
+        module,
+        spec,
+        compiler_cache=NativeParametricOptimizerTemplateCache(),
+        **common,
+    )
+
+    def evaluation_semantics(item):
+        value = item.to_dict()
+        value.pop("batch_trace_hash")
+        return value
+
+    assert len(candidate.queue.trace.evaluations) == 31
+    assert tuple(
+        evaluation_semantics(item) for item in candidate.queue.trace.evaluations
+    ) == tuple(evaluation_semantics(item) for item in control.queue.trace.evaluations)
+    assert tuple(item.to_dict() for item in candidate.queue.trace.decisions) == tuple(
+        item.to_dict() for item in control.queue.trace.decisions
+    )
+    assert [item.semantic_dict() for item in candidate.node_refinements] == [
+        item.semantic_dict() for item in control.node_refinements
+    ]

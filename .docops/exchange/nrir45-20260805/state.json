@@ -1,0 +1,16 @@
+{
+  "task": "nrir45-20260805",
+  "title": "Audit NRIR45 prepared intermediate refinement closure",
+  "status": "ready_for_audit",
+  "round": 1,
+  "executor": "codex",
+  "auditor": "external-model",
+  "approved_round": null,
+  "docs": [
+    "nrir45-20260805/request",
+    "nrir45-20260805/r001/delivery"
+  ],
+  "rev": 3,
+  "created": "2026-08-05T02:35:05Z",
+  "updated": "2026-08-05T02:35:05Z"
+}

@@ -1,0 +1,15 @@
+{
+  "files": {
+    "formal.json": "7e9e8abfee5245422516de4746cb0a9c8e5b332aca61eebba06d03e86e0fb53b",
+    "logs/repeat-0.log": "58274ddad0220daecde576dbf3ae42209132b950d61af12ab202f7b03aa01984",
+    "logs/repeat-1.log": "1442098149bb07a90b8820ae159b8fa24f735a8a6425d097e0770bf2f408bf27",
+    "logs/repeat-2.log": "92daac58340990a60b2499197e7d24194b3eb074a44e3457cd939a61c64f1c8b",
+    "shards/repeat-0.json": "0ab660a91b264336d3655cd312a9e64d189ec1a20014d55177d87fbef15fb17f",
+    "shards/repeat-1.json": "18237ce86f2115e32438b4935ef56dc4742a9708403cc7476d0f95f605c8dbf4",
+    "shards/repeat-2.json": "7309eae40b34a803e7eb85da699a50f72e64a166ccdf7cc5b153f50447212686"
+  },
+  "formal_hash": "be1ccb4229d8b88970c9f9f5bae9d6ff8156d4e9b53c84a218a2a1dd6005d439",
+  "manifest_hash": "0964fa89d792d06d9ca3eaff1ee2959972028b4587b3a531921bb95876ceb39d",
+  "performance_claimed": false,
+  "schema_version": "boundflow.prepared-refinement-manifest/v1"
+}

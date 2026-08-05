@@ -1591,3 +1591,40 @@ multi-workload、property closure 或 ASPLOS-ready claim；全量 `979 passed, 3
 production queue 的成本归因，不回退 NRIR-43 已否决的 CPU scorer batching。
 
 发布状态：NRIR-44 功能/证据提交 `437680e` 已由 PR #55 合入 `main@f194034`。
+
+## 58. Prepared Intermediate Refinement Capsule v1 判定
+
+NRIR-45 的唯一变量是 per-child intermediate refinement 的 validation ownership。NRIR-44 projected
+floor、rank/top-2、refinement target/policy/selected-CROWN、optimizer、objective branch、31/depth4、queue、
+dtype、workload 与 global-60s deadline 全部冻结。每个 exact Program/Execution 必须在 prepare 时完整
+验证一次并生成 typed immutable capsule；runtime 只消费 capsule/Plan-owned targets，不得用 object-ID
+cache、裸 bool 或无条件跳过验证。
+
+路线前 cProfile 显示单条 31-node queue 的 246 次 `_select_targets` 中，186 次来自重复
+`Program.validate()`；30 次 compile 与 30 次 runtime 才是当前语义路径。每 exact object 仍完整验证一次的
+只读 ceiling probe 将 clause 3 trace 从约 `12.85 s` 降到 `9.761678 s`，31 nodes 和 worst lower exact。
+该 probe 只用于选路线。
+
+Phase A 要求 clauses 2/3 three fresh counterbalanced 31-node queues 全语义 exact，prepared/control
+median ratio 均 `<=0.80` 且改善超过 pooled MAD，并证明 validation/target-selection ownership 收敛。
+只有 Phase A 全过才运行 Phase B；其要求 three fresh whole queries 每轮 execution trace `<=40 s`、
+measured wall `<=50 s`，相对 NRIR-44 median ratio 分别 `<=0.90/0.85`。以上是开工前冻结门禁；
+预注册时没有正式结果或新 claim。
+
+正式 Phase A 六组 control/prepared 31-node queue 的 branch/score/state/refinement/worst lower exact；
+target selection=`246→98`、full Program validation=`186→38`、full hash=`217→39`。clauses 2/3
+control/prepared median=`12.981239/9.444103 s` 与 `13.122778/9.666283 s`，ratio=
+`0.727519/0.736603`，改善均大于 pooled MAD。formal hash=
+`be1ccb4229d8b88970c9f9f5bae9d6ff8156d4e9b53c84a218a2a1dd6005d439`。
+
+Phase B 三 fresh processes 的 floor=`8.625022/8.583826/8.628565 s`，whole trace=
+`31.262521/31.319772/31.470078 s`，measured wall=`36.396631/36.513683/36.611709 s`；相对 frozen
+NRIR-44 trace/measured median ratio=`0.710268/0.615738`，均大于 pooled MAD。每轮 selected `[2,3]`、
+nodes `[31,31]`、worst active lower=`-35.530926/-30.258448`，prepared capsules/full replay=`60/60`。
+Phase-B payload hash=`4ae71919b5c4d6e8d6162df8bb7d14143a705f60a599f8e4bfa30d084c1a01f8`；
+两阶段 replay、tamper、全量 `984 passed, 37 skipped` 与静态门禁通过。
+
+NRIR-45 以 fixed ResNet2B property 0 CPU8 internal production admission `VALIDATED-REDUCED` 关闭。
+final 仍 9/9 unknown，`performance_claimed=false`，没有公平竞品、GPU、multi-workload、property closure
+或 ASPLOS-ready claim。下一步先做最终约 31.3 秒路径的 residual phase attribution，再冻结 NRIR-46
+单变量；不重开 NRIR-43 CPU scorer batching，也不事后降低 cap/nodes/depth。

@@ -10,13 +10,22 @@
 
 ---
 
+已由用户豁免执行、但保留的外部审计材料：
+`gemini_doc/BOUNDFLOW_NRIR45_EXTERNAL_AUDIT_HANDOFF_2026_08_05.md`（PR #56，包含 AC1—AC6、
+独立 artifact replay/tamper/回归命令与 claim boundary；未声称获得外部批准）。
+
 ## 1) “我应该从哪读起？”
 
 按目的给四条阅读路径：
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_ROOT_PROJECTION_FLOOR_SCHEDULE_V1_PLAN_2026_08_05.md`
+当前最新入口：`gemini_doc/BOUNDFLOW_PREPARED_INTERMEDIATE_REFINEMENT_CAPSULE_V1_PLAN_2026_08_05.md`
+（NRIR-45 已 `VALIDATED-REDUCED`：typed prepare-once capsule/receipt 将每条 queue 的 target selection
+`246→98`、full validation `186→38`；clauses 2/3 median ratio=`0.727519/0.736603`。Phase B
+whole trace=`31.262521/31.319772/31.470078 s`、measured median ratio vs NRIR-44=`0.615738`，
+每轮 `[31,31]` nodes 与 60/60 full replay exact；final 仍 unknown，ASPLOS-ready=NO）。其直接
+前序为 `gemini_doc/BOUNDFLOW_ROOT_PROJECTION_FLOOR_SCHEDULE_V1_PLAN_2026_08_05.md`
 （NRIR-44 已 `VALIDATED-REDUCED`：typed consumer/liveness contract 将 ranking floor 的
 `9×n31d4` 投影为 `9×n1d0`，Phase A evaluation `279→9`、floor median ratio=`0.407530`；Phase B
 whole=`43.571040/44.144990/44.095736 s`，相对 NRIR-42 median ratio=`0.764254`，两条 production
@@ -25,7 +34,7 @@ queue 仍各 31 nodes。该结论只适用于固定 ResNet2B property 0 CPU8，f
 `gemini_doc/BOUNDFLOW_CROSS_AXIS_VERIFICATION_BATCH_SCHEDULE_V1_PLAN_2026_08_05.md`
 （NRIR-43 已 `VALIDATED-NO-GO`：typed ragged batch 保持 6/6 exact 并将每条 scorer launch
 `31→16`，但 clauses 2/3 median ratio=`1.051134/1.044573`，CPU 墙钟退化；Phase B 按门禁未启动，
-formal hash=`692b9e27…30390`）。下一路线为剩余 top-2 production queue 的单变量成本归因与优化。
+formal hash=`692b9e27…30390`）。
 NRIR-43 提交 `00b82c2` 已由 PR #54 合入 `main@2d245d6`。
 其直接前序为 `gemini_doc/BOUNDFLOW_OBJECTIVE_BRANCH_SCORER_OWNERSHIP_V1_PLAN_2026_08_05.md`
 （NRIR-42 已 `VALIDATED-REDUCED`：typed validated capsule 把每条 31-node queue 的 candidate
@@ -127,6 +136,11 @@ ASPLOS-ready 仍为 NO；功能提交 `264365f` 已由 PR #53 合入 `main@89690
 
 ### 2.1 关键交付文档（“长期有效”）
 
+- `gemini_doc/BOUNDFLOW_PREPARED_INTERMEDIATE_REFINEMENT_CAPSULE_V1_PLAN_2026_08_05.md`：
+  prepare-once validation/hash ownership、typed capsule/receipt、Phase A/B 门禁与 fixed ResNet
+  `VALIDATED-REDUCED` 边界
+- `gemini_doc/BOUNDFLOW_PREPARED_INTERMEDIATE_REFINEMENT_CAPSULE_V1_CHANGELOG_2026_08_05.md`：
+  `246→98` target-selection、`186→38` full-validation、31.3 秒 whole trace、artifacts/replay 与限制
 - `gemini_doc/BOUNDFLOW_SHARED_PARAMETRIC_OBJECTIVE_EVALUATOR_V1_PLAN_2026_08_05.md`：
   NRIR-28 template/instance/cache × NRIR-34 ancestral sibling evaluator 的静动态边界、first-class
   Plan/Batch/Task/Schedule、parity/top-2/三重复门禁与下一 tightness attribution 路线

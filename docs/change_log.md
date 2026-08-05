@@ -1,5 +1,21 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-05：用户豁免 NRIR45 外部 review
+
+- 用户明确要求后续不再调用其他模型 review，由当前执行方持续自检推进；
+- 保留 `nrir45-20260805` exchange 与审计材料，但不伪造 auditor verdict；
+- PR #56 的合并门禁改为 artifact replay/tamper、targeted/full regression、静态检查与 DocOps
+  确定性验证；
+- claim boundary 不变：fixed ResNet2B property 0 CPU8 internal `VALIDATED-REDUCED`，final unknown。
+
+## 2026-08-05：NRIR45 PR #56 外部审计交接
+
+- 发布 draft PR #56，并冻结 base `b6eb697`、feature closure `8b8766e` 与 publication head
+  `af1031e`；
+- 新增 `gemini_doc/BOUNDFLOW_NRIR45_EXTERNAL_AUDIT_HANDOFF_2026_08_05.md`，定义 AC1—AC6、
+  独立 artifact replay/tamper、全量回归与 claim boundary；
+- 该交接最初用于外部审计；随后用户明确豁免执行，材料仍保留且未伪造批准。
+
 ## 2026-07-19：新增 PR-14 外部模型审计交接
 
 - 串联项目起点、Phase 0～6、ASPLOS PR-10～14、真实 verifier coverage/replay 与最终 No-Go；
@@ -4577,3 +4593,35 @@
 
 **记录**
 - `gemini_doc/change_2026-08-05_nrir44_publication.md`
+
+---
+
+## 2026-08-05：NRIR-45 Prepared Intermediate Refinement Capsule v1 预注册
+
+- 从 `main@b6eb697` 创建 `feat/prepared-intermediate-refinement-capsule-v1`；
+- cProfile 定位单 queue 246 次 `_select_targets` 中 186 次来自重复 Program validation；
+- 唯一变量冻结为 prepare-once refinement validation ownership，不改算法、policy、预算或 deadline；
+- Phase A/B 的 exact semantics、ownership、fresh timing 与 NO-GO 条件已冻结；当前无正式 claim。
+
+**记录**
+- `gemini_doc/change_2026-08-05_nrir45_preregistration.md`
+- `gemini_doc/BOUNDFLOW_PREPARED_INTERMEDIATE_REFINEMENT_CAPSULE_V1_PLAN_2026_08_05.md`
+- `gemini_doc/BOUNDFLOW_PREPARED_INTERMEDIATE_REFINEMENT_CAPSULE_V1_CHANGELOG_2026_08_05.md`
+
+---
+
+## 2026-08-05：NRIR-45 Prepared Intermediate Refinement Capsule v1 关闭
+
+- 新增 typed capsule/receipt、5-stage Task/Schedule/Trace、prepared Program/Execution、additive
+  per-child/shared queue 与 projected-floor global composition；
+- Phase A 六组 exact，target selection=`246→98`、full validation=`186→38`、full hash=`217→39`；
+  clauses 2/3 median ratio=`0.727519/0.736603`，formal hash=`be1ccb42…05d439`；
+- Phase B whole trace=`31.262521/31.319772/31.470078 s`，measured=
+  `36.396631/36.513683/36.611709 s`，相对 NRIR-44 median ratio=`0.710268/0.615738`；
+- 每轮 `[31,31]` nodes、60/60 capsule full replay；payload hash=`4ae71919…1a01f8`；
+- 两阶段 replay/tamper、全量 `984 passed, 37 skipped`、Pylint `10.00/10` 通过；以 fixed
+  ResNet2B property 0 CPU8 `VALIDATED-REDUCED` 关闭，final unknown、ASPLOS-ready=NO。
+
+**记录**
+- `gemini_doc/change_2026-08-05_nrir45_prepared_refinement.md`
+- `gemini_doc/BOUNDFLOW_PREPARED_INTERMEDIATE_REFINEMENT_CAPSULE_V1_CHANGELOG_2026_08_05.md`
