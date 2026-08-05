@@ -1,5 +1,13 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-05：NRIR45 PR #56 外部审计交接
+
+- 发布 draft PR #56，并冻结 base `b6eb697`、feature closure `8b8766e` 与 publication head
+  `af1031e`；
+- 新增 `gemini_doc/BOUNDFLOW_NRIR45_EXTERNAL_AUDIT_HANDOFF_2026_08_05.md`，定义 AC1—AC6、
+  独立 artifact replay/tamper、全量回归与 claim boundary；
+- DocOps 下一状态为外部审计，审计批准前不合并 PR，也不在当前分支混入 NRIR46。
+
 ## 2026-07-19：新增 PR-14 外部模型审计交接
 
 - 串联项目起点、Phase 0～6、ASPLOS PR-10～14、真实 verifier coverage/replay 与最终 No-Go；

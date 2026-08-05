@@ -10,6 +10,10 @@
 
 ---
 
+当前外部审计入口：
+`gemini_doc/BOUNDFLOW_NRIR45_EXTERNAL_AUDIT_HANDOFF_2026_08_05.md`（PR #56，包含 AC1—AC6、
+独立 artifact replay/tamper/回归命令与 claim boundary）。
+
 ## 1) “我应该从哪读起？”
 
 按目的给四条阅读路径：

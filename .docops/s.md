@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [56]
-last_ch: ev005214
-last_va: ev005216
+last_ch: ev005236
+last_va: ev005237
 blk:
-next: audit-nrir45-and-profile-residual-31s-path
-updated: 2026-08-05T02:29:06Z
+next: await-nrir45-external-audit-then-merge
+updated: 2026-08-05T02:35:31Z
