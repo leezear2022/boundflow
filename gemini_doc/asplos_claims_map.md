@@ -1313,3 +1313,14 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   `ecb553d88be065054abb0a480b79086ae12cec55a84e5c0ba537572e904ff0fe` /
   `2f22d44fe9f57f233c8a853b66f67f404b03a087d097451e10f663ee257272d9`；本阶段
   `VALIDATED-REDUCED`；全量 `979 passed, 37 skipped`。
+
+### NRIR-45：Prepared Intermediate Refinement Capsule v1（预注册）
+
+- `C1/C2-M-NRIR45-PENDING`：计划新增 typed prepared refinement capsule/receipt 与专用 Task/Schedule，
+  将同一 exact Program/Execution 的完整 validation 从多处递归重算收敛到 prepare-once；尚未实现；
+- `C3-G-NRIR45-PENDING`：首次完整准入、Plan-owned targets、source/split/objective/result binding、
+  mutation/stale/tamper fail-closed 和 artifact full replay 已预注册；尚无 artifact；
+- `C3-E-NRIR45-PENDING`：Phase A queue ratio `<=0.80`、Phase B whole trace/measured `<=40/50 s` 与
+  ratio `<=0.90/0.85` 是 acceptance criteria，不是已观测正式结果；
+- `C3-L-NRIR45`：路线前 validation-cache probe 只用于选路线；即使正式通过也仅允许 fixed ResNet2B
+  property 0 CPU8 internal admission，`performance_claimed=false`，不得外推 ASPLOS-ready。

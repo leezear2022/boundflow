@@ -4577,3 +4577,17 @@
 
 **记录**
 - `gemini_doc/change_2026-08-05_nrir44_publication.md`
+
+---
+
+## 2026-08-05：NRIR-45 Prepared Intermediate Refinement Capsule v1 预注册
+
+- 从 `main@b6eb697` 创建 `feat/prepared-intermediate-refinement-capsule-v1`；
+- cProfile 定位单 queue 246 次 `_select_targets` 中 186 次来自重复 Program validation；
+- 唯一变量冻结为 prepare-once refinement validation ownership，不改算法、policy、预算或 deadline；
+- Phase A/B 的 exact semantics、ownership、fresh timing 与 NO-GO 条件已冻结；当前无正式 claim。
+
+**记录**
+- `gemini_doc/change_2026-08-05_nrir45_preregistration.md`
+- `gemini_doc/BOUNDFLOW_PREPARED_INTERMEDIATE_REFINEMENT_CAPSULE_V1_PLAN_2026_08_05.md`
+- `gemini_doc/BOUNDFLOW_PREPARED_INTERMEDIATE_REFINEMENT_CAPSULE_V1_CHANGELOG_2026_08_05.md`

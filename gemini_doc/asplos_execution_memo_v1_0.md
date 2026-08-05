@@ -1591,3 +1591,21 @@ multi-workload、property closure 或 ASPLOS-ready claim；全量 `979 passed, 3
 production queue 的成本归因，不回退 NRIR-43 已否决的 CPU scorer batching。
 
 发布状态：NRIR-44 功能/证据提交 `437680e` 已由 PR #55 合入 `main@f194034`。
+
+## 58. Prepared Intermediate Refinement Capsule v1（预注册）
+
+NRIR-45 的唯一变量是 per-child intermediate refinement 的 validation ownership。NRIR-44 projected
+floor、rank/top-2、refinement target/policy/selected-CROWN、optimizer、objective branch、31/depth4、queue、
+dtype、workload 与 global-60s deadline 全部冻结。每个 exact Program/Execution 必须在 prepare 时完整
+验证一次并生成 typed immutable capsule；runtime 只消费 capsule/Plan-owned targets，不得用 object-ID
+cache、裸 bool 或无条件跳过验证。
+
+路线前 cProfile 显示单条 31-node queue 的 246 次 `_select_targets` 中，186 次来自重复
+`Program.validate()`；30 次 compile 与 30 次 runtime 才是当前语义路径。每 exact object 仍完整验证一次的
+只读 ceiling probe 将 clause 3 trace 从约 `12.85 s` 降到 `9.761678 s`，31 nodes 和 worst lower exact。
+该 probe 只用于选路线。
+
+Phase A 要求 clauses 2/3 three fresh counterbalanced 31-node queues 全语义 exact，prepared/control
+median ratio 均 `<=0.80` 且改善超过 pooled MAD，并证明 validation/target-selection ownership 收敛。
+只有 Phase A 全过才运行 Phase B；其要求 three fresh whole queries 每轮 execution trace `<=40 s`、
+measured wall `<=50 s`，相对 NRIR-44 median ratio 分别 `<=0.90/0.85`。当前没有正式结果或新 claim。

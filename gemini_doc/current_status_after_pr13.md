@@ -73,6 +73,11 @@
 > ASPLOS-ready=NO；全量 `979 passed, 37 skipped`。下一步转剩余 top-2 production queue 的新一轮
 > 单变量归因与优化。
 > NRIR-44 功能/证据提交 `437680e` 已由 PR #55 合入 `main@f194034`。
+> 2026-08-05 NRIR-45 已预注册：cProfile 定位 top-2 production queue 的最大累计成本为 per-child
+> intermediate refinement；单 queue 的 `_select_targets` 246 次中 186 次来自重复 Program validation。
+> 唯一变量冻结为 prepared-once refinement capsule/validation ownership，不改 target、CROWN、optimizer、
+> branch、queue、31/depth4 或 deadline。路线前 ceiling probe 的 clause 3 queue trace 约
+> `12.85→9.761678 s` 且 worst lower exact；正式 Phase A/B 尚未开始。
 > 2026-08-05 NRIR-36 后续：九子句 NRIR-31 floor 已由 typed root-lower priority 选择 clauses 2/3，
 > dynamic equal-remaining slices 在同一 global start 下执行。三 fresh repeats 都复现
 > rank=`[2,3,4,5,0,8,6,7,1]`，packed nodes=`[[3,3],[3,3],[3,1]]`；repeat 2 第二条未提交

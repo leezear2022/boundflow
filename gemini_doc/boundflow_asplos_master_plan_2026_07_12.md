@@ -63,6 +63,12 @@
 > 证据，ASPLOS-ready=NO。下一单变量来自剩余 top-2 production queue 的成本归因。
 > 功能/证据提交 `437680e` 已由 PR #55 合入 `main@f194034`。
 
+> **2026-08-05 NRIR-45 预注册**：cProfile 显示 top-2 production queue 的 per-child refinement 存在
+> prepare/execute/aggregate 间重复 validation/target-selection；单 queue 246 次 `_select_targets` 中 186 次
+> 来自 `Program.validate()`。下一唯一变量为 typed prepared refinement capsule，首次完整准入不删，
+> refinement/optimizer/branch/queue 语义冻结。Phase A queue ratio 要求 `<=0.80`；Phase B whole trace/
+> measured 要求每轮 `<=40/50 s`。当前无正式 claim，ASPLOS-ready=NO。
+
 > **2026-08-04 NRIR-21 修订**：per-child exact-split objective refinement 的 IR/control、lineage
 > 与 replay 已实现，但固定 ResNet clauses 0/1 的最差 depth-2 leaf lower 相对 root-global 分别
 > 退化 `0.847961/0.936646`，故该策略 `VALIDATED-NO-GO`。下一方法门禁是把祖先已证明 refined
