@@ -118,6 +118,22 @@ BoundFlow 九个 clause 全部在 root 完成，整题为 `verified`；αβ-CROW
    competitor PyTorch CUDA、同 GPU identity 与输入 digest smoke；
 7. **只有全部 PASS 后**：冻结 G1 profiling schema/门槛并开始 read-only attribution；仍不直接做 TIR。
 
+### Post-reboot 六项强制 CUDA smoke
+
+`scripts/run_nrir49_g0_cuda_smoke.py` 已冻结以下六项；缺一项都输出 `status=blocked`、退出码 `2`，
+不得进入 G1：
+
+1. `nvidia_driver_device`：`dgpu_disable!=1`、PCI/NVIDIA device node 与 `nvidia-smi` 同时可见；
+2. `boundflow_torch_cuda`：BoundFlow Torch 在 custom stream 上实算固定 FP32 vector并核对 digest；
+3. `tvm_cuda_build_run`：真实编译并运行仓库 CUDA TIR `add_one`，不是只检查 build flag；
+4. `tvm_ffi_custom_stream`：Torch current raw stream 与 TVM-FFI raw stream exact；
+5. `competitor_torch_cuda`：清除 BoundFlow `PYTHONPATH/TVM_*` 后，在独立 αβ-CROWN env 实算；
+6. `cross_environment_identity_digest`：两套 Torch 的 GPU name/capability/total-memory、固定 vector、
+   model/property digest一致，TVM 输入与输出 oracle一致。
+
+该 smoke 是功能准入，不采集 latency/peak，不触发 DocOps performance rule。当前同一 boot 的 dry-run
+结果为六项 blocked、exit `2`，说明 fail-closed 路径生效；不是 post-reboot 证据。
+
 ## Artifact 与 replay
 
 正式 pre-reboot artifact：
@@ -144,16 +160,31 @@ conda run -n boundflow python scripts/run_nrir49_g0_admission.py replay \
 artifact 内所有性能字段均为 `performance_claimed=false`；GPU 不可用时 memory reachability 与 Amdahl
 share/required speedup 强制保持 `NOT-AUDITABLE/null`。
 
+重启后的唯一 generate 命令：
+
+```bash
+conda run -n boundflow python scripts/run_nrir49_g0_cuda_smoke.py generate \
+  --artifact-dir artifacts/nrir49-g0-cuda-smoke/ga403uv-post-reboot-20260806-v1 \
+  --abcrown-root ../alpha-beta-CROWN \
+  --abcrown-python ../alpha-beta-CROWN/.venv/bin/python \
+  --model ../vnncomp2021/benchmarks/mnistfc/mnist-net_256x2.onnx \
+  --property ../vnncomp2021/benchmarks/mnistfc/prop_2_0.03.vnnlib
+```
+
+只有输出 `{"blockers":[],"g0_cuda_ready":true,"status":"ready_for_g1"}` 才允许关闭 G0；随后用同一
+脚本的 `replay` 子命令复核 manifest、semantic hash 与 derived gates。
+
 ## Validation
 
 - `pytest -q tests/test_nrir49_g0_admission.py tests/test_multiworkload_competitor_e2e_artifact.py`
   → `13 passed`；
-- 全量 `pytest -q tests` → `1006 passed, 37 skipped`；37 个 skip 均为现有 CUDA/环境边界；
+- post-reboot CUDA smoke contract tests=`8 passed`；三组 G0 targeted 合计=`21 passed`；
+- 全量 `pytest -q tests` → `1014 passed, 37 skipped`；37 个 skip 均为现有 CUDA/环境边界；
 - mypy 两个 touched runner clean；Pylint touched runner/tests=`10.00/10`；
 - admission replay PASS，manifest file SHA 与 semantic hash 一致；
 - `mnistfc:2` 两侧结果均为 `verified`，模型/property/repo commit 已嵌入 artifact；
 - competitor repo 与 VNN-COMP sparse clone 均保持 clean；
-- `git diff --check`、新文档 whitespace/link 检查 PASS；正式 artifact 无 `/home/lee` 或 `/tmp` 路径，
+- `git diff --check`、新文档 whitespace/link 检查 PASS；正式 artifact 无用户目录或临时目录绝对路径，
   probe SHA 与最终 runner 一致；
 - 尚未运行任何 GPU benchmark，因此 R002 performance evidence 不适用。
 
@@ -162,8 +193,8 @@ share/required speedup 强制保持 `NOT-AUDITABLE/null`。
 - 本分支未改 TIR/math/default policy；回退只需删除 G0 runner/test/docs；
 - 外部 competitor `.venv` 与 VNN-COMP sparse clone 不属于仓库内容，可独立移除，不影响 BoundFlow conda
   环境；
-- v1—v5 调试 artifact 已移到 `/tmp/nrir49-solveability.hjLjJ6/superseded-admission-artifacts/`，可恢复；
-  仓库只保留无本机用户路径且与最终 runner digest 一致的 v7。
+- v1—v5 调试 artifact 已移到仓库外的 session temporary holding area，可恢复；仓库只保留无本机
+  用户路径且与最终 runner digest 一致的 v7。
 
 ## Links
 

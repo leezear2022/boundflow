@@ -28,11 +28,13 @@ stage: s01
 - clone `alpha-beta-CROWN@e5c7e17` 与 `auto_LiRPA@5a098e8`，按官方 `uv.lock` 创建独立 `.venv`；
 - sparse clone `vnncomp2021@90419aa` 的 MNISTFC，冻结 `mnistfc:2`；
 - 生成并 replay `ga403uv-pre-reboot-20260806-v7`，只剩 GPU infrastructure blocker。
+- 新增 post-reboot 六门 CUDA smoke runner：NVIDIA、BoundFlow Torch、TVM TIR、TVM-FFI stream、
+  competitor Torch 与 cross-env identity/digest；blocked 时生成诊断 artifact 后 exit `2`。
 
 ## Validation
 
-- targeted tests：`13 passed`；
-- 全量：`1006 passed, 37 skipped`；mypy clean；Pylint `10.00/10`；
+- targeted tests：原 admission/worker `13 passed`，post-reboot smoke `8 passed`，合计 `21 passed`；
+- 全量：`1014 passed, 37 skipped`；mypy clean；Pylint `10.00/10`；
 - artifact replay PASS；
 - competitor import smoke：Python `3.11.15`、Torch `2.11.0+cu130`、auto_LiRPA/abcrown `0.7.2`；
 - solveability：BoundFlow=`verified`、αβ-CROWN=`verified`；
@@ -50,7 +52,8 @@ stage: s01
 ## Follow-Ups
 
 1. 用户允许并执行一次正常重启；
-2. 重启后用同 runner 生成 post-reboot artifact，关闭六项 CUDA/同 GPU identity smoke；
+2. 重启后用 `run_nrir49_g0_cuda_smoke.py` 生成 post-reboot artifact，关闭六项 CUDA/同 GPU identity
+   smoke；
 3. 若 GPU 仍不可见，按 v1.1 的 2-attempt/1-engineer-day timebox 转备用主机，而非无限修环境；
 4. infrastructure PASS 后只进入 G1 read-only profiling。
 

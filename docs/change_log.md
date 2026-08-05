@@ -4753,8 +4753,10 @@
 - 独立 αβ-CROWN 官方锁定环境已建成，commit=`e5c7e17`、auto_LiRPA=`5a098e8`，import smoke PASS；
 - VNN-COMP 2021 `mnistfc:2` 在双方 30 秒 CPU qualification 中均整题 `verified`，solveability 门禁通过；
 - 正式 v7 artifact replay PASS，当前唯一 blocker=`gpu_infrastructure_ready`；`g1_ready=false`；
-- targeted `13 passed`、全量 `1006 passed, 37 skipped`、mypy clean、Pylint `10.00/10`；
+- targeted `21 passed`、全量 `1014 passed, 37 skipped`、mypy clean、Pylint `10.00/10`；
 - 未修改 bound math/TIR/kernel/default policy，未产生性能 claim。
+- 新增 post-reboot 六门 CUDA 功能 smoke/replay；当前 pre-reboot dry-run 六项均 blocked、exit `2`，
+  不会把软件 build capability 误当作真实 GPU 可执行。
 
 **记录**
 - `gemini_doc/BOUNDFLOW_NRIR49_G0_GPU_OPPORTUNITY_ADMISSION_V1_PLAN_2026_08_06.md`
