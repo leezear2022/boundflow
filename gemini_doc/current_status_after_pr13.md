@@ -1220,7 +1220,7 @@ observed/semantic=`124/60`、冗余=`64`，60 个 target ledger 全部互异。f
 `performance_claimed=false`。下一独立变量只能是 single-pass target admission receipt；公平竞品、
 10x、property closure 与 ASPLOS-ready 仍为 NO。
 
-## 49. 2026-08-05 NRIR-47 Single-Pass Target Admission Receipt 预注册
+## 49. 2026-08-05 NRIR-47 Single-Pass Target Admission Receipt Phase A NO-GO
 
 NRIR46 已由 PR #57 合入 `main@ca0bcf3`。下一分支为
 `feat/single-pass-target-admission-receipt-v1`，唯一变量是把每个 child 的 exact target selection 从
@@ -1230,5 +1230,15 @@ node-specific 且互异；production 不重选，显式 full replay 必须从 ex
 NRIR46 已测 target reselection ceiling median=`1.038153 s`，只约占 frozen NRIR45 whole trace 3.3%。
 Phase A 预注册 compiler ratio `<=0.85`、clauses 2/3 queue ratio 均 `<=0.97`；只有 correctness、
 ownership、timing 全过才启动 Phase B，其 trace/measured ratio 均须 `<=0.98` 且改善大于 pooled MAD。
-当前没有 NRIR47 实现、artifact 或性能 claim；final 9/9 unknown、`performance_claimed=false`、
-公平竞品/10x/property closure/ASPLOS-ready=NO 不变。
+
+typed receipt/Task/Schedule、additive single-pass compiler、prepared binding、candidate production route
+与 explicit full replay 已实现。每条 candidate queue compile selector/reselection=`30/0`、runtime
+selector=`30`、receipt/full replay=`31/31`；correctness/ownership exact，186 份 receipt replay 与同步
+外层重哈希 tamper 拒绝通过。
+
+正式 compiler ratio=`0.936003 > 0.85`；clauses 2/3 queue ratio=
+`1.011205/1.019338 > 0.97`，所以 timing gate 失败，NRIR47 `VALIDATED-NO-GO`，Phase B gated off。
+formal hash=`a7561e5187a6e396905d261e739280e39f2c3480e83ba2af0fbe6e3b1ec042ce`；
+全量 `992 passed, 37 skipped`。candidate 不默认启用；final 9/9 unknown、
+`performance_claimed=false`、公平竞品/10x/property closure/ASPLOS-ready=NO 不变。下一步转 top-2
+production execution math/queue phase attribution。

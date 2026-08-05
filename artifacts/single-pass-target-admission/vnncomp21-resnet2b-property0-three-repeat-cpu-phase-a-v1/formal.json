@@ -1,0 +1,162 @@
+{
+  "compiler_metric": {
+    "candidate_mad_ns": 28458368,
+    "candidate_median_ns": 2563922434,
+    "candidate_ns": [
+      2856634729,
+      2520504997,
+      2576506461,
+      2550423135,
+      2665035284,
+      2551338407
+    ],
+    "candidate_to_control_median_ratio": 0.9360025298475139,
+    "control_mad_ns": 58076852,
+    "control_median_ns": 2739225966,
+    "control_ns": [
+      2779044031,
+      2872023489,
+      2691519946,
+      2807673650,
+      2612861497,
+      2699407902
+    ],
+    "improvement_exceeds_pooled_mad": true,
+    "maximum_median_ratio": 0.85,
+    "median_improvement_ns": 175303532,
+    "name": "two-clause-child-compiler"
+  },
+  "contract": {
+    "clauses": [
+      2,
+      3
+    ],
+    "expected_child_programs": 30,
+    "expected_receipts_and_full_replays": 31,
+    "maximum_compiler_median_ratio": 0.85,
+    "maximum_queue_median_ratio": 0.97,
+    "paired_orders": [
+      [
+        "control",
+        "prepared"
+      ],
+      [
+        "prepared",
+        "control"
+      ],
+      [
+        "control",
+        "prepared"
+      ]
+    ],
+    "repeat_count": 3,
+    "required_nodes": 31,
+    "required_sibling_groups": 15,
+    "torch_threads": 8
+  },
+  "decision": {
+    "compiler_timing_passed": false,
+    "next_route": "stop_nrir47",
+    "ownership_passed": true,
+    "parity_passed": true,
+    "phase_a_go": false,
+    "queue_timing_passed": false,
+    "reason": "NRIR47 Phase-A gate failed; Phase B is gated off"
+  },
+  "decision_hash": "39491e3f526633d217d45ab177464fb766167539986d7441a45182467bb7c7ba",
+  "formal_hash": "a7561e5187a6e396905d261e739280e39f2c3480e83ba2af0fbe6e3b1ec042ce",
+  "performance_claimed": false,
+  "queue_metrics": [
+    {
+      "candidate_mad_ns": 56875496,
+      "candidate_median_ns": 10212558939,
+      "candidate_ns": [
+        11057799149,
+        10155683443,
+        10212558939
+      ],
+      "candidate_to_control_median_ratio": 1.0112049279707738,
+      "control_mad_ns": 362019976,
+      "control_median_ns": 10099395935,
+      "control_ns": [
+        10565127379,
+        10099395935,
+        9737375959
+      ],
+      "improvement_exceeds_pooled_mad": false,
+      "maximum_median_ratio": 0.97,
+      "median_improvement_ns": -113163004,
+      "name": "clause-2-end-to-end-queue",
+      "original_clause_index": 2
+    },
+    {
+      "candidate_mad_ns": 69458597,
+      "candidate_median_ns": 10250753049,
+      "candidate_ns": [
+        10250753049,
+        10181294452,
+        10332584984
+      ],
+      "candidate_to_control_median_ratio": 1.0193375764106287,
+      "control_mad_ns": 135315321,
+      "control_median_ns": 10056288796,
+      "control_ns": [
+        10903663376,
+        10056288796,
+        9920973475
+      ],
+      "improvement_exceeds_pooled_mad": false,
+      "maximum_median_ratio": 0.97,
+      "median_improvement_ns": -194464253,
+      "name": "clause-3-end-to-end-queue",
+      "original_clause_index": 3
+    }
+  ],
+  "schema_version": "boundflow.single-pass-target-admission-formal/v1",
+  "source": {
+    "base_revision": "ca0bcf398c819990d1af62a3da0bd175455f8bcf",
+    "native_code_revision": "6e6a36ced7427f24d7e8e292eab2b480d8196bf1953abe3648cba5aaaf2e2695",
+    "source_nrir45_hash": "be1ccb4229d8b88970c9f9f5bae9d6ff8156d4e9b53c84a218a2a1dd6005d439",
+    "workload": {
+      "category": "cifar10_resnet",
+      "csv_ordinal": 0,
+      "csv_relative_path": "benchmarks/cifar10_resnet/cifar10_resnet_instances.csv",
+      "csv_sha256": "d0be77761016f65d044918e5f95332cf32bf848e5eef28c5465dfbf287ba984f",
+      "model_input_shape": [
+        1,
+        3,
+        32,
+        32
+      ],
+      "model_output_dim": 10,
+      "model_relative_path": "benchmarks/cifar10_resnet/onnx/resnet_2b.onnx",
+      "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+      "onnx_ops": [
+        "Add",
+        "Conv",
+        "Flatten",
+        "Gemm",
+        "Relu"
+      ],
+      "property_relative_path": "benchmarks/cifar10_resnet/vnnlib_properties_pgd_filtered/resnet2b_pgd_filtered/prop_0_eps_0.008.vnnlib",
+      "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+      "query_ir_hash": "f2151936ce0d9f8d8bcabd7bc3fc0224a71d7907da4ac614d7216e7a0919201b",
+      "workload_id": "cifar10_resnet:000"
+    }
+  },
+  "status": "validated-no-go",
+  "workers": [
+    {
+      "repeat_index": 0,
+      "worker_hash": "d02ed38b640a37fb414d0bafcadc93f2e9d1ed685b33a8bee98ddc28de66003e"
+    },
+    {
+      "repeat_index": 1,
+      "worker_hash": "926a5ee6e0902dda695d084e995b19a1e6db2dff819689b20935c4a004a46bfb"
+    },
+    {
+      "repeat_index": 2,
+      "worker_hash": "1e0087a2bbf95d36dcac3b74b6b1a63ef4bd5b718c1f1a390c11f547876735bc"
+    }
+  ]
+}

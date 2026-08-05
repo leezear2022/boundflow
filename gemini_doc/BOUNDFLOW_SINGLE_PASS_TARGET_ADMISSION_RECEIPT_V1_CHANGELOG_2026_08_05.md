@@ -1,6 +1,6 @@
 ---
-status: preregistered
-updated: 2026-08-05T11:27:57Z
+status: validated-no-go
+updated: 2026-08-05T12:32:05Z
 type: changelog
 topic: boundflow
 slug: single-pass-target-admission-receipt-v1
@@ -11,8 +11,9 @@ stage: s01
 
 ## Summary
 
-- NRIR47 single-pass target admission receipt 已预注册；当前只有计划与证据边界，没有实现、artifact
-  或新性能结果。
+- NRIR47 typed single-pass target admission receipt、prepared binding、显式 production route、full replay
+  与 formal artifact 已完成；correctness/ownership 通过，但 compiler 和两条 queue timing 门禁失败，
+  因此以 `VALIDATED-NO-GO` 关闭且不启动 Phase B。
 
 ## Changes
 
@@ -21,12 +22,21 @@ stage: s01
 - 冻结 typed receipt 的 graph/input/split/bounds/policy/objective/influence/ordered-target 绑定；
 - 冻结 production fast admission 与 explicit full replay 的职责分离；
 - 冻结 Phase A compiler/queue 与 Phase B whole-query fresh-process timing 门禁。
+- 新增 typed receipt/Task/Schedule IR、additive single-pass compiler/prepared Program 与 production
+  candidate route；旧核心 compiler 文件恢复原样以保持 NRIR33/34 frozen revision；
+- 新增 6 条 contract test 与 three-repeat formal generate/replay/tamper runner；
+- artifact：`artifacts/single-pass-target-admission/`
+  `vnncomp21-resnet2b-property0-three-repeat-cpu-phase-a-v1/`。
 
 ## Validation
 
-- preregistration only；没有运行 candidate benchmark，也没有修改 production code；
-- 路线 ceiling 来自 NRIR46：target reselection 估计 median=`1.038153 s`，约占 NRIR45 whole trace
-  3.3%，不能据此预先声称 speedup。
+- candidate 每条 queue compile selector/reselection=`30/0`、runtime selector=`30`、receipt/full
+  replay=`31/31`；correctness/ownership exact，186 份 typed receipt replay；
+- compiler ratio=`0.936003 > 0.85`；clauses 2/3 queue ratio=
+  `1.011205/1.019338 > 0.97`，Phase A timing gate 失败；
+- formal hash=`a7561e5187a6e396905d261e739280e39f2c3480e83ba2af0fbe6e3b1ec042ce`；
+  replay 与同步外层重哈希 tamper 拒绝通过；
+- targeted `55 passed`，全量 `992 passed, 37 skipped`，Black、mypy、Pylint `10.00/10` 通过。
 
 ## Decisions
 
@@ -35,11 +45,15 @@ stage: s01
 - Phase A compiler ratio `<=0.85`、两条 queue ratio `<=0.97`；Phase B trace/measured ratio 均
   `<=0.98`，且所有改善必须大于 pooled MAD；
 - full replay 的 selector 重算不计入 production timing，但必须进入 artifact 计数与语义重建。
+- 计数口径区分 compile selector、compile reselection、runtime semantic selector 与 replay selector；
+  NRIR47 只消除 compile reselection，不删除既有 runtime semantic selection；每条 queue 另把一次 root
+  source admission 显式计入，因此 receipt/full replay=`31/31`。
 
 ## Follow-Ups
 
-- 先实现 receipt IR、具名 compiler admission/full replay API 和负向测试，再运行 Phase A；
-- Phase A 任一门禁失败即关闭，不启动 Phase B。
+- Phase B 已 gated off；candidate 不默认启用，也不形成 speedup claim；
+- 下一单变量先做剩余 top-2 production execution math/queue phase attribution，识别约 20 秒路径中的
+  dominant execution cost，再决定 stronger bound、kernel/backend 或 queue fusion 路线。
 
 ## Links
 

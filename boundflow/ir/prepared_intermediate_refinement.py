@@ -49,13 +49,14 @@ class NativePreparedIntermediateRefinementCapsuleIR:
     target_table_hash: str
     target_count: int
     full_validation_receipt: str
+    target_admission_receipt_hash: Optional[str] = None
     full_validation_count: int = 1
     semantics_owner: str = "boundflow_prepared_intermediate_refinement"
     performance_claimed: bool = False
     schema_version: str = "boundflow.prepared-intermediate-refinement-capsule/v1"
 
     def receipt_dict(self) -> dict[str, object]:
-        return {
+        payload: dict[str, object] = {
             "schema_version": self.schema_version,
             "capsule_id": self.capsule_id,
             "source_plan_hash": self.source_plan_hash,
@@ -76,6 +77,11 @@ class NativePreparedIntermediateRefinementCapsuleIR:
             "semantics_owner": self.semantics_owner,
             "performance_claimed": self.performance_claimed,
         }
+        if self.target_admission_receipt_hash is not None:
+            payload["target_admission_receipt_hash"] = (
+                self.target_admission_receipt_hash
+            )
+        return payload
 
     def validate(self) -> None:
         required = (
@@ -94,12 +100,20 @@ class NativePreparedIntermediateRefinementCapsuleIR:
             self.source_refinement_plan_hash,
             self.source_refinement_semantic_trace_hash,
         )
+        expected_schema = (
+            "boundflow.prepared-intermediate-refinement-capsule/v2"
+            if self.target_admission_receipt_hash is not None
+            else "boundflow.prepared-intermediate-refinement-capsule/v1"
+        )
         if (
-            self.schema_version
-            != "boundflow.prepared-intermediate-refinement-capsule/v1"
+            self.schema_version != expected_schema
             or not self.capsule_id
             or any(not _is_sha256(value) for value in required)
             or any(value is not None and not _is_sha256(value) for value in optional)
+            or (
+                self.target_admission_receipt_hash is not None
+                and not _is_sha256(self.target_admission_receipt_hash)
+            )
             or self.target_count < 1
             or self.full_validation_count != 1
             or self.semantics_owner != "boundflow_prepared_intermediate_refinement"

@@ -4669,3 +4669,21 @@
 - `gemini_doc/change_2026-08-05_nrir47_preregistration.md`
 - `gemini_doc/BOUNDFLOW_SINGLE_PASS_TARGET_ADMISSION_RECEIPT_V1_PLAN_2026_08_05.md`
 - `gemini_doc/BOUNDFLOW_SINGLE_PASS_TARGET_ADMISSION_RECEIPT_V1_CHANGELOG_2026_08_05.md`
+
+---
+
+## 2026-08-05：NRIR-47 Single-Pass Target Admission Receipt Phase A NO-GO
+
+- 新增 typed receipt/Task/Schedule、additive single-pass compiler、prepared binding、candidate production
+  route 与 explicit full replay；legacy compiler 文件保持冻结；
+- 每条 candidate queue compile selector/reselection=`30/0`、runtime selector=`30`、receipt/full
+  replay=`31/31`；correctness/ownership 与 186 receipt replay/tamper 门禁通过；
+- compiler ratio=`0.936003 > 0.85`，clauses 2/3 queue ratio=
+  `1.011205/1.019338 > 0.97`；Phase A timing 失败，Phase B gated off；
+- formal hash=`a7561e51…042ce`；全量 `992 passed, 37 skipped`，Pylint `10.00/10`；
+- 以 `VALIDATED-NO-GO` 关闭，candidate 不默认启用；下一门禁转 top-2 production execution
+  math/queue phase attribution。
+
+**记录**
+- `gemini_doc/change_2026-08-05_nrir47_phase_a_nogo.md`
+- `gemini_doc/BOUNDFLOW_SINGLE_PASS_TARGET_ADMISSION_RECEIPT_V1_CHANGELOG_2026_08_05.md`

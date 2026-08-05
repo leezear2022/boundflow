@@ -1657,7 +1657,7 @@ target selection observed/semantic=`124/60`，64 次冗余 selection 估计耗�
 receipt：production compile 只选择一次，显式 full replay 仍从源输入重算。它不是公平竞品、10x 或
 ASPLOS-ready 终点。
 
-## 60. Single-Pass Target Admission Receipt v1 预注册
+## 60. Single-Pass Target Admission Receipt v1 Phase A NO-GO
 
 PR #57 已将 NRIR46 Phase 0 NO-GO 合入 `main@ca0bcf3`。NRIR47 只处理已观测的 target reselection：
 每 child 从 exact bounds/effective policy/objective influence 选择一次并生成 typed receipt；receipt
@@ -1667,5 +1667,16 @@ PR #57 已将 NRIR46 Phase 0 NO-GO 合入 `main@ca0bcf3`。NRIR47 只处理已�
 NRIR46 三轮 observed/semantic target selection=`124/60`，64 次冗余耗时估计 median=`1.038153 s`；
 60/60 target ledger 互异。因此 NRIR47 禁止跨 child 缓存 targets，也不恢复已 NO-GO 的
 Template/Instance。Phase A compiler ratio 门槛=`0.85`、clauses 2/3 queue ratio=`0.97`；Phase B
-trace/measured ratio=`0.98`，所有改善必须大于 pooled MAD。当前只完成预注册，没有代码、artifact
-或新 claim。
+trace/measured ratio=`0.98`，所有改善必须大于 pooled MAD。
+
+NRIR47 已实现 typed receipt/Task/Schedule、additive single-pass compiler、prepared capsule binding、
+candidate production route 与 explicit full replay。每条 candidate queue compile selector/reselection=
+`30/0`、runtime selector=`30`、receipt/full replay=`31/31`，三轮两条 clause 共 replay 186 份 receipt；
+correctness/ownership 与 synchronized outer-rehash tamper 门禁通过。
+
+正式 compiler control/candidate median=`2.739226/2.563922 s`，ratio=`0.936003 > 0.85`；clauses 2/3
+queue ratio=`1.011205/1.019338 > 0.97`，且 queue 改善未超过 pooled MAD。因此 NRIR47
+`VALIDATED-NO-GO`，Phase B gated off。formal hash=
+`a7561e5187a6e396905d261e739280e39f2c3480e83ba2af0fbe6e3b1ec042ce`；全量
+`992 passed, 37 skipped`，Pylint `10.00/10`。receipt candidate 不默认启用，不形成 performance claim；
+下一门禁转向 top-2 production execution math/queue phase attribution。

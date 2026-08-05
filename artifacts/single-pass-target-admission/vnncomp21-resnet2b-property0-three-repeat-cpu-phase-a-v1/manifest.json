@@ -1,0 +1,15 @@
+{
+  "files": {
+    "formal.json": "fb2d787d6e280a9d23f33d5c6a4e44d3570594aa13b1629aa51599a27c4dfd3c",
+    "logs/repeat-0.log": "d34c12fc99f72c2b6f3ca771fbb82ccf0ae804d2dec12b637735199cdf11a861",
+    "logs/repeat-1.log": "776af13680c5287bb17c6bd80700ff3e06c0aeaabbd25a508455e9774169f5f9",
+    "logs/repeat-2.log": "282b3d0af3808de944f91d5f47511eafe423cd55f0ab7aacc923339dfb41177d",
+    "shards/repeat-0.json": "3202adf41bf52a07645a66cdc8f671627aeaf83689d019a5ec8ec079b04d587f",
+    "shards/repeat-1.json": "f47ed55a1199ec721cac585c0189b1f36764eb4bfc32027525a6074e4b75089d",
+    "shards/repeat-2.json": "50db8be098173a1ec48467366c06035bf926acb292c2f5013ed5acc4ecc9cc9e"
+  },
+  "formal_hash": "a7561e5187a6e396905d261e739280e39f2c3480e83ba2af0fbe6e3b1ec042ce",
+  "manifest_hash": "23d9bb43d9449d5864507f0c078908ab9a08402e757dad27287c0cd86d2a92fc",
+  "performance_claimed": false,
+  "schema_version": "boundflow.single-pass-target-admission-manifest/v1"
+}

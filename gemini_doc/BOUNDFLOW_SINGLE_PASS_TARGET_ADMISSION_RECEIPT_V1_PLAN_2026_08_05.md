@@ -1,6 +1,6 @@
 ---
-status: preregistered
-updated: 2026-08-05T11:27:57Z
+status: validated-no-go
+updated: 2026-08-05T12:32:05Z
 type: plan
 topic: boundflow
 slug: single-pass-target-admission-receipt-v1
@@ -66,29 +66,31 @@ dtype、threads、workload、aggregation、final verdict 与 `performance_claime
 
 ### A. Receipt IR 与 fail-closed admission
 
-- [ ] 新增 versioned `NativeTargetAdmissionReceiptIR` 与 canonical stable hash；
-- [ ] 绑定 exact selection inputs、effective policy、ordered target table 和 selection_count=`1`；
-- [ ] 把 compiler construction 与 full replay 验证拆为具名路径，旧 public compiler 保持 full validation；
-- [ ] prepared Plan/Task/Schedule/capsule 显式消费 receipt hash；
-- [ ] wrong graph/input/split/bounds/policy/objective/influence/target count/order/value/receipt、cross-program
+- [x] 新增 versioned `NativeTargetAdmissionReceiptIR` 与 canonical stable hash；
+- [x] 绑定 exact selection inputs、effective policy、ordered target table 和 selection_count=`1`；
+- [x] 以 additive compiler construction 与 full replay 具名路径保持旧 public compiler 文件/语义不变；
+- [x] prepared Plan/Task/Schedule/capsule 显式消费 receipt hash；
+- [x] wrong graph/input/split/bounds/policy/objective/influence/target count/order/value/receipt、cross-program
   receipt、Tensor mutation/stale owner 全部在 selected-CROWN 前拒绝；
-- [ ] full replay 必须真实重调 selector；禁止把 receipt 自校验冒充 semantic replay。
+- [x] full replay 真实重调 selector；未把 receipt 自校验冒充 semantic replay。
 
 ### B. Phase A compiler/queue formal
 
-- [ ] clauses 2/3 各 three fresh counterbalanced NRIR45-control / NRIR47-single-pass 31-node queues；
-- [ ] 每条 candidate queue production selector=`30`，receipt=`30`，不得出现额外 production reselection；
-- [ ] 每条 candidate queue显式 full replay=`30`，replay selector=`30`，且排除在 production timing 外；
-- [ ] target tables、selected-CROWN、branch/score/state/ancestry/refinement/bounds/worst lower、31 nodes exact；
-- [ ] two-queue compiler-only candidate/control median ratio `<=0.85` 且改善大于 pooled MAD；
-- [ ] clauses 2/3 queue candidate/control median ratio 均 `<=0.97` 且改善大于 pooled MAD；
-- [ ] typed reconstruction 与同步外层重哈希 semantic tamper fail closed。
+- [x] clauses 2/3 各 three fresh counterbalanced NRIR45-control / NRIR47-single-pass 31-node queues；
+- [x] 每条 candidate queue child compile selector=`30`、compile reselection=`0`；root source + 30 child
+  receipt=`31`；既有 runtime semantic selector 仍为 `30`，不得混入 compile ownership 计数；
+- [x] 每条 candidate queue 显式 full replay=`31`、replay selector=`31`，且排除在 production timing 外；
+- [x] target tables、selected-CROWN、branch/score/state/ancestry/refinement/bounds/worst lower、31 nodes exact；
+- [ ] two-queue compiler-only ratio 实测 `0.936003 > 0.85`，虽改善大于 pooled MAD，门禁失败；
+- [ ] clauses 2/3 queue ratio 实测 `1.011205/1.019338 > 0.97`，且改善未超过 pooled MAD；
+- [x] typed reconstruction 与同步外层重哈希 semantic tamper fail closed。
 
 ### C. Phase B whole query
 
-- [ ] 只有 Phase A correctness、ownership、compiler timing、queue timing 全过才启动；
+- [x] Phase A timing 未全过，按预注册禁止启动 Phase B；
 - [ ] three fresh CPU8 global queries，floor/rank/selected `[2,3]`、nodes `[31,31]`、worst lower exact；
-- [ ] 每轮 production selector=`60`、receipt=`60`、显式 full replay/replay selector=`60/60`；
+- [ ] 每轮 child compile selector/reselection=`60/0`、root+child receipt=`62`、既有 runtime semantic
+  selector=`60`、显式 full replay/replay selector=`62/62`；
 - [ ] trace median ratio vs frozen NRIR45 `<=0.98` 且改善大于 pooled MAD；
 - [ ] measured-wall median ratio `<=0.98` 且改善大于 pooled MAD；
 - [ ] final 9/9 unknown、artifact/replay/tamper/full suite/Black/mypy/Pylint/DocOps 全过。
@@ -103,6 +105,19 @@ formal artifact 必须记录 control/candidate 交替顺序、fresh PID、select
 计数、compiler/queue/whole timing、MAD、exact semantic fields、源码与输入 digest。replay 必须先验校验
 所有文件 digest，再重建 receipt 和 full selector semantics；同步改 payload 与 outer digest 后的语义
 篡改仍须拒绝。所有工件保持 `performance_claimed=false`。
+
+### Phase A 最终判定
+
+- correctness/parity 与 ownership 通过：candidate 每条 queue compile selector/reselection=`30/0`，
+  runtime selector=`30`，receipt/full replay=`31/31`；三轮两条 clause 共 replay 186 份 receipt；
+- compiler control/candidate median=`2.739226/2.563922 s`，ratio=`0.936003`，未过 `0.85`；
+- clause 2 queue control/candidate median=`10.099396/10.212559 s`，ratio=`1.011205`；
+- clause 3 queue control/candidate median=`10.056289/10.250753 s`，ratio=`1.019338`；两条均未过
+  `0.97` 且改善未超过 pooled MAD；
+- formal hash=`a7561e5187a6e396905d261e739280e39f2c3480e83ba2af0fbe6e3b1ec042ce`；
+  replay 与 synchronized outer-rehash tamper probe 通过；
+- 结论=`VALIDATED-NO-GO`，Phase B gated off；receipt 机制仅作为未默认启用的 correctness/ownership
+  结果保留，不形成 performance、property closure 或 ASPLOS-ready claim。
 
 即使完全兑现 NRIR46 所测约 `1.038 s` ceiling，相对约 `31.32 s` trace 也只有约 3.3% 改善；本轮是
 compiler IR ownership 清理，不是公平竞品、10x、GPU、多 workload、property closure 或 ASPLOS-ready
@@ -121,5 +136,6 @@ compiler IR ownership 清理，不是公平竞品、10x、GPU、多 workload、p
 ## Links
 
 - changelog: `gemini_doc/BOUNDFLOW_SINGLE_PASS_TARGET_ADMISSION_RECEIPT_V1_CHANGELOG_2026_08_05.md`
+- closure: `gemini_doc/change_2026-08-05_nrir47_phase_a_nogo.md`
 - roadmap: `gemini_doc/boundflow_asplos_master_plan_2026_07_12.md`
 - predecessor: `gemini_doc/BOUNDFLOW_INTERMEDIATE_REFINEMENT_TEMPLATE_INSTANCE_V1_PLAN_2026_08_05.md`

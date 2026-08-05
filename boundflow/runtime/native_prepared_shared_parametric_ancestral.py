@@ -8,10 +8,11 @@ from __future__ import annotations
 
 from dataclasses import replace
 import time
-from typing import Mapping, Optional
+from typing import Callable, Mapping, Optional
 
 import torch
 
+from ..domains.interval import IntervalState
 from ..ir.bound import IntermediateBoundSource
 from ..ir.production_verifier import (
     NativeProductionVerifierTaskKind,
@@ -22,6 +23,7 @@ from ..ir.task import BFTaskModule
 from .native_alpha_beta_optimization_state import NativeAlphaBetaOptimizerPolicy
 from .native_intermediate_refinement import NativeIntermediateRefinementExecution
 from .native_optimized_relu_split_bab_runtime import (
+    NativePerChildRefinementTrace,
     _batched_split_state,
     _build_batched_parent_warm_state,
     _repeat_relu_pre_override,
@@ -38,6 +40,7 @@ from .native_parametric_production_verifier import (
 )
 from .native_prepared_per_child_refinement import (
     _execute_prepared_per_child_refinements,
+    _execute_single_pass_prepared_per_child_refinements,
 )
 from .native_production_verifier import (
     NativeProductionBabEvaluation,
@@ -54,11 +57,21 @@ from .native_relu_split_bab_runtime import (
 from .native_shared_parametric_ancestral import _SharedEvaluatedNode
 from .task_executor import InputSpec
 
+PerChildRefinementExecutor = Callable[
+    ...,
+    tuple[
+        dict[str, IntervalState],
+        tuple[tuple[str, NativeIntermediateRefinementExecution], ...],
+        tuple[NativePerChildRefinementTrace, ...],
+    ],
+]
 
-def _evaluate_prepared_shared_parametric_batch(  # pylint: disable=too-many-statements
+
+def _evaluate_prepared_shared_parametric_batch_with_executor(  # pylint: disable=too-many-statements
     module: BFTaskModule,
     root_input_spec: InputSpec,
     *,
+    per_child_refinement_executor: PerChildRefinementExecutor,
     objective: torch.Tensor,
     nodes: tuple[_RuntimeNode, ...],
     batch_id: str,
@@ -92,20 +105,18 @@ def _evaluate_prepared_shared_parametric_batch(  # pylint: disable=too-many-stat
     else:
         if root_refinement is not None:
             raise ValueError("shared-parametric child received root refinement")
-        batch_relu_pre, refinement_executions, _records = (
-            _execute_prepared_per_child_refinements(
-                module,
-                root_input_spec,
-                objective=objective,
-                nodes=nodes,
-                policy=child_refinement_policy,
-                budget_policy=None,
-                multi_pass_policy=None,
-                budget_group_id=batch_id,
-                parent_by_id=parent_by_id,  # type: ignore[arg-type]
-                strategy="ancestral_constraint_carry_v1",
-                external_constraint_seed=None,
-            )
+        batch_relu_pre, refinement_executions, _records = per_child_refinement_executor(
+            module,
+            root_input_spec,
+            objective=objective,
+            nodes=nodes,
+            policy=child_refinement_policy,
+            budget_policy=None,
+            multi_pass_policy=None,
+            budget_group_id=batch_id,
+            parent_by_id=parent_by_id,  # type: ignore[arg-type]
+            strategy="ancestral_constraint_carry_v1",
+            external_constraint_seed=None,
         )
         warm_state = _build_batched_parent_warm_state(
             module,
@@ -288,4 +299,75 @@ def _evaluate_prepared_shared_parametric_batch(  # pylint: disable=too-many-stat
     return rebound, batch_trace, compiler, refinement_executions
 
 
-__all__ = ["_evaluate_prepared_shared_parametric_batch"]
+def _evaluate_prepared_shared_parametric_batch(
+    module: BFTaskModule,
+    root_input_spec: InputSpec,
+    *,
+    objective: torch.Tensor,
+    nodes: tuple[_RuntimeNode, ...],
+    batch_id: str,
+    policy: NativeAlphaBetaOptimizerPolicy,
+    parent_by_id: Mapping[str, _SharedEvaluatedNode],
+    root_refinement: Optional[NativeIntermediateRefinementExecution],
+    child_refinement_policy: NativeIntermediateRefinementPolicyIR,
+    compiler_cache: NativeParametricOptimizerTemplateCache,
+) -> tuple[
+    tuple[_SharedEvaluatedNode, ...],
+    NativeProductionVerifierBatchTrace,
+    NativeParametricCompilerBatchTrace,
+    tuple[tuple[str, NativeIntermediateRefinementExecution], ...],
+]:
+    return _evaluate_prepared_shared_parametric_batch_with_executor(
+        module,
+        root_input_spec,
+        per_child_refinement_executor=_execute_prepared_per_child_refinements,
+        objective=objective,
+        nodes=nodes,
+        batch_id=batch_id,
+        policy=policy,
+        parent_by_id=parent_by_id,
+        root_refinement=root_refinement,
+        child_refinement_policy=child_refinement_policy,
+        compiler_cache=compiler_cache,
+    )
+
+
+def _evaluate_single_pass_prepared_shared_parametric_batch(
+    module: BFTaskModule,
+    root_input_spec: InputSpec,
+    *,
+    objective: torch.Tensor,
+    nodes: tuple[_RuntimeNode, ...],
+    batch_id: str,
+    policy: NativeAlphaBetaOptimizerPolicy,
+    parent_by_id: Mapping[str, _SharedEvaluatedNode],
+    root_refinement: Optional[NativeIntermediateRefinementExecution],
+    child_refinement_policy: NativeIntermediateRefinementPolicyIR,
+    compiler_cache: NativeParametricOptimizerTemplateCache,
+) -> tuple[
+    tuple[_SharedEvaluatedNode, ...],
+    NativeProductionVerifierBatchTrace,
+    NativeParametricCompilerBatchTrace,
+    tuple[tuple[str, NativeIntermediateRefinementExecution], ...],
+]:
+    return _evaluate_prepared_shared_parametric_batch_with_executor(
+        module,
+        root_input_spec,
+        per_child_refinement_executor=(
+            _execute_single_pass_prepared_per_child_refinements
+        ),
+        objective=objective,
+        nodes=nodes,
+        batch_id=batch_id,
+        policy=policy,
+        parent_by_id=parent_by_id,
+        root_refinement=root_refinement,
+        child_refinement_policy=child_refinement_policy,
+        compiler_cache=compiler_cache,
+    )
+
+
+__all__ = [
+    "_evaluate_prepared_shared_parametric_batch",
+    "_evaluate_single_pass_prepared_shared_parametric_batch",
+]

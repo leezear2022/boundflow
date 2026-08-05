@@ -10,11 +10,12 @@
 
 ---
 
-当前下一分支预注册入口：
+当前最新关闭入口：
 `gemini_doc/BOUNDFLOW_SINGLE_PASS_TARGET_ADMISSION_RECEIPT_V1_PLAN_2026_08_05.md`（NRIR47；
-只把每 child exact target selection `2→1`，60 个动态 target ledger 不共享；显式 full replay 仍重选。
-当前无实现或新性能 claim）。其前序 NRIR46 已由 PR #57 合入 `main@ca0bcf3`，Phase 0 因 strict
-static-shareable median=`1.071197 s < 1.5 s` 以 `VALIDATED-NO-GO` 关闭。
+typed receipt 已把每 child compile selector/reselection 收敛为 `30/0`，60 个动态 target ledger 不共享，
+显式 full replay 仍重选；但 compiler ratio=`0.936003 > 0.85`、两条 queue ratio=
+`1.011205/1.019338 > 0.97`，故 Phase A `VALIDATED-NO-GO`、Phase B gated off）。下一门禁为 top-2
+production execution math/queue attribution。其前序 NRIR46 已由 PR #57 合入 `main@ca0bcf3`。
 
 已由用户豁免执行、但保留的外部审计材料：
 `gemini_doc/BOUNDFLOW_NRIR45_EXTERNAL_AUDIT_HANDOFF_2026_08_05.md`（PR #56，包含 AC1—AC6、
@@ -26,10 +27,11 @@ static-shareable median=`1.071197 s < 1.5 s` 以 `VALIDATED-NO-GO` 关闭。
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新预注册入口：
+当前最新关闭入口：
 `gemini_doc/BOUNDFLOW_SINGLE_PASS_TARGET_ADMISSION_RECEIPT_V1_PLAN_2026_08_05.md`（NRIR47；
-唯一变量是 single-pass exact target admission receipt，Phase A/B timing 与 full-replay 语义门禁已冻结，
-当前无实现或正式结果）。其前序为
+single-pass exact target admission receipt correctness/ownership 已实现并通过；Phase A compiler/queue
+timing 未过，formal hash=`a7561e51…042ce`，状态 `VALIDATED-NO-GO`，下一步做 execution-cost
+attribution）。其前序为
 `gemini_doc/BOUNDFLOW_INTERMEDIATE_REFINEMENT_TEMPLATE_INSTANCE_V1_PLAN_2026_08_05.md`（NRIR46；
 三 fresh process Phase 0 保持 60/60 exact replay，但 strict static topology median 仅
 `1.071197 s`，低于预注册 `1.5 s` 门槛，故 `VALIDATED-NO-GO`，未启动 Phase A/B；PR #57 已合入
