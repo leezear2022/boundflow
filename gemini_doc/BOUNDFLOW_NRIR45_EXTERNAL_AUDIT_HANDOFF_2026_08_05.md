@@ -1,6 +1,6 @@
 ---
-status: ready-for-audit
-updated: 2026-08-05T02:30:00Z
+status: waived-by-user
+updated: 2026-08-05T02:51:57Z
 type: audit-handoff
 topic: boundflow
 slug: nrir45-prepared-intermediate-refinement
@@ -9,6 +9,11 @@ pr: 56
 ---
 
 # NRIR45 Prepared Intermediate Refinement 外部审计交接
+
+> 2026-08-05 用户明确要求后续不再调用其他模型 review，并授权当前执行方持续自检推进。
+> 因此本交接保留为可审计材料，但本轮没有声称获得独立外部批准；PR #56 的关闭依据是已冻结的
+> deterministic replay、tamper、targeted/full regression 与静态门禁。DocOps exchange
+> `nrir45-20260805` 保留 `ready_for_audit` 历史状态，不伪造 auditor verdict。
 
 ## 1. 审计目标
 
@@ -237,4 +242,3 @@ dol lint --soft
 5. claim boundary 是否有漂移；
 6. 不可现场审计项；
 7. 明确说明是否允许 executor 执行 `dol exchange close` 并合并 PR #56。
-

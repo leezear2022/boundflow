@@ -1,12 +1,20 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-05：用户豁免 NRIR45 外部 review
+
+- 用户明确要求后续不再调用其他模型 review，由当前执行方持续自检推进；
+- 保留 `nrir45-20260805` exchange 与审计材料，但不伪造 auditor verdict；
+- PR #56 的合并门禁改为 artifact replay/tamper、targeted/full regression、静态检查与 DocOps
+  确定性验证；
+- claim boundary 不变：fixed ResNet2B property 0 CPU8 internal `VALIDATED-REDUCED`，final unknown。
+
 ## 2026-08-05：NRIR45 PR #56 外部审计交接
 
 - 发布 draft PR #56，并冻结 base `b6eb697`、feature closure `8b8766e` 与 publication head
   `af1031e`；
 - 新增 `gemini_doc/BOUNDFLOW_NRIR45_EXTERNAL_AUDIT_HANDOFF_2026_08_05.md`，定义 AC1—AC6、
   独立 artifact replay/tamper、全量回归与 claim boundary；
-- DocOps 下一状态为外部审计，审计批准前不合并 PR，也不在当前分支混入 NRIR46。
+- 该交接最初用于外部审计；随后用户明确豁免执行，材料仍保留且未伪造批准。
 
 ## 2026-07-19：新增 PR-14 外部模型审计交接
 

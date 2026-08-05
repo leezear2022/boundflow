@@ -10,9 +10,9 @@
 
 ---
 
-当前外部审计入口：
+已由用户豁免执行、但保留的外部审计材料：
 `gemini_doc/BOUNDFLOW_NRIR45_EXTERNAL_AUDIT_HANDOFF_2026_08_05.md`（PR #56，包含 AC1—AC6、
-独立 artifact replay/tamper/回归命令与 claim boundary）。
+独立 artifact replay/tamper/回归命令与 claim boundary；未声称获得外部批准）。
 
 ## 1) “我应该从哪读起？”
 

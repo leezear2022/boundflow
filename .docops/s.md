@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [56]
-last_ch: ev005236
-last_va: ev005237
+last_ch: ev005243
+last_va: ev005245
 blk:
-next: await-nrir45-external-audit-then-merge
-updated: 2026-08-05T02:35:31Z
+next: self-validate-and-merge-pr56-then-nrir46
+updated: 2026-08-05T02:55:58Z
