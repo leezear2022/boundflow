@@ -1,0 +1,209 @@
+{
+  "attribution": {
+    "compile_total_ns": 5356891987,
+    "convertible_to_compile_ratio": 0.39150595533558963,
+    "observed_target_selection_calls": 124,
+    "ownership_ceiling_gate_passed": true,
+    "redundant_target_selection_calls": 64,
+    "redundant_target_selection_estimated_ns": 1026057927,
+    "semantic_target_selection_calls": 60,
+    "static_shareable_gate_ns": 1500000000,
+    "static_topology_ns": 1071197188,
+    "strict_static_gate_passed": false,
+    "template_instance_convertible_ns": 2097255115
+  },
+  "correctness_gate_passed": true,
+  "nrir45": {
+    "accepted_nodes": [
+      31,
+      31
+    ],
+    "correctness_gate_passed": true,
+    "full_replay_count": 60,
+    "prepared_capsule_count": 60,
+    "production_gate_passed": true,
+    "selected_original_clause_indices": [
+      2,
+      3
+    ],
+    "whole_elapsed_ns": 30924657929
+  },
+  "performance_claimed": false,
+  "programs": {
+    "distinct_objective_hashes": 2,
+    "distinct_primal_graph_hashes": 1,
+    "distinct_schedule_topologies": 1,
+    "distinct_target_identity_hashes": 60,
+    "distinct_target_table_hashes": 60,
+    "distinct_task_kind_topologies": 1,
+    "program_count": 60,
+    "target_counts": [
+      739,
+      739,
+      738,
+      738,
+      738,
+      738,
+      737,
+      737,
+      737,
+      737,
+      737,
+      737,
+      737,
+      737,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736,
+      739,
+      739,
+      738,
+      738,
+      738,
+      738,
+      737,
+      737,
+      737,
+      737,
+      737,
+      737,
+      737,
+      737,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736,
+      736
+    ]
+  },
+  "protocol": {
+    "claim_boundary": "phase0_compiler_ownership_diagnosis_only",
+    "instrumentation_scope": "nrir45_runtime_child_compile_only",
+    "timing_kind": "diagnostic_inclusive_exclusive_wall_ns",
+    "torch_threads": 8
+  },
+  "repeat_index": 0,
+  "result_hash": "e570e46b9f960e2aa72f36a0e94a96513e772ab01fd25d7de0878d8c3cdb2446",
+  "schema_version": "boundflow.refinement-template-instance-phase0-worker/v1",
+  "source": {
+    "code_revision": "4e2497724d4f920b86f9880be1caf151c627e067410420f5155509c3f22bfcaa",
+    "nrir45_formal_payload_hash": "4ae71919b5c4d6e8d6162df8bb7d14143a705f60a599f8e4bfa30d084c1a01f8",
+    "nrir45_result_hash": "49b6c66699432a38c78ff28e26d7520080d7514084053694bc9a87754699f1b8"
+  },
+  "timers": {
+    "forward_ibp": {
+      "calls": 248,
+      "exclusive_ns": 176636180,
+      "inclusive_ns": 176636180
+    },
+    "input_bounds_hash": {
+      "calls": 124,
+      "exclusive_ns": 7564475,
+      "inclusive_ns": 7564475
+    },
+    "intermediate_bounds_hash": {
+      "calls": 508,
+      "exclusive_ns": 133296501,
+      "inclusive_ns": 133296501
+    },
+    "legacy_compile_total": {
+      "calls": 60,
+      "exclusive_ns": 238378903,
+      "inclusive_ns": 4364166628
+    },
+    "legacy_program_validate": {
+      "calls": 64,
+      "exclusive_ns": 555698125,
+      "inclusive_ns": 1868451684
+    },
+    "lower_legacy_ir": {
+      "calls": 60,
+      "exclusive_ns": 1009457657,
+      "inclusive_ns": 1009908465
+    },
+    "lower_prepared_ir": {
+      "calls": 60,
+      "exclusive_ns": 21025547,
+      "inclusive_ns": 21025547
+    },
+    "module_validate": {
+      "calls": 120,
+      "exclusive_ns": 764677,
+      "inclusive_ns": 764677
+    },
+    "objective_influence": {
+      "calls": 60,
+      "exclusive_ns": 202597542,
+      "inclusive_ns": 202937741
+    },
+    "policy_validate": {
+      "calls": 2608,
+      "exclusive_ns": 1359679,
+      "inclusive_ns": 1359679
+    },
+    "prepared_capsule": {
+      "calls": 60,
+      "exclusive_ns": 952191099,
+      "inclusive_ns": 952555057
+    },
+    "prepared_compile_total": {
+      "calls": 60,
+      "exclusive_ns": 1876213,
+      "inclusive_ns": 5356891987
+    },
+    "prepared_program_validate": {
+      "calls": 116,
+      "exclusive_ns": 15551609,
+      "inclusive_ns": 15716508
+    },
+    "primal_graph_hash": {
+      "calls": 124,
+      "exclusive_ns": 38589628,
+      "inclusive_ns": 38589628
+    },
+    "program_runtime_roots": {
+      "calls": 176,
+      "exclusive_ns": 229950,
+      "inclusive_ns": 229950
+    },
+    "runtime_receipt_build": {
+      "calls": 60,
+      "exclusive_ns": 10706869,
+      "inclusive_ns": 10706869
+    },
+    "select_targets": {
+      "calls": 124,
+      "exclusive_ns": 1987846178,
+      "inclusive_ns": 1987987234
+    },
+    "split_state_hash": {
+      "calls": 124,
+      "exclusive_ns": 3121155,
+      "inclusive_ns": 3121155
+    }
+  }
+}

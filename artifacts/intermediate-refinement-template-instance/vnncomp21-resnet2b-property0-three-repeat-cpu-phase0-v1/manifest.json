@@ -1,0 +1,14 @@
+{
+  "files": {
+    "formal.json": "177e0624d6939f02fc73a5645c39de732620270f20bfc7d65b0b274e6c32bb93",
+    "logs/repeat-0.log": "173ab4300b8d3b7183a65cbcc46e918511c3d22c337dd633bb771b4ce4414371",
+    "logs/repeat-1.log": "fc8bf7e4f5f36fccfb4f9ea0613fd41b185bc06446e763ecb93eeb268705a561",
+    "logs/repeat-2.log": "f2f308ab39ae7bcf7cf31eef3cd17d507883f1cf72d59298e9122208a1d5ae2d",
+    "shards/repeat-0.json": "8cc4af15ed04c6f27b30ad63c4a05544777cf4cdc6401949af5c12a6924018ab",
+    "shards/repeat-1.json": "161b02ae3479dc4884c05a733f7cac158b18413add75b8fdb0f6377ce0c117d1",
+    "shards/repeat-2.json": "37b6e323b45183ef52abbdca3187ea2fad777625b64b52790992460f649b00ed"
+  },
+  "formal_hash": "363bcc534b0f6df8aede96db726139434182fc6a989cf309bdb505d82f9c1a7d",
+  "performance_claimed": false,
+  "schema_version": "boundflow.refinement-template-instance-phase0-manifest/v1"
+}

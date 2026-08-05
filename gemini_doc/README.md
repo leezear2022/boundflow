@@ -10,6 +10,12 @@
 
 ---
 
+当前最新关闭入口：
+`gemini_doc/BOUNDFLOW_INTERMEDIATE_REFINEMENT_TEMPLATE_INSTANCE_V1_PLAN_2026_08_05.md`（NRIR46
+Phase 0 `VALIDATED-NO-GO`；strict static-shareable median=`1.071197 s < 1.5 s`，因此未实现
+Template/Instance，Phase A/B gated off）。下一候选路线为独立预注册的 single-pass target
+admission receipt，不得把动态 target ledger 当作可共享静态状态。
+
 已由用户豁免执行、但保留的外部审计材料：
 `gemini_doc/BOUNDFLOW_NRIR45_EXTERNAL_AUDIT_HANDOFF_2026_08_05.md`（PR #56，包含 AC1—AC6、
 独立 artifact replay/tamper/回归命令与 claim boundary；未声称获得外部批准）。
@@ -20,7 +26,12 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_PREPARED_INTERMEDIATE_REFINEMENT_CAPSULE_V1_PLAN_2026_08_05.md`
+当前最新关闭入口：
+`gemini_doc/BOUNDFLOW_INTERMEDIATE_REFINEMENT_TEMPLATE_INSTANCE_V1_PLAN_2026_08_05.md`（NRIR46；
+三 fresh process Phase 0 保持 60/60 exact replay，但 strict static topology median 仅
+`1.071197 s`，低于预注册 `1.5 s` 门槛，故 `VALIDATED-NO-GO`，未启动 Phase A/B，且没有 NRIR46
+production 性能 claim）。其直接基线为
+`gemini_doc/BOUNDFLOW_PREPARED_INTERMEDIATE_REFINEMENT_CAPSULE_V1_PLAN_2026_08_05.md`
 （NRIR-45 已 `VALIDATED-REDUCED`：typed prepare-once capsule/receipt 将每条 queue 的 target selection
 `246→98`、full validation `186→38`；clauses 2/3 median ratio=`0.727519/0.736603`。Phase B
 whole trace=`31.262521/31.319772/31.470078 s`、measured median ratio vs NRIR-44=`0.615738`，

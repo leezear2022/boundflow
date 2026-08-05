@@ -1195,3 +1195,27 @@ selected `[2,3]`、两条 `[31,31]` nodes、worst lower 与 final 9/9 unknown �
 unknown，`performance_claimed=false`，公平竞品、GPU、多 workload、property closure 与 ASPLOS-ready
 仍未成立。下一动作不是直接声明“够投”，而是对最终约 31.3 秒 trace 做 residual phase attribution，
 再预注册一个 IR/Plan/Schedule 单变量；不得重开 NRIR-43 CPU batching 或事后降低 cap/nodes/depth。
+
+## 48. 2026-08-05 NRIR-46 Template/Instance Phase 0 NO-GO
+
+residual attribution 已把 NRIR45 whole trace 拆为 floor action median=`10.818262 s`、packed slice
+median=`9.932808 s`、packed-plan compile median=`0.146457 s` 与 rank median=`0.024966 s`。一次
+diagnostic repeat0 的 60 child prepared compile/execute=`5.300590/5.659414 s`、per-child total=
+`10.975123 s`、optimizer execute=`1.156098 s`。这些不是 formal claim。
+
+stacked branch 为 `feat/intermediate-refinement-template-instance-v1`。唯一变量原计划把静态 graph/
+policy/selection recipe/Task/Schedule topology 冻结到 PlanTemplate/ScheduleTemplate，把逐 child split/
+source/objective/bounds/exact target ledger 绑定到 PlanInstance/InstanceSchedule。NRIR46 不做跨节点数值
+batching，不改 cap/nodes/depth/policy/deadline；Phase 0 ceiling、Phase A exact+timing、Phase B whole-query
+按顺序门禁。
+
+Phase 0 三轮 compile total=`5.356892/5.366369/5.452290 s`，strict static topology=
+`1.071197/1.062492/1.071704 s`，ownership-convertible ceiling=`2.097255/2.102134/2.109857 s`。
+预注册 strict static gate 要求 median 至少 `1.5 s`，实测 median=`1.071197 s`，因此 NRIR46
+`VALIDATED-NO-GO`，Template/Instance 未实现，Phase A/B gated off。
+
+三轮仍保持 selected `[2,3]`、nodes `[31,31]`、60/60 capsules/full replay；每轮 target selection
+observed/semantic=`124/60`、冗余=`64`，60 个 target ledger 全部互异。formal hash=
+`712ce359501a010a197797909ab71fb127ebda43329dd3a7a8e21b6dbb4cf846`，replay/tamper 通过，
+`performance_claimed=false`。下一独立变量只能是 single-pass target admission receipt；公平竞品、
+10x、property closure 与 ASPLOS-ready 仍为 NO。
