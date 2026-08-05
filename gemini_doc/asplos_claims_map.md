@@ -1295,13 +1295,21 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   `692b9e273661fce9f12129e134550547afa4023361e2a79d751c437c92f30390`；全量
   `968 passed, 37 skipped`。本阶段 `VALIDATED-NO-GO`。
 
-### NRIR-44：Root-Projection Floor Schedule v1（预注册）
+### NRIR-44：Root-Projection Floor Schedule v1
 
-- `C1/C2-M-NRIR44-PENDING`：计划新增 typed consumer/liveness Plan/Instance/Task/Schedule/Trace，
-  将 ranking floor 的 objective child queries 从 `9×n31d4` 投影为 `9×n1d0`；尚未实现；
-- `C3-G-NRIR44-PENDING`：预注册 baseline/refinement/root/rank/selected exact、evaluation count、
-  three-repeat wall-clock、global deadline 与 synchronized tamper 门禁；尚无 artifact；
-- `C3-E-NRIR44-PENDING`：Phase A floor `<=11 s`/ratio `<=0.50`，Phase B whole `<=48 s`/
-  ratio `<=0.82` 是 acceptance criteria，不是已观测结果；
-- `C3-L-NRIR44`：root projection 是 sound-but-less-complete ranking-only specialization；即使通过也只
-  允许 fixed ResNet2B property 0 CPU8 internal admission，`performance_claimed=false`。
+- `C1/C2-M-NRIR44`：typed consumer/liveness Plan/Instance/7-task Task/Schedule/Trace 显式绑定 source
+  floor、9 clause owners、被消费的 root/status/evidence fields 与 full/projected budget；additive runtime
+  只把 ranking floor child queries 从 `9×n31d4` 投影为 `9×n1d0`，一般 complete verifier 不静默启用；
+- `C3-G-NRIR44`：Phase A 三轮 baseline/refinement/root lower/upper/branch、9/9 unknown、rank=
+  `[2,3,4,5,0,8,6,7,1]`、selected=`[2,3]` exact，objective evaluations=`279→9`；typed replay
+  重建 Plan/Instance/Task/Schedule/Trace，同步外层重哈希 budget/consumer tamper fail closed；
+- `C3-E-NRIR44`：old/projected floor median=`24.235039/9.876515 s`、ratio=`0.407530`；Phase B
+  floor=`8.538814/8.622447/8.648849 s`，whole=`43.571040/44.144990/44.095736 s`，相对 frozen
+  NRIR-42 whole median ratio=`0.764254`；每轮 top-2 production `[31,31]` nodes，worst lower exact；
+- `C3-L-NRIR44`：root projection 是 sound-but-less-complete ranking-only specialization；结论仅为
+  fixed ResNet2B property 0 CPU8 internal admission，final 9/9 unknown，不是公平竞品 speedup、GPU、
+  multi-workload、property closure 或 ASPLOS-ready，`performance_claimed=false`；
+- 工件：`artifacts/root-projection-floor/` Phase A/B；formal hash/payload hash=
+  `ecb553d88be065054abb0a480b79086ae12cec55a84e5c0ba537572e904ff0fe` /
+  `2f22d44fe9f57f233c8a853b66f67f404b03a087d097451e10f663ee257272d9`；本阶段
+  `VALIDATED-REDUCED`；全量 `979 passed, 37 skipped`。

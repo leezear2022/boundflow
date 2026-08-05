@@ -1,0 +1,117 @@
+{
+  "contract": {
+    "expected_rank": [
+      2,
+      3,
+      4,
+      5,
+      0,
+      8,
+      6,
+      7,
+      1
+    ],
+    "expected_selected": [
+      2,
+      3
+    ],
+    "full_evaluations": 279,
+    "maximum_median_ratio": 0.5,
+    "maximum_projected_repeat_ns": 11000000000,
+    "paired_orders": [
+      [
+        "nrir42",
+        "projected"
+      ],
+      [
+        "projected",
+        "nrir42"
+      ],
+      [
+        "nrir42",
+        "projected"
+      ]
+    ],
+    "projected_evaluations": 9,
+    "repeat_count": 3
+  },
+  "decision": {
+    "budget_gate_passed": true,
+    "next_route": "run_nrir44_phase_b",
+    "parity_passed": true,
+    "phase_a_go": true,
+    "reason": "exact semantics and preregistered Phase-A cost gates passed",
+    "repeat_ceiling_passed": true,
+    "timing_gate_passed": true
+  },
+  "decision_hash": "72840c371d1048090433a1ff26242a9cb24b00f60a499521d93acc146eafabdd",
+  "formal_hash": "ecb553d88be065054abb0a480b79086ae12cec55a84e5c0ba537572e904ff0fe",
+  "metrics": {
+    "improvement_exceeds_pooled_mad": true,
+    "maximum_projected_repeat_ns": 10740998231,
+    "median_improvement_ns": 14358524191,
+    "nrir42_elapsed_ns": [
+      24235039126,
+      22859521236,
+      24252771271
+    ],
+    "nrir42_mad_ns": 17732145,
+    "nrir42_median_ns": 24235039126,
+    "projected_elapsed_ns": [
+      9739498239,
+      10740998231,
+      9876514935
+    ],
+    "projected_mad_ns": 137016696,
+    "projected_median_ns": 9876514935,
+    "projected_to_nrir42_median_ratio": 0.4075303895178865
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.root-projection-floor-formal/v1",
+  "source": {
+    "base_revision": "d9d76da",
+    "native_code_revision": "8f1aeffef42d21ba0d5f2024e91e8c6474e79fdcc26963b28ed4b4497da6ae20",
+    "source_nrir42_hash": "0d310c2ffc96844648a83f9921bc7f353ec8425986bccb36f75e6d1cd2b25b58",
+    "workload": {
+      "category": "cifar10_resnet",
+      "csv_ordinal": 0,
+      "csv_relative_path": "benchmarks/cifar10_resnet/cifar10_resnet_instances.csv",
+      "csv_sha256": "d0be77761016f65d044918e5f95332cf32bf848e5eef28c5465dfbf287ba984f",
+      "model_input_shape": [
+        1,
+        3,
+        32,
+        32
+      ],
+      "model_output_dim": 10,
+      "model_relative_path": "benchmarks/cifar10_resnet/onnx/resnet_2b.onnx",
+      "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+      "onnx_ops": [
+        "Add",
+        "Conv",
+        "Flatten",
+        "Gemm",
+        "Relu"
+      ],
+      "property_relative_path": "benchmarks/cifar10_resnet/vnnlib_properties_pgd_filtered/resnet2b_pgd_filtered/prop_0_eps_0.008.vnnlib",
+      "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+      "query_ir_hash": "f2151936ce0d9f8d8bcabd7bc3fc0224a71d7907da4ac614d7216e7a0919201b",
+      "workload_id": "cifar10_resnet:000"
+    }
+  },
+  "status": "validated-reduced",
+  "workers": [
+    {
+      "repeat_index": 0,
+      "worker_hash": "4041f64d572466d56cbd4bac65597733066e490b02a07a233cea500164411f01"
+    },
+    {
+      "repeat_index": 1,
+      "worker_hash": "135b42202c98d1493b82635379918963ac149ecd4b5730530a18798974d537ba"
+    },
+    {
+      "repeat_index": 2,
+      "worker_hash": "67b4a4a2cd7f42165ad054372796c2e9b7ea77647457845f59ded4f3494984bb"
+    }
+  ]
+}

@@ -1,5 +1,9 @@
 # NRIR-44 Root-Projection Floor Schedule v1 预注册记录
 
+> 2026-08-05 状态更新：本预注册已由
+> `gemini_doc/change_2026-08-05_nrir44_root_projection_floor.md` 的 Phase A/B 正式结果关闭；下文
+> “当前无实现”只描述冻结门禁时点，不再是当前状态。
+
 ## 起因
 
 NRIR-43 证明更大的 CPU domain batch 会退化。进一步分解 NRIR-42 floor 后发现，约 21.77 秒中

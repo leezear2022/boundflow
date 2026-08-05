@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev004943
-last_va: ev004944
+last_ch: ev005035
+last_va: ev005036
 blk:
-next: implement-nrir44-phase-a-root-projection-floor-ir-runtime
-updated: 2026-08-05T00:14:46Z
+next: commit-push-open-nrir44-pr
+updated: 2026-08-05T00:50:30Z

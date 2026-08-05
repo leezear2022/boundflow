@@ -1,0 +1,3811 @@
+{
+  "paired_order": [
+    "projected",
+    "nrir42"
+  ],
+  "performance_claimed": false,
+  "repeat_index": 1,
+  "rows": [
+    {
+      "elapsed_ns": 10740998231,
+      "mode": "projected",
+      "objective_evaluation_count": 9,
+      "order_position": 0,
+      "performance_claimed": false,
+      "projection": {
+        "instance": {
+          "clause_owners": [
+            {
+              "objective_hash": "0785a68037a32572ac06fb6f32a6f304254b0c9c64680546f72db8f2d51d28a9",
+              "original_clause_index": 0,
+              "threshold_hash": "73a4805528e56683112bc0717f199ea77cfbb118c59b0f0843bbfe01fc8687b0"
+            },
+            {
+              "objective_hash": "1dc070704cba0d4a6bee1a988044826fb07bdd00f714253eed19c0b3a7bd0e71",
+              "original_clause_index": 1,
+              "threshold_hash": "73a4805528e56683112bc0717f199ea77cfbb118c59b0f0843bbfe01fc8687b0"
+            },
+            {
+              "objective_hash": "fa26d8980f90abe734bbdd8857dfb60909259a0f666bc4708f00d6c7c15ebb06",
+              "original_clause_index": 2,
+              "threshold_hash": "73a4805528e56683112bc0717f199ea77cfbb118c59b0f0843bbfe01fc8687b0"
+            },
+            {
+              "objective_hash": "40c86bb832e8a122c89f4a106bb08b6c1eef89de4110ed48eeb3979ae18f512e",
+              "original_clause_index": 3,
+              "threshold_hash": "73a4805528e56683112bc0717f199ea77cfbb118c59b0f0843bbfe01fc8687b0"
+            },
+            {
+              "objective_hash": "4e53ca48c014ff475c6d0dbb9ac8fcdb8a50833c7a704f2be0efd8c1df6dd629",
+              "original_clause_index": 4,
+              "threshold_hash": "73a4805528e56683112bc0717f199ea77cfbb118c59b0f0843bbfe01fc8687b0"
+            },
+            {
+              "objective_hash": "9d4dc7affe2152e3fb8e80b871cd10e6a2dbea1c2bc28df292ce85742b2b1f48",
+              "original_clause_index": 5,
+              "threshold_hash": "73a4805528e56683112bc0717f199ea77cfbb118c59b0f0843bbfe01fc8687b0"
+            },
+            {
+              "objective_hash": "53fc371457c824abec3029c5fdee85b23d79250e749af3bd3051051742ac8137",
+              "original_clause_index": 6,
+              "threshold_hash": "73a4805528e56683112bc0717f199ea77cfbb118c59b0f0843bbfe01fc8687b0"
+            },
+            {
+              "objective_hash": "8778848eaef762304490620cc62d7c024164bf3d4fa1fbca6c69c56f810267c6",
+              "original_clause_index": 7,
+              "threshold_hash": "73a4805528e56683112bc0717f199ea77cfbb118c59b0f0843bbfe01fc8687b0"
+            },
+            {
+              "objective_hash": "c9cc079410c1c2dc44a586e59322d1f1a72decc7f1a78ba9f0117fc1120b18b3",
+              "original_clause_index": 8,
+              "threshold_hash": "73a4805528e56683112bc0717f199ea77cfbb118c59b0f0843bbfe01fc8687b0"
+            }
+          ],
+          "instance_id": "nrir44:repeat:1:projection:instance",
+          "objective_matrix_hash": "380f1c32321ea47967ad48221134d92d494630777eabe10ef31576a0b051e408",
+          "plan_hash": "aed0e729a46a87a6cc363bd9d2e3f54ab262b0c16e61e19b282ebe38887f72d5",
+          "schema_version": "boundflow.root-projection-floor-instance/v1",
+          "semantic_token": "e73b8a4ffe1c8f5428a3251f33a45b2bcd1da70968cb3afb303dfb090b3ae1d3",
+          "thresholds_hash": "3b1cc1f1fe9a9ea9dab2f3238ea0a399d58bbe976b98448b951cefcf189e984b"
+        },
+        "plan": {
+          "clause_count": 9,
+          "consumed_result_fields": [
+            "root.lower",
+            "root.upper",
+            "root.branch_candidate",
+            "query.status",
+            "counterexample.evidence"
+          ],
+          "full_max_depth": 4,
+          "full_max_nodes": 31,
+          "performance_claimed": false,
+          "plan_id": "nrir44:repeat:1:projection",
+          "projected_max_depth": 0,
+          "projected_max_nodes": 1,
+          "schema_version": "boundflow.root-projection-floor-plan/v1",
+          "semantics_owner": "boundflow_root_projection_floor",
+          "soundness_mode": "ranking_only_sound_less_complete_v1",
+          "source_plan_hash": "2ec61ffc2858b78ee638d3106b46c799626c501833d75340b96a4ec51452e857",
+          "source_schedule_hash": "4de357c47d7eb01da14a447410e16bf6473243139880df7986225b44686fe2a3",
+          "source_task_ir_hash": "c642af195f7a67079602297ad4cbc2da438819f7135a5ed462b7dbf22840b472"
+        },
+        "schedule": {
+          "actions": [
+            {
+              "action_id": "nrir44:repeat:1:projection:launch:0000:admit_source",
+              "sequence": 0,
+              "task_id": "nrir44:repeat:1:projection:admit_source"
+            },
+            {
+              "action_id": "nrir44:repeat:1:projection:launch:0001:analyze_consumers",
+              "sequence": 1,
+              "task_id": "nrir44:repeat:1:projection:analyze_consumers"
+            },
+            {
+              "action_id": "nrir44:repeat:1:projection:launch:0002:execute_baseline",
+              "sequence": 2,
+              "task_id": "nrir44:repeat:1:projection:execute_baseline"
+            },
+            {
+              "action_id": "nrir44:repeat:1:projection:launch:0003:refine_objectives",
+              "sequence": 3,
+              "task_id": "nrir44:repeat:1:projection:refine_objectives"
+            },
+            {
+              "action_id": "nrir44:repeat:1:projection:launch:0004:execute_root_projections",
+              "sequence": 4,
+              "task_id": "nrir44:repeat:1:projection:execute_root_projections"
+            },
+            {
+              "action_id": "nrir44:repeat:1:projection:launch:0005:rank_roots",
+              "sequence": 5,
+              "task_id": "nrir44:repeat:1:projection:rank_roots"
+            },
+            {
+              "action_id": "nrir44:repeat:1:projection:launch:0006:emit_floor",
+              "sequence": 6,
+              "task_id": "nrir44:repeat:1:projection:emit_floor"
+            }
+          ],
+          "full_evaluation_budget": 279,
+          "instance_hash": "5d52d1315ce5421422a511726a3c69bd5e0639371a92342ddf3aa2a2df13d510",
+          "plan_hash": "aed0e729a46a87a6cc363bd9d2e3f54ab262b0c16e61e19b282ebe38887f72d5",
+          "projected_evaluation_budget": 9,
+          "schedule_id": "nrir44:repeat:1:projection:schedule",
+          "schema_version": "boundflow.root-projection-floor-schedule-ir/v1",
+          "task_module_hash": "0ab3b3d95236ec884b2673d882581d7dd01333ed1d47e53512faee45d00d0ef4"
+        },
+        "task_module": {
+          "instance_hash": "5d52d1315ce5421422a511726a3c69bd5e0639371a92342ddf3aa2a2df13d510",
+          "module_id": "nrir44:repeat:1:projection:tasks",
+          "output_task_id": "nrir44:repeat:1:projection:emit_floor",
+          "plan_hash": "aed0e729a46a87a6cc363bd9d2e3f54ab262b0c16e61e19b282ebe38887f72d5",
+          "schema_version": "boundflow.root-projection-floor-task-ir/v1",
+          "tasks": [
+            {
+              "dependency_task_ids": [],
+              "input_value_ids": [
+                "projection.plan",
+                "projection.instance",
+                "source.program"
+              ],
+              "kind": "admit_source",
+              "output_value_ids": [
+                "projection.source"
+              ],
+              "task_id": "nrir44:repeat:1:projection:admit_source"
+            },
+            {
+              "dependency_task_ids": [
+                "nrir44:repeat:1:projection:admit_source"
+              ],
+              "input_value_ids": [
+                "projection.source"
+              ],
+              "kind": "analyze_consumers",
+              "output_value_ids": [
+                "projection.consumer_contract"
+              ],
+              "task_id": "nrir44:repeat:1:projection:analyze_consumers"
+            },
+            {
+              "dependency_task_ids": [
+                "nrir44:repeat:1:projection:analyze_consumers"
+              ],
+              "input_value_ids": [
+                "projection.source"
+              ],
+              "kind": "execute_baseline",
+              "output_value_ids": [
+                "projection.baseline"
+              ],
+              "task_id": "nrir44:repeat:1:projection:execute_baseline"
+            },
+            {
+              "dependency_task_ids": [
+                "nrir44:repeat:1:projection:execute_baseline"
+              ],
+              "input_value_ids": [
+                "projection.baseline"
+              ],
+              "kind": "refine_objectives",
+              "output_value_ids": [
+                "projection.refinements"
+              ],
+              "task_id": "nrir44:repeat:1:projection:refine_objectives"
+            },
+            {
+              "dependency_task_ids": [
+                "nrir44:repeat:1:projection:refine_objectives"
+              ],
+              "input_value_ids": [
+                "projection.consumer_contract",
+                "projection.refinements"
+              ],
+              "kind": "execute_root_projections",
+              "output_value_ids": [
+                "projection.roots"
+              ],
+              "task_id": "nrir44:repeat:1:projection:execute_root_projections"
+            },
+            {
+              "dependency_task_ids": [
+                "nrir44:repeat:1:projection:execute_root_projections"
+              ],
+              "input_value_ids": [
+                "projection.roots"
+              ],
+              "kind": "rank_roots",
+              "output_value_ids": [
+                "projection.ranking"
+              ],
+              "task_id": "nrir44:repeat:1:projection:rank_roots"
+            },
+            {
+              "dependency_task_ids": [
+                "nrir44:repeat:1:projection:rank_roots"
+              ],
+              "input_value_ids": [
+                "projection.ranking"
+              ],
+              "kind": "emit_floor",
+              "output_value_ids": [
+                "projection.floor"
+              ],
+              "task_id": "nrir44:repeat:1:projection:emit_floor"
+            }
+          ]
+        },
+        "trace": {
+          "baseline_trace_hash": "61a5daf8a18aaefb7beee331248f1a33d7f7b6d89fc7509ac5ca43e670d057c9",
+          "clause_traces": [
+            {
+              "child_node_count": 0,
+              "decision_count": 1,
+              "evaluation_count": 1,
+              "objective_hash": "0785a68037a32572ac06fb6f32a6f304254b0c9c64680546f72db8f2d51d28a9",
+              "original_clause_index": 0,
+              "query_trace_hash": "7d4ba739345bf1132ac663d06727a5fbea5b1acdce7d42732fbc9e450302274a",
+              "refinement_plan_hash": "e2a9ad23278542b4678847826fb59da9620757ed885b4238f5adb1b1deb0c55a",
+              "refinement_trace_hash": "d441bccf245f000dc82613ea57ece868ceb3205d2726a2186e92de175c10eee5",
+              "root_evaluation_hash": "e2d99dcb3451742dee67aea08e5326a04671e1799ed737aad5a68f62ed02f44b",
+              "status": "unknown"
+            },
+            {
+              "child_node_count": 0,
+              "decision_count": 1,
+              "evaluation_count": 1,
+              "objective_hash": "1dc070704cba0d4a6bee1a988044826fb07bdd00f714253eed19c0b3a7bd0e71",
+              "original_clause_index": 1,
+              "query_trace_hash": "b7fef8b7a0321ddc20fcddf5ce1156f5d63e80223464b1ccf112c73a2718a254",
+              "refinement_plan_hash": "9f0a24cd36b5442629e9fb526e009036f76c7e49b481d15669e1e53722a79d4a",
+              "refinement_trace_hash": "8421cad5ad8dffcbc6d2009b66de17287426f429e50caafacc0ce12372807457",
+              "root_evaluation_hash": "bf9e1eb77fee9331bae07601226469b93bf6a9ea95c73288c21cfe63df55b83c",
+              "status": "unknown"
+            },
+            {
+              "child_node_count": 0,
+              "decision_count": 1,
+              "evaluation_count": 1,
+              "objective_hash": "fa26d8980f90abe734bbdd8857dfb60909259a0f666bc4708f00d6c7c15ebb06",
+              "original_clause_index": 2,
+              "query_trace_hash": "2d6b874ff005b25f77e5723733cdd16a4c73971123f1f9c11e05ef2906a2dedd",
+              "refinement_plan_hash": "dddc2513b5bb495e7cfd86ed9922a2f7bcf42459854ec8b7dd297ff8c636aea3",
+              "refinement_trace_hash": "dd55bfb721901e747ad26c0dd7cacb0d15ce7da15f6a22cff25c2dc03d860f94",
+              "root_evaluation_hash": "37bdc31f8d35676aed8364c3afd1448fd60ae0389e418ae34872a1f29f312a0c",
+              "status": "unknown"
+            },
+            {
+              "child_node_count": 0,
+              "decision_count": 1,
+              "evaluation_count": 1,
+              "objective_hash": "40c86bb832e8a122c89f4a106bb08b6c1eef89de4110ed48eeb3979ae18f512e",
+              "original_clause_index": 3,
+              "query_trace_hash": "a8547c896d5abb716acf9eb09bc9c30a56c192b6c29da5f24a0060c11fac0c40",
+              "refinement_plan_hash": "e04dc96b7612ac2b00897af060bbad847c153a8369b0d4726f28f18f92d58202",
+              "refinement_trace_hash": "e833943fe5335301b207be2f544be9027e227a682d2ef7281dc6d927486301b2",
+              "root_evaluation_hash": "0ac486624f4711f6c701c96fd51078b2665b69deb3bc4ba2c7aad8bcd895e85e",
+              "status": "unknown"
+            },
+            {
+              "child_node_count": 0,
+              "decision_count": 1,
+              "evaluation_count": 1,
+              "objective_hash": "4e53ca48c014ff475c6d0dbb9ac8fcdb8a50833c7a704f2be0efd8c1df6dd629",
+              "original_clause_index": 4,
+              "query_trace_hash": "320de5d68cbc6f68c393cffd70ec2fab3fe8763af151a30329af8216f985f73c",
+              "refinement_plan_hash": "483687a326ef4abc78a474750b94df70ff92ca67a71efdc109aae6fd8fbb603d",
+              "refinement_trace_hash": "fad39c45d1444c9272285fa9a16801d6bcbf58553069ed280be3c977380f8172",
+              "root_evaluation_hash": "8df11288bbefdf34babcc9a2b53e514ebfd131e6764ae7476115c297fd8a3647",
+              "status": "unknown"
+            },
+            {
+              "child_node_count": 0,
+              "decision_count": 1,
+              "evaluation_count": 1,
+              "objective_hash": "9d4dc7affe2152e3fb8e80b871cd10e6a2dbea1c2bc28df292ce85742b2b1f48",
+              "original_clause_index": 5,
+              "query_trace_hash": "6807e072897c26e7912f30ccd71ae8425783f91b4f132159b54a9ab1a43606b5",
+              "refinement_plan_hash": "fbae9b7129f393efcaf32234eadcc6c9a6db2bb333f96d0c6b1d940a334d7581",
+              "refinement_trace_hash": "eaafb9758bfe50492e150c532a40da6fd695ce8da96ba3c9bcbdfb7bfa73514f",
+              "root_evaluation_hash": "c48abc622a1d9a9444b27782a4dc25a5eec2b8161d116a713e7f324c80f9692a",
+              "status": "unknown"
+            },
+            {
+              "child_node_count": 0,
+              "decision_count": 1,
+              "evaluation_count": 1,
+              "objective_hash": "53fc371457c824abec3029c5fdee85b23d79250e749af3bd3051051742ac8137",
+              "original_clause_index": 6,
+              "query_trace_hash": "1be446b5dfa4d0092ad69ba149e5103cdd5ca5e99f894821636b45b404a2f7a0",
+              "refinement_plan_hash": "bba28342214537a6c76dc5129f708d48f15fa2c2ec37b4865a64fe20d5eab6ac",
+              "refinement_trace_hash": "1db87c561ee0615de511b4f9e5262a448b2607b89fc279f22edcd8f142f7c589",
+              "root_evaluation_hash": "119eb41b7e505cfccb13bd7cc23820f9b4901555d94636753aaee662d6ced72b",
+              "status": "unknown"
+            },
+            {
+              "child_node_count": 0,
+              "decision_count": 1,
+              "evaluation_count": 1,
+              "objective_hash": "8778848eaef762304490620cc62d7c024164bf3d4fa1fbca6c69c56f810267c6",
+              "original_clause_index": 7,
+              "query_trace_hash": "f36ec160d28394fa1ef3893ce7c973585d2d14c453e1a0664b9b91d75d41f487",
+              "refinement_plan_hash": "148480098b5366d143360453c47c31c98c88ae28caeab473f459905ac7f1697e",
+              "refinement_trace_hash": "03a5a507e926057a6d9be4ef8228262efdd81453b1c75a4714ecf028ab115872",
+              "root_evaluation_hash": "98b8a4999a90ff1e8bc435401ad3bd14c498d60472c80892856b1a8b9cfce0e5",
+              "status": "unknown"
+            },
+            {
+              "child_node_count": 0,
+              "decision_count": 1,
+              "evaluation_count": 1,
+              "objective_hash": "c9cc079410c1c2dc44a586e59322d1f1a72decc7f1a78ba9f0117fc1120b18b3",
+              "original_clause_index": 8,
+              "query_trace_hash": "6a280189e4484a71b3b3e316c753700344843051f575587efef5e7528c3567d9",
+              "refinement_plan_hash": "e29883ccda5cb3348d1082db9c60e3e8d0bb272d3312b5a8a2f2dda3680a7877",
+              "refinement_trace_hash": "57b678b2b68e6ee087ea9a5a42da640a754a4472ec1d27e7f8b0314511cf755a",
+              "root_evaluation_hash": "c976d07e3cda18b06afb8548fd70b17a7f6f9651b8834cd8892d7560b8d67965",
+              "status": "unknown"
+            }
+          ],
+          "completed_original_clause_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "final_status": "unknown",
+          "instance_hash": "5d52d1315ce5421422a511726a3c69bd5e0639371a92342ddf3aa2a2df13d510",
+          "performance_claimed": false,
+          "plan_hash": "aed0e729a46a87a6cc363bd9d2e3f54ab262b0c16e61e19b282ebe38887f72d5",
+          "schedule_hash": "f111dae5f110a70be4002bbef85756fddbc8bd3aee146bc7a97fef26d42f65bb",
+          "schema_version": "boundflow.root-projection-floor-trace/v1",
+          "shared_refinement_trace_hash": "7c20b15dc751dcd426c270c7a855ba5988370caa9b8829fe464ea3685d12fa31",
+          "source_floor_trace_hash": "42954d28f9c1e16a5ad697b8bcaf7793807ccc0f5bde7f03dc3aa5a776bbe178",
+          "task_module_hash": "0ab3b3d95236ec884b2673d882581d7dd01333ed1d47e53512faee45d00d0ef4"
+        },
+        "trace_hash": "dd0bda558e2b51108eaa2891952b6d809281de2ecf5f79b1669ee8899dcd7a7a"
+      },
+      "repeat_index": 1,
+      "row_hash": "982293e442efd9d15f3c5d8b08df40f11e1dd2a755a75a4794652ec5b7da4319",
+      "semantics": {
+        "baseline": [
+          {
+            "decisions": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "branch_neuron_index": null,
+                "branch_relu_input": null,
+                "branch_value": 0,
+                "depth": 0,
+                "lower": -543.7172241210938,
+                "priority": -543.7172,
+                "upper": 566.6599731445312
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 1,
+                "lower": -540.3192749023438,
+                "priority": -540.3193,
+                "upper": 564.4537963867188
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 1,
+                "lower": -539.81201171875,
+                "priority": -539.812,
+                "upper": 564.0169677734375
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -540.1006469726562,
+                "priority": -540.1006,
+                "upper": 561.8203125
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -540.22900390625,
+                "priority": -540.229,
+                "upper": 560.8876953125
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -539.6031494140625,
+                "priority": -539.6031,
+                "upper": 561.3493041992188
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -539.7317504882812,
+                "priority": -539.7318,
+                "upper": 560.4481201171875
+              }
+            ],
+            "status": "unknown"
+          },
+          {
+            "decisions": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "branch_neuron_index": null,
+                "branch_relu_input": null,
+                "branch_value": 0,
+                "depth": 0,
+                "lower": -789.3314208984375,
+                "priority": -789.3314,
+                "upper": 826.3755493164062
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 1,
+                "lower": -776.9682006835938,
+                "priority": -776.9682,
+                "upper": 826.2362060546875
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 1,
+                "lower": -776.2970581054688,
+                "priority": -776.2971,
+                "upper": 827.2870483398438
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -776.6387939453125,
+                "priority": -776.6388,
+                "upper": 821.717041015625
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -776.7481079101562,
+                "priority": -776.7481,
+                "upper": 820.688232421875
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -775.90283203125,
+                "priority": -775.9028,
+                "upper": 822.6878051757812
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -776.0070190429688,
+                "priority": -776.007,
+                "upper": 821.796630859375
+              }
+            ],
+            "status": "unknown"
+          },
+          {
+            "decisions": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "branch_neuron_index": null,
+                "branch_relu_input": null,
+                "branch_value": 0,
+                "depth": 0,
+                "lower": -363.1641540527344,
+                "priority": -363.1642,
+                "upper": 518.0650634765625
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 1,
+                "lower": -346.74066162109375,
+                "priority": -346.7407,
+                "upper": 517.9364013671875
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 1,
+                "lower": -347.18426513671875,
+                "priority": -347.1843,
+                "upper": 518.4259033203125
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -340.2728271484375,
+                "priority": -340.2728,
+                "upper": 518.3577270507812
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -340.8096923828125,
+                "priority": -340.8097,
+                "upper": 519.7978515625
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -339.837646484375,
+                "priority": -339.8376,
+                "upper": 517.8562622070312
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -340.4971008300781,
+                "priority": -340.4971,
+                "upper": 519.1246948242188
+              }
+            ],
+            "status": "unknown"
+          },
+          {
+            "decisions": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "branch_neuron_index": null,
+                "branch_relu_input": null,
+                "branch_value": 0,
+                "depth": 0,
+                "lower": -404.23944091796875,
+                "priority": -404.2394,
+                "upper": 510.2369384765625
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 1,
+                "lower": -357.92181396484375,
+                "priority": -357.9218,
+                "upper": 510.1443786621094
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 1,
+                "lower": -366.6595764160156,
+                "priority": -366.6596,
+                "upper": 523.97021484375
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -340.80426025390625,
+                "priority": -340.8043,
+                "upper": 523.8883056640625
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -347.95855712890625,
+                "priority": -347.9586,
+                "upper": 536.3676147460938
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -331.6986389160156,
+                "priority": -331.6986,
+                "upper": 510.03350830078125
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -340.65924072265625,
+                "priority": -340.6592,
+                "upper": 523.6530151367188
+              }
+            ],
+            "status": "unknown"
+          },
+          {
+            "decisions": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "branch_neuron_index": null,
+                "branch_relu_input": null,
+                "branch_value": 0,
+                "depth": 0,
+                "lower": -429.9703674316406,
+                "priority": -429.9704,
+                "upper": 588.2186889648438
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 1,
+                "lower": -415.5721740722656,
+                "priority": -415.5722,
+                "upper": 588.1244506835938
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 1,
+                "lower": -417.6618957519531,
+                "priority": -417.6619,
+                "upper": 589.234375
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -401.2566223144531,
+                "priority": -401.2566,
+                "upper": 589.3215942382812
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -403.0230712890625,
+                "priority": -403.0231,
+                "upper": 594.5078125
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -399.7812805175781,
+                "priority": -399.7813,
+                "upper": 588.1251831054688
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -400.78375244140625,
+                "priority": -400.7838,
+                "upper": 593.172607421875
+              }
+            ],
+            "status": "unknown"
+          },
+          {
+            "decisions": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "branch_neuron_index": null,
+                "branch_relu_input": null,
+                "branch_value": 0,
+                "depth": 0,
+                "lower": -437.8812561035156,
+                "priority": -437.8813,
+                "upper": 609.5070190429688
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 1,
+                "lower": -420.9908142089844,
+                "priority": -420.9908,
+                "upper": 609.286865234375
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 1,
+                "lower": -420.24261474609375,
+                "priority": -420.2426,
+                "upper": 609.5965576171875
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -419.64215087890625,
+                "priority": -419.6422,
+                "upper": 609.1964721679688
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -419.5412902832031,
+                "priority": -419.5413,
+                "upper": 609.2791137695312
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -419.11016845703125,
+                "priority": -419.1102,
+                "upper": 609.5261840820312
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -418.8197021484375,
+                "priority": -418.8197,
+                "upper": 609.6299438476562
+              }
+            ],
+            "status": "unknown"
+          },
+          {
+            "decisions": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "branch_neuron_index": null,
+                "branch_relu_input": null,
+                "branch_value": 0,
+                "depth": 0,
+                "lower": -659.965087890625,
+                "priority": -659.9651,
+                "upper": 697.9096069335938
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 1,
+                "lower": -592.246826171875,
+                "priority": -592.2468,
+                "upper": 697.8392333984375
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 1,
+                "lower": -617.283203125,
+                "priority": -617.2832,
+                "upper": 722.2807006835938
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -561.757080078125,
+                "priority": -561.7571,
+                "upper": 722.4324340820312
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -578.10546875,
+                "priority": -578.1055,
+                "upper": 751.6552124023438
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -536.11669921875,
+                "priority": -536.1167,
+                "upper": 697.5968017578125
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -556.8165893554688,
+                "priority": -556.8166,
+                "upper": 727.379150390625
+              }
+            ],
+            "status": "unknown"
+          },
+          {
+            "decisions": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "branch_neuron_index": null,
+                "branch_relu_input": null,
+                "branch_value": 0,
+                "depth": 0,
+                "lower": -706.3343505859375,
+                "priority": -706.3344,
+                "upper": 835.369873046875
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 1,
+                "lower": -694.9691162109375,
+                "priority": -694.9691,
+                "upper": 833.091796875
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 1,
+                "lower": -694.8826293945312,
+                "priority": -694.8826,
+                "upper": 832.7177734375
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -694.0288696289062,
+                "priority": -694.0289,
+                "upper": 831.9296264648438
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -694.146728515625,
+                "priority": -694.1467,
+                "upper": 831.7314453125
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -694.009033203125,
+                "priority": -694.009,
+                "upper": 831.4618530273438
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -694.0728149414062,
+                "priority": -694.0728,
+                "upper": 831.2557983398438
+              }
+            ],
+            "status": "unknown"
+          },
+          {
+            "decisions": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "branch_neuron_index": null,
+                "branch_relu_input": null,
+                "branch_value": 0,
+                "depth": 0,
+                "lower": -623.8977661132812,
+                "priority": -623.8978,
+                "upper": 883.8757934570312
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 1,
+                "lower": -607.9652709960938,
+                "priority": -607.9653,
+                "upper": 883.77783203125
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 1,
+                "lower": -607.9829711914062,
+                "priority": -607.983,
+                "upper": 884.0248413085938
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -607.7927856445312,
+                "priority": -607.7928,
+                "upper": 876.9976806640625
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -607.6976318359375,
+                "priority": -607.6976,
+                "upper": 874.9049072265625
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -607.734619140625,
+                "priority": -607.7346,
+                "upper": 876.681396484375
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -607.7362060546875,
+                "priority": -607.7362,
+                "upper": 874.599365234375
+              }
+            ],
+            "status": "unknown"
+          }
+        ],
+        "completed_original_clause_indices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "final_status": "unknown",
+        "objective_refinement_hashes": [
+          "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+          "be9e73e0b8f85accdac31986f2582a2ff8be5aadf6cd83af3811d8f259b888a4",
+          "e3c67400210e9d0cd09276a5156e855e6815232124a479c670a5bafe7f00f019",
+          "adebcbf3d114518944962a5fe0efef0facfda995ca0a10149440c12e879d896b",
+          "dc120b11d34e5924b000e6803b1060d1afafaf6805ed42fc4f0cb0726dc50ffa",
+          "4dc3283ce92380d4d5f47134e3d16ffd492c73c63bf18698b2cb0cbb9e5d1e25",
+          "d8c50ff3749fe5adda02ee0b809eb94a368d46dc017ea072b84730680d3cdf8c",
+          "d315870587deaae775682c4e5aa32fec9d7d222a8cb9eaacd6bdb35cbc2f51c1",
+          "d3e3d99d670d3e0daa7ff4e315bac74956a4e18c7043782468a89a509a91a948"
+        ],
+        "ranked_original_clause_indices": [
+          2,
+          3,
+          4,
+          5,
+          0,
+          8,
+          6,
+          7,
+          1
+        ],
+        "roots": [
+          {
+            "branch_candidate": {
+              "lower": -85.59491729736328,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 60.770511627197266,
+              "width": 146.36542892456055
+            },
+            "original_clause_index": 0,
+            "root_lower": -204.17315673828125,
+            "root_upper": 213.74331665039062,
+            "status": "unknown"
+          },
+          {
+            "branch_candidate": {
+              "lower": -85.59491729736328,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 60.770511627197266,
+              "width": 146.36542892456055
+            },
+            "original_clause_index": 1,
+            "root_lower": -298.47283935546875,
+            "root_upper": 308.8791809082031,
+            "status": "unknown"
+          },
+          {
+            "branch_candidate": {
+              "lower": -85.59491729736328,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 60.770511627197266,
+              "width": 146.36542892456055
+            },
+            "original_clause_index": 2,
+            "root_lower": -139.10787963867188,
+            "root_upper": 192.68186950683594,
+            "status": "unknown"
+          },
+          {
+            "branch_candidate": {
+              "lower": -85.59491729736328,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 60.770511627197266,
+              "width": 146.36542892456055
+            },
+            "original_clause_index": 3,
+            "root_lower": -152.2870330810547,
+            "root_upper": 191.56068420410156,
+            "status": "unknown"
+          },
+          {
+            "branch_candidate": {
+              "lower": -85.59491729736328,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 60.770511627197266,
+              "width": 146.36542892456055
+            },
+            "original_clause_index": 4,
+            "root_lower": -163.16854858398438,
+            "root_upper": 218.8386993408203,
+            "status": "unknown"
+          },
+          {
+            "branch_candidate": {
+              "lower": -85.59491729736328,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 60.770511627197266,
+              "width": 146.36542892456055
+            },
+            "original_clause_index": 5,
+            "root_lower": -164.7825164794922,
+            "root_upper": 228.7563018798828,
+            "status": "unknown"
+          },
+          {
+            "branch_candidate": {
+              "lower": -85.59491729736328,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 60.770511627197266,
+              "width": 146.36542892456055
+            },
+            "original_clause_index": 6,
+            "root_lower": -246.59263610839844,
+            "root_upper": 260.082275390625,
+            "status": "unknown"
+          },
+          {
+            "branch_candidate": {
+              "lower": -85.59491729736328,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 60.770511627197266,
+              "width": 146.36542892456055
+            },
+            "original_clause_index": 7,
+            "root_lower": -268.6291809082031,
+            "root_upper": 313.94207763671875,
+            "status": "unknown"
+          },
+          {
+            "branch_candidate": {
+              "lower": -85.59491729736328,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 60.770511627197266,
+              "width": 146.36542892456055
+            },
+            "original_clause_index": 8,
+            "root_lower": -235.29153442382812,
+            "root_upper": 327.22052001953125,
+            "status": "unknown"
+          }
+        ],
+        "selected_original_clause_indices": [
+          2,
+          3
+        ],
+        "shared_refinement_hash": "2e9c4974f5bc342de93ad780c76c6785aafde915d4c6afb4a700cd36104a32d4"
+      }
+    },
+    {
+      "elapsed_ns": 22859521236,
+      "mode": "nrir42",
+      "objective_evaluation_count": 279,
+      "order_position": 1,
+      "performance_claimed": false,
+      "projection": null,
+      "repeat_index": 1,
+      "row_hash": "2a36c9f9998e50fc7cc5f129f96042a628b2164956d5c094391631664a7b82f1",
+      "semantics": {
+        "baseline": [
+          {
+            "decisions": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "branch_neuron_index": null,
+                "branch_relu_input": null,
+                "branch_value": 0,
+                "depth": 0,
+                "lower": -543.7172241210938,
+                "priority": -543.7172,
+                "upper": 566.6599731445312
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 1,
+                "lower": -540.3192749023438,
+                "priority": -540.3193,
+                "upper": 564.4537963867188
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 1,
+                "lower": -539.81201171875,
+                "priority": -539.812,
+                "upper": 564.0169677734375
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -540.1006469726562,
+                "priority": -540.1006,
+                "upper": 561.8203125
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -540.22900390625,
+                "priority": -540.229,
+                "upper": 560.8876953125
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -539.6031494140625,
+                "priority": -539.6031,
+                "upper": 561.3493041992188
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -539.7317504882812,
+                "priority": -539.7318,
+                "upper": 560.4481201171875
+              }
+            ],
+            "status": "unknown"
+          },
+          {
+            "decisions": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "branch_neuron_index": null,
+                "branch_relu_input": null,
+                "branch_value": 0,
+                "depth": 0,
+                "lower": -789.3314208984375,
+                "priority": -789.3314,
+                "upper": 826.3755493164062
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 1,
+                "lower": -776.9682006835938,
+                "priority": -776.9682,
+                "upper": 826.2362060546875
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 1,
+                "lower": -776.2970581054688,
+                "priority": -776.2971,
+                "upper": 827.2870483398438
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -776.6387939453125,
+                "priority": -776.6388,
+                "upper": 821.717041015625
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -776.7481079101562,
+                "priority": -776.7481,
+                "upper": 820.688232421875
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -775.90283203125,
+                "priority": -775.9028,
+                "upper": 822.6878051757812
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -776.0070190429688,
+                "priority": -776.007,
+                "upper": 821.796630859375
+              }
+            ],
+            "status": "unknown"
+          },
+          {
+            "decisions": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "branch_neuron_index": null,
+                "branch_relu_input": null,
+                "branch_value": 0,
+                "depth": 0,
+                "lower": -363.1641540527344,
+                "priority": -363.1642,
+                "upper": 518.0650634765625
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 1,
+                "lower": -346.74066162109375,
+                "priority": -346.7407,
+                "upper": 517.9364013671875
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 1,
+                "lower": -347.18426513671875,
+                "priority": -347.1843,
+                "upper": 518.4259033203125
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -340.2728271484375,
+                "priority": -340.2728,
+                "upper": 518.3577270507812
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -340.8096923828125,
+                "priority": -340.8097,
+                "upper": 519.7978515625
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -339.837646484375,
+                "priority": -339.8376,
+                "upper": 517.8562622070312
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -340.4971008300781,
+                "priority": -340.4971,
+                "upper": 519.1246948242188
+              }
+            ],
+            "status": "unknown"
+          },
+          {
+            "decisions": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "branch_neuron_index": null,
+                "branch_relu_input": null,
+                "branch_value": 0,
+                "depth": 0,
+                "lower": -404.23944091796875,
+                "priority": -404.2394,
+                "upper": 510.2369384765625
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 1,
+                "lower": -357.92181396484375,
+                "priority": -357.9218,
+                "upper": 510.1443786621094
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 1,
+                "lower": -366.6595764160156,
+                "priority": -366.6596,
+                "upper": 523.97021484375
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -340.80426025390625,
+                "priority": -340.8043,
+                "upper": 523.8883056640625
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -347.95855712890625,
+                "priority": -347.9586,
+                "upper": 536.3676147460938
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -331.6986389160156,
+                "priority": -331.6986,
+                "upper": 510.03350830078125
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -340.65924072265625,
+                "priority": -340.6592,
+                "upper": 523.6530151367188
+              }
+            ],
+            "status": "unknown"
+          },
+          {
+            "decisions": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "branch_neuron_index": null,
+                "branch_relu_input": null,
+                "branch_value": 0,
+                "depth": 0,
+                "lower": -429.9703674316406,
+                "priority": -429.9704,
+                "upper": 588.2186889648438
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 1,
+                "lower": -415.5721740722656,
+                "priority": -415.5722,
+                "upper": 588.1244506835938
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 1,
+                "lower": -417.6618957519531,
+                "priority": -417.6619,
+                "upper": 589.234375
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -401.2566223144531,
+                "priority": -401.2566,
+                "upper": 589.3215942382812
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -403.0230712890625,
+                "priority": -403.0231,
+                "upper": 594.5078125
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -399.7812805175781,
+                "priority": -399.7813,
+                "upper": 588.1251831054688
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -400.78375244140625,
+                "priority": -400.7838,
+                "upper": 593.172607421875
+              }
+            ],
+            "status": "unknown"
+          },
+          {
+            "decisions": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "branch_neuron_index": null,
+                "branch_relu_input": null,
+                "branch_value": 0,
+                "depth": 0,
+                "lower": -437.8812561035156,
+                "priority": -437.8813,
+                "upper": 609.5070190429688
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 1,
+                "lower": -420.9908142089844,
+                "priority": -420.9908,
+                "upper": 609.286865234375
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 1,
+                "lower": -420.24261474609375,
+                "priority": -420.2426,
+                "upper": 609.5965576171875
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -419.64215087890625,
+                "priority": -419.6422,
+                "upper": 609.1964721679688
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -419.5412902832031,
+                "priority": -419.5413,
+                "upper": 609.2791137695312
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -419.11016845703125,
+                "priority": -419.1102,
+                "upper": 609.5261840820312
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -418.8197021484375,
+                "priority": -418.8197,
+                "upper": 609.6299438476562
+              }
+            ],
+            "status": "unknown"
+          },
+          {
+            "decisions": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "branch_neuron_index": null,
+                "branch_relu_input": null,
+                "branch_value": 0,
+                "depth": 0,
+                "lower": -659.965087890625,
+                "priority": -659.9651,
+                "upper": 697.9096069335938
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 1,
+                "lower": -592.246826171875,
+                "priority": -592.2468,
+                "upper": 697.8392333984375
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 1,
+                "lower": -617.283203125,
+                "priority": -617.2832,
+                "upper": 722.2807006835938
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -561.757080078125,
+                "priority": -561.7571,
+                "upper": 722.4324340820312
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -578.10546875,
+                "priority": -578.1055,
+                "upper": 751.6552124023438
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -536.11669921875,
+                "priority": -536.1167,
+                "upper": 697.5968017578125
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -556.8165893554688,
+                "priority": -556.8166,
+                "upper": 727.379150390625
+              }
+            ],
+            "status": "unknown"
+          },
+          {
+            "decisions": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "branch_neuron_index": null,
+                "branch_relu_input": null,
+                "branch_value": 0,
+                "depth": 0,
+                "lower": -706.3343505859375,
+                "priority": -706.3344,
+                "upper": 835.369873046875
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 1,
+                "lower": -694.9691162109375,
+                "priority": -694.9691,
+                "upper": 833.091796875
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 1,
+                "lower": -694.8826293945312,
+                "priority": -694.8826,
+                "upper": 832.7177734375
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -694.0288696289062,
+                "priority": -694.0289,
+                "upper": 831.9296264648438
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -694.146728515625,
+                "priority": -694.1467,
+                "upper": 831.7314453125
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -694.009033203125,
+                "priority": -694.009,
+                "upper": 831.4618530273438
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -694.0728149414062,
+                "priority": -694.0728,
+                "upper": 831.2557983398438
+              }
+            ],
+            "status": "unknown"
+          },
+          {
+            "decisions": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "kind": "expand",
+                "reason": "widest_unsplit_ambiguous_relu"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              },
+              {
+                "branch_candidate": null,
+                "kind": "terminal",
+                "reason": "configured_depth_limit"
+              }
+            ],
+            "evaluations": [
+              {
+                "branch_candidate": {
+                  "lower": -221.17330932617188,
+                  "neuron_index": 93,
+                  "relu_input": "31",
+                  "upper": 173.5435333251953,
+                  "width": 394.7168426513672
+                },
+                "branch_neuron_index": null,
+                "branch_relu_input": null,
+                "branch_value": 0,
+                "depth": 0,
+                "lower": -623.8977661132812,
+                "priority": -623.8978,
+                "upper": 883.8757934570312
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 1,
+                "lower": -607.9652709960938,
+                "priority": -607.9653,
+                "upper": 883.77783203125
+              },
+              {
+                "branch_candidate": {
+                  "lower": -217.03172302246094,
+                  "neuron_index": 13,
+                  "relu_input": "31",
+                  "upper": 172.34368896484375,
+                  "width": 389.3754119873047
+                },
+                "branch_neuron_index": 93,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 1,
+                "lower": -607.9829711914062,
+                "priority": -607.983,
+                "upper": 884.0248413085938
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -607.7927856445312,
+                "priority": -607.7928,
+                "upper": 876.9976806640625
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -607.6976318359375,
+                "priority": -607.6976,
+                "upper": 874.9049072265625
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": -1,
+                "depth": 2,
+                "lower": -607.734619140625,
+                "priority": -607.7346,
+                "upper": 876.681396484375
+              },
+              {
+                "branch_candidate": {
+                  "lower": -235.57249450683594,
+                  "neuron_index": 66,
+                  "relu_input": "31",
+                  "upper": 153.698486328125,
+                  "width": 389.27098083496094
+                },
+                "branch_neuron_index": 13,
+                "branch_relu_input": "31",
+                "branch_value": 1,
+                "depth": 2,
+                "lower": -607.7362060546875,
+                "priority": -607.7362,
+                "upper": 874.599365234375
+              }
+            ],
+            "status": "unknown"
+          }
+        ],
+        "completed_original_clause_indices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "final_status": "unknown",
+        "objective_refinement_hashes": [
+          "22c106563e007fb1e133ab7fd239e1a2ffa90ad18c4dca7304b21fe90764c0ab",
+          "be9e73e0b8f85accdac31986f2582a2ff8be5aadf6cd83af3811d8f259b888a4",
+          "e3c67400210e9d0cd09276a5156e855e6815232124a479c670a5bafe7f00f019",
+          "adebcbf3d114518944962a5fe0efef0facfda995ca0a10149440c12e879d896b",
+          "dc120b11d34e5924b000e6803b1060d1afafaf6805ed42fc4f0cb0726dc50ffa",
+          "4dc3283ce92380d4d5f47134e3d16ffd492c73c63bf18698b2cb0cbb9e5d1e25",
+          "d8c50ff3749fe5adda02ee0b809eb94a368d46dc017ea072b84730680d3cdf8c",
+          "d315870587deaae775682c4e5aa32fec9d7d222a8cb9eaacd6bdb35cbc2f51c1",
+          "d3e3d99d670d3e0daa7ff4e315bac74956a4e18c7043782468a89a509a91a948"
+        ],
+        "ranked_original_clause_indices": [
+          2,
+          3,
+          4,
+          5,
+          0,
+          8,
+          6,
+          7,
+          1
+        ],
+        "roots": [
+          {
+            "branch_candidate": {
+              "lower": -85.59491729736328,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 60.770511627197266,
+              "width": 146.36542892456055
+            },
+            "original_clause_index": 0,
+            "root_lower": -204.17315673828125,
+            "root_upper": 213.74331665039062,
+            "status": "unknown"
+          },
+          {
+            "branch_candidate": {
+              "lower": -85.59491729736328,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 60.770511627197266,
+              "width": 146.36542892456055
+            },
+            "original_clause_index": 1,
+            "root_lower": -298.47283935546875,
+            "root_upper": 308.8791809082031,
+            "status": "unknown"
+          },
+          {
+            "branch_candidate": {
+              "lower": -85.59491729736328,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 60.770511627197266,
+              "width": 146.36542892456055
+            },
+            "original_clause_index": 2,
+            "root_lower": -139.10787963867188,
+            "root_upper": 192.68186950683594,
+            "status": "unknown"
+          },
+          {
+            "branch_candidate": {
+              "lower": -85.59491729736328,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 60.770511627197266,
+              "width": 146.36542892456055
+            },
+            "original_clause_index": 3,
+            "root_lower": -152.2870330810547,
+            "root_upper": 191.56068420410156,
+            "status": "unknown"
+          },
+          {
+            "branch_candidate": {
+              "lower": -85.59491729736328,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 60.770511627197266,
+              "width": 146.36542892456055
+            },
+            "original_clause_index": 4,
+            "root_lower": -163.16854858398438,
+            "root_upper": 218.8386993408203,
+            "status": "unknown"
+          },
+          {
+            "branch_candidate": {
+              "lower": -85.59491729736328,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 60.770511627197266,
+              "width": 146.36542892456055
+            },
+            "original_clause_index": 5,
+            "root_lower": -164.7825164794922,
+            "root_upper": 228.7563018798828,
+            "status": "unknown"
+          },
+          {
+            "branch_candidate": {
+              "lower": -85.59491729736328,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 60.770511627197266,
+              "width": 146.36542892456055
+            },
+            "original_clause_index": 6,
+            "root_lower": -246.59263610839844,
+            "root_upper": 260.082275390625,
+            "status": "unknown"
+          },
+          {
+            "branch_candidate": {
+              "lower": -85.59491729736328,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 60.770511627197266,
+              "width": 146.36542892456055
+            },
+            "original_clause_index": 7,
+            "root_lower": -268.6291809082031,
+            "root_upper": 313.94207763671875,
+            "status": "unknown"
+          },
+          {
+            "branch_candidate": {
+              "lower": -85.59491729736328,
+              "neuron_index": 66,
+              "relu_input": "31",
+              "upper": 60.770511627197266,
+              "width": 146.36542892456055
+            },
+            "original_clause_index": 8,
+            "root_lower": -235.29153442382812,
+            "root_upper": 327.22052001953125,
+            "status": "unknown"
+          }
+        ],
+        "selected_original_clause_indices": [
+          2,
+          3
+        ],
+        "shared_refinement_hash": "2e9c4974f5bc342de93ad780c76c6785aafde915d4c6afb4a700cd36104a32d4"
+      }
+    }
+  ],
+  "schema_version": "boundflow.root-projection-floor-worker/v1",
+  "worker_hash": "135b42202c98d1493b82635379918963ac149ecd4b5730530a18798974d537ba"
+}

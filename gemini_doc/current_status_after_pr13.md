@@ -63,10 +63,15 @@
 > `692b9e27…30390`，全量 `968 passed, 37 skipped`。状态为 `VALIDATED-NO-GO`，Phase B 不启动，
 > NRIR-42 production admission 保持。下一变量是 NRIR-44 root-projection floor Schedule。
 > NRIR-43 功能/负结果提交 `00b82c2` 已由 PR #54 合入 `main@2d245d6`。
-> 2026-08-05 NRIR-44 已预注册：只把 ranking floor 的 9 条 objective child queues 从 n31d4 投影为
-> n1d0，baseline/refinement/root semantics/rank/top-2/NRIR-42 production 全部冻结。路线前 probe 的
-> 9 条 root queries 合计 `0.789371 s` 且 9/9 root exact；正式 Phase A 要求 floor 每轮 `<=11 s`、
-> median ratio `<=0.50`，Phase B whole 每轮 `<=48 s`、ratio `<=0.82`。当前仅为计划。
+> 2026-08-05 NRIR-44 已关闭：新增 typed consumer/liveness Plan/Instance/Task/Schedule/Trace，将 ranking
+> floor 的 9 条 objective queues 从 n31d4 投影为 n1d0。Phase A 三轮 root/rank/selected exact，evaluation
+> `279→9`，old/projected floor median=`24.235039/9.876515 s`、ratio=`0.407530`；Phase B floor=
+> `[8.538814,8.622447,8.648849] s`，whole=`[43.571040,44.144990,44.095736] s`，相对 NRIR-42
+> median ratio=`0.764254`。两条 production queue 每轮仍为 `[31,31]` nodes，worst-active lower exact。
+> Phase A formal hash=`ecb553d8…ff0fe`，Phase B payload hash=`2f22d44f…7272d9`。以 fixed ResNet2B
+> property 0 CPU8 `VALIDATED-REDUCED` 关闭；final 9/9 unknown、`performance_claimed=false`、
+> ASPLOS-ready=NO；全量 `979 passed, 37 skipped`。下一步转剩余 top-2 production queue 的新一轮
+> 单变量归因与优化。
 > 2026-08-05 NRIR-36 后续：九子句 NRIR-31 floor 已由 typed root-lower priority 选择 clauses 2/3，
 > dynamic equal-remaining slices 在同一 global start 下执行。三 fresh repeats 都复现
 > rank=`[2,3,4,5,0,8,6,7,1]`，packed nodes=`[[3,3],[3,3],[3,1]]`；repeat 2 第二条未提交

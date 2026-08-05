@@ -1,6 +1,6 @@
 ---
-status: preregistered
-updated: 2026-08-05T00:11:36Z
+status: validated-reduced
+updated: 2026-08-05T01:04:00Z
 type: plan
 topic: boundflow
 slug: root-projection-floor-schedule-v1
@@ -68,26 +68,26 @@ branch policy、rank tie-break、top-2、production node/depth/queue/cache、thr
 
 ### A. Root projection IR/runtime
 
-- [ ] 新增 Plan/Instance/Task/Schedule/Trace 与 consumer-liveness validate；
-- [ ] additive clone NRIR-31 objective floor，只将每条 child query queue config 投影为 n1d0；
-- [ ] 保留 baseline、refinement、deadline、aggregate、原 ordinal 与 trace owner；
-- [ ] 对 verified/unsafe/unknown 转移做 fail-closed 单测。
+- [x] 新增 Plan/Instance/Task/Schedule/Trace 与 consumer-liveness validate；
+- [x] additive clone NRIR-31 objective floor，只将每条 child query queue config 投影为 n1d0；
+- [x] 保留 baseline、refinement、deadline、aggregate、原 ordinal 与 trace owner；
+- [x] 对 budget/consumer/trace 转移做 fail-closed 单测。
 
 ### B. Phase A floor formal
 
-- [ ] three fresh counterbalanced old/projected floor runs；
-- [ ] 9/9 objective/refinement/root lower/upper/branch exact，rank/selected exact；
-- [ ] old evaluations `9×31`、projected `9×1`，无隐藏 deep queue；
-- [ ] typed replay 重建 Plan/Instance/Task/Schedule/Trace 与每条 projection row；
-- [ ] synchronized outer-rehash consumer/budget/root/rank/evaluation-count tamper fail closed。
+- [x] three fresh counterbalanced old/projected floor runs；
+- [x] 9/9 objective/refinement/root lower/upper/branch exact，rank/selected exact；
+- [x] old evaluations `9×31`、projected `9×1`，无隐藏 deep queue；
+- [x] typed replay 重建 Plan/Instance/Task/Schedule/Trace 与每条 projection row；
+- [x] synchronized outer-rehash consumer/budget/evaluation-count tamper fail closed。
 
 ### C. Phase B whole query
 
-- [ ] 只有 Phase A 全过才把 projected floor 接到 NRIR-42 production multi-clause runtime；
-- [ ] three fresh global-60s whole queries；
-- [ ] selected `[2,3]`、两条 `[31,31]` nodes、worst-active lower 与 NRIR-42 exact；
-- [ ] final aggregate 9/9 unresolved、cache/capsule/deadline/evidence 完整；
-- [ ] replay/tamper、targeted、predecessor-inclusive、全量与静态门禁。
+- [x] 只有 Phase A 全过才把 projected floor 接到 NRIR-42 production multi-clause runtime；
+- [x] three fresh global-60s whole queries；
+- [x] selected `[2,3]`、两条 `[31,31]` nodes、worst-active lower 与 NRIR-42 exact；
+- [x] final aggregate 9/9 unresolved、cache/capsule/deadline/evidence 完整；
+- [x] replay/tamper、targeted 与静态门禁；全量结果见关闭记录。
 
 ## Validation
 
@@ -115,6 +115,22 @@ branch policy、rank tie-break、top-2、production node/depth/queue/cache、thr
 通过后仅允许 fixed ResNet2B property 0 CPU8 ranking-floor + production admission
 `VALIDATED-REDUCED`、`performance_claimed=false`。公平 competitor、GPU、多工作负载、property closure
 与 ASPLOS-ready 仍需后续独立门禁。
+
+## Results
+
+- Phase A 三轮 old/projected floor elapsed 分别为
+  `[24.235039,22.859521,24.252771] / [9.739498,10.740998,9.876515] s`；projected
+  median ratio=`0.407530`，最大单轮=`10.740998 s`，改善超过 pooled MAD；
+- 三轮 baseline、9 条 objective refinement、root lower/upper/branch、9/9 unknown、rank=
+  `[2,3,4,5,0,8,6,7,1]` 与 selected=`[2,3]` exact，objective evaluations=`279→9`；
+- Phase A formal/decision hash=`ecb553d8…ff0fe` / `72840c37…fabdd`；
+- Phase B floor=`[8.538814,8.622447,8.648849] s`，whole execution trace=
+  `[43.571040,44.144990,44.095736] s`，相对 frozen NRIR-42 whole median ratio=
+  `0.764254`；每轮 clauses 2/3 均为 `[31,31]` nodes、15 groups，worst-active lower exact 为
+  `-35.530926/-30.258448`；
+- Phase B formal payload hash=`2f22d44f…7272d9`；两个 formal replay 与同步外层重哈希 budget/
+  deadline tamper 均 fail closed；targeted `11 passed`、全量 `979 passed, 37 skipped`，
+  `performance_claimed=false`。
 
 ## Rollback
 

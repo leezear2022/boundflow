@@ -55,10 +55,12 @@
 > `VALIDATED-NO-GO`、Phase B gated off。下一单变量为 root-projection floor Schedule；不把 launch
 > reduction 当性能结果，ASPLOS-ready=NO 不变。
 
-> **2026-08-05 NRIR-44 预注册**：唯一变量为 ranking floor consumer-driven root projection，
-> `9×n31d4 → 9×n1d0`；baseline/refinement/root/rank/top-2 与 NRIR-42 production 冻结。Phase A
-> 要求 floor `<=11 s`、ratio `<=0.50`，Phase B 要求 whole `<=48 s`、ratio `<=0.82`，且完整
-> correctness/evidence gate 通过。当前无新 claim，ASPLOS-ready=NO。
+> **2026-08-05 NRIR-44 关闭**：typed ranking-only consumer contract 将 floor objective evaluations
+> `279→9`，三轮 root/rank/selected exact，old/projected floor median ratio=`0.407530`。Phase B
+> floor=`8.538814/8.622447/8.648849 s`，whole=`43.571040/44.144990/44.095736 s`，相对 NRIR-42
+> median ratio=`0.764254`；两条 production queue 仍各 31 nodes 且 worst lower exact。状态为 fixed
+> ResNet2B property 0 CPU8 `VALIDATED-REDUCED`，但 final 仍 unknown、无公平竞品/multi-workload/GPU
+> 证据，ASPLOS-ready=NO。下一单变量来自剩余 top-2 production queue 的成本归因。
 
 > **2026-08-04 NRIR-21 修订**：per-child exact-split objective refinement 的 IR/control、lineage
 > 与 replay 已实现，但固定 ResNet clauses 0/1 的最差 depth-2 leaf lower 相对 root-global 分别
