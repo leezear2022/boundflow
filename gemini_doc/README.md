@@ -21,7 +21,7 @@
 `9×n31d4` 投影为 `9×n1d0`，Phase A evaluation `279→9`、floor median ratio=`0.407530`；Phase B
 whole=`43.571040/44.144990/44.095736 s`，相对 NRIR-42 median ratio=`0.764254`，两条 production
 queue 仍各 31 nodes。该结论只适用于固定 ResNet2B property 0 CPU8，final unknown，ASPLOS-ready
-仍为 NO）。其直接前序为
+仍为 NO；功能/证据提交 `437680e` 已由 PR #55 合入 `main@f194034`）。其直接前序为
 `gemini_doc/BOUNDFLOW_CROSS_AXIS_VERIFICATION_BATCH_SCHEDULE_V1_PLAN_2026_08_05.md`
 （NRIR-43 已 `VALIDATED-NO-GO`：typed ragged batch 保持 6/6 exact 并将每条 scorer launch
 `31→16`，但 clauses 2/3 median ratio=`1.051134/1.044573`，CPU 墙钟退化；Phase B 按门禁未启动，

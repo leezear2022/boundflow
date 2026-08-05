@@ -1589,3 +1589,5 @@ NRIR-44 以 fixed ResNet2B property 0 CPU8 ranking-floor + production admission
 `VALIDATED-REDUCED` 关闭，`performance_claimed=false`；final 仍 9/9 unknown，没有公平竞品、GPU、
 multi-workload、property closure 或 ASPLOS-ready claim；全量 `979 passed, 37 skipped`。下一单变量必须来自剩余约 35 秒 top-2
 production queue 的成本归因，不回退 NRIR-43 已否决的 CPU scorer batching。
+
+发布状态：NRIR-44 功能/证据提交 `437680e` 已由 PR #55 合入 `main@f194034`。

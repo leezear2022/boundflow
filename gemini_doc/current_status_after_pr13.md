@@ -1,7 +1,7 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
 > 状态日期：2026-08-05
-> 当前 integration base：`d9d76da`（NRIR-43 发布记录；功能 merge `2d245d6`）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
+> 当前 integration base：`f194034`（NRIR-44 PR #55 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
 > 当前研发分支：`feat/root-projection-floor-schedule-v1`
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
@@ -72,6 +72,7 @@
 > property 0 CPU8 `VALIDATED-REDUCED` 关闭；final 9/9 unknown、`performance_claimed=false`、
 > ASPLOS-ready=NO；全量 `979 passed, 37 skipped`。下一步转剩余 top-2 production queue 的新一轮
 > 单变量归因与优化。
+> NRIR-44 功能/证据提交 `437680e` 已由 PR #55 合入 `main@f194034`。
 > 2026-08-05 NRIR-36 后续：九子句 NRIR-31 floor 已由 typed root-lower priority 选择 clauses 2/3，
 > dynamic equal-remaining slices 在同一 global start 下执行。三 fresh repeats 都复现
 > rank=`[2,3,4,5,0,8,6,7,1]`，packed nodes=`[[3,3],[3,3],[3,1]]`；repeat 2 第二条未提交

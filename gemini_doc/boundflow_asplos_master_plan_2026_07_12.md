@@ -2,7 +2,7 @@
 
 > 状态：**顶层执行计划 v1.0；后续研究工作受本文门禁约束。**  
 > 基线日期：2026-07-12  
-> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`d9d76da`
+> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`f194034`
 > 投稿策略：ASPLOS 2027 September Cycle 为有条件冲刺；ASPLOS 2028 为稳健主目标。
 
 > **路线修订（2026-07-20）**：本文保留 2026-07-12 的研究问题、历史门禁和 PR-10—13
@@ -61,6 +61,7 @@
 > median ratio=`0.764254`；两条 production queue 仍各 31 nodes 且 worst lower exact。状态为 fixed
 > ResNet2B property 0 CPU8 `VALIDATED-REDUCED`，但 final 仍 unknown、无公平竞品/multi-workload/GPU
 > 证据，ASPLOS-ready=NO。下一单变量来自剩余 top-2 production queue 的成本归因。
+> 功能/证据提交 `437680e` 已由 PR #55 合入 `main@f194034`。
 
 > **2026-08-04 NRIR-21 修订**：per-child exact-split objective refinement 的 IR/control、lineage
 > 与 replay 已实现，但固定 ResNet clauses 0/1 的最差 depth-2 leaf lower 相对 root-global 分别

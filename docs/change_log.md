@@ -4566,3 +4566,14 @@
 **记录**
 - `gemini_doc/change_2026-08-05_nrir44_root_projection_floor.md`
 - `gemini_doc/BOUNDFLOW_ROOT_PROJECTION_FLOOR_SCHEDULE_V1_CHANGELOG_2026_08_05.md`
+
+---
+
+## 2026-08-05：NRIR-44 发布
+
+- 功能/证据提交 `437680e` 已由 PR #55 合入 `main@f194034`；
+- 发布不扩大 fixed ResNet2B property 0 CPU8 admission 边界，final unknown 与 ASPLOS-ready=NO 不变；
+- 下一动作是先归因剩余 top-2 production queue 成本，再冻结 NRIR-45 单变量。
+
+**记录**
+- `gemini_doc/change_2026-08-05_nrir44_publication.md`
