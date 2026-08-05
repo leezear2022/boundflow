@@ -1680,3 +1680,28 @@ queue ratio=`1.011205/1.019338 > 0.97`，且 queue 改善未超过 pooled MAD。
 `a7561e5187a6e396905d261e739280e39f2c3480e83ba2af0fbe6e3b1ec042ce`；全量
 `992 passed, 37 skipped`，Pylint `10.00/10`。receipt candidate 不默认启用，不形成 performance claim；
 下一门禁转向 top-2 production execution math/queue phase attribution。
+
+## 61. Top-2 Production Execution Cost Attribution v1 判定
+
+NRIR47 已由 PR #58 合入 `main@1e44949`。NRIR48 不实现优化，只测 frozen NRIR45 default
+production route 的 clauses 2/3 31-node queues；NRIR47 candidate 保持禁用。七个互斥顶层类别为
+child refinement compile/execute、optimizer prepare/execute、branch bind/score、materialize/commit 与
+queue-control residual；child execute 再分 fast validate、runtime target select、selected-CROWN、
+propagate-forward 与 hash/trace residual。
+
+正式协议为 clauses 2/3 各 three fresh counterbalanced control/profile。要求 6/6 semantics exact、
+category closure error `<=1%`、profile/control median ratio `<=1.05`。只有同一 category 在两条 clause
+各 3/3 repeats 排第一、median share 均 `>=20%`、share range `<=10` percentage points 且 median
+exclusive ns 大于 MAD，才允许成为 NRIR49 来源。以上门禁均在正式运行前冻结。
+
+正式结果 6/6 control/profile semantic exact，clauses 2/3 profile/control median ratio=
+`1.023199/1.020221`，插桩门禁通过。两条 clause 的 3/3 winner 都是
+`child_refinement_execute_ns`：median=`3.816002/3.704755 s`，queue share=
+`32.1966%/31.1640%`。内部唯一超过 `30%` parent-share 的子类为 selected-CROWN：median=
+`2.663321/2.694436 s`，占 child execute=`71.7725%/72.7291%`。
+
+formal hash=`571c2e47c0c8906d2486e5e19e8152eb1ef0d3024b08cf561e25ed4f71d177a4`；
+顶层/内部闭合、6 profile rows replay、同步 category tamper 拒绝、全量 `996 passed, 37 skipped`
+与静态门禁通过。NRIR48 以 attribution
+`VALIDATED-REDUCED` 关闭，只证明 dominant cost 已缩小到 selected-CROWN execution，不是 speedup。
+下一单变量为 NRIR49 selected-CROWN execution，不再优化 validator、optimizer 或 queue bookkeeping。

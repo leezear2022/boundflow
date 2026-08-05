@@ -11,6 +11,10 @@
 ---
 
 当前最新关闭入口：
+`gemini_doc/BOUNDFLOW_TOP2_PRODUCTION_EXECUTION_COST_ATTRIBUTION_V1_PLAN_2026_08_05.md`（NRIR48；
+frozen NRIR45 clauses 2/3 的 6/6 attribution exact；child refinement execute 在两条 3/3 dominant，
+selected-CROWN 占 parent=`71.7725%/72.7291%`，故 attribution `VALIDATED-REDUCED`；不是 speedup，
+下一路线为 NRIR49 selected-CROWN execution）。其前序
 `gemini_doc/BOUNDFLOW_SINGLE_PASS_TARGET_ADMISSION_RECEIPT_V1_PLAN_2026_08_05.md`（NRIR47；
 typed receipt 已把每 child compile selector/reselection 收敛为 `30/0`，60 个动态 target ledger 不共享，
 显式 full replay 仍重选；但 compiler ratio=`0.936003 > 0.85`、两条 queue ratio=
@@ -28,6 +32,9 @@ production execution math/queue attribution。其前序 NRIR46 已由 PR #57 合
 ### A. 论文/AE 视角（最推荐）
 
 当前最新关闭入口：
+`gemini_doc/BOUNDFLOW_TOP2_PRODUCTION_EXECUTION_COST_ATTRIBUTION_V1_PLAN_2026_08_05.md`（NRIR48；
+NRIR45 default production top-2 queue execution-cost attribution 已把 dominant 缩小到
+selected-CROWN execution；formal hash=`571c2e47…d177a4`）。其前序
 `gemini_doc/BOUNDFLOW_SINGLE_PASS_TARGET_ADMISSION_RECEIPT_V1_PLAN_2026_08_05.md`（NRIR47；
 single-pass exact target admission receipt correctness/ownership 已实现并通过；Phase A compiler/queue
 timing 未过，formal hash=`a7561e51…042ce`，状态 `VALIDATED-NO-GO`，下一步做 execution-cost

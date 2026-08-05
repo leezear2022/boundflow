@@ -92,6 +92,19 @@
 > Phase B gated off。formal hash=`a7561e51…042ce`；全量 `992 passed, 37 skipped`。candidate 不默认
 > 启用，下一门禁转 top-2 production execution math/queue attribution；ASPLOS-ready=NO。
 
+> **2026-08-05 NRIR-48 预注册**：PR #58 已将 NRIR47 NO-GO 合入 `main@1e44949`。本轮只对
+> NRIR45 default production 的 clauses 2/3 做 three-fresh-process paired execution-cost attribution，
+> 不启用 NRIR47 candidate、不实现优化。七类互斥成本须 `<=1%` 闭合，profile/control ratio
+> `<=1.05`；dominant category 还须跨 clause/repeat 满足 `>=20%` share 与稳定性门禁。当前无结果，
+> ASPLOS-ready=NO。
+
+> **2026-08-05 NRIR-48 判定**：6/6 paired semantic exact，profile/control ratio=
+> `1.023199/1.020221`。两条 clause 的 3/3 winner 均为 child refinement execute，queue share=
+> `32.1966%/31.1640%`；内部 selected-CROWN 占 parent=`71.7725%/72.7291%`，为唯一过门禁子类。
+> formal hash=`571c2e47…d177a4`，replay/tamper 通过。状态为 attribution `VALIDATED-REDUCED`，不是
+> speedup；全量 `996 passed, 37 skipped`。下一门禁只做 NRIR49 selected-CROWN execution，
+> ASPLOS-ready=NO。
+
 > **2026-08-04 NRIR-21 修订**：per-child exact-split objective refinement 的 IR/control、lineage
 > 与 replay 已实现，但固定 ResNet clauses 0/1 的最差 depth-2 leaf lower 相对 root-global 分别
 > 退化 `0.847961/0.936646`，故该策略 `VALIDATED-NO-GO`。下一方法门禁是把祖先已证明 refined

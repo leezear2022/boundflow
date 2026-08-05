@@ -1365,3 +1365,17 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - `C3-L-NRIR47`：formal hash=`a7561e5187a6e396905d261e739280e39f2c3480e83ba2af0fbe6e3b1ec042ce`；
   全量 `992 passed, 37 skipped`。candidate 不默认启用，`performance_claimed=false`，不构成 10x、
   公平竞品、GPU、多 workload、property closure 或 ASPLOS-ready。
+
+### NRIR-48：Top-2 Production Execution Cost Attribution v1
+
+- `C3-D-NRIR48`：additive runner 把 frozen NRIR45 clauses 2/3 production queue 分为七个互斥顶层
+  类别，并细分 child refinement execute；NRIR47 candidate 禁用，未修改 production runtime；
+- `C3-G-NRIR48`：6/6 paired semantic exact，profile/control ratio=`1.023199/1.020221 <=1.05`，
+  顶层/内部 closure、6 profile replay 与同步 category tamper 拒绝通过；
+- `C3-R-NRIR48`：两条 clause 3/3 dominant 均为 child execute，median/share=
+  `3.816002 s/32.1966%`、`3.704755 s/31.1640%`；selected-CROWN 为唯一合格内部子类，median=
+  `2.663321/2.694436 s`，parent share=`71.7725%/72.7291%`；
+- `C3-L-NRIR48`：formal hash=`571c2e47c0c8906d2486e5e19e8152eb1ef0d3024b08cf561e25ed4f71d177a4`；
+  全量 `996 passed, 37 skipped`；attribution `VALIDATED-REDUCED` 不是 speedup，不外推 GPU、
+  competitor、multi-workload、property closure 或 ASPLOS-ready；下一路线仅为 NRIR49 selected-CROWN
+  execution。

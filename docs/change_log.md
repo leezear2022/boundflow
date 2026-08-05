@@ -4687,3 +4687,36 @@
 **记录**
 - `gemini_doc/change_2026-08-05_nrir47_phase_a_nogo.md`
 - `gemini_doc/BOUNDFLOW_SINGLE_PASS_TARGET_ADMISSION_RECEIPT_V1_CHANGELOG_2026_08_05.md`
+
+---
+
+## 2026-08-05：NRIR-47 发布与 NRIR-48 Execution Cost Attribution 预注册
+
+- NRIR47 `351f5ce` 已由 PR #58 合入 `main@1e44949`；NO-GO、Phase B gated off 与 candidate disabled
+  边界不变；
+- 新分支 `feat/top2-production-execution-cost-attribution-v1` 只测 frozen NRIR45 default route；
+- clauses 2/3 three-fresh paired control/profile、七个互斥类别、child-execute 子类、closure、
+  perturbation、dominance 与稳定性门禁已冻结；
+- 当前没有 NRIR48 runner、artifact、dominant category 或性能 claim。
+
+**记录**
+- `gemini_doc/change_2026-08-05_nrir47_publication.md`
+- `gemini_doc/change_2026-08-05_nrir48_preregistration.md`
+- `gemini_doc/BOUNDFLOW_TOP2_PRODUCTION_EXECUTION_COST_ATTRIBUTION_V1_PLAN_2026_08_05.md`
+- `gemini_doc/BOUNDFLOW_TOP2_PRODUCTION_EXECUTION_COST_ATTRIBUTION_V1_CHANGELOG_2026_08_05.md`
+
+---
+
+## 2026-08-05：NRIR-48 Top-2 Production Execution Cost Attribution 关闭
+
+- 新增 additive paired attribution runner 与七类顶层/五类 child-execute 互斥闭合；
+- 6/6 semantics exact，profile/control ratio=`1.023199/1.020221`；
+- child execute 两条 3/3 dominant，queue share=`32.1966%/31.1640%`；selected-CROWN 占 parent=
+  `71.7725%/72.7291%`，按预注册规则成为唯一 NRIR-49 来源；
+- formal hash=`571c2e47…d177a4`；replay/tamper、focused `4 passed`、全量
+  `996 passed, 37 skipped`、静态门禁通过；
+- 状态为 attribution `VALIDATED-REDUCED`，不是 speedup；下一路线只做 selected-CROWN execution。
+
+**记录**
+- `gemini_doc/change_2026-08-05_nrir48_execution_cost_attribution.md`
+- `gemini_doc/BOUNDFLOW_TOP2_PRODUCTION_EXECUTION_COST_ATTRIBUTION_V1_CHANGELOG_2026_08_05.md`
