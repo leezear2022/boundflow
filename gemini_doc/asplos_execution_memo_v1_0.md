@@ -1559,3 +1559,20 @@ objective queries 合计约 13.88 秒，而 ranking consumer 只读取每条 roo
 contract 消除非 top-2 的深层 queue work，不继续扩大 CPU domain batch。
 
 发布状态：NRIR-43 提交 `00b82c2` 已由 PR #54 合入 `main@2d245d6`；production 默认仍为 NRIR-42。
+
+## 57. Root-Projection Floor Schedule v1（预注册）
+
+NRIR-44 解决 floor 的 consumer/liveness 冗余。单次分解显示 21.77 秒 floor 中 baseline 约
+4.82 秒，9 条顺序 objective queries 合计约 13.88 秒；而 multi-clause ranking 后续只读取每条
+accepted child 的 root lower。路线冻结前用同一 objective refinement 做 n1d0 probe，9 条合计
+`0.789371 s`，root lower/upper/branch 9/9 与 n31d4 root exact。
+
+唯一变量是将 floor child query 从 `9×n31d4` 投影为 `9×n1d0`。baseline、shared/objective
+refinement、search/optimizer、root semantics、rank/tie-break/top-2、NRIR-42 31-node production、dtype
+与 global-60s deadline 均冻结。该 specialization 是 sound-but-less-complete：非 top-2 clause 在 floor
+阶段不再尝试深层证明，必须显式由 ranking-only consumer contract 启用。
+
+Phase A 要求 baseline/refinement/root/rank/selected exact、objective evaluations `279→9`、three paired
+floor 每轮 `<=11 s` 且 median ratio `<=0.50`。只有全过才运行 Phase B，其要求 three fresh whole
+每轮 `<=48 s`、ratio `<=0.82`，并保持 selected `[2,3]`、两条 `[31,31]` nodes 与 NRIR-42
+branch/score/queue/state/refinement exact。当前尚无正式结果或新 claim。

@@ -1294,3 +1294,14 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   `vnncomp21-resnet2b-property0-three-repeat-cpu-phase-a-v1/`；formal hash=
   `692b9e273661fce9f12129e134550547afa4023361e2a79d751c437c92f30390`；全量
   `968 passed, 37 skipped`。本阶段 `VALIDATED-NO-GO`。
+
+### NRIR-44：Root-Projection Floor Schedule v1（预注册）
+
+- `C1/C2-M-NRIR44-PENDING`：计划新增 typed consumer/liveness Plan/Instance/Task/Schedule/Trace，
+  将 ranking floor 的 objective child queries 从 `9×n31d4` 投影为 `9×n1d0`；尚未实现；
+- `C3-G-NRIR44-PENDING`：预注册 baseline/refinement/root/rank/selected exact、evaluation count、
+  three-repeat wall-clock、global deadline 与 synchronized tamper 门禁；尚无 artifact；
+- `C3-E-NRIR44-PENDING`：Phase A floor `<=11 s`/ratio `<=0.50`，Phase B whole `<=48 s`/
+  ratio `<=0.82` 是 acceptance criteria，不是已观测结果；
+- `C3-L-NRIR44`：root projection 是 sound-but-less-complete ranking-only specialization；即使通过也只
+  允许 fixed ResNet2B property 0 CPU8 internal admission，`performance_claimed=false`。

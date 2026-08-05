@@ -16,7 +16,10 @@
 
 ### A. 论文/AE 视角（最推荐）
 
-当前最新入口：`gemini_doc/BOUNDFLOW_CROSS_AXIS_VERIFICATION_BATCH_SCHEDULE_V1_PLAN_2026_08_05.md`
+当前最新入口：`gemini_doc/BOUNDFLOW_ROOT_PROJECTION_FLOOR_SCHEDULE_V1_PLAN_2026_08_05.md`
+（NRIR-44 仅已预注册：由 consumer/liveness contract 将 ranking floor 的 `9×n31d4` 投影为
+`9×n1d0`；正式 Phase A/B 尚未运行）。其直接前序为
+`gemini_doc/BOUNDFLOW_CROSS_AXIS_VERIFICATION_BATCH_SCHEDULE_V1_PLAN_2026_08_05.md`
 （NRIR-43 已 `VALIDATED-NO-GO`：typed ragged batch 保持 6/6 exact 并将每条 scorer launch
 `31→16`，但 clauses 2/3 median ratio=`1.051134/1.044573`，CPU 墙钟退化；Phase B 按门禁未启动，
 formal hash=`692b9e27…30390`）。下一路线为 NRIR-44 Root-Projection Floor Schedule。

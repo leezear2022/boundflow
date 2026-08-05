@@ -4533,3 +4533,17 @@
 
 **记录**
 - `gemini_doc/change_2026-08-05_nrir43_publication.md`
+
+---
+
+## 2026-08-05：NRIR-44 Root-Projection Floor Schedule v1 预注册
+
+- 从 `main@d9d76da` 创建 `feat/root-projection-floor-schedule-v1`；
+- 唯一变量冻结为 ranking floor objective child query 的 `n31d4→n1d0` consumer projection；
+- baseline/refinement/root/rank/top-2/production 不改，sound-but-less-complete 边界显式；
+- Phase A/B correctness、work reduction、timing 与 NO-GO 条件已冻结；当前无代码或正式 claim。
+
+**记录**
+- `gemini_doc/change_2026-08-05_nrir44_preregistration.md`
+- `gemini_doc/BOUNDFLOW_ROOT_PROJECTION_FLOOR_SCHEDULE_V1_PLAN_2026_08_05.md`
+- `gemini_doc/BOUNDFLOW_ROOT_PROJECTION_FLOOR_SCHEDULE_V1_CHANGELOG_2026_08_05.md`

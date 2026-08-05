@@ -2,7 +2,7 @@
 
 > 状态：**顶层执行计划 v1.0；后续研究工作受本文门禁约束。**  
 > 基线日期：2026-07-12  
-> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`34ca6c6`
+> 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`d9d76da`
 > 投稿策略：ASPLOS 2027 September Cycle 为有条件冲刺；ASPLOS 2028 为稳健主目标。
 
 > **路线修订（2026-07-20）**：本文保留 2026-07-12 的研究问题、历史门禁和 PR-10—13
@@ -54,6 +54,11 @@
 > `31→16`，但 clauses 2/3 median ratio=`1.051134/1.044573`，CPU wall time 退化，故 Phase A
 > `VALIDATED-NO-GO`、Phase B gated off。下一单变量为 root-projection floor Schedule；不把 launch
 > reduction 当性能结果，ASPLOS-ready=NO 不变。
+
+> **2026-08-05 NRIR-44 预注册**：唯一变量为 ranking floor consumer-driven root projection，
+> `9×n31d4 → 9×n1d0`；baseline/refinement/root/rank/top-2 与 NRIR-42 production 冻结。Phase A
+> 要求 floor `<=11 s`、ratio `<=0.50`，Phase B 要求 whole `<=48 s`、ratio `<=0.82`，且完整
+> correctness/evidence gate 通过。当前无新 claim，ASPLOS-ready=NO。
 
 > **2026-08-04 NRIR-21 修订**：per-child exact-split objective refinement 的 IR/control、lineage
 > 与 replay 已实现，但固定 ResNet clauses 0/1 的最差 depth-2 leaf lower 相对 root-global 分别

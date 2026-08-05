@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev004930
-last_va: ev004931
+last_ch: ev004943
+last_va: ev004944
 blk:
-next: preregister-nrir44-root-projection-floor-schedule
-updated: 2026-08-05T00:11:02Z
+next: implement-nrir44-phase-a-root-projection-floor-ir-runtime
+updated: 2026-08-05T00:14:46Z
