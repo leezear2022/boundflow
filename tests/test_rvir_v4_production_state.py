@@ -11,8 +11,11 @@ import torch
 
 from boundflow.runtime.rvir_v4_production_state import (
     ProductionOptimizerPolicyV4,
+    ProductionStateBuilderV4,
     ProductionStateSnapshotV4,
     ProductionTensorRole,
+    capture_alpha_layout_state_v4,
+    capture_alpha_state_v4,
     capture_module_alpha_beta_state_v4,
     capture_split_history_v4,
     diff_production_state_v4,
@@ -33,6 +36,9 @@ class _Node:
     def __init__(self, *, plural: bool = True) -> None:
         self.name = "relu0"
         self.alpha = {"output": torch.full((2, 1, 2, 3), 0.5)}
+        self.inputs = [type("Input", (), {"output_shape": (1, 4)})()]
+        self.alpha_indices = [torch.tensor([0, 2, 3], dtype=torch.long)]
+        self.alpha_lookup_idx = {"output": None}
         beta = [_SparseBeta(torch.tensor([[0.1, 0.2], [0.3, 0.0]]))]
         if plural:
             self.sparse_betas = beta
@@ -209,3 +215,21 @@ def test_history_score_and_depth_are_digest_bound() -> None:
 
     assert entries[0].scores == (0.75,)
     assert entries[0].depths == (3.0,)
+
+
+def test_sparse_alpha_feature_layout_is_owned_and_validated() -> None:
+    node = _Node()
+    builder = ProductionStateBuilderV4()
+    capture_alpha_state_v4({"relu0": node.alpha}, builder)
+    capture_alpha_layout_state_v4([node], builder)
+    snapshot = ProductionStateSnapshotV4(
+        snapshot_id="alpha-layout",
+        tensors=builder.finish(),
+        history=(),
+        optimizer_policy=_policy(),
+    )
+
+    snapshot.validate()
+    roles = {tensor.role for tensor in snapshot.tensors}
+    assert ProductionTensorRole.ALPHA_FEATURE_SHAPE in roles
+    assert ProductionTensorRole.ALPHA_FEATURE_INDEX in roles

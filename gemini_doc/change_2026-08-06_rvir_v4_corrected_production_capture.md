@@ -52,3 +52,14 @@ ownership与可重放捕获，不做性能比较，也不宣称BoundFlow已经�
 - 原样replay通过；同步重签外层capture digest和manifest hash的tensor tamper仍被内部content hash拒绝；
 - V4-0以`VALIDATED-CORRECTED-CAPTURE`关闭，V4-1 frozen-state evaluation准入；
 - V4-2 optimizer replacement和B2 same-solver timing仍未准入，性能claim保持false。
+
+## V4-0C 修正
+
+V4-1映射审计发现v1漏掉`sparse-feature alpha -> primal neuron`的`alpha_indices`，因此v1只能证明
+alpha value ownership，不能证明可执行布局ownership。v1 artifact保留并继续可replay，但对V4-1
+标记为superseded。v2新增feature shape、coordinate indices和optional spec lookup typed tensors；
+V4-1准入暂时撤回，等待v2正式artifact关闭。
+
+v2诊断run捕获6个feature-shape tensors和16个coordinate-index tensors，逐层index range与
+compressed alpha feature length exact；原24-call/core/beta/history/mutation结构不变。runner同时保留
+v1 replay兼容，但只有v2要求alpha-layout门禁。

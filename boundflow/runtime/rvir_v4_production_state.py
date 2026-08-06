@@ -29,6 +29,9 @@ class ProductionTensorRole(str, Enum):
     REFERENCE_LOWER = "reference_lower"
     REFERENCE_UPPER = "reference_upper"
     ALPHA = "alpha"
+    ALPHA_FEATURE_SHAPE = "alpha_feature_shape"
+    ALPHA_FEATURE_INDEX = "alpha_feature_index"
+    ALPHA_SPEC_LOOKUP_INDEX = "alpha_spec_lookup_index"
     BETA_VALUE = "beta_value"
     BETA_LOCATION = "beta_location"
     BETA_SIGN = "beta_sign"
@@ -260,6 +263,7 @@ class ProductionStateSnapshotV4:
             raise ValueError("RVIR-v4 production history keys repeat")
         _validate_beta_tensor_groups(self.tensors)
         validate_beta_history_consistency(self.tensors, self.history)
+        validate_alpha_layout_consistency(self.tensors)
 
     def metadata(self) -> dict[str, object]:
         self.validate()
@@ -372,6 +376,72 @@ def capture_alpha_state_v4(
                 value=value,
                 ownership=ownership,
             )
+
+
+def capture_alpha_layout_state_v4(
+    nodes: Iterable[object], builder: ProductionStateBuilderV4
+) -> None:
+    """Capture sparse-feature/spec index ownership needed to interpret α."""
+
+    for node in nodes:
+        alpha = getattr(node, "alpha", None)
+        if not isinstance(alpha, Mapping) or not alpha:
+            continue
+        layer_name = str(getattr(node, "name", type(node).__name__))
+        encoded_layer = _encode_component(layer_name)
+        inputs = getattr(node, "inputs", None)
+        if not isinstance(inputs, Sequence) or not inputs:
+            raise ValueError(
+                f"RVIR-v4 alpha layer input topology differs: {layer_name}"
+            )
+        output_shape = getattr(inputs[0], "output_shape", None)
+        if not isinstance(output_shape, Sequence) or len(output_shape) < 2:
+            raise ValueError(f"RVIR-v4 alpha feature shape differs: {layer_name}")
+        feature_shape = torch.tensor(
+            [int(dimension) for dimension in output_shape[1:]], dtype=torch.long
+        )
+        if bool((feature_shape <= 0).any()):
+            raise ValueError(f"RVIR-v4 alpha feature shape differs: {layer_name}")
+        builder.add(
+            path=f"alpha_layout/{encoded_layer}/feature_shape",
+            role=ProductionTensorRole.ALPHA_FEATURE_SHAPE,
+            axes=("feature_rank",),
+            value=feature_shape,
+            ownership=ProductionTensorOwnership.COPY_IN,
+        )
+        raw_indices = getattr(node, "alpha_indices", None)
+        if raw_indices is not None:
+            if not isinstance(raw_indices, Sequence) or not all(
+                torch.is_tensor(index) for index in raw_indices
+            ):
+                raise TypeError(f"RVIR-v4 alpha feature indices differ: {layer_name}")
+            for ordinal, index in enumerate(raw_indices):
+                builder.add(
+                    path=f"alpha_layout/{encoded_layer}/feature_index/{ordinal}",
+                    role=ProductionTensorRole.ALPHA_FEATURE_INDEX,
+                    axes=("sparse_feature",),
+                    value=cast(torch.Tensor, index).to(dtype=torch.long),
+                    ownership=ProductionTensorOwnership.COPY_IN,
+                )
+        raw_lookup = getattr(node, "alpha_lookup_idx", None)
+        if isinstance(raw_lookup, Mapping):
+            for start_name, lookup in sorted(raw_lookup.items()):
+                if lookup is None:
+                    continue
+                if not torch.is_tensor(lookup):
+                    raise TypeError(
+                        f"RVIR-v4 alpha spec lookup differs: {layer_name}/{start_name}"
+                    )
+                builder.add(
+                    path=(
+                        f"alpha_layout/{encoded_layer}/spec_lookup/"
+                        f"{_encode_component(str(start_name))}"
+                    ),
+                    role=ProductionTensorRole.ALPHA_SPEC_LOOKUP_INDEX,
+                    axes=_tensor_axes((), cast(torch.Tensor, lookup).ndim),
+                    value=cast(torch.Tensor, lookup).to(dtype=torch.long),
+                    ownership=ProductionTensorOwnership.COPY_IN,
+                )
 
 
 def capture_sparse_beta_state_v4(
@@ -546,6 +616,56 @@ def _validate_beta_tensor_groups(
             or bool((value < 0).any())
         ):
             raise ValueError(f"RVIR-v4 SparseBeta tensor schema differs: {prefix}")
+
+
+def validate_alpha_layout_consistency(
+    tensors: Sequence[OwnedProductionTensorV4],
+) -> None:
+    """Require every compressed α feature axis to have an exact neuron mapping."""
+
+    tensor_map = {tensor.semantic_path: tensor for tensor in tensors}
+    alpha_tensors = [
+        tensor for tensor in tensors if tensor.role == ProductionTensorRole.ALPHA
+    ]
+    for alpha in alpha_tensors:
+        _prefix, encoded_layer, encoded_start = alpha.semantic_path.split("/", 2)
+        layout_prefix = f"alpha_layout/{encoded_layer}"
+        shape_item = tensor_map.get(f"{layout_prefix}/feature_shape")
+        if shape_item is None:
+            continue  # Backward-compatible read of pre-layout V4 artifacts.
+        feature_shape = tuple(int(value) for value in shape_item.value.tolist())
+        indices = sorted(
+            (
+                tensor
+                for path, tensor in tensor_map.items()
+                if path.startswith(f"{layout_prefix}/feature_index/")
+            ),
+            key=lambda tensor: int(tensor.semantic_path.rsplit("/", 1)[1]),
+        )
+        if indices:
+            if len(indices) != len(feature_shape):
+                raise ValueError("RVIR-v4 alpha feature index rank differs")
+            sparse_size = indices[0].value.numel()
+            if any(
+                index.value.dtype != torch.long
+                or index.value.ndim != 1
+                or index.value.numel() != sparse_size
+                or bool((index.value < 0).any())
+                or bool((index.value >= feature_shape[ordinal]).any())
+                for ordinal, index in enumerate(indices)
+            ):
+                raise ValueError("RVIR-v4 alpha feature index content differs")
+        else:
+            sparse_size = int(torch.tensor(feature_shape).prod().item())
+        if alpha.value.shape[-1] != sparse_size:
+            raise ValueError("RVIR-v4 alpha sparse feature size differs")
+        lookup = tensor_map.get(f"{layout_prefix}/spec_lookup/{encoded_start}")
+        if lookup is not None and (
+            lookup.value.dtype != torch.long
+            or bool((lookup.value < 0).any())
+            or bool((lookup.value >= alpha.value.shape[1]).any())
+        ):
+            raise ValueError("RVIR-v4 alpha spec lookup content differs")
 
 
 def validate_beta_history_consistency(
@@ -776,6 +896,7 @@ __all__ = [
     "ProductionStateSnapshotV4",
     "ProductionTensorOwnership",
     "ProductionTensorRole",
+    "capture_alpha_layout_state_v4",
     "capture_alpha_state_v4",
     "capture_module_alpha_beta_state_v4",
     "capture_sparse_beta_state_v4",
@@ -784,5 +905,6 @@ __all__ = [
     "production_snapshot_from_payload_v4",
     "production_snapshot_to_payload_v4",
     "production_tensor_sha256",
+    "validate_alpha_layout_consistency",
     "validate_beta_history_consistency",
 ]

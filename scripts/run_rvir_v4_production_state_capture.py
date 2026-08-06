@@ -20,8 +20,10 @@ import tempfile
 from types import FrameType
 from typing import Any, cast, Iterator, Mapping, Sequence
 
-ARTIFACT_SCHEMA_VERSION = "boundflow.rvir-v4-production-capture-artifact/v1"
-WORKER_SCHEMA_VERSION = "boundflow.rvir-v4-production-capture-worker/v1"
+ARTIFACT_SCHEMA_VERSION = "boundflow.rvir-v4-production-capture-artifact/v2"
+WORKER_SCHEMA_VERSION = "boundflow.rvir-v4-production-capture-worker/v2"
+LEGACY_ARTIFACT_SCHEMA_VERSION = "boundflow.rvir-v4-production-capture-artifact/v1"
+LEGACY_WORKER_SCHEMA_VERSION = "boundflow.rvir-v4-production-capture-worker/v1"
 ABCROWN_COMMIT = "e5c7e17bf0488843acb77b7519f59876717a49f4"
 AUTO_LIRPA_COMMIT = "5a098e8f9fb5786a428a024981d833d303921f2d"
 VNNCOMP_COMMIT = "90419aadcf06cf543ce5c1706cae1059dc9fa6cf"
@@ -262,6 +264,7 @@ def _bounded_input_bounds(value: object) -> tuple[Any, Any]:
 def _build_core_pre_snapshot(
     pre_result: Any,
     *,
+    net: Any,
     core_id: int,
     policy: Any,
 ) -> Any:
@@ -270,6 +273,7 @@ def _build_core_pre_snapshot(
         ProductionStateSnapshotV4,
         ProductionTensorOwnership,
         ProductionTensorRole,
+        capture_alpha_layout_state_v4,
         capture_alpha_state_v4,
         capture_sparse_beta_state_v4,
         capture_split_history_v4,
@@ -329,6 +333,7 @@ def _build_core_pre_snapshot(
         ),
         builder,
     )
+    capture_alpha_layout_state_v4(net.net.nodes(), builder)
     capture_sparse_beta_state_v4(
         _state_data(pre_result.betas_by_layer, "beta"), builder
     )
@@ -475,7 +480,12 @@ class _CaptureObserver:
             if pre_result is None:
                 raise ValueError("RVIR-v4 core pre_result is unavailable")
             policy = _optimizer_policy(self.arguments, kwargs)
-            pre = _build_core_pre_snapshot(pre_result, core_id=core_id, policy=policy)
+            net = kwargs.get("net")
+            if net is None:
+                raise ValueError("RVIR-v4 core network is unavailable")
+            pre = _build_core_pre_snapshot(
+                pre_result, net=net, core_id=core_id, policy=policy
+            )
             self._active_core_id = core_id
             try:
                 result = original(*args, **kwargs)
@@ -646,8 +656,12 @@ def _projections(
         raise TypeError("RVIR-v4 capture call/core rows differ")
     calls = cast(list[dict[str, Any]], calls_raw)
     cores = cast(list[dict[str, Any]], cores_raw)
+    capture_schema = capture.get("schema_version")
+    if capture_schema not in {WORKER_SCHEMA_VERSION, LEGACY_WORKER_SCHEMA_VERSION}:
+        raise ValueError("RVIR-v4 capture worker schema differs")
+    layout_required = capture_schema == WORKER_SCHEMA_VERSION
     call_projection = {
-        "schema_version": WORKER_SCHEMA_VERSION,
+        "schema_version": capture_schema,
         "calls": calls,
         "performance_claimed": False,
     }
@@ -675,30 +689,40 @@ def _projections(
         pre_beta_count = sum(
             tensor.role == ProductionTensorRole.BETA_VALUE for tensor in pre.tensors
         )
-        changed_count = sum(mutation.changed for mutation in mutations)
-        core_rows.append(
-            {
-                "core_id": int(raw["core_id"]),
-                "pre_snapshot_hash": pre.stable_hash(),
-                "post_snapshot_hash": post.stable_hash(),
-                "tensor_count": len(pre.tensors),
-                "history_entry_count": len(pre.history),
-                "beta_value_tensor_count": pre_beta_count,
-                "mutation_receipt_count": len(mutations),
-                "changed_mutation_count": changed_count,
-                "result_shape": list(lower_tensor.shape),
-                "lower_sha256": raw["lower_sha256"],
-                "upper_sha256": raw["upper_sha256"],
-                "branching_decision": raw["branching_decision"],
-                "branching_points": raw["branching_points"],
-                "split_depth": int(raw["split_depth"]),
-                "batch_size": int(raw["batch_size"]),
-                "n_verified": int(raw["n_verified"]),
-                "n_splits": int(raw["n_splits"]),
-            }
+        alpha_shape_count = sum(
+            tensor.role == ProductionTensorRole.ALPHA_FEATURE_SHAPE
+            for tensor in pre.tensors
         )
+        alpha_index_count = sum(
+            tensor.role == ProductionTensorRole.ALPHA_FEATURE_INDEX
+            for tensor in pre.tensors
+        )
+        changed_count = sum(mutation.changed for mutation in mutations)
+        core_row: dict[str, object] = {
+            "core_id": int(raw["core_id"]),
+            "pre_snapshot_hash": pre.stable_hash(),
+            "post_snapshot_hash": post.stable_hash(),
+            "tensor_count": len(pre.tensors),
+            "history_entry_count": len(pre.history),
+            "beta_value_tensor_count": pre_beta_count,
+            "mutation_receipt_count": len(mutations),
+            "changed_mutation_count": changed_count,
+            "result_shape": list(lower_tensor.shape),
+            "lower_sha256": raw["lower_sha256"],
+            "upper_sha256": raw["upper_sha256"],
+            "branching_decision": raw["branching_decision"],
+            "branching_points": raw["branching_points"],
+            "split_depth": int(raw["split_depth"]),
+            "batch_size": int(raw["batch_size"]),
+            "n_verified": int(raw["n_verified"]),
+            "n_splits": int(raw["n_splits"]),
+        }
+        if layout_required:
+            core_row["alpha_feature_shape_tensor_count"] = alpha_shape_count
+            core_row["alpha_feature_index_tensor_count"] = alpha_index_count
+        core_rows.append(core_row)
     core_projection = {
-        "schema_version": WORKER_SCHEMA_VERSION,
+        "schema_version": capture_schema,
         "cores": core_rows,
         "performance_claimed": False,
     }
@@ -724,6 +748,14 @@ def _projections(
         and all_beta_visible
         and all(row["beta_value_tensor_count"] != 0 for row in core_rows)
         and all(row["history_entry_count"] != 0 for row in core_rows)
+        and (
+            not layout_required
+            or all(row["alpha_feature_shape_tensor_count"] == 6 for row in core_rows)
+        )
+        and (
+            not layout_required
+            or all(row["alpha_feature_index_tensor_count"] == 16 for row in core_rows)
+        )
     )
     summary: dict[str, object] = {
         "status": "validated_corrected_capture" if passed else "no_go",
@@ -747,6 +779,13 @@ def _projections(
         "b2_same_solver_timing_admitted": False,
         "performance_claimed": False,
     }
+    if layout_required:
+        summary["core_alpha_feature_shape_tensor_counts"] = [
+            row["alpha_feature_shape_tensor_count"] for row in core_rows
+        ]
+        summary["core_alpha_feature_index_tensor_counts"] = [
+            row["alpha_feature_index_tensor_count"] for row in core_rows
+        ]
     summary["summary_hash"] = canonical_hash(summary)
     if not passed:
         raise ValueError("RVIR-v4 corrected production capture gate failed")
@@ -871,7 +910,8 @@ def _replay(artifact_dir: Path) -> dict[str, object]:
         key: value for key, value in manifest.items() if key != "manifest_hash"
     }
     if (
-        manifest.get("schema_version") != ARTIFACT_SCHEMA_VERSION
+        manifest.get("schema_version")
+        not in {ARTIFACT_SCHEMA_VERSION, LEGACY_ARTIFACT_SCHEMA_VERSION}
         or manifest.get("manifest_hash") != canonical_hash(semantic_manifest)
         or manifest.get("performance_claimed") is not False
     ):

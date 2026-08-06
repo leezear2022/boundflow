@@ -143,3 +143,24 @@ determinism设置。
 - 全量回归=`1118 passed, 3 skipped`；新增artifact replay/tamper focused tests另为`2 passed`；
 - V4-0只证明修正后的production-state ownership/capture/replay，尚未证明BoundFlow evaluator或
   optimizer replacement。V4-1只允许消费冻结post α/β/split state复算lower；V4-2与B2仍关闭。
+
+## V4-0C Alpha Layout 修正与重新开启
+
+V4-1映射前检查发现v1 capture仍缺少sparse-feature alpha的原神经元索引。证据是生产alpha长度与
+当前intermediate unstable count不一致，例如`/input-16`为`121 vs 119`。auto_LiRPA明确通过
+`node.alpha_indices`解释压缩feature轴，并可能通过`alpha_lookup_idx`解释压缩spec轴；只保存alpha
+数值无法无损重建relaxation。
+
+因此上节closure降级为“value/history capture closure”，不能作为完整V4-0 ownership closure：
+
+- v1 artifact保留且可replay，但标记superseded-for-V4-1；
+- V4-1准入撤回，B2继续关闭；
+- v2 capture新增每层full feature shape、每个coordinate的`alpha_indices`与非空
+  `alpha_lookup_idx`，全部进入typed tensor digest和snapshot hash；
+- 正式门禁固定ResNet2B应有6个feature-shape tensors和16个coordinate-index tensors；
+- v2正式artifact/replay/tamper通过后才重新关闭V4-0并准入V4-1。
+
+v2诊断run已通过：6个activation layer均有feature shape，coordinate indices合计16个
+（五个CNN layer各3维、最后linear layer 1维），所有index range和compressed alpha末轴长度逐层
+exact；24-call/core/beta/history/mutation计数保持不变。诊断summary hash=`9d1c71b0…d1dbdb`，
+`performance_claimed=false`。该数字仍需clean committed source的正式artifact冻结。

@@ -4898,6 +4898,10 @@
 - 正式artifact已绑定`6ecab7c`，summary/manifest hash=`86d3365c…a2ff2`/
   `d8fe50fd…2deb4`；原样replay与外层digest重签后的tensor tamper拒绝均通过；
 - V4-0以`VALIDATED-CORRECTED-CAPTURE`关闭，V4-1准入；V4-2/B2仍关闭。
+- 后续V4-1映射审计发现v1遗漏sparse alpha的`alpha_indices`；v1降级为value/history capture并标记
+  superseded-for-V4-1，新增v2 alpha layout capture，V4-1准入暂时撤回等待v2正式证据。
+- v2诊断已捕获6个feature shape和16个coordinate index tensors并逐层exact；v1 replay兼容保留，
+  正式v2 artifact仍需从clean committed source生成。
 
 **记录**
 - `gemini_doc/rvir_v4_production_state_ownership_plan_2026_08_06.md`
