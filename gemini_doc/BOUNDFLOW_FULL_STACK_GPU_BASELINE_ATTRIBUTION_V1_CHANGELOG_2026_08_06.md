@@ -9,6 +9,14 @@ stage: s01
 
 # BoundFlow Full-Stack GPU Baseline and Attribution v1 Changelog
 
+## FSG1 Formal Closure
+
+- 两workload各5 fresh AB/BA pairs，10/10 result/visited-domain exact与attribution closure通过；
+- ResNet/MNIST perturbation median=`1.026200/1.001089<=1.05`；ResNet profile固定234 calls、
+  visited domains=`[6064]`，MNIST 1 call并自然verified；
+- artifact replay exact；summary/manifest hash=`1e5f2946…7d92`/`c9496d27…d1e`；
+- FSG1只关闭B0 measurement denominator，`performance_claimed=false`；当前下一步FSG2。
+
 ## FSG1 Fixed-Iteration Protocol Correction
 
 - 首次正式 60 秒 ResNet control/profile 因 timeout 边界产生约 `150022/150018` visited-domain

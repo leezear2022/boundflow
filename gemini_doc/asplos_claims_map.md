@@ -16,7 +16,8 @@
 > ASPLOS-ready No-Go 不变。2026-08-06 NRIR49A又证明CPU侧selected-CROWN winner在RTX 4060 GPU
 > queue/complete中只占约7.10%/7.05%，Amdahl与physical-memory门禁均失败，selected-CROWN专属
 > G2/G3已gated off。`1.0764x`只是删除该单区域的deletion-only上限，不是BoundFlow全栈上限；FSG0
-> schema/replay合同已验证，当前FSG1只建立official control full-stack trace，尚无全栈性能claim。
+> schema/replay合同已验证；FSG1 official B0 full-stack trace亦已关闭，当前FSG2只推进RVIR-v3
+> replacement correctness，仍无BoundFlow全栈性能claim。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|

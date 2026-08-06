@@ -318,7 +318,7 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 ## 11. Tasks
 
 1. [x] FSG0：文档作用域纠正、schema/aggregator/tests；
-2. [ ] FSG1：official control hook、五fresh baseline artifact/replay（runner/smoke已完成，formal pending）；
+2. [x] FSG1：official control hook、五fresh baseline artifact/replay；
 3. [ ] FSG2：RVIR-v3 executable state与BoundFlow replacement correctness；
 4. [ ] FSG3：B0/B1/B2 paired same-solver baseline；
 5. [ ] FSG4：按B3—B7逐层实现、累计与leave-one-out消融；
@@ -363,6 +363,24 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 - 定向=`10 passed`、全量=`1089 passed, 3 skipped`，Black/mypy/Pylint 10.00/10通过；这些只准入
   instrumentation，正式五轮B0
   artifact必须从提交后的clean code revision生成。
+
+### FSG1 Closure（2026-08-06）
+
+- official code revision=`ac1afc5c687d040e0b0e0eac9cdfe4746d9c35f5`；使用fixed 16 BaB
+  iterations、batch256、auto-enlarge off、seed/reset与cold isolated property；
+- ResNet2B prop0与`mnistfc:2`各5 fresh AB/BA pair，10/10 result/visited-domain exact、
+  attribution/closure/residual通过；ResNet每个profile 234 calls/6064 visited domains，MNIST每个
+  profile 1 call并自然verified；
+- profile perturbation median：ResNet=`1.026200`、MNIST=`1.001089`，均过`<=1.05`门禁；
+- ResNet profile median scope=`4.174046 s`、GPU union=`2.571568 s`（scope share=`61.287%`），
+  operator/solver-control exclusive share=`61.307%/38.693%`；这些是B0分母，不是speedup；
+- profile peak allocated/reserved：ResNet=`640282112/874512384 B`，MNIST=
+  `16490496/31457280 B`；memory-path admission仍须在FSG3—FSG5按natural workload重新判断；
+- 13-file artifact semantic replay通过：summary hash=
+  `1e5f29462af7be10d1db28904ea956399d2b7ea3d8e5c20c5c8d3de43bac7d92`，manifest hash=
+  `c9496d27a04401c9d6cea260a9b2d155c46864b7d3e596e652b05139bdd51d1e`；
+- artifact的`source_dirty_paths=["M .docops/ev.jsonl"]`只来自强制DocOps命令账本；三条code path
+  hash均绑定`ac1afc5`且formal generate前由runner独立要求clean。全程`performance_claimed=false`。
 
 ## 13. Rollback
 

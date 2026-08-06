@@ -1,5 +1,14 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-06：FSG1 official B0 full-stack baseline 正式关闭
+
+- 两workload各5 fresh control/profile pairs，10/10 semantic/closure/replay通过；
+- ResNet/MNIST observer perturbation median=`1.026200/1.001089<=1.05`；ResNet每profile
+  234 calls、6064 visited domains，MNIST每profile 1 call并自然verified；
+- summary/manifest hash=`1e5f2946…7d92`/`c9496d27…d1e`，全程
+  `performance_claimed=false`；下一步FSG2 RVIR-v3 replacement correctness；
+- 详细关闭记录见`gemini_doc/fsg1_fixed_iteration_control_protocol_2026_08_06.md`。
+
 ## 2026-08-06：FSG1 改用 official fixed-iteration 归因协议
 
 - 首轮 ResNet 60 秒 control/profile 出现 `150022/150018` visited-domain timeout 漂移，正式执行被

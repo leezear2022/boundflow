@@ -13,10 +13,10 @@
 当前权威研究入口：
 `gemini_doc/BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md`。FSG0 的作用域
 纠正、全栈 schema、feature activation ledger 与 replay 合同已以20项定向测试和
-`1079 passed, 3 skipped`全量回归关闭；外部审计三项minor亦已修复。当前下一步 FSG1：对
-official original executor 采集
-operator→graph/IR→JIT→runtime schedule→allocator/memory 的 control full-stack trace。FSG1 只建立
-B0 分层基线，尚不能声称 BoundFlow 已有全栈 GPU speedup。
+`1079 passed, 3 skipped`全量回归关闭；外部审计三项minor亦已修复。FSG1又完成official B0
+control full-stack trace：两个workload各5 fresh pair、10/10 attribution closure、semantic replay通过。
+当前下一步 FSG2：实现RVIR-v3 executable state与真正不回调original provider的BoundFlow
+replacement correctness；FSG1仍只建立B0分层基线，尚不能声称BoundFlow已有全栈GPU speedup。
 
 NRIR49A 的正式数据与 artifact 继续有效，但其 `VALIDATED-NO-GO` 仅关闭 selected-CROWN-only
 增量路线：fixed ResNet2B clauses 2/3 的五个 fresh GPU worker测得 selected-CROWN queue/complete share

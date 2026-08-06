@@ -44,3 +44,17 @@ phase判定；这只减少测量器开销，不改变、缓存或替换 solver �
 
 协议代码准入验证：定向`10 passed`、全量`1089 passed, 3 skipped`、Black、mypy、Pylint
 `10.00/10`与`git diff --check`全部通过。正式artifact必须从提交后的clean code revision生成。
+
+## 正式关闭结果
+
+- code revision：`ac1afc5c687d040e0b0e0eac9cdfe4746d9c35f5`；
+- artifact：`artifacts/fsg1-official-control/resnet2b-mnistfc2-rtx4060-five-repeat-v1/`；
+- 两个workload各5 fresh pairs，pair count=10，10/10 attribution closure通过；
+- ResNet observer perturbation median=`1.026200`，MNIST=`1.001089`，均`<=1.05`；
+- ResNet每个profile 234 calls且visited domains=`[6064]`，MNIST每个profile 1 call并自然verified；
+- summary hash=`1e5f29462af7be10d1db28904ea956399d2b7ea3d8e5c20c5c8d3de43bac7d92`；
+- manifest hash=`c9496d27a04401c9d6cea260a9b2d155c46864b7d3e596e652b05139bdd51d1e`；
+- 独立`replay`退出码0且输出exact；`performance_claimed=false`。
+
+因此FSG1以B0 measurement/attribution `VALIDATED-REDUCED`关闭；下一步为FSG2 RVIR-v3
+executable state、mutation receipt与no-original-callback replacement correctness。
