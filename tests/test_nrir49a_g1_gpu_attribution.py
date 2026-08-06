@@ -50,6 +50,7 @@ def _call(clause: int, chunk: int, *, device_ns: int = 400) -> dict[str, Any]:
         "effective_harness_chunk": chunk,
         "device_ns": device_ns,
         "host_wall_ns": 500,
+        "output_schema": {},
     }
 
 
@@ -125,16 +126,26 @@ def _worker(repeat: int) -> dict[str, Any]:
     complete["row_hash"] = canonical_hash(complete)
     representative_profiler = None
     if repeat == 0:
+        source_call = next(
+            row["calls"][0]
+            for row in profiles
+            if row["clause"] == CLAUSES[0] and row["chunk"] == DEFAULT_CHUNK
+        )
         representative_profiler = {
-            "scope": "representative-non-timing-clause2-default32",
+            "scope": (
+                "representative-child-selected-crown-" "non-timing-clause2-default32"
+            ),
             "excluded_from_timing_summary": True,
+            "source_call_hash": canonical_hash(
+                {key: value for key, value in source_call.items() if key != "device_ns"}
+            ),
+            "replayed_output_schema_hash": canonical_hash(source_call["output_schema"]),
             "kernel_count": 10,
             "runtime_launch_api_count": 10,
             "synchronization_api_count": 1,
             "memory_event_count": 1,
             "top_cuda_events": [],
             "top_cpu_events": [],
-            "queue_row": _queue(repeat, CLAUSES[0], DEFAULT_CHUNK, mode="control"),
             "performance_claimed": False,
         }
         representative_profiler["profile_hash"] = canonical_hash(
@@ -233,6 +244,20 @@ def test_worker_cache_rejects_code_revision_mismatch() -> None:
         {key: value for key, value in worker.items() if key != "worker_hash"}
     )
     with pytest.raises(ValueError, match="worker envelope"):
+        validate_worker(worker)
+
+
+def test_worker_rejects_rehashed_profiler_source_tamper() -> None:
+    worker = _worker(0)
+    profiler = worker["representative_profiler"]
+    profiler["source_call_hash"] = "0" * 64
+    profiler["profile_hash"] = canonical_hash(
+        {key: value for key, value in profiler.items() if key != "profile_hash"}
+    )
+    worker["worker_hash"] = canonical_hash(
+        {key: value for key, value in worker.items() if key != "worker_hash"}
+    )
+    with pytest.raises(ValueError, match="profiler source"):
         validate_worker(worker)
 
 

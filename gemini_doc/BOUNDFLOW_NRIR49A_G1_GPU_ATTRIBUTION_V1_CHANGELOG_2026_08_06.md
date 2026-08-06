@@ -30,7 +30,7 @@ stage: s01
 - G0 formal v2：六项 PASS，`ready_for_g1`；
 - 非正式 clause 2 GPU admission probe：31 nodes、15 groups、max depth 4、worst lower
   `-35.53092575073242` exact；
-- runner合同单测8项通过，Black/mypy/Pylint 10.00/10；重启后全量回归
+- runner合同单测增至9项，连同既有CUPTI测试共`10 passed`，Black/mypy/Pylint 10.00/10；重启后全量回归
   `1057 passed, 3 skipped`（407.58秒），正式 G1 timing/summary尚未运行。
 - 两次前台worker被Codex自动续轮回收，均未落盘JSON；`nohup`也被执行器cgroup清理，三者均不构成
   benchmark run；后续应使用可持续前台session或user systemd unit承载长跑。
@@ -38,6 +38,9 @@ stage: s01
   `dgpu_disable=0`排队为delayed apply，`gpu_mux_mode=1`继续保持Optimus/Hybrid，等待重启。
 - 14:29 CST再次重启后`dgpu_disable=0`已生效；RTX 4060 PCI+nvidia driver+device nodes、
   `nvidia-smi` 8188 MiB与Torch CUDA 13.2/SM89全部通过，仅有7 MiB `kwin_wayland`。
+- 首次systemd formal尝试在第0轮末尾的整queue CUPTI profile达到26.5 GiB host peak并被OOM killer终止；
+  无worker JSON落盘，正式计数仍0/5。profiler已收缩为重放一个已计时queue中的真实child
+  selected-CROWN call，关闭shape/stack收集但保留kernel/launch/sync/memory事件；timing矩阵和门槛未改。
 
 ## Decisions
 

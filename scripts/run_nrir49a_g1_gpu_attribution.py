@@ -5,7 +5,7 @@
 # pylint: disable=too-many-branches,too-many-boolean-expressions
 # pylint: disable=too-many-arguments,import-outside-toplevel,protected-access
 # pylint: disable=duplicate-code,cell-var-from-loop,too-many-positional-arguments
-# pylint: disable=missing-function-docstring,line-too-long
+# pylint: disable=missing-function-docstring,line-too-long,too-many-instance-attributes
 
 from __future__ import annotations
 
@@ -364,6 +364,9 @@ class _SelectedCrownTracker:
         self.scope = "unbound"
         self.clause = -1
         self.pending: list[_PendingCall] = []
+        self.representative_call: (
+            tuple[Any, Any, dict[str, Any], dict[str, object]] | None
+        ) = None
 
     def mark(self) -> int:
         return len(self.pending)
@@ -414,6 +417,18 @@ class _SelectedCrownTracker:
             "reserved_after": int(torch.cuda.memory_reserved()),
             "module_inventory_hash": self.inventory_hash,
         }
+        if (
+            self.representative_call is None
+            and self.scope == "chunk_queue"
+            and self.clause == CLAUSES[0]
+            and effective_chunk == DEFAULT_CHUNK
+        ):
+            self.representative_call = (
+                module,
+                input_spec,
+                effective_kwargs,
+                dict(record),
+            )
         self.pending.append(_PendingCall(record, start_event, end_event))
         return output
 
@@ -735,45 +750,35 @@ def _compile_plans(
     return plans
 
 
-def _representative_profiler(
-    *,
-    plan: Any,
-    module: Any,
-    input_spec: Any,
-    objective: torch.Tensor,
-    threshold: torch.Tensor,
-    root: Any,
-    optimizer_policy: Any,
-    branch_policy: Any,
-    tracker: _SelectedCrownTracker,
-    repeat_index: int,
-) -> dict[str, object]:
-    """Capture one non-timing CUPTI/PyTorch profile after the formal matrix."""
+def _representative_profiler(*, tracker: _SelectedCrownTracker) -> dict[str, object]:
+    """Profile one real child selected-CROWN call outside the timing summary."""
 
     from torch.profiler import ProfilerActivity, profile
 
+    if tracker.representative_call is None:
+        raise ValueError("NRIR49A representative selected-CROWN call is unavailable")
+    module, input_spec, kwargs, source_record = tracker.representative_call
+    torch.cuda.synchronize()
     with profile(
         activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
         profile_memory=True,
-        record_shapes=True,
+        record_shapes=False,
+        with_stack=False,
     ) as profiler:
-        row = _execute_queue(
-            plan=plan,
-            module=module,
-            input_spec=input_spec,
-            objective=objective,
-            threshold=threshold,
-            root=root,
-            optimizer_policy=optimizer_policy,
-            branch_policy=branch_policy,
-            tracker=tracker,
-            repeat_index=repeat_index,
-            clause=CLAUSES[0],
-            chunk=DEFAULT_CHUNK,
-            order_position=-2,
-            mode="control",
-            reset_peak=True,
-        )
+        output = tracker.original(module, input_spec, **kwargs)
+        torch.cuda.synchronize()
+    output_schema = {
+        name: {
+            "indices": list(indices),
+            "lower_shape": list(lower.shape),
+            "upper_shape": list(upper.shape),
+            "dtype": str(lower.dtype),
+            "device": str(lower.device),
+        }
+        for name, (indices, lower, upper) in output.items()
+    }
+    if output_schema != source_record["output_schema"]:
+        raise ValueError("NRIR49A representative profiler output differs")
     events = []
     for event in profiler.key_averages():
         events.append(
@@ -790,8 +795,10 @@ def _representative_profiler(
     cuda_events = [item for item in events if item["device_type"] == "DeviceType.CUDA"]
     cpu_events = [item for item in events if item["device_type"] == "DeviceType.CPU"]
     result: dict[str, object] = {
-        "scope": "representative-non-timing-clause2-default32",
+        "scope": "representative-child-selected-crown-non-timing-clause2-default32",
         "excluded_from_timing_summary": True,
+        "source_call_hash": canonical_hash(source_record),
+        "replayed_output_schema_hash": canonical_hash(output_schema),
         "kernel_count": sum(int(item["count"]) for item in cuda_events),
         "runtime_launch_api_count": sum(
             int(item["count"])
@@ -818,7 +825,6 @@ def _representative_profiler(
             key=lambda item: float(item["self_cpu_time_us"]),
             reverse=True,
         )[:25],
-        "queue_row": row,
         "performance_claimed": False,
     }
     result["profile_hash"] = canonical_hash(result)
@@ -974,18 +980,7 @@ def run_worker(
                     control_rows.append(_execute_queue(mode="control", **common))
         representative_profiler = None
         if repeat_index == 0:
-            representative_profiler = _representative_profiler(
-                plan=plans[CLAUSES[0]],
-                module=module,
-                input_spec=input_spec,
-                objective=objectives[CLAUSES[0]],
-                threshold=thresholds[CLAUSES[0]],
-                root=roots[CLAUSES[0]],
-                optimizer_policy=optimizer_policy,
-                branch_policy=branch_policy,
-                tracker=tracker,
-                repeat_index=repeat_index,
-            )
+            representative_profiler = _representative_profiler(tracker=tracker)
     finally:
         refinement._run_selected_crown = original_selected
     worker: dict[str, object] = {
@@ -1128,19 +1123,34 @@ def validate_worker(worker: Mapping[str, Any]) -> None:
         }
         if (
             representative_profiler.get("scope")
-            != "representative-non-timing-clause2-default32"
+            != "representative-child-selected-crown-non-timing-clause2-default32"
             or representative_profiler.get("excluded_from_timing_summary") is not True
             or representative_profiler.get("performance_claimed") is not False
             or representative_profiler.get("kernel_count", 0) <= 0
             or representative_profiler.get("runtime_launch_api_count", 0) <= 0
+            or not isinstance(representative_profiler.get("source_call_hash"), str)
+            or not isinstance(
+                representative_profiler.get("replayed_output_schema_hash"), str
+            )
             or representative_profiler.get("profile_hash")
             != canonical_hash(profile_semantic)
         ):
             raise ValueError("NRIR49A representative profiler differs")
-        _validate_queue_row(
-            _mapping(representative_profiler.get("queue_row"), "profiler queue row"),
-            profile=False,
-        )
+        source_calls = profile_by_key[(CLAUSES[0], DEFAULT_CHUNK)]["calls"]
+        matching_calls = [
+            call
+            for call in source_calls
+            if canonical_hash(
+                {key: value for key, value in call.items() if key != "device_ns"}
+            )
+            == representative_profiler["source_call_hash"]
+        ]
+        if (
+            len(matching_calls) != 1
+            or canonical_hash(matching_calls[0].get("output_schema"))
+            != representative_profiler["replayed_output_schema_hash"]
+        ):
+            raise ValueError("NRIR49A representative profiler source differs")
 
 
 def _memory_decision(

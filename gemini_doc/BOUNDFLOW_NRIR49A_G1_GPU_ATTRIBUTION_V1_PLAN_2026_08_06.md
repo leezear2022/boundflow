@@ -109,8 +109,9 @@ r4: 64,8,16,128,32
 
 default chunk 32 的 complete scope覆盖两次 root构建与 clauses 2/3 两条 queue，记录 all-selected与
 child-selected两种 share；用于反解 headline complete-scope门槛。单独的代表性 CUPTI/PyTorch profiler
-运行只负责 kernel count、CUDA runtime launch API/self CPU time、memory event与同步 API来源，明确排除在
-timing summary之外。
+只重放一个来自已计时default32 queue的真实clause-2 child selected-CROWN call，负责 kernel count、CUDA
+runtime launch API/self CPU time、memory event与同步 API来源，明确排除在timing summary之外；禁止profile
+整条31-node queue，避免事件保留量改变宿主内存可行性。
 
 ## Correctness Gates
 
