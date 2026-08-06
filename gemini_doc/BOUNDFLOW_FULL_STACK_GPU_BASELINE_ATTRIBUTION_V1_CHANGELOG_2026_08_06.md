@@ -1,6 +1,6 @@
 ---
-status: fsg0-post-audit-validated
-updated: 2026-08-06T13:41:43Z
+status: fsg1-runner-ready-formal-pending
+updated: 2026-08-06T13:54:29Z
 type: changelog
 topic: boundflow
 slug: BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1
@@ -8,6 +8,17 @@ stage: s01
 ---
 
 # BoundFlow Full-Stack GPU Baseline and Attribution v1 Changelog
+
+## FSG1 Runner Preparation
+
+- 新增official αβ-CROWN B0 control/profile typed worker合同与full-stack重建器；
+- 新增独立Python 3.11/Torch 2.11 CUDA worker、交替AB/BA fresh-process编排和raw-first artifact/replay；
+- compute-bound observer记录嵌套host/CUDA event、solver phase、stream、allocator counters并可逆恢复；
+- fresh isolated VNNLIB副本避免`.compiled`缓存污染pair中的第二个worker；
+- 真实`mnistfc:2` smoke result exact，ratio=`1.014834<=1.05`，捕获1个initial-CROWN call；
+- 定向`10 passed`、全量`1089 passed, 3 skipped`，三个新文件mypy clean、Pylint 10.00/10；
+  正式五轮结果尚未运行，
+  `performance_claimed=false`。
 
 ## Summary
 

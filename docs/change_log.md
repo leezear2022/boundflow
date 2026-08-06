@@ -1,5 +1,17 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-06：FSG1 official B0 control runner 准备完成
+
+- 新增official control/profile worker，使用αβ-CROWN独立Python 3.11/Torch 2.11 CUDA环境；
+- 观测`BoundedModule.compute_bounds`的嵌套host/CUDA event、solver phase、stream和allocator peak，
+  observer退出后恢复原方法；
+- 新增raw→exclusive critical-path重建、control/profile semantic exact、扰动`<=1.05`门禁及B0证据派生；
+- 每个fresh worker使用独立VNNLIB临时副本，消除`.compiled`缓存造成的pair-order偏差；
+- 真实`mnistfc:2` smoke语义exact、profile/control ratio约`1.0148`、1个initial-CROWN call；只作
+  instrumentation准入，不形成正式性能claim；
+- 定向`10 passed`，全量`1089 passed, 3 skipped`，三个新文件mypy clean、Pylint 10.00/10；
+  正式五轮GPU artifact须在本代码提交后生成。
+
 ## 2026-08-06：FSG0 外部审计三项 minor 全部关闭
 
 - 计划枚举已与代码规范统一：`alpha_optimize`、`setup/unclassified`、

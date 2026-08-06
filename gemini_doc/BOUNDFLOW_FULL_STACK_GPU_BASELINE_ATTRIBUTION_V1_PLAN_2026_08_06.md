@@ -1,6 +1,6 @@
 ---
-status: fsg0-post-audit-validated
-updated: 2026-08-06T13:41:43Z
+status: fsg1-runner-ready-formal-pending
+updated: 2026-08-06T13:54:29Z
 type: plan
 topic: boundflow
 slug: BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1
@@ -318,7 +318,7 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 ## 11. Tasks
 
 1. [x] FSG0：文档作用域纠正、schema/aggregator/tests；
-2. [ ] FSG1：official control hook、五fresh baseline artifact/replay；
+2. [ ] FSG1：official control hook、五fresh baseline artifact/replay（runner/smoke已完成，formal pending）；
 3. [ ] FSG2：RVIR-v3 executable state与BoundFlow replacement correctness；
 4. [ ] FSG3：B0/B1/B2 paired same-solver baseline；
 5. [ ] FSG4：按B3—B7逐层实现、累计与leave-one-out消融；
@@ -349,6 +349,20 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 - 外部审计`APPROVE-WITH-MINOR`；枚举命名、测试mypy覆盖和git provenance三项minor均已修复；
 - FSG0不含GPU timing、official control trace或production替换，故没有性能claim。下一步仅为FSG1 B0
   official-control full-stack attribution。
+
+### FSG1 Runner Preparation（2026-08-06）
+
+- `boundflow/runtime/official_control_attribution.py`已实现严格worker schema、嵌套host/CUDA span重建、
+  exclusive critical path、control/profile semantic exact和`<=1.05`扰动门禁；
+- `scripts/run_fsg1_official_control_baseline.py`已实现独立official worker、AB/BA fresh-process编排、
+  13文件raw-first artifact与语义replay；
+- 为避免official verifier在源VNNLIB旁生成`.compiled`缓存污染后一个worker，每个worker固定使用
+  fresh isolated property副本，cache状态进入protocol；
+- 真实RTX 4060 `mnistfc:2`单pair smoke：status/result exact，control/profile scope=
+  `271479040/275506178 ns`，ratio=`1.014834`，profile捕获1个`initial_crown` call；
+- 定向=`10 passed`、全量=`1089 passed, 3 skipped`，Black/mypy/Pylint 10.00/10通过；这些只准入
+  instrumentation，正式五轮B0
+  artifact必须从提交后的clean code revision生成。
 
 ## 13. Rollback
 

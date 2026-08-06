@@ -3,8 +3,8 @@
 > 生效日期：2026-07-12
 > 当前 integration base：`331086d`（NRIR-39 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/full-stack-gpu-baseline-attribution-v1`（基于NRIR49A closure `7836e11`）；
-> FSG0 full-stack scope/schema/replay已验证，当前下一步为FSG1 official control full-stack trace
+> 当前研发分支：`feat/fsg1-official-control-attribution-v1`（基于FSG0 audit-fix `995a2ef`）；
+> FSG0已验证，FSG1 official-control runner/smoke已完成，正式五轮B0 full-stack trace待运行
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed
