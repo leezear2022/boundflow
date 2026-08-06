@@ -4905,6 +4905,9 @@
 - v2正式artifact绑定`5865905`，summary/manifest hash=`9d1c71b0…d1dbdb`/
   `eea6547a…e3199`；四层digest重签后的越界alpha-index tamper仍被semantic gate拒绝；V4-0重新
   关闭并准入V4-1，V4-2/B2保持关闭。
+- V4-1 native frozen-state evaluator已接通真实ResNet2B core，6-child lower max diff=
+  `2.0265579223632812e-06`、sign=`6/6`、provider callback=0；当前为实现/诊断通过，正式artifact
+  尚待生成，V4-2/B2仍关闭。
 
 **记录**
 - `gemini_doc/rvir_v4_production_state_ownership_plan_2026_08_06.md`

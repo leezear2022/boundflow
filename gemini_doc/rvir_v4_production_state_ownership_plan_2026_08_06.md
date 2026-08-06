@@ -174,3 +174,17 @@ exact；24-call/core/beta/history/mutation计数保持不变。诊断summary has
   capture file digest与manifest hash，仍被alpha feature index semantic range gate拒绝；
 - V4-0现在以`VALIDATED-CORRECTED-CAPTURE-V2`关闭，V4-1重新准入；v1保留为可重放历史工件，
   但不得作为frozen-state evaluator输入；V4-2/B2仍关闭。
+
+## V4-1A Frozen-State Evaluator 实现记录
+
+- 新增`boundflow/runtime/rvir_v4_frozen_state.py`，显式绑定provider activation/preactivation/
+  start-node与BoundFlow primal value，不使用对象地址或隐式ordinal；
+- 用v2 `alpha_indices`把post alpha polarity-0重建为per-domain dense lower slopes；
+- 用history location/sign重建dense split，并把post SparseBeta value按location散射为dense beta；
+- provider intermediate bounds直接作为external refined ReLU preactivation，input/spec/model参数由
+  frozen v2 capture与锁定ONNX提供；
+- frozen state经Bound/PlanTemplate/PlanInstance/Task/Schedule五层native IR编译执行，provider callback=0；
+- ResNet2B真实6-child core诊断：native lower与production core lower max abs diff=
+  `2.0265579223632812e-06`，sign=`6/6`，满足`2e-4`门禁；focused=`1 passed`；
+- 当前是实现与诊断通过，尚未生成独立V4-1 artifact/semantic replay，因此V4-1尚不正式关闭；
+  V4-2 optimizer mutation与B2 timing继续关闭。
