@@ -4908,6 +4908,8 @@
 - V4-1 native frozen-state evaluator已接通真实ResNet2B core，6-child lower max diff=
   `2.0265579223632812e-06`、sign=`6/6`、provider callback=0；当前为实现/诊断通过，正式artifact
   尚待生成，V4-2/B2仍关闭。
+- 新增V4-1正式artifact runner，固定capture/source manifest/model digest与显式topology，replay重新
+  执行五层IR；待runner提交后从clean source生成工件。
 
 **记录**
 - `gemini_doc/rvir_v4_production_state_ownership_plan_2026_08_06.md`

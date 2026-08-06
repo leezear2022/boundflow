@@ -23,3 +23,9 @@
 这证明同一真实core的冻结post α/β/split state可由BoundFlow native evaluator复算lower；不证明
 BoundFlow能执行10-step optimizer mutation，也不产生性能claim。下一动作是生成V4-1正式artifact、
 重放与state/topology tamper门禁；通过后才准入V4-2。
+
+## Artifact Runner
+
+新增正式generate/replay runner，固定v2 capture/source manifest/model digest与六层topology；replay会
+重新执行native IR，而不是只校验JSON。topology JSON必须与代码内冻结映射一致；source capture必须与
+代码内固定digest一致。runner提交后再生成正式工件，避免manifest绑定dirty source。

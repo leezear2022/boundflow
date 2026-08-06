@@ -188,3 +188,13 @@ exact；24-call/core/beta/history/mutation计数保持不变。诊断summary has
   `2.0265579223632812e-06`，sign=`6/6`，满足`2e-4`门禁；focused=`1 passed`；
 - 当前是实现与诊断通过，尚未生成独立V4-1 artifact/semantic replay，因此V4-1尚不正式关闭；
   V4-2 optimizer mutation与B2 timing继续关闭。
+
+### V4-1B Artifact 预冻结
+
+- 新增`scripts/run_rvir_v4_frozen_state_artifact.py`；
+- artifact内复制v2 capture并固定capture、source manifest、ONNX三项SHA256；
+- topology作为独立canonical JSON保存，同时由runner内冻结的六层语义映射复核，禁止仅重签文件；
+- replay重新导入ONNX、重建typed snapshots、重新执行五层IR并逐字段比较execution/summary；
+- 正式门禁：shape=`[6,1]`、allclose=`2e-4`、sign=`6/6`、IR hashes=`10`、provider/fallback=
+  `0/0`、`performance_claimed=false`；
+- runner提交并获得clean source commit后才生成正式artifact；当前仍不关闭V4-1。
