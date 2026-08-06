@@ -997,7 +997,6 @@ def run_worker(
         "performance_claimed": False,
     }
     worker["worker_hash"] = canonical_hash(worker)
-    validate_worker(worker)
     return worker
 
 
@@ -1088,7 +1087,11 @@ def validate_worker(worker: Mapping[str, Any]) -> None:
     for clause in CLAUSES:
         reference = profile_by_key[(clause, DEFAULT_CHUNK)]
         if control_by_clause[clause]["semantics_hash"] != reference["semantics_hash"]:
-            raise ValueError("NRIR49A profile/control semantics differ")
+            raise ValueError(
+                "NRIR49A profile/control semantics differ: "
+                f"clause={clause},profile={reference['semantics_hash']},"
+                f"control={control_by_clause[clause]['semantics_hash']}"
+            )
         for chunk in CHUNKS:
             row = profile_by_key[(clause, chunk)]
             if row["semantics_hash"] != reference["semantics_hash"] or not math.isclose(
@@ -1577,6 +1580,14 @@ def main() -> None:
             benchmark_root=args.benchmark_root.resolve(),
             repeat_index=args.repeat_index,
         )
+        try:
+            validate_worker(worker)
+        except (TypeError, ValueError):
+            invalid_path = args.result_json.resolve().with_suffix(
+                args.result_json.suffix + ".invalid"
+            )
+            _write_json(invalid_path, worker)
+            raise
         _write_json(args.result_json.resolve(), worker)
         print(
             canonical_json(

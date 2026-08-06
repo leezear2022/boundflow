@@ -41,6 +41,9 @@ stage: s01
 - 首次systemd formal尝试在第0轮末尾的整queue CUPTI profile达到26.5 GiB host peak并被OOM killer终止；
   无worker JSON落盘，正式计数仍0/5。profiler已收缩为重放一个已计时queue中的真实child
   selected-CROWN call，关闭shape/stack收集但保留kernel/launch/sync/memory事件；timing矩阵和门槛未改。
+- retry-2 host peak降至2 GiB，证明profiler OOM已关闭；但worker在最终exact gate发现
+  `profile/control semantics differ`后退出，仍无有效worker、正式计数0/5。runner现会在validation失败时
+  原子写入`*.json.invalid`并保留完整raw profile/control语义，下一次只跑repeat-0诊断差异，不改门槛。
 
 ## Decisions
 
