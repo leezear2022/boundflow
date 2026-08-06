@@ -31,7 +31,9 @@ from scripts.run_nrir49a_g1_gpu_attribution import (
     latin_chunk_order,
     projected_scope_speedup,
     required_region_speedup,
+    semantic_numeric_parity,
     selected_call_geometry,
+    structural_semantics,
     validate_worker,
 )
 
@@ -64,6 +66,7 @@ def _queue(
     wall_ns: int = 1000,
 ) -> dict[str, Any]:
     calls = [] if mode == "control" else [_call(clause, chunk)]
+    semantics = {"clause": clause, "score": -3.0 - clause}
     row: dict[str, Any] = {
         "schema_version": QUEUE_SCHEMA_VERSION,
         "repeat_index": repeat,
@@ -86,8 +89,9 @@ def _queue(
         "baseline_reserved": 20_000_000,
         "peak_allocated": 100_000_000,
         "peak_reserved": 120_000_000,
-        "semantics_hash": f"semantics-c{clause}-r{repeat}",
-        "semantics": {"clause": clause},
+        "semantics_hash": canonical_hash(structural_semantics(semantics)),
+        "semantic_payload_hash": canonical_hash(semantics),
+        "semantics": semantics,
         "calls": calls,
         "performance_claimed": False,
     }
@@ -185,6 +189,31 @@ def test_amdahl_inverse_and_infeasible_boundary() -> None:
     assert required_region_speedup(0.20, 1.20) == pytest.approx(6.0)
     assert required_region_speedup(0.10, 1.20) is None
     assert projected_scope_speedup(0.25, 3.0) == pytest.approx(1.20)
+
+
+def test_semantic_parity_separates_exact_structure_from_gpu_numeric_tolerance() -> None:
+    reference: dict[str, Any] = {
+        "branch": {"relu_input": "relu0", "neuron_index": 7},
+        "score": -93.24142456054688,
+        "alpha_hash": "a" * 64,
+    }
+    candidate: dict[str, Any] = {
+        "branch": {"relu_input": "relu0", "neuron_index": 7},
+        "score": -93.24141693115234,
+        "alpha_hash": "b" * 64,
+    }
+    assert structural_semantics(reference) == structural_semantics(candidate)
+    parity = semantic_numeric_parity(reference, candidate)
+    assert parity["numeric_leaf_count"] == 1
+    assert parity["numeric_hash_difference_count"] == 1
+    assert parity["maximum_absolute_difference"] == pytest.approx(7.62939453125e-06)
+    candidate["score"] = -93.0
+    with pytest.raises(ValueError, match="numeric differs"):
+        semantic_numeric_parity(reference, candidate)
+    candidate["score"] = reference["score"]
+    candidate["branch"]["neuron_index"] = 8
+    with pytest.raises(ValueError, match="structural semantics"):
+        semantic_numeric_parity(reference, candidate)
 
 
 def test_selected_geometry_closes_ragged_bytes_and_chunks() -> None:

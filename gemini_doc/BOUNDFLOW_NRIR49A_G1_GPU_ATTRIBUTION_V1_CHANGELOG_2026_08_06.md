@@ -30,7 +30,7 @@ stage: s01
 - G0 formal v2：六项 PASS，`ready_for_g1`；
 - 非正式 clause 2 GPU admission probe：31 nodes、15 groups、max depth 4、worst lower
   `-35.53092575073242` exact；
-- runner合同单测增至9项，连同既有CUPTI测试共`10 passed`，Black/mypy/Pylint 10.00/10；重启后全量回归
+- runner合同单测增至10项，连同既有CUPTI测试共`11 passed`，Black/mypy/Pylint 10.00/10；重启后全量回归
   `1057 passed, 3 skipped`（407.58秒），正式 G1 timing/summary尚未运行。
 - 两次前台worker被Codex自动续轮回收，均未落盘JSON；`nohup`也被执行器cgroup清理，三者均不构成
   benchmark run；后续应使用可持续前台session或user systemd unit承载长跑。
@@ -44,6 +44,10 @@ stage: s01
 - retry-2 host peak降至2 GiB，证明profiler OOM已关闭；但worker在最终exact gate发现
   `profile/control semantics differ`后退出，仍无有效worker、正式计数0/5。runner现会在validation失败时
   原子写入`*.json.invalid`并保留完整raw profile/control语义，下一次只跑repeat-0诊断差异，不改门槛。
+- repeat-0诊断保留33 MiB raw：两clause的profile/control和全部chunk共12组均无结构差异；最大absolute
+  float diff=`1.52587890625e-05`，最大relative diff=`1.710717646052519e-04`，均低于原冻结`2e-4`；
+  差异仅在raw浮点及其alpha/beta/bounds/score派生hash。实现改为结构exact+逐叶finite/tolerance双门禁，
+  同时保存并绑定完整raw payload hash与派生hash差异计数；门槛和production均未改变。
 
 ## Decisions
 

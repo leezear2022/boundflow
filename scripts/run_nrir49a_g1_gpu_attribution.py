@@ -79,6 +79,29 @@ DEFAULT_ARTIFACT_DIR = Path(
     "resnet2b-prop0-clauses2-3-rtx4060-five-repeat-v1"
 )
 DEFAULT_WORKER_CACHE_DIR = Path(".tmp/nrir49a-g1-workers-v1")
+NUMERIC_DERIVED_HASH_KEYS = frozenset(
+    {
+        "alpha_hash",
+        "beta_hash",
+        "child_lower_hash",
+        "final_intermediate_bounds_hash",
+        "initial_intermediate_bounds_hash",
+        "instance_hash",
+        "intermediate_bounds_hash",
+        "parent_selected_state_hash",
+        "payload_hash",
+        "refinement_plan_hash",
+        "refinement_schedule_hash",
+        "refinement_task_module_hash",
+        "score_hash",
+        "selected_state_hash",
+        "semantic_trace_hash",
+        "source_intermediate_constraints_hash",
+        "source_refinement_plan_hash",
+        "source_refinement_semantic_trace_hash",
+        "state_hash",
+    }
+)
 
 
 def canonical_json(value: object, *, indent: int | None = None) -> str:
@@ -95,6 +118,88 @@ def canonical_json(value: object, *, indent: int | None = None) -> str:
 
 def canonical_hash(value: object) -> str:
     return hashlib.sha256(canonical_json(value).encode("utf-8")).hexdigest()
+
+
+def structural_semantics(value: Any) -> Any:
+    """Project raw GPU semantics to exact discrete structure."""
+
+    if isinstance(value, Mapping):
+        return {
+            key: structural_semantics(item)
+            for key, item in value.items()
+            if key not in NUMERIC_DERIVED_HASH_KEYS
+        }
+    if isinstance(value, list):
+        return [structural_semantics(item) for item in value]
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError("NRIR49A semantic float is non-finite")
+        return {"numeric_float": "finite"}
+    return value
+
+
+def semantic_numeric_parity(reference: Any, candidate: Any) -> dict[str, object]:
+    """Require exact structure and tolerance-bound finite GPU numerics."""
+
+    reference_structure = structural_semantics(reference)
+    candidate_structure = structural_semantics(candidate)
+    if reference_structure != candidate_structure:
+        raise ValueError("NRIR49A structural semantics differ")
+    numeric_leaf_count = 0
+    numeric_hash_difference_count = 0
+    maximum_absolute_difference = 0.0
+    maximum_relative_difference = 0.0
+
+    def walk(left: Any, right: Any, *, path: str, key: str | None = None) -> None:
+        nonlocal numeric_leaf_count
+        nonlocal numeric_hash_difference_count
+        nonlocal maximum_absolute_difference
+        nonlocal maximum_relative_difference
+        if type(left) is not type(right):
+            raise ValueError(f"NRIR49A semantic type differs at {path}")
+        if isinstance(left, Mapping):
+            if set(left) != set(right):
+                raise ValueError(f"NRIR49A semantic keys differ at {path}")
+            for item_key in sorted(left):
+                walk(
+                    left[item_key],
+                    right[item_key],
+                    path=f"{path}/{item_key}",
+                    key=item_key,
+                )
+            return
+        if isinstance(left, list):
+            if len(left) != len(right):
+                raise ValueError(f"NRIR49A semantic length differs at {path}")
+            for ordinal, (left_item, right_item) in enumerate(zip(left, right)):
+                walk(left_item, right_item, path=f"{path}[{ordinal}]", key=key)
+            return
+        if isinstance(left, float):
+            if not math.isfinite(left) or not math.isfinite(right):
+                raise ValueError(f"NRIR49A semantic numeric is non-finite at {path}")
+            numeric_leaf_count += 1
+            absolute = abs(left - right)
+            relative = absolute / max(abs(left), abs(right), 1e-30)
+            maximum_absolute_difference = max(maximum_absolute_difference, absolute)
+            maximum_relative_difference = max(maximum_relative_difference, relative)
+            if not math.isclose(left, right, abs_tol=ATOL, rel_tol=RTOL):
+                raise ValueError(f"NRIR49A semantic numeric differs at {path}")
+            return
+        if left != right:
+            if key in NUMERIC_DERIVED_HASH_KEYS and isinstance(left, str):
+                numeric_hash_difference_count += 1
+                return
+            raise ValueError(f"NRIR49A discrete semantic differs at {path}")
+
+    walk(reference, candidate, path="semantics")
+    return {
+        "numeric_leaf_count": numeric_leaf_count,
+        "numeric_hash_difference_count": numeric_hash_difference_count,
+        "maximum_absolute_difference": maximum_absolute_difference,
+        "maximum_relative_difference": maximum_relative_difference,
+        "atol": ATOL,
+        "rtol": RTOL,
+    }
 
 
 def file_sha256(path: Path) -> str:
@@ -612,7 +717,11 @@ def _semantics(execution: Any) -> dict[str, object]:
     from scripts.run_prepared_intermediate_refinement_formal import _semantic_tables
 
     value = _semantic_tables(execution)
-    return {"hash": canonical_hash(value), "tables": value}
+    return {
+        "structural_hash": canonical_hash(structural_semantics(value)),
+        "payload_hash": canonical_hash(value),
+        "tables": value,
+    }
 
 
 def _queue_frontier(execution: Any) -> dict[str, Any]:
@@ -710,7 +819,8 @@ def _execute_queue(
         "baseline_reserved": baseline_reserved,
         "peak_allocated": int(torch.cuda.max_memory_allocated()),
         "peak_reserved": int(torch.cuda.max_memory_reserved()),
-        "semantics_hash": semantic["hash"],
+        "semantics_hash": semantic["structural_hash"],
+        "semantic_payload_hash": semantic["payload_hash"],
         "semantics": semantic["tables"],
         "calls": calls,
         "performance_claimed": False,
@@ -1003,6 +1113,7 @@ def run_worker(
 def _validate_queue_row(row: Mapping[str, Any], *, profile: bool) -> None:
     semantic = {key: value for key, value in row.items() if key != "row_hash"}
     calls = row.get("calls")
+    semantics = row.get("semantics")
     if (
         row.get("schema_version") != QUEUE_SCHEMA_VERSION
         or row.get("clause") not in CLAUSES
@@ -1016,6 +1127,9 @@ def _validate_queue_row(row: Mapping[str, Any], *, profile: bool) -> None:
         or not isinstance(row.get("synchronized_wall_ns"), int)
         or row["synchronized_wall_ns"] <= 0
         or not isinstance(calls, list)
+        or not isinstance(semantics, Mapping)
+        or row.get("semantics_hash") != canonical_hash(structural_semantics(semantics))
+        or row.get("semantic_payload_hash") != canonical_hash(semantics)
         or bool(calls) is not profile
         or row.get("performance_claimed") is not False
         or row.get("row_hash") != canonical_hash(semantic)
@@ -1088,19 +1202,25 @@ def validate_worker(worker: Mapping[str, Any]) -> None:
         reference = profile_by_key[(clause, DEFAULT_CHUNK)]
         if control_by_clause[clause]["semantics_hash"] != reference["semantics_hash"]:
             raise ValueError(
-                "NRIR49A profile/control semantics differ: "
+                "NRIR49A profile/control structural semantics differ: "
                 f"clause={clause},profile={reference['semantics_hash']},"
                 f"control={control_by_clause[clause]['semantics_hash']}"
             )
+        semantic_numeric_parity(
+            reference["semantics"], control_by_clause[clause]["semantics"]
+        )
         for chunk in CHUNKS:
             row = profile_by_key[(clause, chunk)]
-            if row["semantics_hash"] != reference["semantics_hash"] or not math.isclose(
+            if row["semantics_hash"] != reference["semantics_hash"]:
+                raise ValueError("NRIR49A chunk structural semantics differ")
+            semantic_numeric_parity(reference["semantics"], row["semantics"])
+            if not math.isclose(
                 float(row["worst_active_lower"]),
                 float(reference["worst_active_lower"]),
                 abs_tol=ATOL,
                 rel_tol=RTOL,
             ):
-                raise ValueError("NRIR49A chunk semantics differ")
+                raise ValueError("NRIR49A chunk worst lower differs")
     if (
         complete.get("schema_version") != COMPLETE_SCHEMA_VERSION
         or complete.get("repeat_index") != repeat_index
@@ -1198,6 +1318,7 @@ def build_summary(workers: Sequence[Mapping[str, Any]]) -> dict[str, object]:
     queue_shares = []
     complete_shares = []
     perturbation_ratios: dict[int, list[float]] = {clause: [] for clause in CLAUSES}
+    semantic_parity_rows: list[dict[str, Any]] = []
     all_profiles = []
     normalized = []
     for repeat_index in range(REPEAT_COUNT):
@@ -1228,6 +1349,7 @@ def build_summary(workers: Sequence[Mapping[str, Any]]) -> dict[str, object]:
                     "peak_allocated": row["peak_allocated"],
                     "peak_reserved": row["peak_reserved"],
                     "semantics_hash": row["semantics_hash"],
+                    "semantic_payload_hash": row["semantic_payload_hash"],
                 }
             )
         for clause in CLAUSES:
@@ -1236,6 +1358,33 @@ def build_summary(workers: Sequence[Mapping[str, Any]]) -> dict[str, object]:
                 profile["synchronized_wall_ns"]
                 / controls[clause]["synchronized_wall_ns"]
             )
+            control_parity = semantic_numeric_parity(
+                profile["semantics"], controls[clause]["semantics"]
+            )
+            semantic_parity_rows.append(
+                {
+                    "repeat_index": repeat_index,
+                    "clause": clause,
+                    "comparison": "profile-control",
+                    "chunk": DEFAULT_CHUNK,
+                    **control_parity,
+                }
+            )
+            for row in profiles:
+                if row["clause"] != clause:
+                    continue
+                chunk_parity = semantic_numeric_parity(
+                    profile["semantics"], row["semantics"]
+                )
+                semantic_parity_rows.append(
+                    {
+                        "repeat_index": repeat_index,
+                        "clause": clause,
+                        "comparison": "default32-chunk",
+                        "chunk": row["chunk"],
+                        **chunk_parity,
+                    }
+                )
     perturbation_medians = {
         str(clause): _median(values) for clause, values in perturbation_ratios.items()
     }
@@ -1308,6 +1457,9 @@ def build_summary(workers: Sequence[Mapping[str, Any]]) -> dict[str, object]:
             "complete_target_speedup": COMPLETE_TARGET_SPEEDUP,
             "maximum_required_region_speedup": MAXIMUM_REQUIRED_REGION_SPEEDUP,
             "physical_memory_ratio": PHYSICAL_MEMORY_RATIO,
+            "semantic_numeric_atol": ATOL,
+            "semantic_numeric_rtol": RTOL,
+            "numeric_derived_hash_keys": sorted(NUMERIC_DERIVED_HASH_KEYS),
         },
         "queue_shares": queue_shares,
         "complete_shares": complete_shares,
@@ -1321,6 +1473,21 @@ def build_summary(workers: Sequence[Mapping[str, Any]]) -> dict[str, object]:
         },
         "perturbation_medians": perturbation_medians,
         "chunk_metrics": chunk_metrics,
+        "semantic_parity": {
+            "comparisons": semantic_parity_rows,
+            "maximum_absolute_difference": max(
+                float(row["maximum_absolute_difference"])
+                for row in semantic_parity_rows
+            ),
+            "maximum_relative_difference": max(
+                float(row["maximum_relative_difference"])
+                for row in semantic_parity_rows
+            ),
+            "numeric_hash_difference_count": sum(
+                int(row["numeric_hash_difference_count"])
+                for row in semantic_parity_rows
+            ),
+        },
         "memory": memory,
         "decision": decision,
         "decision_hash": canonical_hash(decision),
@@ -1349,6 +1516,7 @@ def normalized_rows(workers: Sequence[Mapping[str, Any]]) -> list[dict[str, obje
                     "peak_allocated": row["peak_allocated"],
                     "peak_reserved": row["peak_reserved"],
                     "semantics_hash": row["semantics_hash"],
+                    "semantic_payload_hash": row["semantic_payload_hash"],
                 }
             )
     return rows

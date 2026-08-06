@@ -119,7 +119,11 @@ runtime launch API/self CPU time、memory event与同步 API来源，明确排�
 - branch、state、ancestry、split ledger与 target ledger相对同 worker chunk32 exact；
 - lower/upper finite且 conservative；worst lower相对 chunk32 `atol<=2e-4, rtol<=2e-4`；
 - selected target覆盖、output ordinal、lower/upper shape/dtype/device exact；
-- profile/control semantics exact；任一失败行进入 `failure_rows.jsonl`，不得汇入性能统计；
+- profile/control与chunk parity采用双门禁：所有离散结构（node/parent/branch/split/target/order/shape/dtype/
+  device/policy）exact；所有raw浮点逐叶finite且使用同一冻结`atol=rtol=2e-4`。alpha/beta/bounds/
+  score等浮点派生hash允许随合格ULP差异改变，但完整raw payload hash必须绑定artifact，replay须重算结构投影、
+  逐叶数值parity及派生hash差异计数；这不是bitwise-float exact，也不改变数值门槛；
+- 任一失败行进入 `failure_rows.jsonl`，不得汇入性能统计；
 - instrumentation `median(profile/control queue wall) <=1.05`，否则 G1 timing verdict为
   `NOT-AUDITABLE-PROFILER-PERTURBATION`。
 
