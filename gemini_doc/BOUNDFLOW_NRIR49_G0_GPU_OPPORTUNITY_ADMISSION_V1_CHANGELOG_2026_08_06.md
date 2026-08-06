@@ -1,6 +1,6 @@
 ---
-status: blocked-one-environment-gate
-updated: 2026-08-05T18:22:00Z
+status: ready-for-g1
+updated: 2026-08-06T03:50:00Z
 type: changelog
 topic: boundflow
 slug: nrir49-g0-gpu-opportunity-admission-v1
@@ -13,8 +13,8 @@ stage: s01
 
 - 启动 NRIR49 G0，新增 fail-closed admission runner/test/artifact；
 - 建成独立 αβ-CROWN 官方锁定环境，并冻结双方整题 `verified` 的公开 solveability 样本；
-- 根因定位为 ASUS firmware 禁用 dGPU，enable 已 queued，等待重启；
-- G1 仍未准入，未修改 TIR/kernel/math，未新增性能 claim。
+- ASUS firmware 已应用 `dgpu_disable=0`，六项 post-reboot CUDA 门禁全部 PASS；
+- G0 已关闭并准入 G1 read-only profiling；未修改 TIR/kernel/math，未新增性能 claim。
 
 ## Changes
 
@@ -30,32 +30,35 @@ stage: s01
 - 生成并 replay `ga403uv-pre-reboot-20260806-v7`，只剩 GPU infrastructure blocker。
 - 新增 post-reboot 六门 CUDA smoke runner：NVIDIA、BoundFlow Torch、TVM TIR、TVM-FFI stream、
   competitor Torch 与 cross-env identity/digest；blocked 时生成诊断 artifact 后 exit `2`。
+- 重启后 dGPU、驱动及双方 Torch CUDA 均恢复；首次六门禁暴露当前 TVM runtime module 不提供
+  `type_key` 属性，kernel 已完成执行但元数据采集误报失败；改为不触发动态函数查找的稳定 Python
+  type identity，并新增回归测试。
+- 保留失败诊断 `ga403uv-post-reboot-20260806-v1`；正式 `v2` 六项 PASS 且 replay PASS，状态为
+  `ready_for_g1`。
 
 ## Validation
 
-- targeted tests：原 admission/worker `13 passed`，post-reboot smoke `8 passed`，合计 `21 passed`；
-- 全量：`1014 passed, 37 skipped`；mypy clean；Pylint `10.00/10`；
-- artifact replay PASS；
+- 本轮 targeted：G0 admission + post-reboot smoke `18 passed`；
+- GPU 恢复后全量：`1049 passed, 3 skipped`；
+- post-reboot `v2` artifact replay PASS；Black check、mypy clean、Pylint `10.00/10`；
 - competitor import smoke：Python `3.11.15`、Torch `2.11.0+cu130`、auto_LiRPA/abcrown `0.7.2`；
 - solveability：BoundFlow=`verified`、αβ-CROWN=`verified`；
-- `rg '/home/lee|/tmp/'` 对正式 v7 artifact 无命中；
+- `rg '/home/lee|/tmp/'` 对正式 pre-reboot v7 artifact 无命中；
 - GPU benchmark 未运行，`performance_claimed=false`。
 
 ## Decisions
 
-- 将 GPU blocker 精确收敛为 `blocked_reboot_required`，不再泛称 driver/透传未知；
+- GPU blocker 已由 `blocked_reboot_required` 关闭；
 - independent competitor env 是公平对照的正式组成，禁止复用不兼容的 BoundFlow Torch env；
 - `mnistfc:2` 只负责 solveability admission，不作为性能调参样本；
 - 用户 `40x` 源码仍缺失，维持 `NOT-AUDITABLE-SOURCE-MISSING`；
-- 重启前不做 G1，更不做 G2/G3/TIR。
+- G0 PASS 后只准入 G1 read-only profiling，仍不直接做 G2/G3/TIR。
 
 ## Follow-Ups
 
-1. 用户允许并执行一次正常重启；
-2. 重启后用 `run_nrir49_g0_cuda_smoke.py` 生成 post-reboot artifact，关闭六项 CUDA/同 GPU identity
-   smoke；
-3. 若 GPU 仍不可见，按 v1.1 的 2-attempt/1-engineer-day timebox 转备用主机，而非无限修环境；
-4. infrastructure PASS 后只进入 G1 read-only profiling。
+1. 冻结 G1 profiling schema、measurement protocol 与量化 go/no-go 公式；
+2. 开始 selected-CROWN 的 read-only GPU cost attribution，不改默认配置；
+3. G1 数据冻结前不启动 G2/G3/TIR。
 
 ## Links
 

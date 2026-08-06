@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev006049
-last_va: ev006055
-blk: gpu-reboot-required-dgpu-delayed-apply
-next: reboot-then-run-nrir49-g0-six-gate-cuda-smoke
-updated: 2026-08-05T18:50:49Z
+last_ch: ev006121
+last_va: ev006122
+blk: none
+next: freeze-nrir49-g1-profiling-contract-and-run-read-only-attribution
+updated: 2026-08-06T03:57:58Z

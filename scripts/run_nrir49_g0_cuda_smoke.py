@@ -67,6 +67,13 @@ def array_sha256(value: np.ndarray) -> str:
     return hashlib.sha256(np.ascontiguousarray(value).tobytes()).hexdigest()
 
 
+def python_type_identity(value: object) -> str:
+    """Return stable Python type metadata without probing dynamic module functions."""
+
+    value_type = type(value)
+    return f"{value_type.__module__}.{value_type.__qualname__}"
+
+
 def _mapping(value: object, label: str) -> Mapping[str, Any]:
     if not isinstance(value, Mapping):
         raise TypeError(f"{label} must be an object")
@@ -291,7 +298,7 @@ def run_tvm_cuda_gate(torch_ready: bool) -> dict[str, object]:
             "output_sha256": array_sha256(actual),
             "expected_output_sha256": array_sha256(expected),
             "kernel_contract": "float32[256]: output = input + 1",
-            "module_type_key": str(module.type_key),
+            "module_python_type": python_type_identity(module),
         }
         if facts["output_sha256"] != facts["expected_output_sha256"]:
             return _record("fail", facts=facts, error="TVM CUDA output digest differs")

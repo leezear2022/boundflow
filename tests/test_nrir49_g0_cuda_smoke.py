@@ -1,6 +1,6 @@
 """Fail-closed contracts for the post-reboot NRIR49 G0 CUDA smoke."""
 
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,too-few-public-methods
 
 from __future__ import annotations
 
@@ -21,6 +21,7 @@ from scripts.run_nrir49_g0_cuda_smoke import (
     expected_vector_contract,
     generate_artifact,
     parse_marked_json,
+    python_type_identity,
     replay_artifact,
     validate_evidence,
 )
@@ -108,6 +109,16 @@ def test_vector_contract_is_stable() -> None:
         "input_sha256": "04441b72253f49384e853fb46a81657e5e28187f02187a47713eb9cd482f9a17",
         "output_sha256": "bdc0fa4648c549a709922fce396b871234a0e0707a14a918e9542b65835e2e2b",
     }
+
+
+def test_python_type_identity_does_not_probe_dynamic_attributes() -> None:
+    class DynamicModule:
+        """Test double whose dynamic lookup must remain untouched."""
+
+        def __getattr__(self, name: str) -> object:
+            raise AssertionError(f"unexpected dynamic lookup: {name}")
+
+    assert python_type_identity(DynamicModule()).endswith(".DynamicModule")
 
 
 def test_cross_environment_gate_requires_device_and_all_digests(tmp_path: Path) -> None:
