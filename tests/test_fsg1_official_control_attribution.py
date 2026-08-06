@@ -82,10 +82,14 @@ def _record(
         },
         "protocol": {
             "device": "cuda",
+            "seed": 100,
+            "reset_seed_after_precompile": True,
             "timeout_seconds": 60,
+            "max_iterations": 16,
             "alpha_steps": 5,
             "beta_steps": 10,
-            "batch_size": 64,
+            "batch_size": 256,
+            "auto_enlarge_batch_size": False,
         },
         "environment": {
             "python": "3.11.15",

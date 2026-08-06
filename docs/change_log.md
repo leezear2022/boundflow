@@ -1,5 +1,22 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-06：FSG1 改用 official fixed-iteration 归因协议
+
+- 首轮 ResNet 60 秒 control/profile 出现 `150022/150018` visited-domain timeout 漂移，正式执行被
+  主动中止，未产出性能结论；
+- runner 现使用 αβ-CROWN 原生 `bab/max_iterations=16` 固定求解前缀，60 秒仅作保险丝；
+- 首次 fixed-16 smoke 又发现 auto batch 会随 observer 的显存状态改变，故关闭 auto enlargement；
+  batch64 的单 pair observer ratio=`1.060620>1.05`，故在正式候选前冻结 batch=256，
+  并固定/重置 seed；该 smoke 的 `18944/18954` 结果不采信；
+- batch256 diagnostic仍有`1.075754`扰动；observer phase识别由每call `inspect.stack()`改为轻量
+  `f_back`遍历，采集合同与solver执行不变；
+- 轻量observer diagnostic ratio=`1.032419<=1.05`，result exact、visited domains=`[6064]`、
+  profile calls=234；只准入正式采集，不形成性能claim；
+- iteration budget 进入 raw protocol、pair exact gate 和 semantic replay；详细记录见
+  `gemini_doc/fsg1_fixed_iteration_control_protocol_2026_08_06.md`。
+- 定向`10 passed`、全量`1089 passed, 3 skipped`、Black、mypy、Pylint 10.00/10及
+  `git diff --check`均通过；正式artifact仍须从提交后的clean revision生成。
+
 ## 2026-08-06：FSG1 official B0 control runner 准备完成
 
 - 新增official control/profile worker，使用αβ-CROWN独立Python 3.11/Torch 2.11 CUDA环境；

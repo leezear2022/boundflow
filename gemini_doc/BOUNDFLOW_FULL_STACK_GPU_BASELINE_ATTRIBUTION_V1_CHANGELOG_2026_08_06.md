@@ -9,6 +9,23 @@ stage: s01
 
 # BoundFlow Full-Stack GPU Baseline and Attribution v1 Changelog
 
+## FSG1 Fixed-Iteration Protocol Correction
+
+- 首次正式 60 秒 ResNet control/profile 因 timeout 边界产生约 `150022/150018` visited-domain
+  漂移，exact work gate 不成立，执行方中止该轮且不采信其数字；
+- 改用 official `bab/max_iterations=16` 固定求解前缀，wall timeout 仅作 fail-closed 保险丝；
+- fixed-16 首次 smoke 暴露 auto batch 的 allocator-dependent 漂移（`18944/18954`），因此正式协议
+  关闭 auto enlargement并固定/重置 seed；batch64 单pair扰动=`1.060620>1.05`，故在任何 candidate
+  前冻结batch=256；这些 diagnostics 均不进入性能证据；
+- batch256 diagnostic仍为`1.075754`，进一步将observer phase识别从构造完整`inspect.stack()`
+  改为只读`f_back`遍历；字段、CUDA event与solver配置均不变；
+- 轻量observer后续diagnostic ratio=`1.032419<=1.05`，result exact、visited domains均`[6064]`、
+  profile calls=234；只作为measurement admission，不进入正式performance evidence；
+- 该预算进入 raw protocol、control/profile exact comparison 与 replay，不构成 complete-query 或
+  BoundFlow performance claim。
+- 定向`10 passed`、全量`1089 passed, 3 skipped`、Black、mypy、Pylint 10.00/10和
+  `git diff --check`通过；正式artifact须绑定本修正的clean code revision。
+
 ## FSG1 Runner Preparation
 
 - 新增official αβ-CROWN B0 control/profile typed worker合同与full-stack重建器；

@@ -10,7 +10,6 @@ from __future__ import annotations
 import argparse
 from contextlib import contextmanager, nullcontext
 import hashlib
-import inspect
 import json
 import os
 from pathlib import Path
@@ -20,6 +19,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from types import FrameType
 from typing import Any, cast, Iterator, Mapping, Sequence
 
 ARTIFACT_SCHEMA_VERSION = "boundflow.fsg1-official-control-artifact/v1"
@@ -30,9 +30,10 @@ ABCROWN_COMMIT = "e5c7e17bf0488843acb77b7519f59876717a49f4"
 AUTO_LIRPA_COMMIT = "5a098e8f9fb5786a428a024981d833d303921f2d"
 DEFAULT_REPEAT_COUNT = 5
 DEFAULT_TIMEOUT_SECONDS = 60
+DEFAULT_MAX_ITERATIONS = 16
 DEFAULT_ALPHA_STEPS = 5
 DEFAULT_BETA_STEPS = 10
-DEFAULT_BATCH_SIZE = 64
+DEFAULT_BATCH_SIZE = 256
 WORKLOADS = (
     {
         "workload_id": "cifar10_resnet:000",
@@ -196,6 +197,7 @@ def _parse_args() -> argparse.Namespace:
     generate.add_argument(
         "--timeout-seconds", type=int, default=DEFAULT_TIMEOUT_SECONDS
     )
+    generate.add_argument("--max-iterations", type=int, default=DEFAULT_MAX_ITERATIONS)
     generate.add_argument("--workload", action="append")
     replay = commands.add_parser("replay")
     replay.add_argument("--artifact-dir", type=Path, required=True)
@@ -213,6 +215,7 @@ def _parse_args() -> argparse.Namespace:
     worker.add_argument("--abcrown-root", type=Path, required=True)
     worker.add_argument("--result-json", type=Path, required=True)
     worker.add_argument("--timeout-seconds", type=int, required=True)
+    worker.add_argument("--max-iterations", type=int, required=True)
     worker.add_argument("--alpha-steps", type=int, default=DEFAULT_ALPHA_STEPS)
     worker.add_argument("--beta-steps", type=int, default=DEFAULT_BETA_STEPS)
     worker.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE)
@@ -221,24 +224,33 @@ def _parse_args() -> argparse.Namespace:
 
 def _phase_from_stack(method: str) -> tuple[str, str]:
     external = "unclassified_compute_bounds"
-    for frame in inspect.stack(context=0)[2:20]:
-        filename = frame.filename.replace("\\", "/")
-        if frame.function == "update_bounds_core":
-            external = "activation_bab_bound"
-            return "beta_split", external
-        if "/input_split/" in filename:
-            external = "input_bab_bound"
-            return "beta_split", external
-        if "incomplete_verifier" in filename:
-            external = "incomplete_verification"
-            return "initial_crown", external
-        if "beta_CROWN_solver" in filename:
-            external = "alpha_crown_initialization"
-            normalized = method.lower().replace("_", "-")
-            return (
-                "alpha_optimize" if "optimized" in normalized else "initial_crown",
-                external,
-            )
+    frame: FrameType = sys._getframe(1)  # pylint: disable=protected-access
+    try:
+        for _ in range(20):
+            parent = frame.f_back
+            if parent is None:
+                break
+            frame = parent
+            filename = frame.f_code.co_filename.replace("\\", "/")
+            function = frame.f_code.co_name
+            if function == "update_bounds_core":
+                external = "activation_bab_bound"
+                return "beta_split", external
+            if "/input_split/" in filename:
+                external = "input_bab_bound"
+                return "beta_split", external
+            if "incomplete_verifier" in filename:
+                external = "incomplete_verification"
+                return "initial_crown", external
+            if "beta_CROWN_solver" in filename:
+                external = "alpha_crown_initialization"
+                normalized = method.lower().replace("_", "-")
+                return (
+                    "alpha_optimize" if "optimized" in normalized else "initial_crown",
+                    external,
+                )
+    finally:
+        del frame
     normalized = method.lower().replace("_", "-")
     if "optimized" in normalized:
         return "alpha_optimize", external
@@ -380,10 +392,14 @@ def _worker(args: argparse.Namespace) -> None:
     config = (
         ConfigBuilder.from_defaults()
         .set("general/device", "cuda")
+        .set("general/seed", 100)
+        .set("general/reset_seed_after_precompile", True)
         .set("general/complete_verifier", "bab")
         .set("attack/pgd_order", "skip")
         .set("bab/timeout", args.timeout_seconds)
+        .set("bab/max_iterations", args.max_iterations)
         .set("solver/batch_size", args.batch_size)
+        .set("solver/auto_enlarge_batch_size", False)
         .set("solver/alpha-crown/iteration", args.alpha_steps)
         .set("solver/beta-crown/iteration", args.beta_steps)
     )
@@ -421,10 +437,14 @@ def _worker(args: argparse.Namespace) -> None:
         },
         "protocol": {
             "device": "cuda",
+            "seed": 100,
+            "reset_seed_after_precompile": True,
             "timeout_seconds": args.timeout_seconds,
+            "max_iterations": args.max_iterations,
             "alpha_steps": args.alpha_steps,
             "beta_steps": args.beta_steps,
             "batch_size": args.batch_size,
+            "auto_enlarge_batch_size": False,
             "complete_verifier": "bab",
             "attack_policy": "skip",
             "synchronize_outer_scope": True,
@@ -521,6 +541,7 @@ def _run_external_worker(
     repeat_index: int,
     pair_order: str,
     timeout_seconds: int,
+    max_iterations: int,
     result_path: Path,
 ) -> dict[str, Any]:
     run_id = f"{workload['workload_id'].replace(':', '-')}-r{repeat_index}-{mode}"
@@ -554,6 +575,8 @@ def _run_external_worker(
         str(result_path),
         "--timeout-seconds",
         str(timeout_seconds),
+        "--max-iterations",
+        str(max_iterations),
     )
     completed = subprocess.run(
         command,
@@ -712,6 +735,8 @@ def _readme() -> str:
 def _generate(args: argparse.Namespace) -> dict[str, object]:
     if args.repeats < 1:
         raise ValueError("FSG1 repeats must be positive")
+    if args.max_iterations < 1:
+        raise ValueError("FSG1 max iterations must be positive")
     if not _code_paths_clean():
         raise ValueError(
             "FSG1 source code paths must be clean before formal generation"
@@ -753,6 +778,7 @@ def _generate(args: argparse.Namespace) -> dict[str, object]:
                                 repeat_index=repeat_index,
                                 pair_order=pair_order,
                                 timeout_seconds=args.timeout_seconds,
+                                max_iterations=args.max_iterations,
                                 result_path=result_path,
                             )
                         )
