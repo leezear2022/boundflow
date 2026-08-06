@@ -12,7 +12,7 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
-from typing import Any, Mapping
+from typing import Any, cast, Mapping
 
 import torch
 
@@ -85,6 +85,34 @@ def _code_revision() -> dict[str, str]:
     return {name: file_sha256(root / name) for name in CODE_PATHS}
 
 
+def _sha256_bytes(value: bytes) -> str:
+    return hashlib.sha256(value).hexdigest()
+
+
+def _verify_code_provenance(manifest: Mapping[str, Any]) -> None:
+    root = _repo_root()
+    source_head = manifest.get("source_git_head")
+    revision = manifest.get("code_revision")
+    if not isinstance(source_head, str) or not isinstance(revision, Mapping):
+        raise ValueError("FSG2 source provenance differs")
+    current_head = _git_value("rev-parse", "HEAD")
+    if current_head == source_head:
+        observed = _code_revision()
+    else:
+        observed = {}
+        for path in CODE_PATHS:
+            blob = subprocess.run(
+                ("git", "show", f"{source_head}:{path}"),
+                cwd=root,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            ).stdout
+            observed[path] = _sha256_bytes(blob)
+    if dict(revision) != observed:
+        raise ValueError("FSG2 source code revision differs")
+
+
 def _code_paths_clean() -> bool:
     return not _git_value("status", "--porcelain=v1", "--", *CODE_PATHS)
 
@@ -117,7 +145,7 @@ def _parse_args() -> argparse.Namespace:
 def _plain_tensor(value: object, label: str) -> torch.Tensor:
     if not torch.is_tensor(value):
         raise TypeError(f"FSG2 source {label} must be a tensor")
-    tensor = value.detach().cpu().contiguous()
+    tensor = cast(torch.Tensor, value).detach().cpu().contiguous()
     if type(tensor) is not torch.Tensor:  # pylint: disable=unidiomatic-typecheck
         tensor = tensor.as_subclass(torch.Tensor)
     return tensor
@@ -296,6 +324,7 @@ def _replay(args: argparse.Namespace) -> dict[str, object]:
         or manifest.get("performance_claimed") is not False
     ):
         raise ValueError("FSG2 manifest envelope differs")
+    _verify_code_provenance(manifest)
     files = manifest.get("files")
     if not isinstance(files, Mapping) or set(files) != set(ARTIFACT_FILES):
         raise ValueError("FSG2 artifact file inventory differs")

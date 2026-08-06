@@ -43,3 +43,19 @@ branch/parent/node/verdict门禁后，FSG2才可完整关闭并进入FSG3 B2 tim
   hash齐全、original/fallback count=`0/0`；
 - 新增real initial-CROWN artifact generator/replay；正式artifact须从提交后的clean revision生成；
 - α/β/split external state到native state的生产映射仍未准入，当前必须fail closed。
+
+## 生产状态inventory与artifact加固
+
+- 新增`scripts/run_fsg2_abcrown_state_inventory.py`，在冻结的αβ-CROWN、auto_LiRPA、
+  VNN-COMP revision上运行ResNet2B property 0、CUDA、`max_iterations=1`，逐个记录真实
+  `compute_bounds`的phase、parent/depth、module α/β state、split相关kwargs及tensor
+  shape/dtype/device/content digest；property使用临时副本，避免污染benchmark仓库；
+- inventory的admission结论由原始call rows确定性派生，不允许“看到alpha phase”自动升级成
+  replacement：当前native RVIR-v3 backend只实现initial-CROWN，真实alpha为start-node keyed嵌套
+  state，beta/split调用前又没有可直接own的完整module beta state；
+- `run_fsg2_rvir_v3_initial_artifact.py replay`新增source commit下逐文件code provenance复核，
+  防止artifact在不同实现上仅凭payload digest通过；
+- 新增纯逻辑测试，保证真实形态和空inventory都不能意外把B2 timing标为admitted。
+
+正式inventory必须在上述runner提交、code path clean后生成；正式结果再写入本节并据此关闭
+FSG2 gate。

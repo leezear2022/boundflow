@@ -1,5 +1,13 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-06：FSG2 production-state inventory与replay provenance
+
+- 新增冻结ResNet2B真实αβ-CROWN state ownership inventory runner，记录phase嵌套及digest-bound
+  alpha/beta/split输入；
+- 新增确定性fail-closed admission测试：局部initial-CROWN replacement不能授权same-solver B2
+  timing；
+- FSG2 initial-CROWN artifact replay现绑定生成时source revision。
+
 ## 2026-08-06：启动FSG2 RVIR-v3真替换合同
 
 - 明确RVIR-v2 exact-call只是passthrough，不计入B2 replacement；
