@@ -99,3 +99,15 @@ determinism设置。
 5. `feat(runtime): replace optimizer mutation and solver core`；
 6. `bench(runtime): close RVIR-v4 and decide B2 admission`。
 
+## V4-0A Typed State 实现记录
+
+- 新增`boundflow/runtime/rvir_v4_production_state.py`：digest-bound tensor、semantic path/axes、
+  source device、read/copy-in/mutable-copy-out与alias group；
+- alpha按`activation/start-node`保存`alpha_polarity/start_spec/domain/feature`axes；
+- beta只从正确的plural `sparse_betas`捕获`val/loc/sign[/bias]`，singular-only对象在beta phase
+  fail closed；
+- history按domain/layer保存location/coefficient/optional bias，并与SparseBeta loc/sign/bias前缀
+  逐项一致性校验；
+- pre/post mutation receipt要求path集合、role/axes/shape/dtype均不漂移；tensor tamper和history
+  mismatch均拒绝；
+- 6项定向单测通过；这只完成typed ownership合同，不代表真实V4-0 capture或backend已通过。

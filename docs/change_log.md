@@ -7,6 +7,8 @@
 - 预注册双边界capture、typed tensor/history/optimizer ownership、frozen-state evaluation、mutation
   replacement与whole-core门禁；
 - V4-3通过前B2及所有性能比较继续fail closed。
+- 新增RVIR-v4 typed production state：start-node alpha、plural SparseBeta四字段、history一致性、
+  alias与pre/post mutation closure；合同定向6项通过，真实capture仍待执行。
 
 ## 2026-08-06：FSG2关闭并阻止非法B2—B7性能外推
 
