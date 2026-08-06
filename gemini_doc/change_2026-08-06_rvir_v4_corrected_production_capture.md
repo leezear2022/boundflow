@@ -63,3 +63,8 @@ V4-1准入暂时撤回，等待v2正式artifact关闭。
 v2诊断run捕获6个feature-shape tensors和16个coordinate-index tensors，逐层index range与
 compressed alpha feature length exact；原24-call/core/beta/history/mutation结构不变。runner同时保留
 v1 replay兼容，但只有v2要求alpha-layout门禁。
+
+v2正式artifact绑定`5865905`，summary/manifest hash=`9d1c71b0…d1dbdb`/
+`eea6547a…e3199`。原样replay通过；越界alpha coordinate index即使同步重签tensor、snapshot、file和
+manifest四层digest仍被semantic range gate拒绝。V4-0以
+`VALIDATED-CORRECTED-CAPTURE-V2`重新关闭，V4-1重新准入，V4-2/B2仍关闭。

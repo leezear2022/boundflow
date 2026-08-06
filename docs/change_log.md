@@ -4902,6 +4902,9 @@
   superseded-for-V4-1，新增v2 alpha layout capture，V4-1准入暂时撤回等待v2正式证据。
 - v2诊断已捕获6个feature shape和16个coordinate index tensors并逐层exact；v1 replay兼容保留，
   正式v2 artifact仍需从clean committed source生成。
+- v2正式artifact绑定`5865905`，summary/manifest hash=`9d1c71b0…d1dbdb`/
+  `eea6547a…e3199`；四层digest重签后的越界alpha-index tamper仍被semantic gate拒绝；V4-0重新
+  关闭并准入V4-1，V4-2/B2保持关闭。
 
 **记录**
 - `gemini_doc/rvir_v4_production_state_ownership_plan_2026_08_06.md`

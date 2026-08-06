@@ -13,8 +13,10 @@ import sys
 
 import torch
 
+from boundflow.runtime.rvir_v4_production_state import production_tensor_sha256
+
 ROOT = Path(__file__).resolve().parents[1]
-ARTIFACT = ROOT / "artifacts/rvir-v4-production-state/resnet2b-core-capture-v1"
+ARTIFACT = ROOT / "artifacts/rvir-v4-production-state/resnet2b-core-capture-v2"
 RUNNER = ROOT / "scripts/run_rvir_v4_production_state_capture.py"
 
 
@@ -49,7 +51,7 @@ def test_frozen_rvir_v4_production_capture_replays() -> None:
         "performance_claimed": False,
         "status": "replay-passed",
         "summary_hash": (
-            "86d3365c929ded94069a6eab10cbe2a1b55327b369005de302f093b01b6a2ff2"
+            "9d1c71b02c42852d0e1a03ffec831b0a43a4c8d61003c125ad05371993d1dbdb"
         ),
     }
 
@@ -81,3 +83,51 @@ def test_frozen_rvir_v4_tensor_tamper_rejected_after_outer_digest_resigning(
 
     assert completed.returncode != 0
     assert "RVIR-v4 production tensor content differs" in completed.stdout
+
+
+def test_frozen_rvir_v4_alpha_index_semantic_tamper_is_rejected(
+    tmp_path: Path,
+) -> None:
+    artifact = tmp_path / "artifact"
+    shutil.copytree(ARTIFACT, artifact)
+    capture_path = artifact / "capture.pt"
+    payload = torch.load(capture_path, map_location="cpu", weights_only=True)
+    snapshot = payload["cores"][0]["pre_snapshot"]
+    item = next(
+        tensor
+        for tensor in snapshot["tensors"]
+        if tensor["role"] == "alpha_feature_index"
+    )
+    item["value"].view(-1)[0] = 10**6
+    item["content_sha256"] = production_tensor_sha256(item["value"])
+    metadata = {
+        "schema_version": snapshot["schema_version"],
+        "snapshot_id": snapshot["snapshot_id"],
+        "tensors": [
+            {key: value for key, value in tensor.items() if key != "value"}
+            for tensor in snapshot["tensors"]
+        ],
+        "history": snapshot["history"],
+        "optimizer_policy": snapshot["optimizer_policy"],
+    }
+    snapshot["snapshot_hash"] = hashlib.sha256(
+        _canonical(metadata).encode("utf-8")
+    ).hexdigest()
+    torch.save(payload, capture_path)
+
+    manifest_path = artifact / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["files"]["capture.pt"] = _sha256(capture_path)
+    semantic = {key: value for key, value in manifest.items() if key != "manifest_hash"}
+    manifest["manifest_hash"] = hashlib.sha256(
+        _canonical(semantic).encode("utf-8")
+    ).hexdigest()
+    manifest_path.write_text(
+        json.dumps(manifest, sort_keys=True, indent=2, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+
+    completed = _replay(artifact)
+
+    assert completed.returncode != 0
+    assert "RVIR-v4 alpha feature index content differs" in completed.stdout

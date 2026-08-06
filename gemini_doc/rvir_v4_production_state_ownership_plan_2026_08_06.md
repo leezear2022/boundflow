@@ -164,3 +164,13 @@ v2诊断run已通过：6个activation layer均有feature shape，coordinate indi
 （五个CNN layer各3维、最后linear layer 1维），所有index range和compressed alpha末轴长度逐层
 exact；24-call/core/beta/history/mutation计数保持不变。诊断summary hash=`9d1c71b0…d1dbdb`，
 `performance_claimed=false`。该数字仍需clean committed source的正式artifact冻结。
+
+### V4-0C 正式关闭
+
+- source commit=`586590553c2304f23d3cb760ca327a2b03568c44`；
+- artifact=`artifacts/rvir-v4-production-state/resnet2b-core-capture-v2`；
+- summary/manifest hash=`9d1c71b0…d1dbdb`/`eea6547a…e3199`；
+- 原样replay通过；layout index被改为越界值后，攻击方同步重算tensor content hash、snapshot hash、
+  capture file digest与manifest hash，仍被alpha feature index semantic range gate拒绝；
+- V4-0现在以`VALIDATED-CORRECTED-CAPTURE-V2`关闭，V4-1重新准入；v1保留为可重放历史工件，
+  但不得作为frozen-state evaluator输入；V4-2/B2仍关闭。
