@@ -442,31 +442,53 @@ def derive_summary(inventory: Mapping[str, Any]) -> dict[str, object]:
         )
         for call in beta_calls
     ]
+    beta_post_counts = [
+        sum(
+            _state_count(call, "post", name)
+            for name in ("sparse_beta", "beta", "split_beta")
+        )
+        for call in beta_calls
+    ]
     beta_constraint_counts = [
         _kwarg_count(call, "intermediate_constr") for call in beta_calls
     ]
+    beta_intermediate_bound_counts = [
+        _kwarg_count(call, "interm_bounds") for call in beta_calls
+    ]
+    beta_aux_reference_counts = [
+        _kwarg_count(call, "aux_reference_bounds") for call in beta_calls
+    ]
+    intermediate_constraint_key_observed = any(
+        "intermediate_constr" in call.get("kwargs_keys", []) for call in beta_calls
+    )
     observed_alpha = bool(alpha_calls) and max(alpha_pre_counts, default=0) > 0
     observed_beta_phase = bool(beta_calls)
     beta_state_explicit = observed_beta_phase and min(beta_pre_counts, default=0) > 0
-    nested_split_context = max(beta_constraint_counts, default=0) > 0
+    nested_split_tensor_context = max(beta_constraint_counts, default=0) > 0
     reasons = ["native_rvir_v3_backend_supports_initial_crown_only"]
     if observed_alpha:
         reasons.append("production_alpha_is_nested_start_node_keyed_state")
     if observed_beta_phase and not beta_state_explicit:
         reasons.append("beta_state_not_explicit_on_bounded_module_before_call")
-    if nested_split_context:
-        reasons.append("split_context_is_nested_in_provider_kwargs")
+    if intermediate_constraint_key_observed and not nested_split_tensor_context:
+        reasons.append("intermediate_constr_key_has_no_owned_tensor_leaf")
+    if max(beta_intermediate_bound_counts, default=0) > 0:
+        reasons.append("provider_intermediate_bounds_are_not_explicit_beta_split_state")
     summary: dict[str, object] = {
         "status": "validated_reduced_state_boundary",
         "workload_id": "cifar10_resnet:000",
         "phase_call_counts": phase_counts,
         "alpha_pre_state_counts": alpha_pre_counts,
         "beta_pre_state_counts": beta_pre_counts,
+        "beta_post_state_counts": beta_post_counts,
         "beta_intermediate_constraint_tensor_counts": beta_constraint_counts,
+        "beta_intermediate_bound_tensor_counts": beta_intermediate_bound_counts,
+        "beta_aux_reference_bound_tensor_counts": beta_aux_reference_counts,
         "production_alpha_state_observed": observed_alpha,
         "production_beta_phase_observed": observed_beta_phase,
         "production_beta_state_explicit_before_call": beta_state_explicit,
-        "provider_nested_split_context_observed": nested_split_context,
+        "intermediate_constraint_key_observed": intermediate_constraint_key_observed,
+        "provider_nested_split_tensor_context_observed": nested_split_tensor_context,
         "initial_crown_replacement_admitted": True,
         "alpha_beta_split_replacement_admitted": False,
         "b2_same_solver_timing_admitted": False,

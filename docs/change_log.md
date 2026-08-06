@@ -7,6 +7,8 @@
 - 新增确定性fail-closed admission测试：局部initial-CROWN replacement不能授权same-solver B2
   timing；
 - FSG2 initial-CROWN artifact replay现绑定生成时source revision。
+- State inventory区分kwargs key presence与实际tensor ownership，并同时记录pre/post beta、
+  intermediate/aux-reference bounds，避免空`intermediate_constr`被误判为split tensor state。
 
 ## 2026-08-06：启动FSG2 RVIR-v3真替换合同
 

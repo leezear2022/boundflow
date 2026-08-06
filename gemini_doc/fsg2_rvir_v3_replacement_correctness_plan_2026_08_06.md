@@ -59,3 +59,8 @@ branch/parent/node/verdict门禁后，FSG2才可完整关闭并进入FSG3 B2 tim
 
 正式inventory必须在上述runner提交、code path clean后生成；正式结果再写入本节并据此关闭
 FSG2 gate。
+
+首轮正式抓取发现需要进一步区分`intermediate_constr`键存在与其中实际存在tensor leaf：
+真实beta-split嵌套调用具有该键，但本workload中其tensor leaf为0；`interm_bounds`则稳定为12个
+tensor。runner据此升级为同时记录pre/post beta state、key presence、intermediate bounds与
+aux-reference bounds，避免把provider上下文误称为已被RVIR own的split state。

@@ -29,7 +29,12 @@ def test_realistic_alpha_beta_inventory_keeps_b2_fail_closed() -> None:
                     "beta": [],
                     "split_beta": [],
                 },
-                "kwarg_state": {"intermediate_constr": []},
+                "kwargs_keys": [],
+                "kwarg_state": {
+                    "intermediate_constr": [],
+                    "interm_bounds": [],
+                    "aux_reference_bounds": [],
+                },
             },
             {
                 "phase": "beta_split",
@@ -39,7 +44,18 @@ def test_realistic_alpha_beta_inventory_keeps_b2_fail_closed() -> None:
                     "beta": [],
                     "split_beta": [],
                 },
-                "kwarg_state": {"intermediate_constr": _state(2)},
+                "post_module_state": {
+                    "alpha": _state(6),
+                    "sparse_beta": [],
+                    "beta": [],
+                    "split_beta": [],
+                },
+                "kwargs_keys": ["intermediate_constr", "interm_bounds"],
+                "kwarg_state": {
+                    "intermediate_constr": [],
+                    "interm_bounds": _state(12),
+                    "aux_reference_bounds": _state(12),
+                },
             },
         ]
     }
@@ -49,10 +65,15 @@ def test_realistic_alpha_beta_inventory_keeps_b2_fail_closed() -> None:
     assert summary["production_alpha_state_observed"] is True
     assert summary["production_beta_phase_observed"] is True
     assert summary["production_beta_state_explicit_before_call"] is False
-    assert summary["provider_nested_split_context_observed"] is True
+    assert summary["intermediate_constraint_key_observed"] is True
+    assert summary["provider_nested_split_tensor_context_observed"] is False
+    assert summary["beta_intermediate_bound_tensor_counts"] == [12]
     assert summary["alpha_beta_split_replacement_admitted"] is False
     assert summary["b2_same_solver_timing_admitted"] is False
-    assert "split_context_is_nested_in_provider_kwargs" in summary["rejection_reasons"]
+    assert (
+        "intermediate_constr_key_has_no_owned_tensor_leaf"
+        in summary["rejection_reasons"]
+    )
 
 
 def test_empty_inventory_cannot_accidentally_admit_replacement() -> None:
