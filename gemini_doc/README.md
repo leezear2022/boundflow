@@ -16,16 +16,17 @@ NRIR48 归因重新审查 CUDA/TIR、selected-CROWN 流程融合、physical aren
 multi-stream、JIT/CUDA Graph 与 same-solver E2E；状态为 `proposed/research-only`，没有新增性能 claim。
 v1.1已把Amdahl反解、可solve workload、memory可达性、RVIR same-solver主对照、GPU fallback与frontend
 coverage前移到G0/G1。
-下一步只做 G0：恢复 GPU、尽力定位并公平复现用户报告的 BoundConv `40x`；若源码丢失则标记
-`NOT-AUDITABLE` 而不阻塞 G1，再用独立 GPU profile判定真实 bottleneck）。配套变更记录：
+G0 已关闭并准入 G1；当前执行
+`gemini_doc/BOUNDFLOW_NRIR49A_G1_GPU_ATTRIBUTION_V1_PLAN_2026_08_06.md`，只做 fixed
+ResNet2B clauses 2/3 的 GPU selected-CROWN attribution、Amdahl反解与physical-memory admission，
+不修改 TIR/default policy）。配套变更记录：
 `gemini_doc/BOUNDFLOW_GPU_COMPILER_ACCELERATION_RESEARCH_V1_CHANGELOG_2026_08_05.md`；修订前外部审计：
 `gemini_doc/external_audit_gpu_compiler_plan_v1_2026_08_05.md`（`approve-with-minor`，唯一M-1已修正）。
 
-G0 当前执行入口：
-`gemini_doc/BOUNDFLOW_NRIR49_G0_GPU_OPPORTUNITY_ADMISSION_V1_PLAN_2026_08_06.md`。pre-reboot v6
-artifact 已关闭 competitor env 与 solveability blocker：独立 αβ-CROWN env import PASS，公开
-`mnistfc:2` 双方整题均 `verified`；当前只剩 ASUS firmware dGPU delayed-apply 的重启门禁。
-`g1_ready=false`，尚未运行 GPU benchmark 或修改 TIR。
+G0 关闭入口：
+`gemini_doc/BOUNDFLOW_NRIR49_G0_GPU_OPPORTUNITY_ADMISSION_V1_PLAN_2026_08_06.md`。post-reboot v2
+的 NVIDIA、双方 Torch、TVM CUDA TIR、TVM-FFI stream与跨环境digest六项均 PASS，状态
+`ready_for_g1`；该结论只解除基础设施阻塞，不包含性能 claim。
 
 当前最新关闭入口：
 `gemini_doc/BOUNDFLOW_TOP2_PRODUCTION_EXECUTION_COST_ATTRIBUTION_V1_PLAN_2026_08_05.md`（NRIR48；
