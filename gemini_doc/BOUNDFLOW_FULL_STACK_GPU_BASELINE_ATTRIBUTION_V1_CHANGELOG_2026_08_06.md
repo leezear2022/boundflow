@@ -1,5 +1,5 @@
 ---
-status: fsg1-runner-ready-formal-pending
+status: fsg2-initial-validated-b2-and-downstream-gated
 updated: 2026-08-06T13:54:29Z
 type: changelog
 topic: boundflow
@@ -9,13 +9,25 @@ stage: s01
 
 # BoundFlow Full-Stack GPU Baseline and Attribution v1 Changelog
 
+## FSG2 Closure and FSG3—FSG5 Dependency Gate
+
+- RVIR-v3 no-original-callback initial-CROWN replacement在冻结ResNet上lower diff=`7.152557e-7`、
+  sign=`9/9`，正式artifact replay通过；
+- production inventory捕获`12 initial + 1 alpha + 11 beta/split` calls；alpha state为嵌套
+  start-node keyed tensors，beta/split前后均无显式beta tensor ownership；
+- FSG2以initial-only `VALIDATED-REDUCED`关闭，完整B2 `NO-GO/not admitted`；FSG3—FSG5因依赖
+  B2而未运行，不形成性能claim，也不宣称B3—B7各层潜力被证伪；
+- inventory v2 summary/manifest=`37f6dbcd…6544`/`e8548a25…ff06`；全量
+  `1107 passed, 3 skipped`。
+
 ## FSG1 Formal Closure
 
 - 两workload各5 fresh AB/BA pairs，10/10 result/visited-domain exact与attribution closure通过；
 - ResNet/MNIST perturbation median=`1.026200/1.001089<=1.05`；ResNet profile固定234 calls、
   visited domains=`[6064]`，MNIST 1 call并自然verified；
 - artifact replay exact；summary/manifest hash=`1e5f2946…7d92`/`c9496d27…d1e`；
-- FSG1只关闭B0 measurement denominator，`performance_claimed=false`；当前下一步FSG2。
+- FSG1只关闭B0 measurement denominator，`performance_claimed=false`；当时下一步为FSG2，现已由
+  本文顶部的FSG2 closure取代。
 
 ## FSG1 Fixed-Iteration Protocol Correction
 

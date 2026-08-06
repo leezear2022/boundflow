@@ -319,10 +319,11 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 
 1. [x] FSG0：文档作用域纠正、schema/aggregator/tests；
 2. [x] FSG1：official control hook、五fresh baseline artifact/replay；
-3. [ ] FSG2：RVIR-v3 executable state与BoundFlow replacement correctness；
-4. [ ] FSG3：B0/B1/B2 paired same-solver baseline；
-5. [ ] FSG4：按B3—B7逐层实现、累计与leave-one-out消融；
-6. [ ] FSG5：multiworkload E2E、solved/TTV/peak与外部审计。
+3. [x] FSG2：以`VALIDATED-REDUCED initial-only`关闭；完整α/β/split replacement与B2
+   `NO-GO/not admitted`；
+4. [—] FSG3：因B2不存在合法same-solver replacement candidate，依赖门禁阻止，未运行；
+5. [—] FSG4：因B3—B7均依赖B2，依赖门禁阻止，未实现/未消融；
+6. [—] FSG5：因无合法B7 candidate，依赖门禁阻止，无系统性能claim。
 
 ## 12. Validation
 
@@ -381,6 +382,19 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
   `c9496d27a04401c9d6cea260a9b2d155c46864b7d3e596e652b05139bdd51d1e`；
 - artifact的`source_dirty_paths=["M .docops/ev.jsonl"]`只来自强制DocOps命令账本；三条code path
   hash均绑定`ac1afc5`且formal generate前由runner独立要求clean。全程`performance_claimed=false`。
+
+### FSG2 Closure 与下游门禁（2026-08-06）
+
+- RVIR-v3 executable payload、mutation ownership、no-original-callback API与正反向合同已实现；
+- frozen ResNet initial-CROWN native replacement lower max diff=`7.152557e-7`、sign=`9/9`、
+  original/fallback=`0/0`，formal summary/manifest=`fd6dbd43…e6c4`/`94f06ef…10a`；
+- production inventory捕获24 calls=`12 initial + 1 alpha + 11 beta/split`；alpha call前21个嵌套
+  alpha tensors，而11个beta/split call前后显式beta tensors均为0；
+- inventory v2 summary/manifest=`37f6dbcd…6544`/`e8548a25…ff06`，semantic replay通过；
+- 因完整production alpha/beta/split state ownership与独立backend未准入，B2 timing fail closed；
+  FSG3—FSG5只按依赖门禁停止，不能解释为B3—B7各层潜力已被证伪；
+- 全量=`1107 passed, 3 skipped`；详细记录见
+  `change_2026-08-06_fsg2_replacement_boundary_and_downstream_gate.md`。
 
 ## 13. Rollback
 

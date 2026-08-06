@@ -64,3 +64,18 @@ FSG2 gate。
 真实beta-split嵌套调用具有该键，但本workload中其tensor leaf为0；`interm_bounds`则稳定为12个
 tensor。runner据此升级为同时记录pre/post beta state、key presence、intermediate bounds与
 aux-reference bounds，避免把provider上下文误称为已被RVIR own的split state。
+
+## 最终关闭
+
+- initial-CROWN artifact：lower max diff=`7.152557373046875e-7`、sign=`9/9`、
+  original/fallback=`0/0`，summary/manifest=`fd6dbd43…e6c4`/`94f06ef…10a`；
+- production inventory v2：24 calls=`12 initial + 1 alpha + 11 beta/split`；alpha pre-state=
+  21 tensors；11个beta/split calls的pre/post显式beta state均为0；summary/manifest=
+  `37f6dbcd…6544`/`e8548a25…ff06`，semantic replay通过；
+- targeted=`18 passed`；全量（`source env.sh`）=`1107 passed, 3 skipped`；Black、mypy与
+  Pylint 10.00/10通过；
+- FSG2状态：`VALIDATED-REDUCED initial-only`；完整production alpha/beta/split replacement与
+  B2 timing=`NO-GO/not admitted`；
+- FSG3—FSG5因依赖B2而gated，未执行，也不能被解释为各优化层已分别失败。
+
+完整审计入口：`change_2026-08-06_fsg2_replacement_boundary_and_downstream_gate.md`。

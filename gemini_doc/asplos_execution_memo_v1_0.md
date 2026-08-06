@@ -3,8 +3,9 @@
 > 生效日期：2026-07-12
 > 当前 integration base：`331086d`（NRIR-39 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/fsg1-official-control-attribution-v1`，FSG1 code revision=`ac1afc5`；
-> FSG0、FSG1均已验证；当前下一步为FSG2 RVIR-v3 executable state/replacement correctness
+> 当前研发分支：`feat/fsg2-rvir-v3-replacement-correctness-v1`；FSG2 revisions=
+> `aa31eae`/`8bf6981`；FSG0、FSG1均已验证；FSG2以initial-only validated-reduced关闭，完整B2
+> replacement未准入，FSG3—FSG5依赖门禁停止
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed
@@ -18,7 +19,8 @@
 > objective evaluator（完成）→ full-frontier tightness attribution（NO-GO）→ objective-branch shared
 > evaluator（完成）→ NRIR48 CPU execution attribution（完成）→ NRIR49A GPU selected-CROWN-only
 > opportunity attribution（NO-GO）→ FSG0 full-stack scope/schema/replay（完成）→ FSG1 official control
-> full-stack trace（完成）→ FSG2 RVIR-v3 replacement correctness（当前下一步）**。
+> full-stack trace（完成）→ FSG2 RVIR-v3 initial replacement（VALIDATED-REDUCED）→完整B2
+> alpha/beta/split replacement（NO-GO/not admitted）→FSG3—FSG5（依赖门禁停止）**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有

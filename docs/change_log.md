@@ -1,5 +1,13 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-06：FSG2关闭并阻止非法B2—B7性能外推
+
+- 真实ResNet initial-CROWN native replacement通过，original/fallback=`0/0`；
+- production state inventory捕获24 calls，确认alpha嵌套state存在而显式beta/split ownership缺失；
+- FSG2以`VALIDATED-REDUCED initial-only`关闭，B2 `NO-GO/not admitted`，FSG3—FSG5依赖门禁停止；
+- 该结论不声称B3—B7各层潜力被证伪，完整记录见
+  `gemini_doc/change_2026-08-06_fsg2_replacement_boundary_and_downstream_gate.md`。
+
 ## 2026-08-06：FSG2 production-state inventory与replay provenance
 
 - 新增冻结ResNet2B真实αβ-CROWN state ownership inventory runner，记录phase嵌套及digest-bound
@@ -28,8 +36,8 @@
 - ResNet/MNIST observer perturbation median=`1.026200/1.001089<=1.05`；ResNet每profile
   234 calls、6064 visited domains，MNIST每profile 1 call并自然verified；
 - summary/manifest hash=`1e5f2946…7d92`/`c9496d27…d1e`，全程
-  `performance_claimed=false`；下一步FSG2 RVIR-v3 replacement correctness；
-- 详细关闭记录见`gemini_doc/fsg1_fixed_iteration_control_protocol_2026_08_06.md`。
+  `performance_claimed=false`；当时下一步为FSG2 RVIR-v3 replacement correctness；
+- 详细关闭记录见`gemini_doc/fsg1_fixed_iteration_control_protocol_2026_08_06.md`；FSG2现已关闭。
 
 ## 2026-08-06：FSG1 改用 official fixed-iteration 归因协议
 

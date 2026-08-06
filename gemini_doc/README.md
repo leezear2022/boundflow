@@ -15,8 +15,13 @@
 纠正、全栈 schema、feature activation ledger 与 replay 合同已以20项定向测试和
 `1079 passed, 3 skipped`全量回归关闭；外部审计三项minor亦已修复。FSG1又完成official B0
 control full-stack trace：两个workload各5 fresh pair、10/10 attribution closure、semantic replay通过。
-当前下一步 FSG2：实现RVIR-v3 executable state与真正不回调original provider的BoundFlow
-replacement correctness；FSG1仍只建立B0分层基线，尚不能声称BoundFlow已有全栈GPU speedup。
+FSG2已以`VALIDATED-REDUCED initial-only`关闭：真实ResNet initial-CROWN可由BoundFlow native
+backend在original/fallback=`0/0`下替换，但production inventory的24 calls显示alpha为嵌套
+start-node keyed state，11个beta/split call前后又没有显式可own的beta tensor。故完整B2
+`NO-GO/not admitted`，FSG3—FSG5按依赖门禁未运行；这不等于算子、图IR、JIT、调度或内存层
+各自已被证伪。当前无BoundFlow全栈GPU speedup claim；重开需先完成production alpha/beta/split
+state ownership与独立replacement backend。关闭记录见
+`gemini_doc/change_2026-08-06_fsg2_replacement_boundary_and_downstream_gate.md`。
 
 NRIR49A 的正式数据与 artifact 继续有效，但其 `VALIDATED-NO-GO` 仅关闭 selected-CROWN-only
 增量路线：fixed ResNet2B clauses 2/3 的五个 fresh GPU worker测得 selected-CROWN queue/complete share

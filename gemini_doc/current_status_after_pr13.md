@@ -2,8 +2,10 @@
 
 > 状态日期：2026-08-06
 > 当前 integration base：`f194034`（NRIR-44 PR #55 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/fsg1-official-control-attribution-v1`，FSG1 code revision=`ac1afc5`；
-> FSG0、FSG1均已验证；当前下一步为FSG2 RVIR-v3 executable state/replacement correctness
+> 当前研发分支：`feat/fsg2-rvir-v3-replacement-correctness-v1`；FSG2 implementation/inventory
+> revisions=`aa31eae`/`8bf6981`；
+> FSG0、FSG1均已验证；FSG2以`VALIDATED-REDUCED initial-only`关闭，完整B2 replacement
+> `NO-GO/not admitted`，FSG3—FSG5按依赖门禁未运行
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入

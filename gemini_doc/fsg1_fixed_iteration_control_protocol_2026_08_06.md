@@ -56,5 +56,6 @@ phase判定；这只减少测量器开销，不改变、缓存或替换 solver �
 - manifest hash=`c9496d27a04401c9d6cea260a9b2d155c46864b7d3e596e652b05139bdd51d1e`；
 - 独立`replay`退出码0且输出exact；`performance_claimed=false`。
 
-因此FSG1以B0 measurement/attribution `VALIDATED-REDUCED`关闭；下一步为FSG2 RVIR-v3
-executable state、mutation receipt与no-original-callback replacement correctness。
+因此FSG1以B0 measurement/attribution `VALIDATED-REDUCED`关闭；当时下一步为FSG2 RVIR-v3
+executable state、mutation receipt与no-original-callback replacement correctness。该下一步已于
+2026-08-06执行并由`change_2026-08-06_fsg2_replacement_boundary_and_downstream_gate.md`取代。
