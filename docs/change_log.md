@@ -1,5 +1,13 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-06：启动RVIR-v4 production-state ownership
+
+- 修正FSG2 beta inventory事实：provider字段为`node.sparse_betas`（复数），旧探针漏记不能证明
+  beta state为空；
+- 预注册双边界capture、typed tensor/history/optimizer ownership、frozen-state evaluation、mutation
+  replacement与whole-core门禁；
+- V4-3通过前B2及所有性能比较继续fail closed。
+
 ## 2026-08-06：FSG2关闭并阻止非法B2—B7性能外推
 
 - 真实ResNet initial-CROWN native replacement通过，original/fallback=`0/0`；
