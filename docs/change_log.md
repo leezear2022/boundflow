@@ -1,5 +1,17 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-06：启动FSG2 RVIR-v3真替换合同
+
+- 明确RVIR-v2 exact-call只是passthrough，不计入B2 replacement；
+- v3冻结owned executable tensors、phase/polarity/ragged batch、α/β/split mutation receipt与
+  no-original-callback API；
+- 计划与claim边界见`gemini_doc/fsg2_rvir_v3_replacement_correctness_plan_2026_08_06.md`。
+- 新增`rvir_v3_replacement.py`：owned tensor digest、phase/polarity/ragged/mutation schema、独立
+  Torch affine reference backend、原子copy-out与no-provider-callback execution receipt；
+- 新增正反向合同测试，旧RVIR-v2入口保持不变。
+- 新增native plain-CROWN v3 backend与真实ResNet artifact runner；diagnostic在无original callback/
+  fallback下lower max diff=`7.15e-7`、sign=`9/9`，α/β/split production replacement仍未准入。
+
 ## 2026-08-06：FSG1 official B0 full-stack baseline 正式关闭
 
 - 两workload各5 fresh control/profile pairs，10/10 semantic/closure/replay通过；
