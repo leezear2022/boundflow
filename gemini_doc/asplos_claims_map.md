@@ -14,8 +14,9 @@
 > dynamic queue；NRIR-35 又以一等六阶段 IR 先执行九子句 floor，再用相同 global start 对 clause 0
 > 做 additive packed work。三轮均保留 9/9 original-ordinal accounting，但仍 9/9 unresolved，故
 > ASPLOS-ready No-Go 不变。2026-08-06 NRIR49A又证明CPU侧selected-CROWN winner在RTX 4060 GPU
-> queue/complete中只占约7.10%/7.05%，Amdahl与physical-memory门禁均失败，selected-CROWN G2/G3
-> 已gated off。
+> queue/complete中只占约7.10%/7.05%，Amdahl与physical-memory门禁均失败，selected-CROWN专属
+> G2/G3已gated off。`1.0764x`只是删除该单区域的deletion-only上限，不是BoundFlow全栈上限；FSG0
+> schema/replay合同已验证，当前FSG1只建立official control full-stack trace，尚无全栈性能claim。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
@@ -1379,10 +1380,10 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   `2.663321/2.694436 s`，parent share=`71.7725%/72.7291%`；
 - `C3-L-NRIR48`：formal hash=`571c2e47c0c8906d2486e5e19e8152eb1ef0d3024b08cf561e25ed4f71d177a4`；
   全量 `996 passed, 37 skipped`；attribution `VALIDATED-REDUCED` 不是 speedup，不外推 GPU、
-  competitor、multi-workload、property closure 或 ASPLOS-ready；下一路线仅为 NRIR49 selected-CROWN
-  execution。
+  competitor、multi-workload、property closure 或 ASPLOS-ready；当时准入的 NRIR49 selected-CROWN
+  execution 已由下节完成，不是当前路线。
 
-### NRIR-49A（G1 NO-GO）：GPU Selected-CROWN Opportunity Attribution v1
+### NRIR-49A（G1 selected-CROWN-only NO-GO）：GPU Selected-CROWN Opportunity Attribution v1
 
 - `C3-D-NRIR49A`：additive read-only runner在RTX 4060 Laptop上执行clauses 2/3、五fresh workers、
   五chunk Latin sweep与paired default32 control；production runtime/TIR/kernel/default policy未修改；
@@ -1394,6 +1395,12 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   Amdahl目标均不可达；最大allocated/reserved比例=`0.009964/0.013530`、合法batch上限1、无OOM，
   physical-memory path=`N/A`；
 - `C3-L-NRIR49A`：summary/manifest hash=`7eefe6a7…ab50`/`d0272fe4…c81f`；5 raw/50 normalized/
-  2 query/0 failure rows，独立replay stdout与所有digest重算通过。G1 `VALIDATED-NO-GO`，
-  selected-CROWN G2/G3 gated off，下一路线=`gpu-winner-reselection`；`performance_claimed=false`，
-  不构成speedup、competitor、multi-workload、solved verdict、memory headline或ASPLOS-ready claim。
+  2 query/0 failure rows，独立replay stdout与所有digest重算通过。G1
+  `VALIDATED-NO-GO(selected-CROWN-only incremental optimization)`，只将selected-CROWN专属G2/G3
+  gated off；`1/(1-0.070986)=1.0764x`只是假设该region变为零耗时的单区域上限，不约束BoundFlow
+  operator/graph/JIT/runtime/memory累计收益。artifact中的`next_route=gpu-winner-reselection`是冻结
+  历史输出，已由
+  `gemini_doc/BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md`取代；FSG0合同已以
+  19项定向测试与`1078 passed, 3 skipped`回归关闭，当前FSG1只采集official control full-stack trace，
+  不构成speedup、competitor、multi-workload、
+  solved verdict、memory headline或ASPLOS-ready claim。

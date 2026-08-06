@@ -9,6 +9,15 @@ stage: s01
 
 # NRIR49A G1 GPU Attribution NO-GO
 
+## 后续范围纠正（2026-08-06）
+
+本变更记录及冻结 artifact 的数据、hash 和历史机器判定均保持不变。本文的 NO-GO 只关闭
+selected-CROWN-only incremental G2/G3，不关闭 BoundFlow operator→IR→JIT→runtime→memory 的
+累计全栈优化。`1.076410x` 仅是把实测 selected-CROWN 区域降为零耗时的 deletion-only Amdahl
+上限，不是 BoundFlow 全栈上限。原 `next_route=gpu-winner-reselection` 保留为历史输出；当前路线由
+[Full-Stack GPU Baseline and Attribution v1](BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md)
+取代。
+
 ## 变更
 
 - 新增只读GPU归因runner与10项合同测试；production runtime、TIR、kernel和默认chunk均未修改。
@@ -37,9 +46,11 @@ stage: s01
 
 `s_queue <20%`，故selected-CROWN不是GPU winner。queue `1.20x`与complete `1.15x`目标均超过相应
 Amdahl无限区域加速上限，三个required-region-speedup字段均为`null`。memory admission亦失败。
-G1按预注册规则以`VALIDATED-NO-GO`关闭，G2/G3 gated off；不得启动selected-CROWN TIR/JIT/融合，
-下一动作是重新归因GPU whole-queue winner。`performance_claimed=false`，不形成speedup、竞品、
-multi-workload、solved verdict、memory headline或ASPLOS-ready claim。
+G1按预注册规则以`VALIDATED-NO-GO`关闭，selected-CROWN-only incremental G2/G3 gated off；不得启动
+该单一区域的专属 TIR/JIT/融合。这一判定不关闭 BoundFlow 全栈优化；原“重新归因 GPU whole-queue
+winner”仅为 closure 当时及 artifact 中的历史 next route，当前已由 Full-Stack 计划取代。
+`performance_claimed=false`，不形成speedup、竞品、multi-workload、solved verdict、memory headline
+或ASPLOS-ready claim。
 
 ## 工件与复核
 
@@ -66,7 +77,7 @@ resnet2b-prop0-clauses2-3-rtx4060-five-repeat-v1
 预期核心输出：`status=replay-passed`、summary hash如上，decision为instrumentation PASS、queue
 opportunity FAIL、latency feasibility FAIL、memory admission FAIL、next route=
 `gpu-winner-reselection`。本轮已独立确认exit 0、stdout逐字一致、全部payload SHA256与manifest hash
-重算吻合。
+重算吻合。该字段是冻结 artifact 的历史机器输出，不因后续 Full-Stack 路线纠正而改写。
 
 ## 失败历史边界
 

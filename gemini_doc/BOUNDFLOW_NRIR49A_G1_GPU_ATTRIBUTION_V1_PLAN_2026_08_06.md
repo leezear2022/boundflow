@@ -9,6 +9,19 @@ stage: s01
 
 # BoundFlow NRIR49A G1 GPU Attribution v1 Plan
 
+## 后续范围纠正（2026-08-06）
+
+本计划的正式数据、门禁判定和冻结 artifact 保持有效且不作修改，但 `VALIDATED-NO-GO` 的作用域应
+严格读作 **selected-CROWN-only incremental G2/G3**。它只关闭围绕该单一区域继续做专属
+TIR/JIT/融合的原 G2/G3 路线，不关闭 BoundFlow 从 operator、Bound/Graph IR、Plan/Schedule、
+跨阶段融合、JIT/CUDA Graph、runtime batching/streams 到 arena/buffer reuse 的累计全栈路线。
+
+`1.076410x` 只是假设实测 share 为 `0.0709863` 的 selected-CROWN 区域被降为零耗时所得的
+deletion-only Amdahl 上限，不是 BoundFlow 全栈加速的理论上限。artifact 中冻结的
+`next_route=gpu-winner-reselection` 仍作为历史机器输出保留；当前工程路线已由
+[Full-Stack GPU Baseline and Attribution v1](BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md)
+取代。
+
 ## Goal
 
 在不修改 production TIR、kernel、默认 chunk、Planner policy、数学或 termination 的前提下，回答三个
@@ -213,7 +226,9 @@ absolute/relative diff=`2.288818359375e-05/1.710717646052519e-04`，均低于预
 对应Amdahl无限加速上限，因此`r_queue_required/r_complete_required/r_latency_required=null`，
 latency路线不可达。最大allocated/reserved仅占物理显存`0.996%/1.353%`，最大合法domain batch=1、
 无OOM，故physical-memory admission失败且该硬件的G8 memory path=`N/A`。按预注册规则，G1以
-`VALIDATED-NO-GO`关闭，停止selected-CROWN G2/G3，不启动TIR实现，下一步重新做GPU winner归因。
+`VALIDATED-NO-GO`关闭，停止原预注册的 selected-CROWN-only incremental G2/G3，不启动该单一区域
+专属 TIR 实现。这不关闭 BoundFlow operator→IR→JIT→runtime→memory 全栈优化；原“下一步重新做
+GPU winner归因”与 artifact 的 `next_route` 均保留为历史记录，当前路线已由上方 Full-Stack 计划取代。
 
 正式 artifact 位于
 `artifacts/nrir49a-g1-gpu-attribution/resnet2b-prop0-clauses2-3-rtx4060-five-repeat-v1/`；
@@ -232,5 +247,6 @@ summary hash=`7eefe6a716fa57874420bcda64487ad02578dae5926fc99426eaaef37d35ab50`�
 
 - changelog: [NRIR49A G1 changelog](BOUNDFLOW_NRIR49A_G1_GPU_ATTRIBUTION_V1_CHANGELOG_2026_08_06.md)
 - G0: [NRIR49 G0 admission](BOUNDFLOW_NRIR49_G0_GPU_OPPORTUNITY_ADMISSION_V1_PLAN_2026_08_06.md)
+- current route: [Full-Stack GPU Baseline and Attribution v1](BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md)
 - roadmap: [GPU compiler acceleration research v1.1](BOUNDFLOW_GPU_COMPILER_ACCELERATION_RESEARCH_V1_PLAN_2026_08_05.md)
 - CPU lineage: [NRIR48 attribution](change_2026-08-05_nrir48_execution_cost_attribution.md)

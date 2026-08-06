@@ -2,8 +2,8 @@
 
 > 状态日期：2026-08-06
 > 当前 integration base：`f194034`（NRIR-44 PR #55 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/nrir49-gpu-selected-crown-opportunity-v1@c4fd0bb`；G1 formal artifact已在该源码
-> revision生成，closure文档变更尚待提交
+> 当前研发分支：`feat/full-stack-gpu-baseline-attribution-v1`（基于NRIR49A closure `7836e11`）；
+> FSG0 schema/replay与文档作用域纠正已验证，下一步为FSG1 official-control B0 full-stack trace
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
@@ -1262,10 +1262,10 @@ percentage points 且稳定超过 pooled MAD。
 `571c2e47c0c8906d2486e5e19e8152eb1ef0d3024b08cf561e25ed4f71d177a4`；replay/tamper 与全量
 `996 passed, 37 skipped` 通过。
 
-NRIR48 attribution `VALIDATED-REDUCED`；未实现优化、没有 speedup claim。下一步只允许另立 NRIR49
-selected-CROWN execution 单变量。
+NRIR48 attribution `VALIDATED-REDUCED`；未实现优化、没有 speedup claim。其 closure 当时只准入另立
+NRIR49 selected-CROWN execution 单变量；该历史动作已由下述 NRIR49A 完成，不是当前指令。
 
-## 51. 2026-08-06 NRIR49A G1 GPU Attribution 判定
+## 51. 2026-08-06 NRIR49A G1 GPU Selected-CROWN-only Opportunity 判定
 
 G0 post-reboot已确认RTX 4060 Laptop、Torch CUDA 13.2/SM89、TVM CUDA TIR、TVM-FFI stream与
 双方workload digest门禁通过。NRIR49A随后只读执行frozen clauses 2/3、31-node production queue；
@@ -1277,8 +1277,18 @@ production runtime、TIR、kernel与默认chunk 32均未修改。
 absolute/relative diff=`2.288818359375e-05/0.0001710717646052519 <=2e-4`。代表调用CUPTI记录
 5954 kernels、5486 launches、398 sync和5364 memory events。
 
-selected-CROWN share低于20%，queue `1.20x`和complete `1.15x`目标均超过Amdahl无限区域加速
-上限；最大allocated/reserved只占8 GiB物理显存`0.996%/1.353%`，合法domain batch上限1且无OOM，
-memory path=`N/A`。summary/manifest hash=`7eefe6a7…ab50`/`d0272fe4…c81f`，独立replay与digest
-重算通过。NRIR49A G1为`VALIDATED-NO-GO`，selected-CROWN G2/G3 gated off；下一步重新归因GPU
-whole-queue winner，不启动selected-CROWN TIR/JIT/融合。ASPLOS-ready仍为NO。
+selected-CROWN share低于20%，queue `1.20x`和complete `1.15x`目标均超过该单区域的Amdahl无限
+加速上限；`1/(1-0.070986)=1.0764x` 只是假设 selected-CROWN region 变为零耗时的
+deletion-only 上限，不是 BoundFlow 的全栈上限。最大allocated/reserved只占8 GiB物理显存
+`0.996%/1.353%`，合法domain batch上限1且无OOM，memory path=`N/A`。summary/manifest hash=
+`7eefe6a7…ab50`/`d0272fe4…c81f`，独立replay与digest重算通过。NRIR49A G1为
+`VALIDATED-NO-GO(selected-CROWN-only incremental optimization)`，只将selected-CROWN专属G2/G3
+gated off；不否定算子、Bound/Graph IR、Plan/Schedule、跨阶段融合、JIT、runtime调度或内存复用的
+累计收益。
+
+正式artifact中的`next_route=gpu-winner-reselection`是冻结历史机器输出，现由
+`gemini_doc/BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md`取代。当前按
+FSG0现已关闭：typed layer/phase/resource/cache、feature activation ledger、critical-path/residual、
+累计消融与tamper-resistant replay合同共19项定向测试通过，全量`1078 passed, 3 skipped`。当前下一步
+FSG1采集official original executor的control full-stack trace；该阶段只建立B0分层基线，尚无BoundFlow
+全栈GPU性能claim。ASPLOS-ready仍为NO。

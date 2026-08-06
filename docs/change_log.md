@@ -1,5 +1,21 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-06：GPU 编译器路线升级为 v1.2 full-stack overlay
+
+- 保留 NRIR49A/G1 的正式数据和冻结 artifact，但将结论收窄为仅关闭
+  selected-CROWN 单点增量优化，不再外推为 BoundFlow 全栈 GPU 上限；
+- 旧 G2—G4 保留历史/gated 语义；冻结 artifact 中的 `gpu-winner-reselection` 不改写，
+  但不再是当前指令；
+- FSG0 schema/critical-path/replay合同已以19项定向测试和`1078 passed, 3 skipped`回归关闭；当前
+  下一步是FSG1 official αβ-CROWN B0 full-stack baseline；目标是建立全栈分母，不是再找一个单点
+  winner；
+- 本次仅修正文档路线与 claim 边界，没有新的性能结果，不宣称 BoundFlow
+  已比 auto_LiRPA/αβ-CROWN 更快；
+- 详细记录：
+  `gemini_doc/BOUNDFLOW_GPU_COMPILER_ACCELERATION_RESEARCH_V1_CHANGELOG_2026_08_05.md`；
+  当前唯一入口：
+  `gemini_doc/BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md`。
+
 ## 2026-08-06：根据评审收紧 GPU 编译器计划的可证伪门禁
 
 - G1新增精确Amdahl反解；任一scope不可达或required region speedup `>10x`时，不启动latency G3；

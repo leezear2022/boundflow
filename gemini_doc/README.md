@@ -10,32 +10,40 @@
 
 ---
 
-当前研究/外部审计入口：
-`gemini_doc/BOUNDFLOW_GPU_COMPILER_ACCELERATION_RESEARCH_V1_PLAN_2026_08_05.md`（基于
-NRIR48 归因重新审查 CUDA/TIR、selected-CROWN 流程融合、physical arena、ragged sibling batch、
-multi-stream、JIT/CUDA Graph 与 same-solver E2E；状态为 `proposed/research-only`，没有新增性能 claim。
-v1.1已把Amdahl反解、可solve workload、memory可达性、RVIR same-solver主对照、GPU fallback与frontend
-coverage前移到G0/G1。
-G0 已关闭并准入 G1；G1现已按预注册门禁以`VALIDATED-NO-GO`关闭：fixed ResNet2B clauses 2/3
-五fresh GPU worker测得selected-CROWN queue/complete share中位=`7.0986%/7.0523%`，低于20%机会
-门槛且Amdahl目标不可达；最大reserved仅1.353%物理显存，memory path=`N/A`。因此停止
-selected-CROWN G2/G3/TIR，下一步重新归因GPU winner。正式入口为
+当前权威研究入口：
+`gemini_doc/BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md`。FSG0 的作用域
+纠正、全栈 schema、feature activation ledger 与 replay 合同已以19项定向测试和
+`1078 passed, 3 skipped`全量回归关闭。当前下一步 FSG1：对 official original executor 采集
+operator→graph/IR→JIT→runtime schedule→allocator/memory 的 control full-stack trace。FSG1 只建立
+B0 分层基线，尚不能声称 BoundFlow 已有全栈 GPU speedup。
+
+NRIR49A 的正式数据与 artifact 继续有效，但其 `VALIDATED-NO-GO` 仅关闭 selected-CROWN-only
+增量路线：fixed ResNet2B clauses 2/3 的五个 fresh GPU worker测得 selected-CROWN queue/complete share
+中位=`7.0986%/7.0523%`；`1/(1-0.070986)=1.0764x` 只是假设该 region 变为零耗时的
+deletion-only 单区域 Amdahl 上限，不是 BoundFlow 从算子、图、JIT、调度、并行到内存管理的累计
+全栈上限。最大reserved仅1.353%物理显存，memory path=`N/A`；因此只停止 selected-CROWN 专属
+G2/G3/TIR。正式 artifact 的 `next_route=gpu-winner-reselection` 是冻结历史机器输出，当前路线已由
+上述 full-stack plan 取代。NRIR49A 正式入口为
 `gemini_doc/BOUNDFLOW_NRIR49A_G1_GPU_ATTRIBUTION_V1_PLAN_2026_08_06.md`，summary hash=
-`7eefe6a7…ab50`，不是speedup claim）。配套变更记录：
-`gemini_doc/BOUNDFLOW_GPU_COMPILER_ACCELERATION_RESEARCH_V1_CHANGELOG_2026_08_05.md`；修订前外部审计：
-`gemini_doc/external_audit_gpu_compiler_plan_v1_2026_08_05.md`（`approve-with-minor`，唯一M-1已修正）。
-G1 closure变更记录：`gemini_doc/change_2026-08-06_nrir49a_g1_gpu_attribution_nogo.md`。
+`7eefe6a7…ab50`，不是 speedup claim；closure变更记录为
+`gemini_doc/change_2026-08-06_nrir49a_g1_gpu_attribution_nogo.md`。
+
+历史 GPU research-only 计划为
+`gemini_doc/BOUNDFLOW_GPU_COMPILER_ACCELERATION_RESEARCH_V1_PLAN_2026_08_05.md`；其 selected-CROWN
+单主线路线已被 full-stack plan 取代。配套变更记录为
+`gemini_doc/BOUNDFLOW_GPU_COMPILER_ACCELERATION_RESEARCH_V1_CHANGELOG_2026_08_05.md`；修订前外部审计为
+`gemini_doc/external_audit_gpu_compiler_plan_v1_2026_08_05.md`。
 
 G0 关闭入口：
 `gemini_doc/BOUNDFLOW_NRIR49_G0_GPU_OPPORTUNITY_ADMISSION_V1_PLAN_2026_08_06.md`。post-reboot v2
 的 NVIDIA、双方 Torch、TVM CUDA TIR、TVM-FFI stream与跨环境digest六项均 PASS，状态
 `ready_for_g1`；该结论只解除基础设施阻塞，不包含性能 claim。
 
-当前最新关闭入口：
+历史前序关闭入口：
 `gemini_doc/BOUNDFLOW_TOP2_PRODUCTION_EXECUTION_COST_ATTRIBUTION_V1_PLAN_2026_08_05.md`（NRIR48；
 frozen NRIR45 clauses 2/3 的 6/6 attribution exact；child refinement execute 在两条 3/3 dominant，
 selected-CROWN 占 parent=`71.7725%/72.7291%`，故 attribution `VALIDATED-REDUCED`；不是 speedup，
-下一路线为 NRIR49 selected-CROWN execution）。其前序
+当时准入的 NRIR49 selected-CROWN execution 已由 NRIR49A 完成，不是当前路线）。其前序
 `gemini_doc/BOUNDFLOW_SINGLE_PASS_TARGET_ADMISSION_RECEIPT_V1_PLAN_2026_08_05.md`（NRIR47；
 typed receipt 已把每 child compile selector/reselection 收敛为 `30/0`，60 个动态 target ledger 不共享，
 显式 full replay 仍重选；但 compiler ratio=`0.936003 > 0.85`、两条 queue ratio=

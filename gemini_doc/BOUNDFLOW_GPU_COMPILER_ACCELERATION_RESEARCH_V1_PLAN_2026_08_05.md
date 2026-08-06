@@ -1,12 +1,12 @@
 ---
-status: proposed
-updated: 2026-08-05T18:22:00Z
+status: superseded-by-full-stack-overlay
+updated: 2026-08-06T09:06:51Z
 type: plan
 topic: boundflow
 slug: gpu-compiler-acceleration-research-v1
 stage: s01
 claim_scope: research-only
-revision: v1.1-review-incorporated
+revision: v1.2-full-stack-overlay
 review_date: 2026-08-06
 inspected_branch: feat/top2-production-execution-cost-attribution-v1
 inspected_head: 849912d
@@ -14,6 +14,16 @@ inspected_head: 849912d
 
 # BoundFlow GPU 编译器加速诊断与执行计划 v1
 
+> **v1.2（2026-08-06）full-stack overlay**：NRIR49A/G1 的数据与冻结 artifact 保持有效，
+> 但它只关闭 **selected-CROWN-only incremental optimization**，不是 BoundFlow 从算子、
+> Bound/Graph IR、Plan/Schedule、JIT/cache、runtime scheduling 到 allocator/memory 的全栈上限。
+> 旧 G2—G4 保留为历史预注册与 gated 路线，不再是当前执行指令。当前唯一路线入口是
+> [BoundFlow Full-Stack GPU Baseline and Attribution v1 Plan](BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md)：
+> FSG0 schema/critical-path/replay合同已验证；当前下一步执行FSG1 official αβ-CROWN B0 full-stack
+> baseline。这不是重新寻找另一个单点 winner，也不产生任何 BoundFlow 性能主张。
+> 本文下方 G0—G8 正文作为 v1.0/v1.1 历史证据与门禁保留；与本修订冲突时，
+> 以 full-stack plan 为准。
+>
 > **v1.1（2026-08-06）评审修订**：新增G1 Amdahl反解与`>10x/INFEASIBLE` kill gate、公开可solve
 > workload、physical-memory reachability、RVIR same-solver主对照、GPU fallback、frontend coverage、
 > G2 timebox与GPU-context selector边界。修订前外部审计见
@@ -701,13 +711,20 @@ Planner policy或cache；所有门禁必须在查看candidate结果前冻结，G
 - 若目标RTX 4060 Laptop/8GB上没有可达的physical-memory admission，则该硬件的G8 memory path预先
   记为`N/A`，不等到G5才发现。
 
-`2026-08-06 FORMAL OUTCOME`：五个fresh-process worker的`s_queue/s_complete`中位=
+`2026-08-06 FORMAL OUTCOME — HISTORICAL SCOPE CORRECTED BY v1.2`：五个fresh-process worker的
+`s_queue/s_complete`中位=
 `0.0709863183/0.0705232890`，paired perturbation中位=`0.999304/1.006747`，故测量有效但20%机会
 门禁失败。queue `1.20x`与complete `1.15x`均超过Amdahl无限区域加速上限，required speedup为
 `INFEASIBLE`；最大allocated/reserved仅物理显存`0.996%/1.353%`，最大合法domain batch=1且无OOM，
-memory path=`N/A`。G1以`VALIDATED-NO-GO`关闭，G2—G4对selected-CROWN gated off；下一动作是重新
-归因GPU whole-queue winner，不启动TIR/JIT/融合实现。formal summary hash=`7eefe6a7…ab50`，
-`performance_claimed=false`。
+memory path=`N/A`。该结果以`VALIDATED-NO-GO(selected-CROWN-only incremental optimization)`
+关闭旧 G1 单点路线；旧 G2—G4 对 selected-CROWN 保持 gated，只作历史路线保留。formal
+summary hash=`7eefe6a7…ab50`，`performance_claimed=false`。
+
+artifact 中已冻结的 `next_route=gpu-winner-reselection` 是当时机器输出，不改写 payload、
+manifest 或 hash；但当前工程路线已由
+[full-stack plan](BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md)
+取代。FSG0 schema/critical-path/replay已关闭；下一步进入FSG1 official B0 full-stack baseline；
+不再重新挑选一个单点 winner，且FSG1不宣称 BoundFlow 性能。
 
 ### G2：资格审查并尝试接通现有 fused executor
 
@@ -1037,6 +1054,12 @@ recommended-first-experiment: ...
 - PR-12、IR-5、NRIR43/46/47的NO-GO是否完整保留。
 
 ## 16. 立即下一步
+
+【v1.2 当前路线覆盖】本节以下 G0/G1 指令是 v1.0/v1.1 的历史执行顺序，已完成其
+selected-CROWN-only 判定使命。当前唯一下一步是
+[full-stack plan](BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md)
+的FSG1 official B0 full-stack baseline；FSG0 schema/critical-path/replay合同已经验证关闭。FSG1只建立
+可审计B0基线，不宣称性能。
 
 本计划批准后，**只启动 G0，不直接写 TIR 或多流 runtime**：
 

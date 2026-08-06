@@ -9,6 +9,15 @@ stage: s01
 
 # BoundFlow NRIR49A G1 GPU Attribution v1 Changelog
 
+## 后续范围纠正（2026-08-06）
+
+本 changelog 与冻结 artifact 记录的数值和判定不变。这里的 `VALIDATED-NO-GO` 仅关闭
+selected-CROWN-only incremental G2/G3，不关闭 BoundFlow operator→IR→JIT→runtime→memory 的
+累计全栈路线；`1.076410x` 仅是把该实测单一区域降为零耗时的 deletion-only Amdahl 上限，不是
+BoundFlow 全栈上限。原 `gpu-winner-reselection` 是历史机器输出，当前路线已由
+[Full-Stack GPU Baseline and Attribution v1](BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md)
+取代。
+
 ## Summary
 
 - G0六项 CUDA门禁通过后启动 G1；
@@ -65,16 +74,20 @@ stage: s01
 - 使用与 floor相同的shared→objective root数学构造后直接进入冻结31-node queue；
 - chunk sweep仅为 harness override，禁止回写默认32；
 - semantic-valid domain batch当前上限1，禁止复制输入伪造memory pressure。
-- 按冻结门禁，selected-CROWN不是GPU winner，queue/complete目标均超过Amdahl无限加速上限；停止
-  G2/G3和selected-CROWN TIR实现，下一路线为`gpu-winner-reselection`。
+- 按冻结门禁，selected-CROWN不是GPU winner，queue/complete目标均超过该单一区域的 Amdahl
+  无限加速上限；停止 selected-CROWN-only incremental G2/G3 和该区域专属 TIR 实现。该决定不关闭
+  BoundFlow 全栈路线；`gpu-winner-reselection` 保留为冻结历史输出，当前路线由 Full-Stack 计划取代。
 
-## Follow-Ups
+## Follow-Ups（历史，已被取代）
 
 1. 提交G1 closure、回归与DocOps证据，交外部模型审计；
 2. 新开只读GPU whole-queue winner归因，不复活selected-CROWN G2/G3；
 3. 只有新winner通过独立share/Amdahl门禁后，才预注册下一优化变量。
 
+上述列表记录 G1 closure 当时的后续动作，不再是当前执行指令；当前应执行 Full-Stack 计划。
+
 ## Links
 
 - plan: [NRIR49A G1 plan](BOUNDFLOW_NRIR49A_G1_GPU_ATTRIBUTION_V1_PLAN_2026_08_06.md)
+- current route: [Full-Stack GPU Baseline and Attribution v1](BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md)
 - roadmap: [GPU compiler acceleration research v1.1](BOUNDFLOW_GPU_COMPILER_ACCELERATION_RESEARCH_V1_PLAN_2026_08_05.md)

@@ -9,6 +9,15 @@ stage: s01
 
 # BoundFlow NRIR49 G0 GPU Opportunity Admission v1 Changelog
 
+## 后续路线说明（2026-08-06）
+
+G0 数据、门禁和冻结 artifact 保持不变；`ready_for_g1` 是历史阶段状态。后续 G1 的
+`VALIDATED-NO-GO` 只关闭 selected-CROWN-only incremental G2/G3，不关闭 BoundFlow
+operator→IR→JIT→runtime→memory 的累计全栈路线。约 `1.0764x` 仅是该单一区域的 deletion-only
+Amdahl 上限，不是全栈上限；旧后续动作现已由
+[Full-Stack GPU Baseline and Attribution v1](BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md)
+取代。
+
 ## Summary
 
 - 启动 NRIR49 G0，新增 fail-closed admission runner/test/artifact；
@@ -52,15 +61,19 @@ stage: s01
 - independent competitor env 是公平对照的正式组成，禁止复用不兼容的 BoundFlow Torch env；
 - `mnistfc:2` 只负责 solveability admission，不作为性能调参样本；
 - 用户 `40x` 源码仍缺失，维持 `NOT-AUDITABLE-SOURCE-MISSING`；
-- G0 PASS 后只准入 G1 read-only profiling，仍不直接做 G2/G3/TIR。
+- G0 PASS 后当时只准入 G1 read-only profiling，仍不直接做 G2/G3/TIR；这是历史阶段边界，当前路线
+  已由 Full-Stack 计划取代。
 
-## Follow-Ups
+## Follow-Ups（历史，已被取代）
 
 1. 冻结 G1 profiling schema、measurement protocol 与量化 go/no-go 公式；
 2. 开始 selected-CROWN 的 read-only GPU cost attribution，不改默认配置；
 3. G1 数据冻结前不启动 G2/G3/TIR。
 
+上述动作已经完成其历史作用；selected-CROWN-only 路线关闭不传播为 BoundFlow 全栈 NO-GO。
+
 ## Links
 
 - plan: [G0 admission plan](BOUNDFLOW_NRIR49_G0_GPU_OPPORTUNITY_ADMISSION_V1_PLAN_2026_08_06.md)
+- current route: [Full-Stack GPU Baseline and Attribution v1](BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md)
 - roadmap: [GPU compiler acceleration research v1.1](BOUNDFLOW_GPU_COMPILER_ACCELERATION_RESEARCH_V1_PLAN_2026_08_05.md)

@@ -102,15 +102,22 @@
 > `1.023199/1.020221`。两条 clause 的 3/3 winner 均为 child refinement execute，queue share=
 > `32.1966%/31.1640%`；内部 selected-CROWN 占 parent=`71.7725%/72.7291%`，为唯一过门禁子类。
 > formal hash=`571c2e47…d177a4`，replay/tamper 通过。状态为 attribution `VALIDATED-REDUCED`，不是
-> speedup；全量 `996 passed, 37 skipped`。下一门禁只做 NRIR49 selected-CROWN execution，
-> ASPLOS-ready=NO。
+> speedup；全量 `996 passed, 37 skipped`。当时准入的下一门禁只做 NRIR49 selected-CROWN execution，
+> 该历史动作已由下段完成，不是当前指令；ASPLOS-ready=NO。
 
-> **2026-08-06 NRIR49A G1 GPU判定**：RTX 4060 Laptop五fresh workers的selected-CROWN
+> **2026-08-06 NRIR49A G1 GPU selected-CROWN-only Opportunity判定**：RTX 4060 Laptop五fresh workers的selected-CROWN
 > queue/complete share中位=`7.0986%/7.0523%`，paired perturbation中位=`0.999304/1.006747`。
 > 测量有效，但20%机会门槛失败；queue 1.20x和complete 1.15x均超过Amdahl无限加速上限。
 > 最大reserved仅1.353%物理显存，合法batch上限1、无OOM，memory path=`N/A`。summary hash=
-> `7eefe6a7…ab50`，replay/digest通过。G1以`VALIDATED-NO-GO`关闭，selected-CROWN G2/G3 gated off；
-> 下一动作重新选择GPU winner，不启动TIR/JIT/融合；ASPLOS-ready=NO。
+> `7eefe6a7…ab50`，replay/digest通过。G1以
+> `VALIDATED-NO-GO(selected-CROWN-only incremental optimization)`关闭，selected-CROWN G2/G3 gated off；
+> `1/(1-0.070986)=1.0764x`只是假设selected-CROWN region变为零耗时的deletion-only单区域上限，
+> 不是BoundFlow全栈上限；只停止selected-CROWN专属TIR/JIT/融合。正式artifact的
+> `next_route=gpu-winner-reselection`是冻结历史输出，已由
+> `gemini_doc/BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md`取代。FSG0
+> schema/replay合同已以19项定向测试和`1078 passed, 3 skipped`关闭；当前下一步为FSG1 official
+> original executor control full-stack trace。该阶段只建立B0分层基线，尚无BoundFlow全栈GPU性能
+> claim，ASPLOS-ready=NO。
 
 > **2026-08-04 NRIR-21 修订**：per-child exact-split objective refinement 的 IR/control、lineage
 > 与 replay 已实现，但固定 ResNet clauses 0/1 的最差 depth-2 leaf lower 相对 root-global 分别

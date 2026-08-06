@@ -3,8 +3,8 @@
 > 生效日期：2026-07-12
 > 当前 integration base：`331086d`（NRIR-39 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/nrir49-gpu-selected-crown-opportunity-v1@c4fd0bb`；G1 formal artifact已生成，
-> closure文档变更尚待提交
+> 当前研发分支：`feat/full-stack-gpu-baseline-attribution-v1`（基于NRIR49A closure `7836e11`）；
+> FSG0 full-stack scope/schema/replay已验证，当前下一步为FSG1 official control full-stack trace
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed
@@ -16,8 +16,9 @@
 > objective-ancestral queue（完成）→ child-budget Pareto（NO-GO）→ sibling-packed evaluator（完成）→
 > cross-clause anytime evaluator（完成）→ multi-clause anytime priority（NO-GO）→ shared parametric
 > objective evaluator（完成）→ full-frontier tightness attribution（NO-GO）→ objective-branch shared
-> evaluator（完成）→ NRIR48 CPU execution attribution（完成）→ NRIR49A GPU selected-CROWN
-> opportunity attribution（NO-GO）**。
+> evaluator（完成）→ NRIR48 CPU execution attribution（完成）→ NRIR49A GPU selected-CROWN-only
+> opportunity attribution（NO-GO）→ FSG0 full-stack scope/schema/replay（完成）→ FSG1 official control
+> full-stack trace（当前下一步）**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有
@@ -1706,9 +1707,10 @@ formal hash=`571c2e47c0c8906d2486e5e19e8152eb1ef0d3024b08cf561e25ed4f71d177a4`�
 顶层/内部闭合、6 profile rows replay、同步 category tamper 拒绝、全量 `996 passed, 37 skipped`
 与静态门禁通过。NRIR48 以 attribution
 `VALIDATED-REDUCED` 关闭，只证明 dominant cost 已缩小到 selected-CROWN execution，不是 speedup。
-下一单变量为 NRIR49 selected-CROWN execution，不再优化 validator、optimizer 或 queue bookkeeping。
+当时准入的下一单变量为 NRIR49 selected-CROWN execution，不再优化 validator、optimizer 或 queue
+bookkeeping；该历史动作已由下节完成，不是当前指令。
 
-## 62. NRIR49A G1 GPU Selected-CROWN Opportunity Attribution NO-GO
+## 62. NRIR49A G1 GPU Selected-CROWN-only Opportunity Attribution NO-GO
 
 G0 post-reboot六项CUDA门禁通过后，NRIR49A只读测量frozen clauses 2/3的GPU selected-CROWN；不改
 production runtime、TIR、kernel、default chunk、solver policy、target ledger或termination。正式协议为
@@ -1723,6 +1725,14 @@ production runtime、TIR、kernel、default chunk、solver policy、target ledge
 path=`N/A`。
 
 formal summary/manifest hash=`7eefe6a7…ab50`/`d0272fe4…c81f`；独立replay exit 0、stdout exact、
-所有payload与manifest digest重算吻合。NRIR49A G1以`VALIDATED-NO-GO`关闭；停止selected-CROWN
-G2/G3/TIR/JIT/融合，下一步重新归因GPU whole-queue winner。`performance_claimed=false`，公平竞品、
-multi-workload、solved verdict、memory headline与ASPLOS-ready仍未成立。
+所有payload与manifest digest重算吻合。NRIR49A G1以
+`VALIDATED-NO-GO(selected-CROWN-only incremental optimization)`关闭；只停止selected-CROWN专属
+G2/G3/TIR/JIT/融合。`1/(1-0.070986)=1.0764x`只是假设该region变为零耗时的deletion-only单区域
+上限，不是BoundFlow从operator、graph/IR、JIT、runtime schedule到allocator/memory的累计全栈上限。
+
+正式artifact中的`next_route=gpu-winner-reselection`为冻结历史机器输出，当前路线已由
+`gemini_doc/BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md`取代。FSG0的
+作用域/schema/feature activation/replay合同已以19项定向测试和`1078 passed, 3 skipped`关闭；当前执行
+FSG1 official original executor control full-stack trace。FSG1只建立B0分层基线，不能声称已有BoundFlow
+全栈性能。`performance_claimed=false`，公平竞品、multi-workload、solved verdict、memory headline与
+ASPLOS-ready仍未成立。

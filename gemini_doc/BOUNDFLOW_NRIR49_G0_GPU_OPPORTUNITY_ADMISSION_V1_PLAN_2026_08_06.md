@@ -9,6 +9,15 @@ stage: s01
 
 # BoundFlow NRIR49 G0 GPU Opportunity Admission v1
 
+## 后续路线说明（2026-08-06）
+
+G0 的环境准入结论与冻结 artifact 保持有效且不作修改。本文的 `ready_for_g1` 和“下一步 G1”是
+历史阶段状态：后续 NRIR49A G1 只对 selected-CROWN-only incremental G2/G3 作出
+`VALIDATED-NO-GO`，没有关闭 BoundFlow operator→IR→JIT→runtime→memory 的累计全栈路线。
+NRIR49A 所得约 `1.0764x` 也只是删除该单一区域的 Amdahl 上限，不是全栈上限。当前路线已由
+[Full-Stack GPU Baseline and Attribution v1](BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md)
+取代。
+
 ## 结论
 
 G0 已关闭：重启后 ASUS firmware 的 `dgpu_disable=0` 生效，NVIDIA driver、BoundFlow Torch、
@@ -117,7 +126,8 @@ BoundFlow 九个 clause 全部在 root 完成，整题为 `verified`；αβ-CROW
 5. **已完成**：重启使 `dgpu_disable=0` 生效，并生成 post-reboot artifact；
 6. **已完成**：`nvidia-smi`、BoundFlow PyTorch CUDA、TVM CUDA build/run、TVM-FFI stream、
    competitor PyTorch CUDA、同 GPU identity 与输入 digest smoke；
-7. **下一步**：冻结 G1 profiling schema/门槛并开始 read-only attribution；仍不直接做 TIR。
+7. **历史下一步（已完成并被取代）**：冻结 G1 profiling schema/门槛并开始 read-only attribution；
+   该单区域阶段已关闭，当前执行 Full-Stack 计划。
 
 ### Post-reboot 六项强制 CUDA smoke
 
@@ -202,4 +212,5 @@ conda run -n boundflow python scripts/run_nrir49_g0_cuda_smoke.py generate \
 ## Links
 
 - changelog: [G0 admission changelog](BOUNDFLOW_NRIR49_G0_GPU_OPPORTUNITY_ADMISSION_V1_CHANGELOG_2026_08_06.md)
+- current route: [Full-Stack GPU Baseline and Attribution v1](BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md)
 - roadmap: [GPU compiler acceleration research v1.1](BOUNDFLOW_GPU_COMPILER_ACCELERATION_RESEARCH_V1_PLAN_2026_08_05.md)

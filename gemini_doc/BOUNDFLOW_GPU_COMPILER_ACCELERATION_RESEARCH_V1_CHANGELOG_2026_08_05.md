@@ -1,14 +1,28 @@
 ---
-status: proposed
-updated: 2026-08-05T18:22:00Z
+status: superseded-by-full-stack-overlay
+updated: 2026-08-06T09:06:51Z
 type: changelog
 topic: boundflow
 slug: gpu-compiler-acceleration-research-v1
 stage: s01
-revision: v1.1-review-incorporated
+revision: v1.2-full-stack-overlay
 ---
 
 # BoundFlow GPU 编译器加速调研计划变更记录
+
+## 2026-08-06：v1.2 full-stack overlay
+
+- 保留 NRIR49A/G1 的全部数据、artifact 和 hash，但将 verdict 作用域精确收窄为
+  `VALIDATED-NO-GO(selected-CROWN-only incremental optimization)`；
+- 明确 `1.0764x` 只是 selected-CROWN deletion-only Amdahl 上限，不是算子→IR/图→
+  Plan/Schedule→JIT/cache→runtime→allocator/memory 的 BoundFlow 全栈上限；
+- 旧 G2—G4 保留为历史预注册与 gated 路线，不再作为当前执行指令；
+- 不改写冻结 artifact 中的 `next_route=gpu-winner-reselection`，但将其标记为已被
+  [full-stack plan](BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md)
+  取代的历史机器输出；
+- 唯一执行顺序改为：FSG0 schema/critical-path/replay合同→FSG1 official αβ-CROWN B0 full-stack
+  baseline；FSG0现已关闭，当前下一步为FSG1，不再重新寻找一个单点winner；
+- 本轮只修正路线和 claim 边界，不实现优化，不产生任何 BoundFlow GPU 性能主张。
 
 ## Summary
 
@@ -88,11 +102,11 @@ revision: v1.1-review-incorporated
 
 ## Follow-Ups
 
-1. 外部模型按代码所有权、数值/replay、benchmark公平性和研究新颖性四个角色审计主计划；
-2. 批准后只启动G0：在timebox内恢复/迁移GPU、定位用户BoundConv实现、审计frontend覆盖；
-3. 在任何正式运行前冻结G1字段、Amdahl公式、solved workload、memory envelope、baseline和kill gate；
-4. 只有G1证明selected-CROWN是GPU真实winner且latency或memory路径数学可达，才开始timeboxed G2/G3。
-5. 当前立即动作：正常重启后重跑 G0 v6 合同；重启前不进入 G1/TIR。
+1. FSG0 full-stack schema、critical-path/interaction聚合器、artifact replay与确定性测试已完成；
+2. 当前进入FSG1，在official αβ-CROWN control侧生成B0 full-stack baseline；
+3. B0只用于分层归因和后续same-solver A/B的公平分母，不宣称BoundFlow speedup；
+4. RVIR replacement correctness、B0/B1/B2 paired timing与B3—B7累计消融均按full-stack plan
+   的后续门禁执行；不恢复旧 G2—G4 单点路线。
 
 ## Links
 
@@ -100,3 +114,4 @@ revision: v1.1-review-incorporated
 - roadmap: [ASPLOS master plan](boundflow_asplos_master_plan_2026_07_12.md)
 - external audit: [GPU 编译计划 v1 外部审计](external_audit_gpu_compiler_plan_v1_2026_08_05.md)
 - G0 execution: [NRIR49 G0 GPU opportunity admission](BOUNDFLOW_NRIR49_G0_GPU_OPPORTUNITY_ADMISSION_V1_PLAN_2026_08_06.md)
+- current route: [Full-stack GPU baseline and attribution](BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md)
