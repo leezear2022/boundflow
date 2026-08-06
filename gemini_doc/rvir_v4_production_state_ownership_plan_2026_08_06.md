@@ -110,4 +110,21 @@ determinism设置。
   逐项一致性校验；
 - pre/post mutation receipt要求path集合、role/axes/shape/dtype均不漂移；tensor tamper和history
   mismatch均拒绝；
-- 6项定向单测通过；这只完成typed ownership合同，不代表真实V4-0 capture或backend已通过。
+- 11项定向单测通过；这只完成typed ownership合同，不代表backend已通过。
+
+## V4-0B Corrected Capture 实现记录
+
+- 新增`scripts/run_rvir_v4_production_state_capture.py`，同一真实GPU run同时观察
+  `BoundedModule.compute_bounds` call tree与`update_bounds_core(pre_result -> core_result)`；
+- 修正FSG2探针遗漏：beta phase只接受plural `node.sparse_betas`，真实run捕获6个
+  `SparseBeta.val/loc/sign`组；singular或只有空容器均fail closed；
+- 捕获input/spec/intermediate/decision-threshold、activation/start-node keyed alpha、domain/layer keyed
+  history、optimizer policy以及pre/post alpha/beta mutation；history的location/sign/bias/score/depth均进入
+  stable hash，ReLU隐式零bias仅在history bias逐项为0时允许省略tensor；
+- 诊断GPU run通过冻结门禁：24 calls=`12 initial + 1 alpha + 11 beta`，真实core=`1`，
+  history entries=`36`，beta value tensors=`6`，mutation receipts=`12`、changed=`7`；
+- capture只允许PyTorch `weights_only=True`安全加载；NumPy scalar在worker边界归一化为Python整数；
+- artifact replay会重建typed snapshot、重算tensor/snapshot/mutation/summary digest与JSON projections，
+  并验证代码来源；`performance_claimed=false`；
+- 本节数字来自正式生成前的诊断run。提交并冻结代码后还必须生成正式artifact和独立replay，
+  V4-0才可关闭；V4-1/V4-2/B2当前仍未准入。

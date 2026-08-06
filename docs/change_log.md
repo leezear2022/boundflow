@@ -4883,3 +4883,19 @@
 - `gemini_doc/BOUNDFLOW_NRIR49A_G1_GPU_ATTRIBUTION_V1_PLAN_2026_08_06.md`
 - `gemini_doc/BOUNDFLOW_NRIR49A_G1_GPU_ATTRIBUTION_V1_CHANGELOG_2026_08_06.md`
 - `gemini_doc/change_2026-08-06_nrir49a_g1_gpu_attribution_nogo.md`
+
+---
+
+## 2026-08-06：RVIR-v4 Corrected Production-State Capture 实现
+
+- 修正FSG2对singular beta字段的遗漏，生产capture只接受plural `node.sparse_betas`；
+- 新增start-node keyed alpha、SparseBeta val/loc/sign/bias、完整split history与optimizer policy的
+  digest-bound typed payload和pre/post mutation closure；
+- 同一真实GPU run观察24-call tree与`update_bounds_core`，诊断得到
+  `12 initial + 1 alpha + 11 beta`、1 core、36 history entries、6 beta tensors、12 mutation receipts；
+- `11 passed`、mypy clean、Pylint `10.00/10`，安全`weights_only=True`语义投影通过；
+- 当前仍是正式artifact生成前状态，V4-1/V4-2/B2均未准入，`performance_claimed=false`。
+
+**记录**
+- `gemini_doc/rvir_v4_production_state_ownership_plan_2026_08_06.md`
+- `gemini_doc/change_2026-08-06_rvir_v4_corrected_production_capture.md`

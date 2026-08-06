@@ -16,6 +16,8 @@ from boundflow.runtime.rvir_v4_production_state import (
     capture_module_alpha_beta_state_v4,
     capture_split_history_v4,
     diff_production_state_v4,
+    production_snapshot_from_payload_v4,
+    production_snapshot_to_payload_v4,
 )
 
 
@@ -106,6 +108,49 @@ def test_history_location_or_sign_mismatch_fails_closed() -> None:
         snapshot.validate()
 
 
+def test_empty_provider_history_bias_does_not_require_beta_bias_tensor() -> None:
+    node = _Node()
+    tensors = capture_module_alpha_beta_state_v4([node], require_beta=True)
+    history = capture_split_history_v4([{"relu0": ([], [], [])}])
+    snapshot = ProductionStateSnapshotV4(
+        snapshot_id="empty-history",
+        tensors=tensors,
+        history=history,
+        optimizer_policy=_policy(),
+    )
+
+    snapshot.validate()
+
+
+def test_zero_relu_history_bias_can_use_implicit_sparse_beta_zero() -> None:
+    node = _Node()
+    tensors = capture_module_alpha_beta_state_v4([node], require_beta=True)
+    history = capture_split_history_v4([{"relu0": ([4], [1.0], [0.0])}])
+    snapshot = ProductionStateSnapshotV4(
+        snapshot_id="implicit-zero-bias",
+        tensors=tensors,
+        history=history,
+        optimizer_policy=_policy(),
+    )
+
+    snapshot.validate()
+
+
+def test_nonzero_history_bias_requires_sparse_beta_bias_tensor() -> None:
+    node = _Node()
+    tensors = capture_module_alpha_beta_state_v4([node], require_beta=True)
+    history = capture_split_history_v4([{"relu0": ([4], [1.0], [0.25])}])
+    snapshot = ProductionStateSnapshotV4(
+        snapshot_id="missing-nonlinear-bias",
+        tensors=tensors,
+        history=history,
+        optimizer_policy=_policy(),
+    )
+
+    with pytest.raises(ValueError, match="SparseBeta/history content differs"):
+        snapshot.validate()
+
+
 def test_mutation_receipts_close_alpha_and_beta_values() -> None:
     before_node = _Node()
     after_node = _Node()
@@ -145,3 +190,22 @@ def test_mutation_schema_drift_is_rejected() -> None:
 
     with pytest.raises(ValueError, match="mutable tensor schema drift"):
         diff_production_state_v4(before, drifted)
+
+
+def test_plain_payload_roundtrip_and_digest_tamper() -> None:
+    snapshot = _snapshot(_Node(), snapshot_id="pre")
+    payload = production_snapshot_to_payload_v4(snapshot)
+
+    restored = production_snapshot_from_payload_v4(payload)
+
+    assert restored.stable_hash() == snapshot.stable_hash()
+    payload["snapshot_hash"] = "0" * 64
+    with pytest.raises(ValueError, match="payload hash differs"):
+        production_snapshot_from_payload_v4(payload)
+
+
+def test_history_score_and_depth_are_digest_bound() -> None:
+    entries = capture_split_history_v4([{"relu0": ([4], [1.0], [0.0], [0.75], [3.0])}])
+
+    assert entries[0].scores == (0.75,)
+    assert entries[0].depths == (3.0,)

@@ -10,7 +10,8 @@ from dataclasses import dataclass
 from enum import Enum
 import hashlib
 import json
-from typing import cast, Iterable, Mapping, Sequence
+from collections.abc import Callable
+from typing import Any, cast, Iterable, Mapping, Sequence
 
 import torch
 
@@ -49,6 +50,14 @@ class ProductionTensorOwnership(str, Enum):
 def _canonical_hash(value: object) -> str:
     encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False)
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def _encode_component(value: str) -> str:
+    return value.replace("%", "%25").replace("/", "%2F")
+
+
+def _decode_component(value: str) -> str:
+    return value.replace("%2F", "/").replace("%25", "%")
 
 
 def production_tensor_sha256(value: torch.Tensor) -> str:
@@ -146,17 +155,23 @@ class ProductionSplitHistoryEntryV4:
     locations: tuple[int, ...]
     coefficients: tuple[float, ...]
     biases: tuple[float, ...] | None = None
+    scores: tuple[float, ...] | None = None
+    depths: tuple[float, ...] | None = None
 
     def validate(self) -> None:
         if self.domain_ordinal < 0 or not self.layer_name:
             raise ValueError("RVIR-v4 split history identity differs")
-        if len(self.locations) != len(self.coefficients) or (
-            self.biases is not None and len(self.biases) != len(self.locations)
+        optional = (self.biases, self.scores, self.depths)
+        if len(self.locations) != len(self.coefficients) or any(
+            values is not None and len(values) != len(self.locations)
+            for values in optional
         ):
             raise ValueError("RVIR-v4 split history lengths differ")
         if any(location < 0 for location in self.locations):
             raise ValueError("RVIR-v4 split history location is negative")
-        values = self.coefficients + (() if self.biases is None else self.biases)
+        values = self.coefficients + tuple(
+            value for items in optional if items is not None for value in items
+        )
         if not all(torch.isfinite(torch.tensor(value)).item() for value in values):
             raise ValueError("RVIR-v4 split history is non-finite")
 
@@ -168,6 +183,8 @@ class ProductionSplitHistoryEntryV4:
             "locations": list(self.locations),
             "coefficients": list(self.coefficients),
             "biases": None if self.biases is None else list(self.biases),
+            "scores": None if self.scores is None else list(self.scores),
+            "depths": None if self.depths is None else list(self.depths),
         }
 
 
@@ -285,7 +302,9 @@ def _tensor_axes(prefix: Sequence[str], rank: int) -> tuple[str, ...]:
     )
 
 
-class _OwnershipBuilder:
+class ProductionStateBuilderV4:
+    """Build one snapshot while preserving provider tensor alias groups."""
+
     def __init__(self) -> None:
         self._aliases: dict[int, str] = {}
         self._tensors: list[OwnedProductionTensorV4] = []
@@ -329,7 +348,7 @@ def _mapping_items(value: object) -> Iterable[tuple[str, object]]:
 
 def capture_alpha_state_v4(
     alpha_by_layer: Mapping[str, Mapping[str, torch.Tensor]],
-    builder: _OwnershipBuilder,
+    builder: ProductionStateBuilderV4,
     *,
     ownership: ProductionTensorOwnership = ProductionTensorOwnership.MUTABLE_COPY_OUT,
 ) -> None:
@@ -342,7 +361,10 @@ def capture_alpha_state_v4(
             if not torch.is_tensor(value):
                 raise TypeError("RVIR-v4 alpha state must contain tensors")
             builder.add(
-                path=f"alpha/{layer_name}/{start_name}",
+                path=(
+                    f"alpha/{_encode_component(layer_name)}/"
+                    f"{_encode_component(start_name)}"
+                ),
                 role=ProductionTensorRole.ALPHA,
                 axes=_tensor_axes(
                     ("alpha_polarity", "start_spec", "domain"), value.ndim
@@ -354,7 +376,7 @@ def capture_alpha_state_v4(
 
 def capture_sparse_beta_state_v4(
     sparse_betas_by_layer: Mapping[str, object],
-    builder: _OwnershipBuilder,
+    builder: ProductionStateBuilderV4,
     *,
     ownership: ProductionTensorOwnership = ProductionTensorOwnership.MUTABLE_COPY_OUT,
 ) -> None:
@@ -380,7 +402,10 @@ def capture_sparse_beta_state_v4(
                     )
                 tensor = cast(torch.Tensor, value)
                 builder.add(
-                    path=f"beta/{layer_name}/{start_name}/{field_name}",
+                    path=(
+                        f"beta/{_encode_component(layer_name)}/"
+                        f"{_encode_component(start_name)}/{field_name}"
+                    ),
                     role=role,
                     axes=_tensor_axes(("domain", "history_slot"), tensor.ndim),
                     value=tensor,
@@ -399,7 +424,7 @@ def capture_module_alpha_beta_state_v4(
 ) -> tuple[OwnedProductionTensorV4, ...]:
     """Capture provider nodes and fail if plural SparseBeta ownership is omitted."""
 
-    builder = _OwnershipBuilder()
+    builder = ProductionStateBuilderV4()
     alpha: dict[str, Mapping[str, torch.Tensor]] = {}
     sparse_betas: dict[str, object] = {}
     for node in nodes:
@@ -415,16 +440,28 @@ def capture_module_alpha_beta_state_v4(
         capture_alpha_state_v4(alpha, builder)
     if sparse_betas:
         capture_sparse_beta_state_v4(sparse_betas, builder)
-    if require_beta and not sparse_betas:
+    result = builder.finish()
+    if require_beta and not any(
+        tensor.role == ProductionTensorRole.BETA_VALUE for tensor in result
+    ):
         raise ValueError(
             "RVIR-v4 beta phase omits provider node.sparse_betas plural state"
         )
-    return builder.finish()
+    return result
 
 
 def capture_split_history_v4(
     history: Sequence[Mapping[str, Sequence[object]]],
 ) -> tuple[ProductionSplitHistoryEntryV4, ...]:
+    def values(
+        raw_value: object, converter: Callable[[Any], object]
+    ) -> tuple[object, ...]:
+        if isinstance(raw_value, (str, bytes, Mapping)) or not isinstance(
+            raw_value, Iterable
+        ):
+            raise ValueError("RVIR-v4 provider split history values differ")
+        return tuple(converter(item) for item in raw_value)
+
     entries: list[ProductionSplitHistoryEntryV4] = []
     for domain_ordinal, domain in enumerate(history):
         for layer_name, raw in sorted(domain.items()):
@@ -432,19 +469,31 @@ def capture_split_history_v4(
                 raise ValueError("RVIR-v4 provider split history differs")
             raw_locations = raw[0]
             raw_coefficients = raw[1]
-            if not isinstance(raw_locations, Sequence) or not isinstance(
-                raw_coefficients, Sequence
-            ):
-                raise ValueError("RVIR-v4 provider split history values differ")
-            locations = tuple(int(item) for item in raw_locations)
-            coefficients = tuple(float(item) for item in raw_coefficients)
+            locations = cast(tuple[int, ...], values(raw_locations, int))
+            coefficients = cast(
+                tuple[float, ...],
+                values(raw_coefficients, float),
+            )
             raw_biases = None if len(raw) < 3 else raw[2]
-            if raw_biases is not None and not isinstance(raw_biases, Sequence):
-                raise ValueError("RVIR-v4 provider split history biases differ")
+            raw_scores = None if len(raw) < 4 else raw[3]
+            raw_depths = None if len(raw) < 5 else raw[4]
             biases = (
                 None
                 if raw_biases is None
-                else tuple(float(item) for item in raw_biases)
+                else cast(
+                    tuple[float, ...],
+                    values(raw_biases, float),
+                )
+            )
+            scores = (
+                None
+                if raw_scores is None
+                else cast(tuple[float, ...], values(raw_scores, float))
+            )
+            depths = (
+                None
+                if raw_depths is None
+                else cast(tuple[float, ...], values(raw_depths, float))
             )
             entry = ProductionSplitHistoryEntryV4(
                 domain_ordinal=domain_ordinal,
@@ -452,6 +501,8 @@ def capture_split_history_v4(
                 locations=locations,
                 coefficients=coefficients,
                 biases=biases,
+                scores=scores,
+                depths=depths,
             )
             entry.validate()
             entries.append(entry)
@@ -505,7 +556,7 @@ def validate_beta_history_consistency(
 
     entries = {(item.domain_ordinal, item.layer_name): item for item in history}
     groups = _beta_groups(tensors)
-    layers_with_beta = {prefix.split("/", 2)[1] for prefix in groups}
+    layers_with_beta = {_decode_component(prefix.split("/", 2)[1]) for prefix in groups}
     for (domain_ordinal, layer_name), entry in entries.items():
         if layer_name not in layers_with_beta:
             raise ValueError(
@@ -514,9 +565,10 @@ def validate_beta_history_consistency(
         layer_groups = [
             group
             for prefix, group in groups.items()
-            if prefix.split("/", 2)[1] == layer_name
+            if _decode_component(prefix.split("/", 2)[1]) == layer_name
         ]
         matched = False
+        candidates: list[str] = []
         for group in layer_groups:
             location = group[ProductionTensorRole.BETA_LOCATION].value
             sign = group[ProductionTensorRole.BETA_SIGN].value
@@ -524,6 +576,9 @@ def validate_beta_history_consistency(
                 domain_ordinal >= location.shape[0]
                 or len(entry.locations) > location.shape[1]
             ):
+                candidates.append(
+                    f"shape={tuple(location.shape)},history={len(entry.locations)}"
+                )
                 continue
             count = len(entry.locations)
             observed_locations = tuple(
@@ -532,26 +587,31 @@ def validate_beta_history_consistency(
             observed_signs = tuple(
                 float(item) for item in sign[domain_ordinal, :count].tolist()
             )
+            candidates.append(f"locations={observed_locations},signs={observed_signs}")
             if (
                 observed_locations != entry.locations
                 or observed_signs != entry.coefficients
             ):
                 continue
             bias_item = group.get(ProductionTensorRole.BETA_BIAS)
-            if entry.biases is not None:
+            if entry.biases:
                 if bias_item is None:
-                    continue
-                observed_biases = tuple(
-                    float(item)
-                    for item in bias_item.value[domain_ordinal, :count].tolist()
-                )
-                if observed_biases != entry.biases:
-                    continue
+                    if any(value != 0.0 for value in entry.biases):
+                        continue
+                else:
+                    observed_biases = tuple(
+                        float(item)
+                        for item in bias_item.value[domain_ordinal, :count].tolist()
+                    )
+                    if observed_biases != entry.biases:
+                        continue
             matched = True
             break
         if not matched:
             raise ValueError(
-                f"RVIR-v4 SparseBeta/history content differs: {domain_ordinal}/{layer_name}"
+                "RVIR-v4 SparseBeta/history content differs: "
+                f"{domain_ordinal}/{layer_name}; expected locations={entry.locations},"
+                f"signs={entry.coefficients}; candidates={candidates}"
             )
 
 
@@ -594,9 +654,122 @@ def diff_production_state_v4(
     return tuple(receipts)
 
 
+def production_snapshot_to_payload_v4(
+    snapshot: ProductionStateSnapshotV4,
+) -> dict[str, object]:
+    """Serialize a snapshot to a torch.save-compatible plain mapping."""
+
+    snapshot.validate()
+    return {
+        "schema_version": snapshot.schema_version,
+        "snapshot_id": snapshot.snapshot_id,
+        "tensors": [
+            tensor.metadata() | {"value": tensor.value.detach().cpu().clone()}
+            for tensor in snapshot.tensors
+        ],
+        "history": [entry.to_dict() for entry in snapshot.history],
+        "optimizer_policy": snapshot.optimizer_policy.to_dict(),
+        "snapshot_hash": snapshot.stable_hash(),
+    }
+
+
+def production_snapshot_from_payload_v4(
+    payload: Mapping[str, object],
+) -> ProductionStateSnapshotV4:
+    """Reconstruct and validate a snapshot from a plain artifact mapping."""
+
+    raw_tensors = payload.get("tensors")
+    raw_history = payload.get("history")
+    raw_policy = payload.get("optimizer_policy")
+    if (
+        not isinstance(raw_tensors, list)
+        or not isinstance(raw_history, list)
+        or not isinstance(raw_policy, Mapping)
+    ):
+        raise TypeError("RVIR-v4 snapshot payload structure differs")
+    tensors: list[OwnedProductionTensorV4] = []
+    for raw in raw_tensors:
+        if not isinstance(raw, Mapping) or not torch.is_tensor(raw.get("value")):
+            raise TypeError("RVIR-v4 snapshot tensor payload differs")
+        value = cast(torch.Tensor, raw["value"])
+        axes = raw.get("axes")
+        if not isinstance(axes, list) or not all(
+            isinstance(axis, str) for axis in axes
+        ):
+            raise TypeError("RVIR-v4 snapshot tensor axes payload differs")
+        tensor = OwnedProductionTensorV4(
+            semantic_path=str(raw.get("semantic_path", "")),
+            role=ProductionTensorRole(str(raw.get("role", ""))),
+            axes=tuple(axes),
+            value=value.detach().cpu().contiguous().clone(),
+            content_sha256=str(raw.get("content_sha256", "")),
+            source_device=str(raw.get("source_device", "")),
+            ownership=ProductionTensorOwnership(str(raw.get("ownership", ""))),
+            alias_group=str(raw.get("alias_group", "")),
+        )
+        tensor.validate()
+        tensors.append(tensor)
+    history: list[ProductionSplitHistoryEntryV4] = []
+    for raw in raw_history:
+        if not isinstance(raw, Mapping):
+            raise TypeError("RVIR-v4 snapshot history payload differs")
+        locations = raw.get("locations")
+        coefficients = raw.get("coefficients")
+        biases = raw.get("biases")
+        scores = raw.get("scores")
+        depths = raw.get("depths")
+        if (
+            not isinstance(locations, list)
+            or not isinstance(coefficients, list)
+            or (biases is not None and not isinstance(biases, list))
+            or (scores is not None and not isinstance(scores, list))
+            or (depths is not None and not isinstance(depths, list))
+        ):
+            raise TypeError("RVIR-v4 snapshot history values differ")
+        history.append(
+            ProductionSplitHistoryEntryV4(
+                domain_ordinal=int(raw.get("domain_ordinal", -1)),
+                layer_name=str(raw.get("layer_name", "")),
+                locations=tuple(int(item) for item in locations),
+                coefficients=tuple(float(item) for item in coefficients),
+                biases=(
+                    None if biases is None else tuple(float(item) for item in biases)
+                ),
+                scores=(
+                    None if scores is None else tuple(float(item) for item in scores)
+                ),
+                depths=(
+                    None if depths is None else tuple(float(item) for item in depths)
+                ),
+            )
+        )
+    policy = ProductionOptimizerPolicyV4(
+        iteration=int(raw_policy.get("iteration", -1)),
+        alpha_learning_rate=float(raw_policy.get("alpha_learning_rate", 0.0)),
+        beta_learning_rate=float(raw_policy.get("beta_learning_rate", 0.0)),
+        bound_lower=bool(raw_policy.get("bound_lower", False)),
+        bound_upper=bool(raw_policy.get("bound_upper", False)),
+        fix_intermediate_bounds=bool(raw_policy.get("fix_intermediate_bounds", False)),
+        deterministic=bool(raw_policy.get("deterministic", False)),
+        stop_criterion_id=str(raw_policy.get("stop_criterion_id", "")),
+    )
+    snapshot = ProductionStateSnapshotV4(
+        snapshot_id=str(payload.get("snapshot_id", "")),
+        tensors=tuple(tensors),
+        history=tuple(history),
+        optimizer_policy=policy,
+        schema_version=str(payload.get("schema_version", "")),
+    )
+    snapshot.validate()
+    if payload.get("snapshot_hash") != snapshot.stable_hash():
+        raise ValueError("RVIR-v4 snapshot payload hash differs")
+    return snapshot
+
+
 __all__ = [
     "RVIR_V4_STATE_SCHEMA_VERSION",
     "OwnedProductionTensorV4",
+    "ProductionStateBuilderV4",
     "ProductionOptimizerPolicyV4",
     "ProductionSplitHistoryEntryV4",
     "ProductionStateMutationV4",
@@ -608,6 +781,8 @@ __all__ = [
     "capture_sparse_beta_state_v4",
     "capture_split_history_v4",
     "diff_production_state_v4",
+    "production_snapshot_from_payload_v4",
+    "production_snapshot_to_payload_v4",
     "production_tensor_sha256",
     "validate_beta_history_consistency",
 ]
