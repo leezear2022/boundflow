@@ -1,8 +1,9 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
-> 状态日期：2026-08-05
+> 状态日期：2026-08-06
 > 当前 integration base：`f194034`（NRIR-44 PR #55 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
-> 当前研发分支：`feat/root-projection-floor-schedule-v1`
+> 当前研发分支：`feat/nrir49-gpu-selected-crown-opportunity-v1@c4fd0bb`；G1 formal artifact已在该源码
+> revision生成，closure文档变更尚待提交
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
@@ -1263,3 +1264,21 @@ percentage points 且稳定超过 pooled MAD。
 
 NRIR48 attribution `VALIDATED-REDUCED`；未实现优化、没有 speedup claim。下一步只允许另立 NRIR49
 selected-CROWN execution 单变量。
+
+## 51. 2026-08-06 NRIR49A G1 GPU Attribution 判定
+
+G0 post-reboot已确认RTX 4060 Laptop、Torch CUDA 13.2/SM89、TVM CUDA TIR、TVM-FFI stream与
+双方workload digest门禁通过。NRIR49A随后只读执行frozen clauses 2/3、31-node production queue；
+production runtime、TIR、kernel与默认chunk 32均未修改。
+
+五个fresh worker全部成功，queue/complete selected-CROWN share中位=
+`0.07098631834282758/0.070523288963519`；paired profile/control ratio中位=
+`0.999304435327957/1.0067470427656482`，测量门禁通过。60组离散结构exact，数值最大
+absolute/relative diff=`2.288818359375e-05/0.0001710717646052519 <=2e-4`。代表调用CUPTI记录
+5954 kernels、5486 launches、398 sync和5364 memory events。
+
+selected-CROWN share低于20%，queue `1.20x`和complete `1.15x`目标均超过Amdahl无限区域加速
+上限；最大allocated/reserved只占8 GiB物理显存`0.996%/1.353%`，合法domain batch上限1且无OOM，
+memory path=`N/A`。summary/manifest hash=`7eefe6a7…ab50`/`d0272fe4…c81f`，独立replay与digest
+重算通过。NRIR49A G1为`VALIDATED-NO-GO`，selected-CROWN G2/G3 gated off；下一步重新归因GPU
+whole-queue winner，不启动selected-CROWN TIR/JIT/融合。ASPLOS-ready仍为NO。

@@ -4761,3 +4761,22 @@
 **记录**
 - `gemini_doc/BOUNDFLOW_NRIR49_G0_GPU_OPPORTUNITY_ADMISSION_V1_PLAN_2026_08_06.md`
 - `gemini_doc/BOUNDFLOW_NRIR49_G0_GPU_OPPORTUNITY_ADMISSION_V1_CHANGELOG_2026_08_06.md`
+
+---
+
+## 2026-08-06：NRIR49A G1 GPU Selected-CROWN Attribution NO-GO
+
+- RTX 4060 Laptop上完成clauses 2/3五fresh workers、五chunk Latin sweep与paired default32 control；
+- selected-CROWN queue/complete share中位=`7.0986%/7.0523%`，profile/control perturbation中位=
+  `0.999304/1.006747`；
+- 20%机会门槛失败，queue 1.20x与complete 1.15x目标均超过Amdahl无限区域加速上限；
+- 最大allocated/reserved仅占物理显存`0.996%/1.353%`，合法batch上限1、无OOM，memory path=`N/A`；
+- 60组结构exact，数值差异在预注册`2e-4`内；summary/manifest hash=`7eefe6a7…ab50`/
+  `d0272fe4…c81f`，独立replay与digest重算通过；
+- G1以`VALIDATED-NO-GO`关闭，selected-CROWN G2/G3 gated off；下一步重新归因GPU winner，
+  `performance_claimed=false`。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_NRIR49A_G1_GPU_ATTRIBUTION_V1_PLAN_2026_08_06.md`
+- `gemini_doc/BOUNDFLOW_NRIR49A_G1_GPU_ATTRIBUTION_V1_CHANGELOG_2026_08_06.md`
+- `gemini_doc/change_2026-08-06_nrir49a_g1_gpu_attribution_nogo.md`

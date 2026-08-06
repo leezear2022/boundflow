@@ -16,12 +16,15 @@ NRIR48 归因重新审查 CUDA/TIR、selected-CROWN 流程融合、physical aren
 multi-stream、JIT/CUDA Graph 与 same-solver E2E；状态为 `proposed/research-only`，没有新增性能 claim。
 v1.1已把Amdahl反解、可solve workload、memory可达性、RVIR same-solver主对照、GPU fallback与frontend
 coverage前移到G0/G1。
-G0 已关闭并准入 G1；当前执行
-`gemini_doc/BOUNDFLOW_NRIR49A_G1_GPU_ATTRIBUTION_V1_PLAN_2026_08_06.md`，只做 fixed
-ResNet2B clauses 2/3 的 GPU selected-CROWN attribution、Amdahl反解与physical-memory admission，
-不修改 TIR/default policy）。配套变更记录：
+G0 已关闭并准入 G1；G1现已按预注册门禁以`VALIDATED-NO-GO`关闭：fixed ResNet2B clauses 2/3
+五fresh GPU worker测得selected-CROWN queue/complete share中位=`7.0986%/7.0523%`，低于20%机会
+门槛且Amdahl目标不可达；最大reserved仅1.353%物理显存，memory path=`N/A`。因此停止
+selected-CROWN G2/G3/TIR，下一步重新归因GPU winner。正式入口为
+`gemini_doc/BOUNDFLOW_NRIR49A_G1_GPU_ATTRIBUTION_V1_PLAN_2026_08_06.md`，summary hash=
+`7eefe6a7…ab50`，不是speedup claim）。配套变更记录：
 `gemini_doc/BOUNDFLOW_GPU_COMPILER_ACCELERATION_RESEARCH_V1_CHANGELOG_2026_08_05.md`；修订前外部审计：
 `gemini_doc/external_audit_gpu_compiler_plan_v1_2026_08_05.md`（`approve-with-minor`，唯一M-1已修正）。
+G1 closure变更记录：`gemini_doc/change_2026-08-06_nrir49a_g1_gpu_attribution_nogo.md`。
 
 G0 关闭入口：
 `gemini_doc/BOUNDFLOW_NRIR49_G0_GPU_OPPORTUNITY_ADMISSION_V1_PLAN_2026_08_06.md`。post-reboot v2

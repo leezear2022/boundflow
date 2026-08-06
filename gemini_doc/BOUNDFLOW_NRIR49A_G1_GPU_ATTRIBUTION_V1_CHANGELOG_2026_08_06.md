@@ -1,6 +1,6 @@
 ---
-status: implementation-ready-formal-run-pending
-updated: 2026-08-06T06:31:05Z
+status: validated-no-go
+updated: 2026-08-06T07:59:16Z
 type: changelog
 topic: boundflow
 slug: nrir49a-g1-gpu-attribution-v1
@@ -12,7 +12,9 @@ stage: s01
 ## Summary
 
 - G0六项 CUDA门禁通过后启动 G1；
-- 正式性能结果尚未运行，所有 opportunity/Amdahl/memory门槛已预注册；
+- 五个 fresh GPU worker与9文件artifact/replay已完成；
+- selected-CROWN GPU queue share中位仅`7.0986% <20%`，latency Amdahl目标不可达，physical-memory
+  admission亦未成立，G1以`VALIDATED-NO-GO`关闭；
 - 本阶段只做 profiler与只读归因，不改 production TIR/kernel/default policy。
 
 ## Changes
@@ -48,6 +50,14 @@ stage: s01
   float diff=`1.52587890625e-05`，最大relative diff=`1.710717646052519e-04`，均低于原冻结`2e-4`；
   差异仅在raw浮点及其alpha/beta/bounds/score派生hash。实现改为结构exact+逐叶finite/tolerance双门禁，
   同时保存并绑定完整raw payload hash与派生hash差异计数；门槛和production均未改变。
+- retry-3以user systemd unit完成5/5 fresh workers，exit 0、wall 30分54秒、主机峰值2.1 GiB；正式
+  queue share中位=`0.0709863183`、complete share中位=`0.0705232890`，paired perturbation中位=
+  `0.999304/1.006747`，60组结构exact且数值最大absolute/relative diff=
+  `2.288818359375e-05/1.710717646052519e-04`。
+- 最大allocated/reserved仅占物理显存`0.996%/1.353%`，合法domain batch上限1、无OOM；memory path=
+  `N/A`。CUPTI代表调用含5954 kernels、5486 launches、398 sync与5364 memory events。
+- artifact summary/manifest hash=`7eefe6a7…ab50`/`d0272fe4…c81f`；独立replay exit 0、stdout exact，
+  文件digest与manifest hash独立重算通过；5 raw/50 normalized/2 query/0 failure rows。
 
 ## Decisions
 
@@ -55,12 +65,14 @@ stage: s01
 - 使用与 floor相同的shared→objective root数学构造后直接进入冻结31-node queue；
 - chunk sweep仅为 harness override，禁止回写默认32；
 - semantic-valid domain batch当前上限1，禁止复制输入伪造memory pressure。
+- 按冻结门禁，selected-CROWN不是GPU winner，queue/complete目标均超过Amdahl无限加速上限；停止
+  G2/G3和selected-CROWN TIR实现，下一路线为`gpu-winner-reselection`。
 
 ## Follow-Ups
 
-1. 重启后复核`dgpu_disable=0`、NVIDIA PCI/module/device、`nvidia-smi`与Torch CUDA；
-2. 运行五轮formal矩阵并生成/replay artifact；
-3. 按冻结门槛选择 G2、memory-only或 NO-GO。
+1. 提交G1 closure、回归与DocOps证据，交外部模型审计；
+2. 新开只读GPU whole-queue winner归因，不复活selected-CROWN G2/G3；
+3. 只有新winner通过独立share/Amdahl门禁后，才预注册下一优化变量。
 
 ## Links
 

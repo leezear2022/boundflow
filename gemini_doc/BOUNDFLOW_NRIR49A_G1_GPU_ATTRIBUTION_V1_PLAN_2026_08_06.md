@@ -1,6 +1,6 @@
 ---
-status: implementation-ready-formal-run-pending
-updated: 2026-08-06T06:31:05Z
+status: validated-no-go
+updated: 2026-08-06T07:59:16Z
 type: plan
 topic: boundflow
 slug: nrir49a-g1-gpu-attribution-v1
@@ -195,12 +195,32 @@ payload与manifest digest，修改 share、target ledger、node count或decision
 - full `pytest tests`；Black、mypy、Pylint；`git diff --check`；
 - DocOps performance规则：正式结果至少5 repeats；unit/single probe不支持性能 claim。
 
-当前 runner合同已通过8项单测、Black、mypy与Pylint 10.00/10。第一次正式worker尚未形成结果：两次
-前台执行被Codex自动续轮回收；随后主机重启后固件状态为`dgpu_disable=1`，RTX 4060从PCI和
-`/dev/nvidia*`消失。2026-08-06已执行`asusctl armoury set dgpu_disable 0`，`asusd`日志确认
-`Queueing GPU attribute dgpu_disable = 0 for delayed apply`；保留`gpu_mux_mode=1`(Optimus/Hybrid)，
-下一次重启已于2026-08-06 14:29 CST应用：NVIDIA PCI/driver/device、`nvidia-smi`和Torch CUDA六项
-复核通过，只有7 MiB桌面合成器。上述中断轮均无worker JSON，不进入统计；接下来启动5轮formal矩阵。
+## Formal Closure
+
+2026-08-06 15:25—15:56 CST 在 RTX 4060 Laptop 8 GiB 上完成五个 fresh worker；Latin chunk顺序、
+clauses 2/3、31 nodes/15 sibling groups/depth 4 与 default chunk 32 均按冻结合同执行。正式服务 exit 0，
+五个 worker 全部通过 envelope、源码修订、结构语义、逐叶 finite/tolerance 与 worker hash 门禁；
+`failure_rows.jsonl` 为0行。代表性真实 child selected-CROWN 调用的 CUPTI 证据包含5954个kernel、
+5486次runtime launch、398次同步与5364个memory event，且不进入 timing summary。
+
+五轮 queue share=`[0.0706513,0.0714660,0.0710831,0.0708815,0.0709863]`，中位数=
+`0.0709863183`；complete share中位数=`0.0705232890`。两条 clause 的 paired profile/control wall
+ratio中位数=`0.999304/1.006747 <=1.05`，故 attribution可审计。60组结构exact；raw GPU数值最大
+absolute/relative diff=`2.288818359375e-05/1.710717646052519e-04`，均低于预注册`2e-4`，并保留
+33877个数值派生hash差异与完整raw payload hash。
+
+`s_queue=7.10% <20%`，selected-CROWN不是GPU winner。queue `1.20x`和complete `1.15x`目标均超过
+对应Amdahl无限加速上限，因此`r_queue_required/r_complete_required/r_latency_required=null`，
+latency路线不可达。最大allocated/reserved仅占物理显存`0.996%/1.353%`，最大合法domain batch=1、
+无OOM，故physical-memory admission失败且该硬件的G8 memory path=`N/A`。按预注册规则，G1以
+`VALIDATED-NO-GO`关闭，停止selected-CROWN G2/G3，不启动TIR实现，下一步重新做GPU winner归因。
+
+正式 artifact 位于
+`artifacts/nrir49a-g1-gpu-attribution/resnet2b-prop0-clauses2-3-rtx4060-five-repeat-v1/`；
+summary hash=`7eefe6a716fa57874420bcda64487ad02578dae5926fc99426eaaef37d35ab50`，manifest hash=
+`d0272fe431d68ba93ef17a69fe7bf9b7ef71c7ab02041680720e65fadd86c81f`。独立 replay exit 0、stdout
+逐字一致，8个payload SHA256与manifest hash均独立重算吻合。`performance_claimed=false`；本结论
+不是speedup、竞品比较、多workload、solved verdict、memory headline或ASPLOS-ready claim。
 
 ## Rollback
 

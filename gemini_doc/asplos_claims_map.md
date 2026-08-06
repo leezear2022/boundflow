@@ -13,7 +13,9 @@
 > domain-axis execution。NRIR-34 已进一步加入 same-parent sibling-group Plan/Task/Schedule 与 packed
 > dynamic queue；NRIR-35 又以一等六阶段 IR 先执行九子句 floor，再用相同 global start 对 clause 0
 > 做 additive packed work。三轮均保留 9/9 original-ordinal accounting，但仍 9/9 unresolved，故
-> ASPLOS-ready No-Go 不变。
+> ASPLOS-ready No-Go 不变。2026-08-06 NRIR49A又证明CPU侧selected-CROWN winner在RTX 4060 GPU
+> queue/complete中只占约7.10%/7.05%，Amdahl与physical-memory门禁均失败，selected-CROWN G2/G3
+> 已gated off。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
@@ -1379,3 +1381,19 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   全量 `996 passed, 37 skipped`；attribution `VALIDATED-REDUCED` 不是 speedup，不外推 GPU、
   competitor、multi-workload、property closure 或 ASPLOS-ready；下一路线仅为 NRIR49 selected-CROWN
   execution。
+
+### NRIR-49A（G1 NO-GO）：GPU Selected-CROWN Opportunity Attribution v1
+
+- `C3-D-NRIR49A`：additive read-only runner在RTX 4060 Laptop上执行clauses 2/3、五fresh workers、
+  五chunk Latin sweep与paired default32 control；production runtime/TIR/kernel/default policy未修改；
+- `C3-G-NRIR49A`：5/5 worker envelope/hash通过，60组离散结构exact，数值最大absolute/relative diff=
+  `2.288818359375e-05/1.710717646052519e-04 <=2e-4`；profile/control ratio中位=
+  `0.999304/1.006747 <=1.05`；代表调用CUPTI含5954 kernels/5486 launches/398 sync/5364 memory events；
+- `C3-E-NRIR49A-NOGO`：queue/complete selected-CROWN share中位=
+  `0.0709863183/0.0705232890`，queue机会门槛`>=0.20`失败，queue `1.20x`与complete `1.15x`
+  Amdahl目标均不可达；最大allocated/reserved比例=`0.009964/0.013530`、合法batch上限1、无OOM，
+  physical-memory path=`N/A`；
+- `C3-L-NRIR49A`：summary/manifest hash=`7eefe6a7…ab50`/`d0272fe4…c81f`；5 raw/50 normalized/
+  2 query/0 failure rows，独立replay stdout与所有digest重算通过。G1 `VALIDATED-NO-GO`，
+  selected-CROWN G2/G3 gated off，下一路线=`gpu-winner-reselection`；`performance_claimed=false`，
+  不构成speedup、competitor、multi-workload、solved verdict、memory headline或ASPLOS-ready claim。

@@ -3,7 +3,8 @@
 > 生效日期：2026-07-12
 > 当前 integration base：`331086d`（NRIR-39 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/objective-branch-whole-query-formal-v1`
+> 当前研发分支：`feat/nrir49-gpu-selected-crown-opportunity-v1@c4fd0bb`；G1 formal artifact已生成，
+> closure文档变更尚待提交
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed
@@ -15,7 +16,8 @@
 > objective-ancestral queue（完成）→ child-budget Pareto（NO-GO）→ sibling-packed evaluator（完成）→
 > cross-clause anytime evaluator（完成）→ multi-clause anytime priority（NO-GO）→ shared parametric
 > objective evaluator（完成）→ full-frontier tightness attribution（NO-GO）→ objective-branch shared
-> evaluator（完成）**。
+> evaluator（完成）→ NRIR48 CPU execution attribution（完成）→ NRIR49A GPU selected-CROWN
+> opportunity attribution（NO-GO）**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有
@@ -1705,3 +1707,22 @@ formal hash=`571c2e47c0c8906d2486e5e19e8152eb1ef0d3024b08cf561e25ed4f71d177a4`�
 与静态门禁通过。NRIR48 以 attribution
 `VALIDATED-REDUCED` 关闭，只证明 dominant cost 已缩小到 selected-CROWN execution，不是 speedup。
 下一单变量为 NRIR49 selected-CROWN execution，不再优化 validator、optimizer 或 queue bookkeeping。
+
+## 62. NRIR49A G1 GPU Selected-CROWN Opportunity Attribution NO-GO
+
+G0 post-reboot六项CUDA门禁通过后，NRIR49A只读测量frozen clauses 2/3的GPU selected-CROWN；不改
+production runtime、TIR、kernel、default chunk、solver policy、target ledger或termination。正式协议为
+五fresh workers、chunk `8/16/128/32/64` Latin轮转、paired default32 control和一个排除在timing外的
+真实child CUPTI profile。
+
+正式5/5 worker通过hash/envelope；60组离散结构exact，raw浮点最大absolute/relative diff=
+`2.288818359375e-05/1.710717646052519e-04 <=2e-4`。两条clause profiler/control ratio中位=
+`0.999304/1.006747 <=1.05`。selected-CROWN queue/complete share中位仅=
+`7.0986%/7.0523%`：低于20%机会门槛，且queue `1.20x`、complete `1.15x`均超过Amdahl无限区域
+加速上限。最大allocated/reserved仅物理显存`0.996%/1.353%`，合法batch上限1、无OOM，memory
+path=`N/A`。
+
+formal summary/manifest hash=`7eefe6a7…ab50`/`d0272fe4…c81f`；独立replay exit 0、stdout exact、
+所有payload与manifest digest重算吻合。NRIR49A G1以`VALIDATED-NO-GO`关闭；停止selected-CROWN
+G2/G3/TIR/JIT/融合，下一步重新归因GPU whole-queue winner。`performance_claimed=false`，公平竞品、
+multi-workload、solved verdict、memory headline与ASPLOS-ready仍未成立。

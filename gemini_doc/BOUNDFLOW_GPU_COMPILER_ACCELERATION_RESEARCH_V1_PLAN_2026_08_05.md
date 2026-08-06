@@ -701,6 +701,14 @@ Planner policy或cache；所有门禁必须在查看candidate结果前冻结，G
 - 若目标RTX 4060 Laptop/8GB上没有可达的physical-memory admission，则该硬件的G8 memory path预先
   记为`N/A`，不等到G5才发现。
 
+`2026-08-06 FORMAL OUTCOME`：五个fresh-process worker的`s_queue/s_complete`中位=
+`0.0709863183/0.0705232890`，paired perturbation中位=`0.999304/1.006747`，故测量有效但20%机会
+门禁失败。queue `1.20x`与complete `1.15x`均超过Amdahl无限区域加速上限，required speedup为
+`INFEASIBLE`；最大allocated/reserved仅物理显存`0.996%/1.353%`，最大合法domain batch=1且无OOM，
+memory path=`N/A`。G1以`VALIDATED-NO-GO`关闭，G2—G4对selected-CROWN gated off；下一动作是重新
+归因GPU whole-queue winner，不启动TIR/JIT/融合实现。formal summary hash=`7eefe6a7…ab50`，
+`performance_claimed=false`。
+
 ### G2：资格审查并尝试接通现有 fused executor
 
 目标：隔离“缺少 backend wiring”“现有数学不覆盖 split state”和“kernel本身不合适”。

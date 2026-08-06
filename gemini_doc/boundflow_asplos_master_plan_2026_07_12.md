@@ -105,6 +105,13 @@
 > speedup；全量 `996 passed, 37 skipped`。下一门禁只做 NRIR49 selected-CROWN execution，
 > ASPLOS-ready=NO。
 
+> **2026-08-06 NRIR49A G1 GPU判定**：RTX 4060 Laptop五fresh workers的selected-CROWN
+> queue/complete share中位=`7.0986%/7.0523%`，paired perturbation中位=`0.999304/1.006747`。
+> 测量有效，但20%机会门槛失败；queue 1.20x和complete 1.15x均超过Amdahl无限加速上限。
+> 最大reserved仅1.353%物理显存，合法batch上限1、无OOM，memory path=`N/A`。summary hash=
+> `7eefe6a7…ab50`，replay/digest通过。G1以`VALIDATED-NO-GO`关闭，selected-CROWN G2/G3 gated off；
+> 下一动作重新选择GPU winner，不启动TIR/JIT/融合；ASPLOS-ready=NO。
+
 > **2026-08-04 NRIR-21 修订**：per-child exact-split objective refinement 的 IR/control、lineage
 > 与 replay 已实现，但固定 ResNet clauses 0/1 的最差 depth-2 leaf lower 相对 root-global 分别
 > 退化 `0.847961/0.936646`，故该策略 `VALIDATED-NO-GO`。下一方法门禁是把祖先已证明 refined
