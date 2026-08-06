@@ -4895,6 +4895,9 @@
   `12 initial + 1 alpha + 11 beta`、1 core、36 history entries、6 beta tensors、12 mutation receipts；
 - `11 passed`、mypy clean、Pylint `10.00/10`，安全`weights_only=True`语义投影通过；
 - 当前仍是正式artifact生成前状态，V4-1/V4-2/B2均未准入，`performance_claimed=false`。
+- 正式artifact已绑定`6ecab7c`，summary/manifest hash=`86d3365c…a2ff2`/
+  `d8fe50fd…2deb4`；原样replay与外层digest重签后的tensor tamper拒绝均通过；
+- V4-0以`VALIDATED-CORRECTED-CAPTURE`关闭，V4-1准入；V4-2/B2仍关闭。
 
 **记录**
 - `gemini_doc/rvir_v4_production_state_ownership_plan_2026_08_06.md`

@@ -1,0 +1,1 @@
+{"call_count":24,"core_count":1,"evidence_status":"validated_corrected_capture","performance_claimed":false,"status":"replay-passed","summary_hash":"86d3365c929ded94069a6eab10cbe2a1b55327b369005de302f093b01b6a2ff2"}

@@ -42,3 +42,13 @@ ownership与可重放捕获，不做性能比较，也不宣称BoundFlow已经�
 当前实现和诊断已通过，但正式artifact必须等代码提交、source provenance可冻结后再生成。因此本修改提交
 本身不关闭V4-0，不准入V4-1、V4-2或B2 timing。下一动作是从clean committed code生成正式artifact，
 执行原样replay和篡改拒绝探针，再更新closure文档。
+
+## 正式 Closure
+
+- code source=`6ecab7c68b56734831a297eeef487234e622a43a`；
+- artifact=`artifacts/rvir-v4-production-state/resnet2b-core-capture-v1`；
+- summary hash=`86d3365c929ded94069a6eab10cbe2a1b55327b369005de302f093b01b6a2ff2`；
+- manifest hash=`d8fe50fd82b3eff461b56f9ad9209ab7ab665f796c4f0ea926ee14f6cdb2deb4`；
+- 原样replay通过；同步重签外层capture digest和manifest hash的tensor tamper仍被内部content hash拒绝；
+- V4-0以`VALIDATED-CORRECTED-CAPTURE`关闭，V4-1 frozen-state evaluation准入；
+- V4-2 optimizer replacement和B2 same-solver timing仍未准入，性能claim保持false。

@@ -128,3 +128,18 @@ determinism设置。
   并验证代码来源；`performance_claimed=false`；
 - 本节数字来自正式生成前的诊断run。提交并冻结代码后还必须生成正式artifact和独立replay，
   V4-0才可关闭；V4-1/V4-2/B2当前仍未准入。
+
+## V4-0 Closure
+
+状态：`VALIDATED-CORRECTED-CAPTURE`，V4-0关闭，V4-1准入。
+
+- source commit=`6ecab7c68b56734831a297eeef487234e622a43a`；
+- artifact=`artifacts/rvir-v4-production-state/resnet2b-core-capture-v1`；
+- summary hash=`86d3365c…a2ff2`，manifest hash=`d8fe50fd…2deb4`；
+- 正式GPU run与诊断结构一致：24 calls、1 core、36 history entries、6 beta value tensors、
+  12 mutation receipts、7 changed mutations；
+- 原样semantic replay=`replay-passed`；payload tensor被修改且外层file/manifest digest同步重签后，
+  replay仍因内部tensor content hash失败；
+- 全量回归=`1118 passed, 3 skipped`；新增artifact replay/tamper focused tests另为`2 passed`；
+- V4-0只证明修正后的production-state ownership/capture/replay，尚未证明BoundFlow evaluator或
+  optimizer replacement。V4-1只允许消费冻结post α/β/split state复算lower；V4-2与B2仍关闭。
