@@ -12,8 +12,9 @@
 
 当前权威研究入口：
 `gemini_doc/BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md`。FSG0 的作用域
-纠正、全栈 schema、feature activation ledger 与 replay 合同已以19项定向测试和
-`1078 passed, 3 skipped`全量回归关闭。当前下一步 FSG1：对 official original executor 采集
+纠正、全栈 schema、feature activation ledger 与 replay 合同已以20项定向测试和
+`1079 passed, 3 skipped`全量回归关闭；外部审计三项minor亦已修复。当前下一步 FSG1：对
+official original executor 采集
 operator→graph/IR→JIT→runtime schedule→allocator/memory 的 control full-stack trace。FSG1 只建立
 B0 分层基线，尚不能声称 BoundFlow 已有全栈 GPU speedup。
 

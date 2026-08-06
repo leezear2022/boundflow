@@ -5,6 +5,7 @@
 from dataclasses import replace
 import json
 from pathlib import Path
+from typing import cast
 
 import pytest
 
@@ -139,8 +140,9 @@ def test_full_stack_summary_separates_gpu_sum_union_and_critical_path() -> None:
     assert summary["gpu_sum_ns"] == 80
     assert summary["gpu_union_ns"] == 60
     assert summary["gpu_overlap_ns"] == 20
-    assert summary["layer_ns"][StackLayer.OPERATOR_EXECUTION.value] == 40
-    assert summary["layer_ns"][StackLayer.RUNTIME_SCHEDULE.value] == 20
+    layer_ns = cast(dict[str, int], summary["layer_ns"])
+    assert layer_ns[StackLayer.OPERATOR_EXECUTION.value] == 40
+    assert layer_ns[StackLayer.RUNTIME_SCHEDULE.value] == 20
 
 
 def test_full_stack_summary_marks_incomplete_critical_path_not_auditable() -> None:
@@ -287,8 +289,10 @@ def test_cumulative_ablation_reports_interactions_instead_of_adding_layers() -> 
         leave_one_out_wall_ns={"ir": 70, "runtime": 60},
     )
 
-    assert summary["cumulative_speedup"]["B2"] == 2.0
-    assert summary["incremental_speedup"]["B2"] == 1.6
+    cumulative = cast(dict[str, float], summary["cumulative_speedup"])
+    incremental = cast(dict[str, float], summary["incremental_speedup"])
+    assert cumulative["B2"] == 2.0
+    assert incremental["B2"] == 1.6
     assert summary["leave_one_out_penalty_ns"] == {"ir": 20, "runtime": 10}
     assert summary["interaction_residual_ns"] == 20
 
@@ -331,7 +335,8 @@ def test_raw_run_parser_round_trips_only_canonical_payload() -> None:
 
 def test_raw_run_parser_recomputes_feature_activation_projection() -> None:
     payload = _run().to_dict()
-    payload["features"]["activated_features"] = ["boundflow_replacement"]
+    features = cast(dict[str, object], payload["features"])
+    features["activated_features"] = ["boundflow_replacement"]
 
     with pytest.raises(ValueError, match="activation projection differs"):
         full_stack_run_from_dict(payload)
@@ -395,4 +400,27 @@ def test_contract_replay_rejects_digest_synchronized_summary_tamper(
     )
 
     with pytest.raises(ValueError, match="semantic replay differs"):
+        replay_artifact(artifact_dir)
+
+
+def test_contract_replay_rejects_manifest_synchronized_git_head_tamper(
+    tmp_path: Path,
+) -> None:
+    raw_run = tmp_path / "input.json"
+    raw_run.write_text(json.dumps(_run().to_dict()), encoding="utf-8")
+    artifact_dir = tmp_path / "artifact"
+    generate_artifact(raw_run, artifact_dir)
+
+    manifest_path = artifact_dir / "manifest.json"
+    manifest = json.loads(manifest_path.read_text("utf-8"))
+    manifest["git_head"] = "0" * 40
+    semantic_manifest = {
+        key: value for key, value in manifest.items() if key != "manifest_hash"
+    }
+    manifest["manifest_hash"] = canonical_hash(semantic_manifest)
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
+    with pytest.raises(ValueError, match="manifest envelope differs"):
         replay_artifact(artifact_dir)

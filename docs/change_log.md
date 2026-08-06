@@ -1,12 +1,21 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-06：FSG0 外部审计三项 minor 全部关闭
+
+- 计划枚举已与代码规范统一：`alpha_optimize`、`setup/unclassified`、
+  `unclassified_residual/not_applicable`不再漂移；
+- FSG0测试用`cast`完成类型收窄，mypy现覆盖合同、runner与测试三个文件；
+- replay新增当前`git_head`校验，同步篡改manifest hash仍会fail closed；
+- 定向`20 passed`，全量`1079 passed, 3 skipped`，Black/mypy/Pylint 10.00/10与DocOps均通过；
+- 外部审计结论保持`APPROVE-WITH-MINOR`原文，三项finding由executor后续修复关闭；无性能claim。
+
 ## 2026-08-06：GPU 编译器路线升级为 v1.2 full-stack overlay
 
 - 保留 NRIR49A/G1 的正式数据和冻结 artifact，但将结论收窄为仅关闭
   selected-CROWN 单点增量优化，不再外推为 BoundFlow 全栈 GPU 上限；
 - 旧 G2—G4 保留历史/gated 语义；冻结 artifact 中的 `gpu-winner-reselection` 不改写，
   但不再是当前指令；
-- FSG0 schema/critical-path/replay合同已以19项定向测试和`1078 passed, 3 skipped`回归关闭；当前
+- FSG0 schema/critical-path/replay合同已以20项定向测试和`1079 passed, 3 skipped`回归关闭；当前
   下一步是FSG1 official αβ-CROWN B0 full-stack baseline；目标是建立全栈分母，不是再找一个单点
   winner；
 - 本次仅修正文档路线与 claim 边界，没有新的性能结果，不宣称 BoundFlow

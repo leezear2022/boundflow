@@ -1401,6 +1401,7 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   operator/graph/JIT/runtime/memory累计收益。artifact中的`next_route=gpu-winner-reselection`是冻结
   历史输出，已由
   `gemini_doc/BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md`取代；FSG0合同已以
-  19项定向测试与`1078 passed, 3 skipped`回归关闭，当前FSG1只采集official control full-stack trace，
+  20项定向测试与`1079 passed, 3 skipped`回归关闭，外部审计三项minor已修复；当前FSG1只采集
+  official control full-stack trace，
   不构成speedup、competitor、multi-workload、
   solved verdict、memory headline或ASPLOS-ready claim。

@@ -1,6 +1,6 @@
 ---
-status: fsg0-validated
-updated: 2026-08-06T09:17:57Z
+status: fsg0-post-audit-validated
+updated: 2026-08-06T13:41:43Z
 type: changelog
 topic: boundflow
 slug: BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1
@@ -27,14 +27,15 @@ stage: s01
 - 明确当前RVIR只是original callable exactly-once transport，PR13C也不是official host solver；
 - 将combined environment或对称RPC设为same-solver headline强制前提；
 - 预注册FSG0—FSG5、correctness/measurement/system gate、13文件artifact与raw replay。
-- 新增typed full-stack attribution合同：九层owner、十个solver phase、host/CUDA/runtime/memory资源、
-  cache状态、A0—A4 replacement成熟度、依赖边和exclusive critical-path segment；
+- 新增typed full-stack attribution合同：九个功能层加一个residual哨兵、九个功能phase加
+  `setup/unclassified`两个哨兵、host/CUDA/runtime/memory/IPC资源、cache状态、A0—A4 replacement
+  成熟度、依赖边和exclusive critical-path segment；
 - 新增physical feature activation ledger，区分IR/Plan/Schedule对象存在与实际驱动dispatch；
 - 新增GPU interval union、critical-path closure、`<=3%` residual门禁、joint Amdahl和累计/
   leave-one-out interaction聚合；
 - 新增contract-only generate/replay runner，绑定raw、summary、code revision和文件digest；同步更新摘要
   与manifest digest仍会被raw语义重算拒绝；
-- 新增19项定向测试；production executor、TIR、runtime默认值均未修改。
+- 新增20项定向测试；production executor、TIR、runtime默认值均未修改。
 
 ## Validation
 
@@ -42,12 +43,23 @@ stage: s01
 - 代码盘点确认当前G1仅hook `_run_selected_crown`，native queue主体仍为eager PyTorch，shared
   Task/Schedule在执行后lower，full-stack执行尚未激活；
 - RVIR盘点确认replacement executor不存在，必须先完成RVIR-v3 executable payload/mutation contract；
-- targeted=`19 passed in 1.11s`；
-- 激活 `env.sh` 后全量=`1078 passed, 3 skipped in 402.60s`；首次未加载activation hook的尝试在
+- targeted=`20 passed in 1.07s`；
+- 激活 `env.sh` 后全量=`1079 passed, 3 skipped in 372.54s`；首次未加载activation hook的尝试在
   collection阶段因`ModuleNotFoundError: tvm`停止，未产生代码失败，随后按仓库环境合同重跑通过；
-- Black check通过；targeted mypy（`--follow-imports=skip`）clean；Pylint=`10.00/10`；
+- Black check通过；合同、runner与测试三个文件mypy（`--follow-imports=skip`）clean；Pylint=`10.00/10`；
   `git diff --check`通过；
 - FSG0状态=`VALIDATED`，仍为`performance_claimed=false`。
+
+## External Audit Response
+
+外部独立审计结论为`APPROVE-WITH-MINOR`（0 blocker / 0 major / 3 minor）。三项均已关闭：
+
+1. PLAN四轴枚举已逐值对齐代码规范，明确功能值与`setup/unclassified`等哨兵值；
+2. 测试中的聚合对象用显式`cast`收窄，mypy从2个源文件扩大到合同、runner、测试3个文件；
+3. replay实时校验`git_head`，新增同步更新manifest hash后的伪造HEAD拒绝测试。
+
+审计原文归档于`external_audit_fsg0_full_stack_gpu_baseline_2026_08_06.md`；原文不回写，以上为
+executor后续响应。
 
 ## Decisions
 

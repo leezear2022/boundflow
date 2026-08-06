@@ -1289,6 +1289,7 @@ gated off；不否定算子、Bound/Graph IR、Plan/Schedule、跨阶段融合�
 正式artifact中的`next_route=gpu-winner-reselection`是冻结历史机器输出，现由
 `gemini_doc/BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md`取代。当前按
 FSG0现已关闭：typed layer/phase/resource/cache、feature activation ledger、critical-path/residual、
-累计消融与tamper-resistant replay合同共19项定向测试通过，全量`1078 passed, 3 skipped`。当前下一步
-FSG1采集official original executor的control full-stack trace；该阶段只建立B0分层基线，尚无BoundFlow
+累计消融与tamper-resistant replay合同共20项定向测试通过，全量`1079 passed, 3 skipped`，外部
+审计三项minor已修复。当前下一步FSG1采集official original executor的control full-stack trace；该阶段
+只建立B0分层基线，尚无BoundFlow
 全栈GPU性能claim。ASPLOS-ready仍为NO。

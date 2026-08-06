@@ -115,7 +115,8 @@
 > 不是BoundFlow全栈上限；只停止selected-CROWN专属TIR/JIT/融合。正式artifact的
 > `next_route=gpu-winner-reselection`是冻结历史输出，已由
 > `gemini_doc/BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md`取代。FSG0
-> schema/replay合同已以19项定向测试和`1078 passed, 3 skipped`关闭；当前下一步为FSG1 official
+> schema/replay合同已以20项定向测试和`1079 passed, 3 skipped`关闭，外部审计三项minor已修复；
+> 当前下一步为FSG1 official
 > original executor control full-stack trace。该阶段只建立B0分层基线，尚无BoundFlow全栈GPU性能
 > claim，ASPLOS-ready=NO。
 

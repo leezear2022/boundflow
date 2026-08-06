@@ -1,6 +1,6 @@
 ---
-status: fsg0-validated
-updated: 2026-08-06T09:17:57Z
+status: fsg0-post-audit-validated
+updated: 2026-08-06T13:41:43Z
 type: plan
 topic: boundflow
 slug: BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1
@@ -137,10 +137,10 @@ A2即使数值exact，也不构成replacement speedup；A3/A4必须证明candida
 
 | 轴 | 冻结取值 |
 |---|---|
-| stack layer | `solver_control / adapter_transport / ir_graph / plan_schedule / backend_compile_jit / operator_execution / graph_boundary / runtime_schedule / memory_allocator` |
-| solver phase | `initial_crown / selected_crown / alpha_opt / beta_split / intersect / forward_propagate / branch_score / queue_commit / termination` |
+| stack layer | `solver_control / adapter_transport / ir_graph / plan_schedule / backend_compile_jit / operator_execution / graph_boundary / runtime_schedule / memory_allocator / unclassified_residual` |
+| solver phase | `setup / initial_crown / selected_crown / alpha_optimize / beta_split / intersect / forward_propagate / branch_score / queue_commit / termination / unclassified` |
 | resource | `host_thread / cuda_stream / cuda_runtime_api / memory / ipc` |
-| cache state | `cold_compile / process_hit / disk_hit / warm_execute` |
+| cache state | `cold_compile / process_hit / disk_hit / warm_execute / not_applicable` |
 
 时间口径分离：
 
@@ -342,10 +342,11 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
   与累计/leave-one-out interaction聚合；
 - 新增 `scripts/run_full_stack_gpu_baseline_attribution.py`：contract-only artifact generate/replay，
   绑定raw/summary/code/file digest并从raw语义重算；`performance_claimed=false`；
-- 新增 `tests/test_full_stack_gpu_attribution.py`：19项schema、cycle、overlap、closure、residual、
+- 新增 `tests/test_full_stack_gpu_attribution.py`：20项schema、cycle、overlap、closure、residual、
   activation、Amdahl、interaction与digest-synchronized tamper测试；
-- targeted=`19 passed`；全量激活环境=`1078 passed, 3 skipped`；Black、targeted mypy clean、
+- targeted=`20 passed`；全量激活环境=`1079 passed, 3 skipped`；Black、三个新文件mypy clean、
   Pylint=`10.00/10`、`git diff --check`通过；
+- 外部审计`APPROVE-WITH-MINOR`；枚举命名、测试mypy覆盖和git provenance三项minor均已修复；
 - FSG0不含GPU timing、official control trace或production替换，故没有性能claim。下一步仅为FSG1 B0
   official-control full-stack attribution。
 

@@ -142,13 +142,15 @@ def replay_artifact(artifact_dir: Path) -> dict[str, object]:
     semantic_manifest = {
         key: value for key, value in manifest.items() if key != "manifest_hash"
     }
-    if (
-        manifest.get("schema_version") != ARTIFACT_SCHEMA_VERSION
-        or manifest.get("status") != "contract-only"
-        or manifest.get("performance_claimed") is not False
-        or manifest.get("manifest_hash") != canonical_hash(semantic_manifest)
-        or manifest.get("code_revision") != _code_revision()
-    ):
+    envelope_checks = (
+        manifest.get("schema_version") == ARTIFACT_SCHEMA_VERSION,
+        manifest.get("status") == "contract-only",
+        manifest.get("performance_claimed") is False,
+        manifest.get("manifest_hash") == canonical_hash(semantic_manifest),
+        manifest.get("git_head") == _git_value("rev-parse", "HEAD"),
+        manifest.get("code_revision") == _code_revision(),
+    )
+    if not all(envelope_checks):
         raise ValueError("full-stack artifact manifest envelope differs")
     files = manifest.get("files")
     if not isinstance(files, dict) or set(files) != set(ARTIFACT_FILES):

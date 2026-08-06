@@ -1732,7 +1732,8 @@ G2/G3/TIR/JIT/融合。`1/(1-0.070986)=1.0764x`只是假设该region变为零耗
 
 正式artifact中的`next_route=gpu-winner-reselection`为冻结历史机器输出，当前路线已由
 `gemini_doc/BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md`取代。FSG0的
-作用域/schema/feature activation/replay合同已以19项定向测试和`1078 passed, 3 skipped`关闭；当前执行
-FSG1 official original executor control full-stack trace。FSG1只建立B0分层基线，不能声称已有BoundFlow
+作用域/schema/feature activation/replay合同已以20项定向测试和`1079 passed, 3 skipped`关闭；外部
+审计三项minor已修复。当前执行FSG1 official original executor control full-stack trace。FSG1只建立B0
+分层基线，不能声称已有BoundFlow
 全栈性能。`performance_claimed=false`，公平竞品、multi-workload、solved verdict、memory headline与
 ASPLOS-ready仍未成立。
