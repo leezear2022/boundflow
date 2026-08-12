@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 from pathlib import Path
 import shutil
 import subprocess
@@ -42,6 +43,8 @@ CAPTURE_MANIFEST_SHA256 = (
     "8706e1176a9d29a232fcc8d455a88c7889920f34ad70c8fb75fd0c711142d255"
 )
 MODEL_SHA256 = "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d"
+NUMERIC_ATOL = 2e-4
+NUMERIC_RTOL = 2e-4
 CODE_PATHS = (
     "boundflow/runtime/rvir_v4_production_state.py",
     "boundflow/runtime/rvir_v4_frozen_state.py",
@@ -153,6 +156,71 @@ def _validate_topology(path: Path) -> None:
         raise ValueError("RVIR-v4 frozen topology semantic mapping differs")
 
 
+def _numeric_close(expected: object, observed: object) -> bool:
+    if not isinstance(expected, (int, float)) or isinstance(expected, bool):
+        return False
+    if not isinstance(observed, (int, float)) or isinstance(observed, bool):
+        return False
+    expected_float = float(expected)
+    observed_float = float(observed)
+    return (
+        math.isfinite(expected_float)
+        and math.isfinite(observed_float)
+        and math.isclose(
+            expected_float,
+            observed_float,
+            rel_tol=NUMERIC_RTOL,
+            abs_tol=NUMERIC_ATOL,
+        )
+    )
+
+
+def _numeric_sequence_close(expected: object, observed: object) -> bool:
+    return (
+        isinstance(expected, list)
+        and isinstance(observed, list)
+        and len(expected) == len(observed)
+        and all(_numeric_close(left, right) for left, right in zip(expected, observed))
+    )
+
+
+def _validate_execution_replay(
+    recorded: Mapping[str, Any], observed: Mapping[str, Any]
+) -> None:
+    if set(recorded) != set(observed):
+        raise ValueError("RVIR-v4 frozen execution field inventory differs")
+    numeric_fields = {"native_lower", "lower_max_abs_diff"}
+    for key in sorted(set(recorded) - numeric_fields):
+        if recorded[key] != observed[key]:
+            raise ValueError(f"RVIR-v4 frozen execution field differs: {key}")
+    if not _numeric_sequence_close(recorded["native_lower"], observed["native_lower"]):
+        raise ValueError("RVIR-v4 frozen execution numeric lower differs")
+    if not _numeric_close(
+        recorded["lower_max_abs_diff"], observed["lower_max_abs_diff"]
+    ):
+        raise ValueError("RVIR-v4 frozen execution numeric max diff differs")
+
+
+def _validate_summary_replay(
+    recorded: Mapping[str, Any], observed: Mapping[str, Any]
+) -> None:
+    if set(recorded) != set(observed):
+        raise ValueError("RVIR-v4 frozen summary field inventory differs")
+    recorded_semantic = {
+        key: value for key, value in recorded.items() if key != "summary_hash"
+    }
+    if recorded.get("summary_hash") != canonical_hash(recorded_semantic):
+        raise ValueError("RVIR-v4 frozen recorded summary hash differs")
+    numeric_fields = {"lower_max_abs_diff", "summary_hash"}
+    for key in sorted(set(recorded) - numeric_fields):
+        if recorded[key] != observed[key]:
+            raise ValueError(f"RVIR-v4 frozen summary field differs: {key}")
+    if not _numeric_close(
+        recorded["lower_max_abs_diff"], observed["lower_max_abs_diff"]
+    ):
+        raise ValueError("RVIR-v4 frozen summary numeric max diff differs")
+
+
 def _execute(
     capture_path: Path, model_path: Path
 ) -> tuple[dict[str, object], dict[str, object]]:
@@ -199,7 +267,12 @@ def _execute(
         "production_lower": expected_lower.flatten().tolist(),
         "lower_max_abs_diff": max_abs_diff,
         "lower_allclose": bool(
-            torch.allclose(result.lower, expected_lower, atol=2e-4, rtol=2e-4)
+            torch.allclose(
+                result.lower,
+                expected_lower,
+                atol=NUMERIC_ATOL,
+                rtol=NUMERIC_RTOL,
+            )
         ),
         "sign_agreement": int(signs.sum().item()),
         "sign_total": int(signs.numel()),
@@ -215,7 +288,7 @@ def _execute(
         and execution["expected_shape"] == [6, 1]
         and execution["lower_allclose"] is True
         and execution["sign_agreement"] == execution["sign_total"] == 6
-        and max_abs_diff <= 2e-4
+        and max_abs_diff <= NUMERIC_ATOL
         and len(result.ir_hashes) == 10
         and execution["original_callback_count"] == 0
         and execution["fallback_dispatch_count"] == 0
@@ -332,13 +405,13 @@ def _replay(artifact: Path, model: Path) -> dict[str, object]:
         raise ValueError("RVIR-v4 frozen source identity differs")
     _validate_topology(artifact / "topology.json")
     execution, summary = _execute(artifact / CAPTURE_FILE, model)
-    if _load_json(artifact / "execution.json") != execution:
-        raise ValueError("RVIR-v4 frozen execution replay differs")
-    if _load_json(artifact / "summary.json") != summary:
-        raise ValueError("RVIR-v4 frozen summary replay differs")
-    if manifest.get("summary_hash") != summary["summary_hash"]:
+    recorded_execution = _load_json(artifact / "execution.json")
+    recorded_summary = _load_json(artifact / "summary.json")
+    _validate_execution_replay(recorded_execution, execution)
+    _validate_summary_replay(recorded_summary, summary)
+    if manifest.get("summary_hash") != recorded_summary["summary_hash"]:
         raise ValueError("RVIR-v4 frozen manifest summary differs")
-    result = _replay_result(summary)
+    result = _replay_result(recorded_summary)
     if (artifact / "replay_stdout.txt").read_text(encoding="utf-8") != (
         canonical_json(result) + "\n"
     ):

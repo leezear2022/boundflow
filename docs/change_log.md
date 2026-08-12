@@ -4910,6 +4910,9 @@
   尚待生成，V4-2/B2仍关闭。
 - 新增V4-1正式artifact runner，固定capture/source manifest/model digest与显式topology，replay重新
   执行五层IR；待runner提交后从clean source生成工件。
+- 首次全量回归为`1089 passed, 39 skipped, 1 failed`；唯一失败定位为replay对CPU浮点执行投影做
+  整份JSON exact比较。修正为离散结构/hash/count exact、finite数值按预注册`2e-4`比较，并新增
+  容差内/外正负测试；重新冻结artifact并全量通过前不关闭V4-1。
 
 **记录**
 - `gemini_doc/rvir_v4_production_state_ownership_plan_2026_08_06.md`

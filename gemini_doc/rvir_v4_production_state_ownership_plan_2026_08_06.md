@@ -198,3 +198,16 @@ exact；24-call/core/beta/history/mutation计数保持不变。诊断summary has
 - 正式门禁：shape=`[6,1]`、allclose=`2e-4`、sign=`6/6`、IR hashes=`10`、provider/fallback=
   `0/0`、`performance_claimed=false`；
 - runner提交并获得clean source commit后才生成正式artifact；当前仍不关闭V4-1。
+
+### V4-1C Replay 数值语义修正
+
+首次全量回归的唯一失败暴露了replay实现错误：对含CPU浮点执行结果的整份`execution.json`使用
+Python字典exact equality，强于V4-1已经预注册的`atol=rtol=2e-4`数值门禁。修正后的责任边界为：
+
+- 字段集合、shape、production lower、IR/state hashes、dispatch/callback/fallback计数、sign与
+  `performance_claimed`仍exact；
+- 重执行的`native_lower`与`lower_max_abs_diff`必须finite，并按`2e-4`比较；
+- 冻结summary自身的canonical hash和manifest引用仍exact；
+- 容差内数值漂移必须replay通过，容差外漂移必须fail closed。
+
+修正代码提交并重新生成正式artifact前，V4-1、V4-2与B2准入状态不变。
