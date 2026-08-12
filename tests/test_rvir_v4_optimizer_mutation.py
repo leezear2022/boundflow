@@ -17,6 +17,7 @@ from boundflow.runtime.native_alpha_beta_optimization_state import (
 )
 from boundflow.runtime.rvir_v4_optimizer_mutation import (
     ProductionMutationPolicyV4,
+    ProductionOptimizerControlsV4,
     ProductionOptimizerStepTraceV4,
     ProductionOptimizerStepV4,
     capture_production_optimizer_controls_v4,
@@ -337,8 +338,12 @@ def test_step_trace_loop_and_mutation_count_tamper_fail_closed() -> None:
     "policy",
     [
         replace(_production_policy(), iteration=0),
+        replace(_production_policy(), iteration=9),
+        replace(_production_policy(), alpha_learning_rate=0.02),
+        replace(_production_policy(), beta_learning_rate=0.04),
         replace(_production_policy(), bound_upper=True),
         replace(_production_policy(), fix_intermediate_bounds=False),
+        replace(_production_policy(), deterministic=True),
         replace(_production_policy(), stop_criterion_id="always-false"),
     ],
 )
@@ -347,6 +352,24 @@ def test_nonproduction_mutation_policy_is_rejected(
 ) -> None:
     with pytest.raises(ValueError, match="not admitted"):
         ProductionMutationPolicyV4(policy, _mutation_policy().controls).validate()
+
+
+@pytest.mark.parametrize(
+    "controls",
+    [
+        replace(_mutation_policy().controls, lr_decay=0.97),
+        replace(_mutation_policy().controls, early_stop_patience=9),
+        replace(_mutation_policy().controls, start_save_best=0.4),
+        replace(_mutation_policy().controls, pruning_in_iteration=False),
+        replace(_mutation_policy().controls, pruning_in_iteration_threshold=0.1),
+        replace(_mutation_policy().controls, max_time=61.0),
+    ],
+)
+def test_nonproduction_optimizer_control_values_are_rejected(
+    controls: ProductionOptimizerControlsV4,
+) -> None:
+    with pytest.raises(ValueError, match="not admitted"):
+        ProductionMutationPolicyV4(_production_policy(), controls).validate()
 
 
 def test_optimizer_uses_distinct_alpha_and_beta_parameter_groups(

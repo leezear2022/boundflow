@@ -16,7 +16,9 @@ copy-out门禁。V4-2B typed step trace、真实Adam-step observer与formal arti
 CPU级语义/篡改测试，但正式GPU artifact仍被driver/library mismatch和CUDA error 803阻塞；因此状态为
 `IMPLEMENTED-CAPTURE-READY`，不是V4-2B closure。配套记录为
 `gemini_doc/change_2026-08-13_rvir_v4_optimizer_mutation_preregistration.md`与
-`gemini_doc/change_2026-08-13_rvir_v4_optimizer_step_trace.md`。B2仍关闭。
+`gemini_doc/change_2026-08-13_rvir_v4_optimizer_step_trace.md`。GPU阻塞期间补做的exact policy与
+call/trace cross-binding见
+`gemini_doc/change_2026-08-13_rvir_v4_optimizer_trace_cross_binding.md`。B2仍关闭。
 
 ---
 

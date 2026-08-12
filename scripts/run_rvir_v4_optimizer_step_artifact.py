@@ -244,6 +244,31 @@ def validate_worker_capture(
         for call, step in zip(nested_calls, trace.steps)
     ):
         raise ValueError("RVIR-v4 optimizer trace/call lineage differs")
+    for call, step in zip(nested_calls, trace.steps):
+        if call.get("pre_state") != [
+            tensor.metadata() for tensor in step.state_tensors
+        ]:
+            raise ValueError("RVIR-v4 optimizer trace/call state binding differs")
+        result_rows = call.get("result_tensors")
+        if not isinstance(result_rows, list):
+            raise TypeError("RVIR-v4 optimizer call result rows differ")
+        lower_rows = [
+            row
+            for row in result_rows
+            if isinstance(row, Mapping) and row.get("path") == "result[0]"
+        ]
+        if len(lower_rows) != 1:
+            raise ValueError("RVIR-v4 optimizer call lower inventory differs")
+        lower_row = lower_rows[0]
+        device = lower_row.get("device")
+        if (
+            lower_row.get("shape") != list(step.lower.shape)
+            or lower_row.get("dtype") != str(step.lower.dtype)
+            or lower_row.get("content_sha256") != step.lower_sha256
+            or not isinstance(device, str)
+            or not _is_cuda_device(device)
+        ):
+            raise ValueError("RVIR-v4 optimizer trace/call lower binding differs")
     core = cores[0]
     pre_snapshot = core.get("pre_snapshot")
     if (

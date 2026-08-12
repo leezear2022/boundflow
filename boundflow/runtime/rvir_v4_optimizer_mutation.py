@@ -413,15 +413,45 @@ class ProductionMutationPolicyV4:
         self.controls.validate()
         if (
             self.iteration_semantics != PRODUCTION_ITERATION_SEMANTICS_V4
-            or self.production.iteration <= 0
+            or self.production.iteration != 10
+            or not math.isclose(
+                self.production.alpha_learning_rate,
+                0.01,
+                rel_tol=0.0,
+                abs_tol=1e-12,
+            )
+            or not math.isclose(
+                self.production.beta_learning_rate,
+                0.05,
+                rel_tol=0.0,
+                abs_tol=1e-12,
+            )
             or self.production.bound_lower is not True
             or self.production.bound_upper is not False
             or self.production.fix_intermediate_bounds is not True
+            or self.production.deterministic is not False
             or "stop_criterion_batch_any" not in self.production.stop_criterion_id
             or self.controls.optimizer != "adam"
+            or not math.isclose(
+                self.controls.lr_decay, 0.98, rel_tol=0.0, abs_tol=1e-12
+            )
             or self.controls.keep_best is not True
             or not self.controls.loss_reduction_id.endswith("reduction_sum")
+            or self.controls.early_stop_patience != 10
+            or not math.isclose(
+                self.controls.start_save_best, 0.5, rel_tol=0.0, abs_tol=1e-12
+            )
             or self.controls.use_float64_in_last_iteration is not False
+            or self.controls.pruning_in_iteration is not True
+            or not math.isclose(
+                self.controls.pruning_in_iteration_threshold,
+                0.2,
+                rel_tol=0.0,
+                abs_tol=1e-12,
+            )
+            or not math.isclose(
+                self.controls.max_time, 60.0, rel_tol=0.0, abs_tol=1e-12
+            )
             or self.controls.enable_alpha_crown is not True
             or self.controls.enable_beta_crown is not True
             or self.controls.init_alpha is not False

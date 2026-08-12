@@ -175,3 +175,17 @@ Pylint=`10.00/10`。尚未接入provider step capture，也未生成formal artif
 下一动作：修复GPU driver/library一致性后，从clean committed source运行formal artifact generation，
 再完成original replay与重签名state/step/result/policy tamper probes。只有这些通过，V4-2B才可关闭并进入
 V4-2C pre-state native initializer；B2继续关闭。
+
+### V4-2B pre-formal hardening
+
+GPU阻塞期间继续对formal runner做攻击面复审，新增两层不依赖正式数值的fail-closed合同：
+
+- fixed production policy不再只检查字段存在/模式，而是精确冻结iteration=`10`、LR=`0.01/0.05`、
+  decay=`0.98`、patience=`10`、start-save=`0.5`、pruning/threshold=`true/0.2`、max-time=`60.0`及
+  deterministic等所有已知production值；
+- 每个step的24项state metadata与lower receipt必须分别等于独立call-tree的`pre_state`和
+  `result[0]` metadata。攻击者即使同步重算tensor/step/trace hash，修改mutable state或lower仍会在
+  cross-view binding处失败；call-result device只接受严格CUDA语法。
+
+focused=`26 passed`、扩展RVIR-v4=`47 passed`、全量=`1118 passed, 39 skipped`、mypy clean、
+Pylint=`10.00/10`。该hardening只加强formal evidence，不改变V4-2B/V4-2/B2未关闭状态。

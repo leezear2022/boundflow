@@ -2,6 +2,7 @@
 
 # pylint: disable=missing-function-docstring,protected-access
 # pylint: disable=too-few-public-methods,duplicate-code
+# pylint: disable=too-many-locals,too-many-statements
 
 from __future__ import annotations
 
@@ -19,6 +20,7 @@ from boundflow.runtime.rvir_v4_optimizer_mutation import (
 from boundflow.runtime.rvir_v4_production_state import ProductionOptimizerPolicyV4
 from boundflow.runtime.rvir_v4_production_state import (
     capture_module_alpha_beta_state_v4,
+    production_tensor_sha256,
 )
 from scripts import run_rvir_v4_optimizer_step_artifact as artifact_runner
 from scripts import run_rvir_v4_production_state_capture as capture_runner
@@ -117,7 +119,26 @@ def _production_policy() -> ProductionOptimizerPolicyV4:
 
 
 def _worker_capture(observer: Any) -> dict[str, object]:
-    calls = list(observer.calls)
+    calls = []
+    for source_call in observer.calls:
+        call = dict(source_call)
+        pre_state = call.get("pre_state")
+        if isinstance(pre_state, list):
+            call["pre_state"] = [
+                (
+                    dict(row) | {"source_device": "cuda:0"}
+                    if isinstance(row, dict)
+                    else row
+                )
+                for row in pre_state
+            ]
+        result_tensors = call.get("result_tensors")
+        if isinstance(result_tensors, list):
+            call["result_tensors"] = [
+                dict(row) | {"device": "cuda:0"} if isinstance(row, dict) else row
+                for row in result_tensors
+            ]
+        calls.append(call)
     calls.extend(
         {
             "call_id": call_id,
@@ -245,6 +266,46 @@ def test_scoped_capture_observes_real_ten_evaluation_nine_adam_step_trace(
         )
     ]
     with pytest.raises(ValueError, match="not CUDA production state"):
+        artifact_runner.validate_worker_capture(_worker_capture(observer))
+    observer.optimizer_step_traces = [
+        production_optimizer_step_trace_to_payload_v4(cuda_trace)
+    ]
+
+    changed_state_steps = list(cuda_trace.steps)
+    changed_state = list(changed_state_steps[3].state_tensors)
+    changed_value = changed_state[0].value + 0.123
+    changed_state[0] = replace(
+        changed_state[0],
+        value=changed_value,
+        content_sha256=production_tensor_sha256(changed_value),
+    )
+    changed_state_steps[3] = replace(
+        changed_state_steps[3], state_tensors=tuple(changed_state)
+    )
+    observer.optimizer_step_traces = [
+        production_optimizer_step_trace_to_payload_v4(
+            replace(cuda_trace, steps=tuple(changed_state_steps))
+        )
+    ]
+    with pytest.raises(ValueError, match="trace/call state binding"):
+        artifact_runner.validate_worker_capture(_worker_capture(observer))
+    observer.optimizer_step_traces = [
+        production_optimizer_step_trace_to_payload_v4(cuda_trace)
+    ]
+
+    changed_lower = cuda_trace.steps[3].lower + 1.0
+    changed_steps = list(cuda_trace.steps)
+    changed_steps[3] = replace(
+        changed_steps[3],
+        lower=changed_lower,
+        lower_sha256=production_tensor_sha256(changed_lower),
+    )
+    observer.optimizer_step_traces = [
+        production_optimizer_step_trace_to_payload_v4(
+            replace(cuda_trace, steps=tuple(changed_steps))
+        )
+    ]
+    with pytest.raises(ValueError, match="trace/call lower binding"):
         artifact_runner.validate_worker_capture(_worker_capture(observer))
     observer.optimizer_step_traces = [
         production_optimizer_step_trace_to_payload_v4(cuda_trace)

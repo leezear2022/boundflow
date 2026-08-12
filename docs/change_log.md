@@ -4969,3 +4969,19 @@
 **记录**
 - `gemini_doc/rvir_v4_optimizer_mutation_plan_2026_08_13.md`
 - `gemini_doc/change_2026-08-13_rvir_v4_optimizer_step_trace.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-2B Policy/Trace Cross-Binding Hardening
+
+- 固定production mutation policy从模式准入收紧为全部已知值exact admission；iteration、双LR、decay、
+  patience、pruning、max-time等任一漂移均fail closed；
+- 每step 24项state metadata和lower receipt分别与独立call-tree `pre_state/result[0]`交叉绑定；
+- 攻击者同步重算tensor/step/trace hash后修改mutable α或lower，仍被cross-view mismatch拒绝；
+- focused=`26 passed`、扩展RVIR-v4=`47 passed`、全量=`1118 passed, 39 skipped`、mypy clean、
+  Pylint=`10.00/10`；正式GPU artifact仍等待重启，V4-2B/V4-2/B2状态和
+  `performance_claimed=false`均不变。
+
+**记录**
+- `gemini_doc/rvir_v4_optimizer_mutation_plan_2026_08_13.md`
+- `gemini_doc/change_2026-08-13_rvir_v4_optimizer_trace_cross_binding.md`

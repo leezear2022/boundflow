@@ -13,6 +13,8 @@
 > 真实Adam-step/LR-scheduler观察与独立artifact runner，CPU定向语义及tamper门禁通过。provider源码
 > 复核修正production live值为`init_alpha=false/max_time=60.0 s`。正式GPU artifact仍被NVML
 > driver/library mismatch及CUDA error 803阻塞，所以V4-2B、V4-2与B2均未关闭，无性能claim。
+> pre-formal hardening又将全部production policy值精确准入，并把每step state/lower与独立call-tree
+> pre/result metadata交叉绑定；内部重哈希后的state/result篡改已被CPU负向测试拒绝。状态仍不升级。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
 > objective-ancestral sibling evaluator，并新增独立 Plan/Batch/Task/Schedule IR 与跨 clause 单一 cache
 > owner。真实 ResNet clause 2 root+pair 与 frozen audit lower/branch/split/α/β/refinement exact，upper
