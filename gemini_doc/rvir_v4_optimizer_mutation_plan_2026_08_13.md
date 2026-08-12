@@ -125,3 +125,20 @@ V4-2必须同时满足：
 
 下一动作改为V4-2B step-trace schema与capture runner。formal GPU run当前由
 `cudaGetDeviceCount error 803`及NVML driver/library mismatch阻塞；schema、replay与CPU负向测试可继续。
+
+### 完成性修正：完整 optimizer controls
+
+V4-2B开工审计确认V4-0 snapshot中的8字段policy只是核心子集；逐step等价还受以下正式默认配置影响：
+optimizer=`adam`、lr decay=`0.98`、keep-best=`true`、loss reduction=`sum`、early-stop patience=`10`、
+start-save-best=`0.5`、last-iteration fp64=`false`、pruning-in-iteration=`true`、threshold=`0.2`、
+max-time=`1e9`、alpha/beta enabled、init-alpha、shared-alpha、output constraints、direct optimization、
+input tightening与cuts。
+
+因此V4-2A的`VALIDATED-POLICY-CONTRACT`精确解释为“双学习率与loop cardinality子合同”，不是完整
+optimizer policy ownership。V4-2B先实现上述controls的live-boundary capture、canonical hash与
+missing/tamper fail-closed，再定义step trace；formal run仍等待GPU恢复。
+
+V4-2B controls schema第一切片已实现：18项controls进入canonical payload/hash，live mapping要求字段
+全集，replay parser要求exact字段集合与严格bool/list/numeric类型；cuts、output constraints、direct
+optimization等当前路线未准入配置fail closed。focused=`10 passed`，mypy clean，typed policy模块
+Pylint=`10.00/10`。尚未接入provider step capture，也未生成formal artifact。

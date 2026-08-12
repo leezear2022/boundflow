@@ -17,6 +17,8 @@ from boundflow.runtime.native_alpha_beta_optimization_state import (
 )
 from boundflow.runtime.rvir_v4_optimizer_mutation import (
     ProductionMutationPolicyV4,
+    capture_production_optimizer_controls_v4,
+    production_optimizer_controls_from_payload_v4,
 )
 from boundflow.runtime.rvir_v4_production_state import ProductionOptimizerPolicyV4
 from boundflow.runtime.task_executor import InputSpec
@@ -35,6 +37,39 @@ def _production_policy() -> ProductionOptimizerPolicyV4:
             "auto_LiRPA.utils.stop_criterion_batch_any.<locals>.<lambda>"
         ),
     )
+
+
+def _loss_reduction_sum(value: torch.Tensor) -> torch.Tensor:
+    return value.sum(dim=-1)
+
+
+def _controls_args() -> dict[str, object]:
+    return {
+        "optimizer": "adam",
+        "lr_decay": 0.98,
+        "keep_best": True,
+        "loss_reduction_func": _loss_reduction_sum,
+        "early_stop_patience": 10,
+        "start_save_best": 0.5,
+        "use_float64_in_last_iteration": False,
+        "pruning_in_iteration": True,
+        "pruning_in_iteration_threshold": 0.2,
+        "max_time": 1e9,
+        "enable_alpha_crown": True,
+        "enable_beta_crown": True,
+        "init_alpha": True,
+        "use_shared_alpha": False,
+        "apply_output_constraints_to": [],
+        "directly_optimize": [],
+        "tighten_input_bounds": False,
+    }
+
+
+def _mutation_policy() -> ProductionMutationPolicyV4:
+    controls = capture_production_optimizer_controls_v4(
+        _controls_args(), cuts_enabled=False
+    )
+    return ProductionMutationPolicyV4(_production_policy(), controls)
 
 
 def _module() -> BFTaskModule:
@@ -65,7 +100,7 @@ def _module() -> BFTaskModule:
 
 
 def test_production_policy_maps_ten_evaluations_to_nine_updates() -> None:
-    policy = ProductionMutationPolicyV4(_production_policy())
+    policy = _mutation_policy()
 
     assert policy.evaluation_count == 10
     assert policy.update_count == 9
@@ -84,6 +119,39 @@ def test_legacy_unified_learning_rate_payload_remains_compatible() -> None:
     assert "beta_lr" not in policy.to_dict()
 
 
+def test_full_production_optimizer_controls_are_digest_bound() -> None:
+    policy = _mutation_policy()
+
+    assert policy.controls.optimizer == "adam"
+    assert policy.controls.lr_decay == 0.98
+    assert policy.controls.pruning_in_iteration is True
+    assert policy.controls.loss_reduction_id.endswith("_loss_reduction_sum")
+    assert len(policy.controls.stable_hash()) == 64
+    assert policy.to_dict()["controls"] == policy.controls.to_dict()
+    assert (
+        production_optimizer_controls_from_payload_v4(policy.controls.to_dict())
+        == policy.controls
+    )
+
+
+def test_missing_or_unadmitted_optimizer_controls_fail_closed() -> None:
+    missing = _controls_args()
+    del missing["lr_decay"]
+    with pytest.raises(ValueError, match="controls missing"):
+        capture_production_optimizer_controls_v4(missing, cuts_enabled=False)
+
+    controls = capture_production_optimizer_controls_v4(
+        _controls_args(), cuts_enabled=True
+    )
+    with pytest.raises(ValueError, match="not admitted"):
+        ProductionMutationPolicyV4(_production_policy(), controls).validate()
+
+    payload = _mutation_policy().controls.to_dict()
+    payload["keep_best"] = "true"
+    with pytest.raises(TypeError, match="boolean fields"):
+        production_optimizer_controls_from_payload_v4(payload)
+
+
 @pytest.mark.parametrize(
     "policy",
     [
@@ -97,7 +165,7 @@ def test_nonproduction_mutation_policy_is_rejected(
     policy: ProductionOptimizerPolicyV4,
 ) -> None:
     with pytest.raises(ValueError, match="not admitted"):
-        ProductionMutationPolicyV4(policy).validate()
+        ProductionMutationPolicyV4(policy, _mutation_policy().controls).validate()
 
 
 def test_optimizer_uses_distinct_alpha_and_beta_parameter_groups(

@@ -4941,6 +4941,11 @@
 - V4-2A以`VALIDATED-POLICY-CONTRACT`关闭：distinct Adam LR=`0.01/0.05`，production
   evaluation/update=`10/9`，旧统一lr兼容及非法策略负向门禁通过；focused=`17 passed`，full=
   `1100 passed, 39 skipped`，mypy clean，新/typed policy模块Pylint=`10.00/10`。V4-2总体与B2仍关闭。
+- 后续完成性审计发现原8字段policy未覆盖lr-decay/keep-best/loss-reduction/early-stop/pruning等controls；
+  V4-2A结论收窄为双LR与loop子合同。新增完整controls schema/live mapping/canonical hash与缺字段、cuts
+  负向门禁；V4-2B step trace必须绑定完整controls hash。
+- V4-2B controls schema第一切片通过`10 passed`、mypy clean、Pylint`10.00/10`；18字段全集、严格
+  payload类型、缺字段/cuts fail-closed。尚未接provider step trace，formal GPU artifact仍阻塞。
 
 **记录**
 - `gemini_doc/rvir_v4_optimizer_mutation_plan_2026_08_13.md`

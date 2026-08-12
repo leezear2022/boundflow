@@ -41,3 +41,15 @@ V4-2、V4-3和B2仍未关闭。
 
 下一动作是V4-2B step-trace schema/capture runner；当前GPU driver/library mismatch阻塞formal run，
 不阻塞schema、replay与CPU负向测试。
+
+## Policy Ownership 完成性修正
+
+继续审计provider后确认原8字段policy未包含lr decay、optimizer choice、keep-best、loss reduction、
+early-stop patience、start-save-best、last-fp64、pruning、max-time及若干feature flags。V4-2A结论收窄为
+“双学习率和10/9 loop子合同已验证”。新增`ProductionOptimizerControlsV4`与live mapping捕获函数，
+缺字段或当前路线不准入的cuts/output constraints等必须fail closed。逐step schema必须绑定完整controls
+hash，不能只绑定原8字段snapshot policy。
+
+controls schema/live mapping/replay parser的CPU切片已通过`10 passed`、mypy clean、Pylint
+`10.00/10`；严格检查18字段全集与类型，cuts及缺字段负向门禁通过。下一步仍是独立V4-2B
+step-trace capture runner；formal artifact等待GPU恢复。
