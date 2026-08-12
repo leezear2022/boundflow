@@ -24,6 +24,11 @@
 > exact call 完成 typed IR admission/dispatch artifact。该结果只修复集成语义，不撤销
 > IR-5 performance No-Go，不启动 IR-6，也不形成 verifier acceleration claim。
 
+> **2026-08-13 RVIR-v4修订**：完整production replacement正在按state ownership门禁重开。
+> V4-1已验证冻结post α/β/split state可由五层native IR独立复算lower；V4-2A仅验证双学习率与
+> 10 evaluation/9 update合同。V4-2B typed raw step trace、真实Adam observer和formal runner已实现，
+> 但GPU driver/library错位阻止正式工件。因此V4-2、B2和后续B3—B7仍未准入，性能结论不变。
+
 > **2026-08-04 P0 修订**：production Schedule-memory ownership audit 为 `NO_GO`。
 > Reduced residual path 能由 Schedule IR 控制 arena 与 region launch，但没有 materialization、
 > storage choice 或 budget decision switch；VNN-COMP ResNet 主计算仍是 external opaque call。

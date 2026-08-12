@@ -19,7 +19,9 @@
 > schema/replay合同已验证；FSG1 official B0 full-stack trace亦已关闭。FSG2现以
 > `VALIDATED-REDUCED initial-only`关闭：完整production alpha/beta/split replacement未准入，
 > 因而B2为NO-GO，FSG3—FSG5按依赖门禁未运行。该结论不否决B3—B7各层潜力，但当前仍无
-> BoundFlow全栈性能claim。
+> BoundFlow全栈性能claim。2026-08-13 RVIR-v4已把V4-1 frozen post-state evaluation关闭，并实现
+> V4-2B 10-evaluation/9-Adam-step typed capture与artifact runner；但真实GPU formal trace尚未生成，
+> V4-2 optimizer replacement与B2状态不变。该实现进展不得升级为correctness closure或性能claim。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|

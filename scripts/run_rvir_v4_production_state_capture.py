@@ -4,6 +4,9 @@
 # pylint: disable=too-many-lines,too-many-locals,too-many-statements
 # pylint: disable=too-many-branches,import-outside-toplevel,protected-access
 # pylint: disable=missing-function-docstring,line-too-long,import-error
+# pylint: disable=too-many-instance-attributes
+# pylint: disable=duplicate-code
+# pylint: disable=unsubscriptable-object
 
 from __future__ import annotations
 
@@ -22,6 +25,7 @@ from typing import Any, cast, Iterator, Mapping, Sequence
 
 ARTIFACT_SCHEMA_VERSION = "boundflow.rvir-v4-production-capture-artifact/v2"
 WORKER_SCHEMA_VERSION = "boundflow.rvir-v4-production-capture-worker/v2"
+OPTIMIZER_WORKER_SCHEMA_VERSION = "boundflow.rvir-v4-optimizer-step-capture-worker/v1"
 LEGACY_ARTIFACT_SCHEMA_VERSION = "boundflow.rvir-v4-production-capture-artifact/v1"
 LEGACY_WORKER_SCHEMA_VERSION = "boundflow.rvir-v4-production-capture-worker/v1"
 ABCROWN_COMMIT = "e5c7e17bf0488843acb77b7519f59876717a49f4"
@@ -151,6 +155,7 @@ def _parse_args() -> argparse.Namespace:
     worker.add_argument("--model", type=Path, required=True)
     worker.add_argument("--property", type=Path, required=True)
     worker.add_argument("--result", type=Path, required=True)
+    worker.add_argument("--optimizer-step-trace", action="store_true")
     return parser.parse_args()
 
 
@@ -394,13 +399,197 @@ def _build_core_post_snapshot(
 
 
 class _CaptureObserver:
-    def __init__(self, torch_module: Any, arguments_module: Any) -> None:
+    def __init__(
+        self,
+        torch_module: Any,
+        arguments_module: Any,
+        *,
+        capture_optimizer_steps: bool = False,
+    ) -> None:
         self.torch = torch_module
         self.arguments = arguments_module
+        self.capture_optimizer_steps = capture_optimizer_steps
         self.calls: list[dict[str, Any]] = []
         self.cores: list[dict[str, Any]] = []
+        self.optimizer_step_traces: list[dict[str, object]] = []
         self._call_stack: list[int] = []
         self._active_core_id: int | None = None
+        self._core_policies: dict[int, Any] = {}
+        self._core_mutation_policies: dict[int, Any] = {}
+        self._optimizer_rows: dict[int, list[dict[str, Any]]] = {}
+        self._optimizer_update_counts: dict[int, int] = {}
+        self._active_adam: Any = None
+        self._pending_optimizer_call_id: int | None = None
+
+    def _capture_mutation_policy(self, instance: Any) -> None:
+        from boundflow.runtime.rvir_v4_optimizer_mutation import (
+            ProductionMutationPolicyV4,
+            capture_production_optimizer_controls_v4,
+        )
+
+        core_id = self._active_core_id
+        if core_id is None or core_id not in self._core_policies:
+            raise RuntimeError("RVIR-v4 optimizer core policy is unavailable")
+        bound_opts = getattr(instance, "bound_opts", None)
+        optimize_bound_args = (
+            None
+            if not isinstance(bound_opts, Mapping)
+            else bound_opts.get("optimize_bound_args")
+        )
+        if not isinstance(optimize_bound_args, Mapping):
+            raise TypeError("RVIR-v4 live optimize-bound controls differ")
+        cut_used = getattr(instance, "cut_used", False)
+        if not isinstance(cut_used, bool):
+            raise TypeError("RVIR-v4 live cut-used flag differs")
+        controls = capture_production_optimizer_controls_v4(
+            optimize_bound_args, cuts_enabled=cut_used
+        )
+        policy = ProductionMutationPolicyV4(
+            production=self._core_policies[core_id], controls=controls
+        )
+        policy.validate()
+        if core_id in self._core_mutation_policies:
+            raise RuntimeError("RVIR-v4 optimizer mutation policy repeats")
+        self._core_mutation_policies[core_id] = policy
+
+    def _begin_optimizer_evaluation(
+        self,
+        *,
+        call_id: int,
+        parent_call_id: int,
+        state_tensors: tuple[Any, ...],
+    ) -> dict[str, Any]:
+        core_id = self._active_core_id
+        if core_id is None or core_id not in self._core_mutation_policies:
+            raise RuntimeError("RVIR-v4 optimizer evaluation lacks live policy")
+        if self._active_adam is None or self._pending_optimizer_call_id is not None:
+            raise RuntimeError("RVIR-v4 optimizer evaluation/Adam ordering differs")
+        raw_param_groups = getattr(self._active_adam, "param_groups", None)
+        if not isinstance(raw_param_groups, list) or len(raw_param_groups) != 2:
+            raise ValueError("RVIR-v4 optimizer parameter-group count differs")
+        param_groups: list[Any] = raw_param_groups
+        first_group = cast(dict[str, Any], param_groups[0])
+        second_group = cast(dict[str, Any], param_groups[1])
+        learning_rates = [first_group.get("lr"), second_group.get("lr")]
+        if not all(
+            isinstance(value, (int, float)) and not isinstance(value, bool)
+            for value in learning_rates
+        ):
+            raise TypeError("RVIR-v4 optimizer learning-rate fields differ")
+        rows = self._optimizer_rows.setdefault(core_id, [])
+        updates_before = self._optimizer_update_counts.setdefault(core_id, 0)
+        row: dict[str, Any] = {
+            "core_id": core_id,
+            "call_id": call_id,
+            "parent_call_id": parent_call_id,
+            "evaluation_ordinal": len(rows),
+            "updates_before": updates_before,
+            "update_after": False,
+            "optimizer_step_ordinal": None,
+            "alpha_learning_rate": float(cast(float, learning_rates[0])),
+            "beta_learning_rate": float(cast(float, learning_rates[1])),
+            "state_tensors": state_tensors,
+        }
+        rows.append(row)
+        return row
+
+    @staticmethod
+    def _result_lower(result: object, torch_module: Any) -> Any:
+        if not isinstance(result, (tuple, list)) or not result:
+            raise TypeError("RVIR-v4 optimizer evaluation result differs")
+        lower = result[0]
+        if not torch_module.is_tensor(lower):
+            raise TypeError("RVIR-v4 optimizer evaluation lower differs")
+        return lower
+
+    def _finalize_optimizer_trace(self, core_id: int) -> None:
+        from boundflow.runtime.rvir_v4_optimizer_mutation import (
+            ProductionOptimizerStepTraceV4,
+            ProductionOptimizerStepV4,
+            production_optimizer_step_trace_to_payload_v4,
+        )
+        from boundflow.runtime.rvir_v4_production_state import production_tensor_sha256
+
+        policy = self._core_mutation_policies.get(core_id)
+        rows = self._optimizer_rows.get(core_id, [])
+        if policy is None or len(rows) != policy.evaluation_count:
+            raise ValueError("RVIR-v4 optimizer production trace cardinality differs")
+        steps = []
+        for row in rows:
+            lower = row.get("lower")
+            state_tensors = row.get("state_tensors")
+            if not self.torch.is_tensor(lower) or not isinstance(state_tensors, tuple):
+                raise TypeError("RVIR-v4 optimizer captured raw tensors differ")
+            lower_tensor = cast(Any, lower)
+            steps.append(
+                ProductionOptimizerStepV4(
+                    core_id=int(row["core_id"]),
+                    call_id=int(row["call_id"]),
+                    parent_call_id=int(row["parent_call_id"]),
+                    evaluation_ordinal=int(row["evaluation_ordinal"]),
+                    updates_before=int(row["updates_before"]),
+                    update_after=bool(row["update_after"]),
+                    optimizer_step_ordinal=cast(
+                        int | None, row["optimizer_step_ordinal"]
+                    ),
+                    alpha_learning_rate=float(row["alpha_learning_rate"]),
+                    beta_learning_rate=float(row["beta_learning_rate"]),
+                    state_tensors=state_tensors,
+                    lower=lower_tensor,
+                    lower_sha256=production_tensor_sha256(lower_tensor),
+                )
+            )
+        trace = ProductionOptimizerStepTraceV4(policy, tuple(steps))
+        trace.validate()
+        self.optimizer_step_traces.append(
+            production_optimizer_step_trace_to_payload_v4(trace)
+        )
+        if self._pending_optimizer_call_id != steps[-1].call_id:
+            raise RuntimeError("RVIR-v4 final evaluation/update boundary differs")
+        self._pending_optimizer_call_id = None
+        self._active_adam = None
+
+    @contextmanager
+    def instrument_adam(self) -> Iterator[None]:
+        if not self.capture_optimizer_steps:
+            yield
+            return
+        adam = self.torch.optim.Adam
+        original_init = adam.__init__
+        original_step = adam.step
+
+        def wrapped_init(instance: Any, *args: Any, **kwargs: Any) -> None:
+            original_init(instance, *args, **kwargs)
+            if self._active_core_id is not None:
+                if self._active_adam is not None:
+                    raise RuntimeError("RVIR-v4 optimizer Adam instance repeats")
+                self._active_adam = instance
+
+        def wrapped_step(instance: Any, *args: Any, **kwargs: Any) -> Any:
+            if self._active_core_id is None or instance is not self._active_adam:
+                return original_step(instance, *args, **kwargs)
+            core_id = self._active_core_id
+            pending = self._pending_optimizer_call_id
+            rows = self._optimizer_rows.get(core_id, [])
+            if pending is None or not rows or rows[-1]["call_id"] != pending:
+                raise RuntimeError("RVIR-v4 Adam step lacks preceding evaluation")
+            expected = self._optimizer_update_counts.get(core_id, 0)
+            if rows[-1]["updates_before"] != expected:
+                raise RuntimeError("RVIR-v4 Adam step ordinal differs")
+            result = original_step(instance, *args, **kwargs)
+            rows[-1]["update_after"] = True
+            rows[-1]["optimizer_step_ordinal"] = expected
+            self._optimizer_update_counts[core_id] = expected + 1
+            self._pending_optimizer_call_id = None
+            return result
+
+        adam.__init__ = wrapped_init
+        adam.step = wrapped_step
+        try:
+            yield
+        finally:
+            adam.__init__ = original_init
+            adam.step = original_step
 
     @contextmanager
     def instrument_compute(self, bounded_module: Any) -> Iterator[None]:
@@ -418,6 +607,20 @@ class _CaptureObserver:
             before = capture_module_alpha_beta_state_v4(
                 instance.nodes(), require_beta=phase == "beta_split"
             )
+            optimizer_row: dict[str, Any] | None = None
+            if (
+                self.capture_optimizer_steps
+                and phase == "beta_split"
+                and self._active_core_id is not None
+            ):
+                if not self._call_stack:
+                    self._capture_mutation_policy(instance)
+                elif len(self._call_stack) == 1:
+                    optimizer_row = self._begin_optimizer_evaluation(
+                        call_id=call_id,
+                        parent_call_id=self._call_stack[-1],
+                        state_tensors=before,
+                    )
             row: dict[str, Any] = {
                 "call_id": call_id,
                 "parent_call_id": self._call_stack[-1] if self._call_stack else None,
@@ -441,6 +644,10 @@ class _CaptureObserver:
             try:
                 result = original(instance, *args, **kwargs)
                 row["result_tensors"] = _tensor_rows(result, "result", self.torch)
+                if optimizer_row is not None:
+                    lower = self._result_lower(result, self.torch)
+                    optimizer_row["lower"] = lower.detach().cpu().contiguous().clone()
+                    self._pending_optimizer_call_id = call_id
                 return result
             finally:
                 after = capture_module_alpha_beta_state_v4(
@@ -480,6 +687,8 @@ class _CaptureObserver:
             if pre_result is None:
                 raise ValueError("RVIR-v4 core pre_result is unavailable")
             policy = _optimizer_policy(self.arguments, kwargs)
+            if self.capture_optimizer_steps:
+                self._core_policies[core_id] = policy
             net = kwargs.get("net")
             if net is None:
                 raise ValueError("RVIR-v4 core network is unavailable")
@@ -489,6 +698,8 @@ class _CaptureObserver:
             self._active_core_id = core_id
             try:
                 result = original(*args, **kwargs)
+                if self.capture_optimizer_steps:
+                    self._finalize_optimizer_trace(core_id)
             finally:
                 self._active_core_id = None
             post = _build_core_post_snapshot(pre, result, core_id=core_id)
@@ -560,7 +771,9 @@ def _worker(args: argparse.Namespace) -> None:
         raise ValueError("RVIR-v4 auto_LiRPA commit differs")
     if _git_value(args.benchmark_root, "rev-parse", "HEAD") != VNNCOMP_COMMIT:
         raise ValueError("RVIR-v4 VNN-COMP commit differs")
-    observer = _CaptureObserver(torch, arguments)
+    observer = _CaptureObserver(
+        torch, arguments, capture_optimizer_steps=args.optimizer_step_trace
+    )
     with tempfile.TemporaryDirectory(prefix="boundflow-rvir-v4-property-") as workspace:
         isolated_property = Path(workspace) / args.property.name
         shutil.copy2(args.property, isolated_property)
@@ -580,6 +793,7 @@ def _worker(args: argparse.Namespace) -> None:
         )
         with (
             observer.instrument_compute(BoundedModule),
+            observer.instrument_adam(),
             observer.instrument_core(stage_solve),
         ):
             solver = ABCrownSolver(str(args.model), config=config)
@@ -587,7 +801,11 @@ def _worker(args: argparse.Namespace) -> None:
                 constraints=IOConstraints(vnnlib_path=str(isolated_property))
             )
     payload: dict[str, Any] = {
-        "schema_version": WORKER_SCHEMA_VERSION,
+        "schema_version": (
+            OPTIMIZER_WORKER_SCHEMA_VERSION
+            if args.optimizer_step_trace
+            else WORKER_SCHEMA_VERSION
+        ),
         "source": {
             "abcrown_commit": ABCROWN_COMMIT,
             "auto_lirpa_commit": AUTO_LIRPA_COMMIT,
@@ -616,6 +834,8 @@ def _worker(args: argparse.Namespace) -> None:
         "cores": observer.cores,
         "performance_claimed": False,
     }
+    if args.optimizer_step_trace:
+        payload["optimizer_step_traces"] = observer.optimizer_step_traces
     args.result.parent.mkdir(parents=True, exist_ok=True)
     torch.save(payload, args.result)
     print(
@@ -624,6 +844,7 @@ def _worker(args: argparse.Namespace) -> None:
                 "status": payload["solver_result"]["status"],
                 "call_count": len(observer.calls),
                 "core_count": len(observer.cores),
+                "optimizer_step_trace_count": len(observer.optimizer_step_traces),
             }
         )
     )

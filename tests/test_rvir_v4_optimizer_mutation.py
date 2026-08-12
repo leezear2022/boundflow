@@ -17,10 +17,20 @@ from boundflow.runtime.native_alpha_beta_optimization_state import (
 )
 from boundflow.runtime.rvir_v4_optimizer_mutation import (
     ProductionMutationPolicyV4,
+    ProductionOptimizerStepTraceV4,
+    ProductionOptimizerStepV4,
     capture_production_optimizer_controls_v4,
     production_optimizer_controls_from_payload_v4,
+    production_optimizer_step_trace_from_payload_v4,
+    production_optimizer_step_trace_to_payload_v4,
 )
-from boundflow.runtime.rvir_v4_production_state import ProductionOptimizerPolicyV4
+from boundflow.runtime.rvir_v4_production_state import (
+    OwnedProductionTensorV4,
+    ProductionOptimizerPolicyV4,
+    ProductionTensorOwnership,
+    ProductionTensorRole,
+    production_tensor_sha256,
+)
 from boundflow.runtime.task_executor import InputSpec
 
 
@@ -54,10 +64,10 @@ def _controls_args() -> dict[str, object]:
         "use_float64_in_last_iteration": False,
         "pruning_in_iteration": True,
         "pruning_in_iteration_threshold": 0.2,
-        "max_time": 1e9,
+        "max_time": 60.0,
         "enable_alpha_crown": True,
         "enable_beta_crown": True,
-        "init_alpha": True,
+        "init_alpha": False,
         "use_shared_alpha": False,
         "apply_output_constraints_to": [],
         "directly_optimize": [],
@@ -96,6 +106,88 @@ def _module() -> BFTaskModule:
                 "b2": torch.tensor([0.0]),
             }
         },
+    )
+
+
+def _owned(
+    *, path: str, role: ProductionTensorRole, value: torch.Tensor, ordinal: int
+) -> OwnedProductionTensorV4:
+    ownership = (
+        ProductionTensorOwnership.MUTABLE_COPY_OUT
+        if role in {ProductionTensorRole.ALPHA, ProductionTensorRole.BETA_VALUE}
+        else ProductionTensorOwnership.COPY_IN
+    )
+    return OwnedProductionTensorV4.own(
+        semantic_path=path,
+        role=role,
+        axes=tuple(f"axis_{axis}" for axis in range(value.ndim)),
+        value=value,
+        ownership=ownership,
+        alias_group=f"alias:{ordinal:06d}",
+    )
+
+
+def _step_state(step: int) -> tuple[OwnedProductionTensorV4, ...]:
+    tensors: list[OwnedProductionTensorV4] = []
+    for layer in range(6):
+        tensors.append(
+            _owned(
+                path=f"alpha/layer-{layer}/start",
+                role=ProductionTensorRole.ALPHA,
+                value=torch.full((2, 1, 6, 1), 0.1 * step + layer / 100.0),
+                ordinal=len(tensors),
+            )
+        )
+    for layer in range(6):
+        tensors.extend(
+            (
+                _owned(
+                    path=f"beta/layer-{layer}/value",
+                    role=ProductionTensorRole.BETA_VALUE,
+                    value=torch.full(
+                        (6, 1), 0.01 * step if layer == 0 else layer / 100.0
+                    ),
+                    ordinal=len(tensors),
+                ),
+                _owned(
+                    path=f"beta/layer-{layer}/location",
+                    role=ProductionTensorRole.BETA_LOCATION,
+                    value=torch.full((6, 1), layer, dtype=torch.int64),
+                    ordinal=len(tensors) + 1,
+                ),
+                _owned(
+                    path=f"beta/layer-{layer}/sign",
+                    role=ProductionTensorRole.BETA_SIGN,
+                    value=torch.ones((6, 1)),
+                    ordinal=len(tensors) + 2,
+                ),
+            )
+        )
+    return tuple(sorted(tensors, key=lambda tensor: tensor.semantic_path))
+
+
+def _step_trace() -> ProductionOptimizerStepTraceV4:
+    steps: list[ProductionOptimizerStepV4] = []
+    for ordinal in range(10):
+        lower = torch.full((6, 1), -1.0 + ordinal / 100.0)
+        steps.append(
+            ProductionOptimizerStepV4(
+                core_id=0,
+                call_id=11 + ordinal,
+                parent_call_id=10,
+                evaluation_ordinal=ordinal,
+                updates_before=ordinal,
+                update_after=ordinal < 9,
+                optimizer_step_ordinal=ordinal if ordinal < 9 else None,
+                alpha_learning_rate=0.01 * 0.98**ordinal,
+                beta_learning_rate=0.05 * 0.98**ordinal,
+                state_tensors=_step_state(ordinal),
+                lower=lower,
+                lower_sha256=production_tensor_sha256(lower),
+            )
+        )
+    return ProductionOptimizerStepTraceV4(
+        mutation_policy=_mutation_policy(), steps=tuple(steps)
     )
 
 
@@ -146,10 +238,99 @@ def test_missing_or_unadmitted_optimizer_controls_fail_closed() -> None:
     with pytest.raises(ValueError, match="not admitted"):
         ProductionMutationPolicyV4(_production_policy(), controls).validate()
 
+    with pytest.raises(ValueError, match="not admitted"):
+        ProductionMutationPolicyV4(
+            _production_policy(), replace(_mutation_policy().controls, init_alpha=True)
+        ).validate()
+
     payload = _mutation_policy().controls.to_dict()
     payload["keep_best"] = "true"
     with pytest.raises(TypeError, match="boolean fields"):
         production_optimizer_controls_from_payload_v4(payload)
+
+    live = _controls_args()
+    live["keep_best"] = "true"
+    with pytest.raises(TypeError, match="live boolean fields"):
+        capture_production_optimizer_controls_v4(live, cuts_enabled=False)
+
+
+def test_ten_step_trace_raw_payload_semantically_replays() -> None:
+    trace = _step_trace()
+    payload = production_optimizer_step_trace_to_payload_v4(trace)
+
+    replayed = production_optimizer_step_trace_from_payload_v4(payload)
+
+    assert replayed.metadata() == trace.metadata()
+    assert replayed.metadata()["evaluation_count"] == 10
+    assert replayed.metadata()["update_count"] == 9
+    assert len(replayed.steps[0].state_tensors) == 24
+
+
+def test_step_trace_tensor_tamper_is_rejected() -> None:
+    payload = production_optimizer_step_trace_to_payload_v4(_step_trace())
+    steps = payload["steps"]
+    assert isinstance(steps, list)
+    lower = steps[3]["lower"]
+    assert torch.is_tensor(lower)
+    lower[0, 0] += 1.0
+
+    with pytest.raises(ValueError, match="identity/result differs"):
+        production_optimizer_step_trace_from_payload_v4(payload)
+
+
+def test_step_trace_copy_in_drift_rejected_with_valid_tensor_digest() -> None:
+    trace = _step_trace()
+    changed_steps = list(trace.steps)
+    state = list(changed_steps[5].state_tensors)
+    target = next(
+        index
+        for index, tensor in enumerate(state)
+        if tensor.role == ProductionTensorRole.BETA_LOCATION
+    )
+    original = state[target]
+    state[target] = _owned(
+        path=original.semantic_path,
+        role=original.role,
+        value=original.value + 1,
+        ordinal=target,
+    )
+    changed_steps[5] = replace(changed_steps[5], state_tensors=tuple(state))
+
+    with pytest.raises(ValueError, match="schema/copy-in drift"):
+        ProductionOptimizerStepTraceV4(
+            mutation_policy=trace.mutation_policy, steps=tuple(changed_steps)
+        ).validate()
+
+
+def test_step_trace_loop_and_mutation_count_tamper_fail_closed() -> None:
+    trace = _step_trace()
+    wrong_ordinal = list(trace.steps)
+    wrong_ordinal[4] = replace(wrong_ordinal[4], updates_before=3)
+    with pytest.raises(ValueError, match="identity/result differs|loop semantics"):
+        ProductionOptimizerStepTraceV4(
+            mutation_policy=trace.mutation_policy, steps=tuple(wrong_ordinal)
+        ).validate()
+
+    wrong_schedule = list(trace.steps)
+    wrong_schedule[2] = replace(wrong_schedule[2], alpha_learning_rate=0.01)
+    with pytest.raises(ValueError, match="learning-rate schedule"):
+        ProductionOptimizerStepTraceV4(
+            mutation_policy=trace.mutation_policy, steps=tuple(wrong_schedule)
+        ).validate()
+
+    wrong_mutation = list(trace.steps)
+    state = list(wrong_mutation[1].state_tensors)
+    unchanged_alpha = next(
+        index
+        for index, tensor in enumerate(state)
+        if tensor.role == ProductionTensorRole.ALPHA
+    )
+    state[unchanged_alpha] = trace.steps[0].state_tensors[unchanged_alpha]
+    wrong_mutation[1] = replace(wrong_mutation[1], state_tensors=tuple(state))
+    with pytest.raises(ValueError, match="mutation count"):
+        ProductionOptimizerStepTraceV4(
+            mutation_policy=trace.mutation_policy, steps=tuple(wrong_mutation)
+        ).validate()
 
 
 @pytest.mark.parametrize(

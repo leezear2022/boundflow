@@ -12,8 +12,11 @@
 
 RVIR-v4当前入口：`gemini_doc/rvir_v4_optimizer_mutation_plan_2026_08_13.md`。V4-1已关闭
 post-state独立复算；V4-2预注册冻结10 evaluation/9 update、双学习率、逐step parity与atomic
-copy-out门禁。配套记录为
-`gemini_doc/change_2026-08-13_rvir_v4_optimizer_mutation_preregistration.md`。B2仍关闭。
+copy-out门禁。V4-2B typed step trace、真实Adam-step observer与formal artifact runner已经实现并通过
+CPU级语义/篡改测试，但正式GPU artifact仍被driver/library mismatch和CUDA error 803阻塞；因此状态为
+`IMPLEMENTED-CAPTURE-READY`，不是V4-2B closure。配套记录为
+`gemini_doc/change_2026-08-13_rvir_v4_optimizer_mutation_preregistration.md`与
+`gemini_doc/change_2026-08-13_rvir_v4_optimizer_step_trace.md`。B2仍关闭。
 
 ---
 

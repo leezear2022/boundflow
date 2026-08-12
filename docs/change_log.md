@@ -4950,3 +4950,22 @@
 **记录**
 - `gemini_doc/rvir_v4_optimizer_mutation_plan_2026_08_13.md`
 - `gemini_doc/change_2026-08-13_rvir_v4_optimizer_mutation_preregistration.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-2B Optimizer Step Trace 与生产捕获器
+
+- 新增10 evaluation/9 update typed trace，逐step绑定24个raw α/SparseBeta tensors、lower、
+  call lineage、真实Adam step ordinal及双LR `0.01/0.05 × 0.98**ordinal`；
+- production observer只在active core的outer optimized call中捕获，并hook真实Adam init/step；额外
+  parameter group、调用/step错序和缺失live controls均fail closed；
+- 新增正式GPU artifact generate/replay runner，绑定三仓/model/property/code/file digest、24-call
+  phase tree、core policy与raw trace语义；不生成CPU替代工件；
+- provider赋值链复核修正live `init_alpha=false/max_time=60.0 s`，并新增相反配置拒绝测试；
+- focused V4-2/V4-0=`31 passed`，首轮full=`1108 passed, 39 skipped`，mypy clean，
+  Pylint=`10.00/10`；正式GPU run仍因NVML mismatch/
+  CUDA error 803 fail closed，V4-2B/V4-2/B2保持未关闭，`performance_claimed=false`。
+
+**记录**
+- `gemini_doc/rvir_v4_optimizer_mutation_plan_2026_08_13.md`
+- `gemini_doc/change_2026-08-13_rvir_v4_optimizer_step_trace.md`

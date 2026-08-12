@@ -3,9 +3,11 @@
 > 生效日期：2026-07-12
 > 当前 integration base：`331086d`（NRIR-39 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
-> 当前研发分支：`feat/fsg2-rvir-v3-replacement-correctness-v1`；FSG2 revisions=
-> `aa31eae`/`8bf6981`；FSG0、FSG1均已验证；FSG2以initial-only validated-reduced关闭，完整B2
-> replacement未准入，FSG3—FSG5依赖门禁停止
+> 当前研发分支：`feat/rvir-v4-production-state-ownership-v1`。FSG2历史 revisions=
+> `aa31eae`/`8bf6981`；FSG0、FSG1均已验证；FSG2 initial-only validated-reduced与完整B2未准入的
+> 历史结论仍成立。RVIR-v4现已关闭V4-1 frozen-state evaluation，V4-2A只关闭双LR/10-9 loop
+> 子合同；V4-2B step trace/capture runner已实现但formal GPU artifact仍阻塞，故完整replacement、
+> B2及FSG3—FSG5仍未准入。
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed

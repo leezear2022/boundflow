@@ -131,8 +131,11 @@ V4-2必须同时满足：
 V4-2B开工审计确认V4-0 snapshot中的8字段policy只是核心子集；逐step等价还受以下正式默认配置影响：
 optimizer=`adam`、lr decay=`0.98`、keep-best=`true`、loss reduction=`sum`、early-stop patience=`10`、
 start-save-best=`0.5`、last-iteration fp64=`false`、pruning-in-iteration=`true`、threshold=`0.2`、
-max-time=`1e9`、alpha/beta enabled、init-alpha、shared-alpha、output constraints、direct optimization、
-input tightening与cuts。
+alpha/beta enabled、init-alpha、shared-alpha、output constraints、direct optimization、input tightening与
+cuts。对固定协议继续沿provider赋值链复核后，beta core的live `init_alpha=false`：α已由pre-state
+attach，不应在optimized call内重新初始化；`max_time=60.0 s`，来自alpha-CROWN默认比例`1.0`乘本协议
+`bab/timeout=60`后被beta配置继承。此前草案中的`init_alpha=true/max_time=1e9`不是该production call
+的live值，已修正，并加入相反配置的fail-closed测试。
 
 因此V4-2A的`VALIDATED-POLICY-CONTRACT`精确解释为“双学习率与loop cardinality子合同”，不是完整
 optimizer policy ownership。V4-2B先实现上述controls的live-boundary capture、canonical hash与
@@ -142,3 +145,33 @@ V4-2B controls schema第一切片已实现：18项controls进入canonical payloa
 全集，replay parser要求exact字段集合与严格bool/list/numeric类型；cuts、output constraints、direct
 optimization等当前路线未准入配置fail closed。focused=`10 passed`，mypy clean，typed policy模块
 Pylint=`10.00/10`。尚未接入provider step capture，也未生成formal artifact。
+
+## 9. V4-2B Step Trace 与 Capture Runner 实现状态
+
+状态：`IMPLEMENTED-CAPTURE-READY / FORMAL-ARTIFACT-BLOCKED`；不是V4-2B正式关闭，更不是V4-2关闭。
+
+- 新增typed `ProductionOptimizerStepV4/TraceV4`：每个step保存core/call/parent lineage、evaluation与
+  observed Adam step ordinal、是否update、当步α/β实际learning rate、24个raw α/SparseBeta tensor及
+  lower raw tensor；canonical payload/hash明确包含`performance_claimed=false`；
+- 固定workload门禁要求每步`6 alpha + 6 beta value + 6 beta location + 6 beta sign`，mutable为
+  alpha/value，location/sign为稳定copy-in；相邻step必须恰有7个mutable tensor改变；
+- trace把production LR `0.01/0.05`与scheduler decay `0.98**ordinal`逐步绑定，不再只根据调用数量
+  推断更新；最后一次evaluation没有Adam step，前9次必须各观察到一次真实`Adam.step()`；
+- production observer只在一个active `update_bounds_core`内、一个outer optimized call下捕获10个
+  depth-1 beta calls；同时从live `BoundedModule.bound_opts`捕获18项controls。额外Adam parameter group、
+  调用/step错序、缺失policy、提前/重复update均fail closed；作用域退出后恢复原provider methods；
+- 新增正式artifact runner，worker固定真实CUDA、三仓commit、模型/property digest、24-call phase tree、
+  core policy与trace lineage；replay从raw tensor重建typed trace，并复核manifest/code/file digest；
+- CPU测试通过一个真实PyTorch Adam + ExponentialLR的嵌套10-evaluation执行验证observer，确认不是静态
+  拼装；raw lower、copy-in、ordinal、LR schedule、mutation count、source identity与parameter group
+  tamper均有拒绝路径；
+- 定向V4-2/V4-0回归=`31 passed`；首轮及最终文件冻结全量复跑均为
+  `1108 passed, 39 skipped`；mypy五文件clean；Pylint五文件=`10.00/10`；
+- 当前运行内核`7.1.5`加载NVIDIA module `610.43.03`，而已安装内核`7.1.8`及用户态NVIDIA library
+  `610.57.04`；GPU probe因此仍为NVML driver/library mismatch与`cudaGetDeviceCount error 803`。
+  formal worker按设计在CUDA admission处失败且不落工件。不得使用CPU synthetic trace代替formal
+  production artifact。
+
+下一动作：修复GPU driver/library一致性后，从clean committed source运行formal artifact generation，
+再完成original replay与重签名state/step/result/policy tamper probes。只有这些通过，V4-2B才可关闭并进入
+V4-2C pre-state native initializer；B2继续关闭。
