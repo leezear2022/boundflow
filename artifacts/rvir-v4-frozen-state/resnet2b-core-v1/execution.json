@@ -1,0 +1,47 @@
+{
+  "expected_shape": [
+    6,
+    1
+  ],
+  "fallback_dispatch_count": 0,
+  "ir_hashes": {
+    "execution_bound_module_hash": "ac35c3c1d1f23c26ed6e2377e624a55b07640faf0f85fb6216dd9b04432a3923",
+    "execution_plan_instance_hash": "7ebd14c6b94cf272cf265ae19ad05157f092b5e861353b86711fed9b3d9e7c42",
+    "execution_plan_template_hash": "8085e0cbef732406f58ef0e83d39791abe2f4690a7f7e231a18d8e0aaa52245f",
+    "representation_binding_hash": "4131cde3fe29cab2782378df8e584818b8e923f24b2273f884df23fdbf51c00d",
+    "schedule_hash": "996dcada8000714a8f9a044a07d039349f99dcdb93260b464f97916c445abd4b",
+    "source_bound_module_hash": "ac35c3c1d1f23c26ed6e2377e624a55b07640faf0f85fb6216dd9b04432a3923",
+    "source_plan_instance_hash": "a56f09b60dd98a12eb12ee9f580e30bac27eafa397115305ea7bcdb671d2b68e",
+    "source_plan_template_hash": "f8612fa08dfe046b520415c4e840ed8197fc92358a4856d8f57c4fe5fae50c1c",
+    "source_schedule_hash": "30c8ebe2c74ccef937bb2134783ae9bccd13e796eea5991a0544736a548771ac",
+    "task_module_hash": "b901bec5b22cc906365cc9c55cdd27ad2a4a949c1ba4facedc11dcce11cc4d85"
+  },
+  "lower_allclose": true,
+  "lower_max_abs_diff": 2.0265579223632812e-06,
+  "native_lower": [
+    -0.36196160316467285,
+    -0.4186352491378784,
+    -0.47125422954559326,
+    -0.3577536344528198,
+    -0.43862903118133545,
+    -0.4879777431488037
+  ],
+  "original_callback_count": 0,
+  "performance_claimed": false,
+  "production_lower": [
+    -0.36196041107177734,
+    -0.41863566637039185,
+    -0.471254825592041,
+    -0.3577544689178467,
+    -0.4386270046234131,
+    -0.48797881603240967
+  ],
+  "replacement_dispatch_count": 1,
+  "result_shape": [
+    6,
+    1
+  ],
+  "sign_agreement": 6,
+  "sign_total": 6,
+  "state_hash": "8f8cd55d995ffcc1e14da353d944e8c2b73867e683a5d0af0fce6997a1b793fe"
+}

@@ -1,0 +1,15 @@
+{
+  "b2_same_solver_timing_admitted": false,
+  "core_count": 1,
+  "domain_count": 6,
+  "fallback_dispatch_count": 0,
+  "lower_max_abs_diff": 2.0265579223632812e-06,
+  "optimizer_mutation_replacement_admitted": false,
+  "original_callback_count": 0,
+  "performance_claimed": false,
+  "sign_agreement": 6,
+  "sign_total": 6,
+  "status": "validated_reduced_frozen_state_evaluation",
+  "summary_hash": "3541318b226ffd28cad0862e1b43055cc701d0973144cb58f4e17122a49f60e9",
+  "workload_id": "cifar10_resnet:000"
+}

@@ -211,3 +211,28 @@ Python字典exact equality，强于V4-1已经预注册的`atol=rtol=2e-4`数值�
 - 容差内数值漂移必须replay通过，容差外漂移必须fail closed。
 
 修正代码提交并重新生成正式artifact前，V4-1、V4-2与B2准入状态不变。
+
+## V4-1 Formal Closure
+
+状态：`VALIDATED-REDUCED-FROZEN-STATE-EVALUATION`；V4-1关闭，V4-2准入，B2不准入。
+
+| 证据 | 正式结果 |
+|---|---|
+| source commit | `c74a2049d3d2484aade7fd5b3dd805df53823d78` |
+| artifact | `artifacts/rvir-v4-frozen-state/resnet2b-core-v1` |
+| manifest hash | `ba6ee2fc32109adc38326d58f7253a0cdeba2dd988ccb957f7a626d6544adf95` |
+| summary hash | `3541318b226ffd28cad0862e1b43055cc701d0973144cb58f4e17122a49f60e9` |
+| topology/state hash | `9be36162…bca35` / `8f8cd55d…793fe` |
+| real core/domain | `1/6` |
+| lower parity | max diff=`2.0265579223632812e-06`，sign=`6/6` |
+| IR/dispatch | 10 hashes；replacement/original/fallback=`1/0/0` |
+| semantic replay | original PASS；topology/state resigned tamper拒绝；`1e-6`数值漂移准入；`1e-2`拒绝 |
+| validation | focused=`21 passed`；full=`1092 passed, 39 skipped`；mypy clean；Pylint=`10.00/10` |
+
+该关闭只说明真实solver core的post α/β/split/intermediate state已能脱离provider callback，经BoundFlow
+五层IR独立复算lower。它没有把pre-state推进到post-state：10-step optimizer mutation、learning-rate
+policy、stop criterion、mutable copy-out和原子提交仍属于V4-2。因此B2 same-solver timing继续关闭，
+不得用本artifact的capture/replay时延形成性能claim。
+
+下一动作固定为V4-2预注册：冻结同一core的pre/post mutation逐tensor判据、10-step policy、callback/
+fallback=`0/0`、state copy-out atomicity和失败回滚，然后才实现optimizer replacement。

@@ -4913,6 +4913,11 @@
 - 首次全量回归为`1089 passed, 39 skipped, 1 failed`；唯一失败定位为replay对CPU浮点执行投影做
   整份JSON exact比较。修正为离散结构/hash/count exact、finite数值按预注册`2e-4`比较，并新增
   容差内/外正负测试；重新冻结artifact并全量通过前不关闭V4-1。
+- V4-1正式artifact绑定`c74a204`，manifest/summary hash=`ba6ee2fc…adf95`/
+  `3541318b…60e9`；6-child lower max diff=`2.0265579223632812e-06`、sign=`6/6`、IR hashes=10、
+  replacement/original/fallback=`1/0/0`。原样replay、topology/state重签名篡改拒绝、容差内/外数值
+  正负测试全部通过；focused=`21 passed`，full=`1092 passed, 39 skipped`，mypy clean，Pylint
+  `10.00/10`。V4-1以`VALIDATED-REDUCED`关闭并准入V4-2预注册；B2仍关闭，无性能claim。
 
 **记录**
 - `gemini_doc/rvir_v4_production_state_ownership_plan_2026_08_06.md`
