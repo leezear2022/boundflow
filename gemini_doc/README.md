@@ -10,6 +10,13 @@
 
 ---
 
+RVIR-v4当前入口：`gemini_doc/rvir_v4_optimizer_mutation_plan_2026_08_13.md`。V4-1已关闭
+post-state独立复算；V4-2预注册冻结10 evaluation/9 update、双学习率、逐step parity与atomic
+copy-out门禁。配套记录为
+`gemini_doc/change_2026-08-13_rvir_v4_optimizer_mutation_preregistration.md`。B2仍关闭。
+
+---
+
 当前权威研究入口：
 `gemini_doc/BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md`。FSG0 的作用域
 纠正、全栈 schema、feature activation ledger 与 replay 合同已以20项定向测试和

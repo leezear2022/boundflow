@@ -4922,3 +4922,26 @@
 **记录**
 - `gemini_doc/rvir_v4_production_state_ownership_plan_2026_08_06.md`
 - `gemini_doc/change_2026-08-06_rvir_v4_corrected_production_capture.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-2 Optimizer Mutation 预注册
+
+- 从正式capture与provider源码冻结production策略：10次evaluation、9次update、alpha/beta LR=
+  `0.01/0.05`、lower-only、fixed intermediate、batch-any stop；
+- 当前native实现只有统一lr、`steps+1` evaluation并重建IBP intermediate，不能直接宣称replacement；
+- V4-2拆成policy/iteration、逐step artifact、pre-state mapper、10-step mutation、atomic copy-out；
+- formal gate要求1 core/6 domains/12 receipts/7 changed、逐step与final数值`2e-4`、callback/fallback=
+  `0/0`及重签名tamper拒绝；
+- 当前CUDA因driver/library mismatch不可用，只阻塞正式step-trace artifact；下一动作是CPU可验证的
+  V4-2A typed policy合同。无optimizer parity或性能claim，B2保持关闭。
+- V4-2A开始实现独立alpha/beta Adam parameter groups与production iteration typed adapter；旧统一lr
+  payload保持兼容，非lower-only/fixed-intermediate/batch-any策略fail closed。验证完成前不升级claim。
+- 同步清理被触及optimizer模块的既有mypy narrowing/变量重名/linear-operator协议注解，不改变数值语义。
+- V4-2A以`VALIDATED-POLICY-CONTRACT`关闭：distinct Adam LR=`0.01/0.05`，production
+  evaluation/update=`10/9`，旧统一lr兼容及非法策略负向门禁通过；focused=`17 passed`，full=
+  `1100 passed, 39 skipped`，mypy clean，新/typed policy模块Pylint=`10.00/10`。V4-2总体与B2仍关闭。
+
+**记录**
+- `gemini_doc/rvir_v4_optimizer_mutation_plan_2026_08_13.md`
+- `gemini_doc/change_2026-08-13_rvir_v4_optimizer_mutation_preregistration.md`
