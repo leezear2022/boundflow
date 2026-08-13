@@ -439,8 +439,9 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 - 新增36-run typed raw contract、固定顺序、cold/query/core/GPU/compile/memory指标；
 - replay只用control生成B0/candidate paired statistics，同时重算profile扰动、semantic、provider、环境和
   break-even门禁；
-- 顺序/删run/provider/scope/semantic/profile/environment负向测试均通过；targeted=`13 passed`、full=
-  `1213 passed, 3 skipped`、mypy clean、Pylint=`10.00/10`；
+- 顺序/删run/provider/scope/semantic/profile/environment负向测试均通过；初始targeted=`13 passed`、full=
+  `1213 passed, 3 skipped`；upper-sentinel amendment后targeted=`14 passed`，post-amendment full延后到
+  real-worker切片统一执行；mypy clean、Pylint=`10.00/10`；
 - 当前=`IMPLEMENTED-SCHEMA-REPLAY / REAL-WORKER-PENDING`，无真实timing或speedup claim。
 
 ## 13. Rollback

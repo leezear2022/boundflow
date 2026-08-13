@@ -39,6 +39,7 @@ def _semantics() -> FSG3SemanticResult:
         lower_values=(-0.4, -0.2),
         upper_shape=(2,),
         upper_values=(0.3, 0.5),
+        upper_positive_infinity_mask=(False, False),
         final_decision=((5, 27), (5, 32), (5, 90), (5, 90), (5, 32), (5, 90)),
         split_depth=1,
         batch_size=6,
@@ -168,6 +169,18 @@ def test_b2_cold_scope_must_include_compile_and_query() -> None:
             b2,
             metrics=replace(b2.metrics, cold_total_ns=b2.metrics.query_wall_ns),
         ).validate()
+
+
+def test_lower_only_positive_infinity_upper_uses_canonical_mask() -> None:
+    semantic = replace(
+        _semantics(),
+        upper_values=(0.0, 0.0),
+        upper_positive_infinity_mask=(True, True),
+    )
+    semantic.validate()
+    assert semantic.to_dict()["upper_positive_infinity_mask"] == [True, True]
+    with pytest.raises(ValueError, match="placeholder differs"):
+        replace(semantic, upper_values=(1.0, 0.0)).validate()
 
 
 def test_control_cannot_smuggle_profile_projection() -> None:

@@ -1569,6 +1569,7 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - `FSG3-G`：correctness/no-fallback、GPU排他、profile/control `<=1.05`、raw semantic replay与同步重签
   tamper为硬门禁；
 - `FSG3-S`：typed schema/replay已实现，顺序/删run/provider/scope/semantic/profile/environment等13项合同
-  测试通过，full=`1213 passed, 3 skipped`；
+  与1项lower-only upper-mask amendment测试通过；初始full=`1213 passed, 3 skipped`，post-amendment
+  full显式延后到real-worker切片；
 - `FSG3-L`：状态=`IMPLEMENTED-SCHEMA-REPLAY / REAL-WORKER-PENDING`；没有timing artifact或speedup
   claim，B3仍待FSG3可审计关闭。

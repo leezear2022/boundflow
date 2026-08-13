@@ -5239,3 +5239,12 @@
 
 **记录**
 - `gemini_doc/change_2026-08-13_fsg3_timing_schema_replay.md`
+
+## 2026-08-13：FSG3 Lower-Only Upper Sentinel Pre-Run Amendment
+
+- 在任何FSG3 real timing前修正预注册与已知production lower-only事实的冲突；
+- upper改为finite canonical payload + exact positive-infinity mask，NaN/`-inf`继续fail closed；
+- 不改变顺序、scope、统计或性能门禁。
+
+**记录**
+- `gemini_doc/change_2026-08-13_fsg3_lower_only_upper_sentinel_amendment.md`

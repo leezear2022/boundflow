@@ -137,7 +137,8 @@ ceil(median(boundflow_compile_ns) /
 
 - status/success/visited domains、queue before/input/accepted/pruned/after、depth/history/threshold identity；
 - final decision、split depth、batch size、n_verified/n_splits；
-- target post lower/upper全部finite，B0/B1/B2同block sign exact，`atol=rtol=2e-4`；
+- target post lower全部finite；upper按§13 pre-run amendment使用finite payload + positive-infinity mask，
+  B0/B1/B2同block mask/sign exact，有限值`atol=rtol=2e-4`；
 - B0 vs B1离散结果exact；B0 vs B2离散结果exact；
 - B1 typed request恰一次validate + provider core恰一次；
 - B2 provider core/compute/update/fallback=`0/0/0/0`；
@@ -223,3 +224,14 @@ manifest digest，也必须被raw语义重算或冻结协议拒绝。
 本预注册不声称B2更快，不声称BoundFlow已经实现TIR/fusion/JIT/multi-stream/arena，不声称固定
 max_iterations=1等于31-node queue或complete-query headline，也不改变ASPLOS-ready=`NO`。它只把
 下一次性能实验变成可证伪、可重放、不会事后挑指标的FSG3 baseline。
+
+## 13. Pre-Run Amendment 1：Lower-Only Upper Sentinel
+
+该修订发生在任何FSG3 real worker或正式timing结果生成之前。V4-3 formal evidence已明确本固定路径为
+lower-only，provider与candidate的upper使用`+inf`作为“未请求”哨兵；原§6“lower/upper全部finite”与
+已知production事实冲突。
+
+修订后的canonical raw表示为：lower必须全部finite；upper保存同shape的finite数值数组与独立
+`upper_positive_infinity_mask`，mask为true的位置数值固定编码为`0.0`。跨配置/mode比较要求mask exact，
+只对mask=false的位置执行`2e-4` allclose与soundness检查。NaN、`-inf`、未掩码`+inf`继续fail closed。
+该修订不改变计时顺序、指标或性能门禁，也不是观察结果后的调参。

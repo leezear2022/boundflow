@@ -179,6 +179,7 @@ class FSG3SemanticResult:  # pylint: disable=too-many-instance-attributes
     lower_values: Tuple[float, ...]
     upper_shape: Tuple[int, ...]
     upper_values: Tuple[float, ...]
+    upper_positive_infinity_mask: Tuple[bool, ...]
     final_decision: Tuple[Tuple[int, int], ...]
     split_depth: int
     batch_size: int
@@ -225,10 +226,19 @@ class FSG3SemanticResult:  # pylint: disable=too-many-instance-attributes
             raise ValueError("FSG3 semantic tensor shape differs")
         if not self.lower_values or not self.upper_values:
             raise ValueError("FSG3 semantic tensor is empty")
-        if not all(
-            math.isfinite(value) for value in (*self.lower_values, *self.upper_values)
-        ):
+        if not all(math.isfinite(value) for value in self.lower_values):
             raise ValueError("FSG3 semantic tensor is non-finite")
+        if len(self.upper_positive_infinity_mask) != len(self.upper_values):
+            raise ValueError("FSG3 upper infinity mask shape differs")
+        if not all(math.isfinite(value) for value in self.upper_values):
+            raise ValueError("FSG3 encoded upper tensor is non-finite")
+        if any(
+            is_infinite and value != 0.0
+            for value, is_infinite in zip(
+                self.upper_values, self.upper_positive_infinity_mask
+            )
+        ):
+            raise ValueError("FSG3 upper infinity placeholder differs")
 
     def to_dict(self) -> dict[str, object]:
         """Return the stable semantic payload."""
@@ -249,6 +259,7 @@ class FSG3SemanticResult:  # pylint: disable=too-many-instance-attributes
             "lower_values": list(self.lower_values),
             "upper_shape": list(self.upper_shape),
             "upper_values": list(self.upper_values),
+            "upper_positive_infinity_mask": list(self.upper_positive_infinity_mask),
             "final_decision": [list(value) for value in self.final_decision],
             "split_depth": self.split_depth,
             "batch_size": self.batch_size,
@@ -478,6 +489,7 @@ def _semantics_from_dict(value: Mapping[str, Any]) -> FSG3SemanticResult:
         "lower_values",
         "upper_shape",
         "upper_values",
+        "upper_positive_infinity_mask",
         "final_decision",
         "split_depth",
         "batch_size",
@@ -513,6 +525,12 @@ def _semantics_from_dict(value: Mapping[str, Any]) -> FSG3SemanticResult:
         ),
         upper_values=tuple(
             float(item) for item in _sequence(value["upper_values"], "upper values")
+        ),
+        upper_positive_infinity_mask=tuple(
+            bool(item)
+            for item in _sequence(
+                value["upper_positive_infinity_mask"], "upper infinity mask"
+            )
         ),
         final_decision=decision,
         split_depth=int(value["split_depth"]),
@@ -658,6 +676,7 @@ def _semantic_pair_failures(
         "history_count",
         "lower_shape",
         "upper_shape",
+        "upper_positive_infinity_mask",
         "final_decision",
         "split_depth",
         "batch_size",
@@ -675,6 +694,8 @@ def _semantic_pair_failures(
             failures.append(f"{label}:{polarity}:length-differs")
             continue
         for index, (expected, actual) in enumerate(zip(baseline, observed)):
+            if polarity == "upper" and reference.upper_positive_infinity_mask[index]:
+                continue
             tolerance = _float_tolerance(expected)
             if abs(actual - expected) > tolerance:
                 failures.append(f"{label}:{polarity}[{index}]:allclose-failed")
