@@ -1,0 +1,4565 @@
+{
+  "evaluation_count": 10,
+  "mutation_policy": {
+    "controls": {
+      "apply_output_constraints_to": [],
+      "cuts_enabled": false,
+      "directly_optimize": [],
+      "early_stop_patience": 10,
+      "enable_alpha_crown": true,
+      "enable_beta_crown": true,
+      "init_alpha": false,
+      "keep_best": true,
+      "loss_reduction_id": "auto_LiRPA.utils.reduction_sum",
+      "lr_decay": 0.98,
+      "max_time": 60.0,
+      "optimizer": "adam",
+      "pruning_in_iteration": true,
+      "pruning_in_iteration_threshold": 0.2,
+      "start_save_best": 0.5,
+      "tighten_input_bounds": false,
+      "use_float64_in_last_iteration": false,
+      "use_shared_alpha": false
+    },
+    "evaluation_count": 10,
+    "iteration_semantics": "evaluate-n-update-n-minus-one/v1",
+    "production": {
+      "alpha_learning_rate": 0.01,
+      "beta_learning_rate": 0.05,
+      "bound_lower": true,
+      "bound_upper": false,
+      "deterministic": false,
+      "fix_intermediate_bounds": true,
+      "iteration": 10,
+      "stop_criterion_id": "auto_LiRPA.utils.stop_criterion_batch_any.<locals>.<lambda>"
+    },
+    "update_count": 9
+  },
+  "mutation_policy_hash": "d36c40126cb8e518c095203381ddc4365ff29198167dde47a3be7af71cc3c679",
+  "performance_claimed": false,
+  "schema_version": "boundflow.rvir-v4-optimizer-step-trace/v1",
+  "steps": [
+    {
+      "alpha_learning_rate": 0.01,
+      "beta_learning_rate": 0.05,
+      "call_id": 11,
+      "core_id": 0,
+      "evaluation_ordinal": 0,
+      "lower_dtype": "float32",
+      "lower_sha256": "ce2fcf0e49954661e5ddfc8ad663d8d08762ccebced0a0d492d51cf5787d6ee1",
+      "lower_shape": [
+        6,
+        1
+      ],
+      "optimizer_step_ordinal": 0,
+      "parent_call_id": 10,
+      "state_hash": "4012569a8edf6d4982c042a15914a33a399cccb4958dfcaa3561e2413bc300ba",
+      "state_tensors": [
+        {
+          "alias_group": "alias:000000",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "b1a61228dd59c22beaaa1117b6f00bfac5b824ccf2d96bc89628e3908998bc91",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2F45/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            178
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000001",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "81d807edf887dbdddaea2000b4e360e0c2954ae31620c3063fddc555798ae0dd",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2F48/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            27
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000002",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "4424d5d8cf9a042928f36edae2381e1163ae6124b1a868bc5467dc25acc9153a",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-12/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            132
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000003",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "94e088d80517494f5f9c1510d837ae73ee57a043733f2b0fc61e6ea4a378f66b",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-16/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            121
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000004",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "c886c34b3b2b2d692f48aa5b4cbfa2e94f5c4577368d6d0bde709cdedbc12419",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-24/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            86
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000005",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "f074557c5d9caaf1ed17de707466262c0493a03df6398dd1381dba6e0b0c57cc",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-4/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            164
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000007",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2F39/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000008",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2F39/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000006",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2F39/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000010",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2F44/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000011",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2F44/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000009",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2F44/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000016",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-20/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000017",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-20/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000015",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-20/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000019",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "f89af9a3962c31360fb00e340c0c9bb8a5b8fcb7f2cd0d623643a1834765d6d2",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-28/0/location",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000020",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "ec37d37a39b0113ef9e7f405155f2ef53160fa67db055c799813a92523036894",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-28/0/sign",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000018",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "82c14331f86c999d4ad98cd46b1b4e945b2f1e3b4362ae34121ee8bc388d9590",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-28/0/value",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000022",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-8/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000023",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-8/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000021",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-8/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000013",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000014",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000012",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        }
+      ],
+      "update_after": true,
+      "updates_before": 0
+    },
+    {
+      "alpha_learning_rate": 0.0098,
+      "beta_learning_rate": 0.049,
+      "call_id": 12,
+      "core_id": 0,
+      "evaluation_ordinal": 1,
+      "lower_dtype": "float32",
+      "lower_sha256": "c83ccfe75afb42a9005324e3181c631426786304dcd9a6972b080a2abca7c018",
+      "lower_shape": [
+        6,
+        1
+      ],
+      "optimizer_step_ordinal": 1,
+      "parent_call_id": 10,
+      "state_hash": "7a3d88fe9a02c4db9b366646e6ca4b98964a533ca5a5287e3e67f7cf1f76c5ef",
+      "state_tensors": [
+        {
+          "alias_group": "alias:000000",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "0e701e6537d5f9903cb0ab9134ea635a6d042cba9a69645c80c8035ad8c51358",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2F45/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            178
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000001",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "3635993be551ee45c1f90552ea0327e6b73bf2e91a307cc1e742845e53fc3ea3",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2F48/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            27
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000002",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "8ca42ff45b9d329f7ec87c85abb71a65fa29a8775c0224dcd6e884bdb28b6a64",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-12/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            132
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000003",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "25d82bf44ab63ac2eff845c782c27f05764f641b7a40a40d24493881cc320586",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-16/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            121
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000004",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "505b529cbe82a9ca79a9b0bcaf368764f837feed630af42677b727183b34cf96",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-24/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            86
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000005",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "1c1cba68fec88d7e20774aa3ec8320dc08963a34a85cc768ca1863f3b2edd4fc",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-4/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            164
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000007",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2F39/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000008",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2F39/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000006",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2F39/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000010",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2F44/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000011",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2F44/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000009",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2F44/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000016",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-20/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000017",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-20/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000015",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-20/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000019",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "f89af9a3962c31360fb00e340c0c9bb8a5b8fcb7f2cd0d623643a1834765d6d2",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-28/0/location",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000020",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "ec37d37a39b0113ef9e7f405155f2ef53160fa67db055c799813a92523036894",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-28/0/sign",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000018",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "34efbc8e533cd80ec7656e0bb4b75a1015f36210778213b7d7ee8e6acf0b17ab",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-28/0/value",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000022",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-8/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000023",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-8/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000021",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-8/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000013",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000014",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000012",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        }
+      ],
+      "update_after": true,
+      "updates_before": 1
+    },
+    {
+      "alpha_learning_rate": 0.009604,
+      "beta_learning_rate": 0.04802,
+      "call_id": 13,
+      "core_id": 0,
+      "evaluation_ordinal": 2,
+      "lower_dtype": "float32",
+      "lower_sha256": "6b33bc088cc36576e7c309241a630f1e5a71dc1f91979c563fd900d42de1eb22",
+      "lower_shape": [
+        6,
+        1
+      ],
+      "optimizer_step_ordinal": 2,
+      "parent_call_id": 10,
+      "state_hash": "76bc50856c131056893abcd05bb8113df06d7f8780164534bc277274f675f6d2",
+      "state_tensors": [
+        {
+          "alias_group": "alias:000000",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "ef2312a4fc1d9934c67405d6f5e36501c94e409e5af2d4e6477555ffe39bbc7e",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2F45/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            178
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000001",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "da2eca6ae5661f552deedf00c23bfacd080593a35617342c9b1811dfe7fa8771",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2F48/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            27
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000002",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "87a9bbe8c73508e599ba06f1311a9b6cec49ee036cb898e5e054e6998496679a",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-12/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            132
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000003",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "ba64f7108e37b38c149dbdddc2fd01e11e3ce82702aaa1d5cb67121b38052c32",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-16/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            121
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000004",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "e7fb80e89702b36f9040b7d0edcdff6c5a1dcce473b134ace1741dc95ca82be3",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-24/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            86
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000005",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "598c99a9d713f653bd87625e4731d4d14bb7d151dbf9f4e31e75cd26951cf899",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-4/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            164
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000007",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2F39/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000008",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2F39/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000006",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2F39/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000010",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2F44/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000011",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2F44/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000009",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2F44/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000016",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-20/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000017",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-20/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000015",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-20/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000019",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "f89af9a3962c31360fb00e340c0c9bb8a5b8fcb7f2cd0d623643a1834765d6d2",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-28/0/location",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000020",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "ec37d37a39b0113ef9e7f405155f2ef53160fa67db055c799813a92523036894",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-28/0/sign",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000018",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "f5fa934e5c6a0ecbc54704f45d94f06dc8280267f37faa0239b96e708a8cb000",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-28/0/value",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000022",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-8/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000023",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-8/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000021",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-8/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000013",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000014",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000012",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        }
+      ],
+      "update_after": true,
+      "updates_before": 2
+    },
+    {
+      "alpha_learning_rate": 0.009411919999999999,
+      "beta_learning_rate": 0.0470596,
+      "call_id": 14,
+      "core_id": 0,
+      "evaluation_ordinal": 3,
+      "lower_dtype": "float32",
+      "lower_sha256": "6fcd41a4eceec9a31557194ed4af8b266bb7aa9ecd9fa133dee3c710eee82400",
+      "lower_shape": [
+        6,
+        1
+      ],
+      "optimizer_step_ordinal": 3,
+      "parent_call_id": 10,
+      "state_hash": "9beae82f58c2e2bde6b5f78fd0309a2e8a62ba7e486b7c08b8b990f91f39fb4c",
+      "state_tensors": [
+        {
+          "alias_group": "alias:000000",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "5ec2b657cea15bf4ad871338dcbb71898156f75943d91d43881666c33e4c88e5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2F45/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            178
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000001",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "e41c517b149ff4fa986e0149a584fbaee65cb0168352e2ff00744ff4dc308012",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2F48/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            27
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000002",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "c914357b83ff37c4279753bf4971e5d2c337263f8b27207794ad71dabf5eb7a1",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-12/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            132
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000003",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "b068e6a1c5501041786ed63c4913d96946df5f4a35b33446c4234b08b3868956",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-16/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            121
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000004",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "0a2bdc38f7e6249ed15fb10f1f9e2b6dbd9a86056a0a961ff5286efba9d3311a",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-24/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            86
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000005",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "5394d3df423709ab094be1a3545d6fc9449cf4c633e0ba1b7f0ccaecc545c86d",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-4/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            164
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000007",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2F39/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000008",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2F39/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000006",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2F39/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000010",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2F44/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000011",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2F44/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000009",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2F44/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000016",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-20/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000017",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-20/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000015",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-20/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000019",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "f89af9a3962c31360fb00e340c0c9bb8a5b8fcb7f2cd0d623643a1834765d6d2",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-28/0/location",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000020",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "ec37d37a39b0113ef9e7f405155f2ef53160fa67db055c799813a92523036894",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-28/0/sign",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000018",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "4211dae42b4782e41dd591747143b5b91cbd60b64e6669dc370cd32ac91e3266",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-28/0/value",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000022",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-8/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000023",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-8/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000021",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-8/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000013",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000014",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000012",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        }
+      ],
+      "update_after": true,
+      "updates_before": 3
+    },
+    {
+      "alpha_learning_rate": 0.009223681599999999,
+      "beta_learning_rate": 0.046118408,
+      "call_id": 15,
+      "core_id": 0,
+      "evaluation_ordinal": 4,
+      "lower_dtype": "float32",
+      "lower_sha256": "23f001970f55118a321a01e8644d5af55e805b8e3551c9bd12ed9e0d2e3ac48c",
+      "lower_shape": [
+        6,
+        1
+      ],
+      "optimizer_step_ordinal": 4,
+      "parent_call_id": 10,
+      "state_hash": "5c8863c8eeb29339c7eaa19f90bdb0bfc305fa5b5009dfaafbec4c71404e7ee4",
+      "state_tensors": [
+        {
+          "alias_group": "alias:000000",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "4b663df535f2d9917a0f3781d06ffed29c864f9ef16edcf32dbb19b528e2429b",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2F45/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            178
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000001",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "5990e8f1ac6990e07187de50348c094300bf856466706347039fe4c625f588bb",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2F48/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            27
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000002",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "01e666212ad79dbb13083ef6f767e60171e8ff2541cbe8ff90923fbb955ae91e",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-12/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            132
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000003",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "2466f34c1ab571b60936099a6ac7eb8c4290a760f6e2235ff25bc1cb21dcec11",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-16/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            121
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000004",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "481ca65e88b40f75fb36f16c6798961da46b9da2f8061add7c2aca4cb8603ed1",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-24/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            86
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000005",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "f317b61e52ba3979860a01303a6fdee08933b4ca2cd4e5701bb0344b8884bbab",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-4/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            164
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000007",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2F39/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000008",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2F39/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000006",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2F39/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000010",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2F44/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000011",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2F44/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000009",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2F44/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000016",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-20/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000017",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-20/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000015",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-20/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000019",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "f89af9a3962c31360fb00e340c0c9bb8a5b8fcb7f2cd0d623643a1834765d6d2",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-28/0/location",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000020",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "ec37d37a39b0113ef9e7f405155f2ef53160fa67db055c799813a92523036894",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-28/0/sign",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000018",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "b102cc3077b4775008ecc8d57419e59d60e46c51634e30ab4cbefdc96b23696d",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-28/0/value",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000022",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-8/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000023",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-8/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000021",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-8/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000013",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000014",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000012",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        }
+      ],
+      "update_after": true,
+      "updates_before": 4
+    },
+    {
+      "alpha_learning_rate": 0.009039207967999998,
+      "beta_learning_rate": 0.04519603984,
+      "call_id": 16,
+      "core_id": 0,
+      "evaluation_ordinal": 5,
+      "lower_dtype": "float32",
+      "lower_sha256": "c4130852e3bbfb2d348a4dc7df9c6844d14f964195d08a23b263a71d7abe7830",
+      "lower_shape": [
+        6,
+        1
+      ],
+      "optimizer_step_ordinal": 5,
+      "parent_call_id": 10,
+      "state_hash": "65439c21a6dd97944114a1d03207369bb18e8ae2e8cc3bc94a5797d5a1461c70",
+      "state_tensors": [
+        {
+          "alias_group": "alias:000000",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "e2f69938e966ba2826ad5e3a71b889f9f9eaf9e87e5e8d8a779ac8a6dce32cdf",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2F45/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            178
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000001",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "c9703ae707a8b8b880406c3be94c5e030a668441c19170b6119058a58ed010a9",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2F48/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            27
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000002",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "b636a9cdb044624bb277eea91eb23f0aad0eaba3560ea3670f07120570d6bbcd",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-12/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            132
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000003",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "f4063e935f392c14679c0887ae4cf7c4232d60283b18a41cef780d332cfb2577",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-16/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            121
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000004",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "80de59d8e36922c0a93f7731b5b299f40d40c1245a2d0c7992b095266cf4558a",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-24/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            86
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000005",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "9d3cdde0dfd02dc8d66e9bda243f01f1a87d7dc442bd09c7252c508125c2d18b",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-4/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            164
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000007",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2F39/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000008",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2F39/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000006",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2F39/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000010",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2F44/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000011",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2F44/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000009",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2F44/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000016",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-20/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000017",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-20/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000015",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-20/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000019",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "f89af9a3962c31360fb00e340c0c9bb8a5b8fcb7f2cd0d623643a1834765d6d2",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-28/0/location",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000020",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "ec37d37a39b0113ef9e7f405155f2ef53160fa67db055c799813a92523036894",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-28/0/sign",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000018",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "9a79cb489bef3541003b5e80b3c720602c093a3d6838c892c58c1b5ee762120d",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-28/0/value",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000022",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-8/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000023",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-8/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000021",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-8/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000013",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000014",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000012",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        }
+      ],
+      "update_after": true,
+      "updates_before": 5
+    },
+    {
+      "alpha_learning_rate": 0.008858423808639998,
+      "beta_learning_rate": 0.0442921190432,
+      "call_id": 17,
+      "core_id": 0,
+      "evaluation_ordinal": 6,
+      "lower_dtype": "float32",
+      "lower_sha256": "1fb04d3ebdccafd0e966983aa6d4a157d1e55a58e1d752a3a8ab8790a28779ef",
+      "lower_shape": [
+        6,
+        1
+      ],
+      "optimizer_step_ordinal": 6,
+      "parent_call_id": 10,
+      "state_hash": "5128d9803c943398856a37879cb1a5d01dc03158f2587912df7fc08fb60aba64",
+      "state_tensors": [
+        {
+          "alias_group": "alias:000000",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "4452e6002b889b00fa334ae4dac893b45a8b698535a0aa94a1201f5a2a0b7c8f",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2F45/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            178
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000001",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "59661599912edf5e3427cd8b338b043b9599b92967ea9f0c872047d394b67770",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2F48/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            27
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000002",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "fb62bd5cbd826346572f5d0a4a2803664a9788b7be0226ab5badd2acc205e46b",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-12/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            132
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000003",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "1f9434ecf3e0ba22d401ab51f76b5e64a286a75f3f4a96bbdb00964ae5fe2bf2",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-16/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            121
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000004",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "dac3dccd87cf7156aab3c6bb823115b96523913f0a692443b0734054cdd989f6",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-24/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            86
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000005",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "5d1d486d8eca2ca722265f3779b5ff8c3b367adcc54c33184e2b3203ee071500",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-4/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            164
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000007",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2F39/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000008",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2F39/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000006",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2F39/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000010",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2F44/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000011",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2F44/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000009",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2F44/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000016",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-20/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000017",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-20/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000015",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-20/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000019",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "f89af9a3962c31360fb00e340c0c9bb8a5b8fcb7f2cd0d623643a1834765d6d2",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-28/0/location",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000020",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "ec37d37a39b0113ef9e7f405155f2ef53160fa67db055c799813a92523036894",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-28/0/sign",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000018",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "52d9d91c5e560bd045e821a8cc883ae7c7fa7c49d0e55b02a0db711eab777b18",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-28/0/value",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000022",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-8/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000023",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-8/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000021",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-8/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000013",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000014",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000012",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        }
+      ],
+      "update_after": true,
+      "updates_before": 6
+    },
+    {
+      "alpha_learning_rate": 0.008681255332467197,
+      "beta_learning_rate": 0.043406276662336,
+      "call_id": 18,
+      "core_id": 0,
+      "evaluation_ordinal": 7,
+      "lower_dtype": "float32",
+      "lower_sha256": "7c13087dd0ae6d915b861a092ddb6b9325c81664a8f8bb6bb8e31ab5d225c4e9",
+      "lower_shape": [
+        6,
+        1
+      ],
+      "optimizer_step_ordinal": 7,
+      "parent_call_id": 10,
+      "state_hash": "43f042406d7a43c6df1a003f924cc991c9649d5d4d1a4550cb3dc39b2b1cc6c3",
+      "state_tensors": [
+        {
+          "alias_group": "alias:000000",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "5394f323f81610797fe6ee44094ab1d85a9b0dcfe3e9c468414d488d9bc3035f",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2F45/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            178
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000001",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "4ed028619979faedb0a8b3465df45345a8f7c47fba7db5eb99181b4a37954fae",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2F48/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            27
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000002",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "b3af0dd27c310eb6f9df89098469a23fb4539d638cfe4bfae32057d9a0464ae9",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-12/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            132
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000003",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "c37952caded6e1ce4e143892898fdaaf5895cd07754e2fa1329da3dfbbd967cd",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-16/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            121
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000004",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "bba560b077b97781bb13debe6c965efa8ef98b210d47f30adc1dd217c4dbed41",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-24/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            86
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000005",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "be335ea64804e818bfa776f4b7cf0197663f33c6d65e3c2cfbe560fe4bdbffa8",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-4/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            164
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000007",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2F39/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000008",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2F39/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000006",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2F39/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000010",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2F44/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000011",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2F44/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000009",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2F44/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000016",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-20/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000017",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-20/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000015",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-20/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000019",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "f89af9a3962c31360fb00e340c0c9bb8a5b8fcb7f2cd0d623643a1834765d6d2",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-28/0/location",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000020",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "ec37d37a39b0113ef9e7f405155f2ef53160fa67db055c799813a92523036894",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-28/0/sign",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000018",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "218fde25c64e24a513672be8a2f162221c54f23a3989a9128fffc9ff8d3e9e79",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-28/0/value",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000022",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-8/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000023",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-8/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000021",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-8/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000013",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000014",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000012",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        }
+      ],
+      "update_after": true,
+      "updates_before": 7
+    },
+    {
+      "alpha_learning_rate": 0.008507630225817853,
+      "beta_learning_rate": 0.04253815112908928,
+      "call_id": 19,
+      "core_id": 0,
+      "evaluation_ordinal": 8,
+      "lower_dtype": "float32",
+      "lower_sha256": "009411622110825d10ef03250a4c7136f6d10ffca59a6b73964b43026657cf02",
+      "lower_shape": [
+        6,
+        1
+      ],
+      "optimizer_step_ordinal": 8,
+      "parent_call_id": 10,
+      "state_hash": "e6e3da1fafa7fd5f2916ba7684f704f8e9b2d347226ebf4790145d687ea4f2c0",
+      "state_tensors": [
+        {
+          "alias_group": "alias:000000",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "960654f9d11bc66b416c01762f42126d5f97e73dd44f0adecb94aca164b9358f",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2F45/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            178
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000001",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "e89002ad28dac0b77de8d3d70e108d23f3ca2383a8dec46a2d122f6ef6fe8e47",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2F48/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            27
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000002",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "c33eeff158e115f4bd0d973f210cad5b8397415ca6cdb01766bb8d58999bd82c",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-12/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            132
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000003",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "c4d5a73b1765d5634061d191349e1f24eb982cf1a4e1b56763588745be22f6f5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-16/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            121
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000004",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "c15913df6ffeb8c55b3645e0fc40e5df01c2fb7a2597e84a90f5659d5dd3b3f0",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-24/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            86
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000005",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "719855228a444f292046bd92761a10c71e70fb2252cea63c437d723efd25529b",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-4/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            164
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000007",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2F39/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000008",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2F39/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000006",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2F39/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000010",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2F44/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000011",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2F44/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000009",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2F44/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000016",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-20/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000017",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-20/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000015",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-20/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000019",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "f89af9a3962c31360fb00e340c0c9bb8a5b8fcb7f2cd0d623643a1834765d6d2",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-28/0/location",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000020",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "ec37d37a39b0113ef9e7f405155f2ef53160fa67db055c799813a92523036894",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-28/0/sign",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000018",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "65cf74bf4fbcbaeb750c43aee349a7a8e022e3c2a0ce46d395c4de187eb04a18",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-28/0/value",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000022",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-8/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000023",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-8/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000021",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-8/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000013",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000014",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000012",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        }
+      ],
+      "update_after": true,
+      "updates_before": 8
+    },
+    {
+      "alpha_learning_rate": 0.008337477621301496,
+      "beta_learning_rate": 0.04168738810650749,
+      "call_id": 20,
+      "core_id": 0,
+      "evaluation_ordinal": 9,
+      "lower_dtype": "float32",
+      "lower_sha256": "64441e47dffc94e729bf8c4ee2db3d560985df5462f83c18a34c6a1f2f29101b",
+      "lower_shape": [
+        6,
+        1
+      ],
+      "optimizer_step_ordinal": null,
+      "parent_call_id": 10,
+      "state_hash": "98e74ca672d480ef7fa82bcb2fea4d6c1844a638fa813fbd7372df3d70127ac3",
+      "state_tensors": [
+        {
+          "alias_group": "alias:000000",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "b72c46e32e437c098aa61ee9a816d2b50e4fdb8f27c5e35c45510f558c32cb8a",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2F45/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            178
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000001",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "f9eb3939fd182ed01b0da3f94603ec5ccb3a7bb40623e12c71ee7243828bef70",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2F48/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            27
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000002",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "e0d6899f0e189e3edd9f2019db1fe0dd1070c1dc606cd16562fd5392385319c8",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-12/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            132
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000003",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "1159da3e6ac96d7353d3d5e0a7073085f9ce51c74d44f1d0d8c371ac670dd337",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-16/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            121
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000004",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "7b5ebc1d51b9b488ef139072949a2ddc9377430f2e15d0950bc59270cf9dd3cd",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-24/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            86
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000005",
+          "axes": [
+            "alpha_polarity",
+            "start_spec",
+            "domain",
+            "feature_axis_0"
+          ],
+          "content_sha256": "8cbd117281f0218e9c34795702affdf1e0447484d53a6983bc193301f1a59d58",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "alpha",
+          "semantic_path": "alpha/%2Finput-4/%2F49",
+          "shape": [
+            2,
+            1,
+            6,
+            164
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000007",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2F39/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000008",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2F39/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000006",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2F39/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000010",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2F44/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000011",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2F44/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000009",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2F44/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000016",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-20/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000017",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-20/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000015",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-20/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000019",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "f89af9a3962c31360fb00e340c0c9bb8a5b8fcb7f2cd0d623643a1834765d6d2",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-28/0/location",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000020",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "ec37d37a39b0113ef9e7f405155f2ef53160fa67db055c799813a92523036894",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-28/0/sign",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000018",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "2900de94ae8ad0ace01e0163f6eece1b0d842f065c8f76b66d5c05094fc25bb2",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-28/0/value",
+          "shape": [
+            6,
+            1
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000022",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput-8/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000023",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput-8/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000021",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput-8/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000013",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+          "dtype": "torch.int64",
+          "ownership": "copy_in",
+          "role": "beta_location",
+          "semantic_path": "beta/%2Finput/0/location",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000014",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "copy_in",
+          "role": "beta_sign",
+          "semantic_path": "beta/%2Finput/0/sign",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        },
+        {
+          "alias_group": "alias:000012",
+          "axes": [
+            "domain",
+            "history_slot"
+          ],
+          "content_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+          "dtype": "torch.float32",
+          "ownership": "mutable_copy_out",
+          "role": "beta_value",
+          "semantic_path": "beta/%2Finput/0/value",
+          "shape": [
+            6,
+            0
+          ],
+          "source_device": "cuda:0"
+        }
+      ],
+      "update_after": false,
+      "updates_before": 9
+    }
+  ],
+  "trace_hash": "fa070bb09265337b297e18fd38ff342ffa657fad75c447f340789a1cb5cc31f4",
+  "update_count": 9
+}

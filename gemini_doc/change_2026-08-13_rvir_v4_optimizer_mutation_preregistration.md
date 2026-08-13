@@ -1,5 +1,8 @@
 # RVIR-v4 V4-2 Optimizer Mutation 预注册修改记录
 
+> 后续状态：本文记录开工时门禁；V4-2B formal GPU trace已于2026-08-13恢复环境后关闭。当前状态与
+> 下一动作以`change_2026-08-13_rvir_v4_optimizer_step_formal_closure.md`为准。
+
 日期：2026-08-13
 
 ## 修改

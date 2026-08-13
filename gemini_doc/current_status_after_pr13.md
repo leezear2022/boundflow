@@ -3,18 +3,17 @@
 > 状态日期：2026-08-13
 > 当前 integration base：`f194034`（NRIR-44 PR #55 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
 > 当前研发分支：`feat/rvir-v4-production-state-ownership-v1`；FSG2历史 implementation/inventory
-> revisions=`aa31eae`/`8bf6981`；当前已推进至RVIR-v4 V4-2B step trace/capture runner实现；
+> revisions=`aa31eae`/`8bf6981`；当前已推进至RVIR-v4 V4-2B formal step-trace关闭；
 > FSG0、FSG1均已验证；FSG2以`VALIDATED-REDUCED initial-only`关闭，完整B2 replacement
 > `NO-GO/not admitted`，FSG3—FSG5按依赖门禁未运行
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-13 RVIR-v4状态：V4-1 frozen-state evaluator已`VALIDATED-REDUCED`关闭；V4-2A只关闭
-> 双LR与10 evaluation/9 update子合同。V4-2B现已实现18项live controls、逐step 24-tensor raw trace、
-> 真实Adam-step/LR-scheduler观察与独立artifact runner，CPU定向语义及tamper门禁通过。provider源码
-> 复核修正production live值为`init_alpha=false/max_time=60.0 s`。正式GPU artifact仍被NVML
-> driver/library mismatch及CUDA error 803阻塞，所以V4-2B、V4-2与B2均未关闭，无性能claim。
-> pre-formal hardening又将全部production policy值精确准入，并把每step state/lower与独立call-tree
-> pre/result metadata交叉绑定；内部重哈希后的state/result篡改已被CPU负向测试拒绝。状态仍不升级。
+> 双LR与10 evaluation/9 update子合同。重启后GPU/NVML恢复，V4-2B正式artifact从`af8db08`生成：
+> 1 core/24 calls、10 evaluations/9 observed Adam updates、每步24项raw state、相邻7项mutable变化，
+> original replay与state/lower/result/lineage/policy五类同步重签名tamper均通过。因此V4-2B以
+> `VALIDATED-PRODUCTION-TRACE`关闭。它只冻结provider真值轨迹；BoundFlow尚未执行mutation，V4-2、
+> B2和性能claim仍关闭。下一切片是V4-2C pre-state native initializer。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
 > objective-ancestral sibling evaluator，并新增独立 Plan/Batch/Task/Schedule IR 与跨 clause 单一 cache
 > owner。真实 ResNet clause 2 root+pair 与 frozen audit lower/branch/split/α/β/refinement exact，upper

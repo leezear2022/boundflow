@@ -1,5 +1,8 @@
 # RVIR-v4 V4-2B Policy/Trace Cross-Binding 修改记录
 
+> 后续状态：本文记录的重启门禁已经解除；正式artifact/replay/tamper closure见
+> `change_2026-08-13_rvir_v4_optimizer_step_formal_closure.md`。
+
 日期：2026-08-13
 
 ## 起因

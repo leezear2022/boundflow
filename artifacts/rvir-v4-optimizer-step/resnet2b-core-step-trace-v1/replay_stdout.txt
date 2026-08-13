@@ -1,0 +1,1 @@
+{"evaluation_count":10,"evidence_status":"validated-step-capture-schema","performance_claimed":false,"status":"replay-passed","summary_hash":"8ae8be3fc53f1571109f265ea96a9ddacf806c3c5596459574517df2783505b7","trace_hash":"fa070bb09265337b297e18fd38ff342ffa657fad75c447f340789a1cb5cc31f4","update_count":9}

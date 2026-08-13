@@ -4985,3 +4985,25 @@
 **记录**
 - `gemini_doc/rvir_v4_optimizer_mutation_plan_2026_08_13.md`
 - `gemini_doc/change_2026-08-13_rvir_v4_optimizer_trace_cross_binding.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-2B Formal Production Trace Closure
+
+- 重启后内核/NVIDIA/NVML恢复一致，external PyTorch `2.11.0+cu130`在RTX 4060 Laptop上正式运行；
+- 从`af8db08`的runner-enforced clean code paths生成1 core/24 calls、10 evaluations/9 observed
+  Adam updates、每步24 state的GPU artifact；9个相邻step均恰有7项mutable改变；
+- original semantic replay通过；state/lower/call-result/step-lineage/policy五类同步内部重哈希、文件
+  digest更新及manifest重签攻击均被指定语义门禁拒绝；
+- 与冻结capture-v2 cross-artifact parity确认source/protocol/call topology/tensor schema/history/policy/
+  branch/mutation exact；GPU float max diff=`6.0797e-06`、lower=`3.5763e-07`、sign exact，低于
+  `2e-4`；source-parity report=`c2b48275...8aec`；
+- artifact manifest SHA256=`7d7745e4...fbe6`，trace=`fa070bb0...31f4`，summary=
+  `8ae8be3f...05b7`，tamper report=`b11ca1da...ab79`且直接绑定probe code SHA256；
+- focused=`29 passed`，GPU恢复后全量=`1157 passed, 3 skipped`且无CUDA skip；Black/mypy clean、
+  Pylint=`10.00/10`；
+- V4-2B以`VALIDATED-PRODUCTION-TRACE`关闭，但V4-2/B2仍关闭，
+  `performance_claimed=false`；下一切片为V4-2C pre-state native initializer。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_optimizer_step_formal_closure.md`

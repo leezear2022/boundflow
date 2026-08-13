@@ -123,7 +123,7 @@ V4-2必须同时满足：
 - 这只证明策略表达与循环基数，不证明任何step tensor或final mutation parity，
   `performance_claimed=false`，B2继续关闭。
 
-下一动作改为V4-2B step-trace schema与capture runner。formal GPU run当前由
+当时下一动作改为V4-2B step-trace schema与capture runner。formal GPU run当时由
 `cudaGetDeviceCount error 803`及NVML driver/library mismatch阻塞；schema、replay与CPU负向测试可继续。
 
 ### 完成性修正：完整 optimizer controls
@@ -139,14 +139,14 @@ attach，不应在optimized call内重新初始化；`max_time=60.0 s`，来自a
 
 因此V4-2A的`VALIDATED-POLICY-CONTRACT`精确解释为“双学习率与loop cardinality子合同”，不是完整
 optimizer policy ownership。V4-2B先实现上述controls的live-boundary capture、canonical hash与
-missing/tamper fail-closed，再定义step trace；formal run仍等待GPU恢复。
+missing/tamper fail-closed，再定义step trace；formal run在该切片当时仍等待GPU恢复。
 
 V4-2B controls schema第一切片已实现：18项controls进入canonical payload/hash，live mapping要求字段
 全集，replay parser要求exact字段集合与严格bool/list/numeric类型；cuts、output constraints、direct
 optimization等当前路线未准入配置fail closed。focused=`10 passed`，mypy clean，typed policy模块
 Pylint=`10.00/10`。尚未接入provider step capture，也未生成formal artifact。
 
-## 9. V4-2B Step Trace 与 Capture Runner 实现状态
+## 9. V4-2B Step Trace 与 Capture Runner 实现时状态（后续由§10取代）
 
 状态：`IMPLEMENTED-CAPTURE-READY / FORMAL-ARTIFACT-BLOCKED`；不是V4-2B正式关闭，更不是V4-2关闭。
 
@@ -188,4 +188,28 @@ GPU阻塞期间继续对formal runner做攻击面复审，新增两层不依赖�
   cross-view binding处失败；call-result device只接受严格CUDA语法。
 
 focused=`26 passed`、扩展RVIR-v4=`47 passed`、全量=`1118 passed, 39 skipped`、mypy clean、
-Pylint=`10.00/10`。该hardening只加强formal evidence，不改变V4-2B/V4-2/B2未关闭状态。
+Pylint=`10.00/10`。该hardening在当时只加强formal evidence；V4-2B的后续状态由下一节更新。
+
+## 10. V4-2B Formal Closure
+
+状态：`VALIDATED-PRODUCTION-TRACE`。系统重启后loaded NVIDIA/NVML均为`610.57.04`，external
+PyTorch `2.11.0+cu130`在RTX 4060 Laptop上成功执行正式worker。工件位于
+`artifacts/rvir-v4-optimizer-step/resnet2b-core-step-trace-v1/`，source head=`af8db08`，manifest
+SHA256=`7d7745e40a901c4f3a420188c42efa2f487248d2da992ca0c08730beb612fbe6`。
+
+正式结构为1 core/24 calls、10 evaluations/9 observed Adam updates、每步24项state、9个相邻transition
+均恰有7项mutable变化；trace hash=`fa070bb0...31f4`，summary hash=`8ae8be3f...05b7`。original replay
+exit 0。state、lower、call-result、step-lineage与policy五类攻击副本均同步更新内部适用hash、artifact
+file digest和manifest hash，仍分别由cross-view/lineage/exact-policy语义门禁拒绝。
+
+与冻结capture-v2的独立cross-artifact parity确认source/protocol/solver、call topology、tensor schema、
+history/policy/branch/mutation离散结构exact；GPU重跑pre/post最大float diff=`6.0797e-06`、最终lower=
+`3.5763e-07`，sign/finite mask exact，低于`atol=rtol=2e-4`。报告hash=`c2b48275...8aec`；超容差
+但内部有效的负向α探针被numeric gate拒绝。
+
+V4-2B只关闭production truth trace，不执行BoundFlow mutation。`optimizer_replacement_admitted=false`、
+`b2_same_solver_timing_admitted=false`、`performance_claimed=false`保持冻结。下一动作只允许V4-2C
+pre-state native initializer；V4-2D/E前不得进入B2。
+
+formal generate/original replay exit 0，五类重签名tamper 5/5拒绝；focused=`29 passed`，GPU恢复后
+全量=`1157 passed, 3 skipped`，Black/mypy clean，Pylint=`10.00/10`。3项skip不含CUDA边界。

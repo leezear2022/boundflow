@@ -19,9 +19,10 @@
 > schema/replay合同已验证；FSG1 official B0 full-stack trace亦已关闭。FSG2现以
 > `VALIDATED-REDUCED initial-only`关闭：完整production alpha/beta/split replacement未准入，
 > 因而B2为NO-GO，FSG3—FSG5按依赖门禁未运行。该结论不否决B3—B7各层潜力，但当前仍无
-> BoundFlow全栈性能claim。2026-08-13 RVIR-v4已把V4-1 frozen post-state evaluation关闭，并实现
-> V4-2B 10-evaluation/9-Adam-step typed capture与artifact runner；但真实GPU formal trace尚未生成，
-> V4-2 optimizer replacement与B2状态不变。该实现进展不得升级为correctness closure或性能claim。
+> BoundFlow全栈性能claim。2026-08-13 RVIR-v4已把V4-1 frozen post-state evaluation关闭；重启后
+> V4-2B 10-evaluation/9-Adam-step正式GPU typed trace、original replay与5类同步重签名tamper通过，以
+> `VALIDATED-PRODUCTION-TRACE`关闭。该结论只冻结provider真值轨迹；V4-2 optimizer replacement与
+> B2状态不变，不得升级为replacement correctness或性能claim。下一切片为V4-2C pre-state mapper。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
@@ -1410,3 +1411,21 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   official control full-stack trace，
   不构成speedup、competitor、multi-workload、
   solved verdict、memory headline或ASPLOS-ready claim。
+
+### RVIR-v4 V4-2B：Production Optimizer Step Truth Trace
+
+- `RVIR-V4-2B-M`：一个真实ResNet2B property 0 CUDA production core捕获10 evaluations、9个真实
+  Adam steps、双LR schedule及每步24项α/SparseBeta state；18项optimizer controls与call lineage进入
+  typed payload/hash；
+- `RVIR-V4-2B-G`：1 core/24 calls、phase=`12/1/11/0`、每步24项state、9个transition各7项mutable
+  改变、state source CUDA均由raw artifact replay重建；state/lower/call-result/step-lineage/policy五类
+  同步重哈希和manifest重签攻击均fail closed；与冻结capture-v2的source/protocol/call topology/
+  tensor schema/history/policy/branch/mutation structure exact，GPU float max diff=`6.0797e-06`、lower=
+  `3.5763e-07`，sign/finite mask exact并通过`2e-4`预注册容差；
+- `RVIR-V4-2B-L`：结论仅为provider production truth trace
+  `VALIDATED-PRODUCTION-TRACE`；`optimizer_replacement_admitted=false`、
+  `b2_same_solver_timing_admitted=false`、`performance_claimed=false`。没有BoundFlow mutation parity、
+  atomic copy-out、same-solver timing或ASPLOS-ready claim；
+- 工件：`artifacts/rvir-v4-optimizer-step/resnet2b-core-step-trace-v1/`；manifest/trace/summary=
+  `7d7745e4...fbe6` / `fa070bb0...31f4` / `8ae8be3f...05b7`；source-parity report=
+  `c2b48275...8aec`。下一切片只允许V4-2C pre-state native initializer。
