@@ -40,25 +40,26 @@ V4-3预注册入口为`gemini_doc/rvir_v4_whole_core_replacement_plan_2026_08_13
 truth，再实现native lA/intermediate、KFSB child evaluation、live return assembly和5次fresh correctness；
 provider core/compute_bounds/update_bounds必须为`0/0/0`。V4-3A现已以
 `VALIDATED-WHOLE-CORE-TRUTH`关闭：451 tensors/213,060 signs fresh replay与六类同步重签攻击通过；见
-`gemini_doc/change_2026-08-13_rvir_v4_whole_core_truth_formal_closure.md`。V4-3B现也已关闭；当前只启动
-V4-3C native KFSB，不启动live whole-core replacement或B2计时。
+`gemini_doc/change_2026-08-13_rvir_v4_whole_core_truth_formal_closure.md`。V4-3B/C/D现也已依序关闭；
+当前只启动V4-3E five-fresh correctness，不启动B2计时。
 
 V4-3B实现记录为`gemini_doc/change_2026-08-13_rvir_v4_native_backward_export.md`：六层native lA与
 12个shared-input intermediate tensors现已由正式artifact关闭，状态为
 `VALIDATED-NATIVE-BACKWARD-EXPORT`；formal closure见
-`gemini_doc/change_2026-08-13_rvir_v4_native_backward_export_formal_closure.md`。下一动作只允许V4-3C
-native KFSB；不能升级为whole-core replacement或B2 timing。
+`gemini_doc/change_2026-08-13_rvir_v4_native_backward_export_formal_closure.md`。其中“下一动作V4-3C”是
+该时点历史门禁，现已由后续V4-3C/D closure取代。
 
 V4-3C实现记录为`gemini_doc/change_2026-08-13_rvir_v4_native_kfsb.md`，formal closure见
 `gemini_doc/change_2026-08-13_rvir_v4_native_kfsb_formal_closure.md`：六层mask exact、三组top-3候选
 共36项与final decision exact，72个child lower sign exact且最大差`3.0994e-06`，八类同步重签攻击
-全部拒绝，状态为`VALIDATED-NATIVE-KFSB`。下一动作只允许V4-3D live return assembly；V4-3E/B2
-继续关闭。
+全部拒绝，状态为`VALIDATED-NATIVE-KFSB`。其中“下一动作V4-3D”是该时点历史门禁，现已由下段
+V4-3D closure取代。
 
-V4-3D capture-ready实现见`gemini_doc/change_2026-08-13_rvir_v4_live_return_assembly.md`：
-BoundFlow whole core已在RTX 4060真实GPU进程中以provider callback=`0/0/0`接入未修改的official
-post/queue，完整core/post语义比较最大差`1.0669e-05`且decision exact。当前仍为
-`FORMAL-ARTIFACT-PENDING`；V4-3E与B2继续关闭。
+V4-3D实现记录见`gemini_doc/change_2026-08-13_rvir_v4_live_return_assembly.md`，formal closure见
+`gemini_doc/change_2026-08-13_rvir_v4_live_return_formal_closure.md`：BoundFlow whole core已在RTX 4060
+真实GPU进程中以provider callback=`0/0/0`接入未修改的official post/queue，完整core/post语义比较
+最大差`1.0669e-05`且decision exact，fresh replay与8类完全重签攻击通过。状态为
+`VALIDATED-LIVE-RETURN`；下一门禁只允许V4-3E five-fresh，B2继续关闭。
 
 ---
 

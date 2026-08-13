@@ -3,7 +3,7 @@
 > 状态日期：2026-08-13
 > 当前 integration base：`f194034`（NRIR-44 PR #55 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
 > 当前研发分支：`feat/rvir-v4-production-state-ownership-v1`；FSG2历史 implementation/inventory
-> revisions=`aa31eae`/`8bf6981`；当前已推进至RVIR-v4 V4-3C native KFSB关闭；
+> revisions=`aa31eae`/`8bf6981`；当前已推进至RVIR-v4 V4-3D live return关闭；
 > FSG0、FSG1均已验证；FSG2以`VALIDATED-REDUCED initial-only`关闭，完整B2 replacement
 > `NO-GO/not admitted`，FSG3—FSG5按依赖门禁未运行
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
@@ -36,10 +36,11 @@
 > `VALIDATED-NATIVE-BACKWARD-EXPORT`关闭。formal native replay为CPU semantic evidence，不是GPU live
 > integration。V4-3C随后从native bounds/split/lA独立推导六层mask，复现三组top-3 candidate并执行
 > 72个child lower；candidate/final decision exact、child lower最大差`3.0994e-06`，八类同步重签攻击
-> 8/8拒绝，full=`1187 passed, 3 skipped`，以`VALIDATED-NATIVE-KFSB`关闭。下一门禁只允许V4-3D
-> live return assembly。V4-3D capture-ready candidate现已在RTX 4060上以零provider bound callback
-> 完成whole-core→official post/queue一次端到端运行，451 tensor语义比较最大差`1.0669e-05`、decision
-> exact；formal artifact仍pending，因此V4-3E、B2与性能claim继续关闭。
+> 8/8拒绝，full=`1187 passed, 3 skipped`，以`VALIDATED-NATIVE-KFSB`关闭。V4-3D随后在RTX 4060上
+> 以零provider bound callback完成whole-core→未修改
+> official post/queue端到端运行，451 tensor语义比较最大差`1.0669e-05`、decision exact；fresh replay
+> 与8类完全重签攻击通过，以`VALIDATED-LIVE-RETURN`关闭。下一门禁为V4-3E five-fresh；V4-3整体、
+> B2与性能claim继续关闭。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
 > objective-ancestral sibling evaluator，并新增独立 Plan/Batch/Task/Schedule IR 与跨 clause 单一 cache
 > owner。真实 ResNet clause 2 root+pair 与 frozen audit lower/branch/split/α/β/refinement exact，upper

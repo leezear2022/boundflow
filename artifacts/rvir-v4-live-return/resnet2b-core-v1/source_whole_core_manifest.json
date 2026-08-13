@@ -1,0 +1,33 @@
+{
+  "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+  "auto_lirpa_commit": "5a098e8f9fb5786a428a024981d833d303921f2d",
+  "code_revision": {
+    "boundflow/runtime/rvir_v4_production_state.py": "0e2c929d054a24e714e048a0c7bb7cdb86ae3f435fef3983fe1f8dd12ea00e31",
+    "boundflow/runtime/rvir_v4_whole_core_truth.py": "7d8382ebb7794b32fd828040e382841e1a79fd2dc56a9d2f1ade7acc8dd64f76",
+    "scripts/run_rvir_v4_production_state_capture.py": "428ff2a1c8c63d053a309ed8f02eb44e88cd770b5b26ceaca6eda68900d49c50",
+    "scripts/run_rvir_v4_whole_core_truth_artifact.py": "60cce63103e3dc1fcffcfe55a0ed8efa725444052cdf2a66056bd1a4501a1dca"
+  },
+  "files": {
+    "README.md": "111116fdc278bd244e8cf41b7fa7e587fee99db7d42177fb242200fd8dfe969b",
+    "replay_stdout.txt": "d1cb20bf32e8977e78ca3456c2fb36f6d237112457278f71474fe079db81e6d3",
+    "summary.json": "d1972153fd0d0bd5a18c72d7c3e8afa388505f96f083d3696777b2d44c56cb43",
+    "truth.pt": "d0126427dcdc868d33c7a7ec6326bdb86c8fb6e624a16c650d46c401ecabd0e9"
+  },
+  "manifest_hash": "1570e572ded581ca285ed147f519dd35d3381e77d426db16e1811df00d0b7bd9",
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "performance_claimed": false,
+  "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+  "replay_contract": {
+    "atol": 0.0002,
+    "discrete_structure_exact": true,
+    "mode": "fresh-pinned-provider-rerun",
+    "rtol": 0.0002,
+    "shape_dtype_device_exact": true,
+    "sign_exact": true
+  },
+  "schema_version": "boundflow.rvir-v4-whole-core-truth-artifact/v1",
+  "source_git_head": "bfdeefc197f583b47d896142889321bbe532b3b2",
+  "status": "validated-whole-core-truth",
+  "summary_hash": "df69ae45b5a2993d36921ceee84e1b815dd3595e72853eec0694d75cabe0396c",
+  "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf"
+}

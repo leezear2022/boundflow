@@ -296,4 +296,19 @@ accepted/pruned domains、lineage/node accounting、termination与verdict。V4-3
 - targeted=`16 passed`，full=`1187 passed, 3 skipped`，mypy clean，Pylint=`10.00/10`；
 - formal native replay为CPU semantic evidence，live GPU host integration仍待V4-3D。
 
-下一门禁为V4-3D live return assembly；V4-3E five-fresh与B2不得提前启动。
+该时点下一门禁为V4-3D；现已由下节正式关闭状态取代。
+
+## V4-3D Formal Closure
+
+状态：`VALIDATED-LIVE-RETURN`；V4-3D关闭，V4-3E准入，V4-3整体/B2仍不准入。
+
+- source=`dc7038a`，artifact=`artifacts/rvir-v4-live-return/resnet2b-core-v1`；
+- native lower/candidate child lower/lA均在`cuda:0`，真实12-path α/β + host packet联合原子提交，
+  12/12 committed、7 changed；
+- provider core/compute_bounds/update_bounds/fallback=`0/0/0/0`，未修改official post/queue消费成功，
+  visited domains=`[6]`；
+- 对V4-3A truth覆盖451 tensors/213,060 signs，最大差`1.0669e-05 <=2e-4`，sign/decision exact；
+- fresh replay通过，八类完全重签攻击8/8拒绝；`performance_claimed=false`。
+
+下一门禁只允许V4-3E按`O,C,C,O,C,O,O,C,O,C`完成五个fresh correctness pairs。5/5通过前不得
+关闭V4-3、设置`b2_same_solver_timing_admitted=true`或启动任何性能计时。

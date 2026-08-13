@@ -1,0 +1,41 @@
+{
+  "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+  "auto_lirpa_commit": "5a098e8f9fb5786a428a024981d833d303921f2d",
+  "code_revision": {
+    "boundflow/runtime/rvir_v4_atomic_copy_out.py": "00bb8d88ff8a21610dcbce2d8ae2a7c97a6c192fbf093c4f5c4028234756c170",
+    "boundflow/runtime/rvir_v4_live_return.py": "a7ad85c24f42b41d12871520c6e40212b8d25f0dabadd7dee0cd66f2bb451856",
+    "boundflow/runtime/rvir_v4_pre_state_initializer.py": "c1695916794c99955cf9fc7e5527bddbb29417824fee734db2e2b29128582ca3",
+    "boundflow/runtime/rvir_v4_whole_core_truth.py": "ee59d642b24a6030c5554d2cff96dc211ae71ae63095ff68322959e6a4bb8efe",
+    "scripts/probe_rvir_v4_live_return_artifact_tamper.py": "fb7fce94b24fb67060951a5caf4beb94aa8a0be96791574ff095c02d850e3370",
+    "scripts/run_rvir_v4_live_return_artifact.py": "54ee6b1284044fd4c749b809b51d52edb579d71db3079d3be6c03f5185f12aba",
+    "scripts/run_rvir_v4_live_return_capture.py": "e70c89442415950b03da55d3b711369cb8aa7dbcd99fe3937187b5589626f539"
+  },
+  "files": {
+    "README.md": "688a69f66ae56b5f65294614ff3090b6fe74e454780388e1f51d66e6358079f9",
+    "live_result.pt": "5559ce5b830e8746e692b027409e82377c29d967e4917ceb2f6afa04ad395a69",
+    "replay_stdout.txt": "4b33478a6991ff1b446f139ea064e8b57d8d8cf567575542078e5b9b3b11c466",
+    "source_whole_core_manifest.json": "0e6ed721dbf796cf8923dd57e09636f05895a1a065595ea1154b170a4a0c9818",
+    "source_whole_core_truth.pt": "d0126427dcdc868d33c7a7ec6326bdb86c8fb6e624a16c650d46c401ecabd0e9",
+    "summary.json": "014ee936ddc54e794d4e8e158d2c54be86825f7d58cb1a195f640103c2cdad00"
+  },
+  "manifest_hash": "4fb6518b6e68a55317f685efa39a6f26cc2452afcc97ff85f02d9616c4adbd98",
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "performance_claimed": false,
+  "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+  "replay_contract": {
+    "atol": 0.0002,
+    "discrete_structure_exact": true,
+    "mode": "fresh-pinned-live-candidate-rerun",
+    "native_device": "cuda:0",
+    "official_post_queue_unmodified": true,
+    "rtol": 0.0002,
+    "shape_dtype_device_exact": true,
+    "sign_exact": true
+  },
+  "schema_version": "boundflow.rvir-v4-live-return-artifact/v1",
+  "source_git_head": "dc7038a93353531f3c5e126b1c0b603db0026027",
+  "source_truth_manifest_sha256": "0e6ed721dbf796cf8923dd57e09636f05895a1a065595ea1154b170a4a0c9818",
+  "status": "validated-live-return-result",
+  "summary_hash": "4caeb541ec2f8d21fbdb7706c1c52ee20e247ff5e2b29acff0e8cb0846f39a6c",
+  "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf"
+}

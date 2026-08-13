@@ -3,7 +3,8 @@
 日期：2026-08-13
 
 当前状态：V4-3A=`VALIDATED-WHOLE-CORE-TRUTH`，V4-3B=`VALIDATED-NATIVE-BACKWARD-EXPORT`，
-V4-3C=`VALIDATED-NATIVE-KFSB`；V4-3D准入；V4-3总体、B2与性能claim仍关闭。
+V4-3C=`VALIDATED-NATIVE-KFSB`，V4-3D=`VALIDATED-LIVE-RETURN`；V4-3E准入；V4-3总体、B2与
+性能claim仍关闭。
 
 ## 1. 目标
 
@@ -126,7 +127,7 @@ V4-3C已由source `a2097c0`正式关闭：六层mask exact，三组candidate共3
 `1187 passed, 3 skipped`。证据见
 `gemini_doc/change_2026-08-13_rvir_v4_native_kfsb_formal_closure.md`。
 
-V4-3D capture-ready live return已完成一次RTX 4060 whole-core→official post/queue运行：provider
+V4-3D现已由source `dc7038a`正式关闭：RTX 4060 whole-core→official post/queue运行的provider
 core/compute/update/fallback=`0/0/0/0`，451 tensor/213,060 signs语义比较最大差`1.0669e-05`、final
-decision exact。下一动作是固定source并生成V4-3D formal artifact与tamper报告；在其正式关闭前，
-V4-3E five-fresh和B2 timing仍按依赖门禁关闭。
+decision exact，fresh replay与8类完全重签攻击通过。下一动作只启动V4-3E five-fresh correctness；
+V4-3整体与B2 timing仍按依赖门禁关闭。

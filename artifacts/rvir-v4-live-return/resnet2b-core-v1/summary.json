@@ -1,0 +1,79 @@
+{
+  "assembly_hash": "ecb2599e07656468e3f2e99f01a4c808c099dc7b0a327bb31736f72a3bb863a7",
+  "atomic_live_and_host_commit": true,
+  "b2_same_solver_timing_admitted": false,
+  "branching_decision": [
+    [
+      5,
+      27
+    ],
+    [
+      5,
+      32
+    ],
+    [
+      5,
+      90
+    ],
+    [
+      5,
+      90
+    ],
+    [
+      5,
+      32
+    ],
+    [
+      5,
+      90
+    ]
+  ],
+  "changed_path_count": 7,
+  "commit_hash": "ad3cbacc6d010d5237e144885a421327917e874b7133f148fbc89cf7cc629db3",
+  "committed_path_count": 12,
+  "core_count": 1,
+  "core_truth_hash": "ed655601bb93b8e8e34774d8f3a101fa09e0974c4991dbaddca3febcbf4d1808",
+  "domain_count": 6,
+  "fallback_dispatch_count": 0,
+  "five_fresh_correctness_admitted": false,
+  "intermediate_count": 6,
+  "kfsb_candidate_count": 3,
+  "lA_count": 6,
+  "n_splits": 6,
+  "n_verified": 0,
+  "native_devices": [
+    "cuda:0"
+  ],
+  "official_post_queue_consumed": true,
+  "performance_claimed": false,
+  "post_truth_hash": "71c90c963a659890179d392e1651a9ac65f8a9cccb7a97aa082e6b4b4522c20b",
+  "provider_compute_bounds_callback_count": 0,
+  "provider_core_callback_count": 0,
+  "provider_update_bounds_call_count": 0,
+  "provider_update_bounds_callback_count": 0,
+  "semantic_parity": {
+    "atol": 0.0002,
+    "b2_same_solver_timing_admitted": false,
+    "max_abs_diff": 1.0669231414794922e-05,
+    "numeric_digest_difference_count": 54,
+    "observed_provider_update_bounds_call_count": 0,
+    "parity_hash": "c23cc8411c651583da0e323ed4d23bd1acf3656d9582cb3c2c54379c95aa79f8",
+    "performance_claimed": false,
+    "reference_provider_update_bounds_call_count": 3,
+    "rtol": 0.0002,
+    "sign_element_count": 213060,
+    "sign_exact": true,
+    "status": "live-return-semantic-parity-passed",
+    "tensor_count": 451,
+    "truth_hash_difference_count": 2,
+    "whole_core_replacement_admitted": true
+  },
+  "solver_status": "verified",
+  "solver_success": true,
+  "status": "validated-live-return-result",
+  "summary_hash": "4caeb541ec2f8d21fbdb7706c1c52ee20e247ff5e2b29acff0e8cb0846f39a6c",
+  "visited_domains": [
+    6
+  ],
+  "whole_core_replacement_admitted": true
+}

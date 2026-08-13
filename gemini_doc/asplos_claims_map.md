@@ -30,7 +30,9 @@
 > 关闭。V4-3B又以零provider callback导出六层native lA、12个shared-input intermediate tensors与
 > final lower，通过五类同步重签攻击，以`VALIDATED-NATIVE-BACKWARD-EXPORT`关闭。V4-3C又以零provider
 > callback推导六层mask、复现三组top-3 candidate、执行72个child lower并恢复final decision，通过八类
-> 同步重签攻击，以`VALIDATED-NATIVE-KFSB`关闭；下一门禁为V4-3D，B2与性能claim仍关闭。
+> 同步重签攻击，以`VALIDATED-NATIVE-KFSB`关闭。V4-3D随后完成真实CUDA whole-core→official
+> post/queue接通、fresh replay与八类完全重签攻击，以`VALIDATED-LIVE-RETURN`关闭；下一门禁为
+> V4-3E，B2与性能claim仍关闭。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
@@ -1520,5 +1522,20 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   outer resign共8/8拒绝；
 - `RVIR-V4-3C-V`：source=`a2097c0`，manifest/tamper SHA256=`28e4da09...2ed8`/
   `c197b5d5...45f9`，targeted=`16 passed`，full=`1187 passed, 3 skipped`；
-- `RVIR-V4-3C-L`：状态=`VALIDATED-NATIVE-KFSB`。只准入V4-3D live return assembly；whole-core、
-  V4-3E、B2与performance仍未准入。
+- `RVIR-V4-3C-L`：状态=`VALIDATED-NATIVE-KFSB`；该时点只准入V4-3D，现已由下节closure取代。
+
+### RVIR-v4 V4-3D（关闭）：Live Return Assembly
+
+- `RVIR-V4-3D-M`：BoundFlow在真实RTX 4060进程执行pre-state→10/9 optimizer→backward→三候选
+  KFSB，原子提交12条provider-owned α/β与host packet并构造完整`UpdateBoundCoreReturn`；
+- `RVIR-V4-3D-G`：native lower/child lower/lA source device均为`cuda:0`；未修改official post/queue
+  消费成功，visited domains=`[6]`，final decision exact；对V4-3A truth的451 tensors/213,060 signs
+  最大差=`1.0669231414794922e-05 <=2e-4`且sign exact；
+- `RVIR-V4-3D-C`：provider core/compute_bounds/update_bounds/fallback=`0/0/0/0`；12/12 path committed、
+  7 changed，live tensor与host packet联合rollback单测通过；
+- `RVIR-V4-3D-T`：lA/intermediate/child lower/α/decision/accounting/provider callback/atomic flag八类
+  完全重签攻击8/8拒绝；
+- `RVIR-V4-3D-V`：source=`dc7038a`，manifest/tamper SHA256=`272ac92c…2d10`/
+  `1e4acb65…ddb1`，targeted=`23 passed`，full=`1196 passed, 3 skipped`；
+- `RVIR-V4-3D-L`：状态=`VALIDATED-LIVE-RETURN`，`whole_core_replacement_admitted=true`仅限固定一次
+  live core；`five_fresh_correctness_admitted=false`、B2/performance仍关闭。只准入V4-3E。

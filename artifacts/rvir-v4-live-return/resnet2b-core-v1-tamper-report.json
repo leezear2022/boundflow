@@ -1,0 +1,76 @@
+{
+  "all_rejected": true,
+  "artifact_source_git_head": "dc7038a93353531f3c5e126b1c0b603db0026027",
+  "attack_count": 8,
+  "attacks": [
+    {
+      "fully_resigned": true,
+      "name": "lA-numeric-full-resign",
+      "rejected": true,
+      "rejection": "RVIR-v4 whole-core numeric semantic parity differs: core.branch_trace.input.lAs._data./48"
+    },
+    {
+      "fully_resigned": true,
+      "name": "intermediate-numeric-full-resign",
+      "rejected": true,
+      "rejection": "RVIR-v4 whole-core numeric semantic parity differs: core.working_intermediate_bounds./input-28.lower"
+    },
+    {
+      "fully_resigned": true,
+      "name": "candidate-lower-full-resign",
+      "rejected": true,
+      "rejection": "RVIR-v4 whole-core numeric semantic parity differs: core.branch_trace.candidate_child_lowers[1]"
+    },
+    {
+      "fully_resigned": true,
+      "name": "alpha-state-full-resign",
+      "rejected": true,
+      "rejection": "RVIR-v4 whole-core numeric semantic parity differs: core.branch_trace.input.alphas._data./48./49"
+    },
+    {
+      "fully_resigned": true,
+      "name": "branch-decision-cross-resign",
+      "rejected": true,
+      "rejection": "RVIR-v4 whole-core discrete parity differs: core.branch_trace.final_decision.decision[0][1]"
+    },
+    {
+      "fully_resigned": true,
+      "name": "core-accounting-full-resign",
+      "rejected": true,
+      "rejection": "RVIR-v4 whole-core scalar parity differs: core.lb_final_max"
+    },
+    {
+      "fully_resigned": true,
+      "name": "provider-callback-full-resign",
+      "rejected": true,
+      "rejection": "RVIR-v4 live-return atomic receipt differs"
+    },
+    {
+      "fully_resigned": true,
+      "name": "atomic-flag-full-resign",
+      "rejected": true,
+      "rejection": "RVIR-v4 live-return atomic receipt differs"
+    }
+  ],
+  "clean_fresh_semantic_parity": {
+    "atol": 0.0002,
+    "b2_same_solver_timing_admitted": false,
+    "max_abs_diff": 1.0669231414794922e-05,
+    "numeric_digest_difference_count": 54,
+    "observed_provider_update_bounds_call_count": 0,
+    "parity_hash": "c23cc8411c651583da0e323ed4d23bd1acf3656d9582cb3c2c54379c95aa79f8",
+    "performance_claimed": false,
+    "reference_provider_update_bounds_call_count": 3,
+    "rtol": 0.0002,
+    "sign_element_count": 213060,
+    "sign_exact": true,
+    "status": "live-return-semantic-parity-passed",
+    "tensor_count": 451,
+    "truth_hash_difference_count": 2,
+    "whole_core_replacement_admitted": true
+  },
+  "clean_frozen_summary_hash": "4caeb541ec2f8d21fbdb7706c1c52ee20e247ff5e2b29acff0e8cb0846f39a6c",
+  "fully_resigned_attack_count": 8,
+  "performance_claimed": false,
+  "schema_version": "boundflow.rvir-v4-live-return-tamper-report/v1"
+}

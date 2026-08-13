@@ -47,9 +47,9 @@
 
 ## 当前边界与下一动作
 
-当前状态为`IMPLEMENTED-LIVE-RETURN / FORMAL-ARTIFACT-PENDING`。该记录证明capture-ready实现与一次
-真实GPU接通，不等于V4-3D formal closure，更不等于V4-3E five-fresh或性能结论。
+本段记录当时的`IMPLEMENTED-LIVE-RETURN / FORMAL-ARTIFACT-PENDING`状态；现已被
+`change_2026-08-13_rvir_v4_live_return_formal_closure.md`中的正式关闭状态取代。该关闭仍不等于
+V4-3E five-fresh或性能结论。
 
-下一步固定source commit，生成V4-3D独立artifact、semantic replay和完全重签tamper报告；只有V4-3D
-正式关闭后才准入V4-3E的五个fresh original/candidate correctness pairs。B2 timing继续关闭，
-`performance_claimed=false`。
+当前下一步以formal closure为准：只启动V4-3E五个fresh original/candidate correctness pairs。B2
+timing继续关闭，`performance_claimed=false`。

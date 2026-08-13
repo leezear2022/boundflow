@@ -5187,3 +5187,14 @@
   语义比较最大差`1.0669231414794922e-05`、sign/decision exact；
 - 当前只到`FORMAL-ARTIFACT-PENDING`，V4-3E/B2/performance未准入；详见
   `gemini_doc/change_2026-08-13_rvir_v4_live_return_assembly.md`。
+
+## 2026-08-13：RVIR-v4 V4-3D Live Return Formal Closure
+
+- source `dc7038a`生成真实CUDA whole-core live-return artifact，12/12 α/β paths与host packet原子提交；
+- provider core/compute/update/fallback=`0/0/0/0`，未修改official post/queue消费成功；
+- 451 tensors/213,060 signs最大差`1.0669e-05`、sign/decision exact；fresh replay与八类完全重签攻击
+  通过；
+- V4-3D=`VALIDATED-LIVE-RETURN`，下一动作V4-3E；V4-3整体/B2/performance仍关闭。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_live_return_formal_closure.md`
