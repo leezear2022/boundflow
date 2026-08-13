@@ -42,3 +42,11 @@ topology、replay stdout、源码revision与文件inventory。replay会重新执
 序列化摘要。capture-ready focused=`4 passed`，mypy四文件clean，Pylint runner/test=`10.00/10`。
 
 runner需先进入clean commit再生成正式artifact；本段不改变V4-2D pending状态。
+
+## Tamper Probe 准备（同日）
+
+新增六类攻击：topology、initial upper-α、production step lower、production step α、optimizer policy、
+recorded parity。lower/α攻击同时更新独立call view，所有capture攻击均重算适用tensor/step/trace/
+snapshot hash、V4-2C source manifest与V4-2D outer manifest；direct semantic builder仍必须拒绝。
+临时报告实测6/6 outer provenance与semantic mutation两层fail closed；mypy clean，Pylint=`10.00/10`。
+probe先进入clean commit，再生成源码digest绑定的正式报告。
