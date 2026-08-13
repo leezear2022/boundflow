@@ -312,3 +312,19 @@ accepted/pruned domains、lineage/node accounting、termination与verdict。V4-3
 
 下一门禁只允许V4-3E按`O,C,C,O,C,O,O,C,O,C`完成五个fresh correctness pairs。5/5通过前不得
 关闭V4-3、设置`b2_same_solver_timing_admitted=true`或启动任何性能计时。
+
+## V4-3E / V4-3 Formal Closure
+
+状态：V4-3E=`VALIDATED-FIVE-FRESH-CORRECTNESS`；V4-3=
+`VALIDATED-WHOLE-CORE-REPLACEMENT`；B2 same-solver timing准入。
+
+- source=`17d2d61`，artifact=`artifacts/rvir-v4-five-fresh/resnet2b-prop0-v1`；
+- 十个fresh进程sequence=`O,C,C,O,C,O,O,C,O,C`，五对counterbalanced correctness 5/5通过；
+- 合计2255 tensors/1,065,300 signs，最大差`1.0669e-05 <=2e-4`，sign/branch exact；
+- 每轮queue accepted/pruned=`6/0`，visited=`[6]`，termination/status/success exact；
+- candidate provider core/compute/update/fallback全零，六类重签攻击6/6拒绝；
+- `five_fresh_correctness_admitted=true`、`b2_same_solver_timing_admitted=true`，但
+  `performance_claimed=false`。
+
+下一步按原FSG3 measurement contract预注册并运行B2 timing；不得把本correctness十进程的wall当作
+speedup。

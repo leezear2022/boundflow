@@ -323,8 +323,8 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 2. [x] FSG1：official control hook、五fresh baseline artifact/replay；
 3. [x] FSG2：历史上以`VALIDATED-REDUCED initial-only`关闭；当时完整α/β/split replacement与B2
    `NO-GO/not admitted`；该阻塞已由RVIR-v4 V4-2的`VALIDATED-OPTIMIZER-REPLACEMENT`修复；
-4. [ ] V4-3/FSG3前置：whole-core live integration与至少5次fresh correctness；通过后才运行
-   B0/B1/B2 same-solver counterbalanced timing；
+4. [x] V4-3/FSG3前置：whole-core live integration与5个fresh correctness pairs已通过；V4-3=
+   `VALIDATED-WHOLE-CORE-REPLACEMENT`，B0/B1/B2 same-solver counterbalanced timing现准入；
 5. [—] FSG4：因B3—B7均依赖B2，依赖门禁阻止，未实现/未消融；
 6. [—] FSG5：因无合法B7 candidate，依赖门禁阻止，无系统性能claim。
 
@@ -409,6 +409,17 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 - FSG3性能计时尚未恢复。先执行V4-3，将executor接入whole `update_bounds_core`并完成至少5次fresh
   correctness；只有V4-3通过，才按本文§4/§7运行B0/B1/B2公平计时；
 - `performance_claimed=false`，B3—B7仍未实现或测量。
+
+### RVIR-v4 V4-3 Closure 与 FSG3/B2 准入（2026-08-13）
+
+- V4-3D已在真实RTX 4060进程以provider core/compute/update/fallback=`0/0/0/0`接入未修改的official
+  post/queue；
+- V4-3E按`O,C,C,O,C,O,O,C,O,C`完成10个fresh进程，5/5 pairs的state/branch/queue/termination
+  与status/success通过，最大差`1.0669e-05 <=2e-4`；
+- V4-3=`VALIDATED-WHOLE-CORE-REPLACEMENT`，正式撤销“B2因ownership缺失不得计时”的当前阻塞；
+  旧FSG2 artifact与其当时的NO-GO结论保留为历史；
+- 下一动作是独立FSG3/B2 measurement，不复用correctness worker wall，不自动准入B3—B7；
+- `b2_same_solver_timing_admitted=true`，`performance_claimed=false`。
 
 ## 13. Rollback
 

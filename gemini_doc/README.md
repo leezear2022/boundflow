@@ -33,15 +33,14 @@ V4-2E实现记录见`gemini_doc/change_2026-08-13_rvir_v4_atomic_copy_out.md`，
 `gemini_doc/change_2026-08-13_rvir_v4_atomic_copy_out_formal_closure.md`：12-path private stage与atomic
 commit、stale/NaN拒绝、mid-copy rollback、formal replay及6类完全重签攻击全部通过。V4-2E状态为
 `VALIDATED-ATOMIC-COPY-OUT`，V4-2整体为`VALIDATED-OPTIMIZER-REPLACEMENT`。它尚未替换whole
-`update_bounds_core`；B2和性能claim仍关闭，下一动作是V4-3 whole-core replacement与5次fresh
-correctness。
+`update_bounds_core`；“B2关闭、下一动作V4-3”是该时点历史门禁，现已由下文V4-3E closure取代。
 
 V4-3预注册入口为`gemini_doc/rvir_v4_whole_core_replacement_plan_2026_08_13.md`：先冻结whole-core
 truth，再实现native lA/intermediate、KFSB child evaluation、live return assembly和5次fresh correctness；
 provider core/compute_bounds/update_bounds必须为`0/0/0`。V4-3A现已以
 `VALIDATED-WHOLE-CORE-TRUTH`关闭：451 tensors/213,060 signs fresh replay与六类同步重签攻击通过；见
 `gemini_doc/change_2026-08-13_rvir_v4_whole_core_truth_formal_closure.md`。V4-3B/C/D现也已依序关闭；
-当前只启动V4-3E five-fresh correctness，不启动B2计时。
+“只启动V4-3E、不启动B2”是该时点历史门禁，现已由下文V4-3E closure取代。
 
 V4-3B实现记录为`gemini_doc/change_2026-08-13_rvir_v4_native_backward_export.md`：六层native lA与
 12个shared-input intermediate tensors现已由正式artifact关闭，状态为
@@ -59,11 +58,13 @@ V4-3D实现记录见`gemini_doc/change_2026-08-13_rvir_v4_live_return_assembly.m
 `gemini_doc/change_2026-08-13_rvir_v4_live_return_formal_closure.md`：BoundFlow whole core已在RTX 4060
 真实GPU进程中以provider callback=`0/0/0`接入未修改的official post/queue，完整core/post语义比较
 最大差`1.0669e-05`且decision exact，fresh replay与8类完全重签攻击通过。状态为
-`VALIDATED-LIVE-RETURN`；下一门禁只允许V4-3E five-fresh，B2继续关闭。
+`VALIDATED-LIVE-RETURN`；“下一门禁只允许V4-3E、B2继续关闭”是该时点历史门禁，现已由下段
+V4-3E closure取代。
 
-V4-3E harness实现记录为`gemini_doc/change_2026-08-13_rvir_v4_five_fresh_correctness.md`：已冻结
-`O,C,C,O,C,O,O,C,O,C`十进程顺序、五对映射及显式queue accounting。当前仍为
-`FORMAL-RUN-PENDING`，不能用单个smoke pair关闭V4-3或开启B2。
+V4-3E harness实现记录为`gemini_doc/change_2026-08-13_rvir_v4_five_fresh_correctness.md`，formal
+closure见`gemini_doc/change_2026-08-13_rvir_v4_five_fresh_formal_closure.md`：
+`O,C,C,O,C,O,O,C,O,C`十个fresh进程、五对完整semantic/queue/termination与六类tamper全部通过。
+V4-3整体=`VALIDATED-WHOLE-CORE-REPLACEMENT`；B2 timing已准入但未执行，仍无performance claim。
 
 ---
 
@@ -72,12 +73,12 @@ V4-3E harness实现记录为`gemini_doc/change_2026-08-13_rvir_v4_five_fresh_cor
 纠正、全栈 schema、feature activation ledger 与 replay 合同已以20项定向测试和
 `1079 passed, 3 skipped`全量回归关闭；外部审计三项minor亦已修复。FSG1又完成official B0
 control full-stack trace：两个workload各5 fresh pair、10/10 attribution closure、semantic replay通过。
-FSG2已以`VALIDATED-REDUCED initial-only`关闭：真实ResNet initial-CROWN可由BoundFlow native
+FSG2历史阶段以`VALIDATED-REDUCED initial-only`关闭：真实ResNet initial-CROWN可由BoundFlow native
 backend在original/fallback=`0/0`下替换，但production inventory的24 calls显示alpha为嵌套
 start-node keyed state，11个beta/split call前后又没有显式可own的beta tensor。故完整B2
-`NO-GO/not admitted`，FSG3—FSG5按依赖门禁未运行；这不等于算子、图IR、JIT、调度或内存层
-各自已被证伪。当前无BoundFlow全栈GPU speedup claim；重开需先完成production alpha/beta/split
-state ownership与独立replacement backend。关闭记录见
+在该时点`NO-GO/not admitted`，FSG3—FSG5按依赖门禁未运行；这不等于算子、图IR、JIT、调度或内存层
+各自已被证伪。该历史ownership blocker现已由上文RVIR-v4 V4-3 whole-core replacement关闭，B2
+same-solver timing已经准入但尚未执行；当前仍无BoundFlow全栈GPU speedup claim。FSG2历史关闭记录见
 `gemini_doc/change_2026-08-06_fsg2_replacement_boundary_and_downstream_gate.md`。
 
 NRIR49A 的正式数据与 artifact 继续有效，但其 `VALIDATED-NO-GO` 仅关闭 selected-CROWN-only

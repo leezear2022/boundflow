@@ -1,0 +1,763 @@
+{
+  "accepted_domain_count_per_run": 6,
+  "all_pairs_admitted": true,
+  "all_sign_exact": true,
+  "b2_same_solver_timing_admitted": true,
+  "candidate_fallback_dispatch_count": 0,
+  "candidate_provider_compute_bounds_callback_count": 0,
+  "candidate_provider_core_callback_count": 0,
+  "candidate_provider_update_bounds_callback_count": 0,
+  "candidate_run_count": 5,
+  "five_fresh_correctness_admitted": true,
+  "maximum_absolute_difference": 1.0669231414794922e-05,
+  "original_run_count": 5,
+  "pair_count": 5,
+  "pairs": [
+    {
+      "branching_decision_exact": true,
+      "candidate_provider_callback_count": 0,
+      "candidate_run_index": 1,
+      "domain_accounting_exact": true,
+      "execution_order": "original-candidate",
+      "original_provider_call_count": 24,
+      "original_run_index": 0,
+      "pair_admitted": true,
+      "pair_hash": "a8d4cadac1aaf5129a4bac71280da8609901fb9a83c95d4fe50b5f0fc0ba59c3",
+      "pair_index": 0,
+      "performance_claimed": false,
+      "queue_accounting_exact": true,
+      "semantic_parity": {
+        "atol": 0.0002,
+        "b2_same_solver_timing_admitted": false,
+        "max_abs_diff": 1.0669231414794922e-05,
+        "numeric_digest_difference_count": 54,
+        "observed_provider_update_bounds_call_count": 0,
+        "parity_hash": "c23cc8411c651583da0e323ed4d23bd1acf3656d9582cb3c2c54379c95aa79f8",
+        "performance_claimed": false,
+        "reference_provider_update_bounds_call_count": 3,
+        "rtol": 0.0002,
+        "sign_element_count": 213060,
+        "sign_exact": true,
+        "status": "live-return-semantic-parity-passed",
+        "tensor_count": 451,
+        "truth_hash_difference_count": 2,
+        "whole_core_replacement_admitted": true
+      },
+      "solver_result_exact": true
+    },
+    {
+      "branching_decision_exact": true,
+      "candidate_provider_callback_count": 0,
+      "candidate_run_index": 2,
+      "domain_accounting_exact": true,
+      "execution_order": "candidate-original",
+      "original_provider_call_count": 24,
+      "original_run_index": 3,
+      "pair_admitted": true,
+      "pair_hash": "8555552d8bd3707b6277c30147cd024766a5bb1b55c7603c7fed59d15b99a199",
+      "pair_index": 1,
+      "performance_claimed": false,
+      "queue_accounting_exact": true,
+      "semantic_parity": {
+        "atol": 0.0002,
+        "b2_same_solver_timing_admitted": false,
+        "max_abs_diff": 1.0669231414794922e-05,
+        "numeric_digest_difference_count": 54,
+        "observed_provider_update_bounds_call_count": 0,
+        "parity_hash": "c23cc8411c651583da0e323ed4d23bd1acf3656d9582cb3c2c54379c95aa79f8",
+        "performance_claimed": false,
+        "reference_provider_update_bounds_call_count": 3,
+        "rtol": 0.0002,
+        "sign_element_count": 213060,
+        "sign_exact": true,
+        "status": "live-return-semantic-parity-passed",
+        "tensor_count": 451,
+        "truth_hash_difference_count": 2,
+        "whole_core_replacement_admitted": true
+      },
+      "solver_result_exact": true
+    },
+    {
+      "branching_decision_exact": true,
+      "candidate_provider_callback_count": 0,
+      "candidate_run_index": 4,
+      "domain_accounting_exact": true,
+      "execution_order": "candidate-original",
+      "original_provider_call_count": 24,
+      "original_run_index": 5,
+      "pair_admitted": true,
+      "pair_hash": "2702304dd592e6f31d211db0c1d2d21a1ad8d4cf9d2b28e28871c89a385f9fdf",
+      "pair_index": 2,
+      "performance_claimed": false,
+      "queue_accounting_exact": true,
+      "semantic_parity": {
+        "atol": 0.0002,
+        "b2_same_solver_timing_admitted": false,
+        "max_abs_diff": 1.0669231414794922e-05,
+        "numeric_digest_difference_count": 54,
+        "observed_provider_update_bounds_call_count": 0,
+        "parity_hash": "c23cc8411c651583da0e323ed4d23bd1acf3656d9582cb3c2c54379c95aa79f8",
+        "performance_claimed": false,
+        "reference_provider_update_bounds_call_count": 3,
+        "rtol": 0.0002,
+        "sign_element_count": 213060,
+        "sign_exact": true,
+        "status": "live-return-semantic-parity-passed",
+        "tensor_count": 451,
+        "truth_hash_difference_count": 2,
+        "whole_core_replacement_admitted": true
+      },
+      "solver_result_exact": true
+    },
+    {
+      "branching_decision_exact": true,
+      "candidate_provider_callback_count": 0,
+      "candidate_run_index": 7,
+      "domain_accounting_exact": true,
+      "execution_order": "original-candidate",
+      "original_provider_call_count": 24,
+      "original_run_index": 6,
+      "pair_admitted": true,
+      "pair_hash": "72432575f874b09aba12501e78d3fce233a17233a013a84e6a14d0db244c6d5b",
+      "pair_index": 3,
+      "performance_claimed": false,
+      "queue_accounting_exact": true,
+      "semantic_parity": {
+        "atol": 0.0002,
+        "b2_same_solver_timing_admitted": false,
+        "max_abs_diff": 1.0669231414794922e-05,
+        "numeric_digest_difference_count": 54,
+        "observed_provider_update_bounds_call_count": 0,
+        "parity_hash": "c23cc8411c651583da0e323ed4d23bd1acf3656d9582cb3c2c54379c95aa79f8",
+        "performance_claimed": false,
+        "reference_provider_update_bounds_call_count": 3,
+        "rtol": 0.0002,
+        "sign_element_count": 213060,
+        "sign_exact": true,
+        "status": "live-return-semantic-parity-passed",
+        "tensor_count": 451,
+        "truth_hash_difference_count": 2,
+        "whole_core_replacement_admitted": true
+      },
+      "solver_result_exact": true
+    },
+    {
+      "branching_decision_exact": true,
+      "candidate_provider_callback_count": 0,
+      "candidate_run_index": 9,
+      "domain_accounting_exact": true,
+      "execution_order": "original-candidate",
+      "original_provider_call_count": 24,
+      "original_run_index": 8,
+      "pair_admitted": true,
+      "pair_hash": "a5402b1d69a84c4d70b9486cdbf2eb8dcdd51deebb3d0e6ec2b00322772d70f3",
+      "pair_index": 4,
+      "performance_claimed": false,
+      "queue_accounting_exact": true,
+      "semantic_parity": {
+        "atol": 0.0002,
+        "b2_same_solver_timing_admitted": false,
+        "max_abs_diff": 1.0669231414794922e-05,
+        "numeric_digest_difference_count": 54,
+        "observed_provider_update_bounds_call_count": 0,
+        "parity_hash": "c23cc8411c651583da0e323ed4d23bd1acf3656d9582cb3c2c54379c95aa79f8",
+        "performance_claimed": false,
+        "reference_provider_update_bounds_call_count": 3,
+        "rtol": 0.0002,
+        "sign_element_count": 213060,
+        "sign_exact": true,
+        "status": "live-return-semantic-parity-passed",
+        "tensor_count": 451,
+        "truth_hash_difference_count": 2,
+        "whole_core_replacement_admitted": true
+      },
+      "solver_result_exact": true
+    }
+  ],
+  "performance_claimed": false,
+  "provider_original_call_count": 120,
+  "pruned_domain_count_per_run": 0,
+  "run_count": 10,
+  "run_summaries": [
+    {
+      "branching_decision": [
+        [
+          5,
+          27
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ]
+      ],
+      "candidate_callback_count": null,
+      "mode": "original",
+      "n_splits": 6,
+      "n_verified": 0,
+      "performance_claimed": false,
+      "provider_call_count": 24,
+      "queue_accounting": {
+        "accepted_domain_count": 6,
+        "after_domain_count": 6,
+        "before_domain_count": 0,
+        "depths": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "input_domain_count": 6,
+        "pruned_domain_count": 0
+      },
+      "solver_result": {
+        "status": "verified",
+        "success": true,
+        "visited_domains": [
+          6
+        ]
+      }
+    },
+    {
+      "branching_decision": [
+        [
+          5,
+          27
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ]
+      ],
+      "candidate_callback_count": 0,
+      "mode": "candidate",
+      "n_splits": 6,
+      "n_verified": 0,
+      "performance_claimed": false,
+      "provider_call_count": 0,
+      "queue_accounting": {
+        "accepted_domain_count": 6,
+        "after_domain_count": 6,
+        "before_domain_count": 0,
+        "depths": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "input_domain_count": 6,
+        "pruned_domain_count": 0
+      },
+      "solver_result": {
+        "status": "verified",
+        "success": true,
+        "visited_domains": [
+          6
+        ]
+      }
+    },
+    {
+      "branching_decision": [
+        [
+          5,
+          27
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ]
+      ],
+      "candidate_callback_count": 0,
+      "mode": "candidate",
+      "n_splits": 6,
+      "n_verified": 0,
+      "performance_claimed": false,
+      "provider_call_count": 0,
+      "queue_accounting": {
+        "accepted_domain_count": 6,
+        "after_domain_count": 6,
+        "before_domain_count": 0,
+        "depths": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "input_domain_count": 6,
+        "pruned_domain_count": 0
+      },
+      "solver_result": {
+        "status": "verified",
+        "success": true,
+        "visited_domains": [
+          6
+        ]
+      }
+    },
+    {
+      "branching_decision": [
+        [
+          5,
+          27
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ]
+      ],
+      "candidate_callback_count": null,
+      "mode": "original",
+      "n_splits": 6,
+      "n_verified": 0,
+      "performance_claimed": false,
+      "provider_call_count": 24,
+      "queue_accounting": {
+        "accepted_domain_count": 6,
+        "after_domain_count": 6,
+        "before_domain_count": 0,
+        "depths": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "input_domain_count": 6,
+        "pruned_domain_count": 0
+      },
+      "solver_result": {
+        "status": "verified",
+        "success": true,
+        "visited_domains": [
+          6
+        ]
+      }
+    },
+    {
+      "branching_decision": [
+        [
+          5,
+          27
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ]
+      ],
+      "candidate_callback_count": 0,
+      "mode": "candidate",
+      "n_splits": 6,
+      "n_verified": 0,
+      "performance_claimed": false,
+      "provider_call_count": 0,
+      "queue_accounting": {
+        "accepted_domain_count": 6,
+        "after_domain_count": 6,
+        "before_domain_count": 0,
+        "depths": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "input_domain_count": 6,
+        "pruned_domain_count": 0
+      },
+      "solver_result": {
+        "status": "verified",
+        "success": true,
+        "visited_domains": [
+          6
+        ]
+      }
+    },
+    {
+      "branching_decision": [
+        [
+          5,
+          27
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ]
+      ],
+      "candidate_callback_count": null,
+      "mode": "original",
+      "n_splits": 6,
+      "n_verified": 0,
+      "performance_claimed": false,
+      "provider_call_count": 24,
+      "queue_accounting": {
+        "accepted_domain_count": 6,
+        "after_domain_count": 6,
+        "before_domain_count": 0,
+        "depths": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "input_domain_count": 6,
+        "pruned_domain_count": 0
+      },
+      "solver_result": {
+        "status": "verified",
+        "success": true,
+        "visited_domains": [
+          6
+        ]
+      }
+    },
+    {
+      "branching_decision": [
+        [
+          5,
+          27
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ]
+      ],
+      "candidate_callback_count": null,
+      "mode": "original",
+      "n_splits": 6,
+      "n_verified": 0,
+      "performance_claimed": false,
+      "provider_call_count": 24,
+      "queue_accounting": {
+        "accepted_domain_count": 6,
+        "after_domain_count": 6,
+        "before_domain_count": 0,
+        "depths": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "input_domain_count": 6,
+        "pruned_domain_count": 0
+      },
+      "solver_result": {
+        "status": "verified",
+        "success": true,
+        "visited_domains": [
+          6
+        ]
+      }
+    },
+    {
+      "branching_decision": [
+        [
+          5,
+          27
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ]
+      ],
+      "candidate_callback_count": 0,
+      "mode": "candidate",
+      "n_splits": 6,
+      "n_verified": 0,
+      "performance_claimed": false,
+      "provider_call_count": 0,
+      "queue_accounting": {
+        "accepted_domain_count": 6,
+        "after_domain_count": 6,
+        "before_domain_count": 0,
+        "depths": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "input_domain_count": 6,
+        "pruned_domain_count": 0
+      },
+      "solver_result": {
+        "status": "verified",
+        "success": true,
+        "visited_domains": [
+          6
+        ]
+      }
+    },
+    {
+      "branching_decision": [
+        [
+          5,
+          27
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ]
+      ],
+      "candidate_callback_count": null,
+      "mode": "original",
+      "n_splits": 6,
+      "n_verified": 0,
+      "performance_claimed": false,
+      "provider_call_count": 24,
+      "queue_accounting": {
+        "accepted_domain_count": 6,
+        "after_domain_count": 6,
+        "before_domain_count": 0,
+        "depths": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "input_domain_count": 6,
+        "pruned_domain_count": 0
+      },
+      "solver_result": {
+        "status": "verified",
+        "success": true,
+        "visited_domains": [
+          6
+        ]
+      }
+    },
+    {
+      "branching_decision": [
+        [
+          5,
+          27
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ]
+      ],
+      "candidate_callback_count": 0,
+      "mode": "candidate",
+      "n_splits": 6,
+      "n_verified": 0,
+      "performance_claimed": false,
+      "provider_call_count": 0,
+      "queue_accounting": {
+        "accepted_domain_count": 6,
+        "after_domain_count": 6,
+        "before_domain_count": 0,
+        "depths": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "input_domain_count": 6,
+        "pruned_domain_count": 0
+      },
+      "solver_result": {
+        "status": "verified",
+        "success": true,
+        "visited_domains": [
+          6
+        ]
+      }
+    }
+  ],
+  "sequence": [
+    "original",
+    "candidate",
+    "candidate",
+    "original",
+    "candidate",
+    "original",
+    "original",
+    "candidate",
+    "original",
+    "candidate"
+  ],
+  "sign_element_comparison_count": 1065300,
+  "status": "validated-five-fresh-correctness",
+  "summary_hash": "cf0bec5aaa1fd90ecd26c8036ebb9a7f03d314b3c47bbd450df9676f16666adf",
+  "tensor_comparison_count": 2255,
+  "visited_domains_per_run": [
+    6
+  ],
+  "whole_core_replacement_admitted": true
+}

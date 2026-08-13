@@ -17,9 +17,9 @@
 > queue/complete中只占约7.10%/7.05%，Amdahl与physical-memory门禁均失败，selected-CROWN专属
 > G2/G3已gated off。`1.0764x`只是删除该单区域的deletion-only上限，不是BoundFlow全栈上限；FSG0
 > schema/replay合同已验证；FSG1 official B0 full-stack trace亦已关闭。FSG2现以
-> `VALIDATED-REDUCED initial-only`关闭：完整production alpha/beta/split replacement未准入，
-> 因而B2为NO-GO，FSG3—FSG5按依赖门禁未运行。该结论不否决B3—B7各层潜力，但当前仍无
-> BoundFlow全栈性能claim。2026-08-13 RVIR-v4已把V4-1 frozen post-state evaluation关闭；重启后
+> `VALIDATED-REDUCED initial-only`关闭：完整production alpha/beta/split replacement在该历史时点未准入，
+> 因而B2曾为NO-GO，FSG3—FSG5按依赖门禁未运行。该结论不否决B3—B7各层潜力。2026-08-13
+> RVIR-v4已把V4-1 frozen post-state evaluation关闭；重启后
 > V4-2B 10-evaluation/9-Adam-step正式GPU typed trace、original replay与5类同步重签名tamper通过，以
 > `VALIDATED-PRODUCTION-TRACE`关闭。V4-2C又以正式artifact关闭6组native pre-state初始化、12/12
 > round-trip及6类双层重签名tamper，状态为`VALIDATED-PRE-STATE-INITIALIZER`。这些结论尚未执行
@@ -31,8 +31,10 @@
 > final lower，通过五类同步重签攻击，以`VALIDATED-NATIVE-BACKWARD-EXPORT`关闭。V4-3C又以零provider
 > callback推导六层mask、复现三组top-3 candidate、执行72个child lower并恢复final decision，通过八类
 > 同步重签攻击，以`VALIDATED-NATIVE-KFSB`关闭。V4-3D随后完成真实CUDA whole-core→official
-> post/queue接通、fresh replay与八类完全重签攻击，以`VALIDATED-LIVE-RETURN`关闭；下一门禁为
-> V4-3E，B2与性能claim仍关闭。
+> post/queue接通、fresh replay与八类完全重签攻击，以`VALIDATED-LIVE-RETURN`关闭。V4-3E再以十个
+> fresh CUDA进程完成5/5 counterbalanced pairs及六类tamper，V4-3整体升级为
+> `VALIDATED-WHOLE-CORE-REPLACEMENT`。历史ownership blocker已被取代；B2 same-solver timing现已准入
+> 但未执行，当前仍无BoundFlow全栈性能claim。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
@@ -1484,7 +1486,7 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   `11 passed`、full=`1175 passed, 3 skipped`、Black/mypy clean、Pylint=`10.00/10`；
 - `RVIR-V4-2E-L`：V4-2E=`VALIDATED-ATOMIC-COPY-OUT`；V4-2 §6八项formal acceptance全部通过，
   整体=`VALIDATED-OPTIMIZER-REPLACEMENT`。whole-core live integration、branch/queue/termination/verdict
-  仍待V4-3；B2和性能claim关闭。
+  在该时点仍待V4-3；该时点B2和性能claim关闭，现已由后续V4-3 closure取代。
 
 ### RVIR-v4 V4-3A（关闭）：Whole-Core Original Truth
 
@@ -1496,7 +1498,7 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - `RVIR-V4-3A-V`：source=`bfdeefc`，manifest/tamper SHA256=`0e6ed721...9818`/
   `dafcb893...a52`，targeted=`12 passed`，full=`1180 passed, 3 skipped`；
 - `RVIR-V4-3A-L`：状态=`VALIDATED-WHOLE-CORE-TRUTH`。只准入V4-3B native lA/intermediate；
-  `whole_core_replacement_admitted=false`、B2与performance claim关闭。
+  该时点`whole_core_replacement_admitted=false`、B2与performance claim关闭，现已由后续closure取代。
 
 ### RVIR-v4 V4-3B（关闭）：Native Backward Export
 
@@ -1509,7 +1511,8 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - `RVIR-V4-3B-V`：source=`762b642`，manifest/tamper SHA256=`110dfd63...8269`/
   `4cdd2231...e355`，targeted=`9 passed`，full=`1183 passed, 3 skipped`；
 - `RVIR-V4-3B-L`：状态=`VALIDATED-NATIVE-BACKWARD-EXPORT`。formal native为CPU semantic replay；
-  KFSB现由V4-3C另行关闭，但GPU live integration、whole-core、B2与performance仍未准入。
+  KFSB现由V4-3C另行关闭；该时点GPU live integration、whole-core、B2与performance仍未准入，现已由
+  后续closure取代。
 
 ### RVIR-v4 V4-3C（关闭）：Native KFSB Candidate Evaluation
 
@@ -1538,4 +1541,22 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - `RVIR-V4-3D-V`：source=`dc7038a`，manifest/tamper SHA256=`272ac92c…2d10`/
   `1e4acb65…ddb1`，targeted=`23 passed`，full=`1196 passed, 3 skipped`；
 - `RVIR-V4-3D-L`：状态=`VALIDATED-LIVE-RETURN`，`whole_core_replacement_admitted=true`仅限固定一次
-  live core；`five_fresh_correctness_admitted=false`、B2/performance仍关闭。只准入V4-3E。
+  live core；该时点`five_fresh_correctness_admitted=false`、B2/performance仍关闭、只准入V4-3E，
+  现已由下节closure取代。
+
+### RVIR-v4 V4-3E / V4-3（关闭）：Five-Fresh Whole-Core Replacement
+
+- `RVIR-V4-3E-P`：sequence exact=`O,C,C,O,C,O,O,C,O,C`，pair mapping exact=
+  `(0,1)/(3,2)/(5,4)/(6,7)/(8,9)`；10个独立CUDA进程、cold isolated property；
+- `RVIR-V4-3E-G`：5/5 pairs通过完整core/post/state/branch/queue/termination；合计2255 tensors、
+  1,065,300 signs，最大差=`1.0669231414794922e-05 <=2e-4`，sign exact；每run accepted/pruned=
+  `6/0`、visited=`[6]`、status/success=`verified/true`；
+- `RVIR-V4-3E-C`：original provider call总数120；candidate provider core/compute/update/fallback=
+  `0/0/0/0`；
+- `RVIR-V4-3E-T`：candidate/original lA、candidate decision三类inner+outer resign与queue/callback/
+  sequence三类outer resign共6/6拒绝；
+- `RVIR-V4-3E-V`：source=`17d2d61`，manifest/tamper SHA256=`ca37bd56…ada2`/
+  `bc41cde5…9fc2`，closing targeted=`8 passed`，full=`1200 passed, 3 skipped`；
+- `RVIR-V4-3E-L`：V4-3E=`VALIDATED-FIVE-FRESH-CORRECTNESS`，V4-3整体=
+  `VALIDATED-WHOLE-CORE-REPLACEMENT`；`b2_same_solver_timing_admitted=true`，但B2未执行且
+  `performance_claimed=false`。

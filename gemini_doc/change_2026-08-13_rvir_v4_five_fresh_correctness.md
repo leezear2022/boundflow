@@ -27,9 +27,8 @@
 
 ## 当前边界与下一动作
 
-当前状态为`IMPLEMENTED-FIVE-FRESH-HARNESS / FORMAL-RUN-PENDING`。重复同一smoke payload的contract
-测试不能替代十个fresh进程，不构成V4-3E关闭。
+本段记录当时的`IMPLEMENTED-FIVE-FRESH-HARNESS / FORMAL-RUN-PENDING`状态；现已被
+`change_2026-08-13_rvir_v4_five_fresh_formal_closure.md`中的十进程正式结果取代。
 
-下一步固定runner source commit，随后按冻结顺序实际运行十个fresh GPU processes、static replay与
-tamper suite。只有5/5独立pairs全部通过，才能设置`five_fresh_correctness_admitted=true`、关闭V4-3并
-将B2 same-solver timing从gated改为admitted；`performance_claimed=false`。
+当前下一步以formal closure为准：预注册并执行FSG3/B2 same-solver timing；
+`performance_claimed=false`直到正式measurement完成。

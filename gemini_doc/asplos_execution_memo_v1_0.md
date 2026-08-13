@@ -5,7 +5,8 @@
 > `ir5-final-validated-nogo`
 > 当前研发分支：`feat/rvir-v4-production-state-ownership-v1`。FSG2历史 revisions=
 > `aa31eae`/`8bf6981`；FSG0、FSG1均已验证；FSG2 initial-only validated-reduced与完整B2未准入的
-> 历史结论仍成立。RVIR-v4现已关闭V4-1 frozen-state evaluation，V4-2A只关闭双LR/10-9 loop
+> 结论只描述当时门禁，现已被后文RVIR-v4 V4-3 whole-core replacement证据取代。RVIR-v4现已关闭
+> V4-1 frozen-state evaluation，V4-2A只关闭双LR/10-9 loop
 > 子合同；重启后V4-2B正式GPU step trace的original replay与5类同步重签名tamper通过，以
 > `VALIDATED-PRODUCTION-TRACE`关闭。它不是mutation replacement。V4-2C又从该正式capture独立重建
 > 6组native α/β/split与真实scope，12/12 mutable round-trip exact；original semantic replay及6类
@@ -25,7 +26,10 @@
 > whole-core→未修改official post/queue接通，
 > provider core/compute/update/fallback=`0/0/0/0`，完整core/post最大差`1.0669e-05`且decision exact；
 > fresh replay与8类完全重签攻击通过，以`VALIDATED-LIVE-RETURN`关闭。下一门禁只允许V4-3E
-> five-fresh correctness；V4-3整体、B2与performance仍关闭。
+> five-fresh correctness。V4-3E现又按`O,C,C,O,C,O,O,C,O,C`启动10个fresh GPU进程，5/5 pairs
+> 的完整core/post/state/branch/queue/termination全部通过，六类重签攻击拒绝，以
+> `VALIDATED-FIVE-FRESH-CORRECTNESS`关闭；V4-3整体=`VALIDATED-WHOLE-CORE-REPLACEMENT`，B2
+> same-solver timing现准入但尚未执行，performance claim仍关闭。
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed
@@ -39,8 +43,9 @@
 > objective evaluator（完成）→ full-frontier tightness attribution（NO-GO）→ objective-branch shared
 > evaluator（完成）→ NRIR48 CPU execution attribution（完成）→ NRIR49A GPU selected-CROWN-only
 > opportunity attribution（NO-GO）→ FSG0 full-stack scope/schema/replay（完成）→ FSG1 official control
-> full-stack trace（完成）→ FSG2 RVIR-v3 initial replacement（VALIDATED-REDUCED）→完整B2
-> alpha/beta/split replacement（NO-GO/not admitted）→FSG3—FSG5（依赖门禁停止）**。
+> full-stack trace（完成）→ FSG2 RVIR-v3 initial replacement（VALIDATED-REDUCED）→历史完整B2
+> alpha/beta/split replacement（NO-GO/not admitted）→RVIR-v4 V4-1—V4-3（完成；取代历史ownership
+> blocker）→FSG3/B2 same-solver timing（已准入、未执行）**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有

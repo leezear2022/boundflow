@@ -3,8 +3,9 @@
 日期：2026-08-13
 
 当前状态：V4-3A=`VALIDATED-WHOLE-CORE-TRUTH`，V4-3B=`VALIDATED-NATIVE-BACKWARD-EXPORT`，
-V4-3C=`VALIDATED-NATIVE-KFSB`，V4-3D=`VALIDATED-LIVE-RETURN`；V4-3E准入；V4-3总体、B2与
-性能claim仍关闭。
+V4-3C=`VALIDATED-NATIVE-KFSB`，V4-3D=`VALIDATED-LIVE-RETURN`，V4-3E=
+`VALIDATED-FIVE-FRESH-CORRECTNESS`；V4-3总体=`VALIDATED-WHOLE-CORE-REPLACEMENT`。B2 timing
+已准入但未执行，性能claim仍关闭。
 
 ## 1. 目标
 
@@ -129,5 +130,10 @@ V4-3C已由source `a2097c0`正式关闭：六层mask exact，三组candidate共3
 
 V4-3D现已由source `dc7038a`正式关闭：RTX 4060 whole-core→official post/queue运行的provider
 core/compute/update/fallback=`0/0/0/0`，451 tensor/213,060 signs语义比较最大差`1.0669e-05`、final
-decision exact，fresh replay与8类完全重签攻击通过。下一动作只启动V4-3E five-fresh correctness；
-V4-3整体与B2 timing仍按依赖门禁关闭。
+decision exact，fresh replay与8类完全重签攻击通过。“下一动作只启动V4-3E、V4-3/B2仍关闭”是该时点
+历史门禁，现已由下段V4-3E closure取代。
+
+V4-3E现已由source `17d2d61`正式关闭：十个fresh进程严格遵循
+`O,C,C,O,C,O,O,C,O,C`，5/5 pairs的2255 tensor/1,065,300 signs、state/branch/queue/termination
+全部通过，最大差`1.0669e-05`，六类重签攻击拒绝。因此V4-3整体关闭，下一动作转为独立FSG3/B2
+same-solver timing；本correctness artifact不形成performance claim。

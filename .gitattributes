@@ -1,2 +1,3 @@
 artifacts/multiworkload-competitor-e2e/**/logs/*.log -diff
 artifacts/native-intermediate-refinement/**/logs/*.log -diff
+artifacts/rvir-v4-five-fresh/**/*.stdout.txt -diff

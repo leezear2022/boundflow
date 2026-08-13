@@ -5207,3 +5207,14 @@
 
 **记录**
 - `gemini_doc/change_2026-08-13_rvir_v4_five_fresh_correctness.md`
+
+## 2026-08-13：RVIR-v4 V4-3E / V4-3 Formal Closure
+
+- 严格运行`O,C,C,O,C,O,O,C,O,C`十个fresh GPU进程，五对correctness 5/5通过；
+- 合计2255 tensors/1,065,300 signs，最大差`1.0669e-05`，state/branch/queue/termination exact；
+- 六类重签攻击拒绝，V4-3=`VALIDATED-WHOLE-CORE-REPLACEMENT`；
+- 第三方solver原始stdout按字节纳入manifest，并以`.gitattributes -diff`保留其原始格式；
+- B2 same-solver timing现准入但未执行，仍无performance claim。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_five_fresh_formal_closure.md`

@@ -1,0 +1,1 @@
+{"all_pairs_admitted":true,"all_sign_exact":true,"b2_same_solver_timing_admitted":true,"evidence_status":"validated-five-fresh-correctness","maximum_absolute_difference":1.0669231414794922e-05,"pair_count":5,"performance_claimed":false,"run_count":10,"status":"replay-passed","summary_hash":"cf0bec5aaa1fd90ecd26c8036ebb9a7f03d314b3c47bbd450df9676f16666adf"}
