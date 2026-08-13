@@ -1429,3 +1429,14 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - 工件：`artifacts/rvir-v4-optimizer-step/resnet2b-core-step-trace-v1/`；manifest/trace/summary=
   `7d7745e4...fbe6` / `fa070bb0...31f4` / `8ae8be3f...05b7`；source-parity report=
   `c2b48275...8aec`。下一切片只允许V4-2C pre-state native initializer。
+
+### RVIR-v4 V4-2C（实现中）：Pre-State Native Initializer
+
+- `RVIR-V4-2C-M-PENDING`：共享typed mapper已从V4-1内部抽出，按topology/alpha-indices/beta-location/
+  history恢复6组dense α/β/split和external intermediate bounds；12个mutable path mapped/full round-trip
+  exact，未消费的upper α plane显式copy-through；V4-1 evaluator复用同一实现；
+- `RVIR-V4-2C-G-PENDING`：正式pre-snapshot/topology/history/intermediate/mapping hash已由测试冻结，
+  focused=`11 passed`、full=`1162 passed, 3 skipped`、mypy clean、Pylint=`10.00/10`；独立formal
+  artifact与重签名tamper尚未生成；
+- `RVIR-V4-2C-L`：状态仅为`IMPLEMENTED-MAPPER-READY / FORMAL-ARTIFACT-PENDING`，没有10-step
+  mutation、post-state parity、atomic copy-out或性能结论。V4-2/B2仍关闭。

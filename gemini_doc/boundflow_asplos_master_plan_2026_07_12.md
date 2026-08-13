@@ -28,7 +28,8 @@
 > V4-1已验证冻结post α/β/split state可由五层native IR独立复算lower；V4-2A仅验证双学习率与
 > 10 evaluation/9 update合同。重启后V4-2B typed raw step trace正式GPU工件、original replay与5类
 > 同步重签名tamper通过，以`VALIDATED-PRODUCTION-TRACE`关闭。下一门禁是V4-2C pre-state native
-> initializer；V4-2、B2和后续B3—B7仍未准入，性能结论不变。
+> initializer；共享mapper第一切片已实现但formal artifact待生成。V4-2、B2和后续B3—B7仍未准入，
+> 性能结论不变。
 
 > **2026-08-04 P0 修订**：production Schedule-memory ownership audit 为 `NO_GO`。
 > Reduced residual path 能由 Schedule IR 控制 arena 与 region launch，但没有 materialization、

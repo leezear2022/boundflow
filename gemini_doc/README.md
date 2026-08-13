@@ -20,7 +20,8 @@ copy-out门禁。系统重启后V4-2B正式GPU step artifact已生成，10 evalu
 call/trace cross-binding见
 `gemini_doc/change_2026-08-13_rvir_v4_optimizer_trace_cross_binding.md`；正式关闭证据见
 `gemini_doc/change_2026-08-13_rvir_v4_optimizer_step_formal_closure.md`。V4-2总体与B2仍关闭，下一切片
-只允许V4-2C pre-state native initializer。
+只允许V4-2C pre-state native initializer。V4-2C共享mapper第一切片已经实现但formal artifact仍待
+生成，见`gemini_doc/change_2026-08-13_rvir_v4_pre_state_initializer.md`。
 
 ---
 

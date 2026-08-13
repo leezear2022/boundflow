@@ -213,3 +213,19 @@ pre-state native initializer；V4-2D/E前不得进入B2。
 
 formal generate/original replay exit 0，五类重签名tamper 5/5拒绝；focused=`29 passed`，GPU恢复后
 全量=`1157 passed, 3 skipped`，Black/mypy clean，Pylint=`10.00/10`。3项skip不含CUDA边界。
+
+## 11. V4-2C Pre-State Initializer 实现状态
+
+状态：`IMPLEMENTED-MAPPER-READY / FORMAL-ARTIFACT-PENDING`。
+
+- V4-1内部topology/layout逻辑已抽为共享typed mapper并由V4-1自身复用；
+- 正式pre-snapshot恢复6组dense lower α、6组SparseBeta、6组split与external intermediate bounds；
+- 12项mutable path mapped/full round-trip bit-exact；6组未消费upper α plane显式copy-through；
+- snapshot/topology/history/intermediate/mapping hash分别为`2a775b66...a256`、`9be36162...ca35`、
+  `8921a052...08a`、`f82523fb...cf06`、`cfcebf92...f8df`；
+- wrong start、重复topology、upper-plane frozen identity漂移及step-0 mutable binding均有测试；
+- focused=`11 passed`、full=`1162 passed, 3 skipped`、mypy clean、Pylint=`10.00/10`；formal artifact
+  待完成。
+
+该状态不关闭V4-2C。下一动作是从clean commit生成独立artifact并完成topology/index/history/
+intermediate/upper-plane/beta-location同步重签名tamper；通过后才进入V4-2D。

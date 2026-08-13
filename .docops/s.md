@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev007488
-last_va: ev007489
+last_ch: ev007512
+last_va: ev007513
 blk: none
-next: v4-2c-pre-state-native-initializer
-updated: 2026-08-13T08:13:34Z
+next: v4-2c-formal-artifact-replay-tamper
+updated: 2026-08-13T08:29:45Z

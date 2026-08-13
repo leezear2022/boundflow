@@ -21,37 +21,15 @@ from .native_alpha_beta_optimization_state import (
     compile_native_alpha_beta_state_query,
     execute_native_alpha_beta_state_query,
 )
+from .rvir_v4_pre_state_initializer import (
+    initialize_rvir_v4_native_pre_state,
+    ProductionReluTopologyV4,
+)
 from .rvir_v4_production_state import (
     ProductionStateSnapshotV4,
     ProductionTensorRole,
 )
 from .task_executor import InputSpec
-
-
-def _encode(value: str) -> str:
-    return value.replace("%", "%25").replace("/", "%2F")
-
-
-@dataclass(frozen=True)
-class ProductionReluTopologyV4:
-    """Exact provider activation/preactivation to native primal-value linkage."""
-
-    provider_activation: str
-    provider_preactivation: str
-    native_preactivation: str
-    provider_start_node: str
-
-    def validate(self) -> None:
-        if any(
-            not value
-            for value in (
-                self.provider_activation,
-                self.provider_preactivation,
-                self.native_preactivation,
-                self.provider_start_node,
-            )
-        ):
-            raise ValueError("RVIR-v4 frozen ReLU topology differs")
 
 
 @dataclass(frozen=True)
@@ -93,8 +71,6 @@ def evaluate_rvir_v4_frozen_state(
         raise ValueError("RVIR-v4 frozen topology keys differ")
     for item in topology:
         item.validate()
-    pre_map = pre.tensor_map()
-    post_map = post.tensor_map()
     lower = _one_role(pre, ProductionTensorRole.INPUT_LOWER)
     upper = _one_role(pre, ProductionTensorRole.INPUT_UPPER)
     linear_spec = _one_role(pre, ProductionTensorRole.LINEAR_SPEC)
@@ -103,64 +79,11 @@ def evaluate_rvir_v4_frozen_state(
         lower=lower,
         upper=upper,
     )
-    relu_pre: dict[str, IntervalState] = {}
-    alphas: dict[str, torch.Tensor] = {}
-    betas: dict[str, torch.Tensor] = {}
-    splits: dict[str, torch.Tensor] = {}
-    preactivation_to_native: dict[str, str] = {}
-    for link in topology:
-        encoded_pre = _encode(link.provider_preactivation)
-        encoded_activation = _encode(link.provider_activation)
-        encoded_start = _encode(link.provider_start_node)
-        native = link.native_preactivation
-        preactivation_to_native[link.provider_preactivation] = native
-        relu_pre[native] = IntervalState(
-            pre_map[f"intermediate/{encoded_pre}/lower"].value,
-            pre_map[f"intermediate/{encoded_pre}/upper"].value,
-        )
-        alpha = post_map[f"alpha/{encoded_activation}/{encoded_start}"].value
-        feature_shape = tuple(
-            int(value)
-            for value in pre_map[
-                f"alpha_layout/{encoded_activation}/feature_shape"
-            ].value.tolist()
-        )
-        dense_alpha = torch.zeros((alpha.shape[2],) + feature_shape, dtype=alpha.dtype)
-        indices: list[torch.Tensor] = []
-        ordinal = 0
-        while f"alpha_layout/{encoded_activation}/feature_index/{ordinal}" in pre_map:
-            indices.append(
-                pre_map[
-                    f"alpha_layout/{encoded_activation}/feature_index/{ordinal}"
-                ].value
-            )
-            ordinal += 1
-        if indices:
-            dense_alpha[(slice(None),) + tuple(indices)] = alpha[0, 0]
-        else:
-            dense_alpha.copy_(alpha[0, 0].reshape_as(dense_alpha))
-        alphas[native] = dense_alpha
-        betas[native] = torch.zeros_like(dense_alpha)
-        splits[native] = torch.zeros_like(dense_alpha, dtype=torch.int8)
-    for history in post.history:
-        if not history.locations:
-            continue
-        native = preactivation_to_native[history.layer_name]
-        dense_split = splits[native].reshape(splits[native].shape[0], -1)
-        for location, coefficient in zip(history.locations, history.coefficients):
-            dense_split[history.domain_ordinal, location] = int(coefficient)
-    for link in topology:
-        encoded_pre = _encode(link.provider_preactivation)
-        prefix = f"beta/{encoded_pre}/0"
-        value_item = post_map.get(f"{prefix}/value")
-        if value_item is None:
-            continue
-        locations = post_map[f"{prefix}/location"].value
-        values = value_item.value
-        dense_beta = betas[link.native_preactivation].reshape(values.shape[0], -1)
-        for domain in range(values.shape[0]):
-            for slot in range(values.shape[1]):
-                dense_beta[domain, int(locations[domain, slot])] = values[domain, slot]
+    mapping = initialize_rvir_v4_native_pre_state(post, topology)
+    relu_pre = mapping.relu_pre
+    alphas = mapping.alphas
+    betas = mapping.betas
+    splits = mapping.splits
     policy = NativeAlphaBetaOptimizerPolicy(
         steps=post.optimizer_policy.iteration,
         lr=post.optimizer_policy.alpha_learning_rate,

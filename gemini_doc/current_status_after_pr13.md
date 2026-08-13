@@ -13,7 +13,8 @@
 > 1 core/24 calls、10 evaluations/9 observed Adam updates、每步24项raw state、相邻7项mutable变化，
 > original replay与state/lower/result/lineage/policy五类同步重签名tamper均通过。因此V4-2B以
 > `VALIDATED-PRODUCTION-TRACE`关闭。它只冻结provider真值轨迹；BoundFlow尚未执行mutation，V4-2、
-> B2和性能claim仍关闭。下一切片是V4-2C pre-state native initializer。
+> B2和性能claim仍关闭。V4-2C共享pre-state mapper现已实现6组dense α/β/split、12项bit-exact
+> round-trip及upper-α copy-through，并由V4-1复用；独立formal artifact仍待生成，因此V4-2C尚未关闭。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
 > objective-ancestral sibling evaluator，并新增独立 Plan/Batch/Task/Schedule IR 与跨 clause 单一 cache
 > owner。真实 ResNet clause 2 root+pair 与 frozen audit lower/branch/split/α/β/refinement exact，upper

@@ -5007,3 +5007,18 @@
 
 **记录**
 - `gemini_doc/change_2026-08-13_rvir_v4_optimizer_step_formal_closure.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-2C Pre-State Native Initializer
+
+- 抽取V4-1 topology/layout为共享typed mapper，并让V4-1 evaluator复用；
+- 正式pre-snapshot恢复6组dense α/β/split和external intermediate bounds；12项mutable path
+  mapped/full round-trip bit-exact，6组upper α plane显式copy-through；
+- 冻结snapshot/topology/history/intermediate/mapping五层身份；wrong start、重复topology、upper-plane
+  identity drift、step-0 mutable binding均fail closed；
+- focused=`11 passed`、full=`1162 passed, 3 skipped`、mypy clean、Pylint=`10.00/10`；
+- 状态仅为`IMPLEMENTED-MAPPER-READY / FORMAL-ARTIFACT-PENDING`，V4-2/B2与性能claim仍关闭。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_pre_state_initializer.md`

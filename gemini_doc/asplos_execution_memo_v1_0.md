@@ -8,7 +8,8 @@
 > 历史结论仍成立。RVIR-v4现已关闭V4-1 frozen-state evaluation，V4-2A只关闭双LR/10-9 loop
 > 子合同；重启后V4-2B正式GPU step trace的original replay与5类同步重签名tamper通过，以
 > `VALIDATED-PRODUCTION-TRACE`关闭。它不是mutation replacement；下一门禁为V4-2C pre-state
-> initializer，完整V4-2、B2及FSG3—FSG5仍未准入。
+> initializer。V4-2C共享mapper已实现并由V4-1复用，但formal artifact尚未生成；完整V4-2、B2及
+> FSG3—FSG5仍未准入。
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed
