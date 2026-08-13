@@ -3,6 +3,7 @@
 # pylint: disable=missing-function-docstring,protected-access
 
 from copy import deepcopy
+import json
 from pathlib import Path
 
 import pytest
@@ -19,6 +20,7 @@ from scripts import run_rvir_v4_whole_core_truth_artifact as artifact_runner
 
 ARTIFACT = Path("artifacts/rvir-v4-whole-core-truth/resnet2b-core-v1")
 TRUTH = ARTIFACT / "truth.pt"
+TAMPER_REPORT = ARTIFACT.parent / "resnet2b-core-v1-tamper-report.json"
 
 
 def _payload() -> dict[str, object]:
@@ -80,3 +82,18 @@ def test_worker_modes_are_named_independently() -> None:
         capture_runner.WHOLE_CORE_WORKER_SCHEMA_VERSION
         != capture_runner.OPTIMIZER_WORKER_SCHEMA_VERSION
     )
+
+
+def test_formal_artifact_static_replay_and_tamper_report() -> None:
+    _truth, summary, result = artifact_runner._verify_static_artifact(ARTIFACT)
+    report = json.loads(TAMPER_REPORT.read_text(encoding="utf-8"))
+
+    assert result["status"] == "replay-passed"
+    assert summary["lA_count"] == 6
+    assert summary["kfsb_candidate_count"] == 3
+    assert summary["whole_core_replacement_admitted"] is False
+    assert summary["b2_same_solver_timing_admitted"] is False
+    assert report["attack_count"] == 6
+    assert report["fully_resigned_attack_count"] == 5
+    assert report["all_rejected"] is True
+    assert report["performance_claimed"] is False

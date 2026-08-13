@@ -3,7 +3,7 @@
 > 状态日期：2026-08-13
 > 当前 integration base：`f194034`（NRIR-44 PR #55 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
 > 当前研发分支：`feat/rvir-v4-production-state-ownership-v1`；FSG2历史 implementation/inventory
-> revisions=`aa31eae`/`8bf6981`；当前已推进至RVIR-v4 V4-2 optimizer replacement关闭；
+> revisions=`aa31eae`/`8bf6981`；当前已推进至RVIR-v4 V4-3A whole-core truth关闭；
 > FSG0、FSG1均已验证；FSG2以`VALIDATED-REDUCED initial-only`关闭，完整B2 replacement
 > `NO-GO/not admitted`，FSG3—FSG5按依赖门禁未运行
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
@@ -26,7 +26,11 @@
 > lower/recorded copy-out/recorded commit六类完全重签攻击在两层6/6拒绝；full=
 > `1175 passed, 3 skipped`。因此V4-2E=`VALIDATED-ATOMIC-COPY-OUT`、V4-2=
 > `VALIDATED-OPTIMIZER-REPLACEMENT`。它不是whole-core live integration；B2与性能claim仍关闭，
-> 下一门禁只允许V4-3 whole-core replacement与5次fresh correctness。
+> V4-3A随后从source `bfdeefc`冻结1 core/6 domains/24 calls、6 intermediate、6 pre-KFSB lA、3组
+> candidate child lower、final decision和完整post/accounting；两次fresh semantic replay覆盖451
+> tensors/213,060 signs，最大差`8.8215e-06 <=2e-4`，六类同步重签攻击6/6拒绝，full=
+> `1180 passed, 3 skipped`。因此V4-3A=`VALIDATED-WHOLE-CORE-TRUTH`。它仍不是candidate whole-core
+> replacement；下一门禁只允许V4-3B native lA/intermediate export，V4-3C—E、B2与性能claim继续关闭。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
 > objective-ancestral sibling evaluator，并新增独立 Plan/Batch/Task/Schedule IR 与跨 clause 单一 cache
 > owner。真实 ResNet clause 2 root+pair 与 frozen audit lower/branch/split/α/β/refinement exact，upper

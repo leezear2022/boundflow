@@ -38,7 +38,10 @@ correctness。
 
 V4-3预注册入口为`gemini_doc/rvir_v4_whole_core_replacement_plan_2026_08_13.md`：先冻结whole-core
 truth，再实现native lA/intermediate、KFSB child evaluation、live return assembly和5次fresh correctness；
-provider core/compute_bounds/update_bounds必须为`0/0/0`。当前只启动V4-3A，不启动B2计时。
+provider core/compute_bounds/update_bounds必须为`0/0/0`。V4-3A现已以
+`VALIDATED-WHOLE-CORE-TRUTH`关闭：451 tensors/213,060 signs fresh replay与六类同步重签攻击通过；见
+`gemini_doc/change_2026-08-13_rvir_v4_whole_core_truth_formal_closure.md`。当前只启动V4-3B native
+lA/intermediate export，不启动KFSB replacement或B2计时。
 
 ---
 

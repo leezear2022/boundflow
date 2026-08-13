@@ -5111,3 +5111,16 @@
 - 修正formal runner解析external venv Python symlink后丢失site-packages的问题。
 - 增加fresh-provider semantic comparator和六类whole-core truth同步重签tamper probe；正式artifact待按最终
   runner commit重新生成。
+
+---
+
+## 2026-08-13：RVIR-v4 V4-3A Whole-Core Truth Formal Closure
+
+- source `bfdeefc`生成正式1 core/6 domain/24 call whole-core truth artifact；
+- 捕获6 intermediate、6 pre-KFSB lA、3 candidate child lowers、final decision与完整post/accounting；
+- 两次fresh semantic replay覆盖451 tensors/213,060 signs，最大差`8.8215e-06 <=2e-4`；
+- 五类full resign与一类字段删除攻击6/6拒绝；targeted=`12 passed`，full=`1180 passed, 3 skipped`；
+- V4-3A=`VALIDATED-WHOLE-CORE-TRUTH`，下一动作V4-3B；V4-3/B2/performance仍关闭。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_whole_core_truth_formal_closure.md`

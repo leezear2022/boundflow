@@ -254,3 +254,18 @@ fallback=`0/0`、state copy-out atomicity和失败回滚，然后才实现optimi
 这关闭的是pre-state→optimizer mutation→post-state事务，不是whole `update_bounds_core`。V4-3必须把
 executor接入真实host，禁止调用provider core/compute_bounds，并以至少5次fresh correctness核对branch、
 accepted/pruned domains、lineage/node accounting、termination与verdict。V4-3通过前不得恢复B2计时。
+
+## V4-3A Formal Closure
+
+状态：`VALIDATED-WHOLE-CORE-TRUTH`；V4-3A关闭，V4-3B准入，V4-3/B2仍不准入。
+
+- source=`bfdeefc`，artifact=`artifacts/rvir-v4-whole-core-truth/resnet2b-core-v1`；
+- 1 core/6 domains/24 calls、6 intermediate、6 pre-KFSB lA、3 KFSB candidates与最终decision完整冻结；
+- fresh replay逐树覆盖451 tensors、213,060 signs，最大差`8.8215e-06 <=2e-4`；
+- lA/intermediate/candidate/decision/accounting五类full resign及字段删除共6/6拒绝；
+- targeted=`12 passed`，full=`1180 passed, 3 skipped`，mypy clean，Pylint=`10.00/10`；
+- `whole_core_replacement_admitted=false`、`b2_same_solver_timing_admitted=false`、
+  `performance_claimed=false`。
+
+下一门禁为V4-3B native lA/intermediate export；original truth中仍有3次provider KFSB child-bound调用，
+不得误写成whole-core replacement已完成。

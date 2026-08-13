@@ -14,7 +14,10 @@
 > 攻击通过，以`VALIDATED-NATIVE-STEP-PARITY`关闭。V4-2E又完成12-path private stage、原子commit与
 > rollback，正式artifact original replay及6类完全重签攻击通过；V4-2整体以
 > `VALIDATED-OPTIMIZER-REPLACEMENT`关闭。它还不是whole `update_bounds_core` live replacement；B2与
-> 性能claim继续关闭，下一门禁只允许V4-3 whole-core replacement和5次fresh correctness。
+> 性能claim继续关闭。V4-3A现又冻结完整original core/post truth、pre-KFSB六层lA、六层intermediate、
+> 三组candidate child lower与最终decision；fresh replay覆盖451 tensors/213,060 signs，六类同步重签
+> 攻击全部拒绝，以`VALIDATED-WHOLE-CORE-TRUTH`关闭。它仍不是replacement；下一门禁只允许V4-3B
+> native lA/intermediate export，V4-3C—E与B2继续关闭。
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed

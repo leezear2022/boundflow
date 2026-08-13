@@ -25,8 +25,9 @@
 > round-trip及6类双层重签名tamper，状态为`VALIDATED-PRE-STATE-INITIALIZER`。这些结论尚未执行
 > optimizer mutation。V4-2D现又以formal 10/9 native loop逐step parity与6类双层重签攻击关闭；V4-2E
 > 随后以12-path atomic copy-out、rollback、formal replay和6类完全重签攻击关闭。V4-2整体状态升级为
-> `VALIDATED-OPTIMIZER-REPLACEMENT`，但这不是whole `update_bounds_core` live replacement；B2与性能
-> claim仍关闭，下一门禁为V4-3 whole-core replacement。
+> `VALIDATED-OPTIMIZER-REPLACEMENT`。V4-3A现又以451-tensor fresh semantic replay和六类同步重签攻击
+> 关闭original whole-core truth。它不是whole `update_bounds_core` live replacement；B2与性能claim仍
+> 关闭，下一门禁为V4-3B native lA/intermediate export。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
@@ -1479,3 +1480,15 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - `RVIR-V4-2E-L`：V4-2E=`VALIDATED-ATOMIC-COPY-OUT`；V4-2 §6八项formal acceptance全部通过，
   整体=`VALIDATED-OPTIMIZER-REPLACEMENT`。whole-core live integration、branch/queue/termination/verdict
   仍待V4-3；B2和性能claim关闭。
+
+### RVIR-v4 V4-3A（关闭）：Whole-Core Original Truth
+
+- `RVIR-V4-3A-M`：original observer在KFSB消费前冻结六层lA，同时保存六层intermediate、三组
+  candidate child lower、final decision、完整core/post和solver accounting；
+- `RVIR-V4-3A-G`：fresh provider replay比较451 tensors/213,060 signs，shape/dtype/device、sign、离散
+  结构exact，最大差`8.821487426757812e-06 <=2e-4`；
+- `RVIR-V4-3A-T`：lA/intermediate/candidate/decision/accounting五类full resign和字段删除攻击6/6拒绝；
+- `RVIR-V4-3A-V`：source=`bfdeefc`，manifest/tamper SHA256=`0e6ed721...9818`/
+  `dafcb893...a52`，targeted=`12 passed`，full=`1180 passed, 3 skipped`；
+- `RVIR-V4-3A-L`：状态=`VALIDATED-WHOLE-CORE-TRUTH`。只准入V4-3B native lA/intermediate；
+  `whole_core_replacement_admitted=false`、B2与performance claim关闭。

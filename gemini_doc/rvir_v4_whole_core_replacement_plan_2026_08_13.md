@@ -2,6 +2,8 @@
 
 日期：2026-08-13
 
+当前状态：V4-3A=`VALIDATED-WHOLE-CORE-TRUTH`；V4-3B准入；V4-3总体、B2与性能claim仍关闭。
+
 ## 1. 目标
 
 把已通过V4-2的pre-state→10/9 native optimizer→12-path atomic copy-out接入真实αβ-CROWN
@@ -109,4 +111,9 @@ V4-3必须同时满足：
 
 ## 7. 下一动作
 
-只实现V4-3A whole-core truth schema/observer/artifact。truth artifact正式关闭前，不实现KFSB或运行B2。
+V4-3A已由source `bfdeefc`正式关闭：451 tensors/213,060 signs的fresh semantic replay通过，六类
+同步重签攻击全部拒绝，full=`1180 passed, 3 skipped`。关闭证据见
+`gemini_doc/change_2026-08-13_rvir_v4_whole_core_truth_formal_closure.md`。
+
+下一动作只实现V4-3B native backward/lA与intermediate export。V4-3C KFSB、V4-3D live return、
+V4-3E five-fresh和B2 timing仍按依赖门禁关闭。

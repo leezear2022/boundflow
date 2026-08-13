@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev007841
-last_va: ev007842
+last_ch: ev007863
+last_va: ev007864
 blk: none
-next: v4-3-whole-core-replacement
-updated: 2026-08-13T10:40:30Z
+next: v4-3b-native-la-intermediate-export
+updated: 2026-08-13T10:52:00Z

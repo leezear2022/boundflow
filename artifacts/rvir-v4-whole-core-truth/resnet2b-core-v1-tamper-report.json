@@ -1,0 +1,64 @@
+{
+  "all_rejected": true,
+  "artifact_source_git_head": "bfdeefc197f583b47d896142889321bbe532b3b2",
+  "attack_count": 6,
+  "attacks": [
+    {
+      "expected_full_resign": true,
+      "name": "lA-numeric-full-resign",
+      "outer_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 whole-core numeric semantic parity differs: core.branch_trace.input.lAs._data./48"
+    },
+    {
+      "expected_full_resign": true,
+      "name": "intermediate-numeric-full-resign",
+      "outer_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 whole-core numeric semantic parity differs: core.working_intermediate_bounds./input-28.lower"
+    },
+    {
+      "expected_full_resign": true,
+      "name": "candidate-lower-full-resign",
+      "outer_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 whole-core numeric semantic parity differs: core.branch_trace.candidate_child_lowers[1]"
+    },
+    {
+      "expected_full_resign": true,
+      "name": "branch-decision-cross-resign",
+      "outer_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 whole-core discrete parity differs: core.branch_trace.final_decision.decision[0][1]"
+    },
+    {
+      "expected_full_resign": true,
+      "name": "core-accounting-full-resign",
+      "outer_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 whole-core scalar parity differs: core.lb_final_max"
+    },
+    {
+      "expected_full_resign": false,
+      "name": "lA-field-deletion-resign-attempt",
+      "outer_resigned": false,
+      "rejected": true,
+      "rejection": "RVIR-v4 whole-core lA inventory differs"
+    }
+  ],
+  "clean_live_parity": {
+    "atol": 0.0002,
+    "max_abs_diff": 6.198883056640625e-06,
+    "numeric_digest_difference_count": 49,
+    "performance_claimed": false,
+    "rtol": 0.0002,
+    "sign_element_count": 213060,
+    "sign_exact": true,
+    "status": "live-provider-semantic-parity-passed",
+    "tensor_count": 451,
+    "truth_hash_difference_count": 2
+  },
+  "fully_resigned_attack_count": 5,
+  "performance_claimed": false,
+  "schema_version": "boundflow.rvir-v4-whole-core-truth-tamper-report/v1"
+}
