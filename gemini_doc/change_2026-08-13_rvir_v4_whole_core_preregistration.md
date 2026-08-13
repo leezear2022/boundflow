@@ -24,3 +24,9 @@
 - 两次独立RTX 4060运行比较：451 tensors、213,060 signs exact、最大绝对差
   `5.066394805908203e-06`、decision exact；
 - 当前仍是capture-ready，不将V4-3A、whole-core replacement或B2 timing标记为通过。
+
+## Formal generation前置修正
+
+首次formal generation暴露runner把`.venv/bin/python`调用`Path.resolve()`后解析为uv base interpreter，
+从而丢失external αβ-CROWN venv的Torch。现改为保留绝对venv launcher symlink；这是执行环境隔离修正，
+不是算法或correctness失败。

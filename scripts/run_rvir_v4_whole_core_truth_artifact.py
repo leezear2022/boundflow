@@ -271,7 +271,9 @@ def _generate(args: argparse.Namespace) -> dict[str, object]:
     output.mkdir(parents=True, exist_ok=True)
     benchmark = args.benchmark_root.resolve()
     abcrown = args.abcrown_root.resolve()
-    python = args.abcrown_python.resolve()
+    # Preserve the virtual-environment launcher symlink. Resolving it selects the
+    # underlying uv base interpreter and silently drops the venv site-packages.
+    python = args.abcrown_python.expanduser().absolute()
     truth = _run_worker(
         benchmark=benchmark,
         abcrown=abcrown,
@@ -340,7 +342,7 @@ def _replay(args: argparse.Namespace) -> dict[str, object]:
         fresh = _run_worker(
             benchmark=args.benchmark_root.resolve(),
             abcrown=args.abcrown_root.resolve(),
-            python=args.abcrown_python.resolve(),
+            python=args.abcrown_python.expanduser().absolute(),
             result=Path(raw) / "fresh-truth.pt",
         )
     fresh_summary = _summary(fresh)

@@ -5108,3 +5108,4 @@
 - 完成whole-core/pre-KFSB/post truth observer、typed validator和external-provider rerun replay；
 - 两次fresh GPU truth的451个tensor在`2e-4`内一致，213,060个sign与最终decision exact；
 - V4-3A尚未关闭，待正式artifact和同步重签tamper suite。
+- 修正formal runner解析external venv Python symlink后丢失site-packages的问题。

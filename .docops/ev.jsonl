@@ -7815,3 +7815,14 @@
 {"id":"ev007815","ts":"2026-08-13T10:35:56Z","ty":"va","st":"s01","result":"pass"}
 {"id":"ev007816","ts":"2026-08-13T10:35:56Z","ty":"cmd","cmd":"Bash:python3","summary":"PostToolUse"}
 {"id":"ev007817","ts":"2026-08-13T10:36:00Z","ty":"cmd","cmd":"Bash:cat","summary":"PostToolUse"}
+{"id":"ev007818","ts":"2026-08-13T10:36:09Z","ty":"cmd","cmd":"Bash:git","summary":"PostToolUse"}
+{"id":"ev007819","ts":"2026-08-13T10:36:14Z","ty":"cmd","cmd":"Bash:git","summary":"PostToolUse"}
+{"id":"ev007820","ts":"2026-08-13T10:36:21Z","ty":"cmd","cmd":"Bash:source","summary":"PostToolUse"}
+{"id":"ev007821","ts":"2026-08-13T10:36:32Z","ty":"cmd","cmd":"Bash:source","summary":"PostToolUse"}
+{"id":"ev007822","ts":"2026-08-13T10:36:39Z","ty":"cmd","cmd":"Bash:source","summary":"PostToolUse"}
+{"id":"ev007823","ts":"2026-08-13T10:36:49Z","ty":"cmd","cmd":"Bash:find","summary":"PostToolUse"}
+{"id":"ev007824","ts":"2026-08-13T10:36:55Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
+{"id":"ev007825","ts":"2026-08-13T10:37:01Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
+{"id":"ev007826","ts":"2026-08-13T10:37:14Z","ty":"ch","st":"s01","slug":"preserve-external-venv-launcher"}
+{"id":"ev007827","ts":"2026-08-13T10:37:14Z","ty":"va","st":"s01","result":"pass"}
+{"id":"ev007828","ts":"2026-08-13T10:37:14Z","ty":"cmd","cmd":"Bash:rmdir","summary":"PostToolUse"}
