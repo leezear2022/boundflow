@@ -61,3 +61,14 @@ B2，也不产生性能claim。
 从本轮clean implementation commit生成独立V4-2C artifact，replay原始V4-2B source artifact，冻结上述
 identity/mapping/12 receipts，并执行同步重签名的topology、index、history、intermediate、upper-plane、
 beta-location篡改探针。全部通过后才关闭V4-2C并进入V4-2D逐step mutation parity。
+
+## Formal Runner 准备（同日）
+
+新增`run_rvir_v4_pre_state_artifact.py`及capture-ready测试。runner从V4-2B正式artifact重新校验并复制
+source capture/manifest，导入冻结ResNet2B ONNX，在真实BoundFlow module上构造native scope，将mapper
+结果恢复为`NativeAlphaBetaOptimizationState`，并冻结topology、mapping、native state、summary、源码
+revision及完整文件inventory。replay不信任序列化结果，而是从source capture与ONNX重新执行映射并逐项
+比较。当前focused验证=`7 passed`，mypy四文件clean，Pylint runner/test=`10.00/10`。
+
+该runner需要先进入clean commit，随后才能生成带source revision的正式artifact；因此本段仍不升级
+V4-2C状态，也不声明optimizer replacement或性能结果。
