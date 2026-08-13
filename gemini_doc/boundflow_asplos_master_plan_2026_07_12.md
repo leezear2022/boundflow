@@ -31,8 +31,9 @@
 > scope恢复6组α/β/split，12/12 round-trip exact；original replay与6类双层重签名tamper通过，以
 > `VALIDATED-PRE-STATE-INITIALIZER`关闭。V4-2D formal native loop已独立执行10 evaluations/9
 > updates，逐step lower/α/β均过`2e-4`门禁，original replay与6类双层重签攻击通过，以
-> `VALIDATED-NATIVE-STEP-PARITY`关闭。terminal copy-out仍待V4-2E；V4-2、B2和后续B3—B7仍未
-> 准入，性能结论不变。
+> `VALIDATED-NATIVE-STEP-PARITY`关闭。V4-2E再以12-path atomic copy-out、失败回滚、正式replay及
+> 6类完全重签攻击关闭；V4-2整体达到`VALIDATED-OPTIMIZER-REPLACEMENT`。whole-core live integration
+> 尚待V4-3，故B2和后续B3—B7仍未准入，性能结论不变。
 
 > **2026-08-04 P0 修订**：production Schedule-memory ownership audit 为 `NO_GO`。
 > Reduced residual path 能由 Schedule IR 控制 arena 与 region launch，但没有 materialization、

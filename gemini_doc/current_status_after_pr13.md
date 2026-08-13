@@ -3,7 +3,7 @@
 > 状态日期：2026-08-13
 > 当前 integration base：`f194034`（NRIR-44 PR #55 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
 > 当前研发分支：`feat/rvir-v4-production-state-ownership-v1`；FSG2历史 implementation/inventory
-> revisions=`aa31eae`/`8bf6981`；当前已推进至RVIR-v4 V4-2D formal native mutation关闭；
+> revisions=`aa31eae`/`8bf6981`；当前已推进至RVIR-v4 V4-2 optimizer replacement关闭；
 > FSG0、FSG1均已验证；FSG2以`VALIDATED-REDUCED initial-only`关闭，完整B2 replacement
 > `NO-GO/not admitted`，FSG3—FSG5按依赖门禁未运行
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
@@ -20,12 +20,13 @@
 > `VALIDATED-PRE-STATE-INITIALIZER`关闭。V4-2D formal native executor又在不读取reference trace、零
 > provider callback下独立执行10 evaluations/9 Adam updates；10/10 step lower/α/β allclose且sign exact，
 > 最大误差=`4.5300e-06/1.4663e-05/3.9861e-07 <=2e-4`，original replay与6类双层完全重签攻击通过，
-> 以`VALIDATED-NATIVE-STEP-PARITY`关闭。terminal atomic copy-out尚未完成；V4-2/B2与性能claim仍
-> 关闭，下一门禁只允许V4-2E。
-> V4-2E capture-ready projector已私有stage并原子提交12个production mutable paths；α/β/final lower
-> 最大误差=`1.4663e-05/3.6135e-07/2.6226e-06 <=2e-4`，NaN/stale/mid-copy fault均保持live pre-image。
-> formal artifact与全量回归尚待完成，状态仅为`IMPLEMENTED-ATOMIC-COPY-OUT /
-> FORMAL-ARTIFACT-PENDING`。
+> 以`VALIDATED-NATIVE-STEP-PARITY`关闭。V4-2E随后私有stage并原子提交12个production mutable paths，
+> 其中7个改变；α/β/final lower最大误差=`1.4663e-05/3.6135e-07/2.6226e-06 <=2e-4`，
+> NaN/stale/mid-copy fault均保持live pre-image。formal original replay和topology/initial α/post α/final
+> lower/recorded copy-out/recorded commit六类完全重签攻击在两层6/6拒绝；full=
+> `1175 passed, 3 skipped`。因此V4-2E=`VALIDATED-ATOMIC-COPY-OUT`、V4-2=
+> `VALIDATED-OPTIMIZER-REPLACEMENT`。它不是whole-core live integration；B2与性能claim仍关闭，
+> 下一门禁只允许V4-3 whole-core replacement与5次fresh correctness。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
 > objective-ancestral sibling evaluator，并新增独立 Plan/Batch/Task/Schedule IR 与跨 clause 单一 cache
 > owner。真实 ResNet clause 2 root+pair 与 frozen audit lower/branch/split/α/β/refinement exact，upper

@@ -22,16 +22,19 @@ call/trace cross-binding见
 `gemini_doc/change_2026-08-13_rvir_v4_optimizer_step_formal_closure.md`。V4-2C随后以正式artifact证明
 6组native α/β/split初始化和12/12 round-trip exact，并通过6类provenance+semantic双层重签名攻击，
 状态为`VALIDATED-PRE-STATE-INITIALIZER`；见
-`gemini_doc/change_2026-08-13_rvir_v4_pre_state_initializer.md`。V4-2总体与B2仍关闭；V4-2D的后续
-关闭状态见下一段。
+`gemini_doc/change_2026-08-13_rvir_v4_pre_state_initializer.md`。V4-2D/E及总体关闭状态见下文。
 
 V4-2D关闭证据见`gemini_doc/change_2026-08-13_rvir_v4_native_optimizer_parity.md`：formal native
 executor在零provider callback下完成10 evaluations/9 updates，10/10 step lower/α/β allclose/sign exact，
 最大误差均低于`2e-4`，并通过6类双层完全重签攻击，状态为
-`VALIDATED-NATIVE-STEP-PARITY`。terminal atomic copy-out仍待V4-2E，不得据此开启B2或性能claim。
+`VALIDATED-NATIVE-STEP-PARITY`。
 
-V4-2E capture-ready记录见`gemini_doc/change_2026-08-13_rvir_v4_atomic_copy_out.md`：12-path private
-stage、atomic commit、stale/NaN pre-write拒绝与mid-copy rollback已实现；formal artifact仍pending。
+V4-2E实现记录见`gemini_doc/change_2026-08-13_rvir_v4_atomic_copy_out.md`，正式关闭证据见
+`gemini_doc/change_2026-08-13_rvir_v4_atomic_copy_out_formal_closure.md`：12-path private stage与atomic
+commit、stale/NaN拒绝、mid-copy rollback、formal replay及6类完全重签攻击全部通过。V4-2E状态为
+`VALIDATED-ATOMIC-COPY-OUT`，V4-2整体为`VALIDATED-OPTIMIZER-REPLACEMENT`。它尚未替换whole
+`update_bounds_core`；B2和性能claim仍关闭，下一动作是V4-3 whole-core replacement与5次fresh
+correctness。
 
 ---
 

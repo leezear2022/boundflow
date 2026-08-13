@@ -5071,3 +5071,21 @@
 
 **记录**
 - `gemini_doc/change_2026-08-13_rvir_v4_pre_state_initializer.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-2E / V4-2 Formal Closure
+
+- clean source `fe7cdb6`从冻结V4-2D capture重新执行pre-state初始化、10 evaluations/9 Adam updates、
+  12-path private staging与实际commit；1 core/6 domains/12 receipts/7 changed结构门禁全部通过；
+- post α/β/final lower最大误差=`1.4663e-05/3.6135e-07/2.6226e-06 <=2e-4`，sign exact，
+  callback/fallback=`0/0`；NaN/stale/fifth-copy fault负向测试保持pre-image；
+- original replay通过；topology、initial upper-α、expected post-α、final lower、recorded copy-out、
+  recorded commit六类完全重签攻击在provenance与semantic两层6/6拒绝；
+- manifest/tamper SHA256=`b76ee573...0136`/`621d5485...f70`；focused=`11 passed`、full=
+  `1175 passed, 3 skipped`、Black/mypy/Pylint通过；
+- V4-2E=`VALIDATED-ATOMIC-COPY-OUT`，V4-2=`VALIDATED-OPTIMIZER-REPLACEMENT`。这不是whole-core
+  live integration或性能结果；B2仍关闭，下一门禁为V4-3 whole-core replacement与5次fresh correctness。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_atomic_copy_out_formal_closure.md`

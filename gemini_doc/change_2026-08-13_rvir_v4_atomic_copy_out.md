@@ -46,3 +46,11 @@ read-only/history/layout与真实post-state后，再一次性提交到provider-o
 
 下一步先提交runner以冻结code provenance，再生成artifact和篡改报告；在这些证据落盘前，上述pending
 状态保持不变。
+
+## 后续关闭
+
+上述pending状态已由
+`gemini_doc/change_2026-08-13_rvir_v4_atomic_copy_out_formal_closure.md`取代：正式artifact/replay、
+6类完全重签tamper、全量回归与V4-2逐项acceptance审计均已通过。当前V4-2E=
+`VALIDATED-ATOMIC-COPY-OUT`、V4-2=`VALIDATED-OPTIMIZER-REPLACEMENT`；B2仍等待V4-3 whole-core
+live integration，不得把本节capture-ready中间状态继续当作当前指令。

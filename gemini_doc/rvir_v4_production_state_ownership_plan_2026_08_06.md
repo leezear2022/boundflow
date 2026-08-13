@@ -236,3 +236,21 @@ policy、stop criterion、mutable copy-out和原子提交仍属于V4-2。因此B
 
 下一动作固定为V4-2预注册：冻结同一core的pre/post mutation逐tensor判据、10-step policy、callback/
 fallback=`0/0`、state copy-out atomicity和失败回滚，然后才实现optimizer replacement。
+
+## V4-2 Formal Closure
+
+状态：`VALIDATED-OPTIMIZER-REPLACEMENT`；V4-2关闭，V4-3准入，B2仍不准入。
+
+- V4-2B正式GPU trace冻结1 core/6 domains、10 evaluations/9 updates及production policy；
+- V4-2C从pre-snapshot恢复6组native α/β/split与external intermediate bounds；
+- V4-2D在零provider callback下独立执行完整10/9 mutation，逐step lower/α/β最大误差均低于`2e-4`；
+- V4-2E私有stage并原子commit 12 paths，其中7 paths改变；post α/β/final lower最大误差=
+  `1.4663e-05/3.6135e-07/2.6226e-06`且sign exact；NaN、stale target和mid-copy fault均fail closed；
+- formal artifact original replay通过，六类同步完全重签攻击在outer provenance和semantic reexecution
+  两层6/6拒绝；full=`1175 passed, 3 skipped`，static/DocOps通过；
+- artifact manifest/tamper SHA256=`b76ee573...0136`/`621d5485...f70`，
+  `performance_claimed=false`。
+
+这关闭的是pre-state→optimizer mutation→post-state事务，不是whole `update_bounds_core`。V4-3必须把
+executor接入真实host，禁止调用provider core/compute_bounds，并以至少5次fresh correctness核对branch、
+accepted/pruned domains、lineage/node accounting、termination与verdict。V4-3通过前不得恢复B2计时。

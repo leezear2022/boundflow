@@ -1,0 +1,23 @@
+{
+  "atomic_commit": true,
+  "commit_hash": "8925e836a982deeaa46a0c64ee8e8149f3af8c07a11d7ce701d9c809ce86fb71",
+  "committed_path_count": 12,
+  "committed_paths": [
+    "alpha/%2F45/%2F49",
+    "alpha/%2F48/%2F49",
+    "alpha/%2Finput-12/%2F49",
+    "alpha/%2Finput-16/%2F49",
+    "alpha/%2Finput-24/%2F49",
+    "alpha/%2Finput-4/%2F49",
+    "beta/%2F39/0/value",
+    "beta/%2F44/0/value",
+    "beta/%2Finput-20/0/value",
+    "beta/%2Finput-28/0/value",
+    "beta/%2Finput-8/0/value",
+    "beta/%2Finput/0/value"
+  ],
+  "copy_out_hash": "d93187516245ca8669e04e3e3f1f664267a6db26af8287283bdc6f3183e34194",
+  "fallback_dispatch_count": 0,
+  "performance_claimed": false,
+  "provider_callback_count": 0
+}

@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev007706
-last_va: ev007707
+last_ch: ev007740
+last_va: ev007741
 blk: none
-next: v4-2e-atomic-provider-copy-out
-updated: 2026-08-13T10:03:54Z
+next: v4-3-whole-core-replacement
+updated: 2026-08-13T10:18:18Z

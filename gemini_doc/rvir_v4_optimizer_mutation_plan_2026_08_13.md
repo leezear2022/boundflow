@@ -250,12 +250,13 @@ V4-2C现已关闭，但只证明初始化接管；其后V4-2D已由下节正式�
 - formal focused=`5 passed`、expanded=`38 passed`、full=`1169 passed, 3 skipped`、mypy clean、
   Pylint=`10.00/10`。
 
-V4-2D已关闭，但尚未把native terminal state原子投影回provider容器，因此V4-2/B2仍不关闭。下一动作
-只允许V4-2E atomic copy-out。
+V4-2D在该时点已关闭，但尚未把native terminal state原子投影回provider容器；该历史缺口现已由
+§13 V4-2E关闭。当前以§13—14为准。
 
-## 13. V4-2E Atomic Copy-Out 实现状态
+## 13. V4-2E Atomic Copy-Out 关闭状态
 
-状态：`IMPLEMENTED-ATOMIC-COPY-OUT / FORMAL-ARTIFACT-PENDING`。
+状态：`VALIDATED-ATOMIC-COPY-OUT`；V4-2整体状态：
+`VALIDATED-OPTIMIZER-REPLACEMENT`。
 
 - terminal dense α按sparse coordinates压回6个production α lower planes，upper planes copy-through；
   dense β按SparseBeta location压回6个value paths；
@@ -263,7 +264,23 @@ V4-2D已关闭，但尚未把native terminal state原子投影回provider容器�
   `1.4663e-05/3.6135e-07/2.6226e-06 <=2e-4`，全部sign exact；
 - commit前校验完整inventory及live pre-image，运行时第五次copy故障会回滚已写paths；NaN terminal和
   stale target均在任何live write前拒绝；callback/fallback=`0/0`；
-- focused=`4 passed`、V4-2D/E扩展=`9 passed`、full=`1173 passed, 3 skipped`、mypy clean、
-  Pylint=`10.00/10`。
+- formal runner从冻结V4-2D source重新执行initializer、10/9 native optimizer和真实12-path commit；
+  显式冻结`1 core / 6 domains / 6 topology / 12 receipts / 7 changed`；
+- original replay通过；topology、initial upper-α、expected post-α、final lower、recorded copy-out与
+  recorded commit六类完全重签攻击在outer provenance与semantic reexecution两层6/6拒绝；
+- manifest/copy-out/commit/summary hash=`b76ee573...0136`/`d9318751...4194`/
+  `8925e836...fb71`/`d250fd49...6692`；tamper SHA256=`621d5485...f70`；
+- focused=`11 passed`、full=`1175 passed, 3 skipped`、Black/mypy clean、Pylint=`10.00/10`。
 
-尚未生成formal artifact/tamper，因此不关闭V4-2E/V4-2/B2。下一动作只允许V4-2E formal closure。
+V4-2 §6八项formal acceptance全部通过，故optimizer mutation correctness replacement准入。该结论尚未
+替换live `update_bounds_core`，B2与性能claim仍关闭；下一动作只允许V4-3 whole-core replacement。
+
+## 14. V4-2 总门禁与移交
+
+V4-2A—E现在共同覆盖完整production policy、raw provider truth trace、pre-state initializer、逐step
+native mutation和atomic post-state copy-out。正式固定workload上provider-independent executor完成
+10 evaluations/9 updates，逐step与terminal state均过`2e-4`及sign门禁，callback/fallback=`0/0`。
+
+关闭标签`VALIDATED-OPTIMIZER-REPLACEMENT`只授予optimizer mutation边界，不授予whole-core、query、
+verdict或性能主张。V4-3必须把该executor接入真实host `update_bounds_core`，核对branch/queue/domain/
+termination/verdict并完成至少5次fresh correctness runs；之后才重新决定B2 AB/BA timing admission。

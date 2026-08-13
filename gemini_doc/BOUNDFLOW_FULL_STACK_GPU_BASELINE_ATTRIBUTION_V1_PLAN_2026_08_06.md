@@ -1,6 +1,6 @@
 ---
-status: fsg1-runner-ready-formal-pending
-updated: 2026-08-06T13:54:29Z
+status: v4-2-correctness-closed-v4-3-next
+updated: 2026-08-13T18:30:00+08:00
 type: plan
 topic: boundflow
 slug: BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1
@@ -73,12 +73,14 @@ same-solver speedup。本文完成不等于 replacement executor、TIR、JIT或�
 - NRIR49A CUDA event、CUPTI、allocator、fresh worker、artifact/replay与GPU parity基础；
 - 一个双方均可在冻结timeout内产生`verified`的公开`mnistfc:2` qualification workload。
 
-当前硬缺口：
+V4-2 formal closure后，原“完整optimizer state ownership未准入”缺口已经关闭：固定ResNet2B core可从
+pre-state独立执行10/9 native mutation并原子生成12-path post-state，逐step/final parity、rollback、
+replay与完全重签tamper均通过。当前硬缺口收窄为：
 
 - `execute_external_verifier_call()`仍执行原external callable，不是BoundFlow replacement；
 - PR13C `SameSolverQueryRuntime` 的host是BoundFlow自有solver，不是官方αβ-CROWN；
-- activation-BaB replacement需要完整live alpha/beta/split/cuts、intermediate bounds、requested polarity、
-  optimizer policy与mutation ownership；当前RVIR identity记录不能直接执行这些数值状态；
+- V4-2 executor尚未替换真实host `update_bounds_core`；branch、accepted/pruned domains、lineage/node
+  accounting、termination/verdict与至少5次fresh correctness仍待V4-3；
 - competitor Python 3.11/Torch 2.11环境当前不能import本机TVM，BoundFlow环境则是Python 3.12/
   Torch 2.12；headline必须建立combined env或对称RPC，不能使用非对称IPC；
 - 当前没有original/candidate共同的GPU full-stack hierarchical raw trace。
@@ -319,9 +321,10 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 
 1. [x] FSG0：文档作用域纠正、schema/aggregator/tests；
 2. [x] FSG1：official control hook、五fresh baseline artifact/replay；
-3. [x] FSG2：以`VALIDATED-REDUCED initial-only`关闭；完整α/β/split replacement与B2
-   `NO-GO/not admitted`；
-4. [—] FSG3：因B2不存在合法same-solver replacement candidate，依赖门禁阻止，未运行；
+3. [x] FSG2：历史上以`VALIDATED-REDUCED initial-only`关闭；当时完整α/β/split replacement与B2
+   `NO-GO/not admitted`；该阻塞已由RVIR-v4 V4-2的`VALIDATED-OPTIMIZER-REPLACEMENT`修复；
+4. [ ] V4-3/FSG3前置：whole-core live integration与至少5次fresh correctness；通过后才运行
+   B0/B1/B2 same-solver counterbalanced timing；
 5. [—] FSG4：因B3—B7均依赖B2，依赖门禁阻止，未实现/未消融；
 6. [—] FSG5：因无合法B7 candidate，依赖门禁阻止，无系统性能claim。
 
@@ -395,6 +398,17 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
   FSG3—FSG5只按依赖门禁停止，不能解释为B3—B7各层潜力已被证伪；
 - 全量=`1107 passed, 3 skipped`；详细记录见
   `change_2026-08-06_fsg2_replacement_boundary_and_downstream_gate.md`。
+
+### RVIR-v4 V4-2 Closure 与 FSG3 重新准入边界（2026-08-13）
+
+- V4-2B—E已补齐真实policy/step truth、pre-state、10/9 native mutation与12-path atomic copy-out；
+- V4-2 formal artifact为`1 core/6 domains/12 receipts/7 changed`，post α/β/final lower均过`2e-4`且
+  sign exact，callback/fallback=`0/0`；original replay与6类完全重签攻击通过；
+- V4-2=`VALIDATED-OPTIMIZER-REPLACEMENT`只撤销上节“optimizer ownership不存在”的当前阻塞，不改写
+  FSG2历史artifact和当时结论；
+- FSG3性能计时尚未恢复。先执行V4-3，将executor接入whole `update_bounds_core`并完成至少5次fresh
+  correctness；只有V4-3通过，才按本文§4/§7运行B0/B1/B2公平计时；
+- `performance_claimed=false`，B3—B7仍未实现或测量。
 
 ## 13. Rollback
 

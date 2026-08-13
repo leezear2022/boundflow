@@ -11,8 +11,10 @@
 > 6组native α/β/split与真实scope，12/12 mutable round-trip exact；original semantic replay及6类
 > 双层重签名tamper通过，以`VALIDATED-PRE-STATE-INITIALIZER`关闭。V4-2D formal native loop又独立
 > 执行10 evaluations/9 updates，逐step lower/α/β全过`2e-4`门禁，original replay与6类双层完全重签
-> 攻击通过，以`VALIDATED-NATIVE-STEP-PARITY`关闭。terminal atomic copy-out尚未完成；完整V4-2、
-> B2及FSG3—FSG5仍未准入。
+> 攻击通过，以`VALIDATED-NATIVE-STEP-PARITY`关闭。V4-2E又完成12-path private stage、原子commit与
+> rollback，正式artifact original replay及6类完全重签攻击通过；V4-2整体以
+> `VALIDATED-OPTIMIZER-REPLACEMENT`关闭。它还不是whole `update_bounds_core` live replacement；B2与
+> 性能claim继续关闭，下一门禁只允许V4-3 whole-core replacement和5次fresh correctness。
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed

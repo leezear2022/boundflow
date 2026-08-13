@@ -23,8 +23,10 @@
 > V4-2B 10-evaluation/9-Adam-step正式GPU typed trace、original replay与5类同步重签名tamper通过，以
 > `VALIDATED-PRODUCTION-TRACE`关闭。V4-2C又以正式artifact关闭6组native pre-state初始化、12/12
 > round-trip及6类双层重签名tamper，状态为`VALIDATED-PRE-STATE-INITIALIZER`。这些结论尚未执行
-> optimizer mutation。V4-2D现又以formal 10/9 native loop逐step parity与6类双层重签攻击关闭；terminal
-> copy-out仍待V4-2E。V4-2 replacement与B2状态不变，不得升级为完整replacement correctness或性能claim。
+> optimizer mutation。V4-2D现又以formal 10/9 native loop逐step parity与6类双层重签攻击关闭；V4-2E
+> 随后以12-path atomic copy-out、rollback、formal replay和6类完全重签攻击关闭。V4-2整体状态升级为
+> `VALIDATED-OPTIMIZER-REPLACEMENT`，但这不是whole `update_bounds_core` live replacement；B2与性能
+> claim仍关闭，下一门禁为V4-3 whole-core replacement。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
@@ -1461,16 +1463,19 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   semantic两层6/6拒绝；manifest/tamper SHA256=`0b4ae1a8...8493`/`47af58e1...5e36`；
 - `RVIR-V4-2D-V`：formal focused=`5 passed`、expanded=`38 passed`、full=`1169 passed, 3 skipped`、
   mypy六文件clean、Pylint=`10.00/10`；
-- `RVIR-V4-2D-L`：以`VALIDATED-NATIVE-STEP-PARITY`关闭。terminal atomic copy-out尚未完成，故
-  V4-2/B2及性能claim仍关闭，下一门禁只允许V4-2E。
+- `RVIR-V4-2D-L`：以`VALIDATED-NATIVE-STEP-PARITY`关闭；terminal copy-out已由下一节关闭。
 
-### RVIR-v4 V4-2E（实现中）：Atomic Copy-Out
+### RVIR-v4 V4-2E / V4-2（关闭）：Atomic Copy-Out 与 Optimizer Replacement
 
-- `RVIR-V4-2E-M-PENDING`：terminal dense α/β已可投影为12个production mutable paths；全部先进入
+- `RVIR-V4-2E-M`：terminal dense α/β投影为12个production mutable paths；全部先进入
   private immutable candidate，通过path/schema/finite/post parity/final lower/read-only门禁后才提交；
-- `RVIR-V4-2E-G-PENDING`：12/12 staged，α/β/final lower max diff=
+- `RVIR-V4-2E-G`：formal runner从冻结source重做pre-state、10/9 native mutation、12/12 stage+commit，
+  显式结构为`1 core/6 domains/6 topology/12 receipts/7 changed`；α/β/final lower max diff=
   `1.4663e-05/3.6135e-07/2.6226e-06 <=2e-4`且sign exact；正向12-path commit、NaN pre-write拒绝、
-  stale-target pre-write拒绝、mid-copy fault rollback均通过；focused=`4 passed`、expanded=`9 passed`、
-  full=`1173 passed, 3 skipped`、mypy clean、Pylint=`10.00/10`；
-- `RVIR-V4-2E-L`：仅为`IMPLEMENTED-ATOMIC-COPY-OUT / FORMAL-ARTIFACT-PENDING`；formal replay/
-  tamper待完成。V4-2/B2及性能claim仍关闭。
+  stale-target pre-write拒绝、mid-copy fault rollback均通过；original replay通过，topology/initial α/
+  post α/final lower/recorded copy-out/recorded commit六类完全重签攻击两层6/6拒绝；
+- `RVIR-V4-2E-V`：manifest/tamper SHA256=`b76ee573...0136`/`621d5485...f70`；focused=
+  `11 passed`、full=`1175 passed, 3 skipped`、Black/mypy clean、Pylint=`10.00/10`；
+- `RVIR-V4-2E-L`：V4-2E=`VALIDATED-ATOMIC-COPY-OUT`；V4-2 §6八项formal acceptance全部通过，
+  整体=`VALIDATED-OPTIMIZER-REPLACEMENT`。whole-core live integration、branch/queue/termination/verdict
+  仍待V4-3；B2和性能claim关闭。
