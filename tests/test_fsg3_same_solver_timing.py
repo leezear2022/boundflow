@@ -16,11 +16,13 @@ from boundflow.runtime.fsg3_same_solver_timing import (
     FSG3EnvironmentGate,
     FSG3ExecutionCounters,
     FSG3Mode,
+    FSG3ProfileSpan,
     FSG3SemanticResult,
     FSG3TimingMetrics,
     FSG3TimingRun,
     fsg3_timing_run_from_dict,
 )
+from scripts import run_fsg3_same_solver_experiment as experiment_runner
 
 
 def _semantics() -> FSG3SemanticResult:
@@ -77,11 +79,62 @@ def _execution(configuration: FSG3Configuration) -> FSG3ExecutionCounters:
     return FSG3ExecutionCounters(1, 0, 0, 0, 0, "torch-eager-reference", "whole_call")
 
 
+def _profile_spans(
+    configuration: FSG3Configuration, metrics: FSG3TimingMetrics
+) -> tuple[FSG3ProfileSpan, ...]:
+    layouts = {
+        FSG3Configuration.B0: (("core", "provider_core"),),
+        FSG3Configuration.B1: (
+            ("core", "typed_pre_state"),
+            ("core", "provider_core"),
+        ),
+        FSG3Configuration.B2: (
+            ("compile", "compile"),
+            ("core", "typed_pre_state"),
+            ("core", "optimizer"),
+            ("core", "backward"),
+            ("core", "kfsb"),
+            ("core", "atomic_commit"),
+        ),
+    }
+    core_names = [name for scope, name in layouts[configuration] if scope == "core"]
+    base, remainder = divmod(metrics.core_wall_ns, len(core_names))
+    core_durations = {
+        name: base + (1 if index < remainder else 0)
+        for index, name in enumerate(core_names)
+    }
+    rows: list[FSG3ProfileSpan] = []
+    offset = 0
+    for scope, name in layouts[configuration] + (("post", "official_post_queue"),):
+        duration = (
+            metrics.boundflow_compile_ns
+            if scope == "compile"
+            else core_durations[name] if scope == "core" else 10_000
+        )
+        rows.append(
+            FSG3ProfileSpan(
+                scope=scope,
+                name=name,
+                stack_layer="test/layer",
+                solver_phase="test_phase",
+                resource="host" if scope == "compile" else "host+cuda",
+                cache_state="cold" if scope == "compile" else "process-hit",
+                start_offset_ns=offset,
+                end_offset_ns=offset + duration,
+                wall_ns=duration,
+                gpu_ns=0 if scope == "compile" else max(1, duration // 2),
+            )
+        )
+        offset += duration + 1_000
+    return tuple(rows)
+
+
 def _runs() -> list[FSG3TimingRun]:
     rows: list[FSG3TimingRun] = []
     for index, (block, position, configuration, mode) in enumerate(
         expected_fsg3_sequence()
     ):
+        metrics = _metrics(configuration, profile=mode == FSG3Mode.PROFILE)
         rows.append(
             FSG3TimingRun(
                 run_id=f"run-{index:02d}-{configuration.value}-{mode.value}",
@@ -91,20 +144,26 @@ def _runs() -> list[FSG3TimingRun]:
                 mode=mode,
                 source_identity="source",
                 protocol_identity="protocol",
-                metrics=_metrics(configuration, profile=mode == FSG3Mode.PROFILE),
+                metrics=metrics,
                 semantics=_semantics(),
                 execution=_execution(configuration),
                 environment=FSG3EnvironmentGate(
                     gpu_uuid="GPU-1",
                     gpu_name="RTX 4060",
+                    runtime_identity="runtime",
                     external_compute_processes=(),
                     thermal_slowdown=False,
                     worker_overlap=False,
                     device_identity_stable=True,
                     ac_powered=True,
                 ),
-                profile_closure_error=(0.005 if mode == FSG3Mode.PROFILE else None),
-                profile_residual_share=(0.02 if mode == FSG3Mode.PROFILE else None),
+                profile_spans=(
+                    _profile_spans(configuration, metrics)
+                    if mode == FSG3Mode.PROFILE
+                    else ()
+                ),
+                profile_closure_error=(0.0 if mode == FSG3Mode.PROFILE else None),
+                profile_residual_share=(0.0 if mode == FSG3Mode.PROFILE else None),
             )
         )
     return rows
@@ -189,6 +248,21 @@ def test_control_cannot_smuggle_profile_projection() -> None:
         replace(control, profile_closure_error=0.0).validate()
 
 
+def test_profile_spans_are_bound_and_closure_is_recomputed() -> None:
+    profile = next(run for run in _runs() if run.mode == FSG3Mode.PROFILE)
+    with pytest.raises(ValueError, match="closure projection"):
+        replace(profile, profile_closure_error=0.001).validate()
+    with pytest.raises(ValueError, match="span layout"):
+        replace(profile, profile_spans=profile.profile_spans[:-1]).validate()
+    first = profile.profile_spans[0]
+    with pytest.raises(ValueError, match="wall projection"):
+        replace(
+            profile,
+            profile_spans=(replace(first, wall_ns=first.wall_ns + 1),)
+            + profile.profile_spans[1:],
+        ).validate()
+
+
 def test_replay_reports_paired_speedups_and_break_even() -> None:
     summary = derive_fsg3_timing_evidence(_runs())
     assert summary["status"] == "validated-fsg3-b0-b1-b2-baseline"
@@ -199,6 +273,58 @@ def test_replay_reports_paired_speedups_and_break_even() -> None:
     assert speedups["B2"]["query_wall_ns"]["median"] == pytest.approx(1.25)
     assert summary["b2_compile_break_even_queries"] == 1
     assert summary["performance_claimed"] is False
+
+
+def test_experiment_derivations_preserve_all_pairs_spans_and_closures() -> None:
+    runs = _runs()
+    paired = experiment_runner._paired_rows(runs)
+    spans = experiment_runner._profile_rows(runs)
+    closure = experiment_runner._closure(runs)
+
+    assert len(paired) == 12
+    assert len(spans) == 72
+    assert len(cast(list[object], closure["rows"])) == 18
+    assert closure["all_closed"] is True
+    assert all(row["performance_claimed"] is False for row in paired)
+    b2 = next(
+        row for row in paired if row["block_index"] == 0 and row["candidate"] == "B2"
+    )
+    assert cast(dict[str, float], b2["speedup_b0_over_candidate"])[
+        "query_wall_ns"
+    ] == pytest.approx(1.25)
+
+
+def test_formal_preflight_admission_is_recomputed() -> None:
+    sample = {
+        "temperature_limit_celsius": 50,
+        "poll_seconds": 5,
+        "timeout_seconds": 900,
+        "sample_count": 1,
+        "wait_ns": 1,
+        "samples": [
+            {
+                "elapsed_ns": 0,
+                "temperature_celsius": 49,
+                "thermal_active": False,
+                "gpu_snapshot": {},
+                "compute_processes": [
+                    {
+                        "pid": 1,
+                        "name": "/usr/bin/kwin_wayland",
+                        "used_memory_mib": 7,
+                    }
+                ],
+                "ac_powered": True,
+            }
+        ],
+        "admitted": True,
+    }
+    experiment_runner._validate_formal_preflight(sample)
+    cast(dict[str, object], cast(list[object], sample["samples"])[0])[
+        "temperature_celsius"
+    ] = 51
+    with pytest.raises(ValueError, match="admission differs"):
+        experiment_runner._validate_formal_preflight(sample)
 
 
 def test_replay_rejects_order_tampering() -> None:
@@ -259,7 +385,27 @@ def test_environment_and_profile_gates_are_recomputed() -> None:
     profile_index = next(
         i for i, run in enumerate(runs) if run.mode == FSG3Mode.PROFILE
     )
-    runs[profile_index] = replace(runs[profile_index], profile_residual_share=0.04)
+    profile = runs[profile_index]
+    core_index = next(
+        index
+        for index, span in enumerate(profile.profile_spans)
+        if span.scope == "core"
+    )
+    core_span = profile.profile_spans[core_index]
+    shortened = replace(
+        core_span,
+        end_offset_ns=core_span.end_offset_ns - 40_000,
+        wall_ns=core_span.wall_ns - 40_000,
+    )
+    spans = list(profile.profile_spans)
+    spans[core_index] = shortened
+    residual = 40_000 / profile.metrics.core_wall_ns
+    runs[profile_index] = replace(
+        profile,
+        profile_spans=tuple(spans),
+        profile_closure_error=residual,
+        profile_residual_share=residual,
+    )
     summary = derive_fsg3_timing_evidence(runs)
     assert summary["status"] == "not-auditable"
     assert summary["environment_passed"] is False
@@ -278,8 +424,6 @@ def test_profile_perturbation_is_not_used_as_headline_latency() -> None:
                     query_wall_ns=1_200_000,
                     cold_total_ns=1_400_000,
                     query_gpu_ns=800_000,
-                    core_wall_ns=600_000,
-                    core_gpu_ns=500_000,
                 ),
             )
     summary = derive_fsg3_timing_evidence(runs)

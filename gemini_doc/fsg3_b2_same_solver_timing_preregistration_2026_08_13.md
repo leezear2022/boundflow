@@ -235,3 +235,33 @@ lower-only，provider与candidate的upper使用`+inf`作为“未请求”哨兵
 `upper_positive_infinity_mask`，mask为true的位置数值固定编码为`0.0`。跨配置/mode比较要求mask exact，
 只对mask=false的位置执行`2e-4` allclose与soundness检查。NaN、`-inf`、未掩码`+inf`继续fail closed。
 该修订不改变计时顺序、指标或性能门禁，也不是观察结果后的调参。
+
+## 14. Pre-Run Amendment 2：Profile Raw Spans 与 Core Closure
+
+正式36-process artifact生成前，将timing schema从v1升级到v2。v1只携带closure/residual投影，无法由
+第三方从raw span重算，因此v2要求每个profile run把有序、互斥、带monotonic offset的typed span纳入
+canonical payload和stable hash。
+
+closure分母冻结为exact `update_bounds_core`的`core_wall_ns`，分子为该配置所有`scope=core` span的
+wall总和；compile与official post/queue分别保留为独立scope。布局固定为：B0=`provider_core/post`，
+B1=`typed_pre_state/provider_core/post`，B2=`compile/typed_pre_state/optimizer/backward/kfsb/
+atomic_commit/post`。删项、换序、重叠、wall投影或derived closure不一致均fail closed。
+
+本修订是在非正式worker smoke发现证据可重放性缺口后、正式artifact之前完成；既有smoke不进入统计，
+没有形成performance claim。详见
+`gemini_doc/change_2026-08-13_fsg3_profile_schema_v2_prerun_amendment.md`。
+
+## 15. Pre-Run Amendment 3：Formal Worker Cool/Idle Preflight
+
+非正式block-0连续smoke与后台全量pytest重叠时，环境门禁正确观察到外部CUDA进程、58→64°C升温及
+software thermal counter增长，0/6 run准入。为执行§7已经冻结的“无worker overlap、无thermal
+slowdown”要求，正式orchestrator在每一个worker开始前执行相同的、非计时preflight：
+
+- GPU温度`<=50°C`；software/hardware thermal reason均为inactive；
+- AC供电；除固定`kwin_wayland <64 MiB`外无CUDA compute process；
+- 每5秒检查一次，最长900秒；完整sample序列写入run metadata并由replay重算；
+- preflight通过后恰一次执行该序列位置的worker。若worker内部仍出现thermal/overlap，则该run和整轮
+  按原门禁失败；不得重试、删除或替换个别run。
+
+preflight不在query/core计时scope内，不改变36-run顺序、指标、重复数或阈值。它固定fresh-process
+latency实验的起始环境，不主张持续吞吐性能。

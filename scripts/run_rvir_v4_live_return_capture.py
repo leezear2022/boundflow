@@ -132,6 +132,7 @@ class _LiveExecutor:
         precompiled_program: Any = None,
         precompiled_module: Any = None,
         capture_payloads: bool = True,
+        profile_recorder: Any = None,
     ):
         if (precompiled_program is None) != (precompiled_module is None):
             raise ValueError("RVIR-v4 live precompiled program/module must be paired")
@@ -141,6 +142,7 @@ class _LiveExecutor:
         self.precompiled_program = precompiled_program
         self.precompiled_module = precompiled_module
         self.capture_payloads = capture_payloads
+        self.profile_recorder = profile_recorder
         self.active = False
         self.core_count = 0
         self.provider_compute_bounds_callback_count = 0
@@ -155,6 +157,17 @@ class _LiveExecutor:
         self.last_post_result: Any = None
 
     def execute(self, net: Any, pre_result: Any, kwargs: Mapping[str, Any]) -> Any:
+        if self.active or self.core_count != 0:
+            raise RuntimeError("RVIR-v4 live core execution repeats")
+        if self.profile_recorder is not None:
+            self.profile_recorder.begin(
+                scope="core",
+                name="typed_pre_state",
+                stack_layer="transport/runtime",
+                solver_phase="production_state_import",
+                resource="host+cuda",
+                cache_state="process-hit",
+            )
         import torch
 
         from boundflow.frontends.onnx.frontend import import_onnx
@@ -188,8 +201,6 @@ class _LiveExecutor:
         from boundflow.runtime.rvir_v4_production_state import ProductionTensorRole
         from boundflow.runtime.task_executor import InputSpec
 
-        if self.active or self.core_count != 0:
-            raise RuntimeError("RVIR-v4 live core execution repeats")
         self.active = True
         previous_profile = sys.getprofile()
 
@@ -303,6 +314,15 @@ class _LiveExecutor:
                 policy=policy,
             )
             initial = mapping.to_native_state(scope)
+            if self.profile_recorder is not None:
+                self.profile_recorder.begin(
+                    scope="core",
+                    name="optimizer",
+                    stack_layer="runtime/optimizer",
+                    solver_phase="alpha_beta_mutation",
+                    resource="host+cuda",
+                    cache_state="process-hit",
+                )
             native = execute_rvir_v4_native_optimizer_trace(
                 module,
                 input_spec,
@@ -317,6 +337,15 @@ class _LiveExecutor:
                 alpha_by_relu_input=native.steps[-1].alpha_by_relu_input,
                 beta_by_relu_input=native.steps[-1].beta_by_relu_input,
             )
+            if self.profile_recorder is not None:
+                self.profile_recorder.begin(
+                    scope="core",
+                    name="backward",
+                    stack_layer="runtime/bound-graph",
+                    solver_phase="native_backward_export",
+                    resource="host+cuda",
+                    cache_state="process-hit",
+                )
             export = export_rvir_v4_native_backward(
                 module=module,
                 input_spec=input_spec,
@@ -325,6 +354,15 @@ class _LiveExecutor:
                 terminal_state=terminal,
                 topology=TOPOLOGY,
             )
+            if self.profile_recorder is not None:
+                self.profile_recorder.begin(
+                    scope="core",
+                    name="kfsb",
+                    stack_layer="runtime/planner",
+                    solver_phase="branching_decision",
+                    resource="host+cuda",
+                    cache_state="process-hit",
+                )
             evaluation = evaluate_rvir_v4_native_kfsb(
                 module=module,
                 input_spec=input_spec,
@@ -334,6 +372,15 @@ class _LiveExecutor:
                 topology=TOPOLOGY,
                 backward_export=export,
             )
+            if self.profile_recorder is not None:
+                self.profile_recorder.begin(
+                    scope="core",
+                    name="atomic_commit",
+                    stack_layer="runtime/state",
+                    solver_phase="atomic_copy_out",
+                    resource="host+cuda",
+                    cache_state="process-hit",
+                )
             d = cast(MutableMapping[str, object], pre_result.d_dict)
             host_candidate = {
                 "history": d["history"],
@@ -373,6 +420,8 @@ class _LiveExecutor:
                         _branch_trace(evaluation, export, core_result, torch),
                     )
                 )
+            if self.profile_recorder is not None:
+                self.profile_recorder.end()
             self.core_count += 1
             return core_result
         finally:

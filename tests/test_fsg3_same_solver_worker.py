@@ -45,10 +45,34 @@ def test_live_executor_requires_paired_precompiled_inputs() -> None:
     assert executor.last_post_result is None
 
 
-def test_profile_mode_fails_closed_until_profile_spans_exist() -> None:
-    args = runner.argparse.Namespace(mode="profile")
-    with pytest.raises(ValueError, match="not implemented"):
-        runner._worker(args)
+def test_profile_recorder_emits_non_overlapping_cuda_span() -> None:
+    class FakeEvent:
+        def record(self, _stream: object) -> None:
+            return None
+
+        def elapsed_time(self, _other: object) -> float:
+            return 0.25
+
+    fake_torch = SimpleNamespace(
+        cuda=SimpleNamespace(
+            Event=lambda **_kwargs: FakeEvent(),
+            current_stream=lambda: object(),
+        )
+    )
+    recorder = runner._ProfileRecorder(fake_torch)
+    with recorder.span(
+        scope="core",
+        name="provider_core",
+        stack_layer="solver/provider",
+        solver_phase="official_update_bounds_core",
+        resource="host+cuda",
+        cache_state="process-hit",
+    ):
+        pass
+    spans = recorder.finalize()
+    assert len(spans) == 1
+    assert spans[0].wall_ns > 0
+    assert spans[0].gpu_ns == 250_000
 
 
 def test_protocol_identity_is_common_across_configurations() -> None:

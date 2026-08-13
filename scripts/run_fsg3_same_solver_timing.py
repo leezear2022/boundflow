@@ -5,11 +5,13 @@
 # pylint: disable=too-many-locals,too-many-statements,too-many-branches
 # pylint: disable=too-many-arguments,too-many-instance-attributes,import-error
 # pylint: disable=missing-function-docstring,too-few-public-methods
+# pylint: disable=duplicate-code
 
 from __future__ import annotations
 
 import argparse
-from contextlib import contextmanager, ExitStack
+from contextlib import contextmanager, ExitStack, nullcontext
+from dataclasses import dataclass
 import json
 import os
 from pathlib import Path
@@ -31,6 +33,7 @@ from boundflow.runtime.fsg3_same_solver_timing import (
     FSG3EnvironmentGate,
     FSG3ExecutionCounters,
     FSG3Mode,
+    FSG3ProfileSpan,
     FSG3SemanticResult,
     FSG3TimingMetrics,
     FSG3TimingRun,
@@ -40,6 +43,115 @@ from scripts import run_rvir_v4_production_state_capture as capture_runner
 
 WORKER_ENVELOPE_SCHEMA = "boundflow.fsg3-same-solver-worker-envelope/v1"
 ALLOWED_GRAPHICS_PROCESSES = ("kwin_wayland",)
+
+
+@dataclass
+class _PendingProfileSpan:
+    scope: str
+    name: str
+    stack_layer: str
+    solver_phase: str
+    resource: str
+    cache_state: str
+    start_offset_ns: int
+    end_offset_ns: int
+    start_event: Any
+    end_event: Any
+
+
+class _ProfileRecorder:
+    """Record sequential profile spans without synchronizing inside a span."""
+
+    def __init__(self, torch_module: Any) -> None:
+        self.torch = torch_module
+        self.epoch_ns = time.perf_counter_ns()
+        self.active: Optional[dict[str, Any]] = None
+        self.pending: list[_PendingProfileSpan] = []
+
+    def begin(
+        self,
+        *,
+        scope: str,
+        name: str,
+        stack_layer: str,
+        solver_phase: str,
+        resource: str,
+        cache_state: str,
+    ) -> None:
+        if self.active is not None:
+            self.end()
+        start_event: Any = None
+        if resource != "host":
+            start_event = self.torch.cuda.Event(enable_timing=True)
+            start_event.record(self.torch.cuda.current_stream())
+        self.active = {
+            "scope": scope,
+            "name": name,
+            "stack_layer": stack_layer,
+            "solver_phase": solver_phase,
+            "resource": resource,
+            "cache_state": cache_state,
+            "start_offset_ns": time.perf_counter_ns() - self.epoch_ns,
+            "start_event": start_event,
+        }
+
+    def end(self) -> None:
+        if self.active is None:
+            raise RuntimeError("FSG3 profile span is not active")
+        end_offset_ns = time.perf_counter_ns() - self.epoch_ns
+        end_event: Any = None
+        if self.active["resource"] != "host":
+            end_event = self.torch.cuda.Event(enable_timing=True)
+            end_event.record(self.torch.cuda.current_stream())
+        self.pending.append(
+            _PendingProfileSpan(
+                scope=str(self.active["scope"]),
+                name=str(self.active["name"]),
+                stack_layer=str(self.active["stack_layer"]),
+                solver_phase=str(self.active["solver_phase"]),
+                resource=str(self.active["resource"]),
+                cache_state=str(self.active["cache_state"]),
+                start_offset_ns=int(self.active["start_offset_ns"]),
+                end_offset_ns=end_offset_ns,
+                start_event=self.active["start_event"],
+                end_event=end_event,
+            )
+        )
+        self.active = None
+
+    @contextmanager
+    def span(self, **metadata: str) -> Iterator[None]:
+        self.begin(**metadata)
+        try:
+            yield
+        finally:
+            self.end()
+
+    def finalize(self) -> tuple[FSG3ProfileSpan, ...]:
+        if self.active is not None:
+            raise ValueError("FSG3 profile span remains active")
+        rows: list[FSG3ProfileSpan] = []
+        for item in self.pending:
+            gpu_ns = (
+                0
+                if item.start_event is None
+                else int(round(item.start_event.elapsed_time(item.end_event) * 1e6))
+            )
+            rows.append(
+                FSG3ProfileSpan(
+                    scope=item.scope,
+                    name=item.name,
+                    stack_layer=item.stack_layer,
+                    solver_phase=item.solver_phase,
+                    resource=item.resource,
+                    cache_state=item.cache_state,
+                    start_offset_ns=item.start_offset_ns,
+                    end_offset_ns=item.end_offset_ns,
+                    wall_ns=item.end_offset_ns - item.start_offset_ns,
+                    gpu_ns=gpu_ns,
+                )
+            )
+        return tuple(rows)
 
 
 def _one_final_bound(value: object, *, label: str) -> tuple[str, Any]:
@@ -137,10 +249,12 @@ class _CoreObserver:  # pylint: disable=too-few-public-methods
         configuration: FSG3Configuration,
         torch_module: Any,
         arguments_module: Any,
+        profile_recorder: Optional[_ProfileRecorder] = None,
     ) -> None:
         self.configuration = configuration
         self.torch = torch_module
         self.arguments = arguments_module
+        self.profile_recorder = profile_recorder
         self.core_count = 0
         self.provider_update_bounds_call_count = 0
         self.typed_validation_count = 0
@@ -173,6 +287,15 @@ class _CoreObserver:  # pylint: disable=too-few-public-methods
             original_compute: Any = None
             try:
                 if self.configuration == FSG3Configuration.B1:
+                    if self.profile_recorder is not None:
+                        self.profile_recorder.begin(
+                            scope="core",
+                            name="typed_pre_state",
+                            stack_layer="transport/runtime",
+                            solver_phase="production_state_validation",
+                            resource="host+cuda",
+                            cache_state="process-hit",
+                        )
                     policy = capture_runner._optimizer_policy(self.arguments, kwargs)
                     snapshot = capture_runner._build_core_pre_snapshot(
                         pre_result,
@@ -215,7 +338,21 @@ class _CoreObserver:  # pylint: disable=too-few-public-methods
                             sys.setprofile(previous_profile)
 
                     heuristic.compute_branching_decisions = counted_compute
+                    if self.profile_recorder is not None:
+                        self.profile_recorder.begin(
+                            scope="core",
+                            name="provider_core",
+                            stack_layer="solver/provider",
+                            solver_phase="official_update_bounds_core",
+                            resource="host+cuda",
+                            cache_state="process-hit",
+                        )
                 result = original(*args, **kwargs)
+                if self.profile_recorder is not None and self.configuration in {
+                    FSG3Configuration.B0,
+                    FSG3Configuration.B1,
+                }:
+                    self.profile_recorder.end()
             finally:
                 self.host_end_ns = time.perf_counter_ns()
                 self.end_event.record(stream)
@@ -249,13 +386,17 @@ class _CoreObserver:  # pylint: disable=too-few-public-methods
 
 
 class _PostObserver:
-    def __init__(self) -> None:
+    def __init__(self, profile_recorder: Optional[_ProfileRecorder] = None) -> None:
         self.last_result: Any = None
         self.count = 0
+        self.profile_recorder = profile_recorder
 
     @contextmanager
-    def instrument(self, stage_postprocess_module: Any) -> Iterator[None]:
+    def instrument(
+        self, stage_postprocess_module: Any, bab_bootstrap_module: Any
+    ) -> Iterator[None]:
         original = stage_postprocess_module.update_bounds_post
+        original_outer = bab_bootstrap_module.branch_and_bound_postprocess
 
         def wrapped(*args: Any, **kwargs: Any) -> Any:
             result = original(*args, **kwargs)
@@ -263,11 +404,26 @@ class _PostObserver:
             self.count += 1
             return result
 
+        def wrapped_outer(*args: Any, **kwargs: Any) -> Any:
+            if self.profile_recorder is None:
+                return original_outer(*args, **kwargs)
+            with self.profile_recorder.span(
+                scope="post",
+                name="official_post_queue",
+                stack_layer="solver/runtime",
+                solver_phase="official_post_and_queue",
+                resource="host+cuda",
+                cache_state="process-hit",
+            ):
+                return original_outer(*args, **kwargs)
+
         stage_postprocess_module.update_bounds_post = wrapped
+        bab_bootstrap_module.branch_and_bound_postprocess = wrapped_outer
         try:
             yield
         finally:
             stage_postprocess_module.update_bounds_post = original
+            bab_bootstrap_module.branch_and_bound_postprocess = original_outer
 
 
 def _visited_domains(result: Any) -> tuple[int, ...]:
@@ -390,8 +546,10 @@ def _nvidia_snapshot() -> dict[str, object]:
     )
     counter_us = int(counters.split()[0])
     return {
+        "driver_version": xml.findtext("driver_version", default="unavailable"),
         "uuid": text_at("uuid"),
         "name": text_at("product_name"),
+        "total_memory": text_at("fb_memory_usage/total"),
         "performance_state": text_at("performance_state"),
         "temperature": text_at("temperature/gpu_temp"),
         "power_draw": text_at("gpu_power_readings/instant_power_draw"),
@@ -440,6 +598,7 @@ def _environment_gate(
     after: Mapping[str, object],
     before_processes: Sequence[Mapping[str, object]],
     after_processes: Sequence[Mapping[str, object]],
+    runtime_identity: str,
 ) -> FSG3EnvironmentGate:
     external: list[str] = []
     by_identity = {
@@ -472,6 +631,7 @@ def _environment_gate(
     return FSG3EnvironmentGate(
         gpu_uuid=str(before["uuid"]),
         gpu_name=str(before["name"]),
+        runtime_identity=runtime_identity,
         external_compute_processes=tuple(external),
         thermal_slowdown=thermal_active or counter_increased,
         worker_overlap=bool(external),
@@ -521,8 +681,6 @@ def _source_identity(args: argparse.Namespace) -> str:
 
 
 def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-locals
-    if args.mode != FSG3Mode.CONTROL.value:
-        raise ValueError("FSG3 profile worker is not implemented in FSG3-2")
     sys.path.insert(0, str(args.abcrown_root / "complete_verifier"))
     sys.path.insert(0, str(args.abcrown_root))
     import torch
@@ -533,7 +691,11 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
         IOConstraints,
     )
     import arguments  # type: ignore[import-not-found]
-    from activation_split import stage_postprocess, stage_solve  # type: ignore[import-not-found]
+    from activation_split import (  # type: ignore[import-not-found]
+        bab_bootstrap,
+        stage_postprocess,
+        stage_solve,
+    )
     from auto_LiRPA import BoundedModule  # type: ignore[import-untyped]
     from branching_domains import BatchedDomainList  # type: ignore[import-not-found]
 
@@ -544,6 +706,7 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
         raise RuntimeError("FSG3 worker requires CUDA")
     configuration = FSG3Configuration(args.configuration)
     mode = FSG3Mode(args.mode)
+    profile_recorder = _ProfileRecorder(torch) if mode == FSG3Mode.PROFILE else None
     torch.cuda.synchronize()
     torch.cuda.empty_cache()
     torch.cuda.reset_peak_memory_stats()
@@ -558,17 +721,31 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
         from boundflow.frontends.onnx.frontend import import_onnx
         from boundflow.planner import plan_interval_ibp_v0
 
-        program = import_onnx(str(args.model), do_shape_infer=True, normalize=True)
-        module = plan_interval_ibp_v0(program)
+        compile_scope = (
+            nullcontext()
+            if profile_recorder is None
+            else profile_recorder.span(
+                scope="compile",
+                name="compile",
+                stack_layer="frontend/planner",
+                solver_phase="onnx_import_and_reference_plan",
+                resource="host",
+                cache_state="cold",
+            )
+        )
+        with compile_scope:
+            program = import_onnx(str(args.model), do_shape_infer=True, normalize=True)
+            module = plan_interval_ibp_v0(program)
         compile_ns = time.perf_counter_ns() - compile_started_ns
 
     core = _CoreObserver(
         configuration=configuration,
         torch_module=torch,
         arguments_module=arguments,
+        profile_recorder=profile_recorder,
     )
     provider = _ProviderObserver(core)
-    post = _PostObserver()
+    post = _PostObserver(profile_recorder)
     queue = _QueueObserver(torch)
     executor: Any = None
     if configuration == FSG3Configuration.B2:
@@ -579,6 +756,7 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
             precompiled_program=program,
             precompiled_module=module,
             capture_payloads=False,
+            profile_recorder=profile_recorder,
         )
 
     with tempfile.TemporaryDirectory(prefix="boundflow-fsg3-property-") as raw:
@@ -608,7 +786,7 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
                 )
             stack.enter_context(provider.instrument(BoundedModule))
             stack.enter_context(core.instrument(stage_solve))
-            stack.enter_context(post.instrument(stage_postprocess))
+            stack.enter_context(post.instrument(stage_postprocess, bab_bootstrap))
             stack.enter_context(queue.instrument(BatchedDomainList))
             query_start_event = torch.cuda.Event(enable_timing=True)
             query_end_event = torch.cuda.Event(enable_timing=True)
@@ -637,10 +815,37 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
         torch_module=torch,
     )
     post_validation_ns = time.perf_counter_ns() - post_validation_started_ns
+    profile_spans = () if profile_recorder is None else profile_recorder.finalize()
+    if profile_spans:
+        covered_core_ns = sum(
+            span.wall_ns for span in profile_spans if span.scope == "core"
+        )
+        profile_closure_error: Optional[float] = abs(
+            core_wall_ns - covered_core_ns
+        ) / float(core_wall_ns)
+        profile_residual_share: Optional[float] = max(
+            core_wall_ns - covered_core_ns, 0
+        ) / float(core_wall_ns)
+    else:
+        profile_closure_error = None
+        profile_residual_share = None
     environment_after = _nvidia_snapshot()
     processes_after = _compute_processes()
+    runtime_environment = {
+        "python_version": sys.version,
+        "python_executable": sys.executable,
+        "torch_version": torch.__version__,
+        "torch_cuda_version": torch.version.cuda,
+        "cudnn_version": torch.backends.cudnn.version(),
+        "driver_version": environment_before["driver_version"],
+        "gpu_total_memory": environment_before["total_memory"],
+    }
     environment = _environment_gate(
-        environment_before, environment_after, processes_before, processes_after
+        environment_before,
+        environment_after,
+        processes_before,
+        processes_after,
+        canonical_hash(runtime_environment),
     )
     if configuration == FSG3Configuration.B2:
         if executor is None or executor.core_count != 1:
@@ -698,8 +903,9 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
         semantics=semantic,
         execution=execution,
         environment=environment,
-        profile_closure_error=None,
-        profile_residual_share=None,
+        profile_spans=profile_spans,
+        profile_closure_error=profile_closure_error,
+        profile_residual_share=profile_residual_share,
     )
     run.validate()
     envelope = {
@@ -719,6 +925,7 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
             "compute_processes_before": processes_before,
             "compute_processes_after": processes_after,
             "allowed_graphics_processes": list(ALLOWED_GRAPHICS_PROCESSES),
+            "runtime_environment": runtime_environment,
             "cold_outer_ns": cold_outer_ns,
             "cold_total_is_compile_plus_query_composite": True,
             "cold_scope_includes_hook_setup": False,

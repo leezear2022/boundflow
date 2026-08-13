@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev008429
-last_va: ev008430
+last_ch: ev008529
+last_va: ev008530
 blk: none
-next: fsg3-profile-spans-and-36-process-orchestrator
-updated: 2026-08-13T14:02:06Z
+next: fsg3-formal-36-process-gpu-baseline
+updated: 2026-08-13T14:34:28Z

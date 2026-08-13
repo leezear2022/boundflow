@@ -5257,3 +5257,22 @@
 
 **记录**
 - `gemini_doc/change_2026-08-13_fsg3_real_control_worker.md`
+
+## 2026-08-13：FSG3 Profile Schema v2 Pre-Run Amendment
+
+- 将profile raw spans、monotonic interval、wall/CUDA duration纳入canonical payload和stable hash；
+- closure冻结为exact core scope，compile与official post/queue独立归因；
+- B0/B1/B2真实profile smoke通过layout与closure门禁；尚无正式performance claim。
+
+**记录**
+- `gemini_doc/change_2026-08-13_fsg3_profile_schema_v2_prerun_amendment.md`
+
+## 2026-08-13：FSG3 Profile Spans 与 36-Process Orchestrator
+
+- 实现B0/B1/B2互斥core spans、compile/post独立scope与runtime identity；
+- 实现固定顺序36 fresh process generation、完整日志、manifest与raw-only replay；
+- block-0 smoke六路语义/closure通过；环境因并行pytest与thermal evidence正确拒绝；
+- 当前仍无正式performance claim，下一步是在clean commit和冷却GPU上执行正式轮。
+
+**记录**
+- `gemini_doc/change_2026-08-13_fsg3_profile_orchestrator.md`

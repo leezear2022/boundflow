@@ -1,6 +1,6 @@
 """Typed raw contracts and replay aggregation for FSG3 B0/B1/B2 timing."""
 
-# pylint: disable=too-many-branches,too-many-locals
+# pylint: disable=too-many-branches,too-many-locals,too-many-lines,duplicate-code
 
 from __future__ import annotations
 
@@ -10,9 +10,9 @@ import hashlib
 import json
 import math
 import statistics
-from typing import Any, Mapping, Optional, Sequence, Tuple
+from typing import Any, cast, Mapping, Optional, Sequence, Tuple
 
-FSG3_TIMING_SCHEMA_VERSION = "boundflow.fsg3-same-solver-timing/v1"
+FSG3_TIMING_SCHEMA_VERSION = "boundflow.fsg3-same-solver-timing/v2"
 FSG3_REPEAT_COUNT = 6
 FSG3_PROFILE_PERTURBATION_LIMIT = 1.05
 FSG3_CLOSURE_ERROR_LIMIT = 0.01
@@ -34,6 +34,28 @@ class FSG3Mode(str, Enum):
 
     CONTROL = "control"
     PROFILE = "profile"
+
+
+FSG3_PROFILE_SPAN_LAYOUT: Mapping[FSG3Configuration, Tuple[Tuple[str, str], ...]] = {
+    FSG3Configuration.B0: (
+        ("core", "provider_core"),
+        ("post", "official_post_queue"),
+    ),
+    FSG3Configuration.B1: (
+        ("core", "typed_pre_state"),
+        ("core", "provider_core"),
+        ("post", "official_post_queue"),
+    ),
+    FSG3Configuration.B2: (
+        ("compile", "compile"),
+        ("core", "typed_pre_state"),
+        ("core", "optimizer"),
+        ("core", "backward"),
+        ("core", "kfsb"),
+        ("core", "atomic_commit"),
+        ("post", "official_post_queue"),
+    ),
+}
 
 
 FSG3_CONFIG_ORDERS: Tuple[Tuple[FSG3Configuration, ...], ...] = (
@@ -158,6 +180,65 @@ class FSG3TimingMetrics:  # pylint: disable=too-many-instance-attributes
             "post_validation_ns": self.post_validation_ns,
             "peak_allocated_bytes": self.peak_allocated_bytes,
             "peak_reserved_bytes": self.peak_reserved_bytes,
+        }
+
+
+@dataclass(frozen=True)
+class FSG3ProfileSpan:  # pylint: disable=too-many-instance-attributes
+    """One non-overlapping host/CUDA attribution interval."""
+
+    scope: str
+    name: str
+    stack_layer: str
+    solver_phase: str
+    resource: str
+    cache_state: str
+    start_offset_ns: int
+    end_offset_ns: int
+    wall_ns: int
+    gpu_ns: int
+
+    def validate(self) -> None:
+        """Reject incomplete, inverted, or non-canonical spans."""
+
+        if self.scope not in {"compile", "core", "post"}:
+            raise ValueError("FSG3 profile span scope differs")
+        if not all(
+            (
+                self.name,
+                self.stack_layer,
+                self.solver_phase,
+                self.resource,
+                self.cache_state,
+            )
+        ):
+            raise ValueError("FSG3 profile span metadata is empty")
+        if self.start_offset_ns < 0 or self.end_offset_ns <= self.start_offset_ns:
+            raise ValueError("FSG3 profile span interval differs")
+        if self.wall_ns != self.end_offset_ns - self.start_offset_ns:
+            raise ValueError("FSG3 profile span wall projection differs")
+        if self.gpu_ns < 0:
+            raise ValueError("FSG3 profile span GPU time is negative")
+        if self.resource == "host" and self.gpu_ns != 0:
+            raise ValueError("FSG3 host-only span cannot report GPU time")
+        if self.cache_state not in {"cold", "process-hit"}:
+            raise ValueError("FSG3 profile span cache state differs")
+
+    def to_dict(self) -> dict[str, object]:
+        """Return the canonical span payload."""
+
+        self.validate()
+        return {
+            "scope": self.scope,
+            "name": self.name,
+            "stack_layer": self.stack_layer,
+            "solver_phase": self.solver_phase,
+            "resource": self.resource,
+            "cache_state": self.cache_state,
+            "start_offset_ns": self.start_offset_ns,
+            "end_offset_ns": self.end_offset_ns,
+            "wall_ns": self.wall_ns,
+            "gpu_ns": self.gpu_ns,
         }
 
 
@@ -333,11 +414,12 @@ class FSG3ExecutionCounters:
 
 
 @dataclass(frozen=True)
-class FSG3EnvironmentGate:
+class FSG3EnvironmentGate:  # pylint: disable=too-many-instance-attributes
     """Raw worker-adjacent exclusion and thermal evidence."""
 
     gpu_uuid: str
     gpu_name: str
+    runtime_identity: str
     external_compute_processes: Tuple[str, ...]
     thermal_slowdown: bool
     worker_overlap: bool
@@ -347,7 +429,7 @@ class FSG3EnvironmentGate:
     def validate(self) -> None:
         """Reject missing device identity without precomputing the gate result."""
 
-        if not self.gpu_uuid or not self.gpu_name:
+        if not self.gpu_uuid or not self.gpu_name or not self.runtime_identity:
             raise ValueError("FSG3 GPU identity is empty")
 
     @property
@@ -369,6 +451,7 @@ class FSG3EnvironmentGate:
         return {
             "gpu_uuid": self.gpu_uuid,
             "gpu_name": self.gpu_name,
+            "runtime_identity": self.runtime_identity,
             "external_compute_processes": list(self.external_compute_processes),
             "thermal_slowdown": self.thermal_slowdown,
             "worker_overlap": self.worker_overlap,
@@ -393,6 +476,7 @@ class FSG3TimingRun:  # pylint: disable=too-many-instance-attributes
     semantics: FSG3SemanticResult
     execution: FSG3ExecutionCounters
     environment: FSG3EnvironmentGate
+    profile_spans: Tuple[FSG3ProfileSpan, ...]
     profile_closure_error: Optional[float]
     profile_residual_share: Optional[float]
     performance_claimed: bool = False
@@ -417,17 +501,51 @@ class FSG3TimingRun:  # pylint: disable=too-many-instance-attributes
         self.environment.validate()
         if self.mode == FSG3Mode.CONTROL:
             if (
-                self.profile_closure_error is not None
+                self.profile_spans
+                or self.profile_closure_error is not None
                 or self.profile_residual_share is not None
             ):
                 raise ValueError("FSG3 control cannot contain profile closure")
         else:
+            expected_layout = FSG3_PROFILE_SPAN_LAYOUT[self.configuration]
+            observed_layout = tuple(
+                (span.scope, span.name) for span in self.profile_spans
+            )
+            if observed_layout != expected_layout:
+                raise ValueError("FSG3 profile span layout differs")
+            previous_end = -1
+            for span in self.profile_spans:
+                span.validate()
+                if span.start_offset_ns < previous_end:
+                    raise ValueError("FSG3 profile spans overlap")
+                previous_end = span.end_offset_ns
             values = (self.profile_closure_error, self.profile_residual_share)
             if any(
                 value is None or not math.isfinite(value) or value < 0
                 for value in values
             ):
                 raise ValueError("FSG3 profile closure is incomplete")
+            covered_core_ns = sum(
+                span.wall_ns for span in self.profile_spans if span.scope == "core"
+            )
+            closure = abs(self.metrics.core_wall_ns - covered_core_ns) / float(
+                self.metrics.core_wall_ns
+            )
+            residual = max(self.metrics.core_wall_ns - covered_core_ns, 0) / float(
+                self.metrics.core_wall_ns
+            )
+            if not math.isclose(
+                cast(float, self.profile_closure_error),
+                closure,
+                rel_tol=0.0,
+                abs_tol=1.0e-12,
+            ) or not math.isclose(
+                cast(float, self.profile_residual_share),
+                residual,
+                rel_tol=0.0,
+                abs_tol=1.0e-12,
+            ):
+                raise ValueError("FSG3 profile closure projection differs")
 
     def to_dict(self) -> dict[str, object]:
         """Return the complete canonical raw record."""
@@ -446,6 +564,7 @@ class FSG3TimingRun:  # pylint: disable=too-many-instance-attributes
             "semantics": self.semantics.to_dict(),
             "execution": self.execution.to_dict(),
             "environment": self.environment.to_dict(),
+            "profile_spans": [span.to_dict() for span in self.profile_spans],
             "profile_closure_error": self.profile_closure_error,
             "profile_residual_share": self.profile_residual_share,
             "performance_claimed": False,
@@ -540,6 +659,36 @@ def _semantics_from_dict(value: Mapping[str, Any]) -> FSG3SemanticResult:
     )
 
 
+def _profile_span_from_dict(value: Mapping[str, Any]) -> FSG3ProfileSpan:
+    names = {
+        "scope",
+        "name",
+        "stack_layer",
+        "solver_phase",
+        "resource",
+        "cache_state",
+        "start_offset_ns",
+        "end_offset_ns",
+        "wall_ns",
+        "gpu_ns",
+    }
+    _exact_keys(value, names, "profile span")
+    span = FSG3ProfileSpan(
+        scope=str(value["scope"]),
+        name=str(value["name"]),
+        stack_layer=str(value["stack_layer"]),
+        solver_phase=str(value["solver_phase"]),
+        resource=str(value["resource"]),
+        cache_state=str(value["cache_state"]),
+        start_offset_ns=int(value["start_offset_ns"]),
+        end_offset_ns=int(value["end_offset_ns"]),
+        wall_ns=int(value["wall_ns"]),
+        gpu_ns=int(value["gpu_ns"]),
+    )
+    span.validate()
+    return span
+
+
 def fsg3_timing_run_from_dict(value: Mapping[str, Any]) -> FSG3TimingRun:
     """Parse a canonical raw run and reject derived-field tampering."""
 
@@ -558,6 +707,7 @@ def fsg3_timing_run_from_dict(value: Mapping[str, Any]) -> FSG3TimingRun:
             "semantics",
             "execution",
             "environment",
+            "profile_spans",
             "profile_closure_error",
             "profile_residual_share",
             "performance_claimed",
@@ -584,6 +734,7 @@ def fsg3_timing_run_from_dict(value: Mapping[str, Any]) -> FSG3TimingRun:
         {
             "gpu_uuid",
             "gpu_name",
+            "runtime_identity",
             "external_compute_processes",
             "thermal_slowdown",
             "worker_overlap",
@@ -596,6 +747,7 @@ def fsg3_timing_run_from_dict(value: Mapping[str, Any]) -> FSG3TimingRun:
     environment = FSG3EnvironmentGate(
         gpu_uuid=str(environment_value["gpu_uuid"]),
         gpu_name=str(environment_value["gpu_name"]),
+        runtime_identity=str(environment_value["runtime_identity"]),
         external_compute_processes=tuple(
             str(item)
             for item in _sequence(
@@ -634,6 +786,10 @@ def fsg3_timing_run_from_dict(value: Mapping[str, Any]) -> FSG3TimingRun:
             replacement_mode=str(execution_value["replacement_mode"]),
         ),
         environment=environment,
+        profile_spans=tuple(
+            _profile_span_from_dict(_mapping(item, "profile span"))
+            for item in _sequence(value["profile_spans"], "profile spans")
+        ),
         profile_closure_error=(
             None
             if value["profile_closure_error"] is None
@@ -737,7 +893,44 @@ def _speedup_summary(
     return _metric_summary(values)
 
 
-def derive_fsg3_timing_evidence(runs: Sequence[FSG3TimingRun]) -> dict[str, object]:
+def _profile_attribution(
+    indexed: Mapping[tuple[int, FSG3Configuration, FSG3Mode], FSG3TimingRun],
+) -> dict[str, object]:
+    result: dict[str, object] = {}
+    for configuration in FSG3Configuration:
+        by_name: dict[str, object] = {}
+        for scope, name in FSG3_PROFILE_SPAN_LAYOUT[configuration]:
+            wall_values: list[float] = []
+            share_values: list[float] = []
+            gpu_values: list[float] = []
+            for block in range(FSG3_REPEAT_COUNT):
+                run = indexed[(block, configuration, FSG3Mode.PROFILE)]
+                span = next(item for item in run.profile_spans if item.name == name)
+                denominator = {
+                    "compile": run.metrics.cold_total_ns,
+                    "core": run.metrics.core_wall_ns,
+                    "post": run.metrics.query_wall_ns,
+                }[scope]
+                wall_values.append(float(span.wall_ns))
+                share_values.append(span.wall_ns / float(denominator))
+                gpu_values.append(float(span.gpu_ns))
+            by_name[name] = {
+                "scope": scope,
+                "wall_ns": _metric_summary(wall_values),
+                "scope_share": _metric_summary(share_values),
+                "gpu_ns": (
+                    _metric_summary(gpu_values)
+                    if all(value > 0 for value in gpu_values)
+                    else {"raw": gpu_values, "not_applicable": True}
+                ),
+            }
+        result[configuration.value] = by_name
+    return result
+
+
+def derive_fsg3_timing_evidence(  # pylint: disable=too-many-statements
+    runs: Sequence[FSG3TimingRun],
+) -> dict[str, object]:
     """Rebuild sequence, semantics, perturbation, statistics, and FSG3 decision."""
 
     if len(runs) != len(expected_fsg3_sequence()):
@@ -767,6 +960,16 @@ def derive_fsg3_timing_evidence(runs: Sequence[FSG3TimingRun]) -> dict[str, obje
         for configuration in FSG3Configuration
     }
     failures: list[str] = []
+    environment_identities = {
+        (
+            run.environment.gpu_uuid,
+            run.environment.gpu_name,
+            run.environment.runtime_identity,
+        )
+        for run in runs
+    }
+    if len(environment_identities) != 1:
+        failures.append("environment-device-or-runtime-identity-differs")
     for run in runs:
         if not run.environment.admitted:
             failures.append(f"{run.run_id}:environment-not-admitted")
@@ -877,6 +1080,7 @@ def derive_fsg3_timing_evidence(runs: Sequence[FSG3TimingRun]) -> dict[str, obje
         "run_hashes": [run.stable_hash() for run in runs],
         "perturbation": perturbation,
         "speedups_b0_over_candidate": speedups,
+        "profile_attribution": _profile_attribution(indexed),
         "b2_compile_break_even_queries": break_even,
         "failure_rows": failures,
         "correctness_passed": not any("block-" in item for item in failures),
