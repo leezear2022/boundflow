@@ -5089,3 +5089,22 @@
 
 **记录**
 - `gemini_doc/change_2026-08-13_rvir_v4_atomic_copy_out_formal_closure.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-3 Whole-Core Replacement 预注册
+
+- 冻结whole-core的bound/state/branch-input/core-result四层输出责任；
+- 执行顺序为truth artifact→native lA/intermediate→KFSB child evaluation→live return→5 fresh
+  correctness；
+- candidate禁止调用provider core、`compute_bounds`和`update_bounds`，三项callback必须`0/0/0`；
+- V4-3前不恢复B2计时，不引入TIR/JIT/fusion/runtime/memory变量。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_whole_core_preregistration.md`
+
+### Capture-ready进展
+
+- 完成whole-core/pre-KFSB/post truth observer、typed validator和external-provider rerun replay；
+- 两次fresh GPU truth的451个tensor在`2e-4`内一致，213,060个sign与最终decision exact；
+- V4-3A尚未关闭，待正式artifact和同步重签tamper suite。

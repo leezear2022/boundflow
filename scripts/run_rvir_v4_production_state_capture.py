@@ -7,6 +7,7 @@
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=duplicate-code
 # pylint: disable=unsubscriptable-object
+# pylint: disable=too-many-return-statements
 
 from __future__ import annotations
 
@@ -14,6 +15,7 @@ import argparse
 from contextlib import contextmanager
 import hashlib
 import json
+from numbers import Integral, Real
 import os
 from pathlib import Path
 import shutil
@@ -26,6 +28,7 @@ from typing import Any, cast, Iterator, Mapping, Sequence
 ARTIFACT_SCHEMA_VERSION = "boundflow.rvir-v4-production-capture-artifact/v2"
 WORKER_SCHEMA_VERSION = "boundflow.rvir-v4-production-capture-worker/v2"
 OPTIMIZER_WORKER_SCHEMA_VERSION = "boundflow.rvir-v4-optimizer-step-capture-worker/v1"
+WHOLE_CORE_WORKER_SCHEMA_VERSION = "boundflow.rvir-v4-whole-core-truth-worker/v1"
 LEGACY_ARTIFACT_SCHEMA_VERSION = "boundflow.rvir-v4-production-capture-artifact/v1"
 LEGACY_WORKER_SCHEMA_VERSION = "boundflow.rvir-v4-production-capture-worker/v1"
 ABCROWN_COMMIT = "e5c7e17bf0488843acb77b7519f59876717a49f4"
@@ -156,6 +159,7 @@ def _parse_args() -> argparse.Namespace:
     worker.add_argument("--property", type=Path, required=True)
     worker.add_argument("--result", type=Path, required=True)
     worker.add_argument("--optimizer-step-trace", action="store_true")
+    worker.add_argument("--whole-core-truth", action="store_true")
     return parser.parse_args()
 
 
@@ -228,6 +232,195 @@ def _tensor_rows(
             rows.extend(_tensor_rows(item, f"{path}[{index}]", torch_module))
         return rows
     return []
+
+
+def _truth_tensor(value: object, label: str, torch_module: Any) -> dict[str, object]:
+    from boundflow.runtime.rvir_v4_production_state import production_tensor_sha256
+
+    if not torch_module.is_tensor(value):
+        raise TypeError(f"RVIR-v4 whole-core {label} is not a tensor")
+    tensor = cast(Any, value).detach().cpu().contiguous().clone()
+    return {
+        "shape": [int(dimension) for dimension in tensor.shape],
+        "dtype": str(tensor.dtype),
+        "source_device": str(cast(Any, value).device),
+        "content_sha256": production_tensor_sha256(tensor),
+        "value": tensor,
+    }
+
+
+def _truth_value(value: object, label: str, torch_module: Any) -> object:
+    if isinstance(value, ValueError):
+        return {"sentinel": "ValueError", "message": str(value)}
+    if torch_module.is_tensor(value):
+        return _truth_tensor(value, label, torch_module)
+    if isinstance(value, Mapping):
+        return {
+            str(key): _truth_value(item, f"{label}.{key}", torch_module)
+            for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))
+        }
+    if isinstance(value, (tuple, list)):
+        return [
+            _truth_value(item, f"{label}[{index}]", torch_module)
+            for index, item in enumerate(value)
+        ]
+    if value is None or isinstance(value, (bool, int, float, str)):
+        return value
+    if isinstance(value, Integral):
+        return int(value)
+    if isinstance(value, Real):
+        return float(value)
+    dataclass_fields = getattr(value, "__dataclass_fields__", None)
+    if isinstance(dataclass_fields, Mapping):
+        return {
+            str(name): _truth_value(
+                getattr(value, name), f"{label}.{name}", torch_module
+            )
+            for name in dataclass_fields
+        }
+    raw = getattr(value, "_data", None)
+    if isinstance(raw, (Mapping, tuple, list)):
+        return _truth_value(raw, f"{label}._data", torch_module)
+    raise TypeError(f"RVIR-v4 whole-core {label} value differs: {type(value)}")
+
+
+def _truth_metadata(value: object) -> object:
+    if isinstance(value, Mapping):
+        if set(value) == {
+            "shape",
+            "dtype",
+            "source_device",
+            "content_sha256",
+            "value",
+        }:
+            return {key: item for key, item in value.items() if key != "value"}
+        return {
+            str(key): _truth_metadata(item)
+            for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))
+        }
+    if isinstance(value, list):
+        return [_truth_metadata(item) for item in value]
+    return value
+
+
+def _capture_whole_core_truth(
+    result: Any, torch_module: Any, branch_trace: Mapping[str, object]
+) -> dict[str, object]:
+    tensor_fields = (
+        "lb",
+        "ub",
+        "lb_last",
+        "ub_last",
+        "new_x_Ls",
+        "new_x_Us",
+        "c",
+        "decision_thresh",
+        "depths",
+        "thresholds",
+    )
+    fields = {
+        name: _truth_value(getattr(result, name), name, torch_module)
+        for name in tensor_fields
+    }
+    for name in ("input_split_idx", "primal_x", "x_Ls", "x_Us"):
+        fields[name] = _truth_value(getattr(result, name), name, torch_module)
+    working_interm: dict[str, object] = {}
+    for name, bounds in sorted(result.working_interm_bounds.items()):
+        working_interm[str(name)] = {
+            "lower": _truth_value(
+                getattr(bounds, "lower_bound", None),
+                f"working_interm_bounds.{name}.lower",
+                torch_module,
+            ),
+            "upper": _truth_value(
+                getattr(bounds, "upper_bound", None),
+                f"working_interm_bounds.{name}.upper",
+                torch_module,
+            ),
+        }
+    l_a = _truth_value(
+        getattr(result.batched_lA, "_data", None), "batched_lA", torch_module
+    )
+    clip = {
+        "data": _truth_value(
+            getattr(result.sub_domain_clip_decisions, "_data", None),
+            "sub_domain_clip_decisions",
+            torch_module,
+        ),
+        "split_depth": int(result.sub_domain_clip_decisions.split_depth),
+        "batch_size": int(result.sub_domain_clip_decisions.batch_size),
+        "topk_objective": int(result.sub_domain_clip_decisions.topk_objective),
+    }
+    decision = result.branching_decision
+    payload: dict[str, object] = {
+        "schema_version": "boundflow.rvir-v4-whole-core-truth/v1",
+        "fields": fields,
+        "nums_effective_beta_per_domain": _truth_value(
+            result.nums_effective_beta_per_domain,
+            "nums_effective_beta_per_domain",
+            torch_module,
+        ),
+        "working_intermediate_bounds": working_interm,
+        "batched_lA": l_a,
+        "branching_decision": {
+            "decision": [
+                [int(layer), int(index)] for layer, index in decision.branching_decision
+            ],
+            "points": _truth_value(
+                decision.branching_points, "branching_points", torch_module
+            ),
+            "split_depth": int(decision.split_depth),
+            "batch_size": int(decision.batch_size),
+        },
+        "sub_domain_clip_decisions": clip,
+        "branch_trace": dict(branch_trace),
+        "new_split_history": _truth_value(
+            result.new_split_history, "new_split_history", torch_module
+        ),
+        "history": _truth_value(result.history, "history", torch_module),
+        "lb_final_max": float(result.lb_final_max),
+        "lb_final_min": float(result.lb_final_min),
+        "n_verified": int(result.n_verified),
+        "n_splits": int(result.n_splits),
+        "performance_claimed": False,
+    }
+    payload["truth_hash"] = canonical_hash(_truth_metadata(payload))
+    return payload
+
+
+def _capture_whole_post_truth(result: Any, torch_module: Any) -> dict[str, object]:
+    payload: dict[str, object] = {
+        "schema_version": "boundflow.rvir-v4-whole-post-truth/v1",
+        "lower_bounds": _truth_value(result.lower_bounds, "lower_bounds", torch_module),
+        "upper_bounds": _truth_value(result.upper_bounds, "upper_bounds", torch_module),
+        "lAs": _truth_value(result.lAs, "lAs", torch_module),
+        "alphas": _truth_value(result.alphas, "alphas", torch_module),
+        "betas": _truth_value(result.betas, "betas", torch_module),
+        "split_history": _truth_value(
+            result.split_history, "split_history", torch_module
+        ),
+        "unstable_bounds": _truth_value(
+            result.unstable_bounds, "unstable_bounds", torch_module
+        ),
+        "primals": _truth_value(result.primals, "primals", torch_module),
+        "c": _truth_value(result.c, "c", torch_module),
+        "x_Ls": _truth_value(result.x_Ls, "x_Ls", torch_module),
+        "x_Us": _truth_value(result.x_Us, "x_Us", torch_module),
+        "input_split_idx": _truth_value(
+            result.input_split_idx, "input_split_idx", torch_module
+        ),
+        "decision_info": _truth_value(
+            result.decision_info, "decision_info", torch_module
+        ),
+        "sub_domain_clip_decisions": _truth_value(
+            result.sub_domain_clip_decisions,
+            "post_sub_domain_clip_decisions",
+            torch_module,
+        ),
+        "performance_claimed": False,
+    }
+    payload["truth_hash"] = canonical_hash(_truth_metadata(payload))
+    return payload
 
 
 def _optimizer_policy(arguments_module: Any, core_kwargs: Mapping[str, Any]) -> Any:
@@ -405,13 +598,17 @@ class _CaptureObserver:
         arguments_module: Any,
         *,
         capture_optimizer_steps: bool = False,
+        capture_whole_core_truth: bool = False,
     ) -> None:
         self.torch = torch_module
         self.arguments = arguments_module
         self.capture_optimizer_steps = capture_optimizer_steps
+        self.capture_whole_core_truth = capture_whole_core_truth
         self.calls: list[dict[str, Any]] = []
         self.cores: list[dict[str, Any]] = []
         self.optimizer_step_traces: list[dict[str, object]] = []
+        self.whole_core_truths: list[dict[str, object]] = []
+        self.whole_post_truths: list[dict[str, object]] = []
         self._call_stack: list[int] = []
         self._active_core_id: int | None = None
         self._core_policies: dict[int, Any] = {}
@@ -420,6 +617,83 @@ class _CaptureObserver:
         self._optimizer_update_counts: dict[int, int] = {}
         self._active_adam: Any = None
         self._pending_optimizer_call_id: int | None = None
+
+    @contextmanager
+    def _instrument_branching(self, heuristic: Any) -> Iterator[dict[str, object]]:
+        trace: dict[str, object] = {
+            "input": None,
+            "candidate_splits": [],
+            "candidate_child_lowers": [],
+            "final_decision": None,
+            "provider_update_bounds_call_count": 0,
+        }
+        if not self.capture_whole_core_truth:
+            yield trace
+            return
+        original_compute = heuristic.compute_branching_decisions
+        branch_net = heuristic.net
+        original_build = branch_net.build_history_and_set_bounds
+
+        def wrapped_build(*args: Any, **kwargs: Any) -> Any:
+            split = kwargs.get("split")
+            if split is None and len(args) >= 2:
+                split = args[1]
+            cast(list[object], trace["candidate_splits"]).append(
+                _truth_value(split, "candidate_split", self.torch)
+            )
+            return original_build(*args, **kwargs)
+
+        def wrapped_compute(*args: Any, **kwargs: Any) -> Any:
+            domains = kwargs.get("domains")
+            if domains is None and args:
+                domains = args[0]
+            trace["input"] = _truth_value(domains, "branch_input", self.torch)
+            branch_net.build_history_and_set_bounds = wrapped_build
+            previous_profile = sys.getprofile()
+
+            def profile(frame: FrameType, event: str, value: object) -> None:
+                if previous_profile is not None:
+                    cast(Any, previous_profile)(frame, event, value)
+                if (
+                    event == "return"
+                    and frame.f_code.co_name == "update_bounds"
+                    and frame.f_code.co_filename.replace("\\", "/").endswith(
+                        "/beta_CROWN_solver.py"
+                    )
+                    and frame.f_locals.get("shortcut") is True
+                ):
+                    cast(list[object], trace["candidate_child_lowers"]).append(
+                        _truth_value(value, "candidate_child_lower", self.torch)
+                    )
+                    trace["provider_update_bounds_call_count"] = (
+                        cast(int, trace["provider_update_bounds_call_count"]) + 1
+                    )
+
+            sys.setprofile(profile)
+            try:
+                result = original_compute(*args, **kwargs)
+            finally:
+                sys.setprofile(previous_profile)
+                branch_net.build_history_and_set_bounds = original_build
+            trace["final_decision"] = {
+                "decision": [
+                    [int(layer), int(index)]
+                    for layer, index in result.branching_decision
+                ],
+                "points": _truth_value(
+                    result.branching_points, "branch_final_points", self.torch
+                ),
+                "split_depth": int(result.split_depth),
+                "batch_size": int(result.batch_size),
+            }
+            return result
+
+        heuristic.compute_branching_decisions = wrapped_compute
+        try:
+            yield trace
+        finally:
+            heuristic.compute_branching_decisions = original_compute
+            branch_net.build_history_and_set_bounds = original_build
 
     def _capture_mutation_policy(self, instance: Any) -> None:
         from boundflow.runtime.rvir_v4_optimizer_mutation import (
@@ -696,8 +970,12 @@ class _CaptureObserver:
                 pre_result, net=net, core_id=core_id, policy=policy
             )
             self._active_core_id = core_id
+            branch_trace: dict[str, object]
             try:
-                result = original(*args, **kwargs)
+                with self._instrument_branching(
+                    kwargs.get("branching_heuristic")
+                ) as branch_trace:
+                    result = original(*args, **kwargs)
                 if self.capture_optimizer_steps:
                     self._finalize_optimizer_trace(core_id)
             finally:
@@ -729,6 +1007,10 @@ class _CaptureObserver:
                 "n_splits": int(result.n_splits),
             }
             self.cores.append(row)
+            if self.capture_whole_core_truth:
+                self.whole_core_truths.append(
+                    _capture_whole_core_truth(result, self.torch, branch_trace)
+                )
             return result
 
         stage_solve_module.update_bounds_core = wrapped
@@ -736,6 +1018,24 @@ class _CaptureObserver:
             yield
         finally:
             stage_solve_module.update_bounds_core = original
+
+    @contextmanager
+    def instrument_post(self, stage_postprocess_module: Any) -> Iterator[None]:
+        original = stage_postprocess_module.update_bounds_post
+
+        def wrapped(*args: Any, **kwargs: Any) -> Any:
+            result = original(*args, **kwargs)
+            if self.capture_whole_core_truth:
+                self.whole_post_truths.append(
+                    _capture_whole_post_truth(result, self.torch)
+                )
+            return result
+
+        stage_postprocess_module.update_bounds_post = wrapped
+        try:
+            yield
+        finally:
+            stage_postprocess_module.update_bounds_post = original
 
 
 def _visited_domains(result: Any) -> list[int]:
@@ -758,7 +1058,7 @@ def _worker(args: argparse.Namespace) -> None:
     from abcrown import ABCrownSolver, ConfigBuilder, IOConstraints  # type: ignore[import-not-found]
     import arguments  # type: ignore[import-not-found]
     from auto_LiRPA import BoundedModule  # type: ignore[import-untyped]
-    from activation_split import stage_solve  # type: ignore[import-not-found]
+    from activation_split import stage_postprocess, stage_solve  # type: ignore[import-not-found]
 
     if not torch.cuda.is_available():
         raise RuntimeError("RVIR-v4 production capture requires CUDA")
@@ -772,8 +1072,13 @@ def _worker(args: argparse.Namespace) -> None:
     if _git_value(args.benchmark_root, "rev-parse", "HEAD") != VNNCOMP_COMMIT:
         raise ValueError("RVIR-v4 VNN-COMP commit differs")
     observer = _CaptureObserver(
-        torch, arguments, capture_optimizer_steps=args.optimizer_step_trace
+        torch,
+        arguments,
+        capture_optimizer_steps=args.optimizer_step_trace,
+        capture_whole_core_truth=args.whole_core_truth,
     )
+    if args.optimizer_step_trace and args.whole_core_truth:
+        raise ValueError("RVIR-v4 worker capture modes are mutually exclusive")
     with tempfile.TemporaryDirectory(prefix="boundflow-rvir-v4-property-") as workspace:
         isolated_property = Path(workspace) / args.property.name
         shutil.copy2(args.property, isolated_property)
@@ -795,6 +1100,7 @@ def _worker(args: argparse.Namespace) -> None:
             observer.instrument_compute(BoundedModule),
             observer.instrument_adam(),
             observer.instrument_core(stage_solve),
+            observer.instrument_post(stage_postprocess),
         ):
             solver = ABCrownSolver(str(args.model), config=config)
             result = solver.verify(
@@ -802,9 +1108,13 @@ def _worker(args: argparse.Namespace) -> None:
             )
     payload: dict[str, Any] = {
         "schema_version": (
-            OPTIMIZER_WORKER_SCHEMA_VERSION
-            if args.optimizer_step_trace
-            else WORKER_SCHEMA_VERSION
+            WHOLE_CORE_WORKER_SCHEMA_VERSION
+            if args.whole_core_truth
+            else (
+                OPTIMIZER_WORKER_SCHEMA_VERSION
+                if args.optimizer_step_trace
+                else WORKER_SCHEMA_VERSION
+            )
         ),
         "source": {
             "abcrown_commit": ABCROWN_COMMIT,
@@ -836,6 +1146,9 @@ def _worker(args: argparse.Namespace) -> None:
     }
     if args.optimizer_step_trace:
         payload["optimizer_step_traces"] = observer.optimizer_step_traces
+    if args.whole_core_truth:
+        payload["whole_core_truths"] = observer.whole_core_truths
+        payload["whole_post_truths"] = observer.whole_post_truths
     args.result.parent.mkdir(parents=True, exist_ok=True)
     torch.save(payload, args.result)
     print(

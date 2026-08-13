@@ -36,6 +36,10 @@ commit、stale/NaN拒绝、mid-copy rollback、formal replay及6类完全重签�
 `update_bounds_core`；B2和性能claim仍关闭，下一动作是V4-3 whole-core replacement与5次fresh
 correctness。
 
+V4-3预注册入口为`gemini_doc/rvir_v4_whole_core_replacement_plan_2026_08_13.md`：先冻结whole-core
+truth，再实现native lA/intermediate、KFSB child evaluation、live return assembly和5次fresh correctness；
+provider core/compute_bounds/update_bounds必须为`0/0/0`。当前只启动V4-3A，不启动B2计时。
+
 ---
 
 当前权威研究入口：
