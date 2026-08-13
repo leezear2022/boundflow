@@ -1,0 +1,1 @@
+{"evidence_status":"validated-pre-state-initializer","mapping_hash":"cfcebf92fc58c269899d98cd65cc9454d7caa6051e2c9da46d415eda1fecf8df","native_state_hash":"e3587dd9a8010d34bb65c1e415bb444917b48e23679855b2fe6ac54d23b4bff0","performance_claimed":false,"status":"replay-passed","summary_hash":"6702a39d5efb8c5b2e05723719b13243595b35eaaedf32eb5eafaf481daf899c"}

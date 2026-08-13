@@ -19,9 +19,11 @@ copy-out门禁。系统重启后V4-2B正式GPU step artifact已生成，10 evalu
 `gemini_doc/change_2026-08-13_rvir_v4_optimizer_step_trace.md`。GPU阻塞期间补做的exact policy与
 call/trace cross-binding见
 `gemini_doc/change_2026-08-13_rvir_v4_optimizer_trace_cross_binding.md`；正式关闭证据见
-`gemini_doc/change_2026-08-13_rvir_v4_optimizer_step_formal_closure.md`。V4-2总体与B2仍关闭，下一切片
-只允许V4-2C pre-state native initializer。V4-2C共享mapper第一切片已经实现但formal artifact仍待
-生成，见`gemini_doc/change_2026-08-13_rvir_v4_pre_state_initializer.md`。
+`gemini_doc/change_2026-08-13_rvir_v4_optimizer_step_formal_closure.md`。V4-2C随后以正式artifact证明
+6组native α/β/split初始化和12/12 round-trip exact，并通过6类provenance+semantic双层重签名攻击，
+状态为`VALIDATED-PRE-STATE-INITIALIZER`；见
+`gemini_doc/change_2026-08-13_rvir_v4_pre_state_initializer.md`。V4-2总体与B2仍关闭，下一切片只允许
+V4-2D逐step native mutation parity。
 
 ---
 

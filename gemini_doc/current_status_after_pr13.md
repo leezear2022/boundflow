@@ -3,7 +3,7 @@
 > 状态日期：2026-08-13
 > 当前 integration base：`f194034`（NRIR-44 PR #55 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
 > 当前研发分支：`feat/rvir-v4-production-state-ownership-v1`；FSG2历史 implementation/inventory
-> revisions=`aa31eae`/`8bf6981`；当前已推进至RVIR-v4 V4-2B formal step-trace关闭；
+> revisions=`aa31eae`/`8bf6981`；当前已推进至RVIR-v4 V4-2C formal pre-state关闭；
 > FSG0、FSG1均已验证；FSG2以`VALIDATED-REDUCED initial-only`关闭，完整B2 replacement
 > `NO-GO/not admitted`，FSG3—FSG5按依赖门禁未运行
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
@@ -13,8 +13,11 @@
 > 1 core/24 calls、10 evaluations/9 observed Adam updates、每步24项raw state、相邻7项mutable变化，
 > original replay与state/lower/result/lineage/policy五类同步重签名tamper均通过。因此V4-2B以
 > `VALIDATED-PRODUCTION-TRACE`关闭。它只冻结provider真值轨迹；BoundFlow尚未执行mutation，V4-2、
-> B2和性能claim仍关闭。V4-2C共享pre-state mapper现已实现6组dense α/β/split、12项bit-exact
-> round-trip及upper-α copy-through，并由V4-1复用；独立formal artifact仍待生成，因此V4-2C尚未关闭。
+> B2和性能claim仍关闭。V4-2C正式artifact从clean runner `96c45a6`生成：共享mapper在真实ResNet2B
+> native scope上恢复6组dense α/β/split与external intermediate bounds，12/12 round-trip bit-exact，
+> upper-α显式copy-through；original replay及topology/index/history/intermediate/upper-α/beta-location
+> 六类内部重哈希、source/outer重签攻击在provenance与semantic两层全部拒绝。因此V4-2C以
+> `VALIDATED-PRE-STATE-INITIALIZER`关闭；下一门禁只允许V4-2D逐step native mutation parity。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
 > objective-ancestral sibling evaluator，并新增独立 Plan/Batch/Task/Schedule IR 与跨 clause 单一 cache
 > owner。真实 ResNet clause 2 root+pair 与 frozen audit lower/branch/split/α/β/refinement exact，upper

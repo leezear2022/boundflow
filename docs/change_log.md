@@ -5022,3 +5022,20 @@
 
 **记录**
 - `gemini_doc/change_2026-08-13_rvir_v4_pre_state_initializer.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-2C Formal Artifact Closure
+
+- 从clean runner `96c45a6`和V4-2B冻结source生成独立pre-state artifact，在真实ResNet2B native
+  module/scope恢复6组α/β/split与`NativeAlphaBetaOptimizationState`；
+- 12/12 mutable round-trip exact，mapping/native-state/summary hash=`cfcebf92...f8df`/
+  `e3587dd9...bff0`/`6702a39d...899c`；manifest SHA256=`daee2fa0...0218`；
+- topology/index/history/intermediate/upper-α/beta-location六类攻击全部重算内部hash及source/outer
+  manifest，外层provenance与内层semantic两级均6/6 fail closed；tamper report=`894c30c4...d858`；
+- focused=`8 passed`、full=`1164 passed, 3 skipped`、mypy clean、Pylint=`10.00/10`；
+- V4-2C以`VALIDATED-PRE-STATE-INITIALIZER`关闭；V4-2/B2和性能claim仍关闭，下一门禁为V4-2D
+  逐step native mutation parity。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_pre_state_initializer.md`

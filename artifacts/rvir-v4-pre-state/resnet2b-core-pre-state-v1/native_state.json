@@ -1,0 +1,91 @@
+{
+  "payload_hash": "d9f0b16e50b160f17f594faa070302d8b3a9dc7711eef77b8b2370ad97be4fc9",
+  "relu_states": {
+    "17": {
+      "alpha_hash": "e94a3eefd49b9387453f2bc26255470bf72d82f30391ecaab1e1d5b928ff9aa1",
+      "beta_hash": "e69fbd3d407f067a8e8b8b0af078287c62fcf5b250b1530522027fdeafc3caa8",
+      "device": "cpu",
+      "dtype": "float32",
+      "shape": [
+        6,
+        8,
+        16,
+        16
+      ],
+      "split_hash": "6c38d2ed30e686da7618facc40c13ff37193b78bbe59f720d0976536c7d6e2a2"
+    },
+    "19": {
+      "alpha_hash": "d3540ed0e97a5f0a58a0389912f5551bc94e80f4d72e116151b99b9f2705691c",
+      "beta_hash": "efc17041826585bcd9f05d1ec6455ada4d92642599060f465ac0e5c72d797292",
+      "device": "cpu",
+      "dtype": "float32",
+      "shape": [
+        6,
+        16,
+        8,
+        8
+      ],
+      "split_hash": "d1da57b679476b2213e966d57c57293d94a39729c5cce5717fb23a6bcc7c2ef6"
+    },
+    "23": {
+      "alpha_hash": "bba7a30698592d2866ceab6f65f51b88bf7d52d53c44a4e013d9f22e5ed972df",
+      "beta_hash": "efc17041826585bcd9f05d1ec6455ada4d92642599060f465ac0e5c72d797292",
+      "device": "cpu",
+      "dtype": "float32",
+      "shape": [
+        6,
+        16,
+        8,
+        8
+      ],
+      "split_hash": "d1da57b679476b2213e966d57c57293d94a39729c5cce5717fb23a6bcc7c2ef6"
+    },
+    "25": {
+      "alpha_hash": "ea08ae70761ebf70cba8bf31e110284fe23186ea6ad3fd60857398b74d9fd6c6",
+      "beta_hash": "efc17041826585bcd9f05d1ec6455ada4d92642599060f465ac0e5c72d797292",
+      "device": "cpu",
+      "dtype": "float32",
+      "shape": [
+        6,
+        16,
+        8,
+        8
+      ],
+      "split_hash": "d1da57b679476b2213e966d57c57293d94a39729c5cce5717fb23a6bcc7c2ef6"
+    },
+    "28": {
+      "alpha_hash": "464a6783568d51bf9a8631d9b3b8b165700ce205f86d7825a6b2ebd412590f4b",
+      "beta_hash": "efc17041826585bcd9f05d1ec6455ada4d92642599060f465ac0e5c72d797292",
+      "device": "cpu",
+      "dtype": "float32",
+      "shape": [
+        6,
+        16,
+        8,
+        8
+      ],
+      "split_hash": "d1da57b679476b2213e966d57c57293d94a39729c5cce5717fb23a6bcc7c2ef6"
+    },
+    "31": {
+      "alpha_hash": "3c3111cbbf432e6b72d6dc1cbcdff62ff0b8b84c52c68bba0f8a012fb85943d3",
+      "beta_hash": "a1863323b7eb3775d738aecd72a06578cea55f97d1d20c281386659676812046",
+      "device": "cpu",
+      "dtype": "float32",
+      "shape": [
+        6,
+        100
+      ],
+      "split_hash": "4ab833bde6e90515b35c5b71eb6afdbbb19652d61e169f53ff35890174cf649e"
+    }
+  },
+  "schema_version": "boundflow.native-alpha-beta-state/v1",
+  "scope": {
+    "input_region_hash": "5f5e9c211a0440daed0df1669d2bcff8cbe1d5d10c3ad0f4b54eb3683ce6bf08",
+    "intermediate_bounds_hash": "b8ed32b2cd103b5e8ae7d20ad70fbb182dc325a6fd131d773c7556f2416ea654",
+    "objective_hash": "dd6cbefb015b1bbe2fa80af5daf642725baaa241041d7bbfeb8ff514d9ac2de6",
+    "optimizer_policy_hash": "58cc80d0056383867ca0949c9b30979db00a699e5e0cb2de0c6b79a8174fdfb4",
+    "primal_graph_hash": "02636a01e4b5a2d1f759dc7748bf80b3303efff2d5697790966f8e93679213e8",
+    "split_state_hash": "2a0c665bc72ca0edcb3e16fa23133f511a6ee0f4ba6cd58a87a2eeac523fe697"
+  },
+  "state_hash": "e3587dd9a8010d34bb65c1e415bb444917b48e23679855b2fe6ac54d23b4bff0"
+}

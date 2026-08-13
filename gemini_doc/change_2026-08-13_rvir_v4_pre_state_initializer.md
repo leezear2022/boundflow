@@ -4,11 +4,11 @@
 
 ## 结论
 
-V4-2C第一切片已实现共享production→native pre-state mapper，状态为
-`IMPLEMENTED-MAPPER-READY / FORMAL-ARTIFACT-PENDING`。它把V4-1原先函数内部的映射提升为独立typed
-合同，并在V4-1 evaluator中复用同一实现，不再维护两套α/β/split布局逻辑。
+V4-2C已以`VALIDATED-PRE-STATE-INITIALIZER`关闭。共享production→native pre-state mapper把V4-1
+原先函数内部的映射提升为独立typed合同，并在V4-1 evaluator中复用同一实现；正式artifact又从
+V4-2B frozen source与ONNX独立重建真实native scope/state并通过双层篡改门禁。
 
-本切片只证明pre-state可逆初始化，不执行10-step optimizer mutation，不做copy-out，不关闭V4-2或
+本阶段只证明pre-state可逆初始化，不执行10-step optimizer mutation，不做copy-out，不关闭V4-2或
 B2，也不产生性能claim。
 
 ## 实现
@@ -47,20 +47,20 @@ B2，也不产生性能claim。
 - topology、history coverage、intermediate/layout角色、α index ordinal/坐标唯一性、beta location唯一性/
   范围、split coefficient均显式校验。
 
-## 验证与边界
+## Mapper 实现提交时的验证与边界
 
 - focused initializer + V4-1 reuse：`11 passed`；
 - mypy三文件clean；Pylint三文件=`10.00/10`；
 - full suite=`1162 passed, 3 skipped`；3项skip不含CUDA；
-- 尚未生成V4-2C独立formal artifact，所以本提交不关闭V4-2C；
+- 当时尚未生成V4-2C独立formal artifact，所以mapper实现提交本身不关闭V4-2C；
 - `optimizer_replacement_admitted=false`、`b2_same_solver_timing_admitted=false`、
   `performance_claimed=false`。
 
-## 下一步
+## Mapper 提交后的动作（现已完成）
 
 从本轮clean implementation commit生成独立V4-2C artifact，replay原始V4-2B source artifact，冻结上述
 identity/mapping/12 receipts，并执行同步重签名的topology、index、history、intermediate、upper-plane、
-beta-location篡改探针。全部通过后才关闭V4-2C并进入V4-2D逐step mutation parity。
+beta-location篡改探针；这些动作已由下述Formal Closure完成。
 
 ## Formal Runner 准备（同日）
 
@@ -80,3 +80,18 @@ upper-α plane、beta location+history。对source capture类攻击，probe会�
 V4-2B source manifest及V4-2C outer manifest；同时绕开序列化结果直接调用semantic builder，要求冻结
 identity或snapshot/step-zero cross-binding拒绝。临时报告实测6/6在外层provenance和内层semantic两层均
 fail closed；mypy clean，Pylint=`10.00/10`。probe先进入clean commit，再生成其源码digest绑定的正式报告。
+
+## Formal Closure（同日）
+
+- clean runner commit=`96c45a6`；artifact路径=
+  `artifacts/rvir-v4-pre-state/resnet2b-core-pre-state-v1/`；
+- original semantic replay exit 0，mapping/native-state/summary hash=`cfcebf92...f8df`/
+  `e3587dd9...bff0`/`6702a39d...899c`；artifact manifest SHA256=`daee2fa0...0218`；
+- tamper report路径=`artifacts/rvir-v4-pre-state/resnet2b-core-pre-state-v1-tamper-report.json`，6/6攻击
+  同时通过outer provenance rejection和direct semantic rejection；报告SHA256=`894c30c4...d858`，
+  report hash=`cfe3f9cd...0033`；
+- focused formal=`8 passed`；full=`1164 passed, 3 skipped`，3项skip均为既有TVM/VNN checkout边界；
+  mypy七文件clean，Pylint七文件=`10.00/10`。
+
+V4-2C由此关闭。下一步只进入V4-2D：以同一native pre-state执行并逐step对齐10次evaluation、9次更新、
+lower与α/β状态；不得提前执行copy-out、B2计时或性能宣称。

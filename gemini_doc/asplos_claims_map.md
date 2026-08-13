@@ -21,8 +21,10 @@
 > 因而B2为NO-GO，FSG3—FSG5按依赖门禁未运行。该结论不否决B3—B7各层潜力，但当前仍无
 > BoundFlow全栈性能claim。2026-08-13 RVIR-v4已把V4-1 frozen post-state evaluation关闭；重启后
 > V4-2B 10-evaluation/9-Adam-step正式GPU typed trace、original replay与5类同步重签名tamper通过，以
-> `VALIDATED-PRODUCTION-TRACE`关闭。该结论只冻结provider真值轨迹；V4-2 optimizer replacement与
-> B2状态不变，不得升级为replacement correctness或性能claim。下一切片为V4-2C pre-state mapper。
+> `VALIDATED-PRODUCTION-TRACE`关闭。V4-2C又以正式artifact关闭6组native pre-state初始化、12/12
+> round-trip及6类双层重签名tamper，状态为`VALIDATED-PRE-STATE-INITIALIZER`。这些结论尚未执行
+> optimizer mutation；V4-2 replacement与B2状态不变，不得升级为replacement correctness或性能claim。
+> 下一切片为V4-2D逐step native mutation parity。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
@@ -1428,15 +1430,22 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   atomic copy-out、same-solver timing或ASPLOS-ready claim；
 - 工件：`artifacts/rvir-v4-optimizer-step/resnet2b-core-step-trace-v1/`；manifest/trace/summary=
   `7d7745e4...fbe6` / `fa070bb0...31f4` / `8ae8be3f...05b7`；source-parity report=
-  `c2b48275...8aec`。下一切片只允许V4-2C pre-state native initializer。
+  `c2b48275...8aec`。该时点下一切片为V4-2C；现已由下节正式关闭。
 
-### RVIR-v4 V4-2C（实现中）：Pre-State Native Initializer
+### RVIR-v4 V4-2C（关闭）：Pre-State Native Initializer
 
-- `RVIR-V4-2C-M-PENDING`：共享typed mapper已从V4-1内部抽出，按topology/alpha-indices/beta-location/
-  history恢复6组dense α/β/split和external intermediate bounds；12个mutable path mapped/full round-trip
-  exact，未消费的upper α plane显式copy-through；V4-1 evaluator复用同一实现；
-- `RVIR-V4-2C-G-PENDING`：正式pre-snapshot/topology/history/intermediate/mapping hash已由测试冻结，
-  focused=`11 passed`、full=`1162 passed, 3 skipped`、mypy clean、Pylint=`10.00/10`；独立formal
-  artifact与重签名tamper尚未生成；
-- `RVIR-V4-2C-L`：状态仅为`IMPLEMENTED-MAPPER-READY / FORMAL-ARTIFACT-PENDING`，没有10-step
-  mutation、post-state parity、atomic copy-out或性能结论。V4-2/B2仍关闭。
+- `RVIR-V4-2C-M`：共享typed mapper按topology/alpha-indices/beta-location/history恢复6组dense
+  α/β/split和external intermediate bounds，并在真实ResNet2B BoundFlow module/scope构造
+  `NativeAlphaBetaOptimizationState`；12个mutable path mapped/full round-trip exact，6组未消费upper α
+  plane显式copy-through；V4-1 evaluator复用同一实现；
+- `RVIR-V4-2C-G`：formal artifact由clean runner `96c45a6`生成，source snapshot/topology/history/
+  intermediate/mapping/native-state/summary hash分别为`2a775b66...a256`、`9be36162...ca35`、
+  `8921a052...08a`、`f82523fb...cf06`、`cfcebf92...f8df`、`e3587dd9...bff0`、
+  `6702a39d...899c`。original semantic replay通过；topology、α index、history score、intermediate、
+  upper α、beta location+history六类攻击在重算内部hash并重签source/outer manifest后，外层provenance
+  与内层semantic identity/cross-binding均6/6拒绝；
+- `RVIR-V4-2C-V`：focused=`8 passed`、full=`1164 passed, 3 skipped`、mypy七文件clean、Pylint=
+  `10.00/10`；artifact manifest SHA256=`daee2fa0...0218`，tamper report SHA256=
+  `894c30c4...d858`/report hash=`cfe3f9cd...0033`；
+- `RVIR-V4-2C-L`：以`VALIDATED-PRE-STATE-INITIALIZER`关闭。没有执行optimizer mutation、post-state
+  parity、atomic copy-out或性能计时；V4-2/B2仍关闭，下一门禁只允许V4-2D逐step native mutation parity。

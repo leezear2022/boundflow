@@ -207,16 +207,16 @@ history/policy/branch/mutation离散结构exact；GPU重跑pre/post最大float d
 `3.5763e-07`，sign/finite mask exact，低于`atol=rtol=2e-4`。报告hash=`c2b48275...8aec`；超容差
 但内部有效的负向α探针被numeric gate拒绝。
 
-V4-2B只关闭production truth trace，不执行BoundFlow mutation。`optimizer_replacement_admitted=false`、
-`b2_same_solver_timing_admitted=false`、`performance_claimed=false`保持冻结。下一动作只允许V4-2C
-pre-state native initializer；V4-2D/E前不得进入B2。
+V4-2B只关闭production truth trace，不执行BoundFlow mutation。其后V4-2C已经按下节正式关闭，但仍只
+负责pre-state初始化。`optimizer_replacement_admitted=false`、`b2_same_solver_timing_admitted=false`、
+`performance_claimed=false`保持冻结；V4-2D/E前不得进入B2。
 
 formal generate/original replay exit 0，五类重签名tamper 5/5拒绝；focused=`29 passed`，GPU恢复后
 全量=`1157 passed, 3 skipped`，Black/mypy clean，Pylint=`10.00/10`。3项skip不含CUDA边界。
 
-## 11. V4-2C Pre-State Initializer 实现状态
+## 11. V4-2C Pre-State Initializer 关闭状态
 
-状态：`IMPLEMENTED-MAPPER-READY / FORMAL-ARTIFACT-PENDING`。
+状态：`VALIDATED-PRE-STATE-INITIALIZER`。
 
 - V4-1内部topology/layout逻辑已抽为共享typed mapper并由V4-1自身复用；
 - 正式pre-snapshot恢复6组dense lower α、6组SparseBeta、6组split与external intermediate bounds；
@@ -224,8 +224,12 @@ formal generate/original replay exit 0，五类重签名tamper 5/5拒绝；focus
 - snapshot/topology/history/intermediate/mapping hash分别为`2a775b66...a256`、`9be36162...ca35`、
   `8921a052...08a`、`f82523fb...cf06`、`cfcebf92...f8df`；
 - wrong start、重复topology、upper-plane frozen identity漂移及step-0 mutable binding均有测试；
-- focused=`11 passed`、full=`1162 passed, 3 skipped`、mypy clean、Pylint=`10.00/10`；formal artifact
-  待完成。
+- clean runner `96c45a6`生成正式artifact并从V4-2B frozen source及ONNX重新构造真实native scope/state；
+- original replay通过；topology/index/history/intermediate/upper-plane/beta-location六类攻击均重算内部
+  snapshot/tensor hash、source manifest与outer manifest，外层provenance和内层semantic两级6/6拒绝；
+- artifact manifest SHA256=`daee2fa0...0218`，mapping/native-state/summary=`cfcebf92...f8df`/
+  `e3587dd9...bff0`/`6702a39d...899c`，tamper report=`894c30c4...d858`；
+- focused=`8 passed`、full=`1164 passed, 3 skipped`、mypy七文件clean、Pylint=`10.00/10`。
 
-该状态不关闭V4-2C。下一动作是从clean commit生成独立artifact并完成topology/index/history/
-intermediate/upper-plane/beta-location同步重签名tamper；通过后才进入V4-2D。
+V4-2C现已关闭，但只证明初始化接管。下一动作是V4-2D逐step native mutation parity；在V4-2D/E前
+仍不得进入B2。
