@@ -22,6 +22,10 @@
 > 最大误差=`4.5300e-06/1.4663e-05/3.9861e-07 <=2e-4`，original replay与6类双层完全重签攻击通过，
 > 以`VALIDATED-NATIVE-STEP-PARITY`关闭。terminal atomic copy-out尚未完成；V4-2/B2与性能claim仍
 > 关闭，下一门禁只允许V4-2E。
+> V4-2E capture-ready projector已私有stage并原子提交12个production mutable paths；α/β/final lower
+> 最大误差=`1.4663e-05/3.6135e-07/2.6226e-06 <=2e-4`，NaN/stale/mid-copy fault均保持live pre-image。
+> formal artifact与全量回归尚待完成，状态仅为`IMPLEMENTED-ATOMIC-COPY-OUT /
+> FORMAL-ARTIFACT-PENDING`。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
 > objective-ancestral sibling evaluator，并新增独立 Plan/Batch/Task/Schedule IR 与跨 clause 单一 cache
 > owner。真实 ResNet clause 2 root+pair 与 frozen audit lower/branch/split/α/β/refinement exact，upper

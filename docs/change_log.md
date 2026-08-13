@@ -5043,6 +5043,20 @@
 
 ---
 
+## 2026-08-13：RVIR-v4 V4-2E Atomic Copy-Out（实现中）
+
+- terminal dense α/β投影回6+6 production mutable paths，upper α copy-through；
+- 私有candidate逐path与真实post及final lower比较，max diff=`1.4663e-05/3.6135e-07/2.6226e-06`；
+- 正向12-path atomic commit、NaN/stale pre-write拒绝、第五次copy故障全回滚通过；
+- focused=`4 passed`、expanded=`9 passed`、full=`1173 passed, 3 skipped`、mypy clean、
+  Pylint=`10.00/10`；
+- 状态为`IMPLEMENTED-ATOMIC-COPY-OUT / FORMAL-ARTIFACT-PENDING`，V4-2/B2与性能claim仍关闭。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_atomic_copy_out.md`
+
+---
+
 ## 2026-08-13：RVIR-v4 V4-2C Formal Artifact Closure
 
 - 从clean runner `96c45a6`和V4-2B冻结source生成独立pre-state artifact，在真实ResNet2B native

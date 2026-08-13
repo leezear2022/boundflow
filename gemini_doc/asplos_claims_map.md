@@ -1463,3 +1463,14 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   mypy六文件clean、Pylint=`10.00/10`；
 - `RVIR-V4-2D-L`：以`VALIDATED-NATIVE-STEP-PARITY`关闭。terminal atomic copy-out尚未完成，故
   V4-2/B2及性能claim仍关闭，下一门禁只允许V4-2E。
+
+### RVIR-v4 V4-2E（实现中）：Atomic Copy-Out
+
+- `RVIR-V4-2E-M-PENDING`：terminal dense α/β已可投影为12个production mutable paths；全部先进入
+  private immutable candidate，通过path/schema/finite/post parity/final lower/read-only门禁后才提交；
+- `RVIR-V4-2E-G-PENDING`：12/12 staged，α/β/final lower max diff=
+  `1.4663e-05/3.6135e-07/2.6226e-06 <=2e-4`且sign exact；正向12-path commit、NaN pre-write拒绝、
+  stale-target pre-write拒绝、mid-copy fault rollback均通过；focused=`4 passed`、expanded=`9 passed`、
+  full=`1173 passed, 3 skipped`、mypy clean、Pylint=`10.00/10`；
+- `RVIR-V4-2E-L`：仅为`IMPLEMENTED-ATOMIC-COPY-OUT / FORMAL-ARTIFACT-PENDING`；formal replay/
+  tamper待完成。V4-2/B2及性能claim仍关闭。

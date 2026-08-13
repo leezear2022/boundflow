@@ -30,6 +30,9 @@ executor在零provider callback下完成10 evaluations/9 updates，10/10 step lo
 最大误差均低于`2e-4`，并通过6类双层完全重签攻击，状态为
 `VALIDATED-NATIVE-STEP-PARITY`。terminal atomic copy-out仍待V4-2E，不得据此开启B2或性能claim。
 
+V4-2E capture-ready记录见`gemini_doc/change_2026-08-13_rvir_v4_atomic_copy_out.md`：12-path private
+stage、atomic commit、stale/NaN pre-write拒绝与mid-copy rollback已实现；formal artifact仍pending。
+
 ---
 
 当前权威研究入口：

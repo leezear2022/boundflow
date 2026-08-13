@@ -252,3 +252,18 @@ V4-2C现已关闭，但只证明初始化接管；其后V4-2D已由下节正式�
 
 V4-2D已关闭，但尚未把native terminal state原子投影回provider容器，因此V4-2/B2仍不关闭。下一动作
 只允许V4-2E atomic copy-out。
+
+## 13. V4-2E Atomic Copy-Out 实现状态
+
+状态：`IMPLEMENTED-ATOMIC-COPY-OUT / FORMAL-ARTIFACT-PENDING`。
+
+- terminal dense α按sparse coordinates压回6个production α lower planes，upper planes copy-through；
+  dense β按SparseBeta location压回6个value paths；
+- 12/12 mutable paths私有stage，read-only/history/policy不变；α/β/final-lower max diff=
+  `1.4663e-05/3.6135e-07/2.6226e-06 <=2e-4`，全部sign exact；
+- commit前校验完整inventory及live pre-image，运行时第五次copy故障会回滚已写paths；NaN terminal和
+  stale target均在任何live write前拒绝；callback/fallback=`0/0`；
+- focused=`4 passed`、V4-2D/E扩展=`9 passed`、full=`1173 passed, 3 skipped`、mypy clean、
+  Pylint=`10.00/10`。
+
+尚未生成formal artifact/tamper，因此不关闭V4-2E/V4-2/B2。下一动作只允许V4-2E formal closure。
