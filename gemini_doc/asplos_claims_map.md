@@ -27,7 +27,9 @@
 > 随后以12-path atomic copy-out、rollback、formal replay和6类完全重签攻击关闭。V4-2整体状态升级为
 > `VALIDATED-OPTIMIZER-REPLACEMENT`。V4-3A现又以451-tensor fresh semantic replay和六类同步重签攻击
 > 关闭original whole-core truth。它不是whole `update_bounds_core` live replacement；B2与性能claim仍
-> 关闭，下一门禁为V4-3B native lA/intermediate export。
+> 关闭。V4-3B又以零provider callback导出六层native lA、12个shared-input intermediate tensors与
+> final lower，通过五类同步重签攻击，以`VALIDATED-NATIVE-BACKWARD-EXPORT`关闭；下一门禁为V4-3C
+> native KFSB，B2与性能claim仍关闭。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
@@ -1492,3 +1494,16 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   `dafcb893...a52`，targeted=`12 passed`，full=`1180 passed, 3 skipped`；
 - `RVIR-V4-3A-L`：状态=`VALIDATED-WHOLE-CORE-TRUTH`。只准入V4-3B native lA/intermediate；
   `whole_core_replacement_admitted=false`、B2与performance claim关闭。
+
+### RVIR-v4 V4-3B（关闭）：Native Backward Export
+
+- `RVIR-V4-3B-M`：通用native CROWN backward显式导出六层lower adjoint，并把共享pre-result external
+  intermediate bounds映射为六个provider preactivation keys；
+- `RVIR-V4-3B-G`：六层lA/12 intermediate/final lower最大差=
+  `9.238719940185547e-07/6.079673767089844e-06/3.0994415283203125e-06 <=2e-4`，sign exact；
+- `RVIR-V4-3B-C`：provider core/compute_bounds/update_bounds/fallback=`0/0/0/0`；
+- `RVIR-V4-3B-T`：lA/intermediate/lower full resign与topology/truth source outer resign共5/5拒绝；
+- `RVIR-V4-3B-V`：source=`762b642`，manifest/tamper SHA256=`110dfd63...8269`/
+  `4cdd2231...e355`，targeted=`9 passed`，full=`1183 passed, 3 skipped`；
+- `RVIR-V4-3B-L`：状态=`VALIDATED-NATIVE-BACKWARD-EXPORT`。formal native为CPU semantic replay，
+  GPU live integration、KFSB、whole-core、B2与performance仍未准入。

@@ -3,7 +3,7 @@
 > 状态日期：2026-08-13
 > 当前 integration base：`f194034`（NRIR-44 PR #55 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
 > 当前研发分支：`feat/rvir-v4-production-state-ownership-v1`；FSG2历史 implementation/inventory
-> revisions=`aa31eae`/`8bf6981`；当前已推进至RVIR-v4 V4-3A whole-core truth关闭；
+> revisions=`aa31eae`/`8bf6981`；当前已推进至RVIR-v4 V4-3B native backward export关闭；
 > FSG0、FSG1均已验证；FSG2以`VALIDATED-REDUCED initial-only`关闭，完整B2 replacement
 > `NO-GO/not admitted`，FSG3—FSG5按依赖门禁未运行
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
@@ -30,7 +30,11 @@
 > candidate child lower、final decision和完整post/accounting；两次fresh semantic replay覆盖451
 > tensors/213,060 signs，最大差`8.8215e-06 <=2e-4`，六类同步重签攻击6/6拒绝，full=
 > `1180 passed, 3 skipped`。因此V4-3A=`VALIDATED-WHOLE-CORE-TRUTH`。它仍不是candidate whole-core
-> replacement；下一门禁只允许V4-3B native lA/intermediate export，V4-3C—E、B2与性能claim继续关闭。
+> replacement。V4-3B随后从terminal native state零provider callback导出六层lA、12个shared-input
+> intermediate tensors和final lower，最大差=`9.2387e-07/6.0797e-06/3.0994e-06 <=2e-4`，sign
+> exact；五类同步重签攻击5/5拒绝，full=`1183 passed, 3 skipped`，以
+> `VALIDATED-NATIVE-BACKWARD-EXPORT`关闭。formal native replay为CPU semantic evidence，不是GPU live
+> integration。下一门禁只允许V4-3C native KFSB；V4-3D/E、B2与性能claim继续关闭。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
 > objective-ancestral sibling evaluator，并新增独立 Plan/Batch/Task/Schedule IR 与跨 clause 单一 cache
 > owner。真实 ResNet clause 2 root+pair 与 frozen audit lower/branch/split/α/β/refinement exact，upper

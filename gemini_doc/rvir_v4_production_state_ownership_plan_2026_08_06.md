@@ -269,3 +269,17 @@ accepted/pruned domains、lineage/node accounting、termination与verdict。V4-3
 
 下一门禁为V4-3B native lA/intermediate export；original truth中仍有3次provider KFSB child-bound调用，
 不得误写成whole-core replacement已完成。
+
+## V4-3B Formal Closure
+
+状态：`VALIDATED-NATIVE-BACKWARD-EXPORT`；V4-3B关闭，V4-3C准入，V4-3/B2仍不准入。
+
+- source=`762b642`，artifact=`artifacts/rvir-v4-native-backward-export/resnet2b-core-v1`；
+- native六层lA、12个shared-input intermediate tensors与final lower最大差=
+  `9.2387e-07/6.0797e-06/3.0994e-06 <=2e-4`，sign exact；
+- provider core/compute_bounds/update_bounds/fallback=`0/0/0/0`；
+- 三类export full resign及topology/truth source outer resign共5/5拒绝；
+- targeted=`9 passed`，full=`1183 passed, 3 skipped`，mypy clean，Pylint=`10.00/10`；
+- formal native replay为CPU deterministic semantic evidence；GPU live integration仍待V4-3D。
+
+下一门禁为V4-3C native KFSB三候选child-bound与final decision；不得把本节升级为whole-core或性能结果。

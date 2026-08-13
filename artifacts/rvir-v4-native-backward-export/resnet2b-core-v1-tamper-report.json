@@ -1,0 +1,40 @@
+{
+  "all_rejected": true,
+  "artifact_source_git_head": "762b642b7cb063d36a72aec018ff4d6f32e99b0c",
+  "attack_count": 5,
+  "attacks": [
+    {
+      "name": "lA-export-full-resign",
+      "outer_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 native backward numeric tensor parity differs"
+    },
+    {
+      "name": "intermediate-export-full-resign",
+      "outer_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 native backward numeric tensor parity differs"
+    },
+    {
+      "name": "lower-export-full-resign",
+      "outer_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 native backward numeric tensor parity differs"
+    },
+    {
+      "name": "topology-outer-resign",
+      "outer_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 native backward topology differs"
+    },
+    {
+      "name": "truth-source-outer-resign",
+      "outer_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 native backward frozen source differs: source_whole_core_truth.pt"
+    }
+  ],
+  "fully_resigned_export_attack_count": 3,
+  "performance_claimed": false,
+  "schema_version": "boundflow.rvir-v4-native-backward-export-tamper-report/v1"
+}

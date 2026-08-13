@@ -17,7 +17,9 @@
 > 性能claim继续关闭。V4-3A现又冻结完整original core/post truth、pre-KFSB六层lA、六层intermediate、
 > 三组candidate child lower与最终decision；fresh replay覆盖451 tensors/213,060 signs，六类同步重签
 > 攻击全部拒绝，以`VALIDATED-WHOLE-CORE-TRUTH`关闭。它仍不是replacement；下一门禁只允许V4-3B
-> native lA/intermediate export，V4-3C—E与B2继续关闭。
+> native lA/intermediate export。V4-3B现又以零provider callback导出六层lA、12个shared-input
+> intermediate tensors与final lower，最大差均不超过`6.08e-06`，五类同步重签攻击拒绝，以
+> `VALIDATED-NATIVE-BACKWARD-EXPORT`关闭。下一门禁只允许V4-3C native KFSB；V4-3D/E与B2继续关闭。
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed

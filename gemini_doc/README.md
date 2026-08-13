@@ -44,8 +44,10 @@ provider core/compute_bounds/update_bounds必须为`0/0/0`。V4-3A现已以
 lA/intermediate export，不启动KFSB replacement或B2计时。
 
 V4-3B实现记录为`gemini_doc/change_2026-08-13_rvir_v4_native_backward_export.md`：六层native lA与
-12个shared-input intermediate tensors的capture-ready parity已通过；正式artifact尚未生成，因此当前
-状态仍是`FORMAL-ARTIFACT-PENDING`，不能升级为KFSB或whole-core replacement。
+12个shared-input intermediate tensors现已由正式artifact关闭，状态为
+`VALIDATED-NATIVE-BACKWARD-EXPORT`；formal closure见
+`gemini_doc/change_2026-08-13_rvir_v4_native_backward_export_formal_closure.md`。下一动作只允许V4-3C
+native KFSB；不能升级为whole-core replacement或B2 timing。
 
 ---
 

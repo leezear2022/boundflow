@@ -5138,3 +5138,16 @@
 
 **记录**
 - `gemini_doc/change_2026-08-13_rvir_v4_native_backward_export.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-3B Native Backward Export Formal Closure
+
+- source `762b642`生成正式native backward export artifact；
+- 六层lA/12 intermediate/final lower最大差=`9.2387e-07/6.0797e-06/3.0994e-06 <=2e-4`，sign exact；
+- provider core/compute_bounds/update_bounds/fallback=`0/0/0/0`；五类同步重签攻击5/5拒绝；
+- targeted=`9 passed`，full=`1183 passed, 3 skipped`；
+- V4-3B=`VALIDATED-NATIVE-BACKWARD-EXPORT`，下一动作V4-3C；V4-3/B2/performance仍关闭。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_native_backward_export_formal_closure.md`

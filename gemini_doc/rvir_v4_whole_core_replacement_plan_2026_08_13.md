@@ -2,7 +2,8 @@
 
 日期：2026-08-13
 
-当前状态：V4-3A=`VALIDATED-WHOLE-CORE-TRUTH`；V4-3B准入；V4-3总体、B2与性能claim仍关闭。
+当前状态：V4-3A=`VALIDATED-WHOLE-CORE-TRUTH`，V4-3B=`VALIDATED-NATIVE-BACKWARD-EXPORT`；
+V4-3C准入；V4-3总体、B2与性能claim仍关闭。
 
 ## 1. 目标
 
@@ -115,5 +116,10 @@ V4-3A已由source `bfdeefc`正式关闭：451 tensors/213,060 signs的fresh sema
 同步重签攻击全部拒绝，full=`1180 passed, 3 skipped`。关闭证据见
 `gemini_doc/change_2026-08-13_rvir_v4_whole_core_truth_formal_closure.md`。
 
-下一动作只实现V4-3B native backward/lA与intermediate export。V4-3C KFSB、V4-3D live return、
-V4-3E five-fresh和B2 timing仍按依赖门禁关闭。
+V4-3B已由source `762b642`正式关闭：六层lA、12个intermediate tensors和final lower最大差=
+`9.2387e-07/6.0797e-06/3.0994e-06`，五类同步重签攻击拒绝，full=
+`1183 passed, 3 skipped`。证据见
+`gemini_doc/change_2026-08-13_rvir_v4_native_backward_export_formal_closure.md`。
+
+下一动作只实现V4-3C native KFSB candidate evaluation。V4-3D live return、V4-3E five-fresh和B2
+timing仍按依赖门禁关闭。
