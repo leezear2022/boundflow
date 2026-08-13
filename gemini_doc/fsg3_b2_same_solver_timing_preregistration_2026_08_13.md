@@ -266,7 +266,7 @@ slowdown”要求，正式orchestrator在每一个worker开始前执行相同的
 preflight不在query/core计时scope内，不改变36-run顺序、指标、重复数或阈值。它固定fresh-process
 latency实验的起始环境，不主张持续吞吐性能。
 
-## 16. Pre-Run Amendment 4：Post-Initialization Worker Preflight（已由§17细化）
+## 16. Pre-Run Amendment 4：Post-Initialization Worker Preflight（已由§17/§19细化）
 
 formal v1执行7个连续位置后整轮中止：outer preflight在`<=50°C`放行，但fresh worker完成
 Python/Torch/solver与CUDA初始化后，worker `environment_before`已约52°C，query内software thermal
@@ -285,7 +285,7 @@ metadata，以便任何整轮fail-fast仍保留环境证据。本修正改变检
 阈值冻结依据：非正式单worker在48→50°C时thermal counter仍增加约1.35秒并被拒绝，而更早独立
 B0 profile在45→46°C曾准入。该校准发生在v2正式36-run之前，pilot值不进入统计。
 
-## 17. Pre-Run Amendment 5：独立温控与功耗耦合遥测（Schema v3）
+## 17. Pre-Run Amendment 5：独立温控与功耗耦合遥测（Schema v3，温度阈值已由§19取代）
 
 本修订发生在任何可准入的正式36-run之前。v2尚未启动完整正式轮；一次48°C pilot与关闭
 `nvidia-powerd`的诊断仍被旧门禁拒绝。进一步读取同一`nvidia-smi -q -x`快照并做受控CUDA矩阵乘后，
@@ -331,3 +331,27 @@ performance claim，重命名为
 partial stdout/stderr与`failed_worker.json`后fail closed。新轮从position 0完整重启。该修订发生在任何
 完整、可回放的正式artifact形成前，详见
 `gemini_doc/change_2026-08-14_fsg3_formal_v3_parent_timeout_abort.md`。
+
+## 19. Pre-Run Amendment 7：Post-Init 温度门禁可达性（Schema v4）
+
+父timeout修正后的v4 attempt从position 0开始，首个worker完整执行176次、约900秒post-init采样：温度
+范围47–54°C，后半程长期在47–49°C回摆，GPU利用率0%、功耗约3.4–3.6W，所有样本的
+`independent_thermal_active=false`，但从未达到45°C。worker最终按自己的900秒门禁退出；该attempt为
+0/36、无run、无manifest/summary/performance claim，保留于
+`artifacts/fsg3-same-solver-timing/resnet2b-prop0-v4-aborted-post-init-45c-infeasible/`。
+
+这证明45°C低于本机“模型和CUDA context已初始化、无计算负载”状态的可持续温度，而不是更严格的有效
+thermal-quality gate。NVIDIA raw T.Limit margin同期仍约38–40°C，HW thermal为0，且严格耦合之外的
+SW thermal为false；继续要求45°C会使实验不可运行，却不增加对真实热降频的排除能力。
+
+下一attempt在任何正式timing产生前冻结如下修订：
+
+1. timing/artifact schema升级为v4；post-init绝对温度上限由45°C改为50°C，与outer上限一致；
+2. independent SW/HW thermal、raw counter、T.Limit margin、AC、外部进程和device identity门禁保持不变；
+3. 每个worker仍fresh、计时前等待、5秒轮询、900秒上限；50°C是inclusive，51°C继续拒绝；
+4. 36-run全排列、control/profile、指标、统计、correctness、no-fallback和performance门禁完全不变；
+5. 非零worker退出与parent timeout均必须产生`failed_worker.json`和partial logs；
+6. 新attempt命名`resnet2b-prop0-v5`，从position 0完整执行，不得混入v1/v3/v4或pilot值。
+
+该修订依据的是preflight feasibility raw，不是任何headline latency或候选速度；完整记录见
+`gemini_doc/change_2026-08-14_fsg3_post_init_temperature_feasibility.md`。

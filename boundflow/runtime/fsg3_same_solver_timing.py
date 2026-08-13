@@ -12,7 +12,7 @@ import math
 import statistics
 from typing import Any, cast, Mapping, Optional, Sequence, Tuple
 
-FSG3_TIMING_SCHEMA_VERSION = "boundflow.fsg3-same-solver-timing/v3"
+FSG3_TIMING_SCHEMA_VERSION = "boundflow.fsg3-same-solver-timing/v4"
 FSG3_REPEAT_COUNT = 6
 FSG3_PROFILE_PERTURBATION_LIMIT = 1.05
 FSG3_CLOSURE_ERROR_LIMIT = 0.01

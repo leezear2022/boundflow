@@ -33,7 +33,7 @@ from boundflow.runtime.fsg3_same_solver_timing import (
 )
 from scripts import run_fsg3_same_solver_timing as worker
 
-ARTIFACT_SCHEMA = "boundflow.fsg3-same-solver-artifact/v3"
+ARTIFACT_SCHEMA = "boundflow.fsg3-same-solver-artifact/v4"
 CODE_PATHS = (
     "boundflow/runtime/fsg3_same_solver_timing.py",
     "scripts/run_fsg3_same_solver_timing.py",
@@ -442,6 +442,10 @@ def _run_worker(
         "stderr_file": stderr_relative,
     }
     if completed.returncode != 0 or not result_path.is_file():
+        _write_json(
+            artifact / "failed_worker.json",
+            {**metadata, "performance_claimed": False},
+        )
         raise RuntimeError(
             f"FSG3 worker {index} failed with {completed.returncode}:\n"
             f"{completed.stdout}\n{completed.stderr}"

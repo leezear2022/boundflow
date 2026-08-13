@@ -415,6 +415,37 @@ def test_worker_timeout_preserves_failure_evidence(
     assert (tmp_path / "logs/run_03.stderr.txt").read_text() == "partial stderr\n"
 
 
+def test_worker_nonzero_exit_preserves_failure_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def failed(*_args: object, **_kwargs: object) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(
+            args=("python", "worker.py"),
+            returncode=2,
+            stdout="worker stdout\n",
+            stderr="worker stderr\n",
+        )
+
+    def host_snapshot() -> dict[str, int]:
+        return {"monotonic_ns": 1}
+
+    monkeypatch.setattr(experiment_runner.subprocess, "run", failed)
+    monkeypatch.setattr(experiment_runner, "_host_snapshot", host_snapshot)
+    with pytest.raises(RuntimeError, match="failed with 2"):
+        experiment_runner._run_worker(
+            artifact=tmp_path,
+            index=4,
+            command=("python", "worker.py"),
+        )
+    failure = json.loads((tmp_path / "failed_worker.json").read_text())
+    assert failure["index"] == 4
+    assert failure["returncode"] == 2
+    assert failure["timed_out"] is False
+    assert failure["performance_claimed"] is False
+    assert (tmp_path / "logs/run_04.stdout.txt").read_text() == "worker stdout\n"
+    assert (tmp_path / "logs/run_04.stderr.txt").read_text() == "worker stderr\n"
+
+
 def test_artifact_environment_gate_is_recomputed_from_raw_diagnostics(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -440,7 +471,7 @@ def test_artifact_environment_gate_is_recomputed_from_raw_diagnostics(
     processes = [{"pid": worker_pid, "name": "/python", "used_memory_mib": 100}]
     worker_preflight = {
         "worker_pid": worker_pid,
-        "temperature_limit_celsius": 45,
+        "temperature_limit_celsius": 50,
         "poll_seconds": 5,
         "timeout_seconds": 900,
         "sample_count": 1,
@@ -448,7 +479,7 @@ def test_artifact_environment_gate_is_recomputed_from_raw_diagnostics(
         "samples": [
             {
                 "elapsed_ns": 0,
-                "temperature_celsius": 44,
+                "temperature_celsius": 50,
                 "independent_thermal_active": False,
                 "gpu_snapshot": snapshot,
                 "compute_processes": processes,

@@ -43,7 +43,7 @@ from scripts import run_rvir_v4_production_state_capture as capture_runner
 
 WORKER_ENVELOPE_SCHEMA = "boundflow.fsg3-same-solver-worker-envelope/v1"
 ALLOWED_GRAPHICS_PROCESSES = ("kwin_wayland",)
-WORKER_PREFLIGHT_TEMPERATURE_LIMIT_C = 45
+WORKER_PREFLIGHT_TEMPERATURE_LIMIT_C = 50
 WORKER_PREFLIGHT_POLL_SECONDS = 5
 WORKER_PREFLIGHT_TIMEOUT_SECONDS = 900
 

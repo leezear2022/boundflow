@@ -77,7 +77,11 @@ B0/B1/B2 worker、profile spans与36-process orchestrator均已实现；v1因旧
 `gemini_doc/change_2026-08-13_fsg3_coupled_power_thermal_telemetry.md`。首个v3正式尝试32/36准入后暴露
 父180秒timeout短于worker 900秒preflight的合同冲突，整轮无主张中止；见
 `gemini_doc/change_2026-08-14_fsg3_formal_v3_parent_timeout_abort.md`。下一动作是在clean commit上以
-1080秒父timeout从position 0生成完整36-process v4 attempt（schema仍为v3）。
+1080秒父timeout从position 0生成完整36-process v4 attempt（schema仍为v3）。该attempt的首个worker
+又以176次raw sample证明post-init 45°C在CUDA-initialized idle状态不可达，0/36无主张中止；schema v4
+遂将绝对温度门禁修正为inclusive 50°C而保留全部独立thermal门禁。见
+`gemini_doc/change_2026-08-14_fsg3_post_init_temperature_feasibility.md`；下一动作是在clean commit上从
+position 0生成`resnet2b-prop0-v5`完整36-process artifact。
 
 ---
 

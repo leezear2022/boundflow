@@ -5306,3 +5306,14 @@
 
 **记录**
 - `gemini_doc/change_2026-08-14_fsg3_formal_v3_parent_timeout_abort.md`
+
+## 2026-08-14：FSG3 Post-Init 温度门禁可达性
+
+- v4首个worker在GPU idle、independent thermal=false时完整900秒仍为47–54°C，45°C不可达；
+- v4以0/36、无performance claim中止，完整raw stdout/stderr保留；
+- timing/artifact schema升级v4，post-init上限改为inclusive 50°C，51°C继续拒绝；
+- thermal/event/process/device等门禁不变，非零退出新增结构化failed-worker evidence；
+- 下一正式attempt从position 0生成`resnet2b-prop0-v5`。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg3_post_init_temperature_feasibility.md`

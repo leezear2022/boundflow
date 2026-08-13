@@ -109,7 +109,7 @@ def test_protocol_identity_is_common_across_configurations() -> None:
 def test_worker_post_init_preflight_admission_is_recomputed() -> None:
     payload = {
         "worker_pid": os.getpid(),
-        "temperature_limit_celsius": 45,
+        "temperature_limit_celsius": 50,
         "poll_seconds": 5,
         "timeout_seconds": 900,
         "sample_count": 1,
@@ -117,7 +117,7 @@ def test_worker_post_init_preflight_admission_is_recomputed() -> None:
         "samples": [
             {
                 "elapsed_ns": 0,
-                "temperature_celsius": 44,
+                "temperature_celsius": 50,
                 "independent_thermal_active": False,
                 "gpu_snapshot": _gpu_snapshot(),
                 "compute_processes": [
@@ -133,6 +133,10 @@ def test_worker_post_init_preflight_admission_is_recomputed() -> None:
         "admitted": True,
     }
     runner._validate_worker_preflight(payload)
+    payload["samples"][0]["temperature_celsius"] = 51
+    with pytest.raises(ValueError, match="admission differs"):
+        runner._validate_worker_preflight(payload)
+    payload["samples"][0]["temperature_celsius"] = 50
     payload["samples"][0]["independent_thermal_active"] = True
     with pytest.raises(ValueError, match="thermal projection differs"):
         runner._validate_worker_preflight(payload)
