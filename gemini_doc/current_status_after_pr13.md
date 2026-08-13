@@ -1,12 +1,19 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
-> 状态日期：2026-08-13
+> **2026-08-14 当前状态**：FSG3正式same-solver基线已关闭。source `a4ee291`的
+> `resnet2b-prop0-v5`包含六个全排列block、36个fresh GPU进程；correctness、environment、
+> profile closure/扰动、static replay与8类outer-resigned tamper门禁全过。B1 query wall=
+> `0.995657x`；当前B2 query/core=`0.908400x/0.516767x`（B0/candidate），显存ratio=`1.0`，因此
+> FSG3=`VALIDATED-FSG3-B0-B1-B2-BASELINE`，B2=`MEASURED-B2-SLOWER`，不是speedup。下一门禁为
+> FSG4/B3 IR/graph/Plan/Schedule复用；B4—B7与最终queue/complete-query门槛均未测试，ASPLOS-ready=NO。
+
+> 状态日期：2026-08-14
 > 当前 integration base：`f194034`（NRIR-44 PR #55 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
 > 当前研发分支：`feat/rvir-v4-production-state-ownership-v1`；FSG2历史 implementation/inventory
 > revisions=`aa31eae`/`8bf6981`；当前已推进至RVIR-v4 V4-3 whole-core replacement关闭；
 > FSG0、FSG1均已验证；FSG2曾以`VALIDATED-REDUCED initial-only`关闭，完整B2 replacement在该时点
 > `NO-GO/not admitted`、FSG3—FSG5按依赖门禁未运行；该ownership blocker现已由RVIR-v4 V4-3
-> whole-core replacement关闭，B2 same-solver timing已准入但未执行
+> whole-core replacement关闭；FSG3 same-solver timing现亦已正式关闭
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
 > ASPLOS-ready 为 **NO**。
 > 2026-08-13 RVIR-v4状态：V4-1 frozen-state evaluator已`VALIDATED-REDUCED`关闭；V4-2A只关闭
@@ -44,10 +51,9 @@
 > B2与性能claim继续关闭。V4-3E随后按冻结顺序运行10个fresh GPU进程，5/5 original/candidate pairs
 > 的完整state/branch/queue/termination通过，六类重签攻击拒绝，以
 > `VALIDATED-FIVE-FRESH-CORRECTNESS`关闭；V4-3整体=`VALIDATED-WHOLE-CORE-REPLACEMENT`。B2
-> same-solver timing现已准入但未执行，尚无performance claim。FSG3/B2六个全排列block、36个fresh
-> control/profile worker与cold/query/core指标已预注册；当前`PREREGISTERED-NOT-RUN`，下一动作是
-> schema/replay与worker实现。FSG3-1 typed schema/replay现已通过13项定向与`1213 passed, 3 skipped`
-> 全量回归；真实GPU worker仍pending，无timing claim。
+> same-solver timing随后按冻结六个全排列block、36个fresh control/profile worker完成；当前正式状态、
+> 数字与下一动作以上方“2026-08-14 当前状态”为准。本段保留V4-3E关闭时的历史顺序，不再作为当前
+> `PREREGISTERED-NOT-RUN`指令。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
 > objective-ancestral sibling evaluator，并新增独立 Plan/Batch/Task/Schedule IR 与跨 clause 单一 cache
 > owner。真实 ResNet clause 2 root+pair 与 frozen audit lower/branch/split/α/β/refinement exact，upper

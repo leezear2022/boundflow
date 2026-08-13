@@ -1,5 +1,21 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-14：FSG3 B0/B1/B2 Same-Solver 正式基线关闭
+
+- 冻结source `a4ee291`生成六个全排列block、36个fresh GPU进程；correctness、environment、
+  closure、profile扰动与raw replay全部通过，summary hash=`df852590d…1318e`；
+- B1 query wall geomean=`0.995657x`；当前B2 reference query/core分别=`0.908400x/0.516767x`
+  （B0/candidate），即B2较慢而非加速；显存ratio=`1.0`、break-even=`not_reachable`；
+- B2 core归因以optimizer约44.0%、atomic commit约24.7%、KFSB约16.7%、typed pre-state约10.7%为主；
+- 新增artifact固定测试与8类outer-resigned tamper probe，全部fail closed；
+- 原始solver日志保持manifest绑定字节，新增FSG3 artifact log的`.gitattributes -diff`，不清洗raw；
+- FSG3定向=`33 passed`，全量=`1233 passed, 3 skipped`，Black/mypy/Pylint=`10.00/10`；
+- FSG3状态=`VALIDATED-FSG3-B0-B1-B2-BASELINE`，B2=`MEASURED-B2-SLOWER`；该结论不否定B3—B7，
+  下一门禁为FSG4/B3 IR/graph/Plan/Schedule复用，ASPLOS-ready仍为NO；
+- 关闭记录与外审入口分别为
+  `gemini_doc/change_2026-08-14_fsg3_same_solver_formal_baseline.md`、
+  `gemini_doc/fsg3_same_solver_external_audit_handoff_2026_08_14.md`。
+
 ## 2026-08-06：启动RVIR-v4 production-state ownership
 
 - 修正FSG2 beta inventory事实：provider字段为`node.sparse_betas`（复数），旧探针漏记不能证明

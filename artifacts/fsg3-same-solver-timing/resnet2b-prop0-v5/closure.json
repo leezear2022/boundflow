@@ -1,0 +1,152 @@
+{
+  "all_closed": true,
+  "closure_limit": 0.01,
+  "performance_claimed": false,
+  "residual_limit": 0.03,
+  "rows": [
+    {
+      "block_index": 0,
+      "closure_error": 0.0005543638494755813,
+      "configuration": "B0",
+      "residual_share": 0.0005543638494755813,
+      "run_hash": "229c7d10f57081efee0d3d2ddb2f7a6b1f9d51befc469e26ec608422c2035794",
+      "run_id": "block-00-pos-01-B0-profile"
+    },
+    {
+      "block_index": 0,
+      "closure_error": 0.0007531559492364715,
+      "configuration": "B1",
+      "residual_share": 0.0007531559492364715,
+      "run_hash": "386f76854d5f343e52254d138fa30314231d9fe0cdbd249a2bcd99c3959a3946",
+      "run_id": "block-00-pos-03-B1-profile"
+    },
+    {
+      "block_index": 0,
+      "closure_error": 0.002336910085167402,
+      "configuration": "B2",
+      "residual_share": 0.002336910085167402,
+      "run_hash": "6d052d72f0ab2371f8fd5876fd3bb6f56bf6e76c3d497b7bcd76e17b3305d6a1",
+      "run_id": "block-00-pos-05-B2-profile"
+    },
+    {
+      "block_index": 1,
+      "closure_error": 0.0005848645516191401,
+      "configuration": "B0",
+      "residual_share": 0.0005848645516191401,
+      "run_hash": "9ae309009c120690a73d3e9c61570a90e168bd97b8e8c1573d580c950fcb6b23",
+      "run_id": "block-01-pos-00-B0-profile"
+    },
+    {
+      "block_index": 1,
+      "closure_error": 0.002316482915927122,
+      "configuration": "B2",
+      "residual_share": 0.002316482915927122,
+      "run_hash": "13da701549c66e2b9e3fa69c19686ebd8976ecc1c74087f358306e533e6b797c",
+      "run_id": "block-01-pos-02-B2-profile"
+    },
+    {
+      "block_index": 1,
+      "closure_error": 0.0007991682188339585,
+      "configuration": "B1",
+      "residual_share": 0.0007991682188339585,
+      "run_hash": "b69b4e89b681c85dcf4d5472cf07a3b5e744bebc2cb7a8141ef474e4ce434f0e",
+      "run_id": "block-01-pos-04-B1-profile"
+    },
+    {
+      "block_index": 2,
+      "closure_error": 0.000767630931894766,
+      "configuration": "B1",
+      "residual_share": 0.000767630931894766,
+      "run_hash": "54f29039cf7a8809776e5af3f7c05d0e8d16b719d717422e66203eccd9e37d5e",
+      "run_id": "block-02-pos-01-B1-profile"
+    },
+    {
+      "block_index": 2,
+      "closure_error": 0.0005335484500813122,
+      "configuration": "B0",
+      "residual_share": 0.0005335484500813122,
+      "run_hash": "de8d3cae7b5dbecb1965885cad769514e11a9e1b4a42f59469d4768e8e768181",
+      "run_id": "block-02-pos-03-B0-profile"
+    },
+    {
+      "block_index": 2,
+      "closure_error": 0.0022961011548888427,
+      "configuration": "B2",
+      "residual_share": 0.0022961011548888427,
+      "run_hash": "74a7537a12f42990c3b252bb0ec884987bb1e8e867f8c1c2d26ac09d70dd5317",
+      "run_id": "block-02-pos-05-B2-profile"
+    },
+    {
+      "block_index": 3,
+      "closure_error": 0.0008408947496183172,
+      "configuration": "B1",
+      "residual_share": 0.0008408947496183172,
+      "run_hash": "40d76fed2259cb90b95ca5f58eae4ae87e5be4e5588c6695d6d9c3105a17307d",
+      "run_id": "block-03-pos-00-B1-profile"
+    },
+    {
+      "block_index": 3,
+      "closure_error": 0.0023342818326394107,
+      "configuration": "B2",
+      "residual_share": 0.0023342818326394107,
+      "run_hash": "8601bfc2c33810ccf5cc789c2c756ba93640ee157f056bb150bd5cc9bc8caea7",
+      "run_id": "block-03-pos-02-B2-profile"
+    },
+    {
+      "block_index": 3,
+      "closure_error": 0.000600991159369,
+      "configuration": "B0",
+      "residual_share": 0.000600991159369,
+      "run_hash": "c1ddd100e6ee08fa04cad11e43513aea90016cc4e75034f98a8753ebf2b8eb5c",
+      "run_id": "block-03-pos-04-B0-profile"
+    },
+    {
+      "block_index": 4,
+      "closure_error": 0.0024355221360033946,
+      "configuration": "B2",
+      "residual_share": 0.0024355221360033946,
+      "run_hash": "b460f4024bb5484b3b237e9a4edecf47c1ca05c3b90a944a4e826cf0a99c0b1c",
+      "run_id": "block-04-pos-01-B2-profile"
+    },
+    {
+      "block_index": 4,
+      "closure_error": 0.0005661382308228053,
+      "configuration": "B0",
+      "residual_share": 0.0005661382308228053,
+      "run_hash": "6c00ce7fff1bf9e67c2027ebb6c864b04f4494c222e3e8719ef28304387d92ba",
+      "run_id": "block-04-pos-03-B0-profile"
+    },
+    {
+      "block_index": 4,
+      "closure_error": 0.0007844054527236314,
+      "configuration": "B1",
+      "residual_share": 0.0007844054527236314,
+      "run_hash": "161a821c481953bd54afb602c61b79a18d7364ba6b58c6f1dddc1c149c6fca2e",
+      "run_id": "block-04-pos-05-B1-profile"
+    },
+    {
+      "block_index": 5,
+      "closure_error": 0.0021852151066131006,
+      "configuration": "B2",
+      "residual_share": 0.0021852151066131006,
+      "run_hash": "3bf9fdd1a178f2b3116b1d3b71e70baa0c18a1694eabfdfe4eb51d7770a8992e",
+      "run_id": "block-05-pos-00-B2-profile"
+    },
+    {
+      "block_index": 5,
+      "closure_error": 0.000842895259670446,
+      "configuration": "B1",
+      "residual_share": 0.000842895259670446,
+      "run_hash": "d4c0a35a3229f67019f752a3243c6044910571ebdab93913b9c4f378e9cbd671",
+      "run_id": "block-05-pos-02-B1-profile"
+    },
+    {
+      "block_index": 5,
+      "closure_error": 0.000548527267606515,
+      "configuration": "B0",
+      "residual_share": 0.000548527267606515,
+      "run_hash": "23dfac63a970ea6d588a47b86aec3d24d9237857df2e572cbbb11a636d6e03c7",
+      "run_id": "block-05-pos-04-B0-profile"
+    }
+  ]
+}

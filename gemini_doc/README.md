@@ -10,6 +10,17 @@
 
 ---
 
+FSG3已由正式`resnet2b-prop0-v5`关闭：source=`a4ee291`，六个全排列block共36个fresh GPU进程，
+correctness/environment/measurement/replay全部通过，summary hash=`df852590d…1318e`。B1 query wall
+geomean=`0.995657x`；当前B2 whole-call reference的query/core分别为`0.908400x/0.516767x`
+（均为B0/candidate），所以B2分类为`MEASURED-B2-SLOWER`，不是speedup；显存无变化。B2 profile显示
+optimizer/atomic commit/KFSB/typed pre-state约占core `44.0%/24.7%/16.7%/10.7%`。正式状态为
+`VALIDATED-FSG3-B0-B1-B2-BASELINE`，下一门禁为FSG4/B3 IR/graph/Plan/Schedule复用；B4 TIR fusion、
+B5 JIT、B6 runtime、B7 arena尚未实现或计时。关闭记录见
+`gemini_doc/change_2026-08-14_fsg3_same_solver_formal_baseline.md`，外部审计入口见
+`gemini_doc/fsg3_same_solver_external_audit_handoff_2026_08_14.md`。下文所有“FSG3尚未执行”均为历史
+时点说明，已被本段取代。
+
 RVIR-v4当前入口：`gemini_doc/rvir_v4_optimizer_mutation_plan_2026_08_13.md`。V4-1已关闭
 post-state独立复算；V4-2预注册冻结10 evaluation/9 update、双学习率、逐step parity与atomic
 copy-out门禁。系统重启后V4-2B正式GPU step artifact已生成，10 evaluation/9 observed Adam update、
@@ -64,12 +75,14 @@ V4-3E closure取代。
 V4-3E harness实现记录为`gemini_doc/change_2026-08-13_rvir_v4_five_fresh_correctness.md`，formal
 closure见`gemini_doc/change_2026-08-13_rvir_v4_five_fresh_formal_closure.md`：
 `O,C,C,O,C,O,O,C,O,C`十个fresh进程、五对完整semantic/queue/termination与六类tamper全部通过。
-V4-3整体=`VALIDATED-WHOLE-CORE-REPLACEMENT`；B2 timing已准入但未执行，仍无performance claim。
+V4-3整体=`VALIDATED-WHOLE-CORE-REPLACEMENT`；“B2 timing已准入但未执行”是该时点历史状态，现已
+由上方FSG3正式关闭取代。
 
 FSG3/B2正式计时预注册见
 `gemini_doc/fsg3_b2_same_solver_timing_preregistration_2026_08_13.md`：冻结B0 original、B1 typed
 passthrough、B2 whole-call reference replacement及六个全排列block，共36个fresh control/profile进程；
-当前正式measurement仍为`PREREGISTERED-NOT-RUN`，不得提前引用速度数字。schema/replay、真实
+预注册时状态为`PREREGISTERED-NOT-RUN`，其门禁未按结果改写；正式结果现以上方FSG3关闭段为准。
+schema/replay、真实
 B0/B1/B2 worker、profile spans与36-process orchestrator均已实现；v1因旧thermal admission在7个位置后
 整轮中止且不形成性能主张。schema v3已对本机严格镜像的SW power/thermal raw telemetry作最窄修正，
 单worker及六路block-0 smoke均通过，完整回归为`1227 passed, 3 skipped`。诊断见
@@ -77,11 +90,11 @@ B0/B1/B2 worker、profile spans与36-process orchestrator均已实现；v1因旧
 `gemini_doc/change_2026-08-13_fsg3_coupled_power_thermal_telemetry.md`。首个v3正式尝试32/36准入后暴露
 父180秒timeout短于worker 900秒preflight的合同冲突，整轮无主张中止；见
 `gemini_doc/change_2026-08-14_fsg3_formal_v3_parent_timeout_abort.md`。下一动作是在clean commit上以
-1080秒父timeout从position 0生成完整36-process v4 attempt（schema仍为v3）。该attempt的首个worker
+1080秒父timeout从position 0生成完整36-process v4 attempt（这是当时动作，现已完成）。该attempt的首个worker
 又以176次raw sample证明post-init 45°C在CUDA-initialized idle状态不可达，0/36无主张中止；schema v4
 遂将绝对温度门禁修正为inclusive 50°C而保留全部独立thermal门禁。见
 `gemini_doc/change_2026-08-14_fsg3_post_init_temperature_feasibility.md`；下一动作是在clean commit上从
-position 0生成`resnet2b-prop0-v5`完整36-process artifact。
+position 0生成`resnet2b-prop0-v5`完整36-process artifact（现已完成）。
 
 ---
 

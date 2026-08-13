@@ -1,5 +1,13 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-14 FSG3当前指令**：正式`resnet2b-prop0-v5`已在source `a4ee291`完成六个全排列block、
+> 36个fresh GPU进程，correctness/environment/measurement/replay全过，summary hash=
+> `df852590d…1318e`。B1 query wall=`0.995657x`；当前B2 query/core=`0.908400x/0.516767x`
+> （B0/candidate），显存ratio=`1.0`，故FSG3以`VALIDATED-FSG3-B0-B1-B2-BASELINE`关闭，B2分类为
+> `MEASURED-B2-SLOWER`而非speedup。B2 core主要为optimizer/atomic commit/KFSB/typed pre-state
+> `44.0%/24.7%/16.7%/10.7%`。下一唯一门禁为FSG4/B3 IR/graph/Plan/Schedule复用；不得把B4 TIR
+> fusion、B5 JIT、B6 runtime或B7 arena提前混入B3，也不得把当前B2外推为全栈NO-GO。
+
 > 生效日期：2026-07-12
 > 当前 integration base：`331086d`（NRIR-39 merge）；历史 closure tag：`pr13-validated-reduced`、
 > `ir5-final-validated-nogo`
@@ -29,9 +37,8 @@
 > five-fresh correctness。V4-3E现又按`O,C,C,O,C,O,O,C,O,C`启动10个fresh GPU进程，5/5 pairs
 > 的完整core/post/state/branch/queue/termination全部通过，六类重签攻击拒绝，以
 > `VALIDATED-FIVE-FRESH-CORRECTNESS`关闭；V4-3整体=`VALIDATED-WHOLE-CORE-REPLACEMENT`，B2
-> same-solver timing现准入但尚未执行，performance claim仍关闭。FSG3/B2已独立冻结六个全排列block、
-> 36 fresh control/profile进程与cold/query/core分层计时协议，状态=`PREREGISTERED-NOT-RUN`；下一动作
-> 只允许实现schema/replay/worker并在clean source后正式运行，不能事后改门禁。
+> same-solver timing在该时点准入但尚未执行。其后FSG3已按冻结协议关闭，当前结论以上方
+> “2026-08-14 FSG3当前指令”为准；本段只保留历史门禁，不得再作为当前next action。
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed
@@ -47,7 +54,8 @@
 > opportunity attribution（NO-GO）→ FSG0 full-stack scope/schema/replay（完成）→ FSG1 official control
 > full-stack trace（完成）→ FSG2 RVIR-v3 initial replacement（VALIDATED-REDUCED）→历史完整B2
 > alpha/beta/split replacement（NO-GO/not admitted）→RVIR-v4 V4-1—V4-3（完成；取代历史ownership
-> blocker）→FSG3/B2 same-solver timing（已准入、未执行）**。
+> blocker）→FSG3/B2 same-solver timing（完成；B2较慢）→FSG4/B3 IR/graph/Plan/Schedule复用
+> （当前）**。
 > 禁止同时启动性能调优与 verifier control-flow 两条主线。
 
 > **2026-07-20 路线修订**：PR-14 No-Go 后对代码进行 IR-first 复审，确认现有

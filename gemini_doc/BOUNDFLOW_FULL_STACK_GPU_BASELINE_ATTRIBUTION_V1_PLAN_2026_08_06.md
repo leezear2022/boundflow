@@ -78,14 +78,16 @@ BoundFlow-vs-original GPU same-solver speedup。正式FSG3协议见
 V4-2 formal closure后，原“完整optimizer state ownership未准入”缺口已经关闭：固定ResNet2B core可从
 pre-state独立执行10/9 native mutation并原子生成12-path post-state，逐step/final parity、rollback、
 replay与完全重签tamper均通过。V4-3随后又完成whole-call live replacement与5个fresh correctness
-pairs。下列前四项是V4-3启动前的历史缺口，现已关闭；当前硬缺口只剩FSG3 measurement尚未执行：
+pairs。下列前四项是V4-3启动前的历史缺口，现已关闭；FSG3 measurement也已于2026-08-14关闭，
+当前硬缺口转为B3尚未实现：
 
 - `execute_external_verifier_call()`仍执行原external callable，不是BoundFlow replacement（历史RVIR-v3）；
 - PR13C `SameSolverQueryRuntime` 的host是BoundFlow自有solver，不是官方αβ-CROWN（历史PR-13C）；
 - V4-2 executor尚未替换真实host `update_bounds_core`（已由V4-3关闭）；
 - competitor Python环境不能import本机TVM（B2 reference path不依赖TVM；B3启用TVM前仍须combined env或
   对称RPC）；
-- 当前没有original/candidate共同的GPU full-stack hierarchical raw trace。
+- original/candidate共同的GPU full-stack hierarchical raw trace已由FSG3 v5补齐；B3 feature activation
+  尚不存在。
 
 ## 4. Fair Comparison Boundary
 
@@ -327,9 +329,11 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
    `NO-GO/not admitted`；该阻塞已由RVIR-v4 V4-2的`VALIDATED-OPTIMIZER-REPLACEMENT`修复；
 4. [x] V4-3/FSG3前置：whole-core live integration与5个fresh correctness pairs已通过；V4-3=
    `VALIDATED-WHOLE-CORE-REPLACEMENT`，B0/B1/B2 same-solver counterbalanced timing现准入；
-5. [~] FSG3：36-process B0/B1/B2正式协议已预注册；typed schema/replay与13项合同测试已完成，
-   real GPU worker与正式measurement尚未执行；
-6. [—] FSG4：因B3—B7均依赖FSG3可审计baseline，依赖门禁阻止，未实现/未消融；
+5. [x] FSG3：source `a4ee291`完成36-process B0/B1/B2正式artifact；correctness、environment、
+   measurement、replay与outer-resigned tamper门禁通过，状态=
+   `VALIDATED-FSG3-B0-B1-B2-BASELINE`；
+6. [~] FSG4：FSG3依赖门禁已解除；下一步只启动B3 IR/graph/Plan/Schedule复用预注册，B4—B7仍未
+   实现/消融；
 7. [—] FSG5：因无合法B7 candidate，依赖门禁阻止，无系统性能claim。
 
 ## 12. Validation
@@ -410,9 +414,8 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
   sign exact，callback/fallback=`0/0`；original replay与6类完全重签攻击通过；
 - V4-2=`VALIDATED-OPTIMIZER-REPLACEMENT`只撤销上节“optimizer ownership不存在”的当前阻塞，不改写
   FSG2历史artifact和当时结论；
-- FSG3性能计时尚未恢复。先执行V4-3，将executor接入whole `update_bounds_core`并完成至少5次fresh
-  correctness；只有V4-3通过，才按本文§4/§7运行B0/B1/B2公平计时；
-- `performance_claimed=false`，B3—B7仍未实现或测量。
+- 本段描述V4-2关闭时的历史门禁；V4-3与FSG3现均已关闭，当前状态见下方FSG3 Formal Closure；
+- `performance_claimed=false`仍保留，B3—B7仍未实现或测量。
 
 ### RVIR-v4 V4-3 Closure 与 FSG3/B2 准入（2026-08-13）
 
@@ -422,7 +425,7 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
   与status/success通过，最大差`1.0669e-05 <=2e-4`；
 - V4-3=`VALIDATED-WHOLE-CORE-REPLACEMENT`，正式撤销“B2因ownership缺失不得计时”的当前阻塞；
   旧FSG2 artifact与其当时的NO-GO结论保留为历史；
-- 下一动作是独立FSG3/B2 measurement，不复用correctness worker wall，不自动准入B3—B7；
+- 该时点下一动作是独立FSG3/B2 measurement；该动作现已完成，但不自动准入B4—B7；
 - `b2_same_solver_timing_admitted=true`，`performance_claimed=false`。
 
 ### FSG3/B2 Timing 预注册（2026-08-13）
@@ -432,7 +435,7 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 - cold total、process-hit query、whole core、GPU event、compile和post-measurement validation严格分离；
 - B2变慢只形成reference baseline，不关闭B3—B7；correctness、环境、profile扰动或replay失败才使FSG3
   fail closed；
-- 当前状态=`PREREGISTERED-NOT-RUN`，无speedup claim。
+- 这是结果产生前冻结的`PREREGISTERED-NOT-RUN`历史状态；当前关闭状态见下方FSG3 Formal Closure。
 
 ### FSG3-1 Schema/Replay（2026-08-13）
 
@@ -442,7 +445,25 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 - 顺序/删run/provider/scope/semantic/profile/environment负向测试均通过；初始targeted=`13 passed`、full=
   `1213 passed, 3 skipped`；upper-sentinel amendment后targeted=`14 passed`，post-amendment full延后到
   real-worker切片统一执行；mypy clean、Pylint=`10.00/10`；
-- 当前=`IMPLEMENTED-SCHEMA-REPLAY / REAL-WORKER-PENDING`，无真实timing或speedup claim。
+- 这是worker实现前的历史状态；正式worker与timing现已由下方FSG3 Formal Closure取代。
+
+### FSG3 Formal Closure（2026-08-14）
+
+- source=`a4ee2910f4039981338fb6d8688ac4af18508b73`生成六个全排列block、36个fresh GPU进程；
+  correctness/environment/measurement全部通过，failure rows为空；
+- B0/B1 provider core/compute/update均为`1/14/3`；B2为`0/0/0`且fallback=0；
+- B1 query wall geomean=`0.995657x`；B2 query/core=`0.908400x/0.516767x`
+  （B0/candidate），显存ratio=`1.0`，compile break-even=`not_reachable`；
+- B2 core主要share为optimizer=`43.999%`、atomic commit=`24.684%`、KFSB=`16.684%`、typed
+  pre-state=`10.720%`、backward=`3.677%`；
+- profile扰动三配置geomean=`1.002178/1.003107/1.001605`，全部通过`<=1.05`门禁；
+- summary/manifest hash=`df852590d…1318e`/`9089e201…1e85`，static replay与8类outer-resigned
+  tamper攻击通过；
+- FSG3=`VALIDATED-FSG3-B0-B1-B2-BASELINE`，B2=`MEASURED-B2-SLOWER`，raw
+  `performance_claimed=false`；当前结果不构成全栈NO-GO；
+- FSG3 tests=`33 passed`、全量=`1233 passed, 3 skipped`，Black/mypy/Pylint=`10.00/10`；
+- FSG4依赖门禁解除。下一动作只允许B3 IR/graph/Plan/Schedule复用，先处理optimizer、atomic、KFSB、
+  pre-state之间的重复工作；B4 TIR/fusion、B5 JIT、B6 runtime、B7 memory仍分别门禁。
 
 ## 13. Rollback
 

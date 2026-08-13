@@ -1,0 +1,1 @@
+{"correctness_passed":true,"environment_passed":true,"evidence_status":"validated-fsg3-b0-b1-b2-baseline","measurement_auditable":true,"performance_claimed":false,"run_count":36,"status":"replay-passed","summary_hash":"df852590d99be09962c1287e7166b421edb260416403a3c91545dca6e2e1318e"}

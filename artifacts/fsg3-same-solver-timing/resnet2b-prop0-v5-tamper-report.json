@@ -1,0 +1,75 @@
+{
+  "all_rejected": true,
+  "artifact_source_git_head": "a4ee2910f4039981338fb6d8688ac4af18508b73",
+  "attack_count": 8,
+  "attacks": [
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "control-latency-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG3 envelope/run projection differs: 0"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "delete-run-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG3 artifact run coverage differs"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "configuration-mode-order-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG3 envelope/run projection differs: 0"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "b1-provider-count-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG3 envelope/run projection differs: 2"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "b2-fallback-count-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG3 fallback dispatch is forbidden"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "semantic-tensor-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG3 envelope/run projection differs: 0"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "temperature-gate-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG3 formal preflight admission differs"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "summary-ratio-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG3 derived replay differs: summary.json"
+    }
+  ],
+  "clean_summary_hash": "df852590d99be09962c1287e7166b421edb260416403a3c91545dca6e2e1318e",
+  "outer_resigned_attack_count": 8,
+  "performance_claimed": false,
+  "schema_version": "boundflow.fsg3-same-solver-tamper-report/v1"
+}

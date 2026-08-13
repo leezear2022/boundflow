@@ -35,6 +35,14 @@
 > 6类完全重签攻击关闭；V4-2整体达到`VALIDATED-OPTIMIZER-REPLACEMENT`。whole-core live integration
 > 尚待V4-3，故B2和后续B3—B7仍未准入，性能结论不变。
 
+> **2026-08-14 FSG3修订**：上述V4-3/B2门禁已由后续whole-core replacement与正式same-solver基线
+> 取代。source `a4ee291`完成B0/B1/B2六个全排列block、36个fresh RTX 4060进程；correctness、
+> environment、measurement与replay全过。B1 query wall=`0.995657x`，当前B2 query/core=
+> `0.908400x/0.516767x`（B0/candidate），显存ratio=`1.0`，故FSG3=
+> `VALIDATED-FSG3-B0-B1-B2-BASELINE`、B2=`MEASURED-B2-SLOWER`。这只建立未优化reference分母，
+> 不关闭B3—B7。下一门禁是FSG4/B3 IR/graph/Plan/Schedule复用；最终B7 vs B0的
+> `1.20x queue / 1.15x complete-query`仍未测试，ASPLOS-ready=NO。
+
 > **2026-08-04 P0 修订**：production Schedule-memory ownership audit 为 `NO_GO`。
 > Reduced residual path 能由 Schedule IR 控制 arena 与 region launch，但没有 materialization、
 > storage choice 或 budget decision switch；VNN-COMP ResNet 主计算仍是 external opaque call。

@@ -34,7 +34,10 @@
 > post/queue接通、fresh replay与八类完全重签攻击，以`VALIDATED-LIVE-RETURN`关闭。V4-3E再以十个
 > fresh CUDA进程完成5/5 counterbalanced pairs及六类tamper，V4-3整体升级为
 > `VALIDATED-WHOLE-CORE-REPLACEMENT`。历史ownership blocker已被取代；B2 same-solver timing现已准入
-> 但未执行，当前仍无BoundFlow全栈性能claim。
+> 并于2026-08-14完成正式FSG3：六个全排列block、36个fresh GPU进程的correctness、environment、
+> measurement与replay全部通过。B1 query wall=`0.995657x`，当前B2 query/core=
+> `0.908400x/0.516767x`（B0/candidate），故FSG3=`VALIDATED-FSG3-B0-B1-B2-BASELINE`、B2=
+> `MEASURED-B2-SLOWER`，不是speedup；B3—B7未实现，当前仍无BoundFlow全栈性能claim。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
@@ -1561,7 +1564,7 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
   `VALIDATED-WHOLE-CORE-REPLACEMENT`；`b2_same_solver_timing_admitted=true`，但B2未执行且
   `performance_claimed=false`。
 
-### FSG3/B2 Same-Solver Timing（预注册、未运行）
+### FSG3/B2 Same-Solver Timing（正式基线已关闭）
 
 - `FSG3-P`：B0/B1/B2物理模式、六个全排列block、每配置6 control+6 profile及36-process exact顺序已
   在`fsg3_b2_same_solver_timing_preregistration_2026_08_13.md`冻结；
@@ -1571,5 +1574,15 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - `FSG3-S`：typed schema/replay已实现，顺序/删run/provider/scope/semantic/profile/environment等13项合同
   与1项lower-only upper-mask amendment测试通过；初始full=`1213 passed, 3 skipped`，post-amendment
   full显式延后到real-worker切片；
-- `FSG3-L`：状态=`IMPLEMENTED-SCHEMA-REPLAY / REAL-WORKER-PENDING`；没有timing artifact或speedup
-  claim，B3仍待FSG3可审计关闭。
+- `FSG3-R`：source=`a4ee291`完成36/36 fresh进程；每配置6 control+6 profile，correctness、environment、
+  profile closure/扰动与static replay全过，summary hash=`df852590d…1318e`；
+- `FSG3-X`：B0/B1 provider core/compute/update分别=`1/14/3`，B2=`0/0/0`且fallback=0，证明物理
+  whole-call replacement而非original callback；
+- `FSG3-T`：B1 query wall geomean=`0.995657x`；B2 query/core=`0.908400x/0.516767x`
+  （B0/candidate），显存ratio=`1.0`，break-even=`not_reachable`；因此B2=
+  `MEASURED-B2-SLOWER`，不得写成加速；
+- `FSG3-A`：B2 core的optimizer/atomic/KFSB/typed-pre share约=
+  `43.999%/24.684%/16.684%/10.720%`，是FSG4/B3优先归因依据；
+- `FSG3-F`：8类payload修改+manifest文件digest/hash同步更新的outer-resigned攻击全部拒绝；
+- `FSG3-L`：状态=`VALIDATED-FSG3-B0-B1-B2-BASELINE`，raw仍
+  `performance_claimed=false`。它不关闭B3—B7；下一门禁为FSG4/B3，ASPLOS-ready仍为NO。

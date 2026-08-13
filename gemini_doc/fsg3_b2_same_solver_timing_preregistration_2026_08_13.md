@@ -1,6 +1,6 @@
 ---
-status: preregistered-not-run
-updated: 2026-08-13T21:10:00+08:00
+status: closed-baseline
+updated: 2026-08-14T00:00:00+08:00
 type: plan
 topic: boundflow
 slug: fsg3-b2-same-solver-timing
@@ -8,6 +8,11 @@ stage: s01
 ---
 
 # FSG3 / B2 Same-Solver Timing 预注册
+
+> **行政关闭注（2026-08-14）**：预注册正文和门禁未按结果回写；正式v5已按本文完成36/36 fresh
+> GPU进程并以`VALIDATED-FSG3-B0-B1-B2-BASELINE`关闭。B2 query/core为
+> `0.908400x/0.516767x`（B0/candidate），分类`MEASURED-B2-SLOWER`，不是speedup。正式证据见
+> `gemini_doc/change_2026-08-14_fsg3_same_solver_formal_baseline.md`。
 
 ## 0. 冻结结论
 
