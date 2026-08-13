@@ -5134,6 +5134,7 @@
 - capture-ready诊断lA/intermediate/final-lower最大差=`9.2387e-07/6.0797e-06/3.0994e-06`，sign exact；
 - provider core/compute_bounds/update_bounds/fallback=`0/0/0/0`；
 - 状态为`IMPLEMENTED-NATIVE-BACKWARD-EXPORT / FORMAL-ARTIFACT-PENDING`，V4-3/B2仍关闭。
+- artifact hardening增加lA/intermediate/lower三类full resign与topology/truth source两类outer resign。
 
 **记录**
 - `gemini_doc/change_2026-08-13_rvir_v4_native_backward_export.md`

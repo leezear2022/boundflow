@@ -242,7 +242,9 @@ def _export_payload(export: NativeBackwardExportV4) -> dict[str, object]:
     }
 
 
-def _export_from_payload(payload: Mapping[str, Any]) -> NativeBackwardExportV4:
+def _export_from_payload(
+    payload: Mapping[str, Any], *, validate_metadata: bool = True
+) -> NativeBackwardExportV4:
     l_as = payload.get("lAs")
     intermediate = payload.get("intermediates")
     lower = payload.get("lower")
@@ -275,7 +277,7 @@ def _export_from_payload(payload: Mapping[str, Any]) -> NativeBackwardExportV4:
         intermediate_source="shared-pre-result-external-bounds",
     )
     export.validate()
-    if export.metadata() != dict(metadata):
+    if validate_metadata and export.metadata() != dict(metadata):
         raise ValueError("RVIR-v4 native backward recorded metadata differs")
     return export
 

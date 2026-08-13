@@ -26,3 +26,6 @@
 
 提交clean runner基线后生成正式V4-3B artifact，执行semantic replay和同步重签tamper门禁；通过后才能
 准入V4-3C native KFSB candidate evaluation。
+
+Artifact hardening已增加三类recorded export完整重签（lA、intermediate、final lower）及topology、
+truth source两类outer resign probe；正式报告须绑定最终clean runner commit重新生成。
