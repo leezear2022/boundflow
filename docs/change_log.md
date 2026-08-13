@@ -5025,6 +5025,21 @@
 
 ---
 
+## 2026-08-13：RVIR-v4 V4-2D Native Optimizer Parity（实现中）
+
+- 新增provider-independent 10 evaluation/9 Adam update typed trace；
+- 固定双学习率、0.98衰减、sum reduction及α/β投影，production trace只进入独立comparator；
+- 逐step比较lower与dense α/β，scope/policy/cardinality/schema/numeric门禁fail closed；
+- 10/10 step allclose/sign exact，lower/α/β最大误差=`4.0531e-06/1.4663e-05/3.9861e-07`；
+- focused=`36 passed`、full=`1167 passed, 3 skipped`、mypy clean、Pylint=`10.00/10`；
+- formal artifact、tamper与atomic copy-out尚未完成，状态为`IMPLEMENTED-STEP-PARITY /
+  FORMAL-ARTIFACT-PENDING`，V4-2/B2和性能claim仍关闭。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_native_optimizer_parity.md`
+
+---
+
 ## 2026-08-13：RVIR-v4 V4-2C Formal Artifact Closure
 
 - 从clean runner `96c45a6`和V4-2B冻结source生成独立pre-state artifact，在真实ResNet2B native

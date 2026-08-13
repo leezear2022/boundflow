@@ -29,8 +29,9 @@
 > 10 evaluation/9 update合同。重启后V4-2B typed raw step trace正式GPU工件、original replay与5类
 > 同步重签名tamper通过，以`VALIDATED-PRODUCTION-TRACE`关闭。V4-2C正式artifact进一步在真实native
 > scope恢复6组α/β/split，12/12 round-trip exact；original replay与6类双层重签名tamper通过，以
-> `VALIDATED-PRE-STATE-INITIALIZER`关闭。下一门禁是V4-2D逐step native mutation parity。V4-2、B2
-> 和后续B3—B7仍未准入，性能结论不变。
+> `VALIDATED-PRE-STATE-INITIALIZER`关闭。V4-2D capture-ready native loop已独立执行10 evaluations/
+> 9 updates，逐step lower/α/β均过`2e-4`门禁，但formal artifact/tamper尚待完成。V4-2、B2和后续
+> B3—B7仍未准入，性能结论不变。
 
 > **2026-08-04 P0 修订**：production Schedule-memory ownership audit 为 `NO_GO`。
 > Reduced residual path 能由 Schedule IR 控制 arena 与 region launch，但没有 materialization、

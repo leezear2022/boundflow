@@ -9,8 +9,9 @@
 > 子合同；重启后V4-2B正式GPU step trace的original replay与5类同步重签名tamper通过，以
 > `VALIDATED-PRODUCTION-TRACE`关闭。它不是mutation replacement。V4-2C又从该正式capture独立重建
 > 6组native α/β/split与真实scope，12/12 mutable round-trip exact；original semantic replay及6类
-> 双层重签名tamper通过，以`VALIDATED-PRE-STATE-INITIALIZER`关闭。下一门禁为V4-2D逐step native
-> mutation parity；完整V4-2、B2及FSG3—FSG5仍未准入。
+> 双层重签名tamper通过，以`VALIDATED-PRE-STATE-INITIALIZER`关闭。V4-2D capture-ready native loop
+> 已独立执行10 evaluations/9 updates，逐step lower/α/β全过`2e-4`门禁；formal artifact/tamper待完成，
+> 尚不关闭V4-2D。完整V4-2、B2及FSG3—FSG5仍未准入。
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed

@@ -17,7 +17,10 @@
 > native scope上恢复6组dense α/β/split与external intermediate bounds，12/12 round-trip bit-exact，
 > upper-α显式copy-through；original replay及topology/index/history/intermediate/upper-α/beta-location
 > 六类内部重哈希、source/outer重签攻击在provenance与semantic两层全部拒绝。因此V4-2C以
-> `VALIDATED-PRE-STATE-INITIALIZER`关闭；下一门禁只允许V4-2D逐step native mutation parity。
+> `VALIDATED-PRE-STATE-INITIALIZER`关闭。V4-2D capture-ready executor现已在不读取reference trace、零
+> provider callback下独立执行10 evaluations/9 Adam updates；10/10 step lower/α/β allclose且sign exact，
+> 最大误差=`4.0531e-06/1.4663e-05/3.9861e-07 <=2e-4`。但formal artifact/tamper尚待生成，状态仅为
+> `IMPLEMENTED-STEP-PARITY / FORMAL-ARTIFACT-PENDING`；V4-2/B2与性能claim仍关闭。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
 > objective-ancestral sibling evaluator，并新增独立 Plan/Batch/Task/Schedule IR 与跨 clause 单一 cache
 > owner。真实 ResNet clause 2 root+pair 与 frozen audit lower/branch/split/α/β/refinement exact，upper

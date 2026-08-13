@@ -25,6 +25,10 @@ call/trace cross-binding见
 `gemini_doc/change_2026-08-13_rvir_v4_pre_state_initializer.md`。V4-2总体与B2仍关闭，下一切片只允许
 V4-2D逐step native mutation parity。
 
+V4-2D capture-ready实现见`gemini_doc/change_2026-08-13_rvir_v4_native_optimizer_parity.md`：native
+executor在零provider callback下完成10 evaluations/9 updates，10/10 step lower/α/β allclose/sign exact，
+最大误差均低于`2e-4`；当前仍为`FORMAL-ARTIFACT-PENDING`，不得据此开启B2或性能claim。
+
 ---
 
 当前权威研究入口：

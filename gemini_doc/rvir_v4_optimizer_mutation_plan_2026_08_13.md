@@ -233,3 +233,18 @@ formal generate/original replay exit 0，五类重签名tamper 5/5拒绝；focus
 
 V4-2C现已关闭，但只证明初始化接管。下一动作是V4-2D逐step native mutation parity；在V4-2D/E前
 仍不得进入B2。
+
+## 12. V4-2D Native Step Mutation Parity 实现状态
+
+状态：`IMPLEMENTED-STEP-PARITY / FORMAL-ARTIFACT-PENDING`。
+
+- 新native executor从V4-2C state独立执行10 evaluations/9 Adam updates，executor接口不接收production
+  reference trace，provider callback count固定为0；
+- 双学习率=`0.01/0.05`、每步decay=`0.98`、loss=`-lower.sum()`及α/β投影与冻结production policy一致；
+- 独立comparator把V4-2B每个step按V4-2C layout映射为dense reference，逐step比较lower、6组α和6组β；
+- 10/10 step allclose/sign exact；lower/α/β最大绝对误差=`4.0531e-06`/`1.4663e-05`/
+  `3.9861e-07 <=2e-4`；native trace/parity hash=`4e173c22...bc76`/`a6b5df97...3959`；
+- focused=`36 passed`、full=`1167 passed, 3 skipped`、mypy clean、Pylint=`10.00/10`。
+
+该实现尚未形成独立formal artifact和完整重签名攻击报告，也未把native terminal state原子投影回provider
+容器，因此不关闭V4-2D/V4-2/B2。下一动作只允许V4-2D formal artifact/replay/tamper。
