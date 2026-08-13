@@ -19,8 +19,13 @@ def test_formal_atomic_copy_out_reexecutes_and_commits_twelve_paths() -> None:
     assert len(copy_out["path_receipts"]) == 12
     assert commit["committed_path_count"] == 12
     assert commit["atomic_commit"] is True
+    assert summary["core_count"] == 1
+    assert summary["domain_count"] == 6
+    assert summary["topology_count"] == 6
     assert summary["evaluation_count"] == 10
     assert summary["update_count"] == 9
+    assert summary["changed_path_count"] == 7
+    assert summary["expected_changed_path_count"] == 7
     assert summary["optimizer_replacement_admitted"] is True
     assert summary["b2_same_solver_timing_admitted"] is False
     assert summary["provider_callback_count"] == 0

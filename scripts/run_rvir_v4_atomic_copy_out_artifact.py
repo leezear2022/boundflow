@@ -252,13 +252,26 @@ def _build_evidence_single_thread(
     }
     commit = commit_rvir_v4_atomic_copy_out(staged, pre=pre, live_targets=live)
     copy_out = staged.metadata()
+    changed_path_count = sum(
+        receipt.before_sha256 != receipt.candidate_sha256
+        for receipt in staged.path_receipts
+    )
+    expected_changed_path_count = sum(
+        receipt.before_sha256 != receipt.expected_sha256
+        for receipt in staged.path_receipts
+    )
     summary: dict[str, object] = {
         "status": "validated-atomic-copy-out",
         "workload_id": "cifar10_resnet:000",
+        "core_count": len(cores),
+        "domain_count": int(objective.shape[0]),
+        "topology_count": len(topology),
         "evaluation_count": len(native.steps),
         "update_count": sum(step.update_after for step in native.steps),
         "staged_path_count": len(staged.path_receipts),
         "committed_path_count": commit["committed_path_count"],
+        "changed_path_count": changed_path_count,
+        "expected_changed_path_count": expected_changed_path_count,
         "copy_out_hash": copy_out["copy_out_hash"],
         "commit_hash": commit["commit_hash"],
         "alpha_maximum_absolute_difference": max(
@@ -282,10 +295,15 @@ def _build_evidence_single_thread(
         "performance_claimed": False,
     }
     if (
-        summary["evaluation_count"] != 10
+        summary["core_count"] != 1
+        or summary["domain_count"] != 6
+        or summary["topology_count"] != 6
+        or summary["evaluation_count"] != 10
         or summary["update_count"] != 9
         or summary["staged_path_count"] != 12
         or summary["committed_path_count"] != 12
+        or summary["changed_path_count"] != 7
+        or summary["expected_changed_path_count"] != 7
         or summary["atomic_commit"] is not True
         or summary["all_sign_exact"] is not True
         or summary["provider_callback_count"] != 0

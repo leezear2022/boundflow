@@ -41,6 +41,8 @@ read-only/history/layout与真实post-state后，再一次性提交到provider-o
   `b2_same_solver_timing_admitted=false`和`performance_claimed=false`；该字段只有在artifact和同步重签
   tamper均通过后才构成正式证据；
 - capture-ready runner测试连同copy-out负向合同共`5 passed`，mypy clean、Pylint=`10.00/10`。
+- formal gate进一步显式冻结`1 core / 6 domains / 6 topology rows / 10 evaluations / 9 updates /
+  12 receipts / 7 changed receipts`，避免只由人工从path receipt反推正式结构。
 
 下一步先提交runner以冻结code provenance，再生成artifact和篡改报告；在这些证据落盘前，上述pending
 状态保持不变。
