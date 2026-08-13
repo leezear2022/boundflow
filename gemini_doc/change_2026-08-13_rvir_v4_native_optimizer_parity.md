@@ -33,3 +33,12 @@ capture-ready实测10/10 step全部allclose且sign exact：跨production GPU真�
 formal artifact、完整同步重签名tamper及post-state atomic copy-out仍待后续门禁；因此V4-2D状态仅为
 `IMPLEMENTED-STEP-PARITY / FORMAL-ARTIFACT-PENDING`，`optimizer_replacement_admitted=false`、
 `b2_same_solver_timing_admitted=false`、`performance_claimed=false`保持不变。
+
+## Formal Runner 准备（同日）
+
+新增`run_rvir_v4_native_optimizer_artifact.py`：从V4-2C正式artifact重新校验source manifest/capture、
+ONNX digest和pre-state mapping，再独立执行native loop，输出逐step native trace、parity、summary、
+topology、replay stdout、源码revision与文件inventory。replay会重新执行10/9 loop并逐项比较，不信任
+序列化摘要。capture-ready focused=`4 passed`，mypy四文件clean，Pylint runner/test=`10.00/10`。
+
+runner需先进入clean commit再生成正式artifact；本段不改变V4-2D pending状态。
