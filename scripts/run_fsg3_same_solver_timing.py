@@ -5,7 +5,7 @@
 # pylint: disable=too-many-locals,too-many-statements,too-many-branches
 # pylint: disable=too-many-arguments,too-many-instance-attributes,import-error
 # pylint: disable=missing-function-docstring,too-few-public-methods
-# pylint: disable=duplicate-code
+# pylint: disable=duplicate-code,too-many-lines,too-many-boolean-expressions
 
 from __future__ import annotations
 
@@ -43,6 +43,9 @@ from scripts import run_rvir_v4_production_state_capture as capture_runner
 
 WORKER_ENVELOPE_SCHEMA = "boundflow.fsg3-same-solver-worker-envelope/v1"
 ALLOWED_GRAPHICS_PROCESSES = ("kwin_wayland",)
+WORKER_PREFLIGHT_TEMPERATURE_LIMIT_C = 45
+WORKER_PREFLIGHT_POLL_SECONDS = 5
+WORKER_PREFLIGHT_TIMEOUT_SECONDS = 900
 
 
 @dataclass
@@ -541,10 +544,15 @@ def _nvidia_snapshot() -> dict[str, object]:
             raise ValueError(f"FSG3 NVIDIA field is unavailable: {path}")
         return value
 
-    counters = text_at(
+    software_thermal_counter = text_at(
         "clocks_event_reasons_counters/clocks_event_reasons_counters_sw_therm_slowdown"
     )
-    counter_us = int(counters.split()[0])
+    software_power_counter = text_at(
+        "clocks_event_reasons_counters/clocks_event_reasons_counters_sw_power_cap"
+    )
+    hardware_thermal_counter = text_at(
+        "clocks_event_reasons_counters/clocks_event_reasons_counters_hw_therm_slowdown"
+    )
     return {
         "driver_version": xml.findtext("driver_version", default="unavailable"),
         "uuid": text_at("uuid"),
@@ -552,16 +560,25 @@ def _nvidia_snapshot() -> dict[str, object]:
         "total_memory": text_at("fb_memory_usage/total"),
         "performance_state": text_at("performance_state"),
         "temperature": text_at("temperature/gpu_temp"),
+        # NVIDIA documents T.Limit as a margin, rather than an absolute
+        # temperature.  Preserve both raw values with unambiguous names.
+        "temperature_tlimit_margin": text_at("temperature/gpu_temp_tlimit"),
+        "target_temperature": text_at("temperature/gpu_target_temperature"),
         "power_draw": text_at("gpu_power_readings/instant_power_draw"),
         "sm_clock": text_at("clocks/sm_clock"),
         "memory_clock": text_at("clocks/mem_clock"),
         "sw_thermal_slowdown": text_at(
             "clocks_event_reasons/clocks_event_reason_sw_thermal_slowdown"
         ),
+        "sw_power_cap": text_at(
+            "clocks_event_reasons/clocks_event_reason_sw_power_cap"
+        ),
         "hw_thermal_slowdown": text_at(
             "clocks_event_reasons/clocks_event_reason_hw_thermal_slowdown"
         ),
-        "sw_thermal_slowdown_counter_us": counter_us,
+        "sw_thermal_slowdown_counter_us": int(software_thermal_counter.split()[0]),
+        "sw_power_cap_counter_us": int(software_power_counter.split()[0]),
+        "hw_thermal_slowdown_counter_us": int(hardware_thermal_counter.split()[0]),
     }
 
 
@@ -593,12 +610,182 @@ def _ac_powered() -> bool:
     return path.is_file() and path.read_text(encoding="utf-8").strip() == "1"
 
 
+def _snapshot_temperature_celsius(snapshot: Mapping[str, object]) -> int:
+    try:
+        return int(str(snapshot["temperature"]).split()[0])
+    except (IndexError, ValueError) as error:
+        raise ValueError("FSG3 worker preflight temperature differs") from error
+
+
+def _reason_active(snapshot: Mapping[str, object], name: str) -> bool:
+    value = snapshot.get(name)
+    if not isinstance(value, str) or value not in ("Active", "Not Active"):
+        raise ValueError(f"FSG3 NVIDIA reason differs: {name}")
+    return value == "Active"
+
+
+def _snapshot_software_counters_coupled(snapshot: Mapping[str, object]) -> bool:
+    """Recognize only the exact driver-level SW power/thermal alias."""
+
+    return (
+        _reason_active(snapshot, "sw_thermal_slowdown")
+        and _reason_active(snapshot, "sw_power_cap")
+        and _integer(
+            snapshot["sw_thermal_slowdown_counter_us"],
+            "software thermal counter",
+        )
+        == _integer(snapshot["sw_power_cap_counter_us"], "software power counter")
+    )
+
+
+def _snapshot_independent_thermal_active(snapshot: Mapping[str, object]) -> bool:
+    """Return thermal activity after excluding an exact SW power-cap alias."""
+
+    return _reason_active(snapshot, "hw_thermal_slowdown") or (
+        _reason_active(snapshot, "sw_thermal_slowdown")
+        and not _snapshot_software_counters_coupled(snapshot)
+    )
+
+
+def _worker_external_processes(
+    processes: Sequence[Mapping[str, object]],
+    *,
+    worker_pid: int | None = None,
+) -> list[str]:
+    effective_worker_pid = os.getpid() if worker_pid is None else worker_pid
+    external: list[str] = []
+    for row in processes:
+        pid = _integer(row["pid"], "process PID")
+        name = str(row["name"])
+        memory = _integer(row["used_memory_mib"], "process memory")
+        if pid == effective_worker_pid:
+            continue
+        if Path(name).name in ALLOWED_GRAPHICS_PROCESSES and memory < 64:
+            continue
+        external.append(f"{pid}:{name}:{memory}MiB")
+    return external
+
+
+def _validate_worker_preflight(value: Mapping[str, Any]) -> None:
+    expected = {
+        "worker_pid",
+        "temperature_limit_celsius",
+        "poll_seconds",
+        "timeout_seconds",
+        "sample_count",
+        "wait_ns",
+        "samples",
+        "admitted",
+    }
+    if (
+        set(value) != expected
+        or not isinstance(value["worker_pid"], int)
+        or isinstance(value["worker_pid"], bool)
+        or int(value["worker_pid"]) <= 0
+        or value["temperature_limit_celsius"] != WORKER_PREFLIGHT_TEMPERATURE_LIMIT_C
+        or value["poll_seconds"] != WORKER_PREFLIGHT_POLL_SECONDS
+        or value["timeout_seconds"] != WORKER_PREFLIGHT_TIMEOUT_SECONDS
+        or value["admitted"] is not True
+        or not isinstance(value["samples"], list)
+        or value["sample_count"] != len(value["samples"])
+        or not value["samples"]
+        or int(value["wait_ns"]) < 0
+    ):
+        raise ValueError("FSG3 worker preflight payload differs")
+    last = value["samples"][-1]
+    if not isinstance(last, Mapping):
+        raise TypeError("FSG3 worker preflight sample differs")
+    processes = last.get("compute_processes")
+    snapshot = last.get("gpu_snapshot")
+    if not isinstance(processes, list):
+        raise TypeError("FSG3 worker preflight process list differs")
+    if not isinstance(snapshot, Mapping):
+        raise TypeError("FSG3 worker preflight GPU snapshot differs")
+    independent_thermal_active = _snapshot_independent_thermal_active(snapshot)
+    if last.get("independent_thermal_active") is not independent_thermal_active:
+        raise ValueError("FSG3 worker preflight thermal projection differs")
+    if (
+        int(last.get("temperature_celsius", -1)) > WORKER_PREFLIGHT_TEMPERATURE_LIMIT_C
+        or independent_thermal_active
+        or last.get("ac_powered") is not True
+        or _worker_external_processes(
+            cast(Sequence[Mapping[str, object]], processes),
+            worker_pid=int(value["worker_pid"]),
+        )
+    ):
+        raise ValueError("FSG3 worker preflight admission differs")
+
+
+def _wait_for_worker_environment() -> dict[str, object]:
+    started_ns = time.monotonic_ns()
+    samples: list[dict[str, object]] = []
+    while True:
+        snapshot = _nvidia_snapshot()
+        processes = _compute_processes()
+        external = _worker_external_processes(processes)
+        if external:
+            raise RuntimeError(
+                "FSG3 worker preflight found external CUDA compute processes: "
+                + ", ".join(external)
+            )
+        independent_thermal_active = _snapshot_independent_thermal_active(snapshot)
+        temperature = _snapshot_temperature_celsius(snapshot)
+        sample = {
+            "elapsed_ns": time.monotonic_ns() - started_ns,
+            "temperature_celsius": temperature,
+            "independent_thermal_active": independent_thermal_active,
+            "gpu_snapshot": snapshot,
+            "compute_processes": processes,
+            "ac_powered": _ac_powered(),
+        }
+        samples.append(sample)
+        ready = (
+            temperature <= WORKER_PREFLIGHT_TEMPERATURE_LIMIT_C
+            and not independent_thermal_active
+            and sample["ac_powered"] is True
+        )
+        if ready:
+            result: dict[str, object] = {
+                "worker_pid": os.getpid(),
+                "temperature_limit_celsius": WORKER_PREFLIGHT_TEMPERATURE_LIMIT_C,
+                "poll_seconds": WORKER_PREFLIGHT_POLL_SECONDS,
+                "timeout_seconds": WORKER_PREFLIGHT_TIMEOUT_SECONDS,
+                "sample_count": len(samples),
+                "wait_ns": time.monotonic_ns() - started_ns,
+                "samples": samples,
+                "admitted": True,
+            }
+            _validate_worker_preflight(cast(Mapping[str, Any], result))
+            return result
+        if (
+            time.monotonic_ns() - started_ns
+            > WORKER_PREFLIGHT_TIMEOUT_SECONDS * 1_000_000_000
+        ):
+            raise TimeoutError("FSG3 worker preflight did not reach cool idle state")
+        print(
+            json.dumps(
+                {
+                    "worker_preflight": "waiting",
+                    "temperature_celsius": temperature,
+                    "independent_thermal_active": independent_thermal_active,
+                    "sample_count": len(samples),
+                },
+                sort_keys=True,
+                separators=(",", ":"),
+            ),
+            flush=True,
+        )
+        time.sleep(WORKER_PREFLIGHT_POLL_SECONDS)
+
+
 def _environment_gate(
     before: Mapping[str, object],
     after: Mapping[str, object],
     before_processes: Sequence[Mapping[str, object]],
     after_processes: Sequence[Mapping[str, object]],
     runtime_identity: str,
+    *,
+    worker_pid: int | None = None,
 ) -> FSG3EnvironmentGate:
     external: list[str] = []
     by_identity = {
@@ -608,7 +795,8 @@ def _environment_gate(
             _integer(row["used_memory_mib"], "process memory"),
         )
         for row in (*before_processes, *after_processes)
-        if _integer(row["pid"], "process PID") != os.getpid()
+        if _integer(row["pid"], "process PID")
+        != (os.getpid() if worker_pid is None else worker_pid)
     }
     for pid, name, memory in sorted(by_identity):
         basename = Path(name).name
@@ -616,24 +804,62 @@ def _environment_gate(
         if basename in ALLOWED_GRAPHICS_PROCESSES and memory < 64:
             continue
         external.append(identity)
-    thermal_active = any(
-        value != "Not Active"
-        for value in (
-            before["sw_thermal_slowdown"],
-            before["hw_thermal_slowdown"],
-            after["sw_thermal_slowdown"],
-            after["hw_thermal_slowdown"],
-        )
+    sw_thermal_before = _integer(
+        before["sw_thermal_slowdown_counter_us"], "software thermal counter"
     )
-    counter_increased = _integer(
-        after["sw_thermal_slowdown_counter_us"], "thermal counter"
-    ) > _integer(before["sw_thermal_slowdown_counter_us"], "thermal counter")
+    sw_thermal_after = _integer(
+        after["sw_thermal_slowdown_counter_us"], "software thermal counter"
+    )
+    sw_power_before = _integer(
+        before["sw_power_cap_counter_us"], "software power counter"
+    )
+    sw_power_after = _integer(
+        after["sw_power_cap_counter_us"], "software power counter"
+    )
+    hw_thermal_before = _integer(
+        before["hw_thermal_slowdown_counter_us"], "hardware thermal counter"
+    )
+    hw_thermal_after = _integer(
+        after["hw_thermal_slowdown_counter_us"], "hardware thermal counter"
+    )
+    if (
+        sw_thermal_after < sw_thermal_before
+        or sw_power_after < sw_power_before
+        or hw_thermal_after < hw_thermal_before
+    ):
+        raise ValueError("FSG3 NVIDIA event counter decreased")
+    software_thermal_signal = (
+        _reason_active(before, "sw_thermal_slowdown")
+        or _reason_active(after, "sw_thermal_slowdown")
+        or sw_thermal_after > sw_thermal_before
+    )
+    software_power_cap_signal = (
+        _reason_active(before, "sw_power_cap")
+        or _reason_active(after, "sw_power_cap")
+        or sw_power_after > sw_power_before
+    )
+    software_counters_coupled = (
+        software_thermal_signal
+        and software_power_cap_signal
+        and before["sw_thermal_slowdown"] == before["sw_power_cap"]
+        and after["sw_thermal_slowdown"] == after["sw_power_cap"]
+        and sw_thermal_before == sw_power_before
+        and sw_thermal_after == sw_power_after
+    )
+    hardware_thermal_slowdown = (
+        _reason_active(before, "hw_thermal_slowdown")
+        or _reason_active(after, "hw_thermal_slowdown")
+        or hw_thermal_after > hw_thermal_before
+    )
     return FSG3EnvironmentGate(
         gpu_uuid=str(before["uuid"]),
         gpu_name=str(before["name"]),
         runtime_identity=runtime_identity,
         external_compute_processes=tuple(external),
-        thermal_slowdown=thermal_active or counter_increased,
+        software_thermal_signal=software_thermal_signal,
+        software_power_cap_signal=software_power_cap_signal,
+        software_thermal_power_counters_coupled=software_counters_coupled,
+        hardware_thermal_slowdown=hardware_thermal_slowdown,
         worker_overlap=bool(external),
         device_identity_stable=(
             before["uuid"] == after["uuid"] and before["name"] == after["name"]
@@ -655,6 +881,12 @@ def _protocol_identity(_configuration: FSG3Configuration) -> str:
             "beta_steps": 10,
             "attack": "skip",
             "property_cache": "cold_isolated_copy",
+            "worker_preflight_temperature_limit_celsius": (
+                WORKER_PREFLIGHT_TEMPERATURE_LIMIT_C
+            ),
+            "thermal_admission_policy": (
+                "reject-independent-thermal-allow-exact-sw-power-coupled-alias"
+            ),
         }
     )
 
@@ -706,12 +938,13 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
         raise RuntimeError("FSG3 worker requires CUDA")
     configuration = FSG3Configuration(args.configuration)
     mode = FSG3Mode(args.mode)
-    profile_recorder = _ProfileRecorder(torch) if mode == FSG3Mode.PROFILE else None
     torch.cuda.synchronize()
     torch.cuda.empty_cache()
+    worker_preflight = _wait_for_worker_environment()
     torch.cuda.reset_peak_memory_stats()
     environment_before = _nvidia_snapshot()
     processes_before = _compute_processes()
+    profile_recorder = _ProfileRecorder(torch) if mode == FSG3Mode.PROFILE else None
     cold_started_ns = time.perf_counter_ns()
     program: Any = None
     module: Any = None
@@ -926,6 +1159,7 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
             "compute_processes_after": processes_after,
             "allowed_graphics_processes": list(ALLOWED_GRAPHICS_PROCESSES),
             "runtime_environment": runtime_environment,
+            "worker_preflight": worker_preflight,
             "cold_outer_ns": cold_outer_ns,
             "cold_total_is_compile_plus_query_composite": True,
             "cold_scope_includes_hook_setup": False,

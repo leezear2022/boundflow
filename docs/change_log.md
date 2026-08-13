@@ -5276,3 +5276,23 @@
 
 **记录**
 - `gemini_doc/change_2026-08-13_fsg3_profile_orchestrator.md`
+
+## 2026-08-13：FSG3 Formal v1 Environment Abort / v2 Worker Preflight
+
+- formal v1连续7个worker均因post-init 52°C与software thermal counter增长而不准入，整轮fail-fast；
+- v1无manifest/性能主张，证据保留且不混入后续值；
+- v2把cool/idle gate补到fresh worker初始化后、计时前，并逐run持久化progress raw；
+- v2必须从position 0完整执行36-run。
+
+**记录**
+- `gemini_doc/change_2026-08-13_fsg3_formal_v1_environment_abort.md`
+
+## 2026-08-13：FSG3 Schema v3 功耗/温控耦合遥测
+
+- 修正RTX 4060 Laptop driver把SW power/thermal reason与counter严格镜像造成的环境误拒绝；
+- 保存power/thermal/HW thermal原始遥测，只允许exact coupled power alias，独立thermal仍fail closed；
+- worker PID和raw gate重算进入artifact replay；真实单worker及六路block-0 smoke环境全部准入；
+- 所有pilot/smoke仍为非正式合同证据，不形成性能主张。
+
+**记录**
+- `gemini_doc/change_2026-08-13_fsg3_coupled_power_thermal_telemetry.md`

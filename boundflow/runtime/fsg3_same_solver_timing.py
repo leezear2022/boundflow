@@ -12,7 +12,7 @@ import math
 import statistics
 from typing import Any, cast, Mapping, Optional, Sequence, Tuple
 
-FSG3_TIMING_SCHEMA_VERSION = "boundflow.fsg3-same-solver-timing/v2"
+FSG3_TIMING_SCHEMA_VERSION = "boundflow.fsg3-same-solver-timing/v3"
 FSG3_REPEAT_COUNT = 6
 FSG3_PROFILE_PERTURBATION_LIMIT = 1.05
 FSG3_CLOSURE_ERROR_LIMIT = 0.01
@@ -421,7 +421,10 @@ class FSG3EnvironmentGate:  # pylint: disable=too-many-instance-attributes
     gpu_name: str
     runtime_identity: str
     external_compute_processes: Tuple[str, ...]
-    thermal_slowdown: bool
+    software_thermal_signal: bool
+    software_power_cap_signal: bool
+    software_thermal_power_counters_coupled: bool
+    hardware_thermal_slowdown: bool
     worker_overlap: bool
     device_identity_stable: bool
     ac_powered: bool
@@ -431,6 +434,19 @@ class FSG3EnvironmentGate:  # pylint: disable=too-many-instance-attributes
 
         if not self.gpu_uuid or not self.gpu_name or not self.runtime_identity:
             raise ValueError("FSG3 GPU identity is empty")
+        if self.software_thermal_power_counters_coupled and not (
+            self.software_thermal_signal and self.software_power_cap_signal
+        ):
+            raise ValueError("FSG3 coupled software counter projection differs")
+
+    @property
+    def independent_thermal_slowdown(self) -> bool:
+        """Exclude exact driver-coupled power/thermal telemetry aliases."""
+
+        return self.hardware_thermal_slowdown or (
+            self.software_thermal_signal
+            and not self.software_thermal_power_counters_coupled
+        )
 
     @property
     def admitted(self) -> bool:
@@ -439,7 +455,7 @@ class FSG3EnvironmentGate:  # pylint: disable=too-many-instance-attributes
         self.validate()
         return (
             not self.external_compute_processes
-            and not self.thermal_slowdown
+            and not self.independent_thermal_slowdown
             and not self.worker_overlap
             and self.device_identity_stable
             and self.ac_powered
@@ -453,7 +469,13 @@ class FSG3EnvironmentGate:  # pylint: disable=too-many-instance-attributes
             "gpu_name": self.gpu_name,
             "runtime_identity": self.runtime_identity,
             "external_compute_processes": list(self.external_compute_processes),
-            "thermal_slowdown": self.thermal_slowdown,
+            "software_thermal_signal": self.software_thermal_signal,
+            "software_power_cap_signal": self.software_power_cap_signal,
+            "software_thermal_power_counters_coupled": (
+                self.software_thermal_power_counters_coupled
+            ),
+            "hardware_thermal_slowdown": self.hardware_thermal_slowdown,
+            "independent_thermal_slowdown": self.independent_thermal_slowdown,
             "worker_overlap": self.worker_overlap,
             "device_identity_stable": self.device_identity_stable,
             "ac_powered": self.ac_powered,
@@ -736,7 +758,11 @@ def fsg3_timing_run_from_dict(value: Mapping[str, Any]) -> FSG3TimingRun:
             "gpu_name",
             "runtime_identity",
             "external_compute_processes",
-            "thermal_slowdown",
+            "software_thermal_signal",
+            "software_power_cap_signal",
+            "software_thermal_power_counters_coupled",
+            "hardware_thermal_slowdown",
+            "independent_thermal_slowdown",
             "worker_overlap",
             "device_identity_stable",
             "ac_powered",
@@ -754,13 +780,22 @@ def fsg3_timing_run_from_dict(value: Mapping[str, Any]) -> FSG3TimingRun:
                 environment_value["external_compute_processes"], "external processes"
             )
         ),
-        thermal_slowdown=bool(environment_value["thermal_slowdown"]),
+        software_thermal_signal=bool(environment_value["software_thermal_signal"]),
+        software_power_cap_signal=bool(environment_value["software_power_cap_signal"]),
+        software_thermal_power_counters_coupled=bool(
+            environment_value["software_thermal_power_counters_coupled"]
+        ),
+        hardware_thermal_slowdown=bool(environment_value["hardware_thermal_slowdown"]),
         worker_overlap=bool(environment_value["worker_overlap"]),
         device_identity_stable=bool(environment_value["device_identity_stable"]),
         ac_powered=bool(environment_value["ac_powered"]),
     )
     if environment.admitted is not bool(environment_value["admitted"]):
         raise ValueError("FSG3 environment admission projection differs")
+    if environment.independent_thermal_slowdown is not bool(
+        environment_value["independent_thermal_slowdown"]
+    ):
+        raise ValueError("FSG3 independent thermal projection differs")
     run = FSG3TimingRun(
         schema_version=str(value["schema_version"]),
         run_id=str(value["run_id"]),

@@ -69,9 +69,13 @@ V4-3整体=`VALIDATED-WHOLE-CORE-REPLACEMENT`；B2 timing已准入但未执行�
 FSG3/B2正式计时预注册见
 `gemini_doc/fsg3_b2_same_solver_timing_preregistration_2026_08_13.md`：冻结B0 original、B1 typed
 passthrough、B2 whole-call reference replacement及六个全排列block，共36个fresh control/profile进程；
-当前为`PREREGISTERED-NOT-RUN`，下一动作是实现schema/replay/worker，不得提前引用任何速度数字。
-其中schema/replay现已实现并通过13项定向、`1213 passed, 3 skipped`全量回归；真实GPU worker与
-measurement仍未执行，当前细分状态=`IMPLEMENTED-SCHEMA-REPLAY / REAL-WORKER-PENDING`。
+当前正式measurement仍为`PREREGISTERED-NOT-RUN`，不得提前引用速度数字。schema/replay、真实
+B0/B1/B2 worker、profile spans与36-process orchestrator均已实现；v1因旧thermal admission在7个位置后
+整轮中止且不形成性能主张。schema v3已对本机严格镜像的SW power/thermal raw telemetry作最窄修正，
+单worker及六路block-0 smoke均通过，完整回归为`1227 passed, 3 skipped`。诊断见
+`gemini_doc/change_2026-08-13_fsg3_formal_v1_environment_abort.md`与
+`gemini_doc/change_2026-08-13_fsg3_coupled_power_thermal_telemetry.md`；下一动作是在clean commit上从
+position 0生成完整36-process v3 artifact。
 
 ---
 

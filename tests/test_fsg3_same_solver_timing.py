@@ -1,6 +1,6 @@
 """Contracts and replay tests for FSG3 B0/B1/B2 same-solver timing."""
 
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,protected-access
 
 from __future__ import annotations
 
@@ -48,6 +48,18 @@ def _semantics() -> FSG3SemanticResult:
         n_verified=0,
         n_splits=6,
     )
+
+
+def _idle_gpu_snapshot() -> dict[str, object]:
+    return {
+        "temperature": "49 C",
+        "sw_thermal_slowdown": "Not Active",
+        "sw_power_cap": "Not Active",
+        "hw_thermal_slowdown": "Not Active",
+        "sw_thermal_slowdown_counter_us": 0,
+        "sw_power_cap_counter_us": 0,
+        "hw_thermal_slowdown_counter_us": 0,
+    }
 
 
 def _metrics(configuration: FSG3Configuration, *, profile: bool) -> FSG3TimingMetrics:
@@ -152,7 +164,10 @@ def _runs() -> list[FSG3TimingRun]:
                     gpu_name="RTX 4060",
                     runtime_identity="runtime",
                     external_compute_processes=(),
-                    thermal_slowdown=False,
+                    software_thermal_signal=False,
+                    software_power_cap_signal=False,
+                    software_thermal_power_counters_coupled=False,
+                    hardware_thermal_slowdown=False,
                     worker_overlap=False,
                     device_identity_stable=True,
                     ac_powered=True,
@@ -305,8 +320,8 @@ def test_formal_preflight_admission_is_recomputed() -> None:
             {
                 "elapsed_ns": 0,
                 "temperature_celsius": 49,
-                "thermal_active": False,
-                "gpu_snapshot": {},
+                "independent_thermal_active": False,
+                "gpu_snapshot": _idle_gpu_snapshot(),
                 "compute_processes": [
                     {
                         "pid": 1,
@@ -325,6 +340,107 @@ def test_formal_preflight_admission_is_recomputed() -> None:
     ] = 51
     with pytest.raises(ValueError, match="admission differs"):
         experiment_runner._validate_formal_preflight(sample)
+
+
+def test_formal_preflight_accepts_only_exact_coupled_software_alias() -> None:
+    snapshot = _idle_gpu_snapshot()
+    snapshot.update(
+        {
+            "sw_thermal_slowdown": "Active",
+            "sw_power_cap": "Active",
+            "sw_thermal_slowdown_counter_us": 42,
+            "sw_power_cap_counter_us": 42,
+        }
+    )
+    sample = {
+        "temperature_limit_celsius": 50,
+        "poll_seconds": 5,
+        "timeout_seconds": 900,
+        "sample_count": 1,
+        "wait_ns": 1,
+        "samples": [
+            {
+                "elapsed_ns": 0,
+                "temperature_celsius": 49,
+                "independent_thermal_active": False,
+                "gpu_snapshot": snapshot,
+                "compute_processes": [],
+                "ac_powered": True,
+            }
+        ],
+        "admitted": True,
+    }
+    experiment_runner._validate_formal_preflight(sample)
+    snapshot["sw_power_cap_counter_us"] = 41
+    with pytest.raises(ValueError, match="thermal projection differs"):
+        experiment_runner._validate_formal_preflight(sample)
+
+
+def test_artifact_environment_gate_is_recomputed_from_raw_diagnostics(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def ac_powered() -> bool:
+        return True
+
+    monkeypatch.setattr(experiment_runner.worker, "_ac_powered", ac_powered)
+    runtime_environment: dict[str, object] = {"runtime": "test"}
+    runtime_identity = experiment_runner.canonical_hash(runtime_environment)
+    run = replace(
+        _runs()[0],
+        environment=replace(
+            _runs()[0].environment,
+            runtime_identity=runtime_identity,
+        ),
+    )
+    snapshot = {
+        **_idle_gpu_snapshot(),
+        "uuid": run.environment.gpu_uuid,
+        "name": run.environment.gpu_name,
+    }
+    worker_pid = 1234
+    processes = [{"pid": worker_pid, "name": "/python", "used_memory_mib": 100}]
+    worker_preflight = {
+        "worker_pid": worker_pid,
+        "temperature_limit_celsius": 45,
+        "poll_seconds": 5,
+        "timeout_seconds": 900,
+        "sample_count": 1,
+        "wait_ns": 1,
+        "samples": [
+            {
+                "elapsed_ns": 0,
+                "temperature_celsius": 44,
+                "independent_thermal_active": False,
+                "gpu_snapshot": snapshot,
+                "compute_processes": processes,
+                "ac_powered": True,
+            }
+        ],
+        "admitted": True,
+    }
+    envelope: dict[str, object] = {
+        "run": run.to_dict(),
+        "diagnostics": {
+            "runtime_environment": runtime_environment,
+            "environment_before": snapshot,
+            "environment_after": snapshot,
+            "compute_processes_before": processes,
+            "compute_processes_after": processes,
+            "worker_preflight": worker_preflight,
+        },
+    }
+    outer = {"host_before": {}, "host_after": {}}
+    environment = experiment_runner._environment([envelope], [outer])
+    assert environment["all_workers_environment_admitted"] is True
+
+    gate = cast(
+        dict[str, object], cast(dict[str, object], envelope["run"])["environment"]
+    )
+    gate["software_thermal_signal"] = True
+    gate["software_power_cap_signal"] = True
+    gate["software_thermal_power_counters_coupled"] = True
+    with pytest.raises(ValueError, match="raw environment gate projection differs"):
+        experiment_runner._environment([envelope], [outer])
 
 
 def test_replay_rejects_order_tampering() -> None:
@@ -411,6 +527,22 @@ def test_environment_and_profile_gates_are_recomputed() -> None:
     assert summary["environment_passed"] is False
     failure_rows = cast(list[str], summary["failure_rows"])
     assert any("residual-failed" in item for item in failure_rows)
+
+
+def test_exact_coupled_power_thermal_signal_is_not_independent_thermal() -> None:
+    environment = _runs()[0].environment
+    coupled = replace(
+        environment,
+        software_thermal_signal=True,
+        software_power_cap_signal=True,
+        software_thermal_power_counters_coupled=True,
+    )
+    coupled.validate()
+    assert coupled.independent_thermal_slowdown is False
+    assert coupled.admitted is True
+    independent = replace(coupled, software_thermal_power_counters_coupled=False)
+    assert independent.independent_thermal_slowdown is True
+    assert independent.admitted is False
 
 
 def test_profile_perturbation_is_not_used_as_headline_latency() -> None:

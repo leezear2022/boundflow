@@ -251,7 +251,7 @@ atomic_commit/post`。删项、换序、重叠、wall投影或derived closure不
 没有形成performance claim。详见
 `gemini_doc/change_2026-08-13_fsg3_profile_schema_v2_prerun_amendment.md`。
 
-## 15. Pre-Run Amendment 3：Formal Worker Cool/Idle Preflight
+## 15. Pre-Run Amendment 3：Formal Worker Cool/Idle Preflight（已由§17细化）
 
 非正式block-0连续smoke与后台全量pytest重叠时，环境门禁正确观察到外部CUDA进程、58→64°C升温及
 software thermal counter增长，0/6 run准入。为执行§7已经冻结的“无worker overlap、无thermal
@@ -265,3 +265,54 @@ slowdown”要求，正式orchestrator在每一个worker开始前执行相同的
 
 preflight不在query/core计时scope内，不改变36-run顺序、指标、重复数或阈值。它固定fresh-process
 latency实验的起始环境，不主张持续吞吐性能。
+
+## 16. Pre-Run Amendment 4：Post-Initialization Worker Preflight（已由§17细化）
+
+formal v1执行7个连续位置后整轮中止：outer preflight在`<=50°C`放行，但fresh worker完成
+Python/Torch/solver与CUDA初始化后，worker `environment_before`已约52°C，query内software thermal
+counter增长，7/7均不准入。v1没有manifest或performance claim，完整证据与原因见
+`gemini_doc/change_2026-08-13_fsg3_formal_v1_environment_abort.md`。
+
+v2保留outer preflight以排除并发，并在每个fresh worker完成import/CUDA初始化后、任何compile/query
+计时前增加第二道冻结检查：温度`<=45°C`、thermal inactive、AC，除worker自身和固定compositor外无
+CUDA compute process；5秒轮询、900秒上限。完整sample进入worker envelope，replay重算最后一条准入
+状态。若随后timed query的thermal counter仍增长，该位置和整轮仍按原门禁失败，不得个别重跑。
+
+v2必须从36-run position 0完整重启，不得混入v1的7个值。orchestrator每个worker后立即刷新raw run与
+metadata，以便任何整轮fail-fast仍保留环境证据。本修正改变检查位置，不改变计时scope、顺序、指标、
+重复数或统计阈值。
+
+阈值冻结依据：非正式单worker在48→50°C时thermal counter仍增加约1.35秒并被拒绝，而更早独立
+B0 profile在45→46°C曾准入。该校准发生在v2正式36-run之前，pilot值不进入统计。
+
+## 17. Pre-Run Amendment 5：独立温控与功耗耦合遥测（Schema v3）
+
+本修订发生在任何可准入的正式36-run之前。v2尚未启动完整正式轮；一次48°C pilot与关闭
+`nvidia-powerd`的诊断仍被旧门禁拒绝。进一步读取同一`nvidia-smi -q -x`快照并做受控CUDA矩阵乘后，
+确认本机RTX 4060 Laptop、driver 610.57.04存在可重复的遥测耦合：software power-cap与software
+thermal的reason同步，两个累计counter在负载前后逐值严格相同；硬件thermal counter始终为0。单进程
+v3 pilot的两个软件counter同为`50,495 -> 168,411 us`，而GPU为45→46°C、T.Limit margin为42→41°C。
+
+NVIDIA官方文档把SW power cap和SW thermal定义为不同clock-event reason，也明确T.Limit是距最大运行
+温度的**margin**，不是绝对温度。因此不能把本机XML中的`gpu_temp_tlimit=42 C`解释为42°C温控阈值，
+也不能在两个来源完全镜像时把单独的software thermal位当成独立物理证据：
+
+- <https://docs.nvidia.com/deploy/nvidia-smi/index.html>
+- <https://docs.nvidia.com/datacenter/dcgm/latest/reference/dcgm-api/dcgm-api-field-constants.html>
+- <https://docs.nvidia.com/datacenter/dcgm/latest/dcgm-api/dcgm-api-field-ids.html>
+
+正式schema升级为v3，并冻结以下fail-closed规则：
+
+1. 每个preflight与timed interval均原样保存SW power、SW thermal、HW thermal的reason和累计counter，
+   同时保存GPU温度、T.Limit margin与target temperature；
+2. 只有在SW power与SW thermal的before/after reason逐点相同，且两个累计counter在before/after都
+   逐值相等时，才将software thermal投影为driver-coupled power-cap alias；普通power limiting允许；
+3. 任一不相等的软件thermal信号、任一HW thermal reason/counter增长、counter倒退、外部CUDA进程、
+   设备身份漂移或非AC供电仍拒绝；温度起点仍保留outer `<=50°C`、post-init `<=45°C`；
+4. worker PID进入canonical preflight，artifact replay从raw snapshot/process列表重新计算preflight与
+   interval gate；只改`admitted`、coupled布尔值或摘要不能通过；
+5. schema v3从position 0完整启动，v1的7个值及所有v2/v3 pilot一律不进入正式统计。
+
+修订后的非正式block-0 smoke覆盖B0/B1/B2 × control/profile六路，6/6环境准入、语义失败0、所有profile
+core closure通过。它只证明合同可执行，不形成性能主张。完整诊断见
+`gemini_doc/change_2026-08-13_fsg3_coupled_power_thermal_telemetry.md`。

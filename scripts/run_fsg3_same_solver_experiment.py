@@ -33,7 +33,7 @@ from boundflow.runtime.fsg3_same_solver_timing import (
 )
 from scripts import run_fsg3_same_solver_timing as worker
 
-ARTIFACT_SCHEMA = "boundflow.fsg3-same-solver-artifact/v1"
+ARTIFACT_SCHEMA = "boundflow.fsg3-same-solver-artifact/v3"
 CODE_PATHS = (
     "boundflow/runtime/fsg3_same_solver_timing.py",
     "scripts/run_fsg3_same_solver_timing.py",
@@ -58,7 +58,11 @@ FORMAL_PREFLIGHT_CONTRACT = {
     "timeout_seconds": PREFLIGHT_TIMEOUT_SECONDS,
     "external_compute_processes_forbidden": True,
     "ac_power_required": True,
-    "thermal_reason_must_be_inactive": True,
+    "independent_thermal_signal_must_be_inactive": True,
+    "exact_coupled_software_power_thermal_alias_allowed": True,
+    "worker_post_init_temperature_limit_celsius": (
+        worker.WORKER_PREFLIGHT_TEMPERATURE_LIMIT_C
+    ),
 }
 
 
@@ -212,15 +216,14 @@ def _wait_for_formal_environment() -> dict[str, object]:
                 "FSG3 formal preflight found external CUDA compute processes: "
                 + ", ".join(external)
             )
-        thermal_active = any(
-            snapshot[name] != "Not Active"
-            for name in ("sw_thermal_slowdown", "hw_thermal_slowdown")
+        independent_thermal_active = worker._snapshot_independent_thermal_active(
+            snapshot
         )
         temperature = _temperature_celsius(snapshot)
         sample = {
             "elapsed_ns": time.monotonic_ns() - started_ns,
             "temperature_celsius": temperature,
-            "thermal_active": thermal_active,
+            "independent_thermal_active": independent_thermal_active,
             "gpu_snapshot": snapshot,
             "compute_processes": processes,
             "ac_powered": worker._ac_powered(),
@@ -228,7 +231,7 @@ def _wait_for_formal_environment() -> dict[str, object]:
         samples.append(sample)
         ready = (
             temperature <= PREFLIGHT_TEMPERATURE_LIMIT_C
-            and not thermal_active
+            and not independent_thermal_active
             and sample["ac_powered"] is True
         )
         if ready:
@@ -248,7 +251,7 @@ def _wait_for_formal_environment() -> dict[str, object]:
                 {
                     "preflight": "waiting",
                     "temperature_celsius": temperature,
-                    "thermal_active": thermal_active,
+                    "independent_thermal_active": independent_thermal_active,
                     "sample_count": len(samples),
                 }
             ),
@@ -283,11 +286,17 @@ def _validate_formal_preflight(value: Mapping[str, Any]) -> None:
     if not isinstance(last, Mapping):
         raise TypeError("FSG3 formal preflight sample differs")
     processes = last.get("compute_processes")
+    snapshot = last.get("gpu_snapshot")
     if not isinstance(processes, list):
         raise TypeError("FSG3 formal preflight process list differs")
+    if not isinstance(snapshot, Mapping):
+        raise TypeError("FSG3 formal preflight GPU snapshot differs")
+    independent_thermal_active = worker._snapshot_independent_thermal_active(snapshot)
+    if last.get("independent_thermal_active") is not independent_thermal_active:
+        raise ValueError("FSG3 formal preflight thermal projection differs")
     if (
         int(last.get("temperature_celsius", -1)) > PREFLIGHT_TEMPERATURE_LIMIT_C
-        or last.get("thermal_active") is not False
+        or independent_thermal_active
         or last.get("ac_powered") is not True
         or _external_compute_processes(cast(Sequence[Mapping[str, object]], processes))
     ):
@@ -484,6 +493,26 @@ def _environment(
             if not isinstance(preflight, Mapping):
                 raise TypeError("FSG3 formal preflight metadata differs")
             _validate_formal_preflight(cast(Mapping[str, Any], preflight))
+        worker_preflight = diagnostics.get("worker_preflight")
+        if not isinstance(worker_preflight, Mapping):
+            raise TypeError("FSG3 worker preflight diagnostics differ")
+        worker._validate_worker_preflight(cast(Mapping[str, Any], worker_preflight))
+        recomputed_gate = worker._environment_gate(
+            cast(Mapping[str, object], diagnostics["environment_before"]),
+            cast(Mapping[str, object], diagnostics["environment_after"]),
+            cast(
+                Sequence[Mapping[str, object]],
+                diagnostics["compute_processes_before"],
+            ),
+            cast(
+                Sequence[Mapping[str, object]],
+                diagnostics["compute_processes_after"],
+            ),
+            str(gate["runtime_identity"]),
+            worker_pid=int(worker_preflight["worker_pid"]),
+        )
+        if gate != recomputed_gate.to_dict():
+            raise ValueError("FSG3 raw environment gate projection differs")
         rows.append(
             {
                 "run_id": run["run_id"],
@@ -496,6 +525,7 @@ def _environment(
                 "host_before": outer["host_before"],
                 "host_after": outer["host_after"],
                 "formal_preflight": preflight,
+                "worker_preflight": worker_preflight,
             }
         )
     runtime_hashes = {canonical_hash(row["runtime_environment"]) for row in rows}
@@ -605,6 +635,8 @@ def _generate(args: argparse.Namespace) -> dict[str, object]:
         envelopes.append(envelope)
         metadata.append(outer)
         runs.append(run)
+        _write_jsonl(artifact / "worker_runs.jsonl", [item.to_dict() for item in runs])
+        _write_jsonl(artifact / "run_metadata.jsonl", metadata)
         print(
             _canonical_json(
                 {
