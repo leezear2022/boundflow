@@ -72,3 +72,11 @@ revision及完整文件inventory。replay不信任序列化结果，而是从sou
 
 该runner需要先进入clean commit，随后才能生成带source revision的正式artifact；因此本段仍不升级
 V4-2C状态，也不声明optimizer replacement或性能结果。
+
+## Tamper Probe 准备（同日）
+
+新增六类同步重哈希/重签名攻击：topology、α sparse index、history score、intermediate bound、未消费
+upper-α plane、beta location+history。对source capture类攻击，probe会重算tensor digest、snapshot hash、
+V4-2B source manifest及V4-2C outer manifest；同时绕开序列化结果直接调用semantic builder，要求冻结
+identity或snapshot/step-zero cross-binding拒绝。临时报告实测6/6在外层provenance和内层semantic两层均
+fail closed；mypy clean，Pylint=`10.00/10`。probe先进入clean commit，再生成其源码digest绑定的正式报告。
