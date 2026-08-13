@@ -55,6 +55,11 @@ V4-3C实现记录为`gemini_doc/change_2026-08-13_rvir_v4_native_kfsb.md`，form
 全部拒绝，状态为`VALIDATED-NATIVE-KFSB`。下一动作只允许V4-3D live return assembly；V4-3E/B2
 继续关闭。
 
+V4-3D capture-ready实现见`gemini_doc/change_2026-08-13_rvir_v4_live_return_assembly.md`：
+BoundFlow whole core已在RTX 4060真实GPU进程中以provider callback=`0/0/0`接入未修改的official
+post/queue，完整core/post语义比较最大差`1.0669e-05`且decision exact。当前仍为
+`FORMAL-ARTIFACT-PENDING`；V4-3E与B2继续关闭。
+
 ---
 
 当前权威研究入口：

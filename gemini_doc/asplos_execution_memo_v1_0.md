@@ -22,7 +22,9 @@
 > `VALIDATED-NATIVE-BACKWARD-EXPORT`关闭。V4-3C随后独立推导六层mask、复现三组top-3候选并执行
 > 72个native child lower；candidate/final decision exact、child lower最大差`3.0994e-06`，八类同步
 > 重签攻击拒绝，以`VALIDATED-NATIVE-KFSB`关闭。下一门禁只允许V4-3D live return assembly；V4-3E
-> 与B2继续关闭。
+> 与B2继续关闭。V4-3D capture-ready实现现已在RTX 4060真实GPU进程完成一次whole-core→official
+> post/queue接通，provider core/compute/update/fallback=`0/0/0/0`，完整core/post最大差
+> `1.0669e-05`且decision exact；当前仍为`FORMAL-ARTIFACT-PENDING`，不得提前升级V4-3D或开启V4-3E。
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed

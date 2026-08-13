@@ -17,8 +17,10 @@ from boundflow.runtime.native_alpha_beta_optimization_state import (
 )
 from boundflow.runtime.rvir_v4_atomic_copy_out import (
     commit_rvir_v4_atomic_copy_out,
+    commit_rvir_v4_live_atomic_copy_out,
     ProductionAtomicCopyOutV4,
     stage_rvir_v4_atomic_copy_out,
+    stage_rvir_v4_live_atomic_copy_out,
 )
 from boundflow.runtime.rvir_v4_native_optimizer import (
     execute_rvir_v4_native_optimizer_trace,
@@ -212,3 +214,117 @@ def test_runtime_copy_failure_rolls_back_already_written_paths(
         )
     for path in live:
         torch.testing.assert_close(live[path], before[path])
+
+
+def _live_host_packets(
+    fixture: _Fixture,
+) -> tuple[dict[str, object], dict[str, object]]:
+    thresholds = next(
+        tensor.value
+        for tensor in fixture.pre.tensors
+        if tensor.role == ProductionTensorRole.DECISION_THRESHOLD
+    )
+    history = [[[], [], [], [], []] for _ in range(6)]
+    host: dict[str, object] = {
+        "history": history,
+        "depths": [1, 1, 1, 1, 1, 1],
+        "thresholds": thresholds.clone(),
+        "discard_after_core": torch.arange(6),
+    }
+    candidate: dict[str, object] = {
+        "history": history,
+        "depths": [1, 1, 1, 1, 1, 1],
+        "thresholds": thresholds.clone(),
+    }
+    return host, candidate
+
+
+def test_live_candidate_has_no_expected_post_dependency_and_commits_host() -> None:
+    fixture = _stage()
+    host, candidate_host = _live_host_packets(fixture)
+    staged = stage_rvir_v4_live_atomic_copy_out(
+        pre=fixture.pre,
+        terminal_state=fixture.terminal,
+        topology=TOPOLOGY,
+        terminal_lower=fixture.native.steps[-1].lower,
+        host_packet=host,
+        host_packet_candidate=candidate_host,
+        candidate_snapshot_id="core:000000:live-candidate",
+    )
+    live = {
+        path: tensor.value.clone()
+        for path, tensor in fixture.pre.tensor_map().items()
+        if tensor.ownership == ProductionTensorOwnership.MUTABLE_COPY_OUT
+    }
+
+    receipt = commit_rvir_v4_live_atomic_copy_out(
+        staged,
+        pre=fixture.pre,
+        live_targets=live,
+        host_packet=host,
+    )
+
+    assert len(staged.path_receipts) == 12
+    assert sum(row.changed for row in staged.path_receipts) == 7
+    assert receipt["committed_path_count"] == 12
+    assert receipt["changed_path_count"] == 7
+    assert receipt["atomic_live_and_host_commit"] is True
+    assert set(host) == {"depths", "history", "thresholds"}
+    assert host["depths"] == candidate_host["depths"]
+    assert host["history"] == candidate_host["history"]
+    torch.testing.assert_close(host["thresholds"], candidate_host["thresholds"])
+    for path, value in live.items():
+        torch.testing.assert_close(
+            value, staged.candidate_snapshot.tensor_map()[path].value
+        )
+
+
+def test_live_host_failure_rolls_back_all_tensors_and_host(
+    monkeypatch,  # type: ignore[no-untyped-def]
+) -> None:
+    fixture = _stage()
+    host, candidate_host = _live_host_packets(fixture)
+    staged = stage_rvir_v4_live_atomic_copy_out(
+        pre=fixture.pre,
+        terminal_state=fixture.terminal,
+        topology=TOPOLOGY,
+        terminal_lower=fixture.native.steps[-1].lower,
+        host_packet=host,
+        host_packet_candidate=candidate_host,
+        candidate_snapshot_id="core:000000:live-candidate",
+    )
+    live = {
+        path: tensor.value.clone()
+        for path, tensor in fixture.pre.tensor_map().items()
+        if tensor.ownership == ProductionTensorOwnership.MUTABLE_COPY_OUT
+    }
+    tensor_before = {path: value.clone() for path, value in live.items()}
+    host_before = dict(host)
+    original = copy_out_module._replace_host_packet  # pylint: disable=protected-access
+    calls = 0
+
+    def fail_first_host_write(target, source) -> None:  # type: ignore[no-untyped-def]
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            target.clear()
+            raise RuntimeError("injected host packet failure")
+        original(target, source)
+
+    monkeypatch.setattr(copy_out_module, "_replace_host_packet", fail_first_host_write)
+    with pytest.raises(RuntimeError, match="injected host packet failure"):
+        commit_rvir_v4_live_atomic_copy_out(
+            staged,
+            pre=fixture.pre,
+            live_targets=live,
+            host_packet=host,
+        )
+    assert set(host) == set(host_before)
+    assert host["depths"] == host_before["depths"]
+    assert host["history"] == host_before["history"]
+    torch.testing.assert_close(host["thresholds"], host_before["thresholds"])
+    torch.testing.assert_close(
+        host["discard_after_core"], host_before["discard_after_core"]
+    )
+    for path in live:
+        torch.testing.assert_close(live[path], tensor_before[path])

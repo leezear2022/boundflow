@@ -175,3 +175,24 @@ def test_mapping_binds_to_independent_native_scope_without_provider_state() -> N
     assert state.splits.keys() == mapping.splits.keys()
     assert state.alphas.keys() == mapping.alphas.keys()
     assert state.betas.keys() == mapping.betas.keys()
+
+
+def test_mapping_moves_live_tensors_without_changing_captured_identity() -> None:
+    mapping = initialize_rvir_v4_native_pre_state(
+        _pre_snapshot(), TOPOLOGY, expected_identity=IDENTITY
+    )
+
+    moved = mapping.to(device=torch.device("cpu"), dtype=torch.float64)
+
+    assert moved.identity == mapping.identity
+    assert moved.round_trip_receipts == mapping.round_trip_receipts
+    assert all(value.dtype == torch.float64 for value in moved.alphas.values())
+    assert all(value.dtype == torch.float64 for value in moved.betas.values())
+    assert all(value.dtype == torch.int8 for value in moved.splits.values())
+    assert all(
+        interval.lower.dtype == torch.float64 and interval.upper.dtype == torch.float64
+        for interval in moved.relu_pre.values()
+    )
+
+    with pytest.raises(ValueError, match="target dtype"):
+        mapping.to(device=torch.device("cpu"), dtype=torch.int64)

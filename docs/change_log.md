@@ -5179,3 +5179,11 @@
 
 **记录**
 - `gemini_doc/change_2026-08-13_rvir_v4_native_kfsb_formal_closure.md`
+# 2026-08-13 — RVIR-v4 V4-3D live return capture-ready
+
+- 新增真实provider-owned α/β与host packet联合原子提交/回滚、完整`UpdateBoundCoreReturn` assembly、
+  official post/queue接入和live GPU runner；
+- RTX 4060 candidate whole core以provider core/compute/update/fallback=`0/0/0/0`完整运行，451 tensor
+  语义比较最大差`1.0669231414794922e-05`、sign/decision exact；
+- 当前只到`FORMAL-ARTIFACT-PENDING`，V4-3E/B2/performance未准入；详见
+  `gemini_doc/change_2026-08-13_rvir_v4_live_return_assembly.md`。

@@ -126,4 +126,7 @@ V4-3C已由source `a2097c0`正式关闭：六层mask exact，三组candidate共3
 `1187 passed, 3 skipped`。证据见
 `gemini_doc/change_2026-08-13_rvir_v4_native_kfsb_formal_closure.md`。
 
-下一动作只实现V4-3D live return assembly。V4-3E five-fresh和B2 timing仍按依赖门禁关闭。
+V4-3D capture-ready live return已完成一次RTX 4060 whole-core→official post/queue运行：provider
+core/compute/update/fallback=`0/0/0/0`，451 tensor/213,060 signs语义比较最大差`1.0669e-05`、final
+decision exact。下一动作是固定source并生成V4-3D formal artifact与tamper报告；在其正式关闭前，
+V4-3E five-fresh和B2 timing仍按依赖门禁关闭。

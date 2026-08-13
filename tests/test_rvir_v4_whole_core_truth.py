@@ -11,7 +11,9 @@ import torch
 
 from boundflow.runtime.rvir_v4_production_state import production_tensor_sha256
 from boundflow.runtime.rvir_v4_whole_core_truth import (
+    compare_rvir_v4_live_return_truth,
     compare_rvir_v4_whole_core_truth,
+    validate_rvir_v4_live_return_result,
     validate_rvir_v4_whole_core_truth,
     whole_core_truth_metadata,
 )
@@ -82,6 +84,48 @@ def test_worker_modes_are_named_independently() -> None:
         capture_runner.WHOLE_CORE_WORKER_SCHEMA_VERSION
         != capture_runner.OPTIMIZER_WORKER_SCHEMA_VERSION
     )
+
+
+def _live_core_from_provider_truth(core: dict[str, object]) -> dict[str, object]:
+    live = deepcopy(core)
+    live["branch_trace"]["provider_update_bounds_call_count"] = 0  # type: ignore[index]
+    semantic = {key: value for key, value in live.items() if key != "truth_hash"}
+    live["truth_hash"] = artifact_runner._canonical_hash(
+        whole_core_truth_metadata(semantic)
+    )
+    return live
+
+
+def test_live_return_contract_accepts_zero_provider_calls_and_compares_truth() -> None:
+    payload = _payload()
+    reference_core = payload["whole_core_truths"][0]  # type: ignore[index]
+    reference_post = payload["whole_post_truths"][0]  # type: ignore[index]
+    live_core = _live_core_from_provider_truth(reference_core)
+
+    summary = validate_rvir_v4_live_return_result(live_core, reference_post)
+    parity = compare_rvir_v4_live_return_truth(
+        reference_core,
+        reference_post,
+        live_core,
+        reference_post,
+    )
+
+    assert summary["provider_update_bounds_call_count"] == 0
+    assert summary["whole_core_replacement_admitted"] is True
+    assert parity["status"] == "live-return-semantic-parity-passed"
+    assert parity["observed_provider_update_bounds_call_count"] == 0
+    assert parity["max_abs_diff"] == 0.0
+    assert parity["whole_core_replacement_admitted"] is True
+    assert parity["b2_same_solver_timing_admitted"] is False
+
+
+def test_live_return_contract_rejects_provider_callback_count() -> None:
+    payload = _payload()
+    core = payload["whole_core_truths"][0]  # type: ignore[index]
+    post = payload["whole_post_truths"][0]  # type: ignore[index]
+
+    with pytest.raises(ValueError, match="KFSB candidate inventory differs"):
+        validate_rvir_v4_live_return_result(core, post)
 
 
 def test_formal_artifact_static_replay_and_tamper_report() -> None:

@@ -37,7 +37,9 @@
 > integration。V4-3C随后从native bounds/split/lA独立推导六层mask，复现三组top-3 candidate并执行
 > 72个child lower；candidate/final decision exact、child lower最大差`3.0994e-06`，八类同步重签攻击
 > 8/8拒绝，full=`1187 passed, 3 skipped`，以`VALIDATED-NATIVE-KFSB`关闭。下一门禁只允许V4-3D
-> live return assembly；V4-3E、B2与性能claim继续关闭。
+> live return assembly。V4-3D capture-ready candidate现已在RTX 4060上以零provider bound callback
+> 完成whole-core→official post/queue一次端到端运行，451 tensor语义比较最大差`1.0669e-05`、decision
+> exact；formal artifact仍pending，因此V4-3E、B2与性能claim继续关闭。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
 > objective-ancestral sibling evaluator，并新增独立 Plan/Batch/Task/Schedule IR 与跨 clause 单一 cache
 > owner。真实 ResNet clause 2 root+pair 与 frozen audit lower/branch/split/α/β/refinement exact，upper

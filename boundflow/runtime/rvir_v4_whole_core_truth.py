@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 from typing import Any, Mapping, cast
@@ -245,10 +246,15 @@ def compare_rvir_v4_whole_core_truth(
     return result
 
 
-def validate_rvir_v4_whole_core_truth(
-    core: Mapping[str, Any], post: Mapping[str, Any]
+def _validate_rvir_v4_whole_core_result(
+    core: Mapping[str, Any],
+    post: Mapping[str, Any],
+    *,
+    provider_update_bounds_call_count: int,
+    status: str,
+    whole_core_replacement_admitted: bool,
 ) -> dict[str, object]:
-    """Validate one fixed ResNet production whole-core and post truth pair."""
+    """Validate one fixed ResNet production whole-core and post result pair."""
 
     _validate_tree(core, label="core")
     _validate_tree(post, label="post")
@@ -317,7 +323,8 @@ def validate_rvir_v4_whole_core_truth(
     candidates = branch.get("candidate_splits")
     child_lowers = branch.get("candidate_child_lowers")
     if (
-        branch.get("provider_update_bounds_call_count") != 3
+        branch.get("provider_update_bounds_call_count")
+        != provider_update_bounds_call_count
         or not isinstance(candidates, list)
         or not isinstance(child_lowers, list)
         or len(candidates) != 3
@@ -354,19 +361,19 @@ def validate_rvir_v4_whole_core_truth(
         raise ValueError("RVIR-v4 whole post/core lower binding differs")
 
     summary: dict[str, object] = {
-        "status": "validated-whole-core-truth",
+        "status": status,
         "core_count": 1,
         "domain_count": 6,
         "intermediate_count": len(working),
         "lA_count": len(l_a_data),
         "kfsb_candidate_count": len(candidates),
-        "provider_update_bounds_call_count": 3,
+        "provider_update_bounds_call_count": provider_update_bounds_call_count,
         "branching_decision": decision["decision"],
         "n_verified": 0,
         "n_splits": 6,
         "core_truth_hash": core["truth_hash"],
         "post_truth_hash": post["truth_hash"],
-        "whole_core_replacement_admitted": False,
+        "whole_core_replacement_admitted": whole_core_replacement_admitted,
         "b2_same_solver_timing_admitted": False,
         "performance_claimed": False,
     }
@@ -374,13 +381,82 @@ def validate_rvir_v4_whole_core_truth(
     return summary
 
 
+def validate_rvir_v4_whole_core_truth(
+    core: Mapping[str, Any], post: Mapping[str, Any]
+) -> dict[str, object]:
+    """Validate one fixed ResNet provider whole-core and post truth pair."""
+
+    return _validate_rvir_v4_whole_core_result(
+        core,
+        post,
+        provider_update_bounds_call_count=3,
+        status="validated-whole-core-truth",
+        whole_core_replacement_admitted=False,
+    )
+
+
+def validate_rvir_v4_live_return_result(
+    core: Mapping[str, Any], post: Mapping[str, Any]
+) -> dict[str, object]:
+    """Validate one BoundFlow-owned core result consumed by the provider post path."""
+
+    return _validate_rvir_v4_whole_core_result(
+        core,
+        post,
+        provider_update_bounds_call_count=0,
+        status="validated-live-return-result",
+        whole_core_replacement_admitted=True,
+    )
+
+
+def compare_rvir_v4_live_return_truth(
+    reference_core: Mapping[str, Any],
+    reference_post: Mapping[str, Any],
+    observed_core: Mapping[str, Any],
+    observed_post: Mapping[str, Any],
+) -> dict[str, object]:
+    """Compare a BoundFlow-owned live return against frozen provider truth."""
+
+    validate_rvir_v4_whole_core_truth(reference_core, reference_post)
+    validate_rvir_v4_live_return_result(observed_core, observed_post)
+    normalized_core = copy.deepcopy(dict(observed_core))
+    branch = _mapping(normalized_core.get("branch_trace"), label="live branch trace")
+    normalized_branch = dict(branch)
+    normalized_branch["provider_update_bounds_call_count"] = 3
+    normalized_core["branch_trace"] = normalized_branch
+    semantic = {
+        key: value for key, value in normalized_core.items() if key != "truth_hash"
+    }
+    normalized_core["truth_hash"] = _canonical_hash(whole_core_truth_metadata(semantic))
+    parity = compare_rvir_v4_whole_core_truth(
+        reference_core,
+        reference_post,
+        normalized_core,
+        observed_post,
+    )
+    parity.update(
+        {
+            "status": "live-return-semantic-parity-passed",
+            "reference_provider_update_bounds_call_count": 3,
+            "observed_provider_update_bounds_call_count": 0,
+            "whole_core_replacement_admitted": True,
+            "b2_same_solver_timing_admitted": False,
+            "performance_claimed": False,
+        }
+    )
+    parity["parity_hash"] = _canonical_hash(parity)
+    return parity
+
+
 __all__ = [
     "compare_rvir_v4_whole_core_truth",
+    "compare_rvir_v4_live_return_truth",
     "PARITY_ATOL",
     "PARITY_RTOL",
     "PROVIDER_ACTIVATIONS",
     "PROVIDER_PREACTIVATIONS",
     "validate_rvir_v4_whole_core_truth",
+    "validate_rvir_v4_live_return_result",
     "whole_core_truth_metadata",
     "WHOLE_CORE_TRUTH_SCHEMA",
     "WHOLE_POST_TRUTH_SCHEMA",

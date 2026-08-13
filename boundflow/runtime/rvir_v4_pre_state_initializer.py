@@ -302,6 +302,42 @@ class ProductionNativePreStateV4:
         state.validate()
         return state
 
+    def to(
+        self, *, device: torch.device, dtype: torch.dtype
+    ) -> "ProductionNativePreStateV4":
+        """Move restored live tensors without changing their captured identity."""
+
+        if not dtype.is_floating_point:
+            raise ValueError("RVIR-v4 pre-state target dtype must be floating point")
+        moved = ProductionNativePreStateV4(
+            identity=self.identity,
+            relu_pre_by_input=tuple(
+                (
+                    name,
+                    IntervalState(
+                        lower=interval.lower.to(device=device, dtype=dtype),
+                        upper=interval.upper.to(device=device, dtype=dtype),
+                    ),
+                )
+                for name, interval in self.relu_pre_by_input
+            ),
+            split_by_relu_input=tuple(
+                (name, value.to(device=device))
+                for name, value in self.split_by_relu_input
+            ),
+            alpha_by_relu_input=tuple(
+                (name, value.to(device=device, dtype=dtype))
+                for name, value in self.alpha_by_relu_input
+            ),
+            beta_by_relu_input=tuple(
+                (name, value.to(device=device, dtype=dtype))
+                for name, value in self.beta_by_relu_input
+            ),
+            round_trip_receipts=self.round_trip_receipts,
+        )
+        moved.validate()
+        return moved
+
 
 def _receipt(
     source: OwnedProductionTensorV4,
