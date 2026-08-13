@@ -327,7 +327,8 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
    `NO-GO/not admitted`；该阻塞已由RVIR-v4 V4-2的`VALIDATED-OPTIMIZER-REPLACEMENT`修复；
 4. [x] V4-3/FSG3前置：whole-core live integration与5个fresh correctness pairs已通过；V4-3=
    `VALIDATED-WHOLE-CORE-REPLACEMENT`，B0/B1/B2 same-solver counterbalanced timing现准入；
-5. [ ] FSG3：36-process B0/B1/B2正式协议已预注册，runner与正式measurement尚未执行；
+5. [~] FSG3：36-process B0/B1/B2正式协议已预注册；typed schema/replay与13项合同测试已完成，
+   real GPU worker与正式measurement尚未执行；
 6. [—] FSG4：因B3—B7均依赖FSG3可审计baseline，依赖门禁阻止，未实现/未消融；
 7. [—] FSG5：因无合法B7 candidate，依赖门禁阻止，无系统性能claim。
 
@@ -432,6 +433,15 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 - B2变慢只形成reference baseline，不关闭B3—B7；correctness、环境、profile扰动或replay失败才使FSG3
   fail closed；
 - 当前状态=`PREREGISTERED-NOT-RUN`，无speedup claim。
+
+### FSG3-1 Schema/Replay（2026-08-13）
+
+- 新增36-run typed raw contract、固定顺序、cold/query/core/GPU/compile/memory指标；
+- replay只用control生成B0/candidate paired statistics，同时重算profile扰动、semantic、provider、环境和
+  break-even门禁；
+- 顺序/删run/provider/scope/semantic/profile/environment负向测试均通过；targeted=`13 passed`、full=
+  `1213 passed, 3 skipped`、mypy clean、Pylint=`10.00/10`；
+- 当前=`IMPLEMENTED-SCHEMA-REPLAY / REAL-WORKER-PENDING`，无真实timing或speedup claim。
 
 ## 13. Rollback
 

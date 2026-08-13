@@ -46,7 +46,8 @@
 > `VALIDATED-FIVE-FRESH-CORRECTNESS`关闭；V4-3整体=`VALIDATED-WHOLE-CORE-REPLACEMENT`。B2
 > same-solver timing现已准入但未执行，尚无performance claim。FSG3/B2六个全排列block、36个fresh
 > control/profile worker与cold/query/core指标已预注册；当前`PREREGISTERED-NOT-RUN`，下一动作是
-> schema/replay与worker实现。
+> schema/replay与worker实现。FSG3-1 typed schema/replay现已通过13项定向与`1213 passed, 3 skipped`
+> 全量回归；真实GPU worker仍pending，无timing claim。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
 > objective-ancestral sibling evaluator，并新增独立 Plan/Batch/Task/Schedule IR 与跨 clause 单一 cache
 > owner。真实 ResNet clause 2 root+pair 与 frozen audit lower/branch/split/α/β/refinement exact，upper

@@ -70,6 +70,8 @@ FSG3/B2正式计时预注册见
 `gemini_doc/fsg3_b2_same_solver_timing_preregistration_2026_08_13.md`：冻结B0 original、B1 typed
 passthrough、B2 whole-call reference replacement及六个全排列block，共36个fresh control/profile进程；
 当前为`PREREGISTERED-NOT-RUN`，下一动作是实现schema/replay/worker，不得提前引用任何速度数字。
+其中schema/replay现已实现并通过13项定向、`1213 passed, 3 skipped`全量回归；真实GPU worker与
+measurement仍未执行，当前细分状态=`IMPLEMENTED-SCHEMA-REPLAY / REAL-WORKER-PENDING`。
 
 ---
 

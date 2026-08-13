@@ -1568,4 +1568,7 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - `FSG3-M`：cold total、process-hit query、whole core、GPU event、compile与post-validation分离；
 - `FSG3-G`：correctness/no-fallback、GPU排他、profile/control `<=1.05`、raw semantic replay与同步重签
   tamper为硬门禁；
-- `FSG3-L`：状态=`PREREGISTERED-NOT-RUN`；没有timing artifact或speedup claim，B3仍待FSG3可审计关闭。
+- `FSG3-S`：typed schema/replay已实现，顺序/删run/provider/scope/semantic/profile/environment等13项合同
+  测试通过，full=`1213 passed, 3 skipped`；
+- `FSG3-L`：状态=`IMPLEMENTED-SCHEMA-REPLAY / REAL-WORKER-PENDING`；没有timing artifact或speedup
+  claim，B3仍待FSG3可审计关闭。

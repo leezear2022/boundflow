@@ -5230,3 +5230,12 @@
 **记录**
 - `gemini_doc/fsg3_b2_same_solver_timing_preregistration_2026_08_13.md`
 - `gemini_doc/change_2026-08-13_fsg3_b2_timing_preregistration.md`
+
+## 2026-08-13：FSG3 Timing Schema 与 Replay
+
+- 新增36-run typed raw schema、严格顺序和B0/B1/B2物理counter合同；
+- replay重算control-only paired speedup、profile perturbation、semantic/environment门禁与break-even；
+- 新增结构及同步篡改负向测试；当前尚未执行真实GPU timing。
+
+**记录**
+- `gemini_doc/change_2026-08-13_fsg3_timing_schema_replay.md`
