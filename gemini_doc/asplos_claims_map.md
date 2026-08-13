@@ -1560,3 +1560,12 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - `RVIR-V4-3E-L`：V4-3E=`VALIDATED-FIVE-FRESH-CORRECTNESS`，V4-3整体=
   `VALIDATED-WHOLE-CORE-REPLACEMENT`；`b2_same_solver_timing_admitted=true`，但B2未执行且
   `performance_claimed=false`。
+
+### FSG3/B2 Same-Solver Timing（预注册、未运行）
+
+- `FSG3-P`：B0/B1/B2物理模式、六个全排列block、每配置6 control+6 profile及36-process exact顺序已
+  在`fsg3_b2_same_solver_timing_preregistration_2026_08_13.md`冻结；
+- `FSG3-M`：cold total、process-hit query、whole core、GPU event、compile与post-validation分离；
+- `FSG3-G`：correctness/no-fallback、GPU排他、profile/control `<=1.05`、raw semantic replay与同步重签
+  tamper为硬门禁；
+- `FSG3-L`：状态=`PREREGISTERED-NOT-RUN`；没有timing artifact或speedup claim，B3仍待FSG3可审计关闭。

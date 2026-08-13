@@ -5218,3 +5218,15 @@
 
 **记录**
 - `gemini_doc/change_2026-08-13_rvir_v4_five_fresh_formal_closure.md`
+
+## 2026-08-13：FSG3/B2 Same-Solver Timing 预注册
+
+- 冻结B0 original、B1 typed passthrough、B2 whole-call reference replacement；
+- 冻结六个配置全排列block、每配置6 control+6 profile，共36个fresh GPU进程；
+- 分离cold total、process-hit query、whole core、GPU event、compile及post-measurement validation；
+- B2快慢只建立reference baseline，不提前关闭尚未实现的B3—B7；
+- 当前=`PREREGISTERED-NOT-RUN`，无performance claim。
+
+**记录**
+- `gemini_doc/fsg3_b2_same_solver_timing_preregistration_2026_08_13.md`
+- `gemini_doc/change_2026-08-13_fsg3_b2_timing_preregistration.md`

@@ -29,7 +29,9 @@
 > five-fresh correctness。V4-3E现又按`O,C,C,O,C,O,O,C,O,C`启动10个fresh GPU进程，5/5 pairs
 > 的完整core/post/state/branch/queue/termination全部通过，六类重签攻击拒绝，以
 > `VALIDATED-FIVE-FRESH-CORRECTNESS`关闭；V4-3整体=`VALIDATED-WHOLE-CORE-REPLACEMENT`，B2
-> same-solver timing现准入但尚未执行，performance claim仍关闭。
+> same-solver timing现准入但尚未执行，performance claim仍关闭。FSG3/B2已独立冻结六个全排列block、
+> 36 fresh control/profile进程与cold/query/core分层计时协议，状态=`PREREGISTERED-NOT-RUN`；下一动作
+> 只允许实现schema/replay/worker并在clean source后正式运行，不能事后改门禁。
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed

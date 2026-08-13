@@ -66,6 +66,11 @@ closure见`gemini_doc/change_2026-08-13_rvir_v4_five_fresh_formal_closure.md`：
 `O,C,C,O,C,O,O,C,O,C`十个fresh进程、五对完整semantic/queue/termination与六类tamper全部通过。
 V4-3整体=`VALIDATED-WHOLE-CORE-REPLACEMENT`；B2 timing已准入但未执行，仍无performance claim。
 
+FSG3/B2正式计时预注册见
+`gemini_doc/fsg3_b2_same_solver_timing_preregistration_2026_08_13.md`：冻结B0 original、B1 typed
+passthrough、B2 whole-call reference replacement及六个全排列block，共36个fresh control/profile进程；
+当前为`PREREGISTERED-NOT-RUN`，下一动作是实现schema/replay/worker，不得提前引用任何速度数字。
+
 ---
 
 当前权威研究入口：

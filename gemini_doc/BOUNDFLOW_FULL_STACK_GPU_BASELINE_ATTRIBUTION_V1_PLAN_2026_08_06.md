@@ -1,5 +1,5 @@
 ---
-status: v4-2-correctness-closed-v4-3-next
+status: fsg3-b2-timing-preregistered-not-run
 updated: 2026-08-13T18:30:00+08:00
 type: plan
 topic: boundflow
@@ -41,8 +41,10 @@ arena/buffer reuse 的累计全栈收益。正式 G1 artifact 的 `next_route=gp
 - 最终以 complete-query、TTV、solved verdict、nodes/s、peak allocated/reserved 和公平 E2E 决定
   BoundFlow GPU 系统主张。
 
-当前总状态为 `UNMEASURED / NOT-YET-AUDITABLE`：尚无合格的 BoundFlow-vs-original GPU
-same-solver speedup。本文完成不等于 replacement executor、TIR、JIT或性能结果已经实现。
+当前总状态为 `FSG3-PREREGISTERED / UNMEASURED`：V4-3 whole-call correctness已关闭，但尚无合格的
+BoundFlow-vs-original GPU same-solver speedup。正式FSG3协议见
+`gemini_doc/fsg3_b2_same_solver_timing_preregistration_2026_08_13.md`。本文完成不等于TIR、JIT或
+性能结果已经实现。
 
 ## 2. Scope and Non-Goals
 
@@ -75,14 +77,14 @@ same-solver speedup。本文完成不等于 replacement executor、TIR、JIT或�
 
 V4-2 formal closure后，原“完整optimizer state ownership未准入”缺口已经关闭：固定ResNet2B core可从
 pre-state独立执行10/9 native mutation并原子生成12-path post-state，逐step/final parity、rollback、
-replay与完全重签tamper均通过。当前硬缺口收窄为：
+replay与完全重签tamper均通过。V4-3随后又完成whole-call live replacement与5个fresh correctness
+pairs。下列前四项是V4-3启动前的历史缺口，现已关闭；当前硬缺口只剩FSG3 measurement尚未执行：
 
-- `execute_external_verifier_call()`仍执行原external callable，不是BoundFlow replacement；
-- PR13C `SameSolverQueryRuntime` 的host是BoundFlow自有solver，不是官方αβ-CROWN；
-- V4-2 executor尚未替换真实host `update_bounds_core`；branch、accepted/pruned domains、lineage/node
-  accounting、termination/verdict与至少5次fresh correctness仍待V4-3；
-- competitor Python 3.11/Torch 2.11环境当前不能import本机TVM，BoundFlow环境则是Python 3.12/
-  Torch 2.12；headline必须建立combined env或对称RPC，不能使用非对称IPC；
+- `execute_external_verifier_call()`仍执行原external callable，不是BoundFlow replacement（历史RVIR-v3）；
+- PR13C `SameSolverQueryRuntime` 的host是BoundFlow自有solver，不是官方αβ-CROWN（历史PR-13C）；
+- V4-2 executor尚未替换真实host `update_bounds_core`（已由V4-3关闭）；
+- competitor Python环境不能import本机TVM（B2 reference path不依赖TVM；B3启用TVM前仍须combined env或
+  对称RPC）；
 - 当前没有original/candidate共同的GPU full-stack hierarchical raw trace。
 
 ## 4. Fair Comparison Boundary
@@ -325,8 +327,9 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
    `NO-GO/not admitted`；该阻塞已由RVIR-v4 V4-2的`VALIDATED-OPTIMIZER-REPLACEMENT`修复；
 4. [x] V4-3/FSG3前置：whole-core live integration与5个fresh correctness pairs已通过；V4-3=
    `VALIDATED-WHOLE-CORE-REPLACEMENT`，B0/B1/B2 same-solver counterbalanced timing现准入；
-5. [—] FSG4：因B3—B7均依赖B2，依赖门禁阻止，未实现/未消融；
-6. [—] FSG5：因无合法B7 candidate，依赖门禁阻止，无系统性能claim。
+5. [ ] FSG3：36-process B0/B1/B2正式协议已预注册，runner与正式measurement尚未执行；
+6. [—] FSG4：因B3—B7均依赖FSG3可审计baseline，依赖门禁阻止，未实现/未消融；
+7. [—] FSG5：因无合法B7 candidate，依赖门禁阻止，无系统性能claim。
 
 ## 12. Validation
 
@@ -421,6 +424,15 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 - 下一动作是独立FSG3/B2 measurement，不复用correctness worker wall，不自动准入B3—B7；
 - `b2_same_solver_timing_admitted=true`，`performance_claimed=false`。
 
+### FSG3/B2 Timing 预注册（2026-08-13）
+
+- 独立预注册冻结B0 original、B1 RVIR typed passthrough、B2 whole-call reference replacement；
+- 六个配置全排列block，每配置6个control+6个profile，共36个fresh进程，所有pair使用同block raw；
+- cold total、process-hit query、whole core、GPU event、compile和post-measurement validation严格分离；
+- B2变慢只形成reference baseline，不关闭B3—B7；correctness、环境、profile扰动或replay失败才使FSG3
+  fail closed；
+- 当前状态=`PREREGISTERED-NOT-RUN`，无speedup claim。
+
 ## 13. Rollback
 
 - FSG0只新增schema/tests/docs，可独立删除；
@@ -435,3 +447,4 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 - roadmap: [GPU compiler acceleration research v1](BOUNDFLOW_GPU_COMPILER_ACCELERATION_RESEARCH_V1_PLAN_2026_08_05.md)
 - selected-only history: [NRIR49A G1 plan](BOUNDFLOW_NRIR49A_G1_GPU_ATTRIBUTION_V1_PLAN_2026_08_06.md)
 - RVIR contract: [Real Verifier IR integration](real_verifier_ir_integration_contract_v1_2026_08_03.md)
+- FSG3 preregistration: [B2 same-solver timing](fsg3_b2_same_solver_timing_preregistration_2026_08_13.md)
