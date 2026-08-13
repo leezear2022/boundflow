@@ -5,6 +5,7 @@
 # pylint: disable=too-many-locals,too-many-statements,too-many-branches
 # pylint: disable=too-many-boolean-expressions,no-member,import-outside-toplevel
 # pylint: disable=too-many-instance-attributes,missing-function-docstring,import-error
+# pylint: disable=too-many-arguments
 
 from __future__ import annotations
 
@@ -122,10 +123,24 @@ def _branch_trace(
 
 
 class _LiveExecutor:
-    def __init__(self, *, model: Path, torch_module: Any, arguments_module: Any):
+    def __init__(
+        self,
+        *,
+        model: Path,
+        torch_module: Any,
+        arguments_module: Any,
+        precompiled_program: Any = None,
+        precompiled_module: Any = None,
+        capture_payloads: bool = True,
+    ):
+        if (precompiled_program is None) != (precompiled_module is None):
+            raise ValueError("RVIR-v4 live precompiled program/module must be paired")
         self.model = model
         self.torch = torch_module
         self.arguments = arguments_module
+        self.precompiled_program = precompiled_program
+        self.precompiled_module = precompiled_module
+        self.capture_payloads = capture_payloads
         self.active = False
         self.core_count = 0
         self.provider_compute_bounds_callback_count = 0
@@ -136,6 +151,8 @@ class _LiveExecutor:
         self.commit_receipts: list[dict[str, object]] = []
         self.assembly_metadata: list[dict[str, object]] = []
         self.pre_state_identities: list[dict[str, str]] = []
+        self.last_core_result: Any = None
+        self.last_post_result: Any = None
 
     def execute(self, net: Any, pre_result: Any, kwargs: Mapping[str, Any]) -> Any:
         import torch
@@ -255,8 +272,14 @@ class _LiveExecutor:
             thresholds = _one_role(
                 pre_snapshot, ProductionTensorRole.DECISION_THRESHOLD
             ).to(device=execution_device, dtype=execution_dtype)
-            program = import_onnx(str(self.model), do_shape_infer=True, normalize=True)
-            module = plan_interval_ibp_v0(program)
+            if self.precompiled_program is None:
+                program = import_onnx(
+                    str(self.model), do_shape_infer=True, normalize=True
+                )
+                module = plan_interval_ibp_v0(program)
+            else:
+                program = self.precompiled_program
+                module = self.precompiled_module
             module.bindings = cast(
                 dict[str, Any],
                 _move_tensors(
@@ -341,13 +364,15 @@ class _LiveExecutor:
             )
             self.assembly_metadata.append(assembly.metadata())
             self.commit_receipts.append(receipt)
-            self.core_payloads.append(
-                capture_runner._capture_whole_core_truth(
-                    core_result,
-                    torch,
-                    _branch_trace(evaluation, export, core_result, torch),
+            self.last_core_result = core_result
+            if self.capture_payloads:
+                self.core_payloads.append(
+                    capture_runner._capture_whole_core_truth(
+                        core_result,
+                        torch,
+                        _branch_trace(evaluation, export, core_result, torch),
+                    )
                 )
-            )
             self.core_count += 1
             return core_result
         finally:
@@ -373,9 +398,11 @@ class _LiveExecutor:
 
         def wrapped_post(*args: Any, **kwargs: Any) -> Any:
             result = original_post(*args, **kwargs)
-            self.post_payloads.append(
-                capture_runner._capture_whole_post_truth(result, self.torch)
-            )
+            self.last_post_result = result
+            if self.capture_payloads:
+                self.post_payloads.append(
+                    capture_runner._capture_whole_post_truth(result, self.torch)
+                )
             return result
 
         stage_solve.update_bounds_core = replacement_core

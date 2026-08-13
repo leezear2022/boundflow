@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: []
-last_ch: ev008350
-last_va: ev008352
+last_ch: ev008429
+last_va: ev008430
 blk: none
-next: fsg3-b0-b1-b2-real-worker-implementation
-updated: 2026-08-13T13:39:03Z
+next: fsg3-profile-spans-and-36-process-orchestrator
+updated: 2026-08-13T14:02:06Z

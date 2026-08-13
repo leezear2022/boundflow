@@ -5248,3 +5248,12 @@
 
 **记录**
 - `gemini_doc/change_2026-08-13_fsg3_lower_only_upper_sentinel_amendment.md`
+
+## 2026-08-13：FSG3 Real B0/B1/B2 Control Worker
+
+- 新增official same-solver B0/B1/B2 control worker和B2 precompiled reference path；
+- 计时scope内禁止V4-3完整truth CPU复制，semantic validation后置；
+- profile在分层span完成前fail closed，尚无正式performance claim。
+
+**记录**
+- `gemini_doc/change_2026-08-13_fsg3_real_control_worker.md`
