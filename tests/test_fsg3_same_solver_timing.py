@@ -5,6 +5,9 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import json
+from pathlib import Path
+import subprocess
 from typing import cast
 
 import pytest
@@ -374,6 +377,42 @@ def test_formal_preflight_accepts_only_exact_coupled_software_alias() -> None:
     snapshot["sw_power_cap_counter_us"] = 41
     with pytest.raises(ValueError, match="thermal projection differs"):
         experiment_runner._validate_formal_preflight(sample)
+
+
+def test_parent_timeout_outlives_worker_post_init_preflight() -> None:
+    assert experiment_runner.WORKER_SUBPROCESS_TIMEOUT_SECONDS >= (
+        experiment_runner.worker.WORKER_PREFLIGHT_TIMEOUT_SECONDS + 180
+    )
+
+
+def test_worker_timeout_preserves_failure_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def timeout(*_args: object, **_kwargs: object) -> None:
+        raise subprocess.TimeoutExpired(
+            cmd=("python", "worker.py"),
+            timeout=experiment_runner.WORKER_SUBPROCESS_TIMEOUT_SECONDS,
+            output=b"partial stdout\n",
+            stderr=b"partial stderr\n",
+        )
+
+    def host_snapshot() -> dict[str, int]:
+        return {"monotonic_ns": 1}
+
+    monkeypatch.setattr(experiment_runner.subprocess, "run", timeout)
+    monkeypatch.setattr(experiment_runner, "_host_snapshot", host_snapshot)
+    with pytest.raises(RuntimeError, match="timed out"):
+        experiment_runner._run_worker(
+            artifact=tmp_path,
+            index=3,
+            command=("python", "worker.py"),
+        )
+    failure = json.loads((tmp_path / "failed_worker.json").read_text())
+    assert failure["index"] == 3
+    assert failure["timed_out"] is True
+    assert failure["performance_claimed"] is False
+    assert (tmp_path / "logs/run_03.stdout.txt").read_text() == "partial stdout\n"
+    assert (tmp_path / "logs/run_03.stderr.txt").read_text() == "partial stderr\n"
 
 
 def test_artifact_environment_gate_is_recomputed_from_raw_diagnostics(

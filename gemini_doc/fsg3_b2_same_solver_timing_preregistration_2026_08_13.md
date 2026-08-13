@@ -316,3 +316,18 @@ NVIDIA官方文档把SW power cap和SW thermal定义为不同clock-event reason�
 修订后的非正式block-0 smoke覆盖B0/B1/B2 × control/profile六路，6/6环境准入、语义失败0、所有profile
 core closure通过。它只证明合同可执行，不形成性能主张。完整诊断见
 `gemini_doc/change_2026-08-13_fsg3_coupled_power_thermal_telemetry.md`。
+
+## 18. Pre-Run Amendment 6：父子 Timeout 一致性
+
+首个schema-v3正式尝试完成32/36个位置且32/32环境准入；第33个fresh worker在连续负载热浸后，
+post-init温度约55°C，因此按§16继续等待45°C门禁。worker允许等待900秒，但orchestrator仍沿用早期
+`180s`子进程总timeout，在worker尚处于合法preflight等待时将其终止。该轮没有manifest、summary或
+performance claim，重命名为
+`artifacts/fsg3-same-solver-timing/resnet2b-prop0-v3-aborted-parent-timeout-32-of-36/`；32个latency不得
+续跑、补齐或进入统计。
+
+下一正式尝试只修正合同冲突，不修改温度、顺序、指标、样本量或性能门禁：父进程timeout固定为
+`worker preflight 900s + 180s execution margin = 1080s`并写入manifest contract；若仍超时，必须持久化
+partial stdout/stderr与`failed_worker.json`后fail closed。新轮从position 0完整重启。该修订发生在任何
+完整、可回放的正式artifact形成前，详见
+`gemini_doc/change_2026-08-14_fsg3_formal_v3_parent_timeout_abort.md`。

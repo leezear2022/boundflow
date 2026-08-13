@@ -5296,3 +5296,13 @@
 
 **记录**
 - `gemini_doc/change_2026-08-13_fsg3_coupled_power_thermal_telemetry.md`
+
+## 2026-08-14：FSG3 Formal v3 父进程 Timeout 中止
+
+- schema-v3正式尝试32/36环境准入后，父180秒timeout错误终止合法的900秒worker冷却等待；
+- 该轮无manifest/summary/performance claim，保留为aborted证据且禁止补跑或引用latency；
+- 父timeout改为1080秒并绑定manifest；超时时持久化partial logs与failed-worker evidence；
+- 下一正式attempt从position 0完整重启，温度、顺序、指标及统计门禁不变。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg3_formal_v3_parent_timeout_abort.md`

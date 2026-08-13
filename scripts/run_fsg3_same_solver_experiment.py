@@ -52,6 +52,7 @@ METRIC_NAMES = (
 PREFLIGHT_TEMPERATURE_LIMIT_C = 50
 PREFLIGHT_POLL_SECONDS = 5
 PREFLIGHT_TIMEOUT_SECONDS = 900
+WORKER_SUBPROCESS_TIMEOUT_SECONDS = worker.WORKER_PREFLIGHT_TIMEOUT_SECONDS + 180
 FORMAL_PREFLIGHT_CONTRACT = {
     "temperature_limit_celsius": PREFLIGHT_TEMPERATURE_LIMIT_C,
     "poll_seconds": PREFLIGHT_POLL_SECONDS,
@@ -63,6 +64,7 @@ FORMAL_PREFLIGHT_CONTRACT = {
     "worker_post_init_temperature_limit_celsius": (
         worker.WORKER_PREFLIGHT_TEMPERATURE_LIMIT_C
     ),
+    "worker_subprocess_timeout_seconds": WORKER_SUBPROCESS_TIMEOUT_SECONDS,
 }
 
 
@@ -371,16 +373,55 @@ def _run_worker(
     )
     before = _host_snapshot()
     started_ns = time.monotonic_ns()
-    completed = subprocess.run(
-        command,
-        cwd=REPOSITORY_ROOT,
-        env=environment,
-        check=False,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        timeout=180,
-    )
+    try:
+        completed = subprocess.run(
+            command,
+            cwd=REPOSITORY_ROOT,
+            env=environment,
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=WORKER_SUBPROCESS_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as error:
+        ended_ns = time.monotonic_ns()
+        after = _host_snapshot()
+
+        def timeout_text(value: bytes | str | None) -> str:
+            if value is None:
+                return ""
+            return value.decode(errors="replace") if isinstance(value, bytes) else value
+
+        (artifact / stdout_relative).write_text(
+            timeout_text(error.stdout), encoding="utf-8"
+        )
+        (artifact / stderr_relative).write_text(
+            timeout_text(error.stderr), encoding="utf-8"
+        )
+        _write_json(
+            artifact / "failed_worker.json",
+            {
+                "index": index,
+                "command": list(command),
+                "returncode": None,
+                "timeout_seconds": WORKER_SUBPROCESS_TIMEOUT_SECONDS,
+                "timed_out": True,
+                "started_monotonic_ns": started_ns,
+                "ended_monotonic_ns": ended_ns,
+                "duration_ns": ended_ns - started_ns,
+                "host_before": before,
+                "host_after": after,
+                "result_file": result_relative,
+                "stdout_file": stdout_relative,
+                "stderr_file": stderr_relative,
+                "performance_claimed": False,
+            },
+        )
+        raise RuntimeError(
+            f"FSG3 worker {index} timed out after "
+            f"{WORKER_SUBPROCESS_TIMEOUT_SECONDS} seconds"
+        ) from error
     ended_ns = time.monotonic_ns()
     after = _host_snapshot()
     (artifact / stdout_relative).write_text(completed.stdout, encoding="utf-8")
@@ -389,7 +430,7 @@ def _run_worker(
         "index": index,
         "command": list(command),
         "returncode": completed.returncode,
-        "timeout_seconds": 180,
+        "timeout_seconds": WORKER_SUBPROCESS_TIMEOUT_SECONDS,
         "timed_out": False,
         "started_monotonic_ns": started_ns,
         "ended_monotonic_ns": ended_ns,

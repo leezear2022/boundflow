@@ -74,8 +74,10 @@ B0/B1/B2 worker、profile spans与36-process orchestrator均已实现；v1因旧
 整轮中止且不形成性能主张。schema v3已对本机严格镜像的SW power/thermal raw telemetry作最窄修正，
 单worker及六路block-0 smoke均通过，完整回归为`1227 passed, 3 skipped`。诊断见
 `gemini_doc/change_2026-08-13_fsg3_formal_v1_environment_abort.md`与
-`gemini_doc/change_2026-08-13_fsg3_coupled_power_thermal_telemetry.md`；下一动作是在clean commit上从
-position 0生成完整36-process v3 artifact。
+`gemini_doc/change_2026-08-13_fsg3_coupled_power_thermal_telemetry.md`。首个v3正式尝试32/36准入后暴露
+父180秒timeout短于worker 900秒preflight的合同冲突，整轮无主张中止；见
+`gemini_doc/change_2026-08-14_fsg3_formal_v3_parent_timeout_abort.md`。下一动作是在clean commit上以
+1080秒父timeout从position 0生成完整36-process v4 attempt（schema仍为v3）。
 
 ---
 
