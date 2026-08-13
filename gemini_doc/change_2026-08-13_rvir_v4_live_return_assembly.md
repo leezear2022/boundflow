@@ -18,6 +18,9 @@
   backward/KFSB tensor按provider `c.device/c.dtype`恢复到真实CUDA设备；
 - 扩展whole-core验证器，区分provider truth的3次candidate `update_bounds`与candidate replacement的
   0次调用，再对完整core/post树执行独立语义比较。
+- 新增formal artifact generator/replayer与tamper probe；artifact绑定source code revision、V4-3A raw
+  truth、live result、atomic receipts、official post/queue accounting与fresh GPU semantic rerun，probe覆盖
+  lA/intermediate/child lower/α/decision/accounting/provider callback/atomic flag八类完全重签攻击。
 
 ## Capture-ready GPU结果
 
