@@ -40,14 +40,18 @@ V4-3预注册入口为`gemini_doc/rvir_v4_whole_core_replacement_plan_2026_08_13
 truth，再实现native lA/intermediate、KFSB child evaluation、live return assembly和5次fresh correctness；
 provider core/compute_bounds/update_bounds必须为`0/0/0`。V4-3A现已以
 `VALIDATED-WHOLE-CORE-TRUTH`关闭：451 tensors/213,060 signs fresh replay与六类同步重签攻击通过；见
-`gemini_doc/change_2026-08-13_rvir_v4_whole_core_truth_formal_closure.md`。当前只启动V4-3B native
-lA/intermediate export，不启动KFSB replacement或B2计时。
+`gemini_doc/change_2026-08-13_rvir_v4_whole_core_truth_formal_closure.md`。V4-3B现也已关闭；当前只启动
+V4-3C native KFSB，不启动live whole-core replacement或B2计时。
 
 V4-3B实现记录为`gemini_doc/change_2026-08-13_rvir_v4_native_backward_export.md`：六层native lA与
 12个shared-input intermediate tensors现已由正式artifact关闭，状态为
 `VALIDATED-NATIVE-BACKWARD-EXPORT`；formal closure见
 `gemini_doc/change_2026-08-13_rvir_v4_native_backward_export_formal_closure.md`。下一动作只允许V4-3C
 native KFSB；不能升级为whole-core replacement或B2 timing。
+
+V4-3C capture-ready实现记录为`gemini_doc/change_2026-08-13_rvir_v4_native_kfsb.md`：六层mask、
+三组top-3候选、72个child lower与最终decision已由BoundFlow独立复现；正式artifact与同步重签tamper
+尚待从clean source commit生成，因此当前仍为`FORMAL-ARTIFACT-PENDING`，V4-3D/B2继续关闭。
 
 ---
 

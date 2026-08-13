@@ -5151,3 +5151,16 @@
 
 **记录**
 - `gemini_doc/change_2026-08-13_rvir_v4_native_backward_export_formal_closure.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-3C Native KFSB（实现中）
+
+- 六层unstable mask由native intermediate/split独立推导，逐元素exact，共4200 unstable；
+- 三组top-3候选共36项、72个child lower及最终六域decision由BoundFlow执行；
+- candidate/final exact，child lower sign exact，最大差`3.0994e-06`；
+- provider core/compute_bounds/update_bounds/fallback=`0/0/0/0`；
+- 当前为`IMPLEMENTED-NATIVE-KFSB / FORMAL-ARTIFACT-PENDING`，V4-3D/B2仍关闭。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_native_kfsb.md`
