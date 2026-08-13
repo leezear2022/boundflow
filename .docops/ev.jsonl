@@ -7826,3 +7826,17 @@
 {"id":"ev007826","ts":"2026-08-13T10:37:14Z","ty":"ch","st":"s01","slug":"preserve-external-venv-launcher"}
 {"id":"ev007827","ts":"2026-08-13T10:37:14Z","ty":"va","st":"s01","result":"pass"}
 {"id":"ev007828","ts":"2026-08-13T10:37:14Z","ty":"cmd","cmd":"Bash:rmdir","summary":"PostToolUse"}
+{"id":"ev007829","ts":"2026-08-13T10:37:18Z","ty":"cmd","cmd":"Bash:git","summary":"PostToolUse"}
+{"id":"ev007830","ts":"2026-08-13T10:37:36Z","ty":"cmd","cmd":"Bash:git","summary":"PostToolUse"}
+{"id":"ev007831","ts":"2026-08-13T10:37:48Z","ty":"cmd","cmd":"Bash:source","summary":"PostToolUse"}
+{"id":"ev007832","ts":"2026-08-13T10:38:07Z","ty":"cmd","cmd":"Bash:source","summary":"PostToolUse"}
+{"id":"ev007833","ts":"2026-08-13T10:38:20Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
+{"id":"ev007834","ts":"2026-08-13T10:39:25Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
+{"id":"ev007835","ts":"2026-08-13T10:39:50Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
+{"id":"ev007836","ts":"2026-08-13T10:40:08Z","ty":"cmd","cmd":"Bash:source","summary":"PostToolUse"}
+{"id":"ev007837","ts":"2026-08-13T10:40:16Z","ty":"ch","st":"s01","slug":"v4-3a-live-semantic-tamper-gate"}
+{"id":"ev007838","ts":"2026-08-13T10:40:16Z","ty":"va","st":"s01","result":"pass"}
+{"id":"ev007839","ts":"2026-08-13T10:40:16Z","ty":"cmd","cmd":"Bash:python3","summary":"PostToolUse"}
+{"id":"ev007840","ts":"2026-08-13T10:40:24Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
+{"id":"ev007841","ts":"2026-08-13T10:40:30Z","ty":"ch","st":"s01","slug":"v4-3a-tamper-probe-ready"}
+{"id":"ev007842","ts":"2026-08-13T10:40:30Z","ty":"va","st":"s01","result":"pass"}

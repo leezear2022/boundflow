@@ -30,3 +30,7 @@
 首次formal generation暴露runner把`.venv/bin/python`调用`Path.resolve()`后解析为uv base interpreter，
 从而丢失external αβ-CROWN venv的Torch。现改为保留绝对venv launcher symlink；这是执行环境隔离修正，
 不是算法或correctness失败。
+
+为关闭同步重签漏洞，artifact replay已拆成static typed reconstruction与fresh-provider semantic parity；新增
+tamper probe覆盖lA、intermediate、candidate lower、branch decision、core accounting五类完整重签攻击，
+以及lA字段删除的结构门禁。正式数字须在基于最终代码commit重新生成artifact后记录。

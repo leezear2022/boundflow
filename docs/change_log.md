@@ -5109,3 +5109,5 @@
 - 两次fresh GPU truth的451个tensor在`2e-4`内一致，213,060个sign与最终decision exact；
 - V4-3A尚未关闭，待正式artifact和同步重签tamper suite。
 - 修正formal runner解析external venv Python symlink后丢失site-packages的问题。
+- 增加fresh-provider semantic comparator和六类whole-core truth同步重签tamper probe；正式artifact待按最终
+  runner commit重新生成。

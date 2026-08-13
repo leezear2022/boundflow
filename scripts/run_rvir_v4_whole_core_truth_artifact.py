@@ -307,8 +307,11 @@ def _generate(args: argparse.Namespace) -> dict[str, object]:
     return result
 
 
-def _replay(args: argparse.Namespace) -> dict[str, object]:
-    artifact = args.artifact_dir.resolve()
+def _verify_static_artifact(
+    artifact: Path,
+) -> tuple[dict[str, Any], dict[str, object], dict[str, object]]:
+    """Validate all frozen files and reconstruct their typed semantics."""
+
     manifest = _load_json(artifact / "manifest.json")
     semantic = {key: value for key, value in manifest.items() if key != "manifest_hash"}
     if (
@@ -325,7 +328,8 @@ def _replay(args: argparse.Namespace) -> dict[str, object]:
     for name in ARTIFACT_FILES:
         if files[name] != _file_sha256(artifact / name):
             raise ValueError(f"RVIR-v4 whole-core digest differs: {name}")
-    summary = _summary(_load_truth(artifact / TRUTH_FILE))
+    frozen = _load_truth(artifact / TRUTH_FILE)
+    summary = _summary(frozen)
     if _load_json(artifact / "summary.json") != summary:
         raise ValueError("RVIR-v4 whole-core semantic replay differs")
     if manifest.get("summary_hash") != summary["summary_hash"]:
@@ -337,7 +341,12 @@ def _replay(args: argparse.Namespace) -> dict[str, object]:
         raise ValueError("RVIR-v4 whole-core replay stdout differs")
     if (artifact / "README.md").read_text(encoding="utf-8") != _readme():
         raise ValueError("RVIR-v4 whole-core README differs")
-    frozen = _load_truth(artifact / TRUTH_FILE)
+    return frozen, summary, result
+
+
+def _replay(args: argparse.Namespace) -> dict[str, object]:
+    artifact = args.artifact_dir.resolve()
+    frozen, summary, result = _verify_static_artifact(artifact)
     with tempfile.TemporaryDirectory(prefix="boundflow-rvir-v4-whole-replay-") as raw:
         fresh = _run_worker(
             benchmark=args.benchmark_root.resolve(),
