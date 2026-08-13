@@ -283,3 +283,17 @@ accepted/pruned domains、lineage/node accounting、termination与verdict。V4-3
 - formal native replay为CPU deterministic semantic evidence；GPU live integration仍待V4-3D。
 
 下一门禁为V4-3C native KFSB三候选child-bound与final decision；不得把本节升级为whole-core或性能结果。
+
+## V4-3C Formal Closure
+
+状态：`VALIDATED-NATIVE-KFSB`；V4-3C关闭，V4-3D准入，V4-3/B2仍不准入。
+
+- source=`a2097c0`，artifact=`artifacts/rvir-v4-native-kfsb/resnet2b-core-v1`；
+- 六层mask 37464 elements/4200 true逐元素exact；三组candidate共36项与final六项exact；
+- 72个child lower sign exact，最大差`3.0994e-06 <=2e-4`；
+- provider core/compute_bounds/update_bounds/fallback=`0/0/0/0`；
+- 六类evaluation full resign及topology/truth source outer resign共8/8拒绝；
+- targeted=`16 passed`，full=`1187 passed, 3 skipped`，mypy clean，Pylint=`10.00/10`；
+- formal native replay为CPU semantic evidence，live GPU host integration仍待V4-3D。
+
+下一门禁为V4-3D live return assembly；V4-3E five-fresh与B2不得提前启动。

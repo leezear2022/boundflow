@@ -28,8 +28,9 @@
 > `VALIDATED-OPTIMIZER-REPLACEMENT`。V4-3A现又以451-tensor fresh semantic replay和六类同步重签攻击
 > 关闭original whole-core truth。它不是whole `update_bounds_core` live replacement；B2与性能claim仍
 > 关闭。V4-3B又以零provider callback导出六层native lA、12个shared-input intermediate tensors与
-> final lower，通过五类同步重签攻击，以`VALIDATED-NATIVE-BACKWARD-EXPORT`关闭；下一门禁为V4-3C
-> native KFSB，B2与性能claim仍关闭。
+> final lower，通过五类同步重签攻击，以`VALIDATED-NATIVE-BACKWARD-EXPORT`关闭。V4-3C又以零provider
+> callback推导六层mask、复现三组top-3 candidate、执行72个child lower并恢复final decision，通过八类
+> 同步重签攻击，以`VALIDATED-NATIVE-KFSB`关闭；下一门禁为V4-3D，B2与性能claim仍关闭。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
@@ -1505,5 +1506,19 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - `RVIR-V4-3B-T`：lA/intermediate/lower full resign与topology/truth source outer resign共5/5拒绝；
 - `RVIR-V4-3B-V`：source=`762b642`，manifest/tamper SHA256=`110dfd63...8269`/
   `4cdd2231...e355`，targeted=`9 passed`，full=`1183 passed, 3 skipped`；
-- `RVIR-V4-3B-L`：状态=`VALIDATED-NATIVE-BACKWARD-EXPORT`。formal native为CPU semantic replay，
-  GPU live integration、KFSB、whole-core、B2与performance仍未准入。
+- `RVIR-V4-3B-L`：状态=`VALIDATED-NATIVE-BACKWARD-EXPORT`。formal native为CPU semantic replay；
+  KFSB现由V4-3C另行关闭，但GPU live integration、whole-core、B2与performance仍未准入。
+
+### RVIR-v4 V4-3C（关闭）：Native KFSB Candidate Evaluation
+
+- `RVIR-V4-3C-M`：六层unstable mask只由native/shared intermediate bounds与terminal split推导；
+  BaBSR alpha/intercept score、top-3、min reduction、invalid threshold与tie-break均由BoundFlow执行；
+- `RVIR-V4-3C-G`：mask 37464 elements/4200 true逐元素exact；三候选36项和final六项exact；72个
+  child lower sign exact，最大差`3.0994415283203125e-06 <=2e-4`；
+- `RVIR-V4-3C-C`：provider core/compute_bounds/update_bounds/fallback=`0/0/0/0`；
+- `RVIR-V4-3C-T`：candidate/child/final/mask/score/reduction六类full resign与topology/truth source两类
+  outer resign共8/8拒绝；
+- `RVIR-V4-3C-V`：source=`a2097c0`，manifest/tamper SHA256=`28e4da09...2ed8`/
+  `c197b5d5...45f9`，targeted=`16 passed`，full=`1187 passed, 3 skipped`；
+- `RVIR-V4-3C-L`：状态=`VALIDATED-NATIVE-KFSB`。只准入V4-3D live return assembly；whole-core、
+  V4-3E、B2与performance仍未准入。

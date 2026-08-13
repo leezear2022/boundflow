@@ -1,0 +1,58 @@
+{
+  "all_rejected": true,
+  "artifact_source_git_head": "a2097c02da368378da5960c51fa54322d9494013",
+  "attack_count": 8,
+  "attacks": [
+    {
+      "name": "candidate-split-full-resign",
+      "outer_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 native KFSB parity differs"
+    },
+    {
+      "name": "child-lower-full-resign",
+      "outer_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 native KFSB child numeric parity differs"
+    },
+    {
+      "name": "final-decision-full-resign",
+      "outer_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 native KFSB parity differs"
+    },
+    {
+      "name": "unstable-mask-full-resign",
+      "outer_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 native KFSB parity differs"
+    },
+    {
+      "name": "topk-score-full-resign",
+      "outer_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 native KFSB recorded score differs"
+    },
+    {
+      "name": "candidate-reduction-full-resign",
+      "outer_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 native KFSB recorded score differs"
+    },
+    {
+      "name": "topology-outer-resign",
+      "outer_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 native KFSB topology differs"
+    },
+    {
+      "name": "truth-source-outer-resign",
+      "outer_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 native KFSB frozen source differs: source_whole_core_truth.pt"
+    }
+  ],
+  "fully_resigned_evaluation_attack_count": 6,
+  "performance_claimed": false,
+  "schema_version": "boundflow.rvir-v4-native-kfsb-tamper-report/v1"
+}

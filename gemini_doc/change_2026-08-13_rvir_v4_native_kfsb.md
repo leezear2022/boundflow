@@ -22,11 +22,9 @@
 - 最终decision exact：`[[5,27],[5,32],[5,90],[5,90],[5,32],[5,90]]`；
 - provider core/`compute_bounds`/`update_bounds` callback与fallback=`0/0/0/0`；
 - related focused tests=`15 passed`，mypy三个source clean，Pylint=`10.00/10`；
-- 当前状态仅为`IMPLEMENTED-NATIVE-KFSB / FORMAL-ARTIFACT-PENDING`，V4-3C、V4-3、B2和性能claim
-  尚未关闭。
+- 本段记录当时的capture-ready状态`IMPLEMENTED-NATIVE-KFSB / FORMAL-ARTIFACT-PENDING`；现已被
+  `change_2026-08-13_rvir_v4_native_kfsb_formal_closure.md`中的正式关闭状态取代。
 
 ## 下一动作
 
-完成full-resign tamper probe，提交clean source基线；随后从该commit生成正式artifact，运行semantic replay、
-targeted/full/Black/mypy/Pylint/DocOps门禁。全部通过后才允许将V4-3C升级为
-`VALIDATED-NATIVE-KFSB`并准入V4-3D live return assembly。
+该动作已完成；当前下一动作以formal closure为准：只启动V4-3D live return assembly。

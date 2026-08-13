@@ -19,7 +19,10 @@
 > 攻击全部拒绝，以`VALIDATED-WHOLE-CORE-TRUTH`关闭。它仍不是replacement；下一门禁只允许V4-3B
 > native lA/intermediate export。V4-3B现又以零provider callback导出六层lA、12个shared-input
 > intermediate tensors与final lower，最大差均不超过`6.08e-06`，五类同步重签攻击拒绝，以
-> `VALIDATED-NATIVE-BACKWARD-EXPORT`关闭。下一门禁只允许V4-3C native KFSB；V4-3D/E与B2继续关闭。
+> `VALIDATED-NATIVE-BACKWARD-EXPORT`关闭。V4-3C随后独立推导六层mask、复现三组top-3候选并执行
+> 72个native child lower；candidate/final decision exact、child lower最大差`3.0994e-06`，八类同步
+> 重签攻击拒绝，以`VALIDATED-NATIVE-KFSB`关闭。下一门禁只允许V4-3D live return assembly；V4-3E
+> 与B2继续关闭。
 > PR-10—14 为历史执行顺序；当前 IR-first 顺序已推进到 **NRIR-15 E2E diagnosis（完成）→
 > NRIR-16 prepared path（完成）→ NRIR-17 objective branching（完成）→ NRIR-18 multiworkload
 > competitor E2E（完成）→ native intermediate-bound refinement（完成）→ objective-directed

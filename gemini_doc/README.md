@@ -49,9 +49,11 @@ V4-3B实现记录为`gemini_doc/change_2026-08-13_rvir_v4_native_backward_export
 `gemini_doc/change_2026-08-13_rvir_v4_native_backward_export_formal_closure.md`。下一动作只允许V4-3C
 native KFSB；不能升级为whole-core replacement或B2 timing。
 
-V4-3C capture-ready实现记录为`gemini_doc/change_2026-08-13_rvir_v4_native_kfsb.md`：六层mask、
-三组top-3候选、72个child lower与最终decision已由BoundFlow独立复现；正式artifact与同步重签tamper
-尚待从clean source commit生成，因此当前仍为`FORMAL-ARTIFACT-PENDING`，V4-3D/B2继续关闭。
+V4-3C实现记录为`gemini_doc/change_2026-08-13_rvir_v4_native_kfsb.md`，formal closure见
+`gemini_doc/change_2026-08-13_rvir_v4_native_kfsb_formal_closure.md`：六层mask exact、三组top-3候选
+共36项与final decision exact，72个child lower sign exact且最大差`3.0994e-06`，八类同步重签攻击
+全部拒绝，状态为`VALIDATED-NATIVE-KFSB`。下一动作只允许V4-3D live return assembly；V4-3E/B2
+继续关闭。
 
 ---
 

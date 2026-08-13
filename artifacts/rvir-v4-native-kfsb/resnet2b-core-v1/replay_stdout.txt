@@ -1,0 +1,1 @@
+{"evaluation_hash":"2af0a666ee9638442c57466b6e2c9618d88cd86a9ac7728f3e94462fe2252fe2","evidence_status":"validated-native-kfsb","performance_claimed":false,"status":"replay-passed","summary_hash":"786550dcdaba109610d3e03bc44d964823fb243b14dae0db862451e33cc6a1a0"}

@@ -3,6 +3,7 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 
 from dataclasses import replace
+import json
 from pathlib import Path
 
 import pytest
@@ -19,6 +20,8 @@ ATOMIC_CAPTURE = Path(
 )
 WHOLE_TRUTH = Path("artifacts/rvir-v4-whole-core-truth/resnet2b-core-v1/truth.pt")
 MODEL = Path("../vnncomp2021/benchmarks/cifar10_resnet/onnx/resnet_2b.onnx")
+ARTIFACT = Path("artifacts/rvir-v4-native-kfsb/resnet2b-core-v1")
+TAMPER_REPORT = ARTIFACT.parent / "resnet2b-core-v1-tamper-report.json"
 
 
 @pytest.fixture(scope="module")
@@ -119,3 +122,15 @@ def test_native_kfsb_comparator_rejects_resigned_semantic_tamper(
             expected_final_decision=typed.final_decision,
             expected_unstable_masks=typed.unstable_masks,
         )
+
+
+def test_formal_artifact_replays_and_rejects_all_tamper_probes() -> None:
+    result = artifact_runner._replay(ARTIFACT, MODEL)
+    report = json.loads(TAMPER_REPORT.read_text(encoding="utf-8"))
+
+    assert result["status"] == "replay-passed"
+    assert report["artifact_source_git_head"].startswith("a2097c0")
+    assert report["attack_count"] == 8
+    assert report["fully_resigned_evaluation_attack_count"] == 6
+    assert report["all_rejected"] is True
+    assert report["performance_claimed"] is False

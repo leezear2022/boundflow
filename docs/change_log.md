@@ -5164,3 +5164,18 @@
 
 **记录**
 - `gemini_doc/change_2026-08-13_rvir_v4_native_kfsb.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-3C Native KFSB Formal Closure
+
+- source `a2097c0`生成正式native KFSB artifact；
+- 六层mask、三组candidate共36项与final decision exact；72个child lower sign exact，最大差
+  `3.0994e-06 <=2e-4`；
+- provider core/compute_bounds/update_bounds/fallback=`0/0/0/0`；六类evaluation full resign和两类
+  outer resign共8/8拒绝；
+- targeted=`16 passed`，full=`1187 passed, 3 skipped`；
+- V4-3C=`VALIDATED-NATIVE-KFSB`，下一动作V4-3D；V4-3E/B2/performance仍关闭。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_native_kfsb_formal_closure.md`
