@@ -181,7 +181,7 @@ def _validate_source_manifest(manifest: Mapping[str, Any]) -> None:
         raise ValueError("RVIR-v4 native optimizer source manifest differs")
 
 
-def _build_evidence(
+def _build_evidence_single_thread(
     capture: Mapping[str, Any], model_path: Path
 ) -> tuple[dict[str, object], dict[str, object], dict[str, object]]:
     source_artifact_runner.source_artifact_runner.validate_worker_capture(capture)
@@ -277,6 +277,19 @@ def _build_evidence(
         raise ValueError("RVIR-v4 native optimizer formal gate failed")
     summary["summary_hash"] = _canonical_hash(summary)
     return native_payload, parity_payload, summary
+
+
+def _build_evidence(
+    capture: Mapping[str, Any], model_path: Path
+) -> tuple[dict[str, object], dict[str, object], dict[str, object]]:
+    """Build deterministic evidence in a fixed single-thread CPU reduction domain."""
+
+    previous_threads = torch.get_num_threads()
+    torch.set_num_threads(1)
+    try:
+        return _build_evidence_single_thread(capture, model_path)
+    finally:
+        torch.set_num_threads(previous_threads)
 
 
 def _replay_result(summary: Mapping[str, Any]) -> dict[str, object]:

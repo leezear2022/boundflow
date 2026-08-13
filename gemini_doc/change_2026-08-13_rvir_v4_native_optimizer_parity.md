@@ -50,3 +50,11 @@ recorded parity。lower/α攻击同时更新独立call view，所有capture攻�
 snapshot hash、V4-2C source manifest与V4-2D outer manifest；direct semantic builder仍必须拒绝。
 临时报告实测6/6 outer provenance与semantic mutation两层fail closed；mypy clean，Pylint=`10.00/10`。
 probe先进入clean commit，再生成源码digest绑定的正式报告。
+
+## Replay Determinism 修正（同日）
+
+首次加入全量回归后，formal tamper test出现一次original replay假阴性：所有`2e-4` parity门禁仍通过，
+但CPU多线程reduction的末位漂移改变native tensor content hash，exact serialized replay因此拒绝。修正为
+evidence build期间临时固定`torch.set_num_threads(1)`并在结束后恢复调用方线程数；没有放宽数值容差。
+同一capture连续5次重建的native trace/parity/summary三组hash完全唯一（`unique=1`），lower/α/β最大
+误差=`4.5300e-06/1.4663e-05/3.9861e-07 <=2e-4`。旧artifact需由该clean修正提交重新生成。
