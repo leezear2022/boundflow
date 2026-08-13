@@ -61,6 +61,10 @@ V4-3D实现记录见`gemini_doc/change_2026-08-13_rvir_v4_live_return_assembly.m
 最大差`1.0669e-05`且decision exact，fresh replay与8类完全重签攻击通过。状态为
 `VALIDATED-LIVE-RETURN`；下一门禁只允许V4-3E five-fresh，B2继续关闭。
 
+V4-3E harness实现记录为`gemini_doc/change_2026-08-13_rvir_v4_five_fresh_correctness.md`：已冻结
+`O,C,C,O,C,O,O,C,O,C`十进程顺序、五对映射及显式queue accounting。当前仍为
+`FORMAL-RUN-PENDING`，不能用单个smoke pair关闭V4-3或开启B2。
+
 ---
 
 当前权威研究入口：

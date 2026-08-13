@@ -5198,3 +5198,12 @@
 
 **记录**
 - `gemini_doc/change_2026-08-13_rvir_v4_live_return_formal_closure.md`
+
+## 2026-08-13：RVIR-v4 V4-3E Five-Fresh Harness（实现中）
+
+- 新增original/candidate fresh worker、目标post-add queue accounting与十进程formal orchestrator；
+- 冻结`O,C,C,O,C,O,O,C,O,C`顺序和五对映射，逐对验证完整core/post/state/branch/queue/termination；
+- 一个真实smoke pair通过，但当前仍为`FORMAL-RUN-PENDING`，V4-3/B2尚未关闭。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_five_fresh_correctness.md`
