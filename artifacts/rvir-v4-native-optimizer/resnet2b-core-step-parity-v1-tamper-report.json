@@ -1,0 +1,73 @@
+{
+  "all_outer_provenance_gates_rejected": true,
+  "all_semantic_mutation_gates_rejected": true,
+  "artifact_manifest_sha256": "0b4ae1a88294f48a2c4fcf0b085f8f3374047d856d24624683d0f73160388493",
+  "artifact_source_git_head": "bba42ac0150fe9a38eb94218806854f4addd2eca",
+  "original_replay": {
+    "evidence_status": "validated-native-step-parity",
+    "native_trace_hash": "d53cc7fcb7d23958c99c0bc188df11e50b70a7cae97edf0bd64e345a4fee7c8c",
+    "parity_hash": "2a74e73547dfd926d2007d0e3414d434672dba3e40afd1a6cebf2a7071ff2c44",
+    "performance_claimed": false,
+    "status": "replay-passed",
+    "summary_hash": "0b28f9c90c9846f41da2b3d263633a1cf58a53b2cb73783fa20ba178e63ab8aa"
+  },
+  "performance_claimed": false,
+  "probe_code_sha256": "c2e2ebe811587bcba319e802443c3cfe61deadac4491b6dc4b0d3b9f41bb8229",
+  "probe_count": 6,
+  "probes": [
+    {
+      "internal_hashes_recomputed": true,
+      "name": "topology-internal-rehash",
+      "outer_error": "RVIR-v4 native optimizer topology differs",
+      "outer_manifest_resigned": true,
+      "semantic_error": "RVIR-v4 pre-state frozen identity differs",
+      "status": "rejected-as-expected"
+    },
+    {
+      "internal_hashes_recomputed": true,
+      "name": "initial-upper-alpha-internal-rehash",
+      "outer_error": "RVIR-v4 native optimizer frozen source differs",
+      "outer_manifest_resigned": true,
+      "semantic_error": "RVIR-v4 pre-state frozen identity differs",
+      "source_manifest_resigned": true,
+      "status": "rejected-as-expected"
+    },
+    {
+      "internal_hashes_recomputed": true,
+      "name": "production-lower-cross-resign",
+      "outer_error": "RVIR-v4 native optimizer frozen source differs",
+      "outer_manifest_resigned": true,
+      "semantic_error": "RVIR-v4 native optimizer parity gate failed",
+      "source_manifest_resigned": true,
+      "status": "rejected-as-expected"
+    },
+    {
+      "internal_hashes_recomputed": true,
+      "name": "production-alpha-cross-resign",
+      "outer_error": "RVIR-v4 native optimizer frozen source differs",
+      "outer_manifest_resigned": true,
+      "semantic_error": "RVIR-v4 native optimizer parity gate failed",
+      "source_manifest_resigned": true,
+      "status": "rejected-as-expected"
+    },
+    {
+      "internal_hashes_recomputed": true,
+      "name": "policy-internal-rehash",
+      "outer_error": "RVIR-v4 native optimizer frozen source differs",
+      "outer_manifest_resigned": true,
+      "semantic_error": "RVIR-v4 production mutation policy is not admitted",
+      "source_manifest_resigned": true,
+      "status": "rejected-as-expected"
+    },
+    {
+      "internal_hashes_recomputed": true,
+      "name": "recorded-parity-internal-rehash",
+      "outer_error": "RVIR-v4 native optimizer semantic replay differs",
+      "outer_manifest_resigned": true,
+      "semantic_reexecution": true,
+      "status": "rejected-as-expected"
+    }
+  ],
+  "report_hash": "0e12b2d63aeb5c469c28a62890a53c6808f33ac14c384044b915abe7f285106c",
+  "schema_version": "boundflow.rvir-v4-native-optimizer-tamper-report/v1"
+}

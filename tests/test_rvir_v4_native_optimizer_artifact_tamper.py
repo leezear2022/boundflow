@@ -24,5 +24,5 @@ def test_native_optimizer_artifact_rejects_fully_resigned_tamper() -> None:
     assert isinstance(original, dict)
     assert original["status"] == "replay-passed"
     assert original["native_trace_hash"] == (
-        "4e173c2239d50759b65ef5ce961321824c454eea0c8c96d0478710282e12bc76"
+        "d53cc7fcb7d23958c99c0bc188df11e50b70a7cae97edf0bd64e345a4fee7c8c"
     )

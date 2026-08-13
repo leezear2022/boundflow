@@ -1,0 +1,96 @@
+{
+  "alpha_maximum_absolute_difference": 1.4662742614746094e-05,
+  "atol": 0.0002,
+  "b2_same_solver_timing_admitted": false,
+  "beta_maximum_absolute_difference": 3.986060619354248e-07,
+  "lower_maximum_absolute_difference": 4.5299530029296875e-06,
+  "native_trace_hash": "d53cc7fcb7d23958c99c0bc188df11e50b70a7cae97edf0bd64e345a4fee7c8c",
+  "optimizer_replacement_admitted": false,
+  "parity_hash": "2a74e73547dfd926d2007d0e3414d434672dba3e40afd1a6cebf2a7071ff2c44",
+  "performance_claimed": false,
+  "production_trace_hash": "fa070bb09265337b297e18fd38ff342ffa657fad75c447f340789a1cb5cc31f4",
+  "rtol": 0.0002,
+  "schema_version": "boundflow.rvir-v4-native-optimizer-parity/v1",
+  "step_rows": [
+    {
+      "allclose": true,
+      "alpha_maximum_absolute_difference": 0.0,
+      "beta_maximum_absolute_difference": 0.0,
+      "evaluation_ordinal": 0,
+      "lower_maximum_absolute_difference": 1.1920928955078125e-06,
+      "sign_exact": true
+    },
+    {
+      "allclose": true,
+      "alpha_maximum_absolute_difference": 1.0952353477478027e-06,
+      "beta_maximum_absolute_difference": 3.725290298461914e-09,
+      "evaluation_ordinal": 1,
+      "lower_maximum_absolute_difference": 3.814697265625e-06,
+      "sign_exact": true
+    },
+    {
+      "allclose": true,
+      "alpha_maximum_absolute_difference": 1.6689300537109375e-06,
+      "beta_maximum_absolute_difference": 9.685754776000977e-08,
+      "evaluation_ordinal": 2,
+      "lower_maximum_absolute_difference": 1.1920928955078125e-06,
+      "sign_exact": true
+    },
+    {
+      "allclose": true,
+      "alpha_maximum_absolute_difference": 2.562999725341797e-06,
+      "beta_maximum_absolute_difference": 1.043081283569336e-07,
+      "evaluation_ordinal": 3,
+      "lower_maximum_absolute_difference": 1.6689300537109375e-06,
+      "sign_exact": true
+    },
+    {
+      "allclose": true,
+      "alpha_maximum_absolute_difference": 4.0531158447265625e-06,
+      "beta_maximum_absolute_difference": 6.705522537231445e-08,
+      "evaluation_ordinal": 4,
+      "lower_maximum_absolute_difference": 1.9073486328125e-06,
+      "sign_exact": true
+    },
+    {
+      "allclose": true,
+      "alpha_maximum_absolute_difference": 5.9604644775390625e-06,
+      "beta_maximum_absolute_difference": 0.0,
+      "evaluation_ordinal": 5,
+      "lower_maximum_absolute_difference": 4.5299530029296875e-06,
+      "sign_exact": true
+    },
+    {
+      "allclose": true,
+      "alpha_maximum_absolute_difference": 8.225440979003906e-06,
+      "beta_maximum_absolute_difference": 3.725290298461914e-08,
+      "evaluation_ordinal": 6,
+      "lower_maximum_absolute_difference": 2.1457672119140625e-06,
+      "sign_exact": true
+    },
+    {
+      "allclose": true,
+      "alpha_maximum_absolute_difference": 1.043081283569336e-05,
+      "beta_maximum_absolute_difference": 2.0489096641540527e-07,
+      "evaluation_ordinal": 7,
+      "lower_maximum_absolute_difference": 1.6689300537109375e-06,
+      "sign_exact": true
+    },
+    {
+      "allclose": true,
+      "alpha_maximum_absolute_difference": 1.2516975402832031e-05,
+      "beta_maximum_absolute_difference": 3.986060619354248e-07,
+      "evaluation_ordinal": 8,
+      "lower_maximum_absolute_difference": 2.7418136596679688e-06,
+      "sign_exact": true
+    },
+    {
+      "allclose": true,
+      "alpha_maximum_absolute_difference": 1.4662742614746094e-05,
+      "beta_maximum_absolute_difference": 3.6135315895080566e-07,
+      "evaluation_ordinal": 9,
+      "lower_maximum_absolute_difference": 2.6226043701171875e-06,
+      "sign_exact": true
+    }
+  ]
+}

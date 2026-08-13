@@ -1,0 +1,21 @@
+{
+  "all_steps_allclose": true,
+  "all_steps_sign_exact": true,
+  "alpha_maximum_absolute_difference": 1.4662742614746094e-05,
+  "atomic_copy_out_executed": false,
+  "b2_same_solver_timing_admitted": false,
+  "beta_maximum_absolute_difference": 3.986060619354248e-07,
+  "evaluation_count": 10,
+  "lower_maximum_absolute_difference": 4.5299530029296875e-06,
+  "native_trace_hash": "d53cc7fcb7d23958c99c0bc188df11e50b70a7cae97edf0bd64e345a4fee7c8c",
+  "optimizer_replacement_admitted": false,
+  "parity_hash": "2a74e73547dfd926d2007d0e3414d434672dba3e40afd1a6cebf2a7071ff2c44",
+  "performance_claimed": false,
+  "production_trace_hash": "fa070bb09265337b297e18fd38ff342ffa657fad75c447f340789a1cb5cc31f4",
+  "provider_callback_count": 0,
+  "source_state_hash": "e3587dd9a8010d34bb65c1e415bb444917b48e23679855b2fe6ac54d23b4bff0",
+  "status": "validated-native-step-parity",
+  "summary_hash": "0b28f9c90c9846f41da2b3d263633a1cf58a53b2cb73783fa20ba178e63ab8aa",
+  "update_count": 9,
+  "workload_id": "cifar10_resnet:000"
+}

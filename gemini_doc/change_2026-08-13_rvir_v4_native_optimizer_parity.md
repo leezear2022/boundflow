@@ -58,3 +58,22 @@ probe先进入clean commit，再生成源码digest绑定的正式报告。
 evidence build期间临时固定`torch.set_num_threads(1)`并在结束后恢复调用方线程数；没有放宽数值容差。
 同一capture连续5次重建的native trace/parity/summary三组hash完全唯一（`unique=1`），lower/α/β最大
 误差=`4.5300e-06/1.4663e-05/3.9861e-07 <=2e-4`。旧artifact需由该clean修正提交重新生成。
+
+## Formal Closure（同日）
+
+- single-thread deterministic runner commit=`bba42ac`；artifact路径=
+  `artifacts/rvir-v4-native-optimizer/resnet2b-core-step-parity-v1/`；
+- original replay exit 0；10 evaluations/9 updates、provider callback=`0`，10/10 step allclose/sign exact；
+- lower/α/β最大绝对误差=`4.5299530029296875e-06`/
+  `1.4662742614746094e-05`/`3.986060619354248e-07 <=2e-4`；
+- native trace/parity/summary hash=`d53cc7fc...7c8c`/`2a74e735...2c44`/`0b28f9c9...b8aa`；
+  artifact manifest SHA256=`0b4ae1a8...8493`；
+- tamper report=`artifacts/rvir-v4-native-optimizer/resnet2b-core-step-parity-v1-tamper-report.json`，
+  topology/initial upper-α/production lower/production α/policy/recorded parity六类攻击均重算适用内部hash、
+  source/outer manifest，outer provenance与direct semantic两层6/6拒绝；报告SHA256=
+  `47af58e1...5e36`，report hash=`0e12b2d6...106c`；
+- formal focused=`5 passed`、expanded RVIR-v4=`38 passed`、full=`1169 passed, 3 skipped`；mypy六文件
+  clean，Pylint六文件=`10.00/10`。
+
+V4-2D由此以`VALIDATED-NATIVE-STEP-PARITY`关闭。该关闭证明独立mutation语义，但没有将terminal
+native state原子写回provider容器；下一门禁只允许V4-2E atomic copy-out。V4-2/B2与性能claim仍关闭。

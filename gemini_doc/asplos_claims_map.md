@@ -23,8 +23,8 @@
 > V4-2B 10-evaluation/9-Adam-step正式GPU typed trace、original replay与5类同步重签名tamper通过，以
 > `VALIDATED-PRODUCTION-TRACE`关闭。V4-2C又以正式artifact关闭6组native pre-state初始化、12/12
 > round-trip及6类双层重签名tamper，状态为`VALIDATED-PRE-STATE-INITIALIZER`。这些结论尚未执行
-> optimizer mutation；V4-2 replacement与B2状态不变，不得升级为replacement correctness或性能claim。
-> 下一切片为V4-2D逐step native mutation parity。
+> optimizer mutation。V4-2D现又以formal 10/9 native loop逐step parity与6类双层重签攻击关闭；terminal
+> copy-out仍待V4-2E。V4-2 replacement与B2状态不变，不得升级为完整replacement correctness或性能claim。
 
 | Claim | 当前状态 | 代码/设计落点 | 必需测试 | 必需工件 |
 |---|---|---|---|---|
@@ -1447,17 +1447,19 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - `RVIR-V4-2C-V`：focused=`8 passed`、full=`1164 passed, 3 skipped`、mypy七文件clean、Pylint=
   `10.00/10`；artifact manifest SHA256=`daee2fa0...0218`，tamper report SHA256=
   `894c30c4...d858`/report hash=`cfe3f9cd...0033`；
-- `RVIR-V4-2C-L`：以`VALIDATED-PRE-STATE-INITIALIZER`关闭。没有执行optimizer mutation、post-state
-  parity、atomic copy-out或性能计时；V4-2/B2仍关闭，下一门禁只允许V4-2D逐step native mutation parity。
+- `RVIR-V4-2C-L`：以`VALIDATED-PRE-STATE-INITIALIZER`关闭。该时点没有执行optimizer mutation、
+  post-state parity、atomic copy-out或性能计时；V4-2D现已由下节关闭。
 
-### RVIR-v4 V4-2D（实现中）：Native Step Mutation Parity
+### RVIR-v4 V4-2D（关闭）：Native Step Mutation Parity
 
-- `RVIR-V4-2D-M-PENDING`：provider-independent native executor已从V4-2C state执行10 evaluations/
+- `RVIR-V4-2D-M`：provider-independent native executor已从V4-2C state执行10 evaluations/
   9 Adam updates；production trace不进入executor，只进入独立dense comparator；双LR、decay、sum loss、
   α/β projection与10/9 loop全部typed/fail closed；
-- `RVIR-V4-2D-G-PENDING`：10/10 step lower/α/β allclose且sign exact，最大绝对误差分别为
-  `4.0531e-06`/`1.4663e-05`/`3.9861e-07 <=2e-4`；native trace/parity hash=
-  `4e173c22...bc76`/`a6b5df97...3959`；focused=`36 passed`、full=`1167 passed, 3 skipped`、
-  mypy clean、Pylint=`10.00/10`；
-- `RVIR-V4-2D-L`：状态仅为`IMPLEMENTED-STEP-PARITY / FORMAL-ARTIFACT-PENDING`；正式artifact、
-  replay、重签名tamper与terminal copy-out尚未完成。V4-2/B2及性能claim仍关闭。
+- `RVIR-V4-2D-G`：single-thread formal replay的10/10 step lower/α/β allclose且sign exact，最大绝对
+  误差=`4.5300e-06`/`1.4663e-05`/`3.9861e-07 <=2e-4`；native trace/parity/summary=
+  `d53cc7fc...7c8c`/`2a74e735...2c44`/`0b28f9c9...b8aa`；六类完全重签攻击在provenance/
+  semantic两层6/6拒绝；manifest/tamper SHA256=`0b4ae1a8...8493`/`47af58e1...5e36`；
+- `RVIR-V4-2D-V`：formal focused=`5 passed`、expanded=`38 passed`、full=`1169 passed, 3 skipped`、
+  mypy六文件clean、Pylint=`10.00/10`；
+- `RVIR-V4-2D-L`：以`VALIDATED-NATIVE-STEP-PARITY`关闭。terminal atomic copy-out尚未完成，故
+  V4-2/B2及性能claim仍关闭，下一门禁只允许V4-2E。

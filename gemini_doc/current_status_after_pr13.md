@@ -3,7 +3,7 @@
 > 状态日期：2026-08-13
 > 当前 integration base：`f194034`（NRIR-44 PR #55 merge）；PR-13 历史基线：`57a854b` / tag `pr13-validated-reduced`
 > 当前研发分支：`feat/rvir-v4-production-state-ownership-v1`；FSG2历史 implementation/inventory
-> revisions=`aa31eae`/`8bf6981`；当前已推进至RVIR-v4 V4-2C formal pre-state关闭；
+> revisions=`aa31eae`/`8bf6981`；当前已推进至RVIR-v4 V4-2D formal native mutation关闭；
 > FSG0、FSG1均已验证；FSG2以`VALIDATED-REDUCED initial-only`关闭，完整B2 replacement
 > `NO-GO/not admitted`，FSG3—FSG5按依赖门禁未运行
 > 总判定：IR-5 final **VALIDATED-NO-GO**；PR-14B 同为 No-Go、PR-14C/IR-6 不启动；
@@ -17,10 +17,11 @@
 > native scope上恢复6组dense α/β/split与external intermediate bounds，12/12 round-trip bit-exact，
 > upper-α显式copy-through；original replay及topology/index/history/intermediate/upper-α/beta-location
 > 六类内部重哈希、source/outer重签攻击在provenance与semantic两层全部拒绝。因此V4-2C以
-> `VALIDATED-PRE-STATE-INITIALIZER`关闭。V4-2D capture-ready executor现已在不读取reference trace、零
+> `VALIDATED-PRE-STATE-INITIALIZER`关闭。V4-2D formal native executor又在不读取reference trace、零
 > provider callback下独立执行10 evaluations/9 Adam updates；10/10 step lower/α/β allclose且sign exact，
-> 最大误差=`4.0531e-06/1.4663e-05/3.9861e-07 <=2e-4`。但formal artifact/tamper尚待生成，状态仅为
-> `IMPLEMENTED-STEP-PARITY / FORMAL-ARTIFACT-PENDING`；V4-2/B2与性能claim仍关闭。
+> 最大误差=`4.5300e-06/1.4663e-05/3.9861e-07 <=2e-4`，original replay与6类双层完全重签攻击通过，
+> 以`VALIDATED-NATIVE-STEP-PARITY`关闭。terminal atomic copy-out尚未完成；V4-2/B2与性能claim仍
+> 关闭，下一门禁只允许V4-2E。
 > 2026-08-05 NRIR-37 后续：frozen NRIR-28 parametric Template/Instance/Cache 已接入
 > objective-ancestral sibling evaluator，并新增独立 Plan/Batch/Task/Schedule IR 与跨 clause 单一 cache
 > owner。真实 ResNet clause 2 root+pair 与 frozen audit lower/branch/split/α/β/refinement exact，upper

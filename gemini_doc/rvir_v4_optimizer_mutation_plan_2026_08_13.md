@@ -231,20 +231,24 @@ formal generate/original replay exit 0，五类重签名tamper 5/5拒绝；focus
   `e3587dd9...bff0`/`6702a39d...899c`，tamper report=`894c30c4...d858`；
 - focused=`8 passed`、full=`1164 passed, 3 skipped`、mypy七文件clean、Pylint=`10.00/10`。
 
-V4-2C现已关闭，但只证明初始化接管。下一动作是V4-2D逐step native mutation parity；在V4-2D/E前
-仍不得进入B2。
+V4-2C现已关闭，但只证明初始化接管；其后V4-2D已由下节正式关闭。在V4-2E前仍不得进入B2。
 
-## 12. V4-2D Native Step Mutation Parity 实现状态
+## 12. V4-2D Native Step Mutation Parity 关闭状态
 
-状态：`IMPLEMENTED-STEP-PARITY / FORMAL-ARTIFACT-PENDING`。
+状态：`VALIDATED-NATIVE-STEP-PARITY`。
 
 - 新native executor从V4-2C state独立执行10 evaluations/9 Adam updates，executor接口不接收production
   reference trace，provider callback count固定为0；
 - 双学习率=`0.01/0.05`、每步decay=`0.98`、loss=`-lower.sum()`及α/β投影与冻结production policy一致；
 - 独立comparator把V4-2B每个step按V4-2C layout映射为dense reference，逐step比较lower、6组α和6组β；
-- 10/10 step allclose/sign exact；lower/α/β最大绝对误差=`4.0531e-06`/`1.4663e-05`/
-  `3.9861e-07 <=2e-4`；native trace/parity hash=`4e173c22...bc76`/`a6b5df97...3959`；
-- focused=`36 passed`、full=`1167 passed, 3 skipped`、mypy clean、Pylint=`10.00/10`。
+- single-thread deterministic formal artifact original replay通过；10/10 step allclose/sign exact，
+  lower/α/β最大绝对误差=`4.5300e-06`/`1.4663e-05`/`3.9861e-07 <=2e-4`；
+- native trace/parity/summary=`d53cc7fc...7c8c`/`2a74e735...2c44`/`0b28f9c9...b8aa`，manifest
+  SHA256=`0b4ae1a8...8493`；
+- topology/initial upper-α/production lower/production α/policy/recorded parity六类完全重签攻击在outer
+  provenance与direct semantic两层6/6拒绝；tamper report=`47af58e1...5e36`；
+- formal focused=`5 passed`、expanded=`38 passed`、full=`1169 passed, 3 skipped`、mypy clean、
+  Pylint=`10.00/10`。
 
-该实现尚未形成独立formal artifact和完整重签名攻击报告，也未把native terminal state原子投影回provider
-容器，因此不关闭V4-2D/V4-2/B2。下一动作只允许V4-2D formal artifact/replay/tamper。
+V4-2D已关闭，但尚未把native terminal state原子投影回provider容器，因此V4-2/B2仍不关闭。下一动作
+只允许V4-2E atomic copy-out。
