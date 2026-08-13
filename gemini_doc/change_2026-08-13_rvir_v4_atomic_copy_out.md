@@ -30,3 +30,17 @@ read-only/history/layout与真实post-state后，再一次性提交到provider-o
 
 本切片仍需formal artifact与完全重签tamper；当前状态为
 `IMPLEMENTED-ATOMIC-COPY-OUT / FORMAL-ARTIFACT-PENDING`，不关闭V4-2E/V4-2/B2，也不声明性能结果。
+
+## Formal Runner 准备
+
+- 新增`run_rvir_v4_atomic_copy_out_artifact.py`，从冻结V4-2D artifact重新执行V4-2C初始化、
+  V4-2D native optimizer、12-path private staging与真实commit，而不是复制已有summary；
+- manifest绑定source capture/source manifest、模型、topology与三份执行代码的SHA256；replay会重新导入
+  ONNX、重跑10次evaluation/9次update、逐项重建copy-out和commit receipt；
+- 正式summary只预备`optimizer_replacement_admitted=true`，同时强制
+  `b2_same_solver_timing_admitted=false`和`performance_claimed=false`；该字段只有在artifact和同步重签
+  tamper均通过后才构成正式证据；
+- capture-ready runner测试连同copy-out负向合同共`5 passed`，mypy clean、Pylint=`10.00/10`。
+
+下一步先提交runner以冻结code provenance，再生成artifact和篡改报告；在这些证据落盘前，上述pending
+状态保持不变。
