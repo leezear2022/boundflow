@@ -5124,3 +5124,16 @@
 
 **记录**
 - `gemini_doc/change_2026-08-13_rvir_v4_whole_core_truth_formal_closure.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-3B Native Backward Export（实现中）
+
+- 通用CROWN backward新增lower-adjoint export；
+- typed映射导出六层provider lA和12个shared-input intermediate bounds tensors；
+- capture-ready诊断lA/intermediate/final-lower最大差=`9.2387e-07/6.0797e-06/3.0994e-06`，sign exact；
+- provider core/compute_bounds/update_bounds/fallback=`0/0/0/0`；
+- 状态为`IMPLEMENTED-NATIVE-BACKWARD-EXPORT / FORMAL-ARTIFACT-PENDING`，V4-3/B2仍关闭。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_native_backward_export.md`

@@ -1681,6 +1681,7 @@ def _run_crown_backward_from_trace(
     fused_crown_steps: Sequence[FusedCrownExecutionStep],
     fused_crown_context: FusedCrownExecutionContext,
     relu_objective_influence_out: Optional[Dict[str, torch.Tensor]],
+    relu_lower_coefficients_out: Optional[Dict[str, torch.Tensor]],
     caller: str,
 ) -> IntervalState:
     task = module.get_entry_task()
@@ -1806,6 +1807,25 @@ def _run_crown_backward_from_trace(
             if x_name not in relu_pre:
                 raise KeyError(
                     f"missing relu pre-activation bounds for value: {x_name}"
+                )
+            if relu_lower_coefficients_out is not None:
+                if x_name in relu_lower_coefficients_out:
+                    raise ValueError(
+                        f"duplicate ReLU lower-coefficient identity: {x_name}"
+                    )
+                coefficient_shape = tuple(
+                    int(dimension) for dimension in relu_pre[x_name].lower.shape[1:]
+                )
+                aligned_lower = _align_backward_state_input_shape(
+                    state, input_shape=coefficient_shape
+                ).A_l.to_dense()
+                relu_lower_coefficients_out[x_name] = (
+                    aligned_lower.reshape(
+                        batch, int(aligned_lower.shape[1]), *coefficient_shape
+                    )
+                    .detach()
+                    .contiguous()
+                    .clone()
                 )
             if relu_objective_influence_out is not None:
                 if x_name in relu_objective_influence_out:
@@ -2129,6 +2149,7 @@ def run_crown_ibp_mlp(
             fused_crown_steps=fused_crown_steps,
             fused_crown_context=fused_context,
             relu_objective_influence_out=None,
+            relu_lower_coefficients_out=None,
             caller="run_crown_ibp_mlp",
         )
 
@@ -2194,6 +2215,7 @@ def run_crown_ibp_mlp_from_forward_trace(
                 )
             ),
             relu_objective_influence_out=None,
+            relu_lower_coefficients_out=None,
             caller="run_crown_ibp_mlp_from_forward_trace",
         )
 
@@ -2234,11 +2256,53 @@ def run_crown_ibp_mlp_with_relu_influence_from_forward_trace(
         fused_crown_steps=(),
         fused_crown_context=FusedCrownExecutionContext(),
         relu_objective_influence_out=influence,
+        relu_lower_coefficients_out=None,
         caller="run_crown_ibp_mlp_with_relu_influence_from_forward_trace",
     )
     if set(influence) != set(relu_pre):
         raise ValueError("ReLU objective influence coverage differs")
     return bounds, {name: influence[name] for name in relu_pre}
+
+
+def run_crown_ibp_mlp_with_relu_lower_coefficients_from_forward_trace(
+    module: BFTaskModule,
+    input_spec: InputSpec,
+    *,
+    interval_env: Dict[str, IntervalState],
+    relu_pre: Dict[str, IntervalState],
+    linear_spec_C: torch.Tensor,
+    relu_alpha: Dict[str, torch.Tensor],
+    relu_pre_add_coeff_l: Dict[str, torch.Tensor],
+    output_value: Optional[str] = None,
+) -> tuple[IntervalState, Dict[str, torch.Tensor]]:
+    """Return optimized lower bounds and the lower adjoint at every ReLU."""
+
+    coefficients: Dict[str, torch.Tensor] = {}
+    bounds = _run_crown_backward_from_trace(
+        module,
+        input_spec,
+        interval_env=interval_env,
+        relu_pre=relu_pre,
+        linear_spec_C=linear_spec_C,
+        output_value=output_value,
+        relu_alpha=relu_alpha,
+        relu_pre_add_coeff_u=None,
+        relu_pre_add_coeff_l=relu_pre_add_coeff_l,
+        fused_crown_executor=None,
+        fused_crown_steps=(),
+        fused_crown_context=FusedCrownExecutionContext(
+            requires_grad=False,
+            alpha_enabled=True,
+            beta_enabled=True,
+            split_state_present=True,
+        ),
+        relu_objective_influence_out=None,
+        relu_lower_coefficients_out=coefficients,
+        caller="run_crown_ibp_mlp_with_relu_lower_coefficients_from_forward_trace",
+    )
+    if set(coefficients) != set(relu_pre):
+        raise ValueError("ReLU lower-coefficient coverage differs")
+    return bounds, {name: coefficients[name] for name in relu_pre}
 
 
 def run_crown_ibp_mlp_with_placement_retry(
