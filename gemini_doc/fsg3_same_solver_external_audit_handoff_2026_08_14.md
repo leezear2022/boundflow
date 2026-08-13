@@ -11,6 +11,7 @@ complete-query、TTV、multi-workload和ASPLOS-ready均未关闭。
 ## 2. 冻结输入
 
 - branch：`feat/rvir-v4-production-state-ownership-v1`；
+- Draft PR：`#60`，base=`main`；
 - formal source：`a4ee2910f4039981338fb6d8688ac4af18508b73`；
 - artifact：`artifacts/fsg3-same-solver-timing/resnet2b-prop0-v5/`；
 - tamper report：

@@ -15,6 +15,7 @@ feature gate启动，最终系统门槛仍只施加到累计B7 vs B0。
 
 ## 正式工件
 
+- Draft PR：`#60`（base=`main`，head=`feat/rvir-v4-production-state-ownership-v1`）；
 - artifact：`artifacts/fsg3-same-solver-timing/resnet2b-prop0-v5/`；
 - tamper report：
   `artifacts/fsg3-same-solver-timing/resnet2b-prop0-v5-tamper-report.json`；

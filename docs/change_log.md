@@ -12,6 +12,7 @@
 - FSG3定向=`33 passed`，全量=`1233 passed, 3 skipped`，Black/mypy/Pylint=`10.00/10`；
 - FSG3状态=`VALIDATED-FSG3-B0-B1-B2-BASELINE`，B2=`MEASURED-B2-SLOWER`；该结论不否定B3—B7，
   下一门禁为FSG4/B3 IR/graph/Plan/Schedule复用，ASPLOS-ready仍为NO；
+- commit `5953c50`已推送，累计RVIR/FSG链以Draft PR `#60`提交到`main`；
 - 关闭记录与外审入口分别为
   `gemini_doc/change_2026-08-14_fsg3_same_solver_formal_baseline.md`、
   `gemini_doc/fsg3_same_solver_external_audit_handoff_2026_08_14.md`。
