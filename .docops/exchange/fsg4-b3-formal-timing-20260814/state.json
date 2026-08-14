@@ -1,0 +1,19 @@
+{
+  "task": "fsg4-b3-formal-timing-20260814",
+  "title": "FSG4 B3 formal timing external audit",
+  "status": "ready_for_audit",
+  "round": 2,
+  "executor": "codex",
+  "auditor": "external-model",
+  "approved_round": null,
+  "docs": [
+    "fsg4-b3-formal-timing-20260814/request",
+    "fsg4-b3-formal-timing-20260814/r001/delivery",
+    "fsg4-b3-formal-timing-20260814/r001/audit",
+    "fsg4-b3-formal-timing-20260814/r001/response-F1",
+    "fsg4-b3-formal-timing-20260814/r002/delivery"
+  ],
+  "rev": 7,
+  "created": "2026-08-14T14:00:21Z",
+  "updated": "2026-08-14T14:02:22Z"
+}

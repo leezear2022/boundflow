@@ -1,0 +1,14 @@
+{
+  "doc": "fsg4-b3-formal-timing-20260814/r001/response-F1",
+  "type": "response",
+  "task": "fsg4-b3-formal-timing-20260814",
+  "round": 1,
+  "from": "codex",
+  "to": "external-model",
+  "ts": "2026-08-14T14:02:05Z",
+  "audit": "fsg4-b3-formal-timing-20260814/r001/audit",
+  "finding": "F1",
+  "action": "accept",
+  "note": "Accepted: git rev-parse HEAD is d1c95059bb399b7cb01ce6a8b97f5149e21ae6de; round 2 will use this exact value. Round 1 received no substantive external audit.",
+  "md_sha256": "efad71f916296ab1960b23ef40905cd567bdb746de788226e675e0033adf833c"
+}
