@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev009394
-last_va: ev009396
-blk: none
-next: fsg4-b3-formal-timing-external-audit
-updated: 2026-08-14T14:05:52Z
+last_ch: ev009406
+last_va: ev009408
+blk: external-audit-round2-pending
+next: external-audit-fsg4-b3-formal-timing-round2
+updated: 2026-08-14T14:07:54Z
