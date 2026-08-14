@@ -84,6 +84,7 @@ def test_fixed_b2_counter_mismatch_fails_closed(counter: str, replacement: int) 
     )
     with pytest.raises(ValueError, match="gate failed"):
         snapshot.validate()
+    assert any(counter in failure for failure in snapshot.gate_failures())
 
 
 def test_profiler_callback_is_not_part_of_counter_contract() -> None:

@@ -10,9 +10,10 @@
 
 ---
 
-FSG4/B3-0显式counter diagnostic已经实现但未运行。它用命名seam event journal替代与provider guard冲突的
-通用profiler，并将raw B2 worker、semantic/environment/provider/fallback、journal-derived counter、code
-revision和manifest绑定；当前=`IMPLEMENTED-NOT-RUN`，无真实counter或performance claim。实现记录见
+FSG4/B3-0显式counter diagnostic已经实现。首次真实运行因α D2H计数seam漏记而fail closed，已在不降低
+`12`门槛的前提下补齐，当前=`IMPLEMENTED-RERUN-PENDING`。它用命名seam event journal替代与provider
+guard冲突的通用profiler，并将raw B2 worker、semantic/environment/provider/fallback、journal-derived
+counter、code revision和manifest绑定；尚无有效正式counter artifact或performance claim。实现记录见
 `gemini_doc/change_2026-08-14_fsg4_b3_explicit_counter_diagnostic_implementation.md`。
 
 FSG4/B3当前入口为

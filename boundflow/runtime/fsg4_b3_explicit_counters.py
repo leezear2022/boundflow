@@ -153,43 +153,60 @@ class Fsg4B3CounterSnapshot:
     def counts(self) -> dict[str, int]:
         return dict(self.counts_by_name)
 
-    def validate(self) -> None:
+    def gate_failures(self) -> tuple[str, ...]:
+        """Return deterministic failure details instead of hiding mismatches."""
+
         counts = self.counts
-        if (
-            self.schema_version != FSG4_B3_COUNTER_SCHEMA
-            or self.configuration != "B2"
-            or self.mode != "control"
-            or self.performance_claimed is not False
-            or self.environment_admitted is not True
-            or len(self.semantic_hash) != 64
-            or len(self.worker_result_sha256) != 64
-            or tuple(name for name, _value in self.counts_by_name)
-            != tuple(sorted(COUNTER_NAMES))
-            or set(counts) != set(COUNTER_NAMES)
-            or any(
-                not isinstance(value, int) or isinstance(value, bool) or value < 0
-                for value in counts.values()
-            )
-            or any(
-                value != EXPECTED_B2_FIXED_COUNTERS[name]
-                for name, value in counts.items()
-                if name in EXPECTED_B2_FIXED_COUNTERS
-            )
-            or counts["tensor_content_hash_count"] <= 0
-            or counts["gpu_tensor_content_hash_count"] <= 0
-            or counts["typed_validate_call_count"] <= 0
-            or counts["stable_hash_call_count"] <= 0
-            or any(
-                value != 0
-                for value in (
-                    self.provider_core_call_count,
-                    self.provider_compute_bounds_call_count,
-                    self.provider_update_bounds_call_count,
-                    self.fallback_dispatch_count,
-                )
+        failures: list[str] = []
+        if self.schema_version != FSG4_B3_COUNTER_SCHEMA:
+            failures.append("schema")
+        if self.configuration != "B2" or self.mode != "control":
+            failures.append("configuration-mode")
+        if self.performance_claimed is not False:
+            failures.append("performance-claim")
+        if self.environment_admitted is not True:
+            failures.append("environment")
+        if len(self.semantic_hash) != 64 or len(self.worker_result_sha256) != 64:
+            failures.append("digest-length")
+        if tuple(name for name, _value in self.counts_by_name) != tuple(
+            sorted(COUNTER_NAMES)
+        ) or set(counts) != set(COUNTER_NAMES):
+            failures.append("counter-inventory")
+        if any(
+            not isinstance(value, int) or isinstance(value, bool) or value < 0
+            for value in counts.values()
+        ):
+            failures.append("counter-type")
+        for name, expected in EXPECTED_B2_FIXED_COUNTERS.items():
+            observed = counts.get(name)
+            if observed != expected:
+                failures.append(f"{name}:expected={expected}:observed={observed}")
+        for name in (
+            "tensor_content_hash_count",
+            "gpu_tensor_content_hash_count",
+            "typed_validate_call_count",
+            "stable_hash_call_count",
+        ):
+            if counts.get(name, 0) <= 0:
+                failures.append(f"{name}:not-positive")
+        if any(
+            value != 0
+            for value in (
+                self.provider_core_call_count,
+                self.provider_compute_bounds_call_count,
+                self.provider_update_bounds_call_count,
+                self.fallback_dispatch_count,
             )
         ):
-            raise ValueError("FSG4/B3 B2 counter snapshot gate failed")
+            failures.append("provider-or-fallback")
+        return tuple(failures)
+
+    def validate(self) -> None:
+        failures = self.gate_failures()
+        if failures:
+            raise ValueError(
+                "FSG4/B3 B2 counter snapshot gate failed: " + ",".join(failures)
+            )
 
     def to_dict(self) -> dict[str, object]:
         self.validate()

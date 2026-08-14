@@ -1,7 +1,7 @@
 # FSG4/B3-0 显式 Counter 诊断实现记录
 
 日期：2026-08-14
-状态：`IMPLEMENTED-NOT-RUN`
+状态：`IMPLEMENTED-RERUN-PENDING`
 分支：`feat/rvir-v4-production-state-ownership-v1`
 
 ## 目标
@@ -60,6 +60,26 @@ B3-0回归。6项warning为既有Torch JIT/profiler与treespec弃用提示。
 - raw worker虽然保留诊断运行时的计时字段，但本阶段明确
   `diagnostic_timing_claimed=false/performance_claimed=false`；
 - 不实现B3-A/B/C，不启动B4 TIR。
+
+## 首次真实诊断失败与修正
+
+source=`f6004a6`的首次`run`完成了真实B2 solver、语义与环境门禁，但snapshot counter gate拒绝，因此临时
+staging未发布为有效artifact。随后以同一source执行只读debug journal聚合，观察到唯一不一致：
+
+```text
+timed_candidate_d2h_copy_count: expected=12, observed=6
+其余全部固定counter与预注册一致
+```
+
+根因是计数seam覆盖不完整，而不是B2物理路径少了6次copy：
+
+- 6个β candidate在`_replacement`执行GPU→CPU，已被原实现统计；
+- 6个α candidate先在`_project_alpha`把GPU dense值copy进CPU-owned sparse layout，进入
+  `_replacement`时已经是CPU，原实现漏计。
+
+修正保持预注册门槛`12`不变，在`_project_alpha`增加显式设备转换计数，并让snapshot gate报告逐字段
+expected/observed。debug raw worker保留在`/tmp/fsg4-b3-counter-debug.XOJtGg/worker.json`，不属于正式
+artifact且不形成性能结论。
 
 ## 下一步
 

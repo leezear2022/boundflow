@@ -2,12 +2,14 @@
 
 ## 2026-08-14：FSG4/B3-0 显式 Counter 诊断实现
 
+- 首次真实B2诊断在counter gate fail closed；唯一偏差为D2H观察`6/12`。确认不是物理路径缺失，而是
+  原计数seam只覆盖β `_replacement`、漏掉α `_project_alpha`中的6次GPU→CPU；补计数点且门槛保持12；
 - 新增26项typed counter与逐事件journal，不使用`sys.setprofile`；
 - 新增真实B2 control diagnostic runner，复用FSG3 environment/semantic/provider/fallback门禁；
 - 新增raw worker、journal、snapshot、code revision、manifest和replay的分层hash绑定；
 - 相关测试`17 passed`，全量回归`1243 passed, 3 skipped`，mypy clean，Pylint 10.00/10；fresh GPU
   run尚待执行；
-- 当前=`IMPLEMENTED-NOT-RUN`，没有真实counter、B3 candidate或performance claim。详细记录见
+- 当前=`IMPLEMENTED-RERUN-PENDING`，没有有效正式counter artifact、B3 candidate或performance claim。详细记录见
   `gemini_doc/change_2026-08-14_fsg4_b3_explicit_counter_diagnostic_implementation.md`。
 
 ## 2026-08-14：FSG4/B3 IR/Graph/Plan/Schedule Reuse 预注册

@@ -315,6 +315,23 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
 
     original_replacement = atomic._replacement
 
+    original_project_alpha = atomic._project_alpha
+
+    @wraps(original_project_alpha)
+    def counted_project_alpha(*args: Any, **kwargs: Any) -> Any:
+        dense = args[1] if len(args) > 1 else kwargs["dense"]
+        result = original_project_alpha(*args, **kwargs)
+        if dense.device.type == "cuda" and result.device.type == "cpu":
+            recorder.add(
+                "timed_candidate_d2h_copy_count",
+                detail="alpha projection GPU dense into CPU-owned sparse layout",
+            )
+        return result
+
+    stack.enter_context(
+        _patch_attribute(atomic, "_project_alpha", counted_project_alpha)
+    )
+
     @wraps(original_replacement)
     def counted_replacement(source: Any, value: Any) -> Any:
         result = original_replacement(source, value)
@@ -519,6 +536,16 @@ def _generate(args: argparse.Namespace) -> None:
         events = [event.to_dict() for event in recorder.events]
         _write_jsonl(staging / "events.jsonl", events)
         counts = recorder.counts()
+        print(
+            _canonical_json(
+                {
+                    "counter_gate": "observed-before-validation",
+                    "counts": counts,
+                    "performance_claimed": False,
+                }
+            ),
+            flush=True,
+        )
         snapshot = Fsg4B3CounterSnapshot(
             counts_by_name=tuple(sorted(counts.items())),
             semantic_hash=canonical_hash(run.semantics.to_dict()),
