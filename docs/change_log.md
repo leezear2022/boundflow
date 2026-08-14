@@ -5408,3 +5408,13 @@
 
 **记录**
 - `gemini_doc/change_2026-08-14_fsg4_b3a_cross_head_replay_fix.md`
+
+## 2026-08-14：FSG4/B3-B Terminal Optimizer Schedule 实现候选
+
+- 新增first-class 10/9 terminal Schedule IR；formal逐step trace保留；
+- production只保存终态并把optimizer父forward trace交给backward；
+- CPU冻结case逐元素等价、负向门禁、42项定向、mypy与Pylint通过；
+- fresh GPU snapshots/forward counter尚待验证，无性能主张。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg4_b3b_terminal_schedule_candidate.md`

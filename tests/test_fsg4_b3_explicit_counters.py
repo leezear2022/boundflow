@@ -10,6 +10,7 @@ from boundflow.runtime.fsg4_b3_explicit_counters import (
     COUNTER_NAMES,
     EXPECTED_B2_FIXED_COUNTERS,
     EXPECTED_B3A_FIXED_COUNTERS,
+    EXPECTED_B3B_FIXED_COUNTERS,
     events_from_rows,
     Fsg4B3CounterRecorder,
     Fsg4B3CounterSnapshot,
@@ -112,6 +113,32 @@ def test_b3a_counter_contract_changes_only_prepared_core_physical_counts() -> No
         fallback_dispatch_count=0,
         environment_admitted=True,
         configuration="B3-A",
+    )
+    snapshot.validate()
+
+
+def test_b3b_counter_contract_changes_only_terminal_schedule_counts() -> None:
+    changed = {
+        name
+        for name, value in EXPECTED_B3A_FIXED_COUNTERS.items()
+        if value != EXPECTED_B3B_FIXED_COUNTERS[name]
+    }
+    assert changed == {
+        "full_optimizer_step_snapshot_count",
+        "forward_trace_build_count",
+    }
+    counts = {name: 1 for name in COUNTER_NAMES}
+    counts.update(EXPECTED_B3B_FIXED_COUNTERS)
+    snapshot = Fsg4B3CounterSnapshot(
+        counts_by_name=tuple(sorted(counts.items())),
+        semantic_hash="1" * 64,
+        worker_result_sha256="2" * 64,
+        provider_core_call_count=0,
+        provider_compute_bounds_call_count=0,
+        provider_update_bounds_call_count=0,
+        fallback_dispatch_count=0,
+        environment_admitted=True,
+        configuration="B3-B",
     )
     snapshot.validate()
 

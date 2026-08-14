@@ -201,7 +201,8 @@ headline ratio：
 1. [x] B3-0：显式call/copy/validation/hash counter diagnostic，状态=`VALIDATED-B2-COUNTERS`，不形成speedup；
 2. [x] B3-A：PreparedCoreTemplate、CorePlanInstance与cache/reject tests；状态=
    `VALIDATED-B3-A-COUNTERS`，不形成timing/speedup；
-3. [ ] B3-B：terminal-only optimizer Schedule和forward-trace handoff；
+3. [ ] B3-B：terminal-only optimizer Schedule和forward-trace handoff；第一版实现候选已落地，等待fresh
+   GPU counter/correctness artifact后才能关闭；
 4. [ ] B3-C：device-resident AtomicCommitPlan、rollback与audit digest分层；
 5. [ ] 五fresh B2/B3 correctness；
 6. [ ] 36-process B0/B2/B3正式artifact、replay与tamper；
@@ -285,3 +286,20 @@ B3-0证明预注册的重复工作真实存在，并把B3-A/B/C的物理分母�
 B3-A证明PreparedCoreTemplate/CorePlanInstance在一个fresh真实solver call中激活且保持冻结语义；它没有
 证明延迟改善，也不满足完整B3正式计时前的5 fresh B2/B3 pair门禁。下一动作只允许B3-B terminal-only
 optimizer Schedule与forward-trace handoff；B3-C和B4—B7继续关闭。
+
+## 17. B3-B Implementation Candidate（2026-08-14）
+
+- 新增`NativeTerminalOptimizerScheduleV1`：10个typed evaluation action、前9个update action、双学习率
+  与0.98 decay全部进入稳定Schedule hash；
+- 新增production terminal executor：执行10/9语义但不构造`NativeProductionOptimizerStepV4`，只保留
+  terminal lower、terminal α/β和一次父forward trace；旧formal trace函数不变；
+- backward新增exact typed forward-trace handoff；graph/scope/split、完整value inventory和tensor placement
+  不一致时fail closed，否则跳过父forward rebuild；
+- `_LiveExecutor`仅在显式prepared core + terminal schedule组合下启用B3-B；B2/B3-A默认路径不变；
+- counter schema预注册B3-B相对B3-A只允许full snapshots `10→0`、forward builds `5→4`；template、
+  scope、optimizer 10/9、KFSB、D2H和commit全部保持；
+- CPU冻结case确认terminal lower/α/β与formal trace最后一步逐元素相同，forward handoff前后backward
+  lower/lA/intermediate逐元素相同；targeted=`42 passed`，mypy touched clean，Pylint=`10.00/10`。
+
+当前状态=`IMPLEMENTED-PENDING-FRESH-GPU`。物理counter和真实same-solver语义仍待提交后的fresh GPU
+artifact证明；B3-C和B4—B7继续关闭。

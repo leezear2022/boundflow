@@ -133,6 +133,7 @@ class _LiveExecutor:
         precompiled_module: Any = None,
         prepared_core_cache: Any = None,
         prepared_core_template_hash: str | None = None,
+        terminal_optimizer_schedule: Any = None,
         capture_payloads: bool = True,
         profile_recorder: Any = None,
     ):
@@ -142,6 +143,8 @@ class _LiveExecutor:
             raise ValueError("RVIR-v4 prepared core cache/hash must be paired")
         if prepared_core_cache is not None and precompiled_program is not None:
             raise ValueError("RVIR-v4 prepared core conflicts with precompiled inputs")
+        if terminal_optimizer_schedule is not None and prepared_core_cache is None:
+            raise ValueError("RVIR-v4 terminal schedule requires prepared core")
         self.model = model
         self.torch = torch_module
         self.arguments = arguments_module
@@ -149,6 +152,7 @@ class _LiveExecutor:
         self.precompiled_module = precompiled_module
         self.prepared_core_cache = prepared_core_cache
         self.prepared_core_template_hash = prepared_core_template_hash
+        self.terminal_optimizer_schedule = terminal_optimizer_schedule
         self.capture_payloads = capture_payloads
         self.profile_recorder = profile_recorder
         self.active = False
@@ -163,6 +167,7 @@ class _LiveExecutor:
         self.pre_state_identities: list[dict[str, str]] = []
         self.prepared_core_template_hashes: list[str] = []
         self.prepared_core_instance_hashes: list[str] = []
+        self.terminal_optimizer_schedule_hashes: list[str] = []
         self.last_core_result: Any = None
         self.last_post_result: Any = None
 
@@ -187,6 +192,9 @@ class _LiveExecutor:
         )
         from boundflow.runtime.fsg4_b3_prepared_core import (
             instantiate_core_plan_v1,
+        )
+        from boundflow.runtime.fsg4_b3_terminal_optimizer_schedule import (
+            execute_terminal_optimizer_schedule_v1,
         )
         from boundflow.runtime.rvir_v4_atomic_copy_out import (
             stage_rvir_v4_live_atomic_copy_out,
@@ -369,21 +377,39 @@ class _LiveExecutor:
                     resource="host+cuda",
                     cache_state="process-hit",
                 )
-            native = execute_rvir_v4_native_optimizer_trace(
-                module,
-                input_spec,
-                linear_spec_C=objective,
-                relu_pre=mapping.relu_pre,
-                initial_state=initial,
-                mutation_policy=mutation_policy,
-                prevalidated_plan=prepared_instance,
-            )
-            terminal = type(initial)(
-                scope=initial.scope,
-                split_by_relu_input=initial.split_by_relu_input,
-                alpha_by_relu_input=native.steps[-1].alpha_by_relu_input,
-                beta_by_relu_input=native.steps[-1].beta_by_relu_input,
-            )
+            terminal_forward_trace = None
+            if self.terminal_optimizer_schedule is None:
+                native = execute_rvir_v4_native_optimizer_trace(
+                    module,
+                    input_spec,
+                    linear_spec_C=objective,
+                    relu_pre=mapping.relu_pre,
+                    initial_state=initial,
+                    mutation_policy=mutation_policy,
+                    prevalidated_plan=prepared_instance,
+                )
+                terminal = type(initial)(
+                    scope=initial.scope,
+                    split_by_relu_input=initial.split_by_relu_input,
+                    alpha_by_relu_input=native.steps[-1].alpha_by_relu_input,
+                    beta_by_relu_input=native.steps[-1].beta_by_relu_input,
+                )
+            else:
+                terminal_result = execute_terminal_optimizer_schedule_v1(
+                    module,
+                    input_spec,
+                    linear_spec_C=objective,
+                    relu_pre=mapping.relu_pre,
+                    initial_state=initial,
+                    mutation_policy=mutation_policy,
+                    schedule=self.terminal_optimizer_schedule,
+                    prevalidated_plan=prepared_instance,
+                )
+                terminal = terminal_result.terminal_state
+                terminal_forward_trace = terminal_result.forward_trace
+                self.terminal_optimizer_schedule_hashes.append(
+                    self.terminal_optimizer_schedule.stable_hash()
+                )
             if self.profile_recorder is not None:
                 self.profile_recorder.begin(
                     scope="core",
@@ -400,6 +426,7 @@ class _LiveExecutor:
                 relu_pre=mapping.relu_pre,
                 terminal_state=terminal,
                 topology=TOPOLOGY,
+                forward_trace=terminal_forward_trace,
             )
             if self.profile_recorder is not None:
                 self.profile_recorder.begin(
@@ -591,6 +618,9 @@ def _worker(args: argparse.Namespace) -> None:
         "pre_state_identities": executor.pre_state_identities,
         "prepared_core_template_hashes": executor.prepared_core_template_hashes,
         "prepared_core_instance_hashes": executor.prepared_core_instance_hashes,
+        "terminal_optimizer_schedule_hashes": (
+            executor.terminal_optimizer_schedule_hashes
+        ),
         "provider_core_callback_count": 0,
         "provider_compute_bounds_callback_count": (
             executor.provider_compute_bounds_callback_count

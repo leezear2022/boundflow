@@ -21,6 +21,9 @@ stage: s01
 
 ## Changes
 
+- B3-B第一版实现候选新增first-class 10/9 terminal Schedule IR、terminal-only production result和
+  optimizer→backward forward-trace handoff；formal逐step trace保留；
+- B3-B counter预注册仅允许full snapshots `10→0`、forward builds `5→4`，其他B3-A计数不变；
 - B3-A第一版实现候选新增typed static template/dynamic instance和exact cache；只有显式cache/hash pair
   才切换prepared executor，B2默认行为不变；
 - optimizer新增exact `CorePlanInstanceV1` receipt入口，拒绝跨state receipt并跳过第二次scope构造；
@@ -45,6 +48,8 @@ stage: s01
 
 ## Validation
 
+- B3-B实现候选CPU冻结case与负向门禁targeted=`42 passed`，mypy touched clean，Pylint=`10.00/10`；
+  fresh GPU尚待执行；
 - B3-A formal artifact replay、六个冻结B2 control语义与6/6 tamper通过；targeted=`34 passed`，full=
   `1257 passed, 3 skipped`；
 - B3-A实现候选targeted=`31 passed`，mypy touched clean，Pylint=`10.00/10`；fresh GPU尚待执行；

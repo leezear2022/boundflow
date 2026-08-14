@@ -73,9 +73,16 @@ EXPECTED_B3A_FIXED_COUNTERS = {
     "template_hit_in_core_count": 1,
 }
 
+EXPECTED_B3B_FIXED_COUNTERS = {
+    **EXPECTED_B3A_FIXED_COUNTERS,
+    "full_optimizer_step_snapshot_count": 0,
+    "forward_trace_build_count": 4,
+}
+
 EXPECTED_FIXED_COUNTERS = {
     "B2": EXPECTED_B2_FIXED_COUNTERS,
     "B3-A": EXPECTED_B3A_FIXED_COUNTERS,
+    "B3-B": EXPECTED_B3B_FIXED_COUNTERS,
 }
 
 
@@ -330,6 +337,7 @@ __all__ = [
     "COUNTER_NAMES",
     "EXPECTED_B2_FIXED_COUNTERS",
     "EXPECTED_B3A_FIXED_COUNTERS",
+    "EXPECTED_B3B_FIXED_COUNTERS",
     "EXPECTED_FIXED_COUNTERS",
     "events_from_rows",
     "FSG4_B3_COUNTER_SCHEMA",

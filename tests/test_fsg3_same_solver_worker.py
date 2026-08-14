@@ -86,6 +86,14 @@ def test_live_executor_requires_paired_precompiled_inputs() -> None:
             prepared_core_template_hash="f" * 64,
             capture_payloads=False,
         )
+    with pytest.raises(ValueError, match="schedule requires prepared core"):
+        live_runner._LiveExecutor(
+            model=runner.Path("model.onnx"),
+            torch_module=torch,
+            arguments_module=SimpleNamespace(),
+            terminal_optimizer_schedule=object(),
+            capture_payloads=False,
+        )
 
 
 def test_profile_recorder_emits_non_overlapping_cuda_span() -> None:

@@ -1,9 +1,14 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-14 FSG4/B3-B实现候选**：first-class 10/9 terminal Schedule IR、terminal-only result和
+> optimizer→backward forward-trace handoff已实现；formal逐step trace与B3-A默认路径保持不变。CPU冻结
+> case逐元素等价，定向`42 passed`、mypy touched clean、Pylint`10.00/10`。状态=
+> `IMPLEMENTED-PENDING-FRESH-GPU`；snapshots `10→0`、forward `5→4`尚未由真实counter证明，无speedup。
+
 > **2026-08-14 FSG4/B3-A关闭状态**：source `c7851c8`的fresh GPU artifact含5157条event，实测template
 > compile/hit=`1/1`、module move=`0`、scope=`1`，其余冻结B2结构与语义不变；replay、六个B2 control
 > 语义和6/6 tamper通过，定向`34 passed`、全量`1257 passed, 3 skipped`。状态=
-> `VALIDATED-B3-A-COUNTERS`，不是timing/speedup；下一动作只允许B3-B terminal-only optimizer Schedule。
+> `VALIDATED-B3-A-COUNTERS`，不是timing/speedup；该“下一动作”已推进到上方实现候选，尚未关闭。
 
 > **2026-08-14 FSG4/B3-0关闭状态**：source `4195361`正式B2 artifact的4625条event确认全部预注册
 > counter，六个冻结B2 control语义、replay与6/6 tamper通过，状态=`VALIDATED-B2-COUNTERS`。它没有

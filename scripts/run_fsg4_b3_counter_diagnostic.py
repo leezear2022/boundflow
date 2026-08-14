@@ -63,6 +63,9 @@ CODE_PATHS = (
     "boundflow/runtime/rvir_v4_live_return.py",
 )
 B3A_CODE_PATHS = CODE_PATHS + ("boundflow/runtime/fsg4_b3_prepared_core.py",)
+B3B_CODE_PATHS = B3A_CODE_PATHS + (
+    "boundflow/runtime/fsg4_b3_terminal_optimizer_schedule.py",
+)
 B3A_MUTABLE_PATHS = (
     "alpha/%2F45/%2F49",
     "alpha/%2F48/%2F49",
@@ -149,6 +152,8 @@ def _code_paths(configuration: str) -> tuple[str, ...]:
         return CODE_PATHS
     if configuration == "B3-A":
         return B3A_CODE_PATHS
+    if configuration == "B3-B":
+        return B3B_CODE_PATHS
     raise ValueError("FSG4/B3 diagnostic configuration differs")
 
 
@@ -292,6 +297,7 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
     from boundflow import planner
     from boundflow.runtime import native_alpha_beta_optimization_state as native_state
     from boundflow.runtime import fsg4_b3_prepared_core as prepared_core
+    from boundflow.runtime import fsg4_b3_terminal_optimizer_schedule as terminal
     from boundflow.runtime import rvir_v4_atomic_copy_out as atomic
     from boundflow.runtime import rvir_v4_live_return as live_return
     from boundflow.runtime import rvir_v4_native_backward_export as backward
@@ -345,6 +351,7 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
     )
     for module_owner, detail in (
         (optimizer, "optimizer forward trace"),
+        (terminal, "terminal optimizer forward trace"),
         (backward, "terminal backward forward trace"),
         (kfsb, "KFSB child forward trace"),
     ):
@@ -359,6 +366,12 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
         "run_crown_ibp_mlp_from_forward_trace",
         "optimizer_bound_evaluation_call_count",
         "optimizer CROWN evaluation",
+    )
+    patch_function(
+        terminal,
+        "run_crown_ibp_mlp_from_forward_trace",
+        "optimizer_bound_evaluation_call_count",
+        "terminal optimizer CROWN evaluation",
     )
     patch_function(
         kfsb,
@@ -418,6 +431,33 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
     stack.enter_context(
         _patch_attribute(
             optimizer, "execute_rvir_v4_native_optimizer_trace", counted_optimizer
+        )
+    )
+
+    original_terminal = terminal.execute_terminal_optimizer_schedule_v1
+
+    @wraps(original_terminal)
+    def counted_terminal(*args: Any, **kwargs: Any) -> Any:
+        result = original_terminal(*args, **kwargs)
+        recorder.add(
+            "optimizer_trace_call_count",
+            detail="one terminal-only production optimizer schedule",
+        )
+        recorder.add(
+            "optimizer_evaluation_count",
+            amount=result.evaluation_count,
+            detail="terminal schedule evaluations",
+        )
+        recorder.add(
+            "optimizer_update_count",
+            amount=result.update_count,
+            detail="terminal schedule updates",
+        )
+        return result
+
+    stack.enter_context(
+        _patch_attribute(
+            terminal, "execute_terminal_optimizer_schedule_v1", counted_terminal
         )
     )
 
@@ -577,6 +617,9 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
         kfsb.NativeKfsbEvaluationV4,
         atomic.ProductionLiveAtomicCopyOutV4,
         live_return.LiveCoreReturnAssemblyV4,
+        terminal.NativeTerminalOptimizerScheduleV1,
+        terminal.NativeOptimizerForwardTraceV1,
+        terminal.NativeTerminalOptimizerResultV1,
     )
     for validate_type in validate_types:
         patch_function(
@@ -591,6 +634,7 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
         native_state.NativeAlphaBetaStateScope,
         native_state.NativeAlphaBetaOptimizationState,
         mutation.ProductionMutationPolicyV4,
+        terminal.NativeTerminalOptimizerScheduleV1,
     )
     for hash_type in hash_types:
         patch_function(
@@ -605,7 +649,7 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
 
 
 @contextmanager
-def _use_b3a_prepared_executor() -> Iterator[None]:
+def _use_prepared_executor(configuration: str) -> Iterator[None]:
     """Prepare static bindings before query/core and inject the opt-in executor."""
 
     import torch
@@ -613,6 +657,9 @@ def _use_b3a_prepared_executor() -> Iterator[None]:
     from boundflow.runtime.fsg4_b3_prepared_core import (
         prepare_core_template_v1,
         PreparedCoreTemplateCache,
+    )
+    from boundflow.runtime.fsg4_b3_terminal_optimizer_schedule import (
+        compile_terminal_optimizer_schedule_v1,
     )
     from scripts import run_rvir_v4_live_return_capture as live_runner
     from scripts.run_rvir_v4_pre_state_artifact import TOPOLOGY
@@ -623,10 +670,10 @@ def _use_b3a_prepared_executor() -> Iterator[None]:
         program = kwargs.pop("precompiled_program", None)
         module = kwargs.pop("precompiled_module", None)
         if program is None or module is None:
-            raise ValueError("FSG4/B3-A requires precompiled program/module")
+            raise ValueError("FSG4/B3 prepared execution requires program/module")
         cache = PreparedCoreTemplateCache()
         template = prepare_core_template_v1(
-            template_id="resnet2b-prop0-b3-a",
+            template_id=f"resnet2b-prop0-{configuration.lower()}",
             program=program,
             module=module,
             topology=TOPOLOGY,
@@ -637,10 +684,16 @@ def _use_b3a_prepared_executor() -> Iterator[None]:
             mutable_paths=B3A_MUTABLE_PATHS,
         )
         template_hash = cache.insert(template)
+        terminal_schedule = (
+            compile_terminal_optimizer_schedule_v1()
+            if configuration == "B3-B"
+            else None
+        )
         return original_executor(
             **kwargs,
             prepared_core_cache=cache,
             prepared_core_template_hash=template_hash,
+            terminal_optimizer_schedule=terminal_schedule,
         )
 
     with _patch_attribute(live_runner, "_LiveExecutor", prepared_executor):
@@ -701,8 +754,8 @@ def _generate(args: argparse.Namespace) -> None:
         recorder = Fsg4B3CounterRecorder()
         with ExitStack() as stack:
             stack.enter_context(_instrument_b2(recorder))
-            if configuration == "B3-A":
-                stack.enter_context(_use_b3a_prepared_executor())
+            if configuration in {"B3-A", "B3-B"}:
+                stack.enter_context(_use_prepared_executor(configuration))
             fsg3_worker._worker(_worker_namespace(args, worker_path))
         worker_sha = _file_sha256(worker_path)
         envelope = _load_json(worker_path)
@@ -875,7 +928,7 @@ def _parse_args() -> argparse.Namespace:
     run.add_argument("--abcrown-root", type=Path, required=True)
     run.add_argument("--model", type=Path, required=True)
     run.add_argument("--property", type=Path, required=True)
-    run.add_argument("--configuration", choices=("B2", "B3-A"), default="B2")
+    run.add_argument("--configuration", choices=("B2", "B3-A", "B3-B"), default="B2")
     replay = commands.add_parser("replay")
     replay.add_argument("--artifact-dir", type=Path, required=True)
     return parser.parse_args()

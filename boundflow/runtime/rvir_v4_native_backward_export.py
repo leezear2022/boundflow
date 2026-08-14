@@ -22,6 +22,7 @@ from .crown_ibp import (
     run_crown_ibp_mlp_with_relu_lower_coefficients_from_forward_trace,
 )
 from .native_alpha_beta_optimization_state import NativeAlphaBetaOptimizationState
+from .fsg4_b3_terminal_optimizer_schedule import NativeOptimizerForwardTraceV1
 from .rvir_v4_pre_state_initializer import ProductionReluTopologyV4
 from .rvir_v4_production_state import production_tensor_sha256
 from .task_executor import InputSpec
@@ -193,6 +194,7 @@ def export_rvir_v4_native_backward(
     relu_pre: Mapping[str, IntervalState],
     terminal_state: NativeAlphaBetaOptimizationState,
     topology: tuple[ProductionReluTopologyV4, ...],
+    forward_trace: NativeOptimizerForwardTraceV1 | None = None,
 ) -> NativeBackwardExportV4:
     """Export lA and shared intermediate bounds without any provider callback."""
 
@@ -209,9 +211,17 @@ def export_rvir_v4_native_backward(
         or set(terminal_state.splits) != native_names
     ):
         raise ValueError("RVIR-v4 native backward state topology differs")
-    interval_env, local_pre = _forward_ibp_trace_mlp(
-        module, input_spec, relu_split_state=terminal_state.splits
-    )
+    if forward_trace is None:
+        interval_env, local_pre = _forward_ibp_trace_mlp(
+            module, input_spec, relu_split_state=terminal_state.splits
+        )
+    else:
+        # pylint: disable-next=unidiomatic-typecheck
+        if type(forward_trace) is not NativeOptimizerForwardTraceV1:
+            raise TypeError("RVIR-v4 native backward forward trace differs")
+        forward_trace.validate(module=module, terminal_state=terminal_state)
+        interval_env = forward_trace.interval_env
+        local_pre = forward_trace.local_relu_pre
     if set(local_pre) != native_names:
         raise ValueError("RVIR-v4 native backward local graph topology differs")
     beta_add = _beta_to_relu_pre_add_coeff(
