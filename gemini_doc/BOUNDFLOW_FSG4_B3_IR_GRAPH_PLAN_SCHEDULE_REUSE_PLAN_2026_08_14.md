@@ -174,6 +174,12 @@ B3-0必须先用显式instrumentation独立重算B2实际counter。若B2预期�
 fresh GPU进程。环境、温度、排他、profile closure、raw-first replay与outer-resigned tamper沿用FSG3
 schema v4，不得读取结果后修改。
 
+测量卫生进一步冻结为：control只启用原有计时观察器，不保留详细physical counter；B2/B3 profile使用
+不保留event journal的轻量直接counter。B3每个control/profile worker仍必须提供prepared template、
+PlanInstance、terminal Schedule、assembly、atomic commit与post-query audit的直接activation receipt。
+profile/control query perturbation必须`<=1.05`；超过即measurement fail closed，不得用profile数字替代
+control headline。
+
 headline ratio：
 
 - cumulative：`B0/B3` query、core、GPU、memory；
@@ -207,7 +213,8 @@ headline ratio：
    `VALIDATED-B3-C-COUNTERS`，不形成timing/speedup；
 5. [x] 五fresh B2/B3 correctness：10/10独立GPU worker、5/5 direct semantic pair、root replay与
    7/7 tamper通过，状态=`VALIDATED-B3-FIVE-FRESH-CORRECTNESS`；
-6. [ ] 36-process B0/B2/B3正式artifact、replay与tamper；
+6. [ ] 36-process B0/B2/B3正式artifact、replay与tamper；runner/schema/replay/tamper已实现并通过
+   108项定向与1308项全量回归，状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`，正式artifact未运行；
 7. [ ] external audit与FSG4/B3 closure。
 
 ## 11. Validation
@@ -381,3 +388,24 @@ B3-C只证明一个fresh真实call的结构和正确性。下一动作是至少5
 
 下一唯一动作是实现并静态验证本计划第8节冻结的B0/B2/B3六全排列、36-process正式计时artifact，然后
 从clean source运行、replay和tamper。B4—B7继续关闭。
+
+上段“实现runner”动作现已由下方实现候选取代；尚未取代的是clean-source正式运行、replay与tamper。
+
+## 22. B3 36-Process Formal Timing Runner Candidate（2026-08-14）
+
+- 新增typed B0/B2/B3 run、activation receipt、36-run sequence、ratio与decision重算合同；
+- 新增raw-first/resumable generator、每worker envelope/log、formal manifest、独立replay与十类
+  outer-resigned tamper probe；
+- control不启用详细counter，B2/B3 profile只启用不保留event journal的轻量counter；每个B3 worker仍以
+  direct receipts证明template/instance/schedule/assembly/commit/audit真实激活；
+- formal preflight、source/code digest、five-fresh admission、benchmark/external repo/runtime/GPU identity、
+  固定36-run顺序均进入protocol；机器绝对路径从artifact projection与日志中清除；
+- 四个独立GPU worker冒烟覆盖B0 control、B2 profile、B3 control/profile，结构门禁通过；冒烟时间不是
+  performance sample；
+- targeted=`108 passed`，full=`1308 passed, 3 skipped, 6 warnings`，Black/mypy clean，Pylint=
+  `10.00/10`；
+- 状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`，没有正式artifact、replay/tamper结果或speedup
+  claim。
+
+下一唯一动作是冻结clean source，从position 0执行完整36-process run，随后在同一artifact上执行root
+replay和十类tamper probe。B4—B7继续关闭。

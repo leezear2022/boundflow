@@ -10,6 +10,14 @@
 
 ---
 
+FSG4/B3 36-process正式计时runner已实现为
+`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`：六个B0/B2/B3全排列、control/profile分离、直接B3
+activation receipts、raw-first/resume、root replay与十类outer-resigned tamper probe均已进入代码；
+targeted=`108 passed`、full=`1308 passed, 3 skipped`、Black/mypy/Pylint通过。正式artifact尚未运行，
+因此当前仍无B3 timing/speedup claim，B4—B7关闭。实现记录见
+`gemini_doc/change_2026-08-14_fsg4_b3_formal_timing_runner_candidate.md`，冻结协议见
+`gemini_doc/BOUNDFLOW_FSG4_B3_IR_GRAPH_PLAN_SCHEDULE_REUSE_PLAN_2026_08_14.md`。
+
 FSG4/B3五组fresh correctness已以`VALIDATED-B3-FIVE-FRESH-CORRECTNESS`关闭：source=`75dfd81`，
 固定交替顺序下10/10独立GPU worker、5/5 direct semantic pair、environment/provider/counter/audit、root
 replay与7/7 tamper全部通过；定向=`56 passed`、全量=`1289 passed, 3 skipped`。这只开放36-process

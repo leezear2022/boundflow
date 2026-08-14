@@ -1,5 +1,17 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-14：FSG4/B3 36-Process 正式计时 Runner 实现候选
+
+- 实现B0/B2/B3六全排列、每配置6个control+6个profile、共36个独立进程的typed正式协议；
+- control不保留详细counter，B2/B3 profile使用轻量直接counter；B3每worker直接绑定prepared
+  template/instance/terminal Schedule/assembly/commit/post-audit activation receipts；
+- 实现raw-first/resume、formal preflight、path sanitization、root replay和十类outer-resigned tamper probe；
+- targeted=`108 passed`、full=`1308 passed, 3 skipped`、Black/mypy/Pylint通过；四个真实GPU worker
+  smoke只验证路径与结构，不形成性能样本；
+- 状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`。正式36-process artifact尚未运行，无B3
+  timing/speedup claim，B4—B7关闭。详见
+  `gemini_doc/change_2026-08-14_fsg4_b3_formal_timing_runner_candidate.md`。
+
 ## 2026-08-14：FSG4/B3-0 正式 B2 Counter 基线关闭
 
 - source=`4195361`生成fresh GPU B2 control artifact，4625条event journal replay通过；

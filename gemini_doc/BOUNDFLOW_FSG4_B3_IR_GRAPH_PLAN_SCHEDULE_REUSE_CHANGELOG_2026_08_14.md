@@ -11,6 +11,8 @@ stage: s01
 
 ## Summary
 
+- B0/B2/B3六全排列36-process正式runner、raw-first/replay与十类tamper probe已实现并通过静态/合同
+  回归；状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`，尚无正式artifact或performance claim；
 - B3五组fresh correctness已以`VALIDATED-B3-FIVE-FRESH-CORRECTNESS`关闭：10/10独立GPU worker、
   5/5 direct semantic pair、root replay与7/7 tamper通过；只开放36-process正式计时，无performance claim；
 - B3-C已以`VALIDATED-B3-C-COUNTERS`关闭：12个device candidate/commit/backup/copy、D2H=`0`、
@@ -27,6 +29,11 @@ stage: s01
 
 ## Changes
 
+- 新增typed B0/B2/B3 timing/activation合同、固定36-run顺序、直接语义与ratio/decision重算；
+- 新增raw-first/resumable orchestrator、source-bound worker envelope、path-sanitized logs、formal preflight、
+  manifest/replay与十类outer-resigned tamper probe；
+- control不保留详细counter；B2/B3 profile使用不保留event journal的轻量counter，并冻结`<=1.05`
+  profile/control扰动门禁；B3所有worker仍须以direct receipts证明IR/Plan/Schedule/commit/audit激活；
 - 新增五组正式raw artifact与冻结artifact test；root replay从10个raw worker重算direct semantics、
   environment、counter、provider/fallback和post-query audit；
 - 正式顺序为`B2→B3-C, B3-C→B2, B2→B3-C, B3-C→B2, B2→B3-C`，未根据中间结果调整；
@@ -64,6 +71,8 @@ stage: s01
 
 ## Validation
 
+- 正式runner targeted=`108 passed`；full=`1308 passed, 3 skipped, 6 warnings`；Black/mypy clean、Pylint=
+  `10.00/10`；四个独立GPU worker冒烟覆盖B0/B2/B3 control/profile但不形成performance sample；
 - 五组正式artifact：10/10 worker、5/5 pair、root replay与7/7 outer-resigned tamper通过；
 - frozen artifact + B3定向=`56 passed`；full=`1289 passed, 3 skipped, 6 warnings`；Pylint=
   `10.00/10`，diff check通过；
@@ -94,9 +103,9 @@ stage: s01
 
 ## Follow-Ups
 
-1. 按已冻结的六个B0/B2/B3全排列实现36-process正式timing runner、replay与tamper；
-2. 先以static/contract test关闭runner，再从新的clean source生成正式artifact；
-3. 计时关闭前不启动B4—B7，不报告B3 speedup。
+1. 提交并推送已验证的runner，形成新的clean source；
+2. 从position 0执行完整36-process正式artifact，再执行root replay与十类tamper；
+3. 按预注册门禁分类；计时关闭前不启动B4—B7，不报告B3 speedup。
 
 ## Links
 

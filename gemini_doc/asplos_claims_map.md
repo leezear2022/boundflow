@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-14 FSG4/B3正式计时Runner候选**：B0/B2/B3六全排列36-process schema、direct activation
+> receipts、raw-first/resume、root replay与十类tamper probe已实现；targeted=`108 passed`、full=
+> `1308 passed, 3 skipped`。状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`，只支持runner机制与
+> 合同实现claim；正式artifact未运行，不支持timing/speedup，B4—B7关闭。
+
 > **2026-08-14 FSG4/B3 Five-Fresh关闭**：source `75dfd81`按预注册顺序完成10/10独立fresh GPU
 > worker与5/5 B2/B3-C direct semantic pairs；environment、provider/fallback、physical counter、
 > post-query audit、root replay与7/7 outer-resigned tamper均通过。状态=

@@ -136,8 +136,25 @@ class Fsg4B3CounterRecorder:
     """Record only explicitly instrumented events; no profiler hooks are used."""
 
     events: list[Fsg4B3CounterEvent] = field(default_factory=list)
+    retain_events: bool = True
+    _direct_counts: dict[str, int] = field(
+        default_factory=lambda: {name: 0 for name in COUNTER_NAMES}
+    )
+
+    def __post_init__(self) -> None:
+        if set(self._direct_counts) != set(COUNTER_NAMES):
+            raise ValueError("FSG4/B3 direct counter inventory differs")
+        if self.events and all(value == 0 for value in self._direct_counts.values()):
+            for event in self.events:
+                event.validate()
+                self._direct_counts[event.counter] += event.amount
 
     def add(self, counter: str, *, amount: int = 1, detail: str) -> None:
+        if counter not in COUNTER_NAMES or amount <= 0 or not detail:
+            raise ValueError("FSG4/B3 counter event differs")
+        self._direct_counts[counter] += amount
+        if not self.retain_events:
+            return
         event = Fsg4B3CounterEvent(
             ordinal=len(self.events),
             counter=counter,
@@ -148,12 +165,16 @@ class Fsg4B3CounterRecorder:
         self.events.append(event)
 
     def counts(self) -> dict[str, int]:
+        if not self.retain_events:
+            return dict(self._direct_counts)
         counts = {name: 0 for name in COUNTER_NAMES}
         for ordinal, event in enumerate(self.events):
             event.validate()
             if event.ordinal != ordinal:
                 raise ValueError("FSG4/B3 counter event ordinal differs")
             counts[event.counter] += event.amount
+        if counts != self._direct_counts:
+            raise ValueError("FSG4/B3 direct counter projection differs")
         return counts
 
 

@@ -928,7 +928,7 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
         stage_postprocess,
         stage_solve,
     )
-    from auto_LiRPA import BoundedModule  # type: ignore[import-untyped]
+    from auto_LiRPA import BoundedModule  # type: ignore[import-untyped,import-not-found]
     from branching_domains import BatchedDomainList  # type: ignore[import-not-found]
 
     capture_runner._validate_inputs(
@@ -1153,6 +1153,15 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
             "typed_snapshot_hash": core.typed_snapshot_hash,
             "pre_state_identities": (
                 [] if executor is None else executor.pre_state_identities
+            ),
+            "prepared_core_template_hashes": (
+                [] if executor is None else executor.prepared_core_template_hashes
+            ),
+            "prepared_core_instance_hashes": (
+                [] if executor is None else executor.prepared_core_instance_hashes
+            ),
+            "terminal_optimizer_schedule_hashes": (
+                [] if executor is None else executor.terminal_optimizer_schedule_hashes
             ),
             "assembly_metadata": (
                 [] if executor is None else executor.assembly_metadata

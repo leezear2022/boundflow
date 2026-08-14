@@ -1,5 +1,11 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-14 FSG4/B3正式计时Runner候选状态**：B0/B2/B3六全排列、control/profile共36个独立
+> worker、direct B3 activation receipts、raw-first/resume、root replay与十类tamper probe已经实现；
+> targeted=`108 passed`、full=`1308 passed, 3 skipped`、静态检查全过。状态=
+> `IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`。正式artifact尚未运行，无timing/speedup claim；下一
+> 唯一动作是冻结clean source后从position 0执行36进程，B4—B7关闭。
+
 > **2026-08-14 FSG4/B3 Five-Fresh关闭状态**：source `75dfd81`生成5组、10个独立fresh GPU
 > worker；固定交替顺序、5/5 direct semantics、全部environment/provider/fallback/counter/audit、root
 > replay和7/7 tamper均通过。定向=`56 passed`，全量=`1289 passed, 3 skipped`。状态=
