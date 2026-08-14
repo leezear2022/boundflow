@@ -1,15 +1,22 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-14 FSG4/B3 Five-Fresh关闭状态**：source `75dfd81`生成5组、10个独立fresh GPU
+> worker；固定交替顺序、5/5 direct semantics、全部environment/provider/fallback/counter/audit、root
+> replay和7/7 tamper均通过。定向=`56 passed`，全量=`1289 passed, 3 skipped`。状态=
+> `VALIDATED-B3-FIVE-FRESH-CORRECTNESS`，只开放B0/B2/B3六全排列36-process正式计时；当前仍无B3
+> timing/speedup，B4—B7关闭。
+
 > **2026-08-14 FSG4/B3-C关闭状态**：source `72bec5e`的fresh GPU artifact含1484条event，实测
 > candidate/commit/backup/copy=`12/12/12/12`、timed candidate D2H=`0`，其余B3-B结构与六个B2
 > control语义保持；headline digest=`0`、post-query audit/replay/6/6 tamper、定向`54 passed`和全量
 > `1279 passed, 3 skipped`通过。状态=`VALIDATED-B3-C-COUNTERS`，不是timing/speedup；下一动作是5组
-> fresh B2/B3 correctness pairs，B4—B7关闭。
+> fresh B2/B3 correctness pairs，B4—B7关闭。该下一动作现已由上方Five-Fresh关闭取代。
 
 > **2026-08-14 FSG4/B3-B关闭状态**：source `42df2dc`的fresh GPU artifact含5157条event，实测full
 > step snapshots=`0`、forward builds=`4`，其余B3-A冻结结构与六个B2 control语义保持；replay、6/6
 > tamper、定向`45 passed`和全量`1265 passed, 3 skipped`通过。状态=
-> `VALIDATED-B3-B-COUNTERS`，不是timing/speedup；下一动作只允许B3-C AtomicCommitPlan。
+> `VALIDATED-B3-B-COUNTERS`，不是timing/speedup；该时点下一动作只允许B3-C AtomicCommitPlan，现已由
+> 上方B3-C与Five-Fresh关闭取代。
 
 > **2026-08-14 FSG4/B3-A关闭状态**：source `c7851c8`的fresh GPU artifact含5157条event，实测template
 > compile/hit=`1/1`、module move=`0`、scope=`1`，其余冻结B2结构与语义不变；replay、六个B2 control
@@ -21,8 +28,8 @@
 > speedup claim；该“下一动作”已由上方B3-A关闭取代，B3-C—B7保持关闭。
 
 > **2026-08-14 FSG4/B3启动状态（历史）**：IR/graph/Plan/Schedule复用完成预注册时尚未实现；当时下一
-> 动作为B3-0。该指令现已被上方B3-0关闭状态取代；当前下一动作是B3-A，仍没有B3 speedup，B3-B—B7
-> 保持关闭。
+> 动作为B3-0。该指令及其后续“下一动作B3-A”已被上方B3-A/B/C与Five-Fresh关闭取代；当前唯一下一
+> 动作是36-process正式B3计时，仍没有B3 speedup，B4—B7保持关闭。
 
 > **2026-08-14 当前状态**：FSG3正式same-solver基线已关闭。source `a4ee291`的
 > `resnet2b-prop0-v5`包含六个全排列block、36个fresh GPU进程；correctness、environment、

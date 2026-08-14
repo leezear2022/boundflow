@@ -332,8 +332,8 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 5. [x] FSG3：source `a4ee291`完成36-process B0/B1/B2正式artifact；correctness、environment、
    measurement、replay与outer-resigned tamper门禁通过，状态=
    `VALIDATED-FSG3-B0-B1-B2-BASELINE`；
-6. [~] FSG4：B3-0/A/B分别关闭为`VALIDATED-B2-COUNTERS`、`VALIDATED-B3-A-COUNTERS`、
-   `VALIDATED-B3-B-COUNTERS`；当前只启动B3-C AtomicCommitPlan，完整B3尚未关闭，B4—B7未实现/消融；
+6. [~] FSG4：B3-0/A/B/C与五组fresh correctness均已关闭；当前只开放B0/B2/B3六全排列、36-process
+   正式计时，尚无B3 performance classification，B4—B7未实现/消融；
 7. [—] FSG5：因无合法B7 candidate，依赖门禁阻止，无系统性能claim。
 
 ## 12. Validation
@@ -500,6 +500,16 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 - 5157 events确认full snapshots=`0`、forward builds=`4`，冻结语义、replay和6/6 tamper通过；
 - 状态=`VALIDATED-B3-B-COUNTERS`，没有timing/performance claim；
 - 下一动作B3-C AtomicCommitPlan；5 fresh pair与正式计时仍未准入。
+
+### FSG4/B3 Five-Fresh Correctness Closure（2026-08-14）
+
+- source=`75dfd8103e8e3dfe824a63e15c2222f8742e28c1`，10/10独立GPU worker、5/5 direct semantic
+  B2/B3-C pair通过；
+- environment、provider/fallback、physical counter、B3-C post-query audit、root replay全部通过；
+- 七类outer-resigned report/protocol/nested counter/semantic/audit/swap/delete攻击7/7拒绝；
+- targeted=`56 passed`，full=`1289 passed, 3 skipped`；
+- 状态=`VALIDATED-B3-FIVE-FRESH-CORRECTNESS`，只开放36-process B0/B2/B3正式计时；仍无
+  performance claim，B4—B7关闭。
 
 ## 13. Rollback
 

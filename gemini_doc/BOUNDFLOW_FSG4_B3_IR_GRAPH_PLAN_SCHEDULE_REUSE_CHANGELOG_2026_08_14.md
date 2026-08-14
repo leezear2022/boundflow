@@ -1,6 +1,6 @@
 ---
 status: active
-updated: 2026-08-14T10:05:19Z
+updated: 2026-08-14T12:43:21Z
 type: changelog
 topic: boundflow
 slug: fsg4-b3-ir-graph-plan-schedule-reuse
@@ -11,6 +11,8 @@ stage: s01
 
 ## Summary
 
+- B3五组fresh correctness已以`VALIDATED-B3-FIVE-FRESH-CORRECTNESS`关闭：10/10独立GPU worker、
+  5/5 direct semantic pair、root replay与7/7 tamper通过；只开放36-process正式计时，无performance claim；
 - B3-C已以`VALIDATED-B3-C-COUNTERS`关闭：12个device candidate/commit/backup/copy、D2H=`0`、
   post-query audit、冻结语义与6/6 tamper通过；无timing/speedup claim；
 - B3-B已以`VALIDATED-B3-B-COUNTERS`关闭：full snapshots=`0`、forward builds=`4`，冻结语义与6/6
@@ -25,6 +27,9 @@ stage: s01
 
 ## Changes
 
+- 新增五组正式raw artifact与冻结artifact test；root replay从10个raw worker重算direct semantics、
+  environment、counter、provider/fallback和post-query audit；
+- 正式顺序为`B2→B3-C, B3-C→B2, B2→B3-C, B3-C→B2, B2→B3-C`，未根据中间结果调整；
 - 首次fresh B3-C run在任何mutation前因opaque provider host value不可序列化而fail closed；修复为
   pre-host绑定完整key inventory、只版本化三项retained字段，candidate/post仍保持exact三字段；失败run
   未生成artifact；
@@ -59,6 +64,9 @@ stage: s01
 
 ## Validation
 
+- 五组正式artifact：10/10 worker、5/5 pair、root replay与7/7 outer-resigned tamper通过；
+- frozen artifact + B3定向=`56 passed`；full=`1289 passed, 3 skipped, 6 warnings`；Pylint=
+  `10.00/10`，diff check通过；
 - B3-C formal artifact replay、六个冻结B2 control语义与6/6 tamper通过；targeted=`54 passed`，full=
   `1279 passed, 3 skipped`；
 - B3-C CUDA事务/provider assembly=`10 passed`，相关定向回归=`50 passed`，Black/mypy clean，Pylint
@@ -86,9 +94,9 @@ stage: s01
 
 ## Follow-Ups
 
-1. 预注册并执行至少5组fresh B2/B3 correctness pairs；
-2. 每组保存raw worker、语义比较、环境、provider/fallback与B3 physical counter；
-3. 只有5/5通过才决定是否准入36-process正式B3计时。
+1. 按已冻结的六个B0/B2/B3全排列实现36-process正式timing runner、replay与tamper；
+2. 先以static/contract test关闭runner，再从新的clean source生成正式artifact；
+3. 计时关闭前不启动B4—B7，不报告B3 speedup。
 
 ## Links
 

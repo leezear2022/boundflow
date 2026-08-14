@@ -1,6 +1,6 @@
 ---
-status: active
-updated: 2026-08-14T12:25:00Z
+status: closed
+updated: 2026-08-14T12:43:21Z
 type: plan
 topic: boundflow
 slug: fsg4-b3-five-fresh-correctness
@@ -85,3 +85,26 @@ stage: s01
 - 7类outer-resigned tamper probe已实现；
 - static tests=`5 passed`，mypy clean，Pylint=`10.00/10`；
 - 当前状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-RUN`，尚无10-worker artifact或correctness claim。
+
+本节是正式运行前的历史状态，已被下方关闭结果取代。
+
+## 9. Formal Closure（2026-08-14）
+
+- source=`75dfd8103e8e3dfe824a63e15c2222f8742e28c1`；
+- artifact=`artifacts/fsg4-b3-correctness-pairs/resnet2b-prop0-v1/`；
+- 固定顺序=`B2→B3-C, B3-C→B2, B2→B3-C, B3-C→B2, B2→B3-C`；
+- 10/10独立fresh GPU worker完成，5/5 pair的direct semantics、environment、provider/fallback、
+  physical counter与post-query audit全部通过；
+- root manifest/report/protocol file SHA256分别为`bf8b3ecc…cb98`/`aab4620b…19e5`/
+  `34a3426d…d49`，internal manifest/report hash分别为`457ab1ad…1573`/`0d649200…2827`；
+- B2每次=`4625 events`、B3-C每次=`1484 events`；B3-C持续满足template hit、terminal-only、
+  forward reuse、device commit和candidate D2H=`0`的冻结counter；
+- root replay从10个raw worker重建5组比较并通过；7类outer-resigned report/protocol/nested counter/
+  semantic/audit/swap/delete攻击7/7拒绝；
+- frozen artifact tests与全部B3定向=`56 passed`；全量=`1289 passed, 3 skipped, 6 warnings`；Pylint=
+  `10.00/10`，diff check通过；
+- 状态=`VALIDATED-B3-FIVE-FRESH-CORRECTNESS`；`b3_timing_admitted=true`，但本artifact继续保持
+  `timing_admitted=false`、`performance_claimed=false`，因为它不是计时样本。
+
+五组正确性门禁关闭后，只开放已经冻结的36-process B0/B2/B3正式计时。该计时必须从新的clean source
+运行，不得把本artifact内的raw wall字段转成ratio。B4—B7仍关闭。

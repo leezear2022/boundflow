@@ -5481,3 +5481,15 @@
 
 **记录**
 - `gemini_doc/change_2026-08-14_fsg4_b3_five_fresh_runner_candidate.md`
+
+## 2026-08-14：FSG4/B3 五组 Fresh Correctness 正式关闭
+
+- source `75dfd81`按冻结交替顺序完成10/10独立fresh GPU worker；
+- 5/5 B2/B3-C direct semantic pair与environment/provider/counter/audit全部通过；
+- root replay从raw重算，七类outer-resigned攻击7/7拒绝；
+- B3定向56项与全量1289项回归通过；
+- 状态`VALIDATED-B3-FIVE-FRESH-CORRECTNESS`，只开放36-process正式计时，无performance claim。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg4_b3_five_fresh_correctness_closure.md`
+- `gemini_doc/fsg4_b3_five_fresh_correctness_external_audit_handoff_2026_08_14.md`

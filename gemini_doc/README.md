@@ -10,16 +10,20 @@
 
 ---
 
-FSG4/B3下一门禁已预注册为5组fresh B2/B3-C correctness pairs：固定10个独立GPU进程、交替顺序、
-raw-first/可恢复artifact、direct semantics/environment/provider/counter/audit逐项验收；本阶段禁止计算或
-报告speedup。计划见`gemini_doc/BOUNDFLOW_FSG4_B3_FIVE_FRESH_CORRECTNESS_PLAN_2026_08_14.md`。
+FSG4/B3五组fresh correctness已以`VALIDATED-B3-FIVE-FRESH-CORRECTNESS`关闭：source=`75dfd81`，
+固定交替顺序下10/10独立GPU worker、5/5 direct semantic pair、environment/provider/counter/audit、root
+replay与7/7 tamper全部通过；定向=`56 passed`、全量=`1289 passed, 3 skipped`。这只开放36-process
+B0/B2/B3正式计时，仍没有timing/speedup claim，B4—B7关闭。计划与关闭记录见
+`gemini_doc/BOUNDFLOW_FSG4_B3_FIVE_FRESH_CORRECTNESS_PLAN_2026_08_14.md`和
+`gemini_doc/change_2026-08-14_fsg4_b3_five_fresh_correctness_closure.md`，外审入口见
+`gemini_doc/fsg4_b3_five_fresh_correctness_external_audit_handoff_2026_08_14.md`。
 
 FSG4/B3-C已以`VALIDATED-B3-C-COUNTERS`关闭：source=`72bec5e`，fresh GPU artifact=
 `artifacts/fsg4-b3-counter-diagnostic/resnet2b-prop0-b3c-v1/`。1484条event确认12个device
 candidate/commit/backup/copy、timed candidate D2H=`0`，B3-B其余固定结构和六个B2 control语义保持；
 headline digest=`0`，24个GPU content hash全部在query同步后的audit；replay与6/6 tamper通过。定向
-`54 passed`、全量`1279 passed, 3 skipped`。这仍不是timing/speedup，下一步必须完成5 fresh B2/B3
-correctness pairs，B4—B7关闭。关闭记录见
+`54 passed`、全量`1279 passed, 3 skipped`。这仍不是timing/speedup；该下一动作现已由上方Five-Fresh
+关闭取代，B4—B7保持关闭。关闭记录见
 `gemini_doc/change_2026-08-14_fsg4_b3c_device_atomic_commit_closure.md`，外审入口见
 `gemini_doc/fsg4_b3c_device_commit_external_audit_handoff_2026_08_14.md`。
 
@@ -27,7 +31,7 @@ FSG4/B3-B已以`VALIDATED-B3-B-COUNTERS`关闭：source=`42df2dc`，fresh GPU ar
 `artifacts/fsg4-b3-counter-diagnostic/resnet2b-prop0-b3b-v1/`。5157条event确认full step snapshots=`0`、
 forward builds=`4`，且B3-A template/module/scope、optimizer 10/9、KFSB、D2H/commit等结构保持；冻结语义、
 replay和6/6 tamper通过。定向`45 passed`、全量`1265 passed, 3 skipped`。这不是timing/speedup，完整
-B3仍需5 fresh pair。下一动作只允许B3-C device-resident AtomicCommitPlan。关闭记录见
+B3在该时点仍需B3-C与5 fresh pair；该历史下一动作已由上方Five-Fresh关闭取代。关闭记录见
 `gemini_doc/change_2026-08-14_fsg4_b3b_terminal_schedule_closure.md`，外审入口见
 `gemini_doc/fsg4_b3b_terminal_schedule_external_audit_handoff_2026_08_14.md`。
 
@@ -52,7 +56,8 @@ FSG4/B3当前入口为
 PreparedCoreTemplate、terminal-only optimizer Schedule与device-resident AtomicCommitPlan，只允许
 IR/graph/Plan/Schedule复用；TIR fusion、JIT/CUDA Graph、runtime streams与arena仍分别留给B4—B7。
 该段是实现前预注册历史状态；B3-0现已由上方正式关闭段取代，下一动作是B3-A。预注册变更记录
-见`gemini_doc/BOUNDFLOW_FSG4_B3_IR_GRAPH_PLAN_SCHEDULE_REUSE_CHANGELOG_2026_08_14.md`；当前B3-0关闭
+见`gemini_doc/BOUNDFLOW_FSG4_B3_IR_GRAPH_PLAN_SCHEDULE_REUSE_CHANGELOG_2026_08_14.md`；该历史
+“下一动作B3-A”现也已被上方B3-A/B/C与Five-Fresh关闭取代。B3-0关闭
 外审交接见`gemini_doc/fsg4_b3_0_counter_external_audit_handoff_2026_08_14.md`，预注册历史外审见
 `gemini_doc/fsg4_b3_preregistration_external_audit_handoff_2026_08_14.md`。
 

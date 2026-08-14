@@ -1,9 +1,16 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-14 FSG4/B3 Five-Fresh关闭指令**：source `75dfd81`按固定交替顺序完成10/10独立
+> fresh GPU worker，5/5 B2/B3-C direct semantic pairs、environment、provider/fallback、physical
+> counter、post-query audit和root replay全部通过，7/7 outer-resigned tamper拒绝；定向=`56 passed`，
+> full=`1289 passed, 3 skipped`。状态=`VALIDATED-B3-FIVE-FRESH-CORRECTNESS`，只将
+> `b3_timing_admitted=true`。五组artifact仍为`timing_admitted=false/performance_claimed=false`。下一
+> 唯一动作是实现并验证冻结的B0/B2/B3六全排列36-process正式计时；B4—B7不得混入。
+
 > **2026-08-14 B3-C关闭指令**：source `72bec5e`的fresh GPU artifact已验证12个CUDA
 > candidate/commit/backup/copy、candidate D2H=`0`、post-query audit、冻结语义、replay和6/6 tamper，
 > 状态=`VALIDATED-B3-C-COUNTERS`，无timing/speedup。下一唯一动作是5组fresh B2/B3 correctness
-> pairs；未5/5通过前不得启动36-process计时，B4—B7不得混入。
+> pairs；未5/5通过前不得启动36-process计时，B4—B7不得混入。该门禁现已由上方Five-Fresh关闭。
 
 > **2026-08-14 FSG4/B3-B关闭指令**：source `42df2dc`的fresh GPU artifact已验证full step
 > snapshots=`0`、forward builds=`4`，冻结语义、replay和6/6 tamper通过，状态=

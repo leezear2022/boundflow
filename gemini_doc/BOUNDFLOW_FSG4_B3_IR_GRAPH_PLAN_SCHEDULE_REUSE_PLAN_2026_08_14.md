@@ -1,6 +1,6 @@
 ---
 status: active
-updated: 2026-08-14T10:05:19Z
+updated: 2026-08-14T12:43:21Z
 type: plan
 topic: boundflow
 slug: fsg4-b3-ir-graph-plan-schedule-reuse
@@ -205,7 +205,8 @@ headline ratio：
    `VALIDATED-B3-B-COUNTERS`，不形成timing/speedup；
 4. [x] B3-C：device-resident AtomicCommitPlan、rollback与audit digest分层；状态=
    `VALIDATED-B3-C-COUNTERS`，不形成timing/speedup；
-5. [ ] 五fresh B2/B3 correctness；
+5. [x] 五fresh B2/B3 correctness：10/10独立GPU worker、5/5 direct semantic pair、root replay与
+   7/7 tamper通过，状态=`VALIDATED-B3-FIVE-FRESH-CORRECTNESS`；
 6. [ ] 36-process B0/B2/B3正式artifact、replay与tamper；
 7. [ ] external audit与FSG4/B3 closure。
 
@@ -360,3 +361,23 @@ AtomicCommitPlan；B4—B7继续关闭。
 
 B3-C只证明一个fresh真实call的结构和正确性。下一动作是至少5组fresh B2/B3 correctness pairs；未
 5/5通过前不得启动36-process正式计时，B4—B7继续关闭。
+
+上段是五组correctness门禁关闭前的历史下一动作，已被下方正式closure取代。
+
+## 21. B3 Five-Fresh Correctness Formal Closure（2026-08-14）
+
+- source=`75dfd8103e8e3dfe824a63e15c2222f8742e28c1`；
+- artifact=`artifacts/fsg4-b3-correctness-pairs/resnet2b-prop0-v1/`；
+- 五组固定交替顺序下10/10独立fresh GPU worker全部完成，B2/B3-C各5个；
+- 5/5 direct semantic pair无failure，source/protocol/runtime/GPU identity一致，environment、provider/
+  fallback、B2/B3-C counter与B3-C post-query audit门禁全部通过；
+- B2每次4625 events，B3-C每次1484 events；后者持续满足template hit=`1`、module move=`0`、scope=
+  `1`、optimizer=`10/9`、snapshots=`0`、forward=`4`、KFSB=`3/3`、candidate D2H=`0`；
+- root internal manifest/report hash=`457ab1adc8…1573`/`0d649200f4…2827`；独立replay通过；
+- 七类outer-resigned report/protocol/nested counter/semantic/audit/swap/delete攻击7/7拒绝；
+- targeted=`56 passed`；full=`1289 passed, 3 skipped, 6 warnings`；Pylint=`10.00/10`；
+- 状态=`VALIDATED-B3-FIVE-FRESH-CORRECTNESS`，只将`b3_timing_admitted`推进为`true`；五组artifact本身
+  仍为`timing_admitted=false`、`performance_claimed=false`。
+
+下一唯一动作是实现并静态验证本计划第8节冻结的B0/B2/B3六全排列、36-process正式计时artifact，然后
+从clean source运行、replay和tamper。B4—B7继续关闭。

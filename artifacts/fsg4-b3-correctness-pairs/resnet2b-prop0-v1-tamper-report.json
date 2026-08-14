@@ -1,0 +1,53 @@
+{
+  "artifact_manifest_sha256": "bf8b3ecccea992cce9dca56c963518510af8dc8d410c0d02b94513160189cb98",
+  "attack_count": 7,
+  "performance_claimed": false,
+  "rejected_count": 7,
+  "report_hash": "52dd43fdbb4de8411c52e31e34006e191e5d3e3cbc57727a0a0f964a0cf32798",
+  "rows": [
+    {
+      "attack": "report-projection-outer-resign",
+      "exception_type": "ValueError",
+      "message": "FSG4/B3 five-fresh report projection differs",
+      "rejected": true
+    },
+    {
+      "attack": "protocol-schedule-outer-resign",
+      "exception_type": "ValueError",
+      "message": "FSG4/B3 five-fresh protocol differs",
+      "rejected": true
+    },
+    {
+      "attack": "nested-counter-journal-outer-resign",
+      "exception_type": "ValueError",
+      "message": "FSG4/B3 B3-C counter snapshot gate failed: forward_trace_build_count:expected=4:observed=3",
+      "rejected": true
+    },
+    {
+      "attack": "nested-worker-semantic-outer-resign",
+      "exception_type": "ValueError",
+      "message": "FSG4/B3 worker differs from frozen FSG3 semantics: frozen-B2-control-0:lower[0]:allclose-failed,frozen-B2-control-0:lower[0]:optimistic,frozen-B2-control-1:lower[0]:allclose-failed,frozen-B2-control-1:lower[0]:optimistic,frozen-B2-control-2:lower[0]:allclose-failed,frozen-B2-control-2:lower[0]:optimistic,frozen-B2-control-3:lower[0]:allclose-failed,frozen-B2-control-3:lower[0]:optimistic,frozen-B2-control-4:lower[0]:allclose-failed,frozen-B2-control-4:lower[0]:optimistic,frozen-B2-control-5:lower[0]:allclose-failed,frozen-B2-control-5:lower[0]:optimistic",
+      "rejected": true
+    },
+    {
+      "attack": "nested-audit-receipt-outer-resign",
+      "exception_type": "ValueError",
+      "message": "FSG4/B3 five-fresh audit binding differs",
+      "rejected": true
+    },
+    {
+      "attack": "swap-pair-positions-outer-resign",
+      "exception_type": "ValueError",
+      "message": "FSG4/B3 five-fresh raw run gate differs",
+      "rejected": true
+    },
+    {
+      "attack": "delete-raw-run-outer-resign",
+      "exception_type": "FileNotFoundError",
+      "message": "[Errno 2] No such file or directory: '/tmp/fsg4-b3-five-fresh-tamper-spkr4e3l/attack-6/runs/pair-04/position-1-b3-c/manifest.json'",
+      "rejected": true
+    }
+  ],
+  "schema_version": "boundflow.fsg4-b3-five-fresh-tamper-report/v1",
+  "timing_admitted": false
+}
