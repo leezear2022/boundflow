@@ -11,7 +11,9 @@
 ---
 
 FSG4/B3-0显式counter diagnostic已经实现。首次真实运行因α D2H计数seam漏记而fail closed，已在不降低
-`12`门槛的前提下补齐，当前=`IMPLEMENTED-RERUN-PENDING`。它用命名seam event journal替代与provider
+`12`门槛的前提下补齐；随后provisional全部counter通过，但因缺独立semantic锚点未追认为正式证据。
+当前=`IMPLEMENTED-REFERENCE-BOUND-RERUN-PENDING`，正式版已绑定FSG3 v5六个B2 control语义并新增
+六类outer-resigned tamper probe。它用命名seam event journal替代与provider
 guard冲突的通用profiler，并将raw B2 worker、semantic/environment/provider/fallback、journal-derived
 counter、code revision和manifest绑定；尚无有效正式counter artifact或performance claim。实现记录见
 `gemini_doc/change_2026-08-14_fsg4_b3_explicit_counter_diagnostic_implementation.md`。

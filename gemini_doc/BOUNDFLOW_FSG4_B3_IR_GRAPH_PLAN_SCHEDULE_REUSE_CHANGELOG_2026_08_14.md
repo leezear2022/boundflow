@@ -20,6 +20,8 @@ stage: s01
 - 首次fresh B2 diagnostic在counter gate fail closed；同source debug聚合确认唯一偏差是D2H=`6/12`。
   源码审计定位原seam只覆盖6个β `_replacement`，漏掉6个α `_project_alpha` GPU→CPU sparse-layout
   copy；已补计数点，不降低`12`门槛；
+- 修正后provisional artifact的全部counter/replay通过，但审计发现semantic hash缺少独立真值锚点；正式版
+  增加FSG3 v5六个冻结B2 control语义绑定与六类outer-resigned tamper probe，不追认provisional目录；
 - B3-0显式counter diagnostic已实现但尚未真实运行：命名seam event journal、B2固定结构门禁、raw worker/
   semantic/environment/provider/fallback绑定、code revision/manifest与独立replay均已落地；
 - 诊断不使用`sys.setprofile`，也不修改B2生产函数；instrumentation在context退出后完整恢复；

@@ -4,6 +4,10 @@
 
 - 首次真实B2诊断在counter gate fail closed；唯一偏差为D2H观察`6/12`。确认不是物理路径缺失，而是
   原计数seam只覆盖β `_replacement`、漏掉α `_project_alpha`中的6次GPU→CPU；补计数点且门槛保持12；
+- 修正后provisional artifact全部counter/replay通过，但发现同步重签worker semantic仍缺独立锚点；正式版
+  改为绑定FSG3 v5六个B2 control语义，并新增六类outer-resigned篡改探针；
+- provisional目录移至`/tmp/fsg4-b3-counter-provisional-2b8120f`保留；新锚定对其中raw worker完成
+  FSG3 B2 control 6/6语义比较，相关测试`21 passed`，等待新source正式rerun；
 - 新增26项typed counter与逐事件journal，不使用`sys.setprofile`；
 - 新增真实B2 control diagnostic runner，复用FSG3 environment/semantic/provider/fallback门禁；
 - 新增raw worker、journal、snapshot、code revision、manifest和replay的分层hash绑定；

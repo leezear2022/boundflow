@@ -15,6 +15,7 @@ from boundflow.runtime.fsg4_b3_explicit_counters import (
     fsg4_b3_counter_snapshot_from_dict,
 )
 from scripts import run_fsg4_b3_counter_diagnostic as diagnostic
+from scripts import probe_fsg4_b3_counter_artifact_tamper as tamper
 from scripts import run_rvir_v4_live_return_capture as live_runner
 
 
@@ -109,3 +110,14 @@ def test_boolean_counter_is_rejected_instead_of_coerced() -> None:
     payload["snapshot_hash"] = diagnostic.canonical_hash(snapshot_payload)
     with pytest.raises(TypeError, match="must be an integer"):
         fsg4_b3_counter_snapshot_from_dict(payload)
+
+
+def test_tamper_probe_covers_outer_resigned_semantics_and_counters() -> None:
+    assert {name for name, _attack in tamper.ATTACKS} == {
+        "counter-report-only-outer-resign",
+        "counter-and-journal-outer-resign",
+        "delete-journal-event-outer-resign",
+        "worker-semantic-outer-resign",
+        "provider-count-outer-resign",
+        "code-revision-outer-resign",
+    }

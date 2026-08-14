@@ -23,6 +23,7 @@ if str(REPOSITORY_ROOT) not in sys.path:
     sys.path.insert(0, str(REPOSITORY_ROOT))
 
 from boundflow.runtime.fsg3_same_solver_timing import (
+    _semantic_pair_failures,
     canonical_hash,
     FSG3Configuration,
     FSG3Mode,
@@ -35,12 +36,24 @@ from boundflow.runtime.fsg4_b3_explicit_counters import (
     fsg4_b3_counter_snapshot_from_dict,
 )
 from scripts import run_fsg3_same_solver_timing as fsg3_worker
+from scripts import run_fsg3_same_solver_experiment as fsg3_experiment
 from scripts import run_rvir_v4_production_state_capture as capture_runner
 
 ARTIFACT_SCHEMA = "boundflow.fsg4-b3-counter-diagnostic-artifact/v1"
 MANIFEST_SCHEMA = "boundflow.fsg4-b3-counter-diagnostic-manifest/v1"
+FSG3_REFERENCE_ARTIFACT = (
+    REPOSITORY_ROOT / "artifacts/fsg3-same-solver-timing/resnet2b-prop0-v5"
+)
+FSG3_REFERENCE_MANIFEST_HASH = (
+    "9089e2019eb5e98cac228151cb061c0f6aceefa0ad6c6b3e298584bcede21e85"
+)
+FSG3_REFERENCE_SUMMARY_HASH = (
+    "df852590d99be09962c1287e7166b421edb260416403a3c91545dca6e2e1318e"
+)
 CODE_PATHS = (
+    "boundflow/runtime/fsg3_same_solver_timing.py",
     "boundflow/runtime/fsg4_b3_explicit_counters.py",
+    "scripts/run_fsg3_same_solver_experiment.py",
     "scripts/run_fsg4_b3_counter_diagnostic.py",
     "scripts/run_fsg3_same_solver_timing.py",
     "scripts/run_rvir_v4_live_return_capture.py",
@@ -143,6 +156,40 @@ def _verify_code_revision(manifest: Mapping[str, Any]) -> None:
         }
     if dict(revision) != observed:
         raise ValueError("FSG4/B3 code revision differs")
+
+
+def _verify_fsg3_semantic_reference(run: Any) -> tuple[str, ...]:
+    reference_manifest = _load_json(FSG3_REFERENCE_ARTIFACT / "manifest.json")
+    references, summary, _replay_result = fsg3_experiment._verify_static_artifact(
+        FSG3_REFERENCE_ARTIFACT
+    )
+    if (
+        reference_manifest.get("manifest_hash") != FSG3_REFERENCE_MANIFEST_HASH
+        or summary.get("summary_hash") != FSG3_REFERENCE_SUMMARY_HASH
+    ):
+        raise ValueError("FSG4/B3 frozen FSG3 reference identity differs")
+    controls = tuple(
+        reference
+        for reference in references
+        if reference.configuration == FSG3Configuration.B2
+        and reference.mode == FSG3Mode.CONTROL
+    )
+    if len(controls) != 6:
+        raise ValueError("FSG4/B3 frozen B2 control coverage differs")
+    failures = tuple(
+        failure
+        for index, reference in enumerate(controls)
+        for failure in _semantic_pair_failures(
+            reference.semantics,
+            run.semantics,
+            label=f"frozen-B2-control-{index}",
+        )
+    )
+    if failures:
+        raise ValueError(
+            "FSG4/B3 worker differs from frozen FSG3 semantics: " + ",".join(failures)
+        )
+    return tuple(reference.run_id for reference in controls)
 
 
 @contextmanager
@@ -533,6 +580,7 @@ def _generate(args: argparse.Namespace) -> None:
         worker_sha = _file_sha256(worker_path)
         envelope = _load_json(worker_path)
         run = _validate_worker_envelope(envelope, worker_sha)
+        reference_run_ids = _verify_fsg3_semantic_reference(run)
         events = [event.to_dict() for event in recorder.events]
         _write_jsonl(staging / "events.jsonl", events)
         counts = recorder.counts()
@@ -566,6 +614,10 @@ def _generate(args: argparse.Namespace) -> None:
             "source_git_head": _git("rev-parse", "HEAD"),
             "source_identity": run.source_identity,
             "protocol_identity": run.protocol_identity,
+            "fsg3_reference_manifest_hash": FSG3_REFERENCE_MANIFEST_HASH,
+            "fsg3_reference_summary_hash": FSG3_REFERENCE_SUMMARY_HASH,
+            "fsg3_reference_b2_control_run_ids": list(reference_run_ids),
+            "fsg3_reference_semantic_failures": [],
             "model_sha256": capture_runner.file_sha256(args.model),
             "property_sha256": capture_runner.file_sha256(args.property),
             "event_count": len(events),
@@ -589,6 +641,8 @@ def _generate(args: argparse.Namespace) -> None:
             "code_revision": _code_revision(),
             "files": files,
             "report_hash": report["report_hash"],
+            "fsg3_reference_manifest_hash": FSG3_REFERENCE_MANIFEST_HASH,
+            "fsg3_reference_summary_hash": FSG3_REFERENCE_SUMMARY_HASH,
             "performance_claimed": False,
         }
         manifest["manifest_hash"] = canonical_hash(manifest)
@@ -623,6 +677,11 @@ def _replay(artifact: Path) -> dict[str, object]:
     if (
         report.get("schema_version") != ARTIFACT_SCHEMA
         or report.get("source_git_head") != manifest.get("source_git_head")
+        or report.get("fsg3_reference_manifest_hash") != FSG3_REFERENCE_MANIFEST_HASH
+        or report.get("fsg3_reference_summary_hash") != FSG3_REFERENCE_SUMMARY_HASH
+        or manifest.get("fsg3_reference_manifest_hash") != FSG3_REFERENCE_MANIFEST_HASH
+        or manifest.get("fsg3_reference_summary_hash") != FSG3_REFERENCE_SUMMARY_HASH
+        or report.get("fsg3_reference_semantic_failures") != []
         or claimed_report_hash != canonical_hash(report_payload)
         or claimed_report_hash != manifest.get("report_hash")
         or report.get("performance_claimed") is not False
@@ -640,11 +699,13 @@ def _replay(artifact: Path) -> dict[str, object]:
     worker_path = artifact / "worker.json"
     envelope = _load_json(worker_path)
     run = _validate_worker_envelope(envelope, _file_sha256(worker_path))
+    reference_run_ids = _verify_fsg3_semantic_reference(run)
     if (
         snapshot.semantic_hash != canonical_hash(run.semantics.to_dict())
         or snapshot.worker_result_sha256 != _file_sha256(worker_path)
         or report.get("source_identity") != run.source_identity
         or report.get("protocol_identity") != run.protocol_identity
+        or report.get("fsg3_reference_b2_control_run_ids") != list(reference_run_ids)
     ):
         raise ValueError("FSG4/B3 worker/report binding differs")
     rows = _load_jsonl(artifact / "events.jsonl")

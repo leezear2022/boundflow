@@ -1,7 +1,7 @@
 # FSG4/B3-0 显式 Counter 诊断实现记录
 
 日期：2026-08-14
-状态：`IMPLEMENTED-RERUN-PENDING`
+状态：`IMPLEMENTED-REFERENCE-BOUND-RERUN-PENDING`
 分支：`feat/rvir-v4-production-state-ownership-v1`
 
 ## 目标
@@ -80,6 +80,16 @@ timed_candidate_d2h_copy_count: expected=12, observed=6
 修正保持预注册门槛`12`不变，在`_project_alpha`增加显式设备转换计数，并让snapshot gate报告逐字段
 expected/observed。debug raw worker保留在`/tmp/fsg4-b3-counter-debug.XOJtGg/worker.json`，不属于正式
 artifact且不形成性能结论。
+
+修正后的source=`2b8120f`已生成一次全部counter通过、静态replay通过的provisional artifact。但关闭前
+审计发现其semantic hash只做artifact内部自洽绑定，尚不能抵抗worker/report/manifest同步重签。因此该
+目录不会作为最终正式证据提交；下一版必须绑定FSG3 v5六个冻结B2 control语义，并通过六类outer-resigned
+counter/journal/worker/provider/code攻击。
+
+provisional目录已可恢复地移到`/tmp/fsg4-b3-counter-provisional-2b8120f`，未删除、未提交。新增真值
+锚定已用该raw worker对FSG3 v5六个B2 control逐一验证，6/6语义比较通过；新增/相关测试现为
+`21 passed`，mypy clean，Pylint 10.00/10。正式artifact仍须从包含真值锚定和tamper probe的新commit
+重新生成。
 
 ## 下一步
 
