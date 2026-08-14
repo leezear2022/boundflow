@@ -201,8 +201,8 @@ headline ratio：
 1. [x] B3-0：显式call/copy/validation/hash counter diagnostic，状态=`VALIDATED-B2-COUNTERS`，不形成speedup；
 2. [x] B3-A：PreparedCoreTemplate、CorePlanInstance与cache/reject tests；状态=
    `VALIDATED-B3-A-COUNTERS`，不形成timing/speedup；
-3. [ ] B3-B：terminal-only optimizer Schedule和forward-trace handoff；第一版实现候选已落地，等待fresh
-   GPU counter/correctness artifact后才能关闭；
+3. [x] B3-B：terminal-only optimizer Schedule和forward-trace handoff；状态=
+   `VALIDATED-B3-B-COUNTERS`，不形成timing/speedup；
 4. [ ] B3-C：device-resident AtomicCommitPlan、rollback与audit digest分层；
 5. [ ] 五fresh B2/B3 correctness；
 6. [ ] 36-process B0/B2/B3正式artifact、replay与tamper；
@@ -301,5 +301,23 @@ optimizer Schedule与forward-trace handoff；B3-C和B4—B7继续关闭。
 - CPU冻结case确认terminal lower/α/β与formal trace最后一步逐元素相同，forward handoff前后backward
   lower/lA/intermediate逐元素相同；targeted=`42 passed`，mypy touched clean，Pylint=`10.00/10`。
 
-当前状态=`IMPLEMENTED-PENDING-FRESH-GPU`。物理counter和真实same-solver语义仍待提交后的fresh GPU
-artifact证明；B3-C和B4—B7继续关闭。
+本节的`IMPLEMENTED-PENDING-FRESH-GPU`是正式运行前历史状态，已被下方closure取代。
+
+## 18. B3-B Formal Closure（2026-08-14）
+
+- source=`42df2dcae2d5c5a10f27ab707d8d7aff7686d15e`；
+- artifact=`artifacts/fsg4-b3-counter-diagnostic/resnet2b-prop0-b3b-v1/`；
+- manifest hash=`2960c85c9b6dfe1382bef39804a9a88b618b438b9b2cb55d629aa24a99c18644`；
+- report hash=`f7c24e9080a51fba990bf67502ee91519b8d67047a37d29a64654cbe4ea77061`；
+- 5157条event独立重放：full optimizer step snapshots=`0`、forward builds=`4`；template compile/hit=
+  `1/1`、module move=`0`、scope=`1`、optimizer=`10/9`、KFSB=`3/3`、D2H/commit/backup/copy=
+  `12/12/12/12`，provider/fallback全零；
+- 六个冻结B2 control语义一致，artifact replay通过；六类outer-resigned攻击6/6拒绝，tamper report
+  hash=`6c1dde930b250d62a9eb00026729888363ea02bae42eb3331daa384ece73dbcf`；
+- targeted=`45 passed`；full=`1265 passed, 3 skipped, 6 warnings`；Black clean，mypy touched clean，
+  Pylint=`10.00/10`；
+- 状态=`VALIDATED-B3-B-COUNTERS`，`diagnostic_timing_claimed=false`、`performance_claimed=false`。
+
+B3-B证明terminal Schedule和forward-trace handoff在一个fresh真实solver call中激活并保持冻结语义；它
+没有证明延迟改善，也不满足完整B3计时前的5 fresh pair。下一动作只允许B3-C device-resident
+AtomicCommitPlan；B4—B7继续关闭。

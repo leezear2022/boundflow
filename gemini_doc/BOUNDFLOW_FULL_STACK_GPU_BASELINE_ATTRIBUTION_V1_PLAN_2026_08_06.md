@@ -332,8 +332,8 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 5. [x] FSG3：source `a4ee291`完成36-process B0/B1/B2正式artifact；correctness、environment、
    measurement、replay与outer-resigned tamper门禁通过，状态=
    `VALIDATED-FSG3-B0-B1-B2-BASELINE`；
-6. [~] FSG4：B3-0=`VALIDATED-B2-COUNTERS`，B3-A=`VALIDATED-B3-A-COUNTERS`；当前只启动B3-B
-   terminal-only optimizer Schedule，完整B3 candidate尚未关闭，B4—B7仍未实现/消融；
+6. [~] FSG4：B3-0/A/B分别关闭为`VALIDATED-B2-COUNTERS`、`VALIDATED-B3-A-COUNTERS`、
+   `VALIDATED-B3-B-COUNTERS`；当前只启动B3-C AtomicCommitPlan，完整B3尚未关闭，B4—B7未实现/消融；
 7. [—] FSG5：因无合法B7 candidate，依赖门禁阻止，无系统性能claim。
 
 ## 12. Validation
@@ -493,6 +493,13 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
   tamper通过；
 - 状态=`VALIDATED-B3-A-COUNTERS`，没有timing/performance claim；
 - 下一动作B3-B terminal-only optimizer Schedule；5 fresh pair与正式计时仍未准入。
+
+### FSG4/B3-B Terminal Schedule Closure（2026-08-14）
+
+- source=`42df2dc`，artifact=`artifacts/fsg4-b3-counter-diagnostic/resnet2b-prop0-b3b-v1/`；
+- 5157 events确认full snapshots=`0`、forward builds=`4`，冻结语义、replay和6/6 tamper通过；
+- 状态=`VALIDATED-B3-B-COUNTERS`，没有timing/performance claim；
+- 下一动作B3-C AtomicCommitPlan；5 fresh pair与正式计时仍未准入。
 
 ## 13. Rollback
 

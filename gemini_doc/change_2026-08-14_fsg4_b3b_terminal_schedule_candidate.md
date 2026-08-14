@@ -1,7 +1,7 @@
 # FSG4/B3-B Terminal Optimizer Schedule 实现候选记录
 
 日期：2026-08-14
-状态：`IMPLEMENTED-PENDING-FRESH-GPU`
+状态：历史实现候选；已由`change_2026-08-14_fsg4_b3b_terminal_schedule_closure.md`取代
 
 ## 目标
 
@@ -18,6 +18,8 @@ TIR/JIT/runtime或arena。
 - backward export支持exact typed forward trace；不提供时保持旧rebuild路径，提供时严格验证后复用。
 - live executor只有在prepared core和terminal schedule同时显式提供时启用B3-B；B2/B3-A不变。
 - diagnostic新增B3-B配置及固定counter gate：相对B3-A只允许snapshots `10→0`、forward `5→4`。
+- outer-resigned report-only攻击从硬编码forward=`4`改为相对当前合法值减1，使同一探针可覆盖B2、B3-A
+  与B3-B而不会在B3-B上成为空变换。
 
 ## 验证
 

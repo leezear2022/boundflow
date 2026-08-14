@@ -10,19 +10,20 @@
 
 ---
 
-FSG4/B3-B已完成第一版实现候选，状态=`IMPLEMENTED-PENDING-FRESH-GPU`：新增first-class terminal
-optimizer Schedule IR，formal 10-step trace保持不变；production只保存terminal lower/α/β并把optimizer
-父forward trace交给backward。CPU真实冻结case确认终态与旧trace逐元素相同、handoff前后backward
-lower/lA/intermediate逐元素相同；定向`42 passed`、mypy touched clean、Pylint `10.00/10`。尚未实测
-snapshots `10→0`和forward `5→4`，无性能主张。下一动作是提交source后生成fresh GPU B3-B artifact。
-记录见`gemini_doc/change_2026-08-14_fsg4_b3b_terminal_schedule_candidate.md`。
+FSG4/B3-B已以`VALIDATED-B3-B-COUNTERS`关闭：source=`42df2dc`，fresh GPU artifact=
+`artifacts/fsg4-b3-counter-diagnostic/resnet2b-prop0-b3b-v1/`。5157条event确认full step snapshots=`0`、
+forward builds=`4`，且B3-A template/module/scope、optimizer 10/9、KFSB、D2H/commit等结构保持；冻结语义、
+replay和6/6 tamper通过。定向`45 passed`、全量`1265 passed, 3 skipped`。这不是timing/speedup，完整
+B3仍需5 fresh pair。下一动作只允许B3-C device-resident AtomicCommitPlan。关闭记录见
+`gemini_doc/change_2026-08-14_fsg4_b3b_terminal_schedule_closure.md`，外审入口见
+`gemini_doc/fsg4_b3b_terminal_schedule_external_audit_handoff_2026_08_14.md`。
 
 FSG4/B3-A已以`VALIDATED-B3-A-COUNTERS`关闭：source=`c7851c8`，fresh GPU artifact=
 `artifacts/fsg4-b3-counter-diagnostic/resnet2b-prop0-b3a-v1/`。5157条event确认template compile/hit=
 `1/1`、module move=`0`、scope=`1`，其余optimizer/forward/KFSB/D2H/commit固定结构与B2一致；六个冻结
 B2 control语义、replay和6/6 outer-resigned tamper通过。定向`34 passed`、全量
 `1257 passed, 3 skipped`。这只证明单次fresh correctness与B3-A物理激活，不是timing/speedup，也未替代
-完整B3计时前的5 fresh pair门禁。该“下一动作”已推进到上方B3-B实现候选，仍待fresh GPU关闭。关闭记录见
+完整B3计时前的5 fresh pair门禁。该“下一动作”已被上方B3-B正式关闭取代。关闭记录见
 `gemini_doc/change_2026-08-14_fsg4_b3a_prepared_core_closure.md`，外审入口见
 `gemini_doc/fsg4_b3a_prepared_core_external_audit_handoff_2026_08_14.md`。
 

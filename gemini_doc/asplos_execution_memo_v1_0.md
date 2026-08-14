@@ -1,9 +1,14 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-14 FSG4/B3-B关闭指令**：source `42df2dc`的fresh GPU artifact已验证full step
+> snapshots=`0`、forward builds=`4`，冻结语义、replay和6/6 tamper通过，状态=
+> `VALIDATED-B3-B-COUNTERS`，无timing/speedup。下一唯一动作是B3-C device-resident AtomicCommitPlan；
+> B4—B7不得提前混入。
+
 > **2026-08-14 FSG4/B3-A关闭指令**：source `c7851c8`的fresh GPU artifact已验证template
 > compile/hit=`1/1`、module move=`0`、scope=`1`，冻结语义、replay和6/6 tamper通过，状态=
 > `VALIDATED-B3-A-COUNTERS`，无timing/speedup。下一唯一动作是B3-B terminal-only optimizer Schedule；
-> B3-C和B4—B7不得提前混入。
+> B3-C和B4—B7不得提前混入。该“下一动作”已被上方B3-B关闭取代。
 
 > **2026-08-14 FSG4/B3-0关闭指令**：B2显式counter已由source `4195361`正式关闭为
 > `VALIDATED-B2-COUNTERS`；counter、六个冻结语义锚定、replay、6/6 tamper和全量回归均通过。下一唯一

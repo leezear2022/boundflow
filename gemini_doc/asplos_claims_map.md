@@ -1,9 +1,15 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-14 FSG4/B3-B关闭**：source `42df2dc`的fresh GPU artifact用5157条event确认full step
+> snapshots=`0`、forward builds=`4`，其余B3-A结构、六个B2 control语义、replay与6/6 tamper保持。状态=
+> `VALIDATED-B3-B-COUNTERS`，仅支持terminal Schedule/forward handoff mechanism/correctness claim，不支持
+> timing/speedup；B3-C及B4—B7仍未关闭。
+
 > **2026-08-14 FSG4/B3-A关闭**：source `c7851c8`的fresh GPU artifact用5157条event确认template
 > compile/hit=`1/1`、module move=`0`、scope=`1`，其余optimizer/forward/KFSB/D2H/commit结构保持；六个
 > B2 control语义、replay和6/6 tamper通过。状态=`VALIDATED-B3-A-COUNTERS`，仅支持prepared-core
-> mechanism/correctness claim，不支持timing/speedup；B3-B/C及B4—B7仍未关闭。
+> mechanism/correctness claim，不支持timing/speedup；“B3-B未关闭”已被上方closure取代，B3-C及
+> B4—B7仍未关闭。
 
 > **2026-08-14 FSG4/B3-0关闭**：source `4195361`的fresh B2 artifact用4625条显式event确认
 > module/scope=`1/2`、optimizer=`10/9/10 snapshots`、forward=`5`、KFSB=`3/3`、D2H/commit=`12/12`，

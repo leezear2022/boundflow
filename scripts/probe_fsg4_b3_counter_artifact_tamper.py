@@ -99,7 +99,9 @@ def _counter_report_only(root: Path) -> None:
     report = _load(root / "report.json")
     snapshot = report["snapshot"]
     assert isinstance(snapshot, dict) and isinstance(snapshot["counts"], dict)
-    snapshot["counts"]["forward_trace_build_count"] = 4
+    current = snapshot["counts"]["forward_trace_build_count"]
+    assert isinstance(current, int) and not isinstance(current, bool) and current > 0
+    snapshot["counts"]["forward_trace_build_count"] = current - 1
     _write(root / "report.json", report)
     _resign(root, derive_counts=False)
 

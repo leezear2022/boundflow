@@ -5418,3 +5418,13 @@
 
 **记录**
 - `gemini_doc/change_2026-08-14_fsg4_b3b_terminal_schedule_candidate.md`
+
+## 2026-08-14：FSG4/B3-B Terminal Optimizer Schedule 正式关闭
+
+- source `42df2dc`的fresh GPU artifact含5157条event；
+- full optimizer snapshots 0、forward builds 4，其他B3-A结构与冻结语义保持；
+- replay、6/6 tamper、45项定向和1265项全量回归通过；
+- 状态`VALIDATED-B3-B-COUNTERS`，无timing/speedup；下一步B3-C。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg4_b3b_terminal_schedule_closure.md`

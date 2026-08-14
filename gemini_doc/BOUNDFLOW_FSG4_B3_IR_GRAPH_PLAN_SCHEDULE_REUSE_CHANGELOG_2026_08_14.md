@@ -11,6 +11,8 @@ stage: s01
 
 ## Summary
 
+- B3-B已以`VALIDATED-B3-B-COUNTERS`关闭：full snapshots=`0`、forward builds=`4`，冻结语义与6/6
+  tamper通过；无timing/speedup claim；
 - B3-A已以`VALIDATED-B3-A-COUNTERS`关闭：5157条event、三项预注册物理变化、冻结语义与6/6 tamper
   通过；无timing/speedup claim；
 - B3-0已以`VALIDATED-B2-COUNTERS`关闭：4625条event、固定counter全中、六个冻结B2 control语义锚定与
@@ -48,6 +50,8 @@ stage: s01
 
 ## Validation
 
+- B3-B formal artifact replay、六个冻结B2 control语义与6/6 tamper通过；targeted=`45 passed`，full=
+  `1265 passed, 3 skipped`；
 - B3-B实现候选CPU冻结case与负向门禁targeted=`42 passed`，mypy touched clean，Pylint=`10.00/10`；
   fresh GPU尚待执行；
 - B3-A formal artifact replay、六个冻结B2 control语义与6/6 tamper通过；targeted=`34 passed`，full=
@@ -69,9 +73,9 @@ stage: s01
 
 ## Follow-Ups
 
-1. 实现B3-B terminal-only optimizer Schedule与terminal forward-trace handoff；
-2. 保持formal逐step trace用于审计，production path才允许消除10份snapshot；
-3. B3-B关闭后再进入B3-C，不并行混合变量。
+1. 实现B3-C device-resident AtomicCommitPlan、rollback和audit digest分层；
+2. candidate在GPU保留，headline core不得执行12次D2H content digest；
+3. B3-C关闭后完成5 fresh correctness pairs，再决定是否准入正式B3计时。
 
 ## Links
 
