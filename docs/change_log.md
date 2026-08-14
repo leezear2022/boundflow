@@ -5399,3 +5399,12 @@
 
 **记录**
 - `gemini_doc/change_2026-08-14_fsg4_b3a_prepared_core_closure.md`
+
+## 2026-08-14：FSG4/B3-A 跨 HEAD Replay 修复
+
+- 修复historical-source verifier固定使用B2 code paths、漏检B3-A新增runtime文件的问题；
+- 改为按artifact configuration重算完整source inventory；
+- artifact和GPU证据不变，B3-A/B3-0跨HEAD replay及code-revision tamper继续fail closed。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg4_b3a_cross_head_replay_fix.md`

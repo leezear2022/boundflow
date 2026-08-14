@@ -180,7 +180,7 @@ def _verify_code_revision(manifest: Mapping[str, Any]) -> None:
                     stderr=subprocess.PIPE,
                 ).stdout
             ).hexdigest()
-            for path in CODE_PATHS
+            for path in _code_paths(configuration)
         }
     if dict(revision) != observed:
         raise ValueError("FSG4/B3 code revision differs")

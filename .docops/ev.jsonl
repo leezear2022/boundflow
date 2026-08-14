@@ -8960,3 +8960,15 @@
 {"id":"ev008960","ts":"2026-08-14T11:20:30Z","ty":"va","st":"s01","pr":60,"result":"pass"}
 {"id":"ev008961","ts":"2026-08-14T11:20:30Z","ty":"cmd","cmd":"Bash:source","summary":"PostToolUse"}
 {"id":"ev008962","ts":"2026-08-14T11:20:37Z","ty":"cmd","cmd":"Bash:git","summary":"PostToolUse"}
+{"id":"ev008963","ts":"2026-08-14T11:20:50Z","ty":"cmd","cmd":"Bash:git","summary":"PostToolUse"}
+{"id":"ev008964","ts":"2026-08-14T11:20:57Z","ty":"cmd","cmd":"Bash:source","summary":"PostToolUse"}
+{"id":"ev008965","ts":"2026-08-14T11:21:11Z","ty":"cmd","cmd":"Bash:python","summary":"PostToolUse"}
+{"id":"ev008966","ts":"2026-08-14T11:21:17Z","ty":"cmd","cmd":"Bash:nl","summary":"PostToolUse"}
+{"id":"ev008967","ts":"2026-08-14T11:21:35Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
+{"id":"ev008968","ts":"2026-08-14T11:21:49Z","ty":"cmd","cmd":"Bash:source","summary":"PostToolUse"}
+{"id":"ev008969","ts":"2026-08-14T11:21:56Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
+{"id":"ev008970","ts":"2026-08-14T11:22:07Z","ty":"cmd","cmd":"Bash:source","summary":"PostToolUse"}
+{"id":"ev008971","ts":"2026-08-14T11:22:17Z","ty":"ch","st":"s01","pr":60,"slug":"fsg4-b3a-cross-head-replay-fix"}
+{"id":"ev008972","ts":"2026-08-14T11:22:17Z","ty":"va","st":"s01","pr":60,"result":"pass"}
+{"id":"ev008973","ts":"2026-08-14T11:22:17Z","ty":"cmd","cmd":"Bash:source","summary":"PostToolUse"}
+{"id":"ev008974","ts":"2026-08-14T11:22:24Z","ty":"cmd","cmd":"Bash:git","summary":"PostToolUse"}

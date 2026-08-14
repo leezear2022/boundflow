@@ -34,7 +34,11 @@ source `c7851c8bae1bc943aa9e3d458e5105deafc553f1`的fresh GPU真实same-solver c
 - 六类outer-resigned counter/journal/semantic/provider/code攻击6/6拒绝；
 - targeted：`34 passed in 4.60s`；
 - full：`1257 passed, 3 skipped, 6 warnings in 478.68s`；
-- Black clean；mypy touched runtime source clean；Pylint `10.00/10`；DocOps lint待最终提交前执行。
+- Black clean；mypy touched runtime source clean；Pylint `10.00/10`；DocOps lint PASS。
+
+关闭artifact提交后的跨HEAD replay首次暴露provenance verifier仍只遍历B2基础code paths，漏掉B3-A新增
+runtime文件，因而正确fail closed。已将historical-source分支改为按artifact configuration选择完整code
+path inventory；不修改artifact、GPU结果、digest或门禁。修复后必须从closure HEAD再次replay。
 
 ## 边界与下一步
 
