@@ -121,3 +121,10 @@ def test_tamper_probe_covers_outer_resigned_semantics_and_counters() -> None:
         "provider-count-outer-resign",
         "code-revision-outer-resign",
     }
+
+
+def test_frozen_fsg3_reference_has_six_b2_controls() -> None:
+    controls = diagnostic._fsg3_reference_controls()
+    assert len(controls) == 6
+    assert all(run.configuration.value == "B2" for run in controls)
+    assert all(run.mode.value == "control" for run in controls)

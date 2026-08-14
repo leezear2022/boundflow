@@ -8,6 +8,9 @@
   改为绑定FSG3 v5六个B2 control语义，并新增六类outer-resigned篡改探针；
 - provisional目录移至`/tmp/fsg4-b3-counter-provisional-2b8120f`保留；新锚定对其中raw worker完成
   FSG3 B2 control 6/6语义比较，相关测试`21 passed`，等待新source正式rerun；
+- `e04bdd3` rerun因Python 3.11/3.12历史profile geomean重算出现`2.6e-9`表示差异而fail closed；改为
+  直接验证冻结FSG3 manifest、完整file digest、36-run顺序及raw B2 semantics，不重算无关性能summary；
+- 修正后相关测试`22 passed`，mypy clean，Pylint 10.00/10；
 - 新增26项typed counter与逐事件journal，不使用`sys.setprofile`；
 - 新增真实B2 control diagnostic runner，复用FSG3 environment/semantic/provider/fallback门禁；
 - 新增raw worker、journal、snapshot、code revision、manifest和replay的分层hash绑定；

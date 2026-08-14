@@ -22,6 +22,9 @@ stage: s01
   copy；已补计数点，不降低`12`门槛；
 - 修正后provisional artifact的全部counter/replay通过，但审计发现semantic hash缺少独立真值锚点；正式版
   增加FSG3 v5六个冻结B2 control语义绑定与六类outer-resigned tamper probe，不追认provisional目录；
+- `e04bdd3`正式rerun因Python 3.11/3.12重算历史profile geomean的`2.6e-9`表示差异fail closed；锚定
+  改为验证FSG3 manifest/完整file digest/36-run顺序和raw B2 semantics，不在worker环境重算历史性能
+  summary；
 - B3-0显式counter diagnostic已实现但尚未真实运行：命名seam event journal、B2固定结构门禁、raw worker/
   semantic/environment/provider/fallback绑定、code revision/manifest与独立replay均已落地；
 - 诊断不使用`sys.setprofile`，也不修改B2生产函数；instrumentation在context退出后完整恢复；

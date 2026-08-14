@@ -25,6 +25,7 @@ if str(REPOSITORY_ROOT) not in sys.path:
 from boundflow.runtime.fsg3_same_solver_timing import (
     _semantic_pair_failures,
     canonical_hash,
+    expected_fsg3_sequence,
     FSG3Configuration,
     FSG3Mode,
     fsg3_timing_run_from_dict,
@@ -36,7 +37,6 @@ from boundflow.runtime.fsg4_b3_explicit_counters import (
     fsg4_b3_counter_snapshot_from_dict,
 )
 from scripts import run_fsg3_same_solver_timing as fsg3_worker
-from scripts import run_fsg3_same_solver_experiment as fsg3_experiment
 from scripts import run_rvir_v4_production_state_capture as capture_runner
 
 ARTIFACT_SCHEMA = "boundflow.fsg4-b3-counter-diagnostic-artifact/v1"
@@ -53,7 +53,6 @@ FSG3_REFERENCE_SUMMARY_HASH = (
 CODE_PATHS = (
     "boundflow/runtime/fsg3_same_solver_timing.py",
     "boundflow/runtime/fsg4_b3_explicit_counters.py",
-    "scripts/run_fsg3_same_solver_experiment.py",
     "scripts/run_fsg4_b3_counter_diagnostic.py",
     "scripts/run_fsg3_same_solver_timing.py",
     "scripts/run_rvir_v4_live_return_capture.py",
@@ -158,16 +157,50 @@ def _verify_code_revision(manifest: Mapping[str, Any]) -> None:
         raise ValueError("FSG4/B3 code revision differs")
 
 
-def _verify_fsg3_semantic_reference(run: Any) -> tuple[str, ...]:
+def _fsg3_reference_controls() -> tuple[Any, ...]:
     reference_manifest = _load_json(FSG3_REFERENCE_ARTIFACT / "manifest.json")
-    references, summary, _replay_result = fsg3_experiment._verify_static_artifact(
-        FSG3_REFERENCE_ARTIFACT
-    )
+    semantic_manifest = dict(reference_manifest)
+    claimed_manifest_hash = semantic_manifest.pop("manifest_hash", None)
     if (
-        reference_manifest.get("manifest_hash") != FSG3_REFERENCE_MANIFEST_HASH
-        or summary.get("summary_hash") != FSG3_REFERENCE_SUMMARY_HASH
+        claimed_manifest_hash != FSG3_REFERENCE_MANIFEST_HASH
+        or claimed_manifest_hash != canonical_hash(semantic_manifest)
+        or reference_manifest.get("summary_hash") != FSG3_REFERENCE_SUMMARY_HASH
     ):
         raise ValueError("FSG4/B3 frozen FSG3 reference identity differs")
+    files = reference_manifest.get("files")
+    if not isinstance(files, Mapping):
+        raise TypeError("FSG4/B3 frozen FSG3 file inventory differs")
+    observed_files = {
+        str(path.relative_to(FSG3_REFERENCE_ARTIFACT))
+        for path in FSG3_REFERENCE_ARTIFACT.rglob("*")
+        if path.is_file() and path.name != "manifest.json"
+    }
+    if set(files) != observed_files:
+        raise ValueError("FSG4/B3 frozen FSG3 file inventory differs")
+    for name, digest in files.items():
+        if not isinstance(name, str) or digest != _file_sha256(
+            FSG3_REFERENCE_ARTIFACT / name
+        ):
+            raise ValueError(f"FSG4/B3 frozen FSG3 file digest differs: {name}")
+    summary = _load_json(FSG3_REFERENCE_ARTIFACT / "summary.json")
+    if summary.get("summary_hash") != FSG3_REFERENCE_SUMMARY_HASH:
+        raise ValueError("FSG4/B3 frozen FSG3 summary identity differs")
+    references = tuple(
+        fsg3_timing_run_from_dict(row)
+        for row in _load_jsonl(FSG3_REFERENCE_ARTIFACT / "worker_runs.jsonl")
+    )
+    expected = tuple(expected_fsg3_sequence())
+    if len(references) != len(expected) or any(
+        (
+            run.block_index,
+            run.sequence_position,
+            run.configuration,
+            run.mode,
+        )
+        != row
+        for run, row in zip(references, expected)
+    ):
+        raise ValueError("FSG4/B3 frozen FSG3 run sequence differs")
     controls = tuple(
         reference
         for reference in references
@@ -176,6 +209,11 @@ def _verify_fsg3_semantic_reference(run: Any) -> tuple[str, ...]:
     )
     if len(controls) != 6:
         raise ValueError("FSG4/B3 frozen B2 control coverage differs")
+    return controls
+
+
+def _verify_fsg3_semantic_reference(run: Any) -> tuple[str, ...]:
+    controls = _fsg3_reference_controls()
     failures = tuple(
         failure
         for index, reference in enumerate(controls)

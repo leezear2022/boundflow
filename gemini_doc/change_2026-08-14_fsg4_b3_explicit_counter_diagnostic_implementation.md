@@ -91,6 +91,14 @@ provisional目录已可恢复地移到`/tmp/fsg4-b3-counter-provisional-2b8120f`
 `21 passed`，mypy clean，Pylint 10.00/10。正式artifact仍须从包含真值锚定和tamper probe的新commit
 重新生成。
 
+source=`e04bdd3`的首次正式rerun又在真值导入阶段fail closed，未发布artifact。原因不是worker semantic
+偏差，而是诊断进程使用αβ-CROWN Python 3.11，FSG3整份summary在该环境重新计算geomean时出现
+`1515116.6008639452`（冻结）对`1515116.6008639426`（重算）的`2.6e-9`表示差异；同一FSG3 replay在
+BoundFlow Python 3.12环境通过。B3-0只需要冻结B2原始语义，不应在worker环境重推导历史性能summary。
+修正改为直接验证FSG3 manifest canonical hash、完整文件inventory/digest、冻结summary hash、36-run顺序
+和六个B2 control raw semantics；不放宽任何语义容差，也不依赖跨Python的geomean位级表示。
+修正后相关测试=`22 passed`，mypy clean，Pylint 10.00/10。
+
 ## 下一步
 
 1. 全量回归并提交实现，冻结source commit；
