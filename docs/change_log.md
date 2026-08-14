@@ -5448,3 +5448,15 @@
 
 **记录**
 - `gemini_doc/change_2026-08-14_fsg4_b3c_host_packet_version_fix.md`
+
+## 2026-08-14：FSG4/B3-C Device-Resident Atomic Commit 正式关闭
+
+- source `72bec5e`的fresh GPU artifact含1484条显式event；
+- candidate/commit/backup/copy=`12/12/12/12`，timed candidate D2H=`0`；
+- headline digest=`0`，24次GPU hash全部位于post-query audit；
+- 六个冻结B2 control语义、replay、6/6 tamper、定向54项和1279项全量回归通过；
+- 状态`VALIDATED-B3-C-COUNTERS`，无timing/speedup；下一步5 fresh pairs。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg4_b3c_device_atomic_commit_closure.md`
+- `gemini_doc/fsg4_b3c_device_commit_external_audit_handoff_2026_08_14.md`

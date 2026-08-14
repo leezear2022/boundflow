@@ -203,7 +203,8 @@ headline ratio：
    `VALIDATED-B3-A-COUNTERS`，不形成timing/speedup；
 3. [x] B3-B：terminal-only optimizer Schedule和forward-trace handoff；状态=
    `VALIDATED-B3-B-COUNTERS`，不形成timing/speedup；
-4. [ ] B3-C：device-resident AtomicCommitPlan、rollback与audit digest分层；
+4. [x] B3-C：device-resident AtomicCommitPlan、rollback与audit digest分层；状态=
+   `VALIDATED-B3-C-COUNTERS`，不形成timing/speedup；
 5. [ ] 五fresh B2/B3 correctness；
 6. [ ] 36-process B0/B2/B3正式artifact、replay与tamper；
 7. [ ] external audit与FSG4/B3 closure。
@@ -339,3 +340,23 @@ AtomicCommitPlan；B4—B7继续关闭。
 
 当前状态仅为`IMPLEMENTED-PENDING-FRESH-GPU-ARTIFACT`。尚无fresh真实worker artifact、全量回归、
 5 fresh pair或任何timing/speedup claim；B4—B7继续关闭。
+
+上段为实现候选历史状态，已被下方正式closure取代。
+
+## 20. B3-C Formal Closure（2026-08-14）
+
+- source=`72bec5ee1bdabfdefbf51201ac49395489eeef65`；
+- artifact=`artifacts/fsg4-b3-counter-diagnostic/resnet2b-prop0-b3c-v1/`；
+- manifest/report internal hash分别为`091f6ac8…e1c2`/`72812a35…cb44`；
+- 1484条event独立重放：candidate/commit/backup/copy=`12/12/12/12`、timed candidate D2H=`0`；
+  template compile/hit=`1/1`、module move=`0`、scope=`1`、optimizer=`10/9`、snapshots=`0`、
+  forward=`4`、KFSB=`3/3`，provider/fallback全零；
+- headline assembly content digest=`0`；24次GPU content hash全部在query计时结束和CUDA同步后的audit，
+  audit/commit hash交叉绑定12条path；
+- 六个冻结B2 control语义一致，artifact replay与6/6 outer-resigned tamper通过；
+- targeted=`54 passed`；full=`1279 passed, 3 skipped, 6 warnings`；Black/mypy clean，Pylint
+  `10.00/10`；
+- 状态=`VALIDATED-B3-C-COUNTERS`，`diagnostic_timing_claimed=false`、`performance_claimed=false`。
+
+B3-C只证明一个fresh真实call的结构和正确性。下一动作是至少5组fresh B2/B3 correctness pairs；未
+5/5通过前不得启动36-process正式计时，B4—B7继续关闭。

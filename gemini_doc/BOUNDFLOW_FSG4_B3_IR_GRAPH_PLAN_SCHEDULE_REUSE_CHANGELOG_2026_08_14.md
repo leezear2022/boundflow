@@ -11,6 +11,8 @@ stage: s01
 
 ## Summary
 
+- B3-C已以`VALIDATED-B3-C-COUNTERS`关闭：12个device candidate/commit/backup/copy、D2H=`0`、
+  post-query audit、冻结语义与6/6 tamper通过；无timing/speedup claim；
 - B3-B已以`VALIDATED-B3-B-COUNTERS`关闭：full snapshots=`0`、forward builds=`4`，冻结语义与6/6
   tamper通过；无timing/speedup claim；
 - B3-A已以`VALIDATED-B3-A-COUNTERS`关闭：5157条event、三项预注册物理变化、冻结语义与6/6 tamper
@@ -57,6 +59,8 @@ stage: s01
 
 ## Validation
 
+- B3-C formal artifact replay、六个冻结B2 control语义与6/6 tamper通过；targeted=`54 passed`，full=
+  `1279 passed, 3 skipped`；
 - B3-C CUDA事务/provider assembly=`10 passed`，相关定向回归=`50 passed`，Black/mypy clean，Pylint
   `10.00/10`；fresh真实worker artifact与全量回归尚待执行；
 - B3-B formal artifact replay、六个冻结B2 control语义与6/6 tamper通过；targeted=`45 passed`，full=
@@ -82,9 +86,9 @@ stage: s01
 
 ## Follow-Ups
 
-1. 从clean committed source生成fresh B3-C ResNet2B/prop0 counter artifact；
-2. 独立确认candidate D2H=`0`、冻结语义、replay、tamper和全量回归；
-3. B3-C关闭后完成5 fresh correctness pairs，再决定是否准入正式B3计时。
+1. 预注册并执行至少5组fresh B2/B3 correctness pairs；
+2. 每组保存raw worker、语义比较、环境、provider/fallback与B3 physical counter；
+3. 只有5/5通过才决定是否准入36-process正式B3计时。
 
 ## Links
 

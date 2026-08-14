@@ -9,6 +9,9 @@ stage: s01
 
 # FSG4/B3-C Device-Resident Atomic Commit 实现候选
 
+> 本文记录实现候选历史状态，已被
+> `gemini_doc/change_2026-08-14_fsg4_b3c_device_atomic_commit_closure.md`正式关闭结论取代。
+
 ## 结论
 
 B3-C第一版实现候选已经完成本地CUDA单元与集成验证，状态为
