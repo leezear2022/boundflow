@@ -1,9 +1,15 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-14 FSG4/B3-A关闭**：source `c7851c8`的fresh GPU artifact用5157条event确认template
+> compile/hit=`1/1`、module move=`0`、scope=`1`，其余optimizer/forward/KFSB/D2H/commit结构保持；六个
+> B2 control语义、replay和6/6 tamper通过。状态=`VALIDATED-B3-A-COUNTERS`，仅支持prepared-core
+> mechanism/correctness claim，不支持timing/speedup；B3-B/C及B4—B7仍未关闭。
+
 > **2026-08-14 FSG4/B3-0关闭**：source `4195361`的fresh B2 artifact用4625条显式event确认
 > module/scope=`1/2`、optimizer=`10/9/10 snapshots`、forward=`5`、KFSB=`3/3`、D2H/commit=`12/12`，
 > tensor hash/typed validate/stable hash=`4417/84/10`；六个冻结B2 control语义与6/6 tamper通过。状态=
-> `VALIDATED-B2-COUNTERS`，不是performance claim；B3-A/B/C仍未实现，B4—B7继续关闭。
+> `VALIDATED-B2-COUNTERS`，不是performance claim；“B3-A未实现”已被上方closure取代，B3-B/C与
+> B4—B7继续关闭。
 
 > **2026-08-14 FSG4/B3预注册（历史）**：FSG3关闭后只准入IR/graph/Plan/Schedule复用层。B3分为
 > PreparedCoreTemplate、terminal-only optimizer Schedule与device-resident AtomicCommitPlan，并冻结

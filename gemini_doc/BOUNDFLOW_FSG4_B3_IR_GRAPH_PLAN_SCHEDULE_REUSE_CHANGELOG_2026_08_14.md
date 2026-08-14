@@ -11,6 +11,8 @@ stage: s01
 
 ## Summary
 
+- B3-A已以`VALIDATED-B3-A-COUNTERS`关闭：5157条event、三项预注册物理变化、冻结语义与6/6 tamper
+  通过；无timing/speedup claim；
 - B3-0已以`VALIDATED-B2-COUNTERS`关闭：4625条event、固定counter全中、六个冻结B2 control语义锚定与
   6/6 outer-resigned tamper通过；
 - FSG3正式基线关闭后启动FSG4/B3；
@@ -43,6 +45,8 @@ stage: s01
 
 ## Validation
 
+- B3-A formal artifact replay、六个冻结B2 control语义与6/6 tamper通过；targeted=`34 passed`，full=
+  `1257 passed, 3 skipped`；
 - B3-A实现候选targeted=`31 passed`，mypy touched clean，Pylint=`10.00/10`；fresh GPU尚待执行；
 - 正式artifact replay通过，targeted=`25 passed`，full=`1248 passed, 3 skipped`，tamper=`6/6`；
 - B3-0 targeted=`17 passed`，mypy clean，Pylint=`10.00/10`；
@@ -60,9 +64,9 @@ stage: s01
 
 ## Follow-Ups
 
-1. 实现B3-A PreparedCoreTemplate/CorePlanInstance，只消除module move与重复scope/static binding；
-2. B3-A先过cache hit/miss/stale reject与fresh correctness，再做单变量计时；
-3. B3-A关闭后再进入B3-B，不并行混合变量。
+1. 实现B3-B terminal-only optimizer Schedule与terminal forward-trace handoff；
+2. 保持formal逐step trace用于审计，production path才允许消除10份snapshot；
+3. B3-B关闭后再进入B3-C，不并行混合变量。
 
 ## Links
 

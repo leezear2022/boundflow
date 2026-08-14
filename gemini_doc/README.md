@@ -10,18 +10,20 @@
 
 ---
 
-FSG4/B3-A已完成第一版实现候选，状态=`IMPLEMENTED-PENDING-FRESH-GPU`：新增严格哈希的
-`PreparedCoreTemplateV1`、`CorePlanInstanceV1`和exact cache；B2默认路径不变，显式B3-A路径把module
-binding搬运移出core，并以动态plan receipt阻止optimizer重复构造scope。定向`31 passed`、mypy
-（touched imports skipped）clean、Pylint `10.00/10`；尚未生成fresh GPU artifact，因此不能声称物理
-counter、correctness或speedup已成立。下一动作是提交实现source后运行B3-A fresh GPU counter/correctness
-artifact。记录见`gemini_doc/change_2026-08-14_fsg4_b3a_prepared_core_candidate.md`。
+FSG4/B3-A已以`VALIDATED-B3-A-COUNTERS`关闭：source=`c7851c8`，fresh GPU artifact=
+`artifacts/fsg4-b3-counter-diagnostic/resnet2b-prop0-b3a-v1/`。5157条event确认template compile/hit=
+`1/1`、module move=`0`、scope=`1`，其余optimizer/forward/KFSB/D2H/commit固定结构与B2一致；六个冻结
+B2 control语义、replay和6/6 outer-resigned tamper通过。定向`34 passed`、全量
+`1257 passed, 3 skipped`。这只证明单次fresh correctness与B3-A物理激活，不是timing/speedup，也未替代
+完整B3计时前的5 fresh pair门禁。下一动作仅B3-B terminal-only optimizer Schedule。关闭记录见
+`gemini_doc/change_2026-08-14_fsg4_b3a_prepared_core_closure.md`，外审入口见
+`gemini_doc/fsg4_b3a_prepared_core_external_audit_handoff_2026_08_14.md`。
 
 FSG4/B3-0已以`VALIDATED-B2-COUNTERS`关闭：source=`4195361`，正式artifact=
 `artifacts/fsg4-b3-counter-diagnostic/resnet2b-prop0-b2-v1/`，4625条event、固定counter全中、FSG3 v5
 六个B2 control语义锚定与6/6 outer-resigned tamper通过。它证明B2重复工作真实存在，但没有B3 speedup；
-`diagnostic_timing_claimed=false/performance_claimed=false`。该“下一动作”现已推进到上方B3-A实现候选，
-仍待fresh GPU关闭。实现记录见
+`diagnostic_timing_claimed=false/performance_claimed=false`。该“下一动作”现已由上方B3-A正式关闭取代。
+实现记录见
 `gemini_doc/change_2026-08-14_fsg4_b3_explicit_counter_diagnostic_implementation.md`。
 
 FSG4/B3当前入口为

@@ -1,7 +1,7 @@
 # FSG4/B3-A Prepared Core 实现候选变更记录
 
 日期：2026-08-14
-状态：`IMPLEMENTED-PENDING-FRESH-GPU`
+状态：历史实现候选；已由`change_2026-08-14_fsg4_b3a_prepared_core_closure.md`取代
 
 ## 起因与目标
 

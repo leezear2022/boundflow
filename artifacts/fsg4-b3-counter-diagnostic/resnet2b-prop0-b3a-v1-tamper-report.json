@@ -1,0 +1,46 @@
+{
+  "artifact_manifest_sha256": "6a6e438c795e0982de9b8334040527bb38d401ac2610182a89f684201c09bf7b",
+  "attack_count": 6,
+  "performance_claimed": false,
+  "rejected_count": 6,
+  "report_hash": "92a1900a8cdba5f42833dbd02efd2aa510d6027d58d43a1152d9a20f280d9997",
+  "rows": [
+    {
+      "attack": "counter-report-only-outer-resign",
+      "exception_type": "ValueError",
+      "message": "FSG4/B3 B3-A counter snapshot gate failed: forward_trace_build_count:expected=5:observed=4",
+      "rejected": true
+    },
+    {
+      "attack": "counter-and-journal-outer-resign",
+      "exception_type": "ValueError",
+      "message": "FSG4/B3 B3-A counter snapshot gate failed: forward_trace_build_count:expected=5:observed=4",
+      "rejected": true
+    },
+    {
+      "attack": "delete-journal-event-outer-resign",
+      "exception_type": "ValueError",
+      "message": "FSG4/B3 B3-A counter snapshot gate failed: optimizer_bound_evaluation_call_count:expected=10:observed=9",
+      "rejected": true
+    },
+    {
+      "attack": "worker-semantic-outer-resign",
+      "exception_type": "ValueError",
+      "message": "FSG4/B3 worker differs from frozen FSG3 semantics: frozen-B2-control-0:lower[0]:allclose-failed,frozen-B2-control-0:lower[0]:optimistic,frozen-B2-control-1:lower[0]:allclose-failed,frozen-B2-control-1:lower[0]:optimistic,frozen-B2-control-2:lower[0]:allclose-failed,frozen-B2-control-2:lower[0]:optimistic,frozen-B2-control-3:lower[0]:allclose-failed,frozen-B2-control-3:lower[0]:optimistic,frozen-B2-control-4:lower[0]:allclose-failed,frozen-B2-control-4:lower[0]:optimistic,frozen-B2-control-5:lower[0]:allclose-failed,frozen-B2-control-5:lower[0]:optimistic",
+      "rejected": true
+    },
+    {
+      "attack": "provider-count-outer-resign",
+      "exception_type": "ValueError",
+      "message": "FSG4/B3 B3-A counter snapshot gate failed: provider-or-fallback",
+      "rejected": true
+    },
+    {
+      "attack": "code-revision-outer-resign",
+      "exception_type": "ValueError",
+      "message": "FSG4/B3 code revision differs",
+      "rejected": true
+    }
+  ],
+  "schema_version": "boundflow.fsg4-b3-counter-tamper-report/v1"
+}

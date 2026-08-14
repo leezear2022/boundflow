@@ -199,8 +199,8 @@ headline ratio：
 ## 10. Tasks
 
 1. [x] B3-0：显式call/copy/validation/hash counter diagnostic，状态=`VALIDATED-B2-COUNTERS`，不形成speedup；
-2. [ ] B3-A：PreparedCoreTemplate、CorePlanInstance与cache/reject tests；第一版实现候选已落地，等待fresh
-   GPU counter/correctness artifact后才能勾选关闭；
+2. [x] B3-A：PreparedCoreTemplate、CorePlanInstance与cache/reject tests；状态=
+   `VALIDATED-B3-A-COUNTERS`，不形成timing/speedup；
 3. [ ] B3-B：terminal-only optimizer Schedule和forward-trace handoff；
 4. [ ] B3-C：device-resident AtomicCommitPlan、rollback与audit digest分层；
 5. [ ] 五fresh B2/B3 correctness；
@@ -264,5 +264,24 @@ B3-0证明预注册的重复工作真实存在，并把B3-A/B/C的物理分母�
   `0→1`；optimizer `10/9`、forward `5`、KFSB `3/3`、D2H/commit `12`等全部保持；
 - 定向验证=`31 passed`，mypy touched clean，Pylint=`10.00/10`。
 
-当前状态仅为`IMPLEMENTED-PENDING-FRESH-GPU`。上述三项物理counter、真实语义等价及性能均未由fresh
-artifact证明；B3-B/C和B4—B7继续关闭。
+本节的`IMPLEMENTED-PENDING-FRESH-GPU`是正式运行前历史状态，已被下方closure取代。
+
+## 16. B3-A Formal Closure（2026-08-14）
+
+- source=`c7851c8bae1bc943aa9e3d458e5105deafc553f1`；
+- artifact=`artifacts/fsg4-b3-counter-diagnostic/resnet2b-prop0-b3a-v1/`；
+- manifest hash=`205978cb69238598dfcb860922e3202677d5b1775f0bd6062218f0369e982c95`；
+- report hash=`89a3584dddb47d2a835bca689bdb0ba6b936d26fa5aff20a968c2323dc6cd05b`；
+- 5157条event独立重放：template compile/hit=`1/1`、module move=`0`、scope=`1`；optimizer=`10/9`、
+  full snapshots=`10`、forward=`5`、KFSB=`3/3`、candidate D2H=`12`、committed/backup/copy=
+  `12/12/12`，provider/fallback全零；
+- 六个冻结B2 control语义一致，artifact replay通过；六类outer-resigned counter/journal/semantic/
+  provider/code攻击6/6拒绝，tamper report hash=
+  `92a1900a8cdba5f42833dbd02efd2aa510d6027d58d43a1152d9a20f280d9997`；
+- targeted=`34 passed`；full=`1257 passed, 3 skipped, 6 warnings`；Black clean，mypy touched clean，
+  Pylint=`10.00/10`；
+- 状态=`VALIDATED-B3-A-COUNTERS`，`diagnostic_timing_claimed=false`、`performance_claimed=false`。
+
+B3-A证明PreparedCoreTemplate/CorePlanInstance在一个fresh真实solver call中激活且保持冻结语义；它没有
+证明延迟改善，也不满足完整B3正式计时前的5 fresh B2/B3 pair门禁。下一动作只允许B3-B terminal-only
+optimizer Schedule与forward-trace handoff；B3-C和B4—B7继续关闭。

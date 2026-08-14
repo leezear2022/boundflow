@@ -5389,3 +5389,13 @@
 
 **记录**
 - `gemini_doc/change_2026-08-14_fsg4_b3a_prepared_core_candidate.md`
+
+## 2026-08-14：FSG4/B3-A Prepared Core 正式关闭
+
+- source `c7851c8`的fresh GPU artifact含5157条显式event；
+- template compile/hit 1/1、module move 0、scope 1，其余冻结结构与语义保持；
+- replay、六个冻结B2 control语义、6/6 tamper和1257项全量回归通过；
+- 状态`VALIDATED-B3-A-COUNTERS`，无timing/speedup；下一步B3-B。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg4_b3a_prepared_core_closure.md`
