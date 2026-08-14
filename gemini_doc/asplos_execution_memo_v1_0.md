@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-14 FSG4/B3当前指令**：只启动
+> `gemini_doc/BOUNDFLOW_FSG4_B3_IR_GRAPH_PLAN_SCHEDULE_REUSE_PLAN_2026_08_14.md`的B3-0显式counter
+> 诊断，然后依次B3-A PreparedCoreTemplate、B3-B terminal Schedule、B3-C AtomicCommitPlan。不得
+> 并行混入TIR/JIT/streams/arena。当前无B3性能claim；cProfile冲突尝试已fail closed且不产生数字。
+
 > **2026-08-14 FSG3当前指令**：正式`resnet2b-prop0-v5`已在source `a4ee291`完成六个全排列block、
 > 36个fresh GPU进程，correctness/environment/measurement/replay全过，summary hash=
 > `df852590d…1318e`。B1 query wall=`0.995657x`；当前B2 query/core=`0.908400x/0.516767x`

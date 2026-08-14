@@ -1,5 +1,18 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-14：FSG4/B3 IR/Graph/Plan/Schedule Reuse 预注册
+
+- 从FSG3正式B2 profile冻结optimizer/atomic/KFSB/typed-pre/backward五区域成本；
+- 源码审计定位module binding move、10份optimizer trace clone、terminal forward重建、12-path
+  GPU→CPU digest/copy与重复validation；
+- B3拆为PreparedCoreTemplate、terminal-only optimizer Schedule、device-resident AtomicCommitPlan，
+  严禁混入B4 TIR、B5 JIT、B6 runtime或B7 arena；
+- 冻结physical counters、五fresh correctness、36-process B0/B2/B3计时及Go/Reduced/No-Go门禁；
+- 一次非claim cProfile因provider guard不兼容fail closed，无调用次数或性能结论；B3-0改用显式counter；
+- 当前仅为`PREREGISTERED-NOT-IMPLEMENTED`，无B3 speedup claim。计划与外审入口见
+  `gemini_doc/BOUNDFLOW_FSG4_B3_IR_GRAPH_PLAN_SCHEDULE_REUSE_PLAN_2026_08_14.md`、
+  `gemini_doc/fsg4_b3_preregistration_external_audit_handoff_2026_08_14.md`。
+
 ## 2026-08-14：FSG3 B0/B1/B2 Same-Solver 正式基线关闭
 
 - 冻结source `a4ee291`生成六个全排列block、36个fresh GPU进程；correctness、environment、

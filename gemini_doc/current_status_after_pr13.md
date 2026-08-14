@@ -1,5 +1,9 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-14 FSG4/B3启动状态**：IR/graph/Plan/Schedule复用已完成预注册但未实现。B3-A/B/C分别
+> 处理prepared template、terminal-only schedule和device-resident commit；当前下一动作仅为B3-0
+> 显式counter诊断。没有B3 speedup，B4—B7保持关闭。
+
 > **2026-08-14 当前状态**：FSG3正式same-solver基线已关闭。source `a4ee291`的
 > `resnet2b-prop0-v5`包含六个全排列block、36个fresh GPU进程；correctness、environment、
 > profile closure/扰动、static replay与8类outer-resigned tamper门禁全过。B1 query wall=

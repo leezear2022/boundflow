@@ -1,5 +1,9 @@
 # BoundFlow 面向 ASPLOS 的总体研发与论文执行计划 v1.0
 
+> **2026-08-14 FSG4/B3预注册**：FSG3正式分母关闭后，下一阶段只允许IR/graph/Plan/Schedule复用。
+> PreparedCoreTemplate、terminal-only optimizer Schedule与device-resident AtomicCommitPlan按A/B/C
+> 顺序独立关闭；B4 TIR、B5 JIT、B6 runtime、B7 arena不得提前混入。当前尚无B3结果。
+
 > 状态：**顶层执行计划 v1.0；后续研究工作受本文门禁约束。**  
 > 基线日期：2026-07-12  
 > 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`f194034`

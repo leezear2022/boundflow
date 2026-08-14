@@ -10,6 +10,14 @@
 
 ---
 
+FSG4/B3当前入口为
+`gemini_doc/BOUNDFLOW_FSG4_B3_IR_GRAPH_PLAN_SCHEDULE_REUSE_PLAN_2026_08_14.md`。B3严格拆为
+PreparedCoreTemplate、terminal-only optimizer Schedule与device-resident AtomicCommitPlan，只允许
+IR/graph/Plan/Schedule复用；TIR fusion、JIT/CUDA Graph、runtime streams与arena仍分别留给B4—B7。
+当前状态=`PREREGISTERED-NOT-IMPLEMENTED`，下一动作是B3-0显式counter诊断，不形成speedup。变更记录
+见`gemini_doc/BOUNDFLOW_FSG4_B3_IR_GRAPH_PLAN_SCHEDULE_REUSE_CHANGELOG_2026_08_14.md`，外审交接见
+`gemini_doc/fsg4_b3_preregistration_external_audit_handoff_2026_08_14.md`。
+
 FSG3已由正式`resnet2b-prop0-v5`关闭：source=`a4ee291`，六个全排列block共36个fresh GPU进程，
 correctness/environment/measurement/replay全部通过，summary hash=`df852590d…1318e`。B1 query wall
 geomean=`0.995657x`；当前B2 whole-call reference的query/core分别为`0.908400x/0.516767x`

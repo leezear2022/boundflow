@@ -1,0 +1,50 @@
+---
+status: active
+updated: 2026-08-14T10:05:19Z
+type: changelog
+topic: boundflow
+slug: fsg4-b3-ir-graph-plan-schedule-reuse
+stage: s01
+---
+
+# FSG4 B3 IR Graph Plan Schedule Reuse Changelog
+
+## Summary
+
+- FSG3正式基线关闭后启动FSG4/B3；
+- 仅预注册IR/graph/Plan/Schedule复用，不实现或计时candidate；
+- B3拆为PreparedCoreTemplate、terminal-only optimizer Schedule和device-resident AtomicCommitPlan。
+
+## Changes
+
+- 从FSG3 v5 profile冻结B2五区域成本与B0/B2比例；
+- 将源码中的module move、10-step trace clone、重复forward、12-path GPU→CPU digest/copy与重复
+  validate映射到B3子阶段；
+- 冻结B0/B2/B3 36-process协议、physical activation counters、correctness/performance分类与rollback；
+- 记录通用cProfile与provider callback guard冲突的失败诊断，改用显式counter。
+
+## Validation
+
+- FSG3 source artifact static replay与33项测试已在前一阶段通过；
+- 本轮只做计划一致性、代码事实和`git diff --check`检查；
+- 尚无B3 implementation、correctness artifact或performance claim。
+
+## Decisions
+
+- 不从selected-CROWN单区或B2较慢外推全栈上限；
+- 不在B3混入TIR、JIT、streams或arena；
+- formal逐step trace保留给审计，production改为terminal-only必须由独立parity证明；
+- artifact digest移出headline timing，但transaction fail-closed不能移除。
+
+## Follow-Ups
+
+1. B3-0显式重算B2 call/copy/hash counter；
+2. 只有counter与预注册一致才实现B3-A PreparedCoreTemplate；
+3. B3-A关闭后再进入B3-B，不并行混合变量。
+
+## Links
+
+- plan：
+  `gemini_doc/BOUNDFLOW_FSG4_B3_IR_GRAPH_PLAN_SCHEDULE_REUSE_PLAN_2026_08_14.md`；
+- roadmap：
+  `gemini_doc/BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md`。

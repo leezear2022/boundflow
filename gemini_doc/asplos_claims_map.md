@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-14 FSG4/B3预注册**：FSG3关闭后只准入IR/graph/Plan/Schedule复用层。B3分为
+> PreparedCoreTemplate、terminal-only optimizer Schedule与device-resident AtomicCommitPlan，并冻结
+> physical counter、correctness、36-process timing和rollback门禁。当前=
+> `PREREGISTERED-NOT-IMPLEMENTED`；没有B3 candidate、timing或speedup，B4—B7继续关闭。
+
 > 本表是动态证据账本。`planned` 不代表已经实现；只有代码、测试和工件均存在时才能改为
 > `validated`。当前执行基线为 PR-12 validated-reduced；PR-13 已以
 > `VALIDATED-REDUCED` 关闭；PR-14B 真实 replay 为 `VALIDATED-NO-GO`，C3 已降级为 C1/C2
