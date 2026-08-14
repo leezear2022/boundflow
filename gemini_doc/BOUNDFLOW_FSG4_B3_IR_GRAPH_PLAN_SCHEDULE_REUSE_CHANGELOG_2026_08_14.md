@@ -11,6 +11,8 @@ stage: s01
 
 ## Summary
 
+- B3-0已以`VALIDATED-B2-COUNTERS`关闭：4625条event、固定counter全中、六个冻结B2 control语义锚定与
+  6/6 outer-resigned tamper通过；
 - FSG3正式基线关闭后启动FSG4/B3；
 - 仅预注册IR/graph/Plan/Schedule复用，不实现或计时candidate；
 - B3拆为PreparedCoreTemplate、terminal-only optimizer Schedule和device-resident AtomicCommitPlan。
@@ -25,8 +27,8 @@ stage: s01
 - `e04bdd3`正式rerun因Python 3.11/3.12重算历史profile geomean的`2.6e-9`表示差异fail closed；锚定
   改为验证FSG3 manifest/完整file digest/36-run顺序和raw B2 semantics，不在worker环境重算历史性能
   summary；
-- B3-0显式counter diagnostic已实现但尚未真实运行：命名seam event journal、B2固定结构门禁、raw worker/
-  semantic/environment/provider/fallback绑定、code revision/manifest与独立replay均已落地；
+- B3-0实现阶段先完成命名seam event journal、B2固定结构门禁、raw worker/semantic/environment/provider/
+  fallback绑定、code revision/manifest与独立replay；该中间“尚未运行”状态现已被正式关闭结果取代；
 - 诊断不使用`sys.setprofile`，也不修改B2生产函数；instrumentation在context退出后完整恢复；
 - 从FSG3 v5 profile冻结B2五区域成本与B0/B2比例；
 - 将源码中的module move、10-step trace clone、重复forward、12-path GPU→CPU digest/copy与重复
@@ -36,6 +38,7 @@ stage: s01
 
 ## Validation
 
+- 正式artifact replay通过，targeted=`25 passed`，full=`1248 passed, 3 skipped`，tamper=`6/6`；
 - B3-0 targeted=`17 passed`，mypy clean，Pylint=`10.00/10`；
 - 全量回归=`1243 passed, 3 skipped`；
 - FSG3 source artifact static replay与33项测试已在前一阶段通过；
@@ -50,8 +53,8 @@ stage: s01
 
 ## Follow-Ups
 
-1. 提交B3-0实现后，从不可变source运行fresh B2 GPU call/copy/hash counter；
-2. 只有counter与预注册一致才实现B3-A PreparedCoreTemplate；
+1. 实现B3-A PreparedCoreTemplate/CorePlanInstance，只消除module move与重复scope/static binding；
+2. B3-A先过cache hit/miss/stale reject与fresh correctness，再做单变量计时；
 3. B3-A关闭后再进入B3-B，不并行混合变量。
 
 ## Links

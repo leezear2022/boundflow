@@ -1,5 +1,9 @@
 # BoundFlow 面向 ASPLOS 的总体研发与论文执行计划 v1.0
 
+> **2026-08-14 FSG4/B3-0关闭**：真实B2显式counter已以`VALIDATED-B2-COUNTERS`冻结；该状态仅证明
+> B3复用目标的物理分母，不是加速结论。下一动作B3-A PreparedCoreTemplate/CorePlanInstance，B3-B/C和
+> B4—B7继续按门禁关闭。
+
 > **2026-08-14 FSG4/B3预注册**：FSG3正式分母关闭后，下一阶段只允许IR/graph/Plan/Schedule复用。
 > PreparedCoreTemplate、terminal-only optimizer Schedule与device-resident AtomicCommitPlan按A/B/C
 > 顺序独立关闭；B4 TIR、B5 JIT、B6 runtime、B7 arena不得提前混入。当前尚无B3结果。

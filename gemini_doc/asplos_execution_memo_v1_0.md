@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-14 FSG4/B3-0关闭指令**：B2显式counter已由source `4195361`正式关闭为
+> `VALIDATED-B2-COUNTERS`；counter、六个冻结语义锚定、replay、6/6 tamper和全量回归均通过。下一唯一
+> 动作是B3-A PreparedCoreTemplate/CorePlanInstance；不得提前混入terminal schedule、atomic改写或B4—B7。
+
 > **2026-08-14 FSG4/B3当前指令**：只启动
 > `gemini_doc/BOUNDFLOW_FSG4_B3_IR_GRAPH_PLAN_SCHEDULE_REUSE_PLAN_2026_08_14.md`的B3-0显式counter
 > 诊断，然后依次B3-A PreparedCoreTemplate、B3-B terminal Schedule、B3-C AtomicCommitPlan。不得

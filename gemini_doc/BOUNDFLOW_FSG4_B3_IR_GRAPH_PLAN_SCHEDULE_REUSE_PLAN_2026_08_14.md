@@ -198,7 +198,7 @@ headline ratio：
 
 ## 10. Tasks
 
-1. [~] B3-0：显式call/copy/validation/hash counter diagnostic，不形成speedup；
+1. [x] B3-0：显式call/copy/validation/hash counter diagnostic，状态=`VALIDATED-B2-COUNTERS`，不形成speedup；
 2. [ ] B3-A：PreparedCoreTemplate、CorePlanInstance与cache/reject tests；
 3. [ ] B3-B：terminal-only optimizer Schedule和forward-trace handoff；
 4. [ ] B3-C：device-resident AtomicCommitPlan、rollback与audit digest分层；
@@ -228,3 +228,23 @@ headline ratio：
 - FSG3 closure：`gemini_doc/change_2026-08-14_fsg3_same_solver_formal_baseline.md`；
 - full-stack roadmap：
   `gemini_doc/BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md`。
+
+## 14. B3-0 Formal Closure（2026-08-14）
+
+- source=`419536126504e2666a5db14681668b7d1add166a`；
+- artifact=`artifacts/fsg4-b3-counter-diagnostic/resnet2b-prop0-b2-v1/`；
+- manifest hash=`ccf15ee17cb1ee74b95984a203cb4893e52d70becbc3ba2d3db70618490bb376`；
+- report hash=`4304ffe87ce09c6e14ff633ae72f469b6b1fb7c60d297179e74176a3a41ad68e`；
+- event journal=`4625`条，replay通过，FSG3 v5六个B2 control语义锚定6/6通过；
+- 固定结构实测：template compile/hit=`1/0`，module move=`1`，scope=`2`，optimizer=`10/9`，
+  full snapshots=`10`，forward traces=`5`，KFSB candidate/child=`3/3`，candidate D2H=`12`，
+  committed/backup/copy=`12/12/12`，provider/fallback全零；
+- 观察型成本：tensor content hash=`4417`，其中GPU tensor hash=`45`；typed validate=`84`；stable
+  hash=`10`；
+- 六类outer-resigned counter/journal/semantic/provider/code攻击6/6拒绝；tamper report hash=
+  `f6392fa609c02d043b2397e36e54e52124630aa93fe51679892058efff644d1d`；
+- targeted=`25 passed`，full=`1248 passed, 3 skipped`，mypy clean，Pylint 10.00/10；
+- 状态=`VALIDATED-B2-COUNTERS`，`diagnostic_timing_claimed=false`、`performance_claimed=false`。
+
+B3-0证明预注册的重复工作真实存在，并把B3-A/B/C的物理分母冻结；它不证明任何B3 speedup。下一动作仅
+允许B3-A PreparedCoreTemplate/CorePlanInstance，B3-B/C与B4—B7继续关闭。

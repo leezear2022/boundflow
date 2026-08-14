@@ -332,8 +332,8 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 5. [x] FSG3：source `a4ee291`完成36-process B0/B1/B2正式artifact；correctness、environment、
    measurement、replay与outer-resigned tamper门禁通过，状态=
    `VALIDATED-FSG3-B0-B1-B2-BASELINE`；
-6. [~] FSG4：FSG3依赖门禁已解除；B3 IR/graph/Plan/Schedule复用已预注册，当前只启动B3-0显式
-   counter diagnostic；B3尚未实现，B4—B7仍未实现/消融；
+6. [~] FSG4：FSG3依赖门禁已解除；B3-0显式counter已以`VALIDATED-B2-COUNTERS`关闭，当前只启动
+   B3-A PreparedCoreTemplate/CorePlanInstance；B3 candidate尚未关闭，B4—B7仍未实现/消融；
 7. [—] FSG5：因无合法B7 candidate，依赖门禁阻止，无系统性能claim。
 
 ## 12. Validation
@@ -474,9 +474,17 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 - 正式比较为六个B0/B2/B3全排列block、36 fresh control/profile进程；
 - `VALIDATED-B3`要求B2/B3 core geomean `>=1.15x`且B0/B3 query `>=1.00x`；另定义Reduced/No-Go，
   但任何correctness/rollback/provider/replay失败都阻止B4；
-- 当前=`PREREGISTERED-NOT-IMPLEMENTED`，下一步B3-0显式counter diagnostic，无performance claim；
+- 本段冻结的是实现前`PREREGISTERED-NOT-IMPLEMENTED`历史状态；现已被下方B3-0 closure取代，下一步
+  B3-A PreparedCoreTemplate，仍无performance claim；
 - 计划入口：
   `gemini_doc/BOUNDFLOW_FSG4_B3_IR_GRAPH_PLAN_SCHEDULE_REUSE_PLAN_2026_08_14.md`。
+
+### FSG4/B3-0 Counter Closure（2026-08-14）
+
+- source=`4195361`，artifact=`artifacts/fsg4-b3-counter-diagnostic/resnet2b-prop0-b2-v1/`；
+- 4625 explicit events、全部固定counter、六个冻结B2 control语义、replay和6/6 tamper通过；
+- 状态=`VALIDATED-B2-COUNTERS`，没有timing/performance claim；
+- 下一动作B3-A PreparedCoreTemplate/CorePlanInstance，后续层不得提前混入。
 
 ## 13. Rollback
 

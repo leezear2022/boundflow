@@ -1,5 +1,9 @@
 # FSG4/B3 IR/Graph/Plan/Schedule Reuse 预注册 — 外部审计交接
 
+> 历史交接：B3-0现已以`VALIDATED-B2-COUNTERS`关闭。当前正式审计入口为
+> `gemini_doc/fsg4_b3_0_counter_external_audit_handoff_2026_08_14.md`；本文末尾“是否允许启动B3-0”只保留
+> 预注册时的审计问题，不再是当前执行指令。
+
 ## 审计目标
 
 请审计

@@ -10,20 +10,19 @@
 
 ---
 
-FSG4/B3-0显式counter diagnostic已经实现。首次真实运行因α D2H计数seam漏记而fail closed，已在不降低
-`12`门槛的前提下补齐；随后provisional全部counter通过，但因缺独立semantic锚点未追认为正式证据。
-当前=`IMPLEMENTED-REFERENCE-BOUND-RERUN-PENDING`，正式版已绑定FSG3 v5六个B2 control语义并新增
-六类outer-resigned tamper probe。它用命名seam event journal替代与provider
-guard冲突的通用profiler，并将raw B2 worker、semantic/environment/provider/fallback、journal-derived
-counter、code revision和manifest绑定；尚无有效正式counter artifact或performance claim。实现记录见
+FSG4/B3-0已以`VALIDATED-B2-COUNTERS`关闭：source=`4195361`，正式artifact=
+`artifacts/fsg4-b3-counter-diagnostic/resnet2b-prop0-b2-v1/`，4625条event、固定counter全中、FSG3 v5
+六个B2 control语义锚定与6/6 outer-resigned tamper通过。它证明B2重复工作真实存在，但没有B3 speedup；
+`diagnostic_timing_claimed=false/performance_claimed=false`。下一动作是B3-A PreparedCoreTemplate。实现记录见
 `gemini_doc/change_2026-08-14_fsg4_b3_explicit_counter_diagnostic_implementation.md`。
 
 FSG4/B3当前入口为
 `gemini_doc/BOUNDFLOW_FSG4_B3_IR_GRAPH_PLAN_SCHEDULE_REUSE_PLAN_2026_08_14.md`。B3严格拆为
 PreparedCoreTemplate、terminal-only optimizer Schedule与device-resident AtomicCommitPlan，只允许
 IR/graph/Plan/Schedule复用；TIR fusion、JIT/CUDA Graph、runtime streams与arena仍分别留给B4—B7。
-当前状态=`PREREGISTERED-NOT-IMPLEMENTED`，下一动作是B3-0显式counter诊断，不形成speedup。变更记录
-见`gemini_doc/BOUNDFLOW_FSG4_B3_IR_GRAPH_PLAN_SCHEDULE_REUSE_CHANGELOG_2026_08_14.md`，外审交接见
+该段是实现前预注册历史状态；B3-0现已由上方正式关闭段取代，下一动作是B3-A。预注册变更记录
+见`gemini_doc/BOUNDFLOW_FSG4_B3_IR_GRAPH_PLAN_SCHEDULE_REUSE_CHANGELOG_2026_08_14.md`；当前B3-0关闭
+外审交接见`gemini_doc/fsg4_b3_0_counter_external_audit_handoff_2026_08_14.md`，预注册历史外审见
 `gemini_doc/fsg4_b3_preregistration_external_audit_handoff_2026_08_14.md`。
 
 FSG3已由正式`resnet2b-prop0-v5`关闭：source=`a4ee291`，六个全排列block共36个fresh GPU进程，

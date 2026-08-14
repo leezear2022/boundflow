@@ -1,9 +1,15 @@
 # BoundFlow ASPLOS Claims Map
 
-> **2026-08-14 FSG4/B3预注册**：FSG3关闭后只准入IR/graph/Plan/Schedule复用层。B3分为
+> **2026-08-14 FSG4/B3-0关闭**：source `4195361`的fresh B2 artifact用4625条显式event确认
+> module/scope=`1/2`、optimizer=`10/9/10 snapshots`、forward=`5`、KFSB=`3/3`、D2H/commit=`12/12`，
+> tensor hash/typed validate/stable hash=`4417/84/10`；六个冻结B2 control语义与6/6 tamper通过。状态=
+> `VALIDATED-B2-COUNTERS`，不是performance claim；B3-A/B/C仍未实现，B4—B7继续关闭。
+
+> **2026-08-14 FSG4/B3预注册（历史）**：FSG3关闭后只准入IR/graph/Plan/Schedule复用层。B3分为
 > PreparedCoreTemplate、terminal-only optimizer Schedule与device-resident AtomicCommitPlan，并冻结
-> physical counter、correctness、36-process timing和rollback门禁。当前=
-> `PREREGISTERED-NOT-IMPLEMENTED`；没有B3 candidate、timing或speedup，B4—B7继续关闭。
+> physical counter、correctness、36-process timing和rollback门禁。该段的
+> `PREREGISTERED-NOT-IMPLEMENTED`已被上方B3-0 closure取代；仍没有B3 candidate/timing/speedup，
+> B4—B7继续关闭。
 
 > 本表是动态证据账本。`planned` 不代表已经实现；只有代码、测试和工件均存在时才能改为
 > `validated`。当前执行基线为 PR-12 validated-reduced；PR-13 已以

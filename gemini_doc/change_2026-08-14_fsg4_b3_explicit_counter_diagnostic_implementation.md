@@ -1,7 +1,7 @@
 # FSG4/B3-0 显式 Counter 诊断实现记录
 
 日期：2026-08-14
-状态：`IMPLEMENTED-REFERENCE-BOUND-RERUN-PENDING`
+状态：`VALIDATED-B2-COUNTERS`
 分支：`feat/rvir-v4-production-state-ownership-v1`
 
 ## 目标
@@ -98,6 +98,33 @@ BoundFlow Python 3.12环境通过。B3-0只需要冻结B2原始语义，不应�
 修正改为直接验证FSG3 manifest canonical hash、完整文件inventory/digest、冻结summary hash、36-run顺序
 和六个B2 control raw semantics；不放宽任何语义容差，也不依赖跨Python的geomean位级表示。
 修正后相关测试=`22 passed`，mypy clean，Pylint 10.00/10。
+
+## 正式关闭结果
+
+第三次正式rerun从source=`4195361`成功，产出
+`artifacts/fsg4-b3-counter-diagnostic/resnet2b-prop0-b2-v1/`。4625条event独立聚合得到：
+
+| Counter group | Observed |
+|---|---:|
+| template compile / hit | `1 / 0` |
+| module binding move / scope construction | `1 / 2` |
+| optimizer evaluation / update / full snapshot | `10 / 9 / 10` |
+| forward trace | `5` |
+| KFSB candidate / child batch | `3 / 3` |
+| candidate D2H / committed path / backup / copy | `12 / 12 / 12 / 12` |
+| tensor hash / GPU tensor hash | `4417 / 45` |
+| typed validate / stable hash | `84 / 10` |
+| provider core/compute/update / fallback | `0 / 0 / 0 / 0` |
+
+FSG3 v5六个B2 control raw semantics全部匹配；static replay通过；六类outer-resigned攻击6/6拒绝；
+targeted=`25 passed`，full=`1248 passed, 3 skipped`，mypy clean，Pylint 10.00/10。manifest/report/tamper
+report hash分别为`ccf15ee1…bb376`、`4304ffe8…ad68e`、`f6392fa6…44d1d`。
+
+4625行event journal是manifest绑定的raw evidence；`.gitattributes`将该路径标为`-diff`以避免PR渲染
+膨胀，不改变文件内容、SHA256或下载/审计能力。
+
+关闭状态是`VALIDATED-B2-COUNTERS`，不是B3性能关闭；所有raw timing都保持
+`diagnostic_timing_claimed=false/performance_claimed=false`。下一步是B3-A PreparedCoreTemplate。
 
 ## 下一步
 

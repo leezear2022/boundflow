@@ -1,8 +1,12 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
-> **2026-08-14 FSG4/B3启动状态**：IR/graph/Plan/Schedule复用已完成预注册但未实现。B3-A/B/C分别
-> 处理prepared template、terminal-only schedule和device-resident commit；当前下一动作仅为B3-0
-> 显式counter诊断。没有B3 speedup，B4—B7保持关闭。
+> **2026-08-14 FSG4/B3-0关闭状态**：source `4195361`正式B2 artifact的4625条event确认全部预注册
+> counter，六个冻结B2 control语义、replay与6/6 tamper通过，状态=`VALIDATED-B2-COUNTERS`。它没有
+> speedup claim；下一动作B3-A PreparedCoreTemplate/CorePlanInstance，B3-B—B7保持关闭。
+
+> **2026-08-14 FSG4/B3启动状态（历史）**：IR/graph/Plan/Schedule复用完成预注册时尚未实现；当时下一
+> 动作为B3-0。该指令现已被上方B3-0关闭状态取代；当前下一动作是B3-A，仍没有B3 speedup，B3-B—B7
+> 保持关闭。
 
 > **2026-08-14 当前状态**：FSG3正式same-solver基线已关闭。source `a4ee291`的
 > `resnet2b-prop0-v5`包含六个全排列block、36个fresh GPU进程；correctness、environment、

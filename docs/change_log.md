@@ -1,5 +1,16 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-14：FSG4/B3-0 正式 B2 Counter 基线关闭
+
+- source=`4195361`生成fresh GPU B2 control artifact，4625条event journal replay通过；
+- 固定counter实测：template=`1/0`、module/scope=`1/2`、optimizer=`10/9/10 snapshots`、forward=`5`、
+  KFSB=`3/3`、D2H/commit/backup/copy=`12/12/12/12`，provider/fallback全零；
+- 观察到tensor hash=`4417`、GPU hash=`45`、typed validate=`84`、stable hash=`10`；
+- 绑定FSG3 v5六个B2 control raw semantics，六类outer-resigned攻击6/6拒绝；
+- targeted=`25 passed`，full=`1248 passed, 3 skipped`，mypy clean，Pylint 10.00/10；
+- 状态=`VALIDATED-B2-COUNTERS`，无timing/performance claim；下一步B3-A PreparedCoreTemplate。详见
+  `gemini_doc/change_2026-08-14_fsg4_b3_explicit_counter_diagnostic_implementation.md`。
+
 ## 2026-08-14：FSG4/B3-0 显式 Counter 诊断实现
 
 - 首次真实B2诊断在counter gate fail closed；唯一偏差为D2H观察`6/12`。确认不是物理路径缺失，而是
@@ -16,7 +27,8 @@
 - 新增raw worker、journal、snapshot、code revision、manifest和replay的分层hash绑定；
 - 相关测试`17 passed`，全量回归`1243 passed, 3 skipped`，mypy clean，Pylint 10.00/10；fresh GPU
   run尚待执行；
-- 当前=`IMPLEMENTED-RERUN-PENDING`，没有有效正式counter artifact、B3 candidate或performance claim。详细记录见
+- 本条记录当时状态=`IMPLEMENTED-RERUN-PENDING`，现已被上方B3-0正式关闭条目取代；当时没有有效正式
+  counter artifact、B3 candidate或performance claim。详细记录见
   `gemini_doc/change_2026-08-14_fsg4_b3_explicit_counter_diagnostic_implementation.md`。
 
 ## 2026-08-14：FSG4/B3 IR/Graph/Plan/Schedule Reuse 预注册
@@ -28,7 +40,8 @@
   严禁混入B4 TIR、B5 JIT、B6 runtime或B7 arena；
 - 冻结physical counters、五fresh correctness、36-process B0/B2/B3计时及Go/Reduced/No-Go门禁；
 - 一次非claim cProfile因provider guard不兼容fail closed，无调用次数或性能结论；B3-0改用显式counter；
-- 当前仅为`PREREGISTERED-NOT-IMPLEMENTED`，无B3 speedup claim。计划与外审入口见
+- 该条为实现前`PREREGISTERED-NOT-IMPLEMENTED`历史状态，现已被上方B3-0关闭取代；仍无B3 speedup
+  claim。计划与预注册外审入口见
   `gemini_doc/BOUNDFLOW_FSG4_B3_IR_GRAPH_PLAN_SCHEDULE_REUSE_PLAN_2026_08_14.md`、
   `gemini_doc/fsg4_b3_preregistration_external_audit_handoff_2026_08_14.md`。
 
