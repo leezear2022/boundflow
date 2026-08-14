@@ -4,7 +4,7 @@ tp: boundflow
 rm: v01
 st: s01
 stat: active
-health: green
+health: yellow
 pr: [60]
 last_ch: ev009406
 last_va: ev009408
