@@ -1,5 +1,16 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-14：FSG4/B3 36-Process 正式计时关闭
+
+- source=`36e9069`完成六个B0/B2/B3全排列、36/36 fresh GPU worker；correctness、environment、
+  activation、measurement及18/18 closure通过；
+- B2/B3 core/query geomean=`1.071617x/1.006623x`，但B0/B3 query=`0.910001x`，故分类恰为
+  `VALIDATED-REDUCED-B3`，不是full B3或相对原始B0 speedup；
+- root replay逐字段重建同一summary，十类outer-resigned攻击`10/10 rejected`；
+- frozen=`6 passed`、targeted=`114 passed`、full=`1314 passed, 3 skipped`；
+- 下一唯一动作是外部审计；通过后只开放B4 cumulative candidate，B5—B7继续关闭。详见
+  `gemini_doc/change_2026-08-14_fsg4_b3_formal_timing_closure.md`。
+
 ## 2026-08-14：FSG4/B3 36-Process 正式计时 Runner 实现候选
 
 - 实现B0/B2/B3六全排列、每配置6个control+6个profile、共36个独立进程的typed正式协议；

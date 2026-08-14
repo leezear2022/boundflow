@@ -1,9 +1,15 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-14 FSG4/B3正式计时内部关闭**：source `36e9069`的36/36 fresh worker、correctness、
+> environment、measurement、direct activation、root replay与10/10 tamper通过。B2/B3 core/query=
+> `1.071617x/1.006623x`，但B0/B3 query=`0.910001x`，所以状态=`VALIDATED-REDUCED-B3`；只支持B3相对
+> B2的reduced机制/计时结论，不支持BoundFlow快于原始auto_LiRPA或ASPLOS全栈performance claim。
+> 外部审计待完成，B4—B7关闭。
+
 > **2026-08-14 FSG4/B3正式计时Runner候选**：B0/B2/B3六全排列36-process schema、direct activation
 > receipts、raw-first/resume、root replay与十类tamper probe已实现；targeted=`108 passed`、full=
 > `1308 passed, 3 skipped`。状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`，只支持runner机制与
-> 合同实现claim；正式artifact未运行，不支持timing/speedup，B4—B7关闭。
+> 合同实现claim；该“正式artifact未运行”历史状态已被上方内部关闭结果取代。
 
 > **2026-08-14 FSG4/B3 Five-Fresh关闭**：source `75dfd81`按预注册顺序完成10/10独立fresh GPU
 > worker与5/5 B2/B3-C direct semantic pairs；environment、provider/fallback、physical counter、

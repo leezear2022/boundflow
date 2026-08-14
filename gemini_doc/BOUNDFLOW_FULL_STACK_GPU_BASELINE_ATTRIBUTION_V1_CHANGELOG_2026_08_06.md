@@ -9,6 +9,15 @@ stage: s01
 
 # BoundFlow Full-Stack GPU Baseline and Attribution v1 Changelog
 
+## FSG4/B3 Formal Timing Internal Closure
+
+- source `36e9069`完成B0/B2/B3六全排列36-process正式artifact；correctness、environment、activation、
+  measurement、root replay与10/10 tamper通过；
+- B2/B3 core/query=`1.071617x/1.006623x`，B0/B3 query=`0.910001x`，分类=
+  `VALIDATED-REDUCED-B3`，没有B0 parity或全栈speedup claim；
+- frozen=`6 passed`、targeted=`114 passed`、full=`1314 passed, 3 skipped`；下一动作为external audit，
+  通过后只开放B4 cumulative candidate。
+
 ## FSG2 Closure and FSG3—FSG5 Dependency Gate
 
 - RVIR-v3 no-original-callback initial-CROWN replacement在冻结ResNet上lower diff=`7.152557e-7`、

@@ -1,6 +1,6 @@
 ---
-status: active
-updated: 2026-08-14T12:43:21Z
+status: validated-reduced-b3-external-audit-pending
+updated: 2026-08-14T21:52:00+08:00
 type: plan
 topic: boundflow
 slug: fsg4-b3-ir-graph-plan-schedule-reuse
@@ -213,8 +213,8 @@ headline ratio：
    `VALIDATED-B3-C-COUNTERS`，不形成timing/speedup；
 5. [x] 五fresh B2/B3 correctness：10/10独立GPU worker、5/5 direct semantic pair、root replay与
    7/7 tamper通过，状态=`VALIDATED-B3-FIVE-FRESH-CORRECTNESS`；
-6. [ ] 36-process B0/B2/B3正式artifact、replay与tamper；runner/schema/replay/tamper已实现并通过
-   108项定向与1308项全量回归，状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`，正式artifact未运行；
+6. [x] 36-process B0/B2/B3正式artifact、replay与tamper；36/36、root replay与10/10 tamper通过，
+   B2/B3 core=`1.071617x`、B0/B3 query=`0.910001x`，状态=`VALIDATED-REDUCED-B3`；
 7. [ ] external audit与FSG4/B3 closure。
 
 ## 11. Validation
@@ -409,3 +409,21 @@ B3-C只证明一个fresh真实call的结构和正确性。下一动作是至少5
 
 下一唯一动作是冻结clean source，从position 0执行完整36-process run，随后在同一artifact上执行root
 replay和十类tamper probe。B4—B7继续关闭。
+
+上段正式运行指令现已由下方关闭结果取代；当前下一唯一动作是external audit，B4—B7在外审前继续关闭。
+
+## 23. B3 36-Process Formal Timing Closure（2026-08-14）
+
+- source=`36e9069ca4f21183c9b36d74024de0ca8b20f59c`；
+- artifact=`artifacts/fsg4-b3-same-solver-timing/resnet2b-prop0-v1/`；
+- 六个B0/B2/B3全排列共36/36 fresh worker，correctness、environment、measurement、activation与18/18
+  profile closure全部通过；
+- B2/B3 core/query geomean=`1.071617x/1.006623x`，六个core pair最差仍`1.063588x`；
+- B0/B3 query/core=`0.910001x/0.535965x`，故仍未回到B0 parity；显存reserved不变；
+- root replay独立重建相同summary；十类outer-resigned attack=`10/10 rejected`；
+- frozen artifact=`6 passed`，targeted=`114 passed`，full=`1314 passed, 3 skipped, 6 warnings`；
+- 状态=`VALIDATED-REDUCED-B3`，不是full B3或全栈speedup；`performance_claimed=false`保持。
+
+下一唯一动作是按
+`gemini_doc/fsg4_b3_formal_timing_external_audit_handoff_2026_08_14.md`进行外部审计。外审通过后只开放
+B4 cumulative candidate；B5—B7与最终system gate继续关闭。

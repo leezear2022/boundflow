@@ -11,6 +11,8 @@ stage: s01
 
 ## Summary
 
+- 36-process正式artifact、root replay与10/10 tamper已关闭为`VALIDATED-REDUCED-B3`：B2/B3 core=
+  `1.071617x`、query=`1.006623x`，但B0/B3 query=`0.910001x`，未回到B0 parity；
 - B0/B2/B3六全排列36-process正式runner、raw-first/replay与十类tamper probe已实现并通过静态/合同
   回归；状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`，尚无正式artifact或performance claim；
 - B3五组fresh correctness已以`VALIDATED-B3-FIVE-FRESH-CORRECTNESS`关闭：10/10独立GPU worker、
@@ -29,6 +31,8 @@ stage: s01
 
 ## Changes
 
+- 从clean source `36e9069`生成六全排列36-worker正式artifact；冻结157个raw/derived文件、外部tamper
+  report和跨HEAD artifact tests；
 - 新增typed B0/B2/B3 timing/activation合同、固定36-run顺序、直接语义与ratio/decision重算；
 - 新增raw-first/resumable orchestrator、source-bound worker envelope、path-sanitized logs、formal preflight、
   manifest/replay与十类outer-resigned tamper probe；
@@ -71,6 +75,8 @@ stage: s01
 
 ## Validation
 
+- 正式36/36 worker、18/18 closure、root replay与10/10 tamper通过；frozen=`6 passed`、targeted=
+  `114 passed`、full=`1314 passed, 3 skipped, 6 warnings`；
 - 正式runner targeted=`108 passed`；full=`1308 passed, 3 skipped, 6 warnings`；Black/mypy clean、Pylint=
   `10.00/10`；四个独立GPU worker冒烟覆盖B0/B2/B3 control/profile但不形成performance sample；
 - 五组正式artifact：10/10 worker、5/5 pair、root replay与7/7 outer-resigned tamper通过；
@@ -103,9 +109,9 @@ stage: s01
 
 ## Follow-Ups
 
-1. 提交并推送已验证的runner，形成新的clean source；
-2. 从position 0执行完整36-process正式artifact，再执行root replay与十类tamper；
-3. 按预注册门禁分类；计时关闭前不启动B4—B7，不报告B3 speedup。
+1. 按外部审计交接独立重算36个raw worker、ratio、replay与tamper；
+2. 外审同意`VALIDATED-REDUCED-B3`后，才开放B4 cumulative candidate；
+3. 不把B3相对B2的`1.071617x`包装成相对B0或全栈speedup。
 
 ## Links
 

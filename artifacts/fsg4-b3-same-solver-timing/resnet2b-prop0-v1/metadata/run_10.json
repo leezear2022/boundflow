@@ -1,0 +1,124 @@
+{
+  "command": {
+    "abcrown_root": "$ABCROWN_ROOT",
+    "benchmark_root": "$VNNCOMP_ROOT",
+    "block_index": 1,
+    "configuration": "B2",
+    "mode": "profile",
+    "model": "$MODEL",
+    "property": "$PROPERTY",
+    "result": "workers/run_10.json",
+    "run_id": "block-01-pos-04-B2-profile",
+    "sequence_position": 4,
+    "worker": "scripts/run_fsg4_b3_same_solver_timing.py"
+  },
+  "duration_ns": 5386989037,
+  "ended_monotonic_ns": 53035547285488,
+  "formal_preflight": {
+    "admitted": true,
+    "poll_seconds": 5,
+    "sample_count": 2,
+    "samples": [
+      {
+        "ac_powered": true,
+        "compute_processes": [
+          {
+            "name": "kwin_wayland",
+            "pid": 1508,
+            "used_memory_mib": 7
+          }
+        ],
+        "elapsed_ns": 105957606,
+        "gpu_snapshot": {
+          "driver_version": "610.57.04",
+          "hw_thermal_slowdown": "Not Active",
+          "hw_thermal_slowdown_counter_us": 0,
+          "memory_clock": "8001 MHz",
+          "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+          "performance_state": "P0",
+          "power_draw": "13.84 W",
+          "sm_clock": "1890 MHz",
+          "sw_power_cap": "Not Active",
+          "sw_power_cap_counter_us": 24686201,
+          "sw_thermal_slowdown": "Not Active",
+          "sw_thermal_slowdown_counter_us": 24686201,
+          "target_temperature": "87 C",
+          "temperature": "51 C",
+          "temperature_tlimit_margin": "36 C",
+          "total_memory": "8188 MiB",
+          "uuid": "GPU-0d3ee0a6-e7da-6b3b-69c4-2153bf99ae8f"
+        },
+        "independent_thermal_active": false,
+        "temperature_celsius": 51
+      },
+      {
+        "ac_powered": true,
+        "compute_processes": [
+          {
+            "name": "kwin_wayland",
+            "pid": 1508,
+            "used_memory_mib": 7
+          }
+        ],
+        "elapsed_ns": 5236537675,
+        "gpu_snapshot": {
+          "driver_version": "610.57.04",
+          "hw_thermal_slowdown": "Not Active",
+          "hw_thermal_slowdown_counter_us": 0,
+          "memory_clock": "405 MHz",
+          "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+          "performance_state": "P8",
+          "power_draw": "3.77 W",
+          "sm_clock": "210 MHz",
+          "sw_power_cap": "Not Active",
+          "sw_power_cap_counter_us": 25637859,
+          "sw_thermal_slowdown": "Not Active",
+          "sw_thermal_slowdown_counter_us": 25637859,
+          "target_temperature": "87 C",
+          "temperature": "49 C",
+          "temperature_tlimit_margin": "38 C",
+          "total_memory": "8188 MiB",
+          "uuid": "GPU-0d3ee0a6-e7da-6b3b-69c4-2153bf99ae8f"
+        },
+        "independent_thermal_active": false,
+        "temperature_celsius": 49
+      }
+    ],
+    "temperature_limit_celsius": 50,
+    "timeout_seconds": 900,
+    "wait_ns": 5236762107
+  },
+  "host_after": {
+    "ac_powered": true,
+    "cpu_governors": [
+      "performance"
+    ],
+    "load_average": [
+      0.8642578125,
+      0.72021484375,
+      0.71533203125
+    ],
+    "monotonic_ns": 53035548689458
+  },
+  "host_before": {
+    "ac_powered": true,
+    "cpu_governors": [
+      "performance"
+    ],
+    "load_average": [
+      0.76513671875,
+      0.6982421875,
+      0.7080078125
+    ],
+    "monotonic_ns": 53030160190392
+  },
+  "index": 10,
+  "performance_claimed": false,
+  "result_file": "workers/run_10.json",
+  "returncode": 0,
+  "started_monotonic_ns": 53030160296451,
+  "stderr_file": "logs/run_10.stderr.txt",
+  "stdout_file": "logs/run_10.stdout.txt",
+  "timed_out": false,
+  "timeout_seconds": 1080
+}

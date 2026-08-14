@@ -10,11 +10,19 @@
 
 ---
 
+FSG4/B3正式36-process计时已以`VALIDATED-REDUCED-B3`形成内部关闭：source=`36e9069`，六个
+B0/B2/B3全排列、36/36 fresh worker、correctness/environment/measurement/activation、root replay与
+10/10 tamper全部通过。B2/B3 core/query=`1.071617x/1.006623x`，但B0/B3 query=`0.910001x`，因此
+B3只相对B2取得reduced收益，仍未快于原始B0。frozen=`6 passed`、targeted=`114 passed`、full=
+`1314 passed, 3 skipped`。当前下一唯一动作是外部审计，B4—B7仍关闭；详见
+`gemini_doc/change_2026-08-14_fsg4_b3_formal_timing_closure.md`和
+`gemini_doc/fsg4_b3_formal_timing_external_audit_handoff_2026_08_14.md`。
+
 FSG4/B3 36-process正式计时runner已实现为
 `IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`：六个B0/B2/B3全排列、control/profile分离、直接B3
 activation receipts、raw-first/resume、root replay与十类outer-resigned tamper probe均已进入代码；
-targeted=`108 passed`、full=`1308 passed, 3 skipped`、Black/mypy/Pylint通过。正式artifact尚未运行，
-因此当前仍无B3 timing/speedup claim，B4—B7关闭。实现记录见
+targeted=`108 passed`、full=`1308 passed, 3 skipped`、Black/mypy/Pylint通过。该段是正式运行前历史
+状态，现已由上方`VALIDATED-REDUCED-B3`结果取代。实现记录见
 `gemini_doc/change_2026-08-14_fsg4_b3_formal_timing_runner_candidate.md`，冻结协议见
 `gemini_doc/BOUNDFLOW_FSG4_B3_IR_GRAPH_PLAN_SCHEDULE_REUSE_PLAN_2026_08_14.md`。
 

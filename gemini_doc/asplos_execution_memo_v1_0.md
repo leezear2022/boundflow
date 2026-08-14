@@ -1,9 +1,14 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-14 FSG4/B3正式计时内部关闭指令**：source `36e9069`完成36/36 fresh worker、全部
+> correctness/environment/measurement/activation、root replay与10/10 tamper。B2/B3 core/query=
+> `1.071617x/1.006623x`，B0/B3 query=`0.910001x`，因此状态=`VALIDATED-REDUCED-B3`，不是full B3
+> 或相对B0 speedup。下一唯一动作是external audit；通过前B4—B7不得启动。
+
 > **2026-08-14 FSG4/B3正式计时Runner指令**：冻结的B0/B2/B3六全排列36-process runner、direct
 > activation receipts、raw-first/replay与十类tamper probe已实现并通过108项定向、1308项全量回归，
 > 状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`。下一唯一动作是提交为clean source，从
-> position 0运行完整artifact，再执行root replay与tamper；结果关闭前不得报告B3 speedup或启动B4—B7。
+> position 0运行完整artifact，再执行root replay与tamper；该历史动作现已由上方正式结果取代。
 
 > **2026-08-14 FSG4/B3 Five-Fresh关闭指令**：source `75dfd81`按固定交替顺序完成10/10独立
 > fresh GPU worker，5/5 B2/B3-C direct semantic pairs、environment、provider/fallback、physical

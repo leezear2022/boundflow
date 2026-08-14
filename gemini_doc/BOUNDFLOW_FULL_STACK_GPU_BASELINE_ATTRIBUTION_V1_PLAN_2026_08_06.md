@@ -1,6 +1,6 @@
 ---
-status: fsg3-b2-timing-preregistered-not-run
-updated: 2026-08-13T18:30:00+08:00
+status: fsg4-b3-validated-reduced-external-audit-pending
+updated: 2026-08-14T21:52:00+08:00
 type: plan
 topic: boundflow
 slug: BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1
@@ -8,6 +8,11 @@ stage: s01
 ---
 
 # BoundFlow Full-Stack GPU Baseline and Attribution v1 Plan
+
+> **2026-08-14 FSG4/B3 overlay**：B3 IR/Graph/Plan/Schedule累计候选已完成六全排列36-process正式
+> same-solver计时。B2/B3 core/query=`1.071617x/1.006623x`，但B0/B3 query=`0.910001x`，故只以
+> `VALIDATED-REDUCED-B3`内部关闭；root replay与10/10 tamper通过。当前下一唯一动作是external audit；
+> 外审通过后才允许从B3累计基线进入B4 operator/cross-stage fusion，B5—B7继续关闭。
 
 ## 0. Route Correction
 
