@@ -5434,8 +5434,17 @@
 - 新增first-class commit plan与dynamic transaction，冻结12条GPU mutable path及rollback顺序；
 - candidate、backup和commit保持CUDA驻留，tensor/host失败均完整回滚；
 - content SHA移到query同步后的headline timing之外；
-- CUDA/相关定向测试`9/49 passed`，mypy clean、Pylint 10.00/10；
+- CUDA/相关定向测试`10/50 passed`，mypy clean、Pylint 10.00/10；
 - 状态`IMPLEMENTED-PENDING-FRESH-GPU-ARTIFACT`，无性能主张。
 
 **记录**
 - `gemini_doc/change_2026-08-14_fsg4_b3c_device_atomic_commit_candidate.md`
+
+## 2026-08-14：FSG4/B3-C Host Packet Version 边界修复
+
+- 首次fresh GPU run在mutation前因真实provider opaque host对象不可序列化而fail closed；
+- pre-host改为绑定完整key inventory并只版本化三项retained字段；candidate/post exact门禁不变；
+- 失败run没有生成artifact，必须从修复commit重新fresh运行。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg4_b3c_host_packet_version_fix.md`

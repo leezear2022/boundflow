@@ -117,6 +117,33 @@ def test_device_candidates_commit_and_audit_outside_headline() -> None:
     assert len(audit["path_digests"]) == 12
 
 
+def test_discarded_provider_host_object_is_versioned_by_inventory_only() -> None:
+    fixture = _stage()
+    terminal = _terminal_cuda(fixture.terminal)
+    plan, targets = _plan_and_targets(fixture)
+    host, host_candidate = _live_host_packets(fixture)
+    host["provider_branching_object"] = object()
+
+    transaction = stage_device_atomic_transaction_v1(
+        plan=plan,
+        core_instance_hash="b" * 64,
+        pre_snapshot_hash=fixture.pre.stable_hash(),
+        pre_snapshot=fixture.pre,
+        live_targets=targets,
+        terminal_state=terminal,
+        topology=TOPOLOGY,
+        terminal_lower=fixture.native.steps[-1].lower.to("cuda"),
+        host_packet=host,
+        host_packet_candidate=host_candidate,
+    )
+    receipt = commit_device_atomic_transaction_v1(
+        transaction, live_targets=targets, host_packet=host
+    )
+
+    assert receipt["committed_path_count"] == 12
+    assert "provider_branching_object" not in host
+
+
 def test_empty_beta_targets_remain_distinct_and_alias_tamper_rejects() -> None:
     fixture = _stage()
     terminal = _terminal_cuda(fixture.terminal)

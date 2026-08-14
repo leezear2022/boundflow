@@ -23,6 +23,9 @@ stage: s01
 
 ## Changes
 
+- 首次fresh B3-C run在任何mutation前因opaque provider host value不可序列化而fail closed；修复为
+  pre-host绑定完整key inventory、只版本化三项retained字段，candidate/post仍保持exact三字段；失败run
+  未生成artifact；
 - B3-C第一版实现候选新增device-resident commit plan/dynamic transaction、12个CUDA candidate、device
   backup/direct copy、tensor+host rollback和post-query content audit；
 - 五个`(6, 0)`SparseBeta target以empty-object identity区分alias，不使用共同的空storage pointer；
@@ -54,7 +57,7 @@ stage: s01
 
 ## Validation
 
-- B3-C CUDA事务/provider assembly=`9 passed`，相关定向回归=`49 passed`，Black/mypy clean，Pylint
+- B3-C CUDA事务/provider assembly=`10 passed`，相关定向回归=`50 passed`，Black/mypy clean，Pylint
   `10.00/10`；fresh真实worker artifact与全量回归尚待执行；
 - B3-B formal artifact replay、六个冻结B2 control语义与6/6 tamper通过；targeted=`45 passed`，full=
   `1265 passed, 3 skipped`；

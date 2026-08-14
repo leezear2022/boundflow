@@ -250,6 +250,20 @@ def _host_version(value: Mapping[str, object]) -> str:
     return _canonical_hash(_host_structure(value))
 
 
+def _host_pre_version(value: Mapping[str, object]) -> str:
+    retained: dict[str, object] = {}
+    for key in ("depths", "history", "thresholds"):
+        if key not in value:
+            raise ValueError(f"FSG4/B3-C live host packet misses {key}")
+        retained[key] = value[key]
+    return _canonical_hash(
+        {
+            "key_inventory": sorted(str(key) for key in value),
+            "retained": _host_structure(retained),
+        }
+    )
+
+
 def _project_alpha_device(
     *,
     target: torch.Tensor,
@@ -456,7 +470,7 @@ def stage_device_atomic_transaction_v1(
         target_versions=versions,
         candidates=tuple(candidates[path] for path in sorted(candidates)),
         terminal_lower=terminal_lower,
-        host_pre_version=_host_version(host_packet),
+        host_pre_version=_host_pre_version(host_packet),
         host_candidate=tuple(
             sorted(host_packet_candidate.items(), key=lambda item: item[0])
         ),
@@ -501,7 +515,7 @@ def commit_device_atomic_transaction_v1(
             _tensor_version(live_targets[path]) != version
             for path, version in versions.items()
         )
-        or _host_version(host_packet) != transaction.host_pre_version
+        or _host_pre_version(host_packet) != transaction.host_pre_version
     ):
         raise ValueError("FSG4/B3-C transaction version is stale")
     candidates = transaction.candidate_values

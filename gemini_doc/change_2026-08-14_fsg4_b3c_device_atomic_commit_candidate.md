@@ -46,8 +46,8 @@ B3-C第一版实现候选已经完成本地CUDA单元与集成验证，状态为
 
 ## 已完成验证
 
-- B3-C CUDA事务与provider assembly：`9 passed`；
-- B2/B3-A/B及B3-C相关定向回归合计：`49 passed`；
+- B3-C CUDA事务与provider assembly：`10 passed`；
+- B2/B3-A/B及B3-C相关定向回归合计：`50 passed`；
 - 覆盖正向commit/audit、NaN、stale version、empty-beta alias、mid-copy failure、host failure、
   terminal-lower drift和outer-resigned receipt tamper；
 - Black clean；mypy四个touched source clean；Pylint `10.00/10`。

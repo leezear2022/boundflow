@@ -334,7 +334,7 @@ AtomicCommitPlan；B4—B7继续关闭。
   digest，并绑定plan/transaction/commit receipt；
 - counter预注册B3-C相对B3-B只允许timed candidate D2H `12→0`，candidate/commit/backup/copy继续
   `12/12/12/12`，其他B3-B固定结构不变；
-- CUDA事务与assembly测试=`9 passed`，相关定向回归=`49 passed`；Black、mypy clean，Pylint
+- CUDA事务与assembly测试=`10 passed`，相关定向回归=`50 passed`；Black、mypy clean，Pylint
   `10.00/10`。
 
 当前状态仅为`IMPLEMENTED-PENDING-FRESH-GPU-ARTIFACT`。尚无fresh真实worker artifact、全量回归、
