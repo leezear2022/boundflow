@@ -10,6 +10,10 @@
 
 ---
 
+FSG4/B3下一门禁已预注册为5组fresh B2/B3-C correctness pairs：固定10个独立GPU进程、交替顺序、
+raw-first/可恢复artifact、direct semantics/environment/provider/counter/audit逐项验收；本阶段禁止计算或
+报告speedup。计划见`gemini_doc/BOUNDFLOW_FSG4_B3_FIVE_FRESH_CORRECTNESS_PLAN_2026_08_14.md`。
+
 FSG4/B3-C已以`VALIDATED-B3-C-COUNTERS`关闭：source=`72bec5e`，fresh GPU artifact=
 `artifacts/fsg4-b3-counter-diagnostic/resnet2b-prop0-b3c-v1/`。1484条event确认12个device
 candidate/commit/backup/copy、timed candidate D2H=`0`，B3-B其余固定结构和六个B2 control语义保持；

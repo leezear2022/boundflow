@@ -5460,3 +5460,24 @@
 **记录**
 - `gemini_doc/change_2026-08-14_fsg4_b3c_device_atomic_commit_closure.md`
 - `gemini_doc/fsg4_b3c_device_commit_external_audit_handoff_2026_08_14.md`
+
+## 2026-08-14：FSG4/B3 五组 Fresh Correctness 预注册
+
+- 冻结5组、10个独立GPU进程及B2/B3-C交替顺序；
+- 冻结direct semantics、environment、provider/fallback、physical counter与post-query audit门禁；
+- raw-first支持只接受完整replay run的中断恢复；本阶段禁止performance ratio；
+- 5/5通过只开放36-process正式计时，B4—B7仍关闭。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B3_FIVE_FRESH_CORRECTNESS_PLAN_2026_08_14.md`
+- `gemini_doc/change_2026-08-14_fsg4_b3_five_fresh_correctness_preregistration.md`
+
+## 2026-08-14：FSG4/B3 五组 Fresh Correctness Runner 实现候选
+
+- 新增10独立子进程的交替pair runner、raw-first protocol与只接受完整run的resume；
+- root replay从raw重算5组direct semantics、environment、counter与audit；
+- 新增report/protocol/nested counter/semantic/audit/swap/delete七类重签名攻击；
+- static 5项、mypy与Pylint通过；待clean source正式运行。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg4_b3_five_fresh_runner_candidate.md`
