@@ -17,6 +17,9 @@ stage: s01
 
 ## Changes
 
+- B3-0显式counter diagnostic已实现但尚未真实运行：命名seam event journal、B2固定结构门禁、raw worker/
+  semantic/environment/provider/fallback绑定、code revision/manifest与独立replay均已落地；
+- 诊断不使用`sys.setprofile`，也不修改B2生产函数；instrumentation在context退出后完整恢复；
 - 从FSG3 v5 profile冻结B2五区域成本与B0/B2比例；
 - 将源码中的module move、10-step trace clone、重复forward、12-path GPU→CPU digest/copy与重复
   validate映射到B3子阶段；
@@ -25,9 +28,10 @@ stage: s01
 
 ## Validation
 
+- B3-0 targeted=`17 passed`，mypy clean，Pylint=`10.00/10`；
+- 全量回归=`1243 passed, 3 skipped`；
 - FSG3 source artifact static replay与33项测试已在前一阶段通过；
-- 本轮只做计划一致性、代码事实和`git diff --check`检查；
-- 尚无B3 implementation、correctness artifact或performance claim。
+- 尚无fresh B2 counter artifact、B3 candidate、correctness artifact或performance claim。
 
 ## Decisions
 
@@ -38,7 +42,7 @@ stage: s01
 
 ## Follow-Ups
 
-1. B3-0显式重算B2 call/copy/hash counter；
+1. 提交B3-0实现后，从不可变source运行fresh B2 GPU call/copy/hash counter；
 2. 只有counter与预注册一致才实现B3-A PreparedCoreTemplate；
 3. B3-A关闭后再进入B3-B，不并行混合变量。
 

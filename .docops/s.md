@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev008783
-last_va: ev008784
+last_ch: ev008816
+last_va: ev008817
 blk: none
-next: fsg4-b3-0-explicit-counter-diagnostic
-updated: 2026-08-14T10:09:43Z
+next: fsg4-b3-0-fresh-b2-gpu-counter-run
+updated: 2026-08-14T10:28:01Z
