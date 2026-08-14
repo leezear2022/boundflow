@@ -10,6 +10,14 @@
 
 ---
 
+FSG4/B3-C第一版device-resident AtomicCommitPlan已进入
+`IMPLEMENTED-PENDING-FRESH-GPU-ARTIFACT`：12条mutable path的shape/dtype/device/alias/rollback顺序
+已冻结，candidate与backup保留在CUDA，直接同设备commit；tensor或host失败恢复完整pre-image；五个空beta
+以对象身份区分alias。content digest已移到query同步后的headline timing之外。CUDA事务与assembly
+`9 passed`，相关定向回归`49 passed`，mypy clean、Pylint 10.00/10。当前仍没有fresh正式artifact、全量
+回归、5 fresh pair或speedup claim；B4—B7关闭。记录见
+`gemini_doc/change_2026-08-14_fsg4_b3c_device_atomic_commit_candidate.md`。
+
 FSG4/B3-B已以`VALIDATED-B3-B-COUNTERS`关闭：source=`42df2dc`，fresh GPU artifact=
 `artifacts/fsg4-b3-counter-diagnostic/resnet2b-prop0-b3b-v1/`。5157条event确认full step snapshots=`0`、
 forward builds=`4`，且B3-A template/module/scope、optimizer 10/9、KFSB、D2H/commit等结构保持；冻结语义、

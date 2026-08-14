@@ -32,8 +32,9 @@ def _move_tensors(value: object, *, device: Any, dtype: Any) -> object:
     import torch
 
     if torch.is_tensor(value):
-        return value.to(
-            device=device, dtype=dtype if value.is_floating_point() else None
+        tensor = cast(torch.Tensor, value)
+        return tensor.to(
+            device=device, dtype=dtype if tensor.is_floating_point() else None
         )
     if isinstance(value, dict):
         return {
@@ -134,6 +135,7 @@ class _LiveExecutor:
         prepared_core_cache: Any = None,
         prepared_core_template_hash: str | None = None,
         terminal_optimizer_schedule: Any = None,
+        device_atomic_commit_plan: Any = None,
         capture_payloads: bool = True,
         profile_recorder: Any = None,
     ):
@@ -145,6 +147,11 @@ class _LiveExecutor:
             raise ValueError("RVIR-v4 prepared core conflicts with precompiled inputs")
         if terminal_optimizer_schedule is not None and prepared_core_cache is None:
             raise ValueError("RVIR-v4 terminal schedule requires prepared core")
+        if (
+            device_atomic_commit_plan is not None
+            and terminal_optimizer_schedule is None
+        ):
+            raise ValueError("FSG4/B3-C device commit requires terminal schedule")
         self.model = model
         self.torch = torch_module
         self.arguments = arguments_module
@@ -153,6 +160,7 @@ class _LiveExecutor:
         self.prepared_core_cache = prepared_core_cache
         self.prepared_core_template_hash = prepared_core_template_hash
         self.terminal_optimizer_schedule = terminal_optimizer_schedule
+        self.device_atomic_commit_plan = device_atomic_commit_plan
         self.capture_payloads = capture_payloads
         self.profile_recorder = profile_recorder
         self.active = False
@@ -168,6 +176,8 @@ class _LiveExecutor:
         self.prepared_core_template_hashes: list[str] = []
         self.prepared_core_instance_hashes: list[str] = []
         self.terminal_optimizer_schedule_hashes: list[str] = []
+        self.device_commit_audits: list[dict[str, object]] = []
+        self._pending_device_audits: list[tuple[Any, ...]] = []
         self.last_core_result: Any = None
         self.last_post_result: Any = None
 
@@ -196,12 +206,20 @@ class _LiveExecutor:
         from boundflow.runtime.fsg4_b3_terminal_optimizer_schedule import (
             execute_terminal_optimizer_schedule_v1,
         )
+        from boundflow.runtime.fsg4_b3_device_atomic_commit import (
+            stage_device_atomic_transaction_v1,
+        )
+        from boundflow.runtime.fsg4_b3_device_live_return import (
+            assemble_device_live_core_return_v1,
+            commit_device_live_core_return_v1,
+        )
         from boundflow.runtime.rvir_v4_atomic_copy_out import (
             stage_rvir_v4_live_atomic_copy_out,
         )
         from boundflow.runtime.rvir_v4_live_return import (
             assemble_rvir_v4_live_core_return,
             commit_rvir_v4_live_core_return,
+            live_targets_from_pre_result_v4,
         )
         from boundflow.runtime.rvir_v4_native_backward_export import (
             export_rvir_v4_native_backward,
@@ -461,28 +479,62 @@ class _LiveExecutor:
                 "depths": list(cast(list[object], d["depths"])),
                 "thresholds": d["thresholds"],
             }
-            staged = stage_rvir_v4_live_atomic_copy_out(
-                pre=pre_snapshot,
-                terminal_state=terminal,
-                topology=TOPOLOGY,
-                terminal_lower=export.lower,
-                host_packet=d,
-                host_packet_candidate=host_candidate,
-                candidate_snapshot_id=f"core:{self.core_count:06d}:live-candidate",
-            )
-            assembly = assemble_rvir_v4_live_core_return(
-                pre_result=pre_result,
-                pre_snapshot=pre_snapshot,
-                staged_copy_out=staged,
-                backward_export=export,
-                kfsb_evaluation=evaluation,
-                topology=TOPOLOGY,
-            )
-            core_result, receipt = commit_rvir_v4_live_core_return(
-                assembly,
-                pre_snapshot=pre_snapshot,
-                host_packet=d,
-            )
+            if self.device_atomic_commit_plan is None:
+                staged = stage_rvir_v4_live_atomic_copy_out(
+                    pre=pre_snapshot,
+                    terminal_state=terminal,
+                    topology=TOPOLOGY,
+                    terminal_lower=export.lower,
+                    host_packet=d,
+                    host_packet_candidate=host_candidate,
+                    candidate_snapshot_id=f"core:{self.core_count:06d}:live-candidate",
+                )
+                assembly = assemble_rvir_v4_live_core_return(
+                    pre_result=pre_result,
+                    pre_snapshot=pre_snapshot,
+                    staged_copy_out=staged,
+                    backward_export=export,
+                    kfsb_evaluation=evaluation,
+                    topology=TOPOLOGY,
+                )
+                core_result, receipt = commit_rvir_v4_live_core_return(
+                    assembly,
+                    pre_snapshot=pre_snapshot,
+                    host_packet=d,
+                )
+            else:
+                if prepared_instance is None or prepared_template is None:
+                    raise ValueError("FSG4/B3-C device commit misses prepared instance")
+                plan = self.device_atomic_commit_plan
+                if plan.prepared_template_hash != prepared_template.stable_hash():
+                    raise ValueError("FSG4/B3-C device commit template differs")
+                live_targets = live_targets_from_pre_result_v4(pre_result, TOPOLOGY)
+                transaction = stage_device_atomic_transaction_v1(
+                    plan=plan,
+                    core_instance_hash=prepared_instance.instance_hash,
+                    pre_snapshot_hash=prepared_instance.snapshot_hash,
+                    pre_snapshot=pre_snapshot,
+                    live_targets=live_targets,
+                    terminal_state=terminal,
+                    topology=TOPOLOGY,
+                    terminal_lower=export.lower,
+                    host_packet=d,
+                    host_packet_candidate=host_candidate,
+                )
+                assembly = assemble_device_live_core_return_v1(
+                    pre_result=pre_result,
+                    transaction=transaction,
+                    backward_export=export,
+                    kfsb_evaluation=evaluation,
+                    topology=TOPOLOGY,
+                )
+                core_result, receipt = commit_device_live_core_return_v1(
+                    assembly,
+                    host_packet=d,
+                )
+                self._pending_device_audits.append(
+                    (transaction, dict(receipt), pre_snapshot, live_targets)
+                )
             self.assembly_metadata.append(assembly.metadata())
             self.commit_receipts.append(receipt)
             self.last_core_result = core_result
@@ -501,6 +553,36 @@ class _LiveExecutor:
         finally:
             sys.setprofile(previous_profile)
             self.active = False
+
+    @property
+    def has_pending_device_audit(self) -> bool:
+        return bool(self._pending_device_audits)
+
+    def finalize_post_query_audit(self) -> None:
+        """Synchronize and materialize B3-C digests outside headline timing."""
+
+        from boundflow.runtime.fsg4_b3_device_atomic_commit import (
+            audit_device_atomic_transaction_v1,
+        )
+
+        if self.device_atomic_commit_plan is None:
+            if self._pending_device_audits:
+                raise ValueError("FSG4/B3-C audit exists without a device plan")
+            return
+        if len(self._pending_device_audits) != 1 or self.device_commit_audits:
+            raise ValueError("FSG4/B3-C post-query audit cardinality differs")
+        self.torch.cuda.synchronize()
+        transaction, receipt, pre_snapshot, live_targets = self._pending_device_audits[
+            0
+        ]
+        audit = audit_device_atomic_transaction_v1(
+            transaction,
+            receipt=receipt,
+            pre_snapshot=pre_snapshot,
+            live_targets=live_targets,
+        )
+        self.device_commit_audits.append(audit)
+        self._pending_device_audits.clear()
 
     @contextmanager
     def instrument(
@@ -588,6 +670,8 @@ def _worker(args: argparse.Namespace) -> None:
             result = solver.verify(
                 constraints=IOConstraints(vnnlib_path=str(isolated_property))
             )
+    if executor.has_pending_device_audit:
+        executor.finalize_post_query_audit()
     payload: dict[str, object] = {
         "schema_version": WORKER_SCHEMA,
         "source": {
@@ -615,6 +699,7 @@ def _worker(args: argparse.Namespace) -> None:
         "whole_post_results": executor.post_payloads,
         "assembly_metadata": executor.assembly_metadata,
         "commit_receipts": executor.commit_receipts,
+        "device_commit_audits": executor.device_commit_audits,
         "pre_state_identities": executor.pre_state_identities,
         "prepared_core_template_hashes": executor.prepared_core_template_hashes,
         "prepared_core_instance_hashes": executor.prepared_core_instance_hashes,

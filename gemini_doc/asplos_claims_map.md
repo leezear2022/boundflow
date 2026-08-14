@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-14 FSG4/B3-C候选边界**：device-resident commit与post-query audit已有本地CUDA/定向测试，
+> 但尚无fresh正式artifact，故只能记为`IMPLEMENTED-PENDING-FRESH-GPU-ARTIFACT`，不能主张D2H已在真实
+> worker降为0，更不能主张timing/speedup。B3-B仍是当前最后一个正式关闭子阶段。
+
 > **2026-08-14 FSG4/B3-B关闭**：source `42df2dc`的fresh GPU artifact用5157条event确认full step
 > snapshots=`0`、forward builds=`4`，其余B3-A结构、六个B2 control语义、replay与6/6 tamper保持。状态=
 > `VALIDATED-B3-B-COUNTERS`，仅支持terminal Schedule/forward handoff mechanism/correctness claim，不支持

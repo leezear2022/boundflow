@@ -321,3 +321,21 @@ optimizer Schedule与forward-trace handoff；B3-C和B4—B7继续关闭。
 B3-B证明terminal Schedule和forward-trace handoff在一个fresh真实solver call中激活并保持冻结语义；它
 没有证明延迟改善，也不满足完整B3计时前的5 fresh pair。下一动作只允许B3-C device-resident
 AtomicCommitPlan；B4—B7继续关闭。
+
+## 19. B3-C Implementation Candidate（2026-08-14）
+
+- 新增`DeviceAtomicCommitPlanV1`，在prepared template阶段冻结12条path的role、shape、dtype、CUDA
+  device、alias equivalence与rollback ordinal；
+- 新增动态transaction，绑定core instance/pre snapshot、live tensor version、host version和12个GPU
+  candidate；α sparse projection与β location projection不再生成CPU candidate snapshot；
+- 12个live target先做device backup，再同设备直接copy；tensor/host任一失败均恢复全部tensor与host
+  pre-image；五个`(6, 0)`beta用empty-object identity验证alias；
+- provider assembly的headline metadata不做GPU content SHA；query计时结束并同步后才生成artifact audit
+  digest，并绑定plan/transaction/commit receipt；
+- counter预注册B3-C相对B3-B只允许timed candidate D2H `12→0`，candidate/commit/backup/copy继续
+  `12/12/12/12`，其他B3-B固定结构不变；
+- CUDA事务与assembly测试=`9 passed`，相关定向回归=`49 passed`；Black、mypy clean，Pylint
+  `10.00/10`。
+
+当前状态仅为`IMPLEMENTED-PENDING-FRESH-GPU-ARTIFACT`。尚无fresh真实worker artifact、全量回归、
+5 fresh pair或任何timing/speedup claim；B4—B7继续关闭。

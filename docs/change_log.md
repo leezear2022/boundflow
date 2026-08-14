@@ -5428,3 +5428,14 @@
 
 **记录**
 - `gemini_doc/change_2026-08-14_fsg4_b3b_terminal_schedule_closure.md`
+
+## 2026-08-14：FSG4/B3-C Device-Resident Atomic Commit 实现候选
+
+- 新增first-class commit plan与dynamic transaction，冻结12条GPU mutable path及rollback顺序；
+- candidate、backup和commit保持CUDA驻留，tensor/host失败均完整回滚；
+- content SHA移到query同步后的headline timing之外；
+- CUDA/相关定向测试`9/49 passed`，mypy clean、Pylint 10.00/10；
+- 状态`IMPLEMENTED-PENDING-FRESH-GPU-ARTIFACT`，无性能主张。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg4_b3c_device_atomic_commit_candidate.md`

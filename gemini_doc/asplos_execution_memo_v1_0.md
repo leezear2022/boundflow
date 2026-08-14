@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-14 B3-C候选指令**：AtomicCommitPlan/device transaction已经实现但尚未正式关闭。当前只允许
+> 提交候选并生成fresh ResNet2B/prop0 B3-C counter artifact，验证D2H `12→0`、replay、tamper与全量
+> 回归；不得提前启动5-pair timing、B4 TIR、B5 JIT或B6/B7 runtime/arena。
+
 > **2026-08-14 FSG4/B3-B关闭指令**：source `42df2dc`的fresh GPU artifact已验证full step
 > snapshots=`0`、forward builds=`4`，冻结语义、replay和6/6 tamper通过，状态=
 > `VALIDATED-B3-B-COUNTERS`，无timing/speedup。下一唯一动作是B3-C device-resident AtomicCommitPlan；

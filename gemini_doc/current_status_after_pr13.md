@@ -1,5 +1,10 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-14 FSG4/B3-C实现候选**：device-resident AtomicCommitPlan、12-path CUDA
+> candidate/backup/direct commit、完整tensor+host rollback和post-query audit分层已经实现；CUDA/定向
+> 测试分别`9/49 passed`。状态仅为`IMPLEMENTED-PENDING-FRESH-GPU-ARTIFACT`，尚无正式artifact、全量
+> 回归、5 fresh pair或性能主张。下一动作是从clean commit生成fresh B3-C counter artifact；B4—B7关闭。
+
 > **2026-08-14 FSG4/B3-B关闭状态**：source `42df2dc`的fresh GPU artifact含5157条event，实测full
 > step snapshots=`0`、forward builds=`4`，其余B3-A冻结结构与六个B2 control语义保持；replay、6/6
 > tamper、定向`45 passed`和全量`1265 passed, 3 skipped`通过。状态=

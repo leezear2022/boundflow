@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate or replay one explicit-counter FSG4/B3 B2 or B3-A artifact."""
 
-# pylint: disable=protected-access,too-many-locals,too-many-statements
+# pylint: disable=protected-access,too-many-locals,too-many-statements,too-many-lines
 # pylint: disable=too-many-branches,wrong-import-position,import-outside-toplevel
 # pylint: disable=too-many-boolean-expressions,missing-function-docstring
 
@@ -66,6 +66,10 @@ B3A_CODE_PATHS = CODE_PATHS + ("boundflow/runtime/fsg4_b3_prepared_core.py",)
 B3B_CODE_PATHS = B3A_CODE_PATHS + (
     "boundflow/runtime/fsg4_b3_terminal_optimizer_schedule.py",
 )
+B3C_CODE_PATHS = B3B_CODE_PATHS + (
+    "boundflow/runtime/fsg4_b3_device_atomic_commit.py",
+    "boundflow/runtime/fsg4_b3_device_live_return.py",
+)
 B3A_MUTABLE_PATHS = (
     "alpha/%2F45/%2F49",
     "alpha/%2F48/%2F49",
@@ -79,6 +83,20 @@ B3A_MUTABLE_PATHS = (
     "beta/%2Finput-28/0/value",
     "beta/%2Finput-8/0/value",
     "beta/%2Finput/0/value",
+)
+B3C_MUTABLE_PATH_CONTRACTS = (
+    ("alpha/%2F45/%2F49", "alpha", (2, 1, 6, 178)),
+    ("alpha/%2F48/%2F49", "alpha", (2, 1, 6, 27)),
+    ("alpha/%2Finput-12/%2F49", "alpha", (2, 1, 6, 132)),
+    ("alpha/%2Finput-16/%2F49", "alpha", (2, 1, 6, 121)),
+    ("alpha/%2Finput-24/%2F49", "alpha", (2, 1, 6, 86)),
+    ("alpha/%2Finput-4/%2F49", "alpha", (2, 1, 6, 164)),
+    ("beta/%2F39/0/value", "beta_value", (6, 0)),
+    ("beta/%2F44/0/value", "beta_value", (6, 0)),
+    ("beta/%2Finput-20/0/value", "beta_value", (6, 0)),
+    ("beta/%2Finput-28/0/value", "beta_value", (6, 1)),
+    ("beta/%2Finput-8/0/value", "beta_value", (6, 0)),
+    ("beta/%2Finput/0/value", "beta_value", (6, 0)),
 )
 
 
@@ -154,6 +172,8 @@ def _code_paths(configuration: str) -> tuple[str, ...]:
         return B3A_CODE_PATHS
     if configuration == "B3-B":
         return B3B_CODE_PATHS
+    if configuration == "B3-C":
+        return B3C_CODE_PATHS
     raise ValueError("FSG4/B3 diagnostic configuration differs")
 
 
@@ -298,6 +318,8 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
     from boundflow.runtime import native_alpha_beta_optimization_state as native_state
     from boundflow.runtime import fsg4_b3_prepared_core as prepared_core
     from boundflow.runtime import fsg4_b3_terminal_optimizer_schedule as terminal
+    from boundflow.runtime import fsg4_b3_device_atomic_commit as device_atomic
+    from boundflow.runtime import fsg4_b3_device_live_return as device_return
     from boundflow.runtime import rvir_v4_atomic_copy_out as atomic
     from boundflow.runtime import rvir_v4_live_return as live_return
     from boundflow.runtime import rvir_v4_native_backward_export as backward
@@ -515,6 +537,24 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
 
     stack.enter_context(_patch_attribute(atomic, "_replacement", counted_replacement))
 
+    original_device_candidate = device_atomic._materialize_device_candidate
+
+    @wraps(original_device_candidate)
+    def counted_device_candidate(*args: Any, **kwargs: Any) -> Any:
+        result = original_device_candidate(*args, **kwargs)
+        path = args[0] if args else kwargs["path"]
+        recorder.add(
+            "candidate_snapshot_materialization_count",
+            detail=f"device candidate path {path}",
+        )
+        return result
+
+    stack.enter_context(
+        _patch_attribute(
+            device_atomic, "_materialize_device_candidate", counted_device_candidate
+        )
+    )
+
     original_copy = atomic._copy_value
 
     @wraps(original_copy)
@@ -526,6 +566,20 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
         )
 
     stack.enter_context(_patch_attribute(atomic, "_copy_value", counted_copy))
+
+    original_device_copy = device_atomic._copy_device_value
+
+    @wraps(original_device_copy)
+    def counted_device_copy(target: Any, source: Any) -> None:
+        original_device_copy(target, source)
+        recorder.add(
+            "live_tensor_copy_call_count",
+            detail=f"direct device copy {tuple(target.shape)} {target.device}",
+        )
+
+    stack.enter_context(
+        _patch_attribute(device_atomic, "_copy_device_value", counted_device_copy)
+    )
 
     original_stage = atomic.stage_rvir_v4_live_atomic_copy_out
 
@@ -539,6 +593,24 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
 
     stack.enter_context(
         _patch_attribute(atomic, "stage_rvir_v4_live_atomic_copy_out", counted_stage)
+    )
+
+    original_device_stage = device_atomic.stage_device_atomic_transaction_v1
+
+    @wraps(original_device_stage)
+    def counted_device_stage(*args: Any, **kwargs: Any) -> Any:
+        result = original_device_stage(*args, **kwargs)
+        recorder.add(
+            "atomic_stage_call_count", detail="one device atomic stage completed"
+        )
+        return result
+
+    stack.enter_context(
+        _patch_attribute(
+            device_atomic,
+            "stage_device_atomic_transaction_v1",
+            counted_device_stage,
+        )
     )
 
     original_commit = atomic.commit_rvir_v4_live_atomic_copy_out
@@ -587,6 +659,56 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
         )
     )
 
+    original_device_commit = device_return.commit_device_atomic_transaction_v1
+
+    @wraps(original_device_commit)
+    def counted_device_commit(*args: Any, **kwargs: Any) -> Any:
+        transaction = args[0] if args else kwargs["transaction"]
+        paths = len(transaction.candidates)
+        copies_before = recorder.counts()["live_tensor_copy_call_count"]
+        try:
+            result = original_device_commit(*args, **kwargs)
+        except Exception:
+            copies_after = recorder.counts()["live_tensor_copy_call_count"]
+            rollback_copies = max(copies_after - copies_before - paths, 0)
+            if rollback_copies:
+                recorder.add(
+                    "rollback_copy_call_count",
+                    amount=rollback_copies,
+                    detail="failed device transaction rollback copies",
+                )
+            raise
+        copies_after = recorder.counts()["live_tensor_copy_call_count"]
+        recorder.add(
+            "atomic_commit_call_count", detail="one device atomic commit completed"
+        )
+        recorder.add(
+            "device_rollback_backup_count",
+            amount=_integer(
+                result["device_rollback_backup_count"], "device backup count"
+            ),
+            detail="device transaction rollback backups",
+        )
+        recorder.add(
+            "commit_copy_call_count",
+            amount=copies_after - copies_before,
+            detail="successful direct device commit copies",
+        )
+        recorder.add(
+            "committed_mutable_path_count",
+            amount=_integer(result["committed_path_count"], "committed path count"),
+            detail="device receipt-confirmed mutable paths",
+        )
+        return result
+
+    stack.enter_context(
+        _patch_attribute(
+            device_return,
+            "commit_device_atomic_transaction_v1",
+            counted_device_commit,
+        )
+    )
+
     def patch_tensor_hash(owner: Any, name: str, detail: str) -> None:
         original = cast(Callable[..., Any], getattr(owner, name))
 
@@ -603,6 +725,7 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
         (production, "production-state tensor digest"),
         (atomic, "atomic-copy tensor digest"),
         (live_return, "live-return tensor digest"),
+        (device_atomic, "post-query device transaction digest"),
     ):
         patch_tensor_hash(module_owner, "production_tensor_sha256", detail)
 
@@ -620,6 +743,9 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
         terminal.NativeTerminalOptimizerScheduleV1,
         terminal.NativeOptimizerForwardTraceV1,
         terminal.NativeTerminalOptimizerResultV1,
+        device_atomic.DeviceAtomicCommitPlanV1,
+        device_atomic.DeviceAtomicTransactionV1,
+        device_return.DeviceLiveCoreReturnAssemblyV1,
     )
     for validate_type in validate_types:
         patch_function(
@@ -635,6 +761,7 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
         native_state.NativeAlphaBetaOptimizationState,
         mutation.ProductionMutationPolicyV4,
         terminal.NativeTerminalOptimizerScheduleV1,
+        device_atomic.DeviceAtomicCommitPlanV1,
     )
     for hash_type in hash_types:
         patch_function(
@@ -661,6 +788,11 @@ def _use_prepared_executor(configuration: str) -> Iterator[None]:
     from boundflow.runtime.fsg4_b3_terminal_optimizer_schedule import (
         compile_terminal_optimizer_schedule_v1,
     )
+    from boundflow.runtime.fsg4_b3_device_atomic_commit import (
+        compile_device_atomic_commit_plan_v1,
+        DeviceAtomicPathSpecV1,
+    )
+    from boundflow.runtime.rvir_v4_production_state import ProductionTensorRole
     from scripts import run_rvir_v4_live_return_capture as live_runner
     from scripts.run_rvir_v4_pre_state_artifact import TOPOLOGY
 
@@ -686,14 +818,35 @@ def _use_prepared_executor(configuration: str) -> Iterator[None]:
         template_hash = cache.insert(template)
         terminal_schedule = (
             compile_terminal_optimizer_schedule_v1()
-            if configuration == "B3-B"
+            if configuration in {"B3-B", "B3-C"}
             else None
         )
+        device_commit_plan = None
+        if configuration == "B3-C":
+            device_commit_plan = compile_device_atomic_commit_plan_v1(
+                plan_id="resnet2b-prop0-b3c-device-commit",
+                prepared_template_hash=template_hash,
+                paths=tuple(
+                    DeviceAtomicPathSpecV1(
+                        semantic_path=path,
+                        role=ProductionTensorRole(role),
+                        shape=shape,
+                        dtype="torch.float32",
+                        device="cuda:0",
+                        alias_group=f"provider-target:{ordinal:02d}",
+                        rollback_ordinal=ordinal,
+                    )
+                    for ordinal, (path, role, shape) in enumerate(
+                        B3C_MUTABLE_PATH_CONTRACTS
+                    )
+                ),
+            )
         return original_executor(
             **kwargs,
             prepared_core_cache=cache,
             prepared_core_template_hash=template_hash,
             terminal_optimizer_schedule=terminal_schedule,
+            device_atomic_commit_plan=device_commit_plan,
         )
 
     with _patch_attribute(live_runner, "_LiveExecutor", prepared_executor):
@@ -754,7 +907,7 @@ def _generate(args: argparse.Namespace) -> None:
         recorder = Fsg4B3CounterRecorder()
         with ExitStack() as stack:
             stack.enter_context(_instrument_b2(recorder))
-            if configuration in {"B3-A", "B3-B"}:
+            if configuration in {"B3-A", "B3-B", "B3-C"}:
                 stack.enter_context(_use_prepared_executor(configuration))
             fsg3_worker._worker(_worker_namespace(args, worker_path))
         worker_sha = _file_sha256(worker_path)
@@ -928,7 +1081,9 @@ def _parse_args() -> argparse.Namespace:
     run.add_argument("--abcrown-root", type=Path, required=True)
     run.add_argument("--model", type=Path, required=True)
     run.add_argument("--property", type=Path, required=True)
-    run.add_argument("--configuration", choices=("B2", "B3-A", "B3-B"), default="B2")
+    run.add_argument(
+        "--configuration", choices=("B2", "B3-A", "B3-B", "B3-C"), default="B2"
+    )
     replay = commands.add_parser("replay")
     replay.add_argument("--artifact-dir", type=Path, required=True)
     return parser.parse_args()

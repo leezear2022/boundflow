@@ -1037,6 +1037,11 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
                 round(query_start_event.elapsed_time(query_end_event) * 1e6)
             )
     cold_outer_ns = time.perf_counter_ns() - cold_started_ns
+    post_query_audit_ns = 0
+    if executor is not None and executor.has_pending_device_audit:
+        post_query_audit_started_ns = time.perf_counter_ns()
+        executor.finalize_post_query_audit()
+        post_query_audit_ns = time.perf_counter_ns() - post_query_audit_started_ns
     core_wall_ns, core_gpu_ns = core.timings()
     if len(queue.events) != 1 or post.count != 1:
         raise ValueError("FSG3 post/queue event count differs")
@@ -1164,6 +1169,11 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
             "cold_total_is_compile_plus_query_composite": True,
             "cold_scope_includes_hook_setup": False,
             "post_validation_excluded_from_timing": True,
+            "post_query_audit_ns": post_query_audit_ns,
+            "post_query_audit_excluded_from_timing": True,
+            "device_commit_audits": (
+                [] if executor is None else executor.device_commit_audits
+            ),
         },
         "performance_claimed": False,
     }

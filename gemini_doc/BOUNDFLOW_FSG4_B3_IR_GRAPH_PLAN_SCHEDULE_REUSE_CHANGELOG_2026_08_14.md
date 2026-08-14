@@ -23,6 +23,10 @@ stage: s01
 
 ## Changes
 
+- B3-C第一版实现候选新增device-resident commit plan/dynamic transaction、12个CUDA candidate、device
+  backup/direct copy、tensor+host rollback和post-query content audit；
+- 五个`(6, 0)`SparseBeta target以empty-object identity区分alias，不使用共同的空storage pointer；
+- B3-C counter预注册相对B3-B只允许candidate D2H `12→0`，其余固定物理counter保持；
 - B3-B第一版实现候选新增first-class 10/9 terminal Schedule IR、terminal-only production result和
   optimizer→backward forward-trace handoff；formal逐step trace保留；
 - B3-B counter预注册仅允许full snapshots `10→0`、forward builds `5→4`，其他B3-A计数不变；
@@ -50,6 +54,8 @@ stage: s01
 
 ## Validation
 
+- B3-C CUDA事务/provider assembly=`9 passed`，相关定向回归=`49 passed`，Black/mypy clean，Pylint
+  `10.00/10`；fresh真实worker artifact与全量回归尚待执行；
 - B3-B formal artifact replay、六个冻结B2 control语义与6/6 tamper通过；targeted=`45 passed`，full=
   `1265 passed, 3 skipped`；
 - B3-B实现候选CPU冻结case与负向门禁targeted=`42 passed`，mypy touched clean，Pylint=`10.00/10`；
@@ -73,8 +79,8 @@ stage: s01
 
 ## Follow-Ups
 
-1. 实现B3-C device-resident AtomicCommitPlan、rollback和audit digest分层；
-2. candidate在GPU保留，headline core不得执行12次D2H content digest；
+1. 从clean committed source生成fresh B3-C ResNet2B/prop0 counter artifact；
+2. 独立确认candidate D2H=`0`、冻结语义、replay、tamper和全量回归；
 3. B3-C关闭后完成5 fresh correctness pairs，再决定是否准入正式B3计时。
 
 ## Links
