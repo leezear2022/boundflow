@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate or replay one explicit-counter FSG4/B3 B2 diagnostic artifact."""
+"""Generate or replay one explicit-counter FSG4/B3 B2 or B3-A artifact."""
 
 # pylint: disable=protected-access,too-many-locals,too-many-statements
 # pylint: disable=too-many-branches,wrong-import-position,import-outside-toplevel
@@ -61,6 +61,21 @@ CODE_PATHS = (
     "boundflow/runtime/rvir_v4_native_kfsb.py",
     "boundflow/runtime/rvir_v4_atomic_copy_out.py",
     "boundflow/runtime/rvir_v4_live_return.py",
+)
+B3A_CODE_PATHS = CODE_PATHS + ("boundflow/runtime/fsg4_b3_prepared_core.py",)
+B3A_MUTABLE_PATHS = (
+    "alpha/%2F45/%2F49",
+    "alpha/%2F48/%2F49",
+    "alpha/%2Finput-12/%2F49",
+    "alpha/%2Finput-16/%2F49",
+    "alpha/%2Finput-24/%2F49",
+    "alpha/%2Finput-4/%2F49",
+    "beta/%2F39/0/value",
+    "beta/%2F44/0/value",
+    "beta/%2Finput-20/0/value",
+    "beta/%2Finput-28/0/value",
+    "beta/%2Finput-8/0/value",
+    "beta/%2Finput/0/value",
 )
 
 
@@ -129,17 +144,31 @@ def _git(*args: str) -> str:
     return completed.stdout.strip()
 
 
-def _code_revision() -> dict[str, str]:
-    return {path: _file_sha256(REPOSITORY_ROOT / path) for path in CODE_PATHS}
+def _code_paths(configuration: str) -> tuple[str, ...]:
+    if configuration == "B2":
+        return CODE_PATHS
+    if configuration == "B3-A":
+        return B3A_CODE_PATHS
+    raise ValueError("FSG4/B3 diagnostic configuration differs")
+
+
+def _code_revision(configuration: str = "B2") -> dict[str, str]:
+    return {
+        path: _file_sha256(REPOSITORY_ROOT / path)
+        for path in _code_paths(configuration)
+    }
 
 
 def _verify_code_revision(manifest: Mapping[str, Any]) -> None:
     source = manifest.get("source_git_head")
     revision = manifest.get("code_revision")
+    configuration = str(manifest.get("configuration", "B2"))
     if not isinstance(source, str) or not isinstance(revision, Mapping):
         raise ValueError("FSG4/B3 source provenance differs")
+    if set(revision) != set(_code_paths(configuration)):
+        raise ValueError("FSG4/B3 code path inventory differs")
     if _git("rev-parse", "HEAD") == source:
-        observed = _code_revision()
+        observed = _code_revision(configuration)
     else:
         observed = {
             path: hashlib.sha256(
@@ -262,6 +291,7 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
 
     from boundflow import planner
     from boundflow.runtime import native_alpha_beta_optimization_state as native_state
+    from boundflow.runtime import fsg4_b3_prepared_core as prepared_core
     from boundflow.runtime import rvir_v4_atomic_copy_out as atomic
     from boundflow.runtime import rvir_v4_live_return as live_return
     from boundflow.runtime import rvir_v4_native_backward_export as backward
@@ -300,6 +330,18 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
         "build_native_alpha_beta_scope",
         "scope_construction_count",
         "optimizer scope equivalence reconstruction",
+    )
+    patch_function(
+        prepared_core,
+        "build_native_alpha_beta_scope",
+        "scope_construction_count",
+        "prepared core dynamic scope construction",
+    )
+    patch_function(
+        prepared_core.PreparedCoreTemplateCache,
+        "resolve",
+        "template_hit_in_core_count",
+        "prepared core exact template cache hit",
     )
     for module_owner, detail in (
         (optimizer, "optimizer forward trace"),
@@ -562,6 +604,49 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
         yield
 
 
+@contextmanager
+def _use_b3a_prepared_executor() -> Iterator[None]:
+    """Prepare static bindings before query/core and inject the opt-in executor."""
+
+    import torch
+
+    from boundflow.runtime.fsg4_b3_prepared_core import (
+        prepare_core_template_v1,
+        PreparedCoreTemplateCache,
+    )
+    from scripts import run_rvir_v4_live_return_capture as live_runner
+    from scripts.run_rvir_v4_pre_state_artifact import TOPOLOGY
+
+    original_executor = live_runner._LiveExecutor
+
+    def prepared_executor(**kwargs: Any) -> Any:
+        program = kwargs.pop("precompiled_program", None)
+        module = kwargs.pop("precompiled_module", None)
+        if program is None or module is None:
+            raise ValueError("FSG4/B3-A requires precompiled program/module")
+        cache = PreparedCoreTemplateCache()
+        template = prepare_core_template_v1(
+            template_id="resnet2b-prop0-b3-a",
+            program=program,
+            module=module,
+            topology=TOPOLOGY,
+            device="cuda:0",
+            dtype=torch.float32,
+            input_shape=(6, 3, 32, 32),
+            objective_shape=(6, 1, 10),
+            mutable_paths=B3A_MUTABLE_PATHS,
+        )
+        template_hash = cache.insert(template)
+        return original_executor(
+            **kwargs,
+            prepared_core_cache=cache,
+            prepared_core_template_hash=template_hash,
+        )
+
+    with _patch_attribute(live_runner, "_LiveExecutor", prepared_executor):
+        yield
+
+
 def _worker_namespace(args: argparse.Namespace, result: Path) -> argparse.Namespace:
     return argparse.Namespace(
         configuration=FSG3Configuration.B2.value,
@@ -601,9 +686,10 @@ def _validate_worker_envelope(value: Mapping[str, Any], worker_sha: str) -> Any:
 
 def _generate(args: argparse.Namespace) -> None:
     artifact = args.artifact_dir.resolve()
+    configuration = str(args.configuration)
     if artifact.exists():
         raise FileExistsError(f"FSG4/B3 artifact already exists: {artifact}")
-    dirty = _git("status", "--porcelain=v1", "--", *CODE_PATHS)
+    dirty = _git("status", "--porcelain=v1", "--", *_code_paths(configuration))
     if dirty:
         raise RuntimeError("FSG4/B3 diagnostic code paths must be committed")
     artifact.parent.mkdir(parents=True, exist_ok=True)
@@ -613,7 +699,10 @@ def _generate(args: argparse.Namespace) -> None:
         staging = Path(raw)
         worker_path = staging / "worker.json"
         recorder = Fsg4B3CounterRecorder()
-        with _instrument_b2(recorder):
+        with ExitStack() as stack:
+            stack.enter_context(_instrument_b2(recorder))
+            if configuration == "B3-A":
+                stack.enter_context(_use_b3a_prepared_executor())
             fsg3_worker._worker(_worker_namespace(args, worker_path))
         worker_sha = _file_sha256(worker_path)
         envelope = _load_json(worker_path)
@@ -645,10 +734,12 @@ def _generate(args: argparse.Namespace) -> None:
             ),
             fallback_dispatch_count=run.execution.fallback_dispatch_count,
             environment_admitted=run.environment.admitted,
+            configuration=configuration,
         )
         snapshot_payload = snapshot.to_dict()
         report: dict[str, object] = {
             "schema_version": ARTIFACT_SCHEMA,
+            "configuration": configuration,
             "source_git_head": _git("rev-parse", "HEAD"),
             "source_identity": run.source_identity,
             "protocol_identity": run.protocol_identity,
@@ -675,8 +766,9 @@ def _generate(args: argparse.Namespace) -> None:
         }
         manifest: dict[str, object] = {
             "schema_version": MANIFEST_SCHEMA,
+            "configuration": configuration,
             "source_git_head": _git("rev-parse", "HEAD"),
-            "code_revision": _code_revision(),
+            "code_revision": _code_revision(configuration),
             "files": files,
             "report_hash": report["report_hash"],
             "fsg3_reference_manifest_hash": FSG3_REFERENCE_MANIFEST_HASH,
@@ -734,6 +826,12 @@ def _replay(artifact: Path) -> dict[str, object]:
     if not isinstance(raw_snapshot, Mapping):
         raise TypeError("FSG4/B3 report snapshot differs")
     snapshot = fsg4_b3_counter_snapshot_from_dict(raw_snapshot)
+    configuration = str(manifest.get("configuration", "B2"))
+    if (
+        snapshot.configuration != configuration
+        or report.get("configuration", "B2") != configuration
+    ):
+        raise ValueError("FSG4/B3 artifact configuration binding differs")
     worker_path = artifact / "worker.json"
     envelope = _load_json(worker_path)
     run = _validate_worker_envelope(envelope, _file_sha256(worker_path))
@@ -777,6 +875,7 @@ def _parse_args() -> argparse.Namespace:
     run.add_argument("--abcrown-root", type=Path, required=True)
     run.add_argument("--model", type=Path, required=True)
     run.add_argument("--property", type=Path, required=True)
+    run.add_argument("--configuration", choices=("B2", "B3-A"), default="B2")
     replay = commands.add_parser("replay")
     replay.add_argument("--artifact-dir", type=Path, required=True)
     return parser.parse_args()

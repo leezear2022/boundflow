@@ -19,6 +19,11 @@ stage: s01
 
 ## Changes
 
+- B3-A第一版实现候选新增typed static template/dynamic instance和exact cache；只有显式cache/hash pair
+  才切换prepared executor，B2默认行为不变；
+- optimizer新增exact `CorePlanInstanceV1` receipt入口，拒绝跨state receipt并跳过第二次scope构造；
+- diagnostic runner新增B3-A模式及预注册counter：只允许module move `1→0`、scope `2→1`、template hit
+  `0→1`，其余B2固定结构不变；
 - 首次fresh B2 diagnostic在counter gate fail closed；同source debug聚合确认唯一偏差是D2H=`6/12`。
   源码审计定位原seam只覆盖6个β `_replacement`，漏掉6个α `_project_alpha` GPU→CPU sparse-layout
   copy；已补计数点，不降低`12`门槛；
@@ -38,11 +43,13 @@ stage: s01
 
 ## Validation
 
+- B3-A实现候选targeted=`31 passed`，mypy touched clean，Pylint=`10.00/10`；fresh GPU尚待执行；
 - 正式artifact replay通过，targeted=`25 passed`，full=`1248 passed, 3 skipped`，tamper=`6/6`；
 - B3-0 targeted=`17 passed`，mypy clean，Pylint=`10.00/10`；
 - 全量回归=`1243 passed, 3 skipped`；
 - FSG3 source artifact static replay与33项测试已在前一阶段通过；
-- 尚无fresh B2 counter artifact、B3 candidate、correctness artifact或performance claim。
+- B2已有正式counter artifact；B3-A目前只有实现候选，尚无fresh B3-A correctness artifact或performance
+  claim。
 
 ## Decisions
 

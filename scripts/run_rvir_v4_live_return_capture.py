@@ -131,16 +131,24 @@ class _LiveExecutor:
         arguments_module: Any,
         precompiled_program: Any = None,
         precompiled_module: Any = None,
+        prepared_core_cache: Any = None,
+        prepared_core_template_hash: str | None = None,
         capture_payloads: bool = True,
         profile_recorder: Any = None,
     ):
         if (precompiled_program is None) != (precompiled_module is None):
             raise ValueError("RVIR-v4 live precompiled program/module must be paired")
+        if (prepared_core_cache is None) != (prepared_core_template_hash is None):
+            raise ValueError("RVIR-v4 prepared core cache/hash must be paired")
+        if prepared_core_cache is not None and precompiled_program is not None:
+            raise ValueError("RVIR-v4 prepared core conflicts with precompiled inputs")
         self.model = model
         self.torch = torch_module
         self.arguments = arguments_module
         self.precompiled_program = precompiled_program
         self.precompiled_module = precompiled_module
+        self.prepared_core_cache = prepared_core_cache
+        self.prepared_core_template_hash = prepared_core_template_hash
         self.capture_payloads = capture_payloads
         self.profile_recorder = profile_recorder
         self.active = False
@@ -153,6 +161,8 @@ class _LiveExecutor:
         self.commit_receipts: list[dict[str, object]] = []
         self.assembly_metadata: list[dict[str, object]] = []
         self.pre_state_identities: list[dict[str, str]] = []
+        self.prepared_core_template_hashes: list[str] = []
+        self.prepared_core_instance_hashes: list[str] = []
         self.last_core_result: Any = None
         self.last_post_result: Any = None
 
@@ -174,6 +184,9 @@ class _LiveExecutor:
         from boundflow.planner import plan_interval_ibp_v0
         from boundflow.runtime.native_alpha_beta_optimization_state import (
             build_native_alpha_beta_scope,
+        )
+        from boundflow.runtime.fsg4_b3_prepared_core import (
+            instantiate_core_plan_v1,
         )
         from boundflow.runtime.rvir_v4_atomic_copy_out import (
             stage_rvir_v4_live_atomic_copy_out,
@@ -283,7 +296,23 @@ class _LiveExecutor:
             thresholds = _one_role(
                 pre_snapshot, ProductionTensorRole.DECISION_THRESHOLD
             ).to(device=execution_device, dtype=execution_dtype)
-            if self.precompiled_program is None:
+            prepared_template = None
+            if self.prepared_core_cache is not None:
+                prepared_template = self.prepared_core_cache.resolve(
+                    self.prepared_core_template_hash, topology=TOPOLOGY
+                )
+                if prepared_template.device != str(
+                    execution_device
+                ) or prepared_template.dtype != str(execution_dtype):
+                    raise ValueError(
+                        "RVIR-v4 prepared core execution placement differs"
+                    )
+                program = prepared_template.program
+                module = prepared_template.module
+                self.prepared_core_template_hashes.append(
+                    prepared_template.stable_hash()
+                )
+            elif self.precompiled_program is None:
                 program = import_onnx(
                     str(self.model), do_shape_infer=True, normalize=True
                 )
@@ -291,29 +320,46 @@ class _LiveExecutor:
             else:
                 program = self.precompiled_program
                 module = self.precompiled_module
-            module.bindings = cast(
-                dict[str, Any],
-                _move_tensors(
-                    module.bindings,
-                    device=execution_device,
-                    dtype=execution_dtype,
-                ),
-            )
+            if prepared_template is None:
+                module.bindings = cast(
+                    dict[str, Any],
+                    _move_tensors(
+                        module.bindings,
+                        device=execution_device,
+                        dtype=execution_dtype,
+                    ),
+                )
             input_spec = InputSpec.box(
                 value_name=program.graph.inputs[0],
                 lower=input_lower,
                 upper=input_upper,
             )
-            policy = mutation_policy.to_native_policy()
-            scope = build_native_alpha_beta_scope(
-                module,
-                input_spec,
-                linear_spec_C=objective,
-                relu_pre=mapping.relu_pre,
-                relu_split_state=mapping.splits,
-                policy=policy,
-            )
-            initial = mapping.to_native_state(scope)
+            prepared_instance = None
+            if prepared_template is None:
+                policy = mutation_policy.to_native_policy()
+                scope = build_native_alpha_beta_scope(
+                    module,
+                    input_spec,
+                    linear_spec_C=objective,
+                    relu_pre=mapping.relu_pre,
+                    relu_split_state=mapping.splits,
+                    policy=policy,
+                )
+                initial = mapping.to_native_state(scope)
+            else:
+                prepared_instance = instantiate_core_plan_v1(
+                    template=prepared_template,
+                    topology=TOPOLOGY,
+                    snapshot=pre_snapshot,
+                    mapping=mapping,
+                    input_spec=input_spec,
+                    linear_spec_C=objective,
+                    mutation_policy=mutation_policy,
+                )
+                initial = prepared_instance.initial_state
+                self.prepared_core_instance_hashes.append(
+                    prepared_instance.instance_hash
+                )
             if self.profile_recorder is not None:
                 self.profile_recorder.begin(
                     scope="core",
@@ -330,6 +376,7 @@ class _LiveExecutor:
                 relu_pre=mapping.relu_pre,
                 initial_state=initial,
                 mutation_policy=mutation_policy,
+                prevalidated_plan=prepared_instance,
             )
             terminal = type(initial)(
                 scope=initial.scope,
@@ -542,6 +589,8 @@ def _worker(args: argparse.Namespace) -> None:
         "assembly_metadata": executor.assembly_metadata,
         "commit_receipts": executor.commit_receipts,
         "pre_state_identities": executor.pre_state_identities,
+        "prepared_core_template_hashes": executor.prepared_core_template_hashes,
+        "prepared_core_instance_hashes": executor.prepared_core_instance_hashes,
         "provider_core_callback_count": 0,
         "provider_compute_bounds_callback_count": (
             executor.provider_compute_bounds_callback_count

@@ -22,6 +22,7 @@ from .native_alpha_beta_optimization_state import (
     build_native_alpha_beta_scope,
     NativeAlphaBetaOptimizationState,
 )
+from .fsg4_b3_prepared_core import CorePlanInstanceV1
 from .rvir_v4_optimizer_mutation import (
     ProductionMutationPolicyV4,
     ProductionOptimizerStepTraceV4,
@@ -236,20 +237,33 @@ def execute_rvir_v4_native_optimizer_trace(
     relu_pre: Mapping[str, IntervalState],
     initial_state: NativeAlphaBetaOptimizationState,
     mutation_policy: ProductionMutationPolicyV4,
+    prevalidated_plan: CorePlanInstanceV1 | None = None,
 ) -> NativeProductionOptimizerTraceV4:
     """Run the admitted production loop without reading its expected step trace."""
 
     mutation_policy.validate()
     initial_state.validate()
     native_policy = mutation_policy.to_native_policy()
-    expected_scope = build_native_alpha_beta_scope(
-        module,
-        input_spec,
-        linear_spec_C=linear_spec_C,
-        relu_pre=relu_pre,
-        relu_split_state=initial_state.splits,
-        policy=native_policy,
-    )
+    if prevalidated_plan is None:
+        expected_scope = build_native_alpha_beta_scope(
+            module,
+            input_spec,
+            linear_spec_C=linear_spec_C,
+            relu_pre=relu_pre,
+            relu_split_state=initial_state.splits,
+            policy=native_policy,
+        )
+    else:
+        # Exact receipt type prevents a subclass from weakening the sealed contract.
+        # pylint: disable-next=unidiomatic-typecheck
+        if type(prevalidated_plan) is not CorePlanInstanceV1:
+            raise TypeError("RVIR-v4 native optimizer prevalidated plan differs")
+        if (
+            prevalidated_plan.initial_state.stable_hash() != initial_state.stable_hash()
+            or prevalidated_plan.scope != initial_state.scope
+        ):
+            raise ValueError("RVIR-v4 native optimizer prevalidated state differs")
+        expected_scope = prevalidated_plan.scope
     if initial_state.scope != expected_scope or set(relu_pre) != set(
         initial_state.splits
     ):

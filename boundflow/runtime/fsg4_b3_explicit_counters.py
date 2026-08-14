@@ -66,6 +66,18 @@ EXPECTED_B2_FIXED_COUNTERS = {
     "timed_candidate_d2h_copy_count": 12,
 }
 
+EXPECTED_B3A_FIXED_COUNTERS = {
+    **EXPECTED_B2_FIXED_COUNTERS,
+    "module_binding_move_in_core_count": 0,
+    "scope_construction_count": 1,
+    "template_hit_in_core_count": 1,
+}
+
+EXPECTED_FIXED_COUNTERS = {
+    "B2": EXPECTED_B2_FIXED_COUNTERS,
+    "B3-A": EXPECTED_B3A_FIXED_COUNTERS,
+}
+
 
 def _canonical_hash(value: object) -> str:
     encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False)
@@ -160,7 +172,7 @@ class Fsg4B3CounterSnapshot:
         failures: list[str] = []
         if self.schema_version != FSG4_B3_COUNTER_SCHEMA:
             failures.append("schema")
-        if self.configuration != "B2" or self.mode != "control":
+        if self.configuration not in EXPECTED_FIXED_COUNTERS or self.mode != "control":
             failures.append("configuration-mode")
         if self.performance_claimed is not False:
             failures.append("performance-claim")
@@ -177,7 +189,9 @@ class Fsg4B3CounterSnapshot:
             for value in counts.values()
         ):
             failures.append("counter-type")
-        for name, expected in EXPECTED_B2_FIXED_COUNTERS.items():
+        for name, expected in EXPECTED_FIXED_COUNTERS.get(
+            self.configuration, {}
+        ).items():
             observed = counts.get(name)
             if observed != expected:
                 failures.append(f"{name}:expected={expected}:observed={observed}")
@@ -205,7 +219,8 @@ class Fsg4B3CounterSnapshot:
         failures = self.gate_failures()
         if failures:
             raise ValueError(
-                "FSG4/B3 B2 counter snapshot gate failed: " + ",".join(failures)
+                f"FSG4/B3 {self.configuration} counter snapshot gate failed: "
+                + ",".join(failures)
             )
 
     def to_dict(self) -> dict[str, object]:
@@ -314,6 +329,8 @@ def events_from_rows(
 __all__ = [
     "COUNTER_NAMES",
     "EXPECTED_B2_FIXED_COUNTERS",
+    "EXPECTED_B3A_FIXED_COUNTERS",
+    "EXPECTED_FIXED_COUNTERS",
     "events_from_rows",
     "FSG4_B3_COUNTER_SCHEMA",
     "Fsg4B3CounterEvent",

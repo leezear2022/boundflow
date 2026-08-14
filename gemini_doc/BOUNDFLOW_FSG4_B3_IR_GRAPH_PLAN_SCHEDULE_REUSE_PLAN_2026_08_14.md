@@ -199,7 +199,8 @@ headline ratio：
 ## 10. Tasks
 
 1. [x] B3-0：显式call/copy/validation/hash counter diagnostic，状态=`VALIDATED-B2-COUNTERS`，不形成speedup；
-2. [ ] B3-A：PreparedCoreTemplate、CorePlanInstance与cache/reject tests；
+2. [ ] B3-A：PreparedCoreTemplate、CorePlanInstance与cache/reject tests；第一版实现候选已落地，等待fresh
+   GPU counter/correctness artifact后才能勾选关闭；
 3. [ ] B3-B：terminal-only optimizer Schedule和forward-trace handoff；
 4. [ ] B3-C：device-resident AtomicCommitPlan、rollback与audit digest分层；
 5. [ ] 五fresh B2/B3 correctness；
@@ -248,3 +249,20 @@ headline ratio：
 
 B3-0证明预注册的重复工作真实存在，并把B3-A/B/C的物理分母冻结；它不证明任何B3 speedup。下一动作仅
 允许B3-A PreparedCoreTemplate/CorePlanInstance，B3-B/C与B4—B7继续关闭。
+
+## 15. B3-A Implementation Candidate（2026-08-14）
+
+- 新增`PreparedCoreTemplateV1`：冻结primal graph/参数内容、六层ReLU topology、device/dtype、输入与
+  objective shape bucket、admitted policy contract、12条mutable copy-out path和实际binding placement；
+- 新增动态`CorePlanInstanceV1`：每次重新绑定snapshot/mapping/input/objective/intermediate bounds/
+  split/α/β/policy并仅调用一次`build_native_alpha_beta_scope`；
+- 新增exact `PreparedCoreTemplateCache`，miss/compile与core hit分别可观测；错误topology、device、dtype、
+  mutable inventory、module parameter drift及跨state receipt全部fail closed；
+- `_LiveExecutor`仅在显式cache/hash pair下启用B3-A；默认B2仍使用原precompiled module、core内move和两次
+  scope路径；prepared路径把binding move放到query/core外，并把typed plan receipt交给optimizer；
+- counter schema预注册B3-A相对B2只允许三项变化：module move `1→0`、scope `2→1`、template hit
+  `0→1`；optimizer `10/9`、forward `5`、KFSB `3/3`、D2H/commit `12`等全部保持；
+- 定向验证=`31 passed`，mypy touched clean，Pylint=`10.00/10`。
+
+当前状态仅为`IMPLEMENTED-PENDING-FRESH-GPU`。上述三项物理counter、真实语义等价及性能均未由fresh
+artifact证明；B3-B/C和B4—B7继续关闭。

@@ -67,6 +67,25 @@ def test_live_executor_requires_paired_precompiled_inputs() -> None:
     assert executor.capture_payloads is False
     assert executor.last_core_result is None
     assert executor.last_post_result is None
+    with pytest.raises(ValueError, match="cache/hash must be paired"):
+        live_runner._LiveExecutor(
+            model=runner.Path("model.onnx"),
+            torch_module=torch,
+            arguments_module=SimpleNamespace(),
+            prepared_core_cache=object(),
+            capture_payloads=False,
+        )
+    with pytest.raises(ValueError, match="conflicts with precompiled"):
+        live_runner._LiveExecutor(
+            model=runner.Path("model.onnx"),
+            torch_module=torch,
+            arguments_module=SimpleNamespace(),
+            precompiled_program=object(),
+            precompiled_module=object(),
+            prepared_core_cache=object(),
+            prepared_core_template_hash="f" * 64,
+            capture_payloads=False,
+        )
 
 
 def test_profile_recorder_emits_non_overlapping_cuda_span() -> None:

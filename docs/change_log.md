@@ -5379,3 +5379,13 @@
 
 **记录**
 - `gemini_doc/change_2026-08-14_fsg3_post_init_temperature_feasibility.md`
+
+## 2026-08-14：FSG4/B3-A Prepared Core 实现候选
+
+- 新增typed静态`PreparedCoreTemplateV1`、动态`CorePlanInstanceV1`与exact cache；
+- B2默认路径不变，显式B3-A路径把module binding move移出core并复用一次构造的scope；
+- topology/device/dtype/mutable inventory/module/state drift全部fail closed；
+- 定向31项、mypy touched与Pylint 10.00/10通过，fresh GPU artifact尚待执行，无性能主张。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg4_b3a_prepared_core_candidate.md`
