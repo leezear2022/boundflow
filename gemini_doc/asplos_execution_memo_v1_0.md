@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-16 FSG4/B4-0 Runner指令**：schema/runner已实现为
+> `IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-ARTIFACT`，但正式fresh artifact和opportunity closure尚未
+> 执行。下一唯一动作是提交clean source后生成control/profile raw、root replay与tamper；在B4-0门禁
+> 关闭前不得实现TIR，B4-A/B/C/D和B5—B7不得提前混入。
+
 > **2026-08-16 FSG4/B4预注册指令**：B4已冻结为14-call production lower-only CROWN累计路线，状态=
 > `PREREGISTERED-NOT-IMPLEMENTED`。B3仍是直接基线、B0仍是累计对照；optimizer-only无限加速不足以
 > 回到B0。下一唯一动作是B4-0 read-only kernel/materialization attribution；B4-0关闭前不得实现TIR，

@@ -1,5 +1,15 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-16：FSG4/B4-0 Kernel/Materialization Attribution Runner 候选
+
+- 新增typed raw profiler event与control/profile独立worker；
+- 显式区分CUDA user annotation和真实kernel，以correlation parent为主、temporal marker为fallback；
+- 确定性gzip raw绑定压缩/解压/canonical digest与行数，可重算phase、kernel、operator、materialization
+  及Amdahl门禁；
+- targeted=`11 passed`、B3/B4相关=`50 passed`、full=`1325 passed, 3 skipped`，静态检查通过；
+- 状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-ARTIFACT`，无B4性能声明。详见
+  `gemini_doc/change_2026-08-16_fsg4_b4_0_kernel_attribution_runner_candidate.md`。
+
 ## 2026-08-16：FSG4/B4 Cumulative CUDA/TIR Fusion 预注册
 
 - 以externally approved B3为直接基线、B0为累计公平对照；

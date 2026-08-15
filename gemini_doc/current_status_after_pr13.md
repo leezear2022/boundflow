@@ -1,5 +1,12 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-16 FSG4/B4-0 Runner候选状态**：typed raw profiler schema、control/profile worker、
+> 14-call/4-forward marker、CUDA annotation/kernel区分、correlation/temporal归因、确定性gzip与
+> operator/kernel/materialization replay已实现；targeted=`11 passed`、B3/B4相关=`50 passed`、full=
+> `1325 passed, 3 skipped`，静态门禁通过。状态=
+> `IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-ARTIFACT`；无B4 performance claim。下一唯一动作是从clean
+> source生成fresh B4-0 artifact并关闭opportunity门禁，B4-A/B/C/D与B5—B7仍未开放。
+
 > **2026-08-16 FSG4/B4预注册状态**：B4 cumulative CUDA/TIR与跨阶段融合已冻结为
 > `PREREGISTERED-NOT-IMPLEMENTED`。路线覆盖14次production lower-only CROWN，而不是只优化占query
 > 7.933%的optimizer。下一唯一动作是B4-0 read-only kernel/materialization attribution；B4-A/B/C/D、

@@ -1,5 +1,9 @@
 # BoundFlow 面向 ASPLOS 的总体研发与论文执行计划 v1.0
 
+> **2026-08-16 FSG4/B4-0 Runner候选**：B3外审关闭后，B4-0 read-only profiler schema/runner已实现，
+> 状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-ARTIFACT`。下一步只允许生成fresh attribution artifact
+> 并关闭opportunity门禁；无B4 performance/B0 parity claim，B4-A/B/C/D与B5—B7仍关闭。
+
 > **2026-08-14 FSG4/B3-0关闭**：真实B2显式counter已以`VALIDATED-B2-COUNTERS`冻结；该状态仅证明
 > B3复用目标的物理分母，不是加速结论。下一动作B3-A PreparedCoreTemplate/CorePlanInstance，B3-B/C和
 > B4—B7继续按门禁关闭。
