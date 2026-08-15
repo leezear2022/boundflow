@@ -1,0 +1,16 @@
+{
+  "task": "fsg4-b4-0-kernel-attribution-20260816",
+  "title": "FSG4 B4-0 kernel attribution opportunity audit",
+  "status": "ready_for_audit",
+  "round": 1,
+  "executor": "codex",
+  "auditor": "external-model",
+  "approved_round": null,
+  "docs": [
+    "fsg4-b4-0-kernel-attribution-20260816/request",
+    "fsg4-b4-0-kernel-attribution-20260816/r001/delivery"
+  ],
+  "rev": 3,
+  "created": "2026-08-15T17:15:54Z",
+  "updated": "2026-08-15T17:15:54Z"
+}

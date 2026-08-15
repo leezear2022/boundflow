@@ -1,0 +1,38 @@
+{
+  "doc": "fsg4-b4-0-kernel-attribution-20260816/r001/delivery",
+  "type": "delivery",
+  "task": "fsg4-b4-0-kernel-attribution-20260816",
+  "round": 1,
+  "from": "codex",
+  "to": "external-model",
+  "ts": "2026-08-15T17:15:54Z",
+  "base_commit": "9adde46",
+  "result_commit": "dcd128c",
+  "changed_files": [
+    "boundflow/runtime/fsg4_b4_kernel_attribution.py",
+    "scripts/run_fsg4_b4_kernel_attribution.py",
+    "tests/test_fsg4_b4_kernel_attribution.py",
+    "tests/test_fsg4_b4_kernel_attribution_runner.py",
+    "artifacts/fsg4-b4-kernel-attribution/resnet2b-prop0-v1",
+    "gemini_doc/change_2026-08-16_fsg4_b4_0_kernel_attribution_closure.md"
+  ],
+  "claims": [
+    "Internal B4-0 attribution/opportunity only; no speedup or memory claim"
+  ],
+  "validation": [
+    {
+      "cmd": "targeted=pass,related=pass,full=pass,replay=pass,tamper=pass,static",
+      "result": "pass"
+    }
+  ],
+  "limitations": [
+    "Profiler timing is attribution-only; allocation delta is cumulative; external audit pending"
+  ],
+  "risks": [
+    "2307 kernels use explicit temporal-marker fallback; audit must distinguish from correlation evidence"
+  ],
+  "open_questions": [
+    "Approve VALIDATED-B4-0-OPPORTUNITY and open only B4-A?"
+  ],
+  "md_sha256": "cd9346ad614b3bf4cace110c698ac30d50c27ff963011f1f25c7e7e7f11f1d3e"
+}
