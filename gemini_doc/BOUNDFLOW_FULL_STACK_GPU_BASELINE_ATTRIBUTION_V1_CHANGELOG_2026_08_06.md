@@ -9,6 +9,14 @@ stage: s01
 
 # BoundFlow Full-Stack GPU Baseline and Attribution v1 Changelog
 
+## FSG4/B4 Cumulative Fusion Preregistration
+
+- B3为直接基线、B0为累计对照；
+- 从raw冻结14次lower-only CROWN的Amdahl share与required-speedup公式；
+- B4依次拆为B4-0 attribution、B4-A terminal export fusion、B4-B differentiable lower-only TIR、
+  B4-C cumulative coverage与B4-D formal timing；
+- 当前`PREREGISTERED-NOT-IMPLEMENTED`，只执行B4-0，B5—B7关闭。
+
 ## FSG4/B3 External Audit Closure
 
 - Round 2从36个raw worker独立重算44项检查，AC1—AC7全PASS，无blocker/major/minor；

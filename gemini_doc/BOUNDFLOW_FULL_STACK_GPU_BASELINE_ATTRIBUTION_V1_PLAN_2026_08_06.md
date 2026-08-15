@@ -15,6 +15,11 @@ stage: s01
 > AC1—AC7并approve，exchange=`closed/approved`。当前只开放从B3累计基线进入B4 operator/cross-stage
 > fusion；B5—B7继续关闭。
 
+> **2026-08-16 FSG4/B4 overlay**：B4已完成实现前预注册，覆盖10次optimizer、1次terminal export与
+> 3次KFSB child的14-call lower-only CROWN路径；当前只执行B4-0 read-only kernel/materialization
+> attribution。B4-A/B/C/D未实现，B5—B7继续关闭。详细协议见
+> `gemini_doc/BOUNDFLOW_FSG4_B4_CUMULATIVE_CUDA_TIR_FUSION_PLAN_2026_08_16.md`。
+
 ## 0. Route Correction
 
 NRIR49A 的正式数据与 artifact 保持有效，但其判定作用域必须收窄为：
@@ -340,7 +345,8 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
    `VALIDATED-FSG3-B0-B1-B2-BASELINE`；
 6. [~] FSG4：B3-0/A/B/C、five-fresh correctness、36-process正式计时与Round 2外审均已关闭；B3=
    `EXTERNALLY-APPROVED-VALIDATED-REDUCED-B3`。当前只开放以B3为直接累计基线的B4
-   operator/cross-stage CUDA/TIR fusion candidate；B5—B7未实现/消融；
+   operator/cross-stage CUDA/TIR fusion candidate；B4已预注册、下一动作仅B4-0 attribution，
+   B4-A/B/C/D及B5—B7未实现/消融；
 7. [—] FSG5：因无合法B7 candidate，依赖门禁阻止，无系统性能claim。
 
 ## 12. Validation
@@ -545,3 +551,4 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 - selected-only history: [NRIR49A G1 plan](BOUNDFLOW_NRIR49A_G1_GPU_ATTRIBUTION_V1_PLAN_2026_08_06.md)
 - RVIR contract: [Real Verifier IR integration](real_verifier_ir_integration_contract_v1_2026_08_03.md)
 - FSG3 preregistration: [B2 same-solver timing](fsg3_b2_same_solver_timing_preregistration_2026_08_13.md)
+- FSG4/B4 preregistration: [cumulative CUDA/TIR fusion](BOUNDFLOW_FSG4_B4_CUMULATIVE_CUDA_TIR_FUSION_PLAN_2026_08_16.md)

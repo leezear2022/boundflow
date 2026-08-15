@@ -1,5 +1,10 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-16 FSG4/B4预注册状态**：B4 cumulative CUDA/TIR与跨阶段融合已冻结为
+> `PREREGISTERED-NOT-IMPLEMENTED`。路线覆盖14次production lower-only CROWN，而不是只优化占query
+> 7.933%的optimizer。下一唯一动作是B4-0 read-only kernel/materialization attribution；B4-A/B/C/D、
+> B5—B7、B0 parity与最终system gate均未关闭。
+
 > **2026-08-15 FSG4/B3外审关闭状态**：Round 2审计从raw独立重算44项检查，AC1—AC7全部PASS，
 > 无blocker/major/minor；exchange=`closed/approved`。B3正式状态=
 > `EXTERNALLY-APPROVED-VALIDATED-REDUCED-B3`。只开放以B3为累计基线的B4 fusion candidate；B5—B7、

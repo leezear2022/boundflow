@@ -10,6 +10,13 @@
 
 ---
 
+FSG4/B4 cumulative CUDA/TIR fusion已完成实现前预注册，状态=
+`PREREGISTERED-NOT-IMPLEMENTED`。B3 raw表明optimizer-only无限加速仍无法追回B0；B4因此冻结覆盖
+10次optimizer、1次terminal export与3次KFSB child的14-call lower-only CROWN主线，依次执行B4-0
+kernel/materialization attribution、B4-A terminal export fusion、B4-B differentiable lower-only TIR、
+B4-C cumulative coverage与B4-D formal timing。当前下一唯一动作是B4-0；B5—B7继续关闭。见
+`gemini_doc/BOUNDFLOW_FSG4_B4_CUMULATIVE_CUDA_TIR_FUSION_PLAN_2026_08_16.md`。
+
 FSG4/B3正式计时已于2026-08-15通过Round 2独立外审并关闭为
 `EXTERNALLY-APPROVED-VALIDATED-REDUCED-B3`：外审从36个raw worker独立重算44项检查，AC1—AC7
 全部PASS，无blocker/major/minor；exchange已由executor关闭为`closed/approved`。当前只开放以B3为

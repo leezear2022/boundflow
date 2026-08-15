@@ -1,5 +1,15 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-16：FSG4/B4 Cumulative CUDA/TIR Fusion 预注册
+
+- 以externally approved B3为直接基线、B0为累计公平对照；
+- 从B3 raw重算optimizer-only与14-call lower-only CROWN的query share、Amdahl上限和追回B0所需
+  speedup，禁止再次把单区域优化外推为系统收益；
+- 冻结B4-0 attribution、B4-A terminal export fusion、B4-B differentiable lower-only TIR、B4-C
+  cumulative coverage与B4-D formal timing；
+- 状态=`PREREGISTERED-NOT-IMPLEMENTED`，下一唯一动作是B4-0，B5—B7继续关闭。详见
+  `gemini_doc/change_2026-08-16_fsg4_b4_cumulative_fusion_preregistration.md`。
+
 ## 2026-08-15：FSG4/B3 正式计时外部审计关闭
 
 - Round 2外审不采信summary，从36个raw worker独立重算44项检查，AC1—AC7全PASS；

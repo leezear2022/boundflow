@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-16 FSG4/B4预注册指令**：B4已冻结为14-call production lower-only CROWN累计路线，状态=
+> `PREREGISTERED-NOT-IMPLEMENTED`。B3仍是直接基线、B0仍是累计对照；optimizer-only无限加速不足以
+> 回到B0。下一唯一动作是B4-0 read-only kernel/materialization attribution；B4-0关闭前不得实现TIR，
+> B4-A/B/C/D和B5—B7不得提前混入。计划入口为
+> `gemini_doc/BOUNDFLOW_FSG4_B4_CUMULATIVE_CUDA_TIR_FUSION_PLAN_2026_08_16.md`。
+
 > **2026-08-15 FSG4/B3外审关闭指令**：Round 2独立外审AC1—AC7全部PASS，无blocker/major/minor，
 > exchange已`closed/approved`。`VALIDATED-REDUCED-B3`正式关闭；下一唯一工程主线是以B3为直接对照的
 > B4 operator/cross-stage CUDA/TIR fusion预注册与B4-0 qualification。B5—B7及最终system gate不得启动。

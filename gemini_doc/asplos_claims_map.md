@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-16 FSG4/B4预注册**：状态=`PREREGISTERED-NOT-IMPLEMENTED`，无B4 performance claim。
+> B3 raw重算显示optimizer-only占query约7.933%，无限加速上限约1.0862x，无法追回B0所需1.0989x；
+> 10 optimizer + 1 terminal export + 3 KFSB child的14-call lower-only CROWN合计约12.010%，单独追回
+> B0 parity需约3.9897x。当前只准入B4-0 attribution，B5—B7与最终system gate关闭；BoundConv 40x
+> 继续标为`USER-REPORTED`。
+
 > **2026-08-15 FSG4/B3外审关闭**：Round 2外部模型从raw独立重算44项检查，AC1—AC7全PASS，
 > 无blocker/major/minor；exchange=`closed/approved`。`VALIDATED-REDUCED-B3`正式成立，只支持B3相对B2
 > core `1.071617x`、query不退化的reduced claim，仍不支持相对B0或ASPLOS全栈speedup。当前仅开放
