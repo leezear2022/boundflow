@@ -1,5 +1,12 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-16 FSG4/B4-0内部关闭**：source=`66154e4`正式artifact含270609 raw events、
+> 35367/35367 CUDA kernel closure、14-call/4-forward exact marker；semantic max diff=`4.768e-7`且
+> discrete/sign exact，replay与9/9 outer-resigned tamper通过。CROWN14覆盖9196 kernels，按B3冻结share
+> 约为67.72% core；terminal export是完整重复CROWN call。状态=
+> `INTERNALLY-VALIDATED-B4-0-OPPORTUNITY-PENDING-EXTERNAL-AUDIT`；只支持attribution/opportunity，
+> 不支持speedup/memory/B0 parity。外审批准后只开放B4-A。
+
 > **2026-08-16 FSG4/B4-0 Runner候选**：read-only profiler schema/runner已实现并通过15项B4、54项
 > B3/B4相关及全量`1329 passed, 3 skipped`；raw保存operator/kernel/stream/shape/memory、明确记录
 > correlation/temporal/unattributed方法，并以确定性gzip和多层digest绑定。状态=

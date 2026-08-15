@@ -1,0 +1,24 @@
+{
+  "files": {
+    "README.md": "504795ee0a83de1dea1cb954376acd6a074ee1b31947c1e37f2eba195e97022d",
+    "events/control.jsonl.gz": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+    "events/profile.jsonl.gz": "ee23d58cca710dabf7fdd98eaf3ce628f572d95534d71d45930f2003c4f7be2e",
+    "logs/control.stderr.txt": "d2ce67b5e675be7301921cb92969df69f51561595e30c7b330cdf0e3a126748c",
+    "logs/control.stdout.txt": "5ffac2ad2fe7af9f2a0d876b0ff31c3fba50f3452df8d09b1db87a2e4793a90d",
+    "logs/profile.stderr.txt": "a571957c2b7c7adb6111282a58a98ea166903661e42a233b6308143889a6fe13",
+    "logs/profile.stdout.txt": "0bc669fa21934af1bb7673421186fd283aeb582b204b818eb448df1e28d1758d",
+    "protocol.json": "010d6a58d7ebd53b2753667196e704cb1083ea893e3f5c7d575e61a19e625b93",
+    "replay_stdout.txt": "17858c356aab782f8edb9276953730dbc824896222cb06148e895c73968b626f",
+    "summary.json": "043bffab15979ec17402526fbf57dc0ba2678270c82cc6f8c5ea4eba6b83c2d0",
+    "tamper_report.json": "19ccf71144934ae9b28d4fa79b3ae992762098a6cc16e6527b3ec3a30b78e482",
+    "workers/control.json": "9a79ac2f1cc6f3820c35a2f48f2a613a69adf15390fe060741581be7c367df00",
+    "workers/profile.json": "2a6c3619ab05d977f8a86ddf88ee86d9e912f94e96eb3464aad3ac2fd02b0668"
+  },
+  "manifest_hash": "8720d2f9c8bb2260c1b7a8e9c328762c2a86623b36c5db3ef165825c5891c4b3",
+  "performance_claimed": false,
+  "protocol_hash": "2b14a2a8d457662f3fa7b230355eb39cd213d9d817e86d18d57a754dcb41c46b",
+  "schema_version": "boundflow.fsg4-b4-kernel-attribution-artifact/v1",
+  "source_git_head": "66154e485594e8a84ad1ce04d701d8543c1a7335",
+  "summary_hash": "987f756db1a257877fbc1581cda85cc00f5d4e7312ab6f3219ad74d58f26bc9e",
+  "worker_count": 2
+}

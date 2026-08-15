@@ -1,5 +1,15 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-16：FSG4/B4-0 Kernel/Materialization Attribution 内部关闭
+
+- source=`66154e4`正式artifact包含270609 events、35367/35367 kernel phase closure和14-call exact marker；
+- semantic discrete/sign exact、max diff=`4.768e-7`；profile扰动不作性能结果；
+- CROWN14聚合9196 kernels/32618329 ns kernel-sum/57292800 B累计allocation delta，按B3冻结share约覆盖
+  67.72% core；B4-A满足消除完整重复terminal export CROWN call；
+- root replay与9/9 outer-resigned tamper通过，仍`performance_claimed=false`；
+- 状态=`INTERNALLY-VALIDATED-B4-0-OPPORTUNITY-PENDING-EXTERNAL-AUDIT`。详见
+  `gemini_doc/change_2026-08-16_fsg4_b4_0_kernel_attribution_closure.md`。
+
 ## 2026-08-16：FSG4/B4-0 Kernel/Materialization Attribution Runner 候选
 
 - 新增typed raw profiler event与control/profile独立worker；

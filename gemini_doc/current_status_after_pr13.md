@@ -1,5 +1,12 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-16 FSG4/B4-0内部关闭状态**：source=`66154e4`正式fresh control/profile artifact含
+> 270609 raw events、35367/35367 CUDA kernel closure、14-call/4-forward exact marker；semantic
+> max diff=`4.76837158203125e-07`、discrete/sign exact，root replay与9/9 outer-resigned tamper通过。
+> CROWN14按冻结B3 share覆盖约67.72% core，B4-A满足消除完整重复terminal export CROWN call。状态=
+> `INTERNALLY-VALIDATED-B4-0-OPPORTUNITY-PENDING-EXTERNAL-AUDIT`，无性能claim；下一步外审，批准后
+> 只启动B4-A，B4-B不得混跑，B4-C/D与B5—B7关闭。
+
 > **2026-08-16 FSG4/B4-0 Runner候选状态**：typed raw profiler schema、control/profile worker、
 > 14-call/4-forward marker、CUDA annotation/kernel区分、correlation/temporal归因、确定性gzip与
 > operator/kernel/materialization replay、B3冻结semantic comparator与9类outer-resigned tamper已实现；

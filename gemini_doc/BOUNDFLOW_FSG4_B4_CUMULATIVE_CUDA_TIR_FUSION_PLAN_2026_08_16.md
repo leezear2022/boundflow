@@ -309,3 +309,10 @@ outer-resigned tamper并将report绑定进最终manifest。
 
 本状态只证明runner实现；正式fresh artifact、raw-derived opportunity、tamper与B4-0 closure尚未完成。
 因此上文“不在B4-0关闭前实现TIR”的门禁不变，下一唯一动作是从clean source生成正式artifact。
+
+### B4-0 正式artifact更新
+
+source=`66154e4`已完成fresh formal artifact、root replay与9/9 outer-resigned tamper，内部状态=
+`INTERNALLY-VALIDATED-B4-0-OPPORTUNITY-PENDING-EXTERNAL-AUDIT`。CROWN14覆盖14个call、9196个kernel；
+B4-A满足消除完整重复terminal export CROWN call，B4-B按冻结share覆盖约67.72% B3 core。外审批准前
+仍不实现TIR；批准后下一唯一动作是B4-A terminal lower/lA handoff，B4-B不得与之混跑。

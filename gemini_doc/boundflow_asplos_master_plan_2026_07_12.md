@@ -1,5 +1,9 @@
 # BoundFlow 面向 ASPLOS 的总体研发与论文执行计划 v1.0
 
+> **2026-08-16 FSG4/B4-0内部关闭**：source=`66154e4`formal attribution/replay/tamper已内部通过，
+> opportunity只准入B4-A/B候选而无性能claim。当前等待外审；批准后下一单变量为B4-A terminal
+> lower/lA handoff，B4-B/C/D与B5—B7不得提前混入。
+
 > **2026-08-16 FSG4/B4-0 Runner候选**：B3外审关闭后，B4-0 read-only profiler schema/runner已实现，
 > 状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-ARTIFACT`。下一步只允许生成fresh attribution artifact
 > 并关闭opportunity门禁；无B4 performance/B0 parity claim，B4-A/B/C/D与B5—B7仍关闭。

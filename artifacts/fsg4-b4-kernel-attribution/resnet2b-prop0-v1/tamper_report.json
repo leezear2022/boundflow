@@ -1,0 +1,54 @@
+{
+  "all_rejected": true,
+  "performance_claimed": false,
+  "probe_count": 9,
+  "report_hash": "0710e26ceed6d2623bc674978d66b6874a911ef361602bc58a927601b3a7865e",
+  "results": [
+    {
+      "error_type": "ValueError",
+      "label": "marker-count",
+      "rejected": true
+    },
+    {
+      "error_type": "ValueError",
+      "label": "raw-phase",
+      "rejected": true
+    },
+    {
+      "error_type": "ValueError",
+      "label": "raw-ordinal",
+      "rejected": true
+    },
+    {
+      "error_type": "ValueError",
+      "label": "raw-duration",
+      "rejected": true
+    },
+    {
+      "error_type": "ValueError",
+      "label": "raw-delete",
+      "rejected": true
+    },
+    {
+      "error_type": "ValueError",
+      "label": "semantic-lower",
+      "rejected": true
+    },
+    {
+      "error_type": "ValueError",
+      "label": "protocol-code",
+      "rejected": true
+    },
+    {
+      "error_type": "ValueError",
+      "label": "worker-kind",
+      "rejected": true
+    },
+    {
+      "error_type": "ValueError",
+      "label": "summary-opportunity",
+      "rejected": true
+    }
+  ],
+  "schema_version": "boundflow.fsg4-b4-kernel-attribution-tamper/v1"
+}

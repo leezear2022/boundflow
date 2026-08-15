@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-16 FSG4/B4-0内部关闭指令**：source=`66154e4`正式artifact、root replay、9/9 tamper及
+> opportunity门禁内部通过，状态=`INTERNALLY-VALIDATED-B4-0-OPPORTUNITY-PENDING-EXTERNAL-AUDIT`。
+> 当前下一唯一动作是外部审计；批准后只启动B4-A terminal lower/lA handoff，不得把B4-B/TIR混入
+> 同一变量，B4-C/D和B5—B7继续关闭。
+
 > **2026-08-16 FSG4/B4-0 Runner指令**：schema/runner已实现为
 > `IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-ARTIFACT`，但正式fresh artifact和opportunity closure尚未
 > 执行。下一唯一动作是提交clean source后生成control/profile raw、root replay与tamper；在B4-0门禁

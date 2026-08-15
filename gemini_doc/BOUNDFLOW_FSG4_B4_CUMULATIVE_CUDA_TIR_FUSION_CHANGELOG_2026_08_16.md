@@ -1,5 +1,15 @@
 # FSG4/B4 cumulative CUDA/TIR fusion changelog
 
+## 2026-08-16 — B4-0 internal opportunity closure
+
+- source=`66154e4`生成fresh control/profile正式artifact；semantic discrete/sign exact，lower max diff=
+  `4.76837158203125e-07`；
+- raw=`270609`events、`35367/35367`kernel closure、14-call/4-forward marker exact；
+- CROWN14=`9196`kernels、`32618329 ns`kernel-sum、`57292800 B`累计allocation delta；
+- B4-A以消除完整terminal export CROWN call准入；B4-B 14-call覆盖约67.72% B3 core，过5%门槛；
+- replay PASS、9/9 outer-resigned tamper rejected；仍`performance_claimed=false`；
+- 状态=`INTERNALLY-VALIDATED-B4-0-OPPORTUNITY-PENDING-EXTERNAL-AUDIT`，外审前不启动TIR。
+
 ## 2026-08-16 — B4-0 runner candidate
 
 - 实现typed raw profiler schema及control/profile独立worker；
