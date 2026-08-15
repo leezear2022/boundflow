@@ -61,3 +61,13 @@ def test_log_sanitizer_removes_machine_paths() -> None:
     assert "$ABCROWN_PYTHON" in sanitized
     assert "$VNNCOMP_ROOT/bench/model.onnx" in sanitized
     assert "$TMP/private-run" in sanitized
+
+
+def test_worker_interpreter_path_preserves_virtualenv_symlink(tmp_path: Path) -> None:
+    target = tmp_path / "base-python"
+    target.touch()
+    virtualenv_python = tmp_path / "venv-python"
+    virtualenv_python.symlink_to(target)
+    observed = runner._absolute_without_symlink_resolution(virtualenv_python)
+    assert observed == virtualenv_python.absolute()
+    assert observed != virtualenv_python.resolve()

@@ -303,6 +303,7 @@ B4-0 profiler schema + fresh attribution artifact
 B4-0 schema/runner已实现为`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-ARTIFACT`。实现包含control/profile
 分离、14-call/4-forward marker、真实kernel与CUDA user annotation区分、correlation/temporal归因、
 确定性gzip raw、operator/kernel/materialization ledger、root replay所需的多层digest绑定和本机路径拒绝。
+worker解释器保留virtualenv symlink，并在创建artifact前独立验证`import boundflow, torch`。
 
 本状态只证明runner实现；正式fresh artifact、raw-derived opportunity、tamper与B4-0 closure尚未完成。
 因此上文“不在B4-0关闭前实现TIR”的门禁不变，下一唯一动作是从clean source生成正式artifact。

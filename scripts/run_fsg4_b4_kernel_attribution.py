@@ -124,6 +124,12 @@ def _code_revision() -> dict[str, str]:
     return {path: _sha256(REPOSITORY_ROOT / path) for path in CODE_PATHS}
 
 
+def _absolute_without_symlink_resolution(path: Path) -> Path:
+    """Make a CLI path absolute while retaining virtualenv interpreter links."""
+
+    return path.expanduser().absolute()
+
+
 def _historical_code_revision(source: str) -> dict[str, str]:
     if _git(REPOSITORY_ROOT, "rev-parse", "HEAD") == source:
         return _code_revision()
@@ -407,6 +413,31 @@ def _run_fresh_worker(
     return _load_json(result)
 
 
+def _validate_worker_python(args: argparse.Namespace) -> None:
+    environment = dict(os.environ)
+    environment["PYTHONNOUSERSITE"] = "1"
+    environment["PYTHONPATH"] = str(REPOSITORY_ROOT)
+    completed = subprocess.run(
+        (
+            str(args.abcrown_python),
+            "-c",
+            "import boundflow, torch; print(torch.__version__)",
+        ),
+        cwd=REPOSITORY_ROOT,
+        env=environment,
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        timeout=60,
+    )
+    if completed.returncode != 0:
+        raise ValueError(
+            "FSG4/B4 worker interpreter cannot import torch/boundflow: "
+            + _sanitize_text(completed.stderr, args)
+        )
+
+
 def _sanitize_text(value: str, args: argparse.Namespace) -> str:
     replacements = (
         (
@@ -532,6 +563,7 @@ def _readme() -> str:
 def _generate(args: argparse.Namespace) -> dict[str, object]:
     if _git(REPOSITORY_ROOT, "status", "--porcelain=v1", "--", *CODE_PATHS):
         raise ValueError("FSG4/B4 code paths must be clean before generation")
+    _validate_worker_python(args)
     artifact = args.artifact_dir.resolve()
     if artifact.exists() and any(artifact.iterdir()):
         raise FileExistsError(f"FSG4/B4 artifact already exists: {artifact.name}")
@@ -664,7 +696,7 @@ def main() -> None:
     elif args.command == "generate":
         args.benchmark_root = args.benchmark_root.resolve()
         args.abcrown_root = args.abcrown_root.resolve()
-        args.abcrown_python = args.abcrown_python.resolve()
+        args.abcrown_python = _absolute_without_symlink_resolution(args.abcrown_python)
         args.model = args.model.resolve()
         args.property = args.property.resolve()
         result = _generate(args)

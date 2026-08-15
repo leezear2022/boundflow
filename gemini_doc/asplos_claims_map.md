@@ -1,7 +1,7 @@
 # BoundFlow ASPLOS Claims Map
 
-> **2026-08-16 FSG4/B4-0 Runner候选**：read-only profiler schema/runner已实现并通过11项B4、50项
-> B3/B4相关及全量`1325 passed, 3 skipped`；raw保存operator/kernel/stream/shape/memory、明确记录
+> **2026-08-16 FSG4/B4-0 Runner候选**：read-only profiler schema/runner已实现并通过12项B4、50项
+> B3/B4相关及全量`1326 passed, 3 skipped`；raw保存operator/kernel/stream/shape/memory、明确记录
 > correlation/temporal/unattributed方法，并以确定性gzip和多层digest绑定。状态=
 > `IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-ARTIFACT`，只支持runner机制claim；正式opportunity、B4-A/B
 > 准入、B4 speedup、B0 parity与ASPLOS-ready均未成立。

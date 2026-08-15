@@ -7,7 +7,8 @@
 - 区分CUDA user annotation、phase device total与真实kernel，未归属kernel不再静默丢弃；
 - raw以确定性gzip JSONL保存，同时绑定压缩/解压/canonical三层digest与行数；
 - 从raw重算exact/root phase、kernel/operator/materialization ledger及Amdahl门禁；
-- B4 targeted=`11 passed`、B3/B4相关=`50 passed`、full=`1325 passed, 3 skipped`，静态检查通过；
+- 修复virtualenv interpreter symlink被`resolve()`展开的问题，并增加worker import preflight；
+- B4 targeted=`12 passed`、B3/B4相关=`50 passed`、full=`1326 passed, 3 skipped`，静态检查通过；
 - 状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-ARTIFACT`，尚无B4性能或opportunity关闭结论。
 
 ## 2026-08-16 — v1 preregistration

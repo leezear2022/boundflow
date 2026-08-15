@@ -6,9 +6,13 @@
 - 显式区分CUDA user annotation和真实kernel，以correlation parent为主、temporal marker为fallback；
 - 确定性gzip raw绑定压缩/解压/canonical digest与行数，可重算phase、kernel、operator、materialization
   及Amdahl门禁；
-- targeted=`11 passed`、B3/B4相关=`50 passed`、full=`1325 passed, 3 skipped`，静态检查通过；
+- virtualenv解释器symlink保留与独立`import boundflow, torch`preflight已修复并fail closed；
+- targeted=`12 passed`、B3/B4相关=`50 passed`、full=`1326 passed, 3 skipped`，静态检查通过；
 - 状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-ARTIFACT`，无B4性能声明。详见
   `gemini_doc/change_2026-08-16_fsg4_b4_0_kernel_attribution_runner_candidate.md`。
+
+解释器修复记录：
+`gemini_doc/change_2026-08-16_fsg4_b4_0_worker_interpreter_symlink_fix.md`。
 
 ## 2026-08-16：FSG4/B4 Cumulative CUDA/TIR Fusion 预注册
 

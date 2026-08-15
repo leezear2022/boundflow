@@ -24,7 +24,7 @@ operator、CUDA kernel与materialization组成”，不回答B4是否加速。
   - 全量raw event以确定性gzip JSONL保存，manifest绑定压缩文件SHA256，worker同时绑定解压内容
     SHA256、canonical raw hash、行数与worker hash；
   - source/code/protocol、B3正式manifest、外部仓库commit、模型/性质digest与零本机路径门禁。
-- 新增11项schema/aggregation/runner测试，覆盖CUDA correlation、user annotation与真实kernel区分、
+- 新增12项schema/aggregation/runner测试，覆盖CUDA correlation、user annotation与真实kernel区分、
   temporal fallback、unattributed保留、canonical roundtrip、gzip确定性、worker hash与日志脱敏。
 
 ## 3. 测量纠错
@@ -40,11 +40,11 @@ smoke同时确认14-call marker为`10/1/3`、forward marker为`1/3`，gzip raw�
 
 ## 4. 验证
 
-- B4 targeted：`11 passed`；
+- B4 targeted：`12 passed`（含worker interpreter symlink保留）；
 - B3 frozen replay：PASS，summary hash保持
   `4c19afd43c18e0409932b86506efdaf6bfc3e07baabcc222dbe79c8149f99bac`；
 - B3/B4相关回归：`50 passed`；
-- 全量：`1325 passed, 3 skipped`（需`conda activate boundflow`加载TVM hook）；
+- 全量：`1326 passed, 3 skipped`（需`conda activate boundflow`加载TVM hook）；
 - Black：PASS；Mypy touched files：clean；Pylint：`10.00/10`；`git diff --check`：PASS。
 
 首次直接调用Conda Python但未激活环境时，三项PR-12测试在collection阶段因`import tvm`失败；激活
@@ -57,3 +57,6 @@ phase/opportunity门禁，未准入B4-A或B4-B，也没有B4 speedup、B0 parity
 
 下一唯一动作：提交clean source，再从该commit运行fresh control/profile、root replay与tamper；只有
 正式raw证明至少一个candidate覆盖`>=5%` B3 core或能消除一个完整重复CROWN call，才准入B4-A/B。
+
+补充：首次正式generate暴露`Path.resolve()`误解析virtualenv interpreter symlink的问题；修复与
+fail-closed preflight见`change_2026-08-16_fsg4_b4_0_worker_interpreter_symlink_fix.md`。
