@@ -16,6 +16,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -26,6 +27,12 @@ if str(REPOSITORY_ROOT) not in sys.path:
     sys.path.insert(0, str(REPOSITORY_ROOT))
 
 from boundflow.runtime.fsg3_same_solver_timing import canonical_hash as b3_hash
+from boundflow.runtime.fsg3_same_solver_timing import (
+    _semantic_pair_failures,
+    _semantics_from_dict,
+    FSG3_FLOAT_ATOL,
+    FSG3_FLOAT_RTOL,
+)
 from boundflow.runtime.fsg4_b4_kernel_attribution import (
     b4_profiler_event_from_dict,
     canonical_hash,
@@ -37,6 +44,7 @@ from scripts import run_fsg4_b3_same_solver_timing as b3_worker
 ARTIFACT_SCHEMA = "boundflow.fsg4-b4-kernel-attribution-artifact/v1"
 PROTOCOL_SCHEMA = "boundflow.fsg4-b4-kernel-attribution-protocol/v1"
 WORKER_SCHEMA = "boundflow.fsg4-b4-kernel-attribution-worker/v1"
+TAMPER_SCHEMA = "boundflow.fsg4-b4-kernel-attribution-tamper/v1"
 B3_FORMAL_ARTIFACT = Path("artifacts/fsg4-b3-same-solver-timing/resnet2b-prop0-v1")
 CODE_PATHS = (
     "boundflow/runtime/fsg4_b4_kernel_attribution.py",
@@ -333,6 +341,8 @@ def _protocol(args: argparse.Namespace) -> dict[str, object]:
             "profile_memory": True,
             "with_stack": False,
         },
+        "direct_semantic_atol": FSG3_FLOAT_ATOL,
+        "direct_semantic_rtol": FSG3_FLOAT_RTOL,
         "b4_0_attribution_only": True,
         "performance_claimed": False,
     }
@@ -349,6 +359,8 @@ def _validate_protocol(value: Mapping[str, Any]) -> None:
         claimed != canonical_hash(payload)
         or value.get("schema_version") != PROTOCOL_SCHEMA
         or value.get("worker_sequence") != ["control", "profile"]
+        or value.get("direct_semantic_atol") != FSG3_FLOAT_ATOL
+        or value.get("direct_semantic_rtol") != FSG3_FLOAT_RTOL
         or value.get("performance_claimed") is not False
         or not isinstance(source, str)
         or not isinstance(revision, Mapping)
@@ -479,6 +491,43 @@ def _run_payload(worker: Mapping[str, Any]) -> Mapping[str, Any]:
     return _validate_b3_envelope(cast(Mapping[str, Any], envelope))
 
 
+def _semantic_pair_report(
+    control: Mapping[str, Any], profiled: Mapping[str, Any]
+) -> dict[str, object]:
+    control_typed = _semantics_from_dict(control)
+    profiled_typed = _semantics_from_dict(profiled)
+    failures = _semantic_pair_failures(
+        control_typed, profiled_typed, label="b4-0:profile-control"
+    )
+    if failures:
+        raise ValueError(
+            "FSG4/B4 control/profile semantics differ: " + ",".join(failures)
+        )
+    lower_diffs = [
+        abs(candidate - reference)
+        for reference, candidate in zip(
+            control_typed.lower_values, profiled_typed.lower_values
+        )
+    ]
+    lower_sign_exact = all(
+        (reference >= 0.0) == (candidate >= 0.0)
+        for reference, candidate in zip(
+            control_typed.lower_values, profiled_typed.lower_values
+        )
+    )
+    if not lower_sign_exact:
+        raise ValueError("FSG4/B4 control/profile lower sign differs")
+    return {
+        "atol": FSG3_FLOAT_ATOL,
+        "rtol": FSG3_FLOAT_RTOL,
+        "discrete_exact": True,
+        "lower_max_abs_diff": max(lower_diffs, default=0.0),
+        "lower_sign_exact": lower_sign_exact,
+        "failure_count": 0,
+        "passed": True,
+    }
+
+
 def _derive(artifact: Path) -> dict[str, object]:
     control = _load_json(artifact / "workers/control.json")
     profiled = _load_json(artifact / "workers/profile.json")
@@ -492,8 +541,9 @@ def _derive(artifact: Path) -> dict[str, object]:
         raise ValueError("FSG4/B4 worker pair differs")
     control_run = _run_payload(control)
     profile_run = _run_payload(profiled)
-    if control_run["semantics"] != profile_run["semantics"]:
-        raise ValueError("FSG4/B4 control/profile semantics differ")
+    control_semantics = cast(Mapping[str, Any], control_run["semantics"])
+    profile_semantics = cast(Mapping[str, Any], profile_run["semantics"])
+    semantic_pair = _semantic_pair_report(control_semantics, profile_semantics)
     event_payloads, jsonl_sha256 = _load_jsonl_gzip(
         artifact / "events/profile.jsonl.gz"
     )
@@ -534,7 +584,8 @@ def _derive(artifact: Path) -> dict[str, object]:
         "status": "measured-attribution-only",
         "control_worker_hash": control["worker_hash"],
         "profile_worker_hash": profiled["worker_hash"],
-        "semantic_hash": b3_hash(control_run["semantics"]),
+        "semantic_hash": b3_hash(control_semantics),
+        "semantic_pair": semantic_pair,
         "marker_counts": dict(
             sorted((str(k), int(v)) for k, v in marker_counts.items())
         ),
@@ -556,8 +607,178 @@ def _readme() -> str:
         "This artifact contains one fresh unprofiled B3 control and one fresh "
         "B3 worker observed with PyTorch CPU/CUDA profiling. Profile time is "
         "attribution-only and never a performance claim. Replay rebuilds the "
-        "14-call marker coverage, raw kernel aggregation, and Amdahl gates.\n"
+        "14-call marker coverage, raw kernel aggregation, and Amdahl gates. "
+        "Tamper probes rewrite and re-sign outer artifact digests.\n"
     )
+
+
+def _write_manifest(artifact: Path) -> dict[str, object]:
+    protocol = _load_json(artifact / "protocol.json")
+    summary = _load_json(artifact / "summary.json")
+    files = sorted(
+        str(path.relative_to(artifact))
+        for path in artifact.rglob("*")
+        if path.is_file() and path.name != "manifest.json"
+    )
+    manifest: dict[str, object] = {
+        "schema_version": ARTIFACT_SCHEMA,
+        "source_git_head": protocol["source_git_head"],
+        "protocol_hash": protocol["protocol_hash"],
+        "summary_hash": summary["summary_hash"],
+        "files": {name: _sha256(artifact / name) for name in files},
+        "worker_count": 2,
+        "performance_claimed": False,
+    }
+    manifest["manifest_hash"] = canonical_hash(manifest)
+    _write_json(artifact / "manifest.json", manifest)
+    return manifest
+
+
+def _rewrite_worker(
+    artifact: Path, kind: str, mutation: Callable[[dict[str, Any]], None]
+) -> None:
+    path = artifact / "workers" / f"{kind}.json"
+    worker = _load_json(path)
+    worker.pop("worker_hash", None)
+    mutation(worker)
+    worker["worker_hash"] = canonical_hash(worker)
+    _write_json(path, worker)
+
+
+def _rewrite_profile_events(
+    artifact: Path, mutation: Callable[[list[dict[str, Any]]], None]
+) -> None:
+    path = artifact / "events/profile.jsonl.gz"
+    rows, _ = _load_jsonl_gzip(path)
+    mutation(rows)
+    content_sha256 = _write_jsonl_gzip(path, rows)
+
+    def bind(worker: dict[str, Any]) -> None:
+        worker["event_count"] = len(rows)
+        worker["raw_event_hash"] = canonical_hash(rows)
+        worker["raw_event_jsonl_sha256"] = content_sha256
+
+    _rewrite_worker(artifact, "profile", bind)
+
+
+def _resign_outer_artifact(artifact: Path) -> None:
+    protocol = _load_json(artifact / "protocol.json")
+    protocol_payload = dict(protocol)
+    protocol_payload.pop("protocol_hash", None)
+    protocol["protocol_hash"] = canonical_hash(protocol_payload)
+    _write_json(artifact / "protocol.json", protocol)
+    _write_manifest(artifact)
+
+
+def _tamper_mutations() -> tuple[tuple[str, Callable[[Path], None]], ...]:
+    def marker_count(root: Path) -> None:
+        def mutate(worker: dict[str, Any]) -> None:
+            cast(dict[str, Any], worker["marker_counts"])["optimizer.crown"] = 9
+
+        _rewrite_worker(root, "profile", mutate)
+
+    def raw_phase(root: Path) -> None:
+        def mutate(rows: list[dict[str, Any]]) -> None:
+            row = next(item for item in rows if item["event_kind"] == "cuda_kernel")
+            row["phase"] = "tampered.phase"
+
+        _rewrite_profile_events(root, mutate)
+
+    def raw_ordinal(root: Path) -> None:
+        def mutate(rows: list[dict[str, Any]]) -> None:
+            rows[1]["event_ordinal"] = rows[0]["event_ordinal"]
+
+        _rewrite_profile_events(root, mutate)
+
+    def raw_duration(root: Path) -> None:
+        def mutate(rows: list[dict[str, Any]]) -> None:
+            row = next(item for item in rows if item["event_kind"] == "cuda_kernel")
+            row["duration_ns"] = int(row["duration_ns"]) + 1
+
+        _rewrite_profile_events(root, mutate)
+
+    def raw_delete(root: Path) -> None:
+        def mutate(rows: list[dict[str, Any]]) -> None:
+            rows.pop()
+
+        _rewrite_profile_events(root, mutate)
+
+    def semantics(root: Path) -> None:
+        def mutate(worker: dict[str, Any]) -> None:
+            envelope = cast(dict[str, Any], worker["b3_envelope"])
+            run = cast(dict[str, Any], envelope["run"])
+            semantic = cast(dict[str, Any], run["semantics"])
+            lower = cast(list[float], semantic["lower_values"])
+            lower[0] += 1.0
+
+        _rewrite_worker(root, "profile", mutate)
+
+    def protocol_code(root: Path) -> None:
+        protocol = _load_json(root / "protocol.json")
+        revision = cast(dict[str, Any], protocol["code_revision"])
+        revision[sorted(revision)[0]] = "0" * 64
+        _write_json(root / "protocol.json", protocol)
+
+    def worker_kind(root: Path) -> None:
+        _rewrite_worker(root, "profile", lambda worker: worker.update(kind="control"))
+
+    def summary_opportunity(root: Path) -> None:
+        summary = _load_json(root / "summary.json")
+        attribution = cast(dict[str, Any], summary["attribution"])
+        opportunity = cast(dict[str, Any], attribution["opportunity"])
+        crown14 = cast(dict[str, Any], opportunity["crown14"])
+        crown14["query_share"] = 0.5
+        attribution.pop("summary_hash", None)
+        attribution["summary_hash"] = canonical_hash(attribution)
+        summary.pop("summary_hash", None)
+        summary["summary_hash"] = canonical_hash(summary)
+        _write_json(root / "summary.json", summary)
+
+    return (
+        ("marker-count", marker_count),
+        ("raw-phase", raw_phase),
+        ("raw-ordinal", raw_ordinal),
+        ("raw-duration", raw_duration),
+        ("raw-delete", raw_delete),
+        ("semantic-lower", semantics),
+        ("protocol-code", protocol_code),
+        ("worker-kind", worker_kind),
+        ("summary-opportunity", summary_opportunity),
+    )
+
+
+def _tamper(artifact: Path) -> dict[str, object]:
+    artifact = artifact.resolve()
+    _replay(artifact)
+    results: list[dict[str, object]] = []
+    with tempfile.TemporaryDirectory(prefix="boundflow-fsg4-b4-tamper-") as raw:
+        temp_root = Path(raw)
+        for label, mutation in _tamper_mutations():
+            candidate = temp_root / label
+            shutil.copytree(artifact, candidate)
+            mutation(candidate)
+            _resign_outer_artifact(candidate)
+            try:
+                _replay(candidate)
+            except (OSError, TypeError, ValueError) as error:
+                results.append(
+                    {
+                        "label": label,
+                        "rejected": True,
+                        "error_type": type(error).__name__,
+                    }
+                )
+            else:
+                raise ValueError(f"FSG4/B4 tamper was accepted: {label}")
+    report: dict[str, object] = {
+        "schema_version": TAMPER_SCHEMA,
+        "probe_count": len(results),
+        "all_rejected": len(results) == len(_tamper_mutations()),
+        "results": results,
+        "performance_claimed": False,
+    }
+    report["report_hash"] = canonical_hash(report)
+    return report
 
 
 def _generate(args: argparse.Namespace) -> dict[str, object]:
@@ -589,22 +810,11 @@ def _generate(args: argparse.Namespace) -> dict[str, object]:
             value = path.read_text(encoding="utf-8")
             if any(token in value for token in ("/home/", "/tmp/", "file://")):
                 raise ValueError(f"FSG4/B4 artifact leaks a local path: {path.name}")
-    files = sorted(
-        str(path.relative_to(artifact))
-        for path in artifact.rglob("*")
-        if path.is_file() and path.name != "manifest.json"
-    )
-    manifest: dict[str, object] = {
-        "schema_version": ARTIFACT_SCHEMA,
-        "source_git_head": protocol["source_git_head"],
-        "protocol_hash": protocol["protocol_hash"],
-        "summary_hash": summary["summary_hash"],
-        "files": {name: _sha256(artifact / name) for name in files},
-        "worker_count": 2,
-        "performance_claimed": False,
-    }
-    manifest["manifest_hash"] = canonical_hash(manifest)
-    _write_json(artifact / "manifest.json", manifest)
+    _write_manifest(artifact)
+    tamper = _tamper(artifact)
+    _write_json(artifact / "tamper_report.json", tamper)
+    _write_manifest(artifact)
+    _replay(artifact)
     return replay
 
 
@@ -644,6 +854,19 @@ def _replay(artifact: Path) -> dict[str, object]:
         raise ValueError("FSG4/B4 summary replay differs")
     if manifest.get("summary_hash") != summary["summary_hash"]:
         raise ValueError("FSG4/B4 manifest summary binding differs")
+    tamper_path = artifact / "tamper_report.json"
+    if tamper_path.is_file():
+        tamper = _load_json(tamper_path)
+        tamper_payload = dict(tamper)
+        tamper_hash = tamper_payload.pop("report_hash", None)
+        if (
+            tamper_hash != canonical_hash(tamper_payload)
+            or tamper.get("schema_version") != TAMPER_SCHEMA
+            or tamper.get("probe_count") != len(_tamper_mutations())
+            or tamper.get("all_rejected") is not True
+            or tamper.get("performance_claimed") is not False
+        ):
+            raise ValueError("FSG4/B4 tamper report differs")
     result = {
         "status": summary["status"],
         "summary_hash": summary["summary_hash"],
@@ -680,6 +903,8 @@ def _parse_args() -> argparse.Namespace:
     generate.add_argument("--artifact-dir", type=Path, required=True)
     replay = commands.add_parser("replay")
     replay.add_argument("--artifact-dir", type=Path, required=True)
+    tamper = commands.add_parser("tamper")
+    tamper.add_argument("--artifact-dir", type=Path, required=True)
     return parser.parse_args()
 
 
@@ -700,8 +925,10 @@ def main() -> None:
         args.model = args.model.resolve()
         args.property = args.property.resolve()
         result = _generate(args)
-    else:
+    elif args.command == "replay":
         result = _replay(args.artifact_dir)
+    else:
+        result = _tamper(args.artifact_dir)
     print(_json(result))
 
 

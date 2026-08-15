@@ -13,7 +13,8 @@
 FSG4/B4-0 attribution runner已实现，状态=
 `IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-ARTIFACT`。typed raw event、control/profile独立worker、
 14-call marker、CUDA annotation/kernel区分、correlation/temporal归因、确定性gzip及
-operator/kernel/materialization聚合已进入代码；全量`1326 passed, 3 skipped`。B3 raw表明
+operator/kernel/materialization聚合、B3冻结semantic comparator与9类outer-resigned tamper已进入代码；
+全量`1329 passed, 3 skipped`。B3 raw表明
 optimizer-only无限加速仍无法追回B0；B4因此冻结覆盖
 10次optimizer、1次terminal export与3次KFSB child的14-call lower-only CROWN主线，依次执行B4-0
 kernel/materialization attribution、B4-A terminal export fusion、B4-B differentiable lower-only TIR、

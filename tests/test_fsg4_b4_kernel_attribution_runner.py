@@ -13,6 +13,31 @@ from boundflow.runtime.fsg4_b4_kernel_attribution import canonical_hash
 from scripts import run_fsg4_b4_kernel_attribution as runner
 
 
+def _semantics(lower_values: list[float]) -> dict[str, object]:
+    return {
+        "status": "verified",
+        "success": True,
+        "visited_domains": [6],
+        "queue_before": 0,
+        "queue_input": 6,
+        "queue_accepted": 6,
+        "queue_pruned": 0,
+        "queue_after": 6,
+        "depths": [1] * 6,
+        "history_count": 6,
+        "lower_shape": [6, 1],
+        "lower_values": lower_values,
+        "upper_shape": [6, 1],
+        "upper_values": [0.0] * 6,
+        "upper_positive_infinity_mask": [True] * 6,
+        "final_decision": [[5, 27], [5, 32], [5, 90]] * 2,
+        "split_depth": 1,
+        "batch_size": 6,
+        "n_verified": 0,
+        "n_splits": 6,
+    }
+
+
 def test_gzip_jsonl_is_deterministic_and_binds_uncompressed_content(
     tmp_path: Path,
 ) -> None:
@@ -71,3 +96,37 @@ def test_worker_interpreter_path_preserves_virtualenv_symlink(tmp_path: Path) ->
     observed = runner._absolute_without_symlink_resolution(virtualenv_python)
     assert observed == virtualenv_python.absolute()
     assert observed != virtualenv_python.resolve()
+
+
+def test_semantic_pair_uses_frozen_b3_tolerance_and_exact_discrete_state() -> None:
+    control = _semantics([-0.4] * 6)
+    profiled = _semantics([-0.400001] * 6)
+    report = runner._semantic_pair_report(control, profiled)
+    assert report["passed"] is True
+    assert report["discrete_exact"] is True
+    assert report["lower_sign_exact"] is True
+    assert report["lower_max_abs_diff"] == pytest.approx(1.0e-6)
+    profiled["queue_after"] = 5
+    with pytest.raises(ValueError, match="queue_after:differs"):
+        runner._semantic_pair_report(control, profiled)
+
+
+def test_semantic_pair_rejects_sign_drift_inside_numeric_tolerance() -> None:
+    control = _semantics([-1.0e-8] * 6)
+    profiled = _semantics([1.0e-8] * 6)
+    with pytest.raises(ValueError, match="lower sign differs"):
+        runner._semantic_pair_report(control, profiled)
+
+
+def test_tamper_probe_set_is_fixed() -> None:
+    assert [label for label, _ in runner._tamper_mutations()] == [
+        "marker-count",
+        "raw-phase",
+        "raw-ordinal",
+        "raw-duration",
+        "raw-delete",
+        "semantic-lower",
+        "protocol-code",
+        "worker-kind",
+        "summary-opportunity",
+    ]
