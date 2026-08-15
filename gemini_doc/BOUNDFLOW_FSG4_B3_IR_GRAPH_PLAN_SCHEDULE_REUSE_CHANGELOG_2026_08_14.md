@@ -11,6 +11,8 @@ stage: s01
 
 ## Summary
 
+- Round 2外审已approve并由executor关闭exchange；B3正式=
+  `EXTERNALLY-APPROVED-VALIDATED-REDUCED-B3`，只开放B4 cumulative candidate；
 - 36-process正式artifact、root replay与10/10 tamper已关闭为`VALIDATED-REDUCED-B3`：B2/B3 core=
   `1.071617x`、query=`1.006623x`，但B0/B3 query=`0.910001x`，未回到B0 parity；
 - B0/B2/B3六全排列36-process正式runner、raw-first/replay与十类tamper probe已实现并通过静态/合同

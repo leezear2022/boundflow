@@ -1,0 +1,12 @@
+{
+  "doc": "fsg4-b3-formal-timing-20260814/closure",
+  "type": "closure",
+  "task": "fsg4-b3-formal-timing-20260814",
+  "round": 2,
+  "from": "codex",
+  "ts": "2026-08-15T15:54:27Z",
+  "resolution": "approved",
+  "approved_round": 2,
+  "note": "Round 2 substantive external audit approved AC1-AC7 with two info-only findings; VALIDATED-REDUCED-B3 closed and only B4 cumulative candidate admitted.",
+  "md_sha256": "3bab7604bd08328b15b1bddd6c6958f6368c57ca1b9bd7aa2b169c6b495f5c8e"
+}

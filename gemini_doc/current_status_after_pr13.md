@@ -1,10 +1,15 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-15 FSG4/B3外审关闭状态**：Round 2审计从raw独立重算44项检查，AC1—AC7全部PASS，
+> 无blocker/major/minor；exchange=`closed/approved`。B3正式状态=
+> `EXTERNALLY-APPROVED-VALIDATED-REDUCED-B3`。只开放以B3为累计基线的B4 fusion candidate；B5—B7、
+> B0 parity、complete-query/TTV与最终system gate仍未关闭。
+
 > **2026-08-14 FSG4/B3正式计时内部关闭状态**：source `36e9069`的六全排列36-process artifact已
 > 36/36完成，correctness/environment/measurement/activation、root replay与10/10 tamper全过。
 > B2/B3 core/query=`1.071617x/1.006623x`，B0/B3 query=`0.910001x`，故状态恰为
 > `VALIDATED-REDUCED-B3`，仍未回到原始B0 parity。frozen=`6 passed`、targeted=`114 passed`、full=
-> `1314 passed, 3 skipped`。下一唯一动作是external audit；B4—B7在外审前关闭。
+> `1314 passed, 3 skipped`。该“external audit待完成”历史状态已由上方Round 2批准取代。
 
 > **2026-08-14 FSG4/B3正式计时Runner候选状态**：B0/B2/B3六全排列、control/profile共36个独立
 > worker、direct B3 activation receipts、raw-first/resume、root replay与十类tamper probe已经实现；

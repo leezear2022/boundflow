@@ -9,6 +9,12 @@ stage: s01
 
 # BoundFlow Full-Stack GPU Baseline and Attribution v1 Changelog
 
+## FSG4/B3 External Audit Closure
+
+- Round 2从36个raw worker独立重算44项检查，AC1—AC7全PASS，无blocker/major/minor；
+- exchange已`closed/approved`，`VALIDATED-REDUCED-B3`正式关闭；
+- 只开放以B3为直接增量对照的B4 operator/cross-stage fusion，B5—B7及最终system gate关闭。
+
 ## FSG4/B3 Formal Timing Internal Closure
 
 - source `36e9069`完成B0/B2/B3六全排列36-process正式artifact；correctness、environment、activation、

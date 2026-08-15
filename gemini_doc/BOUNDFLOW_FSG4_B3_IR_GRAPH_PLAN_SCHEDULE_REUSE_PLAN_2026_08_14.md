@@ -1,6 +1,6 @@
 ---
-status: validated-reduced-b3-external-audit-pending
-updated: 2026-08-14T21:52:00+08:00
+status: externally-approved-validated-reduced-b3
+updated: 2026-08-15T23:54:27+08:00
 type: plan
 topic: boundflow
 slug: fsg4-b3-ir-graph-plan-schedule-reuse
@@ -427,3 +427,17 @@ replay和十类tamper probe。B4—B7继续关闭。
 下一唯一动作是按
 `gemini_doc/fsg4_b3_formal_timing_external_audit_handoff_2026_08_14.md`进行外部审计。外审通过后只开放
 B4 cumulative candidate；B5—B7与最终system gate继续关闭。
+
+上段外审动作已由下方正式closure取代。
+
+## 24. B3 External Audit Closure（2026-08-15）
+
+- DocOps exchange=`fsg4-b3-formal-timing-20260814`，Round 2=`approve`，最终=`closed/approved`；
+- 审计方不采信summary，从raw独立重算44项检查，AC1—AC7全PASS；
+- source/code revision/input identity、36-worker sequence/subprocess、30+6 semantics、12/12 B3 activation、
+  closure/perturbation、ratio/classification、replay/tamper与claim boundary均独立成立；
+- 无blocker/major/minor，仅两条无需处理的环境/原始日志info；
+- 正式状态=`EXTERNALLY-APPROVED-VALIDATED-REDUCED-B3`。
+
+现在只开放B4 cumulative candidate。B4必须以B3为直接增量对照、同时报告B0累计ratio；B5—B7与最终
+`1.20x queue / 1.15x complete-query`继续关闭。

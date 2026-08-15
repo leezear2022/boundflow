@@ -1,10 +1,15 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-15 FSG4/B3外审关闭**：Round 2外部模型从raw独立重算44项检查，AC1—AC7全PASS，
+> 无blocker/major/minor；exchange=`closed/approved`。`VALIDATED-REDUCED-B3`正式成立，只支持B3相对B2
+> core `1.071617x`、query不退化的reduced claim，仍不支持相对B0或ASPLOS全栈speedup。当前仅开放
+> B4 cumulative fusion candidate；B5—B7及最终`1.20x/1.15x`门槛关闭。
+
 > **2026-08-14 FSG4/B3正式计时内部关闭**：source `36e9069`的36/36 fresh worker、correctness、
 > environment、measurement、direct activation、root replay与10/10 tamper通过。B2/B3 core/query=
 > `1.071617x/1.006623x`，但B0/B3 query=`0.910001x`，所以状态=`VALIDATED-REDUCED-B3`；只支持B3相对
 > B2的reduced机制/计时结论，不支持BoundFlow快于原始auto_LiRPA或ASPLOS全栈performance claim。
-> 外部审计待完成，B4—B7关闭。
+> 该“外部审计待完成”历史状态已由上方Round 2批准取代。
 
 > **2026-08-14 FSG4/B3正式计时Runner候选**：B0/B2/B3六全排列36-process schema、direct activation
 > receipts、raw-first/resume、root replay与十类tamper probe已实现；targeted=`108 passed`、full=

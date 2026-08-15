@@ -1,5 +1,14 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-15：FSG4/B3 正式计时外部审计关闭
+
+- Round 2外审不采信summary，从36个raw worker独立重算44项检查，AC1—AC7全PASS；
+- 无blocker/major/minor，仅两条无需处理的solver venv与原始日志info；
+- exchange由executor关闭为`closed/approved`，B3正式=
+  `EXTERNALLY-APPROVED-VALIDATED-REDUCED-B3`；
+- 只开放以B3为直接对照的B4 cumulative fusion candidate；B5—B7和最终system gate继续关闭。详见
+  `gemini_doc/change_2026-08-15_fsg4_b3_external_audit_closure.md`。
+
 ## 2026-08-14：FSG4/B3 36-Process 正式计时关闭
 
 - source=`36e9069`完成六个B0/B2/B3全排列、36/36 fresh GPU worker；correctness、environment、

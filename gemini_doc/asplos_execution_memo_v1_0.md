@@ -1,9 +1,13 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-15 FSG4/B3外审关闭指令**：Round 2独立外审AC1—AC7全部PASS，无blocker/major/minor，
+> exchange已`closed/approved`。`VALIDATED-REDUCED-B3`正式关闭；下一唯一工程主线是以B3为直接对照的
+> B4 operator/cross-stage CUDA/TIR fusion预注册与B4-0 qualification。B5—B7及最终system gate不得启动。
+
 > **2026-08-14 FSG4/B3正式计时内部关闭指令**：source `36e9069`完成36/36 fresh worker、全部
 > correctness/environment/measurement/activation、root replay与10/10 tamper。B2/B3 core/query=
 > `1.071617x/1.006623x`，B0/B3 query=`0.910001x`，因此状态=`VALIDATED-REDUCED-B3`，不是full B3
-> 或相对B0 speedup。下一唯一动作是external audit；通过前B4—B7不得启动。
+> 或相对B0 speedup。该“external audit待完成”历史指令已由上方Round 2批准取代。
 
 > **2026-08-14 FSG4/B3正式计时Runner指令**：冻结的B0/B2/B3六全排列36-process runner、direct
 > activation receipts、raw-first/replay与十类tamper probe已实现并通过108项定向、1308项全量回归，

@@ -10,11 +10,18 @@
 
 ---
 
+FSG4/B3正式计时已于2026-08-15通过Round 2独立外审并关闭为
+`EXTERNALLY-APPROVED-VALIDATED-REDUCED-B3`：外审从36个raw worker独立重算44项检查，AC1—AC7
+全部PASS，无blocker/major/minor；exchange已由executor关闭为`closed/approved`。当前只开放以B3为
+直接累计基线的B4 operator/cross-stage CUDA/TIR fusion candidate；B5—B7和最终system gate继续关闭。
+见`gemini_doc/change_2026-08-15_fsg4_b3_external_audit_closure.md`与
+`.docops/exchange/fsg4-b3-formal-timing-20260814/r002/audit_report_full.md`。
+
 FSG4/B3正式36-process计时已以`VALIDATED-REDUCED-B3`形成内部关闭：source=`36e9069`，六个
 B0/B2/B3全排列、36/36 fresh worker、correctness/environment/measurement/activation、root replay与
 10/10 tamper全部通过。B2/B3 core/query=`1.071617x/1.006623x`，但B0/B3 query=`0.910001x`，因此
 B3只相对B2取得reduced收益，仍未快于原始B0。frozen=`6 passed`、targeted=`114 passed`、full=
-`1314 passed, 3 skipped`。当前下一唯一动作是外部审计，B4—B7仍关闭；详见
+`1314 passed, 3 skipped`。该“外审待完成”历史状态已由上方Round 2批准取代；详见
 `gemini_doc/change_2026-08-14_fsg4_b3_formal_timing_closure.md`和
 `gemini_doc/fsg4_b3_formal_timing_external_audit_handoff_2026_08_14.md`。
 

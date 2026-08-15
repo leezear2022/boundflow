@@ -2,7 +2,7 @@
 
 日期：2026-08-14
 
-状态：`VALIDATED-REDUCED-B3`（外部审计待完成）
+状态：`EXTERNALLY-APPROVED-VALIDATED-REDUCED-B3`
 
 ## 结论
 
@@ -92,3 +92,10 @@ IR/Graph/Plan/Schedule累计机制相对 B2 有可重复的 reduced core收益�
 下一唯一动作是外部模型按独立 raw 重算方式审计本 closure。外审通过后，B3可作为后续 B4
 operator/cross-stage fusion的累计候选；不得把 B3 的`1.071617x`外推为 B4—B7收益，也不得跳过
 same-solver B0累计对照。
+
+## 2026-08-15 外审追认
+
+Round 2已按上述方式从raw独立重算并approve，AC1—AC7全PASS，无blocker/major/minor；exchange随后由
+executor关闭为`closed/approved`。本closure因此正式升级为
+`EXTERNALLY-APPROVED-VALIDATED-REDUCED-B3`，只开放B4 cumulative candidate。两个info finding仅记录
+solver venv差异和manifest-bound上游日志行尾空格，均无需修改。

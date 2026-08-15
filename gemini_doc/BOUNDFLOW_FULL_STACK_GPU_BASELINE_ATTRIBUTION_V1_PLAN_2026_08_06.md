@@ -1,6 +1,6 @@
 ---
-status: fsg4-b3-validated-reduced-external-audit-pending
-updated: 2026-08-14T21:52:00+08:00
+status: fsg4-b3-externally-approved-b4-admitted
+updated: 2026-08-15T23:54:27+08:00
 type: plan
 topic: boundflow
 slug: BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1
@@ -9,10 +9,11 @@ stage: s01
 
 # BoundFlow Full-Stack GPU Baseline and Attribution v1 Plan
 
-> **2026-08-14 FSG4/B3 overlay**：B3 IR/Graph/Plan/Schedule累计候选已完成六全排列36-process正式
+> **2026-08-15 FSG4/B3 overlay**：B3 IR/Graph/Plan/Schedule累计候选已完成六全排列36-process正式
 > same-solver计时。B2/B3 core/query=`1.071617x/1.006623x`，但B0/B3 query=`0.910001x`，故只以
-> `VALIDATED-REDUCED-B3`内部关闭；root replay与10/10 tamper通过。当前下一唯一动作是external audit；
-> 外审通过后才允许从B3累计基线进入B4 operator/cross-stage fusion，B5—B7继续关闭。
+> `VALIDATED-REDUCED-B3`内部关闭；root replay与10/10 tamper通过。Round 2外审现已从raw独立重算
+> AC1—AC7并approve，exchange=`closed/approved`。当前只开放从B3累计基线进入B4 operator/cross-stage
+> fusion；B5—B7继续关闭。
 
 ## 0. Route Correction
 
@@ -337,8 +338,9 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 5. [x] FSG3：source `a4ee291`完成36-process B0/B1/B2正式artifact；correctness、environment、
    measurement、replay与outer-resigned tamper门禁通过，状态=
    `VALIDATED-FSG3-B0-B1-B2-BASELINE`；
-6. [~] FSG4：B3-0/A/B/C与五组fresh correctness均已关闭；当前只开放B0/B2/B3六全排列、36-process
-   正式计时，尚无B3 performance classification，B4—B7未实现/消融；
+6. [~] FSG4：B3-0/A/B/C、five-fresh correctness、36-process正式计时与Round 2外审均已关闭；B3=
+   `EXTERNALLY-APPROVED-VALIDATED-REDUCED-B3`。当前只开放以B3为直接累计基线的B4
+   operator/cross-stage CUDA/TIR fusion candidate；B5—B7未实现/消融；
 7. [—] FSG5：因无合法B7 candidate，依赖门禁阻止，无系统性能claim。
 
 ## 12. Validation
@@ -515,6 +517,18 @@ leave-one-out与最终decision；同步修改summary/manifest digest不得绕过
 - targeted=`56 passed`，full=`1289 passed, 3 skipped`；
 - 状态=`VALIDATED-B3-FIVE-FRESH-CORRECTNESS`，只开放36-process B0/B2/B3正式计时；仍无
   performance claim，B4—B7关闭。
+
+### FSG4/B3 Formal Timing and External Audit Closure（2026-08-15）
+
+- source=`36e9069`，六全排列36/36 fresh worker与30+6 direct semantic pairs通过；
+- B2/B3 core/query=`1.0716174805930418x/1.0066228954759742x`，B0/B3 query=
+  `0.9100012637918488x`，无显存收益；
+- root replay、10/10 outer-resigned tamper、targeted=`114 passed`、full=
+  `1314 passed, 3 skipped`通过；
+- Round 2外审从raw独立重算44项检查，AC1—AC7全PASS，无blocker/major/minor；exchange已由executor
+  关闭为`closed/approved`；
+- 状态=`EXTERNALLY-APPROVED-VALIDATED-REDUCED-B3`：只支持B3相对B2的reduced结论，不支持相对B0
+  或ASPLOS全栈performance claim；只开放B4 cumulative fusion candidate，B5—B7继续关闭。
 
 ## 13. Rollback
 
