@@ -1,5 +1,5 @@
 ---
-status: implemented-pending-clean-source-five-fresh
+status: internally-validated-five-fresh-correctness
 updated: 2026-08-16T23:10:00+08:00
 type: plan
 topic: boundflow
@@ -152,3 +152,10 @@ lineage/export digest移到query结束后的excluded audit，fresh worker另存b
 lower/lA/intermediate。单元/相关门禁与独立GPU smoke通过，状态=
 `IMPLEMENTED-B4-A-PENDING-CLEAN-SOURCE-FIVE-FRESH`。单pair约`1.02894x` core只作诊断，无性能claim。
 下一唯一动作是clean-source five-fresh artifact；正式计时、B4-B/TIR仍关闭。
+
+## 10. Five-fresh关闭更新
+
+source=`43d4117`完成10/10 fresh worker、5/5 direct pair与每pair 19个raw tensor比较；全局最大差=
+`6.109476089477539e-06`，sign/discrete/lineage/counter、无本机路径及root replay全过。状态=
+`INTERNALLY-VALIDATED-B4-A-FIVE-FRESH-CORRECTNESS`，`performance_claimed=false`。下一唯一动作是独立
+B3/B4-A正式计时，不得使用本轮latency形成claim；B4-B/TIR仍关闭。

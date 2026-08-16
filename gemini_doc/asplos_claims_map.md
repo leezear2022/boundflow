@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-16 FSG4/B4-A five-fresh正确性关闭**：source=`43d4117`的10/10 fresh worker、5/5
+> B3/B4-A pair及每pair 19个raw tensor比较全过，最大差=`6.109476e-06`，sign/discrete exact，5/5
+> handoff=1/rerun=0/lineage=6/provider-fallback=0，root replay PASS。状态=
+> `INTERNALLY-VALIDATED-B4-A-FIVE-FRESH-CORRECTNESS`；无性能claim，只开放独立正式计时。
+
 > **2026-08-16 FSG4/B4-A实现候选**：typed terminal producer、one-shot handoff、no-rerun assembly、
 > post-query content audit与five-fresh runner已实现，状态=
 > `IMPLEMENTED-B4-A-PENDING-CLEAN-SOURCE-FIVE-FRESH`。GPU smoke只验证机制/语义，单pair约1.02894x core

@@ -10,6 +10,13 @@
 
 ---
 
+FSG4/B4-A five-fresh correctness已内部关闭为
+`INTERNALLY-VALIDATED-B4-A-FIVE-FRESH-CORRECTNESS`：source=`43d4117`，10/10 fresh worker、5/5 pair、
+每pair 19个terminal export tensor raw比较、sign/discrete/lineage/counter与root replay全过；最大差=
+`6.109476e-06`。本轮不使用latency，`performance_claimed=false`。下一唯一动作是独立正式B3/B4-A
+timing；B4-B/TIR仍关闭。见
+`gemini_doc/change_2026-08-16_fsg4_b4a_five_fresh_correctness_closure.md`。
+
 FSG4/B4-A typed producer/handoff/no-rerun assembly与same-solver opt-in已实现，状态=
 `IMPLEMENTED-B4-A-PENDING-CLEAN-SOURCE-FIVE-FRESH`。runtime热路径不做content D2H hash；完整handoff、
 lineage、terminal export digest及raw float32 payload均在query后排除计时audit绑定。独立GPU smoke已确认

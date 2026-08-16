@@ -1,5 +1,13 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-16：FSG4/B4-A Five-Fresh Correctness 内部关闭
+
+- source=`43d4117`按冻结顺序完成10/10 fresh worker、5/5 B3/B4-A direct pair；
+- 每pair从raw比较19个terminal export tensor，全局最大差=`6.109476e-06`且sign exact；
+- 5/5 handoff=1/rerun=0/lineage=6/provider-fallback=0，final semantics与root replay通过；
+- 状态=`INTERNALLY-VALIDATED-B4-A-FIVE-FRESH-CORRECTNESS`，无性能claim，只开放独立正式计时。详见
+  `gemini_doc/change_2026-08-16_fsg4_b4a_five_fresh_correctness_closure.md`。
+
 ## 2026-08-16：FSG4/B4-A Terminal Lower/lA Handoff 实现候选
 
 - 实现typed terminal producer、one-shot handoff、no-CROWN export assembly与same-solver显式opt-in；

@@ -1,0 +1,73 @@
+{
+  "benchmark_id": "vnncomp2021/cifar10_resnet/resnet2b-prop0",
+  "code_revision": {
+    "boundflow/runtime/fsg3_same_solver_timing.py": "d123711b682bb7ba78d75fab464c00ebfd79c00f67d548a606b59cfe1554205e",
+    "boundflow/runtime/fsg4_b3_device_atomic_commit.py": "49b77fbe924ab36e6590bef1ac2813a2a8cdd96eeefc1af497dbd6672ad0f1da",
+    "boundflow/runtime/fsg4_b3_device_live_return.py": "722a06f0fc0327a82efd8f354eea6ca8ed0dfc5a531645ca23ec73190f86ba6e",
+    "boundflow/runtime/fsg4_b3_explicit_counters.py": "b54f1ea71f3e7fa545f2b065edbcaa5ad774e0ccf7916b3d63437bc17afbbf0b",
+    "boundflow/runtime/fsg4_b3_prepared_core.py": "3a52209ed45a393e68458a2ace7d666766da6f440ac0e09bb629fa657605a04d",
+    "boundflow/runtime/fsg4_b3_terminal_optimizer_schedule.py": "0ac4b72847399e1dbe53a7d89dfd463f52c061c932d4aed93f3b6459b266e778",
+    "boundflow/runtime/fsg4_b4a_terminal_lower_adjoint_handoff.py": "459e5192b04cb81a99c036983bd1f83f6ad54823b85727e98ffd9b3f81f45a29",
+    "boundflow/runtime/rvir_v4_atomic_copy_out.py": "00bb8d88ff8a21610dcbce2d8ae2a7c97a6c192fbf093c4f5c4028234756c170",
+    "boundflow/runtime/rvir_v4_live_return.py": "a7ad85c24f42b41d12871520c6e40212b8d25f0dabadd7dee0cd66f2bb451856",
+    "boundflow/runtime/rvir_v4_native_backward_export.py": "0222c8ae74a0e922ac486fb9f4284c1d5b16f9f534cc0922a31c432056c68b76",
+    "boundflow/runtime/rvir_v4_native_kfsb.py": "10b64b480b058107d12729f713aacf82356af8885458be5f1916639178062cf8",
+    "boundflow/runtime/rvir_v4_native_optimizer.py": "5bc7138101b5b9ee38677218c7921717057e1cee0ccd1895c2a1977e137348df",
+    "scripts/run_fsg3_same_solver_timing.py": "e239ff74a72c244eccb91cf31385507d58dec0955e01560faeda7b5b5261b31f",
+    "scripts/run_fsg4_b3_counter_diagnostic.py": "8d1cadbedfe6409b17e26cb69b2e83810c3d8a666fb3a017e7e4c4775975e689",
+    "scripts/run_fsg4_b4a_correctness_pairs.py": "a71bfcc82e26c194618606674238e9bfd849562ef1b442744812258f0309c2c6",
+    "scripts/run_fsg4_b4a_same_solver_worker.py": "28d9f5b1601137a004a77526965fb42f01f232fb34e8606884d321797efaf52d",
+    "scripts/run_rvir_v4_live_return_capture.py": "04d8d7dadbb9e2dc78f329614b18a4f2cab97f916b9dd7346501fce6babd573e"
+  },
+  "direct_semantic_atol": 0.0002,
+  "direct_semantic_rtol": 0.0002,
+  "log_path_policy": "deterministic-root-aliases-no-host-local-paths",
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "pair_count": 5,
+  "performance_claimed": false,
+  "process_isolation": "one-fresh-subprocess-per-position",
+  "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+  "protocol_hash": "14c60e6eb4e3e564a471390ff422a4f09709c7f8698f680dc3bb70cfa1038ae8",
+  "schedule": [
+    {
+      "pair_index": 0,
+      "positions": [
+        "B3",
+        "B4-A"
+      ]
+    },
+    {
+      "pair_index": 1,
+      "positions": [
+        "B4-A",
+        "B3"
+      ]
+    },
+    {
+      "pair_index": 2,
+      "positions": [
+        "B3",
+        "B4-A"
+      ]
+    },
+    {
+      "pair_index": 3,
+      "positions": [
+        "B4-A",
+        "B3"
+      ]
+    },
+    {
+      "pair_index": 4,
+      "positions": [
+        "B3",
+        "B4-A"
+      ]
+    }
+  ],
+  "schema_version": "boundflow.fsg4-b4a-five-fresh-protocol/v1",
+  "source_git_head": "43d41172a7ab810621782f4a51955c677526ed88",
+  "terminal_export_payload_audit_excluded_from_timing": true,
+  "timing_admitted": false,
+  "worker_count": 10
+}

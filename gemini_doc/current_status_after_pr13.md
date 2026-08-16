@@ -1,5 +1,10 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-16 FSG4/B4-A five-fresh状态**：10/10 fresh、5/5 direct pair与19 tensor/pair全部通过，
+> 最大差=`6.109476e-06`，root replay PASS。状态=
+> `INTERNALLY-VALIDATED-B4-A-FIVE-FRESH-CORRECTNESS`。下一唯一动作是独立正式B3/B4-A计时；无性能
+> claim，B4-B/TIR关闭。
+
 > **2026-08-16 FSG4/B4-A实现候选状态**：typed producer/handoff/no-rerun assembly、same-solver opt-in、
 > post-query raw content audit与5-pair runner已实现，状态=
 > `IMPLEMENTED-B4-A-PENDING-CLEAN-SOURCE-FIVE-FRESH`。下一唯一动作是clean-source five-fresh；当前无
