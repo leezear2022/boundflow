@@ -118,6 +118,7 @@ def _protocol(args: argparse.Namespace) -> dict[str, object]:
         "direct_semantic_atol": ATOL,
         "direct_semantic_rtol": RTOL,
         "terminal_export_payload_audit_excluded_from_timing": True,
+        "log_path_policy": "deterministic-root-aliases-no-host-local-paths",
         "timing_admitted": False,
         "performance_claimed": False,
     }
@@ -137,6 +138,8 @@ def _validate_protocol(value: Mapping[str, Any]) -> None:
         or value.get("direct_semantic_atol") != ATOL
         or value.get("direct_semantic_rtol") != RTOL
         or value.get("terminal_export_payload_audit_excluded_from_timing") is not True
+        or value.get("log_path_policy")
+        != "deterministic-root-aliases-no-host-local-paths"
         or value.get("timing_admitted") is not False
         or value.get("performance_claimed") is not False
         or claimed != canonical_hash(payload)
@@ -185,6 +188,21 @@ def _command(
         "--result",
         str(result),
     )
+
+
+def _sanitize_log(value: str, args: argparse.Namespace) -> str:
+    replacements = (
+        (str(args.abcrown_python.expanduser().absolute()), "$ABCROWN_PYTHON"),
+        (str(args.abcrown_root.resolve()), "$ABCROWN_ROOT"),
+        (str(args.benchmark_root.resolve()), "$BENCHMARK_ROOT"),
+        (str(REPOSITORY_ROOT), "$BOUNDFLOW_ROOT"),
+    )
+    sanitized = value
+    for source, replacement in replacements:
+        sanitized = sanitized.replace(source, replacement)
+    if "/home/" in sanitized or "/tmp/" in sanitized:
+        raise ValueError("FSG4/B4-A worker log contains a host-local path")
+    return sanitized
 
 
 def _tensor_values(value: object, label: str) -> tuple[tuple[int, ...], list[float]]:
@@ -431,8 +449,12 @@ def _generate(args: argparse.Namespace) -> None:
                     text=True,
                     check=False,
                 )
-                (run_root / "stdout.txt").write_text(completed.stdout, encoding="utf-8")
-                (run_root / "stderr.txt").write_text(completed.stderr, encoding="utf-8")
+                (run_root / "stdout.txt").write_text(
+                    _sanitize_log(completed.stdout, args), encoding="utf-8"
+                )
+                (run_root / "stderr.txt").write_text(
+                    _sanitize_log(completed.stderr, args), encoding="utf-8"
+                )
                 if completed.returncode != 0:
                     raise RuntimeError(
                         f"FSG4/B4-A worker failed pair={pair_index} position={position}:\n"

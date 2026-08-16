@@ -71,6 +71,24 @@ def test_b4a_worker_command_preserves_virtualenv_python_symlink(tmp_path: Path) 
     assert command[0] != str(interpreter.resolve())
 
 
+def test_b4a_worker_logs_replace_host_local_roots(tmp_path: Path) -> None:
+    args = Namespace(
+        abcrown_python=tmp_path / "abcrown" / ".venv" / "bin" / "python",
+        abcrown_root=tmp_path / "abcrown",
+        benchmark_root=tmp_path / "benchmark",
+    )
+    value = (
+        f"python={args.abcrown_python.absolute()} "
+        f"model={args.benchmark_root.resolve()}/model.onnx "
+        f"repo={pairs.REPOSITORY_ROOT}/script.py"
+    )
+    sanitized = pairs._sanitize_log(value, args)
+    assert "$ABCROWN_PYTHON" in sanitized
+    assert "$BENCHMARK_ROOT/model.onnx" in sanitized
+    assert "$BOUNDFLOW_ROOT/script.py" in sanitized
+    assert str(tmp_path) not in sanitized
+
+
 def test_b4a_worker_activation_rejects_lineage_and_rerun_tamper() -> None:
     names = ("17", "19", "23", "25", "28", "31")
     handoff_payload = {
