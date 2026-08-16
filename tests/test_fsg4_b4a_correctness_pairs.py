@@ -3,6 +3,8 @@
 # pylint: disable=missing-function-docstring,protected-access
 
 from copy import deepcopy
+from argparse import Namespace
+from pathlib import Path
 
 import pytest
 import torch
@@ -45,6 +47,28 @@ def test_b4a_pair_schedule_is_fixed_and_counterbalanced() -> None:
         ("B3", "B4-A"),
     )
     assert len(pairs.CODE_PATHS) == len(set(pairs.CODE_PATHS))
+
+
+def test_b4a_worker_command_preserves_virtualenv_python_symlink(tmp_path: Path) -> None:
+    interpreter = tmp_path / "venv" / "bin" / "python"
+    interpreter.parent.mkdir(parents=True)
+    interpreter.symlink_to("/usr/bin/python3")
+    args = Namespace(
+        abcrown_python=interpreter,
+        benchmark_root=tmp_path / "benchmark",
+        abcrown_root=tmp_path / "abcrown",
+        model=tmp_path / "model.onnx",
+        property=tmp_path / "property.vnnlib",
+    )
+    command = pairs._command(
+        args,
+        pair_index=0,
+        position=0,
+        configuration="B3",
+        result=tmp_path / "worker.json",
+    )
+    assert command[0] == str(interpreter.absolute())
+    assert command[0] != str(interpreter.resolve())
 
 
 def test_b4a_worker_activation_rejects_lineage_and_rerun_tamper() -> None:

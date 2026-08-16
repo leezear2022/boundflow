@@ -12,6 +12,8 @@
 - correctness worker保存terminal lower、六层lA与六组intermediate lower/upper的标准base64 float32 raw，
   供不同fresh process按`atol=rtol=2e-4`与sign exact直接比较；
 - 新增5-pair交替顺序runner、root semantic replay与固定code/raw/protocol/manifest绑定；正式artifact尚未生成。
+- five-fresh首次启动在worker执行前发现解释器symlink被`resolve()`展开为裸Python；runner已改为保留
+  virtualenv symlink的absolute path，失败未生成artifact、未消耗样本。
 
 ## 当前验证
 
@@ -30,4 +32,3 @@
 状态=`IMPLEMENTED-B4-A-PENDING-CLEAN-SOURCE-FIVE-FRESH`。下一唯一动作是完成全量/静态检查、提交clean
 source，再按冻结顺序生成5 fresh B3/B4-A correctness artifact。five-fresh通过前不得运行正式性能门禁，
 B4-B/TIR、B4-C/D与B5—B7继续关闭。
-

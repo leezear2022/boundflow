@@ -162,7 +162,7 @@ def _command(
     result: Path,
 ) -> tuple[str, ...]:
     return (
-        str(args.abcrown_python.resolve()),
+        str(args.abcrown_python.expanduser().absolute()),
         str(REPOSITORY_ROOT / "scripts/run_fsg4_b4a_same_solver_worker.py"),
         "--configuration",
         configuration,

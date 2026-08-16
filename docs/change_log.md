@@ -5,6 +5,7 @@
 - 实现typed terminal producer、one-shot handoff、no-CROWN export assembly与same-solver显式opt-in；
 - 完整content/lineage/export digest及raw float32 payload在query后排除计时audit绑定；
 - 新增5 fresh B3/B4-A交替runner与root replay；GPU smoke只支持机制/语义，不是性能claim；
+- 修复five-fresh worker解释器symlink被展开为裸Python的问题，失败发生在样本执行前且无半成品artifact；
 - 状态=`IMPLEMENTED-B4-A-PENDING-CLEAN-SOURCE-FIVE-FRESH`。详见
   `gemini_doc/change_2026-08-16_fsg4_b4a_terminal_handoff_implementation.md`。
 
