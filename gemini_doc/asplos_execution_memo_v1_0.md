@@ -1,5 +1,12 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-16 FSG4/B4-A实现候选指令**：实现已到clean-source five-fresh前，下一步只生成5组独立
+> B3/B4-A correctness artifact并root replay；未通过前不测正式性能，不启动B4-B/TIR。
+
+> **2026-08-16 FSG4/B4-A预注册指令**：只实现第10次optimizer evaluation的terminal lower/六层lA
+> typed handoff与zero-rerun export assembly；先验证state/topology/shape lineage、10/9/4/3物理结构及
+> five-fresh correctness，再允许B3/B4-A计时。不得混入B4-B/TIR、JIT、runtime或allocator改动。
+
 > **2026-08-16 FSG4/B4-0外审关闭指令**：Round 1审计AC1—AC7全部PASS，exchange已
 > `closed/approved`，最终状态=`EXTERNALLY-APPROVED-VALIDATED-B4-0-OPPORTUNITY`。下一唯一动作是
 > B4-A预注册与terminal lower/lA handoff；先解决shape-lineage与数值复用正确性，不得启动B4-B/TIR。

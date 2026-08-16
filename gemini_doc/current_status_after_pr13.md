@@ -1,5 +1,15 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-16 FSG4/B4-A实现候选状态**：typed producer/handoff/no-rerun assembly、same-solver opt-in、
+> post-query raw content audit与5-pair runner已实现，状态=
+> `IMPLEMENTED-B4-A-PENDING-CLEAN-SOURCE-FIVE-FRESH`。下一唯一动作是clean-source five-fresh；当前无
+> B4-A performance claim，B4-B/TIR与B5—B7关闭。
+
+> **2026-08-16 FSG4/B4-A预注册状态**：第10次optimizer evaluation→terminal lower/六层lA typed
+> handoff与no-rerun export合同已冻结，状态=`PREREGISTERED-B4-A-NOT-IMPLEMENTED`。下一唯一动作是实现
+> typed lineage、producer与assembly并先过单次/five-fresh correctness；性能门禁尚未开放，B4-B/TIR、
+> B4-C/D与B5—B7关闭。
+
 > **2026-08-16 FSG4/B4-0外审关闭状态**：Round 1外审从raw独立复算AC1—AC7全PASS，无blocker/
 > major；exchange=`closed/approved`。最终状态=`EXTERNALLY-APPROVED-VALIDATED-B4-0-OPPORTUNITY`。
 > 下一唯一工程动作是B4-A预注册与terminal lower/lA handoff；production shape从correlation parent

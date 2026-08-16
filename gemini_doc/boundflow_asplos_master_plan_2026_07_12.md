@@ -1,5 +1,13 @@
 # BoundFlow 面向 ASPLOS 的总体研发与论文执行计划 v1.0
 
+> **2026-08-16 FSG4/B4-A实现候选**：typed handoff/no-rerun路径与five-fresh runner已实现为
+> `IMPLEMENTED-B4-A-PENDING-CLEAN-SOURCE-FIVE-FRESH`。下一步只执行clean-source correctness；无性能
+> claim，B4-B/C/D与B5—B7关闭。
+
+> **2026-08-16 FSG4/B4-A预注册**：状态=`PREREGISTERED-B4-A-NOT-IMPLEMENTED`。只开放terminal
+> lower/lA typed handoff与no-rerun assembly；先过typed lineage、5 fresh correctness，后测B3/B4-A
+> core/query门禁。B4-B/C/D与B5—B7仍关闭。
+
 > **2026-08-16 FSG4/B4-0外审关闭**：Round 1外审批准并关闭为
 > `EXTERNALLY-APPROVED-VALIDATED-B4-0-OPPORTUNITY`。只开放B4-A terminal lower/lA handoff；下一步先
 > 预注册typed lineage/correctness/five-fresh门禁，B4-B/C/D与B5—B7不得提前混入。

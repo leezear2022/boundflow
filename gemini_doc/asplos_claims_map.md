@@ -1,5 +1,16 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-16 FSG4/B4-A实现候选**：typed terminal producer、one-shot handoff、no-rerun assembly、
+> post-query content audit与five-fresh runner已实现，状态=
+> `IMPLEMENTED-B4-A-PENDING-CLEAN-SOURCE-FIVE-FRESH`。GPU smoke只验证机制/语义，单pair约1.02894x core
+> 不构成性能claim；five-fresh与正式计时尚未执行，B4-B/TIR关闭。
+
+> **2026-08-16 FSG4/B4-A预注册**：状态=`PREREGISTERED-B4-A-NOT-IMPLEMENTED`。冻结第10次optimizer
+> evaluation的terminal lower/六层lA typed handoff、export CROWN rerun=0、handoff=1，以及
+> state/graph/split/topology/producer-op/shape/dtype/layout/content lineage。必须先过5 fresh correctness，
+> 才允许检验B3/B4-A core `>=1.03x`与query worst pair `>=0.98x`。当前无B4-A correctness/performance
+> claim，B4-B/TIR与B5—B7关闭。
+
 > **2026-08-16 FSG4/B4-0外审关闭**：Round 1外部模型从formal raw独立复算AC1—AC7全PASS，
 > 无blocker/major；exchange=`closed/approved`。最终状态=
 > `EXTERNALLY-APPROVED-VALIDATED-B4-0-OPPORTUNITY`。只开放B4-A terminal lower/lA handoff；shape必须

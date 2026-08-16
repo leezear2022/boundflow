@@ -10,6 +10,20 @@
 
 ---
 
+FSG4/B4-A typed producer/handoff/no-rerun assembly与same-solver opt-in已实现，状态=
+`IMPLEMENTED-B4-A-PENDING-CLEAN-SOURCE-FIVE-FRESH`。runtime热路径不做content D2H hash；完整handoff、
+lineage、terminal export digest及raw float32 payload均在query后排除计时audit绑定。独立GPU smoke已确认
+handoff=1/rerun=0/provider-fallback=0与冻结语义容差，但单pair性能不是claim。下一唯一动作是提交clean
+source并生成5 fresh B3/B4-A correctness artifact；B4-B/TIR仍关闭。见
+`gemini_doc/change_2026-08-16_fsg4_b4a_terminal_handoff_implementation.md`。
+
+FSG4/B4-A terminal lower/lA handoff已完成实现前预注册，状态=`PREREGISTERED-B4-A-NOT-IMPLEMENTED`。
+候选只允许在optimizer第10次、无update evaluation同时产出terminal lower与六层lA，并让export做
+typed assembly、CROWN rerun=`0`；typed lineage绑定state/graph/split/topology、producer op ordinal/name、
+shape/dtype/device/layout/content hash。先过5 fresh correctness，才允许检验B3/B4-A core `>=1.03x`与
+query worst pair `>=0.98x`。B4-B/TIR及B5—B7保持关闭。见
+`gemini_doc/BOUNDFLOW_FSG4_B4A_TERMINAL_LOWER_ADJOINT_HANDOFF_PLAN_2026_08_16.md`。
+
 FSG4/B4-0 attribution已通过Round 1外审并由executor关闭exchange，最终状态=
 `EXTERNALLY-APPROVED-VALIDATED-B4-0-OPPORTUNITY`。typed raw event、control/profile独立worker、
 14-call marker、CUDA annotation/kernel区分、correlation/temporal归因、确定性gzip及

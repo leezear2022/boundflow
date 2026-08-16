@@ -818,11 +818,11 @@ def _use_prepared_executor(configuration: str) -> Iterator[None]:
         template_hash = cache.insert(template)
         terminal_schedule = (
             compile_terminal_optimizer_schedule_v1()
-            if configuration in {"B3-B", "B3-C"}
+            if configuration in {"B3-B", "B3-C", "B4-A"}
             else None
         )
         device_commit_plan = None
-        if configuration == "B3-C":
+        if configuration in {"B3-C", "B4-A"}:
             device_commit_plan = compile_device_atomic_commit_plan_v1(
                 plan_id="resnet2b-prop0-b3c-device-commit",
                 prepared_template_hash=template_hash,
@@ -846,6 +846,7 @@ def _use_prepared_executor(configuration: str) -> Iterator[None]:
             prepared_core_cache=cache,
             prepared_core_template_hash=template_hash,
             terminal_optimizer_schedule=terminal_schedule,
+            terminal_lower_adjoint_handoff=configuration == "B4-A",
             device_atomic_commit_plan=device_commit_plan,
         )
 

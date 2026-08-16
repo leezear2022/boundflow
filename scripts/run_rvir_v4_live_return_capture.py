@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 from contextlib import contextmanager
 import json
 from pathlib import Path
@@ -26,6 +27,21 @@ from scripts import run_rvir_v4_production_state_capture as capture_runner
 from scripts.run_rvir_v4_pre_state_artifact import EXPECTED_IDENTITY, TOPOLOGY
 
 WORKER_SCHEMA = "boundflow.rvir-v4-live-return-worker/v1"
+
+
+def _audited_tensor_payload(value: Any) -> dict[str, object]:
+    """Encode one tensor only after headline timing has ended."""
+
+    import torch
+
+    tensor = value.detach().cpu().contiguous()
+    return {
+        "shape": [int(dimension) for dimension in tensor.shape],
+        "dtype": str(tensor.dtype),
+        "content_base64": base64.b64encode(
+            tensor.view(torch.uint8).numpy().tobytes()
+        ).decode("ascii"),
+    }
 
 
 def _move_tensors(value: object, *, device: Any, dtype: Any) -> object:
@@ -135,6 +151,7 @@ class _LiveExecutor:
         prepared_core_cache: Any = None,
         prepared_core_template_hash: str | None = None,
         terminal_optimizer_schedule: Any = None,
+        terminal_lower_adjoint_handoff: bool = False,
         device_atomic_commit_plan: Any = None,
         capture_payloads: bool = True,
         profile_recorder: Any = None,
@@ -147,6 +164,8 @@ class _LiveExecutor:
             raise ValueError("RVIR-v4 prepared core conflicts with precompiled inputs")
         if terminal_optimizer_schedule is not None and prepared_core_cache is None:
             raise ValueError("RVIR-v4 terminal schedule requires prepared core")
+        if terminal_lower_adjoint_handoff and terminal_optimizer_schedule is None:
+            raise ValueError("FSG4/B4-A terminal handoff requires terminal schedule")
         if (
             device_atomic_commit_plan is not None
             and terminal_optimizer_schedule is None
@@ -160,6 +179,7 @@ class _LiveExecutor:
         self.prepared_core_cache = prepared_core_cache
         self.prepared_core_template_hash = prepared_core_template_hash
         self.terminal_optimizer_schedule = terminal_optimizer_schedule
+        self.terminal_lower_adjoint_handoff = terminal_lower_adjoint_handoff
         self.device_atomic_commit_plan = device_atomic_commit_plan
         self.capture_payloads = capture_payloads
         self.profile_recorder = profile_recorder
@@ -176,6 +196,12 @@ class _LiveExecutor:
         self.prepared_core_template_hashes: list[str] = []
         self.prepared_core_instance_hashes: list[str] = []
         self.terminal_optimizer_schedule_hashes: list[str] = []
+        self.terminal_lower_adjoint_handoff_metadata: list[dict[str, object]] = []
+        self.terminal_export_assembly_metadata: list[dict[str, object]] = []
+        self.native_backward_export_metadata: list[dict[str, object]] = []
+        self.native_backward_export_payloads: list[dict[str, object]] = []
+        self._pending_terminal_handoff_audits: list[tuple[Any, Any, Any]] = []
+        self._pending_native_backward_exports: list[Any] = []
         self.device_commit_audits: list[dict[str, object]] = []
         self._pending_device_audits: list[tuple[Any, ...]] = []
         self.last_core_result: Any = None
@@ -205,6 +231,11 @@ class _LiveExecutor:
         )
         from boundflow.runtime.fsg4_b3_terminal_optimizer_schedule import (
             execute_terminal_optimizer_schedule_v1,
+        )
+        from boundflow.runtime.fsg4_b4a_terminal_lower_adjoint_handoff import (
+            assemble_native_backward_from_terminal_handoff_v1,
+            execute_terminal_optimizer_with_lower_adjoint_handoff_v1,
+            NativeTerminalLowerAdjointLeaseV1,
         )
         from boundflow.runtime.fsg4_b3_device_atomic_commit import (
             stage_device_atomic_transaction_v1,
@@ -396,6 +427,7 @@ class _LiveExecutor:
                     cache_state="process-hit",
                 )
             terminal_forward_trace = None
+            terminal_handoff_result = None
             if self.terminal_optimizer_schedule is None:
                 native = execute_rvir_v4_native_optimizer_trace(
                     module,
@@ -413,16 +445,42 @@ class _LiveExecutor:
                     beta_by_relu_input=native.steps[-1].beta_by_relu_input,
                 )
             else:
-                terminal_result = execute_terminal_optimizer_schedule_v1(
-                    module,
-                    input_spec,
-                    linear_spec_C=objective,
-                    relu_pre=mapping.relu_pre,
-                    initial_state=initial,
-                    mutation_policy=mutation_policy,
-                    schedule=self.terminal_optimizer_schedule,
-                    prevalidated_plan=prepared_instance,
-                )
+                if self.terminal_lower_adjoint_handoff:
+                    terminal_handoff_result = (
+                        execute_terminal_optimizer_with_lower_adjoint_handoff_v1(
+                            module,
+                            input_spec,
+                            linear_spec_C=objective,
+                            relu_pre=mapping.relu_pre,
+                            initial_state=initial,
+                            mutation_policy=mutation_policy,
+                            schedule=self.terminal_optimizer_schedule,
+                            topology=TOPOLOGY,
+                            prevalidated_plan=prepared_instance,
+                        )
+                    )
+                    terminal_result = terminal_handoff_result.optimizer_result
+                    self.terminal_lower_adjoint_handoff_metadata.append(
+                        terminal_handoff_result.metadata()
+                    )
+                    self._pending_terminal_handoff_audits.append(
+                        (
+                            terminal_handoff_result.handoff,
+                            terminal_result.terminal_state,
+                            terminal_result.forward_trace,
+                        )
+                    )
+                else:
+                    terminal_result = execute_terminal_optimizer_schedule_v1(
+                        module,
+                        input_spec,
+                        linear_spec_C=objective,
+                        relu_pre=mapping.relu_pre,
+                        initial_state=initial,
+                        mutation_policy=mutation_policy,
+                        schedule=self.terminal_optimizer_schedule,
+                        prevalidated_plan=prepared_instance,
+                    )
                 terminal = terminal_result.terminal_state
                 terminal_forward_trace = terminal_result.forward_trace
                 self.terminal_optimizer_schedule_hashes.append(
@@ -437,15 +495,34 @@ class _LiveExecutor:
                     resource="host+cuda",
                     cache_state="process-hit",
                 )
-            export = export_rvir_v4_native_backward(
-                module=module,
-                input_spec=input_spec,
-                linear_spec_C=objective,
-                relu_pre=mapping.relu_pre,
-                terminal_state=terminal,
-                topology=TOPOLOGY,
-                forward_trace=terminal_forward_trace,
-            )
+            if terminal_handoff_result is None:
+                export = export_rvir_v4_native_backward(
+                    module=module,
+                    input_spec=input_spec,
+                    linear_spec_C=objective,
+                    relu_pre=mapping.relu_pre,
+                    terminal_state=terminal,
+                    topology=TOPOLOGY,
+                    forward_trace=terminal_forward_trace,
+                )
+            else:
+                terminal_assembly = assemble_native_backward_from_terminal_handoff_v1(
+                    module=module,
+                    relu_pre=mapping.relu_pre,
+                    terminal_state=terminal,
+                    topology=TOPOLOGY,
+                    forward_trace=terminal_forward_trace,
+                    schedule=self.terminal_optimizer_schedule,
+                    mutation_policy=mutation_policy,
+                    handoff_lease=NativeTerminalLowerAdjointLeaseV1(
+                        terminal_handoff_result.handoff
+                    ),
+                )
+                export = terminal_assembly.export
+                self.terminal_export_assembly_metadata.append(
+                    terminal_assembly.metadata()
+                )
+            self._pending_native_backward_exports.append(export)
             if self.profile_recorder is not None:
                 self.profile_recorder.begin(
                     scope="core",
@@ -584,6 +661,54 @@ class _LiveExecutor:
         self.device_commit_audits.append(audit)
         self._pending_device_audits.clear()
 
+    def finalize_terminal_export_audit(self) -> None:
+        """Bind handoff/export contents after headline query timing."""
+
+        if self.native_backward_export_metadata:
+            raise ValueError("FSG4/B4-A terminal export audit repeats")
+        if len(self._pending_native_backward_exports) != 1:
+            raise ValueError("FSG4/B4-A native export audit cardinality differs")
+        self.torch.cuda.synchronize()
+        self.native_backward_export_metadata.append(
+            self._pending_native_backward_exports[0].metadata()
+        )
+        export = self._pending_native_backward_exports[0]
+        self.native_backward_export_payloads.append(
+            {
+                "lower": _audited_tensor_payload(export.lower),
+                "lAs": {
+                    name: _audited_tensor_payload(value)
+                    for name, value in sorted(export.l_as.items())
+                },
+                "intermediates": {
+                    name: {
+                        "lower": _audited_tensor_payload(value.lower),
+                        "upper": _audited_tensor_payload(value.upper),
+                    }
+                    for name, value in sorted(export.intermediates.items())
+                },
+            }
+        )
+        self._pending_native_backward_exports.clear()
+        if self.terminal_lower_adjoint_handoff:
+            if (
+                len(self._pending_terminal_handoff_audits) != 1
+                or len(self.terminal_lower_adjoint_handoff_metadata) != 1
+            ):
+                raise ValueError("FSG4/B4-A terminal handoff audit cardinality differs")
+            handoff, terminal_state, forward_trace = (
+                self._pending_terminal_handoff_audits[0]
+            )
+            self.terminal_lower_adjoint_handoff_metadata[0]["handoff"] = (
+                handoff.metadata(
+                    terminal_state=terminal_state,
+                    forward_trace=forward_trace,
+                )
+            )
+            self._pending_terminal_handoff_audits.clear()
+        elif self._pending_terminal_handoff_audits:
+            raise ValueError("FSG4/B4-A handoff audit exists for B3 control")
+
     @contextmanager
     def instrument(
         self,
@@ -672,6 +797,7 @@ def _worker(args: argparse.Namespace) -> None:
             )
     if executor.has_pending_device_audit:
         executor.finalize_post_query_audit()
+    executor.finalize_terminal_export_audit()
     payload: dict[str, object] = {
         "schema_version": WORKER_SCHEMA,
         "source": {
@@ -706,6 +832,14 @@ def _worker(args: argparse.Namespace) -> None:
         "terminal_optimizer_schedule_hashes": (
             executor.terminal_optimizer_schedule_hashes
         ),
+        "terminal_lower_adjoint_handoff_metadata": (
+            executor.terminal_lower_adjoint_handoff_metadata
+        ),
+        "terminal_export_assembly_metadata": (
+            executor.terminal_export_assembly_metadata
+        ),
+        "native_backward_export_metadata": executor.native_backward_export_metadata,
+        "native_backward_export_payloads": executor.native_backward_export_payloads,
         "provider_core_callback_count": 0,
         "provider_compute_bounds_callback_count": (
             executor.provider_compute_bounds_callback_count

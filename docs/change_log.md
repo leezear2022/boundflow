@@ -1,5 +1,21 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-16：FSG4/B4-A Terminal Lower/lA Handoff 实现候选
+
+- 实现typed terminal producer、one-shot handoff、no-CROWN export assembly与same-solver显式opt-in；
+- 完整content/lineage/export digest及raw float32 payload在query后排除计时audit绑定；
+- 新增5 fresh B3/B4-A交替runner与root replay；GPU smoke只支持机制/语义，不是性能claim；
+- 状态=`IMPLEMENTED-B4-A-PENDING-CLEAN-SOURCE-FIVE-FRESH`。详见
+  `gemini_doc/change_2026-08-16_fsg4_b4a_terminal_handoff_implementation.md`。
+
+## 2026-08-16：FSG4/B4-A Terminal Lower/lA Handoff 预注册
+
+- 冻结第10次optimizer evaluation同时产出terminal lower与六层lA、terminal export零CROWN重跑；
+- typed lineage绑定state/graph/split/topology、producer op ordinal/name及shape/dtype/device/layout/content；
+- 先过5 fresh correctness，再检验B3/B4-A core `>=1.03x`、query worst pair `>=0.98x`；
+- 状态=`PREREGISTERED-B4-A-NOT-IMPLEMENTED`，B4-B/TIR与B5—B7关闭。详见
+  `gemini_doc/change_2026-08-16_fsg4_b4a_terminal_handoff_preregistration.md`。
+
 ## 2026-08-16：FSG4/B4-0 外部审计关闭
 
 - Round 1外审从formal raw独立重算AC1—AC7全部PASS，无blocker/major；exchange=`closed/approved`；

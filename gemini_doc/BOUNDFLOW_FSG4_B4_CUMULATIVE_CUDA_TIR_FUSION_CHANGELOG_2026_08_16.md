@@ -1,5 +1,21 @@
 # FSG4/B4 cumulative CUDA/TIR fusion changelog
 
+## 2026-08-16 — B4-A implementation candidate
+
+- 实现第10次evaluation terminal lower/lA typed producer、one-shot handoff与zero-rerun assembly；
+- same-solver仅显式opt-in B4-A，其余B3/KFSB/device/post/queue路径不变；
+- content digest与raw float32 export audit移到query后排除计时区；
+- 新增5 fresh pair runner/root replay；GPU smoke通过但不形成性能claim；
+- 状态=`IMPLEMENTED-B4-A-PENDING-CLEAN-SOURCE-FIVE-FRESH`。
+
+## 2026-08-16 — B4-A preregistration
+
+- 冻结optimizer第10次evaluation同时输出terminal lower/lA、export零CROWN重跑的单变量合同；
+- typed lineage绑定state/graph/split/topology、producer op ordinal/name、shape/dtype/device/layout/content；
+- 冻结10/9 optimizer、4 forward、3 KFSB、handoff=1、rerun=0及provider/fallback=0计数；
+- 固定related pytest文件清单、5 fresh correctness与B3/B4-A `1.03x/0.98x`性能门禁；
+- 状态=`PREREGISTERED-B4-A-NOT-IMPLEMENTED`，B4-B/TIR不得混入。
+
 ## 2026-08-16 — B4-0 external audit closure
 
 - Round 1外审从raw独立复算AC1—AC7全PASS，无blocker/major；exchange=`closed/approved`；

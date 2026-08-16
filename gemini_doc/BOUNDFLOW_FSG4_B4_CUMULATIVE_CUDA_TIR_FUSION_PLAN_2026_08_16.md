@@ -323,3 +323,12 @@ Round 1外审AC1—AC7全部PASS，exchange已`closed/approved`，最终状态=
 `EXTERNALLY-APPROVED-VALIDATED-B4-0-OPPORTUNITY`。B4-A正式获准入；其production shape必须从
 correlation parent CPU operator恢复并绑定lineage，后续exchange必须固定related pytest文件清单。
 下一唯一动作是B4-A预注册，B4-B/TIR不得提前混入。
+
+### B4-A预注册更新
+
+B4-A已冻结为`PREREGISTERED-B4-A-NOT-IMPLEMENTED`：第10次optimizer evaluation必须同时产出terminal
+lower与六层lA，export只做typed assembly且CROWN rerun=0。lineage绑定terminal state、graph/split、
+native/provider topology、producer op ordinal/name、shape/dtype/device/layout/content digest；先过5 fresh
+correctness再测B3/B4-A core `>=1.03x`、query worst pair `>=0.98x`。详细合同见
+`gemini_doc/BOUNDFLOW_FSG4_B4A_TERMINAL_LOWER_ADJOINT_HANDOFF_PLAN_2026_08_16.md`。下一唯一动作是
+实现B4-A typed producer/consumer；B4-B/TIR仍关闭。

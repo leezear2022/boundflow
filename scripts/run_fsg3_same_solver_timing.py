@@ -1042,6 +1042,13 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
         post_query_audit_started_ns = time.perf_counter_ns()
         executor.finalize_post_query_audit()
         post_query_audit_ns = time.perf_counter_ns() - post_query_audit_started_ns
+    terminal_export_audit_ns = 0
+    if executor is not None:
+        terminal_export_audit_started_ns = time.perf_counter_ns()
+        executor.finalize_terminal_export_audit()
+        terminal_export_audit_ns = (
+            time.perf_counter_ns() - terminal_export_audit_started_ns
+        )
     core_wall_ns, core_gpu_ns = core.timings()
     if len(queue.events) != 1 or post.count != 1:
         raise ValueError("FSG3 post/queue event count differs")
@@ -1163,6 +1170,20 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
             "terminal_optimizer_schedule_hashes": (
                 [] if executor is None else executor.terminal_optimizer_schedule_hashes
             ),
+            "terminal_lower_adjoint_handoff_metadata": (
+                []
+                if executor is None
+                else executor.terminal_lower_adjoint_handoff_metadata
+            ),
+            "terminal_export_assembly_metadata": (
+                [] if executor is None else executor.terminal_export_assembly_metadata
+            ),
+            "native_backward_export_metadata": (
+                [] if executor is None else executor.native_backward_export_metadata
+            ),
+            "native_backward_export_payloads": (
+                [] if executor is None else executor.native_backward_export_payloads
+            ),
             "assembly_metadata": (
                 [] if executor is None else executor.assembly_metadata
             ),
@@ -1180,6 +1201,8 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
             "post_validation_excluded_from_timing": True,
             "post_query_audit_ns": post_query_audit_ns,
             "post_query_audit_excluded_from_timing": True,
+            "terminal_export_audit_ns": terminal_export_audit_ns,
+            "terminal_export_audit_excluded_from_timing": True,
             "device_commit_audits": (
                 [] if executor is None else executor.device_commit_audits
             ),
