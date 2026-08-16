@@ -6,6 +6,10 @@ source：`66154e485594e8a84ad1ce04d701d8543c1a7335`
 artifact：`artifacts/fsg4-b4-kernel-attribution/resnet2b-prop0-v1/`  
 性能声明：`performance_claimed=false`
 
+> 2026-08-16更新：Round 1外审AC1—AC7全部PASS，exchange已`closed/approved`。本内部状态已由
+> `EXTERNALLY-APPROVED-VALIDATED-B4-0-OPPORTUNITY`取代；外审关闭记录见
+> `change_2026-08-16_fsg4_b4_0_external_audit_closure.md`。
+
 ## 1. 正式执行
 
 从clean source `66154e4`按固定顺序运行一个fresh无profiler B3 control和一个fresh B3 profiler

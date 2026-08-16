@@ -1,5 +1,10 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-16 FSG4/B4-0外审关闭状态**：Round 1外审从raw独立复算AC1—AC7全PASS，无blocker/
+> major；exchange=`closed/approved`。最终状态=`EXTERNALLY-APPROVED-VALIDATED-B4-0-OPPORTUNITY`。
+> 下一唯一工程动作是B4-A预注册与terminal lower/lA handoff；production shape从correlation parent
+> operator恢复并绑定lineage。B4-A correctness/performance尚未成立，B4-B不得混入，B4-C/D与B5—B7关闭。
+
 > **2026-08-16 FSG4/B4-0内部关闭状态**：source=`66154e4`正式fresh control/profile artifact含
 > 270609 raw events、35367/35367 CUDA kernel closure、14-call/4-forward exact marker；semantic
 > max diff=`4.76837158203125e-07`、discrete/sign exact，root replay与9/9 outer-resigned tamper通过。

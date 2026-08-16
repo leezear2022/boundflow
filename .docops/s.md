@@ -4,10 +4,10 @@ tp: boundflow
 rm: v01
 st: s01
 stat: active
-health: yellow
+health: green
 pr: [60]
-last_ch: ev009607
-last_va: ev009608
-blk: awaiting-external-audit
-next: fsg4-b4-0-external-audit
-updated: 2026-08-15T17:14:39Z
+last_ch: ev009620
+last_va: ev009621
+blk: none
+next: fsg4-b4-a-terminal-handoff-preregistration
+updated: 2026-08-16T14:26:26Z

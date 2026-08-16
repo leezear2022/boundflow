@@ -316,3 +316,10 @@ source=`66154e4`已完成fresh formal artifact、root replay与9/9 outer-resigne
 `INTERNALLY-VALIDATED-B4-0-OPPORTUNITY-PENDING-EXTERNAL-AUDIT`。CROWN14覆盖14个call、9196个kernel；
 B4-A满足消除完整重复terminal export CROWN call，B4-B按冻结share覆盖约67.72% B3 core。外审批准前
 仍不实现TIR；批准后下一唯一动作是B4-A terminal lower/lA handoff，B4-B不得与之混跑。
+
+### B4-0 外审关闭更新
+
+Round 1外审AC1—AC7全部PASS，exchange已`closed/approved`，最终状态=
+`EXTERNALLY-APPROVED-VALIDATED-B4-0-OPPORTUNITY`。B4-A正式获准入；其production shape必须从
+correlation parent CPU operator恢复并绑定lineage，后续exchange必须固定related pytest文件清单。
+下一唯一动作是B4-A预注册，B4-B/TIR不得提前混入。

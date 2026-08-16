@@ -1,5 +1,9 @@
 # BoundFlow 面向 ASPLOS 的总体研发与论文执行计划 v1.0
 
+> **2026-08-16 FSG4/B4-0外审关闭**：Round 1外审批准并关闭为
+> `EXTERNALLY-APPROVED-VALIDATED-B4-0-OPPORTUNITY`。只开放B4-A terminal lower/lA handoff；下一步先
+> 预注册typed lineage/correctness/five-fresh门禁，B4-B/C/D与B5—B7不得提前混入。
+
 > **2026-08-16 FSG4/B4-0内部关闭**：source=`66154e4`formal attribution/replay/tamper已内部通过，
 > opportunity只准入B4-A/B候选而无性能claim。当前等待外审；批准后下一单变量为B4-A terminal
 > lower/lA handoff，B4-B/C/D与B5—B7不得提前混入。

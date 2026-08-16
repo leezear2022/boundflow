@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-16 FSG4/B4-0外审关闭指令**：Round 1审计AC1—AC7全部PASS，exchange已
+> `closed/approved`，最终状态=`EXTERNALLY-APPROVED-VALIDATED-B4-0-OPPORTUNITY`。下一唯一动作是
+> B4-A预注册与terminal lower/lA handoff；先解决shape-lineage与数值复用正确性，不得启动B4-B/TIR。
+
 > **2026-08-16 FSG4/B4-0内部关闭指令**：source=`66154e4`正式artifact、root replay、9/9 tamper及
 > opportunity门禁内部通过，状态=`INTERNALLY-VALIDATED-B4-0-OPPORTUNITY-PENDING-EXTERNAL-AUDIT`。
 > 当前下一唯一动作是外部审计；批准后只启动B4-A terminal lower/lA handoff，不得把B4-B/TIR混入

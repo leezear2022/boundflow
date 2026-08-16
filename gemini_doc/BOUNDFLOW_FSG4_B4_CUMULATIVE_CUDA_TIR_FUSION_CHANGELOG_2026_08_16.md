@@ -1,5 +1,13 @@
 # FSG4/B4 cumulative CUDA/TIR fusion changelog
 
+## 2026-08-16 — B4-0 external audit closure
+
+- Round 1外审从raw独立复算AC1—AC7全PASS，无blocker/major；exchange=`closed/approved`；
+- 审计方第10类全重签allocation-delta攻击仍被semantic replay拒绝；
+- 两项minor转为B4-A硬门禁：shape从correlation parent operator恢复并绑定lineage；exchange固定
+  related pytest文件清单；
+- 最终状态=`EXTERNALLY-APPROVED-VALIDATED-B4-0-OPPORTUNITY`；只开放B4-A，B4-B不得混入。
+
 ## 2026-08-16 — B4-0 internal opportunity closure
 
 - source=`66154e4`生成fresh control/profile正式artifact；semantic discrete/sign exact，lower max diff=

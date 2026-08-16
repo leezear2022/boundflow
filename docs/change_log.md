@@ -1,5 +1,13 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-16：FSG4/B4-0 外部审计关闭
+
+- Round 1外审从formal raw独立重算AC1—AC7全部PASS，无blocker/major；exchange=`closed/approved`；
+- 审计方自建第10类全重签allocation-delta攻击仍被拒绝；
+- 两项minor转为B4-A shape-lineage与exchange related-file-list硬门禁；
+- 最终状态=`EXTERNALLY-APPROVED-VALIDATED-B4-0-OPPORTUNITY`，只开放B4-A。详见
+  `gemini_doc/change_2026-08-16_fsg4_b4_0_external_audit_closure.md`。
+
 ## 2026-08-16：FSG4/B4-0 Kernel/Materialization Attribution 内部关闭
 
 - source=`66154e4`正式artifact包含270609 events、35367/35367 kernel phase closure和14-call exact marker；
