@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-18 FSG4/B4-B0 Round 2外审关闭**：状态=
+> `VALIDATED-B4-B0-EXTERNALLY-APPROVED`。独立外审关闭Round 1 F1，确认code/protocol/manifest
+> 绝对身份绑定、all-run topology/lineage全链重签拒绝、5 fresh/10 captures与数值/ownership证据。
+> 该claim只支持capture correctness/ownership；不支持B4-B2/TIR/performance/memory/ASPLOS-ready。
+
 > **2026-08-18 FSG4/B4-B0 v2内部关闭**：source=`422a3ee`，5 fresh/10 captures与
 > 108 tensors/664,744 elements重新生成；max diff=`1.1920928955078125e-07`、sign exact；
 > 绝对source/topology/lineage身份绑定与`11/11`完整性负例通过。状态=

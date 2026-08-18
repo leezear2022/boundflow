@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-18 FSG4/B4-B0 Round 2外审关闭指令**：exchange已`closed/approved`，Round 1 F1
+> 已关闭。下一唯一动作是另行预注册B4-B1 typed pure-PyTorch reference及其correctness/gradient
+> 门禁；不得直接实现B4-B2 CUDA/TIR，不得启动performance/memory计时或升级ASPLOS-ready claim。
+
 > **2026-08-18 FSG4/B4-B0 v2内部关闭指令**：source=`422a3ee`的绝对身份绑定v2 artifact
 > 已通过5 fresh/10 captures、max diff=`1.1920928955078125e-07`、sign exact与`11/11`
 > 完整性负例；定向=`24 passed`、全量=`1376 passed, 3 skipped, 6 warnings`。下一唯一动作

@@ -1,5 +1,13 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-18：FSG4/B4-B0 Round 2 外审关闭
+
+- Round 2独立外审=`approve`，0 blocker / 0 major / 0 minor / 0 info，F1关闭；
+- 审计方自建两类all-run全链重签变体，root replay均拒绝；raw/hash/identity独立重算通过；
+- exchange已由executor关闭，最终状态=`VALIDATED-B4-B0-EXTERNALLY-APPROVED`；
+- 只开放另行预注册的B4-B1 typed pure-PyTorch reference，B4-B2/TIR/performance仍关闭。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4b0_round2_external_closure.md`。
+
 ## 2026-08-18：FSG4/B4-B0 v2 内部关闭
 
 - source=`422a3ee`，生成绝对身份绑定的5-fresh/10-capture v2 formal artifact；

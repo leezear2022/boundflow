@@ -10,6 +10,12 @@
 
 ---
 
+FSG4/B4-B0已通过Round 2独立外审并由executor关闭exchange，最终状态=
+`VALIDATED-B4-B0-EXTERNALLY-APPROVED`。0 blocker/major/minor/info；Round 1 F1已关闭；审计方
+自行构造的all-run topology/lineage全链重签两案均被拒绝。下一步只开放另行预注册B4-B1 typed
+pure-PyTorch reference，B4-B2/TIR/performance/memory/ASPLOS-ready仍关闭。见
+`change_2026-08-18_fsg4_b4b0_round2_external_closure.md`。
+
 FSG4/B4-B0 v2已内部关闭，状态=`VALIDATED-B4-B0-V2-PENDING-ROUND2-EXTERNAL-AUDIT`。
 source=`422a3ee`；5 fresh/10 captures、108 tensors/664,744 elements、max diff=`1.1920928955078125e-07`、
 sign exact；绝对source/topology/lineage身份绑定与11/11完整性负例通过。下一步只允许回复F1并提交

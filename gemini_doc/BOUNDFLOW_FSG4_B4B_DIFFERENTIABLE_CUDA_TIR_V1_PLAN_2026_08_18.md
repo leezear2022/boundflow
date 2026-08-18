@@ -327,3 +327,10 @@ topology、anchor及lineage绝对身份，正式完整性门禁（含Round 1两�
 `11/11 rejected`；定向=`24 passed`，全量=`1376 passed, 3 skipped, 6 warnings`。状态=
 `VALIDATED-B4-B0-V2-PENDING-ROUND2-EXTERNAL-AUDIT`；下一唯一动作
 是回复F1并提交Round 2，获批前不得启动B4-B1/B4-B2、TIR或性能计时。
+
+### B4-B0 Round 2外审关闭
+
+Round 2=`approve`，0 blocker/major/minor/info；F1由绝对身份三层绑定与审计方自建all-run
+topology/lineage全链重签拒绝正式关闭。exchange已由executor关闭，状态=
+`VALIDATED-B4-B0-EXTERNALLY-APPROVED`。现在只允许另行预注册B4-B1 typed pure-PyTorch
+reference；B4-B2 CUDA/TIR、performance、memory、ASPLOS-ready继续关闭。

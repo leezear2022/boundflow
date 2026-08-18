@@ -1,5 +1,11 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-18 FSG4/B4-B0 Round 2外审关闭**：独立外审=`approve`，0 blocker/major/minor/info，
+> F1关闭；审计方自行构造all-run topology/lineage全链重签，两案均被root replay拒绝；raw、
+> 绝对身份、v1/v2 replay、11/11完整性负例、定向24与全量1376/3 skip/6 warnings均独立复核。
+> exchange已关闭，状态=`VALIDATED-B4-B0-EXTERNALLY-APPROVED`。下一步只开放另行预注册的
+> B4-B1 typed pure-PyTorch reference；B4-B2/TIR/performance/memory/ASPLOS-ready继续关闭。
+
 > **2026-08-18 FSG4/B4-B0 v2内部关闭**：source=`422a3ee`，绝对身份绑定的v2 artifact
 > 已完成5 fresh/10 captures，108 tensors/664,744 elements，max diff=`1.1920928955078125e-07`、
 > sign exact；Round 1两类coordinated rewrite进入正式门禁，完整性负例=`11/11 rejected`。
