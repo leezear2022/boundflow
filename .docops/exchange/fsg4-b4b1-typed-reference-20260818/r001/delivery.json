@@ -1,0 +1,54 @@
+{
+  "doc": "fsg4-b4b1-typed-reference-20260818/r001/delivery",
+  "type": "delivery",
+  "task": "fsg4-b4b1-typed-reference-20260818",
+  "round": 1,
+  "from": "codex",
+  "to": "external-model",
+  "ts": "2026-08-18T07:52:51Z",
+  "base_commit": "88e0e7a",
+  "result_commit": "56fcc2b",
+  "changed_files": [
+    "boundflow/ir/differentiable_lower_region.py",
+    "boundflow/runtime/fsg4_b4b1_pytorch_reference.py",
+    "scripts/run_fsg4_b4b1_pytorch_reference_artifact.py",
+    "scripts/probe_fsg4_b4b1_pytorch_reference_integrity.py",
+    "tests/test_fsg4_b4b1_pytorch_reference.py",
+    "artifacts/fsg4-b4b1-pytorch-reference/resnet2b-prop0-v2"
+  ],
+  "claims": [
+    "VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE-PENDING-EXTERNAL-AUDIT; no TIR or performance claim"
+  ],
+  "validation": [
+    {
+      "cmd": "targeted",
+      "result": "pass"
+    },
+    {
+      "cmd": "related",
+      "result": "pass"
+    },
+    {
+      "cmd": "full",
+      "result": "pass"
+    },
+    {
+      "cmd": "static",
+      "result": "pass"
+    },
+    {
+      "cmd": "integrity",
+      "result": "pass"
+    }
+  ],
+  "limitations": [
+    "Frozen S/P production anchors only; B4-B2/TIR/performance/memory/whole-query/ASPLOS-ready closed"
+  ],
+  "risks": [
+    "v1 was thread-policy-sensitive and is explicitly superseded; auditor must verify v2 policy isolation and add an independent coordinated attack"
+  ],
+  "open_questions": [
+    "Approve B4-B1 correctness closure and only allow separate B4-B2 preregistration?"
+  ],
+  "md_sha256": "06d467a4c1feeb42c0a4683312c491f0e2ba04b434d7e9e31a1af020165d116b"
+}
