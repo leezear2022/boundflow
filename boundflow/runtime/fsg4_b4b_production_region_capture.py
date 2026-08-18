@@ -2,6 +2,7 @@
 
 # pylint: disable=too-many-instance-attributes,too-many-boolean-expressions
 # pylint: disable=too-many-arguments,too-many-locals,missing-function-docstring
+# pylint: disable=too-many-lines
 
 from __future__ import annotations
 
@@ -9,11 +10,15 @@ from dataclasses import dataclass
 import hashlib
 import json
 import math
-from typing import cast, Mapping
+from typing import cast, Mapping, TYPE_CHECKING
 
 import torch
 
 from .rvir_v4_production_state import production_tensor_sha256
+
+if TYPE_CHECKING:
+    from .rvir_v4_pre_state_initializer import ProductionNativePreStateV4
+    from .rvir_v4_production_state import ProductionStateSnapshotV4
 
 B4B_CAPTURE_SCHEMA = "boundflow.fsg4-b4b-production-region-capture/v1"
 B4B_SHAPE_SOURCE = "correlation-parent-boundflow-operator"
@@ -160,6 +165,141 @@ def b4b_v1_anchors() -> tuple[DifferentiableRegionAnchorV1, ...]:
     for anchor in anchors:
         anchor.validate()
     return anchors
+
+
+@dataclass(frozen=True)
+class ProductionDifferentiableRegionLineageV1:
+    """Exact compressed-state layout and round-trip ownership for one anchor."""
+
+    provider_start_node: str
+    source_tensor_hashes: tuple[tuple[str, str], ...]
+    round_trip_receipt_hashes: tuple[tuple[str, str], ...]
+    alpha_feature_index_count: int
+    alpha_spec_lookup_present: bool
+    beta_bias_present: bool
+    beta_update_mask_present: bool
+
+    @property
+    def source_hash_map(self) -> dict[str, str]:
+        return dict(self.source_tensor_hashes)
+
+    @property
+    def receipt_hash_map(self) -> dict[str, str]:
+        return dict(self.round_trip_receipt_hashes)
+
+    def validate(self, anchor: DifferentiableRegionAnchorV1) -> None:
+        source_hashes = self.source_hash_map
+        receipt_hashes = self.receipt_hash_map
+        alpha_prefix = anchor.production_alpha_path.rsplit("/", 1)[0]
+        encoded_activation = alpha_prefix.split("/", 1)[1]
+        beta_prefix = anchor.production_beta_path.rsplit("/", 1)[0]
+        index_prefix = f"alpha_layout/{encoded_activation}/feature_index/"
+        index_paths = sorted(
+            path for path in source_hashes if path.startswith(index_prefix)
+        )
+        required = {
+            anchor.production_alpha_path,
+            f"alpha_layout/{encoded_activation}/feature_shape",
+            anchor.production_beta_path,
+            f"{beta_prefix}/location",
+            f"{beta_prefix}/sign",
+        }
+        expected_index_count = len(anchor.preactivation_shape) - 1
+        if (
+            self.provider_start_node != "/49"
+            or not required.issubset(source_hashes)
+            or len(source_hashes) != len(self.source_tensor_hashes)
+            or len(receipt_hashes) != len(self.round_trip_receipt_hashes)
+            or set(receipt_hashes)
+            != {
+                anchor.production_alpha_path,
+                anchor.production_beta_path,
+            }
+            or any(not _is_sha256(value) for value in source_hashes.values())
+            or any(not _is_sha256(value) for value in receipt_hashes.values())
+            or index_paths
+            != [f"{index_prefix}{ordinal}" for ordinal in range(expected_index_count)]
+            or self.alpha_feature_index_count != expected_index_count
+            or self.alpha_spec_lookup_present
+            != any("/spec_lookup/" in path for path in source_hashes)
+            or self.beta_bias_present != (f"{beta_prefix}/bias" in source_hashes)
+            or self.beta_update_mask_present
+        ):
+            raise ValueError("FSG4/B4-B production lineage differs")
+
+    def metadata(self, anchor: DifferentiableRegionAnchorV1) -> dict[str, object]:
+        self.validate(anchor)
+        payload: dict[str, object] = {
+            "provider_start_node": self.provider_start_node,
+            "source_tensor_hashes": dict(sorted(self.source_tensor_hashes)),
+            "round_trip_receipt_hashes": dict(sorted(self.round_trip_receipt_hashes)),
+            "alpha_feature_index_count": self.alpha_feature_index_count,
+            "alpha_spec_lookup_present": self.alpha_spec_lookup_present,
+            "beta_bias_present": self.beta_bias_present,
+            "beta_update_mask_present": self.beta_update_mask_present,
+        }
+        payload["lineage_hash"] = _canonical_hash(payload)
+        return payload
+
+
+def build_production_differentiable_region_lineage_v1(
+    snapshot: ProductionStateSnapshotV4,
+    mapping: ProductionNativePreStateV4,
+    anchor: DifferentiableRegionAnchorV1,
+) -> ProductionDifferentiableRegionLineageV1:
+    """Bind exact α-index/lookup and β-location/sign raw ownership."""
+
+    snapshot.validate()
+    mapping.validate()
+    anchor.validate()
+    tensor_map = snapshot.tensor_map()
+    alpha_prefix = anchor.production_alpha_path.rsplit("/", 1)[0]
+    encoded_activation = alpha_prefix.split("/", 1)[1]
+    beta_prefix = anchor.production_beta_path.rsplit("/", 1)[0]
+    prefixes = (
+        f"alpha_layout/{encoded_activation}/feature_index/",
+        f"alpha_layout/{encoded_activation}/spec_lookup/",
+    )
+    explicit_paths = {
+        anchor.production_alpha_path,
+        f"alpha_layout/{encoded_activation}/feature_shape",
+        anchor.production_beta_path,
+        f"{beta_prefix}/location",
+        f"{beta_prefix}/sign",
+    }
+    for optional in (f"{beta_prefix}/bias",):
+        if optional in tensor_map:
+            explicit_paths.add(optional)
+    explicit_paths.update(
+        tensor.semantic_path
+        for tensor in snapshot.tensors
+        if tensor.semantic_path.startswith(prefixes)
+    )
+    receipts = {
+        receipt.semantic_path: _canonical_hash(receipt.to_dict())
+        for receipt in mapping.round_trip_receipts
+        if receipt.semantic_path
+        in {anchor.production_alpha_path, anchor.production_beta_path}
+    }
+    lineage = ProductionDifferentiableRegionLineageV1(
+        provider_start_node="/49",
+        source_tensor_hashes=tuple(
+            sorted((path, tensor_map[path].content_sha256) for path in explicit_paths)
+        ),
+        round_trip_receipt_hashes=tuple(sorted(receipts.items())),
+        alpha_feature_index_count=sum(
+            path.startswith(f"alpha_layout/{encoded_activation}/feature_index/")
+            for path in explicit_paths
+        ),
+        alpha_spec_lookup_present=any(
+            path.startswith(f"alpha_layout/{encoded_activation}/spec_lookup/")
+            for path in explicit_paths
+        ),
+        beta_bias_present=f"{beta_prefix}/bias" in explicit_paths,
+        beta_update_mask_present=False,
+    )
+    lineage.validate(anchor)
+    return lineage
 
 
 @dataclass(frozen=True)
@@ -520,9 +660,15 @@ class ProductionDifferentiableRegionCaptureV1:
     split_state_hash: str
     topology_hash: str
     anchor: DifferentiableRegionAnchorV1
+    production_lineage: ProductionDifferentiableRegionLineageV1
     values: tuple[tuple[str, CapturedCudaTensorV1], ...]
     gradients: tuple[tuple[str, CapturedCudaTensorV1], ...]
     operator_attributes: tuple[tuple[str, object], ...]
+    source_cuda_device_index: int
+    source_cuda_stream_id: int
+    source_cuda_stream_priority: int
+    source_cuda_stream_is_default: bool
+    source_alias_pairs: tuple[tuple[str, str], ...]
     evaluation_ordinal: int = 0
     phase: str = "optimizer"
     shape_source: str = B4B_SHAPE_SOURCE
@@ -547,6 +693,7 @@ class ProductionDifferentiableRegionCaptureV1:
 
     def validate(self) -> None:  # pylint: disable=too-many-branches
         self.anchor.validate()
+        self.production_lineage.validate(self.anchor)
         values = self.value_map
         gradients = self.gradient_map
         attributes = self.attribute_map
@@ -576,6 +723,15 @@ class ProductionDifferentiableRegionCaptureV1:
             or attributes.get("operator_kind") != self.anchor.producer_op_type
             or attributes.get("weight_shape")
             != list(values["operator_weight"].source_shape)
+            or self.source_cuda_device_index < 0
+            or self.source_cuda_stream_id < 0
+            or self.source_cuda_stream_priority != 0
+            or self.source_cuda_stream_is_default is not True
+            or self.source_alias_pairs
+            or any(
+                snapshot.source_device != f"cuda:{self.source_cuda_device_index}"
+                for snapshot in (*values.values(), *gradients.values())
+            )
         ):
             raise ValueError("FSG4/B4-B production capture differs")
         if self.anchor.producer_op_type == "conv2d" and not {
@@ -653,6 +809,7 @@ class ProductionDifferentiableRegionCaptureV1:
             "topology_hash": self.topology_hash,
             "anchor": self.anchor.metadata(),
             "anchor_hash": self.anchor.stable_hash(),
+            "production_lineage": self.production_lineage.metadata(self.anchor),
             "values": {
                 name: snapshot.metadata() for name, snapshot in sorted(self.values)
             },
@@ -668,6 +825,11 @@ class ProductionDifferentiableRegionCaptureV1:
             "provider_callback_count": self.provider_callback_count,
             "fallback_dispatch_count": self.fallback_dispatch_count,
             "eager_backward_fallback_count": self.eager_backward_fallback_count,
+            "source_cuda_device_index": self.source_cuda_device_index,
+            "source_cuda_stream_id": self.source_cuda_stream_id,
+            "source_cuda_stream_priority": self.source_cuda_stream_priority,
+            "source_cuda_stream_is_default": self.source_cuda_stream_is_default,
+            "source_alias_pairs": [list(pair) for pair in self.source_alias_pairs],
         }
         payload["capture_hash"] = _canonical_hash(payload)
         return payload
@@ -680,18 +842,44 @@ def capture_production_differentiable_region_v1(
     split_state_hash: str,
     topology_hash: str,
     anchor: DifferentiableRegionAnchorV1,
+    production_lineage: ProductionDifferentiableRegionLineageV1,
     values: Mapping[str, torch.Tensor],
     gradients: Mapping[str, torch.Tensor],
     operator_attributes: Mapping[str, object],
 ) -> ProductionDifferentiableRegionCaptureV1:
     """Copy one live CUDA exact call into a validated immutable capture."""
 
+    tensors = {
+        **{f"value:{name}": value for name, value in values.items()},
+        **{f"gradient:{name}": value for name, value in gradients.items()},
+    }
+    devices = {value.device for value in tensors.values()}
+    if len(devices) != 1:
+        raise ValueError("FSG4/B4-B capture CUDA device inventory differs")
+    source_device = next(iter(devices))
+    if source_device.type != "cuda" or source_device.index is None:
+        raise ValueError("FSG4/B4-B capture requires a production CUDA tensor")
+    aliases: list[tuple[str, str]] = []
+    names = sorted(tensors)
+    for left_ordinal, left_name in enumerate(names):
+        left = tensors[left_name]
+        if left.numel() == 0:
+            continue
+        for right_name in names[left_ordinal + 1 :]:
+            right = tensors[right_name]
+            if right.numel() > 0 and (
+                left.untyped_storage().data_ptr() == right.untyped_storage().data_ptr()
+            ):
+                aliases.append((left_name, right_name))
+    current_stream = torch.cuda.current_stream(source_device)
+    default_stream = torch.cuda.default_stream(source_device)
     capture = ProductionDifferentiableRegionCaptureV1(
         source_state_hash=source_state_hash,
         primal_graph_hash=primal_graph_hash,
         split_state_hash=split_state_hash,
         topology_hash=topology_hash,
         anchor=anchor,
+        production_lineage=production_lineage,
         values=tuple(
             (name, CapturedCudaTensorV1.from_tensor(name, value))
             for name, value in sorted(values.items())
@@ -701,8 +889,218 @@ def capture_production_differentiable_region_v1(
             for name, value in sorted(gradients.items())
         ),
         operator_attributes=tuple(sorted(operator_attributes.items())),
+        source_cuda_device_index=source_device.index,
+        source_cuda_stream_id=int(current_stream.cuda_stream),
+        source_cuda_stream_priority=int(current_stream.priority),
+        source_cuda_stream_is_default=current_stream == default_stream,
+        source_alias_pairs=tuple(aliases),
     )
     capture.validate()
+    return capture
+
+
+def production_differentiable_region_capture_to_payload_v1(
+    capture: ProductionDifferentiableRegionCaptureV1,
+) -> dict[str, object]:
+    """Serialize metadata plus raw CPU tensor payload for artifact replay."""
+
+    metadata = capture.metadata()
+    return {
+        "metadata": metadata,
+        "values": {name: snapshot.value.clone() for name, snapshot in capture.values},
+        "gradients": {
+            name: snapshot.value.clone() for name, snapshot in capture.gradients
+        },
+    }
+
+
+def _payload_int(payload: Mapping[str, object], name: str, default: int = -1) -> int:
+    value = payload.get(name, default)
+    if not isinstance(value, int) or isinstance(value, bool):
+        raise TypeError(f"FSG4/B4-B integer field differs: {name}")
+    return value
+
+
+def _payload_shape(payload: Mapping[str, object], name: str) -> tuple[int, ...]:
+    value = payload.get(name)
+    if not isinstance(value, list) or any(
+        not isinstance(item, int) or isinstance(item, bool) for item in value
+    ):
+        raise TypeError(f"FSG4/B4-B shape field differs: {name}")
+    return tuple(value)
+
+
+def _payload_alias_pairs(
+    payload: Mapping[str, object], name: str
+) -> tuple[tuple[str, str], ...]:
+    value = payload.get(name)
+    if not isinstance(value, list):
+        raise TypeError(f"FSG4/B4-B alias field differs: {name}")
+    pairs: list[tuple[str, str]] = []
+    for pair in value:
+        if (
+            not isinstance(pair, list)
+            or len(pair) != 2
+            or any(not isinstance(item, str) for item in pair)
+        ):
+            raise TypeError(f"FSG4/B4-B alias pair differs: {name}")
+        pairs.append((pair[0], pair[1]))
+    return tuple(pairs)
+
+
+def _anchor_from_metadata(
+    payload: Mapping[str, object],
+) -> DifferentiableRegionAnchorV1:
+    anchor = DifferentiableRegionAnchorV1(
+        anchor_id=str(payload.get("anchor_id", "")),
+        role=str(payload.get("role", "")),
+        native_preactivation=str(payload.get("native_preactivation", "")),
+        provider_activation=str(payload.get("provider_activation", "")),
+        provider_preactivation=str(payload.get("provider_preactivation", "")),
+        producer_op_ordinal=_payload_int(payload, "producer_op_ordinal"),
+        producer_op_name=str(payload.get("producer_op_name", "")),
+        producer_op_type=str(payload.get("producer_op_type", "")),
+        coefficient_shape=_payload_shape(payload, "coefficient_shape"),
+        preactivation_shape=_payload_shape(payload, "preactivation_shape"),
+        production_alpha_path=str(payload.get("production_alpha_path", "")),
+        production_alpha_shape=_payload_shape(payload, "production_alpha_shape"),
+        native_alpha_shape=_payload_shape(payload, "native_alpha_shape"),
+        production_beta_path=str(payload.get("production_beta_path", "")),
+        production_beta_shape=_payload_shape(payload, "production_beta_shape"),
+        native_beta_shape=_payload_shape(payload, "native_beta_shape"),
+        beta_must_be_nonempty=payload.get("beta_must_be_nonempty") is True,
+    )
+    anchor.validate()
+    return anchor
+
+
+def _snapshot_from_payload(
+    name: str, metadata: Mapping[str, object], raw: object
+) -> CapturedCudaTensorV1:
+    if not torch.is_tensor(raw):
+        raise TypeError(f"FSG4/B4-B raw tensor differs: {name}")
+    snapshot = CapturedCudaTensorV1(
+        name=name,
+        value=raw,
+        source_shape=_payload_shape(metadata, "shape"),
+        source_dtype=str(metadata.get("dtype", "")),
+        source_device=str(metadata.get("device", "")),
+        source_strides=_payload_shape(metadata, "strides"),
+        source_requires_grad=metadata.get("requires_grad") is True,
+        content_sha256=str(metadata.get("content_sha256", "")),
+    )
+    snapshot.validate()
+    return snapshot
+
+
+def production_differentiable_region_capture_from_payload_v1(
+    payload: Mapping[str, object],
+) -> ProductionDifferentiableRegionCaptureV1:
+    """Rebuild and validate one capture entirely from persisted raw payload."""
+
+    metadata = payload.get("metadata")
+    raw_values = payload.get("values")
+    raw_gradients = payload.get("gradients")
+    if (
+        not isinstance(metadata, Mapping)
+        or not isinstance(raw_values, Mapping)
+        or not isinstance(raw_gradients, Mapping)
+    ):
+        raise TypeError("FSG4/B4-B capture payload envelope differs")
+    anchor_payload = metadata.get("anchor")
+    lineage_payload = metadata.get("production_lineage")
+    value_metadata = metadata.get("values")
+    gradient_metadata = metadata.get("gradients")
+    attributes = metadata.get("operator_attributes")
+    if (
+        not isinstance(anchor_payload, Mapping)
+        or not isinstance(lineage_payload, Mapping)
+        or not isinstance(value_metadata, Mapping)
+        or not isinstance(gradient_metadata, Mapping)
+        or not isinstance(attributes, Mapping)
+        or set(raw_values) != set(value_metadata)
+        or set(raw_gradients) != set(gradient_metadata)
+    ):
+        raise ValueError("FSG4/B4-B capture payload inventory differs")
+    anchor = _anchor_from_metadata(anchor_payload)
+    source_hashes = lineage_payload.get("source_tensor_hashes")
+    receipt_hashes = lineage_payload.get("round_trip_receipt_hashes")
+    if not isinstance(source_hashes, Mapping) or not isinstance(
+        receipt_hashes, Mapping
+    ):
+        raise TypeError("FSG4/B4-B lineage payload differs")
+    lineage = ProductionDifferentiableRegionLineageV1(
+        provider_start_node=str(lineage_payload.get("provider_start_node", "")),
+        source_tensor_hashes=tuple(
+            sorted((str(name), str(value)) for name, value in source_hashes.items())
+        ),
+        round_trip_receipt_hashes=tuple(
+            sorted((str(name), str(value)) for name, value in receipt_hashes.items())
+        ),
+        alpha_feature_index_count=_payload_int(
+            lineage_payload, "alpha_feature_index_count"
+        ),
+        alpha_spec_lookup_present=lineage_payload.get("alpha_spec_lookup_present")
+        is True,
+        beta_bias_present=lineage_payload.get("beta_bias_present") is True,
+        beta_update_mask_present=lineage_payload.get("beta_update_mask_present")
+        is True,
+    )
+    values = tuple(
+        sorted(
+            (
+                str(name),
+                _snapshot_from_payload(
+                    str(name), cast(Mapping[str, object], value_metadata[name]), raw
+                ),
+            )
+            for name, raw in raw_values.items()
+        )
+    )
+    gradients = tuple(
+        sorted(
+            (
+                str(name),
+                _snapshot_from_payload(
+                    str(name), cast(Mapping[str, object], gradient_metadata[name]), raw
+                ),
+            )
+            for name, raw in raw_gradients.items()
+        )
+    )
+    capture = ProductionDifferentiableRegionCaptureV1(
+        source_state_hash=str(metadata.get("source_state_hash", "")),
+        primal_graph_hash=str(metadata.get("primal_graph_hash", "")),
+        split_state_hash=str(metadata.get("split_state_hash", "")),
+        topology_hash=str(metadata.get("topology_hash", "")),
+        anchor=anchor,
+        production_lineage=lineage,
+        values=values,
+        gradients=gradients,
+        operator_attributes=tuple(sorted((str(k), v) for k, v in attributes.items())),
+        source_cuda_device_index=_payload_int(metadata, "source_cuda_device_index"),
+        source_cuda_stream_id=_payload_int(metadata, "source_cuda_stream_id"),
+        source_cuda_stream_priority=_payload_int(
+            metadata, "source_cuda_stream_priority", 1
+        ),
+        source_cuda_stream_is_default=metadata.get("source_cuda_stream_is_default")
+        is True,
+        source_alias_pairs=_payload_alias_pairs(metadata, "source_alias_pairs"),
+        evaluation_ordinal=_payload_int(metadata, "evaluation_ordinal"),
+        phase=str(metadata.get("phase", "")),
+        shape_source=str(metadata.get("shape_source", "")),
+        kernel_shape_inferred=metadata.get("kernel_shape_inferred") is True,
+        capture_count=_payload_int(metadata, "capture_count"),
+        provider_callback_count=_payload_int(metadata, "provider_callback_count"),
+        fallback_dispatch_count=_payload_int(metadata, "fallback_dispatch_count"),
+        eager_backward_fallback_count=_payload_int(
+            metadata, "eager_backward_fallback_count"
+        ),
+        schema_version=str(metadata.get("schema_version", "")),
+    )
+    capture.validate()
+    if capture.metadata() != dict(metadata):
+        raise ValueError("FSG4/B4-B capture semantic replay differs")
     return capture
 
 
@@ -714,7 +1112,11 @@ __all__ = [
     "CapturedCudaTensorV1",
     "DifferentiableRegionAnchorV1",
     "LiveDifferentiableRegionObservationV1",
+    "ProductionDifferentiableRegionLineageV1",
     "ProductionDifferentiableRegionCaptureV1",
     "b4b_v1_anchors",
+    "build_production_differentiable_region_lineage_v1",
     "capture_production_differentiable_region_v1",
+    "production_differentiable_region_capture_from_payload_v1",
+    "production_differentiable_region_capture_to_payload_v1",
 ]

@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-18 FSG4/B4-B0 five-fresh runner指令**：runner、raw typed replay与9类tamper probe
+> 已实现但formal artifact未运行。下一唯一动作是提交冻结runner，然后执行5个fresh CUDA进程、
+> root replay与outer-resigned tamper；全部关闭前不得进入B4-B1或TIR。
+
 > **2026-08-18 FSG4/B4-B0 live observer指令**：evaluation-0 observer与CUDA smoke已通过。下一唯一
 > 动作是实现独立进程、raw-first的5-fresh B4-B0 artifact、root replay与outer-resigned tamper。
 > artifact关闭前不得实现TIR，不得用单次CUDA smoke宣称correctness或performance。

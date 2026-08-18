@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev010177
-last_va: ev010179
+last_ch: ev010238
+last_va: ev010239
 blk: none
-next: fsg4-b4b0-five-fresh-artifact-runner
-updated: 2026-08-18T04:56:27Z
+next: fsg4-b4b0-formal-generate-replay-tamper
+updated: 2026-08-18T05:10:51Z

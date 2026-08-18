@@ -1,5 +1,5 @@
 ---
-status: b4b0-live-observer-implemented-pending-five-fresh
+status: b4b0-five-fresh-runner-implemented-pending-formal-run
 updated: 2026-08-18T04:02:28Z
 type: plan
 topic: boundflow
@@ -292,3 +292,11 @@ observer。已冻结真实物理事实：
 
 observer在evaluation 0 backward后、首次optimizer step前冻结value/gradient，后续9次mutation不得
 改写payload。下一唯一动作是5-fresh raw-first artifact、root replay与tamper；关闭前TIR仍关闭。
+
+### B4-B0 five-fresh runner更新
+
+状态=`IMPLEMENTED-B4-B0-FIVE-FRESH-RUNNER-PENDING-FORMAL-RUN`。typed capture新增α-index/lookup、
+β-location/sign、round-trip receipt、CUDA default-stream/priority和alias ownership；新增独立CUDA
+worker、5-fresh raw-first runner、root typed reconstruction与九类outer-resigned tamper。单fresh
+CUDA及synthetic 5-run summary已通过，但正式5进程artifact尚未执行。下一唯一动作是先提交冻结
+runner，再运行formal generate/replay/tamper；关闭前B4-B1/TIR仍不得启动。

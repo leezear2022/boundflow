@@ -1,5 +1,11 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-18 FSG4/B4-B0 five-fresh runner候选**：状态=
+> `IMPLEMENTED-B4-B0-FIVE-FRESH-RUNNER-PENDING-FORMAL-RUN`。typed capture已补齐α-index/lookup、
+> β-location/sign、round-trip、CUDA default-stream与alias ownership；新增5-fresh raw-first
+> worker/runner、root typed replay和9类outer-resigned tamper。单fresh real CUDA与synthetic 5-run
+> summary通过，但formal artifact尚未生成，因此B4-B1/TIR仍关闭且无performance claim。
+
 > **2026-08-18 FSG4/B4-B0 live observer候选**：状态=
 > `IMPLEMENTED-B4-B0-LIVE-OBSERVER-PENDING-FIVE-FRESH`。显式opt-in observer只在optimizer
 > evaluation 0对`31/Gemm_14`和`25/Conv_8`实施诊断性materialization，默认B3/B4-A

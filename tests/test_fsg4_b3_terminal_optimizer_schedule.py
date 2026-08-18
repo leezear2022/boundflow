@@ -22,6 +22,7 @@ from boundflow.runtime.fsg4_b3_terminal_optimizer_schedule import (
 )
 from boundflow.runtime.fsg4_b4b_production_region_capture import (
     B4BRegionLiveObserverV1,
+    build_production_differentiable_region_lineage_v1,
     capture_production_differentiable_region_v1,
 )
 from boundflow.runtime.rvir_v4_native_backward_export import (
@@ -277,6 +278,9 @@ def test_terminal_schedule_live_observer_finalizes_two_cuda_captures(
             split_state_hash=initial.scope.split_state_hash,
             topology_hash=mapping.identity.topology_hash,
             anchor=anchor,
+            production_lineage=build_production_differentiable_region_lineage_v1(
+                schedule_case["snapshot"], schedule_case["mapping"], anchor
+            ),
             values=values,
             gradients=gradients,
             operator_attributes=dict(observation.operator_attributes),

@@ -1,6 +1,6 @@
 """Contracts for the B4-B production differentiable-region capture."""
 
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,duplicate-code
 
 from dataclasses import replace
 
@@ -11,13 +11,45 @@ from boundflow.runtime.fsg4_b4b_production_region_capture import (
     B4B_PERFORMANCE_ANCHOR_V1,
     B4B_SEMANTIC_ANCHOR_V1,
     CapturedCudaTensorV1,
+    ProductionDifferentiableRegionLineageV1,
     ProductionDifferentiableRegionCaptureV1,
     b4b_v1_anchors,
     capture_production_differentiable_region_v1,
+    production_differentiable_region_capture_from_payload_v1,
+    production_differentiable_region_capture_to_payload_v1,
 )
 from boundflow.runtime.rvir_v4_production_state import production_tensor_sha256
 
 _HASH = "a" * 64
+
+
+def _lineage(anchor) -> ProductionDifferentiableRegionLineageV1:
+    encoded_activation = anchor.production_alpha_path.split("/")[1]
+    beta_prefix = anchor.production_beta_path.rsplit("/", 1)[0]
+    index_count = len(anchor.preactivation_shape) - 1
+    paths = {
+        anchor.production_alpha_path,
+        f"alpha_layout/{encoded_activation}/feature_shape",
+        anchor.production_beta_path,
+        f"{beta_prefix}/location",
+        f"{beta_prefix}/sign",
+        *(
+            f"alpha_layout/{encoded_activation}/feature_index/{ordinal}"
+            for ordinal in range(index_count)
+        ),
+    }
+    return ProductionDifferentiableRegionLineageV1(
+        provider_start_node="/49",
+        source_tensor_hashes=tuple(sorted((path, _HASH) for path in paths)),
+        round_trip_receipt_hashes=(
+            (anchor.production_alpha_path, _HASH),
+            (anchor.production_beta_path, _HASH),
+        ),
+        alpha_feature_index_count=index_count,
+        alpha_spec_lookup_present=False,
+        beta_bias_present=False,
+        beta_update_mask_present=False,
+    )
 
 
 def _snapshot(
@@ -94,9 +126,15 @@ def _capture(*, performance: bool = False) -> ProductionDifferentiableRegionCapt
         split_state_hash=_HASH,
         topology_hash=_HASH,
         anchor=anchor,
+        production_lineage=_lineage(anchor),
         values=tuple(sorted(values.items())),
         gradients=tuple(sorted(gradients.items())),
         operator_attributes=tuple(sorted(attributes.items())),
+        source_cuda_device_index=0,
+        source_cuda_stream_id=0,
+        source_cuda_stream_priority=0,
+        source_cuda_stream_is_default=True,
+        source_alias_pairs=(),
     )
 
 
@@ -118,6 +156,14 @@ def test_b4b_capture_accepts_both_preregistered_anchors(performance: bool) -> No
     capture = _capture(performance=performance)
     capture.validate()
     assert capture.metadata()["capture_hash"]
+
+
+def test_b4b_capture_raw_payload_round_trips() -> None:
+    capture = _capture(performance=True)
+    rebuilt = production_differentiable_region_capture_from_payload_v1(
+        production_differentiable_region_capture_to_payload_v1(capture)
+    )
+    assert rebuilt.metadata() == capture.metadata()
 
 
 def test_b4b_capture_rejects_nonzero_evaluation_ordinal() -> None:
@@ -190,6 +236,7 @@ def test_b4b_live_capture_rejects_cpu_placeholder() -> None:
             split_state_hash=_HASH,
             topology_hash=_HASH,
             anchor=B4B_SEMANTIC_ANCHOR_V1,
+            production_lineage=_lineage(B4B_SEMANTIC_ANCHOR_V1),
             values={"incoming_lower_a": tensor},
             gradients={},
             operator_attributes={},

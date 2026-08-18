@@ -10,6 +10,13 @@
 
 ---
 
+FSG4/B4-B0 five-fresh runner已实现，状态=
+`IMPLEMENTED-B4-B0-FIVE-FRESH-RUNNER-PENDING-FORMAL-RUN`。typed capture现绑定α-index/lookup、
+β-location/sign、round-trip、CUDA default-stream与alias；worker/runner从raw重建10个capture并逐tensor
+比较，另有9类outer-resigned tamper。当前只完成单fresh CUDA与synthetic summary验证，下一步提交
+runner后执行formal 5-fresh；B4-B1/TIR仍关闭。见
+`gemini_doc/change_2026-08-18_fsg4_b4b0_five_fresh_runner_candidate.md`。
+
 FSG4/B4-B0 evaluation-0 live observer已实现，状态=
 `IMPLEMENTED-B4-B0-LIVE-OBSERVER-PENDING-FIVE-FRESH`。observer仅显式opt-in，在两个锚点上使参与
 backward的同一lower-A诊断性materialize/retain-grad；默认B3/B4-A不变。CPU production-state

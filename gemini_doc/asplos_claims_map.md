@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-18 FSG4/B4-B0 five-fresh runner候选**：状态=
+> `IMPLEMENTED-B4-B0-FIVE-FRESH-RUNNER-PENDING-FORMAL-RUN`。只支持runner/mechanism与单fresh
+> CUDA smoke；formal 5-fresh、root replay和9/9 tamper尚未产生，故不升级capture correctness，
+> 不开放B4-B1/TIR/performance。
+
 > **2026-08-18 FSG4/B4-B0 live observer候选**：状态=
 > `IMPLEMENTED-B4-B0-LIVE-OBSERVER-PENDING-FIVE-FRESH`，只支持显式opt-in evaluation-0 live
 > observation与单次CUDA snapshot mechanism。未支持5 fresh、artifact replay/tamper、TIR correctness或

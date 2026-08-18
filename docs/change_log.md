@@ -1,5 +1,13 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-18：FSG4/B4-B0 Five-Fresh Runner 候选
+
+- 补齐α-index/lookup、β-location/sign、round-trip、CUDA stream与alias typed ownership；
+- 新增安全raw payload replay、5-fresh worker/runner与9类outer-resigned tamper probe；
+- 单fresh CUDA worker和synthetic 5-run summary已过，formal artifact尚未运行；状态=
+  `IMPLEMENTED-B4-B0-FIVE-FRESH-RUNNER-PENDING-FORMAL-RUN`。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4b0_five_fresh_runner_candidate.md`。
+
 ## 2026-08-18：FSG4/B4-B0 Evaluation-0 Live Observer 候选
 
 - 新增只在显式opt-in下启用的双锚点observer，默认B3/B4-A路径不变；
