@@ -1,5 +1,22 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-18：FSG4/B4-B Differentiable CUDA/TIR v1 预注册
+
+- 冻结active-beta `node31/Gemm_14`语义锚点和`node25/Conv_8`候选性能锚点；
+- B4-B0先在gradient-active optimizer evaluation 0做5 fresh read-only exact-call capture；
+- PR-12 plain-CROWN capability不放宽，B4-A不进入累计baseline，单shape speedup不外推；
+- 状态=`PREREGISTERED-B4-B-V1-NOT-IMPLEMENTED`。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4b_differentiable_cuda_tir_v1_preregistration.md`。
+
+## 2026-08-18：FSG4/B4-A 外部审计关闭
+
+- Round 1外审从formal raw独立复核AC1—AC7全PASS；0 blocker / 0 major / 1 minor / 1 info；
+- executor关闭exchange为`closed/approved`，最终状态=
+  `EXTERNALLY-APPROVED-VALIDATED-NO-GO-B4-A-PERFORMANCE`；
+- B4-A只保留correctness/mechanism evidence，约1.9% core改善不计入累计performance baseline；
+- 只开放单独B4-B预注册，不自动批准TIR实现。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4a_external_audit_closure.md`。
+
 ## 2026-08-18：FSG4/B4-A 正式计时内部关闭
 
 - source=`46a8493`的v5完成24/24 fresh worker；correctness/environment/activation/profile全过；

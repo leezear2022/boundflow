@@ -1,10 +1,22 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-18 FSG4/B4-B v1预注册**：状态=`PREREGISTERED-B4-B-V1-NOT-IMPLEMENTED`，无
+> implementation/correctness/performance claim。必须同时关闭active-beta Gemm语义锚点和高占比Conv
+> 性能锚点；首先只允许gradient-active evaluation-0 read-only exact-call capture。B4-A不进入
+> 基线，PR-12 plain path不放宽，B4-C/D、whole-core/query/B0/ASPLOS claims全部关闭。
+
+> **2026-08-18 FSG4/B4-A外审关闭**：Round 1独立重算hash链、24/24 environment、6/6
+> correctness、activation/profile、core/query ratio、root replay、14/14 tamper和回归，AC1—AC7全部
+> PASS；exchange=`closed/approved`。最终claim=
+> `EXTERNALLY-APPROVED-VALIDATED-NO-GO-B4-A-PERFORMANCE`；B4-A只支持correctness/mechanism，
+> 不支持累计performance、memory、B0 parity或ASPLOS-ready。仅开放单独预注册B4-B。
+
 > **2026-08-18 FSG4/B4-A正式计时内部关闭**：source=`46a8493`、v5 24/24 worker、6/6 control pair
 > correctness/environment/activation/profile通过，max tensor diff=`4.4107437e-06`、sign exact；core wall
 > geomean=`1.018995x`未过`1.03x`，query worst=`0.996947x`通过`0.98x`，memory无收益；replay与14/14
 > tamper通过。状态=`INTERNALLY-VALIDATED-NO-GO-B4-A-PERFORMANCE-PENDING-EXTERNAL-AUDIT`，无
-> performance claim；fixed related=`73 passed`、full=`1356 passed, 3 skipped`，B4-B/TIR关闭。
+> performance claim；fixed related=`73 passed`、full=`1356 passed, 3 skipped`。该pending状态已由上方
+> Round 1外审批准取代。
 
 > **2026-08-18 FSG4/B4-A正式计时v4环境投影失败**：source=`03043a3`的v4有19个admitted worker；
 > run 19 raw的thermal/power累计值存在`54579 µs`历史偏移，但worker区间增量严格同为`2062477 µs`。

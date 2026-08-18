@@ -1,11 +1,24 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-18 FSG4/B4-B v1预注册**：状态=`PREREGISTERED-B4-B-V1-NOT-IMPLEMENTED`。冻结
+> `node31/Gemm_14` active-beta语义锚点与`node25/Conv_8`候选性能锚点；先在optimizer
+> evaluation 0做read-only exact-call双锚点capture，再允许typed reference和独立
+> CUDA/TIR forward+backward。旧PR-12 plain-CROWN capability不放宽；单shape speedup不得外推。
+> 下一唯一工程动作是B4-B0 capture，TIR实现仍关闭。
+
+> **2026-08-18 FSG4/B4-A外审关闭**：Round 1从formal raw独立复核AC1—AC7全部PASS，
+> exchange=`closed/approved`，0 blocker / 0 major / 1 minor / 1 info。最终状态=
+> `EXTERNALLY-APPROVED-VALIDATED-NO-GO-B4-A-PERFORMANCE`：core=`1.018995x < 1.03x`，
+> query worst=`0.996947x >= 0.98x`。B4-A只保留correctness/mechanism evidence，约1.9%不得
+> 计入B4 cumulative performance baseline。下一唯一动作是单独预注册B4-B differentiable
+> CUDA/TIR；B4-C/D与B5—B7仍关闭。
+
 > **2026-08-18 FSG4/B4-A正式计时内部关闭**：source=`46a8493`的v5完成24/24 fresh worker，6/6
 > semantic pair、19 tensor/pair、activation/environment/profile全部PASS；root replay与14/14 outer-
 > resigned tamper通过。core wall geomean=`1.018995x < 1.03x`，query worst=`0.996947x >= 0.98x`，
 > memory ratio=`1.0`，故内部状态=`VALIDATED-NO-GO-B4-A-PERFORMANCE-PENDING-EXTERNAL-AUDIT`。
-> fixed related=`73 passed`、full=`1356 passed, 3 skipped`。下一唯一动作是外审；B4-A不得累计为
-> performance candidate，B4-B/TIR关闭。
+> fixed related=`73 passed`、full=`1356 passed, 3 skipped`。该待外审状态已由上方Round 1批准
+> 取代。
 
 > **2026-08-18 FSG4/B4-A正式计时v4环境投影失败与修复**：source=`03043a3`的v4有19/19 worker
 > admitted；run 19 raw返回后被旧门禁拒绝。其thermal/power累计值已有`54579 µs`历史偏移，但worker

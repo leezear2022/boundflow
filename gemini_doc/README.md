@@ -10,11 +10,24 @@
 
 ---
 
+FSG4/B4-B differentiable CUDA/TIR v1已预注册，状态=`PREREGISTERED-B4-B-V1-NOT-IMPLEMENTED`。
+计划同时冻结`node31/Gemm_14`的active-beta语义锚点和`node25/Conv_8`候选性能锚点，
+先在gradient-active optimizer evaluation 0做5 fresh read-only exact-call capture；该门禁未过前不改TIR。
+PR-12 plain-CROWN capability不放宽，单shape局部加速不得外推whole-core/query。见
+`gemini_doc/BOUNDFLOW_FSG4_B4B_DIFFERENTIABLE_CUDA_TIR_V1_PLAN_2026_08_18.md`。
+
+FSG4/B4-A正式计时已通过Round 1独立外审并由executor关闭exchange，最终状态=
+`EXTERNALLY-APPROVED-VALIDATED-NO-GO-B4-A-PERFORMANCE`。外审独立重算AC1—AC7，确认
+core=`1.018995x < 1.03x`、query worst=`0.996947x >= 0.98x`，replay与14/14 tamper通过。
+B4-A只保留correctness/mechanism，约1.9%不计入累计performance baseline。下一唯一动作是
+单独预注册B4-B differentiable CUDA/TIR。见
+`gemini_doc/change_2026-08-18_fsg4_b4a_external_audit_closure.md`。
+
 FSG4/B4-A正式计时已在source=`46a8493`内部关闭：v5 24/24 worker、6/6 semantic pair、activation/
 environment/profile、root replay和14/14 tamper全部通过；core wall geomean=`1.018995x < 1.03x`，
 query worst=`0.996947x >= 0.98x`，故为`VALIDATED-NO-GO-B4-A-PERFORMANCE-PENDING-EXTERNAL-AUDIT`。
-fixed related=`73 passed`、full=`1356 passed, 3 skipped`。下一步只做外审，B4-A不得累计为
-performance candidate，B4-B/TIR关闭。见
+fixed related=`73 passed`、full=`1356 passed, 3 skipped`。该pending状态已由上方Round 1外审批准
+取代。见
 `gemini_doc/change_2026-08-18_fsg4_b4a_formal_timing_internal_closure.md`。
 
 FSG4/B4-A正式计时v4在source=`03043a3`得到19个admitted worker，run 19 raw返回后因旧环境投影按累计

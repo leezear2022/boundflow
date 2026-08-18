@@ -1,9 +1,19 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-18 FSG4/B4-B v1执行指令**：预注册已完成，但未实现。下一唯一动作是
+> B4-B0：在optimizer evaluation 0对`node31/Gemm_14`的active-beta语义锚点与
+> `node25/Conv_8`候选性能锚点生成read-only production exact-call capture。两锚点5 fresh
+> 语义/replay/tamper关闭前不得改TIR；不得放宽PR-12或把B4-A累计进baseline。
+
+> **2026-08-18 FSG4/B4-A外审关闭指令**：Round 1独立外审AC1—AC7全部PASS，exchange已
+> `closed/approved`，最终状态=`EXTERNALLY-APPROVED-VALIDATED-NO-GO-B4-A-PERFORMANCE`。
+> B4-A的1.018995x只是已审计的NO-GO数字，不得计入B4累计baseline。下一唯一动作
+> 是单独预注册B4-B可微 lower-only CUDA/TIR双锚点实验；预注册前不得改TIR。
+
 > **2026-08-18 FSG4/B4-A正式计时内部关闭指令**：source=`46a8493`的v5 24/24完成，correctness/
 > environment/activation/profile/replay与14/14 tamper全过；core wall geomean=`1.018995x`未过`1.03x`，
 > query worst=`0.996947x`过`0.98x`。下一唯一动作是外审；不得调低阈值或重跑挑样，B4-A不得累计为
-> performance candidate，B4-B/TIR继续关闭。
+> performance candidate。该“下一步外审”指令已由上方Round 1外审关闭取代。
 
 > **2026-08-18 FSG4/B4-A正式计时v4环境处置**：source=`03043a3`的v4有19个worker admitted，
 > run 19因旧门禁比较thermal/power累计绝对值而非worker区间增量被拒绝；其区间增量严格同为

@@ -341,3 +341,18 @@ source=`46a8493`的v5已按冻结24-process协议完成。correctness/environmen
 baseline。当前状态待外审，B4-B/TIR保持关闭。外审批准NO-GO关闭后，B4-B是否启动必须仅依据B4-0已
 冻结的67.72% differentiable lower-only opportunity和本计划B4-B门禁另行决定；不得把B4-A的1.9%
 收益计入累计候选，也不得修改B4-A阈值重跑。
+
+### B4-A外审最终关闭更新
+
+Round 1独立外审已批准上述NO-GO分类，exchange=`closed/approved`，最终状态=
+`EXTERNALLY-APPROVED-VALIDATED-NO-GO-B4-A-PERFORMANCE`。B4-A只保留correctness/mechanism，
+其约1.9% core改善不进入B4 cumulative baseline。现在仅开放“单独预注册B4-B”：
+预注册必须同时含active-beta语义锚点与高占比Conv性能锚点，在其关闭前B4-C/D与B5—B7仍
+不得启动。
+
+### B4-B v1预注册更新
+
+B4-B已独立预注册为`PREREGISTERED-B4-B-V1-NOT-IMPLEMENTED`。详细合同见
+`gemini_doc/BOUNDFLOW_FSG4_B4B_DIFFERENTIABLE_CUDA_TIR_V1_PLAN_2026_08_18.md`。必须同时使用
+active-beta `node31/Gemm_14`语义锚点和高占比`node25/Conv_8`候选性能锚点。当前
+只开放B4-B0 gradient-active exact-call capture；5 fresh/replay/tamper关闭前不实现TIR。

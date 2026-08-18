@@ -1,5 +1,5 @@
 ---
-status: internally-validated-no-go-pending-external-audit
+status: externally-approved-validated-no-go
 updated: 2026-08-18T09:30:00+08:00
 type: plan
 topic: boundflow
@@ -118,5 +118,7 @@ closure、summary threshold/classification；全部必须拒绝。
 
 source=`46a8493`的v5已24/24完成，root replay与14/14 tamper通过；core wall geomean=`1.018995x`
 未过`1.03x`，query worst=`0.996947x`通过`0.98x`，故内部状态为
-`VALIDATED-NO-GO-B4-A-PERFORMANCE-PENDING-EXTERNAL-AUDIT`。下一唯一动作是外审；v1/v2/v3/v4均不得
-恢复或进入ratio，B4-B/TIR保持关闭。
+`VALIDATED-NO-GO-B4-A-PERFORMANCE-PENDING-EXTERNAL-AUDIT`。v1/v2/v3/v4均不得恢复或进入
+ratio。Round 1外审已独立复核AC1—AC7并由executor关闭exchange，最终状态=
+`EXTERNALLY-APPROVED-VALIDATED-NO-GO-B4-A-PERFORMANCE`。B4-A不累计为performance candidate；
+下一唯一动作是单独预注册B4-B，不是直接修改TIR。
