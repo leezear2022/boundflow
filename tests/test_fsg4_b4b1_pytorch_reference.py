@@ -29,6 +29,7 @@ from scripts import probe_fsg4_b4b1_pytorch_reference_integrity as reference_int
 ARTIFACT = Path("artifacts/fsg4-b4b1-reference-five-fresh/resnet2b-prop0-v1/run_00.pt")
 CAPTURE_ARTIFACT = ARTIFACT.parent
 REFERENCE_ARTIFACT_V1 = Path("artifacts/fsg4-b4b1-pytorch-reference/resnet2b-prop0-v1")
+REFERENCE_ARTIFACT_V2 = Path("artifacts/fsg4-b4b1-pytorch-reference/resnet2b-prop0-v2")
 REFERENCE_INTEGRITY_REPORT = REFERENCE_ARTIFACT_V1.parent / (
     "resnet2b-prop0-v1-integrity-report.json"
 )
@@ -314,6 +315,21 @@ def test_b4b1_v1_reference_artifact_is_rejected_after_policy_freeze() -> None:
         reference_artifact._verify_static_artifact(
             REFERENCE_ARTIFACT_V1, CAPTURE_ARTIFACT
         )
+
+
+def test_b4b1_v2_deterministic_reference_artifact_root_replays() -> None:
+    records, summary, result = reference_artifact._verify_static_artifact(
+        REFERENCE_ARTIFACT_V2, CAPTURE_ARTIFACT
+    )
+    assert len(records) == summary["capture_count"] == result["capture_count"] == 10
+    assert summary["summary_hash"] == (
+        "becd8ae57536bc678392748bee5568d8b18922526df02da1238720b44045d744"
+    )
+    assert result["status"] == "replay-passed"
+    assert result["maximum_absolute_difference"] == 6.109476089477539e-07
+    assert result["all_metrics_sign_exact"] is True
+    assert result["performance_claimed"] is False
+    assert result["tir_admitted"] is False
 
 
 def test_b4b1_reference_runner_restores_and_normalizes_thread_policy() -> None:

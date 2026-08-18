@@ -162,6 +162,8 @@ def _probe(source: Path) -> dict[str, object]:
             )
     report: dict[str, object] = {
         "schema_version": REPORT_SCHEMA,
+        "source_git_head": reference_artifact._git("rev-parse", "HEAD"),
+        "reference_code_revision": reference_artifact._code_revision(),
         "source_artifact_manifest_hash": source_artifact._load_json(
             source / "manifest.json"
         )["manifest_hash"],

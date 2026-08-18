@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev010620
-last_va: ev010621
+last_ch: ev010632
+last_va: ev010633
 blk: none
-next: generate-b4b1-v2-deterministic-reference-artifact
-updated: 2026-08-18T07:37:42Z
+next: generate-b4b1-v2-bound-integrity-report-and-regress
+updated: 2026-08-18T07:39:37Z
