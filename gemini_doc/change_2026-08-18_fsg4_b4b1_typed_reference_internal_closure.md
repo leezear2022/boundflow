@@ -53,3 +53,4 @@ PyTorch线程数影响。v2冻结threads=1、deterministic algorithms、float32 
 ## 下一步
 
 只提交独立外审。外审批准后才允许另行预注册B4-B2 CUDA/TIR；不得直接实现或计时。
+审计请求见`fsg4_b4b1_typed_reference_external_audit_handoff_2026_08_18.md`。
