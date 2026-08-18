@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-18 FSG4/B4-A正式计时Runner指令**：24-process runner、raw-first/resume、root replay及
+> 11类outer-resigned tamper probe已实现。下一唯一动作是提交clean source并运行正式GPU artifact；
+> 在replay/tamper与外审前保持`performance_claimed=false`，不得启动B4-B/TIR。
+
 > **2026-08-18 FSG4/B4-A正式计时指令**：只实现并运行冻结的24-process B3/B4-A协议；control检验
 > core>=1.03x/query worst>=0.98x，profile只归因。不得复用correctness latency或启动B4-B/TIR。
 

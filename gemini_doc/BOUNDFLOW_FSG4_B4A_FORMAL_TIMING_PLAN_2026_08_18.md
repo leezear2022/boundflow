@@ -1,5 +1,5 @@
 ---
-status: preregistered-not-implemented
+status: implemented-pending-clean-source-formal-run
 updated: 2026-08-18T09:30:00+08:00
 type: plan
 topic: boundflow
@@ -93,8 +93,18 @@ closure、summary threshold/classification；全部必须拒绝。
 
 ## 8. 验证与下一步
 
-固定 related tests 必须在 exchange 中逐文件列出，包括 B4-A handoff、worker、five-fresh、formal timing、
-artifact/replay/tamper测试。另跑 full pytest、Black、Mypy、Pylint、`git diff --check`、DocOps lint。
+固定 related tests 必须在 exchange 中逐文件列出：
 
-下一唯一动作是实现24-process formal runner与tamper；clean source后才执行GPU实验。B4-B/TIR保持关闭。
+- `tests/test_fsg4_b4a_terminal_lower_adjoint_handoff.py`
+- `tests/test_fsg4_b4a_correctness_pairs.py`
+- `tests/test_fsg4_b4a_correctness_pairs_artifact.py`
+- `tests/test_fsg4_b4a_formal_timing.py`
+- `tests/test_fsg4_b4a_formal_timing_tamper.py`
+- `tests/test_fsg4_b3_same_solver_timing.py`
+- `tests/test_fsg4_b3_same_solver_worker.py`
+- `tests/test_fsg4_b3_same_solver_artifact.py`
 
+另跑 full pytest、Black、Mypy、Pylint、`git diff --check`、DocOps lint。
+
+24-process formal runner、root replay与11类outer-resigned tamper probe已实现；下一唯一动作是提交clean
+source后执行GPU实验。B4-B/TIR保持关闭。

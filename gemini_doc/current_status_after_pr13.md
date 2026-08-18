@@ -1,8 +1,10 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
-> **2026-08-18 FSG4/B4-A正式计时预注册状态**：24-process B3/B4-A control/profile协议与
-> `1.03x/0.98x`门禁已冻结，状态=`PREREGISTERED-B4-A-FORMAL-TIMING-NOT-IMPLEMENTED`。下一唯一动作是
-> formal runner/replay/tamper实现；无性能claim，B4-B/TIR关闭。
+> **2026-08-18 FSG4/B4-A正式计时Runner状态**：24-process B3/B4-A control/profile runner、raw-first/
+> resume、root replay及11类outer-resigned tamper probe已实现，固定related=`46 passed`，Black/Mypy/
+> Pylint及全量`1350 passed, 3 skipped`通过。状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`。
+> 下一唯一动作是提交clean source并
+> 运行正式GPU artifact；无性能claim，B4-B/TIR关闭。
 
 > **2026-08-16 FSG4/B4-A five-fresh状态**：10/10 fresh、5/5 direct pair与19 tensor/pair全部通过，
 > 最大差=`6.109476e-06`，root replay PASS。状态=

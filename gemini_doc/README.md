@@ -10,10 +10,11 @@
 
 ---
 
-FSG4/B4-A独立正式计时已预注册为24个fresh process（6 block×B3/B4-A×control/profile），只用control
-检验core geomean `>=1.03x`和query worst pair `>=0.98x`；不复用five-fresh latency。状态=
-`PREREGISTERED-B4-A-FORMAL-TIMING-NOT-IMPLEMENTED`，下一步实现formal runner/replay/tamper，B4-B/TIR
-保持关闭。见`gemini_doc/BOUNDFLOW_FSG4_B4A_FORMAL_TIMING_PLAN_2026_08_18.md`。
+FSG4/B4-A独立正式计时runner、raw-first/resume、root replay及11类outer-resigned tamper probe已实现，
+固定related=`46 passed`，Black/Mypy/Pylint及全量`1350 passed, 3 skipped`通过。状态=
+`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`；
+下一步提交clean source并运行24个fresh GPU process，当前无性能claim，B4-B/TIR保持关闭。见
+`gemini_doc/change_2026-08-18_fsg4_b4a_formal_timing_runner_candidate.md`。
 
 FSG4/B4-A five-fresh correctness已内部关闭为
 `INTERNALLY-VALIDATED-B4-A-FIVE-FRESH-CORRECTNESS`：source=`43d4117`，10/10 fresh worker、5/5 pair、

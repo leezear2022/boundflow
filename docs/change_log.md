@@ -1,5 +1,14 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-18：FSG4/B4-A 正式计时 Runner 候选
+
+- 实现6 block、24 fresh worker的B3/B4-A control/profile正式runner与raw-first/resume；
+- root replay从raw重建correctness、activation、environment、profile、ratio与分类；
+- 新增11类outer-resigned latency/semantic/activation/protocol/preflight/derived-summary攻击探针；
+- 固定related=`46 passed`，Black/Mypy/Pylint及全量`1350 passed, 3 skipped`通过；状态=
+  `IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`，无性能claim。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4a_formal_timing_runner_candidate.md`。
+
 ## 2026-08-18：FSG4/B4-A 独立正式计时预注册
 
 - 冻结6 block、B3/B4-A control/profile共24个fresh worker；
