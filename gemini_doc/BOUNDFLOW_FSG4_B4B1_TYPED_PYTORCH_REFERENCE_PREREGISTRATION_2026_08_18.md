@@ -161,3 +161,12 @@ runner的5-fresh formal artifact与完整性负例，typed reference/B4-B2/TIR�
 `IMPLEMENTED-B4-B1A-FIVE-FRESH-RUNNER-PENDING-FORMAL`，下一唯一动作是clean-source formal
 artifact、完整性报告与full regression。协调一致动态bias/adjoint改写明确留待B4-B1 numerical
 reference semantic replay关闭；在此之前不升级typed reference correctness或开放B4-B2/TIR。
+
+### B4-B1a five-fresh内部关闭
+
+source=`4a17423`的formal artifact已完成5 fresh/10 captures、90 amendment tensors/63,645
+elements，max diff=`0.0`、sign exact；root replay、8/8完整性负例、related=`30 passed`、full=
+`1382 passed, 3 skipped, 6 warnings`。状态=
+`VALIDATED-B4-B1A-FIVE-FRESH-CAPTURE-SUFFICIENCY`。下一唯一动作是typed IR与独立
+pure-PyTorch reference，从raw重算forward/VJP并关闭coordinated动态改写限制；B4-B2/TIR/
+performance仍关闭。

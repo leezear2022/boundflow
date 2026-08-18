@@ -1,5 +1,11 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-18 FSG4/B4-B1a five-fresh内部关闭**：source=`4a17423`，formal artifact完成
+> 5 fresh/10 captures、90 amendment tensors/63,645 elements，max diff=0、sign exact；root replay、
+> 8/8完整性负例、related 30与full 1382/3 skip/6 warnings通过。状态=
+> `VALIDATED-B4-B1A-FIVE-FRESH-CAPTURE-SUFFICIENCY`；下一步开放typed IR/pure-PyTorch
+> reference，协调动态改写须由其代数重算关闭；B4-B2/TIR/performance继续关闭。
+
 > **2026-08-18 FSG4/B4-B1a five-fresh runner候选**：独立worker/runner/root replay与8类
 > 完整性probe已实现；5-process pilot比较90 tensors/63,645 elements，max diff=0、sign exact，
 > related=`28 passed`。状态=`IMPLEMENTED-B4-B1A-FIVE-FRESH-RUNNER-PENDING-FORMAL`；

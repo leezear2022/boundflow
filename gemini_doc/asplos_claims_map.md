@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-18 FSG4/B4-B1a内部关闭**：状态=
+> `VALIDATED-B4-B1A-FIVE-FRESH-CAPTURE-SUFFICIENCY`。支持5-fresh bias/output-adjoint/
+> sparse-layout capture sufficiency与root replay；不支持typed numerical reference/gradient parity、
+> coordinated动态重签拒绝、B4-B2/TIR或performance claim。
+
 > **2026-08-18 FSG4/B4-B1a runner候选**：只支持worker/runner机制与临时5-process pilot；
 > formal artifact/8-case报告/full regression尚未产生。协调动态bias/adjoint重签仍是显式限制，
 > 因此无B4-B1 typed reference correctness/gradient、TIR或performance claim。

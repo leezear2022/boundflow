@@ -1,5 +1,14 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-18：FSG4/B4-B1a Five-Fresh 内部关闭
+
+- source=`4a17423`正式artifact完成5 fresh/10 captures、90 tensors/63,645 elements；
+- max diff=`0.0`、sign exact，root replay与8/8 outer-resigned完整性用例通过；
+- related=`30 passed`，full=`1382 passed, 3 skipped, 6 warnings`；
+- 状态=`VALIDATED-B4-B1A-FIVE-FRESH-CAPTURE-SUFFICIENCY`，只开放B4-B1 typed reference，
+  B4-B2/TIR/performance仍关闭。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4b1a_five_fresh_internal_closure.md`。
+
 ## 2026-08-18：FSG4/B4-B1a Five-Fresh Runner 候选
 
 - 新增独立worker、five-fresh raw-first runner/root replay与8类完整性probe；

@@ -1,0 +1,68 @@
+{
+  "artifact_manifest_sha256": "a52a26ab081bbeab816c1486fffd3568e6774ed6c9ea7619dee3a2e4ac0b86d9",
+  "case_count": 8,
+  "known_limit": "coordinated dynamic bias/adjoint rewrites are deferred to B4-B1 numerical reference semantic replay",
+  "performance_claimed": false,
+  "rejected_count": 8,
+  "report_hash": "930f11fd1d9dca9d21f8144090c01a74ef11867fa127b87ba364cc08fcdc382f",
+  "rows": [
+    {
+      "case": "incoming-lower-bias-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B1 amendment numeric tensor differs",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "case": "operator-bias-value-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B1 amendment numeric tensor differs",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "case": "operator-bias-presence-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B1 amendment discrete structure differs",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "case": "output-lower-a-gradient-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B1 amendment numeric tensor differs",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "case": "output-bias-gradient-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B1 amendment numeric tensor differs",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "case": "sparse-mapping-index-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B1 sparse mapping identity differs",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "case": "reference-attribute-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B1 reference capture differs",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "case": "base-topology-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B0 frozen source identity differs",
+      "outer_resigned": true,
+      "rejected": true
+    }
+  ],
+  "schema_version": "boundflow.fsg4-b4b1-reference-integrity-report/v1",
+  "tir_admitted": false
+}

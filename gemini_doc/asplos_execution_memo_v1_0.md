@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-18 FSG4/B4-B1a内部关闭指令**：formal 5-fresh capture sufficiency、8-case完整性
+> 与full regression已通过。下一唯一动作是实现B4-B1 typed IR与独立pure-PyTorch reference，
+> 从raw重算forward/VJP并关闭coordinated动态改写限制；未过five-fresh reference与外审前不得进TIR。
+
 > **2026-08-18 FSG4/B4-B1a runner指令**：worker/runner/probe与5-process pilot已通过，但pilot
 > 非正式证据。下一唯一动作是先提交冻结代码，再生成formal artifact、8-case报告与full regression；
 > 之后才可实现typed IR/reference，B4-B2/TIR继续关闭。

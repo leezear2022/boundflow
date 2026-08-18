@@ -10,6 +10,12 @@
 
 ---
 
+FSG4/B4-B1a five-fresh capture sufficiency已内部关闭，状态=
+`VALIDATED-B4-B1A-FIVE-FRESH-CAPTURE-SUFFICIENCY`。source=`4a17423`；5 fresh/10 captures、
+90 tensors/63,645 elements、max diff 0、sign exact；8/8完整性负例与full 1382/3 skip/6 warnings
+通过。下一步是typed IR/pure-PyTorch reference，B4-B2/TIR/performance仍关闭。见
+`change_2026-08-18_fsg4_b4b1a_five_fresh_internal_closure.md`。
+
 FSG4/B4-B1a five-fresh runner已实现，状态=
 `IMPLEMENTED-B4-B1A-FIVE-FRESH-RUNNER-PENDING-FORMAL`。临时5-process pilot比较90 tensors/
 63,645 elements，max diff=0、sign exact；正式artifact尚未生成，协调动态bias/adjoint改写限制
