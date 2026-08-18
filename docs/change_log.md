@@ -1,5 +1,13 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-18：FSG4/B4-B1a Five-Fresh Runner 候选
+
+- 新增独立worker、five-fresh raw-first runner/root replay与8类完整性probe；
+- 5-process pilot聚合90 tensors/63,645 elements，max diff 0、sign exact，related=`28 passed`；
+- 状态=`IMPLEMENTED-B4-B1A-FIVE-FRESH-RUNNER-PENDING-FORMAL`，协调动态改写限制已披露；
+- typed IR/reference/TIR仍关闭。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4b1a_five_fresh_runner_candidate.md`。
+
 ## 2026-08-18：FSG4/B4-B1a Capture Sufficiency Contract
 
 - 新增显式opt-in B4-B1 observer，捕获incoming/operator bias与region output adjoints；

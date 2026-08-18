@@ -153,3 +153,11 @@ real CUDA双锚点payload生成/replay通过，related=`26 passed`、full=
 `1378 passed, 3 skipped, 6 warnings`。当前状态=
 `IMPLEMENTED-B4-B1A-CAPTURE-CONTRACT-PENDING-FIVE-FRESH`；下一唯一动作是独立worker/
 runner的5-fresh formal artifact与完整性负例，typed reference/B4-B2/TIR仍关闭。
+
+### B4-B1a five-fresh runner候选
+
+独立worker/runner/root replay与8类完整性probe已实现。临时5-process pilot比较90 tensors/
+63,645 elements，max diff=`0.0`、sign exact；related=`28 passed`。当前=
+`IMPLEMENTED-B4-B1A-FIVE-FRESH-RUNNER-PENDING-FORMAL`，下一唯一动作是clean-source formal
+artifact、完整性报告与full regression。协调一致动态bias/adjoint改写明确留待B4-B1 numerical
+reference semantic replay关闭；在此之前不升级typed reference correctness或开放B4-B2/TIR。

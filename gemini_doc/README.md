@@ -10,6 +10,12 @@
 
 ---
 
+FSG4/B4-B1a five-fresh runner已实现，状态=
+`IMPLEMENTED-B4-B1A-FIVE-FRESH-RUNNER-PENDING-FORMAL`。临时5-process pilot比较90 tensors/
+63,645 elements，max diff=0、sign exact；正式artifact尚未生成，协调动态bias/adjoint改写限制
+留待numerical reference关闭。下一步是clean-source formal run。见
+`change_2026-08-18_fsg4_b4b1a_five_fresh_runner_candidate.md`。
+
 FSG4/B4-B1a capture sufficiency contract已实现，状态=
 `IMPLEMENTED-B4-B1A-CAPTURE-CONTRACT-PENDING-FIVE-FRESH`。显式observer与新payload已捕获并
 绑定bias、region output adjoints及sparse layout raw，单次real CUDA replay通过；下一步是

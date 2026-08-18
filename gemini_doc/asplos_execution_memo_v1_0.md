@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-18 FSG4/B4-B1a runner指令**：worker/runner/probe与5-process pilot已通过，但pilot
+> 非正式证据。下一唯一动作是先提交冻结代码，再生成formal artifact、8-case报告与full regression；
+> 之后才可实现typed IR/reference，B4-B2/TIR继续关闭。
+
 > **2026-08-18 FSG4/B4-B1a capture合同指令**：bias/output-adjoint/sparse-layout amendment已
 > 实现并通过单次real CUDA replay。下一唯一动作是独立worker/runner的5-fresh formal artifact、
 > root replay与bias/adjoint/layout完整性负例；关闭前不得实现typed reference或B4-B2/TIR。

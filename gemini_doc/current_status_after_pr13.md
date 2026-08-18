@@ -1,5 +1,10 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-18 FSG4/B4-B1a five-fresh runner候选**：独立worker/runner/root replay与8类
+> 完整性probe已实现；5-process pilot比较90 tensors/63,645 elements，max diff=0、sign exact，
+> related=`28 passed`。状态=`IMPLEMENTED-B4-B1A-FIVE-FRESH-RUNNER-PENDING-FORMAL`；
+> coordinated动态bias/adjoint改写留待numerical reference语义拒绝，typed IR/reference/TIR未开放。
+
 > **2026-08-18 FSG4/B4-B1a capture contract候选**：显式opt-in observer已捕获incoming/
 > operator bias与region output adjoints；新payload在B4-B0 base上绑定全部sparse layout raw并可
 > root重建。real CUDA双锚点通过，related=`26 passed`、full=`1378 passed, 3 skipped, 6 warnings`。

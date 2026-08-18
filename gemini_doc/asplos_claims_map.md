@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-18 FSG4/B4-B1a runner候选**：只支持worker/runner机制与临时5-process pilot；
+> formal artifact/8-case报告/full regression尚未产生。协调动态bias/adjoint重签仍是显式限制，
+> 因此无B4-B1 typed reference correctness/gradient、TIR或performance claim。
+
 > **2026-08-18 FSG4/B4-B1a capture contract候选**：状态=
 > `IMPLEMENTED-B4-B1A-CAPTURE-CONTRACT-PENDING-FIVE-FRESH`。仅支持bias/output-adjoint/
 > sparse-layout raw capture与单次real CUDA replay机制；不支持five-fresh、typed reference
