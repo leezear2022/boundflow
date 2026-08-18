@@ -104,6 +104,20 @@ def _mutate_candidate_activation(artifact: Path) -> None:
     _write_envelope(artifact, index, envelope)
 
 
+def _mutate_candidate_profile_counter(artifact: Path) -> None:
+    index = _first_index(artifact, configuration="B4-A", mode="profile")
+    envelope = _envelope(artifact, index)
+    activation = cast(dict[str, Any], envelope["activation"])
+    counts = cast(dict[str, Any], activation["profile_counter_counts"])
+    counts["optimizer_evaluation_count"] = 9
+    activation["profile_counter_counts_hash"] = canonical_hash(
+        dict(sorted(counts.items()))
+    )
+    activation.pop("activation_hash", None)
+    activation["activation_hash"] = canonical_hash(activation)
+    _write_envelope(artifact, index, envelope)
+
+
 def _mutate_export_payload(artifact: Path) -> None:
     index = _first_index(artifact, configuration="B4-A", mode="control")
     envelope = _envelope(artifact, index)
@@ -191,6 +205,7 @@ ATTACKS: tuple[tuple[str, Callable[[Path], None]], ...] = (
     ("delete-worker-outer-resign", _delete_worker),
     ("aggregate-order-outer-resign", _swap_aggregate_order),
     ("candidate-activation-outer-resign", _mutate_candidate_activation),
+    ("candidate-profile-counter-outer-resign", _mutate_candidate_profile_counter),
     ("export-payload-outer-resign", _mutate_export_payload),
     ("runtime-environment-outer-resign", _mutate_runtime_environment),
     ("worker-protocol-outer-resign", _mutate_worker_protocol),

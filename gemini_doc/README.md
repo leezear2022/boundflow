@@ -10,8 +10,13 @@
 
 ---
 
-FSG4/B4-A独立正式计时runner、raw-first/resume、root replay及11类outer-resigned tamper probe已实现，
-固定related=`46 passed`，Black/Mypy/Pylint及全量`1350 passed, 3 skipped`通过。状态=
+FSG4/B4-A正式计时v1在source=`292a035`的worker 3因B4-A显式计数器alias覆盖缺口fail closed；不完整
+raw不进入结论。计数覆盖修复后的live diagnostic恢复forward=4、bound eval=10、optimizer=`1/10/9`、
+handoff/rerun=`1/0`。下一步clean source后从position 0生成v2；当前无性能claim。见
+`gemini_doc/change_2026-08-18_fsg4_b4a_profile_counter_coverage_fix.md`。
+
+FSG4/B4-A独立正式计时runner、raw-first/resume、root replay及12类outer-resigned tamper probe已实现，
+固定related=`62 passed`，Black/Mypy/Pylint及全量`1352 passed, 3 skipped`通过。状态=
 `IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`；
 下一步提交clean source并运行24个fresh GPU process，当前无性能claim，B4-B/TIR保持关闭。见
 `gemini_doc/change_2026-08-18_fsg4_b4a_formal_timing_runner_candidate.md`。

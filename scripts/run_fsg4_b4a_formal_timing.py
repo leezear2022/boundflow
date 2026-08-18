@@ -384,6 +384,30 @@ def _validate_worker(
     worker_revision = protocol.get("code_revision")
     activation_payload = dict(activation)
     activation_hash = activation_payload.pop("activation_hash", None)
+    profile_counts = activation.get("profile_counter_counts")
+    expected_profile = worker.EXPECTED_B3C_FIXED_COUNTERS
+    if mode == "profile":
+        if (
+            not isinstance(profile_counts, Mapping)
+            or activation.get("profile_counter_counts_hash")
+            != canonical_hash(dict(sorted(profile_counts.items())))
+            or any(
+                profile_counts.get(name) != value
+                for name, value in expected_profile.items()
+            )
+            or activation.get("forward_trace_build_count")
+            != expected_profile["forward_trace_build_count"]
+        ):
+            raise ValueError("FSG4/B4-A formal physical profile counter differs")
+    elif any(
+        activation.get(name) is not None
+        for name in (
+            "profile_counter_counts",
+            "profile_counter_counts_hash",
+            "forward_trace_build_count",
+        )
+    ):
+        raise ValueError("FSG4/B4-A formal control profile receipt differs")
     if (
         activation.get("terminal_lower_adjoint_handoff_count") != expected_handoff
         or activation.get("terminal_export_crown_rerun_count") != expected_rerun

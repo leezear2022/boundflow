@@ -1,6 +1,6 @@
 """Contracts for B4-A same-solver worker and five-fresh replay."""
 
-# pylint: disable=missing-function-docstring,protected-access
+# pylint: disable=missing-function-docstring,protected-access,duplicate-code
 
 from copy import deepcopy
 from argparse import Namespace
@@ -9,6 +9,8 @@ from pathlib import Path
 import pytest
 import torch
 
+from boundflow.runtime.fsg3_same_solver_timing import FSG3Mode
+from boundflow.runtime.fsg4_b3_explicit_counters import COUNTER_NAMES
 from scripts import run_fsg4_b4a_correctness_pairs as pairs
 from scripts import run_fsg4_b4a_same_solver_worker as worker
 from scripts.run_rvir_v4_live_return_capture import _audited_tensor_payload
@@ -142,7 +144,7 @@ def test_b4a_worker_activation_rejects_lineage_and_rerun_tamper() -> None:
             }
         ],
     }
-    activation = worker._activation("B4-A", diagnostics)
+    activation = worker._activation("B4-A", diagnostics, actual_profile_counts=None)
     assert activation["terminal_lower_adjoint_handoff_count"] == 1
     assert activation["terminal_export_crown_rerun_count"] == 0
     assert activation["lineage_count"] == 6
@@ -152,11 +154,21 @@ def test_b4a_worker_activation_rejects_lineage_and_rerun_tamper() -> None:
         "kernel_shape_inferred"
     ] = True
     with pytest.raises(ValueError, match="lineage receipt differs"):
-        worker._activation("B4-A", tampered)
+        worker._activation("B4-A", tampered, actual_profile_counts=None)
 
     tampered = deepcopy(diagnostics)
     tampered["terminal_export_assembly_metadata"][0][
         "terminal_export_crown_rerun_count"
     ] = 1
     with pytest.raises(ValueError, match="activation receipt differs"):
-        worker._activation("B4-A", tampered)
+        worker._activation("B4-A", tampered, actual_profile_counts=None)
+
+
+def test_b4a_profile_counter_contract_preserves_physical_forward_four() -> None:
+    counts = {name: 1 for name in COUNTER_NAMES}
+    counts.update(worker.EXPECTED_B3C_FIXED_COUNTERS)
+    payload = {"activation": {"detailed_counts": counts}}
+    assert worker._actual_profile_counts(payload, FSG3Mode.PROFILE) == counts
+    assert counts["forward_trace_build_count"] == 4
+    with pytest.raises(ValueError, match="control counter receipt differs"):
+        worker._actual_profile_counts(payload, FSG3Mode.CONTROL)

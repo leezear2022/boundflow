@@ -1,6 +1,6 @@
 """Preregistered protocol and decision tests for FSG4/B4-A formal timing."""
 
-# pylint: disable=protected-access,missing-function-docstring
+# pylint: disable=protected-access,missing-function-docstring,duplicate-code
 
 from argparse import Namespace
 from pathlib import Path

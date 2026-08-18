@@ -24,7 +24,7 @@ stage: s01
   B3 handoff/rerun=`0/1`、B4-A=`1/0`、lineage=6及provider/fallback=0。
 - root replay从24个raw worker、metadata与日志重建paired ratio、profile closure和冻结分类；正式外审前
   始终保持`performance_claimed=false`。
-- 新增 `scripts/probe_fsg4_b4a_formal_timing_tamper.py`，固定11类outer-resigned攻击：latency、worker
+- 新增 `scripts/probe_fsg4_b4a_formal_timing_tamper.py`，固定12类outer-resigned攻击：latency、worker
   delete/order、activation、raw export tensor、runtime、worker protocol、formal preflight、outer protocol、
   paired ratio与summary。
 
@@ -32,7 +32,7 @@ stage: s01
 
 - `tests/test_fsg4_b4a_formal_timing.py`：冻结顺序与唯一性、精确门槛边界、四类NO-GO边界、venv
   symlink、路径清洗及timeout失败记录。
-- `tests/test_fsg4_b4a_formal_timing_tamper.py`：冻结11类攻击清单。
+- `tests/test_fsg4_b4a_formal_timing_tamper.py`：冻结12类攻击清单。
 
 ## 已执行验证
 
@@ -49,4 +49,4 @@ stage: s01
 
 状态为 `IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`。本轮没有使用 correctness artifact latency，
 没有形成B4-A speedup claim，也没有打开B4-B/TIR。下一唯一动作是提交clean source，随后从position 0
-生成24-process正式GPU artifact，再执行root replay、11/11 tamper、全量回归与外部审计。
+生成24-process正式GPU artifact，再执行root replay、12/12 tamper、全量回归与外部审计。

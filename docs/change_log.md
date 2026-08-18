@@ -1,10 +1,19 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-18：FSG4/B4-A Profile Counter 覆盖修复
+
+- source=`292a035`的正式v1在worker 3因B4-A profiler alias覆盖缺口fail closed，v1不进入结论；
+- 显式instrumentation新增B4-A forward、两类CROWN evaluation和terminal optimizer wrapper；
+- live diagnostic恢复forward=4、bound eval=10、optimizer=`1/10/9`、handoff/rerun=`1/0`；
+- tamper清单扩为12类，固定related=`62 passed`、全量=`1352 passed, 3 skipped`；下一步clean source后
+  从position 0运行v2，无性能claim。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4a_profile_counter_coverage_fix.md`。
+
 ## 2026-08-18：FSG4/B4-A 正式计时 Runner 候选
 
 - 实现6 block、24 fresh worker的B3/B4-A control/profile正式runner与raw-first/resume；
 - root replay从raw重建correctness、activation、environment、profile、ratio与分类；
-- 新增11类outer-resigned latency/semantic/activation/protocol/preflight/derived-summary攻击探针；
+- 新增12类outer-resigned latency/semantic/activation/protocol/preflight/derived-summary攻击探针；
 - 固定related=`46 passed`，Black/Mypy/Pylint及全量`1350 passed, 3 skipped`通过；状态=
   `IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`，无性能claim。详见
   `gemini_doc/change_2026-08-18_fsg4_b4a_formal_timing_runner_candidate.md`。

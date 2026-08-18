@@ -22,9 +22,8 @@ if str(REPOSITORY_ROOT) not in sys.path:
     sys.path.insert(0, str(REPOSITORY_ROOT))
 
 from boundflow.runtime.fsg3_same_solver_timing import canonical_hash, FSG3Mode
-from boundflow.runtime.fsg4_b3_same_solver_timing import (
-    fsg4_b3_timing_run_from_dict,
-)
+from boundflow.runtime.fsg4_b3_explicit_counters import EXPECTED_B3C_FIXED_COUNTERS
+from boundflow.runtime.fsg4_b3_same_solver_timing import fsg4_b3_timing_run_from_dict
 from scripts import run_fsg4_b3_counter_diagnostic as diagnostic
 from scripts import run_fsg4_b3_same_solver_timing as b3_worker
 
@@ -70,7 +69,10 @@ def _empty_list(value: object, label: str) -> None:
 
 
 def _activation(
-    configuration: str, diagnostics: Mapping[str, Any]
+    configuration: str,
+    diagnostics: Mapping[str, Any],
+    *,
+    actual_profile_counts: Mapping[str, int] | None,
 ) -> dict[str, object]:
     exports = _one_mapping(
         diagnostics.get("native_backward_export_metadata"), "native export"
@@ -148,6 +150,23 @@ def _activation(
             "fallback_dispatch_count": 0,
             "performance_claimed": False,
         }
+    if actual_profile_counts is not None:
+        if any(
+            actual_profile_counts.get(name) != value
+            for name, value in EXPECTED_B3C_FIXED_COUNTERS.items()
+        ):
+            raise ValueError("FSG4/B4-A profile counter receipt differs")
+        activation.update(
+            {
+                "profile_counter_counts": dict(sorted(actual_profile_counts.items())),
+                "profile_counter_counts_hash": canonical_hash(
+                    dict(sorted(actual_profile_counts.items()))
+                ),
+                "forward_trace_build_count": actual_profile_counts[
+                    "forward_trace_build_count"
+                ],
+            }
+        )
     activation["activation_hash"] = canonical_hash(activation)
     return activation
 
@@ -163,6 +182,27 @@ def _candidate_executor() -> Iterator[None]:
 
     with diagnostic._patch_attribute(diagnostic, "_use_prepared_executor", use_b4a):
         yield
+
+
+def _actual_profile_counts(
+    run_payload: Mapping[str, Any], mode: FSG3Mode
+) -> dict[str, int] | None:
+    activation = run_payload.get("activation")
+    if not isinstance(activation, Mapping):
+        raise TypeError("FSG4/B4-A inherited activation differs")
+    counts = activation.get("detailed_counts")
+    if mode == FSG3Mode.CONTROL:
+        if counts is not None:
+            raise ValueError("FSG4/B4-A control counter receipt differs")
+        return None
+    if not isinstance(counts, Mapping) or any(
+        not isinstance(name, str)
+        or not isinstance(value, int)
+        or isinstance(value, bool)
+        for name, value in counts.items()
+    ):
+        raise TypeError("FSG4/B4-A profile counter payload differs")
+    return {str(name): int(value) for name, value in counts.items()}
 
 
 def _b3_namespace(args: argparse.Namespace, result: Path) -> argparse.Namespace:
@@ -203,10 +243,15 @@ def _worker(args: argparse.Namespace) -> None:
     diagnostics = base_envelope.get("diagnostics")
     if not isinstance(run_payload, Mapping) or not isinstance(diagnostics, Mapping):
         raise TypeError("FSG4/B4-A inherited worker payload differs")
+    actual_profile_counts = _actual_profile_counts(run_payload, mode)
     run = fsg4_b3_timing_run_from_dict(cast(Mapping[str, object], run_payload))
     if run.configuration.value != "B3" or run.mode != mode:
         raise ValueError("FSG4/B4-A inherited measurement identity differs")
-    activation = _activation(configuration, diagnostics)
+    activation = _activation(
+        configuration,
+        diagnostics,
+        actual_profile_counts=actual_profile_counts,
+    )
     protocol: dict[str, object] = {
         "source_git_head": diagnostic._git("rev-parse", "HEAD"),
         "code_revision": _code_revision(),

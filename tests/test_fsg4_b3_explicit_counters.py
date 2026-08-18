@@ -1,8 +1,10 @@
 """Contracts for the FSG4/B3 explicit-counter diagnostic."""
 
-# pylint: disable=missing-function-docstring,protected-access
+# pylint: disable=missing-function-docstring,protected-access,duplicate-code
+# pylint: disable=no-value-for-parameter,missing-kwoa
 
 import copy
+from types import SimpleNamespace
 
 import pytest
 
@@ -16,6 +18,7 @@ from boundflow.runtime.fsg4_b3_explicit_counters import (
     Fsg4B3CounterSnapshot,
     fsg4_b3_counter_snapshot_from_dict,
 )
+from boundflow.runtime import fsg4_b4a_terminal_lower_adjoint_handoff as b4a
 from scripts import run_fsg4_b3_counter_diagnostic as diagnostic
 from scripts import probe_fsg4_b3_counter_artifact_tamper as tamper
 from scripts import run_rvir_v4_live_return_capture as live_runner
@@ -155,6 +158,43 @@ def test_named_instrumentation_patches_and_restores_without_profiler() -> None:
         assert live_runner._move_tensors is not original
     assert live_runner._move_tensors is original
     assert not recorder.events
+
+
+def test_named_instrumentation_covers_b4a_terminal_optimizer_aliases(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(b4a, "_forward_ibp_trace_mlp", lambda: "forward")
+    monkeypatch.setattr(
+        b4a, "run_crown_ibp_mlp_from_forward_trace", lambda: "update-crown"
+    )
+    monkeypatch.setattr(
+        b4a,
+        "run_crown_ibp_mlp_with_relu_lower_coefficients_from_forward_trace",
+        lambda: "terminal-crown",
+    )
+    monkeypatch.setattr(
+        b4a,
+        "execute_terminal_optimizer_with_lower_adjoint_handoff_v1",
+        lambda: SimpleNamespace(
+            optimizer_evaluation_count=10,
+            optimizer_update_count=9,
+        ),
+    )
+    recorder = Fsg4B3CounterRecorder(retain_events=False)
+    with diagnostic._instrument_b2(recorder):
+        assert b4a._forward_ibp_trace_mlp() == "forward"
+        assert b4a.run_crown_ibp_mlp_from_forward_trace() == "update-crown"
+        assert (
+            b4a.run_crown_ibp_mlp_with_relu_lower_coefficients_from_forward_trace()
+            == "terminal-crown"
+        )
+        b4a.execute_terminal_optimizer_with_lower_adjoint_handoff_v1()
+    counts = recorder.counts()
+    assert counts["forward_trace_build_count"] == 1
+    assert counts["optimizer_bound_evaluation_call_count"] == 2
+    assert counts["optimizer_trace_call_count"] == 1
+    assert counts["optimizer_evaluation_count"] == 10
+    assert counts["optimizer_update_count"] == 9
 
 
 def test_boolean_counter_is_rejected_instead_of_coerced() -> None:

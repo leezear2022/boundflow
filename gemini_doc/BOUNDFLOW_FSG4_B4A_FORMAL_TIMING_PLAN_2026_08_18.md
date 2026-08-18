@@ -100,11 +100,12 @@ closure、summary threshold/classification；全部必须拒绝。
 - `tests/test_fsg4_b4a_correctness_pairs_artifact.py`
 - `tests/test_fsg4_b4a_formal_timing.py`
 - `tests/test_fsg4_b4a_formal_timing_tamper.py`
+- `tests/test_fsg4_b3_explicit_counters.py`
 - `tests/test_fsg4_b3_same_solver_timing.py`
 - `tests/test_fsg4_b3_same_solver_worker.py`
 - `tests/test_fsg4_b3_same_solver_artifact.py`
 
 另跑 full pytest、Black、Mypy、Pylint、`git diff --check`、DocOps lint。
 
-24-process formal runner、root replay与11类outer-resigned tamper probe已实现；下一唯一动作是提交clean
+24-process formal runner、root replay与12类outer-resigned tamper probe已实现；下一唯一动作是提交clean
 source后执行GPU实验。B4-B/TIR保持关闭。

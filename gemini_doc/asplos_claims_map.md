@@ -1,8 +1,13 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-18 FSG4/B4-A正式计时v1失败诊断**：source=`292a035`的worker 3因B4-A profiler alias覆盖
+> 缺口fail closed；不是performance/correctness失败。修复后live diagnostic物理计数为forward=4、bound
+> eval=10、optimizer=`1/10/9`、handoff/rerun=`1/0`。v1不完整raw不进入任何ratio；只允许clean-source
+> v2从position 0重跑，当前无性能claim。
+
 > **2026-08-18 FSG4/B4-A正式计时Runner候选**：冻结的24-process B3/B4-A control/profile runner、
-> raw-first/resume、root replay及11类outer-resigned tamper probe已实现；固定related=`46 passed`，
-> Black/Mypy/Pylint及全量`1350 passed, 3 skipped`通过。状态=
+> raw-first/resume、root replay及12类outer-resigned tamper probe已实现；固定related=`62 passed`，
+> Black/Mypy/Pylint及全量`1352 passed, 3 skipped`通过。状态=
 > `IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`，无性能claim，B4-B/TIR关闭。
 
 > **2026-08-16 FSG4/B4-A five-fresh正确性关闭**：source=`43d4117`的10/10 fresh worker、5/5

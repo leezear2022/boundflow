@@ -318,6 +318,7 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
     from boundflow.runtime import native_alpha_beta_optimization_state as native_state
     from boundflow.runtime import fsg4_b3_prepared_core as prepared_core
     from boundflow.runtime import fsg4_b3_terminal_optimizer_schedule as terminal
+    from boundflow.runtime import fsg4_b4a_terminal_lower_adjoint_handoff as b4a
     from boundflow.runtime import fsg4_b3_device_atomic_commit as device_atomic
     from boundflow.runtime import fsg4_b3_device_live_return as device_return
     from boundflow.runtime import rvir_v4_atomic_copy_out as atomic
@@ -374,6 +375,7 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
     for module_owner, detail in (
         (optimizer, "optimizer forward trace"),
         (terminal, "terminal optimizer forward trace"),
+        (b4a, "B4-A terminal optimizer forward trace"),
         (backward, "terminal backward forward trace"),
         (kfsb, "KFSB child forward trace"),
     ):
@@ -394,6 +396,18 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
         "run_crown_ibp_mlp_from_forward_trace",
         "optimizer_bound_evaluation_call_count",
         "terminal optimizer CROWN evaluation",
+    )
+    patch_function(
+        b4a,
+        "run_crown_ibp_mlp_from_forward_trace",
+        "optimizer_bound_evaluation_call_count",
+        "B4-A optimizer update CROWN evaluation",
+    )
+    patch_function(
+        b4a,
+        "run_crown_ibp_mlp_with_relu_lower_coefficients_from_forward_trace",
+        "optimizer_bound_evaluation_call_count",
+        "B4-A terminal lower-adjoint CROWN evaluation",
     )
     patch_function(
         kfsb,
@@ -480,6 +494,35 @@ def _instrument_b2(recorder: Fsg4B3CounterRecorder) -> Iterator[None]:
     stack.enter_context(
         _patch_attribute(
             terminal, "execute_terminal_optimizer_schedule_v1", counted_terminal
+        )
+    )
+
+    original_b4a_terminal = b4a.execute_terminal_optimizer_with_lower_adjoint_handoff_v1
+
+    @wraps(original_b4a_terminal)
+    def counted_b4a_terminal(*args: Any, **kwargs: Any) -> Any:
+        result = original_b4a_terminal(*args, **kwargs)
+        recorder.add(
+            "optimizer_trace_call_count",
+            detail="one B4-A terminal optimizer handoff schedule",
+        )
+        recorder.add(
+            "optimizer_evaluation_count",
+            amount=result.optimizer_evaluation_count,
+            detail="B4-A terminal handoff evaluations",
+        )
+        recorder.add(
+            "optimizer_update_count",
+            amount=result.optimizer_update_count,
+            detail="B4-A terminal handoff updates",
+        )
+        return result
+
+    stack.enter_context(
+        _patch_attribute(
+            b4a,
+            "execute_terminal_optimizer_with_lower_adjoint_handoff_v1",
+            counted_b4a_terminal,
         )
     )
 
