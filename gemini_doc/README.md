@@ -10,6 +10,12 @@
 
 ---
 
+FSG4/B4-B0外审Round 1=`changes_requested`：协调一致改写全部run的topology/lineage可绕过原相对
+一致性校验。F1 major的v2绝对身份绑定已实现，状态=
+`IMPLEMENTED-B4-B0-R1-F1-IDENTITY-BINDING-PENDING-V2`；合法v1 replay保持，11/11本地完整性
+负向用例拒绝。下一步生成clean-source v2并重交Round 2；B4-B1/TIR仍关闭。见
+`gemini_doc/change_2026-08-18_fsg4_b4b0_round1_identity_binding_fix.md`。
+
 FSG4/B4-B0 five-fresh已内部关闭，状态=
 `VALIDATED-B4-B0-FIVE-FRESH-PENDING-EXTERNAL-AUDIT`。source=`1dbb2de`；5个独立CUDA进程、
 10份capture、108组tensor/664,744元素root replay，max diff=`1.1920928955078125e-07`、

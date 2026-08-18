@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-18 FSG4/B4-B0 Round 1纠正指令**：外审`changes_requested`，F1 major确认原replay
+> 未绑定绝对source/topology/lineage身份。v2修复已实现并在旧raw上拒绝11/11负例；下一唯一动作
+> 是冻结提交后生成v2、replay、11类完整性负例与回归，再提交Round 2。批准前B4-B1/TIR关闭。
+
 > **2026-08-18 FSG4/B4-B0 five-fresh内部关闭指令**：source=`1dbb2de`的formal artifact已通过
 > 5 fresh/10 capture raw replay、108 tensor/664,744元素、max diff=`1.192e-7`、sign exact与
 > 9/9 outer-resigned tamper。状态=`VALIDATED-B4-B0-FIVE-FRESH-PENDING-EXTERNAL-AUDIT`。

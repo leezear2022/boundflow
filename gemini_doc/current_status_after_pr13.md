@@ -1,5 +1,12 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-18 FSG4/B4-B0外审Round 1与F1修复**：外审=`changes_requested`，1 major：
+> 全5 run/10 capture同步改写topology或lineage source hashes并全重签可绕过原相对一致性。
+> v2修复已冻结source/model/state/primal/split/topology/schedule及逐锚点anchor/lineage绝对身份，
+> manifest↔protocol同源；合法v1 replay保持，两类coordinated回归与总计`11/11`完整性负例拒绝。
+> 当前=`IMPLEMENTED-B4-B0-R1-F1-IDENTITY-BINDING-PENDING-V2`；须生成v2并Round 2批准，
+> B4-B1/B4-B2/TIR/performance继续关闭。
+
 > **2026-08-18 FSG4/B4-B0 five-fresh内部关闭**：source=`1dbb2de`，5个独立CUDA
 > subprocess生成S/P各5份capture；root replay从raw重建10份typed capture，比较108组tensor/
 > 664,744元素，max diff=`1.1920928955078125e-07`、sign exact；九类outer-resigned tamper

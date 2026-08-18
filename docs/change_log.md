@@ -1,5 +1,13 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-18：FSG4/B4-B0 Round 1 Identity Binding 修复
+
+- 外审Round 1以1个major否决：全run协调改写topology/lineage并重签可绕过相对一致性；
+- v2 verifier新增绝对冻结source/topology/anchor/lineage身份及manifest↔protocol绑定；
+- 合法v1 replay保持，原9类+两类coordinated完整性负例=`11/11 rejected`，回归4 passed；
+- 状态=`IMPLEMENTED-B4-B0-R1-F1-IDENTITY-BINDING-PENDING-V2`，B4-B1/TIR仍关闭。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4b0_round1_identity_binding_fix.md`。
+
 ## 2026-08-18：FSG4/B4-B0 Five-Fresh 内部关闭
 
 - source=`1dbb2de`，5个fresh CUDA进程生成10份S/P typed capture；

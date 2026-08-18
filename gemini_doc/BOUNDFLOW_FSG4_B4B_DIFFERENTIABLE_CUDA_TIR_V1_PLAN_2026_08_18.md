@@ -1,5 +1,5 @@
 ---
-status: b4b0-five-fresh-validated-pending-external-audit
+status: b4b0-round1-f1-fixed-pending-v2
 updated: 2026-08-18T04:02:28Z
 type: plan
 topic: boundflow
@@ -309,3 +309,12 @@ sign exact。state/start-node/topology/shape/alpha-index/beta-location/gradient/
 outer-resigned攻击`9/9 rejected`；定向20、全量`1372 passed, 3 skipped, 6 warnings`。内部状态=
 `VALIDATED-B4-B0-FIVE-FRESH-PENDING-EXTERNAL-AUDIT`。外审批准后才开放B4-B1；B4-B2 TIR、
 performance和system claim保持关闭。
+
+### B4-B0 Round 1外审与identity binding修复
+
+Round 1=`changes_requested`，F1 major证明全run同步改写topology或lineage并全重签可绕过原相对
+一致性。v2 verifier已将source capture/model、source state、primal/split/topology/schedule、两锚点
+anchor/lineage/source tensor/receipt hashes冻结为绝对身份，同时绑定manifest与protocol同源。
+合法v1 replay保持，原9类+两类coordinated完整性负例=`11/11 rejected`。当前状态=
+`IMPLEMENTED-B4-B0-R1-F1-IDENTITY-BINDING-PENDING-V2`；下一唯一动作是clean-source v2 formal
+artifact与Round 2。B4-B1/B4-B2/TIR/performance仍关闭。

@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import json
 import os
@@ -30,9 +31,12 @@ from boundflow.runtime.fsg4_b4b_production_region_capture import (
 )
 from scripts import run_fsg4_b4b_capture_worker as worker
 
-ARTIFACT_SCHEMA = "boundflow.fsg4-b4b0-five-fresh-artifact/v1"
-PROTOCOL_SCHEMA = "boundflow.fsg4-b4b0-five-fresh-protocol/v1"
-SUMMARY_SCHEMA = "boundflow.fsg4-b4b0-five-fresh-summary/v1"
+LEGACY_ARTIFACT_SCHEMA = "boundflow.fsg4-b4b0-five-fresh-artifact/v1"
+LEGACY_PROTOCOL_SCHEMA = "boundflow.fsg4-b4b0-five-fresh-protocol/v1"
+LEGACY_SUMMARY_SCHEMA = "boundflow.fsg4-b4b0-five-fresh-summary/v1"
+ARTIFACT_SCHEMA = "boundflow.fsg4-b4b0-five-fresh-artifact/v2"
+PROTOCOL_SCHEMA = "boundflow.fsg4-b4b0-five-fresh-protocol/v2"
+SUMMARY_SCHEMA = "boundflow.fsg4-b4b0-five-fresh-summary/v2"
 RUN_COUNT = 5
 ATOL = 2e-4
 RTOL = 2e-4
@@ -52,6 +56,110 @@ CODE_PATHS = (
     "scripts/run_fsg4_b4b_five_fresh_artifact.py",
     "scripts/probe_fsg4_b4b_five_fresh_tamper.py",
 )
+
+FROZEN_SOURCE_IDENTITY: dict[str, object] = {
+    "source_capture_sha256": (
+        "f42229dd06be8521865d14af4cc51450ec8bec4e792934b457c276aad50126dc"
+    ),
+    "model_sha256": (
+        "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d"
+    ),
+    "source_state_hash": (
+        "e3587dd9a8010d34bb65c1e415bb444917b48e23679855b2fe6ac54d23b4bff0"
+    ),
+    "schedule_hash": (
+        "69af2bb2346f70bf690438b57b0e651c7f491d06007adfc1140538be79d60659"
+    ),
+    "primal_graph_hash": (
+        "02636a01e4b5a2d1f759dc7748bf80b3303efff2d5697790966f8e93679213e8"
+    ),
+    "split_state_hash": (
+        "2a0c665bc72ca0edcb3e16fa23133f511a6ee0f4ba6cd58a87a2eeac523fe697"
+    ),
+    "topology_hash": (
+        "9be361625e492b1401a402fd19ad5d80ac06a977c74f137c7563e96de06bca35"
+    ),
+    "anchors": {
+        "semantic-active-beta-gemm-14": {
+            "anchor_hash": (
+                "62e56f848d3237f5d144b5e0f84a488b92dc454ddbccf7c9315928648a5eb2ae"
+            ),
+            "lineage_hash": (
+                "959398ff4013742a1d7d8454f7f0eb28e642949adefae927fa605db6a589672b"
+            ),
+            "source_tensor_hashes": {
+                "alpha/%2F48/%2F49": (
+                    "81d807edf887dbdddaea2000b4e360e0c2954ae31620c3063fddc555798ae0dd"
+                ),
+                "alpha_layout/%2F48/feature_index/0": (
+                    "f1a18154002639664110cccb4a1d6c8664168f21edaeaaaf4a17179a546ff7c6"
+                ),
+                "alpha_layout/%2F48/feature_shape": (
+                    "f6a3b6597e45ef2d039118370d773aff121eb3dcd5761e7e33a587b1d35f83ab"
+                ),
+                "beta/%2Finput-28/0/location": (
+                    "f89af9a3962c31360fb00e340c0c9bb8a5b8fcb7f2cd0d623643a1834765d6d2"
+                ),
+                "beta/%2Finput-28/0/sign": (
+                    "ec37d37a39b0113ef9e7f405155f2ef53160fa67db055c799813a92523036894"
+                ),
+                "beta/%2Finput-28/0/value": (
+                    "82c14331f86c999d4ad98cd46b1b4e945b2f1e3b4362ae34121ee8bc388d9590"
+                ),
+            },
+            "round_trip_receipt_hashes": {
+                "alpha/%2F48/%2F49": (
+                    "c96fa510c12ddd7116b4f436648d5cfcb91690017ad3cfa2393e299c7d52aa49"
+                ),
+                "beta/%2Finput-28/0/value": (
+                    "a9d29b1d7863a8f2bceda6119b3e74eef8854d65fabc20eb1ef2aaf2c3e7f969"
+                ),
+            },
+        },
+        "performance-conv-8-candidate": {
+            "anchor_hash": (
+                "3063894b5b0520b3a873e2960524e06cbd3a70cf57316cdc3d7d47e0700a3a9b"
+            ),
+            "lineage_hash": (
+                "47d1765d021d62cc3e3406654aadd59e8284ebd24e4077454ae0e2d8a0f59ec0"
+            ),
+            "source_tensor_hashes": {
+                "alpha/%2Finput-24/%2F49": (
+                    "c886c34b3b2b2d692f48aa5b4cbfa2e94f5c4577368d6d0bde709cdedbc12419"
+                ),
+                "alpha_layout/%2Finput-24/feature_index/0": (
+                    "cb9b04c511a5e2c838768c630f52a5f194566ef3ca99a589bc1caafbbb842d98"
+                ),
+                "alpha_layout/%2Finput-24/feature_index/1": (
+                    "5833fc3baae56b93b256638c58594f455610183976a2d48a603cf9a87aabd141"
+                ),
+                "alpha_layout/%2Finput-24/feature_index/2": (
+                    "35ec69f55f7ea1f377747aeea63bcbbda17db71f88fadb02142e216e1a73958a"
+                ),
+                "alpha_layout/%2Finput-24/feature_shape": (
+                    "b5e9e2a8e35a3bce0a4cafddf492ede29b04a3587c245d52d73c28a06605b879"
+                ),
+                "beta/%2Finput-20/0/location": (
+                    "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0"
+                ),
+                "beta/%2Finput-20/0/sign": (
+                    "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5"
+                ),
+                "beta/%2Finput-20/0/value": (
+                    "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5"
+                ),
+            },
+            "round_trip_receipt_hashes": {
+                "alpha/%2Finput-24/%2F49": (
+                    "73479cdd8e084c8ddb8206dec185c15ca8b434a0ec0075ee0f4bb55f66d548d8"
+                ),
+                "beta/%2Finput-20/0/value": (
+                    "698bcdd537fde330b3ba69ebed13a3bbebde9caa9d395eb5e0696a65c8f24f1d"
+                ),
+            },
+        },
+    },
+}
 
 
 def _canonical_json(value: object, *, indent: int | None = None) -> str:
@@ -135,6 +243,13 @@ def _verify_code_provenance(manifest: Mapping[str, Any]) -> None:
 
 
 def _protocol(source_capture: Path, model: Path) -> dict[str, object]:
+    source_capture_hash = _file_sha256(source_capture)
+    model_hash = _file_sha256(model)
+    if (
+        source_capture_hash != FROZEN_SOURCE_IDENTITY["source_capture_sha256"]
+        or model_hash != FROZEN_SOURCE_IDENTITY["model_sha256"]
+    ):
+        raise ValueError("FSG4/B4-B0 frozen source input differs")
     payload: dict[str, object] = {
         "schema_version": PROTOCOL_SCHEMA,
         "source_git_head": _git("rev-parse", "HEAD"),
@@ -149,8 +264,9 @@ def _protocol(source_capture: Path, model: Path) -> dict[str, object]:
         "sign_exact": True,
         "default_cuda_stream_required": True,
         "source_alias_pairs_required": [],
-        "source_capture_sha256": _file_sha256(source_capture),
-        "model_sha256": _file_sha256(model),
+        "source_capture_sha256": source_capture_hash,
+        "model_sha256": model_hash,
+        "frozen_source_identity": copy.deepcopy(FROZEN_SOURCE_IDENTITY),
         "performance_claimed": False,
         "tir_admitted": False,
     }
@@ -161,8 +277,9 @@ def _protocol(source_capture: Path, model: Path) -> dict[str, object]:
 def _validate_protocol(value: Mapping[str, Any]) -> None:
     semantic = dict(value)
     claimed = semantic.pop("protocol_hash", None)
+    schema = value.get("schema_version")
     if (
-        value.get("schema_version") != PROTOCOL_SCHEMA
+        schema not in {PROTOCOL_SCHEMA, LEGACY_PROTOCOL_SCHEMA}
         or value.get("run_count") != RUN_COUNT
         or value.get("run_indices") != list(range(RUN_COUNT))
         or value.get("process_isolation") != "one-fresh-subprocess-per-capture"
@@ -173,6 +290,14 @@ def _validate_protocol(value: Mapping[str, Any]) -> None:
         or value.get("sign_exact") is not True
         or value.get("default_cuda_stream_required") is not True
         or value.get("source_alias_pairs_required") != []
+        or value.get("source_capture_sha256")
+        != FROZEN_SOURCE_IDENTITY["source_capture_sha256"]
+        or value.get("model_sha256") != FROZEN_SOURCE_IDENTITY["model_sha256"]
+        or (
+            schema == PROTOCOL_SCHEMA
+            and value.get("frozen_source_identity") != FROZEN_SOURCE_IDENTITY
+        )
+        or (schema == LEGACY_PROTOCOL_SCHEMA and "frozen_source_identity" in value)
         or value.get("performance_claimed") is not False
         or value.get("tir_admitted") is not False
         or claimed != _canonical_hash(semantic)
@@ -199,6 +324,30 @@ def _captures(
     return captures
 
 
+def _validate_frozen_capture_identity(
+    capture: ProductionDifferentiableRegionCaptureV1,
+) -> None:
+    anchors = FROZEN_SOURCE_IDENTITY["anchors"]
+    if not isinstance(anchors, Mapping):
+        raise TypeError("FSG4/B4-B0 frozen anchor identity differs")
+    expected = anchors.get(capture.anchor.anchor_id)
+    if not isinstance(expected, Mapping):
+        raise ValueError("FSG4/B4-B0 frozen anchor is absent")
+    lineage = capture.production_lineage.metadata(capture.anchor)
+    if (
+        capture.source_state_hash != FROZEN_SOURCE_IDENTITY["source_state_hash"]
+        or capture.primal_graph_hash != FROZEN_SOURCE_IDENTITY["primal_graph_hash"]
+        or capture.split_state_hash != FROZEN_SOURCE_IDENTITY["split_state_hash"]
+        or capture.topology_hash != FROZEN_SOURCE_IDENTITY["topology_hash"]
+        or capture.anchor.stable_hash() != expected.get("anchor_hash")
+        or lineage.get("lineage_hash") != expected.get("lineage_hash")
+        or lineage.get("source_tensor_hashes") != expected.get("source_tensor_hashes")
+        or lineage.get("round_trip_receipt_hashes")
+        != expected.get("round_trip_receipt_hashes")
+    ):
+        raise ValueError("FSG4/B4-B0 frozen source identity differs")
+
+
 def _validate_run(
     payload: Mapping[str, Any], *, run_index: int, protocol: Mapping[str, Any]
 ) -> list[ProductionDifferentiableRegionCaptureV1]:
@@ -206,8 +355,15 @@ def _validate_run(
     if (
         payload.get("schema_version") != worker.WORKER_SCHEMA
         or payload.get("run_index") != run_index
-        or payload.get("source_capture_sha256") != protocol.get("source_capture_sha256")
-        or payload.get("model_sha256") != protocol.get("model_sha256")
+        or payload.get("source_capture_sha256")
+        != FROZEN_SOURCE_IDENTITY["source_capture_sha256"]
+        or payload.get("model_sha256") != FROZEN_SOURCE_IDENTITY["model_sha256"]
+        or protocol.get("source_capture_sha256")
+        != FROZEN_SOURCE_IDENTITY["source_capture_sha256"]
+        or protocol.get("model_sha256") != FROZEN_SOURCE_IDENTITY["model_sha256"]
+        or payload.get("source_state_hash")
+        != FROZEN_SOURCE_IDENTITY["source_state_hash"]
+        or payload.get("schedule_hash") != FROZEN_SOURCE_IDENTITY["schedule_hash"]
         or payload.get("evaluation_count") != 10
         or payload.get("update_count") != 9
         or payload.get("performance_claimed") is not False
@@ -216,7 +372,10 @@ def _validate_run(
         or environment.get("compute_capability") != [8, 9]
     ):
         raise ValueError("FSG4/B4-B0 worker envelope differs")
-    return _captures(payload)
+    captures = _captures(payload)
+    for capture in captures:
+        _validate_frozen_capture_identity(capture)
+    return captures
 
 
 def _discrete_projection(
@@ -307,7 +466,11 @@ def _summary(
         for anchor in range(2)
     ]
     summary: dict[str, object] = {
-        "schema_version": SUMMARY_SCHEMA,
+        "schema_version": (
+            LEGACY_SUMMARY_SCHEMA
+            if protocol.get("schema_version") == LEGACY_PROTOCOL_SCHEMA
+            else SUMMARY_SCHEMA
+        ),
         "status": "validated-b4-b0-five-fresh-capture",
         "protocol_hash": protocol["protocol_hash"],
         "run_count": RUN_COUNT,
@@ -441,6 +604,7 @@ def _generate(args: argparse.Namespace) -> dict[str, object]:
             "code_revision": _code_revision(),
             "protocol_hash": protocol["protocol_hash"],
             "summary_hash": summary["summary_hash"],
+            "frozen_source_identity_hash": _canonical_hash(FROZEN_SOURCE_IDENTITY),
             "files": _all_files(root),
             "performance_claimed": False,
             "tir_admitted": False,
@@ -460,7 +624,7 @@ def _verify_static_artifact(
     semantic = dict(manifest)
     claimed = semantic.pop("manifest_hash", None)
     if (
-        manifest.get("schema_version") != ARTIFACT_SCHEMA
+        manifest.get("schema_version") not in {ARTIFACT_SCHEMA, LEGACY_ARTIFACT_SCHEMA}
         or claimed != _canonical_hash(semantic)
         or manifest.get("performance_claimed") is not False
         or manifest.get("tir_admitted") is not False
@@ -472,6 +636,20 @@ def _verify_static_artifact(
         raise ValueError("FSG4/B4-B0 artifact inventory differs")
     protocol = _load_json(artifact / "protocol.json")
     _validate_protocol(protocol)
+    if (
+        manifest.get("source_git_head") != protocol.get("source_git_head")
+        or manifest.get("code_revision") != protocol.get("code_revision")
+        or (
+            manifest.get("schema_version") == ARTIFACT_SCHEMA
+            and manifest.get("frozen_source_identity_hash")
+            != _canonical_hash(FROZEN_SOURCE_IDENTITY)
+        )
+        or (
+            manifest.get("schema_version") == LEGACY_ARTIFACT_SCHEMA
+            and "frozen_source_identity_hash" in manifest
+        )
+    ):
+        raise ValueError("FSG4/B4-B0 manifest protocol identity differs")
     runs = [_load_torch(artifact / name) for name in RUN_FILES]
     summary = _summary(cast(list[Mapping[str, Any]], runs), protocol)
     if (

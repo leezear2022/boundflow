@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-18 FSG4/B4-B0 Round 1纠正**：外审以1个major否决原内部关闭；协调一致topology/
+> lineage重写可绕过相对run校验。v2绝对身份绑定已实现但formal artifact未生成，状态=
+> `IMPLEMENTED-B4-B0-R1-F1-IDENTITY-BINDING-PENDING-V2`。因此B4-B0仍未外审批准，B4-B1/
+> TIR/performance无新增claim。
+
 > **2026-08-18 FSG4/B4-B0 five-fresh内部关闭**：状态=
 > `VALIDATED-B4-B0-FIVE-FRESH-PENDING-EXTERNAL-AUDIT`。支持production evaluation-0双锚点
 > capture correctness/ownership：5 fresh、10 captures、raw typed replay、max diff=`1.192e-7`、

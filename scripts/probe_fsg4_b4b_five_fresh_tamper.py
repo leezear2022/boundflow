@@ -18,7 +18,7 @@ import torch
 from boundflow.runtime.rvir_v4_production_state import production_tensor_sha256
 from scripts import run_fsg4_b4b_five_fresh_artifact as artifact
 
-REPORT_SCHEMA = "boundflow.fsg4-b4b0-five-fresh-tamper-report/v1"
+REPORT_SCHEMA = "boundflow.fsg4-b4b0-five-fresh-tamper-report/v2"
 
 
 def _load_run(root: Path) -> dict[str, object]:
@@ -158,6 +158,42 @@ def _stream(root: Path) -> None:
     _save_run(root, run)
 
 
+def _coordinated_topology(root: Path) -> None:
+    for name in artifact.RUN_FILES:
+        run = torch.load(root / name, map_location="cpu", weights_only=True)
+        assert isinstance(run, dict)
+        captures = run["captures"]
+        assert isinstance(captures, list)
+        for capture in captures:
+            assert isinstance(capture, dict)
+            metadata = _metadata(cast(dict[str, object], capture))
+            metadata["topology_hash"] = "b" * 64
+            _resign_capture(metadata)
+        torch.save(run, root / name)
+
+
+def _coordinated_lineage(root: Path) -> None:
+    for name in artifact.RUN_FILES:
+        run = torch.load(root / name, map_location="cpu", weights_only=True)
+        assert isinstance(run, dict)
+        captures = run["captures"]
+        assert isinstance(captures, list)
+        for capture in captures:
+            assert isinstance(capture, dict)
+            metadata = _metadata(cast(dict[str, object], capture))
+            lineage = metadata["production_lineage"]
+            assert isinstance(lineage, dict)
+            hashes = lineage["source_tensor_hashes"]
+            assert isinstance(hashes, dict)
+            first = sorted(hashes)[0]
+            hashes[first] = "b" * 64
+            lineage_payload = dict(lineage)
+            lineage_payload.pop("lineage_hash", None)
+            lineage["lineage_hash"] = artifact._canonical_hash(lineage_payload)
+            _resign_capture(metadata)
+        torch.save(run, root / name)
+
+
 ATTACKS: tuple[tuple[str, Callable[[Path], None]], ...] = (
     ("state-outer-resigned", _state),
     ("start-node-outer-resigned", _start_node),
@@ -168,6 +204,8 @@ ATTACKS: tuple[tuple[str, Callable[[Path], None]], ...] = (
     ("gradient-outer-resigned", _gradient),
     ("alias-outer-resigned", _alias),
     ("stream-outer-resigned", _stream),
+    ("coordinated-all-runs-topology-outer-resigned", _coordinated_topology),
+    ("coordinated-all-runs-lineage-outer-resigned", _coordinated_lineage),
 )
 
 
