@@ -45,7 +45,7 @@ from .fused_crown import (
     FusedReluAffineRequest,
     validate_fused_crown_execution_steps,
 )
-from .fsg4_b4b_production_region_capture import B4BRegionLiveObserverV1
+from .fsg4_b4b_production_region_capture import B4BRegionLiveObserverProtocol
 from .linear_operator import (
     DenseLinearOperator,
     LinearOperator,
@@ -1685,7 +1685,7 @@ def _run_crown_backward_from_trace(
     relu_objective_influence_out: Optional[Dict[str, torch.Tensor]],
     relu_lower_coefficients_out: Optional[Dict[str, torch.Tensor]],
     caller: str,
-    b4b_region_observer: B4BRegionLiveObserverV1 | None = None,
+    b4b_region_observer: B4BRegionLiveObserverProtocol | None = None,
 ) -> IntervalState:
     task = module.get_entry_task()
     raw_params = module.bindings.get("params", {})
@@ -1761,10 +1761,11 @@ def _run_crown_backward_from_trace(
 
         if op.op_type == "linear":
             weight_raw = _get_tensor(op.inputs[1])
+            bias_raw = _get_tensor(op.inputs[2]) if len(op.inputs) == 3 else None
             contrib = _backprop_linear_step(
                 state,
                 weight=weight_raw,
-                bias=_get_tensor(op.inputs[2]) if len(op.inputs) == 3 else None,
+                bias=bias_raw,
                 device=device,
                 dtype=dtype,
                 caller=caller,
@@ -1773,18 +1774,18 @@ def _run_crown_backward_from_trace(
             in_shape = _value_shape(
                 input_spec=input_spec, interval_env=interval_env, value_name=in_name
             )
-            adjoints[in_name] = _accumulate_backward_state(
-                adjoints.get(in_name), contrib, input_shape=in_shape
-            )
             if b4b_region_observer is not None and b4b_region_observer.wants(out_name):
-                weight_tensor = (
-                    weight_raw
-                    if torch.is_tensor(weight_raw)
-                    else torch.as_tensor(weight_raw, device=device, dtype=dtype)
+                weight_tensor, normalized_bias = _normalize_linear_inputs(
+                    weight_raw,
+                    bias_raw,
+                    device=device,
+                    dtype=dtype,
+                    caller=caller,
                 )
-                b4b_region_observer.observe_affine_output(
+                replacement = b4b_region_observer.observe_affine_output(
                     out_name,
                     operator_weight=weight_tensor,
+                    operator_bias=(None if bias_raw is None else normalized_bias),
                     output_lower_a=contrib.A_l.to_dense()
                     .reshape(batch, contrib.A_l.spec_dim, *in_shape)
                     .contiguous(),
@@ -1794,6 +1795,23 @@ def _run_crown_backward_from_trace(
                         "weight_shape": list(weight_tensor.shape),
                     },
                 )
+                if replacement is not None:
+                    replaced_lower_a, replaced_bias = replacement
+                    contrib = AffineBackwardState(
+                        A_u=contrib.A_u,
+                        A_l=cast(
+                            LinearOperator,
+                            DenseLinearOperator(
+                                replaced_lower_a,
+                                input_shape=in_shape,
+                            ),
+                        ),
+                        b_u=contrib.b_u,
+                        b_l=replaced_bias,
+                    )
+            adjoints[in_name] = _accumulate_backward_state(
+                adjoints.get(in_name), contrib, input_shape=in_shape
+            )
             continue
 
         if op.op_type == "flatten":
@@ -1847,6 +1865,7 @@ def _run_crown_backward_from_trace(
                     incoming_lower_a=incoming_lower_a,
                     preactivation_lower=relu_pre[x_name].lower,
                     preactivation_upper=relu_pre[x_name].upper,
+                    incoming_lower_bias=aligned.b_l,
                 )
                 observed_incoming = b4b_region_observer.observed_incoming_lower_a(
                     x_name
@@ -1987,39 +2006,33 @@ def _run_crown_backward_from_trace(
                 input_spec=input_spec, interval_env=interval_env, value_name=out_name
             )
             weight_raw = _get_tensor(op.inputs[1])
+            bias_raw = _get_tensor(op.inputs[2]) if len(op.inputs) == 3 else None
             contrib = _backprop_conv2d_step(
                 state,
                 input_shape=in_shape,
                 output_shape=out_shape,
                 weight=weight_raw,
-                bias=_get_tensor(op.inputs[2]) if len(op.inputs) == 3 else None,
+                bias=bias_raw,
                 attrs=dict(op.attrs),
                 device=device,
                 dtype=dtype,
                 caller=caller,
             )
-            adjoints[in_name] = _accumulate_backward_state(
-                adjoints.get(in_name), contrib, input_shape=in_shape
-            )
             if b4b_region_observer is not None and b4b_region_observer.wants(out_name):
-                weight_tensor = (
-                    weight_raw
-                    if torch.is_tensor(weight_raw)
-                    else torch.as_tensor(weight_raw, device=device, dtype=dtype)
-                )
-                _weight, _bias, stride, padding, dilation, groups = (
+                weight_tensor, conv_bias, stride, padding, dilation, groups = (
                     _normalize_conv2d_inputs(
                         weight_raw,
-                        _get_tensor(op.inputs[2]) if len(op.inputs) == 3 else None,
+                        bias_raw,
                         attrs=dict(op.attrs),
                         device=device,
                         dtype=dtype,
                         caller=caller,
                     )
                 )
-                b4b_region_observer.observe_affine_output(
+                replacement = b4b_region_observer.observe_affine_output(
                     out_name,
                     operator_weight=weight_tensor,
+                    operator_bias=conv_bias,
                     output_lower_a=contrib.A_l.to_dense()
                     .reshape(batch, contrib.A_l.spec_dim, *in_shape)
                     .contiguous(),
@@ -2033,6 +2046,23 @@ def _run_crown_backward_from_trace(
                         "groups": groups,
                     },
                 )
+                if replacement is not None:
+                    replaced_lower_a, replaced_bias = replacement
+                    contrib = AffineBackwardState(
+                        A_u=contrib.A_u,
+                        A_l=cast(
+                            LinearOperator,
+                            DenseLinearOperator(
+                                replaced_lower_a,
+                                input_shape=in_shape,
+                            ),
+                        ),
+                        b_u=contrib.b_u,
+                        b_l=replaced_bias,
+                    )
+            adjoints[in_name] = _accumulate_backward_state(
+                adjoints.get(in_name), contrib, input_shape=in_shape
+            )
             continue
 
         if op.op_type == "add":
@@ -2260,7 +2290,7 @@ def run_crown_ibp_mlp_from_forward_trace(
     fused_crown_executor: Optional[FusedCrownExecutor] = None,
     fused_crown_steps: Sequence[FusedCrownExecutionStep] = (),
     fused_crown_context: Optional[FusedCrownExecutionContext] = None,
-    b4b_region_observer: B4BRegionLiveObserverV1 | None = None,
+    b4b_region_observer: B4BRegionLiveObserverProtocol | None = None,
 ) -> IntervalState:
     """
     Backward-only CROWN-IBP given a precomputed forward trace (interval_env + relu_pre).

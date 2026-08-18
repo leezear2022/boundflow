@@ -10,7 +10,7 @@ from dataclasses import dataclass
 import hashlib
 import json
 import math
-from typing import cast, Mapping, TYPE_CHECKING
+from typing import cast, Mapping, Protocol, TYPE_CHECKING
 
 import torch
 
@@ -165,6 +165,46 @@ def b4b_v1_anchors() -> tuple[DifferentiableRegionAnchorV1, ...]:
     for anchor in anchors:
         anchor.validate()
     return anchors
+
+
+class B4BRegionLiveObserverProtocol(Protocol):
+    """Duck-typed observer boundary shared by B4-B0 and B4-B1."""
+
+    def begin_evaluation(
+        self,
+        evaluation_ordinal: int,
+        *,
+        native_alphas: Mapping[str, torch.Tensor],
+        native_betas: Mapping[str, torch.Tensor],
+        relu_pre_add_coeff_l: Mapping[str, torch.Tensor],
+    ) -> None: ...
+
+    def wants(self, native_preactivation: str) -> bool: ...
+
+    def observe_relu_input(
+        self,
+        native_preactivation: str,
+        *,
+        incoming_lower_a: torch.Tensor,
+        preactivation_lower: torch.Tensor,
+        preactivation_upper: torch.Tensor,
+        incoming_lower_bias: torch.Tensor,
+    ) -> None: ...
+
+    def observed_incoming_lower_a(self, native_preactivation: str) -> torch.Tensor: ...
+
+    def observe_affine_output(
+        self,
+        native_preactivation: str,
+        *,
+        operator_weight: torch.Tensor,
+        operator_bias: torch.Tensor | None,
+        output_lower_a: torch.Tensor,
+        output_bias: torch.Tensor,
+        operator_attributes: Mapping[str, object],
+    ) -> tuple[torch.Tensor, torch.Tensor] | None: ...
+
+    def complete_evaluation(self, *, loss_seed: torch.Tensor) -> None: ...
 
 
 @dataclass(frozen=True)
@@ -443,7 +483,9 @@ class B4BRegionLiveObserverV1:
         incoming_lower_a: torch.Tensor,
         preactivation_lower: torch.Tensor,
         preactivation_upper: torch.Tensor,
+        incoming_lower_bias: torch.Tensor | None = None,
     ) -> None:
+        del incoming_lower_bias
         if not self.wants(native_preactivation):
             raise ValueError("FSG4/B4-B observer received an ineligible ReLU")
         if native_preactivation in self._pending:
@@ -480,7 +522,9 @@ class B4BRegionLiveObserverV1:
         output_lower_a: torch.Tensor,
         output_bias: torch.Tensor,
         operator_attributes: Mapping[str, object],
-    ) -> None:
+        operator_bias: torch.Tensor | None = None,
+    ) -> tuple[torch.Tensor, torch.Tensor] | None:
+        del operator_bias
         pending = self._pending.get(native_preactivation)
         if pending is None or "output_lower_a" in pending:
             raise ValueError("FSG4/B4-B observer affine ownership differs")
@@ -1105,6 +1149,7 @@ def production_differentiable_region_capture_from_payload_v1(
 
 
 __all__ = [
+    "B4BRegionLiveObserverProtocol",
     "B4B_CAPTURE_SCHEMA",
     "B4B_PERFORMANCE_ANCHOR_V1",
     "B4B_SEMANTIC_ANCHOR_V1",

@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-18 FSG4/B4-B1a capture contract候选**：状态=
+> `IMPLEMENTED-B4-B1A-CAPTURE-CONTRACT-PENDING-FIVE-FRESH`。仅支持bias/output-adjoint/
+> sparse-layout raw capture与单次real CUDA replay机制；不支持five-fresh、typed reference
+> correctness/gradient、B4-B2/TIR或performance claim。
+
 > **2026-08-18 FSG4/B4-B1预注册**：仅冻结计划与门禁，不新增实现claim。现有B4-B0 capture
 > 不足以自包含重建bias/局部gradient；B4-B1必须新增incoming bias、operator bias、region output
 > adjoints与sparse layout raw，并通过five-fresh typed reference parity。B4-B2/TIR/performance未开放。

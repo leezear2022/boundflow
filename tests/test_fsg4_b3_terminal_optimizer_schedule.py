@@ -25,6 +25,13 @@ from boundflow.runtime.fsg4_b4b_production_region_capture import (
     build_production_differentiable_region_lineage_v1,
     capture_production_differentiable_region_v1,
 )
+from boundflow.runtime.fsg4_b4b1_reference_capture import (
+    B4B1RegionLiveObserverV1,
+    build_b4b1_reference_attributes_v1,
+    capture_production_differentiable_reference_v1,
+    production_differentiable_reference_capture_from_payload_v1,
+    production_differentiable_reference_capture_to_payload_v1,
+)
 from boundflow.runtime.rvir_v4_native_backward_export import (
     export_rvir_v4_native_backward,
 )
@@ -214,6 +221,38 @@ def test_terminal_schedule_opt_in_observes_two_evaluation_zero_regions(
             assert observation.relu_pre_add_coeff_l is None
 
 
+def test_terminal_schedule_b4b1_observer_captures_bias_and_output_adjoints(
+    schedule_case,
+) -> None:
+    observer = B4B1RegionLiveObserverV1()
+    result = execute_terminal_optimizer_schedule_v1(
+        schedule_case["module"],
+        schedule_case["spec"],
+        linear_spec_C=schedule_case["objective"],
+        relu_pre=schedule_case["mapping"].relu_pre,
+        initial_state=schedule_case["instance"].initial_state,
+        mutation_policy=schedule_case["production"].mutation_policy,
+        schedule=compile_terminal_optimizer_schedule_v1(),
+        prevalidated_plan=schedule_case["instance"],
+        b4b_region_observer=observer,
+    )
+    assert len(observer.observations) == 2
+    assert result.evaluation_count == 10
+    for observation in observer.observations:
+        observation.validate()
+        base = observation.base
+        assert tuple(observation.incoming_lower_bias.shape) == (6, 1)
+        assert observation.operator_bias is not None
+        assert tuple(observation.output_lower_a_gradient.shape) == tuple(
+            base.output_lower_a.shape
+        )
+        assert tuple(observation.output_bias_gradient.shape) == tuple(
+            base.output_bias.shape
+        )
+        assert torch.isfinite(observation.output_lower_a_gradient).all()
+        assert torch.isfinite(observation.output_bias_gradient).all()
+
+
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA is unavailable")
 def test_terminal_schedule_live_observer_finalizes_two_cuda_captures(
     schedule_case,
@@ -293,6 +332,99 @@ def test_terminal_schedule_live_observer_finalizes_two_cuda_captures(
         for capture in captures
         for _name, snapshot in (*capture.values, *capture.gradients)
     )
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA is unavailable")
+def test_terminal_schedule_b4b1_cuda_capture_replays_bias_and_output_adjoints(
+    schedule_case,
+) -> None:
+    device = torch.device("cuda:0")
+    module = copy.deepcopy(schedule_case["module"])
+    module.bindings = _move_test_value(module.bindings, device=device)
+    mapping = schedule_case["mapping"].to(device=device, dtype=torch.float32)
+    initial = mapping.to_native_state(schedule_case["instance"].scope)
+    lower, upper = schedule_case["spec"].perturbation.bounding_box(
+        schedule_case["spec"].center
+    )
+    spec = InputSpec.box(
+        value_name=schedule_case["spec"].value_name,
+        lower=lower.to(device),
+        upper=upper.to(device),
+    )
+    observer = B4B1RegionLiveObserverV1()
+    execute_terminal_optimizer_schedule_v1(
+        module,
+        spec,
+        linear_spec_C=schedule_case["objective"].to(device),
+        relu_pre=mapping.relu_pre,
+        initial_state=initial,
+        mutation_policy=schedule_case["production"].mutation_policy,
+        schedule=compile_terminal_optimizer_schedule_v1(),
+        b4b_region_observer=observer,
+    )
+    production_by_path = {
+        item.semantic_path: item.value.to(device).contiguous()
+        for item in schedule_case["snapshot"].tensors
+    }
+    captures = []
+    for observation in observer.observations:
+        base_observation = observation.base
+        anchor = base_observation.anchor
+        lineage = build_production_differentiable_region_lineage_v1(
+            schedule_case["snapshot"], schedule_case["mapping"], anchor
+        )
+        values = {
+            "incoming_lower_a": base_observation.incoming_lower_a,
+            "preactivation_lower": base_observation.preactivation_lower,
+            "preactivation_upper": base_observation.preactivation_upper,
+            "production_alpha": production_by_path[anchor.production_alpha_path],
+            "native_alpha": base_observation.native_alpha,
+            "production_beta": production_by_path[anchor.production_beta_path],
+            "native_beta": base_observation.native_beta,
+            "operator_weight": base_observation.operator_weight,
+            "output_lower_a": base_observation.output_lower_a,
+            "output_bias": base_observation.output_bias,
+            "loss_seed": base_observation.loss_seed,
+        }
+        if base_observation.relu_pre_add_coeff_l is not None:
+            values["relu_pre_add_coeff_l"] = base_observation.relu_pre_add_coeff_l
+        gradients = {"native_alpha": base_observation.native_alpha_gradient}
+        if base_observation.native_beta_gradient is not None:
+            gradients["native_beta"] = base_observation.native_beta_gradient
+        if base_observation.incoming_lower_a_gradient is not None:
+            gradients["incoming_lower_a"] = base_observation.incoming_lower_a_gradient
+        base = capture_production_differentiable_region_v1(
+            source_state_hash=initial.stable_hash(),
+            primal_graph_hash=initial.scope.primal_graph_hash,
+            split_state_hash=initial.scope.split_state_hash,
+            topology_hash=mapping.identity.topology_hash,
+            anchor=anchor,
+            production_lineage=lineage,
+            values=values,
+            gradients=gradients,
+            operator_attributes=dict(base_observation.operator_attributes),
+        )
+        mapping_tensors = {
+            path: production_by_path[path]
+            for path in lineage.source_hash_map
+            if path not in {anchor.production_alpha_path, anchor.production_beta_path}
+        }
+        reference = capture_production_differentiable_reference_v1(
+            base=base,
+            observation=observation,
+            mapping_tensors=mapping_tensors,
+            reference_attributes=build_b4b1_reference_attributes_v1(
+                base,
+                operator_bias_present=observation.operator_bias_present,
+            ),
+        )
+        payload = production_differentiable_reference_capture_to_payload_v1(reference)
+        replayed = production_differentiable_reference_capture_from_payload_v1(payload)
+        assert replayed.metadata() == reference.metadata()
+        captures.append(replayed)
+    assert len(captures) == 2
+    assert all(capture.operator_bias_present for capture in captures)
+    assert all(capture.mapping_tensors for capture in captures)
 
 
 def test_terminal_result_matches_formal_trace_last_step(schedule_case) -> None:

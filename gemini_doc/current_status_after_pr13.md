@@ -1,5 +1,10 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-18 FSG4/B4-B1a capture contract候选**：显式opt-in observer已捕获incoming/
+> operator bias与region output adjoints；新payload在B4-B0 base上绑定全部sparse layout raw并可
+> root重建。real CUDA双锚点通过，related=`26 passed`、full=`1378 passed, 3 skipped, 6 warnings`。
+> 状态=`IMPLEMENTED-B4-B1A-CAPTURE-CONTRACT-PENDING-FIVE-FRESH`；typed IR/reference/TIR未实现。
+
 > **2026-08-18 FSG4/B4-B1预注册**：下一阶段仅为typed pure-PyTorch reference。B4-B0 raw
 > 可将两锚点output A重建到约`3e-8`，但缺incoming bias/operator bias时output bias差约
 > `0.55/1.11`，且whole-objective `loss_seed`不能替代region output adjoints。因此B4-B1a先扩展

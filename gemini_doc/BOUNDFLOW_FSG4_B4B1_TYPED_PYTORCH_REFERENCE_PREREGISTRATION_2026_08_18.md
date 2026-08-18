@@ -144,3 +144,12 @@ admission 必须逐项拒绝：
 若 capture sufficiency、sparse reconstruction、forward 或 gradient 任一门禁失败，记录 raw 与
 NO-GO/BLOCKED 证据并停止；不得以放宽 tolerance、删掉 active-beta S-anchor 或改用 synthetic-only
 workload 继续。
+
+## 9. 执行更新：B4-B1a capture contract候选
+
+显式opt-in observer与reference capture amendment已实现：incoming/operator bias、实际region
+output adjoints、sparse α/β layout raw、presence与Conv output padding均进入raw/replay合同。单次
+real CUDA双锚点payload生成/replay通过，related=`26 passed`、full=
+`1378 passed, 3 skipped, 6 warnings`。当前状态=
+`IMPLEMENTED-B4-B1A-CAPTURE-CONTRACT-PENDING-FIVE-FRESH`；下一唯一动作是独立worker/
+runner的5-fresh formal artifact与完整性负例，typed reference/B4-B2/TIR仍关闭。

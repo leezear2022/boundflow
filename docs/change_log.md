@@ -1,5 +1,13 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-18：FSG4/B4-B1a Capture Sufficiency Contract
+
+- 新增显式opt-in B4-B1 observer，捕获incoming/operator bias与region output adjoints；
+- 新reference capture在B4-B0 base上绑定sparse layout raw、bias/adjoint/presence/Conv attrs；
+- real CUDA payload生成/replay通过，related=`26 passed`，full=`1378 passed, 3 skipped, 6 warnings`；
+- 状态=`IMPLEMENTED-B4-B1A-CAPTURE-CONTRACT-PENDING-FIVE-FRESH`，typed IR/TIR仍未实现。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4b1a_capture_sufficiency_contract.md`。
+
 ## 2026-08-18：FSG4/B4-B1 Typed PyTorch Reference 预注册
 
 - B4-B0 Round 2批准后，只开放B4-B1 typed pure-PyTorch reference；

@@ -10,6 +10,12 @@
 
 ---
 
+FSG4/B4-B1a capture sufficiency contract已实现，状态=
+`IMPLEMENTED-B4-B1A-CAPTURE-CONTRACT-PENDING-FIVE-FRESH`。显式observer与新payload已捕获并
+绑定bias、region output adjoints及sparse layout raw，单次real CUDA replay通过；下一步是
+5-fresh formal artifact，typed IR/reference/TIR仍未实现。见
+`change_2026-08-18_fsg4_b4b1a_capture_sufficiency_contract.md`。
+
 FSG4/B4-B1 typed pure-PyTorch reference已预注册。调研确认B4-B0 capture虽可精确重建output A，
 但缺incoming/operator bias与region output adjoints，不能自包含重建bias/production gradient。
 下一步先做B4-B1a read-only capture amendment，B4-B2/TIR/performance仍关闭。见

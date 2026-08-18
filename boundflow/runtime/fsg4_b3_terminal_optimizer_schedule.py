@@ -23,7 +23,7 @@ from ..ir.task import BFTaskModule
 from .alpha_beta_crown import BetaState, _beta_to_relu_pre_add_coeff
 from .crown_ibp import _forward_ibp_trace_mlp, run_crown_ibp_mlp_from_forward_trace
 from .fsg4_b3_prepared_core import CorePlanInstanceV1
-from .fsg4_b4b_production_region_capture import B4BRegionLiveObserverV1
+from .fsg4_b4b_production_region_capture import B4BRegionLiveObserverProtocol
 from .native_alpha_beta_optimization_state import (
     build_native_alpha_beta_scope,
     NativeAlphaBetaOptimizationState,
@@ -334,7 +334,7 @@ def execute_terminal_optimizer_schedule_v1(
     mutation_policy: ProductionMutationPolicyV4,
     schedule: NativeTerminalOptimizerScheduleV1,
     prevalidated_plan: CorePlanInstanceV1 | None = None,
-    b4b_region_observer: B4BRegionLiveObserverV1 | None = None,
+    b4b_region_observer: B4BRegionLiveObserverProtocol | None = None,
 ) -> NativeTerminalOptimizerResultV1:
     """Execute 10/9 semantics while retaining no per-step state snapshots."""
 
