@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-18 FSG4/B4-B1预注册指令**：先实现B4-B1a capture sufficiency amendment，补齐
+> incoming bias、operator bias、region output adjoints与sparse layout raw；再实现typed IR与独立
+> pure-PyTorch reference。不得从target倒推输入；five-fresh与外审关闭前不得进入B4-B2/TIR。
+
 > **2026-08-18 FSG4/B4-B0 Round 2外审关闭指令**：exchange已`closed/approved`，Round 1 F1
 > 已关闭。下一唯一动作是另行预注册B4-B1 typed pure-PyTorch reference及其correctness/gradient
 > 门禁；不得直接实现B4-B2 CUDA/TIR，不得启动performance/memory计时或升级ASPLOS-ready claim。

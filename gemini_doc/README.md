@@ -10,6 +10,12 @@
 
 ---
 
+FSG4/B4-B1 typed pure-PyTorch reference已预注册。调研确认B4-B0 capture虽可精确重建output A，
+但缺incoming/operator bias与region output adjoints，不能自包含重建bias/production gradient。
+下一步先做B4-B1a read-only capture amendment，B4-B2/TIR/performance仍关闭。见
+`BOUNDFLOW_FSG4_B4B1_TYPED_PYTORCH_REFERENCE_PREREGISTRATION_2026_08_18.md`与
+`change_2026-08-18_fsg4_b4b1_preregistration.md`。
+
 FSG4/B4-B0已通过Round 2独立外审并由executor关闭exchange，最终状态=
 `VALIDATED-B4-B0-EXTERNALLY-APPROVED`。0 blocker/major/minor/info；Round 1 F1已关闭；审计方
 自行构造的all-run topology/lineage全链重签两案均被拒绝。下一步只开放另行预注册B4-B1 typed

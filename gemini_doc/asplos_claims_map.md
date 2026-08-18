@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-18 FSG4/B4-B1预注册**：仅冻结计划与门禁，不新增实现claim。现有B4-B0 capture
+> 不足以自包含重建bias/局部gradient；B4-B1必须新增incoming bias、operator bias、region output
+> adjoints与sparse layout raw，并通过five-fresh typed reference parity。B4-B2/TIR/performance未开放。
+
 > **2026-08-18 FSG4/B4-B0 Round 2外审关闭**：状态=
 > `VALIDATED-B4-B0-EXTERNALLY-APPROVED`。独立外审关闭Round 1 F1，确认code/protocol/manifest
 > 绝对身份绑定、all-run topology/lineage全链重签拒绝、5 fresh/10 captures与数值/ownership证据。

@@ -1,5 +1,14 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-18：FSG4/B4-B1 Typed PyTorch Reference 预注册
+
+- B4-B0 Round 2批准后，只开放B4-B1 typed pure-PyTorch reference；
+- 识别现有capture缺少incoming bias、operator bias与region output adjoints，禁止从target倒推；
+- 冻结B4-B1a capture amendment、typed IR、sparse α/β reconstruction、forward/gradient与负向门禁；
+- B4-B2/TIR/performance继续关闭。详见
+  `gemini_doc/BOUNDFLOW_FSG4_B4B1_TYPED_PYTORCH_REFERENCE_PREREGISTRATION_2026_08_18.md`与
+  `gemini_doc/change_2026-08-18_fsg4_b4b1_preregistration.md`。
+
 ## 2026-08-18：FSG4/B4-B0 Round 2 外审关闭
 
 - Round 2独立外审=`approve`，0 blocker / 0 major / 0 minor / 0 info，F1关闭；

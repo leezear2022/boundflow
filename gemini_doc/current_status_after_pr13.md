@@ -1,5 +1,10 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-18 FSG4/B4-B1预注册**：下一阶段仅为typed pure-PyTorch reference。B4-B0 raw
+> 可将两锚点output A重建到约`3e-8`，但缺incoming bias/operator bias时output bias差约
+> `0.55/1.11`，且whole-objective `loss_seed`不能替代region output adjoints。因此B4-B1a先扩展
+> read-only capture，再建typed IR/reference；禁止target倒推。B4-B2/TIR/performance继续关闭。
+
 > **2026-08-18 FSG4/B4-B0 Round 2外审关闭**：独立外审=`approve`，0 blocker/major/minor/info，
 > F1关闭；审计方自行构造all-run topology/lineage全链重签，两案均被root replay拒绝；raw、
 > 绝对身份、v1/v2 replay、11/11完整性负例、定向24与全量1376/3 skip/6 warnings均独立复核。

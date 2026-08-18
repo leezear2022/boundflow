@@ -1,6 +1,6 @@
 ---
-status: b4b0-round1-f1-fixed-pending-v2
-updated: 2026-08-18T04:02:28Z
+status: b4b1-typed-pytorch-reference-preregistered
+updated: 2026-08-18T06:24:00Z
 type: plan
 topic: boundflow
 slug: BOUNDFLOW_FSG4_B4B_DIFFERENTIABLE_CUDA_TIR_V1
@@ -334,3 +334,11 @@ Round 2=`approve`，0 blocker/major/minor/info；F1由绝对身份三层绑定�
 topology/lineage全链重签拒绝正式关闭。exchange已由executor关闭，状态=
 `VALIDATED-B4-B0-EXTERNALLY-APPROVED`。现在只允许另行预注册B4-B1 typed pure-PyTorch
 reference；B4-B2 CUDA/TIR、performance、memory、ASPLOS-ready继续关闭。
+
+### B4-B1 typed pure-PyTorch reference预注册
+
+B4-B1预注册已冻结。B4-B0现有raw足以把两锚点output A重建至约`3e-8`，但缺少进入region前
+的lower bias、operator bias与region output adjoints，不能自包含重建output bias或production
+gradient。下一唯一动作是B4-B1a read-only capture sufficiency amendment；随后才允许typed IR/
+reference。详细合同见
+`gemini_doc/BOUNDFLOW_FSG4_B4B1_TYPED_PYTORCH_REFERENCE_PREREGISTRATION_2026_08_18.md`。
