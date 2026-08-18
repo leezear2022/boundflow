@@ -1,5 +1,5 @@
 ---
-status: b4b0-capture-contract-implemented-pending-live-hook
+status: b4b0-live-observer-implemented-pending-five-fresh
 updated: 2026-08-18T04:02:28Z
 type: plan
 topic: boundflow
@@ -276,3 +276,19 @@ solver，不支持correctness/performance claim。
 
 下一唯一工程动作：在optimizer evaluation 0将typed contract接入显式opt-in live observer；未通过
 B4-B0 five-fresh/replay/tamper前不实现TIR。
+
+### B4-B0 live observer更新
+
+显式opt-in evaluation-0 observer已实现并通过CPU production-state与real CUDA smoke，状态=
+`IMPLEMENTED-B4-B0-LIVE-OBSERVER-PENDING-FIVE-FRESH`。observer仅在诊断路径将两锚点的
+structured lower-A物化为参与后续计算的同一tensor并retain gradient；默认执行不安装
+observer。已冻结真实物理事实：
+
+- S-anchor `31/Gemm_14`：incoming-A requires-grad=false，active-beta pre-add/β gradient存在，
+  weight=`(100,1024)`；
+- P-anchor `25/Conv_8`：incoming-A requires-grad=true且gradient存在，production beta empty，
+  因此pre-add/β gradient必须为absent，不得伪造零tensor；weight=`(16,16,3,3)`，
+  stride/padding/dilation=`(1,1)`，groups=`1`。
+
+observer在evaluation 0 backward后、首次optimizer step前冻结value/gradient，后续9次mutation不得
+改写payload。下一唯一动作是5-fresh raw-first artifact、root replay与tamper；关闭前TIR仍关闭。

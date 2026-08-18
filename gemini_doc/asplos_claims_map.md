@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-18 FSG4/B4-B0 live observer候选**：状态=
+> `IMPLEMENTED-B4-B0-LIVE-OBSERVER-PENDING-FIVE-FRESH`，只支持显式opt-in evaluation-0 live
+> observation与单次CUDA snapshot mechanism。未支持5 fresh、artifact replay/tamper、TIR correctness或
+> speedup。真实事实为S-anchor active-beta gradient存在/P-anchor empty-beta无gradient，不伪造
+> 全零pre-add。
+
 > **2026-08-18 FSG4/B4-B0 typed capture contract候选**：状态=
 > `IMPLEMENTED-B4-B0-CAPTURE-CONTRACT-PENDING-LIVE-HOOK`。仅支持schema/admission/tamper-unit
 > mechanism；不支持live capture、5 fresh、gradient parity、TIR或speedup。合同同时绑定production

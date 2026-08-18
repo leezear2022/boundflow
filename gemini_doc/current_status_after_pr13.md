@@ -1,5 +1,14 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-18 FSG4/B4-B0 live observer候选**：状态=
+> `IMPLEMENTED-B4-B0-LIVE-OBSERVER-PENDING-FIVE-FRESH`。显式opt-in observer只在optimizer
+> evaluation 0对`31/Gemm_14`和`25/Conv_8`实施诊断性materialization，默认B3/B4-A
+> 路径不变。CPU production-state与real CUDA smoke均通过，确认Gemm incoming-A不可微但
+> active-beta gradient存在，Conv incoming-A gradient存在但empty-beta无pre-add/β gradient；weight=
+> `(100,1024)`/`(16,16,3,3)`。related=`53 passed`，full=
+> `1369 passed, 3 skipped, 6 warnings`，Mypy clean，Pylint 10.00/10。
+> 尚无five-fresh/replay/tamper或TIR/performance claim。
+
 > **2026-08-18 FSG4/B4-B0 typed capture contract**：状态=
 > `IMPLEMENTED-B4-B0-CAPTURE-CONTRACT-PENDING-LIVE-HOOK`。新schema分离production compressed
 > α/β映射源、native dense α/β/`relu_pre_add_coeff_l`输入及native gradients；冻结双锚点

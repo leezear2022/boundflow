@@ -10,6 +10,15 @@
 
 ---
 
+FSG4/B4-B0 evaluation-0 live observer已实现，状态=
+`IMPLEMENTED-B4-B0-LIVE-OBSERVER-PENDING-FIVE-FRESH`。observer仅显式opt-in，在两个锚点上使参与
+backward的同一lower-A诊断性materialize/retain-grad；默认B3/B4-A不变。CPU production-state
+和真实CUDA smoke均证明S-anchor有active-beta gradient、P-anchor empty-beta无pre-add/gradient，且
+evaluation-0 payload在首次optimizer step前冻结。related=`53 passed`，full=
+`1369 passed, 3 skipped, 6 warnings`，静态门禁通过。
+下一步是5-fresh artifact/replay/tamper，TIR仍关闭。见
+`gemini_doc/change_2026-08-18_fsg4_b4b0_live_observer_candidate.md`。
+
 FSG4/B4-B0 typed production-region capture contract已实现，状态=
 `IMPLEMENTED-B4-B0-CAPTURE-CONTRACT-PENDING-LIVE-HOOK`。合同明确分离production compressed α/β
 源状态、native dense α/β/`relu_pre_add_coeff_l`算子输入及native gradients，并对

@@ -23,6 +23,7 @@ from ..ir.task import BFTaskModule
 from .alpha_beta_crown import BetaState, _beta_to_relu_pre_add_coeff
 from .crown_ibp import _forward_ibp_trace_mlp, run_crown_ibp_mlp_from_forward_trace
 from .fsg4_b3_prepared_core import CorePlanInstanceV1
+from .fsg4_b4b_production_region_capture import B4BRegionLiveObserverV1
 from .native_alpha_beta_optimization_state import (
     build_native_alpha_beta_scope,
     NativeAlphaBetaOptimizationState,
@@ -333,6 +334,7 @@ def execute_terminal_optimizer_schedule_v1(
     mutation_policy: ProductionMutationPolicyV4,
     schedule: NativeTerminalOptimizerScheduleV1,
     prevalidated_plan: CorePlanInstanceV1 | None = None,
+    b4b_region_observer: B4BRegionLiveObserverV1 | None = None,
 ) -> NativeTerminalOptimizerResultV1:
     """Execute 10/9 semantics while retaining no per-step state snapshots."""
 
@@ -395,6 +397,13 @@ def execute_terminal_optimizer_schedule_v1(
             relu_pre=dict(relu_pre),
             relu_split_state=initial_state.splits,
         )
+        if b4b_region_observer is not None:
+            b4b_region_observer.begin_evaluation(
+                action.evaluation_ordinal,
+                native_alphas=alphas,
+                native_betas=betas,
+                relu_pre_add_coeff_l=relu_pre_add,
+            )
         bounds = run_crown_ibp_mlp_from_forward_trace(
             module,
             input_spec,
@@ -403,10 +412,15 @@ def execute_terminal_optimizer_schedule_v1(
             linear_spec_C=linear_spec_C,
             relu_alpha=alphas,
             relu_pre_add_coeff_l=relu_pre_add,
+            b4b_region_observer=b4b_region_observer,
         )
         if action.update_after:
             optimizer.zero_grad(set_to_none=True)
             (-bounds.lower.sum()).backward()
+            if b4b_region_observer is not None and action.evaluation_ordinal == 0:
+                b4b_region_observer.complete_evaluation(
+                    loss_seed=-torch.ones_like(bounds.lower)
+                )
             optimizer.step()
             with torch.no_grad():
                 for value in alphas.values():

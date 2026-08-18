@@ -58,9 +58,6 @@ def _capture(*, performance: bool = False) -> ProductionDifferentiableRegionCapt
         "native_beta": _snapshot(
             "native_beta", anchor.native_beta_shape, requires_grad=True
         ),
-        "relu_pre_add_coeff_l": _snapshot(
-            "relu_pre_add_coeff_l", anchor.native_beta_shape, requires_grad=True
-        ),
         "operator_weight": _snapshot(
             "operator_weight",
             (16, 16, 3, 3) if performance else (100, 1024),
@@ -73,8 +70,12 @@ def _capture(*, performance: bool = False) -> ProductionDifferentiableRegionCapt
     }
     gradients = {
         "native_alpha": _snapshot("native_alpha", anchor.native_alpha_shape),
-        "native_beta": _snapshot("native_beta", anchor.native_beta_shape),
     }
+    if anchor.beta_must_be_nonempty:
+        values["relu_pre_add_coeff_l"] = _snapshot(
+            "relu_pre_add_coeff_l", anchor.native_beta_shape, requires_grad=True
+        )
+        gradients["native_beta"] = _snapshot("native_beta", anchor.native_beta_shape)
     if performance:
         gradients["incoming_lower_a"] = _snapshot(
             "incoming_lower_a", anchor.coefficient_shape
@@ -127,7 +128,7 @@ def test_b4b_capture_rejects_nonzero_evaluation_ordinal() -> None:
 def test_b4b_capture_rejects_missing_beta_gradient() -> None:
     capture = _capture()
     gradients = tuple(item for item in capture.gradients if item[0] != "native_beta")
-    with pytest.raises(ValueError, match="production capture differs"):
+    with pytest.raises(ValueError, match="gradient ownership differs"):
         replace(capture, gradients=gradients).validate()
 
 
@@ -157,6 +158,16 @@ def test_b4b_capture_rejects_incomplete_conv_attributes() -> None:
         replace(
             capture, operator_attributes=tuple(sorted(attributes.items()))
         ).validate()
+
+
+def test_b4b_capture_rejects_fabricated_empty_beta_pre_add() -> None:
+    capture = _capture(performance=True)
+    values = dict(capture.values)
+    values["relu_pre_add_coeff_l"] = _snapshot(
+        "relu_pre_add_coeff_l", capture.anchor.native_beta_shape
+    )
+    with pytest.raises(ValueError, match="empty beta pre-add is fabricated"):
+        replace(capture, values=tuple(sorted(values.items()))).validate()
 
 
 def test_b4b_capture_rejects_resigned_tensor_content() -> None:

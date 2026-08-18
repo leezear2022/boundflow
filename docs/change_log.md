@@ -1,5 +1,14 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-18：FSG4/B4-B0 Evaluation-0 Live Observer 候选
+
+- 新增只在显式opt-in下启用的双锚点observer，默认B3/B4-A路径不变；
+- evaluation 0 backward后、首次optimizer step前冻结value/gradient，防止被后续mutation改写；
+- CPU production-state与real CUDA smoke通过，独立确认S/P锚点的真实gradient与Conv attrs；
+- related=`53 passed`，full=`1369 passed, 3 skipped, 6 warnings`，Mypy clean，Pylint 10.00/10；状态=
+  `IMPLEMENTED-B4-B0-LIVE-OBSERVER-PENDING-FIVE-FRESH`。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4b0_live_observer_candidate.md`。
+
 ## 2026-08-18：FSG4/B4-B0 Typed Capture Contract 候选
 
 - 新增双锚点production differentiable-region capture schema与stable metadata/hash；
