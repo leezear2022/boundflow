@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-18 FSG4/B4-A正式计时预注册**：冻结24个fresh B3/B4-A control/profile worker，control
+> 门禁为core geomean `>=1.03x`、query worst pair `>=0.98x`；five-fresh latency不复用。状态=
+> `PREREGISTERED-B4-A-FORMAL-TIMING-NOT-IMPLEMENTED`，无性能claim，B4-B/TIR关闭。
+
 > **2026-08-16 FSG4/B4-A five-fresh正确性关闭**：source=`43d4117`的10/10 fresh worker、5/5
 > B3/B4-A pair及每pair 19个raw tensor比较全过，最大差=`6.109476e-06`，sign/discrete exact，5/5
 > handoff=1/rerun=0/lineage=6/provider-fallback=0，root replay PASS。状态=

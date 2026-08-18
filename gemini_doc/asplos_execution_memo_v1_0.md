@@ -1,5 +1,8 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-18 FSG4/B4-A正式计时指令**：只实现并运行冻结的24-process B3/B4-A协议；control检验
+> core>=1.03x/query worst>=0.98x，profile只归因。不得复用correctness latency或启动B4-B/TIR。
+
 > **2026-08-16 FSG4/B4-A five-fresh关闭指令**：correctness已以10/10 worker、5/5 pair、19 tensor/pair
 > 和root replay内部关闭。下一步只实现独立B3/B4-A正式计时，检验core>=1.03x/query worst>=0.98x；
 > 不得复用correctness latency或启动B4-B/TIR。

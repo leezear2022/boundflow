@@ -1,5 +1,13 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-18：FSG4/B4-A 独立正式计时预注册
+
+- 冻结6 block、B3/B4-A control/profile共24个fresh worker；
+- control门禁为core geomean `>=1.03x`、query worst pair `>=0.98x`，不复用correctness latency；
+- 冻结correctness/activation/environment/profile/replay/tamper与路径可移植合同；
+- 状态=`PREREGISTERED-B4-A-FORMAL-TIMING-NOT-IMPLEMENTED`。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4a_formal_timing_preregistration.md`。
+
 ## 2026-08-16：FSG4/B4-A Five-Fresh Correctness 内部关闭
 
 - source=`43d4117`按冻结顺序完成10/10 fresh worker、5/5 B3/B4-A direct pair；
