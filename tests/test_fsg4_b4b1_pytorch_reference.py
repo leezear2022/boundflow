@@ -24,9 +24,11 @@ from boundflow.runtime.fsg4_b4b1_reference_capture import (
 )
 from boundflow.runtime.rvir_v4_production_state import production_tensor_sha256
 from scripts import run_fsg4_b4b1_pytorch_reference_artifact as reference_artifact
+from scripts import probe_fsg4_b4b1_pytorch_reference_integrity as reference_integrity
 
 ARTIFACT = Path("artifacts/fsg4-b4b1-reference-five-fresh/resnet2b-prop0-v1/run_00.pt")
 CAPTURE_ARTIFACT = ARTIFACT.parent
+REFERENCE_ARTIFACT = Path("artifacts/fsg4-b4b1-pytorch-reference/resnet2b-prop0-v1")
 
 
 def _captures() -> tuple[ProductionDifferentiableReferenceCaptureV1, ...]:
@@ -302,3 +304,32 @@ def test_b4b1_reference_artifact_candidate_recomputes_all_five_fresh() -> None:
     assert summary["p_incoming_a_gradient_count"] == 5
     assert summary["performance_claimed"] is False
     assert summary["tir_admitted"] is False
+
+
+def test_b4b1_formal_reference_artifact_root_replays() -> None:
+    records, summary, result = reference_artifact._verify_static_artifact(
+        REFERENCE_ARTIFACT, CAPTURE_ARTIFACT
+    )
+    assert len(records) == summary["capture_count"] == result["capture_count"] == 10
+    assert summary["summary_hash"] == (
+        "9489c70ff8cae22f46482e6e19f27c5eba04a7cad3f233d4cfaee72987674cc2"
+    )
+    assert result["status"] == "replay-passed"
+    assert result["maximum_absolute_difference"] == 1.9073486328125e-06
+    assert result["all_metrics_sign_exact"] is True
+    assert result["performance_claimed"] is False
+    assert result["tir_admitted"] is False
+
+
+def test_b4b1_coordinated_all_run_rewrites_are_numerically_rejected() -> None:
+    report = reference_integrity._probe(CAPTURE_ARTIFACT.resolve())
+    assert report["case_count"] == report["rejected_count"] == 2
+    assert all(
+        row["all_runs_rewritten"] is True
+        and row["inner_capture_hashes_resigned"] is True
+        and row["source_summary_resigned"] is True
+        and row["source_manifest_resigned"] is True
+        and row["derived_protocol_resigned"] is True
+        and row["rejected_by_numerical_reference"] is True
+        for row in report["rows"]
+    )
