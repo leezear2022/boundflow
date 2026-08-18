@@ -170,3 +170,18 @@ elements，max diff=`0.0`、sign exact；root replay、8/8完整性负例、rela
 `VALIDATED-B4-B1A-FIVE-FRESH-CAPTURE-SUFFICIENCY`。下一唯一动作是typed IR与独立
 pure-PyTorch reference，从raw重算forward/VJP并关闭coordinated动态改写限制；B4-B2/TIR/
 performance仍关闭。
+
+### B4-B1 typed IR/reference候选
+
+`DifferentiableLowerRegionIRV1`、raw-bound instance与独立pure-PyTorch reference已经实现。IR显式
+冻结β=`-value*split-sign`、α direction/spec选择与sparse reconstruction、lower sign-select、
+intercept reduction、Linear/Conv transpose contraction、bias carry、default stream/no alias/single
+consumer。reference不调用TVM，也不调用`crown_ibp.py`私有helper。
+
+在formal B4-B1a run 0的S/P双锚点上，sparse native α/β、forward A/bias、native α gradient、
+S native β gradient、P incoming-A gradient全部满足`atol=rtol=2e-4`且sign exact；最大观察误差为
+P incoming-A gradient的`1.9073486328125e-06`。S incoming-A forced-grad micro与独立eager分解
+一致；动态改写incoming bias或output adjoint、即使重签其tensor digest，仍由数值语义比较拒绝。
+related=`28 passed`，Black/scoped Mypy/Pylint=`10.00/10`通过。当前状态仅为
+`IMPLEMENTED-B4-B1-TYPED-REFERENCE-PENDING-FIVE-FRESH`；下一动作是生成并重放5 fresh × 2
+anchors的正式reference artifact与协调篡改probe，B4-B2/TIR/performance仍关闭。
