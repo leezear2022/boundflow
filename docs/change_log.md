@@ -1,5 +1,14 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-18：FSG4/B4-A Strict Preflight 加固
+
+- source=`ee73bc2`的v2完成5个worker后，worker 5因独立software thermal slowdown fail closed；
+- v2不续跑、不形成ratio，失败worker environment明确为`admitted=false`；
+- formal preflight加固为每worker前GPU `<=45°C`且software thermal完全inactive；
+- 固定related=`63 passed`、全量=`1353 passed, 3 skipped`；下一步clean source后从position 0运行v3，
+  无性能claim。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4a_strict_preflight_hardening.md`。
+
 ## 2026-08-18：FSG4/B4-A Profile Counter 覆盖修复
 
 - source=`292a035`的正式v1在worker 3因B4-A profiler alias覆盖缺口fail closed，v1不进入结论；

@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-18 FSG4/B4-A正式计时v2环境处置**：source=`ee73bc2`的v2因worker 5独立software
+> thermal slowdown fail closed；不得续跑或挑样本。preflight加固为`<=45°C`且software thermal完全
+> inactive；下一步只允许clean-source v3从position 0重跑，仍无performance claim。
+
 > **2026-08-18 FSG4/B4-A正式计时v1失败处置**：source=`292a035`的v1在worker 3因B4-A profiler
 > alias覆盖缺口fail closed；v1不完整raw不得续跑或形成ratio。已修复并live验证物理计数；下一步只允许
 > clean-source v2从position 0重跑，仍保持`performance_claimed=false`与B4-B/TIR关闭。

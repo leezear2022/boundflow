@@ -31,6 +31,36 @@ def _profiles(*, closure: float = 0.01, residual: float = 0.03):
     return [{"closure_error": closure, "residual_share": residual} for _ in range(12)]
 
 
+def _preflight(*, temperature: int = 45, software_thermal: str = "Not Active"):
+    active = software_thermal == "Active"
+    return {
+        "temperature_limit_celsius": timing.B4A_PREFLIGHT_TEMPERATURE_LIMIT_C,
+        "poll_seconds": timing.base_experiment.PREFLIGHT_POLL_SECONDS,
+        "timeout_seconds": timing.base_experiment.PREFLIGHT_TIMEOUT_SECONDS,
+        "sample_count": 1,
+        "wait_ns": 1,
+        "samples": [
+            {
+                "elapsed_ns": 0,
+                "temperature_celsius": temperature,
+                "independent_thermal_active": False,
+                "gpu_snapshot": {
+                    "temperature": f"{temperature} C",
+                    "sw_thermal_slowdown": software_thermal,
+                    "sw_power_cap": "Active" if active else "Not Active",
+                    "hw_thermal_slowdown": "Not Active",
+                    "sw_thermal_slowdown_counter_us": 42 if active else 0,
+                    "sw_power_cap_counter_us": 42 if active else 0,
+                    "hw_thermal_slowdown_counter_us": 0,
+                },
+                "compute_processes": [],
+                "ac_powered": True,
+            }
+        ],
+        "admitted": True,
+    }
+
+
 def test_formal_sequence_is_fixed_unique_and_counterbalanced() -> None:
     flattened = [entry for block in timing.SEQUENCE for entry in block]
     assert len(flattened) == 24
@@ -50,6 +80,19 @@ def test_formal_sequence_is_fixed_unique_and_counterbalanced() -> None:
         )
         == 24
     )
+
+
+def test_formal_preflight_requires_cool_and_fully_inactive_software_thermal() -> None:
+    timing._validate_formal_preflight(_preflight())
+    assert timing.FORMAL_PREFLIGHT_CONTRACT["temperature_limit_celsius"] == 45
+    assert (
+        timing.FORMAL_PREFLIGHT_CONTRACT["software_thermal_signal_must_be_inactive"]
+        is True
+    )
+    with pytest.raises(ValueError, match="strict preflight admission differs"):
+        timing._validate_formal_preflight(_preflight(temperature=46))
+    with pytest.raises(ValueError, match="strict preflight admission differs"):
+        timing._validate_formal_preflight(_preflight(software_thermal="Active"))
 
 
 def test_formal_decision_accepts_exact_preregistered_boundaries() -> None:

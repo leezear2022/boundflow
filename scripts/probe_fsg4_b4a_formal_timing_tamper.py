@@ -157,7 +157,7 @@ def _mutate_formal_preflight(artifact: Path) -> None:
     preflight = cast(dict[str, Any], metadata["formal_preflight"])
     sample = cast(list[dict[str, Any]], preflight["samples"])[-1]
     sample["temperature_celsius"] = (
-        artifact_runner.base_experiment.PREFLIGHT_TEMPERATURE_LIMIT_C + 1
+        artifact_runner.B4A_PREFLIGHT_TEMPERATURE_LIMIT_C + 1
     )
     artifact_runner._write_json(metadata_path, metadata)
     rows = artifact_runner._load_jsonl(artifact / "run_metadata.jsonl")

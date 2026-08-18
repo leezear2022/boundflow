@@ -1,5 +1,10 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-18 FSG4/B4-A正式计时v2环境拒绝与preflight加固**：source=`ee73bc2`的v2越过原计数
+> 失败点并完成5个worker，但worker 5结束时检测到独立software thermal slowdown，environment
+> `admitted=false`并fail closed。v2不形成ratio。runner现要求每个worker前GPU `<=45°C`且software
+> thermal=`Not Active`，不再接受与power counter暂时耦合的active信号；下一步clean source v3从0重跑。
+
 > **2026-08-18 FSG4/B4-A正式计时v1失败与计数覆盖修复**：source=`292a035`的v1在worker 3
 > `B4-A-profile` fail closed；根因是显式计数器未patch B4-A模块持有的terminal optimizer函数引用，导致
 > forward少记1、optimizer四项记0。已扩展B4-A alias观测，独立live diagnostic恢复forward=4、bound
@@ -7,8 +12,8 @@
 > 参与结论；下一步clean source后从position 0生成v2。`performance_claimed=false`，B4-B/TIR关闭。
 
 > **2026-08-18 FSG4/B4-A正式计时Runner状态**：24-process B3/B4-A control/profile runner、raw-first/
-> resume、root replay及12类outer-resigned tamper probe已实现，固定related=`62 passed`，Black/Mypy/
-> Pylint及全量`1352 passed, 3 skipped`通过。状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`。
+> resume、root replay及12类outer-resigned tamper probe已实现，固定related=`63 passed`，Black/Mypy/
+> Pylint及全量`1353 passed, 3 skipped`通过。状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`。
 > 下一唯一动作是提交clean source并
 > 运行正式GPU artifact；无性能claim，B4-B/TIR关闭。
 

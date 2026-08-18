@@ -70,8 +70,13 @@ CORE_GATE = 1.03
 QUERY_WORST_GATE = 0.98
 ATOL = 2e-4
 RTOL = 2e-4
+B4A_PREFLIGHT_TEMPERATURE_LIMIT_C = 45
 WORKER_TIMEOUT_SECONDS = base_experiment.WORKER_SUBPROCESS_TIMEOUT_SECONDS
-FORMAL_PREFLIGHT_CONTRACT = dict(base_experiment.FORMAL_PREFLIGHT_CONTRACT)
+FORMAL_PREFLIGHT_CONTRACT = {
+    **base_experiment.FORMAL_PREFLIGHT_CONTRACT,
+    "temperature_limit_celsius": B4A_PREFLIGHT_TEMPERATURE_LIMIT_C,
+    "software_thermal_signal_must_be_inactive": True,
+}
 
 
 def _canonical_json(value: object, *, indent: int | None = None) -> str:
@@ -335,8 +340,84 @@ def _normalize_preflight(value: Mapping[str, Any]) -> dict[str, Any]:
         for process in sample["compute_processes"]:
             if isinstance(process, dict) and isinstance(process.get("name"), str):
                 process["name"] = Path(process["name"]).name
-    base_experiment._validate_formal_preflight(normalized)
+    _validate_formal_preflight(normalized)
     return normalized
+
+
+def _validate_formal_preflight(value: Mapping[str, Any]) -> None:
+    base_value = dict(value)
+    base_value["temperature_limit_celsius"] = (
+        base_experiment.PREFLIGHT_TEMPERATURE_LIMIT_C
+    )
+    base_experiment._validate_formal_preflight(base_value)
+    samples = value.get("samples")
+    if (
+        value.get("temperature_limit_celsius") != B4A_PREFLIGHT_TEMPERATURE_LIMIT_C
+        or not isinstance(samples, list)
+        or not samples
+        or not isinstance(samples[-1], Mapping)
+    ):
+        raise ValueError("FSG4/B4-A strict preflight payload differs")
+    last = cast(Mapping[str, Any], samples[-1])
+    snapshot = last.get("gpu_snapshot")
+    if (
+        not isinstance(snapshot, Mapping)
+        or int(last.get("temperature_celsius", -1)) > B4A_PREFLIGHT_TEMPERATURE_LIMIT_C
+        or snapshot.get("sw_thermal_slowdown") != "Not Active"
+    ):
+        raise ValueError("FSG4/B4-A strict preflight admission differs")
+
+
+def _wait_for_formal_environment() -> dict[str, object]:
+    started = time.monotonic_ns()
+    samples: list[dict[str, object]] = []
+    while True:
+        observed = base_experiment._wait_for_formal_environment()
+        observed_samples = observed.get("samples")
+        if not isinstance(observed_samples, list) or not observed_samples:
+            raise TypeError("FSG4/B4-A strict preflight samples differ")
+        samples.extend(cast(list[dict[str, object]], observed_samples))
+        last = samples[-1]
+        snapshot = last.get("gpu_snapshot")
+        ready = (
+            isinstance(snapshot, Mapping)
+            and int(str(last.get("temperature_celsius", -1)))
+            <= B4A_PREFLIGHT_TEMPERATURE_LIMIT_C
+            and snapshot.get("sw_thermal_slowdown") == "Not Active"
+        )
+        if ready:
+            value: dict[str, object] = {
+                "temperature_limit_celsius": B4A_PREFLIGHT_TEMPERATURE_LIMIT_C,
+                "poll_seconds": base_experiment.PREFLIGHT_POLL_SECONDS,
+                "timeout_seconds": base_experiment.PREFLIGHT_TIMEOUT_SECONDS,
+                "sample_count": len(samples),
+                "wait_ns": time.monotonic_ns() - started,
+                "samples": samples,
+                "admitted": True,
+            }
+            _validate_formal_preflight(value)
+            return value
+        if (
+            time.monotonic_ns() - started
+            > base_experiment.PREFLIGHT_TIMEOUT_SECONDS * 1_000_000_000
+        ):
+            raise TimeoutError("FSG4/B4-A strict preflight did not reach cool idle")
+        print(
+            _canonical_json(
+                {
+                    "preflight": "waiting-for-b4a-cool-idle",
+                    "temperature_celsius": last.get("temperature_celsius"),
+                    "software_thermal_slowdown": (
+                        snapshot.get("sw_thermal_slowdown")
+                        if isinstance(snapshot, Mapping)
+                        else None
+                    ),
+                    "sample_count": len(samples),
+                }
+            ),
+            flush=True,
+        )
+        time.sleep(base_experiment.PREFLIGHT_POLL_SECONDS)
 
 
 def _validate_worker(
@@ -595,9 +676,7 @@ def _load_complete(
         or not isinstance(metadata.get("formal_preflight"), Mapping)
     ):
         raise ValueError(f"FSG4/B4-A resume metadata differs: {index}")
-    base_experiment._validate_formal_preflight(
-        cast(Mapping[str, Any], metadata["formal_preflight"])
-    )
+    _validate_formal_preflight(cast(Mapping[str, Any], metadata["formal_preflight"]))
     return envelope, metadata, run
 
 
@@ -817,9 +896,7 @@ def _generate(args: argparse.Namespace) -> dict[str, object]:
                 source_git_head=cast(str, expected_protocol["source_git_head"]),
             )
             if loaded is None:
-                preflight = _normalize_preflight(
-                    base_experiment._wait_for_formal_environment()
-                )
+                preflight = _normalize_preflight(_wait_for_formal_environment())
                 envelope, metadata = _run_worker(
                     artifact=artifact,
                     index=index,

@@ -41,7 +41,8 @@ commit 与 post/queue 条件下，消除一次 terminal export parent CROWN 是�
 
 control 才进入 headline ratio；profile 只报告 optimizer、terminal export assembly、KFSB 等分层 wall/GPU
 归因和 closure，不与 control 混算。每个 worker 启动前执行与 B3 正式实验相同的 AC power、GPU process、
-thermal/power stability preflight。
+thermal/power stability preflight。v2环境拒绝后的加固要求：最终sample还必须GPU `<=45°C`且
+`sw_thermal_slowdown=Not Active`；active信号即使与power counter精确耦合也不准入。
 
 ## 3. Raw-first 与环境
 
