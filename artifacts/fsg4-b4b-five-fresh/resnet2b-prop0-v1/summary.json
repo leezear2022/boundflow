@@ -1,0 +1,105 @@
+{
+  "all_discrete_structure_exact": true,
+  "all_numeric_within_tolerance": true,
+  "all_sign_exact": true,
+  "capture_count": 10,
+  "comparisons": [
+    {
+      "all_sign_exact": true,
+      "anchor_id": "semantic-active-beta-gemm-14",
+      "discrete_structure_exact": true,
+      "element_comparison_count": 113686,
+      "maximum_absolute_difference": 0.0,
+      "run_index": 1,
+      "tensor_comparison_count": 14
+    },
+    {
+      "all_sign_exact": true,
+      "anchor_id": "performance-conv-8-candidate",
+      "discrete_structure_exact": true,
+      "element_comparison_count": 52500,
+      "maximum_absolute_difference": 1.1920928955078125e-07,
+      "run_index": 1,
+      "tensor_comparison_count": 13
+    },
+    {
+      "all_sign_exact": true,
+      "anchor_id": "semantic-active-beta-gemm-14",
+      "discrete_structure_exact": true,
+      "element_comparison_count": 113686,
+      "maximum_absolute_difference": 0.0,
+      "run_index": 2,
+      "tensor_comparison_count": 14
+    },
+    {
+      "all_sign_exact": true,
+      "anchor_id": "performance-conv-8-candidate",
+      "discrete_structure_exact": true,
+      "element_comparison_count": 52500,
+      "maximum_absolute_difference": 1.1920928955078125e-07,
+      "run_index": 2,
+      "tensor_comparison_count": 13
+    },
+    {
+      "all_sign_exact": true,
+      "anchor_id": "semantic-active-beta-gemm-14",
+      "discrete_structure_exact": true,
+      "element_comparison_count": 113686,
+      "maximum_absolute_difference": 0.0,
+      "run_index": 3,
+      "tensor_comparison_count": 14
+    },
+    {
+      "all_sign_exact": true,
+      "anchor_id": "performance-conv-8-candidate",
+      "discrete_structure_exact": true,
+      "element_comparison_count": 52500,
+      "maximum_absolute_difference": 1.1920928955078125e-07,
+      "run_index": 3,
+      "tensor_comparison_count": 13
+    },
+    {
+      "all_sign_exact": true,
+      "anchor_id": "semantic-active-beta-gemm-14",
+      "discrete_structure_exact": true,
+      "element_comparison_count": 113686,
+      "maximum_absolute_difference": 0.0,
+      "run_index": 4,
+      "tensor_comparison_count": 14
+    },
+    {
+      "all_sign_exact": true,
+      "anchor_id": "performance-conv-8-candidate",
+      "discrete_structure_exact": true,
+      "element_comparison_count": 52500,
+      "maximum_absolute_difference": 1.1920928955078125e-07,
+      "run_index": 4,
+      "tensor_comparison_count": 13
+    }
+  ],
+  "element_comparison_count": 664744,
+  "environment": {
+    "compute_capability": [
+      8,
+      9
+    ],
+    "cuda_runtime": "13.2",
+    "device_index": 0,
+    "gpu_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "torch_version": "2.12.1+cu132"
+  },
+  "maximum_absolute_difference": 1.1920928955078125e-07,
+  "performance_anchor_count": 5,
+  "performance_claimed": false,
+  "protocol_hash": "d9e8a76e36806355f193d249574b38dfbbaf18c602fd2bcf40edb442d1350da1",
+  "root_raw_replay_passed": true,
+  "run_count": 5,
+  "schedule_hash": "69af2bb2346f70bf690438b57b0e651c7f491d06007adfc1140538be79d60659",
+  "schema_version": "boundflow.fsg4-b4b0-five-fresh-summary/v1",
+  "semantic_anchor_count": 5,
+  "source_state_hash": "e3587dd9a8010d34bb65c1e415bb444917b48e23679855b2fe6ac54d23b4bff0",
+  "status": "validated-b4-b0-five-fresh-capture",
+  "summary_hash": "93b62ce30830ffb199f5fc8ddad6db61aff790b4925bccfc18afa238221f399c",
+  "tensor_comparison_count": 108,
+  "tir_admitted": false
+}

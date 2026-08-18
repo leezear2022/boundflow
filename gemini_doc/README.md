@@ -10,6 +10,13 @@
 
 ---
 
+FSG4/B4-B0 five-fresh已内部关闭，状态=
+`VALIDATED-B4-B0-FIVE-FRESH-PENDING-EXTERNAL-AUDIT`。source=`1dbb2de`；5个独立CUDA进程、
+10份capture、108组tensor/664,744元素root replay，max diff=`1.1920928955078125e-07`、
+sign exact；九类outer-resigned tamper `9/9 rejected`；全量=`1372 passed, 3 skipped, 6 warnings`。
+只关闭capture correctness/ownership；外审前B4-B1/TIR仍关闭。见
+`gemini_doc/change_2026-08-18_fsg4_b4b0_five_fresh_internal_closure.md`。
+
 FSG4/B4-B0 five-fresh runner已实现，状态=
 `IMPLEMENTED-B4-B0-FIVE-FRESH-RUNNER-PENDING-FORMAL-RUN`。typed capture现绑定α-index/lookup、
 β-location/sign、round-trip、CUDA default-stream与alias；worker/runner从raw重建10个capture并逐tensor

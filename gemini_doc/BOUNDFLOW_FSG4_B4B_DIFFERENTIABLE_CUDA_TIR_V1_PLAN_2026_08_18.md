@@ -1,5 +1,5 @@
 ---
-status: b4b0-five-fresh-runner-implemented-pending-formal-run
+status: b4b0-five-fresh-validated-pending-external-audit
 updated: 2026-08-18T04:02:28Z
 type: plan
 topic: boundflow
@@ -300,3 +300,12 @@ observer在evaluation 0 backward后、首次optimizer step前冻结value/gradien
 worker、5-fresh raw-first runner、root typed reconstruction与九类outer-resigned tamper。单fresh
 CUDA及synthetic 5-run summary已通过，但正式5进程artifact尚未执行。下一唯一动作是先提交冻结
 runner，再运行formal generate/replay/tamper；关闭前B4-B1/TIR仍不得启动。
+
+### B4-B0 five-fresh内部关闭
+
+source=`1dbb2de`的formal artifact已执行5个独立CUDA进程，S/P各5份capture；root replay从raw
+重建10份typed capture，比较108组tensor/664,744元素，最大差=`1.1920928955078125e-07`且
+sign exact。state/start-node/topology/shape/alpha-index/beta-location/gradient/alias/stream九类
+outer-resigned攻击`9/9 rejected`；定向20、全量`1372 passed, 3 skipped, 6 warnings`。内部状态=
+`VALIDATED-B4-B0-FIVE-FRESH-PENDING-EXTERNAL-AUDIT`。外审批准后才开放B4-B1；B4-B2 TIR、
+performance和system claim保持关闭。

@@ -1,0 +1,33 @@
+{
+  "code_revision": {
+    "boundflow/runtime/crown_ibp.py": "31bd5025aa92a60970263d76c09735f3bd24fd3e26555ddc753ff9af8ffbcc8e",
+    "boundflow/runtime/fsg4_b3_terminal_optimizer_schedule.py": "81ed9160a5c5745923f63939daae94f9ec9260ff370eb93efbcfc1c490f4a285",
+    "boundflow/runtime/fsg4_b4b_production_region_capture.py": "eff0512d04d8373bb24b831bfdbf643bd9b12abfa9ce9af8069679625b81bf45",
+    "scripts/probe_fsg4_b4b_five_fresh_tamper.py": "a411f99c27a5799479397ccd41f2b34db24d26fdb1604b82a3f957b43bbecfe8",
+    "scripts/run_fsg4_b4b_capture_worker.py": "dac03f6ee633ab541d0df480cef11ab70264ec33a4728849852ee0daff8fc2c0",
+    "scripts/run_fsg4_b4b_five_fresh_artifact.py": "3fe2a83f3542d786ad3e38c28b3f8427d80200ebb77d5e081e005f36fbc53f91"
+  },
+  "files": {
+    "README.md": "05226dd00ac19479335136a6c3249da4513c57f397a08f648e711967b0d276d7",
+    "protocol.json": "19b9ddd552e3370cce694572dec0ffd7b6fc1c7a8652c9d140b5aeb107b315ec",
+    "replay_stdout.txt": "3463ad2b9df6512257ed8fcd95d3cacd7e404ac3a0293415db644a84e3de9351",
+    "run_00.pt": "d49b0e0744fbf5a639330da4d0410ab82c7c409c98f73db3317699744295a20f",
+    "run_00.stdout.txt": "31562b3c832fed644185641bec000438ee526dc4927fb1bdfd1ea612c17957aa",
+    "run_01.pt": "54cb67e77c05d8d64000901fbe4e4614e156c3b6856fd884d98aec9f0ec528c7",
+    "run_01.stdout.txt": "e43ed892fe50cc71871fc34bb1ea5882d260bcf31b6d9606d6bb8f167ef8b509",
+    "run_02.pt": "1952d033a6b93a53dbd9edb295b45dd88b938c19fb7f9e94a13bd7cd9043b5b2",
+    "run_02.stdout.txt": "00ffc4a390166a92e80d85079f4236f5137e08e19914bbc1ddb226b1353bcda9",
+    "run_03.pt": "a6ed15eabda78fc268aef435747fc8e1af9736f70734590860a02464a4f4095f",
+    "run_03.stdout.txt": "4f43195a8e90006ced1afca481ba273e5f0b1476db41e85dd77ce58c4ac9c940",
+    "run_04.pt": "666f5ca938dd4f0d5c16aa09f906f24aedf2ad1a4ec0b301e8221c394eefe5fa",
+    "run_04.stdout.txt": "08f4a67d5e2fd3677a2e0aa6e68c04bb45db55cda8330bd50c65769f57fe7202",
+    "summary.json": "6f0fa1a1712df2304c8bd87278a754e86eacc71e81ac0ed16f9a539e4c425b6e"
+  },
+  "manifest_hash": "79059be7bee161b3774beda09b711484cd6aa3cefbb8cded93c8fc851c2601ab",
+  "performance_claimed": false,
+  "protocol_hash": "d9e8a76e36806355f193d249574b38dfbbaf18c602fd2bcf40edb442d1350da1",
+  "schema_version": "boundflow.fsg4-b4b0-five-fresh-artifact/v1",
+  "source_git_head": "1dbb2de4bc29eb92457e2d24c3e627d638b6607a",
+  "summary_hash": "93b62ce30830ffb199f5fc8ddad6db61aff790b4925bccfc18afa238221f399c",
+  "tir_admitted": false
+}

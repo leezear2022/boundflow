@@ -1,5 +1,12 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-18 FSG4/B4-B0 five-fresh内部关闭**：source=`1dbb2de`，5个独立CUDA
+> subprocess生成S/P各5份capture；root replay从raw重建10份typed capture，比较108组tensor/
+> 664,744元素，max diff=`1.1920928955078125e-07`、sign exact；九类outer-resigned tamper
+> `9/9 rejected`。定向=`20 passed`，full=`1372 passed, 3 skipped, 6 warnings`。状态=
+> `VALIDATED-B4-B0-FIVE-FRESH-PENDING-EXTERNAL-AUDIT`；只关闭capture correctness/ownership，
+> 外审前B4-B1/TIR仍关闭，无performance claim。
+
 > **2026-08-18 FSG4/B4-B0 five-fresh runner候选**：状态=
 > `IMPLEMENTED-B4-B0-FIVE-FRESH-RUNNER-PENDING-FORMAL-RUN`。typed capture已补齐α-index/lookup、
 > β-location/sign、round-trip、CUDA default-stream与alias ownership；新增5-fresh raw-first

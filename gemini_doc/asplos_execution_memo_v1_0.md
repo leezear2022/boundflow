@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-18 FSG4/B4-B0 five-fresh内部关闭指令**：source=`1dbb2de`的formal artifact已通过
+> 5 fresh/10 capture raw replay、108 tensor/664,744元素、max diff=`1.192e-7`、sign exact与
+> 9/9 outer-resigned tamper。状态=`VALIDATED-B4-B0-FIVE-FRESH-PENDING-EXTERNAL-AUDIT`。
+> 下一唯一动作是外审；批准后只开放B4-B1 typed IR/reference，B4-B2 TIR仍关闭。
+
 > **2026-08-18 FSG4/B4-B0 five-fresh runner指令**：runner、raw typed replay与9类tamper probe
 > 已实现但formal artifact未运行。下一唯一动作是提交冻结runner，然后执行5个fresh CUDA进程、
 > root replay与outer-resigned tamper；全部关闭前不得进入B4-B1或TIR。

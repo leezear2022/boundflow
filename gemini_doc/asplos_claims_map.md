@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-18 FSG4/B4-B0 five-fresh内部关闭**：状态=
+> `VALIDATED-B4-B0-FIVE-FRESH-PENDING-EXTERNAL-AUDIT`。支持production evaluation-0双锚点
+> capture correctness/ownership：5 fresh、10 captures、raw typed replay、max diff=`1.192e-7`、
+> sign exact、9/9 outer-resigned tamper。仍不支持TIR correctness、region/whole-core/query speedup、
+> memory或ASPLOS-ready；`performance_claimed=false`、`tir_admitted=false`。
+
 > **2026-08-18 FSG4/B4-B0 five-fresh runner候选**：状态=
 > `IMPLEMENTED-B4-B0-FIVE-FRESH-RUNNER-PENDING-FORMAL-RUN`。只支持runner/mechanism与单fresh
 > CUDA smoke；formal 5-fresh、root replay和9/9 tamper尚未产生，故不升级capture correctness，

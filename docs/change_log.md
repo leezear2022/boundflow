@@ -1,5 +1,14 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-18：FSG4/B4-B0 Five-Fresh 内部关闭
+
+- source=`1dbb2de`，5个fresh CUDA进程生成10份S/P typed capture；
+- root replay比较108组tensor/664,744元素，max diff=`1.1920928955078125e-07`、sign exact；
+- state/start-node/topology/shape/alpha-index/beta-location/gradient/alias/stream九类全重签攻击
+  `9/9 rejected`；定向20、全量`1372 passed, 3 skipped, 6 warnings`；
+- 状态=`VALIDATED-B4-B0-FIVE-FRESH-PENDING-EXTERNAL-AUDIT`，B4-B1/TIR仍关闭。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4b0_five_fresh_internal_closure.md`。
+
 ## 2026-08-18：FSG4/B4-B0 Five-Fresh Runner 候选
 
 - 补齐α-index/lookup、β-location/sign、round-trip、CUDA stream与alias typed ownership；

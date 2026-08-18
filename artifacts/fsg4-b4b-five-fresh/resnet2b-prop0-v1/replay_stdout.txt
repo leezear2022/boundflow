@@ -1,0 +1,1 @@
+{"all_sign_exact":true,"capture_count":10,"evidence_status":"validated-b4-b0-five-fresh-capture","maximum_absolute_difference":1.1920928955078125e-07,"performance_claimed":false,"run_count":5,"status":"replay-passed","summary_hash":"93b62ce30830ffb199f5fc8ddad6db61aff790b4925bccfc18afa238221f399c","tir_admitted":false}
