@@ -230,3 +230,40 @@ def test_environment_gate_recomputes_coupled_power_thermal_interval(
     assert rejected.software_thermal_power_counters_coupled is False
     assert rejected.independent_thermal_slowdown is True
     assert rejected.admitted is False
+
+    offset_before = _gpu_snapshot(
+        sw_thermal="Not Active",
+        sw_power="Not Active",
+        sw_thermal_counter=1_100,
+        sw_power_counter=1_000,
+    )
+    offset_after = _gpu_snapshot(
+        sw_thermal="Not Active",
+        sw_power="Not Active",
+        sw_thermal_counter=1_120,
+        sw_power_counter=1_020,
+    )
+    offset_coupled = runner._environment_gate(
+        offset_before,
+        offset_after,
+        (),
+        (),
+        "runtime",
+        worker_pid=123,
+    )
+    assert offset_coupled.software_thermal_power_counters_coupled is True
+    assert offset_coupled.independent_thermal_slowdown is False
+    assert offset_coupled.admitted is True
+
+    offset_after["sw_power_cap_counter_us"] = 1_019
+    offset_independent = runner._environment_gate(
+        offset_before,
+        offset_after,
+        (),
+        (),
+        "runtime",
+        worker_pid=123,
+    )
+    assert offset_independent.software_thermal_power_counters_coupled is False
+    assert offset_independent.independent_thermal_slowdown is True
+    assert offset_independent.admitted is False

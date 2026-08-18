@@ -140,6 +140,17 @@ def _mutate_runtime_environment(artifact: Path) -> None:
     _write_envelope(artifact, index, envelope)
 
 
+def _mutate_environment_counter_delta(artifact: Path) -> None:
+    index = _first_index(artifact, configuration="B3", mode="control")
+    envelope = _envelope(artifact, index)
+    diagnostics = cast(dict[str, Any], envelope["diagnostics"])
+    after = cast(dict[str, Any], diagnostics["environment_after"])
+    after["sw_thermal_slowdown_counter_us"] = (
+        int(after["sw_thermal_slowdown_counter_us"]) + 1
+    )
+    _write_envelope(artifact, index, envelope)
+
+
 def _mutate_worker_protocol(artifact: Path) -> None:
     index = _first_index(artifact, configuration="B4-A", mode="profile")
     envelope = _envelope(artifact, index)
@@ -219,6 +230,7 @@ ATTACKS: tuple[tuple[str, Callable[[Path], None]], ...] = (
     ("candidate-profile-counter-outer-resign", _mutate_candidate_profile_counter),
     ("export-payload-outer-resign", _mutate_export_payload),
     ("runtime-environment-outer-resign", _mutate_runtime_environment),
+    ("environment-counter-delta-outer-resign", _mutate_environment_counter_delta),
     ("worker-protocol-outer-resign", _mutate_worker_protocol),
     ("formal-preflight-outer-resign", _mutate_formal_preflight),
     ("power-policy-outer-resign", _mutate_power_policy),

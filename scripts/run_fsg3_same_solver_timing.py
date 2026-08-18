@@ -804,6 +804,34 @@ def _environment_gate(
         if basename in ALLOWED_GRAPHICS_PROCESSES and memory < 64:
             continue
         external.append(identity)
+    (
+        software_thermal_signal,
+        software_power_cap_signal,
+        software_counters_coupled,
+        hardware_thermal_slowdown,
+    ) = _environment_counter_projection(before, after)
+    return FSG3EnvironmentGate(
+        gpu_uuid=str(before["uuid"]),
+        gpu_name=str(before["name"]),
+        runtime_identity=runtime_identity,
+        external_compute_processes=tuple(external),
+        software_thermal_signal=software_thermal_signal,
+        software_power_cap_signal=software_power_cap_signal,
+        software_thermal_power_counters_coupled=software_counters_coupled,
+        hardware_thermal_slowdown=hardware_thermal_slowdown,
+        worker_overlap=bool(external),
+        device_identity_stable=(
+            before["uuid"] == after["uuid"] and before["name"] == after["name"]
+        ),
+        ac_powered=_ac_powered(),
+    )
+
+
+def _environment_counter_projection(
+    before: Mapping[str, object], after: Mapping[str, object]
+) -> tuple[bool, bool, bool, bool]:
+    """Project interval-local NVIDIA power and thermal counter evidence."""
+
     sw_thermal_before = _integer(
         before["sw_thermal_slowdown_counter_us"], "software thermal counter"
     )
@@ -843,28 +871,18 @@ def _environment_gate(
         and software_power_cap_signal
         and before["sw_thermal_slowdown"] == before["sw_power_cap"]
         and after["sw_thermal_slowdown"] == after["sw_power_cap"]
-        and sw_thermal_before == sw_power_before
-        and sw_thermal_after == sw_power_after
+        and sw_thermal_after - sw_thermal_before == sw_power_after - sw_power_before
     )
     hardware_thermal_slowdown = (
         _reason_active(before, "hw_thermal_slowdown")
         or _reason_active(after, "hw_thermal_slowdown")
         or hw_thermal_after > hw_thermal_before
     )
-    return FSG3EnvironmentGate(
-        gpu_uuid=str(before["uuid"]),
-        gpu_name=str(before["name"]),
-        runtime_identity=runtime_identity,
-        external_compute_processes=tuple(external),
-        software_thermal_signal=software_thermal_signal,
-        software_power_cap_signal=software_power_cap_signal,
-        software_thermal_power_counters_coupled=software_counters_coupled,
-        hardware_thermal_slowdown=hardware_thermal_slowdown,
-        worker_overlap=bool(external),
-        device_identity_stable=(
-            before["uuid"] == after["uuid"] and before["name"] == after["name"]
-        ),
-        ac_powered=_ac_powered(),
+    return (
+        software_thermal_signal,
+        software_power_cap_signal,
+        software_counters_coupled,
+        hardware_thermal_slowdown,
     )
 
 

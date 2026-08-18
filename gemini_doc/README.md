@@ -10,10 +10,16 @@
 
 ---
 
+FSG4/B4-A正式计时v4在source=`03043a3`得到19个admitted worker，run 19 raw返回后因旧环境投影按累计
+绝对值比较thermal/power counter而被拒绝；该worker两个counter已有`54579 µs`历史偏移，但区间增量
+严格同为`2062477 µs`。门禁已改为interval delta exact，formal replay从raw重算，tamper扩为14类；
+v4不形成ratio，下一步验证、提交clean source并从0生成v5。见
+`gemini_doc/change_2026-08-18_fsg4_b4a_environment_interval_coupling_fix.md`。
+
 FSG4/B4-A正式计时v3在source=`be2fa96`完成20个worker后，worker 20因执行期software thermal counter
 独立增长被environment门禁拒绝；correctness/activation/profile结构完整，但v3不进入ratio。runner现
 冻结`nvidia-powerd=inactive`与`enforced.power.limit=55.0 W`，逐worker及replay验证，tamper扩为13类；
-下一步验证、提交clean source并从0生成v4。见
+其v4指令已被上方失败处置与v5指令取代。见
 `gemini_doc/change_2026-08-18_fsg4_b4a_power_policy_binding.md`。
 
 FSG4/B4-A正式计时v2在source=`ee73bc2`完成5个worker后，worker 5因独立software thermal slowdown
@@ -26,8 +32,8 @@ raw不进入结论。计数覆盖修复后的live diagnostic恢复forward=4、bo
 handoff/rerun=`1/0`。下一步clean source后从position 0生成v2；当前无性能claim。见
 `gemini_doc/change_2026-08-18_fsg4_b4a_profile_counter_coverage_fix.md`。
 
-FSG4/B4-A独立正式计时runner、raw-first/resume、root replay及13类outer-resigned tamper probe已实现，
-固定related=`63 passed`，Black/Mypy/Pylint及全量`1353 passed, 3 skipped`通过。状态=
+FSG4/B4-A独立正式计时runner、raw-first/resume、root replay及14类outer-resigned tamper probe已实现，
+固定related=`70 passed`，Black/Mypy/Pylint及全量`1353 passed, 3 skipped`通过。状态=
 `IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`；
 下一步提交clean source并运行24个fresh GPU process，当前无性能claim，B4-B/TIR保持关闭。见
 `gemini_doc/change_2026-08-18_fsg4_b4a_formal_timing_runner_candidate.md`。

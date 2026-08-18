@@ -1,5 +1,13 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-18：FSG4/B4-A 环境计数区间耦合修复
+
+- source=`03043a3`的v4有19个worker admitted，run 19 raw因旧环境门禁比较累计绝对值而fail closed；
+- run 19 thermal/power counter已有`54579 µs`历史偏移，但worker区间增量严格同为`2062477 µs`；
+- coupling改为interval delta exact，formal replay从raw before/after重算环境投影；
+- tamper清单扩为14类；下一步验证、提交clean source并从position 0运行v5，无性能claim。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4a_environment_interval_coupling_fix.md`。
+
 ## 2026-08-18：FSG4/B4-A GPU 功耗策略绑定
 
 - source=`be2fa96`的v3完成20个worker后，worker 20因执行期software thermal counter独立增长而

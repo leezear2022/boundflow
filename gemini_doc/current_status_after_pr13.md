@@ -1,10 +1,16 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-18 FSG4/B4-A正式计时v4环境投影失败与修复**：source=`03043a3`的v4有19/19 worker
+> admitted；run 19 raw返回后被旧门禁拒绝。其thermal/power累计值已有`54579 µs`历史偏移，但worker
+> 区间增量严格同为`2062477 µs`，故根因是旧代码比较累计绝对值而非区间增量。门禁已改为delta exact，
+> formal replay从raw重算投影，tamper扩为14类。v4不形成ratio；下一步验证并以clean source从0生成
+> v5，无性能claim，B4-B/TIR关闭。
+
 > **2026-08-18 FSG4/B4-A正式计时v3环境拒绝与功耗策略绑定**：source=`be2fa96`的v3完成20个
 > worker，worker 20 correctness/activation/profile计数完整，但执行期software thermal counter独立增长，
 > environment=`admitted=false`，v3不形成ratio。根因边界是active `nvidia-powerd`/Dynamic Boost未被
 > 原协议约束；runner现冻结service=`inactive`、`enforced.power.limit=55.0 W`并逐worker/replay验证，
-> tamper扩为13类。下一步验证并提交clean source，从0生成v4；无性能claim，B4-B/TIR关闭。
+> tamper扩为13类。该“下一步v4”指令已被上方v4失败与v5指令取代。
 
 > **2026-08-18 FSG4/B4-A正式计时v2环境拒绝与preflight加固**：source=`ee73bc2`的v2越过原计数
 > 失败点并完成5个worker，但worker 5结束时检测到独立software thermal slowdown，environment
@@ -18,7 +24,7 @@
 > 参与结论；下一步clean source后从position 0生成v2。`performance_claimed=false`，B4-B/TIR关闭。
 
 > **2026-08-18 FSG4/B4-A正式计时Runner状态**：24-process B3/B4-A control/profile runner、raw-first/
-> resume、root replay及13类outer-resigned tamper probe已实现，固定related=`63 passed`，Black/Mypy/
+> resume、root replay及14类outer-resigned tamper probe已实现，固定related=`70 passed`，Black/Mypy/
 > Pylint及全量`1353 passed, 3 skipped`通过。状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`。
 > 下一唯一动作是提交clean source并
 > 运行正式GPU artifact；无性能claim，B4-B/TIR关闭。

@@ -32,6 +32,7 @@ from boundflow.runtime.fsg4_b3_same_solver_timing import (
     fsg4_b3_timing_run_from_dict,
 )
 from scripts import run_fsg3_same_solver_experiment as base_experiment
+from scripts import run_fsg3_same_solver_timing as fsg3_worker
 from scripts import run_fsg4_b4a_correctness_pairs as correctness
 from scripts import run_fsg4_b4a_same_solver_worker as worker
 
@@ -510,6 +511,7 @@ def _validate_worker(
         or run.execution.fallback_dispatch_count != 0
     ):
         raise ValueError("FSG4/B4-A formal worker run differs")
+    _validate_worker_environment_projection(run, diagnostics)
     expected_handoff = 0 if configuration == "B3" else 1
     expected_rerun = 1 if configuration == "B3" else 0
     protocol_payload = dict(protocol)
@@ -571,6 +573,24 @@ def _validate_worker(
     ):
         raise ValueError("FSG4/B4-A formal activation differs")
     return run
+
+
+def _validate_worker_environment_projection(
+    run: FSG4B3TimingRun, diagnostics: Mapping[str, Any]
+) -> None:
+    before = diagnostics.get("environment_before")
+    after = diagnostics.get("environment_after")
+    if not isinstance(before, Mapping) or not isinstance(after, Mapping):
+        raise TypeError("FSG4/B4-A formal worker environment evidence differs")
+    projection = fsg3_worker._environment_counter_projection(before, after)
+    observed = (
+        run.environment.software_thermal_signal,
+        run.environment.software_power_cap_signal,
+        run.environment.software_thermal_power_counters_coupled,
+        run.environment.hardware_thermal_slowdown,
+    )
+    if projection != observed:
+        raise ValueError("FSG4/B4-A formal worker environment projection differs")
 
 
 def _run_worker(

@@ -1,9 +1,14 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-18 FSG4/B4-A正式计时v4环境处置**：source=`03043a3`的v4有19个worker admitted，
+> run 19因旧门禁比较thermal/power累计绝对值而非worker区间增量被拒绝；其区间增量严格同为
+> `2062477 µs`。已改为delta-exact投影并由replay从raw重算，tamper共14类。v4不得续跑或形成ratio；
+> 下一步验证并以clean source从0运行v5，仍无performance claim。
+
 > **2026-08-18 FSG4/B4-A正式计时v3环境处置**：source=`be2fa96`的v3完成20个worker后因执行期
 > software thermal counter独立增长fail closed；v3不得续跑或形成ratio。正式功耗策略冻结为
 > `nvidia-powerd=inactive`与`enforced.power.limit=55.0 W`，逐worker/replay重验，tamper共13类。下一步
-> 完成验证并以clean source从0运行v4，仍无performance claim。
+> 该v4指令已被上方v4失败处置与v5指令取代。
 
 > **2026-08-18 FSG4/B4-A正式计时v2环境处置**：source=`ee73bc2`的v2因worker 5独立software
 > thermal slowdown fail closed；不得续跑或挑样本。preflight加固为`<=45°C`且software thermal完全
@@ -14,7 +19,7 @@
 > clean-source v2从position 0重跑，仍保持`performance_claimed=false`与B4-B/TIR关闭。
 
 > **2026-08-18 FSG4/B4-A正式计时Runner指令**：24-process runner、raw-first/resume、root replay及
-> 13类outer-resigned tamper probe已实现。下一唯一动作是提交clean source并运行正式GPU artifact；
+> 14类outer-resigned tamper probe已实现。下一唯一动作是提交clean source并运行正式GPU artifact；
 > 在replay/tamper与外审前保持`performance_claimed=false`，不得启动B4-B/TIR。
 
 > **2026-08-18 FSG4/B4-A正式计时指令**：只实现并运行冻结的24-process B3/B4-A协议；control检验

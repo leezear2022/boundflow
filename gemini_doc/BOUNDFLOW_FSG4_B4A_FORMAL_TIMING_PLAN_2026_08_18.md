@@ -1,5 +1,5 @@
 ---
-status: implemented-pending-power-policy-validation
+status: implemented-pending-interval-coupling-validation
 updated: 2026-08-18T09:30:00+08:00
 type: plan
 topic: boundflow
@@ -46,6 +46,8 @@ thermal/power stability preflight。v2环境拒绝后的加固要求：最终sam
 v3又证明温度门槛不足以约束移动GPU Dynamic Boost：正式序列额外冻结
 `nvidia-powerd.service=inactive`与`enforced.power.limit=55.0 W`，protocol、每worker preflight和
 replay必须三处一致；实验完成后恢复service。
+v4进一步暴露累计counter历史偏移：coupling必须按待测worker区间的thermal/power counter增量严格相等
+判断，不得要求两个生命周期累计绝对值相等；replay必须从raw before/after重算该投影。
 
 ## 3. Raw-first 与环境
 
@@ -100,6 +102,7 @@ closure、summary threshold/classification；全部必须拒绝。
 
 固定 related tests 必须在 exchange 中逐文件列出：
 
+- `tests/test_fsg3_same_solver_worker.py`
 - `tests/test_fsg4_b4a_terminal_lower_adjoint_handoff.py`
 - `tests/test_fsg4_b4a_correctness_pairs.py`
 - `tests/test_fsg4_b4a_correctness_pairs_artifact.py`
@@ -112,6 +115,6 @@ closure、summary threshold/classification；全部必须拒绝。
 
 另跑 full pytest、Black、Mypy、Pylint、`git diff --check`、DocOps lint。
 
-24-process formal runner、root replay与13类outer-resigned tamper probe已实现；下一唯一动作是完成
-功耗策略合同验证、提交clean source后从position 0执行v4。v1/v2/v3均不得恢复或进入ratio，B4-B/TIR
-保持关闭。
+24-process formal runner、root replay与14类outer-resigned tamper probe已实现；下一唯一动作是完成
+区间计数耦合修复验证、提交clean source后从position 0执行v5。v1/v2/v3/v4均不得恢复或进入ratio，
+B4-B/TIR保持关闭。
