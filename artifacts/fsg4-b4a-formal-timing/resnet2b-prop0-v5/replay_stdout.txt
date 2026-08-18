@@ -1,0 +1,1 @@
+{"core_wall_geomean":1.0189949992169265,"performance_candidate_admitted":false,"performance_claimed":false,"query_wall_worst_pair":0.996947022444439,"run_count":24,"status":"validated-no-go-b4a-performance","summary_hash":"46360e41e87917f2f5f801733fe6f13f10591cb63eff9b2675db37320a0bc3d7"}

@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-18 FSG4/B4-A正式计时内部关闭**：source=`46a8493`、v5 24/24 worker、6/6 control pair
+> correctness/environment/activation/profile通过，max tensor diff=`4.4107437e-06`、sign exact；core wall
+> geomean=`1.018995x`未过`1.03x`，query worst=`0.996947x`通过`0.98x`，memory无收益；replay与14/14
+> tamper通过。状态=`INTERNALLY-VALIDATED-NO-GO-B4-A-PERFORMANCE-PENDING-EXTERNAL-AUDIT`，无
+> performance claim；fixed related=`73 passed`、full=`1356 passed, 3 skipped`，B4-B/TIR关闭。
+
 > **2026-08-18 FSG4/B4-A正式计时v4环境投影失败**：source=`03043a3`的v4有19个admitted worker；
 > run 19 raw的thermal/power累计值存在`54579 µs`历史偏移，但worker区间增量严格同为`2062477 µs`。
 > 旧门禁错误比较累计绝对值，现改为interval delta exact，并由formal replay从raw重算；tamper扩为14类。

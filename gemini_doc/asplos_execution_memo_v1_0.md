@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-18 FSG4/B4-A正式计时内部关闭指令**：source=`46a8493`的v5 24/24完成，correctness/
+> environment/activation/profile/replay与14/14 tamper全过；core wall geomean=`1.018995x`未过`1.03x`，
+> query worst=`0.996947x`过`0.98x`。下一唯一动作是外审；不得调低阈值或重跑挑样，B4-A不得累计为
+> performance candidate，B4-B/TIR继续关闭。
+
 > **2026-08-18 FSG4/B4-A正式计时v4环境处置**：source=`03043a3`的v4有19个worker admitted，
 > run 19因旧门禁比较thermal/power累计绝对值而非worker区间增量被拒绝；其区间增量严格同为
 > `2062477 µs`。已改为delta-exact投影并由replay从raw重算，tamper共14类。v4不得续跑或形成ratio；

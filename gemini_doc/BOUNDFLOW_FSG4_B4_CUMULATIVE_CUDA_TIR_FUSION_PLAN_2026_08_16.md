@@ -332,3 +332,12 @@ native/provider topology、producer op ordinal/name、shape/dtype/device/layout/
 correctness再测B3/B4-A core `>=1.03x`、query worst pair `>=0.98x`。详细合同见
 `gemini_doc/BOUNDFLOW_FSG4_B4A_TERMINAL_LOWER_ADJOINT_HANDOFF_PLAN_2026_08_16.md`。下一唯一动作是
 实现B4-A typed producer/consumer；B4-B/TIR仍关闭。
+
+### B4-A正式计时关闭更新
+
+source=`46a8493`的v5已按冻结24-process协议完成。correctness/environment/activation/profile、root replay
+与14/14 tamper全部通过；core wall geomean=`1.0189949992x < 1.03x`，query worst=
+`0.9969470224x >= 0.98x`，故B4-A只保留机制/reduced evidence，不能进入B4 cumulative performance
+baseline。当前状态待外审，B4-B/TIR保持关闭。外审批准NO-GO关闭后，B4-B是否启动必须仅依据B4-0已
+冻结的67.72% differentiable lower-only opportunity和本计划B4-B门禁另行决定；不得把B4-A的1.9%
+收益计入累计候选，也不得修改B4-A阈值重跑。

@@ -1,5 +1,11 @@
 # FSG4/B4 cumulative CUDA/TIR fusion changelog
 
+## 2026-08-18 — B4-A formal timing internal closure
+
+- source=`46a8493`的24-process v5通过correctness/environment/activation/profile/replay与14/14 tamper；
+- core wall geomean=`1.018995x`未过`1.03x`，query worst=`0.996947x`通过`0.98x`；
+- B4-A以NO-GO performance / validated mechanism内部关闭，不能累计；下一步外审，B4-B/TIR仍关闭。
+
 ## 2026-08-16 — B4-A implementation candidate
 
 - 实现第10次evaluation terminal lower/lA typed producer、one-shot handoff与zero-rerun assembly；

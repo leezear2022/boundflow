@@ -159,3 +159,12 @@ source=`43d4117`完成10/10 fresh worker、5/5 direct pair与每pair 19个raw te
 `6.109476089477539e-06`，sign/discrete/lineage/counter、无本机路径及root replay全过。状态=
 `INTERNALLY-VALIDATED-B4-A-FIVE-FRESH-CORRECTNESS`，`performance_claimed=false`。下一唯一动作是独立
 B3/B4-A正式计时，不得使用本轮latency形成claim；B4-B/TIR仍关闭。
+
+## 10. 2026-08-18 正式计时关闭更新
+
+source=`46a8493`的v5按独立24-process协议完成：correctness/environment/activation/profile、root replay
+与14/14 tamper全部通过；core wall geomean=`1.0189949992x`未过预注册`1.03x`，query worst pair=
+`0.9969470224x`通过`0.98x`。因此B4-A以
+`INTERNALLY-VALIDATED-NO-GO-B4-A-PERFORMANCE-PENDING-EXTERNAL-AUDIT`关闭：机制与correctness保留，
+但不得累计为B4 performance candidate。下一步只做外审；B4-B是否启动仍须外审后依据B4总路线另行
+决定，不得降低阈值或复用held-out重跑。

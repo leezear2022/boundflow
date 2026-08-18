@@ -1,5 +1,13 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-18：FSG4/B4-A 正式计时内部关闭
+
+- source=`46a8493`的v5完成24/24 fresh worker；correctness/environment/activation/profile全过；
+- core wall geomean=`1.018995x < 1.03x`，query worst=`0.996947x >= 0.98x`，memory无收益；
+- root replay与14/14 outer-resigned tamper通过，本机路径扫描与manifest SHA256复核通过；
+- 内部状态=`VALIDATED-NO-GO-B4-A-PERFORMANCE-PENDING-EXTERNAL-AUDIT`，下一步只做外审。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4a_formal_timing_internal_closure.md`。
+
 ## 2026-08-18：FSG4/B4-A 环境计数区间耦合修复
 
 - source=`03043a3`的v4有19个worker admitted，run 19 raw因旧环境门禁比较累计绝对值而fail closed；

@@ -1,5 +1,12 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-18 FSG4/B4-A正式计时内部关闭**：source=`46a8493`的v5完成24/24 fresh worker，6/6
+> semantic pair、19 tensor/pair、activation/environment/profile全部PASS；root replay与14/14 outer-
+> resigned tamper通过。core wall geomean=`1.018995x < 1.03x`，query worst=`0.996947x >= 0.98x`，
+> memory ratio=`1.0`，故内部状态=`VALIDATED-NO-GO-B4-A-PERFORMANCE-PENDING-EXTERNAL-AUDIT`。
+> fixed related=`73 passed`、full=`1356 passed, 3 skipped`。下一唯一动作是外审；B4-A不得累计为
+> performance candidate，B4-B/TIR关闭。
+
 > **2026-08-18 FSG4/B4-A正式计时v4环境投影失败与修复**：source=`03043a3`的v4有19/19 worker
 > admitted；run 19 raw返回后被旧门禁拒绝。其thermal/power累计值已有`54579 µs`历史偏移，但worker
 > 区间增量严格同为`2062477 µs`，故根因是旧代码比较累计绝对值而非区间增量。门禁已改为delta exact，

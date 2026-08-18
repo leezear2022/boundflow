@@ -1,5 +1,5 @@
 ---
-status: implemented-pending-interval-coupling-validation
+status: internally-validated-no-go-pending-external-audit
 updated: 2026-08-18T09:30:00+08:00
 type: plan
 topic: boundflow
@@ -108,6 +108,7 @@ closure、summary threshold/classification；全部必须拒绝。
 - `tests/test_fsg4_b4a_correctness_pairs_artifact.py`
 - `tests/test_fsg4_b4a_formal_timing.py`
 - `tests/test_fsg4_b4a_formal_timing_tamper.py`
+- `tests/test_fsg4_b4a_formal_timing_artifact.py`
 - `tests/test_fsg4_b3_explicit_counters.py`
 - `tests/test_fsg4_b3_same_solver_timing.py`
 - `tests/test_fsg4_b3_same_solver_worker.py`
@@ -115,6 +116,7 @@ closure、summary threshold/classification；全部必须拒绝。
 
 另跑 full pytest、Black、Mypy、Pylint、`git diff --check`、DocOps lint。
 
-24-process formal runner、root replay与14类outer-resigned tamper probe已实现；下一唯一动作是完成
-区间计数耦合修复验证、提交clean source后从position 0执行v5。v1/v2/v3/v4均不得恢复或进入ratio，
-B4-B/TIR保持关闭。
+source=`46a8493`的v5已24/24完成，root replay与14/14 tamper通过；core wall geomean=`1.018995x`
+未过`1.03x`，query worst=`0.996947x`通过`0.98x`，故内部状态为
+`VALIDATED-NO-GO-B4-A-PERFORMANCE-PENDING-EXTERNAL-AUDIT`。下一唯一动作是外审；v1/v2/v3/v4均不得
+恢复或进入ratio，B4-B/TIR保持关闭。

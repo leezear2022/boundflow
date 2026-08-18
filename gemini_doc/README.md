@@ -10,6 +10,13 @@
 
 ---
 
+FSG4/B4-A正式计时已在source=`46a8493`内部关闭：v5 24/24 worker、6/6 semantic pair、activation/
+environment/profile、root replay和14/14 tamper全部通过；core wall geomean=`1.018995x < 1.03x`，
+query worst=`0.996947x >= 0.98x`，故为`VALIDATED-NO-GO-B4-A-PERFORMANCE-PENDING-EXTERNAL-AUDIT`。
+fixed related=`73 passed`、full=`1356 passed, 3 skipped`。下一步只做外审，B4-A不得累计为
+performance candidate，B4-B/TIR关闭。见
+`gemini_doc/change_2026-08-18_fsg4_b4a_formal_timing_internal_closure.md`。
+
 FSG4/B4-A正式计时v4在source=`03043a3`得到19个admitted worker，run 19 raw返回后因旧环境投影按累计
 绝对值比较thermal/power counter而被拒绝；该worker两个counter已有`54579 µs`历史偏移，但区间增量
 严格同为`2062477 µs`。门禁已改为interval delta exact，formal replay从raw重算，tamper扩为14类；
