@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-18 FSG4/B4-B0 v2内部关闭**：source=`422a3ee`，5 fresh/10 captures与
+> 108 tensors/664,744 elements重新生成；max diff=`1.1920928955078125e-07`、sign exact；
+> 绝对source/topology/lineage身份绑定与`11/11`完整性负例通过。状态=
+> `VALIDATED-B4-B0-V2-PENDING-ROUND2-EXTERNAL-AUDIT`，不支持TIR/performance/memory claim。
+
 > **2026-08-18 FSG4/B4-B0 Round 1纠正**：外审以1个major否决原内部关闭；协调一致topology/
 > lineage重写可绕过相对run校验。v2绝对身份绑定已实现但formal artifact未生成，状态=
 > `IMPLEMENTED-B4-B0-R1-F1-IDENTITY-BINDING-PENDING-V2`。因此B4-B0仍未外审批准，B4-B1/

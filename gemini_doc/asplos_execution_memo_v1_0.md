@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-18 FSG4/B4-B0 v2内部关闭指令**：source=`422a3ee`的绝对身份绑定v2 artifact
+> 已通过5 fresh/10 captures、max diff=`1.1920928955078125e-07`、sign exact与`11/11`
+> 完整性负例；定向=`24 passed`、全量=`1376 passed, 3 skipped, 6 warnings`。下一唯一动作
+> 是回复F1并提交Round 2独立外审；获批前不得启动B4-B1/B4-B2、
+> TIR实现或性能计时。
+
 > **2026-08-18 FSG4/B4-B0 Round 1纠正指令**：外审`changes_requested`，F1 major确认原replay
 > 未绑定绝对source/topology/lineage身份。v2修复已实现并在旧raw上拒绝11/11负例；下一唯一动作
 > 是冻结提交后生成v2、replay、11类完整性负例与回归，再提交Round 2。批准前B4-B1/TIR关闭。

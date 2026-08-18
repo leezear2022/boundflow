@@ -1,5 +1,12 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-18 FSG4/B4-B0 v2内部关闭**：source=`422a3ee`，绝对身份绑定的v2 artifact
+> 已完成5 fresh/10 captures，108 tensors/664,744 elements，max diff=`1.1920928955078125e-07`、
+> sign exact；Round 1两类coordinated rewrite进入正式门禁，完整性负例=`11/11 rejected`。
+> 定向=`24 passed`，全量=`1376 passed, 3 skipped, 6 warnings`。
+> 当前=`VALIDATED-B4-B0-V2-PENDING-ROUND2-EXTERNAL-AUDIT`；B4-B1/B4-B2/TIR/performance
+> 继续关闭。
+
 > **2026-08-18 FSG4/B4-B0外审Round 1与F1修复**：外审=`changes_requested`，1 major：
 > 全5 run/10 capture同步改写topology或lineage source hashes并全重签可绕过原相对一致性。
 > v2修复已冻结source/model/state/primal/split/topology/schedule及逐锚点anchor/lineage绝对身份，

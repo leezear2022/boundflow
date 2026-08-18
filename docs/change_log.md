@@ -1,5 +1,14 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-18：FSG4/B4-B0 v2 内部关闭
+
+- source=`422a3ee`，生成绝对身份绑定的5-fresh/10-capture v2 formal artifact；
+- max diff=`1.1920928955078125e-07`、sign exact，108 tensors / 664,744 elements；
+- Round 1两类coordinated rewrite纳入正式门禁，完整性负例=`11/11 rejected`；
+- 定向=`24 passed`，全量=`1376 passed, 3 skipped, 6 warnings`；
+- 状态=`VALIDATED-B4-B0-V2-PENDING-ROUND2-EXTERNAL-AUDIT`，B4-B1/TIR/performance仍关闭。
+  详见 `gemini_doc/change_2026-08-18_fsg4_b4b0_v2_internal_closure.md`。
+
 ## 2026-08-18：FSG4/B4-B0 Round 1 Identity Binding 修复
 
 - 外审Round 1以1个major否决：全run协调改写topology/lineage并重签可绕过相对一致性；

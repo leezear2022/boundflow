@@ -12,8 +12,8 @@ import torch
 from scripts import probe_fsg4_b4b_five_fresh_tamper as integrity
 from scripts import run_fsg4_b4b_five_fresh_artifact as artifact
 
-ARTIFACT = Path("artifacts/fsg4-b4b-five-fresh/resnet2b-prop0-v1")
-TAMPER = ARTIFACT.parent / "resnet2b-prop0-v1-tamper-report.json"
+ARTIFACT = Path("artifacts/fsg4-b4b-five-fresh/resnet2b-prop0-v2")
+TAMPER = ARTIFACT.parent / "resnet2b-prop0-v2-tamper-report.json"
 SOURCE_CAPTURE = Path(
     "artifacts/rvir-v4-pre-state/resnet2b-core-pre-state-v1/source_capture.pt"
 )
@@ -40,8 +40,8 @@ def test_b4b0_five_fresh_artifact_replays_all_raw_captures() -> None:
 def test_b4b0_five_fresh_tamper_report_rejects_all_attacks() -> None:
     report = json.loads(TAMPER.read_text(encoding="utf-8"))
 
-    assert report["attack_count"] == 9
-    assert report["rejected_count"] == 9
+    assert report["attack_count"] == 11
+    assert report["rejected_count"] == 11
     assert all(row["outer_resigned"] is True for row in report["rows"])
     assert all(row["rejected"] is True for row in report["rows"])
     assert report["performance_claimed"] is False

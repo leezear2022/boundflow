@@ -318,3 +318,12 @@ anchor/lineage/source tensor/receipt hashes冻结为绝对身份，同时绑定m
 合法v1 replay保持，原9类+两类coordinated完整性负例=`11/11 rejected`。当前状态=
 `IMPLEMENTED-B4-B0-R1-F1-IDENTITY-BINDING-PENDING-V2`；下一唯一动作是clean-source v2 formal
 artifact与Round 2。B4-B1/B4-B2/TIR/performance仍关闭。
+
+### B4-B0 v2内部关闭
+
+source=`422a3ee`的v2 formal artifact已完成5 fresh/10 captures，比较108 tensors/664,744
+elements，max diff=`1.1920928955078125e-07`、sign exact。protocol与manifest绑定冻结source、
+topology、anchor及lineage绝对身份，正式完整性门禁（含Round 1两类coordinated rewrite）=
+`11/11 rejected`；定向=`24 passed`，全量=`1376 passed, 3 skipped, 6 warnings`。状态=
+`VALIDATED-B4-B0-V2-PENDING-ROUND2-EXTERNAL-AUDIT`；下一唯一动作
+是回复F1并提交Round 2，获批前不得启动B4-B1/B4-B2、TIR或性能计时。

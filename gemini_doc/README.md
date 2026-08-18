@@ -10,6 +10,13 @@
 
 ---
 
+FSG4/B4-B0 v2已内部关闭，状态=`VALIDATED-B4-B0-V2-PENDING-ROUND2-EXTERNAL-AUDIT`。
+source=`422a3ee`；5 fresh/10 captures、108 tensors/664,744 elements、max diff=`1.1920928955078125e-07`、
+sign exact；绝对source/topology/lineage身份绑定与11/11完整性负例通过。下一步只允许回复F1并提交
+Round 2；定向=`24 passed`、全量=`1376 passed, 3 skipped, 6 warnings`；B4-B1/B4-B2/TIR/
+performance仍关闭。变更见
+`change_2026-08-18_fsg4_b4b0_v2_internal_closure.md`。
+
 FSG4/B4-B0外审Round 1=`changes_requested`：协调一致改写全部run的topology/lineage可绕过原相对
 一致性校验。F1 major的v2绝对身份绑定已实现，状态=
 `IMPLEMENTED-B4-B0-R1-F1-IDENTITY-BINDING-PENDING-V2`；合法v1 replay保持，11/11本地完整性
