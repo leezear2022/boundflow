@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-18 FSG4/B4-B0 capture合同指令**：typed schema和9项测试已实现，但尚未接live
+> solver。下一唯一动作是在optimizer evaluation 0的显式opt-in路径捕获两锚点的
+> compressed源状态、native dense输入、outputs和native gradients；未live 5 fresh前不得实现TIR。
+
 > **2026-08-18 FSG4/B4-B v1执行指令**：预注册已完成，但未实现。下一唯一动作是
 > B4-B0：在optimizer evaluation 0对`node31/Gemm_14`的active-beta语义锚点与
 > `node25/Conv_8`候选性能锚点生成read-only production exact-call capture。两锚点5 fresh

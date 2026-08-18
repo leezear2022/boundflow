@@ -1,6 +1,7 @@
 # FSG4/B4-B Differentiable CUDA/TIR v1 预注册记录
 
-日期：2026-08-18  
+日期：2026-08-18
+
 状态：`PREREGISTERED-B4-B-V1-NOT-IMPLEMENTED`
 
 ## 背景
@@ -18,6 +19,9 @@ B4-0已冻结可微 lower-only CROWN opportunity；B4-A已外审关闭为性能N
 - 第一工程步只做B4-B0：optimizer evaluation 0的gradient-active、read-only exact-call capture，
   两锚点各至少5 fresh process，含raw tensor/output/gradient、root replay与tamper。
 - B4-B0通过前不实现TIR；不改宽`boundflow/runtime/fused_crown.py`的PR-12 plain capability。
+- capture明确分离production compressed α/β映射源与native dense α/β/
+  `relu_pre_add_coeff_l`算子输入；gradient归属于native dense leaf，不把压缩源伪造为
+  exact-region autograd leaf。
 - 未来TIR必须有独立schema/cache/dispatch，forward与custom backward同时通过；单shape局部
   speedup不得外推为whole-core/query claim。
 

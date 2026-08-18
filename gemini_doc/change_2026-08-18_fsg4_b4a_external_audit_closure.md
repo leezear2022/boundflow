@@ -1,7 +1,9 @@
 # FSG4/B4-A 外部审计关闭记录
 
-日期：2026-08-18  
-最终状态：`EXTERNALLY-APPROVED-VALIDATED-NO-GO-B4-A-PERFORMANCE`  
+日期：2026-08-18
+
+最终状态：`EXTERNALLY-APPROVED-VALIDATED-NO-GO-B4-A-PERFORMANCE`
+
 exchange：`fsg4-b4a-formal-timing-20260818`，Round 1，`closed/approved`
 
 ## 1. 审计结论

@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-18 FSG4/B4-B0 typed capture contract候选**：状态=
+> `IMPLEMENTED-B4-B0-CAPTURE-CONTRACT-PENDING-LIVE-HOOK`。仅支持schema/admission/tamper-unit
+> mechanism；不支持live capture、5 fresh、gradient parity、TIR或speedup。合同同时绑定production
+> compressed与native dense状态，防止把压缩源伪造为exact-region autograd leaf。
+
 > **2026-08-18 FSG4/B4-B v1预注册**：状态=`PREREGISTERED-B4-B-V1-NOT-IMPLEMENTED`，无
 > implementation/correctness/performance claim。必须同时关闭active-beta Gemm语义锚点和高占比Conv
 > 性能锚点；首先只允许gradient-active evaluation-0 read-only exact-call capture。B4-A不进入

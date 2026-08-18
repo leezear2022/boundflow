@@ -1,5 +1,5 @@
 ---
-status: preregistered-not-implemented
+status: b4b0-capture-contract-implemented-pending-live-hook
 updated: 2026-08-18T04:02:28Z
 type: plan
 topic: boundflow
@@ -76,8 +76,10 @@ correlation parent CPU operator恢复并绑定lineage，不得猜测。
 - incoming coefficient shape=`[6, 1, 100]`；
 - preactivation shape=`[6, 100]`；
 - producer=`/input-28`；
-- α source=`/48`，sparse parameter shape=`(2, 1, 6, 27)`；
-- β source=`/input-28`，value shape=`(6, 1)`；
+- production compressed α source=`alpha/%2F48/%2F49`，shape=`(2, 1, 6, 27)`；
+- mapped native dense α shape=`(6, 100)`；
+- production compressed β source=`beta/%2Finput-28/0/value`，shape=`(6, 1)`；
+- mapped native dense β与`relu_pre_add_coeff_l` shape=`(6, 100)`；
 - dtype/device/layout=`float32/cuda/contiguous`；
 - 必须同时观测incoming A、α、β的gradient。
 
@@ -92,7 +94,10 @@ Gemm backward与optimizer mutation的端到端所有权，不用于宣称高占�
 - preactivation shape=`[6, 16, 8, 8]`；
 - producer=`/input-20`；
 - dtype/device/layout=`float32/cuda/contiguous`；
-- β shape=`(6, 0)`，因此P-anchor不替代S-anchor。
+- production compressed α source=`alpha/%2Finput-24/%2F49`，shape=`(2,1,6,86)`，
+  mapped native dense α shape=`(6,16,8,8)`；
+- production compressed β source=`beta/%2Finput-20/0/value`，shape=`(6,0)`，但mapped native dense
+  β和`relu_pre_add_coeff_l` shape=`(6,16,8,8)`；因此P-anchor不替代S-anchor。
 
 B4-0 raw还观察到高频`cudnn_convolution_transpose` production shapes，例如
 `[6,16,8,8] x [16,16,3,3]`。B4-B0必须从gradient-active的exact call现场捕获
@@ -110,10 +115,13 @@ terminal no-grad evaluation，否则无法冻结custom backward。
 - source/code/external repo/model/property/protocol identity；
 - start-node key、node ordinal/name、producer ordinal/name、phase/call/evaluation ordinal；
 - lower/upper bounds、incoming lower A、previous lower A、weight/bias与Conv/Gemm attributes；
-- sparse alpha value/index/lookup/start-node mapping；
-- beta value/sign/loc/bias/update_mask及空/非空状态；
+- production compressed alpha value/index/lookup/start-node mapping，mapped native dense alpha，以及两者
+  round-trip lineage；
+- production compressed beta value/sign/loc/bias/update_mask与空/非空状态，mapped native dense beta、
+  `relu_pre_add_coeff_l`以及两者round-trip lineage；
 - eager output lower A、bias delta、下一producer输入；
-- loss-seeded incoming gradient及incoming A/α/β的eager gradients；
+- loss-seeded incoming gradient及incoming A/native dense α/native dense β的eager gradients；production
+  compressed α/β是映射源状态，不伪造为exact region直接的autograd leaf；
 - shape/dtype/device/layout/requires_grad/alias/stream；
 - raw tensor payload与canonical digest，所有写盘/hash位于timed region之外。
 
@@ -254,5 +262,12 @@ B3行为必须bit-for-bit保持原语义。无论B4-B结果为GO或NO-GO，都�
 - PR-12 plain capability：`boundflow/runtime/fused_crown.py`；
 - production mutable state：`scripts/run_fsg4_b3_counter_diagnostic.py`。
 
-下一唯一工程动作：实现B4-B0 read-only production exact-call capture；未通过B4-B0前不实现
-TIR。
+## 12. 执行更新（2026-08-18）
+
+B4-B0 typed capture substrate已实现，状态=
+`IMPLEMENTED-B4-B0-CAPTURE-CONTRACT-PENDING-LIVE-HOOK`。实现明确分离production compressed
+α/β映射源与native dense α/β/`relu_pre_add_coeff_l`算子输入及native gradients；9项测试、
+fixed related 45项和静态门禁通过。尚未接入live solver，不支持correctness/performance claim。
+
+下一唯一工程动作：在optimizer evaluation 0将typed contract接入显式opt-in live observer；未通过
+B4-B0 five-fresh/replay/tamper前不实现TIR。

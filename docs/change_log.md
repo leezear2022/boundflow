@@ -1,5 +1,13 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-18：FSG4/B4-B0 Typed Capture Contract 候选
+
+- 新增双锚点production differentiable-region capture schema与stable metadata/hash；
+- 分离production compressed α/β映射源、native dense输入/gradients与`relu_pre_add_coeff_l`；
+- 9项正/负测试、fixed related 45 passed，Mypy clean，Pylint 10.00/10；
+- 状态=`IMPLEMENTED-B4-B0-CAPTURE-CONTRACT-PENDING-LIVE-HOOK`，无live/TIR/performance claim。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4b_capture_contract_candidate.md`。
+
 ## 2026-08-18：FSG4/B4-B Differentiable CUDA/TIR v1 预注册
 
 - 冻结active-beta `node31/Gemm_14`语义锚点和`node25/Conv_8`候选性能锚点；
