@@ -28,7 +28,10 @@ from scripts import probe_fsg4_b4b1_pytorch_reference_integrity as reference_int
 
 ARTIFACT = Path("artifacts/fsg4-b4b1-reference-five-fresh/resnet2b-prop0-v1/run_00.pt")
 CAPTURE_ARTIFACT = ARTIFACT.parent
-REFERENCE_ARTIFACT = Path("artifacts/fsg4-b4b1-pytorch-reference/resnet2b-prop0-v1")
+REFERENCE_ARTIFACT_V1 = Path("artifacts/fsg4-b4b1-pytorch-reference/resnet2b-prop0-v1")
+REFERENCE_INTEGRITY_REPORT = REFERENCE_ARTIFACT_V1.parent / (
+    "resnet2b-prop0-v1-integrity-report.json"
+)
 
 
 def _captures() -> tuple[ProductionDifferentiableReferenceCaptureV1, ...]:
@@ -297,7 +300,7 @@ def test_b4b1_reference_artifact_candidate_recomputes_all_five_fresh() -> None:
     assert len(records) == summary["capture_count"] == 10
     assert summary["metric_comparison_count"] == 60
     assert summary["element_comparison_count"] == 196380
-    assert summary["maximum_absolute_difference"] == 1.9073486328125e-06
+    assert summary["maximum_absolute_difference"] == 6.109476089477539e-07
     assert summary["all_metrics_allclose"] is True
     assert summary["all_metrics_sign_exact"] is True
     assert summary["s_native_beta_gradient_count"] == 5
@@ -306,19 +309,28 @@ def test_b4b1_reference_artifact_candidate_recomputes_all_five_fresh() -> None:
     assert summary["tir_admitted"] is False
 
 
-def test_b4b1_formal_reference_artifact_root_replays() -> None:
-    records, summary, result = reference_artifact._verify_static_artifact(
-        REFERENCE_ARTIFACT, CAPTURE_ARTIFACT
-    )
-    assert len(records) == summary["capture_count"] == result["capture_count"] == 10
-    assert summary["summary_hash"] == (
-        "9489c70ff8cae22f46482e6e19f27c5eba04a7cad3f233d4cfaee72987674cc2"
-    )
-    assert result["status"] == "replay-passed"
-    assert result["maximum_absolute_difference"] == 1.9073486328125e-06
-    assert result["all_metrics_sign_exact"] is True
-    assert result["performance_claimed"] is False
-    assert result["tir_admitted"] is False
+def test_b4b1_v1_reference_artifact_is_rejected_after_policy_freeze() -> None:
+    with pytest.raises(ValueError, match="reference protocol differs"):
+        reference_artifact._verify_static_artifact(
+            REFERENCE_ARTIFACT_V1, CAPTURE_ARTIFACT
+        )
+
+
+def test_b4b1_reference_runner_restores_and_normalizes_thread_policy() -> None:
+    previous = torch.get_num_threads()
+    try:
+        rows = []
+        for threads in (1, 4):
+            torch.set_num_threads(threads)
+            protocol = reference_artifact._protocol(CAPTURE_ARTIFACT)
+            records = reference_artifact._records_from_source(
+                CAPTURE_ARTIFACT, protocol
+            )
+            assert torch.get_num_threads() == threads
+            rows.append(records)
+        assert rows[0] == rows[1]
+    finally:
+        torch.set_num_threads(previous)
 
 
 def test_b4b1_coordinated_all_run_rewrites_are_numerically_rejected() -> None:
@@ -333,3 +345,16 @@ def test_b4b1_coordinated_all_run_rewrites_are_numerically_rejected() -> None:
         and row["rejected_by_numerical_reference"] is True
         for row in report["rows"]
     )
+
+
+def test_b4b1_formal_integrity_report_is_hash_bound() -> None:
+    report = reference_artifact._load_json(REFERENCE_INTEGRITY_REPORT)
+    assert report["case_count"] == report["rejected_count"] == 2
+    assert report["report_hash"] == (
+        "7e53b7d77b16935ce12eab7a3bfcedcc678737a4e4ece54b0c456343cf0f6623"
+    )
+    assert report["probe_code_sha256"] == (
+        "6336a0ad75d2eee2fdf74267b302fa70b671d688bd240e801c8c925a09cfce05"
+    )
+    assert report["performance_claimed"] is False
+    assert report["tir_admitted"] is False

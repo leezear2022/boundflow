@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 import hashlib
 import json
 from pathlib import Path
@@ -15,6 +16,8 @@ import shutil
 import subprocess
 import tempfile
 from typing import Any, cast, Mapping, Sequence
+
+import torch
 
 from boundflow.runtime.fsg4_b4b1_pytorch_reference import (
     B4B1_REFERENCE_ATOL,
@@ -31,6 +34,7 @@ ARTIFACT_SCHEMA = "boundflow.fsg4-b4b1-pytorch-reference-artifact/v1"
 PROTOCOL_SCHEMA = "boundflow.fsg4-b4b1-pytorch-reference-protocol/v1"
 SUMMARY_SCHEMA = "boundflow.fsg4-b4b1-pytorch-reference-summary/v1"
 RUN_COUNT = 5
+REFERENCE_TORCH_THREADS = 1
 ANCHORS = (
     "semantic-active-beta-gemm-14",
     "performance-conv-8-candidate",
@@ -165,6 +169,10 @@ def _protocol(capture_artifact: Path) -> dict[str, object]:
         "alpha_direction_index": 0,
         "alpha_spec_index": 0,
         "beta_pre_add_formula": "negative-value-times-split-sign-v1",
+        "torch_num_threads": REFERENCE_TORCH_THREADS,
+        "torch_deterministic_algorithms": True,
+        "torch_float32_matmul_precision": "highest",
+        "torch_mkldnn_enabled": False,
         "atol": B4B1_REFERENCE_ATOL,
         "rtol": B4B1_REFERENCE_RTOL,
         "sign_exact": True,
@@ -188,6 +196,10 @@ def _validate_protocol(protocol: Mapping[str, Any], capture_artifact: Path) -> N
         or protocol.get("alpha_direction_index") != 0
         or protocol.get("alpha_spec_index") != 0
         or protocol.get("beta_pre_add_formula") != "negative-value-times-split-sign-v1"
+        or protocol.get("torch_num_threads") != REFERENCE_TORCH_THREADS
+        or protocol.get("torch_deterministic_algorithms") is not True
+        or protocol.get("torch_float32_matmul_precision") != "highest"
+        or protocol.get("torch_mkldnn_enabled") is not False
         or protocol.get("atol") != B4B1_REFERENCE_ATOL
         or protocol.get("rtol") != B4B1_REFERENCE_RTOL
         or protocol.get("sign_exact") is not True
@@ -244,7 +256,29 @@ def _records_from_source(
     _validate_protocol(protocol, capture_artifact)
     runs, _summary, _result = source_artifact._verify_static_artifact(capture_artifact)
     source_protocol = source_artifact._load_json(capture_artifact / "protocol.json")
-    return _records(cast(list[Mapping[str, Any]], runs), source_protocol)
+    with _reference_execution_policy():
+        return _records(cast(list[Mapping[str, Any]], runs), source_protocol)
+
+
+@contextmanager
+def _reference_execution_policy():
+    """Freeze and restore the CPU policy used by exact derived-record replay."""
+
+    previous_threads = torch.get_num_threads()
+    previous_deterministic = torch.are_deterministic_algorithms_enabled()
+    previous_precision = torch.get_float32_matmul_precision()
+    previous_mkldnn = torch.backends.mkldnn.enabled
+    try:
+        torch.set_num_threads(REFERENCE_TORCH_THREADS)
+        torch.use_deterministic_algorithms(True)
+        torch.set_float32_matmul_precision("highest")
+        torch.backends.mkldnn.enabled = False
+        yield
+    finally:
+        torch.backends.mkldnn.enabled = previous_mkldnn
+        torch.set_float32_matmul_precision(previous_precision)
+        torch.use_deterministic_algorithms(previous_deterministic)
+        torch.set_num_threads(previous_threads)
 
 
 def _summary(
