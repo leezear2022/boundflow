@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-18 FSG4/B4-A正式计时v3环境拒绝**：source=`be2fa96`的v3完成20个worker后，worker 20
+> 因执行期software thermal counter独立增长而`environment.admitted=false`；correctness、activation与
+> profile结构未失败，但v3整体不进入ratio。正式协议现绑定`nvidia-powerd=inactive`与
+> `enforced.power.limit=55.0 W`，逐worker和replay重验，tamper扩为13类。只允许clean-source v4从0
+> 重跑，当前无performance claim。
+
 > **2026-08-18 FSG4/B4-A正式计时v2环境拒绝**：source=`ee73bc2`的v2在5个complete worker后，
 > worker 5因独立software thermal slowdown而`environment.admitted=false`；v2不进入ratio。B4-A formal
 > preflight加固为每worker前`<=45°C`且software thermal完全inactive；只允许clean-source v3从0重跑，
@@ -11,7 +17,7 @@
 > v2从position 0重跑，当前无性能claim。
 
 > **2026-08-18 FSG4/B4-A正式计时Runner候选**：冻结的24-process B3/B4-A control/profile runner、
-> raw-first/resume、root replay及12类outer-resigned tamper probe已实现；固定related=`63 passed`，
+> raw-first/resume、root replay及13类outer-resigned tamper probe已实现；固定related=`63 passed`，
 > Black/Mypy/Pylint及全量`1353 passed, 3 skipped`通过。状态=
 > `IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`，无性能claim，B4-B/TIR关闭。
 

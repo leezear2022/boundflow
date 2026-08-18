@@ -35,6 +35,8 @@ def _preflight(*, temperature: int = 45, software_thermal: str = "Not Active"):
     active = software_thermal == "Active"
     return {
         "temperature_limit_celsius": timing.B4A_PREFLIGHT_TEMPERATURE_LIMIT_C,
+        "nvidia_powerd_state": timing.NVIDIA_POWERD_REQUIRED_STATE,
+        "gpu_power_limit_watts": timing.GPU_POWER_LIMIT_WATTS,
         "poll_seconds": timing.base_experiment.PREFLIGHT_POLL_SECONDS,
         "timeout_seconds": timing.base_experiment.PREFLIGHT_TIMEOUT_SECONDS,
         "sample_count": 1,
@@ -93,6 +95,10 @@ def test_formal_preflight_requires_cool_and_fully_inactive_software_thermal() ->
         timing._validate_formal_preflight(_preflight(temperature=46))
     with pytest.raises(ValueError, match="strict preflight admission differs"):
         timing._validate_formal_preflight(_preflight(software_thermal="Active"))
+    wrong_power = _preflight()
+    wrong_power["nvidia_powerd_state"] = "active"
+    with pytest.raises(ValueError, match="strict preflight payload differs"):
+        timing._validate_formal_preflight(wrong_power)
 
 
 def test_formal_decision_accepts_exact_preregistered_boundaries() -> None:

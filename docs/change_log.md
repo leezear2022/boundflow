@@ -1,5 +1,14 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-18：FSG4/B4-A GPU 功耗策略绑定
+
+- source=`be2fa96`的v3完成20个worker后，worker 20因执行期software thermal counter独立增长而
+  fail closed；v3不续跑、不形成ratio；
+- 正式协议、每worker preflight和replay绑定`nvidia-powerd=inactive`与
+  `enforced.power.limit=55.0 W`；
+- tamper清单扩为13类；下一步完成验证、提交clean source并从position 0运行v4，无性能claim。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4a_power_policy_binding.md`。
+
 ## 2026-08-18：FSG4/B4-A Strict Preflight 加固
 
 - source=`ee73bc2`的v2完成5个worker后，worker 5因独立software thermal slowdown fail closed；

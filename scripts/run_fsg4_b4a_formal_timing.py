@@ -71,11 +71,15 @@ QUERY_WORST_GATE = 0.98
 ATOL = 2e-4
 RTOL = 2e-4
 B4A_PREFLIGHT_TEMPERATURE_LIMIT_C = 45
+NVIDIA_POWERD_REQUIRED_STATE = "inactive"
+GPU_POWER_LIMIT_WATTS = 55.0
 WORKER_TIMEOUT_SECONDS = base_experiment.WORKER_SUBPROCESS_TIMEOUT_SECONDS
 FORMAL_PREFLIGHT_CONTRACT = {
     **base_experiment.FORMAL_PREFLIGHT_CONTRACT,
     "temperature_limit_celsius": B4A_PREFLIGHT_TEMPERATURE_LIMIT_C,
     "software_thermal_signal_must_be_inactive": True,
+    "nvidia_powerd_required_state": NVIDIA_POWERD_REQUIRED_STATE,
+    "gpu_power_limit_watts": GPU_POWER_LIMIT_WATTS,
 }
 
 
@@ -136,6 +140,35 @@ def _git(root: Path, *args: str) -> str:
         text=True,
     )
     return completed.stdout.strip()
+
+
+def _nvidia_powerd_state() -> str:
+    completed = subprocess.run(
+        ("systemctl", "is-active", "nvidia-powerd.service"),
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    return completed.stdout.strip()
+
+
+def _gpu_power_limit_watts() -> float:
+    completed = subprocess.run(
+        (
+            "nvidia-smi",
+            "--query-gpu=enforced.power.limit",
+            "--format=csv,noheader,nounits",
+        ),
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    rows = [row.strip() for row in completed.stdout.splitlines() if row.strip()]
+    if len(rows) != 1:
+        raise ValueError("FSG4/B4-A GPU power-limit inventory differs")
+    return float(rows[0])
 
 
 def _code_revision() -> dict[str, str]:
@@ -214,6 +247,8 @@ def _protocol(args: argparse.Namespace) -> dict[str, object]:
         "property_name": property_path.name,
         "property_sha256": _file_sha256(property_path),
         "python_name": args.abcrown_python.name,
+        "nvidia_powerd_state": _nvidia_powerd_state(),
+        "gpu_power_limit_watts": _gpu_power_limit_watts(),
         "headline_mode": "control-only",
         "profile_role": "attribution-only",
         "core_wall_geomean_gate": CORE_GATE,
@@ -238,6 +273,8 @@ def _validate_protocol(value: Mapping[str, Any]) -> None:
         or value.get("correctness_identity") != _correctness_identity()
         or value.get("headline_mode") != "control-only"
         or value.get("profile_role") != "attribution-only"
+        or value.get("nvidia_powerd_state") != NVIDIA_POWERD_REQUIRED_STATE
+        or value.get("gpu_power_limit_watts") != GPU_POWER_LIMIT_WATTS
         or value.get("core_wall_geomean_gate") != CORE_GATE
         or value.get("query_wall_worst_pair_gate") != QUERY_WORST_GATE
         or value.get("performance_claimed") is not False
@@ -346,6 +383,8 @@ def _normalize_preflight(value: Mapping[str, Any]) -> dict[str, Any]:
 
 def _validate_formal_preflight(value: Mapping[str, Any]) -> None:
     base_value = dict(value)
+    base_value.pop("nvidia_powerd_state", None)
+    base_value.pop("gpu_power_limit_watts", None)
     base_value["temperature_limit_celsius"] = (
         base_experiment.PREFLIGHT_TEMPERATURE_LIMIT_C
     )
@@ -353,6 +392,8 @@ def _validate_formal_preflight(value: Mapping[str, Any]) -> None:
     samples = value.get("samples")
     if (
         value.get("temperature_limit_celsius") != B4A_PREFLIGHT_TEMPERATURE_LIMIT_C
+        or value.get("nvidia_powerd_state") != NVIDIA_POWERD_REQUIRED_STATE
+        or value.get("gpu_power_limit_watts") != GPU_POWER_LIMIT_WATTS
         or not isinstance(samples, list)
         or not samples
         or not isinstance(samples[-1], Mapping)
@@ -372,6 +413,16 @@ def _wait_for_formal_environment() -> dict[str, object]:
     started = time.monotonic_ns()
     samples: list[dict[str, object]] = []
     while True:
+        powerd_state = _nvidia_powerd_state()
+        power_limit = _gpu_power_limit_watts()
+        if (
+            powerd_state != NVIDIA_POWERD_REQUIRED_STATE
+            or power_limit != GPU_POWER_LIMIT_WATTS
+        ):
+            raise RuntimeError(
+                "FSG4/B4-A formal GPU power policy differs: "
+                f"powerd={powerd_state}:limit={power_limit}"
+            )
         observed = base_experiment._wait_for_formal_environment()
         observed_samples = observed.get("samples")
         if not isinstance(observed_samples, list) or not observed_samples:
@@ -388,6 +439,8 @@ def _wait_for_formal_environment() -> dict[str, object]:
         if ready:
             value: dict[str, object] = {
                 "temperature_limit_celsius": B4A_PREFLIGHT_TEMPERATURE_LIMIT_C,
+                "nvidia_powerd_state": powerd_state,
+                "gpu_power_limit_watts": power_limit,
                 "poll_seconds": base_experiment.PREFLIGHT_POLL_SECONDS,
                 "timeout_seconds": base_experiment.PREFLIGHT_TIMEOUT_SECONDS,
                 "sample_count": len(samples),

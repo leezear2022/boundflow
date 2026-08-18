@@ -165,6 +165,17 @@ def _mutate_formal_preflight(artifact: Path) -> None:
     artifact_runner._write_jsonl(artifact / "run_metadata.jsonl", rows)
 
 
+def _mutate_power_policy(artifact: Path) -> None:
+    metadata_path = artifact / "metadata/run_00.json"
+    metadata = artifact_runner._load_json(metadata_path)
+    preflight = cast(dict[str, Any], metadata["formal_preflight"])
+    preflight["nvidia_powerd_state"] = "active"
+    artifact_runner._write_json(metadata_path, metadata)
+    rows = artifact_runner._load_jsonl(artifact / "run_metadata.jsonl")
+    rows[0] = metadata
+    artifact_runner._write_jsonl(artifact / "run_metadata.jsonl", rows)
+
+
 def _mutate_protocol_sequence(artifact: Path) -> None:
     protocol = artifact_runner._load_json(artifact / "protocol.json")
     sequence = cast(list[dict[str, Any]], protocol["sequence"])
@@ -210,6 +221,7 @@ ATTACKS: tuple[tuple[str, Callable[[Path], None]], ...] = (
     ("runtime-environment-outer-resign", _mutate_runtime_environment),
     ("worker-protocol-outer-resign", _mutate_worker_protocol),
     ("formal-preflight-outer-resign", _mutate_formal_preflight),
+    ("power-policy-outer-resign", _mutate_power_policy),
     ("protocol-sequence-outer-resign", _mutate_protocol_sequence),
     ("paired-ratio-outer-resign", _mutate_paired_ratio),
     ("summary-outer-resign", _mutate_summary),

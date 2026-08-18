@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-18 FSG4/B4-A正式计时v3环境处置**：source=`be2fa96`的v3完成20个worker后因执行期
+> software thermal counter独立增长fail closed；v3不得续跑或形成ratio。正式功耗策略冻结为
+> `nvidia-powerd=inactive`与`enforced.power.limit=55.0 W`，逐worker/replay重验，tamper共13类。下一步
+> 完成验证并以clean source从0运行v4，仍无performance claim。
+
 > **2026-08-18 FSG4/B4-A正式计时v2环境处置**：source=`ee73bc2`的v2因worker 5独立software
 > thermal slowdown fail closed；不得续跑或挑样本。preflight加固为`<=45°C`且software thermal完全
 > inactive；下一步只允许clean-source v3从position 0重跑，仍无performance claim。
@@ -9,7 +14,7 @@
 > clean-source v2从position 0重跑，仍保持`performance_claimed=false`与B4-B/TIR关闭。
 
 > **2026-08-18 FSG4/B4-A正式计时Runner指令**：24-process runner、raw-first/resume、root replay及
-> 12类outer-resigned tamper probe已实现。下一唯一动作是提交clean source并运行正式GPU artifact；
+> 13类outer-resigned tamper probe已实现。下一唯一动作是提交clean source并运行正式GPU artifact；
 > 在replay/tamper与外审前保持`performance_claimed=false`，不得启动B4-B/TIR。
 
 > **2026-08-18 FSG4/B4-A正式计时指令**：只实现并运行冻结的24-process B3/B4-A协议；control检验

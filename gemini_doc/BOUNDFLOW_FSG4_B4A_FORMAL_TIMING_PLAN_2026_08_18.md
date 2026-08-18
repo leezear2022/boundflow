@@ -1,5 +1,5 @@
 ---
-status: implemented-pending-clean-source-formal-run
+status: implemented-pending-power-policy-validation
 updated: 2026-08-18T09:30:00+08:00
 type: plan
 topic: boundflow
@@ -43,6 +43,9 @@ control 才进入 headline ratio；profile 只报告 optimizer、terminal export
 归因和 closure，不与 control 混算。每个 worker 启动前执行与 B3 正式实验相同的 AC power、GPU process、
 thermal/power stability preflight。v2环境拒绝后的加固要求：最终sample还必须GPU `<=45°C`且
 `sw_thermal_slowdown=Not Active`；active信号即使与power counter精确耦合也不准入。
+v3又证明温度门槛不足以约束移动GPU Dynamic Boost：正式序列额外冻结
+`nvidia-powerd.service=inactive`与`enforced.power.limit=55.0 W`，protocol、每worker preflight和
+replay必须三处一致；实验完成后恢复service。
 
 ## 3. Raw-first 与环境
 
@@ -52,6 +55,7 @@ thermal/power stability preflight。v2环境拒绝后的加固要求：最终sam
 - venv Python 保留 symlink，不可 `resolve()` 成裸解释器；
 - logs 使用 `$BOUNDFLOW_ROOT/$ABCROWN_ROOT/$VNNCOMP_ROOT/$PYTHON` 别名并拒绝本机路径；
 - protocol 绑定 source/code blobs、B4-A five-fresh manifest/file hash、模型/property与三个外部 commit。
+- protocol 同时绑定GPU功耗策略；任何worker前service非inactive或生效功耗上限非55.0 W立即拒绝。
 
 ## 4. Correctness 与 activation
 
@@ -108,5 +112,6 @@ closure、summary threshold/classification；全部必须拒绝。
 
 另跑 full pytest、Black、Mypy、Pylint、`git diff --check`、DocOps lint。
 
-24-process formal runner、root replay与12类outer-resigned tamper probe已实现；下一唯一动作是提交clean
-source后执行GPU实验。B4-B/TIR保持关闭。
+24-process formal runner、root replay与13类outer-resigned tamper probe已实现；下一唯一动作是完成
+功耗策略合同验证、提交clean source后从position 0执行v4。v1/v2/v3均不得恢复或进入ratio，B4-B/TIR
+保持关闭。
