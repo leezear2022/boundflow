@@ -142,7 +142,6 @@ def build_b4b1_differentiable_lower_ir_v1(
         split_state_hash=base.split_state_hash,
         topology_hash=base.topology_hash,
         lineage_hash=cast(str, lineage.metadata(anchor)["lineage_hash"]),
-        base_capture_hash=cast(str, base.metadata()["capture_hash"]),
     )
     ir.validate()
     return ir

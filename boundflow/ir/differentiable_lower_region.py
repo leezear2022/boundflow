@@ -132,7 +132,6 @@ class DifferentiableLowerRegionIRV1:
     split_state_hash: str
     topology_hash: str
     lineage_hash: str
-    base_capture_hash: str
     alpha_direction_index: int = 0
     alpha_spec_index: int = 0
     relu_lower_relaxation: str = "ambiguous-alpha-sign-select-v1"
@@ -168,7 +167,6 @@ class DifferentiableLowerRegionIRV1:
             self.split_state_hash,
             self.topology_hash,
             self.lineage_hash,
-            self.base_capture_hash,
         )
         expected_coefficient = (
             self.domain_count,
@@ -314,7 +312,6 @@ class DifferentiableLowerRegionIRV1:
                 "split_state_hash": self.split_state_hash,
                 "topology_hash": self.topology_hash,
                 "lineage_hash": self.lineage_hash,
-                "base_capture_hash": self.base_capture_hash,
             },
             "lower_only": self.lower_only,
             "coefficient_representation": self.coefficient_representation,
@@ -348,8 +345,8 @@ class DifferentiableLowerRegionInstanceV1:
         if (
             self.schema_version != DIFFERENTIABLE_LOWER_REGION_INSTANCE_SCHEMA
             or self.ir_hash != ir.stable_hash()
-            or self.base_capture_hash != ir.base_capture_hash
             or not _is_sha256(self.reference_capture_hash)
+            or not _is_sha256(self.base_capture_hash)
             or len(hashes) != len(self.input_tensor_hashes)
             or tuple(sorted(hashes))
             != tuple(name for name, _value in self.input_tensor_hashes)

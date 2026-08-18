@@ -98,6 +98,24 @@ def test_b4b1_ir_freezes_order_and_signed_beta_semantics() -> None:
     assert performance_ir.operator_attribute_map["output_padding"] == (0, 0)
 
 
+def test_b4b1_static_ir_hash_is_stable_across_five_fresh_runs() -> None:
+    hashes: dict[str, set[str]] = {}
+    for run_index in range(5):
+        payload = torch.load(
+            ARTIFACT.parent / f"run_{run_index:02d}.pt",
+            map_location="cpu",
+            weights_only=False,
+        )
+        for raw in payload["captures"]:
+            capture = production_differentiable_reference_capture_from_payload_v1(raw)
+            ir = build_b4b1_differentiable_lower_ir_v1(capture)
+            hashes.setdefault(ir.anchor_id, set()).add(ir.stable_hash())
+    assert {anchor: len(values) for anchor, values in hashes.items()} == {
+        "semantic-active-beta-gemm-14": 1,
+        "performance-conv-8-candidate": 1,
+    }
+
+
 @pytest.mark.parametrize(
     ("field", "value"),
     [
