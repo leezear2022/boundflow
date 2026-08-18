@@ -14,6 +14,8 @@
 - 对Conv强制weight shape、stride/padding/dilation/groups；
 - 显式分离production compressed alpha/beta映射源与native dense alpha/beta、
   `relu_pre_add_coeff_l`及native gradients。production compressed state不被伪造为exact-region leaf。
+- incoming A只在production raw本身`requires_grad=true`时要求gradient；顶层锚点不伪造
+  production gradient，custom-backward的incoming-A gradient由后续micro requires-grad clone验证。
 
 ## 负向门禁
 
@@ -22,8 +24,10 @@ tensor内容被篡改、CPU placeholder，以及两个正向锚点。
 
 ## 验证
 
-- `pytest -q tests/test_fsg4_b4b_production_region_capture.py`：`9 passed`；
+- `pytest -q tests/test_fsg4_b4b_production_region_capture.py`：`10 passed`；
 - B4-B/PR-12/B4-A/B3 fixed related：`45 passed`；
+- incoming-A所有权负向测试加入后fixed related：`46 passed`；
+- full：`1366 passed, 3 skipped, 6 warnings in 443.94s`；
 - Mypy explicit package bases：PASS；
 - Pylint：`10.00/10`；
 - Black：PASS。

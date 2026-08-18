@@ -4,7 +4,8 @@
 
 - 新增双锚点production differentiable-region capture schema与stable metadata/hash；
 - 分离production compressed α/β映射源、native dense输入/gradients与`relu_pre_add_coeff_l`；
-- 9项正/负测试、fixed related 45 passed，Mypy clean，Pylint 10.00/10；
+- 10项正/负测试、fixed related 46 passed、full=`1366 passed, 3 skipped`，Mypy clean，
+  Pylint 10.00/10；
 - 状态=`IMPLEMENTED-B4-B0-CAPTURE-CONTRACT-PENDING-LIVE-HOOK`，无live/TIR/performance claim。详见
   `gemini_doc/change_2026-08-18_fsg4_b4b_capture_contract_candidate.md`。
 

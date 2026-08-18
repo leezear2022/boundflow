@@ -81,7 +81,9 @@ correlation parent CPU operator恢复并绑定lineage，不得猜测。
 - production compressed β source=`beta/%2Finput-28/0/value`，shape=`(6, 1)`；
 - mapped native dense β与`relu_pre_add_coeff_l` shape=`(6, 100)`；
 - dtype/device/layout=`float32/cuda/contiguous`；
-- 必须同时观测incoming A、α、β的gradient。
+- 必须观测native dense α/β gradient；production incoming A是否requires-grad按raw事实记录。
+  顶层S-anchor可以是非可微objective常量；incoming-A custom-backward责任在B4-B1/B2
+  micro通过显式requires-grad clone验证，不伪造production gradient。
 
 S-anchor用于证明稀疏α选取、beta scatter/sign/loc/value、ReLU sign selection、bias reduction、
 Gemm backward与optimizer mutation的端到端所有权，不用于宣称高占比性能。
@@ -120,8 +122,9 @@ terminal no-grad evaluation，否则无法冻结custom backward。
 - production compressed beta value/sign/loc/bias/update_mask与空/非空状态，mapped native dense beta、
   `relu_pre_add_coeff_l`以及两者round-trip lineage；
 - eager output lower A、bias delta、下一producer输入；
-- loss-seeded incoming gradient及incoming A/native dense α/native dense β的eager gradients；production
-  compressed α/β是映射源状态，不伪造为exact region直接的autograd leaf；
+- loss-seeded native dense α/native dense β gradients；incoming A仅在production raw本身
+  `requires_grad=true`时要求其gradient；production compressed α/β是映射源状态，不伪造为
+  exact region直接的autograd leaf；
 - shape/dtype/device/layout/requires_grad/alias/stream；
 - raw tensor payload与canonical digest，所有写盘/hash位于timed region之外。
 
@@ -179,7 +182,8 @@ wrapper，但forward/backward两侧的backend receipt、module hash、stream和c
 ### Micro门禁
 
 - forward lower A/bias：atol/rtol=`2e-4`，sign exact；
-- incoming A/α/β gradient：atol/rtol=`2e-4`，sign exact for finite nonzero entries；
+- micro中显式requires-grad的incoming A/native α/native β gradient：atol/rtol=`2e-4`，
+  sign exact for finite nonzero entries；
 - 常量/离散结构exact，NaN/Inf一律拒绝；
 - 5个固定seed x 2 anchors x forward/backward全过；
 - warm时延排除compile/load/cache/hash，单列cold与warm；
@@ -266,8 +270,9 @@ B3行为必须bit-for-bit保持原语义。无论B4-B结果为GO或NO-GO，都�
 
 B4-B0 typed capture substrate已实现，状态=
 `IMPLEMENTED-B4-B0-CAPTURE-CONTRACT-PENDING-LIVE-HOOK`。实现明确分离production compressed
-α/β映射源与native dense α/β/`relu_pre_add_coeff_l`算子输入及native gradients；9项测试、
-fixed related 45项和静态门禁通过。尚未接入live solver，不支持correctness/performance claim。
+α/β映射源与native dense α/β/`relu_pre_add_coeff_l`算子输入及native gradients；10项测试、
+fixed related 46项、full=`1366 passed, 3 skipped`和静态门禁通过。尚未接入live
+solver，不支持correctness/performance claim。
 
 下一唯一工程动作：在optimizer evaluation 0将typed contract接入显式opt-in live observer；未通过
 B4-B0 five-fresh/replay/tamper前不实现TIR。

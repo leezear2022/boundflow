@@ -40,7 +40,7 @@ def _capture(*, performance: bool = False) -> ProductionDifferentiableRegionCapt
     anchor = B4B_PERFORMANCE_ANCHOR_V1 if performance else B4B_SEMANTIC_ANCHOR_V1
     values = {
         "incoming_lower_a": _snapshot(
-            "incoming_lower_a", anchor.coefficient_shape, requires_grad=True
+            "incoming_lower_a", anchor.coefficient_shape, requires_grad=performance
         ),
         "preactivation_lower": _snapshot(
             "preactivation_lower", anchor.preactivation_shape
@@ -72,10 +72,13 @@ def _capture(*, performance: bool = False) -> ProductionDifferentiableRegionCapt
         "loss_seed": _snapshot("loss_seed", (6, 1)),
     }
     gradients = {
-        "incoming_lower_a": _snapshot("incoming_lower_a", anchor.coefficient_shape),
         "native_alpha": _snapshot("native_alpha", anchor.native_alpha_shape),
         "native_beta": _snapshot("native_beta", anchor.native_beta_shape),
     }
+    if performance:
+        gradients["incoming_lower_a"] = _snapshot(
+            "incoming_lower_a", anchor.coefficient_shape
+        )
     attributes: dict[str, object] = {
         "operator_kind": anchor.producer_op_type,
         "weight_shape": list(values["operator_weight"].source_shape),
@@ -126,6 +129,16 @@ def test_b4b_capture_rejects_missing_beta_gradient() -> None:
     gradients = tuple(item for item in capture.gradients if item[0] != "native_beta")
     with pytest.raises(ValueError, match="production capture differs"):
         replace(capture, gradients=gradients).validate()
+
+
+def test_b4b_capture_rejects_spurious_incoming_gradient() -> None:
+    capture = _capture()
+    gradients = dict(capture.gradients)
+    gradients["incoming_lower_a"] = _snapshot(
+        "incoming_lower_a", capture.anchor.coefficient_shape
+    )
+    with pytest.raises(ValueError, match="gradient ownership differs"):
+        replace(capture, gradients=tuple(sorted(gradients.items()))).validate()
 
 
 def test_b4b_capture_rejects_empty_semantic_beta() -> None:

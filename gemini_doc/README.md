@@ -13,8 +13,9 @@
 FSG4/B4-B0 typed production-region capture contract已实现，状态=
 `IMPLEMENTED-B4-B0-CAPTURE-CONTRACT-PENDING-LIVE-HOOK`。合同明确分离production compressed α/β
 源状态、native dense α/β/`relu_pre_add_coeff_l`算子输入及native gradients，并对
-evaluation-0、CUDA identity、hash、Conv attrs、provider/fallback实施fail closed。新测试9 passed，
-fixed related 45 passed，静态门禁通过。尚未接live solver，无correctness/performance claim，
+evaluation-0、CUDA identity、hash、Conv attrs、provider/fallback实施fail closed。新测试10 passed，
+fixed related 46 passed，full=`1366 passed, 3 skipped`，静态门禁通过。尚未接live solver，
+无correctness/performance claim，
 TIR仍关闭。见`gemini_doc/change_2026-08-18_fsg4_b4b_capture_contract_candidate.md`。
 
 FSG4/B4-B differentiable CUDA/TIR v1已预注册，状态=`PREREGISTERED-B4-B-V1-NOT-IMPLEMENTED`。

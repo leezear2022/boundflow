@@ -242,7 +242,8 @@ _REQUIRED_VALUES = frozenset(
         "loss_seed",
     }
 )
-_REQUIRED_GRADIENTS = frozenset({"incoming_lower_a", "native_alpha", "native_beta"})
+_REQUIRED_GRADIENTS = frozenset({"native_alpha", "native_beta"})
+_OPTIONAL_GRADIENTS = frozenset({"incoming_lower_a"})
 
 
 @dataclass(frozen=True)
@@ -294,7 +295,8 @@ class ProductionDifferentiableRegionCaptureV1:
             or self.anchor.stable_hash() not in frozen_anchors
             or set(values) != _REQUIRED_VALUES
             or len(values) != len(self.values)
-            or set(gradients) != _REQUIRED_GRADIENTS
+            or not _REQUIRED_GRADIENTS.issubset(gradients)
+            or not set(gradients).issubset(_REQUIRED_GRADIENTS | _OPTIONAL_GRADIENTS)
             or len(gradients) != len(self.gradients)
             or len(attributes) != len(self.operator_attributes)
             or self.evaluation_ordinal != 0
@@ -328,10 +330,11 @@ class ProductionDifferentiableRegionCaptureV1:
             "relu_pre_add_coeff_l": self.anchor.native_beta_shape,
         }
         expected_gradient_shapes = {
-            "incoming_lower_a": self.anchor.coefficient_shape,
             "native_alpha": self.anchor.native_alpha_shape,
             "native_beta": self.anchor.native_beta_shape,
         }
+        if "incoming_lower_a" in gradients:
+            expected_gradient_shapes["incoming_lower_a"] = self.anchor.coefficient_shape
         for name, snapshot in values.items():
             snapshot.validate()
             if name != snapshot.name:
@@ -347,13 +350,14 @@ class ProductionDifferentiableRegionCaptureV1:
             ):
                 raise ValueError(f"FSG4/B4-B gradient tensor differs: {name}")
         if (
-            values["incoming_lower_a"].source_requires_grad is not True
-            or values["native_alpha"].source_requires_grad is not True
+            values["native_alpha"].source_requires_grad is not True
             or values["native_beta"].source_requires_grad is not True
             or values["production_alpha"].source_requires_grad is not False
             or values["production_beta"].source_requires_grad is not False
             or values["relu_pre_add_coeff_l"].source_requires_grad is not True
             or any(snapshot.source_requires_grad for snapshot in gradients.values())
+            or values["incoming_lower_a"].source_requires_grad
+            != ("incoming_lower_a" in gradients)
             or self.anchor.beta_must_be_nonempty
             != (math.prod(values["production_beta"].source_shape) > 0)
         ):

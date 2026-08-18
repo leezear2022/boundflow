@@ -3,8 +3,9 @@
 > **2026-08-18 FSG4/B4-B0 typed capture contract**：状态=
 > `IMPLEMENTED-B4-B0-CAPTURE-CONTRACT-PENDING-LIVE-HOOK`。新schema分离production compressed
 > α/β映射源、native dense α/β/`relu_pre_add_coeff_l`输入及native gradients；冻结双锚点
-> 和evaluation-0/CUDA/hash/Conv attrs/provider-fallback门禁。新测试9 passed，fixed related 45
-> passed，Mypy clean，Pylint 10.00/10。尚未接入live solver，无correctness/performance claim，TIR仍关闭。
+> 和evaluation-0/CUDA/hash/Conv attrs/provider-fallback门禁。新测试10 passed，fixed related 46
+> passed，full=`1366 passed, 3 skipped`，Mypy clean，Pylint 10.00/10。尚未接入live solver，
+> 无correctness/performance claim，TIR仍关闭。
 
 > **2026-08-18 FSG4/B4-B v1预注册**：状态=`PREREGISTERED-B4-B-V1-NOT-IMPLEMENTED`。冻结
 > `node31/Gemm_14` active-beta语义锚点与`node25/Conv_8`候选性能锚点；先在optimizer
