@@ -1,7 +1,7 @@
 """Typed IR and pure-PyTorch semantic gates for FSG4/B4-B1."""
 
 # pylint: disable=protected-access,missing-function-docstring,too-many-locals
-# pylint: disable=duplicate-code
+# pylint: disable=duplicate-code,import-error
 
 from dataclasses import replace
 from pathlib import Path
@@ -23,8 +23,10 @@ from boundflow.runtime.fsg4_b4b1_reference_capture import (
     production_differentiable_reference_capture_from_payload_v1,
 )
 from boundflow.runtime.rvir_v4_production_state import production_tensor_sha256
+from scripts import run_fsg4_b4b1_pytorch_reference_artifact as reference_artifact
 
 ARTIFACT = Path("artifacts/fsg4-b4b1-reference-five-fresh/resnet2b-prop0-v1/run_00.pt")
+CAPTURE_ARTIFACT = ARTIFACT.parent
 
 
 def _captures() -> tuple[ProductionDifferentiableReferenceCaptureV1, ...]:
@@ -283,3 +285,20 @@ def test_b4b1_p_anchor_keeps_empty_beta_gradient_absent() -> None:
     assert capture.base.value_map["production_beta"].value.shape == (6, 0)
     assert result.native_beta_gradient is None
     assert result.incoming_lower_a_gradient is not None
+
+
+def test_b4b1_reference_artifact_candidate_recomputes_all_five_fresh() -> None:
+    protocol = reference_artifact._protocol(CAPTURE_ARTIFACT)
+    reference_artifact._validate_protocol(protocol, CAPTURE_ARTIFACT)
+    records = reference_artifact._records_from_source(CAPTURE_ARTIFACT, protocol)
+    summary = reference_artifact._summary(records, protocol)
+    assert len(records) == summary["capture_count"] == 10
+    assert summary["metric_comparison_count"] == 60
+    assert summary["element_comparison_count"] == 196380
+    assert summary["maximum_absolute_difference"] == 1.9073486328125e-06
+    assert summary["all_metrics_allclose"] is True
+    assert summary["all_metrics_sign_exact"] is True
+    assert summary["s_native_beta_gradient_count"] == 5
+    assert summary["p_incoming_a_gradient_count"] == 5
+    assert summary["performance_claimed"] is False
+    assert summary["tir_admitted"] is False
