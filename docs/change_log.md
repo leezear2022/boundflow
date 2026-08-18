@@ -5768,3 +5768,15 @@
 **记录**
 - `gemini_doc/change_2026-08-14_fsg4_b3_five_fresh_correctness_closure.md`
 - `gemini_doc/fsg4_b3_five_fresh_correctness_external_audit_handoff_2026_08_14.md`
+
+## 2026-08-18：FSG4/B4-B1 Typed PyTorch Reference 内部关闭
+
+- typed lower-region IR/instance从5 fresh raw重建双锚点；
+- pure-PyTorch forward/local VJP完成60 metrics/196,380 elements，max diff=`6.109e-7`且sign exact；
+- 两类协调all-run bias/adjoint全链重签由数值语义2/2拒绝；
+- v1执行策略缺口由deterministic v2修正，全量`1405 passed, 3 skipped`；
+- 状态`VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE-PENDING-EXTERNAL-AUDIT`，B4-B2/TIR仍关闭。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4B1_TYPED_PYTORCH_REFERENCE_PREREGISTRATION_2026_08_18.md`
+- `gemini_doc/change_2026-08-18_fsg4_b4b1_typed_reference_internal_closure.md`

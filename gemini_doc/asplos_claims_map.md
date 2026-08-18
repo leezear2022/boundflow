@@ -1,5 +1,12 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-18 FSG4/B4-B1内部关闭**：状态=
+> `VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE-PENDING-EXTERNAL-AUDIT`。支持两个冻结production
+> 锚点的typed lower-region IR/instance、sparse α/β重建、pure-PyTorch forward/local VJP与eligible
+> production gradient parity，以及协调bias/adjoint全链重签的数值拒绝。v2=5 fresh/10 captures、
+> 60 metrics/196,380 elements、max diff=`6.109476089477539e-07`、sign exact；v1执行策略未冻结
+> 已被superseded。该claim不支持B4-B2/TIR、性能、显存、whole-core/query或ASPLOS-ready。
+
 > **2026-08-18 FSG4/B4-B1a内部关闭**：状态=
 > `VALIDATED-B4-B1A-FIVE-FRESH-CAPTURE-SUFFICIENCY`。支持5-fresh bias/output-adjoint/
 > sparse-layout capture sufficiency与root replay；不支持typed numerical reference/gradient parity、

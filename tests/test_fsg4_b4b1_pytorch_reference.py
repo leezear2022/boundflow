@@ -31,7 +31,7 @@ CAPTURE_ARTIFACT = ARTIFACT.parent
 REFERENCE_ARTIFACT_V1 = Path("artifacts/fsg4-b4b1-pytorch-reference/resnet2b-prop0-v1")
 REFERENCE_ARTIFACT_V2 = Path("artifacts/fsg4-b4b1-pytorch-reference/resnet2b-prop0-v2")
 REFERENCE_INTEGRITY_REPORT = REFERENCE_ARTIFACT_V1.parent / (
-    "resnet2b-prop0-v1-integrity-report.json"
+    "resnet2b-prop0-v2-integrity-report.json"
 )
 
 
@@ -367,10 +367,12 @@ def test_b4b1_formal_integrity_report_is_hash_bound() -> None:
     report = reference_artifact._load_json(REFERENCE_INTEGRITY_REPORT)
     assert report["case_count"] == report["rejected_count"] == 2
     assert report["report_hash"] == (
-        "7e53b7d77b16935ce12eab7a3bfcedcc678737a4e4ece54b0c456343cf0f6623"
+        "6a3192f6a6ab2e14ab012bfedd3cc4251de416739ec6850290c98cd3aa399313"
     )
     assert report["probe_code_sha256"] == (
-        "6336a0ad75d2eee2fdf74267b302fa70b671d688bd240e801c8c925a09cfce05"
+        "154c90153d9fd2ac461957a1401c0d5184a59278dd239e956889fd95f731648b"
     )
+    assert report["source_git_head"] == ("255d5fb2211faf5983bb9006ce3d2ef75c4f1c0b")
+    assert set(report["reference_code_revision"]) == set(reference_artifact.CODE_PATHS)
     assert report["performance_claimed"] is False
     assert report["tir_admitted"] is False

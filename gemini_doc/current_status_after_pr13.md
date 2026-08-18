@@ -1,5 +1,14 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-18 FSG4/B4-B1内部关闭**：source artifact=`d9164b8`，deterministic v2完成
+> 5 fresh/10 captures的typed IR/instance重建与pure-PyTorch forward/VJP；60 metrics/196,380
+> elements、max diff=`6.109476089477539e-07`、allclose/sign exact。2/2 incoming-bias/
+> output-adjoint协调all-run全链重签由数值reference拒绝；related=`131 passed`、full=
+> `1405 passed, 3 skipped, 6 warnings`，Black/Mypy/Pylint通过。首次full的v1单失败已归因于未冻结
+> PyTorch线程策略；v2冻结并恢复threads/determinism/precision/MKLDNN，跨1/4/8线程入口records
+> 一致。当前=`VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE-PENDING-EXTERNAL-AUDIT`；下一步仅外审，
+> B4-B2/TIR/performance/memory/ASPLOS-ready继续关闭。
+
 > **2026-08-18 FSG4/B4-B1a five-fresh内部关闭**：source=`4a17423`，formal artifact完成
 > 5 fresh/10 captures、90 amendment tensors/63,645 elements，max diff=0、sign exact；root replay、
 > 8/8完整性负例、related 30与full 1382/3 skip/6 warnings通过。状态=

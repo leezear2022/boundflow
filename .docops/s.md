@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev010632
-last_va: ev010633
+last_ch: ev010650
+last_va: ev010651
 blk: none
-next: generate-b4b1-v2-bound-integrity-report-and-regress
-updated: 2026-08-18T07:39:37Z
+next: submit-fsg4-b4b1-independent-external-audit
+updated: 2026-08-18T07:50:51Z

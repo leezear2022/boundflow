@@ -10,6 +10,14 @@
 
 ---
 
+FSG4/B4-B1 typed pure-PyTorch reference已内部关闭，状态=
+`VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE-PENDING-EXTERNAL-AUDIT`。v2从5 fresh raw重编译
+S/P静态IR与10个instance，60 metrics/196,380 elements、max diff=`6.109476089477539e-07`、
+allclose/sign exact；2/2 all-run bias/adjoint全链重签由数值语义拒绝；related=`131 passed`、full=
+`1405 passed, 3 skipped, 6 warnings`。v1因未冻结PyTorch执行策略被明确superseded/fail-closed。
+下一唯一动作是外审；获批前B4-B2/TIR/performance仍关闭。见
+`change_2026-08-18_fsg4_b4b1_typed_reference_internal_closure.md`。
+
 FSG4/B4-B1a five-fresh capture sufficiency已内部关闭，状态=
 `VALIDATED-B4-B1A-FIVE-FRESH-CAPTURE-SUFFICIENCY`。source=`4a17423`；5 fresh/10 captures、
 90 tensors/63,645 elements、max diff 0、sign exact；8/8完整性负例与full 1382/3 skip/6 warnings

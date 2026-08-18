@@ -1,5 +1,12 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-18 FSG4/B4-B1内部关闭指令**：deterministic v2以5 fresh/10 captures重编译typed
+> IR/instance并独立执行pure-PyTorch forward/VJP；60 metrics/196,380 elements、max diff=
+> `6.109476089477539e-07`、sign exact，2/2协调all-run全链重签由数值语义拒绝；related 131、
+> full 1405/3 skip/6 warnings通过。状态=
+> `VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE-PENDING-EXTERNAL-AUDIT`。下一唯一动作是外审；
+> 批准前不得实现B4-B2 CUDA/TIR、计时或升级performance/memory/ASPLOS-ready claim。
+
 > **2026-08-18 FSG4/B4-B1a内部关闭指令**：formal 5-fresh capture sufficiency、8-case完整性
 > 与full regression已通过。下一唯一动作是实现B4-B1 typed IR与独立pure-PyTorch reference，
 > 从raw重算forward/VJP并关闭coordinated动态改写限制；未过five-fresh reference与外审前不得进TIR。

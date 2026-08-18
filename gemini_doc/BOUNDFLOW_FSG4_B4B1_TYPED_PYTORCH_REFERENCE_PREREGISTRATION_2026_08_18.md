@@ -185,3 +185,20 @@ P incoming-A gradient的`1.9073486328125e-06`。S incoming-A forced-grad micro�
 related=`28 passed`，Black/scoped Mypy/Pylint=`10.00/10`通过。当前状态仅为
 `IMPLEMENTED-B4-B1-TYPED-REFERENCE-PENDING-FIVE-FRESH`；下一动作是生成并重放5 fresh × 2
 anchors的正式reference artifact与协调篡改probe，B4-B2/TIR/performance仍关闭。
+
+### B4-B1内部关闭
+
+deterministic v2 formal artifact从B4-B1a的5个原始PT逐条重编译两个静态IR、10个instance与
+10个reference receipt：60 metrics/196,380 elements，maximum absolute difference=
+`6.109476089477539e-07`，allclose/sign exact全过；S native β gradient=5/5、P incoming-A
+gradient=5/5，S forced incoming-A micro gate通过。
+
+两类coordinated all-run攻击分别改写incoming bias与output adjoint，同时重签内部capture、source
+summary/manifest与derived protocol；旧capture-sufficiency层仍可接受，但typed numerical replay
+`2/2 rejected`。首次v1 full回归的唯一失败暴露未冻结CPU线程策略；v2 protocol冻结threads=1、
+deterministic algorithms=true、precision=highest、MKLDNN=false，并在退出时恢复调用方状态。
+入口threads=1/4/8的records一致。related=`131 passed`；full=
+`1405 passed, 3 skipped, 6 warnings`；Black、scoped Mypy、Pylint=`10.00/10`、diff与DocOps通过。
+
+状态最多升级为`VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE-PENDING-EXTERNAL-AUDIT`。v1明确
+superseded；B4-B2/TIR/performance/memory/ASPLOS-ready继续关闭，外审批准前不得推进。
