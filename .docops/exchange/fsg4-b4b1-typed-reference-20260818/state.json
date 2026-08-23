@@ -9,9 +9,11 @@
   "docs": [
     "fsg4-b4b1-typed-reference-20260818/request",
     "fsg4-b4b1-typed-reference-20260818/r001/delivery",
-    "fsg4-b4b1-typed-reference-20260818/r001/audit"
+    "fsg4-b4b1-typed-reference-20260818/r001/audit",
+    "fsg4-b4b1-typed-reference-20260818/r001/response-F1",
+    "fsg4-b4b1-typed-reference-20260818/r001/response-F2"
   ],
-  "rev": 5,
+  "rev": 7,
   "created": "2026-08-18T07:52:51Z",
-  "updated": "2026-08-22T17:33:11Z"
+  "updated": "2026-08-23T02:20:02Z"
 }
