@@ -1,10 +1,18 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-24 FSG4/B4-B2-v2 manual TIR正式关闭指令**：clean source=`5b2c9ba`
+> 完成5 correctness、6-worker `BTR/BRT/TBR/TRB/RBT/RTB`三方计时、root replay与10/10
+> outer-resigned tamper。exact kernels=`1+1`，workspace=0，max diff=`1.90735e-06`且sign exact；
+> PyTorch/TIR geomean/lower/worst=`4.89834x/4.73771x/4.68601x`，Triton/TIR=
+> `1.68273x/1.60695x/1.56888x`，allocated/reserved ratio=`0.450886/1.0`。最终=
+> `VALIDATED-B4-B2-V2-MANUAL-TIR`，现在只开放B4-B3 exact-call integration；core/query claim仍关闭。
+
 > **2026-08-24 FSG4/B4-B2-v2 manual TIR实现指令**：manual TVM TIR已等价实现exact
 > `1 forward + 1 backward`、workspace=0、5 raw sign exact；PlanInstance常驻PackedFunc/DLPack/
 > combined buffers并把stream admission移出双launch hot path。非正式三方probe约PyTorch/Triton/TIR=
 > `0.500/0.153/0.093 ms`，不形成claim。当前唯一动作=提交clean source并执行5 correctness+
 > 6-worker三方formal timing；正式达到Triton 0.90x且对PyTorch≥1.20x才开放B4-B3。
+> 该待运行指令已由上方manual TIR正式关闭指令取代。
 
 > **2026-08-24 FSG4/B4-B2-v2 Triton正式关闭指令**：clean source=`77a15eb`完成
 > 12 fresh calibration、5 correctness、6-worker AB/BA timing、root semantic replay+独立重编译与

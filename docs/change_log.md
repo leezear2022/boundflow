@@ -1,5 +1,17 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-24：FSG4/B4-B2 v2 Manual TVM TIR 正式关闭
+
+- CIBC式P-anchor横向融合下沉为手写TVM TIR，真实CUDA exact `1+1` kernels、workspace=0；
+- 5 correctness与6-worker三方formal全部通过，max diff=`1.90735e-06`且sign exact；
+- PyTorch/TIR geomean/lower/worst=`4.89834x/4.73771x/4.68601x`；
+- Triton/TIR geomean/lower/worst=`1.68273x/1.60695x/1.56888x`；
+- root semantic replay通过，outer-resigned tamper `10/10 rejected`；
+- 状态=`VALIDATED-B4-B2-V2-MANUAL-TIR`，只开放B4-B3 exact-call integration。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4B2_V2_MANUAL_TIR_FORMAL_CLOSURE_2026_08_24.md`
+
 ## 2026-08-23：FSG4/B4-B2 B2-4 Sparse-source Conv TIR 内部关闭
 
 - compressed alpha=`[6,86]`直接进入TIR，empty beta保持absent；

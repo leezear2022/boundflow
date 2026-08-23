@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev011412
-last_va: ev011413
+last_ch: ev011442
+last_va: ev011443
 blk: none
-next: run-b4b2-v2-manual-tir-formal-artifact
-updated: 2026-08-23T18:11:38Z
+next: implement-b4b3-cibc-exact-call
+updated: 2026-08-23T18:18:16Z

@@ -1,5 +1,11 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+FSG4/B4-B2 v2 manual TVM TIR已正式关闭：P-anchor CIBC式横向融合真实CUDA exact `1+1`
+kernels、workspace=0，5 correctness与6-worker三方formal通过；PyTorch/TIR geomean/lower/worst=
+`4.89834x/4.73771x/4.68601x`，Triton/TIR=`1.68273x/1.60695x/1.56888x`。状态=
+`VALIDATED-B4-B2-V2-MANUAL-TIR`，当前只开放B4-B3 exact-call integration，core/query claim仍关闭。
+见`BOUNDFLOW_FSG4_B4B2_V2_MANUAL_TIR_FORMAL_CLOSURE_2026_08_24.md`。
+
 FSG4/B4-B2 B2-4 P-anchor sparse-source Conv已内部关闭：P0 five raw与12项bounded candidate
 共68 metrics/217,770元素通过，ledger冻结且无timing/winner/performance claim。当前只开放B2-4
 外审，B2-5/B4-B3关闭。见

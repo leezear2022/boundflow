@@ -1,0 +1,55 @@
+{
+  "baseline_speedup_gate": 1.2,
+  "capture_identity": {
+    "manifest_sha256": "a52a26ab081bbeab816c1486fffd3568e6774ed6c9ea7619dee3a2e4ac0b86d9",
+    "run_payload_sha256": [
+      "5fafb48689b0579a22790974c661f215b651025c05da76b31d21b981c973c587",
+      "149261f60dd218333266150c3ede4abad7eaf0c451c391e7c832ed3c8826613c",
+      "b9bcc3a211eb53bb1aa58a91e397bc911402105471f234fe48df2e3261d2d91b",
+      "2d3cef3a501d28eb5f56fdbdeb246522d85356afe506aed2dd357ae12917d6ac",
+      "869ea8be94a98c77bb510f8bfd3daf58424d32113304529264cda2caddb42ddd"
+    ]
+  },
+  "code_revision": {
+    "boundflow/backends/tvm/cibc_horizontal_fused_conv.py": "ae2e8ca19a3f4d430419959c2781baf8b63b0d42bbcbbf168c0a4bcd56c2b93e",
+    "boundflow/runtime/fsg4_b4b2_cibc_tir.py": "f80d6256b342eeab400a650c3e78e39c0c8a1fa3330548c4ad583a56127a518b",
+    "gemini_doc/BOUNDFLOW_FSG4_B4B2_V2_CIBC_PARITY_FUSION_PLAN_2026_08_24.md": "e531f4386c3ae00160b82da8763c56ec9c6a8d18ad0a7288c4251cd808de8aa9",
+    "scripts/run_fsg4_b4b2_v2_cibc_tir_artifact.py": "e99a45d1f10fd65c24d14517fbf4e4cdecaefba77e24d8055529ffc2d1b23ed3",
+    "scripts/run_fsg4_b4b2_v2_cibc_tir_worker.py": "e4f16d80ddc9311d7bcfe4b2e4689c3c2ea02a8dd538e08be31f952a24b148d3",
+    "tests/test_fsg4_b4b2_cibc_tir.py": "c2a7b91991b97a129631c8f7b8152f732ad2807efc712a7811b4ad1a33142b83"
+  },
+  "compile_excluded": true,
+  "correctness_worker_count": 5,
+  "groups_per_worker": 30,
+  "memory_ratio_gate": 1.05,
+  "parity_element_count": 12810,
+  "parity_tolerance": 0.0002,
+  "performance_claimed": false,
+  "plan_instance_reuse_included": true,
+  "protocol_hash": "1412d5b8d9d2b824787a044158d16c02fa0b44fb20e193c92b577be62f49ef83",
+  "schema_version": "boundflow.fsg4-b4b2-v2-cibc-tir-protocol/v1",
+  "source_git_head": "5b2c9ba53e20a95ccd85ddae13e0d481f226c902",
+  "timing_orders": [
+    "BTR",
+    "BRT",
+    "TBR",
+    "TRB",
+    "RBT",
+    "RTB"
+  ],
+  "timing_worker_count": 6,
+  "triton_identity": {
+    "manifest_hash": "8214e3f99400c55dcc31dcea60baba5b16e8b8f3602a3983d3be16b8cc5b9aed",
+    "source_git_head": "77a15ebec0b0deb3798ad35553bde53c8295616b",
+    "summary_hash": "5784a8c738c7887047e435a99f5d1ac199f52d8e411e5b921293b7158f7006a0",
+    "summary_sha256": "8e76c2115b169a2b6469e9ca87111bba09ceef53e52e7a18fdaeeef7c238a70a",
+    "winner_config": {
+      "block_k": 32,
+      "block_m": 32,
+      "num_warps": 4
+    },
+    "winner_config_ordinal": 1
+  },
+  "triton_retention_gate": 0.9,
+  "warmups_per_side": 10
+}
