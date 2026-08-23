@@ -1,11 +1,18 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-24 FSG4/B4-B2-v2 manual TIR实现指令**：manual TVM TIR已等价实现exact
+> `1 forward + 1 backward`、workspace=0、5 raw sign exact；PlanInstance常驻PackedFunc/DLPack/
+> combined buffers并把stream admission移出双launch hot path。非正式三方probe约PyTorch/Triton/TIR=
+> `0.500/0.153/0.093 ms`，不形成claim。当前唯一动作=提交clean source并执行5 correctness+
+> 6-worker三方formal timing；正式达到Triton 0.90x且对PyTorch≥1.20x才开放B4-B3。
+
 > **2026-08-24 FSG4/B4-B2-v2 Triton正式关闭指令**：clean source=`77a15eb`完成
 > 12 fresh calibration、5 correctness、6-worker AB/BA timing、root semantic replay+独立重编译与
 > 10/10 outer-resigned tamper。winner=1；exact kernels=`1+1`，workspace=0，max diff=
 > `1.90735e-06`且sign exact；geomean/lower/worst=`2.83772x/2.78575x/2.74000x`，allocated/
 > reserved ratio=`0.363337/1.0`。最终=`VALIDATED-B4-B2-V2-TRITON-PHYSICS`，只开放manual
 > TVM TIR等价port；TIR达到Triton 0.90x且对PyTorch≥1.20x前B4-B3关闭。
+> 该待实现指令已由上方manual TIR实现指令取代。
 
 > **2026-08-24 FSG4/B4-B2-v2 CIBC-parity实现指令**：Triton horizontal fused
 > forward/backward已实现，12/12 config及5/5 raw均对public-PyTorch oracle allclose/sign exact；
