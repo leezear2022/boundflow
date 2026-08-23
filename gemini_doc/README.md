@@ -965,3 +965,6 @@ CIBC-IBP水平融合已实现：一个manual TIR kernel同时完成center/deviat
 PyTorch Conv；另有plan-owned DLPack/runtime和公平CUDA-graph整图路径。当前诊断为真实Conv约
 `7.72x`、ResNet2B完整IBP graph约`2.70x`，正式artifact前不形成claim。见
 `BOUNDFLOW_CIBC_IBP_HORIZONTAL_FUSION_IMPLEMENTATION_CHANGELOG_2026_08_24.md`。
+正式协议已冻结：3个独立operator schedule workers选择64/128/256之一，再用6 fresh CUDA Graph
+whole-model workers验证；输入copy计入、6 Conv coverage与全中间interval语义门禁由raw replay重算。
+见`BOUNDFLOW_CIBC_IBP_HORIZONTAL_FORMAL_PROTOCOL_CHANGELOG_2026_08_24.md`。

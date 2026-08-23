@@ -2138,3 +2138,9 @@ ASPLOS-ready仍未成立。
 > `IMPLEMENTED-PENDING-FORMAL`。下一唯一动作=6 fresh operator/model formal artifact；不得与已NO-GO
 > 的B4 alpha-CROWN claim合并。
 >
+> **2026-08-24 CIBC-IBP正式协议指令**：operator层固定3个fresh schedule workers、真实6 Conv、
+> 每算子30×500次；whole-model固定6 fresh、每组100次×30组。baseline/candidate均用CUDA Graph，
+> 输入lower/upper copy计入。门禁为operator geomean/worst≥`2.0/1.2x`、whole-model
+> geomean/worst≥`1.5/1.2x`、全部中间interval absolute diff≤`3e-4`且sign exact。协议提交后才运行，
+> 运行中不得新增schedule或修改门槛；显存与alpha-CROWN不属于本claim。
+>

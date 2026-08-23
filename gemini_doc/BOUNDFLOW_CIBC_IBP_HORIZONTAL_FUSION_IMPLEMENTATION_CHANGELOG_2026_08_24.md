@@ -42,4 +42,6 @@ elementwise调用。
 
 生成CIBC-IBP formal artifact：6个真实Conv signature×3 schedule的operator sweep，以及6 fresh
 baseline-graph/CIBC-graph成对计时。正式门禁暂定operator geomean≥2x、whole-model geomean≥1.5x、
-worst pair≥1.2x、最终及逐层`atol=rtol=3e-4`、sign exact、peak allocated/reserved≤1.05x。
+worst pair≥1.2x、最终及逐层`atol=rtol=3e-4`、sign exact。本阶段不主张显存收益；CUDA Graph
+private-pool与两份计划同时驻留使进程内allocated/reserved差值不是公平的单计划peak对照，显存门禁留到
+独立fresh-process memory artifact，不能由本轮latency结果外推。
