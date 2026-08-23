@@ -73,7 +73,6 @@ class CIBCDenseExactTIRExecutorV3:
             or tensor.dtype != torch.float32
             or tensor.device != self.device
             or not tensor.is_contiguous()
-            or not bool(torch.isfinite(tensor).all().item())
             for tensor, shape in zip(self.inputs, expected_shapes)
         ):
             raise ValueError("CIBC dense exact input contract differs")

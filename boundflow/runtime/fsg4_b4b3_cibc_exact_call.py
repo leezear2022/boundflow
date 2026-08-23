@@ -93,6 +93,7 @@ class B4B3CIBCExactCallObserverV1:
         reference_capture: ProductionDifferentiableReferenceCaptureV1,
         *,
         compiled: CompiledCIBCDenseExactConvTIRV3 | None = None,
+        record_local_parity: bool = True,
     ) -> None:
         reference_capture.validate()
         if reference_capture.base.anchor != B4B_PERFORMANCE_ANCHOR_V1:
@@ -112,6 +113,7 @@ class B4B3CIBCExactCallObserverV1:
         self._provider_activation_count = 0
         self._unsupported_semantic_anchor_count = 0
         self.local_parity: list[dict[str, float | bool]] = []
+        self._record_local_parity = record_local_parity
         self._reference_operator_attributes = dict(
             reference_capture.base.operator_attributes
         )
@@ -179,7 +181,7 @@ class B4B3CIBCExactCallObserverV1:
     ) -> None:
         if not self.wants(native_preactivation):
             raise ValueError("B4-B3 CIBC received an ineligible ReLU")
-        if self._evaluation_ordinal == 0:
+        if self._evaluation_ordinal == 0 and self._record_local_parity:
             self._capture.observe_relu_input(
                 native_preactivation,
                 incoming_lower_a=incoming_lower_a,

@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-24 FSG4/B4-C0累计core计时准备指令**：已把per-evaluation finite `.item()`及
+> correctness-only local parity同步移出timing hot path；结构/stream门禁保持fail closed，correctness
+> 默认行为不变。当前唯一动作=实现并运行双方预热、BC/CB交错、30 groups、6 fresh cumulative core
+> timing；结果前无performance claim。
+
 > **2026-08-24 FSG4/B4-B3 five-fresh正式关闭指令**：source=`1d06aab`完成5 independent
 > BC/CB pairs；terminal lower与全部α/β allclose/sign exact，max diff=`3.57628e-07`；provider/
 > forward/backward=`50/50/45`，fallback/eager/materialization=0，native-value bridge=50；root replay

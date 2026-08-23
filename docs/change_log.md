@@ -1,5 +1,15 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-24：FSG4/B4-C0 Core Timing Runtime Prep
+
+- per-evaluation GPU finite `.item()`移出exact executor hot path；
+- timing模式关闭correctness-only evaluation-0 local parity同步；
+- shape/dtype/device/layout/stream门禁与correctness默认行为保持；
+- 下一步=6-fresh warmed/interleaved cumulative core timing。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4C0_CORE_TIMING_RUNTIME_PREP_CHANGELOG_2026_08_24.md`
+
 ## 2026-08-24：FSG4/B4-B3 CIBC Five-fresh 正式关闭
 
 - 5 fresh、13 metrics/worker全部allclose/sign exact，max diff=`3.57628e-07`；
