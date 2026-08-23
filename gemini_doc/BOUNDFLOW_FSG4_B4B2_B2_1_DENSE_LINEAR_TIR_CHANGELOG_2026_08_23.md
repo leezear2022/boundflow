@@ -63,3 +63,4 @@ stage: s01
 - runtime: `boundflow/runtime/fsg4_b4b2_dense_linear_tir.py`
 - runner: `scripts/run_fsg4_b4b2_dense_linear_tir_correctness.py`
 - tests: `tests/test_fsg4_b4b2_dense_linear_tir.py`
+- audit handoff: `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_1_EXTERNAL_AUDIT_HANDOFF_2026_08_23.md`
