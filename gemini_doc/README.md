@@ -6,14 +6,14 @@
 - 让别人（或未来的你）能快速定位：某个决策/某个口径/某个脚本是“为什么这样做”；
 - 让论文/AE 的证据链（claim → 命令 → 产物 → 字段）能闭环。
 
-FSG4/B4-B2 B2-2 S-anchor sparse-source Linear TIR已内部通过：compressed alpha/beta直接
-进入TIR并返回compressed gradients，5 raw/20 metrics/31,590元素，max diff=
-`8.642673492431641e-07`，forbidden dense-state workspace count=`0`，full=
-`1448 passed, 3 skipped`。当前=
-`VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS-PENDING-EXTERNAL-AUDIT`；下一步只做
-B2-2外审，P-anchor/timing/B2-3/B2-4/B2-5/B4-B3继续关闭。见
+FSG4/B4-B2 B2-2 S-anchor sparse-source Linear TIR已外审批准：独立float64重算、
+GPU runner、workspace结构与全量回归均通过。最终=
+`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS`；只开放
+B2-3 P-anchor Conv dense correctness，timing/B2-4/B2-5/B4-B3继续关闭。见
 `BOUNDFLOW_FSG4_B4B2_B2_2_SPARSE_LINEAR_TIR_CHANGELOG_2026_08_23.md`与
-`BOUNDFLOW_FSG4_B4B2_B2_2_EXTERNAL_AUDIT_HANDOFF_2026_08_23.md`。
+`BOUNDFLOW_FSG4_B4B2_B2_2_EXTERNAL_AUDIT_HANDOFF_2026_08_23.md`、
+`external_audit_b4b2_b2_2_sparse_linear_tir_2026_08_23.md`与
+`BOUNDFLOW_FSG4_B4B2_B2_2_EXTERNAL_AUDIT_CLOSURE_CHANGELOG_2026_08_23.md`。
 
 FSG4/B4-B2 B2-1 S-anchor dense Linear TIR已外审批准：独立float64重算36,750元素
 max diff=`6.988e-07`，GPU现场复跑逐位复现原始receipt/results，full=

@@ -1,9 +1,14 @@
 # BoundFlow 面向 ASPLOS 的总体研发与论文执行计划 v1.0
 
+> **2026-08-23 FSG4/B4-B2 B2-2外审关闭**：独立外审`APPROVE`，0 blocker/
+> major/minor；最终=`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS`。
+> 只开放B2-3 P-anchor Conv dense correctness，timing与后续阶段关闭。
+
 > **2026-08-23 FSG4/B4-B2 B2-2内部关闭**：S sparse-source TIR 5/5 raw correctness通过，
 > native dense alpha/beta/scaled-A workspace count=`0`，当前=
 > `VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS-PENDING-EXTERNAL-AUDIT`。只开放
 > B2-2外审；P-anchor、timing与后续阶段关闭。
+> 该待审状态已由上方外审关闭状态取代。
 
 > **2026-08-23 FSG4/B4-B2 B2-1外审关闭**：独立外审`APPROVE`，0 blocker/
 > 0 major；最终=`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-1-DENSE-LINEAR-CORRECTNESS`。

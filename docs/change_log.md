@@ -5854,3 +5854,14 @@
 **记录**
 - `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_2_SPARSE_LINEAR_TIR_CHANGELOG_2026_08_23.md`
 - `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_2_EXTERNAL_AUDIT_HANDOFF_2026_08_23.md`
+
+## 2026-08-23：FSG4/B4-B2 B2-2 外审关闭
+
+- 外审`APPROVE`，0 blocker/major/minor，2 info；
+- 无 autograd float64独立重算、GPU runner、workspace结构、hash与全量回归全过；
+- 最终=`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS`；
+- 只开放B2-3 P-anchor Conv dense correctness，timing/B2-4/B2-5/B4-B3关闭。
+
+**记录**
+- `gemini_doc/external_audit_b4b2_b2_2_sparse_linear_tir_2026_08_23.md`
+- `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_2_EXTERNAL_AUDIT_CLOSURE_CHANGELOG_2026_08_23.md`

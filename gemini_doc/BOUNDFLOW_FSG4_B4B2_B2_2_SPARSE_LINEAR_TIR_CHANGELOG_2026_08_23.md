@@ -1,6 +1,6 @@
 ---
-status: validated-internal-pending-external-audit
-updated: 2026-08-23T07:00:00Z
+status: externally-approved
+updated: 2026-08-23T08:50:00Z
 type: changelog
 topic: boundflow
 slug: fsg4-b4b2-b2-2-sparse-linear-tir
@@ -11,8 +11,8 @@ stage: s01
 
 ## Summary
 
-- B2-2 已完成 S-anchor sparse-source fused forward/backward correctness，状态=
-  `VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS-PENDING-EXTERNAL-AUDIT`；
+- B2-2 已通过独立外审，最终状态=
+  `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS`；
 - 5 raw、20 metrics、31,590 elements 全部 allclose/sign exact，max diff=
   `8.642673492431641e-07`；
 - 本轮不计时，不开放 P-anchor、B2-3/B2-4/B2-5 或 B4-B3。
@@ -50,10 +50,10 @@ stage: s01
 
 ## Decisions
 
-- B2-2 S-anchor sparse-source correctness 内部门禁通过，只开放独立外审；
+- B2-2 外审`APPROVE`（0 blocker/0 major/0 minor），允许关闭B2-2；
 - `sparse_source_admitted=true`只表示本 ABI 直接消费 compressed state，不是 performance admission；
 - `performance_claimed=false`，没有 timing API、speedup、memory ratio、P-anchor 或 same-solver claim；
-- 外审批准前 B2-3/P-anchor、B2-4/B2-5、B4-B3 全部关闭。
+- 只开放B2-3 P-anchor Conv dense correctness；timing、B2-4/B2-5、B4-B3保持关闭。
 
 ## Links
 
@@ -64,3 +64,5 @@ stage: s01
 - runner: `scripts/run_fsg4_b4b2_sparse_linear_tir_correctness.py`
 - tests: `tests/test_fsg4_b4b2_sparse_linear_tir.py`
 - audit handoff: `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_2_EXTERNAL_AUDIT_HANDOFF_2026_08_23.md`
+- audit: `gemini_doc/external_audit_b4b2_b2_2_sparse_linear_tir_2026_08_23.md`
+- audit closure: `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_2_EXTERNAL_AUDIT_CLOSURE_CHANGELOG_2026_08_23.md`

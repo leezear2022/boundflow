@@ -1,6 +1,6 @@
 ---
-status: b4b2-b2-2-validated-pending-external-audit
-updated: 2026-08-23T07:00:00Z
+status: b4b2-b2-2-externally-approved-b2-3-open
+updated: 2026-08-23T08:50:00Z
 type: plan
 topic: boundflow
 slug: BOUNDFLOW_FSG4_B4B_DIFFERENTIABLE_CUDA_TIR_V1
@@ -9,11 +9,17 @@ stage: s01
 
 # FSG4/B4-B Differentiable CUDA/TIR v1 Plan
 
+> **2026-08-23 B2-2外审批准**：`APPROVE`，0 blocker/major/minor；独立数学、GPU、
+> workspace与回归全通过。最终=
+> `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS`。唯一下一动作=
+> B2-3 P-anchor Conv dense correctness；timing/B2-4/B2-5/B4-B3关闭。
+
 > **2026-08-23 B2-2内部关闭**：S-anchor compressed alpha/beta直接TIR与compressed
 > gradient projection已通过5 raw，max diff=`8.642673492431641e-07`，禁止dense-state
 > workspace count=`0`。当前=
 > `VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS-PENDING-EXTERNAL-AUDIT`。下一唯一
 > 动作=B2-2外审；P-anchor/timing/B2-3/B2-4/B2-5/B4-B3关闭。
+> 该待审状态已由上方外审批准状态取代。
 
 > **2026-08-23 B2-1外审批准**：`APPROVE`，0 blocker/0 major；独立float64重算与
 > 现场GPU复跑全部通过。最终=

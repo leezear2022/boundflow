@@ -1,6 +1,6 @@
 ---
-status: ready-for-external-audit
-updated: 2026-08-23T07:05:00Z
+status: closed-approved
+updated: 2026-08-23T08:50:00Z
 type: audit-handoff
 topic: boundflow
 slug: fsg4-b4b2-b2-2-sparse-source-external-audit
@@ -8,6 +8,10 @@ stage: s01
 ---
 
 # FSG4/B4-B2 B2-2 Sparse-source Linear TIR External Audit Handoff
+
+> **2026-08-23 外审关闭**：`APPROVE`，0 blocker/0 major/0 minor；最终=
+> `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS`。只开放
+> B2-3 P-anchor Conv dense correctness，timing/B2-4/B2-5/B4-B3仍关闭。
 
 ## 1. 冻结点与状态上限
 
@@ -184,4 +188,3 @@ python /home/lee/.codex/plugins/cache/personal/docops-logic/0.2.0+codex.20260802
 
 只有`approve`且无 blocker/major，才允许关闭 B2-2 并开放 B2-3 P-anchor dense correctness。
 timing、B2-4/B2-5 与 B4-B3 在任何情况下仍关闭。
-
