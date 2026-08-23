@@ -1,8 +1,14 @@
 # BoundFlow 面向 ASPLOS 的总体研发与论文执行计划 v1.0
 
+> **2026-08-23 FSG4/B4-B2 B2-0关闭更新**：状态=
+> `VALIDATED-B4-B2-B2-0-ABI-PROBE`。RTX 4060 identity TIR forward/backward已满足first-class
+> receipt、DLPack/current stream/cache/一阶autograd门禁；下一唯一动作=B2-1 S-anchor dense
+> correctness。尚无region融合、timing或performance claim。
+
 > **2026-08-23 FSG4/B4-B2预注册更新**：状态=
 > `PREREGISTERED-B4-B2-TYPED-CUDA-TIR-NOT-IMPLEMENTED`。下一唯一动作=B2-0 first-class
 > lowering/receipt/identity-TIR ABI probe；通过前不得实现region TIR或启动timing。
+> 该预注册状态已由上方B2-0关闭更新取代。
 
 > **2026-08-23 FSG4/B4-B1关闭更新**：Round 2独立外审已批准并关闭exchange，最终=
 > `EXTERNALLY-APPROVED-VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE`。只开放另行预注册B4-B2

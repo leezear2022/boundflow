@@ -1,9 +1,16 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-23 FSG4/B4-B2 B2-0内部关闭**：first-class lowering/receipt与identity CUDA/TIR
+> forward/backward已在RTX 4060/sm_89通过；cold miss→warm hit、DLPack与current stream exact、
+> launch 1/1、fallback/eager backward 0/0、full=`1426 passed, 3 skipped`。当前状态=
+> `VALIDATED-B4-B2-B2-0-ABI-PROBE`。下一唯一动作=B2-1 S-anchor dense correctness；
+> region融合、timing、B2-2/P-anchor/B4-B3仍关闭。
+
 > **2026-08-23 FSG4/B4-B2预注册**：dense semantic ABI与sparse-source fused ABI、first-class
 > compiler/schedule/module/launch IR、custom-autograd与6-worker物理门禁已冻结；状态=
 > `PREREGISTERED-B4-B2-TYPED-CUDA-TIR-NOT-IMPLEMENTED`。下一唯一动作=B2-0 identity-TIR ABI
 > probe。尚无TIR实现或性能claim。
+> 该预注册状态已由上方B2-0内部关闭取代。
 
 > **2026-08-23 FSG4/B4-B1外审关闭**：exchange=`closed/approved`，Round 2 F1/F2 CLOSED，
 > AC1—AC6全PASS且findings=0。最终状态=

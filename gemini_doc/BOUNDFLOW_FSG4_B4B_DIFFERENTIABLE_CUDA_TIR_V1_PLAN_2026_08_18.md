@@ -1,6 +1,6 @@
 ---
-status: b4b2-typed-cuda-tir-preregistered-not-implemented
-updated: 2026-08-23T02:47:06Z
+status: b4b2-b2-0-abi-validated-next-b2-1
+updated: 2026-08-23T03:10:59Z
 type: plan
 topic: boundflow
 slug: BOUNDFLOW_FSG4_B4B_DIFFERENTIABLE_CUDA_TIR_V1
@@ -8,6 +8,10 @@ stage: s01
 ---
 
 # FSG4/B4-B Differentiable CUDA/TIR v1 Plan
+
+> **2026-08-23 B4-B2/B2-0更新**：identity CUDA/TIR与first-class receipt ABI已内部通过，
+> 状态=`VALIDATED-B4-B2-B2-0-ABI-PROBE`。下一唯一动作=B2-1 S-anchor dense correctness；
+> 尚无region融合、timing或performance claim。
 
 ## 0. 准入、目标与非目标
 

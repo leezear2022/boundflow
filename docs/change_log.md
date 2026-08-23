@@ -5788,8 +5788,21 @@
 - B4-B2仅完成预注册，冻结dense→sparse-source ABI、first-class编译IR、custom backward、
   five-fresh与6-worker物理门禁；
 - 当前无B4-B2 TIR或性能claim，下一步只做B2-0 identity-TIR ABI probe。
+- 上述预注册状态已由下方B2-0内部关闭记录取代。
 
 **记录**
 - `gemini_doc/change_2026-08-23_fsg4_b4b1_round2_external_closure.md`
 - `gemini_doc/BOUNDFLOW_FSG4_B4B2_TYPED_CUDA_TIR_PREREGISTRATION_PLAN_2026_08_23.md`
 - `gemini_doc/BOUNDFLOW_FSG4_B4B2_TYPED_CUDA_TIR_PREREGISTRATION_CHANGELOG_2026_08_23.md`
+
+## 2026-08-23：FSG4/B4-B2 B2-0 Identity TIR ABI 内部关闭
+
+- 新增first-class Template/Instance/Schedule/Module/Launch IR与canonical round-trip/hash门禁；
+- identity CUDA/TIR forward/backward通过一阶custom autograd，显式拒绝higher-order；
+- RTX 4060实测DLPack/current stream exact、cold miss→warm hit、launch 1/1、无alias/fallback；
+- targeted 12、B4-B相关66、full `1426 passed, 3 skipped`，静态检查全过；
+- 状态=`VALIDATED-B4-B2-B2-0-ABI-PROBE`，只开放B2-1 S-anchor dense correctness，
+  尚无region融合或性能claim。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_0_IDENTITY_TIR_CHANGELOG_2026_08_23.md`

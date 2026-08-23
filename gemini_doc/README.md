@@ -6,10 +6,12 @@
 - 让别人（或未来的你）能快速定位：某个决策/某个口径/某个脚本是“为什么这样做”；
 - 让论文/AE 的证据链（claim → 命令 → 产物 → 字段）能闭环。
 
-FSG4/B4-B2已预注册，状态=`PREREGISTERED-B4-B2-TYPED-CUDA-TIR-NOT-IMPLEMENTED`。计划冻结
-dense→sparse-source两级ABI、first-class compiler/schedule/module/launch IR、custom autograd、
-stream/alias/cache、5-fresh与6-worker物理门禁；下一步仅B2-0 identity-TIR ABI probe，尚无TIR或
-性能claim。见`BOUNDFLOW_FSG4_B4B2_TYPED_CUDA_TIR_PREREGISTRATION_PLAN_2026_08_23.md`。
+FSG4/B4-B2 B2-0 ABI probe已内部通过，状态=`VALIDATED-B4-B2-B2-0-ABI-PROBE`：first-class
+compiler/schedule/module/launch IR、identity CUDA/TIR双symbol、一阶custom autograd、DLPack/current
+stream/cache/alias门禁已在RTX 4060验证，full=`1426 passed, 3 skipped`。下一步仅B2-1 S-anchor
+dense correctness；尚无region融合或性能claim。见
+`BOUNDFLOW_FSG4_B4B2_B2_0_IDENTITY_TIR_CHANGELOG_2026_08_23.md`与
+`BOUNDFLOW_FSG4_B4B2_TYPED_CUDA_TIR_PREREGISTRATION_PLAN_2026_08_23.md`。
 
 FSG4/B4-B1已在Round 2独立外审批准并由executor关闭exchange，最终状态=
 `EXTERNALLY-APPROVED-VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE`。F1/F2 CLOSED、AC1—AC6

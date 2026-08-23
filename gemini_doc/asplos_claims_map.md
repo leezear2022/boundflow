@@ -1,8 +1,15 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-23 FSG4/B4-B2 B2-0内部关闭**：允许claim仅为
+> `VALIDATED-B4-B2-B2-0-ABI-PROBE`：first-class compiler/receipt IR可round-trip，identity CUDA/TIR
+> forward/backward在RTX 4060上满足DLPack pointer/current-stream exact、launch 1/1、cache
+> miss→hit、无alias/fallback/eager backward及一阶gradient exact。明确不支持region数学、
+> sparse-source融合、micro/system speedup、memory或ASPLOS-ready。
+
 > **2026-08-23 FSG4/B4-B2预注册**：只冻结计划，状态=
 > `PREREGISTERED-B4-B2-TYPED-CUDA-TIR-NOT-IMPLEMENTED`。当前无B4-B2 lowering、TIR、custom
 > backward、module/launch receipt、micro speedup或memory claim。下一步仅B2-0 ABI probe。
+> 该预注册状态已由上方B2-0内部关闭取代。
 
 > **2026-08-23 FSG4/B4-B1外审关闭**：最终claim=
 > `EXTERNALLY-APPROVED-VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE`。Round 2独立关闭F1/F2，

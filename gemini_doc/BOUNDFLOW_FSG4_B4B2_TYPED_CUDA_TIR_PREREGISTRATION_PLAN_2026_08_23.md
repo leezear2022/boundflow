@@ -1,6 +1,6 @@
 ---
-status: preregistered-not-implemented
-updated: 2026-08-23T02:43:32Z
+status: validated-b2-0-next-b2-1
+updated: 2026-08-23T03:10:59Z
 type: plan
 topic: boundflow
 slug: fsg4-b4b2-typed-cuda-tir-preregistration
@@ -8,6 +8,11 @@ stage: s01
 ---
 
 # FSG4/B4-B2 Typed CUDA/TIR Preregistration
+
+> **2026-08-23 B2-0内部关闭**：first-class Template/Instance/Schedule/Module/Launch IR、
+> identity CUDA/TIR forward/backward、DLPack pointer/current stream、module cache与一阶custom
+> autograd已在RTX 4060通过。状态=`VALIDATED-B4-B2-B2-0-ABI-PROBE`，full=
+> `1426 passed, 3 skipped`。下一唯一动作=B2-1 S-anchor dense correctness；尚无region融合或性能claim。
 
 ## 0. 结论、准入与状态上限
 
@@ -199,6 +204,10 @@ sm_89、TVM/FFI commit、schedule hash、forward/backward symbol set。动态α/
 只实现typed lowering skeleton、round-trip IR、identity TIR forward/backward probe、DLPack data_ptr、
 current-stream、module/cache/launch receipt。默认功能仍关闭。若zero-copy、stream或一阶autograd任一
 无法在独立probe中成立，状态=`BLOCKED-B4-B2-ABI`，不得写region TIR。
+
+**内部结果（2026-08-23）**：通过。GPU=RTX 4060/sm_89；cold miss→warm hit；forward/backward
+launch=`1/1`；DLPack/stream exact；alias/fallback/eager backward=`0/0/0`；higher-order与receipt
+篡改fail closed。该结果只开放B2-1，不进入timing。
 
 ### B2-1：S-anchor dense forward/backward
 
