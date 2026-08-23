@@ -17,3 +17,7 @@ wall timing只以`timing_diagnostic_only=true`披露，不进入本轮判定；f
 交错、重复的累计core timing。
 
 下一步：提交clean source，然后生成正式artifact并root replay。
+
+实现验证时发现fresh subprocess若覆盖`PYTHONPATH`会丢失conda activation注入的TVM Python路径；
+runner已改为在继承值前置repo root，保持进程隔离且不破坏TVM环境。失败发生在任何raw worker写出前，
+不构成部分证据。

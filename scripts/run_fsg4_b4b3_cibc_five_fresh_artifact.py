@@ -245,7 +245,10 @@ def run_worker(
 ) -> None:
     environment = os.environ.copy()
     environment["PYTHONNOUSERSITE"] = "1"
-    environment["PYTHONPATH"] = str(REPOSITORY_ROOT)
+    inherited_pythonpath = environment.get("PYTHONPATH", "")
+    environment["PYTHONPATH"] = os.pathsep.join(
+        part for part in (str(REPOSITORY_ROOT), inherited_pythonpath) if part
+    )
     completed = subprocess.run(
         (
             sys.executable,
