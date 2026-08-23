@@ -1,5 +1,15 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-24：FSG4/B4-B3 CIBC Five-fresh Runner
+
+- 5 independent workers与BC/CB交错顺序已实现；
+- 冻结13项terminal state metrics、local parity、exact receipt与完整identity/hash链；
+- root replay从raw重算全部门禁；timing只作diagnostic；
+- 下一步=clean-source formal artifact。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4B3_CIBC_FIVE_FRESH_RUNNER_CHANGELOG_2026_08_24.md`
+
 ## 2026-08-24：FSG4/B4-B3 CIBC Exact-call 实现
 
 - dense-native-α TIR接入production 10/9 optimizer，修复compressed/native α与incoming-bias梯度所有权；

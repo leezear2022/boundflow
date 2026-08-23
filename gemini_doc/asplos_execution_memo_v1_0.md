@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-24 FSG4/B4-B3 five-fresh runner指令**：已实现5 independent workers、
+> `BC/CB/BC/CB/BC`顺序、13项terminal state metrics、local parity、exact receipt、code/source/
+> model/reference identity及root semantic replay。timing字段只作diagnostic。当前唯一动作=提交clean
+> source并生成正式artifact；通过后才开放累计core timing。
+
 > **2026-08-24 FSG4/B4-B3 exact-call实现指令**：P-anchor dense-native-α manual TIR已接入
 > production 10/9 optimizer，receipt=`10 forward/9 backward`，fallback/eager/materialization=0；
 > S-anchor显式unsupported并走B3。接线证伪compressed-86 α可替代完整native α，并修复了
