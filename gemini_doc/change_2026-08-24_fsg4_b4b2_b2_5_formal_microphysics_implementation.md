@@ -32,6 +32,9 @@ stage: s01
 - shared-memory/vector/half token均为0；
 - 12项calibration开发跑完成，winner ordinal=`11`，median约`1.51104 ms`；
 - 单worker开发测量显示v1明显慢于public-PyTorch baseline，但该数字不是clean-source formal claim。
+- 首次formal tamper probe有7/8拒绝，暴露`--no-recompile`路径未把timing worker module hash与
+  calibration winner交叉绑定；已补schedule/module双绑定与专项回归，旧artifact降级为失败证据并
+  从新clean source重生成，禁止沿用旧manifest形成结论。
 
 ## Boundary
 

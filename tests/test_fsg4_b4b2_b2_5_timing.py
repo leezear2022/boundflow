@@ -104,6 +104,8 @@ def _fake_inputs(speedups: list[float]):
                 "run_ordinal": ordinal,
                 "order": TIMING_ORDERS[ordinal],
                 "candidate_ordinal": 0,
+                "schedule_hash": rows[0]["schedule_hash"],
+                "module_receipt_hash": rows[0]["module_receipt_hash"],
                 "warmups_per_side": B2_5_WARMUP_COUNT,
                 "pair_count": B2_5_PAIR_COUNT,
                 "pairs": pairs,
@@ -133,3 +135,10 @@ def test_b2_5_summary_admits_only_all_physical_gates() -> None:
     assert rejected["timing_admitted"] is False
     assert rejected["b4b3_open"] is False
     assert rejected["status"] == "validated-no-go-b4-b2-v1-physics"
+
+
+def test_b2_5_summary_rejects_outer_resigned_module_hash() -> None:
+    calibration, correctness, timings = _fake_inputs([1.10] * 6)
+    timings[0]["module_receipt_hash"] = "f" * 64
+    with pytest.raises(ValueError, match="timing worker differs"):
+        derive_summary(calibration, correctness, timings)

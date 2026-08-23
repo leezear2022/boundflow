@@ -275,6 +275,9 @@ def derive_summary(
             result.get("run_ordinal") != ordinal
             or result.get("order") != TIMING_ORDERS[ordinal]
             or result.get("candidate_ordinal") != winner
+            or result.get("schedule_hash") != winner_row.get("schedule_hash")
+            or result.get("module_receipt_hash")
+            != winner_row.get("module_receipt_hash")
             or result.get("warmups_per_side") != B2_5_WARMUP_COUNT
             or result.get("pair_count") != B2_5_PAIR_COUNT
             or not isinstance(pairs, list)
