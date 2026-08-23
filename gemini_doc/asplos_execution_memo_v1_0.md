@@ -1,10 +1,19 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-24 FSG4/B4-B2 B2-5正式关闭指令**：clean source=`bf1c8b7`完成12项
+> calibration、S/P各5 independent correctness、6-worker AB/BA timing、root replay与8/8
+> outer-resigned tamper。winner=11；geomean/bootstrap-lower/worst=
+> `0.424842x/0.403157x/0.377693x`，allocated/reserved ratio=`0.474638/1.0`；真实CUDA kernels=
+> `3 forward + 3 backward`。最终=`VALIDATED-NO-GO-B4-B2-V1-PHYSICS`，B4-B3关闭。
+> 该结论只关闭当前6-kernel/12-schedule v1；下一动作=B4-B2-v2 CIBC-parity horizontal fusion/
+> autotuning预注册与实现，B4-C/D继续关闭。
+
 > **2026-08-24 FSG4/B4-B2 B2-5实现候选指令**：wrapper-inclusive public-PyTorch baseline、
 > 真实CUDA kernel inventory、12项calibration、S/P各5 independent correctness、6-worker AB/BA
 > timing、artifact/replay与8类outer-resigned tamper已实现。开发探针确认当前TIR为3 forward +
 > 3 backward kernels，历史`launch=1/1`仅表示module call。下一唯一动作=提交clean source并生成
 > formal artifact；结果前无performance claim，B4-B3仍关闭。
+> 该待运行指令已由上方B2-5正式关闭指令取代。
 
 > **2026-08-24 FSG4/B4-B2 B2-4外审关闭指令**：Round 1 `APPROVE`，0 blocker/
 > major/minor；exchange已由executor关闭为`closed/approved`。独立float64闭合公式、现场GPU、

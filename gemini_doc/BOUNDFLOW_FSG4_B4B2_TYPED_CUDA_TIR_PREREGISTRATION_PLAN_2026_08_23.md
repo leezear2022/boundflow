@@ -1,6 +1,6 @@
 ---
-status: externally-approved-b2-4-b2-5-open
-updated: 2026-08-24T00:10:00+08:00
+status: validated-no-go-b4-b2-v1-physics
+updated: 2026-08-24T01:05:00+08:00
 type: plan
 topic: boundflow
 slug: fsg4-b4b2-typed-cuda-tir-preregistration
@@ -9,9 +9,16 @@ stage: s01
 
 # FSG4/B4-B2 Typed CUDA/TIR Preregistration
 
+> **2026-08-24 B2-5正式关闭**：source=`bf1c8b7`，10 correctness + 6 AB/BA timing、
+> replay与8/8 tamper通过。winner=11，geomean=`0.424842x`、bootstrap lower=`0.403157x`、
+> worst=`0.377693x`；allocated/reserved ratio=`0.474638/1.0`。最终=
+> `VALIDATED-NO-GO-B4-B2-V1-PHYSICS`，B4-B3关闭。只关闭当前6-kernel/12-schedule v1，下一步
+> 另行预注册B4-B2-v2 CIBC-parity；B4-C/D继续关闭。
+
 > **2026-08-24 B2-5实现候选**：formal worker/artifact/replay/tamper已实现；真实CUDA kernel
 > inventory显示当前winner族为3 forward + 3 backward kernels，`module_call=1/1`不再冒充kernel
 > count。下一动作=clean-source formal generate/replay/tamper；正式结果前B4-B3仍关闭。
+> 该待运行状态已由上方B2-5正式关闭状态取代。
 
 > **2026-08-24 B2-4外审关闭**：Round 1 `APPROVE`，0 blocker/major/minor；exchange=
 > `closed/approved`。最终=

@@ -1,0 +1,56 @@
+{
+  "all_rejected": true,
+  "case_count": 8,
+  "rejected_count": 8,
+  "rows": [
+    {
+      "case": "latency-raw-outer-resign",
+      "error_tail": "ValueError: B4-B2 B2-5 timing derivation differs",
+      "rejected": true,
+      "returncode": 1
+    },
+    {
+      "case": "winner-outer-resign",
+      "error_tail": "ValueError: B4-B2 B2-5 calibration winner differs",
+      "rejected": true,
+      "returncode": 1
+    },
+    {
+      "case": "kernel-inventory-outer-resign",
+      "error_tail": "ValueError: B4-B2 B2-5 timing worker differs",
+      "rejected": true,
+      "returncode": 1
+    },
+    {
+      "case": "semantic-outer-resign",
+      "error_tail": "ValueError: B4-B2 B2-5 correctness worker differs",
+      "rejected": true,
+      "returncode": 1
+    },
+    {
+      "case": "source-revision-outer-resign",
+      "error_tail": "ValueError: B4-B2 B2-5 protocol differs",
+      "rejected": true,
+      "returncode": 1
+    },
+    {
+      "case": "missing-correctness-outer-resign",
+      "error_tail": "ValueError: B4-B2 B2-5 correctness count differs",
+      "rejected": true,
+      "returncode": 1
+    },
+    {
+      "case": "thirteenth-candidate-outer-resign",
+      "error_tail": "ValueError: B4-B2 B2-5 calibration ledger differs",
+      "rejected": true,
+      "returncode": 1
+    },
+    {
+      "case": "module-hash-outer-resign",
+      "error_tail": "ValueError: B4-B2 B2-5 timing worker differs",
+      "rejected": true,
+      "returncode": 1
+    }
+  ],
+  "schema_version": "boundflow.fsg4-b4b2-b2-5-tamper-report/v1"
+}

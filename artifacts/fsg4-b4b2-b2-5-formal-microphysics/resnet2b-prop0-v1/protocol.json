@@ -1,0 +1,53 @@
+{
+  "bootstrap_lower_gate": 1.0,
+  "bootstrap_sample_count": 10000,
+  "bootstrap_seed": 20260824,
+  "candidate_compile_cache_excluded": true,
+  "candidate_count": 12,
+  "capture_identity": {
+    "manifest_file_sha256": "a52a26ab081bbeab816c1486fffd3568e6774ed6c9ea7619dee3a2e4ac0b86d9",
+    "manifest_hash": "67ace9e4a28c84306ee881a41aad1f16d9eddb7e80471ad76b030d691d9b25f6",
+    "relative_path": "artifacts/fsg4-b4b1-reference-five-fresh/resnet2b-prop0-v1",
+    "run_payload_sha256": [
+      "5fafb48689b0579a22790974c661f215b651025c05da76b31d21b981c973c587",
+      "149261f60dd218333266150c3ede4abad7eaf0c451c391e7c832ed3c8826613c",
+      "b9bcc3a211eb53bb1aa58a91e397bc911402105471f234fe48df2e3261d2d91b",
+      "2d3cef3a501d28eb5f56fdbdeb246522d85356afe506aed2dd357ae12917d6ac",
+      "869ea8be94a98c77bb510f8bfd3daf58424d32113304529264cda2caddb42ddd"
+    ]
+  },
+  "code_revision": {
+    "boundflow/backends/tvm/differentiable_lower_sparse_conv.py": "bc57326d9d3909fbf3c5be5c09c7d60631983f2557d9ddacfcfa35dc4d437091",
+    "boundflow/ir/differentiable_lower_sparse_conv_tir.py": "1d54c42bae5fd2a0229a9c981beb16d8109d3f668a6b5f66cba731dae3008541",
+    "boundflow/runtime/fsg4_b4b2_sparse_conv_timing.py": "8abe43c3026ccd20677a38e950f95a200f4e3d0952027b681bad686c8c6a2372",
+    "boundflow/runtime/fsg4_b4b2_sparse_conv_tir.py": "2e8d0683c2989caa192a6f6dd851a90e726324e75464c6030387a69a40168d29",
+    "boundflow/runtime/fsg4_b4b2_sparse_linear_tir.py": "ceb0d5732fa78a03dc661ade891149cdb64a498221a51a31ae682a61b8291101",
+    "scripts/probe_fsg4_b4b2_b2_5_artifact_tamper.py": "28ff03f2a3231d81973580e9e9753a110c3d5c3a51bd68d548c4967039300c7a",
+    "scripts/run_fsg4_b4b2_b2_5_artifact.py": "64dbbfd2fba5e5523e79f07b344d686dfbdd436bfabc14ca044c06502510b9df",
+    "scripts/run_fsg4_b4b2_b2_5_worker.py": "3b833fa154c5bce4c3a3955bc4e359298044a0189adf7077eb7155371fa8f299"
+  },
+  "correctness_workers": {
+    "P": 5,
+    "S": 5
+  },
+  "memory_ratio_gate": 1.05,
+  "module_call_is_not_kernel_count": true,
+  "pairs_per_worker": 30,
+  "performance_claimed": false,
+  "protocol_hash": "f9bb89b6a93c09790d9ae839656ad2d38ca72c77e89e9ffefe2256e7c3827d29",
+  "schema_version": "boundflow.fsg4-b4b2-b2-5-protocol/v1",
+  "source_git_head": "bf1c8b75230ebfa33706e1ce0436d1f8199cd5fe",
+  "speedup_geomean_gate": 1.05,
+  "timing_orders": [
+    "AB",
+    "BA",
+    "AB",
+    "BA",
+    "AB",
+    "BA"
+  ],
+  "timing_worker_count": 6,
+  "warmups_per_side": 10,
+  "worst_worker_gate": 0.98,
+  "wrapper_output_gradient_allocation_included": true
+}

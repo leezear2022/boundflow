@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev011273
-last_va: ev011274
+last_ch: ev011283
+last_va: ev011284
 blk: none
-next: freeze-clean-source-and-run-b4b2-b2-5-formal-artifact
-updated: 2026-08-23T17:17:57Z
+next: preregister-and-implement-b4b2-v2-cibc-parity-fusion-autotuning
+updated: 2026-08-23T17:25:51Z
