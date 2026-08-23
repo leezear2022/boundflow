@@ -1,5 +1,12 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-24 CIBC-IBP水平融合正式状态**：source=`a52b177`，3个operator schedule worker与
+> 6个whole-model fresh worker正式通过。选中128 threads；6 Conv geomean/worst=
+> `12.795/9.142x`，完整ResNet2B IBP graph geomean/worst=`2.4563/2.4509x`，输入copy计入，
+> max diff=`2.4414e-4`、sign exact，10/10 tamper rejected，全量=`1492 passed, 3 skipped`。
+> 当前=`VALIDATED-REDUCED-CIBC-IBP-CONV-HORIZONTAL`；production default仍不变，auto_LiRPA/
+> solver/query/memory/跨模型claim仍关闭。
+
 > **2026-08-23 FSG4/B4-B2 B2-4内部关闭**：compressed alpha=`[6,86]`、empty beta absent；
 > P0 five raw与12 candidate共68 metrics/217,770元素通过，max diff=`2.384185791015625e-06`。
 > ledger已冻结但未计时/选winner。下一步只开放B2-4外审；B2-5/B4-B3关闭。

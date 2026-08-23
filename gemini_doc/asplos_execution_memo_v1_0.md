@@ -2144,3 +2144,10 @@ ASPLOS-ready仍未成立。
 > geomean/worst≥`1.5/1.2x`、全部中间interval absolute diff≤`3e-4`且sign exact。协议提交后才运行，
 > 运行中不得新增schedule或修改门槛；显存与alpha-CROWN不属于本claim。
 >
+> **2026-08-24 CIBC-IBP正式关闭指令**：source=`a52b177`的3 operator+6 model fresh artifact通过。
+> 128-thread schedule的6 Conv geomean/worst=`12.795/9.142x`；完整ResNet2B IBP CUDA Graph
+> geomean/bootstrap lower/worst=`2.4563/2.4539/2.4509x`，输入copy计入；全中间interval max diff=
+> `2.4414e-4`且sign exact；10/10 fully-resigned tamper rejected。最终=
+> `VALIDATED-REDUCED-CIBC-IBP-CONV-HORIZONTAL`。不得升级为auto_LiRPA、alpha-CROWN/BaB/query、
+> memory、跨模型或ASPLOS-ready claim。
+>

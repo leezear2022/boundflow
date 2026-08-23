@@ -1,5 +1,12 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-24 CIBC-IBP Conv水平融合正式关闭**：允许claim=
+> `VALIDATED-REDUCED-CIBC-IBP-CONV-HORIZONTAL`。RTX 4060/sm_89、ResNet2B prop0上，真实6 Conv
+> operator speedup geomean/worst=`12.795/9.142x`，完整IBP CUDA Graph 6-fresh
+> geomean/bootstrap-lower/worst=`2.4563/2.4539/2.4509x`；全部中间interval max diff=
+> `2.4414e-4`且sign exact，10/10全重签tamper拒绝。该claim只对BoundFlow既有四Conv IBP baseline
+> 成立，不是auto_LiRPA、alpha-CROWN/BaB/query、memory、跨模型或ASPLOS-ready claim。
+
 > **2026-08-23 FSG4/B4-B2 B2-4内部关闭**：允许claim仅为
 > `VALIDATED-B4-B2-B2-4-SPARSE-CONV-P0-AND-BOUNDED-LEDGER-CORRECTNESS-PENDING-EXTERNAL-AUDIT`。
 > 12项均为correctness-admitted，不是performance-admitted；B2-5/B4-B3未开放。

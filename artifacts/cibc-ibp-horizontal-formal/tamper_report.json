@@ -1,0 +1,59 @@
+{
+  "fully_resigned": true,
+  "probe_count": 10,
+  "rejected_count": 10,
+  "report_hash": "19d429ec21a2eb69660f7e5a9584014347392977df76a4fa31ffd1c4fc0bfb9d",
+  "results": [
+    {
+      "error": "CIBC IBP protocol differs",
+      "probe": "protocol-performance-claim",
+      "rejected": true
+    },
+    {
+      "error": "CIBC IBP timing group derivation differs",
+      "probe": "timing-derivation",
+      "rejected": true
+    },
+    {
+      "error": "CIBC IBP worker semantic derivation differs",
+      "probe": "semantic-error",
+      "rejected": true
+    },
+    {
+      "error": "CIBC IBP model coverage differs",
+      "probe": "conv-coverage",
+      "rejected": true
+    },
+    {
+      "error": "CIBC IBP worker identity differs",
+      "probe": "worker-identity",
+      "rejected": true
+    },
+    {
+      "error": "CIBC IBP operator inventory differs",
+      "probe": "operator-inventory",
+      "rejected": true
+    },
+    {
+      "error": "CIBC IBP semantic replay differs",
+      "probe": "summary-speedup",
+      "rejected": true
+    },
+    {
+      "error": "CIBC IBP semantic replay differs",
+      "probe": "selected-schedule",
+      "rejected": true
+    },
+    {
+      "error": "CIBC IBP worker hardware differs",
+      "probe": "hardware-identity",
+      "rejected": true
+    },
+    {
+      "error": "CIBC IBP model coverage differs",
+      "probe": "graph-receipt",
+      "rejected": true
+    }
+  ],
+  "schema_version": "boundflow.cibc-ibp-horizontal-tamper/v1"
+}

@@ -1,0 +1,41 @@
+{
+  "baseline_cuda_graph": true,
+  "candidate_cuda_graph": true,
+  "conv_coverage": 6,
+  "final_maximum_absolute_difference": 0.000244140625,
+  "input_copy_included": true,
+  "maximum_absolute_difference": 0.000244140625,
+  "model_speedup_bootstrap_lower_95": 2.4538553447313016,
+  "model_speedup_geomean": 2.456310282102286,
+  "model_speedup_worst": 2.4509075978286576,
+  "model_speedups": [
+    2.4581506693908395,
+    2.4573086827933763,
+    2.4509075978286576,
+    2.460536026357991,
+    2.4551666551204465,
+    2.4558028529200087
+  ],
+  "operator_speedup_geomean": 12.795107698179335,
+  "operator_speedup_worst": 9.14229089216829,
+  "operator_speedups": [
+    9.14229089216829,
+    14.616587131390267,
+    11.592260396461903,
+    22.67151941854789,
+    11.210881403882613,
+    11.14484789456344
+  ],
+  "performance_admitted": true,
+  "performance_claimed": false,
+  "schedule_geomeans": {
+    "128": 12.795107698179335,
+    "256": 12.725012981267922,
+    "64": 11.672159452554453
+  },
+  "schema_version": "boundflow.cibc-ibp-horizontal-summary/v1",
+  "selected_threads_per_block": 128,
+  "sign_exact": true,
+  "status": "validated-cibc-ibp-horizontal",
+  "summary_hash": "baea55cb74a791275cad950bd93d266ccc5499f911e141e5757a2238266846e7"
+}
