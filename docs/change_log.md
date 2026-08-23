@@ -1,5 +1,15 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-24：FSG4/B4-C0 Cumulative Core Runner
+
+- 双方3 warmups、30 interleaved groups与per-group 13项语义核对已实现；
+- compile/preparation排除，完整10/9 runtime与native-value bridge计入；
+- timing capture关闭状态由receipt显式冻结；
+- 单worker pilot ratio=`0.9360x`，仅验证runner，下一步=6 fresh formal。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4C0_CUMULATIVE_CORE_RUNNER_CHANGELOG_2026_08_24.md`
+
 ## 2026-08-24：FSG4/B4-C0 Core Timing Runtime Prep
 
 - per-evaluation GPU finite `.item()`移出exact executor hot path；

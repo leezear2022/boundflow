@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-24 FSG4/B4-C0累计core runner指令**：双方3 warmups、30 interleaved groups、
+> per-group 13项semantic parity与peak memory已实现；timing关闭correctness capture并由receipt显式
+> 记录。单worker pilot warmed B3/candidate=`81.918/87.519 ms`，ratio=`0.9360x`，只作runner验证。
+> 当前唯一动作=提交clean source并执行6 fresh BC/CB formal；结果前无performance claim。
+
 > **2026-08-24 FSG4/B4-C0累计core计时准备指令**：已把per-evaluation finite `.item()`及
 > correctness-only local parity同步移出timing hot path；结构/stream门禁保持fail closed，correctness
 > 默认行为不变。当前唯一动作=实现并运行双方预热、BC/CB交错、30 groups、6 fresh cumulative core

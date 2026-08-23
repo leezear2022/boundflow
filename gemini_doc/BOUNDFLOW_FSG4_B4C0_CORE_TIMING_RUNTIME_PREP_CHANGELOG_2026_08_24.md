@@ -19,3 +19,6 @@ stage: s01
 
 这不是性能结论，只是把measurement perturbation移出被测路径。下一步实现预热、交错、30-group、
 6-fresh累计core worker/artifact。
+
+后续runner验证又将evaluation-0 capture整体从timing模式关闭；correctness模式仍默认开启。receipt新增
+`correctness_capture_enabled`并要求其与S-anchor unsupported计数一致，避免以关闭诊断冒充语义覆盖。

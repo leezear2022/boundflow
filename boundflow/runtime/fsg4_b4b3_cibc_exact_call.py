@@ -54,6 +54,7 @@ class B4B3CIBCExactCallReceiptV1:
     forward_launch_count: int
     backward_launch_count: int
     unsupported_semantic_anchor_count: int
+    correctness_capture_enabled: bool
     native_value_bridge_count: int
     adjoint_materialization_count: int
     fallback_count: int
@@ -69,7 +70,8 @@ class B4B3CIBCExactCallReceiptV1:
             or self.provider_activation_count != 10
             or self.forward_launch_count != 10
             or self.backward_launch_count != 9
-            or self.unsupported_semantic_anchor_count != 1
+            or self.unsupported_semantic_anchor_count
+            != int(self.correctness_capture_enabled)
             or self.native_value_bridge_count != 10
             or self.adjoint_materialization_count != 0
             or self.fallback_count != 0
@@ -94,6 +96,7 @@ class B4B3CIBCExactCallObserverV1:
         *,
         compiled: CompiledCIBCDenseExactConvTIRV3 | None = None,
         record_local_parity: bool = True,
+        capture_evaluation_zero: bool = True,
     ) -> None:
         reference_capture.validate()
         if reference_capture.base.anchor != B4B_PERFORMANCE_ANCHOR_V1:
@@ -114,6 +117,7 @@ class B4B3CIBCExactCallObserverV1:
         self._unsupported_semantic_anchor_count = 0
         self.local_parity: list[dict[str, float | bool]] = []
         self._record_local_parity = record_local_parity
+        self._capture_enabled = capture_evaluation_zero
         self._reference_operator_attributes = dict(
             reference_capture.base.operator_attributes
         )
@@ -152,12 +156,13 @@ class B4B3CIBCExactCallObserverV1:
         self._evaluation_ordinal = evaluation_ordinal
         self._native_alphas = native_alphas
         self._pending = {}
-        self._capture.begin_evaluation(
-            evaluation_ordinal,
-            native_alphas=native_alphas,
-            native_betas=native_betas,
-            relu_pre_add_coeff_l=relu_pre_add_coeff_l,
-        )
+        if self._capture_enabled:
+            self._capture.begin_evaluation(
+                evaluation_ordinal,
+                native_alphas=native_alphas,
+                native_betas=native_betas,
+                relu_pre_add_coeff_l=relu_pre_add_coeff_l,
+            )
 
     def wants(self, native_preactivation: str) -> bool:
         if self._evaluation_ordinal is None:
@@ -165,7 +170,8 @@ class B4B3CIBCExactCallObserverV1:
         return (
             native_preactivation == B4B_PERFORMANCE_ANCHOR_V1.native_preactivation
             or (
-                self._evaluation_ordinal == 0
+                self._capture_enabled
+                and self._evaluation_ordinal == 0
                 and native_preactivation == B4B_SEMANTIC_ANCHOR_V1.native_preactivation
             )
         )
@@ -181,7 +187,7 @@ class B4B3CIBCExactCallObserverV1:
     ) -> None:
         if not self.wants(native_preactivation):
             raise ValueError("B4-B3 CIBC received an ineligible ReLU")
-        if self._evaluation_ordinal == 0 and self._record_local_parity:
+        if self._evaluation_ordinal == 0 and self._capture_enabled:
             self._capture.observe_relu_input(
                 native_preactivation,
                 incoming_lower_a=incoming_lower_a,
@@ -208,6 +214,8 @@ class B4B3CIBCExactCallObserverV1:
             if value is None:
                 raise ValueError("B4-B3 CIBC incoming lower A is unavailable")
             return value
+        if not self._capture_enabled:
+            raise ValueError("B4-B3 CIBC semantic capture is disabled")
         return self._capture.observed_incoming_lower_a(native_preactivation)
 
     def observe_affine_output(
@@ -265,7 +273,7 @@ class B4B3CIBCExactCallObserverV1:
         )
         self._executors.append(executor)
         self._provider_activation_count += 1
-        if self._evaluation_ordinal == 0:
+        if self._evaluation_ordinal == 0 and self._record_local_parity:
             self.local_parity.append(
                 {
                     "output_a_max_abs_diff": float(
@@ -284,7 +292,7 @@ class B4B3CIBCExactCallObserverV1:
             )
         routed_a = _ExactValueCandidateGradient.apply(output_lower_a, candidate_a)
         routed_bias = _ExactValueCandidateGradient.apply(output_bias, candidate_bias)
-        if self._evaluation_ordinal == 0:
+        if self._evaluation_ordinal == 0 and self._capture_enabled:
             self._capture.observe_affine_output(
                 native_preactivation,
                 operator_weight=operator_weight,
@@ -299,7 +307,8 @@ class B4B3CIBCExactCallObserverV1:
     def complete_evaluation(self, *, loss_seed: torch.Tensor) -> None:
         if self._evaluation_ordinal != 0:
             raise ValueError("B4-B3 CIBC capture closure differs")
-        self._capture.complete_evaluation(loss_seed=loss_seed)
+        if self._capture_enabled:
+            self._capture.complete_evaluation(loss_seed=loss_seed)
 
     def receipt(self) -> B4B3CIBCExactCallReceiptV1:
         self._validate_previous_evaluation()
@@ -314,6 +323,7 @@ class B4B3CIBCExactCallObserverV1:
                 item.backward_launch_count for item in self._executors
             ),
             unsupported_semantic_anchor_count=self._unsupported_semantic_anchor_count,
+            correctness_capture_enabled=self._capture_enabled,
             native_value_bridge_count=len(self._executors),
             adjoint_materialization_count=sum(
                 item.adjoint_materialization_count for item in self._executors

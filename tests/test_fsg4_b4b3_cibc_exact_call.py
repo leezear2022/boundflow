@@ -174,6 +174,7 @@ def test_exact_call_receipt_rejects_missing_native_value_bridge() -> None:
         forward_launch_count=10,
         backward_launch_count=9,
         unsupported_semantic_anchor_count=1,
+        correctness_capture_enabled=True,
         native_value_bridge_count=9,
         adjoint_materialization_count=0,
         fallback_count=0,
