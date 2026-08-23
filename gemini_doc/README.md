@@ -953,3 +953,7 @@ FSG4/B4-C1 provider-owned lower已实现：P-anchor不再native+TIR双算，plan
 单worker语义exact但累计core约`0.95x`。局部`4.90x`的native分母包含observer强制`to_dense()`，不是
 真实production materialization frontier。当前下一动作是6 fresh正式关闭，随后若NO-GO转B4-C2大
 region累计覆盖。见`BOUNDFLOW_FSG4_B4C1_PROVIDER_OWNED_LOWER_CHANGELOG_2026_08_24.md`。
+FSG4/B4-C1正式以`VALIDATED-NO-GO-B4-C1-MATERIALIZATION-FRONTIER`关闭：6 fresh/180 groups，
+core geomean=`0.94815x`、worst=`0.94547x`，语义max diff=`7.153e-7`且8/8 tamper拒绝。
+当前只开放B4-C2真实materialization frontier大区域融合与14-call coverage。见
+`BOUNDFLOW_FSG4_B4C1_PROVIDER_OWNED_LOWER_FORMAL_CLOSURE_2026_08_24.md`。

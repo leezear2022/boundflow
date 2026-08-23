@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev011667
-last_va: ev011668
+last_ch: ev011682
+last_va: ev011683
 blk: none
-next: run-b4c1-six-fresh-formal-closure
-updated: 2026-08-23T19:10:36Z
+next: implement-b4c2-materialization-frontier-fusion
+updated: 2026-08-23T19:13:36Z

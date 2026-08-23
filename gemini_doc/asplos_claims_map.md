@@ -1850,3 +1850,7 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 - `FSG3-F`：8类payload修改+manifest文件digest/hash同步更新的outer-resigned攻击全部拒绝；
 - `FSG3-L`：状态=`VALIDATED-FSG3-B0-B1-B2-BASELINE`，raw仍
   `performance_claimed=false`。它不关闭B3—B7；下一门禁为FSG4/B3，ASPLOS-ready仍为NO。
+> **2026-08-24 B4-C1 claim边界**：provider-owned lower机制和optimizer语义成立，但6 fresh core
+> geomean=`0.94815x`，最终=`VALIDATED-NO-GO-B4-C1-MATERIALIZATION-FRONTIER`；不得引用局部
+> `4.90x`作为production speedup。B4-C2/B4-D/query仍未验证。
+>

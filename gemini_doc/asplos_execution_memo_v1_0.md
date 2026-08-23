@@ -2120,3 +2120,9 @@ ASPLOS-ready仍未成立。
 > 但累计core仅约`0.95x`。当前只开放6 fresh正式关闭；若NO-GO，转B4-C2真实materialization
 > frontier累计覆盖，不得继续把局部eager-materialization的`4.90x`外推为production speedup。
 >
+> **2026-08-24 FSG4/B4-C1正式NO-GO指令**：source=`01bb215`完成6 fresh/180 groups；
+> provider-owned lower语义max diff=`7.153e-7`且sign exact，但core geomean=`0.94815x`、
+> worst=`0.94547x`，8/8 tamper rejected。最终=
+> `VALIDATED-NO-GO-B4-C1-MATERIALIZATION-FRONTIER`。只开放B4-C2真实materialization frontier
+> operator-tree融合与14-call累计coverage；不得继续调同一P-anchor。
+>

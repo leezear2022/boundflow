@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Outer-resigned semantic tamper probes for B4-C0 cumulative core evidence."""
 
-# pylint: disable=wrong-import-position,missing-function-docstring
+# pylint: disable=wrong-import-position,missing-function-docstring,too-many-locals
 
 from __future__ import annotations
 
@@ -73,6 +73,14 @@ def main() -> None:
     parser.add_argument("--artifact", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    candidate_mode = artifact.load_json(args.artifact / "protocol.json").get(
+        "candidate_mode", "native-value-bridge"
+    )
+    receipt_count_field = (
+        "provider_owned_lower_count"
+        if candidate_mode == "provider-owned-lower"
+        else "native_value_bridge_count"
+    )
     cases: tuple[tuple[str, str, Callable[[Path], None]], ...] = (
         (
             "protocol-gate",
@@ -98,13 +106,11 @@ def main() -> None:
             ),
         ),
         (
-            "receipt-bridge",
+            "receipt-provider-ownership",
             "raw/run_02_bc.json",
             lambda path: _resign_worker(
                 path,
-                lambda value: value["receipt"].__setitem__(
-                    "native_value_bridge_count", 0
-                ),
+                lambda value: value["receipt"].__setitem__(receipt_count_field, 0),
             ),
         ),
         (

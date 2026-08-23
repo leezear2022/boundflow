@@ -1,5 +1,5 @@
 ---
-status: implemented-pending-six-fresh
+status: validated-no-go-b4c1-materialization-frontier
 updated: 2026-08-24T11:15:00+08:00
 type: changelog
 topic: boundflow
@@ -14,6 +14,10 @@ stage: s01
 B4-C1 已把 P-anchor 的 lower ReLU→Conv 所有权移到 CIBC TIR provider：production CROWN 在
 provider admission 后只执行 native upper side，lower side不再先算 native 再走 TIR。当前状态只是
 `IMPLEMENTED-PENDING-SIX-FRESH`；单 worker 探针语义通过但累计 core 约为 `0.95x`，尚无性能 claim。
+
+> 正式更新：6 fresh geomean=`0.9481500115566288x`、worst=`0.9454748158005997x`，
+> 语义max diff=`7.153e-7`且8/8 tamper拒绝。最终以
+> `VALIDATED-NO-GO-B4-C1-MATERIALIZATION-FRONTIER`关闭，转B4-C2。
 
 ## 代码改动
 
