@@ -1,0 +1,16 @@
+{
+  "task": "cibc-ibp-horizontal-20260824",
+  "title": "CIBC IBP horizontal fusion formal closure audit",
+  "status": "ready_for_audit",
+  "round": 1,
+  "executor": "codex",
+  "auditor": "external-model",
+  "approved_round": null,
+  "docs": [
+    "cibc-ibp-horizontal-20260824/request",
+    "cibc-ibp-horizontal-20260824/r001/delivery"
+  ],
+  "rev": 3,
+  "created": "2026-08-23T20:04:49Z",
+  "updated": "2026-08-23T20:04:49Z"
+}
