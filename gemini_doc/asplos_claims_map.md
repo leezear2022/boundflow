@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-23 FSG4/B4-B2 B2-3内部关闭**：允许claim仅为
+> `VALIDATED-B4-B2-B2-3-P-CONV-DENSE-CORRECTNESS-PENDING-EXTERNAL-AUDIT`：P-anchor dense
+> Conv forward/output bias/native alpha gradient/incoming-A gradient 对B4-B1 oracle通过，empty beta
+> gradient absent。`performance_claimed=false`；B2-4/B2-5/B4-B3未开放。
+
 > **2026-08-23 FSG4/B4-B2 B2-2外审批准**：最终claim=
 > `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS`。独立数学、
 > GPU、workspace结构、receipt与全量回归均通过。仅支持S-anchor sparse-source

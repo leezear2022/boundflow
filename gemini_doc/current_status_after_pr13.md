@@ -1,5 +1,9 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-23 FSG4/B4-B2 B2-3内部关闭**：P-anchor Conv dense correctness 5/5 raw、
+> 20/20 metrics、92,190元素全过，max diff=`2.384185791015625e-06`、sign exact；beta gradient
+> absent，workspace结构门禁exact。当前只开放B2-3外审；timing/B2-4/B2-5/B4-B3关闭。
+
 > **2026-08-23 FSG4/B4-B2 B2-2外审关闭**：`APPROVE`，0 blocker/major/minor；独立
 > float64重算、GPU runner、scheduled TIR workspace与全量测试均通过。最终=
 > `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS`。下一步只开放

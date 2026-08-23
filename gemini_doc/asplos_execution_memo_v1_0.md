@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-23 FSG4/B4-B2 B2-3内部关闭指令**：P-anchor dense Conv TIR 5/5 raw、
+> 20/20 metrics、92,190元素通过，max diff=`2.384185791015625e-06`且sign exact；beta gradient
+> absent，结构化workspace门禁通过。当前=
+> `VALIDATED-B4-B2-B2-3-P-CONV-DENSE-CORRECTNESS-PENDING-EXTERNAL-AUDIT`。唯一下一动作=
+> B2-3外审；B2-4/B2-5/timing/B4-B3关闭。
+
 > **2026-08-23 FSG4/B4-B2 B2-2外审关闭指令**：`APPROVE`，0 blocker/major/minor；
 > float64独立重算max diff≤`6.99e-07`，现场GPU、workspace结构与hash全部复现。最终=
 > `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS`。唯一下一动作=

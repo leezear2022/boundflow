@@ -1,6 +1,6 @@
 ---
-status: externally-approved-b2-2-b2-3-open
-updated: 2026-08-23T08:50:00Z
+status: validated-b2-3-pending-external-audit
+updated: 2026-08-23T11:33:28Z
 type: plan
 topic: boundflow
 slug: fsg4-b4b2-typed-cuda-tir-preregistration
@@ -8,6 +8,9 @@ stage: s01
 ---
 
 # FSG4/B4-B2 Typed CUDA/TIR Preregistration
+
+> **2026-08-23 B2-3内部关闭**：P-anchor dense Conv 5 raw/20 metrics/92,190元素通过；
+> 当前只开放B2-3外审，B2-4/B2-5/timing/B4-B3关闭。
 
 > **2026-08-23 B2-2外审批准**：`APPROVE`，0 blocker/major/minor；无autograd float64独立
 > 重算、GPU复跑、workspace结构与hash全部通过。最终=
@@ -263,6 +266,13 @@ B2-2关闭并只开放B2-3 P-anchor dense correctness，timing仍关闭。
 
 实现Conv transpose-contraction dense correctness schedule，冻结`[6,1,16,8,8] x [16,16,3,3]`与
 全部attrs。P incoming-A/native α gradient必须通过；empty β保持absent。
+
+**内部结果（2026-08-23）**：5/5 raw、20/20 metrics、92,190元素通过，max diff=
+`2.384185791015625e-06`且sign exact；incoming-A/native α gradient present、beta gradient absent，
+19/19 DLPack pointer、cache miss→hit、launch 1/1、fallback/eager 0/0全过；scheduled TIR
+alloc-buffer结构只含`adjoint_conv`与`output_bias_delta`。状态=
+`VALIDATED-B4-B2-B2-3-P-CONV-DENSE-CORRECTNESS-PENDING-EXTERNAL-AUDIT`，只开放B2-3外审；
+B2-4/B2-5/timing/B4-B3仍关闭。
 
 ### B2-4：P-anchor sparse-source fused schedule search
 

@@ -1,5 +1,16 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-23：FSG4/B4-B2 B2-3 P-anchor Dense Conv TIR 内部关闭
+
+- 新增first-class dense Conv Template/Instance/Schedule/Module/Launch receipts及CUDA/TIR
+  forward/backward runtime；empty beta保持absent；
+- 5 raw/20 metrics/92,190元素全部allclose/sign exact，max diff=
+  `2.384185791015625e-06`，DLPack=`19/19`，fallback/eager=`0/0`；
+- scheduled TIR alloc-buffer结构门禁只准入`adjoint_conv`与`output_bias_delta`；
+- full=`1457 passed, 3 skipped`，状态=
+  `VALIDATED-B4-B2-B2-3-P-CONV-DENSE-CORRECTNESS-PENDING-EXTERNAL-AUDIT`；
+- 只开放B2-3外审，B2-4/B2-5/timing/B4-B3保持关闭。
+
 ## 2026-08-18：FSG4/B4-B1a Five-Fresh 内部关闭
 
 - source=`4a17423`正式artifact完成5 fresh/10 captures、90 tensors/63,645 elements；

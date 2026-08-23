@@ -188,6 +188,30 @@ def test_b4b2_dense_linear_clamp_endpoint_gradients_match_reference() -> None:
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA is required")
+def test_b4b2_dense_linear_dtype_device_and_nonfinite_rejected() -> None:
+    capture, _lower_ir, _lower_instance, template, _schedule = _lower()
+    tensors = dense_linear.build_b4b2_dense_linear_tensors_v1(
+        capture, template, device=torch.device("cuda:0")
+    )
+    with pytest.raises(ValueError, match="tensor differs: native_alpha"):
+        dense_linear._validate_dense_linear_tensors(
+            replace(tensors, native_alpha=tensors.native_alpha.double()), template
+        )
+    bad = tensors.native_alpha.detach().clone()
+    bad[0, 0] = float("nan")
+    bad.requires_grad_(True)
+    with pytest.raises(ValueError, match="tensor differs: native_alpha"):
+        dense_linear._validate_dense_linear_tensors(
+            replace(tensors, native_alpha=bad), template
+        )
+    cpu = tensors.native_beta.detach().cpu().requires_grad_(True)
+    with pytest.raises(ValueError, match="tensor differs: native_beta"):
+        dense_linear._validate_dense_linear_tensors(
+            replace(tensors, native_beta=cpu), template
+        )
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA is required")
 def test_b4b2_dense_linear_a_equal_zero_owns_lower_branch_with_zero_alpha_vjp() -> None:
     capture, _lower_ir, _lower_instance, template, schedule = _lower()
     tensors = dense_linear.build_b4b2_dense_linear_tensors_v1(
