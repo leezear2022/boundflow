@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-24 FSG4/B4-C0 artifact指令**：6 fresh BC/CB、180 raw groups、root median/
+> geomean/bootstrap/worst/memory/semantic/receipt重算已实现。冻结no-regression=
+> geomean≥1/lower>1/worst≥0.98/memory≤1.05，research=1.05。当前唯一动作=提交clean source并formal；
+> 若bridge候选NO-GO，只开放provider-owned lower path rewrite。
+
 > **2026-08-24 FSG4/B4-C0累计core runner指令**：双方3 warmups、30 interleaved groups、
 > per-group 13项semantic parity与peak memory已实现；timing关闭correctness capture并由receipt显式
 > 记录。单worker pilot warmed B3/candidate=`81.918/87.519 ms`，ratio=`0.9360x`，只作runner验证。

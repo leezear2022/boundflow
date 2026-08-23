@@ -1,5 +1,15 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-24：FSG4/B4-C0 Cumulative Core Artifact
+
+- 6 fresh BC/CB、180 raw groups与root统计/语义/receipt replay已实现；
+- no-regression门禁=`1.00x/lower>1/worst≥0.98/memory≤1.05`；research=`1.05x`；
+- NO-GO时只开放provider-owned lower path rewrite；
+- 下一步=clean-source formal。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4C0_CUMULATIVE_CORE_ARTIFACT_CHANGELOG_2026_08_24.md`
+
 ## 2026-08-24：FSG4/B4-C0 Cumulative Core Runner
 
 - 双方3 warmups、30 interleaved groups与per-group 13项语义核对已实现；
