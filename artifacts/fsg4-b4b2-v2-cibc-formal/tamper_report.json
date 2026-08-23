@@ -1,0 +1,59 @@
+{
+  "all_rejected": true,
+  "case_count": 10,
+  "rejected_count": 10,
+  "report_hash": "81b5b5de1026c24cc9450e825fa491ca1cbeea2c574e758193284e6aa05f9741",
+  "results": [
+    {
+      "error": "CIBC artifact protocol differs",
+      "name": "protocol-gate",
+      "rejected": true
+    },
+    {
+      "error": "CIBC artifact calibration row differs",
+      "name": "calibration-sample",
+      "rejected": true
+    },
+    {
+      "error": "CIBC artifact calibration row differs",
+      "name": "calibration-median",
+      "rejected": true
+    },
+    {
+      "error": "CIBC artifact timing derivation differs",
+      "name": "timing-pair",
+      "rejected": true
+    },
+    {
+      "error": "CIBC artifact timing derivation differs",
+      "name": "timing-derived-speedup",
+      "rejected": true
+    },
+    {
+      "error": "CIBC artifact structural receipt differs",
+      "name": "kernel-inventory",
+      "rejected": true
+    },
+    {
+      "error": "CIBC artifact correctness row differs",
+      "name": "correctness-tolerance",
+      "rejected": true
+    },
+    {
+      "error": "CIBC artifact timing row differs",
+      "name": "compiled-ptx",
+      "rejected": true
+    },
+    {
+      "error": "CIBC artifact semantic replay differs",
+      "name": "summary-geomean",
+      "rejected": true
+    },
+    {
+      "error": "CIBC artifact calibration row differs",
+      "name": "frozen-config",
+      "rejected": true
+    }
+  ],
+  "schema_version": "boundflow.fsg4-b4b2-v2-cibc-tamper/v1"
+}
