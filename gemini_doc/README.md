@@ -6,12 +6,15 @@
 - 让别人（或未来的你）能快速定位：某个决策/某个口径/某个脚本是“为什么这样做”；
 - 让论文/AE 的证据链（claim → 命令 → 产物 → 字段）能闭环。
 
-FSG4/B4-B2 B2-1 S-anchor dense Linear TIR已内部通过：5 raw、20 metrics/36,750元素，max diff=
-`8.642673492431641e-07`且sign exact，full=`1437 passed, 3 skipped`。当前状态=
-`VALIDATED-B4-B2-B2-1-DENSE-LINEAR-CORRECTNESS-PENDING-EXTERNAL-AUDIT`；下一步只做外审，
-B2-2 sparse-source与timing继续关闭。见
+FSG4/B4-B2 B2-1 S-anchor dense Linear TIR已外审批准：独立float64重算36,750元素
+max diff=`6.988e-07`，GPU现场复跑逐位复现原始receipt/results，full=
+`1437 passed, 3 skipped`。最终状态=
+`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-1-DENSE-LINEAR-CORRECTNESS`；只开放B2-2
+S-anchor sparse-source fused forward/backward，timing/P-anchor/B2-4/B2-5/B4-B3继续关闭。见
 `BOUNDFLOW_FSG4_B4B2_B2_1_DENSE_LINEAR_TIR_CHANGELOG_2026_08_23.md`与
-`BOUNDFLOW_FSG4_B4B2_B2_1_EXTERNAL_AUDIT_HANDOFF_2026_08_23.md`。
+`BOUNDFLOW_FSG4_B4B2_B2_1_EXTERNAL_AUDIT_HANDOFF_2026_08_23.md`、
+`external_audit_b4b2_b2_1_dense_linear_tir_2026_08_23.md`与
+`BOUNDFLOW_FSG4_B4B2_B2_1_EXTERNAL_AUDIT_CLOSURE_CHANGELOG_2026_08_23.md`。
 
 FSG4/B4-B2 B2-0 ABI probe已外审批准，状态=
 `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-0-ABI-PROBE`：first-class
@@ -20,7 +23,8 @@ stream/cache/alias门禁已由auditor在RTX 4060现场复现，full=`1426 passed
 dense correctness；尚无region融合或性能claim。见
 `BOUNDFLOW_FSG4_B4B2_B2_0_IDENTITY_TIR_CHANGELOG_2026_08_23.md`与
 `external_audit_b4b2_b2_0_identity_tir_probe_2026_08_23.md`、
-`BOUNDFLOW_FSG4_B4B2_TYPED_CUDA_TIR_PREREGISTRATION_PLAN_2026_08_23.md`。
+`BOUNDFLOW_FSG4_B4B2_TYPED_CUDA_TIR_PREREGISTRATION_PLAN_2026_08_23.md`。该“下一步B2-1”历史指令
+已由上方B2-1外审关闭状态取代。
 
 FSG4/B4-B1已在Round 2独立外审批准并由executor关闭exchange，最终状态=
 `EXTERNALLY-APPROVED-VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE`。F1/F2 CLOSED、AC1—AC6

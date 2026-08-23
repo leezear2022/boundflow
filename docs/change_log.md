@@ -5830,3 +5830,14 @@
 **记录**
 - `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_1_DENSE_LINEAR_TIR_CHANGELOG_2026_08_23.md`
 - `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_1_EXTERNAL_AUDIT_HANDOFF_2026_08_23.md`
+
+## 2026-08-23：FSG4/B4-B2 B2-1 外审关闭
+
+- 外审`APPROVE`，0 blocker/0 major；独立float64重算与现场GPU复跑全通过；
+- B4-B related口径由`76`更正为`77 passed`；full仍为`1437 passed, 3 skipped`；
+- 最终=`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-1-DENSE-LINEAR-CORRECTNESS`；
+- 只开放B2-2 S-anchor sparse-source fused forward/backward，其余阶段仍关闭。
+
+**记录**
+- `gemini_doc/external_audit_b4b2_b2_1_dense_linear_tir_2026_08_23.md`
+- `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_1_EXTERNAL_AUDIT_CLOSURE_CHANGELOG_2026_08_23.md`

@@ -1,10 +1,17 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-23 FSG4/B4-B2 B2-1外审关闭指令**：独立外审`APPROVE`，0 blocker/
+> 0 major；float64独立重算36,750元素最大差=`6.988e-07`，现场GPU逐位复现
+> runner与三项receipt hash；targeted/related/full=`23/77/1437 passed`，3 skipped。最终=
+> `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-1-DENSE-LINEAR-CORRECTNESS`。唯一下一动作=
+> B2-2 S-anchor sparse-source fused forward/backward；timing、P-anchor、B2-4/B2-5、B4-B3关闭。
+
 > **2026-08-23 FSG4/B4-B2 B2-1内部关闭指令**：S-anchor dense Linear TIR完成5 raw、
 > 20 metrics/36,750元素，max diff=`8.642673492431641e-07`且sign exact；full=
 > `1437 passed, 3 skipped`。当前=
 > `VALIDATED-B4-B2-B2-1-DENSE-LINEAR-CORRECTNESS-PENDING-EXTERNAL-AUDIT`。下一唯一动作=外审，
 > 批准前不得实现B2-2或启动timing。
+> 该待审指令已由上方外审关闭指令取代。
 
 > **2026-08-23 FSG4/B4-B2 B2-0外审关闭指令**：verdict=`APPROVE`，0 blocker/0 major；
 > auditor现场GPU复跑逐位复现三项receipt hash。最终状态=

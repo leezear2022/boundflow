@@ -1,6 +1,6 @@
 ---
-status: ready-for-external-audit
-updated: 2026-08-23T04:58:30Z
+status: closed-approved
+updated: 2026-08-23T05:45:00Z
 type: audit-handoff
 topic: boundflow
 slug: fsg4-b4b2-b2-1-dense-linear-external-audit
@@ -8,6 +8,10 @@ stage: s01
 ---
 
 # FSG4/B4-B2 B2-1 Dense Linear TIR External Audit Handoff
+
+> **2026-08-23 外审关闭**：`APPROVE`，0 blocker/0 major；本交接中B4-B related=`76`
+> 已被审计方现场更正为`77 passed`。当前只开放B2-2，timing/P-anchor/B2-4/B2-5/
+> B4-B3仍关闭。
 
 ## 1. 审计对象与冻结点
 
@@ -53,7 +57,7 @@ same-solver、optimizer activation或旧production执行路径改动。
 - template=`d96bb8d62eb2e112e4f9ac5e98bc971cb41122cd97273ebb3fc1c4fc5c0a0be4`；
 - schedule=`989c3eae7fcefed3a6399b000c51eb222c5e5ba2a31a220ef42db5d86ca5de4b`；
 - module receipt=`e99121435e5db022c02f1d1610ffb9d4048397e09168f91f6857e425ad80801a`；
-- targeted=`23 passed`，B4-B related=`76 passed`，full=
+- targeted=`23 passed`，B4-B related=`77 passed`（外审现场更正），full=
   `1437 passed, 3 skipped, 6 warnings`。
 
 ## 4. Acceptance criteria
