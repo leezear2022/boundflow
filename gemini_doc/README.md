@@ -949,3 +949,7 @@ ASPLOS-ready 仍为 NO；功能提交 `264365f` 已由 PR #53 合入 `main@89690
    - `docs/bench_jsonl_schema.md`
    - 对应的 contract tests / postprocess tests
 4. 运行产物目录 `artifacts/`、`out/` 不进入 git（已在 `.gitignore` 忽略）。
+FSG4/B4-C1 provider-owned lower已实现：P-anchor不再native+TIR双算，plan buffer与DLPack view已复用；
+单worker语义exact但累计core约`0.95x`。局部`4.90x`的native分母包含observer强制`to_dense()`，不是
+真实production materialization frontier。当前下一动作是6 fresh正式关闭，随后若NO-GO转B4-C2大
+region累计覆盖。见`BOUNDFLOW_FSG4_B4C1_PROVIDER_OWNED_LOWER_CHANGELOG_2026_08_24.md`。

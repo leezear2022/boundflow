@@ -104,6 +104,8 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
             compiled=compiled,
             record_local_parity=False,
             capture_evaluation_zero=False,
+            native_value_bridge=not args.provider_owned,
+            provider_owns_lower_path=args.provider_owned,
         )
         result = execute_terminal_optimizer_schedule_v1(
             module,
@@ -146,7 +148,9 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
         observed_maximum, observed_allclose, observed_sign = _semantic_maximum(
             baseline, candidate
         )
-        if not observed_allclose or not observed_sign or observed_maximum > ATOL:
+        if not args.allow_semantic_drift and (
+            not observed_allclose or not observed_sign or observed_maximum > ATOL
+        ):
             raise ValueError("B4-C0 cumulative core semantic pair differs")
         maximum = max(maximum, observed_maximum)
         sign_exact = sign_exact and observed_sign
@@ -189,7 +193,7 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
         "candidate_median_ms": candidate_median,
         "paired_speedup": baseline_median / candidate_median,
         "maximum_absolute_difference": maximum,
-        "allclose": True,
+        "allclose": maximum <= ATOL,
         "sign_exact": sign_exact,
         "receipt": receipt,
         "baseline_peak_allocated_bytes": baseline_peak[0],
@@ -204,6 +208,9 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
             "compute_capability": [major, minor],
         },
         "performance_claimed": False,
+        "candidate_mode": (
+            "provider-owned-lower" if args.provider_owned else "native-value-bridge"
+        ),
     }
     payload["worker_hash"] = exact_worker.canonical_hash(payload)
     return payload
@@ -216,6 +223,8 @@ def main() -> None:
     parser.add_argument("--run-ordinal", type=int, choices=range(6), required=True)
     parser.add_argument("--order", choices=("BC", "CB"), required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--provider-owned", action="store_true")
+    parser.add_argument("--allow-semantic-drift", action="store_true")
     args = parser.parse_args()
     payload = _run(args)
     encoded = json.dumps(

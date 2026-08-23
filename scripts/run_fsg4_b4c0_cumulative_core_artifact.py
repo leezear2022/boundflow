@@ -3,6 +3,7 @@
 
 # pylint: disable=too-many-locals,too-many-statements,too-many-branches
 # pylint: disable=too-many-boolean-expressions,missing-function-docstring
+# pylint: disable=too-many-arguments
 
 from __future__ import annotations
 
@@ -117,7 +118,9 @@ def bootstrap_lower(values: Sequence[float]) -> float:
     return samples[int(0.025 * len(samples))]
 
 
-def protocol(source_capture: Path, model: Path) -> dict[str, object]:
+def protocol(
+    source_capture: Path, model: Path, *, provider_owned: bool
+) -> dict[str, object]:
     value: dict[str, object] = {
         "schema_version": PROTOCOL_SCHEMA,
         "source_git_head": git("rev-parse", "HEAD"),
@@ -130,7 +133,11 @@ def protocol(source_capture: Path, model: Path) -> dict[str, object]:
         "groups_per_worker": 30,
         "compile_excluded": True,
         "full_optimizer_runtime_included": True,
-        "native_value_bridge_included": True,
+        "candidate_mode": (
+            "provider-owned-lower" if provider_owned else "native-value-bridge"
+        ),
+        "native_value_bridge_included": not provider_owned,
+        "provider_owned_lower_included": provider_owned,
         "correctness_capture_excluded": True,
         "semantic_atol": ATOL,
         "semantic_rtol": ATOL,
@@ -148,6 +155,7 @@ def validate_protocol(value: Mapping[str, Any]) -> None:
     payload = dict(value)
     claimed = payload.pop("protocol_hash", None)
     source = value.get("source_git_head")
+    candidate_mode = value.get("candidate_mode", "native-value-bridge")
     if (
         claimed != canonical_hash(payload)
         or value.get("schema_version") != PROTOCOL_SCHEMA
@@ -157,7 +165,11 @@ def validate_protocol(value: Mapping[str, Any]) -> None:
         or value.get("orders") != list(ORDERS)
         or value.get("warmups_per_side") != 3
         or value.get("groups_per_worker") != 30
-        or value.get("native_value_bridge_included") is not True
+        or candidate_mode not in {"native-value-bridge", "provider-owned-lower"}
+        or value.get("native_value_bridge_included")
+        is not (candidate_mode == "native-value-bridge")
+        or value.get("provider_owned_lower_included", False)
+        is not (candidate_mode == "provider-owned-lower")
         or value.get("correctness_capture_excluded") is not True
         or value.get("no_regression_geomean_gate") != NO_REGRESSION_GATE
         or value.get("research_geomean_gate") != RESEARCH_GATE
@@ -166,7 +178,9 @@ def validate_protocol(value: Mapping[str, Any]) -> None:
         raise ValueError("B4-C0 cumulative core protocol differs")
 
 
-def validate_worker(value: Mapping[str, Any], ordinal: int) -> None:
+def validate_worker(
+    value: Mapping[str, Any], ordinal: int, *, candidate_mode: str
+) -> None:
     payload = dict(value)
     claimed = payload.pop("worker_hash", None)
     groups = value.get("groups")
@@ -191,7 +205,13 @@ def validate_worker(value: Mapping[str, Any], ordinal: int) -> None:
         or receipt.get("backward_launch_count") != 9
         or receipt.get("correctness_capture_enabled") is not False
         or receipt.get("unsupported_semantic_anchor_count") != 0
-        or receipt.get("native_value_bridge_count") != 10
+        or value.get("candidate_mode", "native-value-bridge") != candidate_mode
+        or receipt.get("native_value_bridge_count")
+        != (10 if candidate_mode == "native-value-bridge" else 0)
+        or receipt.get("provider_owned_lower_count", 0)
+        != (10 if candidate_mode == "provider-owned-lower" else 0)
+        or receipt.get("plan_buffer_reuse_count", 9) != 9
+        or int(receipt.get("dlpack_view_cache_hit_count", 63)) < 63
         or receipt.get("fallback_count") != 0
         or receipt.get("eager_count") != 0
         or receipt.get("adjoint_materialization_count") != 0
@@ -220,11 +240,13 @@ def validate_worker(value: Mapping[str, Any], ordinal: int) -> None:
         raise ValueError(f"B4-C0 cumulative core derivation differs: {ordinal}")
 
 
-def derive_summary(workers: Sequence[Mapping[str, Any]]) -> dict[str, object]:
+def derive_summary(
+    workers: Sequence[Mapping[str, Any]], *, candidate_mode: str, legacy: bool = False
+) -> dict[str, object]:
     if len(workers) != 6:
         raise ValueError("B4-C0 cumulative core worker count differs")
     for ordinal, worker in enumerate(workers):
-        validate_worker(worker, ordinal)
+        validate_worker(worker, ordinal, candidate_mode=candidate_mode)
     speedups = [float(worker["paired_speedup"]) for worker in workers]
     allocated_ratios = [
         float(worker["candidate_peak_allocated_bytes"])
@@ -250,9 +272,17 @@ def derive_summary(workers: Sequence[Mapping[str, Any]]) -> dict[str, object]:
     summary: dict[str, object] = {
         "schema_version": SUMMARY_SCHEMA,
         "status": (
-            "validated-b4-c0-cumulative-core"
+            (
+                "validated-b4-c0-cumulative-core"
+                if legacy
+                else "validated-b4-c1-provider-owned-lower"
+            )
             if no_regression
-            else "validated-no-go-b4-c0-native-value-bridge"
+            else (
+                "validated-no-go-b4-c0-native-value-bridge"
+                if legacy
+                else f"validated-no-go-{candidate_mode}"
+            )
         ),
         "run_count": len(workers),
         "worker_speedups": speedups,
@@ -274,15 +304,23 @@ def derive_summary(workers: Sequence[Mapping[str, Any]]) -> dict[str, object]:
         "no_regression_admitted": no_regression,
         "research_speedup_admitted": research,
         "provider_ownership_rewrite_admitted": not no_regression,
-        "native_value_bridge_included": True,
+        "native_value_bridge_included": candidate_mode == "native-value-bridge",
         "performance_claimed": False,
     }
+    if not legacy:
+        summary["candidate_mode"] = candidate_mode
     summary["summary_hash"] = canonical_hash(summary)
     return summary
 
 
 def run_worker(
-    *, source_capture: Path, model: Path, ordinal: int, order: str, output: Path
+    *,
+    source_capture: Path,
+    model: Path,
+    ordinal: int,
+    order: str,
+    output: Path,
+    provider_owned: bool,
 ) -> None:
     environment = os.environ.copy()
     environment["PYTHONNOUSERSITE"] = "1"
@@ -290,21 +328,24 @@ def run_worker(
     environment["PYTHONPATH"] = os.pathsep.join(
         item for item in (str(REPOSITORY_ROOT), inherited) if item
     )
+    command = [
+        sys.executable,
+        str(REPOSITORY_ROOT / "scripts/run_fsg4_b4c0_cumulative_core_worker.py"),
+        "--source-capture",
+        str(source_capture),
+        "--model",
+        str(model),
+        "--run-ordinal",
+        str(ordinal),
+        "--order",
+        order,
+        "--output",
+        str(output),
+    ]
+    if provider_owned:
+        command.append("--provider-owned")
     subprocess.run(
-        (
-            sys.executable,
-            str(REPOSITORY_ROOT / "scripts/run_fsg4_b4c0_cumulative_core_worker.py"),
-            "--source-capture",
-            str(source_capture),
-            "--model",
-            str(model),
-            "--run-ordinal",
-            str(ordinal),
-            "--order",
-            order,
-            "--output",
-            str(output),
-        ),
+        command,
         cwd=REPOSITORY_ROOT,
         env=environment,
         check=True,
@@ -331,9 +372,15 @@ def manifest(
     return value
 
 
-def generate(root: Path, *, source_capture: Path, model: Path) -> dict[str, object]:
+def generate(
+    root: Path,
+    *,
+    source_capture: Path,
+    model: Path,
+    provider_owned: bool,
+) -> dict[str, object]:
     root.mkdir(parents=True, exist_ok=True)
-    protocol_value = protocol(source_capture, model)
+    protocol_value = protocol(source_capture, model, provider_owned=provider_owned)
     write_json(root / "protocol.json", protocol_value)
     workers = []
     for ordinal, order in enumerate(ORDERS):
@@ -344,9 +391,13 @@ def generate(root: Path, *, source_capture: Path, model: Path) -> dict[str, obje
             ordinal=ordinal,
             order=order,
             output=output,
+            provider_owned=provider_owned,
         )
         workers.append(load_json(output))
-    summary = derive_summary(workers)
+    summary = derive_summary(
+        workers,
+        candidate_mode=str(protocol_value["candidate_mode"]),
+    )
     write_json(root / "summary.json", summary)
     write_json(root / "manifest.json", manifest(root, protocol_value, summary))
     return summary
@@ -376,7 +427,16 @@ def replay(root: Path) -> dict[str, object]:
         load_json(root / "raw" / f"run_{ordinal:02d}_{order.lower()}.json")
         for ordinal, order in enumerate(ORDERS)
     ]
-    if derive_summary(workers) != summary:
+    if (
+        derive_summary(
+            workers,
+            candidate_mode=str(
+                protocol_value.get("candidate_mode", "native-value-bridge")
+            ),
+            legacy="candidate_mode" not in protocol_value,
+        )
+        != summary
+    ):
         raise ValueError("B4-C0 cumulative core semantic replay differs")
     return summary
 
@@ -387,6 +447,7 @@ def main() -> None:
     parser.add_argument("--source-capture", type=Path)
     parser.add_argument("--model", type=Path)
     parser.add_argument("--replay", action="store_true")
+    parser.add_argument("--provider-owned", action="store_true")
     args = parser.parse_args()
     if args.replay:
         result = replay(args.artifact)
@@ -397,6 +458,7 @@ def main() -> None:
             args.artifact,
             source_capture=args.source_capture,
             model=args.model,
+            provider_owned=args.provider_owned,
         )
     print(canonical_json(result))
 

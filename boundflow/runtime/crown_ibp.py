@@ -1512,6 +1512,79 @@ def _backprop_relu_step_structured(
     return AffineBackwardState(A_u=upper, A_l=lower, b_u=out_b_u, b_l=out_b_l)
 
 
+def _backprop_relu_upper_only_step_structured(
+    state: AffineBackwardState,
+    *,
+    pre: IntervalState,
+    x_name: str,
+    relu_alpha: Optional[Dict[str, torch.Tensor]],
+    relu_pre_add_coeff_u: Optional[Dict[str, torch.Tensor]],
+    device: torch.device,
+    dtype: torch.dtype,
+    caller: str,
+) -> tuple[LinearOperator, torch.Tensor]:
+    """Compute only the upper side when a provider owns the fused lower path."""
+
+    input_shape = tuple(int(dim) for dim in pre.lower.shape[1:])
+    pre_numel = int(pre.lower[0].numel())
+    if pre_numel != state.A_u.input_numel:
+        raise ValueError(f"{caller} provider-owned upper ReLU shape differs")
+    if (
+        pre.lower.dim() != 2
+        and relu_pre_add_coeff_u is not None
+        and x_name in relu_pre_add_coeff_u
+    ):
+        raise NotImplementedError(
+            f"{caller} provider-owned upper ReLU pre-add rank differs"
+        )
+    relaxation = _relu_backward_relaxation(
+        pre=pre,
+        x_name=x_name,
+        relu_alpha=relu_alpha,
+        device=device,
+        dtype=dtype,
+        caller=caller,
+    )
+    bias_A_u = materialize_linear_operator(
+        state.A_u,
+        reason="provider_owned_relu_upper_bias_reduce",
+        operator_site=f"{x_name}:upper:provider-owned",
+        source_value=x_name,
+        source_primal_op="relu",
+        persistent_or_ephemeral="ephemeral",
+        logical_lifetime_begin="provider_owned_relu_upper",
+        logical_lifetime_end="provider_owned_relu_upper:return",
+        beta_related=(
+            relu_pre_add_coeff_u is not None and x_name in relu_pre_add_coeff_u
+        ),
+    )
+    selected_beta = torch.where(
+        bias_A_u >= 0,
+        relaxation.beta_u.unsqueeze(1),
+        relaxation.beta_l.unsqueeze(1),
+    )
+    output_bias = state.b_u + (bias_A_u * selected_beta).sum(dim=2)
+    batch = int(pre.lower.shape[0])
+    upper: LinearOperator = SignSplitLinearOperator(
+        base=state.A_u,
+        positive_scale=relaxation.alpha_u.reshape(batch, *input_shape),
+        negative_scale=relaxation.alpha_l.reshape(batch, *input_shape),
+        source_value=x_name,
+        bound_direction="upper",
+    )
+    if relu_pre_add_coeff_u is not None and x_name in relu_pre_add_coeff_u:
+        upper = _add_structured_relu_pre_coeff(
+            upper,
+            relu_pre_add_coeff_u[x_name],
+            x_name=x_name,
+            label="relu_pre_add_coeff_u",
+            input_shape=input_shape,
+            device=device,
+            dtype=dtype,
+        )
+    return upper, output_bias
+
+
 def _backprop_relu_step(
     state: AffineBackwardState,
     *,
@@ -1978,17 +2051,54 @@ def _run_crown_backward_from_trace(
                     )
                     consumed_affine_indices.add(step.affine_op_index)
                     continue
-            contrib = _backprop_relu_step(
-                state,
-                pre=relu_pre[x_name],
-                x_name=x_name,
-                relu_alpha=relu_alpha,
-                relu_pre_add_coeff_u=relu_pre_add_coeff_u,
-                relu_pre_add_coeff_l=relu_pre_add_coeff_l,
-                device=device,
-                dtype=dtype,
-                caller=caller,
+            provider_owns_lower = bool(
+                b4b_region_observer is not None
+                and getattr(
+                    b4b_region_observer,
+                    "provider_owns_affine_output",
+                    lambda _name: False,
+                )(x_name)
             )
+            if provider_owns_lower:
+                if (
+                    relu_lower_coefficients_out is not None
+                    or relu_objective_influence_out is not None
+                    or (
+                        relu_pre_add_coeff_l is not None
+                        and x_name in relu_pre_add_coeff_l
+                    )
+                ):
+                    raise ValueError(
+                        "provider-owned lower ReLU diagnostic/beta ownership differs"
+                    )
+                upper, upper_bias = _backprop_relu_upper_only_step_structured(
+                    state,
+                    pre=relu_pre[x_name],
+                    x_name=x_name,
+                    relu_alpha=relu_alpha,
+                    relu_pre_add_coeff_u=relu_pre_add_coeff_u,
+                    device=device,
+                    dtype=dtype,
+                    caller=caller,
+                )
+                contrib = AffineBackwardState(
+                    A_u=upper,
+                    A_l=state.A_l,
+                    b_u=upper_bias,
+                    b_l=state.b_l,
+                )
+            else:
+                contrib = _backprop_relu_step(
+                    state,
+                    pre=relu_pre[x_name],
+                    x_name=x_name,
+                    relu_alpha=relu_alpha,
+                    relu_pre_add_coeff_u=relu_pre_add_coeff_u,
+                    relu_pre_add_coeff_l=relu_pre_add_coeff_l,
+                    device=device,
+                    dtype=dtype,
+                    caller=caller,
+                )
             in_shape = _value_shape(
                 input_spec=input_spec, interval_env=interval_env, value_name=x_name
             )
@@ -2007,18 +2117,15 @@ def _run_crown_backward_from_trace(
             )
             weight_raw = _get_tensor(op.inputs[1])
             bias_raw = _get_tensor(op.inputs[2]) if len(op.inputs) == 3 else None
-            contrib = _backprop_conv2d_step(
-                state,
-                input_shape=in_shape,
-                output_shape=out_shape,
-                weight=weight_raw,
-                bias=bias_raw,
-                attrs=dict(op.attrs),
-                device=device,
-                dtype=dtype,
-                caller=caller,
+            provider_owns_lower = bool(
+                b4b_region_observer is not None
+                and getattr(
+                    b4b_region_observer,
+                    "provider_owns_affine_output",
+                    lambda _name: False,
+                )(out_name)
             )
-            if b4b_region_observer is not None and b4b_region_observer.wants(out_name):
+            if provider_owns_lower:
                 weight_tensor, conv_bias, stride, padding, dilation, groups = (
                     _normalize_conv2d_inputs(
                         weight_raw,
@@ -2029,14 +2136,21 @@ def _run_crown_backward_from_trace(
                         caller=caller,
                     )
                 )
-                replacement = b4b_region_observer.observe_affine_output(
+                upper_base = (
+                    state.A_u
+                    if tuple(state.A_u.input_shape) == tuple(out_shape)
+                    else state.A_u.reshape_input(out_shape)
+                )
+                upper_bias = state.b_u
+                if conv_bias is not None:
+                    bias_map = conv_bias.view(-1, 1, 1).expand(out_shape)
+                    upper_bias = upper_bias + upper_base.contract_input(bias_map)
+                replaced_lower_a, replaced_bias = getattr(
+                    b4b_region_observer, "provide_affine_output"
+                )(
                     out_name,
                     operator_weight=weight_tensor,
                     operator_bias=conv_bias,
-                    output_lower_a=contrib.A_l.to_dense()
-                    .reshape(batch, contrib.A_l.spec_dim, *in_shape)
-                    .contiguous(),
-                    output_bias=contrib.b_l,
                     operator_attributes={
                         "operator_kind": "conv2d",
                         "weight_shape": list(weight_tensor.shape),
@@ -2046,20 +2160,81 @@ def _run_crown_backward_from_trace(
                         "groups": groups,
                     },
                 )
-                if replacement is not None:
-                    replaced_lower_a, replaced_bias = replacement
-                    contrib = AffineBackwardState(
-                        A_u=contrib.A_u,
-                        A_l=cast(
-                            LinearOperator,
-                            DenseLinearOperator(
-                                replaced_lower_a,
-                                input_shape=in_shape,
-                            ),
+                contrib = AffineBackwardState(
+                    A_u=upper_base.conv2d_right(
+                        weight_tensor,
+                        stride=stride,
+                        padding=padding,
+                        dilation=dilation,
+                        groups=groups,
+                        input_shape=in_shape,
+                    ),
+                    A_l=cast(
+                        LinearOperator,
+                        DenseLinearOperator(
+                            replaced_lower_a,
+                            input_shape=in_shape,
                         ),
-                        b_u=contrib.b_u,
-                        b_l=replaced_bias,
+                    ),
+                    b_u=upper_bias,
+                    b_l=replaced_bias,
+                )
+            else:
+                contrib = _backprop_conv2d_step(
+                    state,
+                    input_shape=in_shape,
+                    output_shape=out_shape,
+                    weight=weight_raw,
+                    bias=bias_raw,
+                    attrs=dict(op.attrs),
+                    device=device,
+                    dtype=dtype,
+                    caller=caller,
+                )
+                if b4b_region_observer is not None and b4b_region_observer.wants(
+                    out_name
+                ):
+                    weight_tensor, conv_bias, stride, padding, dilation, groups = (
+                        _normalize_conv2d_inputs(
+                            weight_raw,
+                            bias_raw,
+                            attrs=dict(op.attrs),
+                            device=device,
+                            dtype=dtype,
+                            caller=caller,
+                        )
                     )
+                    replacement = b4b_region_observer.observe_affine_output(
+                        out_name,
+                        operator_weight=weight_tensor,
+                        operator_bias=conv_bias,
+                        output_lower_a=contrib.A_l.to_dense()
+                        .reshape(batch, contrib.A_l.spec_dim, *in_shape)
+                        .contiguous(),
+                        output_bias=contrib.b_l,
+                        operator_attributes={
+                            "operator_kind": "conv2d",
+                            "weight_shape": list(weight_tensor.shape),
+                            "stride": list(stride),
+                            "padding": list(padding),
+                            "dilation": list(dilation),
+                            "groups": groups,
+                        },
+                    )
+                    if replacement is not None:
+                        replaced_lower_a, replaced_bias = replacement
+                        contrib = AffineBackwardState(
+                            A_u=contrib.A_u,
+                            A_l=cast(
+                                LinearOperator,
+                                DenseLinearOperator(
+                                    replaced_lower_a,
+                                    input_shape=in_shape,
+                                ),
+                            ),
+                            b_u=contrib.b_u,
+                            b_l=replaced_bias,
+                        )
             adjoints[in_name] = _accumulate_backward_state(
                 adjoints.get(in_name), contrib, input_shape=in_shape
             )

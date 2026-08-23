@@ -2115,3 +2115,8 @@ G2/G3/TIR/JIT/融合。`1/(1-0.070986)=1.0764x`只是假设该region变为零耗
 分层基线，不能声称已有BoundFlow
 全栈性能。`performance_claimed=false`，公平竞品、multi-workload、solved verdict、memory headline与
 ASPLOS-ready仍未成立。
+> **2026-08-24 FSG4/B4-C1实现指令**：P-anchor lower ReLU→Conv已改为provider-owned，native
+> lower不再双算；10次迭代复用plan buffer/DLPack view。单worker语义误差≤`7.153e-7`且sign exact，
+> 但累计core仅约`0.95x`。当前只开放6 fresh正式关闭；若NO-GO，转B4-C2真实materialization
+> frontier累计覆盖，不得继续把局部eager-materialization的`4.90x`外推为production speedup。
+>

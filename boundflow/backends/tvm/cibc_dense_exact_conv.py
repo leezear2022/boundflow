@@ -57,82 +57,87 @@ def build_cibc_dense_exact_conv_tir_v3():
         )
         accumulator = T.alloc_buffer((1,), "float32", scope="local")
         bias_reduced = T.alloc_buffer((1,), "float32", scope="local")
-        for block_x in T.thread_binding(54, thread="blockIdx.x"):
+        output_partial = T.alloc_buffer((128,), "float32", scope="shared")
+        for block_x in T.thread_binding(198, thread="blockIdx.x"):
             for thread_x in T.thread_binding(128, thread="threadIdx.x"):
-                flat = block_x * 128 + thread_x
-                if block_x < 48:
-                    output_w = flat % 8
-                    output_h = flat // 8 % 8
-                    output_channel = flat // 64 % 16
-                    output_domain = flat // 1024
-                    accumulator[0] = T.float32(0)
-                    for reduction in range(144):
-                        input_channel = reduction // 9
-                        kernel_h = reduction // 3 % 3
-                        kernel_w = reduction % 3
-                        input_h = output_h + 1 - kernel_h
-                        input_w = output_w + 1 - kernel_w
-                        if (
-                            0 <= input_h
-                            and input_h < 8
-                            and 0 <= input_w
-                            and input_w < 8
-                        ):
-                            incoming_value = incoming[
-                                output_domain, 0, input_channel, input_h, input_w
-                            ]
-                            lower_value = lower[
-                                output_domain, input_channel, input_h, input_w
-                            ]
-                            upper_value = upper[
-                                output_domain, input_channel, input_h, input_w
-                            ]
-                            denominator = T.max(
-                                upper_value - lower_value,
-                                T.float32(1.1920928955078125e-7),
-                            )
-                            upper_slope = T.if_then_else(
+                reduction_lane = thread_x % 4
+                output_flat = T.min(block_x * 32 + thread_x // 4, 6143)
+                output_w = output_flat % 8
+                output_h = output_flat // 8 % 8
+                output_channel = output_flat // 64 % 16
+                output_domain = output_flat // 1024
+                accumulator[0] = T.float32(0)
+                for reduction_outer in range(36):
+                    reduction = reduction_outer * 4 + reduction_lane
+                    input_channel = reduction // 9
+                    kernel_h = reduction // 3 % 3
+                    kernel_w = reduction % 3
+                    input_h = output_h + 1 - kernel_h
+                    input_w = output_w + 1 - kernel_w
+                    if 0 <= input_h and input_h < 8 and 0 <= input_w and input_w < 8:
+                        incoming_value = incoming[
+                            output_domain, 0, input_channel, input_h, input_w
+                        ]
+                        lower_value = lower[
+                            output_domain, input_channel, input_h, input_w
+                        ]
+                        upper_value = upper[
+                            output_domain, input_channel, input_h, input_w
+                        ]
+                        denominator = T.max(
+                            upper_value - lower_value,
+                            T.float32(1.1920928955078125e-7),
+                        )
+                        upper_slope = T.if_then_else(
+                            lower_value >= T.float32(0),
+                            T.float32(1),
+                            T.if_then_else(
+                                upper_value <= T.float32(0),
+                                T.float32(0),
+                                upper_value / denominator,
+                            ),
+                        )
+                        alpha_value = alpha[
+                            output_domain, input_channel, input_h, input_w
+                        ]
+                        lower_slope = T.if_then_else(
+                            T.And(
+                                lower_value < T.float32(0),
+                                upper_value > T.float32(0),
+                            ),
+                            T.min(T.max(alpha_value, T.float32(0)), T.float32(1)),
+                            T.if_then_else(
                                 lower_value >= T.float32(0),
                                 T.float32(1),
-                                T.if_then_else(
-                                    upper_value <= T.float32(0),
-                                    T.float32(0),
-                                    upper_value / denominator,
-                                ),
-                            )
-                            alpha_value = alpha[
-                                output_domain, input_channel, input_h, input_w
+                                T.float32(0),
+                            ),
+                        )
+                        selected_slope = T.if_then_else(
+                            incoming_value >= T.float32(0),
+                            lower_slope,
+                            upper_slope,
+                        )
+                        accumulator[0] = (
+                            accumulator[0]
+                            + incoming_value
+                            * selected_slope
+                            * weight[
+                                input_channel,
+                                output_channel,
+                                kernel_h,
+                                kernel_w,
                             ]
-                            lower_slope = T.if_then_else(
-                                T.And(
-                                    lower_value < T.float32(0),
-                                    upper_value > T.float32(0),
-                                ),
-                                T.min(T.max(alpha_value, T.float32(0)), T.float32(1)),
-                                T.if_then_else(
-                                    lower_value >= T.float32(0),
-                                    T.float32(1),
-                                    T.float32(0),
-                                ),
-                            )
-                            selected_slope = T.if_then_else(
-                                incoming_value >= T.float32(0),
-                                lower_slope,
-                                upper_slope,
-                            )
-                            accumulator[0] = (
-                                accumulator[0]
-                                + incoming_value
-                                * selected_slope
-                                * weight[
-                                    input_channel,
-                                    output_channel,
-                                    kernel_h,
-                                    kernel_w,
-                                ]
-                            )
-                    combined_output[flat] = accumulator[0]
-                bias_domain = T.max(block_x - 48, 0)
+                        )
+                output_partial[thread_x] = accumulator[0]
+                T.tvm_storage_sync("shared")
+                if T.And(block_x < 192, reduction_lane == 0):
+                    combined_output[output_flat] = (
+                        output_partial[thread_x]
+                        + output_partial[thread_x + 1]
+                        + output_partial[thread_x + 2]
+                        + output_partial[thread_x + 3]
+                    )
+                bias_domain = T.max(block_x - 192, 0)
                 accumulator[0] = T.float32(0)
                 for reduction_outer in range(8):
                     reduction = reduction_outer * 128 + thread_x
@@ -197,9 +202,9 @@ def build_cibc_dense_exact_conv_tir_v3():
                         bias_reduced[0],
                         thread_x,
                     )
-                if T.And(48 <= block_x, thread_x == 0):
-                    combined_output[6144 + block_x - 48] = (
-                        incoming_bias[block_x - 48, 0] + bias_reduced[0]
+                if T.And(192 <= block_x, thread_x == 0):
+                    combined_output[6144 + block_x - 192] = (
+                        incoming_bias[block_x - 192, 0] + bias_reduced[0]
                     )
 
     @T.prim_func

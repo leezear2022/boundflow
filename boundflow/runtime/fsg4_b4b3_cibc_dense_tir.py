@@ -31,6 +31,9 @@ class CIBCDenseExactTIRExecutorV3:
         operator_weight: torch.Tensor,
         operator_bias: torch.Tensor,
         compiled: CompiledCIBCDenseExactConvTIRV3,
+        combined_output: torch.Tensor | None = None,
+        combined_gradient: torch.Tensor | None = None,
+        dlpack_view_cache: dict[int, object] | None = None,
     ) -> None:
         import tvm
         import tvm_ffi
@@ -42,6 +45,7 @@ class CIBCDenseExactTIRExecutorV3:
         self.fallback_count = 0
         self.eager_count = 0
         self.adjoint_materialization_count = 0
+        self.dlpack_view_cache_hit_count = 0
         self.device = incoming_lower_a.device
         self.stream_id = int(torch.cuda.current_stream(self.device).cuda_stream)
         ordinal = self.device.index
@@ -76,12 +80,27 @@ class CIBCDenseExactTIRExecutorV3:
             for tensor, shape in zip(self.inputs, expected_shapes)
         ):
             raise ValueError("CIBC dense exact input contract differs")
-        self.combined_output = torch.empty(
-            6150, dtype=torch.float32, device=self.device
+        self.combined_output = (
+            torch.empty(6150, dtype=torch.float32, device=self.device)
+            if combined_output is None
+            else combined_output
         )
-        self.combined_gradient = torch.empty(
-            12288, dtype=torch.float32, device=self.device
+        self.combined_gradient = (
+            torch.empty(12288, dtype=torch.float32, device=self.device)
+            if combined_gradient is None
+            else combined_gradient
         )
+        if (
+            tuple(self.combined_output.shape) != (6150,)
+            or self.combined_output.dtype != torch.float32
+            or self.combined_output.device != self.device
+            or not self.combined_output.is_contiguous()
+            or tuple(self.combined_gradient.shape) != (12288,)
+            or self.combined_gradient.dtype != torch.float32
+            or self.combined_gradient.device != self.device
+            or not self.combined_gradient.is_contiguous()
+        ):
+            raise ValueError("CIBC dense exact plan buffer contract differs")
         forward_tensors = (*self.inputs, self.combined_output)
         static_backward_tensors = (
             incoming_lower_a,
@@ -101,15 +120,24 @@ class CIBCDenseExactTIRExecutorV3:
                 )
             }.values()
         )
+        self._dlpack_view_cache = {} if dlpack_view_cache is None else dlpack_view_cache
+
+        def cached_view(tensor: torch.Tensor) -> object:
+            pointer = tensor.data_ptr()
+            view = self._dlpack_view_cache.get(pointer)
+            if view is not None:
+                self.dlpack_view_cache_hit_count += 1
+                return view
+            view = tvm.runtime.from_dlpack(tensor)
+            if torch.from_dlpack(view).data_ptr() != pointer:
+                raise RuntimeError("CIBC dense exact DLPack pointer differs")
+            self._dlpack_view_cache[pointer] = view
+            return view
+
+        self._cached_view = cached_view
         self._static_views = {
-            tensor.data_ptr(): tvm.runtime.from_dlpack(tensor) for tensor in all_static
+            tensor.data_ptr(): cached_view(tensor) for tensor in all_static
         }
-        if any(
-            torch.from_dlpack(self._static_views[tensor.data_ptr()]).data_ptr()
-            != tensor.data_ptr()
-            for tensor in all_static
-        ):
-            raise RuntimeError("CIBC dense exact static DLPack pointer differs")
         self.forward_views = tuple(
             self._static_views[tensor.data_ptr()] for tensor in forward_tensors
         )
@@ -138,8 +166,6 @@ class CIBCDenseExactTIRExecutorV3:
     def backward(
         self, output_a_gradient: torch.Tensor, output_bias_gradient: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        import tvm
-
         self._validate_stream()
         if (
             tuple(output_a_gradient.shape) != (6, 1, 16, 8, 8)
@@ -158,13 +184,10 @@ class CIBCDenseExactTIRExecutorV3:
             self.fallback_count += 1
             raise ValueError("CIBC dense exact scalar bias seed differs")
         adjoints = (output_a_gradient, bias_seed)
-        dynamic_views = tuple(tvm.runtime.from_dlpack(tensor) for tensor in adjoints)
-        if any(
-            torch.from_dlpack(view).data_ptr() != tensor.data_ptr()
-            for view, tensor in zip(dynamic_views, adjoints)
-        ):
-            self.fallback_count += 1
-            raise RuntimeError("CIBC dense exact adjoint DLPack pointer differs")
+        dynamic_views = (
+            self._cached_view(adjoints[0]),
+            self._cached_view(adjoints[1]),
+        )
         self._dynamic_adjoint_views = dynamic_views
         self.backward_function(
             *self.static_backward_views,
@@ -230,6 +253,9 @@ def execute_cibc_dense_exact_tir_v3(
     operator_weight: torch.Tensor,
     operator_bias: torch.Tensor,
     compiled: CompiledCIBCDenseExactConvTIRV3,
+    combined_output: torch.Tensor | None = None,
+    combined_gradient: torch.Tensor | None = None,
+    dlpack_view_cache: dict[int, object] | None = None,
 ) -> tuple[torch.Tensor, torch.Tensor, CIBCDenseExactTIRExecutorV3]:
     executor = CIBCDenseExactTIRExecutorV3(
         incoming_lower_a=incoming_lower_a,
@@ -240,6 +266,9 @@ def execute_cibc_dense_exact_tir_v3(
         operator_weight=operator_weight,
         operator_bias=operator_bias,
         compiled=compiled,
+        combined_output=combined_output,
+        combined_gradient=combined_gradient,
+        dlpack_view_cache=dlpack_view_cache,
     )
     output_a, output_bias = _CIBCDenseExactTIRFunctionV3.apply(
         incoming_lower_a,
