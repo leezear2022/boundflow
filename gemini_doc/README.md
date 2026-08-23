@@ -6,6 +6,12 @@
 - 让别人（或未来的你）能快速定位：某个决策/某个口径/某个脚本是“为什么这样做”；
 - 让论文/AE 的证据链（claim → 命令 → 产物 → 字段）能闭环。
 
+FSG4/B4-B1已在Round 2独立外审批准并由executor关闭exchange，最终状态=
+`EXTERNALLY-APPROVED-VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE`。F1/F2 CLOSED、AC1—AC6
+全PASS、findings=0；receipt负例20/20、execution-policy 6/6、完整性负例2/2。下一步只开放
+另行预注册B4-B2，不直接实现/计时TIR。见
+`change_2026-08-23_fsg4_b4b1_round2_external_closure.md`。
+
 > 约定：每次工程改动都应在 `gemini_doc/` 新增一份 `change_YYYY-MM-DD_*.md` 记录，并在 `docs/change_log.md` 追加一条总账。
 
 ---
@@ -14,7 +20,8 @@ FSG4/B4-B1 Round 1外审已`request_changes`：F1为receipt exact metric/gradien
 未绑定，F2为PyTorch deterministic warn/debug mode未原样恢复。两项修复已进入clean source
 `e711e99`；v3 root replay与2/2完整性负例通过，RTX 4060 full=`1414 passed, 3 skipped`，
 当前重交Round 2。B4-B2/TIR/
-performance仍关闭。见`change_2026-08-23_fsg4_b4b1_round1_f1_f2_fix.md`。
+performance仍关闭。该历史状态已由上方Round 2批准取代；见
+`change_2026-08-23_fsg4_b4b1_round1_f1_f2_fix.md`。
 
 FSG4/B4-B1 typed pure-PyTorch reference已内部关闭，状态=
 `VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE-PENDING-EXTERNAL-AUDIT`。v2从5 fresh raw重编译

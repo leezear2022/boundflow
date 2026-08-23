@@ -1,5 +1,9 @@
 # BoundFlow 面向 ASPLOS 的总体研发与论文执行计划 v1.0
 
+> **2026-08-23 FSG4/B4-B1关闭更新**：Round 2独立外审已批准并关闭exchange，最终=
+> `EXTERNALLY-APPROVED-VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE`。只开放另行预注册B4-B2
+> typed CUDA/TIR candidate；不得从B4-B1 correctness直接升级性能claim。
+
 > **2026-08-16 FSG4/B4-A实现候选**：typed handoff/no-rerun路径与five-fresh runner已实现为
 > `IMPLEMENTED-B4-A-PENDING-CLEAN-SOURCE-FIVE-FRESH`。下一步只执行clean-source correctness；无性能
 > claim，B4-B/C/D与B5—B7关闭。

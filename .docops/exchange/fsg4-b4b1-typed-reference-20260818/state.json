@@ -1,7 +1,7 @@
 {
   "task": "fsg4-b4b1-typed-reference-20260818",
   "title": "FSG4 B4-B1 typed pure-PyTorch reference external audit",
-  "status": "approved",
+  "status": "closed",
   "round": 2,
   "executor": "codex",
   "auditor": "external-model",
@@ -13,9 +13,10 @@
     "fsg4-b4b1-typed-reference-20260818/r001/response-F1",
     "fsg4-b4b1-typed-reference-20260818/r001/response-F2",
     "fsg4-b4b1-typed-reference-20260818/r002/delivery",
-    "fsg4-b4b1-typed-reference-20260818/r002/audit"
+    "fsg4-b4b1-typed-reference-20260818/r002/audit",
+    "fsg4-b4b1-typed-reference-20260818/closure"
   ],
-  "rev": 10,
+  "rev": 11,
   "created": "2026-08-18T07:52:51Z",
-  "updated": "2026-08-23T02:36:32Z"
+  "updated": "2026-08-23T02:37:44Z"
 }

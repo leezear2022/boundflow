@@ -1,11 +1,16 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-23 FSG4/B4-B1 Round 2外审关闭指令**：exchange已`closed/approved`，F1/F2
+> CLOSED，AC1—AC6全PASS且findings=0。最终状态=
+> `EXTERNALLY-APPROVED-VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE`。下一唯一动作是另行预注册
+> B4-B2 typed CUDA/TIR candidate；预注册完成前不得实现/计时TIR或升级performance claim。
+
 > **2026-08-23 FSG4/B4-B1 Round 1修复指令**：外审以F1 receipt inventory/target未精确
 > fail-closed、F2 deterministic warn/debug mode未原样恢复两个major判定`request_changes`。
 > 两项修复已进入clean source=`e711e99`，旧v2被新协议拒绝；v3已完成root replay与2/2完整性
 > 负例，RTX 4060全量=`1414 passed, 3 skipped`。下一唯一动作是提交Round 2。外审批准前
 > 不得实现B4-B2 CUDA/TIR或升级
-> 任何性能类claim。
+> 任何性能类claim。该待审指令已由上方Round 2批准取代。
 
 > **2026-08-18 FSG4/B4-B1内部关闭指令**：deterministic v2以5 fresh/10 captures重编译typed
 > IR/instance并独立执行pure-PyTorch forward/VJP；60 metrics/196,380 elements、max diff=

@@ -1,5 +1,11 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-23 FSG4/B4-B1外审关闭**：exchange=`closed/approved`，Round 2 F1/F2 CLOSED，
+> AC1—AC6全PASS且findings=0。最终状态=
+> `EXTERNALLY-APPROVED-VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE`。Executor RTX 4060 full=
+> `1414 passed, 3 skipped`；auditor CPU-only full=`1366 passed, 51 skipped`，集合边界一致。
+> 下一步只开放另行预注册B4-B2 typed CUDA/TIR candidate；不得直接实现/计时TIR。
+
 > **2026-08-23 FSG4/B4-B1 Round 1外审纠正**：正式verdict=`request_changes`，F1/F2均为
 > major。F1为receipt metric/gradient target inventory未精确绑定；F2为deterministic warn/debug
 > mode未原样恢复。两项修复已在工作树通过targeted=`31 passed`、related=`127 passed, 12 skipped`、
@@ -7,7 +13,7 @@
 > 60 metrics/196,380 elements、max diff=`6.109476089477539e-07`、sign exact、2/2完整性负例，
 > targeted=`32 passed`、related=`140 passed`、RTX 4060 full=`1414 passed, 3 skipped, 6 warnings`。
 > 下一步是重交Round 2；B4-B2/TIR/performance/memory/
-> ASPLOS-ready仍关闭。
+> ASPLOS-ready仍关闭。该待审状态已由上方Round 2批准取代。
 
 > **2026-08-18 FSG4/B4-B1内部关闭**：source artifact=`d9164b8`，deterministic v2完成
 > 5 fresh/10 captures的typed IR/instance重建与pure-PyTorch forward/VJP；60 metrics/196,380

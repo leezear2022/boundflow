@@ -1,5 +1,5 @@
 ---
-status: ready-for-round2-external-audit
+status: approved-round2-closed
 updated: 2026-08-23
 type: audit-handoff
 topic: boundflow
@@ -7,6 +7,9 @@ stage: s01
 ---
 
 # FSG4/B4-B1 Round 2 外审交接
+
+> 关闭注：Round 2已`approve`，findings=0，F1/F2 CLOSED；executor已关闭exchange。本文件保留
+> 为审计输入，最终记录见`change_2026-08-23_fsg4_b4b1_round2_external_closure.md`。
 
 ## 1. 请求判定
 

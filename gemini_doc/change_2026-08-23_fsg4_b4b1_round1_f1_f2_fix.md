@@ -1,5 +1,5 @@
 ---
-status: validated-pending-round2-external-audit
+status: superseded-by-round2-external-approval
 updated: 2026-08-23
 type: change-record
 topic: boundflow
@@ -7,6 +7,9 @@ stage: s01
 ---
 
 # FSG4/B4-B1 Round 1 F1/F2 修复记录
+
+> 2026-08-23更新：Round 2已独立批准并由executor关闭exchange，最终状态=
+> `EXTERNALLY-APPROVED-VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE`。本文件保留为Round 1修复历史。
 
 ## 结论
 
