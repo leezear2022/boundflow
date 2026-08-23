@@ -2126,3 +2126,9 @@ ASPLOS-ready仍未成立。
 > `VALIDATED-NO-GO-B4-C1-MATERIALIZATION-FRONTIER`。只开放B4-C2真实materialization frontier
 > operator-tree融合与14-call累计coverage；不得继续调同一P-anchor。
 >
+> **2026-08-24 FSG4/B4-C2与B4总关闭指令**：真实6-site lower materialization frontier已覆盖
+> optimizer 60/60次，三worker语义exact但speedup仅`0.3488/0.3374/0.3460x`，peak allocated
+> ratio=`1.3401`。根因是dense autograd中间态跨层保留。最终=
+> `VALIDATED-NO-GO-B4-C2-DENSE-RETENTION`且本轮纵向alpha-CROWN B4整体NO-GO；B4-D关闭。
+> 下一路线独立启动CIBC论文的IBP/forward-bound水平融合与autotuning，不继承B4 claim。
+>

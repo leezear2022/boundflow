@@ -957,3 +957,7 @@ FSG4/B4-C1正式以`VALIDATED-NO-GO-B4-C1-MATERIALIZATION-FRONTIER`关闭：6 fr
 core geomean=`0.94815x`、worst=`0.94547x`，语义max diff=`7.153e-7`且8/8 tamper拒绝。
 当前只开放B4-C2真实materialization frontier大区域融合与14-call coverage。见
 `BOUNDFLOW_FSG4_B4C1_PROVIDER_OWNED_LOWER_FORMAL_CLOSURE_2026_08_24.md`。
+FSG4/B4-C2接管6个真实materialization sites后，3 fresh speedup仅`0.337—0.349x`且显存增加34%，
+虽语义exact但触发kill gate；纵向alpha-CROWN B4整体以NO-GO关闭，B4-D不开放。下一路线转向CIBC
+论文真正的IBP/forward-bound水平融合与autotuning。见
+`BOUNDFLOW_FSG4_B4C2_MATERIALIZATION_FRONTIER_KILL_CHANGELOG_2026_08_24.md`。

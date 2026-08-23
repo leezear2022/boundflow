@@ -1854,3 +1854,7 @@ C2 标记 validated-reduced，不能解释为论文级 complete。
 > geomean=`0.94815x`，最终=`VALIDATED-NO-GO-B4-C1-MATERIALIZATION-FRONTIER`；不得引用局部
 > `4.90x`作为production speedup。B4-C2/B4-D/query仍未验证。
 >
+> **2026-08-24 B4总claim边界**：B4-C2 6-site/60-call机制语义成立，但3-worker仅
+> `0.337—0.349x`且peak allocated=`1.3401x`，纵向alpha-CROWN融合以`VALIDATED-NO-GO-B4`
+> 关闭；没有core/query speedup claim。后续CIBC水平融合是独立路线。
+>

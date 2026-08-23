@@ -1409,6 +1409,7 @@ def _backprop_relu_step_structured(
     device: torch.device,
     dtype: torch.dtype,
     caller: str,
+    dense_lower_once: bool = False,
 ) -> AffineBackwardState:
     """Keep the main post-ReLU coefficient structured; materialize only bias reduction."""
 
@@ -1482,13 +1483,35 @@ def _backprop_relu_step_structured(
         source_value=x_name,
         bound_direction="upper",
     )
-    lower: LinearOperator = SignSplitLinearOperator(
-        base=state.A_l,
-        positive_scale=relaxation.alpha_l.reshape(batch, *input_shape),
-        negative_scale=relaxation.alpha_u.reshape(batch, *input_shape),
-        source_value=x_name,
-        bound_direction="lower",
-    )
+    if dense_lower_once:
+        selected_alpha_l = torch.where(
+            bias_A_l >= 0,
+            relaxation.alpha_l.unsqueeze(1),
+            relaxation.alpha_u.unsqueeze(1),
+        )
+        dense_lower = bias_A_l * selected_alpha_l
+        if relu_pre_add_coeff_l is not None and x_name in relu_pre_add_coeff_l:
+            add = _broadcast_relu_pre_add_coeff(
+                relu_pre_add_coeff_l[x_name],
+                batch=batch,
+                flat_dim=pre_numel,
+                x_name=x_name,
+                label="relu_pre_add_coeff_l",
+                device=device,
+                dtype=dtype,
+            )
+            dense_lower = dense_lower + add.unsqueeze(1)
+        lower: LinearOperator = DenseLinearOperator(
+            dense_lower, input_shape=input_shape
+        )
+    else:
+        lower = SignSplitLinearOperator(
+            base=state.A_l,
+            positive_scale=relaxation.alpha_l.reshape(batch, *input_shape),
+            negative_scale=relaxation.alpha_u.reshape(batch, *input_shape),
+            source_value=x_name,
+            bound_direction="lower",
+        )
     if relu_pre_add_coeff_u is not None and x_name in relu_pre_add_coeff_u:
         upper = _add_structured_relu_pre_coeff(
             upper,
@@ -1499,7 +1522,11 @@ def _backprop_relu_step_structured(
             device=device,
             dtype=dtype,
         )
-    if relu_pre_add_coeff_l is not None and x_name in relu_pre_add_coeff_l:
+    if (
+        not dense_lower_once
+        and relu_pre_add_coeff_l is not None
+        and x_name in relu_pre_add_coeff_l
+    ):
         lower = _add_structured_relu_pre_coeff(
             lower,
             relu_pre_add_coeff_l[x_name],
@@ -2088,17 +2115,43 @@ def _run_crown_backward_from_trace(
                     b_l=state.b_l,
                 )
             else:
-                contrib = _backprop_relu_step(
-                    state,
-                    pre=relu_pre[x_name],
-                    x_name=x_name,
-                    relu_alpha=relu_alpha,
-                    relu_pre_add_coeff_u=relu_pre_add_coeff_u,
-                    relu_pre_add_coeff_l=relu_pre_add_coeff_l,
-                    device=device,
-                    dtype=dtype,
-                    caller=caller,
+                owns_relu_frontier = bool(
+                    b4b_region_observer is not None
+                    and getattr(
+                        b4b_region_observer,
+                        "provider_owns_relu_lower_materialization",
+                        lambda _name: False,
+                    )(x_name)
                 )
+                if owns_relu_frontier:
+                    contrib = _backprop_relu_step_structured(
+                        state,
+                        pre=relu_pre[x_name],
+                        x_name=x_name,
+                        relu_alpha=relu_alpha,
+                        relu_pre_add_coeff_u=relu_pre_add_coeff_u,
+                        relu_pre_add_coeff_l=relu_pre_add_coeff_l,
+                        device=device,
+                        dtype=dtype,
+                        caller=caller,
+                        dense_lower_once=True,
+                    )
+                    getattr(
+                        b4b_region_observer,
+                        "record_relu_lower_materialization",
+                    )(x_name)
+                else:
+                    contrib = _backprop_relu_step(
+                        state,
+                        pre=relu_pre[x_name],
+                        x_name=x_name,
+                        relu_alpha=relu_alpha,
+                        relu_pre_add_coeff_u=relu_pre_add_coeff_u,
+                        relu_pre_add_coeff_l=relu_pre_add_coeff_l,
+                        device=device,
+                        dtype=dtype,
+                        caller=caller,
+                    )
             in_shape = _value_shape(
                 input_spec=input_spec, interval_env=interval_env, value_name=x_name
             )

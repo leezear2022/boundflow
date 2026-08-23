@@ -33,6 +33,9 @@ from boundflow.runtime.fsg4_b4b1_reference_capture import (
 from boundflow.runtime.fsg4_b4b3_cibc_exact_call import (
     B4B3CIBCExactCallObserverV1,
 )
+from boundflow.runtime.fsg4_b4c2_materialization_frontier import (
+    B4C2MaterializationFrontierObserverV1,
+)
 from scripts import run_fsg4_b4b3_cibc_exact_worker as exact_worker
 
 WORKER_SCHEMA = "boundflow.fsg4-b4c0-cumulative-core-worker/v1"
@@ -99,14 +102,17 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
         )
 
     def candidate_call():
-        observer = B4B3CIBCExactCallObserverV1(
-            reference_capture,
-            compiled=compiled,
-            record_local_parity=False,
-            capture_evaluation_zero=False,
-            native_value_bridge=not args.provider_owned,
-            provider_owns_lower_path=args.provider_owned,
-        )
+        if args.materialization_frontier:
+            observer = B4C2MaterializationFrontierObserverV1()
+        else:
+            observer = B4B3CIBCExactCallObserverV1(
+                reference_capture,
+                compiled=compiled,
+                record_local_parity=False,
+                capture_evaluation_zero=False,
+                native_value_bridge=not args.provider_owned,
+                provider_owns_lower_path=args.provider_owned,
+            )
         result = execute_terminal_optimizer_schedule_v1(
             module,
             spec,
@@ -209,7 +215,11 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
         },
         "performance_claimed": False,
         "candidate_mode": (
-            "provider-owned-lower" if args.provider_owned else "native-value-bridge"
+            "materialization-frontier"
+            if args.materialization_frontier
+            else (
+                "provider-owned-lower" if args.provider_owned else "native-value-bridge"
+            )
         ),
     }
     payload["worker_hash"] = exact_worker.canonical_hash(payload)
@@ -224,8 +234,13 @@ def main() -> None:
     parser.add_argument("--order", choices=("BC", "CB"), required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--provider-owned", action="store_true")
+    parser.add_argument("--materialization-frontier", action="store_true")
     parser.add_argument("--allow-semantic-drift", action="store_true")
     args = parser.parse_args()
+    if args.provider_owned and args.materialization_frontier:
+        parser.error(
+            "provider-owned and materialization-frontier are mutually exclusive"
+        )
     payload = _run(args)
     encoded = json.dumps(
         payload, sort_keys=True, separators=(",", ":"), allow_nan=False
