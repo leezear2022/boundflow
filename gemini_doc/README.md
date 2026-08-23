@@ -961,3 +961,7 @@ FSG4/B4-C2接管6个真实materialization sites后，3 fresh speedup仅`0.337—
 虽语义exact但触发kill gate；纵向alpha-CROWN B4整体以NO-GO关闭，B4-D不开放。下一路线转向CIBC
 论文真正的IBP/forward-bound水平融合与autotuning。见
 `BOUNDFLOW_FSG4_B4C2_MATERIALIZATION_FRONTIER_KILL_CHANGELOG_2026_08_24.md`。
+CIBC-IBP水平融合已实现：一个manual TIR kernel同时完成center/deviation与lower/upper，取代4次
+PyTorch Conv；另有plan-owned DLPack/runtime和公平CUDA-graph整图路径。当前诊断为真实Conv约
+`7.72x`、ResNet2B完整IBP graph约`2.70x`，正式artifact前不形成claim。见
+`BOUNDFLOW_CIBC_IBP_HORIZONTAL_FUSION_IMPLEMENTATION_CHANGELOG_2026_08_24.md`。

@@ -2132,3 +2132,9 @@ ASPLOS-ready仍未成立。
 > `VALIDATED-NO-GO-B4-C2-DENSE-RETENTION`且本轮纵向alpha-CROWN B4整体NO-GO；B4-D关闭。
 > 下一路线独立启动CIBC论文的IBP/forward-bound水平融合与autotuning，不继承B4 claim。
 >
+> **2026-08-24 CIBC-IBP水平融合实现指令**：已按论文center/deviation公式实现单kernel lower/upper
+> Conv TIR、64/128/256 schedule、plan-owned零拷贝runtime及公平baseline/candidate CUDA graph。
+> 诊断上真实Conv约`7.72x`、完整ResNet2B IBP graph约`2.70x`，但仍为
+> `IMPLEMENTED-PENDING-FORMAL`。下一唯一动作=6 fresh operator/model formal artifact；不得与已NO-GO
+> 的B4 alpha-CROWN claim合并。
+>

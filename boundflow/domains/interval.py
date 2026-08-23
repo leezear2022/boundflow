@@ -17,11 +17,17 @@ class IntervalState(DomainState):
 
     def validate(self) -> None:
         if self.lower.shape != self.upper.shape:
-            raise ValueError(f"interval shape mismatch: {self.lower.shape} vs {self.upper.shape}")
+            raise ValueError(
+                f"interval shape mismatch: {self.lower.shape} vs {self.upper.shape}"
+            )
         if self.lower.dtype != self.upper.dtype:
-            raise ValueError(f"interval dtype mismatch: {self.lower.dtype} vs {self.upper.dtype}")
+            raise ValueError(
+                f"interval dtype mismatch: {self.lower.dtype} vs {self.upper.dtype}"
+            )
         if self.lower.device != self.upper.device:
-            raise ValueError(f"interval device mismatch: {self.lower.device} vs {self.upper.device}")
+            raise ValueError(
+                f"interval device mismatch: {self.lower.device} vs {self.upper.device}"
+            )
 
 
 class IntervalDomain(AbstractDomain):
@@ -40,7 +46,9 @@ class IntervalDomain(AbstractDomain):
         - conv2d: y = conv2d(x, weight, bias, stride, padding, dilation, groups)
         """
         if not isinstance(state_in, IntervalState):
-            raise TypeError(f"IntervalDomain expects IntervalState, got {type(state_in)}")
+            raise TypeError(
+                f"IntervalDomain expects IntervalState, got {type(state_in)}"
+            )
 
         x_l, x_u = state_in.lower, state_in.upper
         w = weight
@@ -60,13 +68,61 @@ class IntervalDomain(AbstractDomain):
             dilation = _as_int_tuple(attrs.get("dilation", 1), dim=2)
             groups = int(attrs.get("groups", 1))
 
+            if x_l.device.type == "cuda" and not (
+                x_l.requires_grad or x_u.requires_grad or w.requires_grad
+            ):
+                from ..runtime.cibc_ibp_conv import (
+                    execute_active_cibc_ibp_conv_v1,
+                )
+
+                fused = execute_active_cibc_ibp_conv_v1(
+                    x_l,
+                    x_u,
+                    w,
+                    b,
+                    stride=stride,
+                    padding=padding,
+                    dilation=dilation,
+                    groups=groups,
+                )
+                if fused is not None:
+                    return IntervalState(lower=fused[0], upper=fused[1])
+
             w_pos = torch.clamp(w, min=0.0)
             w_neg = torch.clamp(w, max=0.0)
-            y_l = F.conv2d(x_l, w_pos, bias=None, stride=stride, padding=padding, dilation=dilation, groups=groups) + F.conv2d(
-                x_u, w_neg, bias=None, stride=stride, padding=padding, dilation=dilation, groups=groups
+            y_l = F.conv2d(
+                x_l,
+                w_pos,
+                bias=None,
+                stride=stride,
+                padding=padding,
+                dilation=dilation,
+                groups=groups,
+            ) + F.conv2d(
+                x_u,
+                w_neg,
+                bias=None,
+                stride=stride,
+                padding=padding,
+                dilation=dilation,
+                groups=groups,
             )
-            y_u = F.conv2d(x_u, w_pos, bias=None, stride=stride, padding=padding, dilation=dilation, groups=groups) + F.conv2d(
-                x_l, w_neg, bias=None, stride=stride, padding=padding, dilation=dilation, groups=groups
+            y_u = F.conv2d(
+                x_u,
+                w_pos,
+                bias=None,
+                stride=stride,
+                padding=padding,
+                dilation=dilation,
+                groups=groups,
+            ) + F.conv2d(
+                x_l,
+                w_neg,
+                bias=None,
+                stride=stride,
+                padding=padding,
+                dilation=dilation,
+                groups=groups,
             )
             if torch.is_tensor(b):
                 y_l = y_l + b.view(1, -1, 1, 1)
@@ -87,14 +143,22 @@ class IntervalDomain(AbstractDomain):
 
     def relu_transformer(self, state_in: DomainState) -> DomainState:
         if not isinstance(state_in, IntervalState):
-            raise TypeError(f"IntervalDomain expects IntervalState, got {type(state_in)}")
-        return IntervalState(lower=torch.relu(state_in.lower), upper=torch.relu(state_in.upper))
+            raise TypeError(
+                f"IntervalDomain expects IntervalState, got {type(state_in)}"
+            )
+        return IntervalState(
+            lower=torch.relu(state_in.lower), upper=torch.relu(state_in.upper)
+        )
 
-    def elementwise_transformer(self, states_in: List[DomainState], op: str) -> DomainState:
+    def elementwise_transformer(
+        self, states_in: List[DomainState], op: str
+    ) -> DomainState:
         if any(not isinstance(s, IntervalState) for s in states_in):
             raise TypeError("IntervalDomain expects IntervalState inputs")
         if len(states_in) != 2:
-            raise ValueError(f"elementwise '{op}' expects 2 inputs, got {len(states_in)}")
+            raise ValueError(
+                f"elementwise '{op}' expects 2 inputs, got {len(states_in)}"
+            )
 
         a, b = states_in[0], states_in[1]
         if op == "add":
@@ -109,7 +173,9 @@ class IntervalDomain(AbstractDomain):
                 ],
                 dim=0,
             )
-            return IntervalState(lower=candidates.min(dim=0).values, upper=candidates.max(dim=0).values)
+            return IntervalState(
+                lower=candidates.min(dim=0).values, upper=candidates.max(dim=0).values
+            )
 
         raise NotImplementedError(f"unsupported elementwise op: {op}")
 
