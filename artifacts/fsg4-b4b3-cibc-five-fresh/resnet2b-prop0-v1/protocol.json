@@ -1,0 +1,35 @@
+{
+  "code_revision": {
+    "boundflow/backends/tvm/cibc_dense_exact_conv.py": "fade0607222156bf5908cf7cdf2243e756d07e6b2f39ac2fc70abc0b5f5b601e",
+    "boundflow/runtime/crown_ibp.py": "cddbb8052f619c73fd73f918269650359ba4932c2ccda6a569c73ff60930e56c",
+    "boundflow/runtime/fsg4_b3_terminal_optimizer_schedule.py": "b53c2ccfc3c5c128b677e613aafed5bb1ecf38e05d3551141d07a9a0871794b8",
+    "boundflow/runtime/fsg4_b4b3_cibc_dense_tir.py": "3c99da5a17587a01c189f4ebc6f72ca99f3e124acf6a02e9fdc23fc7116ebacb",
+    "boundflow/runtime/fsg4_b4b3_cibc_exact_call.py": "ff0ead4fb24cd286c599ae8ca6dcad9f339e4b431de44c959baa88c9240d3c92",
+    "scripts/run_fsg4_b4b3_cibc_exact_worker.py": "d45db3a3e264dfb5feb2a35b44e5d16c5a7e2de3d795ae9ecf0f0fa600861e16",
+    "scripts/run_fsg4_b4b3_cibc_five_fresh_artifact.py": "a96d2580f3b7b1891538bdd5a3534d7552e5b11ae8b32e9022adb53520e8f5fb",
+    "tests/test_fsg4_b4b3_cibc_exact_call.py": "ac23a3012375810eaf127e01d7068631ebe55b44314c63717c203da0b8808741"
+  },
+  "exact_evaluation_count": 10,
+  "exact_update_count": 9,
+  "local_parity_atol": 0.0002,
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "native_value_bridge_required": true,
+  "orders": [
+    "BC",
+    "CB",
+    "BC",
+    "CB",
+    "BC"
+  ],
+  "performance_claimed": false,
+  "protocol_hash": "2a4cac280bf4ad48897f9eb34f90f860f688a9748ba36854091c995f84e2f00c",
+  "reference_manifest_sha256": "a52a26ab081bbeab816c1486fffd3568e6774ed6c9ea7619dee3a2e4ac0b86d9",
+  "run_count": 5,
+  "schema_version": "boundflow.fsg4-b4b3-cibc-five-fresh-protocol/v1",
+  "source_capture_sha256": "f42229dd06be8521865d14af4cc51450ec8bec4e792934b457c276aad50126dc",
+  "source_git_head": "1d06aab80614c2da3822ab949570d2b324dc12d0",
+  "terminal_atol": 0.0002,
+  "terminal_rtol": 0.0002,
+  "terminal_sign_exact_required": true,
+  "timing_diagnostic_only": true
+}

@@ -1,5 +1,15 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-24：FSG4/B4-B3 CIBC Five-fresh 正式关闭
+
+- 5 fresh、13 metrics/worker全部allclose/sign exact，max diff=`3.57628e-07`；
+- provider/forward/backward=`50/50/45`，fallback/eager/materialization=`0/0/0`；
+- native-value bridge=50显式冻结；root replay与tamper `8/8 rejected`；
+- 状态=`VALIDATED-B4-B3-CIBC-EXACT-CALL`，只开放累计core formal timing。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4B3_CIBC_FIVE_FRESH_FORMAL_CLOSURE_2026_08_24.md`
+
 ## 2026-08-24：FSG4/B4-B3 CIBC Five-fresh Runner
 
 - 5 independent workers与BC/CB交错顺序已实现；

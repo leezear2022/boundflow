@@ -1,9 +1,16 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-24 FSG4/B4-B3 five-fresh正式关闭指令**：source=`1d06aab`完成5 independent
+> BC/CB pairs；terminal lower与全部α/β allclose/sign exact，max diff=`3.57628e-07`；provider/
+> forward/backward=`50/50/45`，fallback/eager/materialization=0，native-value bridge=50；root replay
+> 与8/8 outer-resigned tamper通过。最终=`VALIDATED-B4-B3-CIBC-EXACT-CALL`，只开放预热交错的
+> 累计core timing。raw首调用ratio受warmup支配，明确不是性能证据。
+
 > **2026-08-24 FSG4/B4-B3 five-fresh runner指令**：已实现5 independent workers、
 > `BC/CB/BC/CB/BC`顺序、13项terminal state metrics、local parity、exact receipt、code/source/
 > model/reference identity及root semantic replay。timing字段只作diagnostic。当前唯一动作=提交clean
 > source并生成正式artifact；通过后才开放累计core timing。
+> 该待运行指令已由上方five-fresh正式关闭指令取代。
 
 > **2026-08-24 FSG4/B4-B3 exact-call实现指令**：P-anchor dense-native-α manual TIR已接入
 > production 10/9 optimizer，receipt=`10 forward/9 backward`，fallback/eager/materialization=0；

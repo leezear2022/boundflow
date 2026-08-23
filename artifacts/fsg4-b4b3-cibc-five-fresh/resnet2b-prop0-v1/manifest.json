@@ -1,0 +1,16 @@
+{
+  "files": {
+    "protocol.json": "901407e334229ce52c334d928fd69ceb4a2e229fcb158dfbc0c73684bb1f6d1f",
+    "raw/run_00_bc.json": "ccbcc848bd2758bca16793cb7676a4fda38c5cbda367751e8fbf0dc188002e39",
+    "raw/run_01_cb.json": "0f7728ac2927e16c3899fe55b8703a8bce58e5e4f562a6909157470b0359d7b6",
+    "raw/run_02_bc.json": "0482184bee429571173fb3ecadcb4c078467b8026b3f8380f04f80e970d60369",
+    "raw/run_03_cb.json": "5c7f9c7d32e8587e9f95103710296985e520008228312d361a9009786ebd59a7",
+    "raw/run_04_bc.json": "d12d8a1c60d8a38936bf116a7919878d13bee44fe28eaab27f9560c7f78a52e6",
+    "summary.json": "bb4ea615bda09b27cb709964ba36e6dd09c15a33cde4381b01484dd2f808c31e"
+  },
+  "manifest_hash": "ff93b594fb0eb674ae1c62f71c56c98a8fbd623239b880b807605d67c2ba51e7",
+  "protocol_hash": "2a4cac280bf4ad48897f9eb34f90f860f688a9748ba36854091c995f84e2f00c",
+  "schema_version": "boundflow.fsg4-b4b3-cibc-five-fresh-manifest/v1",
+  "source_git_head": "1d06aab80614c2da3822ab949570d2b324dc12d0",
+  "summary_hash": "74145ab9126eda7543ac6f58952b111a97958f4a6e4f79353fb94cc03da38ce6"
+}

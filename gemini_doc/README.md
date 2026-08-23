@@ -1,9 +1,15 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+FSG4/B4-B3 CIBC exact-call已由5 fresh正式关闭：terminal lower与全部α/β allclose/sign exact，
+max diff=`3.57628e-07`；provider/forward/backward=`50/50/45`，fallback/eager/materialization=0，
+root replay与8/8 tamper通过。当前只开放预热交错的累计core timing，native-value bridge仍显式
+保留。见`BOUNDFLOW_FSG4_B4B3_CIBC_FIVE_FRESH_FORMAL_CLOSURE_2026_08_24.md`。
+
 FSG4/B4-B3 CIBC exact-call已实现并等待5 fresh：P-anchor完整native α TIR接入10/9 optimizer，
 forward/backward=`10/9`、fallback/eager/materialization=0，terminal lower与全部α/β smoke
 allclose/sign exact。当前明确保留10次native-value bridge以稳定Adam轨迹，尚无core/query性能
 claim。见`BOUNDFLOW_FSG4_B4B3_CIBC_EXACT_CALL_IMPLEMENTATION_CHANGELOG_2026_08_24.md`。
+该待five-fresh状态已由上方正式关闭状态取代。
 
 FSG4/B4-B2 v2 manual TVM TIR已正式关闭：P-anchor CIBC式横向融合真实CUDA exact `1+1`
 kernels、workspace=0，5 correctness与6-worker三方formal通过；PyTorch/TIR geomean/lower/worst=
