@@ -1,6 +1,6 @@
 ---
-status: validated-pending-external-audit
-updated: 2026-08-23T13:57:26Z
+status: externally-approved-closed
+updated: 2026-08-24T00:10:00+08:00
 type: changelog
 topic: boundflow
 slug: fsg4-b4b2-b2-4-sparse-conv-tir
@@ -8,6 +8,15 @@ stage: s01
 ---
 
 # FSG4/B4-B2 B2-4 P-anchor Sparse-source Conv TIR
+
+## 0. External Closure
+
+Round 1外审已`APPROVE`（0 blocker/major/minor），executor已执行DocOps exchange close，最终状态=
+`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-4-SPARSE-CONV-P0-AND-BOUNDED-LEDGER-CORRECTNESS`。
+
+审计方独立完成float64闭合公式重算、现场GPU runner、12项ledger/hash、workspace、负向篡改与
+全量回归复核。该批准只关闭correctness与bounded ledger，不证明任何candidate性能。现在只开放
+B2-5 formal independent-process artifact/replay/AB-BA timing；不得添加第13个candidate，B4-B3仍关闭。
 
 ## 1. Internal Verdict
 
@@ -132,8 +141,8 @@ PlanTemplate常量并进入template/cache hash；动态输入只包含compressed
 - 不主张whole-core/query/B0 parity；
 - 不主张B4-B2 GO、B4-B3开放或ASPLOS-ready。
 
-下一唯一动作=B2-4最终外审。只有外审APPROVE且0 blocker/major，才允许按照已冻结ledger进入
-B2-5 formal independent-process artifact与预注册AB/BA timing；不得追加第13个candidate。
+下一唯一动作=B2-5 formal independent-process artifact与预注册AB/BA timing；必须按照已冻结ledger
+执行，不得追加第13个candidate。B2-5关闭前不得进入B4-B3。
 
 ## 8. Files
 

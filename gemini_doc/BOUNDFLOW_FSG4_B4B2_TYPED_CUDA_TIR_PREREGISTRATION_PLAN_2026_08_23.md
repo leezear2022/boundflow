@@ -1,6 +1,6 @@
 ---
-status: validated-b2-4-pending-external-audit
-updated: 2026-08-23T13:57:26Z
+status: externally-approved-b2-4-b2-5-open
+updated: 2026-08-24T00:10:00+08:00
 type: plan
 topic: boundflow
 slug: fsg4-b4b2-typed-cuda-tir-preregistration
@@ -9,9 +9,16 @@ stage: s01
 
 # FSG4/B4-B2 Typed CUDA/TIR Preregistration
 
+> **2026-08-24 B2-4外审关闭**：Round 1 `APPROVE`，0 blocker/major/minor；exchange=
+> `closed/approved`。最终=
+> `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-4-SPARSE-CONV-P0-AND-BOUNDED-LEDGER-CORRECTNESS`。
+> 只开放B2-5 formal independent-process correctness/artifact/replay/AB-BA timing；冻结ledger
+> 不变且不得增加第13项。B4-B3仍关闭，B2-4不形成performance claim。
+
 > **2026-08-23 B2-4内部关闭**：P0 five raw与12项bounded candidate全部compile/correct，
 > 68 metrics/217,770元素、max diff=`2.384185791015625e-06`、sign exact。ledger已在timing前
 > 冻结，当前无timing/winner/performance claim。只开放B2-4外审；B2-5/B4-B3关闭。
+> 该待审状态已由上方B2-4外审关闭状态取代。
 
 > **2026-08-23 B2-3外审批准**：`APPROVE`，0 blocker/major/minor；只开放B2-4
 > P-anchor sparse-source schedule。timing/B2-5/B4-B3关闭。

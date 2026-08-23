@@ -1,8 +1,16 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-24 FSG4/B4-B2 B2-4外审关闭指令**：Round 1 `APPROVE`，0 blocker/
+> major/minor；exchange已由executor关闭为`closed/approved`。独立float64闭合公式、现场GPU、
+> 12项ledger与篡改门禁全部通过。最终=
+> `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-4-SPARSE-CONV-P0-AND-BOUNDED-LEDGER-CORRECTNESS`。
+> 现在只开放B2-5 formal independent-process correctness/artifact/replay/AB-BA timing；必须复用冻结
+> 12项ledger，不得追加第13项。B4-B3继续关闭，且B2-4本身不形成performance claim。
+
 > **2026-08-23 FSG4/B4-B2 B2-4内部关闭指令**：P-anchor sparse-source Conv P0与12项
 > bounded schedule ledger全部compile/correct，68 metrics/217,770元素通过；无timing、winner或
 > performance claim。当前只开放B2-4最终外审；B2-5/B4-B3关闭。
+> 该待审指令已由上方B2-4外审关闭指令取代。
 
 > **2026-08-23 FSG4/B4-B2 B2-3外审关闭指令**：Round 1 `APPROVE`，0 blocker/
 > major/minor；最终=`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-3-P-CONV-DENSE-CORRECTNESS`。
