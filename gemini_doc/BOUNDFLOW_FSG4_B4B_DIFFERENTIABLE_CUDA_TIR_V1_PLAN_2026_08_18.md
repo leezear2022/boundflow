@@ -1,5 +1,5 @@
 ---
-status: b4b2-b2-0-abi-validated-next-b2-1
+status: b4b2-b2-0-externally-approved-next-b2-1
 updated: 2026-08-23T03:10:59Z
 type: plan
 topic: boundflow
@@ -8,6 +8,9 @@ stage: s01
 ---
 
 # FSG4/B4-B Differentiable CUDA/TIR v1 Plan
+
+> **2026-08-23 B2-0外审批准**：`APPROVE`，0 blocker/0 major；GPU probe三hash现场逐位复现。
+> 最终=`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-0-ABI-PROBE`，下一唯一动作=B2-1。
 
 > **2026-08-23 B4-B2/B2-0更新**：identity CUDA/TIR与first-class receipt ABI已内部通过，
 > 状态=`VALIDATED-B4-B2-B2-0-ABI-PROBE`。下一唯一动作=B2-1 S-anchor dense correctness；

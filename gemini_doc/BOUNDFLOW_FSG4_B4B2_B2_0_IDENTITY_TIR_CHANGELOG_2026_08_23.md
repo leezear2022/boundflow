@@ -1,5 +1,5 @@
 ---
-status: validated-b2-0
+status: externally-approved-b2-0
 updated: 2026-08-23T03:10:59Z
 type: changelog
 topic: boundflow
@@ -41,8 +41,15 @@ stage: s01
   均无alias；first-order output/gradient bit-exact；
 - targeted=`12 passed`；B4-B1+targeted=`44 passed`；B4-B相关=`66 passed`；
 - full=`1426 passed, 3 skipped, 6 warnings`（3 skip均为既有环境边界）；
-- `rebuild_tvm.sh`=`ninja: no work to do`；Black、4-file Mypy、5-file Pylint 10.00、
+- `rebuild_tvm.sh`完成且增量树无需重编译；Black、4-file Mypy、5-file Pylint 10.00、
   `git diff --check`通过。
+
+### External audit
+
+- `APPROVE`，0 blocker/0 major、2 minor+3 info；
+- auditor现场重跑GPU probe，三项receipt hash逐位一致；
+- 最终状态=`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-0-ABI-PROBE`；
+- audit：`gemini_doc/external_audit_b4b2_b2_0_identity_tir_probe_2026_08_23.md`。
 
 ## Decisions
 

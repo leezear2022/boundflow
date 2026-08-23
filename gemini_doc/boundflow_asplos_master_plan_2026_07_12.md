@@ -1,5 +1,9 @@
 # BoundFlow 面向 ASPLOS 的总体研发与论文执行计划 v1.0
 
+> **2026-08-23 FSG4/B4-B2 B2-0外审关闭**：`APPROVE`，0 blocker/0 major，auditor现场
+> GPU复跑三hash逐位一致。最终=
+> `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-0-ABI-PROBE`；下一唯一动作=B2-1。
+
 > **2026-08-23 FSG4/B4-B2 B2-0关闭更新**：状态=
 > `VALIDATED-B4-B2-B2-0-ABI-PROBE`。RTX 4060 identity TIR forward/backward已满足first-class
 > receipt、DLPack/current stream/cache/一阶autograd门禁；下一唯一动作=B2-1 S-anchor dense

@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-23 FSG4/B4-B2 B2-0外审批准**：最终claim=
+> `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-0-ABI-PROBE`。外审现场GPU复跑三hash逐位一致，
+> 0 blocker/0 major。仍只支持ABI接线正确性，不支持region数学、sparse融合、timing、性能、
+> memory或ASPLOS-ready。
+
 > **2026-08-23 FSG4/B4-B2 B2-0内部关闭**：允许claim仅为
 > `VALIDATED-B4-B2-B2-0-ABI-PROBE`：first-class compiler/receipt IR可round-trip，identity CUDA/TIR
 > forward/backward在RTX 4060上满足DLPack pointer/current-stream exact、launch 1/1、cache

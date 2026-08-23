@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-23 FSG4/B4-B2 B2-0外审关闭指令**：verdict=`APPROVE`，0 blocker/0 major；
+> auditor现场GPU复跑逐位复现三项receipt hash。最终状态=
+> `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-0-ABI-PROBE`。下一唯一动作=B2-1 S-anchor dense
+> correctness，先处理真实fallback计数与异常退出状态恢复；不得启动timing或B2-2。
+
 > **2026-08-23 FSG4/B4-B2 B2-0关闭指令**：状态=
 > `VALIDATED-B4-B2-B2-0-ABI-PROBE`。first-class编译/执行receipt、identity TIR双symbol、DLPack
 > 零拷贝、显式current stream、cache miss→hit与一阶custom backward已在RTX 4060通过；full=

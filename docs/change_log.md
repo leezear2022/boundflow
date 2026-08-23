@@ -5806,3 +5806,14 @@
 
 **记录**
 - `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_0_IDENTITY_TIR_CHANGELOG_2026_08_23.md`
+
+## 2026-08-23：FSG4/B4-B2 B2-0 外审关闭
+
+- 外审`APPROVE`，0 blocker/0 major、2 minor+3 info；
+- auditor现场RTX 4060复跑probe，template/schedule/module receipt hash逐位一致；
+- 最终状态=`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-0-ABI-PROBE`；
+- 只开放B2-1 S-anchor dense correctness；真实fallback计数与异常退出恢复随B2-1处理。
+
+**记录**
+- `gemini_doc/external_audit_b4b2_b2_0_identity_tir_probe_2026_08_23.md`
+- `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_0_EXTERNAL_AUDIT_CLOSURE_CHANGELOG_2026_08_23.md`

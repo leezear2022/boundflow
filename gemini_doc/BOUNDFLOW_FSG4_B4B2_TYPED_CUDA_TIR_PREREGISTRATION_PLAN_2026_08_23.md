@@ -1,5 +1,5 @@
 ---
-status: validated-b2-0-next-b2-1
+status: externally-approved-b2-0-next-b2-1
 updated: 2026-08-23T03:10:59Z
 type: plan
 topic: boundflow
@@ -8,6 +8,11 @@ stage: s01
 ---
 
 # FSG4/B4-B2 Typed CUDA/TIR Preregistration
+
+> **2026-08-23 B2-0外审批准**：auditor现场GPU复跑并逐位复现三项receipt hash，verdict=
+> `APPROVE`（0 blocker/0 major）。最终状态=
+> `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-0-ABI-PROBE`。只开放B2-1 S-anchor dense
+> correctness；2 minor随B2-1处理，不改变B2-0结论。
 
 > **2026-08-23 B2-0内部关闭**：first-class Template/Instance/Schedule/Module/Launch IR、
 > identity CUDA/TIR forward/backward、DLPack pointer/current stream、module cache与一阶custom

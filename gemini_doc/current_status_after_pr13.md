@@ -1,5 +1,9 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-23 FSG4/B4-B2 B2-0外审关闭**：verdict=`APPROVE`，auditor现场GPU复跑三项
+> receipt hash逐位一致；最终=`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-0-ABI-PROBE`。
+> 下一唯一动作=B2-1 S-anchor dense correctness；timing、B2-2/P-anchor/B4-B3继续关闭。
+
 > **2026-08-23 FSG4/B4-B2 B2-0内部关闭**：first-class lowering/receipt与identity CUDA/TIR
 > forward/backward已在RTX 4060/sm_89通过；cold miss→warm hit、DLPack与current stream exact、
 > launch 1/1、fallback/eager backward 0/0、full=`1426 passed, 3 skipped`。当前状态=
