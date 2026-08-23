@@ -1,0 +1,29 @@
+{
+  "doc": "fsg4-b4b2-b2-3-dense-conv-20260823/r001/audit",
+  "type": "audit",
+  "task": "fsg4-b4b2-b2-3-dense-conv-20260823",
+  "round": 1,
+  "from": "external-model",
+  "to": "codex",
+  "ts": "2026-08-23T12:47:40Z",
+  "verdict": "approve",
+  "delivery": "fsg4-b4b2-b2-3-dense-conv-20260823/r001/delivery",
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "info",
+      "path": "boundflow/ir/differentiable_lower_dense_conv_tir.py:477-507",
+      "evidence": "module receipt 的 unscheduled/scheduled_tir_hash 与 device_source_hash 在 validate 时仅做 64-hex 格式校验、不重编译比对,单独篡改该 hash 字符串不会被检出;但 template/schedule/workspace inventory/cache_key/launch 链篡改均 fail-closed,workspace inventory 锚定冻结常量,与 B2-1/B2-2 已批准设计相同",
+      "advice": "可接受;B2-5 独立进程 replay 阶段可由 replay 侧重编译比对这些 hash"
+    },
+    {
+      "id": "F2",
+      "severity": "info",
+      "path": "tests/test_fsg4_b4b2_dense_conv_tir.py",
+      "evidence": "dense Conv 无单独 shape-mismatch 拒绝用例(形状校验存在于 runtime:227-229,与 dtype/device 共用同一 raise 分支,已被间接覆盖)",
+      "advice": "后续切片可顺手补一条 shape 失配用例;不阻塞"
+    }
+  ],
+  "summary": "独立外审 B2-3 P-anchor dense Conv TIR forward/backward correctness(source 7307070,HEAD 2710d01==origin),AC1—AC6 全部 PASS。AC1:7307070 后继于 B2-2 外审关闭提交 c28c903,17 文件 +2586/-8,无 timing/B2-4/B2-5/B4-B3/production/vendored 改动;预注册门禁条文无事后改动;五级 first-class receipt 与 B2-1/B2-2 同构且 fail-closed。AC2:亲读 TIR 并独立推导 ReLU lower slope/intercept、conv_transpose2d 索引映射、adjoint、bias reduction、α/incoming-A VJP,语义全部正确;用无 autograd float64 闭合公式(手写 padding+einsum,非 repo reference)重算 5 raw 四路输出,对 float32 TIR 最差 |diff|=1.83e-06,sign exact;β absent 由 capture production_beta=(6,0) 与 beta_active=False 设计保证。AC3:现场重跑 runner,逐位复现 template 950f2053…/schedule 1de607ad…/module 4511fbc5…,5 raw/20 metrics/92190 元素,max diff 2.384185791015625e-06,cache miss→hit×4,launch 1/1,fallback/eager 0/0,DLPack 19/19,RTX 4060 sm_89 与环境 manifest 一致。AC4:独立结构遍历 scheduled TIR alloc_buffers,恰为 adjoint_conv[6,1,16,8,8]+output_bias_delta[6,1];8 类篡改全部 fail-closed。AC5:负路径覆盖完整且断言具体;上轮 info#1(dense Linear 专项拒绝用例)本轮已补齐关闭。AC6:targeted 43、related 97、全量 1457 passed/3 skipped(既有环境边界);black/mypy/pylint 10.00/diff check/TVM rebuild/dol validate/lint 全过。claim 边界无漂移,performance_claimed=false 由 receipt 硬校验。结论 APPROVE,同意关闭 B2-3 并只开放 B2-4 P-anchor sparse-source schedule;timing、B2-5、B4-B3 保持关闭。详见 r001/audit_report_full.md 与 gemini_doc/external_audit_b4b2_b2_3_dense_conv_tir_2026_08_23.md。",
+  "md_sha256": "9c9809b5bba90dea92ac702192092d5d30f595e8bb64e4264438eab45742d3c6"
+}

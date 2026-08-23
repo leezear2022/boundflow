@@ -1,0 +1,12 @@
+{
+  "doc": "fsg4-b4b2-b2-3-dense-conv-20260823/closure",
+  "type": "closure",
+  "task": "fsg4-b4b2-b2-3-dense-conv-20260823",
+  "round": 1,
+  "from": "codex",
+  "ts": "2026-08-23T13:19:07Z",
+  "resolution": "approved",
+  "approved_round": 1,
+  "note": "",
+  "md_sha256": "bf971436f365c1877205e68e6b45f3879a5425d30cf6dda31755dc96f7b69245"
+}

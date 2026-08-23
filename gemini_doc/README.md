@@ -1,5 +1,10 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+FSG4/B4-B2 B2-3 P-anchor dense Conv TIR已外审批准：最终=
+`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-3-P-CONV-DENSE-CORRECTNESS`。当前只开放B2-4
+P-anchor sparse-source schedule，timing/B2-5/B4-B3关闭。见
+`BOUNDFLOW_FSG4_B4B2_B2_3_EXTERNAL_AUDIT_CLOSURE_CHANGELOG_2026_08_23.md`。
+
 FSG4/B4-B2 B2-3 P-anchor dense Conv TIR已内部关闭：5 raw、20 metrics、92,190元素
 allclose/sign exact，max diff=`2.384185791015625e-06`，beta gradient absent，结构化workspace
 门禁通过；状态=`VALIDATED-B4-B2-B2-3-P-CONV-DENSE-CORRECTNESS-PENDING-EXTERNAL-AUDIT`。

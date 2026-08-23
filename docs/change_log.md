@@ -1,5 +1,12 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-23：FSG4/B4-B2 B2-3 外审关闭
+
+- Round 1=`APPROVE`，0 blocker/major/minor，2 info；
+- 独立float64、现场GPU、结构workspace、篡改与全量回归全部通过；
+- 最终=`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-3-P-CONV-DENSE-CORRECTNESS`；
+- 只开放B2-4 P-anchor sparse-source schedule；timing/B2-5/B4-B3关闭。
+
 ## 2026-08-23：FSG4/B4-B2 B2-3 P-anchor Dense Conv TIR 内部关闭
 
 - 新增first-class dense Conv Template/Instance/Schedule/Module/Launch receipts及CUDA/TIR
