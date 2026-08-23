@@ -1,0 +1,17 @@
+{
+  "files": {
+    "protocol.json": "ddf740521919d97accfa14dbcdab008f27eb0268ff0d7485392c9b02b63ef371",
+    "raw/run_00_bc.json": "1edc4a762fa87557698e15b68b91a03e1942a8cab85ebe6fb9aa100364e3780c",
+    "raw/run_01_cb.json": "d02a2d074f01b8a03c0fcc146001cbc55b8c67c60950474518aee413ecf52064",
+    "raw/run_02_bc.json": "1de8d5d85bcfe7e4e6ed3778d6fd4b060053148848b89894abcae9fd7f758d66",
+    "raw/run_03_cb.json": "25690538929ee22f1d413bc1bc20e2cf41f29ac46ead190597320c2c0ad2f509",
+    "raw/run_04_bc.json": "894cc091cdd58a2d476c9d7611df9f34af44e42f3c5bb77449a3276486d640f4",
+    "raw/run_05_cb.json": "d317abcc0a26270077b83927af24615f5c9126b4adbb5cbb9c381ec5bca0b455",
+    "summary.json": "ba246ef096fe79968f854fd471fd152964630b1e248f61b79d0d3d3477020a29"
+  },
+  "manifest_hash": "ea54377b7b792b50f7413c31c45dc18884ad11da3d3d82bdcff016895f16258a",
+  "protocol_hash": "d3340ad3d5a2d81d9bd1bb612391ed734f9311c2cb0c62fc69c2046fd16a8124",
+  "schema_version": "boundflow.fsg4-b4c0-cumulative-core-manifest/v1",
+  "source_git_head": "d1db31e693def0aa2b3eda26352eb40f951f64cc",
+  "summary_hash": "7a0b0505cfdd26f02e41cdaa6ebc8b69ea85f74499e41f5ac01a42925e2db9f9"
+}

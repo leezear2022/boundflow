@@ -1,9 +1,16 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-24 FSG4/B4-C0正式NO-GO指令**：source=`d1db31e`完成6 fresh/180 groups；
+> bridge候选geomean/lower/worst=`0.94034x/0.93778x/0.93418x`，memory allocated/reserved=
+> `1.04818/1.0`；semantic max diff=`7.15256e-07`且sign exact，root replay与8/8 tamper通过。最终=
+> `VALIDATED-NO-GO-B4-C0-NATIVE-VALUE-BRIDGE`。只开放B4-C1 provider-owned lower path rewrite，
+> 禁止以bridge形成performance claim。
+
 > **2026-08-24 FSG4/B4-C0 artifact指令**：6 fresh BC/CB、180 raw groups、root median/
 > geomean/bootstrap/worst/memory/semantic/receipt重算已实现。冻结no-regression=
 > geomean≥1/lower>1/worst≥0.98/memory≤1.05，research=1.05。当前唯一动作=提交clean source并formal；
 > 若bridge候选NO-GO，只开放provider-owned lower path rewrite。
+> 该待运行指令已由上方正式NO-GO指令取代。
 
 > **2026-08-24 FSG4/B4-C0累计core runner指令**：双方3 warmups、30 interleaved groups、
 > per-group 13项semantic parity与peak memory已实现；timing关闭correctness capture并由receipt显式

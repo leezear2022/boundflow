@@ -1,0 +1,39 @@
+{
+  "code_revision": {
+    "boundflow/backends/tvm/cibc_dense_exact_conv.py": "fade0607222156bf5908cf7cdf2243e756d07e6b2f39ac2fc70abc0b5f5b601e",
+    "boundflow/runtime/crown_ibp.py": "cddbb8052f619c73fd73f918269650359ba4932c2ccda6a569c73ff60930e56c",
+    "boundflow/runtime/fsg4_b3_terminal_optimizer_schedule.py": "b53c2ccfc3c5c128b677e613aafed5bb1ecf38e05d3551141d07a9a0871794b8",
+    "boundflow/runtime/fsg4_b4b3_cibc_dense_tir.py": "134da83fb1dbb144b22d66b2945ebc717d26a96565d08865f1cffec2ea644167",
+    "boundflow/runtime/fsg4_b4b3_cibc_exact_call.py": "616e35ee4a7ae28f5ca1509eaa6d3671dd4f63c5667571aa2579497b7d256a6c",
+    "scripts/run_fsg4_b4c0_cumulative_core_artifact.py": "878090d3137f9546c49da6ea31e85f954404216d7dbabde217b5cd6e538a62c6",
+    "scripts/run_fsg4_b4c0_cumulative_core_worker.py": "910b5d662f7f5c23add2a7a97b5d4987f41243bacc2357d9ffc58ed9aa583d9f",
+    "tests/test_fsg4_b4b3_cibc_exact_call.py": "c7a2a853c3ff18f4198605ddc7cded54ffa9a7af8a25fdbba4ce6d2828a2f53e"
+  },
+  "compile_excluded": true,
+  "correctness_capture_excluded": true,
+  "full_optimizer_runtime_included": true,
+  "groups_per_worker": 30,
+  "memory_ratio_gate": 1.05,
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "native_value_bridge_included": true,
+  "no_regression_geomean_gate": 1.0,
+  "orders": [
+    "BC",
+    "CB",
+    "BC",
+    "CB",
+    "BC",
+    "CB"
+  ],
+  "performance_claimed": false,
+  "protocol_hash": "d3340ad3d5a2d81d9bd1bb612391ed734f9311c2cb0c62fc69c2046fd16a8124",
+  "research_geomean_gate": 1.05,
+  "run_count": 6,
+  "schema_version": "boundflow.fsg4-b4c0-cumulative-core-protocol/v1",
+  "semantic_atol": 0.0002,
+  "semantic_rtol": 0.0002,
+  "source_capture_sha256": "f42229dd06be8521865d14af4cc51450ec8bec4e792934b457c276aad50126dc",
+  "source_git_head": "d1db31e693def0aa2b3eda26352eb40f951f64cc",
+  "warmups_per_side": 3,
+  "worst_worker_gate": 0.98
+}

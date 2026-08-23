@@ -1,5 +1,10 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+FSG4/B4-C0累计core正式结果=`VALIDATED-NO-GO-B4-C0-NATIVE-VALUE-BRIDGE`：6 fresh/180 groups
+geomean/lower/worst=`0.94034x/0.93778x/0.93418x`，语义sign exact、max diff=`7.15e-7`，root
+replay与8/8 tamper通过。当前只开放B4-C1 provider-owned lower path rewrite。见
+`BOUNDFLOW_FSG4_B4C0_CUMULATIVE_CORE_FORMAL_CLOSURE_2026_08_24.md`。
+
 FSG4/B4-B3 CIBC exact-call已由5 fresh正式关闭：terminal lower与全部α/β allclose/sign exact，
 max diff=`3.57628e-07`；provider/forward/backward=`50/50/45`，fallback/eager/materialization=0，
 root replay与8/8 tamper通过。当前只开放预热交错的累计core timing，native-value bridge仍显式

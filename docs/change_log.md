@@ -1,5 +1,16 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-24：FSG4/B4-C0 Cumulative Core 正式 NO-GO
+
+- 6 fresh/180 groups geomean/lower/worst=`0.94034x/0.93778x/0.93418x`；
+- semantics sign exact、max diff=`7.15e-7`，memory=`1.04818/1.0`；
+- root replay与tamper `8/8 rejected`；
+- 状态=`VALIDATED-NO-GO-B4-C0-NATIVE-VALUE-BRIDGE`；
+- 只开放B4-C1 provider-owned lower path rewrite。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4C0_CUMULATIVE_CORE_FORMAL_CLOSURE_2026_08_24.md`
+
 ## 2026-08-24：FSG4/B4-C0 Cumulative Core Artifact
 
 - 6 fresh BC/CB、180 raw groups与root统计/语义/receipt replay已实现；
