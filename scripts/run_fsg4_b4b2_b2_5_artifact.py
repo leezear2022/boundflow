@@ -392,7 +392,8 @@ def collect_files(artifact: Path) -> dict[str, str]:
 def generate(artifact: Path) -> dict[str, object]:
     if artifact.exists():
         raise FileExistsError(f"B4-B2 B2-5 artifact already exists: {artifact}")
-    if subprocess.run(("git", "diff", "--quiet"), cwd=REPOSITORY_ROOT).returncode != 0:
+    tracked_changes = {row for row in git("diff", "--name-only").splitlines() if row}
+    if tracked_changes - {".docops/ev.jsonl"}:
         raise RuntimeError("B4-B2 B2-5 generate requires a clean tracked worktree")
     if (
         subprocess.run(

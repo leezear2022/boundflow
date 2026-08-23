@@ -22,6 +22,8 @@ stage: s01
 - CUDA event timing、allocated/reserved、GPU temperature/power/clock、semantic/cache/fallback证据；
 - source/code/capture绑定artifact、root replay、TIR/device-source独立重编译；
 - 8类outer-resigned tamper probe。
+- clean-source检查只豁免DocOps hook自动追加的`.docops/ev.jsonl`事件；任何其他tracked diff或
+  staged diff仍fail closed。
 
 ## Development Evidence
 
