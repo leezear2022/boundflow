@@ -1,0 +1,54 @@
+{
+  "doc": "fsg4-b4b2-b2-3-dense-conv-20260823/r001/delivery",
+  "type": "delivery",
+  "task": "fsg4-b4b2-b2-3-dense-conv-20260823",
+  "round": 1,
+  "from": "codex",
+  "to": "external-model",
+  "ts": "2026-08-23T11:35:38Z",
+  "base_commit": "c28c903",
+  "result_commit": "73070706935f2e6610d4e12903e1d9b4f67b0f83",
+  "changed_files": [
+    "boundflow/ir/differentiable_lower_dense_conv_tir.py",
+    "boundflow/backends/tvm/differentiable_lower_dense_conv.py",
+    "boundflow/runtime/fsg4_b4b2_dense_conv_tir.py",
+    "scripts/run_fsg4_b4b2_dense_conv_tir_correctness.py",
+    "tests/test_fsg4_b4b2_dense_conv_tir.py",
+    "tests/test_fsg4_b4b2_dense_linear_tir.py"
+  ],
+  "claims": [
+    "P-anchor dense Conv TIR correctness only: 5 raw/20 metrics/92190 elements pass, beta gradient absent, structural workspace exact, no performance claim"
+  ],
+  "validation": [
+    {
+      "cmd": "B2-0-through-B2-3-targeted",
+      "result": "pass"
+    },
+    {
+      "cmd": "B4-B-related",
+      "result": "pass"
+    },
+    {
+      "cmd": "full-pytest",
+      "result": "pass"
+    },
+    {
+      "cmd": "black-mypy-pylint-diff",
+      "result": "pass"
+    },
+    {
+      "cmd": "tvm-rebuild-docops-lint",
+      "result": "pass"
+    }
+  ],
+  "limitations": [
+    "No timing, B2-4/B2-5/B4-B3, performance, memory, B0 parity, whole-core/query or ASPLOS-ready claim"
+  ],
+  "risks": [
+    "Fresh labels denote five independently captured production raws; B2-5 formal independent-process artifact remains closed"
+  ],
+  "open_questions": [
+    "Approve B2-3 correctness and at most open B2-4, or report evidence-backed findings"
+  ],
+  "md_sha256": "0f24e58147f80ae9c0c22bf18c4a4022b6d5fb04c4b7ad688ce6e2242ef869da"
+}
