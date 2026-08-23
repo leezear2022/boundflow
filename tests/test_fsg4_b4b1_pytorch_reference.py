@@ -87,6 +87,35 @@ def test_b4b1_reference_replays_both_formal_anchors() -> None:
     )
 
 
+@pytest.mark.parametrize("capture_index", [0, 1])
+def test_b4b1_receipt_rejects_incomplete_or_unbound_metric_inventory(
+    capture_index: int,
+) -> None:
+    capture = _captures()[capture_index]
+    ir, instance = _compile(capture)
+    result = run_b4b1_pytorch_reference_v1(capture, ir, instance)
+    receipt = build_b4b1_reference_receipt_v1(capture, ir, instance, result)
+    with pytest.raises(ValueError, match="reference receipt differs"):
+        replace(receipt, metrics=(), semantic_passed=True).validate(ir, instance)
+    with pytest.raises(ValueError, match="reference receipt differs"):
+        replace(receipt, metrics=receipt.metrics[:-1]).validate(ir, instance)
+    with pytest.raises(ValueError, match="reference receipt differs"):
+        replace(
+            receipt,
+            incoming_lower_a_gradient_present=(
+                not receipt.incoming_lower_a_gradient_present
+            ),
+        ).validate(ir, instance)
+    changed = replace(receipt.metrics[0], production_hash="0" * 64)
+    with pytest.raises(ValueError, match="reference receipt differs"):
+        replace(receipt, metrics=(changed, *receipt.metrics[1:])).validate(ir, instance)
+    changed = replace(
+        receipt.metrics[0], element_count=receipt.metrics[0].element_count + 1
+    )
+    with pytest.raises(ValueError, match="reference receipt differs"):
+        replace(receipt, metrics=(changed, *receipt.metrics[1:])).validate(ir, instance)
+
+
 def test_b4b1_ir_freezes_order_and_signed_beta_semantics() -> None:
     semantic, performance = _captures()
     semantic_ir, _instance = _compile(semantic)
@@ -317,19 +346,11 @@ def test_b4b1_v1_reference_artifact_is_rejected_after_policy_freeze() -> None:
         )
 
 
-def test_b4b1_v2_deterministic_reference_artifact_root_replays() -> None:
-    records, summary, result = reference_artifact._verify_static_artifact(
-        REFERENCE_ARTIFACT_V2, CAPTURE_ARTIFACT
-    )
-    assert len(records) == summary["capture_count"] == result["capture_count"] == 10
-    assert summary["summary_hash"] == (
-        "becd8ae57536bc678392748bee5568d8b18922526df02da1238720b44045d744"
-    )
-    assert result["status"] == "replay-passed"
-    assert result["maximum_absolute_difference"] == 6.109476089477539e-07
-    assert result["all_metrics_sign_exact"] is True
-    assert result["performance_claimed"] is False
-    assert result["tir_admitted"] is False
+def test_b4b1_v2_reference_artifact_is_rejected_after_receipt_policy_freeze() -> None:
+    with pytest.raises(ValueError, match="reference protocol differs"):
+        reference_artifact._verify_static_artifact(
+            REFERENCE_ARTIFACT_V2, CAPTURE_ARTIFACT
+        )
 
 
 def test_b4b1_reference_runner_restores_and_normalizes_thread_policy() -> None:
@@ -347,6 +368,46 @@ def test_b4b1_reference_runner_restores_and_normalizes_thread_policy() -> None:
         assert rows[0] == rows[1]
     finally:
         torch.set_num_threads(previous)
+
+
+@pytest.mark.parametrize("initial_debug_mode", [0, 1, 2])
+@pytest.mark.parametrize("raise_inside", [False, True])
+def test_b4b1_reference_runner_restores_complete_execution_policy(
+    initial_debug_mode: int, raise_inside: bool
+) -> None:
+    previous_threads = torch.get_num_threads()
+    previous_debug_mode = torch.get_deterministic_debug_mode()
+    previous_precision = torch.get_float32_matmul_precision()
+    previous_mkldnn = torch.backends.mkldnn.enabled
+    try:
+        torch.set_num_threads(4)
+        torch.set_deterministic_debug_mode(initial_debug_mode)
+        torch.set_float32_matmul_precision("medium")
+        torch.backends.mkldnn.enabled = True
+
+        def exercise() -> None:
+            with reference_artifact._reference_execution_policy():
+                assert torch.get_num_threads() == 1
+                assert torch.get_deterministic_debug_mode() == 2
+                assert torch.get_float32_matmul_precision() == "highest"
+                assert torch.backends.mkldnn.enabled is False
+                if raise_inside:
+                    raise RuntimeError("expected execution-policy probe")
+
+        if raise_inside:
+            with pytest.raises(RuntimeError, match="execution-policy probe"):
+                exercise()
+        else:
+            exercise()
+        assert torch.get_num_threads() == 4
+        assert torch.get_deterministic_debug_mode() == initial_debug_mode
+        assert torch.get_float32_matmul_precision() == "medium"
+        assert torch.backends.mkldnn.enabled is True
+    finally:
+        torch.backends.mkldnn.enabled = previous_mkldnn
+        torch.set_float32_matmul_precision(previous_precision)
+        torch.set_deterministic_debug_mode(previous_debug_mode)
+        torch.set_num_threads(previous_threads)
 
 
 def test_b4b1_coordinated_all_run_rewrites_are_numerically_rejected() -> None:

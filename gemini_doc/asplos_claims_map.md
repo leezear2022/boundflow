@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-23 FSG4/B4-B1 Round 1纠正**：外审状态=`REQUEST-CHANGES-B4-B1-R1-F1-F2`。
+> 原v2数值重算仍成立，但receipt exact inventory/target binding与deterministic warn/debug restore
+> 不满足接口门禁；工作树候选修复不升级claim。clean-source v3与Round 2批准前，B4-B1未外审
+> 关闭，B4-B2/TIR/performance/memory/ASPLOS-ready继续关闭。
+
 > **2026-08-18 FSG4/B4-B1内部关闭**：状态=
 > `VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE-PENDING-EXTERNAL-AUDIT`。支持两个冻结production
 > 锚点的typed lower-region IR/instance、sparse α/β重建、pure-PyTorch forward/local VJP与eligible

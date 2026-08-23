@@ -35,6 +35,7 @@ PROTOCOL_SCHEMA = "boundflow.fsg4-b4b1-pytorch-reference-protocol/v1"
 SUMMARY_SCHEMA = "boundflow.fsg4-b4b1-pytorch-reference-summary/v1"
 RUN_COUNT = 5
 REFERENCE_TORCH_THREADS = 1
+REFERENCE_DETERMINISTIC_DEBUG_MODE = 2
 ANCHORS = (
     "semantic-active-beta-gemm-14",
     "performance-conv-8-candidate",
@@ -171,8 +172,11 @@ def _protocol(capture_artifact: Path) -> dict[str, object]:
         "beta_pre_add_formula": "negative-value-times-split-sign-v1",
         "torch_num_threads": REFERENCE_TORCH_THREADS,
         "torch_deterministic_algorithms": True,
+        "torch_deterministic_debug_mode": REFERENCE_DETERMINISTIC_DEBUG_MODE,
+        "torch_deterministic_state_restore": "exact-debug-mode-v1",
         "torch_float32_matmul_precision": "highest",
         "torch_mkldnn_enabled": False,
+        "receipt_metric_inventory": "exact-ir-contract-target-v1",
         "atol": B4B1_REFERENCE_ATOL,
         "rtol": B4B1_REFERENCE_RTOL,
         "sign_exact": True,
@@ -198,8 +202,12 @@ def _validate_protocol(protocol: Mapping[str, Any], capture_artifact: Path) -> N
         or protocol.get("beta_pre_add_formula") != "negative-value-times-split-sign-v1"
         or protocol.get("torch_num_threads") != REFERENCE_TORCH_THREADS
         or protocol.get("torch_deterministic_algorithms") is not True
+        or protocol.get("torch_deterministic_debug_mode")
+        != REFERENCE_DETERMINISTIC_DEBUG_MODE
+        or protocol.get("torch_deterministic_state_restore") != "exact-debug-mode-v1"
         or protocol.get("torch_float32_matmul_precision") != "highest"
         or protocol.get("torch_mkldnn_enabled") is not False
+        or protocol.get("receipt_metric_inventory") != "exact-ir-contract-target-v1"
         or protocol.get("atol") != B4B1_REFERENCE_ATOL
         or protocol.get("rtol") != B4B1_REFERENCE_RTOL
         or protocol.get("sign_exact") is not True
@@ -265,19 +273,19 @@ def _reference_execution_policy():
     """Freeze and restore the CPU policy used by exact derived-record replay."""
 
     previous_threads = torch.get_num_threads()
-    previous_deterministic = torch.are_deterministic_algorithms_enabled()
+    previous_deterministic_debug_mode = torch.get_deterministic_debug_mode()
     previous_precision = torch.get_float32_matmul_precision()
     previous_mkldnn = torch.backends.mkldnn.enabled
     try:
         torch.set_num_threads(REFERENCE_TORCH_THREADS)
-        torch.use_deterministic_algorithms(True)
+        torch.set_deterministic_debug_mode(REFERENCE_DETERMINISTIC_DEBUG_MODE)
         torch.set_float32_matmul_precision("highest")
         torch.backends.mkldnn.enabled = False
         yield
     finally:
         torch.backends.mkldnn.enabled = previous_mkldnn
         torch.set_float32_matmul_precision(previous_precision)
-        torch.use_deterministic_algorithms(previous_deterministic)
+        torch.set_deterministic_debug_mode(previous_deterministic_debug_mode)
         torch.set_num_threads(previous_threads)
 
 

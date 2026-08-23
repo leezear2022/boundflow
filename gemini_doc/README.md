@@ -10,6 +10,11 @@
 
 ---
 
+FSG4/B4-B1 Round 1外审已`request_changes`：F1为receipt exact metric/gradient target inventory
+未绑定，F2为PyTorch deterministic warn/debug mode未原样恢复。两项候选修复已通过
+targeted/related/full门禁；当前以clean source生成v3并重交Round 2。B4-B2/TIR/
+performance仍关闭。见`change_2026-08-23_fsg4_b4b1_round1_f1_f2_fix.md`。
+
 FSG4/B4-B1 typed pure-PyTorch reference已内部关闭，状态=
 `VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE-PENDING-EXTERNAL-AUDIT`。v2从5 fresh raw重编译
 S/P静态IR与10个instance，60 metrics/196,380 elements、max diff=`6.109476089477539e-07`、

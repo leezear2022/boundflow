@@ -36,6 +36,14 @@ def _canonical_hash(value: object) -> str:
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
+def _is_sha256(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(character in "0123456789abcdef" for character in value)
+    )
+
+
 def _contract(
     name: str, role: str, snapshot: CapturedCudaTensorV1
 ) -> DifferentiableTensorContractIRV1:
@@ -477,8 +485,8 @@ class ReferenceParityMetricV1:
             or self.element_count < 1
             or not math.isfinite(self.maximum_absolute_difference)
             or self.maximum_absolute_difference < 0.0
-            or len(self.reference_hash) != 64
-            or len(self.production_hash) != 64
+            or not _is_sha256(self.reference_hash)
+            or not _is_sha256(self.production_hash)
         ):
             raise ValueError("B4-B1 reference parity metric differs")
 
@@ -522,16 +530,47 @@ class DifferentiableLowerReferenceReceiptV1:
         instance.validate_against(ir)
         for metric in self.metrics:
             metric.validate()
+        expected_targets = {
+            "native_alpha": "value/native_alpha",
+            "native_alpha_gradient": "production_gradient/native_alpha",
+            "native_beta": "value/native_beta",
+            "output_bias": "value/output_bias",
+            "output_lower_a": "value/output_lower_a",
+        }
+        if ir.beta_active:
+            expected_targets["native_beta_gradient"] = "production_gradient/native_beta"
+        if "production_gradient/incoming_lower_a" in ir.tensor_contract_map:
+            expected_targets["incoming_lower_a_gradient"] = (
+                "production_gradient/incoming_lower_a"
+            )
+        expected_names = tuple(sorted(expected_targets))
+        observed_names = tuple(metric.name for metric in self.metrics)
+        metric_map = {metric.name: metric for metric in self.metrics}
+        expected_incoming = "incoming_lower_a_gradient" in expected_targets
+        targets_bound = True
+        for metric_name, contract_name in expected_targets.items():
+            contract = ir.tensor_contract_map.get(contract_name)
+            expected_metric = metric_map.get(metric_name)
+            production_hash = instance.input_tensor_hash_map.get(contract_name)
+            if (
+                contract is None
+                or expected_metric is None
+                or production_hash is None
+                or expected_metric.element_count != math.prod(contract.shape)
+                or expected_metric.production_hash != production_hash
+            ):
+                targets_bound = False
+                break
         if (
             self.schema_version != B4B1_REFERENCE_RECEIPT_SCHEMA
             or self.ir_hash != ir.stable_hash()
             or self.instance_hash != instance.stable_hash(ir)
             or self.reference_capture_hash != instance.reference_capture_hash
             or self.anchor_id != ir.anchor_id
-            or len({metric.name for metric in self.metrics}) != len(self.metrics)
-            or tuple(sorted(metric.name for metric in self.metrics))
-            != tuple(metric.name for metric in self.metrics)
+            or observed_names != expected_names
+            or not targets_bound
             or self.beta_gradient_present != ir.beta_active
+            or self.incoming_lower_a_gradient_present != expected_incoming
             or self.semantic_passed
             != all(metric.allclose and metric.sign_exact for metric in self.metrics)
             or self.atol != B4B1_REFERENCE_ATOL
