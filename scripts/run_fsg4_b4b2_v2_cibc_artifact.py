@@ -18,6 +18,7 @@ import random
 import statistics
 import subprocess
 import sys
+import tempfile
 from typing import Any, Mapping, Sequence
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
@@ -36,8 +37,24 @@ BOOTSTRAP_LOWER_GATE = 1.0
 WORST_WORKER_GATE = 0.98
 MEMORY_RATIO_GATE = 1.05
 RESEARCH_TARGET = 2.0
+PARITY_TOLERANCE = 2.0e-4
+PARITY_ELEMENT_COUNT = 12_810
 BOOTSTRAP_SAMPLES = 10_000
 BOOTSTRAP_SEED = 20260824
+FROZEN_CONFIGS = (
+    (32, 16, 4),
+    (32, 32, 4),
+    (32, 64, 4),
+    (64, 16, 4),
+    (64, 32, 4),
+    (64, 64, 4),
+    (64, 32, 8),
+    (64, 64, 8),
+    (128, 16, 4),
+    (128, 32, 4),
+    (128, 64, 4),
+    (128, 64, 8),
+)
 CODE_PATHS = (
     "boundflow/runtime/fsg4_b4b2_cibc_triton.py",
     "scripts/run_fsg4_b4b2_v2_cibc_worker.py",
@@ -141,6 +158,8 @@ def protocol() -> dict[str, object]:
         "worst_worker_gate": WORST_WORKER_GATE,
         "memory_ratio_gate": MEMORY_RATIO_GATE,
         "research_target": RESEARCH_TARGET,
+        "parity_tolerance": PARITY_TOLERANCE,
+        "parity_element_count": PARITY_ELEMENT_COUNT,
         "bootstrap_samples": BOOTSTRAP_SAMPLES,
         "bootstrap_seed": BOOTSTRAP_SEED,
         "compile_and_calibration_excluded": True,
@@ -167,6 +186,8 @@ def validate_protocol(value: Mapping[str, Any]) -> None:
         or value.get("timing_worker_count") != 6
         or value.get("timing_orders") != list(TIMING_ORDERS)
         or value.get("speedup_geomean_gate") != SPEEDUP_GATE
+        or value.get("parity_tolerance") != PARITY_TOLERANCE
+        or value.get("parity_element_count") != PARITY_ELEMENT_COUNT
         or value.get("performance_claimed") is not False
     ):
         raise ValueError("CIBC artifact protocol differs")
@@ -238,13 +259,32 @@ def derive_summary(
         raise ValueError("CIBC artifact calibration inventory differs")
     for row in calibrations:
         parity = row.get("parity")
+        ordinal = int(row["config_ordinal"])
+        samples = row.get("samples_ms")
+        _validate_receipt(row, ordinal)
         if (
             not isinstance(parity, Mapping)
             or parity.get("allclose") is not True
             or parity.get("sign_exact") is not True
+            or float(parity.get("maximum_absolute_difference", math.inf))
+            > PARITY_TOLERANCE
+            or parity.get("element_count") != PARITY_ELEMENT_COUNT
             or row.get("calibration_warmups") != worker.CALIBRATION_WARMUPS
             or row.get("calibration_repeats") != worker.CALIBRATION_REPEATS
-            or len(row.get("samples_ms", [])) != worker.CALIBRATION_REPEATS
+            or not isinstance(samples, list)
+            or len(samples) != worker.CALIBRATION_REPEATS
+            or any(
+                not math.isfinite(float(sample)) or float(sample) <= 0.0
+                for sample in samples
+            )
+            or row.get("median_ms")
+            != statistics.median(float(sample) for sample in samples)
+            or row.get("config")
+            != {
+                "block_m": FROZEN_CONFIGS[ordinal][0],
+                "block_k": FROZEN_CONFIGS[ordinal][1],
+                "num_warps": FROZEN_CONFIGS[ordinal][2],
+            }
         ):
             raise ValueError("CIBC artifact calibration row differs")
     winner_row = min(calibrations, key=lambda row: float(row["median_ms"]))
@@ -262,6 +302,9 @@ def derive_summary(
             or not isinstance(parity, Mapping)
             or parity.get("allclose") is not True
             or parity.get("sign_exact") is not True
+            or float(parity.get("maximum_absolute_difference", math.inf))
+            > PARITY_TOLERANCE
+            or parity.get("element_count") != PARITY_ELEMENT_COUNT
             or result.get("compilation") != winner_compilation
         ):
             raise ValueError("CIBC artifact correctness row differs")
@@ -287,9 +330,25 @@ def derive_summary(
             or not isinstance(parity, Mapping)
             or parity.get("allclose") is not True
             or parity.get("sign_exact") is not True
+            or float(parity.get("maximum_absolute_difference", math.inf))
+            > PARITY_TOLERANCE
+            or parity.get("element_count") != PARITY_ELEMENT_COUNT
             or result.get("compilation") != winner_compilation
         ):
             raise ValueError("CIBC artifact timing row differs")
+        for pair_ordinal, pair in enumerate(pairs):
+            baseline_value = float(pair["baseline_ms"])
+            candidate_value = float(pair["candidate_ms"])
+            if (
+                pair.get("pair_ordinal") != pair_ordinal
+                or pair.get("order") != TIMING_ORDERS[ordinal]
+                or not math.isfinite(baseline_value)
+                or baseline_value <= 0.0
+                or not math.isfinite(candidate_value)
+                or candidate_value <= 0.0
+                or pair.get("speedup") != baseline_value / candidate_value
+            ):
+                raise ValueError("CIBC artifact timing pair differs")
         baseline = statistics.median(float(row["baseline_ms"]) for row in pairs)
         candidate = statistics.median(float(row["candidate_ms"]) for row in pairs)
         speedup = baseline / candidate
@@ -297,6 +356,12 @@ def derive_summary(
             result.get("baseline_median_ms") != baseline
             or result.get("candidate_median_ms") != candidate
             or result.get("paired_speedup") != speedup
+            or result.get("allocated_ratio")
+            != float(result["candidate_peak_allocated_bytes"])
+            / float(result["baseline_peak_allocated_bytes"])
+            or result.get("reserved_ratio")
+            != float(result["candidate_peak_reserved_bytes"])
+            / float(result["baseline_peak_reserved_bytes"])
         ):
             raise ValueError("CIBC artifact timing derivation differs")
         speedups.append(speedup)
@@ -441,7 +506,7 @@ def generate(root: Path) -> dict[str, object]:
     return summary
 
 
-def replay(root: Path) -> dict[str, object]:
+def replay(root: Path, *, recompile: bool = False) -> dict[str, object]:
     protocol_value = load_json(root / "protocol.json")
     summary = load_json(root / "summary.json")
     manifest_value = load_json(root / "manifest.json")
@@ -482,6 +547,30 @@ def replay(root: Path) -> dict[str, object]:
     derived = derive_summary(calibrations, correctness, timings)
     if derived != summary:
         raise ValueError("CIBC artifact semantic replay differs")
+    if recompile:
+        winner = int(summary["winner_config_ordinal"])
+        with tempfile.TemporaryDirectory(
+            prefix="boundflow-cibc-recompile-"
+        ) as directory:
+            output = Path(directory) / "correctness.json"
+            run_worker(
+                (
+                    "--mode",
+                    "correctness",
+                    "--run-ordinal",
+                    "0",
+                    "--config-ordinal",
+                    str(winner),
+                ),
+                output,
+            )
+            observed = validate_envelope(load_json(output), "correctness")
+        if (
+            observed.get("compilation") != summary.get("winner_compilation")
+            or observed.get("kernel_inventory") != summary.get("kernel_inventory")
+            or observed.get("config") != summary.get("winner_config")
+        ):
+            raise ValueError("CIBC artifact independent recompile differs")
     return summary
 
 
@@ -489,9 +578,10 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--artifact", type=Path, required=True)
     parser.add_argument("--replay", action="store_true")
+    parser.add_argument("--recompile", action="store_true")
     args = parser.parse_args()
     root = args.artifact.resolve()
-    summary = replay(root) if args.replay else generate(root)
+    summary = replay(root, recompile=args.recompile) if args.replay else generate(root)
     print(canonical_json(summary))
 
 
