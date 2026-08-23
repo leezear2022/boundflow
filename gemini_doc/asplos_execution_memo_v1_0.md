@@ -1,5 +1,19 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-24 FSG4/B4-B2-v2 CIBC-parity实现指令**：Triton horizontal fused
+> forward/backward已实现，12/12 config及5/5 raw均对public-PyTorch oracle allclose/sign exact；
+> profiler确认exact `1 forward + 1 backward`真实CUDA kernel、global intermediate workspace=0。
+> 非正式probe约`2–3.7x`，不形成claim。当前唯一动作=绑定clean source生成12 fresh calibration、
+> 5 correctness、6 AB/BA timing的formal artifact/replay；门禁通过才开放manual TIR port，B4-B3
+> 仍关闭。
+
+> **2026-08-24 FSG4/B4-B2-v2 CIBC-parity预注册指令**：以B2-5 v1 NO-GO为直接输入，冻结
+> `1 forward + 1 backward` horizontal fused ABI、零global intermediate workspace、12项Triton
+> autotune space与`1.20x` minimum/`2.00x` research target。先以Triton作为CUDA融合/schedule oracle；
+> oracle通过后才等价下沉manual TIR并独立重复门禁。当前唯一动作=v2 fused kernel correctness；
+> B4-B3/C/D仍关闭。
+> 该待实现指令已由上方v2实现指令取代。
+
 > **2026-08-24 FSG4/B4-B2 B2-5正式关闭指令**：clean source=`bf1c8b7`完成12项
 > calibration、S/P各5 independent correctness、6-worker AB/BA timing、root replay与8/8
 > outer-resigned tamper。winner=11；geomean/bootstrap-lower/worst=
