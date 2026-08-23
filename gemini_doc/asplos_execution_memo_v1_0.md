@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-23 FSG4/B4-B2 B2-4内部关闭指令**：P-anchor sparse-source Conv P0与12项
+> bounded schedule ledger全部compile/correct，68 metrics/217,770元素通过；无timing、winner或
+> performance claim。当前只开放B2-4最终外审；B2-5/B4-B3关闭。
+
 > **2026-08-23 FSG4/B4-B2 B2-3外审关闭指令**：Round 1 `APPROVE`，0 blocker/
 > major/minor；最终=`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-3-P-CONV-DENSE-CORRECTNESS`。
 > 唯一工程动作=B2-4 P-anchor sparse-source schedule；timing/B2-5/B4-B3关闭。

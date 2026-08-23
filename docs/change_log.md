@@ -1,5 +1,14 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-23：FSG4/B4-B2 B2-4 Sparse-source Conv TIR 内部关闭
+
+- compressed alpha=`[6,86]`直接进入TIR，empty beta保持absent；
+- P0 five raw + 12项bounded candidate共68 metrics/217,770元素全部allclose/sign exact，
+  max diff=`2.384185791015625e-06`；
+- 12个schedule/module hash唯一，ledger=`1660edca…07c6`且在timing前冻结；
+- targeted/related/full=`51/105/1465 passed`，3 skipped；静态与TVM rebuild全过；
+- 当前只开放B2-4外审；无timing/winner/performance claim，B2-5/B4-B3关闭。
+
 ## 2026-08-23：FSG4/B4-B2 B2-3 外审关闭
 
 - Round 1=`APPROVE`，0 blocker/major/minor，2 info；

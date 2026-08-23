@@ -1,5 +1,10 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+FSG4/B4-B2 B2-4 P-anchor sparse-source Conv已内部关闭：P0 five raw与12项bounded candidate
+共68 metrics/217,770元素通过，ledger冻结且无timing/winner/performance claim。当前只开放B2-4
+外审，B2-5/B4-B3关闭。见
+`BOUNDFLOW_FSG4_B4B2_B2_4_SPARSE_CONV_TIR_CHANGELOG_2026_08_23.md`。
+
 FSG4/B4-B2 B2-3 P-anchor dense Conv TIR已外审批准：最终=
 `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-3-P-CONV-DENSE-CORRECTNESS`。当前只开放B2-4
 P-anchor sparse-source schedule，timing/B2-5/B4-B3关闭。见

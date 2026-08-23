@@ -179,6 +179,11 @@ def test_b4b2_dense_conv_dtype_device_nonfinite_interval_and_range_rejected() ->
     )
     with pytest.raises(ValueError, match="tensor differs: native_alpha"):
         dense_conv._validate_dense_conv_tensors(
+            replace(tensors, native_alpha=tensors.native_alpha[:, :, :, :-1]),
+            template,
+        )
+    with pytest.raises(ValueError, match="tensor differs: native_alpha"):
+        dense_conv._validate_dense_conv_tensors(
             replace(tensors, native_alpha=tensors.native_alpha.double()), template
         )
     bad = tensors.native_alpha.detach().clone()

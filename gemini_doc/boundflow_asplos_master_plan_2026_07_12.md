@@ -1,5 +1,9 @@
 # BoundFlow 面向 ASPLOS 的总体研发与论文执行计划 v1.0
 
+> **2026-08-23 FSG4/B4-B2 B2-4内部关闭**：P-anchor sparse-source Conv P0与12项
+> bounded candidate correctness已验证，ledger在timing前冻结。只开放B2-4外审；正式timing、
+> B2-5/B4-B3继续关闭。
+
 > **2026-08-23 FSG4/B4-B2 B2-3外审关闭**：独立外审`APPROVE`，最终=
 > `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-3-P-CONV-DENSE-CORRECTNESS`。只开放B2-4
 > P-anchor sparse-source schedule；timing/B2-5/B4-B3关闭。

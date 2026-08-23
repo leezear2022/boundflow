@@ -1,6 +1,6 @@
 ---
-status: externally-approved-b2-3-b2-4-open
-updated: 2026-08-23T12:47:40Z
+status: validated-b2-4-pending-external-audit
+updated: 2026-08-23T13:57:26Z
 type: plan
 topic: boundflow
 slug: fsg4-b4b2-typed-cuda-tir-preregistration
@@ -8,6 +8,10 @@ stage: s01
 ---
 
 # FSG4/B4-B2 Typed CUDA/TIR Preregistration
+
+> **2026-08-23 B2-4内部关闭**：P0 five raw与12项bounded candidate全部compile/correct，
+> 68 metrics/217,770元素、max diff=`2.384185791015625e-06`、sign exact。ledger已在timing前
+> 冻结，当前无timing/winner/performance claim。只开放B2-4外审；B2-5/B4-B3关闭。
 
 > **2026-08-23 B2-3外审批准**：`APPROVE`，0 blocker/major/minor；只开放B2-4
 > P-anchor sparse-source schedule。timing/B2-5/B4-B3关闭。
@@ -290,6 +294,13 @@ B2-4/B2-5/timing/B4-B3仍关闭。
 不得笛卡尔积无限搜索：在写任何timing raw前，候选ledger最多冻结12个schedule hash；正式结果后
 不得追加候选。P-anchor用于schedule calibration，最终只保留一个winner进入five-fresh confirmation。
 候选全失败不允许临时改用cuDNN/CUTLASS extern掩盖TIR物理结论。
+
+**内部结果（2026-08-23）**：compressed alpha=`[6,86]`直接进入TIR，empty beta保持absent；
+P0 5 raw/20 metrics/64,050元素与12 candidate/48 metrics/153,720元素全部通过，合计
+68 metrics/217,770元素，max diff=`2.384185791015625e-06`且sign exact。12项balanced ledger
+覆盖预注册全部knob取值，hash均唯一；ledger=`1660edca…07c6`，
+`timing_raw_present=false`、`winner_selected=false`。状态=
+`VALIDATED-B4-B2-B2-4-SPARSE-CONV-P0-AND-BOUNDED-LEDGER-CORRECTNESS-PENDING-EXTERNAL-AUDIT`。
 
 ### B2-5：formal five-fresh artifact与外审
 

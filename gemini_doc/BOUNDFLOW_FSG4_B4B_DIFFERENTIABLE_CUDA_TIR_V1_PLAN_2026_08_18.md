@@ -1,6 +1,6 @@
 ---
-status: b4b2-b2-3-validated-pending-external-audit
-updated: 2026-08-23T11:33:28Z
+status: b4b2-b2-4-validated-pending-external-audit
+updated: 2026-08-23T13:57:26Z
 type: plan
 topic: boundflow
 slug: BOUNDFLOW_FSG4_B4B_DIFFERENTIABLE_CUDA_TIR_V1
@@ -8,6 +8,10 @@ stage: s01
 ---
 
 # FSG4/B4-B Differentiable CUDA/TIR v1 Plan
+
+> **2026-08-23 B2-4内部关闭**：P0 five raw与12项bounded sparse Conv candidate全部
+> compile/correct；ledger在timing前冻结，当前无winner/performance claim。只开放B2-4外审；
+> B2-5/B4-B3关闭。
 
 > **2026-08-23 B2-3内部关闭**：P-anchor dense Conv correctness 5/5 raw、20/20 metrics通过；
 > 当前只开放B2-3外审，B2-4/B2-5/timing/B4-B3继续关闭。详见

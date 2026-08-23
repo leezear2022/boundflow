@@ -1,5 +1,9 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-23 FSG4/B4-B2 B2-4内部关闭**：compressed alpha=`[6,86]`、empty beta absent；
+> P0 five raw与12 candidate共68 metrics/217,770元素通过，max diff=`2.384185791015625e-06`。
+> ledger已冻结但未计时/选winner。下一步只开放B2-4外审；B2-5/B4-B3关闭。
+
 > **2026-08-23 FSG4/B4-B2 B2-3外审关闭**：`APPROVE`，0 blocker/major/minor；独立
 > float64与现场GPU均通过。最终=
 > `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-3-P-CONV-DENSE-CORRECTNESS`。当前只开放
