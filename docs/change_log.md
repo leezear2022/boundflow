@@ -5780,3 +5780,16 @@
 **记录**
 - `gemini_doc/BOUNDFLOW_FSG4_B4B1_TYPED_PYTORCH_REFERENCE_PREREGISTRATION_2026_08_18.md`
 - `gemini_doc/change_2026-08-18_fsg4_b4b1_typed_reference_internal_closure.md`
+
+## 2026-08-23：FSG4/B4-B1 外审关闭与 B4-B2 预注册
+
+- B4-B1 Round 2独立外审关闭F1/F2，exchange=`closed/approved`；
+- 最终状态=`EXTERNALLY-APPROVED-VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE`；
+- B4-B2仅完成预注册，冻结dense→sparse-source ABI、first-class编译IR、custom backward、
+  five-fresh与6-worker物理门禁；
+- 当前无B4-B2 TIR或性能claim，下一步只做B2-0 identity-TIR ABI probe。
+
+**记录**
+- `gemini_doc/change_2026-08-23_fsg4_b4b1_round2_external_closure.md`
+- `gemini_doc/BOUNDFLOW_FSG4_B4B2_TYPED_CUDA_TIR_PREREGISTRATION_PLAN_2026_08_23.md`
+- `gemini_doc/BOUNDFLOW_FSG4_B4B2_TYPED_CUDA_TIR_PREREGISTRATION_CHANGELOG_2026_08_23.md`

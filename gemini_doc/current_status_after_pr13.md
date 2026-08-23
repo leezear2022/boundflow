@@ -1,10 +1,15 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-23 FSG4/B4-B2预注册**：dense semantic ABI与sparse-source fused ABI、first-class
+> compiler/schedule/module/launch IR、custom-autograd与6-worker物理门禁已冻结；状态=
+> `PREREGISTERED-B4-B2-TYPED-CUDA-TIR-NOT-IMPLEMENTED`。下一唯一动作=B2-0 identity-TIR ABI
+> probe。尚无TIR实现或性能claim。
+
 > **2026-08-23 FSG4/B4-B1外审关闭**：exchange=`closed/approved`，Round 2 F1/F2 CLOSED，
 > AC1—AC6全PASS且findings=0。最终状态=
 > `EXTERNALLY-APPROVED-VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE`。Executor RTX 4060 full=
 > `1414 passed, 3 skipped`；auditor CPU-only full=`1366 passed, 51 skipped`，集合边界一致。
-> 下一步只开放另行预注册B4-B2 typed CUDA/TIR candidate；不得直接实现/计时TIR。
+> 下一步只开放另行预注册B4-B2 typed CUDA/TIR candidate；该动作已由上方预注册完成状态取代。
 
 > **2026-08-23 FSG4/B4-B1 Round 1外审纠正**：正式verdict=`request_changes`，F1/F2均为
 > major。F1为receipt metric/gradient target inventory未精确绑定；F2为deterministic warn/debug

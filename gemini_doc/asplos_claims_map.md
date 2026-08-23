@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-23 FSG4/B4-B2预注册**：只冻结计划，状态=
+> `PREREGISTERED-B4-B2-TYPED-CUDA-TIR-NOT-IMPLEMENTED`。当前无B4-B2 lowering、TIR、custom
+> backward、module/launch receipt、micro speedup或memory claim。下一步仅B2-0 ABI probe。
+
 > **2026-08-23 FSG4/B4-B1外审关闭**：最终claim=
 > `EXTERNALLY-APPROVED-VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE`。Round 2独立关闭F1/F2，
 > AC1—AC6全PASS、findings=0；raw=5/10/60/196,380、max diff=`6.109476089477539e-07`、

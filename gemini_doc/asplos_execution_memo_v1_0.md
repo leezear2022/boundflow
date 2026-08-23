@@ -1,9 +1,14 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-23 FSG4/B4-B2预注册指令**：状态=
+> `PREREGISTERED-B4-B2-TYPED-CUDA-TIR-NOT-IMPLEMENTED`。已冻结dense→sparse-source两级ABI、
+> first-class Template/Schedule/Module/Launch receipts、custom-autograd/stream/alias/cache、5-fresh与
+> 6-worker物理kill gate。下一唯一动作=B2-0 identity-TIR ABI probe；通过前不得实现region TIR。
+
 > **2026-08-23 FSG4/B4-B1 Round 2外审关闭指令**：exchange已`closed/approved`，F1/F2
 > CLOSED，AC1—AC6全PASS且findings=0。最终状态=
 > `EXTERNALLY-APPROVED-VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE`。下一唯一动作是另行预注册
-> B4-B2 typed CUDA/TIR candidate；预注册完成前不得实现/计时TIR或升级performance claim。
+> B4-B2 typed CUDA/TIR candidate；该指令已由上方预注册完成状态取代。
 
 > **2026-08-23 FSG4/B4-B1 Round 1修复指令**：外审以F1 receipt inventory/target未精确
 > fail-closed、F2 deterministic warn/debug mode未原样恢复两个major判定`request_changes`。

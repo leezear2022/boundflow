@@ -6,10 +6,15 @@
 - 让别人（或未来的你）能快速定位：某个决策/某个口径/某个脚本是“为什么这样做”；
 - 让论文/AE 的证据链（claim → 命令 → 产物 → 字段）能闭环。
 
+FSG4/B4-B2已预注册，状态=`PREREGISTERED-B4-B2-TYPED-CUDA-TIR-NOT-IMPLEMENTED`。计划冻结
+dense→sparse-source两级ABI、first-class compiler/schedule/module/launch IR、custom autograd、
+stream/alias/cache、5-fresh与6-worker物理门禁；下一步仅B2-0 identity-TIR ABI probe，尚无TIR或
+性能claim。见`BOUNDFLOW_FSG4_B4B2_TYPED_CUDA_TIR_PREREGISTRATION_PLAN_2026_08_23.md`。
+
 FSG4/B4-B1已在Round 2独立外审批准并由executor关闭exchange，最终状态=
 `EXTERNALLY-APPROVED-VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE`。F1/F2 CLOSED、AC1—AC6
 全PASS、findings=0；receipt负例20/20、execution-policy 6/6、完整性负例2/2。下一步只开放
-另行预注册B4-B2，不直接实现/计时TIR。见
+另行预注册B4-B2，不直接实现/计时TIR。该动作已由上方预注册完成状态取代；见
 `change_2026-08-23_fsg4_b4b1_round2_external_closure.md`。
 
 > 约定：每次工程改动都应在 `gemini_doc/` 新增一份 `change_YYYY-MM-DD_*.md` 记录，并在 `docs/change_log.md` 追加一条总账。

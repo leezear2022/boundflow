@@ -1,6 +1,6 @@
 ---
-status: b4b1-typed-pytorch-reference-preregistered
-updated: 2026-08-18T06:24:00Z
+status: b4b2-typed-cuda-tir-preregistered-not-implemented
+updated: 2026-08-23T02:47:06Z
 type: plan
 topic: boundflow
 slug: BOUNDFLOW_FSG4_B4B_DIFFERENTIABLE_CUDA_TIR_V1
@@ -342,3 +342,14 @@ B4-B1预注册已冻结。B4-B0现有raw足以把两锚点output A重建至约`3
 gradient。下一唯一动作是B4-B1a read-only capture sufficiency amendment；随后才允许typed IR/
 reference。详细合同见
 `gemini_doc/BOUNDFLOW_FSG4_B4B1_TYPED_PYTORCH_REFERENCE_PREREGISTRATION_2026_08_18.md`。
+
+### B4-B1 Round 2外审关闭与B4-B2预注册
+
+B4-B1已在Round 2关闭F1/F2并由executor关闭exchange，最终=
+`EXTERNALLY-APPROVED-VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE`。B4-B2现已另行预注册为
+`PREREGISTERED-B4-B2-TYPED-CUDA-TIR-NOT-IMPLEMENTED`：先做B2-0 first-class lowering/receipt/
+identity-TIR ABI probe，再依次做S dense、S sparse fused、P dense、P bounded schedule与formal
+five-fresh。详细门禁见
+`gemini_doc/BOUNDFLOW_FSG4_B4B2_TYPED_CUDA_TIR_PREREGISTRATION_PLAN_2026_08_23.md`。
+
+预注册没有实现、计时或准入TIR。下一唯一工程动作=B2-0；其通过前region TIR与B4-B3仍关闭。

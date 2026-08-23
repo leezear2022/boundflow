@@ -1,8 +1,12 @@
 # BoundFlow 面向 ASPLOS 的总体研发与论文执行计划 v1.0
 
+> **2026-08-23 FSG4/B4-B2预注册更新**：状态=
+> `PREREGISTERED-B4-B2-TYPED-CUDA-TIR-NOT-IMPLEMENTED`。下一唯一动作=B2-0 first-class
+> lowering/receipt/identity-TIR ABI probe；通过前不得实现region TIR或启动timing。
+
 > **2026-08-23 FSG4/B4-B1关闭更新**：Round 2独立外审已批准并关闭exchange，最终=
 > `EXTERNALLY-APPROVED-VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE`。只开放另行预注册B4-B2
-> typed CUDA/TIR candidate；不得从B4-B1 correctness直接升级性能claim。
+> typed CUDA/TIR candidate；该动作已由上方预注册完成状态取代。
 
 > **2026-08-16 FSG4/B4-A实现候选**：typed handoff/no-rerun路径与five-fresh runner已实现为
 > `IMPLEMENTED-B4-A-PENDING-CLEAN-SOURCE-FIVE-FRESH`。下一步只执行clean-source correctness；无性能
