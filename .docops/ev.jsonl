@@ -11060,3 +11060,9 @@
 {"id":"ev011060","ts":"2026-08-23T07:00:06Z","ty":"ch","st":"s01","pr":60,"slug":"fsg4-b4b2-b2-2-sparse-source-linear"}
 {"id":"ev011061","ts":"2026-08-23T07:00:06Z","ty":"va","st":"s01","pr":60,"result":"pass"}
 {"id":"ev011062","ts":"2026-08-23T07:00:06Z","ty":"cmd","cmd":"Bash:source","summary":"PostToolUse"}
+{"id":"ev011063","ts":"2026-08-23T07:00:21Z","ty":"cmd","cmd":"Bash:git","summary":"PostToolUse"}
+{"id":"ev011064","ts":"2026-08-23T07:01:37Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
+{"id":"ev011065","ts":"2026-08-23T07:01:45Z","ty":"cmd","cmd":"Bash:git","summary":"PostToolUse"}
+{"id":"ev011066","ts":"2026-08-23T07:01:51Z","ty":"ch","st":"s01","pr":60,"slug":"fsg4-b4b2-b2-2-external-audit-handoff"}
+{"id":"ev011067","ts":"2026-08-23T07:01:51Z","ty":"va","st":"s01","pr":60,"result":"pass"}
+{"id":"ev011068","ts":"2026-08-23T07:01:51Z","ty":"cmd","cmd":"Bash:source","summary":"PostToolUse"}
