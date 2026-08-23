@@ -1,5 +1,16 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-24：FSG4/B4-B3 CIBC Exact-call 实现
+
+- dense-native-α TIR接入production 10/9 optimizer，修复compressed/native α与incoming-bias梯度所有权；
+- receipt=`10 forward/9 backward`，fallback/eager/materialization=`0/0/0`，S-anchor显式unsupported；
+- smoke terminal lower及全部α/β allclose/sign exact，max diff=`3.57628e-07`；
+- 以显式native-value/candidate-gradient bridge维持Adam float32轨迹；bridge移除前无性能claim；
+- 下一步=clean-source 5 fresh correctness与root replay。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4B3_CIBC_EXACT_CALL_IMPLEMENTATION_CHANGELOG_2026_08_24.md`
+
 ## 2026-08-24：FSG4/B4-B2 v2 Manual TVM TIR 正式关闭
 
 - CIBC式P-anchor横向融合下沉为手写TVM TIR，真实CUDA exact `1+1` kernels、workspace=0；

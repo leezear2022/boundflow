@@ -1,5 +1,10 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+FSG4/B4-B3 CIBC exact-call已实现并等待5 fresh：P-anchor完整native α TIR接入10/9 optimizer，
+forward/backward=`10/9`、fallback/eager/materialization=0，terminal lower与全部α/β smoke
+allclose/sign exact。当前明确保留10次native-value bridge以稳定Adam轨迹，尚无core/query性能
+claim。见`BOUNDFLOW_FSG4_B4B3_CIBC_EXACT_CALL_IMPLEMENTATION_CHANGELOG_2026_08_24.md`。
+
 FSG4/B4-B2 v2 manual TVM TIR已正式关闭：P-anchor CIBC式横向融合真实CUDA exact `1+1`
 kernels、workspace=0，5 correctness与6-worker三方formal通过；PyTorch/TIR geomean/lower/worst=
 `4.89834x/4.73771x/4.68601x`，Triton/TIR=`1.68273x/1.60695x/1.56888x`。状态=

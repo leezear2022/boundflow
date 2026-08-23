@@ -1,5 +1,12 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-24 FSG4/B4-B3 exact-call实现指令**：P-anchor dense-native-α manual TIR已接入
+> production 10/9 optimizer，receipt=`10 forward/9 backward`，fallback/eager/materialization=0；
+> S-anchor显式unsupported并走B3。接线证伪compressed-86 α可替代完整native α，并修复了
+> incoming-bias identity gradient所有权。smoke terminal lower及全部α/β allclose/sign exact，max
+> diff=`3.57628e-07`。当前以`native value + candidate gradient` bridge维持Adam float32轨迹，故
+> 只开放5 fresh correctness/replay；bridge移除前不得形成core/query加速claim。
+
 > **2026-08-24 FSG4/B4-B2-v2 manual TIR正式关闭指令**：clean source=`5b2c9ba`
 > 完成5 correctness、6-worker `BTR/BRT/TBR/TRB/RBT/RTB`三方计时、root replay与10/10
 > outer-resigned tamper。exact kernels=`1+1`，workspace=0，max diff=`1.90735e-06`且sign exact；
