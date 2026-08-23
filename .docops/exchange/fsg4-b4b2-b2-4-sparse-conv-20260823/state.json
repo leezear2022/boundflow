@@ -1,0 +1,16 @@
+{
+  "task": "fsg4-b4b2-b2-4-sparse-conv-20260823",
+  "title": "Audit B4-B2 B2-4 sparse-source Conv P0 and bounded schedule ledger",
+  "status": "ready_for_audit",
+  "round": 1,
+  "executor": "codex",
+  "auditor": "external-model",
+  "approved_round": null,
+  "docs": [
+    "fsg4-b4b2-b2-4-sparse-conv-20260823/request",
+    "fsg4-b4b2-b2-4-sparse-conv-20260823/r001/delivery"
+  ],
+  "rev": 3,
+  "created": "2026-08-23T13:59:31Z",
+  "updated": "2026-08-23T13:59:31Z"
+}
