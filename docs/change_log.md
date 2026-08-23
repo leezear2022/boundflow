@@ -5817,3 +5817,15 @@
 **记录**
 - `gemini_doc/external_audit_b4b2_b2_0_identity_tir_probe_2026_08_23.md`
 - `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_0_EXTERNAL_AUDIT_CLOSURE_CHANGELOG_2026_08_23.md`
+
+## 2026-08-23：FSG4/B4-B2 B2-1 Dense Linear TIR 内部关闭
+
+- first-class S-anchor dense Linear Template/Instance/Schedule/Module/Launch IR完成；
+- CUDA/TIR forward/output-bias与native α/β backward在5 raw、20 metrics/36,750元素通过；
+- max diff=`8.642673492431641e-07`，allclose/sign exact；
+- targeted 23、B4-B相关76、full `1437 passed, 3 skipped`；
+- 真实fallback计数与异常退出状态恢复关闭B2-0外审minor；
+- 当前只开放B2-1外审，B2-2 sparse-source与timing关闭。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_1_DENSE_LINEAR_TIR_CHANGELOG_2026_08_23.md`

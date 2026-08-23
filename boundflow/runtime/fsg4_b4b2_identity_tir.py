@@ -214,6 +214,15 @@ class _IdentityTIRExecutor:
         self.backward_observation: Optional[_LaunchObservation] = None
         self.forward_launch_count = 0
         self.backward_launch_count = 0
+        self.fallback_count = 0
+        self.eager_backward_count = 0
+
+    def reject_fallback(self, *, eager_backward: bool) -> None:
+        """Count and reject an unsupported path instead of hiding it."""
+
+        self.fallback_count += 1
+        self.eager_backward_count += int(eager_backward)
+        raise RuntimeError("identity TIR fallback is forbidden")
 
     def _launch(
         self, symbol: str, source: torch.Tensor, result: torch.Tensor
@@ -363,8 +372,8 @@ def run_b4b2_identity_tir_probe_v1(
         cache_event=executor.cache_event,
         forward_launch_count=executor.forward_launch_count,
         backward_launch_count=executor.backward_launch_count,
-        fallback_count=0,
-        eager_backward_count=0,
+        fallback_count=executor.fallback_count,
+        eager_backward_count=executor.eager_backward_count,
     )
     launch.validate_against(template, instance, schedule, executor.module_receipt)
     return DifferentiableLowerIdentityProbeResultV1(

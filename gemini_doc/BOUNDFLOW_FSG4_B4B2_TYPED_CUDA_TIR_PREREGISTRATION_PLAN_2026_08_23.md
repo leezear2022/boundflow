@@ -1,5 +1,5 @@
 ---
-status: externally-approved-b2-0-next-b2-1
+status: validated-b2-1-pending-external-audit
 updated: 2026-08-23T03:10:59Z
 type: plan
 topic: boundflow
@@ -8,6 +8,11 @@ stage: s01
 ---
 
 # FSG4/B4-B2 Typed CUDA/TIR Preregistration
+
+> **2026-08-23 B2-1内部关闭**：S-anchor dense Linear TIR完成5 raw/20 metrics/36,750元素，
+> max diff=`8.642673492431641e-07`且sign exact；full=`1437 passed, 3 skipped`。状态=
+> `VALIDATED-B4-B2-B2-1-DENSE-LINEAR-CORRECTNESS-PENDING-EXTERNAL-AUDIT`。只开放外审，
+> B2-2 sparse-source与timing继续关闭。
 
 > **2026-08-23 B2-0外审批准**：auditor现场GPU复跑并逐位复现三项receipt hash，verdict=
 > `APPROVE`（0 blocker/0 major）。最终状态=
@@ -218,6 +223,10 @@ launch=`1/1`；DLPack/stream exact；alias/fallback/eager backward=`0/0/0`；hig
 
 实现Linear/Gemm dense semantic ABI。5个B4-B1 raw instances逐项比较forward A/bias、incoming-A
 clone、native α、active native β gradients；先用确定性correctness schedule，不计时。
+
+**内部结果（2026-08-23）**：5/5 raw、20/20 metrics通过，36,750元素max diff=
+`8.642673492431641e-07`、sign exact；incoming A hash不变，α/β gradient present，
+fallback/eager=`0/0`。等待外审，尚未开放B2-2。
 
 ### B2-2：S-anchor sparse-source fused forward/backward
 

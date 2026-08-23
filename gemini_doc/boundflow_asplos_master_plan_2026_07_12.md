@@ -1,5 +1,9 @@
 # BoundFlow 面向 ASPLOS 的总体研发与论文执行计划 v1.0
 
+> **2026-08-23 FSG4/B4-B2 B2-1内部关闭**：S dense Linear TIR 5/5 raw correctness通过，
+> 当前=`VALIDATED-B4-B2-B2-1-DENSE-LINEAR-CORRECTNESS-PENDING-EXTERNAL-AUDIT`。
+> 只开放外审；B2-2 sparse-source与timing关闭。
+
 > **2026-08-23 FSG4/B4-B2 B2-0外审关闭**：`APPROVE`，0 blocker/0 major，auditor现场
 > GPU复跑三hash逐位一致。最终=
 > `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-0-ABI-PROBE`；下一唯一动作=B2-1。

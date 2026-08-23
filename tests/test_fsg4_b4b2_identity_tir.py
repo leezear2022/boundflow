@@ -164,6 +164,18 @@ def test_b4b2_identity_tir_rejects_higher_order_gradient() -> None:
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA is required")
+def test_b4b2_identity_tir_true_fallback_counters_fail_closed() -> None:
+    _lower_ir, _lower_instance, template, schedule = _lower_identity(64)
+    executor = identity._IdentityTIRExecutor(
+        template, schedule, identity.DifferentiableLowerIdentityModuleCache()
+    )
+    with pytest.raises(RuntimeError, match="fallback is forbidden"):
+        executor.reject_fallback(eager_backward=True)
+    assert executor.fallback_count == 1
+    assert executor.eager_backward_count == 1
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA is required")
 def test_b4b2_identity_tir_rejects_invalid_tensor_and_resigned_instance() -> None:
     lower_ir, lower_instance, template, schedule = _lower_identity(64)
     source = torch.randn(64, device="cuda", requires_grad=True)

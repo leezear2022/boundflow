@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-23 FSG4/B4-B2 B2-1内部关闭**：允许claim仅为
+> `VALIDATED-B4-B2-B2-1-DENSE-LINEAR-CORRECTNESS-PENDING-EXTERNAL-AUDIT`：冻结S-anchor的
+> dense Linear forward/output-bias与native α/β VJP在5 raw上通过。dense workspace仍存在，
+> 不支持sparse-source融合、timing、speedup、memory或ASPLOS-ready。
+
 > **2026-08-23 FSG4/B4-B2 B2-0外审批准**：最终claim=
 > `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-0-ABI-PROBE`。外审现场GPU复跑三hash逐位一致，
 > 0 blocker/0 major。仍只支持ABI接线正确性，不支持region数学、sparse融合、timing、性能、

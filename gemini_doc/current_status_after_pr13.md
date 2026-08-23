@@ -1,5 +1,10 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-23 FSG4/B4-B2 B2-1内部关闭**：5份S raw、20 metrics/36,750元素全部通过，
+> max diff=`8.642673492431641e-07`、sign exact；targeted 23、related 76、full=
+> `1437 passed, 3 skipped`。当前=
+> `VALIDATED-B4-B2-B2-1-DENSE-LINEAR-CORRECTNESS-PENDING-EXTERNAL-AUDIT`；下一步仅外审。
+
 > **2026-08-23 FSG4/B4-B2 B2-0外审关闭**：verdict=`APPROVE`，auditor现场GPU复跑三项
 > receipt hash逐位一致；最终=`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-0-ABI-PROBE`。
 > 下一唯一动作=B2-1 S-anchor dense correctness；timing、B2-2/P-anchor/B4-B3继续关闭。

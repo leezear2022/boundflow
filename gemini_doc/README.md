@@ -6,6 +6,12 @@
 - 让别人（或未来的你）能快速定位：某个决策/某个口径/某个脚本是“为什么这样做”；
 - 让论文/AE 的证据链（claim → 命令 → 产物 → 字段）能闭环。
 
+FSG4/B4-B2 B2-1 S-anchor dense Linear TIR已内部通过：5 raw、20 metrics/36,750元素，max diff=
+`8.642673492431641e-07`且sign exact，full=`1437 passed, 3 skipped`。当前状态=
+`VALIDATED-B4-B2-B2-1-DENSE-LINEAR-CORRECTNESS-PENDING-EXTERNAL-AUDIT`；下一步只做外审，
+B2-2 sparse-source与timing继续关闭。见
+`BOUNDFLOW_FSG4_B4B2_B2_1_DENSE_LINEAR_TIR_CHANGELOG_2026_08_23.md`。
+
 FSG4/B4-B2 B2-0 ABI probe已外审批准，状态=
 `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-0-ABI-PROBE`：first-class
 compiler/schedule/module/launch IR、identity CUDA/TIR双symbol、一阶custom autograd、DLPack/current
