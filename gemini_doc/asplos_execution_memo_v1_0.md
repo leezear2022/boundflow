@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-24 FSG4/B4-B2 B2-5实现候选指令**：wrapper-inclusive public-PyTorch baseline、
+> 真实CUDA kernel inventory、12项calibration、S/P各5 independent correctness、6-worker AB/BA
+> timing、artifact/replay与8类outer-resigned tamper已实现。开发探针确认当前TIR为3 forward +
+> 3 backward kernels，历史`launch=1/1`仅表示module call。下一唯一动作=提交clean source并生成
+> formal artifact；结果前无performance claim，B4-B3仍关闭。
+
 > **2026-08-24 FSG4/B4-B2 B2-4外审关闭指令**：Round 1 `APPROVE`，0 blocker/
 > major/minor；exchange已由executor关闭为`closed/approved`。独立float64闭合公式、现场GPU、
 > 12项ledger与篡改门禁全部通过。最终=

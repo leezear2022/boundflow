@@ -9,6 +9,10 @@ stage: s01
 
 # FSG4/B4-B2 Typed CUDA/TIR Preregistration
 
+> **2026-08-24 B2-5实现候选**：formal worker/artifact/replay/tamper已实现；真实CUDA kernel
+> inventory显示当前winner族为3 forward + 3 backward kernels，`module_call=1/1`不再冒充kernel
+> count。下一动作=clean-source formal generate/replay/tamper；正式结果前B4-B3仍关闭。
+
 > **2026-08-24 B2-4外审关闭**：Round 1 `APPROVE`，0 blocker/major/minor；exchange=
 > `closed/approved`。最终=
 > `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-4-SPARSE-CONV-P0-AND-BOUNDED-LEDGER-CORRECTNESS`。
