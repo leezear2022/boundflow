@@ -1,6 +1,6 @@
 # FSG4/B4-B1 Round 2 外审关闭记录
 
-最终状态：`EXTERNALLY-APPROVED-VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE`  
+最终状态：`EXTERNALLY-APPROVED-VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE`
 exchange：`fsg4-b4b1-typed-reference-20260818`，Round 2，`closed/approved`
 
 ## 结论
