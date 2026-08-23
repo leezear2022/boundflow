@@ -3,8 +3,10 @@
 > **2026-08-23 FSG4/B4-B1 Round 1外审纠正**：正式verdict=`request_changes`，F1/F2均为
 > major。F1为receipt metric/gradient target inventory未精确绑定；F2为deterministic warn/debug
 > mode未原样恢复。两项修复已在工作树通过targeted=`31 passed`、related=`127 passed, 12 skipped`、
-> full=`1365 passed, 51 skipped, 7 warnings`。先前`.git`只读阻塞已解除；下一步是以clean
-> source生成v3、完成最终回归并重交Round 2。B4-B2/TIR/performance/memory/ASPLOS-ready仍关闭。
+> full=`1365 passed, 51 skipped, 7 warnings`。clean source=`e711e99`；v3已完成10 captures/
+> 60 metrics/196,380 elements、max diff=`6.109476089477539e-07`、sign exact、2/2完整性负例，
+> targeted=`32 passed`。下一步是最终回归并重交Round 2；B4-B2/TIR/performance/memory/
+> ASPLOS-ready仍关闭。
 
 > **2026-08-18 FSG4/B4-B1内部关闭**：source artifact=`d9164b8`，deterministic v2完成
 > 5 fresh/10 captures的typed IR/instance重建与pure-PyTorch forward/VJP；60 metrics/196,380

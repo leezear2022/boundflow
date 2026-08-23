@@ -1,5 +1,5 @@
 ---
-status: implemented-pending-v3-and-round2
+status: validated-pending-round2-external-audit
 updated: 2026-08-23
 type: change-record
 topic: boundflow
@@ -49,7 +49,15 @@ precision 和 MKLDNN 均原样恢复。旧 v2 因缺少新协议字段明确 fai
 
 ## 当前验证
 
-- targeted：`31 passed`；
+- clean source：`e711e991bed54a16c881a2f2bbeb18d71de3c210`；
+- v3 manifest：`2f8a1ffde0f99777e0ab6d9dddb1042c2f7f6c71e57882d141035553475e4e3f`；
+- v3 protocol：`b95bc20c8dcaef8635741842b85d4d0bf9e41c9592c60896677907cd96914baf`；
+- v3 summary：`753a9558a7c36cb89f02963dcd08fc8e76fdfcd415f7dc5d969eea77dffc7a0b`；
+- v3 integrity report：`50a12f577d60a8bf115ee8c40b248f88ecd451715a4b0b4a2f420dedc4aec964`，
+  `2/2 rejected`；
+- v3 root replay：5 runs、10 captures、60 metrics、196,380 elements、max diff=
+  `6.109476089477539e-07`、sign exact；
+- targeted：`32 passed`；
 - B3/B4 related：`127 passed, 12 skipped`；
 - full（完整激活`boundflow`环境）：`1365 passed, 51 skipped, 7 warnings`；
 - scoped Mypy：PASS；
@@ -62,9 +70,8 @@ precision 和 MKLDNN 均原样恢复。旧 v2 因缺少新协议字段明确 fai
 
 ## 下一步与边界
 
-1. 从 clean source 生成并 replay `resnet2b-prop0-v3`，更新正式 integrity evidence；
-2. 完成最终 targeted/related/full/static/DocOps validation；
-3. 对 F1/F2 各执行一次 `dol exchange respond`，然后 delivery Round 2；
-4. 只有 Round 2 独立批准并关闭 exchange 后，才可另行预注册 B4-B2。
+1. 完成最终 related/full/static/DocOps validation；
+2. 对 F1/F2 各执行一次 `dol exchange respond`，然后 delivery Round 2；
+3. 只有 Round 2 独立批准并关闭 exchange 后，才可另行预注册 B4-B2。
 
 B4-B2、CUDA/TIR、performance、memory、whole-core/query speedup 与 ASPLOS-ready 继续关闭。

@@ -30,8 +30,9 @@ ARTIFACT = Path("artifacts/fsg4-b4b1-reference-five-fresh/resnet2b-prop0-v1/run_
 CAPTURE_ARTIFACT = ARTIFACT.parent
 REFERENCE_ARTIFACT_V1 = Path("artifacts/fsg4-b4b1-pytorch-reference/resnet2b-prop0-v1")
 REFERENCE_ARTIFACT_V2 = Path("artifacts/fsg4-b4b1-pytorch-reference/resnet2b-prop0-v2")
+REFERENCE_ARTIFACT_V3 = Path("artifacts/fsg4-b4b1-pytorch-reference/resnet2b-prop0-v3")
 REFERENCE_INTEGRITY_REPORT = REFERENCE_ARTIFACT_V1.parent / (
-    "resnet2b-prop0-v2-integrity-report.json"
+    "resnet2b-prop0-v3-integrity-report.json"
 )
 
 
@@ -353,6 +354,21 @@ def test_b4b1_v2_reference_artifact_is_rejected_after_receipt_policy_freeze() ->
         )
 
 
+def test_b4b1_v3_hardened_reference_artifact_root_replays() -> None:
+    records, summary, result = reference_artifact._verify_static_artifact(
+        REFERENCE_ARTIFACT_V3, CAPTURE_ARTIFACT
+    )
+    assert len(records) == summary["capture_count"] == result["capture_count"] == 10
+    assert summary["summary_hash"] == (
+        "753a9558a7c36cb89f02963dcd08fc8e76fdfcd415f7dc5d969eea77dffc7a0b"
+    )
+    assert result["status"] == "replay-passed"
+    assert result["maximum_absolute_difference"] == 6.109476089477539e-07
+    assert result["all_metrics_sign_exact"] is True
+    assert result["performance_claimed"] is False
+    assert result["tir_admitted"] is False
+
+
 def test_b4b1_reference_runner_restores_and_normalizes_thread_policy() -> None:
     previous = torch.get_num_threads()
     try:
@@ -428,12 +444,12 @@ def test_b4b1_formal_integrity_report_is_hash_bound() -> None:
     report = reference_artifact._load_json(REFERENCE_INTEGRITY_REPORT)
     assert report["case_count"] == report["rejected_count"] == 2
     assert report["report_hash"] == (
-        "6a3192f6a6ab2e14ab012bfedd3cc4251de416739ec6850290c98cd3aa399313"
+        "50a12f577d60a8bf115ee8c40b248f88ecd451715a4b0b4a2f420dedc4aec964"
     )
     assert report["probe_code_sha256"] == (
         "154c90153d9fd2ac461957a1401c0d5184a59278dd239e956889fd95f731648b"
     )
-    assert report["source_git_head"] == ("255d5fb2211faf5983bb9006ce3d2ef75c4f1c0b")
+    assert report["source_git_head"] == ("e711e991bed54a16c881a2f2bbeb18d71de3c210")
     assert set(report["reference_code_revision"]) == set(reference_artifact.CODE_PATHS)
     assert report["performance_claimed"] is False
     assert report["tir_admitted"] is False

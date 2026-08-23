@@ -2,8 +2,9 @@
 
 > **2026-08-23 FSG4/B4-B1 Round 1修复指令**：外审以F1 receipt inventory/target未精确
 > fail-closed、F2 deterministic warn/debug mode未原样恢复两个major判定`request_changes`。
-> 两项候选修复已进入工作树，旧v2将被新协议拒绝；必须在clean source commit上生成v3、完成
-> 回归并提交Round 2。外审批准前不得实现B4-B2 CUDA/TIR或升级任何性能类claim。
+> 两项修复已进入clean source=`e711e99`，旧v2被新协议拒绝；v3已完成root replay与2/2完整性
+> 负例，下一唯一动作是最终回归并提交Round 2。外审批准前不得实现B4-B2 CUDA/TIR或升级
+> 任何性能类claim。
 
 > **2026-08-18 FSG4/B4-B1内部关闭指令**：deterministic v2以5 fresh/10 captures重编译typed
 > IR/instance并独立执行pure-PyTorch forward/VJP；60 metrics/196,380 elements、max diff=
