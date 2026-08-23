@@ -56,6 +56,9 @@ stage: s01
   forward/backward；
 - probe/raw stdout正式artifact仍按预注册保留到B2-5。
 
+> **2026-08-23 后续状态**：B2-2已完成内部correctness门禁，上述“下一动作B2-2”已执行；
+> 当前只开放B2-2外审，B2-3/P-anchor未开放。
+
 ## Links
 
 - plan: `gemini_doc/BOUNDFLOW_FSG4_B4B2_TYPED_CUDA_TIR_PREREGISTRATION_PLAN_2026_08_23.md`

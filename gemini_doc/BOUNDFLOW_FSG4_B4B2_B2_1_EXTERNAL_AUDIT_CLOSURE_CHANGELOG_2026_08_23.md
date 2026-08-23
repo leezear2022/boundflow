@@ -50,10 +50,12 @@ S-anchor TIR，返回 compressed alpha/beta gradient 并投影回 native receipt
 alpha/beta/scaled-A workspace。B2-2 失败即
 `VALIDATED-NO-GO-B4-B2-SEMANTICS`，不得转向 P 性能规避。
 
+> **2026-08-23 后续状态**：上述B2-2实现动作已完成内部correctness门禁，当前下一步
+> 只为B2-2外审；B2-3/P-anchor仍未开放。
+
 ## Links
 
 - audit: `gemini_doc/external_audit_b4b2_b2_1_dense_linear_tir_2026_08_23.md`
 - handoff: `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_1_EXTERNAL_AUDIT_HANDOFF_2026_08_23.md`
 - implementation: `eb74e45`
 - handoff commit: `2da99da`
-

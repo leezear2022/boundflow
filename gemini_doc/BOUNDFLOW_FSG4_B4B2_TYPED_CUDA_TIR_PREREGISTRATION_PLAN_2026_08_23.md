@@ -1,6 +1,6 @@
 ---
-status: externally-approved-b2-1-b2-2-open
-updated: 2026-08-23T05:45:00Z
+status: validated-b2-2-pending-external-audit
+updated: 2026-08-23T07:00:00Z
 type: plan
 topic: boundflow
 slug: fsg4-b4b2-typed-cuda-tir-preregistration
@@ -9,10 +9,17 @@ stage: s01
 
 # FSG4/B4-B2 Typed CUDA/TIR Preregistration
 
+> **2026-08-23 B2-2内部关闭**：27项compressed alpha与每domain单项beta mapping已作为
+> Template常量直接进入TIR，返回compressed gradients；5 raw/20 metrics/31,590元素
+> 通过，max diff=`8.642673492431641e-07`，禁止dense-state workspace count=`0`。当前=
+> `VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS-PENDING-EXTERNAL-AUDIT`。只开放
+> B2-2外审；P-anchor/timing/B2-3/B2-4/B2-5/B4-B3关闭。
+
 > **2026-08-23 B2-1外审批准**：`APPROVE`，0 blocker/0 major；float64独立重算
 > 36,750元素与现场GPU runner全通过，B4-B related更正为`77 passed`。最终=
 > `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-1-DENSE-LINEAR-CORRECTNESS`。只开放B2-2
 > S-anchor sparse-source fused forward/backward；timing/P-anchor/B2-4/B2-5/B4-B3关闭。
+> 该“只开放B2-2”状态已由上方B2-2内部关闭状态取代。
 
 > **2026-08-23 B2-1内部关闭**：S-anchor dense Linear TIR完成5 raw/20 metrics/36,750元素，
 > max diff=`8.642673492431641e-07`且sign exact；full=`1437 passed, 3 skipped`。状态=
@@ -239,6 +246,11 @@ fallback/eager=`0/0`。外审已`APPROVE`且无blocker/major，B2-1关闭并只�
 将27项compressed α与每domain单项β location/sign直接纳入TIR；返回compressed α/β gradient并
 投影回native receipt。禁止global dense α/β/scaled-A workspace。S失败即=
 `VALIDATED-NO-GO-B4-B2-SEMANTICS`，不得以P性能继续。
+
+**内部结果（2026-08-23）**：5/5 raw、20/20 metrics、31,590元素通过，max diff=
+`8.642673492431641e-07`且sign exact；compressed gradient projection、21/21 DLPack pointer、
+current stream、cache miss→hit、launch 1/1、fallback/eager 0/0全过；scheduled TIR无native
+dense alpha/beta/scaled-A/relu-A global workspace。等待外审，尚未开放B2-3或timing。
 
 ### B2-3：P-anchor dense forward/backward
 

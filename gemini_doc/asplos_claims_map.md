@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-23 FSG4/B4-B2 B2-2内部关闭**：允许claim仅为
+> `VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS-PENDING-EXTERNAL-AUDIT`：S-anchor直接
+> 消费compressed alpha/beta并返回compressed gradients，5 raw correctness通过；
+> scheduled TIR无native dense alpha/beta/scaled-A global workspace。不支持P-anchor、timing、
+> speedup、memory ratio、same-solver或ASPLOS-ready。
+
 > **2026-08-23 FSG4/B4-B2 B2-1外审批准**：最终claim=
 > `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-1-DENSE-LINEAR-CORRECTNESS`。独立float64重算
 > 36,750元素与现场GPU复跑均通过，0 blocker/0 major。仅支持S-anchor dense

@@ -1,10 +1,17 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-23 FSG4/B4-B2 B2-2内部关闭**：compressed alpha/beta已直接进入
+> S-anchor TIR，compressed gradient projection对native oracle通过；5/20/31,590，max diff=
+> `8.642673492431641e-07`，workspace forbidden count=`0`；targeted/related/full=
+> `34/88/1448 passed`，3 skipped。当前=
+> `VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS-PENDING-EXTERNAL-AUDIT`；下一步仅外审。
+
 > **2026-08-23 FSG4/B4-B2 B2-1外审关闭**：`APPROVE`，0 blocker/0 major；独立
 > float64重算36,750元素max diff=`6.988e-07`，GPU现场复跑与三hash逐位一致；
 > targeted/related/full=`23/77/1437 passed`，3 skipped。最终=
 > `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-1-DENSE-LINEAR-CORRECTNESS`；下一步只开放
 > B2-2 S-anchor sparse-source fused forward/backward，其他后续阶段仍关闭。
+> 该“下一步B2-2”状态已由上方B2-2内部关闭状态取代。
 
 > **2026-08-23 FSG4/B4-B2 B2-1内部关闭**：5份S raw、20 metrics/36,750元素全部通过，
 > max diff=`8.642673492431641e-07`、sign exact；targeted 23、related 77（外审更正）、full=

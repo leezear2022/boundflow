@@ -1,10 +1,18 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-23 FSG4/B4-B2 B2-2内部关闭指令**：S-anchor已直接从compressed alpha
+> `[6,27]`/beta`[6,1]`执行TIR forward/backward并返回compressed gradients；5 raw/
+> 20 metrics/31,590 elements，max diff=`8.642673492431641e-07`，targeted/related/full=
+> `34/88/1448 passed`，3 skipped。禁止dense-state workspace count=`0`，当前=
+> `VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS-PENDING-EXTERNAL-AUDIT`。下一唯一动作=
+> B2-2外审；P-anchor、timing、B2-3/B2-4/B2-5、B4-B3关闭。
+
 > **2026-08-23 FSG4/B4-B2 B2-1外审关闭指令**：独立外审`APPROVE`，0 blocker/
 > 0 major；float64独立重算36,750元素最大差=`6.988e-07`，现场GPU逐位复现
 > runner与三项receipt hash；targeted/related/full=`23/77/1437 passed`，3 skipped。最终=
 > `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-1-DENSE-LINEAR-CORRECTNESS`。唯一下一动作=
 > B2-2 S-anchor sparse-source fused forward/backward；timing、P-anchor、B2-4/B2-5、B4-B3关闭。
+> 该“下一动作B2-2”指令已由上方B2-2内部关闭指令取代。
 
 > **2026-08-23 FSG4/B4-B2 B2-1内部关闭指令**：S-anchor dense Linear TIR完成5 raw、
 > 20 metrics/36,750元素，max diff=`8.642673492431641e-07`且sign exact；full=

@@ -5841,3 +5841,15 @@
 **记录**
 - `gemini_doc/external_audit_b4b2_b2_1_dense_linear_tir_2026_08_23.md`
 - `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_1_EXTERNAL_AUDIT_CLOSURE_CHANGELOG_2026_08_23.md`
+
+## 2026-08-23：FSG4/B4-B2 B2-2 Sparse-source Linear TIR 内部关闭
+
+- compressed alpha `[6,27]`/beta `[6,1]`直接进入S-anchor TIR，返回compressed gradients；
+- 5 raw/20 metrics/31,590元素全过，max diff=`8.642673492431641e-07`；
+- scheduled TIR forbidden dense-state workspace count=`0`；
+- targeted 34、B4-B related 88、full `1448 passed, 3 skipped`；
+- 状态=`VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS-PENDING-EXTERNAL-AUDIT`；
+- 只开放B2-2外审，P-anchor/timing与后续阶段关闭。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_2_SPARSE_LINEAR_TIR_CHANGELOG_2026_08_23.md`
