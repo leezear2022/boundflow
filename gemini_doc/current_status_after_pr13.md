@@ -5,7 +5,8 @@
 > mode未原样恢复。两项修复已在工作树通过targeted=`31 passed`、related=`127 passed, 12 skipped`、
 > full=`1365 passed, 51 skipped, 7 warnings`。clean source=`e711e99`；v3已完成10 captures/
 > 60 metrics/196,380 elements、max diff=`6.109476089477539e-07`、sign exact、2/2完整性负例，
-> targeted=`32 passed`。下一步是最终回归并重交Round 2；B4-B2/TIR/performance/memory/
+> targeted=`32 passed`、related=`140 passed`、RTX 4060 full=`1414 passed, 3 skipped, 6 warnings`。
+> 下一步是重交Round 2；B4-B2/TIR/performance/memory/
 > ASPLOS-ready仍关闭。
 
 > **2026-08-18 FSG4/B4-B1内部关闭**：source artifact=`d9164b8`，deterministic v2完成

@@ -10770,3 +10770,13 @@
 {"id":"ev010770","ts":"2026-08-23T02:09:56Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
 {"id":"ev010771","ts":"2026-08-23T02:10:05Z","ty":"ch","st":"s01","pr":60,"slug":"fsg4-b4b1-hardened-v3-artifact"}
 {"id":"ev010772","ts":"2026-08-23T02:10:05Z","ty":"va","st":"s01","pr":60,"result":"pass"}
+{"id":"ev010773","ts":"2026-08-23T02:10:05Z","ty":"cmd","cmd":"Bash:dol.py","summary":"PostToolUse"}
+{"id":"ev010774","ts":"2026-08-23T02:10:23Z","ty":"cmd","cmd":"Bash:source","summary":"PostToolUse"}
+{"id":"ev010775","ts":"2026-08-23T02:10:43Z","ty":"cmd","cmd":"Bash:source","summary":"PostToolUse"}
+{"id":"ev010776","ts":"2026-08-23T02:18:26Z","ty":"cmd","cmd":"Bash:source","summary":"PostToolUse"}
+{"id":"ev010777","ts":"2026-08-23T02:18:41Z","ty":"cmd","cmd":"Bash:git","summary":"PostToolUse"}
+{"id":"ev010778","ts":"2026-08-23T02:19:28Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
+{"id":"ev010779","ts":"2026-08-23T02:19:33Z","ty":"cmd","cmd":"Bash:date","summary":"PostToolUse"}
+{"id":"ev010780","ts":"2026-08-23T02:19:37Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
+{"id":"ev010781","ts":"2026-08-23T02:19:44Z","ty":"ch","st":"s01","pr":60,"slug":"fsg4-b4b1-round2-handoff"}
+{"id":"ev010782","ts":"2026-08-23T02:19:44Z","ty":"va","st":"s01","pr":60,"result":"pass"}

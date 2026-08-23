@@ -58,20 +58,20 @@ precision 和 MKLDNN 均原样恢复。旧 v2 因缺少新协议字段明确 fai
 - v3 root replay：5 runs、10 captures、60 metrics、196,380 elements、max diff=
   `6.109476089477539e-07`、sign exact；
 - targeted：`32 passed`；
-- B3/B4 related：`127 passed, 12 skipped`；
-- full（完整激活`boundflow`环境）：`1365 passed, 51 skipped, 7 warnings`；
+- B3/B4 related（RTX 4060）：`140 passed`；
+- full（RTX 4060、完整激活`boundflow`环境）：`1414 passed, 3 skipped, 6 warnings`；
 - scoped Mypy：PASS；
 - scoped Pylint：`10.00/10`；
 - `git diff --check`：PASS。
 
-以上为修复工作树的候选验证，不替代 clean-source v3 artifact 或外部 Round 2 审计。首次直接
-调用conda解释器的full在collection阶段因未触发activation hook、TVM不可见而停止；完整
-`conda activate boundflow`后重跑全绿，已明确区分环境调用错误与代码回归。
+以上为clean-source v3内部验证，不替代外部Round 2审计。首次直接调用conda解释器的full在
+collection阶段因未触发activation hook、TVM不可见而停止；完整`conda activate boundflow`
+后先在CPU不可用CUDA环境得到`1365 passed, 51 skipped`，权限/设备恢复后又在RTX 4060上完成
+`1414 passed, 3 skipped`，已明确区分环境调用错误、环境skip与代码回归。
 
 ## 下一步与边界
 
-1. 完成最终 related/full/static/DocOps validation；
-2. 对 F1/F2 各执行一次 `dol exchange respond`，然后 delivery Round 2；
-3. 只有 Round 2 独立批准并关闭 exchange 后，才可另行预注册 B4-B2。
+1. 对 F1/F2 各执行一次 `dol exchange respond`，然后 delivery Round 2；
+2. 只有 Round 2 独立批准并关闭 exchange 后，才可另行预注册 B4-B2。
 
 B4-B2、CUDA/TIR、performance、memory、whole-core/query speedup 与 ASPLOS-ready 继续关闭。
