@@ -11,6 +11,12 @@ stage: s01
 
 ## 0. 结论与当前边界
 
+> **2026-08-25 R3-1b3 closure / R3-2A preregistration**：compiled P-α custom VJP 的5对fresh
+> correctness与memory门禁已关闭为 `VALIDATED-R3-1B3-COMPILED-FIVE-FRESH`，只开放R3-2A。
+> R3-2A现已冻结P-anchor 10 evaluation/9 Adam mutation、逐步动态rebind、five-fresh、memory与
+> replay/tamper合同；仍不计时。见 `BOUNDFLOW_R3_1B3_FIVE_FRESH_FORMAL_CLOSURE_2026_08_25.md`
+> 和 `BOUNDFLOW_R3_2A_OPTIMIZER_TRAJECTORY_CORRECTNESS_PLAN_2026_08_25.md`。
+
 > **2026-08-25 R3-1 M0 Python rematerialization NO-GO**：5对独立native/candidate的final lower
 > 与compressed dα语义全过，saved dense A=0、custom backward mandatory成立；但peak allocated=
 > `1.1181179x`且没有compiled bounded-arena module，违反§8/R3-1硬门禁。R3-2A保持关闭。下一只
