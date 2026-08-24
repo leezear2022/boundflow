@@ -1,5 +1,10 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-25 当前状态：R3-1b3通过，R3-1已admit**：source=`eeeb1bf`的5对/10 fresh
+> correctness/memory全部通过；最坏allocated/reserved=`0.06417x/0.16667x`，lower/dα max diff=
+> `4.05312e-6/6.14673e-8`，9/9 tamper。当前只开放R3-2A optimizer trajectory correctness；
+> timing仍关闭。见`BOUNDFLOW_R3_1B3_FIVE_FRESH_FORMAL_CLOSURE_2026_08_25.md`。
+>
 > **2026-08-25 当前执行：R3-1b3协议已冻结待formal**：10 fresh subprocess，顺序=
 > `NC/CN/NC/CN/NC`；candidate/native absolute peak allocated与reserved必须逐对`<=1.0x`。
 > 协议/worker/replay/tamper/synthetic tests已实现，下一只提交clean source并运行；不计时。见

@@ -1,5 +1,12 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-25 R3-1b3 five-fresh正式通过**：source=`eeeb1bf`，5对/10独立process全部semantic/
+> structure/memory通过；最坏allocated/reserved ratio=`0.06417x/0.16667x`，lower/dα max diff=
+> `4.05312e-6/6.14673e-8`，9/9全重签tamper拒绝。允许claim=
+> `VALIDATED-R3-1B3-COMPILED-FIVE-FRESH`与冻结single-evaluation memory reduction；
+> `r3_1_admitted=true`。optimizer/query/timing/performance仍false，下一只开放R3-2A correctness。见
+> `BOUNDFLOW_R3_1B3_FIVE_FRESH_FORMAL_CLOSURE_2026_08_25.md`。
+>
 > **2026-08-25 R3-1b2 compiled custom VJP正式关闭**：source=`12402da`的artifact/replay通过；
 > lower/dα max diff=`3.81470e-6/6.14673e-8`、sign exact、dα nonzero=`281/281`；2 scratch、
 > saved dense A=0、warm allocation=0，12/12全重签tamper拒绝。允许claim仅为

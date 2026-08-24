@@ -1,5 +1,13 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+R3-1b2/b3外部审计交接已生成，要求从raw独立复核compiled VJP、五对absolute memory、失败纪律和
+claim边界，见`BOUNDFLOW_R3_1B2_B3_EXTERNAL_AUDIT_HANDOFF_2026_08_25.md`。
+
+R3-1b3 five-fresh正式通过：source=`eeeb1bf`，5对/10 fresh的最坏allocated/reserved=
+`0.06417x/0.16667x`，lower/dα max diff=`4.05312e-6/6.14673e-8`，9/9 tamper拒绝。
+`r3_1_admitted=true`，只开放R3-2A optimizer trajectory correctness；没有timing/speedup claim。见
+`BOUNDFLOW_R3_1B3_FIVE_FRESH_FORMAL_CLOSURE_2026_08_25.md`。
+
 R3-1b3 five-fresh correctness/memory已预注册并实现协议待formal：固定10个fresh subprocess、
 `NC/CN/NC/CN/NC`、absolute peak allocated/reserved均须`<=1.0x`；不测latency。下一步提交
 clean source后运行，见`BOUNDFLOW_R3_1B3_FIVE_FRESH_CORRECTNESS_MEMORY_PLAN_2026_08_25.md`。

@@ -1,6 +1,6 @@
 ---
-status: validated-r3-1b2-r3-1b3-open
-updated: 2026-08-25T05:18:00+08:00
+status: validated-r3-1b3-r3-1-admitted-r3-2a-open
+updated: 2026-08-25T05:58:00+08:00
 type: plan
 topic: boundflow
 slug: r3-1b-bounded-arena-compiled-recurrence
@@ -38,6 +38,11 @@ stage: s01
 > max diff=`3.81470e-6/6.14673e-8`、sign exact，2 scratch、saved dense A=0、warm allocation=0，
 > 12/12全重签tamper拒绝。只开放b3 five-fresh correctness/memory；见
 > `BOUNDFLOW_R3_1B2_COMPILED_P_ALPHA_VJP_FORMAL_CLOSURE_2026_08_25.md`。
+>
+> **2026-08-25 R3-1b3 closure**：source=`eeeb1bf`的5对/10 fresh formal全部通过；最坏
+> allocated/reserved ratio=`0.06417x/0.16667x`，lower/dα max diff=`4.05312e-6/6.14673e-8`，
+> 9/9 tamper拒绝。`r3_1_admitted=true`，只开放R3-2A correctness；见
+> `BOUNDFLOW_R3_1B3_FIVE_FRESH_FORMAL_CLOSURE_2026_08_25.md`。
 
 ## 1. Why this branch exists
 
@@ -185,5 +190,5 @@ re-signed tamper。只有 b3 全过才将 `r3_1_admitted=true` 并开放 R3-2A�
 
 ## 9. Next executable action
 
-预注册并实现 R3-1b3 five-fresh `NC/CN/NC/CN/NC` correctness + peak allocated/reserved protocol；
-不记录latency、不改optimizer。
+预注册 R3-2A optimizer trajectory correctness；冻结10-step逐步lower/dα/α/optimizer state/order，
+不记录latency。
