@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-25 R3-1b2关闭/b3开放指令**：source=`12402da`的compiled custom VJP
+> artifact/replay和12/12 tamper通过；lower/dα max diff=`3.81470e-6/6.14673e-8`，2 scratch、
+> saved dense A=0、warm allocation=0。当前唯一动作是b3 five-fresh correctness与peak
+> allocated/reserved；R3-1 admission、optimizer和timing继续关闭。见
+> `BOUNDFLOW_R3_1B2_COMPILED_P_ALPHA_VJP_FORMAL_CLOSURE_2026_08_25.md`。
+>
 > **2026-08-25 R3-1b2实现待formal指令**：10-symbol compiled custom VJP单worker通过；
 > lower/dα max diff=`3.93391e-6/6.14673e-8`、2 scratch、saved dense A=0、warm allocation=0。
 > 下一唯一动作是提交clean source并生成raw-first artifact/replay/tamper；不得提前进入b3、optimizer

@@ -1,6 +1,6 @@
 ---
-status: implemented-r3-1b2-pending-clean-source-formal
-updated: 2026-08-25T04:45:00+08:00
+status: validated-r3-1b2-r3-1b3-open
+updated: 2026-08-25T05:18:00+08:00
 type: plan
 topic: boundflow
 slug: r3-1b-bounded-arena-compiled-recurrence
@@ -33,6 +33,11 @@ stage: s01
 > 已通过；lower/dα max diff=`3.93391e-6/6.14673e-8`、sign exact、2 scratch、saved dense A=0、
 > warm allocation=0。当前等待clean-source artifact/replay/tamper，不提前关闭b2；见
 > `BOUNDFLOW_R3_1B2_COMPILED_P_ALPHA_VJP_IMPLEMENTATION_2026_08_25.md`。
+>
+> **2026-08-25 R3-1b2 closure**：clean source=`12402da`的artifact/replay通过；lower/dα
+> max diff=`3.81470e-6/6.14673e-8`、sign exact，2 scratch、saved dense A=0、warm allocation=0，
+> 12/12全重签tamper拒绝。只开放b3 five-fresh correctness/memory；见
+> `BOUNDFLOW_R3_1B2_COMPILED_P_ALPHA_VJP_FORMAL_CLOSURE_2026_08_25.md`。
 
 ## 1. Why this branch exists
 
@@ -180,5 +185,5 @@ re-signed tamper。只有 b3 全过才将 `r3_1_admitted=true` 并开放 R3-2A�
 
 ## 9. Next executable action
 
-提交 R3-1b2 clean source并生成单worker raw-first artifact、semantic replay与fully re-signed tamper；
-通过前不启动five-fresh、不跑timing、不改 optimizer。
+预注册并实现 R3-1b3 five-fresh `NC/CN/NC/CN/NC` correctness + peak allocated/reserved protocol；
+不记录latency、不改optimizer。

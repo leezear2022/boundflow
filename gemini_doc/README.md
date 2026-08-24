@@ -1,5 +1,10 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+R3-1b2 compiled P-alpha VJP已正式关闭：source=`12402da`，lower/dα max diff=
+`3.81470e-6/6.14673e-8`、sign exact；2 scratch、saved dense A=0、warm allocation=0，12/12
+全重签tamper拒绝。当前只开放b3 five-fresh correctness/memory；R3-1仍未admit且不计时。见
+`BOUNDFLOW_R3_1B2_COMPILED_P_ALPHA_VJP_FORMAL_CLOSURE_2026_08_25.md`。
+
 R3-1b2 compiled P-alpha VJP已实现待formal：单worker lower/dα max diff=
 `3.93391e-6/6.14673e-8`、sign exact，2 coefficient scratch、4 sign bitmap、saved dense A=0、
 warm allocation=0。当前只允许clean-source artifact/replay/tamper；尚未关闭b2或开放b3。见

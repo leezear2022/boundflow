@@ -1,0 +1,11 @@
+{
+  "files": {
+    "README.md": "35cd17b8e33a887d153463088436f32a02948a66382fbcd4bf6678fd8613f379",
+    "protocol.json": "3f058d3fba95bbe990753c15764d8f61def3c7ed5a568f6e2698ff86c6a92a87",
+    "raw.jsonl": "47e15c7cfed29a51723185ae80cb00d0e9838aeb77afd8816aae779605ca70aa",
+    "replay_stdout.txt": "f510b61955b9862e1c24e2f1e653b37807477c966a708f92d97f7d1978be19ba",
+    "summary.json": "aa06d3dd9e9aa9a80df9c2eb07f7e7231c6acd579b1a5b57917261d56ca882f5"
+  },
+  "manifest_hash": "b9841c3786bbb16a52826bc01ff5d7778db2ddcf22a83dbf57e599fc554f467f",
+  "schema_version": "boundflow.r3-1b2-compiled-p-alpha-vjp-artifact/v1"
+}
