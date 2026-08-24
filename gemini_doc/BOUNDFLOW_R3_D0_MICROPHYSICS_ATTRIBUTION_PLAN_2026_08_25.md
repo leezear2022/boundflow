@@ -1,5 +1,5 @@
 ---
-status: preregistered-r3-d0-read-only-attribution
+status: implemented-awaiting-r3-d0-formal
 updated: 2026-08-25T06:20:00+08:00
 type: plan
 topic: boundflow
@@ -117,5 +117,6 @@ region family、target budget、required speedup、summary route和performance c
 
 ## 7. 当前边界
 
-本文只完成预注册。下一工程动作是实现diagnostic-only profiler worker与event replay；不得改R3-2B runtime
-math或现有artifact。D0通过前CUDA Graph、kernel fusion/schedule tuning和R3-3全部关闭。
+预注册后已实现diagnostic-only profiler worker与event replay；下一工程动作是从干净source运行5 fresh
+formal artifact与fully re-signed tamper。不得改R3-2B runtime math或现有artifact。D0正式关闭前CUDA
+Graph、kernel fusion/schedule tuning和R3-3全部关闭。

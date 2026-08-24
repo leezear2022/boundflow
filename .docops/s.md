@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev012835
-last_va: ev012836
+last_ch: ev012877
+last_va: ev012878
 blk: none
-next: implement-r3-d0-diagnostic-only-profiler-and-event-replay
-updated: 2026-08-24T22:23:04Z
+next: run-r3-d0-five-pair-formal-artifact-and-fully-resigned-tamper
+updated: 2026-08-24T22:37:28Z
