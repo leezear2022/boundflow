@@ -54,3 +54,17 @@ artifact closure；`timing_recorded=false`、`performance_claimed=false`、`r3_1
 
 下一步生成独立 raw-first R3-1b1 artifact、semantic replay与 fully re-signed tamper；通过后才可关闭 b1并
 开放 b2 compiled P-alpha VJP。
+
+## 5. Artifact tooling prepared
+
+实现 smoke 后继续新增：
+
+- fresh-process worker：独立构造 native oracle 与 compiled candidate；
+- raw-first artifact generator/replay：绑定 source commit、7 个 code blob、模型/capture digest、
+  module/device-source/trace/plan receipt；
+- 10 类 fully re-signed tamper：candidate/native lower、module/device source hash、launch count、scratch
+  alias、warm allocation、stream mismatch、compiled-region 和 DLPack exact count；
+- artifact tests当前在 artifact 尚未生成时显式 skip，不构成 closure。
+
+tooling 的 mypy、pylint 10.00/10与现有专项测试已通过。下一提交先冻结 tooling source，再从该 clean
+source生成正式 artifact。
