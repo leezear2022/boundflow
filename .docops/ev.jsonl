@@ -12201,3 +12201,11 @@
 {"id":"ev012201","ts":"2026-08-24T17:37:58Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
 {"id":"ev012202","ts":"2026-08-24T17:38:07Z","ty":"cmd","cmd":"Bash:git","summary":"PostToolUse"}
 {"id":"ev012203","ts":"2026-08-24T17:38:14Z","ty":"cmd","cmd":"Bash:conda","summary":"PostToolUse"}
+{"id":"ev012204","ts":"2026-08-24T17:38:20Z","ty":"cmd","cmd":"Bash:git","summary":"PostToolUse"}
+{"id":"ev012205","ts":"2026-08-24T17:38:26Z","ty":"cmd","cmd":"Bash:git","summary":"PostToolUse"}
+{"id":"ev012206","ts":"2026-08-24T17:38:48Z","ty":"cmd","cmd":"Bash:sed","summary":"PostToolUse"}
+{"id":"ev012207","ts":"2026-08-24T17:38:52Z","ty":"cmd","cmd":"Bash:sed","summary":"PostToolUse"}
+{"id":"ev012208","ts":"2026-08-24T17:39:02Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
+{"id":"ev012209","ts":"2026-08-24T17:39:14Z","ty":"cmd","cmd":"Bash:conda","summary":"PostToolUse"}
+{"id":"ev012210","ts":"2026-08-24T17:39:22Z","ty":"ch","st":"s01","pr":60,"slug":"r1a-formal-docops-hook-exemption"}
+{"id":"ev012211","ts":"2026-08-24T17:39:22Z","ty":"va","st":"s01","pr":60,"result":"pass"}

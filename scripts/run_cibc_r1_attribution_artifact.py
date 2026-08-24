@@ -65,6 +65,7 @@ PRODUCTION_TOPOLOGY_HASH = (
 )
 EXPECTED_SEMANTIC_MAXIMUM = 0.000244140625
 EXPECTED_SEMANTIC_ELEMENT_COUNT = 235_992
+ALLOWED_FORMAL_DIRTY_PATHS = (".docops/ev.jsonl",)
 CODE_PATHS = (
     "boundflow/runtime/cibc_ibp_graph.py",
     "boundflow/runtime/cibc_r1_attribution.py",
@@ -115,6 +116,11 @@ def _code_revision() -> dict[str, str]:
     return {path: file_sha256(REPOSITORY_ROOT / path) for path in CODE_PATHS}
 
 
+def _tracked_dirty_paths() -> tuple[str, ...]:
+    rows = _git("status", "--porcelain", "--untracked-files=no").splitlines()
+    return tuple(sorted(row[3:] for row in rows if len(row) >= 4))
+
+
 def _historical_code_revision(source: str) -> dict[str, str]:
     result = {}
     for path in CODE_PATHS:
@@ -145,7 +151,10 @@ def protocol(source_capture: Path, model: Path, *, smoke: bool) -> dict[str, obj
     value: dict[str, object] = {
         "schema_version": PROTOCOL_SCHEMA,
         "source_git_head": _git("rev-parse", "HEAD"),
-        "source_clean": not bool(_git("status", "--porcelain", "--untracked-files=no")),
+        "source_clean": set(_tracked_dirty_paths()).issubset(
+            ALLOWED_FORMAL_DIRTY_PATHS
+        ),
+        "allowed_formal_dirty_paths": list(ALLOWED_FORMAL_DIRTY_PATHS),
         "code_revision": _code_revision(),
         "source_capture_sha256": file_sha256(source_capture),
         "model_sha256": file_sha256(model),
@@ -181,6 +190,7 @@ def validate_protocol(value: Mapping[str, Any]) -> None:
         "schema_version",
         "source_git_head",
         "source_clean",
+        "allowed_formal_dirty_paths",
         "code_revision",
         "source_capture_sha256",
         "model_sha256",
@@ -211,6 +221,7 @@ def validate_protocol(value: Mapping[str, Any]) -> None:
         or len(source) != 40
         or any(character not in "0123456789abcdef" for character in source)
         or not isinstance(value.get("source_clean"), bool)
+        or value.get("allowed_formal_dirty_paths") != list(ALLOWED_FORMAL_DIRTY_PATHS)
         or not isinstance(code_revision, dict)
         or set(code_revision) != set(CODE_PATHS)
         or any(not _valid_digest(code_revision[path]) for path in CODE_PATHS)
