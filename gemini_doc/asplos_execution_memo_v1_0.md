@@ -1,5 +1,14 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-25 R3-1 M0 NO-GO与重新设计指令**：5对独立进程证明full-region custom backward
+> 语义成立，但Python rematerialization peak allocated=`1.1181179x`且不是compiled bounded-arena
+> region，因此正式=`VALIDATED-NO-GO-R3-1-M0-PYTHON-REMATERIALIZATION`。不得进入R3-2A、不得
+> 接optimizer或计时。下一唯一动作是先预注册R3-1b compiled recurrence：plan-key context、compressed
+> leaves、两scratch、无dynamic allocation，并重跑同一five-fresh门禁。见
+> `BOUNDFLOW_R3_1_M0_PYTHON_REMATERIALIZATION_FORMAL_NO_GO_CLOSURE_2026_08_25.md`。
+> R3-1b门禁与分步DAG已冻结，当前只开放b0 exact trace/liveness compiler；不得提前写TIR。见
+> `BOUNDFLOW_R3_1B_BOUNDED_ARENA_COMPILED_RECURRENCE_PLAN_2026_08_25.md`。
+
 > **2026-08-25 R3-0 compressed-alpha v2关闭/R3-1重新开放指令**：source=`8941e66`的v2
 > artifact/replay和12/12全重签tamper通过；production compressed alpha exact=`[2,1,6,86]`，
 > saved logical/unique=`207888/109584 B`。v1 admission作废但通用机制证据保留。下一唯一工程动作

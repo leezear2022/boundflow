@@ -1,5 +1,13 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-25 当前状态：R3-1 M0 Python rematerialization NO-GO**：5对fresh的lower/dα语义
+> 全过，最大差=`4.7684e-7/2.3283e-10`；但peak allocated=`1.1181179x`、compiled region=0/5，
+> 因此R3-1未admit、R3-2A关闭。下一只允许预注册R3-1b bounded-arena compiled recurrence；当前
+> 无timing/performance claim。见
+> `BOUNDFLOW_R3_1_M0_PYTHON_REMATERIALIZATION_FORMAL_NO_GO_CLOSURE_2026_08_25.md`。
+> R3-1b已预注册但未实现；当前下一动作仅为b0 exact trace/liveness compiler与negative tests。见
+> `BOUNDFLOW_R3_1B_BOUNDED_ARENA_COMPILED_RECURRENCE_PLAN_2026_08_25.md`。
+
 > **2026-08-25 当前状态：R3-0 compressed-alpha v2关闭，R3-1重新开放**：source=`8941e66`，
 > production alpha=`[2,1,6,86]`，saved logical/unique=`207888/109584 B`，replay逐字节一致、
 > 12/12全重签tamper拒绝。当前只实现`25/Conv_8`单evaluation mandatory custom backward

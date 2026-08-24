@@ -1,0 +1,37 @@
+{
+  "atol": 0.0002,
+  "code_revision": {
+    "boundflow/runtime/r3_structured_owner_custom_backward.py": "c3021a1e5661339d49afce87c8e29613920ecad700e67b3a1d9f96a549b91534",
+    "scripts/run_r3_structured_owner_five_fresh_artifact.py": "ff254e2e2138ca00c4c1d709f7a1c806ef55c5425b7977e96e29217e31879117",
+    "scripts/run_r3_structured_owner_worker.py": "781acb11adc66254b641bb9c6c1191d40b2340fe484b852886247ee91bfcf3e4",
+    "tests/test_r3_structured_owner_custom_backward.py": "ae15ce50caad16658758a9d85b627e4f6cc2eff59141fd06366a17161ef4faba"
+  },
+  "compiled_region_required": true,
+  "custom_backward_count": 1,
+  "custom_forward_count": 1,
+  "evaluation_count": 1,
+  "memory_peak_allocated_ratio_max": 1.0,
+  "memory_peak_reserved_ratio_max": 1.0,
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "optimizer_mutation_count": 0,
+  "pair_orders": [
+    "NC",
+    "CN",
+    "NC",
+    "CN",
+    "NC"
+  ],
+  "performance_claimed": false,
+  "process_isolation": "one-mode-per-fresh-subprocess",
+  "protocol_hash": "e20ea3b30e6a8537849d6dabd8e3b5abf02949cb090ba4c8f240ca1aa268c1a9",
+  "rtol": 0.0002,
+  "run_count": 5,
+  "saved_dense_a_count_max": 0,
+  "schema_version": "boundflow.r3-1-m0-five-fresh-protocol/v1",
+  "scratch_slot_count_max": 2,
+  "sign_exact": true,
+  "source_capture_sha256": "f42229dd06be8521865d14af4cc51450ec8bec4e792934b457c276aad50126dc",
+  "source_git_head": "7bc1bde6c88212b9a4653f2e6e080eab7f3263ec",
+  "start_node_id": "25/Conv_8",
+  "timing_recorded": false
+}

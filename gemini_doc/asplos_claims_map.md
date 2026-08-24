@@ -1,5 +1,16 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-25 R3-1 M0 Python rematerialization正式NO-GO**：clean source=`7bc1bde`完成5对
+> 独立native/candidate。final lower/dα最大差=`4.7684e-7/2.3283e-10`，5/5 semantic与structure
+> 通过，saved dense A=0、custom forward/backward=1/1；但candidate/native peak allocated=
+> `1.1181179x`，0/5通过`<=1.0x`，且compiled bounded-arena region=0/5；reserved=`1.0x`。
+> 最终=`VALIDATED-NO-GO-R3-1-M0-PYTHON-REMATERIALIZATION`，R3-1 admission=false、R3-2A关闭，
+> 无latency/performance claim。下一只允许预注册R3-1b compiled recurrence。见
+> `BOUNDFLOW_R3_1_M0_PYTHON_REMATERIALIZATION_FORMAL_NO_GO_CLOSURE_2026_08_25.md`。
+> 后继R3-1b只完成预注册，当前=`PREREGISTERED-R3-1B-NOT-IMPLEMENTED`；只开放b0 trace/liveness，
+> 无compiled/correctness/memory/performance升级。见
+> `BOUNDFLOW_R3_1B_BOUNDED_ARENA_COMPILED_RECURRENCE_PLAN_2026_08_25.md`。
+
 > **2026-08-25 R3-0 compressed-alpha v2正式关闭**：clean source=`8941e66`的v2 artifact绑定
 > P-anchor production compressed alpha=`[2,1,6,86]`，saved logical/unique=
 > `207888/109584 B`，saved coefficient/dense escape/context=`0/0/0`；replay逐字节一致，12/12

@@ -1,0 +1,41 @@
+{
+  "code_revision": {
+    "boundflow/runtime/r3_structured_owner_custom_backward.py": "c3021a1e5661339d49afce87c8e29613920ecad700e67b3a1d9f96a549b91534",
+    "scripts/run_r3_structured_owner_five_fresh_artifact.py": "ff254e2e2138ca00c4c1d709f7a1c806ef55c5425b7977e96e29217e31879117",
+    "scripts/run_r3_structured_owner_worker.py": "781acb11adc66254b641bb9c6c1191d40b2340fe484b852886247ee91bfcf3e4",
+    "tests/test_r3_structured_owner_custom_backward.py": "ae15ce50caad16658758a9d85b627e4f6cc2eff59141fd06366a17161ef4faba"
+  },
+  "files": {
+    "README.md": "2172222dbae065c7c381abd3d378e3aea7462bfc062604a2c6a8b307f6724ab5",
+    "protocol.json": "1c2e9dbd4ebd75e8319a6b112f92e051e35a980c14d47f2ac225a5c1bb466c67",
+    "replay_stdout.txt": "961932767eae0305536847505af199cb3fb34837858cff6022c3989176bf2011",
+    "run_00_candidate.pt": "46dd75a5b526fd2b06de167c70f856348898303975af9ef0ccc1c2a70dd409b2",
+    "run_00_candidate.stdout.txt": "cf744f78e1a1dbe8562110e5d1a2f382be0e27751e972126240f5cc7b1f88907",
+    "run_00_native.pt": "46b71d03c34276daa77047c1323dd95ae2ded4569d6b49ec4a20c91fcaf64783",
+    "run_00_native.stdout.txt": "edbe7f13396b62f192b6c964a31187f3795083fdca8c8bdec60972b4f3b9afa6",
+    "run_01_candidate.pt": "b16dab2632182eac5c4229a9f26ddad3ef2ffa7f16f115f875b681bd7673b450",
+    "run_01_candidate.stdout.txt": "f1272ba02a97ec671d1afb15f461f925203025baa46b82cd3da812bdec90fbbd",
+    "run_01_native.pt": "21cfb3d7732811c45d9e154801eb457a9e176f74d92e1d5ad65665e0a412098e",
+    "run_01_native.stdout.txt": "64a72ce160d4d883a689742abf7b17de68de052fcf5a2c2034650cd8bc19d8a9",
+    "run_02_candidate.pt": "bcc5e6fec6ccd4d4890051ccf59fdac8080f7ea20ace93ced735cc2ce297ee45",
+    "run_02_candidate.stdout.txt": "aebec15cf481c904033e0bbc01b3b6035dde482b79b8d7deb8f3774bec226702",
+    "run_02_native.pt": "84c5a14feb2a439e6f2519598fe69f822b9b382a31d8dc4515032f91dc267cd8",
+    "run_02_native.stdout.txt": "2d5b2738246bf35eaa370d1d6b8e8bc98eb32b1ec6ec03b4c7b7902dc72ed095",
+    "run_03_candidate.pt": "b31f03849a23f90a9b884ef056423b388137783312c3f43748e97e478ab32a0e",
+    "run_03_candidate.stdout.txt": "f081e8f3f6da0cdb385b22b55647bb3eb8e0b3ec2ef4d56fa3c5095fab1be49c",
+    "run_03_native.pt": "8f676ea09bfaa8781ecb808ed962831515998b229181cf376a88c7096a321cd0",
+    "run_03_native.stdout.txt": "e9467e13871c409bb508811360459088607ed6285084aa6314ef7663c184244e",
+    "run_04_candidate.pt": "7f797b46abdc4e26ef3a72cd5a0e4f3588a950b82c799369bafc5aa49ba1724e",
+    "run_04_candidate.stdout.txt": "12906b0ba51b84143b0bb63ca69394f06bf983043e4435ba0e92b755f35969df",
+    "run_04_native.pt": "2ca36cb581e0a54290e2f972fbd0c6962d553da2fc17f6526fe7282e788bf8d2",
+    "run_04_native.stdout.txt": "c7512ca0033fa82ba23e52f51087a2fdfd620bec8dd1f09261e6426106355af3",
+    "summary.json": "d3e61ead03cf0c4239184e178ab7fac4fad2c97dd902fb8a4c1c3e9c97511aa7"
+  },
+  "manifest_hash": "45235de378431ceaaa1d523fbb9eca628153c46fa25ad87ed9ec2bf1ecd1e3a2",
+  "performance_claimed": false,
+  "protocol_hash": "e20ea3b30e6a8537849d6dabd8e3b5abf02949cb090ba4c8f240ca1aa268c1a9",
+  "schema_version": "boundflow.r3-1-m0-five-fresh-artifact/v1",
+  "source_git_head": "7bc1bde6c88212b9a4653f2e6e080eab7f3263ec",
+  "summary_hash": "3dc8217a98687c8237b3fe83d9c73034ad23b82f2fba8fa8202c9931a0165feb",
+  "timing_recorded": false
+}

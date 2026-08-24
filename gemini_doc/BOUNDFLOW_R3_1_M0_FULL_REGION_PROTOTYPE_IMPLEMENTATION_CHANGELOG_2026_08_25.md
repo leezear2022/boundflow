@@ -1,6 +1,6 @@
 ---
-status: implemented-pending-five-fresh-no-go-gate
-updated: 2026-08-25T06:20:00+08:00
+status: validated-no-go-r3-1-m0-python-rematerialization
+updated: 2026-08-25T06:55:00+08:00
 type: changelog
 topic: boundflow
 slug: r3-1-m0-full-region-prototype
@@ -46,6 +46,7 @@ alpha/beta version 不变。
 
 ## 4. 下一动作
 
-先提交 source，在 clean commit 上运行 5 对独立 native/candidate correctness+memory worker，并将
-compiled-region 缺失作为硬门禁而不是 finding。若 NO-GO 成立，只允许另立 R3-1b bounded-arena
-compiled recurrence，不得把当前 Python prototype 接进 optimizer。
+clean source five-fresh 已完成：5/5 semantic/structure 通过，但 0/5 peak allocated 通过且 0/5
+compiled-region 通过，最终=`VALIDATED-NO-GO-R3-1-M0-PYTHON-REMATERIALIZATION`。只允许另立
+R3-1b bounded-arena compiled recurrence，不得把当前 Python prototype 接进 optimizer。正式证据见
+`BOUNDFLOW_R3_1_M0_PYTHON_REMATERIALIZATION_FORMAL_NO_GO_CLOSURE_2026_08_25.md`。

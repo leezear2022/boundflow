@@ -1,5 +1,13 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+R3-1 M0 Python rematerialization 已正式 NO-GO：5对独立进程语义/结构全过，lower/dα最大差=
+`4.7684e-7/2.3283e-10`，但peak allocated=`1.1181179x`且compiled bounded-arena=0/5；reserved=
+`1.0x`。R3-1 admission=false、R3-2A关闭，无性能claim。下一只允许预注册R3-1b compiled
+recurrence。见`BOUNDFLOW_R3_1_M0_PYTHON_REMATERIALIZATION_FORMAL_NO_GO_CLOSURE_2026_08_25.md`。
+R3-1b bounded-arena compiled recurrence 已预注册；当前只开放b0 exact trace/liveness compiler，TIR、
+custom VJP、five-fresh和timing均关闭。见
+`BOUNDFLOW_R3_1B_BOUNDED_ARENA_COMPILED_RECURRENCE_PLAN_2026_08_25.md`。
+
 R3-0 compressed-alpha v2已正式关闭：source=`8941e66`，P-anchor alpha binding exact=
 `[2,1,6,86]`，saved logical/unique=`207888/109584 B`；replay逐字节一致、12/12全重签tamper拒绝。
 v1只保留通用合同机制历史证据。当前只开放R3-1一个evaluation mandatory custom backward

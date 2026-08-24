@@ -1,6 +1,6 @@
 ---
-status: validated-r3-0-compressed-alpha-v2-r3-1-open
-updated: 2026-08-25T05:35:00+08:00
+status: validated-no-go-r3-1-m0-r3-1b-preregistration-open
+updated: 2026-08-25T06:55:00+08:00
 type: plan
 topic: boundflow
 slug: r3-structured-owner-custom-backward-redesign
@@ -10,6 +10,12 @@ stage: s01
 # BoundFlow R3 结构化所有权与自定义反向重设计
 
 ## 0. 结论与当前边界
+
+> **2026-08-25 R3-1 M0 Python rematerialization NO-GO**：5对独立native/candidate的final lower
+> 与compressed dα语义全过，saved dense A=0、custom backward mandatory成立；但peak allocated=
+> `1.1181179x`且没有compiled bounded-arena module，违反§8/R3-1硬门禁。R3-2A保持关闭。下一只
+> 允许预注册R3-1b真正的compiled recurrence，不允许把Python prototype接入optimizer。见
+> `BOUNDFLOW_R3_1_M0_PYTHON_REMATERIALIZATION_FORMAL_NO_GO_CLOSURE_2026_08_25.md`。
 
 > **2026-08-25 R3-0 compressed-alpha v2 closure**：v1 fixture 的 dense-alpha admission 已撤销；
 > clean source=`8941e66`的v2以P-anchor production compressed alpha `[2,1,6,86]`重建，replay

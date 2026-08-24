@@ -1,5 +1,11 @@
 # BoundFlow 面向 ASPLOS 的总体研发与论文执行计划 v1.0
 
+> **2026-08-25 R3路线最新覆盖**：R1-A已NO-GO，R3-0 compressed-alpha v2已关闭；R3-1 M0
+> Python rematerialization语义通过但因peak allocated=`1.1181179x`和compiled-region=0/5正式
+> NO-GO。R3-2A关闭。当前只开放R3-1b0 exact trace/liveness compiler，不写TIR、不计时。权威文档为
+> `gemini_doc/BOUNDFLOW_R3_1_M0_PYTHON_REMATERIALIZATION_FORMAL_NO_GO_CLOSURE_2026_08_25.md`与
+> `gemini_doc/BOUNDFLOW_R3_1B_BOUNDED_ARENA_COMPILED_RECURRENCE_PLAN_2026_08_25.md`。
+
 > **2026-08-25 R0/R1覆盖说明**：R0已完成；R1 scope/clock/query-local attribution已冻结为独立
 > pre-registration，尚无runner/artifact。下一动作仅实现R1-0 schema/calibration/topology tests。
 > same-solver传播必须按op type实测`q_B3,k`与exact production `G_query,k`，独立IBP
