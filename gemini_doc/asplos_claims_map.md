@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-25 R3-1b2数学归约（非compiled claim）**：独立closed-form P-alpha VJP相对native
+> autograd max diff=`4.47035e-8`、sign exact、nonzero=`281/281`，证明无需跨forward/backward
+> 保存dense A。compiled VJP/custom backward/memory/R3-1 admission/timing/performance仍false；
+> 下一只实现checkpoint/sign TIR。见
+> `BOUNDFLOW_R3_1B2_P_ALPHA_VJP_MATH_REDUCTION_2026_08_25.md`。
+>
 > **2026-08-25 R3-1b1 compiled full-lower正式关闭**：source=`bdfa53d`的fresh-process
 > artifact/replay通过；lower max diff=`3.8147e-6`、15 launches、2 scratch×73,728 B、70/70
 > DLPack、warm allocation=0，10/10全重签tamper拒绝。允许claim仅为

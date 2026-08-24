@@ -1,5 +1,10 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-25 当前状态：R3-1b2数学门禁通过，TIR实现开放**：P-alpha closed-form VJP对
+> native autograd max diff=`4.47035e-8`、sign exact、nonzero=`281/281`；无需跨forward/backward
+> 保存dense A。当前只实现checkpoint/sign TIR与mandatory custom backward；R3-1仍未admit，
+> five-fresh/timing关闭。见`BOUNDFLOW_R3_1B2_P_ALPHA_VJP_MATH_REDUCTION_2026_08_25.md`。
+>
 > **2026-08-25 当前状态：R3-1b1关闭，b2开放**：fresh-process full-lower artifact/replay通过；
 > lower max diff=`3.8147e-6`、15 launches、2 scratch×73,728 B、70/70 DLPack、warm allocation=0，
 > 10/10全重签tamper拒绝。当前只开放compiled P-alpha VJP；R3-1仍未admit、不计时。见

@@ -1,5 +1,10 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+R3-1b2 P-alpha VJP 数学归约已通过：相对native autograd max diff=`4.47035e-8`、sign exact、
+nonzero=`281/281`，且公式不要求跨forward/backward保存dense A。当前只开放checkpoint/sign TIR与
+mandatory custom backward；尚无compiled VJP、memory或性能claim。见
+`BOUNDFLOW_R3_1B2_P_ALPHA_VJP_MATH_REDUCTION_2026_08_25.md`。
+
 R3-1b1 compiled full-lower已正式关闭：fresh source=`bdfa53d`、lower max diff=`3.8147e-6`、
 15 launches、2 scratch×73,728 B、70/70 DLPack、warm allocation=0，10/10全重签tamper拒绝。
 只开放b2 compiled P-alpha VJP；R3-1仍未admit且不计时。见

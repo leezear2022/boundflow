@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-25 R3-1b2数学门禁/实现指令**：closed-form P-alpha VJP对native autograd
+> max diff=`4.47035e-8`、sign exact、nonzero=`281/281`；该结果只开放checkpoint/sign TIR与
+> mandatory custom backward单worker。不得把数学oracle当candidate，不得生成five-fresh、接
+> optimizer或计时。见`BOUNDFLOW_R3_1B2_P_ALPHA_VJP_MATH_REDUCTION_2026_08_25.md`。
+>
 > **2026-08-25 R3-1b1关闭/b2开放指令**：source=`bdfa53d`的fresh-process full-lower
 > artifact/replay通过；lower max diff=`3.8147e-6`、15 launches、2 scratch×73,728 B、70/70
 > DLPack、warm allocation=0，10/10全重签tamper拒绝。当前唯一动作是compiled P-alpha VJP；

@@ -1,6 +1,6 @@
 ---
-status: validated-r3-1b1-r3-1b2-open
-updated: 2026-08-25T10:55:00+08:00
+status: validated-r3-1b2-math-reduction-tir-open
+updated: 2026-08-25T04:11:00+08:00
 type: plan
 topic: boundflow
 slug: r3-1b-bounded-arena-compiled-recurrence
@@ -23,6 +23,11 @@ stage: s01
 > 通过；lower max diff=`3.814697265625e-06`，15 launches、2 scratch、70/70 DLPack、warm
 > allocation=0。当前只开放b2 compiled P-alpha VJP；见
 > `BOUNDFLOW_R3_1B1_COMPILED_FULL_LOWER_FORMAL_CLOSURE_2026_08_25.md`。
+>
+> **2026-08-25 R3-1b2 math gate**：P-alpha closed-form VJP 与 native autograd 的 max diff=
+> `4.470348358154297e-08`、sign exact、nonzero=`281/281`。这只证明可在不跨 forward/backward
+> 保存 dense A 的条件下归约；compiled TIR/custom backward仍未实现。下一只实现checkpoint/sign
+> TIR，见`BOUNDFLOW_R3_1B2_P_ALPHA_VJP_MATH_REDUCTION_2026_08_25.md`。
 
 ## 1. Why this branch exists
 
@@ -170,5 +175,5 @@ re-signed tamper。只有 b3 全过才将 `r3_1_admitted=true` 并开放 R3-2A�
 
 ## 9. Next executable action
 
-实现 R3-1b2 compiled P-alpha VJP 单 worker correctness/ownership；不启动five-fresh、不跑timing、
-不改 optimizer。
+实现 R3-1b2 checkpoint/sign TIR 与 mandatory custom backward 单 worker correctness/ownership；
+不启动five-fresh、不跑timing、不改 optimizer。
