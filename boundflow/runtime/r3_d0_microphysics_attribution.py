@@ -415,6 +415,8 @@ def derive_worker_ledger(
     ledger: dict[str, object] = {
         "schema_version": LEDGER_SCHEMA,
         "mode": mode,
+        "event_count": len(events),
+        "event_payload_hash": canonical_hash([event.to_dict() for event in events]),
         "unprofiled_median_ns": unprofiled_median_ns,
         "profiled_host_wall_ns": profiled_host_wall_ns,
         "marker_host_ns": marker_host_ns,

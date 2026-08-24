@@ -72,6 +72,8 @@ def _ledger(mode: str, wall: int) -> dict[str, object]:
 def test_r3d0_event_round_trip_and_union_accounting() -> None:
     ledger = _ledger("candidate", 100_000_000)
     assert ledger["kernel_union_ns"] == 50_000_000
+    assert ledger["event_count"] == 4
+    assert len(ledger["event_payload_hash"]) == 64
     assert ledger["kernel_overlap_ns"] == 0
     assert ledger["profiled_host_residual_ns"] == 50_000_000
     assert ledger["host_residual_ns"] == 50_000_000
