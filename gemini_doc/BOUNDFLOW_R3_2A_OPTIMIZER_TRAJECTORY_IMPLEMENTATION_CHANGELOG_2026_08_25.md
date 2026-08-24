@@ -37,3 +37,8 @@ formal clean-source检查只审计tracked文件；未跟踪的用户输入`docs/
 第二次启动发现通用git helper的`.strip()`会移除porcelain首行的leading status column，导致合法
 ` M .docops/ev.jsonl`被误读；clean checker现直接读取未strip的porcelain stdout并同时验证status=`M`
 和exact path。该次仍在任何worker启动前fail closed，无partial artifact。
+
+首轮5-pair artifact执行和semantic replay已通过，但在写tamper probe前发现replay只验证protocol hash，
+尚未逐字段冻结门槛。该artifact降级为pre-hardening诊断副本；runner新增10/9、lr/decay、两组tolerance、
+memory gate、claim flags、pair order、source/code revision和exact文件inventory语义校验。必须从新clean
+source重跑全部worker，不能复用首轮raw形成正式关闭。

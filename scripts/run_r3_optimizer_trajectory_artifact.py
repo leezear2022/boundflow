@@ -365,6 +365,75 @@ def _protocol(source_revision: str, capture: Path, model: Path) -> dict[str, obj
     return payload
 
 
+def _validate_protocol_semantics(
+    protocol: Mapping[str, object], manifest: Mapping[str, object]
+) -> None:
+    expected_fields = {
+        "schema_version",
+        "source_revision",
+        "source_capture",
+        "model",
+        "pair_order",
+        "evaluation_count",
+        "mutation_count",
+        "alpha_lr",
+        "lr_decay",
+        "lower_gradient_tolerance",
+        "state_tolerance",
+        "memory_ratio_max",
+        "timing_recorded",
+        "performance_claimed",
+        "code_revision",
+        "protocol_hash",
+    }
+    expected_scalars = {
+        "schema_version": PROTOCOL_SCHEMA,
+        "pair_order": [list(value) for value in ORDER],
+        "evaluation_count": 10,
+        "mutation_count": 9,
+        "alpha_lr": 0.01,
+        "lr_decay": 0.98,
+        "lower_gradient_tolerance": {
+            "atol": 2e-4,
+            "rtol": 2e-4,
+            "sign_exact": True,
+        },
+        "state_tolerance": {"atol": 2e-5, "rtol": 2e-5},
+        "memory_ratio_max": 1.0,
+        "timing_recorded": False,
+        "performance_claimed": False,
+    }
+    if set(protocol) != expected_fields or any(
+        protocol.get(name) != value for name, value in expected_scalars.items()
+    ):
+        raise ValueError("R3-2A frozen protocol semantics differ")
+    source_revision = protocol.get("source_revision")
+    if (
+        not isinstance(source_revision, str)
+        or len(source_revision) != 40
+        or source_revision != manifest.get("source_revision")
+    ):
+        raise ValueError("R3-2A protocol source revision differs")
+    capture = protocol.get("source_capture")
+    model = protocol.get("model")
+    if (
+        not isinstance(capture, dict)
+        or capture.get("repo_path")
+        != "artifacts/rvir-v4-pre-state/resnet2b-core-pre-state-v1/source_capture.pt"
+        or not isinstance(capture.get("sha256"), str)
+        or len(str(capture["sha256"])) != 64
+        or not isinstance(model, dict)
+        or model.get("public_id") != "vnncomp2021/cifar10_resnet/resnet_2b.onnx"
+        or not isinstance(model.get("sha256"), str)
+        or len(str(model["sha256"])) != 64
+    ):
+        raise ValueError("R3-2A protocol external identity differs")
+    code_revision = protocol.get("code_revision")
+    expected_code = {name: _file_hash(ROOT / name) for name in CODE_PATHS}
+    if code_revision != expected_code:
+        raise ValueError("R3-2A protocol code revision differs")
+
+
 def generate(output: Path, capture: Path, model: Path) -> None:
     if output.exists():
         raise FileExistsError(f"R3-2A artifact output already exists: {output}")
@@ -430,8 +499,15 @@ def replay(artifact: Path) -> dict[str, object]:
     ):
         raise ValueError("R3-2A manifest hash/schema differs")
     files = manifest.get("files")
-    if not isinstance(files, dict) or any(
-        _file_hash(artifact / name) != digest for name, digest in files.items()
+    expected_files = {"protocol.json", "summary.json"} | {
+        f"raw/run-{run_index:02d}-{sequence}-{mode}.pt"
+        for run_index, pair in enumerate(ORDER)
+        for sequence, mode in enumerate(pair)
+    }
+    if (
+        not isinstance(files, dict)
+        or set(files) != expected_files
+        or any(_file_hash(artifact / name) != digest for name, digest in files.items())
     ):
         raise ValueError("R3-2A manifest file digest differs")
     protocol = json.loads((artifact / "protocol.json").read_text())
@@ -442,6 +518,7 @@ def replay(artifact: Path) -> dict[str, object]:
         or protocol_hash != manifest["protocol_hash"]
     ):
         raise ValueError("R3-2A protocol hash differs")
+    _validate_protocol_semantics(protocol, manifest)
     raws = [_load(path) for path in sorted((artifact / "raw").glob("*.pt"))]
     summary = _summary(raws)
     frozen = json.loads((artifact / "summary.json").read_text())
