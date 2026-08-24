@@ -1,5 +1,12 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-24 R3-SO-CVJP设计状态**：允许的唯一表述是
+> `PREREGISTERED-DESIGN-REVIEW-ONLY-R3-SO-CVJP`。已冻结closed lower-region DAG owner、
+> region-level single custom VJP、零saved dense A、bounded scratch和R3-0—R3-7门禁；尚无实现、
+> correctness、memory、speedup、same-solver或ASPLOS-ready claim。它不改变B4-C2 hard NO-GO，也不
+> 取代当前CIBC-G1工程next。见
+> `BOUNDFLOW_R3_STRUCTURED_OWNER_CUSTOM_BACKWARD_REDESIGN_PLAN_2026_08_24.md`。
+
 > **2026-08-24 CIBC-IBP外审批准**：最终claim=
 > `EXTERNALLY-APPROVED-VALIDATED-REDUCED-CIBC-IBP-CONV-HORIZONTAL`。Round 1独立外审重算
 > operator/whole-graph headline、float64 oracle、baseline/CUDA Graph公平性、replay及13类tamper，

@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev011883
-last_va: ev011884
+last_ch: ev011931
+last_va: ev011932
 blk: none
-next: preregister-cibc-g1-optimized-graph-attribution
-updated: 2026-08-24T02:52:52Z
+next: external-review-r3-design-before-r3-0
+updated: 2026-08-24T03:31:25Z

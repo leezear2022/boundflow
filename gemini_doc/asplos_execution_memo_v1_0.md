@@ -1,5 +1,14 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-24 R3结构化lower owner重设计指令**：未来α-CROWN恢复路线已冻结为
+> `PREREGISTERED-DESIGN-REVIEW-ONLY-R3-SO-CVJP`。不复活B4-C2；改用closed lower region的
+> first-class DAG owner和region-level single custom VJP，forward只暴露最终lower，dense A只允许
+> kernel内/两个ping-pong scratch短暂存在，backward默认从compressed α/β、bounds、weights重算。
+> `ctx.executor`、逐层Function、native shadow和implicit `to_dense()`禁止。当前只允许外部设计评审，
+> 不开放R3-0实现；CIBC-G1仍是当前工程动作。见
+> `BOUNDFLOW_R3_STRUCTURED_OWNER_CUSTOM_BACKWARD_REDESIGN_PLAN_2026_08_24.md`与
+> `BOUNDFLOW_R3_STRUCTURED_OWNER_EXTERNAL_REVIEW_PROMPT_2026_08_24.md`。
+
 > **2026-08-24 CIBC外审关闭与路线复审指令**：Round 1独立外审`APPROVE`，exchange已
 > `closed/approved`；最终=
 > `EXTERNALLY-APPROVED-VALIDATED-REDUCED-CIBC-IBP-CONV-HORIZONTAL`。6 Conv operator

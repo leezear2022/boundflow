@@ -1,5 +1,12 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-24 R3 structured-owner/custom-VJP设计状态**：已完成独立重设计预注册，状态=
+> `PREREGISTERED-DESIGN-REVIEW-ONLY-R3-SO-CVJP`。方案使用closed lower region的DAG owner、一个
+> custom VJP、M0 rematerialization和最多两个scratch；dense A不得进入Function output、saved tensor、
+> ctx/executor或跨层buffer。当前只进入外部设计评审，未开放实现/性能，CIBC-G1仍是当前工程next。
+> 见`BOUNDFLOW_R3_STRUCTURED_OWNER_CUSTOM_BACKWARD_REDESIGN_PLAN_2026_08_24.md`与
+> `BOUNDFLOW_R3_STRUCTURED_OWNER_EXTERNAL_REVIEW_PROMPT_2026_08_24.md`。
+
 > **2026-08-24 CIBC外审与当前下一步**：Round 1独立外审`APPROVE`，exchange已由executor
 > 关闭为`closed/approved`，最终=
 > `EXTERNALLY-APPROVED-VALIDATED-REDUCED-CIBC-IBP-CONV-HORIZONTAL`。外审独立重算全部

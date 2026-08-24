@@ -28,7 +28,7 @@ materialization frontier → whole-core/query传播。B4的内部DAG为：
 
 | 阶段 | 结果 | 判定 |
 |---|---|---|
-| B4-A | terminal复用正确性与计时完成 | reduced；不足以形成系统claim |
+| B4-A | terminal复用正确性与计时完成；core `1.018995x < 1.03x` | externally approved performance NO-GO；mechanism/correctness保留 |
 | B4-B0/B1 | 两个真实anchor与独立oracle完成 | correctness validated |
 | B4-B2-0—B2-4 | typed ABI、Linear/Conv dense+sparse TIR完成 | correctness validated |
 | B4-B3 | 10 evaluation/9 mutation production exact-call完成 | mechanism validated |
@@ -67,3 +67,8 @@ geomean=`12.80x`；完整ResNet2B IBP图受未融合Linear/ReLU/add等部分限�
 下一研究层若继续，应按证据增量依次为：CIBC Linear水平融合 → 第二model family → same-workload
 auto_LiRPA adapter → solver/query传播 → memory/runtime多分支并行。它们是扩大claim的后续路线，
 不是本轮closure的遗漏验收项。
+
+α-CROWN 若未来恢复，不能复活 C2；新的 region-level structured owner/custom VJP 设计、生命周期
+门禁和外部评审入口见
+`BOUNDFLOW_R3_STRUCTURED_OWNER_CUSTOM_BACKWARD_REDESIGN_PLAN_2026_08_24.md` 与
+`BOUNDFLOW_R3_STRUCTURED_OWNER_EXTERNAL_REVIEW_PROMPT_2026_08_24.md`。该设计目前不开放实现。

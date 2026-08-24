@@ -1,5 +1,15 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+α-CROWN 的未来恢复路线已完成独立重设计预注册，状态=
+`PREREGISTERED-DESIGN-REVIEW-ONLY-R3-SO-CVJP`。它采用 closed lower region 的 first-class DAG owner
+与 region-level single custom VJP：Python/IR/autograd 边界不传 dense A，backward 默认重算，
+kernel 只允许 bounded transient scratch；旧 B4-C2、逐层 Function 与 `ctx.executor` 均禁止。
+当前没有实现或新性能 claim，CIBC-G1 仍是 executable next。主设计、修改记录和可直接转发的 GitHub
+外审 Prompt 见 `BOUNDFLOW_R3_STRUCTURED_OWNER_CUSTOM_BACKWARD_REDESIGN_PLAN_2026_08_24.md`、
+`BOUNDFLOW_R3_STRUCTURED_OWNER_CUSTOM_BACKWARD_REDESIGN_CHANGELOG_2026_08_24.md` 与
+`BOUNDFLOW_R3_STRUCTURED_OWNER_EXTERNAL_REVIEW_PROMPT_2026_08_24.md`。父恢复计划的第一轮独立评审
+原文保存在 `external_review_failed_gates_recovery_plan_2026_08_24.md`。
+
 CIBC-IBP水平融合已通过Round 1独立外审并由executor关闭exchange，最终=
 `EXTERNALLY-APPROVED-VALIDATED-REDUCED-CIBC-IBP-CONV-HORIZONTAL`：6 Conv operator
 geomean/worst=`12.7951/9.1423x`，完整ResNet2B IBP graph geomean/worst=

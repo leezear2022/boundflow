@@ -311,25 +311,20 @@ path 重新计算，不能简单相加 kernel time。
 
 ### R3：α-CROWN 恢复路线（独立于 CIBC-IBP，不立即实现）
 
-R3 不复活 B4-C2，而是建立新的 `structured-owner + custom backward` 契约：
+本节的初版方向已由独立详细预注册
+`BOUNDFLOW_R3_STRUCTURED_OWNER_CUSTOM_BACKWARD_REDESIGN_PLAN_2026_08_24.md` 取代。新方案不是
+B4-C2 v2，而是 closed lower region 的 first-class DAG owner 与 region-level single custom VJP：
 
-1. high-level IR 保留 structured BoundConv/Linear/ReLU composition，不在 forward 边界提前生成
-   六层 dense A；
-2. custom autograd forward 只产出实际消费所需 value；
-3. backward 保存 compressed α/β、split/history、weight/bias identity 与最小 shape metadata，
-   dense adjoint/center/deviation 在 kernel 内重算或分块重算；
-4. 用 `saved_tensors_hooks` 做测量 receipt，证明每层保存集合、bytes、lifetime；
-5. 先单 site，再两个相邻 site，最后六 site；每级先过 live-set/semantic，再允许 timing；
-6. correctness worker 可运行 native shadow，control worker 严禁 native+candidate 双算。
+- Python/IR/autograd 边界不传 dense A；
+- region forward 只产出最终 `[batch,spec]` lower；
+- dense A 只能在 kernel 内或最多两个 plan-owned ping-pong scratch 中短暂存在；
+- backward 默认从 compressed α/β、bounds、weights 与静态 plan 重算，不保存逐层 A；
+- `ctx.executor`、逐层 custom Function、native+candidate 双算和 implicit `to_dense()` 全部禁止；
+- 单 P-anchor、active-beta S-anchor、双 site、residual DAG、六 site逐级门禁后，才可能重开 B4-D。
 
-建议冻结的 R3 门禁：
-
-- terminal lower、sign、α/β、split/history 与 optimizer mutation exact/allclose；
-- global dense materialization count `=0`（必要 output 除外）；
-- peak allocated/reserved `<=1.0x` native baseline；
-- 单 anchor wrapper-inclusive `>=1.20x`；
-- 两 site cumulative geomean `>=1.0x`、worst `>=0.98x` 后才扩到六 site；
-- 六 site不回退后才重开 same-solver query，不允许用局部 `4.90x`替代累计证据。
+该详细设计当前只是 `PREREGISTERED-DESIGN-REVIEW-ONLY`，不开放实现或性能 claim；配套外审 Prompt
+为 `BOUNDFLOW_R3_STRUCTURED_OWNER_EXTERNAL_REVIEW_PROMPT_2026_08_24.md`。当前 executable next 仍是
+CIBC-G1 attribution，不因 R3 文档完成而改变。
 
 ### R4：JIT、调度、内存与多分支运行时
 
