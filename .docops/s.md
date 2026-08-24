@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev012250
-last_va: ev012251
+last_ch: ev012275
+last_va: ev012276
 blk: none
-next: run-r1a-six-pair-formal-and-replay
-updated: 2026-08-24T17:46:33Z
+next: implement-r3-0-contract-static-validator
+updated: 2026-08-24T17:57:00Z

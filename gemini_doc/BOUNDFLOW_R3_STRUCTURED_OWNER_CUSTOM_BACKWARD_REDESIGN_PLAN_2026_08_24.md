@@ -1,6 +1,6 @@
 ---
-status: preregistered-design-review-only
-updated: 2026-08-25T00:13:21+08:00
+status: preregistered-r3-0-open
+updated: 2026-08-25T03:20:00+08:00
 type: plan
 topic: boundflow
 slug: r3-structured-owner-custom-backward-redesign
@@ -10,6 +10,12 @@ stage: s01
 # BoundFlow R3 结构化所有权与自定义反向重设计
 
 ## 0. 结论与当前边界
+
+> **2026-08-25 reprioritization**：CIBC R1-A 已按冻结协议关闭为
+> `VALIDATED-NO-GO-R1A-ATTRIBUTION`，R1-B/R1-C/R1-D/R2不再开放。该 formal closure 满足本文
+> §14 所需的显式 reprioritization 记录，因此现在只开放 R3-0 合同和静态验证器；R3-1及其后续、
+> production接入和timing仍关闭。见
+> `BOUNDFLOW_CIBC_R1_A_FORMAL_NO_GO_CLOSURE_2026_08_25.md`。
 
 可以重新设计，但这不是修补或复活 B4-C2。新路线暂命名为
 **R3-SO-CVJP（Structured Owner + Custom VJP）**，核心是：
@@ -565,11 +571,9 @@ PyTorch 官方文档要求 backward 所需 Tensor 通过 `save_for_backward` 保
 
 - 设计评审不改 production code，所以 rollback 是删除/修订本预注册文档；
 - R3 实现必须新开独立分支和 DocOps exchange；
-- 当前工程 next 是 R0 审计卫生 + R1 协议/目标冻结，随后才是 CIBC-G1 attribution；
-- R3 外部设计评审可与上述只读/文档工作并行，但 R3-0 实现继续关闭，直到 R2 关闭或留下显式
-  reprioritization 记录；
-- 当前文档 next 是把配套 Prompt 发给至少两个独立模型，汇总 blocker/major 后再决定是否修订并冻结
-  R3-0 合同。
+- R1-A formal NO-GO closure 已留下显式 reprioritization 记录，R3-0 现已开放；
+- R3-0 只实现合同、静态验证器、negative tests 与 formal replay，不接 production、不计时；
+- R3-1 只有在 R3-0 formal artifact 通过后才开放，不能以 design review 或单元测试提前接入。
 
 ## Links
 

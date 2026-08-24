@@ -1,6 +1,15 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
-> **2026-08-25 R0关闭/R1预注册指令**：R0静态与文档卫生已关闭，无性能重跑或claim升级。R1已冻结
+> **2026-08-25 R1-A正式关闭与R3-0开放指令**：clean source=`fe80c75`的6-pair Nsight formal
+> 已完成；owner归属结构完整，但profile perturbation=`1.1838—1.1859x`导致`0/6`通过冻结
+> `[0.95,1.05]`，clock receipt仅`3/6`。最终=`VALIDATED-NO-GO-R1A-ATTRIBUTION`；不得放宽门槛、
+> 选择性保留pair或从不合格profile形成share。R1-B/R1-C/R1-D/条件R2与三方formal关闭。
+> 下一唯一工程动作转为R3-0合同/静态验证器：IR/Template/Instance、closure/liveness、receipt、
+> negative tests；不接production、不计时，R3-1仍关闭。见
+> `BOUNDFLOW_CIBC_R1_A_FORMAL_NO_GO_CLOSURE_2026_08_25.md`与
+> `BOUNDFLOW_R3_STRUCTURED_OWNER_CUSTOM_BACKWARD_REDESIGN_PLAN_2026_08_24.md`。
+
+> **2026-08-25 R0关闭/R1预注册指令（历史，已由上方R1-A NO-GO取代）**：R0静态与文档卫生已关闭，无性能重跑或claim升级。R1已冻结
 > candidate graph→same-solver eligible share→exact query-local replay→feasibility closure四级DAG；
 > 独立IBP graph的`G=2.45631`只作历史敏感性，禁止代填真实query的`G_query,k`。下一唯一动作是实现
 > R1-0 clock/topology/schema及negative tests；clean source前不得运行formal profiler，R1-D前不得写

@@ -1,6 +1,13 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
-R0审计卫生已于2026-08-25关闭；R1 scope/clock/query-local attribution已预注册但未运行。当前唯一
+CIBC R1-A 已于2026-08-25按冻结协议正式关闭为
+`VALIDATED-NO-GO-R1A-ATTRIBUTION`：六组Nsight profile均完整重建42 graph nodes/4400 owner events，
+但profile perturbation=`1.1838—1.1859x`、`0/6`通过`[0.95,1.05]`，clock receipt仅`3/6`。
+因此R1-B/R1-C/R1-D/R2关闭，不形成op/query share或性能claim。当前下一动作只开放R3-0合同和
+静态验证器，不接production、不计时。正式结果、artifact、replay/tamper与claim边界见
+`BOUNDFLOW_CIBC_R1_A_FORMAL_NO_GO_CLOSURE_2026_08_25.md`。
+
+R0审计卫生已于2026-08-25关闭；以下R1预注册状态为历史，已由上方正式NO-GO取代。此前唯一
 动作是实现R1-0时钟校准、topology/schema与negative tests，再在clean source上做runner smoke。
 R1强制按same-solver op type记录`q_B3,k`，并从exact production signature重测`G_query,k`；独立
 ResNet2B IBP graph的`2.45631x`不得代填。主计划与修改记录见

@@ -1,6 +1,15 @@
 # BoundFlow ASPLOS Claims Map
 
-> **2026-08-25 R0/R1状态（不升级claim）**：R0只关闭3条新增mypy、1条限定C0415、CIBC计时/
+> **2026-08-25 CIBC R1-A正式NO-GO**：source=`fe80c75`完成6组
+> `CP/PC/CP/PC/CP/PC` clean-source Nsight formal。owner reconstruction每组均为42 graph nodes、
+> 4400 events、unowned/temporal=`0/0`，但profile perturbation六组均为`1.1838—1.1859x`，
+> `0/6`满足冻结`[0.95,1.05]`；CUPTI clock仅`3/6` admitted，故最终=
+> `VALIDATED-NO-GO-R1A-ATTRIBUTION`，`performance_claimed=false`。不得形成op/query share；
+> R1-B/R1-C/R1-D/R2关闭。CIBC既有`2.45631x` graph reduced claim不撤销但不得外推。下一只开放
+> R3-0合同/静态验证器，不接production、不计时。见
+> `BOUNDFLOW_CIBC_R1_A_FORMAL_NO_GO_CLOSURE_2026_08_25.md`。
+
+> **2026-08-25 R0/R1状态（历史，已由上方R1-A NO-GO取代）**：R0只关闭3条新增mypy、1条限定C0415、CIBC计时/
 > tolerance披露和历史证据入口；CIBC既有reduced claim与所有NO-GO不变。R1当前仅为
 > `PREREGISTERED-NOT-RUN-CIBC-R1-SCOPE-CLOCK-QUERY-LOCAL-ATTRIBUTION`：尚无runner、artifact、
 > query-local `G`、same-solver share或新性能证据。独立graph `2.45631x`不得传播为query claim。

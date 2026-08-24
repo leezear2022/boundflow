@@ -1,6 +1,13 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
-> **2026-08-25 R0完成/R1冻结状态**：R0代码与文档卫生已完成；R1 scope/clock/query-local协议已
+> **2026-08-25 当前状态：R1-A正式NO-GO，转R3-0**：6组clean-source Nsight formal已完成。
+> 每组均重建42 graph nodes/4400 owner events且unowned/temporal=`0/0`，但六组profile扰动=
+> `1.1838—1.1859x`、`0/6`满足冻结`[0.95,1.05]`；clock仅`3/6`通过。因此不得形成op-type或
+> same-solver share，R1-B/R1-C/R1-D/R2关闭。当前唯一工程动作是R3-0合同和静态验证器；不接
+> production、不计时，R3-1 mandatory custom backward仍关闭。见
+> `BOUNDFLOW_CIBC_R1_A_FORMAL_NO_GO_CLOSURE_2026_08_25.md`。
+
+> **2026-08-25 R0完成/R1冻结状态（历史，已由上方R1-A NO-GO取代）**：R0代码与文档卫生已完成；R1 scope/clock/query-local协议已
 > 预注册但未实现/运行。当前唯一工程动作是实现R1-0 calibration/topology/schema与negative tests，
 > 然后在clean source上先做runner smoke。独立CIBC graph `2.45631x`不得用作真实query的
 > `G_query,k`；same-solver必须按op type记录`q_B3,k`并用exact production signature现场重测

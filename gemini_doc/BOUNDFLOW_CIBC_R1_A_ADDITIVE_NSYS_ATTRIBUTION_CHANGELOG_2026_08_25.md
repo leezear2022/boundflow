@@ -1,6 +1,6 @@
 ---
-status: implemented-pending-formal-run
-updated: 2026-08-25T01:42:00+08:00
+status: validated-no-go-r1a-attribution
+updated: 2026-08-25T03:20:00+08:00
 type: changelog
 topic: boundflow
 slug: cibc-r1-a-additive-nsys-attribution
@@ -13,8 +13,8 @@ stage: s01
 
 - 在不改变默认 CIBC 执行行为的前提下，实现 opt-in source-op marker、fresh control/profile worker、
   CUPTI/NVTX clock anchor、Nsight SQLite graph-node owner 重放、artifact replay 与全重签篡改探针。
-- `performance_claimed=false`；正式 6-pair 结果尚未生成，本提交只开放在 clean commit 上执行 R1-A
-  formal，不开放 R1-B/R1-C/R2。
+- `performance_claimed=false`；clean source 上的正式 6-pair 已完成，结果为
+  `VALIDATED-NO-GO-R1A-ATTRIBUTION`。R1-B/R1-C/R1-D/R2 全部保持关闭。
 
 ## Changes
 
@@ -51,6 +51,23 @@ stage: s01
   - kernel/memcpy/runtime/graph launch=`4200/200/520/100`；
   - owner events=`4400`，unowned=`0`，temporal fallback=`0`，stream=`[7]`；
   - profile median=`0.11558 ms`。该单探针不是正式 6-pair performance result。
+- 正式 source=`fe80c754fabaa13ac917ba556d156f13b02a42ae`，顺序固定为
+  `CP/PC/CP/PC/CP/PC`；六组 control median=`0.097669/0.097853/0.097690/0.097689/
+  0.097690/0.097883 ms`，profile median=`0.115830/0.115955/0.115674/0.115645/
+  0.115824/0.116074 ms`。
+- 六组 profiler perturbation=`1.185947/1.184988/1.184093/1.183806/1.185633/1.185838x`，
+  `0/6` 落入冻结的 `[0.95,1.05]`；CUPTI clock receipt 为 `3/6` admitted。因此
+  `formal_attribution_admitted=false`，不能从这些 profile wall 形成 op share。
+- 每组结构证据一致：`42` graph nodes、`138` clone mappings、`20` groups/`100` replays、
+  `4200` kernels、`200` memcpy、`520` runtime APIs、`100` graph launches、`4400` owner events；
+  unowned/temporal fallback=`0/0`，single stream=`[7]`。
+- root replay 从六份 SQLite 和 raw 重算后逐字节复现 summary；summary hash=
+  `16e46384830993bf5850dfd1ca84823795580ce31234f9e04634c6acb01ca583`。
+- 9 类 scope/source/order/clock/semantic/timing/topology/verdict 全重签篡改均被拒绝；tamper hash=
+  `112e23e0b333ca5fda18c34dca990e6602e1123964fb68337481b0d8b40fde5a`。
+- 正式 artifact=`artifacts/cibc-r1-optimized-graph-attribution/resnet2b-prop0-v1`，含原始
+  `.nsys-rep`/SQLite、owner ledgers、replay stdout 与 tamper report；manifest SHA256=
+  `62a15384676b00dc006699928380258a36cf3113595e34d84db1f4a01d9d9e13`。
 
 ## Decisions
 
@@ -60,12 +77,19 @@ stage: s01
 - flatten/view 无 CUDA graph node是合法的零 device-wall bucket；未归属设备事件仍必须为零。
 - 单 stream 强制 `exclusive_wall == critical_path == overlap_adjusted_wall`；runtime/sync bucket只接收
   group wall 减去已归属 kernel/memcpy 的剩余，不以 overlap 修饰 headline。
+- 正式结果按预注册门禁关闭为 NO-GO：不放宽 `1.05`、不挑选 3 个 clock-pass pair、不把完整但
+  不可准入的 owner ledger 用于 headline share。
+- 一次早期正式尝试在 pair 2 遇到 clock rejection 后暴露 runner 会丢弃负证据；随后只修复
+  “保存/序列化 NO-GO”流程，没有改变门槛或实验参数。可审计失败尝试保留在本机 ignored
+  `.failed` 目录，不进入正式 artifact 与 claim。
 
 ## Follow-Ups
 
-- 在本提交成为 clean source 后生成 6-pair formal artifact，并由 replay 重算 perturbation verdict。
-- 若任一 pair 超出 `[0.95,1.05]`，R1-A formal NO-GO，R1-B 与后续优化保持关闭；不得调宽门槛。
-- formal closure 后更新 claims map、execution memo/current status 与外审交接。
+- R1-B same-solver share、R1-C query-local replay、R1-D feasibility 与条件 R2 不再开放；不能以
+  “换 profiler/调宽扰动/重跑挑选”复活本协议。
+- 依据既有 reprioritization 条款，下一独立工程阶段转为 R3-0：只实现 structured-owner/custom-VJP
+  的 IR/Template/Instance、closure/liveness、receipt 和负向验证器；不接 production、不计时。
+- R3-0 必须另立修改记录和 artifact/replay 合同；R3-1 仍由 R3-0 正式关闭结果门控。
 
 ## Links
 
