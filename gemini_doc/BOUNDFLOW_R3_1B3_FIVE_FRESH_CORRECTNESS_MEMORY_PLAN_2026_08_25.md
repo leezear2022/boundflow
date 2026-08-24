@@ -83,3 +83,11 @@ tamper至少覆盖数值、memory、compiled/custom VJP、scratch/saved state、
 3. 运行10个fresh subprocess；
 4. replay + tamper + targeted/full regression；
 5. 按预注册公式关闭为GO或NO-GO，不挑样重跑。
+
+## 7. Formal run-0 环境纠正
+
+首次 clean-source formal 在 run 0 native 完成、candidate import 阶段 fail closed：subprocess 环境把
+`PYTHONPATH` 重置为仓库根，误删 Conda activation 提供的 TVM/TVM-FFI 路径，candidate 因
+`ModuleNotFoundError: tvm` 退出。原子临时目录自动清理，未产生可续跑的部分 artifact，也没有
+数值/memory 结果进入结论。修正仅把仓库根前置并保留冻结父进程 `PYTHONPATH`；必须提交新 clean
+source 后从 run 0 重跑全部10 worker。

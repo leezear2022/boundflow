@@ -162,7 +162,10 @@ def _run_worker(
 ) -> str:
     environment = dict(os.environ)
     environment["PYTHONNOUSERSITE"] = "1"
-    environment["PYTHONPATH"] = str(REPOSITORY_ROOT)
+    inherited_pythonpath = environment.get("PYTHONPATH", "")
+    environment["PYTHONPATH"] = os.pathsep.join(
+        value for value in (str(REPOSITORY_ROOT), inherited_pythonpath) if value
+    )
     completed = subprocess.run(
         (
             str(python),
