@@ -30,3 +30,6 @@ stage: s01
 
 formal clean-source检查只审计tracked文件；未跟踪的用户输入`docs/CIBC_for_DAC.pdf`不属于本轮源码，
 不得因为它存在而阻塞artifact，也不得自动加入、移动或删除。
+
+首次formal启动进一步暴露DocOps hook会在每条命令后追加`.docops/ev.jsonl`，使tracked全零变化条件
+不可达。runner现在只豁免这一条append-only事件日志；任何其它tracked路径变化仍fail closed。

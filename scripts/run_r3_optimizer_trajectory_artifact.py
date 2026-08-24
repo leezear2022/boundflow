@@ -74,6 +74,11 @@ def _git(*args: str) -> str:
     ).stdout.strip()
 
 
+def _tracked_source_is_clean() -> bool:
+    rows = _git("status", "--porcelain", "--untracked-files=no").splitlines()
+    return all(row[3:] == ".docops/ev.jsonl" for row in rows)
+
+
 def _load(path: Path) -> dict[str, object]:
     value = torch.load(path, map_location="cpu", weights_only=True)
     if not isinstance(value, dict):
@@ -354,7 +359,7 @@ def _protocol(source_revision: str, capture: Path, model: Path) -> dict[str, obj
 def generate(output: Path, capture: Path, model: Path) -> None:
     if output.exists():
         raise FileExistsError(f"R3-2A artifact output already exists: {output}")
-    if _git("status", "--porcelain", "--untracked-files=no"):
+    if not _tracked_source_is_clean():
         raise RuntimeError("R3-2A formal generation requires a clean worktree")
     revision = _git("rev-parse", "HEAD")
     temp = Path(tempfile.mkdtemp(prefix="r3-2a-artifact-", dir=output.parent))
