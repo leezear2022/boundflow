@@ -39,14 +39,17 @@ performance claim。clean-source formal artifact/replay 通过前不开放 R3-1�
 - `scripts/run_r3_structured_owner_artifact.py`
   - clean committed source、code blob、atomic generate、manifest 与 replay；
   - replay 读取 recorded commit blob，不依赖当前工作树源码内容。
+  - formal preflight 首次运行发现通用 git helper 的 `.strip()` 会破坏 porcelain leading status，令
+    `.docops/ev.jsonl` 被误解析为 `docops/ev.jsonl`；已改为保留原始 stdout 的专用 parser，并新增
+    dot-path/rename destination 测试。该失败发生在 artifact 创建和合同执行前，没有实验结果可采信。
 - `scripts/probe_r3_structured_owner_tamper.py`
   - 12 类 topology/state/ownership/liveness/claim 全重签 mutation 探针。
-- tests：新增 38 个合同/负向测试，覆盖 topology、closure、source expansion、bias ownership、scratch、
+- tests：新增 40 个合同/负向测试，覆盖 topology、closure、source expansion、bias ownership、scratch、
   dense escape、recursive context、saved ledger、instance identity 和 forbidden claims。
 
 ## Validation
 
-- R3-0 targeted：`38 passed`；
+- R3-0 targeted：`40 passed`；
 - mypy：IR/runtime clean；
 - Black：pass；Pylint：目标 `10.00/10`；
 - formal artifact 尚未运行；必须先提交 clean source，再由 artifact runner 从该 commit 生成。

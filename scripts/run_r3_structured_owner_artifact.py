@@ -64,7 +64,19 @@ def _git(*args: str) -> str:
 
 
 def _tracked_status() -> tuple[str, ...]:
-    output = _git("status", "--porcelain=v1", "--untracked-files=no")
+    result = subprocess.run(
+        ("git", "status", "--porcelain=v1", "--untracked-files=no"),
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+    return _parse_porcelain(result.stdout)
+
+
+def _parse_porcelain(output: str) -> tuple[str, ...]:
+    """Preserve the leading status column and dot-prefixed repository paths."""
+
     paths: list[str] = []
     for line in output.splitlines():
         if len(line) < 4:
