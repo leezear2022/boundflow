@@ -73,6 +73,7 @@ def test_r3d0_event_round_trip_and_union_accounting() -> None:
     ledger = _ledger("candidate", 100_000_000)
     assert ledger["kernel_union_ns"] == 50_000_000
     assert ledger["kernel_overlap_ns"] == 0
+    assert ledger["profiled_host_residual_ns"] == 50_000_000
     assert ledger["host_residual_ns"] == 50_000_000
     assert ledger["calibration_admitted"] is True
     event = _event(0, "marker", 1, 5, phase="wrapper", family="wrapper")

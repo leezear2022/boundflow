@@ -400,7 +400,10 @@ def derive_worker_ledger(
         }
         for phase, rows in sorted(phase_grouped.items())
     }
-    host_residual_ns = max(unprofiled_median_ns - kernel_union_ns, 0)
+    profiled_host_residual_ns = max(profiled_host_wall_ns - kernel_union_ns, 0)
+    host_residual_ns = round(
+        unprofiled_median_ns * (profiled_host_residual_ns / profiled_host_wall_ns)
+    )
     compiled_kernels = [
         event
         for event in kernels
@@ -420,6 +423,7 @@ def derive_worker_ledger(
         "kernel_union_ns": kernel_union_ns,
         "kernel_sum_ns": kernel_sum_ns,
         "kernel_overlap_ns": kernel_sum_ns - kernel_union_ns,
+        "profiled_host_residual_ns": profiled_host_residual_ns,
         "host_residual_ns": host_residual_ns,
         "kernel_count": len(kernels),
         "compiled_launch_marker_count": sum(
@@ -429,7 +433,7 @@ def derive_worker_ledger(
             "kernel_count": len(compiled_kernels),
             "kernel_sum_ns": compiled_kernel_sum_ns,
             "kernel_union_ns": _union_ns(compiled_kernels),
-            "wrapper_share": compiled_kernel_sum_ns / unprofiled_median_ns,
+            "profiled_wrapper_share": compiled_kernel_sum_ns / profiled_host_wall_ns,
             "persistent_dense_a": False if mode == "candidate" else None,
             "scratch_buffer_count": 2 if mode == "candidate" else None,
             "semantic_closure_source": (
@@ -500,7 +504,7 @@ def derive_pair_route(
     compiled = candidate_ledger.get("compiled_region")
     if not isinstance(compiled, Mapping):
         raise TypeError("R3-D0 compiled region differs")
-    compiled_share = float(compiled["kernel_sum_ns"]) / candidate_ns
+    compiled_share = float(compiled["profiled_wrapper_share"])
     compiled_denominator = target_ns / candidate_ns - (1.0 - compiled_share)
     compiled_required = (
         None if compiled_denominator <= 0.0 else compiled_share / compiled_denominator
