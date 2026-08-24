@@ -9,6 +9,12 @@ stage: s01
 
 # BoundFlow R3-0 Structured Owner Formal Closure
 
+> **历史证据警告（2026-08-25）**：本文件对应 v1 通用合同 fixture。后续复核发现其 alpha
+> binding 是 dense native shape，因此本文件中的 `r3_1_open=true` 不再具有 admission 权威性。
+> compressed-alpha v2 已修正并正式通过，当前权威 closure 为
+> `BOUNDFLOW_R3_0_COMPRESSED_ALPHA_V2_FORMAL_CLOSURE_2026_08_25.md`。v1 的 validator、closure、
+> liveness 与 tamper 证据继续保留，但不得用来证明 production-shaped R3-1 输入合同。
+
 ## 1. Verdict
 
 R3-0 contract/static-validator 阶段正式关闭为 `VALIDATED-R3-0-CONTRACT`。

@@ -1,6 +1,6 @@
 ---
-status: implemented-pending-v2-formal
-updated: 2026-08-25T05:05:00+08:00
+status: validated-r3-0-compressed-alpha-v2
+updated: 2026-08-25T05:35:00+08:00
 type: changelog
 topic: boundflow
 slug: r3-0-compressed-alpha-fix
@@ -34,5 +34,9 @@ custom backward。
 
 ## Next
 
-提交修正源码，从 clean commit 生成 `r3-0-contract-v2`，重跑 replay 与 12 类全重签 tamper，然后
-再决定是否恢复 R3-1 admission。
+该修正已由 clean source commit `8941e66` 生成 `r3-0-contract-v2`。replay stdout 与 summary
+逐字节一致，12/12 全重签 tamper 均被 semantic replay 拒绝；alpha binding exact=
+`[2,1,6,86]`，saved logical/unique=`207888/109584 B`。R3-1 admission 因此恢复，但只开放
+`25/Conv_8` 单 evaluation mandatory custom-backward correctness，不计时。
+
+正式证据见 `BOUNDFLOW_R3_0_COMPRESSED_ALPHA_V2_FORMAL_CLOSURE_2026_08_25.md`。

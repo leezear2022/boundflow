@@ -1,6 +1,6 @@
 ---
-status: validated-r3-0-r3-1-open
-updated: 2026-08-25T04:25:00+08:00
+status: validated-r3-0-compressed-alpha-v2-r3-1-open
+updated: 2026-08-25T05:35:00+08:00
 type: plan
 topic: boundflow
 slug: r3-structured-owner-custom-backward-redesign
@@ -10,6 +10,12 @@ stage: s01
 # BoundFlow R3 结构化所有权与自定义反向重设计
 
 ## 0. 结论与当前边界
+
+> **2026-08-25 R3-0 compressed-alpha v2 closure**：v1 fixture 的 dense-alpha admission 已撤销；
+> clean source=`8941e66`的v2以P-anchor production compressed alpha `[2,1,6,86]`重建，replay
+> 逐字节一致且12/12 tamper拒绝。现在重新只开放R3-1 mandatory custom-backward correctness；
+> R3-2A/timing/performance仍关闭。见
+> `BOUNDFLOW_R3_0_COMPRESSED_ALPHA_V2_FORMAL_CLOSURE_2026_08_25.md`。
 
 > **2026-08-25 reprioritization**：CIBC R1-A 已按冻结协议关闭为
 > `VALIDATED-NO-GO-R1A-ATTRIBUTION`，R1-B/R1-C/R1-D/R2不再开放。该 formal closure 满足本文

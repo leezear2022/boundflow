@@ -1,9 +1,17 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-25 R3-0 compressed-alpha v2正式关闭**：clean source=`8941e66`的v2 artifact绑定
+> P-anchor production compressed alpha=`[2,1,6,86]`，saved logical/unique=
+> `207888/109584 B`，saved coefficient/dense escape/context=`0/0/0`；replay逐字节一致，12/12
+> 全重签tamper拒绝。v1只保留通用机制历史证据。当前只恢复R3-1单evaluation mandatory custom
+> backward correctness；production/timing/performance仍false。见
+> `BOUNDFLOW_R3_0_COMPRESSED_ALPHA_V2_FORMAL_CLOSURE_2026_08_25.md`。
+
 > **2026-08-25 R3-0 compressed-alpha纠正（R3-1暂时重关）**：v1合同机制仍成立，但formal fixture
 > 的alpha binding是dense native shape，不足以代表P-anchor production compressed `[2,1,6,86]`。
 > 已修正binding与saved-state bytes，当前待clean-source v2 replay/tamper；通过前R3-1重新关闭，
-> 无claim升级。见`BOUNDFLOW_R3_0_COMPRESSED_ALPHA_FIX_CHANGELOG_2026_08_25.md`。
+> 无claim升级。该待v2状态已由上方v2正式关闭取代。见
+> `BOUNDFLOW_R3_0_COMPRESSED_ALPHA_FIX_CHANGELOG_2026_08_25.md`。
 
 > **2026-08-25 R3-0正式关闭**：source=`e9b11e3`的contract artifact/replay通过，8 nodes/8 edges、
 > 2 scratch、saved logical/unique=`304128/205824 B`，saved coefficient/dense escape/context=

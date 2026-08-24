@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev012357
-last_va: ev012358
+last_ch: ev012373
+last_va: ev012374
 blk: none
-next: run-r3-0-compressed-alpha-v2-formal
-updated: 2026-08-24T18:33:00Z
+next: implement-r3-1-full-region-custom-backward
+updated: 2026-08-24T21:35:00Z

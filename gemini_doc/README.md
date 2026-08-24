@@ -1,8 +1,14 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+R3-0 compressed-alpha v2已正式关闭：source=`8941e66`，P-anchor alpha binding exact=
+`[2,1,6,86]`，saved logical/unique=`207888/109584 B`；replay逐字节一致、12/12全重签tamper拒绝。
+v1只保留通用合同机制历史证据。当前只开放R3-1一个evaluation mandatory custom backward
+correctness，不计时。见`BOUNDFLOW_R3_0_COMPRESSED_ALPHA_V2_FORMAL_CLOSURE_2026_08_25.md`。
+
 R3-0 v1复核发现formal fixture的alpha binding是dense native而非P-anchor production compressed
 `[2,1,6,86]`。验证器机制保留，但R3-1 admission暂时撤回；修正已实现，下一步生成v2
-artifact/replay/tamper。见`BOUNDFLOW_R3_0_COMPRESSED_ALPHA_FIX_CHANGELOG_2026_08_25.md`。
+artifact/replay/tamper。该待v2状态已由上方正式closure取代。见
+`BOUNDFLOW_R3_0_COMPRESSED_ALPHA_FIX_CHANGELOG_2026_08_25.md`。
 
 R3-0 已正式关闭为`VALIDATED-R3-0-CONTRACT`：clean-source artifact/replay通过，8 nodes/8 edges、
 2 scratch、saved coefficient/dense escape/context=`0/0/0`，12/12 fully re-signed tamper拒绝。
