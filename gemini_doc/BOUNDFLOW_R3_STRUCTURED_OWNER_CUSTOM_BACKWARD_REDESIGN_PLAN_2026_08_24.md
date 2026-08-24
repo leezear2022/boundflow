@@ -11,6 +11,12 @@ stage: s01
 
 ## 0. 结论与当前边界
 
+> **2026-08-25 R3-2A closure / R3-2B preregistration**：P-anchor 5对fresh的10/9 optimizer
+> trajectory correctness、ownership、memory与12/12 tamper已通过，只开放R3-2B。R3-2B冻结为
+> host-wall wrapper-inclusive 3 warmup/30 samples×5 fresh pair；GO仍为geomean>=`1.20x`、worst>=
+> `0.98x`、memory<=`1.0x`。见 `BOUNDFLOW_R3_2A_OPTIMIZER_TRAJECTORY_FORMAL_CLOSURE_2026_08_25.md`
+> 与 `BOUNDFLOW_R3_2B_WRAPPER_INCLUSIVE_TIMING_PLAN_2026_08_25.md`。
+
 > **2026-08-25 R3-1b3 closure / R3-2A preregistration**：compiled P-α custom VJP 的5对fresh
 > correctness与memory门禁已关闭为 `VALIDATED-R3-1B3-COMPILED-FIVE-FRESH`，只开放R3-2A。
 > R3-2A现已冻结P-anchor 10 evaluation/9 Adam mutation、逐步动态rebind、five-fresh、memory与
