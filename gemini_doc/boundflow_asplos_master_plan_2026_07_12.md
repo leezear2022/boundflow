@@ -1,5 +1,11 @@
 # BoundFlow 面向 ASPLOS 的总体研发与论文执行计划 v1.0
 
+> **2026-08-25 R0/R1覆盖说明**：R0已完成；R1 scope/clock/query-local attribution已冻结为独立
+> pre-registration，尚无runner/artifact。下一动作仅实现R1-0 schema/calibration/topology tests。
+> same-solver传播必须按op type实测`q_B3,k`与exact production `G_query,k`，独立IBP
+> `2.45631x`不能作为query常数。R1-D route closure前R2与R3-0保持关闭。权威计划为
+> `gemini_doc/BOUNDFLOW_CIBC_R1_SCOPE_CLOCK_QUERY_LOCAL_ATTRIBUTION_PLAN_2026_08_25.md`。
+
 > **2026-08-25 当前恢复路线覆盖说明**：本历史总计划中的性能执行顺序，现由
 > `gemini_doc/BOUNDFLOW_FAILED_GATES_DIAGNOSIS_AND_RECOVERY_PLAN_2026_08_24.md`覆盖。当前先做R0
 > hygiene与R1 scope/clock协议冻结，再做CIBC-G1、same-solver eligible-IBP share/workload admission、

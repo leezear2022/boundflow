@@ -1,6 +1,6 @@
 ---
 status: validated-reduced-cibc-ibp-conv-horizontal
-updated: 2026-08-24T15:25:00+08:00
+updated: 2026-08-25T00:50:00+08:00
 type: changelog
 topic: boundflow
 slug: cibc-ibp-horizontal-formal-closure
@@ -67,6 +67,20 @@ alpha-CROWN/BaB/query speedup、显存收益或ASPLOS-ready结论。
 | 3 | CB | 0.176809 | 0.071858 | 2.46054x |
 | 4 | BC | 0.176808 | 0.072015 | 2.45517x |
 | 5 | CB | 0.176560 | 0.071895 | 2.45580x |
+
+## Measurement and Tolerance Disclosure
+
+- operator 与 whole-model headline 都是 **steady-state warm execution**：TIR compile、schedule
+  selection/autotune、Plan construction、CUDA Graph capture 和 warmup 不在 timed interval；
+- whole-model 两侧 timed interval 都包含 lower/upper input copy 与 CUDA Graph replay，因此
+  `2.45631x` 不是省略 candidate input 搬运得到的数字；
+- cold compile、plan construction、graph capture 和 break-even 尚未由本 artifact 测量，不能从本
+  closure 推导 JIT/cold-start claim；这些字段已转入 R1 预注册；
+- `semantic_atol=semantic_rtol=3e-4` 已在 source=`a52b177` 的 protocol、正式 worker 运行前冻结，
+  不是看到结果后的放宽；
+- 实测最大差 `0.000244140625 = 2^-12`。外部审计核对该差值对应受影响数值指数档的一次 binary32
+  spacing，并确认 sign exact；因此本轮 `3e-4` 是覆盖已观察单-ULP量级的预注册容差，不是提高
+  算法误差预算。该解释不允许后续阶段自动沿用同一容差，新的 scope 仍须独立预注册。
 
 ## Semantics and Integrity
 

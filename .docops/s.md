@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev011983
-last_va: ev011984
+last_ch: ev012039
+last_va: ev012040
 blk: none
-next: implement-r0-and-preregister-r1-scope-clock-attribution
-updated: 2026-08-24T16:19:52Z
+next: implement-r1-clock-topology-schema-tests
+updated: 2026-08-25T00:49:52+08:00

@@ -63,17 +63,22 @@ class IntervalDomain(AbstractDomain):
         op = attrs.get("op")
 
         if op == "conv2d" or (op is None and x_l.dim() == 4 and w.dim() == 4):
-            stride = _as_int_tuple(attrs.get("stride", 1), dim=2)
-            padding = _as_int_tuple(attrs.get("padding", 0), dim=2)
-            dilation = _as_int_tuple(attrs.get("dilation", 1), dim=2)
+            stride = _as_int_pair(attrs.get("stride", 1))
+            padding = _as_int_pair(attrs.get("padding", 0))
+            dilation = _as_int_pair(attrs.get("dilation", 1))
             groups = int(attrs.get("groups", 1))
 
             if x_l.device.type == "cuda" and not (
                 x_l.requires_grad or x_u.requires_grad or w.requires_grad
             ):
+                # Keep this import lazy: boundflow.runtime.__init__ imports the
+                # interval executor, so moving it to module scope creates a cycle.
+                # pylint: disable=import-outside-toplevel
                 from ..runtime.cibc_ibp_conv import (
                     execute_active_cibc_ibp_conv_v1,
                 )
+
+                # pylint: enable=import-outside-toplevel
 
                 fused = execute_active_cibc_ibp_conv_v1(
                     x_l,
@@ -183,12 +188,12 @@ class IntervalDomain(AbstractDomain):
 IntTupleLike = Union[int, Sequence[int]]
 
 
-def _as_int_tuple(value: IntTupleLike, *, dim: int) -> Tuple[int, ...]:
+def _as_int_pair(value: IntTupleLike) -> Tuple[int, int]:
     if isinstance(value, int):
-        return (value,) * dim
+        return value, value
     if isinstance(value, (list, tuple)):
-        if len(value) == dim:
-            return tuple(int(v) for v in value)
+        if len(value) == 2:
+            return int(value[0]), int(value[1])
         if len(value) == 1:
-            return (int(value[0]),) * dim
-    raise ValueError(f"invalid int tuple: {value} (expected dim={dim})")
+            return int(value[0]), int(value[0])
+    raise ValueError(f"invalid int pair: {value}")

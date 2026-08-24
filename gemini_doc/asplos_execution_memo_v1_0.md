@@ -1,5 +1,13 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-25 R0关闭/R1预注册指令**：R0静态与文档卫生已关闭，无性能重跑或claim升级。R1已冻结
+> candidate graph→same-solver eligible share→exact query-local replay→feasibility closure四级DAG；
+> 独立IBP graph的`G=2.45631`只作历史敏感性，禁止代填真实query的`G_query,k`。下一唯一动作是实现
+> R1-0 clock/topology/schema及negative tests；clean source前不得运行formal profiler，R1-D前不得写
+> Linear/Conv/epilogue优化。见
+> `BOUNDFLOW_CIBC_R1_SCOPE_CLOCK_QUERY_LOCAL_ATTRIBUTION_PLAN_2026_08_25.md`与
+> `BOUNDFLOW_R0_HYGIENE_R1_PREREGISTRATION_CHANGELOG_2026_08_25.md`。
+
 > **2026-08-25 恢复计划目标范围与R3阶段修正指令**：当前工程顺序修订为R0审计卫生→R1协议/
 > 目标冻结→CIBC-G1只读归因→same-solver eligible-IBP query-share与benchmark admission→仅实现数学
 > 可达的R2→B0/B3/cumulative candidate三方formal。冻结目标为B0-relative complete-query

@@ -1,6 +1,6 @@
 ---
 status: b4-closed-cibc-conv-validated-reduced
-updated: 2026-08-24T15:25:00+08:00
+updated: 2026-08-25T00:50:00+08:00
 type: report
 topic: boundflow
 slug: b4-original-plan-and-cibc-final-status
@@ -8,6 +8,11 @@ stage: s01
 ---
 
 # B4 Original Plan and CIBC Final Status
+
+> **2026-08-25 口径澄清**：本报告 frontmatter 中的 `cibc-conv-validated-reduced` 只描述后续 CIBC
+> 单模型 IBP claim，不描述 B4-A。B4-A 的最终且唯一性能分类是
+> `EXTERNALLY-APPROVED-VALIDATED-NO-GO-B4-A-PERFORMANCE`；仅 mechanism/correctness 证据保留，
+> `1.018995x` 不得写成 reduced performance candidate 或计入累计 baseline。
 
 ## 起点与原计划
 

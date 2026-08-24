@@ -1,6 +1,6 @@
 ---
 status: internally-validated-five-fresh-correctness
-updated: 2026-08-16T23:10:00+08:00
+updated: 2026-08-25T00:50:00+08:00
 type: plan
 topic: boundflow
 slug: BOUNDFLOW_FSG4_B4A_TERMINAL_LOWER_ADJOINT_HANDOFF
@@ -8,6 +8,10 @@ stage: s01
 ---
 
 # FSG4/B4-A terminal lower/lA typed handoff 计划
+
+> **2026-08-25 历史措辞澄清**：本文后文“mechanism/reduced evidence”只表示correctness/mechanism
+> 证据可保留，不是reduced performance分类。B4-A最终唯一性能状态为
+> `EXTERNALLY-APPROVED-VALIDATED-NO-GO-B4-A-PERFORMANCE`，其`1.018995x`不得进入累计baseline。
 
 ## 0. 判定与边界
 

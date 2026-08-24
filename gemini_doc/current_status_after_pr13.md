@@ -1,6 +1,13 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
-> **2026-08-25 当前执行状态修订**：下一工程动作不是直接改TIR，也不是启动R3实现；先完成R0的
+> **2026-08-25 R0完成/R1冻结状态**：R0代码与文档卫生已完成；R1 scope/clock/query-local协议已
+> 预注册但未实现/运行。当前唯一工程动作是实现R1-0 calibration/topology/schema与negative tests，
+> 然后在clean source上先做runner smoke。独立CIBC graph `2.45631x`不得用作真实query的
+> `G_query,k`；same-solver必须按op type记录`q_B3,k`并用exact production signature现场重测
+> `G_query,k`。R1-D关闭前R2/R3-0继续关闭。见
+> `BOUNDFLOW_CIBC_R1_SCOPE_CLOCK_QUERY_LOCAL_ATTRIBUTION_PLAN_2026_08_25.md`。
+
+> **2026-08-25 当前执行状态修订（该冻结动作已完成，由上方R0完成状态取代）**：下一工程动作不是直接改TIR，也不是启动R3实现；先完成R0的
 > 3条新增mypy `arg-type`、1条新增pylint `C0415`与计时披露，再冻结R1三层目标、CUPTI↔host/NVTX
 > 校准和raw schema，随后执行CIBC-G1只读归因。归因后还必须测same-solver eligible-IBP query
 > share并冻结可solve workload/held-out family；数学可达才开放R2，之后跑B0/B3/cumulative

@@ -1,6 +1,6 @@
 ---
 status: internally-validated-no-go-pending-external-audit
-updated: 2026-08-18T11:45:00+08:00
+updated: 2026-08-25T00:50:00+08:00
 type: change
 topic: boundflow
 slug: fsg4-b4a-formal-timing-internal-closure
@@ -8,6 +8,10 @@ stage: s01
 ---
 
 # FSG4/B4-A 正式计时内部关闭
+
+> **2026-08-25 历史措辞澄清**：本文“validated mechanism/reduced evidence”不表示performance
+> reduced；外审后的最终且唯一性能分类是
+> `EXTERNALLY-APPROVED-VALIDATED-NO-GO-B4-A-PERFORMANCE`。机制/正确性可保留，性能候选不可累计。
 
 ## 1. 判定
 

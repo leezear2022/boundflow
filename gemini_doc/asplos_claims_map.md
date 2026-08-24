@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-25 R0/R1状态（不升级claim）**：R0只关闭3条新增mypy、1条限定C0415、CIBC计时/
+> tolerance披露和历史证据入口；CIBC既有reduced claim与所有NO-GO不变。R1当前仅为
+> `PREREGISTERED-NOT-RUN-CIBC-R1-SCOPE-CLOCK-QUERY-LOCAL-ATTRIBUTION`：尚无runner、artifact、
+> query-local `G`、same-solver share或新性能证据。独立graph `2.45631x`不得传播为query claim。
+> 见`BOUNDFLOW_CIBC_R1_SCOPE_CLOCK_QUERY_LOCAL_ATTRIBUTION_PLAN_2026_08_25.md`。
+
 > **2026-08-25 恢复协议修订（不升级claim）**：CIBC、B3、B4-C与R3的既有claim均不变。本次只冻结
 > scope-correct targets与证据顺序：B0-relative query qualification/research=`1.00/1.15x`、queue
 > research=`1.20x`；same-solver eligible-IBP share未知，B3-side

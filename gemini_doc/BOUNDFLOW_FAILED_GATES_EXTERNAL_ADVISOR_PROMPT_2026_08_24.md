@@ -1,5 +1,11 @@
 # BoundFlow 失败门禁与恢复路线外部评审 Prompt
 
+> **2026-08-25 评审对象更新**：R0已完成，R1现有独立预注册
+> `gemini_doc/BOUNDFLOW_CIBC_R1_SCOPE_CLOCK_QUERY_LOCAL_ATTRIBUTION_PLAN_2026_08_25.md`。请把它作为
+> 当前主要审计对象；不要继续把“缺目标T/缺时钟校准”当未处理finding。重点检查按op type的
+> `q_B3,k`、exact production `G_query,k`、独立graph `2.45631x`禁用规则和16类tamper是否足以防止
+> same-solver分母失真。
+
 请把下面整段连同仓库或相关文档交给另一个大模型。评审方应作为**怀疑型 GPU 编译器、神经网络
 验证器和实验方法学审稿人**，不要把执行方摘要当事实。
 
@@ -17,6 +23,8 @@ GitHub 入口：
 
 建议同时读取：
 
+- `gemini_doc/BOUNDFLOW_CIBC_R1_SCOPE_CLOCK_QUERY_LOCAL_ATTRIBUTION_PLAN_2026_08_25.md`
+- `gemini_doc/BOUNDFLOW_R0_HYGIENE_R1_PREREGISTRATION_CHANGELOG_2026_08_25.md`
 - `gemini_doc/external_audit_cibc_ibp_horizontal_2026_08_24.md`
 - `gemini_doc/BOUNDFLOW_FSG4_B4B2_V2_CIBC_PARITY_FUSION_PLAN_2026_08_24.md`
 - `gemini_doc/BOUNDFLOW_FSG4_B4C0_CUMULATIVE_CORE_FORMAL_CLOSURE_2026_08_24.md`
@@ -108,8 +116,10 @@ GitHub 入口：
   `1.26373x`。请用 Amdahl/critical-path 模型计算各建议路线需要的区域 speedup；
 - 哪些组合在 RTX 4060 Laptop 上物理可达，哪些在测量前就应 NO-GO？
 - 请独立推导 `q_B3_required(1.00)=0.151798`、`q_B3_required(1.15)=0.351998`；公式、scope 或舍入是否有误？
-- same-solver `q_B3` 应包含/排除哪些 adapter、receipt、copy、fallback 成本，才能避免把 graph share
-  高估？
+- same-solver `q_B3,k` 应包含/排除哪些 adapter、receipt、copy、fallback 成本，才能避免把 graph
+  share高估？exact production `G_query,k` 的wrapper边界是否公平？
+- 若真实query的op构成/shape/state与独立IBP图不同，R1把未知`G_query,k`置为1、只保留
+  `G_independent=2.45631`作历史敏感性的处理是否足够保守？
 - memory path 在 8 GB 上如何构造“自然 workload”而不是人为放大 batch？
 
 ### Q7：执行顺序与替代路线是否正确

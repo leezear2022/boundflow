@@ -1,6 +1,6 @@
 ---
 status: preregistered-not-implemented
-updated: 2026-08-16T00:30:00+08:00
+updated: 2026-08-25T00:50:00+08:00
 type: plan
 topic: boundflow
 slug: BOUNDFLOW_FSG4_B4_CUMULATIVE_CUDA_TIR_FUSION
@@ -8,6 +8,10 @@ stage: s01
 ---
 
 # FSG4/B4 cumulative CUDA/TIR 与跨阶段融合计划
+
+> **2026-08-25 历史措辞澄清**：本文后文“B4-A mechanism/reduced evidence”仅指非性能机制证据；
+> B4-A最终唯一性能状态为`EXTERNALLY-APPROVED-VALIDATED-NO-GO-B4-A-PERFORMANCE`，不得进入
+> cumulative performance baseline。
 
 ## 0. 当前判定
 

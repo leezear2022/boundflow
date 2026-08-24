@@ -1,6 +1,6 @@
 ---
 status: diagnosed-recovery-preregistration-required
-updated: 2026-08-25T00:13:21+08:00
+updated: 2026-08-25T00:50:00+08:00
 type: plan
 topic: boundflow
 slug: failed-gates-diagnosis-and-recovery
@@ -8,6 +8,13 @@ stage: s01
 ---
 
 # BoundFlow 失败门禁诊断与恢复计划
+
+> **2026-08-25 R0/R1执行更新**：R0 的3条新增mypy `arg-type`已修复，lazy runtime import的
+> pylint `C0415`已限定并记录循环依赖原因；CIBC closure已补steady-state/cold边界和预注册
+> `3e-4`/单-ULP量级解释；§12已补FSG3、NRIR49A、B4-C2 raw，B4-A唯一性能分类已澄清为
+> externally approved NO-GO。R1 scope/clock/query-local协议已冻结但未实现/运行；下一动作只允许
+> 实现clock/topology/schema及negative tests。独立IBP `G=2.45631`不得代填same-solver
+> `G_query,k`。见`BOUNDFLOW_CIBC_R1_SCOPE_CLOCK_QUERY_LOCAL_ATTRIBUTION_PLAN_2026_08_25.md`。
 
 ## 0. 一句话结论
 
@@ -224,7 +231,7 @@ operator 处于 eager launch-bound、整图 baseline 已被 CUDA Graph 压缩的
 
 ## 7. 恢复路线
 
-### R0：审计卫生闭环（先做，文档/类型级，不改性能语义）
+### R0：审计卫生闭环（2026-08-25 已完成，不改性能语义）
 
 目标：让已经批准的 CIBC claim 没有模糊口径。
 
@@ -236,11 +243,18 @@ operator 处于 eager launch-bound、整图 baseline 已被 CUDA Graph 压缩的
 - 下一阶段额外记录 cold compile、plan construction 和 break-even，不把它们混进 steady-state；
 - `.docops/ev.jsonl` 三个历史重复 id 作为独立 DocOps 维护任务，不与性能代码混交。
 
-R0 不重跑正式性能，不改变任何阈值，不升级 claim。
+R0 已由 `BOUNDFLOW_R0_HYGIENE_R1_PREREGISTRATION_CHANGELOG_2026_08_25.md` 关闭：不重跑正式
+性能、不改变任何阈值、不升级 claim。三个历史 DocOps duplicate id 仍作为独立维护项，不影响
+`dol lint --soft`，也未与本轮性能/代码修复混交。
 
-### R1：CIBC-G1 optimized-graph attribution（R0/协议冻结后唯一开放的研究动作）
+### R1：CIBC-G1 optimized-graph attribution（协议已冻结，runner/artifact 尚未实现）
 
 目标：回答当前 candidate 的剩余 0.071–0.072 ms 究竟花在哪里。
+
+以下摘要受独立预注册
+`BOUNDFLOW_CIBC_R1_SCOPE_CLOCK_QUERY_LOCAL_ATTRIBUTION_PLAN_2026_08_25.md`约束。该计划把 R1
+拆为 candidate graph attribution、same-solver eligible admission、exact query-local replay 和机械
+route closure；本节未写出的 raw/schema/tamper 条款以独立预注册为准。
 
 #### R1.1 必须分出的桶
 
@@ -314,8 +328,9 @@ q_B3_required(1.15) = 0.351998   # 达到 query 研究门槛至少 35.20%
 ```
 
 这两个数只是用现有 graph speedup 计算的乐观 feasibility bound，不是 query speedup claim；在
-`q_B3`、adapter/wrapper 成本、region identity 和 eligible coverage 未由 raw 冻结前，不得据此宣称
-B0 parity 可达。
+`q_B3,k`、op-type构成、adapter/wrapper成本、region identity、eligible coverage与exact production
+signature的`G_query,k`未由raw冻结前，不得据此宣称B0 parity可达。真实传播必须使用
+`delta_k=q_B3,k*(1-1/G_query,k)`或event-DAG critical-path counterfactual；测不到的`G_query,k`按1处理。
 
 #### R1.4 same-solver 与 benchmark 准入（只读，不提前补前端）
 
@@ -491,13 +506,22 @@ R3-0。
 
 - CIBC 外审：`external_audit_cibc_ibp_horizontal_2026_08_24.md`；
 - CIBC formal：`../artifacts/cibc-ibp-horizontal-formal/resnet2b-prop0-v1/summary.json`；
+- FSG3 B0/B2 same-solver formal（B0/B2 query/core 来源）：
+  `../artifacts/fsg3-same-solver-timing/resnet2b-prop0-v5/summary.json`；
+- NRIR49A selected-CROWN raw/summary：
+  `../artifacts/nrir49a-g1-gpu-attribution/resnet2b-prop0-clauses2-3-rtx4060-five-repeat-v1/`；
 - B3 formal：`../artifacts/fsg4-b3-same-solver-timing/resnet2b-prop0-v1/summary.json`；
 - B4-A formal：`../artifacts/fsg4-b4a-formal-timing/resnet2b-prop0-v5/summary.json`；
 - B4-B2 v1：`../artifacts/fsg4-b4b2-b2-5-formal-microphysics/resnet2b-prop0-v1/summary.json`；
 - B4-B2 v2 TIR：`../artifacts/fsg4-b4b2-v2-cibc-tir-formal/resnet2b-prop0-v1/summary.json`；
 - B4-C0 formal：`../artifacts/fsg4-b4c0-cumulative-core/resnet2b-prop0-v1/summary.json`；
 - B4-C1 formal：`../artifacts/fsg4-b4c1-provider-owned-lower/resnet2b-prop0-v1/summary.json`；
-- B4-C2 closure：`BOUNDFLOW_FSG4_B4C2_MATERIALIZATION_FRONTIER_KILL_CHANGELOG_2026_08_24.md`；
+- B4-C2 raw：
+  `../artifacts/fsg4-b4c2-materialization-frontier-pilot/resnet2b-prop0-v1/run_00_BC.json`、
+  `run_01_CB.json`、`run_02_BC.json`；closure：
+  `BOUNDFLOW_FSG4_B4C2_MATERIALIZATION_FRONTIER_KILL_CHANGELOG_2026_08_24.md`；
+- R1 scope/clock/query-local attribution 预注册：
+  `BOUNDFLOW_CIBC_R1_SCOPE_CLOCK_QUERY_LOCAL_ATTRIBUTION_PLAN_2026_08_25.md`；
 - 外部评审 prompt：`BOUNDFLOW_FAILED_GATES_EXTERNAL_ADVISOR_PROMPT_2026_08_24.md`；
 - 本文变更记录：`BOUNDFLOW_FAILED_GATES_DIAGNOSIS_AND_RECOVERY_CHANGELOG_2026_08_24.md`。
 

@@ -1,6 +1,6 @@
 ---
 status: documented
-updated: 2026-08-24T11:30:00+08:00
+updated: 2026-08-25T00:50:00+08:00
 type: changelog
 topic: boundflow
 slug: r3-structured-owner-custom-backward-redesign
@@ -44,8 +44,9 @@ stage: s01
 
 ## Decisions
 
-- 当前 executable engineering next 仍是 `preregister-cibc-g1-optimized-graph-attribution`；R3 只是未来
-  α-CROWN 恢复路线的 design-review track。
+- 本段原始 executable next 是 `preregister-cibc-g1-optimized-graph-attribution`；该动作已于
+  2026-08-25 完成协议冻结并由 R1-0 instrumentation/schema tests 取代。R3 仍只是未来 α-CROWN
+  恢复路线的 design-review track。
 - Region forward 只返回最终 lower，不返回逐层 A；upper path 暂留 native。
 - Function context 不保存带 Tensor 的 executor/instance；所有必要 Tensor 只经 `save_for_backward`。
 - v1 允许 bounded transient dense scratch，但禁止 dense A 跨 layer/autograd lifetime。
@@ -55,8 +56,9 @@ stage: s01
 
 - 把 external-review Prompt 发给至少两个独立模型；合并 blocker/major 建议。
 - 若评审通过，另开 R3-0 contract-only 分支和 DocOps exchange；不得直接写 TIR。
-- CIBC 主线仍按恢复计划完成 R0/G1；外部评审提出的 R1 target T、clock-domain calibration 等问题
-  在对应预注册中关闭，不在本设计提交里偷跑。
+- CIBC 主线的 R0 与 R1 target/scope/clock 预注册已由
+  `BOUNDFLOW_CIBC_R1_SCOPE_CLOCK_QUERY_LOCAL_ATTRIBUTION_PLAN_2026_08_25.md`关闭；下一步只实现
+  R1-0基础，不在本R3设计里偷跑。
 
 ## Links
 

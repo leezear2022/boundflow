@@ -1,5 +1,12 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+R0审计卫生已于2026-08-25关闭；R1 scope/clock/query-local attribution已预注册但未运行。当前唯一
+动作是实现R1-0时钟校准、topology/schema与negative tests，再在clean source上做runner smoke。
+R1强制按same-solver op type记录`q_B3,k`，并从exact production signature重测`G_query,k`；独立
+ResNet2B IBP graph的`2.45631x`不得代填。主计划与修改记录见
+`BOUNDFLOW_CIBC_R1_SCOPE_CLOCK_QUERY_LOCAL_ATTRIBUTION_PLAN_2026_08_25.md`、
+`BOUNDFLOW_R0_HYGIENE_R1_PREREGISTRATION_CHANGELOG_2026_08_25.md`。
+
 当前权威执行顺序已按外部建议修正：R0审计卫生→R1协议/目标冻结→CIBC-G1只读归因→same-solver
 eligible-IBP share与benchmark admission→数学可达的R2→B0/B3/cumulative candidate三方formal。
 query qualification/research与queue research分别冻结为B0-relative `1.00/1.15/1.20x`，任何graph/
@@ -11,8 +18,8 @@ query/queue share不得跨scope代入；R1新增CUPTI↔host/NVTX时钟校准rec
 `PREREGISTERED-DESIGN-REVIEW-ONLY-R3-SO-CVJP`。它采用 closed lower region 的 first-class DAG owner
 与 region-level single custom VJP：Python/IR/autograd 边界不传 dense A，backward 默认重算，
 kernel 只允许 bounded transient scratch；旧 B4-C2、逐层 Function 与 `ctx.executor` 均禁止。
-当前没有实现或新性能 claim；executable next 是 R0 + R1 protocol/target freeze，随后才是
-CIBC-G1。主设计、修改记录和可直接转发的 GitHub
+当前没有实现或新性能 claim；R0与R1 protocol/target freeze已完成，executable next是R1-0
+instrumentation/schema tests。R3主设计、修改记录和可直接转发的 GitHub
 外审 Prompt 见 `BOUNDFLOW_R3_STRUCTURED_OWNER_CUSTOM_BACKWARD_REDESIGN_PLAN_2026_08_24.md`、
 `BOUNDFLOW_R3_STRUCTURED_OWNER_CUSTOM_BACKWARD_REDESIGN_CHANGELOG_2026_08_24.md` 与
 `BOUNDFLOW_R3_STRUCTURED_OWNER_EXTERNAL_REVIEW_PROMPT_2026_08_24.md`。父恢复计划的第一轮独立评审
@@ -23,8 +30,8 @@ CIBC-IBP水平融合已通过Round 1独立外审并由executor关闭exchange，�
 geomean/worst=`12.7951/9.1423x`，完整ResNet2B IBP graph geomean/worst=
 `2.45631/2.45091x`。外审确认baseline公平、输入copy计入、两侧CUDA Graph、float64 oracle、
 replay与13类篡改均成立；同时指出3条新mypy错误、steady-state/1 ULP披露等minor/info。
-当前唯一研究动作是先完成R0审计卫生与R1 scope/clock协议冻结，再执行CIBC-G1 candidate-only
-optimized-graph attribution；不得直接扩TIR或复活B4-C2。失败门禁总账、R0—R5恢复路线与外部评审prompt见
+当前唯一研究动作是按已冻结R1协议实现candidate-only optimized-graph attribution的
+calibration/topology/schema基础；不得直接扩TIR或复活B4-C2。失败门禁总账、R0—R5恢复路线与外部评审prompt见
 `BOUNDFLOW_FAILED_GATES_DIAGNOSIS_AND_RECOVERY_PLAN_2026_08_24.md`、
 `BOUNDFLOW_FAILED_GATES_EXTERNAL_ADVISOR_PROMPT_2026_08_24.md`与
 `external_audit_cibc_ibp_horizontal_2026_08_24.md`。
