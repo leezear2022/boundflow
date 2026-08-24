@@ -33,3 +33,7 @@ formal clean-source检查只审计tracked文件；未跟踪的用户输入`docs/
 
 首次formal启动进一步暴露DocOps hook会在每条命令后追加`.docops/ev.jsonl`，使tracked全零变化条件
 不可达。runner现在只豁免这一条append-only事件日志；任何其它tracked路径变化仍fail closed。
+
+第二次启动发现通用git helper的`.strip()`会移除porcelain首行的leading status column，导致合法
+` M .docops/ev.jsonl`被误读；clean checker现直接读取未strip的porcelain stdout并同时验证status=`M`
+和exact path。该次仍在任何worker启动前fail closed，无partial artifact。

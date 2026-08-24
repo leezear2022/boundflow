@@ -75,8 +75,17 @@ def _git(*args: str) -> str:
 
 
 def _tracked_source_is_clean() -> bool:
-    rows = _git("status", "--porcelain", "--untracked-files=no").splitlines()
-    return all(row[3:] == ".docops/ev.jsonl" for row in rows)
+    status = subprocess.run(
+        ("git", "status", "--porcelain", "--untracked-files=no"),
+        cwd=ROOT,
+        check=True,
+        text=True,
+        capture_output=True,
+    ).stdout
+    rows = status.splitlines()
+    return all(
+        row.endswith(" .docops/ev.jsonl") and row[:2].strip() == "M" for row in rows
+    )
 
 
 def _load(path: Path) -> dict[str, object]:
