@@ -48,9 +48,6 @@ EXPECTED_CANDIDATE_LOWER_HASH = (
 EXPECTED_CANDIDATE_GRADIENT_HASH = (
     "59a35857595de0ceb4beec4ce13d91505c9b50dfd4a927fbf1379729706b2813"
 )
-EXPECTED_NATIVE_GRADIENT_HASH = (
-    "6eca0131b85f0132dbd32a1dad89efb9bae8a8fe69c81f53b32b0dc36bff19a9"
-)
 EXPECTED_NATIVE_LOWER = (
     -0.3708932399749756,
     -0.422172486782074,
@@ -210,7 +207,7 @@ def _validate_worker(record: dict[str, Any]) -> None:
         gradient,
         count=1032,
         candidate_hash=EXPECTED_CANDIDATE_GRADIENT_HASH,
-        native_hash=EXPECTED_NATIVE_GRADIENT_HASH,
+        native_hash=None,
         expected_nonzero=281,
     )
     if (

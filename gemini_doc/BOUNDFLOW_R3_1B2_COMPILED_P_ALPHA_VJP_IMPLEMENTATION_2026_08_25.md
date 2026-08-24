@@ -65,3 +65,12 @@ R3-1b2，也不能证明 five-fresh memory gate。`timing_recorded=false`、
 
 下一步提交 clean source，再从该固定 revision 生成 single-worker raw-first artifact、独立 semantic
 replay与 fully re-signed tamper。该门禁通过后才决定是否进入 b3 five-fresh；不接 optimizer、不计时。
+
+## 5. Formal dry-run 纠正
+
+首次 clean-source 生成在创建空目录后、写入任何 artifact 文件前 fail closed：协议错误地冻结了
+native autograd gradient 的逐位 hash。多次 fresh process 显示 candidate TIR lower/dα hash
+稳定，但 native PyTorch CUDA autograd 在容差内存在末位非确定性；数值 max diff、sign 和 nonzero
+均稳定。修正为：candidate 继续要求逐位 float32 hash，native 要求 raw 自洽 hash 并由 replay
+独立重算 `2e-4`/sign/nonzero 门禁，不再要求跨进程逐位相同。空目录已用 `rmdir` 移除，正式
+artifact 必须从修正后的新 clean commit 重新生成。
