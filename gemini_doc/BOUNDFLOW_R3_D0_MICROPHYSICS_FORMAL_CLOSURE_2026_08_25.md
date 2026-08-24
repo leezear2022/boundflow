@@ -39,6 +39,8 @@ formal source=`423206911599de5aee7a718ddee65cf527b48e28`，artifact：
   `effective_pre23`占`3.41%–3.51%`；
 - residual6+residual11若单独承担全部目标，worst required=`15.4733x`；
 - 12/12 fully re-signed tamper拒绝；targeted=`9 passed`；`performance_claimed=false`。
+- 全量回归=`1615 passed, 3 skipped, 6 warnings`（666.58秒）；3个skip均为既有TVM重复编译或冻结
+  VNN-COMP checkout环境边界。
 
 ## 3. 失败与修正轨迹
 

@@ -16,4 +16,5 @@ stage: s01
 - 预注册D1-A factorization、D1-B有限schedule空间与D1-C wrapper门禁；
 - 权威memo、claims map、current status与README同步；不形成speedup claim，不开放R3-3。
 
-验证：artifact replay、12/12 tamper、targeted 9 passed；文档diff/lint在提交前记录。
+验证：artifact replay、12/12 tamper、targeted 9 passed；全量`1615 passed,3 skipped,6 warnings`；
+文档diff/lint在提交前记录。
