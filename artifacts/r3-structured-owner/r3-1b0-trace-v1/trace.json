@@ -1,0 +1,372 @@
+{
+  "compiled_region": false,
+  "domain_count": 6,
+  "dtype": "torch.float32",
+  "performance_claimed": false,
+  "production_plan_hash": "39d61775caac6d64a5a2d697073d0caa434d34bb2f054351f474700e9d61910f",
+  "schema_version": "boundflow.r3-1b0-bounded-arena-trace/v1",
+  "scratch_capacity_elements": 18432,
+  "scratch_slot_count": 2,
+  "source_hash": "f510204e8f82a4f2defdcdca694e1ae133eb73978f9c4a7f8b26a6cf0406743e",
+  "spec_count": 1,
+  "start_node_id": "25/Conv_8",
+  "steps": [
+    {
+      "accumulate_into_output": false,
+      "branches": [],
+      "in_place": false,
+      "input_shape": [
+        6,
+        1,
+        10
+      ],
+      "input_slot": -1,
+      "input_value": "spec",
+      "kind": "spec_seed",
+      "ordinal": 0,
+      "output_shape": [
+        6,
+        1,
+        10
+      ],
+      "output_slot": 0,
+      "output_value": "33",
+      "primal_ops": []
+    },
+    {
+      "accumulate_into_output": false,
+      "branches": [],
+      "in_place": false,
+      "input_shape": [
+        6,
+        1,
+        10
+      ],
+      "input_slot": 0,
+      "input_value": "33",
+      "kind": "linear_right",
+      "ordinal": 1,
+      "output_shape": [
+        6,
+        1,
+        100
+      ],
+      "output_slot": 1,
+      "output_value": "32",
+      "primal_ops": [
+        "Gemm_16"
+      ]
+    },
+    {
+      "accumulate_into_output": false,
+      "branches": [],
+      "in_place": true,
+      "input_shape": [
+        6,
+        1,
+        100
+      ],
+      "input_slot": 1,
+      "input_value": "32",
+      "kind": "relu_lower",
+      "ordinal": 2,
+      "output_shape": [
+        6,
+        1,
+        100
+      ],
+      "output_slot": 1,
+      "output_value": "31",
+      "primal_ops": [
+        "Relu_15"
+      ]
+    },
+    {
+      "accumulate_into_output": false,
+      "branches": [],
+      "in_place": false,
+      "input_shape": [
+        6,
+        1,
+        100
+      ],
+      "input_slot": 1,
+      "input_value": "31",
+      "kind": "linear_right",
+      "ordinal": 3,
+      "output_shape": [
+        6,
+        1,
+        1024
+      ],
+      "output_slot": 0,
+      "output_value": "30",
+      "primal_ops": [
+        "Gemm_14"
+      ]
+    },
+    {
+      "accumulate_into_output": false,
+      "branches": [],
+      "in_place": true,
+      "input_shape": [
+        6,
+        1,
+        1024
+      ],
+      "input_slot": 0,
+      "input_value": "30",
+      "kind": "reshape_view",
+      "ordinal": 4,
+      "output_shape": [
+        6,
+        1,
+        16,
+        8,
+        8
+      ],
+      "output_slot": 0,
+      "output_value": "29",
+      "primal_ops": [
+        "Flatten_13"
+      ]
+    },
+    {
+      "accumulate_into_output": false,
+      "branches": [],
+      "in_place": true,
+      "input_shape": [
+        6,
+        1,
+        16,
+        8,
+        8
+      ],
+      "input_slot": 0,
+      "input_value": "29",
+      "kind": "relu_lower",
+      "ordinal": 5,
+      "output_shape": [
+        6,
+        1,
+        16,
+        8,
+        8
+      ],
+      "output_slot": 0,
+      "output_value": "28",
+      "primal_ops": [
+        "Relu_12"
+      ]
+    },
+    {
+      "accumulate_into_output": true,
+      "branches": [
+        {
+          "identity": false,
+          "join_value": "24",
+          "primal_ops": [
+            "Conv_10",
+            "Relu_9",
+            "Conv_8"
+          ],
+          "source_value": "27"
+        },
+        {
+          "identity": true,
+          "join_value": "24",
+          "primal_ops": [],
+          "source_value": "24"
+        }
+      ],
+      "in_place": false,
+      "input_shape": [
+        6,
+        1,
+        16,
+        8,
+        8
+      ],
+      "input_slot": 0,
+      "input_value": "28",
+      "kind": "residual_region",
+      "ordinal": 6,
+      "output_shape": [
+        6,
+        1,
+        16,
+        8,
+        8
+      ],
+      "output_slot": 1,
+      "output_value": "24",
+      "primal_ops": [
+        "Add_11",
+        "Conv_10",
+        "Relu_9",
+        "Conv_8"
+      ]
+    },
+    {
+      "accumulate_into_output": false,
+      "branches": [],
+      "in_place": true,
+      "input_shape": [
+        6,
+        1,
+        16,
+        8,
+        8
+      ],
+      "input_slot": 1,
+      "input_value": "24",
+      "kind": "relu_lower",
+      "ordinal": 7,
+      "output_shape": [
+        6,
+        1,
+        16,
+        8,
+        8
+      ],
+      "output_slot": 1,
+      "output_value": "23",
+      "primal_ops": [
+        "Relu_7"
+      ]
+    },
+    {
+      "accumulate_into_output": true,
+      "branches": [
+        {
+          "identity": false,
+          "join_value": "18",
+          "primal_ops": [
+            "Conv_4",
+            "Relu_3",
+            "Conv_2"
+          ],
+          "source_value": "21"
+        },
+        {
+          "identity": false,
+          "join_value": "18",
+          "primal_ops": [
+            "Conv_5"
+          ],
+          "source_value": "22"
+        }
+      ],
+      "in_place": false,
+      "input_shape": [
+        6,
+        1,
+        16,
+        8,
+        8
+      ],
+      "input_slot": 1,
+      "input_value": "23",
+      "kind": "residual_region",
+      "ordinal": 8,
+      "output_shape": [
+        6,
+        1,
+        8,
+        16,
+        16
+      ],
+      "output_slot": 0,
+      "output_value": "18",
+      "primal_ops": [
+        "Add_6",
+        "Conv_4",
+        "Relu_3",
+        "Conv_2",
+        "Conv_5"
+      ]
+    },
+    {
+      "accumulate_into_output": false,
+      "branches": [],
+      "in_place": true,
+      "input_shape": [
+        6,
+        1,
+        8,
+        16,
+        16
+      ],
+      "input_slot": 0,
+      "input_value": "18",
+      "kind": "relu_lower",
+      "ordinal": 9,
+      "output_shape": [
+        6,
+        1,
+        8,
+        16,
+        16
+      ],
+      "output_slot": 0,
+      "output_value": "17",
+      "primal_ops": [
+        "Relu_1"
+      ]
+    },
+    {
+      "accumulate_into_output": false,
+      "branches": [],
+      "in_place": false,
+      "input_shape": [
+        6,
+        1,
+        8,
+        16,
+        16
+      ],
+      "input_slot": 0,
+      "input_value": "17",
+      "kind": "conv2d_right",
+      "ordinal": 10,
+      "output_shape": [
+        6,
+        1,
+        3,
+        32,
+        32
+      ],
+      "output_slot": 1,
+      "output_value": "input.1",
+      "primal_ops": [
+        "Conv_0"
+      ]
+    },
+    {
+      "accumulate_into_output": false,
+      "branches": [],
+      "in_place": false,
+      "input_shape": [
+        6,
+        1,
+        3,
+        32,
+        32
+      ],
+      "input_slot": 1,
+      "input_value": "input.1",
+      "kind": "input_concretize",
+      "ordinal": 11,
+      "output_shape": [
+        6,
+        1
+      ],
+      "output_slot": -1,
+      "output_value": "lower",
+      "primal_ops": []
+    }
+  ],
+  "timing_recorded": false,
+  "topology_hash": "8ebd62ca506db4a2e59b752c5db78635ac125b65100a72dafc9b24dd137cce0b",
+  "trace_hash": "a5279f8e76b722dbebd8df23a417f9de7b5d65c4dce5067035627be9137e20bc"
+}

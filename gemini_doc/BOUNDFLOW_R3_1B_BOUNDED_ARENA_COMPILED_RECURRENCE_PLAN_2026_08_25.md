@@ -1,6 +1,6 @@
 ---
-status: preregistered-r3-1b-not-implemented
-updated: 2026-08-25T07:15:00+08:00
+status: validated-r3-1b0-r3-1b1-open
+updated: 2026-08-25T08:15:00+08:00
 type: plan
 topic: boundflow
 slug: r3-1b-bounded-arena-compiled-recurrence
@@ -8,6 +8,11 @@ stage: s01
 ---
 
 # BoundFlow R3-1b Bounded-Arena Compiled Recurrence 预注册计划
+
+> **2026-08-25 R3-1b0 closure**：clean source static artifact/replay与6/6 fully re-signed tamper
+> 通过；12-step、2 residual、2 scratch、每slot 73,728 B正式冻结。当前只开放b1 compiled
+> full-lower forward；b2 custom VJP、b3 five-fresh与timing继续关闭。见
+> `BOUNDFLOW_R3_1B0_TRACE_LIVENESS_FORMAL_CLOSURE_2026_08_25.md`。
 
 ## 1. Why this branch exists
 

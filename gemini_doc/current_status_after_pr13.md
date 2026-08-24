@@ -1,5 +1,10 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-25 当前状态：R3-1b0关闭，b1开放**：exact reverse trace正式=
+> `VALIDATED-R3-1B0-TRACE-LIVENESS`；12 steps、2 residual、2 scratch，每slot 73,728 B，6/6 tamper。
+> 下一只实现compiled no-grad full-lower forward；b2/b3/timing关闭，当前仍无physical memory或性能
+> claim。见`BOUNDFLOW_R3_1B0_TRACE_LIVENESS_FORMAL_CLOSURE_2026_08_25.md`。
+
 > **2026-08-25 当前状态：R3-1 M0 Python rematerialization NO-GO**：5对fresh的lower/dα语义
 > 全过，最大差=`4.7684e-7/2.3283e-10`；但peak allocated=`1.1181179x`、compiled region=0/5，
 > 因此R3-1未admit、R3-2A关闭。下一只允许预注册R3-1b bounded-arena compiled recurrence；当前

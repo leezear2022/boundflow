@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-25 R3-1b0关闭/b1开放指令**：12-step exact recurrence、2 residual fused segment、
+> 2 scratch×73,728 B的static trace已由clean-source replay和6/6 tamper关闭。下一唯一工程动作是b1
+> compiled full-lower forward，只做no-grad lower parity、zero-copy/current-stream、真实scratch pointer与
+> warm allocation=0；不得实现custom VJP、five-fresh或计时。见
+> `BOUNDFLOW_R3_1B0_TRACE_LIVENESS_FORMAL_CLOSURE_2026_08_25.md`。
+
 > **2026-08-25 R3-1 M0 NO-GO与重新设计指令**：5对独立进程证明full-region custom backward
 > 语义成立，但Python rematerialization peak allocated=`1.1181179x`且不是compiled bounded-arena
 > region，因此正式=`VALIDATED-NO-GO-R3-1-M0-PYTHON-REMATERIALIZATION`。不得进入R3-2A、不得

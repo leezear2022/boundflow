@@ -1,5 +1,12 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-25 R3-1b0 trace/liveness正式关闭**：source=`8b0da11`的contract artifact/replay
+> 通过，真实ResNet2B full-lower reverse trace=`12 steps/2 residual regions`；融合branch schedule只用
+> 2个scratch，每slot=`18432 float32=73728 B`，6/6全重签tamper拒绝。当前=
+> `VALIDATED-R3-1B0-TRACE-LIVENESS`，只开放b1 compiled no-grad full-lower forward。它不是physical
+> pointer/allocation、correctness、memory或performance claim。见
+> `BOUNDFLOW_R3_1B0_TRACE_LIVENESS_FORMAL_CLOSURE_2026_08_25.md`。
+
 > **2026-08-25 R3-1 M0 Python rematerialization正式NO-GO**：clean source=`7bc1bde`完成5对
 > 独立native/candidate。final lower/dα最大差=`4.7684e-7/2.3283e-10`，5/5 semantic与structure
 > 通过，saved dense A=0、custom forward/backward=1/1；但candidate/native peak allocated=

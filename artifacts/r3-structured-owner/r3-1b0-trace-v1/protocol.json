@@ -1,0 +1,22 @@
+{
+  "code_revision": {
+    "boundflow/ir/r3_bounded_arena.py": "1ee39f8d06cf4387d866f1f3dd9f35e153704bc76af002fd1ef3c16bd45b5a66",
+    "boundflow/runtime/r3_bounded_arena_trace_compiler.py": "128fe7b6ee08f9d21bf43ec81e8a2420905e5a0bc0bf392dbdbb17e54b40ae59",
+    "boundflow/runtime/r3_structured_owner_custom_backward.py": "c3021a1e5661339d49afce87c8e29613920ecad700e67b3a1d9f96a549b91534",
+    "scripts/run_r3_bounded_arena_trace_artifact.py": "5e4d74990fd7847c96ed4b2190d22e14996057faed7b8fa5c681cb0cd70c66c2",
+    "tests/test_r3_bounded_arena_trace_compiler.py": "8a38b151b27bf5dfb6f9b22ceef092ae71695a04e923ee8ad9863637d957042a"
+  },
+  "compiled_region": false,
+  "expected_production_plan_hash": "39d61775caac6d64a5a2d697073d0caa434d34bb2f054351f474700e9d61910f",
+  "expected_source_hash": "f510204e8f82a4f2defdcdca694e1ae133eb73978f9c4a7f8b26a6cf0406743e",
+  "expected_topology_hash": "8ebd62ca506db4a2e59b752c5db78635ac125b65100a72dafc9b24dd137cce0b",
+  "expected_trace_hash": "a5279f8e76b722dbebd8df23a417f9de7b5d65c4dce5067035627be9137e20bc",
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "performance_claimed": false,
+  "protocol_hash": "2bbd785ea04e95005e4e5b67417c5bb261f8cd94789940e6f207680f0d065c48",
+  "run_kind": "contract-only",
+  "schema_version": "boundflow.r3-1b0-trace-protocol/v1",
+  "source_capture_sha256": "f42229dd06be8521865d14af4cc51450ec8bec4e792934b457c276aad50126dc",
+  "source_git_head": "8b0da116d81b30fcba98eb5793945bd7d0ad7967",
+  "timing_recorded": false
+}

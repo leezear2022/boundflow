@@ -1,6 +1,6 @@
 ---
-status: implemented-r3-1b0-pending-clean-source-formal
-updated: 2026-08-25T07:45:00+08:00
+status: validated-r3-1b0-trace-liveness
+updated: 2026-08-25T08:15:00+08:00
 type: changelog
 topic: boundflow
 slug: r3-1b0-exact-trace-liveness
@@ -34,6 +34,7 @@ stage: s01
 ## 3. Validation
 
 - targeted=`3 passed`；
+- R3 related=`50 passed`；全量=`1580 passed, 3 skipped`；
 - slot、branch join、shape/topology与primal graph/order篡改均 fail closed；
 - mypy clean；pylint=`10.00/10`；`git diff --check`通过。
 
@@ -45,5 +46,6 @@ stage: s01
 
 ## 5. Next
 
-从clean source生成trace artifact/replay与negative tamper；formal通过后才开放R3-1b1 compiled
-full-lower forward。
+clean source trace artifact/replay与6/6全重签tamper已通过，当前正式=
+`VALIDATED-R3-1B0-TRACE-LIVENESS`。只开放R3-1b1 compiled full-lower forward；custom VJP、five-fresh
+和timing仍关闭。见`BOUNDFLOW_R3_1B0_TRACE_LIVENESS_FORMAL_CLOSURE_2026_08_25.md`。

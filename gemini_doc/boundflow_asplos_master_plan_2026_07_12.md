@@ -1,5 +1,10 @@
 # BoundFlow 面向 ASPLOS 的总体研发与论文执行计划 v1.0
 
+> **2026-08-25 R3-1b0最新覆盖**：exact trace/liveness已正式关闭为
+> `VALIDATED-R3-1B0-TRACE-LIVENESS`；当前只开放b1 compiled no-grad full-lower forward。b2 custom
+> VJP、b3 five-fresh、optimizer/timing均关闭。见
+> `gemini_doc/BOUNDFLOW_R3_1B0_TRACE_LIVENESS_FORMAL_CLOSURE_2026_08_25.md`。
+
 > **2026-08-25 R3路线最新覆盖**：R1-A已NO-GO，R3-0 compressed-alpha v2已关闭；R3-1 M0
 > Python rematerialization语义通过但因peak allocated=`1.1181179x`和compiled-region=0/5正式
 > NO-GO。R3-2A关闭。当前只开放R3-1b0 exact trace/liveness compiler，不写TIR、不计时。权威文档为
