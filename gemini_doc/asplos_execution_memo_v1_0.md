@@ -1,6 +1,12 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
-> **2026-08-25 R3-0实现指令**：contract source已实现但尚未formal关闭。当前唯一动作是在clean commit
+> **2026-08-25 R3-0关闭/R3-1开放指令**：R3-0 artifact/replay及12/12全重签tamper已通过，最终=
+> `VALIDATED-R3-0-CONTRACT`。下一唯一工程动作是R3-1：`25/Conv_8`、一个evaluation、mutation=0、
+> candidate forward/custom backward各一次、five fresh独立native oracle；saved dense A=0、scratch<=2。
+> 本阶段不计时；R3-2A/2B继续关闭。见
+> `BOUNDFLOW_R3_0_STRUCTURED_OWNER_FORMAL_CLOSURE_2026_08_25.md`。
+
+> **2026-08-25 R3-0实现指令（历史，已由上方formal closure取代）**：contract source已实现但尚未formal关闭。当前唯一动作是在clean commit
 > 上生成R3-0 artifact、replay和12类fully re-signed tamper；通过前不得接P-anchor custom backward。
 > 该实现没有production/timing/performance。见
 > `BOUNDFLOW_R3_0_STRUCTURED_OWNER_CONTRACT_IMPLEMENTATION_CHANGELOG_2026_08_25.md`。

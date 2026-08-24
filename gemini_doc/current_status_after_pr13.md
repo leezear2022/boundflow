@@ -1,7 +1,13 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
-> **2026-08-25 R3-0实现待formal**：typed region DAG、closure/liveness、BiasSplit ownership、
-> dense-escape/context/saved-state validators和artifact/replay/tamper runner已实现，38 tests通过。
+> **2026-08-25 当前状态：R3-0关闭，R3-1开放**：contract replay通过，12/12全重签tamper拒绝；
+> 8 nodes/8 edges、2 scratch，saved coefficient/dense escape/context=`0/0/0`。当前=
+> `VALIDATED-R3-0-CONTRACT`，下一只实现`25/Conv_8` mandatory custom backward correctness；不计时，
+> R3-2A/2B关闭；全量=`1568 passed, 3 skipped`。见
+> `BOUNDFLOW_R3_0_STRUCTURED_OWNER_FORMAL_CLOSURE_2026_08_25.md`。
+
+> **2026-08-25 R3-0实现待formal（历史，已由上方formal closure取代）**：typed region DAG、closure/liveness、BiasSplit ownership、
+> dense-escape/context/saved-state validators和artifact/replay/tamper runner已实现，40 tests通过。
 > 当前=`IMPLEMENTED-R3-0-PENDING-CLEAN-SOURCE-FORMAL`；下一唯一动作是从clean commit生成并重放
 > contract artifact。R3-1、production和timing保持关闭。见
 > `BOUNDFLOW_R3_0_STRUCTURED_OWNER_CONTRACT_IMPLEMENTATION_CHANGELOG_2026_08_25.md`。

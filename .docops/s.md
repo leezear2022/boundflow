@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev012312
-last_va: ev012313
+last_ch: ev012326
+last_va: ev012327
 blk: none
-next: run-r3-0-clean-source-artifact-replay-tamper
-updated: 2026-08-24T18:09:40Z
+next: implement-r3-1-p-anchor-mandatory-custom-backward
+updated: 2026-08-24T18:24:00Z

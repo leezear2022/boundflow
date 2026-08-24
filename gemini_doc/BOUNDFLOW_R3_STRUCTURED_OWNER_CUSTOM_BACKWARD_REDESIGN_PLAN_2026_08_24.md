@@ -1,6 +1,6 @@
 ---
-status: preregistered-r3-0-open
-updated: 2026-08-25T03:20:00+08:00
+status: validated-r3-0-r3-1-open
+updated: 2026-08-25T04:25:00+08:00
 type: plan
 topic: boundflow
 slug: r3-structured-owner-custom-backward-redesign
@@ -16,6 +16,11 @@ stage: s01
 > §14 所需的显式 reprioritization 记录，因此现在只开放 R3-0 合同和静态验证器；R3-1及其后续、
 > production接入和timing仍关闭。见
 > `BOUNDFLOW_CIBC_R1_A_FORMAL_NO_GO_CLOSURE_2026_08_25.md`。
+
+> **2026-08-25 R3-0 closure**：clean source formal artifact/replay与12/12 fully re-signed tamper
+> 已通过，状态=`VALIDATED-R3-0-CONTRACT`。现在只开放R3-1 `25/Conv_8`一个evaluation的mandatory
+> custom-backward correctness；optimizer mutation、timing和R3-2A及以后仍关闭。见
+> `BOUNDFLOW_R3_0_STRUCTURED_OWNER_FORMAL_CLOSURE_2026_08_25.md`。
 
 可以重新设计，但这不是修补或复活 B4-C2。新路线暂命名为
 **R3-SO-CVJP（Structured Owner + Custom VJP）**，核心是：

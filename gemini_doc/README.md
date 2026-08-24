@@ -1,7 +1,13 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
-R3-0 structured-owner contract source 已实现：typed DAG、Template/Instance、closure/fanout/BiasSplit、
-两scratch liveness、dense-escape/context/saved-state validators及artifact/replay/tamper runner，38 tests
+R3-0 已正式关闭为`VALIDATED-R3-0-CONTRACT`：clean-source artifact/replay通过，8 nodes/8 edges、
+2 scratch、saved coefficient/dense escape/context=`0/0/0`，12/12 fully re-signed tamper拒绝。
+这仍不是production/custom-backward/performance。下一只开放R3-1 `25/Conv_8`一个evaluation的
+mandatory custom-backward correctness，不计时。见
+`BOUNDFLOW_R3_0_STRUCTURED_OWNER_FORMAL_CLOSURE_2026_08_25.md`。
+
+以下R3-0 source-only状态为历史，已由上方formal closure取代。R3-0 structured-owner contract source 已实现：typed DAG、Template/Instance、closure/fanout/BiasSplit、
+两scratch liveness、dense-escape/context/saved-state validators及artifact/replay/tamper runner，40 tests
 通过。当前只到`IMPLEMENTED-R3-0-PENDING-CLEAN-SOURCE-FORMAL`；R3-1和production/timing仍关闭。
 见`BOUNDFLOW_R3_0_STRUCTURED_OWNER_CONTRACT_IMPLEMENTATION_CHANGELOG_2026_08_25.md`。
 

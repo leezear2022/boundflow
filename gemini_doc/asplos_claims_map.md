@@ -1,8 +1,15 @@
 # BoundFlow ASPLOS Claims Map
 
-> **2026-08-25 R3-0实现状态（不升级claim）**：first-class lower-region DAG、Template/Instance、
+> **2026-08-25 R3-0正式关闭**：source=`e9b11e3`的contract artifact/replay通过，8 nodes/8 edges、
+> 2 scratch、saved logical/unique=`304128/205824 B`，saved coefficient/dense escape/context=
+> `0/0/0`；12/12全重签tamper拒绝。允许claim仅为`VALIDATED-R3-0-CONTRACT`，production/timing/
+> performance仍false。下一只开放R3-1 P-anchor mandatory-backward correctness；R3-2A/timing关闭。
+> 全量=`1568 passed, 3 skipped`。
+> 见`BOUNDFLOW_R3_0_STRUCTURED_OWNER_FORMAL_CLOSURE_2026_08_25.md`。
+
+> **2026-08-25 R3-0实现状态（历史，已由上方formal closure取代）**：first-class lower-region DAG、Template/Instance、
 > closure/fanout/BiasSplit、两scratch liveness、dense-escape、recursive context、saved-state ledger和
-> fail-closed receipt已实现，38个targeted tests通过。当前仅=
+> fail-closed receipt已实现，40个targeted tests通过。当前仅=
 > `IMPLEMENTED-R3-0-PENDING-CLEAN-SOURCE-FORMAL`；production/timing/performance均false，R3-1仍关闭。
 > 见`BOUNDFLOW_R3_0_STRUCTURED_OWNER_CONTRACT_IMPLEMENTATION_CHANGELOG_2026_08_25.md`。
 

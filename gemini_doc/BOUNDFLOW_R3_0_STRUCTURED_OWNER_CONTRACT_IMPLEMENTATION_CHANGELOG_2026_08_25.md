@@ -1,6 +1,6 @@
 ---
-status: implemented-pending-clean-source-formal
-updated: 2026-08-25T04:05:00+08:00
+status: validated-r3-0-contract
+updated: 2026-08-25T04:25:00+08:00
 type: changelog
 topic: boundflow
 slug: r3-0-structured-owner-contract-implementation
@@ -14,7 +14,8 @@ stage: s01
 R3-0 已实现 first-class lower-region DAG、Template/Instance 分离、closure/fanout/bias ownership、
 bounded scratch liveness、dense escape、context tensor reachability、saved-tensor ledger 与 fail-closed
 receipt。该阶段仍是 contract-only：没有 production 接入、custom backward、CUDA kernel、timing 或
-performance claim。clean-source formal artifact/replay 通过前不开放 R3-1。
+performance claim。clean-source formal artifact/replay 与 12 类全重签篡改已通过；R3-1 现在只按
+既有预注册开放 P-anchor mandatory custom-backward correctness。
 
 ## Changes
 
@@ -52,22 +53,31 @@ performance claim。clean-source formal artifact/replay 通过前不开放 R3-1�
 - R3-0 targeted：`40 passed`；
 - mypy：IR/runtime clean；
 - Black：pass；Pylint：目标 `10.00/10`；
-- formal artifact 尚未运行；必须先提交 clean source，再由 artifact runner 从该 commit 生成。
+- formal source=`e9b11e3dae1ade98228f1c60d9bda1cffdd0eed2`；artifact replay逐字节一致；
+  bundle/template/instance/summary hash分别为`aebfe761…cb6a`、`319dd908…dfbf`、
+  `7f0921fd…3e53`、`83b2c8be…2e23`。
+- formal receipt：8 nodes/8 edges、2 scratch slots、saved logical/unique=`304128/205824 B`、
+  saved coefficient/dense escape/context tensor=`0/0/0`；production/timing/performance均false。
+- 12/12 fully re-signed tamper rejected；tamper hash=`409a7343…de22`。
+- 全量回归：`1568 passed, 3 skipped`；skip均为既有TVM重复编译/VNN-COMP checkout环境边界。
 
 ## Claim Boundary
 
-- 当前状态仅为 `IMPLEMENTED-R3-0-PENDING-CLEAN-SOURCE-FORMAL`；
+- 当前状态为 `VALIDATED-R3-0-CONTRACT`；
 - `production_connected=false`、`timing_recorded=false`、`performance_claimed=false`；
 - 不声称 custom VJP、dα/dβ correctness、saved-state 实测、memory improvement 或 speedup；
-- R3-1 在 formal artifact/replay 与 tamper 全通过前保持关闭。
+- R3-1 只开放一个evaluation、optimizer mutation冻结、mandatory custom backward的P-anchor
+  correctness；R3-2A及timing继续关闭。
 
 ## Next
 
-1. 提交 R3-0 contract source；
-2. 从 clean commit 生成 artifact，replay，并运行 12 类 fully re-signed tamper；
-3. 同步 claims/memo/status；若通过，才开放 R3-1 P-anchor mandatory custom backward correctness。
+1. 另立 R3-1 implementation changelog；
+2. 接 `25/Conv_8` 单 evaluation，candidate forward/custom VJP exactly once；
+3. five fresh 对独立 native worker 比 final lower/dα/empty beta，并证明 saved dense A=0、scratch<=2；
+4. R3-1 不计时；通过前 R3-2A 仍关闭。
 
 ## Links
 
 - design：`BOUNDFLOW_R3_STRUCTURED_OWNER_CUSTOM_BACKWARD_REDESIGN_PLAN_2026_08_24.md`
 - R1 reprioritization：`BOUNDFLOW_CIBC_R1_A_FORMAL_NO_GO_CLOSURE_2026_08_25.md`
+- formal closure：`BOUNDFLOW_R3_0_STRUCTURED_OWNER_FORMAL_CLOSURE_2026_08_25.md`
