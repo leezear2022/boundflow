@@ -1,0 +1,50 @@
+{
+  "doc": "cibc-ibp-horizontal-20260824/r001/audit",
+  "type": "audit",
+  "task": "cibc-ibp-horizontal-20260824",
+  "round": 1,
+  "from": "external-model",
+  "to": "codex",
+  "ts": "2026-08-23T23:55:45Z",
+  "verdict": "approve",
+  "delivery": "cibc-ibp-horizontal-20260824/r001/delivery",
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "minor",
+      "path": "boundflow/domains/interval.py:83-85",
+      "evidence": "mypy 3 条新引入 arg-type 错误(tuple[int,...] vs tuple[int,int])+ pylint 新增 C0415;delivery 的 Black/Mypy/Pylint=10.00/10 只对 3 个新模块成立(interval.py=7.01/10)",
+      "advice": "为 stride/padding/dilation 加 cast 或补 pylint disable,或在交付文档把 lint 声明范围限定为新文件"
+    },
+    {
+      "id": "F2",
+      "severity": "minor",
+      "path": ".docops/ev.jsonl",
+      "evidence": "dol validate 报 3 个 duplicate event id(ev009180/ev009388/ev010862),为历史既有(base 已存在),非本轮引入;dol lint --soft 通过",
+      "advice": "后续独立任务去重,不阻塞本轮"
+    },
+    {
+      "id": "F3",
+      "severity": "info",
+      "path": "protocol semantic_atol=3e-4",
+      "evidence": "既往阶段多用 2e-4;本轮 3e-4 在正式运行前冻结(a52b177 引入后未变),实测整图 diff=2^-12 恰为 float32 单 ULP",
+      "advice": "建议在 protocol changelog 补量级依据"
+    },
+    {
+      "id": "F4",
+      "severity": "info",
+      "path": "scripts/run_cibc_ibp_horizontal_worker.py",
+      "evidence": "算子级 wall-clock 下 baseline 近 CPU launch-bound(6 算子 baseline 之和 0.29ms>整图 0.176ms),算子级 12.8x 主要刻画 eager launch 开销消除;整图 2.456x 才是系统数字,文档边界已正确处理",
+      "advice": "未来扩大 claim 时维持此口径"
+    },
+    {
+      "id": "F5",
+      "severity": "info",
+      "path": "计时口径",
+      "evidence": "TIR 编译/plan 构造在 warmup 前完成、不计入计时,closure 文档未显式披露 steady-state 口径",
+      "advice": "建议 closure 补一行"
+    }
+  ],
+  "summary": "独立外部审计通过,AC1—AC7 与 B4 kill gate 合规全部 PASS。AC1:protocol 门禁/schedule/3e-4 容差于 a52b177 正式运行前冻结,freeze→validate 间零代码改动;8 个 code blob、manifest、protocol/summary/worker 哈希及 capture/ONNX digest 全部独立重算一致。AC2:自写 float64 oracle 对 6/6 production Conv 抽查,fused 误差与 float32 baseline 同量级、sign 一致、lo≤up 成立。AC3:从 3×6×30 组 raw 独立重算,schedule geomean 11.6722/12.7951/12.7250、选中 128、算子 geomean/worst 12.7951x/9.1423x 逐位一致;baseline 为 production 四-Conv 公式逐字复现无慢化;GPU 空闲时物理重跑 operator worker 得 geomean 12.7865/worst 9.0398(偏差≤1.2%)。AC4:6 份整图 raw 重算 geomean 2.45631x/bootstrap lower 2.45386x/worst 2.45091x 逐位一致;输入 copy 计入、双侧 CUDA Graph 对等、6/6 覆盖;物理重跑 model worker 得 2.45837 vs 正式 2.45815。AC5:root replay 退出 0 且为真语义重算;10/10 全重签 tamper 独立重跑全拒,审计方另自建 3 类变体亦全拒。AC6:全量 1492 passed/3 skipped 复现,skip 均为文档化环境边界;black/diff-check/dol lint 通过。AC7:closure/claims map/memo/current_status 四处一致限定 reduced claim(RTX4060+ResNet2B+IBP+相对自身四-Conv baseline),production 默认路径未改,无 auto_LiRPA/α-CROWN/BaB/memory/cross-model/ASPLOS 漂移。B4:C1 0.948x、C2 0.337–0.349x/显存 1.34x 按预注册 kill gate 正式关闭,顺序在 git 历史上成立。同意关闭 VALIDATED-REDUCED-CIBC-IBP-CONV-HORIZONTAL。详见 r001/audit_report_full.md。",
+  "md_sha256": "0067b11ac266b1dfc10162e9f3bc191c8b7cb02e5ff79318d628acf149c93d53"
+}

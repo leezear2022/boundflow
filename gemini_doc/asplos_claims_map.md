@@ -1,5 +1,13 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-24 CIBC-IBP外审批准**：最终claim=
+> `EXTERNALLY-APPROVED-VALIDATED-REDUCED-CIBC-IBP-CONV-HORIZONTAL`。Round 1独立外审重算
+> operator/whole-graph headline、float64 oracle、baseline/CUDA Graph公平性、replay及13类tamper，
+> exchange已`closed/approved`。该批准不改变作用域：只限RTX 4060/sm_89、ResNet2B prop0、
+> steady-state IBP、相对BoundFlow既有四-Conv baseline；明确不支持auto_LiRPA、alpha-CROWN/BaB/
+> query、memory、跨模型或ASPLOS-ready。下一研究动作仅为R0卫生与CIBC-G1只读归因预注册，见
+> `BOUNDFLOW_FAILED_GATES_DIAGNOSIS_AND_RECOVERY_PLAN_2026_08_24.md`。
+
 > **2026-08-24 CIBC-IBP Conv水平融合正式关闭**：允许claim=
 > `VALIDATED-REDUCED-CIBC-IBP-CONV-HORIZONTAL`。RTX 4060/sm_89、ResNet2B prop0上，真实6 Conv
 > operator speedup geomean/worst=`12.795/9.142x`，完整IBP CUDA Graph 6-fresh

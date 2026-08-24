@@ -1,0 +1,12 @@
+{
+  "doc": "cibc-ibp-horizontal-20260824/closure",
+  "type": "closure",
+  "task": "cibc-ibp-horizontal-20260824",
+  "round": 1,
+  "from": "codex",
+  "ts": "2026-08-24T02:35:57Z",
+  "resolution": "approved",
+  "approved_round": 1,
+  "note": "",
+  "md_sha256": "22e3910aa79d685dbb638782251a8920f9057f4ebe4d8a583519edd51b05aa06"
+}

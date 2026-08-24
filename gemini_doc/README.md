@@ -1,5 +1,16 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+CIBC-IBP水平融合已通过Round 1独立外审并由executor关闭exchange，最终=
+`EXTERNALLY-APPROVED-VALIDATED-REDUCED-CIBC-IBP-CONV-HORIZONTAL`：6 Conv operator
+geomean/worst=`12.7951/9.1423x`，完整ResNet2B IBP graph geomean/worst=
+`2.45631/2.45091x`。外审确认baseline公平、输入copy计入、两侧CUDA Graph、float64 oracle、
+replay与13类篡改均成立；同时指出3条新mypy错误、steady-state/1 ULP披露等minor/info。
+当前唯一研究动作是先完成R0审计卫生，再预注册CIBC-G1 candidate-only optimized-graph
+attribution；不得直接扩TIR或复活B4-C2。失败门禁总账、R0—R5恢复路线与外部评审prompt见
+`BOUNDFLOW_FAILED_GATES_DIAGNOSIS_AND_RECOVERY_PLAN_2026_08_24.md`、
+`BOUNDFLOW_FAILED_GATES_EXTERNAL_ADVISOR_PROMPT_2026_08_24.md`与
+`external_audit_cibc_ibp_horizontal_2026_08_24.md`。
+
 FSG4/B4-C0累计core正式结果=`VALIDATED-NO-GO-B4-C0-NATIVE-VALUE-BRIDGE`：6 fresh/180 groups
 geomean/lower/worst=`0.94034x/0.93778x/0.93418x`，语义sign exact、max diff=`7.15e-7`，root
 replay与8/8 tamper通过。当前只开放B4-C1 provider-owned lower path rewrite。见

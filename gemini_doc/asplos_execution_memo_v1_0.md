@@ -1,5 +1,16 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-24 CIBC外审关闭与路线复审指令**：Round 1独立外审`APPROVE`，exchange已
+> `closed/approved`；最终=
+> `EXTERNALLY-APPROVED-VALIDATED-REDUCED-CIBC-IBP-CONV-HORIZONTAL`。6 Conv operator
+> geomean/worst=`12.7951/9.1423x`，完整ResNet2B IBP graph=`2.45631/2.45091x`；claim仍只限
+> RTX 4060/sm_89、ResNet2B prop0、steady-state IBP、相对BoundFlow四-Conv baseline。失败门禁
+> 总复盘确认：B4-B2 v2 local TIR成功，B4-C0/C1/C2失败在production ownership/materialization/
+> autograd lifetime，B5—B7及complete solve尚未运行。当前先做R0外审卫生，再只允许预注册
+> CIBC-G1 candidate-only NVTX/CUPTI/CUDA-Graph attribution；归因前不得选Linear/Conv/elementwise/
+> runtime实现分支，也不得复活B4-C2。权威路线见
+> `BOUNDFLOW_FAILED_GATES_DIAGNOSIS_AND_RECOVERY_PLAN_2026_08_24.md`。
+
 > **2026-08-24 FSG4/B4-C0正式NO-GO指令**：source=`d1db31e`完成6 fresh/180 groups；
 > bridge候选geomean/lower/worst=`0.94034x/0.93778x/0.93418x`，memory allocated/reserved=
 > `1.04818/1.0`；semantic max diff=`7.15256e-07`且sign exact，root replay与8/8 tamper通过。最终=

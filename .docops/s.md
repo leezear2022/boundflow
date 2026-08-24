@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev011825
-last_va: ev011826
+last_ch: ev011883
+last_va: ev011884
 blk: none
-next: external-audit-cibc-ibp-horizontal-formal-closure
-updated: 2026-08-23T20:04:00Z
+next: preregister-cibc-g1-optimized-graph-attribution
+updated: 2026-08-24T02:52:52Z

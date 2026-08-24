@@ -1,5 +1,13 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-24 CIBC外审与当前下一步**：Round 1独立外审`APPROVE`，exchange已由executor
+> 关闭为`closed/approved`，最终=
+> `EXTERNALLY-APPROVED-VALIDATED-REDUCED-CIBC-IBP-CONV-HORIZONTAL`。外审独立重算全部
+> headline、float64 oracle、replay和13类tamper；0 blocker/major，2 minor+4 info。当前唯一研究
+> 动作是先完成R0静态检查/口径卫生，再预注册CIBC-G1 optimized-graph attribution；不得把
+> 该IBP结果外推到auto_LiRPA/alpha-CROWN/BaB/query，也不得把未运行的B5—B7写成失败。详见
+> `BOUNDFLOW_FAILED_GATES_DIAGNOSIS_AND_RECOVERY_PLAN_2026_08_24.md`。
+
 > **2026-08-24 CIBC-IBP水平融合正式状态**：source=`a52b177`，3个operator schedule worker与
 > 6个whole-model fresh worker正式通过。选中128 threads；6 Conv geomean/worst=
 > `12.795/9.142x`，完整ResNet2B IBP graph geomean/worst=`2.4563/2.4509x`，输入copy计入，
