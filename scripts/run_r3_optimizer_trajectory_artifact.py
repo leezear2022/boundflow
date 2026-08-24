@@ -354,7 +354,7 @@ def _protocol(source_revision: str, capture: Path, model: Path) -> dict[str, obj
 def generate(output: Path, capture: Path, model: Path) -> None:
     if output.exists():
         raise FileExistsError(f"R3-2A artifact output already exists: {output}")
-    if _git("status", "--porcelain"):
+    if _git("status", "--porcelain", "--untracked-files=no"):
         raise RuntimeError("R3-2A formal generation requires a clean worktree")
     revision = _git("rev-parse", "HEAD")
     temp = Path(tempfile.mkdtemp(prefix="r3-2a-artifact-", dir=output.parent))
