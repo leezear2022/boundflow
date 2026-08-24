@@ -1,6 +1,6 @@
 ---
-status: validated-r3-1b2-math-reduction-tir-open
-updated: 2026-08-25T04:11:00+08:00
+status: implemented-r3-1b2-pending-clean-source-formal
+updated: 2026-08-25T04:45:00+08:00
 type: plan
 topic: boundflow
 slug: r3-1b-bounded-arena-compiled-recurrence
@@ -28,6 +28,11 @@ stage: s01
 > `4.470348358154297e-08`、sign exact、nonzero=`281/281`。这只证明可在不跨 forward/backward
 > 保存 dense A 的条件下归约；compiled TIR/custom backward仍未实现。下一只实现checkpoint/sign
 > TIR，见`BOUNDFLOW_R3_1B2_P_ALPHA_VJP_MATH_REDUCTION_2026_08_25.md`。
+>
+> **2026-08-25 R3-1b2 implementation note**：10-symbol compiled VJP/custom Function单worker
+> 已通过；lower/dα max diff=`3.93391e-6/6.14673e-8`、sign exact、2 scratch、saved dense A=0、
+> warm allocation=0。当前等待clean-source artifact/replay/tamper，不提前关闭b2；见
+> `BOUNDFLOW_R3_1B2_COMPILED_P_ALPHA_VJP_IMPLEMENTATION_2026_08_25.md`。
 
 ## 1. Why this branch exists
 
@@ -175,5 +180,5 @@ re-signed tamper。只有 b3 全过才将 `r3_1_admitted=true` 并开放 R3-2A�
 
 ## 9. Next executable action
 
-实现 R3-1b2 checkpoint/sign TIR 与 mandatory custom backward 单 worker correctness/ownership；
-不启动five-fresh、不跑timing、不改 optimizer。
+提交 R3-1b2 clean source并生成单worker raw-first artifact、semantic replay与fully re-signed tamper；
+通过前不启动five-fresh、不跑timing、不改 optimizer。
