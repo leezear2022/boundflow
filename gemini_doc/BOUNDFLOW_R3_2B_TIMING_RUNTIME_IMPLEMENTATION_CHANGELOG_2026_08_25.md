@@ -21,3 +21,7 @@ stage: s01
 - 一对非正式diagnostic得到native/candidate median约`99.64/754.64 ms`，speedup=`0.13203x`，
   correctness与memory仍通过。该值不替代5-pair formal，不据此修改协议；
 - 尚未运行formal timing，当前无performance claim。
+
+formal已完成采样且初步replay为NO-GO；新增10类fully re-signed tamper probe，覆盖latency raw、terminal
+lower/α、counter、memory、sample count、clock、protocol threshold和summary verdict/order。全部拒绝后才
+形成正式NO-GO closure。

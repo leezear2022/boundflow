@@ -1,6 +1,11 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
-> **2026-08-25 当前状态：R3-2A通过，只开放R3-2B**：source=`e7ae590`的P-anchor 5-pair
+> **2026-08-25 当前状态：R3-2B正式NO-GO，当前variant停止**：source=`f43eb76`，5对×30
+> wrapper样本geomean/worst=`0.133989x/0.130371x`，约慢`7.46x`；语义保持且memory降至
+> `0.0584567x/0.153846x`。R3-3/multi-site/same-solver关闭；下一只允许R3-D0只读microphysics
+> attribution预注册。见 `BOUNDFLOW_R3_2B_WRAPPER_TIMING_FORMAL_NO_GO_CLOSURE_2026_08_25.md`。
+
+> **历史：2026-08-25 当前状态：R3-2A通过，只开放R3-2B**：source=`e7ae590`的P-anchor 5-pair
 > 10/9 optimizer trajectory逐步语义、ownership和memory全过；最大lower/dα/α差=
 > `8.58307e-6/8.28877e-8/2.38419e-7`，worst allocated/reserved=`0.0586911x/0.166667x`，
 > 12/12 tamper，全量=`1602 passed,3 skipped`。当前只开放同轨迹wrapper-inclusive local timing；

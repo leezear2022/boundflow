@@ -1,6 +1,12 @@
 # BoundFlow ASPLOS Claims Map
 
-> **2026-08-25 R3-2A trajectory correctness正式通过**：source=`e7ae590`，5对/10独立process的
+> **2026-08-25 R3-2B local wrapper正式NO-GO**：source=`f43eb76`，5对×30样本的host-wall
+> geomean/worst=`0.133989x/0.130371x`；correctness保持，memory worst=`0.0584567x/0.153846x`。
+> 允许claim仅为`VALIDATED-NO-GO-R3-2B-DISPATCH-GRANULARITY`和“R3-2A memory成立但当前physical
+> execution失败”；不得claim speedup、R3-3开放或same-solver收益。见
+> `BOUNDFLOW_R3_2B_WRAPPER_TIMING_FORMAL_NO_GO_CLOSURE_2026_08_25.md`。
+
+> **历史：2026-08-25 R3-2A trajectory correctness正式通过**：source=`e7ae590`，5对/10独立process的
 > P-anchor 10/9 Adam轨迹逐步lower/dα/α/moments通过；最大差=`8.58307e-6/8.28877e-8/
 > 2.38419e-7/4.19095e-8/1.04592e-11`，memory worst=`0.0586911x/0.166667x`，12/12 tamper，
 > 全量=`1602 passed,3 skipped`。只允许claim `VALIDATED-R3-2A-P-TRAJECTORY`；未计时、无speedup/

@@ -11,6 +11,11 @@ stage: s01
 
 ## 0. 结论与当前边界
 
+> **2026-08-25 R3-2B formal NO-GO**：5对×30 host-wall完整10/9 wrapper的geomean/worst=
+> `0.133989x/0.130371x`；correctness与memory通过，但当前compiled single-site约慢`7.46x`，触发
+> §9/§10 kill gate。R3-3及以后关闭；只允许另行预注册R3-D0只读microphysics归因，不能扩当前
+> variant。见 `BOUNDFLOW_R3_2B_WRAPPER_TIMING_FORMAL_NO_GO_CLOSURE_2026_08_25.md`。
+
 > **2026-08-25 R3-2A closure / R3-2B preregistration**：P-anchor 5对fresh的10/9 optimizer
 > trajectory correctness、ownership、memory与12/12 tamper已通过，只开放R3-2B。R3-2B冻结为
 > host-wall wrapper-inclusive 3 warmup/30 samples×5 fresh pair；GO仍为geomean>=`1.20x`、worst>=

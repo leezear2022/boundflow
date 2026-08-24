@@ -3,7 +3,13 @@
 R3-1b2/b3外部审计交接已生成，要求从raw独立复核compiled VJP、五对absolute memory、失败纪律和
 claim边界，见`BOUNDFLOW_R3_1B2_B3_EXTERNAL_AUDIT_HANDOFF_2026_08_25.md`。
 
-R3-2A P-anchor 10/9 optimizer trajectory正式通过：source=`e7ae590`，5对/10 fresh逐步lower/dα/α/
+R3-2B P-anchor wrapper timing正式NO-GO：source=`f43eb76`，5对×30样本geomean/worst=
+`0.133989x/0.130371x`，candidate约慢`7.46x`；correctness保持、memory worst=
+`0.0584567x/0.153846x`，10/10 tamper，全量=`1606 passed,3 skipped`。当前variant停止，R3-3关闭；
+只允许R3-D0只读microphysics归因。见
+`BOUNDFLOW_R3_2B_WRAPPER_TIMING_FORMAL_NO_GO_CLOSURE_2026_08_25.md`。
+
+历史R3-2A P-anchor 10/9 optimizer trajectory正式通过：source=`e7ae590`，5对/10 fresh逐步lower/dα/α/
 Adam-state全过，最坏allocated/reserved=`0.0586911x/0.166667x`，12/12 tamper，全量=
 `1602 passed,3 skipped`。只开放R3-2B wrapper-inclusive local timing，尚无performance claim。见
 `BOUNDFLOW_R3_2A_OPTIMIZER_TRAJECTORY_FORMAL_CLOSURE_2026_08_25.md`。

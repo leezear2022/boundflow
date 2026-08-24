@@ -1,6 +1,13 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
-> **2026-08-25 R3-2A关闭/R3-2B开放指令**：source=`e7ae590`的5对/10 fresh、每worker
+> **2026-08-25 R3-2B正式NO-GO**：source=`f43eb76`的5对×30完整10/9 wrapper样本得到
+> geomean/worst=`0.133989x/0.130371x`，candidate约慢`7.46x`；correctness通过，memory worst=
+> `0.0584567x/0.153846x`，10/10 tamper，全量=`1606 passed,3 skipped`。状态=
+> `VALIDATED-NO-GO-R3-2B-DISPATCH-GRANULARITY`；当前single-site variant被kill，R3-3/multi-site/
+> same-solver关闭。唯一允许下一动作是预注册R3-D0只读microphysics归因，不得直接扩当前variant。
+> 见 `BOUNDFLOW_R3_2B_WRAPPER_TIMING_FORMAL_NO_GO_CLOSURE_2026_08_25.md`。
+
+> **历史：2026-08-25 R3-2A关闭/R3-2B开放指令**：source=`e7ae590`的5对/10 fresh、每worker
 > 10 evaluation/9 Adam mutation全部通过；最大lower/dα/α差=`8.58307e-6/8.28877e-8/2.38419e-7`，
 > worst allocated/reserved=`0.0586911x/0.166667x`，12/12全重签tamper拒绝，全量=`1602 passed,
 > 3 skipped`。状态=`VALIDATED-R3-2A-P-TRAJECTORY`；当前唯一动作是预注册并执行R3-2B同轨迹
