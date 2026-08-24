@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
 from typing import Any, cast
 
 import pytest
@@ -225,6 +226,19 @@ def test_formal_preflight_requires_nsys_before_workers(
             model=model,
             smoke=False,
         )
+
+
+def test_porcelain_parser_preserves_dot_prefixed_paths(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    completed = subprocess.CompletedProcess(
+        args=("git",),
+        returncode=0,
+        stdout=" M .docops/ev.jsonl\nM  tracked.py\n",
+        stderr="",
+    )
+    monkeypatch.setattr(artifact.subprocess, "run", lambda *_args, **_kwargs: completed)
+    assert artifact._tracked_dirty_paths() == (".docops/ev.jsonl", "tracked.py")
 
 
 def test_nsys_export_receipt_round_trip_and_anchor_gate() -> None:

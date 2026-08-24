@@ -117,7 +117,14 @@ def _code_revision() -> dict[str, str]:
 
 
 def _tracked_dirty_paths() -> tuple[str, ...]:
-    rows = _git("status", "--porcelain", "--untracked-files=no").splitlines()
+    rows = subprocess.run(
+        ("git", "status", "--porcelain", "--untracked-files=no"),
+        cwd=REPOSITORY_ROOT,
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    ).stdout.splitlines()
     return tuple(sorted(row[3:] for row in rows if len(row) >= 4))
 
 

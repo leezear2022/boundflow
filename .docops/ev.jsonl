@@ -12209,3 +12209,10 @@
 {"id":"ev012209","ts":"2026-08-24T17:39:14Z","ty":"cmd","cmd":"Bash:conda","summary":"PostToolUse"}
 {"id":"ev012210","ts":"2026-08-24T17:39:22Z","ty":"ch","st":"s01","pr":60,"slug":"r1a-formal-docops-hook-exemption"}
 {"id":"ev012211","ts":"2026-08-24T17:39:22Z","ty":"va","st":"s01","pr":60,"result":"pass"}
+{"id":"ev012212","ts":"2026-08-24T17:39:22Z","ty":"cmd","cmd":"Bash:python3","summary":"PostToolUse"}
+{"id":"ev012213","ts":"2026-08-24T17:39:36Z","ty":"cmd","cmd":"Bash:conda","summary":"PostToolUse"}
+{"id":"ev012214","ts":"2026-08-24T17:39:46Z","ty":"cmd","cmd":"Bash:git","summary":"PostToolUse"}
+{"id":"ev012215","ts":"2026-08-24T17:39:56Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
+{"id":"ev012216","ts":"2026-08-24T17:40:04Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
+{"id":"ev012217","ts":"2026-08-24T17:40:19Z","ty":"ch","st":"s01","pr":60,"slug":"r1a-preserve-porcelain-path"}
+{"id":"ev012218","ts":"2026-08-24T17:40:19Z","ty":"va","st":"s01","pr":60,"result":"pass"}
