@@ -1,5 +1,12 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-25 R3-D0关闭，只开放R3-D1-A**：source=`4232069`的5 fresh microphysics formal得到
+> compiled-region share=`99.6627%–99.7257%`、worst required=`9.3180x ≤ 10x`；Graph物理门禁5/5
+> false，12/12 fully re-signed tamper拒绝。只开放residual11 staged factorization correctness；D1 timing、
+> R3-3/multi-site/same-solver仍关闭，`performance_claimed=false`。见
+> `BOUNDFLOW_R3_D0_MICROPHYSICS_FORMAL_CLOSURE_2026_08_25.md`与
+> `BOUNDFLOW_R3_D1_COMPILED_REGION_SCHEDULE_PLAN_2026_08_25.md`。
+
 > **2026-08-25 R3-2B正式NO-GO**：source=`f43eb76`的5对×30完整10/9 wrapper样本得到
 > geomean/worst=`0.133989x/0.130371x`，candidate约慢`7.46x`；correctness通过，memory worst=
 > `0.0584567x/0.153846x`，10/10 tamper，全量=`1606 passed,3 skipped`。状态=

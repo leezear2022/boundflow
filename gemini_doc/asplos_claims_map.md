@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-25 R3-D0 claim边界**：可claim只读归因证明当前R3-2B candidate的compiled region占
+> `99.6627%–99.7257%`、whole-region worst required=`9.3180x`，因此存在预注册D1 schedule
+> opportunity；不得claim已加速、Graph有效、R3-3开放或same-solver收益。见
+> `BOUNDFLOW_R3_D0_MICROPHYSICS_FORMAL_CLOSURE_2026_08_25.md`。
+
 > **2026-08-25 R3-2B local wrapper正式NO-GO**：source=`f43eb76`，5对×30样本的host-wall
 > geomean/worst=`0.133989x/0.130371x`；correctness保持，memory worst=`0.0584567x/0.153846x`。
 > 允许claim仅为`VALIDATED-NO-GO-R3-2B-DISPATCH-GRANULARITY`和“R3-2A memory成立但当前physical

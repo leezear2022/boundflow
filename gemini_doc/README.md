@@ -1,5 +1,11 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+当前最新：R3-D0 microphysics以`VALIDATED-R3-D0-COMPILED-REGION-SCHEDULE-OPPORTUNITY`关闭；
+compiled share=`99.6627%–99.7257%`、worst required=`9.3180x`，Graph 5/5 false，12/12 tamper。
+只开放R3-D1-A residual11 staged factorization correctness，尚无performance claim。见
+`BOUNDFLOW_R3_D0_MICROPHYSICS_FORMAL_CLOSURE_2026_08_25.md`与
+`BOUNDFLOW_R3_D1_COMPILED_REGION_SCHEDULE_PLAN_2026_08_25.md`。
+
 R3-1b2/b3外部审计交接已生成，要求从raw独立复核compiled VJP、五对absolute memory、失败纪律和
 claim边界，见`BOUNDFLOW_R3_1B2_B3_EXTERNAL_AUDIT_HANDOFF_2026_08_25.md`。
 

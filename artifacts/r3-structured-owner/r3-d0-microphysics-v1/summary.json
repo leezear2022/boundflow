@@ -1,0 +1,2754 @@
+{
+  "all_compiled_region_within_10x": true,
+  "all_graph_physical": false,
+  "graph_route_open": false,
+  "order": [
+    [
+      "native",
+      "candidate"
+    ],
+    [
+      "candidate",
+      "native"
+    ],
+    [
+      "native",
+      "candidate"
+    ],
+    [
+      "candidate",
+      "native"
+    ],
+    [
+      "native",
+      "candidate"
+    ]
+  ],
+  "pair_count": 5,
+  "pair_metrics": [
+    {
+      "alpha_max_abs_diff": 2.384185791015625e-07,
+      "candidate_compiled_region": {
+        "kernel_count": 520,
+        "kernel_sum_ns": 724357723,
+        "kernel_union_ns": 724357723,
+        "persistent_dense_a": false,
+        "profiled_wrapper_share": 0.997180087103478,
+        "scratch_buffer_count": 2,
+        "semantic_closure_source": "R3-2A-validated-full-region-10/9"
+      },
+      "candidate_host_residual_ns": 1957522,
+      "candidate_kernel_union_ns": 724484258,
+      "candidate_median_ns": 739882426,
+      "lower_max_abs_diff": 8.344650268554688e-06,
+      "native_host_residual_ns": 89290727,
+      "native_kernel_union_ns": 16019679,
+      "native_median_ns": 100159150,
+      "order": [
+        "native",
+        "candidate"
+      ],
+      "pair_index": 0,
+      "route": {
+        "candidate_host_residual_ns": 1957522,
+        "candidate_ns": 739882426,
+        "compiled_region_route": {
+          "denominator": 0.10998984633045737,
+          "required_speedup": 9.066110376293418,
+          "semantic_closure_admitted": true,
+          "within_10x": true,
+          "wrapper_share": 0.997180087103478
+        },
+        "family_routes": [
+          {
+            "denominator": -0.8871846182580726,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "backward.clear",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 5.622514948070952e-06
+          },
+          {
+            "denominator": -0.8729539126351227,
+            "family": "boundflow_r31b1_residual11",
+            "phase": "backward.clear",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.014236328137897953
+          },
+          {
+            "denominator": -0.8871797742451942,
+            "family": "boundflow_r31b2_clear_arenas",
+            "phase": "backward.clear",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.0466527826409002e-05
+          },
+          {
+            "denominator": -0.8871890730199161,
+            "family": "boundflow_r31b2_pack_a24_sign",
+            "phase": "backward.clear",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.1677531045993516e-06
+          },
+          {
+            "denominator": -0.8871872997652017,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.9410078189909596e-06
+          },
+          {
+            "denominator": -0.8871890730199161,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.1677531045993516e-06
+          },
+          {
+            "denominator": -0.8871621281982803,
+            "family": "boundflow_r31b2_effective_pre17",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.811257474035476e-05
+          },
+          {
+            "denominator": -0.852726458280098,
+            "family": "boundflow_r31b2_effective_pre23",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.034463782492922736
+          },
+          {
+            "denominator": -0.8862805556982734,
+            "family": "boundflow_r31b2_effective_pre25",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.000909685074747268
+          },
+          {
+            "denominator": -0.8864026953745576,
+            "family": "boundflow_r31b1_conv0",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0007875453984630795
+          },
+          {
+            "denominator": -0.8870338443025361,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.00015639647048462264
+          },
+          {
+            "denominator": -0.8871436549929173,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.6585780103391724e-05
+          },
+          {
+            "denominator": -0.8871725095774429,
+            "family": "boundflow_r31b1_relu17_coeff",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.7731195577822794e-05
+          },
+          {
+            "denominator": -0.8871692212171379,
+            "family": "boundflow_r31b1_relu23_coeff",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.1019555882788327e-05
+          },
+          {
+            "denominator": -0.8871511021220913,
+            "family": "boundflow_r31b1_relu28_coeff",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 3.9138650929384284e-05
+          },
+          {
+            "denominator": -0.8871439604468544,
+            "family": "boundflow_r31b1_relu31_coeff",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.6280326166309026e-05
+          },
+          {
+            "denominator": -0.7301152638360769,
+            "family": "boundflow_r31b1_residual11",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.15707497693694375
+          },
+          {
+            "denominator": -0.5628338571548483,
+            "family": "boundflow_r31b1_residual6",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.3243563836181723
+          },
+          {
+            "denominator": -0.8871486760609538,
+            "family": "boundflow_r31b1_seed",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.156471206683317e-05
+          },
+          {
+            "denominator": -0.8867102482937832,
+            "family": "boundflow_r31b2_conv10_right",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.00047999247923750525
+          },
+          {
+            "denominator": -0.8871872997652017,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.9410078189909596e-06
+          },
+          {
+            "denominator": -0.887189116270031,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.1245029896141905e-06
+          },
+          {
+            "denominator": -0.887186391512787,
+            "family": "boundflow_r31b1_relu28_coeff",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 3.849260233679344e-06
+          },
+          {
+            "denominator": -0.887189289270491,
+            "family": "boundflow_r31b1_seed",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 9.515025296735458e-07
+          },
+          {
+            "denominator": -0.8871753627334658,
+            "family": "boundflow_r31b2_pack_a18_sign",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.4878039554895442e-05
+          },
+          {
+            "denominator": -0.8871494113129086,
+            "family": "boundflow_r31b2_pack_a20_sign",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.082946011208543e-05
+          },
+          {
+            "denominator": -0.8871783888899486,
+            "family": "boundflow_r31b2_pack_a24_sign",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.1851883072027446e-05
+          },
+          {
+            "denominator": -0.8871739354796713,
+            "family": "boundflow_r31b2_pack_ainput_sign",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.6305293349405762e-05
+          },
+          {
+            "denominator": -0.8849093486465195,
+            "family": "boundflow_r31b1_concretize",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0022808921265011907
+          },
+          {
+            "denominator": -0.886427910191594,
+            "family": "boundflow_r31b1_conv0",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0007623305814267306
+          },
+          {
+            "denominator": -0.8870973814245814,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 9.285934843923432e-05
+          },
+          {
+            "denominator": -0.8871678818151394,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.235895788123504e-05
+          },
+          {
+            "denominator": -0.8851619712165817,
+            "family": "boundflow_r31b1_relu17_bias",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.002028269556438958
+          },
+          {
+            "denominator": -0.8871682251129271,
+            "family": "boundflow_r31b1_relu17_coeff",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.2015660093540322e-05
+          },
+          {
+            "denominator": -0.8861480819476399,
+            "family": "boundflow_r31b1_relu23_bias",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0010421588253807235
+          },
+          {
+            "denominator": -0.8871709066200562,
+            "family": "boundflow_r31b1_relu23_coeff",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.933415296446033e-05
+          },
+          {
+            "denominator": -0.88613034804893,
+            "family": "boundflow_r31b1_relu28_bias",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0010598927240907327
+          },
+          {
+            "denominator": -0.8871705592675703,
+            "family": "boundflow_r31b1_relu28_coeff",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.9681505450434904e-05
+          },
+          {
+            "denominator": -0.8870703528058479,
+            "family": "boundflow_r31b1_relu31_bias",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.00011988796717277347
+          },
+          {
+            "denominator": -0.8871654165585853,
+            "family": "boundflow_r31b1_relu31_coeff",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.4824214435389226e-05
+          },
+          {
+            "denominator": -0.7870963036857787,
+            "family": "boundflow_r31b1_residual11",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.10009393708724203
+          },
+          {
+            "denominator": -0.5628523263055131,
+            "family": "boundflow_r31b1_residual6",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.3243379144675076
+          },
+          {
+            "denominator": -0.8871663234594339,
+            "family": "boundflow_r31b1_seed",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.3917313586794127e-05
+          },
+          {
+            "denominator": -0.8871890730199161,
+            "family": "boundflow_r31b2_clear_arenas",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.1677531045993516e-06
+          },
+          {
+            "denominator": -0.8871883377679614,
+            "family": "boundflow_r31b2_compressed_gradient",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.9030050593470915e-06
+          },
+          {
+            "denominator": -0.887185957660071,
+            "family": "boundflow_r31b2_pack_a20_sign",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.283112949624242e-06
+          },
+          {
+            "denominator": -0.8871890743714822,
+            "family": "boundflow_r31b2_pack_a24_sign",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.1664015385060654e-06
+          },
+          {
+            "denominator": -0.8870904587030516,
+            "family": "adam-step",
+            "phase": "optimizer.adam",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 9.978206996904667e-05
+          },
+          {
+            "denominator": -0.8871863496142381,
+            "family": "boundflow_r31b2_compressed_gradient",
+            "phase": "optimizer.adam",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 3.891158782571219e-06
+          },
+          {
+            "denominator": -0.8871750153809798,
+            "family": "alpha-clamp",
+            "phase": "optimizer.clamp",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.5225392040870017e-05
+          },
+          {
+            "denominator": -0.8871878620166965,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "optimizer.clamp",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.378756324183864e-06
+          },
+          {
+            "denominator": -0.8729400725983275,
+            "family": "boundflow_r31b1_residual11",
+            "phase": "optimizer.clamp",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.014250168174693205
+          },
+          {
+            "denominator": -0.8871809419982989,
+            "family": "boundflow_r31b1_conv0",
+            "phase": "optimizer.scheduler",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 9.298774721809652e-06
+          },
+          {
+            "denominator": -0.8871882512677314,
+            "family": "boundflow_r31b1_relu17_coeff",
+            "phase": "optimizer.scheduler",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.989505289317414e-06
+          },
+          {
+            "denominator": -0.8871767453855792,
+            "family": "boundflow_r31b2_compressed_gradient",
+            "phase": "wrapper",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.3495387441463571e-05
+          },
+          {
+            "denominator": -0.8871765264318721,
+            "family": "wrapper",
+            "phase": "wrapper",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.371434114857595e-05
+          }
+        ],
+        "graph_capture_admitted": false,
+        "graph_optimistic_ns": 737924904,
+        "graph_physical": false,
+        "native_ns": 100159150,
+        "performance_claimed": false,
+        "required_saving_ns": 656416467.6666666,
+        "route": "compiled-region-schedule",
+        "route_hash": "7113d24a98b319f914fa934d194e6cfc980de307b588d52ba496695a4c578a7b",
+        "schema_version": "boundflow.r3-d0-amdahl-route/v1",
+        "target_candidate_ns": 83465958.33333334,
+        "target_speedup": 1.2
+      }
+    },
+    {
+      "alpha_max_abs_diff": 2.384185791015625e-07,
+      "candidate_compiled_region": {
+        "kernel_count": 520,
+        "kernel_sum_ns": 740806140,
+        "kernel_union_ns": 740806140,
+        "persistent_dense_a": false,
+        "profiled_wrapper_share": 0.9972164980978449,
+        "scratch_buffer_count": 2,
+        "semantic_closure_source": "R3-2A-validated-full-region-10/9"
+      },
+      "candidate_host_residual_ns": 1924413,
+      "candidate_kernel_union_ns": 740931484,
+      "candidate_median_ns": 735977004,
+      "lower_max_abs_diff": 8.58306884765625e-06,
+      "native_host_residual_ns": 89601213,
+      "native_kernel_union_ns": 16019261,
+      "native_median_ns": 100434112,
+      "order": [
+        "candidate",
+        "native"
+      ],
+      "pair_index": 1,
+      "route": {
+        "candidate_host_residual_ns": 1924413,
+        "candidate_ns": 735977004,
+        "compiled_region_route": {
+          "denominator": 0.11093621064110978,
+          "required_speedup": 8.989098260476412,
+          "semantic_closure_admitted": true,
+          "within_10x": true,
+          "wrapper_share": 0.9972164980978449
+        },
+        "family_routes": [
+          {
+            "denominator": -0.8862746785858361,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "backward.clear",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 5.60887089890651e-06
+          },
+          {
+            "denominator": -0.8720695037730644,
+            "family": "boundflow_r31b1_residual11",
+            "phase": "backward.clear",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.014210783683670639
+          },
+          {
+            "denominator": -0.8862698523480859,
+            "family": "boundflow_r31b2_clear_arenas",
+            "phase": "backward.clear",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.043510864912839e-05
+          },
+          {
+            "denominator": -0.8862790686686546,
+            "family": "boundflow_r31b2_pack_a24_sign",
+            "phase": "backward.clear",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.2187880805036674e-06
+          },
+          {
+            "denominator": -0.886277939557289,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.3478994460538877e-06
+          },
+          {
+            "denominator": -0.8862519835832624,
+            "family": "boundflow_r31b2_effective_pre17",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.8303873472655404e-05
+          },
+          {
+            "denominator": -0.8518249785786332,
+            "family": "boundflow_r31b2_effective_pre23",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.03445530887810185
+          },
+          {
+            "denominator": -0.8853696910707642,
+            "family": "boundflow_r31b2_effective_pre25",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0009105963859707769
+          },
+          {
+            "denominator": -0.8854918253215784,
+            "family": "boundflow_r31b1_conv0",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0007884621351566033
+          },
+          {
+            "denominator": -0.8861181927182423,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.00016209473849267172
+          },
+          {
+            "denominator": -0.8862346773360145,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.561012072056534e-05
+          },
+          {
+            "denominator": -0.8862622868943153,
+            "family": "boundflow_r31b1_relu17_coeff",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.8000562419746473e-05
+          },
+          {
+            "denominator": -0.8862591563617206,
+            "family": "boundflow_r31b1_relu23_coeff",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.113109501448499e-05
+          },
+          {
+            "denominator": -0.8862427659039557,
+            "family": "boundflow_r31b1_relu28_coeff",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 3.752155277938548e-05
+          },
+          {
+            "denominator": -0.8862340672626051,
+            "family": "boundflow_r31b1_relu31_coeff",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.622019412986985e-05
+          },
+          {
+            "denominator": -0.7291799020213228,
+            "family": "boundflow_r31b1_residual11",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.15710038543541233
+          },
+          {
+            "denominator": -0.5360321892158829,
+            "family": "boundflow_r31b1_residual6",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.3502480982408521
+          },
+          {
+            "denominator": -0.8862386353401154,
+            "family": "boundflow_r31b1_seed",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.165211661966547e-05
+          },
+          {
+            "denominator": -0.8858396201556681,
+            "family": "boundflow_r31b2_conv10_right",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.000440667301066923
+          },
+          {
+            "denominator": -0.8862759394947979,
+            "family": "boundflow_r31b2_pack_a20_sign",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.34796193713683e-06
+          },
+          {
+            "denominator": -0.8862773743222372,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.9131344978816755e-06
+          },
+          {
+            "denominator": -0.8862791569866314,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.1304701036555756e-06
+          },
+          {
+            "denominator": -0.8862763742909916,
+            "family": "boundflow_r31b1_relu28_coeff",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 3.913165743423146e-06
+          },
+          {
+            "denominator": -0.8862793309051089,
+            "family": "boundflow_r31b1_seed",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 9.565516261701024e-07
+          },
+          {
+            "denominator": -0.8862403283277946,
+            "family": "boundflow_r31b2_conv10_right",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 3.9959128940392815e-05
+          },
+          {
+            "denominator": -0.8862655492245063,
+            "family": "boundflow_r31b2_pack_a18_sign",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.4738232228788496e-05
+          },
+          {
+            "denominator": -0.886239416614526,
+            "family": "boundflow_r31b2_pack_a20_sign",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.08708422090862e-05
+          },
+          {
+            "denominator": -0.8862672435709237,
+            "family": "boundflow_r31b2_pack_a24_sign",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.3043885811410488e-05
+          },
+          {
+            "denominator": -0.8862640681999714,
+            "family": "boundflow_r31b2_pack_ainput_sign",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.621925676362573e-05
+          },
+          {
+            "denominator": -0.8839972908537597,
+            "family": "boundflow_r31b1_concretize",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.002282996602975383
+          },
+          {
+            "denominator": -0.8855175625387701,
+            "family": "boundflow_r31b1_conv0",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.000762724917964964
+          },
+          {
+            "denominator": -0.8861897656066801,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 9.052185005497808e-05
+          },
+          {
+            "denominator": -0.8862579810532594,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.230640347561729e-05
+          },
+          {
+            "denominator": -0.8842508667114097,
+            "family": "boundflow_r31b1_relu17_bias",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0020294207453253527
+          },
+          {
+            "denominator": -0.8862581984513562,
+            "family": "boundflow_r31b1_relu17_coeff",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.2089005378760447e-05
+          },
+          {
+            "denominator": -0.8852374641133035,
+            "family": "boundflow_r31b1_relu23_bias",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0010428233434315293
+          },
+          {
+            "denominator": -0.8862607651076373,
+            "family": "boundflow_r31b1_relu23_coeff",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.9522349097744365e-05
+          },
+          {
+            "denominator": -0.8852196401868374,
+            "family": "boundflow_r31b1_relu28_bias",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0010606472698975796
+          },
+          {
+            "denominator": -0.8862586359650262,
+            "family": "boundflow_r31b1_relu28_coeff",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.1651491708836056e-05
+          },
+          {
+            "denominator": -0.8861602402276507,
+            "family": "boundflow_r31b1_relu31_bias",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.00012004722908434786
+          },
+          {
+            "denominator": -0.8862554578765978,
+            "family": "boundflow_r31b1_relu31_coeff",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.4829580137262006e-05
+          },
+          {
+            "denominator": -0.7865068344807504,
+            "family": "boundflow_r31b1_residual11",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.09977345297598456
+          },
+          {
+            "denominator": -0.5600044191960468,
+            "family": "boundflow_r31b1_residual6",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.3262758682606882
+          },
+          {
+            "denominator": -0.8862563301864614,
+            "family": "boundflow_r31b1_seed",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.395727027362393e-05
+          },
+          {
+            "denominator": -0.8862791569866314,
+            "family": "boundflow_r31b2_clear_arenas",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.1304701036555756e-06
+          },
+          {
+            "denominator": -0.8862783308738633,
+            "family": "boundflow_r31b2_compressed_gradient",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.956582871711573e-06
+          },
+          {
+            "denominator": -0.8861806756487552,
+            "family": "adam-step",
+            "phase": "optimizer.adam",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 9.961180797980476e-05
+          },
+          {
+            "denominator": -0.8862764191293491,
+            "family": "boundflow_r31b2_compressed_gradient",
+            "phase": "optimizer.adam",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 3.8683273859464225e-06
+          },
+          {
+            "denominator": -0.8862648956714776,
+            "family": "alpha-clamp",
+            "phase": "optimizer.clamp",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.5391785257464375e-05
+          },
+          {
+            "denominator": -0.8862778960776696,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "optimizer.clamp",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.391379065425256e-06
+          },
+          {
+            "denominator": -0.8719963710532818,
+            "family": "boundflow_r31b1_residual11",
+            "phase": "optimizer.clamp",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.01428391640345328
+          },
+          {
+            "denominator": -0.8862708958589508,
+            "family": "boundflow_r31b1_conv0",
+            "phase": "optimizer.scheduler",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 9.39159778421555e-06
+          },
+          {
+            "denominator": -0.886278287394244,
+            "family": "boundflow_r31b1_relu17_coeff",
+            "phase": "optimizer.scheduler",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.0000624910829416e-06
+          },
+          {
+            "denominator": -0.88626680877473,
+            "family": "boundflow_r31b2_compressed_gradient",
+            "phase": "wrapper",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.3478682005124171e-05
+          },
+          {
+            "denominator": -0.8862669826932074,
+            "family": "wrapper",
+            "phase": "wrapper",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.3304763527638697e-05
+          }
+        ],
+        "graph_capture_admitted": false,
+        "graph_optimistic_ns": 734052591,
+        "graph_physical": false,
+        "native_ns": 100434112,
+        "performance_claimed": false,
+        "required_saving_ns": 652281910.6666666,
+        "route": "compiled-region-schedule",
+        "route_hash": "61f544afa4b9e4992bf46fbf8f58fab48d8bea9c2ba58b9d828e100832573dc7",
+        "schema_version": "boundflow.r3-d0-amdahl-route/v1",
+        "target_candidate_ns": 83695093.33333334,
+        "target_speedup": 1.2
+      }
+    },
+    {
+      "alpha_max_abs_diff": 2.384185791015625e-07,
+      "candidate_compiled_region": {
+        "kernel_count": 520,
+        "kernel_sum_ns": 720349568,
+        "kernel_union_ns": 720349568,
+        "persistent_dense_a": false,
+        "profiled_wrapper_share": 0.9972572094637475,
+        "scratch_buffer_count": 2,
+        "semantic_closure_source": "R3-2A-validated-full-region-10/9"
+      },
+      "candidate_host_residual_ns": 1932015,
+      "candidate_kernel_union_ns": 720475520,
+      "candidate_median_ns": 752218966,
+      "lower_max_abs_diff": 8.58306884765625e-06,
+      "native_host_residual_ns": 89368778,
+      "native_kernel_union_ns": 16014940,
+      "native_median_ns": 100175606,
+      "order": [
+        "native",
+        "candidate"
+      ],
+      "pair_index": 2,
+      "route": {
+        "candidate_host_residual_ns": 1932015,
+        "candidate_ns": 752218966,
+        "compiled_region_route": {
+          "denominator": 0.10823509680761259,
+          "required_speedup": 9.213806231784204,
+          "semantic_closure_admitted": true,
+          "within_10x": true,
+          "wrapper_share": 0.9972572094637475
+        },
+        "family_routes": [
+          {
+            "denominator": -0.8890107968021287,
+            "family": "boundflow_r31b2_clear_arenas",
+            "phase": "backward.clear",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.1315854006265512e-05
+          },
+          {
+            "denominator": -0.8890192624222312,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.850233903833794e-06
+          },
+          {
+            "denominator": -0.8890210065952171,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.1060609179056515e-06
+          },
+          {
+            "denominator": -0.8889943760515783,
+            "family": "boundflow_r31b2_effective_pre17",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.773660455671095e-05
+          },
+          {
+            "denominator": -0.8553114869657957,
+            "family": "boundflow_r31b2_effective_pre23",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.03371062569033922
+          },
+          {
+            "denominator": -0.8881314783723937,
+            "family": "boundflow_r31b2_effective_pre25",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0008906342837412584
+          },
+          {
+            "denominator": -0.8882506271894949,
+            "family": "boundflow_r31b1_conv0",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0007714854666400422
+          },
+          {
+            "denominator": -0.8888554789953719,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.00016663366076308158
+          },
+          {
+            "denominator": -0.8889776987268004,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.44139293345071e-05
+          },
+          {
+            "denominator": -0.8890047134670802,
+            "family": "boundflow_r31b1_relu17_coeff",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.7399189054746593e-05
+          },
+          {
+            "denominator": -0.8890013939549264,
+            "family": "boundflow_r31b1_relu23_coeff",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.071870120860526e-05
+          },
+          {
+            "denominator": -0.8889183556338744,
+            "family": "boundflow_r31b1_relu28_bias",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.00010375702226045707
+          },
+          {
+            "denominator": -0.8889856139752442,
+            "family": "boundflow_r31b1_relu28_coeff",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 3.649868089074478e-05
+          },
+          {
+            "denominator": -0.8889768066993053,
+            "family": "boundflow_r31b1_relu31_coeff",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.530595682959688e-05
+          },
+          {
+            "denominator": -0.7353279315391967,
+            "family": "boundflow_r31b1_residual11",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.15369418111693822
+          },
+          {
+            "denominator": -0.5717397310789599,
+            "family": "boundflow_r31b1_residual6",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.317282381577175
+          },
+          {
+            "denominator": -0.8889813160245861,
+            "family": "boundflow_r31b1_seed",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.0796631548904604e-05
+          },
+          {
+            "denominator": -0.8885913391518147,
+            "family": "boundflow_r31b2_conv10_right",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.00043077350432028325
+          },
+          {
+            "denominator": -0.8890164121883273,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 5.700467807667588e-06
+          },
+          {
+            "denominator": -0.8890210065952171,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.1060609179056515e-06
+          },
+          {
+            "denominator": -0.8890163696475227,
+            "family": "boundflow_r31b1_relu28_coeff",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 5.743008612202421e-06
+          },
+          {
+            "denominator": -0.8572987926142417,
+            "family": "boundflow_r31b1_residual6",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.031723320041893224
+          },
+          {
+            "denominator": -0.8890211767584352,
+            "family": "boundflow_r31b1_seed",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 9.358976997663205e-07
+          },
+          {
+            "denominator": -0.8889830176567675,
+            "family": "boundflow_r31b2_conv10_right",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 3.9094999367511294e-05
+          },
+          {
+            "denominator": -0.8890075211601796,
+            "family": "boundflow_r31b2_pack_a18_sign",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.4591495955447632e-05
+          },
+          {
+            "denominator": -0.8889779127602233,
+            "family": "boundflow_r31b2_pack_a20_sign",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.4199895911691224e-05
+          },
+          {
+            "denominator": -0.8890093065445698,
+            "family": "boundflow_r31b2_pack_a24_sign",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.280611156512637e-05
+          },
+          {
+            "denominator": -0.8890062449360434,
+            "family": "boundflow_r31b2_pack_ainput_sign",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.5867720091492615e-05
+          },
+          {
+            "denominator": -0.8867882391752049,
+            "family": "boundflow_r31b1_concretize",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0022338734809300197
+          },
+          {
+            "denominator": -0.8882758179927802,
+            "family": "boundflow_r31b1_conv0",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0007462946633547126
+          },
+          {
+            "denominator": -0.8889421306260089,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 7.998203012605242e-05
+          },
+          {
+            "denominator": -0.8889988827180586,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.3229938076302107e-05
+          },
+          {
+            "denominator": -0.8870365937214795,
+            "family": "boundflow_r31b1_relu17_bias",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0019855189346555243
+          },
+          {
+            "denominator": -0.8890005019274313,
+            "family": "boundflow_r31b1_relu17_coeff",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.1610728703695036e-05
+          },
+          {
+            "denominator": -0.8880018924347799,
+            "family": "boundflow_r31b1_relu23_bias",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0010202202213550676
+          },
+          {
+            "denominator": -0.8890030955871078,
+            "family": "boundflow_r31b1_relu23_coeff",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.9017069027211953e-05
+          },
+          {
+            "denominator": -0.8880883832079998,
+            "family": "boundflow_r31b1_relu28_bias",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0009337294481351856
+          },
+          {
+            "denominator": -0.8890027565900716,
+            "family": "boundflow_r31b1_relu28_coeff",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.93560660633489e-05
+          },
+          {
+            "denominator": -0.8889048701988369,
+            "family": "boundflow_r31b1_relu31_bias",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.00011724245729799906
+          },
+          {
+            "denominator": -0.8889977766571407,
+            "family": "boundflow_r31b1_relu31_coeff",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.4335998994207758e-05
+          },
+          {
+            "denominator": -0.7773446094329578,
+            "family": "boundflow_r31b1_residual11",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.11167750322317717
+          },
+          {
+            "denominator": -0.6035012913159296,
+            "family": "boundflow_r31b1_residual6",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.28552082134020534
+          },
+          {
+            "denominator": -0.8889986354496323,
+            "family": "boundflow_r31b1_seed",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.3477206502660822e-05
+          },
+          {
+            "denominator": -0.8890201983199308,
+            "family": "boundflow_r31b2_compressed_gradient",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.9143362040674734e-06
+          },
+          {
+            "denominator": -0.8890209640544126,
+            "family": "boundflow_r31b2_pack_a24_sign",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.1486017224404842e-06
+          },
+          {
+            "denominator": -0.8889244854979279,
+            "family": "adam-step",
+            "phase": "optimizer.adam",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 9.762715820701602e-05
+          },
+          {
+            "denominator": -0.8890183703947361,
+            "family": "boundflow_r31b2_compressed_gradient",
+            "phase": "optimizer.adam",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 3.7422613989235684e-06
+          },
+          {
+            "denominator": -0.8890070957521342,
+            "family": "alpha-clamp",
+            "phase": "optimizer.clamp",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.501690400079596e-05
+          },
+          {
+            "denominator": -0.88901981545269,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "optimizer.clamp",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.2972034448809685e-06
+          },
+          {
+            "denominator": -0.8749895683078713,
+            "family": "boundflow_r31b1_residual11",
+            "phase": "optimizer.clamp",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.014032544348263615
+          },
+          {
+            "denominator": -0.8890129238423554,
+            "family": "boundflow_r31b1_conv0",
+            "phase": "optimizer.scheduler",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 9.188813779523874e-06
+          },
+          {
+            "denominator": -0.8890201557791263,
+            "family": "boundflow_r31b1_relu17_coeff",
+            "phase": "optimizer.scheduler",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.9568770086023064e-06
+          },
+          {
+            "denominator": -0.8890088824659246,
+            "family": "boundflow_r31b2_compressed_gradient",
+            "phase": "wrapper",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.3230190210332984e-05
+          },
+          {
+            "denominator": -0.8890087136321067,
+            "family": "wrapper",
+            "phase": "wrapper",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.3399024028330601e-05
+          }
+        ],
+        "graph_capture_admitted": false,
+        "graph_optimistic_ns": 750286951,
+        "graph_physical": false,
+        "native_ns": 100175606,
+        "performance_claimed": false,
+        "required_saving_ns": 668739294.3333334,
+        "route": "compiled-region-schedule",
+        "route_hash": "a5a391a9a15b004bca1116af2baec66d902806dc3596041a00c1943b06cddd34",
+        "schema_version": "boundflow.r3-d0-amdahl-route/v1",
+        "target_candidate_ns": 83479671.66666667,
+        "target_speedup": 1.2
+      }
+    },
+    {
+      "alpha_max_abs_diff": 2.384185791015625e-07,
+      "candidate_compiled_region": {
+        "kernel_count": 520,
+        "kernel_sum_ns": 741757822,
+        "kernel_union_ns": 741757822,
+        "persistent_dense_a": false,
+        "profiled_wrapper_share": 0.9966268939046792,
+        "scratch_buffer_count": 2,
+        "semantic_closure_source": "R3-2A-validated-full-region-10/9"
+      },
+      "candidate_host_residual_ns": 2358451,
+      "candidate_kernel_union_ns": 741884319,
+      "candidate_median_ns": 736292555,
+      "lower_max_abs_diff": 8.344650268554688e-06,
+      "native_host_residual_ns": 89295895,
+      "native_kernel_union_ns": 16015422,
+      "native_median_ns": 100089906,
+      "order": [
+        "candidate",
+        "native"
+      ],
+      "pair_index": 3,
+      "route": {
+        "candidate_host_residual_ns": 2358451,
+        "candidate_ns": 736292555,
+        "compiled_region_route": {
+          "denominator": 0.10990829873974504,
+          "required_speedup": 9.067803844954602,
+          "semantic_closure_admitted": true,
+          "within_10x": true,
+          "wrapper_share": 0.9966268939046792
+        },
+        "family_routes": [
+          {
+            "denominator": -0.8722972908506457,
+            "family": "boundflow_r31b1_residual11",
+            "phase": "backward.clear",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.014421304314288496
+          },
+          {
+            "denominator": -0.8867069041598553,
+            "family": "boundflow_r31b2_clear_arenas",
+            "phase": "backward.clear",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.1691005078816803e-05
+          },
+          {
+            "denominator": -0.8867156832789108,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.911886023348423e-06
+          },
+          {
+            "denominator": -0.8867174638211573,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.1313437767953528e-06
+          },
+          {
+            "denominator": -0.8866902586024382,
+            "family": "boundflow_r31b2_effective_pre17",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.8336562495868234e-05
+          },
+          {
+            "denominator": -0.8520843430231343,
+            "family": "boundflow_r31b2_effective_pre23",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.034634252141799805
+          },
+          {
+            "denominator": -0.8858043444429504,
+            "family": "boundflow_r31b2_effective_pre25",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0009142507219837365
+          },
+          {
+            "denominator": -0.8859366410407341,
+            "family": "boundflow_r31b1_conv0",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0007819541241999928
+          },
+          {
+            "denominator": -0.8865447091204121,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0001738860445220718
+          },
+          {
+            "denominator": -0.8866716151978475,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.697996708658829e-05
+          },
+          {
+            "denominator": -0.8867006892389397,
+            "family": "boundflow_r31b1_relu17_coeff",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.7905925994321646e-05
+          },
+          {
+            "denominator": -0.8866972992820767,
+            "family": "boundflow_r31b1_relu23_coeff",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.1295882857324287e-05
+          },
+          {
+            "denominator": -0.8866121143924917,
+            "family": "boundflow_r31b1_relu28_bias",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.00010648077244241591
+          },
+          {
+            "denominator": -0.8866791312320141,
+            "family": "boundflow_r31b1_relu28_coeff",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 3.946393291997907e-05
+          },
+          {
+            "denominator": -0.8866723105736143,
+            "family": "boundflow_r31b1_relu31_coeff",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.628459131981852e-05
+          },
+          {
+            "denominator": -0.7268553448839368,
+            "family": "boundflow_r31b1_residual11",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.15986325028099735
+          },
+          {
+            "denominator": -0.5607997788324778,
+            "family": "boundflow_r31b1_residual6",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.32591881633245634
+          },
+          {
+            "denominator": -0.8866771809202932,
+            "family": "boundflow_r31b1_seed",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.141424464084117e-05
+          },
+          {
+            "denominator": -0.8862361768685818,
+            "family": "boundflow_r31b2_conv10_right",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0004824182963523243
+          },
+          {
+            "denominator": -0.886714247708236,
+            "family": "boundflow_r31b2_pack_a20_sign",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.347456698105551e-06
+          },
+          {
+            "denominator": -0.8867156832789108,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.911886023348423e-06
+          },
+          {
+            "denominator": -0.8867174651793132,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.1299856210008805e-06
+          },
+          {
+            "denominator": -0.8867147705982169,
+            "family": "boundflow_r31b1_relu28_coeff",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 3.82456671723375e-06
+          },
+          {
+            "denominator": -0.8867176390232548,
+            "family": "boundflow_r31b1_seed",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 9.561416793084375e-07
+          },
+          {
+            "denominator": -0.8867036011249632,
+            "family": "boundflow_r31b2_pack_a18_sign",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.4994039970973223e-05
+          },
+          {
+            "denominator": -0.8866776970194952,
+            "family": "boundflow_r31b2_pack_a20_sign",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.089814543894173e-05
+          },
+          {
+            "denominator": -0.8867054699473363,
+            "family": "boundflow_r31b2_pack_a24_sign",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.312521759777946e-05
+          },
+          {
+            "denominator": -0.8867022551925708,
+            "family": "boundflow_r31b2_pack_ainput_sign",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.6339972363295185e-05
+          },
+          {
+            "denominator": -0.8844263636483463,
+            "family": "boundflow_r31b1_concretize",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0022922315165878598
+          },
+          {
+            "denominator": -0.885943547262949,
+            "family": "boundflow_r31b1_conv0",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0007750479019851016
+          },
+          {
+            "denominator": -0.8866364987216256,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 8.20964433084618e-05
+          },
+          {
+            "denominator": -0.8866960823744849,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.251279044917139e-05
+          },
+          {
+            "denominator": -0.8846806144875389,
+            "family": "boundflow_r31b1_relu17_bias",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.002037980677395278
+          },
+          {
+            "denominator": -0.886696386601383,
+            "family": "boundflow_r31b1_relu17_coeff",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.2208563551209613e-05
+          },
+          {
+            "denominator": -0.8856712669055848,
+            "family": "boundflow_r31b1_relu23_bias",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0010473282593493017
+          },
+          {
+            "denominator": -0.8866990363633379,
+            "family": "boundflow_r31b1_relu23_coeff",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.9558801596194327e-05
+          },
+          {
+            "denominator": -0.8857599694186776,
+            "family": "boundflow_r31b1_relu28_bias",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0009586257462565271
+          },
+          {
+            "denominator": -0.8866989073385374,
+            "family": "boundflow_r31b1_relu28_coeff",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.9687826396669188e-05
+          },
+          {
+            "denominator": -0.8865981199551854,
+            "family": "boundflow_r31b1_relu31_bias",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.00012047520974865758
+          },
+          {
+            "denominator": -0.8866936906621309,
+            "family": "boundflow_r31b1_relu31_coeff",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.4904502803236954e-05
+          },
+          {
+            "denominator": -0.7861361059124115,
+            "family": "boundflow_r31b1_residual11",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.10058248925252272
+          },
+          {
+            "denominator": -0.539316981142095,
+            "family": "boundflow_r31b1_residual6",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.34740161402283903
+          },
+          {
+            "denominator": -0.8866946508782776,
+            "family": "boundflow_r31b1_seed",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.3944286656545102e-05
+          },
+          {
+            "denominator": -0.8867166828815755,
+            "family": "boundflow_r31b2_compressed_gradient",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.912283358616875e-06
+          },
+          {
+            "denominator": -0.8867174217183277,
+            "family": "boundflow_r31b2_pack_a24_sign",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.1734466064239914e-06
+          },
+          {
+            "denominator": -0.8866185031573489,
+            "family": "adam-step",
+            "phase": "optimizer.adam",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.00010009200758521862
+          },
+          {
+            "denominator": -0.8867146836762461,
+            "family": "boundflow_r31b2_compressed_gradient",
+            "phase": "optimizer.adam",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 3.911488688079971e-06
+          },
+          {
+            "denominator": -0.8867031651569531,
+            "family": "alpha-clamp",
+            "phase": "optimizer.clamp",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.5430007980998803e-05
+          },
+          {
+            "denominator": -0.8867161613497504,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "optimizer.clamp",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.433815183694204e-06
+          },
+          {
+            "denominator": -0.8723709151181082,
+            "family": "boundflow_r31b1_residual11",
+            "phase": "optimizer.clamp",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.014347680046825953
+          },
+          {
+            "denominator": -0.8867092075920827,
+            "family": "boundflow_r31b1_conv0",
+            "phase": "optimizer.scheduler",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 9.387572851391931e-06
+          },
+          {
+            "denominator": -0.8867165959596046,
+            "family": "boundflow_r31b1_relu17_coeff",
+            "phase": "optimizer.scheduler",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.9992053294630962e-06
+          },
+          {
+            "denominator": -0.8867050787984675,
+            "family": "boundflow_r31b2_compressed_gradient",
+            "phase": "wrapper",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.3516366466587455e-05
+          },
+          {
+            "denominator": -0.8867049063126816,
+            "family": "wrapper",
+            "phase": "wrapper",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.3688852252485426e-05
+          }
+        ],
+        "graph_capture_admitted": false,
+        "graph_optimistic_ns": 733934104,
+        "graph_physical": false,
+        "native_ns": 100089906,
+        "performance_claimed": false,
+        "required_saving_ns": 652884300.0,
+        "route": "compiled-region-schedule",
+        "route_hash": "0b85fea8992f326e78350767b55401e18c7ebab9468ff0412c44c048d4bc2c9d",
+        "schema_version": "boundflow.r3-d0-amdahl-route/v1",
+        "target_candidate_ns": 83408255.0,
+        "target_speedup": 1.2
+      }
+    },
+    {
+      "alpha_max_abs_diff": 2.384185791015625e-07,
+      "candidate_compiled_region": {
+        "kernel_count": 520,
+        "kernel_sum_ns": 720302933,
+        "kernel_union_ns": 720302933,
+        "persistent_dense_a": false,
+        "profiled_wrapper_share": 0.9968968276811337,
+        "scratch_buffer_count": 2,
+        "semantic_closure_source": "R3-2A-validated-full-region-10/9"
+      },
+      "candidate_host_residual_ns": 2152181,
+      "candidate_kernel_union_ns": 720428823,
+      "candidate_median_ns": 734798476,
+      "lower_max_abs_diff": 8.58306884765625e-06,
+      "native_host_residual_ns": 86386896,
+      "native_kernel_union_ns": 16020177,
+      "native_median_ns": 97071717,
+      "order": [
+        "native",
+        "candidate"
+      ],
+      "pair_index": 4,
+      "route": {
+        "candidate_host_residual_ns": 2152181,
+        "candidate_ns": 734798476,
+        "compiled_region_route": {
+          "denominator": 0.10698564814297695,
+          "required_speedup": 9.31804260650801,
+          "semantic_closure_admitted": true,
+          "within_10x": true,
+          "wrapper_share": 0.9968968276811337
+        },
+        "family_routes": [
+          {
+            "denominator": -0.8899055616713064,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "backward.clear",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 5.6178668503389765e-06
+          },
+          {
+            "denominator": -0.8755815335958862,
+            "family": "boundflow_r31b1_residual11",
+            "phase": "backward.clear",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.01432964594227057
+          },
+          {
+            "denominator": -0.8899005943229529,
+            "family": "boundflow_r31b2_clear_arenas",
+            "phase": "backward.clear",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.05852152039575e-05
+          },
+          {
+            "denominator": -0.8899100037055602,
+            "family": "boundflow_r31b2_pack_a24_sign",
+            "phase": "backward.clear",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.1758325965825765e-06
+          },
+          {
+            "denominator": -0.8899082617313431,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.917806813741949e-06
+          },
+          {
+            "denominator": -0.8899100472549156,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.132283241153592e-06
+          },
+          {
+            "denominator": -0.8898828697352933,
+            "family": "boundflow_r31b2_effective_pre17",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.8309802863554115e-05
+          },
+          {
+            "denominator": -0.8553986065970012,
+            "family": "boundflow_r31b2_effective_pre23",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.03451257294115564
+          },
+          {
+            "denominator": -0.8889997718231523,
+            "family": "boundflow_r31b2_effective_pre25",
+            "phase": "backward.effective",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0009114077150045695
+          },
+          {
+            "denominator": -0.8891308975714315,
+            "family": "boundflow_r31b1_conv0",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0007802819667252549
+          },
+          {
+            "denominator": -0.889743296772978,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.00016788276517873453
+          },
+          {
+            "denominator": -0.8898655370918325,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.564244632428987e-05
+          },
+          {
+            "denominator": -0.8898933678517863,
+            "family": "boundflow_r31b1_relu17_coeff",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.7811686370454585e-05
+          },
+          {
+            "denominator": -0.8898898852642694,
+            "family": "boundflow_r31b1_relu23_coeff",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.1294273887416175e-05
+          },
+          {
+            "denominator": -0.8898050048487036,
+            "family": "boundflow_r31b1_relu28_bias",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.00010617468945322092
+          },
+          {
+            "denominator": -0.8898717673714935,
+            "family": "boundflow_r31b1_relu28_coeff",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 3.9412166663230805e-05
+          },
+          {
+            "denominator": -0.8898649314836086,
+            "family": "boundflow_r31b1_relu31_coeff",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.624805454822419e-05
+          },
+          {
+            "denominator": -0.7469062503880316,
+            "family": "boundflow_r31b1_residual11",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.14300492915012525
+          },
+          {
+            "denominator": -0.5651383135149562,
+            "family": "boundflow_r31b1_residual6",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.3247728660232006
+          },
+          {
+            "denominator": -0.8898696715587635,
+            "family": "boundflow_r31b1_seed",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.150797939325067e-05
+          },
+          {
+            "denominator": -0.8894301333580882,
+            "family": "boundflow_r31b2_conv10_right",
+            "phase": "backward.recompute",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0004810461800685607
+          },
+          {
+            "denominator": -0.8899082617313431,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.917806813741949e-06
+          },
+          {
+            "denominator": -0.8899100908042711,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.088733885724608e-06
+          },
+          {
+            "denominator": -0.8899073036455236,
+            "family": "boundflow_r31b1_relu28_coeff",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 3.875892633179604e-06
+          },
+          {
+            "denominator": -0.8899102214523373,
+            "family": "boundflow_r31b1_seed",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 9.580858194376548e-07
+          },
+          {
+            "denominator": -0.8898962448310793,
+            "family": "boundflow_r31b2_pack_a18_sign",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.4934707077427307e-05
+          },
+          {
+            "denominator": -0.8898661508655605,
+            "family": "boundflow_r31b2_pack_a20_sign",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 4.502867259621262e-05
+          },
+          {
+            "denominator": -0.8898992456538519,
+            "family": "boundflow_r31b2_pack_a24_sign",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.1933884304898858e-05
+          },
+          {
+            "denominator": -0.8898949791779373,
+            "family": "boundflow_r31b2_pack_ainput_sign",
+            "phase": "backward.sign",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.6200360219582164e-05
+          },
+          {
+            "denominator": -0.8876244355465974,
+            "family": "boundflow_r31b1_concretize",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0022867439915593944
+          },
+          {
+            "denominator": -0.8891377797305067,
+            "family": "boundflow_r31b1_conv0",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0007733998076501183
+          },
+          {
+            "denominator": -0.8898289597160243,
+            "family": "boundflow_r31b1_linear14",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 8.221982213256523e-05
+          },
+          {
+            "denominator": -0.8898872668592742,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.3912678882583854e-05
+          },
+          {
+            "denominator": -0.8878787175111125,
+            "family": "boundflow_r31b1_relu17_bias",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0020324620270442697
+          },
+          {
+            "denominator": -0.8898891000149542,
+            "family": "boundflow_r31b1_relu17_coeff",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.2079523202495048e-05
+          },
+          {
+            "denominator": -0.888866729903234,
+            "family": "boundflow_r31b1_relu23_bias",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.0010444496349227594
+          },
+          {
+            "denominator": -0.8898917973531562,
+            "family": "boundflow_r31b1_relu23_coeff",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.938218500061233e-05
+          },
+          {
+            "denominator": -0.8889552249153004,
+            "family": "boundflow_r31b1_relu28_bias",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.000955954622856349
+          },
+          {
+            "denominator": -0.889891408130792,
+            "family": "boundflow_r31b1_relu28_coeff",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.977140736475888e-05
+          },
+          {
+            "denominator": -0.8897909846780901,
+            "family": "boundflow_r31b1_relu31_bias",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.00012019486006663955
+          },
+          {
+            "denominator": -0.8898863114952895,
+            "family": "boundflow_r31b1_relu31_coeff",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.48680428673072e-05
+          },
+          {
+            "denominator": -0.7755462485472003,
+            "family": "boundflow_r31b1_residual11",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.11436493099095649
+          },
+          {
+            "denominator": -0.5651479338397539,
+            "family": "boundflow_r31b1_residual6",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.32476324569840287
+          },
+          {
+            "denominator": -0.8898870981055219,
+            "family": "boundflow_r31b1_seed",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.408143263487117e-05
+          },
+          {
+            "denominator": -0.8899100050664775,
+            "family": "boundflow_r31b2_clear_arenas",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.1744716792254207e-06
+          },
+          {
+            "denominator": -0.8899092647274353,
+            "family": "boundflow_r31b2_compressed_gradient",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.914810721518154e-06
+          },
+          {
+            "denominator": -0.8899100037055602,
+            "family": "boundflow_r31b2_pack_a24_sign",
+            "phase": "forward",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.1758325965825765e-06
+          },
+          {
+            "denominator": -0.8898112759558854,
+            "family": "adam-step",
+            "phase": "optimizer.adam",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 9.990358227144717e-05
+          },
+          {
+            "denominator": -0.8899073471948791,
+            "family": "boundflow_r31b2_compressed_gradient",
+            "phase": "optimizer.adam",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 3.832343277750619e-06
+          },
+          {
+            "denominator": -0.889895847443211,
+            "family": "alpha-clamp",
+            "phase": "optimizer.clamp",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.533209494571679e-05
+          },
+          {
+            "denominator": -0.8899087829626908,
+            "family": "boundflow_r31b1_linear16",
+            "phase": "optimizer.clamp",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.396575465951293e-06
+          },
+          {
+            "denominator": -0.8756145889175742,
+            "family": "boundflow_r31b1_residual11",
+            "phase": "optimizer.clamp",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 0.014296590620582616
+          },
+          {
+            "denominator": -0.8899018164267396,
+            "family": "boundflow_r31b1_conv0",
+            "phase": "optimizer.scheduler",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 9.363111417231627e-06
+          },
+          {
+            "denominator": -0.8899091762678071,
+            "family": "boundflow_r31b1_relu17_coeff",
+            "phase": "optimizer.scheduler",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 2.0032703497332784e-06
+          },
+          {
+            "denominator": -0.8898976356886183,
+            "family": "boundflow_r31b2_compressed_gradient",
+            "phase": "wrapper",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.3543849538414121e-05
+          },
+          {
+            "denominator": -0.8898974179418412,
+            "family": "wrapper",
+            "phase": "wrapper",
+            "required_speedup": null,
+            "semantic_closure_admitted": false,
+            "within_10x": false,
+            "wrapper_share": 1.3761596315559043e-05
+          }
+        ],
+        "graph_capture_admitted": false,
+        "graph_optimistic_ns": 732646295,
+        "graph_physical": false,
+        "native_ns": 97071717,
+        "performance_claimed": false,
+        "required_saving_ns": 653905378.5,
+        "route": "compiled-region-schedule",
+        "route_hash": "f083ef57a9f21f603bd4cee727a6d2c2bc0a39b992fc7ebc824d54d64938f690",
+        "schema_version": "boundflow.r3-d0-amdahl-route/v1",
+        "target_candidate_ns": 80893097.5,
+        "target_speedup": 1.2
+      }
+    }
+  ],
+  "performance_claimed": false,
+  "r3_3_open": false,
+  "r3_d1_open": true,
+  "sample_count_per_worker": 30,
+  "summary_hash": "67f433d708fe544951d07425c8cb7644717072417d6e68287e5d2e82693c1e9b",
+  "verdict": "VALIDATED-R3-D0-COMPILED-REGION-SCHEDULE-OPPORTUNITY",
+  "warmup_count_per_worker": 3,
+  "worker_count": 10,
+  "worst_compiled_region_required_speedup": 9.31804260650801
+}

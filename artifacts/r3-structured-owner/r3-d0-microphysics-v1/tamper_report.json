@@ -1,0 +1,69 @@
+{
+  "case_count": 12,
+  "cases": [
+    {
+      "case": "kernel-duration",
+      "error": "R3-D0 worker ledger replay differs",
+      "rejected": true
+    },
+    {
+      "case": "correlation-id",
+      "error": "R3-D0 worker ledger replay differs",
+      "rejected": true
+    },
+    {
+      "case": "marker-ordinal",
+      "error": "R3-D0 worker ledger replay differs",
+      "rejected": true
+    },
+    {
+      "case": "fallback-method",
+      "error": "R3-D0 worker ledger replay differs",
+      "rejected": true
+    },
+    {
+      "case": "region-family",
+      "error": "R3-D0 worker ledger replay differs",
+      "rejected": true
+    },
+    {
+      "case": "host-calibration",
+      "error": "R3-D0 worker ledger replay differs",
+      "rejected": true
+    },
+    {
+      "case": "launch-count",
+      "error": "R3-D0 worker ledger replay differs",
+      "rejected": true
+    },
+    {
+      "case": "target-budget",
+      "error": "R3-D0 summary replay differs",
+      "rejected": true
+    },
+    {
+      "case": "required-speedup",
+      "error": "R3-D0 summary replay differs",
+      "rejected": true
+    },
+    {
+      "case": "route",
+      "error": "R3-D0 summary replay differs",
+      "rejected": true
+    },
+    {
+      "case": "summary-verdict",
+      "error": "R3-D0 summary replay differs",
+      "rejected": true
+    },
+    {
+      "case": "performance-claim",
+      "error": "R3-D0 artifact boundary differs",
+      "rejected": true
+    }
+  ],
+  "performance_claimed": false,
+  "rejected_count": 12,
+  "report_hash": "ab39756cd799f546a5994c70a1689a324cd4cf5a4261d9c5bafa374dbbc03b3f",
+  "schema_version": "boundflow.r3-d0-microphysics-tamper-report/v1"
+}

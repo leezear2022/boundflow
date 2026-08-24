@@ -1,0 +1,49 @@
+{
+  "code_revision": {
+    "boundflow/runtime/r3_compiled_p_alpha_vjp.py": "59c122e3b7ace7e1093f04478f2ecf3c04c48ab6b77e902e577bca52d6ef8205",
+    "boundflow/runtime/r3_d0_microphysics_attribution.py": "c11b5c66509ef4ebb739b35fc2f1f19128696021eae420debc643cfa6d171f21",
+    "boundflow/runtime/r3_full_lower_forward_tir.py": "dd7fce2c78b70271f02ad1544053906f3031e07f8270a568bc2ee6617f506420",
+    "boundflow/runtime/r3_optimizer_trajectory_timing.py": "ef3e1657138b12056c0de4fcc47835dc8884cc1fb8b69799c505d080eba79b7d",
+    "scripts/run_r3_d0_microphysics_artifact.py": "a6b28cd4f87a0ba2cca9bfcb22378a4c2223eb2ce0f209e506e2b7311b8e6148",
+    "scripts/run_r3_d0_microphysics_worker.py": "4ad0e5039ae8665029be03d5bfc8c55fcc40a815532e00d979e8ca796b8b5602"
+  },
+  "containment_fallback_max_fraction": 0.05,
+  "cuda_calibration_threshold": "max(2ms,5pct-cuda-event)",
+  "host_calibration_threshold": "max(5ms,5pct-host-wall)",
+  "inter_worker_cooldown_seconds": 30,
+  "max_required_region_speedup": 10.0,
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "order": [
+    [
+      "native",
+      "candidate"
+    ],
+    [
+      "candidate",
+      "native"
+    ],
+    [
+      "native",
+      "candidate"
+    ],
+    [
+      "candidate",
+      "native"
+    ],
+    [
+      "native",
+      "candidate"
+    ]
+  ],
+  "performance_claimed": false,
+  "protocol_hash": "38efd8302890b484b8dd0fa42def2eb5fd935cb27850d943852bffd5b7d15851",
+  "r3_2b_manifest_file_sha256": "3ec78e5714ecc6044949672a171f3f3b94e62f10c3f71674c559983714c23f93",
+  "sample_count": 30,
+  "sanity_relative_tolerance": 0.15,
+  "schema_version": "boundflow.r3-d0-microphysics-protocol/v1",
+  "source_capture_sha256": "f42229dd06be8521865d14af4cc51450ec8bec4e792934b457c276aad50126dc",
+  "source_git_head": "423206911599de5aee7a718ddee65cf527b48e28",
+  "target_speedup": 1.2,
+  "unattributed_kernel_max": 0,
+  "warmup_count": 3
+}
