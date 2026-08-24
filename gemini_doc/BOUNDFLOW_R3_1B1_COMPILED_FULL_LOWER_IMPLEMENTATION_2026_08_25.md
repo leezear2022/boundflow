@@ -1,6 +1,6 @@
 ---
-status: implemented-smoke-passed-artifact-pending
-updated: 2026-08-25T10:20:00+08:00
+status: validated-formal-closure
+updated: 2026-08-25T10:55:00+08:00
 type: changelog
 topic: boundflow
 slug: r3-1b1-compiled-full-lower-implementation
@@ -8,6 +8,10 @@ stage: s01
 ---
 
 # BoundFlow R3-1b1 compiled full-lower implementation
+
+> **Formal closure**：source=`bdfa53d`的artifact/replay与10/10全重签tamper已通过；本实现记录的
+> pending状态由`BOUNDFLOW_R3_1B1_COMPILED_FULL_LOWER_FORMAL_CLOSURE_2026_08_25.md`取代。
+> closure后的全量回归为`1585 passed, 3 skipped`。
 
 ## 1. Scope
 

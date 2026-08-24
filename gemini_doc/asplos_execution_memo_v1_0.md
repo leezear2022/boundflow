@@ -1,6 +1,12 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
-> **2026-08-25 R3-1b0关闭/b1开放指令**：12-step exact recurrence、2 residual fused segment、
+> **2026-08-25 R3-1b1关闭/b2开放指令**：source=`bdfa53d`的fresh-process full-lower
+> artifact/replay通过；lower max diff=`3.8147e-6`、15 launches、2 scratch×73,728 B、70/70
+> DLPack、warm allocation=0，10/10全重签tamper拒绝。当前唯一动作是compiled P-alpha VJP；
+> R3-1 admission、five-fresh、optimizer与timing继续关闭。见
+> `BOUNDFLOW_R3_1B1_COMPILED_FULL_LOWER_FORMAL_CLOSURE_2026_08_25.md`。
+>
+> **2026-08-25 R3-1b0关闭/b1开放指令（已由上方b1 closure取代）**：12-step exact recurrence、2 residual fused segment、
 > 2 scratch×73,728 B的static trace已由clean-source replay和6/6 tamper关闭。下一唯一工程动作是b1
 > compiled full-lower forward，只做no-grad lower parity、zero-copy/current-stream、真实scratch pointer与
 > warm allocation=0；不得实现custom VJP、five-fresh或计时。见
@@ -12,7 +18,7 @@
 > 接optimizer或计时。下一唯一动作是先预注册R3-1b compiled recurrence：plan-key context、compressed
 > leaves、两scratch、无dynamic allocation，并重跑同一five-fresh门禁。见
 > `BOUNDFLOW_R3_1_M0_PYTHON_REMATERIALIZATION_FORMAL_NO_GO_CLOSURE_2026_08_25.md`。
-> R3-1b门禁与分步DAG已冻结，当前只开放b0 exact trace/liveness compiler；不得提前写TIR。见
+> R3-1b“当前只开放b0”是历史指令，已由上方b0/b1 closure取代。见
 > `BOUNDFLOW_R3_1B_BOUNDED_ARENA_COMPILED_RECURRENCE_PLAN_2026_08_25.md`。
 
 > **2026-08-25 R3-0 compressed-alpha v2关闭/R3-1重新开放指令**：source=`8941e66`的v2

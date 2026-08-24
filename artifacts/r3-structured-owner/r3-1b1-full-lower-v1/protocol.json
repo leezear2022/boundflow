@@ -1,0 +1,28 @@
+{
+  "artifact_schema": "boundflow.r3-1b1-full-lower-artifact/v1",
+  "code_revision": {
+    "boundflow/backends/tvm/r3_full_lower_forward.py": "6d9789ead1da1998d1e0bc7ea6b39490e4ca7326fda2000e5e4e0d5617c5eb9d",
+    "boundflow/runtime/r3_full_lower_forward_tir.py": "dd7fce2c78b70271f02ad1544053906f3031e07f8270a568bc2ee6617f506420",
+    "scripts/probe_r3_full_lower_forward_tamper.py": "a4b4876885dc0daabc98c223fde3cff3f5be955bcd33da9b261697f4428c0186",
+    "scripts/run_r3_full_lower_forward_artifact.py": "8427db59f4e2d49205687c134eb3e5ed5375df5c33a07f67694602812aa26225",
+    "scripts/run_r3_full_lower_forward_worker.py": "ec4e596a3fdf054942d8d4cf8a92ead14be78834082c5824e768f7b14dc3dbd0",
+    "tests/test_r3_full_lower_forward_artifact.py": "6f8905ea3b1e3242c8e70760be9678c57ca3398f961c6b640c0cc5a78a65614e",
+    "tests/test_r3_full_lower_forward_tir.py": "ea6c22bd82a8d75d9924334ec2eba63d1263a89720a96d73d1e8c2b2b1cefe1e"
+  },
+  "comparison": "independent-native-vs-compiled-full-lower",
+  "compiled_scope": "full-lower-forward-from-objective-seed-through-input-concretize",
+  "custom_vjp": false,
+  "fresh_process_count": 1,
+  "hardware": "NVIDIA GeForce RTX 4060 Laptop GPU / sm_89",
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "performance_claimed": false,
+  "schema_version": "boundflow.r3-1b1-full-lower-protocol/v1",
+  "source_capture_sha256": "f42229dd06be8521865d14af4cc51450ec8bec4e792934b457c276aad50126dc",
+  "source_commit": "bdfa53dc4d92bc6a3bc2dab3c31996e49209e4e3",
+  "timing_recorded": false,
+  "tolerance": {
+    "atol": 0.0002,
+    "rtol": 0.0002,
+    "sign_exact": true
+  }
+}

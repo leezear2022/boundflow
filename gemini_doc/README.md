@@ -1,16 +1,19 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+R3-1b1 compiled full-lower已正式关闭：fresh source=`bdfa53d`、lower max diff=`3.8147e-6`、
+15 launches、2 scratch×73,728 B、70/70 DLPack、warm allocation=0，10/10全重签tamper拒绝。
+只开放b2 compiled P-alpha VJP；R3-1仍未admit且不计时。见
+`BOUNDFLOW_R3_1B1_COMPILED_FULL_LOWER_FORMAL_CLOSURE_2026_08_25.md`。
+
 R3-1b0 exact trace/liveness已正式关闭：12-step、2 residual fused region、2 scratch×73,728 B，
-clean-source replay与6/6 tamper通过。当前只开放b1 compiled no-grad full-lower forward；这不是physical
-memory/correctness/performance claim。见
+clean-source replay与6/6 tamper通过。该“只开放b1”状态已由上方b1 closure取代。见
 `BOUNDFLOW_R3_1B0_TRACE_LIVENESS_FORMAL_CLOSURE_2026_08_25.md`。
 
 R3-1 M0 Python rematerialization 已正式 NO-GO：5对独立进程语义/结构全过，lower/dα最大差=
 `4.7684e-7/2.3283e-10`，但peak allocated=`1.1181179x`且compiled bounded-arena=0/5；reserved=
 `1.0x`。R3-1 admission=false、R3-2A关闭，无性能claim。下一只允许预注册R3-1b compiled
 recurrence。见`BOUNDFLOW_R3_1_M0_PYTHON_REMATERIALIZATION_FORMAL_NO_GO_CLOSURE_2026_08_25.md`。
-R3-1b bounded-arena compiled recurrence 已预注册；当前只开放b0 exact trace/liveness compiler，TIR、
-custom VJP、five-fresh和timing均关闭。见
+R3-1b bounded-arena compiled recurrence 已预注册；该旧“只开放b0”状态已由上方b0/b1 closure取代。见
 `BOUNDFLOW_R3_1B_BOUNDED_ARENA_COMPILED_RECURRENCE_PLAN_2026_08_25.md`。
 
 R3-0 compressed-alpha v2已正式关闭：source=`8941e66`，P-anchor alpha binding exact=

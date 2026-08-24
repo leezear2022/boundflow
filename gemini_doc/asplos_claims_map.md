@@ -1,6 +1,13 @@
 # BoundFlow ASPLOS Claims Map
 
-> **2026-08-25 R3-1b0 trace/liveness正式关闭**：source=`8b0da11`的contract artifact/replay
+> **2026-08-25 R3-1b1 compiled full-lower正式关闭**：source=`bdfa53d`的fresh-process
+> artifact/replay通过；lower max diff=`3.8147e-6`、15 launches、2 scratch×73,728 B、70/70
+> DLPack、warm allocation=0，10/10全重签tamper拒绝。允许claim仅为
+> `VALIDATED-R3-1B1-COMPILED-FULL-LOWER`；custom VJP/R3-1 admission/timing/performance仍false。
+> 下一只开放b2 compiled P-alpha VJP。见
+> `BOUNDFLOW_R3_1B1_COMPILED_FULL_LOWER_FORMAL_CLOSURE_2026_08_25.md`。
+>
+> **2026-08-25 R3-1b0 trace/liveness正式关闭（后继b1亦已关闭）**：source=`8b0da11`的contract artifact/replay
 > 通过，真实ResNet2B full-lower reverse trace=`12 steps/2 residual regions`；融合branch schedule只用
 > 2个scratch，每slot=`18432 float32=73728 B`，6/6全重签tamper拒绝。当前=
 > `VALIDATED-R3-1B0-TRACE-LIVENESS`，只开放b1 compiled no-grad full-lower forward。它不是physical
@@ -14,7 +21,7 @@
 > 最终=`VALIDATED-NO-GO-R3-1-M0-PYTHON-REMATERIALIZATION`，R3-1 admission=false、R3-2A关闭，
 > 无latency/performance claim。下一只允许预注册R3-1b compiled recurrence。见
 > `BOUNDFLOW_R3_1_M0_PYTHON_REMATERIALIZATION_FORMAL_NO_GO_CLOSURE_2026_08_25.md`。
-> 后继R3-1b只完成预注册，当前=`PREREGISTERED-R3-1B-NOT-IMPLEMENTED`；只开放b0 trace/liveness，
+> 后继R3-1b“只完成预注册”是历史状态，已由上方b0/b1 closure取代；
 > 无compiled/correctness/memory/performance升级。见
 > `BOUNDFLOW_R3_1B_BOUNDED_ARENA_COMPILED_RECURRENCE_PLAN_2026_08_25.md`。
 

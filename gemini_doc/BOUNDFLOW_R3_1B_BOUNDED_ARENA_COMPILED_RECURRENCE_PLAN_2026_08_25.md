@@ -1,6 +1,6 @@
 ---
-status: implemented-r3-1b1-smoke-artifact-pending
-updated: 2026-08-25T10:20:00+08:00
+status: validated-r3-1b1-r3-1b2-open
+updated: 2026-08-25T10:55:00+08:00
 type: plan
 topic: boundflow
 slug: r3-1b-bounded-arena-compiled-recurrence
@@ -18,6 +18,11 @@ stage: s01
 > launcher 已实现，单次真实 GPU smoke 的 lower max diff=`3.814697265625e-06`、warm dynamic
 > allocated bytes=`0`。当前仍等待 raw-first artifact/replay/tamper，因此不提前关闭 b1；见
 > `BOUNDFLOW_R3_1B1_COMPILED_FULL_LOWER_IMPLEMENTATION_2026_08_25.md`。
+>
+> **2026-08-25 R3-1b1 closure**：fresh-process artifact/replay 与10/10 fully re-signed tamper
+> 通过；lower max diff=`3.814697265625e-06`，15 launches、2 scratch、70/70 DLPack、warm
+> allocation=0。当前只开放b2 compiled P-alpha VJP；见
+> `BOUNDFLOW_R3_1B1_COMPILED_FULL_LOWER_FORMAL_CLOSURE_2026_08_25.md`。
 
 ## 1. Why this branch exists
 
@@ -165,5 +170,5 @@ re-signed tamper。只有 b3 全过才将 `r3_1_admitted=true` 并开放 R3-2A�
 
 ## 9. Next executable action
 
-生成 R3-1b1 raw-first artifact、semantic replay 与 fully re-signed tamper；不写 custom VJP、不跑
-timing、不改 optimizer。
+实现 R3-1b2 compiled P-alpha VJP 单 worker correctness/ownership；不启动five-fresh、不跑timing、
+不改 optimizer。

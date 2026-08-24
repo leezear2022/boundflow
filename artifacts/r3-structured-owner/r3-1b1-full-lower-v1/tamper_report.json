@@ -1,0 +1,17 @@
+{
+  "attack_count": 10,
+  "rejected": [
+    "candidate-lower",
+    "native-lower",
+    "module-hash",
+    "device-source-hash",
+    "launch-count",
+    "scratch-alias",
+    "warm-allocation",
+    "stream-mismatch",
+    "compiled-region",
+    "dlpack-exact"
+  ],
+  "rejected_count": 10,
+  "status": "tamper-passed"
+}

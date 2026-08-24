@@ -1,6 +1,11 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
-> **2026-08-25 当前状态：R3-1b0关闭，b1开放**：exact reverse trace正式=
+> **2026-08-25 当前状态：R3-1b1关闭，b2开放**：fresh-process full-lower artifact/replay通过；
+> lower max diff=`3.8147e-6`、15 launches、2 scratch×73,728 B、70/70 DLPack、warm allocation=0，
+> 10/10全重签tamper拒绝。当前只开放compiled P-alpha VJP；R3-1仍未admit、不计时。见
+> `BOUNDFLOW_R3_1B1_COMPILED_FULL_LOWER_FORMAL_CLOSURE_2026_08_25.md`。
+>
+> **2026-08-25 R3-1b0关闭/b1开放（已由上方b1 closure取代）**：exact reverse trace正式=
 > `VALIDATED-R3-1B0-TRACE-LIVENESS`；12 steps、2 residual、2 scratch，每slot 73,728 B，6/6 tamper。
 > 下一只实现compiled no-grad full-lower forward；b2/b3/timing关闭，当前仍无physical memory或性能
 > claim。见`BOUNDFLOW_R3_1B0_TRACE_LIVENESS_FORMAL_CLOSURE_2026_08_25.md`。
@@ -10,7 +15,7 @@
 > 因此R3-1未admit、R3-2A关闭。下一只允许预注册R3-1b bounded-arena compiled recurrence；当前
 > 无timing/performance claim。见
 > `BOUNDFLOW_R3_1_M0_PYTHON_REMATERIALIZATION_FORMAL_NO_GO_CLOSURE_2026_08_25.md`。
-> R3-1b已预注册但未实现；当前下一动作仅为b0 exact trace/liveness compiler与negative tests。见
+> R3-1b“已预注册但未实现”是历史状态，已由上方b0/b1 closure取代。见
 > `BOUNDFLOW_R3_1B_BOUNDED_ARENA_COMPILED_RECURRENCE_PLAN_2026_08_25.md`。
 
 > **2026-08-25 当前状态：R3-0 compressed-alpha v2关闭，R3-1重新开放**：source=`8941e66`，
