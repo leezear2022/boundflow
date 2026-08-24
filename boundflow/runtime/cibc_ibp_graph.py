@@ -1,13 +1,14 @@
 """Prepared CUDA-graph execution for CIBC horizontal IBP model flow."""
 
-# pylint: disable=too-many-locals,missing-function-docstring
+# pylint: disable=too-many-locals,too-many-arguments,missing-function-docstring
 # pylint: disable=too-many-instance-attributes,import-outside-toplevel
 # pylint: disable=too-many-boolean-expressions
 
 from __future__ import annotations
 
+from contextlib import AbstractContextManager, nullcontext
 from dataclasses import dataclass
-from typing import Any, cast
+from typing import Any, Callable, cast
 
 import torch
 
@@ -19,6 +20,8 @@ from boundflow.runtime.dag_utils import (
 from boundflow.ir.task import BFTaskModule
 from boundflow.runtime.cibc_ibp_conv import use_cibc_ibp_conv_v1
 
+OpContextFactory = Callable[[int, str], AbstractContextManager[None]]
+
 
 def run_cibc_ibp_graph_once_v1(
     module: BFTaskModule,
@@ -27,6 +30,7 @@ def run_cibc_ibp_graph_once_v1(
     input_lower: torch.Tensor,
     input_upper: torch.Tensor,
     threads_per_block: int | None,
+    op_context_factory: OpContextFactory | None = None,
 ) -> tuple[dict[str, IntervalState], int]:
     task = module.get_entry_task()
     params = dict(module.bindings.get("params", {}))
@@ -51,52 +55,60 @@ def run_cibc_ibp_graph_once_v1(
     )
 
     def execute() -> None:
-        for op in task.ops:
-            if op.op_type in {"linear", "conv2d"}:
-                x = state(op.inputs[0])
-                weight = params[op.inputs[1]]
-                bias = params[op.inputs[2]] if len(op.inputs) == 3 else None
-                attrs: dict[str, Any] = dict(op.attrs)
-                attrs.setdefault("op", op.op_type)
-                env[op.outputs[0]] = cast(
-                    IntervalState,
-                    domain.affine_transformer(x, weight, bias, **attrs),
-                )
-            elif op.op_type == "relu":
-                env[op.outputs[0]] = cast(
-                    IntervalState, domain.relu_transformer(state(op.inputs[0]))
-                )
-            elif op.op_type == "add":
-                env[op.outputs[0]] = cast(
-                    IntervalState,
-                    domain.elementwise_transformer(
-                        [state(op.inputs[0]), state(op.inputs[1])], "add"
-                    ),
-                )
-            elif op.op_type == "flatten":
-                x = state(op.inputs[0])
-                env[op.outputs[0]] = IntervalState(
-                    lower=torch.flatten(x.lower, 1, -1),
-                    upper=torch.flatten(x.upper, 1, -1),
-                )
-            elif op.op_type == "concat":
-                parts = [state(name) for name in op.inputs]
-                axis = normalize_concat_axis(
-                    op.attrs.get("axis", 1),
-                    rank_with_batch=parts[0].lower.dim(),
-                    caller="run_cibc_ibp_graph_once_v1",
-                )
-                validate_concat_tensor_shapes(
-                    [tuple(item.lower.shape) for item in parts],
-                    axis=axis,
-                    caller="run_cibc_ibp_graph_once_v1",
-                )
-                env[op.outputs[0]] = IntervalState(
-                    lower=torch.cat([item.lower for item in parts], dim=axis),
-                    upper=torch.cat([item.upper for item in parts], dim=axis),
-                )
-            else:
-                raise NotImplementedError(f"CIBC IBP graph op differs: {op.op_type}")
+        for ordinal, op in enumerate(task.ops):
+            context = (
+                op_context_factory(ordinal, op.op_type)
+                if op_context_factory is not None
+                else nullcontext()
+            )
+            with context:
+                if op.op_type in {"linear", "conv2d"}:
+                    x = state(op.inputs[0])
+                    weight = params[op.inputs[1]]
+                    bias = params[op.inputs[2]] if len(op.inputs) == 3 else None
+                    attrs: dict[str, Any] = dict(op.attrs)
+                    attrs.setdefault("op", op.op_type)
+                    env[op.outputs[0]] = cast(
+                        IntervalState,
+                        domain.affine_transformer(x, weight, bias, **attrs),
+                    )
+                elif op.op_type == "relu":
+                    env[op.outputs[0]] = cast(
+                        IntervalState, domain.relu_transformer(state(op.inputs[0]))
+                    )
+                elif op.op_type == "add":
+                    env[op.outputs[0]] = cast(
+                        IntervalState,
+                        domain.elementwise_transformer(
+                            [state(op.inputs[0]), state(op.inputs[1])], "add"
+                        ),
+                    )
+                elif op.op_type == "flatten":
+                    x = state(op.inputs[0])
+                    env[op.outputs[0]] = IntervalState(
+                        lower=torch.flatten(x.lower, 1, -1),
+                        upper=torch.flatten(x.upper, 1, -1),
+                    )
+                elif op.op_type == "concat":
+                    parts = [state(name) for name in op.inputs]
+                    axis = normalize_concat_axis(
+                        op.attrs.get("axis", 1),
+                        rank_with_batch=parts[0].lower.dim(),
+                        caller="run_cibc_ibp_graph_once_v1",
+                    )
+                    validate_concat_tensor_shapes(
+                        [tuple(item.lower.shape) for item in parts],
+                        axis=axis,
+                        caller="run_cibc_ibp_graph_once_v1",
+                    )
+                    env[op.outputs[0]] = IntervalState(
+                        lower=torch.cat([item.lower for item in parts], dim=axis),
+                        upper=torch.cat([item.upper for item in parts], dim=axis),
+                    )
+                else:
+                    raise NotImplementedError(
+                        f"CIBC IBP graph op differs: {op.op_type}"
+                    )
 
     if context_manager is None:
         execute()
@@ -115,6 +127,7 @@ class CIBCIBPCUDAGraphPlanV1:
     input_lower: torch.Tensor
     input_upper: torch.Tensor
     threads_per_block: int | None
+    op_context_factory: OpContextFactory | None = None
 
     def __post_init__(self) -> None:
         import tvm_ffi
@@ -134,6 +147,7 @@ class CIBCIBPCUDAGraphPlanV1:
                         input_lower=self.input_lower,
                         input_upper=self.input_upper,
                         threads_per_block=self.threads_per_block,
+                        op_context_factory=self.op_context_factory,
                     )
         capture_stream.synchronize()
         self.graph = torch.cuda.CUDAGraph()
@@ -146,6 +160,7 @@ class CIBCIBPCUDAGraphPlanV1:
                         input_lower=self.input_lower,
                         input_upper=self.input_upper,
                         threads_per_block=self.threads_per_block,
+                        op_context_factory=self.op_context_factory,
                     )
         if self.threads_per_block is not None and self.launch_count != 6:
             raise ValueError("CIBC IBP CUDA graph Conv coverage differs")
