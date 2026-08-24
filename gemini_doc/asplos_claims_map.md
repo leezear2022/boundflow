@@ -1,5 +1,15 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-25 恢复协议修订（不升级claim）**：CIBC、B3、B4-C与R3的既有claim均不变。本次只冻结
+> scope-correct targets与证据顺序：B0-relative query qualification/research=`1.00/1.15x`、queue
+> research=`1.20x`；same-solver eligible-IBP share未知，B3-side
+> `q_B3_required=15.18%/35.20%`仅是基于
+> B3=`0.910001x`和CIBC graph=`2.45631x`的乐观可达性界，不是query结果。R1必须有时钟校准receipt。
+> R3-1必须执行custom backward；R3-2已拆为2A轨迹正确性与2B wrapper timing，仍为
+> `PREREGISTERED-DESIGN-REVIEW-ONLY`。详见
+> `BOUNDFLOW_FAILED_GATES_DIAGNOSIS_AND_RECOVERY_PLAN_2026_08_24.md`与
+> `BOUNDFLOW_R3_STRUCTURED_OWNER_CUSTOM_BACKWARD_REDESIGN_PLAN_2026_08_24.md`。
+
 > **2026-08-24 R3-SO-CVJP设计状态**：允许的唯一表述是
 > `PREREGISTERED-DESIGN-REVIEW-ONLY-R3-SO-CVJP`。已冻结closed lower-region DAG owner、
 > region-level single custom VJP、零saved dense A、bounded scratch和R3-0—R3-7门禁；尚无实现、

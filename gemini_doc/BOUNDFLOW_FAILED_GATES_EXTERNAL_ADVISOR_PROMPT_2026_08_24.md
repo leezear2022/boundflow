@@ -9,6 +9,12 @@
 
 `gemini_doc/BOUNDFLOW_FAILED_GATES_DIAGNOSIS_AND_RECOVERY_PLAN_2026_08_24.md`
 
+GitHub 入口：
+
+- 仓库：<https://github.com/leezear2022/boundflow>
+- Draft PR #60：<https://github.com/leezear2022/boundflow/pull/60>
+- 当前分支：<https://github.com/leezear2022/boundflow/tree/feat/rvir-v4-production-state-ownership-v1>
+
 建议同时读取：
 
 - `gemini_doc/external_audit_cibc_ibp_horizontal_2026_08_24.md`
@@ -37,7 +43,24 @@
    reduction，没有完成论文级多层 tiling/shared cache/vectorize/unroll/cost-model search；
 10. B5 JIT、B6 runtime、B7 memory、complete query/solve 尚未运行，不能当成已经失败。
 
-## 二、请重点质疑的判断
+## 二、修订后冻结的协议（请审计，而不是把它当未解决建议）
+
+1. 三个系统 scope target 已冻结：complete-query qualification=`1.00x`、complete-query research=
+   `1.15x`、queue/BaB research=`1.20x`，baseline 都是 B0；局部 whole-graph 实验另用同 scope 的
+   `T_graph`；
+2. `r_required = s / (1/T - (1-s))` 只能使用同一 timing scope 的 `s/T`；分母 `<=0` 即该单区域
+   物理不可达；
+3. 把 CIBC whole-graph 收益传播到 query 前，必须先测 same-solver 两侧 eligible-IBP share。传播
+   方程只使用待优化 B3/candidate 侧的 `q_B3`。当前 `R_current=0.910001`、`G=2.45631` 的乐观
+   上界为 `R_new=R_current/((1-q_B3)+q_B3/G)`；parity/research 分别要求
+   `q_B3>=0.151798/0.351998`；
+4. CUPTI GPU timestamp 与 host/NVTX 必须有同步点和 Nsight export calibration receipt；单 stream、
+   无真实 overlap 时 headline 使用 exclusive/critical-path wall，overlap-adjusted 必须退化一致；
+5. R1 之后先做 same-solver share admission、前端 op coverage 清单和可 solve/held-out workload 冻结，
+   数学可达才实现 R2；随后跑 B0/B3/cumulative candidate 三方 formal；
+6. R3 设计评审可并行，但 R3-0 实现保持关闭，除非 R2 关闭或有显式 reprioritization。
+
+## 三、请重点质疑的判断
 
 ### Q1：门禁分类是否正确
 
@@ -58,7 +81,8 @@
 - 在当前 CIBC candidate 上做 candidate-only NVTX/CUPTI/CUDA Graph node attribution，能否可靠分解
   Conv、Linear、ReLU、add、copy 与 runtime？
 - 应使用 exclusive wall、kernel sum、critical path 还是 overlap-adjusted share 作为路由依据？
-- profile/control perturbation、correlation、CUDA Graph node ownership 和时钟域该怎样 fail-closed？
+- 修订后的同步点/calibration receipt、profile/control perturbation、correlation 与 CUDA Graph node
+  ownership 是否足以让时钟域 fail closed？还缺哪项可机器检查字段？
 - 是否有更短、更能证伪的第一个实验？
 
 ### Q4：CIBC 优化空间是否被低估
@@ -83,19 +107,31 @@
 - 从 B3 的 B0-relative query `0.910001x` 到 parity 需要约 `1.09890x`，到 final `1.15x` 需要约
   `1.26373x`。请用 Amdahl/critical-path 模型计算各建议路线需要的区域 speedup；
 - 哪些组合在 RTX 4060 Laptop 上物理可达，哪些在测量前就应 NO-GO？
-- CIBC-IBP `2.456x` 加入 same-solver 后可能被什么比例稀释？需要哪项 raw 才能回答？
+- 请独立推导 `q_B3_required(1.00)=0.151798`、`q_B3_required(1.15)=0.351998`；公式、scope 或舍入是否有误？
+- same-solver `q_B3` 应包含/排除哪些 adapter、receipt、copy、fallback 成本，才能避免把 graph share
+  高估？
 - memory path 在 8 GB 上如何构造“自然 workload”而不是人为放大 batch？
 
-## 三、必须检查的工程卫生问题
+### Q7：执行顺序与替代路线是否正确
 
-- 外审指出 `boundflow/domains/interval.py:83-85` 有 3 条本轮新 mypy arg-type 错误和新增 pylint
-  import-outside-toplevel；
+- R0/R1 protocol freeze → G1 attribution → same-solver share/workload admission → mathematically
+  reachable R2 → B0/B3/candidate formal 的顺序是否存在越序或遗漏？
+- 当前 CIBC per-op schedule winner 不同、global winner=128，只能支持 shape/signature-keyed static
+  specialization；需要什么 context-changing raw 才能升级为 cache/memory-aware adaptive planner？
+- JIT 的 admission 改为
+  `expected_reuse*expected_per_query_saving > compile_cost+cache_load+invalidation_cost` 是否完整？
+- receipt 热路径目前只是归因假设；请从代码指出哪些检查可安全移到 admission，哪些必须每次执行。
+
+## 四、必须检查的工程卫生问题
+
+- 外审指出 `boundflow/domains/interval.py:83-85` 有 3 条本轮新增 mypy `arg-type`，line 74 有 1 条
+  新增 pylint `C0415`；既有 8 条 `DomainState attr-defined` 不属于本次修复；
 - CIBC closure 应明确 `3e-4` tolerance 的 1 ULP 理由；
 - steady-state operator/graph timing 排除了 compile/plan construction，需补 cold/break-even；
 - `.docops/ev.jsonl` 有 3 个历史 duplicate ids，但不是本轮性能改动引入；
 - 检查这些问题是否只是 minor，还是会污染性能/语义结论。
 
-## 四、期望输出格式
+## 五、期望输出格式
 
 请按以下结构输出，结论要可执行：
 
@@ -105,7 +141,8 @@
 4. **遗漏机制**：最多 8 项，按 expected system value / risk / effort 排序；
 5. **候选路线排名**：每条包含目标文件/IR 边界、预期物理变化、所需 share、`r_required`、
    correctness gate、memory gate、kill condition；
-6. **R1 预注册修订稿**：给出你建议的 raw schema、fresh 顺序、扰动阈值、closure 方程、tamper cases；
+6. **R1 预注册修订稿**：审计 scope target、same-solver `q`、时钟校准 raw schema、fresh 顺序、扰动
+   阈值、closure 方程与 tamper cases；
 7. **两周执行计划**：每天或按 5 个工程阶段列出，不要把未通过阶段后的工作提前开放；
 8. **论文 claim 边界**：现在能写什么、不能写什么、还缺哪三份核心证据；
 9. **blocker/major/minor/info findings**；

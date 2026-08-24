@@ -1,6 +1,6 @@
 ---
 status: preregistered-design-review-only
-updated: 2026-08-24T11:30:00+08:00
+updated: 2026-08-25T00:13:21+08:00
 type: plan
 topic: boundflow
 slug: r3-structured-owner-custom-backward-redesign
@@ -22,7 +22,8 @@ stage: s01
 
 本文只冻结设计与可证伪门禁，状态是
 `PREREGISTERED-DESIGN-REVIEW-ONLY`。它不开放实现、不形成 correctness/performance/memory claim，
-也不改变当前 CIBC 路线“先完成 G1 optimized-graph attribution”的工程顺序。
+也不改变当前工程顺序：先完成 R0 审计卫生与 R1 协议/目标冻结，再执行 G1
+optimized-graph attribution。
 
 ## 1. 基础问题与已证实的失败
 
@@ -392,19 +393,39 @@ production、不计时。
 
 ### R3-1：P-anchor 单 site、正确性 only
 
-只接 `25/Conv_8`，一个 evaluation，native reference 在独立 worker。比较 final lower、α gradient、
-empty beta、receipt 和 scratch。
+只接 `25/Conv_8`，一个 evaluation，native reference 在独立 worker。optimizer state 固定，禁止
+`optimizer.step()`，每个 worker 恰好执行一次 candidate forward 和一次 **必须存在的 custom
+backward**；比较 final lower、`dα`、empty beta、receipt 和 scratch。纯 `no_grad` forward 只可作为
+smoke，不能关闭 R3-1，因为它无法证明 M0 VJP、saved-state 和 autograd lifetime 合同。
 
 通过条件：
 
 - five fresh、独立 oracle、max diff/sign 达冻结 tolerance；
 - saved dense A=`0`，scratch `<=2`，peak `<=1.0x` native；
-- forward/VJP exactly once，fallback/eager/shadow=`0`；
+- forward/custom-VJP exactly once，`dα` 与独立 oracle 达冻结 tolerance，fallback/eager/shadow=`0`；
+- optimizer mutation count=`0`、α/β version 不变；
 - 未计时，不形成 performance claim。
 
-### R3-2：P-anchor 10/9 mutation 与本地物理门禁
+### R3-2A：P-anchor 10/9 mutation 轨迹正确性
 
-在 R3-1 correctness 不变的基础上运行 10 evaluation/9 mutation，冻结 wrapper-inclusive timing。
+在 R3-1 的 mandatory-backward correctness 不变的基础上运行 10 evaluation/9 optimizer mutation；
+本阶段只关闭完整轨迹正确性，不读取 latency、不形成 performance claim。
+
+通过条件：
+
+- 5 fresh，candidate control path 无 native shadow/fallback/eager；
+- 逐 evaluation terminal lower、`dα`/`dβ`（P-anchor beta absent）、mutation input/output 与独立
+  native worker 达冻结 exact/allclose/sign 规则；
+- final α/β、split/history、optimizer mutation count/order 全部一致；
+- saved dense A=`0`、scratch `<=2`、allocated/reserved peak `<=1.0x` native；
+- formal raw/replay 能从 mutation 0 重放到 mutation 9，任何中间轨迹漂移 fail closed。
+
+### R3-2B：P-anchor 10/9 wrapper-inclusive 本地物理门禁
+
+只有 R3-2A 通过后才开放计时。baseline 必须是**同一个 P-anchor、同一 10 evaluation/9 mutation
+轨迹、native single-owner wrapper**；candidate 是 R3 region owner/custom VJP。两侧 optimizer、输入、
+stream、warmup、mutation 次数和 correctness capture 开关完全对称，不得用 no-grad baseline 或局部
+kernel latency代替 wrapper-inclusive worker。
 
 GO：
 
@@ -459,7 +480,7 @@ GO：
 BoundFlow executor；B3 为累计 typed baseline，同时保留 B0 原执行器公平对照。
 
 此阶段重新测 complete query、queue、bound quality、branch、TTV/solved 和 memory。局部 `4.898x`、
-R3-2 或 R3-6 数字均不能代替系统证据。
+R3-2B 或 R3-6 数字均不能代替系统证据。
 
 ## 10. 统一 kill 条件
 
@@ -470,7 +491,7 @@ R3-2 或 R3-6 数字均不能代替系统证据。
 - semantic/sign/αβ/split/history/optimizer mutation 漂移；
 - scratch 超过两个 max-layer buffers，或 warm execution 新增隐式 allocation；
 - DAG node count/执行次数随层数超线性增长；
-- 单 site wrapper-inclusive `<1.20x`，或双 site `<1.00x`；
+- R3-2B 单 site wrapper-inclusive `<1.20x`，或双 site `<1.00x`；
 - 任一正式 stage worst pair `<0.98x`；
 - peak allocated/reserved `>1.0x` native；
 - 为通过门禁而修改 target、tolerance、worker subset 或 baseline。
@@ -544,8 +565,11 @@ PyTorch 官方文档要求 backward 所需 Tensor 通过 `save_for_backward` 保
 
 - 设计评审不改 production code，所以 rollback 是删除/修订本预注册文档；
 - R3 实现必须新开独立分支和 DocOps exchange；
-- 当前工程 next 仍是 CIBC-G1 attribution；
-- 当前文档 next 是把配套 Prompt 发给至少两个独立模型，汇总 blocker/major 后再决定是否冻结 R3-0。
+- 当前工程 next 是 R0 审计卫生 + R1 协议/目标冻结，随后才是 CIBC-G1 attribution；
+- R3 外部设计评审可与上述只读/文档工作并行，但 R3-0 实现继续关闭，直到 R2 关闭或留下显式
+  reprioritization 记录；
+- 当前文档 next 是把配套 Prompt 发给至少两个独立模型，汇总 blocker/major 后再决定是否修订并冻结
+  R3-0 合同。
 
 ## Links
 

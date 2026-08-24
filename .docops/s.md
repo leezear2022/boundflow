@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev011931
-last_va: ev011932
+last_ch: ev011983
+last_va: ev011984
 blk: none
-next: external-review-r3-design-before-r3-0
-updated: 2026-08-24T03:31:25Z
+next: implement-r0-and-preregister-r1-scope-clock-attribution
+updated: 2026-08-24T16:19:52Z

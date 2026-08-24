@@ -1,5 +1,14 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-25 当前执行状态修订**：下一工程动作不是直接改TIR，也不是启动R3实现；先完成R0的
+> 3条新增mypy `arg-type`、1条新增pylint `C0415`与计时披露，再冻结R1三层目标、CUPTI↔host/NVTX
+> 校准和raw schema，随后执行CIBC-G1只读归因。归因后还必须测same-solver eligible-IBP query
+> share并冻结可solve workload/held-out family；数学可达才开放R2，之后跑B0/B3/cumulative
+> candidate三方formal。R3设计评审可并行；R3-1是冻结optimizer mutation但mandatory backward，
+> R3-2拆为2A correctness/2B timing，R3-0代码仍关闭。见
+> `BOUNDFLOW_FAILED_GATES_DIAGNOSIS_AND_RECOVERY_PLAN_2026_08_24.md`与
+> `BOUNDFLOW_RECOVERY_PLAN_TARGET_SCOPE_R3_STAGE_CORRECTION_CHANGELOG_2026_08_24.md`。
+
 > **2026-08-24 R3 structured-owner/custom-VJP设计状态**：已完成独立重设计预注册，状态=
 > `PREREGISTERED-DESIGN-REVIEW-ONLY-R3-SO-CVJP`。方案使用closed lower region的DAG owner、一个
 > custom VJP、M0 rematerialization和最多两个scratch；dense A不得进入Function output、saved tensor、

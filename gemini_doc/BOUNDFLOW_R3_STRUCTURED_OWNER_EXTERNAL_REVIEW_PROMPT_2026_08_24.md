@@ -118,9 +118,12 @@ differentiable TIR 对 PyTorch 已达到 `4.89834x`，但 production 累计接�
 提案阶段：
 
 - R3-0 contract/validator only；
-- R3-1 P-anchor single-site correctness；
-- R3-2 P-anchor 10/9 mutation，wrapper-inclusive geomean `>=1.20x`、worst `>=0.98x`、memory
-  `<=1.0x`；
+- R3-1 P-anchor single-site correctness：optimizer state 固定、无 `optimizer.step()`，但一次 custom
+  backward 与 `dα` 对照是强制门禁；纯 no-grad 只能 smoke；
+- R3-2A P-anchor 10/9 mutation trajectory correctness：逐 evaluation lower/gradient/mutation、final
+  α/β、split/history 和 mutation order 通过前不计时；
+- R3-2B 只在 R3-2A 通过后比较同 P-anchor、同 10/9 轨迹的 native single-owner wrapper，
+  wrapper-inclusive geomean `>=1.20x`、worst `>=0.98x`、memory `<=1.0x`；
 - R3-3 S-anchor active-beta correctness；
 - R3-4 topology 选出的 closed two-site region，geomean `>=1.0x`、worst `>=0.98x`；
 - R3-5 最小 residual/fanout DAG；
@@ -128,16 +131,19 @@ differentiable TIR 对 PyTorch 已达到 `4.89834x`，但 production 累计接�
 - 只有 R3-6 GO 才开放 R3-7 same-solver B4-D。
 
 统一 kill：任何 dense A 进入 output/saved/ctx/persistent layer buffer、任何 shadow/fallback/to_dense、
-语义或 optimizer mutation 漂移、node count 超线性、single-site `<1.20x`、two-site `<1.0x`、memory
-`>1.0x`，都停止当前 variant。
+语义或 optimizer mutation 漂移、node count 超线性、R3-2B single-site `<1.20x`、two-site
+`<1.0x`、memory `>1.0x`，都停止当前 variant。
 
 请判断：
 
 1. 哪些 gate 太松、太严或无法可靠测量？
-2. R3-2 的 `1.20x` 是否合理，还是局部 share/重算成本使其数学上不可达？
-3. R3-4 应如何从 topology/post-dominator 机械选择 pair？
-4. R3-6 的 `1.05x` 足以开放 query 实验吗，还是必须先恢复 B0 parity？
-5. 哪个最短实验能尽早证伪“region-level custom VJP 可行”？
+2. R3-1 “冻结 optimizer mutation、但 mandatory backward”是否是隔离 VJP/liveness 的正确最小实验？
+   no-grad 是否应明确禁止关闭该阶段？
+3. 把原 R3-2 拆成 2A trajectory correctness 与 2B wrapper timing 是否足以防止数值轨迹和性能
+   归因互相污染？`1.20x` 是否合理，还是局部 share/重算成本使其数学上不可达？
+4. R3-4 应如何从 topology/post-dominator 机械选择 pair？
+5. R3-6 的 `1.05x` 足以开放 query 实验吗，还是必须先恢复 B0 parity？
+6. 哪个最短实验能尽早证伪“region-level custom VJP 可行”？
 
 ## 7. 请比较替代方案
 
@@ -167,7 +173,7 @@ microbenchmark 替代累计证据。请具体比较：
 8. **阶段门禁修订表**：保留/修改/删除及理由；
 9. **最短证伪实验**：一个提交可完成，列 raw 字段与预期结果；
 10. **两周条件式计划**：上游不过不得提前开放下游；
-11. **claim 边界**：现在、R3-2、R3-6、R3-7 分别能说什么；
+11. **claim 边界**：现在、R3-1、R3-2A、R3-2B、R3-6、R3-7 分别能说什么；
 12. **唯一下一动作**。
 
 凡是没有 raw/代码直接支持的结论必须标记 `inference`。不要因为局部 TIR 有 `4.898x` 就默认 region

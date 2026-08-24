@@ -1,5 +1,13 @@
 # BoundFlow 面向 ASPLOS 的总体研发与论文执行计划 v1.0
 
+> **2026-08-25 当前恢复路线覆盖说明**：本历史总计划中的性能执行顺序，现由
+> `gemini_doc/BOUNDFLOW_FAILED_GATES_DIAGNOSIS_AND_RECOVERY_PLAN_2026_08_24.md`覆盖。当前先做R0
+> hygiene与R1 scope/clock协议冻结，再做CIBC-G1、same-solver eligible-IBP share/workload admission、
+> 数学可达的R2和B0/B3/cumulative candidate三方formal。query qualification/research与queue
+> research目标为B0-relative `1.00/1.15/1.20x`。R3仅开放设计评审；R3-1 mandatory backward，
+> R3-2拆为2A trajectory correctness和2B wrapper timing，R3-0实现关闭。该覆盖不撤销任何既有
+> NO-GO，也不升级CIBC/R3/ASPLOS claim。
+
 > **2026-08-23 FSG4/B4-B2 B2-4内部关闭**：P-anchor sparse-source Conv P0与12项
 > bounded candidate correctness已验证，ledger在timing前冻结。只开放B2-4外审；正式timing、
 > B2-5/B4-B3继续关闭。

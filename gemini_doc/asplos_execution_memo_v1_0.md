@@ -1,5 +1,17 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-25 恢复计划目标范围与R3阶段修正指令**：当前工程顺序修订为R0审计卫生→R1协议/
+> 目标冻结→CIBC-G1只读归因→same-solver eligible-IBP query-share与benchmark admission→仅实现数学
+> 可达的R2→B0/B3/cumulative candidate三方formal。冻结目标为B0-relative complete-query
+> qualification/research=`1.00/1.15x`、queue research=`1.20x`；graph/query/queue share不得跨scope
+> 代入。以当前B3=`0.910001x`、CIBC graph=`2.45631x`计算的乐观B3-side `q_B3_required`为parity
+> `15.18%`、query research `35.20%`，但在same-solver raw前不是性能claim。R1必须绑定
+> CUPTI↔host/NVTX时钟校准receipt。R3-1冻结optimizer mutation但custom backward/dα强制；原R3-2
+> 拆为2A轨迹正确性和2B wrapper-inclusive timing。R3设计评审可并行，R3-0实现仍关闭。权威修订见
+> `BOUNDFLOW_FAILED_GATES_DIAGNOSIS_AND_RECOVERY_PLAN_2026_08_24.md`、
+> `BOUNDFLOW_R3_STRUCTURED_OWNER_CUSTOM_BACKWARD_REDESIGN_PLAN_2026_08_24.md`与
+> `BOUNDFLOW_RECOVERY_PLAN_TARGET_SCOPE_R3_STAGE_CORRECTION_CHANGELOG_2026_08_24.md`。
+
 > **2026-08-24 R3结构化lower owner重设计指令**：未来α-CROWN恢复路线已冻结为
 > `PREREGISTERED-DESIGN-REVIEW-ONLY-R3-SO-CVJP`。不复活B4-C2；改用closed lower region的
 > first-class DAG owner和region-level single custom VJP，forward只暴露最终lower，dense A只允许

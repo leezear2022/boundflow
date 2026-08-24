@@ -1,6 +1,6 @@
 ---
 status: diagnosed-recovery-preregistration-required
-updated: 2026-08-24T10:39:09+08:00
+updated: 2026-08-25T00:13:21+08:00
 type: plan
 topic: boundflow
 slug: failed-gates-diagnosis-and-recovery
@@ -12,11 +12,12 @@ stage: s01
 ## 0. 一句话结论
 
 下一步不是继续给现有 `B4-C2` dense autograd 链打补丁，也不是立即宣称 CIBC 已经完成。
-应先启动一个只读的 **CIBC-G1 optimized-graph attribution**：在当前已经外审批准、整图
-`2.4563x` 的 CIBC-IBP candidate 上，用 NVTX/CUPTI/CUDA Graph node 证据重新分解 Conv、Linear、
-ReLU、residual add、input copy 与 graph/runtime 的时间和关键路径；同时补齐本轮审计发现的静态
-检查与计时口径问题。归因完成后，才按实测 share 选择 `Linear/elementwise 图融合`、`Conv 深度调优`
-或 `copy/runtime`，而不是凭直觉挑算子。
+应先完成 **R0 审计卫生 + R1 协议/目标冻结**，再启动只读的 **CIBC-G1 optimized-graph
+attribution**：在当前已经外审批准、整图 `2.4563x` 的 CIBC-IBP candidate 上，用
+NVTX/CUPTI/CUDA Graph node 证据重新分解 Conv、Linear、ReLU、residual add、input copy 与
+graph/runtime 的时间和关键路径。随后必须在 same-solver 路径实测 eligible-IBP query share；只有
+把同一时钟域的 share 与同一层级的冻结目标代入可达性公式后，才允许选择
+`Linear/elementwise 图融合`、`Conv 深度调优`或 `copy/runtime`，而不是凭直觉挑算子。
 
 对 α-CROWN 路线，局部 TIR 已经证明能快 `4.89834x`，失败点不是“CUDA/TIR 本身不行”，而是
 **集成所有权与 autograd 生命周期不对**。后续若恢复，必须从“结构化表示保持到自定义 backward、
@@ -107,10 +108,11 @@ B3 通过 IR/graph/plan reuse 把相对 B2 core 提高到 `1.071617x`，query �
 - 达到最终 `1.15x` complete-query，B3 之后需要 `1.15 / 0.910001 = 1.26373x`；
 - 因此只做 1%—3% 的局部 micro-optimization 不可能形成最终故事。
 
-没做好的地方不是 B3 门禁，而是此前把大量 Python/receipt/typed-state/atomic-commit 机制先接进
-热路径，再期待一个 plan reuse 阶段全部回收。恢复路线必须将 correctness receipt 与 hot-path
-runtime receipt 分层，静态/结构验证移到 compile/admission，运行时只保留 O(1) counters 和
-fail-closed identity。
+没做好的地方不是 B3 门禁，而是此前把 Python/receipt/typed-state/atomic-commit 机制接进热路径，
+再期待一个 plan reuse 阶段全部回收。**receipt 是待测归因假设，不是已经证实的唯一瓶颈**：R1 与
+same-solver profile 必须分别量出 validation、state assembly、dispatch、atomic commit 和 O(1)
+identity/counter 的 exclusive/critical-path 成本。只有被 raw 证明为热路径成本的静态/结构检查，才
+允许移到 compile/admission；运行时仍须保留 fail-closed identity 与必要的 O(1) 证据。
 
 ### 4.3 B4-A：目标区域太小，机制正确但 headline 不够
 
@@ -226,8 +228,9 @@ operator 处于 eager launch-bound、整图 baseline 已被 CUDA Graph 压缩的
 
 目标：让已经批准的 CIBC claim 没有模糊口径。
 
-- 修复 `boundflow/domains/interval.py:83-85` 本轮新引入的 3 条 mypy arg-type 错误；
-- 处理或明确限定新增 `import-outside-toplevel` 的 pylint 范围；
+- 修复 `boundflow/domains/interval.py:83-85` 本轮新引入的 **3 条 mypy `arg-type`**；
+- 处理或明确限定 `boundflow/domains/interval.py:74` 本轮新增的 **1 条 pylint `C0415`**；既有
+  `DomainState` 的 8 条 `attr-defined` 不在本修复中偷换范围；
 - 在 CIBC closure 补充 `3e-4` 来自正式运行前冻结且实测 `2^-12` 为该量级 1 ULP；
 - 明确 operator/graph 数字是 steady-state，TIR compile 与 plan construction 不在计时区；
 - 下一阶段额外记录 cold compile、plan construction 和 break-even，不把它们混进 steady-state；
@@ -235,7 +238,7 @@ operator 处于 eager launch-bound、整图 baseline 已被 CUDA Graph 压缩的
 
 R0 不重跑正式性能，不改变任何阈值，不升级 claim。
 
-### R1：CIBC-G1 optimized-graph attribution（唯一立即开放的研究动作）
+### R1：CIBC-G1 optimized-graph attribution（R0/协议冻结后唯一开放的研究动作）
 
 目标：回答当前 candidate 的剩余 0.071–0.072 ms 究竟花在哪里。
 
@@ -259,17 +262,69 @@ R0 不重跑正式性能，不改变任何阈值，不升级 claim。
 - profile/control 扰动必须预注册且 `<=1.05`，raw-first，不能从 summary 倒推；
 - kernel sum、exclusive wall、critical path、overlap-adjusted wall 四个口径分开。
 
+时钟域必须额外 fail closed：
+
+- 用一个显式 CPU/NVTX 同步点绑定 CUPTI GPU timestamp 与 host monotonic timestamp，冻结映射参数；
+- Nsight Systems export 必须生成 calibration receipt，记录 trace session、clock source、同步点、
+  最大残差和无法关联的 event 数；receipt 缺失或残差超预注册阈值时，不得形成 share；
+- CUDA Graph node、kernel、memcpy 只能在完成 correlation 和时钟校准后进入 critical path；
+- 若图是单 stream 且没有真实 overlap，headline 采用 exclusive/critical-path wall；此时
+  overlap-adjusted 结果必须退化为同一口径，不能把时钟域差或重复扣除包装成额外收益。
+
 #### R1.3 量化路由公式
 
-对目标系统增益 `T` 和实测区域 share `s`，需要的区域加速倍数为：
+先冻结三个不同系统层级的目标，后续不得互换分母：
+
+| 目标 | 冻结值 | baseline 与用途 |
+|---|---:|---|
+| `T_query_qualification` | `1.00x` | candidate/B0 complete-query parity，决定能否作为累计候选 |
+| `T_query_research` | `1.15x` | candidate/B0 complete-query 研究门槛 |
+| `T_queue_research` | `1.20x` | candidate/B0 queue/BaB 端到端研究门槛 |
+
+`T_graph` 是每个 whole-IBP-graph 实验另行预注册的局部目标；当前 CIBC closure 的历史资格门槛仍是
+相对 BoundFlow 四-Conv graph baseline `>=1.50x`，但它不等于 query 或 queue 目标。由此：
+
+- graph 内 share `s_graph` 只能与同一 graph timing scope 的 `T_graph` 配对；
+- complete-query share `s_query` 只能与 `T_query_qualification/research` 配对；
+- queue share `s_queue` 只能与 `T_queue_research` 配对；
+- kernel-sum share 不能直接代入 exclusive/critical-path 的目标。
+
+对同一 timing scope 的目标增益 `T` 和实测区域 share `s`，需要的区域加速倍数为：
 
 ```text
 r_required = s / (1 / T - (1 - s))
 ```
 
-只有分母为正且 `r_required` 在该类 kernel 的物理可达范围内，才开实现分支。若某区域即使无限
-加速也达不到下一系统门槛，则不允许单独立项。多区域 candidate 则使用 measured overlap/critical
-path 重新计算，不能简单相加 kernel time。
+只有分母为正且 `r_required` 在该类 kernel 的物理可达范围内，才开实现分支；分母 `<=0` 表示该
+单区域即使无限加速也无法到达目标。多区域 candidate 使用 measured overlap/critical path 重算，
+不能简单相加 kernel time。
+
+在把 CIBC graph 收益外推到 query 前，必须先从 **same-solver original executor vs RVIR adapter +
+BoundFlow executor** 的 eligible 调用中分别实测两侧 share。下式使用的是待优化 B3/candidate 侧
+`q_B3 = eligible_replaceable_IBP_wall_B3 / complete_query_wall_B3`，而不是 B0 share 或 profiler kernel
+sum。以当前 B3/B0 query ratio `R_current=0.910001` 和已批准 CIBC whole-graph speedup `G=2.45631`
+作为纯可达性上界，进一步假设该 graph speedup 能无接入成本覆盖同一 replaceable B3 region，则：
+
+```text
+R_new = R_current / ((1 - q_B3) + q_B3 / G)
+q_B3_required(T) = (1 - R_current / T) / (1 - 1 / G)
+
+q_B3_required(1.00) = 0.151798   # 回到 B0 parity 至少 15.18%
+q_B3_required(1.15) = 0.351998   # 达到 query 研究门槛至少 35.20%
+```
+
+这两个数只是用现有 graph speedup 计算的乐观 feasibility bound，不是 query speedup claim；在
+`q_B3`、adapter/wrapper 成本、region identity 和 eligible coverage 未由 raw 冻结前，不得据此宣称
+B0 parity 可达。
+
+#### R1.4 same-solver 与 benchmark 准入（只读，不提前补前端）
+
+- 冻结 eligible-IBP 的调用定义、计时边界和 `q`，同时披露 ineligible/fallback/unknown owner；
+- 对目标公开模型做前端 op coverage 审计，列 unsupported op、shape/dtype 和最小实现范围；
+- 至少预选一个 baseline/candidate 都能在同 timeout 内得到非 `unknown` 的公开 workload；
+- 至少预选两个 held-out model family，并在看到 candidate 结果前冻结 hash、timeout 和排除理由；
+- 本阶段只做 admission 与缺口清单，不因为缺 op 就先写 parser/backend，避免 benchmark 选择被实现
+  结果反向污染。
 
 ### R2：CIBC-G2 全图编译优化（由 R1 数据选支路）
 
@@ -323,19 +378,25 @@ B4-C2 v2，而是 closed lower region 的 first-class DAG owner 与 region-level
 - 单 P-anchor、active-beta S-anchor、双 site、residual DAG、六 site逐级门禁后，才可能重开 B4-D。
 
 该详细设计当前只是 `PREREGISTERED-DESIGN-REVIEW-ONLY`，不开放实现或性能 claim；配套外审 Prompt
-为 `BOUNDFLOW_R3_STRUCTURED_OWNER_EXTERNAL_REVIEW_PROMPT_2026_08_24.md`。当前 executable next 仍是
-CIBC-G1 attribution，不因 R3 文档完成而改变。
+为 `BOUNDFLOW_R3_STRUCTURED_OWNER_EXTERNAL_REVIEW_PROMPT_2026_08_24.md`。当前 executable next 是
+R0 审计卫生与 R1 协议/目标冻结，随后才执行 CIBC-G1 attribution；不因 R3 文档完成而提前开放
+R3-0。
 
 ### R4：JIT、调度、内存与多分支运行时
 
 只有 R2 或 R3 出现累计 no-regression candidate 后才进入：
 
-- JIT：compile cache、shape specialization、cold/warm/break-even；
+- JIT：AOT/cache-first，shape/signature specialization；只有满足
+  `expected_reuse * expected_per_query_saving > compile_cost + cache_load + invalidation_cost` 才允许
+  后台编译 fallback，不能用任意的“复用次数倍数”替代成本账；
 - runtime：critical-path aware launch、CUDA Graph update、真正可并发的 residual branches；
 - allocation：plan-owned arena、liveness reuse、避免 CUDA Graph private pool 被重复实例化；
 - batching：query/domain/spec 三个轴分开，不能用一种 batch 承担所有语义；
-- planner claim 只限 GPU-context selection（shape、cache、显存压力），不复活已失败的通用 global
-  planner 性能 claim。
+- 当前证据只支持 **shape/signature-keyed static schedule specialization**：CIBC raw 的 per-op winner
+  为 ordinal `0→256`、`2→128`、`4/5/8/10→64`，而 6-op formal global winner 是 `128`。这证明不同
+  production shape 需要不同合法 schedule，但尚未证明 cache state、memory pressure 或动态负载下的
+  adaptive planner；后者必须另做 context-changing raw 才能形成 GPU-context selection claim；
+- 不复活已失败的通用 global planner 性能 claim。
 
 ### R5：系统闭环
 
@@ -352,21 +413,28 @@ CIBC-G1 attribution，不因 R3 文档完成而改变。
 
 ### 现在（一个短提交）
 
-1. 完成 R0 的 3 条新静态检查修复与 steady-state/tolerance 披露；
-2. 预注册 R1 artifact schema、NVTX ordinal、control/profile 扰动门禁、critical-path 口径；
-3. 不改 TIR schedule，不加第四个 threads 候选，不碰 α-CROWN production path。
+1. 完成 R0 的 3 条新增 mypy `arg-type`、1 条新增 pylint `C0415` 与
+   steady-state/tolerance 披露；
+2. 预注册 R1 artifact schema、三个 scope target、NVTX ordinal、时钟校准、control/profile 扰动与
+   critical-path 口径；
+3. R3 设计评审可并行继续，但 R3-0 实现保持关闭；不改 TIR schedule、不加第四个 threads 候选、
+   不碰 α-CROWN production path。
 
 ### 紧接着（只读测量阶段）
 
-4. 生成 5–6 fresh CIBC candidate-only attribution raw；
+4. 生成 5–6 fresh CIBC candidate-only attribution raw，先完成时钟/correlation admission；
 5. 从 raw 冻结每个桶的 exclusive/critical-path share 和 cold/warm/break-even；
-6. 用 `r_required` 公式写出 R2-A/B/C/D 的明确 GO/NO-GO 排序。
+6. 在 same-solver 路径实测 eligible-IBP query share `q`，同时只读冻结前端 op coverage、两个
+   held-out family 与至少一个可 solve workload；
+7. 用同 scope 的 `r_required` 与 `q_required` 写出 R2-A/B/C/D 的明确 GO/NO-GO 排序。
 
 ### 归因之后
 
-7. 只实现排名第一且数学上可达到 whole-graph 门槛的 R2 分支；
-8. 单算子/子图通过后，必须回到完整 ResNet2B IBP CUDA Graph；
-9. R2 关闭后再决定是否投入 R3；R3 必须先有 custom-backward/live-set 设计评审。
+8. 只实现排名第一且数学上可达到 query qualification/research 目标的 R2 分支；
+9. 单算子/子图通过后，必须回到完整 ResNet2B IBP CUDA Graph；
+10. 以 B0/B3/cumulative candidate 三方 formal protocol 检验接入后 parity、query 与 memory；
+11. R2 关闭后再决定是否开放 R3-0；若要提前转 R3，必须有显式 reprioritization 记录。无论何时
+    实现，R3 都必须先完成 custom-backward/live-set 外部设计评审。
 
 ## 9. 预注册时必须回答的反证问题
 
