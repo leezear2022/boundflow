@@ -52,6 +52,13 @@ fail closed 和 candidate source escape gate。mypy clean；pylint在限定动�
 
 ## 4. 当前边界与下一动作
 
+### 4.1 Formal protocol implementation
+
+已新增 fresh worker、raw-first artifact generator/replay、12类fully re-signed tamper probe与artifact
+tests。协议固定 source/code revision、capture/model、trace/plan、b1/b2 module、完整 lower/dα raw、
+float32 tensor hash与所有ownership receipt；replay从raw独立重算数值差、sign、nonzero和tensor hash，
+不采信summary。当前仍需先提交这些脚本为clean source，再运行正式artifact。
+
 当前状态仅为 `IMPLEMENTED-R3-1B2-PENDING-CLEAN-SOURCE-FORMAL`。单次同进程 smoke 不能关闭
 R3-1b2，也不能证明 five-fresh memory gate。`timing_recorded=false`、
 `performance_claimed=false`、`r3_1_admitted=false`。
