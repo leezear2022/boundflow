@@ -1,5 +1,10 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-25 当前执行：R3-1b3协议已冻结待formal**：10 fresh subprocess，顺序=
+> `NC/CN/NC/CN/NC`；candidate/native absolute peak allocated与reserved必须逐对`<=1.0x`。
+> 协议/worker/replay/tamper/synthetic tests已实现，下一只提交clean source并运行；不计时。见
+> `BOUNDFLOW_R3_1B3_FIVE_FRESH_CORRECTNESS_MEMORY_PLAN_2026_08_25.md`。
+>
 > **2026-08-25 当前状态：R3-1b2关闭，b3开放**：source=`12402da`的compiled custom VJP
 > artifact/replay通过；lower/dα max diff=`3.81470e-6/6.14673e-8`、sign exact；2 scratch、
 > saved dense A=0、warm allocation=0，12/12 tamper。下一只做five-fresh correctness与physical

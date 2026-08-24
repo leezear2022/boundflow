@@ -1,5 +1,9 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+R3-1b3 five-fresh correctness/memory已预注册并实现协议待formal：固定10个fresh subprocess、
+`NC/CN/NC/CN/NC`、absolute peak allocated/reserved均须`<=1.0x`；不测latency。下一步提交
+clean source后运行，见`BOUNDFLOW_R3_1B3_FIVE_FRESH_CORRECTNESS_MEMORY_PLAN_2026_08_25.md`。
+
 R3-1b2 compiled P-alpha VJP已正式关闭：source=`12402da`，lower/dα max diff=
 `3.81470e-6/6.14673e-8`、sign exact；2 scratch、saved dense A=0、warm allocation=0，12/12
 全重签tamper拒绝。当前只开放b3 five-fresh correctness/memory；R3-1仍未admit且不计时。见
