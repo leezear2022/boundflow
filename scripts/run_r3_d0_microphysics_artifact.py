@@ -16,6 +16,7 @@ import statistics
 import subprocess
 import sys
 import tempfile
+import time
 from typing import Any, Mapping
 
 import torch
@@ -43,6 +44,7 @@ CODE_PATHS = (
     "boundflow/runtime/r3_compiled_p_alpha_vjp.py",
     "boundflow/runtime/r3_full_lower_forward_tir.py",
 )
+INTER_WORKER_COOLDOWN_SECONDS = 30
 
 
 def _canonical(value: object) -> str:
@@ -279,6 +281,7 @@ def _protocol() -> dict[str, object]:
         "order": [list(value) for value in ORDER],
         "warmup_count": 3,
         "sample_count": 30,
+        "inter_worker_cooldown_seconds": INTER_WORKER_COOLDOWN_SECONDS,
         "target_speedup": 1.20,
         "sanity_relative_tolerance": 0.15,
         "host_calibration_threshold": "max(5ms,5pct-host-wall)",
@@ -306,6 +309,7 @@ def generate(output: Path, capture: Path, model: Path) -> None:
         raw_root = root / "raw"
         raw_root.mkdir()
         raws = []
+        worker_ordinal = 0
         for pair, order in enumerate(ORDER):
             for position, mode in enumerate(order):
                 result = raw_root / f"run-{pair:02d}-{position}-{mode}.pt"
@@ -328,6 +332,9 @@ def generate(output: Path, capture: Path, model: Path) -> None:
                     check=True,
                 )
                 raws.append(_load(result))
+                worker_ordinal += 1
+                if worker_ordinal < 10:
+                    time.sleep(INTER_WORKER_COOLDOWN_SECONDS)
         summary = _summarize(raws)
         _json_write(root / "protocol.json", protocol)
         _json_write(root / "summary.json", summary)

@@ -27,6 +27,9 @@ D0只读测量，不修改schedule/kernel/production，不形成speedup claim，
 - 每worker 3次warmup后profile 1个完整wrapper；另测30次unprofiled host-wall sanity，必须与R3-2B
   median在`±15%`内，否则profile run不得用于headline attribution；
 - 不裁剪kernel/event，不按结果选择pair。
+- 2026-08-25环境稳定性addendum：一次完整批次后半程native出现`157–160 ms`并被上述`±15%`
+  门禁拒绝；后续formal在每个fresh worker之间固定idle `30 s`，仍从pair 0整批重跑。不得按mode、温度或
+  中间结果动态改变等待时间。
 
 ## 3. 时钟与归因
 
