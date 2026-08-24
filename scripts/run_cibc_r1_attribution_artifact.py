@@ -615,6 +615,7 @@ def generate(
     protocol_value = protocol(source_capture, model, smoke=smoke)
     if not smoke and protocol_value["source_clean"] is not True:
         raise RuntimeError("R1-A formal requires a clean source commit")
+    root.parent.mkdir(parents=True, exist_ok=True)
     temporary = Path(tempfile.mkdtemp(prefix="cibc-r1a-", dir=root.parent))
     try:
         _write_json(temporary / "protocol.json", protocol_value)

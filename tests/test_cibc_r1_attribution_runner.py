@@ -283,3 +283,23 @@ def test_smoke_artifact_replay_rebuilds_summary_and_manifest(
         root / "manifest.json", artifact._manifest(root, protocol, summary)
     )
     assert artifact.replay(root) == summary
+
+
+def test_generate_creates_exact_missing_parent_atomically(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    protocol = _protocol(tmp_path, monkeypatch)
+    source = tmp_path / "source.pt"
+    model = tmp_path / "model.onnx"
+    control = _worker("control")
+    profile = _worker("profile")
+    monkeypatch.setattr(artifact, "protocol", lambda _source, _model, smoke: protocol)
+    monkeypatch.setattr(
+        artifact,
+        "_run_worker",
+        lambda **kwargs: control if kwargs["mode"] == "control" else profile,
+    )
+    root = tmp_path / "missing" / "nested" / "artifact"
+    summary = artifact.generate(root, source_capture=source, model=model, smoke=True)
+    assert root.is_dir()
+    assert artifact.replay(root) == summary
