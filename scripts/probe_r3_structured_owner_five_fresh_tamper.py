@@ -2,11 +2,11 @@
 """Probe fully re-signed R3-1 M0 artifact mutations against semantic replay."""
 
 # pylint: disable=wrong-import-position,protected-access,too-many-locals
+# pylint: disable=missing-function-docstring
 
 from __future__ import annotations
 
 import argparse
-import copy
 import json
 from pathlib import Path
 import shutil

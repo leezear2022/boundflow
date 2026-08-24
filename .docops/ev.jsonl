@@ -12429,3 +12429,7 @@
 {"id":"ev012429","ts":"2026-08-24T18:55:53Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
 {"id":"ev012430","ts":"2026-08-24T18:56:06Z","ty":"ch","st":"s01","pr":60,"slug":"r3-1-m0-tamper-probe"}
 {"id":"ev012431","ts":"2026-08-24T18:56:06Z","ty":"va","st":"s01","pr":60,"result":"pass"}
+{"id":"ev012432","ts":"2026-08-24T18:56:06Z","ty":"cmd","cmd":"Bash:source","summary":"PostToolUse"}
+{"id":"ev012433","ts":"2026-08-24T18:56:11Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
+{"id":"ev012434","ts":"2026-08-24T18:56:22Z","ty":"ch","st":"s01","pr":60,"slug":"r3-1-tamper-lint-fix"}
+{"id":"ev012435","ts":"2026-08-24T18:56:23Z","ty":"va","st":"s01","pr":60,"result":"pass"}
