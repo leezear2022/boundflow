@@ -31,7 +31,18 @@ D0只读测量，不修改schedule/kernel/production，不形成speedup claim，
 ## 3. 时钟与归因
 
 每个worker冻结host `perf_counter_ns`、CUDA/CUPTI activity和显式NVTX/record-function边界。必须有
-host↔CUDA calibration receipt；残差超预注册阈值则该worker不得产生share。
+host↔CUDA calibration receipt。正式实现前冻结以下数值门槛：
+
+- profiler中的wrapper CPU marker与外层`perf_counter_ns` wall残差必须不超过
+  `max(5 ms, 5% * host_wall)`；
+- CUDA event elapsed与首末CUPTI kernel activity envelope残差必须不超过
+  `max(2 ms, 5% * cuda_event_elapsed)`；
+- correlation/CPU-parent优先；仅其缺失时允许marker containment fallback，fallback不得超过该worker
+  CUDA kernel数的`5%`，unattributed kernel必须为`0`；
+- 任一残差、fallback或unattributed门禁失败，该worker不得产生share，也不得参与路线判定。
+
+这里CUDA event elapsed允许包含单stream kernel之间的host dispatch gap，kernel union只由原始activity区间
+重建；二者不能相互替代，也不能用两时钟域直接相减生成host residual。
 
 candidate marker层级：
 
@@ -47,6 +58,8 @@ wrapper
 CUPTI correlation id；只有缺失时允许explicit marker containment fallback，并单独计数。
 
 native按PyTorch operator/aten/cuDNN kernel family报告相同字段，但不得用candidate symbol命名强行一一对应。
+same-solver真实query中的eligible region还必须按op type分别报告share；独立IBP图的`2.45631x`只能作为
+历史乐观上界，不能代替query内真实region构成或真实可达`G`。
 
 ## 4. 必须输出的账本
 
@@ -106,4 +119,3 @@ region family、target budget、required speedup、summary route和performance c
 
 本文只完成预注册。下一工程动作是实现diagnostic-only profiler worker与event replay；不得改R3-2B runtime
 math或现有artifact。D0通过前CUDA Graph、kernel fusion/schedule tuning和R3-3全部关闭。
-
