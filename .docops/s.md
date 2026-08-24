@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev012484
-last_va: ev012485
+last_ch: ev012546
+last_va: ev012547
 blk: none
-next: implement-r3-1b1-compiled-full-lower-forward
-updated: 2026-08-25T00:20:00Z
+next: generate-r3-1b1-artifact-replay-tamper
+updated: 2026-08-25T02:25:00Z
