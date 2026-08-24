@@ -256,6 +256,7 @@ def test_nsys_export_receipt_round_trip_and_anchor_gate() -> None:
         unowned_event_count=0,
         temporal_fallback_count=0,
         graph_node_owner_hash="a" * 64,
+        formal_admitted=True,
     )
     assert nsys_export_receipt_from_dict(receipt.to_dict()) == receipt
     payload = receipt.to_dict()
@@ -303,3 +304,24 @@ def test_generate_creates_exact_missing_parent_atomically(
     summary = artifact.generate(root, source_capture=source, model=model, smoke=True)
     assert root.is_dir()
     assert artifact.replay(root) == summary
+
+
+def test_generate_preserves_partial_raw_on_worker_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    protocol = _protocol(tmp_path, monkeypatch)
+    source = tmp_path / "source.pt"
+    model = tmp_path / "model.onnx"
+    monkeypatch.setattr(artifact, "protocol", lambda _source, _model, smoke: protocol)
+    monkeypatch.setattr(
+        artifact,
+        "_run_worker",
+        lambda **_kwargs: (_ for _ in ()).throw(RuntimeError("fresh worker failed")),
+    )
+    root = tmp_path / "failed" / "artifact"
+    with pytest.raises(RuntimeError, match="fresh worker failed"):
+        artifact.generate(root, source_capture=source, model=model, smoke=True)
+    assert not root.exists()
+    failure = artifact._load_json(root.with_name("artifact.failed") / "failure.json")
+    assert failure["error"] == "fresh worker failed"
+    assert failure["performance_claimed"] is False

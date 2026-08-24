@@ -54,13 +54,14 @@ class R1NsightExportReceipt:
     unowned_event_count: int
     temporal_fallback_count: int
     graph_node_owner_hash: str
+    formal_admitted: bool
     schema_version: str = NSYS_EXPORT_SCHEMA
 
     def validate(self) -> None:
         if (
             self.schema_version != NSYS_EXPORT_SCHEMA
             or len(self.anchor_errors_ns) < 3
-            or any(value < 0 or value > 2_000 for value in self.anchor_errors_ns)
+            or any(value < 0 for value in self.anchor_errors_ns)
             or self.graph_node_count != 42
             or self.cloned_graph_node_count < 42
             or self.profile_group_count != 20
@@ -73,6 +74,8 @@ class R1NsightExportReceipt:
             or self.unowned_event_count != 0
             or self.temporal_fallback_count != 0
             or len(self.graph_node_owner_hash) != 64
+            or self.formal_admitted
+            != all(value <= 2_000 for value in self.anchor_errors_ns)
         ):
             raise ValueError("R1 Nsight export receipt differs")
 
@@ -93,6 +96,7 @@ class R1NsightExportReceipt:
             "unowned_event_count": self.unowned_event_count,
             "temporal_fallback_count": self.temporal_fallback_count,
             "graph_node_owner_hash": self.graph_node_owner_hash,
+            "formal_admitted": self.formal_admitted,
         }
 
 
@@ -116,9 +120,12 @@ def nsys_export_receipt_from_dict(value: object) -> R1NsightExportReceipt:
         "unowned_event_count",
         "temporal_fallback_count",
         "graph_node_owner_hash",
+        "formal_admitted",
     }
     if set(value) != expected:
         raise ValueError("R1 Nsight export receipt fields differ")
+    if not isinstance(value["formal_admitted"], bool):
+        raise ValueError("R1 Nsight export receipt admission differs")
     try:
         receipt = R1NsightExportReceipt(
             schema_version=str(value["schema_version"]),
@@ -135,6 +142,7 @@ def nsys_export_receipt_from_dict(value: object) -> R1NsightExportReceipt:
             unowned_event_count=int(value["unowned_event_count"]),
             temporal_fallback_count=int(value["temporal_fallback_count"]),
             graph_node_owner_hash=str(value["graph_node_owner_hash"]),
+            formal_admitted=bool(value["formal_admitted"]),
         )
     except (KeyError, TypeError, ValueError) as error:
         raise ValueError("R1 Nsight export receipt values differ") from error
@@ -223,9 +231,6 @@ def derive_nsys_attribution(
             nsys_anchor_errors_ns=anchor_errors,
             thresholds=calibration.thresholds,
         )
-        if not rebuilt_calibration.formal_admitted:
-            raise ValueError("R1 Nsight calibrated export not admitted")
-
         marker_ranges = _ranges(connection, "boundflow.r1/graph/%")
         expected_marker_counts = Counter(
             topology.marker_for(node.ordinal) for node in topology.nodes
@@ -415,6 +420,7 @@ def derive_nsys_attribution(
             unowned_event_count=unowned,
             temporal_fallback_count=0,
             graph_node_owner_hash=canonical_hash(owner_payload),
+            formal_admitted=rebuilt_calibration.formal_admitted,
         )
         receipt.validate()
         return receipt, owner_ledger, timing, rebuilt_calibration.to_dict()

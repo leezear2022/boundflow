@@ -384,12 +384,13 @@ def validate_worker(value: Mapping[str, Any], *, mode: str, pair_ordinal: int) -
                 inventory.get("export_receipt")
             )
             timing_ledger_from_dict(inventory.get("timing_ledger"))
+            expected_formal = rebuilt.formal_admitted
             if (
-                not rebuilt.formal_admitted
-                or value.get("cupti_admitted") is not True
-                or value.get("formal_attribution_admitted") is not True
-                or inventory.get("formal_attribution_available") is not True
-                or inventory.get("reason") is not None
+                value.get("cupti_admitted") is not rebuilt.cupti_admitted
+                or value.get("formal_attribution_admitted") is not expected_formal
+                or inventory.get("formal_attribution_available") is not expected_formal
+                or inventory.get("reason")
+                != (None if expected_formal else "clock_calibration_rejected")
                 or inventory.get("owner_ledger_hash") is None
                 or inventory.get("owner_ledger_file")
                 != f"raw/pair_{pair_ordinal:02d}_owner_ledger.json"
@@ -399,6 +400,7 @@ def validate_worker(value: Mapping[str, Any], *, mode: str, pair_ordinal: int) -
                 != f"raw/pair_{pair_ordinal:02d}_profile.nsys-rep"
                 or value.get("profiler_epoch_warmup_excluded") is not False
                 or export_receipt.anchor_errors_ns != rebuilt.nsys_anchor_errors_ns
+                or export_receipt.formal_admitted is not expected_formal
             ):
                 raise ValueError("R1-A Nsight profile boundary differs")
         else:
@@ -541,18 +543,19 @@ def _run_worker(
             text=True,
         )
         value = _load_json(pending_worker)
-        pending_worker.unlink()
         receipt, owner, timing, calibration = derive_nsys_attribution(
             sqlite_path, value
         )
+        pending_worker.unlink()
         owner_payload = owner.to_dict()
         owner_path = raw_root / f"pair_{pair_ordinal:02d}_owner_ledger.json"
         _write_json(owner_path, owner_payload)
         pending_inventory = value["profile_inventory"]
         assert isinstance(pending_inventory, dict)
+        formal_attribution = bool(calibration["formal_admitted"])
         value["calibration_receipt"] = calibration
-        value["cupti_admitted"] = True
-        value["formal_attribution_admitted"] = True
+        value["cupti_admitted"] = bool(calibration["cupti_admitted"])
+        value["formal_attribution_admitted"] = formal_attribution
         value["profile_inventory"] = {
             "backend": "nsys_sqlite",
             "anchors": pending_inventory["anchors"],
@@ -562,8 +565,8 @@ def _run_worker(
             "owner_ledger_file": f"raw/pair_{pair_ordinal:02d}_owner_ledger.json",
             "sqlite_file": f"raw/pair_{pair_ordinal:02d}_profile.sqlite",
             "nsys_report_file": f"raw/pair_{pair_ordinal:02d}_profile.nsys-rep",
-            "formal_attribution_available": True,
-            "reason": None,
+            "formal_attribution_available": formal_attribution,
+            "reason": None if formal_attribution else "clock_calibration_rejected",
         }
         value["worker_hash"] = canonical_hash(
             {key: item for key, item in value.items() if key != "worker_hash"}
@@ -645,8 +648,23 @@ def generate(
         )
         os.replace(temporary, root)
         return summary
-    except BaseException:
-        shutil.rmtree(temporary, ignore_errors=True)
+    except BaseException as error:
+        failure: dict[str, object] = {
+            "schema_version": "boundflow.cibc-r1-attribution-failure/v1",
+            "error_type": type(error).__name__,
+            "error": str(error),
+            "source_git_head": protocol_value["source_git_head"],
+            "run_kind": protocol_value["run_kind"],
+            "performance_claimed": False,
+        }
+        failure["failure_hash"] = canonical_hash(failure)
+        _write_json(temporary / "failure.json", failure)
+        failed = root.with_name(root.name + ".failed")
+        suffix = 1
+        while failed.exists():
+            failed = root.with_name(root.name + f".failed-{suffix:02d}")
+            suffix += 1
+        os.replace(temporary, failed)
         raise
 
 
