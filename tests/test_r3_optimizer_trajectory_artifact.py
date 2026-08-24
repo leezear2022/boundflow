@@ -2,6 +2,7 @@
 
 # pylint: disable=missing-function-docstring,duplicate-code
 
+import json
 from pathlib import Path
 
 import pytest
@@ -19,3 +20,13 @@ def test_r32a_formal_artifact_replays() -> None:
     assert summary["trajectory_correctness_admitted"] is True
     assert summary["r3_2b_open"] is True
     assert summary["performance_claimed"] is False
+
+
+def test_r32a_formal_tamper_report_rejects_all_cases() -> None:
+    report_path = ARTIFACT / "tamper_report.json"
+    if not report_path.is_file():
+        pytest.skip("R3-2A tamper report is not generated yet")
+    report = json.loads(report_path.read_text())
+    assert report["case_count"] == report["rejected_count"] == 12
+    assert report["all_rejected"] is True
+    assert report["performance_claimed"] is False

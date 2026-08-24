@@ -1,6 +1,13 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
-> **2026-08-25 当前状态：R3-1b3通过，R3-1已admit**：source=`eeeb1bf`的5对/10 fresh
+> **2026-08-25 当前状态：R3-2A通过，只开放R3-2B**：source=`e7ae590`的P-anchor 5-pair
+> 10/9 optimizer trajectory逐步语义、ownership和memory全过；最大lower/dα/α差=
+> `8.58307e-6/8.28877e-8/2.38419e-7`，worst allocated/reserved=`0.0586911x/0.166667x`，
+> 12/12 tamper，全量=`1602 passed,3 skipped`。当前只开放同轨迹wrapper-inclusive local timing；
+> 尚无speedup/query claim。见
+> `BOUNDFLOW_R3_2A_OPTIMIZER_TRAJECTORY_FORMAL_CLOSURE_2026_08_25.md`。
+
+> **历史：2026-08-25 当前状态：R3-1b3通过，R3-1已admit**：source=`eeeb1bf`的5对/10 fresh
 > correctness/memory全部通过；最坏allocated/reserved=`0.06417x/0.16667x`，lower/dα max diff=
 > `4.05312e-6/6.14673e-8`，9/9 tamper。当前只开放R3-2A optimizer trajectory correctness；
 > timing仍关闭。见`BOUNDFLOW_R3_1B3_FIVE_FRESH_FORMAL_CLOSURE_2026_08_25.md`。

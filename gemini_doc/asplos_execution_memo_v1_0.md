@@ -1,6 +1,13 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
-> **2026-08-25 R3-1b3关闭/R3-2A开放指令**：source=`eeeb1bf`的5对/10 fresh全部通过；
+> **2026-08-25 R3-2A关闭/R3-2B开放指令**：source=`e7ae590`的5对/10 fresh、每worker
+> 10 evaluation/9 Adam mutation全部通过；最大lower/dα/α差=`8.58307e-6/8.28877e-8/2.38419e-7`，
+> worst allocated/reserved=`0.0586911x/0.166667x`，12/12全重签tamper拒绝，全量=`1602 passed,
+> 3 skipped`。状态=`VALIDATED-R3-2A-P-TRAJECTORY`；当前唯一动作是预注册并执行R3-2B同轨迹
+> wrapper-inclusive计时。R3-2A未读取latency，不形成performance claim。见
+> `BOUNDFLOW_R3_2A_OPTIMIZER_TRAJECTORY_FORMAL_CLOSURE_2026_08_25.md`。
+
+> **历史：2026-08-25 R3-1b3关闭/R3-2A开放指令**：source=`eeeb1bf`的5对/10 fresh全部通过；
 > worst allocated/reserved=`0.06417x/0.16667x`，lower/dα max diff=`4.05312e-6/6.14673e-8`，
 > 9/9 tamper。`r3_1_admitted=true`；当前唯一动作是预注册R3-2A 10-step optimizer trajectory
 > correctness。不得提前计时或外推query。见

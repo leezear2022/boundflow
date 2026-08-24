@@ -42,3 +42,7 @@ formal clean-source检查只审计tracked文件；未跟踪的用户输入`docs/
 尚未逐字段冻结门槛。该artifact降级为pre-hardening诊断副本；runner新增10/9、lr/decay、两组tolerance、
 memory gate、claim flags、pair order、source/code revision和exact文件inventory语义校验。必须从新clean
 source重跑全部worker，不能复用首轮raw形成正式关闭。
+
+新增12类fully re-signed tamper probe，覆盖中间lower/dα/α、Adam moment、dense-A/fallback receipt、
+evaluation/termination、immutable identity、memory、summary admission和protocol tolerance。探针结果必须
+作为artifact ancillary report冻结，且12/12拒绝后才允许R3-2A closure。
