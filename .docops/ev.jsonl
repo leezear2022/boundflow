@@ -12470,3 +12470,8 @@
 {"id":"ev012470","ts":"2026-08-24T19:07:44Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
 {"id":"ev012471","ts":"2026-08-24T19:07:56Z","ty":"ch","st":"s01","pr":60,"slug":"r3-1b0-trace-artifact-runner"}
 {"id":"ev012472","ts":"2026-08-24T19:07:56Z","ty":"va","st":"s01","pr":60,"result":"pass"}
+{"id":"ev012473","ts":"2026-08-24T19:07:56Z","ty":"cmd","cmd":"Bash:source","summary":"PostToolUse"}
+{"id":"ev012474","ts":"2026-08-24T19:08:07Z","ty":"cmd","cmd":"Bash:source","summary":"PostToolUse"}
+{"id":"ev012475","ts":"2026-08-24T19:08:39Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
+{"id":"ev012476","ts":"2026-08-24T19:08:51Z","ty":"ch","st":"s01","pr":60,"slug":"r3-1b0-trace-tamper"}
+{"id":"ev012477","ts":"2026-08-24T19:08:51Z","ty":"va","st":"s01","pr":60,"result":"pass"}
