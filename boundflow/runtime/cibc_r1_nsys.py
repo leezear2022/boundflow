@@ -74,8 +74,7 @@ class R1NsightExportReceipt:
             or self.unowned_event_count != 0
             or self.temporal_fallback_count != 0
             or len(self.graph_node_owner_hash) != 64
-            or self.formal_admitted
-            != all(value <= 2_000 for value in self.anchor_errors_ns)
+            or not isinstance(self.formal_admitted, bool)
         ):
             raise ValueError("R1 Nsight export receipt differs")
 

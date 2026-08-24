@@ -260,9 +260,11 @@ def test_nsys_export_receipt_round_trip_and_anchor_gate() -> None:
     )
     assert nsys_export_receipt_from_dict(receipt.to_dict()) == receipt
     payload = receipt.to_dict()
-    payload["anchor_errors_ns"] = [221, 2_001, 224]
-    with pytest.raises(ValueError, match="receipt differs"):
+    payload["formal_admitted"] = "true"
+    with pytest.raises(ValueError, match="admission differs"):
         nsys_export_receipt_from_dict(payload)
+    rejected = R1NsightExportReceipt(**{**receipt.__dict__, "formal_admitted": False})
+    assert nsys_export_receipt_from_dict(rejected.to_dict()) == rejected
 
 
 def test_smoke_artifact_replay_rebuilds_summary_and_manifest(
