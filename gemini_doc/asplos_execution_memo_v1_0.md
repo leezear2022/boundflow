@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-25 R3-0实现指令**：contract source已实现但尚未formal关闭。当前唯一动作是在clean commit
+> 上生成R3-0 artifact、replay和12类fully re-signed tamper；通过前不得接P-anchor custom backward。
+> 该实现没有production/timing/performance。见
+> `BOUNDFLOW_R3_0_STRUCTURED_OWNER_CONTRACT_IMPLEMENTATION_CHANGELOG_2026_08_25.md`。
+
 > **2026-08-25 R1-A正式关闭与R3-0开放指令**：clean source=`fe80c75`的6-pair Nsight formal
 > 已完成；owner归属结构完整，但profile perturbation=`1.1838—1.1859x`导致`0/6`通过冻结
 > `[0.95,1.05]`，clock receipt仅`3/6`。最终=`VALIDATED-NO-GO-R1A-ATTRIBUTION`；不得放宽门槛、

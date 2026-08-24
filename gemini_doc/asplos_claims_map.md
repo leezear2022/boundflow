@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-25 R3-0实现状态（不升级claim）**：first-class lower-region DAG、Template/Instance、
+> closure/fanout/BiasSplit、两scratch liveness、dense-escape、recursive context、saved-state ledger和
+> fail-closed receipt已实现，38个targeted tests通过。当前仅=
+> `IMPLEMENTED-R3-0-PENDING-CLEAN-SOURCE-FORMAL`；production/timing/performance均false，R3-1仍关闭。
+> 见`BOUNDFLOW_R3_0_STRUCTURED_OWNER_CONTRACT_IMPLEMENTATION_CHANGELOG_2026_08_25.md`。
+
 > **2026-08-25 CIBC R1-A正式NO-GO**：source=`fe80c75`完成6组
 > `CP/PC/CP/PC/CP/PC` clean-source Nsight formal。owner reconstruction每组均为42 graph nodes、
 > 4400 events、unowned/temporal=`0/0`，但profile perturbation六组均为`1.1838—1.1859x`，

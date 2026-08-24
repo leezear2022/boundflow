@@ -1,5 +1,11 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-25 R3-0实现待formal**：typed region DAG、closure/liveness、BiasSplit ownership、
+> dense-escape/context/saved-state validators和artifact/replay/tamper runner已实现，38 tests通过。
+> 当前=`IMPLEMENTED-R3-0-PENDING-CLEAN-SOURCE-FORMAL`；下一唯一动作是从clean commit生成并重放
+> contract artifact。R3-1、production和timing保持关闭。见
+> `BOUNDFLOW_R3_0_STRUCTURED_OWNER_CONTRACT_IMPLEMENTATION_CHANGELOG_2026_08_25.md`。
+
 > **2026-08-25 当前状态：R1-A正式NO-GO，转R3-0**：6组clean-source Nsight formal已完成。
 > 每组均重建42 graph nodes/4400 owner events且unowned/temporal=`0/0`，但六组profile扰动=
 > `1.1838—1.1859x`、`0/6`满足冻结`[0.95,1.05]`；clock仅`3/6`通过。因此不得形成op-type或

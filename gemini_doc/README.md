@@ -1,5 +1,10 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+R3-0 structured-owner contract source 已实现：typed DAG、Template/Instance、closure/fanout/BiasSplit、
+两scratch liveness、dense-escape/context/saved-state validators及artifact/replay/tamper runner，38 tests
+通过。当前只到`IMPLEMENTED-R3-0-PENDING-CLEAN-SOURCE-FORMAL`；R3-1和production/timing仍关闭。
+见`BOUNDFLOW_R3_0_STRUCTURED_OWNER_CONTRACT_IMPLEMENTATION_CHANGELOG_2026_08_25.md`。
+
 CIBC R1-A 已于2026-08-25按冻结协议正式关闭为
 `VALIDATED-NO-GO-R1A-ATTRIBUTION`：六组Nsight profile均完整重建42 graph nodes/4400 owner events，
 但profile perturbation=`1.1838—1.1859x`、`0/6`通过`[0.95,1.05]`，clock receipt仅`3/6`。
