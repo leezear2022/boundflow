@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-25 R3-0 v2纠正指令**：复核发现v1 fixture用dense native α而非P-anchor production
+> compressed `[2,1,6,86]`。验证器结论保留，但R3-1 admission暂时撤回；下一唯一动作是提交修正并
+> 生成v2 artifact/replay/tamper。不得在v2关闭前实现custom backward。见
+> `BOUNDFLOW_R3_0_COMPRESSED_ALPHA_FIX_CHANGELOG_2026_08_25.md`。
+
 > **2026-08-25 R3-0关闭/R3-1开放指令**：R3-0 artifact/replay及12/12全重签tamper已通过，最终=
 > `VALIDATED-R3-0-CONTRACT`。下一唯一工程动作是R3-1：`25/Conv_8`、一个evaluation、mutation=0、
 > candidate forward/custom backward各一次、five fresh独立native oracle；saved dense A=0、scratch<=2。

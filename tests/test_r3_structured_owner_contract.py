@@ -32,6 +32,8 @@ def test_frozen_bundle_replays_to_claim_bounded_summary() -> None:
     assert summary["node_count"] == 8
     assert summary["edge_count"] == 8
     assert summary["scratch_slot_count"] == 2
+    assert summary["saved_logical_bytes"] == 207888
+    assert summary["saved_unique_storage_bytes"] == 109584
     assert summary["saved_coefficient_bytes"] == 0
     assert summary["dense_escape_count"] == 0
     assert summary["context_tensor_count"] == 0
@@ -39,6 +41,10 @@ def test_frozen_bundle_replays_to_claim_bounded_summary() -> None:
     assert summary["timing_recorded"] is False
     assert summary["performance_claimed"] is False
     assert summary["r3_1_open"] is True
+    instance = cast(dict[str, object], bundle["instance"])
+    bindings = cast(list[dict[str, object]], instance["bindings"])
+    alpha = next(item for item in bindings if item["role"] == "alpha")
+    assert alpha["shape"] == [2, 1, 6, 86]
 
 
 @pytest.mark.parametrize(

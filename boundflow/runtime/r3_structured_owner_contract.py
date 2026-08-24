@@ -204,9 +204,7 @@ def build_r30_instance(
         split_history_hash=_hash("p-anchor-empty-split-history"),
         domain_hash=_hash("p-anchor-domain-zero"),
         bindings=(
-            _binding(
-                "alpha", "alpha", 4096, shape=(6, 1, 16, 8, 8), requires_grad=True
-            ),
+            _binding("alpha", "alpha", 4096, shape=(2, 1, 6, 86), requires_grad=True),
             _binding("beta", "beta", 8192, shape=(6, 0), requires_grad=True),
             _binding("lower", "bound", 12288, shape=(6, 16, 8, 8)),
             _binding("upper", "bound", 16384, shape=(6, 16, 8, 8)),
@@ -226,11 +224,11 @@ def build_r30_ledger() -> SavedTensorLedgerV1:
     entries = (
         SavedTensorEntryV1(
             "alpha",
-            (6, 1, 16, 8, 8),
+            (2, 1, 6, 86),
             "torch.float32",
             "cuda:0",
             "alpha",
-            98304,
+            2064,
             0,
             False,
         ),

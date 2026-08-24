@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev012326
-last_va: ev012327
+last_ch: ev012357
+last_va: ev012358
 blk: none
-next: implement-r3-1-p-anchor-mandatory-custom-backward
-updated: 2026-08-24T18:24:00Z
+next: run-r3-0-compressed-alpha-v2-formal
+updated: 2026-08-24T18:33:00Z

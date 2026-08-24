@@ -1,5 +1,10 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-25 R3-0 fixture纠正状态**：v1 validators仍成立，但alpha fixture不是production
+> compressed shape；已改为`[2,1,6,86]`并重算saved bytes。当前等待v2 clean-source formal，
+> R3-1暂时重关，无performance claim。见
+> `BOUNDFLOW_R3_0_COMPRESSED_ALPHA_FIX_CHANGELOG_2026_08_25.md`。
+
 > **2026-08-25 当前状态：R3-0关闭，R3-1开放**：contract replay通过，12/12全重签tamper拒绝；
 > 8 nodes/8 edges、2 scratch，saved coefficient/dense escape/context=`0/0/0`。当前=
 > `VALIDATED-R3-0-CONTRACT`，下一只实现`25/Conv_8` mandatory custom backward correctness；不计时，

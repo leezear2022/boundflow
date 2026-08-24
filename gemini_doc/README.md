@@ -1,5 +1,9 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+R3-0 v1复核发现formal fixture的alpha binding是dense native而非P-anchor production compressed
+`[2,1,6,86]`。验证器机制保留，但R3-1 admission暂时撤回；修正已实现，下一步生成v2
+artifact/replay/tamper。见`BOUNDFLOW_R3_0_COMPRESSED_ALPHA_FIX_CHANGELOG_2026_08_25.md`。
+
 R3-0 已正式关闭为`VALIDATED-R3-0-CONTRACT`：clean-source artifact/replay通过，8 nodes/8 edges、
 2 scratch、saved coefficient/dense escape/context=`0/0/0`，12/12 fully re-signed tamper拒绝。
 这仍不是production/custom-backward/performance。下一只开放R3-1 `25/Conv_8`一个evaluation的
