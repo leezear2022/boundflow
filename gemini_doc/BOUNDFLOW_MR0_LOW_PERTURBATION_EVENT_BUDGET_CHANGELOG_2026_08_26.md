@@ -1,5 +1,5 @@
 ---
-status: preregistration-recorded
+status: implemented-formal-run-pending
 updated: 2026-08-26T13:30:00+08:00
 type: changelog
 topic: boundflow
@@ -25,4 +25,16 @@ stage: s01
 
 ## Validation pending
 
-本记录仅冻结协议。实现、formal raw、replay、tamper、full regression与最终 verdict 尚待后续提交。
+实现已新增：
+
+- `boundflow/runtime/mr0_explicit_event_budget.py`：budget row、geomean、bootstrap upper 与机械
+  verdict重算；
+- fresh worker：真实CIBC 17-op CUDA Graph、预分配36个event object、1/4/8/17对逐次记录；
+- artifact/replay：source blob、input digest、portable log、5 raw与summary绑定；
+- 12类fully re-signed tamper框架与专项测试。
+
+提交前单worker smoke保持semantic exact、36 tensor/235992元素、pointer/contract/stream稳定；非正式
+overhead ratio随budget=`1.0618/1.1615/1.3226/2.1307x`。这些数字只证明runner可执行并预示
+formal可能NO-GO，不参与最终结论。正式raw必须从clean implementation commit的worker 0重新生成。
+
+当前 targeted/typing/lint 后冻结source；formal raw、tamper、full regression与最终 verdict 尚待后续提交。
