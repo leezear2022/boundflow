@@ -1,8 +1,12 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-26 当前状态：MR3-0真实provider hook feasibility通过**：真实beta-split optimized call
+> 的outer/inner=`1/10`，`/49`下P ReLU/Conv probe=`20/20`；完整state max diff=`2.02656e-6`、
+> 12/12 tamper。下一只实现fail-closed candidate bridge；未开放timing。
+
 > **2026-08-26 当前执行：MR3 P-anchor production bridge correctness已预注册**：只接
 > `25/Conv_8`，5 pair/10 fresh逐步核对10 evaluation/9 backward-mutation与outer atomic commit；
-> 不计时、不扩S-anchor/multi-site。下一先确认真实provider hook，再实现fail-closed bridge。
+> 不计时、不扩S-anchor/multi-site。真实hook已由MR3-0确认，下一实现fail-closed bridge。
 
 > **2026-08-26 当前状态：MR2选出P-anchor，只开放bridge correctness预注册**：P `25/Conv_8`
 > site/ABI/ownership/VJP/10×evaluation+9×mutation均proven，multi-site显式single-site bounded，唯一

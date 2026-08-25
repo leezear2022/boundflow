@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-26 MR3-0真实provider hook feasibility通过**：source=`8a63503`，2 pair/4 fresh，
+> beta-split outer/inner=`1/10`，probe P ReLU/Conv=`20/20`；完整state max diff=`2.02656e-6`、
+> sign exact，empty β=`[6,0]`，12/12 tamper。只开放MR3 candidate bridge implementation；
+> timing/multi-site/same-solver关闭。见
+> `BOUNDFLOW_MR3_0_PROVIDER_HOOK_FEASIBILITY_FORMAL_CLOSURE_2026_08_26.md`。
+
 > **2026-08-26 MR3 P-anchor production bridge correctness预注册**：固定真实provider exact call、
 > P `25/Conv_8`单site、5 pair/10 fresh、region forward/backward=`10/9`、outer launch/emit/commit=
 > `1/1/1`，逐步比较lower/dα/α/Adam/termination-visible result。无timing；通过也只开放单site

@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev013745
-last_va: ev013746
+last_ch: ev013757
+last_va: ev013758
 blk: none
-next: generate-mr3-0-four-process-formal-artifact
-updated: 2026-08-25T06:31:08Z
+next: implement-mr3-fail-closed-p-anchor-candidate-bridge
+updated: 2026-08-25T06:45:13Z

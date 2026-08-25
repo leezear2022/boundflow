@@ -1,7 +1,7 @@
 # 修改记录：MR3-0 Provider Hook Feasibility
 
 > 日期：2026-08-26  
-> 状态：计划冻结，待实现与实测
+> 状态：正式通过；candidate bridge implementation已开放
 
 ## 修改
 

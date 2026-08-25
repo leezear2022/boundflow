@@ -1,7 +1,12 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-26 MR3-0 claim边界**：可claim真实provider beta-split exact call存在精确P hook，
+> 2 pair/4 fresh的pass-through完整state max diff=`2.02656e-6`、sign exact，12/12 tamper，状态=
+> `VALIDATED-MR3-0-PROVIDER-HOOK-FEASIBILITY`。只开放candidate bridge implementation；不得claim
+> replacement已接入、bridge correctness、timing、multi-site或same-solver performance。
+
 > **2026-08-26 MR3预注册边界**：当前只冻结P-anchor真实provider bridge correctness协议，尚无
-> implementation/formal raw。不得claim bridge已接入、correctness通过、timing或production coverage；
+> candidate replacement/formal raw。不得claim bridge已接入、correctness通过、timing或production coverage；
 > 通过最多开放single-site bridge timing预注册。
 
 > **2026-08-26 MR2 claim边界**：可claim P-anchor是冻结P/S两site中唯一具备production bridge
