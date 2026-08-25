@@ -17,3 +17,10 @@ stage: s01
 - focused=`12 passed`，mypy四文件分别clean，pylint/Black/diff通过。
 
 本提交只建立clean-source formal gate。尚无6-pair正式结果，不形成性能claim。
+
+## Formal-run前证据链 amendment
+
+timing worker为bridge追加prewarmed cache入口后，既有correctness artifact按预期因code revision变化拒绝
+replay。未放宽validator；而是将该追加接口及负向测试纳入correctness manifest，重签后重新replay通过，
+summary hash保持`293c5c8b…a718`，新manifest file SHA256为`15ba6b30…f443`。正式timing只能绑定
+这个可重放的新identity。

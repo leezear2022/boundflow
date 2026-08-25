@@ -26,9 +26,14 @@ termination与atomic rollback语义。
 - formal gate commit=`d2ed121`，lossless-xz amendment=`72155ed`；
 - artifact=`artifacts/measurement-recovery/mr5-multi-conv-production-bridge-v1/`；
 - summary hash=`293c5c8b902cb7bfa813da03f3b4519a81dab6059b166264f3d98f68f616a718`；
-- manifest file SHA256=`54192c2adeae45483f16dc1394df4c4cdb5888d0e11c999f0110217d60314032`；
+- manifest file SHA256=`15ba6b30f5b62d13d5f04ab3cef3641df6b8decafa5f51f6ca7765ea0dfff443`；
 - 三个外部repo、model/property identity与MR4/MR3冻结值一致；
 - raw以`raw.json.xz`无损保存，解压后约150 MB，仓库对象约18 MB。
+
+2026-08-26 timing amendment：为正式计时在已验证bridge上追加可选prewarmed cache入口和只读
+timing receipt，并补相应负向测试；correctness raw、summary、source commit及所有数值未修改。旧manifest
+按fail-closed设计拒绝了code blob漂移，随后以当前code revision重签并成功replay，summary hash仍为
+`293c5c8b…a718`。该amendment只恢复correctness证据链，不改变correctness或performance claim。
 
 ## 3. Five-pair semantic closure
 

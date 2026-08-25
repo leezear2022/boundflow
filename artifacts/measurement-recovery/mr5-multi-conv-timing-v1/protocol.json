@@ -1,0 +1,97 @@
+{
+  "absolute_peak_memory_ratio_gate": 1.05,
+  "bootstrap_lower_gate": 1.0,
+  "bootstrap_samples": 10000,
+  "bootstrap_seed": 20260826,
+  "code_revision": {
+    "boundflow/runtime/mr5_multi_conv_production_bridge.py": "ffe37b3b904aa6d13140cb4e829602d6b2188f0b896ca53a57f0bc64d9ea4d13",
+    "boundflow/runtime/mr5_multi_conv_timing.py": "4b36076551fbb7bec9ff987db8cdfce5e9a75b5192c5402e8a2f490cfcf33b0f",
+    "scripts/probe_mr5_multi_conv_timing_tamper.py": "23274e9b1f6450969948f65d715be2cfd9904a6c28c558a37eb7d6946eef6568",
+    "scripts/run_mr5_multi_conv_timing_formal.py": "f69f4ad4ad9c39c59e0a4fd492adf90cc663f3c26e4fa427beffaf1d46769928",
+    "scripts/run_mr5_multi_conv_timing_worker.py": "8db6c8b7fa761896311d5cc839600a5f49e8ea2f8387a6ff7e6cf7df4b72246b",
+    "tests/test_mr5_multi_conv_timing.py": "941580cf709e1bc8c11b5da3ba066ac6c72b13ffd45a43212b54959e1b874605"
+  },
+  "correctness_identity": {
+    "manifest_file_sha256": "15ba6b30f5b62d13d5f04ab3cef3641df6b8decafa5f51f6ca7765ea0dfff443",
+    "manifest_hash": "f70aa95a984e73150e4e323bfbad43c57ce32d29ec29815af5ea17176131d27b",
+    "replay_status": "VALIDATED-MR5-MULTI-CONV-PRODUCTION-BRIDGE-CORRECTNESS",
+    "summary_file_sha256": "f08935208d36d45c461efcc505b82982dffcb5345658e7ec4328b37bd178fa41"
+  },
+  "diagnostic_clock": "same-current-stream-cuda-event",
+  "generator_commit": "9c08bf6a2636768770c3af9c97c7852fba750820",
+  "headline_clock": "host-perf-counter-ns",
+  "host_geomean_gate": 1.05,
+  "model_name": "resnet_2b.onnx",
+  "pair_count": 6,
+  "performance_claimed": false,
+  "property_name": "prop_0_eps_0.008.vnnlib",
+  "protocol_hash": "ef3cf43b7f1ef648035b21641bce90e3ca71fc90ee01574fe792a1f2bc0a241e",
+  "python_name": "python",
+  "resume_policy": "reject-any-existing-artifact",
+  "run_order": [
+    [
+      0,
+      0,
+      "provider"
+    ],
+    [
+      0,
+      1,
+      "bridge"
+    ],
+    [
+      1,
+      0,
+      "bridge"
+    ],
+    [
+      1,
+      1,
+      "provider"
+    ],
+    [
+      2,
+      0,
+      "provider"
+    ],
+    [
+      2,
+      1,
+      "bridge"
+    ],
+    [
+      3,
+      0,
+      "bridge"
+    ],
+    [
+      3,
+      1,
+      "provider"
+    ],
+    [
+      4,
+      0,
+      "provider"
+    ],
+    [
+      4,
+      1,
+      "bridge"
+    ],
+    [
+      5,
+      0,
+      "bridge"
+    ],
+    [
+      5,
+      1,
+      "provider"
+    ]
+  ],
+  "schema_version": "boundflow.mr5-multi-conv-timing-protocol/v1",
+  "source_commit": "24a208140b73ed943d983ea73f2a20f842a19015",
+  "worker_count": 12,
+  "worst_pair_gate": 0.98
+}

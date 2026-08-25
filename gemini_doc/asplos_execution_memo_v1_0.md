@@ -1,6 +1,14 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
-> **2026-08-26 MR5 multi-Conv production correctness正式通过，只开放timing预注册**：5 pair/
+> **2026-08-26 MR5 multi-site正式计时NO-GO，MR6 guard attribution已预注册**：6 pair/12 fresh
+> 完整outer host geomean/bootstrap lower/worst=`0.834407/0.828498/0.824644x`，candidate约慢
+> `19.84%`；correctness、30/27、cache、memory、host/event与20/20 tamper通过。当前三独立module/
+> validation/runtime形态停止，complete-query仍关闭。代码账本发现至少360次同步value guard；下一只
+> 做MR6 unsafe ceiling attribution，不形成性能claim。见
+> `BOUNDFLOW_MR5_MULTI_SITE_TIMING_FORMAL_NO_GO_CLOSURE_2026_08_26.md`与
+> `BOUNDFLOW_MR6_HOT_PATH_GUARD_ATTRIBUTION_PLAN_2026_08_26.md`。
+
+> **历史（已由上方timing NO-GO取代）：2026-08-26 MR5 multi-Conv production correctness正式通过，只开放timing预注册**：5 pair/
 > 10 fresh，C2/C1/C0累计`150/135`，general/optimizer max diff=`5.00679e-6/2.56300e-6`，
 > atomic rollback、21/21 tamper、full=`1787 passed,3 skipped`。不得写成speedup；下一步只按冻结
 > 6 pair协议测完整warm-cache outer exact call。见

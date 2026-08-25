@@ -1,0 +1,130 @@
+{
+  "all_rejected": true,
+  "attack_count": 20,
+  "attacks": [
+    {
+      "attack": "host-zero-full-resign",
+      "error": "ValueError",
+      "ordinal": 0,
+      "rejected": true
+    },
+    {
+      "attack": "event-zero-full-resign",
+      "error": "ValueError",
+      "ordinal": 1,
+      "rejected": true
+    },
+    {
+      "attack": "peak-below-base-full-resign",
+      "error": "ValueError",
+      "ordinal": 2,
+      "rejected": true
+    },
+    {
+      "attack": "source-full-resign",
+      "error": "ValueError",
+      "ordinal": 3,
+      "rejected": true
+    },
+    {
+      "attack": "protocol-full-resign",
+      "error": "ValueError",
+      "ordinal": 4,
+      "rejected": true
+    },
+    {
+      "attack": "solver-full-resign",
+      "error": "ValueError",
+      "ordinal": 5,
+      "rejected": true
+    },
+    {
+      "attack": "semantic-full-resign",
+      "error": "ValueError",
+      "ordinal": 6,
+      "rejected": true
+    },
+    {
+      "attack": "module-stability-full-resign",
+      "error": "ValueError",
+      "ordinal": 7,
+      "rejected": true
+    },
+    {
+      "attack": "module-inner-hash-full-resign",
+      "error": "ValueError",
+      "ordinal": 8,
+      "rejected": true
+    },
+    {
+      "attack": "bridge-count-full-resign",
+      "error": "ValueError",
+      "ordinal": 9,
+      "rejected": true
+    },
+    {
+      "attack": "cache-miss-full-resign",
+      "error": "ValueError",
+      "ordinal": 10,
+      "rejected": true
+    },
+    {
+      "attack": "signature-full-resign",
+      "error": "ValueError",
+      "ordinal": 11,
+      "rejected": true
+    },
+    {
+      "attack": "workspace-full-resign",
+      "error": "ValueError",
+      "ordinal": 12,
+      "rejected": true
+    },
+    {
+      "attack": "fresh-module-drift-full-resign",
+      "error": "ValueError",
+      "ordinal": 13,
+      "rejected": true
+    },
+    {
+      "attack": "stream-drift-full-resign",
+      "error": "ValueError",
+      "ordinal": 14,
+      "rejected": true
+    },
+    {
+      "attack": "device-projection-full-resign",
+      "error": "ValueError",
+      "ordinal": 15,
+      "rejected": true
+    },
+    {
+      "attack": "run-order-full-resign",
+      "error": "ValueError",
+      "ordinal": 16,
+      "rejected": true
+    },
+    {
+      "attack": "run-mode-full-resign",
+      "error": "ValueError",
+      "ordinal": 17,
+      "rejected": true
+    },
+    {
+      "attack": "delete-run-full-resign",
+      "error": "ValueError",
+      "ordinal": 18,
+      "rejected": true
+    },
+    {
+      "attack": "worker-performance-claim-full-resign",
+      "error": "ValueError",
+      "ordinal": 19,
+      "rejected": true
+    }
+  ],
+  "performance_claimed": false,
+  "rejected_count": 20,
+  "report_hash": "b80c1aa3b14d0f303be39a79e40996172733320277fcb2f049536ddf2a639d9c",
+  "schema_version": "boundflow.mr5-multi-conv-timing-tamper/v1"
+}

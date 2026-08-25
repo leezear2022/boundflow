@@ -1,6 +1,12 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
-最新：MR5 multi-Conv production correctness正式通过；真实C2→C1→C0三site累计`150/135`，5 pair
+最新：MR5 multi-site正式计时以NO-GO关闭；6 pair完整outer host geomean=`0.834407x`，correctness、
+30/27、cache、memory、clock direction与20/20 tamper通过，但当前三独立site runtime约慢19.84%。
+下一阶段MR6只量化至少360次同步value guard的unsafe ceiling，不形成性能claim。见
+`BOUNDFLOW_MR5_MULTI_SITE_TIMING_FORMAL_NO_GO_CLOSURE_2026_08_26.md`与
+`BOUNDFLOW_MR6_HOT_PATH_GUARD_ATTRIBUTION_PLAN_2026_08_26.md`。
+
+历史（correctness保留，timing已由上方NO-GO关闭）：MR5 multi-Conv production correctness正式通过；真实C2→C1→C0三site累计`150/135`，5 pair
 general/optimizer max diff=`5.00679e-6/2.56300e-6`，atomic rollback、21/21 tamper、full=
 `1787 passed,3 skipped`。multi-site timing预注册已激活，但尚无speedup。见
 `BOUNDFLOW_MR5_MULTI_CONV_CORRECTNESS_FORMAL_CLOSURE_2026_08_26.md`与

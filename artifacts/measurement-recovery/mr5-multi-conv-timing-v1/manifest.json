@@ -1,0 +1,31 @@
+{
+  "files": {
+    "pair_metrics.jsonl": "6254cd89036e0e03330317603aa1637caa2d9e068976f9cac1bccee2e74b5c67",
+    "protocol.json": "29b1947af51a1e164848c28d06a0c6c6b798bf0f4bd8789f6b1dd07546615f9a",
+    "raw.json": "558fde6b823ce53a909a779223e7ffe5b6ad480b9dcd47c6f8dcc6ab4c87b612",
+    "replay_stdout.txt": "5ab6f18eb9434e83e5144a4623c9dcc6b8ca882008ba44071dfafa476ff82f84",
+    "summary.json": "b0d05f6e2f0997e72aa137a8d7d3de2985dd4d1f77f9ce10585edc97eea26973",
+    "tamper_report.json": "1d086e4173a085a001468b1a51e59f53f2384e46adb7de60122027d0d956fd24",
+    "workers/run_0_0_provider.json": "59c89e5ea92ffd18274c8d28590f6a58b26a0cfb1ce242f532a230f94ece9b4b",
+    "workers/run_0_1_bridge.json": "5c77ace6a0f6baa7928513efbcf8db3b73107746cae9cedeb4e7d942ba8c2e35",
+    "workers/run_1_0_bridge.json": "07cd1cadecc7fda39d11b08533f8b1c502ecc8971a7fe33bfe12d166324693dd",
+    "workers/run_1_1_provider.json": "d66e91ccf3bd3c4148b35e8e998003c5d75eb2e4ccf51fe46001d0b04dff0b20",
+    "workers/run_2_0_provider.json": "6a55418c9e304146367b29831ed7f085b83509f55ae9c41091241a49afde40fd",
+    "workers/run_2_1_bridge.json": "398072909c96516be1ed0c20e527ee7a446c0c952de264b89915c99c02a32136",
+    "workers/run_3_0_bridge.json": "62baedb8aa44e6998bd5452f507529f20a4d7b20e5ae4123877902026167708e",
+    "workers/run_3_1_provider.json": "09fb237d45c6f9d2a166e25f82873b105f983c9726b0915127ba03fc56489215",
+    "workers/run_4_0_provider.json": "afd635e9b411e846cf9771f9dc24df3970ec7d852c226c20919a05d6c8fb8ed3",
+    "workers/run_4_1_bridge.json": "b664a3dea3dfbe2eb2c00ddcd46be1900fc1ba6d0595334c5cb797fb834483a7",
+    "workers/run_5_0_bridge.json": "1ff01754c7ebf7965feed7a02e58659e26cdee3012b5cf03f9ff95b3260898be",
+    "workers/run_5_1_provider.json": "0b830d4cef4bdc4e0d6845c894d2dd712891945c2db4a0bf17771b17582f67dd"
+  },
+  "generator_commit": "9c08bf6a2636768770c3af9c97c7852fba750820",
+  "manifest_hash": "2b5fcf94acb570a1217f251d6607b30df5425711cafe5ba9cf756b0557592384",
+  "performance_claimed": false,
+  "protocol_hash": "ef3cf43b7f1ef648035b21641bce90e3ca71fc90ee01574fe792a1f2bc0a241e",
+  "raw_hash": "762a674b8711a66cecabe84c850cef51ea13922cba9db38726ef509f3879c5f0",
+  "schema_version": "boundflow.mr5-multi-conv-timing-artifact/v1",
+  "source_commit": "24a208140b73ed943d983ea73f2a20f842a19015",
+  "status": "VALIDATED-NO-GO-MR5-MULTI-CONV-PRODUCTION-BRIDGE-PHYSICS",
+  "summary_hash": "b9e3b766408083f20e6c533ad35caf05bcbce7437e90b3c68747ee7b03fb07e9"
+}

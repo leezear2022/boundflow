@@ -1,6 +1,12 @@
 # BoundFlow ASPLOS Claims Map
 
-> **2026-08-26 MR5 multi-Conv production correctness正式通过**：三条真实C2→C1→C0 lower
+> **2026-08-26 MR5 multi-site timing claim边界**：6 pair/12 fresh完整outer exact-call host
+> geomean/bootstrap lower/worst=`0.834407/0.828498/0.824644x`，状态=
+> `VALIDATED-NO-GO-MR5-MULTI-CONV-PRODUCTION-BRIDGE-PHYSICS`。correctness、三site `30/27`、
+> cache/memory/clock direction与20/20 tamper均通过；因此保留correctness，但没有speedup、query/queue、
+> B0/B3 parity或ASPLOS-ready claim。MR6只做同步guard诊断 ceiling。
+
+> **历史（correctness保留，但timing已由上方NO-GO关闭）：2026-08-26 MR5 multi-Conv production correctness正式通过**：三条真实C2→C1→C0 lower
 > ReLU+Conv路径在5 pair/10 fresh中累计`150/135` forward/backward，general/optimizer max diff=
 > `5.00679e-6/2.56300e-6`，atomic rollback、21/21 tamper、全量=`1787 passed,3 skipped`。
 > 只开放multi-site warm-cache outer exact-call timing预注册；尚无speedup、query/queue或B0/B3 claim。

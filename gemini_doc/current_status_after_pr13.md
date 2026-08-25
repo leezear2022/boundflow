@@ -1,6 +1,11 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
-> **2026-08-26 当前状态：MR5 multi-Conv correctness通过，timing预注册激活**：C2→C1→C0
+> **2026-08-26 当前状态：MR5 multi-site timing正式NO-GO，MR6 attribution开放**：6 pair完整
+> outer host geomean=`0.834407x`，所有latency gate失败，candidate约慢19.84%；语义、launch、cache、
+> memory和tamper闭合。complete-query继续关闭。下一只量化当前outer至少360次device→host同步guard的
+> ceiling；未过预注册路由门禁不得实现安全replacement或扩到query。
+
+> **历史（correctness保留，timing已由上方NO-GO关闭）：2026-08-26 当前状态：MR5 multi-Conv correctness通过，timing预注册激活**：C2→C1→C0
 > 三site在真实outer exact call中累计`150/135` launch，5 pair semantics/optimizer/atomic/tamper/full均闭合；
 > 当前仍无性能claim。下一步只跑6 pair warm-cache multi-site outer timing，不直接进complete query。
 
