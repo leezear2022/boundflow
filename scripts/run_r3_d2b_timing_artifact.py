@@ -242,9 +242,14 @@ def replay(root: Path) -> dict[str, Any]:
     if (
         ph != _hash(pu)
         or ph != manifest["protocol_hash"]
+        or protocol["schema_version"] != "boundflow.r3-d2b-wrapper-timing-protocol/v1"
         or protocol["source_revision"] != manifest["source_revision"]
         or protocol["order"] != [list(x) for x in ORDER]
+        or protocol["warmup_count"] != 3
+        or protocol["sample_count"] != 30
         or protocol["region_gate"] != 11.8762
+        or protocol["parity_gate"] != 1.0
+        or protocol["research_gate"] != 1.2
         or protocol["code_revision"] != {x: _file_hash(ROOT / x) for x in CODE}
     ):
         raise ValueError("R3-D2B timing protocol differs")

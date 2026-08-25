@@ -27,3 +27,8 @@ formal 重算。
 candidate/native geomean/worst=`1.65905x/1.49073x`、D1-C recovery geomean/worst=
 `6.79727x/5.97433x`、region worst=`47.9682x`。当前只标记 research gate passed pending tamper，
 尚无正式性能 claim。
+
+首轮 source-bound tamper 在 `protocol-research` 案例 fail：攻击者把 research threshold 从 `1.2` 改为
+`1.0` 并重签 protocol/manifest 后，replay 仍接受。原因是 replay 只冻结 region gate 与顺序。该 artifact
+不关闭；replay 改为逐项冻结 schema、3/30、region/parity/research 三门槛、顺序、source 与全部 code
+hash，并要求新 revision 完整重跑。
