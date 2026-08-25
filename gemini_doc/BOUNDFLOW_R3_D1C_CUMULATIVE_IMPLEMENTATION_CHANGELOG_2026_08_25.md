@@ -1,5 +1,5 @@
 ---
-status: implemented-correctness-smoke-passed-timing-pending
+status: implemented-smoke-attributed-formal-pending
 updated: 2026-08-25T19:04:00+08:00
 type: changelog
 topic: boundflow
@@ -35,3 +35,23 @@ stage: s01
 
 当前只证明 cumulative 接线的单次轨迹语义与 ownership；没有计时、没有性能 claim。下一步先运行
 三方 smoke（native / frozen R3-2B / D1-C）确认物理传播，再冻结 5 fresh NC/CN formal protocol。
+
+## 三方 smoke 与热态归因
+
+- native wrapper median：`100.0135295 ms`；
+- frozen R3-2B median：`735.273388 ms`；
+- D1-C median：`393.6993405 ms`；
+- D1-C 相对 B3：`1.867601x`，相对 native：`0.254035x`；
+- allocated/reserved peak 与 B3 相同：`1,209,344 / 4,194,304 B`。
+
+三次 warmup 后单 wrapper CUDA-event attribution：
+
+- host wrapper：`394.156977 ms`；
+- custom backward：`369.410046 ms`；
+- whole forward：`11.557728 ms`；
+- residual6+11：`5.443584 ms`；
+- non-residual forward：`6.114144 ms`；
+- host uncovered：`13.189203 ms`。
+
+这说明 D1-C 已把 forward 热点移除，但 custom backward 成为约 `93.7%` 的新主导。smoke 不是 formal
+claim；下一步仍按预注册生成 five-fresh 三方 artifact，不能用这一次测量直接关闭门禁。
