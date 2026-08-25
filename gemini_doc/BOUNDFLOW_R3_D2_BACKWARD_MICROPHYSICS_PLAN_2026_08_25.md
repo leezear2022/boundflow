@@ -1,6 +1,6 @@
 ---
-status: preregistered-d2a-attribution-open
-updated: 2026-08-25T20:02:00+08:00
+status: preregistered-d2a-readiness-gated
+updated: 2026-08-25T22:40:00+08:00
 type: plan
 topic: boundflow
 slug: r3-d2-backward-microphysics
@@ -28,7 +28,13 @@ D1-C 已把 forward residual 热点从 v1 raw TIR 降到约 `5.44 ms/10 evaluati
 
 ## 3. D2-A five-fresh 归因
 
-每个 fresh process：3 warmup，执行一次完整 D1-C 10/9 wrapper；同一 non-default stream 上用 CUDA event
+每个 fresh process 先执行测量前 readiness：至少 3、最多 10 次不插桩完整 D1-C 10/9 wrapper；最近 3 次
+必须全部落在对应 D1-C formal latency 的 `±10%`，且 `max/min≤1.05`。通过后立即执行一次不插桩 anchor，
+anchor 仍须在 formal `±10%`；随后执行 phase-only wrapper，必须在 anchor `±10%`。任何条件失败均 fail
+closed，不生成部分 artifact，也不得通过反复重抽样或放宽阈值形成 headline。symbol-only ledger 固定 3 warmup，
+不参与 headline。
+
+phase-only wrapper 在同一 non-default stream 上用 CUDA event
 覆盖并分层记录：
 
 - whole forward；
@@ -40,7 +46,8 @@ D1-C 已把 forward residual 热点从 v1 raw TIR 降到约 `5.44 ms/10 evaluati
 - optimizer/host uncovered。
 
 同时冻结每个 B1/B2 symbol 的 launch count 与 CUDA duration。event nesting 必须满足 child sum 不超过
-parent tolerance；单 stream 禁止 overlap-adjustment。5 fresh 逐项重算 share、稳定性与 required speedup。
+parent tolerance；单 stream 禁止 overlap-adjustment。5 fresh 逐项重算 readiness、anchor、share、稳定性与
+required speedup。
 
 ## 4. 量化路由
 

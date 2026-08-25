@@ -50,6 +50,10 @@ from scripts.run_rvir_v4_pre_state_artifact import TOPOLOGY
 D1C_ARTIFACT = ROOT / "artifacts/r3-structured-owner/r3-d1c-wrapper-formal-v1"
 WORKER_SCHEMA = "boundflow.r3-d2a-backward-attribution-worker/v1"
 WARMUP_COUNT = 3
+MAX_WARMUP_COUNT = 10
+READINESS_FORMAL_TOLERANCE = 0.10
+READINESS_SPREAD_MAX = 1.05
+ANCHOR_PHASE_TOLERANCE = 0.10
 
 
 def _file_hash(path: Path) -> str:
@@ -159,15 +163,53 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
             alpha.copy_(initial_alpha)
         alpha.grad = None
 
-    def warmup(candidate: PreparedR3D1CCumulativeCandidateV1) -> None:
+    def execute_once(candidate: PreparedR3D1CCumulativeCandidateV1):  # type: ignore[no-untyped-def]
+        with torch.cuda.stream(stream):
+            started = time.perf_counter_ns()
+            result = execute_r32b_wrapper_v1(
+                plan, tensors, schedule, candidate=candidate
+            )
+            stream.synchronize()
+            elapsed = time.perf_counter_ns() - started
+        return result, elapsed
+
+    def fixed_warmup(candidate: PreparedR3D1CCumulativeCandidateV1) -> None:
         for _ in range(WARMUP_COUNT):
             reset()
-            with torch.cuda.stream(stream):
-                execute_r32b_wrapper_v1(plan, tensors, schedule, candidate=candidate)
-            stream.synchronize()
+            execute_once(candidate)
 
     phase_candidate = PreparedR3D1CCumulativeCandidateV1(plan, trace, tensors)
-    warmup(phase_candidate)
+    warmup_host_ns = []
+    formal_d1c_ns = float(reference_metric["d1c_median_ns"])
+    readiness_pass = False
+    for _ in range(MAX_WARMUP_COUNT):
+        reset()
+        _warmup_result, elapsed_ns = execute_once(phase_candidate)
+        warmup_host_ns.append(elapsed_ns)
+        if len(warmup_host_ns) >= WARMUP_COUNT:
+            recent = warmup_host_ns[-WARMUP_COUNT:]
+            ratios = [value / formal_d1c_ns for value in recent]
+            readiness_pass = (
+                all(
+                    1.0 - READINESS_FORMAL_TOLERANCE
+                    <= ratio
+                    <= 1.0 + READINESS_FORMAL_TOLERANCE
+                    for ratio in ratios
+                )
+                and max(recent) / min(recent) <= READINESS_SPREAD_MAX
+            )
+            if readiness_pass:
+                break
+    if not readiness_pass:
+        raise RuntimeError("R3-D2A phase readiness gate differs")
+    reset()
+    _anchor_result, anchor_host_ns = execute_once(phase_candidate)
+    if not (
+        1.0 - READINESS_FORMAL_TOLERANCE
+        <= anchor_host_ns / formal_d1c_ns
+        <= 1.0 + READINESS_FORMAL_TOLERANCE
+    ):
+        raise RuntimeError("R3-D2A phase anchor differs")
     reset()
     phase_events = _instrument_phases(phase_candidate)
     with torch.cuda.stream(stream):
@@ -177,6 +219,12 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
         )
         stream.synchronize()
         host_wrapper_ns = time.perf_counter_ns() - started
+    if not (
+        1.0 - ANCHOR_PHASE_TOLERANCE
+        <= host_wrapper_ns / anchor_host_ns
+        <= 1.0 + ANCHOR_PHASE_TOLERANCE
+    ):
+        raise RuntimeError("R3-D2A phase/anchor calibration differs")
     phase_ms = {name: _elapsed(rows) for name, rows in phase_events.items()}
     phase_totals = {name: sum(values) for name, values in phase_ms.items()}
     backward_children = sum(
@@ -202,7 +250,7 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
 
     reset()
     symbol_candidate = PreparedR3D1CCumulativeCandidateV1(plan, trace, tensors)
-    warmup(symbol_candidate)
+    fixed_warmup(symbol_candidate)
     reset()
     symbol_events = _instrument_symbols(symbol_candidate)
     with torch.cuda.stream(stream):
@@ -228,7 +276,15 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
         "d1c_manifest_sha256": _file_hash(D1C_ARTIFACT / "manifest.json"),
         "plan_hash": plan.stable_hash(),
         "trace_hash": trace.stable_hash(),
-        "warmup_count": WARMUP_COUNT,
+        "minimum_warmup_count": WARMUP_COUNT,
+        "maximum_warmup_count": MAX_WARMUP_COUNT,
+        "actual_warmup_count": len(warmup_host_ns),
+        "warmup_host_ns": warmup_host_ns,
+        "readiness_formal_tolerance": READINESS_FORMAL_TOLERANCE,
+        "readiness_spread_max": READINESS_SPREAD_MAX,
+        "anchor_phase_tolerance": ANCHOR_PHASE_TOLERANCE,
+        "readiness_pass": readiness_pass,
+        "anchor_host_ns": anchor_host_ns,
         "host_wrapper_ns": host_wrapper_ns,
         "formal_reference_native_ns": reference_metric["native_median_ns"],
         "formal_reference_d1c_ns": reference_metric["d1c_median_ns"],

@@ -38,6 +38,6 @@ def test_r3d2a_formal_tamper_report_rejects_all_cases() -> None:
     if not path.exists():
         pytest.skip("R3-D2A tamper report has not been generated")
     report = json.loads(path.read_text(encoding="utf-8"))
-    assert report["case_count"] == 12
-    assert report["rejected_count"] == 12
+    assert report["case_count"] == 14
+    assert report["rejected_count"] == 14
     assert all(row["rejected"] is True for row in report["cases"])

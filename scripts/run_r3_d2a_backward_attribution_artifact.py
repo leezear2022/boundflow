@@ -35,6 +35,11 @@ D1C_ARTIFACT = ROOT / "artifacts/r3-structured-owner/r3-d1c-wrapper-formal-v1"
 D1B_ARTIFACT = ROOT / "artifacts/r3-structured-owner/r3-d1b-schedule-formal-v1"
 RUN_COUNT = 5
 COOLDOWN_SECONDS = 30
+MINIMUM_WARMUP_COUNT = 3
+MAXIMUM_WARMUP_COUNT = 10
+READINESS_FORMAL_TOLERANCE = 0.10
+READINESS_SPREAD_MAX = 1.05
+ANCHOR_PHASE_TOLERANCE = 0.10
 PHASES = (
     "backward",
     "coefficient_sign",
@@ -124,7 +129,15 @@ def _validate_worker(raw: Mapping[str, Any]) -> None:
         "d1c_manifest_sha256",
         "plan_hash",
         "trace_hash",
-        "warmup_count",
+        "minimum_warmup_count",
+        "maximum_warmup_count",
+        "actual_warmup_count",
+        "warmup_host_ns",
+        "readiness_formal_tolerance",
+        "readiness_spread_max",
+        "anchor_phase_tolerance",
+        "readiness_pass",
+        "anchor_host_ns",
         "host_wrapper_ns",
         "formal_reference_native_ns",
         "formal_reference_d1c_ns",
@@ -153,7 +166,12 @@ def _validate_worker(raw: Mapping[str, Any]) -> None:
         set(raw) != expected
         or raw["schema_version"] != "boundflow.r3-d2a-backward-attribution-worker/v1"
         or raw["run_index"] not in range(RUN_COUNT)
-        or raw["warmup_count"] != 3
+        or raw["minimum_warmup_count"] != MINIMUM_WARMUP_COUNT
+        or raw["maximum_warmup_count"] != MAXIMUM_WARMUP_COUNT
+        or raw["readiness_formal_tolerance"] != READINESS_FORMAL_TOLERANCE
+        or raw["readiness_spread_max"] != READINESS_SPREAD_MAX
+        or raw["anchor_phase_tolerance"] != ANCHOR_PHASE_TOLERANCE
+        or raw["readiness_pass"] is not True
         or raw["single_stream_no_overlap"] is not True
         or raw["symbol_profile_headline_forbidden"] is not True
         or raw["diagnostic_only"] is not True
@@ -163,15 +181,42 @@ def _validate_worker(raw: Mapping[str, Any]) -> None:
     host_ns = raw["host_wrapper_ns"]
     symbol_host_ns = raw["symbol_profile_host_ns"]
     reference_ns = raw["formal_reference_d1c_ns"]
+    anchor_ns = raw["anchor_host_ns"]
+    actual_warmup_count = raw["actual_warmup_count"]
+    warmup_host_ns = raw["warmup_host_ns"]
     if (
         not isinstance(host_ns, int)
         or not isinstance(symbol_host_ns, int)
+        or not isinstance(anchor_ns, int)
         or not isinstance(reference_ns, (int, float))
+        or not isinstance(actual_warmup_count, int)
+        or not isinstance(warmup_host_ns, list)
         or host_ns <= 0
         or symbol_host_ns <= 0
-        or not 0.85 <= host_ns / float(reference_ns) <= 1.15
+        or anchor_ns <= 0
+        or not MINIMUM_WARMUP_COUNT <= actual_warmup_count <= MAXIMUM_WARMUP_COUNT
+        or len(warmup_host_ns) != actual_warmup_count
+        or any(not isinstance(value, int) or value <= 0 for value in warmup_host_ns)
     ):
         raise ValueError("R3-D2A host timing sanity differs")
+    recent = warmup_host_ns[-MINIMUM_WARMUP_COUNT:]
+    reference_ns_float = float(reference_ns)
+    if (
+        any(
+            not 1.0 - READINESS_FORMAL_TOLERANCE
+            <= value / reference_ns_float
+            <= 1.0 + READINESS_FORMAL_TOLERANCE
+            for value in recent
+        )
+        or max(recent) / min(recent) > READINESS_SPREAD_MAX
+        or not 1.0 - READINESS_FORMAL_TOLERANCE
+        <= anchor_ns / reference_ns_float
+        <= 1.0 + READINESS_FORMAL_TOLERANCE
+        or not 1.0 - ANCHOR_PHASE_TOLERANCE
+        <= host_ns / anchor_ns
+        <= 1.0 + ANCHOR_PHASE_TOLERANCE
+    ):
+        raise ValueError("R3-D2A readiness replay differs")
     phase_ms = raw["phase_ms"]
     totals = raw["phase_totals_ms"]
     if not isinstance(phase_ms, Mapping) or not isinstance(totals, Mapping):
@@ -407,7 +452,11 @@ def _protocol(revision: str, capture: Path, model: Path) -> dict[str, Any]:
         "schema_version": "boundflow.r3-d2a-backward-attribution-protocol/v1",
         "source_revision": revision,
         "run_count": RUN_COUNT,
-        "warmup_count": 3,
+        "minimum_warmup_count": MINIMUM_WARMUP_COUNT,
+        "maximum_warmup_count": MAXIMUM_WARMUP_COUNT,
+        "readiness_formal_tolerance": READINESS_FORMAL_TOLERANCE,
+        "readiness_spread_max": READINESS_SPREAD_MAX,
+        "anchor_phase_tolerance": ANCHOR_PHASE_TOLERANCE,
         "cooldown_seconds": COOLDOWN_SECONDS,
         "source_capture_sha256": _file_hash(capture),
         "model_sha256": _file_hash(model),
@@ -416,7 +465,6 @@ def _protocol(revision: str, capture: Path, model: Path) -> dict[str, Any]:
         "generic_required_cap": 10.0,
         "verified_residual_required_cap": 15.50,
         "minimum_share": 0.20,
-        "phase_profile_sanity": [0.85, 1.15],
         "single_stream_no_overlap": True,
         "symbol_profile_headline_forbidden": True,
         "code_revision": {name: _file_hash(ROOT / name) for name in CODE_PATHS},
@@ -513,12 +561,15 @@ def replay(artifact: Path) -> dict[str, Any]:
         raise ValueError("R3-D2A protocol hash differs")
     frozen = {
         "run_count": RUN_COUNT,
-        "warmup_count": 3,
+        "minimum_warmup_count": MINIMUM_WARMUP_COUNT,
+        "maximum_warmup_count": MAXIMUM_WARMUP_COUNT,
+        "readiness_formal_tolerance": READINESS_FORMAL_TOLERANCE,
+        "readiness_spread_max": READINESS_SPREAD_MAX,
+        "anchor_phase_tolerance": ANCHOR_PHASE_TOLERANCE,
         "cooldown_seconds": COOLDOWN_SECONDS,
         "generic_required_cap": 10.0,
         "verified_residual_required_cap": 15.50,
         "minimum_share": 0.20,
-        "phase_profile_sanity": [0.85, 1.15],
         "single_stream_no_overlap": True,
         "symbol_profile_headline_forbidden": True,
     }

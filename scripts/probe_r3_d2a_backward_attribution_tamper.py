@@ -111,6 +111,18 @@ def run(artifact: Path) -> dict[str, object]:
             ),
         ),
         (
+            "readiness",
+            lambda root: _mutate_raw(
+                root, lambda raw: raw.__setitem__("readiness_pass", False)
+            ),
+        ),
+        (
+            "anchor",
+            lambda root: _mutate_raw(
+                root, lambda raw: raw.__setitem__("anchor_host_ns", 1)
+            ),
+        ),
+        (
             "phase-duration",
             lambda root: _mutate_raw(
                 root,

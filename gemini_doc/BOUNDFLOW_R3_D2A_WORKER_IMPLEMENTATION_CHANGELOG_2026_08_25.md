@@ -1,6 +1,6 @@
 ---
-status: implemented-smoke-passed-formal-pending
-updated: 2026-08-25T20:41:00+08:00
+status: readiness-gate-implemented-formal-pending
+updated: 2026-08-25T22:40:00+08:00
 type: changelog
 topic: boundflow
 slug: r3-d2a-worker-implementation
@@ -50,3 +50,18 @@ D1-C formal terminal，独立重算 lower/α diff 与 sign；加固后必须重�
 `phase_cuda/formal_host` 得到最多`1.0126`的非物理 share。summary 已改为先在同一 worker 计算
 `phase_cuda/profile_host`，再乘 `formal_host/profile_host` calibration scale 投影 formal duration；
 required-speedup 只使用投影后的同 scope duration。第二轮 raw 同样不进入正式 artifact，必须再次重跑。
+
+## Formal 前稳定性门禁
+
+scope 修正后的两次正式生成均在 worker 内 fail closed，未留下 artifact。第一次第 5 个 phase worker
+相对 formal 慢约 `17.3%`；第二次第 2、3 个 worker 分别慢约 `33.0%`、`14.1%`。这表明完整 backward
+存在持续 GPU 状态波动，继续重抽样会形成 selection bias；因此不重抽、不放宽旧 `±15%` 事后 sanity，
+而是在测量前冻结 readiness：
+
+- 至少 3、最多 10 次不插桩 warmup；最近 3 次均须在 formal `±10%` 且 spread `≤1.05`；
+- 通过后立即执行不插桩 anchor，仍须在 formal `±10%`；
+- phase-only 测量必须在 anchor `±10%`，否则该 fresh process 失败；
+- replay 独立重算上述所有条件，tamper 增加 readiness 与 anchor 两类全重签拒绝探针。
+
+该修订只控制“何时允许开始测量”，不改变 D2-A phase、Amdahl 公式、share/required cap 或性能 claim
+边界。失败进程不产生部分 raw，正式 five-fresh 必须在固定源码 revision 下重新从 run 0 开始。
