@@ -4,7 +4,9 @@
 `1.033126x`，diagnostic相对provider仍为`0.903007x`，语义、clock、module与12/12 tamper通过。
 安全guard fusion关闭，下一步只读拆launch/FFI/layout/materialization/kernel。见
 `BOUNDFLOW_MR6_GUARD_ATTRIBUTION_FORMAL_NO_GO_CLOSURE_2026_08_26.md`与
-`BOUNDFLOW_MR7_LAUNCH_MATERIALIZATION_ATTRIBUTION_PLAN_2026_08_26.md`。
+`BOUNDFLOW_MR7_LAUNCH_MATERIALIZATION_ATTRIBUTION_PLAN_2026_08_26.md`。完整的去PyTorch热路径、主流程
+多算子编译、并行调度与memory/arena planning路线见
+`BOUNDFLOW_FULLY_COMPILED_VERIFIER_RUNTIME_V1_ARCHITECTURE_2026_08_25.md`。
 
 最新：MR5 multi-site正式计时以NO-GO关闭；6 pair完整outer host geomean=`0.834407x`，correctness、
 30/27、cache、memory、clock direction与20/20 tamper通过，但当前三独立site runtime约慢19.84%。

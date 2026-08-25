@@ -19,6 +19,11 @@ stage: s01
 3. site-specific TIR schedule/autotuning；
 4. 或者当前路线整体NO-GO。
 
+MR7同时是全编译验证器运行时路线的`FCR-0`入口门。完整目标、编译边界和分阶段迁移见
+`BOUNDFLOW_FULLY_COMPILED_VERIFIER_RUNTIME_V1_ARCHITECTURE_2026_08_25.md`。MR7只负责建立物理账本，
+但其开放的MR7-A/MR7-C后续必须以多算子compiled region、统一execution graph或arena为目标，不能
+退化为继续堆叠逐算子的PyTorch↔TVM wrapper。
+
 ## 2. Scope与目标冻结
 
 - workload、10/9、C2→C1→C0、module和diagnostic guard policy继承MR6；
@@ -61,6 +66,9 @@ CUPTI↔host/NVTX calibration残差超`max(5us,2%)`则本run不得形成share。
 - 若launch envelope本身`>=15%`但单site kernel不dominant：开放MR7-C cross-site或cross-step
   schedule/graph amortization feasibility，先做ABI/correctness，不直接优化；
 - 三项均不满足：当前MR5/R3 production Conv replacement路线总NO-GO，不再沿本路径加工程量。
+
+上述“总NO-GO”只关闭当前逐站点production Conv replacement，不关闭FCR路线中optimizer、branch/queue、
+memory planning或其他由独立归因支持的compiled region。
 
 无论哪支开放，都必须先用Amdahl公式验证该share在`1.107412x` parity目标下数学可达；required region
 speedup `>10x`则直接NO-GO。
