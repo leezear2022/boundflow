@@ -1,5 +1,5 @@
 ---
-status: implementation-in-progress
+status: formal-tooling-implemented
 updated: 2026-08-26T01:05:00+08:00
 type: changelog
 topic: boundflow
@@ -23,6 +23,11 @@ ledger，先证明 ledger 低扰动，再决定 host boundary 是否能开放 FC
 - 固定 semantic、30/27、cache/module/stream/fallback、host closure、host ratio、clock direction 门禁；
 - 固定 15%/15 ms、4/5 run 与 required-region-speedup `<=10x` opportunity 门禁；
 - 新增 CPU replay 与 fully re-signed host-call drift 单测。
+- source derive 已冻结于 `0a1e79553e216ed5c34604a235d537288fcf8e19`；
+- 新增 10-fresh formal runner，按 role 分别调用已冻结的 MR6 diagnostic 与 MR7 control worker；
+- protocol 绑定 source、generator、代码 blob、MR6/MR7 artifact identity、外部仓库和全部门禁；
+- replay 从 raw 重算 pair metric、perturbation/opportunity gate 与 status；
+- 新增 12 类 fully re-signed raw tamper 和 repository artifact replay 测试。
 
 ## 3. Claim 边界
 
@@ -34,8 +39,8 @@ ledger，先证明 ledger 低扰动，再决定 host boundary 是否能开放 FC
 
 ## 4. 后续
 
-1. 通过专项测试、black/mypy/pylint；
-2. 提交 source freeze；
-3. 在后续提交增加 formal runner、artifact replay 与 tamper；
-4. 运行 5 pair GPU formal；
+1. 通过 formal tooling 专项测试、black/mypy/pylint；
+2. 提交 generator freeze；
+3. 运行 5 pair GPU formal；
+4. 运行 replay、12 类 tamper 与全量回归；
 5. 按冻结门禁形成 closure 并更新权威文档。
