@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-26 R3-D2-B performance claim边界**：固定P-anchor完整10/9 local wrapper的5 fresh
+> candidate/native geomean/worst=`1.752001x/1.724843x`，D1-C recovery=`6.968886x/6.831907x`，
+> region worst=`53.9195x`，12/12 tamper；状态=`VALIDATED-R3-D2B-WRAPPER-RESEARCH`。只开放R3-3
+> active-beta correctness；不得claim multi-site/same-solver/query/queue/ASPLOS-ready。
+
 > **2026-08-26 R3-D2-B correctness claim边界**：可claim staged residual6/11 backward 接入在 5 pair/
 > 10 fresh 的 lower、compressed dα、α、Adam两类moment逐步最大差均为`0.0`，ownership与12/12
 > tamper成立；只开放wrapper-inclusive timing。不得claim任何speedup、R3-3或same-solver开放。

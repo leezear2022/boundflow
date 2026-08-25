@@ -1,6 +1,6 @@
 ---
-status: research-gate-passed-tamper-pending
-updated: 2026-08-26T01:10:00+08:00
+status: validated-research-r3-3-correctness-open
+updated: 2026-08-26T01:40:00+08:00
 type: plan
 topic: boundflow
 slug: r3-d2b-wrapper-timing
@@ -57,3 +57,8 @@ source=`5e4fed1` 的 5 triplet / 450 host-wall samples 已由 replay 重算：ca
 research gate，但 fully re-signed tamper 尚未生成，因此 artifact 固定
 `provisional_verdict=RESEARCH-GATE-PASSED-PENDING-TAMPER`、`performance_claimed=false`、
 `r3_3_open=false`。下一动作只允许 tamper/replay/closure。
+
+最终 source=`3ee5920` 完整重跑并通过 12/12 tamper：candidate/native geomean/worst=
+`1.752001x/1.724843x`，D1-C recovery=`6.968886x/6.831907x`，region worst=`53.9195x`。状态正式升级
+为 `VALIDATED-R3-D2B-WRAPPER-RESEARCH`，只开放 R3-3 active-beta correctness。见
+`BOUNDFLOW_R3_D2B_WRAPPER_TIMING_FORMAL_CLOSURE_2026_08_26.md`。

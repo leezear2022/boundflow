@@ -1,5 +1,9 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-26 当前状态：D2-B local wrapper research gate通过，只开放R3-3 correctness**：
+> candidate/native geomean/worst=`1.752001x/1.724843x`，region worst=`53.9195x`，12/12 tamper。
+> multi-site与same-solver关闭。
+
 > **2026-08-26 当前状态：D2-B correctness通过，只开放timing**：5 pair/10 fresh逐步lower、dα、α、
 > Adam moment最大差均`0.0`，ownership/12 tamper/全量回归通过。尚无speedup；R3-3与same-solver关闭。
 

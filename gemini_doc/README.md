@@ -1,5 +1,10 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新：R3-D2-B完整10/9 local wrapper正式通过；candidate/native geomean/worst=
+`1.752001x/1.724843x`，D1-C recovery=`6.968886x/6.831907x`，region worst=`53.9195x`，12/12
+tamper。只开放R3-3 S-anchor active-beta correctness；见
+`BOUNDFLOW_R3_D2B_WRAPPER_TIMING_FORMAL_CLOSURE_2026_08_26.md`。
+
 最新：R3-D2-B staged backward correctness已关闭；5 pair/10 fresh 的lower、compressed dα、α、Adam
 两类moment最大差均`0.0`，12/12 tamper，全量=`1647 passed,3 skipped`。只开放wrapper-inclusive
 timing，尚无性能claim；见`BOUNDFLOW_R3_D2B_CORRECTNESS_FORMAL_CLOSURE_2026_08_25.md`。
