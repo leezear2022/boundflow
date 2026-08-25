@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-26 MR4预注册边界**：MR3 single-site timing NO-GO后，只开放无计时production exact-call
+> Conv site census；冻结三条direct ReLU→Conv edge、5 fresh、10/9轨迹、absent β与静态MAC账本。
+> 尚无raw或multi-site实现；即使通过也只开放MR5 correctness预注册，不得claim speedup/share。
+
 > **2026-08-26 MR3 single-site production bridge timing NO-GO**：6 pair/12 fresh完整outer exact call
 > host geomean/bootstrap lower/worst=`0.979727/0.939360/0.916094x`，三条latency gate失败；
 > correctness、module、memory与host/event方向通过，16/16 tamper。状态=

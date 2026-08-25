@@ -1,5 +1,10 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新执行：MR4 production Conv site census已预注册；在MR3 single-site NO-GO后，以5 fresh无计时
+provider hook核对三条direct ReLU→Conv edge、10/9轨迹、absent β与静态MAC/materialization账本。
+通过最多开放MR5 multi-site correctness。见
+`BOUNDFLOW_MR4_PRODUCTION_CONV_SITE_CENSUS_PLAN_2026_08_26.md`。
+
 最新：MR3 single-site production bridge physical timing正式NO-GO；6 pair/12 fresh完整outer exact-call
 host geomean/bootstrap lower/worst=`0.979727/0.939360/0.916094x`，candidate平均约慢2%。correctness、
 module、memory、host/event方向与16/16 tamper通过；保留production bridge correctness，但same-solver

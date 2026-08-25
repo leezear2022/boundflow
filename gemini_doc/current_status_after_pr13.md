@@ -1,5 +1,9 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-26 当前执行：MR4 production Conv site census已预注册**：只读真实provider exact call，
+> 不计时、不改TIR；确认三条Conv edge是否都有稳定10/9、absent β和足够静态MAC机会。通过也只开放
+> multi-site correctness，不覆盖MR3 single-site NO-GO。
+
 > **2026-08-26 当前状态：MR3 single-site production bridge timing NO-GO**：完整outer exact call
 > 6 pair的host geomean/bootstrap lower/worst=`0.979727/0.939360/0.916094x`，candidate平均约慢2%；
 > 语义、10/9 launch、module稳定、memory与host/event方向均通过。保留correctness，same-solver

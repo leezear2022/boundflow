@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-26 MR4 production Conv site census已预注册**：不等待MR3外审，沿其允许后继先做
+> 无计时O(1) census；5 fresh核对三条direct ReLU→Conv edge、10/9轨迹、absent β、full α与静态
+> MAC/materialization账本。通过最多开放MR5 multi-site correctness，timing/性能claim关闭。见
+> `BOUNDFLOW_MR4_PRODUCTION_CONV_SITE_CENSUS_PLAN_2026_08_26.md`。
+
 > **2026-08-26 MR3 single-site production bridge physical timing正式NO-GO**：6 pair/12 fresh的
 > host geomean/bootstrap lower/worst=`0.979727/0.939360/0.916094x`，absolute peak allocated/
 > reserved worst=`1.032240/1.032258x`；correctness、module、memory、时钟方向与16/16 tamper通过。
