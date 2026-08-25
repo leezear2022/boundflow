@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-26 R3-3 isolated attribution claim边界**：source=`1c15624`的5 fresh均完成事件/账本
+> 重建，但profile扰动=`2.4061–2.8053x`、calibration residual=`110–119 us`，因此`0/5`
+> attribution admitted，route=`STOP`；12/12 tamper，全量=`1667 passed,3 skipped`。只允许claim
+> `VALIDATED-R3-3-ISOLATED-ATTRIBUTION-STOP-QUALITY`。bridge=`35.89–39.55%`、autograd=
+> `26.24–27.72%`等均为非准入投影，不得用于选择路线或传播到query/queue；R3-4/same-solver关闭。
+
 > **2026-08-26 R3-3 active-β isolated timing NO-GO**：6 fresh/180 pairs 的 geomean/bootstrap/worst=
 > `0.668275x/0.629157x/0.599089x`，三项latency gate均失败；absolute allocated/reserved=
 > `1.037109x/1.0x`，incremental allocated worst=`10.9375x`，12/12 tamper。只允许claim

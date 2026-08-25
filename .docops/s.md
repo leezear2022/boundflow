@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev013475
-last_va: ev013476
+last_ch: ev013516
+last_va: ev013517
 blk: none
-next: implement-r3-3-isolated-microphysics-attribution
-updated: 2026-08-25T04:37:12Z
+next: preregister-low-perturbation-measurement-recovery
+updated: 2026-08-25T05:08:08Z

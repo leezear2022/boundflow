@@ -1,5 +1,11 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-26 当前状态：R3-3只读microphysics attribution route=STOP**：5 fresh的profile
+> 扰动=`2.4061–2.8053x`、calibration residual=`110–119 us`，故`0/5`准入；12/12 tamper，
+> 全量=`1667 passed,3 skipped`。
+> bridge/autograd share只是不具准入资格的诊断投影。停止当前fixed S-anchor physical分支，R3-4与
+> same-solver继续关闭；后续不得放宽门槛或据此直接实现ABI/autograd优化。
+
 > **2026-08-26 当前执行：R3-3只读microphysics attribution已预注册**：先做CUPTI/
 > NVTX/correlation归因和Amdahl route decision，不改TIR/schedule。主口径要达1.05x需总回收
 > `1.571209x`，单bucket至少占约`36.35%`才有物理可达性。

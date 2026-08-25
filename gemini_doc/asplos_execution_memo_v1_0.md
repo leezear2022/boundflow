@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-26 R3-3只读microphysics attribution质量失败，route=STOP**：source=`1c15624`，
+> 5 fresh均完成raw/replay，但profile扰动=`2.4061–2.8053x`且calibration residual=`110–119 us`，
+> `0/5`准入；12/12 fully re-signed tamper拒绝，全量=`1667 passed,3 skipped`。bridge/autograd等share仅保留为非准入诊断投影，
+> 不得选择优化路线。当前fixed S-anchor R3-3 physical分支停止，R3-4/same-solver继续关闭。见
+> `BOUNDFLOW_R3_3_ISOLATED_ATTRIBUTION_FORMAL_STOP_CLOSURE_2026_08_26.md`。
+
 > **2026-08-26 R3-3只读microphysics attribution预注册**：将candidate wrapper分为
 > forward/backward kernel union、bridge/launch idle、autograd/allocation、other/unexplained，从
 > 正式`0.668275x`反推总需求`1.571209x`与单bucket最小可达share约`36.35%`。

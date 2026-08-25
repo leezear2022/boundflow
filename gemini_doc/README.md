@@ -1,5 +1,11 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新：R3-3只读microphysics attribution以质量门禁fail closed；5 fresh profile扰动=
+`2.4061–2.8053x`、calibration residual=`110–119 us`，`0/5`准入，route=`STOP`，12/12 tamper，
+全量=`1667 passed,3 skipped`。
+所有bucket share仅为非准入投影，R3-4/same-solver关闭；见
+`BOUNDFLOW_R3_3_ISOLATED_ATTRIBUTION_FORMAL_STOP_CLOSURE_2026_08_26.md`。
+
 最新执行：R3-3只读microphysics attribution/route decision已预注册，只分解kernel、
 bridge/launch、autograd/allocation与unexplained share，不改TIR/schedule。见
 `BOUNDFLOW_R3_3_ISOLATED_MICROPHYSICS_ATTRIBUTION_PLAN_2026_08_26.md`。
