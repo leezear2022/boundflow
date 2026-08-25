@@ -1,0 +1,114 @@
+{
+  "boundary_median_ns": 25891032.500241246,
+  "boundary_share": 0.19818347555466614,
+  "device_kernel_share": 0.08691455973150919,
+  "gates": {
+    "amdahl_reachable": true,
+    "device_envelope_closure": true,
+    "host_closure": true,
+    "launch_counts": true,
+    "module_stability": true,
+    "pair_count": true,
+    "profile_control_event_ratio": false,
+    "semantic_exact": true
+  },
+  "launch_host_share": 0.0836115838930123,
+  "median_device_share": {
+    "backward_device_kernel": 0.0014541390733388466,
+    "forward_device_kernel": 0.08546042065817035
+  },
+  "median_host_share": {
+    "admission_handoff": 0.027128829511891894,
+    "ffi_dlpack_stream": 0.0836115838930123,
+    "layout_materialization": 0.01301921836253964,
+    "optimizer_and_residual": 0.7735101418738027,
+    "post_output_guard": 0.1015526732991142
+  },
+  "pair_count": 3,
+  "pair_metrics": [
+    {
+      "backward_device_ns": 208359,
+      "control_outer_host_ns": 127785607,
+      "device_envelope_error_ratio": 0.0118553021245323,
+      "forward_device_ns": 12242447,
+      "pair_index": 0,
+      "profile_control_cuda_event_ratio": 1.2393994391940961,
+      "profile_outer_host_ns": 158377943,
+      "semantic_allclose": true,
+      "semantic_maximum_absolute_difference": 2.4065375328063965e-06,
+      "semantic_sign_exact": true,
+      "site_device_ns": {
+        "C0": 5549817,
+        "C1": 3362734,
+        "C2": 3538255
+      }
+    },
+    {
+      "backward_device_ns": 208544,
+      "control_outer_host_ns": 133124505,
+      "device_envelope_error_ratio": 0.00865243341529085,
+      "forward_device_ns": 12242946,
+      "pair_index": 1,
+      "profile_control_cuda_event_ratio": 1.0395530147317595,
+      "profile_outer_host_ns": 138393907,
+      "semantic_allclose": true,
+      "semantic_maximum_absolute_difference": 9.5367431640625e-07,
+      "semantic_sign_exact": true,
+      "site_device_ns": {
+        "C0": 5550389,
+        "C1": 3362564,
+        "C2": 3538537
+      }
+    },
+    {
+      "backward_device_ns": 208320,
+      "control_outer_host_ns": 130641732,
+      "device_envelope_error_ratio": 0.009772815403648149,
+      "forward_device_ns": 12243062,
+      "pair_index": 2,
+      "profile_control_cuda_event_ratio": 1.0967334856358666,
+      "profile_outer_host_ns": 143280816,
+      "semantic_allclose": true,
+      "semantic_maximum_absolute_difference": 1.2516975402832031e-06,
+      "semantic_sign_exact": true,
+      "site_device_ns": {
+        "C0": 5550001,
+        "C1": 3362528,
+        "C2": 3538853
+      }
+    }
+  ],
+  "parity_target": 1.107412,
+  "performance_claimed": false,
+  "required_parity_region_speedup": 1.9585328351739053,
+  "research_target": 1.273523,
+  "run_count": 6,
+  "same_site_slowest": true,
+  "schema_version": "boundflow.mr7-launch-materialization-formal/v1",
+  "selected_share": 0.19818347555466614,
+  "site_device_ns": {
+    "C0": [
+      5549817,
+      5550389,
+      5550001
+    ],
+    "C1": [
+      3362734,
+      3362564,
+      3362528
+    ],
+    "C2": [
+      3538255,
+      3538537,
+      3538853
+    ]
+  },
+  "slowest_site_by_run": [
+    "C0",
+    "C0",
+    "C0"
+  ],
+  "source_commit": "527618241861dab9d03dfd4b3c8229ef53b79b55",
+  "status": "INVALID_MR7_ATTRIBUTION",
+  "summary_hash": "c889a4e5782230df1d0c915aca2b0187bf78fde7cbbab1a6fb7b402d0929d09d"
+}

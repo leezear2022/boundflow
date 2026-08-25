@@ -1,5 +1,10 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-26 当前状态：MR7已完整执行但归因INVALID，MR7-R预注册**：一个profile/control
+> perturbation=`1.239399 >1.10`否决全局资格；其余semantic/launch/host/device/tamper门禁通过。
+> `25.891 ms/19.818%`host boundary与`8.692%`device kernel仅为诊断。下一步只跑5 pair unprofiled
+> MR6 diagnostic vs MR7 ledger，未通过不得实现FCR-1。
+
 > **2026-08-26 当前状态：MR6 guard dominance NO-GO，MR7 attribution已预注册**：9 fresh显示
 > `360→60`同步guard仅回收`1.033126x`，diagnostic/provider仍需`1.107412x`才到parity。安全guard
 > fusion不开放；下一步只读拆57 launch、540 DLPack view、layout/materialization与per-site kernel。

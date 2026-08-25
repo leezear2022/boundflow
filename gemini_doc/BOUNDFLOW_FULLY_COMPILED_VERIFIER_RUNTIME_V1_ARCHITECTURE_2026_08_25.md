@@ -198,6 +198,10 @@ MR7 原冻结路由继续有效，但解释更新为：MR7-A/MR7-C 若成立，�
 计划，不能只做一个更薄的 PyTorch↔TVM wrapper；MR7-B 只有在 device kernel share 和跨 run site winner
 同时成立时才允许 schedule sweep。
 
+2026-08-26执行注：MR7因一个CUPTI profile/control扰动样本超过`1.10`而正式INVALID；其host boundary
+与device kernel数字仅作诊断，不能开放上述路由。下一步MR7-R只用unprofiled pair验证host ledger与
+boundary；通过后最多开放FCR-1的compiled-region/arena/FFI ABI与correctness。
+
 ## 10. 预期贡献边界
 
 这条路线的研究主张不是“把 CROWN 放到 GPU”，而是：verification-specific IR 使编译器能在保持

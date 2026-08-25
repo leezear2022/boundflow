@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev014393
-last_va: ev014394
+last_ch: ev014412
+last_va: ev014413
 blk: none
-next: generate-mr7-six-fresh-formal-artifact-and-tamper-report
-updated: 2026-08-25T16:09:30Z
+next: implement-and-run-mr7r-unprofiled-host-recovery
+updated: 2026-08-25T16:23:00Z

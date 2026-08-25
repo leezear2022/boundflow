@@ -1,5 +1,11 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新：MR7已完整执行但正式状态为`INVALID_MR7_ATTRIBUTION`；第1组profile/control扰动=
+`1.239399 >1.10`，因此不得从诊断性的`25.891 ms/19.818%`host boundary或`8.692%`device kernel
+开放优化。下一唯一动作是MR7-R的5 pair unprofiled ledger qualification。见
+`BOUNDFLOW_MR7_LAUNCH_MATERIALIZATION_FORMAL_INVALID_CLOSURE_2026_08_26.md`与
+`BOUNDFLOW_MR7R_UNPROFILED_HOST_RECOVERY_PLAN_2026_08_26.md`。
+
 最新：MR6 guard attribution正式NO-GO；3 triplet/9 fresh把同步guard从`360→60`仅获得
 `1.033126x`，diagnostic相对provider仍为`0.903007x`，语义、clock、module与12/12 tamper通过。
 安全guard fusion关闭，下一步只读拆launch/FFI/layout/materialization/kernel。见

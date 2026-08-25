@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-26 MR7 claim边界**：正式状态=`INVALID_MR7_ATTRIBUTION`。6 fresh中仅
+> profile/control perturbation gate失败（`1.239399 >1.10`）；host/device账本、semantic、30/27与
+> 11/11 tamper通过。`25.891 ms/19.818%`host boundary、`8.692%`device kernel不得claim为正式share或
+> opportunity。MR7-A/B/C关闭，只开放MR7-R unprofiled ledger qualification。
+
 > **2026-08-26 MR6 claim边界**：unsafe diagnostic把同步guard `360→60`只带来`1.033126x`，相对
 > provider仍为`0.903007x`，状态=`VALIDATED-NO-GO-MR6-GUARD-DOMINANCE`。语义/clock/module/
 > guard与12/12 tamper通过，但`production_admitted=false/performance_claimed=false`；不得claim安全

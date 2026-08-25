@@ -1,6 +1,6 @@
 ---
-status: preregistered
-updated: 2026-08-26T23:35:00+08:00
+status: executed-invalid
+updated: 2026-08-26T00:25:00+08:00
 type: plan
 topic: boundflow
 slug: mr7-launch-materialization-attribution
@@ -80,3 +80,11 @@ speedup `>10x`则直接NO-GO。
 - 不用独立CIBC-IBP `2.4563x`替代same-solver数据；
 - 不在归因阶段修改schedule、allocator、kernel、solver或阈值；
 - 不形成complete-query、queue、competitor或ASPLOS-ready claim。
+
+## 7. 执行结果注解
+
+6 fresh/3 pair已执行。correctness、30/27、host closure、device envelope和11/11 tamper通过，但
+profile/control ratio=`1.239399/1.039553/1.096733`，第1组超过`1.10`，故正式状态为
+`INVALID_MR7_ATTRIBUTION`，MR7-A/B/C均未开放。诊断host boundary median=`25.891 ms/19.818%`，
+只用于预注册MR7-R，不是opportunity claim。见
+`BOUNDFLOW_MR7_LAUNCH_MATERIALIZATION_FORMAL_INVALID_CLOSURE_2026_08_26.md`。

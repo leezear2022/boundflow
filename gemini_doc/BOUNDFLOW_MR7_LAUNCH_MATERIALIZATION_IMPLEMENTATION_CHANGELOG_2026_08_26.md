@@ -1,6 +1,6 @@
 ---
-status: implemented-awaiting-formal
-updated: 2026-08-26T00:10:00+08:00
+status: formal-executed-invalid
+updated: 2026-08-26T00:25:00+08:00
 type: changelog
 topic: boundflow
 slug: mr7-launch-materialization-implementation
@@ -30,6 +30,8 @@ stage: s01
 
 ## 待完成
 
-- 三组 fresh counterbalanced formal artifact；
-- replay、fully re-signed tamper；
-- 按冻结阈值关闭 MR7 并只开放一个后继路线。
+- 已完成三组 fresh counterbalanced formal artifact与独立replay；
+- 已完成11/11 fully re-signed tamper；
+- 定向`7 passed`，全量`1815 passed, 3 skipped, 6 warnings`；
+- profile/control perturbation有一组`1.239399 >1.10`，MR7按冻结阈值以INVALID关闭；
+- 后继仅开放MR7-R unprofiled host recovery，未开放MR7-A/B/C实现。

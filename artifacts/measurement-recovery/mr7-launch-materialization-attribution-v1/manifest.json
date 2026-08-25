@@ -1,0 +1,19 @@
+{
+  "files": {
+    "pair_metrics.jsonl": "4214d41e45fede95ca81c08f19f2a1b10eb60bd14a7340aaef2c93a48ba797d3",
+    "protocol.json": "6ba0a7878b87b81f75dfb2a54c9ba690212714ed756f21da7a1d2f499e2e3c21",
+    "raw.json": "4d6971585db8fe27691a4902fb2fd5621c50543255e20b0a00460cda30230e27",
+    "replay_stdout.txt": "ec03ad93f8fa4ff6bf7c3e260a2323533db9b297457cc73cb7a2d763d2d1fe93",
+    "summary.json": "e986205b36cb1497b1484576947cb5c1fe19aa3e71f4b7bd6faf700d7a070341",
+    "tamper_report.json": "3aa5de21a53e63bb52f6b892d2e309f59d81f4b5b78d6f3fd54da79cbd31ffde"
+  },
+  "generator_commit": "fb2eb52a2b1926692dd0d4dca8781f698db9ebce",
+  "manifest_hash": "8fe0843c7763e1de2be058b33d6001430a8fc1a133fc3dceca6cb6dffaf8d50e",
+  "performance_claimed": false,
+  "protocol_hash": "c062863452e5ef399f65defbdff3966eab28d022a39bbda119ad08a7abd2ef57",
+  "raw_hash": "ca660a64010ecd86187b1ad3b4d1d6dd664aa5b155ed57c5ae7806daa067c67f",
+  "schema_version": "boundflow.mr7-launch-materialization-artifact/v1",
+  "source_commit": "527618241861dab9d03dfd4b3c8229ef53b79b55",
+  "status": "INVALID_MR7_ATTRIBUTION",
+  "summary_hash": "c889a4e5782230df1d0c915aca2b0187bf78fde7cbbab1a6fb7b402d0929d09d"
+}

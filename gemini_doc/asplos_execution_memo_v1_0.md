@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-26 MR7正式执行为INVALID，只开放MR7-R无profiler恢复**：6 fresh/3 pair的语义、
+> 30/27、host closure、device envelope与11/11 tamper通过，但profile/control ratio第1组=
+> `1.239399 >1.10`，因此MR7-A/B/C均未正式开放。诊断host boundary=`25.891 ms/19.818%`、device
+> kernel=`8.692%`只能用于设计。下一唯一动作是5 pair MR6 diagnostic vs MR7 ledger control，证明
+> unprofiled ledger低扰动后再决定FCR-1 compiled-region/arena/FFI资格。见MR7 INVALID closure与MR7-R计划。
+
 > **2026-08-26 MR6 guard dominance正式NO-GO，只开放MR7 attribution**：3 triplet/9 fresh将
 > 同步guard从`360→60`，full/diagnostic geomean仅`1.033126x <1.10x`；provider/diagnostic=
 > `0.903007x <0.98x`，三方语义exact、9/9 clock方向、12/12 tamper。MR6-B安全guard fusion关闭。
