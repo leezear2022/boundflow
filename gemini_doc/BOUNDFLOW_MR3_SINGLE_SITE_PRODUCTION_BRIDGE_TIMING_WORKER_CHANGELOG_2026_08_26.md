@@ -19,6 +19,8 @@ ResNet2B property-0的一次beta-split optimized outer call；provider保留原�
 
 - 新增`scripts/run_mr3_production_bridge_timing_worker.py`；
 - bridge侧在计时前完成TIR compile/cache与固定shape dummy forward/backward warm；
+- bridge侧冻结module/device-source hash、TVM版本、exported symbols与dummy `1/1/0/0`
+  launch/fallback/eager receipt，供6个fresh candidate进程做稳定性门禁；
 - CUDA event在tracker初始化时预分配，避免event构造进入计时region；
 - headline记录host `perf_counter_ns`，同一current stream event只作为diagnostic；
 - outer call前同步并reset peak，记录absolute base/peak allocated/reserved；

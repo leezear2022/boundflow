@@ -133,7 +133,19 @@ def _warm_candidate(torch_module: Any):
         or executor.eager_count != 0
     ):
         raise ValueError("MR3 timing candidate warm receipt differs")
-    return compiled
+    receipt = {
+        "module_hash": compiled.module_hash,
+        "device_source_hash": compiled.device_source_hash,
+        "tvm_version": compiled.tvm_version,
+        "exported_symbols": list(compiled.exported_symbols),
+        "global_workspace_bytes": compiled.global_workspace_bytes,
+        "dummy_forward_launch_count": executor.forward_launch_count,
+        "dummy_backward_launch_count": executor.backward_launch_count,
+        "dummy_fallback_count": executor.fallback_count,
+        "dummy_eager_count": executor.eager_count,
+    }
+    receipt["receipt_hash"] = canonical_hash(receipt)
+    return compiled, receipt
 
 
 class _TimingTracker:
@@ -147,7 +159,10 @@ class _TimingTracker:
         self.inner_count = 0
         self.bridge: MR3ProductionPAnchorBridgeV1 | None = None
         self.bridge_receipt: dict[str, object] | None = None
-        self.compiled = _warm_candidate(torch_module) if mode == "bridge" else None
+        self.compiled = None
+        self.candidate_module_receipt: dict[str, object] | None = None
+        if mode == "bridge":
+            self.compiled, self.candidate_module_receipt = _warm_candidate(torch_module)
         self.start_event = torch_module.cuda.Event(enable_timing=True)
         self.end_event = torch_module.cuda.Event(enable_timing=True)
         self.measurement: dict[str, object] | None = None
@@ -384,6 +399,7 @@ def _worker(args: argparse.Namespace) -> None:
         "final_target_alpha_state": tracker.final_alpha_state,
         "final_module_state": tracker.final_module_state,
         "measurement": tracker.measurement,
+        "candidate_module_receipt": tracker.candidate_module_receipt,
         "bridge_receipt": tracker.bridge_receipt,
         "timing_recorded": True,
         "performance_claimed": False,
