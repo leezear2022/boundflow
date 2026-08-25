@@ -36,6 +36,7 @@ CODE = (
     "boundflow/runtime/r3_d2b_staged_backward.py",
     "scripts/run_r3_d2b_timing_worker.py",
     "scripts/run_r3_d2b_timing_artifact.py",
+    "scripts/probe_r3_d2b_timing_tamper.py",
 )
 
 
@@ -241,8 +242,10 @@ def replay(root: Path) -> dict[str, Any]:
     if (
         ph != _hash(pu)
         or ph != manifest["protocol_hash"]
+        or protocol["source_revision"] != manifest["source_revision"]
         or protocol["order"] != [list(x) for x in ORDER]
         or protocol["region_gate"] != 11.8762
+        or protocol["code_revision"] != {x: _file_hash(ROOT / x) for x in CODE}
     ):
         raise ValueError("R3-D2B timing protocol differs")
     summary = _summary([_load(p) for p in sorted((root / "raw").glob("*.pt"))])
