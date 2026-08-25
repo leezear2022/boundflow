@@ -48,6 +48,7 @@ ARTIFACT_FILES = ("raw.json", "summary.json", "replay_stdout.txt", "README.md")
 CODE_PATHS = (
     "boundflow/runtime/mr3_provider_hook_feasibility.py",
     "scripts/run_mr3_provider_hook_feasibility.py",
+    "scripts/probe_mr3_provider_hook_feasibility_tamper.py",
     "tests/test_mr3_provider_hook_feasibility.py",
 )
 TARGET_RELU = "/input-24"
