@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+from typing import Callable
+
 import torch
 
 from boundflow.backends.tvm.cibc_dense_exact_conv import (
@@ -34,6 +36,7 @@ class CIBCDenseExactTIRExecutorV3:
         combined_output: torch.Tensor | None = None,
         combined_gradient: torch.Tensor | None = None,
         dlpack_view_cache: dict[int, object] | None = None,
+        backward_observer: Callable[[], None] | None = None,
     ) -> None:
         import tvm
         import tvm_ffi
@@ -148,6 +151,7 @@ class CIBCDenseExactTIRExecutorV3:
             self.combined_gradient.data_ptr()
         ]
         self._dynamic_adjoint_views: tuple[object, object] | None = None
+        self._backward_observer = backward_observer
 
     def _validate_stream(self) -> None:
         if int(torch.cuda.current_stream(self.device).cuda_stream) != self.stream_id:
@@ -175,14 +179,15 @@ class CIBCDenseExactTIRExecutorV3:
             or tuple(output_bias_gradient.shape) != (6, 1)
             or output_bias_gradient.dtype != torch.float32
             or output_bias_gradient.device != self.device
-            or tuple(output_bias_gradient.stride()) != (0, 0)
         ):
             self.fallback_count += 1
             raise ValueError("CIBC dense exact output adjoint differs")
         bias_seed = output_bias_gradient[0, 0].reshape(1)
-        if not bias_seed.is_contiguous():
+        if not bias_seed.is_contiguous() or not torch.equal(
+            output_bias_gradient, bias_seed.expand_as(output_bias_gradient)
+        ):
             self.fallback_count += 1
-            raise ValueError("CIBC dense exact scalar bias seed differs")
+            raise ValueError("CIBC dense exact uniform scalar bias seed differs")
         adjoints = (output_a_gradient, bias_seed)
         dynamic_views = (
             self._cached_view(adjoints[0]),
@@ -195,6 +200,8 @@ class CIBCDenseExactTIRExecutorV3:
             self.combined_gradient_view,
         )
         self.backward_launch_count += 1
+        if self._backward_observer is not None:
+            self._backward_observer()
         incoming_gradient = self.combined_gradient[:6144].view_as(self.inputs[0])
         alpha_gradient = self.combined_gradient[6144:].view_as(self.inputs[3])
         return incoming_gradient, alpha_gradient, output_bias_gradient
@@ -256,6 +263,7 @@ def execute_cibc_dense_exact_tir_v3(
     combined_output: torch.Tensor | None = None,
     combined_gradient: torch.Tensor | None = None,
     dlpack_view_cache: dict[int, object] | None = None,
+    backward_observer: Callable[[], None] | None = None,
 ) -> tuple[torch.Tensor, torch.Tensor, CIBCDenseExactTIRExecutorV3]:
     executor = CIBCDenseExactTIRExecutorV3(
         incoming_lower_a=incoming_lower_a,
@@ -269,6 +277,7 @@ def execute_cibc_dense_exact_tir_v3(
         combined_output=combined_output,
         combined_gradient=combined_gradient,
         dlpack_view_cache=dlpack_view_cache,
+        backward_observer=backward_observer,
     )
     output_a, output_bias = _CIBCDenseExactTIRFunctionV3.apply(
         incoming_lower_a,
