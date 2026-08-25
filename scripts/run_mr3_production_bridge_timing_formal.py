@@ -147,7 +147,7 @@ def _correctness_identity() -> dict[str, object]:
     return {
         "manifest_file_sha256": _sha256(CORRECTNESS_ARTIFACT / "manifest.json"),
         "manifest_hash": manifest["manifest_hash"],
-        "summary_hash": manifest["summary_hash"],
+        "summary_file_sha256": manifest["files"]["summary.json"],
         "replay_status": "VALIDATED-MR3-P-PRODUCTION-BRIDGE-CORRECTNESS",
     }
 

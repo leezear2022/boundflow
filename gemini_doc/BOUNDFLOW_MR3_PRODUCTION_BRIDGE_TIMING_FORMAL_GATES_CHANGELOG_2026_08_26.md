@@ -34,3 +34,9 @@ stage: s01
 - synthetic/negative：18项（GO/NO-GO、source freeze、16 tamper）预期全部通过；
 - Black、mypy、pylint与`git diff --check`纳入提交前门禁；
 - formal GPU结果留到clean implementation commit之后运行。
+
+## 4. 启动前修正
+
+首次formal命令在0个timing worker启动前被correctness identity读取拒绝：旧artifact manifest只冻结
+`files["summary.json"]`的文件SHA256，并无顶层`summary_hash`。runner改为绑定实际存在的
+`summary_file_sha256`；目标timing artifact当时不存在，因此没有partial raw或样本重用。
