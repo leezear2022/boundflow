@@ -14,7 +14,8 @@
 - ReLU=`/input-24`，其输入/producer Conv=`/input-20`；
 - compressed α=`[2,1,6,86]`，feature index 可无损恢复至 `[6,16,8,8]`；
 - β 在 P-anchor 上为空，不能伪造 zero tensor；
-- ReLU 输出 A 与随后 Conv 输入 A 的 identity/content/shape 邻接可证明；
+- ReLU 输出 A 与随后 Conv 输入 A 的 content/shape/version 语义邻接可证明；provider coefficient
+  map 允许产生新的 storage pointer，但必须显式披露；
 - probe 只调用原方法并原样返回，provider result/state 与 control 等价。
 
 ## 2. 协议
@@ -28,12 +29,15 @@ alpha/feature-index ABI、A pointer/version/content receipt、当前 CUDA device
 
 ## 3. 门禁
 
-1. 两个 pair 的 solver status、success、visited domains 与外层 exact-call result hash 等价；
+1. 两个 pair 的 solver status、success、visited domains、逐 evaluation lower、外层 result 与最终
+   provider state 等价；discrete identity exact，float 使用 `atol=2e-4,rtol=2e-4` 与 sign exact；
 2. probe 外层 beta exact call=`1`，内部 evaluation=`10`，P ReLU/Conv=`10/10`；
 3. evaluation ordinal 连续为 0..9，全部 start node=`/49`；
-4. ReLU output lower-A 与 Conv input lower-A 的 shape/pointer/version/content 全部一致；
+4. ReLU output lower-A 与 Conv input lower-A 的 shape/version/content 全部一致；pointer 是否复用作为
+   representation receipt 披露，不作为语义等价条件；
 5. α sparse/full ABI、bounds、weight、bias、lower-A、bias contribution 与冻结 MR3 合同一致；
-6. P β 为空；fallback/eager/replacement/native-shadow=`0/0/0/0`；
+6. P β 固定为一个 `[6,0]` provider empty tensor、总 `numel=0`；不得把它解释为 active β，也不得
+   另造 pseudo-zero；fallback/eager/replacement/native-shadow=`0/0/0/0`；
 7. probe 前后 CUDA device/stream 不漂移；
 8. replay 从 raw 重算全部门禁，不能只验 digest；tamper 至少 10 类全重签仍被拒绝。
 
@@ -46,3 +50,9 @@ alpha/feature-index ABI、A pointer/version/content receipt、当前 CUDA device
 
 任何结论都不开放 timing、multi-site、S-anchor、same-solver performance 或 complete-query claim。
 
+## 5. Formal 前 exploratory correction
+
+首个非 formal probe 在 artifact 生成前确认：provider 的 P β 表示为一个真实 empty tensor，而非
+零个对象；ReLU→Conv coefficient-map handoff 保持数值逐位一致但更换 storage pointer；独立 fresh
+GPU 进程的连续浮点 hash 不稳定。因此上述门禁在 formal raw 前改为 empty-tensor receipt、语义邻接
+和预注册数值容差。该修正不接受任何 candidate 数值，也不改变 MR3 correctness 容差。
