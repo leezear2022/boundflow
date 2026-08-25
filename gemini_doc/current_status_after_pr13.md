@@ -1,5 +1,9 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-26 当前执行：R3-3 isolated timing 协议已冻结**：6 fresh AB/BA、10 warmup/
+> 30 pairs，baseline含dense α/β reconstruction+autograd，candidate含TIR custom wrapper。未生成
+> formal raw 前没有active-β性能claim；R3-4/same-solver仍关闭。
+
 > **2026-08-26 当前状态：R3-3 active-β correctness通过，只开放 isolated timing**：
 > S-anchor 5 fresh的forward/compressed α/β VJP、ownership、workspace/cache全过，max diff=
 > `8.64267e-7`，β=30/30 nonzero，12/12 tamper，全量=`1653 passed,3 skipped`。R3-4与

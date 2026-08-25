@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-26 R3-3 isolated timing 预注册**：固定 S-anchor public-PyTorch CUDA dense
+> reconstruction+autograd baseline 对 cache-hit sparse Linear TIR custom wrapper；6 fresh、AB/BA、
+> 10 warmup/30 pairs，GO=`geomean>=1.05x/bootstrap>=1.00x/worst>=0.98x/memory<=1.05x`。
+> 即使通过也不自动开放R3-4。见`BOUNDFLOW_R3_3_ACTIVE_BETA_ISOLATED_TIMING_PLAN_2026_08_26.md`。
+
 > **2026-08-26 R3-3 active-β correctness正式通过，只开放 isolated timing**：source=`7350572`，
 > S-anchor 5 fresh/20 metrics max diff=`8.64267e-7`，β gradient=30/30 nonzero，12/12 tamper，
 > 全量=`1653 passed,3 skipped`。未计时、无performance claim；R3-4/same-solver继续关闭。见

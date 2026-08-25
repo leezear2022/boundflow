@@ -1,5 +1,9 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新执行：R3-3 active-β isolated timing 已预注册，固定 6 fresh AB/BA、10 warmup/
+30 pairs 的 public-PyTorch CUDA wrapper 对 cache-hit TIR wrapper。通过也不自动开放R3-4；见
+`BOUNDFLOW_R3_3_ACTIVE_BETA_ISOLATED_TIMING_PLAN_2026_08_26.md`。
+
 最新：R3-3 S-anchor active-β correctness正式通过；5 fresh/20 metrics max diff=
 `8.64267e-7`，β gradient=30/30 nonzero，12/12 tamper，全量=`1653 passed,3 skipped`。
 未计时，只开放 isolated timing；见
