@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-26 MR0低扰动测量恢复预注册**：在CIBC 17-op production CUDA Graph上，不用
+> profiler/NVTX，校准预分配CUDA-event pair预算=`1/4/8/17`；5 fresh、20 pair×100 replay。
+> 17对只有geomean/bootstrap-upper/worst=`<=1.05/1.05/1.08x`才开放MR1内部owner绑定；
+> same-solver/R2/性能claim仍关闭。见`BOUNDFLOW_MR0_LOW_PERTURBATION_EVENT_BUDGET_PLAN_2026_08_26.md`。
+
 > **2026-08-26 R3-3只读microphysics attribution质量失败，route=STOP**：source=`1c15624`，
 > 5 fresh均完成raw/replay，但profile扰动=`2.4061–2.8053x`且calibration residual=`110–119 us`，
 > `0/5`准入；12/12 fully re-signed tamper拒绝，全量=`1667 passed,3 skipped`。bridge/autograd等share仅保留为非准入诊断投影，

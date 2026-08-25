@@ -1,5 +1,9 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-26 当前执行：MR0 explicit-event budget预注册**：R3-3 profiler route STOP 后，先在
+> CIBC 17-op graph上验证1/4/8/17对预分配CUDA event的扰动；正式只用17对的
+> `geomean/bootstrap-upper/worst<=1.05/1.05/1.08x`决策。通过也只开放MR1 correctness。
+
 > **2026-08-26 当前状态：R3-3只读microphysics attribution route=STOP**：5 fresh的profile
 > 扰动=`2.4061–2.8053x`、calibration residual=`110–119 us`，故`0/5`准入；12/12 tamper，
 > 全量=`1667 passed,3 skipped`。

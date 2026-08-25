@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev013516
-last_va: ev013517
+last_ch: ev013533
+last_va: ev013534
 blk: none
-next: preregister-low-perturbation-measurement-recovery
-updated: 2026-08-25T05:08:08Z
+next: implement-mr0-explicit-event-budget
+updated: 2026-08-25T05:12:07Z

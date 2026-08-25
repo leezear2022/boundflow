@@ -1,5 +1,10 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新执行：R3-3 attribution STOP 后转 MR0 低扰动显式事件预算校准；固定 CIBC production 17-op、
+5 fresh、event-pair budget=`1/4/8/17`，只有17对的geomean/bootstrap-upper/worst全部通过
+`1.05/1.05/1.08x`才开放内部边界correctness，不形成share或性能claim。见
+`BOUNDFLOW_MR0_LOW_PERTURBATION_EVENT_BUDGET_PLAN_2026_08_26.md`。
+
 最新：R3-3只读microphysics attribution以质量门禁fail closed；5 fresh profile扰动=
 `2.4061–2.8053x`、calibration residual=`110–119 us`，`0/5`准入，route=`STOP`，12/12 tamper，
 全量=`1667 passed,3 skipped`。

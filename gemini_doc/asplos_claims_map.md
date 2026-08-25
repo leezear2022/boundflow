@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-26 MR0预注册边界**：当前只冻结CIBC 17-op explicit CUDA-event record预算的低扰动
+> 校准协议，尚无raw或结论。MR0通过最多开放internal-boundary correctness；不得claim op share、
+> query/same-solver speedup、R2开放或ASPLOS-ready。
+
 > **2026-08-26 R3-3 isolated attribution claim边界**：source=`1c15624`的5 fresh均完成事件/账本
 > 重建，但profile扰动=`2.4061–2.8053x`、calibration residual=`110–119 us`，因此`0/5`
 > attribution admitted，route=`STOP`；12/12 tamper，全量=`1667 passed,3 skipped`。只允许claim
