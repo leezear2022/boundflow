@@ -1,0 +1,22 @@
+{
+  "code_revision": {
+    "boundflow/runtime/fsg4_b4b3_cibc_dense_tir.py": "f2ec9ab7892ac2542b244cee3ef02a6c68fd3b83ae0238a780f10ba3e2e688e4",
+    "boundflow/runtime/mr3_production_bridge_formal.py": "59e4deb9d3b64699694d8c99e90e529ff50df7770403b10caf3f0d3e7242fad6",
+    "boundflow/runtime/mr3_production_p_anchor_bridge.py": "530979ddef7a594db21abf4c7a35bec9f885fe3e4155297b6fe56adc8781ff97",
+    "scripts/probe_mr3_production_bridge_tamper.py": "742e5120b091908d2ee86226d687e7240f5cc4b49720ca6fda9ece01ff4d1d78",
+    "scripts/run_mr3_production_bridge_formal.py": "9ea6bfa4774468ee194e07b76c2aee42d5d16e96ed7360e220e1c3629181293e",
+    "scripts/run_mr3_production_p_anchor_bridge_worker.py": "0acc8b23816e613afa1bf0a95125550501e81c2f71d91967205a97f6fffc0cdd",
+    "tests/test_mr3_production_bridge_formal.py": "ae191459e20868022ddc445bce77bd9fc0565d23ad9ae37de92cd96c5e69b75e",
+    "tests/test_mr3_production_p_anchor_bridge.py": "4faf72355db8530dcb635076659ede49180ece8f9ec3d900f9798037e838002c"
+  },
+  "files": {
+    "README.md": "1abe4c7405d7dbd4532ac42e8f35d18d613eba68dc635b44e642eea9c61c9796",
+    "raw.json": "be964d52c5bb73f98f2d51cb6e2f20383f89c7df69ae1aed450a55806e454a18",
+    "replay_stdout.txt": "cd57ff614647d222d026cccd029e5f40d2d072d5b5c437b7484a99c7db5020fa",
+    "summary.json": "b38b1d926e07cca57ba29b026922b26da1b7c4258cfae59bd079c4f27338caed",
+    "tamper_report.json": "ab376a95aa3b357509b87bbe92fe74799c97d030f3191af21f8e68c7f607b6f9"
+  },
+  "manifest_hash": "6eb22a7ae1d778d293b24b8694330226fc2a888a5b63d84a0a114b4f495371c1",
+  "schema_version": "boundflow.mr3-production-bridge-formal/v1",
+  "source_commit": "baddf7c9fb7d6881a4429de484847bcfe2b52368"
+}
