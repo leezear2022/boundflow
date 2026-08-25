@@ -1,7 +1,7 @@
 # 修改记录：MR1 Same-Solver 静态可替换性审计
 
 > 日期：2026-08-26  
-> 状态：预注册完成，尚未执行
+> 状态：正式执行完成，VALIDATED-NO-GO
 
 ## 修改
 
@@ -17,3 +17,11 @@
 - 预注册阶段只运行文档一致性与 `git diff --check`；
 - 实现、测试、正式工件和 verdict 必须在后续提交完成，禁止回改本文件门槛。
 
+## Formal result
+
+- source=`a6b6d05`，394条activation call无损计数，ResNet2B ledger=`51`；
+- 当前CIBC full-graph eligibility=`0/51`，机械verdict=
+  `VALIDATED-NO-GO-MR1-CIBC-FULL-GRAPH-SAME-SOLVER`；
+- 51/51均为activation-BaB、非IBP、split state present、provider-owned exact call；
+- self-contained replay PASS，13/13 fully re-signed tamper rejected；
+- targeted=`10 passed`，typing/lint/format通过；full regression待closure最终补录。

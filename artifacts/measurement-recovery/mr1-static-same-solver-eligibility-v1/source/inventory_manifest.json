@@ -1,0 +1,17 @@
+{
+  "code_revision": {
+    "scripts/run_fsg2_abcrown_state_inventory.py": "acfdf9dfa595fe4cd6158521d6c767b43cd738fdfd58b22def207b803af81e4e"
+  },
+  "files": {
+    "README.md": "3dbaf3845285dbb8bfc02591027b56e9f66790bf21c33099150ddf080bf75f3a",
+    "inventory.json": "ab0595bb002b79d80be8b78abd7a795a8aa634b17c9a8524df5a1b9b5fe19e06",
+    "replay_stdout.txt": "b742f5a11d231964812c236b2264ce0f54f5ac0188b04154ecb82b7ae4455054",
+    "summary.json": "da829fe5c498ee5a57ef013375a743b379cfc0f7edcb6469602536499d6a6eb1"
+  },
+  "manifest_hash": "e8548a25b851ac86faae3b8bb216c987c58136b9c0970ce3652dfcba559fff06",
+  "performance_claimed": false,
+  "schema_version": "boundflow.fsg2-abcrown-state-inventory/v1",
+  "source_git_head": "8bf6981f2952a8ec5f8390bbef843ee7400e1a70",
+  "status": "validated_reduced_state_boundary",
+  "summary_hash": "37f6dbcdeadf74591ce52eaeb5d22116948ce06867a5ba3ba7ee76a23daa6544"
+}

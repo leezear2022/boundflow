@@ -1,5 +1,14 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-26 当前状态：MR1-S full-graph static eligibility NO-GO**：394条activation raw全部
+> 审计，ResNet2B=`0/51 eligible`；51/51不是IBP整图调用，而是带split state的provider-owned
+> activation-BaB/CROWN call。关闭CIBC整图直接替换，same-solver timing/R2不开；下一只做MR2
+> production CROWN subgraph/owner contract inventory。
+
+> **2026-08-26 当前状态：MR0 explicit-event budget NO-GO**：17对event的five-fresh
+> geomean/bootstrap-upper/worst=`2.137191/2.153191/2.163574x`；12/12 tamper。MR1关闭，
+> 下一步只做既有B3/RVIR raw的无计时same-solver static eligibility audit，不实现性能候选。
+
 > **2026-08-26 当前执行：MR0 explicit-event budget预注册**：R3-3 profiler route STOP 后，先在
 > CIBC 17-op graph上验证1/4/8/17对预分配CUDA event的扰动；正式只用17对的
 > `geomean/bootstrap-upper/worst<=1.05/1.05/1.08x`决策。通过也只开放MR1 correctness。

@@ -1,5 +1,16 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-26 MR1-S claim边界**：394条activation raw无损计数，ResNet2B当前CIBC full-graph
+> eligibility=`0/51`，13/13 tamper，状态=
+> `VALIDATED-NO-GO-MR1-CIBC-FULL-GRAPH-SAME-SOLVER`。只允许claim当前整图IBP executor不能
+> 直接替换这些activation-BaB/CROWN exact calls；不得claim CIBC/CROWN子图无性能机会、query
+> 会变慢或历史`2.45631x`失效。same-solver timing/R2继续关闭。
+
+> **2026-08-26 MR0 claim边界**：可claim CIBC 17-op graph每replay记录17对预分配CUDA event的
+> geomean/bootstrap-upper/worst扰动=`2.137191/2.153191/2.163574x`，故
+> `VALIDATED-NO-GO-MR0-EXPLICIT-EVENT-BUDGET`；12/12 tamper。不能把该ratio解释成op share或
+> query性能，也不能据此选择优化。MR1/same-solver/R2关闭。
+
 > **2026-08-26 MR0预注册边界**：当前只冻结CIBC 17-op explicit CUDA-event record预算的低扰动
 > 校准协议，尚无raw或结论。MR0通过最多开放internal-boundary correctness；不得claim op share、
 > query/same-solver speedup、R2开放或ASPLOS-ready。

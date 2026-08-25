@@ -1,5 +1,16 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新：MR1-S无计时static same-solver eligibility审计正式NO-GO；394条activation raw全纳入，
+ResNet2B `0/51`可由当前CIBC 17-op IBP整图直接替换。51/51均为activation-BaB/CROWN、split
+state present、provider-owned exact call；13/13 tamper。只关闭整图直接替换，下一开放MR2
+production CROWN subgraph/owner contract inventory；见
+`BOUNDFLOW_MR1_STATIC_SAME_SOLVER_ELIGIBILITY_FORMAL_NO_GO_CLOSURE_2026_08_26.md`。
+
+最新：MR0 17-op explicit CUDA-event budget正式NO-GO；five-fresh geomean/bootstrap-upper/worst=
+`2.137191/2.153191/2.163574x`，12/12 tamper。1对event也仅geomean通过，upper/worst失败，且不具
+完整owner覆盖。原internal-boundary MR1关闭，下一步只开放无计时same-solver static eligibility audit；见
+`BOUNDFLOW_MR0_EXPLICIT_EVENT_BUDGET_FORMAL_NO_GO_CLOSURE_2026_08_26.md`。
+
 最新执行：R3-3 attribution STOP 后转 MR0 低扰动显式事件预算校准；固定 CIBC production 17-op、
 5 fresh、event-pair budget=`1/4/8/17`，只有17对的geomean/bootstrap-upper/worst全部通过
 `1.05/1.05/1.08x`才开放内部边界correctness，不形成share或性能claim。见

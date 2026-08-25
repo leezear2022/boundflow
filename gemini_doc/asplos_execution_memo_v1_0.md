@@ -1,5 +1,16 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-26 MR1-S static same-solver eligibility正式NO-GO**：source=`a6b6d05`，冻结394条
+> activation raw，ResNet2B 逐调用=`0/51 eligible`；51/51均为activation-BaB/CROWN、split
+> present、provider-owned exact call。13/13 tamper。关闭CIBC IBP整图直接替换，不撤销CIBC
+> reduced claim；下一只开放MR2 production CROWN subgraph/owner contract inventory。见
+> `BOUNDFLOW_MR1_STATIC_SAME_SOLVER_ELIGIBILITY_FORMAL_NO_GO_CLOSURE_2026_08_26.md`。
+
+> **2026-08-26 MR0 explicit-event budget正式NO-GO**：source=`651e432`，CIBC 17-op graph的
+> 17对event five-fresh geomean/bootstrap-upper/worst=`2.137191/2.153191/2.163574x`，12/12
+> tamper。MR1/same-solver/R2关闭；下一只允许从既有B3/RVIR raw做无计时static eligibility audit。
+> 见`BOUNDFLOW_MR0_EXPLICIT_EVENT_BUDGET_FORMAL_NO_GO_CLOSURE_2026_08_26.md`。
+
 > **2026-08-26 MR0低扰动测量恢复预注册**：在CIBC 17-op production CUDA Graph上，不用
 > profiler/NVTX，校准预分配CUDA-event pair预算=`1/4/8/17`；5 fresh、20 pair×100 replay。
 > 17对只有geomean/bootstrap-upper/worst=`<=1.05/1.05/1.08x`才开放MR1内部owner绑定；
