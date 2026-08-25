@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import lzma
 import os
 from pathlib import Path
 import shutil
@@ -69,6 +70,22 @@ def _load_json(path: Path) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise TypeError(f"JSON root must be an object: {path}")
     return value
+
+
+def _load_json_xz(path: Path) -> dict[str, Any]:
+    value = json.loads(lzma.decompress(path.read_bytes()).decode("utf-8"))
+    if not isinstance(value, dict):
+        raise TypeError(f"compressed JSON root must be an object: {path}")
+    return value
+
+
+def _write_json_xz(path: Path, value: object) -> None:
+    path.write_bytes(
+        lzma.compress(
+            (_json_text(value, indent=2) + "\n").encode("utf-8"),
+            preset=9,
+        )
+    )
 
 
 def _sha256(path: Path) -> str:
@@ -186,7 +203,7 @@ def replay_artifact(artifact: Path) -> dict[str, object]:
             raise TypeError("MR5 formal manifest file entry differs")
         if _sha256(artifact / relative) != expected:
             raise ValueError(f"MR5 formal artifact digest differs: {relative}")
-    summary = derive_summary(_load_json(artifact / "raw.json"))
+    summary = derive_summary(_load_json_xz(artifact / "raw.json.xz"))
     if summary != _load_json(artifact / "summary.json"):
         raise ValueError("MR5 formal summary replay differs")
     return summary
@@ -272,7 +289,7 @@ def generate_artifact(args: argparse.Namespace) -> dict[str, object]:
         if staging.exists():
             shutil.rmtree(staging)
         staging.mkdir(parents=True)
-        _write_json(staging / "raw.json", raw)
+        _write_json_xz(staging / "raw.json.xz", raw)
         _write_json(staging / "summary.json", summary)
         (staging / "README.md").write_text(
             "# MR5 Multi-Conv Production Bridge Formal Artifact\n\n"
