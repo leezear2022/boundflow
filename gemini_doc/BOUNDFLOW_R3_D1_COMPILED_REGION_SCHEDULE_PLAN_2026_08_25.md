@@ -1,5 +1,5 @@
 ---
-status: d1b-isolated-validated-d1c-open
+status: d1c-validated-no-go-superseded-by-d2a
 updated: 2026-08-25T15:10:00+08:00
 type: plan
 topic: boundflow
@@ -88,6 +88,10 @@ claim的fully re-signed tamper。
 
 ## 7. 当前动作
 
-residual11与residual6 D1-A correctness已关闭；D1-B固定256-thread winner以5 fresh isolated
-geomean/worst=`58.0619x/56.8625x`、10/10 tamper关闭。当前只开放D1-C cumulative wrapper。
-R3-3与same-solver仍关闭；不得修改v1或D1-A/B formal artifact。
+**历史准入（已被下方closure取代）**：residual11与residual6 D1-A correctness已关闭；D1-B固定
+256-thread winner以5 fresh isolated geomean/worst=`58.0619x/56.8625x`、10/10 tamper关闭；当时
+只开放D1-C cumulative wrapper。R3-3与same-solver仍关闭；不得修改v1或D1-A/B formal artifact。
+
+**2026-08-25 closure**：D1-C formal wrapper geomean/worst=`0.249369x/0.243233x`，相对B3
+recovery=`1.879305x/1.855758x`，以`VALIDATED-NO-GO-R3-D1C-CUMULATIVE-WRAPPER`关闭。
+本计划不再开放任何D1实现；唯一后继为D2-A只读backward attribution。

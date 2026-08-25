@@ -1,5 +1,9 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-25 当前状态：D1-C正式NO-GO，只开放D2-A**：wrapper geomean/worst=
+> `0.249369x/0.243233x`，B3 recovery=`1.879305x/1.855758x`，语义/memory/12 tamper通过。
+> forward热点已移除但backward成为新主导；R3-3与same-solver关闭。
+
 > **2026-08-25 当前状态：D1-B isolated通过，只开放D1-C**：256-thread winner 5 fresh
 > geomean/worst=`58.0619x/56.8625x`，max diff=`9.53674e-7`、10/10 tamper；完整10/9 wrapper
 > 尚未运行，不能claim query/queue/ASPLOS speedup。

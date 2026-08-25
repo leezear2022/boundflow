@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-25 R3-D1-C claim边界**：可claim当前forward-only cumulative variant相对B3回收
+> `1.879305x`，但相对native仅`0.249369x`，因此以VALIDATED-NO-GO关闭；D1-B isolated 58x保留。
+> 不得claim wrapper/query speedup或R3-3开放；只开放D2-A只读backward attribution。
+
 > **2026-08-25 R3-D1-B claim边界**：可claim冻结256-thread two-kernel schedule在production
 > residual6+11 isolated对比v1 raw TIR的5-fresh geomean/worst=`58.0619x/56.8625x`，且
 > correctness/ownership/tamper成立。不得claim完整compiled region、optimizer wrapper、query或queue

@@ -1,5 +1,10 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新：R3-D1-C cumulative wrapper以VALIDATED-NO-GO关闭；native wrapper geomean/worst=
+`0.249369x/0.243233x`，相对B3 recovery=`1.879305x/1.855758x`。只开放D2-A backward
+microphysics attribution；见`BOUNDFLOW_R3_D1C_CUMULATIVE_FORMAL_NO_GO_CLOSURE_2026_08_25.md`
+与`BOUNDFLOW_R3_D2_BACKWARD_MICROPHYSICS_PLAN_2026_08_25.md`。
+
 最新：R3-D1-B isolated schedule资格通过，source=`06f8765`，256-thread winner的5 fresh
 geomean/worst=`58.0619x/56.8625x`，10/10 tamper。只开放D1-C完整10/9 wrapper；不得把isolated
 数字写成query/queue性能。见`BOUNDFLOW_R3_D1B_SCHEDULE_FORMAL_CLOSURE_2026_08_25.md`。

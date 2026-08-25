@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev013123
-last_va: ev013124
+last_ch: ev013131
+last_va: ev013132
 blk: none
-next: implement-r3-d1c-cumulative-10x9-wrapper
-updated: 2026-08-25T01:07:36Z
+next: implement-r3-d2a-five-fresh-backward-attribution
+updated: 2026-08-25T01:23:00Z

@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-25 R3-D1-C正式NO-GO，只开放D2-A backward attribution**：5 fresh triplet得到
+> wrapper geomean/worst=`0.249369x/0.243233x`，B3→D1-C recovery=`1.879305x/1.855758x`；
+> correctness/memory通过、12/12 tamper，但9.3181x与1.20x门禁失败。R3-3/same-solver仍关闭。见
+> `BOUNDFLOW_R3_D1C_CUMULATIVE_FORMAL_NO_GO_CLOSURE_2026_08_25.md`与
+> `BOUNDFLOW_R3_D2_BACKWARD_MICROPHYSICS_PLAN_2026_08_25.md`。
+
 > **2026-08-25 R3-D1-B isolated schedule资格通过，只开放D1-C wrapper**：source=`06f8765`，
 > 冻结256-thread serial/two-kernel winner的5 fresh residual6+11 geomean/worst=`58.0619x/
 > 56.8625x`，max diff=`9.53674e-7`、10/10 tamper。仅为isolated claim；完整10/9 wrapper、
