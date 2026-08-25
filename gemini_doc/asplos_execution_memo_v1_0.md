@@ -1,5 +1,12 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-26 MR3 P-anchor production bridge correctness正式通过**：implementation source=
+> `baddf7c`，5 pair/10 fresh固定`PB/BP/PB/BP/PB`；candidate forward/backward=`50/45`，一般与
+> optimizer trajectory最坏diff均`3.15905e-6`、sign exact；evaluation-5 failure atomic rollback与
+> 18/18 fully re-signed tamper通过。无timing/performance claim；唯一下一动作是预注册single-site
+> bridge timing，S-anchor/multi-site/same-solver继续关闭。见
+> `BOUNDFLOW_MR3_P_ANCHOR_PRODUCTION_BRIDGE_FORMAL_CLOSURE_2026_08_26.md`。
+
 > **2026-08-26 MR3-0真实provider hook feasibility通过**：source=`8a63503`，2 pair/4 fresh，
 > beta-split outer/inner=`1/10`，probe P ReLU/Conv=`20/20`；完整state max diff=`2.02656e-6`、
 > sign exact，empty β=`[6,0]`，12/12 tamper。只开放MR3 candidate bridge implementation；

@@ -1,5 +1,10 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-26 当前状态：MR3真实production bridge correctness通过**：P-anchor
+> `/49: /input-24 → /input-20`已由TIR forward/custom backward接管；5 pair/10 fresh、50/45 launch、
+> 10/9 trajectory、atomic rollback与18/18 tamper全过，最坏diff=`3.15905e-6`。没有timing claim；
+> 下一只允许预注册single-site timing，S-anchor/multi-site/same-solver仍关闭。
+
 > **2026-08-26 当前状态：MR3-0真实provider hook feasibility通过**：真实beta-split optimized call
 > 的outer/inner=`1/10`，`/49`下P ReLU/Conv probe=`20/20`；完整state max diff=`2.02656e-6`、
 > 12/12 tamper。下一只实现fail-closed candidate bridge；未开放timing。

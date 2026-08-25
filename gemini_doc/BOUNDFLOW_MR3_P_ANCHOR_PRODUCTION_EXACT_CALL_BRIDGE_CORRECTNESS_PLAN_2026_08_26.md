@@ -1,5 +1,9 @@
 # BoundFlow MR3 P-anchor Production Exact-Call Bridge Correctness 预注册
 
+> **2026-08-26关闭注**：本预注册已由
+> `BOUNDFLOW_MR3_P_ANCHOR_PRODUCTION_BRIDGE_FORMAL_CLOSURE_2026_08_26.md`执行并通过；后续以closure
+> 与claims map为当前口径。
+
 > 日期：2026-08-26  
 > 性质：production integration correctness；无timing、无speedup claim  
 > 前置：MR2 selected=`P:25/Conv_8`，bridge未实现  

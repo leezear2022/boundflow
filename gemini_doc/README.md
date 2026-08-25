@@ -1,5 +1,11 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新：MR3 P-anchor真实production bridge correctness正式通过；source=`baddf7c`，5 pair/10 fresh的
+candidate forward/backward=`50/45`，每pair一般/optimizer元素=`72,202/46,440`，全局最坏diff=
+`3.15905e-6`、sign exact；mutation-after-failure atomic rollback通过，18/18 tamper。未计时，只开放
+single-site timing预注册。见
+`BOUNDFLOW_MR3_P_ANCHOR_PRODUCTION_BRIDGE_FORMAL_CLOSURE_2026_08_26.md`。
+
 最新：MR3-0真实provider hook feasibility正式通过；source=`8a63503`，2 pair/4 fresh均精确绑定
 beta-split 10-evaluation call的`/49: /input-24 → /input-20`，20/20 ReLU/Conv，完整state
 max diff=`2.02656e-6`、sign exact，12/12 tamper。只开放MR3 candidate bridge implementation，
