@@ -44,7 +44,13 @@ PROPERTY_RELATIVE_PATH = (
 )
 MODEL_SHA256 = "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d"
 PROPERTY_SHA256 = "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff"
-ARTIFACT_FILES = ("raw.json", "summary.json", "replay_stdout.txt", "README.md")
+ARTIFACT_FILES = (
+    "raw.json",
+    "summary.json",
+    "tamper_report.json",
+    "replay_stdout.txt",
+    "README.md",
+)
 CODE_PATHS = (
     "boundflow/runtime/mr3_provider_hook_feasibility.py",
     "scripts/run_mr3_provider_hook_feasibility.py",
@@ -625,6 +631,37 @@ def _replay_result(summary: Mapping[str, Any]) -> dict[str, object]:
     }
 
 
+def _pending_tamper_report() -> dict[str, object]:
+    report: dict[str, object] = {
+        "status": "pending",
+        "attack_count": 0,
+        "rejected_count": 0,
+        "all_rejected": False,
+        "results": [],
+        "performance_claimed": False,
+    }
+    report["result_hash"] = canonical_hash(report)
+    return report
+
+
+def _validate_tamper_report(report: Mapping[str, Any]) -> None:
+    unsigned = dict(report)
+    result_hash = unsigned.pop("result_hash", None)
+    results = report.get("results")
+    if (
+        result_hash != canonical_hash(unsigned)
+        or report.get("status") != "validated"
+        or report.get("attack_count") != 12
+        or report.get("rejected_count") != 12
+        or report.get("all_rejected") is not True
+        or report.get("performance_claimed") is not False
+        or not isinstance(results, list)
+        or len(results) != 12
+        or any(row.get("rejected") is not True for row in results)
+    ):
+        raise ValueError("MR3-0 tamper report differs")
+
+
 def _generate(args: argparse.Namespace) -> dict[str, object]:
     if not _code_clean():
         raise ValueError("MR3-0 code paths must be clean before formal generation")
@@ -681,6 +718,7 @@ def _generate(args: argparse.Namespace) -> dict[str, object]:
     summary = derive_summary(raw)
     _write_json(artifact / "raw.json", raw)
     _write_json(artifact / "summary.json", summary)
+    _write_json(artifact / "tamper_report.json", _pending_tamper_report())
     replay_result = _replay_result(summary)
     (artifact / "replay_stdout.txt").write_text(
         _json_text(replay_result) + "\n", encoding="utf-8"
@@ -743,6 +781,7 @@ def replay(artifact: Path) -> dict[str, object]:
         raise ValueError("MR3-0 semantic replay differs")
     if manifest.get("summary_hash") != summary["summary_hash"]:
         raise ValueError("MR3-0 summary projection differs")
+    _validate_tamper_report(_load_json(artifact / "tamper_report.json"))
     result = _replay_result(summary)
     if (artifact / "replay_stdout.txt").read_text(encoding="utf-8") != _json_text(
         result

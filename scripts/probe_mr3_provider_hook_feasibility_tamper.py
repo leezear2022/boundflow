@@ -151,6 +151,7 @@ def run_attacks(artifact: Path) -> dict[str, object]:
                 error = str(caught)
             results.append({"attack": name, "rejected": rejected, "error": error})
     result: dict[str, object] = {
+        "status": "validated",
         "attack_count": len(results),
         "rejected_count": sum(bool(row["rejected"]) for row in results),
         "all_rejected": all(bool(row["rejected"]) for row in results),
@@ -172,6 +173,14 @@ def main() -> None:
     encoded = json.dumps(result, sort_keys=True, separators=(",", ":"), allow_nan=False)
     if args.output is not None:
         args.output.write_text(encoded + "\n", encoding="utf-8")
+        if args.output.resolve().parent == args.artifact_dir.resolve():
+            manifest_path = args.artifact_dir.resolve() / "manifest.json"
+            manifest = _load(manifest_path)
+            manifest["files"][args.output.name] = _sha256(args.output.resolve())
+            unsigned = dict(manifest)
+            unsigned.pop("manifest_hash", None)
+            manifest["manifest_hash"] = canonical_hash(unsigned)
+            _write(manifest_path, manifest)
     print(encoded)
 
 
