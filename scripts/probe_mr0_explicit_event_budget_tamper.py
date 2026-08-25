@@ -95,15 +95,17 @@ def run(artifact: Path) -> dict[str, object]:
             "control-sample",
             lambda root: _mutate_raw(
                 root,
-                lambda raw: raw["budget_rows"][-1]["control_ms"].__setitem__(0, 100.0),
+                lambda raw: raw["budget_rows"][-1].__setitem__(
+                    "control_ms", [100.0] * 20
+                ),
             ),
         ),
         (
             "instrumented-sample",
             lambda root: _mutate_raw(
                 root,
-                lambda raw: raw["budget_rows"][-1]["instrumented_ms"].__setitem__(
-                    0, 0.0001
+                lambda raw: raw["budget_rows"][-1].__setitem__(
+                    "instrumented_ms", [0.0001] * 20
                 ),
             ),
         ),

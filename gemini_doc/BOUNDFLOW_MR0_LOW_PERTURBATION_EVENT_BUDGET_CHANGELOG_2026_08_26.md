@@ -38,3 +38,7 @@ overhead ratio随budget=`1.0618/1.1615/1.3226/2.1307x`。这些数字只证明ru
 formal可能NO-GO，不参与最终结论。正式raw必须从clean implementation commit的worker 0重新生成。
 
 当前 targeted/typing/lint 后冻结source；formal raw、tamper、full regression与最终 verdict 尚待后续提交。
+
+首次 clean-source formal 在 source=`3080af6` 得到预期 NO-GO，但第一类 tamper 只改一个非中位
+样本，无法改变派生summary，因而被replay接受。该 artifact 不作为最终证据。修正攻击为整组20个
+latency样本的全重签改写，不修改门槛、worker或统计协议；修正source后必须从worker 0重跑formal。
