@@ -54,6 +54,8 @@ candidate 总时间需要的加速为：
 - 单 stream 无 overlap 时不做 overlap-adjustment；有 overlap 则同时披露 kernel-sum 与 union-wall，
   headline 只使用 union-wall；
 - GPU 温度/功耗/时钟/驱动在每个 process 前后冻结。
+- profiler 扰动门禁：同一 worker 的 profiled CUDA-event wrapper / unprofiled 30-sample
+  candidate median 必须 `<=1.20x`；超限则 attribution 失败并 route=`STOP`。
 
 ## 4. 互斥归因账本
 
