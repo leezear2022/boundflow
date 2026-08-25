@@ -1,6 +1,6 @@
 ---
-status: preregistered-correctness-open
-updated: 2026-08-26T02:00:00+08:00
+status: validated-r3-3-s-active-beta-correctness
+updated: 2026-08-26T04:15:00+08:00
 type: plan
 topic: boundflow
 slug: r3-3-s-anchor-active-beta
@@ -67,3 +67,11 @@ artifact 不得关闭 R3-3。
 B4-B1 已验证 execution policy：CPU thread=`1`、deterministic debug mode=`2`、float32 matmul
 precision=`highest`、MKLDNN disabled，并在退出时恢复原进程状态。修正后必须从新的 clean
 source 重生全部 raw、cache probe、manifest 与 tamper，不得原地重签首轮 artifact。
+
+## 7. 执行结果
+
+修正后 source=`7350572` 的 5 fresh/20 metrics 全部通过，max diff=
+`8.642673492431641e-07`，active β gradient=30/30 nonzero，cache 证据为 5 个 fresh miss +
+独立 `miss→4 hit`，12/12 tamper 拒绝，全量回归=`1653 passed,3 skipped`。状态关闭为
+`VALIDATED-R3-3-S-ACTIVE-BETA-CORRECTNESS`，详见
+`BOUNDFLOW_R3_3_ACTIVE_BETA_FORMAL_CLOSURE_2026_08_26.md`。

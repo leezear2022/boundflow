@@ -1,5 +1,10 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-26 当前状态：R3-3 active-β correctness通过，只开放 isolated timing**：
+> S-anchor 5 fresh的forward/compressed α/β VJP、ownership、workspace/cache全过，max diff=
+> `8.64267e-7`，β=30/30 nonzero，12/12 tamper，全量=`1653 passed,3 skipped`。R3-4与
+> same-solver关闭，尚无active-β性能数字。
+
 > **2026-08-26 当前状态：D2-B local wrapper research gate通过，只开放R3-3 correctness**：
 > candidate/native geomean/worst=`1.752001x/1.724843x`，region worst=`53.9195x`，12/12 tamper。
 > multi-site与same-solver关闭。

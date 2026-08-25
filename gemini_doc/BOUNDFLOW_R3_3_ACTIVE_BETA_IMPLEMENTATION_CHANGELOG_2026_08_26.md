@@ -1,6 +1,6 @@
 ---
-status: implementation-ready-formal-pending
-updated: 2026-08-26T03:00:00+08:00
+status: validated-r3-3-s-active-beta-correctness
+updated: 2026-08-26T04:15:00+08:00
 type: changelog
 topic: boundflow
 slug: r3-3-active-beta-implementation
@@ -52,3 +52,10 @@ closure。
 修正复用 B4-B1 已测的 `_reference_execution_policy`，将 worker 内部 oracle 与 replay oracle
 同时固定为 1 CPU thread、deterministic debug mode 2、highest matmul precision、MKLDNN off，
 且离开 context 时恢复环境。必须从修正后 source 重生 artifact 并重跑全量回归。
+
+## 6. 最终结果
+
+修正后 source=`7350572` 从零重生 formal artifact；5 fresh/20 metrics max diff=
+`8.642673492431641e-07`，active β gradient=30/30 nonzero，12/12 tamper，targeted=
+`15 passed`，full=`1653 passed,3 skipped`。R3-3 correctness 已正式关闭，只开放另行预注册
+的 isolated timing。

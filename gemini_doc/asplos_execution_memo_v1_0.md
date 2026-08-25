@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-26 R3-3 active-β correctness正式通过，只开放 isolated timing**：source=`7350572`，
+> S-anchor 5 fresh/20 metrics max diff=`8.64267e-7`，β gradient=30/30 nonzero，12/12 tamper，
+> 全量=`1653 passed,3 skipped`。未计时、无performance claim；R3-4/same-solver继续关闭。见
+> `BOUNDFLOW_R3_3_ACTIVE_BETA_FORMAL_CLOSURE_2026_08_26.md`。
+
 > **2026-08-26 R3-D2-B performance正式通过，只开放R3-3 correctness**：source=`3ee5920`，5 fresh
 > local-wrapper candidate/native geomean/worst=`1.752001x/1.724843x`，region worst=`53.9195x`，
 > 12/12 tamper。只开放S-anchor active-beta correctness；same-solver仍关闭。见

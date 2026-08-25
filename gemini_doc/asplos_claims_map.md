@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-26 R3-3 active-β correctness claim边界**：固定 S-anchor `31/Gemm_14` 的 5 fresh/
+> 20 metrics 全过，max diff=`8.64267e-7`，β gradient=30/30 nonzero，12/12 tamper，全量=
+> `1653 passed,3 skipped`。可 claim=`VALIDATED-R3-3-S-ACTIVE-BETA-CORRECTNESS`；只开放另行
+> 预注册的 isolated timing。不得claim speedup、R3-4/same-solver/query/queue 开放。
+
 > **2026-08-26 R3-D2-B performance claim边界**：固定P-anchor完整10/9 local wrapper的5 fresh
 > candidate/native geomean/worst=`1.752001x/1.724843x`，D1-C recovery=`6.968886x/6.831907x`，
 > region worst=`53.9195x`，12/12 tamper；状态=`VALIDATED-R3-D2B-WRAPPER-RESEARCH`。只开放R3-3
