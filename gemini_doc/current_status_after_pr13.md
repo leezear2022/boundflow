@@ -1,5 +1,9 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-25 当前状态：D1-A两个热点正确性均关闭，只开放D1-B**：residual6 source=`52fc62c`，
+> 5 fresh/`122,940`元素最大diff=`1.91618e-6`、sign exact、10/10 tamper；未计时且无性能claim。
+> D1-C、R3-3与same-solver继续关闭。
+
 > **2026-08-25 当前状态：D1-A residual11通过，residual6 correctness开放**：5 fresh/10 tamper通过，
 > max diff=`8.04557e-7`，未计时。D1-B/C、R3-3与same-solver关闭。
 

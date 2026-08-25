@@ -1,5 +1,5 @@
 ---
-status: residual11-correctness-validated-residual6-open
+status: d1a-correctness-validated-d1b-open
 updated: 2026-08-25T15:10:00+08:00
 type: plan
 topic: boundflow
@@ -88,6 +88,6 @@ claim的fully re-signed tamper。
 
 ## 7. 当前动作
 
-residual11已以5 fresh、float64 oracle、10/10 tamper关闭；当前只开放D1-A residual6 staged
-factorization correctness。D1-B timing、D1-C wrapper、R3-3与same-solver仍关闭。不改v1/residual11
-formal artifact。
+residual11与residual6均已以5 fresh、float64 oracle、10/10 tamper关闭；当前只开放D1-B冻结
+schedule qualification。D1-C wrapper、R3-3与same-solver仍关闭。不改v1或两个D1-A formal
+artifact。

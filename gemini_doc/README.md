@@ -1,5 +1,9 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新：R3-D1-A residual6 staged correctness正式通过，source=`52fc62c`，5 fresh三方最大diff=
+`1.91618e-6`、10/10 tamper、无计时。D1-A两个热点块均已关闭，只开放D1-B固定schedule
+qualification；见`BOUNDFLOW_R3_D1A_RESIDUAL6_FORMAL_CLOSURE_2026_08_25.md`。
+
 最新：R3-D1-A residual11 staged correctness正式通过，5 fresh三方max diff=`8.04557e-7`、10/10
 tamper、无计时。只开放residual6 staged correctness；见
 `BOUNDFLOW_R3_D1A_RESIDUAL11_FORMAL_CLOSURE_2026_08_25.md`。

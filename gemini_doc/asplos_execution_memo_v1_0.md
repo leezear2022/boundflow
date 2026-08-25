@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-25 R3-D1-A residual6 correctness关闭，只开放D1-B schedule qualification**：source=
+> `52fc62c`，5 fresh/`122,940`元素三方最大diff=`1.91618e-6`、sign exact、10/10 fully
+> re-signed tamper、2 launch/1 scratch、无persistent dense A。未计时、无performance claim；D1-C、
+> R3-3与same-solver仍关闭。见`BOUNDFLOW_R3_D1A_RESIDUAL6_FORMAL_CLOSURE_2026_08_25.md`。
+
 > **2026-08-25 R3-D1-A residual11 correctness关闭**：source=`8fc15be`，5 fresh三方对照最大diff=
 > `8.04557e-7`、sign exact、10/10 tamper、2 launch/1 scratch、无persistent dense A。未计时、无
 > performance claim；只开放residual6 staged correctness，D1-B/C与R3-3仍关闭。见

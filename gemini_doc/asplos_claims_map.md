@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-25 R3-D1-A residual6 claim边界**：可claim residual6两阶段factorization在生产输入上
+> 与v1及独立float64 oracle等价（5 fresh最大diff=`1.91618e-6`、sign exact），并满足2 launch/
+> 1 scratch/无persistent dense A合同。只开放D1-B固定schedule qualification；不得claim speedup、
+> D1-C/R3-3开放或whole wrapper改善。
+
 > **2026-08-25 R3-D1-A claim边界**：可claim residual11两阶段factorization在生产输入上与v1及独立
 > float64 oracle等价（max diff=`8.04557e-7`），且ownership合同成立；不得claim任何speedup、D1-B
 > 已开放或whole wrapper改善。只开放residual6 correctness。

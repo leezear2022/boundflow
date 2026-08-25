@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev013004
-last_va: ev013005
+last_ch: ev013017
+last_va: ev013018
 blk: none
-next: generate-r3-d1a-residual6-five-fresh-and-tamper
-updated: 2026-08-25T00:24:00Z
+next: implement-r3-d1b-fixed-schedule-qualification
+updated: 2026-08-25T00:26:30Z

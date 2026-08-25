@@ -1,0 +1,60 @@
+{
+  "case_count": 10,
+  "cases": [
+    {
+      "case": "input",
+      "error": "R3-D1 residual6 semantics differ",
+      "rejected": true
+    },
+    {
+      "case": "candidate-output",
+      "error": "R3-D1 residual6 semantics differ",
+      "rejected": true
+    },
+    {
+      "case": "reference-output",
+      "error": "R3-D1 residual6 semantics differ",
+      "rejected": true
+    },
+    {
+      "case": "schedule-hash",
+      "error": "R3-D1 residual6 compiler receipt drifted",
+      "rejected": true
+    },
+    {
+      "case": "launch-count",
+      "error": "R3-D1 residual6 receipt differs",
+      "rejected": true
+    },
+    {
+      "case": "scratch-count",
+      "error": "R3-D1 residual6 receipt differs",
+      "rejected": true
+    },
+    {
+      "case": "timing-recorded",
+      "error": "R3-D1 residual6 receipt differs",
+      "rejected": true
+    },
+    {
+      "case": "atol",
+      "error": "R3-D1 residual6 protocol hash differs",
+      "rejected": true
+    },
+    {
+      "case": "d1b-open",
+      "error": "R3-D1 residual6 protocol hash differs",
+      "rejected": true
+    },
+    {
+      "case": "performance-claim",
+      "error": "R3-D1 residual6 artifact boundary differs",
+      "rejected": true
+    }
+  ],
+  "performance_claimed": false,
+  "rejected_count": 10,
+  "report_hash": "a6ee34e1f234fba407987f07238e38ec0d718a06127acf43f1dfb076690542a4",
+  "schema_version": "boundflow.r3-d1a-residual6-tamper/v1",
+  "timing_recorded": false
+}
