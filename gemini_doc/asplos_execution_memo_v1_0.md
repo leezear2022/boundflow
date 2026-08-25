@@ -1,5 +1,14 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-26 GC-0/FCR-1 ABI+correctness已预注册，待独立外审**：已冻结通用
+> `VerificationProgram/Region/Value/Op/Effect/VJP`、analysis-only legality、22类拒绝原因、
+> Relax/TIR重编译identity、真实physical arena/prepared runtime、P empty-β/S active-β/multi-site
+> 10/9三类signature、双独立oracle、five-fresh replay/tamper与AC1—AC7。schema禁止硬编码
+> ResNet/site；warm per-op crossing/allocation/PyTorch tensor op和saved/persistent dense A目标均为0。
+> 当前`implementation_open=false/timing_open=false/performance_claimed=false`；下一唯一动作是独立外审
+> 本预注册，批准后才从GC0-0通用schema与负向合法性测试开始。见
+> `BOUNDFLOW_GC0_FCR1_VERIFICATION_GRAPH_ABI_CORRECTNESS_PLAN_2026_08_26.md`。
+
 > **2026-08-26 MR7-R正式通过，只开放GC-0/FCR-1 ABI+correctness预注册**：10 fresh/5 pair
 > ledger/baseline host ratio median=`1.006858`，per-run=`0.942775–1.026335`；boundary median=
 > `20.333%/24.684 ms`，5/5同时过15%/15 ms，required parity region speedup=`1.91214x`。

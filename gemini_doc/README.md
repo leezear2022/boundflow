@@ -1,5 +1,13 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新执行：GC-0/FCR-1 verification graph ABI+correctness已完成预注册，状态=
+`PREREGISTERED-NOT-IMPLEMENTED-NOT-RUN-GC0-FCR1`。协议冻结通用graph/effect/legality、Relax/TIR
+重编译identity、真实arena/prepared runtime、minimal-saved-state VJP、P empty-β/S active-β/multi-site
+10/9、双oracle、five-fresh replay与22类fully re-signed tamper。独立外审批准前不写实现；timing/
+performance继续关闭。见
+`BOUNDFLOW_GC0_FCR1_VERIFICATION_GRAPH_ABI_CORRECTNESS_PLAN_2026_08_26.md`与
+`BOUNDFLOW_GC0_FCR1_VERIFICATION_GRAPH_ABI_CORRECTNESS_CHANGELOG_2026_08_26.md`。
+
 最新：MR7-R正式通过，状态=`VALIDATED_MR7R_HOST_BOUNDARY_OPPORTUNITY`；10 fresh/5 pair的
 ledger/baseline host ratio median=`1.006858`，boundary median=`20.333%/24.684 ms`，5/5过门禁，
 required region speedup=`1.91214x`。这不是已实现speedup；只开放GC-0/FCR-1 graph ABI+correctness

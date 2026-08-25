@@ -1,5 +1,11 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-26 当前执行：GC-0/FCR-1 ABI+correctness已预注册，待独立外审**：通用graph/effect/
+> legality、Relax/TIR lowering identity、physical arena/prepared runtime、minimal-saved-state VJP、
+> P empty-β/S active-β/multi-site 10/9、双oracle、five-fresh replay与22类fully re-signed tamper均已
+> 冻结。尚无代码或raw，`implementation_open=false/timing_open=false/performance_claimed=false`。
+> 下一唯一动作是外审本文；批准后只开放GC0-0 schema与negative legality tests。
+
 > **2026-08-26 当前状态：MR7-R通过，GC-0/FCR-1 correctness预注册开放**：10 fresh/5 pair
 > 证明unprofiled ledger低扰动；boundary median=`20.333%/24.684 ms`、5/5过门禁，required region
 > speedup=`1.91214x`。这只是opportunity admission，不是speedup。下一步先冻结verification graph ABI、

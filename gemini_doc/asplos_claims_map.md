@@ -1,5 +1,12 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-26 GC-0/FCR-1预注册claim边界**：状态=
+> `PREREGISTERED-NOT-IMPLEMENTED-NOT-RUN-GC0-FCR1`。本文只冻结通用verification graph/effect/
+> legality/lowering/arena/VJP与correctness协议；尚无schema实现、Relax/TIR region、physical arena、
+> formal raw或correctness结果。独立外审批准前`implementation_open=false`；全阶段
+> `timing_open=false/performance_claimed=false`。不得claim graph compiler已实现、旧bridge parity、
+> query/queue收益或ASPLOS-ready。
+
 > **2026-08-26 MR7-R claim边界**：正式状态=`VALIDATED_MR7R_HOST_BOUNDARY_OPPORTUNITY`。
 > 10 fresh/5 pair证明unprofiled ledger低扰动；boundary median=`20.333%/24.684 ms`、5/5过门禁，
 > required parity region speedup=`1.91214x`。本轮只正式建立compiled-region opportunity，不是已实现
