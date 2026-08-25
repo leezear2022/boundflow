@@ -1,6 +1,6 @@
 ---
-status: preregistered-formal-timing-open
-updated: 2026-08-26T00:35:00+08:00
+status: research-gate-passed-tamper-pending
+updated: 2026-08-26T01:10:00+08:00
 type: plan
 topic: boundflow
 slug: r3-d2b-wrapper-timing
@@ -50,3 +50,10 @@ artifact 必须包含 15 个 raw worker、protocol、summary、manifest 与 full
 从 30 个 sample 重算 median、geomean、worst、region ratio、语义与最终 verdict。旧 D1-C artifact 只作
 历史交叉核对，不替代同轮 control。
 
+## 5. Formal 数值状态（尚未 closure）
+
+source=`5e4fed1` 的 5 triplet / 450 host-wall samples 已由 replay 重算：candidate/native geomean/worst=
+`1.65905x/1.49073x`，D1-C recovery=`6.79727x/5.97433x`，region worst=`47.9682x`。数值上通过
+research gate，但 fully re-signed tamper 尚未生成，因此 artifact 固定
+`provisional_verdict=RESEARCH-GATE-PASSED-PENDING-TAMPER`、`performance_claimed=false`、
+`r3_3_open=false`。下一动作只允许 tamper/replay/closure。

@@ -20,3 +20,10 @@ stage: s01
 allocated/reserved相同。该结果只证明 worker 与量级可执行，`performance_claimed=false`，必须由 five-fresh
 formal 重算。
 
+## Formal replay 与状态机修正
+
+首轮 formal 数值通过后发现 summary 在 tamper 前提前写入 claim/open；该 artifact 未提交并可恢复地保存在
+`/tmp/r3-d2b-timing-premature-claim.I73iEd/`。修正后的 source=`5e4fed1` 完整重跑得到
+candidate/native geomean/worst=`1.65905x/1.49073x`、D1-C recovery geomean/worst=
+`6.79727x/5.97433x`、region worst=`47.9682x`。当前只标记 research gate passed pending tamper，
+尚无正式性能 claim。
