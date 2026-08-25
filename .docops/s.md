@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev014375
-last_va: ev014376
+last_ch: ev014393
+last_va: ev014394
 blk: none
-next: freeze-mr7-source-and-generate-six-fresh-formal-artifact
-updated: 2026-08-25T16:02:30Z
+next: generate-mr7-six-fresh-formal-artifact-and-tamper-report
+updated: 2026-08-25T16:09:30Z
