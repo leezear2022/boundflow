@@ -1,5 +1,10 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新：R3-D2-A five-fresh backward attribution已关闭；coefficient-sign minimum share=`0.870614`，
+worst research required=`11.8762x≤15.50x`，residual6/residual11 dominant signature五次一致，14/14
+tamper。只开放D2-B staged residual reuse correctness，尚无性能claim；见
+`BOUNDFLOW_R3_D2A_BACKWARD_ATTRIBUTION_FORMAL_CLOSURE_2026_08_25.md`。
+
 最新：R3-D1-C cumulative wrapper以VALIDATED-NO-GO关闭；native wrapper geomean/worst=
 `0.249369x/0.243233x`，相对B3 recovery=`1.879305x/1.855758x`。只开放D2-A backward
 microphysics attribution；见`BOUNDFLOW_R3_D1C_CUMULATIVE_FORMAL_NO_GO_CLOSURE_2026_08_25.md`

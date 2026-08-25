@@ -1,5 +1,9 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-25 当前状态：D2-A正式关闭，只开放D2-B correctness**：coefficient-sign 5 fresh
+> minimum share=`0.870614`、worst research required=`11.8762x≤15.50x`；residual6/residual11
+> dominant signature稳定，14/14 tamper通过。没有性能claim；D2-B timing、R3-3与same-solver关闭。
+
 > **2026-08-25 当前状态：D1-C正式NO-GO，只开放D2-A**：wrapper geomean/worst=
 > `0.249369x/0.243233x`，B3 recovery=`1.879305x/1.855758x`，语义/memory/12 tamper通过。
 > forward热点已移除但backward成为新主导；R3-3与same-solver关闭。

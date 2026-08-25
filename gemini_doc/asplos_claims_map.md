@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-25 R3-D2-A claim边界**：可claim只读 five-fresh 归因得到 coefficient-sign minimum share=
+> `0.870614`、worst research required=`11.8762x≤15.50x`，且 residual6/residual11 dominant signature
+> 五次一致、14/14 tamper；因此只开放 D2-B staged residual reuse correctness。不得claim已加速、
+> wrapper/query收益、R3-3或same-solver开放。
+
 > **2026-08-25 R3-D1-C claim边界**：可claim当前forward-only cumulative variant相对B3回收
 > `1.879305x`，但相对native仅`0.249369x`，因此以VALIDATED-NO-GO关闭；D1-B isolated 58x保留。
 > 不得claim wrapper/query speedup或R3-3开放；只开放D2-A只读backward attribution。

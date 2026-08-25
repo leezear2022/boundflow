@@ -1,6 +1,6 @@
 ---
-status: preregistered-d2a-readiness-gated
-updated: 2026-08-25T22:40:00+08:00
+status: d2a-validated-d2b-open
+updated: 2026-08-25T23:05:00+08:00
 type: plan
 topic: boundflow
 slug: r3-d2-backward-microphysics
@@ -89,5 +89,8 @@ formal raw 重算。
 
 ## 6. 当前动作
 
-只开放 D2-A five-fresh backward attribution。D2-B、R3-3、same-solver、query/queue 与 ASPLOS performance
-claim 全部关闭。
+D2-A 已以 `VALIDATED-R3-D2A-COEFFICIENT-SIGN-ROUTE` 关闭：coefficient-sign 5 fresh minimum share=
+`0.870614`，worst research required=`11.8762x≤15.50x`，dominant symbol 五次均为 residual6/residual11，
+14/14 tamper。只开放 D2-B staged residual reuse correctness；D2-B timing、R3-3、same-solver、
+query/queue 与 ASPLOS performance claim 仍关闭。见
+`BOUNDFLOW_R3_D2A_BACKWARD_ATTRIBUTION_FORMAL_CLOSURE_2026_08_25.md`。

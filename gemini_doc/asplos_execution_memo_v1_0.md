@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-25 R3-D2-A正式关闭，只开放D2-B correctness**：source=`a6eaac4`，五次 readiness/
+> anchor/phase通过；coefficient-sign minimum share=`0.870614`、worst research required=
+> `11.8762x≤15.50x`，residual6/residual11为稳定 dominant signature，14/14 tamper。仅开放
+> coefficient-sign staged residual reuse correctness；timing/R3-3/same-solver关闭。见
+> `BOUNDFLOW_R3_D2A_BACKWARD_ATTRIBUTION_FORMAL_CLOSURE_2026_08_25.md`。
+
 > **2026-08-25 R3-D1-C正式NO-GO，只开放D2-A backward attribution**：5 fresh triplet得到
 > wrapper geomean/worst=`0.249369x/0.243233x`，B3→D1-C recovery=`1.879305x/1.855758x`；
 > correctness/memory通过、12/12 tamper，但9.3181x与1.20x门禁失败。R3-3/same-solver仍关闭。见

@@ -1,6 +1,6 @@
 ---
-status: readiness-gate-implemented-formal-pending
-updated: 2026-08-25T22:40:00+08:00
+status: formal-passed-d2b-open
+updated: 2026-08-25T23:05:00+08:00
 type: changelog
 topic: boundflow
 slug: r3-d2a-worker-implementation
@@ -65,3 +65,10 @@ scope 修正后的两次正式生成均在 worker 内 fail closed，未留下 ar
 
 该修订只控制“何时允许开始测量”，不改变 D2-A phase、Amdahl 公式、share/required cap 或性能 claim
 边界。失败进程不产生部分 raw，正式 five-fresh 必须在固定源码 revision 下重新从 run 0 开始。
+
+## 正式结果
+
+source=`a6eaac4` 的 five-fresh 通过；phase host=`393.459/392.976/393.868/417.221/393.134 ms`。
+coefficient-sign minimum share=`0.870614`、worst parity/research required=`7.6473x/11.8762x`；五次
+dominant symbol 均为 residual6、residual11、effective-pre23。14/14 全重签 tamper 与 3 个 replay tests
+通过，正式开放 D2-B staged residual reuse correctness；没有形成性能 claim。
