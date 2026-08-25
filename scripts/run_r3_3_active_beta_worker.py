@@ -27,6 +27,9 @@ from boundflow.runtime.fsg4_b4b1_reference_capture import (
     production_differentiable_reference_capture_from_payload_v1,
 )
 from boundflow.runtime.rvir_v4_production_state import production_tensor_sha256
+from scripts.run_fsg4_b4b1_pytorch_reference_artifact import (
+    _reference_execution_policy,
+)
 
 CAPTURE_ARTIFACT = ROOT / "artifacts/fsg4-b4b1-reference-five-fresh/resnet2b-prop0-v1"
 SCHEMA = "boundflow.r3-3-active-beta-worker/v1"
@@ -70,11 +73,13 @@ def _run(run_ordinal: int) -> dict[str, object]:
         tensors,
         fresh_run_ordinal=run_ordinal,
     )
-    result = sparse_linear.run_b4b2_sparse_linear_tir_v1(
-        capture,
-        fresh_run_ordinal=run_ordinal,
-        cache=sparse_linear.DifferentiableLowerSparseLinearModuleCache(),
-    )
+    with _reference_execution_policy():
+        result = sparse_linear.run_b4b2_sparse_linear_tir_v1(
+            capture,
+            fresh_run_ordinal=run_ordinal,
+            cache=sparse_linear.DifferentiableLowerSparseLinearModuleCache(),
+        )
+        reference = run_b4b1_pytorch_reference_v1(capture, lower_ir, lower_instance)
     _path, empty_capture = _capture(run_ordinal, 1)
     empty_ir = build_b4b1_differentiable_lower_ir_v1(empty_capture)
     empty_rejected = False
@@ -86,7 +91,6 @@ def _run(run_ordinal: int) -> dict[str, object]:
         empty_rejected = "S-anchor differs" in str(caught)
     if not empty_rejected:
         raise RuntimeError("R3-3 empty-beta specialization was accepted")
-    reference = run_b4b1_pytorch_reference_v1(capture, lower_ir, lower_instance)
     if reference.native_beta_gradient is None:
         raise RuntimeError("R3-3 native beta gradient is absent")
     reference_alpha, reference_beta, unowned_zero = (

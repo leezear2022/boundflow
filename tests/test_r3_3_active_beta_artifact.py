@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 import pytest
+import torch
 
 from scripts.run_r3_3_active_beta_artifact import replay
 
@@ -33,6 +34,26 @@ def test_r3_3_opens_only_isolated_timing() -> None:
     assert summary["isolated_timing_open"] is True
     assert summary["r3_4_open"] is False
     assert summary["same_solver_open"] is False
+
+
+def test_r3_3_replay_freezes_and_restores_cpu_oracle_policy() -> None:
+    if not ARTIFACT.exists():
+        pytest.skip("R3-3 active-beta artifact has not been generated")
+    previous_threads = torch.get_num_threads()
+    previous_precision = torch.get_float32_matmul_precision()
+    previous_mkldnn = torch.backends.mkldnn.enabled
+    try:
+        torch.set_num_threads(4)
+        torch.set_float32_matmul_precision("medium")
+        torch.backends.mkldnn.enabled = True  # type: ignore[assignment]
+        replay(ARTIFACT)
+        assert torch.get_num_threads() == 4
+        assert torch.get_float32_matmul_precision() == "medium"
+        assert torch.backends.mkldnn.enabled is True
+    finally:
+        torch.backends.mkldnn.enabled = previous_mkldnn  # type: ignore[assignment]
+        torch.set_float32_matmul_precision(previous_precision)
+        torch.set_num_threads(previous_threads)
 
 
 def test_r3_3_tamper_report_rejects_all_cases() -> None:

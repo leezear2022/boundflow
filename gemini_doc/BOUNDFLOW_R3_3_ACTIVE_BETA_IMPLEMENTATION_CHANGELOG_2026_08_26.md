@@ -41,3 +41,14 @@ stage: s01
 
 本记录不声称 R3-3 已关闭，不记录性能，不开放 R3-4 或 same-solver。下一步是先提交
 精确 source，再生成与该 source revision 绑定的 formal artifact。
+
+## 5. 首轮 formal 回归失败及修正
+
+首轮 source=`ee0e96d` 的专项结果为 5 worker、max diff=`8.642673492431641e-07`、
+12/12 tamper、`14 passed`。但全量回归得到 `1650 passed,3 skipped,2 failed`：两个失败
+均由同进程前序测试后 CPU oracle 逐字节 hash 不稳定触发。该 artifact 作废，不形成
+closure。
+
+修正复用 B4-B1 已测的 `_reference_execution_policy`，将 worker 内部 oracle 与 replay oracle
+同时固定为 1 CPU thread、deterministic debug mode 2、highest matmul precision、MKLDNN off，
+且离开 context 时恢复环境。必须从修正后 source 重生 artifact 并重跑全量回归。

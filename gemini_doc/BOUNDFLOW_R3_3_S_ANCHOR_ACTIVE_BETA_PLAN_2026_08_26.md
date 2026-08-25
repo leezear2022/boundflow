@@ -56,3 +56,14 @@ specialization 门禁失败，R3-3 当前 variant NO-GO，不得退化为 empty 
 实现下不能由同一组 launch receipt 同时成立。本节在任何 R3-3 formal raw 生成前勘误为
 “fresh correctness 各自 cold miss + 独立 cache-sequence probe”。不改 correctness、ownership、workspace、
 tamper 或下一阶段边界。
+
+## 6. 首轮 formal 失败与 oracle 执行策略冻结
+
+首轮 artifact 的专项 replay/tamper 通过，但全量同进程回归在前序测试改变 CPU PyTorch
+执行状态后，oracle 逐字节 hash 重放失败（`1650 passed,3 skipped,2 failed`）。因此首轮
+artifact 不得关闭 R3-3。
+
+修正后的 formal protocol 必须在 worker 内部 reference 与 replay 重算 reference 两处都使用
+B4-B1 已验证 execution policy：CPU thread=`1`、deterministic debug mode=`2`、float32 matmul
+precision=`highest`、MKLDNN disabled，并在退出时恢复原进程状态。修正后必须从新的 clean
+source 重生全部 raw、cache probe、manifest 与 tamper，不得原地重签首轮 artifact。

@@ -40,6 +40,9 @@ from boundflow.runtime.fsg4_b4b1_reference_capture import (
     production_differentiable_reference_capture_from_payload_v1,
 )
 from boundflow.runtime import fsg4_b4b2_sparse_linear_tir as sparse_linear
+from scripts.run_fsg4_b4b1_pytorch_reference_artifact import (
+    _reference_execution_policy,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 CAPTURE = ROOT / "artifacts/fsg4-b4b1-reference-five-fresh/resnet2b-prop0-v1"
@@ -55,6 +58,7 @@ CODE_PATHS = (
     "boundflow/runtime/fsg4_b4b1_pytorch_reference.py",
     "boundflow/runtime/fsg4_b4b2_sparse_linear_tir.py",
     "scripts/run_fsg4_b4b2_sparse_linear_tir_correctness.py",
+    "scripts/run_fsg4_b4b1_pytorch_reference_artifact.py",
     "scripts/run_r3_3_active_beta_worker.py",
     "scripts/run_r3_3_active_beta_artifact.py",
     "scripts/probe_r3_3_active_beta_tamper.py",
@@ -285,7 +289,8 @@ def _validate_worker(
     )
     lower_ir = build_b4b1_differentiable_lower_ir_v1(capture)
     lower_instance = build_b4b1_differentiable_lower_instance_v1(capture, lower_ir)
-    oracle = run_b4b1_pytorch_reference_v1(capture, lower_ir, lower_instance)
+    with _reference_execution_policy():
+        oracle = run_b4b1_pytorch_reference_v1(capture, lower_ir, lower_instance)
     if oracle.native_beta_gradient is None:
         raise RuntimeError("R3-3 replay native beta gradient is absent")
     oracle_alpha, oracle_beta, oracle_unowned_zero = (
