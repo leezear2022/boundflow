@@ -31,6 +31,7 @@ wrapper、query、queue 或 ASPLOS end-to-end speedup。
 - maximum correctness diff：`9.5367431640625e-07`，sign exact；
 - 4 launch、2 scratch、无 persistent dense A；
 - 10/10 fully re-signed tamper，targeted `11 passed`。
+- 全量回归：`1633 passed, 3 skipped, 6 warnings in 659.89s`；三个 skip 均为既有环境边界。
 
 ## 为什么是 58x
 
