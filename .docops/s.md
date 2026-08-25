@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev013259
-last_va: ev013260
+last_ch: ev013266
+last_va: ev013267
 blk: none
 next: preregister-r3-d2b-wrapper-inclusive-timing
-updated: 2026-08-25T02:45:31Z
+updated: 2026-08-25T02:48:00Z
