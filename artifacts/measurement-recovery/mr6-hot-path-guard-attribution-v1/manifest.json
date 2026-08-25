@@ -1,0 +1,19 @@
+{
+  "files": {
+    "protocol.json": "4b704dc6648ba5a0ab59570ffa40a9ce1b441a0a5e5c283cff0f4cf382bcf2b3",
+    "raw.json": "eb68846ad24acdfcd2d29c59a5dbaf9bfaf2502b3bd6dbd198a1325d57c943d0",
+    "replay_stdout.txt": "23efb11e4941ebc8927bb54b80ebbe90efcca45aead0be9c827308bd4aae38cb",
+    "summary.json": "e9712e1f7679b637336825639436e6b3b786a78433508a378fa821a938c64652",
+    "tamper_report.json": "38b3367ccd846325b50182f0a2c5b3c016ce26350ca1146a1b0ec0d415594cf2",
+    "triplet_metrics.jsonl": "12ba4b577769a70d83ab0274159f8800e70e5f5afb2d2bd6d2ab1fde2847275b"
+  },
+  "generator_commit": "273e0a7b49c1b69d3473b7e853419a074eab21b9",
+  "manifest_hash": "c597e67d5d15c851c46ef226c65b486dda1e0227c44cbc30b54238c81bfa4810",
+  "performance_claimed": false,
+  "protocol_hash": "e2924901450dd12939995b6b361abb03ee84248bd565efda84dde2f2e72fb1dc",
+  "raw_hash": "ac7c0b7b754fc64e2272aa6c5946029ee87ee7e44a4cfdaa2124bcd65f35b1e7",
+  "schema_version": "boundflow.mr6-hot-path-guard-attribution-artifact/v1",
+  "source_commit": "fb3c245fc8de1be08471d91b97b026ded9ce204b",
+  "status": "VALIDATED-NO-GO-MR6-GUARD-DOMINANCE",
+  "summary_hash": "6af1382481b9d50860bb245a60ac4cb7e8bd0b864c94d6f78c019004aefeabdb"
+}

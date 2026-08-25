@@ -1,5 +1,5 @@
 ---
-status: implemented-awaiting-clean-source-formal-run
+status: validated-no-go
 updated: 2026-08-26T23:05:00+08:00
 type: changelog
 topic: boundflow
@@ -20,3 +20,7 @@ stage: s01
 - CPU unit gates覆盖三种guard receipt、全重签count攻击和空raw拒绝。
 
 本提交只建立formal gate。正式9 fresh尚未运行，不形成guard dominance或性能claim。
+
+后续clean-source正式运行已完成：状态=`VALIDATED-NO-GO-MR6-GUARD-DOMINANCE`，summary hash=
+`6af1382481b9d50860bb245a60ac4cb7e8bd0b864c94d6f78c019004aefeabdb`；12/12 tamper、
+focused `12 passed`、full `1808 passed,3 skipped`。本段取代上一句“尚未运行”。

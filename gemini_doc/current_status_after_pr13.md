@@ -1,5 +1,9 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-26 当前状态：MR6 guard dominance NO-GO，MR7 attribution已预注册**：9 fresh显示
+> `360→60`同步guard仅回收`1.033126x`，diagnostic/provider仍需`1.107412x`才到parity。安全guard
+> fusion不开放；下一步只读拆57 launch、540 DLPack view、layout/materialization与per-site kernel。
+
 > **2026-08-26 当前状态：MR5 multi-site timing正式NO-GO，MR6 attribution开放**：6 pair完整
 > outer host geomean=`0.834407x`，所有latency gate失败，candidate约慢19.84%；语义、launch、cache、
 > memory和tamper闭合。complete-query继续关闭。下一只量化当前outer至少360次device→host同步guard的

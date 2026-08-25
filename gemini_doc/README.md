@@ -1,5 +1,11 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新：MR6 guard attribution正式NO-GO；3 triplet/9 fresh把同步guard从`360→60`仅获得
+`1.033126x`，diagnostic相对provider仍为`0.903007x`，语义、clock、module与12/12 tamper通过。
+安全guard fusion关闭，下一步只读拆launch/FFI/layout/materialization/kernel。见
+`BOUNDFLOW_MR6_GUARD_ATTRIBUTION_FORMAL_NO_GO_CLOSURE_2026_08_26.md`与
+`BOUNDFLOW_MR7_LAUNCH_MATERIALIZATION_ATTRIBUTION_PLAN_2026_08_26.md`。
+
 最新：MR5 multi-site正式计时以NO-GO关闭；6 pair完整outer host geomean=`0.834407x`，correctness、
 30/27、cache、memory、clock direction与20/20 tamper通过，但当前三独立site runtime约慢19.84%。
 下一阶段MR6只量化至少360次同步value guard的unsafe ceiling，不形成性能claim。见

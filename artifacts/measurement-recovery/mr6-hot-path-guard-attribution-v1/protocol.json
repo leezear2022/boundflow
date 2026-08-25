@@ -1,0 +1,82 @@
+{
+  "code_revision": {
+    "boundflow/runtime/mr6_guard_attribution.py": "0f82ff1621c48391997dfed33106b5d69106dbdb041ff67010af2396e36f973e",
+    "scripts/probe_mr6_guard_attribution_tamper.py": "6e1d5604351ca4fe6b36657cd37a38ba1a907d7921137d93769d967568145ee9",
+    "scripts/run_mr6_guard_attribution_formal.py": "b6d0e6d90604ea6cbd41acc5985ffec5692496ec86c89c8dd8f296e9f9a22f2a",
+    "scripts/run_mr6_guard_attribution_worker.py": "76a34f1387d321ddf64a8ecb4f7ae51a76c7f4d6bbb58470c39e10eb38b0a467",
+    "tests/test_mr6_guard_attribution.py": "1c22e34c4a78dabffca9d888b97ca1633d62cb41aac2072b942f204e528fad4e",
+    "tests/test_mr6_guard_attribution_worker.py": "de8bb365d3561f4c222b33f91b415ade11785436ee80217d738c510ef8a94032"
+  },
+  "diagnostic_clock": "same-current-stream-cuda-event",
+  "diagnostic_guard_count": 60,
+  "diagnostic_production_admitted": false,
+  "full_diagnostic_geomean_gate": 1.1,
+  "full_guard_count": 360,
+  "generator_commit": "273e0a7b49c1b69d3473b7e853419a074eab21b9",
+  "headline_clock": "host-perf-counter-ns",
+  "model_name": "resnet_2b.onnx",
+  "mr5_timing_identity": {
+    "manifest_file_sha256": "617f130c040d9308441da1ae85aeb6dbaf5ecaaf66b26122817eeeef244ad793",
+    "manifest_hash": "2b5fcf94acb570a1217f251d6607b30df5425711cafe5ba9cf756b0557592384",
+    "status": "VALIDATED-NO-GO-MR5-MULTI-CONV-PRODUCTION-BRIDGE-PHYSICS",
+    "summary_hash": "b9e3b766408083f20e6c533ad35caf05bcbce7437e90b3c68747ee7b03fb07e9"
+  },
+  "performance_claimed": false,
+  "property_name": "prop_0_eps_0.008.vnnlib",
+  "protocol_hash": "e2924901450dd12939995b6b361abb03ee84248bd565efda84dde2f2e72fb1dc",
+  "provider_diagnostic_geomean_gate": 0.98,
+  "provider_diagnostic_worst_gate": 0.95,
+  "python_name": "python",
+  "resume_policy": "reject-any-existing-artifact",
+  "run_order": [
+    [
+      0,
+      0,
+      "provider"
+    ],
+    [
+      0,
+      1,
+      "full"
+    ],
+    [
+      0,
+      2,
+      "diagnostic"
+    ],
+    [
+      1,
+      0,
+      "full"
+    ],
+    [
+      1,
+      1,
+      "diagnostic"
+    ],
+    [
+      1,
+      2,
+      "provider"
+    ],
+    [
+      2,
+      0,
+      "diagnostic"
+    ],
+    [
+      2,
+      1,
+      "provider"
+    ],
+    [
+      2,
+      2,
+      "full"
+    ]
+  ],
+  "schema_version": "boundflow.mr6-hot-path-guard-attribution-protocol/v1",
+  "source_commit": "fb3c245fc8de1be08471d91b97b026ded9ce204b",
+  "triplet_count": 3,
+  "worker_count": 9
+}

@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-26 MR6 claim边界**：unsafe diagnostic把同步guard `360→60`只带来`1.033126x`，相对
+> provider仍为`0.903007x`，状态=`VALIDATED-NO-GO-MR6-GUARD-DOMINANCE`。语义/clock/module/
+> guard与12/12 tamper通过，但`production_admitted=false/performance_claimed=false`；不得claim安全
+> guard优化或query收益。只开放MR7 read-only launch/materialization attribution。
+
 > **2026-08-26 MR5 multi-site timing claim边界**：6 pair/12 fresh完整outer exact-call host
 > geomean/bootstrap lower/worst=`0.834407/0.828498/0.824644x`，状态=
 > `VALIDATED-NO-GO-MR5-MULTI-CONV-PRODUCTION-BRIDGE-PHYSICS`。correctness、三site `30/27`、

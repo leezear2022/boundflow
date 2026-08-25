@@ -1,6 +1,13 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
-> **2026-08-26 MR5 multi-site正式计时NO-GO，MR6 guard attribution已预注册**：6 pair/12 fresh
+> **2026-08-26 MR6 guard dominance正式NO-GO，只开放MR7 attribution**：3 triplet/9 fresh将
+> 同步guard从`360→60`，full/diagnostic geomean仅`1.033126x <1.10x`；provider/diagnostic=
+> `0.903007x <0.98x`，三方语义exact、9/9 clock方向、12/12 tamper。MR6-B安全guard fusion关闭。
+> 下一只拆57 launch、540 DLPack views、layout/materialization和device kernel，不改优化。见
+> `BOUNDFLOW_MR6_GUARD_ATTRIBUTION_FORMAL_NO_GO_CLOSURE_2026_08_26.md`与
+> `BOUNDFLOW_MR7_LAUNCH_MATERIALIZATION_ATTRIBUTION_PLAN_2026_08_26.md`。
+
+> **历史（MR6已由上方formal关闭）：2026-08-26 MR5 multi-site正式计时NO-GO，MR6 guard attribution已预注册**：6 pair/12 fresh
 > 完整outer host geomean/bootstrap lower/worst=`0.834407/0.828498/0.824644x`，candidate约慢
 > `19.84%`；correctness、30/27、cache、memory、host/event与20/20 tamper通过。当前三独立module/
 > validation/runtime形态停止，complete-query仍关闭。代码账本发现至少360次同步value guard；下一只
