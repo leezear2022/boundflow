@@ -1,5 +1,5 @@
 ---
-status: d1a-correctness-validated-d1b-open
+status: d1b-isolated-validated-d1c-open
 updated: 2026-08-25T15:10:00+08:00
 type: plan
 topic: boundflow
@@ -88,6 +88,6 @@ claim的fully re-signed tamper。
 
 ## 7. 当前动作
 
-residual11与residual6均已以5 fresh、float64 oracle、10/10 tamper关闭；当前只开放D1-B冻结
-schedule qualification。D1-C wrapper、R3-3与same-solver仍关闭。不改v1或两个D1-A formal
-artifact。
+residual11与residual6 D1-A correctness已关闭；D1-B固定256-thread winner以5 fresh isolated
+geomean/worst=`58.0619x/56.8625x`、10/10 tamper关闭。当前只开放D1-C cumulative wrapper。
+R3-3与same-solver仍关闭；不得修改v1或D1-A/B formal artifact。

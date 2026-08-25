@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-25 R3-D1-B claim边界**：可claim冻结256-thread two-kernel schedule在production
+> residual6+11 isolated对比v1 raw TIR的5-fresh geomean/worst=`58.0619x/56.8625x`，且
+> correctness/ownership/tamper成立。不得claim完整compiled region、optimizer wrapper、query或queue
+> speedup；只开放D1-C cumulative wrapper。
+
 > **2026-08-25 R3-D1-A residual6 claim边界**：可claim residual6两阶段factorization在生产输入上
 > 与v1及独立float64 oracle等价（5 fresh最大diff=`1.91618e-6`、sign exact），并满足2 launch/
 > 1 scratch/无persistent dense A合同。只开放D1-B固定schedule qualification；不得claim speedup、

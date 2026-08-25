@@ -1,0 +1,60 @@
+{
+  "case_count": 10,
+  "cases": [
+    {
+      "case": "duration",
+      "error": "R3-D1B timing derivation differs",
+      "rejected": true
+    },
+    {
+      "case": "derived-speedup",
+      "error": "R3-D1B timing derivation differs",
+      "rejected": true
+    },
+    {
+      "case": "threads",
+      "error": "R3-D1B schedule or semantic receipt differs",
+      "rejected": true
+    },
+    {
+      "case": "schedule-hash",
+      "error": "R3-D1B fresh compiler/environment receipt differs",
+      "rejected": true
+    },
+    {
+      "case": "scratch",
+      "error": "R3-D1B schedule or semantic receipt differs",
+      "rejected": true
+    },
+    {
+      "case": "sign",
+      "error": "R3-D1B schedule or semantic receipt differs",
+      "rejected": true
+    },
+    {
+      "case": "protocol-gate",
+      "error": "R3-D1B protocol contract differs",
+      "rejected": true
+    },
+    {
+      "case": "summary-worst",
+      "error": "R3-D1B semantic replay differs",
+      "rejected": true
+    },
+    {
+      "case": "d1c-open",
+      "error": "R3-D1B semantic replay differs",
+      "rejected": true
+    },
+    {
+      "case": "wrapper-claim",
+      "error": "R3-D1B semantic replay differs",
+      "rejected": true
+    }
+  ],
+  "isolated_performance_claimed": true,
+  "rejected_count": 10,
+  "report_hash": "c4d1e16cd9062bb9f7606cbb2bbe84cb66b8cec9ac7f811df9b4447ac7269391",
+  "schema_version": "boundflow.r3-d1b-schedule-tamper/v1",
+  "wrapper_performance_claimed": false
+}

@@ -13059,3 +13059,12 @@
 {"id":"ev013059","ts":"2026-08-25T00:36:37Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
 {"id":"ev013060","ts":"2026-08-25T00:36:46Z","ty":"ch","st":"s01","pr":60,"slug":"harden-r3-d1b-formal-replay"}
 {"id":"ev013061","ts":"2026-08-25T00:36:48Z","ty":"va","st":"s01","pr":60,"result":"pass"}
+{"id":"ev013062","ts":"2026-08-25T00:36:53Z","ty":"cmd","cmd":"Bash:dol.py;","summary":"PostToolUse"}
+{"id":"ev013063","ts":"2026-08-25T00:37:24Z","ty":"cmd","cmd":"Bash:conda","summary":"PostToolUse"}
+{"id":"ev013064","ts":"2026-08-25T00:37:38Z","ty":"cmd","cmd":"Bash:python","summary":"PostToolUse"}
+{"id":"ev013065","ts":"2026-08-25T00:38:17Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}
+{"id":"ev013066","ts":"2026-08-25T00:38:24Z","ty":"cmd","cmd":"Bash:conda","summary":"PostToolUse"}
+{"id":"ev013067","ts":"2026-08-25T00:38:32Z","ty":"ch","st":"s01","pr":60,"slug":"close-r3-d1b-isolated-schedule"}
+{"id":"ev013068","ts":"2026-08-25T00:38:34Z","ty":"va","st":"s01","pr":60,"result":"pass"}
+{"id":"ev013069","ts":"2026-08-25T00:38:35Z","ty":"cmd","cmd":"Bash:dol.py;","summary":"PostToolUse"}
+{"id":"ev013070","ts":"2026-08-25T00:38:39Z","ty":"cmd","cmd":"apply_patch","summary":"PostToolUse"}

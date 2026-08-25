@@ -1,0 +1,21 @@
+{
+  "calibration_sha256": "64ae777cbfe55484bb5795c86a1850cd36c58c297cec19ed094ccb76a9d32d56",
+  "code_revision": {
+    "boundflow/backends/tvm/r3_d1b_serial_schedule.py": "88d68131a090204aa65904ef45882c9ed174da6d2e4ac3bfc8484ee9323eb619",
+    "scripts/probe_r3_d1b_serial_schedule.py": "8c8b61608215ea48e4c5b092bd25838ee5928b92398e354585844ef1fafc3dda",
+    "scripts/run_r3_d1b_schedule_artifact.py": "face7b67980b4e7a14fa8d4239c5bc2d6288b772599c567dd3dace415bc2f1a7",
+    "scripts/run_r3_d1b_schedule_worker.py": "feee9a658014b421f43804fab8ca744b4a36a4f24239006419b3ec0fa73c7213"
+  },
+  "isolated_opportunity_gate": 15.5,
+  "protocol_hash": "f6457ec447b1571e00fca747c1d1380d566f9cc94576f56cff323c2d1e4d03d0",
+  "residual11_manifest_sha256": "8caec806af8c5e51ba51ad49b4b0ab54ca8cf4b2dd4ea2c8fd9c2751f3f8b7f0",
+  "residual6_manifest_sha256": "442f6a9196f5cba9adf9f4ab153cc35b1136fd4fb7e72ffb2e01c73c3a552d04",
+  "run_count": 5,
+  "sample_count": 10,
+  "schema_version": "boundflow.r3-d1b-schedule-protocol/v1",
+  "source_git_head": "06f87650901b67f2e7e37d467b52e723b2a246ec",
+  "warmup_count": 2,
+  "winner_schedule_kind": "two-kernel-serial-reduction",
+  "winner_threads_per_block": 256,
+  "wrapper_performance_claimed": false
+}

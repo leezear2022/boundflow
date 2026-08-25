@@ -1,0 +1,58 @@
+{
+  "calibration_sha256": "64ae777cbfe55484bb5795c86a1850cd36c58c297cec19ed094ccb76a9d32d56",
+  "environment": {
+    "compute_capability": "8.9",
+    "cuda_runtime": "13.2",
+    "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "torch": "2.12.1+cu132"
+  },
+  "isolated_opportunity_gate": 15.5,
+  "isolated_performance_claimed": true,
+  "measurement": {
+    "baseline_device_source_hash": "82f5f60da545d1fc0ee6d49eff3b65cec8facbdb3bf499e3049d3bf5dac893db",
+    "baseline_median_ms": 34.26150321960449,
+    "baseline_ms": [
+      48.610591888427734,
+      48.21094512939453,
+      34.26201629638672,
+      34.251678466796875,
+      34.24972915649414,
+      34.2690544128418,
+      34.25177764892578,
+      34.260990142822266,
+      34.27635192871094,
+      34.22617721557617
+    ],
+    "baseline_scheduled_tir_hash": "cb66872be8cd6423e6b1c2859e2271ef21c93085844a25ce954d97358ab47d77",
+    "candidate_device_source_hash": "f14de96aa418f3a24a54094735839c03aba7abc8523015442fc0b79af89eae1a",
+    "candidate_median_ms": 0.5913600027561188,
+    "candidate_ms": [
+      0.8355839848518372,
+      0.7936000227928162,
+      0.6082559823989868,
+      0.5754560232162476,
+      0.6451200246810913,
+      0.5939199924468994,
+      0.5877760052680969,
+      0.5785599946975708,
+      0.5888000130653381,
+      0.579584002494812
+    ],
+    "candidate_scheduled_tir_hash": "08a997640759ba16ffbbebb662daec8b5e26d165f61582e92672e329482f4849",
+    "launch_count": 4,
+    "maximum_diff": 9.5367431640625e-07,
+    "persistent_dense_a": false,
+    "schedule_kind": "two-kernel-serial-reduction",
+    "scratch_count": 2,
+    "sign_exact": true,
+    "speedup": 57.93679494711141,
+    "threads_per_block": 256
+  },
+  "residual11_manifest_sha256": "8caec806af8c5e51ba51ad49b4b0ab54ca8cf4b2dd4ea2c8fd9c2751f3f8b7f0",
+  "residual6_manifest_sha256": "442f6a9196f5cba9adf9f4ab153cc35b1136fd4fb7e72ffb2e01c73c3a552d04",
+  "run_index": 4,
+  "schema_version": "boundflow.r3-d1b-schedule-worker/v1",
+  "source_git_head": "06f87650901b67f2e7e37d467b52e723b2a246ec",
+  "winner_frozen": true,
+  "wrapper_performance_claimed": false
+}

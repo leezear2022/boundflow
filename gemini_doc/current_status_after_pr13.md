@@ -1,5 +1,9 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-25 当前状态：D1-B isolated通过，只开放D1-C**：256-thread winner 5 fresh
+> geomean/worst=`58.0619x/56.8625x`，max diff=`9.53674e-7`、10/10 tamper；完整10/9 wrapper
+> 尚未运行，不能claim query/queue/ASPLOS speedup。
+
 > **2026-08-25 当前状态：D1-A两个热点正确性均关闭，只开放D1-B**：residual6 source=`52fc62c`，
 > 5 fresh/`122,940`元素最大diff=`1.91618e-6`、sign exact、10/10 tamper；未计时且无性能claim。
 > D1-C、R3-3与same-solver继续关闭。

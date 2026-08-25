@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-25 R3-D1-B isolated schedule资格通过，只开放D1-C wrapper**：source=`06f8765`，
+> 冻结256-thread serial/two-kernel winner的5 fresh residual6+11 geomean/worst=`58.0619x/
+> 56.8625x`，max diff=`9.53674e-7`、10/10 tamper。仅为isolated claim；完整10/9 wrapper、
+> query与ASPLOS性能尚未验证。见`BOUNDFLOW_R3_D1B_SCHEDULE_FORMAL_CLOSURE_2026_08_25.md`。
+
 > **2026-08-25 R3-D1-A residual6 correctness关闭，只开放D1-B schedule qualification**：source=
 > `52fc62c`，5 fresh/`122,940`元素三方最大diff=`1.91618e-6`、sign exact、10/10 fully
 > re-signed tamper、2 launch/1 scratch、无persistent dense A。未计时、无performance claim；D1-C、

@@ -1,5 +1,9 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新：R3-D1-B isolated schedule资格通过，source=`06f8765`，256-thread winner的5 fresh
+geomean/worst=`58.0619x/56.8625x`，10/10 tamper。只开放D1-C完整10/9 wrapper；不得把isolated
+数字写成query/queue性能。见`BOUNDFLOW_R3_D1B_SCHEDULE_FORMAL_CLOSURE_2026_08_25.md`。
+
 最新：R3-D1-A residual6 staged correctness正式通过，source=`52fc62c`，5 fresh三方最大diff=
 `1.91618e-6`、10/10 tamper、无计时。D1-A两个热点块均已关闭，只开放D1-B固定schedule
 qualification；见`BOUNDFLOW_R3_D1A_RESIDUAL6_FORMAL_CLOSURE_2026_08_25.md`。
