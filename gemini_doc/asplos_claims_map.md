@@ -1,6 +1,13 @@
 # BoundFlow ASPLOS Claims Map
 
-> **2026-08-26 MR3 timing预注册边界**：当前只冻结single-site production outer exact-call timing
+> **2026-08-26 MR3 single-site production bridge timing NO-GO**：6 pair/12 fresh完整outer exact call
+> host geomean/bootstrap lower/worst=`0.979727/0.939360/0.916094x`，三条latency gate失败；
+> correctness、module、memory与host/event方向通过，16/16 tamper。状态=
+> `VALIDATED-NO-GO-MR3-P-PRODUCTION-BRIDGE-PHYSICS`。保留production bridge correctness，但不得
+> claim speedup、complete-query/queue、B0/B3 parity或multi-site；全量=`1743 passed,3 skipped`，
+> 当前variant停止。
+
+> **历史（已由上方NO-GO取代）：2026-08-26 MR3 timing预注册边界**：当前只冻结single-site production outer exact-call timing
 > 协议，尚无正式latency/memory raw。不得claim speedup、query/queue收益或B0/B3 parity；MR3
 > correctness claim不变。
 

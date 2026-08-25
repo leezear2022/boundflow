@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev013948
-last_va: ev013949
+last_ch: ev013980
+last_va: ev013981
 blk: none
-next: run-mr3-production-bridge-timing-formal-artifact
-updated: 2026-08-25T08:01:17Z
+next: external-audit-mr3-production-bridge-timing-no-go
+updated: 2026-08-25T08:20:28Z

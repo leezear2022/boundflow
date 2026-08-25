@@ -1,6 +1,12 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
-> **2026-08-26 当前执行：MR3 single-site production bridge timing已预注册**：6 pair/12 fresh
+> **2026-08-26 当前状态：MR3 single-site production bridge timing NO-GO**：完整outer exact call
+> 6 pair的host geomean/bootstrap lower/worst=`0.979727/0.939360/0.916094x`，candidate平均约慢2%；
+> 语义、10/9 launch、module稳定、memory与host/event方向均通过。保留correctness，same-solver
+> complete-query/multi-site关闭；全量=`1743 passed,3 skipped`。下一步不是继续传播，而是外审本
+> closure或另行预注册新结构路线。
+
+> **历史（已由上方NO-GO取代）：2026-08-26 当前执行：MR3 single-site production bridge timing已预注册**：6 pair/12 fresh
 > `PB/BP/PB/BP/PB/BP`，headline为完整outer exact-call host wall；CUDA event仅诊断，formal观测、
 > compile与dummy warm排除。尚无timing claim，complete-query/multi-site仍关闭。
 

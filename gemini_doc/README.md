@@ -1,6 +1,12 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
-最新执行：MR3 single-site production bridge timing已预注册；固定6 pair/12 fresh、完整outer exact-call
+最新：MR3 single-site production bridge physical timing正式NO-GO；6 pair/12 fresh完整outer exact-call
+host geomean/bootstrap lower/worst=`0.979727/0.939360/0.916094x`，candidate平均约慢2%。correctness、
+module、memory、host/event方向与16/16 tamper通过；保留production bridge correctness，但same-solver
+complete-query/multi-site关闭；全量=`1743 passed,3 skipped`。见
+`BOUNDFLOW_MR3_P_PRODUCTION_BRIDGE_TIMING_FORMAL_NO_GO_CLOSURE_2026_08_26.md`。
+
+历史（已由上方NO-GO取代）：MR3 single-site production bridge timing已预注册；固定6 pair/12 fresh、完整outer exact-call
 host headline、CUDA-event诊断与absolute memory，显式剥离formal观测/compile冷启动。尚无样本或性能
 claim。见`BOUNDFLOW_MR3_SINGLE_SITE_PRODUCTION_BRIDGE_TIMING_PLAN_2026_08_26.md`。
 

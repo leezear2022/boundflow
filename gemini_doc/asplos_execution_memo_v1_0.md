@@ -1,6 +1,13 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
-> **2026-08-26 MR3 single-site production bridge timing预注册**：固定6 pair/12 fresh、完整outer
+> **2026-08-26 MR3 single-site production bridge physical timing正式NO-GO**：6 pair/12 fresh的
+> host geomean/bootstrap lower/worst=`0.979727/0.939360/0.916094x`，absolute peak allocated/
+> reserved worst=`1.032240/1.032258x`；correctness、module、memory、时钟方向与16/16 tamper通过。
+> 全量=`1743 passed,3 skipped`。保留MR3 correctness，关闭same-solver complete-query传播；
+> 当前variant不得复活。见
+> `BOUNDFLOW_MR3_P_PRODUCTION_BRIDGE_TIMING_FORMAL_NO_GO_CLOSURE_2026_08_26.md`。
+
+> **历史（已由上方NO-GO取代）：2026-08-26 MR3 single-site production bridge timing预注册**：固定6 pair/12 fresh、完整outer
 > exact-call host-wall headline、CUDA-event诊断、absolute memory与`1.05/1.00/0.98x`门禁；剥离
 > formal trajectory/hash/rollback观测和compile/module warm。尚无正式样本；即使GO也只开放
 > complete-query timing预注册。见

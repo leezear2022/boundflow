@@ -1,5 +1,5 @@
 ---
-status: preregistered
+status: closed-no-go
 updated: 2026-08-26T15:45:00+08:00
 type: plan
 topic: boundflow
@@ -99,3 +99,11 @@ O(1) counter账本或重新预注册新的结构路线。
 
 本文件冻结实验，不代表实验已运行。当前仍只能claim MR3 production bridge correctness，不能claim任何
 新增性能或memory收益。
+
+## 9. 事后结果注记（不修改原门禁）
+
+正式6 pair/12 process已完成：host geomean/bootstrap lower/worst=
+`0.979727/0.939360/0.916094x`，三条latency gate失败；absolute peak allocated/reserved worst=
+`1.032240/1.032258x`通过，语义与host/event方向通过。机械状态=
+`VALIDATED-NO-GO-MR3-P-PRODUCTION-BRIDGE-PHYSICS`，complete-query timing保持关闭。见
+`BOUNDFLOW_MR3_P_PRODUCTION_BRIDGE_TIMING_FORMAL_NO_GO_CLOSURE_2026_08_26.md`。
