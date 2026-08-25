@@ -1,0 +1,82 @@
+{
+  "all_rejected": true,
+  "attack_count": 12,
+  "attacks": [
+    {
+      "attack": "host-ratio-full-resign",
+      "error": "ValueError",
+      "ordinal": 0,
+      "rejected": true
+    },
+    {
+      "attack": "boundary-category-full-resign",
+      "error": "ValueError",
+      "ordinal": 1,
+      "rejected": true
+    },
+    {
+      "attack": "semantic-full-resign",
+      "error": "ValueError",
+      "ordinal": 2,
+      "rejected": true
+    },
+    {
+      "attack": "launch-full-resign",
+      "error": "ValueError",
+      "ordinal": 3,
+      "rejected": true
+    },
+    {
+      "attack": "fallback-full-resign",
+      "error": "ValueError",
+      "ordinal": 4,
+      "rejected": true
+    },
+    {
+      "attack": "module-full-resign",
+      "error": "ValueError",
+      "ordinal": 5,
+      "rejected": true
+    },
+    {
+      "attack": "guard-full-resign",
+      "error": "ValueError",
+      "ordinal": 6,
+      "rejected": true
+    },
+    {
+      "attack": "stream-full-resign",
+      "error": "ValueError",
+      "ordinal": 7,
+      "rejected": true
+    },
+    {
+      "attack": "run-order-full-resign",
+      "error": "ValueError",
+      "ordinal": 8,
+      "rejected": true
+    },
+    {
+      "attack": "delete-run-full-resign",
+      "error": "ValueError",
+      "ordinal": 9,
+      "rejected": true
+    },
+    {
+      "attack": "performance-claim-full-resign",
+      "error": "ValueError",
+      "ordinal": 10,
+      "rejected": true
+    },
+    {
+      "attack": "source-full-resign",
+      "error": "ValueError",
+      "ordinal": 11,
+      "rejected": true
+    }
+  ],
+  "performance_claimed": false,
+  "rejected_count": 12,
+  "report_hash": "965ca72535f618a2639ed4e30669a2c23935533ca39b6c0c1a5ce8ed83ee661f",
+  "schema_version": "boundflow.mr7r-unprofiled-host-recovery-tamper/v1"
+}

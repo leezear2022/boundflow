@@ -1,6 +1,11 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
-> **2026-08-26 当前状态：MR7已完整执行但归因INVALID，MR7-R预注册**：一个profile/control
+> **2026-08-26 当前状态：MR7-R通过，GC-0/FCR-1 correctness预注册开放**：10 fresh/5 pair
+> 证明unprofiled ledger低扰动；boundary median=`20.333%/24.684 ms`、5/5过门禁，required region
+> speedup=`1.91214x`。这只是opportunity admission，不是speedup。下一步先冻结verification graph ABI、
+> guarded rules、Relax/TIR lowering、arena identity和correctness，timing继续关闭。
+
+> **历史（已由MR7-R formal关闭）：2026-08-26 当前状态：MR7已完整执行但归因INVALID，MR7-R预注册**：一个profile/control
 > perturbation=`1.239399 >1.10`否决全局资格；其余semantic/launch/host/device/tamper门禁通过。
 > `25.891 ms/19.818%`host boundary与`8.692%`device kernel仅为诊断。下一步只跑5 pair unprofiled
 > MR6 diagnostic vs MR7 ledger，未通过不得实现FCR-1。

@@ -1,16 +1,22 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新：MR7-R正式通过，状态=`VALIDATED_MR7R_HOST_BOUNDARY_OPPORTUNITY`；10 fresh/5 pair的
+ledger/baseline host ratio median=`1.006858`，boundary median=`20.333%/24.684 ms`，5/5过门禁，
+required region speedup=`1.91214x`。这不是已实现speedup；只开放GC-0/FCR-1 graph ABI+correctness
+预注册，timing仍关闭。见
+`BOUNDFLOW_MR7R_UNPROFILED_HOST_RECOVERY_FORMAL_CLOSURE_2026_08_26.md`。
+
 最新调研（不改变执行顺序）：基于MR7 raw、现有Bound/Plan/Task/Schedule/R3/CIBC代码和TVM
 Relax/TIR、MLIR、OpenXLA、PyTorch 2、CUDA Graph一手资料，新增verification-aware图编译、guarded
 rewrite、physical arena/execution graph路线。结论是BoundFlow保有验证语义和合法性，Relax/TIR承担图融合
 与kernel lowering，物理runtime承担arena/stream/event/command graph。本文`performance_claimed=false`，
-当前唯一执行动作仍是MR7-R；见
+MR7-R已完成并开放上述GC-0/FCR-1 correctness预注册；见
 `BOUNDFLOW_MR7_GRAPH_COMPILER_RULE_RUNTIME_RESEARCH_PLAN_2026_08_26.md`与
 `BOUNDFLOW_MR7_GRAPH_COMPILER_RULE_RUNTIME_RESEARCH_CHANGELOG_2026_08_26.md`。
 
-最新：MR7已完整执行但正式状态为`INVALID_MR7_ATTRIBUTION`；第1组profile/control扰动=
+历史（MR7-R已关闭恢复动作）：MR7已完整执行但正式状态为`INVALID_MR7_ATTRIBUTION`；第1组profile/control扰动=
 `1.239399 >1.10`，因此不得从诊断性的`25.891 ms/19.818%`host boundary或`8.692%`device kernel
-开放优化。下一唯一动作是MR7-R的5 pair unprofiled ledger qualification。见
+开放优化。当时下一唯一动作是MR7-R的5 pair unprofiled ledger qualification（现已完成）。见
 `BOUNDFLOW_MR7_LAUNCH_MATERIALIZATION_FORMAL_INVALID_CLOSURE_2026_08_26.md`与
 `BOUNDFLOW_MR7R_UNPROFILED_HOST_RECOVERY_PLAN_2026_08_26.md`。
 

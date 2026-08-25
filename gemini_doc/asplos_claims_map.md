@@ -1,6 +1,11 @@
 # BoundFlow ASPLOS Claims Map
 
-> **2026-08-26 MR7 claim边界**：正式状态=`INVALID_MR7_ATTRIBUTION`。6 fresh中仅
+> **2026-08-26 MR7-R claim边界**：正式状态=`VALIDATED_MR7R_HOST_BOUNDARY_OPPORTUNITY`。
+> 10 fresh/5 pair证明unprofiled ledger低扰动；boundary median=`20.333%/24.684 ms`、5/5过门禁，
+> required parity region speedup=`1.91214x`。本轮只正式建立compiled-region opportunity，不是已实现
+> speedup；只开放GC-0/FCR-1 ABI+correctness预注册，`timing_open=false/performance_claimed=false`。
+
+> **历史（MR7-R已关闭原恢复动作）：2026-08-26 MR7 claim边界**：正式状态=`INVALID_MR7_ATTRIBUTION`。6 fresh中仅
 > profile/control perturbation gate失败（`1.239399 >1.10`）；host/device账本、semantic、30/27与
 > 11/11 tamper通过。`25.891 ms/19.818%`host boundary、`8.692%`device kernel不得claim为正式share或
 > opportunity。MR7-A/B/C关闭，只开放MR7-R unprofiled ledger qualification。

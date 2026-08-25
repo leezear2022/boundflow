@@ -9,6 +9,9 @@ stage: s01
 
 # MR7 Launch / Materialization 正式归因 INVALID Closure
 
+> **后续状态**：本 closure 的MR7-R后继已于2026-08-26正式通过；当前下一步已变为GC-0/FCR-1
+> verification graph ABI+correctness预注册。见MR7-R formal closure。
+
 ## 1. 结论
 
 MR7 已按冻结协议完整执行，但状态只能是：
@@ -53,7 +56,7 @@ optimizer、branch/queue、execution graph、parallel scheduling与memory/arena 
 逐站点Conv bridge。MR7 INVALID只说明“带CUPTI的pair不能作为host share准入协议”，不是这些系统假设
 已被证伪。
 
-## 5. 唯一后继
+## 5. 历史唯一后继（MR7-R已完成）
 
 下一步只开放`MR7-R`无profiler host recovery：用独立进程成对比较MR6原始diagnostic与MR7 ledger
 control，验证ledger本身不扰动outer，并用5个unprofiled fresh决定host boundary门禁。CUPTI数字只作

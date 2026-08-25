@@ -1,5 +1,5 @@
 ---
-status: preregistered
+status: executed-validated-opportunity
 updated: 2026-08-26T00:25:00+08:00
 type: plan
 topic: boundflow
@@ -8,6 +8,11 @@ stage: s01
 ---
 
 # MR7-R Unprofiled Host Attribution Recovery 预注册
+
+> **2026-08-26执行完成**：正式状态=`VALIDATED_MR7R_HOST_BOUNDARY_OPPORTUNITY`；host ratio
+> median=`1.006858`，boundary median=`20.333%/24.684 ms`，5/5 run通过，required region
+> speedup=`1.91214x`。只开放GC-0/FCR-1 ABI+correctness预注册，timing仍关闭。见
+> `BOUNDFLOW_MR7R_UNPROFILED_HOST_RECOVERY_FORMAL_CLOSURE_2026_08_26.md`。
 
 ## 1. 问题
 

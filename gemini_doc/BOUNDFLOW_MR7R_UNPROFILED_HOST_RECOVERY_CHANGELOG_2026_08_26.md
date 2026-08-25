@@ -1,5 +1,5 @@
 ---
-status: formal-tooling-implemented
+status: formal-closed-validated-opportunity
 updated: 2026-08-26T01:05:00+08:00
 type: changelog
 topic: boundflow
@@ -44,3 +44,18 @@ ledger，先证明 ledger 低扰动，再决定 host boundary 是否能开放 FC
 3. 运行 5 pair GPU formal；
 4. 运行 replay、12 类 tamper 与全量回归；
 5. 按冻结门禁形成 closure 并更新权威文档。
+
+## 5. Formal 结果
+
+- artifact：`artifacts/measurement-recovery/mr7r-unprofiled-host-recovery-v1/`；
+- status=`VALIDATED_MR7R_HOST_BOUNDARY_OPPORTUNITY`；
+- 10 fresh/5 pair，host ratio median=`1.00685785`，per-run min/max=
+  `0.94277477/1.02633524`；
+- boundary median=`20.333052% / 24.683788 ms`，qualifying=`5/5`；
+- required parity region speedup=`1.91213674x`；
+- semantic max diff=`2.7418137e-6`、sign exact；
+- replay通过，12/12 fully re-signed tamper拒绝；
+- 相关=`13 passed`，全量=`1821 passed,3 skipped`；
+- `timing_open=false/performance_claimed=false`。
+
+下一步只开放 GC-0/FCR-1 verification graph ABI 与 correctness 预注册。

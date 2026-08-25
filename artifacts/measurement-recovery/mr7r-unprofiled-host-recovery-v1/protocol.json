@@ -1,0 +1,119 @@
+{
+  "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+  "auto_lirpa_commit": "5a098e8f9fb5786a428a024981d833d303921f2d",
+  "baseline_mode": "diagnostic",
+  "baseline_worker": "scripts/run_mr6_guard_attribution_worker.py",
+  "boundary_absolute_ns_gate": 15000000,
+  "boundary_categories": [
+    "ffi_dlpack_stream",
+    "layout_materialization",
+    "post_output_guard"
+  ],
+  "boundary_qualifying_run_gate": 4,
+  "boundary_share_gate": 0.15,
+  "code_revision": {
+    "boundflow/runtime/mr7r_unprofiled_host_recovery.py": "10649e02ddb5a7cdf3e4eb5793f8ca357d9f7bbf53adc888cdbf5c2b88962cd8",
+    "scripts/probe_mr7r_unprofiled_host_recovery_tamper.py": "8bd02bd8bb0eb69e173f030e70a6e06ffe24c9e8c5549731831a75ddd6f62952",
+    "scripts/run_mr6_guard_attribution_worker.py": "76a34f1387d321ddf64a8ecb4f7ae51a76c7f4d6bbb58470c39e10eb38b0a467",
+    "scripts/run_mr7_launch_materialization_worker.py": "b88b0dfcec1f3b0eee2e2c7dbf13f93e12040f311bd92a4f1c94c8b518b7bef0",
+    "scripts/run_mr7r_unprofiled_host_recovery_formal.py": "a5ee207324180f8a178d047807463f1b22619ba3254074181f90f420d6a5b930",
+    "tests/test_mr7r_unprofiled_host_recovery.py": "45931dc86167601a5d36a6e91ed246895ff9df275cced82f36e7f3f7d3a33f61",
+    "tests/test_mr7r_unprofiled_host_recovery_artifact.py": "1572166f40482177c56e590ffcb46ef3638a6fc1caff1a3d2d22b4c0bfe96137"
+  },
+  "diagnostic_clock": "same-current-stream-cuda-event",
+  "diagnostic_production_admitted": false,
+  "generator_commit": "5ba792e55b7d1c5e0c698b8390594fb119310174",
+  "headline_clock": "unprofiled-host-perf-counter-ns",
+  "host_closure_error_gate": 0.02,
+  "host_event_direction_required_count": 5,
+  "ledger_baseline_host_ratio_median_gate": [
+    0.95,
+    1.05
+  ],
+  "ledger_baseline_host_ratio_run_gate": [
+    0.9,
+    1.1
+  ],
+  "ledger_kind": "control",
+  "ledger_worker": "scripts/run_mr7_launch_materialization_worker.py",
+  "maximum_required_region_speedup": 10.0,
+  "model_name": "resnet_2b.onnx",
+  "mr6_identity": {
+    "manifest_file_sha256": "ad0e469c5e8586ccac5d34ffa8f879afafd581468a86fe456764463b341b11fa",
+    "manifest_hash": "c597e67d5d15c851c46ef226c65b486dda1e0227c44cbc30b54238c81bfa4810",
+    "status": "VALIDATED-NO-GO-MR6-GUARD-DOMINANCE",
+    "summary_hash": "6af1382481b9d50860bb245a60ac4cb7e8bd0b864c94d6f78c019004aefeabdb"
+  },
+  "mr7_identity": {
+    "manifest_file_sha256": "79c24d4f22f6329c821eae11b28bd2241c431ab34c444e6d8a3bf55e2832d2f7",
+    "manifest_hash": "8fe0843c7763e1de2be058b33d6001430a8fc1a133fc3dceca6cb6dffaf8d50e",
+    "status": "INVALID_MR7_ATTRIBUTION",
+    "summary_hash": "c889a4e5782230df1d0c915aca2b0187bf78fde7cbbab1a6fb7b402d0929d09d"
+  },
+  "pair_count": 5,
+  "pair_order": "BL/LB/BL/LB/BL",
+  "parity_target": 1.107412,
+  "performance_claimed": false,
+  "profile_enabled": false,
+  "property_name": "prop_0_eps_0.008.vnnlib",
+  "protocol_hash": "b3f34cc3560cde422a58113a216bb46ddbbe41fcf042000e9a1e7b9c85248d86",
+  "python_name": "python",
+  "resume_policy": "reject-any-existing-artifact",
+  "run_order": [
+    [
+      0,
+      0,
+      "baseline"
+    ],
+    [
+      0,
+      1,
+      "ledger"
+    ],
+    [
+      1,
+      0,
+      "ledger"
+    ],
+    [
+      1,
+      1,
+      "baseline"
+    ],
+    [
+      2,
+      0,
+      "baseline"
+    ],
+    [
+      2,
+      1,
+      "ledger"
+    ],
+    [
+      3,
+      0,
+      "ledger"
+    ],
+    [
+      3,
+      1,
+      "baseline"
+    ],
+    [
+      4,
+      0,
+      "baseline"
+    ],
+    [
+      4,
+      1,
+      "ledger"
+    ]
+  ],
+  "schema_version": "boundflow.mr7r-unprofiled-host-recovery-protocol/v1",
+  "source_commit": "0a1e79553e216ed5c34604a235d537288fcf8e19",
+  "timing_open": false,
+  "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf",
+  "worker_count": 10
+}

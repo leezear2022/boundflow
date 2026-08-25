@@ -11,13 +11,17 @@ performance_claimed: false
 
 # 基于 MR7 的 BoundFlow 图编译、验证规则与物理运行时调研计划
 
+> **2026-08-26执行状态更新**：MR7-R已正式通过，boundary median=`20.333%/24.684 ms`、5/5过
+> 门禁，required region speedup=`1.91214x`。本路线现只开放GC-0/FCR-1 ABI+correctness预注册；
+> timing仍关闭。见MR7-R formal closure。
+
 ## 0. 文档地位与一句话结论
 
 本文是基于 MR7 raw、当前 BoundFlow/TVM 代码和外部编译系统的一次**架构调研与预设计**，不是新的
 性能 closure，也不改变当前权威执行顺序。
 
 - MR7 的正式状态仍是 `INVALID_MR7_ATTRIBUTION`；
-- 当前唯一已开放的实验仍是 MR7-R unprofiled host recovery；
+- 本文初稿时唯一开放实验为 MR7-R；该实验现已正式通过并关闭；
 - 本文中的 MR7 share、required speedup 和 route 都标为 `[diagnostic-only]`；
 - 本文不开放 MR7-A/B/C、FCR timing、same-solver、query、queue 或 ASPLOS claim；
 - `performance_claimed=false`。
@@ -707,8 +711,8 @@ MR7 的 `[diagnostic-only]` 分类可用来决定下一轮要测哪些 counter�
 
 ### 12.1 启动条件
 
-MR7-R 必须先证明 unprofiled ledger 低扰动并关闭当前机会门禁。若 MR7-R 不通过，则本文继续作为长期
-架构，不以 MR7 share 作为 FCR-1 的 performance admission；需另找有效 attribution 协议。
+MR7-R 已证明 unprofiled ledger 低扰动并关闭机会门禁；正式结果为 boundary median=
+`20.333%/24.684 ms`、5/5 qualifying。该结果只开放下述 ABI/correctness，不开放 performance timing。
 
 ### 12.2 FCR-1 首个 region
 
@@ -870,14 +874,12 @@ claim 只停留在对应层级。
 
 ## 17. 与当前权威路线的关系
 
-执行顺序保持：
+MR7-R已通过后的执行顺序为：
 
 ```text
-当前：MR7 INVALID
-  ↓
-MR7-R unprofiled ledger qualification（唯一开放动作）
-  ├─ invalid/no-go：不得用MR7 share开放FCR-1 timing；重做归因
-  └─ opportunity validated：只开放GC-0/FCR-1 ABI+correctness
+MR7 INVALID → MR7-R opportunity validated（已完成）
+        ↓（当前只开放）
+GC-0/FCR-1 ABI + correctness预注册
         ↓
 GC-1 guarded fusion correctness
         ↓
@@ -886,9 +888,9 @@ GC-2 physical arena/runtime
 GC-3 command graph + 独立预注册 timing
 ```
 
-因此本文是 MR7-R 后的工程蓝图，不取代
-`BOUNDFLOW_MR7R_UNPROFILED_HOST_RECOVERY_PLAN_2026_08_26.md`，也不授权现在直接改 TIR、打开 CUDA
-Graph 或跑性能搜索。
+因此本文已成为 MR7-R 后的工程蓝图；MR7-R原预注册由formal closure关闭。本文不授权直接改 TIR、
+打开 CUDA Graph 或跑性能搜索。历史预注册见
+`BOUNDFLOW_MR7R_UNPROFILED_HOST_RECOVERY_PLAN_2026_08_26.md`。
 
 ## 18. 开工前应冻结的最小接口
 

@@ -1,6 +1,13 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
-> **2026-08-26 MR7正式执行为INVALID，只开放MR7-R无profiler恢复**：6 fresh/3 pair的语义、
+> **2026-08-26 MR7-R正式通过，只开放GC-0/FCR-1 ABI+correctness预注册**：10 fresh/5 pair
+> ledger/baseline host ratio median=`1.006858`，per-run=`0.942775–1.026335`；boundary median=
+> `20.333%/24.684 ms`，5/5同时过15%/15 ms，required parity region speedup=`1.91214x`。
+> semantic max diff=`2.7418e-6`、sign exact，12/12 tamper，全量=`1821 passed,3 skipped`。
+> 这不是已实现speedup；timing仍关闭。下一唯一动作是冻结verification graph ABI、guarded legality、
+> Relax/TIR lowering、physical arena identity与correctness协议。
+
+> **历史（MR7-R已由上方formal关闭）：2026-08-26 MR7正式执行为INVALID，只开放MR7-R无profiler恢复**：6 fresh/3 pair的语义、
 > 30/27、host closure、device envelope与11/11 tamper通过，但profile/control ratio第1组=
 > `1.239399 >1.10`，因此MR7-A/B/C均未正式开放。诊断host boundary=`25.891 ms/19.818%`、device
 > kernel=`8.692%`只能用于设计。下一唯一动作是5 pair MR6 diagnostic vs MR7 ledger control，证明
