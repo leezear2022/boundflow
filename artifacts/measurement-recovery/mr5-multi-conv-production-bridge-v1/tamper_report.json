@@ -1,0 +1,113 @@
+{
+  "attack_count": 21,
+  "rejected_count": 21,
+  "report_hash": "adb832707ab60a0a15c849f4c9d4e7f71c601e7acf5964496b492a695a3f7a6d",
+  "results": [
+    {
+      "error": "MR5 formal worker provenance/count differs",
+      "name": "solver_visited",
+      "rejected": true
+    },
+    {
+      "error": "MR5 formal worker provenance/count differs",
+      "name": "protocol_site_order",
+      "rejected": true
+    },
+    {
+      "error": "MR5 site/evaluation region order differs",
+      "name": "region_site",
+      "rejected": true
+    },
+    {
+      "error": "MR3 tensor numeric drift at region_states[0].lower_a[0]",
+      "name": "region_value",
+      "rejected": true
+    },
+    {
+      "error": "MR3 tensor numeric drift at mutation[0].gradient[0]",
+      "name": "optimizer_gradient",
+      "rejected": true
+    },
+    {
+      "error": "MR5 mutation order differs",
+      "name": "optimizer_step",
+      "rejected": true
+    },
+    {
+      "error": "MR5 bridge receipt differs",
+      "name": "forward_count",
+      "rejected": true
+    },
+    {
+      "error": "MR5 bridge receipt differs",
+      "name": "backward_count",
+      "rejected": true
+    },
+    {
+      "error": "MR5 bridge receipt differs",
+      "name": "beta_numel",
+      "rejected": true
+    },
+    {
+      "error": "MR5 bridge receipt differs",
+      "name": "pending_site",
+      "rejected": true
+    },
+    {
+      "error": "MR5 bridge receipt differs",
+      "name": "performance_claim",
+      "rejected": true
+    },
+    {
+      "error": "MR5 C0 module receipt differs",
+      "name": "signature_hash",
+      "rejected": true
+    },
+    {
+      "error": "MR5 C0 module receipt differs",
+      "name": "module_site",
+      "rejected": true
+    },
+    {
+      "error": "MR5 bridge compiler receipt drifted across fresh runs",
+      "name": "module_hash",
+      "rejected": true
+    },
+    {
+      "error": "MR5 C1 module receipt differs",
+      "name": "workspace_shape",
+      "rejected": true
+    },
+    {
+      "error": "MR5 bridge compiler receipt drifted across fresh runs",
+      "name": "fresh_module_drift",
+      "rejected": true
+    },
+    {
+      "error": "MR5 atomic rollback receipt differs",
+      "name": "rollback_pointer",
+      "rejected": true
+    },
+    {
+      "error": "MR5 atomic rollback receipt differs",
+      "name": "rollback_site",
+      "rejected": true
+    },
+    {
+      "error": "MR5 formal raw provenance differs",
+      "name": "run_order",
+      "rejected": true
+    },
+    {
+      "error": "MR5 formal raw provenance differs",
+      "name": "source_commit",
+      "rejected": true
+    },
+    {
+      "error": "MR5 provider unexpectedly has bridge receipt",
+      "name": "provider_bridge_receipt",
+      "rejected": true
+    }
+  ],
+  "schema_version": "boundflow.mr5-multi-conv-tamper/v1"
+}

@@ -1,6 +1,6 @@
 ---
-status: preregistered-active
-updated: 2026-08-26T18:58:00+08:00
+status: closed-validated
+updated: 2026-08-26T20:40:00+08:00
 type: plan
 topic: boundflow
 slug: mr5-multi-conv-production-bridge-correctness
@@ -111,3 +111,10 @@ queue、B0/B3 parity或ASPLOS-ready。
 
 当前文件只冻结未来correctness实验。没有multi-site implementation、没有candidate raw，也没有新增
 performance/memory claim；MR3 NO-GO不变，MR4的`4.5P`仍只是一项静态结构账本。
+
+## 10. 事后结果注记（不修改原门禁）
+
+MR5按冻结协议关闭：5 pair/10 fresh、candidate launch=`150/135`，general/optimizer max diff=
+`5.00679e-6/2.56300e-6`，atomic rollback通过，21/21 tamper，focused/full=
+`23/1787 passed`（3 skipped）。状态=`VALIDATED-MR5-MULTI-CONV-PRODUCTION-BRIDGE-CORRECTNESS`；
+只开放独立multi-site timing预注册，不自动claim性能。

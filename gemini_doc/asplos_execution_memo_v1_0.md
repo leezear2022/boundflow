@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-26 MR5 multi-Conv production correctness正式通过，只开放timing预注册**：5 pair/
+> 10 fresh，C2/C1/C0累计`150/135`，general/optimizer max diff=`5.00679e-6/2.56300e-6`，
+> atomic rollback、21/21 tamper、full=`1787 passed,3 skipped`。不得写成speedup；下一步只按冻结
+> 6 pair协议测完整warm-cache outer exact call。见
+> `BOUNDFLOW_MR5_MULTI_CONV_CORRECTNESS_FORMAL_CLOSURE_2026_08_26.md`。
+
 > **2026-08-26 MR4 production Conv census正式通过，只开放MR5 correctness预注册**：5 fresh/
 > 150 rows，C0/C1/C2均10/9、β=`[6,0]`、handoff exact；static total=`4.5P`、new sites=`3.5P`，
 > semantic max diff=`3.51667e-6`，16/16 tamper，全量=`1764 passed,3 skipped`。MR5预注册已激活；

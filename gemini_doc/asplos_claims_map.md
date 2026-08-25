@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-26 MR5 multi-Conv production correctness正式通过**：三条真实C2→C1→C0 lower
+> ReLU+Conv路径在5 pair/10 fresh中累计`150/135` forward/backward，general/optimizer max diff=
+> `5.00679e-6/2.56300e-6`，atomic rollback、21/21 tamper、全量=`1787 passed,3 skipped`。
+> 只开放multi-site warm-cache outer exact-call timing预注册；尚无speedup、query/queue或B0/B3 claim。
+
 > **2026-08-26 MR4 production Conv census正式通过**：5 fresh/150 rows确认C0/C1/C2三条direct
 > Conv edge均为10/9、absent β、handoff exact；静态MAC=`1.5/2.0/1.0P`，total=`4.5P`，
 > global semantic max diff=`3.51667e-6`，16/16 tamper，全量=`1764 passed,3 skipped`。MR5

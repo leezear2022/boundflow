@@ -1,5 +1,9 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-26 当前状态：MR5 multi-Conv correctness通过，timing预注册激活**：C2→C1→C0
+> 三site在真实outer exact call中累计`150/135` launch，5 pair semantics/optimizer/atomic/tamper/full均闭合；
+> 当前仍无性能claim。下一步只跑6 pair warm-cache multi-site outer timing，不直接进complete query。
+
 > **2026-08-26 当前状态：MR4 census通过，MR5 multi-site correctness预注册已激活**：三条真实Conv
 > edge各50 rows，10/9、absent β、handoff exact；static total=`4.5P`，16/16 tamper，全量=
 > `1764 passed,3 skipped`。尚未实现multi-site bridge，不能计时；下一步实现shape/stride-keyed

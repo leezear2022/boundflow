@@ -1,5 +1,11 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新：MR5 multi-Conv production correctness正式通过；真实C2→C1→C0三site累计`150/135`，5 pair
+general/optimizer max diff=`5.00679e-6/2.56300e-6`，atomic rollback、21/21 tamper、full=
+`1787 passed,3 skipped`。multi-site timing预注册已激活，但尚无speedup。见
+`BOUNDFLOW_MR5_MULTI_CONV_CORRECTNESS_FORMAL_CLOSURE_2026_08_26.md`与
+`BOUNDFLOW_MR5_MULTI_SITE_PRODUCTION_TIMING_PLAN_2026_08_26.md`。
+
 最新：MR4 production Conv census正式通过；5 fresh/150 rows确认三条direct Conv edge均为10/9、
 absent β、handoff exact，static MAC total=`4.5P`、new sites=`3.5P`，16/16 tamper，全量=
 `1764 passed,3 skipped`。MR5 multi-site correctness预注册已激活，timing关闭。见
