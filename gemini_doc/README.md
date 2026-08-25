@@ -1,5 +1,9 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新执行：MR3 single-site production bridge timing已预注册；固定6 pair/12 fresh、完整outer exact-call
+host headline、CUDA-event诊断与absolute memory，显式剥离formal观测/compile冷启动。尚无样本或性能
+claim。见`BOUNDFLOW_MR3_SINGLE_SITE_PRODUCTION_BRIDGE_TIMING_PLAN_2026_08_26.md`。
+
 最新：MR3 P-anchor真实production bridge correctness正式通过；source=`baddf7c`，5 pair/10 fresh的
 candidate forward/backward=`50/45`，每pair一般/optimizer元素=`72,202/46,440`，全局最坏diff=
 `3.15905e-6`、sign exact；mutation-after-failure atomic rollback通过，18/18 tamper。未计时，只开放

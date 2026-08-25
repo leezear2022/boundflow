@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-26 MR3 single-site production bridge timing预注册**：固定6 pair/12 fresh、完整outer
+> exact-call host-wall headline、CUDA-event诊断、absolute memory与`1.05/1.00/0.98x`门禁；剥离
+> formal trajectory/hash/rollback观测和compile/module warm。尚无正式样本；即使GO也只开放
+> complete-query timing预注册。见
+> `BOUNDFLOW_MR3_SINGLE_SITE_PRODUCTION_BRIDGE_TIMING_PLAN_2026_08_26.md`。
+
 > **2026-08-26 MR3 P-anchor production bridge correctness正式通过**：implementation source=
 > `baddf7c`，5 pair/10 fresh固定`PB/BP/PB/BP/PB`；candidate forward/backward=`50/45`，一般与
 > optimizer trajectory最坏diff均`3.15905e-6`、sign exact；evaluation-5 failure atomic rollback与

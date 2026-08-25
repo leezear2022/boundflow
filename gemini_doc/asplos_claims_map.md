@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-26 MR3 timing预注册边界**：当前只冻结single-site production outer exact-call timing
+> 协议，尚无正式latency/memory raw。不得claim speedup、query/queue收益或B0/B3 parity；MR3
+> correctness claim不变。
+
 > **2026-08-26 MR3 production bridge claim边界**：可claim单个P-anchor真实provider exact call的
 > typed lower-region replacement correctness；5 pair/10 fresh、50/45 forward/backward、10/9
 > gradient/Adam/clamp trajectory与atomic rollback通过，一般/optimizer最坏diff=`3.15905e-6`、

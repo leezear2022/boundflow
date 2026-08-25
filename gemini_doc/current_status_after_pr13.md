@@ -1,5 +1,9 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-26 当前执行：MR3 single-site production bridge timing已预注册**：6 pair/12 fresh
+> `PB/BP/PB/BP/PB/BP`，headline为完整outer exact-call host wall；CUDA event仅诊断，formal观测、
+> compile与dummy warm排除。尚无timing claim，complete-query/multi-site仍关闭。
+
 > **2026-08-26 当前状态：MR3真实production bridge correctness通过**：P-anchor
 > `/49: /input-24 → /input-20`已由TIR forward/custom backward接管；5 pair/10 fresh、50/45 launch、
 > 10/9 trajectory、atomic rollback与18/18 tamper全过，最坏diff=`3.15905e-6`。没有timing claim；
