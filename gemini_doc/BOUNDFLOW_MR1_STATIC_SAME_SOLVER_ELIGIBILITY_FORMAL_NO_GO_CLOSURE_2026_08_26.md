@@ -68,7 +68,7 @@ manifest；无`/home/`路径，root replay可从source重算ledger/coverage/summ
   owner、ledger eligibility/reason、coverage count、summary count/route；
 - targeted：`10 passed`；
 - mypy：3个实现文件clean；pylint=`10.00/10`；Black/diff通过；
-- full regression：待最终记录。
+- full regression：`1687 passed, 3 skipped`（3项均为既有环境边界）。
 
 ## 6. Route propagation
 
@@ -88,4 +88,3 @@ eligibility为`0/51`，因此该直接接入假设NO-GO。
 
 禁止：CIBC不能加速αβ-CROWN、CROWN子图没有机会、query会变慢、历史`2.45631x`无效、任何
 same-solver/complete-query/queue speedup或ASPLOS-ready。
-

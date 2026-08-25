@@ -1,0 +1,87 @@
+{
+  "b4_b3_admitted": false,
+  "bootstrap_lower_95": 2.785754654624944,
+  "calibration_medians_ms": [
+    0.26899200677871704,
+    0.1924000009894371,
+    0.27107200026512146,
+    0.2861119955778122,
+    0.26521599292755127,
+    0.2723519951105118,
+    0.2677440047264099,
+    0.23820800334215164,
+    0.26767998933792114,
+    0.2523200064897537,
+    0.32468800246715546,
+    0.2667360007762909
+  ],
+  "correctness_worker_count": 5,
+  "kernel_inventory": {
+    "backward_kernel_count": 1,
+    "forward_kernel_count": 1,
+    "global_intermediate_workspace_bytes": 0,
+    "kernel_names": [
+      "_cibc_forward_kernel_v2",
+      "_cibc_backward_kernel_v2"
+    ],
+    "total_kernel_count": 2
+  },
+  "maximum_absolute_difference": 1.9073486328125e-06,
+  "maximum_allocated_ratio": 0.3633369923161361,
+  "maximum_reserved_ratio": 1.0,
+  "minimum_go_admitted": true,
+  "performance_claimed": false,
+  "research_target_2x_met": true,
+  "schema_version": "boundflow.fsg4-b4b2-v2-cibc-summary/v1",
+  "sign_exact": true,
+  "speedup_geomean": 2.837719484336988,
+  "speedups": [
+    2.847544564786829,
+    2.7687974429444706,
+    2.9150637481517214,
+    2.894800913201376,
+    2.8644301611946568,
+    2.739996843548485
+  ],
+  "status": "validated-b4-b2-v2-triton-physics",
+  "summary_hash": "5784a8c738c7887047e435a99f5d1ac199f52d8e411e5b921293b7158f7006a0",
+  "tvm_tir_port_admitted": true,
+  "winner_calibration_median_ms": 0.1924000009894371,
+  "winner_compilation": {
+    "backward": {
+      "assembly_hashes": {
+        "cubin": "71746e0f9c5ee6a97b31eed7b1a54e9777f150a9a113ea8ff35b1d2443735e9a",
+        "llir": "e33c4461143d838713bce997e38e0cf0cc86af75a27f97b245927ef33553867f",
+        "ptx": "2df315a8163eaa309e2dad1bc704731ba7bfa5c54a17fdf0d2e92540bcba688f",
+        "ttgir": "ad483c3429ebbb87ca4ff63c4f6d0441412fa0faca6d827fc256e7aba9bf3f5e",
+        "ttir": "2876eacdb762209305f7c522b14ba76b6d31a66b103b0aaa7356177e106e882e"
+      },
+      "compiled_hash": "20cb4bd72359bedc2c84ba6b8770e4719da587801e80dfd1f228913c6b2953a3",
+      "kernel_name": "_cibc_backward_kernel_v2",
+      "register_count": 80,
+      "source_hash": "1e7ab018a70022b6b8dfe83c570254a9a43eb35d930ebcd8ba357e183043a635",
+      "spill_count": 0
+    },
+    "forward": {
+      "assembly_hashes": {
+        "cubin": "f781b9703b3fc0bf41415fc6626fa84b2717f395cd5fec218eab71d02d31b705",
+        "llir": "b4db3f04c0f35fb357462701093891836f06f0c6445f613b1ef111ae8dec9ecc",
+        "ptx": "4438f5f4a00ac662a45084bb13b33ab35bdefa34205b7c4e148c31df4ee6e616",
+        "ttgir": "681c24210b2bd10f9953135e9e94a62e9d392ceaf36948c414db5ec732267d18",
+        "ttir": "1875fbdc7e34196c0da3709579f147fa8797bb938feaf61a5aba9ded2291b212"
+      },
+      "compiled_hash": "ed8c7ef23c3d7a63326b839a884f54b1aa1e7b6f6d25f1465da2538419659fc5",
+      "kernel_name": "_cibc_forward_kernel_v2",
+      "register_count": 114,
+      "source_hash": "fb2bff0c3161dbbe7fb94da1409d9bff9f5ed309baaf1aa5c39f62f2bf3d543e",
+      "spill_count": 0
+    }
+  },
+  "winner_config": {
+    "block_k": 32,
+    "block_m": 32,
+    "num_warps": 4
+  },
+  "winner_config_ordinal": 1,
+  "worst_worker_speedup": 2.739996843548485
+}

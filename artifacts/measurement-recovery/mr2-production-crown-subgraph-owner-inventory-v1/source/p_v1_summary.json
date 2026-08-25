@@ -1,0 +1,48 @@
+{
+  "allocated_passed": true,
+  "b4b3_open": false,
+  "bootstrap_95_lower": 0.4031569161542472,
+  "bootstrap_lower_passed": false,
+  "correctness_worker_count": 10,
+  "kernel_inventory": {
+    "backward_kernel_count": 3,
+    "forward_kernel_count": 3,
+    "half_token_count": 0,
+    "kernel_names": [
+      "boundflow_b4b2_sparse_conv_backward_kernel",
+      "boundflow_b4b2_sparse_conv_backward_kernel_1",
+      "boundflow_b4b2_sparse_conv_backward_kernel_2",
+      "boundflow_b4b2_sparse_conv_forward_kernel",
+      "boundflow_b4b2_sparse_conv_forward_kernel_1",
+      "boundflow_b4b2_sparse_conv_forward_kernel_2"
+    ],
+    "shared_memory_token_count": 0,
+    "total_kernel_count": 6,
+    "vector_token_count": 0
+  },
+  "maximum_absolute_difference": 2.384185791015625e-06,
+  "maximum_allocated_ratio": 0.4746376811594203,
+  "maximum_reserved_ratio": 1.0,
+  "paired_speedup_geomean": 0.42484238749783887,
+  "performance_claimed": false,
+  "reserved_passed": true,
+  "schema_version": "boundflow.fsg4-b4b2-b2-5-summary/v1",
+  "speedup_geomean_passed": false,
+  "status": "validated-no-go-b4-b2-v1-physics",
+  "summary_hash": "f873d4717b7029aa045836ed276d5cd4c752696b82100ba5f1f739cd99f4b163",
+  "timing_admitted": false,
+  "timing_worker_count": 6,
+  "winner_module_receipt_hash": "24995e019c7f83b2ae5f13eb85ee88a97ad13a9b65e6a2cde21e0def4c628d03",
+  "winner_ordinal": 11,
+  "winner_schedule_hash": "2b2d651826d393e9141a7cc1936a5cd9c6c3c2b54c78508c3896af30e2140e28",
+  "worker_speedups": [
+    0.41494064210262194,
+    0.3776925294408135,
+    0.434150783689633,
+    0.4300251100205945,
+    0.4423875933128566,
+    0.4542608734069574
+  ],
+  "worst_worker_passed": false,
+  "worst_worker_speedup": 0.3776925294408135
+}

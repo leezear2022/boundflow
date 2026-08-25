@@ -1,7 +1,7 @@
 # 修改记录：MR2 Production CROWN Subgraph/Owner Inventory
 
 > 日期：2026-08-26  
-> 状态：预注册完成，尚未执行
+> 状态：正式执行完成，P-anchor bridge correctness预注册已开放
 
 ## 修改
 
@@ -17,3 +17,11 @@
 - targeted/typing/lint/full regression；
 - 根据机械route只开放合法后继。
 
+## Formal result
+
+- source=`26233bf`，self-contained MR2 artifact replay PASS；
+- P-anchor七层状态=`proven/proven/proven/proven/proven/bounded-single-site/missing`，为唯一ready site；
+- S-anchor缺site identity、10/9 trajectory、multi-site consumer和production connection；
+- route只开放P-anchor production exact-call bridge correctness预注册；bridge/timing尚未开放；
+- 12/12 fully re-signed tamper，targeted=`10 passed`，full=`1697 passed,3 skipped`，
+  typing/lint/format通过。

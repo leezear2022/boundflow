@@ -24,4 +24,4 @@
   `VALIDATED-NO-GO-MR1-CIBC-FULL-GRAPH-SAME-SOLVER`；
 - 51/51均为activation-BaB、非IBP、split state present、provider-owned exact call；
 - self-contained replay PASS，13/13 fully re-signed tamper rejected；
-- targeted=`10 passed`，typing/lint/format通过；full regression待closure最终补录。
+- targeted=`10 passed`，typing/lint/format通过；full regression=`1687 passed,3 skipped`。
