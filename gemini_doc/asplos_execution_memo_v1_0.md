@@ -1,5 +1,15 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-26 MR3 P-anchor production bridge correctness预注册**：固定真实provider exact call、
+> P `25/Conv_8`单site、5 pair/10 fresh、region forward/backward=`10/9`、outer launch/emit/commit=
+> `1/1/1`，逐步比较lower/dα/α/Adam/termination-visible result。无timing；通过也只开放单site
+> timing预注册。见`BOUNDFLOW_MR3_P_ANCHOR_PRODUCTION_EXACT_CALL_BRIDGE_CORRECTNESS_PLAN_2026_08_26.md`。
+
+> **2026-08-26 MR2 owner inventory通过，只开放P-anchor bridge correctness预注册**：source=
+> `26233bf`；P `25/Conv_8`七层readiness仅production connection missing，S `31/Gemm_14`仍缺
+> identity/trajectory/consumer/connection；12/12 tamper。bridge尚未实现，timing/same-solver/R2
+> 关闭。见`BOUNDFLOW_MR2_PRODUCTION_CROWN_SUBGRAPH_OWNER_INVENTORY_FORMAL_CLOSURE_2026_08_26.md`。
+
 > **2026-08-26 MR1-S static same-solver eligibility正式NO-GO**：source=`a6b6d05`，冻结394条
 > activation raw，ResNet2B 逐调用=`0/51 eligible`；51/51均为activation-BaB/CROWN、split
 > present、provider-owned exact call。13/13 tamper。关闭CIBC IBP整图直接替换，不撤销CIBC

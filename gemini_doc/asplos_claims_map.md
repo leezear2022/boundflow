@@ -1,5 +1,13 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-26 MR3预注册边界**：当前只冻结P-anchor真实provider bridge correctness协议，尚无
+> implementation/formal raw。不得claim bridge已接入、correctness通过、timing或production coverage；
+> 通过最多开放single-site bridge timing预注册。
+
+> **2026-08-26 MR2 claim边界**：可claim P-anchor是冻结P/S两site中唯一具备production bridge
+> correctness预注册资格者；P仅`production_exact_call_connection` missing，S有四层missing；12/12
+> tamper。不得claim bridge已实现、production coverage、timing/same-solver/multi-site或ASPLOS-ready。
+
 > **2026-08-26 MR1-S claim边界**：394条activation raw无损计数，ResNet2B当前CIBC full-graph
 > eligibility=`0/51`，13/13 tamper，状态=
 > `VALIDATED-NO-GO-MR1-CIBC-FULL-GRAPH-SAME-SOLVER`。只允许claim当前整图IBP executor不能

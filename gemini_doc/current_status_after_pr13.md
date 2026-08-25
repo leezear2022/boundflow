@@ -1,5 +1,13 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-26 当前执行：MR3 P-anchor production bridge correctness已预注册**：只接
+> `25/Conv_8`，5 pair/10 fresh逐步核对10 evaluation/9 backward-mutation与outer atomic commit；
+> 不计时、不扩S-anchor/multi-site。下一先确认真实provider hook，再实现fail-closed bridge。
+
+> **2026-08-26 当前状态：MR2选出P-anchor，只开放bridge correctness预注册**：P `25/Conv_8`
+> site/ABI/ownership/VJP/10×evaluation+9×mutation均proven，multi-site显式single-site bounded，唯一
+> missing为production exact-call connection；S-anchor仍有四层缺口。bridge/timing均未实现。
+
 > **2026-08-26 当前状态：MR1-S full-graph static eligibility NO-GO**：394条activation raw全部
 > 审计，ResNet2B=`0/51 eligible`；51/51不是IBP整图调用，而是带split state的provider-owned
 > activation-BaB/CROWN call。关闭CIBC整图直接替换，same-solver timing/R2不开；下一只做MR2

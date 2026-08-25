@@ -1,5 +1,16 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新执行：MR3 P-anchor production exact-call bridge correctness已预注册；固定P `25/Conv_8`、
+5 pair/10 fresh、10 evaluation/9 backward-mutation，外层launch/emit/commit=`1/1/1`。无timing，
+通过也只开放single-site timing预注册。见
+`BOUNDFLOW_MR3_P_ANCHOR_PRODUCTION_EXACT_CALL_BRIDGE_CORRECTNESS_PLAN_2026_08_26.md`。
+
+最新：MR2 production CROWN subgraph/owner inventory正式通过；P-anchor `25/Conv_8`为唯一
+bridge-correctness-ready site，前五层合同proven、multi-site显式bounded、仅production connection
+missing。S-anchor仍缺identity/trajectory/consumer/connection。12/12 tamper；只开放MR3 P-anchor
+bridge correctness预注册，不开放timing。见
+`BOUNDFLOW_MR2_PRODUCTION_CROWN_SUBGRAPH_OWNER_INVENTORY_FORMAL_CLOSURE_2026_08_26.md`。
+
 最新：MR1-S无计时static same-solver eligibility审计正式NO-GO；394条activation raw全纳入，
 ResNet2B `0/51`可由当前CIBC 17-op IBP整图直接替换。51/51均为activation-BaB/CROWN、split
 state present、provider-owned exact call；13/13 tamper。只关闭整图直接替换，下一开放MR2
