@@ -95,6 +95,13 @@ def _load(path: Path) -> dict[str, Any]:
     return value
 
 
+def _d1c_reference(run_index: int) -> dict[str, Any]:
+    matches = sorted((D1C_ARTIFACT / "raw").glob(f"run-{run_index:02d}-*-d1c.pt"))
+    if len(matches) != 1:
+        raise ValueError("R3-D2A D1-C reference inventory differs")
+    return _load(matches[0])
+
+
 def _positive_timing_list(value: object, count: int) -> list[float]:
     if (
         not isinstance(value, list)
@@ -220,6 +227,20 @@ def _validate_worker(raw: Mapping[str, Any]) -> None:
         or float(raw["symbol_phase_alpha_diff"]) > 2e-5
     ):
         raise ValueError("R3-D2A terminal semantics differ")
+    reference = _d1c_reference(int(raw["run_index"]))
+    reference_lower = reference["terminal_lower"]
+    reference_alpha = reference["terminal_alpha"]
+    if not torch.is_tensor(reference_lower) or not torch.is_tensor(reference_alpha):
+        raise TypeError("R3-D2A frozen reference differs")
+    rebuilt_lower_diff = float((lower - reference_lower).abs().max().item())
+    rebuilt_alpha_diff = float((alpha - reference_alpha).abs().max().item())
+    rebuilt_sign = torch.equal(torch.sign(lower), torch.sign(reference_lower))
+    if (
+        rebuilt_lower_diff != float(raw["reference_lower_diff"])
+        or rebuilt_alpha_diff != float(raw["reference_alpha_diff"])
+        or rebuilt_sign is not raw["reference_sign_exact"]
+    ):
+        raise ValueError("R3-D2A frozen terminal replay differs")
     if raw["execution"] != {
         "evaluation_count": 10,
         "optimizer_mutation_count": 9,

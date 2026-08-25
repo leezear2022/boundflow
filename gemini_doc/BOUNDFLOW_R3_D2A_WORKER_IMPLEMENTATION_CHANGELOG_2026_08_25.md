@@ -38,3 +38,10 @@ stage: s01
 
 formal 尚未生成前，基于 D1-B 已验证 worst `56.8625x` 的同构 residual signature，把该精确映射路径
 的 required-speedup admission 上限从通用 `10x` 修正为 `15.50x`。未知区域仍保持 `10x`。
+
+## 首轮 formal replay 加固
+
+首轮 raw 生成后，tamper 探针发现：若同时修改 terminal tensor 与其 tensor hash，replay 只检查了 worker
+已存的 diff 字段，没有从冻结 D1-C raw 重新计算，导致该 tamper 被接受。replay 已改为按 run index 加载
+D1-C formal terminal，独立重算 lower/α diff 与 sign；加固后必须重新提交源码并重跑全部 five-fresh，
+首轮 raw 不进入正式 artifact。
