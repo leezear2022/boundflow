@@ -167,14 +167,14 @@ def _content_equal(left: torch.Tensor, right: torch.Tensor) -> bool:
 class MR5MultiConvProductionBridgeV1:
     """Replace C2→C1→C0 lower paths while provider owns optimizer and state."""
 
-    def __init__(self) -> None:
+    def __init__(self, *, cache: MR5GeneralizedConvModuleCacheV1 | None = None) -> None:
         if not torch.cuda.is_available():
             raise RuntimeError("MR5 multi-Conv bridge requires CUDA")
         major, minor = torch.cuda.get_device_capability()
         self.signatures = mr5_frozen_signatures(f"sm_{major}{minor}")
         for signature in self.signatures.values():
             signature.validate()
-        self.cache = MR5GeneralizedConvModuleCacheV1()
+        self.cache = cache or MR5GeneralizedConvModuleCacheV1()
         self.current_evaluation: int | None = None
         self.expected_site_ordinal = 0
         self.pending: dict[str, dict[str, torch.Tensor]] = {}
@@ -395,6 +395,51 @@ class MR5MultiConvProductionBridgeV1:
         )
         receipt.validate()
         return receipt
+
+    def timing_receipt(self) -> dict[str, object]:
+        """Return the prewarmed 30/27 lifecycle without correctness cache policy."""
+
+        if (
+            self.evaluation_count != 10
+            or self.site_order_count != 30
+            or any(self.forward[site] != 10 for site in MR5_SITE_ORDER)
+            or any(self.backward[site] != 9 for site in MR5_SITE_ORDER)
+            or any(self.beta_count[site] != 10 for site in MR5_SITE_ORDER)
+            or any(self.beta_numel[site] != 0 for site in MR5_SITE_ORDER)
+            or any(self.handoff_content[site] != 10 for site in MR5_SITE_ORDER)
+            or any(self.cache_miss[site] != 0 for site in MR5_SITE_ORDER)
+            or any(self.cache_hit[site] != 10 for site in MR5_SITE_ORDER)
+            or set(self.module_receipts) != set(MR5_SITE_ORDER)
+            or self.pending
+            or self.fallback_count
+            or self.eager_count
+            or self.native_shadow_count
+        ):
+            raise ValueError("MR5 prewarmed timing receipt differs")
+        return {
+            "evaluation_count": self.evaluation_count,
+            "site_order_count": self.site_order_count,
+            "forward_launches": dict(self.forward),
+            "backward_launches": dict(self.backward),
+            "beta_tensor_count": dict(self.beta_count),
+            "beta_numel": dict(self.beta_numel),
+            "handoff_content_count": dict(self.handoff_content),
+            "handoff_pointer_count": dict(self.handoff_pointer),
+            "cache_miss_count": dict(self.cache_miss),
+            "cache_hit_count": dict(self.cache_hit),
+            "signature_hashes": {
+                site: signature.stable_hash()
+                for site, signature in self.signatures.items()
+            },
+            "module_receipts": self.module_receipts,
+            "pending_site_count": len(self.pending),
+            "fallback_count": self.fallback_count,
+            "eager_count": self.eager_count,
+            "native_shadow_count": self.native_shadow_count,
+            "prewarmed_before_outer": True,
+            "timing_recorded": True,
+            "performance_claimed": False,
+        }
 
 
 __all__ = [

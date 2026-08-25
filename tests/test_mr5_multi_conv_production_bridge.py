@@ -10,6 +10,7 @@ import pytest
 
 from boundflow.runtime.mr5_multi_conv_production_bridge import (
     MR5MultiConvBridgeReceiptV1,
+    MR5MultiConvProductionBridgeV1,
     MR5_SITE_ORDER,
     mr5_frozen_signatures,
 )
@@ -57,6 +58,38 @@ def test_mr5_bridge_receipt_accepts_only_closed_30_27_lifecycle() -> None:
     receipt = _receipt()
     receipt.validate()
     assert receipt.to_dict()["performance_claimed"] is False
+
+
+def _prewarmed_bridge() -> MR5MultiConvProductionBridgeV1:
+    bridge = object.__new__(MR5MultiConvProductionBridgeV1)
+    bridge.evaluation_count = 10
+    bridge.site_order_count = 30
+    bridge.forward = {site: 10 for site in MR5_SITE_ORDER}
+    bridge.backward = {site: 9 for site in MR5_SITE_ORDER}
+    bridge.beta_count = {site: 10 for site in MR5_SITE_ORDER}
+    bridge.beta_numel = {site: 0 for site in MR5_SITE_ORDER}
+    bridge.handoff_content = {site: 10 for site in MR5_SITE_ORDER}
+    bridge.handoff_pointer = {site: 0 for site in MR5_SITE_ORDER}
+    bridge.cache_miss = {site: 0 for site in MR5_SITE_ORDER}
+    bridge.cache_hit = {site: 10 for site in MR5_SITE_ORDER}
+    bridge.signatures = mr5_frozen_signatures("sm_89")
+    bridge.module_receipts = {site: {"site_id": site} for site in MR5_SITE_ORDER}
+    bridge.pending = {}
+    bridge.fallback_count = 0
+    bridge.eager_count = 0
+    bridge.native_shadow_count = 0
+    return bridge
+
+
+def test_mr5_prewarmed_timing_receipt_requires_all_cache_hits() -> None:
+    bridge = _prewarmed_bridge()
+    receipt = bridge.timing_receipt()
+    assert receipt["cache_miss_count"] == {"C2": 0, "C1": 0, "C0": 0}
+    assert receipt["cache_hit_count"] == {"C2": 10, "C1": 10, "C0": 10}
+    assert receipt["prewarmed_before_outer"] is True
+    bridge.cache_miss["C1"] = 1
+    with pytest.raises(ValueError, match="prewarmed timing receipt differs"):
+        bridge.timing_receipt()
 
 
 @pytest.mark.parametrize(
