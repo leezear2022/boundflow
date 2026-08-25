@@ -1,6 +1,6 @@
 ---
-status: preregistered-correctness-open
-updated: 2026-08-25T23:20:00+08:00
+status: correctness-validated-timing-open
+updated: 2026-08-26T00:20:00+08:00
 type: plan
 topic: boundflow
 slug: r3-d2b-staged-backward-correctness
@@ -54,3 +54,9 @@ required speedup，不能误写成 whole-wrapper 比值；timing 必须分别报
 只有每个 fresh 的 staged/raw region 达到其同 pair Amdahl required，且 whole candidate/native geomean 与
 worst 均 `≥1.20x`，才通过 research gate。否则按预注册结果 reduced 或 NO-GO，不放宽门槛。R3-3、
 same-solver、query/queue 与 ASPLOS claim 保持关闭。
+
+## 5. 正式结果
+
+source=`f08054d` 的 5 pair / 10 fresh trajectory 全部通过；lower、compressed dα、α、Adam
+exp_avg/exp_avg_sq 最大差均为 `0.0`，12/12 tamper，全量=`1647 passed,3 skipped`。correctness 正式
+关闭，只开放独立 timing 协议。见`BOUNDFLOW_R3_D2B_CORRECTNESS_FORMAL_CLOSURE_2026_08_25.md`。

@@ -1,6 +1,6 @@
 ---
-status: implemented-targeted-passed-formal-pending
-updated: 2026-08-25T23:50:00+08:00
+status: formal-correctness-passed-timing-open
+updated: 2026-08-26T00:20:00+08:00
 type: changelog
 topic: boundflow
 slug: r3-d2b-runtime-implementation
@@ -35,3 +35,8 @@ stage: s01
 - 新增 five-pair 交错顺序 artifact/replay、12 类 fully re-signed tamper 和三项 artifact tests；
 - 单 pair pre-formal smoke 的五类最大差均为 `0.0`；该结果只验证协议可执行，不代替 five fresh；
 - 协议强制 `timing_recorded=false`、`performance_claimed=false`。
+
+## Formal closure
+
+5 pair / 10 fresh process 的五类逐步差均为 `0.0`；12/12 tamper、targeted `6 passed`、全量
+`1647 passed,3 skipped,6 warnings`。correctness 关闭，只开放 wrapper-inclusive timing。

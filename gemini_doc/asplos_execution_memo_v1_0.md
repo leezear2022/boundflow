@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-26 R3-D2-B correctness正式通过，只开放timing**：source=`f08054d`，5 pair/10 fresh
+> 的lower、dα、α、Adam exp_avg/exp_avg_sq最大差均`0.0`；12/12 tamper，全量=`1647 passed,
+> 3 skipped`。无计时、无performance claim。见`BOUNDFLOW_R3_D2B_CORRECTNESS_FORMAL_CLOSURE_2026_08_25.md`。
+
 > **2026-08-25 R3-D2-A正式关闭，只开放D2-B correctness**：source=`a6eaac4`，五次 readiness/
 > anchor/phase通过；coefficient-sign minimum share=`0.870614`、worst research required=
 > `11.8762x≤15.50x`，residual6/residual11为稳定 dominant signature，14/14 tamper。仅开放

@@ -1,5 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-26 当前状态：D2-B correctness通过，只开放timing**：5 pair/10 fresh逐步lower、dα、α、
+> Adam moment最大差均`0.0`，ownership/12 tamper/全量回归通过。尚无speedup；R3-3与same-solver关闭。
+
 > **2026-08-25 当前状态：D2-A正式关闭，只开放D2-B correctness**：coefficient-sign 5 fresh
 > minimum share=`0.870614`、worst research required=`11.8762x≤15.50x`；residual6/residual11
 > dominant signature稳定，14/14 tamper通过。没有性能claim；D2-B timing、R3-3与same-solver关闭。

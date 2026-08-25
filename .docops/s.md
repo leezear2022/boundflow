@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev013242
-last_va: ev013243
+last_ch: ev013251
+last_va: ev013252
 blk: none
-next: implement-r3-d2b-staged-residual-reuse-correctness
-updated: 2026-08-25T02:29:44Z
+next: preregister-r3-d2b-wrapper-inclusive-timing
+updated: 2026-08-25T02:44:14Z

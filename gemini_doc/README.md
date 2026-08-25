@@ -1,5 +1,9 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新：R3-D2-B staged backward correctness已关闭；5 pair/10 fresh 的lower、compressed dα、α、Adam
+两类moment最大差均`0.0`，12/12 tamper，全量=`1647 passed,3 skipped`。只开放wrapper-inclusive
+timing，尚无性能claim；见`BOUNDFLOW_R3_D2B_CORRECTNESS_FORMAL_CLOSURE_2026_08_25.md`。
+
 最新：R3-D2-A five-fresh backward attribution已关闭；coefficient-sign minimum share=`0.870614`，
 worst research required=`11.8762x≤15.50x`，residual6/residual11 dominant signature五次一致，14/14
 tamper。只开放D2-B staged residual reuse correctness，尚无性能claim；见

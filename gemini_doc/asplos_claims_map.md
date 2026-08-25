@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-26 R3-D2-B correctness claim边界**：可claim staged residual6/11 backward 接入在 5 pair/
+> 10 fresh 的 lower、compressed dα、α、Adam两类moment逐步最大差均为`0.0`，ownership与12/12
+> tamper成立；只开放wrapper-inclusive timing。不得claim任何speedup、R3-3或same-solver开放。
+
 > **2026-08-25 R3-D2-A claim边界**：可claim只读 five-fresh 归因得到 coefficient-sign minimum share=
 > `0.870614`、worst research required=`11.8762x≤15.50x`，且 residual6/residual11 dominant signature
 > 五次一致、14/14 tamper；因此只开放 D2-B staged residual reuse correctness。不得claim已加速、
