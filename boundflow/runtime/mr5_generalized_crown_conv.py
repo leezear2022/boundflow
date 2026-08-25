@@ -10,7 +10,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Callable, Optional
 
 import torch
 import torch.nn.functional as torch_functional
@@ -141,8 +141,11 @@ def validate_mr5_generalized_conv_tensors(
             or not bool(torch.isfinite(tensor).all().item())
         ):
             raise ValueError(f"MR5 generalized Conv tensor differs: {name}")
-    if not tensors.incoming.requires_grad or not tensors.alpha.requires_grad:
-        raise ValueError("MR5 generalized Conv gradient ownership differs")
+    if tensors.incoming.requires_grad != tensors.alpha.requires_grad:
+        raise ValueError(
+            "MR5 generalized Conv gradient ownership differs: "
+            f"incoming={tensors.incoming.requires_grad},alpha={tensors.alpha.requires_grad}"
+        )
     if tensors.lower.requires_grad or tensors.upper.requires_grad:
         raise ValueError("MR5 generalized Conv bound ownership differs")
     if bool((tensors.lower > tensors.upper).any().item()):
@@ -166,6 +169,8 @@ class MR5GeneralizedConvExecutorV1:
         self,
         signature: MR5GeneralizedConvSignatureV1,
         cache: MR5GeneralizedConvModuleCacheV1,
+        *,
+        backward_observer: Callable[[str], None] | None = None,
     ) -> None:
         self.signature = signature
         self.compiled, self.module_receipt, self.cache_event = cache.get(signature)
@@ -176,6 +181,7 @@ class MR5GeneralizedConvExecutorV1:
         self.forward_observation: Optional[_LaunchObservation] = None
         self.backward_observation: Optional[_LaunchObservation] = None
         self._tensors: Optional[MR5GeneralizedConvTensorsV1] = None
+        self._backward_observer = backward_observer
 
     def reject(self, reason: str) -> None:
         self.fallback_count += 1
@@ -314,6 +320,8 @@ class MR5GeneralizedConvExecutorV1:
             (alpha_gradient, incoming_gradient),
         )
         self.backward_launch_count += 1
+        if self._backward_observer is not None:
+            self._backward_observer(self.signature.site_id)
         return incoming_gradient, alpha_gradient
 
 
@@ -364,10 +372,14 @@ def execute_mr5_generalized_conv_v1(
     signature: MR5GeneralizedConvSignatureV1,
     tensors: MR5GeneralizedConvTensorsV1,
     cache: MR5GeneralizedConvModuleCacheV1,
+    *,
+    backward_observer: Callable[[str], None] | None = None,
 ) -> tuple[torch.Tensor, torch.Tensor, MR5GeneralizedConvExecutorV1]:
     """Execute one typed site through the custom TIR backward boundary."""
 
-    executor = MR5GeneralizedConvExecutorV1(signature, cache)
+    executor = MR5GeneralizedConvExecutorV1(
+        signature, cache, backward_observer=backward_observer
+    )
     executor.prime(tensors)
     result_a, result_bias = _MR5GeneralizedConvFunction.apply(
         tensors.incoming,
