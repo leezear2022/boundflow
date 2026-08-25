@@ -27,3 +27,11 @@ stage: s01
 - `tests/test_r3_d2b_staged_backward.py`：`3 passed`；
 - 完整 10/9 terminal lower/α/sign 对 D1-C 通过；
 - 正式 five-fresh 逐步轨迹与 tamper 尚未生成，因此 timing 仍关闭。
+
+## Formal protocol implementation
+
+- 新增 D1-C/D2-B 独立进程 worker，逐 evaluation 冻结 lower、compressed dα、α、Adam exp_avg/
+  exp_avg_sq 与两层 receipt；
+- 新增 five-pair 交错顺序 artifact/replay、12 类 fully re-signed tamper 和三项 artifact tests；
+- 单 pair pre-formal smoke 的五类最大差均为 `0.0`；该结果只验证协议可执行，不代替 five fresh；
+- 协议强制 `timing_recorded=false`、`performance_claimed=false`。
