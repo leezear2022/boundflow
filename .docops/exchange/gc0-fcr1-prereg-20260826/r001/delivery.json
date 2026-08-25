@@ -1,0 +1,49 @@
+{
+  "doc": "gc0-fcr1-prereg-20260826/r001/delivery",
+  "type": "delivery",
+  "task": "gc0-fcr1-prereg-20260826",
+  "round": 1,
+  "from": "codex-executor",
+  "to": "external-model-auditor",
+  "ts": "2026-08-25T17:34:09Z",
+  "base_commit": "9c5f3867c657078cb6ba980a613b686c5a08f2d2",
+  "result_commit": "68dd54c332f6d9a46640a70cdb83bbd4fb81c3f8",
+  "changed_files": [
+    ".docops/ev.jsonl",
+    ".docops/s.md",
+    "gemini_doc/BOUNDFLOW_GC0_FCR1_VERIFICATION_GRAPH_ABI_CORRECTNESS_PLAN_2026_08_26.md",
+    "gemini_doc/BOUNDFLOW_GC0_FCR1_VERIFICATION_GRAPH_ABI_CORRECTNESS_CHANGELOG_2026_08_26.md",
+    "gemini_doc/BOUNDFLOW_MR7_GRAPH_COMPILER_RULE_RUNTIME_RESEARCH_PLAN_2026_08_26.md",
+    "gemini_doc/README.md",
+    "gemini_doc/asplos_claims_map.md",
+    "gemini_doc/asplos_execution_memo_v1_0.md",
+    "gemini_doc/current_status_after_pr13.md"
+  ],
+  "claims": [
+    "Documentation-only preregistration freezes generic verification graph/effect/legality/lowering/arena/VJP contracts and staged GC-0/GC-1/GC-2 correctness gates; it makes no implementation or performance claim."
+  ],
+  "validation": [
+    {
+      "cmd": "git diff --check",
+      "result": "pass"
+    },
+    {
+      "cmd": "gc0 prereg deterministic content/path/scope checks",
+      "result": "pass"
+    },
+    {
+      "cmd": "dol lint --soft",
+      "result": "pass"
+    }
+  ],
+  "limitations": [
+    "No implementation, formal raw, timing, CUDA Graph, multistream, schedule search, production default change, query/queue claim, or ASPLOS-ready claim."
+  ],
+  "risks": [
+    "Primary audit risks are hidden model/site hardcoding, GC stage collapse, insufficient effect/alias closure, symbolic arena being misrepresented as physical runtime, non-independent oracle/replay, and over-broad claim language."
+  ],
+  "open_questions": [
+    "Is this preregistration sufficiently complete, internally consistent, falsifiable, and stage-correct to open only GC0-0 generic schema plus negative legality tests?"
+  ],
+  "md_sha256": "6dfb02f073a9f2d8dac0085c69c46079ee423e902639a44d1f81f15a910e1284"
+}

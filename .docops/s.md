@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev014629
-last_va: ev014630
+last_ch: ev014639
+last_va: ev014640
 blk: none
-next: preregister-gc0-fcr1-verification-graph-abi-correctness
-updated: 2026-08-25T17:33:07Z
+next: external-audit-gc0-fcr1-preregistration-r001
+updated: 2026-08-25T17:34:32Z
