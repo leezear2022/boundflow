@@ -38,7 +38,9 @@ source owner 在非空 β 下的 forward、α VJP、β VJP、location/sign 与 u
 4. 27 个 α feature index 严格递增唯一；6 个 β location 合法且 sign∈{-1,+1}；
 5. forward/backward launch=`1/1`，DLPack pointer exact=`21/21`，fallback/eager=`0/0`；
 6. forbidden dense α/β global workspace count=`0`，persistent dense state=`0`；
-7. template/schedule/module receipt 五次稳定，cache miss→4 hit；
+7. template/schedule/module receipt 五次稳定；五个 fresh worker 各自使用空缓存，
+   因此必须各自报告 cold miss；另起一个独立的同进程 cache-sequence probe，以同一 module cache
+   依次执行五个 capture，必须得到 `miss,hit,hit,hit,hit`。两类证据不得混用；
 8. fully re-signed tamper 覆盖 β tensor/hash、location、sign、projection、unowned-zero、launch、
    empty-specialization、protocol 与 summary gate。
 
@@ -48,3 +50,9 @@ source owner 在非空 β 下的 forward、α VJP、β VJP、location/sign 与 u
 timing；R3-4 adjacent sites、R3-6、same-solver、query/queue 继续关闭。若任何 β ownership/gradient/
 specialization 门禁失败，R3-3 当前 variant NO-GO，不得退化为 empty β 或借用 P-anchor 性能数字。
 
+## 5. 正式前协议勘误
+
+初版第 3.7 条同时要求“五个独立进程”与“同一缓存 miss→4 hit”，两者在进程隔离的
+实现下不能由同一组 launch receipt 同时成立。本节在任何 R3-3 formal raw 生成前勘误为
+“fresh correctness 各自 cold miss + 独立 cache-sequence probe”。不改 correctness、ownership、workspace、
+tamper 或下一阶段边界。
