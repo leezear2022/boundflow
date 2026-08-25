@@ -1,0 +1,99 @@
+{
+  "candidate_minimum_materialization_bytes_per_evaluation": 344136,
+  "candidate_minimum_materialization_bytes_per_outer_call": 3441360,
+  "eligible_total_mac_ratio_to_p": 4.5,
+  "gates": {
+    "absent_beta": true,
+    "eligible_total_mac_ratio": true,
+    "fresh_runs": true,
+    "handoff": true,
+    "metadata_stability": true,
+    "new_site_mac_ratio": true,
+    "site_count": true,
+    "solver_semantics": true,
+    "topology": true,
+    "trajectory": true
+  },
+  "global_semantic_maximum_absolute_difference": 3.516674041748047e-06,
+  "mr5_correctness_preregistration_open": true,
+  "new_site_mac_ratio_to_p": 3.5,
+  "performance_claimed": false,
+  "projected_candidate_backward_launch_count": 27,
+  "projected_candidate_forward_launch_count": 30,
+  "row_count": 150,
+  "run_count": 5,
+  "schema_version": "boundflow.mr4-production-conv-site-census-formal/v1",
+  "semantic_metrics": [
+    {
+      "allclose": true,
+      "candidate_run": 1,
+      "element_count": 9540,
+      "maximum_absolute_difference": 2.2649765014648438e-06,
+      "metric_hash": "f95f56c4eb609c83ac7c861aa046607994a316004a46a9e5f536c4ca349760b2",
+      "reference_run": 0,
+      "sign_exact": true
+    },
+    {
+      "allclose": true,
+      "candidate_run": 2,
+      "element_count": 9540,
+      "maximum_absolute_difference": 2.596527338027954e-06,
+      "metric_hash": "b1b201d8cd3b1d897ebfeb79368e3eea08b028cbf7b0b6ffc60cbd595c290dc7",
+      "reference_run": 0,
+      "sign_exact": true
+    },
+    {
+      "allclose": true,
+      "candidate_run": 3,
+      "element_count": 9540,
+      "maximum_absolute_difference": 2.384185791015625e-06,
+      "metric_hash": "feac01597c0328203b02430136977aacb2bc3ff7db590f1d548b7ea8b00a5d30",
+      "reference_run": 0,
+      "sign_exact": true
+    },
+    {
+      "allclose": true,
+      "candidate_run": 4,
+      "element_count": 9540,
+      "maximum_absolute_difference": 3.516674041748047e-06,
+      "metric_hash": "53af6ec5a0d33ce79f8e090f8d9652bc76b51267192d2cdea497bd80d338a740",
+      "reference_run": 0,
+      "sign_exact": true
+    }
+  ],
+  "site_beta_numel": {
+    "C0": 0,
+    "C1": 0,
+    "C2": 0
+  },
+  "site_candidate_minimum_materialization_bytes_per_evaluation": {
+    "C0": 172056,
+    "C1": 98328,
+    "C2": 73752
+  },
+  "site_count": 3,
+  "site_evaluation_counts": {
+    "C0": 50,
+    "C1": 50,
+    "C2": 50
+  },
+  "site_forward_mac_units": {
+    "C0": 1327104,
+    "C1": 1769472,
+    "C2": 884736
+  },
+  "site_grad_enabled_counts": {
+    "C0": 45,
+    "C1": 45,
+    "C2": 45
+  },
+  "site_handoff_content_match_counts": {
+    "C0": 50,
+    "C1": 50,
+    "C2": 50
+  },
+  "source_commit": "1fa4f0f952bae344a24b78aab8b3ca72e6bcd244",
+  "status": "OPEN-MR5-MULTI-CONV-PRODUCTION-BRIDGE-CORRECTNESS-PREREGISTRATION",
+  "summary_hash": "728b39629db5d9790c289f9b2ac9bbe913b7f2b8d2a59537ea658857a264279c",
+  "timing_open": false
+}

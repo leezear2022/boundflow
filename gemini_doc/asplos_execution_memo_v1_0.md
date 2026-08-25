@@ -1,6 +1,12 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
-> **2026-08-26 MR4 production Conv site census已预注册**：不等待MR3外审，沿其允许后继先做
+> **2026-08-26 MR4 production Conv census正式通过，只开放MR5 correctness预注册**：5 fresh/
+> 150 rows，C0/C1/C2均10/9、β=`[6,0]`、handoff exact；static total=`4.5P`、new sites=`3.5P`，
+> semantic max diff=`3.51667e-6`，16/16 tamper，全量=`1764 passed,3 skipped`。MR5预注册已激活；
+> 不得写成speedup/share，timing仍关闭。见
+> `BOUNDFLOW_MR4_PRODUCTION_CONV_SITE_CENSUS_FORMAL_CLOSURE_2026_08_26.md`。
+
+> **历史（已由上方formal取代）：2026-08-26 MR4 production Conv site census已预注册**：不等待MR3外审，沿其允许后继先做
 > 无计时O(1) census；5 fresh核对三条direct ReLU→Conv edge、10/9轨迹、absent β、full α与静态
 > MAC/materialization账本。通过最多开放MR5 multi-site correctness，timing/性能claim关闭。见
 > `BOUNDFLOW_MR4_PRODUCTION_CONV_SITE_CENSUS_PLAN_2026_08_26.md`。

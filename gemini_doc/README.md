@@ -1,6 +1,11 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
-最新执行：MR4 production Conv site census已预注册；在MR3 single-site NO-GO后，以5 fresh无计时
+最新：MR4 production Conv census正式通过；5 fresh/150 rows确认三条direct Conv edge均为10/9、
+absent β、handoff exact，static MAC total=`4.5P`、new sites=`3.5P`，16/16 tamper，全量=
+`1764 passed,3 skipped`。MR5 multi-site correctness预注册已激活，timing关闭。见
+`BOUNDFLOW_MR4_PRODUCTION_CONV_SITE_CENSUS_FORMAL_CLOSURE_2026_08_26.md`。
+
+历史（已由上方formal取代）：MR4 production Conv site census已预注册；在MR3 single-site NO-GO后，以5 fresh无计时
 provider hook核对三条direct ReLU→Conv edge、10/9轨迹、absent β与静态MAC/materialization账本。
 通过最多开放MR5 multi-site correctness。见
 `BOUNDFLOW_MR4_PRODUCTION_CONV_SITE_CENSUS_PLAN_2026_08_26.md`。

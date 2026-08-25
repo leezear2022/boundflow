@@ -1,0 +1,4 @@
+{"allclose":true,"candidate_run":1,"element_count":9540,"maximum_absolute_difference":2.2649765014648438e-06,"metric_hash":"f95f56c4eb609c83ac7c861aa046607994a316004a46a9e5f536c4ca349760b2","reference_run":0,"sign_exact":true}
+{"allclose":true,"candidate_run":2,"element_count":9540,"maximum_absolute_difference":2.596527338027954e-06,"metric_hash":"b1b201d8cd3b1d897ebfeb79368e3eea08b028cbf7b0b6ffc60cbd595c290dc7","reference_run":0,"sign_exact":true}
+{"allclose":true,"candidate_run":3,"element_count":9540,"maximum_absolute_difference":2.384185791015625e-06,"metric_hash":"feac01597c0328203b02430136977aacb2bc3ff7db590f1d548b7ea8b00a5d30","reference_run":0,"sign_exact":true}
+{"allclose":true,"candidate_run":4,"element_count":9540,"maximum_absolute_difference":3.516674041748047e-06,"metric_hash":"53af6ec5a0d33ce79f8e090f8d9652bc76b51267192d2cdea497bd80d338a740","reference_run":0,"sign_exact":true}

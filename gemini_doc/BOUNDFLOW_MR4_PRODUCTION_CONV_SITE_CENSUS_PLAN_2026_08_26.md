@@ -1,5 +1,5 @@
 ---
-status: preregistered
+status: validated-mr5-correctness-preregistration-open
 updated: 2026-08-26T17:30:00+08:00
 type: plan
 topic: boundflow
@@ -105,3 +105,10 @@ atomic rollback与完整outer result等价。MR5必须先证明三site cumulativ
 
 本文件只冻结census协议。当前没有MR4 raw、没有multi-site implementation，也没有新增性能或memory
 claim。MR3 single-site NO-GO与CIBC full-graph IBP reduced claim均保持原样。
+
+## 9. 事后结果注记（不修改原门禁）
+
+5 fresh/150 rows全部通过；C0/C1/C2 MAC ratio=`1.5/2.0/1.0P`，total=`4.5P`、new sites=`3.5P`；
+global semantic max diff=`3.516674041748047e-06`，16/16 tamper。状态=
+`OPEN-MR5-MULTI-CONV-PRODUCTION-BRIDGE-CORRECTNESS-PREREGISTRATION`；timing仍关闭。见
+`BOUNDFLOW_MR4_PRODUCTION_CONV_SITE_CENSUS_FORMAL_CLOSURE_2026_08_26.md`。

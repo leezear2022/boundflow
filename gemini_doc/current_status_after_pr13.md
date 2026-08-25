@@ -1,6 +1,11 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
-> **2026-08-26 当前执行：MR4 production Conv site census已预注册**：只读真实provider exact call，
+> **2026-08-26 当前状态：MR4 census通过，MR5 multi-site correctness预注册已激活**：三条真实Conv
+> edge各50 rows，10/9、absent β、handoff exact；static total=`4.5P`，16/16 tamper，全量=
+> `1764 passed,3 skipped`。尚未实现multi-site bridge，不能计时；下一步实现shape/stride-keyed
+> generalized TIR与三site cumulative ownership/correctness协议。
+
+> **历史（已由上方formal取代）：2026-08-26 当前执行：MR4 production Conv site census已预注册**：只读真实provider exact call，
 > 不计时、不改TIR；确认三条Conv edge是否都有稳定10/9、absent β和足够静态MAC机会。通过也只开放
 > multi-site correctness，不覆盖MR3 single-site NO-GO。
 

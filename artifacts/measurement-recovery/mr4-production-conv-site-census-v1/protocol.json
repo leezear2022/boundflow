@@ -1,0 +1,36 @@
+{
+  "candidate_executed": false,
+  "code_revision": {
+    "boundflow/runtime/mr4_production_conv_site_census.py": "e3654efc9994d509a2b50c724082bbe6bc6de365dfccc841d69163cc7d6809e8",
+    "scripts/probe_mr4_production_conv_site_census_tamper.py": "cb4f19dda79c992bc69fc8bc28e79c35846da0daf401056bd4e73be6f9e39ade",
+    "scripts/run_mr4_production_conv_site_census_formal.py": "a2cd65cb82d1f16a0f4feed035ccfe40287b3224180b4e1f860da0b4df7b3883",
+    "scripts/run_mr4_production_conv_site_census_worker.py": "04d1932089b25d6155113c6db83e4b3eaa0629df45f2f26f0fa9d43de7bb90de",
+    "tests/test_mr4_production_conv_site_census.py": "81e1284c27e2aebfdebb903c1c4d828c51fe7192e5924fea25d31c5eb07748e1"
+  },
+  "eligible_total_mac_ratio_gate": 1.75,
+  "generator_commit": "ac5137862615ebc48ee2f609dc9906a447babdca",
+  "model_name": "resnet_2b.onnx",
+  "mr3_prerequisite": {
+    "manifest_file_sha256": "33c48be72b09805439aaed499f07086f7b55f7ed88d56d2dfa6001fab43b6f3e",
+    "manifest_hash": "a7e3b7f370b6951717e63110a16101c81b4620298d2a9d0d1abd88f79a18b4b6",
+    "status": "VALIDATED-NO-GO-MR3-P-PRODUCTION-BRIDGE-PHYSICS",
+    "summary_hash": "6fd90461be736ee627c46132e3d4eaa65cd3e47dd79a5c8f049cf025650bd3db"
+  },
+  "new_site_mac_ratio_gate": 0.75,
+  "performance_claimed": false,
+  "property_name": "prop_0_eps_0.008.vnnlib",
+  "protocol_hash": "6914ec1d94a5b18daab1f4ffe8a4ecc7dff63f6f63eccf4b747c894880571d7d",
+  "python_name": "python",
+  "resume_policy": "reject-any-existing-artifact",
+  "run_order": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "schema_version": "boundflow.mr4-production-conv-site-census-protocol/v1",
+  "source_commit": "1fa4f0f952bae344a24b78aab8b3ca72e6bcd244",
+  "timing_recorded": false,
+  "worker_count": 5
+}

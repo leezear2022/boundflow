@@ -1,6 +1,12 @@
 # BoundFlow ASPLOS Claims Map
 
-> **2026-08-26 MR4预注册边界**：MR3 single-site timing NO-GO后，只开放无计时production exact-call
+> **2026-08-26 MR4 production Conv census正式通过**：5 fresh/150 rows确认C0/C1/C2三条direct
+> Conv edge均为10/9、absent β、handoff exact；静态MAC=`1.5/2.0/1.0P`，total=`4.5P`，
+> global semantic max diff=`3.51667e-6`，16/16 tamper，全量=`1764 passed,3 skipped`。MR5
+> multi-site correctness预注册已激活；
+> MAC不是time share，timing/performance仍关闭。
+
+> **历史（已由上方formal取代）：2026-08-26 MR4预注册边界**：MR3 single-site timing NO-GO后，只开放无计时production exact-call
 > Conv site census；冻结三条direct ReLU→Conv edge、5 fresh、10/9轨迹、absent β与静态MAC账本。
 > 尚无raw或multi-site实现；即使通过也只开放MR5 correctness预注册，不得claim speedup/share。
 
