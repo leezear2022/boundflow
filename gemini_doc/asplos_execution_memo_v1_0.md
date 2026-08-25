@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-26 R3-3只读microphysics attribution预注册**：将candidate wrapper分为
+> forward/backward kernel union、bridge/launch idle、autograd/allocation、other/unexplained，从
+> 正式`0.668275x`反推总需求`1.571209x`与单bucket最小可达share约`36.35%`。
+> 只输出KERNEL/BRIDGE/AUTOGRAD/CUMULATIVE/STOP路由，R3-4/same-solver不开。见
+> `BOUNDFLOW_R3_3_ISOLATED_MICROPHYSICS_ATTRIBUTION_PLAN_2026_08_26.md`。
+
 > **2026-08-26 R3-3 isolated timing正式NO-GO，只开放只读归因**：source=`947eb61`，
 > geomean/bootstrap/worst=`0.668275x/0.629157x/0.599089x`，12/12 tamper，full=
 > `1658 passed,3 skipped`。保留active-β correctness，停止当前fixed schedule的R3-4扩展。见

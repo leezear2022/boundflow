@@ -1,5 +1,9 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新执行：R3-3只读microphysics attribution/route decision已预注册，只分解kernel、
+bridge/launch、autograd/allocation与unexplained share，不改TIR/schedule。见
+`BOUNDFLOW_R3_3_ISOLATED_MICROPHYSICS_ATTRIBUTION_PLAN_2026_08_26.md`。
+
 最新：R3-3 active-β isolated timing 以 NO-GO 关闭；geomean/bootstrap/worst=
 `0.668275x/0.629157x/0.599089x`，12/12 tamper，全量=`1658 passed,3 skipped`。保留
 correctness，只开放只读microphysics attribution；见

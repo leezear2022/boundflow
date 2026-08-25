@@ -1,5 +1,9 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-26 当前执行：R3-3只读microphysics attribution已预注册**：先做CUPTI/
+> NVTX/correlation归因和Amdahl route decision，不改TIR/schedule。主口径要达1.05x需总回收
+> `1.571209x`，单bucket至少占约`36.35%`才有物理可达性。
+
 > **2026-08-26 当前状态：R3-3 isolated timing NO-GO，只读 attribution 开放**：
 > TIR/PyTorch geomean/bootstrap/worst=`0.668275x/0.629157x/0.599089x`，候选约慢1.50x；
 > active-β correctness保留。R3-4/same-solver关闭，下一只允许拆分FFI/kernel/autograd/allocation。
