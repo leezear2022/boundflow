@@ -29,6 +29,7 @@ wrapper 中相对冻结 B3 获得 `1.879305x` geomean recovery；但相对 nativ
 - manifest hash：`a8b4ee27fc4a496b8c873d404dde96b9bfb13312fce80a8cef0d84f909ae6754`；
 - 5 fresh triplets、15 worker、每 worker 3 warmup+30 samples、14×30 秒 cooldown；
 - 12/12 fully re-signed tamper rejected；targeted `5 passed`。
+- 全量回归：`1638 passed, 3 skipped, 6 warnings in 667.71s`；三个 skip 均为既有环境边界。
 
 ## Formal 数字
 
