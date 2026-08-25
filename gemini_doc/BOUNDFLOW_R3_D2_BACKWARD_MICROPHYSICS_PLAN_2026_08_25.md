@@ -53,12 +53,20 @@ parent tolerance；单 stream 禁止 overlap-adjustment。5 fresh 逐项重算 s
 - qualification parity：`T = native_median / d1c_median` 对应达到 `1.00x native`；
 - research：目标 D1-C latency=`native/1.20`；
 - 若分母 `≤0`，该区域即使无限加速也不能达标；
-- 若 worst fresh `r_required >10x`，该区域不进入 D2-B；
-- 只有 share 跨 5 fresh 均 `≥20%`、required `≤10x`、且存在合法 structured-owner schedule，才开放。
+- 通用未知区域若 worst fresh `r_required >10x`，不进入 D2-B；
+- **预 formal 修订**：若 dominant symbol 精确映射到 D1-B 已正式验证的 residual6/residual11 signature，
+  则 admission 上限改为 `15.50x`；同时要求 D1-B formal worst `56.8625x` 作为既有物理上界，且映射
+  必须由 symbol/shape/ABI receipt 逐项证明。超过 `15.50x` 仍关闭；
+- 只有 share 跨 5 fresh 均 `≥20%`、required 不超过其适用上限、且存在合法 structured-owner
+  schedule，才开放。
 
 按当前非正式 attribution 粗算：去除 backward 后的其余成本约 `24.75 ms`；要达到 native parity，
 backward 约需 `5.0x`，要达到 native/1.20 约需 `6.5x`。这只是 feasibility estimate，D2-A 必须从
 formal raw 重算。
+
+预 formal phase-only smoke 进一步定位：coefficient-sign约`342.90 ms`，其中symbol-only扰动账本显示
+旧raw residual6/residual11分别约`257.38/105.02 ms`；它们与D1-B staged signature同构。该 smoke
+只用于冻结上述15.50x已验证路径例外，不形成share或性能claim。
 
 ## 5. D2-B 候选顺序
 
