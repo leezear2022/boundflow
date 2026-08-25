@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev014011
-last_va: ev014012
+last_ch: ev014028
+last_va: ev014029
 blk: none
-next: implement-mr4-production-conv-site-census-formal-gates
-updated: 2026-08-25T08:29:36Z
+next: run-mr4-production-conv-site-census-formal-artifact
+updated: 2026-08-25T08:36:09Z
