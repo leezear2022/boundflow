@@ -1,6 +1,6 @@
 ---
-status: preregistered-isolated-timing-open
-updated: 2026-08-26T04:30:00+08:00
+status: validated-no-go-r3-3-s-isolated-physics
+updated: 2026-08-26T05:30:00+08:00
 type: plan
 topic: boundflow
 slug: r3-3-active-beta-isolated-timing
@@ -93,3 +93,10 @@ kernel-only latency。
 本轮 GO 最多证明单个 active-β S-anchor 局部物理收益。完成后必须先单独做 route
 decision：核对该 site 在 D2-B/same-solver 真实路径的 call count/share、adjacent topology、下一 site
 是否同构。只有新预注册明确开放，才能进 R3-4；否则转 attribution 或 NO-GO。
+
+## 7. 执行结果
+
+6 fresh/180 pairs 得到 geomean/bootstrap lower/worst=`0.668275x/0.629157x/0.599089x`，
+三项 latency gate 全失败；absolute allocated/reserved=`1.037109x/1.0x`，incremental allocated
+worst=`10.9375x`。12/12 tamper、full=`1658 passed,3 skipped`。本 fixed schedule 以
+`VALIDATED-NO-GO-R3-3-S-ISOLATED-PHYSICS` 关闭，下一只开放只读 attribution/route decision。

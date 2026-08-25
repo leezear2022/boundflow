@@ -1,6 +1,6 @@
 ---
-status: implementation-ready-formal-pending
-updated: 2026-08-26T05:00:00+08:00
+status: validated-no-go-r3-3-s-isolated-physics
+updated: 2026-08-26T05:30:00+08:00
 type: changelog
 topic: boundflow
 slug: r3-3-active-beta-timing-implementation
@@ -31,3 +31,8 @@ stage: s01
 
 本实现不修改 TIR/schedule，不做 tuning，不开放 R3-4/same-solver。若 formal 低于预注册
 门禁，必须以 NO-GO 关闭当前 fixed schedule，不得改阈值或切 kernel-only latency。
+
+## 最终结果
+
+formal geomean/bootstrap lower/worst=`0.668275x/0.629157x/0.599089x`，12/12 tamper，
+full=`1658 passed,3 skipped`。当前 fixed schedule 已 NO-GO，R3-4/same-solver 不开放。

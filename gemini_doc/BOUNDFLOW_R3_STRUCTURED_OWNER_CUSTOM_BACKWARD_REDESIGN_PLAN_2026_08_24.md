@@ -1,6 +1,6 @@
 ---
-status: validated-r3-3-active-beta-correctness
-updated: 2026-08-26T04:15:00+08:00
+status: validated-no-go-r3-3-s-isolated-physics
+updated: 2026-08-26T05:30:00+08:00
 type: plan
 topic: boundflow
 slug: r3-structured-owner-custom-backward-redesign
@@ -10,6 +10,11 @@ stage: s01
 # BoundFlow R3 结构化所有权与自定义反向重设计
 
 ## 0. 结论与当前边界
+
+> **2026-08-26 R3-3 isolated timing NO-GO**：单 S-anchor fixed schedule 的6 fresh wrapper geomean/
+> bootstrap/worst=`0.668275x/0.629157x/0.599089x`，三项延迟门禁失败。保留
+> active-β correctness，但停止R3-4扩展。只开放另行预注册的只读microphysics attribution/
+> route decision。见`BOUNDFLOW_R3_3_ACTIVE_BETA_TIMING_FORMAL_NO_GO_CLOSURE_2026_08_26.md`。
 
 > **2026-08-26 R3-3 active-β correctness closure**：后续 D2 路线合法恢复 R3-3 后，固定
 > S-anchor 5 fresh/20 metrics 通过，max diff=`8.64267e-7`，β=30/30 nonzero，12/12 tamper。

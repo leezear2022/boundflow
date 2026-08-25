@@ -1,5 +1,10 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新：R3-3 active-β isolated timing 以 NO-GO 关闭；geomean/bootstrap/worst=
+`0.668275x/0.629157x/0.599089x`，12/12 tamper，全量=`1658 passed,3 skipped`。保留
+correctness，只开放只读microphysics attribution；见
+`BOUNDFLOW_R3_3_ACTIVE_BETA_TIMING_FORMAL_NO_GO_CLOSURE_2026_08_26.md`。
+
 最新执行：R3-3 active-β isolated timing 已预注册，固定 6 fresh AB/BA、10 warmup/
 30 pairs 的 public-PyTorch CUDA wrapper 对 cache-hit TIR wrapper。通过也不自动开放R3-4；见
 `BOUNDFLOW_R3_3_ACTIVE_BETA_ISOLATED_TIMING_PLAN_2026_08_26.md`。

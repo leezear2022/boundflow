@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-26 R3-3 active-β isolated timing NO-GO**：6 fresh/180 pairs 的 geomean/bootstrap/worst=
+> `0.668275x/0.629157x/0.599089x`，三项latency gate均失败；absolute allocated/reserved=
+> `1.037109x/1.0x`，incremental allocated worst=`10.9375x`，12/12 tamper。只允许claim
+> `VALIDATED-NO-GO-R3-3-S-ISOLATED-PHYSICS`；correctness保留，R3-4/same-solver关闭。
+
 > **2026-08-26 R3-3 active-β correctness claim边界**：固定 S-anchor `31/Gemm_14` 的 5 fresh/
 > 20 metrics 全过，max diff=`8.64267e-7`，β gradient=30/30 nonzero，12/12 tamper，全量=
 > `1653 passed,3 skipped`。可 claim=`VALIDATED-R3-3-S-ACTIVE-BETA-CORRECTNESS`；只开放另行

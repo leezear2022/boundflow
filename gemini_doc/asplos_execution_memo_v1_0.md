@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-26 R3-3 isolated timing正式NO-GO，只开放只读归因**：source=`947eb61`，
+> geomean/bootstrap/worst=`0.668275x/0.629157x/0.599089x`，12/12 tamper，full=
+> `1658 passed,3 skipped`。保留active-β correctness，停止当前fixed schedule的R3-4扩展。见
+> `BOUNDFLOW_R3_3_ACTIVE_BETA_TIMING_FORMAL_NO_GO_CLOSURE_2026_08_26.md`。
+
 > **2026-08-26 R3-3 isolated timing 预注册**：固定 S-anchor public-PyTorch CUDA dense
 > reconstruction+autograd baseline 对 cache-hit sparse Linear TIR custom wrapper；6 fresh、AB/BA、
 > 10 warmup/30 pairs，GO=`geomean>=1.05x/bootstrap>=1.00x/worst>=0.98x/memory<=1.05x`。
