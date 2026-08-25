@@ -1,5 +1,10 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-25 R3-D1-A residual11 correctness关闭**：source=`8fc15be`，5 fresh三方对照最大diff=
+> `8.04557e-7`、sign exact、10/10 tamper、2 launch/1 scratch、无persistent dense A。未计时、无
+> performance claim；只开放residual6 staged correctness，D1-B/C与R3-3仍关闭。见
+> `BOUNDFLOW_R3_D1A_RESIDUAL11_FORMAL_CLOSURE_2026_08_25.md`。
+
 > **2026-08-25 R3-D0关闭，只开放R3-D1-A**：source=`4232069`的5 fresh microphysics formal得到
 > compiled-region share=`99.6627%–99.7257%`、worst required=`9.3180x ≤ 10x`；Graph物理门禁5/5
 > false，12/12 fully re-signed tamper拒绝。只开放residual11 staged factorization correctness；D1 timing、

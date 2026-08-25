@@ -4,6 +4,7 @@
 # pylint: disable=too-many-locals,too-many-statements,too-many-branches
 # pylint: disable=too-many-boolean-expressions,missing-function-docstring
 # pylint: disable=import-outside-toplevel,not-callable
+# pylint: disable=duplicate-code
 
 from __future__ import annotations
 
@@ -355,7 +356,11 @@ def replay(output: Path) -> dict[str, object]:
         raise ValueError("R3-D1 artifact boundary differs")
     protocol_copy = dict(protocol)
     protocol_hash = protocol_copy.pop("protocol_hash", None)
-    if _hash(protocol_copy) != protocol_hash:
+    if (
+        _hash(protocol_copy) != protocol_hash
+        or manifest.get("protocol_hash") != protocol_hash
+        or manifest.get("summary_hash") != summary.get("summary_hash")
+    ):
         raise ValueError("R3-D1 protocol hash differs")
     files = manifest.get("files")
     if not isinstance(files, Mapping) or any(

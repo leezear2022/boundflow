@@ -1,5 +1,9 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新：R3-D1-A residual11 staged correctness正式通过，5 fresh三方max diff=`8.04557e-7`、10/10
+tamper、无计时。只开放residual6 staged correctness；见
+`BOUNDFLOW_R3_D1A_RESIDUAL11_FORMAL_CLOSURE_2026_08_25.md`。
+
 当前最新：R3-D0 microphysics以`VALIDATED-R3-D0-COMPILED-REGION-SCHEDULE-OPPORTUNITY`关闭；
 compiled share=`99.6627%–99.7257%`、worst required=`9.3180x`，Graph 5/5 false，12/12 tamper。
 只开放R3-D1-A residual11 staged factorization correctness，尚无performance claim。见

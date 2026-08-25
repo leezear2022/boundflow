@@ -1,0 +1,57 @@
+{
+  "d1a_residual11_correctness": true,
+  "d1b_timing_open": false,
+  "element_count": 61500,
+  "launch_count_per_run": 2,
+  "maximum_diff": 8.045568298253869e-07,
+  "metrics": [
+    {
+      "candidate_oracle_bias_diff": 4.4692896117304315e-07,
+      "candidate_oracle_output_diff": 3.020774368145407e-08,
+      "candidate_reference_bias_diff": 3.5762786865234375e-07,
+      "candidate_reference_output_diff": 1.043081283569336e-07,
+      "reference_oracle_bias_diff": 8.045568298253869e-07,
+      "reference_oracle_output_diff": 9.150149860026602e-08
+    },
+    {
+      "candidate_oracle_bias_diff": 4.4692896117304315e-07,
+      "candidate_oracle_output_diff": 3.020774368145407e-08,
+      "candidate_reference_bias_diff": 3.5762786865234375e-07,
+      "candidate_reference_output_diff": 1.043081283569336e-07,
+      "reference_oracle_bias_diff": 8.045568298253869e-07,
+      "reference_oracle_output_diff": 9.150149860026602e-08
+    },
+    {
+      "candidate_oracle_bias_diff": 4.4692896117304315e-07,
+      "candidate_oracle_output_diff": 3.020774368145407e-08,
+      "candidate_reference_bias_diff": 3.5762786865234375e-07,
+      "candidate_reference_output_diff": 1.043081283569336e-07,
+      "reference_oracle_bias_diff": 8.045568298253869e-07,
+      "reference_oracle_output_diff": 9.150149860026602e-08
+    },
+    {
+      "candidate_oracle_bias_diff": 4.4692896117304315e-07,
+      "candidate_oracle_output_diff": 3.020774368145407e-08,
+      "candidate_reference_bias_diff": 3.5762786865234375e-07,
+      "candidate_reference_output_diff": 1.043081283569336e-07,
+      "reference_oracle_bias_diff": 8.045568298253869e-07,
+      "reference_oracle_output_diff": 9.150149860026602e-08
+    },
+    {
+      "candidate_oracle_bias_diff": 4.4692896117304315e-07,
+      "candidate_oracle_output_diff": 3.020774368145407e-08,
+      "candidate_reference_bias_diff": 3.5762786865234375e-07,
+      "candidate_reference_output_diff": 1.043081283569336e-07,
+      "reference_oracle_bias_diff": 8.045568298253869e-07,
+      "reference_oracle_output_diff": 9.150149860026602e-08
+    }
+  ],
+  "performance_claimed": false,
+  "persistent_dense_a": false,
+  "residual6_open": true,
+  "run_count": 5,
+  "scratch_count": 1,
+  "sign_exact": true,
+  "summary_hash": "f7e0d6a75229f594449eecec47ff405d757338978c2ca3f04dbc9fd41503cf1b",
+  "timing_recorded": false
+}

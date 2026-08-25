@@ -1,0 +1,19 @@
+{
+  "files": {
+    "protocol.json": "cf0fcd4aad7f53705137e6b1680978bcad57d1c4a72cefba203da37751ed6a36",
+    "raw/run-00.pt": "7d96d8f1b8d3389de7f3917b6fa635304f29ace3cf27178a2c0a93ffbbd6c8d6",
+    "raw/run-01.pt": "967634157e6a2833f1022aee2c28697e1c6e960dafe4a8e52e410f38d0cdeb69",
+    "raw/run-02.pt": "b18a8a8da0706e1e5079137d83f75fb7b3956aa9f9c94834f11580e6e69bebeb",
+    "raw/run-03.pt": "f3b762263d6a833493fd190fb6c5fea04e6275e07ce02cc660d86ab8dac6663f",
+    "raw/run-04.pt": "e92c8fdb22f71358a216a7c7432bd94a872ab5c7c8de28f177e65f3d8fe2b28d",
+    "summary.json": "fbb7caef5126b5b9e1edfddf97ae575245a0d5019170c86c013c75a727c50667",
+    "tamper_report.json": "33c450f0d42adb77d9ab86b2fbff6b42ffe0d1dee8718bb7d8814c07c1423a8d"
+  },
+  "manifest_hash": "575f4a5412893a4d23d78a54bdf87a1a835cd77ee9012de84e876edb8ea73490",
+  "performance_claimed": false,
+  "protocol_hash": "3a99958144d8404974573856b6cdd8ccbb111bba38c219439139405d263e70ad",
+  "schema_version": "boundflow.r3-d1a-residual11-manifest/v1",
+  "source_git_head": "8fc15be38fc9d05e51b44c9dd775d4594386eec6",
+  "summary_hash": "f7e0d6a75229f594449eecec47ff405d757338978c2ca3f04dbc9fd41503cf1b",
+  "timing_recorded": false
+}

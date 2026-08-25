@@ -1,5 +1,8 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-25 当前状态：D1-A residual11通过，residual6 correctness开放**：5 fresh/10 tamper通过，
+> max diff=`8.04557e-7`，未计时。D1-B/C、R3-3与same-solver关闭。
+
 > **2026-08-25 当前状态：R3-D0正式关闭，R3-D1-A开放**：5 fresh formal全部通过calibration/sanity，
 > Graph route关闭，compiled-region worst required=`9.3180x ≤ 10x`，12/12 tamper拒绝。下一只实现
 > residual11 staged factorization correctness；没有performance claim，D1-B/C与R3-3关闭。

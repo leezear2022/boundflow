@@ -1,5 +1,9 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-25 R3-D1-A claim边界**：可claim residual11两阶段factorization在生产输入上与v1及独立
+> float64 oracle等价（max diff=`8.04557e-7`），且ownership合同成立；不得claim任何speedup、D1-B
+> 已开放或whole wrapper改善。只开放residual6 correctness。
+
 > **2026-08-25 R3-D0 claim边界**：可claim只读归因证明当前R3-2B candidate的compiled region占
 > `99.6627%–99.7257%`、whole-region worst required=`9.3180x`，因此存在预注册D1 schedule
 > opportunity；不得claim已加速、Graph有效、R3-3开放或same-solver收益。见

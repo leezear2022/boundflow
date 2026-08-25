@@ -1,6 +1,7 @@
 """Formal replay gate for D1-A residual11 correctness."""
 
 from pathlib import Path
+import json
 
 import pytest
 
@@ -25,3 +26,13 @@ def test_r3d1_residual11_formal_opens_only_residual6_correctness() -> None:
     summary = replay(ARTIFACT)
     assert summary["residual6_open"] is True
     assert summary["d1b_timing_open"] is False
+
+
+def test_r3d1_residual11_tamper_report_rejects_all_cases() -> None:
+    path = ARTIFACT / "tamper_report.json"
+    if not path.exists():
+        pytest.skip("R3-D1-A tamper report is not generated yet")
+    report = json.loads(path.read_text(encoding="utf-8"))
+    assert report["case_count"] == 10
+    assert report["rejected_count"] == 10
+    assert all(row["rejected"] is True for row in report["cases"])

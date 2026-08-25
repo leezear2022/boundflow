@@ -1,5 +1,5 @@
 ---
-status: implemented-awaiting-five-fresh-formal
+status: formal-validated
 updated: 2026-08-25T15:55:00+08:00
 type: changelog
 topic: boundflow
@@ -31,5 +31,5 @@ stage: s01
 
 ## 下一步
 
-提交干净source后运行5 fresh correctness artifact与fully re-signed tamper。通过前residual6、D1-B timing和
-D1-C wrapper保持关闭。
+5 fresh correctness artifact与10/10 fully re-signed tamper已通过；只开放residual6 correctness，D1-B
+timing和D1-C wrapper保持关闭。
