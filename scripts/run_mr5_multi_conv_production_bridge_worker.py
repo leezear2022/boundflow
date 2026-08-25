@@ -6,6 +6,7 @@
 # pylint: disable=too-many-locals,too-many-statements,too-many-branches
 # pylint: disable=too-many-boolean-expressions,too-few-public-methods
 # pylint: disable=line-too-long
+# pylint: disable=duplicate-code
 # mypy: disable-error-code=import-untyped
 
 from __future__ import annotations
