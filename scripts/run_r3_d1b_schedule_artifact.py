@@ -86,6 +86,37 @@ def _median(values: object) -> float:
     return statistics.median(numbers)
 
 
+def _validate_protocol(protocol: Mapping[str, Any]) -> None:
+    required = {
+        "schema_version",
+        "source_git_head",
+        "run_count",
+        "warmup_count",
+        "sample_count",
+        "winner_threads_per_block",
+        "winner_schedule_kind",
+        "isolated_opportunity_gate",
+        "residual11_manifest_sha256",
+        "residual6_manifest_sha256",
+        "calibration_sha256",
+        "code_revision",
+        "wrapper_performance_claimed",
+        "protocol_hash",
+    }
+    if (
+        set(protocol) != required
+        or protocol["schema_version"] != "boundflow.r3-d1b-schedule-protocol/v1"
+        or protocol["run_count"] != RUN_COUNT
+        or protocol["warmup_count"] != 2
+        or protocol["sample_count"] != 10
+        or protocol["winner_threads_per_block"] != 256
+        or protocol["winner_schedule_kind"] != "two-kernel-serial-reduction"
+        or protocol["isolated_opportunity_gate"] != GATE
+        or protocol["wrapper_performance_claimed"] is not False
+    ):
+        raise ValueError("R3-D1B protocol contract differs")
+
+
 def _validate_raw(
     raw: Mapping[str, Any], protocol: Mapping[str, Any]
 ) -> dict[str, float]:
@@ -185,6 +216,18 @@ def _summarize(
     ):
         raise ValueError("R3-D1B fresh process inventory differs")
     metrics = [_validate_raw(raw, protocol) for raw in raws]
+    receipt_names = (
+        "candidate_scheduled_tir_hash",
+        "candidate_device_source_hash",
+        "baseline_scheduled_tir_hash",
+        "baseline_device_source_hash",
+    )
+    receipts = {
+        tuple(raw["measurement"][name] for name in receipt_names) for raw in raws
+    }
+    environments = {_canonical(raw["environment"]) for raw in raws}
+    if len(receipts) != 1 or len(environments) != 1:
+        raise ValueError("R3-D1B fresh compiler/environment receipt differs")
     speedups = [metric["speedup"] for metric in metrics]
     summary: dict[str, Any] = {
         "schema_version": "boundflow.r3-d1b-schedule-summary/v1",
@@ -286,6 +329,7 @@ def replay(output: Path) -> dict[str, Any]:
     protocol_hash = protocol_copy.pop("protocol_hash", None)
     if protocol_hash != _hash(protocol_copy):
         raise ValueError("R3-D1B protocol hash differs")
+    _validate_protocol(protocol)
     summary_copy = dict(summary)
     summary_hash = summary_copy.pop("summary_hash", None)
     if summary_hash != _hash(summary_copy):

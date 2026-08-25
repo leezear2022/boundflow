@@ -30,3 +30,9 @@ stage: s01
 - five-fresh 完成前不形成 formal claim；
 - 通过后只允许 claim isolated residual6+11 固定 schedule qualification；
 - `wrapper_performance_claimed=false`，D1-C 仍需独立 cumulative 10/9 wrapper protocol。
+
+## 预生成 tamper 修正
+
+首版 duration tamper 只改一个非中位数样本，统计上不会改变 median，因而被正确接受。该探针已改为
+重写完整 10 样本数组；同时 replay 新增强制：五个 fresh compiler receipt 完全一致、environment receipt
+完全一致、protocol 的 winner/sample/gate/claim 字段精确匹配。修正后 10/10 fully re-signed tamper 均拒绝。

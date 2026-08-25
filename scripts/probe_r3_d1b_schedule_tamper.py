@@ -91,7 +91,9 @@ def run(artifact: Path) -> dict[str, object]:
     cases: tuple[tuple[str, Callable[[Path], None]], ...] = (
         (
             "duration",
-            lambda root: _mutate_raw(root, ("measurement", "candidate_ms", "0"), 10.0),
+            lambda root: _mutate_raw(
+                root, ("measurement", "candidate_ms"), [10.0] * 10
+            ),
         ),
         (
             "derived-speedup",
