@@ -1,5 +1,13 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新调研（不改变执行顺序）：基于MR7 raw、现有Bound/Plan/Task/Schedule/R3/CIBC代码和TVM
+Relax/TIR、MLIR、OpenXLA、PyTorch 2、CUDA Graph一手资料，新增verification-aware图编译、guarded
+rewrite、physical arena/execution graph路线。结论是BoundFlow保有验证语义和合法性，Relax/TIR承担图融合
+与kernel lowering，物理runtime承担arena/stream/event/command graph。本文`performance_claimed=false`，
+当前唯一执行动作仍是MR7-R；见
+`BOUNDFLOW_MR7_GRAPH_COMPILER_RULE_RUNTIME_RESEARCH_PLAN_2026_08_26.md`与
+`BOUNDFLOW_MR7_GRAPH_COMPILER_RULE_RUNTIME_RESEARCH_CHANGELOG_2026_08_26.md`。
+
 最新：MR7已完整执行但正式状态为`INVALID_MR7_ATTRIBUTION`；第1组profile/control扰动=
 `1.239399 >1.10`，因此不得从诊断性的`25.891 ms/19.818%`host boundary或`8.692%`device kernel
 开放优化。下一唯一动作是MR7-R的5 pair unprofiled ledger qualification。见
