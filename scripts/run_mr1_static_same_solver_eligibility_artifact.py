@@ -165,6 +165,12 @@ def generate(output: Path) -> dict[str, object]:
         _write_jsonl(temporary / "ledger.jsonl", ledger)
         _write(temporary / "coverage.json", coverage)
         _write(temporary / "summary.json", summary)
+        (temporary / "replay_stdout.txt").write_text(
+            "MR1 replay PASS: "
+            f"eligible={summary['eligible_target_model_call_count']}/"
+            f"{summary['target_model_call_count']} verdict={summary['verdict']}\n",
+            encoding="utf-8",
+        )
         files = {
             str(path.relative_to(temporary)): _file_hash(path)
             for path in sorted(temporary.rglob("*"))

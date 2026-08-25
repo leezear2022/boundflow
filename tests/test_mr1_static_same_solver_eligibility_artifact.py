@@ -22,6 +22,11 @@ def test_generate_and_replay_temporary_artifact(tmp_path: Path) -> None:
     replayed = replay(output)
     assert generated == replayed
     assert generated["eligible_target_model_call_count"] == 0
+    assert (
+        (output / "replay_stdout.txt")
+        .read_text(encoding="utf-8")
+        .startswith("MR1 replay PASS: eligible=0/51")
+    )
 
 
 def test_formal_artifact_replays_when_present() -> None:
