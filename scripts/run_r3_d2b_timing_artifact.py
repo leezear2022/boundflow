@@ -209,18 +209,19 @@ def _summary(raws: list[dict[str, Any]]) -> dict[str, Any]:
         "region_gate": 11.8762,
         "parity_gate": parity,
         "research_gate": research,
-        "verdict": (
-            "VALIDATED-R3-D2B-WRAPPER-RESEARCH"
+        "provisional_verdict": (
+            "RESEARCH-GATE-PASSED-PENDING-TAMPER"
             if research
             else (
-                "VALIDATED-REDUCED-R3-D2B-PARITY"
+                "PARITY-GATE-PASSED-PENDING-TAMPER"
                 if parity
-                else "VALIDATED-NO-GO-R3-D2B-WRAPPER"
+                else "NO-GO-GATE-PENDING-TAMPER"
             )
         ),
-        "r3_3_open": research,
+        "timing_closure_pending_tamper": True,
+        "r3_3_open": False,
         "same_solver_open": False,
-        "performance_claimed": research,
+        "performance_claimed": False,
     }
     result["summary_hash"] = _hash(result)
     return result
@@ -251,7 +252,7 @@ def replay(root: Path) -> dict[str, Any]:
     ):
         raise ValueError("R3-D2B timing replay differs")
     print(
-        f"R3-D2B timing replay PASS: geomean={summary['candidate_native_geomean']:.4f} worst={summary['candidate_native_worst']:.4f} verdict={summary['verdict']}"
+        f"R3-D2B timing replay PASS: geomean={summary['candidate_native_geomean']:.4f} worst={summary['candidate_native_worst']:.4f} verdict={summary['provisional_verdict']}"
     )
     return summary
 
