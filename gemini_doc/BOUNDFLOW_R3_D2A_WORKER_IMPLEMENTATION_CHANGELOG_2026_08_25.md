@@ -45,3 +45,8 @@ formal 尚未生成前，基于 D1-B 已验证 worst `56.8625x` 的同构 residu
 已存的 diff 字段，没有从冻结 D1-C raw 重新计算，导致该 tamper 被接受。replay 已改为按 run index 加载
 D1-C formal terminal，独立重算 lower/α diff 与 sign；加固后必须重新提交源码并重跑全部 five-fresh，
 首轮 raw 不进入正式 artifact。
+
+第二轮 raw 暴露另一项 scope 问题：两个 profile worker 比对应 formal D1-C 慢约`13%–14%`，直接用
+`phase_cuda/formal_host` 得到最多`1.0126`的非物理 share。summary 已改为先在同一 worker 计算
+`phase_cuda/profile_host`，再乘 `formal_host/profile_host` calibration scale 投影 formal duration；
+required-speedup 只使用投影后的同 scope duration。第二轮 raw 同样不进入正式 artifact，必须再次重跑。

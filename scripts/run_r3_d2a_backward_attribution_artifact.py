@@ -267,6 +267,8 @@ def _row(raw: Mapping[str, Any]) -> dict[str, Any]:
     _validate_worker(raw)
     total_ms = float(raw["formal_reference_d1c_ns"]) / 1_000_000.0
     native_ms = float(raw["formal_reference_native_ns"]) / 1_000_000.0
+    profile_host_ms = float(raw["host_wrapper_ns"]) / 1_000_000.0
+    calibration_scale = total_ms / profile_host_ms
     totals = raw["phase_totals_ms"]
     assert isinstance(totals, Mapping)
     phase_values = {
@@ -277,14 +279,18 @@ def _row(raw: Mapping[str, Any]) -> dict[str, Any]:
         "terminal_backward_residual": float(raw["terminal_backward_residual_ms"]),
     }
     phases = {}
-    for name, region_ms in phase_values.items():
-        parity_physical, parity_required = _required(region_ms, total_ms, native_ms)
+    for name, raw_region_ms in phase_values.items():
+        calibrated_region_ms = raw_region_ms * calibration_scale
+        parity_physical, parity_required = _required(
+            calibrated_region_ms, total_ms, native_ms
+        )
         research_physical, research_required = _required(
-            region_ms, total_ms, native_ms / 1.20
+            calibrated_region_ms, total_ms, native_ms / 1.20
         )
         phases[name] = {
-            "duration_ms": region_ms,
-            "formal_wrapper_share": region_ms / total_ms,
+            "raw_duration_ms": raw_region_ms,
+            "calibrated_duration_ms": calibrated_region_ms,
+            "formal_wrapper_share": raw_region_ms / profile_host_ms,
             "parity_physical": parity_physical,
             "parity_required_speedup": parity_required,
             "research_physical": research_physical,
@@ -293,9 +299,10 @@ def _row(raw: Mapping[str, Any]) -> dict[str, Any]:
     symbol_totals = {name: sum(values) for name, values in raw["symbol_ms"].items()}
     return {
         "run_index": raw["run_index"],
-        "profile_host_ms": float(raw["host_wrapper_ns"]) / 1_000_000.0,
+        "profile_host_ms": profile_host_ms,
         "formal_d1c_ms": total_ms,
         "formal_native_ms": native_ms,
+        "phase_to_formal_calibration_scale": calibration_scale,
         "profile_sanity_ratio": float(raw["host_wrapper_ns"])
         / float(raw["formal_reference_d1c_ns"]),
         "phases": phases,
