@@ -1,5 +1,5 @@
 ---
-status: implemented-formal-run-pending
+status: validated-no-go-closed
 updated: 2026-08-26T13:30:00+08:00
 type: changelog
 topic: boundflow
@@ -42,3 +42,8 @@ formal可能NO-GO，不参与最终结论。正式raw必须从clean implementati
 首次 clean-source formal 在 source=`3080af6` 得到预期 NO-GO，但第一类 tamper 只改一个非中位
 样本，无法改变派生summary，因而被replay接受。该 artifact 不作为最终证据。修正攻击为整组20个
 latency样本的全重签改写，不修改门槛、worker或统计协议；修正source后必须从worker 0重跑formal。
+
+最终source=`651e432`已从worker 0重跑：17对geomean/bootstrap upper/worst=
+`2.137191/2.153191/2.163574x`，三门禁均失败；12/12 tamper通过。最终状态=
+`VALIDATED-NO-GO-MR0-EXPLICIT-EVENT-BUDGET`，MR1/same-solver/R2关闭。专项=`10 passed`，
+全量=`1677 passed,3 skipped`。
