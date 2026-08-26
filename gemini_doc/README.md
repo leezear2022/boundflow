@@ -1,11 +1,17 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新执行：GC0-1 capture/analysis已完成文档预注册，状态=
+`PREREGISTERED-NOT-IMPLEMENTED-NOT-RUN-GC0-1`。核心是provider-neutral capture、deterministic
+use-def/postdominator/effect/alias/dense-lineage分析，以及shallow/full witness分层。尚无实现；下一只做
+预注册外审。见`BOUNDFLOW_GC0_1_CAPTURE_ANALYSIS_PREREGISTRATION_PLAN_2026_08_26.md`与
+`BOUNDFLOW_GC0_1_CAPTURE_ANALYSIS_PREREGISTRATION_CHANGELOG_2026_08_26.md`。
+
 最新执行：GC0-0已通过独立外审并关闭，状态=
 `VALIDATED-GC0-0-GENERIC-VERIFICATION-GRAPH-SCHEMA`。只证明通用schema与fail-closed identity，
 不证明capture/analysis/lowering/runtime/performance；唯一后继是GC0-1 capture/analysis预注册。见
 `BOUNDFLOW_GC0_0_VERIFICATION_GRAPH_SCHEMA_EXTERNAL_AUDIT_CLOSURE_2026_08_26.md`。
 
-最新执行：GC0-0 generic verification graph schema已实现并完成内部验证，状态=
+历史（已由上方GC0-0外审关闭取代）：GC0-0 generic schema内部验证状态=
 `INTERNALLY-VALIDATED-GC0-0-GENERIC-SCHEMA-PENDING-EXTERNAL-AUDIT`。22类拒绝原因分为15类direct与
 7类GC0-1 analysis-only；empty-β Conv、active-β Linear、multi-Conv 10/9仅做canonical round-trip。
 尚无capture、legality analysis、Relax/TIR lowering、physical runtime、production执行或性能claim。

@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev014725
-last_va: ev014726
+last_ch: ev014743
+last_va: ev014747
 blk: none
-next: write-gc0-1-capture-analysis-preregistration
-updated: 2026-08-26T02:39:27Z
+next: validate-and-deliver-gc0-1-preregistration-audit
+updated: 2026-08-26T02:49:54Z

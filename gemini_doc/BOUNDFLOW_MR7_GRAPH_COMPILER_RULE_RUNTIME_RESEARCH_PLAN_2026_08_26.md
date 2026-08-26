@@ -11,7 +11,8 @@ performance_claimed: false
 
 # 基于 MR7 的 BoundFlow 图编译、验证规则与物理运行时调研计划
 
-> **2026-08-26执行状态更新**：MR7-R已正式通过，boundary median=`20.333%/24.684 ms`、5/5过
+> **历史（已由下方GC0-0关闭与GC0-1预注册状态取代）：2026-08-26执行状态更新**：MR7-R已正式
+> 通过，boundary median=`20.333%/24.684 ms`、5/5过
 > 门禁，required region speedup=`1.91214x`。GC-0/FCR-1预注册已由外审批准并关闭；GC0-0通用
 > schema与direct negative legality tests已实现并完成内部验证，待独立外审。capture、analysis、
 > lowering、runtime与timing仍关闭，`performance_claimed=false`；GC0-0外审批准后才允许预注册
@@ -20,6 +21,9 @@ performance_claimed: false
 > **2026-08-26后继状态**：GC0-0已由独立外审批准并关闭；只开放GC0-1 capture/analysis预注册，
 > 不开放实现、lowering、runtime或timing。GC0-1必须把schema-level shallow rejection与具有完整
 > graph witness的analysis rejection分开计数。
+
+> **2026-08-26最新后继**：GC0-1 capture/analysis预注册已冻结，待独立外审；尚无实现或admission
+> 结果。批准后也只允许bounded metadata capture/analysis，不开放lowering/runtime/timing。
 
 ## 0. 文档地位与一句话结论
 

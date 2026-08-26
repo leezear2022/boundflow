@@ -1,11 +1,15 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-26 当前执行：GC0-1 capture/analysis已预注册，待独立外审**：只冻结source snapshot、
+> generic adapter、A0—A8 analysis与full causal witness协议。当前没有GC0-1代码或artifact；下一步只审计
+> 预注册，批准后才允许实现。lowering/runtime/timing继续关闭。
+
 > **2026-08-26 当前状态：GC0-0外审批准并关闭，只开放GC0-1预注册**：正式状态=
 > `VALIDATED-GC0-0-GENERIC-VERIFICATION-GRAPH-SCHEMA`。外审确认schema、22 reason、三类fixture、
 > canonical hash/tamper、非执行registry与1832+3回归全部成立。minor要求GC0-1区分schema-level
 > shallow policy rejection与full analysis witness。当前不得实现GC0-1；下一只写预注册并外审。
 
-> **2026-08-26 当前执行：GC0-0 generic schema已实现并完成内部验证，待独立外审**：通用
+> **历史（已由上方GC0-0外审关闭取代）：2026-08-26 GC0-0内部验证状态**：通用
 > `Program/Region/Value/Op/Effect/VJP/Rule/LegalityResult/Module`、canonical identity与22类拒绝原因
 > 分层已落地；三类fixture仅证明schema表达与round-trip。没有capture、analysis、lowering、arena、
 > runtime、production执行或计时。下一唯一动作是GC0-0外审；批准后只开放GC0-1预注册，不能越级

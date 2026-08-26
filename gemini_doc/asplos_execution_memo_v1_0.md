@@ -1,12 +1,18 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-26 GC0-1 capture/analysis已预注册，待独立外审**：冻结provider-neutral snapshot、三类
+> adapter、deterministic capture、A0—A8 use-def/boundary/postdominator/effect/residual/alias/dense-VJP
+> analysis、shallow/full witness分层、15 direct+7 analysis negative、five-fresh replay与16类tamper。
+> 尚无实现或raw，`implementation_open=false/timing_open=false/performance_claimed=false`。下一唯一
+> 动作是独立外审本文，批准后才允许一次bounded GC0-1 implementation/formal提交。
+
 > **2026-08-26 GC0-0外审批准并正式关闭，只开放GC0-1预注册**：状态=
 > `VALIDATED-GC0-0-GENERIC-VERIFICATION-GRAPH-SCHEMA`；Round 1为0 blocker/major、1 minor、1 info，
 > 11/49/full 1832+3均通过。schema-level shallow policy拒绝不得冒充full graph analysis witness；
 > GC0-1必须用captured negative graph闭合effect order、external use、alias/lifetime、dense escape等。
 > 当前实现门禁仍关，下一唯一动作是GC0-1 capture/analysis预注册与外审。见GC0-0 external audit closure。
 
-> **2026-08-26 GC0-0通用verification graph schema已实现并完成内部验证，待独立外审**：新增
+> **历史（已由上方GC0-0外审关闭取代）：2026-08-26 GC0-0通用schema内部验证状态**：新增
 > `Program/Region/Value/Op/Effect/VJP/Rule/LegalityResult/Module`的typed、canonical、stable-hash
 > 表示；22类拒绝原因机械分为15类constructor/identity direct与7类GC0-1 analysis-only。empty-β
 > Conv、active-β Linear、multi-Conv 10/9三类fixture只做schema构造与canonical round-trip，不执行

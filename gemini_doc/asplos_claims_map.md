@@ -1,12 +1,17 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-26 GC0-1预注册claim边界**：状态=`PREREGISTERED-NOT-IMPLEMENTED-NOT-RUN-GC0-1`。
+> 只冻结capture/analysis protocol、causal witness、negative graph、replay/tamper与停止条件；尚无adapter、
+> analysis pass、formal artifact或admitted region。`implementation_open=false/timing_open=false/`
+> `performance_claimed=false`；不得claim GC0-2、rewrite、runtime或性能已开放。
+
 > **2026-08-26 GC0-0正式claim**：状态=`VALIDATED-GC0-0-GENERIC-VERIFICATION-GRAPH-SCHEMA`。
 > 可claim通用typed/canonical schema、22 reason vocabulary及15-direct/7-analysis分类、三类signature
 > schema表达和reject-side fail-closed；不得把shallow policy rejection写成full graph analysis，也不得
 > claim capture、legality admission、lowering、runtime、production correctness或性能。只开放GC0-1
 > 预注册，`performance_claimed=false`。
 
-> **2026-08-26 GC0-0 claim边界**：状态=
+> **历史（已由上方GC0-0正式claim取代）：2026-08-26 GC0-0内部验证claim边界**：状态=
 > `INTERNALLY-VALIDATED-GC0-0-GENERIC-SCHEMA-PENDING-EXTERNAL-AUDIT`。可claim通用typed schema、
 > canonical JSON/stable hash、22类拒绝枚举的15 direct/7 analysis-only机械分区，以及三类通用
 > signature fixture round-trip；不得claim capture/legality analysis、Relax/TIR lowering、physical
