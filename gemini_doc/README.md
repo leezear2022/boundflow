@@ -1,5 +1,10 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新执行：GC0-0已通过独立外审并关闭，状态=
+`VALIDATED-GC0-0-GENERIC-VERIFICATION-GRAPH-SCHEMA`。只证明通用schema与fail-closed identity，
+不证明capture/analysis/lowering/runtime/performance；唯一后继是GC0-1 capture/analysis预注册。见
+`BOUNDFLOW_GC0_0_VERIFICATION_GRAPH_SCHEMA_EXTERNAL_AUDIT_CLOSURE_2026_08_26.md`。
+
 最新执行：GC0-0 generic verification graph schema已实现并完成内部验证，状态=
 `INTERNALLY-VALIDATED-GC0-0-GENERIC-SCHEMA-PENDING-EXTERNAL-AUDIT`。22类拒绝原因分为15类direct与
 7类GC0-1 analysis-only；empty-β Conv、active-β Linear、multi-Conv 10/9仅做canonical round-trip。

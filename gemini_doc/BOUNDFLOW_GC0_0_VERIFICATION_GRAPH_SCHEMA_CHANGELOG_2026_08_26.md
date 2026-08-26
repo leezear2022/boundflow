@@ -3,9 +3,14 @@
 date: 2026-08-26
 stage: GC0-0
 parent: `ad23d86ddd2d8dc95b4ad4dd74d6a02710a34bce`
-status: internally-validated-pending-external-audit
+status: externally-approved-closed
 timing-open: false
 performance-claimed: false
+
+> **2026-08-26外审关闭**：exchange `gc0-0-schema-20260826` Round 1 已 approve 并由executor
+> 关闭；0 blocker、0 major、1 minor、1 info。正式状态为
+> `VALIDATED-GC0-0-GENERIC-VERIFICATION-GRAPH-SCHEMA`。唯一后继是GC0-1 capture/analysis
+> 预注册，不是实现。F1/F2 的 shallow-policy/full-analysis 分层约束见独立closure文档。
 
 ## 1. 门禁与范围
 

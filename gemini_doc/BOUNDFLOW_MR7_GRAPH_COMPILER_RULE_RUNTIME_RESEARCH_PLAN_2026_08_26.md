@@ -17,6 +17,10 @@ performance_claimed: false
 > lowering、runtime与timing仍关闭，`performance_claimed=false`；GC0-0外审批准后才允许预注册
 > GC0-1。见MR7-R formal closure、GC-0/FCR-1预注册与GC0-0 changelog。
 
+> **2026-08-26后继状态**：GC0-0已由独立外审批准并关闭；只开放GC0-1 capture/analysis预注册，
+> 不开放实现、lowering、runtime或timing。GC0-1必须把schema-level shallow rejection与具有完整
+> graph witness的analysis rejection分开计数。
+
 ## 0. 文档地位与一句话结论
 
 本文是基于 MR7 raw、当前 BoundFlow/TVM 代码和外部编译系统的一次**架构调研与预设计**，不是新的

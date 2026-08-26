@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-26 GC0-0外审批准并正式关闭，只开放GC0-1预注册**：状态=
+> `VALIDATED-GC0-0-GENERIC-VERIFICATION-GRAPH-SCHEMA`；Round 1为0 blocker/major、1 minor、1 info，
+> 11/49/full 1832+3均通过。schema-level shallow policy拒绝不得冒充full graph analysis witness；
+> GC0-1必须用captured negative graph闭合effect order、external use、alias/lifetime、dense escape等。
+> 当前实现门禁仍关，下一唯一动作是GC0-1 capture/analysis预注册与外审。见GC0-0 external audit closure。
+
 > **2026-08-26 GC0-0通用verification graph schema已实现并完成内部验证，待独立外审**：新增
 > `Program/Region/Value/Op/Effect/VJP/Rule/LegalityResult/Module`的typed、canonical、stable-hash
 > 表示；22类拒绝原因机械分为15类constructor/identity direct与7类GC0-1 analysis-only。empty-β

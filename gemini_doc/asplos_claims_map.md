@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-26 GC0-0正式claim**：状态=`VALIDATED-GC0-0-GENERIC-VERIFICATION-GRAPH-SCHEMA`。
+> 可claim通用typed/canonical schema、22 reason vocabulary及15-direct/7-analysis分类、三类signature
+> schema表达和reject-side fail-closed；不得把shallow policy rejection写成full graph analysis，也不得
+> claim capture、legality admission、lowering、runtime、production correctness或性能。只开放GC0-1
+> 预注册，`performance_claimed=false`。
+
 > **2026-08-26 GC0-0 claim边界**：状态=
 > `INTERNALLY-VALIDATED-GC0-0-GENERIC-SCHEMA-PENDING-EXTERNAL-AUDIT`。可claim通用typed schema、
 > canonical JSON/stable hash、22类拒绝枚举的15 direct/7 analysis-only机械分区，以及三类通用

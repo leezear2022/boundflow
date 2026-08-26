@@ -1,16 +1,18 @@
 {
   "task": "gc0-0-schema-20260826",
   "title": "GC0-0 Generic Verification Graph Schema Audit",
-  "status": "ready_for_audit",
+  "status": "closed",
   "round": 1,
   "executor": "codex-executor",
   "auditor": "external-model-auditor",
-  "approved_round": null,
+  "approved_round": 1,
   "docs": [
     "gc0-0-schema-20260826/request",
-    "gc0-0-schema-20260826/r001/delivery"
+    "gc0-0-schema-20260826/r001/delivery",
+    "gc0-0-schema-20260826/r001/audit",
+    "gc0-0-schema-20260826/closure"
   ],
-  "rev": 3,
+  "rev": 6,
   "created": "2026-08-26T01:02:34Z",
-  "updated": "2026-08-26T01:02:34Z"
+  "updated": "2026-08-26T02:38:22Z"
 }
