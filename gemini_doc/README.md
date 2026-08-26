@@ -1,5 +1,11 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+用户审阅稿（不改变当前执行权威）：基于根README已定义的
+`Frontend/BoundFlow IR→Global Planner→BoundTasks→TVM`主线，新增端到端接通计划。它建议先用CIBC
+IBP证明完整pipeline保住已有图级收益，再接structured CROWN与RVIR same-solver；GC0-1降为Bound
+legality子阶段，现有外审暂缓。见
+`BOUNDFLOW_README_PIPELINE_END_TO_END_ACCELERATION_DRAFT_PLAN_2026_08_26.md`。
+
 最新执行：GC0-1 capture/analysis已完成文档预注册，状态=
 `PREREGISTERED-NOT-IMPLEMENTED-NOT-RUN-GC0-1`。核心是provider-neutral capture、deterministic
 use-def/postdominator/effect/alias/dense-lineage分析，以及shallow/full witness分层。尚无实现；下一只做
