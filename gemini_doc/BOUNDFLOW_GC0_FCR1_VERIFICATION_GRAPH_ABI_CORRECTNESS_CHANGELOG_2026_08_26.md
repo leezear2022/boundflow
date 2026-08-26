@@ -14,7 +14,7 @@ performance-claimed: false
 - 冻结双独立 oracle、五组 fresh、数值/离散/trajectory/rollback 门禁；
 - 冻结 `10/9` region submission、warm per-op crossing/allocation/PyTorch tensor op=0、dense-A=0；
 - 冻结 semantic replay 与 22 类 fully re-signed tamper；
-- 冻结 GC0-0—GC2-2 分阶段提交 DAG、AC1—AC7、GO/NO-GO 与后继开放边界；
+- 冻结 GC0-0—GC2-2 分阶段提交 DAG、Plan-AC1—Plan-AC7、GO/NO-GO 与后继开放边界；
 - 对齐总蓝图的 GC-0/GC-1/GC-2 分层：GC-0 只关 ABI/legality，GC-1 关 rewrite/VJP correctness，
   GC-2 才关真实 arena/runtime；禁止一次提交或一次结论跳级；
 - 明确独立外审批准前 `implementation_open=false`，全阶段 `timing_open=false`、

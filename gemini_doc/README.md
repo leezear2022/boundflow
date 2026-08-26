@@ -1,9 +1,16 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
-最新执行：GC-0/FCR-1 verification graph ABI+correctness已完成预注册，状态=
+最新执行：GC0-0 generic verification graph schema已实现并完成内部验证，状态=
+`INTERNALLY-VALIDATED-GC0-0-GENERIC-SCHEMA-PENDING-EXTERNAL-AUDIT`。22类拒绝原因分为15类direct与
+7类GC0-1 analysis-only；empty-β Conv、active-β Linear、multi-Conv 10/9仅做canonical round-trip。
+尚无capture、legality analysis、Relax/TIR lowering、physical runtime、production执行或性能claim。
+下一步只做GC0-0外审。见
+`BOUNDFLOW_GC0_0_VERIFICATION_GRAPH_SCHEMA_CHANGELOG_2026_08_26.md`。
+
+历史（预注册外审已批准并关闭）：GC-0/FCR-1 verification graph ABI+correctness预注册状态=
 `PREREGISTERED-NOT-IMPLEMENTED-NOT-RUN-GC0-FCR1`。协议冻结通用graph/effect/legality、Relax/TIR
 重编译identity、真实arena/prepared runtime、minimal-saved-state VJP、P empty-β/S active-β/multi-site
-10/9、双oracle、five-fresh replay与22类fully re-signed tamper。独立外审批准前不写实现；timing/
+10/9、双oracle、five-fresh replay与22类fully re-signed tamper。外审只批准了上方GC0-0范围；timing/
 performance继续关闭。见
 `BOUNDFLOW_GC0_FCR1_VERIFICATION_GRAPH_ABI_CORRECTNESS_PLAN_2026_08_26.md`与
 `BOUNDFLOW_GC0_FCR1_VERIFICATION_GRAPH_ABI_CORRECTNESS_CHANGELOG_2026_08_26.md`。

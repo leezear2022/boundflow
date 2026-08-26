@@ -1,12 +1,20 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
-> **2026-08-26 GC-0/FCR-1 ABI+correctness已预注册，待独立外审**：已冻结通用
+> **2026-08-26 GC0-0通用verification graph schema已实现并完成内部验证，待独立外审**：新增
+> `Program/Region/Value/Op/Effect/VJP/Rule/LegalityResult/Module`的typed、canonical、stable-hash
+> 表示；22类拒绝原因机械分为15类constructor/identity direct与7类GC0-1 analysis-only。empty-β
+> Conv、active-β Linear、multi-Conv 10/9三类fixture只做schema构造与canonical round-trip，不执行
+> production region。当前`capture/analysis/lowering/runtime/timing/performance`均未开放；下一唯一动作是
+> GC0-0独立外审，批准后才允许预注册GC0-1，不得直接实现GC0-1。见
+> `BOUNDFLOW_GC0_0_VERIFICATION_GRAPH_SCHEMA_CHANGELOG_2026_08_26.md`。
+
+> **历史（预注册外审已批准并关闭）：2026-08-26 GC-0/FCR-1 ABI+correctness预注册**：已冻结通用
 > `VerificationProgram/Region/Value/Op/Effect/VJP`、analysis-only legality、22类拒绝原因、
 > Relax/TIR重编译identity、真实physical arena/prepared runtime、P empty-β/S active-β/multi-site
 > 10/9三类signature、双独立oracle、five-fresh replay/tamper与AC1—AC7。schema禁止硬编码
 > ResNet/site；warm per-op crossing/allocation/PyTorch tensor op和saved/persistent dense A目标均为0。
-> 当前`implementation_open=false/timing_open=false/performance_claimed=false`；下一唯一动作是独立外审
-> 本预注册，批准后才从GC0-0通用schema与负向合法性测试开始。见
+> 当时`implementation_open=false/timing_open=false/performance_claimed=false`；独立外审随后只批准
+> GC0-0通用schema与负向合法性测试。当前动作以上方GC0-0状态为准。见
 > `BOUNDFLOW_GC0_FCR1_VERIFICATION_GRAPH_ABI_CORRECTNESS_PLAN_2026_08_26.md`。
 
 > **2026-08-26 MR7-R正式通过，只开放GC-0/FCR-1 ABI+correctness预注册**：10 fresh/5 pair

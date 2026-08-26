@@ -1,9 +1,16 @@
 # BoundFlow ASPLOS Claims Map
 
-> **2026-08-26 GC-0/FCR-1预注册claim边界**：状态=
+> **2026-08-26 GC0-0 claim边界**：状态=
+> `INTERNALLY-VALIDATED-GC0-0-GENERIC-SCHEMA-PENDING-EXTERNAL-AUDIT`。可claim通用typed schema、
+> canonical JSON/stable hash、22类拒绝枚举的15 direct/7 analysis-only机械分区，以及三类通用
+> signature fixture round-trip；不得claim capture/legality analysis、Relax/TIR lowering、physical
+> arena/runtime、production replacement、correctness formal或任何speedup。`timing_open=false/`
+> `performance_claimed=false`，GC0-1仍关闭。
+
+> **历史（预注册外审已批准并关闭）：2026-08-26 GC-0/FCR-1预注册claim边界**：状态=
 > `PREREGISTERED-NOT-IMPLEMENTED-NOT-RUN-GC0-FCR1`。本文只冻结通用verification graph/effect/
 > legality/lowering/arena/VJP与correctness协议；尚无schema实现、Relax/TIR region、physical arena、
-> formal raw或correctness结果。独立外审批准前`implementation_open=false`；全阶段
+> formal raw或correctness结果。当时独立外审批准前`implementation_open=false`；全阶段
 > `timing_open=false/performance_claimed=false`。不得claim graph compiler已实现、旧bridge parity、
 > query/queue收益或ASPLOS-ready。
 

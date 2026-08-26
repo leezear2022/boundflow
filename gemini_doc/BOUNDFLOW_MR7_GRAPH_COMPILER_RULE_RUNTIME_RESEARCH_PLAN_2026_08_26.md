@@ -12,9 +12,10 @@ performance_claimed: false
 # 基于 MR7 的 BoundFlow 图编译、验证规则与物理运行时调研计划
 
 > **2026-08-26执行状态更新**：MR7-R已正式通过，boundary median=`20.333%/24.684 ms`、5/5过
-> 门禁，required region speedup=`1.91214x`。GC-0/FCR-1 ABI+correctness现已完成独立预注册，待
-> 外审；`implementation_open=false/timing_open=false/performance_claimed=false`。批准后只开放
-> GC0-0通用schema与negative legality tests。见MR7-R formal closure与GC-0/FCR-1预注册。
+> 门禁，required region speedup=`1.91214x`。GC-0/FCR-1预注册已由外审批准并关闭；GC0-0通用
+> schema与direct negative legality tests已实现并完成内部验证，待独立外审。capture、analysis、
+> lowering、runtime与timing仍关闭，`performance_claimed=false`；GC0-0外审批准后才允许预注册
+> GC0-1。见MR7-R formal closure、GC-0/FCR-1预注册与GC0-0 changelog。
 
 ## 0. 文档地位与一句话结论
 

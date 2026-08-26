@@ -1,12 +1,16 @@
 # BoundFlow GC-0/FCR-1 Verification Graph ABI + Correctness 预注册
 
-status: preregistered-not-implemented-not-run
+> **2026-08-26状态注**：本预注册已由exchange `gc0-fcr1-prereg-20260826` Round 1批准并由
+> executor关闭；批准只开放GC0-0 generic schema/direct negative subset。GC0-1须另行预注册与外审，
+> timing/performance全程关闭。正文门禁保留为冻结合同。
+
+status: preregistered-approved-closed-gc0-0-only
 date: 2026-08-26
 predecessor: `9c5f3867c657078cb6ba980a613b686c5a08f2d2`
 predecessor-state: `VALIDATED_MR7R_HOST_BOUNDARY_OPPORTUNITY`
 timing-open: false
 performance-claimed: false
-implementation-open: false（须先完成独立外审）
+implementation-open: GC0-0-only（外审已批准并由executor关闭；GC0-1及以后仍关闭）
 
 ## 0. 冻结声明
 
@@ -165,7 +169,8 @@ program_hash
 - `semantic_owner="boundflow.verification-graph/v1"`；
 - program ID 来源于 semantic content，不来源于 model filename；
 - region/value/op/effect ID 全局唯一；
-- entry region 可多于一个，但 GC-0 formal 只执行一个 closed lower region；
+- entry region 可多于一个；GC-0 formal 只对一个代表性 closed lower region 做 schema
+  construction、admit/lower ABI 与 canonical replay，不执行 production region；
 - source/parameter/numeric/target identity 任一变化均使 program hash 变化。
 
 ### 4.2 `VerificationRegionV1`
@@ -560,15 +565,31 @@ candidate 不得调用 production oracle 或 closed-form helper；replay 不得�
 
 不得因 observed diff 较小而事后收紧/放宽容差；formal summary 同时披露最大绝对/相对差和 sign count。
 
-### 9.4 结构门禁
+### 9.4 分阶段结构门禁
+
+#### 9.4.1 GC-0 ABI/analysis/lowering 门禁
+
+- GC0-0：三 signature 均可由通用 schema 构造并 canonical round-trip；这不是 legality admission或执行；
+- GC0-0：22 类 rejection enum/schema 完整，直接可触发子集全部 fail closed；
+- GC0-1：三 signature 的 analysis-only legality 与全部 22 类 negative graph 才要求逐项执行；
+- GC0-2：program/region/analysis/rule/lowering/TIR/schedule/symbolic-arena/module hash 稳定；
+- GC-0 全阶段不得记录 timing，不得执行 production candidate region。
+
+#### 9.4.2 GC-1 semantic/VJP 门禁
 
 五组 fresh 均必须满足：
 
-- 三 signature 全 admitted，所有 negative graph 全 rejected；
-- program/region/analysis/rule/lowering/TIR/schedule/arena/module hash 稳定；
+- 三 signature 全 admitted，所有 GC-1 semantic/VJP negative graph 全 rejected；
+- 双 oracle、lower/sign、compressed dα/dβ、state/trajectory/rollback 满足 §9.3；
 - production outer lifecycle=`10 evaluation/9 mutation/1 commit`；
-- region submission=`10 forward/9 backward`；
 - fallback/eager/native shadow=`0/0/0`；
+- semantic/rule/lowering/module identity 全组稳定。
+
+#### 9.4.3 GC-2 physical runtime 门禁
+
+五组 fresh 均必须满足：
+
+- region submission=`10 forward/9 backward`；
 - warm per-op crossing/dynamic allocation/PyTorch tensor op=`0/0/0`；
 - saved/persistent dense A=`0/0`；
 - current device/stream、module、arena pointer、slice offset、lease、epoch按合同保持；
@@ -647,7 +668,9 @@ replay 必须从 raw frozen input/state：
 
 实现只能按以下顺序；每阶段关闭和外审后才允许写下一阶段的实现预注册：
 
-1. `GC0-0 schema`：通用 graph/effect/rule/legality 类型和 22 类拒绝单测；
+1. `GC0-0 schema`：通用 graph/effect/rule/legality 类型、完整22类rejection enum/schema，以及无需
+   analysis pass即可独立触发的constructor/identity/fallback/polarity/VJP负例；依赖拓扑、
+   postdominator、effect-order或alias analysis的negative graph明确留到GC0-1；
 2. `GC0-1 capture-analysis`：从现有 Bound/Task/R3 capture 构建通用 graph，analysis-only legality；
 3. `GC0-2 lowering-arena-abi`：Relax/TIR request、receipt、symbolic arena/lease/epoch identity、
    semantic replay；不执行 production region；
@@ -664,29 +687,33 @@ validation/lint；任何代码实现前必须确认其父提交包含已批准�
 
 ## 12. Acceptance criteria
 
-本文把 acceptance 分成不可跳级的三层。GC-0 只由 AC1—AC3 关闭；GC-1 只由 AC1—AC3 加 AC5/AC6
-中相应 correctness 项关闭；GC-2/FCR-1 最终关闭才要求 AC1—AC7 全部满足。
+本文把 acceptance 分成不可跳级的三层。GC-0 只由 Plan-AC1—Plan-AC3 关闭；GC-1 只由
+Plan-AC1—Plan-AC3 加 Plan-AC5/Plan-AC6 中相应 correctness 项关闭；GC-2/FCR-1 最终关闭才要求
+Plan-AC1—Plan-AC7 全部满足。外部 exchange 中的验收项统一写作 Audit-AC，禁止与本节重名。
 
-### AC1 — 预注册与范围
+### Plan-AC1 — 预注册与范围
 
 - plan 在实现前提交并外审批准；
 - schema/代码不硬编码模型/site；
-- P empty-β、S active-β、multi-site 10/9 三 signature 全覆盖；
+- P empty-β、S active-β、multi-site 10/9 三 signature 全覆盖；GC0-0/GC-0关闭时只要求通用schema
+  construction与canonical round-trip能表达三者，legality admission和production execution分别属于
+  GC0-1与GC-1；
 - timing/performance 字段强制 false。
 
-### AC2 — Graph/legality
+### Plan-AC2 — Graph/legality
 
 - 通用 program/region/value/op/effect/VJP schema canonical/stable；
 - closed-world、external use、postdominator、state/effect/alias/dense escape 都有 witness；
-- 22 类稳定拒绝原因专项测试通过。
+- GC0-0完整冻结22类稳定拒绝枚举并测试无需analysis的直接子集；GC0-1关闭时才要求22类negative
+  graph全部由analysis-only legality逐项拒绝。
 
-### AC3 — Lowering identity
+### Plan-AC3 — Lowering identity
 
 - Relax/TIR/module/schedule/target/source 全链路 hash；
 - replay 重新 lower/compile 后逐层一致；
 - unsupported/different identity 在 launch 前拒绝。
 
-### AC4 — Physical runtime
+### Plan-AC4 — Physical runtime
 
 - arena 是真实运行 storage，不是只读 ledger；
 - persistent view/pointer/lease/epoch identity 成立；
@@ -694,19 +721,19 @@ validation/lint；任何代码实现前必须确认其父提交包含已批准�
 - region submission 精确 `10/9`，fallback/eager/native shadow=0；
 - saved/persistent dense A=0。
 
-### AC5 — Semantics/VJP/trajectory
+### Plan-AC5 — Semantics/VJP/trajectory
 
 - 两个独立 oracle；
 - 五组 fresh 三 signature 数值、sign、owned/unowned gradient、state/effect/trajectory/rollback 全过；
 - max diff 在冻结容差内，离散值 exact。
 
-### AC6 — Artifact/replay/tamper
+### Plan-AC6 — Artifact/replay/tamper
 
 - raw-first、manifest/source/environment 完整、零本机路径；
 - semantic replay 重建 graph→compile→arena→oracle→summary；
 - `22/22` fully re-signed tamper rejected。
 
-### AC7 — 工程质量与 claim
+### Plan-AC7 — 工程质量与 claim
 
 - targeted 与 full test 通过；skip 逐项为冻结环境边界；
 - Black/Mypy/Pylint/diff/DocOps lint 通过；
@@ -717,7 +744,7 @@ validation/lint；任何代码实现前必须确认其父提交包含已批准�
 
 ### 13.1 GO
 
-GC-0 的 AC1—AC3 通过后，状态只能是：
+GC-0 的 Plan-AC1—Plan-AC3 通过后，状态只能是：
 
 ```text
 VALIDATED-GC0-VERIFICATION-GRAPH-ABI
@@ -731,7 +758,7 @@ GC-1 correctness 独立关闭后，状态只能是：
 VALIDATED-GC1-FCR1-GUARDED-REGION-CORRECTNESS
 ```
 
-它只开放 GC-2 physical runtime 预注册。最终 AC1—AC7 全部通过后，状态只能是：
+它只开放 GC-2 physical runtime 预注册。最终 Plan-AC1—Plan-AC7 全部通过后，状态只能是：
 
 ```text
 VALIDATED-FCR1-VERIFICATION-GRAPH-ABI-CORRECTNESS
