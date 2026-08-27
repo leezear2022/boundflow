@@ -1,15 +1,26 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
-用户审阅稿（不改变当前执行权威）：基于根README已定义的
-`Frontend/BoundFlow IR→Global Planner→BoundTasks→TVM`主线，新增端到端接通计划。它建议先用CIBC
-IBP证明完整pipeline保住已有图级收益，再接structured CROWN与RVIR same-solver；GC0-1降为Bound
-legality子阶段，现有外审暂缓。见
-`BOUNDFLOW_README_PIPELINE_END_TO_END_ACCELERATION_DRAFT_PLAN_2026_08_26.md`。
+最新执行（v6 S0，用户已批准）：以ASPLOS’27 September cycle为条件投稿目标，把总体约`10×`
+same-solver complete-query冻结为尚未验证的研究北极星。计划只保留verification semantic lifting、joint
+representation/fusion/lifetime/rematerialization/custom-VJP编译、trajectory-preserving RVIR integration三项
+候选贡献；CIBC作为2023年AAAI’24既有研究起点，B4/R3/NRIR/RVIR/GC0资产全部进入一个cumulative candidate，
+不再新造solver execution IR。S0第二批已用33个explicit transaction target完成两workload×5 pair formal：
+ResNet/MNISTFC最低机制覆盖=`99.632%/99.248%`，observer扰动中位数=`0.996×/0.999×`，S0 attribution已
+admitted。互斥事务预算把O1/O2/O3/O4/O5研究目标冻结为`16×/8×/12×/20×/4×`，ResNet/MNISTFC
+在`h=0`、不计接入成本时的条件式10×投影=`12.562×/11.657×`；这些目标均未验证，所以只开放S1
+canonical compiler path实现，性能门禁和
+performance claim保持关闭。下一只做CIBC `Primal→Bound→Plan→Relax/TIR→Prepared Runtime`纵向闭环。
+见`BOUNDFLOW_README_PIPELINE_END_TO_END_ACCELERATION_DRAFT_PLAN_2026_08_26.md`与
+`BOUNDFLOW_ASPLOS27_S0_EXPLICIT_SOLVER_TRANSACTION_MARKERS_CHANGELOG_2026_08_27.md`。rapid-review两页和CIBC
+增量骨架分别见`BOUNDFLOW_ASPLOS27_RAPID_REVIEW_TWO_PAGE_STORY_DRAFT_2026_08_27.md`、
+`BOUNDFLOW_CIBC_TO_ASPLOS27_CHANGES_NOTE_DRAFT_2026_08_27.md`。
 
-最新执行：GC0-1 capture/analysis已完成文档预注册，状态=
+历史执行状态（其“下一步外审”已由上方v6 ASPLOS’27用户审阅稿覆盖，schema/claim状态仍保留）：GC0-1
+capture/analysis已完成文档预注册，状态=
 `PREREGISTERED-NOT-IMPLEMENTED-NOT-RUN-GC0-1`。核心是provider-neutral capture、deterministic
 use-def/postdominator/effect/alias/dense-lineage分析，以及shallow/full witness分层。尚无实现；下一只做
-预注册外审。见`BOUNDFLOW_GC0_1_CAPTURE_ANALYSIS_PREREGISTRATION_PLAN_2026_08_26.md`与
+预注册外审是旧执行指令；v6获批后只按S0 attribution/cumulative smoke推进。见
+`BOUNDFLOW_GC0_1_CAPTURE_ANALYSIS_PREREGISTRATION_PLAN_2026_08_26.md`与
 `BOUNDFLOW_GC0_1_CAPTURE_ANALYSIS_PREREGISTRATION_CHANGELOG_2026_08_26.md`。
 
 最新执行：GC0-0已通过独立外审并关闭，状态=
