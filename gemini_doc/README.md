@@ -13,6 +13,7 @@ terminal bridge。S3外审批准前代码/timing关闭。见
 `BOUNDFLOW_ASPLOS27_S4_0_ADMISSION_PREFLIGHT_CORRECTION_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_0_LIVE_LEASE_IMPLEMENTATION_READINESS_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1A_ORDERED_BUFFER_ABI_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
+`BOUNDFLOW_ASPLOS27_S4_1A_PREPARE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1BC_DAG_ADJOINT_PREFLIGHT_CORRECTION_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
@@ -35,6 +36,13 @@ correctness阶段必须保留content hash；storage token固定绑定`untyped_st
 非dataclass `__slots__` class并拒绝copy/deepcopy/pickle，S4-0 negative最低扩为44类；receipt进artifact，lease绝不进
 artifact或跨query cache。
 这些是设计修正，不是S4实现或性能结果。
+
+S4-1A prepare事务已进一步冻结：正式12-path CUDA owner探针得到6 α leaf+1 active β leaf+5 empty token，parameter/
+gradient均`4,254 elements / 17,016 B`，base DLPack=`16/16` pointer exact；一次双group Adam后parameter/gradient pointer
+稳定且source hash/version不变。private lease必须保留existing source=`12 tensors / 8,502 elements / 34,008 logical B`，
+incremental allocation=`0`，不能再以“provider source retained”拒绝；真正禁止的是provider container/callback及lease外
+source引用。parameter/buffer/view三阶段故障注入均清理到candidate refs=0、allocated delta=0、source不变，并禁止retry/
+fallback/`empty_cache`。S4-1A negative最低冻结为36类，implementation仍closed。
 
 S4-3进一步确认exact-call不是薄adapter：真实事务还包含KFSB三次batch-24 child CROWN、12条return constructor、
 一次official post、host packet prune和`pre_result.interm_bounds` clear。现有device atomic v1在mid-commit故障时只能

@@ -324,6 +324,9 @@ prepare_s4_mutable_buffers_v1(
 
 该函数先调用lease revalidate，再pack candidate buffer，并把lease ownership transfer进prepared runtime；prepared
 runtime不能保留provider lookup callback，但必须保留强引用lease直到S4-3结束。
+精确two-phase prepare、12-source retention账、16 base DLPack view和三阶段failure cleanup见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_PREPARE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`。S4-0 wrapper进入
+`PREPARING`后无论成功或失败都不得再次prepare；失败关闭lease但不修改source。
 
 ### 5.2 S4-3
 

@@ -10,6 +10,21 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-28：S4-1A冻结two-phase prepare、private lease retention与failure cleanup
+
+- 审计发现旧蓝图自相矛盾：prepared runtime必须把S4-0 strong-ref lease保留到S4-3，却又以
+  `PROVIDER_SOURCE_RETAINED_AFTER_PREPARE`拒绝任何source Tensor；修正为private lease内恰12条source合法且必要，
+  lease外source引用、provider container/callback/closure才拒绝；
+- formal owner CUDA probe得到6 α leaf、1 active β leaf、5 empty token，parameter/gradient均4,254元素/17,016 B，
+  16 base DLPack view全部pointer exact；candidate 16 storage互异且与12 source storage不相交；
+- 一次双param-group Adam后parameter/gradient pointer稳定、LR=`0.0098/0.049`，source hash/version不变；
+- source lease retention probe得到12 tensors/8,502 elements/34,008 logical B，新增allocated bytes=0；外部owner删除后
+  lease合法延长lifetime，close后allocated回到baseline；
+- 冻结Phase A零allocation validation→Phase B local staging→Phase C single-transfer adoption；
+- parameter/buffer/view三阶段异常注入全部`FAILED_CLOSED`、candidate refs=0、allocated delta=0、source不变、stream/device
+  恢复，且retry/fallback/empty-cache=0；
+- S4-1A negative最低冻结为36类；S3/S4-0未批准前implementation、TIR、timing继续closed。
+
 ## 2026-08-28：S4-0 V3冻结pinned PyTorch/CUDA identity与serialization ABI
 
 - 在`torch 2.12.1+cu132/cuda:0`验证view共享storage `_cdata`与storage起始pointer，但Tensor `data_ptr()`受offset影响；

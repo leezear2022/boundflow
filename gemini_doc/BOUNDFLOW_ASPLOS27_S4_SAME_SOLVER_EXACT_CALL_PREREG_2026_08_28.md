@@ -227,6 +227,10 @@ S4-1A ordered buffer/lease/version ABI的精确实施蓝图见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_ORDERED_BUFFER_ABI_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`。六lower-α与
 唯一active β必须是独立contiguous leaf parameter；五empty β只保留token；preserved α不得进入candidate GPU
 optimizer。hot evaluator不得接受dict/callback/tensor override，warm DLPack view creation必须为0。
+prepare事务和失败清理见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_PREPARE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`：private lease必须
+恰好保留12条source Tensor（8,502元素/34,008 logical B，incremental allocation 0），但provider container/callback和
+lease外source引用为0；base view固定16/16；prepare失败clean close且retry/fallback/empty-cache均为0。
 
 S4-1B0/1B三元endpoint纠正与六site graph见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_BOX_ENDPOINT_SUBGRADIENT_CLOSURE_2026_08_28.md`及

@@ -100,7 +100,8 @@ prepared runtime持有：
 - 六个contiguous lower-α parameter buffer，总4,248元素；prepare时从source精确pack，commit时按slot精确copy-out；
 - 一条active β parameter buffer，共6元素；
 - 五个empty β slot（不得为便于实现伪造非空参数）；
-- preserved α direction由immutable host snapshot/source receipt拥有，不进入candidate GPU optimizer；
+- preserved α direction存在于original live full-source Tensor并由private lease强引用，同时由immutable snapshot/receipt绑定
+  digest；它不进入candidate GPU optimizer；
 - S4-2由sealed policy driver建立两个Adam param group，`lrα=0.01/lrβ=0.05`；
 - scheduler decay=`0.98`；
 - S4-1A先建立persistent gradient views，optimizer moments在S4-2 prepare。
@@ -118,8 +119,9 @@ pack/optimizer/copy-out三段在semantic path、slice和identity上完全闭合�
 | dα+dβ | 4,254 | 17,016 |
 | Adam m+v（active参数） | 8,508 | 34,032 |
 
-preserved α另有4,248元素/16,992 logical bytes，但属于host source identity，不计入candidate device parameter/
-gradient/moment账。这是静态设计账，不是实测显存claim。step scalar、allocator元数据、module workspace和terminal
+preserved α另有4,248元素/16,992 logical bytes；source live lease实际强引用12条existing CUDA Tensor、8,502元素/
+34,008 logical bytes，incremental allocation=0。该账不计入candidate new parameter/gradient/moment，但必须披露
+lifetime retention并在S4-3后close。这是静态设计账，不是实测显存claim。step scalar、allocator元数据、module workspace和terminal
 arena另行披露。ordered buffer、empty β token、lease/version与DLPack纪律见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_ORDERED_BUFFER_ABI_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`。
 
@@ -287,7 +289,8 @@ S3外审批准后：
 
 1. S4-0先交付tensor-free compressed slot receipt及不可序列化strong-ref live lease；
 2. S4-1A从current provider mapping逐对象重验并单次接管lease，然后绑定独立leaf lower-α/active-β buffers、empty β
-   token、persistent gradients和ordered ABI；lease持续到S4-3 commit/abort，不在pack后丢弃；
+   token、persistent gradients和ordered ABI；prepare采用validation→local staging→single-transfer，异常逆序清理并
+   `FAILED_CLOSED`；lease持续到S4-3 commit/abort，不在pack后丢弃；
 3. S4-1B0关闭Ainput zero→center三元endpoint，S4-1B/1C完成六V与六路gradient；
 4. S4-1D完成single-evaluation closure；
 5. S4-2A抽出sealed policy driver，以native dense evaluator回归原行为；

@@ -1,5 +1,5 @@
 ---
-status: corrected-v3-implementation-blueprint
+status: corrected-v4-prepare-transaction-frozen-implementation-blueprint
 date: 2026-08-28
 type: implementation-plan
 topic: boundflow
@@ -31,6 +31,9 @@ TIR launch。核心选择是：
 原始source的ephemeral lease。S4-1A必须从current provider mapping复核同一Python object/storage/version后接管该lease，
 不能仅凭receipt稳定group重新取得same-content clone。Plan/Bound/Verification Graph仍由已有owner负责。V3反例与生命周期见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_LIVE_LEASE_IMPLEMENTATION_READINESS_2026_08_28.md`。
+
+prepare两阶段事务、strong-ref retention账和失败清理的最终实施合同见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_PREPARE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`。
 
 ## 1. 为什么不能沿用完整α source作为optimizer参数
 
@@ -90,10 +93,11 @@ terminal时不回填full GPU source；由existing atomic copy-out以immutable so
 S4-1A本身只创建parameter/gradient/lower/upstream与typed tokens；Adam moments由S4-2 sealed policy driver prepare。
 这些是logical design bytes，不是allocator peak、reserved memory或性能claim。
 
-### 2.3 preserved state
+### 2.3 leased existing source与preserved state
 
-4,248 preserved α元素仍在immutable host snapshot/source receipt中，共16,992 logical bytes。它不属于candidate GPU
-parameter、gradient或moment预算。S4-1A只保存per-slot preserved slice hash与source identity。
+S4-0 live lease强引用六个full α、六个β value source，共`8,502 elements / 34,008 logical bytes / 12 tensors`；其中
+4,248 preserved α为16,992 B。lease新增CUDA allocation=`0`，但会延长existing source lifetime，因此必须单列
+`leased existing source`，不能算作candidate new allocation或完全省略。
 
 ## 3. 建议新增模块和类型
 
@@ -136,6 +140,7 @@ beta_device_initial_hash
 ```
 
 runtime对象可以持有tensor，但其`metadata()`/artifact receipt不得序列化tensor或raw pointer。
+该对象必须是非dataclass `__slots__` class并拒绝copy/deepcopy/pickle；不能让`dataclasses.asdict()`递归进入Tensor。
 
 ### 3.3 `PreparedS4MutableBuffersV1`
 
@@ -150,6 +155,8 @@ runtime对象可以持有tensor，但其`metadata()`/artifact receipt不得序�
 - 建立prepare-only DLPack views；
 - 维护state/evaluation/result lease版本；
 - 提供tensor-free preparation receipt。
+- 只在private lease内保留恰好12条provider source Tensor；禁止provider container/callback和lease外source引用；
+- prepare任一步失败时按view→buffer→lease固定逆序清理并进入`FAILED_CLOSED`，禁止retry/fallback。
 
 建议属性：
 
@@ -168,9 +175,12 @@ fixed_upstream                  # [D,1], frozen -1 for -lower.sum()
 state_version
 evaluation_generation
 lease_state
+prepare_state                  # OPEN/PREPARING/TRANSFERRED/FAILED_CLOSED
 ```
 
 `beta_slot_to_physical_ordinal`属于static tuple，不允许hot path按semantic path查dict。
+`PreparedS4MutableBuffersV1`同样是非dataclass `__slots__` class并拒绝copy/deepcopy/pickle；artifact只接受独立frozen
+preparation receipt，不递归遍历prepared owner。
 
 ## 4. ordered evaluator ABI
 
@@ -247,7 +257,7 @@ PREPARED(state_version=0)
 
 S4-1A只实现/测试状态机与buffer owner，不执行真实evaluation；S4-1D才用compiled evaluator驱动它。
 
-## 6. prepare入口与算法
+## 6. prepare入口与两阶段事务
 
 ```text
 prepare_s4_mutable_buffers_v1(
@@ -259,28 +269,36 @@ prepare_s4_mutable_buffers_v1(
 ```
 
 不能从snapshot CPU clone直接pack后声称接入live solver；必须使用current provider mapping中的原Tensor。mapping只在
-prepare调用中读取，不保留provider lookup callback；但prepared owner必须接管S4-0 strong-ref lease并保持到S4-3
-commit/abort，不能pack后释放原source身份。
+prepare调用中读取，不保留provider lookup callback；prepared owner必须接管S4-0 strong-ref lease并保持到S4-3
+commit/abort。prepared对象递归持有source Tensor是**必要行为**，但只能存在于private lease且恰好12条。
 
-严格步骤：
+严格步骤分三phase：
 
-1. 校验prepared admission中的receipt/lease shared admission identity；
-2. 要求current provider mapping为existing helper返回的exact built-in dict并验证path集合exact；
-3. 逐slot要求current tensor `is` lease strong ref，并按raw storage、shape/dtype/device、stride/offset、`_version`、
-   content固定顺序重查；`.data`/DLPack version bypass必须由content hash拒绝；
-4. 确认target device为同一CUDA device、dtype为float32、目标stream identity有效；
-5. 逐slot从live source `[0,0]`建立contiguous leaf α parameter；
-6. 逐slot建立同shape persistent dα buffer；
-7. non-empty live β建立leaf parameter与persistent dβ；
-8. empty β只建立token，物理buffer/optimizer ordinal=`-1`；
-9. 建立persistent lower=`[D,1]`与upstream=`-1`；
-10. 验证device initial hash与admission active hash一致；
-11. 丢弃current mapping容器/provider callback，但把single-transfer lease移入prepared owner；
-12. 记录parameter/gradient/output pointer identity；
-13. 为所有未来TIR直接参数建立DLPack view；
-14. 验证DLPack round-trip pointer exact；
-15. 构造tensor-free prepare receipt；artifact walker必须跳过/拒绝private lease；
-16. 将状态置为`PREPARED/version=0/generation=-1`。
+**Phase A（allocation=0）**：
+
+1. wrapper `OPEN→PREPARING`，第二次调用立即拒绝；
+2. 校验receipt/lease identity、exact built-in dict/path coverage；
+3. 按object/storage/physical/layout/version/content/alias重验current source；
+4. 冻结device/stream/policy和expected manifest。
+
+**Phase B（local staging）**：
+
+5. 用`source[0,0].detach().clone(memory_format=contiguous).requires_grad_(True)`建立六α leaf；
+6. active β同样显式clone为独立leaf，五empty β只建token；
+7. 建立7 gradient、lower、upstream并验证16-way storage独立及与12 source storage不相交；
+8. 建立恰好16个base DLPack view并验证16/16 pointer exact；roundtrip Tensor立即释放；
+9. 构造并验证tensor-free preparation receipt。
+
+**Phase C（single-transfer adoption）**：
+
+10. 只用固定字段赋值把lease和staging移入prepared owner；
+11. 清空wrapper lease并置`TRANSFERRED`；
+12. prepared置`PREPARED/version=0/generation=-1`。
+
+任一步失败必须逆序清除roundtrip→TVM view→output→gradient→parameter→lease，wrapper=`FAILED_CLOSED`；不调用
+`torch.cuda.empty_cache()`，不retry，不native fallback，且source hash/version、device/stream/policy必须不变。
+formal fault evidence只允许同步entry current stream后读取allocated/source证据；reserved delta仅披露、不作pass/fail，
+success prepare不新增同步。
 
 S4-1A不得创建full `[2,1,D,W]` device α copy、dense `[D,*feature_shape]` α/β、Adam、TIR module、CUDA Graph或
 timing event。
@@ -297,9 +315,9 @@ timing event。
 - pointer drift在launch前拒绝；
 - empty β不注册DLPack view。
 
-不在预注册阶段写死view总数；S4-1D冻结实际TIR signature后再固定manifest。当前physical mutable/output buffer
-最低为16个（7 parameter + 7 gradient + lower + upstream），但reshape view可能增加view entry，不能把“16”伪写成
-最终DLPack count。
+S4-1A `base_dlpack_view_count`固定为16（7 parameter + 7 gradient + lower + upstream），base pointer exact也必须为16。
+S4-1D因实际TIR signature增加的同storage reshape view另记`additional_tir_view_count`和最终total；不得把base 16伪写成
+最终TIR总view count，也不得让additional view反向改变S4-1A owner。
 
 ## 8. preparation receipt
 
@@ -325,8 +343,18 @@ dense_beta_materialization_count=0
 prepare_dlpack_view_count
 prepare_dlpack_pointer_exact_count
 warm_dlpack_view_count=0
+base_dlpack_view_count=16
+base_dlpack_pointer_exact_count=16
 leaf_parameter_count
 nonleaf_parameter_count=0
+leased_source_tensor_count=12
+leased_source_element_count=8502
+leased_source_logical_bytes=34008
+lease_incremental_allocated_bytes=0
+prepare_outcome=PREPARED
+prepare_retry_count=0
+prepare_fallback_count=0
+empty_cache_call_count=0
 timing_recorded=false
 performance_claimed=false
 receipt_hash
@@ -356,8 +384,14 @@ S4-1A至少冻结：
 16. `GRADIENT_GENERATION_MISMATCH`；
 17. `DICT_CALLBACK_OR_TENSOR_OVERRIDE_ESCAPE`；
 18. `AUTOGRAD_HISTORY_OR_REGISTRY_OBSERVED`；
-19. `PROVIDER_SOURCE_RETAINED_AFTER_PREPARE`；
+19. `PROVIDER_CONTAINER_OR_CALLBACK_RETAINED`；
 20. `CLAIM_FLAG_TRUE_BEFORE_FORMAL`。
+
+并增加：`LEASED_SOURCE_INVENTORY_MISMATCH`、`SOURCE_TENSOR_OUTSIDE_PRIVATE_LEASE`、
+`BUFFER_PREPARE_ALREADY_ATTEMPTED`、`BUFFER_PREPARE_TRANSFER_STATE_MISMATCH`、`BUFFER_PREPARE_CLEANUP_INCOMPLETE`、
+`PARAMETER_SOURCE_STORAGE_ALIAS`、`PARAMETER_GRADIENT_STORAGE_ALIAS`、`BASE_DLPACK_VIEW_COUNT_MISMATCH`、
+`PREPARE_SOURCE_MUTATION_OBSERVED`、`PREPARE_DEVICE_STREAM_OR_POLICY_DRIFT`、`PREPARE_EMPTY_CACHE_FORBIDDEN`和
+`PREPARE_FALLBACK_OR_RETRY_FORBIDDEN`。
 
 每个detail code映射到S4-0已有GC0 reason类别；不扩展Verification IR vocabulary。
 
@@ -387,7 +421,7 @@ tests/test_asplos27_s4_ordered_buffer_abi.py
 14. two-fresh process descriptor/hash一致；
 15. claim/timing/performance flags全false。
 
-### 10.2 negative/tamper
+### 10.2 minimum 36 negative/tamper
 
 逐项覆盖§9全部20类，并额外覆盖：
 
@@ -403,22 +437,31 @@ tests/test_asplos27_s4_ordered_buffer_abi.py
 - 同一prepared admission/lease第二次prepare拒绝；prepared owner不得序列化lease；
 - `.data`/DLPack alias绕过`_version`的content drift拒绝；hash同步成本留到S4-P单列，不在correctness阶段移除；
 - 用snapshot CPU clone替换live CUDA mapping，拒绝；
-- prepare结果递归持有provider source Tensor，拒绝。
+- prepared owner在private lease外再次持有source Tensor，拒绝；private lease恰好12条是positive；
+- provider container/callback/closure被保留，拒绝；
+- parameter/buffer/view三阶段故障注入后candidate refs、allocated delta、retry/fallback必须为0；
+- failure cleanup调用`empty_cache()`或第二次prepare，拒绝；
+- adoption字段转移点异常不得产生double-owner/no-owner。
 
 ## 11. 当前原型验证
 
 在冻结production snapshot上做了一次不入库的GPU owner原型：
 
 ```text
-alpha leaf buffers = 6
-active beta leaf buffers = 1
-empty beta tokens = 5
-parameter elements/bytes = 4,254 / 17,016
-gradient bytes = 17,016
-Adam m+v logical bytes = 34,032
-leaf_all = true
-pointer_stable_after_step = true
-post-scheduler LR = [0.0098, 0.049]
+formal owner: 6 alpha + 1 active beta + 5 empty token
+parameter/gradient = 4,254 elements / 17,016 B each
+base DLPack = 16/16 pointer exact
+all candidate storage independent from 12 source storage
+one-step Adam parameter/gradient pointer stable
+source hash/version unchanged
+
+leased source = 12 tensors / 8,502 elements / 34,008 logical B
+lease incremental allocated bytes = 0
+
+failure injection = parameters/buffers/views 3/3 clean
+candidate refs alive after cleanup = 0/3
+allocated delta after cleanup = 0/3
+retry/fallback/empty_cache = 0/0/0
 ```
 
 该原型只验证PyTorch owner与内存算术可行，不是S4实现、correctness closure或性能证据。
