@@ -1,5 +1,5 @@
 ---
-status: implementation-ready-gate-closed-v2
+status: implementation-ready-gate-closed-v3-s4-1c-construction-frozen
 date: 2026-08-28
 type: selector-gradient-tir-arena-readiness
 topic: boundflow
@@ -36,6 +36,9 @@ S4-1B/1C 已从“六site公式蓝图”压到可以逐文件实现的后端合�
    不新增physical storage或49,152 B；
 7. 隔离七symbol CUDA/TIR对独立PyTorch reference逐位exact，float64最大差`2.3576e-7`，并能把A/V/bound/
    α/upstream/index异常poison为NaN。
+8. 2026-08-29 S4-1C施工将完整Pass C冻结为nonterminal 17-action、terminal 23-action；site31必须
+   `dα→dβ→copy→transform`，terminal copy增加6个typed symbol但新增0 descriptor/storage；construction
+   hash=`ad8ea91c...5b93`。
 
 这仍只是implementation-readiness evidence。production closure必须在S3外审批准后按S4-0→1A→1B0→1B→1C
 逐级执行five-fresh、raw/replay/tamper。
@@ -353,9 +356,11 @@ total                         2,862 B
 | 31 | `[36864,37464)` | 600 |
 
 总计37,464 elements/149,856 B，六data pointer不同但storage token相同，interval无重叠。V arena与两个main
-coefficient arena、residual11 scratch、residual6 scratch共四个coefficient physical storage完全不相交。
+coefficient physical storage完全不相交；residual11/6 scratch分别只是这两个coefficient storage的offset slice，
+不能再写成四个coefficient physical storage。
 
-reverse pass C固定`31→28→25→23→19→17`。terminal ordinal每site同stream：
+reverse pass C固定`31→28→25→23→19→17`。nonterminal完整动作数=`10 coefficient+7 emitter=17`；terminal
+再插入6个copy，总动作数=`23`。terminal ordinal每site同stream：
 
 ```text
 V_READY + A_PRETRANSFORM_READY
@@ -367,6 +372,10 @@ V_READY + A_PRETRANSFORM_READY
 
 现场六slot simulation得到gradient read-before-copy exact、terminal slot==pretransform A exact、dynamic allocation=0。
 由于每个V slot只由自己的emitter读取，copy后不再被其他site读取；同stream ordering足够，不需要每siteevent/sync。
+
+site31是例外中的例外：V31同时被dα31和dβ31读取，必须等两个reader都入队后才能copy。合成反例中，正确copy前
+dβ为`[-1017,-1117,-1231,+1317,+1417,+1531]`；先copy A31再读会变成
+`[-6,-6,-6,+6,+6,+6]`，因此validator必须逐reader计数而不是只检查`dα emitted`布尔位。
 
 禁止cross-stream copy、copy post-transform A、emitter未入队先覆盖V、result lease未消费即下一evaluation重写arena。
 
@@ -399,6 +408,10 @@ timing_recorded=false / performance_claimed=false
 
 terminal receipt另绑定reverse order、每slot read/copy/transform sequence、pretransform coefficient hash、spec-axis view、
 one-shot lease和arena generation。
+
+terminal copy可增加6个copy symbol，使完整module symbol总数为13，但复用既有A/V descriptor，新增descriptor和storage
+均为0。result-facing普通Torch view额外为6：五个Conv-shaped terminal view加一个lower `[D,1]`；site31
+`[D,1,100]`复用emitter view。
 
 ## 10. 正式negative矩阵补充
 

@@ -453,8 +453,9 @@ output[D,F]
 六slot必须无重叠、无空洞、完整覆盖`[0,37464)`。S4-1C emitter会用`[D,1,F]`形状读取同一storage，因此那些是
 额外DLPack descriptor，不是额外storage。
 
-terminal lA lease需要六个普通Torch shaped view（增加spec轴），lower lease需要一个`[D,1]`普通Torch view；它们应在
-prepare建立并单独计数，不进入argument DLPack 110口径，也不新增physical storage。
+terminal lA lease需要六个shape合同，但site31 emitter view本身已是`[D,1,100]`、可直接复用；因此相对argument
+DLPack额外建立五个Conv-shaped普通Torch view。lower lease另需一个`[D,1]`普通Torch view，额外普通view总数为6。
+它们应在prepare建立并单独计数，不进入argument DLPack 110口径，也不新增physical storage。
 
 ## 9. 90/110 DLPack descriptor完整重算
 

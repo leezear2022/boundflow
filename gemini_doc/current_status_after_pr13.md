@@ -11,6 +11,9 @@
 > arena generation转换。源码/GPU storage probe还证明D1C residual scratch只是coefficient arena slice，旧账重复加了
 > `49,152 B`；S4-1D/S4-2/S4-3 design subtotal已纠正为`389,574/491,774/559,838 B`。这些都不是peak/performance
 > claim，且不改变S3外审前S4 code closed门禁。
+> S4-1C逐文件施工现又冻结Pass C nonterminal/terminal=`17/23` actions、7 gradient+6 terminal-copy symbols、
+> site31双reader顺序、单37,464-element V/lA arena、110 argument descriptor与6个额外普通result view。GPU
+> lifecycle probe的warm allocated/reserved=`0/0`只属设计可行性诊断，当前仍没有S4 production代码。
 >
 > **历史（等待上方S3外审决定）：**
 > **2026-08-28 当前状态：S3 3x本地optimizer内部关闭，只开放S4 same-solver实现/正确性**。source=

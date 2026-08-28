@@ -153,6 +153,10 @@ nonterminal与terminal success各一类，均不隐式返回`READY`。
 10. publish result and enter RESULT_LEASED
 ```
 
+S4-1C construction进一步冻结步骤4—5的内部计数：nonterminal=`10 coefficient+7 emitter=17` actions；
+terminal=`17+6 copy=23` actions。site31必须在dα和dβ两个V reader都入队后才copy；完整module最多为7个
+gradient symbol+6个copy symbol，但copy新增argument descriptor/storage均为0。
+
 `counter reset`已经属于post-begin事务。步骤1—9任一异常都执行同一个慢路径：
 
 - 不发布result或terminal child；
@@ -259,6 +263,9 @@ prepare-time argument descriptor固定为：
 
 `46`是七个gradient emitter signature中的unique scope；`48`只是base+emitter局部并集，不是整个prepared evaluator。
 全部110个argument descriptor必须在prepare建立且pointer exact，warm invocation的DLPack view creation=`0`。
+
+composite result另使用6个普通Torch view（五个Conv-shaped terminal reshape+lower `[D,1]`）；site31
+terminal shape与现有emitter `[D,1,100]` view一致。它们不属于110个argument DLPack，也不新增storage。
 
 每个component receipt至少绑定：
 

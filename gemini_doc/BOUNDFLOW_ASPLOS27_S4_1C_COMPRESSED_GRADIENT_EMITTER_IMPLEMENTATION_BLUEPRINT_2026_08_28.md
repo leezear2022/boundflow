@@ -1,5 +1,5 @@
 ---
-status: draft-corrected-by-selector-gradient-tir-readiness-v2
+status: draft-corrected-by-s4-1c-construction-v3
 date: 2026-08-28
 type: implementation-plan
 topic: boundflow
@@ -31,6 +31,12 @@ dα_i = upstream × A_i × V_i
 
 因此S4-1C只需要一个layout-parameterized α emitter模板，formal实例化六次；site31同一边界再发射唯一active dβ。
 不应串六个B4-B2 wrapper，也不应materialize dense gradient或保存跨层A。
+
+2026-08-29逐动作施工已冻结在
+`BOUNDFLOW_ASPLOS27_S4_1C_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`，canonical construction
+hash=`ad8ea91c...5b93`。该施工包进一步确认：Pass C coefficient recompute只有10项；nonterminal总动作数
+为17，terminal插入六次pre-transform copy后为23；site31必须按`dα→dβ→copy→transform`，不能套用
+“dα后即可覆盖V”的一般规则。
 
 ## 1. 通用数学模板
 
@@ -211,6 +217,18 @@ identity和one-shot lease必须进入receipt。
 非terminal ordinal禁止lA copy；ordinal 9每site恰一次，总terminal lA copy count=6。copy可在后续profile中与emitter
 融合，但correctness第一版保持显式。
 
+完整动作账为：
+
+```text
+coefficient recompute actions = 10
+gradient emitter actions      = 7
+nonterminal Pass C actions    = 17
+terminal copy actions         = 6
+terminal Pass C actions       = 23
+```
+
+site31有两个V reader，必须在dα31和dβ31均入队后才允许copy。其他site只有一个dα reader。
+
 ## 6. 一个logical evaluation的结构账
 
 S4-1C完成后，单evaluation为：
@@ -238,6 +256,10 @@ receipt必须区分：
 view=`46`。其中与S4-1A base 16重叠14，因此base+emitter局部并集为48；这不是整个prepared evaluator。
 2026-08-29完整施工重算确认S4-1B已有90个argument descriptor，emitter另与其中12个flattened ReLU bound
 descriptor重叠，故S4-1C只新增20、完整S4-1A/B/C总数为110。全部prepare-time pointer exact；warm view仍为0。
+
+六terminal copy可作为同module的额外6个typed copy symbol，因此完整module最多13个exported symbol；它们复用现有
+A/V descriptor，新增DLPack descriptor=0。result-facing普通Torch view相对argument DLPack只新增6个：五个
+Conv-shaped terminal view和一个`[D,1]` lower view；site31已有`[D,1,100]` emitter view可直接复用。
 
 不能把两次coefficient pass伪写成一次，也不能把六emitter称为“一个kernel”。
 

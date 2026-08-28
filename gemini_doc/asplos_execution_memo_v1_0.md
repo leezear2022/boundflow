@@ -16,6 +16,10 @@
 > 因而S4-1D/S4-2/S4-3 known logical subtotal修正为`389,574/491,774/559,838 B`。production只有在S4-1B证明
 > pass B复用coefficient arena的phase alias后才可维持该账，否则S4-1D增加`73,728 B`至`463,302 B`。
 > cache/module/cache-observation/formal-sidecar分层，warm路径禁止为content hash或class count新增同步；不新增IR。
+> S4-1C施工又将Pass C冻结为nonterminal 17-action与terminal 23-action：10个coefficient动作、7个gradient
+> emitter，terminal再插入6个pre-transform lA copy；site31必须`dα→dβ→copy→transform`。六lA复用单一
+> 37,464-element V arena，copy新增0 descriptor/storage；完整A/B/C仍为110个argument descriptor，result-facing
+> 额外普通Torch view为6。construction hash=`ad8ea91c...5b93`。这些仍是code-closed设计合同。
 >
 > **历史（等待上方S3外审关闭）：**
 > **2026-08-28 当前唯一指令：S3内部关闭，只开放S4 same-solver实现/正确性接入**。S3 v2在source

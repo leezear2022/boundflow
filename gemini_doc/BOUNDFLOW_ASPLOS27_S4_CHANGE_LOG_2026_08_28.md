@@ -10,6 +10,29 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：冻结S4-1C compressed-gradient与terminal-lA逐文件施工包
+
+- 新增775行construction package，把Pass C精确拆为10个coefficient动作、6个dα、1个active dβ：
+  nonterminal=`17`，terminal再插入6个copy后=`23`；
+- 冻结site31双reader顺序`dα31→dβ31→copy A31→ReLU31`；机械tamper验证copy-before-dβ、
+  transform-before-copy和missing-dβ均拒绝；
+- GPU arena lifecycle probe确认六V/lA slot共一个storage、interval无重叠/无空洞、6/6 DLPack pointer exact，
+  warm dynamic allocated/reserved=`0/0`；TVM FFI在`use_torch_stream`内与non-default Torch stream exact且退出恢复；
+- terminal copy增加6个typed symbol，完整module最多13个symbol，但新增argument descriptor/storage=`0`；full
+  S4-1A/B/C仍为110个descriptor；
+- 纠正result view口径：site31 `[D,1,100]`可复用emitter view，所以额外普通Torch view为五个Conv reshape+
+  lower `[D,1]`，合计6而非7；
+- 现有native handoff fixture复核shape/order/37,464元素成立，但其六个clone storage只作oracle；S4目标仍是单arena lease；
+- construction canonical hash=`ad8ea91c39419cbfef0cf3eaa8db7fc339e54798daecf67ca6d97254a9755b93`；
+  S3仍`ready_for_audit`，S4 production/formal/timing/performance继续closed。
+
+### 验证
+
+- 17/23 action state validator及三类结构tamper：PASS；
+- native terminal handoff shape/order inventory：PASS；
+- RTX 4060 arena/view/stream/warm allocation lifecycle：PASS；
+- construction hash、文档一致性、目标回归、DocOps lint：提交前执行。
+
 ## 2026-08-29：刷新S4设计外审交接至S4-1B construction readiness v13
 
 - design-result commit更新为`b34bf6721d3b890bea223aa7c3c372d6cc10609d`，冻结base仍为

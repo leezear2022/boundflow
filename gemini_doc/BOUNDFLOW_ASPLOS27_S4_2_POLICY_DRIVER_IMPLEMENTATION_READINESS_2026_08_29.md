@@ -284,6 +284,10 @@ S4-1D 的 `389,574 B` 已包含 current compressed parameter/gradient、lower、
 arena内residual scratch views、tokens/metadata，但不包含 policy driver state。旧`438,726 B`把两个arena slice误作
 独立storage，已被取代。
 
+其中每次S4-1D evaluate的Pass C结构已进一步冻结为nonterminal 17-action或terminal 23-action；S4-2只负责在
+evaluation之间做受控state re-arm/version transition，不能在driver内改变Pass C顺序、偷偷增加第11次CROWN或把
+terminal copy移到dβ31之前。
+
 ### 6.1 persistent policy state
 
 ```text

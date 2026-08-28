@@ -252,6 +252,9 @@ lease按consumer拆分：
 - rollback buffer在device commit成功后可释放；
 - S4-0 live source lease在current-provider revalidation、commit与post consumer结束后关闭。
 
+terminal sublease的生产端固定来自ordinal 9的23-action Pass C；site31先完成dα/dβ两个reader再把V31覆盖为lA31。
+S4-3不得通过额外CROWN调用补lA，也不得在KFSB侧猜测或重建pre-transform coefficient。
+
 “KFSB consume后释放所有terminal state”是错误边界，会让core_result在post前悬空。
 
 ## 5. 修正后的memory ledger

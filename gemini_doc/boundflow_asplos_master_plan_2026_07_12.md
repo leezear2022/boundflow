@@ -11,6 +11,9 @@
 > descriptor=`90`（S4-1B）/`110`（full A/B/C）。D1C residual scratch经源码和GPU storage identity复核是两个
 > coefficient arena的offset slice，新增physical bytes为0；S4-1D/S4-2/S4-3 design subtotal相应修正为
 > `389,574/491,774/559,838 B`。这不升级correctness、memory peak或performance claim。
+> 2026-08-29 S4-1C construction进一步冻结完整Pass C：nonterminal=`10 coefficient+7 emitter=17` actions，
+> terminal插入6个lA copy后=`23`；site31先dα、再dβ、再覆盖V31为lA31。六lA仍复用单一V arena，完整
+> argument descriptor保持110，terminal copy新增0。S3批准和前序S4门禁前仍不得实现。
 
 > **2026-08-25 R3-1b0最新覆盖**：exact trace/liveness已正式关闭为
 > `VALIDATED-R3-1B0-TRACE-LIVENESS`；当前只开放b1 compiled no-grad full-lower forward。b2 custom

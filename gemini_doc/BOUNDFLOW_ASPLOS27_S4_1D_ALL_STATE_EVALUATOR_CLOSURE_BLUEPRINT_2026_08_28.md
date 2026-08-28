@@ -97,6 +97,11 @@ CUDA identities、bound polarity、endpoint/clamp policy。instance tensor/point
 8. return result lease
 ```
 
+2026-08-29 S4-1C施工已把步骤4—5机械展开：coefficient动作10项，gradient emitter 7项，因此nonterminal
+Pass C固定17-action；terminal插入六个copy后固定23-action。site31必须
+`dα31→dβ31→copy lA31→ReLU31`，其他site才是单reader的`dα→copy→transform/reuse`。S4-1D receipt
+必须验证这两个完整action inventory，不能只检查“7 emitter已执行”。
+
 任何步骤失败：
 
 - parameter state version不变；
@@ -152,6 +157,9 @@ evaluate。terminal child只可transfer一次；parent可先close，child close�
 | lower + upstream + bias accumulator | 72 | evaluator |
 | compressed indices + β metadata | 2,862 | S4-1C static metadata |
 | 合计 | **389,574** | corrected correctness design ledger |
+
+terminal lA复用V arena、不增加physical bytes或argument DLPack。result-facing普通Torch view相对110个argument
+descriptor只额外6个：五个Conv-shaped terminal reshape和一个lower `[D,1]`；site31 `[D,1,100]`复用emitter view。
 
 `389,574 B`以S4-1B证明`selected_endpoint[18,432]`在pass B安全复用一块coefficient arena为前提；S4-1B0
 isolated pack/select的caller-owned selector+selected output为`92,160 B`，并不自动满足该alias。若phase proof失败，
