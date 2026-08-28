@@ -5,7 +5,8 @@
 > 现冻结E0 self-consistent、E1 challenge-bound、E2 independently-witnessed、E3 hardware-attested四级保证；当前
 > RTX 4060正式关闭至少需要外审者控制fresh run与独立重算的E2 procedural witness。S3继续
 > `PENDING-EXTERNAL-AUDIT`，S4代码/formal/timing仍关闭。见
-> `BOUNDFLOW_EXECUTION_EVIDENCE_TRUST_AND_WITNESS_PLAN_2026_08_29.md`。
+> `BOUNDFLOW_EXECUTION_EVIDENCE_TRUST_AND_WITNESS_PLAN_2026_08_29.md`及
+> `BOUNDFLOW_EXECUTION_EVIDENCE_TRUST_CONSISTENCY_AUDIT_2026_08_29.md`。
 
 > **2026-08-29 S4-4 evidence construction不新增claim**：只冻结33-process formal evidence设计（18 positive+
 > 15 fault）、stdlib tensor sidecar、16-node/36-edge seal DAG与96-case tamper registry。纠正后的semantic

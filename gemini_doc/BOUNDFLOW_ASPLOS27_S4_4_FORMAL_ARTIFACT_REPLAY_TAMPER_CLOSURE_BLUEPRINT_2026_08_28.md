@@ -17,6 +17,12 @@ tenx-claimed: false
 
 # ASPLOS'27 S4-4：formal artifact、stdlib replay与fully re-signed tamper关闭蓝图
 
+> **2026-08-29 challenge/witness supersession**：本稿的raw-first、stdlib replay、外部anchor方向继续有效，
+> 但“external anchor→anchored replay”不能单独称independent authenticity。executor/同repo Git/DocOps固定的
+> expected-input anchor最多为E1；E2还要求auditor预发行challenge、控制或独立委托fresh run、独立重算并生成
+> execution witness。artifact内部16-node/36-edge DAG不改，challenge/witness属于外部流程节点。当前权威协议见
+> `BOUNDFLOW_EXECUTION_EVIDENCE_TRUST_AND_WITNESS_PLAN_2026_08_29.md`。
+
 > 2026-08-29修订：S4-3 implementation-readiness新增prepared working-β、prefix rollback、two-stage host packet与
 > post/queue独立计数；本稿的formal schema和tamper集合以下述修订为准。
 >

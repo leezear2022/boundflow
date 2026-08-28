@@ -15,6 +15,8 @@ S3 executor shadow pre-audit证明：攻击者若同步修改raw、重算summary
 - 新增`BOUNDFLOW_EXECUTION_EVIDENCE_TRUST_AND_WITNESS_PLAN_2026_08_29.md`；
 - 新增`BOUNDFLOW_ASPLOS27_S3_EXTERNAL_AUDIT_SUPPLEMENT_F1_2026_08_29.md`，把F1独立攻击、fresh run与
   assurance-level判定变成外审强制输入；
+- 新增`BOUNDFLOW_EXECUTION_EVIDENCE_TRUST_CONSISTENCY_AUDIT_2026_08_29.md`，逐文档核对S3/S4旧术语、
+  anchor owner与权威阅读顺序；
 - 冻结E0 self-consistent、E1 challenge-bound、E2 independently-witnessed、E3 hardware-attested四级保证；
 - 冻结`BFExternalAuditChallengeV1`与`BFExternalExecutionWitnessV1`；
 - 冻结challenge→fresh run→independent recompute→witness→audit verdict状态机；
@@ -36,8 +38,12 @@ S3 executor shadow pre-audit证明：攻击者若同步修改raw、重算summary
 - `BOUNDFLOW_ASPLOS27_S3_FORMAL_CLOSURE_2026_08_28.md`：增加证据保证范围修订；
 - `BOUNDFLOW_ASPLOS27_S3_EXTERNAL_AUDIT_HANDOFF_2026_08_28.md`：增加影子finding补充入口；
 - `BOUNDFLOW_ASPLOS27_S3_EXTERNAL_AUDIT_EXECUTION_RECEIPT_2026_08_29.md`：限定10/10措辞；
+- `BOUNDFLOW_ASPLOS27_S3_OPTIMIZER_RUNTIME_PREREG_2026_08_28.md`与S3 change log：标记历史tamper命名；
+- S4-4 blueprint/readiness：把anchor单独充分性降为E1并指向challenge/witness owner；
 - `BOUNDFLOW_ASPLOS27_S4_4_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`：增加challenge/witness
   所有权修订；
+- `BOUNDFLOW_ASPLOS27_S4_DESIGN_EXTERNAL_AUDIT_HANDOFF_2026_08_28.md`：升级v19、37份必读、104/103项问题；
+- S4 change log：记录内部DAG不变与外部流程owner；
 - `asplos_claims_map.md`与`README.md`：同步PENDING-EXTERNAL-AUDIT边界。
 
 exchange r001、formal artifact、代码、测试与历史raw均未修改。

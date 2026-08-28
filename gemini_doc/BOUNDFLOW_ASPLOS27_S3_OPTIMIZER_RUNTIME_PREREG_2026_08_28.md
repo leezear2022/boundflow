@@ -11,6 +11,12 @@ external-audit: deferred-to-next-round-by-user
 
 # ASPLOS'27 S3：Optimizer / Runtime 累计候选预注册
 
+> **2026-08-29 tamper术语修订**：本稿§5的“fully outer-resigned”是历史命名，实际合同只覆盖
+> `outer-manifest-resigned-derived-inconsistent`攻击；同步修改raw、重算summary并重签manifest的coherent artifact
+> 在E0 self-check可被接受。S3执行真实性必须由外审者控制fresh run和独立重算形成`E2-DIRECT-LEGACY`。
+> 当前权威解释见`BOUNDFLOW_EXECUTION_EVIDENCE_TRUST_AND_WITNESS_PLAN_2026_08_29.md`，不改本稿18-worker/
+> 六order/门槛数值。
+
 ## 1. 目标与边界
 
 S2 已证明固定 ResNet2B P-anchor 的一次 CROWN lower + compressed dα VJP 经 canonical

@@ -1,5 +1,5 @@
 ---
-status: ready-for-external-design-audit-v18-s4-4-construction-readiness-frozen
+status: ready-for-external-design-audit-v19-trust-witness-amended
 date: 2026-08-29
 type: external-audit-handoff
 topic: boundflow
@@ -7,6 +7,7 @@ slug: asplos27-s4-design-audit
 audit-kind: preregistration-and-implementation-blueprint
 base-commit: ebf45cc72438141d8f0b35dadfd5cf774d7e753f
 design-result-commit: c750fafdde8435f56146294faf509221a780057d
+trust-amendment-base: 1bf3f6aafff71a101259d854351465e839a25333
 execution-authority: false
 code-change-open: false
 performance-claimed: false
@@ -15,6 +16,13 @@ complete-query-claimed: false
 ---
 
 # BoundFlow ASPLOS'27 S4-0—S4-4设计外审交接
+
+> **2026-08-29 v19 trust/witness修订**：S3 coherent full-resign反例证明artifact self-consistency与expected-input
+> anchor不足以单独形成independent authenticity。当前外审必须先读
+> `BOUNDFLOW_EXECUTION_EVIDENCE_TRUST_AND_WITNESS_PLAN_2026_08_29.md`和
+> `BOUNDFLOW_EXECUTION_EVIDENCE_TRUST_CONSISTENCY_AUDIT_2026_08_29.md`。S4-4内部16-node/36-edge DAG、
+> 96-case registry保持不变；外部closure新增auditor challenge、launch authority、independent recompute和execution
+> witness。existing Git/DocOps anchor单独最多E1，E2才是独立见证。本文仍是design-only，不开放代码/formal/timing。
 
 ## 0. 给外审模型的直接任务
 
@@ -46,11 +54,11 @@ speedup或complete-query性能已经存在。
 16. S4-3 live诊断据此引入prepared working-β、prefix-only rollback、post/queue独立计数与细粒度latch是否正确；
 17. 是否同意在S3外审批准后仍按S4-0→1A→1B0→1B→1C→1D→2→3→4顺序实施；
 18. 是否发现必须在第一行S4代码开工前修正的blocker/major。
-19. artifact self-consistency与source/model真实性分层是否正确，external trust anchor是否关闭全量替换后重签；
+19. artifact self-consistency与source/model真实性分层是否正确；expected-input anchor为何单独最多E1，何时必须E2 witness；
 20. 101 core/4 script/559 TVM Python/3 native的低扰动loaded snapshot加关键receipt，是否是可接受的source closure；
 21. per-worker tensor index + content-addressed raw-binary sidecar是否完整保留IEEE、logical path、view和alias语义；
 22. 18 positive + 15 isolated fault=33 subprocess是否为最小且充分的poison/freshness拓扑；
-23. semantic-root→summary→tamper→stdout→manifest→external-anchor的seal DAG是否无环，外审前pending状态是否正确。
+23. artifact内部16-node/36-edge seal DAG是否无环；外部challenge/witness节点为何不应改变该内部hash；
 24. S4-0 V4新增keyword-only `exact_call_id`并将raw identity只留在private lease、hash写入receipt是否足以绑定phase；
 25. pinned provider的exact built-in `dict/list/Tensor`事实是否支持专用strict extractor，且不应复用历史宽松helper；
 26. receipt前后两次live token capture是否足以关闭admission read race，又没有冒充通用并发锁；
@@ -143,6 +151,10 @@ speedup或complete-query性能已经存在。
 99. final protocol hash在实现时是否还必须绑定source/input/numeric/schema完整值，而不能误用当前仅用于设计复核的
     structure projection hash？
 100. 是否同意本轮仍只关闭S4设计施工合同，不开放S4代码/formal/timing/performance，唯一外部动作仍是S3审计？
+101. challenge是否由独立auditor在source/delivery冻结后、fresh run前发行，nonce/expiry/reuse owner是否完整？
+102. launch authority由谁控制；direct、delegated和legacy三种E2 profile是否被正确区分？
+103. execution witness是否绑定challenge、manifest、semantic root、独立重算与限制，signer trust是否来自artifact外？
+104. 设计能否稳定报告achieved assurance level，而不把E0/E1升级成E2/E3？
 
 ## 1. 审计范围和Git边界
 
@@ -203,7 +215,10 @@ speedup或complete-query性能已经存在。
 31. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
 32. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_EVIDENCE_IMPLEMENTATION_READINESS_2026_08_29.md`；
 33. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`（V1权威施工合同）；
-34. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
+34. `gemini_doc/BOUNDFLOW_EXECUTION_EVIDENCE_TRUST_AND_WITNESS_PLAN_2026_08_29.md`（当前trust authority）；
+35. `gemini_doc/BOUNDFLOW_EXECUTION_EVIDENCE_TRUST_CONSISTENCY_AUDIT_2026_08_29.md`；
+36. `gemini_doc/BOUNDFLOW_ASPLOS27_S3_EXTERNAL_AUDIT_SUPPLEMENT_F1_2026_08_29.md`；
+37. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
 
 ## 3. 已冻结的production事实，请独立复核
 
@@ -451,7 +466,8 @@ PASS要求：
 - tensor index + content-addressed raw-binary sidecar和stdlib decode足以恢复IEEE、logical path、view/alias；
 - stdlib replayer不import BoundFlow/PyTorch/TVM/Numpy/αβ-CROWN，不复用production validator；
 - source inventory以低扰动loaded module/native snapshot、declared critical source和compiled receipt共同覆盖，不用高扰动call trace；
-- artifact内hash只形成self-consistency，真实性由外部anchor绑定manifest/semantic root/source/input/replayer；
+- artifact内hash只形成E0 self-consistency；expected-input anchor最多E1，E2另需auditor-controlled/delegated run、
+  independent recompute与execution witness；
 - summary所有字段均能从protocol/source/raw重建；
 - seal DAG无summary↔tamper↔manifest hash cycle，replay有derive/self-check/anchored-check三种模式；
 - artifact无绝对本机路径/credential泄漏；
@@ -475,6 +491,8 @@ PASS要求：
 - 96类攻击编号/分区完备，13 external-anchor、5 frozen-protocol、77 raw-semantic、1 execution-evidence；
 - 除T19外95类攻击全部fully re-signed并被对应owner拒绝；T19必须诚实写
   `OFFLINE_UNATTESTABLE`，不得虚称offline artifact能密码学证明fresh process；
+- coherent full-resign在E0 self-check可保持内部自洽；真实性替换必须由E1 external-parameter mismatch或E2 witness
+  拒绝，不能硬编码headline伪装semantic detection；
 - raw semantic攻击同步更新payload/file/summary/manifest后仍由self-check拒绝；source/model authenticity替换由external
   anchor拒绝；process freshness只形成execution evidence，不虚称cryptographic attestation；
 - 外审另造至少3个未预注册攻击仍能被设计覆盖；
@@ -880,6 +898,10 @@ source env.sh
 97. stdlib replay是否能独立重建三个version轴、23-state whole-core、fault terminal和所有summary，不复用production validator？
 98. 当前protocol structure projection是否明确不等于future full protocol hash；实现时还必须绑定哪些source/input/numeric/schema值？
 99. 是否同意S4-4施工合同仍是design-only，S3批准前不开放S4代码/formal/timing/performance？
+100. challenge发行顺序、256-bit nonce、expiry、single-consume和expected digest是否足够且没有冒充truth proof？
+101. auditor-controlled direct、challenge-bound delegated与S3 legacy direct三种profile是否被正确区分？
+102. witness是否绑定launch authority、manifest、semantic root、stdlib recompute、tamper scope与limitations？
+103. 最终报告能否明确achieved E0/E1/E2/E3，并在缺E2时保持claim pending？
 
 ## 9. 输出格式
 
@@ -891,6 +913,7 @@ source env.sh
 - 每项finding稳定ID、严重度、源码/文档位置、可复现实验和建议修订；
 - 独立重算的state/memory/counter数字；
 - 至少3个外审自建攻击及预期拒绝层；
+- achieved assurance level、challenge/launch/witness owner及不可达层；
 - 明确是否同意：**S3批准后只开放S4-0，实现仍必须逐级关闭；S4-P继续关闭**。
 
 不要输出“性能提升已验证”或“ASPLOS-ready”；本轮没有这种证据。

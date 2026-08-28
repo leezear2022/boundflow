@@ -10,6 +10,15 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：S4-4 external anchor升级为challenge+witness所有权
+
+- S3 coherent full-resign反例证明artifact内部hash/semantic闭包不等于执行真实性；
+- 保留S4-4 33-worker、16-node/36-edge seal DAG和96-case registry；
+- existing expected-input anchor单独最多E1，E2新增auditor challenge、independent launch/recompute与witness；
+- challenge/witness作为artifact外流程节点，不修改冻结的内部DAG hash；
+- design handoff升级v19：必读37份、top-level 104项、must-answer 103项，并新增assurance-level审计问题；
+- S3外审前仍不开放S4代码、formal、timing或performance。
+
 ## 2026-08-29：刷新S4设计外审交接v18
 
 - design-result commit更新为`c750fafdde8435f56146294faf509221a780057d`，审计range固定为

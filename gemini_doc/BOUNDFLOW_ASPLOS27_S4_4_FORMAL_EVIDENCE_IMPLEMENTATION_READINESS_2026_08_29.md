@@ -17,6 +17,12 @@ tenx-claimed: false
 
 # ASPLOS'27 S4-4：formal evidence、stdlib replay与trust anchor实施就绪审计
 
+> **2026-08-29 trust-owner supersession**：本稿的source closure、codec、raw budget、fault拓扑与artifact外anchor
+> 诊断继续有效；§2中`ANCHORED_AUTHENTIC = self-check + Git/DocOps anchor exact`现收窄为E1
+> `CHALLENGE_BOUND`上限。正式E2必须增加auditor-controlled/delegated fresh run、stdlib独立重算和execution
+> witness；executor自签Git/DocOps记录不构成独立主体。详见
+> `BOUNDFLOW_EXECUTION_EVIDENCE_TRUST_AND_WITNESS_PLAN_2026_08_29.md`。
+
 > 2026-08-29施工冻结修订：本稿的source/codec/anchor诊断事实继续有效；S4-3新状态机、15-fault registry、
 > variant-specific raw floor、16-node seal DAG和96-case tamper现由
 > `BOUNDFLOW_ASPLOS27_S4_4_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`拥有。实施以施工包为准；

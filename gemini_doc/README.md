@@ -6,7 +6,8 @@
 > W01—W24 negative suite。当前RTX 4060不具备官方H100+ GPU attestation路径，因此S3/S4正式关闭依赖外审者
 > 亲自启动fresh run并独立重算的E2 procedural witness。SSHSIG/DSSE/Rekor仅为可选签名/发布层，不冒充物理执行
 > 真实性。另新增`BOUNDFLOW_ASPLOS27_S3_EXTERNAL_AUDIT_SUPPLEMENT_F1_2026_08_29.md`，可直接作为原r001的
-> 增补请求交给外审。本轮不改exchange/artifact/代码，不开放S4。
+> 增补请求交给外审。`BOUNDFLOW_EXECUTION_EVIDENCE_TRUST_CONSISTENCY_AUDIT_2026_08_29.md`进一步完成
+> S3/S4旧“fully resigned”与anchor充分性措辞的逐文档取代映射。本轮不改exchange/artifact/代码，不开放S4。
 
 > **2026-08-29 S3执行方影子预审发现待外审裁决的证据边界**：新增
 > `BOUNDFLOW_ASPLOS27_S3_EXECUTOR_SHADOW_PREAUDIT_2026_08_29.md`。AC1—AC5/AC7的顺序、10/9事务、

@@ -9,6 +9,14 @@ stage: s03
 
 # ASPLOS'27 S3 修改记录
 
+## 2026-08-29：执行证据保证范围修订
+
+- executor shadow构造两类coherent full resign，确认self-check只证明artifact内部闭包；
+- 历史“fully outer-resigned 10/10”收窄为outer-manifest-resigned、derived-semantics-inconsistent攻击；
+- S3外审要求auditor-controlled 18-worker fresh run与stdlib独立重算，达到`E2-DIRECT-LEGACY`；
+- 新增外审supplement与E0—E3 trust plan；exchange r001、formal raw、代码和数字均未修改；
+- S4代码/formal/timing继续关闭。
+
 ## 2026-08-28：冻结 S3 optimizer/runtime 大批次
 
 - 新增 S3 预注册，固定 P-anchor 10/9 local wrapper 的 N/D/P 三方语义与六全排列性能协议；
