@@ -1,12 +1,12 @@
 ---
-status: ready-for-external-design-audit-v4-ternary-tir-abi-frozen
+status: ready-for-external-design-audit-v5-selector-gradient-abi-frozen
 date: 2026-08-28
 type: external-audit-handoff
 topic: boundflow
 slug: asplos27-s4-design-audit
 audit-kind: preregistration-and-implementation-blueprint
 base-commit: ebf45cc72438141d8f0b35dadfd5cf774d7e753f
-design-result-commit: a5ae9265c51a34fb5f76f41989cf877e362e9ef7
+design-result-commit: 0b220ecc86a8283951c15eb1745004d79ad22293
 execution-authority: false
 code-change-open: false
 performance-claimed: false
@@ -37,16 +37,18 @@ speedup或complete-query性能已经存在。
 11. S4-1B0把site19根因收窄到`Ainput==0→center`、恢复selected-primal lowering是否数学成立；
 12. S4-1B0现场发现浮点NaN classifier会被TVM/CUDA错误化简后，改用IEEE-754 exponent位检查、独立cache
     key与module/launch receipt是否足以fail closed；
-13. 是否同意在S3外审批准后仍按S4-0→1A→1B0→1B→1C→1D→2→3→4顺序实施；
-14. 是否发现必须在第一行S4代码开工前修正的blocker/major。
+13. 五张binary selector是否也必须使用`-128` sentinel；七gradient TIR的safe-index/finite poison、46 emitter
+    views/48 prepared views和terminal arena phase是否完整；
+14. 是否同意在S3外审批准后仍按S4-0→1A→1B0→1B→1C→1D→2→3→4顺序实施；
+15. 是否发现必须在第一行S4代码开工前修正的blocker/major。
 
 ## 1. 审计范围和Git边界
 
 - branch：`feat/rvir-v4-production-state-ownership-v1`；
 - 本轮设计base：`ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
-- S4-0 live admission/lease、S4-3A scratch finalization、S4-1A prepare transaction与S4-1B0 ternary TIR
-  ABI全部设计结果：`a5ae9265c51a34fb5f76f41989cf877e362e9ef7`；
-- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..a5ae9265c51a34fb5f76f41989cf877e362e9ef7`
+- S4-0 live admission/lease、S4-3A scratch finalization、S4-1A prepare transaction、S4-1B0 ternary TIR与
+  S4-1B/1C selector/gradient/arena ABI全部设计结果：`0b220ecc86a8283951c15eb1745004d79ad22293`；
+- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..0b220ecc86a8283951c15eb1745004d79ad22293`
   和下列S4文档的完整版本为准；
 - S3 formal实现/结果不在本轮重新验收，但它是S4设计输入；S3独立exchange仍等待审计；
 - `.docops/exchange/gc0-1-prereg-20260826`异步audit文件和`docs/CIBC_for_DAC.pdf`是用户保留的范围外dirty文件，
@@ -78,12 +80,13 @@ speedup或complete-query性能已经存在。
 12. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1BC_DAG_ADJOINT_PREFLIGHT_CORRECTION_2026_08_28.md`（历史v1）；
 13. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
 14. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
-15. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`；
-16. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
-17. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
-18. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
-19. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
-20. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
+15. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1BC_SELECTOR_GRADIENT_TIR_IMPLEMENTATION_READINESS_2026_08_28.md`；
+16. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`；
+17. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
+18. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
+19. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
+20. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
+21. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
 
 ## 3. 已冻结的production事实，请独立复核
 
@@ -187,6 +190,15 @@ PASS要求：
   物理账是否准确；
 - S4 cache key是否必须超出compute capability，绑定schema/symbol/TIR/target/shape/dtype/threads和三项policy；
 - cache hit后重验module receipt、旧binary cache key必须miss/拒绝是否足够防止历史模块冒充；
+- A18/A20/A24/A26/A29五张binary selector若仍只有0/1，NaN是否会因`A>=0=false`静默选upper；把六张
+  selector统一加入`-128` invalid sentinel是否必要且不改变normal zero branch语义；
+- S4 selector总bytes是否应为55,296、相对R31B2增加12,288，而不是“center为0所以总bytes不变”；
+- gradient TIR是否必须safe-clamp runtime index/location再poison invalid，避免validator失误时先发生OOB；
+- A/V/bound/α/upstream nonfinite、lower>upper或α越界是否必须qNaN poison，避免gate false返回有限0；
+- β sign保持int8并在TIR内cast是否比prepare float32 copy更忠实；metadata是否为2,862 B；
+- 7 launch、53 argument occurrence、emitter unique view 46、与base重叠14、additional 32、prepared total 48
+  的口径是否逐项成立；
+- reverse `31→28→25→23→19→17`中同stream emitter-read→terminal-copy→transform是否足以保护V/lA slot；
 - coefficient-action VJP作为规范oracle、selected-primal作为优化lowering的双层owner是否合理；
 - pass C按31→28→25→23→19→17即时导出六dα和site31 active dβ；
 - site25/site19可从existing residual scratch取incoming coefficient；
@@ -349,6 +361,16 @@ PASS要求：
 - old R31B2 module hash before/after均为`3871bf0e...be575`，S4 module/cache key均与旧binary隔离；
 - max-finite与min-subnormal两组midpoint重结合反例均出现bit difference；
 - S4-1B0相关历史S2/R31B2回归：`14 passed in 15.75s`；production code diff=`0`；
+- 真实D2B coefficient pass抽取A18/A20/A24/A26/A29/Ainput，六组nonfinite=0；A26/A20由两个existing
+  residual scratch直接承载，A18/A20/A24/Ainput与old bitmap逐位一致；
+- seven-symbol gradient TIR corrected reference逐位max diff=0、sign exact、float64 max diff=
+  `2.3575648810947314e-07`；7 launch、53 arguments、46/46 emitter view、workspace/alloc_buffer/dense output=0；
+- 第一次gradient diagnostic因reference upstream广播成`[D,D,W]`而FAIL，已保留；显式reshape为`[D,1,1]`
+  后才形成PASS；
+- A=NaN、V=Inf、lower>upper、α越界、upstream NaN、index越界六类poison probe均产生qNaN；
+- V/lA arena六slot interval不重叠、单storage且与四个coefficient/scratch storage分离；reverse same-stream
+  read/copy/reuse simulation中gradient与terminal pretransform A均exact，dynamic allocation=0；
+- S4-1B/1C相关R3 residual/D2B/R31B2/B4-B2/terminal回归：`29 passed in 23.99s`；
 - existing live-return/device-commit targeted：`12 passed in 6.58s`；production code diff=`0`；
 - `git diff --check`、DocOps exchange validate/lint：PASS。
 
@@ -357,8 +379,8 @@ PASS要求：
 ## 7. 建议外审操作
 
 ```bash
-git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..a5ae9265c51a34fb5f76f41989cf877e362e9ef7
-git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..a5ae9265c51a34fb5f76f41989cf877e362e9ef7
+git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..0b220ecc86a8283951c15eb1745004d79ad22293
+git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..0b220ecc86a8283951c15eb1745004d79ad22293
 
 source env.sh
 /home/lee/miniconda3/envs/boundflow/bin/python -m pytest -q \
@@ -390,6 +412,11 @@ source env.sh
 - 用max-finite与min-subnormal复现midpoint重结合位差，检查TIR attr/cache/receipt是否绑定operation order；
 - 自建cache collision：用旧binary key、删policy字段或改threads后尝试命中新ternary module，要求miss/拒绝；
 - 独立核对pack/select为2 launch、5 unique view、6 argument occurrence，且无physical center和workspace；
+- 对五张binary selector分别注入NaN/Inf，确认pack=`-128`且consumer输出qNaN，不得静默选择upper/lower；
+- 用invalid index/location攻击gradient TIR，确认先safe-read再poison而非OOB；同时确认safe clamp不等于admit；
+- 独立重算7 launch/53 arguments/emitter46/base16/additional32/total48，并检查46与48是两个不同scope；
+- 复现diagnostic reference的`[D,1]`广播错误，再以`[D,1,1]`修正，禁止把第一次FAIL归咎candidate；
+- 检查β sign int8、metadata 2,862 B及六slot reverse read→copy→transform phase；
 - 检查tamper编号1—68；
 - 用CUDA tensor验证commit+restore后的`_version`；
 - 亲读provider core/post确认clear/prune/post顺序；
@@ -401,15 +428,17 @@ source env.sh
 2. 三元box endpoint是否完整解释旧site19反例；derived-center且不新增tensor是否为正确最小ABI？
 3. IEEE exponent classifier、canonical NaN、operation-order绑定和独立cache key是否关闭了TIR ABI歧义？
 4. two-launch/5-view设计应保持独立到correctness closure，还是有充分理由在第一版就与相邻kernel融合？
-5. six-site V→gradient→terminal-lA alias是否有无法由phase state解决的lifetime冲突？
-6. net scratch是否必须成为第13+条production数值path，还是应保持为独立phase-aware lifetime/finalization transaction？
-7. post failure后是否有比`COMMITTED_POST_FAILED_POISONED`更严格、可实现的安全语义？
-8. B0/R/C 18 fresh是否足够证明reference和candidate，不依赖历史`.pt`？
-9. stdlib raw schema是否缺dtype、negative-zero、NaN payload、alias或view metadata？
-10. executed-source inventory是否有更可靠的闭包算法？
-11. snapshot semantic truth、瞬时live observation和S4-1A prepared owner三段边界是否仍遗漏live alias/version race？
-12. 68类tamper还缺哪类可全重签semantic attack？
-13. 是否同意当前唯一执行顺序，不开放S4-P timing？
+5. 五binary selector sentinel、safe-index poison和finite poison是否足以关闭silent-zero/OOB边界？
+6. emitter46/prepared48、β int8 metadata和七launch物理账是否准确？
+7. six-site V→gradient→terminal-lA alias是否有无法由phase state解决的lifetime冲突？
+8. net scratch是否必须成为第13+条production数值path，还是应保持为独立phase-aware lifetime/finalization transaction？
+9. post failure后是否有比`COMMITTED_POST_FAILED_POISONED`更严格、可实现的安全语义？
+10. B0/R/C 18 fresh是否足够证明reference和candidate，不依赖历史`.pt`？
+11. stdlib raw schema是否缺dtype、negative-zero、NaN payload、alias或view metadata？
+12. executed-source inventory是否有更可靠的闭包算法？
+13. snapshot semantic truth、瞬时live observation和S4-1A prepared owner三段边界是否仍遗漏live alias/version race？
+14. 68类tamper还缺哪类可全重签semantic attack？
+15. 是否同意当前唯一执行顺序，不开放S4-P timing？
 
 ## 9. 输出格式
 
