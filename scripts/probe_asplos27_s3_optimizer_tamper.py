@@ -57,7 +57,10 @@ def probe(source: Path) -> dict[str, object]:
             protocol = artifact_tool.load_json(target / "protocol.json")
             summary = artifact_tool.load_json(target / "summary.json")
             if name == "latency":
-                rows[0]["latency_ns"]["P"][0] += 1  # type: ignore[index]
+                rows[0]["latency_ns"]["P"] = [  # type: ignore[index]
+                    max(1, value // 2)
+                    for value in rows[0]["latency_ns"]["P"]  # type: ignore[index]
+                ]
             elif name == "step-lower":
                 rows[0]["semantic"]["P"][0]["lower"]["values"][0] += 1.0  # type: ignore[index]
             elif name == "step-gradient":
@@ -84,7 +87,7 @@ def probe(source: Path) -> dict[str, object]:
             rejected = False
             error = ""
             try:
-                artifact_tool.replay(target)
+                artifact_tool.replay(target, require_validated_3x=False)
             except (ValueError, TypeError, KeyError, OverflowError) as exception:
                 rejected = True
                 error = str(exception)
@@ -104,7 +107,8 @@ def probe(source: Path) -> dict[str, object]:
         "performance_claimed": False,
     }
     if report["case_count"] != 10 or report["rejected_count"] != 10:
-        raise RuntimeError("S3 tamper probe did not reject every case")
+        accepted = [row["name"] for row in cases if not row["rejected"]]
+        raise RuntimeError(f"S3 tamper probe accepted cases: {accepted}")
     return report
 
 

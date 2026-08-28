@@ -64,3 +64,17 @@ stage: s03
 
 - worker 单次 GPU smoke：PASS；
 - formal artifact：待 source-exact 提交后生成。
+
+## 2026-08-28：S3 v1 正式 NO-GO，并冻结 v2 稳健协议
+
+- v1 六 fresh 的 P/native geomean=`2.5695746x`、worst=`0.7595405x`，按冻结门槛如实关闭为 NO-GO；
+- raw 显示一个完整 fresh 进程中 N/D/P 同时持续退化，而非单样本长尾；
+- 保留 v1 全部 raw，不删除或替换异常 worker；
+- 新增 v2 预注册：每 order 三个 fresh 重复，共 18 worker，以六个 order 内中位数形成 headline，并披露
+  全部 raw 指标；
+- 性能阈值、语义、receipt 与 claim 边界不变。
+
+### 验证
+
+- v1 raw/replay：待 negative artifact tamper 与 manifest 收口；
+- v2：尚未实现或运行。
