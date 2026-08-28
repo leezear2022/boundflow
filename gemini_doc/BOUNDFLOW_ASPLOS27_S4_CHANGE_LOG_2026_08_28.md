@@ -10,6 +10,22 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-28：S4-1B0冻结TIR位级nonfinite ABI、缓存隔离与精确物理账
+
+- 首次CUDA探针发现浮点`x==x && abs(x)!=Inf`在当前TVM/CUDA lowering下不能可靠拒绝NaN：NaN被错误
+  编成zero，探针FAIL；正式设计改为float32 IEEE-754 exponent mask `0x7f800000`位级检查；
+- 修正后NaN/±Inf全部编码`-128`，select对任何非法selector输出bits=`0x7fc00000`的canonical quiet NaN；
+  `+0/-0`均归center，正负min-subnormal保留符号，边界探针PASS；
+- max-finite与min-subnormal给出两组确定性位级反例，证明`(lower+upper)*0.5`不能重结合成
+  `lower*0.5+upper*0.5`；
+- 冻结独立pack/select物理账：2 launch、5 unique tensor/prepare view、6 argument occurrence、pointer exact 5/5、
+  warm view 0、center tensor/view 0、workspace 0；
+- cache key必须绑定schema、symbol、TIR/module、target、shape/dtype/threads及endpoint/midpoint/nonfinite policy，
+  不能复用只按compute capability索引的旧R31B2 cache；
+- 真实18,432 Ainput重跑仍为positive/negative/zero/invalid=`8,689/9,137/606/0`，selected hash仍为
+  `7e95e075...39b652`，606个zero全部被旧binary误编码；legacy module hash before/after相同；
+- 新增S4-1B0 TIR ABI/cache/receipt实施就绪文档；S3批准前production代码、formal、timing与performance仍closed。
+
 ## 2026-08-28：S4-1A冻结two-phase prepare、private lease retention与failure cleanup
 
 - 审计发现旧蓝图自相矛盾：prepared runtime必须把S4-0 strong-ref lease保留到S4-3，却又以

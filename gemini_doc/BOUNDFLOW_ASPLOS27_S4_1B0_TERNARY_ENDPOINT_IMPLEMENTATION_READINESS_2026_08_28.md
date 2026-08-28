@@ -1,5 +1,5 @@
 ---
-status: implementation-ready-gate-closed
+status: implementation-ready-gate-closed-superseded-in-part-by-tir-abi-v2
 date: 2026-08-28
 type: source-map-and-patch-blueprint
 topic: boundflow
@@ -70,14 +70,18 @@ select = boundflow_s4_select_input_endpoint_ternary
 coefficient[18432] float32
   → endpoint_selector[18432] int8
 
-selector[i] = !isfinite(coefficient[i]) ? -128
+bits = reinterpret_uint32(coefficient[i])
+nonfinite = (bits & 0x7f800000) == 0x7f800000
+
+selector[i] = nonfinite ? -128
             : coefficient[i] > 0 ? +1
             : coefficient[i] < 0 ? -1
             : 0
 ```
 
 这会把`+0.0`与`-0.0`都映射为0；任何非零subnormal仍按其真实符号映射，禁止epsilon分类。`-128`是
-reserved invalid sentinel，不是第四种合法endpoint。
+reserved invalid sentinel，不是第四种合法endpoint。现场反例证明浮点`x==x`式NaN检查可被当前
+TVM/CUDA lowering错误化简，因此正式实现必须使用上述IEEE-754 exponent位检查；详见TIR ABI v2文档。
 
 ### 2.2 select TIR
 
@@ -85,11 +89,12 @@ reserved invalid sentinel，不是第四种合法endpoint。
 selected[i] = selector[i] == +1 ? lower[i]
             : selector[i] == -1 ? upper[i]
             : selector[i] ==  0 ? (lower[i] + upper[i]) * float32(0.5)
-            : canonical_nan
+            : canonical_qnan_bits_0x7fc00000
 ```
 
 midpoint的operation order必须与pinned provider保持`add→multiply by 0.5`；不得改成`lower*0.5+upper*0.5`后
-假设bitwise identity。S4 receipt绑定derivation schema/hash，而不是绑定一个不存在的center input pointer。
+假设bitwise identity。max-finite和min-subnormal已分别给出overflow/underflow位级反例。S4 receipt绑定
+derivation schema/hash，而不是绑定一个不存在的center input pointer。
 
 ### 2.3 schedule/物理账
 
@@ -99,6 +104,19 @@ midpoint的operation order必须与pinned provider保持`add→multiply by 0.5`�
 - extra center tensor/view/allocation=`0`；
 - select output应写入existing selected graph/pre17 producer路径，不新增Python-visible tensor；
 - formal S4整图最终是否单独保留select kernel由S4-1B profile决定，S4-1B0不计时。
+
+独立pack/select物理账冻结为2 launch、5 unique tensor、6 argument occurrence、prepare DLPack view 5/5
+pointer exact、warm view 0、extra center tensor/view 0。若后续融合，必须形成新schema/module hash并重新闭合，不能
+改写本轮receipt。
+
+### 2.4 cache key与module receipt补充
+
+S4 cache不得复用当前只按compute capability索引的R31B2 cache类型。key还必须绑定schema、两个symbol、
+unscheduled/scheduled TIR hash、target/compute capability、dtype、numel、threads、endpoint/midpoint/nonfinite
+三项policy。cache hit后仍重验module receipt；旧binary key必须miss或稳定拒绝。
+
+完整字段、miss/hit门禁和现场hash见
+`BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_TIR_ABI_IMPLEMENTATION_READINESS_2026_08_28.md`。
 
 ## 3. 为什么不能直接修改v1
 
@@ -137,7 +155,8 @@ performance_claimed=false
 formal fixture预期`positive/negative/zero=8689/9137/606`。计数只在correctness/formal路径冻结；后续timing路径不得
 为每次warm call增加host同步统计。production runtime只需生成selector并将其generation绑定到本次coefficient pass。
 
-nonfinite coefficient不应被两个comparison都false后静默当zero。pack写`-128`，select传播canonical NaN；
+nonfinite coefficient不应被两个comparison都false后静默当zero。pack用IEEE-754 exponent位检查写`-128`，select
+传播bits=`0x7fc00000`的canonical quiet NaN；
 S4-1D existing final-finite gate在result lease/commit前拒绝。失败慢路径再扫描selector sentinel并给出稳定
 `NONFINITE_AINPUT_COEFFICIENT`，正常路径不新增status buffer、计数kernel或额外host同步。
 
@@ -214,7 +233,7 @@ workspace_bytes=0
 diagnostic_module_hash=8ecfca40...b630c0
 ```
 
-### 7.2 nonfinite sentinel探针
+### 7.2 nonfinite sentinel探针（v2修正）
 
 独立CUDA/TIR验证NaN、`+Inf`、`-Inf`不会误归zero：
 
@@ -225,6 +244,9 @@ invalid_outputs_nan=3
 extra_status_buffer=0
 ```
 
+第一次使用浮点`x==x && abs(x)!=Inf`的探针为FAIL：NaN被错误分类成0。改用float32 exponent位检查后，
+NaN/±Inf三项才全部为`-128`。这个失败结果必须保留，不能只披露最终PASS。
+
 ### 7.3 formal production Ainput探针
 
 从existing compiled coefficient pass读取真实Ainput，再由独立新TIR执行pack/select：
@@ -234,11 +256,14 @@ status=PASS
 positive/negative/zero=8689/9137/606
 old_binary_zero_misclassified=606
 selected_hash=7e95e075...39b652
-derived_center_hash=d6164a06...f5b003
-diagnostic_tir_module_hash=eb3e7ec6...250fb5
+derived_center_hash=2a3b69e1...f5f003
+diagnostic_tir_module_hash=c25b7590...3e6fb
 extra_center_tensor_count=0
 selector_bytes=18432
 ```
+
+本次重新从真实lower/upper按provider order派生center，故center hash scope取代旧diagnostic projection短写；
+selected hash与`8,689/9,137/606`保持一致。完整hash和scope说明见TIR ABI v2文档。
 
 探针是design-time evidence，不是production artifact或correctness closure；正式实现仍需five-fresh、raw/replay和
 fully re-signed tamper。

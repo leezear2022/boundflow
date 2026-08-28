@@ -73,6 +73,12 @@ fanout：formal Ainput有606个exact zero，provider的`abs(A)`导数要求zero�
 规范oracle，selected-primal恢复为优化lowering。原arena/scratch/55,296-byte selector+sign/149,856-byte V/lA及
 compressed ABI保留；formal tamper仍为68类。S3外审和S4-1B0 formal关闭前，S4代码/timing仍关闭。
 
+S4-1B0后端ABI继续完成实现前硬化：现场反例证明浮点`x==x`式NaN classifier会在当前TVM/CUDA lowering下
+把NaN误归zero，故正式pack改为IEEE-754 float32 exponent位检查；修正后NaN/±Inf均为`-128` sentinel。
+同时冻结2 launch/5 view/6 argument、zero center tensor/view、独立cache key和module/launch receipt；真实Ainput
+仍精确复现`8,689/9,137/606/0`且旧binary误编码606。详见
+`BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_TIR_ABI_IMPLEMENTATION_READINESS_2026_08_28.md`。
+
 最新执行（v8 S3，待合并外审）：S3 v2已把S2 prepared direct VJP接入ResNet2B P-anchor完整10次
 CROWN evaluation/9次Adam mutation本地wrapper。18 fresh稳健formal得到P/native order-median
 geomean/worst=`3.2438943700x/3.2246091003x`，P/旧D2B=`1.8422164274x`；逐step语义/sign、replay与
