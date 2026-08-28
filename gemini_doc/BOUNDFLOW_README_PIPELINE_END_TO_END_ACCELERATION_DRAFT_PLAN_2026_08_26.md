@@ -1294,6 +1294,20 @@ provider return与completion后，对core-owned12-path α/β和局部host packet
 | RVIR-v4 | 固定ResNet2B property 0、1 core/6 domains/depth 1、`max_iterations=1`下core state/trajectory与成功路径branch/queue/termination等价；12-path core publish支持content compensation | host exact-call typed ABI和唯一core publish authority；DomainList pop/add失败原子性、多轮/多workload仍待验证 |
 | artifact/replay/tamper | raw-first与fail-closed纪律 | 复用纪律、manifest schema与harness模式；M0—M6仍须分别实现本阶段的semantic replay，不能宣称存在一个可直接套用的统一框架 |
 
+S4 whole-core correctness的formal evidence进一步冻结四条通用规则：
+
+1. artifact内hash只能证明**自洽**，不能证明source/model/replayer的**真实性**；真实性由DocOps/Git审计请求中的
+   artifact外trust anchor绑定；
+2. B0/R/C六全排列是18个positive process，15个poison/abort点必须另用15个fresh process，总计33，禁止复用已
+   poisoned进程；
+3. whole-core tensor raw采用stdlib可解的index + content-addressed binary payload sidecar，保留IEEE bits、logical
+   path、view/alias投影，不能只留`.pt`或summary；
+4. internal replay通过后只写`PENDING-EXTERNAL-AUDIT`，审计批准后的closure才可写`VALIDATED`。
+
+实施合同见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_EVIDENCE_IMPLEMENTATION_READINESS_2026_08_29.md`。这些是
+correctness证据设计，不是性能结果，也不开放S4代码。
+
 关键数字的仓库证据入口固定如下，避免后续只引用本计划的二手汇总：
 
 - CIBC整图：`gemini_doc/BOUNDFLOW_CIBC_IBP_HORIZONTAL_FORMAL_CLOSURE_2026_08_24.md`；

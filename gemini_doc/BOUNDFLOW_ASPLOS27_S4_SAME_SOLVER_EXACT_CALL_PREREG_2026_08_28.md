@@ -341,21 +341,28 @@ B0 original provider只作额外semantic control，不作为S4实现依赖。五
 - validation/staging失败必须在live mutation前clean abort；mid-commit只可恢复committed prefix且仍进入
   `COMMIT_POISONED`；post/queue故障分别进入`POST_POISONED/QUEUE_POISONED`，禁止native fallback、重试或继续。
 
-所有离散字段exact；有限浮点沿用已冻结容差。通过后状态只能是
-`VALIDATED-S4-SAME-SOLVER-CORRECTNESS`，仍不形成性能claim。
+所有离散字段exact；有限浮点沿用已冻结容差。内部formal通过后只能写
+`FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT`；外审批准后的closure commit才可升级为
+`VALIDATED-S4-SAME-SOLVER-CORRECTNESS`，且仍不形成性能claim。
 
 ### S4-4：artifact/replay/tamper closure
 
-精确artifact tree、18-worker六全排列B0/R/C、stdlib tensor codec/replayer、pre/mid/post/queue fault状态与71类
-fully re-signed tamper合同见
-`gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`。
+精确artifact tree、18-worker六全排列B0/R/C、15个隔离fault worker、stdlib tensor codec/replayer、external trust
+anchor、pre/mid/post/queue fault状态与71类fully re-signed tamper合同见：
 
-- raw-first，source commit、TVM submodule、三个外部仓库、model/property与全部code blob绑定；
-- 六个B0/R/C全排列triplet、18个fresh subprocess；部分结果不得resume成formal；
+- 总门禁：`gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
+- 实施就绪修订：
+  `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_EVIDENCE_IMPLEMENTATION_READINESS_2026_08_29.md`。
+
+- raw-first，source commit、TVM submodule、三个外部仓库、model/property、loaded core/native inventory与关键compiled
+  receipt绑定；artifact外trust anchor另绑manifest/semantic root/replayer；
+- 六个B0/R/C全排列triplet、18个positive subprocess，加15个隔离fault subprocess，总数33；部分结果不得resume成formal；
 - raw逐step保留，不只存summary digest；
-- tensor raw必须有不依赖`.pt`的stdlib可解码投影；replay不得import BoundFlow/PyTorch/TVM/αβ-CROWN；
+- tensor raw必须有不依赖`.pt`的stdlib可解码index + content-addressed binary payload；replay不得import
+  BoundFlow/PyTorch/TVM/αβ-CROWN；
 - replay从raw重算coverage、trajectory、whole-core、receipt、failure state与verdict；
-- 至少71类fully outer-resigned tamper，覆盖source/protocol、worker/process、state/trajectory、terminal handoff、KFSB、
+- 至少71类fully outer-resigned tamper，按external-anchor/frozen-protocol/raw-semantics/execution-evidence分层；覆盖
+  source/protocol、worker/process、state/trajectory、terminal handoff、KFSB、
   transaction/provider/post、artifact/replay、scratch phase/finalization/storage alias、S4-0 live binding/exclusive ownership与
   claim flag；
 - official post与candidate queue add均发生于commit之后；fault必须分别记录为`POST_POISONED/QUEUE_POISONED`，禁止

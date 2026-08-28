@@ -19,6 +19,12 @@ tenx-claimed: false
 
 > 2026-08-29修订：S4-3 implementation-readiness新增prepared working-β、prefix rollback、two-stage host packet与
 > post/queue独立计数；本稿的formal schema和tamper集合以下述修订为准。
+>
+> 2026-08-29第二次修订：实现细节以
+> `BOUNDFLOW_ASPLOS27_S4_4_FORMAL_EVIDENCE_IMPLEMENTATION_READINESS_2026_08_29.md`为准。该审计用真实
+> S3/RVIR raw和stdlib edge probe纠正了本稿的inline-base64、18-worker、手写source allowlist、artifact内自证
+> authenticity、seal顺序和外审前`VALIDATED`六项假设。本文保留总门禁和71类攻击语义，不再作为codec/source/
+> process topology的唯一实现合同。
 
 ## 0. 直接结论
 
@@ -29,7 +35,9 @@ S4-4不是“把S4-0—S4-3测试结果复制进manifest”。它必须从同一
 正式协议固定为：
 
 ```text
-6个全排列triplet × 3个独立fresh subprocess = 18个worker
+6个全排列triplet × 3个独立fresh subprocess = 18个positive worker
+15个fault injection × 1个独立fresh subprocess = 15个fault worker
+formal总数 = 33个worker
 
 B0 = pinned original provider whole-core
 R  = provider-independent RVIR native whole-core reference
@@ -43,8 +51,9 @@ C  = S4 compiled evaluator + sealed policy + S4-3 transaction
 3. C才是需要关闭的compiled same-solver路径；
 4. 六个排列可完整平衡variant的执行位置和冷/热顺序，即使本轮不形成latency claim也能暴露顺序相关状态污染。
 
-S4-4只关闭correctness/evidence chain。即使18/18通过，状态也只能升级为
-`VALIDATED-S4-SAME-SOLVER-CORRECTNESS`；S4-P timing必须另行预注册、另行生成artifact。
+S4-4只关闭correctness/evidence chain。33/33与内部replay通过后，artifact只能写
+`FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT`；只有外部审计批准后的closure commit才可升级为
+`VALIDATED-S4-SAME-SOLVER-CORRECTNESS`。S4-P timing必须另行预注册、另行生成artifact。
 
 ## 1. 对现有artifact基础设施的审计结论
 
@@ -77,7 +86,7 @@ S3 v2的20 MB JSONL可由标准库读取，但只覆盖P-anchor optimizer，并�
 - poisoned failure state。
 
 此外，串联历史artifact manifest只能证明旧source下各子机制曾分别通过，不能证明新S4 source中的组合路径执行过。
-S4-4可把旧manifest作为historical-oracle provenance输入，但**formal truth必须由本轮18个新worker产生**。
+S4-4可把旧manifest作为historical-oracle provenance输入，但**formal truth必须由本轮18个positive与15个fault新worker产生**。
 
 ## 2. artifact目录与文件合同
 
@@ -88,12 +97,15 @@ artifacts/asplos27-s4-whole-core/resnet2b-prop0-v1/
   protocol.json
   environment.json
   source_identity.json
+  anchor_request.json
   workers.jsonl
   pairs.jsonl
   raw/
     w00-b0/
       worker.json
-      tensor_records.jsonl.gz
+      tensor_index.jsonl.gz
+      payload_index.jsonl.gz
+      tensor_payloads.bin.gz
       trajectory.jsonl.gz
       kfsb.jsonl.gz
       transaction.jsonl.gz
@@ -102,9 +114,11 @@ artifacts/asplos27-s4-whole-core/resnet2b-prop0-v1/
     ...
     w17-c/
   fault/
-    precommit.jsonl
-    midcommit.jsonl
-    postcommit.jsonl
+    f00-precommit/
+      worker.json
+      fault.json
+    ...
+    f14-postcommit/
   summary.json
   replay_stdout.txt
   tamper_report.json
@@ -119,7 +133,7 @@ process任何失败都把整个输出移动为`.failed-<reason>`或写到另一�
 
 - 目标不存在或为空；
 - 任何已有formal文件都导致fail closed；
-- 18个worker必须一次完整生成；
+- 18个positive与15个fault worker必须一次完整生成；
 - 缺一个worker、stderr出现未允许exception、进程返回非0或atomic rename未完成，均不得生成summary/manifest；
 - failed attempt保留供诊断，但manifest中`formal=false`，不能被后续工具“补齐”为formal。
 
@@ -211,8 +225,13 @@ asplos_ready_claimed
 - compile artifact/TIR/module receipt hash。
 
 不能只绑定手写的5—10个`CODE_PATHS`然后把未列出的transitive implementation当成可信。第一版实现应生成
-`executed_source_inventory.jsonl`：结合静态allowlist和运行时import observer，取二者并集后冻结。出现repo内已执行
-Python模块却不在inventory时fail closed。
+`executed_source_inventory.jsonl`：在低扰动worker结束快照中冻结repo core/scripts、TVM/TVM-FFI Python和repo-local
+native library，并另外绑定关键compiled module/TIR receipt。逐call `sys.setprofile`已实测把约15—17秒worker拖到超过
+120秒仍未结束，因此禁止作为formal observer。出现repo内loaded module/native file不在inventory时fail closed。
+
+`source_identity.json`只证明artifact内部source投影自洽。真实性必须由artifact外的DocOps/Git审计请求绑定
+`manifest_hash/semantic_root/source_commit/protocol/model/property/config/replayer blob`；artifact内自带的伪anchor不得自动
+采信。
 
 ### 4.2 clean-source纪律
 
@@ -232,14 +251,14 @@ formal generation前：
 `.pt`可以保留为开发缓存或repo内部复跑输入，但不得是S4-4唯一raw。外部模型/审计脚本应能只用：
 
 ```text
-json, gzip, base64, hashlib, struct, math
+json, gzip, hashlib, struct, math
 ```
 
 恢复shape、dtype、全部IEEE payload、sign/finite class和numeric differences。
 
-### 5.2 tensor record schema
+### 5.2 tensor index + content-addressed binary payload schema
 
-每个logical tensor一行canonical JSON：
+每个logical tensor一行canonical JSON index；payload按首次出现顺序写入同worker的raw binary sidecar：
 
 ```text
 TensorRecordV1:
@@ -251,21 +270,24 @@ TensorRecordV1:
     dtype
     shape
     byte_order = little
-    encoding = base64-ieee-bytes
-    payload_base64
+    encoding = indexed-ieee-binary-v1
+    payload_id
+    payload_offset
     payload_nbytes
     payload_sha256
     source_device
     materialization_reason
 ```
 
-raw payload先按contiguous CPU logical value导出IEEE bytes；`payload_sha256`绑定解码前原始bytes。正式dtype至少支持：
+raw payload先按contiguous CPU logical value导出IEEE bytes；同worker相同payload按content hash复用，但logical tensor、view和
+alias投影仍逐条保留。`payload_sha256`绑定解压后的原始bytes。正式dtype至少支持：
 
 - bool、int8/16/32/64；
 - float16、bfloat16、float32、float64。
 
-stdlib replayer必须自己实现bfloat16→float32解码，不得import numpy。gzip固定`mtime=0`、固定压缩级别和文件名字段，
-确保同一raw投影可确定性重建；manifest绑定压缩文件bytes，semantic replay绑定解压后的record/payload hash。
+stdlib replayer必须自己实现bfloat16→float32解码，不得import numpy。gzip固定`mtime=0`、固定压缩级别和空文件名字段；
+manifest绑定本次生成的压缩文件bytes，semantic replay绑定解压后的canonical stream/payload hash。不同zlib版本不要求
+重新压缩后逐字节一致。
 
 ### 5.3 tensor path与重复检测
 
@@ -454,7 +476,7 @@ replayer不得调用production receipt `.validate()`、artifact runner的`valida
 1. canonical验证manifest及manifest hash；
 2. 逐文件核对size/SHA256；
 3. 验证source identity与protocol hash；
-4. 解码18个worker tensor raw；
+4. 解码18个positive和15个fault worker raw；
 5. 重建triplet/variant/process inventory；
 6. 重建每step trajectory和10/9/10 cardinality；
 7. 重建terminal handoff/lA inventory；
@@ -486,7 +508,7 @@ stdlib replayer按tensor path对齐：
 `summary.json`至少包含：
 
 - schema/status/source/protocol hash；
-- worker/triplet/order/variant counts=`18/6/6/3`；
+- total/positive/fault/triplet/order/variant counts=`33/18/15/6/6/3`；
 - B0/R、R/C、B0/C的lower/state/gradient/core/post/KFSB max diff；
 - sign/discrete exact flags与元素计数；
 - 10/9/10 trajectory exact；
@@ -505,14 +527,14 @@ stdlib replayer按tensor path对齐：
 - 所有claim flags=false；
 - `summary_hash`。
 
-状态只有两种：
+artifact生成端状态只有两种：
 
 ```text
-VALIDATED-S4-SAME-SOLVER-CORRECTNESS
-VALIDATED-NO-GO-S4-SAME-SOLVER-CORRECTNESS
+FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT
+FORMAL-NO-GO-S4-SAME-SOLVER-CORRECTNESS
 ```
 
-不能设置“部分通过但gate open”。
+外审批准后的独立closure commit才可写`VALIDATED-S4-SAME-SOLVER-CORRECTNESS`。不能设置“部分通过但gate open”。
 
 ## 11. manifest设计
 
@@ -540,12 +562,14 @@ worker异常。
 ```text
 raw workers
   → fault raw
-  → stdlib replay-derived summary
-  → fully re-signed tamper report
-  → replay stdout
+  → semantic root
+  → stdlib raw-derived summary
+  → fully re-signed tamper report（只绑定semantic root，不依赖final manifest）
+  → replay stdout（只含semantic结果，不含final manifest hash）
   → README
   → final manifest seal
-  → final replay
+  → artifact外external anchor
+  → anchored final replay
 ```
 
 tamper report必须进入manifest；不能在manifest后生成一个未绑定报告。
@@ -560,8 +584,12 @@ S4-4冻结minimum 71类。每案都要：
 4. 同步重算gzip/file digest；
 5. 同步重算summary（攻击者可伪造）；
 6. 同步重算manifest file inventory和`manifest_hash`；
-7. 运行stdlib replayer；
-8. 必须由raw-derived invariant拒绝。
+7. 按攻击类型运行`self-check`或`anchored-check`；
+8. 必须由预注册enforcement layer拒绝：`EXTERNAL_ANCHOR`、`FROZEN_PROTOCOL`、
+   `RAW_SEMANTIC_DERIVATION`或`EXECUTION_EVIDENCE_ONLY`。
+
+raw semantic攻击必须在同步重签外层文件后由self-check拒绝；source/model/replayer真实性替换由external anchor拒绝，不能
+虚称artifact内部可自行分辨；process freshness只形成execution evidence，不虚称cryptographic attestation。
 
 ### A. source/protocol（8）
 
@@ -720,15 +748,17 @@ auditor不能采信executor summary数字，至少独立完成：
 只有S3外审批准且S4-0—S4-3依序关闭后才允许：
 
 1. `docs: preregister S4-4 formal closure`；
-2. `feat(artifact): add stdlib tensor record codec`；
-3. `feat(artifact): add S4 whole-core fresh worker projection`；
-4. `feat(artifact): add 18-worker six-permutation runner`；
-5. `feat(artifact): add pre/mid/post commit fault records`；
-6. `feat(artifact): add independent stdlib semantic replay`；
-7. `test(artifact): add 68 fully re-signed attacks`；
-8. `artifact: generate S4 whole-core formal v1`；
-9. `docs: close S4 correctness and prepare external audit`；
-10. `docs: preregister S4-P timing`。
+2. `feat(artifact): add strict stdlib tensor index and binary payload codec`；
+3. `feat(artifact): add source/native inventory and external anchor schema`；
+4. `feat(artifact): add S4 whole-core fresh worker projection`；
+5. `feat(artifact): add 18-worker six-permutation runner`；
+6. `feat(artifact): add 15 isolated fault workers`；
+7. `feat(artifact): add derive self-check and anchored replay`；
+8. `test(artifact): add 71 layered fully re-signed attacks`；
+9. `artifact: generate S4 whole-core formal candidate`；
+10. `docs: deliver external anchor and audit exchange`；
+11. `docs: close S4 correctness or formal NO-GO`；
+12. `docs: preregister S4-P timing`。
 
 artifact代码、formal raw和closure文档应分提交，避免代码与其第一次结果共享不可审计dirty source。
 
@@ -738,13 +768,13 @@ artifact代码、formal raw和closure文档应分提交，避免代码与其第�
 
 只有以下全部成立：
 
-- source clean、18 worker完整、六全排列exact；
+- source clean、18 positive + 15 fault=`33` worker完整、六全排列exact；
 - B0/R与R/C whole-core/core/post/solver parity全部通过；
 - 10/9/10、terminal handoff、KFSB 3/3/72、12-path transaction exact；
 - provider C路径bound callback=0、constructor=12、post=1；
 - precommit/midcommit/postcommit failure分类正确且禁止非法fallback/retry；
 - stdlib replay从raw逐字重建summary；
-- 68/68 fully re-signed tamper拒绝；
+- 71/71 fully re-signed tamper按正确enforcement layer拒绝；
 - targeted/full/static/DocOps全过；
 - 外部审计批准；
 - 所有性能/complete-query/10x flag仍false。

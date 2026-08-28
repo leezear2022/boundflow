@@ -1,6 +1,6 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
-最新动作（v14 S3外审/S4 whole-core事务实施就绪）：S3已正式交付DocOps exchange
+最新动作（v15 S3外审/S4 whole-core形式化证据实施就绪）：S3已正式交付DocOps exchange
 `asplos27-s3-optimizer-runtime-20260828`，状态=`ready_for_audit/r001`。S4只读普查确认production
 optimizer每step有六α source/8,496 stored元素（lower-only active/preserved各4,248）与一条active β；S3 P-only
 对应1,032 stored/516 active且β为空，不能直接作为whole-core exact-call。S4草案冻结compressed evaluator→
@@ -25,6 +25,7 @@ terminal bridge。S3外审批准前代码/timing关闭。见
 `BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_29.md`、
 `BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`、
+`BOUNDFLOW_ASPLOS27_S4_4_FORMAL_EVIDENCE_IMPLEMENTATION_READINESS_2026_08_29.md`、
 `BOUNDFLOW_ASPLOS27_S4_DESIGN_EXTERNAL_AUDIT_HANDOFF_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
 
@@ -75,11 +76,13 @@ B0/R/C不伪造scratch parity，也不形成memory claim。六条terminal/export
 冻结query-scoped exclusive owner：candidate首次commit后，同一query禁止provider reentry、fallback和第二次core call；
 cuts/clip/BFS/multitree/all-node LP等额外consumer保持fail closed。
 
-S4-4不沿用旧RVIR `.pt`作为唯一formal truth；冻结18个fresh subprocess覆盖B0/R/C六全排列，tensor以stdlib可解码
-IEEE raw投影保存，由不import BoundFlow/PyTorch/TVM的replayer独立重建summary。minimum 71类fully re-signed
-tamper覆盖source、trajectory、terminal/KFSB、transaction/provider/post、scratch phase/storage/alias/finalization、
-exclusive owner和artifact；official post失败单列为
-`COMMITTED_POST_FAILED_POISONED`。
+S4-4不沿用旧RVIR `.pt`作为唯一formal truth。最新implementation-readiness用真实raw复核后冻结18个B0/R/C positive
+subprocess + 15个隔离fault subprocess，总计33；tensor采用stdlib可解码的index + content-addressed raw-binary
+sidecar。低扰动source snapshot实测加载101个BoundFlow core、4个repo script、559个TVM/TVM-FFI Python和3个
+repo-native文件，证明旧12-path手写source list不完整；逐call profile因超过120秒被拒绝作为formal observer。artifact
+内hash只证明self-consistency，source/model真实性另由DocOps/Git external trust anchor绑定。minimum 71类fully
+re-signed tamper按anchor/protocol/raw semantics/execution evidence分层；internal PASS只能写
+`FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT`，外审后才可VALIDATED。
 
 S4-1B/1C只读预检发现的site19 `0.0011564/9 sign mismatch`已进一步定位到input box零点次梯度，而非DAG/
 fanout：formal Ainput有606个exact zero，provider的`abs(A)`导数要求zero→center，旧binary endpoint却取lower。

@@ -10,6 +10,28 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：关闭S4-4 formal evidence实施前六项结构缺口
+
+- 新增631行S4-4 implementation-readiness审计；从S3 v2 runner、RVIR whole-core `.pt`、真实single-worker
+  source snapshot和Python stdlib edge behavior独立诊断，不生成S4 production代码或formal结果；
+- 证明artifact内部hash只能证明self-consistency，无法阻止攻击者同时替换source/model/raw/replayer并全重签；新增由
+  DocOps/Git审计请求持有的external trust anchor，绑定manifest/semantic root/source/protocol/input/replayer identity；
+- normal worker低扰动snapshot得到101个BoundFlow core Python、4个repo script、559个TVM/TVM-FFI Python和3个
+  repo-local native library，canonical inventory hash=`421ce0...c83`；旧12项`CODE_PATHS`不能声称完整source closure；
+- 逐call `sys.setprofile` source probe在超过120秒后仍未完成，而normal约15—17秒；正式worker禁止该高扰动observer；
+- 对B0/R/C现有tensor raw实测content duplication，并把inline base64改为per-worker tensor index + content-addressed
+  raw-binary gzip sidecar；B0/candidate raw-binary规划载体为`225,621/206,180 B`，只作codec诊断，不形成formal size claim；
+- 修正process topology为18 positive + 15 isolated fault=`33`；poisoned process不得复用；
+- 冻结无环seal DAG、derive/self-check/anchored-check三种replay、四类tamper enforcement和外审前
+  `FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT`状态；71类tamper数量不变但不再虚称全部由artifact内部语义拒绝；
+- whole-core已知numeric raw规划区间为`37.8557—47.5839 MiB`，只用于资源预案，明确排除metadata/new field和实际
+  compression结果；同步主预注册、S4-4蓝图、README主计划与目录导引。
+
+### 验证
+
+- source inventory/codec/stdlib edge probe：完成；高扰动call trace人工中止并作为diagnostic failure披露；
+- 文档合同、定向回归、DocOps validation/lint在提交前执行。
+
 ## 2026-08-29：刷新S4设计外审交接至whole-core transaction readiness v8
 
 - design-result commit更新为`751fc39580dae82267398d17c1c2bad551eca8f1`，冻结base仍为
