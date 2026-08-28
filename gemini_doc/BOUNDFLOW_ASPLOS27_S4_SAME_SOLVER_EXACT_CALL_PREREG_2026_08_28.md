@@ -265,6 +265,12 @@ lower-direction α/sparse β，oracle保留dense native representation；逐ordi
 evaluation/update=`10/9`，candidate evaluation=`10`，provider/native evaluation=`0`。任何policy shortcut、固定
 10/9无条件展开或读取expected trace都拒绝。
 
+精确实施合同见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`。该合同进一步
+冻结production terminal ordinal仍调用一次scheduler：evaluation/parameter mutation/scheduler call分别为
+`10/9/10`，但第10次scheduler产生的post LR不被后续evaluation消费；同时要求从live pruner直接捕获preserve-mask，
+不得把formal workload上未触发的stop/prune/restore分支静默删除。
+
 ### S4-3：whole-core exact-call correctness
 
 在同一`ABCrownSolver.verify`内比较：

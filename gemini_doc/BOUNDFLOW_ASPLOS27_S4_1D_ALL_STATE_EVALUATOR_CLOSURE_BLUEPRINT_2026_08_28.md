@@ -280,6 +280,10 @@ VALIDATED-S4-1D-ALL-STATE-SINGLE-EVALUATION-CORRECTNESS
 它只开放S4-2 sealed production 10/9 policy trajectory。S4-2必须比较每ordinal lower、六α/六β before/gradient/after、
 moments、LR、clamp、keep-best/stop及terminal bridge；S4-P timing继续关闭。
 
+S4-2不得复用S3简化循环；精确driver/receipt/negative gate见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`。其中
+production计数口径冻结为evaluation/parameter mutation/scheduler call=`10/9/10`。
+
 建议提交：
 
 1. `feat(runtime): assemble S4 all-state prepared evaluator`；

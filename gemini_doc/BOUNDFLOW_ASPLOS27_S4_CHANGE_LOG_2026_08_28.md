@@ -10,6 +10,27 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-28：冻结S4-2 sealed production policy driver精确实施蓝图
+
+- 再次确认S3 exchange仍为`ready_for_audit/r001`、无audit产物，因此不越过S4代码门禁；
+- 亲读pinned production `auto_LiRPA@5a098e8/optimized_bounds.py`，确认现有RVIR/S3简化10/9循环未完整覆盖
+  keep-best、stop、patience、iteration pruning、max-time、restore-best与terminal scheduler call；
+- 从production raw独立重算六domain winner均为ordinal 9，terminal post mutable state与step 9为`12/12`路径一致；
+- 纠正scheduler计数：production为10 evaluation、9 parameter mutation、10 scheduler call；第10次post LR不再被消费；
+- 冻结representation-neutral sealed driver、native dense/compiled compressed两个closed evaluator、policy runtime state、
+  functional Adam prepared moments、per-step raw receipt与minimum 23类negative/tamper门禁；
+- 汇总S4-1D加m/v的known logical subtotal=`420,744 bytes`，并明确step scalar/best checkpoint/pruner/workspace仍需
+  分项测量，不形成memory claim；
+- 新增S4-2实施蓝图并回链S4主预注册、evaluator ABI、S4-1D与README；仍无S4实现/GPU执行/性能claim。
+
+### 验证
+
+- production raw重算：`best_iteration_by_domain=[9,9,9,9,9,9]`、terminal-is-best全true、post mutable与step9=
+  `12/12`，PASS；
+- pinned external source核对：αβ-CROWN=`e5c7e17`、auto_LiRPA=`5a098e8`，terminal iteration后仍有
+  `scheduler.step()`，PASS；
+- targeted optimizer/policy/terminal tests、文档一致性、DocOps/exchange/lint结果在本批提交前补录。
+
 ## 2026-08-28：完成same-solver接入前的production coverage普查
 
 - 正式创建并交付DocOps exchange `asplos27-s3-optimizer-runtime-20260828`，状态=

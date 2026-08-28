@@ -296,6 +296,10 @@ S3外审批准后：
 S4-1D唯一prepared evaluator、386,712-byte logical correctness ledger、five-fresh/raw/replay/tamper门禁见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`。
 
+S4-2 sealed driver的live keep-best/stop/patience/pruning、functional Adam、`10/9/10`
+evaluation/update/scheduler-call与trajectory artifact合同见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`。
+
 ## 8. 当前门禁
 
 本文只是implementation blueprint。S3 exchange仍为`ready_for_audit`，没有external approval；因此S4代码、GPU
