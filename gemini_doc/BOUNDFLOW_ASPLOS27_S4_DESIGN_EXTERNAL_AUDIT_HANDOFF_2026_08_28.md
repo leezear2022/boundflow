@@ -1,12 +1,12 @@
 ---
-status: ready-for-external-design-audit-v3-live-lease
+status: ready-for-external-design-audit-v3-python-abi-frozen
 date: 2026-08-28
 type: external-audit-handoff
 topic: boundflow
 slug: asplos27-s4-design-audit
 audit-kind: preregistration-and-implementation-blueprint
 base-commit: ebf45cc72438141d8f0b35dadfd5cf774d7e753f
-design-result-commit: e0a53440c32842ab4a9db94764ad9e74be7880a4
+design-result-commit: eabf94999fba124f2774a05177aad6a0a95e9c96
 execution-authority: false
 code-change-open: false
 performance-claimed: false
@@ -42,8 +42,8 @@ speedup或complete-query性能已经存在。
 - branch：`feat/rvir-v4-production-state-ownership-v1`；
 - 本轮设计base：`ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
 - S4-0 live admission/lease、S4-3A scratch finalization与S4-1B0 ternary endpoint纠正全部设计结果：
-  `e0a53440c32842ab4a9db94764ad9e74be7880a4`；
-- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..e0a53440c32842ab4a9db94764ad9e74be7880a4`
+  `eabf94999fba124f2774a05177aad6a0a95e9c96`；
+- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..eabf94999fba124f2774a05177aad6a0a95e9c96`
   和下列S4文档的完整版本为准；
 - S3 formal实现/结果不在本轮重新验收，但它是S4设计输入；S3独立exchange仍等待审计；
 - `.docops/exchange/gc0-1-prereg-20260826`异步audit文件和`docs/CIBC_for_DAC.pdf`是用户保留的范围外dirty文件，
@@ -146,6 +146,8 @@ PASS要求：
 - auditor复现distinct views共享storage反例，确认snapshot alias group不能替代live storage group；
 - auditor复现全量same-content clone替换，确认canonical group/hash可完全相同，因此receipt不能替代strong-ref lease；
 - prepared lease必须single-transfer、不可序列化，并从S4-0保持到S4-3 current-provider precommit；
+- live input只接受existing helper返回的exact built-in dict；lease/wrapper必须为非dataclass `__slots__` class并同时拒绝
+  copy/deepcopy/pickle；
 - `plan.source_state_hash`只作dense mapping provenance；plan/snapshot projection可不调用dense initializer独立重算；
 - topology hash按plan order canonical，输入tuple置换不改变receipt；
 - β width与history长度exact，不接受只匹配前缀；
@@ -154,6 +156,7 @@ PASS要求：
 - P-only和active-β missing明确拒绝；
 - schema没有ResNet2B/node/shape特判；
 - same-storage view、empty clone、provider rebind与lease重复使用均在mutation/commit前拒绝；
+- `.data`/DLPack alias绕过`_version`时仍由content hash拒绝；hash同步成本保留到S4-P实测，不在correctness阶段删除；
 - S4-0无GPU执行、dense initializer、TIR或timing。
 
 ### AC3：S4-1 all-state evaluator物理可行性
@@ -289,6 +292,11 @@ PASS要求：
   (`75d3252e...3c9f`)，但raw object/nonempty storage/empty object identity全部不等；因此receipt不能替代strong-ref lease；
 - lease guard probe：same-content clone、same-storage view和empty clone均以`LIVE_SOURCE_OBJECT_REPLACED`拒绝，in-place
   mutation以`LIVE_TENSOR_VERSION_MISMATCH`拒绝；
+- pinned PyTorch/CUDA primitives probe：view共享storage `_cdata`/storage pointer但Tensor pointer受offset影响；empty pointer
+  均为0而storage identity各异；弱引用在外部owner删除后失效；copy/deepcopy/pickle/asdict门禁均按冻结结果拒绝；
+- version bypass probe：普通in-place增加`_version`，`.data`和DLPack alias写入改变content但原Tensor version不变，
+  same-object `set_`保持object却更换storage；
+- stable guard-order probe逐项得到object/storage/layout/version/content/admission/transfer/close/serialization预期detail；
 - β exact-width exploit：active β width从1扩为2并全量重签、history仍为1时existing snapshot validator接受，证明S4-0
   `beta_width == history_width`是必要门禁；
 - formal snapshot mutable=`12`（6 α+6 β value）、source device metadata=`cuda:0`；snapshot/mapping/R31 plan hash分别为
@@ -318,8 +326,8 @@ PASS要求：
 ## 7. 建议外审操作
 
 ```bash
-git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..c4d54d1eca96e517ba3372bd5265860bc3366b24
-git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..c4d54d1eca96e517ba3372bd5265860bc3366b24
+git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..eabf94999fba124f2774a05177aad6a0a95e9c96
+git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..eabf94999fba124f2774a05177aad6a0a95e9c96
 
 source env.sh
 /home/lee/miniconda3/envs/boundflow/bin/python -m pytest -q \
