@@ -1,5 +1,13 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+最新动作（v9 S3外审/S4预注册）：S3已正式交付DocOps exchange
+`asplos27-s3-optimizer-runtime-20260828`，状态=`ready_for_audit/r001`。S4只读普查确认production
+optimizer每step有六α/8,496元素与一条active β；S3 P-only只动态覆盖1,032 α元素且β为空，不能直接作为
+whole-core exact-call。S4草案冻结all-mutable-state compiled evaluation→existing host policy→terminal
+handoff→KFSB/atomic commit路线；S3外审批准前代码/timing关闭。见
+`BOUNDFLOW_ASPLOS27_S4_SAME_SOLVER_EXACT_CALL_PREREG_2026_08_28.md`和
+`BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
+
 最新执行（v8 S3，待合并外审）：S3 v2已把S2 prepared direct VJP接入ResNet2B P-anchor完整10次
 CROWN evaluation/9次Adam mutation本地wrapper。18 fresh稳健formal得到P/native order-median
 geomean/worst=`3.2438943700x/3.2246091003x`，P/旧D2B=`1.8422164274x`；逐step语义/sign、replay与

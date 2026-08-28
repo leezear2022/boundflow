@@ -1,11 +1,18 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-28 当前动作：S3外审ready，S4仅文档预注册**。DocOps task=
+> `asplos27-s3-optimizer-runtime-20260828`、status=`ready_for_audit/r001`。S4只读coverage核对发现
+> production六α/8,496元素+一条active β，而S3 P-only只覆盖1,032 α元素且β为空；S4须先扩为全部mutable
+> state compiled evaluation，不能直接包装whole-core。S3外审批准前S4代码与timing关闭。
+>
+> **历史（等待上方S3外审决定）：**
 > **2026-08-28 当前状态：S3 3x本地optimizer内部关闭，只开放S4 same-solver实现/正确性**。source=
 > `1766cbc`，artifact=`artifacts/asplos27-s3-optimizer/resnet2b-p-anchor-v2`。18 fresh、六顺序各三重复
 > 的P/native order-median geomean/worst=`3.2438943700x/3.2246091003x`，P/旧D2B=
 > `1.8422164274x`；逐step lower/dα/α/Adam state与sign通过，replay PASS、10/10篡改拒绝。v1
 > `2.5695746x/0.7595405x` NO-GO及三个崩溃尝试保留。whole-wrapper dynamic allocated/reserved=
-> `13,824/0 B`，不能claim 0/0。same-solver性能、complete-query、跨模型、10x与ASPLOS-ready仍关闭。
+> `13,824/0 B`，不能claim 0/0。该内部结论已交外审；same-solver实现是否开放以上方状态为准，
+> same-solver性能、complete-query、跨模型、10x与ASPLOS-ready仍关闭。
 >
 > **历史（S2数值保留，旧selected-value CUDA Graph安全机制已由S3修复取代）：**
 > **2026-08-28 当前状态：S2 canonical coarse CROWN direct VJP关闭**。source=`d9582b5`，artifact=

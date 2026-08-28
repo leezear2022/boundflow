@@ -1,13 +1,20 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-28 S3外审/S4预注册边界**：DocOps task=
+> `asplos27-s3-optimizer-runtime-20260828`现为`ready_for_audit/r001`；S4状态=
+> `DRAFT-PREREGISTERED-NOT-IMPLEMENTED-NOT-RUN`。production raw证明每step有六α/8,496元素及一条
+> `[6,1]` active β，S3只动态覆盖P-anchor 1,032个α元素且P β为空。因此不得claim S3已经whole-core
+> eligible或same-solver connected；S4代码/timing在S3外审批准前关闭。state element coverage
+> `12.1469%`不得表述为runtime share。
+>
 > **2026-08-28 S3 optimizer/runtime内部结论**：状态=
 > `VALIDATED-S3-3X-LOCAL-OPTIMIZER-V2-PENDING-EXTERNAL-AUDIT`。source=`1766cbc`，ResNet2B
 > P-anchor完整10 evaluation/9 Adam mutation wrapper的18 fresh稳健formal得到P/native order-median
 > geomean/worst=`3.2438943700x/3.2246091003x`、P/旧D2B=`1.8422164274x`；逐step lower/dα/α/Adam
 > state与sign通过，replay通过，10/10全重签篡改拒绝。可claim的范围仅为该本地冻结trajectory；v1
 > `2.5695746x/0.7595405x` NO-GO必须并列披露。whole-wrapper dynamic allocated/reserved=
-> `13,824/0 B`，不claim 0/0。只开放S4 same-solver implementation/correctness；不得claim same-solver
-> 性能、complete-query、跨模型、总体10x或ASPLOS-ready。
+> `13,824/0 B`，不claim 0/0。内部结果只支持提交S3外审和编写S4预注册草案；正式开放S4实现须以上方
+> 外审状态为准。不得claim same-solver性能、complete-query、跨模型、总体10x或ASPLOS-ready。
 >
 > **历史（S2数值保留，selected-value CUDA Graph机制已由S3安全修复取代）：**
 > **2026-08-28 S2 coarse CROWN direct custom VJP结论**：状态=

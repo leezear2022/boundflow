@@ -1,6 +1,6 @@
 # BoundFlow ASPLOS’27 production verification compiler 与 10× 端到端加速计划（v8 执行稿）
 
-status: execution-active-s4-same-solver-implementation-open
+status: s3-ready-for-external-audit-s4-prereg-draft
 date: 2026-08-26
 updated: 2026-08-28
 revision: v8-s3-internal-closure
@@ -13,9 +13,16 @@ paper-secondary-pillar: gpu-runtime-and-accelerator-systems
 performance-north-star: 10x-same-solver-complete-query
 performance-north-star-status: hypothesis-not-validated
 execution-authority: true
-code-change-open: s4-same-solver-implementation-and-correctness-only
+code-change-open: false-pending-s3-external-audit
 external-audit: deferred-by-user
 performance-claimed: false
+
+> **2026-08-28 S4 coverage修正（v9状态，不改10x北极星）**：S3已进入DocOps外审round 1。只读核对
+> production optimizer raw发现每step包含六α/8,496元素与一条`[6,1]` active β；S3 P-anchor candidate
+> 只动态拥有1,032个α元素(`12.1469%` state-element coverage，不是runtime share)，其β为空。因此S4
+> 不能把S3 wrapper直接替换whole `update_bounds_core`；必须先编译全部mutable α/β的single-evaluation
+> lower+VJP，再注入existing host production policy，并复用terminal handoff/KFSB/atomic commit。S3独立
+> 外审批准前S4仅允许预注册审阅，代码和timing关闭。
 
 > **2026-08-28 执行状态更新（v8）**：S1 standalone IBP compiler pipeline、S2 single-evaluation coarse
 > CROWN与S3完整10 evaluation/9 Adam mutation本地wrapper已依次关闭。S3 v2的18 fresh稳健formal达到
@@ -1943,6 +1950,6 @@ S0只观察和组合已有资产，不新增IR、schema或新kernel。它在48�
   schema/规则，不等待新外审；
 - S0—S3已经按本稿顺序形成standalone IBP、single-evaluation CROWN和本地10/9 wrapper的内部关闭点，但
   不把10x、ASPLOS-ready或局部数字升级为same-solver claim；
-- 本稿当前为`execution-authority=true/code-change-open=s4-same-solver-implementation-and-correctness-only`；
-  下一动作只允许RVIR exact-call接入、trajectory correctness与真实share/integration-overhead归因。S4正式
-  timing、未归因O6/O7、complete-query与10x claim仍关闭。
+- 本稿当前为`execution-authority=true/code-change-open=false-pending-s3-external-audit`；下一动作是完成
+  S3独立外审并审阅S4 all-mutable-state预注册。批准后才允许S4-0 coverage代码；S4正式timing、未归因
+  O6/O7、complete-query与10x claim仍关闭。
