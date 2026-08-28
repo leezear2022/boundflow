@@ -10,6 +10,34 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：关闭S4-1A逐文件施工歧义并冻结V5 construction package
+
+- 新增867行
+  `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`；亲读S4-0 V4、R31
+  DLPack cache和formal snapshot/plan，并现场运行CUDA owner/fault/key-collision探针，不生成production代码；
+- scope从旧稿混合的buffer/evaluator/Adam/terminal收回到buffer prepare；public API删除caller device/stream override，
+  由runtime观察并绑定exact-call private ticket；
+- plan-order重算6 α+1 active β+5 empty，parameter/gradient=`4254/4254`、candidate 16 storage逻辑=`34,080 B`；
+  本机allocator delta=`39,936 B`仅披露、不作跨环境门禁；
+- 构造same-pointer/shape different-stride反例，证明existing `(data_ptr,shape)`key可绕过TVM noncontiguous拒绝并复用错误
+  view；V5 key加入storage/stride/offset/dtype/device且lookup前fail closed；
+- 修正success无同步措辞：S4-1A source双capture+parameter/upstream校验=`32 D2H / 85,056 B`，与S4-0累计=
+  `56 / 153,072 B`；
+- 第一次cleanup只clear containers仍残留`1,024 B`；single resource owner、清loop local、退出`except`后raise在
+  retained traceback下使parameter/buffer/view三阶段allocated delta 0且`__context__ is None`；
+- minimum negative由36增至68，formal冻结5 positive+7 isolated fault；provider mapping stability/process-global
+  exclusivity保持false；construction model完整JSON hash=
+  `8ad25c2abf1eb98c3b1097bf7acb46aba227f7e94f0c7c03169f39e8da409a9d`；
+- 同步主预注册、历史S4-1A修订标记、README和总体计划；S3/S4-0门禁前S4-1A代码/formal/timing继续closed。
+
+### 验证
+
+- CUDA owner/allocator、DLPack collision、retained-traceback cleanup与plan-order probes：完成；第一次noncontiguous
+  direct registration失败按诊断事实保留；
+- construction JSON/hash、关键算术、引用与`git diff --check`：PASS；
+- V4 state/R31/S3/sparse Linear+Conv TIR定向回归：`48 passed in 189.07s`；
+- DocOps validation/lint：提交前执行。
+
 ## 2026-08-29：刷新S4设计外审交接至S4-0 construction readiness v10
 
 - design-result commit更新为`3f16a2709281db6d92cc711d3a2c97a7763a5a14`，冻结base仍为

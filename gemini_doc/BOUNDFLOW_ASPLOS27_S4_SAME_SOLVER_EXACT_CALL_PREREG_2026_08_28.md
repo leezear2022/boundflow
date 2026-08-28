@@ -235,13 +235,20 @@ query exclusivity仍必须由S4-3 exact-call latch关闭。否则S4-1关闭。
 ### S4-1：all-state single-evaluation compiled correctness
 
 S4-1A ordered buffer/lease/version ABI的精确实施蓝图见
-`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_ORDERED_BUFFER_ABI_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`。六lower-α与
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_ORDERED_BUFFER_ABI_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；V5第一行代码合同见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`。六lower-α与
 唯一active β必须是独立contiguous leaf parameter；五empty β只保留token；preserved α不得进入candidate GPU
-optimizer。hot evaluator不得接受dict/callback/tensor override，warm DLPack view creation必须为0。
+optimizer。S4-1A只做buffer prepare，不提前拥有evaluation/result lease、Adam、10/9 trajectory或terminal handoff；
+hot evaluator不得接受dict/callback/tensor override，warm DLPack view creation必须为0。
 prepare事务和失败清理见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_PREPARE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`：private lease必须
 恰好保留12条source Tensor（8,502元素/34,008 logical B，incremental allocation 0），但provider container/callback和
 lease外source引用为0；base view固定16/16；prepare失败clean close且retry/fallback/empty-cache均为0。
+V5不接受caller device/stream override；view key在lookup前绑定storage/shape/stride/offset/dtype/device，关闭existing
+`(data_ptr,shape)`碰撞。content validation使S4-1A产生`32`条logical D2H、`85,056 B`，与S4-0累计为
+`56/153,072 B`，不能写success无同步。single resource owner必须在retained traceback下清理到allocated delta 0；
+minimum negative=`68`，formal=`5 positive + 7 isolated fault`。S4-1A只证明local buffer owner，不证明provider mapping
+stability或process-global exclusivity。
 
 S4-1B0/1B三元endpoint纠正与六site graph见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_BOX_ENDPOINT_SUBGRADIENT_CLOSURE_2026_08_28.md`及

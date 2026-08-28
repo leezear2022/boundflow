@@ -15,6 +15,14 @@ performance-claimed: false
 
 # ASPLOS'27 S4-1A：buffer prepare事务、lease转移与失败清理实施就绪结论
 
+> **V5权威修订（2026-08-29）**：精确施工合同已由
+> `BOUNDFLOW_ASPLOS27_S4_1A_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`取代。V5新增单一
+> `_S4BufferResourceOwnerV1`，禁止逐字段move；cleanup除清owner字段外还必须清loop local，并在退出`except`后抛stable
+> error，避免retained traceback继续持有CUDA Tensor/TVM view。现场反例中只clear container残留`1,024 B`，修正后
+> parameter/buffer/view三阶段保留异常对象仍为allocated delta 0且`__context__ is None`。现有
+> `(data_ptr,shape)`view key存在same-pointer/shape different-stride静默碰撞，V5在lookup前拒绝noncontiguous并绑定完整
+> storage/layout identity。本文后文“success无同步”“36 negative”“one-step Adam positive”只保留历史语义。
+
 ## 0. 直接结论
 
 S4-1A的数值buffer布局已经可行，但旧蓝图缺少两个production级所有权合同：

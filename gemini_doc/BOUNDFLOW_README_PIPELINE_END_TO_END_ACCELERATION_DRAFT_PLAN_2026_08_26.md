@@ -1994,3 +1994,12 @@ strict built-in `dict/list/Tensor` extractor读取，
 零GPU活动。S4-0关闭的是local single-transfer和phase identity；process-global query exclusivity仍由S4-3 exact-call
 latch关闭。minimum negative为56，5 fresh real-provider receipt必须可由stdlib replay；这些仍是implementation contract，
 不是S4性能结果。
+
+S4-1A逐文件施工合同见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`。它只负责把S4-0承认的
+12条live source转为6 α+1 active β parameter、7 gradient、lower/upstream共16个independent storage/view；不提前实现
+evaluator、Adam、10/9 trajectory或terminal handoff。现有R31 `(data_ptr,shape)`DLPack key存在same-pointer/shape
+different-stride碰撞，故新key在lookup前检查contiguous并绑定storage/stride/offset/dtype/device。source双capture和
+initialized candidate校验使本阶段D2H=`32/85,056 B`、与S4-0累计=`56/153,072 B`；必须进入未来wrapper成本。
+failure使用single resource owner并清空loop local/error context，避免retained traceback保留显存。68类negative、
+5 positive+7 fault formal与process-global mapping/exclusivity=false均为施工门禁，不是已实现结果。

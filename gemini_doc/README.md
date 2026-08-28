@@ -1,6 +1,6 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
-最新动作（v16 S3外审/S4-0逐文件施工就绪）：S3已正式交付DocOps exchange
+最新动作（v17 S3外审/S4-1A逐文件施工就绪）：S3已正式交付DocOps exchange
 `asplos27-s3-optimizer-runtime-20260828`，状态=`ready_for_audit/r001`。S4只读普查确认production
 optimizer每step有六α source/8,496 stored元素（lower-only active/preserved各4,248）与一条active β；S3 P-only
 对应1,032 stored/516 active且β为空，不能直接作为whole-core exact-call。S4草案冻结compressed evaluator→
@@ -15,6 +15,7 @@ terminal bridge。S3外审批准前代码/timing关闭。见
 `BOUNDFLOW_ASPLOS27_S4_0_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`、
 `BOUNDFLOW_ASPLOS27_S4_1A_ORDERED_BUFFER_ABI_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1A_PREPARE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`、
+`BOUNDFLOW_ASPLOS27_S4_1A_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`、
 `BOUNDFLOW_ASPLOS27_S4_1BC_DAG_ADJOINT_PREFLIGHT_CORRECTION_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
@@ -52,12 +53,15 @@ identity，process-global exact-call exclusivity仍由S4-3 latch负责。施工�
 `471424594fb4b6d017feac936a6005eb9d0451fd5579d026204ec952d0995239`；施工包内冻结完整canonical JSON，
 S3外审前代码仍closed。
 
-S4-1A prepare事务已进一步冻结：正式12-path CUDA owner探针得到6 α leaf+1 active β leaf+5 empty token，parameter/
-gradient均`4,254 elements / 17,016 B`，base DLPack=`16/16` pointer exact；一次双group Adam后parameter/gradient pointer
-稳定且source hash/version不变。private lease必须保留existing source=`12 tensors / 8,502 elements / 34,008 logical B`，
-incremental allocation=`0`，不能再以“provider source retained”拒绝；真正禁止的是provider container/callback及lease外
-source引用。parameter/buffer/view三阶段故障注入均清理到candidate refs=0、allocated delta=0、source不变，并禁止retry/
-fallback/`empty_cache`。S4-1A negative最低冻结为36类，implementation仍closed。
+S4-1A V5施工审计把scope收回到buffer prepare：正式owner仍是6 α leaf+1 active β leaf+5 empty token，parameter/
+gradient均`4,254 elements / 17,016 B`，16 candidate storage逻辑量=`34,080 B`，base DLPack=`16/16`；Adam、evaluation/
+result lease、10/9 version和terminal handoff分别属于S4-2/S4-1D/S4-3，不再冒充S4-1A closure。private lease保留
+existing source=`12 tensors / 8,502 elements / 34,008 logical B`且incremental allocation=0。现有
+`(data_ptr,shape)`DLPack key可被same-pointer/shape different-stride碰撞，V5改为lookup前contiguous检查和完整
+storage/layout key。content validation使S4-1A自身D2H=`32/85,056 B`、与S4-0累计=`56/153,072 B`。
+第一次cleanup只clear container仍残留`1,024 B`；single resource owner+清loop local+退出`except`后raise使保留异常对象
+时三阶段allocated delta均0、error context为空。negative=`68`，formal冻结5 positive+7 fault；construction hash=
+`8ad25c2abf1eb98c3b1097bf7acb46aba227f7e94f0c7c03169f39e8da409a9d`。implementation仍closed。
 
 S4-3进一步确认exact-call不是薄adapter：真实事务还包含KFSB三次batch-24 child CROWN、12条return constructor、
 一次official post、host packet prune和`pre_result.interm_bounds` clear。现有device atomic v1在mid-commit故障时只能

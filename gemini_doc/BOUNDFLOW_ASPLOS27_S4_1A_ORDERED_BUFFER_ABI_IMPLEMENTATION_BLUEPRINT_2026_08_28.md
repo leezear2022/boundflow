@@ -15,6 +15,14 @@ performance-claimed: false
 
 # ASPLOS'27 S4-1A：ordered parameter/gradient buffer ABI实施蓝图
 
+> **V5权威修订（2026-08-29）**：本稿保留16-storage/view与private lease方向，但第一行代码的scope、public API、
+> DLPack key、validation D2H、exception cleanup、formal和negative，以
+> `BOUNDFLOW_ASPLOS27_S4_1A_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`为准。V5 API不接受caller提供
+> device/stream；S4-1A只做buffer prepare，旧稿的evaluation/result lease、Adam smoke、10/9 version和terminal handoff
+> 分别留给S4-1D/S4-2/S4-3。view key绑定storage/stride/offset/dtype/device；success prepare披露S4-1A
+> `32 D2H / 85,056 B`，与S4-0累计`56 / 153,072 B`。minimum negative由36增至68，formal为5 positive +
+> 7 isolated fault。process-global provider mapping stability仍未在S4-1A关闭。
+
 ## 0. 直接结论
 
 S4-1A应把S4-0的tensor-free slot admission与live version lease实例化为**稳定的GPU buffer ownership**，但仍不实现CROWN数学或
