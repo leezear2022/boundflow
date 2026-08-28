@@ -41,6 +41,9 @@ v2 不重跑或替换 v1 的任一行，而是全新空目录、全新 source co
 - 对每个 order 的 3 个 pair speedup 取中位数，headline 为 6 个 order-median 的 geomean 与 worst；
 - 同时披露 18-worker raw geomean、raw worst、每个 order 的三值和 dispersion；
 - correctness、receipt、memory 对 18/18 全部执行，不使用中位数豁免；
+- 2026-08-28 teardown smoke 发现连续约六个进程后 GPU 可进入持续慢功耗态；在新的 source-exact formal
+  开始前追加冻结每个 fresh worker 之间 `15 s` 的 untimed cooldown。该等待不进入任何 latency 样本，且对
+  N/D/P 三方一视同仁；protocol 必须记录该值；
 - 3x gate 保持 `geomean>=3.00x / worst-order-median>=2.50x / P-D>=1.50x`；
 - reduced/no-go 门槛不变；tamper、manifest、source blob 与 claim 边界不变。
 
@@ -53,3 +56,5 @@ v2 不重跑或替换 v1 的任一行，而是全新空目录、全新 source co
 v1 与 v2 必须在 closure 中并列披露，禁止只报 v2。若 v2 仍不过，S3 关闭并进入 residual attribution，不能
 继续增加重复次数或更换 estimator。
 
+补充诊断依据：同一次六进程 smoke 的第六个 PDN 为 N/D/P=`158.56/531.10/212.19 ms`；固定等待 15 秒后
+独立 PDN 恢复为 `101.63/57.20/30.90 ms`。这只用于冻结环境恢复间隔，不进入 headline。

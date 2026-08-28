@@ -326,6 +326,20 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
         json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n",
         encoding="utf-8",
     )
+    # TVM VM/DLPack/CUDA-Graph owners must die while CUDA and the TVM allocator
+    # are both live.  Leaving this graph to interpreter-finalization order can
+    # make TVM release an already-finalized pooled allocation after a successful
+    # worker.  The payload above contains only host scalars/lists at this point.
+    stream.synchronize()
+    modes.clear()
+    del candidate_result
+    del result
+    del prepared
+    del tensors
+    del direct
+    del candidate
+    gc.collect()
+    torch.cuda.synchronize()
     return payload
 
 

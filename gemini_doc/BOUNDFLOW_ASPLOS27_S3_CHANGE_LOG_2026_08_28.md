@@ -105,3 +105,30 @@ stage: s03
 - 独立失败 worker reproduction：PASS；
 - failed-attempt-a：仅诊断证据，不形成 artifact verdict；
 - 完整 v2：待 source-exact 后重跑。
+
+## 2026-08-28：定位 TVM teardown abort 并增加显式生命周期收口
+
+- 第二次完整 v2 在首轮 `PDN` 完成、写出 N/D/P=`103.57/61.91/31.49 ms` 后于进程退出时 abort；
+- 持久化 stderr 精确显示 TVM allocator 在 interpreter finalization 中重复释放未分配项；
+- failed attempt B 原样保留，仍不采信已写出的 result；
+- worker 在 payload 完成后、Python 返回前，先同步 stream，清空 prepared owner 引用并 `gc.collect()`，保证
+  TVM VM/DLPack/CUDA Graph owner 在 CUDA/TVM allocator 仍存活时析构；
+- 该改动不进入 timed region、不修改结果或 estimator，只修进程 teardown correctness。
+
+### 验证
+
+- teardown 多进程 smoke：待运行；
+- 完整 v2：继续关闭，必须在 source-exact 后从空目录重跑。
+
+## 2026-08-28：冻结进程间功耗态恢复间隔
+
+- teardown 六顺序 smoke 6/6 正常退出，确认显式 owner 清理修复 SIGABRT；
+- 第六个连续进程进入慢功耗态，15 秒等待后相同 PDN 恢复为健康延迟；
+- v2 protocol 新增 `inter_worker_cooldown_seconds=15`，只发生在 fresh worker 之间、计时区间外；
+- 仍保留 18 行 raw、三重复中位 estimator 与原 3x 门槛，不删除或重跑单行。
+
+### 验证
+
+- teardown：连续 6 fresh worker 全部 exit 0；
+- cooldown recovery：PDN P `212.19 ms → 30.90 ms`；
+- v2 formal：待新的 source-exact commit 后从空目录运行。

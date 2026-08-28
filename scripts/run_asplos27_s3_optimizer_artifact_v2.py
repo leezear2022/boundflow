@@ -15,6 +15,7 @@ import statistics
 import subprocess
 import sys
 import tempfile
+import time
 from typing import Any
 
 from scripts import run_asplos27_s3_optimizer_artifact as v1
@@ -25,6 +26,7 @@ PROTOCOL_SCHEMA = "boundflow.asplos27-s3-optimizer-protocol/v2"
 MANIFEST_SCHEMA = "boundflow.asplos27-s3-optimizer-manifest/v2"
 ORDERS = v1.ORDERS
 REPLICATES = 3
+INTER_WORKER_COOLDOWN_SECONDS = 15
 CODE_PATHS = (
     *v1.CODE_PATHS,
     "scripts/run_asplos27_s3_optimizer_artifact_v2.py",
@@ -50,6 +52,7 @@ def protocol(source: Path, model: Path) -> dict[str, object]:
         "orders": list(ORDERS),
         "replicate_count_per_order": REPLICATES,
         "fresh_process_count": len(ORDERS) * REPLICATES,
+        "inter_worker_cooldown_seconds": INTER_WORKER_COOLDOWN_SECONDS,
         "headline_estimator": "geomean-of-six-within-order-median-pair-speedups",
         "warmup_groups": 5,
         "sample_groups": 30,
@@ -232,6 +235,7 @@ def replay(artifact: Path, *, require_validated_3x: bool = True) -> dict[str, ob
         protocol_value.get("schema_version") != PROTOCOL_SCHEMA
         or protocol_value.get("fresh_process_count") != 18
         or protocol_value.get("replicate_count_per_order") != 3
+        or protocol_value.get("inter_worker_cooldown_seconds") != 15
         or protocol_value.get("headline_estimator")
         != "geomean-of-six-within-order-median-pair-speedups"
         or protocol_value.get("p_over_n_geomean_min") != 3.0
@@ -316,6 +320,9 @@ def generate(artifact: Path, source_capture: Path, model: Path) -> dict[str, obj
                         f"returncode={process.returncode} log={log_path}"
                     )
                 records.append(v1.load_json(result))
+                worker_ordinal = replicate * len(ORDERS) + run_index
+                if worker_ordinal + 1 < len(ORDERS) * REPLICATES:
+                    time.sleep(INTER_WORKER_COOLDOWN_SECONDS)
     (artifact / "raw/workers.jsonl").write_text(
         "".join(v1.canonical(row) + "\n" for row in records), encoding="utf-8"
     )
