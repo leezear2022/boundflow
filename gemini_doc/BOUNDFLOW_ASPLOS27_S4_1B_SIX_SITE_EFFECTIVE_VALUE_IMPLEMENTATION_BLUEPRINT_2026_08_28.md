@@ -197,6 +197,27 @@ S4-1B输出owner不可审计。
 Relax函数返回六个arena view组成的fixed tuple/token，不允许VM动态创建payload tensor。wrapper只返回一个typed
 lease，hot path不把六个Python tensor装dict。
 
+### 5.3.1 E0 selected input的phase alias门禁
+
+S4-1B0隔离pack/select必须为`selected_input[18,432]`提供`73,728 B` caller-owned output；它不在S4-1A的16个
+base storage内。production若要维持本蓝图的`438,726 B` ledger，必须在本阶段证明该output复用一块existing
+coefficient arena：
+
+```text
+pass A完成并捕获六selector
+  -> 被复用coefficient arena没有live reader
+  -> generation切换为E0 selected-input scratch
+  -> ternary select写满18,432 float32
+  -> Conv0同stream消费完成
+  -> pass B完成
+  -> pass C先重算coefficient，再允许gradient emitter读取
+```
+
+证明必须绑定storage token、前后descriptor、generation、stream/event order和live-reader count；不得让旧coefficient
+DLPack view以旧shape/generation继续访问同storage。若任一项不能成立，implementation必须分配独立`73,728 B`并同步
+修正S4-1D/S4-2/S4-3 ledger。S4-1B0的5个isolated view也不能计入S4-1A base view；production additional view由
+本阶段统一view inventory统计。
+
 ### 5.4 active α ABI
 
 selected-ReLU TIR统一接收：

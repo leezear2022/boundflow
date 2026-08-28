@@ -153,6 +153,10 @@ evaluate。terminal child只可transfer一次；parent可先close，child close�
 | compressed indices + β metadata | 2,862 | S4-1C static metadata |
 | 合计 | **438,726** | correctness design ledger |
 
+`438,726 B`以S4-1B证明`selected_endpoint[18,432]`在pass B安全复用一块coefficient arena为前提；S4-1B0
+isolated pack/select的caller-owned selector+selected output为`92,160 B`，并不自动满足该alias。若phase proof失败，
+本ledger增加`73,728 B`。
+
 旧账漏掉`49,152 + 2,862 = 52,014 B`。VM/cuDNN workspace、allocator metadata与module storage仍须分项披露。
 S4-2 Adam m+v另加34,032 logical bytes，不属于S4-1D。
 

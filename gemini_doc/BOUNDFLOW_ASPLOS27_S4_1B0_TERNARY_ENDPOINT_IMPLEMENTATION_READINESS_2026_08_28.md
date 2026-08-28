@@ -102,12 +102,14 @@ derivation schema/hash，而不是绑定一个不存在的center input pointer�
 - global workspace=`0`；
 - selector buffer=`18,432 int8 / 18,432 bytes`；
 - extra center tensor/view/allocation=`0`；
-- select output应写入existing selected graph/pre17 producer路径，不新增Python-visible tensor；
+- select output不新增Python-visible result tensor，但隔离probe仍必须由caller提供`73,728 B` physical output；production
+  只有在S4-1B证明pass A→B→C lifetime后才可复用existing coefficient arena；
 - formal S4整图最终是否单独保留select kernel由S4-1B profile决定，S4-1B0不计时。
 
-独立pack/select物理账冻结为2 launch、5 unique tensor、6 argument occurrence、prepare DLPack view 5/5
-pointer exact、warm view 0、extra center tensor/view 0。若后续融合，必须形成新schema/module hash并重新闭合，不能
-改写本轮receipt。
+独立pack/select物理账冻结为2 launch、5 unique tensor、6 argument occurrence、isolated prepare DLPack view 5/5
+pointer exact、warm view 0、extra center tensor/view 0、caller-owned output=`18,432+73,728=92,160 B`。这是隔离
+module scope，既不把whole selected graph伪装成2 launch，也不把这5项误算成S4-1A的16个base view。若后续融合，
+必须形成新schema/module hash并重新闭合，不能改写本轮receipt。
 
 ### 2.4 cache key与module receipt补充
 
@@ -152,8 +154,9 @@ workspace_bytes=0
 performance_claimed=false
 ```
 
-formal fixture预期`positive/negative/zero=8689/9137/606`。计数只在correctness/formal路径冻结；后续timing路径不得
-为每次warm call增加host同步统计。production runtime只需生成selector并将其generation绑定到本次coefficient pass。
+formal fixture预期`positive/negative/zero=8689/9137/606`。计数与tensor content hash只在correctness/formal
+observation sidecar冻结；后续warm/timing路径不得为每次call增加host同步统计。production runtime只需生成selector并
+将descriptor/generation绑定到本次coefficient pass。
 
 nonfinite coefficient不应被两个comparison都false后静默当zero。pack用IEEE-754 exponent位检查写`-128`，select
 传播bits=`0x7fc00000`的canonical quiet NaN；
@@ -178,8 +181,8 @@ S3 approved+closed且S4-0/1A依次关闭后：
    - exact`8689/9137/606`；
    - selected output逐位等于independent formula；
    - old binary明确误编码606；
-   - no center tensor/view/allocation。
-4. `feat(runtime): bind selector generation to S4 evaluator`
+   - no center tensor/view；隔离selector/selected output的`92,160 B`必须披露。
+4. `feat(runtime): bind selector generation to S4 evaluator`（属于后续S4-1B/1D，不属于B0 backend closure）
    - same ordinal/version/stream；
    - lower/upper/derivation identity；
    - fail before result lease/commit。

@@ -4,6 +4,9 @@
 > “DAG-adjoint原则性失败”收窄为input box `A==0`次梯度：三元lower/upper/center endpoint使六site dα与active
 > dβ全部闭合。coefficient VJP作为规范oracle、selected-primal作为优化lowering；详见S4-1B0 ternary合同与
 > same-solver prereg。本覆盖不升级任何implementation/performance claim。
+> S4-1B0 construction补充：backend lowering不新增IR；isolated 5-view module输出逻辑量=`92,160 B`，与S4-1A
+> base view无重叠。production ledger省去`73,728 B selected_endpoint`的前提是S4-1B另行关闭coefficient arena
+> phase alias/liveness；未关闭则加回内存账。warm路径不得做content/count D2H。
 
 > **2026-08-25 R3-1b0最新覆盖**：exact trace/liveness已正式关闭为
 > `VALIDATED-R3-1B0-TRACE-LIVENESS`；当前只开放b1 compiled no-grad full-lower forward。b2 custom

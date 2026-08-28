@@ -131,7 +131,9 @@ dβ_i = upstream * (-V_i * split_sign_i)
  0 = A == 0 = center
 ```
 
-总 sign/selector 存储仍为55,296 bytes，不新增 bitmap，也不增加动态分配。
+最终S4 sign/selector存储仍为55,296 bytes，不新增第七张bitmap。这里不等于S4-1B0隔离module“零物理输出”：
+隔离pack/select需要18,432-byte selector和73,728-byte selected output；production是否把selected output复用到existing
+coefficient arena，必须由S4-1B phase/lifetime合同证明，不能由本数学closure提前宣称。
 
 ### 4.2 其他五张 coefficient branch bitmap保持二元
 

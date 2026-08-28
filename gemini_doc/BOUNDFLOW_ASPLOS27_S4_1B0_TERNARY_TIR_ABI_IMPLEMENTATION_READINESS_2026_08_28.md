@@ -164,12 +164,19 @@ lower * float32(0.5) + upper * float32(0.5)
 | launch | 2 | pack 1 + select 1；是否随后融合由 S4-1B profile 决定 |
 | unique tensor | 5 | coefficient、lower、upper、selector、selected output |
 | argument occurrence | 6 | pack 2 + select 4；selector跨两个symbol复用 |
-| prepare DLPack view | 5 | 5/5 pointer exact |
-| warm DLPack view | 0 | prepared owner复用既有view |
-| selector storage | 18,432 B | existing int8 slot |
+| isolated prepare DLPack view | 5 | 隔离module caller建立，5/5 pointer exact；不是S4-1A base view |
+| isolated warm DLPack view | 0 | 隔离prepared micro-owner复用上述5项 |
+| selector storage | 18,432 B | 隔离probe为caller-owned独立storage；production owner属于S4-1B六selector |
+| selected output storage | 73,728 B | 隔离probe为caller-owned独立storage；production alias必须由S4-1B phase证明 |
 | center tensor | 0 | midpoint在select内部派生 |
 | center DLPack view | 0 | 不存在physical center input |
 | global workspace | 0 | 纯elementwise TIR |
+
+隔离module的两块output storage合计`92,160 B`。它们不是S4-1A的16个parameter/gradient/lower/upstream
+base storage，也不能仅凭“selected graph/pre17已有路径”写成零新增物理量。S4最终ledger可继续只计六selector和
+existing coefficient arena，但S4-1B必须另行证明：pass A selector capture完成后、pass C coefficient recompute开始前，
+`selected_endpoint[18,432]`安全复用一块coefficient arena，且没有live reader、跨stream或result lease alias。若该
+phase proof失败，则S4-1B必须把`73,728 B`加入production ledger，而不是从S4-1B0账上删掉。
 
 这里的`launch=2`是 S4-1B0 独立模块的设计账，不是最终 whole-region headline。未来若将 pack/select 合并进
 相邻 kernel，必须形成新 module/schema/hash，并重新执行 correctness closure；不能事后把当前两 launch receipt
@@ -248,11 +255,13 @@ threads_per_block
 endpoint_policy / midpoint_policy / nonfinite_policy
 input_numel / selector_bytes / global_workspace_bytes
 exported_symbols
-compile_count / cache_miss_count / cache_hit_count
 performance_claimed=false
 ```
 
-validate 必须重算 canonical receipt hash，并与编译返回的真实 module/sources 比较；不能只检查“64位hex格式”。
+`compile_count/cache_miss_count/cache_hit_count`是**cache observation**，不是compiled module的不可变身份，必须放在
+独立cache receipt里。module validate必须重算canonical receipt hash、重哈希receipt持有的真实TIR/device source，
+并与本次build identity比较；不能只检查“64位hex格式”。cache hit时允许不重新编译，但仍要重建cheap
+unscheduled/scheduled blueprint、重算lookup key并重哈希cached source；external replay再从源码重新编译比较。
 
 ### 5.2 launch receipt
 
@@ -260,19 +269,20 @@ validate 必须重算 canonical receipt hash，并与编译返回的真实 modul
 
 ```text
 evaluation_ordinal / parameter_state_version / selector_generation
-coefficient_hash / lower_hash / upper_hash / selector_hash
-positive_count / negative_count / zero_count / invalid_count
+coefficient_generation / lower_generation / upper_generation
 pack_launch_count=1 / select_launch_count=1
 argument_occurrence_count=6
-prepare_dlpack_view_count=5 / pointer_exact_count=5
+isolated_prepare_dlpack_view_count=5 / pointer_exact_count=5
 warm_dlpack_view_count=0
 extra_center_tensor_count=0 / extra_center_dlpack_view_count=0
 fallback_count=0 / eager_candidate_count=0 / native_shadow_count=0
 timing_recorded=false / performance_claimed=false
 ```
 
-formal fixture才要求`8689/9137/606/0`。generic runtime不能把这些模型特定数量写进schema validator；它只验证
-总数等于numel、invalid=0和raw重算一致。formal protocol另行绑定fixture expectation。
+warm production receipt不得为了content hash或class count增加D2H/synchronization。`coefficient/lower/upper/selector`
+content hash和`8689/9137/606/0`只进入correctness/formal observation sidecar，在已同步的raw上独立重算；generic
+runtime不能把这些模型特定数量写进schema validator。正常warm路径只绑定prepared descriptor、generation、ordinal、
+module/cache identity与O(1) launch/fallback counters；nonfinite由后续device poison和S4-1D final-finite gate处理。
 
 ## 6. 两组现场 CUDA 结果
 

@@ -1,6 +1,6 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
-最新动作（v17 S3外审/S4-1A逐文件施工就绪）：S3已正式交付DocOps exchange
+最新动作（v18 S3外审/S4-1B0逐文件施工就绪）：S3已正式交付DocOps exchange
 `asplos27-s3-optimizer-runtime-20260828`，状态=`ready_for_audit/r001`。S4只读普查确认production
 optimizer每step有六α source/8,496 stored元素（lower-only active/preserved各4,248）与一条active β；S3 P-only
 对应1,032 stored/516 active且β为空，不能直接作为whole-core exact-call。S4草案冻结compressed evaluator→
@@ -16,6 +16,7 @@ terminal bridge。S3外审批准前代码/timing关闭。见
 `BOUNDFLOW_ASPLOS27_S4_1A_ORDERED_BUFFER_ABI_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1A_PREPARE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1A_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`、
+`BOUNDFLOW_ASPLOS27_S4_1B0_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`、
 `BOUNDFLOW_ASPLOS27_S4_1BC_DAG_ADJOINT_PREFLIGHT_CORRECTION_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
@@ -111,6 +112,13 @@ S4-1B0后端ABI继续完成实现前硬化：现场反例证明浮点`x==x`式Na
 同时冻结2 launch/5 view/6 argument、zero center tensor/view、独立cache key和module/launch receipt；真实Ainput
 仍精确复现`8,689/9,137/606/0`且旧binary误编码606。详见
 `BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_TIR_ABI_IMPLEMENTATION_READINESS_2026_08_28.md`。
+
+S4-1B0逐文件施工复核进一步纠正物理owner：独立pack/select的5个DLPack view不属于S4-1A的16个base view；
+隔离caller必须提供`18,432 B` selector和`73,728 B` selected output，现场allocated增量合计`92,160 B`。
+production要维持`438,726 B` ledger，必须由S4-1B证明pass B selected output安全复用一块coefficient arena；否则
+ledger增加`73,728 B`。同时拆开precompile cache key、immutable module receipt、mutable hit/miss observation和
+formal content/count sidecar，禁止warm路径为hash/count新增D2H/sync；本backend不新增IR。construction hash=
+`5056d302aa27785ab8a22bd8f5665ebef0a4aba2ca22bc72ce28581144dbcc2a`。implementation仍closed。
 
 S4-1B/1C后端继续收紧：六张selector统一以`-128`表示nonfinite invalid，避免五张binary表把NaN静默选成upper；
 真实A18/A20/A24/A26/A29/Ainput inventory已从staged pass复核。七symbol gradient diagnostic对corrected PyTorch

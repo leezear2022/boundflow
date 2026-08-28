@@ -10,6 +10,29 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：冻结S4-1B0逐文件施工包并纠正isolated/production物理账
+
+- 亲读R31B2 binary pack、S2 binary select、现有cache/receipt与pinned provider midpoint源码，确认S4应新增独立
+  backend-local lowering，但不需要新增`boundflow/ir`对象；
+- 现场SM89内存TIR边界探针通过：signed zero归center、正负subnormal保留、NaN/±Inf写`-128`、非法select输出
+  canonical `0x7fc00000`，5/5 DLPack pointer exact；
+- max-finite/min-subnormal现场逐位重算得到`0x7f800000 vs 0x7f7fffff`、`0x00000001 vs 0x00000000`，冻结
+  add-then-mul midpoint policy；
+- 纠正旧物理表：5个isolated view不是S4-1A base；selector/selected output逻辑与allocated增量均为
+  `18,432+73,728=92,160 B`，reserved slab=`2,097,152 B`只披露；
+- S4 production要维持`438,726 B` ledger，必须由S4-1B证明pass B复用coefficient arena的storage/generation/
+  live-reader/stream phase；失败则加回`73,728 B`；
+- 拆分cache lookup key、immutable module receipt、mutable cache observation和formal tensor sidecar；device source是
+  compile output，不循环进入首次lookup key；warm路径禁止为content hash/class count新增D2H/sync；
+- 新增663行S4-1B0 construction package、20 stable reason、16项测试布局和11-worker future formal拓扑；canonical
+  model hash=`5056d302aa27785ab8a22bd8f5665ebef0a4aba2ca22bc72ce28581144dbcc2a`；
+- S3外审、S4-0、S4-1A门禁不变，production/formal/timing/performance仍closed。
+
+### 验证
+
+- SM89 boundary/midpoint/allocator diagnostics：PASS；
+- construction model canonical hash、文档一致性、目标既有回归、DocOps lint：提交前执行。
+
 ## 2026-08-29：刷新S4设计外审交接至S4-1A construction readiness v11
 
 - design-result commit更新为`97c6199acdb06aa7f55cc984896e17ca3e881a8a`，冻结base仍为

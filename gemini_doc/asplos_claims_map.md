@@ -10,6 +10,8 @@
 > S4 design-time只读补充：Ainput positive/negative/zero=`8,689/9,137/606`；三元zero→center后六dα
 > overall max diff=`1.63912773132e-07`、active dβ=`1.1920928955078125e-07`且sign exact。这只纠正
 > S4-1B0设计，不升级production correctness、same-solver或performance claim。
+> S4-1B0 construction-time GPU诊断只证明位级classifier/midpoint机制与isolated物理账：5 view、2 launch、
+> caller-owned output=`92,160 B`。它不证明S4-1A view复用、production arena alias或warm/query性能；后两项仍false。
 >
 > **2026-08-28 S3 optimizer/runtime内部结论**：状态=
 > `VALIDATED-S3-3X-LOCAL-OPTIMIZER-V2-PENDING-EXTERNAL-AUDIT`。source=`1766cbc`，ResNet2B

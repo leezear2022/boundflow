@@ -10,6 +10,9 @@
 > dense state只作oracle/terminal bridge；见S4 same-solver prereg与evaluator ABI草案。S4-1B0最新只读根因为
 > input box的`A==0`次梯度：606个zero须选择center，非DAG/fanout原则性失败；三元endpoint后六site gradient
 > 全部闭合，但production implementation/formal仍在S3外审后逐级开放。
+> S4-1B0最新施工合同又拆清物理scope：isolated pack/select的5个view不属于S4-1A base，selector+selected
+> output为`92,160 B`；production只有在S4-1B证明pass B复用coefficient arena的phase alias后才可维持现有ledger。
+> cache/module/cache-observation/formal-sidecar分层，warm路径禁止为content hash或class count新增同步；不新增IR。
 >
 > **历史（等待上方S3外审关闭）：**
 > **2026-08-28 当前唯一指令：S3内部关闭，只开放S4 same-solver实现/正确性接入**。S3 v2在source

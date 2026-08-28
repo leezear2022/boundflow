@@ -5,6 +5,8 @@
 > production六α source/8,496 stored元素（lower-only active/preserved各4,248）+一条active β，而S3 P-only
 > 对应1,032 stored/516 active且β为空；S4须先扩为全部mutable
 > state compiled evaluation，不能直接包装whole-core。S3外审批准前S4代码与timing关闭。
+> S4-1B0施工合同已把isolated backend与production owner拆开：5个isolated view、`92,160 B`输出只作diagnostic；
+> selected output复用coefficient arena仍待S4-1B phase proof，不能提前从production ledger消失。当前没有S4代码。
 >
 > **历史（等待上方S3外审决定）：**
 > **2026-08-28 当前状态：S3 3x本地optimizer内部关闭，只开放S4 same-solver实现/正确性**。source=

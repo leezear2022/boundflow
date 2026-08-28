@@ -205,6 +205,10 @@ formal fixture、排除模型parameters、fixed bounds和compiled-module内部wo
 | compressed static metadata | 2,862 | α indices + β location/sign |
 | **合计** | **438,726** | **36个logical physical buffers** |
 
+该合计隐含一个尚待S4-1B implementation关闭的phase alias：ternary input select的`73,728 B selected_endpoint`
+复用existing coefficient arena，而不是独立分配。S4-1B0隔离module实测仍需要distinct output；若production
+live-reader/generation/stream证明失败，本表必须增加`73,728 B`，不能继续沿用`438,726 B`。
+
 旧账`386,712 B`漏项为：
 
 ```text
