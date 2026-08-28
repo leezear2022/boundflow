@@ -31,3 +31,14 @@ performance-claimed: false
   `relax.ext.cudnn`与`cudnn.conv2d.forward`可见，`libcudnn.so.9`可解析；
 - 最初一次TVM core/cuDNN已经成功后，冗余editable tvm-ffi build失败；该问题通过条件化
   tvm-ffi步骤关闭，不能误记为TVM/cuDNN core build失败。
+
+## 2026-08-28 S2-A selected-value compiler
+
+- 新增一个standard Relax function，按真实依赖表达input select、ReLU17/19/23 select以及Conv0/2/4/
+  shortcut5/8；不再逐输出重算前层Conv；
+- 四个verification-specific select进入scheduled TIR；五个Conv call全部进入TVM cuDNN codegen；
+  Conv4与Conv8因签名相同共享一个partition function，所以证据分别记录`4 functions / 5 calls`；
+- source Relax、partitioned Relax、RunCodegen后IR、device sources、target与compile time进入compiled
+  identity；cuDNN不是五个call时直接拒绝；
+- 本机首次编译约`0.33 s`，独立对比旧D2B `pre25`最大差`1.90735e-6`且sign exact；该数是实现
+  correctness诊断，不是formal性能claim。
