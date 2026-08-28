@@ -15,6 +15,11 @@ performance-claimed: false
 
 ## 0. 结论
 
+> 2026-08-29 S4-2施工补充：result不再被视为可返回ordered raw Tensor tuple，而是opaque exact-consumer
+> capability；10次调用由run-level evaluator family发行10个one-shot generation，不能复活已关闭的S4-1D对象。
+> terminal lA只在六domain的terminal state同时为best时交给S4-3，否则稳定拒绝。精确合同见
+> `BOUNDFLOW_ASPLOS27_S4_2_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`。
+
 S4 candidate热路径应直接拥有production compressed lower-direction α与sparse β，不应继续以RVIR reference的
 dense native α/β作为optimizer参数。dense native state只保留两种用途：
 

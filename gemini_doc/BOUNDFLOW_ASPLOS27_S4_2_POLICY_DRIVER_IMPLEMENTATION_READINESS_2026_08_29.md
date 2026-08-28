@@ -9,6 +9,12 @@ same-solver-claimed: false
 
 ## 0. 结论
 
+> 2026-08-29施工级修订：本稿完成source/live/readiness诊断，但后续施工复核又关闭了opaque capability消费、
+> evaluator family re-arm、version拆分、terminal-best/lA一致性和fresh顺序平衡问题。实现以
+> `BOUNDFLOW_ASPLOS27_S4_2_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`为准。下文20-worker/
+> `25.59 MiB`为已被取代的readiness估算；新formal为24 workers，mandatory transition-tensor floor至少
+> `60,550,896 B`，且仍不等于完整artifact。
+
 S4-2 的主方向成立：应把 production α/β 优化循环抽成 sealed、无任意 callback、与 evaluator
 representation 无关的 host policy driver，再分别接 native dense oracle 与 compiled compressed evaluator。
 但旧蓝图在开工前还需要关闭四个实现歧义：
@@ -413,37 +419,36 @@ driver 必须支持 sealed、枚举式 test-only program，不接受任意 callb
 这些 fixture 只证明 control state machine，不进入 ResNet performance artifact，也不能与 fixed production policy
 共用 program hash。
 
-## 9. formal artifact 冻结
+## 9. formal artifact 冻结（历史readiness口径，施工包已取代）
 
-### 9.1 fresh-process 拓扑
+### 9.1 fresh-process 拓扑修正
 
-“five-fresh”明确解释为五对、每个成员独立 process：
-
-```text
-A/B: 5 pairs = 10 fresh worker processes
-B/C: 5 pairs = 10 fresh worker processes
-total         = 20 fresh worker processes
-```
-
-每对顺序预注册并交替；任一 worker 缺失、重复或失败，整组作废，不允许 resume。
-
-### 9.2 C 路径最低 full-IEEE payload 预算
-
-对 candidate 每 ordinal 至少保存：
+旧“five-fresh”虽然解释为五对、每个成员独立process，但无法平衡正反顺序，现修正为：
 
 ```text
-parameter before/gradient/after      3 * 17,016
-m/v before/after                     2 * 34,032
-step before/after                    2 * 28
-lower                                24
-per ordinal                          119,192 B
-10 ordinals                        1,191,920 B
-terminal six lA                      149,856 B
-minimum per-run numeric payload    1,341,776 B
+A/B: 6 pairs = 12 fresh worker processes  # AB/BA各3
+B/C: 6 pairs = 12 fresh worker processes  # BC/CB各3
+total         = 24 fresh worker processes
 ```
 
-20 workers 若都按此下限存储约 `25.59 MiB`；A 路径 full native α、policy masks、receipts和JSON/base64开销会更大。
-因此正式 manifest 应给 raw 实际 bytes，而不是只给 hashes。
+每对顺序预注册并严格平衡；任一worker缺失、重复或失败，整组作废，不允许resume。
+
+### 9.2 mandatory transition-tensor floor修正
+
+旧candidate-only估算每ordinal保存parameter/gradient/after、m/v before/after、step与lower，但漏掉functional Adam
+unprojected parameter shadow和最终restore state，也把A/B dense raw按candidate尺寸外推。施工包按path修正为：
+
+```text
+A = 10*(parameter before/after) + 9*gradient
+    + 10*(m/v before/after) + 10*(step before/after) + 10*lower
+    + 9*unprojected shadow + restored state + terminal lA
+
+B/C同式，但terminal evaluator derivative也保存，所以gradient count=10。
+```
+
+A/B/C per-run mandatory tensor floor=`2,837,288/2,871,296/1,511,936 B`；6A+12B+6C合计
+`60,550,896 B = 57.74583435058594 MiB`。这仍排除policy projection、receipt、source和容器开销；正式manifest
+必须给raw实际bytes，而不是只给hashes。
 
 ### 9.3 replay 必须独立重算
 
@@ -464,7 +469,7 @@ minimum per-run numeric payload    1,341,776 B
 5. terminal scheduler 改为 fixed live path 事实，不写成所有 exit 的无条件行为；
 6. mutation/evaluator failure 改为 `POISONED_NO_RETRY`，删除虚假 rollback 承诺；
 7. patience synthetic fixture 使用独立 sealed program；
-8. A/B 与 B/C 各五对，共 20 fresh workers；
+8. 历史readiness曾冻结A/B与B/C各五对；施工复核发现3/2顺序不平衡，现以各六对、共24 fresh workers取代；
 9. formal raw 明确最低 payload 预算；
 10. fixed production pruning physical path标为 inactive，但 active branch仍由 synthetic fixture覆盖。
 
@@ -476,7 +481,7 @@ minimum per-run numeric payload    1,341,776 B
 4. `test(runtime): close native A/B policy parity and synthetic branches`；
 5. `feat(runtime): bind compiled compressed evaluator`；
 6. `test(runtime): close B/C 10/9/10 all-state trajectory`；
-7. `artifact: freeze 20-worker raw replay and fully re-signed tamper`；
+7. `artifact: freeze 24-worker balanced raw replay and fully re-signed tamper`；
 8. `docs: close S4-2 and only then open S4-3 implementation`。
 
 ## 12. 当前停止点

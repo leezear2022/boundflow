@@ -17,6 +17,10 @@
 > S4-1D逐文件施工进一步发现旧raw预算与lease API不够：5+5 candidate-only `919,680 B`被12-worker三方+
 > terminal V sidecar `4,209,984 B`取代；raw Tensor getter禁止，parent/child capability采用9-state lifecycle。
 > 这些仍是code/formal closed设计修正，不改变下一动作S3独立外审。
+> S4-2逐文件施工现又补齐policy owner：opaque exact consume、run-level evaluator family、10个one-shot generation/
+> 9次controlled re-arm、三个version轴、28项commit cursor与terminal-best/lA一致性门禁。旧A/B与B/C各5对无法
+> 平衡正反顺序，已改为各6对共24 fresh；mandatory transition-tensor floor至少`60,550,896 B`。
+> `491,774 B`降为known base lower bound，完整policy storage/peak待实现receipt。当前依然没有S4代码或formal。
 >
 > **历史（等待上方S3外审决定）：**
 > **2026-08-28 当前状态：S3 3x本地optimizer内部关闭，只开放S4 same-solver实现/正确性**。source=

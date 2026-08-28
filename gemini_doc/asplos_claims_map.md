@@ -22,6 +22,10 @@
 > S4-1D construction-time state/raw诊断同样不升级claim：9-state/14-transition capability模型、15-node seal DAG和
 > `4,209,984 B` minimum raw都只是预注册合同；旧`919,680 B`降为candidate-only历史估算。当前没有S4-1D
 > evaluator、12-worker artifact或formal PASS，construction hash=`76da1864...3cd1`。
+> S4-2 construction-time只新增设计合同，不升级claim：opaque exact consume、10-generation/9-re-arm、
+> evaluation-input/optimizer-mutation/storage-commit三轴、28-item commit cursor与16-state/32-transition模型均尚未
+> 实现。terminal-best/lA要求六domain均为ordinal9 best；旧20-worker formal已被24-worker平衡拓扑取代，mandatory
+> transition-tensor floor=`60,550,896 B`。`491,774 B`只是known base lower bound，不是完整memory或peak claim。
 >
 > **2026-08-28 S3 optimizer/runtime内部结论**：状态=
 > `VALIDATED-S3-3X-LOCAL-OPTIMIZER-V2-PENDING-EXTERNAL-AUDIT`。source=`1766cbc`，ResNet2B

@@ -2,8 +2,8 @@
 
 status: s3-ready-for-external-audit-s4-prereg-draft
 date: 2026-08-26
-updated: 2026-08-28
-revision: v12-s4-ternary-box-endpoint-correction
+updated: 2026-08-29
+revision: v13-s4-policy-driver-construction
 supersedes-revision: v6-asplos27-ten-x
 supersedes-draft-at: 20f4741
 submission-target: ASPLOS-2027-September-cycle
@@ -16,6 +16,15 @@ execution-authority: true
 code-change-open: false-pending-s3-external-audit
 external-audit: s3-ready-for-external-audit
 performance-claimed: false
+
+> **2026-08-29 S4-2 policy施工收束（v13，不改10x北极星）**：S4-1D opaque result不能暴露raw Tensor，
+> 所以S4-2采用exact sealed consume，并由run-level evaluator family发行10个one-shot generation、执行9次受控
+> re-arm；不是把已关闭的一次性evaluator重新打开。evaluation-input version、9次Adam mutation、storage commit
+> generation拆开，functional Adam采用28项deterministic commit cursor。terminal lA只在六domain的terminal
+> state同时为best时进入S4-3，earlier-best拒绝错配。formal由旧20 worker修正为24 worker，mandatory
+> transition-tensor floor至少`60,550,896 B`；`491,774 B`只是known base lower bound。详见
+> `BOUNDFLOW_ASPLOS27_S4_2_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`。这些仍是design，S3外审
+> 批准前S4代码/formal/timing关闭。
 
 > **2026-08-28 S4 ternary box endpoint纠正（v12）**：上一轮site19 `1.156e-3/9 sign mismatch`并非DAG/fanout
 > 原则性失败，而是input concretization把606个`A==0`错误归入lower；provider的`abs(A)`零点次梯度要求center。

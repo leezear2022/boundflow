@@ -10,6 +10,37 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：冻结S4-2 policy driver实施施工合同
+
+- 新增1184行S4-2 implementation construction package；生产代码仍为0，S3外审批准前
+  `code/formal/timing/performance`保持closed；
+- result消费改为opaque exact sealed-consumer，禁止raw Tensor getter；10次evaluation由run-level evaluator family
+  发行10个one-shot generation，9次controlled re-arm不复活已关闭的S4-1D对象；
+- 将旧`ordinal==parameter_version==mutation_count`拆成evaluation-input version、optimizer mutation count与
+  storage commit generation，避免terminal restore被误计为第10次Adam update；
+- 新增terminal-best/lA一致性门禁：当前六domain best均为ordinal9时允许零重跑handoff；任一earlier-best则
+  `TERMINAL_ADJOINT_NOT_BEST_STATE` fail closed，不拼接ordinal9 lA与更早α/β；
+- functional Adam提交冻结为28项deterministic cursor（7 parameter+7m+7v+7step），scheduler只在tensor commit后
+  提交；任一post-begin/partial commit/re-arm失败均`POISONED_NO_RETRY`；
+- policy run机械模型=`16 states/16 events/32 legal/224 invalid`，canonical hash=
+  `75e0c1b7aa4fc9bd439d15af41f7c1b86c8c4c7f732ca6bb55108488fa743279`；
+- 纠正formal顺序偏差：A/B、B/C各由5对改为6对，正反顺序各3，总计24 fresh subprocess；
+- 修正mandatory transition-tensor raw floor：A/B/C per-run=
+  `2,837,288/2,871,296/1,511,936 B`，6A+12B+6C=`60,550,896 B`（约57.746 MiB）；仍不含policy
+  projection/receipt/source/container，不能冒充完整artifact；
+- 将`491,774 B`收紧为known tensor/base lower bound；完整policy control storage与allocated/reserved必须由实现receipt
+  补齐，不能写成完整footprint、peak或memory gain；
+- 同步S4-2 blueprint/readiness、evaluator ABI、README、memo、claims map、current status与设计外审handoff。
+
+### 验证
+
+- pinned production source blob hash、checkpoint `[0,6,7,8,9]`、10/9/10 LR、terminal-best事实复核；
+- state model与24-worker raw算术由stdlib脚本独立重算；
+- S4-2相关optimizer/terminal/state依赖回归=`36 passed, 1 deselected`；被排除的历史S2 artifact strict replay
+  现场只差`p_over_n_geomean 4.245381964572069 vs 4.24538196457207`一个末位ULP，原冻结artifact不改写；
+- 施工包=`1184 lines`、file hash=`b473e31bd00df48499288f60b4f92b8230a69cc5a22ba6762972e5c8391524e3`；
+  32 transition、224 invalid、三path raw floor、链接与git diff均机械通过；DocOps validation/lint在提交前执行。
+
 ## 2026-08-29：刷新S4设计外审交接至S4-1D construction readiness v15
 
 - design-result commit更新为`10bef37620080e7bb1eccdbb108084f2ea556a98`，冻结base仍为

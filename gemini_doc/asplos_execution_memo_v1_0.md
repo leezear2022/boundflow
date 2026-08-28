@@ -24,6 +24,12 @@
 > 12 fresh，A/B/C output+terminal V sidecar最低numeric raw=`4,209,984 B`；result改为opaque exact-consumer
 > capability，不公开raw Tensor；parent/child为9-state/14-transition正交lifecycle，seal DAG为15 nodes。
 > construction hash=`76da1864...3cd1`。当前仍只执行S3外审，S4-1D code/formal关闭。
+> S4-2最新施工合同进一步冻结opaque exact policy consume、run-level evaluator family、9次controlled re-arm、
+> 28项mutation commit cursor和16-state policy事务。evaluation-input version、9次Adam mutation与storage commit
+> generation必须分开；terminal lA仅在六domain均以ordinal9为best时允许零重跑handoff。旧5+5 pair形成顺序3/2
+> 不平衡，已改为A/B与B/C各6对、共24 fresh；mandatory transition-tensor floor至少`60,550,896 B`。
+> `491,774 B`现只称known tensor/base lower bound。施工更细不改变当前唯一动作：仍先完成S3独立外审，S4-2代码/
+> formal/timing关闭。
 >
 > **历史（等待上方S3外审关闭）：**
 > **2026-08-28 当前唯一指令：S3内部关闭，只开放S4 same-solver实现/正确性接入**。S3 v2在source

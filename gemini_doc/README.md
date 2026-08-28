@@ -1,5 +1,13 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+> **2026-08-29 S4-2施工合同已冻结、代码仍关闭**：新增
+> `BOUNDFLOW_ASPLOS27_S4_2_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`，把policy result改为opaque exact
+> consume，以run-level evaluator family发行10个one-shot generation并完成9次controlled re-arm；version拆成
+> evaluation-input/optimizer-mutation/storage-commit三轴。terminal lA只在六domain的terminal state同时为best时
+> handoff，earlier-best稳定拒绝。formal由旧20 worker改为24 worker，mandatory transition-tensor floor修正为
+> `60,550,896 B`；`491,774 B`只保留为known base lower bound，不是完整footprint/peak。S3外审批准前S4代码、
+> formal、timing和performance仍全部closed。
+
 最新动作（v20 S3外审/S4-1C gradient/terminal-lA逐文件施工就绪）：S3已正式交付DocOps exchange
 `asplos27-s3-optimizer-runtime-20260828`，状态=`ready_for_audit/r001`。S4只读普查确认production
 optimizer每step有六α source/8,496 stored元素（lower-only active/preserved各4,248）与一条active β；S3 P-only

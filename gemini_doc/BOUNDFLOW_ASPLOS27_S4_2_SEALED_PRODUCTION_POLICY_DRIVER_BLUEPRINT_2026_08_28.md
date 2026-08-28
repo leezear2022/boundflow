@@ -19,6 +19,11 @@ date: 2026-08-28
 > `BOUNDFLOW_ASPLOS27_S4_2_POLICY_DRIVER_IMPLEMENTATION_READINESS_2026_08_29.md`为准；修正后的S4-2/S4-3
 > known logical subtotal为S4-2 `491,774 B`；S4-3后续readiness补齐persistent upper/depths后为`559,838 B`。
 > 这仍是design，不开放production代码。
+>
+> 2026-08-29施工级再收束：具体API、opaque exact consume、run-level evaluator family、9次controlled re-arm、
+> 三个version轴、terminal-best/lA一致性门禁、16-state policy事务、24-worker顺序平衡formal及修正raw下限，以
+> `BOUNDFLOW_ASPLOS27_S4_2_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`为准。`491,774 B`现只称已知
+> tensor/base lower bound，不能称完整policy-driver footprint或peak。
 
 S4-2不能直接复用`execute_rvir_v4_native_optimizer_trace`、S3 P-anchor循环或
 `execute_terminal_optimizer_with_lower_adjoint_handoff_v1`。这些路径已经证明10次CROWN evaluation、9次Adam
@@ -340,7 +345,7 @@ compressed best α/β checkpoint                 17,016 B
 best lower                                         24 B
 ret_0 comparison reference                         24 B
 next parameter/m/v/step shadow                  51,076 B
-known S4-2 logical subtotal                    491,774 B
+known S4-2 tensor/base lower bound             491,774 B
 ```
 
 其中known CUDA logical=`491,718 B`，CPU logical=`56 B`。该数仍排除model/fixed input、cuDNN/TVM workspace、
@@ -545,12 +550,12 @@ policy/program/evaluator/source hashes
 performance_claimed = false
 ```
 
-### 9.3 five-fresh与replay
+### 9.3 six-pair balanced fresh与replay
 
-- A/B先`5 pairs = 10 fresh worker processes`关闭driver extraction；
-- B/C再`5 pairs = 10 fresh worker processes`关闭compiled trajectory；
-- 总计20个fresh worker，不能把一个process内重复调用算成fresh；
-- pair顺序预注册并交替，部分结果不得resume；
+- A/B先`6 pairs = 12 fresh worker processes`关闭driver extraction，AB/BA各3对；
+- B/C再`6 pairs = 12 fresh worker processes`关闭compiled trajectory，BC/CB各3对；
+- 总计24个fresh worker，不能把一个process内重复调用算成fresh；
+- 旧5对形成3/2顺序不平衡，已被取代；部分结果不得resume；
 - replay从raw重算全部数值最大差、policy decisions、Adam equations、scheduler计数和terminal round-trip；
 - source绑定BoundFlow commit、TVM submodule、production αβ-CROWN/auto_LiRPA、model/property与所有code blobs。
 
