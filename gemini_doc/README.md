@@ -79,6 +79,12 @@ S4-1B0后端ABI继续完成实现前硬化：现场反例证明浮点`x==x`式Na
 仍精确复现`8,689/9,137/606/0`且旧binary误编码606。详见
 `BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_TIR_ABI_IMPLEMENTATION_READINESS_2026_08_28.md`。
 
+S4-1B/1C后端继续收紧：六张selector统一以`-128`表示nonfinite invalid，避免五张binary表把NaN静默选成upper；
+真实A18/A20/A24/A26/A29/Ainput inventory已从staged pass复核。七symbol gradient diagnostic对corrected PyTorch
+reference逐位exact、float64最大差`2.36e-7`，并冻结7 launch/53 arguments/emitter46 views、prepared总48 views、
+β sign int8与2,862 B metadata。六V/terminal-lA slot同storage但interval不重叠，same-stream read→copy→reuse通过。
+详见`BOUNDFLOW_ASPLOS27_S4_1BC_SELECTOR_GRADIENT_TIR_IMPLEMENTATION_READINESS_2026_08_28.md`。
+
 最新执行（v8 S3，待合并外审）：S3 v2已把S2 prepared direct VJP接入ResNet2B P-anchor完整10次
 CROWN evaluation/9次Adam mutation本地wrapper。18 fresh稳健formal得到P/native order-median
 geomean/worst=`3.2438943700x/3.2246091003x`，P/旧D2B=`1.8422164274x`；逐step语义/sign、replay与

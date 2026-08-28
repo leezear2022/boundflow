@@ -10,6 +10,23 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-28：S4-1B/1C冻结六selector sentinel、七gradient TIR与48-view ABI
+
+- 真实D2B staged pass抽取A18/A20/A24/A26/A29/Ainput，normal数据全部finite；A26/A20直接来自两个existing
+  stage1 scratch，证明无需新增persistent dense A；
+- 把IEEE nonfinite sentinel从Ainput扩展到五张binary selector：legal 0/1，invalid=-128；consumer只显式接受
+  0/1，其余输出canonical qNaN，关闭NaN静默选upper的漏洞；
+- 修正selector物理账：S4总55,296 B，相对R31B2新增A26/A29共12,288 B；“不新增center”不等于总bytes不变；
+- 隔离编译6个dα+1个dβ symbol，corrected PyTorch reference逐位max diff=0、sign exact，float64 max diff=
+  `2.3576e-7`；global workspace/alloc_buffer/dense output/saved A均0；
+- 第一次reference因upstream `[D,1]`广播成跨domain `[D,D,W]`而FAIL，已保留并以显式`[D,1,1]`修正后重跑；
+- 新emitter用IEEE finite poison和safe-index-then-poison：A/V/bound/α/upstream/index六类tamper均产生NaN；
+- 冻结7 launch、53 argument occurrence、emitter view 46/46 exact；与S4-1A base重叠14，新增32，总prepared=48；
+- β sign保持int8，metadata总量修正为2,862 B；
+- 六V/lA slot单storage、interval不重叠且与四个coefficient/scratch storage分离；reverse same-stream
+  read→terminal copy→reuse simulation通过；
+- 新增S4-1BC实施就绪合同；S3批准前production代码/formal/timing/performance继续closed。
+
 ## 2026-08-28：S4-1B0冻结TIR位级nonfinite ABI、缓存隔离与精确物理账
 
 - 首次CUDA探针发现浮点`x==x && abs(x)!=Inf`在当前TVM/CUDA lowering下不能可靠拒绝NaN：NaN被错误

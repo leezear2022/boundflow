@@ -1,5 +1,5 @@
 ---
-status: draft-implementation-blueprint
+status: draft-corrected-by-selector-gradient-tir-readiness-v2
 date: 2026-08-28
 type: implementation-plan
 topic: boundflow
@@ -127,7 +127,11 @@ upstream[D,S] float32
 → compressed_dalpha[D,W] float32
 ```
 
-一个thread负责一个`(d,k)`，S为compile-time reduction。formal S=1，但模板/receipt保留axis identity。
+一个thread负责一个`(d,k)`，S为compile-time reduction。formal S=1，但模板/receipt保留axis identity。runtime
+index必须先clamp到safe feature后读取，再用range predicate决定poison；不能在验证前直接OOB访问。
+
+若A/V/lower/upper/α/upstream任一非有限、lower>upper、α越界或index非法，输出必须为bits=`0x7fc00000`的
+canonical qNaN，不能因lower-α gate为false静默输出0。全局duplicate/unsorted index仍在launch前拒绝。
 
 ### 3.2 site31 combined α/β ABI
 
@@ -136,13 +140,14 @@ site31可在同一module中导出α与β两个PrimFunc，correctness第一版允
 
 ```text
 coefficient_adjoint_V[D,S,F]
-beta_location[D,Q] int32/int64 normalized
-beta_sign[D,Q] float32
+beta_location[D,Q] int32 normalized
+beta_sign[D,Q] int8
 upstream[D,S]
 → compressed_dbeta[D,Q]
 ```
 
-location在prepare阶段normalize为int32并hash绑定；production source int64仍由S4-0 receipt保留。转换只发生一次。
+location在prepare阶段normalize为int32并hash绑定；production source int64仍由S4-0 receipt保留。sign保持provider
+split/history的int8并在TIR内cast，禁止建立无必要float32 copy。location同样safe-read后poison invalid，sign只接受±1。
 
 ### 3.3 schedule
 
@@ -172,9 +177,10 @@ S4-1C是correctness阶段，不在这里autotune。
 
 - compressed α indices总708 int32，2,832 bytes；
 - active β normalized locations 6 int32，24 bytes；
-- active β signs 6 float32，24 bytes。
+- active β signs 6 int8，6 bytes。
 
-这些是logical bytes，不是allocator peak。selected-ReLU使用的dense alpha map属于S4-1B/static metadata；gradient
+metadata合计=`2,832+24+6=2,862 B`，取代旧2,880 B口径。这些是logical bytes，不是allocator peak。
+selected-ReLU使用的dense alpha map属于S4-1B/static metadata；gradient
 emitter只需要compressed indices，不再读dense map。
 
 ## 5. emission state machine
@@ -227,6 +233,10 @@ receipt必须区分：
 - gradient output allocation=`0`；
 - warm DLPack/Python dispatch=`0`；
 - provider/native shadow/fallback=`0`。
+
+第一版物理账进一步冻结：7 symbols/launch、53 argument occurrences、emitter unique DLPack view=`46`。其中与
+S4-1A base 16重叠14，因此`additional_tir_view_count=32`、`total_prepared_view_count=48`，全部prepare-time
+pointer exact；warm view仍为0。
 
 不能把两次coefficient pass伪写成一次，也不能把六emitter称为“一个kernel”。
 
@@ -281,7 +291,9 @@ S4-1C不接Adam、不计时；只允许单evaluation与terminal-mode correctness
 19. terminal lA缺slot/重复copy/lease复用、post-transform copy或spec-axis identity丢失；
 20.全重签receipt后修改count/bytes/claim；
 21. provider/native fallback；
-22. timing/performance flag提前为true。
+22. timing/performance flag提前为true；23. A/V/α/upstream NaN因gate false静默输出0；
+24. index/location验证前OOB读；25. β sign错误转float32或非±1；26. emitter46/base16/total48口径混淆；
+27. metadata仍写旧2,880 B；28. seven launch伪写成一个kernel。
 
 ## 9. fail-closed detail code
 

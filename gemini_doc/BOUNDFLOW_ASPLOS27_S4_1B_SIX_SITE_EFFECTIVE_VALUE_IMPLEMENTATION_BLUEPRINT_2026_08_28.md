@@ -1,5 +1,5 @@
 ---
-status: draft-requires-s4-1b0-ternary-endpoint-closure
+status: draft-corrected-by-selector-gradient-tir-readiness-v2
 date: 2026-08-28
 type: implementation-plan
 topic: boundflow
@@ -113,9 +113,9 @@ selected-primal lowering需要一张三元endpoint selector和五张二元coeffi
 | bitmap | 选择对象 | elements/bytes | 当前状态 |
 |---|---|---:|---|
 | `endpoint_ainput_v2` | input lower/upper/center | 18,432 | **语义升级** |
-| `sign_a18` | ReLU17 | 12,288 | 已有 |
-| `sign_a20` | ReLU19 | 6,144 | 已有 |
-| `sign_a24` | ReLU23 | 6,144 | 已有 |
+| `sign_a18` | ReLU17 | 12,288 | S4独立symbol，复用既有捕获点 |
+| `sign_a20` | ReLU19 | 6,144 | S4独立symbol，复用既有捕获点 |
+| `sign_a24` | ReLU23 | 6,144 | S4独立symbol，复用既有捕获点 |
 | `sign_a26` | ReLU25 | 6,144 | **新增** |
 | `sign_a29` | ReLU28 | 6,144 | **新增** |
 | 合计 | — | **55,296** | 当前43,008 + 新增12,288 |
@@ -124,9 +124,13 @@ selected-primal lowering需要一张三元endpoint selector和五张二元coeffi
 emitter处直接使用。
 
 `endpoint_ainput_v2`取值冻结为`+1 iff A>0`、`-1 iff A<0`、`0 iff A==0`；formal inventory为
-`8689/9137/606`。其余五张bitmap仍为`1 iff coefficient >= 0 else 0`，因为ReLU显式`where`把zero归入lower
-branch。selector/bitmap receipt必须绑定evaluation ordinal、parameter state version、β/split/history identity、
-coefficient module hash、lower/upper与derived-center formula hash、pointer generation。总物理bytes不变。
+`8689/9137/606`。其余五张bitmap合法值仍为`1 iff coefficient >= 0 else 0`，因为ReLU显式`where`把zero归入lower
+branch；但六张selector遇到nonfinite都必须写reserved`-128`，consumer对非法值输出canonical NaN，禁止NaN静默
+选upper/lower。selector/bitmap receipt必须绑定evaluation ordinal、parameter state version、β/split/history identity、
+coefficient module hash、lower/upper与derived-center formula hash、pointer generation。
+
+S4总physical selector bytes=`55,296`，相对current R31B2的`43,008`新增A26/A29共`12,288 B`；只有center
+tensor/view新增为0，不能写成selector总bytes不变。详细inventory与TIR finite规则见S4-1BC readiness v2。
 
 ## 4. 现有资产与真正缺口
 
@@ -149,7 +153,8 @@ coefficient module hash、lower/upper与derived-center formula hash、pointer ge
 6. 当前receipt没有all-six value inventory/version/lifetime。
 7. 旧二元input endpoint在site19失败`1.156e-3/9 sign mismatch`；三元规则已只读闭合，但未形成formal artifact；
 8. current `R31B2_PACK_AINPUT_SYMBOL`只能编码二元`>=0`，S4缺独立ternary pack/select和derived-center schema；
-9. receipt尚未逐action绑定residual fanout/accumulate、bias与box concretization provenance。
+9. receipt尚未逐action绑定residual fanout/accumulate、bias与box concretization provenance；
+10. 五张binary selector尚无IEEE-754 nonfinite sentinel，NaN可能被`A>=0=false`静默映射到upper branch。
 
 ### 4.3 为什么不直接扩展`effective_pre23`大kernel
 
@@ -256,8 +261,9 @@ admission_hash / ordered_buffer_abi_hash / production_plan_hash
 module/source/schedule hashes
 evaluation_ordinal / parameter_state_version / sign_generation / value_generation
 
-input_endpoint_selector_schema=ternary-box-endpoint-v2
+input_endpoint_selector_schema=boundflow.asplos27-s4-ternary-endpoint/v1
 input_endpoint_positive/negative/zero_count=8689/9137/606
+selector_invalid_sentinel=-128 / selector_invalid_count=0
 input_lower_hash / input_upper_hash / derived_center_formula_hash
 selector_and_sign_buffer_count=6
 selector_and_sign_elements=55296
@@ -301,7 +307,8 @@ comparison均`atol=rtol=2e-4`；但最终compressed gradient必须`max abs/rel <
 
 至少覆盖：
 
-1. selector/sign buffer少/多/slot错配；2. A26/A29来自旧version；3. endpoint selector非int8或值非-1/0/+1；
+1. selector/sign buffer少/多/slot错配；2. A26/A29来自旧version；3. endpoint selector非int8或值非-1/0/+1/-128，
+   或binary selector非0/1/-128；
 4. arena offset重叠/空洞/越界；5. slot顺序漂移；6. active α被full-source repack；
 7. empty β错误传入；8. bound/alpha-map identity漂移；9. residual branch/Add顺序漂移；
 10. pre28漏skip或pre23漏shortcut；11. Flatten/Gemm14 layout漂移；12. warm DLPack/Python view构造；
@@ -309,7 +316,8 @@ comparison均`atol=rtol=2e-4`；但最终compressed gradient必须`max abs/rel <
 16. lease未释放即重写arena；17. 全重签后修改bytes/copy/kernel/claim；18. timing/performance flag提前为true；
 19. binary endpoint替换ternary endpoint；20. residual fanout/accumulation VJP provenance漂移；
 21. zero count或derived-center formula漂移；22. site19 zero-subgradient反例未关闭却标admitted；
-23. coefficient/VJP action sequence hash错配。
+23. coefficient/VJP action sequence hash错配；24. nonfinite binary coefficient静默选择upper/lower；
+25. `selector!=0`把`-128`误当lower；26. selector bytes仍写43,008或“不变”。
 
 ## 11. 与S4-1C gradient的接口
 
