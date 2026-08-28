@@ -91,3 +91,24 @@ performance-claimed: false
 - S4-0蓝图保持`execution-authority=false/code-change-open=false/performance-claimed=false`；
 - `git diff --check`与文档关键字段检索：PASS；
 - DocOps change/validation与lint在提交前执行。
+
+## 2026-08-28：完成S4-1A ordered buffer/lease ABI实施蓝图
+
+- 亲读S2/S3 prepared executor、P-only direct VJP、host Adam与R31B2 DLPack/view cache，确认S4 all-state不应
+  复用full α source或nonleaf slice作为optimizer参数；
+- 冻结6个独立contiguous lower-α leaf buffer、1个active β leaf buffer与5个empty β metadata token；
+- preserved α只由immutable host snapshot/commit receipt拥有，不进入candidate GPU optimizer；
+- 冻结persistent dα/dβ/lower/upstream、ordered tuple ABI、result lease与0—9/version 0—9状态机；
+- 明确compiled VJP直接向sealed driver提供gradient，不使用PyTorch autograd Function、global registry或saved history；
+- 冻结prepare-only DLPack/pointer纪律、18类fail-closed reason及positive/negative测试矩阵；
+- 用冻结snapshot做一次不入库GPU owner原型，验证7个leaf参数、两Adam groups、persistent grad赋值与step后pointer稳定；
+- 新增S4-1A实施蓝图并同步主S4 ABI/预注册；仍无S4实现、correctness closure或性能claim。
+
+### 验证
+
+- GPU owner原型：α/active β/empty β=`6/1/5`，parameter/gradient logical bytes=
+  `17,016/17,016`，Adam m+v=`34,032`，leaf all=true，step后pointer stable=true，PASS；
+- S3 optimizer、R31B2 compiled P VJP与R31B1 full-lower targeted：`11 passed in 13.66s`；
+- 文档交叉检索确认preserved α不进入candidate GPU optimizer、empty β无物理参数、S4-1A仍closed；
+- `git diff --check`：PASS；
+- DocOps change/validation与lint在提交前执行。

@@ -99,10 +99,10 @@ prepared runtime持有：
 - 六个contiguous lower-α parameter buffer，总4,248元素；prepare时从source精确pack，commit时按slot精确copy-out；
 - 一条active β parameter buffer，共6元素；
 - 五个empty β slot（不得为便于实现伪造非空参数）；
-- preserved α direction作为immutable copy-in；
-- 两个Adam param group，`lrα=0.01/lrβ=0.05`；
+- preserved α direction由immutable host snapshot/source receipt拥有，不进入candidate GPU optimizer；
+- S4-2由sealed policy driver建立两个Adam param group，`lrα=0.01/lrβ=0.05`；
 - scheduler decay=`0.98`；
-- persistent gradient views与optimizer moments。
+- S4-1A先建立persistent gradient views，optimizer moments在S4-2 prepare。
 
 这里的parameter buffer不要求是原始`[2,1,6,width]`source tensor的PyTorch leaf view；生产合同只要求
 pack/optimizer/copy-out三段在semantic path、slice和identity上完全闭合。这样避免把非leaf view误当Adam参数，
@@ -113,12 +113,14 @@ pack/optimizer/copy-out三段在semantic path、slice和identity上完全闭合�
 | 项 | 元素 | bytes(float32) |
 |---|---:|---:|
 | active lower α | 4,248 | 16,992 |
-| preserved α direction | 4,248 | 16,992 |
 | active β | 6 | 24 |
 | dα+dβ | 4,254 | 17,016 |
 | Adam m+v（active参数） | 8,508 | 34,032 |
 
-这是静态设计账，不是实测显存claim。step scalar、allocator元数据、module workspace和terminal arena另行披露。
+preserved α另有4,248元素/16,992 logical bytes，但属于host source identity，不计入candidate device parameter/
+gradient/moment账。这是静态设计账，不是实测显存claim。step scalar、allocator元数据、module workspace和terminal
+arena另行披露。ordered buffer、empty β token、lease/version与DLPack纪律见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_ORDERED_BUFFER_ABI_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`。
 
 ### 2.3 terminal dense bridge
 
@@ -127,7 +129,7 @@ atomic copy-out使用。桥必须证明：
 
 - compressed→dense→compressed round-trip exact；
 - unowned dense位置为冻结默认值，不参与production copy-out；
-- preserved α directiondigest未变；
+- preserved α direction digest未变；
 - active β location/sign exact；
 - bridge count=`1`，ordinal 0—8为0；
 - dynamic allocation与D2H copy为0。
@@ -282,7 +284,7 @@ S4 correctness保持KFSB不变是正确的ownership切分，但S4-P必须单独�
 S3外审批准后：
 
 1. S4-0先交付compressed slot descriptor与stored/active/preserved三类coverage；
-2. S4-1A绑定all-state buffers和ordered ABI；
+2. S4-1A绑定独立leaf lower-α/active-β buffers、empty β token、persistent gradients和ordered lease ABI；
 3. S4-1B/1C完成effective values与六路gradient；
 4. S4-1D完成single-evaluation closure；
 5. S4-2A抽出sealed policy driver，以native dense evaluator回归原行为；

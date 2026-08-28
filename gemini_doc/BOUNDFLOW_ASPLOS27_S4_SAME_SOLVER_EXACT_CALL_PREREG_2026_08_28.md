@@ -210,6 +210,11 @@ GO：六α+六β全覆盖，active β=`1/1`，且schema无模型特判。否则S
 
 ### S4-1：all-state single-evaluation compiled correctness
 
+S4-1A ordered buffer/lease/version ABI的精确实施蓝图见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_ORDERED_BUFFER_ABI_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`。六lower-α与
+唯一active β必须是独立contiguous leaf parameter；五empty β只保留token；preserved α不得进入candidate GPU
+optimizer。hot evaluator不得接受dict/callback/tensor override，warm DLPack view creation必须为0。
+
 交付：一个prepared evaluator在ordinal 0输入上返回lower、六dα、六dβ和receipt。
 
 门禁：
