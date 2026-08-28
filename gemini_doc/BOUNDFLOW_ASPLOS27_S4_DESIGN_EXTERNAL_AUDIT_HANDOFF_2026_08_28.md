@@ -1,12 +1,12 @@
 ---
-status: ready-for-external-design-audit
+status: ready-for-external-design-audit-v3-live-lease
 date: 2026-08-28
 type: external-audit-handoff
 topic: boundflow
 slug: asplos27-s4-design-audit
 audit-kind: preregistration-and-implementation-blueprint
 base-commit: ebf45cc72438141d8f0b35dadfd5cf774d7e753f
-design-result-commit: c4d54d1eca96e517ba3372bd5265860bc3366b24
+design-result-commit: e0a53440c32842ab4a9db94764ad9e74be7880a4
 execution-authority: false
 code-change-open: false
 performance-claimed: false
@@ -28,7 +28,8 @@ speedup或complete-query性能已经存在。
 3. all-state compiled VJP、sealed production policy、terminal handoff、KFSB、commit/post是否有遗漏owner；
 4. S4-3 failure state是否诚实，尤其PyTorch `_version`与post-after-commit；
 5. S4-0 preflight关于offline snapshot不能证明live storage alias/`_version`的纠正是否成立；
-6. 瞬时live mapping→tensor-free receipt→S4-1A pack前lease复核是否关闭ownership且没有新增IR；
+6. tensor-free receipt与不可序列化strong-ref ephemeral lease的双层owner是否关闭S4-0→S4-1A→S4-3跨阶段
+   object/storage/version ownership且没有新增IR；
 7. live B0/R phase probe把scratch合同从terminal disposal升级为variant-specific finalization v2是否成立；
 8. terminal logical/unique storage、view alias、B0 batch-24 residue与当前R batch-12 stale是否被正确区分；
 9. S4-4的stdlib raw/replay和68类fully re-signed tamper是否足以支持第三方独立审计；
@@ -40,9 +41,9 @@ speedup或complete-query性能已经存在。
 
 - branch：`feat/rvir-v4-production-state-ownership-v1`；
 - 本轮设计base：`ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
-- S4-0 live admission、S4-3A scratch finalization与S4-1B0 ternary endpoint纠正全部设计结果：
-  `c4d54d1eca96e517ba3372bd5265860bc3366b24`；
-- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..c4d54d1eca96e517ba3372bd5265860bc3366b24`
+- S4-0 live admission/lease、S4-3A scratch finalization与S4-1B0 ternary endpoint纠正全部设计结果：
+  `e0a53440c32842ab4a9db94764ad9e74be7880a4`；
+- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..e0a53440c32842ab4a9db94764ad9e74be7880a4`
   和下列S4文档的完整版本为准；
 - S3 formal实现/结果不在本轮重新验收，但它是S4设计输入；S3独立exchange仍等待审计；
 - `.docops/exchange/gc0-1-prereg-20260826`异步audit文件和`docs/CIBC_for_DAC.pdf`是用户保留的范围外dirty文件，
@@ -65,18 +66,19 @@ speedup或complete-query性能已经存在。
 3. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_EVALUATOR_ABI_AND_TERMINAL_HANDOFF_2026_08_28.md`；
 4. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_MUTABLE_STATE_ADMISSION_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
 5. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_ADMISSION_PREFLIGHT_CORRECTION_2026_08_28.md`；
-6. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_ORDERED_BUFFER_ABI_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
-7. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_BOX_ENDPOINT_SUBGRADIENT_CLOSURE_2026_08_28.md`；
-8. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_ENDPOINT_IMPLEMENTATION_READINESS_2026_08_28.md`；
-9. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1BC_DAG_ADJOINT_PREFLIGHT_CORRECTION_2026_08_28.md`（历史v1）；
-10. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
-11. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
-12. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`；
-13. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
-14. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
-15. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
-16. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
-17. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
+6. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_LIVE_LEASE_IMPLEMENTATION_READINESS_2026_08_28.md`；
+7. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_ORDERED_BUFFER_ABI_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
+8. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_BOX_ENDPOINT_SUBGRADIENT_CLOSURE_2026_08_28.md`；
+9. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_ENDPOINT_IMPLEMENTATION_READINESS_2026_08_28.md`；
+10. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1BC_DAG_ADJOINT_PREFLIGHT_CORRECTION_2026_08_28.md`（历史v1）；
+11. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
+12. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
+13. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`；
+14. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
+15. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
+16. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
+17. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
+18. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
 
 ## 3. 已冻结的production事实，请独立复核
 
@@ -142,6 +144,8 @@ PASS要求：
 - snapshot/topology/plan/live-source四方key、shape、dtype、device、feature index、β location/sign、object/storage/
   stride/offset/version全覆盖；
 - auditor复现distinct views共享storage反例，确认snapshot alias group不能替代live storage group；
+- auditor复现全量same-content clone替换，确认canonical group/hash可完全相同，因此receipt不能替代strong-ref lease；
+- prepared lease必须single-transfer、不可序列化，并从S4-0保持到S4-3 current-provider precommit；
 - `plan.source_state_hash`只作dense mapping provenance；plan/snapshot projection可不调用dense initializer独立重算；
 - topology hash按plan order canonical，输入tuple置换不改变receipt；
 - β width与history长度exact，不接受只匹配前缀；
@@ -149,6 +153,7 @@ PASS要求：
 - five empty β是metadata token，不伪造physical tensor；
 - P-only和active-β missing明确拒绝；
 - schema没有ResNet2B/node/shape特判；
+- same-storage view、empty clone、provider rebind与lease重复使用均在mutation/commit前拒绝；
 - S4-0无GPU执行、dense initializer、TIR或timing。
 
 ### AC3：S4-1 all-state evaluator物理可行性
@@ -280,6 +285,12 @@ PASS要求：
 
 - S4-0 snapshot/live反例：两个distinct view共享live storage，但snapshot按object id生成两个alias group并clone成
   两个storage；`OwnedProductionTensorV4`没有live version/storage字段；
+- S4-0跨阶段反例：把全部source换成same-content clone后canonical projection/hash仍exact相等
+  (`75d3252e...3c9f`)，但raw object/nonempty storage/empty object identity全部不等；因此receipt不能替代strong-ref lease；
+- lease guard probe：same-content clone、same-storage view和empty clone均以`LIVE_SOURCE_OBJECT_REPLACED`拒绝，in-place
+  mutation以`LIVE_TENSOR_VERSION_MISMATCH`拒绝；
+- β exact-width exploit：active β width从1扩为2并全量重签、history仍为1时existing snapshot validator接受，证明S4-0
+  `beta_width == history_width`是必要门禁；
 - formal snapshot mutable=`12`（6 α+6 β value）、source device metadata=`cuda:0`；snapshot/mapping/R31 plan hash分别为
   `2a775b...a256`/`cfcebf...f8df`/`39d617...910f`，plan source hash绑定mapping而非snapshot；
 - live B0 terminal probe：α=`6 tensors/33,984 B`、intermediate=`12/299,712 B`、all-node lA=
@@ -299,6 +310,7 @@ PASS要求：
 - formal in-memory CUDA/TIR pack/select逐位PASS，old binary误编码606 zero；selected hash=
   `7e95e075...39b652`，derived-center hash=`d6164a06...f5b003`，extra center tensor=0；
 - nonfinite sentinel CUDA/TIR PASS：NaN/±Inf→`-128`→NaN，S4-1D final-finite gate前不发布result；
+- existing live-return/device-commit targeted：`12 passed in 6.58s`；production code diff=`0`；
 - `git diff --check`、DocOps exchange validate/lint：PASS。
 
 这些只证明设计输入和历史基础设施仍存在，不证明S4-0—S4-4实现通过。
