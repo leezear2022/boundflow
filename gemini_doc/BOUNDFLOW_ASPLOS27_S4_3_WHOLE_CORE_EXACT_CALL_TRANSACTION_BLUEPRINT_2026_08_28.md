@@ -430,19 +430,24 @@ optimizer或downstream consumer继续持有旧tensor。只有完成以下审计�
 ## 10. provider net scratch consumer audit
 
 provider attach过程可能让net内部α通过`detach().requires_grad_(True)`共享原storage，β对象也被附着到net。candidate路径
-绕开provider optimizer后，net scratch与production source是否仍被后续读取必须机械回答。
-
-审计至少形成：
+绕开provider optimizer后，net scratch的consumer与lifetime已由
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`完成read-only
+源码审计。固定v1结论为：
 
 | consumer phase | 读取core return | 读取live source | 读取net scratch | 结论 |
 |---|---:|---:|---:|---|
-| KFSB setup | 待核 | 待核 | 待核 | 必须有source evidence |
-| `update_bounds_post` | 待核 | 待核 | 待核 | 必须有source evidence |
-| queue insert | 待核 | 待核 | 待核 | 必须有source evidence |
-| next bound call | 待核 | 待核 | 待核 | 必须有source evidence |
+| BoundFlow native KFSB | 是 | typed terminal state | 否 | provider-independent |
+| `update_bounds_post` | 是 | 否 | 否 | 函数无net参数 |
+| queue insert | post结果 | 写domain storage | 否 | domain list成为owner |
+| next pick/pre | 否 | 是 | 否 | 从domain packet重建 |
+| next candidate core | typed pre | 是 | 否 | closed-world安全 |
+| next provider core / all-node LP | 是 | 是 | 是/可能 | S4-v1必须拒绝 |
 
-只有证明net scratch在commit之后dead，才允许不更新它；否则它必须成为transaction path或candidate必须在prepare阶段绑定
-同一合法storage。不能依靠当前single-query刚好不报错来关闭ownership。
+但reference会move/gc terminal α、intermediate lower/upper和lA。candidate必须新增prepared scratch disposal plan：formal
+静态最低为`6 α + 12 intermediate attributes + 6 lA = 24 attributes`，actual inventory必须live枚举；β在reference中
+不clear，不能自行删除。首次candidate commit后还必须锁定query-scoped exclusive owner，禁止provider fallback/reentry。
+net scratch不增加production mutable tensor path的12计数，但必须进入logical transaction、memory disclosure、raw/replay/
+tamper。
 
 ## 11. official post是correctness scope的一部分
 

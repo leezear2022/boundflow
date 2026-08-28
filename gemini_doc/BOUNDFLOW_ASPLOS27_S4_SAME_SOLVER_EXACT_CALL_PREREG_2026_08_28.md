@@ -279,6 +279,13 @@ exact transaction、provider兼容对象、official post、host packet/intermedi
 现有device atomic v1只能在mid-commit故障后恢复tensor内容，不能恢复PyTorch `_version`；因此S4-3必须把提交前
 clean abort与提交中`POISONED_NO_RETRY`分开，不得把后者写成可透明fallback的完全回滚。
 
+provider net scratch的consumer/lifetime精确审计见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`。冻结结论是：
+normal fixed path的candidate KFSB、official post、queue storage和candidate next-pre不把net dynamic scratch当数值输入；
+但reference会move/gc六α、六组intermediate lower/upper和六lA。candidate因此必须live枚举并镜像scratch disposal，
+formal fixture静态最低为24个attribute，同时保持production mutable tensor path恰为12。S4-v1使用query-scoped
+exclusive core-owner latch；candidate首次commit后，同一query禁止provider reentry、fallback或第二次core call。
+
 在同一`ABCrownSolver.verify`内比较：
 
 ```text
@@ -300,7 +307,8 @@ B0 original provider只作额外semantic control，不作为S4实现依赖。五
 - KFSB child CROWN=`3`、child batch=`24`、child lower元素=`72`，不得从scope中隐藏。
 - provider bound callbacks=`0`，但provider return constructor调用=`12`、official postprocess=`1`；三类计数不得合并；
 - host packet必须prune到history/depths/thresholds，`pre_result.interm_bounds`必须恰一次clear并纳入logical commit；
-- provider net scratch的下游consumer必须机械关闭；不能只因当前fixture运行成功就假设其dead；
+- provider net scratch的下游consumer必须机械关闭并镜像reference disposal；scratch计数不得混入12条production tensor
+  path；同一query的provider reentry/multi-core必须fail closed；
 - validation/staging失败必须在live mutation前clean abort；mid-commit故障即使内容恢复也必须进入
   `POISONED_NO_RETRY`，禁止native fallback、重试或继续queue。
 
@@ -309,7 +317,7 @@ B0 original provider只作额外semantic control，不作为S4实现依赖。五
 
 ### S4-4：artifact/replay/tamper closure
 
-精确artifact tree、18-worker六全排列B0/R/C、stdlib tensor codec/replayer、pre/mid/post commit fault状态与40类
+精确artifact tree、18-worker六全排列B0/R/C、stdlib tensor codec/replayer、pre/mid/post commit fault状态与48类
 fully re-signed tamper合同见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`。
 
@@ -318,8 +326,8 @@ fully re-signed tamper合同见
 - raw逐step保留，不只存summary digest；
 - tensor raw必须有不依赖`.pt`的stdlib可解码投影；replay不得import BoundFlow/PyTorch/TVM/αβ-CROWN；
 - replay从raw重算coverage、trajectory、whole-core、receipt、failure state与verdict；
-- 至少40类fully outer-resigned tamper，覆盖source/protocol、worker/process、state/trajectory、terminal handoff、KFSB、
-  transaction/provider/post、artifact/replay与claim flag；
+- 至少48类fully outer-resigned tamper，覆盖source/protocol、worker/process、state/trajectory、terminal handoff、KFSB、
+  transaction/provider/post、artifact/replay、scratch disposal/exclusive ownership与claim flag；
 - official post发生于commit之后；post fault必须记录为`COMMITTED_POST_FAILED_POISONED`，禁止rollback/retry/queue继续；
 - targeted/full/static/DocOps全过后，才允许另写S4-P性能预注册。
 

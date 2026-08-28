@@ -10,6 +10,32 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-28：关闭S4-3A provider net scratch consumer/lifetime源码审计
+
+- 亲读pinned provider pre/core/post/domain-storage与auto_LiRPA optimizer源码，确认fixed candidate KFSB、official post、
+  queue storage和candidate next-pre不读取net dynamic scratch作数值输入；all-node LP、cuts/clip/BFS/multitree及
+  provider reentry仍可能重新读取net，因此继续fail closed；
+- 区分production numeric ownership与scratch lifetime：12条α/β tensor commit保持不变，新增
+  `ProviderNetScratchDisposalPlanV1`镜像reference的六α、12个intermediate lower/upper和六lA move/gc；formal
+  fixture静态最低24个attribute，但generic schema必须live枚举，禁止硬编码24；
+- 确认reference不清理sparse β，candidate必须披露stale β retention且证明consumer count=`0`，不能伪写成memory收益；
+- 发现`last_update_preserve_mask`只在pruner分支更新、不会每call无条件reset；因此S4-v1冻结query-scoped exclusive
+  core-owner latch，candidate首次commit后禁止同query provider reentry、fallback、第二次core call和solver复用；
+- attribute reference swap可恢复identity，但任何tensor copy后的失败仍因PyTorch `_version`漂移进入
+  `POISONED_NO_RETRY`；post failure仍是`COMMITTED_POST_FAILED_POISONED`；
+- formal raw增加scratch inventory/disposal/sentinel/preserve-mask/latch投影，fully re-signed tamper最低由40类扩为48类；
+- 新增独立S4-3A诊断文档并同步主预注册、S4-3/S4-4、evaluator ABI、设计外审交接与README；仍无S4代码、
+  runtime evidence、performance或same-solver claim。
+
+### 验证
+
+- pinned provider/auto_LiRPA source AST与文本事实、24项静态inventory算术、1—48 tamper编号及跨文档链接独立
+  检查：PASS；首次编号脚本把攻击执行步骤1—8误纳入inventory，收窄到A—F分区后确认`1..48`连续完备；
+- live-return/native-KFSB/whole-core/device-commit/pre-state/production-state/terminal-handoff targeted：
+  `45 passed in 8.48s`；
+- `git diff --check`、DocOps change/validation/exchange/lint在提交前执行；
+- 保持S3 exchange为`ready_for_audit`，DocOps `next=external-audit-asplos27-s3-optimizer-runtime`不变。
+
 ## 2026-08-28：生成S4-0—S4-4设计外审交接
 
 - 以`ebf45cc..1d378eb`为精确设计范围，新增独立external design audit handoff；

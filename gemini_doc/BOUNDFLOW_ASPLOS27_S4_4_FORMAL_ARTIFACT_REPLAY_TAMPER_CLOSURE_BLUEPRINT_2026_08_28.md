@@ -327,6 +327,8 @@ compressed internal gradient，用于2e-5门禁。
 - commit order/state/hash；
 - content audit与post-query audit；
 - failure state必须属于合法state machine。
+- provider net scratch pre/post inventory、live枚举的disposal attributes、sentinel kind、preserve-mask mirror和exclusive
+  owner latch；production tensor path count仍恰为12，scratch count必须单列。
 
 ### 6.6 official post与solver result
 
@@ -466,6 +468,7 @@ stdlib replayer按tensor path对齐：
 - KFSB 3/3/72和final decision；
 - 12-path commit/host prune/container clear；
 - provider bound callback/constructor/postprocess counters；
+- provider net α/intermediate/lA scratch disposal、stale β retention与exclusive owner counters；
 - solver status/success/visited/verdict；
 - fault matrix与clean/poisoned状态计数；
 - candidate/rollback logical bytes和实测allocated/reserved披露（非performance）；
@@ -521,7 +524,7 @@ tamper report必须进入manifest；不能在manifest后生成一个未绑定报
 
 ## 12. fully re-signed tamper矩阵
 
-S4-4冻结minimum 40类。每案都要：
+S4-4冻结minimum 48类。每案都要：
 
 1. copy完整artifact；
 2. 修改semantic raw/protocol/source/summary之一；
@@ -587,6 +590,17 @@ S4-4冻结minimum 40类。每案都要：
 39. tamper report删案后重签；
 40. replay stdout伪造PASS。
 
+### F. provider net scratch/lifetime（8）
+
+41. 删除一个scratch disposal path；
+42. 把lA/intermediate sentinel改回stale tensor；
+43. 修改`last_update_preserve_mask` mirror；
+44. 伪造exclusive owner latch transition；
+45. 把provider reentry count从1改0；
+46. 把multi-core count从2改1；
+47. 隐藏stale net β retention/memory；
+48. 把scratch disposal错误混入production 12-path commit count。
+
 必须报告每案稳定reason，不接受“因为文件digest不匹配”作为fully re-signed攻击的唯一拒绝理由。
 
 ## 13. tests与静态门禁
@@ -602,7 +616,7 @@ S4-4冻结minimum 40类。每案都要：
 - incomplete/no-resume；
 - summary全raw重算；
 - manifest seal/order；
-- 40类tamper。
+- 48类tamper。
 
 ### 13.2 S4 whole-core专项
 
@@ -670,7 +684,7 @@ artifact代码、formal raw和closure文档应分提交，避免代码与其第�
 - provider C路径bound callback=0、constructor=12、post=1；
 - precommit/midcommit/postcommit failure分类正确且禁止非法fallback/retry；
 - stdlib replay从raw逐字重建summary；
-- 40/40 fully re-signed tamper拒绝；
+- 48/48 fully re-signed tamper拒绝；
 - targeted/full/static/DocOps全过；
 - 外部审计批准；
 - 所有性能/complete-query/10x flag仍false。
