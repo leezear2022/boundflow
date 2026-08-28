@@ -18,6 +18,7 @@ terminal bridge。S3外审批准前代码/timing关闭。见
 `BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`、
+`BOUNDFLOW_ASPLOS27_S4_1D_EVALUATOR_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`、
@@ -47,7 +48,8 @@ fallback/`empty_cache`。S4-1A negative最低冻结为36类，implementation仍c
 S4-3进一步确认exact-call不是薄adapter：真实事务还包含KFSB三次batch-24 child CROWN、12条return constructor、
 一次official post、host packet prune和`pre_result.interm_bounds` clear。现有device atomic v1在mid-commit故障时只能
 恢复tensor内容，无法恢复PyTorch `_version`；因此新合同明确使用`POISONED_NO_RETRY`，禁止partial commit后fallback/
-重试。candidate+rollback加入后已知logical subtotal=`488,760 bytes`，不等于实测peak显存。
+重试。S4-1D事务复核发现旧memory ledger漏掉residual scratch与compressed metadata共`52,014 B`；修正后
+S4-1D/S4-2/S4-3已知logical subtotal分别为`438,726/472,758/540,774 B`，都不等于实测peak显存。
 
 S4-3A源码审计及live B0/R phase probe进一步关闭provider net scratch歧义：fixed candidate KFSB/post/queue/next-pre
 不读取net dynamic scratch作数值输入，因此production tensor commit仍是12条。reference terminal会move/gc六α、12个
@@ -84,6 +86,12 @@ S4-1B/1C后端继续收紧：六张selector统一以`-128`表示nonfinite invali
 reference逐位exact、float64最大差`2.36e-7`，并冻结7 launch/53 arguments/emitter46 views、prepared总48 views、
 β sign int8与2,862 B metadata。六V/terminal-lA slot同storage但interval不重叠，same-stream read→copy→reuse通过。
 详见`BOUNDFLOW_ASPLOS27_S4_1BC_SELECTOR_GRADIENT_TIR_IMPLEMENTATION_READINESS_2026_08_28.md`。
+
+S4-1D事务合同现已进一步冻结：request admission完全read-only；进入`EVALUATING`后任一失败均转
+`POISONED_NO_RETRY`并烧毁generation，不允许reset半写arena；成功只发布一个composite result lease，terminal child
+只可transfer一次。correctness formal改为5 nonterminal + 5 terminal fresh，全部lower/gradient/lA以stdlib可解码
+IEEE raw保存；candidate numeric payload合计仅`919,680 B`，不再允许hash+bounded projection代替原始数值。
+见`BOUNDFLOW_ASPLOS27_S4_1D_EVALUATOR_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`。
 
 最新执行（v8 S3，待合并外审）：S3 v2已把S2 prepared direct VJP接入ResNet2B P-anchor完整10次
 CROWN evaluation/9次Adam mutation本地wrapper。18 fresh稳健formal得到P/native order-median

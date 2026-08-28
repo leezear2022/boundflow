@@ -232,10 +232,10 @@ rollback subtotal  = 34,008 bytes
 candidate + rollback = 68,016 bytes
 ```
 
-S4-1D evaluator加S4-2 Adam m/v的已知subtotal为`420,744 bytes`；加入candidate/rollback后：
+S4-1D evaluator加S4-2 Adam m/v的修正subtotal为`472,758 bytes`；加入candidate/rollback后：
 
 ```text
-known S4-3 logical subtotal = 420,744 + 68,016 = 488,760 bytes
+known S4-3 logical subtotal = 472,758 + 68,016 = 540,774 bytes
 ```
 
 这**不是peak memory claim**。它明确不含：provider working-beta deepcopy、step scalar、best checkpoint、KFSB child

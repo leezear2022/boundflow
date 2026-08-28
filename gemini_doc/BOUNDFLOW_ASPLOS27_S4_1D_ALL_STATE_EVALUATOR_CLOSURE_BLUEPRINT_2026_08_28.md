@@ -1,5 +1,5 @@
 ---
-status: draft-implementation-blueprint
+status: draft-implementation-blueprint-corrected-by-transaction-readiness
 date: 2026-08-28
 type: implementation-plan
 topic: boundflow
@@ -35,6 +35,10 @@ PreparedS4AllStateCrownEvaluatorV1.evaluate(request)
 terminal mode只在ordinal 9额外产生六lA lease；非terminal不能出现handoff。
 
 S4-1D通过只证明single-evaluation correctness/ownership，不接Adam、不证明10/9 trajectory、不计时。
+
+本蓝图的事务、内存和artifact细节已由
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_EVALUATOR_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`
+收紧：旧`386,712 B`账和“失败后reset/retry”语义已被取代。
 
 ## 1. 唯一runtime owner
 
@@ -82,8 +86,8 @@ CUDA identities、bound polarity、endpoint/clamp policy。instance tensor/point
 ## 3. exact evaluate序列
 
 ```text
-0. validate request ordinal/version/lease/stream/module identities
-1. reset scalar counters and phase tags; no buffer allocation
+0. read-only validate request ordinal/version/lease/stream/module/view identities
+1. atomically enter EVALUATING, allocate generation, then reset scalar counters and phase tags
 2. pass A: compute lower + coefficient propagation + six sign bitmaps
 3. pass B: ternary-endpoint selected-primal lowering writes six V slots; coefficient-action VJP remains the oracle
 4. pass C: recompute coefficient; at each site emit compressed gradients
@@ -98,7 +102,9 @@ CUDA identities、bound polarity、endpoint/clamp policy。instance tensor/point
 - parameter state version不变；
 - result lease不发布；
 - live solver不变；
--下一次调用必须显式reset/rollback generation，不能把半写arena当有效结果。
+- 若在read-only admission前拒绝，state/generation/buffer/counter全不变，可修正request后重试；
+- 若已进入`EVALUATING`，owner立即进入`POISONED_NO_RETRY`，generation永久烧毁；
+- 半写arena不恢复、不消费、不跨generation复用；调用方必须close并重新prepare。
 
 ## 4. request/result ABI
 
@@ -119,14 +125,17 @@ S4-1D correctness只准两种fixture：ordinal0/version0/nonterminal与ordinal9/
 ### 4.2 result
 
 ```text
-lower[D,S]
-alpha_gradient_leases[6]
-beta_gradient_leases[6]       # one physical + five token
-terminal_handoff_or_none
-execution_receipt
+S4AllStateResultLeaseV1:
+    lower[D,S]
+    alpha_gradient_views[6]
+    beta_gradient_slots[6]       # one physical + five token
+    terminal_child_transfer      # terminal only, one-shot
+    execution_receipt
 ```
 
-全部是persistent lease，不是clone。结果metadata按admission slot顺序；不接受semantic-path dict。
+它是一个不可复制、不可序列化的composite lease，不是若干可独立释放的clone/view。lease存活时拒绝下一次
+evaluate。terminal child只可transfer一次；parent可先close，child close才最终释放arena。结果metadata按admission slot
+顺序；不接受semantic-path dict。S4-1D一个fresh process只执行一次evaluation，success后不隐式回到`READY`。
 
 ## 5. logical memory ledger
 
@@ -139,10 +148,12 @@ execution_receipt
 | six sign bitmap | 55,296 | S4-1B |
 | coefficient-adjoint/terminal-lA shared arena | 149,856 | S4-1B/1C |
 | two coefficient arenas | 147,456 | existing R31B1 |
+| residual scratch | 49,152 | existing staged residual |
 | lower + upstream + bias accumulator | 72 | evaluator |
-| 合计 | **386,712** | correctness design ledger |
+| compressed indices + β metadata | 2,862 | S4-1C static metadata |
+| 合计 | **438,726** | correctness design ledger |
 
-另有compressed indices/maps、β metadata、VM/cuDNN workspace、allocator metadata与module storage，必须分项披露。
+旧账漏掉`49,152 + 2,862 = 52,014 B`。VM/cuDNN workspace、allocator metadata与module storage仍须分项披露。
 S4-2 Adam m+v另加34,032 logical bytes，不属于S4-1D。
 
 该表不是peak allocated/reserved claim。implementation必须用CUDA allocator计数独立测量，不得用logical sum替代。
@@ -180,6 +191,7 @@ provider/fallback/eager/native_shadow_count=0
 
 actual kernel/VM/copy counts
 all logical bytes from component receipts
+base/additional/total prepared view count=16/32/48
 timing_recorded=false
 performance_claimed=false
 receipt_hash
@@ -203,9 +215,10 @@ C: S4 compiled evaluator
 显式证明旧二元规则复现`0.0011564247542992234/9`、三元规则关闭至`4.2375177145e-08/0`；existing S2/R31B2、B4-B2
 site31/25交集继续作为局部oracle，不能替代A/B full comparison。
 
-### 7.2 five-fresh order
+### 7.2 5+5 fresh order
 
-至少5个fresh subprocess，control/candidate顺序预注册交替。每个process重新：
+至少10个fresh subprocess：5个ordinal0/version0/nonterminal，5个ordinal9/version9/terminal；每个process恰执行
+一次evaluation。每类fixture的A/B/C或control/candidate顺序预注册。每个process重新：
 
 - load frozen source；
 - verify source/model/property/module hashes；
@@ -240,7 +253,9 @@ replay.py
 ```
 
 raw逐run保存lower、六dα、active dβ、empty token metadata、terminal lA（如适用）、component receipts和environment。
-large tensor可存content hash+bounded numeric projection，但replay必须从冻结payload重新计算summary，不能只核外层digest。
+全部numeric tensor必须保存stdlib可解码的base64 IEEE raw，绑定dtype/shape/endianness/content hash。5个nonterminal加
+5个terminal candidate numeric payload只需`919,680 B`（约`0.877075 MiB`），因此projection只能作附加摘要，不能替代
+完整payload。replay必须从冻结payload重新计算summary，不能只核外层digest。
 
 tamper至少：source/module/plan/state version、slot order、lower、任一dα、dβ location/sign、empty β、lA phase、counter、
 logical bytes、kernel/copy count、claim flag；全重签外层digest后仍应被semantic replay拒绝。
@@ -258,14 +273,14 @@ logical bytes、kernel/copy count、claim flag；全重签外层digest后仍应�
 7. empty β被physicalized；
 8. result发布前component未完成；
 9. result lease未释放即下一evaluate；
-10.异常后半写result被消费；
+10. post-begin异常后owner未poison、generation被retry/reuse或半写result被消费；
 11. terminal lA在nonterminal出现或terminal缺失；
 12. third coefficient pass/11th CROWN；
 13. warm allocation/view/dispatch；
 14. autograd registry/history出现；
 15. provider/native shadow/fallback；
-16. logical memory ledger少记或把effective伪写dense-A=0；
-17. raw缺run/partial resume；
+16. logical memory ledger漏掉scratch/metadata或把effective伪写dense-A=0；
+17. raw缺5+5 worker、串换terminal fixture或partial resume；
 18. replay只校digest不重算；
 19.全重签semantic tamper未拒；
 20. performance/timing/same-solver flag提前true。
@@ -288,7 +303,7 @@ production计数口径冻结为evaluation/parameter mutation/scheduler call=`10/
 建议提交：
 
 1. `feat(runtime): assemble S4 all-state prepared evaluator`；
-2. `test(runtime): close S4-1D five-fresh correctness`；
+2. `test(runtime): close S4-1D 5+5 fresh correctness`；
 3. `artifact: add S4-1D replay and tamper closure`；
 4. `docs: close S4-1D and preregister S4-2 trajectory`。
 

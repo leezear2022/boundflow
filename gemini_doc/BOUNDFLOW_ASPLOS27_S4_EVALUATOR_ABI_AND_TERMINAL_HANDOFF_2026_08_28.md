@@ -167,15 +167,22 @@ PreparedAllStateCrownEvaluatorV1.evaluate(request)
   -> AllStateCrownEvaluationResultV1
 
 result:
-    lower_view                    # [6,1]
-    alpha_gradient_views          # ordered six [6,width]
-    beta_gradient_views           # ordered six [6,q]
-    terminal_handoff_lease | None
-    execution_receipt
+    composite_result_lease:
+        lower_view                    # [6,1]
+        alpha_gradient_views          # ordered six [6,width]
+        beta_gradient_slots           # one physical + five typed token
+        terminal_child_transfer       # terminal only, one-shot
+        execution_receipt
 ```
 
-gradient view直接交给host optimizer，禁止clone后再赋值。empty β保持zero-width view，不得用`None`或补零tensor代替。
+gradient view直接交给host optimizer，禁止clone后再赋值。empty β保持typed zero-width metadata token，不创建物理
+Tensor/view，也不得用`None`或补零tensor代替。
 所有view在prepare时完成DLPack/TVM绑定，warm invocation只更新版本与launch counters。
+
+这里的result是一个composite lease：任一子view都不能独立释放后被下一evaluation重写。S4-1D formal每个fresh owner只执行
+一次evaluation；terminal child只可transfer一次，parent可先close但child close之前arena仍存活。read-only request拒绝不改
+state；一旦进入`EVALUATING`，任何失败均为`POISONED_NO_RETRY`，不得reset generation后复用半写arena。精确状态机见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_EVALUATOR_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`。
 
 ### 3.3 policy driver
 
@@ -299,8 +306,11 @@ S3外审批准后：
 8. S4-4 artifact/replay/tamper；
 9. 另立S4-P timing，再决定是否开放compiled KFSB child batch。
 
-S4-1D唯一prepared evaluator、386,712-byte logical correctness ledger、five-fresh/raw/replay/tamper门禁见
+S4-1D唯一prepared evaluator、修正后的438,726-byte logical correctness ledger、5+5 fresh/full-IEEE raw/replay/tamper
+门禁见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`。
+事务实施冻结与旧账`52,014 B`漏项纠正见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_EVALUATOR_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`。
 
 S4-2 sealed driver的live keep-best/stop/patience/pruning、functional Adam、`10/9/10`
 evaluation/update/scheduler-call与trajectory artifact合同见

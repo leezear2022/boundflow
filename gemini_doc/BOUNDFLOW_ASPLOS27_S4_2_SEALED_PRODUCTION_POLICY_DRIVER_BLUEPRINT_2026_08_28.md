@@ -312,14 +312,14 @@ foreach/capturable/differentiable/fused = live production values
 
 ### 4.3 correctness logical ledger
 
-S4-1D ledger为`386,712 bytes`。加入candidate m+v后，已知静态logical subtotal为：
+S4-1D修正ledger为`438,726 bytes`。加入candidate m+v后，已知静态logical subtotal为：
 
 ```text
-386,712 + 34,032 = 420,744 bytes
+438,726 + 34,032 = 472,758 bytes
 ```
 
 该数仍排除model/fixed input、cuDNN/TVM workspace、allocator metadata、7个step scalar、best-state checkpoint、pruner
-mask和terminal bridge scratch。S4-2必须分项测量这些新增项，`420,744`不是peak显存claim。
+mask和terminal bridge scratch。S4-2必须分项测量这些新增项，`472,758`不是peak显存claim。
 
 ## 5. sealed driver精确状态机
 

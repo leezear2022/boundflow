@@ -10,6 +10,34 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-28：S4-1D冻结evaluator事务、composite lease与完整IEEE replay
+
+- 对原S4-1D蓝图做implementation-readiness复核，旧`386,712 B`logical ledger漏掉`49,152 B` residual scratch与
+  `2,862 B` compressed metadata，共漏`52,014 B`；修正S4-1D/S4-2/S4-3 subtotal为
+  `438,726/472,758/540,774 B`；
+- CUDA allocation探针实例化36个logical physical buffers：logical=`438,726 B`、allocated delta=`448,000 B`、
+  reserved delta=`2,097,152 B`、allocator minus logical=`9,274 B`；existing source lease `34,008 B`只延长
+  lifetime且不计新增allocation；这些均不形成peak-memory claim；
+- 冻结read-only request admission与顶层状态机：pre-begin reject不消耗generation；进入`EVALUATING`后counter reset、
+  pass A/B/C、finite gate、receipt build/validate任一失败均进入`POISONED_NO_RETRY`，generation永久烧毁；
+- 14-case独立状态机枚举全部通过，model hash=`8942bb5970f268f47314265e0a1683947e7d5cddf6d421d3fd80cd778a9627eb`；
+- lower、六dα、六dβ及terminal lA统一为composite result lease；overlap evaluate拒绝，terminal child只可transfer一次，
+  parent可先close但child close才最终释放arena，S4-1D success不隐式回到`READY`；
+- prepared ABI冻结base/additional/total view=`16/32/48`，receipt绑定selector nonfinite/safe-index/operation-order及
+  live counters；
+- formal从含糊“至少five fresh”收紧为5个ordinal0 nonterminal + 5个ordinal9 terminal fresh，每process只执行一次；
+- 全部candidate lower/gradient/lA raw只有`919,680 B`（`0.877075 MiB`），冻结为stdlib可解码完整IEEE payload；
+  hash/projection只可作附加摘要，不能替代第三方numeric replay；
+- 新增S4-1D evaluator transaction implementation-readiness文档并同步蓝图、主ABI、S4-2/S4-3账、README与主预注册；
+  S3外审前S4 production代码/formal/timing/performance继续closed。
+
+### 验证
+
+- logical ledger独立重算：`17,016+17,016+55,296+149,856+147,456+49,152+72+2,862=438,726 B`，PASS；
+- full raw budget独立重算：nonterminal=`17,040 B`、terminal=`166,896 B`、5+5=`919,680 B`，canonical hash=
+  `1e2aab39a7f7049a09371fef6ec1e0a01dc1e2ec6b25ed7c4060b2cf78e2f0d6`，PASS；
+- 状态机/CUDA probe和既有定向回归、DocOps validation/lint在提交前执行。
+
 ## 2026-08-28：S4-1B/1C冻结六selector sentinel、七gradient TIR与48-view ABI
 
 - 真实D2B staged pass抽取A18/A20/A24/A26/A29/Ainput，normal数据全部finite；A26/A20直接来自两个existing
@@ -297,15 +325,15 @@ performance-claimed: false
   precommit `ABORTED_CLEAN`与mid-commit `POISONED_NO_RETRY`两类失败，后者禁止fallback/retry/继续queue；
 - 冻结`PreparedWholeCoreTransactionV2`、terminal one-shot handoff、existing KFSB 3×batch-24、provider-compatible
   core return、official post与provider net scratch consumer audit；
-- 独立汇总candidate+rollback=`68,016 bytes`，连同S4-1D+S4-2已知账得到S4-3 known logical subtotal=
-  `488,760 bytes`，并明确不形成peak-memory claim；
+- 独立汇总candidate+rollback=`68,016 bytes`；本节当时沿用旧S4-1D账得到`488,760 B`，现已由本文首节纠正为
+  `540,774 B`，并继续明确不形成peak-memory claim；
 - 冻结five-fresh R/C、minimum 26类fully re-signed tamper和18类negative/fault-injection门禁；仍无S4实现、
   GPU correctness、same-solver或性能claim。
 
 ### 验证
 
-- stdlib/AST/source重算：candidate=`34,008 bytes`、candidate+rollback=`68,016 bytes`、known subtotal=
-  `488,760 bytes`；provider return constructor=`4 direct + 8 helper = 12`，PASS；
+- stdlib/AST/source重算：candidate=`34,008 bytes`、candidate+rollback=`68,016 bytes`本身仍成立；旧known subtotal
+  `488,760 B`因上游ledger漏项已被首节修正为`540,774 B`；provider return constructor=`4 direct + 8 helper = 12`，PASS；
 - CUDA最小探针确认同一tensor先commit再content rollback后值恢复，但`_version=0→1→2`，不能恢复为0；
 - pinned provider source确认`interm_bounds.clear()`、`pre_result.interm_bounds.clear()`与post
   `torch.max(ret_l[final_name], lb_last.cpu())`存在；
@@ -323,8 +351,8 @@ performance-claimed: false
 - 纠正scheduler计数：production为10 evaluation、9 parameter mutation、10 scheduler call；第10次post LR不再被消费；
 - 冻结representation-neutral sealed driver、native dense/compiled compressed两个closed evaluator、policy runtime state、
   functional Adam prepared moments、per-step raw receipt与minimum 23类negative/tamper门禁；
-- 汇总S4-1D加m/v的known logical subtotal=`420,744 bytes`，并明确step scalar/best checkpoint/pruner/workspace仍需
-  分项测量，不形成memory claim；
+- 本节当时沿用旧S4-1D账汇总加m/v=`420,744 B`；首节补齐scratch/metadata后修正为`472,758 B`。step scalar/
+  best checkpoint/pruner/workspace仍需分项测量，不形成memory claim；
 - 新增S4-2实施蓝图并回链S4主预注册、evaluator ABI、S4-1D与README；仍无S4实现/GPU执行/性能claim。
 
 ### 验证
@@ -417,7 +445,7 @@ performance-claimed: false
 - `git diff --check`与文档关键字段检索：PASS；
 - DocOps change/validation与lint在提交前执行。
 
-## 2026-08-28：完成S4-1D all-state evaluator closure实施蓝图
+## 2026-08-28（历史v1，内存/事务/fresh口径已被上节修正）：完成S4-1D all-state evaluator closure实施蓝图
 
 - 收束S4-0 admission、S4-1A buffers、S4-1B effective graph与S4-1C emitters为唯一prepared evaluator owner；
 - 冻结prepare/evaluate/rollback/result lease序列与component receipt hash链；
