@@ -6,7 +6,7 @@ topic: boundflow
 slug: asplos27-s4-design-audit
 audit-kind: preregistration-and-implementation-blueprint
 base-commit: ebf45cc72438141d8f0b35dadfd5cf774d7e753f
-design-result-commit: 1d378eb
+design-result-commit: d9ddede332688c94859c11879532c40488d4124f
 execution-authority: false
 code-change-open: false
 performance-claimed: false
@@ -27,7 +27,7 @@ speedup或complete-query性能已经存在。
 2. S4-0—S4-4的分层是否真正对应production事务，而不是为写IR/receipt而写IR/receipt；
 3. all-state compiled VJP、sealed production policy、terminal handoff、KFSB、commit/post是否有遗漏owner；
 4. S4-3 failure state是否诚实，尤其PyTorch `_version`与post-after-commit；
-5. S4-4的stdlib raw/replay和40类fully re-signed tamper是否足以支持第三方独立审计；
+5. S4-4的stdlib raw/replay和48类fully re-signed tamper是否足以支持第三方独立审计；
 6. 是否同意在S3外审批准后仍按S4-0→1A→1B→1C→1D→2→3→4顺序实施；
 7. 是否发现必须在第一行S4代码开工前修正的blocker/major。
 
@@ -35,8 +35,9 @@ speedup或complete-query性能已经存在。
 
 - branch：`feat/rvir-v4-production-state-ownership-v1`；
 - 本轮设计base：`ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
-- S4-4设计结果：`1d378eb`；
-- 审计范围以`ebf45cc..1d378eb`和下列S4文档的完整当前版本为准；
+- S4-3A consumer/lifetime审计及S4-4修订结果：`d9ddede332688c94859c11879532c40488d4124f`；
+- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..d9ddede332688c94859c11879532c40488d4124f`
+  和下列S4文档的完整版本为准；
 - S3 formal实现/结果不在本轮重新验收，但它是S4设计输入；S3独立exchange仍等待审计；
 - `.docops/exchange/gc0-1-prereg-20260826`异步audit文件和`docs/CIBC_for_DAC.pdf`是用户保留的范围外dirty文件，
   不得误判为S4设计diff。
@@ -63,8 +64,9 @@ speedup或complete-query性能已经存在。
 8. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`；
 9. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
 10. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
-11. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
-12. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
+11. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
+12. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
+13. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
 
 ## 3. 已冻结的production事实，请独立复核
 
@@ -170,9 +172,11 @@ PASS要求：
 3. provider constructor failure是否在commit前；
 4. official post failure是否必然在commit后；
 5. host packet prune和intermediate container clear是否属于同一logical transaction；
-6. net scratch是否可能被post/queue/next call继续读取；
+6. net scratch是否可能被post/queue/next call继续读取，reference的α/intermediate/lA move/gc是否已由candidate
+   disposal plan镜像；
 7. pointer-swap是否被正确保持为未批准实验；
-8. failure后禁止fallback/retry/queue continue是否足够fail closed。
+8. failure后禁止fallback/retry/queue continue是否足够fail closed；
+9. query-scoped exclusive core-owner latch是否足以排除provider reentry、multi-core和stale preserve-mask。
 
 如果能设计出既恢复内容又保持`_version`/alias/consumer identity的更强方案，请作为替代设计说明，但不要把未证明方案
 标成当前实现。
@@ -201,6 +205,8 @@ PASS要求：
 - summary所有字段均能从protocol/source/raw重建；
 - artifact无绝对本机路径/credential泄漏；
 - failure artifact与positive worker分离但被同一manifest绑定。
+- scratch pre/post inventory、live disposal keys/sentinel kinds、stale β retention和exclusive owner latch均可从raw重建，
+  且scratch count与production 12-path count严格分离。
 
 请评估18-worker设计是否过度或不足，以及B0/R/C在独立进程下如何证明同一个deterministic pre-state。
 
@@ -208,7 +214,7 @@ PASS要求：
 
 PASS要求：
 
-- 40类攻击编号/分区完备且全部fully re-signed；
+- 48类攻击编号/分区完备且全部fully re-signed；
 - 攻击同步更新payload/file/summary/manifest，拒绝原因来自semantic invariant而非简单digest；
 - 外审另造至少3个未预注册攻击仍能被设计覆盖；
 - S4各级code/timing flag仍closed；
@@ -247,12 +253,12 @@ PASS要求：
 
 本轮不是实现测试，但executor已核对设计事实：
 
-- S4-3相关whole-core/live-return/KFSB/commit/terminal targeted：`36 passed`；
+- S4-3/S4-3A相关whole-core/live-return/KFSB/commit/pre-state/production-state/terminal targeted：`45 passed`；
 - S4-4参考artifact相关targeted：`19 passed`；
 - CUDA探针：tensor content restore后`_version=0→1→2`；
 - S3 v2 raw=`18 rows / 20,747,422 bytes`；
 - old RVIR five-fresh=`10 .pt / 16,975,355 bytes`；
-- S4-4 tamper inventory=`1..40`、order/worker=`6/18`；
+- S4-4 tamper inventory=`1..48`、order/worker=`6/18`；
 - `git diff --check`、DocOps exchange validate/lint：PASS。
 
 这些只证明设计输入和历史基础设施仍存在，不证明S4-0—S4-4实现通过。
@@ -260,8 +266,8 @@ PASS要求：
 ## 7. 建议外审操作
 
 ```bash
-git diff --stat ebf45cc..1d378eb
-git diff --check ebf45cc..1d378eb
+git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..d9ddede332688c94859c11879532c40488d4124f
+git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..d9ddede332688c94859c11879532c40488d4124f
 
 source env.sh
 /home/lee/miniconda3/envs/boundflow/bin/python -m pytest -q \
@@ -274,7 +280,7 @@ source env.sh
 另外请用自己的短脚本：
 
 - 重算mutable inventory和memory ledger；
-- 检查tamper编号1—40；
+- 检查tamper编号1—48；
 - 用CUDA tensor验证commit+restore后的`_version`；
 - 亲读provider core/post确认clear/prune/post顺序；
 - 搜索S4文档所有`claimed/open/validated`词，核对没有implementation或performance漂移。
@@ -284,12 +290,12 @@ source env.sh
 1. 是否存在blocker/major，使S4-0在S3批准后仍不能开工？
 2. all-state VJP的两个coefficient arena方案是否漏掉某个residual/fanout owner？
 3. six-site effective→gradient→terminal-lA alias是否有无法由phase state解决的lifetime冲突？
-4. net scratch是否必须成为第13+条transaction path？
+4. net scratch是否必须成为第13+条production数值path，还是应保持为独立lifetime/disposal transaction？
 5. post failure后是否有比`COMMITTED_POST_FAILED_POISONED`更严格、可实现的安全语义？
 6. B0/R/C 18 fresh是否足够证明reference和candidate，不依赖历史`.pt`？
 7. stdlib raw schema是否缺dtype、negative-zero、NaN payload、alias或view metadata？
 8. executed-source inventory是否有更可靠的闭包算法？
-9. 40类tamper还缺哪类可全重签semantic attack？
+9. 48类tamper还缺哪类可全重签semantic attack？
 10. 是否同意当前唯一执行顺序，不开放S4-P timing？
 
 ## 9. 输出格式
