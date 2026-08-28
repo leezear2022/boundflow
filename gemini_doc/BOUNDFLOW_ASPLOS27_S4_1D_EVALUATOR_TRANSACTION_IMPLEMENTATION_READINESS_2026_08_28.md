@@ -1,5 +1,5 @@
 ---
-status: implementation-readiness-frozen-pending-s3-external-audit
+status: implementation-readiness-corrected-by-s4-1d-construction-v2
 date: 2026-08-28
 type: implementation-readiness
 topic: boundflow
@@ -20,7 +20,7 @@ performance-claimed: false
 S4-1D现在可以被实现为一个明确的prepared-runtime事务，但S3独立外审尚未返回，因此本文只冻结合同，
 不开放production代码。
 
-本轮只读审计纠正了旧蓝图的四个实质问题：
+此前只读审计纠正了旧蓝图的四个实质问题；2026-08-29逐文件施工又纠正三项组合边界：
 
 1. 2026-08-29进一步源码复核把S4-1D logical correctness ledger从`438,726 B`纠正为`389,574 B`：旧审计把
    coefficient arena内部两个residual scratch slice误作独立storage，重复加了`49,152 B`；真正相对
@@ -28,10 +28,13 @@ S4-1D现在可以被实现为一个明确的prepared-runtime事务，但S3独立
 2. evaluation一旦进入GPU写阶段，失败后不能在同一prepared object上reset/retry；正确状态是
    `POISONED_NO_RETRY`，generation永久烧毁；
 3. lower、六dα、六dβ和可选terminal lA不是若干可独立释放的松散view，而是一个composite result lease；
-4. 单次输出很小，5个nonterminal加5个terminal worker的完整IEEE tensor raw合计仅`919,680 B`
-   （`0.877075 MiB`），所以S4-1D禁止只保存hash+bounded projection。
+4. 旧`919,680 B`只是5+5 candidate output，不是A/B/C三方raw；formal改为两fixture各六全排列、共12 worker，
+   三方output+terminal V sidecar最低numeric raw=`4,209,984 B`；
+5. terminal child transfer与parent close是正交动作；状态机修正为9 states/14 legal transitions/67 invalid；
+6. raw Tensor getter无法提供可撤销capability；result/child必须opaque，只能被exact sealed consumer消费。
 
-以上都是设计修正，不是S4实现、GPU formal或性能结果。
+权威逐文件施工包为`BOUNDFLOW_ASPLOS27_S4_1D_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`，canonical
+hash=`76da1864...3cd1`。以上都是设计修正，不是S4实现、GPU formal或性能结果。
 
 ## 1. owner与非owner
 
@@ -91,7 +94,7 @@ PreparedS4AllStateCrownEvaluatorV1
 
 ## 3. 状态机
 
-### 3.1 顶层状态
+### 3.1 顶层与parent/child正交状态
 
 ```text
 PREPARED_READY
@@ -99,12 +102,23 @@ PREPARED_READY
   -- read-only admission reject --> PREPARED_READY
 
 EVALUATING
-  -- success + receipt validate --> RESULT_LEASED
+  -- nonterminal success --> NT_PARENT_OPEN
+  -- terminal success ----> T_PARENT_OPEN_CHILD_EMBEDDED
   -- any failure -------------> POISONED_NO_RETRY
 
-RESULT_LEASED
-  -- nonterminal composite close --> CLOSED
-  -- terminal child transferred --> PARENT_CLOSED_CHILD_LIVE
+NT_PARENT_OPEN
+  -- parent close --> CLOSED
+
+T_PARENT_OPEN_CHILD_EMBEDDED
+  -- transfer child --> T_PARENT_OPEN_CHILD_LIVE
+  -- parent close ---> CLOSED  # embedded child一起撤销
+
+T_PARENT_OPEN_CHILD_LIVE
+  -- child close  --> T_PARENT_OPEN_CHILD_CLOSED
+  -- parent close --> PARENT_CLOSED_CHILD_LIVE
+
+T_PARENT_OPEN_CHILD_CLOSED
+  -- parent close --> CLOSED
 
 PARENT_CLOSED_CHILD_LIVE
   -- terminal child close -------> CLOSED
@@ -112,6 +126,9 @@ PARENT_CLOSED_CHILD_LIVE
 POISONED_NO_RETRY
   -- close/release --------------> CLOSED
 ```
+
+完整模型为9 states、9 events、14 legal transitions；其余67种state/event组合稳定拒绝，canonical hash=
+`963e723f...599d`。transfer child绝不隐式close parent；child-first与parent-first都必须合法。
 
 S4-1D formal中每个fresh process只执行一次evaluation，所以success后不会隐式返回`READY`。S4-2若需要10次
 evaluation，必须由sealed driver引入显式parameter mutation/state-version transition和下一generation合同，不能让
@@ -126,14 +143,15 @@ S4-1D先偷偷支持不受控复用。
 - receipt中的pass A/B/C、finite gate、lease和result必须绑定同一generation；
 - partial component receipt不能被下一evaluation继承。
 
-独立状态机枚举覆盖14个case，canonical model hash为：
+旧独立failure/success枚举仍覆盖14个case，canonical model hash为：
 
 ```text
 8942bb5970f268f47314265e0a1683947e7d5cddf6d421d3fd80cd778a9627eb
 ```
 
 枚举结果：5类pre-begin rejection均不改状态；7类post-begin failure均进入`POISONED_NO_RETRY`；
-nonterminal与terminal success各一类，均不隐式返回`READY`。
+nonterminal与terminal success各一类，均不隐式返回`READY`。该14-case failure模型与上方14-transition
+capability模型是两个口径，不得混淆。
 
 ## 4. exact transaction sequence
 
@@ -150,7 +168,7 @@ nonterminal与terminal success各一类，均不隐式返回`READY`。
 7. seal one composite result lease
 8. build execution receipt from component receipts + live counters
 9. independently validate execution receipt
-10. publish result and enter RESULT_LEASED
+10. publish result and enter NT_PARENT_OPEN or T_PARENT_OPEN_CHILD_EMBEDDED
 ```
 
 S4-1C construction进一步冻结步骤4—5的内部计数：nonterminal=`10 coefficient+7 emitter=17` actions；
@@ -172,27 +190,34 @@ fail-closed边界。
 
 ## 5. composite result lease
 
-成功结果是一个不可复制、不可序列化、single-close的composite lease：
+成功结果是一个不可复制、不可序列化、single-close的opaque composite capability：
 
 ```text
 S4AllStateResultLeaseV1
-  lower_view
-  six_alpha_gradient_views
-  six_beta_gradient_slots       # 1 physical + 5 typed token
-  terminal_child_transfer       # terminal only, one-shot
-  execution_receipt
+  tensor-free execution_receipt
+  consume_into_exact_sealed_policy(driver)
+  transfer_terminal_child()       # terminal only, one-shot
+  serialize_into_exact_formal_sink(sink)
+  close()
 ```
+
+不得公开`.lower/.gradients/.lA`、Tensor tuple/dict、`__iter__`、DLPack或generic callback。现场反例证明：即使lease
+close后property拒绝，先前取得的raw Tensor引用仍可读取；因此“close后任何已逃逸view访问都拒绝”在Python/PyTorch中
+不可实现。诚实合同是API禁止raw Tensor escape，close后拒绝新的consume/transfer/serialize。
 
 规则：
 
-- lower与所有gradient view共同持有arena generation；不得单独release后重写其中一部分；
+- lower与所有gradient private view共同持有arena generation；不得单独release后重写其中一部分；
 - lease存活时拒绝第二次evaluate；
 - nonterminal close直接关闭prepared evaluator；
 - terminal child只能transfer一次，重复transfer拒绝；
 - parent result可以在child仍存活时close，但arena直到child close才最终释放；
-- terminal child只包含六lA的不可变view和lineage/phase receipt，不得携带optimizer/provider callback；
-- child close之后任何view访问都拒绝；
+- terminal child为opaque capability，只允许exact sealed KFSB/formal consumer，不公开六lA raw Tensor；
+- child close之后拒绝新的consume/serialize；此前raw Tensor逃逸由API禁止与consumer retention audit防止，不能声称可撤销；
 - close不等于CUDA allocator立即归还reserved memory，artifact不得混淆logical release和physical free。
+
+sealed consumer必须是repo内exact class并绑定implementation hash，拒绝subclass/duck typing/arbitrary callable；消费后检查
+consumer字段与return没有保留source Tensor/storage。
 
 ## 6. corrected logical memory ledger
 
@@ -295,11 +320,11 @@ kernel用canonical qNaN传播错误，final gate把它转为稳定fail-closed re
 
 ## 9. formal worker与完整raw
 
-S4-1D冻结为至少10个fresh subprocess：
+S4-1D修正为12个fresh subprocess，每类fixture覆盖A/B/C六全排列：
 
 ```text
-5 × ordinal0/version0/nonterminal
-5 × ordinal9/version9/terminal
+6 × ordinal0/version0/nonterminal   # ABC/ACB/BAC/BCA/CAB/CBA
+6 × ordinal9/version9/terminal      # ABC/ACB/BAC/BCA/CAB/CBA
 ```
 
 每个process：
@@ -310,12 +335,12 @@ S4-1D冻结为至少10个fresh subprocess：
 - raw先落盘，summary后生成；
 - 不resume、不复用candidate process、不从expected trace构造candidate output。
 
-每类5个worker内部预注册A/B/C执行顺序或pair顺序，必须同时保存A production capture、B independent native oracle、
-C compiled candidate的输入identity与输出。
+每类六个worker的A/B/C顺序逐项冻结；三实现使用source-equivalent但mutable storage-independent输入，必须同时保存A
+production、B independent native oracle、C compiled candidate的输入identity与完整输出。
 
-### 9.1 full IEEE payload budget
+### 9.1 full IEEE payload budget修正
 
-每个worker的candidate numeric payload：
+每个实现每worker numeric payload：
 
 | tensor | bytes |
 |---|---:|
@@ -326,18 +351,16 @@ C compiled candidate的输入identity与输出。
 因此：
 
 ```text
-nonterminal worker = 17,040 B
-terminal worker    = 166,896 B
-5 + 5 total        = 919,680 B = 0.877075 MiB
+candidate 6+6 outputs        = 1,103,616 B
+A/B/C three-way outputs      = 3,310,848 B
+terminal candidate V sidecar =   899,136 B
+minimum numeric raw          = 4,209,984 B = 4.01495361328125 MiB
 ```
 
-预算canonical hash：
+旧`919,680 B/1e2aab...`仅为5+5 candidate-only历史估算，不能再称formal完整raw。terminal V sidecar必须在lA
+覆盖前抓取；三方output和sidecar外的JSON/receipt/environment bytes另计。
 
-```text
-1e2aab39a7f7049a09371fef6ec1e0a01dc1e2ec6b25ed7c4060b2cf78e2f0d6
-```
-
-raw必须以stdlib可解码的base64 IEEE bytes保存全部lower/gradient/lA，并绑定dtype、shape、endianness、signed-zero/
+raw必须以stdlib可解码的content-addressed IEEE bytes保存三方全部lower/gradient/lA及terminal candidate V sidecar，并绑定dtype、shape、endianness、signed-zero/
 NaN policy和content hash。projection只可作为便于阅读的附加摘要，不能替代full payload。
 
 ## 10. independent replay与tamper
@@ -375,8 +398,8 @@ S3外审批准后，S4-1D只能在S4-0、1A、1B0、1B、1C逐级关闭后按以
 1. `feat(runtime): add S4-1D read-only request admission and state machine`；
 2. `feat(runtime): assemble pass A/B/C with 110 prepared argument descriptors`；
 3. `feat(runtime): add final gate and composite result lease`；
-4. `test(runtime): close pre-begin/post-begin/lease negative matrix`；
-5. `artifact: close 5+5 full-IEEE replay and fully re-signed tamper`；
+4. `test(runtime): close pre-begin/post-begin/opaque-capability negative matrix`；
+5. `artifact: close 12-worker six-permutation full-IEEE replay and fully re-signed tamper`；
 6. `docs: close S4-1D and only then open S4-2`。
 
 STOP条件：

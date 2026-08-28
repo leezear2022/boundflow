@@ -182,7 +182,7 @@ coefficient-program VJP仍是规范oracle。不得保存跨层float32 dense A，
 B4-B2继续作为数学oracle/codegen资产；D1C/D2B scratch暴露site25/site19 incoming coefficient。
 
 S4-1内部顺序固定为1A all-state ABI、1B0 ternary endpoint closure、1B六site values、1C
-六dα/active dβ emitters、1D single-evaluation 5+5 fresh closure。五步完成前S4-2继续关闭。
+六dα/active dβ emitters、1D single-evaluation 6+6 six-permutation fresh closure。五步完成前S4-2继续关闭。
 
 terminal模式下，六site coefficient-adjoint slot可在本site gradient已消费后phase-safe改作terminal lA slot；lA
 总计37,464 float32/149,856 bytes。复制对象必须是ReLU transform前incoming A，handoff view必须绑定
@@ -263,8 +263,9 @@ phase-safe复用coefficient-adjoint arena保存六lA，禁止第11次CROWN。
 
 S4-1D single-evaluation closure见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`：唯一prepared evaluator
-组装S4-0/1A/1B/1C，以5个nonterminal加5个terminal fresh比较lower/六dα/六dβ/terminal lA，并以full-IEEE
-raw-first replay/tamper关闭；通过只开放S4-2 10/9 trajectory，timing仍关闭。事务与完整raw冻结见
+组装S4-0/1A/1B/1C，以6个nonterminal加6个terminal fresh分别覆盖A/B/C六全排列，比较lower/六dα/六dβ/
+terminal lA，并以full-IEEE raw-first replay/tamper关闭；result为opaque sealed-consumer capability，不公开raw Tensor。
+通过只开放S4-2 10/9 trajectory，timing仍关闭。事务与完整raw冻结见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_EVALUATOR_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`。
 
 交付：一个prepared evaluator在ordinal 0输入上返回lower、六dα、六dβ和receipt。

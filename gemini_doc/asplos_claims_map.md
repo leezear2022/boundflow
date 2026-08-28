@@ -19,6 +19,9 @@
 > S4-1C construction-time lifecycle/顺序诊断只证明合同可实现：Pass C为17/23 action、site31需要
 > `dα→dβ→copy→transform`、六V/lA slot为一个storage且warm diagnostic allocation=`0/0`。它不等于production
 > gradient correctness、memory peak或性能结果；construction hash=`ad8ea91c...5b93`，S4 claim仍false。
+> S4-1D construction-time state/raw诊断同样不升级claim：9-state/14-transition capability模型、15-node seal DAG和
+> `4,209,984 B` minimum raw都只是预注册合同；旧`919,680 B`降为candidate-only历史估算。当前没有S4-1D
+> evaluator、12-worker artifact或formal PASS，construction hash=`76da1864...3cd1`。
 >
 > **2026-08-28 S3 optimizer/runtime内部结论**：状态=
 > `VALIDATED-S3-3X-LOCAL-OPTIMIZER-V2-PENDING-EXTERNAL-AUDIT`。source=`1766cbc`，ResNet2B

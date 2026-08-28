@@ -14,6 +14,9 @@
 > 2026-08-29 S4-1C construction进一步冻结完整Pass C：nonterminal=`10 coefficient+7 emitter=17` actions，
 > terminal插入6个lA copy后=`23`；site31先dα、再dβ、再覆盖V31为lA31。六lA仍复用单一V arena，完整
 > argument descriptor保持110，terminal copy新增0。S3批准和前序S4门禁前仍不得实现。
+> 2026-08-29 S4-1D construction把single-evaluation owner收束为opaque sealed-consumer capability；raw Tensor getter
+> 被反例否定，parent/child修正为9-state lifecycle。formal由5+5改为每fixture六全排列、12 fresh，minimum numeric
+> raw=`4,209,984 B`。这仍是implementation contract，不是formal结果。
 
 > **2026-08-25 R3-1b0最新覆盖**：exact trace/liveness已正式关闭为
 > `VALIDATED-R3-1B0-TRACE-LIVENESS`；当前只开放b1 compiled no-grad full-lower forward。b2 custom

@@ -14,6 +14,9 @@
 > S4-1C逐文件施工现又冻结Pass C nonterminal/terminal=`17/23` actions、7 gradient+6 terminal-copy symbols、
 > site31双reader顺序、单37,464-element V/lA arena、110 argument descriptor与6个额外普通result view。GPU
 > lifecycle probe的warm allocated/reserved=`0/0`只属设计可行性诊断，当前仍没有S4 production代码。
+> S4-1D逐文件施工进一步发现旧raw预算与lease API不够：5+5 candidate-only `919,680 B`被12-worker三方+
+> terminal V sidecar `4,209,984 B`取代；raw Tensor getter禁止，parent/child capability采用9-state lifecycle。
+> 这些仍是code/formal closed设计修正，不改变下一动作S3独立外审。
 >
 > **历史（等待上方S3外审决定）：**
 > **2026-08-28 当前状态：S3 3x本地optimizer内部关闭，只开放S4 same-solver实现/正确性**。source=

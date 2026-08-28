@@ -1,5 +1,5 @@
 ---
-status: draft-implementation-blueprint-corrected-by-transaction-readiness
+status: draft-corrected-by-s4-1d-construction-v3
 date: 2026-08-28
 type: implementation-plan
 topic: boundflow
@@ -39,6 +39,10 @@ S4-1D通过只证明single-evaluation correctness/ownership，不接Adam、不�
 本蓝图的事务、内存和artifact细节已由
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_EVALUATOR_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`
 收紧：旧`386,712 B`账和“失败后reset/retry”语义已被取代。
+
+2026-08-29逐文件施工又修正：result必须为opaque sealed-consumer capability而非raw Tensor getter；parent/child
+采用9-state正交lifecycle；formal由5+5改为两fixture各六全排列、12 fresh；minimum three-way output+terminal V
+sidecar numeric raw=`4,209,984 B`。权威施工包canonical hash=`76da1864...3cd1`。
 
 ## 1. 唯一runtime owner
 
@@ -130,17 +134,18 @@ S4-1D correctness只准两种fixture：ordinal0/version0/nonterminal与ordinal9/
 ### 4.2 result
 
 ```text
-S4AllStateResultLeaseV1:
-    lower[D,S]
-    alpha_gradient_views[6]
-    beta_gradient_slots[6]       # one physical + five token
-    terminal_child_transfer      # terminal only, one-shot
-    execution_receipt
+S4AllStateResultCapabilityV1:
+    tensor-free execution_receipt
+    consume_into_exact_sealed_policy(driver)
+    transfer_terminal_child()       # terminal only, opaque/one-shot
+    serialize_into_exact_formal_sink(sink)
+    close()
 ```
 
-它是一个不可复制、不可序列化的composite lease，不是若干可独立释放的clone/view。lease存活时拒绝下一次
-evaluate。terminal child只可transfer一次；parent可先close，child close才最终释放arena。结果metadata按admission slot
-顺序；不接受semantic-path dict。S4-1D一个fresh process只执行一次evaluation，success后不隐式回到`READY`。
+它是一个不可复制、不可序列化的opaque composite capability，不公开raw Tensor/view/dict。raw Tensor一旦逃逸就无法由
+lease close撤销，因此只能由exact sealed policy/KFSB/formal consumer消费，并在返回后检查consumer不保留source storage。
+capability存活时拒绝下一次evaluate。terminal child只可transfer一次；parent/child可任一先close，最后一个close才结束
+capability lifecycle。结果metadata按admission slot顺序；S4-1D success不隐式回到`READY`。
 
 ## 5. logical memory ledger
 
@@ -229,10 +234,11 @@ C: S4 compiled evaluator
 显式证明旧二元规则复现`0.0011564247542992234/9`、三元规则关闭至`4.2375177145e-08/0`；existing S2/R31B2、B4-B2
 site31/25交集继续作为局部oracle，不能替代A/B full comparison。
 
-### 7.2 5+5 fresh order
+### 7.2 6+6 fresh six-permutation order
 
-至少10个fresh subprocess：5个ordinal0/version0/nonterminal，5个ordinal9/version9/terminal；每个process恰执行
-一次evaluation。每类fixture的A/B/C或control/candidate顺序预注册。每个process重新：
+固定12个fresh subprocess：6个ordinal0/version0/nonterminal，6个ordinal9/version9/terminal；每类逐一覆盖
+`ABC/ACB/BAC/BCA/CAB/CBA`。每个process的A/B/C使用source-equivalent、storage-independent state，并各执行一次。
+每个process重新：
 
 - load frozen source；
 - verify source/model/property/module hashes；
@@ -266,10 +272,10 @@ summary.json
 replay.py
 ```
 
-raw逐run保存lower、六dα、active dβ、empty token metadata、terminal lA（如适用）、component receipts和environment。
-全部numeric tensor必须保存stdlib可解码的base64 IEEE raw，绑定dtype/shape/endianness/content hash。5个nonterminal加
-5个terminal candidate numeric payload只需`919,680 B`（约`0.877075 MiB`），因此projection只能作附加摘要，不能替代
-完整payload。replay必须从冻结payload重新计算summary，不能只核外层digest。
+raw逐run保存A/B/C三方lower、六dα、active dβ、empty token metadata、terminal lA（如适用）、candidate terminal
+V-pre-overwrite sidecar、component receipts和environment。全部numeric tensor保存stdlib可解码IEEE raw并绑定dtype/shape/
+endianness/content hash。最低numeric raw=`4,209,984 B`；旧`919,680 B`只是5+5 candidate-only历史估算。
+projection只能作附加摘要，replay必须从冻结payload重算summary。
 
 tamper至少：source/module/plan/state version、slot order、lower、任一dα、dβ location/sign、empty β、lA phase、counter、
 logical bytes、kernel/copy count、claim flag；全重签外层digest后仍应被semantic replay拒绝。
@@ -294,7 +300,7 @@ logical bytes、kernel/copy count、claim flag；全重签外层digest后仍应�
 14. autograd registry/history出现；
 15. provider/native shadow/fallback；
 16. logical memory ledger漏掉scratch/metadata或把effective伪写dense-A=0；
-17. raw缺5+5 worker、串换terminal fixture或partial resume；
+17. raw缺12 worker/任一六全排列、串换terminal fixture或partial resume；
 18. replay只校digest不重算；
 19.全重签semantic tamper未拒；
 20. performance/timing/same-solver flag提前true。
@@ -317,7 +323,7 @@ production计数口径冻结为evaluation/parameter mutation/scheduler call=`10/
 建议提交：
 
 1. `feat(runtime): assemble S4 all-state prepared evaluator`；
-2. `test(runtime): close S4-1D 5+5 fresh correctness`；
+2. `test(runtime): close S4-1D 12-worker six-permutation correctness`；
 3. `artifact: add S4-1D replay and tamper closure`；
 4. `docs: close S4-1D and preregister S4-2 trajectory`。
 

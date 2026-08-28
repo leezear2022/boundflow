@@ -20,6 +20,10 @@
 > emitter，terminal再插入6个pre-transform lA copy；site31必须`dα→dβ→copy→transform`。六lA复用单一
 > 37,464-element V arena，copy新增0 descriptor/storage；完整A/B/C仍为110个argument descriptor，result-facing
 > 额外普通Torch view为6。construction hash=`ad8ea91c...5b93`。这些仍是code-closed设计合同。
+> S4-1D施工继续纠正组合事务：旧`919,680 B`只是5+5 candidate output，正式设计改为两fixture各六全排列、
+> 12 fresh，A/B/C output+terminal V sidecar最低numeric raw=`4,209,984 B`；result改为opaque exact-consumer
+> capability，不公开raw Tensor；parent/child为9-state/14-transition正交lifecycle，seal DAG为15 nodes。
+> construction hash=`76da1864...3cd1`。当前仍只执行S3外审，S4-1D code/formal关闭。
 >
 > **历史（等待上方S3外审关闭）：**
 > **2026-08-28 当前唯一指令：S3内部关闭，只开放S4 same-solver实现/正确性接入**。S3 v2在source

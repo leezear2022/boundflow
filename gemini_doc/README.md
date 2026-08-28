@@ -24,6 +24,7 @@ terminal bridge。S3外审批准前代码/timing关闭。见
 `BOUNDFLOW_ASPLOS27_S4_1C_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`、
 `BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1D_EVALUATOR_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`、
+`BOUNDFLOW_ASPLOS27_S4_1D_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`、
 `BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_2_POLICY_DRIVER_IMPLEMENTATION_READINESS_2026_08_29.md`、
 `BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`、
@@ -141,7 +142,8 @@ Torch allocator和driver/VM/cuDNN footprint。construction hash=
 S4-1D事务合同现已进一步冻结：request admission完全read-only；进入`EVALUATING`后任一失败均转
 `POISONED_NO_RETRY`并烧毁generation，不允许reset半写arena；成功只发布一个composite result lease，terminal child
 只可transfer一次。correctness formal改为5 nonterminal + 5 terminal fresh，全部lower/gradient/lA以stdlib可解码
-IEEE raw保存；candidate numeric payload合计仅`919,680 B`，不再允许hash+bounded projection代替原始数值。
+IEEE raw保存。2026-08-29施工纠正旧`919,680 B`仅为5+5 candidate-only估算；当前12-worker A/B/C三方output+
+terminal V sidecar最低numeric raw=`4,209,984 B`，不再允许hash+bounded projection代替原始数值。
 见`BOUNDFLOW_ASPLOS27_S4_1D_EVALUATOR_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`。
 
 最新执行（v8 S3，待合并外审）：S3 v2已把S2 prepared direct VJP接入ResNet2B P-anchor完整10次

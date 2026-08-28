@@ -10,6 +10,29 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：冻结S4-1D evaluator逐文件施工并纠正raw/capability合同
+
+- 新增983行S4-1D construction package，组合Pass A19、Pass B one graph与Pass C17/23 action；
+- 发现旧`919,680 B`仅为5+5 candidate output，不能支持A/B/C三方独立复核；formal改为nonterminal/terminal
+  各六全排列、12 fresh；三方output=`3,310,848 B`，terminal candidate V sidecar=`899,136 B`，最低numeric
+  raw=`4,209,984 B`；
+- 纠正terminal transfer与parent close混同：冻结9 states、9 events、14 legal transitions、67 invalid，model hash=
+  `963e723f...599d`；
+- raw Tensor escape反例确认wrapper close不能撤销已取得Tensor；result/terminal child改为opaque exact sealed-consumer
+  capability，不公开getter/dict/DLPack/generic callback；
+- 冻结15-node component→execution→artifact seal DAG，hash=`444a98d8...bca9`，明确result runtime ref与receipt
+  不得循环、manifest排除自身；
+- argument DLPack=`110`、private ordinary result view=`6`、conditional ledger=`389,574/463,302 B`保持；
+- construction canonical hash=`76da18648d874dfec6e867deaf26122f093f8157c68967ef2d06afe362243cd1`；
+  S3仍`ready_for_audit`，S4 production/formal/timing/performance继续closed。
+
+### 验证
+
+- 9-state/14-transition模型与5条完整close trace：PASS；
+- 15-node DAG拓扑和无环检查：PASS；
+- raw Tensor escape反例：PASS（证明不能claim revocation）；
+- 12-worker raw算术、construction hash、文档一致性、回归与DocOps lint：提交前执行。
+
 ## 2026-08-29：刷新S4设计外审交接至S4-1C construction readiness v14
 
 - design-result commit更新为`79b5b6cbc33590dc2040c52aaee1661c40b4c7db`，冻结base仍为
