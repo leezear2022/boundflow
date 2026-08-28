@@ -49,3 +49,18 @@ stage: s03
 - targeted GPU：`4 passed in 10.86s`；
 - mypy：2 files clean；
 - full regression：待 formal source-exact 后运行。
+
+## 2026-08-28：增加 S3 raw-first formal 工具链
+
+- 新增 N/D/P 六全排列 fresh worker，计时覆盖完整 10/9 wrapper；
+- raw 保存每一步 lower、gradient、α 与 Adam moments，replay 用标准库重算 tensor digest、容差、符号、
+  counters、速度和 verdict；
+- manifest 绑定 source commit、代码 blob、protocol、raw、logs 与 summary；
+- 新增 10 类 outer-resigned tamper probe 与 artifact 回归测试；
+- 单次非正式诊断 N/D/P 中位数约 `118.47/58.24/31.89 ms`，P/N 约 `3.72x`；该数字不形成 claim，
+  正式结果只来自 source-exact 后的六 fresh artifact。
+
+### 验证
+
+- worker 单次 GPU smoke：PASS；
+- formal artifact：待 source-exact 提交后生成。
