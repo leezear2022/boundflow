@@ -1,5 +1,11 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+> **2026-08-29 S3外审执行入口已在当前环境重新验证、外审仍pending**：新增
+> `BOUNDFLOW_ASPLOS27_S3_EXTERNAL_AUDIT_EXECUTION_RECEIPT_2026_08_29.md`。result commit到当前HEAD的关键
+> code/artifact零漂移；protocol code hash 12/12、replay、10/10 tamper、targeted 19、full
+> `1884 passed, 3 skipped, 6 warnings`均现场复现。该回执只修正审计执行环境与静态检查命令口径，不是外审
+> approve，不开放S4代码或timing；唯一下一动作仍是`asplos27-s3-optimizer-runtime-20260828`外审。
+
 > **2026-08-29 S4-4 formal evidence施工合同已冻结、实现仍关闭**：新增
 > `BOUNDFLOW_ASPLOS27_S4_4_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`。formal固定为18个positive、
 > 15个fault、共33个独立进程；raw采用stdlib index + content-addressed binary sidecar。纠正后的semantic
