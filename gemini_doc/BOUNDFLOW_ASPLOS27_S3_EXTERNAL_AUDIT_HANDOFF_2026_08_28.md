@@ -1,12 +1,12 @@
 ---
-status: draft-pending-final-commit
+status: ready-for-external-audit
 date: 2026-08-28
 type: external-audit-handoff
 topic: boundflow
 slug: asplos27-s3-optimizer-runtime
 base-commit: ad58afb
 formal-source: 1766cbcbb95466f3c4d9afda448a5e1db9bfbe36
-result-commit: pending-finalization
+result-commit: 6ef12b55dfc1c9f1207adcc55694460a72e14821
 performance-claimed: false
 ---
 
@@ -28,7 +28,8 @@ performance-claimed: false
 - S3 base=`ad58afb`；
 - final formal source=`1766cbcbb95466f3c4d9afda448a5e1db9bfbe36`；
 - vendored TVM source=`9802f45b802225f2ea46499eec4ab7b16f64a73f`；
-- result commit在executor最终落账后填入front matter；
+- result commit=`6ef12b55dfc1c9f1207adcc55694460a72e14821`；该提交包含v2 formal artifact、closure、
+  权威文档与DocOps validation；其后的handoff-only提交不得修改执行证据；
 - `.docops/exchange/gc0-1-prereg-20260826`下的异步审计文件与`docs/CIBC_for_DAC.pdf`是用户保留的
   范围外dirty文件，不得纳入S3 diff或提交判定；
 - 旧S1+S2 exchange保持原样，本轮不能通过改写旧exchange来掩盖S3发现的安全问题。
