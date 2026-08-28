@@ -180,3 +180,27 @@ stage: s03
 - 连续 6 fresh teardown stress：6/6 exit 0，无 TVM/heap abort；
 - 第六进程仍会进入已诊断慢功耗态，因此 formal 继续使用冻结的 15 秒进程间恢复间隔；
 - full v2 formal：待 source-exact commit。
+
+## 2026-08-28：S3 v2 正式通过 3x 本地 optimizer 门槛
+
+- source=`1766cbce71bb357800649965541f13578370ee49`，完成六顺序×三重复=`18`个fresh subprocess；
+- order-median headline P/native geomean/worst=`3.2438943700x/3.2246091003x`，P/旧D2B=
+  `1.8422164274x`；18行raw geomean/worst=`3.2478466675x/3.1784933816x`；
+- lower/compressed dα最大差=`7.8678131e-6/8.2887709e-8`，α与Adam moments通过冻结容差，lower/
+  gradient sign exact；
+- graph-safe receipt在18/18固定为selected graph=`0`、VM=`10`、output-copy TIR=`10`、warm DLPack=
+  `0`；
+- whole-wrapper warm dynamic allocated/reserved=`13,824/0 B`。allocated非零来自host-owned Adam首次建立
+  梯度/moment，故不再沿用whole-wrapper `0/0`措辞；
+- v2 replay PASS，summary hash=`494feff6457da88e45cf9a4906d42fac2254d6d4323d8d90732503ba6860fb6d`；
+  fully outer-resigned tamper=`10/10 rejected`；
+- v1 `2.5696x/0.7595x` NO-GO与三个失败尝试继续并列保留；
+- 状态关闭为`VALIDATED-S3-3X-LOCAL-OPTIMIZER-V2`，只开放S4 same-solver实现/正确性接入；query、
+  complete-query、跨模型、总体10x与ASPLOS-ready仍关闭。
+
+### 验证
+
+- targeted环境+S2+S3：`19 passed`；
+- full regression：`1884 passed, 3 skipped, 6 warnings in 710.22s`；
+- Black：12个相关Python文件无需改动；mypy：12 files clean；pylint：`10.00/10`；
+- stdlib-only raw重算、`git diff --check`：PASS；DocOps lint在最终落账后执行。

@@ -1,5 +1,14 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-28 当前唯一指令：S3内部关闭，只开放S4 same-solver实现/正确性接入**。S3 v2在source
+> `1766cbc`的ResNet2B P-anchor完整10 evaluation/9 Adam mutation本地wrapper上，以18 fresh、六顺序各
+> 三重复得到P/native order-median geomean/worst=`3.2438943700x/3.2246091003x`，P/旧D2B=
+> `1.8422164274x`；逐step lower/dα/α/Adam state与sign通过，replay通过，10/10全重签篡改拒绝。v1
+> `2.5695746x/0.7595405x` NO-GO与三个崩溃尝试必须保留。whole-wrapper dynamic allocated/reserved=
+> `13,824/0 B`，非零项来自host Adam state，不得写成0/0。只允许S4接入同一αβ-CROWN host solver并先做
+> correctness/share归因；same-solver性能、complete-query、跨模型、总体10x与ASPLOS-ready仍关闭。
+>
+> **历史（已由上方S3内部关闭取代）：**
 > **2026-08-28 当前唯一指令：S2已关闭，下一只写S3 optimizer 10/9 trajectory预注册**。S2在source
 > `d9582b5`、P-anchor单evaluation六fresh全排列上达到P/native geomean=`4.2453819646x`、worst=
 > `3.5407988567x`，P/旧D2B=`2.4676101728x`；correctness/sign、active β、zero dense-A、zero warm

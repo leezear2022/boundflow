@@ -1,11 +1,21 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
-最新执行（v7 S2，待合并外审）：S2已把ResNet2B P-anchor coarse CROWN单evaluation接入canonical
+最新执行（v8 S3，待合并外审）：S3 v2已把S2 prepared direct VJP接入ResNet2B P-anchor完整10次
+CROWN evaluation/9次Adam mutation本地wrapper。18 fresh稳健formal得到P/native order-median
+geomean/worst=`3.2438943700x/3.2246091003x`，P/旧D2B=`1.8422164274x`；逐step语义/sign、replay与
+10/10篡改通过。v1的`2.5695746x/0.7595405x` NO-GO及三个失败尝试仍保留。whole-wrapper dynamic
+allocated/reserved=`13,824/0 B`，非零项来自host Adam state，不能写成0/0。该结论仅属于冻结P-anchor
+10/9 trajectory；只开放S4 same-solver implementation/correctness，不构成query、跨模型、总体10x或
+ASPLOS-ready claim。见`BOUNDFLOW_ASPLOS27_S3_FORMAL_CLOSURE_2026_08_28.md`。
+
+历史执行（v7 S2，其selected-value CUDA Graph机制已由S3安全修复取代）：S2曾把ResNet2B P-anchor coarse CROWN单evaluation接入canonical
 Relax/TIR/cuDNN + prepared direct custom VJP。六fresh全排列P/native geomean=`4.2453819646x`、worst=
 `3.5407988567x`，P/旧D2B=`2.4676101728x`；correctness/sign、active β、zero dense-A、zero warm
 allocation、replay和10/10篡改通过。该结论只属于P-anchor单evaluation，不是optimizer、same-solver、
-complete-query或总体10×。正式计划/结果见`BOUNDFLOW_ASPLOS27_S2_COARSE_CROWN_CUSTOM_VJP_PLAN_2026_08_28.md`
-和`BOUNDFLOW_ASPLOS27_S2_FORMAL_CLOSURE_2026_08_28.md`；下一只写S3 10/9 trajectory预注册。
+complete-query或总体10×。S3随后发现selected-value graph捕获临时cuDNN workspace，当前production实现已改为
+graph-safe VM + persistent output TIR；S2数值保留，但旧graph机制不再作为安全机制claim。正式计划/结果见
+`BOUNDFLOW_ASPLOS27_S2_COARSE_CROWN_CUSTOM_VJP_PLAN_2026_08_28.md`和
+`BOUNDFLOW_ASPLOS27_S2_FORMAL_CLOSURE_2026_08_28.md`。
 
 历史执行（v6 S1）：S1已把standalone ResNet2B IBP的17-op图接入一个canonical
 Relax/TIR/prepared CUDA-Graph入口，6个Conv使用paired-output CIBC TIR，Linear由2个cuBLAS shape-family

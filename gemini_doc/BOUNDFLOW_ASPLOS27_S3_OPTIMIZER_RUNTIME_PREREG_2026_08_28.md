@@ -1,5 +1,5 @@
 ---
-status: preregistered-s3-optimizer-runtime
+status: closed-by-s3-v2-internal-validation
 updated: 2026-08-28T13:20:00+08:00
 type: plan
 topic: boundflow
@@ -111,3 +111,14 @@ DocOps validation 全部完成后授予；它仍只覆盖本地 P-anchor 10/9 wr
 `VALIDATED-REDUCED-S3` 只允许做 residual attribution，不自动开放 same-solver 性能；NO-GO 则关闭当前
 host-Adam/S2组合，依据 raw 判断是否需要 functional optimizer epilogue 或更粗 submission，禁止改门槛。
 
+## 8. Source-exact safety addendum 与最终状态
+
+v2最终formal之前的连续fresh尝试暴露了selected-value CUDA Graph捕获临时cuDNN workspace、以及TVM
+cuDNN TLS workspace析构顺序未定义的问题。为满足fail-closed生命周期要求，source=`1766cbc`在formal前
+冻结了更严格的receipt：selected graph replay=`0`、VM invocation=`10`、persistent output-copy TIR=`10`、
+warm DLPack=`0`。这取代§3中原定graph replay=`10`的结构预期，但性能门槛与数值协议没有降低；失败证据、
+修复顺序和最终结果见S3 change log与formal closure。
+
+最终v2通过3x门槛并关闭为`VALIDATED-S3-3X-LOCAL-OPTIMIZER-V2-PENDING-EXTERNAL-AUDIT`。whole-wrapper
+warm dynamic allocated/reserved实测为`13,824/0 B`，非零项来自host-owned Adam首次状态建立，故不主张
+whole-wrapper `0/0`。只开放S4 same-solver implementation/correctness，不自动形成same-solver性能claim。

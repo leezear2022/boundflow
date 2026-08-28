@@ -1,11 +1,20 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-28 当前状态：S3 3x本地optimizer内部关闭，只开放S4 same-solver实现/正确性**。source=
+> `1766cbc`，artifact=`artifacts/asplos27-s3-optimizer/resnet2b-p-anchor-v2`。18 fresh、六顺序各三重复
+> 的P/native order-median geomean/worst=`3.2438943700x/3.2246091003x`，P/旧D2B=
+> `1.8422164274x`；逐step lower/dα/α/Adam state与sign通过，replay PASS、10/10篡改拒绝。v1
+> `2.5695746x/0.7595405x` NO-GO及三个崩溃尝试保留。whole-wrapper dynamic allocated/reserved=
+> `13,824/0 B`，不能claim 0/0。same-solver性能、complete-query、跨模型、10x与ASPLOS-ready仍关闭。
+>
+> **历史（S2数值保留，旧selected-value CUDA Graph安全机制已由S3修复取代）：**
 > **2026-08-28 当前状态：S2 canonical coarse CROWN direct VJP关闭**。source=`d9582b5`，artifact=
 > `artifacts/asplos27-s2-crown-pipeline/resnet2b-p-anchor-v2`。六fresh全排列P/native geomean=
 > `4.2453819646x`、worst=`3.5407988567x`，P/旧D2B=`2.4676101728x`；lower/dα max diff=
 > `3.09944e-6/6.14673e-8`且sign exact；五cuDNN calls、4 selected TIR、two graph replays、active β、
-> saved dense A=`0`、warm alloc/reserved=`0/0`成立。状态=`VALIDATED-S2-4X-CANONICAL-CROWN`；
-> 下一只写S3 optimizer 10/9 trajectory预注册，same-solver/complete-query/10×/ASPLOS-ready仍关闭。
+> saved dense A=`0`、warm alloc/reserved=`0/0`成立。状态=`VALIDATED-S2-4X-CANONICAL-CROWN`。
+> S3后续发现旧selected-value graph会捕获临时cuDNN workspace，当前production实现已改为安全VM+
+> persistent output TIR；S2 graph机制不再作为当前claim。其S3后继已由上方关闭。
 >
 > **2026-08-28 S1历史关闭点**。source=`56c494f`，artifact=
 > `artifacts/asplos27-s1-cibc-pipeline/resnet2b-prop0-v2`；六fresh pipeline/PyTorch geomean=

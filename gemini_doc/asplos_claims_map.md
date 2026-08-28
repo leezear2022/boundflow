@@ -1,13 +1,24 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-28 S3 optimizer/runtime内部结论**：状态=
+> `VALIDATED-S3-3X-LOCAL-OPTIMIZER-V2-PENDING-EXTERNAL-AUDIT`。source=`1766cbc`，ResNet2B
+> P-anchor完整10 evaluation/9 Adam mutation wrapper的18 fresh稳健formal得到P/native order-median
+> geomean/worst=`3.2438943700x/3.2246091003x`、P/旧D2B=`1.8422164274x`；逐step lower/dα/α/Adam
+> state与sign通过，replay通过，10/10全重签篡改拒绝。可claim的范围仅为该本地冻结trajectory；v1
+> `2.5695746x/0.7595405x` NO-GO必须并列披露。whole-wrapper dynamic allocated/reserved=
+> `13,824/0 B`，不claim 0/0。只开放S4 same-solver implementation/correctness；不得claim same-solver
+> 性能、complete-query、跨模型、总体10x或ASPLOS-ready。
+>
+> **历史（S2数值保留，selected-value CUDA Graph机制已由S3安全修复取代）：**
 > **2026-08-28 S2 coarse CROWN direct custom VJP结论**：状态=
 > `VALIDATED-S2-4X-CANONICAL-CROWN`。source=`d9582b5`，P-anchor单evaluation六fresh全排列中
 > BoundFlow/PyTorch geomean=`4.2453819646x`、worst=`3.5407988567x`，BoundFlow/旧D2B
 > geomean=`2.4676101728x`；lower/dα max diff=`3.09944e-6/6.14673e-8`且sign exact。五个Conv
-> call进入TVM cuDNN，selected ReLU进入4个TIR，forward/effective各一次CUDA Graph replay，active β、
+> call进入TVM cuDNN，selected ReLU进入4个TIR，历史formal中forward/effective各一次CUDA Graph replay，active β、
 > two-slot arena、saved dense A=`0`成立。只允许claim ResNet2B P-anchor coarse CROWN单evaluation同scope
-> 4.245×；optimizer 10/9、same-solver、complete-query、跨模型、总体10×与ASPLOS-ready仍为NO。下一只允许
-> S3 optimizer trajectory预注册。
+> 4.245×。后续S3发现selected-value graph捕获临时cuDNN workspace不具备安全production所有权，已改为
+> graph-safe VM + persistent output TIR；因此S2 CUDA Graph结构不得继续作为当前production claim。其
+> optimizer 10/9后继已由上方S3关闭；same-solver、complete-query、跨模型、总体10×与ASPLOS-ready仍为NO。
 >
 > **2026-08-28 S1 canonical CIBC pipeline资格结论（历史基线）**：状态=
 > `VALIDATED-S1-CIBC-CANONICAL-PIPELINE`。source=`56c494f`，6个fresh process中pipeline/PyTorch

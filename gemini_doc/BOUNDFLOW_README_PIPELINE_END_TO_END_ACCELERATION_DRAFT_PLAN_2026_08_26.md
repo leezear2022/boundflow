@@ -1,10 +1,10 @@
-# BoundFlow ASPLOS’27 production verification compiler 与 10× 端到端加速计划（v6 执行稿）
+# BoundFlow ASPLOS’27 production verification compiler 与 10× 端到端加速计划（v8 执行稿）
 
-status: execution-active-s1-implementation-open
+status: execution-active-s4-same-solver-implementation-open
 date: 2026-08-26
-updated: 2026-08-27
-revision: v6-asplos27-ten-x
-supersedes-revision: v5-hybrid-capture-import
+updated: 2026-08-28
+revision: v8-s3-internal-closure
+supersedes-revision: v6-asplos27-ten-x
 supersedes-draft-at: 20f4741
 submission-target: ASPLOS-2027-September-cycle
 submission-deadline: 2026-09-09-AoE
@@ -13,9 +13,17 @@ paper-secondary-pillar: gpu-runtime-and-accelerator-systems
 performance-north-star: 10x-same-solver-complete-query
 performance-north-star-status: hypothesis-not-validated
 execution-authority: true
-code-change-open: s1-canonical-compiler-path-only
+code-change-open: s4-same-solver-implementation-and-correctness-only
 external-audit: deferred-by-user
 performance-claimed: false
+
+> **2026-08-28 执行状态更新（v8）**：S1 standalone IBP compiler pipeline、S2 single-evaluation coarse
+> CROWN与S3完整10 evaluation/9 Adam mutation本地wrapper已依次关闭。S3 v2的18 fresh稳健formal达到
+> P/native geomean/worst=`3.2438943700x/3.2246091003x`、P/旧D2B=`1.8422164274x`，逐step语义、
+> replay和10/10全重签篡改通过；v1 `2.5695746x/0.7595405x` NO-GO并列保留。S3发现并修复了
+> selected-value CUDA Graph临时cuDNN workspace与TVM TLS析构所有权问题，当前结构为安全VM调用+
+> persistent output TIR。下一只开放S4 RVIR same-solver implementation/correctness与真实share归因；本文
+> 10x north star仍为未验证假设，不能由S3局部3.2439x外推。
 
 ## A. ASPLOS’27 总控目标：把现有成果收束为一篇论文，而不是继续扩张对象数量
 
@@ -1933,7 +1941,8 @@ S0只观察和组合已有资产，不新增IR、schema或新kernel。它在48�
 - GC0-1 analysis算法作为M1一次性semantic lifting的legality输入，GC0-0 schema/negative reasons继续复用；
 - GC0不是tensor capture机制，也不再决定当前主节奏或扩张为execution graph；ASPLOS sprint中只复用已完成
   schema/规则，不等待新外审；
-- v6已进入S0执行，但不把10×、ASPLOS-ready或任何局部数字升级为新claim；
-- 本稿当前为`execution-authority=true/code-change-open=s1-canonical-compiler-path-only`；S0第二批已把
-  两workload最低机制覆盖提高到`99.632%/99.248%`并关闭归因门禁。下一动作只允许实现S1 canonical CIBC
-  vertical path；S1性能claim、未归因的O6/O7以及S2 CROWN region仍关闭。
+- S0—S3已经按本稿顺序形成standalone IBP、single-evaluation CROWN和本地10/9 wrapper的内部关闭点，但
+  不把10x、ASPLOS-ready或局部数字升级为same-solver claim；
+- 本稿当前为`execution-authority=true/code-change-open=s4-same-solver-implementation-and-correctness-only`；
+  下一动作只允许RVIR exact-call接入、trajectory correctness与真实share/integration-overhead归因。S4正式
+  timing、未归因O6/O7、complete-query与10x claim仍关闭。
