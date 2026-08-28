@@ -2,10 +2,12 @@
 
 > **2026-08-28 当前唯一指令：完成S3独立外审；S4只允许预注册审阅，不允许代码或计时**。S3已正式
 > 交付DocOps task=`asplos27-s3-optimizer-runtime-20260828`、round 1、status=`ready_for_audit`。
-> S4只读普查确认production每step有六α/8,496元素和一条`[6,1]` active β，而S3 P-only仅覆盖1,032个
-> α元素(`12.1469%` state-element coverage，非时间share)且β为空。S4必须先闭合all-mutable-state compiled
+> S4只读普查确认production每step有六α source/8,496 stored元素（lower-only active=4,248、preserved=
+> 4,248）和一条`[6,1]` active β，而S3 P-only覆盖1,032 stored/516 active α元素(`12.1469%`
+> state-element coverage，非时间share)且β为空。S4必须先闭合all-mutable-state compiled
 > evaluation，再接existing host policy/terminal handoff/KFSB/commit；禁止P-only直接冒充whole-core。外审
-> 批准前`code-change-open=false/timing-open=false`。见S4 same-solver prereg草案。
+> 批准前`code-change-open=false/timing-open=false`。candidate应直接优化compressed lower-α/sparse β，native
+> dense state只作oracle/terminal bridge；见S4 same-solver prereg与evaluator ABI草案。
 >
 > **历史（等待上方S3外审关闭）：**
 > **2026-08-28 当前唯一指令：S3内部关闭，只开放S4 same-solver实现/正确性接入**。S3 v2在source

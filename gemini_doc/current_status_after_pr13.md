@@ -2,7 +2,8 @@
 
 > **2026-08-28 当前动作：S3外审ready，S4仅文档预注册**。DocOps task=
 > `asplos27-s3-optimizer-runtime-20260828`、status=`ready_for_audit/r001`。S4只读coverage核对发现
-> production六α/8,496元素+一条active β，而S3 P-only只覆盖1,032 α元素且β为空；S4须先扩为全部mutable
+> production六α source/8,496 stored元素（lower-only active/preserved各4,248）+一条active β，而S3 P-only
+> 对应1,032 stored/516 active且β为空；S4须先扩为全部mutable
 > state compiled evaluation，不能直接包装whole-core。S3外审批准前S4代码与timing关闭。
 >
 > **历史（等待上方S3外审决定）：**

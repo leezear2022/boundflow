@@ -60,7 +60,7 @@ evaluation primitive，并在第4步消费最后一次evaluation的terminal hand
 
 ### 1.2 mutable-state覆盖差距
 
-冻结production optimizer trace的每个step包含：
+冻结production optimizer trace的每个step包含以下六个α source tensor：
 
 | mutable path | shape | 元素数 | S3是否拥有 |
 |---|---:|---:|---|
@@ -72,9 +72,10 @@ evaluation primitive，并在第4步消费最后一次evaluation的terminal hand
 | `alpha/%2Finput-4/%2F49` | `[2,1,6,164]` | 1968 | 否 |
 | `beta/%2Finput-28/0/value` | `[6,1]` | 6 | 否，唯一active β |
 
-production α合计8,496元素，S3动态α只覆盖1,032元素，即`12.1468926554%`。这只是state element
-coverage，**不是时间share或Amdahl数字**。S3绑定的P β为`beta/%2Finput-20/0/value:[6,0]`，对active β
-覆盖为0/6。
+production α source合计8,496 stored元素；lower-only实际optimizer-active的是每个source的`[0,0]`slice，合计
+4,248元素，另一方向4,248元素在copy-out中原样保留。P对应1,032 stored/516 active；两种口径下coverage都为
+`12.1468926554%`。这只是state element coverage，**不是时间share或Amdahl数字**。S3绑定的P β为
+`beta/%2Finput-20/0/value:[6,0]`，对active β覆盖为0/6。
 
 ### 1.3 whole-core输出差距
 
@@ -91,10 +92,11 @@ S3只返回terminal lower、terminal P α和局部receipt。production whole-cor
 
 ## 2. 关键设计决定
 
-### 2.1 接入点是evaluation provider，不是whole optimizer wrapper
+### 2.1 接入点是sealed policy driver，不是whole optimizer wrapper
 
 S3的`execute_asplos27_s3_optimizer_v1`是资格实验：它只对一个α建立简化host Adam。S4 production接入不复用
-该简化loop作为owner，而是给已有`execute_rvir_v4_native_optimizer_trace`增加sealed typed evaluator：
+该简化loop作为owner，也不把任意callback塞进`execute_rvir_v4_native_optimizer_trace`。应从existing loop抽出sealed
+production policy driver，并只允许native-dense oracle与compiled-compressed candidate两个exact evaluator。
 
 ```text
 PreparedProductionCrownEvaluationV1.evaluate(
@@ -105,15 +107,21 @@ PreparedProductionCrownEvaluationV1.evaluate(
 
 ProductionCrownEvaluationResultV1:
     lower
-    dalpha_by_semantic_path      # 六条，compressed/native shape exact
-    dbeta_by_semantic_path       # 六条，含唯一[6,1] active β
+    dalpha_by_semantic_path      # 六条lower-direction optimizer-slot shape [6,width]
+    dbeta_by_semantic_path       # 六条[6,q]，含唯一[6,1] active β与五条empty β
     terminal_handoff_or_none     # 只允许ordinal 9拥有
     execution_receipt
 ```
 
-existing host loop继续唯一拥有两组Adam param group(`lrα=0.01/lrβ=0.05`)、decay=`0.98`、clamp、10/9
+host policy driver继续唯一拥有两组Adam param group(`lrα=0.01/lrβ=0.05`)、decay=`0.98`、clamp、10/9
 ordinal、stop/patience/pruning/keep-best policy identity。candidate evaluator只做纯evaluation/VJP，不得修改
 optimizer state、policy或live solver object。
+
+candidate热路径直接优化production compressed lower-direction α与sparse β；RVIR dense native state只作oracle，并在
+ordinal 9后通过一次性round-trip-exact bridge供existing KFSB/commit消费。详细ABI、stored/active/preserved口径和
+terminal arena见`gemini_doc/BOUNDFLOW_ASPLOS27_S4_EVALUATOR_ABI_AND_TERMINAL_HANDOFF_2026_08_28.md`。
+六个active lower-α使用prepared contiguous parameter buffers，不要求把source的非leaf slice直接交给Adam；
+preserved direction不进入gradient ABI，并由prepare/commit receipt证明未变。
 
 接口必须是精确sealed类型或protocol+receipt双重校验，不接受任意callback；candidate模式不得回退到native
 `run_crown_ibp_mlp_from_forward_trace`、`autograd.backward`或provider `compute_bounds/update_bounds`。
@@ -171,6 +179,10 @@ coefficient pass逐site即时压缩gradient”执行。不得保存跨层float32
 S4-1内部顺序固定为1A all-state ABI、1B六site effective values、1C六dα/active dβ emitters、1D single-evaluation
 five-fresh closure。四步完成前S4-2继续关闭。
 
+terminal模式下，六site effective-value slot可在本site gradient已消费后phase-safe改作terminal lA slot；lA总计
+37,464 float32/149,856 bytes。该alias必须由slot状态机验证，不能作为未经证明的memory优化。shared intermediate
+bounds来自入口`relu_pre`，不属于candidate输出。existing KFSB仍执行3次batch-24 child CROWN，S4-P必须单列其share。
+
 ## 3. 分阶段门禁
 
 ### S4-0：production signature admission（无GPU执行）
@@ -182,6 +194,8 @@ five-fresh closure。四步完成前S4-2继续关闭。
 - snapshot mutable α key与compiled gradient key完全相等；
 - snapshot mutable β key与compiled gradient key完全相等；
 - feature index、shape、dtype、device、location/sign与split/history lineage一致；
+- stored α、optimizer-active lower direction与preserved direction分别计数并绑定；
+- preserved α direction在任一candidate mutation后digest不变；
 - P-only计划在当前fixture上明确拒绝，reason=`MUTABLE_STATE_COVERAGE_INCOMPLETE`；
 - active β缺失明确拒绝，reason=`ACTIVE_BETA_COVERAGE_INCOMPLETE`；
 - 不接受多余、重复、乱序或alias冲突binding；
@@ -209,7 +223,8 @@ S4-1不计时；通过只开放S4-2。
 
 ### S4-2：production host-policy 10/9 trajectory
 
-把S4-1 evaluator注入existing production optimizer loop，不使用S3简化loop。逐ordinal比较：
+把native oracle与S4-1 evaluator接入同一sealed production policy driver，不使用S3简化loop。candidate优化compressed
+lower-direction α/sparse β，oracle保留dense native representation；逐ordinal比较production-visible投影：
 
 - lower；
 - 六α、六β before/after；
@@ -217,6 +232,9 @@ S4-1不计时；通过只开放S4-2。
 - α/β learning rate与scheduler；
 - update/prune/keep-best/restore/stop predicate；
 - terminal state与mutation policy hash。
+
+还必须比较compressed→dense→compressed terminal bridge exact、preserved α direction无漂移；bridge只允许ordinal 9
+执行一次。
 
 门禁沿用production parity：lower/state max diff均`<=2e-4`，gradient内部门禁`<=2e-5`，sign exact；
 evaluation/update=`10/9`，candidate evaluation=`10`，provider/native evaluation=`0`。任何policy shortcut、固定
@@ -241,6 +259,8 @@ B0 original provider只作额外semantic control，不作为S4实现依赖。五
 - 12-path atomic commit、rollback与queue/post；
 - exact-call=`1`，provider compute/update、fallback、native shadow=`0`；
 - terminal duplicate CROWN=`0`。
+- terminal lA lease=`1`且one-shot；六lA总37,464元素；hot handoff clone/dynamic allocation如实计数；
+- KFSB child CROWN=`3`、child batch=`24`、child lower元素=`72`，不得从scope中隐藏。
 
 所有离散字段exact；有限浮点沿用已冻结容差。通过后状态只能是
 `VALIDATED-S4-SAME-SOLVER-CORRECTNESS`，仍不形成性能claim。
@@ -296,6 +316,12 @@ terminal export或commit来制造headline。
 19. `KFSB_OR_BRANCH_DRIFT`；
 20. `ATOMIC_COMMIT_OR_ROLLBACK_DRIFT`；
 21. `CLAIM_FLAG_TRUE_BEFORE_FORMAL`。
+
+并追加：`ALPHA_MUTABLE_DIRECTION_MISMATCH`、`ALPHA_PRESERVED_DIRECTION_DRIFT`、
+`COMPRESSED_NATIVE_ROUND_TRIP_MISMATCH`、`DENSE_BRIDGE_BEFORE_TERMINAL`、`TERMINAL_SLOT_PHASE_MISMATCH`、
+`EFFECTIVE_VALUE_OVERWRITTEN_BEFORE_GRADIENT`、`TERMINAL_LA_INVENTORY_INCOMPLETE`、
+`TERMINAL_LA_LEASE_REUSED`、`INTERMEDIATE_SOURCE_VERSION_MISMATCH`、
+`HOT_HANDOFF_CLONE_OR_ALLOCATION_OBSERVED`。
 
 拒绝必须发生在对应evaluation launch、live mutation或commit之前；发生异常时existing live state必须保持原样。
 

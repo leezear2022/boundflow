@@ -2,8 +2,9 @@
 
 > **2026-08-28 S3外审/S4预注册边界**：DocOps task=
 > `asplos27-s3-optimizer-runtime-20260828`现为`ready_for_audit/r001`；S4状态=
-> `DRAFT-PREREGISTERED-NOT-IMPLEMENTED-NOT-RUN`。production raw证明每step有六α/8,496元素及一条
-> `[6,1]` active β，S3只动态覆盖P-anchor 1,032个α元素且P β为空。因此不得claim S3已经whole-core
+> `DRAFT-PREREGISTERED-NOT-IMPLEMENTED-NOT-RUN`。production raw证明每step有六α source/8,496 stored元素，
+> lower-only active/preserved各4,248，并有一条`[6,1]` active β；S3 P-anchor对应1,032 stored/516 active且
+> P β为空。因此不得claim S3已经whole-core
 > eligible或same-solver connected；S4代码/timing在S3外审批准前关闭。state element coverage
 > `12.1469%`不得表述为runtime share。
 >

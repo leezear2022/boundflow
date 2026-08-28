@@ -1,11 +1,14 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
-最新动作（v9 S3外审/S4预注册）：S3已正式交付DocOps exchange
+最新动作（v10 S3外审/S4 ABI冻结）：S3已正式交付DocOps exchange
 `asplos27-s3-optimizer-runtime-20260828`，状态=`ready_for_audit/r001`。S4只读普查确认production
-optimizer每step有六α/8,496元素与一条active β；S3 P-only只动态覆盖1,032 α元素且β为空，不能直接作为
-whole-core exact-call。S4草案冻结all-mutable-state compiled evaluation→existing host policy→terminal
-handoff→KFSB/atomic commit路线；S3外审批准前代码/timing关闭。见
+optimizer每step有六α source/8,496 stored元素（lower-only active/preserved各4,248）与一条active β；S3 P-only
+对应1,032 stored/516 active且β为空，不能直接作为whole-core exact-call。S4草案冻结compressed evaluator→
+sealed host policy→phase-tagged terminal lA handoff→existing KFSB/atomic commit路线；native dense state只作oracle/
+terminal bridge。S3外审批准前代码/timing关闭。见
 `BOUNDFLOW_ASPLOS27_S4_SAME_SOLVER_EXACT_CALL_PREREG_2026_08_28.md`和
+`BOUNDFLOW_ASPLOS27_S4_ALL_STATE_VJP_FEASIBILITY_2026_08_28.md`、
+`BOUNDFLOW_ASPLOS27_S4_EVALUATOR_ABI_AND_TERMINAL_HANDOFF_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
 
 最新执行（v8 S3，待合并外审）：S3 v2已把S2 prepared direct VJP接入ResNet2B P-anchor完整10次

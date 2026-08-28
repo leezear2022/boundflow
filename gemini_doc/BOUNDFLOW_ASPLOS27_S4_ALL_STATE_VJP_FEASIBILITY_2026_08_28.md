@@ -56,8 +56,9 @@ gradient outputs。该方案是对现有R3/S2整图编译工作的扩展，不�
 | `19` | `/input-12` | `[16,8,8]` | 132 | `/input-8:[6,0]` | residual6内部`Conv_2` | 无该shape实例；staged residual已有 |
 | `17` | `/input-4` | `[8,16,16]` | 164 | `/input:[6,0]` | `Conv_0` | 无该shape实例；整图已有 |
 
-compressed α总宽为`708`，按`2 directions × 1 spec × 6 domains`计为8,496元素。P-anchor宽86、共1,032
-元素，只占α state元素`12.1468926554%`；该比例不是运行时间share。
+compressed α总宽为`708`，按`2 directions × 1 spec × 6 domains`计为8,496 stored元素。lower-only实际
+optimizer-active的是`[0,0]`slice，共4,248元素；另一方向由copy-out原样保留。P-anchor宽86，对应1,032 stored/
+516 active元素；两种口径下均占`12.1468926554%`。该比例不是运行时间share。
 
 active β恰为site 31的6个元素。其location为逐domain的`[17,17,31,17,17,31]`，sign与split owner来自冻结
 production snapshot/history，不得由candidate重新推断。
@@ -144,8 +145,8 @@ persistent value arena。logical元素数为：
 6 × (2048 + 1024 + 1024 + 1024 + 1024 + 100) = 37,464 float32
 ```
 
-即149,856 bytes；这是设计上限账，不是实测memory claim。可以用lifetime复用进一步降低，但S4-1 correctness
-先不以此调参。
+即149,856 bytes；这是设计上限账，不是实测memory claim。ordinal 9 terminal lA逐site与其同shape，可在本site
+gradient消费后用phase-tagged slot复用；该alias必须单独证明，S4-1 correctness不能靠未经验证的覆盖来过memory gate。
 
 ### 4.3 pass C：重算coefficient并就地压缩gradient
 

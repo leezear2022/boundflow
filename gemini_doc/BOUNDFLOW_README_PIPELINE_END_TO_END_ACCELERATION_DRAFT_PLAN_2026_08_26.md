@@ -1,9 +1,9 @@
-# BoundFlow ASPLOS’27 production verification compiler 与 10× 端到端加速计划（v8 执行稿）
+# BoundFlow ASPLOS’27 production verification compiler 与 10× 端到端加速计划（v10 执行稿）
 
 status: s3-ready-for-external-audit-s4-prereg-draft
 date: 2026-08-26
 updated: 2026-08-28
-revision: v8-s3-internal-closure
+revision: v10-s4-compressed-evaluator-abi
 supersedes-revision: v6-asplos27-ten-x
 supersedes-draft-at: 20f4741
 submission-target: ASPLOS-2027-September-cycle
@@ -17,12 +17,14 @@ code-change-open: false-pending-s3-external-audit
 external-audit: deferred-by-user
 performance-claimed: false
 
-> **2026-08-28 S4 coverage修正（v9状态，不改10x北极星）**：S3已进入DocOps外审round 1。只读核对
-> production optimizer raw发现每step包含六α/8,496元素与一条`[6,1]` active β；S3 P-anchor candidate
-> 只动态拥有1,032个α元素(`12.1469%` state-element coverage，不是runtime share)，其β为空。因此S4
-> 不能把S3 wrapper直接替换whole `update_bounds_core`；必须先编译全部mutable α/β的single-evaluation
-> lower+VJP，再注入existing host production policy，并复用terminal handoff/KFSB/atomic commit。S3独立
-> 外审批准前S4仅允许预注册审阅，代码和timing关闭。
+> **2026-08-28 S4 ABI修正（v10状态，不改10x北极星）**：S3已进入DocOps外审round 1。只读核对
+> production optimizer raw与atomic copy-out发现：六个α source共8,496 stored元素，但lower-only optimizer
+> 实际只更新`[0,0]`方向的4,248 active元素，另4,248元素保持不变；P-anchor对应1,032 stored/516 active，
+> 两种口径下coverage均为`12.1469%`（不是runtime share）。因此S4不能把S3 wrapper直接替换whole
+> `update_bounds_core`；必须让compiled evaluator直接消费六个compressed lower-α slot与sparse β，并由
+> sealed host policy driver唯一拥有10/9 optimizer policy。RVIR dense state只作独立oracle与terminal一次性bridge；
+> terminal lA/KFSB/atomic commit继续沿用现有语义，KFSB的3次batch-24 child CROWN必须在S4-P单列。
+> S3独立外审批准前S4仅允许预注册审阅，代码和timing关闭。
 
 > **2026-08-28 执行状态更新（v8）**：S1 standalone IBP compiler pipeline、S2 single-evaluation coarse
 > CROWN与S3完整10 evaluation/9 Adam mutation本地wrapper已依次关闭。S3 v2的18 fresh稳健formal达到
