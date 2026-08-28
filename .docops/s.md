@@ -6,8 +6,8 @@ st: s02
 stat: active
 health: green
 pr: [60, 61]
-last_ch: ev016267
-last_va: ev016268
+last_ch: ev016273
+last_va: ev016274
 blk: none
 next: implement-and-close-asplos27-s2-before-combined-external-audit
-updated: 2026-08-28T04:25:11Z
+updated: 2026-08-28T04:28:08Z

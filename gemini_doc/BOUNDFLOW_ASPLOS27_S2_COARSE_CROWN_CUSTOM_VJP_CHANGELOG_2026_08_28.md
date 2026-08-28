@@ -73,3 +73,13 @@ performance-claimed: false
   CUDA Graph；运行时显式记录一次forward replay以及其17个logical launch、D1C 4-stage ownership；
 - 修改后三方worker预跑N/D/P约`8.751/4.835/1.921 ms`，P/N约`4.56x`；仍仅为formal前
   feasibility；六fresh协议继续执行。
+
+## 2026-08-28 formal runner与replay实现
+
+- fresh worker固定`NDP/NPD/DNP/DPN/PND/PDN`六全排列，每个进程5 warmup groups、30 measured
+  groups，三方使用独立tensor owner、同一non-default stream及调用前后device boundary sync；
+- raw JSONL保存全部540个latency样本、三方lower/dα数值、receipt、cold prepare、warm peak与环境；
+- artifact replay只从raw重算correctness、sign、geomean/worst、memory和所有门禁，并核对git blob、source/
+  model、plan/trace、Relax/device identities及manifest；
+- tamper probe定义10类攻击；receipt攻击会重签inner receipt，latency攻击会重算median/summary，所有case再重签
+  outer manifest，避免只测SHA256表层。
