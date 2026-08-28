@@ -42,3 +42,17 @@ performance-claimed: false
   identity；cuDNN不是五个call时直接拒绝；
 - 本机首次编译约`0.33 s`，独立对比旧D2B `pre25`最大差`1.90735e-6`且sign exact；该数是实现
   correctness诊断，不是formal性能claim。
+
+## 2026-08-28 S2-B prepared direct custom VJP
+
+- `PreparedS2CrownProgramV1`复用R3-D2B的plan、lifetime trace、two-slot arena、active-β coefficient
+  wavefront、recompute-A26和compressed-gradient kernel，只替换错误的effective-value owner；
+- 28个输入/参数/state view在prepare阶段一次DLPack绑定；cuDNN/Relax chain预热后由一个CUDA Graph
+  submission执行，输出直接成为`pre25`的graph-stable view；
+- `run_vjp(dynamic_alpha, upstream)`是直接custom VJP API；不创建`autograd.Function`上下文，不保存
+  dense A或autograd history；外部dynamic α/upstream在准入后复制进固定owner；
+- execution receipt绑定plan、trace、B1/B2/D1C、三层Relax identity、device sources、4 partition
+  functions/5 Conv calls、4 selected TIR、arena、active β与零fallback；
+- 与独立native PyTorch比较，lower最大差`3.09944e-6`、compressed dα最大差`4.37722e-8`、sign
+  exact；短测native/D2B/S2中位约`8.920/6.332/2.122 ms`，即S2约`4.20x`，仅作为formal前
+  feasibility，不形成性能claim。
