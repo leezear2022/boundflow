@@ -49,7 +49,7 @@ S4-3蓝图中的“provider net scratch consumer待核”已经从源码层闭�
 
 本次read-only审计基于：
 
-- BoundFlow source probe HEAD：`3ca4d5c`（相对`34ae567`只有S4文档变更，runtime capture路径未改）；
+- BoundFlow probe执行HEAD：`6648859`；runtime capture代码自`3ca4d5c`未改，二者之间只有S4文档/DocOps变更；
 - αβ-CROWN：`e5c7e17bf0488843acb77b7519f59876717a49f4`；
 - auto_LiRPA：`5a098e8f9fb5786a428a024981d833d303921f2d`。
 
