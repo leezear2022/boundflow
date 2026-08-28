@@ -197,6 +197,8 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
         raise RuntimeError("S3 optimizer worker requires CUDA")
     if args.order not in ORDERS or args.run_index != ORDERS.index(args.order):
         raise ValueError("S3 optimizer worker order identity differs")
+    if args.replicate_index not in range(3):
+        raise ValueError("S3 optimizer worker replicate identity differs")
     (
         plan,
         trace,
@@ -280,6 +282,7 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
     payload: dict[str, object] = {
         "schema_version": WORKER_SCHEMA,
         "run_index": args.run_index,
+        "replicate_index": args.replicate_index,
         "order": args.order,
         "source_capture_sha256": _file_hash(args.source_capture),
         "model_sha256": _file_hash(args.model),
@@ -332,13 +335,15 @@ def main() -> None:
     parser.add_argument("--model", type=Path, required=True)
     parser.add_argument("--order", choices=ORDERS, required=True)
     parser.add_argument("--run-index", type=int, required=True)
+    parser.add_argument("--replicate-index", type=int, default=0)
     parser.add_argument("--result", type=Path, required=True)
     args = parser.parse_args()
     payload = _run(args)
     medians = cast(dict[str, object], payload["median_latency_ns"])
     print(
         "S3 optimizer worker "
-        f"order={args.order} N={medians['N']} D={medians['D']} P={medians['P']} "
+        f"replicate={args.replicate_index} order={args.order} "
+        f"N={medians['N']} D={medians['D']} P={medians['P']} "
         "performance_claimed=false",
         flush=True,
     )

@@ -78,3 +78,16 @@ stage: s03
 
 - v1 raw/replay：待 negative artifact tamper 与 manifest 收口；
 - v2：尚未实现或运行。
+
+## 2026-08-28：实现 S3 v2 18-worker 稳健 formal
+
+- worker 增加预注册的 `replicate_index`，不改变单 worker 的 5/30 和三方路径；
+- 新增 v2 artifact/replay，以每 order 三个 fresh pair 的中位数形成六顺序 headline；
+- 全部 18 行仍逐行执行 v1 的完整 trajectory、receipt、memory 与 tensor digest 验证；
+- summary 同时披露 18-worker raw geomean/worst 与每 order 三个原始 speedup；
+- 新增 v2 10 类 outer-resigned tamper 与回归测试。
+
+### 验证
+
+- 静态检查与 source-exact：待下一提交；
+- 18-worker formal：尚未运行。
