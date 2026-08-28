@@ -165,7 +165,10 @@ site31 active β按已经在B4-B2 sparse Linear独立验证的语义：
 dbeta[d,q] = -upstream[d] * effective_pre31[d, location(d,q)] * split_sign[d,q]
 ```
 
-empty β不launch计算kernel，返回绑定到预分配零宽view的exact empty tensor。
+empty β不launch计算kernel，返回S4-1A ordered ABI中的exact typed empty token。
+
+精确的通用`[D,S,F]→[D,W]` α emitter、site31 sparse β emitter、六site插入点与ordinal-9 terminal lA phase
+合同见`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`。
 
 residual11 stage1 scratch就是site25的incoming coefficient；residual6 stage1 scratch就是site19的incoming
 coefficient。应在stage1与stage2之间发射compressed gradient，不再重做独立Conv。
@@ -192,7 +195,8 @@ S3外审批准且S4转为execution-authority后，S4-1仍按以下四刀推进�
 1. `S4-1A all-state ABI`：从六个layout生成ordered output slots、persistent buffers和coverage receipt；
 2. `S4-1B effective values`：补齐六site selected preactivation，与独立PyTorch/f64局部oracle比较；精确arena、
    A26/A29 sign、selected Relax graph和negative门禁见S4-1B实施蓝图；
-3. `S4-1C gradient emitters`：先site31 active β，再31/28/23/17 explicit ReLU，最后25/19 staged residual；
+3. `S4-1C gradient emitters`：一个通用α模板实例化六site，site31另有active β；插入顺序为
+   31→28→25(stage)→23→19(stage)→17；
 4. `S4-1D evaluator closure`：一个logical evaluation返回lower、六dα、六dβ，five fresh通过。
 
 1B/1C均不接optimizer、不计时；1D通过前S4-2保持关闭。

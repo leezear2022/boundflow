@@ -220,6 +220,11 @@ S4-1B六site selected-primal graph见
 37,464-element persistent arena输出pre17/19/23/25/28/31，sign bitmap为Ainput/A18/A20/A24/A26/A29共55,296
 int8；cross-layer saved float32 coefficient仍为0。
 
+S4-1C通用gradient emitter与terminal lA phase见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`：
+一个layout-parameterized `[D,S,F]→[D,W]` α模板实例化六site，site31增加sparse β；ordinal9在gradient消费后
+phase-safe复用effective arena保存六lA，禁止第11次CROWN。
+
 交付：一个prepared evaluator在ordinal 0输入上返回lower、六dα、六dβ和receipt。
 
 门禁：

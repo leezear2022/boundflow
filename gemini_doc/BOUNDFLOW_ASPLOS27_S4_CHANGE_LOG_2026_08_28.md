@@ -92,6 +92,25 @@ performance-claimed: false
 - `git diff --check`与文档关键字段检索：PASS；
 - DocOps change/validation与lint在提交前执行。
 
+## 2026-08-28：完成S4-1C通用compressed gradient emitter实施蓝图
+
+- 逐项核对explicit ReLU与D1C staged residual边界，冻结pass C插入顺序为31→28→25→23→19→17；
+- 冻结通用`[D,S,F]→[D,W]` lower-α VJP模板，operator种类不进入emitter schema；
+- 冻结site31 sparse β公式、production location/sign与B4-B2/full-autograd/float64三方oracle；
+- 明确五empty β为token且launch=0，全部physical gradient输出复用S4-1A 17,016 bytes；
+- 冻结coefficient/effective/version、same-stream arena lifetime、六emitter/一β emitter与22类negative gate；
+- 冻结ordinal9在gradient消费后复用effective slot写terminal lA，六slot各一次，禁止第三次coefficient/第11次CROWN；
+- 新增S4-1C实施蓝图并同步可行性/主预注册；仍无实现、GPU correctness或性能claim。
+
+### 验证
+
+- 独立重算dα/dβ elements=`4248/6`、persistent gradient=`17,016 bytes`、compressed indices=
+  `708 int32/2,832 bytes`、active β normalized location/sign=`24/24 bytes`，PASS；
+- B4-B2 sparse Linear、R31B2 P VJP、residual11/6 staged与B4-A terminal lA：`26 passed in 19.96s`；
+- source核对B4-B2 β公式确为`-adjoint_relu*sign`，residual stage1/2 caller-owned scratch路径存在；
+- empty β旧“零宽view”措辞已统一修正为typed token；`git diff --check`：PASS；
+- DocOps change/validation与lint在提交前执行。
+
 ## 2026-08-28：完成S4-1B六site effective-value graph实施蓝图
 
 - 亲读R31B2 effective-pre17/23/25 TIR、S2 selected Relax graph与closed-form oracle，逐stage恢复selected primal语义；
