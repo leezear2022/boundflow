@@ -98,6 +98,23 @@ def test_tvm_ffi_library_search_path_when_configured():
     assert os.path.join(build_dir, "lib") in library_paths
 
 
+def test_tvm_cudnn_runtime_when_configured():
+    """S2 requires TVM cuDNN codegen and its wheel-local shared library."""
+
+    cudnn_root = os.environ.get("BOUNDFLOW_CUDNN_ROOT")
+    if not cudnn_root:
+        pytest.skip("BOUNDFLOW_CUDNN_ROOT is not configured")
+    library_paths = os.environ.get("LD_LIBRARY_PATH", "").split(":")
+    assert os.path.join(cudnn_root, "lib") in library_paths
+    import tvm
+
+    assert tvm.get_global_func("relax.ext.cudnn", allow_missing=True) is not None
+    assert (
+        tvm.get_global_func("tvm.contrib.cudnn.conv2d.forward", allow_missing=True)
+        is not None
+    )
+
+
 def main() -> int:
     # CLI mode: strict check.
     ok, messages = _check_env(
