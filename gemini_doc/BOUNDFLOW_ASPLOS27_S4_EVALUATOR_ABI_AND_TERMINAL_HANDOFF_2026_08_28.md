@@ -283,8 +283,8 @@ S4 correctness保持KFSB不变是正确的ownership切分，但S4-P必须单独�
 
 S3外审批准后：
 
-1. S4-0先交付compressed slot descriptor与stored/active/preserved三类coverage；
-2. S4-1A绑定独立leaf lower-α/active-β buffers、empty β token、persistent gradients和ordered lease ABI；
+1. S4-0先交付compressed slot descriptor、stored/active/preserved coverage及瞬时live object/storage/version lease；
+2. S4-1A重新验证live lease后绑定独立leaf lower-α/active-β buffers、empty β token、persistent gradients和ordered ABI；
 3. S4-1B/1C完成effective values与六路gradient；
 4. S4-1D完成single-evaluation closure；
 5. S4-2A抽出sealed policy driver，以native dense evaluator回归原行为；
@@ -311,7 +311,7 @@ query-scoped exclusive core-owner latch见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`。这些是logical
 lifetime transaction，不是terminal ABI的第13+条production数值path。
 
-S4-4正式证据链、18 fresh B0/R/C六全排列、stdlib tensor raw/replay、56类fully re-signed tamper及
+S4-4正式证据链、18 fresh B0/R/C六全排列、stdlib tensor raw/replay、64类fully re-signed tamper及
 `COMMITTED_POST_FAILED_POISONED`见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`。
 

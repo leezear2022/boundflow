@@ -129,7 +129,7 @@ preserved direction不进入gradient ABI，并由prepare/commit receipt证明未
 ### 2.2 全state representation，不复制六个P特判
 
 R3 plan已经含六个`relu_layouts`和全部tensor specs；S4应把“动态参数集合”从单一
-`p_alpha_input_ordinal`推广为由production snapshot/topology推导的有序mutable binding：
+`p_alpha_input_ordinal`推广为由production snapshot/topology/plan和瞬时live source共同闭合的有序mutable binding：
 
 - key=`semantic_path`；
 - shape/dtype/device/feature-index/beta-location/sign全部来自existing typed snapshot/layout；
@@ -137,6 +137,9 @@ R3 plan已经含六个`relu_layouts`和全部tensor specs；S4应把“动态参
 - empty β是合法零宽tensor，active β必须保持location/sign owner；
 - plan/schema中禁止ResNet2B名称、固定node id、固定shape或固定“6”作为通用机制条件；
 - formal fixture可以冻结上述六条路径，但只能作为实例证据。
+
+snapshot是CPU clone语义证据，不能证明live storage alias或Tensor `_version`；因此live mapping只在admission/prepare
+边界瞬时读取，不进入IR、canonical receipt或artifact raw pointer。snapshot alias group与live storage group必须分列。
 
 不得创建第二套VerificationGraph或optimizer IR。静态候选继续lower到现有Relax/TIR，runtime binding只负责
 把live state映射到已编译参数槽。
@@ -189,7 +192,9 @@ bounds来自入口`relu_pre`，不属于candidate输出。existing KFSB仍执行
 
 精确类型、compiler入口、reason映射和negative测试矩阵见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_MUTABLE_STATE_ADMISSION_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`。
-S4-0只新增tensor-free typed runtime binding receipt，复用现有snapshot/topology/plan与GC0 rejection vocabulary；
+开工前V2修正证据见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_ADMISSION_PREFLIGHT_CORRECTION_2026_08_28.md`。S4-0只新增tensor-free typed
+runtime binding receipt，复用现有snapshot/topology/plan与GC0 rejection vocabulary，并瞬时观察live source；
 不得新增solver/execution IR或通过native dense initializer实现candidate admission。
 
 交付：typed mutable binding与coverage receipt，不实现TIR、不计时。
@@ -199,6 +204,9 @@ S4-0只新增tensor-free typed runtime binding receipt，复用现有snapshot/to
 - snapshot mutable α key与compiled gradient key完全相等；
 - snapshot mutable β key与compiled gradient key完全相等；
 - feature index、shape、dtype、device、location/sign与split/history lineage一致；
+- plan/snapshot binding projection可独立重算；R31 `source_state_hash`只作dense oracle provenance，不冒充snapshot hash；
+- live path/object/storage/version/stride/offset/content与snapshot exact，empty zero-pointer不伪装alias；
+- 每domain β width与history长度exact，不接受只匹配前缀；
 - stored α、optimizer-active lower direction与preserved direction分别计数并绑定；
 - preserved α direction在任一candidate mutation后digest不变；
 - P-only计划在当前fixture上明确拒绝，reason=`MUTABLE_STATE_COVERAGE_INCOMPLETE`；
@@ -206,7 +214,7 @@ S4-0只新增tensor-free typed runtime binding receipt，复用现有snapshot/to
 - 不接受多余、重复、乱序或alias冲突binding；
 - performance/timing/same-solver flag全部false。
 
-GO：六α+六β全覆盖，active β=`1/1`，且schema无模型特判。否则S4-1关闭。
+GO：六α+六β全覆盖，active β=`1/1`，live lease与plan projection关闭，且schema无模型特判。否则S4-1关闭。
 
 ### S4-1：all-state single-evaluation compiled correctness
 
@@ -319,7 +327,7 @@ B0 original provider只作额外semantic control，不作为S4实现依赖。五
 
 ### S4-4：artifact/replay/tamper closure
 
-精确artifact tree、18-worker六全排列B0/R/C、stdlib tensor codec/replayer、pre/mid/post commit fault状态与56类
+精确artifact tree、18-worker六全排列B0/R/C、stdlib tensor codec/replayer、pre/mid/post commit fault状态与64类
 fully re-signed tamper合同见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`。
 
@@ -328,8 +336,9 @@ fully re-signed tamper合同见
 - raw逐step保留，不只存summary digest；
 - tensor raw必须有不依赖`.pt`的stdlib可解码投影；replay不得import BoundFlow/PyTorch/TVM/αβ-CROWN；
 - replay从raw重算coverage、trajectory、whole-core、receipt、failure state与verdict；
-- 至少56类fully outer-resigned tamper，覆盖source/protocol、worker/process、state/trajectory、terminal handoff、KFSB、
-  transaction/provider/post、artifact/replay、scratch phase/finalization/storage alias/exclusive ownership与claim flag；
+- 至少64类fully outer-resigned tamper，覆盖source/protocol、worker/process、state/trajectory、terminal handoff、KFSB、
+  transaction/provider/post、artifact/replay、scratch phase/finalization/storage alias、S4-0 live binding/exclusive ownership与
+  claim flag；
 - official post发生于commit之后；post fault必须记录为`COMMITTED_POST_FAILED_POISONED`，禁止rollback/retry/queue继续；
 - targeted/full/static/DocOps全过后，才允许另写S4-P性能预注册。
 

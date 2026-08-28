@@ -20,7 +20,7 @@ performance-claimed: false
 S4-1D不再增加新算法，而是把此前四刀收束为一个唯一production-shaped prepared evaluator：
 
 ```text
-S4-0  static mutable-state admission
+S4-0  tensor-free mutable-state admission + live source lease projection
   ↓
 S4-1A ordered parameter/gradient buffers + lease/version
   ↓

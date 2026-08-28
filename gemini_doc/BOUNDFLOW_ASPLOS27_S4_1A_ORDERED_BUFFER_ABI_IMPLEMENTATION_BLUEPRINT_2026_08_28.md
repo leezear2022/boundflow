@@ -1,5 +1,5 @@
 ---
-status: draft-implementation-blueprint
+status: corrected-v2-implementation-blueprint
 date: 2026-08-28
 type: implementation-plan
 topic: boundflow
@@ -17,7 +17,7 @@ performance-claimed: false
 
 ## 0. 直接结论
 
-S4-1A应把S4-0的tensor-free slot admission实例化为**稳定的GPU buffer ownership**，但仍不实现CROWN数学或
+S4-1A应把S4-0的tensor-free slot admission与live version lease实例化为**稳定的GPU buffer ownership**，但仍不实现CROWN数学或
 TIR launch。核心选择是：
 
 1. 六个lower-α各自成为独立contiguous leaf parameter buffer，shape=`[domain, compressed_width]`；
@@ -27,7 +27,8 @@ TIR launch。核心选择是：
 5. hot evaluator调用只接受ordinal/version/token，不接受dict、semantic-path lookup、任意callback或动态tensor列表；
 6. 所有DLPack view只在prepare阶段建立，warm evaluation新建view=`0`。
 
-这不是新的IR。S4-0 receipt是静态admission，S4-1A对象是prepared runtime instance；Plan/Bound/Verification Graph
+这不是新的IR。S4-0 receipt是tensor-free admission，但含瞬时live source观察得到的object/storage/version projection；
+S4-1A对象是prepared runtime instance，必须重新取得同一live mapping并在pack前复核lease。Plan/Bound/Verification Graph
 仍由已有owner负责。
 
 ## 1. 为什么不能沿用完整α source作为optimizer参数
@@ -140,6 +141,7 @@ runtime对象可以持有tensor，但其`metadata()`/artifact receipt不得序�
 职责：
 
 - 验证S4-0 admission hash与snapshot hash；
+- 重新验证live source path/object/storage/version/shape/dtype/device/stride/offset/content与admission lease；
 - 一次性pack 6 α + active β；
 - 创建persistent gradient/lower/upstream；
 - 建立slot ordinal→physical buffer的tuple，不建立hot dict；
@@ -242,23 +244,38 @@ PREPARED(state_version=0)
 
 S4-1A只实现/测试状态机与buffer owner，不执行真实evaluation；S4-1D才用compiled evaluator驱动它。
 
-## 6. prepare算法
+## 6. prepare入口与算法
+
+```text
+prepare_s4_mutable_buffers_v1(
+    admission: S4MutableStateAdmissionV1,
+    live_mutable_sources: Mapping[str, torch.Tensor],
+    device: torch.device,
+    stream_identity: ...,
+) -> PreparedS4MutableBuffersV1
+```
+
+不能从snapshot CPU clone直接pack后声称接入live solver；必须使用与S4-0相同semantic path的当前live tensor。mapping只在
+prepare调用中读取，prepared owner只持有新建parameter/output buffer，不保留provider source Tensor。
 
 严格步骤：
 
-1. 校验admission与snapshot identity；
-2. 确认device为CUDA、dtype为float32、目标stream identity有效；
-3. 逐slot从source `[0,0]`建立contiguous leaf α parameter；
-4. 逐slot建立同shape persistent dα buffer；
-5. non-empty β建立leaf parameter与persistent dβ；
-6. empty β建立token，物理buffer/optimizer ordinal=`-1`；
-7. 建立persistent lower=`[D,1]`与upstream=`-1`；
-8. 验证device initial hash与source active hash一致；
-9. 记录parameter/gradient/output pointer identity；
-10. 为所有未来TIR直接参数建立DLPack view；
-11. 验证DLPack round-trip pointer exact；
-12. 构造tensor-free prepare receipt；
-13. 将状态置为`PREPARED/version=0/generation=-1`。
+1. 校验admission/snapshot/plan binding identity；
+2. 固化live mapping并验证path集合exact；
+3. 逐slot重查live object/storage group、`_version`、shape/dtype/device/stride/offset/content；
+4. 确认target device为同一CUDA device、dtype为float32、目标stream identity有效；
+5. 逐slot从live source `[0,0]`建立contiguous leaf α parameter；
+6. 逐slot建立同shape persistent dα buffer；
+7. non-empty live β建立leaf parameter与persistent dβ；
+8. empty β只建立token，物理buffer/optimizer ordinal=`-1`；
+9. 建立persistent lower=`[D,1]`与upstream=`-1`；
+10. 验证device initial hash与admission active hash一致；
+11. 丢弃所有provider live source临时引用，递归检查prepared owner无provider tensor；
+12. 记录parameter/gradient/output pointer identity；
+13. 为所有未来TIR直接参数建立DLPack view；
+14. 验证DLPack round-trip pointer exact；
+15. 构造tensor-free prepare receipt；
+16. 将状态置为`PREPARED/version=0/generation=-1`。
 
 S4-1A不得创建full `[2,1,D,W]` device α copy、dense `[D,*feature_shape]` α/β、Adam、TIR module、CUDA Graph或
 timing event。
@@ -317,23 +334,25 @@ receipt_hash
 S4-1A至少冻结：
 
 1. `ADMISSION_IDENTITY_MISMATCH`；
-2. `SLOT_BUFFER_COUNT_MISMATCH`；
-3. `EMPTY_BETA_PHYSICAL_BUFFER_FORBIDDEN`；
-4. `PARAMETER_NOT_LEAF`；
-5. `PARAMETER_REQUIRES_GRAD_MISMATCH`；
-6. `BUFFER_DTYPE_OR_DEVICE_MISMATCH`；
-7. `BUFFER_NONCONTIGUOUS`；
-8. `BUFFER_INITIAL_CONTENT_MISMATCH`；
-9. `PRESERVED_DIRECTION_DEVICE_COPY_OBSERVED`；
-10. `PARAMETER_POINTER_DRIFT`；
-11. `GRADIENT_POINTER_DRIFT`；
-12. `WARM_DLPACK_VIEW_CREATED`；
-13. `EVALUATION_ORDINAL_OR_VERSION_MISMATCH`；
-14. `RESULT_LEASE_STILL_ACTIVE`；
-15. `GRADIENT_GENERATION_MISMATCH`；
-16. `DICT_CALLBACK_OR_TENSOR_OVERRIDE_ESCAPE`；
-17. `AUTOGRAD_HISTORY_OR_REGISTRY_OBSERVED`；
-18. `CLAIM_FLAG_TRUE_BEFORE_FORMAL`。
+2. `LIVE_SOURCE_LEASE_MISMATCH`；
+3. `SLOT_BUFFER_COUNT_MISMATCH`；
+4. `EMPTY_BETA_PHYSICAL_BUFFER_FORBIDDEN`；
+5. `PARAMETER_NOT_LEAF`；
+6. `PARAMETER_REQUIRES_GRAD_MISMATCH`；
+7. `BUFFER_DTYPE_OR_DEVICE_MISMATCH`；
+8. `BUFFER_NONCONTIGUOUS`；
+9. `BUFFER_INITIAL_CONTENT_MISMATCH`；
+10. `PRESERVED_DIRECTION_DEVICE_COPY_OBSERVED`；
+11. `PARAMETER_POINTER_DRIFT`；
+12. `GRADIENT_POINTER_DRIFT`；
+13. `WARM_DLPACK_VIEW_CREATED`；
+14. `EVALUATION_ORDINAL_OR_VERSION_MISMATCH`；
+15. `RESULT_LEASE_STILL_ACTIVE`；
+16. `GRADIENT_GENERATION_MISMATCH`；
+17. `DICT_CALLBACK_OR_TENSOR_OVERRIDE_ESCAPE`；
+18. `AUTOGRAD_HISTORY_OR_REGISTRY_OBSERVED`；
+19. `PROVIDER_SOURCE_RETAINED_AFTER_PREPARE`；
+20. `CLAIM_FLAG_TRUE_BEFORE_FORMAL`。
 
 每个detail code映射到S4-0已有GC0 reason类别；不扩展Verification IR vocabulary。
 
@@ -365,7 +384,7 @@ tests/test_asplos27_s4_ordered_buffer_abi.py
 
 ### 10.2 negative/tamper
 
-逐项覆盖§9全部18类，并额外覆盖：
+逐项覆盖§9全部20类，并额外覆盖：
 
 - 调换两个slot的physical buffer；
 - 把empty β替换成`torch.empty(D,0)`并加入optimizer；
@@ -374,6 +393,9 @@ tests/test_asplos27_s4_ordered_buffer_abi.py
 - ordinal 9后执行mutation；
 - 异常后state version或pointer manifest漂移；
 - 全重签receipt后修改logical bytes、view count或claim flag。
+- S4-0 admission后修改live source content或`_version`，prepare在任何allocation前拒绝；
+- 用snapshot CPU clone替换live CUDA mapping，拒绝；
+- prepare结果递归持有provider source Tensor，拒绝。
 
 ## 11. 当前原型验证
 

@@ -10,6 +10,7 @@ terminal bridge。S3外审批准前代码/timing关闭。见
 `BOUNDFLOW_ASPLOS27_S4_ALL_STATE_VJP_FEASIBILITY_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_EVALUATOR_ABI_AND_TERMINAL_HANDOFF_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_0_MUTABLE_STATE_ADMISSION_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
+`BOUNDFLOW_ASPLOS27_S4_0_ADMISSION_PREFLIGHT_CORRECTION_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1A_ORDERED_BUFFER_ABI_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
@@ -20,6 +21,14 @@ terminal bridge。S3外审批准前代码/timing关闭。见
 `BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_DESIGN_EXTERNAL_AUDIT_HANDOFF_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
+
+S4-0开工前源码审计纠正了offline snapshot与live binding的边界：`ProductionStateSnapshotV4`会保存CPU clone，
+其alias group按source Tensor object `id`而非storage生成，也不含live `_version`/stride/offset；因此原三输入
+`snapshot+topology+plan`不能关闭live mutation ownership。V2仍不新增IR，只在admission入口瞬时接收
+`Mapping[path, live Tensor]`，检查object/storage/version/device/content后返回tensor/pointer-free receipt。R31
+`source_state_hash`绑定dense mapping而非snapshot，现作为oracle provenance；另增可独立重算的plan/snapshot projection
+hash。β width与history从前缀相等收紧为exact，S4-0 negative最低扩为30类，S4-1A pack前必须重验live lease。
+这些是设计修正，不是S4实现或性能结果。
 
 S4-3进一步确认exact-call不是薄adapter：真实事务还包含KFSB三次batch-24 child CROWN、12条return constructor、
 一次official post、host packet prune和`pre_result.interm_bounds` clear。现有device atomic v1在mid-commit故障时只能
@@ -38,7 +47,7 @@ B0/R/C不伪造scratch parity，也不形成memory claim。六条terminal/export
 cuts/clip/BFS/multitree/all-node LP等额外consumer保持fail closed。
 
 S4-4不沿用旧RVIR `.pt`作为唯一formal truth；冻结18个fresh subprocess覆盖B0/R/C六全排列，tensor以stdlib可解码
-IEEE raw投影保存，由不import BoundFlow/PyTorch/TVM的replayer独立重建summary。minimum 56类fully re-signed
+IEEE raw投影保存，由不import BoundFlow/PyTorch/TVM的replayer独立重建summary。minimum 64类fully re-signed
 tamper覆盖source、trajectory、terminal/KFSB、transaction/provider/post、scratch phase/storage/alias/finalization、
 exclusive owner和artifact；official post失败单列为
 `COMMITTED_POST_FAILED_POISONED`。

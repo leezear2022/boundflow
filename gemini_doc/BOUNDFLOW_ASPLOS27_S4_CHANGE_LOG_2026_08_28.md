@@ -10,6 +10,32 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-28：S4-0开工前源码审计纠正offline snapshot与live binding边界
+
+- S3 exchange仍为`ready_for_audit/r001`，因此未写S4 production代码；本轮只完成不越级的implementation preflight；
+- 亲读`OwnedProductionTensorV4.own`与`ProductionStateBuilderV4`，确认snapshot会CPU clone，alias group按source
+  Tensor object `id`而非storage生成，且不保存live `_version`、stride、offset或storage identity；
+- 只读反例用同一base的两个distinct view证明：live storage共享，但snapshot生成两个alias group并克隆成两个独立
+  storage。由此原`snapshot+topology+plan`三输入函数不能关闭live mutation ownership；
+- formal snapshot独立重算仍为12 mutable path（六α+六β value）、source device metadata=`cuda:0`、snapshot hash=
+  `2a775b...a256`；这些是capture语义证据，不是当前live storage/version证据；
+- 现场重建确认R31 `plan.source_state_hash=cfcebf...f8df`绑定dense mapping，不等于snapshot hash；plan validator本身还
+  冻结六layout/domain6/spec1/P-anchor，因此只作为当前formal specialization，不冒充generic plan；
+- S4-0 V2入口增加瞬时`Mapping[path, live Tensor]`，只观察object/storage/version/stride/offset/device/content，raw
+  pointer不进canonical receipt；snapshot alias与live storage alias分列，不新增IR层；
+- topology hash改为plan-order canonical；新增plan/snapshot projection hash、β width/history exact门禁、S4-1A pack前
+  lease复核；negative最低由15扩为30类，S4-1A detail reason由18扩为20类，S4-4 formal tamper由56扩为64类；
+- 新增S4-0 preflight correction并同步S4-0、主预注册、S4-1A、evaluator ABI、README和设计外审交接；S4代码/
+  GPU/timing/performance继续closed。
+
+### 验证
+
+- live-view/snapshot反例：`live_objects_distinct=true`、`live_storage_shared=true`、snapshot alias=`2 unique`、snapshot
+  storage=`2 unique`、version/storage字段均不存在；
+- formal inventory：mutable=`12`、roles=`6 alpha + 6 beta_value`、source device metadata=`cuda:0`、α leading axes exact；
+- fixture identity：snapshot=`2a775b...a256`、mapping=`cfcebf...f8df`、plan=`39d617...910f`，source语义分层成立；
+- 文档一致性、目标测试、DocOps validation在提交前执行；无性能claim。
+
 ## 2026-08-28：live B0/R phase probe将scratch disposal升级为finalization v2
 
 - 在上一轮36项terminal inventory基础上继续做只读live probe，分别观察original provider B0与现有

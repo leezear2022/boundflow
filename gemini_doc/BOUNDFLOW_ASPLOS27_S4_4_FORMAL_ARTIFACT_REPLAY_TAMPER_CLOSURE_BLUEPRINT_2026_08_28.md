@@ -274,7 +274,8 @@ owner inventory，不允许根据Python对象遍历顺序临时命名为`tensor_
 ### 6.1 pre-state
 
 - production snapshot/topology/policy/plan/module identity；
-- 12条mutable path的shape/dtype/device/pointer/alias/version；
+- 12条mutable path的shape/dtype/device/object-group/storage-group/stride/offset/version与content hash；raw
+  object id/data pointer/storage handle不进入canonical artifact；
 - stored/active/preserved α inventory；
 - active/empty β inventory；
 - host packet与intermediate container pre hash；
@@ -540,7 +541,7 @@ tamper report必须进入manifest；不能在manifest后生成一个未绑定报
 
 ## 12. fully re-signed tamper矩阵
 
-S4-4冻结minimum 56类。每案都要：
+S4-4冻结minimum 64类。每案都要：
 
 1. copy完整artifact；
 2. 修改semantic raw/protocol/source/summary之一；
@@ -628,6 +629,17 @@ S4-4冻结minimum 56类。每案都要：
 55. 篡改β field/container identity或跨phase residue lineage；
 56. 把attribute sentinel替换伪写为立即释放CUDA storage或allocated下降。
 
+### H. S4-0 live mutable admission（8）
+
+57. 用snapshot object alias group替代live storage group；
+58. 隐藏两个distinct nonempty view共享同一storage；
+59. 修改live Tensor `_version`并全重签外层receipt；
+60. 保持shape/dtype但修改stride或storage offset；
+61. 把五个empty β的zero pointer伪装成一个共享storage alias；
+62. 把R31 dense mapping `source_state_hash`冒充snapshot hash并删除plan binding projection；
+63. 在β/history已匹配前缀后追加一个未拥有slot；
+64. 把raw object id/data pointer写入canonical receipt，或用topology输入顺序改变canonical hash。
+
 必须报告每案稳定reason，不接受“因为文件digest不匹配”作为fully re-signed攻击的唯一拒绝理由。
 
 ## 13. tests与静态门禁
@@ -643,7 +655,7 @@ S4-4冻结minimum 56类。每案都要：
 - incomplete/no-resume；
 - summary全raw重算；
 - manifest seal/order；
-- 56类tamper。
+- 64类tamper。
 
 ### 13.2 S4 whole-core专项
 
@@ -692,7 +704,7 @@ auditor不能采信executor summary数字，至少独立完成：
 4. `feat(artifact): add 18-worker six-permutation runner`；
 5. `feat(artifact): add pre/mid/post commit fault records`；
 6. `feat(artifact): add independent stdlib semantic replay`；
-7. `test(artifact): add 56 fully re-signed attacks`；
+7. `test(artifact): add 64 fully re-signed attacks`；
 8. `artifact: generate S4 whole-core formal v1`；
 9. `docs: close S4 correctness and prepare external audit`；
 10. `docs: preregister S4-P timing`。
@@ -711,7 +723,7 @@ artifact代码、formal raw和closure文档应分提交，避免代码与其第�
 - provider C路径bound callback=0、constructor=12、post=1；
 - precommit/midcommit/postcommit failure分类正确且禁止非法fallback/retry；
 - stdlib replay从raw逐字重建summary；
-- 56/56 fully re-signed tamper拒绝；
+- 64/64 fully re-signed tamper拒绝；
 - targeted/full/static/DocOps全过；
 - 外部审计批准；
 - 所有性能/complete-query/10x flag仍false。
