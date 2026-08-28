@@ -10,6 +10,33 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-28：冻结S4-3 whole-core exact-call事务与失败语义
+
+- 再次确认S3 exchange仍为`ready_for_audit/r001`、无audit产物，保持S4代码/correctness/timing关闭；
+- 亲读live-return、terminal export、KFSB、device atomic commit与pinned provider core/post路径，恢复完整solver事务；
+- 纠正“provider调用为0”的粗口径：bound callback=`0`，但固定路径return constructor=`12`、official post=`1`；
+- 补入provider真实副作用：host `d`必须prune到history/depths/thresholds，`pre_result.interm_bounds`必须clear；
+- 确认现有device commit v1的mid-commit rollback只能恢复内容，不能恢复PyTorch tensor `_version`；冻结
+  precommit `ABORTED_CLEAN`与mid-commit `POISONED_NO_RETRY`两类失败，后者禁止fallback/retry/继续queue；
+- 冻结`PreparedWholeCoreTransactionV2`、terminal one-shot handoff、existing KFSB 3×batch-24、provider-compatible
+  core return、official post与provider net scratch consumer audit；
+- 独立汇总candidate+rollback=`68,016 bytes`，连同S4-1D+S4-2已知账得到S4-3 known logical subtotal=
+  `488,760 bytes`，并明确不形成peak-memory claim；
+- 冻结five-fresh R/C、minimum 26类fully re-signed tamper和18类negative/fault-injection门禁；仍无S4实现、
+  GPU correctness、same-solver或性能claim。
+
+### 验证
+
+- stdlib/AST/source重算：candidate=`34,008 bytes`、candidate+rollback=`68,016 bytes`、known subtotal=
+  `488,760 bytes`；provider return constructor=`4 direct + 8 helper = 12`，PASS；
+- CUDA最小探针确认同一tensor先commit再content rollback后值恢复，但`_version=0→1→2`，不能恢复为0；
+- pinned provider source确认`interm_bounds.clear()`、`pre_result.interm_bounds.clear()`与post
+  `torch.max(ret_l[final_name], lb_last.cpu())`存在；
+- live return、atomic copy-out、terminal export、native KFSB、whole-core truth、device commit/live return与B4-A
+  terminal handoff targeted：`36 passed in 9.90s`；
+- S4-3蓝图和五份回链文档`git diff --check`：PASS；
+- DocOps change/validation、exchange validate与lint在提交前执行。
+
 ## 2026-08-28：冻结S4-2 sealed production policy driver精确实施蓝图
 
 - 再次确认S3 exchange仍为`ready_for_audit/r001`、无audit产物，因此不越过S4代码门禁；

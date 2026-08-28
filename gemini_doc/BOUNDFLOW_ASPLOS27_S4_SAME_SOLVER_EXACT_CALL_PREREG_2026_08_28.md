@@ -273,6 +273,12 @@ evaluation/update=`10/9`，candidate evaluation=`10`，provider/native evaluatio
 
 ### S4-3：whole-core exact-call correctness
 
+exact transaction、provider兼容对象、official post、host packet/intermediate-container副作用、device commit及失败语义的
+精确实施合同见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`。特别注意，
+现有device atomic v1只能在mid-commit故障后恢复tensor内容，不能恢复PyTorch `_version`；因此S4-3必须把提交前
+clean abort与提交中`POISONED_NO_RETRY`分开，不得把后者写成可透明fallback的完全回滚。
+
 在同一`ABCrownSolver.verify`内比较：
 
 ```text
@@ -292,6 +298,11 @@ B0 original provider只作额外semantic control，不作为S4实现依赖。五
 - terminal duplicate CROWN=`0`。
 - terminal lA lease=`1`且one-shot；六lA总37,464元素；hot handoff clone/dynamic allocation如实计数；
 - KFSB child CROWN=`3`、child batch=`24`、child lower元素=`72`，不得从scope中隐藏。
+- provider bound callbacks=`0`，但provider return constructor调用=`12`、official postprocess=`1`；三类计数不得合并；
+- host packet必须prune到history/depths/thresholds，`pre_result.interm_bounds`必须恰一次clear并纳入logical commit；
+- provider net scratch的下游consumer必须机械关闭；不能只因当前fixture运行成功就假设其dead；
+- validation/staging失败必须在live mutation前clean abort；mid-commit故障即使内容恢复也必须进入
+  `POISONED_NO_RETRY`，禁止native fallback、重试或继续queue。
 
 所有离散字段exact；有限浮点沿用已冻结容差。通过后状态只能是
 `VALIDATED-S4-SAME-SOLVER-CORRECTNESS`，仍不形成性能claim。
@@ -353,6 +364,11 @@ terminal export或commit来制造headline。
 `EFFECTIVE_VALUE_OVERWRITTEN_BEFORE_GRADIENT`、`TERMINAL_LA_INVENTORY_INCOMPLETE`、
 `TERMINAL_LA_LEASE_REUSED`、`INTERMEDIATE_SOURCE_VERSION_MISMATCH`、
 `HOT_HANDOFF_CLONE_OR_ALLOCATION_OBSERVED`。
+
+S4-3再追加：`PROVIDER_RETURN_CONSTRUCTOR_COUNT_MISMATCH`、`PROVIDER_POSTPROCESS_COUNT_MISMATCH`、
+`HOST_PACKET_SCHEMA_OR_PRUNE_MISMATCH`、`INTERMEDIATE_CONTAINER_NOT_CLEARED`、
+`MID_COMMIT_FAILURE_POISONED`、`RETRY_AFTER_POISONED_FORBIDDEN`、
+`FALLBACK_AFTER_PARTIAL_COMMIT_FORBIDDEN`、`NET_SCRATCH_CONSUMER_UNRESOLVED`。
 
 拒绝必须发生在对应evaluation launch、live mutation或commit之前；发生异常时existing live state必须保持原样。
 

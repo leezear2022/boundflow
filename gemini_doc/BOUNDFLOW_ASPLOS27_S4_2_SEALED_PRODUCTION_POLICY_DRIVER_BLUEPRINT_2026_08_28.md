@@ -579,6 +579,12 @@ S3外审批准、S4-0与S4-1D依次关闭后，S4-2按以下短提交执行：
 
 通过后只开放S4-3 whole-core exact-call correctness；timing/S4-P仍关闭。
 
+S4-3的精确后继合同见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`。它把terminal
+handoff、existing KFSB、provider-compatible core return、official post、12-path device commit、host packet及
+`pre_result.interm_bounds`副作用纳入同一个logical transaction，并诚实区分precommit clean abort与mid-commit
+`POISONED_NO_RETRY`。
+
 ### STOP
 
 任一情况停止：

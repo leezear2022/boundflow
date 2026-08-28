@@ -300,6 +300,11 @@ S4-2 sealed driver的live keep-best/stop/patience/pruning、functional Adam、`1
 evaluation/update/scheduler-call与trajectory artifact合同见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`。
 
+S4-3 whole-core exact-call的provider return constructor、official post、host packet、intermediate-container、device commit
+以及`POISONED_NO_RETRY`失败语义见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`。existing KFSB/
+commit可复用其数学与owner，但不能直接继承“完全原子”措辞。
+
 ## 8. 当前门禁
 
 本文只是implementation blueprint。S3 exchange仍为`ready_for_audit`，没有external approval；因此S4代码、GPU
