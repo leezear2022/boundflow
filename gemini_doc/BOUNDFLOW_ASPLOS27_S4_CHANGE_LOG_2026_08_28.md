@@ -10,6 +10,21 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：刷新S4设计外审交接至policy-driver readiness v7
+
+- design-result commit更新为`83d27b0f62db88fcf17b00daf36e865846ccc208`，冻结base仍为
+  `ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
+- 必读文档增至23份，加入S4-2 implementation-readiness；must-answer新增live policy/functional Adam、checkpoint/
+  patience可达性、shadow/poison、20-worker raw与`540,926/608,942 B`账；
+- 建议审计命令加入native optimizer/source-parity回归；
+- 仍只交付设计审计材料，不新建exchange、不打开S4 production代码/formal/timing/performance。
+
+### 验证
+
+- handoff commit/range、23份必读文档、17个top-level must-answer、16个末尾问题及修正memory/test字段完整性：
+  提交前验证；
+- `git diff --check`、DocOps validation/exchange validate/lint在提交前执行。
+
 ## 2026-08-29：关闭S4-2 policy driver实施前歧义
 
 - 新增S4-2 implementation-readiness审计，亲读pinned production源码并用live observer冻结10个ordinal的

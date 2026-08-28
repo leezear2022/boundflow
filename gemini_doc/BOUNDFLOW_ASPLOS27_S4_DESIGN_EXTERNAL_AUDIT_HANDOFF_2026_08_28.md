@@ -1,12 +1,12 @@
 ---
-status: ready-for-external-design-audit-v6-evaluator-transaction-frozen
+status: ready-for-external-design-audit-v7-policy-driver-readiness-frozen
 date: 2026-08-29
 type: external-audit-handoff
 topic: boundflow
 slug: asplos27-s4-design-audit
 audit-kind: preregistration-and-implementation-blueprint
 base-commit: ebf45cc72438141d8f0b35dadfd5cf774d7e753f
-design-result-commit: 52d7bd875466ae539eca34a552b4b5c7957d2437
+design-result-commit: 83d27b0f62db88fcf17b00daf36e865846ccc208
 execution-authority: false
 code-change-open: false
 performance-claimed: false
@@ -41,17 +41,19 @@ speedup或complete-query性能已经存在。
     views/48 prepared views和terminal arena phase是否完整；
 14. S4-1D read-only admission、post-begin `POISONED_NO_RETRY`、composite result lease、5+5 full-IEEE raw和
     修正后的`438,726 B` ledger是否共同关闭single-evaluation事务；
-15. 是否同意在S3外审批准后仍按S4-0→1A→1B0→1B→1C→1D→2→3→4顺序实施；
-16. 是否发现必须在第一行S4代码开工前修正的blocker/major。
+15. S4-2 live policy/functional Adam审计是否正确关闭checkpoint、patience reachability、step/best/shadow memory、
+    post-begin poison和20-worker formal口径；
+16. 是否同意在S3外审批准后仍按S4-0→1A→1B0→1B→1C→1D→2→3→4顺序实施；
+17. 是否发现必须在第一行S4代码开工前修正的blocker/major。
 
 ## 1. 审计范围和Git边界
 
 - branch：`feat/rvir-v4-production-state-ownership-v1`；
 - 本轮设计base：`ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
 - S4-0 live admission/lease、S4-3A scratch finalization、S4-1A prepare transaction、S4-1B0 ternary TIR、
-  S4-1B/1C selector/gradient/arena ABI及S4-1D evaluator transaction全部设计结果：
-  `52d7bd875466ae539eca34a552b4b5c7957d2437`；
-- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..52d7bd875466ae539eca34a552b4b5c7957d2437`
+  S4-1B/1C selector/gradient/arena ABI、S4-1D evaluator transaction及S4-2 policy implementation-readiness全部设计结果：
+  `83d27b0f62db88fcf17b00daf36e865846ccc208`；
+- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..83d27b0f62db88fcf17b00daf36e865846ccc208`
   和下列S4文档的完整版本为准；
 - S3 formal实现/结果不在本轮重新验收，但它是S4设计输入；S3独立exchange仍等待审计；
 - `.docops/exchange/gc0-1-prereg-20260826`异步audit文件和`docs/CIBC_for_DAC.pdf`是用户保留的范围外dirty文件，
@@ -87,10 +89,11 @@ speedup或complete-query性能已经存在。
 16. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`；
 17. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_EVALUATOR_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`；
 18. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
-19. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
-20. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
-21. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
-22. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
+19. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_POLICY_DRIVER_IMPLEMENTATION_READINESS_2026_08_29.md`；
+20. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
+21. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
+22. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
+23. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
 
 ## 3. 已冻结的production事实，请独立复核
 
@@ -110,6 +113,10 @@ speedup或complete-query性能已经存在。
 - parameter mutation=`9`；
 - scheduler call=`10`；
 - terminal scheduler产生的post LR没有后续evaluation消费；
+- 上述第10次scheduler只属于当前无early-exit fixed path；early exit在scheduler之前发生；
+- checkpoint ordinal=`0,6,7,8,9`，ordinal 5不满足`i > int(10*0.5)`；
+- fixed 10-step程序中patience从0开始最多到10，源码`patience>10`不可达；
+- fixed physical pruning为inactive，preserve/next-preserve mask均为`None`；
 - formal raw中六domain best ordinal均为9，但设计仍保留keep-best/prune/stop/patience/timeout/restore分支。
 
 请亲读pinned `auto_LiRPA@5a098e8/optimized_bounds.py`确认。
@@ -128,10 +135,11 @@ speedup或complete-query性能已经存在。
 ### 3.4 known logical memory账
 
 - S4-1D correctness ledger=`438,726 bytes`；
-- 加S4-2 Adam m/v known subtotal=`472,758 bytes`；
+- S4-2 current m/v/step、compressed best、best lower、`ret_0`和transition shadow新增=`102,200 bytes`；
+- S4-2 known subtotal=`540,926 bytes`（CUDA `540,870` + CPU `56`）；
 - full candidate=`34,008 bytes`；
 - candidate+rollback=`68,016 bytes`；
-- S4-3 known subtotal=`540,774 bytes`。
+- S4-3 known subtotal=`608,942 bytes`。
 
 旧S4-1D账`386,712 B`漏掉`49,152 B` residual scratch与`2,862 B` metadata，共`52,014 B`。这些是
 design-time logical bytes，不是实测peak allocated/reserved。请独立检查是否仍有重复计数、漏项或错误归属。
@@ -228,9 +236,16 @@ PASS要求：
 - native dense oracle与compiled compressed evaluator是两个closed实现，不接受任意callback；
 - sealed driver完整拥有live policy，而非无条件`for range(10)`；
 - functional Adam/ExponentialLR、clamp、keep-best/prune/stop/patience/timeout/restore均可逐step比较；
+- live two-group `batch_dim=2/0`、Adam defaults和7个CPU float32 step scalar进入ABI；
+- pinned functional Adam对9×7 parameter的parameter/m/v/step共63组比较bit exact；
+- transition使用out-of-place shadow，stable copy-commit或任何post-begin失败进入`POISONED_NO_RETRY`，不伪称
+  content rollback可恢复`_version`/hidden state；
+- A/B与B/C各5对/10 fresh worker，总计20 worker；
 - terminal compressed→dense→compressed只在ordinal 9执行一次；
 - preserved α不进入optimizer；
 - `10/9/10`不被错误简化成`10/9/9`；
+- fixed checkpoint=`[0,6,7,8,9]`且10-step patience `>10`不可达；不可达分支使用不同program hash的sealed
+  synthetic fixture；
 - S4-2不执行KFSB/commit/post/timing。
 
 ### AC5：S4-3 whole-core transaction与失败语义
@@ -390,6 +405,9 @@ PASS要求：
 - S4-1D full raw预算：nonterminal/terminal/5+5=`17,040/166,896/919,680 B`，canonical hash=
   `1e2aab39a7f7049a09371fef6ec1e0a01dc1e2ec6b25ed7c4060b2cf78e2f0d6`；
 - 本次S4-1D evaluator依赖回归：`37 passed in 27.85s`；production code diff=`0`；
+- 本次S4-2 readiness依赖回归：`41 passed in 26.63s`；production code diff=`0`；
+- S4-2 arithmetic/reachability/link检查：`540,926/608,942 B`、checkpoint `[0,6,7,8,9]`、10-step
+  patience `>10`不可达、23份必读文档全部存在；
 - existing live-return/device-commit targeted：`12 passed in 6.58s`；production code diff=`0`；
 - `git diff --check`、DocOps exchange validate/lint：PASS。
 
@@ -398,8 +416,8 @@ PASS要求：
 ## 7. 建议外审操作
 
 ```bash
-git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..52d7bd875466ae539eca34a552b4b5c7957d2437
-git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..52d7bd875466ae539eca34a552b4b5c7957d2437
+git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..83d27b0f62db88fcf17b00daf36e865846ccc208
+git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..83d27b0f62db88fcf17b00daf36e865846ccc208
 
 source env.sh
 /home/lee/miniconda3/envs/boundflow/bin/python -m pytest -q \
@@ -407,6 +425,8 @@ source env.sh
   tests/test_rvir_v4_native_kfsb.py \
   tests/test_fsg4_b3_device_atomic_commit.py \
   tests/test_fsg4_b4a_terminal_lower_adjoint_handoff.py \
+  tests/test_rvir_v4_native_optimizer.py \
+  tests/test_rvir_v4_optimizer_step_source_parity.py \
   tests/test_r3_compiled_p_alpha_vjp.py \
   tests/test_r3_full_lower_forward_tir.py \
   tests/test_asplos27_s2_crown_pipeline.py
@@ -438,6 +458,9 @@ source env.sh
 - 检查β sign int8、metadata 2,862 B及六slot reverse read→copy→transform phase；
 - 检查tamper编号1—68；
 - 用CUDA tensor验证commit+restore后的`_version`；
+- 亲读production checkpoint条件，独立重算fixed ordinal `[0,6,7,8,9]`和patience reachability；
+- 以相同state/defaults独立比较functional Adam和live Adam，不采信summary的63/63；
+- 重算S4-2 current/keep-best/shadow与CPU step ledger，检查fixed intermediate clone是否被安全移除；
 - 亲读provider core/post确认clear/prune/post顺序；
 - 搜索S4文档所有`claimed/open/validated`词，核对没有implementation或performance漂移。
 
@@ -457,7 +480,8 @@ source env.sh
 12. executed-source inventory是否有更可靠的闭包算法？
 13. snapshot semantic truth、瞬时live observation和S4-1A prepared owner三段边界是否仍遗漏live alias/version race？
 14. 68类tamper还缺哪类可全重签semantic attack？
-15. 是否同意当前唯一执行顺序，不开放S4-P timing？
+15. S4-2是否仍遗漏optimizer/policy state、可达分支、失败owner或raw字段？
+16. 是否同意当前唯一执行顺序，不开放S4-P timing？
 
 ## 9. 输出格式
 
