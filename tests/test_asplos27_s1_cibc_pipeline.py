@@ -114,7 +114,7 @@ def test_s1_compile_receipt_rejects_claim_and_missing_cublas() -> None:
 def test_s1_formal_artifact_replays_and_passes_all_qualification_gates() -> None:
     from scripts import run_asplos27_s1_cibc_artifact as artifact
 
-    root = Path("artifacts/asplos27-s1-cibc-pipeline/resnet2b-prop0-v1")
+    root = Path("artifacts/asplos27-s1-cibc-pipeline/resnet2b-prop0-v2")
     if not root.is_dir():
         pytest.skip("S1 formal artifact unavailable")
     result = artifact.replay(root)
@@ -134,7 +134,7 @@ def test_s1_formal_artifact_replays_and_passes_all_qualification_gates() -> None
 
 
 def test_s1_formal_artifact_rejects_every_outer_resigned_tamper() -> None:
-    root = Path("artifacts/asplos27-s1-cibc-pipeline/resnet2b-prop0-v1")
+    root = Path("artifacts/asplos27-s1-cibc-pipeline/resnet2b-prop0-v2")
     if not root.is_dir():
         pytest.skip("S1 formal artifact unavailable")
     report = __import__("json").loads(
@@ -144,6 +144,21 @@ def test_s1_formal_artifact_rejects_every_outer_resigned_tamper() -> None:
     assert all(row["outer_resigned"] is True for row in report["rows"])
     assert all(row["rejected"] is True for row in report["rows"])
     assert report["performance_claimed"] is False
+
+
+def test_s1_historical_code_revision_ignores_dirty_worktree(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from scripts import run_asplos27_s1_cibc_artifact as artifact
+
+    source = artifact.git("rev-parse", "HEAD")
+    expected = artifact.code_revision(source)
+    monkeypatch.setattr(
+        artifact,
+        "file_sha256",
+        lambda _path: (_ for _ in ()).throw(AssertionError("read working tree")),
+    )
+    assert artifact.code_revision(source) == expected
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA unavailable")

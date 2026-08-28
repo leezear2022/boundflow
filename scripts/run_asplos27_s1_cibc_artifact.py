@@ -90,8 +90,8 @@ def git(*args: str, binary: bool = False):
 
 
 def historical_sha256(source: str, path: str) -> str:
-    if git("rev-parse", "HEAD") == source:
-        return file_sha256(REPOSITORY_ROOT / path)
+    """Hash the immutable Git object, never a possibly dirty working-tree file."""
+
     return hashlib.sha256(git("show", f"{source}:{path}", binary=True)).hexdigest()
 
 

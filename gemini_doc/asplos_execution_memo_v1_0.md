@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-28 当前唯一指令：S1已关闭，下一只进入S2 coarse CROWN/custom VJP**。S1在source
+> `56c494f`上完成17-op mixed Relax/TIR、6 CIBC Conv、2 cuBLAS partitions及prepared CUDA Graph；
+> 六fresh的pipeline/PyTorch=`2.5028099854x`、pipeline/direct=`1.0001854311x`，三条资格门槛通过。
+> 这只是standalone IBP compiler-plumbing qualification；same-solver、query、10×和论文性能claim仍关闭。
+> S2必须复用同一canonical Relax/TIR/prepared入口，不得恢复per-site runner或B4-C2 dense retention。
+
 > **2026-08-26 GC0-1 capture/analysis已预注册，待独立外审**：冻结provider-neutral snapshot、三类
 > adapter、deterministic capture、A0—A8 use-def/boundary/postdominator/effect/residual/alias/dense-VJP
 > analysis、shallow/full witness分层、15 direct+7 analysis negative、five-fresh replay与16类tamper。

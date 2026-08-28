@@ -1,5 +1,13 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-28 S1 canonical CIBC pipeline资格结论**：状态=
+> `VALIDATED-S1-CIBC-CANONICAL-PIPELINE`。source=`56c494f`，6个fresh process中pipeline/PyTorch
+> geomean=`2.5028099854x`、worst=`2.4600205501x`，pipeline/direct geomean=`1.0001854311x`；
+> 17-op、6/6 CIBC call_tir、2 cuBLAS partitions、fallback/eager/warm-DLPack=`0`，final pair
+> max diff=`0.000244140625`且sign exact。只允许claim standalone ResNet2B IBP canonical pipeline保住
+> 已有CIBC winner；`performance_claimed=false`，不得claim same-solver、BaB/query、跨模型、memory、
+> 10×或ASPLOS-ready。下一只开放S2 coarse CROWN/custom VJP设计与实现。
+
 > **2026-08-26 GC0-1预注册claim边界**：状态=`PREREGISTERED-NOT-IMPLEMENTED-NOT-RUN-GC0-1`。
 > 只冻结capture/analysis protocol、causal witness、negative graph、replay/tamper与停止条件；尚无adapter、
 > analysis pass、formal artifact或admitted region。`implementation_open=false/timing_open=false/`

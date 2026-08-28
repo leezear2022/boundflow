@@ -200,6 +200,35 @@ canonical CIBC `Primal→Bound→Plan→Relax/TIR→Prepared Runtime`纵向实�
 `12.795×`且远高于B4-B2 local `4.898×`，O2—O4目标也都只是待证伪目标；任何一轴无法达到预算时必须用
 新direct cumulative结果重算，不得保留12.56×/11.66×投影。
 
+### A.5.3 2026-08-28 S1 canonical CIBC pipeline closure
+
+S1 已把 standalone ResNet2B IBP 的完整 17-op 图收束到一个 standard Relax function：6 个 Conv 调用
+CIBC paired-output TIR，2 个 Linear shape family 由 TVM cuBLAS partition 接管，ReLU/Add/Flatten 保持
+standard Relax dataflow；compile 后由 prepared VM + static-address CUDA Graph 作为唯一执行入口。旧
+`CIBCIBPCUDAGraphPlanV1`只作为 PyTorch/direct-CIBC oracle，不是 production pipeline。
+
+formal artifact=`artifacts/asplos27-s1-cibc-pipeline/resnet2b-prop0-v2`，source=`56c494f`（实现
+`aa537ed`）。6 个 fresh
+process覆盖`BDP/BPD/DBP/DPB/PBD/PDB`六全排列，每进程30组×每对象200 replay，三侧均包含input copy：
+
+| S1 metric | formal result | gate |
+|---|---:|---:|
+| direct-CIBC/PyTorch geomean | `2.5023460x` | disclosure |
+| canonical pipeline/PyTorch geomean | `2.5028100x` | `>=2.20x` |
+| canonical pipeline/PyTorch worst | `2.4600206x` | `>=2.00x` |
+| canonical pipeline/direct propagation geomean | `1.0001854x` | `>=0.90x` |
+| canonical pipeline/direct propagation worst | `0.9898443x` | disclosure |
+| maximum absolute difference | `0.000244140625` | `<=3e-4` + sign exact |
+
+结构门禁同时成立：17-op、6/6 CIBC call_tir、2 cuBLAS partitions、warm DLPack construction=0、
+fallback/eager shadow=0、graph-stable output无额外materialization copy；raw→summary replay PASS，8/8 fully
+outer-resigned tamper rejected。summary/manifest hash分别为`7c2fe8b0…ff60`/`bd4eaa4a…80cc`。
+
+因此S1=`VALIDATED-S1-CIBC-CANONICAL-PIPELINE`，只说明完整compiler plumbing保住standalone IBP winner；
+`same_solver_claimed=false`、`performance_claimed=false`仍保持，不撤销MR1的CIBC full-graph exact-call
+`0/51 eligible`。唯一下一工程动作是S2 coarse CROWN/custom VJP进入同一prepared path；在S2/M5之前不得把
+本结果写成αβ-CROWN、BaB、query或complete-query speedup。
+
 ### A.6 ASPLOS’27 13天submission sprint
 
 ASPLOS’27 September cycle截止为`2026-09-09 AoE`，当前不存在先做完下方M0—M6再写论文的时间。执行顺序

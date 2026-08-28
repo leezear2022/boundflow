@@ -1,5 +1,11 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-28 当前状态：S1 canonical CIBC pipeline资格关闭**。source=`56c494f`，artifact=
+> `artifacts/asplos27-s1-cibc-pipeline/resnet2b-prop0-v2`；六fresh pipeline/PyTorch geomean=
+> `2.5028099854x`、worst=`2.4600205501x`，pipeline/direct=`1.0001854311x`。17-op、6/6 CIBC、
+> 2 cuBLAS、fallback/eager/warm-DLPack=0，final correctness/replay/8类tamper通过。下一只允许S2
+> coarse CROWN/custom VJP；same-solver、complete-query和总体10×仍未运行、未声明。
+
 > **2026-08-26 当前执行：GC0-1 capture/analysis已预注册，待独立外审**：只冻结source snapshot、
 > generic adapter、A0—A8 analysis与full causal witness协议。当前没有GC0-1代码或artifact；下一步只审计
 > 预注册，批准后才允许实现。lowering/runtime/timing继续关闭。

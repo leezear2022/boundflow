@@ -1,5 +1,5 @@
 ---
-status: implementation-in-progress
+status: validated-s1-cibc-pipeline
 date: 2026-08-28
 type: changelog
 topic: boundflow
@@ -36,9 +36,26 @@ performance-claimed: false
 
 最终 formal 数字只能来自冻结的 six-fresh artifact，不能引用上述 smoke。
 
-## 当前验证
+## Formal closure
 
-- targeted：`9 passed`；
-- 单 fresh worker smoke：PyTorch/direct/pipeline约
-  `0.17293/0.07028/0.07022 ms`，pipeline/PyTorch约`2.4626x`，pipeline/direct约`1.0009x`；
-- formal six-fresh、全量测试、静态检查与 DocOps closure：待执行。
+- source=`56c494f`（实现=`aa537ed`）；
+- artifact=`artifacts/asplos27-s1-cibc-pipeline/resnet2b-prop0-v2`；
+- 6 fresh全排列、30 group×200 replay；
+- direct/PyTorch geomean=`2.5023460x`；
+- pipeline/PyTorch geomean=`2.5028100x`、worst=`2.4600206x`；
+- pipeline/direct geomean=`1.0001854x`、worst=`0.9898443x`；
+- max diff=`0.000244140625`、sign exact；
+- replay PASS，8/8 outer-resigned tamper rejected；
+- summary hash=`7c2fe8b0191514bbf70c70528ce459594e8e7846484f596357ffbfe64040ff60`；
+- manifest hash=`bd4eaa4a9f0610d2db9fb8848e27de41ef906372fb96bc03c8317a31260680cc`；
+- `s1_performance_admitted=true`；`same_solver_claimed=false`、`performance_claimed=false`。
+
+## Closure修正与验证
+
+- formal后新增artifact replay/tamper测试时，发现`historical_sha256()`在source等于HEAD时错误读取可能脏的
+  working-tree文件；已改为只读取`git show <source>:<path>`的不可变Git object，并新增专项回归；
+- 旧`v1`保留为superseded诊断artifact；正式`v2`绑定source=`56c494f`，避免“commit写一个hash、
+  protocol实际绑定未提交文件”的身份歧义；
+- targeted=`12 passed`；
+- full=`1868 passed, 3 skipped`，3个skip均为既有TVM/VNN-COMP环境边界；
+- black/mypy/pylint、TVM环境smoke、DocOps最终结果见合并外审交接。

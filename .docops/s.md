@@ -6,8 +6,8 @@ st: s01
 stat: active
 health: green
 pr: [60]
-last_ch: ev016097
-last_va: ev016098
+last_ch: ev016146
+last_va: ev016147
 blk: none
-next: run-s1-six-fresh-formal-and-replay
-updated: 2026-08-28T00:35:36Z
+next: external-audit-asplos27-s1-combined-implementation-formal
+updated: 2026-08-28T01:03:08Z

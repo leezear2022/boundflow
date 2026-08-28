@@ -1,19 +1,14 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
-最新执行（v6 S0，用户已批准）：以ASPLOS’27 September cycle为条件投稿目标，把总体约`10×`
-same-solver complete-query冻结为尚未验证的研究北极星。计划只保留verification semantic lifting、joint
-representation/fusion/lifetime/rematerialization/custom-VJP编译、trajectory-preserving RVIR integration三项
-候选贡献；CIBC作为2023年AAAI’24既有研究起点，B4/R3/NRIR/RVIR/GC0资产全部进入一个cumulative candidate，
-不再新造solver execution IR。S0第二批已用33个explicit transaction target完成两workload×5 pair formal：
-ResNet/MNISTFC最低机制覆盖=`99.632%/99.248%`，observer扰动中位数=`0.996×/0.999×`，S0 attribution已
-admitted。互斥事务预算把O1/O2/O3/O4/O5研究目标冻结为`16×/8×/12×/20×/4×`，ResNet/MNISTFC
-在`h=0`、不计接入成本时的条件式10×投影=`12.562×/11.657×`；这些目标均未验证，所以只开放S1
-canonical compiler path实现，性能门禁和
-performance claim保持关闭。下一只做CIBC `Primal→Bound→Plan→Relax/TIR→Prepared Runtime`纵向闭环。
-见`BOUNDFLOW_README_PIPELINE_END_TO_END_ACCELERATION_DRAFT_PLAN_2026_08_26.md`与
-`BOUNDFLOW_ASPLOS27_S0_EXPLICIT_SOLVER_TRANSACTION_MARKERS_CHANGELOG_2026_08_27.md`。rapid-review两页和CIBC
-增量骨架分别见`BOUNDFLOW_ASPLOS27_RAPID_REVIEW_TWO_PAGE_STORY_DRAFT_2026_08_27.md`、
-`BOUNDFLOW_CIBC_TO_ASPLOS27_CHANGES_NOTE_DRAFT_2026_08_27.md`。
+最新执行（v6 S1，待合并外审）：S1已把standalone ResNet2B IBP的17-op图接入一个canonical
+Relax/TIR/prepared CUDA-Graph入口，6个Conv使用paired-output CIBC TIR，Linear由2个cuBLAS shape-family
+partition覆盖。6个fresh process中pipeline/PyTorch geomean=`2.5028099854x`、worst=`2.4600205501x`，
+pipeline/direct geomean=`1.0001854311x`；它通过S1 compiler-plumbing qualification，但
+`performance_claimed=false`，不构成same-solver、query、10×或ASPLOS headline。S0的33个事务归因和
+条件式10×预算仍是后续研究输入，不是实测收益。下一只做S2 coarse CROWN/custom VJP canonical region；
+正式实现与结果见`BOUNDFLOW_ASPLOS27_S1_CANONICAL_CIBC_PIPELINE_PLAN_2026_08_28.md`、
+`BOUNDFLOW_ASPLOS27_S1_CANONICAL_CIBC_PIPELINE_FORMAL_CLOSURE_2026_08_28.md`，总体路线见
+`BOUNDFLOW_README_PIPELINE_END_TO_END_ACCELERATION_DRAFT_PLAN_2026_08_26.md`。
 
 历史执行状态（其“下一步外审”已由上方v6 ASPLOS’27用户审阅稿覆盖，schema/claim状态仍保留）：GC0-1
 capture/analysis已完成文档预注册，状态=
