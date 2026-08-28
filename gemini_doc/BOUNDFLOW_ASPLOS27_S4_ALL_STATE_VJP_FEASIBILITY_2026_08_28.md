@@ -83,7 +83,7 @@ P-only。
 当前`PreparedR31B2CompiledCustomBackwardV1`及D1C/D2B/S2后继已有：
 
 1. 完整coefficient-sign reverse pass；
-2. 43,008 bytes sign bitmap：`A24/A20/A18/Ainput`；
+2. 当前43,008 bytes sign bitmap：`A24/A20/A18/Ainput`；S4另需`A26/A29`共12,288 bytes，合计55,296；
 3. effective preactivation：`pre17/pre23/pre25`；
 4. residual11/residual6两阶段schedule，内部coefficient分别可在stage scratch中观察；
 5. P-site `dα25`压缩kernel；
@@ -190,7 +190,8 @@ S4-1允许：
 S3外审批准且S4转为execution-authority后，S4-1仍按以下四刀推进：
 
 1. `S4-1A all-state ABI`：从六个layout生成ordered output slots、persistent buffers和coverage receipt；
-2. `S4-1B effective values`：补齐六site selected preactivation，与独立PyTorch/f64局部oracle比较；
+2. `S4-1B effective values`：补齐六site selected preactivation，与独立PyTorch/f64局部oracle比较；精确arena、
+   A26/A29 sign、selected Relax graph和negative门禁见S4-1B实施蓝图；
 3. `S4-1C gradient emitters`：先site31 active β，再31/28/23/17 explicit ReLU，最后25/19 staged residual；
 4. `S4-1D evaluator closure`：一个logical evaluation返回lower、六dα、六dβ，five fresh通过。
 

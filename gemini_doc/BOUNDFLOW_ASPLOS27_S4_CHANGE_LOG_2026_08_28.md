@@ -92,6 +92,27 @@ performance-claimed: false
 - `git diff --check`与文档关键字段检索：PASS；
 - DocOps change/validation与lint在提交前执行。
 
+## 2026-08-28：完成S4-1B六site effective-value graph实施蓝图
+
+- 亲读R31B2 effective-pre17/23/25 TIR、S2 selected Relax graph与closed-form oracle，逐stage恢复selected primal语义；
+- 冻结一个37,464-element/149,856-byte persistent value arena及六slot exact offset/shape；
+- 确认现有sign bitmap为43,008 bytes，S4补A26/A29各6,144 bytes后合计55,296；不需要A32 bitmap；
+- 冻结扩展S2 safe-VM selected Relax graph为首选实现，logical stage 6、persistent output copy第一版允许6次并如实披露；
+- 明确A29在ReLU28 transform前pack，A26必须从D1C/D2B residual11 staged scratch导出，不准额外重跑CROWN；
+- 冻结active `[D,W]` α TIR ABI、effective-value receipt、三方oracle与18类negative gate；
+- 澄清active β应以B4-B2 `-adjoint_relu*split_sign`与full-composition effective value双oracle验证，不能只按类比实现；
+- 新增S4-1B实施蓝图并同步可行性/主预注册；仍无实现、GPU correctness或性能claim。
+
+### 验证
+
+- 独立重算six-value offsets=`[0,12288,18432,24576,30720,36864]`、elements/bytes=
+  `37,464/149,856`，six-sign=`55,296 bytes`、existing/new=`43,008/12,288`，PASS；
+- S2 selected pipeline、P-alpha closed-form oracle、D1C cumulative与D2B staged backward：
+  `13 passed in 18.76s`；
+- source检索确认existing effective-pre symbols恰为17/23/25，S2 graph内部已有pre17/19/23/25；
+- S4-1B蓝图保持implementation/correctness/timing/performance全部closed；`git diff --check`：PASS；
+- DocOps change/validation与lint在提交前执行。
+
 ## 2026-08-28：完成S4-1A ordered buffer/lease ABI实施蓝图
 
 - 亲读S2/S3 prepared executor、P-only direct VJP、host Adam与R31B2 DLPack/view cache，确认S4 all-state不应
