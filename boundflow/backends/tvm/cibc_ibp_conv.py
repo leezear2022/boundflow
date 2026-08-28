@@ -19,6 +19,7 @@ from boundflow.backends.tvm.differentiable_lower_identity import (
 )
 
 CIBC_IBP_CONV_SYMBOL = "boundflow_cibc_ibp_conv_horizontal_v1"
+CIBC_IBP_CONV_RELAX_SYMBOL = "boundflow_cibc_ibp_conv_horizontal_relax_v1"
 
 
 @dataclass(frozen=True)
@@ -165,6 +166,114 @@ def build_cibc_ibp_conv_tir_v1(
     return tvm.IRModule({CIBC_IBP_CONV_SYMBOL: horizontal_conv})
 
 
+def build_cibc_ibp_conv_relax_tir_v1(
+    signature: CIBCIBPConvSignatureV1, *, threads_per_block: int
+):
+    """Build the same fused Conv with two DPS outputs for Relax ``call_tir``."""
+
+    import tvm
+    from tvm.script import tir as T
+
+    signature.validate()
+    if threads_per_block not in {64, 128, 256}:
+        raise ValueError("CIBC IBP Conv schedule differs")
+    input_shape = signature.input_shape
+    weight_shape = signature.weight_shape
+    output_shape = signature.output_shape
+    output_count = math.prod(output_shape)
+    reduction_extent = math.prod(weight_shape[1:])
+    block_count = math.ceil(output_count / threads_per_block)
+
+    @T.prim_func
+    def horizontal_conv_relax(
+        lower: T.Buffer(input_shape, "float32"),
+        upper: T.Buffer(input_shape, "float32"),
+        weight: T.Buffer(weight_shape, "float32"),
+        bias: T.Buffer((weight_shape[0],), "float32"),
+        lower_output: T.Buffer(output_shape, "float32"),
+        upper_output: T.Buffer(output_shape, "float32"),
+    ):
+        T.func_attr(
+            {
+                "global_symbol": CIBC_IBP_CONV_RELAX_SYMBOL,
+                "tir.noalias": True,
+                "boundflow.schema_version": "cibc-ibp-conv-horizontal-relax/v1",
+            }
+        )
+        center = T.alloc_buffer((1,), "float32", scope="local")
+        deviation = T.alloc_buffer((1,), "float32", scope="local")
+        for block_x in T.thread_binding(block_count, thread="blockIdx.x"):
+            for thread_x in T.thread_binding(threads_per_block, thread="threadIdx.x"):
+                flat = block_x * threads_per_block + thread_x
+                if flat < output_count:
+                    output_w = flat % output_shape[3]
+                    output_h = flat // output_shape[3] % output_shape[2]
+                    output_channel = (
+                        flat // (output_shape[2] * output_shape[3]) % output_shape[1]
+                    )
+                    output_batch = flat // (
+                        output_shape[1] * output_shape[2] * output_shape[3]
+                    )
+                    center[0] = T.float32(0)
+                    deviation[0] = T.float32(0)
+                    for reduction in range(reduction_extent):
+                        kernel_w = reduction % weight_shape[3]
+                        kernel_h = reduction // weight_shape[3] % weight_shape[2]
+                        input_channel = reduction // (weight_shape[2] * weight_shape[3])
+                        input_h = (
+                            output_h * signature.stride[0]
+                            - signature.padding[0]
+                            + kernel_h * signature.dilation[0]
+                        )
+                        input_w = (
+                            output_w * signature.stride[1]
+                            - signature.padding[1]
+                            + kernel_w * signature.dilation[1]
+                        )
+                        if (
+                            0 <= input_h
+                            and input_h < input_shape[2]
+                            and 0 <= input_w
+                            and input_w < input_shape[3]
+                        ):
+                            lower_value = lower[
+                                output_batch,
+                                input_channel,
+                                input_h,
+                                input_w,
+                            ]
+                            upper_value = upper[
+                                output_batch,
+                                input_channel,
+                                input_h,
+                                input_w,
+                            ]
+                            weight_value = weight[
+                                output_channel,
+                                input_channel,
+                                kernel_h,
+                                kernel_w,
+                            ]
+                            center[0] = (
+                                center[0]
+                                + (lower_value + upper_value)
+                                * T.float32(0.5)
+                                * weight_value
+                            )
+                            deviation[0] = deviation[0] + (
+                                upper_value - lower_value
+                            ) * T.float32(0.5) * T.abs(weight_value)
+                    center[0] = center[0] + bias[output_channel]
+                    lower_output[output_batch, output_channel, output_h, output_w] = (
+                        center[0] - deviation[0]
+                    )
+                    upper_output[output_batch, output_channel, output_h, output_w] = (
+                        center[0] + deviation[0]
+                    )
+
+    return tvm.IRModule({CIBC_IBP_CONV_RELAX_SYMBOL: horizontal_conv_relax})
+
+
 def compile_cibc_ibp_conv_tir_v1(
     signature: CIBCIBPConvSignatureV1,
     *,
@@ -193,9 +302,11 @@ def compile_cibc_ibp_conv_tir_v1(
 
 
 __all__ = [
+    "CIBC_IBP_CONV_RELAX_SYMBOL",
     "CIBC_IBP_CONV_SYMBOL",
     "CIBCIBPConvSignatureV1",
     "CompiledCIBCIBPConvV1",
     "build_cibc_ibp_conv_tir_v1",
+    "build_cibc_ibp_conv_relax_tir_v1",
     "compile_cibc_ibp_conv_tir_v1",
 ]

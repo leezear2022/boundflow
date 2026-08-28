@@ -94,6 +94,7 @@ stage_tvm() {
     -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
     -DUSE_LLVM="${llvm_config}" \
     -DUSE_CUDA="${selected_cuda_root}" \
+    -DUSE_CUBLAS=ON \
     -DHIDE_PRIVATE_SYMBOLS=ON
   run_env cmake --build "${TVM_BUILD_DIR}" --parallel "${JOBS}"
   # Python 与 TVM C++ 构建都来自 TVM 锁定的同一个内嵌 tvm-ffi commit。
@@ -110,7 +111,7 @@ stage_verify() {
   require_conda
   run_env bash "${ROOT_DIR}/scripts/setup_hooks.sh"
   run_env python "${ROOT_DIR}/scripts/env_doctor.py" --strict --json-out "${ROOT_DIR}/artifacts/env/boundflow-doctor.json"
-  run_env python -c 'import tvm; import triton'  # LLVM/符号隔离门禁
+  run_env python -c 'import tvm; import triton; assert tvm.get_global_func("relax.ext.cublas", allow_missing=True); assert tvm.get_global_func("tvm.contrib.cublas.matmul", allow_missing=True)'  # LLVM/符号隔离与S1混合后端门禁
   run_env python "${ROOT_DIR}/scripts/smoke_tvm_cuda.py"
   run_env python -m pytest -q "${ROOT_DIR}/tests"
 }
