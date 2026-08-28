@@ -10,6 +10,21 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：刷新S4设计外审交接至S4-1A construction readiness v11
+
+- design-result commit更新为`97c6199acdb06aa7f55cc984896e17ca3e881a8a`，冻结base仍为
+  `ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
+- 必读文档增至27份，加入S4-1A V5 construction package；top-level任务由29增至37，补scope、runtime-observed
+  context、DLPack collision、D2H账、traceback cleanup、single-owner adoption、uninitialized buffer和formal边界；
+- AC3新增`34,080/39,936 B`逻辑/本机allocator分层、`32/85,056`与累计`56/153,072`、68 negative及12 worker；
+- evidence inventory加入plan-order、collision FAIL/PASS、cleanup `1,024→0 B`、V5 hash和`48 passed`；
+- must-answer由28增至36；仍不新建S4 exchange、不开放production/formal/timing/performance。
+
+### 验证
+
+- handoff base/result commit、27份必读文档、37项top-level任务、36项末尾问题及V5字段：提交前验证；
+- `git diff --check`、DocOps validation/lint在提交前执行。
+
 ## 2026-08-29：关闭S4-1A逐文件施工歧义并冻结V5 construction package
 
 - 新增867行
