@@ -6,7 +6,7 @@ topic: boundflow
 slug: asplos27-s4-design-audit
 audit-kind: preregistration-and-implementation-blueprint
 base-commit: ebf45cc72438141d8f0b35dadfd5cf774d7e753f
-design-result-commit: 07b7e9cea040073f1b0cdaf66c71bdf68295556b
+design-result-commit: bf0096a3a6b7f5c72c48de5c8394e2751bd8b3ec
 execution-authority: false
 code-change-open: false
 performance-claimed: false
@@ -27,17 +27,18 @@ speedup或complete-query性能已经存在。
 2. S4-0—S4-4的分层是否真正对应production事务，而不是为写IR/receipt而写IR/receipt；
 3. all-state compiled VJP、sealed production policy、terminal handoff、KFSB、commit/post是否有遗漏owner；
 4. S4-3 failure state是否诚实，尤其PyTorch `_version`与post-after-commit；
-5. live reference probe把scratch disposal从24纠正为36是否成立，尤其六条export lA与18条all-node GC lA的区别；
-6. S4-4的stdlib raw/replay和48类fully re-signed tamper是否足以支持第三方独立审计；
-7. 是否同意在S3外审批准后仍按S4-0→1A→1B→1C→1D→2→3→4顺序实施；
-8. 是否发现必须在第一行S4代码开工前修正的blocker/major。
+5. live B0/R phase probe把scratch合同从terminal disposal升级为variant-specific finalization v2是否成立；
+6. terminal logical/unique storage、view alias、B0 batch-24 residue与当前R batch-12 stale是否被正确区分；
+7. S4-4的stdlib raw/replay和56类fully re-signed tamper是否足以支持第三方独立审计；
+8. 是否同意在S3外审批准后仍按S4-0→1A→1B→1C→1D→2→3→4顺序实施；
+9. 是否发现必须在第一行S4代码开工前修正的blocker/major。
 
 ## 1. 审计范围和Git边界
 
 - branch：`feat/rvir-v4-production-state-ownership-v1`；
 - 本轮设计base：`ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
-- S4-3A live scratch probe纠错及S4-4修订结果：`07b7e9cea040073f1b0cdaf66c71bdf68295556b`；
-- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..07b7e9cea040073f1b0cdaf66c71bdf68295556b`
+- S4-3A live scratch phase/alias/finalization修订结果：`bf0096a3a6b7f5c72c48de5c8394e2751bd8b3ec`；
+- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..bf0096a3a6b7f5c72c48de5c8394e2751bd8b3ec`
   和下列S4文档的完整版本为准；
 - S3 formal实现/结果不在本轮重新验收，但它是S4设计输入；S3独立exchange仍等待审计；
 - `.docops/exchange/gc0-1-prereg-20260826`异步audit文件和`docs/CIBC_for_DAC.pdf`是用户保留的范围外dirty文件，
@@ -173,13 +174,16 @@ PASS要求：
 3. provider constructor failure是否在commit前；
 4. official post failure是否必然在commit后；
 5. host packet prune和intermediate container clear是否属于同一logical transaction；
-6. net scratch是否可能被post/queue/next call继续读取，reference的α/intermediate/lA move/gc是否已由candidate
-   disposal plan镜像；
+6. net scratch是否可能被post/queue/next call继续读取；PlanV2对B0 observe与R/C normalize的variant policy是否安全；
 7. `BatchedlA.from_net`导出的六条split-layer lA是否确实只是`gc_lA_from_net`清理的18条all-node lA子集；
 8. 当前fixture `6 α + 12 intermediate + 18 lA = 36`是否应作为protocol fixture expectation而非generic schema常数；
 9. pointer-swap是否被正确保持为未批准实验；
 10. failure后禁止fallback/retry/queue continue是否足够fail closed；
-11. query-scoped exclusive core-owner latch是否足以排除provider reentry、multi-core和stale preserve-mask。
+11. query-scoped exclusive core-owner latch是否足以排除provider reentry、multi-core和stale preserve-mask；
+12. B0 terminal transfer后被provider KFSB重新写成batch-24 residue、而当前R保持batch-12 stale scratch的phase事实
+    是否成立；
+13. R/C在native KFSB后normalize 36 path、B0仅observe residue是否是比“伪造三方scratch parity”更安全的设计；
+14. logical bytes、unique storage、view alias与attribute sentinel是否被正确区分，尤其clear attribute不等于立即free。
 
 如果能设计出既恢复内容又保持`_version`/alias/consumer identity的更强方案，请作为替代设计说明，但不要把未证明方案
 标成当前实现。
@@ -208,8 +212,10 @@ PASS要求：
 - summary所有字段均能从protocol/source/raw重建；
 - artifact无绝对本机路径/credential泄漏；
 - failure artifact与positive worker分离但被同一manifest绑定。
-- scratch pre/post inventory、live disposal keys/sentinel kinds、stale β retention和exclusive owner latch均可从raw重建，
-  且scratch count与production 12-path count严格分离。
+- scratch按`core-entry/terminal-pre/terminal-post-transfer/post-KFSB/post-finalization/solver-return`投影，live
+  finalization keys/sentinel、logical/unique bytes、alias与object/storage/data-pointer lineage均可从raw重建；
+- B0六β container/96 B nonempty residue与R/C provider-net β inventory=`0`按variant核验；scratch count与production
+  12-path count严格分离，且不把sentinel替换升级为即时CUDA memory free。
 
 请评估18-worker设计是否过度或不足，以及B0/R/C在独立进程下如何证明同一个deterministic pre-state。
 
@@ -217,7 +223,7 @@ PASS要求：
 
 PASS要求：
 
-- 48类攻击编号/分区完备且全部fully re-signed；
+- 56类攻击编号/分区完备且全部fully re-signed；
 - 攻击同步更新payload/file/summary/manifest，拒绝原因来自semantic invariant而非简单digest；
 - 外审另造至少3个未预注册攻击仍能被设计覆盖；
 - S4各级code/timing flag仍closed；
@@ -256,15 +262,18 @@ PASS要求：
 
 本轮不是实现测试，但executor已核对设计事实：
 
-- live reference core probe：α=`6 tensors/33,984 B`、intermediate=`12/299,712 B`、all-node lA=
-  `18/471,984 B`、β container=`6×1`保持，logical total=`805,680 B`；
+- live B0 terminal probe：α=`6 tensors/33,984 B`、intermediate=`12/299,712 B`、all-node lA=
+  `18/471,984 B`，logical total=`805,680 B`、unique storage=`756,528 B`；两组lA shared-storage alias，六α、
+  12 intermediate与六export lA return均为共享source storage/data-pointer的新view/object；
+- live B0 solver-return：provider KFSB留下batch-24 scratch，连β unique=`2,829,600 B`；live current R：core-entry到
+  solver-return保持batch-12 stale scratch，unique=`1,414,752 B`、provider-net β inventory=`0`；
 - S4-3/S4-3A相关whole-core/live-return/KFSB/commit/pre-state/production-state/terminal targeted：
   `45 passed in 8.43s`；
 - S4-4参考artifact相关targeted：`19 passed`；
 - CUDA探针：tensor content restore后`_version=0→1→2`；
 - S3 v2 raw=`18 rows / 20,747,422 bytes`；
 - old RVIR five-fresh=`10 .pt / 16,975,355 bytes`；
-- S4-4 tamper inventory=`1..48`、order/worker=`6/18`；
+- S4-4 tamper inventory=`1..56`、order/worker=`6/18`；
 - `git diff --check`、DocOps exchange validate/lint：PASS。
 
 这些只证明设计输入和历史基础设施仍存在，不证明S4-0—S4-4实现通过。
@@ -272,8 +281,8 @@ PASS要求：
 ## 7. 建议外审操作
 
 ```bash
-git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..07b7e9cea040073f1b0cdaf66c71bdf68295556b
-git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..07b7e9cea040073f1b0cdaf66c71bdf68295556b
+git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..bf0096a3a6b7f5c72c48de5c8394e2751bd8b3ec
+git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..bf0096a3a6b7f5c72c48de5c8394e2751bd8b3ec
 
 source env.sh
 /home/lee/miniconda3/envs/boundflow/bin/python -m pytest -q \
@@ -287,8 +296,10 @@ source env.sh
 
 - 重算mutable inventory和memory ledger；
 - 独立区分`BatchedlA.from_net(get_splittable_activations)`与`gc_lA_from_net(net.nodes())`，核对当前fixture为6 export/
-  18 disposal而不是6/6；
-- 检查tamper编号1—48；
+  18 all-node path而不是6/6；
+- 独立重算terminal logical/unique storage与两个lA alias group，确认empty `data_ptr=0`不算alias；
+- 检查B0 post-KFSB batch-24 residue、current R batch-12 stale和PlanV2 R/C normalization的phase/owner逻辑；
+- 检查tamper编号1—56；
 - 用CUDA tensor验证commit+restore后的`_version`；
 - 亲读provider core/post确认clear/prune/post顺序；
 - 搜索S4文档所有`claimed/open/validated`词，核对没有implementation或performance漂移。
@@ -298,12 +309,12 @@ source env.sh
 1. 是否存在blocker/major，使S4-0在S3批准后仍不能开工？
 2. all-state VJP的两个coefficient arena方案是否漏掉某个residual/fanout owner？
 3. six-site effective→gradient→terminal-lA alias是否有无法由phase state解决的lifetime冲突？
-4. net scratch是否必须成为第13+条production数值path，还是应保持为独立lifetime/disposal transaction？
+4. net scratch是否必须成为第13+条production数值path，还是应保持为独立phase-aware lifetime/finalization transaction？
 5. post failure后是否有比`COMMITTED_POST_FAILED_POISONED`更严格、可实现的安全语义？
 6. B0/R/C 18 fresh是否足够证明reference和candidate，不依赖历史`.pt`？
 7. stdlib raw schema是否缺dtype、negative-zero、NaN payload、alias或view metadata？
 8. executed-source inventory是否有更可靠的闭包算法？
-9. 48类tamper还缺哪类可全重签semantic attack？
+9. 56类tamper还缺哪类可全重签semantic attack？
 10. 是否同意当前唯一执行顺序，不开放S4-P timing？
 
 ## 9. 输出格式
