@@ -1,5 +1,12 @@
 # ASPLOS'27 S4-4：formal artifact、stdlib replay、tamper与外部锚实施施工包
 
+> **2026-08-29 challenge/witness所有权修订**：本稿16-node artifact seal DAG、96-case registry和external
+> anchor字段继续有效，但单独由executor在Git/DocOps中写入的anchor最多形成`CHALLENGE_BOUND`，不能自动称为
+> independent authenticity。正式关闭还必须有auditor预先发行challenge、auditor-controlled fresh run、独立重算和
+> execution witness，达到`INDEPENDENTLY_WITNESSED`。新增外部流程节点不改artifact内部16-node/36-edge hash。
+> 详细schema、状态机与W01—W24 negative suite由
+> `BOUNDFLOW_EXECUTION_EVIDENCE_TRUST_AND_WITNESS_PLAN_2026_08_29.md`拥有。
+
 status: implementation-construction-design-only
 date: 2026-08-29
 execution-authority: false

@@ -17,6 +17,11 @@ performance-claimed: false
 
 # BoundFlow ASPLOS'27 S3外审执行复核回执
 
+> **2026-08-29后续影子预审修订**：下文“fully outer-resigned tamper 10/10”应精确理解为外层manifest已重签、
+> 但raw与派生summary仍存在语义不一致的攻击全部拒绝。同步修改raw、重算summary并重签manifest的内部自洽变体
+> 可通过self-check，这属于离线自签artifact的保证边界。该新finding不改变本回执的命令复现事实，但要求外审另做
+> fresh run并裁决`S3-SHADOW-F1`。见`BOUNDFLOW_ASPLOS27_S3_EXECUTOR_SHADOW_PREAUDIT_2026_08_29.md`。
+
 ## 0. 结论
 
 S3 exchange仍为`ready_for_audit/r001`，没有收到外部审计结果。本回执不充当审计，也不批准S4。

@@ -1,5 +1,12 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-29 S3/S4执行证据信任边界修订，不新增claim**：S3影子预审构造了两类同步修改raw、重算summary并
+> 重签manifest的内部自洽artifact，证明既有10/10 tamper只关闭派生语义不一致攻击，不单独证明GPU物理执行真实性。
+> 现冻结E0 self-consistent、E1 challenge-bound、E2 independently-witnessed、E3 hardware-attested四级保证；当前
+> RTX 4060正式关闭至少需要外审者控制fresh run与独立重算的E2 procedural witness。S3继续
+> `PENDING-EXTERNAL-AUDIT`，S4代码/formal/timing仍关闭。见
+> `BOUNDFLOW_EXECUTION_EVIDENCE_TRUST_AND_WITNESS_PLAN_2026_08_29.md`。
+
 > **2026-08-29 S4-4 evidence construction不新增claim**：只冻结33-process formal evidence设计（18 positive+
 > 15 fault）、stdlib tensor sidecar、16-node/36-edge seal DAG与96-case tamper registry。纠正后的semantic
 > tensor-occurrence floor=`85,795,608 B`只用于证据容量规划，不是显存或artifact大小；95类tamper必须拒绝，

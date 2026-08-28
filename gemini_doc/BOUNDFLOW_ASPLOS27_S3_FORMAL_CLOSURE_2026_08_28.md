@@ -14,6 +14,13 @@ tenx-claimed: false
 
 # ASPLOS'27 S3 optimizer/runtime 正式收口
 
+> **2026-08-29证据保证范围修订**：本稿的数值、10/9事务、v1 NO-GO和v2性能统计不变；“fully
+> outer-resigned tamper”只表示外层manifest已重签但派生语义仍不一致的10类攻击被拒绝。执行方影子预审已证明，
+> 若同步修改raw、重算summary并重签manifest，self-check可接受内部自洽artifact。因此本稿状态严格保持
+> `PENDING-EXTERNAL-AUDIT`；物理执行真实性需外审者亲自fresh run和独立重算。详见
+> `BOUNDFLOW_ASPLOS27_S3_EXECUTOR_SHADOW_PREAUDIT_2026_08_29.md`与
+> `BOUNDFLOW_EXECUTION_EVIDENCE_TRUST_AND_WITNESS_PLAN_2026_08_29.md`。
+
 ## 1. 结论
 
 S3 v2 在冻结的 ResNet2B P-anchor、10 次 CROWN evaluation / 9 次 Adam mutation 本地 wrapper 上通过

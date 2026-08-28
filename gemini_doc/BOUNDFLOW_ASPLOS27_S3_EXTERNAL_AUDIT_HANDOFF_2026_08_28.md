@@ -12,6 +12,12 @@ performance-claimed: false
 
 # BoundFlow ASPLOS'27 S3 external audit handoff
 
+> **2026-08-29补充审计输入（不改r001原request）**：外审必须同时读取
+> `BOUNDFLOW_ASPLOS27_S3_EXECUTOR_SHADOW_PREAUDIT_2026_08_29.md`和
+> `BOUNDFLOW_EXECUTION_EVIDENCE_TRUST_AND_WITNESS_PLAN_2026_08_29.md`，并正式裁决`S3-SHADOW-F1`。
+> 现有10/10 probe证明的是outer-manifest-resigned后派生语义不一致会被拒绝，不证明完整重写raw/summary/manifest
+> 后的artifact来自真实GPU执行。只有外审者控制的fresh run与独立重算才形成当前环境可达到的E2见证。
+
 ## 1. 审计请求
 
 请外部审计方不采信closure/summary数字，从raw、源码与独立数学实现判定是否同意：

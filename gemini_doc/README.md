@@ -1,5 +1,13 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+> **2026-08-29 执行证据信任与外部见证协议已冻结、代码仍关闭**：新增
+> `BOUNDFLOW_EXECUTION_EVIDENCE_TRUST_AND_WITNESS_PLAN_2026_08_29.md`及独立change log。协议把保证拆为
+> E0内部自洽、E1 challenge绑定、E2独立见证、E3硬件证明；冻结audit challenge、execution witness、状态机和
+> W01—W24 negative suite。当前RTX 4060不具备官方H100+ GPU attestation路径，因此S3/S4正式关闭依赖外审者
+> 亲自启动fresh run并独立重算的E2 procedural witness。SSHSIG/DSSE/Rekor仅为可选签名/发布层，不冒充物理执行
+> 真实性。另新增`BOUNDFLOW_ASPLOS27_S3_EXTERNAL_AUDIT_SUPPLEMENT_F1_2026_08_29.md`，可直接作为原r001的
+> 增补请求交给外审。本轮不改exchange/artifact/代码，不开放S4。
+
 > **2026-08-29 S3执行方影子预审发现待外审裁决的证据边界**：新增
 > `BOUNDFLOW_ASPLOS27_S3_EXECUTOR_SHADOW_PREAUDIT_2026_08_29.md`。AC1—AC5/AC7的顺序、10/9事务、
 > stdlib数值重算、v1/v2性能和claim边界均复核成立，另一次18-worker fresh shadow也完成；但两类“同步修改
