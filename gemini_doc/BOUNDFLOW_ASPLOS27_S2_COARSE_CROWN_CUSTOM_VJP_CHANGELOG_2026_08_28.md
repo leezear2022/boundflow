@@ -56,3 +56,11 @@ performance-claimed: false
 - 与独立native PyTorch比较，lower最大差`3.09944e-6`、compressed dα最大差`4.37722e-8`、sign
   exact；短测native/D2B/S2中位约`8.920/6.332/2.122 ms`，即S2约`4.20x`，仅作为formal前
   feasibility，不形成性能claim。
+
+## 2026-08-28 correctness与fail-closed测试
+
+- 增加native PyTorch、旧D2B direct、S2 canonical三方lower/dα对照，reference不经过S2 compiler；
+- 检查5个cuDNN call、单graph replay、active β、零saved dense A/history、零warm DLPack与零fallback；
+- receipt对claim、call count、replay count、β owner、dense-A、fallback和hash篡改全部拒绝；
+- default stream与immutable state version漂移均在selected graph launch前拒绝；
+- 专属测试`5 passed`；formal artifact与全量回归尚未在此节点运行。
