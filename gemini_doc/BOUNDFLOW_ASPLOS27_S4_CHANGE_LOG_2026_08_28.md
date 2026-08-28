@@ -10,6 +10,30 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：关闭S4-0逐文件施工歧义并冻结V4 construction package
+
+- 新增784行
+  `gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`；逐文件审计existing
+  snapshot/live-return/R31/FSG4边界和pinned αβ-CROWN provider容器，不生成production代码；
+- 发现旧四输入API没有exact-call identity，V4增加keyword-only `exact_call_id`，receipt只保存hash，private lease保存raw
+  identity并绑定owner PID/thread/current stream；
+- 证明历史`live_targets_from_pre_result_v4()`接受`MutableMapping/Mapping`并调用`.get()`，与读取前拒绝custom Mapping
+  的negative矛盾；pinned provider实为built-in `dict/list/Tensor`，故冻结S4专用strict extractor而不修改历史helper；
+- 把一次live capture改为receipt前后双capture，新增`LIVE_SOURCE_READ_RACE`；宽泛snapshot/plan `ValueError`使用
+  envelope checks加稳定residual code归一，不解析英文错误文本；
+- 修正“无GPU执行”为零candidate kernel/零candidate CUDA allocation；12 tensors × 2 content passes形成24条logical
+  D2H和`68,016 B`逻辑载荷，明确不冒充CUPTI物理transaction count；
+- minimum negative由44增为56；formal closure冻结5 fresh real-provider process、JSON receipt与stdlib replay；
+- claim缩到local single-transfer和phase identity，process-global exact-call exclusivity继续由S4-3 latch关闭；canonical
+  construction model冻结完整紧凑JSON并可独立重算，hash=
+  `471424594fb4b6d017feac936a6005eb9d0451fd5579d026204ec952d0995239`；
+- 同步主预注册、历史S4-0修订标记、README和总体计划；S3仍待外审，S4代码/formal/timing/performance继续closed。
+
+### 验证
+
+- provider/container、existing helper、snapshot/plan validator与D2H accounting只读源码合同：提交前验证；
+- 文档模型hash、关键计数、引用、`git diff --check`、定向回归与DocOps validation/lint：提交前执行。
+
 ## 2026-08-29：刷新S4设计外审交接至formal evidence readiness v9
 
 - design-result commit更新为`33b2b2a425f997da79e78cb5826650b19d3f9927`，冻结base仍为

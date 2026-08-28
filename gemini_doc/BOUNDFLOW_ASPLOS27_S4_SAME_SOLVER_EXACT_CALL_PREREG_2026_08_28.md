@@ -191,13 +191,14 @@ bounds来自入口`relu_pre`，不属于candidate输出。existing KFSB仍执行
 
 ## 3. 分阶段门禁
 
-### S4-0：production signature admission（无GPU执行）
+### S4-0：production signature admission（零candidate kernel/allocation）
 
 精确类型、compiler入口、reason映射和negative测试矩阵见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_MUTABLE_STATE_ADMISSION_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`。
 开工前V2/V3修正证据见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_ADMISSION_PREFLIGHT_CORRECTION_2026_08_28.md`与
-`gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_LIVE_LEASE_IMPLEMENTATION_READINESS_2026_08_28.md`。S4-0只新增tensor-free typed
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_LIVE_LEASE_IMPLEMENTATION_READINESS_2026_08_28.md`。第一行代码的V4权威施工合同见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`。S4-0只新增tensor-free typed
 runtime binding receipt和不可序列化ephemeral runtime lease，复用现有snapshot/topology/plan与GC0 rejection vocabulary；
 不得新增solver/execution IR或通过native dense initializer实现candidate admission。
 
@@ -209,17 +210,27 @@ runtime binding receipt和不可序列化ephemeral runtime lease，复用现有s
 - snapshot mutable β key与compiled gradient key完全相等；
 - feature index、shape、dtype、device、location/sign与split/history lineage一致；
 - plan/snapshot binding projection可独立重算；R31 `source_state_hash`只作dense oracle provenance，不冒充snapshot hash；
+- keyword-only `exact_call_id`非空并绑定receipt hash与private lease raw identity，禁止prepared wrapper跨exact call；
+- 只接受pinned provider真实使用的exact built-in `dict/list/Tensor`层级；dict subclass/custom Mapping必须在读取前拒绝，
+  不复用历史宽松`live_targets_from_pre_result_v4()`；
 - live path/shape/content与snapshot exact；ephemeral lease保证S4-0、S4-1A、S4-3看到同一Python object/raw
   storage/version，empty zero-pointer不伪装alias；
+- receipt构造前后各采集一次live token，任一object/storage/version/content/stream变化均以
+  `LIVE_SOURCE_READ_RACE`拒绝；
+- 允许且必须披露content validation的D2H：12 tensors × 2 passes=`24`条logical copy、
+  `8,502 × 4 × 2 = 68,016 B`；candidate kernel/CUDA allocation保持0，这不是CUPTI物理transaction claim；
 - 每domain β width与history长度exact，不接受只匹配前缀；
 - stored α、optimizer-active lower direction与preserved direction分别计数并绑定；
 - preserved α direction在任一candidate mutation后digest不变；
 - P-only计划在当前fixture上明确拒绝，reason=`MUTABLE_STATE_COVERAGE_INCOMPLETE`；
 - active β缺失明确拒绝，reason=`ACTIVE_BETA_COVERAGE_INCOMPLETE`；
-- 不接受多余、重复、乱序、alias冲突binding、same-content clone替换、provider rebind或lease重复transfer；
+- 不接受多余、重复、乱序、alias冲突binding、same-content clone替换、provider rebind、read race、exact-call错配或
+  lease重复transfer；minimum negative为56类，宽泛validator异常必须归一到冻结detail code而非解析英文错误文本；
 - performance/timing/same-solver flag全部false。
 
-GO：六α+六β全覆盖，active β=`1/1`，live lease与plan projection关闭，且schema无模型特判。否则S4-1关闭。
+GO：六α+六β全覆盖，active β=`1/1`，5 fresh real-provider worker、receipt stdlib replay、56类negative、live lease与
+plan projection关闭，且schema无模型特判。S4-0只证明local single-transfer与phase identity binding；process-global
+query exclusivity仍必须由S4-3 exact-call latch关闭。否则S4-1关闭。
 
 ### S4-1：all-state single-evaluation compiled correctness
 

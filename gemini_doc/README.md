@@ -1,6 +1,6 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
-最新动作（v15 S3外审/S4 whole-core形式化证据实施就绪）：S3已正式交付DocOps exchange
+最新动作（v16 S3外审/S4-0逐文件施工就绪）：S3已正式交付DocOps exchange
 `asplos27-s3-optimizer-runtime-20260828`，状态=`ready_for_audit/r001`。S4只读普查确认production
 optimizer每step有六α source/8,496 stored元素（lower-only active/preserved各4,248）与一条active β；S3 P-only
 对应1,032 stored/516 active且β为空，不能直接作为whole-core exact-call。S4草案冻结compressed evaluator→
@@ -12,6 +12,7 @@ terminal bridge。S3外审批准前代码/timing关闭。见
 `BOUNDFLOW_ASPLOS27_S4_0_MUTABLE_STATE_ADMISSION_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_0_ADMISSION_PREFLIGHT_CORRECTION_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_0_LIVE_LEASE_IMPLEMENTATION_READINESS_2026_08_28.md`、
+`BOUNDFLOW_ASPLOS27_S4_0_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`、
 `BOUNDFLOW_ASPLOS27_S4_1A_ORDERED_BUFFER_ABI_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1A_PREPARE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1BC_DAG_ADJOINT_PREFLIGHT_CORRECTION_2026_08_28.md`、
@@ -40,6 +41,16 @@ correctness阶段必须保留content hash；storage token固定绑定`untyped_st
 非dataclass `__slots__` class并拒绝copy/deepcopy/pickle，S4-0 negative最低扩为44类；receipt进artifact，lease绝不进
 artifact或跨query cache。
 这些是设计修正，不是S4实现或性能结果。
+
+S4-0 V4逐文件施工审计又关闭六处实现歧义：入口增加keyword-only `exact_call_id`并只把其hash写入receipt；
+pinned provider的α/β容器经源码确认是exact built-in `dict/list/Tensor`，因此新增strict extraction helper，禁止复用历史
+`live_targets_from_pre_result_v4()`的宽松`Mapping.get()`路径；live token在receipt前后采集两次以拒绝read race；
+宽泛`ValueError`通过envelope check加稳定residual code归一，不能解析英文文本；minimum negative从44增为56。
+content hash会把12条CUDA Tensor移到CPU，因此正式账不是“零GPU活动”，而是零candidate kernel/零candidate CUDA
+allocation，同时披露两轮共24条logical D2H、`68,016 B`逻辑载荷。S4-0只能证明local single-transfer与phase
+identity，process-global exact-call exclusivity仍由S4-3 latch负责。施工合同canonical hash=
+`471424594fb4b6d017feac936a6005eb9d0451fd5579d026204ec952d0995239`；施工包内冻结完整canonical JSON，
+S3外审前代码仍closed。
 
 S4-1A prepare事务已进一步冻结：正式12-path CUDA owner探针得到6 α leaf+1 active β leaf+5 empty token，parameter/
 gradient均`4,254 elements / 17,016 B`，base DLPack=`16/16` pointer exact；一次双group Adam后parameter/gradient pointer

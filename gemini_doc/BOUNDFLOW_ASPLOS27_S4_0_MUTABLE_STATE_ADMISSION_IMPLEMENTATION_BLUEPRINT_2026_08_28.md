@@ -14,6 +14,14 @@ performance-claimed: false
 
 # ASPLOS'27 S4-0：production mutable-state admission实施蓝图
 
+> **V4权威修订（2026-08-29）**：本稿保留S4-0语义目标和V3反例，但第一行代码的函数签名、strict provider
+> extraction、live-token双采集、GPU活动披露、reason归一化、negative数量和关闭口径，以
+> `BOUNDFLOW_ASPLOS27_S4_0_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`为准。V4新增keyword-only
+> `exact_call_id`，禁止复用宽松的历史live helper；S4-0是零candidate kernel/零candidate CUDA allocation，而非
+> 零GPU活动。正式positive会为12条CUDA source各做两次content validation，共24条logical D2H记录、
+> `68,016 B`逻辑载荷。minimum negative由44增至56。S4-0只证明本prepared wrapper的single-transfer和phase
+> identity；process-global exact-call exclusivity仍由S4-3 latch关闭。
+
 ## 0. 直接结论
 
 S4-0不需要新增solver IR、execution IR或另一套verification graph。它需要一个**tensor-free typed runtime
@@ -24,6 +32,7 @@ ProductionStateSnapshotV4
   + ProductionReluTopologyV4
   + R31FullRegionPlanV1
   + transient Mapping[path, live Tensor]
+  + exact_call_id
   + VerificationRejectionReason
   → PreparedS4MutableStateAdmissionV1
        ├─ S4MutableStateAdmissionV1
@@ -32,7 +41,8 @@ ProductionStateSnapshotV4
 
 receipt证明六个compressed lower-α slot、六个sparse β slot及layout/history的稳定投影；lease用强引用和raw token保证
 S4-1A/S4-3操作的仍是同一批live object/storage/version。mapping和lease不进入receipt或artifact，lease不可跨query复用。
-S4-0不创建dense α/β、不分配GPU buffer、不执行TIR、不计时，也不改变live solver state。
+S4-0不创建dense α/β、不分配candidate GPU buffer、不执行candidate TIR、不计时，也不改变live solver state；
+live content校验引起的D2H必须按V4施工包单列，不得归零或混为candidate execution。
 
 开工前源码审计已证明原三输入签名无法验证live storage alias和`_version`；详细反例与修正依据见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_ADMISSION_PREFLIGHT_CORRECTION_2026_08_28.md`。

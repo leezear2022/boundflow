@@ -14,6 +14,12 @@ performance-claimed: false
 
 # ASPLOS'27 S4-0 admission开工前源码审计与V2修正
 
+> **V4权威修订（2026-08-29）**：本稿的offline/live边界诊断继续成立；精确施工合同已被
+> `BOUNDFLOW_ASPLOS27_S4_0_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`取代。V4入口是
+> `snapshot + topology + plan + strict live sources + exact_call_id`五输入，使用专用built-in container extractor，
+> 在receipt前后采集两次live token并拒绝read race。minimum negative为56；正式S4-0披露24条logical D2H、
+> `68,016 B`逻辑validation载荷。本文后文的“四输入签名”“44类”和复用宽松helper仅保留为历史演进记录。
+
 ## 0. 直接结论
 
 原S4-0方向——“只新增runtime admission receipt，不新增solver/graph/execution IR”——仍然正确，但原函数签名
@@ -336,5 +342,5 @@ S4-0 code = closed
 S4 GPU/timing/performance = closed
 ```
 
-S3批准后第一笔S4-0代码必须以本修正后的四输入签名为准。若实现仍只有`snapshot + topology + plan`，则只能声称
+S3批准后第一笔S4-0代码必须以V4施工包的五输入签名为准。若实现仍只有`snapshot + topology + plan`，则只能声称
 “offline semantic admission”，不能关闭live mutable-state admission，也不能进入S4-1A。

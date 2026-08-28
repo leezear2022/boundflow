@@ -1984,3 +1984,13 @@ S0只观察和组合已有资产，不新增IR、schema或新kernel。它在48�
 - 本稿当前为`execution-authority=true/code-change-open=false-pending-s3-external-audit`；下一动作是完成
   S3独立外审并审阅S4 all-mutable-state预注册。批准后才允许S4-0 coverage代码；S4正式timing、未归因
   O6/O7、complete-query与10x claim仍关闭。
+
+S4-0第一行代码的边界已在
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`中进一步冻结：canonical
+compiler入口除snapshot/topology/plan/live sources外，还必须绑定keyword-only `exact_call_id`；pinned provider只经
+strict built-in `dict/list/Tensor` extractor读取，
+并在receipt构造前后两次采集object/storage/version/content/stream token。admission的content校验会产生12 tensors ×
+2 passes=`24`条logical D2H、`68,016 B`逻辑载荷，故只能声称零candidate kernel/零candidate CUDA allocation，不能写
+零GPU活动。S4-0关闭的是local single-transfer和phase identity；process-global query exclusivity仍由S4-3 exact-call
+latch关闭。minimum negative为56，5 fresh real-provider receipt必须可由stdlib replay；这些仍是implementation contract，
+不是S4性能结果。

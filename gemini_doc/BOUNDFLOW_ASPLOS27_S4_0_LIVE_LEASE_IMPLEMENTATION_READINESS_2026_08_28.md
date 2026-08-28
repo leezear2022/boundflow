@@ -14,6 +14,13 @@ performance-claimed: false
 
 # ASPLOS'27 S4-0：跨阶段live ownership与ephemeral lease实施就绪结论
 
+> **V4权威修订（2026-08-29）**：V3 strong-ref lease方向保持，但精确API和claim边界以
+> `BOUNDFLOW_ASPLOS27_S4_0_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`为准。lease新增private raw
+> `exact_call_id`、owner PID/thread和current-stream token；receipt只保存exact-call hash。strict extraction不用现有
+> `live_targets_from_pre_result_v4()`的宽松`Mapping.get()`路径；双capture拒绝admission read race。minimum negative
+> 从44增至56。S4-0只关闭local single-transfer，不能单独声称process-global query exclusivity；该性质留给S4-3 latch。
+> live content hash的两轮D2H按24条/`68,016 B`逻辑载荷披露，不能写成零GPU活动。
+
 ## 0. 直接结论
 
 S4-0 V2把输入从offline snapshot扩成了`snapshot + topology + plan + transient live mapping`，但其返回值仍只有
