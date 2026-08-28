@@ -17,6 +17,11 @@ tenx-claimed: false
 
 # ASPLOS'27 S4-3：whole-core事务实现就绪审计
 
+> 2026-08-29施工冻结修订：本稿的live诊断事实继续有效；状态机、scratch finalization、14-step commit、
+> queue partial-mutation、6-pair formal与raw floor已由
+> `BOUNDFLOW_ASPLOS27_S4_3_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`机械闭合。实施以施工包为准；
+> 本稿旧`14-transition`模型、5对formal和把`559,838 B`称为total-new的措辞均被取代。
+
 ## 0. 直接结论
 
 S4-3的计算语义和provider consumer已经足够清楚，但旧蓝图还不能直接照着实现。对真实B3-C same-solver路径做
@@ -268,17 +273,18 @@ S4-3不得通过额外CROWN调用补lA，也不得在KFSB侧猜测或重建pre-t
 | persistent depths `[6]` | CPU | 24 |
 | immutable β location/sign lease | external retained | 72 |
 
-因此新的known-new subtotal为：
+因此新的known tensor/base lower bound为：
 
 ```text
 S4-3 CUDA = 491,718 + 68,016 + 24 = 559,758 B
 S4-3 CPU  = 56 + 24                  =      80 B
-S4-3 total-new logical              = 559,838 B
+S4-3 known base lower bound          = 559,838 B
 ```
 
-external retained的β location/sign `72 B`不重复计入new allocation，但必须计入liveness披露。该subtotal仍不是peak：
-S4-2 scratch、candidate、rollback和post output不一定同时达到最大live set，CUDA allocator size class/workspace也未包含。
-formal必须按phase记录`logical live / allocated / reserved / peak`，禁止把静态subtotal冒充峰值。
+external retained的β location/sign `72 B`不重复计入new allocation，但必须计入liveness披露。该base lower bound既不是
+完整prepared transaction也不是peak：S4-2完整policy storage、transaction对象、provider scratch、KFSB workspace、
+post/queue storage、CUDA allocator size class/workspace均未包含。formal必须按phase记录
+`logical live / unique storage / allocated / reserved / peak`，禁止把静态base冒充总量或峰值。
 
 ## 6. container与host logical commit
 
@@ -314,38 +320,20 @@ untouched_suffix_restore_count = 0
 即使`restored_prefix_count == committed_prefix_count`且content exact，terminal仍是`COMMIT_POISONED`，因为PyTorch
 `_version`不可逆。不得fallback、retry、继续post或继续queue。
 
-## 7. 覆盖post/queue的exclusive latch
+## 7. 覆盖terminal/KFSB/scratch/commit/post/queue的exclusive latch
 
-旧`UNCLAIMED/CANDIDATE_ACTIVE/COMPLETED/POISONED`太粗，无法阻止commit/post期间重入。冻结状态：
-
-```text
-UNCLAIMED
-  -> PREPARED
-  -> COMMITTING
-  -> CORE_COMMITTED
-  -> POSTPROCESSING
-  -> POST_READY
-  -> QUEUEING
-  -> COMPLETED
-```
-
-failure terminals：
+旧模型仍然太粗：它没有表示terminal capability已消费、KFSB执行和36项provider scratch部分finalization。
+施工包冻结的新模型为：
 
 ```text
-PRECOMMIT_ABORTED_CLEAN
-COMMIT_POISONED
-POST_POISONED
-QUEUE_POISONED
+23 states / 22 events / 40 legal / 466 invalid
+hash = 6ed3d2fd946aaa0f6342f637a4754cc50eeec96e24392ed3b42adbbf92a3388a
 ```
 
-只有第一条state transition前的fail可进入clean terminal。一旦进入`COMMITTING`，任何失败都禁止native fallback/retry。
-official post失败进入`POST_POISONED`；queue add失败进入`QUEUE_POISONED`，不能降级成post success或clean abort。
-
-14条静态transition与修正memory ledger的canonical model hash为：
-
-```text
-833e8a9bfc72cfa4856d72765f888fe8d4416deb08cd46fdda57aedd406ccaf5
-```
+主链明确经过`TERMINAL_CLAIMED→KFSB_RUNNING→SCRATCH_FINALIZING→CORE_STAGED→DEVICE_COMMITTING→
+HOST_COMMITTING→CONTAINER_COMMITTING→CORE_COMMITTED→POSTPROCESSING→QUEUEING→COMPLETED`。
+terminal claim后、device copy前的失败进入`STAGING_POISONED`；device/host/container失败进入`COMMIT_POISONED`；
+post失败为`POST_POISONED`；add或check-worst失败为`QUEUE_POISONED`。只有terminal claim前且live state未变的拒绝可clean。
 
 该hash只是设计模型的确定性指纹，未来实现必须从代码重新生成，不能硬编码成通过条件。
 
@@ -426,8 +414,8 @@ receipt保持tensor-free；raw object/storage token只存在于进程内lease和
 
 ## 10. formal run合同修正
 
-S4-3自身仍采用R/C 5对、10个fresh subprocess做implementation correctness；S4-4再运行B0/R/C六全排列18
-worker。每个S4-3 worker必须原始记录：
+5对只能形成3/2顺序分布，不能平衡R/C。S4-3改为R/C 6对、12个fresh subprocess，`RC/CR=3/3`；
+S4-4再运行B0/R/C六全排列18 worker。每个S4-3 worker必须原始记录：
 
 - core entry/exit、post entry/exit、queue add entry/exit ordinal；
 - 12条device path pre/candidate/final/fault version；
@@ -439,6 +427,8 @@ worker。每个S4-3 worker必须原始记录：
 - lower/lA/intermediate/state及post output完整IEEE numeric payload。
 
 R/C correctness只能在official post和candidate queue insertion都成功后判PASS，不能在core return处提前结束。
+施工包按冻结semantic snapshot schema重算出的12-worker mandatory tensor-occurrence floor为`38,610,816 B`；
+它允许content-addressed sidecar去重，所以不是物理文件大小下限。
 
 ## 11. 实现短提交顺序
 
@@ -451,7 +441,7 @@ S3 external approval且S4-0—S4-2依序关闭后，S4-3只按以下顺序开放
 5. `feat(runtime): commit host packet and intermediate container`；
 6. `feat(adapter): observe official post and candidate queue insertion`；
 7. `test(runtime): add S4-3 state/container/rollback/post negatives`；
-8. `artifact: add five-pair whole-core correctness replay`；
+8. `artifact: add six-pair whole-core correctness replay`；
 9. `docs: close S4-3 and open S4-4`。
 
 每一刀都必须保持provider compute/update/fallback为0；第6刀之前不得宣称whole-core complete。
@@ -465,7 +455,7 @@ S3 external approval且S4-0—S4-2依序关闭后，S4-3只按以下顺序开放
 - prefix-only rollback不写untouched suffix，故障仍诚实poison；
 - official post=1、candidate post queue add=1、query total add=2分别实测；
 - terminal/working leases覆盖各自最后consumer；
-- R/C 5对从core到queue完整闭合且raw可重放。
+- R/C 6对、12 fresh从terminal到queue完整闭合且raw可重放。
 
 ### STOP
 

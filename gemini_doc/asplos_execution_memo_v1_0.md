@@ -30,6 +30,12 @@
 > 不平衡，已改为A/B与B/C各6对、共24 fresh；mandatory transition-tensor floor至少`60,550,896 B`。
 > `491,774 B`现只称known tensor/base lower bound。施工更细不改变当前唯一动作：仍先完成S3独立外审，S4-2代码/
 > formal/timing关闭。
+> S4-3最新施工合同把exact-call transaction扩为terminal claim→KFSB→36项provider scratch finalization→
+> 14-step device/host/container commit→official post→candidate queue add→check-worst。机械模型=
+> `23 states/22 events/40 legal/466 invalid`、hash=`6ed3d2fd...a3388a`；terminal claim后的staging failure、
+> commit/post/queue failure分别poison且禁止retry/fallback。R/C由5对改6对、12 fresh，mandatory
+> tensor-occurrence floor=`38,610,816 B`；`559,838 B`仅为known base lower bound。这仍不改变当前唯一动作：
+> S3外审前S4-3代码/formal/timing关闭。
 >
 > **历史（等待上方S3外审关闭）：**
 > **2026-08-28 当前唯一指令：S3内部关闭，只开放S4 same-solver实现/正确性接入**。S3 v2在source

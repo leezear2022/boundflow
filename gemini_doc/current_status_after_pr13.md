@@ -21,6 +21,10 @@
 > 9次controlled re-arm、三个version轴、28项commit cursor与terminal-best/lA一致性门禁。旧A/B与B/C各5对无法
 > 平衡正反顺序，已改为各6对共24 fresh；mandatory transition-tensor floor至少`60,550,896 B`。
 > `491,774 B`降为known base lower bound，完整policy storage/peak待实现receipt。当前依然没有S4代码或formal。
+> S4-3逐文件施工现把whole-core边界机械闭合：terminal claim、KFSB、36项scratch finalization、14-step
+> device/host/container commit、official post、candidate add与check-worst统一进入23-state transaction；prefix rollback
+> 不写untouched suffix，queue partial mutation不rollback而poison。旧5对R/C改为6对/12 fresh，mandatory
+> tensor-occurrence floor=`38,610,816 B`；`559,838 B`降为known base lower bound。仍无S4-3实现/formal/性能claim。
 >
 > **历史（等待上方S3外审决定）：**
 > **2026-08-28 当前状态：S3 3x本地optimizer内部关闭，只开放S4 same-solver实现/正确性**。source=

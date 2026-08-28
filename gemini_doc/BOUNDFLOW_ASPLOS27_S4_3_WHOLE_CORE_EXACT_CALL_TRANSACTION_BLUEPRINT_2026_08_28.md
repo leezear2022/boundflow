@@ -19,6 +19,11 @@ complete-query-claimed: false
 > 2026-08-29实施就绪修订：本稿的路线仍有效，但memory、working-β、rollback、lease和post/queue细节已由
 > `BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_29.md`精确化。实现时以
 > 后者为准；旧`608,942 B`、blanket restore与粗粒度post状态机不再是当前合同。
+>
+> 2026-08-29施工冻结修订：最终实现合同现由
+> `BOUNDFLOW_ASPLOS27_S4_3_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`拥有。23-state模型、36项scratch
+> finalization、14-step commit、queue partial failure、6-pair/12-worker formal和`38,610,816 B` raw occurrence
+> floor取代本稿较早的粗粒度状态与five-fresh描述。
 
 ## 0. 直接结论
 
@@ -243,7 +248,7 @@ known subtotal按2026-08-29 arena-slice owner复核修正为`491,774 bytes`；S4
 ```text
 known S4-3 CUDA subtotal = 491,718 + 68,016 + 24 = 559,758 bytes
 known S4-3 CPU subtotal  = 56 + 24 = 80 bytes
-known S4-3 logical subtotal = 559,838 bytes
+known S4-3 tensor/base lower bound = 559,838 bytes
 ```
 
 这**不是peak memory claim**。provider β location/sign的72 B是external retained liveness，不重复计入new allocation；
@@ -502,13 +507,13 @@ R/C必须在同一个`ABCrownSolver.verify`边界、同一model/property、seed�
 
 ### 12.2 运行顺序
 
-预注册五个fresh pair并交替顺序，例如：
+施工包纠正为六个fresh pair，保证顺序平衡：
 
 ```text
-R/C, C/R, R/C, C/R, R/C
+R/C, C/R, R/C, C/R, R/C, C/R
 ```
 
-每个worker独立进程；部分结果不能resume成formal。raw先落盘，再从raw生成summary。
+共12个worker，`RC/CR=3/3`。每个worker独立进程；部分结果不能resume成formal。raw先落盘，再从raw生成summary。
 
 ### 12.3 数值门禁
 

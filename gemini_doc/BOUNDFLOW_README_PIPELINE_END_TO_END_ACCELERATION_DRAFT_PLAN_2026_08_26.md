@@ -3,7 +3,7 @@
 status: s3-ready-for-external-audit-s4-prereg-draft
 date: 2026-08-26
 updated: 2026-08-29
-revision: v13-s4-policy-driver-construction
+revision: v14-s4-whole-core-transaction-construction
 supersedes-revision: v6-asplos27-ten-x
 supersedes-draft-at: 20f4741
 submission-target: ASPLOS-2027-September-cycle
@@ -16,6 +16,15 @@ execution-authority: true
 code-change-open: false-pending-s3-external-audit
 external-audit: s3-ready-for-external-audit
 performance-claimed: false
+
+> **2026-08-29 S4-3 whole-core事务施工收束（v14，不改10x北极星）**：S4-3不再从12-path copy起算，
+> 而是从terminal capability claim开始，覆盖3次KFSB/72 child lower、36项provider-net scratch finalization、
+> 12 device+host+container的14-step logical commit、一次official post、一次candidate queue add与check-worst。
+> 状态模型修正为`23/22/40/466`，hash=`6ed3d2fd...a3388a`；prefix rollback不写untouched suffix，post/queue
+> partial failure禁止retry/fallback。R/C由5对改为6对/12 fresh，mandatory tensor-occurrence floor=
+> `38,610,816 B`；`559,838 B`只称known base lower bound。详见
+> `BOUNDFLOW_ASPLOS27_S4_3_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`。这些仍是design，S3外审
+> 批准前S4代码/formal/timing关闭。
 
 > **2026-08-29 S4-2 policy施工收束（v13，不改10x北极星）**：S4-1D opaque result不能暴露raw Tensor，
 > 所以S4-2采用exact sealed consume，并由run-level evaluator family发行10个one-shot generation、执行9次受控
@@ -1702,7 +1711,9 @@ query内第二次`BatchedDomainList.add`。production实现必须用prepared wor
 committed prefix，并让exclusive latch经过`COMMITTING→CORE_COMMITTED→POSTPROCESSING→POST_READY→QUEUEING`
 后才完成。receipt分列`provider_postprocess=1/query-total-add=2/candidate-post-add=1`；post或queue失败均为poison，
 不能伪装成clean rollback。2026-08-29按真实coefficient-arena slice owner扣除重复计算的residual scratch后，
-S4-3 known-new logical subtotal修正为`559,838 B`，仍不是peak-memory claim。
+S4-3 known tensor/base lower bound修正为`559,838 B`，仍不是完整footprint或peak-memory claim。最新施工包还将
+whole-core latch扩为23-state，并把R/C formal修正为6对/12 fresh；mandatory tensor-occurrence raw floor为
+`38,610,816 B`，允许content-addressed sidecar去重，不能冒充物理artifact大小。
 
 ### 8.7 M6：formal 与证据驱动扩展
 

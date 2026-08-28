@@ -1,5 +1,13 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+> **2026-08-29 S4-3 whole-core事务施工合同已冻结、代码仍关闭**：新增
+> `BOUNDFLOW_ASPLOS27_S4_3_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`。whole-core owner不再只从
+> 12-path commit起算，而是覆盖terminal claim、3次KFSB/72 child lower、36项provider scratch finalization、
+> 12 device+host+container的14-step commit、一次official post、一次candidate queue add和一次check-worst。
+> 状态机修正为`23 states/22 events/40 legal/466 invalid`，hash=`6ed3d2fd...a3388a`；rollback只恢复
+> 已写device prefix，queue partial mutation一律poison。R/C formal由5对改为6对/12 fresh，mandatory
+> tensor-occurrence floor=`38,610,816 B`。`559,838 B`只称known base lower bound。S3外审前实现/formal/timing仍关闭。
+
 > **2026-08-29 S4-2施工合同已冻结、代码仍关闭**：新增
 > `BOUNDFLOW_ASPLOS27_S4_2_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`，把policy result改为opaque exact
 > consume，以run-level evaluator family发行10个one-shot generation并完成9次controlled re-arm；version拆成
@@ -37,6 +45,7 @@ terminal bridge。S3外审批准前代码/timing关闭。见
 `BOUNDFLOW_ASPLOS27_S4_2_POLICY_DRIVER_IMPLEMENTATION_READINESS_2026_08_29.md`、
 `BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_29.md`、
+`BOUNDFLOW_ASPLOS27_S4_3_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`、
 `BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_4_FORMAL_EVIDENCE_IMPLEMENTATION_READINESS_2026_08_29.md`、
@@ -93,6 +102,12 @@ untouched target的`_version`也`+1`。因此implementation冻结prepared workin
 committed-prefix-only best-effort restore，并把exclusive latch延长到official post和candidate queue add完成。三个真实
 counter必须分列为post=`1`、query-total add=`2`、candidate-post add=`1`；commit/post/queue fault分别poison，不能
 伪装clean rollback。这仍是implementation-readiness，不是S4 correctness或性能结果。
+
+S4-3施工包进一步把上述事实变成whole-core唯一状态机：terminal claim后尚未写live state的KFSB/scratch/core-stage
+故障也不能clean retry，新增`STAGING_POISONED`；36项scratch finalization是独立可失败mutation；logical commit固定
+14 ordinal；queue `add()`按真实Python list/TensorStorage/alpha/intermediate/threshold/C/num_domains mutation surface
+做formal before/after与fault inventory，但不伪称provider内部原子或rollback。5-pair顺序3/2偏斜被6-pair取代，
+12-worker raw tensor-occurrence floor为`38,610,816 B`；physical sidecar允许内容去重，故该数不是文件大小下限。
 
 S4-3A源码审计及live B0/R phase probe进一步关闭provider net scratch歧义：fixed candidate KFSB/post/queue/next-pre
 不读取net dynamic scratch作数值输入，因此production tensor commit仍是12条。reference terminal会move/gc六α、12个

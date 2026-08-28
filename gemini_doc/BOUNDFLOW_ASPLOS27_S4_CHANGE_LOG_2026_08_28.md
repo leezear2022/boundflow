@@ -10,6 +10,36 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：冻结S4-3 whole-core exact-call事务实施施工合同
+
+- 新增1134行S4-3 implementation construction package；生产代码仍为0，S3外审批准前
+  `code/formal/timing/performance`保持closed；
+- 把whole-core transaction起点从device commit前移到terminal capability claim，完整覆盖KFSB、provider scratch、
+  core assembly、device/host/container commit、official post、candidate queue add和check-worst；
+- 旧粗粒度latch被`23 states/22 events/40 legal/466 invalid`取代，canonical hash=
+  `6ed3d2fd946aaa0f6342f637a4754cc50eeec96e24392ed3b42adbbf92a3388a`；terminal claim后的pre-copy
+  failure也进入`STAGING_POISONED`，不再伪装clean retry；
+- provider scratch 36项finalization成为独立可失败mutation；partial normalization记录changed prefix并poison，
+  不复活provider core；
+- logical commit固定为14 ordinal：12条stable device path、host final packet replace、intermediate container clear；
+  rollback只逆序恢复成功写入的device prefix，untouched suffix write=`0`；
+- 亲读`BatchedDomainList.add`确认queue会依次修改多类Python/TensorStorage owner，不能当原子容器。production只留
+  O(1) counter；formal/fault保存mutation-unit before/after，任何add或check-worst异常均`QUEUE_POISONED`；
+- 纠正formal顺序：R/C由5对改为6对，`RC/CR=3/3`，共12 fresh subprocess；
+- 基于冻结semantic projection重算mandatory tensor-occurrence floor：R/C per-run=
+  `3,897,248/2,537,888 B`，6R+6C=`38,610,816 B`（36.8221435546875 MiB）；content-addressed
+  sidecar可去重，故不是物理文件大小下限；
+- `559,838 B`收紧为known tensor/base lower bound，不包含完整policy/transaction/provider scratch/KFSB/post/queue/
+  allocator workspace，不得用于memory peak或gain claim；
+- 同步S4-3 blueprint/readiness、README、memo、claims map、current status与ASPLOS主计划。
+
+### 验证
+
+- pinned provider 7个源码blob hash、whole-core/post historical semantic tensor occurrence、queue mutation source复核；
+- 23-state模型、40 legal/466 invalid与hash由stdlib脚本独立生成；
+- 6-pair raw floor算术由独立脚本重算；
+- 施工包链接、文档一致性、相关回归、git diff与DocOps在提交前验证。
+
 ## 2026-08-29：冻结S4-2 policy driver实施施工合同
 
 - 新增1184行S4-2 implementation construction package；生产代码仍为0，S3外审批准前

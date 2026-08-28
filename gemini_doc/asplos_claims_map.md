@@ -26,6 +26,11 @@
 > evaluation-input/optimizer-mutation/storage-commit三轴、28-item commit cursor与16-state/32-transition模型均尚未
 > 实现。terminal-best/lA要求六domain均为ordinal9 best；旧20-worker formal已被24-worker平衡拓扑取代，mandatory
 > transition-tensor floor=`60,550,896 B`。`491,774 B`只是known base lower bound，不是完整memory或peak claim。
+> S4-3 construction-time同样只增加设计合同：terminal/KFSB/scratch/commit/post/queue合并为
+> `23-state/22-event/40-transition` whole-core owner，12 device+host+container=`14` mutation；queue partial failure
+> 和check-worst failure均poison。R/C formal修正为6对/12 fresh，mandatory tensor-occurrence floor=
+> `38,610,816 B`。`559,838 B`只是known base lower bound；当前没有S4-3 runtime、artifact、correctness、memory peak、
+> same-solver或performance claim。
 >
 > **2026-08-28 S3 optimizer/runtime内部结论**：状态=
 > `VALIDATED-S3-3X-LOCAL-OPTIMIZER-V2-PENDING-EXTERNAL-AUDIT`。source=`1766cbc`，ResNet2B
