@@ -7,6 +7,10 @@
 > state compiled evaluation，不能直接包装whole-core。S3外审批准前S4代码与timing关闭。
 > S4-1B0施工合同已把isolated backend与production owner拆开：5个isolated view、`92,160 B`输出只作diagnostic；
 > selected output复用coefficient arena仍待S4-1B phase proof，不能提前从production ledger消失。当前没有S4代码。
+> S4-1B逐文件施工现已补齐pass A 19-action、42-read+7-write selected graph、90/110 argument descriptor与
+> arena generation转换。源码/GPU storage probe还证明D1C residual scratch只是coefficient arena slice，旧账重复加了
+> `49,152 B`；S4-1D/S4-2/S4-3 design subtotal已纠正为`389,574/491,774/559,838 B`。这些都不是peak/performance
+> claim，且不改变S3外审前S4 code closed门禁。
 >
 > **历史（等待上方S3外审决定）：**
 > **2026-08-28 当前状态：S3 3x本地optimizer内部关闭，只开放S4 same-solver实现/正确性**。source=

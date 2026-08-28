@@ -1692,7 +1692,8 @@ allocation；v1 blanket rollback会推进11条untouched target的`_version`；of
 query内第二次`BatchedDomainList.add`。production实现必须用prepared working-β/persistent upper，rollback只恢复
 committed prefix，并让exclusive latch经过`COMMITTING→CORE_COMMITTED→POSTPROCESSING→POST_READY→QUEUEING`
 后才完成。receipt分列`provider_postprocess=1/query-total-add=2/candidate-post-add=1`；post或queue失败均为poison，
-不能伪装成clean rollback。修正后的S4-3 known-new logical subtotal为`608,990 B`，仍不是peak-memory claim。
+不能伪装成clean rollback。2026-08-29按真实coefficient-arena slice owner扣除重复计算的residual scratch后，
+S4-3 known-new logical subtotal修正为`559,838 B`，仍不是peak-memory claim。
 
 ### 8.7 M6：formal 与证据驱动扩展
 

@@ -148,16 +148,18 @@ evaluate。terminal child只可transfer一次；parent可先close，child close�
 | six sign bitmap | 55,296 | S4-1B |
 | coefficient-adjoint/terminal-lA shared arena | 149,856 | S4-1B/1C |
 | two coefficient arenas | 147,456 | existing R31B1 |
-| residual scratch | 49,152 | existing staged residual |
+| residual scratch | 0 additional | two offset views inside coefficient arenas |
 | lower + upstream + bias accumulator | 72 | evaluator |
 | compressed indices + β metadata | 2,862 | S4-1C static metadata |
-| 合计 | **438,726** | correctness design ledger |
+| 合计 | **389,574** | corrected correctness design ledger |
 
-`438,726 B`以S4-1B证明`selected_endpoint[18,432]`在pass B安全复用一块coefficient arena为前提；S4-1B0
+`389,574 B`以S4-1B证明`selected_endpoint[18,432]`在pass B安全复用一块coefficient arena为前提；S4-1B0
 isolated pack/select的caller-owned selector+selected output为`92,160 B`，并不自动满足该alias。若phase proof失败，
-本ledger增加`73,728 B`。
+本ledger增加`73,728 B`至`463,302 B`。
 
-旧账漏掉`49,152 + 2,862 = 52,014 B`。VM/cuDNN workspace、allocator metadata与module storage仍须分项披露。
+2026-08-29源码复核推翻了“residual scratch是独立storage”的旧假设：`residual11`与`residual6`分别是两个
+coefficient arena的offset slice，因此只新增descriptor、不新增physical bytes。相对最早`386,712 B`账，只应增加
+`2,862 B` compressed metadata。VM/cuDNN workspace、allocator metadata与module storage仍须分项披露。
 S4-2 Adam m+v另加34,032 logical bytes，不属于S4-1D。
 
 该表不是peak allocated/reserved claim。implementation必须用CUDA allocator计数独立测量，不得用logical sum替代。
@@ -195,7 +197,7 @@ provider/fallback/eager/native_shadow_count=0
 
 actual kernel/VM/copy counts
 all logical bytes from component receipts
-base/additional/total prepared view count=16/32/48
+base/S4-1B/full-S4-1ABC prepared argument descriptor count=16/90/110
 timing_recorded=false
 performance_claimed=false
 receipt_hash

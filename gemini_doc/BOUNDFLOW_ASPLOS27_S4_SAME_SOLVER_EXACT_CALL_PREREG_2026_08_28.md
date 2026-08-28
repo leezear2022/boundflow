@@ -321,7 +321,8 @@ clean abort与提交中`POISONED_NO_RETRY`分开，不得把后者写成可透�
 2026-08-29 live implementation-readiness修订见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_29.md`：working-β必须
 prepared、rollback只恢复已提交prefix、terminal lease按KFSB/post最后consumer拆分；exclusive latch覆盖commit、official
-post和candidate queue add。known-new logical subtotal修正为CUDA=`608,910 B`、CPU=`80 B`、总计=`608,990 B`。
+post和candidate queue add。2026-08-29扣除重复计算的residual arena slice后，known-new logical subtotal修正为
+CUDA=`559,758 B`、CPU=`80 B`、总计=`559,838 B`。
 
 provider net scratch的consumer/lifetime精确审计见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`。冻结结论是：

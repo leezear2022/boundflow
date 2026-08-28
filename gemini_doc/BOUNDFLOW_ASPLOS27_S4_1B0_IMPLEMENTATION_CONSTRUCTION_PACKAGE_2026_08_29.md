@@ -447,7 +447,8 @@ pass A completes selector capture
 ```
 
 必须证明storage token相同、logical descriptor不同、generation变化明确、same stream或event依赖完整、没有result lease和
-旧DLPack descriptor误用。未证明则分配独立73,728 B并修正`438,726 B` ledger。
+旧DLPack descriptor误用。未证明则分配独立73,728 B，并把2026-08-29修正后的`389,574 B` ledger改为
+`463,302 B`。
 
 这个alias门禁属于S4-1B，不属于B0。B0只证明两个TIR对caller-owned distinct storage正确。
 

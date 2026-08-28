@@ -17,7 +17,7 @@ date: 2026-08-28
 > 2026-08-29 实施就绪修订：live observer、functional Adam 与源码可达性审计已完成。本文的事务失败语义、
 > checkpoint索引、optimizer ABI、fresh-worker口径及memory ledger以
 > `BOUNDFLOW_ASPLOS27_S4_2_POLICY_DRIVER_IMPLEMENTATION_READINESS_2026_08_29.md`为准；修正后的S4-2/S4-3
-> known logical subtotal为S4-2 `540,926 B`；S4-3后续readiness补齐persistent upper/depths后为`608,990 B`。
+> known logical subtotal为S4-2 `491,774 B`；S4-3后续readiness补齐persistent upper/depths后为`559,838 B`。
 > 这仍是design，不开放production代码。
 
 S4-2不能直接复用`execute_rvir_v4_native_optimizer_trace`、S3 P-anchor循环或
@@ -329,22 +329,22 @@ torch 2.11.0+cu130上的live probe还证明functional Adam与production Adam在9
 
 ### 4.3 correctness logical ledger
 
-S4-1D修正ledger为`438,726 bytes`。S4-2还必须拥有current m/v、step、compressed best checkpoint、best lower、
+S4-1D 2026-08-29按真实arena slice owner再修正为`389,574 bytes`。S4-2还必须拥有current m/v、step、compressed best checkpoint、best lower、
 `ret_0`以及validate-before-commit shadow：
 
 ```text
-S4-1D evaluator state                         438,726 B
+S4-1D evaluator state                         389,574 B
 current Adam m/v                               34,032 B
 current step scalars (CPU)                         28 B
 compressed best α/β checkpoint                 17,016 B
 best lower                                         24 B
 ret_0 comparison reference                         24 B
 next parameter/m/v/step shadow                  51,076 B
-known S4-2 logical subtotal                    540,926 B
+known S4-2 logical subtotal                    491,774 B
 ```
 
-其中known CUDA logical=`540,870 B`，CPU logical=`56 B`。该数仍排除model/fixed input、cuDNN/TVM workspace、
-allocator metadata、policy/pruner masks和Python object。S4-2必须分项测量，`540,926`不是peak显存claim。fixed
+其中known CUDA logical=`491,718 B`，CPU logical=`56 B`。该数仍排除model/fixed input、cuDNN/TVM workspace、
+allocator metadata、policy/pruner masks和Python object。S4-2必须分项测量，`491,774`不是peak显存claim。fixed
 intermediate bounds为immutable prepared input，不复制production `299,712 B` best-intermediate clone；必须以
 object/storage/version/content guards及S4-3 official-post parity证明该ownership缩减合法。
 

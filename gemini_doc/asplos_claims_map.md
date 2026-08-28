@@ -12,6 +12,10 @@
 > S4-1B0设计，不升级production correctness、same-solver或performance claim。
 > S4-1B0 construction-time GPU诊断只证明位级classifier/midpoint机制与isolated物理账：5 view、2 launch、
 > caller-owned output=`92,160 B`。它不证明S4-1A view复用、production arena alias或warm/query性能；后两项仍false。
+> S4-1B construction-time source/descriptor/storage诊断进一步冻结S4-1B/full A-B-C argument descriptor=`90/110`，
+> residual scratch新增physical bytes=`0`，并把S4-1D/S4-2/S4-3 known logical subtotal纠正为
+> `389,574/491,774/559,838 B`。这些仍是design ledger与implementation contract，不是peak memory、production
+> correctness或performance claim；selected-input phase alias未关闭时S4-1D必须加`73,728 B`。
 >
 > **2026-08-28 S3 optimizer/runtime内部结论**：状态=
 > `VALIDATED-S3-3X-LOCAL-OPTIMIZER-V2-PENDING-EXTERNAL-AUDIT`。source=`1766cbc`，ResNet2B

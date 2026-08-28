@@ -234,9 +234,10 @@ receipt必须区分：
 - warm DLPack/Python dispatch=`0`；
 - provider/native shadow/fallback=`0`。
 
-第一版物理账进一步冻结：7 symbols/launch、53 argument occurrences、emitter unique DLPack view=`46`。其中与
-S4-1A base 16重叠14，因此`additional_tir_view_count=32`、`total_prepared_view_count=48`，全部prepare-time
-pointer exact；warm view仍为0。
+第一版emitter局部物理账进一步冻结：7 symbols/launch、53 argument occurrences、emitter unique DLPack
+view=`46`。其中与S4-1A base 16重叠14，因此base+emitter局部并集为48；这不是整个prepared evaluator。
+2026-08-29完整施工重算确认S4-1B已有90个argument descriptor，emitter另与其中12个flattened ReLU bound
+descriptor重叠，故S4-1C只新增20、完整S4-1A/B/C总数为110。全部prepare-time pointer exact；warm view仍为0。
 
 不能把两次coefficient pass伪写成一次，也不能把六emitter称为“一个kernel”。
 
@@ -292,7 +293,8 @@ S4-1C不接Adam、不计时；只允许单evaluation与terminal-mode correctness
 20.全重签receipt后修改count/bytes/claim；
 21. provider/native fallback；
 22. timing/performance flag提前为true；23. A/V/α/upstream NaN因gate false静默输出0；
-24. index/location验证前OOB读；25. β sign错误转float32或非±1；26. emitter46/base16/total48口径混淆；
+24. index/location验证前OOB读；25. β sign错误转float32或非±1；26. emitter46/base16/local48/S4-1B 90/
+full 110口径混淆；
 27. metadata仍写旧2,880 B；28. seven launch伪写成一个kernel。
 
 ## 9. fail-closed detail code

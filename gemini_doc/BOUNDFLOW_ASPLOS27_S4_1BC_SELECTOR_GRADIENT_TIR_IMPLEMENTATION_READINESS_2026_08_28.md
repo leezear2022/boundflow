@@ -25,13 +25,15 @@ S4-1B/1C 已从“六site公式蓝图”压到可以逐文件实现的后端合�
 2. 所有runtime feature index/location必须先clamp到安全读地址，再以合法性谓词决定输出canonical NaN，不能让
    tamper在validator失误时触发越界CUDA读；
 3. 六dα+一dβ第一版应明确披露7个symbol/launch、53次参数出现、emitter所见46个unique view；与S4-1A
-   base 16重叠14项，因此prepared owner新增32个view，总计48；
+   base 16重叠14项，因此**base+emitter局部scope**新增32个view、局部并集48；2026-08-29完整施工复核补齐
+   pass A与selected graph后，S4-1B总数为90、S4-1A/B/C总数为110，48不得再称整个prepared evaluator；
 4. β sign从provider split/history得到，物理dtype应保持int8并在TIR内cast；不需要旧蓝图的float32 sign copy，
    metadata总量由2,880 B修正为2,862 B；
 5. V/terminal-lA的37,464-element arena六slot互不重叠且只占一个storage；reverse pass C可以在同一stream按
    `emitter read A/V → terminal copy pre-transform A → transform/reuse A`安全复用slot；
 6. 真实A18/A20/A24/A26/A29/Ainput的positive/negative/zero inventory已从existing staged pass提取，证明A26/A20
-   可直接来自两个persistent residual scratch，不需要新增dense A；
+   可直接来自两个residual scratch descriptor，不需要新增dense A；两个scratch还是coefficient arena的offset slice，
+   不新增physical storage或49,152 B；
 7. 隔离七symbol CUDA/TIR对独立PyTorch reference逐位exact，float64最大差`2.3576e-7`，并能把A/V/bound/
    α/upstream/index异常poison为NaN。
 
@@ -309,16 +311,22 @@ A views 6 + V views 6 + lower/upper 12 + active alpha 6 + alpha index 6
 ```
 
 46/46 pointer exact在现场成立。S4-1A已有16 base views，emitter复用六alpha parameter、六alpha gradient、
-一beta gradient和upstream，共14项：
+一beta gradient和upstream，共14项。这里只计算base+emitter局部scope：
 
 ```text
 base_view_count = 16
-additional_tir_view_count = 46 - 14 = 32
-total_prepared_view_count = 48
+emitter_additional_over_base = 46 - 14 = 32
+base_plus_emitter_local_union = 48
 ```
 
-active β parameter和final lower result仍属于base owner，但不作为gradient emitter实参。receipt必须同时列base/
-additional/total，不能把emitter46与prepared48混为同一个口径。
+active β parameter和final lower result仍属于base owner，但不作为gradient emitter实参。该48只是局部子系统，不是
+S4-1B或S4-1D总数。完整施工机械重算为：
+
+```text
+S4-1B = base16 + selected49 - active-alpha overlap5 + pass-A-new30 = 90
+S4-1C new over S4-1B = 46 - base-overlap14 - flat-bound-overlap12 = 20
+S4-1A/B/C full argument-descriptor union = 110
+```
 
 static metadata：
 
@@ -379,7 +387,8 @@ plan/layout/index/location/sign hashes
 finite_policy / safe_index_policy / canonical_nan_bits
 launch_count=7 / argument_occurrence_count=53
 emitter_unique_view_count=46 / pointer_exact=46
-base_view_count=16 / additional_tir_view_count=32 / total_prepared_view_count=48
+base_view_count=16 / emitter_additional_over_base=32 / base_plus_emitter_local_union=48
+s4_1b_argument_descriptor_count=90 / s4_1abc_argument_descriptor_count=110
 alpha_output_count=6 / beta_output_count=1 / empty_beta_launch_count=0
 alpha_index_bytes=2832 / beta_location_bytes=24 / beta_sign_bytes=6
 saved_dense_A=0 / dense_gradient_output=0 / global_workspace=0
@@ -405,7 +414,7 @@ one-shot lease和arena generation。
 8. safe clamp被误写为接受invalid index；
 9. β sign转float32后缺少±1身份；
 10. beta parameter通过`*0`伪装为TIR数据依赖；
-11. emitter46、base16、total48三种view口径混淆；
+11. emitter46、base16、local48、S4-1B 90、full 110五种view口径混淆；
 12. metadata bytes写成旧2,880；
 13. diagnostic广播错误结果被当candidate failure或production evidence；
 14. coefficient-only probe错误调用完整D2B receipt；
@@ -424,7 +433,7 @@ feat(tvm): add isolated S4 binary selector pack symbols
 test(tvm): close real six-selector inventory and sentinel tamper
 feat(tvm): add seven-symbol compressed gradient module
 test(tvm): close safe-index/nonfinite/shape/layout CUDA gates
-feat(runtime): bind 48 prepared views and reverse phase state
+feat(runtime): bind 90 S4-1B and 110 full prepared argument descriptors
 test(runtime): close terminal read-copy-transform ordering
 test(formal): run five-fresh six dα + active dβ + terminal lA
 ```

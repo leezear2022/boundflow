@@ -309,16 +309,16 @@ S3外审批准后：
 8. S4-4 artifact/replay/tamper；
 9. 另立S4-P timing，再决定是否开放compiled KFSB child batch。
 
-S4-1D唯一prepared evaluator、修正后的438,726-byte logical correctness ledger、5+5 fresh/full-IEEE raw/replay/tamper
+S4-1D唯一prepared evaluator、修正后的389,574-byte logical correctness ledger、5+5 fresh/full-IEEE raw/replay/tamper
 门禁见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`。
-事务实施冻结与旧账`52,014 B`漏项纠正见
+事务实施冻结、90/110-view口径与residual scratch slice重复计账纠正见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_EVALUATOR_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`。
 
 S4-2 sealed driver的live keep-best/stop/patience/pruning、functional Adam、`10/9/10`
 evaluation/update/scheduler-call与trajectory artifact合同见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`。live policy、
-functional Adam bit-exact probe、failure poison、checkpoint可达性和`540,926 B`修正ledger见
+functional Adam bit-exact probe、failure poison、checkpoint可达性和`491,774 B`修正ledger见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_POLICY_DRIVER_IMPLEMENTATION_READINESS_2026_08_29.md`。
 
 S4-3 whole-core exact-call的provider return constructor、official post、host packet、intermediate-container、device commit

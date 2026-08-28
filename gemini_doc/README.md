@@ -1,6 +1,6 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
-最新动作（v18 S3外审/S4-1B0逐文件施工就绪）：S3已正式交付DocOps exchange
+最新动作（v19 S3外审/S4-1B六站点逐文件施工就绪）：S3已正式交付DocOps exchange
 `asplos27-s3-optimizer-runtime-20260828`，状态=`ready_for_audit/r001`。S4只读普查确认production
 optimizer每step有六α source/8,496 stored元素（lower-only active/preserved各4,248）与一条active β；S3 P-only
 对应1,032 stored/516 active且β为空，不能直接作为whole-core exact-call。S4草案冻结compressed evaluator→
@@ -19,6 +19,7 @@ terminal bridge。S3外审批准前代码/timing关闭。见
 `BOUNDFLOW_ASPLOS27_S4_1B0_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`、
 `BOUNDFLOW_ASPLOS27_S4_1BC_DAG_ADJOINT_PREFLIGHT_CORRECTION_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
+`BOUNDFLOW_ASPLOS27_S4_1B_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`、
 `BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1D_EVALUATOR_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`、
@@ -67,11 +68,13 @@ storage/layout key。content validation使S4-1A自身D2H=`32/85,056 B`、与S4-0
 S4-3进一步确认exact-call不是薄adapter：真实事务还包含KFSB三次batch-24 child CROWN、12条return constructor、
 一次official post、host packet prune和`pre_result.interm_bounds` clear。现有device atomic v1在mid-commit故障时只能
 恢复tensor内容，无法恢复PyTorch `_version`；因此新合同明确使用`POISONED_NO_RETRY`，禁止partial commit后fallback/
-重试。S4-1D事务复核发现旧memory ledger漏掉residual scratch与compressed metadata共`52,014 B`；修正后
+重试。S4-1D早期事务复核曾把residual scratch与compressed metadata共`52,014 B`加入账；2026-08-29逐源码
+owner复核发现两个residual scratch其实是coefficient arena的offset slice，旧probe把它们误分配为独立storage。
+所以physical新增scratch bytes=`0`，只保留`2,862 B` compressed metadata；
 S4-2 live policy/functional Adam实施就绪审计进一步发现旧账只加了m/v，漏掉CPU step、compressed keep-best、
 `ret_0`和validate-before-commit shadow；同时mutation失败不能恢复PyTorch `_version`。因此失败统一为
 `POISONED_NO_RETRY`，fixed checkpoint ordinal为`0,6,7,8,9`，10-step程序中的`patience>10`不可达、改由独立
-sealed synthetic policy覆盖。S4-1D/S4-2/S4-3已知logical subtotal现为`438,726/540,926/608,990 B`，都不等于
+sealed synthetic policy覆盖。S4-1D/S4-2/S4-3已知logical subtotal现为`389,574/491,774/559,838 B`，都不等于
 实测peak显存。
 
 S4-3 live B3-C事务审计进一步发现：current candidate没有清空六key `pre_result.interm_bounds`；working-β
@@ -115,16 +118,24 @@ S4-1B0后端ABI继续完成实现前硬化：现场反例证明浮点`x==x`式Na
 
 S4-1B0逐文件施工复核进一步纠正物理owner：独立pack/select的5个DLPack view不属于S4-1A的16个base view；
 隔离caller必须提供`18,432 B` selector和`73,728 B` selected output，现场allocated增量合计`92,160 B`。
-production要维持`438,726 B` ledger，必须由S4-1B证明pass B selected output安全复用一块coefficient arena；否则
-ledger增加`73,728 B`。同时拆开precompile cache key、immutable module receipt、mutable hit/miss observation和
+production要维持`389,574 B` ledger，必须由S4-1B证明pass B selected output安全复用一块coefficient arena；否则
+ledger增加`73,728 B`至`463,302 B`。同时拆开precompile cache key、immutable module receipt、mutable hit/miss observation和
 formal content/count sidecar，禁止warm路径为hash/count新增D2H/sync；本backend不新增IR。construction hash=
 `5056d302aa27785ab8a22bd8f5665ebef0a4aba2ca22bc72ce28581144dbcc2a`。implementation仍closed。
 
 S4-1B/1C后端继续收紧：六张selector统一以`-128`表示nonfinite invalid，避免五张binary表把NaN静默选成upper；
 真实A18/A20/A24/A26/A29/Ainput inventory已从staged pass复核。七symbol gradient diagnostic对corrected PyTorch
-reference逐位exact、float64最大差`2.36e-7`，并冻结7 launch/53 arguments/emitter46 views、prepared总48 views、
-β sign int8与2,862 B metadata。六V/terminal-lA slot同storage但interval不重叠，same-stream read→copy→reuse通过。
+reference逐位exact、float64最大差`2.36e-7`，并冻结7 launch/53 arguments/emitter46 views、β sign int8与
+2,862 B metadata；当时的48只是base+emitter局部并集，不是整个prepared evaluator。六V/terminal-lA slot
+同storage但interval不重叠，same-stream read→copy→reuse通过。
 详见`BOUNDFLOW_ASPLOS27_S4_1BC_SELECTOR_GRADIENT_TIR_IMPLEMENTATION_READINESS_2026_08_28.md`。
+
+S4-1B V1逐文件施工复核现已冻结pass A 19-action顺序、A26/A20 staged插入点、42-read+7-write六站点
+Relax graph、coefficient arena selected-input generation alias与immutable compile/cache receipt。机械descriptor集合重算
+为S4-1B=`90`、完整S4-1A/B/C=`110`；terminal/result普通Torch view另计，不增加DLPack或storage。S2诊断还显示
+selected graph prepare的Torch allocated仅`24,576 B`，但CUDA driver free减少`25,165,824 B`，因此S4必须同时披露
+Torch allocator和driver/VM/cuDNN footprint。construction hash=
+`a9b1d90df3cd122eb43491d327432ded52f957928d77e1dbcf2e7286bc4a317d`；S3未批准，implementation仍closed。
 
 S4-1D事务合同现已进一步冻结：request admission完全read-only；进入`EVALUATING`后任一失败均转
 `POISONED_NO_RETRY`并烧毁generation，不允许reset半写arena；成功只发布一个composite result lease，terminal child

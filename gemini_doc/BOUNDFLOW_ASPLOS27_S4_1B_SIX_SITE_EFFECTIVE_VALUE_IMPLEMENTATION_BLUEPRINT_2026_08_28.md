@@ -1,5 +1,5 @@
 ---
-status: draft-corrected-by-selector-gradient-tir-readiness-v2
+status: draft-corrected-by-s4-1b-construction-v3
 date: 2026-08-28
 type: implementation-plan
 topic: boundflow
@@ -50,6 +50,12 @@ selected input
 `BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_BOX_ENDPOINT_SUBGRADIENT_CLOSURE_2026_08_28.md`定义的S4-1B0门禁。
 S2 selected Relax/cuDNN与R31B2 selected-ReLU TIR继续作为六site lowering的主要复用资产；S4以新symbol升级input
 endpoint pack/select schema，zero分支从lower/upper派生center，不新增center tensor，仍禁止另写per-site Python executor。
+
+> 2026-08-29施工复核：本蓝图的数学与selected graph方向不变，但完整prepared物理口径已由
+> `BOUNDFLOW_ASPLOS27_S4_1B_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`收紧。S4-1B需要
+> 90个prepare-time argument DLPack descriptor，完整S4-1A/B/C为110个；旧48只代表base+gradient-emitter局部
+> scope。D1C residual scratch是两个coefficient arena的offset slice，新增physical bytes为0，不得再把49,152 B
+> 重复计入memory ledger。
 
 ## 1. 数学语义
 
@@ -200,7 +206,7 @@ lease，hot path不把六个Python tensor装dict。
 ### 5.3.1 E0 selected input的phase alias门禁
 
 S4-1B0隔离pack/select必须为`selected_input[18,432]`提供`73,728 B` caller-owned output；它不在S4-1A的16个
-base storage内。production若要维持本蓝图的`438,726 B` ledger，必须在本阶段证明该output复用一块existing
+base storage内。production若要维持修正后的`389,574 B` ledger，必须在本阶段证明该output复用一块existing
 coefficient arena：
 
 ```text
@@ -214,7 +220,8 @@ pass A完成并捕获六selector
 ```
 
 证明必须绑定storage token、前后descriptor、generation、stream/event order和live-reader count；不得让旧coefficient
-DLPack view以旧shape/generation继续访问同storage。若任一项不能成立，implementation必须分配独立`73,728 B`并同步
+DLPack view以旧shape/generation继续访问同storage。若任一项不能成立，implementation必须分配独立`73,728 B`，把
+S4-1D修正为`463,302 B`并同步
 修正S4-1D/S4-2/S4-3 ledger。S4-1B0的5个isolated view也不能计入S4-1A base view；production additional view由
 本阶段统一view inventory统计。
 

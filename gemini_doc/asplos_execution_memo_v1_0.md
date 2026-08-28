@@ -11,7 +11,10 @@
 > input box的`A==0`次梯度：606个zero须选择center，非DAG/fanout原则性失败；三元endpoint后六site gradient
 > 全部闭合，但production implementation/formal仍在S3外审后逐级开放。
 > S4-1B0最新施工合同又拆清物理scope：isolated pack/select的5个view不属于S4-1A base，selector+selected
-> output为`92,160 B`；production只有在S4-1B证明pass B复用coefficient arena的phase alias后才可维持现有ledger。
+> output为`92,160 B`；S4-1B施工复核现冻结pass A 19-action、selected graph 42-read+7-write、S4-1B 90与
+> full A/B/C 110个argument descriptor。两个residual scratch是coefficient arena offset slice，不新增physical bytes；
+> 因而S4-1D/S4-2/S4-3 known logical subtotal修正为`389,574/491,774/559,838 B`。production只有在S4-1B证明
+> pass B复用coefficient arena的phase alias后才可维持该账，否则S4-1D增加`73,728 B`至`463,302 B`。
 > cache/module/cache-observation/formal-sidecar分层，warm路径禁止为content hash或class count新增同步；不新增IR。
 >
 > **历史（等待上方S3外审关闭）：**

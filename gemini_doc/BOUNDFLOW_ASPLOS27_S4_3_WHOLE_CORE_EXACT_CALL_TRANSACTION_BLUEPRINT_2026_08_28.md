@@ -237,12 +237,13 @@ candidate + rollback = 68,016 bytes
 ```
 
 S4-2 implementation-readiness已补齐step、compressed best、`ret_0`和validate-before-commit shadow，修正后的
-known subtotal为`540,926 bytes`；S4-3还必须prepared持有upper `[6,1]`与depths `[6]`。加入candidate/rollback后：
+known subtotal按2026-08-29 arena-slice owner复核修正为`491,774 bytes`；S4-3还必须prepared持有upper `[6,1]`
+与depths `[6]`。加入candidate/rollback后：
 
 ```text
-known S4-3 CUDA subtotal = 540,870 + 68,016 + 24 = 608,910 bytes
+known S4-3 CUDA subtotal = 491,718 + 68,016 + 24 = 559,758 bytes
 known S4-3 CPU subtotal  = 56 + 24 = 80 bytes
-known S4-3 logical subtotal = 608,990 bytes
+known S4-3 logical subtotal = 559,838 bytes
 ```
 
 这**不是peak memory claim**。provider β location/sign的72 B是external retained liveness，不重复计入new allocation；

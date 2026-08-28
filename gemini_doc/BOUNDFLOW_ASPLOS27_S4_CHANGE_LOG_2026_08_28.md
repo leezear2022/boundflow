@@ -10,6 +10,31 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：冻结S4-1B六站点施工包并纠正90/110-view与arena-slice物理账
+
+- 新增S4-1B construction package，冻结pass A 19-action、A26/A20 staged residual插入点、42-read+7-write
+  Relax graph、six V slot、coefficient-arena generation alias、immutable compile receipt与mutable cache observation；
+- 机械descriptor集合重算：base=`16`、selected graph=`49`、overlap=`5`、pass-A new=`30`，所以S4-1B=`90`；
+  S4-1C emitter isolated=`46`，与base/flattened bounds重叠`14/12`，只新增`20`，full A/B/C=`110`；
+- 纠正旧“prepared total 48”措辞：48只等于base+gradient-emitter局部并集，不含pass A和selected graph；
+- 亲读`r3_d1c_cumulative_wrapper.py`并做GPU storage identity probe，确认residual11/6 scratch分别是
+  coefficient arena1/0的offset slice，physical storage count仍为2、scratch additional bytes=`0`；
+- 因此旧`438,726 B`账重复加了`49,152 B`。S4-1D/S4-2/S4-3 known logical subtotal统一改为
+  `389,574/491,774/559,838 B`；selected-input phase alias失败时S4-1D为`463,302 B`；
+- 旧36-buffer/448,000 B probe因真的独立分配scratch，只能作为被取代的过度分配diagnostic；future probe必须从
+  prepared owner按storage identity去重；
+- S2 graph诊断显示prepare Torch allocated=`24,576 B`而CUDA driver free delta=`-25,165,824 B`，故future
+  memory artifact必须同时披露Torch allocator和TVM/VM/cuDNN driver footprint；
+- construction canonical hash=`a9b1d90df3cd122eb43491d327432ded52f957928d77e1dbcf2e7286bc4a317d`；
+  S3仍`ready_for_audit`，S4 production/formal/timing/performance继续closed。
+
+### 验证
+
+- descriptor集合断言`16/49/5/30/90/46/14/12/20/110`：PASS；
+- GPU storage identity/offset与physical storage count：PASS；
+- ledger算术`389,574/491,774/559,838`：PASS；
+- construction hash、文档一致性、目标回归、DocOps lint：提交前执行。
+
 ## 2026-08-29：刷新S4设计外审交接至S4-1B0 construction readiness v12
 
 - design-result commit更新为`5dd9d1c78de71773f3891377cb983afc031e41ea`，冻结base仍为

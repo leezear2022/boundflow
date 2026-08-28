@@ -256,7 +256,7 @@ lease按consumer拆分：
 
 ## 5. 修正后的memory ledger
 
-已冻结S4-2 subtotal：CUDA=`540,870 B`、CPU=`56 B`、总计=`540,926 B`。S4-3新增：
+修正后的S4-2 subtotal：CUDA=`491,718 B`、CPU=`56 B`、总计=`491,774 B`。S4-3新增：
 
 | item | device | new logical bytes |
 |---|---|---:|
@@ -268,9 +268,9 @@ lease按consumer拆分：
 因此新的known-new subtotal为：
 
 ```text
-S4-3 CUDA = 540,870 + 68,016 + 24 = 608,910 B
+S4-3 CUDA = 491,718 + 68,016 + 24 = 559,758 B
 S4-3 CPU  = 56 + 24                  =      80 B
-S4-3 total-new logical              = 608,990 B
+S4-3 total-new logical              = 559,838 B
 ```
 
 external retained的β location/sign `72 B`不重复计入new allocation，但必须计入liveness披露。该subtotal仍不是peak：

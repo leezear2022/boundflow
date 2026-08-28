@@ -7,6 +7,10 @@
 > S4-1B0 construction补充：backend lowering不新增IR；isolated 5-view module输出逻辑量=`92,160 B`，与S4-1A
 > base view无重叠。production ledger省去`73,728 B selected_endpoint`的前提是S4-1B另行关闭coefficient arena
 > phase alias/liveness；未关闭则加回内存账。warm路径不得做content/count D2H。
+> 2026-08-29 S4-1B construction继续冻结pass A 19-action、selected graph 42-read+7-write与prepared argument
+> descriptor=`90`（S4-1B）/`110`（full A/B/C）。D1C residual scratch经源码和GPU storage identity复核是两个
+> coefficient arena的offset slice，新增physical bytes为0；S4-1D/S4-2/S4-3 design subtotal相应修正为
+> `389,574/491,774/559,838 B`。这不升级correctness、memory peak或performance claim。
 
 > **2026-08-25 R3-1b0最新覆盖**：exact trace/liveness已正式关闭为
 > `VALIDATED-R3-1B0-TRACE-LIVENESS`；当前只开放b1 compiled no-grad full-lower forward。b2 custom

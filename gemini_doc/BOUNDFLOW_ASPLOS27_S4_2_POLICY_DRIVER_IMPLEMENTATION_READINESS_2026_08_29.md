@@ -14,7 +14,8 @@ representation 无关的 host policy driver，再分别接 native dense oracle �
 但旧蓝图在开工前还需要关闭四个实现歧义：
 
 1. `472,758 B` 只加了 Adam `m/v`，漏掉 step、compressed keep-best、初始比较基准和
-   validate-before-commit shadow；修正后的已知 logical subtotal 是 **`540,926 B`**；
+   validate-before-commit shadow；在2026-08-29进一步扣除重复计算的residual arena slice后，修正后的已知
+   logical subtotal 是 **`491,774 B`**；
 2. evaluator、Adam、clamp 或 scheduler 失败后不能承诺恢复成“从未执行”；一旦 evaluator transaction
    已开始或 mutable state 开始提交，run 必须进入 **`POISONED_NO_RETRY`**；
 3. 固定 `iteration=10, early_stop_patience=10` 时，源码条件 `patience > 10` 不可达；该分支只能用显式
@@ -279,13 +280,14 @@ intermediate container 与 official post visible state。
 
 ## 6. 修正后的 logical memory ledger
 
-S4-1D 的 `438,726 B` 已包含 current compressed parameter/gradient、lower、terminal lA、dense bridge、residual
-scratch、tokens/metadata，但不包含 policy driver state。
+S4-1D 的 `389,574 B` 已包含 current compressed parameter/gradient、lower、terminal lA、dense bridge、coefficient
+arena内residual scratch views、tokens/metadata，但不包含 policy driver state。旧`438,726 B`把两个arena slice误作
+独立storage，已被取代。
 
 ### 6.1 persistent policy state
 
 ```text
-S4-1D evaluator state                         438,726 B
+S4-1D evaluator state                         389,574 B
 current Adam m/v                               34,032 B
 current step scalars (CPU)                         28 B
 compressed best α/β checkpoint                 17,016 B
@@ -311,22 +313,22 @@ stable current buffers。任何 mid-copy/hidden-state failure 都进入 poison�
 ### 6.3 subtotal
 
 ```text
-438,726 + 34,032 + 28 + 17,016 + 24 + 24 + 51,076
-= 540,926 B
+389,574 + 34,032 + 28 + 17,016 + 24 + 24 + 51,076
+= 491,774 B
 ```
 
 设备分解：
 
 ```text
-known CUDA logical bytes = 540,870 B
+known CUDA logical bytes = 491,718 B
 known CPU logical bytes  =      56 B
-known cross-device total = 540,926 B
+known cross-device total = 491,774 B
 ```
 
 若后续 S4-3 继续使用已冻结的 full candidate + rollback `68,016 B`：
 
 ```text
-known S4-3 subtotal = 540,926 + 68,016 + persistent upper/depths 48 = 608,990 B
+known S4-3 subtotal = 491,774 + 68,016 + persistent upper/depths 48 = 559,838 B
 ```
 
 其中upper为CUDA 24 B、depths为CPU 24 B；working-β location/sign 72 B是external retained liveness，不重复计入new
@@ -451,8 +453,8 @@ minimum per-run numeric payload    1,341,776 B
 
 ## 10. 对旧蓝图的修正清单
 
-1. memory subtotal：`472,758 → 540,926 B`；
-2. downstream S4-3 subtotal：历史`540,774 → 608,942 B`，后由S4-3 readiness补齐upper/depths为`608,990 B`；
+1. memory subtotal：历史`472,758 → 540,926 B`，2026-08-29 arena-slice owner复核后再纠正为`491,774 B`；
+2. downstream S4-3 subtotal：历史`540,774 → 608,942 → 608,990 B`，同次复核后纠正为`559,838 B`；
 3. Adam ABI 增加 per-group `batch_dim` 与 step CPU/float32；
 4. checkpoint ordinals 冻结为 `0,6,7,8,9`；
 5. terminal scheduler 改为 fixed live path 事实，不写成所有 exit 的无条件行为；

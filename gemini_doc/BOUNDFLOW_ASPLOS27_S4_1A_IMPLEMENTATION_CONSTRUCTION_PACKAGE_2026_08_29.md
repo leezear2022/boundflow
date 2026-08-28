@@ -198,7 +198,8 @@ S4-1A只拥有：
 - S4-0 private lease到prepared runtime的single-owner transfer；
 - 6 α leaf parameter + 1 active β leaf parameter；
 - 6 dα + 1 active dβ persistent output；
-- lower与fixed upstream persistent buffer；
+- lower physical `[D]`与fixed upstream `[D,1]` persistent buffer；S4-1D result只建立普通Torch `[D,1]` view，
+  不新增storage或DLPack descriptor；
 - 5 empty β typed token；
 - 16 base DLPack view与private exact view key；
 - buffer preparation receipt；

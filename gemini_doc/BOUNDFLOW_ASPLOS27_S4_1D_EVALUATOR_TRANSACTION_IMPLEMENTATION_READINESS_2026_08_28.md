@@ -22,8 +22,9 @@ S4-1D现在可以被实现为一个明确的prepared-runtime事务，但S3独立
 
 本轮只读审计纠正了旧蓝图的四个实质问题：
 
-1. S4-1D logical correctness ledger不是`386,712 B`，而是`438,726 B`；旧账漏掉
-   `49,152 B` residual scratch和`2,862 B` compressed metadata，共漏`52,014 B`；
+1. 2026-08-29进一步源码复核把S4-1D logical correctness ledger从`438,726 B`纠正为`389,574 B`：旧审计把
+   coefficient arena内部两个residual scratch slice误作独立storage，重复加了`49,152 B`；真正相对
+   `386,712 B`旧账新增的只有`2,862 B` compressed metadata；
 2. evaluation一旦进入GPU写阶段，失败后不能在同一prepared object上reset/retry；正确状态是
    `POISONED_NO_RETRY`，generation永久烧毁；
 3. lower、六dα、六dβ和可选terminal lA不是若干可独立释放的松散view，而是一个composite result lease；
@@ -45,7 +46,7 @@ PreparedS4AllStateCrownEvaluatorV1
 - request admission和evaluation generation；
 - 六α、一active β和五empty β token的ordered ABI；
 - pass A/B/C module与persistent arena；
-- 48个prepare-time view的lifetime；
+- S4-1B 90个、完整S4-1A/B/C 110个prepare-time argument descriptor的lifetime；
 - final finite gate；
 - composite result lease与terminal child transfer；
 - component receipt、live counter和最终execution receipt。
@@ -73,7 +74,7 @@ PreparedS4AllStateCrownEvaluatorV1
 6. admission/plan/trace/ordered-buffer hashes exact
 7. live source object/storage/version/content guards exact
 8. module/cache/hardware/dtype/device/stream identities exact
-9. all 48 prepared views pointer/shape/stride/dtype exact
+9. all 110 prepared argument descriptors pointer/shape/stride/dtype/offset exact
 10. component receipts independently validate
 ```
 
@@ -200,61 +201,64 @@ formal fixture、排除模型parameters、fixed bounds和compiled-module内部wo
 | six selectors | 55,296 | 6 int8 buffers，`-128`为invalid |
 | V/terminal-lA arena | 149,856 | 1 storage，6 non-overlap slots |
 | two coefficient arenas | 147,456 | 2 persistent storages |
-| residual scratch | 49,152 | 2 existing staged storages |
+| residual scratch | 0 additional | 2 offset views inside coefficient arenas |
 | lower + upstream + bias | 72 | 3 scalar/small outputs |
 | compressed static metadata | 2,862 | α indices + β location/sign |
-| **合计** | **438,726** | **36个logical physical buffers** |
+| **合计** | **389,574** | **34个logical physical buffers** |
 
 该合计隐含一个尚待S4-1B implementation关闭的phase alias：ternary input select的`73,728 B selected_endpoint`
 复用existing coefficient arena，而不是独立分配。S4-1B0隔离module实测仍需要distinct output；若production
-live-reader/generation/stream证明失败，本表必须增加`73,728 B`，不能继续沿用`438,726 B`。
+live-reader/generation/stream证明失败，本表必须增加`73,728 B`至`463,302 B`，不能继续沿用`389,574 B`。
 
-旧账`386,712 B`漏项为：
+修正关系为：
 
 ```text
-49,152 residual scratch + 2,862 static metadata = 52,014 B
-386,712 + 52,014 = 438,726 B
+residual scratch additional physical bytes = 0
+386,712 + 2,862 static metadata = 389,574 B
 ```
 
-CUDA allocation探针得到：
+旧CUDA allocation探针曾得到：
 
 ```text
-logical total                 438,726 B
+old over-allocated logical total 438,726 B
 torch allocated delta         448,000 B
 torch reserved delta        2,097,152 B
-allocator minus logical         9,274 B
+allocator minus old logical     9,274 B
 existing source lease bytes    34,008 B  # 只延长lifetime，不是新增allocation
 ```
 
-该探针只说明ledger在本设计fixture中的物理可实例化性。`allocated/reserved`含allocator行为，不能与logical sum互换；
-fixed bounds和compiled workspace仍需implementation receipt单独披露。
+该probe按36个独立buffer手工实例化，真的给两个scratch分配了额外storage，所以只能说明旧过度分配设计可实例化，
+不能验证production reuse。新probe必须从真实prepared owner按storage `_cdata`去重，并核对scratch offset。
+`allocated/reserved`含allocator行为，不能与logical sum互换；fixed bounds和compiled workspace仍需implementation
+receipt单独披露。
 
 修正后的S4-1D本阶段小计不变；下游S4-2实施就绪审计随后补齐了optimizer step、compressed best、`ret_0`和
 validate-before-commit shadow，故下游数字以2026-08-29修订为准：
 
 ```text
-S4-1D                                  438,726 B
+S4-1D                                  389,574 B
 + S4-2 policy/optimizer additions      102,200 B
-= S4-2 known subtotal                  540,926 B
+= S4-2 known subtotal                  491,774 B
 + S4-3 candidate + rollback             68,016 B
 + S4-3 persistent upper/depths              48 B
-= S4-3 known subtotal                  608,990 B
+= S4-3 known subtotal                  559,838 B
 ```
 
 这些仍不是peak-memory claim。
 
-## 7. 48-view ABI与component receipt
+## 7. 90/110-view ABI与component receipt
 
-prepare-time view固定为：
+prepare-time argument descriptor固定为：
 
-- S4-1A base views=`16`；
-- S4-1B/1C emitter所需unique views=`46`；
-- emitter与base重叠=`14`；
-- additional TIR views=`32`；
-- prepared total=`48`。
+- S4-1A base=`16`；
+- S4-1B selected graph=`49`，与base active α重叠`5`；
+- S4-1B pass A额外=`30`；
+- S4-1B union=`16+49-5+30=90`；
+- S4-1C emitter isolated=`46`，与base重叠`14`、与S4-1B flattened bounds再重叠`12`；
+- S4-1C新增=`20`，完整S4-1A/B/C union=`110`。
 
-`46`是七个gradient emitter signature中的unique view scope；`48`是整个prepared evaluator scope，不能互换。
-全部view必须在prepare建立且pointer exact，warm invocation的DLPack view creation=`0`。
+`46`是七个gradient emitter signature中的unique scope；`48`只是base+emitter局部并集，不是整个prepared evaluator。
+全部110个argument descriptor必须在prepare建立且pointer exact，warm invocation的DLPack view creation=`0`。
 
 每个component receipt至少绑定：
 
@@ -349,8 +353,8 @@ replayer必须不import BoundFlow、PyTorch、TVM、NumPy或αβ-CROWN，并从p
 5. composite lease拆成可独立重写的view；
 6. terminal child transfer两次；
 7. parent/child close顺序伪造；
-8. 48-view receipt改为46或反之；
-9. 漏掉49,152 B scratch或2,862 B metadata；
+8. 90/110-view receipt改成46/48局部口径；
+9. 把49,152 B scratch重复算成独立physical storage，或漏掉2,862 B metadata；
 10. 以projection替换full IEEE payload；
 11. qNaN被改为0并重签；
 12. terminal/nonterminal worker配比或fixture串换。
@@ -362,7 +366,7 @@ replayer必须不import BoundFlow、PyTorch、TVM、NumPy或αβ-CROWN，并从p
 S3外审批准后，S4-1D只能在S4-0、1A、1B0、1B、1C逐级关闭后按以下顺序实现：
 
 1. `feat(runtime): add S4-1D read-only request admission and state machine`；
-2. `feat(runtime): assemble pass A/B/C with 48 prepared views`；
+2. `feat(runtime): assemble pass A/B/C with 110 prepared argument descriptors`；
 3. `feat(runtime): add final gate and composite result lease`；
 4. `test(runtime): close pre-begin/post-begin/lease negative matrix`；
 5. `artifact: close 5+5 full-IEEE replay and fully re-signed tamper`；

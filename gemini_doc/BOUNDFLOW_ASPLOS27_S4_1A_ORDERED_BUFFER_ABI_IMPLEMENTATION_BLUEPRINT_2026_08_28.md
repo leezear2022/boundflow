@@ -94,7 +94,7 @@ terminal时不回填full GPU source；由existing atomic copy-out以immutable so
 |---|---:|---:|---:|
 | dα output | 6 | 4,248 | 16,992 |
 | active dβ output | 1 | 6 | 24 |
-| lower output | 1 | 6 | 24 |
+| lower output | 1 | 6 | 24，physical shape `[D]` |
 | fixed upstream | 1 | 6 | 24 |
 | Adam m+v（S4-2才创建） | 14 tensors | 8,508 | 34,032 |
 
@@ -212,7 +212,7 @@ S4EvaluationResultLeaseV1:
     evaluation_ordinal
     input_state_version
     evaluation_generation
-    lower                       # persistent [D,1] view
+    lower                       # result-side [D,1] view over physical [D] buffer
     alpha_gradient_leases       # exact ordered tuple[6]
     beta_gradient_leases        # ordered tuple[6]: physical or empty token
     terminal_handoff_or_none
