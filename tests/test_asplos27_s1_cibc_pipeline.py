@@ -111,6 +111,41 @@ def test_s1_compile_receipt_rejects_claim_and_missing_cublas() -> None:
         replace(receipt, cublas_partition_count=0).validate()
 
 
+def test_s1_formal_artifact_replays_and_passes_all_qualification_gates() -> None:
+    from scripts import run_asplos27_s1_cibc_artifact as artifact
+
+    root = Path("artifacts/asplos27-s1-cibc-pipeline/resnet2b-prop0-v1")
+    if not root.is_dir():
+        pytest.skip("S1 formal artifact unavailable")
+    result = artifact.replay(root)
+    summary = artifact.load_json(root / "summary.json")
+    assert result["status"] == "replay-passed"
+    assert summary["status"] == "validated-s1-cibc-pipeline"
+    assert summary["run_count"] == 6
+    assert summary["op_count"] == 17
+    assert summary["cibc_conv_coverage"] == 6
+    assert summary["cublas_partition_count"] == 2
+    assert summary["pipeline_speedup_geomean"] >= 2.20
+    assert summary["pipeline_speedup_worst"] >= 2.00
+    assert summary["pipeline_direct_propagation_geomean"] >= 0.90
+    assert summary["s1_performance_admitted"] is True
+    assert summary["same_solver_claimed"] is False
+    assert summary["performance_claimed"] is False
+
+
+def test_s1_formal_artifact_rejects_every_outer_resigned_tamper() -> None:
+    root = Path("artifacts/asplos27-s1-cibc-pipeline/resnet2b-prop0-v1")
+    if not root.is_dir():
+        pytest.skip("S1 formal artifact unavailable")
+    report = __import__("json").loads(
+        (root / "tamper_report.json").read_text(encoding="utf-8")
+    )
+    assert report["case_count"] == report["rejected_count"] == 8
+    assert all(row["outer_resigned"] is True for row in report["rows"])
+    assert all(row["rejected"] is True for row in report["rows"])
+    assert report["performance_claimed"] is False
+
+
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA unavailable")
 def test_s1_resnet2b_pipeline_matches_reference_and_rejects_mutation() -> None:
     from scripts import run_cibc_ibp_horizontal_worker as worker
