@@ -1,12 +1,12 @@
 ---
-status: ready-for-external-design-audit-v14-s4-1c-construction-readiness-frozen
+status: ready-for-external-design-audit-v15-s4-1d-construction-readiness-frozen
 date: 2026-08-29
 type: external-audit-handoff
 topic: boundflow
 slug: asplos27-s4-design-audit
 audit-kind: preregistration-and-implementation-blueprint
 base-commit: ebf45cc72438141d8f0b35dadfd5cf774d7e753f
-design-result-commit: 79b5b6cbc33590dc2040c52aaee1661c40b4c7db
+design-result-commit: 10bef37620080e7bb1eccdbb108084f2ea556a98
 execution-authority: false
 code-change-open: false
 performance-claimed: false
@@ -39,8 +39,8 @@ speedup或complete-query性能已经存在。
     key与module/launch receipt是否足以fail closed；
 13. 五张binary selector是否也必须使用`-128` sentinel；七gradient TIR的safe-index/finite poison、46 emitter
     views与base+emitter local 48口径是否完整；
-14. S4-1D read-only admission、post-begin `POISONED_NO_RETRY`、composite result lease、5+5 full-IEEE raw和
-    修正后的`389,574 B` ledger是否共同关闭single-evaluation事务；
+14. S4-1D read-only admission、post-begin `POISONED_NO_RETRY`、opaque result capability、12-worker六全排列
+    full-IEEE raw和修正后的`389,574 B` ledger是否共同关闭single-evaluation事务；
 15. S4-2 live policy/functional Adam审计是否正确关闭checkpoint、patience reachability、step/best/shadow memory、
     post-begin poison和20-worker formal口径；
 16. S4-3 live诊断据此引入prepared working-β、prefix-only rollback、post/queue独立计数与细粒度latch是否正确；
@@ -88,6 +88,15 @@ speedup或complete-query性能已经存在。
 58. runtime O(1) receipt与formal V-pre-overwrite/lA-post-copy sidecar分层是否避免热路径D2H/hash；
 59. native six-clone handoff迁移到one-arena one-shot lease是否保持topology/order/spec-axis与KFSB lifetime；
 60. 62类S4-1C negative、5+5 fresh和17/23 action replay是否还有遗漏或无法机械实现之处。
+61. S4-1D旧`919,680 B`是否确只是5+5 candidate output，不能支持A/B/C三方独立复核；
+62. formal改为两fixture各六全排列、12 fresh是否是关闭执行顺序/owner污染的合理最小拓扑；
+63. `3,310,848 B` three-way output+`899,136 B` terminal V sidecar=`4,209,984 B`最低raw是否准确；
+64. raw Tensor getter不可撤销反例是否意味着result/terminal必须改成opaque exact sealed-consumer capability；
+65. exact consumer type/hash与post-consume retention audit能否充分阻止Tensor/storage逃逸，是否还有更强可实现边界；
+66. parent/child 9-state、14 legal transition、67 invalid组合是否完整，transfer是否正确独立于parent close；
+67. component→execution→artifact 15-node seal DAG是否无环，result runtime ref是否正确排除于semantic root；
+68. 86类S4-1D negative、12-worker raw-first/replay/full-resign tamper是否足够且可机械实现；
+69. S4-1D通过后只开放S4-2而不提前暴露raw Tensor/支持re-arm，边界是否正确。
 
 ## 1. 审计范围和Git边界
 
@@ -95,9 +104,9 @@ speedup或complete-query性能已经存在。
 - 本轮设计base：`ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
 - S4-0 live admission/lease、S4-3A scratch finalization、S4-1A prepare transaction、S4-1B0 ternary TIR、
   S4-1B/1C selector/gradient/arena ABI、S4-1D evaluator、S4-2 policy、S4-3 whole-core transaction及S4-4 formal
-  evidence readiness、S4-0 V4、S4-1A V5、S4-1B0、S4-1B与S4-1C construction readiness全部设计结果：
-  `79b5b6cbc33590dc2040c52aaee1661c40b4c7db`；
-- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..79b5b6cbc33590dc2040c52aaee1661c40b4c7db`
+  evidence readiness、S4-0 V4、S4-1A V5、S4-1B0、S4-1B、S4-1C与S4-1D construction readiness全部设计结果：
+  `10bef37620080e7bb1eccdbb108084f2ea556a98`；
+- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..10bef37620080e7bb1eccdbb108084f2ea556a98`
   和下列S4文档的完整版本为准；
 - S3 formal实现/结果不在本轮重新验收，但它是S4设计输入；S3独立exchange仍等待审计；
 - `.docops/exchange/gc0-1-prereg-20260826`异步audit文件和`docs/CIBC_for_DAC.pdf`是用户保留的范围外dirty文件，
@@ -137,14 +146,15 @@ speedup或complete-query性能已经存在。
 20. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1BC_SELECTOR_GRADIENT_TIR_IMPLEMENTATION_READINESS_2026_08_28.md`；
 21. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`；
 22. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_EVALUATOR_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`；
-23. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
-24. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_POLICY_DRIVER_IMPLEMENTATION_READINESS_2026_08_29.md`；
-25. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
-26. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_29.md`；
-27. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
-28. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
-29. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_EVIDENCE_IMPLEMENTATION_READINESS_2026_08_29.md`；
-30. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
+23. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`（V1权威施工合同）；
+24. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
+25. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_POLICY_DRIVER_IMPLEMENTATION_READINESS_2026_08_29.md`；
+26. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
+27. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_29.md`；
+28. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
+29. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
+30. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_EVIDENCE_IMPLEMENTATION_READINESS_2026_08_29.md`；
+31. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
 
 ## 3. 已冻结的production事实，请独立复核
 
@@ -315,7 +325,12 @@ PASS要求：
 - lower/六dα/六dβ/terminal lA是否应由一个composite lease共同持有，terminal child是否只可transfer一次；
 - S4-1D每fresh owner只执行一次、success不隐式回`READY`是否比提前允许10-step复用更安全；
 - 5 nonterminal + 5 terminal worker是否足够关闭两种fixture，且每个worker恰一次evaluation；
-- candidate完整IEEE raw `919,680 B`足够小时，禁止仅存hash+bounded projection是否合理；
+- 旧candidate-only `919,680 B`为何不足；12-worker A/B/C output+terminal V sidecar最低numeric raw
+  `4,209,984 B`是否准确，禁止仅存hash+bounded projection是否合理；
+- raw Tensor getter无法撤销已逃逸引用的反例是否成立；result/terminal child是否必须只提供exact sealed consumer/
+  formal sink方法而不公开Tensor/dict/DLPack/generic callback；
+- parent/child 9-state、9-event、14 legal transition与67 invalid组合是否覆盖embedded、child-first、parent-first和poison；
+- 15-node seal DAG是否正确排除receipt/result、raw/summary和manifest self-hash循环；
 - 36-buffer logical ledger、allocator delta与existing source lease lifetime三种口径是否被正确区分。
 
 请特别找出文档中可能把“数学可行”误写为“已有production implementation”的地方。
@@ -541,9 +556,18 @@ PASS要求：
   site31 copy-before-dβ数值反例成立，warm allocated/reserved=`0/0`；
 - `tvm_ffi.use_torch_stream`内non-default Torch/FFI stream exact，退出后FFI stream恢复；
 - S4-1C construction相关五文件回归=`23 passed in 17.68s`；production code diff=`0`；
-- S4-1D full raw预算：nonterminal/terminal/5+5=`17,040/166,896/919,680 B`，canonical hash=
-  `1e2aab39a7f7049a09371fef6ec1e0a01dc1e2ec6b25ed7c4060b2cf78e2f0d6`；
-- 本次S4-1D evaluator依赖回归：`37 passed in 27.85s`；production code diff=`0`；
+- 旧S4-1D candidate-only raw预算：nonterminal/terminal/5+5=`17,040/166,896/919,680 B`，旧hash=
+  `1e2aab39...e2f0d6`，现已明确降为历史估算；
+- S4-1D construction package=`983 lines`，canonical hash=
+  `76da18648d874dfec6e867deaf26122f093f8157c68967ef2d06afe362243cd1`；
+- 修正formal topology=`12 workers`：nonterminal/terminal各覆盖A/B/C六全排列；candidate output=
+  `1,103,616 B`、three-way output=`3,310,848 B`、terminal V sidecar=`899,136 B`、minimum numeric raw=
+  `4,209,984 B`；
+- capability model=`9 states/9 events/14 legal/67 invalid`，hash=`963e723f...599d`；5条完整close trace通过；
+- component→execution→artifact seal DAG=`15 nodes`且无环，hash=`444a98d8...bca9`；
+- raw Tensor escape反例：lease property close后拒绝，但先前escaped Tensor仍可读sum=`28.0`，证明public getter
+  不能支持revocable claim；
+- 本次S4-1D construction依赖回归：`37 passed in 20.65s`；production code diff=`0`；
 - 本次S4-2 readiness依赖回归：`41 passed in 26.63s`；production code diff=`0`；
 - S4-2/S4-3 ledger检查：`491,774/559,838 B`、checkpoint `[0,6,7,8,9]`、10-step patience `>10`
   不可达、24份必读文档全部存在；
@@ -563,8 +587,8 @@ PASS要求：
 ## 7. 建议外审操作
 
 ```bash
-git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..79b5b6cbc33590dc2040c52aaee1661c40b4c7db
-git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..79b5b6cbc33590dc2040c52aaee1661c40b4c7db
+git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..10bef37620080e7bb1eccdbb108084f2ea556a98
+git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..10bef37620080e7bb1eccdbb108084f2ea556a98
 
 source env.sh
 /home/lee/miniconda3/envs/boundflow/bin/python -m pytest -q \
@@ -628,6 +652,15 @@ source env.sh
 - 在`use_torch_stream`前/中/后读取FFI stream，确认中间exact、退出恢复；
 - 独立重算110 argument DLPack、6 result ordinary views、13 module symbols三种互不混淆的口径；
 - 检查runtime receipt没有V/lA content hash或D2H，formal sidecar在V覆盖前与lA copy后分别绑定raw；
+- 从S4-1D施工包提取canonical JSON并重算`76da18...3cd1`；独立重算12-worker raw四项算术；
+- 枚举9 states×9 events，确认只有14 legal transition，其余67项reject且state不变；分别跑embedded close、
+  child-first、parent-first、nonterminal和post-failure五条完整trace；
+- 构造naive lease raw Tensor getter，close wrapper后验证escaped Tensor仍可访问；据此审查API是否完全禁止getter/
+  tuple/dict/DLPack/generic callback；
+- 亲读future sealed policy/KFSB/formal consumer边界，攻击subclass、duck type、consumer字段保留与raw Tensor return；
+- 独立拓扑排序15-node seal DAG，检查result↔receipt、raw↔summary与manifest self-hash均无循环；
+- 建立12 worker protocol，确认两fixture各恰含ABC/ACB/BAC/BCA/CAB/CBA且A/B/C mutable storage独立；
+- 重算candidate=`1,103,616`、three-way=`3,310,848`、V-sidecar=`899,136`、minimum=`4,209,984 B`；
 - 检查tamper编号1—68；
 - 用CUDA tensor验证commit+restore后的`_version`；
 - 亲读production checkpoint条件，独立重算fixed ordinal `[0,6,7,8,9]`和patience reachability；
@@ -697,6 +730,15 @@ source env.sh
 57. runtime O(1) receipt/formal pre-overwrite V sidecar/post-copy lA sidecar能否同时保证性能边界与独立审计？
 58. native six-clone handoff迁移为one-arena lease时，plan order、spec axis、KFSB消费与post lifetime还有何遗漏？
 59. 62类S4-1C negative和5+5 fresh formal是否充分；外审还能构造哪类phase/stream/storage全重签攻击？
+60. 是否同意旧`919,680 B`只能称5+5 candidate-only估算，A/B/C独立复核必须保存三方完整output？
+61. 两fixture各六全排列、12 fresh是否为合理最小formal拓扑；是否仍需隔离A/B/C到独立subprocess？
+62. `4,209,984 B` minimum numeric raw是否完整；terminal V sidecar只存6个terminal worker是否足够依赖前序component closure？
+63. raw Tensor escape反例是否否定public view getter；opaque exact sealed-consumer capability还有何可实现的更强防逃逸机制？
+64. exact class/implementation hash与post-consume retention audit是否足够，consumer内部异常或CUDA异步引用怎样关闭？
+65. 9-state/14-transition模型是否遗漏transfer后parent仍open、child-first、embedded close或并发close状态？
+66. 15-node seal DAG是否无循环；execution semantic root、result runtime ref、raw/summary/manifest边界是否正确？
+67. 86类S4-1D negative与至少12类fully re-signed tamper是否足够，外审还能构造哪类capability/raw/DAG攻击？
+68. 是否同意S4-1D success不回READY，10次re-arm只能由S4-2新合同拥有，而不是提前塞入evaluator？
 
 ## 9. 输出格式
 

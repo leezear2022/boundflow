@@ -10,6 +10,20 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：刷新S4设计外审交接至S4-1D construction readiness v15
+
+- design-result commit更新为`10bef37620080e7bb1eccdbb108084f2ea556a98`，冻结base仍为
+  `ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
+- 必读文档由30增至31，加入983行S4-1D construction package；top-level任务由60增至69，must-answer由59增至68；
+- AC3新增12-worker六全排列、三方raw+V sidecar、opaque capability、9-state lifecycle和15-node seal DAG；
+- evidence新增raw预算四项算术、Tensor escape反例、capability/DAG hash及37项依赖回归；
+- 外审命令和Git范围更新到`10bef37`；仍不新建S4 exchange、不开放production/formal/timing/performance。
+
+### 验证
+
+- handoff base/result commit、31份必读、69项top-level任务、68项must-answer、v15新增字段：提交前验证；
+- `git diff --check`、DocOps validation/lint在提交前执行。
+
 ## 2026-08-29：冻结S4-1D evaluator逐文件施工并纠正raw/capability合同
 
 - 新增983行S4-1D construction package，组合Pass A19、Pass B one graph与Pass C17/23 action；
