@@ -233,7 +233,8 @@ S4-1D                                  438,726 B
 + S4-2 policy/optimizer additions      102,200 B
 = S4-2 known subtotal                  540,926 B
 + S4-3 candidate + rollback             68,016 B
-= S4-3 known subtotal                  608,942 B
++ S4-3 persistent upper/depths              48 B
+= S4-3 known subtotal                  608,990 B
 ```
 
 这些仍不是peak-memory claim。

@@ -326,8 +326,11 @@ known cross-device total = 540,926 B
 若后续 S4-3 继续使用已冻结的 full candidate + rollback `68,016 B`：
 
 ```text
-known S4-3 subtotal = 540,926 + 68,016 = 608,942 B
+known S4-3 subtotal = 540,926 + 68,016 + persistent upper/depths 48 = 608,990 B
 ```
+
+其中upper为CUDA 24 B、depths为CPU 24 B；working-β location/sign 72 B是external retained liveness，不重复计入new
+allocation。详见2026-08-29 S4-3 implementation-readiness审计。
 
 这些都不是 `torch.cuda.max_memory_allocated()` 或 reserved-memory claim；policy masks、Python objects、allocator
 metadata、module/cuDNN/TVM workspace、model/fixed inputs仍需实测披露。
@@ -449,7 +452,7 @@ minimum per-run numeric payload    1,341,776 B
 ## 10. 对旧蓝图的修正清单
 
 1. memory subtotal：`472,758 → 540,926 B`；
-2. downstream S4-3 subtotal：`540,774 → 608,942 B`；
+2. downstream S4-3 subtotal：历史`540,774 → 608,942 B`，后由S4-3 readiness补齐upper/depths为`608,990 B`；
 3. Adam ABI 增加 per-group `batch_dim` 与 step CPU/float32；
 4. checkpoint ordinals 冻结为 `0,6,7,8,9`；
 5. terminal scheduler 改为 fixed live path 事实，不写成所有 exit 的无条件行为；

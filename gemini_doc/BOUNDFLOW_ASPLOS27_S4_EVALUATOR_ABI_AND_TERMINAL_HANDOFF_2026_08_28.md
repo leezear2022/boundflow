@@ -256,6 +256,9 @@ ordinal 9 compiled evaluation
 lA只供KFSB读取；最终provider return的`batched_lA`在当前fixed path中是empty。lA lease可在KFSB/assembly后释放，
 不得延长到solver queue生命周期。
 
+但composite lease不能整体随lA一起释放：terminal lower、working α/β和shared intermediates仍被official post的
+`core_result`消费，必须保持到post完成。各sublease按最后consumer独立关闭。
+
 hot assembly不得对lower/lA重复`clone()`；若existing B4-A assembly的clone仍存在，S4-3必须新增pointer-safe immutable
 lease路径或把clone成本单独计入，不能声称zero dynamic allocation。
 
@@ -323,14 +326,18 @@ S4-3 whole-core exact-call的provider return constructor、official post、host 
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`。existing KFSB/
 commit可复用其数学与owner，但不能直接继承“完全原子”措辞。
 
+implementation-readiness修订见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_29.md`，它进一步冻结
+prepared working-β、persistent upper/depths、prefix-only rollback和覆盖post/queue的exclusive latch。
+
 provider net α/intermediate/lA scratch的consumer、terminal 36-path transfer、B0 post-KFSB batch-24 residue、R/C
 post-native-KFSB 36-path normalization由`ProviderNetScratchFinalizationPlanV2`表达；storage alias/unique bytes、β variant policy及
 query-scoped exclusive core-owner latch见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`。这些是logical
 lifetime transaction，不是terminal ABI的第13+条production数值path。
 
-S4-4正式证据链、18 fresh B0/R/C六全排列、stdlib tensor raw/replay、68类fully re-signed tamper及
-`COMMITTED_POST_FAILED_POISONED`见
+S4-4正式证据链、18 fresh B0/R/C六全排列、stdlib tensor raw/replay、71类fully re-signed tamper及
+`COMMIT_POISONED/POST_POISONED/QUEUE_POISONED`见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`。
 
 ## 8. 当前门禁

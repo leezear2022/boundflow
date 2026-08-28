@@ -1673,6 +1673,13 @@ pre-commit abort、stale conflict、mid-publish compensation和async completion 
 复用。历史B3/B0 query=`0.910001x`只作路由：parity至少需`1.09890x`，到`1.15x`至少需
 `1.26373x`；必须用新same-solver GPU share、integration overhead和region speedup重算。
 
+S4-3 live审计把该边界进一步具体化：current B3-C的working-β `deepcopy`与temporary upper会产生热路径CUDA
+allocation；v1 blanket rollback会推进11条untouched target的`_version`；official post后的candidate domain add只是
+query内第二次`BatchedDomainList.add`。production实现必须用prepared working-β/persistent upper，rollback只恢复
+committed prefix，并让exclusive latch经过`COMMITTING→CORE_COMMITTED→POSTPROCESSING→POST_READY→QUEUEING`
+后才完成。receipt分列`provider_postprocess=1/query-total-add=2/candidate-post-add=1`；post或queue失败均为poison，
+不能伪装成clean rollback。修正后的S4-3 known-new logical subtotal为`608,990 B`，仍不是peak-memory claim。
+
 ### 8.7 M6：formal 与证据驱动扩展
 
 先完成native/direct-region/full compiler三方、complete query和queue formal。只有新profile开门，才依次考虑：

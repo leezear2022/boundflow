@@ -17,7 +17,8 @@ date: 2026-08-28
 > 2026-08-29 实施就绪修订：live observer、functional Adam 与源码可达性审计已完成。本文的事务失败语义、
 > checkpoint索引、optimizer ABI、fresh-worker口径及memory ledger以
 > `BOUNDFLOW_ASPLOS27_S4_2_POLICY_DRIVER_IMPLEMENTATION_READINESS_2026_08_29.md`为准；修正后的S4-2/S4-3
-> known logical subtotal为`540,926/608,942 B`。这仍是design，不开放production代码。
+> known logical subtotal为S4-2 `540,926 B`；S4-3后续readiness补齐persistent upper/depths后为`608,990 B`。
+> 这仍是design，不开放production代码。
 
 S4-2不能直接复用`execute_rvir_v4_native_optimizer_trace`、S3 P-anchor循环或
 `execute_terminal_optimizer_with_lower_adjoint_handoff_v1`。这些路径已经证明10次CROWN evaluation、9次Adam

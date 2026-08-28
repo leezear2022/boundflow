@@ -10,6 +10,32 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：关闭S4-3 whole-core事务实施前歧义
+
+- 新增488行S4-3 implementation-readiness审计；亲读pinned provider/BoundFlow源码并在真实B3-C same-solver context中
+  观察assembly、device commit、official post、queue add与故障rollback；
+- 证明current candidate没有清空`pre_result.interm_bounds`，六key从assembly前一直存活到worker结束；host packet则
+  经过含`betas/history/depths`的decision阶段后才最终裁为`thresholds/history/depths`；
+- 量化current working-β `deepcopy`的CUDA allocator delta=`1,024 B`、peak delta=`2,048 B`；与temporary upper一起使
+  assembly allocated delta=`1,536 B`，因此冻结prepared working-β bridge、persistent upper/depths与hot tensor
+  allocation/deepcopy=`0`；
+- 修正S4-3 known-new logical subtotal为CUDA=`608,910 B`、CPU=`80 B`、总计=`608,990 B`；β location/sign
+  `72 B`作为external retained liveness披露而不重复计入new allocation，该账仍不是peak；
+- 故障注入证明current v1在第一条copy失败后执行12条blanket restore：第一条version `+2`，11条untouched target也
+  `+1`；V2改为committed-prefix-only best-effort restore，但无论content是否恢复都进入`COMMIT_POISONED`；
+- live post/queue观察确认official post=`1`、query total domain add=`2`、candidate post domain add=`1`，三者必须
+  独立counter；旧execution schema缺post counter，禁止从null/其他counter推断；
+- exclusive latch扩成`UNCLAIMED→PREPARED→COMMITTING→CORE_COMMITTED→POSTPROCESSING→POST_READY→QUEUEING→`
+  `COMPLETED`，commit/post/queue fault分别poison；14条transition与ledger canonical hash=
+  `833e8a9b...6ccaf5`；
+- S4-4 tamper从68类扩为71类，加入post/queue counter混写、blanket rollback伪装prefix rollback和failure-state互换；
+  同步主预注册、evaluator ABI、S4-3/3A、S4-4与README；S3外审前production/formal/timing仍关闭。
+
+### 验证
+
+- true B3-C live assembly/post/queue/fault probes：完成；首次wrong-import与scope-mismatch失败作为诊断边界保留；
+- ledger/state canonical model、文档引用/旧数字/旧状态扫描、定向回归与DocOps validation/lint在提交前执行。
+
 ## 2026-08-29：刷新S4设计外审交接至policy-driver readiness v7
 
 - design-result commit更新为`83d27b0f62db88fcf17b00daf36e865846ccc208`，冻结base仍为

@@ -16,6 +16,10 @@ complete-query-claimed: false
 
 # ASPLOS'27 S4-3：whole-core exact-call事务与回滚实施蓝图
 
+> 2026-08-29实施就绪修订：本稿的路线仍有效，但memory、working-β、rollback、lease和post/queue细节已由
+> `BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_29.md`精确化。实现时以
+> 后者为准；旧`608,942 B`、blanket restore与粗粒度post状态机不再是当前合同。
+
 ## 0. 直接结论
 
 S4-3不是“把S4-2的terminal tensor塞回provider”的薄adapter。真实`update_bounds_core`事务同时改变或消费：
@@ -233,15 +237,17 @@ candidate + rollback = 68,016 bytes
 ```
 
 S4-2 implementation-readiness已补齐step、compressed best、`ret_0`和validate-before-commit shadow，修正后的
-known subtotal为`540,926 bytes`；加入candidate/rollback后：
+known subtotal为`540,926 bytes`；S4-3还必须prepared持有upper `[6,1]`与depths `[6]`。加入candidate/rollback后：
 
 ```text
-known S4-3 logical subtotal = 540,926 + 68,016 = 608,942 bytes
+known S4-3 CUDA subtotal = 540,870 + 68,016 + 24 = 608,910 bytes
+known S4-3 CPU subtotal  = 56 + 24 = 80 bytes
+known S4-3 logical subtotal = 608,990 bytes
 ```
 
-这**不是peak memory claim**。其中S4-2 step/shadow-step的56 B在CPU；它明确不含：provider working-beta
-deepcopy、policy/pruner masks、KFSB child buffers、model/fixed inputs、cuDNN/TVM workspace、allocator metadata、
-post D2H输出及shared intermediate source storage。
+这**不是peak memory claim**。provider β location/sign的72 B是external retained liveness，不重复计入new allocation；
+hot path必须以prepared bridge消除working-beta deepcopy。该账仍不含policy/pruner masks、KFSB child buffers、model/fixed
+inputs、cuDNN/TVM workspace、allocator metadata、post D2H输出及shared intermediate source storage。
 
 ## 5. terminal export：禁止第11次CROWN
 
@@ -393,21 +399,19 @@ detached旧对象后声称solver state已更新。事务结束后lease必须clos
 所有target candidate和rollback buffer必须在commit前准备完毕。commit区域不允许编译、lazy import、planner decision、
 provider bound callback或动态GPU allocation。
 
+rollback只能恢复已经candidate-write的prefix，不能为了形式上的“12/12 restored”回写untouched suffix。即使prefix内容
+恢复exact，`_version`仍不可逆，terminal仍为poisoned。
+
 ### 9.3 失败状态机
 
 ```text
-PREPARED
-  ├─ validation/staging error → ABORTED_CLEAN
-  └─ COMMITTING
-       ├─ success → COMMITTED
-       └─ runtime fault
-            → restore tensor content + host packet/container when possible
-            → POISONED_NO_RETRY
+UNCLAIMED -> PREPARED -> COMMITTING -> CORE_COMMITTED
+          -> POSTPROCESSING -> POST_READY -> QUEUEING -> COMPLETED
 
-COMMITTED
-  └─ POSTPROCESSING
-       ├─ success → COMPLETED
-       └─ official post fault → COMMITTED_POST_FAILED_POISONED
+pre-begin fault  -> PRECOMMIT_ABORTED_CLEAN
+commit fault     -> COMMIT_POISONED
+post fault       -> POST_POISONED
+queue-add fault  -> QUEUE_POISONED
 ```
 
 语义：
@@ -415,8 +419,9 @@ COMMITTED
 - `ABORTED_CLEAN`：可以安全报告失败；live内容、identity、version均未变；
 - `COMMITTED`：可以进入official post；
 - `POISONED_NO_RETRY`：不能调用native fallback、不能重新commit、不能继续queue；只能终止并保留fault artifact。
-- `COMMITTED_POST_FAILED_POISONED`：12-path/host/container提交已经发生，official post没有形成合法queue result；不得把
-  它伪装成precommit clean abort，也不得自动回滚后重调post。当前query必须终止并冻结commit/post fault raw。
+- `POST_POISONED`：12-path/host/container提交已经发生，official post没有形成合法queue result；
+- `QUEUE_POISONED`：post已经完成，但candidate child queue insertion失败或部分发生；两者都不得伪装成precommit clean
+  abort，也不得自动回滚、重调post或重试queue。当前query必须终止并冻结fault raw。
 
 不得把`POISONED_NO_RETRY`伪写成“rollback success”。
 
@@ -472,7 +477,12 @@ core_result_raw
 post_result_raw
 solver_status / success / visited
 queue-visible lower / upper / alpha / beta / history / depth / threshold
+provider_postprocess_call_count = 1
+query_total_domain_add_count = 2
+candidate_post_domain_add_count = 1
 ```
+
+query total包含一次initial unverified-domain add和一次candidate post add；这三个counter必须分别实测，不能从彼此推断。
 
 历史live-return证据曾比较451个tensor-derived对象、213,060个sign元素，最大有限浮点差
 `1.0669231414794922e-05`且sign exact；这些只作为覆盖规模参考。S4-3必须用新R/C raw重算，不能复制历史summary。
@@ -522,6 +532,8 @@ R/C, C/R, R/C, C/R, R/C
 - provider bound callbacks=`0`；
 - provider return constructors=`12`；
 - official postprocess=`1`；
+- query total domain add=`2`；
+- candidate post domain add=`1`；
 - committed paths=`12`；
 - host packet字段恰为history/depths/thresholds；
 - intermediate-container clear=`1`；
@@ -637,7 +649,7 @@ S3外审批准且S4-0—S4-2依次关闭后，按短提交推进：
 - 12 live paths、host packet和intermediate container完成同一logical commit；
 - provider bound callbacks=0、constructor=12、post=1；
 - precommit失败clean，mid-commit失败明确poisoned且禁止fallback/retry；
-- official post失败明确为`COMMITTED_POST_FAILED_POISONED`，禁止继续queue或伪装clean rollback；
+- official post/queue add失败分别明确为`POST_POISONED/QUEUE_POISONED`，禁止继续或伪装clean rollback；
 - provider net scratch consumer audit无未决读取；
 - replay PASS，minimum 26类tamper全拒绝；
 - timing/performance/same-solver headline flag仍false。

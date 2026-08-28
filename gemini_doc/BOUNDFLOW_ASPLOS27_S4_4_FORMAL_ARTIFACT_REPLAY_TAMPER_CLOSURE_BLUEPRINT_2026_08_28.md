@@ -17,6 +17,9 @@ tenx-claimed: false
 
 # ASPLOS'27 S4-4：formal artifact、stdlib replay与fully re-signed tamper关闭蓝图
 
+> 2026-08-29修订：S4-3 implementation-readiness新增prepared working-β、prefix rollback、two-stage host packet与
+> post/queue独立计数；本稿的formal schema和tamper集合以下述修订为准。
+
 ## 0. 直接结论
 
 S4-4不是“把S4-0—S4-3测试结果复制进manifest”。它必须从同一个clean source重新执行B0/R/C三条whole-core
@@ -325,9 +328,10 @@ provider scratch的variant policy与36-path binding必须来自`ProviderNetScrat
 - core-return所有字段及provider type identity；
 - provider return constructor inventory=12；
 - 12 target pre/candidate/post value和`_version`；
+- committed/restored prefix及untouched suffix restore count；
 - candidate/rollback buffer inventory；
-- host packet before/candidate/after；
-- intermediate container before/after；
+- host packet before/intermediate/final；
+- intermediate container identity/before/after/clear ordinal；
 - commit order/state/hash；
 - content audit与post-query audit；
 - failure state必须属于合法state machine。
@@ -344,6 +348,8 @@ provider scratch的variant policy与36-path binding必须来自`ProviderNetScrat
 ### 6.6 official post与solver result
 
 - provider postprocess call=1；
+- query total domain add=2；
+- candidate post domain add=1；
 - core/post lower、upper、α、β、history、depth、threshold projection；
 - 451个tensor-derived对象和sign inventory由新raw重算，历史数量不作硬编码通用条件；
 - solver status/success/visited；
@@ -358,6 +364,8 @@ provider scratch的variant policy与36-path binding必须来自`ProviderNetScrat
 | provider compute/update callback | provider原生值 | 0 | 0 |
 | provider return constructor | provider内部，不作12硬门禁 | 12 | 12 |
 | official postprocess | 1 | 1 | 1 |
+| query total domain add | 按同query固定路径实测 | 2 | 2 |
+| candidate post domain add | 1 | 1 | 1 |
 | compiled S4 evaluation | 0 | 0 | 10 |
 | native RVIR evaluation | 0 | 10 | 0 |
 | terminal duplicate CROWN | 按provider原生披露 | 0 | 0 |
@@ -375,29 +383,29 @@ scratch table描述variant-specific non-authoritative provider state；queue-vis
 ### 8.1 成功路径状态机
 
 ```text
-PREPARED
-  → COMMITTING
-  → COMMITTED
-  → POSTPROCESSING
-  → COMPLETED
+UNCLAIMED → PREPARED → COMMITTING → CORE_COMMITTED
+          → POSTPROCESSING → POST_READY → QUEUEING → COMPLETED
 ```
 
 ### 8.2 失败路径
 
 ```text
-PREPARED validation/staging/KFSB/assembly failure
-  → ABORTED_CLEAN
+UNCLAIMED/PREPARED validation/staging/KFSB/assembly failure
+  → PRECOMMIT_ABORTED_CLEAN
 
 COMMITTING device/host/container failure
-  → content rollback where possible
-  → POISONED_NO_RETRY
+  → committed-prefix-only content restore where possible
+  → COMMIT_POISONED
 
 POSTPROCESSING official post failure
-  → COMMITTED_POST_FAILED_POISONED
+  → POST_POISONED
+
+QUEUEING candidate domain add failure
+  → QUEUE_POISONED
 ```
 
-`COMMITTED_POST_FAILED_POISONED`是S4-4审计中新识别的必要状态：post发生在commit后，不能把它误归为clean abort，
-也不能自动回滚后重新调用post。current query必须终止，保留commit/post failure raw，禁止fallback和queue继续。
+post/queue发生在commit后，不能把故障误归为clean abort，也不能自动回滚后重调post/queue。current query必须终止，
+保留commit/post/queue failure raw，禁止fallback。prefix content恢复也不能恢复PyTorch `_version`。
 
 ### 8.3 fault injection matrix
 
@@ -414,7 +422,10 @@ POSTPROCESSING official post failure
 9. receipt seal前；
 10. official post entry；
 11. official post materialization中；
-12. official post return前。
+12. official post return前；
+13. candidate queue add entry；
+14. candidate queue add中；
+15. candidate queue add return前。
 
 每案保存pre/post内容、object identity、`_version`、host/container state、fallback/retry/queue counters和最终failure state。
 fault raw不混入18个positive worker summary，但必须被同一manifest绑定。
@@ -541,7 +552,7 @@ tamper report必须进入manifest；不能在manifest后生成一个未绑定报
 
 ## 12. fully re-signed tamper矩阵
 
-S4-4冻结minimum 68类。每案都要：
+S4-4冻结minimum 71类。每案都要：
 
 1. copy完整artifact；
 2. 修改semantic raw/protocol/source/summary之一；
@@ -587,7 +598,7 @@ S4-4冻结minimum 68类。每案都要：
 25. KFSB child lower；
 26. KFSB final decision。
 
-### D. transaction/provider/post（10）
+### D. transaction/provider/post/queue（13）
 
 27. committed path count/order；
 28. candidate tensor value；
@@ -598,54 +609,57 @@ S4-4冻结minimum 68类。每案都要：
 33. provider constructor count；
 34. official postprocess count；
 35. official post lower/value；
-36. poisoned failure伪写为clean rollback。
+36. poisoned failure伪写为clean rollback；
+37. query-total add与candidate-post add混写；
+38. blanket rollback伪写成prefix-only；
+39. post/queue failure state互换。
 
 ### E. artifact/replay（4）
 
-37. tensor payload改值并重签payload/file/manifest；
-38. summary status伪升级；
-39. tamper report删案后重签；
-40. replay stdout伪造PASS。
+40. tensor payload改值并重签payload/file/manifest；
+41. summary status伪升级；
+42. tamper report删案后重签；
+43. replay stdout伪造PASS。
 
 ### F. provider net scratch/finalization（8）
 
-41. 删除一个R/C finalization path；
-42. 把R/C lA/intermediate sentinel改回stale tensor；
-43. 修改`last_update_preserve_mask` mirror；
-44. 伪造exclusive owner latch transition；
-45. 把provider reentry count从1改0；
-46. 把multi-core count从2改1；
-47. 隐藏B0 stale net β retention或伪造R/C provider-net β inventory；
-48. 把scratch finalization错误混入production 12-path commit count。
+44. 删除一个R/C finalization path；
+45. 把R/C lA/intermediate sentinel改回stale tensor；
+46. 修改`last_update_preserve_mask` mirror；
+47. 伪造exclusive owner latch transition；
+48. 把provider reentry count从1改0；
+49. 把multi-core count从2改1；
+50. 隐藏B0 stale net β retention或伪造R/C provider-net β inventory；
+51. 把scratch finalization错误混入production 12-path commit count。
 
 ### G. scratch phase/storage/alias（8）
 
-49. 把B0 post-KFSB batch-24 residue伪写为batch-12；
-50. 把R/C post-finalization sentinel伪写为未归一化stale tensor；
-51. 交换terminal-transfer与post-KFSB phase ordinal；
-52. 用logical tensor bytes冒充unique storage bytes；
-53. 删除一个lA shared-storage alias group；
-54. 把empty tensor的`data_ptr=0`错误合并成真实alias group；
-55. 篡改β field/container identity或跨phase residue lineage；
-56. 把attribute sentinel替换伪写为立即释放CUDA storage或allocated下降。
+52. 把B0 post-KFSB batch-24 residue伪写为batch-12；
+53. 把R/C post-finalization sentinel伪写为未归一化stale tensor；
+54. 交换terminal-transfer与post-KFSB phase ordinal；
+55. 用logical tensor bytes冒充unique storage bytes；
+56. 删除一个lA shared-storage alias group；
+57. 把empty tensor的`data_ptr=0`错误合并成真实alias group；
+58. 篡改β field/container identity或跨phase residue lineage；
+59. 把attribute sentinel替换伪写为立即释放CUDA storage或allocated下降。
 
 ### H. S4-0 live mutable admission（8）
 
-57. 用snapshot object alias group替代live storage group；
-58. 隐藏两个distinct nonempty view共享同一storage；
-59. 修改live Tensor `_version`并全重签外层receipt；
-60. 保持shape/dtype但修改stride或storage offset；
-61. 把五个empty β的zero pointer伪装成一个共享storage alias；
-62. 把R31 dense mapping `source_state_hash`冒充snapshot hash并删除plan binding projection；
-63. 在β/history已匹配前缀后追加一个未拥有slot；
-64. 把raw object id/data pointer写入canonical receipt，或用topology输入顺序改变canonical hash。
+60. 用snapshot object alias group替代live storage group；
+61. 隐藏两个distinct nonempty view共享同一storage；
+62. 修改live Tensor `_version`并全重签外层receipt；
+63. 保持shape/dtype但修改stride或storage offset；
+64. 把五个empty β的zero pointer伪装成一个共享storage alias；
+65. 把R31 dense mapping `source_state_hash`冒充snapshot hash并删除plan binding projection；
+66. 在β/history已匹配前缀后追加一个未拥有slot；
+67. 把raw object id/data pointer写入canonical receipt，或用topology输入顺序改变canonical hash。
 
 ### I. S4-1 ternary endpoint与terminal lA phase（4）
 
-65. 用旧二元`Ainput>=0→lower`替换三元lower/upper/center selector并全重签；
-66. 篡改Ainput zero class/count、lower/upper identity或derived-center公式并全重签；
-67. 把606个zero selector重写为positive/lower，注入已知site19错值并同步重签gradient/summary/manifest；
-68. 把terminal lA改为post-transform coefficient，或删除`[D,S,*feature]`中的spec-axis identity。
+68. 用旧二元`Ainput>=0→lower`替换三元lower/upper/center selector并全重签；
+69. 篡改Ainput zero class/count、lower/upper identity或derived-center公式并全重签；
+70. 把606个zero selector重写为positive/lower，注入已知site19错值并同步重签gradient/summary/manifest；
+71. 把terminal lA改为post-transform coefficient，或删除`[D,S,*feature]`中的spec-axis identity。
 
 必须报告每案稳定reason，不接受“因为文件digest不匹配”作为fully re-signed攻击的唯一拒绝理由。
 
@@ -662,7 +676,7 @@ S4-4冻结minimum 68类。每案都要：
 - incomplete/no-resume；
 - summary全raw重算；
 - manifest seal/order；
-- 68类tamper。
+- 71类tamper。
 
 ### 13.2 S4 whole-core专项
 

@@ -205,7 +205,8 @@ S4-1B实现前插入`S4-1B0 DAG-adjoint reduction closure`：
 5. `TERMINAL_LA_POST_TRANSFORM_COPY`；
 6. `TERMINAL_LA_SPEC_AXIS_IDENTITY_MISMATCH`。
 
-S4-4 formal minimum由64类扩为68类fully outer-resigned tamper；新增64之后的四类为：普通primal替换、fanout/
+本阶段把S4-4 formal minimum由64类扩为68类fully outer-resigned tamper；2026-08-29 S4-3 readiness又加入3类
+post/queue/rollback攻击，当前minimum为71类。本阶段新增64之后的四类为：普通primal替换、fanout/
 residual VJP provenance删除、site19错值重签、terminal lA pre/post-transform或spec-axis身份篡改。
 
 ## 8. 历史文件冻结状态

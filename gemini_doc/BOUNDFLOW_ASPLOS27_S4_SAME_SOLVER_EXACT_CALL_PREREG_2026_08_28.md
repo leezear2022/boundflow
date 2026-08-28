@@ -300,6 +300,11 @@ exact transaction、provider兼容对象、official post、host packet/intermedi
 现有device atomic v1只能在mid-commit故障后恢复tensor内容，不能恢复PyTorch `_version`；因此S4-3必须把提交前
 clean abort与提交中`POISONED_NO_RETRY`分开，不得把后者写成可透明fallback的完全回滚。
 
+2026-08-29 live implementation-readiness修订见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_29.md`：working-β必须
+prepared、rollback只恢复已提交prefix、terminal lease按KFSB/post最后consumer拆分；exclusive latch覆盖commit、official
+post和candidate queue add。known-new logical subtotal修正为CUDA=`608,910 B`、CPU=`80 B`、总计=`608,990 B`。
+
 provider net scratch的consumer/lifetime精确审计见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`。冻结结论是：
 normal fixed path的candidate KFSB、official post、queue storage和candidate next-pre不把net dynamic scratch当数值输入。
@@ -328,19 +333,20 @@ B0 original provider只作额外semantic control，不作为S4实现依赖。五
 - terminal lA lease=`1`且one-shot；六lA总37,464元素；hot handoff clone/dynamic allocation如实计数；
 - KFSB child CROWN=`3`、child batch=`24`、child lower元素=`72`，不得从scope中隐藏。
 - provider bound callbacks=`0`，但provider return constructor调用=`12`、official postprocess=`1`；三类计数不得合并；
+- query total domain add=`2`，其中candidate post domain add=`1`；两者必须由observer分别记录，不能相互推断；
 - host packet必须prune到history/depths/thresholds，`pre_result.interm_bounds`必须恰一次clear并纳入logical commit；
 - provider net scratch的下游consumer必须机械关闭；B0 KFSB residue与R/C normalized差异显式记录，禁止伪造disposal
   parity；logical/unique storage与alias分列，scratch计数不得混入12条production tensor path；同一query的provider
   reentry/multi-core必须fail closed；
-- validation/staging失败必须在live mutation前clean abort；mid-commit故障即使内容恢复也必须进入
-  `POISONED_NO_RETRY`，禁止native fallback、重试或继续queue。
+- validation/staging失败必须在live mutation前clean abort；mid-commit只可恢复committed prefix且仍进入
+  `COMMIT_POISONED`；post/queue故障分别进入`POST_POISONED/QUEUE_POISONED`，禁止native fallback、重试或继续。
 
 所有离散字段exact；有限浮点沿用已冻结容差。通过后状态只能是
 `VALIDATED-S4-SAME-SOLVER-CORRECTNESS`，仍不形成性能claim。
 
 ### S4-4：artifact/replay/tamper closure
 
-精确artifact tree、18-worker六全排列B0/R/C、stdlib tensor codec/replayer、pre/mid/post commit fault状态与68类
+精确artifact tree、18-worker六全排列B0/R/C、stdlib tensor codec/replayer、pre/mid/post/queue fault状态与71类
 fully re-signed tamper合同见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`。
 
@@ -349,10 +355,11 @@ fully re-signed tamper合同见
 - raw逐step保留，不只存summary digest；
 - tensor raw必须有不依赖`.pt`的stdlib可解码投影；replay不得import BoundFlow/PyTorch/TVM/αβ-CROWN；
 - replay从raw重算coverage、trajectory、whole-core、receipt、failure state与verdict；
-- 至少68类fully outer-resigned tamper，覆盖source/protocol、worker/process、state/trajectory、terminal handoff、KFSB、
+- 至少71类fully outer-resigned tamper，覆盖source/protocol、worker/process、state/trajectory、terminal handoff、KFSB、
   transaction/provider/post、artifact/replay、scratch phase/finalization/storage alias、S4-0 live binding/exclusive ownership与
   claim flag；
-- official post发生于commit之后；post fault必须记录为`COMMITTED_POST_FAILED_POISONED`，禁止rollback/retry/queue继续；
+- official post与candidate queue add均发生于commit之后；fault必须分别记录为`POST_POISONED/QUEUE_POISONED`，禁止
+  rollback/retry/fallback；
 - targeted/full/static/DocOps全过后，才允许另写S4-P性能预注册。
 
 ## 4. Timing与性能门禁仍关闭

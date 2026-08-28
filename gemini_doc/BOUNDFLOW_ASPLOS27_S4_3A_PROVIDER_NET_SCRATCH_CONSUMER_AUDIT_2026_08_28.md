@@ -16,6 +16,10 @@ complete-query-claimed: false
 
 # ASPLOS'27 S4-3A：provider net scratch consumer与lifetime审计
 
+> 2026-08-29修订：scratch consumer结论保持成立；whole-core transaction的working-β、prefix rollback、lease、
+> official post与queue-add状态以`BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_29.md`
+> 为准。
+
 ## 0. 直接结论
 
 S4-3蓝图中的“provider net scratch consumer待核”已经从源码层闭合，但结论不是简单的“需要第13条数值commit”或
@@ -303,7 +307,10 @@ commit，不能在candidate correctness尚未完成时提前clear。
 ```text
 ExclusiveCoreOwnerLatchV1:
     query_identity
-    state = UNCLAIMED | CANDIDATE_ACTIVE | COMPLETED | POISONED
+    state = UNCLAIMED | PREPARED | COMMITTING | CORE_COMMITTED |
+            POSTPROCESSING | POST_READY | QUEUEING | COMPLETED |
+            PRECOMMIT_ABORTED_CLEAN | COMMIT_POISONED |
+            POST_POISONED | QUEUE_POISONED
     first_candidate_commit_ordinal
     provider_reentry_count
     fallback_count
@@ -312,12 +319,12 @@ ExclusiveCoreOwnerLatchV1:
 规则：
 
 - adapter安装后provider bound core callback已经禁止；
-- 第一次candidate transaction开始前从`UNCLAIMED`进入commit state；
-- 成功commit后=`CANDIDATE_ACTIVE`；
+- 第一次candidate transaction开始前从`UNCLAIMED`进入`PREPARED`，首个live write前进入`COMMITTING`；
+- 成功commit后=`CORE_COMMITTED`，随后显式经过post与queue states；
 - 后续same-query core只能再次走同一admitted candidate signature；
 - 任一unsupported signature、provider reentry或fallback请求立即fail closed；
-- query成功post/termination后=`COMPLETED`；
-- mid/post commit故障=`POISONED`；
+- candidate post queue insertion成功后=`COMPLETED`；
+- commit/post/queue故障分别=`COMMIT_POISONED/POST_POISONED/QUEUE_POISONED`；
 - latch不能跨solver/query复用。
 
 formal ResNet2B v1现有证据只有`core_count=1`。因此S4 correctness claim只覆盖一个whole-core exact-call；多core BaB、
@@ -482,7 +489,7 @@ successful R/C core commit后scratch normalization已生效。official post失�
 - 不重attach旧α/β；
 - 不调用provider core；
 - latch=`POISONED`；
-- failure=`COMMITTED_POST_FAILED_POISONED`；
+- failure=`POST_POISONED`；若post已成功而candidate queue add失败，则=`QUEUE_POISONED`；
 - query终止。
 
 ## 8. unsupported optional path gates

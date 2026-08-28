@@ -1,6 +1,6 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
-最新动作（v13 S3外审/S4 provider scratch生命周期冻结）：S3已正式交付DocOps exchange
+最新动作（v14 S3外审/S4 whole-core事务实施就绪）：S3已正式交付DocOps exchange
 `asplos27-s3-optimizer-runtime-20260828`，状态=`ready_for_audit/r001`。S4只读普查确认production
 optimizer每step有六α source/8,496 stored元素（lower-only active/preserved各4,248）与一条active β；S3 P-only
 对应1,032 stored/516 active且β为空，不能直接作为whole-core exact-call。S4草案冻结compressed evaluator→
@@ -22,6 +22,7 @@ terminal bridge。S3外审批准前代码/timing关闭。见
 `BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_2_POLICY_DRIVER_IMPLEMENTATION_READINESS_2026_08_29.md`、
 `BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`、
+`BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_29.md`、
 `BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_DESIGN_EXTERNAL_AUDIT_HANDOFF_2026_08_28.md`、
@@ -53,8 +54,15 @@ S4-3进一步确认exact-call不是薄adapter：真实事务还包含KFSB三次b
 S4-2 live policy/functional Adam实施就绪审计进一步发现旧账只加了m/v，漏掉CPU step、compressed keep-best、
 `ret_0`和validate-before-commit shadow；同时mutation失败不能恢复PyTorch `_version`。因此失败统一为
 `POISONED_NO_RETRY`，fixed checkpoint ordinal为`0,6,7,8,9`，10-step程序中的`patience>10`不可达、改由独立
-sealed synthetic policy覆盖。S4-1D/S4-2/S4-3已知logical subtotal现为`438,726/540,926/608,942 B`，都不等于
+sealed synthetic policy覆盖。S4-1D/S4-2/S4-3已知logical subtotal现为`438,726/540,926/608,990 B`，都不等于
 实测peak显存。
+
+S4-3 live B3-C事务审计进一步发现：current candidate没有清空六key `pre_result.interm_bounds`；working-β
+`deepcopy`与temporary upper造成assembly allocator delta=`1,536 B`；第一条copy故障后的blanket restore会让11条
+untouched target的`_version`也`+1`。因此implementation冻结prepared working-β、persistent upper/depths和
+committed-prefix-only best-effort restore，并把exclusive latch延长到official post和candidate queue add完成。三个真实
+counter必须分列为post=`1`、query-total add=`2`、candidate-post add=`1`；commit/post/queue fault分别poison，不能
+伪装clean rollback。这仍是implementation-readiness，不是S4 correctness或性能结果。
 
 S4-3A源码审计及live B0/R phase probe进一步关闭provider net scratch歧义：fixed candidate KFSB/post/queue/next-pre
 不读取net dynamic scratch作数值输入，因此production tensor commit仍是12条。reference terminal会move/gc六α、12个
@@ -68,7 +76,7 @@ B0/R/C不伪造scratch parity，也不形成memory claim。六条terminal/export
 cuts/clip/BFS/multitree/all-node LP等额外consumer保持fail closed。
 
 S4-4不沿用旧RVIR `.pt`作为唯一formal truth；冻结18个fresh subprocess覆盖B0/R/C六全排列，tensor以stdlib可解码
-IEEE raw投影保存，由不import BoundFlow/PyTorch/TVM的replayer独立重建summary。minimum 68类fully re-signed
+IEEE raw投影保存，由不import BoundFlow/PyTorch/TVM的replayer独立重建summary。minimum 71类fully re-signed
 tamper覆盖source、trajectory、terminal/KFSB、transaction/provider/post、scratch phase/storage/alias/finalization、
 exclusive owner和artifact；official post失败单列为
 `COMMITTED_POST_FAILED_POISONED`。

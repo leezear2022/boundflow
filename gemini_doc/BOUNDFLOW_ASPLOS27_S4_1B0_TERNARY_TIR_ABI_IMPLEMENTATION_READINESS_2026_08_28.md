@@ -341,7 +341,8 @@ S4-1B0正式实现至少拒绝：
 19. fallback/eager/native shadow非零；
 20. timing或performance flag翻转。
 
-这些加入S4-1B0自身negative后，不改变S4-4总共68类攻击的冻结数量；S4-4中endpoint分区仍按更高层语义
+这些加入S4-1B0自身negative后，当时不改变S4-4的68类冻结数量；2026-08-29 S4-3 readiness另增3类，当前总数
+为71类。S4-4中endpoint分区仍按更高层语义
 攻击聚合，不把每个底层unit negative重复算成新的formal攻击编号。
 
 ## 8. 获批后的最小实现顺序

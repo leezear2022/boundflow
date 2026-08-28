@@ -178,7 +178,8 @@ S3外审批准并关闭前仍不得写production S4代码。开放后，S4-1B0�
 5. `INPUT_ENDPOINT_SELECTOR_SCHEMA_MISMATCH`；
 6. `SITE19_ZERO_SUBGRADIENT_COUNTEREXAMPLE_NOT_CLOSED`。
 
-S4-4保留68类fully outer-resigned攻击总数，后四类语义修正为：
+本阶段S4-4保留68类fully outer-resigned攻击总数；2026-08-29 S4-3 readiness另增3类，当前总数为71类。
+当时后四类语义修正为：
 
 - 65：把三元Ainput selector替换成旧二元`A>=0→lower`；
 - 66：篡改zero class/count、lower/upper identity或derived-center formula；
