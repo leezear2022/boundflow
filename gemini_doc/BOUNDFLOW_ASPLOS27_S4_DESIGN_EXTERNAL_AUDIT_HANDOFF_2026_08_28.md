@@ -6,7 +6,7 @@ topic: boundflow
 slug: asplos27-s4-design-audit
 audit-kind: preregistration-and-implementation-blueprint
 base-commit: ebf45cc72438141d8f0b35dadfd5cf774d7e753f
-design-result-commit: eabf94999fba124f2774a05177aad6a0a95e9c96
+design-result-commit: 7f9854332f223a703b9a2315f58bac56cf07a677
 execution-authority: false
 code-change-open: false
 performance-claimed: false
@@ -30,20 +30,21 @@ speedup或complete-query性能已经存在。
 5. S4-0 preflight关于offline snapshot不能证明live storage alias/`_version`的纠正是否成立；
 6. tensor-free receipt与不可序列化strong-ref ephemeral lease的双层owner是否关闭S4-0→S4-1A→S4-3跨阶段
    object/storage/version ownership且没有新增IR；
-7. live B0/R phase probe把scratch合同从terminal disposal升级为variant-specific finalization v2是否成立；
-8. terminal logical/unique storage、view alias、B0 batch-24 residue与当前R batch-12 stale是否被正确区分；
-9. S4-4的stdlib raw/replay和68类fully re-signed tamper是否足以支持第三方独立审计；
-10. S4-1B0把site19根因收窄到`Ainput==0→center`、恢复selected-primal lowering是否数学成立；
-11. 是否同意在S3外审批准后仍按S4-0→1A→1B0→1B→1C→1D→2→3→4顺序实施；
-12. 是否发现必须在第一行S4代码开工前修正的blocker/major。
+7. S4-1A two-phase prepare、12-source private lease retention、16 base view和三阶段失败清理是否闭合；
+8. live B0/R phase probe把scratch合同从terminal disposal升级为variant-specific finalization v2是否成立；
+9. terminal logical/unique storage、view alias、B0 batch-24 residue与当前R batch-12 stale是否被正确区分；
+10. S4-4的stdlib raw/replay和68类fully re-signed tamper是否足以支持第三方独立审计；
+11. S4-1B0把site19根因收窄到`Ainput==0→center`、恢复selected-primal lowering是否数学成立；
+12. 是否同意在S3外审批准后仍按S4-0→1A→1B0→1B→1C→1D→2→3→4顺序实施；
+13. 是否发现必须在第一行S4代码开工前修正的blocker/major。
 
 ## 1. 审计范围和Git边界
 
 - branch：`feat/rvir-v4-production-state-ownership-v1`；
 - 本轮设计base：`ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
 - S4-0 live admission/lease、S4-3A scratch finalization与S4-1B0 ternary endpoint纠正全部设计结果：
-  `eabf94999fba124f2774a05177aad6a0a95e9c96`；
-- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..eabf94999fba124f2774a05177aad6a0a95e9c96`
+  `7f9854332f223a703b9a2315f58bac56cf07a677`；
+- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..7f9854332f223a703b9a2315f58bac56cf07a677`
   和下列S4文档的完整版本为准；
 - S3 formal实现/结果不在本轮重新验收，但它是S4设计输入；S3独立exchange仍等待审计；
 - `.docops/exchange/gc0-1-prereg-20260826`异步audit文件和`docs/CIBC_for_DAC.pdf`是用户保留的范围外dirty文件，
@@ -68,17 +69,18 @@ speedup或complete-query性能已经存在。
 5. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_ADMISSION_PREFLIGHT_CORRECTION_2026_08_28.md`；
 6. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_LIVE_LEASE_IMPLEMENTATION_READINESS_2026_08_28.md`；
 7. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_ORDERED_BUFFER_ABI_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
-8. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_BOX_ENDPOINT_SUBGRADIENT_CLOSURE_2026_08_28.md`；
-9. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_ENDPOINT_IMPLEMENTATION_READINESS_2026_08_28.md`；
-10. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1BC_DAG_ADJOINT_PREFLIGHT_CORRECTION_2026_08_28.md`（历史v1）；
-11. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
-12. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
-13. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`；
-14. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
-15. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
-16. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
-17. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
-18. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
+8. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_PREPARE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`；
+9. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_BOX_ENDPOINT_SUBGRADIENT_CLOSURE_2026_08_28.md`；
+10. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_ENDPOINT_IMPLEMENTATION_READINESS_2026_08_28.md`；
+11. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1BC_DAG_ADJOINT_PREFLIGHT_CORRECTION_2026_08_28.md`（历史v1）；
+12. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
+13. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
+14. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`；
+15. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
+16. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
+17. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
+18. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
+19. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
 
 ## 3. 已冻结的production事实，请独立复核
 
@@ -163,6 +165,12 @@ PASS要求：
 
 请从现有R31B1/R31B2/D1C/D2B/B4-B2代码验证：
 
+- S4-1A formal buffer是否为6 α leaf+1 active β leaf+5 empty token、parameter/gradient各4,254元素/17,016 B、
+  base DLPack 16/16 exact，且16 candidate storage与12 source storage完全不相交；
+- private lease保留12 source/8,502 elements/34,008 logical B是否确为incremental allocation 0，同时确实延长lifetime；
+- `PROVIDER_SOURCE_RETAINED_AFTER_PREPARE`删除是否正确，provider container/callback与lease外source引用是否才应拒绝；
+- two-phase prepare是否在validation前锁定single-attempt、在local staging后single-transfer；parameter/buffer/view故障时是否
+  逆序释放、source不变、allocated回entry、stream/device恢复，且retry/fallback/empty-cache均为0；
 - forward实际已消费六α+active β；
 - 缺口确实是P-only gradient ABI，而非forward根本不支持其他site；
 - 旧二元selected-primal在site19失败是否确由606个Ainput zero错误映射到lower导致；
@@ -297,6 +305,12 @@ PASS要求：
 - version bypass probe：普通in-place增加`_version`，`.data`和DLPack alias写入改变content但原Tensor version不变，
   same-object `set_`保持object却更换storage；
 - stable guard-order probe逐项得到object/storage/layout/version/content/admission/transfer/close/serialization预期detail；
+- S4-1A formal owner probe：6 α+1 active β leaf、5 empty token，parameter/gradient=`4254/4254 elements`与
+  `17016/17016 B`，base DLPack=`16/16`，storage独立；one-step Adam后pointer稳定且source hash/version不变；
+- lease retention probe：12 source/8,502 elements/34,008 logical B，incremental allocation=0；外部owner删除后lease
+  维持storage，close后allocated回baseline；
+- prepare failure probe在parameter/buffer/view三点注入：3/3 `FAILED_CLOSED`、candidate refs=0、allocated delta=0、
+  source hash/version不变、device/stream恢复、retry被拒且未调用empty-cache；
 - β exact-width exploit：active β width从1扩为2并全量重签、history仍为1时existing snapshot validator接受，证明S4-0
   `beta_width == history_width`是必要门禁；
 - formal snapshot mutable=`12`（6 α+6 β value）、source device metadata=`cuda:0`；snapshot/mapping/R31 plan hash分别为
@@ -326,8 +340,8 @@ PASS要求：
 ## 7. 建议外审操作
 
 ```bash
-git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..eabf94999fba124f2774a05177aad6a0a95e9c96
-git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..eabf94999fba124f2774a05177aad6a0a95e9c96
+git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..7f9854332f223a703b9a2315f58bac56cf07a677
+git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..7f9854332f223a703b9a2315f58bac56cf07a677
 
 source env.sh
 /home/lee/miniconda3/envs/boundflow/bin/python -m pytest -q \
