@@ -32,14 +32,14 @@ exact empty output。
 ```text
 coefficient pass #1
   → 只保存各阶段sign bitmap
-effective-value pass
-  → 产生六个ReLU preactivation的选定值
+coefficient-schedule adjoint pass
+  → 产生六个post-ReLU coefficient state的VJP adjoint
 coefficient pass #2
   → A到达每个ReLU时立即压缩导出dα/dβ
   → 继续复用两个arena向输入传播
 ```
 
-这样跨层保存的dense coefficient A仍为0；新增持久状态是sign bitmap、六组effective primal values和compressed
+这样跨层保存的dense coefficient A仍为0；新增持久状态是sign bitmap、六组coefficient-program adjoints和compressed
 gradient outputs。该方案是对现有R3/S2整图编译工作的扩展，不是另起炉灶。
 
 ## 1. production六site语义清单
@@ -95,14 +95,15 @@ P-only。
 
 | 项目 | 当前 | S4所需 |
 |---|---|---|
-| effective value | `pre17/pre23/pre25` | 增加或显式导出`pre19/pre28/pre31` |
+| coefficient adjoint | P-anchor局部`pre25`等价已证 | 六site逐action VJP；site19普通primal等价已被反例否定 |
 | compressed dα | 仅site 25 | site `17/19/23/25/28/31`全部输出 |
 | compressed dβ | 无 | site31 `[6,1]`；其余五条exact empty |
 | terminal handoff | lower + P α | lower + six gradients；ordinal 9另带lA/intermediate handoff |
 | optimizer binding | 单P Adam | existing production两param-group host policy |
 
-这三个missing effective values不要求引入新抽象IR：它们是现有selected-value/effective-value TIR图的额外输出。六路
-gradient emitter应由shape/layout参数化的同一语义模板生成，formal实例仍可冻结ResNet2B shape。
+六个V slot不要求引入新顶层solver IR，但不能再视为现有selected-value图的普通额外输出。它们必须从现有typed
+coefficient schedule派生adjoint action；普通primal lowering只有逐site证明等价后才准入。gradient emitter仍由
+shape/layout参数化的同一语义模板生成，formal实例可冻结ResNet2B shape。
 
 ## 3. 为什么不能直接串六个B4-B2单site TIR
 
@@ -121,15 +122,15 @@ site25 Conv。直接串六个单sitewrapper有四个问题：
 
 ### 4.1 pass A：冻结本evaluation的coefficient signs
 
-运行现有完整coefficient reverse pass。除已有`A24/A20/A18/Ainput`外，若effective-value传播确实需要额外site
-sign，则只允许保存`int8` bitmap；禁止保存float32 dense coefficient。
+运行现有完整coefficient reverse pass。除已有`A24/A20/A18/Ainput`外，coefficient-adjoint replay需要额外site
+sign时只允许保存`int8` bitmap；禁止保存float32 dense coefficient。
 
 sign receipt必须绑定evaluation ordinal、全部α/β version、plan/module hash与bitmap pointer。α/β变化后旧bitmap
 必须拒绝，不能跨ordinal复用。
 
-### 4.2 pass B：一次forward effective-value传播
+### 4.2 pass B：一次coefficient-schedule adjoint replay
 
-从input lower/upper按sign bitmap选择端点，沿现有图正向计算：
+原稿建议从input lower/upper按sign bitmap选择端点并沿原始primal图正向计算：
 
 ```text
 input → pre17 → ReLU17 → pre19 → ReLU19
@@ -138,22 +139,25 @@ input → pre17 → ReLU17 → pre19 → ReLU19
       → Flatten/Gemm14 → pre31
 ```
 
-输出六个`[domain, feature]` effective value。它们是primal selected values，不是coefficient A，允许放在独立
-persistent value arena。logical元素数为：
+真实production-state探针显示该候选在site19 compressed gradient上最大误差
+`0.0011564247542992234`且9个符号不一致，故不得作为规范。修正后的pass B对pass A typed coefficient action
+sequence做精确VJP，输出六个`[domain, feature]` coefficient adjoint `V_i=d lower/dT_i`。它们不是coefficient A，
+允许放在独立persistent adjoint arena。logical元素数仍为：
 
 ```text
 6 × (2048 + 1024 + 1024 + 1024 + 1024 + 100) = 37,464 float32
 ```
 
-即149,856 bytes；这是设计上限账，不是实测memory claim。ordinal 9 terminal lA逐site与其同shape，可在本site
-gradient消费后用phase-tagged slot复用；该alias必须单独证明，S4-1 correctness不能靠未经验证的覆盖来过memory gate。
+即149,856 bytes；这是设计上限账，不是实测memory claim。ordinal 9 terminal lA逐site与其物理元素数相同，可在
+本sitegradient消费后用phase-tagged slot复用；handoff必须恢复`[D,S,*feature]`view，且复制对象是ReLU transform
+前incoming A。该alias必须单独证明。
 
 ### 4.3 pass C：重算coefficient并就地压缩gradient
 
 第二次从objective反向传播coefficient。A到达每个ReLU时，在arena被下一步覆盖前立即执行：
 
 ```text
-dalpha[d,k] = upstream[d] * A_relu[d, feature(k)] * effective_pre[d, feature(k)]
+dalpha[d,k] = upstream[d] * A_relu[d, feature(k)] * coefficient_adjoint_V[d, feature(k)]
 ```
 
 准入条件与现有P kernel一致：lower-bound direction、ambiguous ReLU、`A_relu >= 0`、合法feature mapping；另一α
@@ -162,7 +166,7 @@ direction按当前lower-only语义输出0。随后原地应用ReLU coefficient t
 site31 active β按已经在B4-B2 sparse Linear独立验证的语义：
 
 ```text
-dbeta[d,q] = -upstream[d] * effective_pre31[d, location(d,q)] * split_sign[d,q]
+dbeta[d,q] = -upstream[d] * coefficient_adjoint_V31[d, location(d,q)] * split_sign[d,q]
 ```
 
 empty β不launch计算kernel，返回S4-1A ordered ABI中的exact typed empty token。
@@ -180,36 +184,38 @@ S4-1允许：
 - coefficient float arena：恰2个，复用现有容量；
 - cross-layer saved dense A：0；
 - sign bitmap：显式计数与bytes；
-- effective primal arena：显式计数与bytes；
+- coefficient-adjoint arena：显式计数与bytes；
 - compressed output：六dα + 一active dβ + 五empty dβ；
 - Python-visible per-site tensor：0；
 - warm DLPack construction：0；
 - dynamic output allocation：0。
 
-不得把effective primal value误记为dense A，但receipt必须分别披露两者，防止通过改名隐藏内存。
+不得把coefficient adjoint误记为dense A，但receipt必须分别披露两者，防止通过改名隐藏内存。
 
 ## 5. S4-1内部实施顺序
 
-S3外审批准且S4转为execution-authority后，S4-1仍按以下四刀推进：
+S3外审批准且S4转为execution-authority后，S4-1按以下五刀推进：
 
 1. `S4-1A all-state ABI`：从六个layout生成ordered output slots、persistent buffers和coverage receipt；
-2. `S4-1B effective values`：补齐六site selected preactivation，与独立PyTorch/f64局部oracle比较；精确arena、
-   A26/A29 sign、selected Relax graph和negative门禁见S4-1B实施蓝图；
-3. `S4-1C gradient emitters`：一个通用α模板实例化六site，site31另有active β；插入顺序为
+2. `S4-1B0 DAG adjoint reduction`：先关闭site19 `1.156e-3/9 sign mismatch`反例；
+3. `S4-1B coefficient adjoints`：从typed coefficient actions派生六site VJP；精确arena、A26/A29 sign与
+   negative门禁见S4-1B实施蓝图；
+4. `S4-1C gradient emitters`：一个通用α模板实例化六site，site31另有active β；插入顺序为
    31→28→25(stage)→23→19(stage)→17；
-4. `S4-1D evaluator closure`：一个logical evaluation返回lower、六dα、六dβ，five fresh通过。
+5. `S4-1D evaluator closure`：一个logical evaluation返回lower、六dα、六dβ，five fresh通过。
 
 1B/1C均不接optimizer、不计时；1D通过前S4-2保持关闭。
 
 ## 6. 预期风险与kill gate
 
-1. **sign语义不足**：若现有四bitmap不足以重建六site effective values，可增加bitmap，但不得改存dense A；
-2. **residual内部A不可见**：优先使用已完成的D1C/D2B stage scratch；若必须重跑native residual则NO-GO；
-3. **active β公式漂移**：以B4-B2 sparse Linear和production autograd双oracle为准，任何location/sign偏差即STOP；
-4. **两次coefficient pass成本过高**：S4-1只做correctness。性能问题留S4-P实测，不能在正确性阶段删状态；
-5. **terminal lA需要第三次CROWN**：ordinal 9必须复用pass C最终arenas/receipt组装handoff；若需要完整第11次CROWN，
+1. **普通primal等价失败**：site19反例未关闭时S4-1B/1C STOP，不得加site特判掩盖；
+2. **sign语义不足**：若六bitmap不足以重放coefficient adjoint，可补typed action evidence，但不得改存dense A；
+3. **residual内部A不可见**：优先使用已完成的D1C/D2B stage scratch；若必须重跑native residual则NO-GO；
+4. **active β公式漂移**：以B4-B2 sparse Linear和production autograd双oracle为准，任何location/sign偏差即STOP；
+5. **两次coefficient pass成本过高**：S4-1只做correctness。性能问题留S4-P实测，不能在正确性阶段删状态；
+6. **terminal lA需要第三次CROWN**：ordinal 9必须复用pass C最终arenas/receipt组装handoff；若需要完整第11次CROWN，
    S4-3 NO-GO；
-6. **shape参数化退化为模型特判**：template允许shape实例化，但schema/capability不能出现model名或固定node id。
+7. **shape参数化退化为模型特判**：template允许shape实例化，但schema/capability不能出现model名或固定node id。
 
 ## 7. 当前门禁
 

@@ -174,16 +174,18 @@ KFSB、atomic commit和queue/post继续由已有RVIR owner执行，不纳入comp
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_ALL_STATE_VJP_FEASIBILITY_2026_08_28.md`。审计确认现有整图forward已经消费
 六α和active β，缺口是custom backward只导出P gradient，不是其余五site完全没有编译。
 
-S4-1实现固定复用当前两个coefficient arena，按“完整sign pass → 六site effective-value pass → 第二次
-coefficient pass逐site即时压缩gradient”执行。不得保存跨层float32 dense A，也不得把六个B4-B2单sitewrapper
+S4-1实现固定复用当前两个coefficient arena，按“完整sign pass → 六site coefficient-schedule adjoint replay →
+第二次coefficient pass逐site即时压缩gradient”执行。普通selected-primal图已在site19 production compressed
+投影上出现`0.0011564247542992234`最大误差与9个符号错误，不再是规范owner。不得保存跨层float32 dense A，也不得把六个B4-B2单sitewrapper
 串成production路径。B4-B2只作为数学oracle/codegen资产；D1C/D2B residual stage scratch用于暴露site25/site19
 的内部incoming coefficient。
 
-S4-1内部顺序固定为1A all-state ABI、1B六site effective values、1C六dα/active dβ emitters、1D single-evaluation
-five-fresh closure。四步完成前S4-2继续关闭。
+S4-1内部顺序固定为1A all-state ABI、1B0 DAG-adjoint reduction closure、1B六site coefficient adjoints、1C
+六dα/active dβ emitters、1D single-evaluation five-fresh closure。五步完成前S4-2继续关闭。
 
-terminal模式下，六site effective-value slot可在本site gradient已消费后phase-safe改作terminal lA slot；lA总计
-37,464 float32/149,856 bytes。该alias必须由slot状态机验证，不能作为未经证明的memory优化。shared intermediate
+terminal模式下，六site coefficient-adjoint slot可在本site gradient已消费后phase-safe改作terminal lA slot；lA
+总计37,464 float32/149,856 bytes。复制对象必须是ReLU transform前incoming A，handoff view必须绑定
+`[D,S,*feature]` spec轴。该alias必须由slot状态机验证，不能作为未经证明的memory优化。shared intermediate
 bounds来自入口`relu_pre`，不属于candidate输出。existing KFSB仍执行3次batch-24 child CROWN，S4-P必须单列其share。
 
 ## 3. 分阶段门禁
@@ -223,15 +225,16 @@ S4-1A ordered buffer/lease/version ABI的精确实施蓝图见
 唯一active β必须是独立contiguous leaf parameter；五empty β只保留token；preserved α不得进入candidate GPU
 optimizer。hot evaluator不得接受dict/callback/tensor override，warm DLPack view creation必须为0。
 
-S4-1B六site selected-primal graph见
+S4-1B0/1B coefficient-adjoint纠正与六site graph见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1BC_DAG_ADJOINT_PREFLIGHT_CORRECTION_2026_08_28.md`及
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`：一个
-37,464-element persistent arena输出pre17/19/23/25/28/31，sign bitmap为Ainput/A18/A20/A24/A26/A29共55,296
-int8；cross-layer saved float32 coefficient仍为0。
+37,464-element persistent arena输出六个`V_i=d lower/dT_i`，sign bitmap为Ainput/A18/A20/A24/A26/A29共
+55,296 int8；cross-layer saved float32 coefficient仍为0。
 
 S4-1C通用gradient emitter与terminal lA phase见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`：
 一个layout-parameterized `[D,S,F]→[D,W]` α模板实例化六site，site31增加sparse β；ordinal9在gradient消费后
-phase-safe复用effective arena保存六lA，禁止第11次CROWN。
+phase-safe复用coefficient-adjoint arena保存六lA，禁止第11次CROWN。
 
 S4-1D single-evaluation closure见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`：唯一prepared evaluator
@@ -248,7 +251,7 @@ S4-2 10/9 trajectory，timing仍关闭。
 - logical evaluation=`1`；provider/fallback/native-shadow/eager=`0`；
 - per-site Python dispatch、warm DLPack、dynamic output allocation=`0`；
 - saved/persistent dense A=`0`；terminal handoff在非terminal ordinal必须不存在；
-- six-site effective primal arena、sign bitmap与compressed output必须分项披露bytes，禁止通过重命名隐藏内存；
+- six-site coefficient-adjoint arena、sign bitmap与compressed output必须分项披露bytes，禁止通过重命名隐藏内存；
 - coefficient arena恰为existing 2个；site25/site19从staged residual scratch即时导出，不得另跑native Conv；
 - five fresh correctness，任一site或元素不等价即NO-GO。
 
@@ -327,7 +330,7 @@ B0 original provider只作额外semantic control，不作为S4实现依赖。五
 
 ### S4-4：artifact/replay/tamper closure
 
-精确artifact tree、18-worker六全排列B0/R/C、stdlib tensor codec/replayer、pre/mid/post commit fault状态与64类
+精确artifact tree、18-worker六全排列B0/R/C、stdlib tensor codec/replayer、pre/mid/post commit fault状态与68类
 fully re-signed tamper合同见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`。
 
@@ -336,7 +339,7 @@ fully re-signed tamper合同见
 - raw逐step保留，不只存summary digest；
 - tensor raw必须有不依赖`.pt`的stdlib可解码投影；replay不得import BoundFlow/PyTorch/TVM/αβ-CROWN；
 - replay从raw重算coverage、trajectory、whole-core、receipt、failure state与verdict；
-- 至少64类fully outer-resigned tamper，覆盖source/protocol、worker/process、state/trajectory、terminal handoff、KFSB、
+- 至少68类fully outer-resigned tamper，覆盖source/protocol、worker/process、state/trajectory、terminal handoff、KFSB、
   transaction/provider/post、artifact/replay、scratch phase/finalization/storage alias、S4-0 live binding/exclusive ownership与
   claim flag；
 - official post发生于commit之后；post fault必须记录为`COMMITTED_POST_FAILED_POISONED`，禁止rollback/retry/queue继续；

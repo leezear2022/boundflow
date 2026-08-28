@@ -24,9 +24,10 @@ dense native α/β作为optimizer参数。dense native state只保留两种用�
 每个evaluation的ABI固定为一个ordered state tuple、一个ordered gradient tuple和一个lower。ordinal 9额外返回
 one-shot lower/lA handoff；ordinal 0—8必须没有handoff。不得在热路径构造按site Python dict。
 
-terminal lA与六site effective primal values的shape完全相同，均为37,464个float32。推荐用同一组phase-tagged
-slots：pass B结束时slot是effective value；pass C在某site导出gradient后，ordinal 9才允许用该site incoming lA
-覆盖已经消费完的effective value。这样无需第三个CROWN pass，也无需新增149,856 bytes峰值。
+terminal lA与六site coefficient-adjoint values的物理元素数相同，均为37,464个float32。推荐用同一组
+phase-tagged slots：pass B结束时slot是`V_i=d lower/dT_i`；pass C在某site导出gradient后，ordinal 9才允许用
+ReLU transform前的incoming lA覆盖已经消费完的V。handoff必须恢复`[D,S,*feature]`typed view。这样无需第三个
+CROWN pass，也无需新增149,856 bytes峰值。
 
 ## 1. 三种state representation不能混为一谈
 
@@ -219,10 +220,11 @@ EMPTY
   → RELEASED
 ```
 
-pass C按`31→28→25→23→19→17`到达site。只有该site gradient已经消费effective value后，terminal模式才可把
+pass C按`31→28→25→23→19→17`到达site。只有该site gradient已经消费coefficient adjoint后，terminal模式才可把
 incoming coefficient写回同slot。非terminal模式不得生成或泄漏lA。
 
-必须有结构测试证明任何site都没有“先覆盖effective value、后计算gradient”的别名错误。若lifetime分析失败，先使用
+必须有结构测试证明任何site都没有“先覆盖coefficient adjoint、后计算gradient”的别名错误，也没有post-transform
+lA copy或spec-axis丢失。若lifetime分析失败，先使用
 独立预分配terminal arena保证正确性，并如实披露额外149,856 bytes；不得以错误alias换memory数字。
 
 ### 4.3 intermediate bounds不属于candidate输出
@@ -285,7 +287,7 @@ S3外审批准后：
 
 1. S4-0先交付compressed slot descriptor、stored/active/preserved coverage及瞬时live object/storage/version lease；
 2. S4-1A重新验证live lease后绑定独立leaf lower-α/active-β buffers、empty β token、persistent gradients和ordered ABI；
-3. S4-1B/1C完成effective values与六路gradient；
+3. S4-1B0关闭site19 DAG-adjoint反例，S4-1B/1C完成六V与六路gradient；
 4. S4-1D完成single-evaluation closure；
 5. S4-2A抽出sealed policy driver，以native dense evaluator回归原行为；
 6. S4-2B接入compiled compressed evaluator，逐step比较production-visible state；
@@ -311,7 +313,7 @@ query-scoped exclusive core-owner latch见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`。这些是logical
 lifetime transaction，不是terminal ABI的第13+条production数值path。
 
-S4-4正式证据链、18 fresh B0/R/C六全排列、stdlib tensor raw/replay、64类fully re-signed tamper及
+S4-4正式证据链、18 fresh B0/R/C六全排列、stdlib tensor raw/replay、68类fully re-signed tamper及
 `COMMITTED_POST_FAILED_POISONED`见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`。
 

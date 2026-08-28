@@ -10,6 +10,31 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-28：六site预检证伪普通selected-primal等价并改用coefficient-program adjoint
+
+- S3 exchange仍为`ready_for_audit/r001`，本轮没有写S4 production代码或开放timing；
+- 用冻结ResNet2B production pre-state、同一CUDA/objective/α/β/split做六site只读数学探针：full PyTorch CROWN
+  dense α autograd投影production compressed ownership，对比原S4-1B普通selected-primal候选；
+- site17/23/25/28/31 max diff分别为`7.334e-9/4.063e-8/4.470e-8/8.196e-8/1.639e-7`且sign exact；
+  site19失败：max diff=`0.0011564247542992234`、9个sign mismatch；
+- 独立核对generic/compiled input A max diff=`5.029141902923584e-08`且sign exact，排除coefficient arena/
+  endpoint-sign错误；site31 active β六location仍为max diff=`1.1920928955078125e-07`、sign exact；
+- 亲读provider ReLU backward确认terminal `lA`是transform前incoming A；formal handoff必须恢复
+  `[D,S,*feature]` view，不能只以当前`S=1`的元素数证明ABI；
+- 新增S4-1B0：对typed CROWN coefficient actions做精确VJP replay，定义`V_i=d lower/dT_i`；普通primal图只有
+  逐site证明后才可作为lowering，禁止site19特判；
+- 两块coefficient arena、D1C residual scratch、55,296-byte sign、149,856-byte V/lA shared arena、compressed
+  ABI与terminal handoff继续复用；formal tamper由64扩为68类；
+- 新增独立纠正文档并同步主计划、S4 prereg、1B/1C/1D、evaluator、formal与外审交接；不升级correctness/
+  performance claim。
+
+### 验证
+
+- 六site compressed投影：5 PASS / site19 FAIL已显式冻结，未把失败包装为validated；
+- β31 owned 6：max diff=`1.1920928955078125e-07`、sign mismatch=`0`；
+- terminal lA inventory shape现场为17 `[6,1,8,16,16]`、19/23/25/28 `[6,1,16,8,8]`、31 `[6,1,100]`；
+- 文档一致性、目标测试与DocOps validation在提交前执行。
+
 ## 2026-08-28：S4-0开工前源码审计纠正offline snapshot与live binding边界
 
 - S3 exchange仍为`ready_for_audit/r001`，因此未写S4 production代码；本轮只完成不越级的implementation preflight；

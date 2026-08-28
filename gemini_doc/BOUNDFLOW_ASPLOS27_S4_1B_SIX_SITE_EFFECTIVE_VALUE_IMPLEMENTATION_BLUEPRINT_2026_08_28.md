@@ -1,5 +1,5 @@
 ---
-status: draft-implementation-blueprint
+status: draft-requires-s4-1b0-dag-adjoint-closure
 date: 2026-08-28
 type: implementation-plan
 topic: boundflow
@@ -13,12 +13,20 @@ timing-open: false
 performance-claimed: false
 ---
 
-# ASPLOS'27 S4-1B：六site effective-value graph实施蓝图
+# ASPLOS'27 S4-1B：六site coefficient-adjoint graph实施蓝图
 
 ## 0. 直接结论
 
-S4-1B不是六个独立BoundOp wrapper，也不是保存六份dense coefficient A。它是一条按coefficient sign选择
-ReLU relaxation/input endpoint的**单向selected primal graph**：
+S4-1B不是六个独立BoundOp wrapper，也不是保存六份dense coefficient A。原稿曾把它定义为按coefficient sign
+运行原始primal DAG的单向selected-primal graph；2026-08-28只读预检已证明这个等价在site19不成立：
+
+```text
+production compressed α19 max abs diff = 0.0011564247542992234
+gradient sign mismatch = 9
+```
+
+因此本蓝图的规范owner改为**CROWN coefficient schedule的精确adjoint replay**。以下原始primal图只保留为
+candidate lowering直觉，不再是correctness规范：
 
 ```text
 selected input
@@ -30,12 +38,26 @@ selected input
   → flatten/Gemm14 = pre31
 ```
 
-一次execution写入一个149,856-byte persistent arena的六个slot。它只保存primal selected values，不保存反向
-coefficient；pass C重算coefficient并消费这些values生成六dα与active dβ。
+一次execution写入一个149,856-byte persistent arena的六个slot。slot保存
+`V_i = d lower / d T_i`，其中`T_i`是ReLU transform后的coefficient state；它不保存反向coefficient。pass C
+重算coefficient并消费这些V生成六dα与active dβ。
 
-实现应扩展已经验证的S2 selected Relax/cuDNN graph与R31B2 selected-ReLU TIR，不另写per-site Python executor。
+实现前必须先关闭
+`BOUNDFLOW_ASPLOS27_S4_1BC_DAG_ADJOINT_PREFLIGHT_CORRECTION_2026_08_28.md`定义的S4-1B0门禁。S2 selected
+Relax/cuDNN与R31B2 selected-ReLU TIR只能作为五个已通过site和局部anchor的复用资产，不能直接充当六site规范；
+仍禁止另写per-site Python executor。
 
 ## 1. 数学语义
+
+规范定义不是“`V_i`必然等于普通primal `pre_i`”，而是：
+
+```text
+A_i = ReLU transform前incoming coefficient
+T_i = A_i * selected_slope_i + beta_add_i
+V_i = d lower / d T_i
+```
+
+只有逐site证明`V_i == selected pre_i`后，下面的selected-primal公式才可作为该site的优化lowering。
 
 对每个ReLU site `i`，令production fixed bound为`l_i/u_i`，lower-α为`α_i`，pass A产生的incoming lower
 coefficient为`A_i`。selected relaxation：
@@ -56,8 +78,9 @@ input endpoint：
 selected_input = A_input >= 0 ? input_lower : input_upper
 ```
 
-随后只执行原始primal Conv/Add/Flatten/Gemm，得到六个`pre_i`。β不直接进入selected primal公式；active β先在
-coefficient pass中改变`A`，其影响由sign bitmap与pass C coefficient体现。
+原稿建议随后只执行原始primal Conv/Add/Flatten/Gemm得到六个`pre_i`。该方式现在降为candidate：active β先在
+coefficient pass中改变`A`，但DAG fanout、residual accumulation和coefficient injection的精确VJP必须由
+coefficient-adjoint schedule负责。site19反例关闭前不得生成production module。
 
 ## 2. 六个输出slot
 
@@ -78,7 +101,7 @@ offset/shape来自plan/value graph，通用schema不写死这些formal数字。p
 
 ## 3. sign bitmap inventory
 
-selected primal graph需要六张int8 bitmap：
+coefficient-adjoint replay需要六张int8 bitmap来重放Pass A的离散branch choice：
 
 | bitmap | 选择对象 | elements/bytes | 当前状态 |
 |---|---|---:|---|
@@ -115,6 +138,8 @@ parameter state version、β/split/history identity、coefficient module hash与
 4. current α ABI仍是`[2,1,D,W]`，S4必须改为S4-1A active `[D,W]`；
 5. current S2只copy/export pre25，S4需六slot persistent handoff；
 6. 当前receipt没有all-six value inventory/version/lifetime。
+7. 普通selected-primal图在site19 production compressed projection上已失败`1.156e-3/9 sign mismatch`；
+8. 尚无对residual fanout/accumulate、bias与box concretization逐action绑定的adjoint schedule。
 
 ### 4.3 为什么不直接扩展`effective_pre23`大kernel
 
@@ -122,14 +147,16 @@ parameter state version、β/split/history identity、coefficient module hash与
 产生重复写/race或需要额外全图同步。all-state本来就必须保存pre19，因此应把selected graph拆成具有明确stage
 边界的单向图，而不是继续把早期中间值藏在巨型kernel内部。
 
-## 5. 推荐实现：扩展S2 selected Relax graph
+## 5. 推荐实现：从coefficient schedule派生adjoint replay
 
 ### 5.1 原因
 
-S2 selected graph已经验证Conv/Residual图语义、cuDNN+TIR混合、current stream、persistent output和S3修复后的
-safe VM invocation。因此S4-1B优先扩展它，而不是重写六个CUDA kernel。
+S2 selected graph已经验证Conv/Residual局部语义、cuDNN+TIR混合、current stream、persistent output和S3修复后的
+safe VM invocation；它继续作为kernel/graph复用资产。规范实现则必须从Pass A的typed coefficient action sequence
+逐action派生VJP，显式编码seed、Linear/Conv right、ReLU transform、β add、residual duplicate/accumulate、bias与
+box concretization。不得用S2 graph本身跳过S4-1B0。
 
-### 5.2 logical stages
+### 5.2 logical adjoint stages
 
 ```text
 E0 input_select + Conv0                     → pre17 slot
@@ -142,7 +169,9 @@ E4 selected_relu25 + Conv10
 E5 selected_relu28 + Flatten + Gemm14       → pre31 slot
 ```
 
-这是六个logical stages，不等于六个CUDA kernel；actual cuDNN/TIR/copy kernel count由compiled module receipt披露。
+上图仅描述期望的物理dataflow。每个stage还必须绑定其来源coefficient action与fanout provenance；site19在
+S4-1B0关闭前不得标记为等价。logical stage不等于CUDA kernel；actual cuDNN/TIR/copy kernel count由compiled
+module receipt披露。
 
 ### 5.3 persistent outputs
 
@@ -200,13 +229,13 @@ generation时，在effective graph launch前拒绝。
 建议新增：
 
 ```text
-boundflow/backends/tvm/asplos27_s4_effective_values.py
-boundflow/runtime/asplos27_s4_effective_value_graph.py
+boundflow/backends/tvm/asplos27_s4_coefficient_adjoints.py
+boundflow/runtime/asplos27_s4_coefficient_adjoint_graph.py
 ```
 
-`S4EffectiveValueLayoutV1`保存plan-derived slot/shape/offset/producer/sign dependency；
-`PreparedS4EffectiveValueGraphV1`持有compiled module、one value arena、six views、six sign buffers和S4-1A parameters；
-`S4EffectiveValueResultLeaseV1`只暴露ordinal/version/generation/ordered views/receipt。
+`S4CoefficientAdjointLayoutV1`保存plan-derived slot/shape/offset/coefficient-action/fanout/sign dependency；
+`PreparedS4CoefficientAdjointGraphV1`持有compiled module、one V arena、six views、six sign buffers和S4-1A
+parameters；`S4CoefficientAdjointResultLeaseV1`只暴露ordinal/version/generation/ordered views/receipt。
 
 ## 8. structural receipt
 
@@ -220,10 +249,12 @@ evaluation_ordinal / parameter_state_version / sign_generation / value_generatio
 sign_bitmap_count=6
 sign_bitmap_elements=55296
 sign_bitmap_logical_bytes=55296
-effective_value_arena_count=1
-effective_value_slot_count=6
-effective_value_elements=37464
-effective_value_logical_bytes=149856
+coefficient_adjoint_arena_count=1
+coefficient_adjoint_slot_count=6
+coefficient_adjoint_elements=37464
+coefficient_adjoint_logical_bytes=149856
+coefficient_action_sequence_hash / adjoint_action_sequence_hash
+fanout_accumulation_provenance_hash
 saved_dense_coefficient_count=0
 full_alpha_repack_count=0
 logical_stage_count=6
@@ -235,18 +266,20 @@ fallback/eager/native_shadow=0
 timing_recorded=false / performance_claimed=false
 ```
 
-effective primal arena必须与dense coefficient A分别命名和计数，禁止用“arena”总称隐藏二者。
+coefficient-adjoint arena必须与dense coefficient A分别命名和计数，禁止用“arena”总称隐藏二者。
 
 ## 9. correctness oracle
 
-至少三方：
+S4-1B0与S4-1B至少四方：
 
-1. independent PyTorch selected-primal oracle：按§1公式手写完整forward，不调用candidate module；
-2. float64 closed-form oracle：同输入/sign/α执行，作为数值地面真值；
-3. existing S2/R31B2交集：pre17/pre23/pre25逐元素比较，证明扩展未改旧语义。
+1. full provider-independent PyTorch CROWN autograd：六dense α/β求梯度后投影production ownership；
+2. coefficient-action adjoint oracle：不调用candidate module，逐action重放VJP；
+3. float64 no-autograd gradient formula，近零A位置直接比较gradient、禁止以除法构造V；
+4. existing S2/R31B2交集：对已证明site比较局部值与最终gradient，证明复用未改旧语义。
 
 每个site/fresh run记录shape/dtype/device、max abs/rel diff、finite和content hash。冻结门槛：float32及float64
-comparison均`atol=rtol=2e-4`；downstream gradient sign gate留S4-1C，不能用pre-value tolerance替代。
+comparison均`atol=rtol=2e-4`；但最终compressed gradient必须`max abs/rel <=2e-5`且sign exact。site19必须
+显式关闭`0.0011564247542992234/9`反例，不能用value tolerance或其余五site通过替代。
 
 至少five fresh process；input/state/sign/module identity逐run绑定。S4-1B不计时。
 
@@ -259,7 +292,9 @@ comparison均`atol=rtol=2e-4`；downstream gradient sign gate留S4-1C，不能�
 7. empty β错误传入；8. bound/alpha-map identity漂移；9. residual branch/Add顺序漂移；
 10. pre28漏skip或pre23漏shortcut；11. Flatten/Gemm14 layout漂移；12. warm DLPack/Python view构造；
 13. VM动态输出allocation；14. saved float32 coefficient跨stage；15. native/provider fallback；
-16. lease未释放即重写arena；17. 全重签后修改bytes/copy/kernel/claim；18. timing/performance flag提前为true。
+16. lease未释放即重写arena；17. 全重签后修改bytes/copy/kernel/claim；18. timing/performance flag提前为true；
+19. ordinary primal替换coefficient adjoint；20. residual fanout/accumulation VJP provenance漂移；
+21. site19反例未关闭却标admitted；22. coefficient/adjoint action sequence hash错配。
 
 ## 11. 与S4-1C gradient的接口
 
@@ -267,30 +302,31 @@ S4-1C pass C在incoming coefficient仍在两个arena之一时立即发射：
 
 ```text
 dalpha_i[d,k]
-  = upstream[d] * incoming_A_i[d,feature(k)] * effective_pre_i[d,feature(k)]
+  = upstream[d] * incoming_A_i[d,feature(k)] * coefficient_adjoint_V_i[d,feature(k)]
 ```
 
 并应用lower-direction/ambiguous/`A>=0`/feature ownership门禁。
 
 active β的局部B4-B2公式为`-adjoint_relu * split_sign`；在full composition中`adjoint_relu`由对应
-effective selected primal value承担，因此site31 emitter必须用B4-B2 sparse Linear与full PyTorch autograd双oracle
-确认，不能只凭符号类比实现。
+coefficient-program adjoint `V_i`承担，因此site31 emitter必须用B4-B2 sparse Linear、full PyTorch autograd与
+coefficient-action adjoint三方确认，不能只凭普通primal类比实现。
 
 S4-1B只交付values，不交付gradient；任何gradient数字仍标未验证。
 
 ## 12. 当前状态与提交顺序
 
-只有S3 approved+closed、S4-0 validated、S4-1A validated后才能实现：
+只有S3 approved+closed、S4-0 validated、S4-1A validated且S4-1B0关闭site19反例后才能实现：
 
-1. `feat(compiler): add six-site effective-value layout and sign manifest`；
-2. `feat(tvm): extend selected graph through pre31 with persistent outputs`；
-3. `test(tvm): close S4-1B five-fresh effective-value correctness`；
-4. `docs: close S4-1B and open S4-1C emitters`。
+1. `test(math): close six-site coefficient-schedule adjoint reduction`；
+2. `feat(compiler): add six-site coefficient-adjoint layout and sign manifest`；
+3. `feat(tvm): lower coefficient adjoint replay with persistent outputs`；
+4. `test(tvm): close S4-1B five-fresh coefficient-adjoint correctness`；
+5. `docs: close S4-1B and open S4-1C emitters`。
 
 当前保持：
 
 ```text
 S3 exchange = ready_for_audit
-S4-0/S4-1A/S4-1B implementation = closed
+S4-0/S4-1A/S4-1B0/S4-1B implementation = closed
 S4 timing/performance = closed
 ```

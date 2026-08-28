@@ -541,7 +541,7 @@ tamper report必须进入manifest；不能在manifest后生成一个未绑定报
 
 ## 12. fully re-signed tamper矩阵
 
-S4-4冻结minimum 64类。每案都要：
+S4-4冻结minimum 68类。每案都要：
 
 1. copy完整artifact；
 2. 修改semantic raw/protocol/source/summary之一；
@@ -640,6 +640,13 @@ S4-4冻结minimum 64类。每案都要：
 63. 在β/history已匹配前缀后追加一个未拥有slot；
 64. 把raw object id/data pointer写入canonical receipt，或用topology输入顺序改变canonical hash。
 
+### I. S4-1 DAG adjoint与terminal lA phase（4）
+
+65. 用普通selected-primal输出替换coefficient-program adjoint并全重签；
+66. 删除residual fanout/accumulation VJP provenance或交换其action owner；
+67. 注入已知site19 reduction反例错值并同步重签gradient/summary/manifest；
+68. 把terminal lA改为post-transform coefficient，或删除`[D,S,*feature]`中的spec-axis identity。
+
 必须报告每案稳定reason，不接受“因为文件digest不匹配”作为fully re-signed攻击的唯一拒绝理由。
 
 ## 13. tests与静态门禁
@@ -655,7 +662,7 @@ S4-4冻结minimum 64类。每案都要：
 - incomplete/no-resume；
 - summary全raw重算；
 - manifest seal/order；
-- 64类tamper。
+- 68类tamper。
 
 ### 13.2 S4 whole-core专项
 
@@ -704,7 +711,7 @@ auditor不能采信executor summary数字，至少独立完成：
 4. `feat(artifact): add 18-worker six-permutation runner`；
 5. `feat(artifact): add pre/mid/post commit fault records`；
 6. `feat(artifact): add independent stdlib semantic replay`；
-7. `test(artifact): add 64 fully re-signed attacks`；
+7. `test(artifact): add 68 fully re-signed attacks`；
 8. `artifact: generate S4 whole-core formal v1`；
 9. `docs: close S4 correctness and prepare external audit`；
 10. `docs: preregister S4-P timing`。
@@ -723,7 +730,7 @@ artifact代码、formal raw和closure文档应分提交，避免代码与其第�
 - provider C路径bound callback=0、constructor=12、post=1；
 - precommit/midcommit/postcommit failure分类正确且禁止非法fallback/retry；
 - stdlib replay从raw逐字重建summary；
-- 64/64 fully re-signed tamper拒绝；
+- 68/68 fully re-signed tamper拒绝；
 - targeted/full/static/DocOps全过；
 - 外部审计批准；
 - 所有性能/complete-query/10x flag仍false。

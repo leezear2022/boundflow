@@ -12,6 +12,7 @@ terminal bridge。S3外审批准前代码/timing关闭。见
 `BOUNDFLOW_ASPLOS27_S4_0_MUTABLE_STATE_ADMISSION_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_0_ADMISSION_PREFLIGHT_CORRECTION_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1A_ORDERED_BUFFER_ABI_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
+`BOUNDFLOW_ASPLOS27_S4_1BC_DAG_ADJOINT_PREFLIGHT_CORRECTION_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`、
@@ -47,10 +48,17 @@ B0/R/C不伪造scratch parity，也不形成memory claim。六条terminal/export
 cuts/clip/BFS/multitree/all-node LP等额外consumer保持fail closed。
 
 S4-4不沿用旧RVIR `.pt`作为唯一formal truth；冻结18个fresh subprocess覆盖B0/R/C六全排列，tensor以stdlib可解码
-IEEE raw投影保存，由不import BoundFlow/PyTorch/TVM的replayer独立重建summary。minimum 64类fully re-signed
+IEEE raw投影保存，由不import BoundFlow/PyTorch/TVM的replayer独立重建summary。minimum 68类fully re-signed
 tamper覆盖source、trajectory、terminal/KFSB、transaction/provider/post、scratch phase/storage/alias/finalization、
 exclusive owner和artifact；official post失败单列为
 `COMMITTED_POST_FAILED_POISONED`。
+
+S4-1B/1C开工前只读数学预检进一步纠正了value owner：普通selected-primal图在六site中5个通过，但site19
+production compressed α出现max diff=`0.0011564247542992234`与9个sign mismatch；generic/compiled input A仍为
+max diff=`5.029141902923584e-08`且sign exact，故不是arena问题。新S4-1B0要求从typed CROWN coefficient
+schedule派生精确VJP adjoint `V_i=d lower/dT_i`，普通primal图仅可作为逐site证明后的lowering。原两arena、residual
+scratch、sign、149,856-byte V/lA slot和compressed ABI保留；terminal lA固定为ReLU transform前incoming A并恢复
+spec轴。formal tamper minimum同步扩为68类。S3外审和S4-1B0关闭前，S4代码/timing仍关闭。
 
 最新执行（v8 S3，待合并外审）：S3 v2已把S2 prepared direct VJP接入ResNet2B P-anchor完整10次
 CROWN evaluation/9次Adam mutation本地wrapper。18 fresh稳健formal得到P/native order-median

@@ -17,14 +17,14 @@ performance-claimed: false
 
 ## 0. 直接结论
 
-S4-1D不再增加新算法，而是把此前四刀收束为一个唯一production-shaped prepared evaluator：
+S4-1D不再增加新算法，而是把此前1A/1B0/1B/1C收束为一个唯一production-shaped prepared evaluator：
 
 ```text
 S4-0  tensor-free mutable-state admission + live source lease projection
   ↓
 S4-1A ordered parameter/gradient buffers + lease/version
   ↓
-S4-1B pass A signs + pass B six effective values
+S4-1B pass A signs + pass B six coefficient-schedule adjoints
   ↓
 S4-1C pass C six dα + active dβ + terminal lA phase
   ↓
@@ -85,7 +85,7 @@ CUDA identities、bound polarity、endpoint/clamp policy。instance tensor/point
 0. validate request ordinal/version/lease/stream/module identities
 1. reset scalar counters and phase tags; no buffer allocation
 2. pass A: compute lower + coefficient propagation + six sign bitmaps
-3. pass B: selected-primal graph writes six effective-value slots
+3. pass B: exact coefficient-action VJP writes six adjoint slots; ordinary selected-primal substitution is forbidden
 4. pass C: recompute coefficient; at each site emit compressed gradients
 5. if terminal: after each gradient read, copy incoming A to same value slot as lA
 6. seal lower/gradient/(optional lA) leases
@@ -137,7 +137,7 @@ execution_receipt
 | active α/β parameters | 17,016 | S4-1A |
 | dα/dβ outputs | 17,016 | S4-1A |
 | six sign bitmap | 55,296 | S4-1B |
-| effective/terminal-lA shared arena | 149,856 | S4-1B/1C |
+| coefficient-adjoint/terminal-lA shared arena | 149,856 | S4-1B/1C |
 | two coefficient arenas | 147,456 | existing R31B1 |
 | lower + upstream + bias accumulator | 72 | evaluator |
 | 合计 | **386,712** | correctness design ledger |
@@ -199,7 +199,8 @@ B: provider-independent native full PyTorch/autograd oracle
 C: S4 compiled evaluator
 ```
 
-另以float64 no-autograd局部公式复核六effective values与compressed emitters。existing S2/R31B2、B4-B2
+另以coefficient-action adjoint replay和float64 no-autograd局部公式复核六V values与compressed emitters。site19
+必须显式关闭`0.0011564247542992234/9 sign mismatch`反例；existing S2/R31B2、B4-B2
 site31/25交集继续作为局部oracle，不能替代A/B full comparison。
 
 ### 7.2 five-fresh order

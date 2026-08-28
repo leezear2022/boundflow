@@ -5,7 +5,7 @@ type: implementation-plan
 topic: boundflow
 slug: asplos27-s4-1c-compressed-gradient-emitter
 stage: s04
-depends-on: validated-s4-1b-six-site-effective-values
+depends-on: validated-s4-1b0-dag-adjoint-reduction-and-s4-1b-six-site-coefficient-adjoints
 execution-authority: false-pending-s3-external-audit-s4-0-s4-1a-s4-1b
 code-change-open: false
 gpu-correctness-open: false
@@ -17,13 +17,15 @@ performance-claimed: false
 
 ## 0. 直接结论
 
-当pass C的incoming coefficient `A_i`和S4-1B的effective preactivation `V_i`同时可用时，六site dα已经
+当pass C的incoming coefficient `A_i`和S4-1B的coefficient-program adjoint `V_i`同时可用时，六site dα已经
 不再依赖原始operator是Conv、Linear还是Residual：
 
 ```text
 dα_i = upstream × A_i × V_i
 ```
 
+这里`V_i = d lower / d T_i`，`T_i`为ReLU transform后的coefficient state；它不是未经证明的普通primal
+preactivation。2026-08-28反例表明普通selected-primal替换在site19产生`1.156e-3`误差与9个符号错误。
 再应用lower direction、ambiguous ReLU、`A_i>=0`、compressed feature ownership与clamp endpoint语义即可。
 
 因此S4-1C只需要一个layout-parameterized α emitter模板，formal实例化六次；site31同一边界再发射唯一active dβ。
@@ -76,9 +78,9 @@ relu_lower_A = incoming_A * selected_slope - beta * split_sign
 dβ[d,q] = Σ_s upstream[d,s] * (-V[d,s,location[d,q]] * split_sign[d,q])
 ```
 
-B4-B2局部模板写作`-adjoint_relu * split_sign`；在full composition中，`V`是该coefficient的selected-primal
-adjoint。这个等价关系必须由site31 B4-B2 sparse Linear、full PyTorch autograd和float64公式三方证明，不能仅凭
-符号推导升级claim。
+B4-B2局部模板写作`-adjoint_relu * split_sign`；在full composition中，`V`是该coefficient state的程序adjoint。
+这个关系必须由site31 B4-B2 sparse Linear、full PyTorch autograd、coefficient-action adjoint replay和float64
+公式证明，不能仅凭普通primal类比升级claim。
 
 当前active metadata：location=`[17,17,31,17,17,31]`、sign=`[1,1,1,-1,-1,-1]`、shape=`[6,1]`。
 通用模板允许`Q>=0`；`Q=0`直接返回S4-1A empty token且launch count=0。
@@ -115,7 +117,7 @@ boundflow/runtime/asplos27_s4_gradient_emitters.py
 
 ```text
 incoming_A[D,S,F] float32
-effective_pre[D,S,F] float32
+coefficient_adjoint_V[D,S,F] float32
 lower[D,F] float32
 upper[D,F] float32
 active_alpha[D,W] float32
@@ -132,7 +134,7 @@ site31可在同一module中导出α与β两个PrimFunc，correctness第一版允
 融合成一个kernel。β ABI：
 
 ```text
-effective_pre[D,S,F]
+coefficient_adjoint_V[D,S,F]
 beta_location[D,Q] int32/int64 normalized
 beta_sign[D,Q] float32
 upstream[D,S]
@@ -194,8 +196,10 @@ GRADIENT_CONSUMED
   → COEFFICIENT_TRANSFORMED
 ```
 
-即S4-1B effective-value slot只在本site gradient读取完成后才允许改写为terminal lA。六slot shape与对应A完全一致，
-因此无需第三套arena。phase tag、generation和one-shot lease必须进入receipt。
+即S4-1B coefficient-adjoint slot只在本site gradient读取完成后才允许改写为terminal lA。formal物理slot为
+`[D,F]`，handoff必须恢复并绑定`[D,S,*feature]`视图；当前`S=1`不能被省略成ABI事实。terminal复制对象必须是
+ReLU transform前的incoming `A_i`，顺序为emitter读A/V→copy A→transform。phase tag、generation、spec-axis
+identity和one-shot lease必须进入receipt。
 
 非terminal ordinal禁止lA copy；ordinal 9每site恰一次，总terminal lA copy count=6。copy可在后续profile中与emitter
 融合，但correctness第一版保持显式。
@@ -206,7 +210,7 @@ S4-1C完成后，单evaluation为：
 
 ```text
 pass A: coefficient/lower + six sign bitmap
-pass B: six effective pre values
+pass B: six coefficient-schedule adjoint values
 pass C: coefficient recompute + six dα + one dβ
 ```
 
@@ -233,7 +237,7 @@ receipt必须区分：
 
 1. production captured/native optimizer autograd gradient；
 2. provider-independent full PyTorch autograd；
-3. no-autograd float64 closed formula；
+3. coefficient-action adjoint replay与no-autograd float64 closed formula；
 4. site25与existing R31B2 P kernel交集；
 5. site31与B4-B2 sparse Linear α/β交集。
 
@@ -257,7 +261,7 @@ S4-1C不接Adam、不计时；只允许单evaluation与terminal-mode correctness
 
 1. A/V/state version不一致；
 2. incoming coefficient site错配；
-3. effective-value slot错配；
+3. coefficient-adjoint slot错配或ordinary-primal替换；
 4. α index重复/越界/乱序；
 5. active α不是`[D,W]`或full-source escape；
 6. stable/non-ambiguous位置产生非零gradient；
@@ -273,7 +277,7 @@ S4-1C不接Adam、不计时；只允许单evaluation与terminal-mode correctness
 16. dynamic output allocation；
 17. ordinal非9产生terminal lA；
 18. effective slot未消费就覆盖；
-19. terminal lA缺slot/重复copy/lease复用；
+19. terminal lA缺slot/重复copy/lease复用、post-transform copy或spec-axis identity丢失；
 20.全重签receipt后修改count/bytes/claim；
 21. provider/native fallback；
 22. timing/performance flag提前为true。
@@ -293,7 +297,12 @@ GRADIENT_OUTPUT_POINTER_DRIFT
 GRADIENT_GENERATION_MISMATCH
 DENSE_GRADIENT_OR_COEFFICIENT_ESCAPE
 RESIDUAL_STAGE_INSERTION_MISMATCH
+ORDINARY_PRIMAL_SUBSTITUTED_FOR_COEFFICIENT_ADJOINT
+DAG_FANOUT_ADJOINT_OWNERSHIP_MISMATCH
+SITE19_REDUCTION_COUNTEREXAMPLE_NOT_CLOSED
 TERMINAL_LA_BEFORE_GRADIENT_CONSUMED
+TERMINAL_LA_POST_TRANSFORM_COPY
+TERMINAL_LA_SPEC_AXIS_IDENTITY_MISMATCH
 TERMINAL_LA_ORDINAL_MISMATCH
 TERMINAL_LA_INVENTORY_INCOMPLETE
 CLAIM_FLAG_TRUE_BEFORE_FORMAL
