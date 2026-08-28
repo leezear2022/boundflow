@@ -4,6 +4,7 @@
 # pylint: disable=too-many-instance-attributes,too-many-locals
 # pylint: disable=too-many-boolean-expressions,protected-access
 # pylint: disable=missing-function-docstring,too-many-statements
+# pylint: disable=duplicate-code
 
 from __future__ import annotations
 
@@ -98,6 +99,9 @@ class S3OptimizerExecutionReceiptV1:
     custom_backward_count: int
     forward_graph_replay_count: int
     selected_graph_replay_count: int
+    selected_vm_invocation_count: int
+    selected_output_copy_count: int
+    warm_dlpack_view_count: int
     host_policy_cut_count: int
     autograd_function_count: int
     executor_registry_count: int
@@ -129,7 +133,10 @@ class S3OptimizerExecutionReceiptV1:
             or self.custom_forward_count != 10
             or self.custom_backward_count != 10
             or self.forward_graph_replay_count != 10
-            or self.selected_graph_replay_count != 10
+            or self.selected_graph_replay_count != 0
+            or self.selected_vm_invocation_count != 10
+            or self.selected_output_copy_count != 10
+            or self.warm_dlpack_view_count != 0
             or self.host_policy_cut_count != 10
             or self.autograd_function_count
             or self.executor_registry_count
@@ -217,6 +224,8 @@ def execute_asplos27_s3_optimizer_v1(
     custom_backward_count = 0
     forward_graph_replay_count = 0
     selected_graph_replay_count = 0
+    selected_vm_invocation_count = 0
+    selected_output_copy_count = 0
     candidate.begin_sample()
 
     for action in schedule.actions:
@@ -237,13 +246,15 @@ def execute_asplos27_s3_optimizer_v1(
             candidate.custom_forward_count != 1
             or candidate.custom_backward_count != 1
             or candidate.s2_forward_graph_replay_count != 1
-            or candidate.s2_selected_graph_replay_count != 1
+            or candidate.s2_selected_vm_invocation_count != 1
+            or candidate.s2_selected_output_copy_count != 1
         ):
             raise RuntimeError("S3 optimizer per-step execution differs")
         custom_forward_count += 1
         custom_backward_count += 1
         forward_graph_replay_count += 1
-        selected_graph_replay_count += 1
+        selected_vm_invocation_count += 1
+        selected_output_copy_count += 1
 
         lower_capture = _clone_cpu(lower) if capture else None
         gradient_capture = _clone_cpu(gradient) if capture else None
@@ -288,6 +299,9 @@ def execute_asplos27_s3_optimizer_v1(
         custom_backward_count=custom_backward_count,
         forward_graph_replay_count=forward_graph_replay_count,
         selected_graph_replay_count=selected_graph_replay_count,
+        selected_vm_invocation_count=selected_vm_invocation_count,
+        selected_output_copy_count=selected_output_copy_count,
+        warm_dlpack_view_count=0,
         host_policy_cut_count=10,
         autograd_function_count=0,
         executor_registry_count=0,

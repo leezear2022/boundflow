@@ -33,6 +33,7 @@ CODE_PATHS = (
     "scripts/probe_asplos27_s3_optimizer_v2_tamper.py",
     "tests/test_asplos27_s3_optimizer_artifact_v2.py",
 )
+TVM_CUDNN_UTILS = "src/runtime/contrib/cudnn/cudnn_utils.cc"
 
 
 def code_revision(revision: str) -> dict[str, str]:
@@ -41,12 +42,29 @@ def code_revision(revision: str) -> dict[str, str]:
     }  # pylint: disable=protected-access
 
 
+def tvm_revision(revision: str) -> str:
+    return v1.git("rev-parse", f"{revision}:boundflow/3rdparty/tvm")
+
+
+def tvm_blob_hash(revision: str, path: str) -> str:
+    blob = subprocess.run(
+        ["git", "show", f"{revision}:{path}"],
+        cwd=ROOT / "boundflow/3rdparty/tvm",
+        check=True,
+        capture_output=True,
+    ).stdout
+    return hashlib.sha256(blob).hexdigest()
+
+
 def protocol(source: Path, model: Path) -> dict[str, object]:
     revision = v1.git("rev-parse", "HEAD")
+    pinned_tvm = tvm_revision(revision)
     return {
         "schema_version": PROTOCOL_SCHEMA,
         "source_revision": revision,
         "code_revision": code_revision(revision),
+        "tvm_submodule_revision": pinned_tvm,
+        "tvm_cudnn_utils_sha256": tvm_blob_hash(pinned_tvm, TVM_CUDNN_UTILS),
         "source_capture_sha256": v1.file_sha256(source),
         "model_sha256": v1.file_sha256(model),
         "orders": list(ORDERS),
@@ -84,6 +102,16 @@ def validate_records(
     ]
     if observed != expected:
         raise ValueError("S3 v2 raw replicate/order inventory differs")
+    for row in records:
+        receipt = row.get("candidate_receipt")
+        if (
+            not isinstance(receipt, dict)
+            or receipt.get("selected_graph_replay_count") != 0
+            or receipt.get("selected_vm_invocation_count") != 10
+            or receipt.get("selected_output_copy_count") != 10
+            or receipt.get("warm_dlpack_view_count") != 0
+        ):
+            raise ValueError("S3 v2 graph-safe selected-value receipt differs")
 
     replica_summaries = []
     for replicate in range(REPLICATES):
@@ -257,6 +285,14 @@ def replay(artifact: Path, *, require_validated_3x: bool = True) -> dict[str, ob
         "code_revision"
     ) != code_revision(revision):
         raise ValueError("S3 v2 code revision differs")
+    pinned_tvm = protocol_value.get("tvm_submodule_revision")
+    if (
+        not isinstance(pinned_tvm, str)
+        or pinned_tvm != tvm_revision(revision)
+        or protocol_value.get("tvm_cudnn_utils_sha256")
+        != tvm_blob_hash(pinned_tvm, TVM_CUDNN_UTILS)
+    ):
+        raise ValueError("S3 v2 TVM workspace source differs")
     summary = validate_records(
         v1.load_records(artifact / "raw/workers.jsonl"), protocol_value
     )

@@ -17,6 +17,7 @@ S2_SELECTED_VALUE_SCHEMA = "boundflow.asplos27-s2-selected-value/v1"
 S2_SELECTED_VALUE_FUNCTION = "boundflow_s2_selected_value"
 S2_SELECTED_VALUE_CUDNN_FUNCTIONS = 4
 S2_SELECTED_VALUE_CUDNN_CALLS = 5
+S2_SELECTED_VALUE_TIR_COUNT = 5
 
 
 @dataclass(frozen=True)
@@ -49,7 +50,7 @@ class CompiledS2SelectedValueV1:
             or not self.target
             or self.cudnn_partition_function_count != S2_SELECTED_VALUE_CUDNN_FUNCTIONS
             or self.cudnn_conv_call_count != S2_SELECTED_VALUE_CUDNN_CALLS
-            or self.selected_tir_count != 4
+            or self.selected_tir_count != S2_SELECTED_VALUE_TIR_COUNT
             or self.compile_ms <= 0.0
         ):
             raise ValueError("S2 selected-value compiled identity differs")
@@ -143,6 +144,20 @@ def _selected_relu_primfunc(
     ).with_attr("boundflow.schema_version", S2_SELECTED_VALUE_SCHEMA)
 
 
+def _output_copy_primfunc():
+    from tvm import te
+
+    source = te.placeholder((6, 16, 8, 8), "float32", name="source")
+    copied = te.compute(
+        (6, 16, 8, 8),
+        lambda d, c, h, w: source[d, c, h, w],
+        name="persistent_output_copy",
+    )
+    return te.create_prim_func([source, copied]).with_attr(
+        "boundflow.schema_version", S2_SELECTED_VALUE_SCHEMA
+    )
+
+
 def _tensor_var(relax: Any, name: str, shape: tuple[int, ...], dtype: str = "float32"):
     return relax.Var(name, relax.TensorStructInfo(shape, dtype))
 
@@ -183,6 +198,7 @@ def build_s2_selected_value_relax_module_v1():
         _tensor_var(relax, "sign_a24", (6144,), "int8"),
         _tensor_var(relax, "weight8", (16, 16, 3, 3)),
         _tensor_var(relax, "bias8", (16,)),
+        _tensor_var(relax, "persistent_output", (6, 16, 8, 8)),
     ]
 
     input_name = "boundflow_s2_select_input_tir"
@@ -221,6 +237,16 @@ def build_s2_selected_value_relax_module_v1():
             "selected_relu",
         ).with_attr("global_symbol", relu23_name),
         relu23_name,
+    )
+    output_copy_name = "boundflow_s2_persistent_output_copy_tir"
+    output_copy_global = builder.add_func(
+        _schedule_elementwise(
+            tvm,
+            output_copy_name,
+            _output_copy_primfunc(),
+            "persistent_output_copy",
+        ).with_attr("global_symbol", output_copy_name),
+        output_copy_name,
     )
 
     def conv_bias(  # type: ignore[no-untyped-def]
@@ -313,7 +339,15 @@ def build_s2_selected_value_relax_module_v1():
                 padding=(1, 1),
                 channels=16,
             )
-            output = builder.emit_output(pre25)
+            persistent = builder.emit(
+                relax.call_tir_inplace(
+                    output_copy_global,
+                    relax.Tuple([pre25, parameters[28]]),
+                    inplace_indices=[1],
+                    out_sinfo=relax.TensorStructInfo((6, 16, 8, 8), "float32"),
+                )
+            )
+            output = builder.emit_output(persistent)
         builder.emit_func_output(output)
     return builder.get()
 
@@ -412,7 +446,7 @@ def compile_s2_selected_value_v1(*, device_index: int = 0) -> CompiledS2Selected
         target=str(target),
         cudnn_partition_function_count=partition_function_count,
         cudnn_conv_call_count=cudnn_call_count,
-        selected_tir_count=4,
+        selected_tir_count=S2_SELECTED_VALUE_TIR_COUNT,
         compile_ms=compile_ms,
     )
     compiled.validate()
@@ -424,6 +458,7 @@ __all__ = [
     "S2_SELECTED_VALUE_CUDNN_CALLS",
     "S2_SELECTED_VALUE_CUDNN_FUNCTIONS",
     "S2_SELECTED_VALUE_FUNCTION",
+    "S2_SELECTED_VALUE_TIR_COUNT",
     "build_s2_selected_value_relax_module_v1",
     "compile_s2_selected_value_v1",
 ]

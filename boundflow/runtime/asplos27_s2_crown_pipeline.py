@@ -18,6 +18,7 @@ from boundflow.backends.tvm.asplos27_s2_selected_value import (
     CompiledS2SelectedValueV1,
     S2_SELECTED_VALUE_CUDNN_CALLS,
     S2_SELECTED_VALUE_CUDNN_FUNCTIONS,
+    S2_SELECTED_VALUE_TIR_COUNT,
     compile_s2_selected_value_v1,
 )
 from boundflow.runtime.r3_d2b_staged_backward import (
@@ -57,7 +58,7 @@ S2_SELECTED_VALUE_CACHE = S2SelectedValueModuleCacheV1()
 
 
 class PreparedS2SelectedValueGraphV1:
-    """Persistent DLPack bindings and one CUDA-graph submission."""
+    """Persistent DLPack bindings with graph-safe Relax VM invocation."""
 
     def __init__(
         self,
@@ -82,13 +83,14 @@ class PreparedS2SelectedValueGraphV1:
             raise ValueError("S2 selected-value prepared arguments differ")
         self.compiled = compiled
         self.device = device
-        self.arguments = arguments
+        self.output = torch.empty((6, 16, 8, 8), dtype=torch.float32, device=device)
+        self.arguments = (*arguments, self.output)
         self.argument_identity = tuple(
             (value.data_ptr(), tuple(value.shape), str(value.dtype))
-            for value in arguments
+            for value in self.arguments
         )
         self.argument_views = tuple(
-            tvm.runtime.from_dlpack(value) for value in arguments
+            tvm.runtime.from_dlpack(value) for value in self.arguments
         )
         ordinal = device.index
         if ordinal is None:
@@ -102,22 +104,32 @@ class PreparedS2SelectedValueGraphV1:
                 with tvm_ffi.use_torch_stream(torch.cuda.stream(capture_stream)):
                     self.function(*self.argument_views)
         capture_stream.synchronize()
-        self.graph = torch.cuda.CUDAGraph()
         with torch.cuda.stream(capture_stream):
-            with torch.cuda.graph(self.graph, stream=capture_stream):
-                with tvm_ffi.use_torch_stream(torch.cuda.stream(capture_stream)):
-                    self.captured_result = self.function(*self.argument_views)
+            with tvm_ffi.use_torch_stream(torch.cuda.stream(capture_stream)):
+                initial_result = self.function(*self.argument_views)
         capture_stream.synchronize()
-        self.output = torch.from_dlpack(self.captured_result)
+        initial_output = torch.from_dlpack(initial_result)
         if (
             tuple(self.output.shape) != (6, 16, 8, 8)
             or self.output.dtype != torch.float32
             or self.output.device != device
             or not self.output.is_contiguous()
+            or initial_output.data_ptr() != self.output.data_ptr()
         ):
             raise RuntimeError("S2 selected-value captured output differs")
         self.prepare_dlpack_view_count = len(self.argument_views) + 1
         self.replay_count = 0
+        self.vm_invocation_count = 0
+        self.output_copy_count = 0
+        self.result_owners: list[object] = []
+
+    def begin_sample(self) -> None:
+        """Release prior synchronized outputs and own this sample's VM results."""
+
+        self.result_owners.clear()
+        self.replay_count = 0
+        self.vm_invocation_count = 0
+        self.output_copy_count = 0
 
     def _validate_identity(self) -> None:
         current = tuple(
@@ -133,9 +145,16 @@ class PreparedS2SelectedValueGraphV1:
             raise RuntimeError("S2 selected-value non-default stream is required")
 
     def replay(self) -> torch.Tensor:
+        import tvm_ffi
+
         self._validate_identity()
-        self.graph.replay()
+        current = torch.cuda.current_stream(self.device)
+        with tvm_ffi.use_torch_stream(torch.cuda.stream(current)):
+            result = self.function(*self.argument_views)
+        self.result_owners.append(result)
         self.replay_count += 1
+        self.vm_invocation_count += 1
+        self.output_copy_count += 1
         return self.output
 
 
@@ -157,6 +176,8 @@ class S2CrownExecutionReceiptV1:
     selected_tir_count: int
     forward_graph_replay_count: int
     selected_graph_replay_count: int
+    selected_vm_invocation_count: int
+    selected_output_copy_count: int
     custom_forward_count: int
     custom_backward_count: int
     existing_arena_count: int
@@ -190,16 +211,18 @@ class S2CrownExecutionReceiptV1:
             or not self.selected_device_source_hashes
             or self.cudnn_partition_function_count != S2_SELECTED_VALUE_CUDNN_FUNCTIONS
             or self.cudnn_conv_call_count != S2_SELECTED_VALUE_CUDNN_CALLS
-            or self.selected_tir_count != 4
+            or self.selected_tir_count != S2_SELECTED_VALUE_TIR_COUNT
             or self.forward_graph_replay_count != 1
-            or self.selected_graph_replay_count != 1
+            or self.selected_graph_replay_count != 0
+            or self.selected_vm_invocation_count != 1
+            or self.selected_output_copy_count != 1
             or self.custom_forward_count != 1
             or self.custom_backward_count != 1
             or self.existing_arena_count != 2
             or not self.active_beta
             or self.saved_dense_a_count != 0
             or self.saved_autograd_history
-            or self.prepare_dlpack_view_count != 29
+            or self.prepare_dlpack_view_count != 30
             or self.warm_dlpack_view_count != 0
             or self.fallback_count
             or self.eager_candidate_count
@@ -266,7 +289,8 @@ class PreparedS2CrownProgramV1(PreparedR3D2BStagedBackwardCandidateV1):
         self._register_view(tvm, self.pre25_value)
         self._capture_forward_graph()
         self.s2_forward_graph_replay_count = 0
-        self.s2_selected_graph_replay_count = 0
+        self.s2_selected_vm_invocation_count = 0
+        self.s2_selected_output_copy_count = 0
 
     def _reset_forward_capture_counters(self) -> None:
         self.custom_forward_count = 0
@@ -274,6 +298,10 @@ class PreparedS2CrownProgramV1(PreparedR3D2BStagedBackwardCandidateV1):
         self.d1c_launch_count = 0
         self.d1c_bias_inplace_alias_count = 0
         self.b2_launch_count = 0
+
+    def begin_sample(self) -> None:
+        super().begin_sample()
+        self.selected_value.begin_sample()
 
     def _capture_forward_graph(self) -> None:
         capture_stream = torch.cuda.Stream(device=self.device)
@@ -296,8 +324,11 @@ class PreparedS2CrownProgramV1(PreparedR3D2BStagedBackwardCandidateV1):
     def begin_evaluation(self, ordinal: int) -> None:
         super().begin_evaluation(ordinal)
         self.s2_forward_graph_replay_count = 0
-        self.s2_selected_graph_replay_count = 0
+        self.s2_selected_vm_invocation_count = 0
+        self.s2_selected_output_copy_count = 0
         self.selected_value.replay_count = 0
+        self.selected_value.vm_invocation_count = 0
+        self.selected_value.output_copy_count = 0
 
     def forward(self) -> torch.Tensor:
         if self.custom_forward_count:
@@ -320,7 +351,8 @@ class PreparedS2CrownProgramV1(PreparedR3D2BStagedBackwardCandidateV1):
         result = self.selected_value.replay()
         if result.data_ptr() != self.pre25_value.data_ptr():
             raise RuntimeError("S2 selected-value output ownership differs")
-        self.s2_selected_graph_replay_count += 1
+        self.s2_selected_vm_invocation_count += 1
+        self.s2_selected_output_copy_count += 1
 
     def run_vjp(
         self,
@@ -373,7 +405,9 @@ class PreparedS2CrownProgramV1(PreparedR3D2BStagedBackwardCandidateV1):
             cudnn_conv_call_count=compiled.cudnn_conv_call_count,
             selected_tir_count=compiled.selected_tir_count,
             forward_graph_replay_count=self.s2_forward_graph_replay_count,
-            selected_graph_replay_count=self.s2_selected_graph_replay_count,
+            selected_graph_replay_count=0,
+            selected_vm_invocation_count=self.s2_selected_vm_invocation_count,
+            selected_output_copy_count=self.s2_selected_output_copy_count,
             custom_forward_count=self.custom_forward_count,
             custom_backward_count=self.custom_backward_count,
             existing_arena_count=2,

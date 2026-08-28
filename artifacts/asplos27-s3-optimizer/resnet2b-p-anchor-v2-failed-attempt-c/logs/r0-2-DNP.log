@@ -1,0 +1,2 @@
+S3 optimizer worker replicate=0 order=DNP N=98540443.0 D=56464582.5 P=30640677.5 performance_claimed=false
+free(): chunks in smallbin corrupted

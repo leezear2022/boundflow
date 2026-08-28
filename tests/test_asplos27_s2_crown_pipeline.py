@@ -105,13 +105,16 @@ def test_s2_receipt_proves_five_cudnn_calls_and_no_dense_saved_a() -> None:
     receipt = prepared.execution_receipt()
     assert receipt.cudnn_partition_function_count == 4
     assert receipt.cudnn_conv_call_count == 5
-    assert receipt.selected_tir_count == 4
+    assert receipt.selected_tir_count == 5
     assert receipt.forward_graph_replay_count == 1
-    assert receipt.selected_graph_replay_count == 1
+    assert receipt.selected_graph_replay_count == 0
+    assert receipt.selected_vm_invocation_count == 1
+    assert receipt.selected_output_copy_count == 1
+    assert receipt.prepare_dlpack_view_count == 30
+    assert receipt.warm_dlpack_view_count == 0
     assert receipt.active_beta is True
     assert receipt.saved_dense_a_count == 0
     assert receipt.saved_autograd_history is False
-    assert receipt.warm_dlpack_view_count == 0
     assert receipt.fallback_count == receipt.eager_candidate_count == 0
     assert receipt.performance_claimed is False
     assert receipt.output_pointer == prepared.pre25_value.data_ptr()
@@ -129,7 +132,7 @@ def test_s2_receipt_rejects_resigned_semantic_and_claim_tamper() -> None:
         replace(receipt, performance_claimed=True),
         replace(receipt, cudnn_conv_call_count=4),
         replace(receipt, forward_graph_replay_count=2),
-        replace(receipt, selected_graph_replay_count=2),
+        replace(receipt, selected_vm_invocation_count=2),
         replace(receipt, active_beta=False),
         replace(receipt, saved_dense_a_count=1),
         replace(receipt, fallback_count=1),

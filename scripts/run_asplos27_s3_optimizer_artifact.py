@@ -270,6 +270,18 @@ def validate_records(
 
         receipt = row.get("candidate_receipt")
         direct_receipt = row.get("direct_receipt")
+        legacy_graph_receipt = (
+            isinstance(receipt, dict)
+            and receipt.get("selected_graph_replay_count") == 10
+            and "selected_vm_invocation_count" not in receipt
+            and "selected_output_copy_count" not in receipt
+        )
+        graph_safe_vm_receipt = (
+            isinstance(receipt, dict)
+            and receipt.get("selected_graph_replay_count") == 0
+            and receipt.get("selected_vm_invocation_count") == 10
+            and receipt.get("selected_output_copy_count") == 10
+        )
         if (
             not isinstance(receipt, dict)
             or not _receipt_hash_valid(receipt)
@@ -282,7 +294,7 @@ def validate_records(
             or receipt.get("custom_forward_count") != 10
             or receipt.get("custom_backward_count") != 10
             or receipt.get("forward_graph_replay_count") != 10
-            or receipt.get("selected_graph_replay_count") != 10
+            or not (legacy_graph_receipt or graph_safe_vm_receipt)
             or receipt.get("host_policy_cut_count") != 10
             or receipt.get("autograd_function_count") != 0
             or receipt.get("executor_registry_count") != 0

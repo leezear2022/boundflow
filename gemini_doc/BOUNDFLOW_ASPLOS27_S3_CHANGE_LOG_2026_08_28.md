@@ -132,3 +132,51 @@ stage: s03
 - teardown：连续 6 fresh worker 全部 exit 0；
 - cooldown recovery：PDN P `212.19 ms → 30.90 ms`；
 - v2 formal：待新的 source-exact commit 后从空目录运行。
+
+## 2026-08-28：修复 cuDNN CUDA Graph workspace 所有权
+
+- 第三次 v2 仍在成功写出 worker 后出现 glibc heap corruption，说明显式 Python teardown 不是根治；
+- 代码审查确认 selected-value Relax/cuDNN VM 调用内部使用 TVM 临时 workspace，把该调用捕获进 CUDA Graph
+  会让 replay 保留已归还 workspace 的裸指针；
+- selected-value 子图改为每 evaluation 安全调用 VM，并拷入 prepare 阶段建立的 persistent output buffer；
+- 外层仅操作 persistent tensor/TIR 的 forward CUDA Graph 保留；
+- receipt 改为 `selected_graph_replay=0 / vm_invocation=1 / output_copy=1`，S3 聚合为 `0/10/10`；
+- v1 replay 兼容历史 graph receipt，但 v2 强制只接受 graph-safe receipt。
+
+### 验证
+
+- S2/S3 trajectory correctness：待重跑；
+- 进程 teardown stress：待重跑；
+- 该修复可能损失性能，3x 门槛不降低。
+
+## 2026-08-28：修复 TVM cuDNN workspace TLS 析构所有权
+
+- graph-safe VM 路径正确性恢复后，多进程 stress 仍在进程退出时触发 `WorkspacePool::Free`；
+- 源码定位到 cuDNN `ConvEntry` 把长期缓存的 workspace 放在线程本地临时 workspace pool，而两个 TLS owner
+  的析构顺序未定义；
+- 改为 `ConvEntry` 用 `AllocDataSpace` 直接持有 persistent device workspace，仅在容量增长时重分配；
+- `CleanWorkspace` 使用匹配的 `FreeDataSpace` 并立即把指针置空，消除跨 TLS pool 的释放与重复释放；
+- 这是隔离的 vendored TVM runtime 修复，不改 cuDNN 算法、TIR、数值或 timed protocol。
+
+### 验证
+
+- TVM incremental rebuild：待运行；
+- S2/S3 correctness + 多进程 teardown stress：待 rebuild 后运行；
+- formal 继续关闭。
+
+## 2026-08-28：用 persistent output TIR 恢复 zero-warm-DLPack
+
+- 为 selected-value Relax 函数新增第 29 个 persistent output 参数；
+- 新增最终 `call_tir_inplace` copy TIR，使 VM 返回值与预分配 output storage 同一；
+- selected TIR 数由 `4→5`，receipt 为 `graph=0 / VM=10 / output-copy-TIR=10 / warm-DLPack=0`；
+- graph-safe VM 不再创建每步 DLPack view，也不持有动态输出 storage；
+- v2 code revision 额外绑定 vendored cuDNN workspace 修复源码。
+- TVM 子模块修复提交：`9802f45b802225f2ea46499eec4ab7b16f64a73f`；
+
+### 验证
+
+- S2/S3 关键 trajectory：2 passed；随后环境+全 targeted `15 passed`（workspace rebuild 后）；
+- graph-safe + persistent output 单 worker：N/D/P=`100.40/56.62/30.74 ms`；
+- 连续 6 fresh teardown stress：6/6 exit 0，无 TVM/heap abort；
+- 第六进程仍会进入已诊断慢功耗态，因此 formal 继续使用冻结的 15 秒进程间恢复间隔；
+- full v2 formal：待 source-exact commit。

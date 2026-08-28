@@ -146,7 +146,10 @@ def test_s3_receipt_proves_direct_vjp_and_host_policy_cut() -> None:
     receipt = result.receipt
     assert receipt.custom_forward_count == receipt.custom_backward_count == 10
     assert receipt.forward_graph_replay_count == 10
-    assert receipt.selected_graph_replay_count == 10
+    assert receipt.selected_graph_replay_count == 0
+    assert receipt.selected_vm_invocation_count == 10
+    assert receipt.selected_output_copy_count == 10
+    assert receipt.warm_dlpack_view_count == 0
     assert receipt.host_policy_cut_count == 10
     assert receipt.autograd_function_count == receipt.executor_registry_count == 0
     assert receipt.fallback_count == receipt.eager_candidate_count == 0
@@ -170,6 +173,7 @@ def test_s3_receipt_rejects_resigned_counter_and_claim_tamper() -> None:
         replace(receipt, evaluation_count=9),
         replace(receipt, custom_backward_count=9),
         replace(receipt, host_policy_cut_count=9),
+        replace(receipt, selected_vm_invocation_count=9),
         replace(receipt, autograd_function_count=1),
         replace(receipt, fallback_count=1),
         replace(receipt, saved_dense_a_count=1),
