@@ -1,11 +1,18 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
-最新执行（v6 S1，待合并外审）：S1已把standalone ResNet2B IBP的17-op图接入一个canonical
+最新执行（v7 S2，待合并外审）：S2已把ResNet2B P-anchor coarse CROWN单evaluation接入canonical
+Relax/TIR/cuDNN + prepared direct custom VJP。六fresh全排列P/native geomean=`4.2453819646x`、worst=
+`3.5407988567x`，P/旧D2B=`2.4676101728x`；correctness/sign、active β、zero dense-A、zero warm
+allocation、replay和10/10篡改通过。该结论只属于P-anchor单evaluation，不是optimizer、same-solver、
+complete-query或总体10×。正式计划/结果见`BOUNDFLOW_ASPLOS27_S2_COARSE_CROWN_CUSTOM_VJP_PLAN_2026_08_28.md`
+和`BOUNDFLOW_ASPLOS27_S2_FORMAL_CLOSURE_2026_08_28.md`；下一只写S3 10/9 trajectory预注册。
+
+历史执行（v6 S1）：S1已把standalone ResNet2B IBP的17-op图接入一个canonical
 Relax/TIR/prepared CUDA-Graph入口，6个Conv使用paired-output CIBC TIR，Linear由2个cuBLAS shape-family
 partition覆盖。6个fresh process中pipeline/PyTorch geomean=`2.5028099854x`、worst=`2.4600205501x`，
 pipeline/direct geomean=`1.0001854311x`；它通过S1 compiler-plumbing qualification，但
 `performance_claimed=false`，不构成same-solver、query、10×或ASPLOS headline。S0的33个事务归因和
-条件式10×预算仍是后续研究输入，不是实测收益。下一只做S2 coarse CROWN/custom VJP canonical region；
+条件式10×预算仍是后续研究输入，不是实测收益；其S2后继已由上方v7结果关闭；
 正式实现与结果见`BOUNDFLOW_ASPLOS27_S1_CANONICAL_CIBC_PIPELINE_PLAN_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S1_CANONICAL_CIBC_PIPELINE_FORMAL_CLOSURE_2026_08_28.md`，总体路线见
 `BOUNDFLOW_README_PIPELINE_END_TO_END_ACCELERATION_DRAFT_PLAN_2026_08_26.md`。

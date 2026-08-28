@@ -1,10 +1,17 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
-> **2026-08-28 当前状态：S1 canonical CIBC pipeline资格关闭**。source=`56c494f`，artifact=
+> **2026-08-28 当前状态：S2 canonical coarse CROWN direct VJP关闭**。source=`d9582b5`，artifact=
+> `artifacts/asplos27-s2-crown-pipeline/resnet2b-p-anchor-v2`。六fresh全排列P/native geomean=
+> `4.2453819646x`、worst=`3.5407988567x`，P/旧D2B=`2.4676101728x`；lower/dα max diff=
+> `3.09944e-6/6.14673e-8`且sign exact；五cuDNN calls、4 selected TIR、two graph replays、active β、
+> saved dense A=`0`、warm alloc/reserved=`0/0`成立。状态=`VALIDATED-S2-4X-CANONICAL-CROWN`；
+> 下一只写S3 optimizer 10/9 trajectory预注册，same-solver/complete-query/10×/ASPLOS-ready仍关闭。
+>
+> **2026-08-28 S1历史关闭点**。source=`56c494f`，artifact=
 > `artifacts/asplos27-s1-cibc-pipeline/resnet2b-prop0-v2`；六fresh pipeline/PyTorch geomean=
 > `2.5028099854x`、worst=`2.4600205501x`，pipeline/direct=`1.0001854311x`。17-op、6/6 CIBC、
-> 2 cuBLAS、fallback/eager/warm-DLPack=0，final correctness/replay/8类tamper通过。下一只允许S2
-> coarse CROWN/custom VJP；same-solver、complete-query和总体10×仍未运行、未声明。
+> 2 cuBLAS、fallback/eager/warm-DLPack=0，final correctness/replay/8类tamper通过；其S2后继已由
+> 上方结果关闭。same-solver、complete-query和总体10×仍未运行、未声明。
 
 > **2026-08-26 当前执行：GC0-1 capture/analysis已预注册，待独立外审**：只冻结source snapshot、
 > generic adapter、A0—A8 analysis与full causal witness协议。当前没有GC0-1代码或artifact；下一步只审计

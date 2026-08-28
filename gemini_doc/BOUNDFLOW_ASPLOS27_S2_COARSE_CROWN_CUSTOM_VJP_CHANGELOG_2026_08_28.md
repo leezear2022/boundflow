@@ -1,5 +1,5 @@
 ---
-status: implementation-started
+status: validated-s2-4x-canonical-crown
 date: 2026-08-28
 type: changelog
 topic: boundflow
@@ -83,3 +83,18 @@ performance-claimed: false
   model、plan/trace、Relax/device identities及manifest；
 - tamper probe定义10类攻击；receipt攻击会重签inner receipt，latency攻击会重算median/summary，所有case再重签
   outer manifest，避免只测SHA256表层。
+
+## 2026-08-28 formal v2 closure
+
+- 最终source固定为`d9582b552348c534dc5fb039231496e21c9f9b4c`；v2 artifact的protocol逐blob
+  绑定compiler/runtime/worker/artifact/test/env/build脚本；
+- 六fresh process独立重算P/N geomean=`4.24538196457207x`、worst=`3.540798856743263x`，
+  P/D geomean=`2.4676101727573547x`，通过冻结的`4.00/3.50/0.90`三门槛；
+- lower max diff=`3.0994415283203125e-06`、compressed dα max diff=
+  `6.146728992462158e-08`，两者sign exact；warm dynamic allocated/reserved=`0/0`；
+- raw-only replay通过，summary hash=`694c011ae80fa4131c2fcc3112bfcd75ae1ab4e502763797662e6fb2755482e4`；
+  inner/outer-resigned tamper=`10/10 rejected`；
+- 专属`7 passed`；全量`1876 passed, 3 skipped`；targeted mypy clean、pylint `10.00/10`、black
+  clean；
+- 关闭`VALIDATED-S2-4X-CANONICAL-CROWN`，只开放S3 optimizer 10/9 trajectory预注册；
+  same-solver、complete-query、跨模型、总体10×及ASPLOS-ready仍未成立。

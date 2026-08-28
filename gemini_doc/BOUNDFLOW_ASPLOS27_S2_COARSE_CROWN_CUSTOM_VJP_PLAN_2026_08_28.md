@@ -1,5 +1,5 @@
 ---
-status: implementation-open-no-external-audit-this-round
+status: validated-s2-4x-canonical-crown
 date: 2026-08-28
 type: plan
 topic: boundflow
@@ -7,6 +7,8 @@ slug: asplos27-s2-coarse-crown-custom-vjp
 execution-authority: true
 external-audit: deferred-by-user
 performance-claimed: false
+formal-source: d9582b552348c534dc5fb039231496e21c9f9b4c
+formal-artifact: artifacts/asplos27-s2-crown-pipeline/resnet2b-p-anchor-v2
 ---
 
 # ASPLOS’27 S2 coarse CROWN + custom VJP canonical pipeline计划

@@ -1,12 +1,21 @@
 # BoundFlow ASPLOS Claims Map
 
-> **2026-08-28 S1 canonical CIBC pipeline资格结论**：状态=
+> **2026-08-28 S2 coarse CROWN direct custom VJP结论**：状态=
+> `VALIDATED-S2-4X-CANONICAL-CROWN`。source=`d9582b5`，P-anchor单evaluation六fresh全排列中
+> BoundFlow/PyTorch geomean=`4.2453819646x`、worst=`3.5407988567x`，BoundFlow/旧D2B
+> geomean=`2.4676101728x`；lower/dα max diff=`3.09944e-6/6.14673e-8`且sign exact。五个Conv
+> call进入TVM cuDNN，selected ReLU进入4个TIR，forward/effective各一次CUDA Graph replay，active β、
+> two-slot arena、saved dense A=`0`成立。只允许claim ResNet2B P-anchor coarse CROWN单evaluation同scope
+> 4.245×；optimizer 10/9、same-solver、complete-query、跨模型、总体10×与ASPLOS-ready仍为NO。下一只允许
+> S3 optimizer trajectory预注册。
+>
+> **2026-08-28 S1 canonical CIBC pipeline资格结论（历史基线）**：状态=
 > `VALIDATED-S1-CIBC-CANONICAL-PIPELINE`。source=`56c494f`，6个fresh process中pipeline/PyTorch
 > geomean=`2.5028099854x`、worst=`2.4600205501x`，pipeline/direct geomean=`1.0001854311x`；
 > 17-op、6/6 CIBC call_tir、2 cuBLAS partitions、fallback/eager/warm-DLPack=`0`，final pair
 > max diff=`0.000244140625`且sign exact。只允许claim standalone ResNet2B IBP canonical pipeline保住
 > 已有CIBC winner；`performance_claimed=false`，不得claim same-solver、BaB/query、跨模型、memory、
-> 10×或ASPLOS-ready。下一只开放S2 coarse CROWN/custom VJP设计与实现。
+> 10×或ASPLOS-ready。其S2后继已由上方结果关闭。
 
 > **2026-08-26 GC0-1预注册claim边界**：状态=`PREREGISTERED-NOT-IMPLEMENTED-NOT-RUN-GC0-1`。
 > 只冻结capture/analysis protocol、causal witness、negative graph、replay/tamper与停止条件；尚无adapter、

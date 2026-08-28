@@ -1,6 +1,12 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
-> **2026-08-28 当前唯一指令：S1已关闭，下一只进入S2 coarse CROWN/custom VJP**。S1在source
+> **2026-08-28 当前唯一指令：S2已关闭，下一只写S3 optimizer 10/9 trajectory预注册**。S2在source
+> `d9582b5`、P-anchor单evaluation六fresh全排列上达到P/native geomean=`4.2453819646x`、worst=
+> `3.5407988567x`，P/旧D2B=`2.4676101728x`；correctness/sign、active β、zero dense-A、zero warm
+> allocation、raw replay和10/10篡改门禁通过。S3只能把同一prepared direct VJP接回冻结的10 evaluation/
+> 9 mutation trajectory；不得把单evaluation 4.245×外推为same-solver、complete-query或总体10×。
+>
+> **2026-08-28 S1历史关闭点**。S1在source
 > `56c494f`上完成17-op mixed Relax/TIR、6 CIBC Conv、2 cuBLAS partitions及prepared CUDA Graph；
 > 六fresh的pipeline/PyTorch=`2.5028099854x`、pipeline/direct=`1.0001854311x`，三条资格门槛通过。
 > 这只是standalone IBP compiler-plumbing qualification；same-solver、query、10×和论文性能claim仍关闭。
