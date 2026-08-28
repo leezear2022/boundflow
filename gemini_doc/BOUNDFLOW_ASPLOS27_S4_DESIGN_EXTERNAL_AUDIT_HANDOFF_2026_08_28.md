@@ -1,12 +1,12 @@
 ---
-status: ready-for-external-design-audit-v13-s4-1b-construction-readiness-frozen
+status: ready-for-external-design-audit-v14-s4-1c-construction-readiness-frozen
 date: 2026-08-29
 type: external-audit-handoff
 topic: boundflow
 slug: asplos27-s4-design-audit
 audit-kind: preregistration-and-implementation-blueprint
 base-commit: ebf45cc72438141d8f0b35dadfd5cf774d7e753f
-design-result-commit: b34bf6721d3b890bea223aa7c3c372d6cc10609d
+design-result-commit: 79b5b6cbc33590dc2040c52aaee1661c40b4c7db
 execution-authority: false
 code-change-open: false
 performance-claimed: false
@@ -80,6 +80,14 @@ speedup或complete-query性能已经存在。
 50. Ainput coefficient→selected-input→coefficient的generation/live-reader/stream转换能否在不重建warm DLPack view下实现；
 51. S2 prepare的Torch allocated与CUDA driver free delta差异，是否证明future artifact必须双口径披露TVM/VM/cuDNN footprint；
 52. 55类S4-1B negative、five-fresh raw/replay/full-resign tamper是否仍有遗漏。
+53. S4-1C完整Pass C是否确为10 coefficient+7 emitter=`17` actions，terminal插入6 copy后=`23`；
+54. site31是否必须等待dα31和dβ31两个V reader后再copy，逐reader state是否比单`gradient emitted`位更强；
+55. terminal copy作为6个额外typed symbol、完整module 13 symbols是否合理，且新增descriptor/storage确为0；
+56. 六V/lA slot是否在一个37,464-element storage上无重叠/无空洞，terminal in-place覆盖是否不需要额外arena；
+57. argument DLPack 110与result普通Torch view 6的口径是否准确，site31 view是否确可复用；
+58. runtime O(1) receipt与formal V-pre-overwrite/lA-post-copy sidecar分层是否避免热路径D2H/hash；
+59. native six-clone handoff迁移到one-arena one-shot lease是否保持topology/order/spec-axis与KFSB lifetime；
+60. 62类S4-1C negative、5+5 fresh和17/23 action replay是否还有遗漏或无法机械实现之处。
 
 ## 1. 审计范围和Git边界
 
@@ -87,9 +95,9 @@ speedup或complete-query性能已经存在。
 - 本轮设计base：`ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
 - S4-0 live admission/lease、S4-3A scratch finalization、S4-1A prepare transaction、S4-1B0 ternary TIR、
   S4-1B/1C selector/gradient/arena ABI、S4-1D evaluator、S4-2 policy、S4-3 whole-core transaction及S4-4 formal
-  evidence readiness、S4-0 V4、S4-1A V5、S4-1B0与S4-1B construction readiness全部设计结果：
-  `b34bf6721d3b890bea223aa7c3c372d6cc10609d`；
-- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..b34bf6721d3b890bea223aa7c3c372d6cc10609d`
+  evidence readiness、S4-0 V4、S4-1A V5、S4-1B0、S4-1B与S4-1C construction readiness全部设计结果：
+  `79b5b6cbc33590dc2040c52aaee1661c40b4c7db`；
+- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..79b5b6cbc33590dc2040c52aaee1661c40b4c7db`
   和下列S4文档的完整版本为准；
 - S3 formal实现/结果不在本轮重新验收，但它是S4设计输入；S3独立exchange仍等待审计；
 - `.docops/exchange/gc0-1-prereg-20260826`异步audit文件和`docs/CIBC_for_DAC.pdf`是用户保留的范围外dirty文件，
@@ -125,17 +133,18 @@ speedup或complete-query性能已经存在。
 16. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
 17. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`（V1权威施工合同）；
 18. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
-19. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1BC_SELECTOR_GRADIENT_TIR_IMPLEMENTATION_READINESS_2026_08_28.md`；
-20. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`；
-21. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_EVALUATOR_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`；
-22. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
-23. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_POLICY_DRIVER_IMPLEMENTATION_READINESS_2026_08_29.md`；
-24. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
-25. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_29.md`；
-26. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
-27. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
-28. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_EVIDENCE_IMPLEMENTATION_READINESS_2026_08_29.md`；
-29. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
+19. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`（V1权威施工合同）；
+20. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1BC_SELECTOR_GRADIENT_TIR_IMPLEMENTATION_READINESS_2026_08_28.md`；
+21. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`；
+22. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_EVALUATOR_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`；
+23. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
+24. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_POLICY_DRIVER_IMPLEMENTATION_READINESS_2026_08_29.md`；
+25. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
+26. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_29.md`；
+27. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
+28. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
+29. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_EVIDENCE_IMPLEMENTATION_READINESS_2026_08_29.md`；
+30. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
 
 ## 3. 已冻结的production事实，请独立复核
 
@@ -276,7 +285,7 @@ PASS要求：
 - gradient TIR是否必须safe-clamp runtime index/location再poison invalid，避免validator失误时先发生OOB；
 - A/V/bound/α/upstream nonfinite、lower>upper或α越界是否必须qNaN poison，避免gate false返回有限0；
 - β sign保持int8并在TIR内cast是否比prepare float32 copy更忠实；metadata是否为2,862 B；
-- 7 launch、53 argument occurrence、emitter unique view 46、与base重叠14、additional 32、prepared total 48
+- 7 launch、53 argument occurrence、emitter unique view 46、与base重叠14、additional 32、base+emitter local 48
   的口径是否逐项成立；
 - reverse `31→28→25→23→19→17`中同stream emitter-read→terminal-copy→transform是否足以保护V/lA slot；
 - coefficient-action VJP作为规范oracle、selected-primal作为优化lowering的双层owner是否合理；
@@ -290,6 +299,17 @@ PASS要求：
 - S4-1B descriptor是否为`16+49-5+30=90`，full A/B/C是否为`90+20=110`；
 - terminal lA与V slot alias的lifetime门禁充分，且复制发生于ReLU transform前并恢复
   `[D,S,*feature]` spec-axis view；若不足是否应默认独立arena。
+- Pass C是否只需10个coefficient动作并在A18结束，所以nonterminal完整action count=`17`而非继续执行
+  ReLU17/Conv0/concretize；terminal插入6 copy后是否恰为`23`；
+- site31的V31是否有dα/dβ两个reader，严格顺序必须为`dα31→dβ31→copy→ReLU31`；单一
+  `gradient emitted`布尔位是否会错误放行copy-before-dβ；
+- terminal copy的6个额外typed symbol是否使完整module最多13 symbols，但因复用A/V使新增argument
+  descriptor/storage均为0；
+- 六V/lA interval是否无重叠、无空洞、共一个37,464-element storage；site31 emitter/result shape相同是否使
+  result-facing额外普通Torch view总数为6而非7；
+- runtime receipt是否只保留O(1) phase/counter/identity；formal sidecar是否必须在覆盖前抓V、覆盖后抓lA且完全
+  位于production timing之外；
+- native handoff的六份clone storage能否安全迁移为plan-order one-arena one-shot lease，并在KFSB后只释放lA sublease；
 - request admission是否在任何counter/buffer/generation mutation前完成，pre-begin reject是否保持`READY`；
 - counter reset之后任一pass/finite/receipt失败是否必须`POISONED_NO_RETRY`，禁止reset/reuse generation；
 - lower/六dα/六dβ/terminal lA是否应由一个composite lease共同持有，terminal child是否只可transfer一次；
@@ -512,6 +532,15 @@ PASS要求：
   该数只作本机诊断，证明future formal不能只看Torch allocator；
 - S4-1B construction package=`847 lines`，canonical hash=
   `a9b1d90df3cd122eb43491d327432ded52f957928d77e1dbcf2e7286bc4a317d`；
+- S4-1C construction package=`775 lines`，canonical hash=
+  `ad8ea91c39419cbfef0cf3eaa8db7fc339e54798daecf67ca6d97254a9755b93`；
+- Pass C mechanical state validator：nonterminal/terminal=`17/23` actions且正例0 error；copy31-before-dβ、
+  ReLU28-before-copy和missing-dβ三类tamper均稳定拒绝；
+- native terminal fixture复核lower=`[6,1]`、plan order=`17,19,23,25,28,31`、total lA=`37,464`；
+- RTX 4060 synthetic arena lifecycle：six slot/one storage、interval non-overlap/full-cover、6/6 DLPack pointer exact，
+  site31 copy-before-dβ数值反例成立，warm allocated/reserved=`0/0`；
+- `tvm_ffi.use_torch_stream`内non-default Torch/FFI stream exact，退出后FFI stream恢复；
+- S4-1C construction相关五文件回归=`23 passed in 17.68s`；production code diff=`0`；
 - S4-1D full raw预算：nonterminal/terminal/5+5=`17,040/166,896/919,680 B`，canonical hash=
   `1e2aab39a7f7049a09371fef6ec1e0a01dc1e2ec6b25ed7c4060b2cf78e2f0d6`；
 - 本次S4-1D evaluator依赖回归：`37 passed in 27.85s`；production code diff=`0`；
@@ -534,8 +563,8 @@ PASS要求：
 ## 7. 建议外审操作
 
 ```bash
-git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..b34bf6721d3b890bea223aa7c3c372d6cc10609d
-git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..b34bf6721d3b890bea223aa7c3c372d6cc10609d
+git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..79b5b6cbc33590dc2040c52aaee1661c40b4c7db
+git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..79b5b6cbc33590dc2040c52aaee1661c40b4c7db
 
 source env.sh
 /home/lee/miniconda3/envs/boundflow/bin/python -m pytest -q \
@@ -593,6 +622,12 @@ source env.sh
 - 分别观测Torch allocated/reserved与CUDA driver free，确认prepared VM/cuDNN footprint没有被warm=0隐去；
 - 复现diagnostic reference的`[D,1]`广播错误，再以`[D,1,1]`修正，禁止把第一次FAIL归咎candidate；
 - 检查β sign int8、metadata 2,862 B及六slot reverse read→copy→transform phase；
+- 从S4-1C施工包提取canonical JSON并重算`ad8ea9...5b93`，独立生成17/23 action表；
+- 将site31 copy与dβ交换、将ReLU28与copy交换、删除dβ31，确认phase validator分别拒绝；
+- fresh CUDA arena重建六interval，核对one-storage/non-overlap/full-cover、emitter/terminal view pointer和warm 0/0；
+- 在`use_torch_stream`前/中/后读取FFI stream，确认中间exact、退出恢复；
+- 独立重算110 argument DLPack、6 result ordinary views、13 module symbols三种互不混淆的口径；
+- 检查runtime receipt没有V/lA content hash或D2H，formal sidecar在V覆盖前与lA copy后分别绑定raw；
 - 检查tamper编号1—68；
 - 用CUDA tensor验证commit+restore后的`_version`；
 - 亲读production checkpoint条件，独立重算fixed ordinal `[0,6,7,8,9]`和patience reachability；
@@ -654,6 +689,14 @@ source env.sh
 49. coefficient→selected-input→coefficient generation转换还缺什么reader/event/descriptor revocation门禁？
 50. immutable module receipt、mutable cache observation和VM result token owner是否足以避免warm view/object泄漏？
 51. 55类S4-1B negative和five-fresh formal是否足够，外审还能构造哪类全重签攻击？
+52. nonterminal/terminal Pass C=`17/23` action重算是否准确，是否漏掉必要producer、transform或finalize动作？
+53. site31双reader顺序能否由逐reader phase稳定保证，copy-before-dβ反例是否足以证明单布尔位不安全？
+54. 7 gradient+6 terminal-copy=`13` symbols的首版correctness拆分是否合理，还是copy应作为runtime primitive而非symbol？
+55. terminal copy新增descriptor/storage=`0`与single 37,464-element arena alias是否完整，有无隐藏consumer迫使独立arena？
+56. full argument DLPack=`110`、result extra ordinary Torch view=`6`是否准确，site31 view reuse会否与lease phase冲突？
+57. runtime O(1) receipt/formal pre-overwrite V sidecar/post-copy lA sidecar能否同时保证性能边界与独立审计？
+58. native six-clone handoff迁移为one-arena lease时，plan order、spec axis、KFSB消费与post lifetime还有何遗漏？
+59. 62类S4-1C negative和5+5 fresh formal是否充分；外审还能构造哪类phase/stream/storage全重签攻击？
 
 ## 9. 输出格式
 

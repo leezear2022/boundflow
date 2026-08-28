@@ -10,6 +10,22 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：刷新S4设计外审交接至S4-1C construction readiness v14
+
+- design-result commit更新为`79b5b6cbc33590dc2040c52aaee1661c40b4c7db`，冻结base仍为
+  `ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
+- 必读文档由29增至30，加入775行S4-1C construction package；top-level任务由52增至60，must-answer由51增至59；
+- AC3新增17/23 action、site31双reader、13 symbol/0-copy-descriptor、single V/lA arena、result普通view=6和
+  runtime/formal sidecar分层；
+- evidence加入action tamper、native handoff inventory、GPU arena/DLPack/stream/warm-allocation诊断、construction
+  hash与23项相关回归；
+- 外审命令和Git范围更新到`79b5b6c`；仍不新建S4 exchange、不开放production/formal/timing/performance。
+
+### 验证
+
+- handoff base/result commit、30份必读、60项top-level任务、59项must-answer、v14新增字段：提交前验证；
+- `git diff --check`、DocOps validation/lint在提交前执行。
+
 ## 2026-08-29：冻结S4-1C compressed-gradient与terminal-lA逐文件施工包
 
 - 新增775行construction package，把Pass C精确拆为10个coefficient动作、6个dα、1个active dβ：
