@@ -10,6 +10,22 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：刷新S4设计外审交接至formal evidence readiness v9
+
+- design-result commit更新为`33b2b2a425f997da79e78cb5826650b19d3f9927`，冻结base仍为
+  `ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
+- 必读文档增至25份，加入S4-4 implementation-readiness；top-level任务增至23项，新增external anchor、低扰动
+  source/native closure、indexed binary codec、33-worker topology、seal DAG和pending-audit状态审计；
+- AC7/AC8不再要求不可能的artifact内source authenticity自证，改为self-check raw semantics与anchored-check
+  authenticity分层；末尾must-answer增至22项；
+- evidence inventory加入`101/4/559/3` loaded source、codec size、formal raw规划区间与本轮`4+37 passed`；
+- 仍只交付设计审计材料，不新建S4 exchange、不开放production/formal/timing/performance。
+
+### 验证
+
+- handoff commit/range、25份必读文档、23项top-level任务、22项末尾问题及S4-4修订字段：提交前验证；
+- `git diff --check`、DocOps validation/lint在提交前执行。
+
 ## 2026-08-29：关闭S4-4 formal evidence实施前六项结构缺口
 
 - 新增631行S4-4 implementation-readiness审计；从S3 v2 runner、RVIR whole-core `.pt`、真实single-worker
