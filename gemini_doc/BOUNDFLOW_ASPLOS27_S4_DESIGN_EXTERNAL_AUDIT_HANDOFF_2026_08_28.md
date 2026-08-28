@@ -6,7 +6,7 @@ topic: boundflow
 slug: asplos27-s4-design-audit
 audit-kind: preregistration-and-implementation-blueprint
 base-commit: ebf45cc72438141d8f0b35dadfd5cf774d7e753f
-design-result-commit: bf0096a3a6b7f5c72c48de5c8394e2751bd8b3ec
+design-result-commit: 08b8ebe2a9356d630a0c43556d13d7608bc59005
 execution-authority: false
 code-change-open: false
 performance-claimed: false
@@ -27,18 +27,20 @@ speedup或complete-query性能已经存在。
 2. S4-0—S4-4的分层是否真正对应production事务，而不是为写IR/receipt而写IR/receipt；
 3. all-state compiled VJP、sealed production policy、terminal handoff、KFSB、commit/post是否有遗漏owner；
 4. S4-3 failure state是否诚实，尤其PyTorch `_version`与post-after-commit；
-5. live B0/R phase probe把scratch合同从terminal disposal升级为variant-specific finalization v2是否成立；
-6. terminal logical/unique storage、view alias、B0 batch-24 residue与当前R batch-12 stale是否被正确区分；
-7. S4-4的stdlib raw/replay和56类fully re-signed tamper是否足以支持第三方独立审计；
-8. 是否同意在S3外审批准后仍按S4-0→1A→1B→1C→1D→2→3→4顺序实施；
-9. 是否发现必须在第一行S4代码开工前修正的blocker/major。
+5. S4-0 preflight关于offline snapshot不能证明live storage alias/`_version`的纠正是否成立；
+6. 瞬时live mapping→tensor-free receipt→S4-1A pack前lease复核是否关闭ownership且没有新增IR；
+7. live B0/R phase probe把scratch合同从terminal disposal升级为variant-specific finalization v2是否成立；
+8. terminal logical/unique storage、view alias、B0 batch-24 residue与当前R batch-12 stale是否被正确区分；
+9. S4-4的stdlib raw/replay和64类fully re-signed tamper是否足以支持第三方独立审计；
+10. 是否同意在S3外审批准后仍按S4-0→1A→1B→1C→1D→2→3→4顺序实施；
+11. 是否发现必须在第一行S4代码开工前修正的blocker/major。
 
 ## 1. 审计范围和Git边界
 
 - branch：`feat/rvir-v4-production-state-ownership-v1`；
 - 本轮设计base：`ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
-- S4-3A live scratch phase/alias/finalization修订结果：`bf0096a3a6b7f5c72c48de5c8394e2751bd8b3ec`；
-- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..bf0096a3a6b7f5c72c48de5c8394e2751bd8b3ec`
+- S4-0 live admission与S4-3A scratch finalization全部设计结果：`08b8ebe2a9356d630a0c43556d13d7608bc59005`；
+- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..08b8ebe2a9356d630a0c43556d13d7608bc59005`
   和下列S4文档的完整版本为准；
 - S3 formal实现/结果不在本轮重新验收，但它是S4设计输入；S3独立exchange仍等待审计；
 - `.docops/exchange/gc0-1-prereg-20260826`异步audit文件和`docs/CIBC_for_DAC.pdf`是用户保留的范围外dirty文件，
@@ -60,15 +62,16 @@ speedup或complete-query性能已经存在。
 2. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_ALL_STATE_VJP_FEASIBILITY_2026_08_28.md`；
 3. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_EVALUATOR_ABI_AND_TERMINAL_HANDOFF_2026_08_28.md`；
 4. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_MUTABLE_STATE_ADMISSION_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
-5. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_ORDERED_BUFFER_ABI_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
-6. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
-7. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
-8. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`；
-9. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
-10. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
-11. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
-12. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
-13. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
+5. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_ADMISSION_PREFLIGHT_CORRECTION_2026_08_28.md`；
+6. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_ORDERED_BUFFER_ABI_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
+7. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
+8. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
+9. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`；
+10. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
+11. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
+12. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
+13. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
+14. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
 
 ## 3. 已冻结的production事实，请独立复核
 
@@ -131,7 +134,12 @@ PASS要求：
 
 PASS要求：
 
-- snapshot/topology/plan三方key、shape、dtype、device、feature index、β location/sign、alias/version全覆盖；
+- snapshot/topology/plan/live-source四方key、shape、dtype、device、feature index、β location/sign、object/storage/
+  stride/offset/version全覆盖；
+- auditor复现distinct views共享storage反例，确认snapshot alias group不能替代live storage group；
+- `plan.source_state_hash`只作dense mapping provenance；plan/snapshot projection可不调用dense initializer独立重算；
+- topology hash按plan order canonical，输入tuple置换不改变receipt；
+- β width与history长度exact，不接受只匹配前缀；
 - stored/active/preserved α口径分开；
 - five empty β是metadata token，不伪造physical tensor；
 - P-only和active-β missing明确拒绝；
@@ -223,7 +231,7 @@ PASS要求：
 
 PASS要求：
 
-- 56类攻击编号/分区完备且全部fully re-signed；
+- 64类攻击编号/分区完备且全部fully re-signed；
 - 攻击同步更新payload/file/summary/manifest，拒绝原因来自semantic invariant而非简单digest；
 - 外审另造至少3个未预注册攻击仍能被设计覆盖；
 - S4各级code/timing flag仍closed；
@@ -262,18 +270,22 @@ PASS要求：
 
 本轮不是实现测试，但executor已核对设计事实：
 
+- S4-0 snapshot/live反例：两个distinct view共享live storage，但snapshot按object id生成两个alias group并clone成
+  两个storage；`OwnedProductionTensorV4`没有live version/storage字段；
+- formal snapshot mutable=`12`（6 α+6 β value）、source device metadata=`cuda:0`；snapshot/mapping/R31 plan hash分别为
+  `2a775b...a256`/`cfcebf...f8df`/`39d617...910f`，plan source hash绑定mapping而非snapshot；
 - live B0 terminal probe：α=`6 tensors/33,984 B`、intermediate=`12/299,712 B`、all-node lA=
   `18/471,984 B`，logical total=`805,680 B`、unique storage=`756,528 B`；两组lA shared-storage alias，六α、
   12 intermediate与六export lA return均为共享source storage/data-pointer的新view/object；
 - live B0 solver-return：provider KFSB留下batch-24 scratch，连β unique=`2,829,600 B`；live current R：core-entry到
   solver-return保持batch-12 stale scratch，unique=`1,414,752 B`、provider-net β inventory=`0`；
-- S4-3/S4-3A相关whole-core/live-return/KFSB/commit/pre-state/production-state/terminal targeted：
-  `45 passed in 8.43s`；
+- S4-0/S4-3相关production-state/pre-state/R31/whole-core/live-return/KFSB/commit/terminal targeted：
+  `49 passed in 9.13s`；
 - S4-4参考artifact相关targeted：`19 passed`；
 - CUDA探针：tensor content restore后`_version=0→1→2`；
 - S3 v2 raw=`18 rows / 20,747,422 bytes`；
 - old RVIR five-fresh=`10 .pt / 16,975,355 bytes`；
-- S4-4 tamper inventory=`1..56`、order/worker=`6/18`；
+- S4-4 tamper inventory=`1..64`、order/worker=`6/18`；
 - `git diff --check`、DocOps exchange validate/lint：PASS。
 
 这些只证明设计输入和历史基础设施仍存在，不证明S4-0—S4-4实现通过。
@@ -281,8 +293,8 @@ PASS要求：
 ## 7. 建议外审操作
 
 ```bash
-git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..bf0096a3a6b7f5c72c48de5c8394e2751bd8b3ec
-git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..bf0096a3a6b7f5c72c48de5c8394e2751bd8b3ec
+git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..08b8ebe2a9356d630a0c43556d13d7608bc59005
+git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..08b8ebe2a9356d630a0c43556d13d7608bc59005
 
 source env.sh
 /home/lee/miniconda3/envs/boundflow/bin/python -m pytest -q \
@@ -295,11 +307,15 @@ source env.sh
 另外请用自己的短脚本：
 
 - 重算mutable inventory和memory ledger；
+- 亲读`OwnedProductionTensorV4.own`/`ProductionStateBuilderV4`，自建distinct-view shared-storage反例，核对
+  snapshot alias/object/storage/version能力边界；
+- 重建R31 plan，确认`source_state_hash==dense mapping hash!=snapshot hash`，检查plan/snapshot projection设计；
+- 构造β width大于history但前缀相同的tamper，确认V2要求exact width；
 - 独立区分`BatchedlA.from_net(get_splittable_activations)`与`gc_lA_from_net(net.nodes())`，核对当前fixture为6 export/
   18 all-node path而不是6/6；
 - 独立重算terminal logical/unique storage与两个lA alias group，确认empty `data_ptr=0`不算alias；
 - 检查B0 post-KFSB batch-24 residue、current R batch-12 stale和PlanV2 R/C normalization的phase/owner逻辑；
-- 检查tamper编号1—56；
+- 检查tamper编号1—64；
 - 用CUDA tensor验证commit+restore后的`_version`；
 - 亲读provider core/post确认clear/prune/post顺序；
 - 搜索S4文档所有`claimed/open/validated`词，核对没有implementation或performance漂移。
@@ -314,8 +330,9 @@ source env.sh
 6. B0/R/C 18 fresh是否足够证明reference和candidate，不依赖历史`.pt`？
 7. stdlib raw schema是否缺dtype、negative-zero、NaN payload、alias或view metadata？
 8. executed-source inventory是否有更可靠的闭包算法？
-9. 56类tamper还缺哪类可全重签semantic attack？
-10. 是否同意当前唯一执行顺序，不开放S4-P timing？
+9. snapshot semantic truth、瞬时live observation和S4-1A prepared owner三段边界是否仍遗漏live alias/version race？
+10. 64类tamper还缺哪类可全重签semantic attack？
+11. 是否同意当前唯一执行顺序，不开放S4-P timing？
 
 ## 9. 输出格式
 
