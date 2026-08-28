@@ -10,6 +10,31 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-28：live B0/R phase probe将scratch disposal升级为finalization v2
+
+- 在上一轮36项terminal inventory基础上继续做只读live probe，分别观察original provider B0与现有
+  provider-independent RVIR R的`core-entry/terminal-transfer/post-KFSB/core-return/solver-return`对象、storage和指针；
+- B0 terminal pre-extract的36项logical=`805,680 B`，unique storage=`756,528 B`；`/37`与`/38`、`/45`与`/46`
+  各共享一组lA storage。六α、12 intermediate和六export lA的terminal返回值都是新Python对象，但与net attribute
+  共享storage/data pointer，所以attribute替换为sentinel不等于立即释放全部logical bytes；
+- B0随后三个provider KFSB child CROWN重新写入batch-24 scratch，solver return仍保留α/intermediate/lA/β unique
+  storage=`2,829,600 B`；这是真实provider KFSB residue，不是terminal authoritative state；
+- 当前R native KFSB不读写provider net，在core-entry已有batch-12 stale scratch时，36项对象/storage一直原样保留到
+  solver return，unique storage=`1,414,752 B`，因此“R已经镜像B0 terminal disposal”不成立；
+- 设计升级为`ProviderNetScratchFinalizationPlanV2`：B0只观察`PROVIDER_KFSB_RESIDUE`；R/C在native KFSB后以
+  query-scoped exclusive owner为前提，把live枚举36项归一化为sentinel，并要求provider-net β inventory=`0`。B0与R/C
+  final scratch差异以`NON_AUTHORITATIVE_PROVIDER_KFSB_RESIDUE`显式准入，不重建无消费者的batch-24 residue；
+- formal raw增加phase ordinal、logical/unique bytes、alias group及object/storage/data-pointer lineage；empty tensor
+  `data_ptr=0`不算真实alias。fully re-signed tamper最低由48扩为56类；不形成allocated/reserved下降或性能claim；
+- 同步S4-3A、S4-3、主预注册、evaluator ABI、S4-4、README和设计外审材料；S3外审仍待返回，S4代码/timing关闭。
+
+### 验证
+
+- live B0：terminal scratch unique=`756,528 B`，连β=`756,624 B`；solver-return batch-24 residue连β=
+  `2,829,600 B`；live R：core-entry到solver-return batch-12 stale unique=`1,414,752 B`；
+- 36项finalization path、两组lA storage alias、六α/12 intermediate/六export-lA terminal view alias和β owner边界已逐项盘点；
+- 本节取代下节“candidate镜像terminal disposal”的设计结论；下节数值保留为terminal phase历史事实。
+
 ## 2026-08-28：live reference probe纠正scratch disposal 24→36
 
 - 在pinned ResNet2B/CUDA/reference worker上外包只读provider extraction observer，现场执行一个真实

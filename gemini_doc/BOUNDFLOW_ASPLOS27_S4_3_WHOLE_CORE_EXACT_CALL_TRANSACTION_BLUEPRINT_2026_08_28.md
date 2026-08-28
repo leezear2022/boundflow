@@ -443,12 +443,17 @@ provider attach过程可能让net内部α通过`detach().requires_grad_(True)`�
 | next candidate core | typed pre | 是 | 否 | closed-world安全 |
 | next provider core / all-node LP | 是 | 是 | 是/可能 | S4-v1必须拒绝 |
 
-但reference会move/gc terminal α、intermediate lower/upper和lA。candidate必须新增prepared scratch disposal plan：formal
-现场reference probe纠正静态最低为`6 α + 12 intermediate attributes + 18 all-node lA = 36 attributes`；其中只有
-六条split-layer lA进入terminal `BatchedlA`，但GC会清空18个nonempty node lA。actual inventory必须live枚举；β在reference中
-不clear，不能自行删除。首次candidate commit后还必须锁定query-scoped exclusive owner，禁止provider fallback/reentry。
-net scratch不增加production mutable tensor path的12计数，但必须进入logical transaction、memory disclosure、raw/replay/
-tamper。
+live probe证明reference terminal extraction中途move/gc
+`6 α + 12 intermediate attributes + 18 all-node lA = 36 attributes`；只有六条split-layer lA进入terminal
+`BatchedlA`。但B0随后三次provider KFSB child CROWN会重填batch-24 scratch，约`2,829,600 B` unique storage并保持到
+solver return；当前R则把batch-12 stale scratch约`1,414,752 B`原样保留。两者都不是post/queue owner。
+
+因此candidate必须使用`ProviderNetScratchFinalizationPlanV2`：B0只观测KFSB residue，R/C在native KFSB后把live枚举的
+36 path规范化为sentinel，provider net β inventory必须为0；B0/R/C差异以
+`NON_AUTHORITATIVE_PROVIDER_KFSB_RESIDUE`显式准入，不要求虚假disposal parity。首次candidate commit后锁定
+query-scoped exclusive owner，禁止provider fallback/reentry。net scratch不增加production mutable tensor path的12计数，
+但phase、logical/unique storage、alias、finalization必须进入transaction、memory disclosure、raw/replay/tamper；attribute
+clear本身不构成即时CUDA free或memory claim。
 
 ## 11. official post是correctness scope的一部分
 

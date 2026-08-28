@@ -318,6 +318,9 @@ compressed internal gradient，用于2e-5门禁。
 
 ### 6.5 core return与transaction
 
+provider scratch的variant policy与36-path binding必须来自`ProviderNetScratchFinalizationPlanV2`，不能由artifact runner
+根据expected summary临时拼装。
+
 - core-return所有字段及provider type identity；
 - provider return constructor inventory=12；
 - 12 target pre/candidate/post value和`_version`；
@@ -327,9 +330,15 @@ compressed internal gradient，用于2e-5门禁。
 - commit order/state/hash；
 - content audit与post-query audit；
 - failure state必须属于合法state machine。
-- provider net scratch pre/post inventory、live枚举的disposal attributes、sentinel kind、preserve-mask mirror和exclusive
-  owner latch；当前formal fixture预期`6 α + 12 intermediate + 18 all-node lA = 36` disposal attributes，同时另记
-  六条terminal/export lA；production tensor path count仍恰为12，scratch/export/path count必须分列。
+- provider net scratch必须按`core-entry → terminal-pre-extract → terminal-post-transfer → post-KFSB →
+  post-finalization → solver-return`逐phase保存inventory；每个tensor同时记录logical bytes、unique storage bytes、
+  object/storage/data-pointer lineage和view/alias group；empty tensor的`data_ptr=0`不得合并为真实alias；
+- 当前fixture live枚举`6 α + 12 intermediate + 18 all-node lA = 36`个finalization attributes，同时另记六条
+  terminal/export lA；B0只观察terminal transfer和KFSB重新产生的batch-24 residue，R/C在native KFSB后把36项归一化
+  为sentinel。production tensor commit仍恰为12，scratch/export/commit count必须分列；
+- B0允许保留六个provider β container及96 B nonempty storage；R/C admission要求provider-net β inventory=`0`，active β
+  由typed core-result owner持有。B0与R/C final scratch差异只可用
+  `NON_AUTHORITATIVE_PROVIDER_KFSB_RESIDUE`准入，不能伪写成数值parity或立即CUDA memory release。
 
 ### 6.6 official post与solver result
 
@@ -352,9 +361,13 @@ compressed internal gradient，用于2e-5门禁。
 | native RVIR evaluation | 0 | 10 | 0 |
 | terminal duplicate CROWN | 按provider原生披露 | 0 | 0 |
 | KFSB child CROWN | 3 | 3 | 3 |
+| provider scratch finalization | observe only | 36 sentinel | 36 sentinel |
+| provider-net β inventory | 6 containers / 96 B nonempty | 0 | 0 |
+| final scratch policy | batch-24 residue | normalized | normalized |
 | fallback/native shadow/eager | 不适用/披露 | 0 | 0 |
 
 不得把B0原生provider调用计入C的`provider_bound_callback_count`，也不得用B0的不同内部constructor结构判C失败。
+scratch table描述variant-specific non-authoritative provider state；queue-visible/core-result语义仍必须B0/R/C一致。
 
 ## 8. transaction与fault artifact
 
@@ -469,7 +482,9 @@ stdlib replayer按tensor path对齐：
 - KFSB 3/3/72和final decision；
 - 12-path commit/host prune/container clear；
 - provider bound callback/constructor/postprocess counters；
-- provider net α/intermediate/lA scratch disposal、stale β retention与exclusive owner counters；
+- provider net scratch按phase/variant投影：B0 terminal transfer、B0 KFSB batch-24 residue、R/C finalization；
+- logical bytes、unique storage bytes、alias group和object/storage/data-pointer lineage；
+- B0 β retention、R/C provider-net β inventory=`0`与exclusive owner counters；
 - solver status/success/visited/verdict；
 - fault matrix与clean/poisoned状态计数；
 - candidate/rollback logical bytes和实测allocated/reserved披露（非performance）；
@@ -525,7 +540,7 @@ tamper report必须进入manifest；不能在manifest后生成一个未绑定报
 
 ## 12. fully re-signed tamper矩阵
 
-S4-4冻结minimum 48类。每案都要：
+S4-4冻结minimum 56类。每案都要：
 
 1. copy完整artifact；
 2. 修改semantic raw/protocol/source/summary之一；
@@ -591,16 +606,27 @@ S4-4冻结minimum 48类。每案都要：
 39. tamper report删案后重签；
 40. replay stdout伪造PASS。
 
-### F. provider net scratch/lifetime（8）
+### F. provider net scratch/finalization（8）
 
-41. 删除一个scratch disposal path；
-42. 把lA/intermediate sentinel改回stale tensor；
+41. 删除一个R/C finalization path；
+42. 把R/C lA/intermediate sentinel改回stale tensor；
 43. 修改`last_update_preserve_mask` mirror；
 44. 伪造exclusive owner latch transition；
 45. 把provider reentry count从1改0；
 46. 把multi-core count从2改1；
-47. 隐藏stale net β retention/memory；
-48. 把scratch disposal错误混入production 12-path commit count。
+47. 隐藏B0 stale net β retention或伪造R/C provider-net β inventory；
+48. 把scratch finalization错误混入production 12-path commit count。
+
+### G. scratch phase/storage/alias（8）
+
+49. 把B0 post-KFSB batch-24 residue伪写为batch-12；
+50. 把R/C post-finalization sentinel伪写为未归一化stale tensor；
+51. 交换terminal-transfer与post-KFSB phase ordinal；
+52. 用logical tensor bytes冒充unique storage bytes；
+53. 删除一个lA shared-storage alias group；
+54. 把empty tensor的`data_ptr=0`错误合并成真实alias group；
+55. 篡改β field/container identity或跨phase residue lineage；
+56. 把attribute sentinel替换伪写为立即释放CUDA storage或allocated下降。
 
 必须报告每案稳定reason，不接受“因为文件digest不匹配”作为fully re-signed攻击的唯一拒绝理由。
 
@@ -617,7 +643,7 @@ S4-4冻结minimum 48类。每案都要：
 - incomplete/no-resume；
 - summary全raw重算；
 - manifest seal/order；
-- 48类tamper。
+- 56类tamper。
 
 ### 13.2 S4 whole-core专项
 
@@ -666,7 +692,7 @@ auditor不能采信executor summary数字，至少独立完成：
 4. `feat(artifact): add 18-worker six-permutation runner`；
 5. `feat(artifact): add pre/mid/post commit fault records`；
 6. `feat(artifact): add independent stdlib semantic replay`；
-7. `test(artifact): add 40 fully re-signed attacks`；
+7. `test(artifact): add 56 fully re-signed attacks`；
 8. `artifact: generate S4 whole-core formal v1`；
 9. `docs: close S4 correctness and prepare external audit`；
 10. `docs: preregister S4-P timing`。
@@ -685,7 +711,7 @@ artifact代码、formal raw和closure文档应分提交，避免代码与其第�
 - provider C路径bound callback=0、constructor=12、post=1；
 - precommit/midcommit/postcommit failure分类正确且禁止非法fallback/retry；
 - stdlib replay从raw逐字重建summary；
-- 48/48 fully re-signed tamper拒绝；
+- 56/56 fully re-signed tamper拒绝；
 - targeted/full/static/DocOps全过；
 - 外部审计批准；
 - 所有性能/complete-query/10x flag仍false。

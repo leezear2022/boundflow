@@ -26,16 +26,21 @@ S4-3进一步确认exact-call不是薄adapter：真实事务还包含KFSB三次b
 恢复tensor内容，无法恢复PyTorch `_version`；因此新合同明确使用`POISONED_NO_RETRY`，禁止partial commit后fallback/
 重试。candidate+rollback加入后已知logical subtotal=`488,760 bytes`，不等于实测peak显存。
 
-S4-3A源码审计及live reference probe进一步关闭provider net scratch歧义：fixed candidate KFSB/post/queue/next-pre
-不读取net dynamic scratch作数值输入，因此production tensor commit仍是12条；但reference会move/gc六α、12个
-intermediate lower/upper和18个all-node lA，candidate必须按live inventory镜像disposal（formal静态最低36 attribute）。
-六条terminal/export lA只是18条GC inventory的子集，不能混计。β在reference中不清理，
-必须单独披露stale retention。S4-v1因此冻结query-scoped exclusive owner：candidate首次commit后，同一query禁止
-provider reentry、fallback和第二次core call；cuts/clip/BFS/multitree/all-node LP等额外consumer保持fail closed。
+S4-3A源码审计及live B0/R phase probe进一步关闭provider net scratch歧义：fixed candidate KFSB/post/queue/next-pre
+不读取net dynamic scratch作数值输入，因此production tensor commit仍是12条。reference terminal会move/gc六α、12个
+intermediate lower/upper和18个all-node lA；这36项logical=`805,680 B`，但因两组lA共享storage且terminal return为
+storage-sharing view，terminal unique storage仅`756,528 B`，attribute置sentinel不等于立即释放CUDA storage。随后B0
+provider KFSB又生成batch-24 residue，solver return unique storage含β=`2,829,600 B`；当前R则原样保留core-entry的
+batch-12 stale scratch，unique=`1,414,752 B`。因此S4改用`ProviderNetScratchFinalizationPlanV2`：B0只观察并披露
+provider KFSB residue，R/C在native KFSB后把live枚举的36项归一化为sentinel，且provider-net β inventory必须为0；
+B0/R/C不伪造scratch parity，也不形成memory claim。六条terminal/export lA只是18条GC inventory的子集。S4-v1同时
+冻结query-scoped exclusive owner：candidate首次commit后，同一query禁止provider reentry、fallback和第二次core call；
+cuts/clip/BFS/multitree/all-node LP等额外consumer保持fail closed。
 
 S4-4不沿用旧RVIR `.pt`作为唯一formal truth；冻结18个fresh subprocess覆盖B0/R/C六全排列，tensor以stdlib可解码
-IEEE raw投影保存，由不import BoundFlow/PyTorch/TVM的replayer独立重建summary。minimum 48类fully re-signed
-tamper覆盖source、trajectory、terminal/KFSB、transaction/provider/post、scratch lifetime/exclusive owner和artifact；official post失败单列为
+IEEE raw投影保存，由不import BoundFlow/PyTorch/TVM的replayer独立重建summary。minimum 56类fully re-signed
+tamper覆盖source、trajectory、terminal/KFSB、transaction/provider/post、scratch phase/storage/alias/finalization、
+exclusive owner和artifact；official post失败单列为
 `COMMITTED_POST_FAILED_POISONED`。
 
 最新执行（v8 S3，待合并外审）：S3 v2已把S2 prepared direct VJP接入ResNet2B P-anchor完整10次

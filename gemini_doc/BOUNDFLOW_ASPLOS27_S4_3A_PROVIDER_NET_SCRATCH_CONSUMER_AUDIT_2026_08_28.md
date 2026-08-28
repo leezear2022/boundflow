@@ -1,5 +1,5 @@
 ---
-status: diagnostic-complete-corrected-code-closed
+status: diagnostic-complete-corrected-v2-code-closed
 date: 2026-08-28
 type: consumer-and-lifetime-audit
 topic: boundflow
@@ -31,13 +31,18 @@ S4-3蓝图中的“provider net scratch consumer待核”已经从源码层闭�
    `exclusive_core_owner=CANDIDATE`，同一query不允许provider fallback/mixed execution。
 4. formal v1还必须fail closed拒绝all-node-split LP、cuts/BICCOS、clip、BFS/multitree和非固定KFSB；这些路径会在
    core之后或core内部重新读取net scratch。
-5. S4-3新增`ProviderNetScratchDisposalPlanV1`，镜像reference的move/gc生命周期。现场reference core探针纠正了
-   初稿计数：`BatchedlA.from_net`只导出六条split-layer lA，但`gc_lA_from_net`会清空18个nonempty node lA。
-   formal静态最低inventory因此是
-   `6 α entries + 12 intermediate lower/upper attributes + 18 lA attributes = 36 attributes`；实际实现必须从live
-   provider object枚举并冻结，不能把36硬编码为通用schema。
+5. terminal extraction阶段确实会move/gc
+   `6 α entries + 12 intermediate lower/upper attributes + 18 lA attributes = 36 attributes`；其中
+   `BatchedlA.from_net`只导出六条split-layer lA，不能替代18条all-node GC inventory。
+6. 但36个sentinel不是B0 `update_bounds_core`的最终状态：随后三次provider KFSB child CROWN会重新填充net，留下
+   batch-24 α/intermediate/lA residue并一直存活到solver return。当前provider-independent R则把core-entry已有的
+   batch-12 stale scratch原样保留；两者都不是post/queue的数值owner。
+7. `ProviderNetScratchFinalizationPlanV2`因此取代V1：B0只观测`PROVIDER_KFSB_RESIDUE`；R/C在native KFSB后把
+   36个live α/intermediate/lA attribute规范化为sentinel，并要求provider net β inventory为0。R/C互相exact，B0/R/C
+   的net scratch差异必须以`NON_AUTHORITATIVE_PROVIDER_KFSB_RESIDUE`显式准入，不能伪写成disposal parity。
 
-所以production α/β数值commit仍是12条semantic path；net scratch作为**lifetime/disposal transaction**单独receipt化，
+所以production α/β数值commit仍是12条semantic path；net scratch作为**phase-aware lifetime/finalization transaction**
+单独receipt化，
 不能混入12-path coverage数字，也不能在S4-P显存测量中忽略。
 
 ## 1. pinned事实基础
@@ -97,6 +102,44 @@ S4-3蓝图中的“provider net scratch consumer待核”已经从源码层闭�
 该数是逻辑tensor字节相加，不是unique-storage、peak allocated/reserved或性能claim；诊断worker结果位于临时目录并已
 自动清理。S4-4 formal必须用冻结raw重新枚举、记录storage identity/alias并独立重放。本探针只用于纠正“六条terminal
 lA等于六个GC attribute”的错误假设。
+
+### 1.2 storage alias与terminal transfer事实
+
+第二个只读probe在第一次terminal extraction前同时冻结tensor object/storage/data pointer：
+
+- 36个disposal tensor逻辑合计`805,680 B`，但只有34个nonempty unique storages、`756,528 B`；
+- lA `/37`与`/38`共享storage，`/45`与`/46`共享storage，所以logical bytes不能当unique storage；
+- 六α return全部是新Tensor object，但`6/6`与net source共享storage/data pointer；
+- 12 intermediate return同样是新Tensor object，但`12/12`共享source storage/data pointer；
+- 六条export lA是transpose/view object，`6/6`共享source storage/data pointer；
+- 因而把net attribute换成sentinel并不会立即释放这些return仍持有的storage。36项清理是owner/reference transfer，
+  不是`805,680 B`即时free证明。
+
+terminal sparse β只有`/input-28`的一组`val/loc/sign`非空，logical/unique storage均为`96 B`；其余layer的
+`[6,0]` empty tensors不应因`data_ptr=0`被误判成跨layer alias。`BetaFullData.from_net`返回原list和原SparseBeta
+object；field tensor可在后续KFSB中被替换。当前probe同时确认`last_update_preserve_mask=None`、`cut_used=false`、
+`constraints_optimized=None`。
+
+### 1.3 B0 post-KFSB residue与当前R stale scratch
+
+第三、第四个probe分别覆盖B0 provider core和现有RVIR provider-independent R：
+
+| phase/variant | α unique | intermediate unique | lA logical / unique | β unique | 合计unique |
+|---|---:|---:|---:|---:|---:|
+| B0 terminal pre-extract(batch 6) | 33,984 | 299,712 | 471,984 / 422,832 | 96 | 756,624 |
+| B0 core/solver return residue(batch 24) | 135,936 | 1,198,848 | 1,887,936 / 1,494,720 | 96 | 2,829,600 |
+| current R core-entry/return stale(batch 12) | 67,968 | 599,424 | 943,968 / 747,360 | 0 | 1,414,752 |
+
+B0在terminal extraction之后执行三次batch-24 provider child CROWN；最终六α、12 intermediate和18 lA全部换成
+batch-24新storage，并从core return到official post、queue和solver return保持object/storage exact。它是最后一次KFSB
+候选计算残留，不是`core_result`或queue owner。
+
+当前R的native KFSB/provider-independent exact-call则完全不读写provider net：core entry已有的batch-12 α/intermediate/lA
+在core return和solver return保持`36/36` object与storage identity；net β inventory为0，provider compute/update callback和
+fallback均为0。也就是说当前R尚未做scratch normalization，只是把旧值原样留在net。
+
+这些数字来自临时诊断run，不是formal artifact或memory claim。尤其不能用B0 residue与R stale scratch之差宣称节省；
+S4-4必须同步测量allocated/reserved、storage alias/lifetime和R/C finalization后的真实状态。
 
 ## 2. reference事务对net的读写
 
@@ -291,27 +334,39 @@ signature变化和candidate→provider切换都需要后续独立artifact，不�
 
 这与S4-4的B0/R/C独立subprocess协议一致。
 
-## 6. `ProviderNetScratchDisposalPlanV1`
+## 6. `ProviderNetScratchFinalizationPlanV2`
 
 ### 6.1 plan不是新IR
 
-它是prepared runtime lifetime plan，只包含provider attribute binding：
+V2取代只描述terminal move/gc的`ProviderNetScratchDisposalPlanV1`。它是prepared runtime lifetime plan，只包含
+provider attribute binding、phase和variant policy：
 
 ```text
-ScratchAttributeBindingV1:
+ScratchAttributeBindingV2:
     category                 # ALPHA / INTERMEDIATE_LOWER / INTERMEDIATE_UPPER / LA
     provider_object_identity
     attribute_or_mapping_key
     pre_object_identity
     pre_tensor_identity_or_sentinel
-    disposal_sentinel_kind
-    expected_reference_owner
+    storage_identity / alias_group
+    terminal_transfer_sentinel_kind
+    finalization_sentinel_kind
     rollback_ordinal
+
+ProviderNetScratchFinalizationPlanV2:
+    variant_policy           # B0_OBSERVE_RESIDUE / R_C_NORMALIZE
+    core_entry_inventory
+    terminal_transfer_audit  # B0-only source observation
+    post_kfsb_inventory
+    finalization_bindings
+    beta_admission
+    policy_mirrors
+    exclusive_owner_latch
 ```
 
 不表达solver control、图、TIR或优化策略。
 
-### 6.2 formal最低inventory
+### 6.2 terminal transfer inventory
 
 由live reference core probe得到当前formal fixture静态下界：
 
@@ -322,7 +377,7 @@ ScratchAttributeBindingV1:
 | intermediate upper | 6 | attribute→EmptiedTensor |
 | exported split-layer lA | 6 | 进入`BatchedlA`，不作为全GC计数替代物 |
 | all-node nonempty lA | 18 | attribute→EmptiedTensor |
-| 合计disposal attributes | 36 | reference release/move mirror |
+| 合计transfer attributes | 36 | terminal owner/reference transfer |
 
 实现必须运行时枚举：
 
@@ -330,25 +385,48 @@ ScratchAttributeBindingV1:
 - `layers_requiring_bounds`中actual nonempty lower/upper；
 - `net.nodes()`中actual nonempty lA。
 
-若actual不是formal预注册inventory，必须在任何mutation前拒绝并输出extra/missing path；不得截断到36。六条terminal
-lA export与18条provider lA disposal必须使用不同字段和计数器。
+该36项描述B0 terminal extraction和R/C finalization的attribute path集合，不表示B0 core return为36个sentinel。
+若actual path不是formal预注册inventory，必须在任何mutation前拒绝并输出extra/missing path；不得截断到36。六条
+terminal lA export与18条all-node lA path必须使用不同字段和计数器；storage统计还必须保留alias group。
 
-### 6.3 β为何不在disposal list
+### 6.3 variant-specific final state
 
-reference `BetaFullData.from_net`不move/clear sparse β；working β可继续引用net对象直到post转换。因此candidate不应为了
-“清干净”自行删除net β，否则反而偏离reference生命周期。
+| variant | post-KFSB provider net policy | 当前fixture expectation |
+|---|---|---|
+| B0 | `B0_OBSERVE_RESIDUE` | batch-24 α/intermediate/lA residue + 6 sparse β containers |
+| R | `R_C_NORMALIZE` | native KFSB后36 path全部sentinel；provider β tensor/container inventory=0 |
+| C | `R_C_NORMALIZE` | 与R exact；active β只在typed/core result owner中 |
 
-candidate必须如实披露：
+B0 residue不复制到R/C，因为它既不是queue-visible state，也没有后续consumer；伪造batch-24 residue会额外制造约2.83 MB
+unique storage并重新引入provider scratch owner。R/C也不能继续沿用当前R的batch-12 stale值，而必须在logical commit中
+规范化。
 
-- net仍持有pre/stale sparse β；
-- core return持有candidate working β；
-- 两者的logical/allocated bytes；
-- exclusive latch保证stale net β不被读取。
+允许差异必须同时满足：
+
+- source/动态probe证明post、queue和固定next-pre不读net scratch；
+- query-scoped exclusive owner阻止provider reentry/reuse；
+- B0、R、C raw分别记录entry、post-KFSB和solver-return inventory；
+- R/C finalization exact，B0差异reason固定为`NON_AUTHORITATIVE_PROVIDER_KFSB_RESIDUE`；
+- 不用该差异自动形成memory claim。
+
+### 6.4 β admission与identity
+
+reference B0的`BetaFullData.from_net`返回原list/SparseBeta object，KFSB期间非空`val/loc/sign`field storage可被替换，
+最终仍留下六个container。R/C不模仿该residue：当前provider-independent入口的net β inventory为0，active β由typed
+production state/core result拥有。
+
+R/C admission必须：
+
+- launch前要求provider net sparse β tensor/container inventory=0；
+- 若非0则fail closed，不通过“顺手清理”接管未知alias；
+- core result持有candidate working β并供official post转换；
+- B0 raw披露六container、18 field tensor（仅3个nonempty、96 B）及field identity变化；
+- R/C raw证明net β保持0，exclusive latch阻止重新attach/read。
 
 若后续选择把candidate β attach到net以消除双份存储，必须另证alias、version、rollback和post owner，不能在S4-3A
 顺手升级。
 
-### 6.4 preserve mask与policy scratch
+### 6.5 preserve mask与policy scratch
 
 `last_update_preserve_mask`不是disposal tensor，但应作为policy mirror attribute：
 
@@ -356,7 +434,7 @@ candidate必须如实披露：
 - S4-3 commit把net field设置为该projection，便于debug/provenance并消除stale值；
 - receipt比较reference/candidate mask；
 - attribute assignment可identity rollback；
-- 它不计入12 production mutable paths或36 disposal attributes。
+- 它不计入12 production mutable paths或36 finalization attributes。
 
 `constraints_optimized`在fixed output-constraint-disabled路径应被验证/镜像为None；`cut_used`必须为false；`bound_opts`只保存
 canonical policy hash并由candidate prepare确定性设置。
@@ -371,7 +449,8 @@ S4-3 logical transaction包含：
 12 production tensor content paths
 1 host d packet
 1 pre_result.interm_bounds container
-N provider scratch attribute disposals      # current formal fixture expected 36
+N provider scratch attribute finalizations  # current formal fixture expected 36
+1 variant finalization policy               # B0 observe / R-C normalize
 policy mirrors                              # preserve mask / constraints / cut state
 1 exclusive owner latch
 ```
@@ -388,7 +467,7 @@ policy mirrors                              # preserve mask / constraints / cut 
 4. commit 12 tensor contents；
 5. replace/prune host packet；
 6. clear pre_result intermediate container；
-7. apply scratch sentinels；
+7. apply R/C post-KFSB scratch finalization sentinels（B0只observe，不修改）；
 8. apply preserve/constraint/cut mirrors；
 9. seal latch与receipt；
 10. official post。
@@ -397,7 +476,7 @@ policy mirrors                              # preserve mask / constraints / cut 
 
 ### 7.3 success/post failure
 
-successful core commit后scratch disposal已生效。official post失败时：
+successful R/C core commit后scratch normalization已生效。official post失败时：
 
 - 不恢复net scratch；
 - 不重attach旧α/β；
@@ -436,13 +515,19 @@ S4-v1必须在candidate launch前固定拒绝：
 S4-4每个worker新增：
 
 ```text
-net_scratch_pre_inventory
-net_scratch_post_core_inventory
-net_scratch_post_post_inventory
+net_scratch_core_entry_inventory
+net_scratch_terminal_pre_extract_inventory        # B0 only
+net_scratch_terminal_post_transfer_inventory      # B0 only
+net_scratch_post_kfsb_inventory
+net_scratch_post_finalization_inventory
+net_scratch_solver_return_inventory
 alpha_value/sentinel counts
 intermediate_tensor/sentinel counts
 lA_tensor/sentinel counts
 beta_object/value inventory
+logical_bytes / unique_storage_bytes / alias_groups
+tensor object / storage / data-pointer lineage
+scratch_finalization_policy
 last_update_preserve_mask identity/content
 constraints_optimized state
 cut_used state
@@ -453,12 +538,14 @@ exclusive_owner_latch transitions
 ### 9.2 parity规则
 
 - B0/R/C的queue-visible语义必须一致；
-- R/C scratch disposal categories/keys/sentinel kinds exact；
-- B0可有provider内部object id差异，但lifetime category/count应与R/C对齐；
-- C net sparse β可保持stale，但必须披露且consumer count=0；
+- B0 terminal transfer 36项、post-KFSB batch-24 residue和solver-return identity逐phase自洽；
+- R/C core-entry stale inventory如实记录，post-finalization 36个sentinel exact；
+- B0 residue与R/C normalized差异必须命中固定allowed-difference reason，不能要求虚假lifetime parity；
+- R/C provider net sparse β必须为0；active β只在typed/core result owner中；
 - C provider reentry/fallback=0；
-- actual disposal inventory必须来自raw，不从expected summary复制；
-- post后没有unexpected CUDA tensor retained byα/intermediate/lA paths。
+- actual phase/finalization inventory必须来自raw，不从expected summary复制；
+- logical与unique storage分列，empty tensor `data_ptr=0`不得形成alias group；
+- 不能把terminal transfer或R/C normalization写成即时free/allocated下降。
 
 ### 9.3 dynamic consumer probe
 
@@ -492,11 +579,20 @@ exclusive_owner_latch transitions
 15. `UNEXPECTED_NET_SCRATCH_READ_AFTER_CORE`；
 16. `STALE_NET_BETA_CONSUMER_OBSERVED`；
 17. `SCRATCH_LIFETIME_MEMORY_UNDISCLOSED`；
-18. `SCRATCH_PATH_MIXED_INTO_PRODUCTION_12_COUNT`。
+18. `SCRATCH_PATH_MIXED_INTO_PRODUCTION_12_COUNT`；
+19. `SCRATCH_PHASE_ORDER_MISMATCH`；
+20. `B0_KFSB_RESIDUE_PROJECTION_MISMATCH`；
+21. `RC_FINALIZATION_NOT_NORMALIZED`；
+22. `SCRATCH_LOGICAL_UNIQUE_STORAGE_CONFLATED`；
+23. `SCRATCH_ALIAS_GROUP_MISMATCH`；
+24. `EMPTY_STORAGE_FALSE_ALIAS`；
+25. `BETA_FIELD_IDENTITY_LINEAGE_MISMATCH`；
+26. `SCRATCH_IMMEDIATE_FREE_FALSE_CLAIM`。
 
-fully re-signed tamper必须覆盖至少：删除一个disposal path、把lA sentinel改为tensor、改preserve mask、伪造
-exclusive latch、把provider reentry从1改0、把multi-core从2改1、隐藏stale beta memory、把36 scratch错误并入12-path
-commit count。
+fully re-signed tamper必须覆盖至少：删除一个finalization path、把lA sentinel改为tensor、改preserve mask、伪造
+exclusive latch、把provider reentry从1改0、把multi-core从2改1、隐藏B0 β/residue、把36 scratch错误并入12-path、
+交换terminal-transfer/post-KFSB phase、把B0 batch24改12、把R/C normalized改stale、删除alias group、用logical替代
+unique storage、把empty `data_ptr=0`伪装成alias、声称attribute clear即时释放storage。
 
 ## 11. tests与实现切分
 
@@ -504,8 +600,8 @@ S3批准且S4-0—S4-2关闭后，S4-3A按短提交：
 
 1. `test(adapter): inventory provider post-core scratch consumers`；
 2. `feat(adapter): add exclusive core owner latch`；
-3. `feat(runtime): compile provider scratch disposal plan`；
-4. `test(runtime): mirror alpha/intermediate/lA disposal and rollback refs`；
+3. `feat(runtime): compile provider scratch finalization plan v2`；
+4. `test(runtime): audit B0 residue and normalize R/C scratch`；
 5. `feat(runtime): bind preserve-mask and constraint scratch mirrors`；
 6. `test(adapter): reject optional/mixed/multi-core paths`；
 7. `artifact: record B0/R/C scratch lifetime projection`；
@@ -520,13 +616,15 @@ S3批准且S4-0—S4-2关闭后，S4-3A按短提交：
 S4-3只有在以下新增条件也成立时才能关闭：
 
 - normal fixed path从core return到post/queue没有net dynamic scratch read；
-- actual scratch inventory完整且reference/candidate disposal parity通过；
+- B0 terminal transfer、post-KFSB residue与solver-return phase lineage完整；
+- R/C finalization categories/keys/sentinel exact，且不再保留core-entry stale batch-12 scratch；
 - formal最低36 attributes逐项解释，extra/missing fail closed；六条export lA与18条GC lA分开核对；
-- net β保留有显式consumer=0和memory披露；
+- B0 net β residue有显式consumer=0和memory披露，R/C provider net β inventory=0；
 - preserve mask/constraints/cut mirrors一致；
 - exclusive owner latch阻止provider fallback/reentry；
 - all-node/cut/clip/BFS/multitree/multi-core/reuse均在launch前拒绝；
-- scratch disposal只在commit发生，precommit failure完全不变；
+- R/C scratch finalization只在commit发生，precommit failure完全不变；
+- logical/unique storage、alias和transfer-return shared storage均由raw重放；
 - mid/post failure进入对应poisoned状态；
 - raw/replay/tamper覆盖lifetime而非只比较numeric result。
 
@@ -539,7 +637,9 @@ S4-3只有在以下新增条件也成立时才能关闭：
 - 不能枚举actual α/intermediate/lA owner；
 - 为了fallback允许candidate后provider reentry；
 - all-node LP或cuts在formal中可达；
-- 未清理scratch却声称显存不恶化；
+- R/C未规范化stale scratch却声称已清理；
+- 把B0 KFSB residue当authoritative state，要求R/C额外重建；
+- 把attribute sentinel replacement写成即时CUDA free或allocated下降；
 - 把net scratch disposal伪写为第13条production α/β数值path；
 - 通过硬编码36绕过动态inventory。
 
