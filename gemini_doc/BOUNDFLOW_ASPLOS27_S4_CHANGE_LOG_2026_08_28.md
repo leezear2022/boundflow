@@ -71,3 +71,23 @@ performance-claimed: false
   不是代码回归；
 - 主计划、S4预注册、可行性、ABI蓝图与三份权威状态文档的口径统一；`git diff --check`：PASS；
 - 本批DocOps change/validation、exchange validate与lint在提交前执行。
+
+## 2026-08-28：完成S4-0 mutable-state admission精确实施蓝图
+
+- 再次核对S3 exchange仍为`ready_for_audit/r001`且无audit产物，保持S4代码/timing门禁关闭；
+- 亲读`ProductionStateSnapshotV4`、`ProductionReluTopologyV4`、`R31FullRegionPlanV1`、atomic copy-out与
+  GC0 rejection vocabulary，确认S4-0无需新增IR或dense candidate state；
+- 冻结唯一新增对象为tensor-free `S4MutableStateAdmissionV1`及六个`S4MutableSlotV1` metadata receipt；
+- 冻结snapshot→topology→plan的15步确定性admission算法、15个稳定detail reason到GC0 reason的映射；
+- 预注册10项positive/structural与minimum 15类negative/tamper测试；
+- 明确S4-0不得分配GPU buffer、调用native dense initializer/TVM/provider、创建optimizer或记录timing；
+- 新增S4-0实施蓝图并回链主预注册；本轮仍无S4代码/GPU执行/性能claim。
+
+### 验证
+
+- stdlib/PyTorch独立重算formal inventory：mutable paths=`12`、α/β slots=`6/6`、
+  stored/active/preserved=`8496/4248/4248`、active β=`1 slot/6 elements`、mutable alias全唯一，PASS；
+- production state、pre-state initializer、GC0 schema与R3 structured owner targeted：`33 passed in 4.37s`；
+- S4-0蓝图保持`execution-authority=false/code-change-open=false/performance-claimed=false`；
+- `git diff --check`与文档关键字段检索：PASS；
+- DocOps change/validation与lint在提交前执行。

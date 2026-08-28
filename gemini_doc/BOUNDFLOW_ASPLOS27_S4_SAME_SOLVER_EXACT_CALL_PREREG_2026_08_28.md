@@ -187,6 +187,11 @@ bounds来自入口`relu_pre`，不属于candidate输出。existing KFSB仍执行
 
 ### S4-0：production signature admission（无GPU执行）
 
+精确类型、compiler入口、reason映射和negative测试矩阵见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_MUTABLE_STATE_ADMISSION_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`。
+S4-0只新增tensor-free typed runtime binding receipt，复用现有snapshot/topology/plan与GC0 rejection vocabulary；
+不得新增solver/execution IR或通过native dense initializer实现candidate admission。
+
 交付：typed mutable binding与coverage receipt，不实现TIR、不计时。
 
 必须机械证明：
