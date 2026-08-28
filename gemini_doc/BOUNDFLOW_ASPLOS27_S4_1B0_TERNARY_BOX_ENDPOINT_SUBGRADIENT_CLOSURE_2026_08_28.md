@@ -144,24 +144,26 @@ dβ_i = upstream * (-V_i * split_sign_i)
 原因是这些位置执行显式`where(A >= 0, lower_slope, upper_slope)`；zero明确属于lower branch，不涉及
 `abs`在零点的次梯度。禁止为了接口统一而把它们改成三元语义。
 
-### 4.3 center身份
+### 4.3 derived center身份
 
-prepared program必须绑定`input_center`的shape/dtype/device/content hash、由lower/upper构造center的公式版本，以及
-selector schema hash。warm execution不得临时重算或从Python对象猜测center。
+R31 plan只有input lower/upper，provider也以`(x_U+x_L)/2`派生center；因此不得新增physical `input_center`
+tensor、pointer或DLPack view。select TIR在zero分支按冻结operation order`(lower+upper)*float32(0.5)`派生center。
+prepared program绑定lower/upper identity、derived-center formula schema/hash和selector schema hash。
 
 现有`R31B2_PACK_AINPUT_SYMBOL`的“`>=0`打包为1，否则0”只能作为历史二元实现；S4 all-site模块不得原样复用。
-需新增明确命名的ternary pack/select lowering，避免同一buffer名称掩盖不同语义版本。
+需以新S4 schema和新symbol新增ternary pack/select lowering，避免同一buffer名称掩盖不同语义版本；S2/R31B2 v1
+symbol与hash必须保持不变。
 
 ## 5. S4-1B0实现门禁
 
 S3外审批准并关闭前仍不得写production S4代码。开放后，S4-1B0必须先于S4-1B完成：
 
-1. 冻结`endpoint_ainput_v2`schema和三元pack/select TIR/Relax合同；
+1. 冻结`endpoint_ainput_v2`schema、三元pack/select与derived-center TIR合同；
 2. exact-zero必须按逐位`A == 0`分类，不得用epsilon把非零值并入zero；
 3. 绑定606/8,689/9,137 inventory及其content hash；
 4. full PyTorch autograd、stdlib/float64公式、selected-primal candidate三方比较；
 5. 六dα与active dβ最终gradient均`max abs/rel <=2e-5`且sign exact；
-6. five fresh process绑定state/action/selector/center/module/layout hash；
+6. five fresh process绑定state/action/selector/lower/upper/derivation/module/layout hash；
 7. fallback/eager/native shadow、dynamic allocation、timing与performance flag均为0/false；
 8. replay必须从raw重算三元分类、六site gradient和summary，而非只验外层digest。
 
@@ -171,7 +173,7 @@ S3外审批准并关闭前仍不得写production S4代码。开放后，S4-1B0�
 
 1. `BINARY_INPUT_ENDPOINT_SUBSTITUTED_FOR_TERNARY`；
 2. `INPUT_ENDPOINT_ZERO_CLASS_COUNT_MISMATCH`；
-3. `INPUT_CENTER_IDENTITY_MISMATCH`；
+3. `INPUT_CENTER_DERIVATION_SCHEMA_MISMATCH`；
 4. `INPUT_ENDPOINT_SELECTOR_VALUE_OUT_OF_RANGE`；
 5. `INPUT_ENDPOINT_SELECTOR_SCHEMA_MISMATCH`；
 6. `SITE19_ZERO_SUBGRADIENT_COUNTEREXAMPLE_NOT_CLOSED`。
@@ -179,7 +181,7 @@ S3外审批准并关闭前仍不得写production S4代码。开放后，S4-1B0�
 S4-4保留68类fully outer-resigned攻击总数，后四类语义修正为：
 
 - 65：把三元Ainput selector替换成旧二元`A>=0→lower`；
-- 66：篡改zero class/count或center identity；
+- 66：篡改zero class/count、lower/upper identity或derived-center formula；
 - 67：将606个zero重写为positive/lower并全重签，复现旧site19错值；
 - 68：terminal lA post-transform copy或spec-axis identity篡改。
 

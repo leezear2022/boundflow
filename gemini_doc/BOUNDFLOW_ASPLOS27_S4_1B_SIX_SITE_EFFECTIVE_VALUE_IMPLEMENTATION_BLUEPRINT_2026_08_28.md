@@ -48,8 +48,8 @@ selected input
 
 实现前必须先关闭
 `BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_BOX_ENDPOINT_SUBGRADIENT_CLOSURE_2026_08_28.md`定义的S4-1B0门禁。
-S2 selected Relax/cuDNN与R31B2 selected-ReLU TIR继续作为六site lowering的主要复用资产；只需升级input
-endpoint pack/select schema并加入center identity，仍禁止另写per-site Python executor。
+S2 selected Relax/cuDNN与R31B2 selected-ReLU TIR继续作为六site lowering的主要复用资产；S4以新symbol升级input
+endpoint pack/select schema，zero分支从lower/upper派生center，不新增center tensor，仍禁止另写per-site Python executor。
 
 ## 1. 数学语义
 
@@ -126,7 +126,7 @@ emitter处直接使用。
 `endpoint_ainput_v2`取值冻结为`+1 iff A>0`、`-1 iff A<0`、`0 iff A==0`；formal inventory为
 `8689/9137/606`。其余五张bitmap仍为`1 iff coefficient >= 0 else 0`，因为ReLU显式`where`把zero归入lower
 branch。selector/bitmap receipt必须绑定evaluation ordinal、parameter state version、β/split/history identity、
-coefficient module hash、center hash与pointer generation。总物理bytes不变。
+coefficient module hash、lower/upper与derived-center formula hash、pointer generation。总物理bytes不变。
 
 ## 4. 现有资产与真正缺口
 
@@ -148,7 +148,7 @@ coefficient module hash、center hash与pointer generation。总物理bytes不�
 5. current S2只copy/export pre25，S4需六slot persistent handoff；
 6. 当前receipt没有all-six value inventory/version/lifetime。
 7. 旧二元input endpoint在site19失败`1.156e-3/9 sign mismatch`；三元规则已只读闭合，但未形成formal artifact；
-8. current `R31B2_PACK_AINPUT_SYMBOL`只能编码二元`>=0`，缺ternary pack/select和center identity；
+8. current `R31B2_PACK_AINPUT_SYMBOL`只能编码二元`>=0`，S4缺独立ternary pack/select和derived-center schema；
 9. receipt尚未逐action绑定residual fanout/accumulate、bias与box concretization provenance。
 
 ### 4.3 为什么不直接扩展`effective_pre23`大kernel
@@ -180,7 +180,7 @@ E5 selected_relu28 + Flatten + Gemm14       → pre31 slot
 ```
 
 上图描述期望物理dataflow。每个stage还必须绑定来源coefficient action与fanout provenance；E0必须绑定三元
-endpoint schema、center identity及zero inventory。logical stage不等于CUDA kernel；actual cuDNN/TIR/copy kernel
+endpoint schema、lower/upper identity、derived-center formula及zero inventory。logical stage不等于CUDA kernel；actual cuDNN/TIR/copy kernel
 count由compiled module receipt披露。
 
 ### 5.3 persistent outputs
@@ -258,7 +258,7 @@ evaluation_ordinal / parameter_state_version / sign_generation / value_generatio
 
 input_endpoint_selector_schema=ternary-box-endpoint-v2
 input_endpoint_positive/negative/zero_count=8689/9137/606
-input_center_hash
+input_lower_hash / input_upper_hash / derived_center_formula_hash
 selector_and_sign_buffer_count=6
 selector_and_sign_elements=55296
 selector_and_sign_logical_bytes=55296
@@ -308,7 +308,7 @@ comparison均`atol=rtol=2e-4`；但最终compressed gradient必须`max abs/rel <
 13. VM动态输出allocation；14. saved float32 coefficient跨stage；15. native/provider fallback；
 16. lease未释放即重写arena；17. 全重签后修改bytes/copy/kernel/claim；18. timing/performance flag提前为true；
 19. binary endpoint替换ternary endpoint；20. residual fanout/accumulation VJP provenance漂移；
-21. zero count/center identity漂移；22. site19 zero-subgradient反例未关闭却标admitted；
+21. zero count或derived-center formula漂移；22. site19 zero-subgradient反例未关闭却标admitted；
 23. coefficient/VJP action sequence hash错配。
 
 ## 11. 与S4-1C gradient的接口

@@ -643,7 +643,7 @@ S4-4冻结minimum 68类。每案都要：
 ### I. S4-1 ternary endpoint与terminal lA phase（4）
 
 65. 用旧二元`Ainput>=0→lower`替换三元lower/upper/center selector并全重签；
-66. 篡改Ainput zero class/count或input-center identity并全重签；
+66. 篡改Ainput zero class/count、lower/upper identity或derived-center公式并全重签；
 67. 把606个zero selector重写为positive/lower，注入已知site19错值并同步重签gradient/summary/manifest；
 68. 把terminal lA改为post-transform coefficient，或删除`[D,S,*feature]`中的spec-axis identity。
 

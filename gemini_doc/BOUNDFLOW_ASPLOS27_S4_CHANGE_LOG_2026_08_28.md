@@ -10,6 +10,28 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-28：S4-1B0源码映射与CUDA探针冻结最小实施边界
+
+- 亲读R31/S2/R31B2源码确认static plan只有input lower/upper，没有独立center tensor；pinned provider同样以
+  `(x_U+x_L)/2`派生center；
+- 决定zero分支在新S4 select TIR内按冻结`add→*0.5`顺序派生center，不新增plan tensor、DLPack view、pointer或
+  warm allocation；
+- 旧`R31B2_PACK_AINPUT_SYMBOL`、S2 selected-value v1与其source/module hash保持不变；S4必须新增独立schema和
+  symbol，防止历史artifact出现同名不同义；
+- 内存中CUDA/TIR signed-zero探针通过：`[-1,0,0,1,-1,1,-1,1]`，`+0.0/-0.0`均归zero，subnormal保留符号，
+  workspace=0；
+- formal真实Ainput探针通过：positive/negative/zero=`8,689/9,137/606`，old binary误编码zero=`606`，新TIR
+  selected output与independent PyTorch逐位相等，extra center tensor=0，selector=`18,432 bytes`；
+- nonfinite CUDA探针通过：NaN/±Inf pack为reserved `-128`，select传播NaN，合法`-0/+1/-1`仍得到
+  midpoint/lower/upper；失败由S4-1D final-finite gate拒绝，正常路径不加status buffer；
+- 新增逐文件patch blueprint、16项negative矩阵与nonfinite fail-closed边界；S3外审前仍不写production代码。
+
+### 验证
+
+- formal selected hash=`7e95e075...39b652`；derived-center hash=`d6164a06...f5b003`；
+- diagnostic formal TIR module hash=`eb3e7ec6...250fb5`；
+- 文档一致性、既有S2/R31定向回归、DocOps lint在提交前执行。
+
 ## 2026-08-28：逐层tap修正site19根因，selected-primal以三元endpoint恢复
 
 - 对上一轮site19反例继续做只读逐层tap：exact V18重建pre19为0误差，差异最终定位到input affine；
@@ -20,7 +42,7 @@ performance-claimed: false
   1.639e-7`，sign mismatch全0；active dβ最大误差`1.192e-7`、sign mismatch=0；
 - 新增S4-1B0权威合同；保留coefficient-program VJP为规范oracle，恢复selected-primal为优化lowering；无需推倒
   S2/R31B2、两块coefficient arena、residual scratch、V/lA arena或compressed emitter；
-- Ainput int8 buffer升级为三元selector，其余五张ReLU bitmap保持二元，总存储仍55,296 bytes；新增center identity、
+- Ainput int8 buffer升级为三元selector，其余五张ReLU bitmap保持二元，总存储仍55,296 bytes；新增derived-center、
   zero inventory和binary→ternary tamper门禁；formal tamper总数仍为68；
 - 上一节“DAG/fanout根因”显式标为被本节取代，不静默改写历史；S3外审前S4 production代码/timing继续关闭。
 

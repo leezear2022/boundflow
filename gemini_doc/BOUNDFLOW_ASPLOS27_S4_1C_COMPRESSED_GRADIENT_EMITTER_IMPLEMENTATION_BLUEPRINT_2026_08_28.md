@@ -262,7 +262,7 @@ S4-1C不接Adam、不计时；只允许单evaluation与terminal-mode correctness
 
 1. A/V/state version不一致；
 2. incoming coefficient site错配；
-3. value slot错配、binary endpoint替换ternary endpoint或center identity漂移；
+3. value slot错配、binary endpoint替换ternary endpoint或derived-center formula漂移；
 4. α index重复/越界/乱序；
 5. active α不是`[D,W]`或full-source escape；
 6. stable/non-ambiguous位置产生非零gradient；

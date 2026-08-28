@@ -56,7 +56,7 @@ exclusive owner和artifact；official post失败单列为
 S4-1B/1C只读预检发现的site19 `0.0011564/9 sign mismatch`已进一步定位到input box零点次梯度，而非DAG/
 fanout：formal Ainput有606个exact zero，provider的`abs(A)`导数要求zero→center，旧binary endpoint却取lower。
 三元`positive→lower / negative→upper / zero→center`后六dα overall max=`1.639e-7`、active dβ max=
-`1.192e-7`且sign exact。S4-1B0现冻结ternary endpoint、center identity与zero inventory；coefficient VJP保留为
+`1.192e-7`且sign exact。S4-1B0现冻结ternary endpoint、derived-center formula与zero inventory；coefficient VJP保留为
 规范oracle，selected-primal恢复为优化lowering。原arena/scratch/55,296-byte selector+sign/149,856-byte V/lA及
 compressed ABI保留；formal tamper仍为68类。S3外审和S4-1B0 formal关闭前，S4代码/timing仍关闭。
 

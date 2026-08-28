@@ -20,7 +20,7 @@ performance-claimed: false
 > **2026-08-28 S4 ternary box endpoint纠正（v12）**：上一轮site19 `1.156e-3/9 sign mismatch`并非DAG/fanout
 > 原则性失败，而是input concretization把606个`A==0`错误归入lower；provider的`abs(A)`零点次梯度要求center。
 > 改为`A>0→lower / A<0→upper / A==0→center`后，六dα最大误差`1.639e-7`、active dβ最大误差
-> `1.192e-7`且全部sign exact。S4-1B0改为三元endpoint/center identity/zero inventory closure；
+> `1.192e-7`且全部sign exact。S4-1B0改为三元endpoint/derived-center formula/zero inventory closure；
 > coefficient-program VJP保留为规范oracle，selected-primal恢复为可复用的优化lowering。两块coefficient arena、
 > residual scratch、55,296-byte selector/sign、149,856-byte V/lA arena、compressed ABI与terminal handoff均保留。
 > S3外审及S4-1B0 formal关闭前，S4实现和timing仍关闭。
