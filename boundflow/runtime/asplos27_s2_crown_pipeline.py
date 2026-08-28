@@ -4,13 +4,13 @@
 # pylint: disable=import-error,import-outside-toplevel,protected-access
 # pylint: disable=too-many-instance-attributes,too-many-locals
 # pylint: disable=too-many-boolean-expressions,missing-function-docstring
+# pylint: disable=too-few-public-methods
 
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 import hashlib
 import json
-from typing import Any
 
 import torch
 
@@ -222,7 +222,9 @@ class S2CrownExecutionReceiptV1:
 class PreparedS2CrownProgramV1(PreparedR3D2BStagedBackwardCandidateV1):
     """Canonical P-anchor forward plus direct custom VJP without autograd state."""
 
-    def __init__(self, plan, trace, tensors: tuple[torch.Tensor, ...]) -> None:  # type: ignore[no-untyped-def]
+    def __init__(  # type: ignore[no-untyped-def]
+        self, plan, trace, tensors: tuple[torch.Tensor, ...]
+    ) -> None:
         super().__init__(plan, trace, tensors)
         import tvm
 

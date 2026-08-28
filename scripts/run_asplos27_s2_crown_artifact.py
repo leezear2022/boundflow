@@ -2,12 +2,11 @@
 """Generate or semantically replay the ASPLOS'27 S2 formal artifact."""
 
 # pylint: disable=too-many-locals,too-many-statements,too-many-branches
-# pylint: disable=missing-function-docstring,duplicate-code
+# pylint: disable=missing-function-docstring,duplicate-code,too-many-boolean-expressions
 
 from __future__ import annotations
 
 import argparse
-import copy
 import hashlib
 import json
 import math

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Apply ten outer-resigned semantic attacks to an S2 formal artifact."""
 
-# pylint: disable=protected-access
+# pylint: disable=protected-access,missing-function-docstring
 
 from __future__ import annotations
 

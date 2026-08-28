@@ -3,7 +3,8 @@
 # mypy: disable-error-code=import-untyped
 # pylint: disable=import-error,import-outside-toplevel,too-many-locals
 # pylint: disable=too-many-statements,too-many-arguments,too-many-positional-arguments
-# pylint: disable=missing-function-docstring,invalid-name
+# pylint: disable=missing-function-docstring,invalid-name,too-many-instance-attributes
+# pylint: disable=too-many-boolean-expressions
 
 from __future__ import annotations
 
@@ -222,7 +223,9 @@ def build_s2_selected_value_relax_module_v1():
         relu23_name,
     )
 
-    def conv_bias(data, weight, bias, *, strides, padding, channels):  # type: ignore[no-untyped-def]
+    def conv_bias(  # type: ignore[no-untyped-def]
+        data, weight, bias, *, strides, padding, channels
+    ):
         conv = builder.emit(
             relax.op.nn.conv2d(
                 data,

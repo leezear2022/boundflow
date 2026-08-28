@@ -1,7 +1,7 @@
 """Correctness, ownership, and fail-closed gates for ASPLOS'27 S2."""
 
 # pylint: disable=missing-function-docstring,too-many-locals
-# pylint: disable=protected-access,duplicate-code
+# pylint: disable=protected-access,duplicate-code,import-outside-toplevel
 
 from dataclasses import replace
 from pathlib import Path
@@ -162,3 +162,39 @@ def test_s2_immutable_state_mutation_is_rejected_before_vjp() -> None:
         with pytest.raises(ValueError, match="immutable version drifted"):
             prepared.run_vjp()
     assert prepared.selected_value.replay_count == 0
+
+
+def test_s2_formal_artifact_replays_and_passes_frozen_4x_gate() -> None:
+    from scripts import run_asplos27_s2_crown_artifact as artifact
+
+    root = Path("artifacts/asplos27-s2-crown-pipeline/resnet2b-p-anchor-v2")
+    if not root.is_dir():
+        pytest.skip("S2 formal artifact unavailable")
+    result = artifact.replay(root)
+    summary = artifact.load_json(root / "summary.json")
+    assert result["status"] == "replay-passed"
+    assert summary["status"] == "validated-s2-4x-canonical-crown"
+    assert summary["run_count"] == 6
+    assert summary["orders"] == ["NDP", "NPD", "DNP", "DPN", "PND", "PDN"]
+    assert summary["p_over_n_geomean"] >= 4.00
+    assert summary["p_over_n_worst"] >= 3.50
+    assert summary["p_over_d_geomean"] >= 0.90
+    assert summary["max_lower_abs_diff"] <= 2e-4
+    assert summary["max_gradient_abs_diff"] <= 2e-4
+    assert summary["lower_sign_exact"] is True
+    assert summary["gradient_sign_exact"] is True
+    assert summary["warm_dynamic_allocated_bytes"] == 0
+    assert summary["performance_claimed"] is False
+
+
+def test_s2_formal_artifact_rejects_ten_outer_resigned_attacks() -> None:
+    root = Path("artifacts/asplos27-s2-crown-pipeline/resnet2b-p-anchor-v2")
+    if not root.is_dir():
+        pytest.skip("S2 formal artifact unavailable")
+    report = __import__("json").loads(
+        (root / "tamper_report.json").read_text(encoding="utf-8")
+    )
+    assert report["case_count"] == report["rejected_count"] == 10
+    assert all(row["outer_resigned"] is True for row in report["rows"])
+    assert all(row["rejected"] is True for row in report["rows"])
+    assert report["performance_claimed"] is False
