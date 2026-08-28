@@ -10,6 +10,24 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：刷新S4设计外审交接v18
+
+- design-result commit更新为`c750fafdde8435f56146294faf509221a780057d`，审计range固定为
+  `ebf45cc72438141d8f0b35dadfd5cf774d7e753f..c750fafdde8435f56146294faf509221a780057d`；
+- 必读文档由33份增至34份，加入S4-4 implementation construction package；
+- top-level独立复核问题由88项增至100项，must-answer由87项增至99项，新增15-fault terminal、
+  B0/R/C raw算术、16/36 seal DAG、96-case enforcement、T19 offline真实性限制和protocol full-hash边界；
+- AC7/AC8更新为S4-4施工合同的active口径：`85,795,608 B` semantic occurrence、96类攻击、95 reject+
+  1 `OFFLINE_UNATTESTABLE`，旧71类和`37.8557—47.5839 MiB`只作historical输入；
+- 外审命令和证据索引绑定最新commit，并要求外审独立重算fault/tamper/DAG/bytes，不采信executor summary；
+- S3 exchange仍为`ready_for_audit/r001`，本次只刷新设计外审材料，不开放S4代码/formal/timing/performance。
+
+### 验证
+
+- 34份必读文档存在；top-level 1—100、must-answer 1—99连续无重复；
+- S4-4 package行数/hash、15-fault/96-tamper/16-node DAG/bytes与施工提交逐项一致；
+- handoff Git range、`git diff --check`与DocOps在提交前验证。
+
 ## 2026-08-29：冻结S4-4 formal evidence实施施工合同
 
 - 新增1133行S4-4 implementation construction package，document SHA256=

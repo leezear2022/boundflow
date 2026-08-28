@@ -1,12 +1,12 @@
 ---
-status: ready-for-external-design-audit-v17-s4-3-construction-readiness-frozen
+status: ready-for-external-design-audit-v18-s4-4-construction-readiness-frozen
 date: 2026-08-29
 type: external-audit-handoff
 topic: boundflow
 slug: asplos27-s4-design-audit
 audit-kind: preregistration-and-implementation-blueprint
 base-commit: ebf45cc72438141d8f0b35dadfd5cf774d7e753f
-design-result-commit: c3af760a391d6368396d3c39fc9045f363eebfa6
+design-result-commit: c750fafdde8435f56146294faf509221a780057d
 execution-authority: false
 code-change-open: false
 performance-claimed: false
@@ -33,7 +33,7 @@ speedup或complete-query性能已经存在。
 7. S4-1A two-phase prepare、12-source private lease retention、16 base view和三阶段失败清理是否闭合；
 8. live B0/R phase probe把scratch合同从terminal disposal升级为variant-specific finalization v2是否成立；
 9. terminal logical/unique storage、view alias、B0 batch-24 residue与当前R batch-12 stale是否被正确区分；
-10. S4-4的indexed-binary stdlib raw、33-worker replay和71类layered fully re-signed tamper是否足以支持第三方独立审计；
+10. S4-4的indexed-binary stdlib raw、33-worker replay和96类layered tamper是否足以支持第三方独立审计；
 11. S4-1B0把site19根因收窄到`Ainput==0→center`、恢复selected-primal lowering是否数学成立；
 12. S4-1B0现场发现浮点NaN classifier会被TVM/CUDA错误化简后，改用IEEE-754 exponent位检查、独立cache
     key与module/launch receipt是否足以fail closed；
@@ -125,6 +125,24 @@ speedup或complete-query性能已经存在。
 87. tensor-occurrence、unique content和physical file bytes三口径是否足以避免raw预算claim漂移？
 88. `559,838 B`降为known tensor/base lower bound后，prepared transaction/provider scratch/KFSB/post/queue/allocator
     还应强制测量哪些storage与phase peak？
+89. S4-4的15-fault registry是否逐项覆盖preclaim clean、staging/commit/post/queue poison，且没有把claim后故障
+    错写为可retry clean abort？
+90. B0/R/C per-run semantic occurrence=`3,829,232/3,897,248/2,537,888 B`是否逐项成立？
+91. 18 positive=`61,586,208 B`、15 fault=`24,209,400 B`、总计=`85,795,608 B`是否正确，是否还有
+    mandatory semantic tensor遗漏？
+92. 语义出现量、worker-local unique content与最终physical artifact bytes三口径是否已彻底分离？
+93. 16-node/36-edge final evidence seal DAG是否可按冻结序列化规则重建且确实无环？
+94. semantic root、derived summary、tamper report、replay stdout、manifest、external anchor和anchored record的
+    先后边界是否避免任何self-hash循环？
+95. 96-case registry的13/5/77/1 enforcement分层是否正确，是否有应移动到另一层的攻击？
+96. T19 fresh-process attestation只能返回`OFFLINE_UNATTESTABLE`是否是诚实且必要的限制，现场外审应补何种OS/
+    parent/process证据？
+97. 其余95类在同步重写payload/summary/manifest的fully re-signed条件下是否都有明确拒绝owner？
+98. stdlib replayer是否能从raw独立重建S4-2三个version轴、S4-3 23-state事务、fault terminal与全部headline，
+    而不调用production validator？
+99. final protocol hash在实现时是否还必须绑定source/input/numeric/schema完整值，而不能误用当前仅用于设计复核的
+    structure projection hash？
+100. 是否同意本轮仍只关闭S4设计施工合同，不开放S4代码/formal/timing/performance，唯一外部动作仍是S3审计？
 
 ## 1. 审计范围和Git边界
 
@@ -132,9 +150,9 @@ speedup或complete-query性能已经存在。
 - 本轮设计base：`ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
 - S4-0 live admission/lease、S4-3A scratch finalization、S4-1A prepare transaction、S4-1B0 ternary TIR、
   S4-1B/1C selector/gradient/arena ABI、S4-1D evaluator、S4-2 policy、S4-3 whole-core transaction及S4-4 formal
-  evidence readiness、S4-0 V4、S4-1A V5、S4-1B0、S4-1B、S4-1C、S4-1D、S4-2与S4-3 construction readiness
-  全部设计结果：`c3af760a391d6368396d3c39fc9045f363eebfa6`；
-- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..c3af760a391d6368396d3c39fc9045f363eebfa6`
+  evidence readiness、S4-0 V4、S4-1A V5、S4-1B0、S4-1B、S4-1C、S4-1D、S4-2、S4-3与S4-4 construction readiness
+  全部设计结果：`c750fafdde8435f56146294faf509221a780057d`；
+- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..c750fafdde8435f56146294faf509221a780057d`
   和下列S4文档的完整版本为准；
 - S3 formal实现/结果不在本轮重新验收，但它是S4设计输入；S3独立exchange仍等待审计；
 - `.docops/exchange/gc0-1-prereg-20260826`异步audit文件和`docs/CIBC_for_DAC.pdf`是用户保留的范围外dirty文件，
@@ -184,7 +202,8 @@ speedup或complete-query性能已经存在。
 30. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
 31. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
 32. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_EVIDENCE_IMPLEMENTATION_READINESS_2026_08_29.md`；
-33. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
+33. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`（V1权威施工合同）；
+34. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
 
 ## 3. 已冻结的production事实，请独立复核
 
@@ -437,6 +456,11 @@ PASS要求：
 - seal DAG无summary↔tamper↔manifest hash cycle，replay有derive/self-check/anchored-check三种模式；
 - artifact无绝对本机路径/credential泄漏；
 - failure artifact与positive worker分离但被同一manifest绑定。
+- semantic occurrence floor必须独立重算为B0/R/C per-run=
+  `3,829,232/3,897,248/2,537,888 B`、18 positive=`61,586,208 B`、15 fault=
+  `24,209,400 B`、总计=`85,795,608 B`，且不得写成physical file size；
+- final evidence seal DAG固定为16 nodes/36 edges，按施工包canonical payload重算hash=
+  `01e179ea504f94c3e9720d5f63b318e34e912738d30c21d690f283b857ac491c`并完成topological sort；
 - scratch按`core-entry/terminal-pre/terminal-post-transfer/post-KFSB/post-finalization/solver-return`投影，live
   finalization keys/sentinel、logical/unique bytes、alias与object/storage/data-pointer lineage均可从raw重建；
 - B0六β container/96 B nonempty residue与R/C provider-net β inventory=`0`按variant核验；scratch count与production
@@ -448,7 +472,9 @@ PASS要求：
 
 PASS要求：
 
-- 71类攻击编号/分区完备且全部fully re-signed；
+- 96类攻击编号/分区完备，13 external-anchor、5 frozen-protocol、77 raw-semantic、1 execution-evidence；
+- 除T19外95类攻击全部fully re-signed并被对应owner拒绝；T19必须诚实写
+  `OFFLINE_UNATTESTABLE`，不得虚称offline artifact能密码学证明fresh process；
 - raw semantic攻击同步更新payload/file/summary/manifest后仍由self-check拒绝；source/model authenticity替换由external
   anchor拒绝；process freshness只形成execution evidence，不虚称cryptographic attestation；
 - 外审另造至少3个未预注册攻击仍能被设计覆盖；
@@ -533,11 +559,12 @@ PASS要求：
 - CUDA探针：tensor content restore后`_version=0→1→2`；
 - S3 v2 raw=`18 rows / 20,747,422 bytes`；
 - old RVIR five-fresh=`10 .pt / 16,975,355 bytes`；
-- S4-4 tamper inventory=`1..71`、order/positive/fault/total=`6/18/15/33`；
+- S4-4 historical tamper inventory=`1..71`已由施工包96-case registry取代；order/positive/fault/total=
+  `6/18/15/33`不变；
 - normal S3 worker loaded snapshot=`101 BoundFlow core + 4 repo scripts + 559 TVM/TVM-FFI Python + 3 repo native`，
   canonical inventory hash=`421ce0b7...74c83`；逐call profile超过120秒后人工中止，禁止进入formal observer；
-- legacy B0/R-C indexed raw-binary codec诊断=`225,621/206,180 B`；whole-core已知numeric raw规划区间=
-  `37.8557—47.5839 MiB`，两者均不是S4 formal size claim；
+- legacy B0/R-C indexed raw-binary codec诊断=`225,621/206,180 B`；旧whole-core numeric raw规划区间
+  `37.8557—47.5839 MiB`已被S4-4施工重算取代，不再作为active预算；
 - Ainput exact class=`positive 8,689 / negative 9,137 / zero 606`；三元endpoint六dα overall max=
   `1.63912773132e-07`、active dβ max=`1.1920928955078125e-07`、sign mismatch均0；
 - 第一版nonfinite CUDA/TIR探针FAIL：浮点`x==x && abs(x)!=Inf`把NaN误归zero；该失败已保留而非删除；
@@ -600,7 +627,7 @@ PASS要求：
 - 本次S4-1D construction依赖回归：`37 passed in 20.65s`；production code diff=`0`；
 - 本次S4-2 readiness依赖回归：`41 passed in 26.63s`；production code diff=`0`；
 - S4-2/S4-3 ledger检查：`491,774/559,838 B`、checkpoint `[0,6,7,8,9]`、10-step patience `>10`
-  不可达；本版33份必读文档全部存在；
+  不可达；本版34份必读文档全部存在；
 - S4-2 construction package=`1184 lines`、file hash=
   `b473e31bd00df48499288f60b4f92b8230a69cc5a22ba6762972e5c8391524e3`；production code diff=`0`；
 - policy run机械模型=`16 states/16 events/32 legal/224 invalid`，canonical hash=
@@ -629,18 +656,28 @@ PASS要求：
   `1,025,952/3,897,248/2,537,888 B`，总计`38,610,816 B`；
 - `559,838 B`降为known tensor/base lower bound，不再称total-new或完整footprint；
 - 本次S4-3 construction依赖回归=`63 passed in 8.96s`；production code diff=`0`；
+- S4-4 construction package=`1133 lines`、file hash=
+  `13eede1ca40931cefa0500ca8079fd9aac2210f507ff354ab5d8d1efbd171bc3`；production code diff=`0`；
+- 15-fault registry hash=`4b69d50391ff84d42a0d6ea5fb8c43d7b6f8040db4de5cd43d56cc2848256330`；
+- 96-tamper registry hash=`5fdfa8bcbc41516807f7eef220ede181253ade7b0c42fa31a4620dcdf37f7d05`，
+  layer counts=`13/5/77/1`，95 reject + 1 `OFFLINE_UNATTESTABLE`；
+- final evidence DAG=`16 nodes/36 edges`、acyclic、hash=
+  `01e179ea504f94c3e9720d5f63b318e34e912738d30c21d690f283b857ac491c`；
+- B0/R/C per-run=`3,829,232/3,897,248/2,537,888 B`，positive/fault/all=
+  `61,586,208/24,209,400/85,795,608 B`，均为semantic occurrence而非physical size；
+- 本次S4-4 construction依赖回归=`34 passed in 8.58s`；registry/DAG/bytes由stdlib独立重算；
 - existing live-return/device-commit targeted：`12 passed in 6.58s`；production code diff=`0`；
 - S4-0 construction依赖回归：`32 passed in 6.93s`；canonical JSON stdlib重算PASS；production code diff=`0`；
 - S4-1A construction依赖回归：`48 passed in 189.07s`；canonical JSON/bytes stdlib重算PASS；production code diff=`0`；
-- `git diff --check`、DocOps exchange validate/lint：PASS。
+- `git diff --check`、DocOps lint：PASS；S3 exchange状态仍为`ready_for_audit/r001`。
 
 这些只证明设计输入和历史基础设施仍存在，不证明S4-0—S4-4实现通过。
 
 ## 7. 建议外审操作
 
 ```bash
-git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..c3af760a391d6368396d3c39fc9045f363eebfa6
-git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..c3af760a391d6368396d3c39fc9045f363eebfa6
+git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..c750fafdde8435f56146294faf509221a780057d
+git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..c750fafdde8435f56146294faf509221a780057d
 
 source env.sh
 /home/lee/Codes/alpha-beta-CROWN/.venv/bin/python -m pytest -q \
@@ -719,7 +756,7 @@ source env.sh
 - 独立拓扑排序15-node seal DAG，检查result↔receipt、raw↔summary与manifest self-hash均无循环；
 - 建立12 worker protocol，确认两fixture各恰含ABC/ACB/BAC/BCA/CAB/CBA且A/B/C mutable storage独立；
 - 重算candidate=`1,103,616`、three-way=`3,310,848`、V-sidecar=`899,136`、minimum=`4,209,984 B`；
-- 检查tamper编号1—68；
+- 检查historical S4-1D tamper编号1—68，并另从S4-4施工包独立提取T01—T96；
 - 用CUDA tensor验证commit+restore后的`_version`；
 - 亲读production checkpoint条件，独立重算fixed ordinal `[0,6,7,8,9]`和patience reachability；
 - 以相同state/defaults独立比较functional Adam和live Adam，不采信summary的63/63；
@@ -733,6 +770,11 @@ source env.sh
 - 独立重算whole-core/post历史semantic occurrence=`821,976/50,976 B`、transaction=`102,024 B`、queue=
   `50,976 B`和总downstream=`1,025,952 B`；再核R/C 6-pair总计`38,610,816 B`；
 - 检查artifact同时披露semantic occurrence、unique content与physical file bytes，不把content-addressed去重冒充漏raw；
+- 从S4-4施工包独立生成15-fault registry，按冻结canonical JSON重算`4b69d503...256330`；
+- 独立提取96-case registry，核对13/5/77/1分层与`5fdfa8bc...7d05`，确认T19只形成
+  `OFFLINE_UNATTESTABLE`；
+- 重建16-node/36-edge seal DAG、做topological sort并重算`01e179ea...491c`；
+- 独立重算B0/R/C per-run、18 positive、15 fault及总semantic occurrence，禁止采信summary数字；
 - 亲读provider core/post确认clear/prune/post顺序；
 - 搜索S4文档所有`claimed/open/validated`词，核对没有implementation或performance漂移。
 
@@ -751,7 +793,7 @@ source env.sh
 11. indexed-binary stdlib raw schema是否缺dtype、negative-zero、NaN payload、alias或view metadata？
 12. loaded snapshot + declared critical source + native/compiled receipt是否是低扰动且足够保守的source closure？
 13. snapshot semantic truth、瞬时live observation和S4-1A prepared owner三段边界是否仍遗漏live alias/version race？
-14. 71类tamper还缺哪类可全重签semantic attack？
+14. 96类tamper还缺哪类可全重签semantic attack；13/5/77/1分层是否合理？
 15. S4-2是否仍遗漏optimizer/policy state、可达分支、失败owner或raw字段？
 16. prepared working-β共享immutable location/sign到post结束是否安全，还是必须为72 B metadata建persistent copy？
 17. query-total add=2与candidate-post add=1的receipt边界是否足以避免queue claim混淆？
@@ -826,6 +868,18 @@ source env.sh
 85. R/C 6对/12 fresh、`RC/CR=3/3`是否是S4-3 correctness的合理最小拓扑？
 86. `1,025,952` downstream、R/C per-run `3,897,248/2,537,888`与总计`38,610,816 B`是否逐项成立？
 87. `559,838 B`作为known base lower bound的排除项是否完整；实现receipt还需冻结哪些physical peak测点？
+88. 15-fault registry是否覆盖正确terminal state；F01 clean与F02—F15 poison的边界是否有误？
+89. B0/R/C per-run=`3,829,232/3,897,248/2,537,888 B`是否逐项成立，B0是否正确排除不存在的candidate snapshot？
+90. positive/fault/all=`61,586,208/24,209,400/85,795,608 B`是否完整，是否仍有double count或漏项？
+91. semantic occurrence、unique content和physical artifact bytes是否已充分分层，content dedup是否可能掩盖缺raw？
+92. 16-node/36-edge seal DAG按冻结canonical编码是否重算为`01e179ea...491c`且无环？
+93. semantic root、summary、tamper、stdout、manifest、external anchor、anchored record的seal顺序是否正确？
+94. 96-case registry是否编号连续、无重复、层数恰为13/5/77/1，hash是否为`5fdfa8bc...7d05`？
+95. T19返回`OFFLINE_UNATTESTABLE`是否是唯一诚实结论；现场外审怎样补足fresh-process evidence？
+96. 除T19外95类fully re-signed攻击是否都有确定拒绝层；至少再构造3类未列攻击验证覆盖性。
+97. stdlib replay是否能独立重建三个version轴、23-state whole-core、fault terminal和所有summary，不复用production validator？
+98. 当前protocol structure projection是否明确不等于future full protocol hash；实现时还必须绑定哪些source/input/numeric/schema值？
+99. 是否同意S4-4施工合同仍是design-only，S3批准前不开放S4代码/formal/timing/performance？
 
 ## 9. 输出格式
 
