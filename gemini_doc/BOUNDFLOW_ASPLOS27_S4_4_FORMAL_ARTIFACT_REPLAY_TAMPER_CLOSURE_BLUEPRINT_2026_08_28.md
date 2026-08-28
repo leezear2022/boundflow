@@ -25,6 +25,11 @@ tenx-claimed: false
 > S3/RVIR raw和stdlib edge probe纠正了本稿的inline-base64、18-worker、手写source allowlist、artifact内自证
 > authenticity、seal顺序和外审前`VALIDATED`六项假设。本文保留总门禁和71类攻击语义，不再作为codec/source/
 > process topology的唯一实现合同。
+>
+> 2026-08-29施工冻结修订：最终实现合同现由
+> `BOUNDFLOW_ASPLOS27_S4_4_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`拥有。它绑定S4-3新23-state
+> 模型，纠正B0/R/C与15 fault raw floor，把fault matrix加入scratch/check-worst，并将tamper registry扩为96类。
+> 本稿旧71类、KFSB/assembly clean-abort和raw规划数字均降为历史设计。
 
 ## 0. 直接结论
 
@@ -404,16 +409,17 @@ scratch table描述variant-specific non-authoritative provider state；queue-vis
 
 ### 8.1 成功路径状态机
 
-```text
-UNCLAIMED → PREPARED → COMMITTING → CORE_COMMITTED
-          → POSTPROCESSING → POST_READY → QUEUEING → COMPLETED
-```
+正式replay使用S4-3施工包的23-state/22-event/40-transition模型，hash=
+`6ed3d2fd946aaa0f6342f637a4754cc50eeec96e24392ed3b42adbbf92a3388a`，不再使用旧粗链。
 
 ### 8.2 失败路径
 
 ```text
-UNCLAIMED/PREPARED validation/staging/KFSB/assembly failure
+terminal claim前validation failure
   → PRECOMMIT_ABORTED_CLEAN
+
+terminal claim后KFSB/scratch/assembly failure
+  → STAGING_POISONED
 
 COMMITTING device/host/container failure
   → committed-prefix-only content restore where possible
@@ -433,21 +439,21 @@ post/queue发生在commit后，不能把故障误归为clean abort，也不能�
 
 至少fresh注入：
 
-1. precommit source/version validation；
-2. KFSB后、core assembly前；
-3. provider constructor；
-4. device copy ordinal 1；
-5. device copy ordinal 6；
-6. device copy ordinal 12；
-7. host packet replace；
-8. intermediate container clear；
-9. receipt seal前；
-10. official post entry；
-11. official post materialization中；
-12. official post return前；
-13. candidate queue add entry；
+1. terminal claim前source/version validation；
+2. KFSB开始后；
+3. provider scratch finalization中；
+4. provider constructor；
+5. device copy ordinal 1；
+6. device copy ordinal 6；
+7. device copy ordinal 12；
+8. host packet replace；
+9. intermediate container clear；
+10. core seal revalidation；
+11. official post entry；
+12. official post materialization中；
+13. official post return前；
 14. candidate queue add中；
-15. candidate queue add return前。
+15. `check_worst_domain`。
 
 每案保存pre/post内容、object identity、`_version`、host/container state、fallback/retry/queue counters和最终failure state。
 fault raw不混入18个positive worker summary，但必须被同一manifest绑定。
@@ -574,9 +580,9 @@ raw workers
 
 tamper report必须进入manifest；不能在manifest后生成一个未绑定报告。
 
-## 12. fully re-signed tamper矩阵
+## 12. fully re-signed tamper矩阵（历史71类，已由96类施工registry取代）
 
-S4-4冻结minimum 71类。每案都要：
+本节71类保留为历史输入；正式实现使用施工包96-case registry。每案仍必须：
 
 1. copy完整artifact；
 2. 修改semantic raw/protocol/source/summary之一；
@@ -704,7 +710,7 @@ raw semantic攻击必须在同步重签外层文件后由self-check拒绝；sour
 - incomplete/no-resume；
 - summary全raw重算；
 - manifest seal/order；
-- 71类tamper。
+- 96类layered tamper（95拒绝+1项offline freshness诚实限制）。
 
 ### 13.2 S4 whole-core专项
 
@@ -754,7 +760,7 @@ auditor不能采信executor summary数字，至少独立完成：
 5. `feat(artifact): add 18-worker six-permutation runner`；
 6. `feat(artifact): add 15 isolated fault workers`；
 7. `feat(artifact): add derive self-check and anchored replay`；
-8. `test(artifact): add 71 layered fully re-signed attacks`；
+8. `test(artifact): add 96 layered fully re-signed attacks`；
 9. `artifact: generate S4 whole-core formal candidate`；
 10. `docs: deliver external anchor and audit exchange`；
 11. `docs: close S4 correctness or formal NO-GO`；
@@ -774,7 +780,7 @@ artifact代码、formal raw和closure文档应分提交，避免代码与其第�
 - provider C路径bound callback=0、constructor=12、post=1；
 - precommit/midcommit/postcommit failure分类正确且禁止非法fallback/retry；
 - stdlib replay从raw逐字重建summary；
-- 71/71 fully re-signed tamper按正确enforcement layer拒绝；
+- 96-case registry exact；95类按正确enforcement layer拒绝，fresh-process attestation一类明确offline不可证明；
 - targeted/full/static/DocOps全过；
 - 外部审计批准；
 - 所有性能/complete-query/10x flag仍false。

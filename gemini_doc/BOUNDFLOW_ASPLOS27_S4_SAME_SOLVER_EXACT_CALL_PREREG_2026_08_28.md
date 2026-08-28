@@ -368,11 +368,13 @@ B0 original provider只作额外semantic control，不作为S4实现依赖。五
 ### S4-4：artifact/replay/tamper closure
 
 精确artifact tree、18-worker六全排列B0/R/C、15个隔离fault worker、stdlib tensor codec/replayer、external trust
-anchor、pre/mid/post/queue fault状态与71类fully re-signed tamper合同见：
+anchor、pre/mid/post/queue fault状态与96类tamper合同见：
 
 - 总门禁：`gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
 - 实施就绪修订：
-  `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_EVIDENCE_IMPLEMENTATION_READINESS_2026_08_29.md`。
+  `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_EVIDENCE_IMPLEMENTATION_READINESS_2026_08_29.md`；
+- 施工冻结合同：
+  `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`。
 
 - raw-first，source commit、TVM submodule、三个外部仓库、model/property、loaded core/native inventory与关键compiled
   receipt绑定；artifact外trust anchor另绑manifest/semantic root/replayer；
@@ -381,12 +383,19 @@ anchor、pre/mid/post/queue fault状态与71类fully re-signed tamper合同见�
 - tensor raw必须有不依赖`.pt`的stdlib可解码index + content-addressed binary payload；replay不得import
   BoundFlow/PyTorch/TVM/αβ-CROWN；
 - replay从raw重算coverage、trajectory、whole-core、receipt、failure state与verdict；
-- 至少71类fully outer-resigned tamper，按external-anchor/frozen-protocol/raw-semantics/execution-evidence分层；覆盖
+- 96类tamper按external-anchor/frozen-protocol/raw-semantics/execution-evidence分层；其中95类fully
+  outer-resigned攻击必须拒绝，fresh-process attestation只能诚实报告`OFFLINE_UNATTESTABLE`，不得伪造
+  artifact内密码学证明；覆盖
   source/protocol、worker/process、state/trajectory、terminal handoff、KFSB、
   transaction/provider/post、artifact/replay、scratch phase/finalization/storage alias、S4-0 live binding/exclusive ownership与
   claim flag；
 - official post与candidate queue add均发生于commit之后；fault必须分别记录为`POST_POISONED/QUEUE_POISONED`，禁止
   rollback/retry/fallback；
+- corrected semantic tensor-occurrence floor为positive/fault/all=
+  `61,586,208/24,209,400/85,795,608 B`；它是逻辑出现量，不是physical artifact size，worker-local
+  content dedup合法；
+- final evidence seal DAG固定为16 nodes/36 edges，hash=
+  `01e179ea504f94c3e9720d5f63b318e34e912738d30c21d690f283b857ac491c`；
 - targeted/full/static/DocOps全过后，才允许另写S4-P性能预注册。
 
 ## 4. Timing与性能门禁仍关闭

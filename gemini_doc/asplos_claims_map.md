@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-29 S4-4 evidence construction不新增claim**：只冻结33-process formal evidence设计（18 positive+
+> 15 fault）、stdlib tensor sidecar、16-node/36-edge seal DAG与96-case tamper registry。纠正后的semantic
+> tensor-occurrence floor=`85,795,608 B`只用于证据容量规划，不是显存或artifact大小；95类tamper必须拒绝，
+> fresh-process attestation一类只能报告`OFFLINE_UNATTESTABLE`。当前仍无S4 implementation、formal artifact、
+> correctness、performance或ASPLOS-ready claim，唯一下一动作仍是S3外审。
+
 > **2026-08-28 S3外审/S4预注册边界**：DocOps task=
 > `asplos27-s3-optimizer-runtime-20260828`现为`ready_for_audit/r001`；S4状态=
 > `DRAFT-PREREGISTERED-NOT-IMPLEMENTED-NOT-RUN`。production raw证明每step有六α source/8,496 stored元素，

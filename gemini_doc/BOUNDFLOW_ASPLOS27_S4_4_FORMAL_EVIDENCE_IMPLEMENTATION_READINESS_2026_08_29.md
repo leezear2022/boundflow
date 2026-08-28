@@ -17,6 +17,11 @@ tenx-claimed: false
 
 # ASPLOS'27 S4-4：formal evidence、stdlib replay与trust anchor实施就绪审计
 
+> 2026-08-29施工冻结修订：本稿的source/codec/anchor诊断事实继续有效；S4-3新状态机、15-fault registry、
+> variant-specific raw floor、16-node seal DAG和96-case tamper现由
+> `BOUNDFLOW_ASPLOS27_S4_4_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`拥有。实施以施工包为准；
+> 本稿旧`1,341,776 B/run`、`37.8557—47.5839 MiB`和71类tamper均被取代。
+
 ## 0. 直接结论
 
 S4-4原蓝图的方向正确：18个B0/R/C positive worker、完整IEEE raw、标准库replay和fully re-signed tamper都是
@@ -123,7 +128,7 @@ untrusted convenience copy，但formal replayer必须显式接收**artifact外�
 
 ### 2.4 tamper enforcement分层
 
-71类攻击必须逐项声明enforcement layer：
+施工包96类攻击必须逐项声明enforcement layer；本节原71类只是其历史子集：
 
 - `EXTERNAL_ANCHOR`：source revision、code blob集合、model/property/config等真实性；
 - `FROZEN_PROTOCOL`：容差、claim flag、worker/variant/path/状态机常数；
@@ -373,15 +378,15 @@ pairing和状态污染检查。
 
 ### 6.2 fault workers
 
-S4-3冻结的15个注入点每个必须独立candidate process：
+S4-3施工包修正后的15个注入点每个必须独立candidate process：
 
 ```text
-precommit 1
-KFSB/assembly/provider constructor 2
+preclaim validation 1
+KFSB/scratch/provider constructor 3
 device copy ordinals 1/6/12 3
-host/container/receipt 3
+host/container/core seal 3
 official post entry/mid/return 3
-candidate queue add entry/mid/return 3
+queue add mid/check-worst 2
 total 15
 ```
 
@@ -401,39 +406,23 @@ parent执行纪律和外部现场重跑支持。
 
 parent必须是stdlib-only、不得import torch/tvm或创建CUDA context；interpreter选择显式绑定，不允许静默PATH fallback。
 
-## 7. raw payload规划预算
+## 7. raw payload规划预算（施工修正版）
 
-已冻结C trajectory最低为`1,341,776 B/run`。结合existing whole-core raw、独立KFSB与12-path pre/candidate/post
-projection，保守no-dedup positive规划上界：
-
-```text
-B0 per run = 1,341,776 + 1,869,400 + 38,040 + 102,024
-           = 3,351,240 B
-6 B0       = 20,107,440 B
-
-R/C per run = 1,341,776 + 872,952 + 38,040 + 102,024
-            = 2,354,792 B
-12 R/C      = 28,257,504 B
-
-positive no-dedup planning upper = 48,364,944 B = 46.1244 MiB
-```
-
-只应用legacy core已实测content dedup，positive planning floor为：
+旧账使用过时C trajectory、为B0伪加candidate snapshot并重复计入KFSB。施工包按semantic occurrence重算：
 
 ```text
-48,364,944 - (6*1,098,900 + 12*300,608)
-= 38,164,248 B = 36.3963 MiB
+B0/R/C per positive = 3,829,232 / 3,897,248 / 2,537,888 B
+18 positive total   = 61,586,208 B
+
+fault minimum/run   = C policy 1,511,936 + pre/candidate/fault 102,024
+                    = 1,613,960 B
+15 fault minimum    = 24,209,400 B
+
+33-worker minimum   = 85,795,608 B = 81.8210678100586 MiB
 ```
 
-15 fault case若每案保存12-path pre/candidate/post，至少再增加：
-
-```text
-15 * 102,024 = 1,530,360 B = 1.4595 MiB
-```
-
-因此当前已知numeric规划区间约`37.8557—47.5839 MiB`，不含JSON metadata、source inventory、stdout/stderr和
-尚未实例化的S4字段，也不等于最终compressed artifact size。实现manifest必须报告实际logical、unique-content、
-decompressed、compressed和file bytes，不能复制该预算当结果。
+这是tensor-occurrence floor，不是unique payload或compressed file size；fault阶段额外raw尚未包含。manifest必须分别
+报告occurrence、unique-content、decompressed、compressed和tree bytes。
 
 ## 8. seal DAG：消除summary/tamper/manifest循环
 
@@ -494,9 +483,9 @@ VALIDATED-S4-SAME-SOLVER-CORRECTNESS
 三种状态都保持timing/performance/query/queue/tenx/ASPLOS-ready claim为false。`queue_claimed=false`不妨碍记录固定路径
 queue accounting correctness。
 
-## 11. 修正后的71类tamper规则
+## 11. 96类tamper施工registry
 
-保留1—71编号，但每案新增：
+历史1—71全部保留其语义，并由施工包扩为T01—T96；每案新增：
 
 ```text
 expected_enforcement_layer
@@ -565,7 +554,7 @@ stable_reason
 ### 13.4 replay/tamper
 
 - summary所有字段都有raw/protocol/source来源；
-- 71 case registry exact；
+- 96 case registry exact；95类拒绝，freshness attestation一类输出offline limitation；
 - authenticity/semantic/freshness enforcement不混写；
 - final manifest/tamper/summary无hash cycle；
 - stored replay stdout可逐字重建；
@@ -582,7 +571,7 @@ stable_reason
 5. `feat(artifact): add 18-worker stdlib parent runner`；
 6. `feat(artifact): add 15 isolated fault workers`；
 7. `feat(artifact): add derive self-check and anchored replay`；
-8. `test(artifact): add 71 layered fully re-signed attacks`；
+8. `test(artifact): add 96 layered fully re-signed attacks`；
 9. `artifact: generate S4 whole-core formal candidate`；
 10. `docs: deliver external anchor and audit exchange`；
 11. `docs: close S4 correctness or formal NO-GO`；
@@ -600,7 +589,7 @@ artifact代码、正式raw、external anchor/audit request和closure必须分提
 - semantic root、summary、tamper、manifest、external anchor形成无环证据DAG；
 - self-check与anchored-check均PASS；
 - B0/R/C whole-core到candidate queue insertion parity关闭；
-- 71类按正确enforcement layer拒绝；
+- 96-case registry exact；95类按正确enforcement layer拒绝，1类freshness只形成execution evidence；
 - artifact状态仍pending external，全部性能flag false；
 - external audit批准后才升级validated。
 

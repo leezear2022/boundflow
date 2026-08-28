@@ -3,7 +3,7 @@
 status: s3-ready-for-external-audit-s4-prereg-draft
 date: 2026-08-26
 updated: 2026-08-29
-revision: v14-s4-whole-core-transaction-construction
+revision: v15-s4-formal-evidence-construction
 supersedes-revision: v6-asplos27-ten-x
 supersedes-draft-at: 20f4741
 submission-target: ASPLOS-2027-September-cycle
@@ -16,6 +16,16 @@ execution-authority: true
 code-change-open: false-pending-s3-external-audit
 external-audit: s3-ready-for-external-audit
 performance-claimed: false
+
+> **2026-08-29 S4-4 formal evidence施工收束（v15，不改10x北极星）**：S4-4正式合同冻结为
+> 18个positive + 15个fault、共33个独立进程；每个tensor用stdlib可解码index与content-addressed binary
+> sidecar表示。纠正后的semantic tensor-occurrence floor为positive `61,586,208 B`、fault
+> `24,209,400 B`、总计`85,795,608 B`，这些是逻辑出现量而不是物理artifact大小。seal DAG为
+> `16 nodes/36 edges`，hash=`01e179ea...491c`；tamper registry扩为96类，hash=
+> `5fdfa8bc...7d05`，其中95类必须拒绝，fresh-process attestation一类只能诚实报告
+> `OFFLINE_UNATTESTABLE`，不得伪造密码学证明。详见
+> `BOUNDFLOW_ASPLOS27_S4_4_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`。这些仍是design；S3外审
+> 批准前S4代码、formal、timing和performance全部关闭。
 
 > **2026-08-29 S4-3 whole-core事务施工收束（v14，不改10x北极星）**：S4-3不再从12-path copy起算，
 > 而是从terminal capability claim开始，覆盖3次KFSB/72 child lower、36项provider-net scratch finalization、

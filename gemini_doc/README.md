@@ -1,5 +1,13 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+> **2026-08-29 S4-4 formal evidence施工合同已冻结、实现仍关闭**：新增
+> `BOUNDFLOW_ASPLOS27_S4_4_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`。formal固定为18个positive、
+> 15个fault、共33个独立进程；raw采用stdlib index + content-addressed binary sidecar。纠正后的semantic
+> tensor-occurrence floor为positive/fault/总计=`61,586,208/24,209,400/85,795,608 B`，不是物理文件大小。
+> 16-node/36-edge seal DAG hash=`01e179ea...491c`；96-case tamper registry hash=`5fdfa8bc...7d05`，
+> 95类必须拒绝，fresh-process attestation一类必须写`OFFLINE_UNATTESTABLE`。S3外审前S4-4代码/formal/timing
+> 仍关闭，不能形成correctness、performance或ASPLOS claim。
+
 > **2026-08-29 S4-3 whole-core事务施工合同已冻结、代码仍关闭**：新增
 > `BOUNDFLOW_ASPLOS27_S4_3_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`。whole-core owner不再只从
 > 12-path commit起算，而是覆盖terminal claim、3次KFSB/72 child lower、36项provider scratch finalization、
@@ -49,6 +57,7 @@ terminal bridge。S3外审批准前代码/timing关闭。见
 `BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_4_FORMAL_EVIDENCE_IMPLEMENTATION_READINESS_2026_08_29.md`、
+`BOUNDFLOW_ASPLOS27_S4_4_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`、
 `BOUNDFLOW_ASPLOS27_S4_DESIGN_EXTERNAL_AUDIT_HANDOFF_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
 
@@ -120,12 +129,14 @@ B0/R/C不伪造scratch parity，也不形成memory claim。六条terminal/export
 冻结query-scoped exclusive owner：candidate首次commit后，同一query禁止provider reentry、fallback和第二次core call；
 cuts/clip/BFS/multitree/all-node LP等额外consumer保持fail closed。
 
-S4-4不沿用旧RVIR `.pt`作为唯一formal truth。最新implementation-readiness用真实raw复核后冻结18个B0/R/C positive
-subprocess + 15个隔离fault subprocess，总计33；tensor采用stdlib可解码的index + content-addressed raw-binary
-sidecar。低扰动source snapshot实测加载101个BoundFlow core、4个repo script、559个TVM/TVM-FFI Python和3个
-repo-native文件，证明旧12-path手写source list不完整；逐call profile因超过120秒被拒绝作为formal observer。artifact
-内hash只证明self-consistency，source/model真实性另由DocOps/Git external trust anchor绑定。minimum 71类fully
-re-signed tamper按anchor/protocol/raw semantics/execution evidence分层；internal PASS只能写
+S4-4不沿用旧RVIR `.pt`作为唯一formal truth。施工合同冻结18个B0/R/C positive subprocess + 15个隔离fault
+subprocess，总计33；tensor采用stdlib可解码index + content-addressed raw-binary sidecar。positive/fault/all
+semantic tensor-occurrence floor分别为`61,586,208/24,209,400/85,795,608 B`，允许worker-local内容去重，故
+不是物理文件大小。低扰动source snapshot实测加载101个BoundFlow core、4个repo script、559个TVM/TVM-FFI Python
+和3个repo-native文件，证明旧12-path手写source list不完整；逐call profile因超过120秒被拒绝作为formal observer。
+artifact内hash只证明self-consistency，source/model真实性另由DocOps/Git external trust anchor绑定。正式seal DAG为
+16 nodes/36 edges；96类tamper按anchor/protocol/raw semantics/execution evidence分层，其中95类必须拒绝，T19
+fresh-process attestation只能诚实报告`OFFLINE_UNATTESTABLE`。internal PASS只能写
 `FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT`，外审后才可VALIDATED。
 
 S4-1B/1C只读预检发现的site19 `0.0011564/9 sign mismatch`已进一步定位到input box零点次梯度，而非DAG/

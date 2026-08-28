@@ -10,6 +10,35 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：冻结S4-4 formal evidence实施施工合同
+
+- 新增1133行S4-4 implementation construction package，document SHA256=
+  `13eede1ca40931cefa0500ca8079fd9aac2210f507ff354ab5d8d1efbd171bc3`；生产代码仍为0，S3外审批准前
+  `code/formal/timing/performance`保持closed；
+- formal worker固定为六个B0/R/C全排列的18 positive + 15个隔离fault，共33个fresh subprocess；部分结果
+  不得resume成formal；
+- fault registry冻结为15类，覆盖preclaim clean abort、staging poison、7类commit poison、3类post/queue
+  poison，canonical hash=`4b69d50391ff84d42a0d6ea5fb8c43d7b6f8040db4de5cd43d56cc2848256330`；
+- raw tensor用stdlib可解码index + content-addressed binary sidecar，B0/R/C per-run semantic occurrence=
+  `3,829,232/3,897,248/2,537,888 B`；positive/fault/all floor=
+  `61,586,208/24,209,400/85,795,608 B`。这些是逻辑出现量，不是物理artifact大小，允许worker-local
+  内容去重；
+- 纠正旧`1,341,776 B/run`、`37.8557—47.5839 MiB`、KFSB重复计数与B0不存在candidate snapshot等预算错误；
+- final evidence seal DAG冻结为16 nodes/36 edges，hash=
+  `01e179ea504f94c3e9720d5f63b318e34e912738d30c21d690f283b857ac491c`；
+- tamper registry由历史71类扩为96类，hash=
+  `5fdfa8bcbc41516807f7eef220ede181253ade7b0c42fa31a4620dcdf37f7d05`；95类必须在fully
+  re-signed后拒绝，T19 fresh-process attestation必须诚实报告`OFFLINE_UNATTESTABLE`，不得把artifact内部
+  self-consistency写成外部真实性证明；
+- 同步S4-4 blueprint/readiness、README、memo、claims map、current status、主预注册与ASPLOS主计划。
+
+### 验证
+
+- 15-fault registry、96-tamper registry及分层计数由stdlib脚本独立重算；
+- 16-node/36-edge seal DAG完成topological sort并独立重算canonical hash；
+- 18 positive、15 fault及总raw occurrence算术独立重算；
+- 施工包链接、文档一致性、相关artifact/replay回归、git diff与DocOps在提交前验证。
+
 ## 2026-08-29：冻结S4-3 whole-core exact-call事务实施施工合同
 
 - 新增1134行S4-3 implementation construction package；生产代码仍为0，S3外审批准前

@@ -1,5 +1,12 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-29 S4-4施工合同已冻结，但唯一动作仍是S3外审**。formal固定为18 positive + 15 fault、共
+> 33个独立进程，stdlib tensor index + content-addressed binary sidecar；纠正后的positive/fault/all semantic
+> occurrence floor=`61,586,208/24,209,400/85,795,608 B`，不是physical artifact size。seal DAG=
+> `16 nodes/36 edges`、hash=`01e179ea...491c`；tamper registry=96、hash=`5fdfa8bc...7d05`，其中95类
+> 必须拒绝，fresh-process attestation只能报告`OFFLINE_UNATTESTABLE`。这是design-only合同，不开放S4-4代码、
+> formal、timing或任何performance/ASPLOS claim。
+
 > **2026-08-28 当前唯一指令：完成S3独立外审；S4只允许预注册审阅，不允许代码或计时**。S3已正式
 > 交付DocOps task=`asplos27-s3-optimizer-runtime-20260828`、round 1、status=`ready_for_audit`。
 > S4只读普查确认production每step有六α source/8,496 stored元素（lower-only active=4,248、preserved=

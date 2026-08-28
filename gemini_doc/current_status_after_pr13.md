@@ -1,5 +1,11 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-29 S4-4 formal evidence施工合同已冻结，状态仍是design-only**。18 positive + 15 fault=
+> 33个独立进程；positive/fault/all semantic tensor-occurrence floor=
+> `61,586,208/24,209,400/85,795,608 B`。seal DAG=`16 nodes/36 edges`，96类tamper中95类必须
+> fail closed，fresh-process attestation只能诚实报告`OFFLINE_UNATTESTABLE`。该工作没有实现或运行S4，
+> 不改变S3 exchange仍待外审、S4 code/formal/timing/performance均closed的现状。
+
 > **2026-08-28 当前动作：S3外审ready，S4仅文档预注册**。DocOps task=
 > `asplos27-s3-optimizer-runtime-20260828`、status=`ready_for_audit/r001`。S4只读coverage核对发现
 > production六α source/8,496 stored元素（lower-only active/preserved各4,248）+一条active β，而S3 P-only
