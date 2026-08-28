@@ -1,5 +1,5 @@
 ---
-status: design-correction-required-before-implementation
+status: superseded-root-cause-record
 date: 2026-08-28
 type: diagnosis-and-corrected-plan
 topic: boundflow
@@ -14,10 +14,16 @@ performance-claimed: false
 
 # ASPLOS'27 S4-1B/1C：DAG coefficient-adjoint预检与设计纠正
 
+> **2026-08-28后续纠正：** 本文成功发现并阻止了site19错误进入production，但把根因归到DAG/fanout过宽。
+> 独立逐层tap已定位真实根因为`A_input == 0`时box concretization的次梯度：provider取center，旧candidate取
+> lower。采用三元lower/upper/center endpoint后六site全部闭合。当前权威设计见
+> `BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_BOX_ENDPOINT_SUBGRADIENT_CLOSURE_2026_08_28.md`。本文以下数字作为
+> 历史v1反例和诊断过程保留，不再作为当前根因或实现指令。
+
 ## 0. 直接结论
 
-S4原蓝图中“用一张普通selected-primal图生成六个`pre_i`，再统一计算
-`dα_i=A_i×pre_i`”的假设，已经被真实ResNet2B production state证伪：六个site中五个通过，site19在其
+S4原蓝图中使用**二元输入endpoint**的selected-primal graph，曾被真实ResNet2B production state证伪：
+六个site中五个通过，site19在其
 production compressed ownership上出现：
 
 ```text
@@ -26,22 +32,25 @@ gradient sign mismatch = 9
 owned width = 132 per domain
 ```
 
-这不是coefficient arena或输入端点符号错误。现有compiled coefficient pass与generic CROWN在input A上：
+该轮曾据此排除coefficient arena，但“不是输入端点错误”的判断现已被后续逐层tap推翻。coefficient数值虽一致，
+从coefficient到endpoint VJP的`A==0`次梯度仍可错误。旧检查为：
 
 ```text
 max abs diff = 5.029141902923584e-08
 sign mismatch = 0
 ```
 
-因此不得直接实现原S4-1B selected-primal graph。正确owner应改为：
+因此当时正确地停止了直接实现，但以下“必须改成完整coefficient schedule adjoint replay”的结论现降为规范定义，
+不再要求作为唯一物理实现：
 
 > 对实际CROWN coefficient schedule做精确adjoint replay，令`V_i`成为post-ReLU transformed coefficient
 > state的VJP adjoint；随后用同一时刻的incoming `A_i`发射compressed dα/dβ。
 
-原有两块coefficient arena、六张sign bitmap、两个residual stage scratch、37,464-element value arena、
-compressed output ABI与terminal lA handoff都继续复用；被否定的是value的推导方式，不是这些物理资产。
+后续三元endpoint实验证明：修正后的selected-primal graph可作为优化lowering。原有两块coefficient arena、六张
+selector/sign bitmap、两个residual stage scratch、37,464-element value arena、
+compressed output ABI与terminal lA handoff都继续复用；真正被否定的是二元input endpoint语义。
 
-## 1. 本轮只读证据
+## 1. 历史v1只读证据
 
 固定输入：仓库冻结的ResNet2B property-0 pre-state、CUDA、六个production topology site、同一objective、
 同一α/β/split。探针没有修改production代码，也没有形成性能claim。
@@ -95,7 +104,7 @@ incoming A ready
 formal当前`S=1`，value arena可物理保存`[D,F]`，但handoff必须恢复`[D,1,*feature_shape]`视图并绑定
 spec-axis identity，不能仅以元素数相同证明ABI相同。
 
-## 2. 为什么原假设不够
+## 2. 历史v1归因（已被三元endpoint证据收窄）
 
 原图把`V_i`定义为按全局coefficient sign运行原始primal DAG得到的`pre_i`。这个等价在链式或已验证的局部
 anchor上成立，但真实CROWN程序还包含：
@@ -109,7 +118,7 @@ anchor上成立，但真实CROWN程序还包含：
 site19反例证明：仅从原始primal拓扑和全局sign bitmap推导，尚不足以证明每个site的VJP owner。这里不能靠继续
 增加特判或另写site19 kernel解决；那会重新制造per-site旁路。
 
-## 3. 修正后的数学owner
+## 3. 仍保留的规范数学owner
 
 对site `i`，定义：
 
@@ -132,7 +141,7 @@ dβ_i = upstream × V_i × d(beta_add_i)/dβ_i
 关键变化是`V_i`由**coefficient program的精确VJP**定义。普通selected-primal `pre_i`只能在经过逐site
 等价证明后作为优化lowering，不能反过来充当规范。
 
-## 4. 修正后的三pass结构
+## 4. 历史v1三pass建议（物理实现已被取代）
 
 ```text
 Pass A: coefficient/lower + exact branch/sign trace
@@ -154,7 +163,7 @@ Pass C: coefficient recompute + compressed emit
 Pass B可以由手写typed adjoint schedule或TVM Relax/TIR可审计VJP实现；第一版不得依赖不透明autograd runtime，
 也不得退回六个Python wrapper。它仍属于现有CROWN schedule的派生lowering，不新增顶层solver IR。
 
-## 5. 新增S4-1B0门禁
+## 5. 历史v1 S4-1B0门禁（由ternary endpoint合同取代）
 
 S4-1B实现前插入`S4-1B0 DAG-adjoint reduction closure`：
 
@@ -185,7 +194,7 @@ S4-1B实现前插入`S4-1B0 DAG-adjoint reduction closure`：
 需要改名：`effective primal arena`改为`coefficient-adjoint arena`。它仍不是dense coefficient A，但receipt必须
 分别披露A、V、terminal lA的phase和bytes。
 
-## 7. 新增fail-closed/tamper覆盖
+## 7. 历史v1 fail-closed/tamper（编号保留、语义已改写）
 
 至少新增：
 
@@ -199,12 +208,12 @@ S4-1B实现前插入`S4-1B0 DAG-adjoint reduction closure`：
 S4-4 formal minimum由64类扩为68类fully outer-resigned tamper；新增64之后的四类为：普通primal替换、fanout/
 residual VJP provenance删除、site19错值重签、terminal lA pre/post-transform或spec-axis身份篡改。
 
-## 8. 当前门禁
+## 8. 历史文件冻结状态
 
 ```text
 S3 exchange = ready_for_audit
 S4-0/S4-1A implementation = closed pending S3
-S4-1B0 = design-corrected, implementation closed
+S4-1B0 v1 = superseded by ternary endpoint contract
 S4-1B/S4-1C/S4-1D = closed behind S4-1B0
 S4 timing/performance = closed
 ```

@@ -174,13 +174,13 @@ KFSB、atomic commit和queue/post继续由已有RVIR owner执行，不纳入comp
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_ALL_STATE_VJP_FEASIBILITY_2026_08_28.md`。审计确认现有整图forward已经消费
 六α和active β，缺口是custom backward只导出P gradient，不是其余五site完全没有编译。
 
-S4-1实现固定复用当前两个coefficient arena，按“完整sign pass → 六site coefficient-schedule adjoint replay →
-第二次coefficient pass逐site即时压缩gradient”执行。普通selected-primal图已在site19 production compressed
-投影上出现`0.0011564247542992234`最大误差与9个符号错误，不再是规范owner。不得保存跨层float32 dense A，也不得把六个B4-B2单sitewrapper
-串成production路径。B4-B2只作为数学oracle/codegen资产；D1C/D2B residual stage scratch用于暴露site25/site19
-的内部incoming coefficient。
+S4-1固定复用当前两个coefficient arena，按“完整selector/sign pass → 三元endpoint selected-primal graph →
+第二次coefficient pass逐site即时压缩gradient”执行。旧二元endpoint在site19出现
+`0.0011564247542992234/9`，但zero→center三元规则已把六site设计误差压到`<=1.63912773132e-07`且sign exact。
+coefficient-program VJP仍是规范oracle。不得保存跨层float32 dense A，也不得串六个B4-B2单sitewrapper。
+B4-B2继续作为数学oracle/codegen资产；D1C/D2B scratch暴露site25/site19 incoming coefficient。
 
-S4-1内部顺序固定为1A all-state ABI、1B0 DAG-adjoint reduction closure、1B六site coefficient adjoints、1C
+S4-1内部顺序固定为1A all-state ABI、1B0 ternary endpoint closure、1B六site values、1C
 六dα/active dβ emitters、1D single-evaluation five-fresh closure。五步完成前S4-2继续关闭。
 
 terminal模式下，六site coefficient-adjoint slot可在本site gradient已消费后phase-safe改作terminal lA slot；lA
@@ -225,11 +225,11 @@ S4-1A ordered buffer/lease/version ABI的精确实施蓝图见
 唯一active β必须是独立contiguous leaf parameter；五empty β只保留token；preserved α不得进入candidate GPU
 optimizer。hot evaluator不得接受dict/callback/tensor override，warm DLPack view creation必须为0。
 
-S4-1B0/1B coefficient-adjoint纠正与六site graph见
-`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1BC_DAG_ADJOINT_PREFLIGHT_CORRECTION_2026_08_28.md`及
+S4-1B0/1B三元endpoint纠正与六site graph见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_BOX_ENDPOINT_SUBGRADIENT_CLOSURE_2026_08_28.md`及
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`：一个
-37,464-element persistent arena输出六个`V_i=d lower/dT_i`，sign bitmap为Ainput/A18/A20/A24/A26/A29共
-55,296 int8；cross-layer saved float32 coefficient仍为0。
+37,464-element persistent arena输出六个`V_i=d lower/dT_i`；Ainput为三元selector，A18/A20/A24/A26/A29
+保持二元bitmap，共55,296 int8；cross-layer saved float32 coefficient仍为0。
 
 S4-1C通用gradient emitter与terminal lA phase见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`：

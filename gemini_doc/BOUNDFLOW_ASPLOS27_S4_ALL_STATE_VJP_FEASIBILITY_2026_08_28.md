@@ -95,15 +95,15 @@ P-only。
 
 | 项目 | 当前 | S4所需 |
 |---|---|---|
-| coefficient adjoint | P-anchor局部`pre25`等价已证 | 六site逐action VJP；site19普通primal等价已被反例否定 |
+| coefficient adjoint | P-anchor局部`pre25`等价已证 | 六site selected-primal；input endpoint需三元zero→center |
 | compressed dα | 仅site 25 | site `17/19/23/25/28/31`全部输出 |
 | compressed dβ | 无 | site31 `[6,1]`；其余五条exact empty |
 | terminal handoff | lower + P α | lower + six gradients；ordinal 9另带lA/intermediate handoff |
 | optimizer binding | 单P Adam | existing production两param-group host policy |
 
-六个V slot不要求引入新顶层solver IR，但不能再视为现有selected-value图的普通额外输出。它们必须从现有typed
-coefficient schedule派生adjoint action；普通primal lowering只有逐site证明等价后才准入。gradient emitter仍由
-shape/layout参数化的同一语义模板生成，formal实例可冻结ResNet2B shape。
+六个V slot不要求引入新顶层solver IR。其规范由现有typed coefficient schedule的VJP定义；修正三元endpoint后，
+现有selected-value图已逐site证明可作为优化lowering。gradient emitter仍由shape/layout参数化的同一语义模板
+生成，formal实例可冻结ResNet2B shape。
 
 ## 3. 为什么不能直接串六个B4-B2单site TIR
 
@@ -128,9 +128,9 @@ sign时只允许保存`int8` bitmap；禁止保存float32 dense coefficient。
 sign receipt必须绑定evaluation ordinal、全部α/β version、plan/module hash与bitmap pointer。α/β变化后旧bitmap
 必须拒绝，不能跨ordinal复用。
 
-### 4.2 pass B：一次coefficient-schedule adjoint replay
+### 4.2 pass B：一次三元endpoint selected-primal lowering
 
-原稿建议从input lower/upper按sign bitmap选择端点并沿原始primal图正向计算：
+从input lower/upper/center按三元selector选择端点并沿原始primal图正向计算：
 
 ```text
 input → pre17 → ReLU17 → pre19 → ReLU19
@@ -139,10 +139,10 @@ input → pre17 → ReLU17 → pre19 → ReLU19
       → Flatten/Gemm14 → pre31
 ```
 
-真实production-state探针显示该候选在site19 compressed gradient上最大误差
-`0.0011564247542992234`且9个符号不一致，故不得作为规范。修正后的pass B对pass A typed coefficient action
-sequence做精确VJP，输出六个`[domain, feature]` coefficient adjoint `V_i=d lower/dT_i`。它们不是coefficient A，
-允许放在独立persistent adjoint arena。logical元素数仍为：
+旧二元`A>=0→lower`候选在site19最大误差`0.0011564247542992234`且9个符号不一致；逐层tap证明根因是
+606个`A_input==0`应取center。三元规则后六site最大误差`1.63912773132e-07`、sign mismatch=0。pass B输出六个
+`[domain, feature]`值`V_i=d lower/dT_i`；coefficient-action VJP仍作为独立规范oracle。V不是coefficient A，允许
+放在独立persistent arena。logical元素数仍为：
 
 ```text
 6 × (2048 + 1024 + 1024 + 1024 + 1024 + 100) = 37,464 float32
@@ -197,8 +197,8 @@ S4-1允许：
 S3外审批准且S4转为execution-authority后，S4-1按以下五刀推进：
 
 1. `S4-1A all-state ABI`：从六个layout生成ordered output slots、persistent buffers和coverage receipt；
-2. `S4-1B0 DAG adjoint reduction`：先关闭site19 `1.156e-3/9 sign mismatch`反例；
-3. `S4-1B coefficient adjoints`：从typed coefficient actions派生六site VJP；精确arena、A26/A29 sign与
+2. `S4-1B0 ternary endpoint closure`：冻结zero→center语义并关闭site19 `1.156e-3/9`反例；
+3. `S4-1B six-site values`：扩展selected-primal lowering；精确arena、A26/A29 sign与
    negative门禁见S4-1B实施蓝图；
 4. `S4-1C gradient emitters`：一个通用α模板实例化六site，site31另有active β；插入顺序为
    31→28→25(stage)→23→19(stage)→17；
@@ -208,8 +208,8 @@ S3外审批准且S4转为execution-authority后，S4-1按以下五刀推进：
 
 ## 6. 预期风险与kill gate
 
-1. **普通primal等价失败**：site19反例未关闭时S4-1B/1C STOP，不得加site特判掩盖；
-2. **sign语义不足**：若六bitmap不足以重放coefficient adjoint，可补typed action evidence，但不得改存dense A；
+1. **三元endpoint未闭合**：site19反例未由zero→center规则关闭时S4-1B/1C STOP，不得加site特判掩盖；
+2. **selector语义不足**：Ainput必须三元，五张ReLU bitmap保持二元；可补typed action evidence但不得存dense A；
 3. **residual内部A不可见**：优先使用已完成的D1C/D2B stage scratch；若必须重跑native residual则NO-GO；
 4. **active β公式漂移**：以B4-B2 sparse Linear和production autograd双oracle为准，任何location/sign偏差即STOP；
 5. **两次coefficient pass成本过高**：S4-1只做correctness。性能问题留S4-P实测，不能在正确性阶段删状态；

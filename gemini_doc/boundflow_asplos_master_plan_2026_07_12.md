@@ -1,5 +1,10 @@
 # BoundFlow 面向 ASPLOS 的总体研发与论文执行计划 v1.0
 
+> **2026-08-28 S4设计覆盖**：当前唯一动作仍是S3独立外审，S4代码/timing关闭。S4-1B0只读根因已从
+> “DAG-adjoint原则性失败”收窄为input box `A==0`次梯度：三元lower/upper/center endpoint使六site dα与active
+> dβ全部闭合。coefficient VJP作为规范oracle、selected-primal作为优化lowering；详见S4-1B0 ternary合同与
+> same-solver prereg。本覆盖不升级任何implementation/performance claim。
+
 > **2026-08-25 R3-1b0最新覆盖**：exact trace/liveness已正式关闭为
 > `VALIDATED-R3-1B0-TRACE-LIVENESS`；当前只开放b1 compiled no-grad full-lower forward。b2 custom
 > VJP、b3 five-fresh、optimizer/timing均关闭。见

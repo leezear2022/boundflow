@@ -1,9 +1,9 @@
-# BoundFlow ASPLOS’27 production verification compiler 与 10× 端到端加速计划（v11 执行稿）
+# BoundFlow ASPLOS’27 production verification compiler 与 10× 端到端加速计划（v12 执行稿）
 
 status: s3-ready-for-external-audit-s4-prereg-draft
 date: 2026-08-26
 updated: 2026-08-28
-revision: v11-s4-dag-coefficient-adjoint-correction
+revision: v12-s4-ternary-box-endpoint-correction
 supersedes-revision: v6-asplos27-ten-x
 supersedes-draft-at: 20f4741
 submission-target: ASPLOS-2027-September-cycle
@@ -17,14 +17,13 @@ code-change-open: false-pending-s3-external-audit
 external-audit: s3-ready-for-external-audit
 performance-claimed: false
 
-> **2026-08-28 S4 DAG-adjoint纠正（v11）**：在不修改production代码的六site GPU/PyTorch预检中，
-> 原“单一selected-primal图产生六个`pre_i`，再用`A_i×pre_i`发射dα”的设计仅5/6 site成立；site19在
-> production compressed indices上最大误差=`0.0011564247542992234`且9个gradient sign不一致。input A的
-> generic/compiled交叉检查仍为max diff=`5.029141902923584e-08`、sign exact，故不是arena错误，而是DAG/
-> coefficient-program adjoint owner定义不足。S4新增1B0门禁：Pass B必须改为对typed CROWN coefficient
-> schedule做精确VJP replay，`V_i=d lower/dT_i`；普通primal图只有逐site证明等价后才能作为lowering。
-> 两块coefficient arena、residual scratch、55,296-byte sign、149,856-byte V/lA shared arena、compressed ABI
-> 与terminal handoff继续复用。S3外审及S4-1B0关闭前，S4实现和timing仍关闭。
+> **2026-08-28 S4 ternary box endpoint纠正（v12）**：上一轮site19 `1.156e-3/9 sign mismatch`并非DAG/fanout
+> 原则性失败，而是input concretization把606个`A==0`错误归入lower；provider的`abs(A)`零点次梯度要求center。
+> 改为`A>0→lower / A<0→upper / A==0→center`后，六dα最大误差`1.639e-7`、active dβ最大误差
+> `1.192e-7`且全部sign exact。S4-1B0改为三元endpoint/center identity/zero inventory closure；
+> coefficient-program VJP保留为规范oracle，selected-primal恢复为可复用的优化lowering。两块coefficient arena、
+> residual scratch、55,296-byte selector/sign、149,856-byte V/lA arena、compressed ABI与terminal handoff均保留。
+> S3外审及S4-1B0 formal关闭前，S4实现和timing仍关闭。
 
 > **2026-08-28 S4 ABI修正（v10状态，不改10x北极星）**：S3已进入DocOps外审round 1。只读核对
 > production optimizer raw与atomic copy-out发现：六个α source共8,496 stored元素，但lower-only optimizer

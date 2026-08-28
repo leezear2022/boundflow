@@ -5,7 +5,7 @@ type: implementation-plan
 topic: boundflow
 slug: asplos27-s4-1c-compressed-gradient-emitter
 stage: s04
-depends-on: validated-s4-1b0-dag-adjoint-reduction-and-s4-1b-six-site-coefficient-adjoints
+depends-on: validated-s4-1b0-ternary-endpoint-and-s4-1b-six-site-values
 execution-authority: false-pending-s3-external-audit-s4-0-s4-1a-s4-1b
 code-change-open: false
 gpu-correctness-open: false
@@ -24,8 +24,9 @@ performance-claimed: false
 dα_i = upstream × A_i × V_i
 ```
 
-这里`V_i = d lower / d T_i`，`T_i`为ReLU transform后的coefficient state；它不是未经证明的普通primal
-preactivation。2026-08-28反例表明普通selected-primal替换在site19产生`1.156e-3`误差与9个符号错误。
+这里`V_i = d lower / d T_i`，`T_i`为ReLU transform后的coefficient state。旧二元input endpoint曾在site19
+产生`1.156e-3`误差与9个符号错误；三元lower/upper/center endpoint已把该site降至
+`4.2375177145e-08/0`，证明修正后的selected-primal可作为V的优化lowering。
 再应用lower direction、ambiguous ReLU、`A_i>=0`、compressed feature ownership与clamp endpoint语义即可。
 
 因此S4-1C只需要一个layout-parameterized α emitter模板，formal实例化六次；site31同一边界再发射唯一active dβ。
@@ -209,8 +210,8 @@ identity和one-shot lease必须进入receipt。
 S4-1C完成后，单evaluation为：
 
 ```text
-pass A: coefficient/lower + six sign bitmap
-pass B: six coefficient-schedule adjoint values
+pass A: coefficient/lower + one ternary endpoint selector + five binary sign bitmaps
+pass B: six selected-primal V values, independently checked against coefficient VJP
 pass C: coefficient recompute + six dα + one dβ
 ```
 
@@ -261,7 +262,7 @@ S4-1C不接Adam、不计时；只允许单evaluation与terminal-mode correctness
 
 1. A/V/state version不一致；
 2. incoming coefficient site错配；
-3. coefficient-adjoint slot错配或ordinary-primal替换；
+3. value slot错配、binary endpoint替换ternary endpoint或center identity漂移；
 4. α index重复/越界/乱序；
 5. active α不是`[D,W]`或full-source escape；
 6. stable/non-ambiguous位置产生非零gradient；

@@ -7,6 +7,9 @@
 > P β为空。因此不得claim S3已经whole-core
 > eligible或same-solver connected；S4代码/timing在S3外审批准前关闭。state element coverage
 > `12.1469%`不得表述为runtime share。
+> S4 design-time只读补充：Ainput positive/negative/zero=`8,689/9,137/606`；三元zero→center后六dα
+> overall max diff=`1.63912773132e-07`、active dβ=`1.1920928955078125e-07`且sign exact。这只纠正
+> S4-1B0设计，不升级production correctness、same-solver或performance claim。
 >
 > **2026-08-28 S3 optimizer/runtime内部结论**：状态=
 > `VALIDATED-S3-3X-LOCAL-OPTIMIZER-V2-PENDING-EXTERNAL-AUDIT`。source=`1766cbc`，ResNet2B

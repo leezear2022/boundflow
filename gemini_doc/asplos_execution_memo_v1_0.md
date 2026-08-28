@@ -7,7 +7,9 @@
 > state-element coverage，非时间share)且β为空。S4必须先闭合all-mutable-state compiled
 > evaluation，再接existing host policy/terminal handoff/KFSB/commit；禁止P-only直接冒充whole-core。外审
 > 批准前`code-change-open=false/timing-open=false`。candidate应直接优化compressed lower-α/sparse β，native
-> dense state只作oracle/terminal bridge；见S4 same-solver prereg与evaluator ABI草案。
+> dense state只作oracle/terminal bridge；见S4 same-solver prereg与evaluator ABI草案。S4-1B0最新只读根因为
+> input box的`A==0`次梯度：606个zero须选择center，非DAG/fanout原则性失败；三元endpoint后六site gradient
+> 全部闭合，但production implementation/formal仍在S3外审后逐级开放。
 >
 > **历史（等待上方S3外审关闭）：**
 > **2026-08-28 当前唯一指令：S3内部关闭，只开放S4 same-solver实现/正确性接入**。S3 v2在source

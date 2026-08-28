@@ -640,11 +640,11 @@ S4-4冻结minimum 68类。每案都要：
 63. 在β/history已匹配前缀后追加一个未拥有slot；
 64. 把raw object id/data pointer写入canonical receipt，或用topology输入顺序改变canonical hash。
 
-### I. S4-1 DAG adjoint与terminal lA phase（4）
+### I. S4-1 ternary endpoint与terminal lA phase（4）
 
-65. 用普通selected-primal输出替换coefficient-program adjoint并全重签；
-66. 删除residual fanout/accumulation VJP provenance或交换其action owner；
-67. 注入已知site19 reduction反例错值并同步重签gradient/summary/manifest；
+65. 用旧二元`Ainput>=0→lower`替换三元lower/upper/center selector并全重签；
+66. 篡改Ainput zero class/count或input-center identity并全重签；
+67. 把606个zero selector重写为positive/lower，注入已知site19错值并同步重签gradient/summary/manifest；
 68. 把terminal lA改为post-transform coefficient，或删除`[D,S,*feature]`中的spec-axis identity。
 
 必须报告每案稳定reason，不接受“因为文件digest不匹配”作为fully re-signed攻击的唯一拒绝理由。

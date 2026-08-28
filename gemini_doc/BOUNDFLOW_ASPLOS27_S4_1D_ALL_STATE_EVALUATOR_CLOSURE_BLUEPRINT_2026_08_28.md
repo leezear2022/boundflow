@@ -24,7 +24,7 @@ S4-0  tensor-free mutable-state admission + live source lease projection
   ↓
 S4-1A ordered parameter/gradient buffers + lease/version
   ↓
-S4-1B pass A signs + pass B six coefficient-schedule adjoints
+S4-1B pass A ternary/binary selectors + pass B six selected-primal V values
   ↓
 S4-1C pass C six dα + active dβ + terminal lA phase
   ↓
@@ -85,7 +85,7 @@ CUDA identities、bound polarity、endpoint/clamp policy。instance tensor/point
 0. validate request ordinal/version/lease/stream/module identities
 1. reset scalar counters and phase tags; no buffer allocation
 2. pass A: compute lower + coefficient propagation + six sign bitmaps
-3. pass B: exact coefficient-action VJP writes six adjoint slots; ordinary selected-primal substitution is forbidden
+3. pass B: ternary-endpoint selected-primal lowering writes six V slots; coefficient-action VJP remains the oracle
 4. pass C: recompute coefficient; at each site emit compressed gradients
 5. if terminal: after each gradient read, copy incoming A to same value slot as lA
 6. seal lower/gradient/(optional lA) leases
@@ -199,8 +199,8 @@ B: provider-independent native full PyTorch/autograd oracle
 C: S4 compiled evaluator
 ```
 
-另以coefficient-action adjoint replay和float64 no-autograd局部公式复核六V values与compressed emitters。site19
-必须显式关闭`0.0011564247542992234/9 sign mismatch`反例；existing S2/R31B2、B4-B2
+另以coefficient-action VJP和float64 no-autograd局部公式复核六V values与compressed emitters。site19必须
+显式证明旧二元规则复现`0.0011564247542992234/9`、三元规则关闭至`4.2375177145e-08/0`；existing S2/R31B2、B4-B2
 site31/25交集继续作为局部oracle，不能替代A/B full comparison。
 
 ### 7.2 five-fresh order

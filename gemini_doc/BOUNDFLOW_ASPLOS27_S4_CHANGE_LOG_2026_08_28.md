@@ -10,19 +10,39 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
-## 2026-08-28：六site预检证伪普通selected-primal等价并改用coefficient-program adjoint
+## 2026-08-28：逐层tap修正site19根因，selected-primal以三元endpoint恢复
+
+- 对上一轮site19反例继续做只读逐层tap：exact V18重建pre19为0误差，差异最终定位到input affine；
+- provider lower concretization为`A*center-abs(A)*radius+bias`，PyTorch在`A==0`处`abs`导数为0，因此精确
+  endpoint必须是`A>0→lower / A<0→upper / A==0→center`，而不是旧`A>=0→lower`；
+- formal Ainput inventory独立统计为positive=`8,689`、negative=`9,137`、exact-zero=`606`；
+- 用三元规则重算六site：dα最大误差依次为`7.334e-9/4.238e-8/4.063e-8/4.470e-8/8.196e-8/
+  1.639e-7`，sign mismatch全0；active dβ最大误差`1.192e-7`、sign mismatch=0；
+- 新增S4-1B0权威合同；保留coefficient-program VJP为规范oracle，恢复selected-primal为优化lowering；无需推倒
+  S2/R31B2、两块coefficient arena、residual scratch、V/lA arena或compressed emitter；
+- Ainput int8 buffer升级为三元selector，其余五张ReLU bitmap保持二元，总存储仍55,296 bytes；新增center identity、
+  zero inventory和binary→ternary tamper门禁；formal tamper总数仍为68；
+- 上一节“DAG/fanout根因”显式标为被本节取代，不静默改写历史；S3外审前S4 production代码/timing继续关闭。
+
+### 验证
+
+- six-site ternary projection：六dα + active dβ全PASS，overall dα max=`1.63912773132e-07`；
+- Ainput inventory：`8689 + 9137 + 606 = 18432`；
+- 文档一致性、目标测试、DocOps validation在提交前执行。
+
+## 2026-08-28（历史v1，已被上节收窄）：六site预检阻止site19错误进入production
 
 - S3 exchange仍为`ready_for_audit/r001`，本轮没有写S4 production代码或开放timing；
 - 用冻结ResNet2B production pre-state、同一CUDA/objective/α/β/split做六site只读数学探针：full PyTorch CROWN
   dense α autograd投影production compressed ownership，对比原S4-1B普通selected-primal候选；
 - site17/23/25/28/31 max diff分别为`7.334e-9/4.063e-8/4.470e-8/8.196e-8/1.639e-7`且sign exact；
   site19失败：max diff=`0.0011564247542992234`、9个sign mismatch；
-- 独立核对generic/compiled input A max diff=`5.029141902923584e-08`且sign exact，排除coefficient arena/
-  endpoint-sign错误；site31 active β六location仍为max diff=`1.1920928955078125e-07`、sign exact；
+- 独立核对generic/compiled input A max diff=`5.029141902923584e-08`且sign exact；当时据此排除endpoint错误，
+  但后续证明数值相同并不能排除`A==0`次梯度错误；
 - 亲读provider ReLU backward确认terminal `lA`是transform前incoming A；formal handoff必须恢复
   `[D,S,*feature]` view，不能只以当前`S=1`的元素数证明ABI；
-- 新增S4-1B0：对typed CROWN coefficient actions做精确VJP replay，定义`V_i=d lower/dT_i`；普通primal图只有
-  逐site证明后才可作为lowering，禁止site19特判；
+- 当时提出完整coefficient-action VJP replay；当前仅保留其规范oracle角色，物理实现改用已闭合的三元endpoint
+  selected-primal lowering；
 - 两块coefficient arena、D1C residual scratch、55,296-byte sign、149,856-byte V/lA shared arena、compressed
   ABI与terminal handoff继续复用；formal tamper由64扩为68类；
 - 新增独立纠正文档并同步主计划、S4 prereg、1B/1C/1D、evaluator、formal与外审交接；不升级correctness/

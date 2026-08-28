@@ -53,12 +53,12 @@ tamper覆盖source、trajectory、terminal/KFSB、transaction/provider/post、sc
 exclusive owner和artifact；official post失败单列为
 `COMMITTED_POST_FAILED_POISONED`。
 
-S4-1B/1C开工前只读数学预检进一步纠正了value owner：普通selected-primal图在六site中5个通过，但site19
-production compressed α出现max diff=`0.0011564247542992234`与9个sign mismatch；generic/compiled input A仍为
-max diff=`5.029141902923584e-08`且sign exact，故不是arena问题。新S4-1B0要求从typed CROWN coefficient
-schedule派生精确VJP adjoint `V_i=d lower/dT_i`，普通primal图仅可作为逐site证明后的lowering。原两arena、residual
-scratch、sign、149,856-byte V/lA slot和compressed ABI保留；terminal lA固定为ReLU transform前incoming A并恢复
-spec轴。formal tamper minimum同步扩为68类。S3外审和S4-1B0关闭前，S4代码/timing仍关闭。
+S4-1B/1C只读预检发现的site19 `0.0011564/9 sign mismatch`已进一步定位到input box零点次梯度，而非DAG/
+fanout：formal Ainput有606个exact zero，provider的`abs(A)`导数要求zero→center，旧binary endpoint却取lower。
+三元`positive→lower / negative→upper / zero→center`后六dα overall max=`1.639e-7`、active dβ max=
+`1.192e-7`且sign exact。S4-1B0现冻结ternary endpoint、center identity与zero inventory；coefficient VJP保留为
+规范oracle，selected-primal恢复为优化lowering。原arena/scratch/55,296-byte selector+sign/149,856-byte V/lA及
+compressed ABI保留；formal tamper仍为68类。S3外审和S4-1B0 formal关闭前，S4代码/timing仍关闭。
 
 最新执行（v8 S3，待合并外审）：S3 v2已把S2 prepared direct VJP接入ResNet2B P-anchor完整10次
 CROWN evaluation/9次Adam mutation本地wrapper。18 fresh稳健formal得到P/native order-median
