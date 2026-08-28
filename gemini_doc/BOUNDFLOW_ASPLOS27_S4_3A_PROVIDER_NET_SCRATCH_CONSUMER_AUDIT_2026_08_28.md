@@ -1,5 +1,5 @@
 ---
-status: diagnostic-complete-code-closed
+status: diagnostic-complete-corrected-code-closed
 date: 2026-08-28
 type: consumer-and-lifetime-audit
 topic: boundflow
@@ -31,9 +31,11 @@ S4-3蓝图中的“provider net scratch consumer待核”已经从源码层闭�
    `exclusive_core_owner=CANDIDATE`，同一query不允许provider fallback/mixed execution。
 4. formal v1还必须fail closed拒绝all-node-split LP、cuts/BICCOS、clip、BFS/multitree和非固定KFSB；这些路径会在
    core之后或core内部重新读取net scratch。
-5. S4-3新增`ProviderNetScratchDisposalPlanV1`，镜像reference的move/gc生命周期。formal静态最低inventory为
-   `6 α entries + 12 intermediate lower/upper attributes + 6 lA attributes = 24 attributes`；实际实现必须从live
-   provider object枚举并冻结，不能把24硬编码为通用schema。
+5. S4-3新增`ProviderNetScratchDisposalPlanV1`，镜像reference的move/gc生命周期。现场reference core探针纠正了
+   初稿计数：`BatchedlA.from_net`只导出六条split-layer lA，但`gc_lA_from_net`会清空18个nonempty node lA。
+   formal静态最低inventory因此是
+   `6 α entries + 12 intermediate lower/upper attributes + 18 lA attributes = 36 attributes`；实际实现必须从live
+   provider object枚举并冻结，不能把36硬编码为通用schema。
 
 所以production α/β数值commit仍是12条semantic path；net scratch作为**lifetime/disposal transaction**单独receipt化，
 不能混入12-path coverage数字，也不能在S4-P显存测量中忽略。
@@ -42,7 +44,7 @@ S4-3蓝图中的“provider net scratch consumer待核”已经从源码层闭�
 
 本次read-only审计基于：
 
-- BoundFlow：`34ae567c5152a04b09496daffa554626dfb38407`；
+- BoundFlow source probe HEAD：`3ca4d5c`（相对`34ae567`只有S4文档变更，runtime capture路径未改）；
 - αβ-CROWN：`e5c7e17bf0488843acb77b7519f59876717a49f4`；
 - auto_LiRPA：`5a098e8f9fb5786a428a024981d833d303921f2d`。
 
@@ -61,6 +63,40 @@ S4-3蓝图中的“provider net scratch consumer待核”已经从源码层闭�
 - `auto_LiRPA/auto_LiRPA/optimized_bounds.py`。
 
 正式实现/证据必须重新绑定当时source，不得把上述commit或绝对路径写入通用runtime schema。
+
+### 1.1 live reference core纠错探针
+
+在固定ResNet2B property、CUDA、`max_iterations=1`、batch 64、β-CROWN 10 evaluations下，复用现有
+`run_rvir_v4_production_state_capture.py` reference worker，并只在以下provider extraction入口外包只读observer：
+
+- `WorkingIntermBoundsInfo.from_net(move=True)`；
+- `BatchedlA.from_net(move=True)`与`BatchedlA.gc_lA_from_net`；
+- `AlphaValueData.from_net(move=True)`；
+- `BetaFullData.from_net`。
+
+单次运行得到`core_count=1`，事实如下：
+
+| category | live tensor/attribute | reference结果 | logical bytes |
+|---|---:|---|---:|
+| terminal part-scope α | 6 | 六个mapping entry均变为`ValueError` | 33,984 |
+| intermediate lower/upper | 12 | 六层×lower/upper均变为`EmptiedTensor` | 299,712 |
+| exported split-layer lA | 6 | 进入`BatchedlA`，总37,464 float32 | 149,856（属于下行18项） |
+| all-node lA disposal | 18 | `gc_lA_from_net`把18个tensor attribute全部变为`EmptiedTensor` | 471,984 |
+| sparse β containers | 6×1 | before/after容器与count不变 | 本探针未冻结tensor bytes |
+
+18条lA disposal path为：`/input-1`、`/input`、`/input-4`、`/input-8`、`/input-12`、`/37`、`/38`、
+`/39`、`/input-16`、`/input-20`、`/input-24`、`/43`、`/44`、`/45`、`/46`、`/input-28`、`/48`、`/49`。
+第二次幂等GC仍枚举18个attribute，但其中tensor count已经为0。
+
+本次pre-disposal logical tensor bytes合计：
+
+```text
+33,984 + 299,712 + 471,984 = 805,680 bytes
+```
+
+该数是逻辑tensor字节相加，不是unique-storage、peak allocated/reserved或性能claim；诊断worker结果位于临时目录并已
+自动清理。S4-4 formal必须用冻结raw重新枚举、记录storage identity/alias并独立重放。本探针只用于纠正“六条terminal
+lA等于六个GC attribute”的错误假设。
 
 ## 2. reference事务对net的读写
 
@@ -277,15 +313,16 @@ ScratchAttributeBindingV1:
 
 ### 6.2 formal最低inventory
 
-由现有formal topology/core truth得到静态下界：
+由live reference core probe得到当前formal fixture静态下界：
 
 | category | expected formal最低数 | reference动作 |
 |---|---:|---|
 | terminal part-scope α entries | 6 | mapping entry→ValueError sentinel |
 | intermediate lower | 6 | attribute→EmptiedTensor |
 | intermediate upper | 6 | attribute→EmptiedTensor |
-| lA | 6 | attribute→EmptiedTensor |
-| 合计 | 24 | reference release/move mirror |
+| exported split-layer lA | 6 | 进入`BatchedlA`，不作为全GC计数替代物 |
+| all-node nonempty lA | 18 | attribute→EmptiedTensor |
+| 合计disposal attributes | 36 | reference release/move mirror |
 
 实现必须运行时枚举：
 
@@ -293,7 +330,8 @@ ScratchAttributeBindingV1:
 - `layers_requiring_bounds`中actual nonempty lower/upper；
 - `net.nodes()`中actual nonempty lA。
 
-若actual不是formal预注册inventory，必须在任何mutation前拒绝并输出extra/missing path；不得截断到24。
+若actual不是formal预注册inventory，必须在任何mutation前拒绝并输出extra/missing path；不得截断到36。六条terminal
+lA export与18条provider lA disposal必须使用不同字段和计数器。
 
 ### 6.3 β为何不在disposal list
 
@@ -318,7 +356,7 @@ candidate必须如实披露：
 - S4-3 commit把net field设置为该projection，便于debug/provenance并消除stale值；
 - receipt比较reference/candidate mask；
 - attribute assignment可identity rollback；
-- 它不计入12 production mutable paths或24 disposal attributes。
+- 它不计入12 production mutable paths或36 disposal attributes。
 
 `constraints_optimized`在fixed output-constraint-disabled路径应被验证/镜像为None；`cut_used`必须为false；`bound_opts`只保存
 canonical policy hash并由candidate prepare确定性设置。
@@ -333,7 +371,7 @@ S4-3 logical transaction包含：
 12 production tensor content paths
 1 host d packet
 1 pre_result.interm_bounds container
-N provider scratch attribute disposals      # formal runtime expected 24
+N provider scratch attribute disposals      # current formal fixture expected 36
 policy mirrors                              # preserve mask / constraints / cut state
 1 exclusive owner latch
 ```
@@ -457,7 +495,7 @@ exclusive_owner_latch transitions
 18. `SCRATCH_PATH_MIXED_INTO_PRODUCTION_12_COUNT`。
 
 fully re-signed tamper必须覆盖至少：删除一个disposal path、把lA sentinel改为tensor、改preserve mask、伪造
-exclusive latch、把provider reentry从1改0、把multi-core从2改1、隐藏stale beta memory、把24 scratch错误并入12-path
+exclusive latch、把provider reentry从1改0、把multi-core从2改1、隐藏stale beta memory、把36 scratch错误并入12-path
 commit count。
 
 ## 11. tests与实现切分
@@ -483,7 +521,7 @@ S4-3只有在以下新增条件也成立时才能关闭：
 
 - normal fixed path从core return到post/queue没有net dynamic scratch read；
 - actual scratch inventory完整且reference/candidate disposal parity通过；
-- formal最低24 attributes逐项解释，extra/missing fail closed；
+- formal最低36 attributes逐项解释，extra/missing fail closed；六条export lA与18条GC lA分开核对；
 - net β保留有显式consumer=0和memory披露；
 - preserve mask/constraints/cut mirrors一致；
 - exclusive owner latch阻止provider fallback/reentry；
@@ -503,7 +541,7 @@ S4-3只有在以下新增条件也成立时才能关闭：
 - all-node LP或cuts在formal中可达；
 - 未清理scratch却声称显存不恶化；
 - 把net scratch disposal伪写为第13条production α/β数值path；
-- 通过硬编码24绕过动态inventory。
+- 通过硬编码36绕过动态inventory。
 
 ## 13. 当前停止点
 

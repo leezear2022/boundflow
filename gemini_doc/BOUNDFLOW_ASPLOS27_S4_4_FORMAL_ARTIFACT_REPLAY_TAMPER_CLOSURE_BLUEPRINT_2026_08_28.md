@@ -328,7 +328,8 @@ compressed internal gradient，用于2e-5门禁。
 - content audit与post-query audit；
 - failure state必须属于合法state machine。
 - provider net scratch pre/post inventory、live枚举的disposal attributes、sentinel kind、preserve-mask mirror和exclusive
-  owner latch；production tensor path count仍恰为12，scratch count必须单列。
+  owner latch；当前formal fixture预期`6 α + 12 intermediate + 18 all-node lA = 36` disposal attributes，同时另记
+  六条terminal/export lA；production tensor path count仍恰为12，scratch/export/path count必须分列。
 
 ### 6.6 official post与solver result
 

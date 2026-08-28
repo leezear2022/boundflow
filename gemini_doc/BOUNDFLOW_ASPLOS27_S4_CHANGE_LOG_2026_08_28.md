@@ -10,12 +10,34 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-28：live reference probe纠正scratch disposal 24→36
+
+- 在pinned ResNet2B/CUDA/reference worker上外包只读provider extraction observer，现场执行一个真实
+  `update_bounds_core`，不修改BoundFlow或provider production源码；
+- 实测terminal part-scope α为6个tensor/33,984 B，六层intermediate lower/upper为12个tensor/299,712 B；
+- 发现初稿把“`BatchedlA`导出的六条split-layer lA”误当成“`gc_lA_from_net`清理的全部lA”。现场实际为
+  18个nonempty node lA/471,984 B，全部变为`EmptiedTensor`；第二次GC为18个sentinel/0 tensor；
+- sparse β为六个layer container、每个一项，extract前后不变，验证“不纳入disposal但需披露retention”的设计；
+- 当前formal fixture disposal静态最低由`6+12+6=24`纠正为`6+12+18=36`，同时保持terminal/export lA=`6`、
+  production mutable tensor path=`12`和tamper minimum=`48`不变；generic schema仍必须live枚举，禁止硬编码36；
+- 三类被清理tensor logical bytes合计`805,680 B`；该值不是unique-storage、peak allocated/reserved或性能claim，
+  临时diagnostic raw已自动清理，S4-4 formal仍需冻结storage/alias/raw；
+- 同步S4-3A、S4-3、主预注册、evaluator ABI、S4-4和README；S4代码与timing继续closed。
+
+### 验证
+
+- live reference worker：`core_count=1`，scratch observer event=`6`，solver status=`verified`；
+- α `6→0 tensor`、intermediate `12→0 tensor`、lA GC `18→0 tensor`、β container `6×1→6×1`；
+- 36项算术、18条lA path、805,680 B逻辑字节、tamper `1..48`及S4 closed flags独立复核：PASS；
+- whole-core/live-return/KFSB/device-commit/pre-state/production-state/terminal targeted：`45 passed in 8.43s`；
+- 下节原24项记录保留为历史错误并由本节明确取代。
+
 ## 2026-08-28：关闭S4-3A provider net scratch consumer/lifetime源码审计
 
 - 亲读pinned provider pre/core/post/domain-storage与auto_LiRPA optimizer源码，确认fixed candidate KFSB、official post、
   queue storage和candidate next-pre不读取net dynamic scratch作数值输入；all-node LP、cuts/clip/BFS/multitree及
   provider reentry仍可能重新读取net，因此继续fail closed；
-- 区分production numeric ownership与scratch lifetime：12条α/β tensor commit保持不变，新增
+- 【历史，已由上节live probe纠正】区分production numeric ownership与scratch lifetime：12条α/β tensor commit保持不变，新增
   `ProviderNetScratchDisposalPlanV1`镜像reference的六α、12个intermediate lower/upper和六lA move/gc；formal
   fixture静态最低24个attribute，但generic schema必须live枚举，禁止硬编码24；
 - 确认reference不清理sparse β，candidate必须披露stale β retention且证明consumer count=`0`，不能伪写成memory收益；

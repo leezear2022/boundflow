@@ -282,8 +282,9 @@ clean abort与提交中`POISONED_NO_RETRY`分开，不得把后者写成可透�
 provider net scratch的consumer/lifetime精确审计见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`。冻结结论是：
 normal fixed path的candidate KFSB、official post、queue storage和candidate next-pre不把net dynamic scratch当数值输入；
-但reference会move/gc六α、六组intermediate lower/upper和六lA。candidate因此必须live枚举并镜像scratch disposal，
-formal fixture静态最低为24个attribute，同时保持production mutable tensor path恰为12。S4-v1使用query-scoped
+但reference会move/gc六α、六组intermediate lower/upper和18个all-node lA。六条split-layer lA是export subset，不能
+替代18条GC inventory。candidate因此必须live枚举并镜像scratch disposal，formal fixture静态最低为36个attribute，
+同时保持production mutable tensor path恰为12。S4-v1使用query-scoped
 exclusive core-owner latch；candidate首次commit后，同一query禁止provider reentry、fallback或第二次core call。
 
 在同一`ABCrownSolver.verify`内比较：

@@ -26,9 +26,10 @@ S4-3进一步确认exact-call不是薄adapter：真实事务还包含KFSB三次b
 恢复tensor内容，无法恢复PyTorch `_version`；因此新合同明确使用`POISONED_NO_RETRY`，禁止partial commit后fallback/
 重试。candidate+rollback加入后已知logical subtotal=`488,760 bytes`，不等于实测peak显存。
 
-S4-3A源码审计进一步关闭provider net scratch歧义：fixed candidate KFSB/post/queue/next-pre不读取net dynamic
-scratch作数值输入，因此production tensor commit仍是12条；但reference会move/gc六α、12个intermediate
-lower/upper和六lA，candidate必须按live inventory镜像disposal（formal静态最低24 attribute）。β在reference中不清理，
+S4-3A源码审计及live reference probe进一步关闭provider net scratch歧义：fixed candidate KFSB/post/queue/next-pre
+不读取net dynamic scratch作数值输入，因此production tensor commit仍是12条；但reference会move/gc六α、12个
+intermediate lower/upper和18个all-node lA，candidate必须按live inventory镜像disposal（formal静态最低36 attribute）。
+六条terminal/export lA只是18条GC inventory的子集，不能混计。β在reference中不清理，
 必须单独披露stale retention。S4-v1因此冻结query-scoped exclusive owner：candidate首次commit后，同一query禁止
 provider reentry、fallback和第二次core call；cuts/clip/BFS/multitree/all-node LP等额外consumer保持fail closed。
 

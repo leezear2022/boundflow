@@ -444,7 +444,8 @@ provider attach过程可能让net内部α通过`detach().requires_grad_(True)`�
 | next provider core / all-node LP | 是 | 是 | 是/可能 | S4-v1必须拒绝 |
 
 但reference会move/gc terminal α、intermediate lower/upper和lA。candidate必须新增prepared scratch disposal plan：formal
-静态最低为`6 α + 12 intermediate attributes + 6 lA = 24 attributes`，actual inventory必须live枚举；β在reference中
+现场reference probe纠正静态最低为`6 α + 12 intermediate attributes + 18 all-node lA = 36 attributes`；其中只有
+六条split-layer lA进入terminal `BatchedlA`，但GC会清空18个nonempty node lA。actual inventory必须live枚举；β在reference中
 不clear，不能自行删除。首次candidate commit后还必须锁定query-scoped exclusive owner，禁止provider fallback/reentry。
 net scratch不增加production mutable tensor path的12计数，但必须进入logical transaction、memory disclosure、raw/replay/
 tamper。

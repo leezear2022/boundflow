@@ -305,7 +305,8 @@ S4-3 whole-core exact-call的provider return constructor、official post、host 
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`。existing KFSB/
 commit可复用其数学与owner，但不能直接继承“完全原子”措辞。
 
-provider net α/intermediate/lA scratch的consumer与move/gc生命周期、formal最低24 attribute disposal、stale β保留披露及
+provider net α/intermediate/lA scratch的consumer与move/gc生命周期、formal最低36 attribute disposal（六条export lA，
+18条all-node GC lA）、stale β保留披露及
 query-scoped exclusive core-owner latch见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`。这些是logical
 lifetime transaction，不是terminal ABI的第13+条production数值path。
