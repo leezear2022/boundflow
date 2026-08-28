@@ -1,12 +1,12 @@
 ---
-status: ready-for-external-design-audit-v5-selector-gradient-abi-frozen
-date: 2026-08-28
+status: ready-for-external-design-audit-v6-evaluator-transaction-frozen
+date: 2026-08-29
 type: external-audit-handoff
 topic: boundflow
 slug: asplos27-s4-design-audit
 audit-kind: preregistration-and-implementation-blueprint
 base-commit: ebf45cc72438141d8f0b35dadfd5cf774d7e753f
-design-result-commit: 0b220ecc86a8283951c15eb1745004d79ad22293
+design-result-commit: 52d7bd875466ae539eca34a552b4b5c7957d2437
 execution-authority: false
 code-change-open: false
 performance-claimed: false
@@ -39,16 +39,19 @@ speedup或complete-query性能已经存在。
     key与module/launch receipt是否足以fail closed；
 13. 五张binary selector是否也必须使用`-128` sentinel；七gradient TIR的safe-index/finite poison、46 emitter
     views/48 prepared views和terminal arena phase是否完整；
-14. 是否同意在S3外审批准后仍按S4-0→1A→1B0→1B→1C→1D→2→3→4顺序实施；
-15. 是否发现必须在第一行S4代码开工前修正的blocker/major。
+14. S4-1D read-only admission、post-begin `POISONED_NO_RETRY`、composite result lease、5+5 full-IEEE raw和
+    修正后的`438,726 B` ledger是否共同关闭single-evaluation事务；
+15. 是否同意在S3外审批准后仍按S4-0→1A→1B0→1B→1C→1D→2→3→4顺序实施；
+16. 是否发现必须在第一行S4代码开工前修正的blocker/major。
 
 ## 1. 审计范围和Git边界
 
 - branch：`feat/rvir-v4-production-state-ownership-v1`；
 - 本轮设计base：`ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
-- S4-0 live admission/lease、S4-3A scratch finalization、S4-1A prepare transaction、S4-1B0 ternary TIR与
-  S4-1B/1C selector/gradient/arena ABI全部设计结果：`0b220ecc86a8283951c15eb1745004d79ad22293`；
-- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..0b220ecc86a8283951c15eb1745004d79ad22293`
+- S4-0 live admission/lease、S4-3A scratch finalization、S4-1A prepare transaction、S4-1B0 ternary TIR、
+  S4-1B/1C selector/gradient/arena ABI及S4-1D evaluator transaction全部设计结果：
+  `52d7bd875466ae539eca34a552b4b5c7957d2437`；
+- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..52d7bd875466ae539eca34a552b4b5c7957d2437`
   和下列S4文档的完整版本为准；
 - S3 formal实现/结果不在本轮重新验收，但它是S4设计输入；S3独立exchange仍等待审计；
 - `.docops/exchange/gc0-1-prereg-20260826`异步audit文件和`docs/CIBC_for_DAC.pdf`是用户保留的范围外dirty文件，
@@ -82,11 +85,12 @@ speedup或complete-query性能已经存在。
 14. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
 15. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1BC_SELECTOR_GRADIENT_TIR_IMPLEMENTATION_READINESS_2026_08_28.md`；
 16. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`；
-17. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
-18. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
-19. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
-20. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
-21. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
+17. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_EVALUATOR_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`；
+18. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
+19. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
+20. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
+21. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
+22. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
 
 ## 3. 已冻结的production事实，请独立复核
 
@@ -123,13 +127,14 @@ speedup或complete-query性能已经存在。
 
 ### 3.4 known logical memory账
 
-- S4-1D correctness ledger=`386,712 bytes`；
-- 加S4-2 Adam m/v known subtotal=`420,744 bytes`；
+- S4-1D correctness ledger=`438,726 bytes`；
+- 加S4-2 Adam m/v known subtotal=`472,758 bytes`；
 - full candidate=`34,008 bytes`；
 - candidate+rollback=`68,016 bytes`；
-- S4-3 known subtotal=`488,760 bytes`。
+- S4-3 known subtotal=`540,774 bytes`。
 
-这些是design-time logical bytes，不是实测peak allocated/reserved。请检查是否有重复计数、漏项或错误归属。
+旧S4-1D账`386,712 B`漏掉`49,152 B` residual scratch与`2,862 B` metadata，共`52,014 B`。这些是
+design-time logical bytes，不是实测peak allocated/reserved。请独立检查是否仍有重复计数、漏项或错误归属。
 
 ## 4. Acceptance criteria
 
@@ -206,6 +211,13 @@ PASS要求：
 - two coefficient arenas足够；
 - terminal lA与V slot alias的lifetime门禁充分，且复制发生于ReLU transform前并恢复
   `[D,S,*feature]` spec-axis view；若不足是否应默认独立arena。
+- request admission是否在任何counter/buffer/generation mutation前完成，pre-begin reject是否保持`READY`；
+- counter reset之后任一pass/finite/receipt失败是否必须`POISONED_NO_RETRY`，禁止reset/reuse generation；
+- lower/六dα/六dβ/terminal lA是否应由一个composite lease共同持有，terminal child是否只可transfer一次；
+- S4-1D每fresh owner只执行一次、success不隐式回`READY`是否比提前允许10-step复用更安全；
+- 5 nonterminal + 5 terminal worker是否足够关闭两种fixture，且每个worker恰一次evaluation；
+- candidate完整IEEE raw `919,680 B`足够小时，禁止仅存hash+bounded projection是否合理；
+- 36-buffer logical ledger、allocator delta与existing source lease lifetime三种口径是否被正确区分。
 
 请特别找出文档中可能把“数学可行”误写为“已有production implementation”的地方。
 
@@ -371,6 +383,13 @@ PASS要求：
 - V/lA arena六slot interval不重叠、单storage且与四个coefficient/scratch storage分离；reverse same-stream
   read/copy/reuse simulation中gradient与terminal pretransform A均exact，dynamic allocation=0；
 - S4-1B/1C相关R3 residual/D2B/R31B2/B4-B2/terminal回归：`29 passed in 23.99s`；
+- S4-1D read-only admission/state-machine设计枚举=`14 cases`，model hash=
+  `8942bb5970f268f47314265e0a1683947e7d5cddf6d421d3fd80cd778a9627eb`；
+- S4-1D ledger CUDA probe：logical/allocated/reserved=`438,726/448,000/2,097,152 B`，36 buffers，prepared
+  view=`16+32=48`，existing source lease=`34,008 B`且incremental allocation 0；
+- S4-1D full raw预算：nonterminal/terminal/5+5=`17,040/166,896/919,680 B`，canonical hash=
+  `1e2aab39a7f7049a09371fef6ec1e0a01dc1e2ec6b25ed7c4060b2cf78e2f0d6`；
+- 本次S4-1D evaluator依赖回归：`37 passed in 27.85s`；production code diff=`0`；
 - existing live-return/device-commit targeted：`12 passed in 6.58s`；production code diff=`0`；
 - `git diff --check`、DocOps exchange validate/lint：PASS。
 
@@ -379,8 +398,8 @@ PASS要求：
 ## 7. 建议外审操作
 
 ```bash
-git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..0b220ecc86a8283951c15eb1745004d79ad22293
-git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..0b220ecc86a8283951c15eb1745004d79ad22293
+git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..52d7bd875466ae539eca34a552b4b5c7957d2437
+git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..52d7bd875466ae539eca34a552b4b5c7957d2437
 
 source env.sh
 /home/lee/miniconda3/envs/boundflow/bin/python -m pytest -q \

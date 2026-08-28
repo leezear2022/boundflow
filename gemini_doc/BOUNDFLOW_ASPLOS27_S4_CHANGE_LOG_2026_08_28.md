@@ -10,6 +10,21 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：刷新S4设计外审交接至evaluator transaction v6
+
+- design-result commit更新为`52d7bd875466ae539eca34a552b4b5c7957d2437`，审计范围仍从冻结base
+  `ebf45cc72438141d8f0b35dadfd5cf774d7e753f`开始；
+- 必读顺序加入S4-1D transaction readiness，must-answer新增read-only admission、post-begin poison、composite lease、
+  5+5 full-IEEE raw和修正memory ledger；
+- 外审known memory账同步为S4-1D/S4-2/S4-3=`438,726/472,758/540,774 B`并显式解释旧账漏项；
+- evidence inventory加入14-case状态机hash、CUDA logical/allocator账、`919,680 B` raw预算与`37 passed`回归；
+- 本次只刷新用户可交给外部模型的设计审计材料，不新建exchange、不开放S4代码或性能门禁。
+
+### 验证
+
+- handoff commit/range、22份必读文档、16个must-answer、memory/raw/test字段完整性检查：PASS；
+- `git diff --check`、DocOps validation/exchange validate/lint在提交前执行。
+
 ## 2026-08-28：S4-1D冻结evaluator事务、composite lease与完整IEEE replay
 
 - 对原S4-1D蓝图做implementation-readiness复核，旧`386,712 B`logical ledger漏掉`49,152 B` residual scratch与
