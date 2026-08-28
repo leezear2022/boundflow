@@ -1,12 +1,12 @@
 ---
-status: ready-for-external-design-audit-v3-python-abi-frozen
+status: ready-for-external-design-audit-v4-ternary-tir-abi-frozen
 date: 2026-08-28
 type: external-audit-handoff
 topic: boundflow
 slug: asplos27-s4-design-audit
 audit-kind: preregistration-and-implementation-blueprint
 base-commit: ebf45cc72438141d8f0b35dadfd5cf774d7e753f
-design-result-commit: 7f9854332f223a703b9a2315f58bac56cf07a677
+design-result-commit: a5ae9265c51a34fb5f76f41989cf877e362e9ef7
 execution-authority: false
 code-change-open: false
 performance-claimed: false
@@ -35,16 +35,18 @@ speedup或complete-query性能已经存在。
 9. terminal logical/unique storage、view alias、B0 batch-24 residue与当前R batch-12 stale是否被正确区分；
 10. S4-4的stdlib raw/replay和68类fully re-signed tamper是否足以支持第三方独立审计；
 11. S4-1B0把site19根因收窄到`Ainput==0→center`、恢复selected-primal lowering是否数学成立；
-12. 是否同意在S3外审批准后仍按S4-0→1A→1B0→1B→1C→1D→2→3→4顺序实施；
-13. 是否发现必须在第一行S4代码开工前修正的blocker/major。
+12. S4-1B0现场发现浮点NaN classifier会被TVM/CUDA错误化简后，改用IEEE-754 exponent位检查、独立cache
+    key与module/launch receipt是否足以fail closed；
+13. 是否同意在S3外审批准后仍按S4-0→1A→1B0→1B→1C→1D→2→3→4顺序实施；
+14. 是否发现必须在第一行S4代码开工前修正的blocker/major。
 
 ## 1. 审计范围和Git边界
 
 - branch：`feat/rvir-v4-production-state-ownership-v1`；
 - 本轮设计base：`ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
-- S4-0 live admission/lease、S4-3A scratch finalization与S4-1B0 ternary endpoint纠正全部设计结果：
-  `7f9854332f223a703b9a2315f58bac56cf07a677`；
-- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..7f9854332f223a703b9a2315f58bac56cf07a677`
+- S4-0 live admission/lease、S4-3A scratch finalization、S4-1A prepare transaction与S4-1B0 ternary TIR
+  ABI全部设计结果：`a5ae9265c51a34fb5f76f41989cf877e362e9ef7`；
+- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..a5ae9265c51a34fb5f76f41989cf877e362e9ef7`
   和下列S4文档的完整版本为准；
 - S3 formal实现/结果不在本轮重新验收，但它是S4设计输入；S3独立exchange仍等待审计；
 - `.docops/exchange/gc0-1-prereg-20260826`异步audit文件和`docs/CIBC_for_DAC.pdf`是用户保留的范围外dirty文件，
@@ -72,15 +74,16 @@ speedup或complete-query性能已经存在。
 8. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_PREPARE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`；
 9. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_BOX_ENDPOINT_SUBGRADIENT_CLOSURE_2026_08_28.md`；
 10. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_ENDPOINT_IMPLEMENTATION_READINESS_2026_08_28.md`；
-11. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1BC_DAG_ADJOINT_PREFLIGHT_CORRECTION_2026_08_28.md`（历史v1）；
-12. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
-13. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
-14. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`；
-15. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
-16. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
-17. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
-18. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
-19. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
+11. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_TIR_ABI_IMPLEMENTATION_READINESS_2026_08_28.md`；
+12. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1BC_DAG_ADJOINT_PREFLIGHT_CORRECTION_2026_08_28.md`（历史v1）；
+13. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
+14. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
+15. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`；
+16. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
+17. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
+18. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
+19. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
+20. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
 
 ## 3. 已冻结的production事实，请独立复核
 
@@ -175,6 +178,15 @@ PASS要求：
 - 缺口确实是P-only gradient ABI，而非forward根本不支持其他site；
 - 旧二元selected-primal在site19失败是否确由606个Ainput zero错误映射到lower导致；
 - 三元`positive→lower / negative→upper / zero→center`是否与provider `abs`零点次梯度严格一致；
+- 浮点`x==x` NaN检查在当前TVM/CUDA lowering中被错误化简的FAIL探针是否可信；float32 exponent
+  bits/mask=`0x7f800000`是否是当前dtype下更强的fail-closed classifier；
+- select是否显式区分`+1/-1/0/invalid`，invalid生成bits=`0x7fc00000`的canonical quiet NaN，而非被default
+  else吞成center；
+- max-finite和min-subnormal反例是否证明midpoint operation order必须绑定`(lower+upper)*float32(0.5)`；
+- 独立pack/select的2 launch、5 unique tensor/view、6 argument occurrence、zero center tensor/view、zero workspace
+  物理账是否准确；
+- S4 cache key是否必须超出compute capability，绑定schema/symbol/TIR/target/shape/dtype/threads和三项policy；
+- cache hit后重验module receipt、旧binary cache key必须miss/拒绝是否足够防止历史模块冒充；
 - coefficient-action VJP作为规范oracle、selected-primal作为优化lowering的双层owner是否合理；
 - pass C按31→28→25→23→19→17即时导出六dα和site31 active dβ；
 - site25/site19可从existing residual scratch取incoming coefficient；
@@ -329,9 +341,14 @@ PASS要求：
 - S4-4 tamper inventory=`1..68`、order/worker=`6/18`；
 - Ainput exact class=`positive 8,689 / negative 9,137 / zero 606`；三元endpoint六dα overall max=
   `1.63912773132e-07`、active dβ max=`1.1920928955078125e-07`、sign mismatch均0；
+- 第一版nonfinite CUDA/TIR探针FAIL：浮点`x==x && abs(x)!=Inf`把NaN误归zero；该失败已保留而非删除；
+- 改用IEEE-754 float32 exponent位检查后边界探针PASS：`+0/-0`均为zero、正负subnormal保留符号、
+  NaN/±Inf=`-128`、invalid输出canonical NaN；2 launch、5/5 DLPack pointer exact、workspace=0；
 - formal in-memory CUDA/TIR pack/select逐位PASS，old binary误编码606 zero；selected hash=
-  `7e95e075...39b652`，derived-center hash=`d6164a06...f5b003`，extra center tensor=0；
-- nonfinite sentinel CUDA/TIR PASS：NaN/±Inf→`-128`→NaN，S4-1D final-finite gate前不发布result；
+  `7e95e075...39b652`，本次真实lower/upper derived-center hash=`2a3b69e1...5f003`，extra center tensor/view=0；
+- old R31B2 module hash before/after均为`3871bf0e...be575`，S4 module/cache key均与旧binary隔离；
+- max-finite与min-subnormal两组midpoint重结合反例均出现bit difference；
+- S4-1B0相关历史S2/R31B2回归：`14 passed in 15.75s`；production code diff=`0`；
 - existing live-return/device-commit targeted：`12 passed in 6.58s`；production code diff=`0`；
 - `git diff --check`、DocOps exchange validate/lint：PASS。
 
@@ -340,15 +357,18 @@ PASS要求：
 ## 7. 建议外审操作
 
 ```bash
-git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..7f9854332f223a703b9a2315f58bac56cf07a677
-git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..7f9854332f223a703b9a2315f58bac56cf07a677
+git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..a5ae9265c51a34fb5f76f41989cf877e362e9ef7
+git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..a5ae9265c51a34fb5f76f41989cf877e362e9ef7
 
 source env.sh
 /home/lee/miniconda3/envs/boundflow/bin/python -m pytest -q \
   tests/test_rvir_v4_live_return.py \
   tests/test_rvir_v4_native_kfsb.py \
   tests/test_fsg4_b3_device_atomic_commit.py \
-  tests/test_fsg4_b4a_terminal_lower_adjoint_handoff.py
+  tests/test_fsg4_b4a_terminal_lower_adjoint_handoff.py \
+  tests/test_r3_compiled_p_alpha_vjp.py \
+  tests/test_r3_full_lower_forward_tir.py \
+  tests/test_asplos27_s2_crown_pipeline.py
 ```
 
 另外请用自己的短脚本：
@@ -366,6 +386,10 @@ source env.sh
   `4.2375177145e-08/0`及六site overall `<=1.63912773132e-07/0`；
 - 从formal Ainput独立统计positive/negative/zero，并亲读provider `center-abs*radius`与PyTorch zero-subgradient；
 - 复核新增center tensor是否确属多余；验证S4新symbol而非修改v1能保持S2/S3 artifact identity；
+- 独立复现浮点`x==x` classifier失败，再以uint32 exponent mask重编译；不要只采信最终PASS；
+- 用max-finite与min-subnormal复现midpoint重结合位差，检查TIR attr/cache/receipt是否绑定operation order；
+- 自建cache collision：用旧binary key、删policy字段或改threads后尝试命中新ternary module，要求miss/拒绝；
+- 独立核对pack/select为2 launch、5 unique view、6 argument occurrence，且无physical center和workspace；
 - 检查tamper编号1—68；
 - 用CUDA tensor验证commit+restore后的`_version`；
 - 亲读provider core/post确认clear/prune/post顺序；
@@ -375,15 +399,17 @@ source env.sh
 
 1. 是否存在blocker/major，使S4-0在S3批准后仍不能开工？
 2. 三元box endpoint是否完整解释旧site19反例；derived-center且不新增tensor是否为正确最小ABI？
-3. six-site V→gradient→terminal-lA alias是否有无法由phase state解决的lifetime冲突？
-4. net scratch是否必须成为第13+条production数值path，还是应保持为独立phase-aware lifetime/finalization transaction？
-5. post failure后是否有比`COMMITTED_POST_FAILED_POISONED`更严格、可实现的安全语义？
-6. B0/R/C 18 fresh是否足够证明reference和candidate，不依赖历史`.pt`？
-7. stdlib raw schema是否缺dtype、negative-zero、NaN payload、alias或view metadata？
-8. executed-source inventory是否有更可靠的闭包算法？
-9. snapshot semantic truth、瞬时live observation和S4-1A prepared owner三段边界是否仍遗漏live alias/version race？
-10. 68类tamper还缺哪类可全重签semantic attack？
-11. 是否同意当前唯一执行顺序，不开放S4-P timing？
+3. IEEE exponent classifier、canonical NaN、operation-order绑定和独立cache key是否关闭了TIR ABI歧义？
+4. two-launch/5-view设计应保持独立到correctness closure，还是有充分理由在第一版就与相邻kernel融合？
+5. six-site V→gradient→terminal-lA alias是否有无法由phase state解决的lifetime冲突？
+6. net scratch是否必须成为第13+条production数值path，还是应保持为独立phase-aware lifetime/finalization transaction？
+7. post failure后是否有比`COMMITTED_POST_FAILED_POISONED`更严格、可实现的安全语义？
+8. B0/R/C 18 fresh是否足够证明reference和candidate，不依赖历史`.pt`？
+9. stdlib raw schema是否缺dtype、negative-zero、NaN payload、alias或view metadata？
+10. executed-source inventory是否有更可靠的闭包算法？
+11. snapshot semantic truth、瞬时live observation和S4-1A prepared owner三段边界是否仍遗漏live alias/version race？
+12. 68类tamper还缺哪类可全重签semantic attack？
+13. 是否同意当前唯一执行顺序，不开放S4-P timing？
 
 ## 9. 输出格式
 
