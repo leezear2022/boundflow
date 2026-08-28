@@ -10,6 +10,21 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：刷新S4设计外审交接至S4-0 construction readiness v10
+
+- design-result commit更新为`3f16a2709281db6d92cc711d3a2c97a7763a5a14`，冻结base仍为
+  `ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
+- 必读文档增至26份，加入S4-0 V4 construction package；top-level任务由23增至29，补exact-call identity、strict
+  provider extraction、双capture、D2H披露、stable reason和local/global exclusivity六项审计；
+- AC2改为五方identity，明确existing live helper不可复用、5 fresh/56 negative、零candidate而非零GPU活动；
+- evidence inventory加入V4 construction hash、`6/12/12/8502/34008/2/24/68016/56`与`32 passed`；
+- 末尾must-answer由22增至28；仍不新建S4 exchange、不开放production/formal/timing/performance。
+
+### 验证
+
+- handoff base/result commit、26份必读文档、29项top-level任务、28项末尾问题及V4字段：提交前验证；
+- `git diff --check`、DocOps validation/lint在提交前执行。
+
 ## 2026-08-29：关闭S4-0逐文件施工歧义并冻结V4 construction package
 
 - 新增784行
