@@ -1,5 +1,5 @@
 ---
-status: diagnostic-complete-corrected-v3-code-closed
+status: diagnostic-complete-v3-python-abi-frozen-code-closed
 date: 2026-08-28
 type: implementation-readiness-correction
 topic: boundflow
@@ -81,6 +81,54 @@ snapshot_validate_accepted_unowned_suffix=true
 
 因此S4-0的`beta_width == history_width`不是重复校验，而是阻止compiled optimizer取得history未拥有β slot的必要门禁。
 
+### 1.3 pinned PyTorch/CUDA身份原语探针
+
+在formal环境`torch 2.12.1+cu132 / cuda:0`现场实测：
+
+```text
+S4_LIVE_LEASE_PYTORCH_PRIMITIVES_PROBE_PASS
+storage_wrapper_ids_unique=1
+storage_cdata_unique=1
+base_view_storage_cdata_equal=true
+base_view_storage_data_ptr_equal=true
+base_view_tensor_data_ptr_equal=false
+base_view_offset=5
+base_detach_object_equal=false
+base_detach_storage_equal=true
+base_clone_storage_equal=false
+empty_data_ptrs=[0,0]
+empty_storage_cdata_equal=false
+post_mutation_versions=[1,1,1,0]
+weak_alive_with_strong_lease=true
+weak_alive_without_strong_lease=false
+```
+
+由此冻结：
+
+- object身份必须用强引用后的`current is original`，不能只保存`id()`；
+- storage身份至少绑定`device + untyped_storage()._cdata + storage.data_ptr() + storage.nbytes()`；Tensor
+  `data_ptr()`受view offset影响，不能单独代表storage；
+- empty tensor虽然storage `_cdata`不同，但两个pointer都可能是0；empty owner仍以object identity为第一门禁；
+- `detach()`会创建新Python object但共享storage/version，必须按object replacement拒绝；
+- weakref不能维持事务owner，外部mapping删除后会失效，必须持有strong reference。
+
+### 1.4 `_version`绕过反例
+
+同一环境分别执行普通in-place、`.data`写入、DLPack alias写入和same-object `set_`：
+
+```text
+S4_LIVE_LEASE_VERSION_BYPASS_PROBE_PASS
+normal_inplace:       version_changed=true,  content_changed=true
+data_inplace:         version_changed=false, content_changed=true
+dlpack_inplace:       version_changed=false, content_changed=true
+same_object_set_storage:
+                      object_same=true, storage_same=false, version_changed=true
+```
+
+所以`_version`是必要门禁但不是充分门禁。S4 correctness必须保留content hash重算，才能拒绝`.data`/DLPack/raw
+device write绕过。该hash可能产生device→host同步成本，必须在S4-P wrapper账中单列；在没有证明所有raw writer均不可达前，
+不得为了headline改成version-only guard。
+
 ## 2. 复用现有边界，不再造adapter
 
 ### 2.1 live source枚举
@@ -131,6 +179,20 @@ content_hash
 receipt_object_group / receipt_storage_group
 ```
 
+冻结raw storage token为：
+
+```text
+(
+  str(tensor.device),
+  int(tensor.untyped_storage()._cdata),
+  int(tensor.untyped_storage().data_ptr()),
+  int(tensor.untyped_storage().nbytes()),
+)
+```
+
+`_cdata`属于pinned PyTorch runtime私有身份，只在本进程lease内使用；不得进入canonical receipt。若未来PyTorch升级移除
+该字段，admission必须fail closed并重新审计token，不能静默降级为Tensor `data_ptr()`。
+
 最低方法：
 
 ```text
@@ -150,12 +212,25 @@ close() -> None
 5. 在应保持未变的phase，content hash exact；
 6. receipt admission hash和lease admission hash exact。
 
-若object已替换，即使内容完全相同也拒绝；若原object被in-place修改，即使后来把值改回，也以version漂移拒绝。
+若object已替换，即使内容完全相同也拒绝；若原object被普通in-place修改，即使后来把值改回，也以version漂移拒绝；
+若通过`.data`/DLPack绕过version，则以content mismatch拒绝。
 
 ### 3.3 serialization与生命周期门禁
 
-lease不得提供`to_dict()`或stable hash；`__getstate__`/`__reduce__`必须稳定抛出
-`LIVE_LEASE_SERIALIZATION_FORBIDDEN`对应异常。不得仅依赖“调用方不会序列化”的约定。
+lease和prepared wrapper必须是带`__slots__`的普通class，**不得是dataclass**。receipt仍是frozen dataclass。原因是
+`dataclasses.asdict()`会递归dataclass字段并绕过预期artifact边界；对非dataclass wrapper调用它会稳定`TypeError`。
+
+lease/wrapper不得提供`to_dict()`或stable hash；两者都必须实现`__copy__`、`__deepcopy__`、`__getstate__`、
+`__reduce__`、`__reduce_ex__`并稳定抛出`LIVE_LEASE_SERIALIZATION_FORBIDDEN`。只给lease加guard不够：wrapper浅拷贝
+可能生成共享同一lease的第二个外壳，虽然single-transfer仍会拒绝，但不应允许这种歧义。
+
+现场结果：
+
+```text
+copy(lease) / deepcopy(lease) / pickle(lease) = forbidden
+pickle(prepared wrapper) = forbidden
+dataclasses.asdict(non-dataclass wrapper) = TypeError
+```
 
 冻结状态机：
 
@@ -171,8 +246,9 @@ OPEN
 - S4-1A不得丢弃lease后只保留canonical receipt；
 - S4-2只修改candidate buffers，不修改lease source；
 - S4-3必须从**当前provider mapping**重新枚举12条target并与lease逐对象比较；
-- commit/abort后清空强引用并close；
+- commit/abort/poisoned后在`finally`清空强引用并close；不得依赖`__del__`；
 - close后任何read/revalidate/transfer都拒绝；
+- `close()`本身允许幂等，便于异常路径`finally`清理，但不恢复任何能力；
 - 不能跨query、跨core call、provider fallback或retry复用。
 
 ## 4. 冻结入口与返回类型
@@ -184,14 +260,14 @@ prepare_s4_mutable_state_admission_v1(
     snapshot: ProductionStateSnapshotV4,
     topology: tuple[ProductionReluTopologyV4, ...],
     production_plan: R31FullRegionPlanV1,
-    live_mutable_sources: Mapping[str, torch.Tensor],
+    live_mutable_sources: dict[str, torch.Tensor],
 ) -> PreparedS4MutableStateAdmissionV1
 ```
 
 其中：
 
 ```text
-PreparedS4MutableStateAdmissionV1:
+PreparedS4MutableStateAdmissionV1:       # normal class with __slots__, not dataclass
     receipt: S4MutableStateAdmissionV1
     _live_lease: S4LiveMutableLeaseV1
 
@@ -199,11 +275,31 @@ PreparedS4MutableStateAdmissionV1:
     close()
 ```
 
-wrapper、lease均不得canonicalize；只有`.receipt`允许进入artifact。若实现语言/typing原因采用
-`tuple[receipt, lease]`，必须额外以shared admission hash和single-transfer guard防止错配；优先采用wrapper。
+wrapper、lease均不得canonicalize/copy/pickle；只有`.receipt`允许进入artifact。wrapper不得公开lease property，
+`transfer_to_buffer_prepare()`成功后应把自身`_live_lease`置空，使第二次调用在进入S4-1A前拒绝。禁止退化为公开
+`tuple[receipt, lease]`，避免调用方拆散、错配或独立保存lease。
 
-入口仍必须先把mapping materialize成普通`dict`并拒绝lazy/callable provider view，但生成lease时应保留dict中原始Tensor的
-强引用，不能在函数返回前全部释放。
+入口只接受`type(live_mutable_sources) is dict`；这与existing helper返回类型一致，并排除覆写迭代/查找的dict subclass、
+lazy mapping和callable provider view。入口立即按canonical path形成tuple快照；生成lease时保留原始Tensor强引用，不能在
+函数返回前全部释放。
+
+### 4.1 冻结revalidation顺序
+
+为了使组合篡改得到稳定detail code，顺序固定为：
+
+1. lease state（closed/transfer）；
+2. receipt/lease admission hash；
+3. exact built-in dict与path coverage；
+4. `current is original`；
+5. raw storage token；
+6. shape/dtype/device；
+7. stride/storage offset；
+8. `_version`；
+9. content hash；
+10. cross-path alias projection。
+
+因此same-storage `detach/view`仍先报object replaced；same-object `set_`报storage replaced；普通`add_`报version mismatch；
+`.data`/DLPack写入报content mismatch。不得让一个宽泛`RECEIPT_IDENTITY_MISMATCH`取代这些stable detail。
 
 ## 5. S4-1A与S4-3的修正接口
 
@@ -220,7 +316,7 @@ prepare_s4_mutable_buffers_v1(admission, newly_reacquired_mapping, ...)
 ```text
 prepare_s4_mutable_buffers_v1(
     prepared_admission: PreparedS4MutableStateAdmissionV1,
-    current_live_sources: Mapping[str, torch.Tensor],
+    current_live_sources: dict[str, torch.Tensor],
     device,
     stream_identity,
 ) -> PreparedS4MutableBuffersV1
@@ -249,6 +345,9 @@ clean abort；不能向lease保存的旧对象写入后声称solver state已提�
 |---|---|---|
 | `LIVE_SOURCE_OBJECT_REPLACED` | `RECEIPT_IDENTITY_MISMATCH` | current provider path不再指向原Tensor object |
 | `LIVE_SOURCE_STORAGE_REPLACED` | `UNSAFE_ALIAS_OR_LIFETIME` | 原object合同下storage identity漂移 |
+| `LIVE_SOURCE_SHAPE_DTYPE_DEVICE_MISMATCH` | `DTYPE_OR_DEVICE_MISMATCH` | live physical signature漂移 |
+| `LIVE_SOURCE_STRIDE_OFFSET_MISMATCH` | `LAYOUT_NOT_NORMALIZABLE` | 同object布局/offset漂移 |
+| `LIVE_SOURCE_CONTENT_MISMATCH` | `RECEIPT_IDENTITY_MISMATCH` | version未变但content漂移也必须拒绝 |
 | `LIVE_LEASE_ADMISSION_MISMATCH` | `RECEIPT_IDENTITY_MISMATCH` | receipt与lease不属于同一次admission |
 | `LIVE_LEASE_ALREADY_TRANSFERRED` | `UNSAFE_ALIAS_OR_LIFETIME` | lease被第二个prepared runtime复用 |
 | `LIVE_LEASE_ALREADY_CLOSED` | `UNSAFE_ALIAS_OR_LIFETIME` | close后继续使用 |
@@ -259,7 +358,7 @@ reason仍映射到已有`VerificationRejectionReason`，不扩Verification IR vo
 
 ## 7. 修正后的测试最低集
 
-S4-0 minimum negative从30扩为至少38类。除V2测试外新增：
+S4-0 minimum negative从30扩为至少44类。除V2测试外新增：
 
 1. 全部source替换为same-content clone，canonical projection/hash相同，但lease拒绝；
 2. source替换为same-storage view，object guard拒绝；
@@ -273,6 +372,12 @@ S4-0 minimum negative从30扩为至少38类。除V2测试外新增：
 10. lease保持强引用：外部mapping/局部变量删除并GC后，原Tensor仍活到commit/close；
 11. commit/abort/poisoned每条路径均清空强引用且不可复用；
 12. artifact递归对象图只含receipt，不含lease/Tensor/raw identity。
+13. `.data.add_()`不改变source `_version`但content hash拒绝；
+14. DLPack alias写入不改变source `_version`但content hash拒绝；
+15. same-object `set_()`更换storage，storage guard先于version拒绝；
+16. `detach()`共享storage/version但object guard拒绝；
+17. prepared wrapper的copy/deepcopy/pickle全部拒绝；
+18. dict subclass/custom mapping即使内容相同也在读取Tensor前拒绝。
 
 还必须保留β width/history exploit专项测试；只运行`snapshot.validate()`不算关闭。
 
@@ -288,6 +393,21 @@ strong_reference_required=true
 canonical_receipt_alone_sufficient=false
 ```
 
+冻结guard顺序原型另得到：
+
+```text
+S4_LIVE_LEASE_STABLE_GUARD_ORDER_PROBE_PASS
+same_content_clone=LIVE_SOURCE_OBJECT_REPLACED
+same_storage_detach=LIVE_SOURCE_OBJECT_REPLACED
+same_object_storage_rebind=LIVE_SOURCE_STORAGE_REPLACED
+same_object_layout_change=LIVE_SOURCE_LAYOUT_MISMATCH  # prototype aggregate；production拆shape/stride码
+normal_inplace=LIVE_TENSOR_VERSION_MISMATCH
+data_version_bypass=LIVE_SOURCE_CONTENT_MISMATCH
+admission_mismatch=LIVE_LEASE_ADMISSION_MISMATCH
+double_transfer=LIVE_LEASE_ALREADY_TRANSFERRED
+after_close=LIVE_LEASE_ALREADY_CLOSED
+```
+
 ## 8. 文件边界与实施顺序
 
 S3批准后，S4-0仍只新增原计划的单个runtime模块和单个test模块；receipt、lease、prepared wrapper可以共处同一模块，
@@ -301,10 +421,10 @@ tests/test_asplos27_s4_mutable_state_admission.py
 建议代码顺序：
 
 1. canonical slot/receipt和现有V2 projection validation；
-2. live token捕获、strong-ref lease和serialization guard；
+2. dual storage token捕获、strong-ref lease和lease/wrapper serialization guard；
 3. prepared wrapper与single-transfer lifecycle；
 4. β width/history exact gate；
-5. 38+ negative与fresh-process receipt determinism；
+5. 44+ negative与fresh-process receipt determinism；
 6. 只在S4-0关闭后修改S4-1A prepared buffer实现。
 
 ## 9. 关闭门槛
@@ -316,8 +436,9 @@ S4-0只有同时满足以下条件才能关闭：
 - receipt与lease职责分离，artifact中lease/Tensor/raw identity为0；
 - current provider mapping整体/局部rebind均在mutation/commit前拒绝；
 - β width/history exact，未拥有后缀被拒绝；
-- lease single-transfer/single-query/close/serialization门禁全部机械测试；
-- minimum 38类negative exact reason；
+- lease single-transfer/single-query/strong-ref/idempotent-close/serialization门禁全部机械测试；
+- `.data`/DLPack version bypass由content hash拒绝，相关同步成本不隐瞒；
+- minimum 44类negative exact reason；
 - dense/GPU/TIR/provider callback/timing/performance仍为0/false；
 - S3 external audit已经approved并close。
 

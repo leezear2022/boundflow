@@ -132,7 +132,7 @@ prepare_s4_mutable_state_admission_v1(
     snapshot: ProductionStateSnapshotV4,
     topology: tuple[ProductionReluTopologyV4, ...],
     production_plan: R31FullRegionPlanV1,
-    live_mutable_sources: Mapping[str, torch.Tensor],
+    live_mutable_sources: dict[str, torch.Tensor],
 ) -> PreparedS4MutableStateAdmissionV1
 ```
 
@@ -289,7 +289,7 @@ snapshot中`ownership=MUTABLE_COPY_OUT`的集合必须恰等于：
 
 ## 9. 修正后的测试最低集
 
-原20类negative保留并扩为至少38类；除原V2用例外新增关键用例：
+原20类negative保留并扩为至少44类；除原V2用例外新增关键用例：
 
 1. 两个distinct view共享nonempty storage，拒绝；
 2. 同一Tensor object绑定两个mutable path，拒绝；
@@ -312,6 +312,10 @@ snapshot中`ownership=MUTABLE_COPY_OUT`的集合必须恰等于：
 19. lease只能transfer一次，close后不可再用；
 20. S4-1A pack后provider rebind，S4-3 precommit拒绝；
 21. 外部mapping引用删除并GC后，lease强引用保持原Tensor直到commit/close。
+22. `.data`和DLPack alias写入在`_version`不变时仍由content hash拒绝；
+23. same-object `set_`按storage replaced拒绝；
+24. lease/wrapper均为非dataclass `__slots__` class，copy/deepcopy/pickle拒绝；
+25. input只接受exact built-in dict，dict subclass/custom Mapping拒绝。
 
 positive还必须证明：
 

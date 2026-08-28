@@ -252,7 +252,7 @@ S4-1A只实现/测试状态机与buffer owner，不执行真实evaluation；S4-1
 ```text
 prepare_s4_mutable_buffers_v1(
     prepared_admission: PreparedS4MutableStateAdmissionV1,
-    current_live_sources: Mapping[str, torch.Tensor],
+    current_live_sources: dict[str, torch.Tensor],
     device: torch.device,
     stream_identity: ...,
 ) -> PreparedS4MutableBuffersV1
@@ -265,8 +265,9 @@ commit/abort，不能pack后释放原source身份。
 严格步骤：
 
 1. 校验prepared admission中的receipt/lease shared admission identity；
-2. materialize current provider mapping并验证path集合exact；
-3. 逐slot要求current tensor `is` lease strong ref，并重查raw storage、`_version`、shape/dtype/device/stride/offset/content；
+2. 要求current provider mapping为existing helper返回的exact built-in dict并验证path集合exact；
+3. 逐slot要求current tensor `is` lease strong ref，并按raw storage、shape/dtype/device、stride/offset、`_version`、
+   content固定顺序重查；`.data`/DLPack version bypass必须由content hash拒绝；
 4. 确认target device为同一CUDA device、dtype为float32、目标stream identity有效；
 5. 逐slot从live source `[0,0]`建立contiguous leaf α parameter；
 6. 逐slot建立同shape persistent dα buffer；
@@ -400,6 +401,7 @@ tests/test_asplos27_s4_ordered_buffer_abi.py
 - S4-0 admission后修改live source content或`_version`，prepare在任何allocation前拒绝；
 - S4-0 admission后用same-content clone或same-storage view替换provider path，prepare在任何allocation前拒绝；
 - 同一prepared admission/lease第二次prepare拒绝；prepared owner不得序列化lease；
+- `.data`/DLPack alias绕过`_version`的content drift拒绝；hash同步成本留到S4-P单列，不在correctness阶段移除；
 - 用snapshot CPU clone替换live CUDA mapping，拒绝；
 - prepare结果递归持有provider source Tensor，拒绝。
 

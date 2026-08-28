@@ -10,6 +10,18 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-28：S4-0 V3冻结pinned PyTorch/CUDA identity与serialization ABI
+
+- 在`torch 2.12.1+cu132/cuda:0`验证view共享storage `_cdata`与storage起始pointer，但Tensor `data_ptr()`受offset影响；
+  empty tensor pointer均为0而storage `_cdata`各异；`detach()`新建object但共享storage/version；
+- 弱引用在外部mapping删除后失效，strong-ref lease是防止object/address reuse并维持事务owner的必要条件；
+- 实测普通in-place增加`_version`，但`.data.add_()`与DLPack alias写入改变content而原Tensor `_version`不变；因此
+  correctness保留content hash，未来S4-P单列同步成本，禁止未证明地降级为version-only；
+- 冻结storage token=`device+untyped_storage._cdata+storage.data_ptr+nbytes`，raw字段只在进程内lease使用；
+- lease/prepared wrapper固定为非dataclass `__slots__` class，二者同时拒绝copy/deepcopy/pickle；receipt继续frozen dataclass；
+- 冻结guard顺序为state→admission→exact dict/coverage→object→storage→physical signature→stride/offset→version→content→alias；
+- negative最低由38扩为44类，新增version bypass、same-object storage rebind、detach和custom Mapping门禁；S4 code仍closed。
+
 ## 2026-08-28：S4-0 V3以ephemeral strong-ref lease关闭跨阶段object replacement漏洞
 
 - 审计V2“瞬时live mapping→tensor-free receipt→S4-1A重新取得mapping”后发现稳定投影无法证明跨时间对象身份：
