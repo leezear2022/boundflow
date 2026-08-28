@@ -1,12 +1,12 @@
 ---
-status: ready-for-external-design-audit-v16-s4-2-construction-readiness-frozen
+status: ready-for-external-design-audit-v17-s4-3-construction-readiness-frozen
 date: 2026-08-29
 type: external-audit-handoff
 topic: boundflow
 slug: asplos27-s4-design-audit
 audit-kind: preregistration-and-implementation-blueprint
 base-commit: ebf45cc72438141d8f0b35dadfd5cf774d7e753f
-design-result-commit: e6c8a786cd70e4c465fc0965095c1955a972a9a6
+design-result-commit: c3af760a391d6368396d3c39fc9045f363eebfa6
 execution-authority: false
 code-change-open: false
 performance-claimed: false
@@ -109,6 +109,22 @@ speedup或complete-query性能已经存在。
 76. A/B与B/C各6对、正反各3的24-worker topology是否为合理最小顺序平衡设计；
 77. A/B/C per-run raw floor=`2,837,288/2,871,296/1,511,936 B`及总计`60,550,896 B`是否正确，
     `491,774 B`降为known base lower bound后还有哪些必须在实现前冻结的storage。
+78. S4-3 whole-core transaction是否必须从terminal claim起算，而不是从第一条device copy起算；post-claim pre-copy
+    failure进入`STAGING_POISONED`是否正确？
+79. provider scratch 36项finalization作为独立可失败mutation是否完整；partial sentinel normalization后是否存在任何
+    可安全retry/provider reentry路径？
+80. 23-state/22-event/40-legal/466-invalid模型是否完整；hash=`6ed3d2fd...a3388a`能否独立重建？
+81. 12 device+host final packet+intermediate container clear=`14` mutation是否是正确logical commit边界？
+82. prefix-only inverse restore且untouched suffix write=0是否是in-place PyTorch `_version`约束下最强可实现语义？
+83. provider `BatchedDomainList.add`的多owner mutation surface是否证明queue不能声称原子；fault后只盘点changed units并
+    `QUEUE_POISONED`是否足够？
+84. add成功但`check_worst_domain`失败时，candidate add count=1且query poisoned是否正确？
+85. R/C由5对改为6对、`RC/CR=3/3`、12 fresh是否为合理最小顺序平衡设计？
+86. downstream semantic occurrence=`1,025,952 B`、R/C per-run=`3,897,248/2,537,888 B`、总计
+    `38,610,816 B`是否算术和scope均正确？
+87. tensor-occurrence、unique content和physical file bytes三口径是否足以避免raw预算claim漂移？
+88. `559,838 B`降为known tensor/base lower bound后，prepared transaction/provider scratch/KFSB/post/queue/allocator
+    还应强制测量哪些storage与phase peak？
 
 ## 1. 审计范围和Git边界
 
@@ -116,9 +132,9 @@ speedup或complete-query性能已经存在。
 - 本轮设计base：`ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
 - S4-0 live admission/lease、S4-3A scratch finalization、S4-1A prepare transaction、S4-1B0 ternary TIR、
   S4-1B/1C selector/gradient/arena ABI、S4-1D evaluator、S4-2 policy、S4-3 whole-core transaction及S4-4 formal
-  evidence readiness、S4-0 V4、S4-1A V5、S4-1B0、S4-1B、S4-1C、S4-1D与S4-2 construction readiness
-  全部设计结果：`e6c8a786cd70e4c465fc0965095c1955a972a9a6`；
-- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..e6c8a786cd70e4c465fc0965095c1955a972a9a6`
+  evidence readiness、S4-0 V4、S4-1A V5、S4-1B0、S4-1B、S4-1C、S4-1D、S4-2与S4-3 construction readiness
+  全部设计结果：`c3af760a391d6368396d3c39fc9045f363eebfa6`；
+- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..c3af760a391d6368396d3c39fc9045f363eebfa6`
   和下列S4文档的完整版本为准；
 - S3 formal实现/结果不在本轮重新验收，但它是S4设计输入；S3独立exchange仍等待审计；
 - `.docops/exchange/gc0-1-prereg-20260826`异步audit文件和`docs/CIBC_for_DAC.pdf`是用户保留的范围外dirty文件，
@@ -164,10 +180,11 @@ speedup或complete-query性能已经存在。
 26. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`（V1权威施工合同）；
 27. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
 28. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_29.md`；
-29. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
-30. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
-31. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_EVIDENCE_IMPLEMENTATION_READINESS_2026_08_29.md`；
-32. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
+29. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`（V1权威施工合同）；
+30. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
+31. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
+32. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_EVIDENCE_IMPLEMENTATION_READINESS_2026_08_29.md`；
+33. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
 
 ## 3. 已冻结的production事实，请独立复核
 
@@ -583,7 +600,7 @@ PASS要求：
 - 本次S4-1D construction依赖回归：`37 passed in 20.65s`；production code diff=`0`；
 - 本次S4-2 readiness依赖回归：`41 passed in 26.63s`；production code diff=`0`；
 - S4-2/S4-3 ledger检查：`491,774/559,838 B`、checkpoint `[0,6,7,8,9]`、10-step patience `>10`
-  不可达；本版32份必读文档全部存在；
+  不可达；本版33份必读文档全部存在；
 - S4-2 construction package=`1184 lines`、file hash=
   `b473e31bd00df48499288f60b4f92b8230a69cc5a22ba6762972e5c8391524e3`；production code diff=`0`；
 - policy run机械模型=`16 states/16 events/32 legal/224 invalid`，canonical hash=
@@ -601,7 +618,17 @@ PASS要求：
 - true B3-C official post=`1`，query-total domain add=`2`、candidate-post add=`1`；post CUDA allocated delta=`0`；
 - first-copy fault后current v1 copy seam=`13`，version delta为一条`+2`、11条untouched `+1`，证明prefix-only
   restore与poison状态是必要修正；
-- S4-3 transition/ledger canonical hash=`833e8a9b...6ccaf5`；本轮依赖回归=`37 passed in 20.45s`；
+- S4-3旧readiness粗粒度transition hash=`833e8a9b...6ccaf5`已被施工包取代；旧live诊断事实仍保留；
+- S4-3 construction package=`1134 lines`、file hash=
+  `0a2a9612dbe401fd5c1afb23646eb3ad11c6958dc0c95f7634bf9ff3b63644a6`；production code diff=`0`；
+- whole-core机械模型=`23 states/22 events/40 legal/466 invalid`，canonical hash=
+  `6ed3d2fd946aaa0f6342f637a4754cc50eeec96e24392ed3b42adbbf92a3388a`；
+- logical commit=`12 device + host + container = 14`；36项provider scratch finalization和queue partial mutation均进入
+  poison合同；
+- S4-3 formal修正为R/C 6对、`RC/CR=3/3`、12 fresh；downstream/R/C per-run tensor occurrence=
+  `1,025,952/3,897,248/2,537,888 B`，总计`38,610,816 B`；
+- `559,838 B`降为known tensor/base lower bound，不再称total-new或完整footprint；
+- 本次S4-3 construction依赖回归=`63 passed in 8.96s`；production code diff=`0`；
 - existing live-return/device-commit targeted：`12 passed in 6.58s`；production code diff=`0`；
 - S4-0 construction依赖回归：`32 passed in 6.93s`；canonical JSON stdlib重算PASS；production code diff=`0`；
 - S4-1A construction依赖回归：`48 passed in 189.07s`；canonical JSON/bytes stdlib重算PASS；production code diff=`0`；
@@ -612,8 +639,8 @@ PASS要求：
 ## 7. 建议外审操作
 
 ```bash
-git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..e6c8a786cd70e4c465fc0965095c1955a972a9a6
-git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..e6c8a786cd70e4c465fc0965095c1955a972a9a6
+git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..c3af760a391d6368396d3c39fc9045f363eebfa6
+git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..c3af760a391d6368396d3c39fc9045f363eebfa6
 
 source env.sh
 /home/lee/Codes/alpha-beta-CROWN/.venv/bin/python -m pytest -q \
@@ -697,6 +724,15 @@ source env.sh
 - 亲读production checkpoint条件，独立重算fixed ordinal `[0,6,7,8,9]`和patience reachability；
 - 以相同state/defaults独立比较functional Adam和live Adam，不采信summary的63/63；
 - 重算S4-2 current/keep-best/shadow与CPU step ledger，检查fixed intermediate clone是否被安全移除；
+- 从S4-3施工包重建23-state/22-event模型，确认40 legal、466 invalid及`6ed3d2fd...a3388a`；
+- 在terminal claim后、KFSB、scratch finalization、core staging、device/host/container、post、add、check-worst各点注入
+  fault，确认只在claim前可clean，其余分别进入staging/commit/post/queue poison；
+- 对36项provider scratch finalization逐ordinal fault，确认partial sentinel state不触发provider reentry或retry；
+- 对12条device copy逐ordinal fault，检查只逆序恢复successful prefix、untouched suffix write=0且`_version`不可逆；
+- 亲读`BatchedDomainList.add`并建立mutation-unit before/after清单；add中途与check-worst故障后均不得second add；
+- 独立重算whole-core/post历史semantic occurrence=`821,976/50,976 B`、transaction=`102,024 B`、queue=
+  `50,976 B`和总downstream=`1,025,952 B`；再核R/C 6-pair总计`38,610,816 B`；
+- 检查artifact同时披露semantic occurrence、unique content与physical file bytes，不把content-addressed去重冒充漏raw；
 - 亲读provider core/post确认clear/prune/post顺序；
 - 搜索S4文档所有`claimed/open/validated`词，核对没有implementation或performance漂移。
 
@@ -779,6 +815,17 @@ source env.sh
 75. 24-worker 6-pair balanced topology是否合理；A/B/B/C的B worker必须独立重跑是否正确？
 76. `60,550,896 B` mandatory transition-tensor floor是否逐项成立；policy projection、source、receipt和完整storage
     还应强制加入哪些raw/ledger字段？
+77. whole-core transaction从terminal claim开始是否必要；claim后尚未device mutation的failure为何不能clean retry？
+78. 36项scratch finalization的attribute inventory、partial failure和provider β=0合同是否完整？
+79. 23-state/22-event/40-legal/466-invalid模型是否遗漏scratch、post、check-worst或owner close转换？
+80. 14-step commit是否正确；host/container mutation失败后best-effort内容恢复为何仍必须commit poison？
+81. prefix-only inverse restore、untouched suffix write=0与逐path version receipt是否充分关闭blanket rollback错误？
+82. fixed `BatchedDomainList.add` mutation-unit inventory是否完整；生产O(1)与formal/fault全快照分层是否合理？
+83. add成功但check-worst失败时，queue已改变且query必须终止的判断是否正确？
+84. official post/candidate add/query total add/check-worst=`1/1/2/1`四个counter是否足以防止summary混淆？
+85. R/C 6对/12 fresh、`RC/CR=3/3`是否是S4-3 correctness的合理最小拓扑？
+86. `1,025,952` downstream、R/C per-run `3,897,248/2,537,888`与总计`38,610,816 B`是否逐项成立？
+87. `559,838 B`作为known base lower bound的排除项是否完整；实现receipt还需冻结哪些physical peak测点？
 
 ## 9. 输出格式
 
