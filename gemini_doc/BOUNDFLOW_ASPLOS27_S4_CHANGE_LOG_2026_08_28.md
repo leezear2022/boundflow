@@ -31,3 +31,16 @@ performance-claimed: false
 - RVIR native optimizer/mutation/live return、FSG4 same-solver合同与S3 pipeline targeted：`44 passed`；
 - S4 source mapping与`git diff --check`：PASS；
 - DocOps change/validation与lint：最终落账后执行。
+
+## 2026-08-28：完成六路α/active β compiled VJP可行性审计
+
+- 从冻结capture逐site恢复六个logical shape、compressed width、β owner及active β location；
+- 对照R3 bounded-arena trace，确认site31/25分别有exact sparse Linear/Conv单siteTIR，其余site不能直接串
+  现有B4-B2 wrapper；
+- 亲读R31B1、R31B2、D1C、D2B与S2/S3代码，确认整图forward早已消费六α与active β，当前缺口仅为P-only
+  gradient output ABI；
+- 冻结all-state VJP物理方案：一次完整sign pass、一次六site effective-value pass、一次coefficient重算并在每个
+  ReLU即时压缩gradient；
+- 复用D1C/D2B residual stage scratch导出site25/site19 incoming coefficient，保持跨层saved dense A=`0`；
+- 新增独立可行性文档并把S4-1细分为1A ABI、1B effective values、1C emitters、1D evaluator closure；
+- 本轮仍无S4代码/GPU执行/性能claim，S3外审门禁不变。

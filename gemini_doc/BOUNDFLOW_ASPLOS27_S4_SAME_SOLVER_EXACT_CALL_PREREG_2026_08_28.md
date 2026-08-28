@@ -157,6 +157,20 @@ ordinal 9必须选择性导出terminal lower、lA及需要的intermediate bounds
 KFSB、atomic commit和queue/post继续由已有RVIR owner执行，不纳入compiled tensor region，也不因candidate
 路径改变顺序。
 
+### 2.5 all-state VJP物理实现冻结
+
+详细coverage与算法见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_ALL_STATE_VJP_FEASIBILITY_2026_08_28.md`。审计确认现有整图forward已经消费
+六α和active β，缺口是custom backward只导出P gradient，不是其余五site完全没有编译。
+
+S4-1实现固定复用当前两个coefficient arena，按“完整sign pass → 六site effective-value pass → 第二次
+coefficient pass逐site即时压缩gradient”执行。不得保存跨层float32 dense A，也不得把六个B4-B2单sitewrapper
+串成production路径。B4-B2只作为数学oracle/codegen资产；D1C/D2B residual stage scratch用于暴露site25/site19
+的内部incoming coefficient。
+
+S4-1内部顺序固定为1A all-state ABI、1B六site effective values、1C六dα/active dβ emitters、1D single-evaluation
+five-fresh closure。四步完成前S4-2继续关闭。
+
 ## 3. 分阶段门禁
 
 ### S4-0：production signature admission（无GPU执行）
@@ -187,6 +201,8 @@ GO：六α+六β全覆盖，active β=`1/1`，且schema无模型特判。否则S
 - logical evaluation=`1`；provider/fallback/native-shadow/eager=`0`；
 - per-site Python dispatch、warm DLPack、dynamic output allocation=`0`；
 - saved/persistent dense A=`0`；terminal handoff在非terminal ordinal必须不存在；
+- six-site effective primal arena、sign bitmap与compressed output必须分项披露bytes，禁止通过重命名隐藏内存；
+- coefficient arena恰为existing 2个；site25/site19从staged residual scratch即时导出，不得另跑native Conv；
 - five fresh correctness，任一site或元素不等价即NO-GO。
 
 S4-1不计时；通过只开放S4-2。
