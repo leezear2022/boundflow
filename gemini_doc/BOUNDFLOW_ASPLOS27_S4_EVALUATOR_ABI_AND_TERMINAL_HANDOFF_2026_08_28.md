@@ -285,8 +285,9 @@ S4 correctness保持KFSB不变是正确的ownership切分，但S4-P必须单独�
 
 S3外审批准后：
 
-1. S4-0先交付compressed slot descriptor、stored/active/preserved coverage及瞬时live object/storage/version lease；
-2. S4-1A重新验证live lease后绑定独立leaf lower-α/active-β buffers、empty β token、persistent gradients和ordered ABI；
+1. S4-0先交付tensor-free compressed slot receipt及不可序列化strong-ref live lease；
+2. S4-1A从current provider mapping逐对象重验并单次接管lease，然后绑定独立leaf lower-α/active-β buffers、empty β
+   token、persistent gradients和ordered ABI；lease持续到S4-3 commit/abort，不在pack后丢弃；
 3. S4-1B0关闭Ainput zero→center三元endpoint，S4-1B/1C完成六V与六路gradient；
 4. S4-1D完成single-evaluation closure；
 5. S4-2A抽出sealed policy driver，以native dense evaluator回归原行为；

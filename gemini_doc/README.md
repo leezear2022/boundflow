@@ -11,6 +11,7 @@ terminal bridge。S3外审批准前代码/timing关闭。见
 `BOUNDFLOW_ASPLOS27_S4_EVALUATOR_ABI_AND_TERMINAL_HANDOFF_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_0_MUTABLE_STATE_ADMISSION_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_0_ADMISSION_PREFLIGHT_CORRECTION_2026_08_28.md`、
+`BOUNDFLOW_ASPLOS27_S4_0_LIVE_LEASE_IMPLEMENTATION_READINESS_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1A_ORDERED_BUFFER_ABI_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1BC_DAG_ADJOINT_PREFLIGHT_CORRECTION_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`、
@@ -25,10 +26,11 @@ terminal bridge。S3外审批准前代码/timing关闭。见
 
 S4-0开工前源码审计纠正了offline snapshot与live binding的边界：`ProductionStateSnapshotV4`会保存CPU clone，
 其alias group按source Tensor object `id`而非storage生成，也不含live `_version`/stride/offset；因此原三输入
-`snapshot+topology+plan`不能关闭live mutation ownership。V2仍不新增IR，只在admission入口瞬时接收
-`Mapping[path, live Tensor]`，检查object/storage/version/device/content后返回tensor/pointer-free receipt。R31
-`source_state_hash`绑定dense mapping而非snapshot，现作为oracle provenance；另增可独立重算的plan/snapshot projection
-hash。β width与history从前缀相等收紧为exact，S4-0 negative最低扩为30类，S4-1A pack前必须重验live lease。
+`snapshot+topology+plan`不能关闭live mutation ownership。V3仍不新增IR：admission同时返回tensor/pointer-free canonical
+receipt和不可序列化strong-ref ephemeral lease。反例证明same-content clone可产生完全相同的stable group/hash却不是原
+object/storage，故lease必须从S4-0经S4-1A保留到S4-3 current-provider precommit复核。R31 `source_state_hash`绑定dense
+mapping而非snapshot，现作为oracle provenance；另增可独立重算的plan/snapshot projection hash。β width与history从前缀
+相等收紧为exact，S4-0 negative最低扩为38类；receipt进artifact，lease绝不进artifact或跨query cache。
 这些是设计修正，不是S4实现或性能结果。
 
 S4-3进一步确认exact-call不是薄adapter：真实事务还包含KFSB三次batch-24 child CROWN、12条return constructor、

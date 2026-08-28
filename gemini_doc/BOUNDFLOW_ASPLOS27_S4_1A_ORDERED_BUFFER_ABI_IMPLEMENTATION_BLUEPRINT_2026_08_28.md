@@ -1,5 +1,5 @@
 ---
-status: corrected-v2-implementation-blueprint
+status: corrected-v3-implementation-blueprint
 date: 2026-08-28
 type: implementation-plan
 topic: boundflow
@@ -27,9 +27,10 @@ TIR launch。核心选择是：
 5. hot evaluator调用只接受ordinal/version/token，不接受dict、semantic-path lookup、任意callback或动态tensor列表；
 6. 所有DLPack view只在prepare阶段建立，warm evaluation新建view=`0`。
 
-这不是新的IR。S4-0 receipt是tensor-free admission，但含瞬时live source观察得到的object/storage/version projection；
-S4-1A对象是prepared runtime instance，必须重新取得同一live mapping并在pack前复核lease。Plan/Bound/Verification Graph
-仍由已有owner负责。
+这不是新的IR。S4-0现在返回`PreparedS4MutableStateAdmissionV1`：公开部分是tensor-free receipt，私有部分是强引用
+原始source的ephemeral lease。S4-1A必须从current provider mapping复核同一Python object/storage/version后接管该lease，
+不能仅凭receipt稳定group重新取得same-content clone。Plan/Bound/Verification Graph仍由已有owner负责。V3反例与生命周期见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_LIVE_LEASE_IMPLEMENTATION_READINESS_2026_08_28.md`。
 
 ## 1. 为什么不能沿用完整α source作为optimizer参数
 
@@ -141,7 +142,8 @@ runtime对象可以持有tensor，但其`metadata()`/artifact receipt不得序�
 职责：
 
 - 验证S4-0 admission hash与snapshot hash；
-- 重新验证live source path/object/storage/version/shape/dtype/device/stride/offset/content与admission lease；
+- 从prepared admission单次transfer live lease，并从current provider mapping验证path、Python object、raw storage、version、
+  shape/dtype/device/stride/offset/content；
 - 一次性pack 6 α + active β；
 - 创建persistent gradient/lower/upstream；
 - 建立slot ordinal→physical buffer的tuple，不建立hot dict；
@@ -153,6 +155,7 @@ runtime对象可以持有tensor，但其`metadata()`/artifact receipt不得序�
 
 ```text
 admission
+live_source_lease              # private, nonserializable, kept through S4-3
 physical_slots                  # tuple，严格admission order
 alpha_parameters                # tuple[6]
 alpha_gradients                 # tuple[6]
@@ -248,21 +251,22 @@ S4-1A只实现/测试状态机与buffer owner，不执行真实evaluation；S4-1
 
 ```text
 prepare_s4_mutable_buffers_v1(
-    admission: S4MutableStateAdmissionV1,
-    live_mutable_sources: Mapping[str, torch.Tensor],
+    prepared_admission: PreparedS4MutableStateAdmissionV1,
+    current_live_sources: Mapping[str, torch.Tensor],
     device: torch.device,
     stream_identity: ...,
 ) -> PreparedS4MutableBuffersV1
 ```
 
-不能从snapshot CPU clone直接pack后声称接入live solver；必须使用与S4-0相同semantic path的当前live tensor。mapping只在
-prepare调用中读取，prepared owner只持有新建parameter/output buffer，不保留provider source Tensor。
+不能从snapshot CPU clone直接pack后声称接入live solver；必须使用current provider mapping中的原Tensor。mapping只在
+prepare调用中读取，不保留provider lookup callback；但prepared owner必须接管S4-0 strong-ref lease并保持到S4-3
+commit/abort，不能pack后释放原source身份。
 
 严格步骤：
 
-1. 校验admission/snapshot/plan binding identity；
-2. 固化live mapping并验证path集合exact；
-3. 逐slot重查live object/storage group、`_version`、shape/dtype/device/stride/offset/content；
+1. 校验prepared admission中的receipt/lease shared admission identity；
+2. materialize current provider mapping并验证path集合exact；
+3. 逐slot要求current tensor `is` lease strong ref，并重查raw storage、`_version`、shape/dtype/device/stride/offset/content；
 4. 确认target device为同一CUDA device、dtype为float32、目标stream identity有效；
 5. 逐slot从live source `[0,0]`建立contiguous leaf α parameter；
 6. 逐slot建立同shape persistent dα buffer；
@@ -270,11 +274,11 @@ prepare调用中读取，prepared owner只持有新建parameter/output buffer，
 8. empty β只建立token，物理buffer/optimizer ordinal=`-1`；
 9. 建立persistent lower=`[D,1]`与upstream=`-1`；
 10. 验证device initial hash与admission active hash一致；
-11. 丢弃所有provider live source临时引用，递归检查prepared owner无provider tensor；
+11. 丢弃current mapping容器/provider callback，但把single-transfer lease移入prepared owner；
 12. 记录parameter/gradient/output pointer identity；
 13. 为所有未来TIR直接参数建立DLPack view；
 14. 验证DLPack round-trip pointer exact；
-15. 构造tensor-free prepare receipt；
+15. 构造tensor-free prepare receipt；artifact walker必须跳过/拒绝private lease；
 16. 将状态置为`PREPARED/version=0/generation=-1`。
 
 S4-1A不得创建full `[2,1,D,W]` device α copy、dense `[D,*feature_shape]` α/β、Adam、TIR module、CUDA Graph或
@@ -394,6 +398,8 @@ tests/test_asplos27_s4_ordered_buffer_abi.py
 - 异常后state version或pointer manifest漂移；
 - 全重签receipt后修改logical bytes、view count或claim flag。
 - S4-0 admission后修改live source content或`_version`，prepare在任何allocation前拒绝；
+- S4-0 admission后用same-content clone或same-storage view替换provider path，prepare在任何allocation前拒绝；
+- 同一prepared admission/lease第二次prepare拒绝；prepared owner不得序列化lease；
 - 用snapshot CPU clone替换live CUDA mapping，拒绝；
 - prepare结果递归持有provider source Tensor，拒绝。
 

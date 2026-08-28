@@ -1,5 +1,5 @@
 ---
-status: diagnostic-complete-corrected-v2-code-closed
+status: diagnostic-complete-corrected-v3-code-closed
 date: 2026-08-28
 type: implementation-preflight-correction
 topic: boundflow
@@ -32,9 +32,11 @@ snapshot + topology + R31 plan → tensor-free admission
 - `R31FullRegionPlanV1.source_state_hash`绑定的是dense native mapping hash，不是snapshot hash；若S4-0禁止调用dense
   initializer，就不能把该字段当作可独立重算的snapshot binding。
 
-因此S4-0 V2仍只输出一个tensor-free receipt，但编译入口必须额外接收**瞬时live mutable source mapping**。它只在函数内
-检查live object/storage/version/stride/device/content，返回前不保留Tensor、pointer或provider object。该mapping是runtime
-函数参数，不是新IR，也不序列化。
+因此S4-0必须同时形成两个不同生命周期的结果：一个tensor-free canonical receipt，以及一个持有原始Tensor强引用和
+raw object/storage/version token的ephemeral live lease。mapping是runtime函数参数，不是新IR；lease也不是IR或artifact，
+但必须一直活到S4-1A pack并随prepared runtime转移到S4-3 precommit。只返回receipt会允许same-content clone用同样的稳定
+group编号冒充原object。完整反例与V3冻结接口见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_LIVE_LEASE_IMPLEMENTATION_READINESS_2026_08_28.md`。
 
 ## 1. 独立源码证据
 
@@ -111,24 +113,27 @@ S4-0仍不新增IR层。对象职责如下：
 ProductionStateSnapshotV4       semantic content/history/policy truth
 ProductionReluTopologyV4        provider/native topology links
 R31FullRegionPlanV1             current formal static compiled-plan specialization
-Mapping[path, live Tensor]      transient observation only; never stored
+Mapping[path, live Tensor]      current-provider source view
               │
               ▼
-S4MutableStateAdmissionV1       tensor-free canonical runtime receipt
+PreparedS4MutableStateAdmissionV1
+  ├─ S4MutableStateAdmissionV1  tensor-free canonical runtime receipt
+  └─ S4LiveMutableLeaseV1       ephemeral strong-ref runtime owner
 ```
 
-瞬时mapping不能成为provider回调或延迟读取owner；函数返回后唯一持久对象是receipt。S4-1A随后依据receipt重新取得live
-targets，并在任何buffer bind前复核object/storage/version guard。S4-0不提前拥有prepared buffer。
+mapping不能成为provider回调或延迟读取owner。receipt不保存Tensor/raw identity；lease则只在本进程当前exact-call中保存
+强引用和raw token，禁止序列化、跨query缓存或重复transfer。S4-1A必须消费prepared admission并转移lease；S4-3 commit前
+必须重新枚举current provider targets并与lease逐对象复核。S4-0不提前拥有GPU prepared buffer。
 
 ## 3. 修正函数签名
 
 ```text
-compile_s4_mutable_state_admission_v1(
+prepare_s4_mutable_state_admission_v1(
     snapshot: ProductionStateSnapshotV4,
     topology: tuple[ProductionReluTopologyV4, ...],
     production_plan: R31FullRegionPlanV1,
     live_mutable_sources: Mapping[str, torch.Tensor],
-) -> S4MutableStateAdmissionV1
+) -> PreparedS4MutableStateAdmissionV1
 ```
 
 函数必须拒绝lazy mapping、callable、provider object和可在迭代中改变的自定义mapping；入口先复制为普通`dict`，验证
@@ -183,19 +188,21 @@ beta_live_content_hash
 当前formal门禁要求12个live mutable path object group唯一；nonempty storage group也唯一。五个empty β不因零pointer
 互相alias。后续若真实provider出现合法view alias，必须另预注册commit owner，不在S4-0自动接受。
 
-### 4.2 version lease
+### 4.2 ephemeral version/object lease
 
-S4-0记录入口`_version`，但不宣称它永久有效。S4-1A bind和S4-3 commit前都必须验证：
+S4-0记录入口`_version`并由ephemeral lease强引用原Tensor。S4-1A bind和S4-3 commit前都必须从current provider
+mapping验证：
 
 ```text
 same semantic path
-same object/storage group
+same Python object and raw storage identity
 same shape/dtype/device/stride/offset
 same _version
 same content hash
 ```
 
-任一变化在launch/mutation前拒绝。receipt中的version是lease baseline，不是可跨query复用的全局state version。
+任一变化在launch/mutation前拒绝。receipt中的稳定group只是可重放投影；真正的跨阶段identity由不可序列化lease保证，
+不是可跨query复用的全局state version。
 
 ## 5. plan/snapshot绑定算法
 
@@ -250,7 +257,9 @@ snapshot中`ownership=MUTABLE_COPY_OUT`的集合必须恰等于：
 11. live object/storage alias、stride/offset；
 12. live version；
 13. aggregate/hash重算；
-14. receipt self-validation。
+14. receipt self-validation；
+15. 构造strong-ref lease并验证receipt/lease shared admission hash；
+16. 返回不可序列化prepared wrapper。
 
 任何失败发生在GPU allocation、dense materialization、TVM/provider调用和live mutation之前。
 
@@ -269,13 +278,18 @@ snapshot中`ownership=MUTABLE_COPY_OUT`的集合必须恰等于：
 | `PLAN_ORACLE_PROVENANCE_UNVERIFIABLE` | `RECEIPT_IDENTITY_MISMATCH` |
 | `BETA_HISTORY_WIDTH_MISMATCH` | `BETA_LOCATION_SIGN_HISTORY_MISMATCH` |
 | `EMPTY_TENSOR_FALSE_ALIAS` | `UNSAFE_ALIAS_OR_LIFETIME` |
+| `LIVE_SOURCE_OBJECT_REPLACED` | `RECEIPT_IDENTITY_MISMATCH` |
+| `LIVE_SOURCE_STORAGE_REPLACED` | `UNSAFE_ALIAS_OR_LIFETIME` |
+| `LIVE_LEASE_ADMISSION_MISMATCH` | `RECEIPT_IDENTITY_MISMATCH` |
+| `LIVE_LEASE_ALREADY_TRANSFERRED` | `UNSAFE_ALIAS_OR_LIFETIME` |
+| `LIVE_LEASE_SERIALIZATION_FORBIDDEN` | `RECEIPT_IDENTITY_MISMATCH` |
 
 旧蓝图的`STATE_VERSION_MISMATCH`必须拆开snapshot schema version与live Tensor `_version`，避免同一reason掩盖两个
 不同owner边界。
 
 ## 9. 修正后的测试最低集
 
-原20类negative保留并扩为至少30类；新增关键用例：
+原20类negative保留并扩为至少38类；除原V2用例外新增关键用例：
 
 1. 两个distinct view共享nonempty storage，拒绝；
 2. 同一Tensor object绑定两个mutable path，拒绝；
@@ -291,11 +305,18 @@ snapshot中`ownership=MUTABLE_COPY_OUT`的集合必须恰等于：
 12. β width大于history长度但前缀相同，拒绝；
 13. empty β附加一个未进history的slot，拒绝；
 14. live mapping使用callable/lazy mapping，拒绝；
-15. object/pointer/storage raw identity没有进入canonical JSON或artifact。
+15. object/pointer/storage raw identity没有进入canonical JSON或artifact；
+16. 全量same-content clone替换时canonical receipt可相同，但lease以object replaced拒绝；
+17. same-storage view替换、empty clone替换分别拒绝；
+18. lease不能pickle/deepcopy/artifact遍历；
+19. lease只能transfer一次，close后不可再用；
+20. S4-1A pack后provider rebind，S4-3 precommit拒绝；
+21. 外部mapping引用删除并GC后，lease强引用保持原Tensor直到commit/close。
 
 positive还必须证明：
 
-- admission返回后递归对象图无Tensor/module/callback/provider object/raw pointer；
+- canonical receipt递归对象图无Tensor/module/callback/provider object/raw pointer；prepared wrapper的Tensor只能存在于
+  私有ephemeral lease，且serialization guard必须拒绝；
 - monkeypatch dense initializer、CUDA allocation、TVM和provider entry为必抛，positive仍通过；
 - 两个fresh process的canonical receipt/hash exact；
 - formal计数仍为六slot、12 mutable path、`8496/4248/4248` α和1 active β/6元素；

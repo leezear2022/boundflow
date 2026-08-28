@@ -10,6 +10,21 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-28：S4-0 V3以ephemeral strong-ref lease关闭跨阶段object replacement漏洞
+
+- 审计V2“瞬时live mapping→tensor-free receipt→S4-1A重新取得mapping”后发现稳定投影无法证明跨时间对象身份：
+  全量same-content clone替换可保持canonical projection/hash完全相同，但Python object、nonempty storage及empty object
+  identity全部不同；反例canonical hash=`75d3252e...3c9f`；
+- 冻结双层owner：`S4MutableStateAdmissionV1`继续tensor-free/canonical/replayable，新增同模块内不可序列化
+  `S4LiveMutableLeaseV1`及prepared wrapper，强引用原始12条Tensor并保存raw object/storage/version私有token；这不是IR；
+- lease生命周期改为S4-0 create→S4-1A single transfer→S4-2 candidate-only mutation→S4-3 current-provider rebind/
+  precommit revalidate→commit/abort/poisoned→close；same-content clone、same-storage view、empty clone和provider rebind均拒绝；
+- 复用existing `live_targets_from_pre_result_v4()`枚举current provider targets，不再新增provider adapter；
+- 独立构造active β width `1→2`、history仍为1且全量重签的snapshot，现有validator接受，证明S4-0 width/history exact
+  门禁必要；
+- S4-0 negative最低由30扩为38类，并加入lease错配、重复transfer、close后使用和serialization/artifact泄漏拒绝；
+- S3仍`ready_for_audit`，S4-0 production code、GPU执行、timing与performance全部保持closed。
+
 ## 2026-08-28：S4-1B0源码映射与CUDA探针冻结最小实施边界
 
 - 亲读R31/S2/R31B2源码确认static plan只有input lower/upper，没有独立center tensor；pinned provider同样以

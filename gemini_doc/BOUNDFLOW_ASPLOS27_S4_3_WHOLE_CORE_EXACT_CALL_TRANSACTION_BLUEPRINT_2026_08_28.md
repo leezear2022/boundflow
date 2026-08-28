@@ -361,16 +361,21 @@ container clear与host packet replace必须和12-path device commit处于同一�
 
 1. source/code/model/property identity；
 2. plan/policy/topology/lineage hash；
-3. 12-path key/shape/dtype/device/pointer/alias；
-4. tensor `_version`与pre digest；
-5. preserved α digest；
-6. S4-2 terminal state和handoff lease；
-7. KFSB inventory/decision；
-8. provider factory和official post identity；
-9. host packet candidate schema/hash；
-10. intermediate-container identity/pre hash；
-11. all finite/numeric/discrete gates；
-12. claim flags全部false。
+3. 调用existing `live_targets_from_pre_result_v4()`从current provider mapping重新枚举12条target；
+4. current target逐path必须`is` S4-0 strong-ref lease中的原Tensor，并验证raw storage/pointer/alias；
+5. tensor `_version`、shape/dtype/device/stride/offset与pre digest；
+6. preserved α digest；
+7. S4-2 terminal state和handoff lease；
+8. KFSB inventory/decision；
+9. provider factory和official post identity；
+10. host packet candidate schema/hash；
+11. intermediate-container identity/pre hash；
+12. all finite/numeric/discrete gates；
+13. claim flags全部false。
+
+若provider mapping在S4-1A pack后被整体或局部替换，即使新Tensor内容、稳定group与`_version=0`完全相同，也必须以
+`LIVE_LEASE_PROVIDER_REBIND`在copy前clean abort。commit必须写入current provider仍持有的原对象，不能写入lease保存的
+detached旧对象后声称solver state已更新。事务结束后lease必须close；mid-commit poisoned路径也不得复用lease fallback/retry。
 
 ### 9.2 commit顺序
 

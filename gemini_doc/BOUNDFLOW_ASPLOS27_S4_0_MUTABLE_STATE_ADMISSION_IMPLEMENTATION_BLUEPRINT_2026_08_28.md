@@ -1,5 +1,5 @@
 ---
-status: corrected-v2-implementation-blueprint
+status: corrected-v3-implementation-blueprint
 date: 2026-08-28
 type: implementation-plan
 topic: boundflow
@@ -16,8 +16,8 @@ performance-claimed: false
 
 ## 0. 直接结论
 
-S4-0不需要新增solver IR、execution IR或另一套verification graph。它只需要一个**tensor-free typed runtime
-binding receipt**，把已有四类权威对象与一个瞬时live source view闭合：
+S4-0不需要新增solver IR、execution IR或另一套verification graph。它需要一个**tensor-free typed runtime
+binding receipt**和一个**不可序列化的ephemeral live lease**，分别关闭可审计语义与跨阶段对象身份：
 
 ```text
 ProductionStateSnapshotV4
@@ -25,15 +25,19 @@ ProductionStateSnapshotV4
   + R31FullRegionPlanV1
   + transient Mapping[path, live Tensor]
   + VerificationRejectionReason
-  → S4MutableStateAdmissionV1
+  → PreparedS4MutableStateAdmissionV1
+       ├─ S4MutableStateAdmissionV1
+       └─ S4LiveMutableLeaseV1
 ```
 
-该receipt只证明“六个compressed lower-α slot、六个sparse β slot及其layout/history/live object-storage-version
-ownership可以被后续compiled evaluator完整且确定性地绑定”。瞬时mapping只在函数内观察，不进入receipt或artifact。
+receipt证明六个compressed lower-α slot、六个sparse β slot及layout/history的稳定投影；lease用强引用和raw token保证
+S4-1A/S4-3操作的仍是同一批live object/storage/version。mapping和lease不进入receipt或artifact，lease不可跨query复用。
 S4-0不创建dense α/β、不分配GPU buffer、不执行TIR、不计时，也不改变live solver state。
 
 开工前源码审计已证明原三输入签名无法验证live storage alias和`_version`；详细反例与修正依据见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_ADMISSION_PREFLIGHT_CORRECTION_2026_08_28.md`。
+tensor-free receipt无法独自排除same-content clone替换的反例及最终V3接口见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_LIVE_LEASE_IMPLEMENTATION_READINESS_2026_08_28.md`。
 
 当前S3 external audit仍未返回，因此本文只有implementation blueprint地位；不能据此直接开始S4代码。
 
@@ -218,22 +222,40 @@ raw Python object id、data pointer和storage handle只允许在compile函数内
 group按plan/path首次出现顺序稳定编号。empty tensor的`data_ptr=0`不构成alias；除非是同一Tensor object，否则每个empty
 path独立group。
 
+### 3.4 `S4LiveMutableLeaseV1`与prepared wrapper
+
+同一runtime模块内再定义非IR、非artifact对象：
+
+```text
+S4LiveMutableLeaseV1
+  private strong refs + raw object/storage/version/layout/content tokens
+  single-transfer / current-provider-revalidate / close
+
+PreparedS4MutableStateAdmissionV1
+  receipt: S4MutableStateAdmissionV1
+  private lease: S4LiveMutableLeaseV1
+```
+
+lease/wrapper不得提供canonical serialization；pickle/deepcopy/artifact walker必须fail closed。canonical receipt仍保持
+完全tensor-free。lease从S4-0活到S4-3 commit/abort，S4-1A不得pack后丢弃它。
+
 ## 4. 编译入口
 
 冻结函数职责：
 
 ```text
-compile_s4_mutable_state_admission_v1(
+prepare_s4_mutable_state_admission_v1(
     snapshot: ProductionStateSnapshotV4,
     topology: tuple[ProductionReluTopologyV4, ...],
     production_plan: R31FullRegionPlanV1,
     live_mutable_sources: Mapping[str, torch.Tensor],
-) -> S4MutableStateAdmissionV1
+) -> PreparedS4MutableStateAdmissionV1
 ```
 
 当前函数可接受R31 plan作为formal输入，但新增dataclass本身不得包含ResNet2B、native id、固定shape或P-anchor
 常数。未来general plan只需满足同一metadata contract，不修改receipt schema。`live_mutable_sources`是瞬时普通mapping，
-不是IR或持久owner；函数返回前不得把Tensor/provider object保存到receipt、registry或closure。
+不是IR；函数返回前不得把Tensor/provider object保存到receipt、registry或closure，但必须把原Tensor强引用保存在私有
+ephemeral lease，直到S4-3事务结束。lease不得进入artifact或跨query cache。
 
 RVIR adapter在core入口按topology/plan从live `node.alpha[start]`和`node.sparse_betas[0].val`构造12-path普通`dict`；
 必须传原Tensor引用，禁止用snapshot CPU clone、`.to()`副本或dense initializer结果冒充live source。location/sign/history
@@ -261,7 +283,9 @@ RVIR adapter在core入口按topology/plan从live `node.alpha[start]`和`node.spa
 15. 拒绝重复object、nonempty shared storage、非法view/offset；empty zero-pointer不得互相归为alias；
 16. 汇总stored/active/preserved与β计数，从slot重算mutable path set hash；
 17. 构造receipt，四个claim/execution flag全部false，且递归对象图tensor/provider/pointer-free；
-18. 调用receipt `validate()`重算全部projection/hash并返回。
+18. 调用receipt `validate()`重算全部projection/hash；
+19. 以同一次admission hash构造strong-ref lease和prepared wrapper；
+20. 对receipt做tensor-free检查，对lease做serialization-forbidden检查后返回wrapper。
 
 S4-0不得调用：
 
@@ -272,8 +296,9 @@ S4-0不得调用：
 - Adam optimizer；
 - wall-clock或CUDA event timing。
 
-S4-0记录的live `_version`只是本query lease baseline。S4-1A buffer bind和S4-3 commit前必须再次验证同一
-path/object/storage/version/content；S4-0不能把一次admission升级成可跨mutation永久复用的许可。
+S4-0记录的live `_version`只是本query lease baseline。S4-1A buffer bind和S4-3 commit前必须从current provider mapping
+再次验证同一path、同一Python object、同一raw storage/version/content；不能只重算稳定group。S4-0不能把一次admission
+升级成可跨mutation或跨query永久复用的许可。
 
 ## 6. reason映射
 
@@ -306,6 +331,13 @@ S4-0至少冻结以下detail code，并映射到已有GC0 reason：
 | `NONFINITE_MUTABLE_STATE` | `DTYPE_OR_DEVICE_MISMATCH` |
 | `CLAIM_FLAG_TRUE_BEFORE_FORMAL` | `RECEIPT_IDENTITY_MISMATCH` |
 | `S4_0_EXECUTION_FORBIDDEN` | `RUNTIME_FALLBACK_REQUIRED` |
+| `LIVE_SOURCE_OBJECT_REPLACED` | `RECEIPT_IDENTITY_MISMATCH` |
+| `LIVE_SOURCE_STORAGE_REPLACED` | `UNSAFE_ALIAS_OR_LIFETIME` |
+| `LIVE_LEASE_ADMISSION_MISMATCH` | `RECEIPT_IDENTITY_MISMATCH` |
+| `LIVE_LEASE_ALREADY_TRANSFERRED` | `UNSAFE_ALIAS_OR_LIFETIME` |
+| `LIVE_LEASE_ALREADY_CLOSED` | `UNSAFE_ALIAS_OR_LIFETIME` |
+| `LIVE_LEASE_SERIALIZATION_FORBIDDEN` | `RECEIPT_IDENTITY_MISMATCH` |
+| `LIVE_LEASE_PROVIDER_REBIND` | `RECEIPT_IDENTITY_MISMATCH` |
 
 映射属于runtime binding的精化，不升级GC0 legality claim，也不要求修改`VerificationRejectionReason`。
 
@@ -330,7 +362,7 @@ tests/test_asplos27_s4_mutable_state_admission.py
 9. receipt validate独立重算计数与hash；
 10. formal binding与native pre-state oracle的12个semantic path及mapped slice hash一致。
 
-### 7.2 minimum 30 negative/tamper
+### 7.2 minimum 38 negative/tamper
 
 1. snapshot schema/version变更；
 2. `bound_upper=true`或`bound_lower=false`；
@@ -362,6 +394,14 @@ tests/test_asplos27_s4_mutable_state_admission.py
 28. β width大于history长度但已验证前缀一致；
 29. `plan.source_state_hash`被替换成snapshot hash；
 30. live mapping是callable/lazy provider view或receipt泄漏raw pointer。
+31. 全量same-content clone替换，stable projection/hash相同但object lease拒绝；
+32. same-storage view替换；
+33. empty β同shape clone替换；
+34. receipt/lease来自不同admission；
+35. lease重复transfer；
+36. lease close后revalidate；
+37. lease被pickle/deepcopy/artifact walker序列化；
+38. S4-1A pack后current provider mapping rebind，S4-3 precommit拒绝。
 
 每个负向测试必须断言exact `detail_code`和对应`VerificationRejectionReason`，不能只断言“抛异常”。
 
@@ -387,7 +427,7 @@ gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md
 
 建议提交切片：
 
-1. `feat(runtime): add S4 mutable-state admission receipt`；
+1. `feat(runtime): add S4 mutable-state admission receipt and live lease`；
 2. `test(runtime): close S4-0 admission and tamper gates`；
 3. `docs: close S4-0 and preregister S4-1A`。
 
@@ -402,8 +442,9 @@ gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md
 - snapshot/plan/topology/live source四方binding闭合，live object/storage/version guard成立；
 - plan binding projection可从snapshot/layout/spec独立重算，不调用dense initializer；
 - β width与history exact，不接受只匹配前缀；
-- receipt tensor-free/pointer-free且canonical hash跨fresh process一致；
-- minimum 30类negative全部exact fail-closed；
+- receipt tensor-free/pointer-free且canonical hash跨fresh process一致；lease不可序列化且强引用原始live targets；
+- S4-1A与S4-3从current provider mapping复核同一object/storage/version，clone/rebind不能冒充；
+- minimum 38类negative全部exact fail-closed；
 - dense materialization/GPU execution/provider fallback/timing/performance flag全为0/false；
 - targeted/full/static/DocOps通过；
 - S3 external audit已经approved并正式close。

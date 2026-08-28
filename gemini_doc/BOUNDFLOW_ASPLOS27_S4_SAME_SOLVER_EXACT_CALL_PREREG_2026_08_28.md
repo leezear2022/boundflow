@@ -138,8 +138,9 @@ R3 plan已经含六个`relu_layouts`和全部tensor specs；S4应把“动态参
 - plan/schema中禁止ResNet2B名称、固定node id、固定shape或固定“6”作为通用机制条件；
 - formal fixture可以冻结上述六条路径，但只能作为实例证据。
 
-snapshot是CPU clone语义证据，不能证明live storage alias或Tensor `_version`；因此live mapping只在admission/prepare
-边界瞬时读取，不进入IR、canonical receipt或artifact raw pointer。snapshot alias group与live storage group必须分列。
+snapshot是CPU clone语义证据，不能证明live storage alias或Tensor `_version`；因此live mapping不进入IR、canonical
+receipt或artifact raw pointer。S4-0必须另建不可序列化strong-ref ephemeral lease，跨S4-1A pack保持到S4-3 commit/abort，
+并在两处从current provider mapping复核同一Python object/storage/version。snapshot alias group与live storage group必须分列。
 
 不得创建第二套VerificationGraph或optimizer IR。静态候选继续lower到现有Relax/TIR，runtime binding只负责
 把live state映射到已编译参数槽。
@@ -194,9 +195,10 @@ bounds来自入口`relu_pre`，不属于candidate输出。existing KFSB仍执行
 
 精确类型、compiler入口、reason映射和negative测试矩阵见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_MUTABLE_STATE_ADMISSION_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`。
-开工前V2修正证据见
-`gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_ADMISSION_PREFLIGHT_CORRECTION_2026_08_28.md`。S4-0只新增tensor-free typed
-runtime binding receipt，复用现有snapshot/topology/plan与GC0 rejection vocabulary，并瞬时观察live source；
+开工前V2/V3修正证据见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_ADMISSION_PREFLIGHT_CORRECTION_2026_08_28.md`与
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_LIVE_LEASE_IMPLEMENTATION_READINESS_2026_08_28.md`。S4-0只新增tensor-free typed
+runtime binding receipt和不可序列化ephemeral runtime lease，复用现有snapshot/topology/plan与GC0 rejection vocabulary；
 不得新增solver/execution IR或通过native dense initializer实现candidate admission。
 
 交付：typed mutable binding与coverage receipt，不实现TIR、不计时。
@@ -207,13 +209,14 @@ runtime binding receipt，复用现有snapshot/topology/plan与GC0 rejection voc
 - snapshot mutable β key与compiled gradient key完全相等；
 - feature index、shape、dtype、device、location/sign与split/history lineage一致；
 - plan/snapshot binding projection可独立重算；R31 `source_state_hash`只作dense oracle provenance，不冒充snapshot hash；
-- live path/object/storage/version/stride/offset/content与snapshot exact，empty zero-pointer不伪装alias；
+- live path/shape/content与snapshot exact；ephemeral lease保证S4-0、S4-1A、S4-3看到同一Python object/raw
+  storage/version，empty zero-pointer不伪装alias；
 - 每domain β width与history长度exact，不接受只匹配前缀；
 - stored α、optimizer-active lower direction与preserved direction分别计数并绑定；
 - preserved α direction在任一candidate mutation后digest不变；
 - P-only计划在当前fixture上明确拒绝，reason=`MUTABLE_STATE_COVERAGE_INCOMPLETE`；
 - active β缺失明确拒绝，reason=`ACTIVE_BETA_COVERAGE_INCOMPLETE`；
-- 不接受多余、重复、乱序或alias冲突binding；
+- 不接受多余、重复、乱序、alias冲突binding、same-content clone替换、provider rebind或lease重复transfer；
 - performance/timing/same-solver flag全部false。
 
 GO：六α+六β全覆盖，active β=`1/1`，live lease与plan projection关闭，且schema无模型特判。否则S4-1关闭。
