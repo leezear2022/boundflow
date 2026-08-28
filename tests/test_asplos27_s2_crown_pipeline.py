@@ -106,6 +106,7 @@ def test_s2_receipt_proves_five_cudnn_calls_and_no_dense_saved_a() -> None:
     assert receipt.cudnn_partition_function_count == 4
     assert receipt.cudnn_conv_call_count == 5
     assert receipt.selected_tir_count == 4
+    assert receipt.forward_graph_replay_count == 1
     assert receipt.selected_graph_replay_count == 1
     assert receipt.active_beta is True
     assert receipt.saved_dense_a_count == 0
@@ -127,6 +128,7 @@ def test_s2_receipt_rejects_resigned_semantic_and_claim_tamper() -> None:
     mutations = (
         replace(receipt, performance_claimed=True),
         replace(receipt, cudnn_conv_call_count=4),
+        replace(receipt, forward_graph_replay_count=2),
         replace(receipt, selected_graph_replay_count=2),
         replace(receipt, active_beta=False),
         replace(receipt, saved_dense_a_count=1),

@@ -64,3 +64,12 @@ performance-claimed: false
 - receipt对claim、call count、replay count、β owner、dense-A、fallback和hash篡改全部拒绝；
 - default stream与immutable state version漂移均在selected graph launch前拒绝；
 - 专属测试`5 passed`；formal artifact与全量回归尚未在此节点运行。
+
+## 2026-08-28 wrapper成本回收
+
+- 第一版host-boundary短测只有约`3.41x`，低于冻结的worst `3.50x`；归因显示旧B1 forward的17次
+  launch仍在每次调用走Python dispatch，约`1.76 ms`；
+- 在不改变数学、arena或kernel的前提下，把已固定pointer/schedule的整个forward wavefront捕获为第二个
+  CUDA Graph；运行时显式记录一次forward replay以及其17个logical launch、D1C 4-stage ownership；
+- 修改后三方worker预跑N/D/P约`8.751/4.835/1.921 ms`，P/N约`4.56x`；仍仅为formal前
+  feasibility；六fresh协议继续执行。

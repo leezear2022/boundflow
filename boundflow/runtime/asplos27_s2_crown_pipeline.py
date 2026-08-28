@@ -155,6 +155,7 @@ class S2CrownExecutionReceiptV1:
     cudnn_partition_function_count: int
     cudnn_conv_call_count: int
     selected_tir_count: int
+    forward_graph_replay_count: int
     selected_graph_replay_count: int
     custom_forward_count: int
     custom_backward_count: int
@@ -190,6 +191,7 @@ class S2CrownExecutionReceiptV1:
             or self.cudnn_partition_function_count != S2_SELECTED_VALUE_CUDNN_FUNCTIONS
             or self.cudnn_conv_call_count != S2_SELECTED_VALUE_CUDNN_CALLS
             or self.selected_tir_count != 4
+            or self.forward_graph_replay_count != 1
             or self.selected_graph_replay_count != 1
             or self.custom_forward_count != 1
             or self.custom_backward_count != 1
@@ -260,12 +262,57 @@ class PreparedS2CrownProgramV1(PreparedR3D2BStagedBackwardCandidateV1):
         )
         self.pre25_value = self.selected_value.output.reshape(6144)
         self._register_view(tvm, self.pre25_value)
+        self._capture_forward_graph()
+        self.s2_forward_graph_replay_count = 0
         self.s2_selected_graph_replay_count = 0
+
+    def _reset_forward_capture_counters(self) -> None:
+        self.custom_forward_count = 0
+        self.forward_executor.launch_count = 0
+        self.d1c_launch_count = 0
+        self.d1c_bias_inplace_alias_count = 0
+        self.b2_launch_count = 0
+
+    def _capture_forward_graph(self) -> None:
+        capture_stream = torch.cuda.Stream(device=self.device)
+        capture_stream.wait_stream(torch.cuda.current_stream(self.device))
+        for _ in range(3):
+            self._reset_forward_capture_counters()
+            with torch.cuda.stream(capture_stream):
+                super().forward()
+        capture_stream.synchronize()
+        self.forward_graph = torch.cuda.CUDAGraph()
+        self._reset_forward_capture_counters()
+        with torch.cuda.stream(capture_stream):
+            with torch.cuda.graph(self.forward_graph, stream=capture_stream):
+                self.captured_lower = super().forward()
+        capture_stream.synchronize()
+        if self.captured_lower.data_ptr() != self.forward_executor.output.data_ptr():
+            raise RuntimeError("S2 forward graph output ownership differs")
+        self._reset_forward_capture_counters()
 
     def begin_evaluation(self, ordinal: int) -> None:
         super().begin_evaluation(ordinal)
+        self.s2_forward_graph_replay_count = 0
         self.s2_selected_graph_replay_count = 0
         self.selected_value.replay_count = 0
+
+    def forward(self) -> torch.Tensor:
+        if self.custom_forward_count:
+            raise RuntimeError("S2 canonical forward count differs")
+        current = torch.cuda.current_stream(self.device)
+        if int(current.cuda_stream) == int(
+            torch.cuda.default_stream(self.device).cuda_stream
+        ):
+            raise RuntimeError("S2 canonical non-default stream is required")
+        self.custom_forward_count = 1
+        self.forward_graph.replay()
+        self.s2_forward_graph_replay_count = 1
+        self.forward_executor.launch_count = 17
+        self.d1c_launch_count = 4
+        self.d1c_bias_inplace_alias_count = 2
+        self.b2_launch_count = 1
+        return self.captured_lower
 
     def _effective_value_pass(self, _s0: torch.Tensor, _s1: torch.Tensor) -> None:
         result = self.selected_value.replay()
@@ -323,6 +370,7 @@ class PreparedS2CrownProgramV1(PreparedR3D2BStagedBackwardCandidateV1):
             cudnn_partition_function_count=compiled.cudnn_partition_function_count,
             cudnn_conv_call_count=compiled.cudnn_conv_call_count,
             selected_tir_count=compiled.selected_tir_count,
+            forward_graph_replay_count=self.s2_forward_graph_replay_count,
             selected_graph_replay_count=self.s2_selected_graph_replay_count,
             custom_forward_count=self.custom_forward_count,
             custom_backward_count=self.custom_backward_count,
