@@ -1,5 +1,13 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+> **2026-08-29 S3执行方影子预审发现待外审裁决的证据边界**：新增
+> `BOUNDFLOW_ASPLOS27_S3_EXECUTOR_SHADOW_PREAUDIT_2026_08_29.md`。AC1—AC5/AC7的顺序、10/9事务、
+> stdlib数值重算、v1/v2性能和claim边界均复核成立，另一次18-worker fresh shadow也完成；但两类“同步修改
+> raw、重算summary、再重签manifest”的内部自洽artifact可被replay接受。稳定finding
+> `S3-SHADOW-F1=candidate-major/open`说明既有10/10 tamper只证明内部一致性，不能单独证明GPU物理执行真实性。
+> 这不是外审verdict，不修改既有exchange；下一动作仍是S3外审，并要求外审明确裁决该finding。S4代码/formal/
+> timing继续关闭。
+
 > **2026-08-29 S3外审执行入口已在当前环境重新验证、外审仍pending**：新增
 > `BOUNDFLOW_ASPLOS27_S3_EXTERNAL_AUDIT_EXECUTION_RECEIPT_2026_08_29.md`。result commit到当前HEAD的关键
 > code/artifact零漂移；protocol code hash 12/12、replay、10/10 tamper、targeted 19、full
