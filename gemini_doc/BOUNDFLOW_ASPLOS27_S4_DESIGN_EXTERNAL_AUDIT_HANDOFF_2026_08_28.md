@@ -6,7 +6,7 @@ topic: boundflow
 slug: asplos27-s4-design-audit
 audit-kind: preregistration-and-implementation-blueprint
 base-commit: ebf45cc72438141d8f0b35dadfd5cf774d7e753f
-design-result-commit: d9ddede332688c94859c11879532c40488d4124f
+design-result-commit: 07b7e9cea040073f1b0cdaf66c71bdf68295556b
 execution-authority: false
 code-change-open: false
 performance-claimed: false
@@ -27,16 +27,17 @@ speedup或complete-query性能已经存在。
 2. S4-0—S4-4的分层是否真正对应production事务，而不是为写IR/receipt而写IR/receipt；
 3. all-state compiled VJP、sealed production policy、terminal handoff、KFSB、commit/post是否有遗漏owner；
 4. S4-3 failure state是否诚实，尤其PyTorch `_version`与post-after-commit；
-5. S4-4的stdlib raw/replay和48类fully re-signed tamper是否足以支持第三方独立审计；
-6. 是否同意在S3外审批准后仍按S4-0→1A→1B→1C→1D→2→3→4顺序实施；
-7. 是否发现必须在第一行S4代码开工前修正的blocker/major。
+5. live reference probe把scratch disposal从24纠正为36是否成立，尤其六条export lA与18条all-node GC lA的区别；
+6. S4-4的stdlib raw/replay和48类fully re-signed tamper是否足以支持第三方独立审计；
+7. 是否同意在S3外审批准后仍按S4-0→1A→1B→1C→1D→2→3→4顺序实施；
+8. 是否发现必须在第一行S4代码开工前修正的blocker/major。
 
 ## 1. 审计范围和Git边界
 
 - branch：`feat/rvir-v4-production-state-ownership-v1`；
 - 本轮设计base：`ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
-- S4-3A consumer/lifetime审计及S4-4修订结果：`d9ddede332688c94859c11879532c40488d4124f`；
-- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..d9ddede332688c94859c11879532c40488d4124f`
+- S4-3A live scratch probe纠错及S4-4修订结果：`07b7e9cea040073f1b0cdaf66c71bdf68295556b`；
+- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..07b7e9cea040073f1b0cdaf66c71bdf68295556b`
   和下列S4文档的完整版本为准；
 - S3 formal实现/结果不在本轮重新验收，但它是S4设计输入；S3独立exchange仍等待审计；
 - `.docops/exchange/gc0-1-prereg-20260826`异步audit文件和`docs/CIBC_for_DAC.pdf`是用户保留的范围外dirty文件，
@@ -174,9 +175,11 @@ PASS要求：
 5. host packet prune和intermediate container clear是否属于同一logical transaction；
 6. net scratch是否可能被post/queue/next call继续读取，reference的α/intermediate/lA move/gc是否已由candidate
    disposal plan镜像；
-7. pointer-swap是否被正确保持为未批准实验；
-8. failure后禁止fallback/retry/queue continue是否足够fail closed；
-9. query-scoped exclusive core-owner latch是否足以排除provider reentry、multi-core和stale preserve-mask。
+7. `BatchedlA.from_net`导出的六条split-layer lA是否确实只是`gc_lA_from_net`清理的18条all-node lA子集；
+8. 当前fixture `6 α + 12 intermediate + 18 lA = 36`是否应作为protocol fixture expectation而非generic schema常数；
+9. pointer-swap是否被正确保持为未批准实验；
+10. failure后禁止fallback/retry/queue continue是否足够fail closed；
+11. query-scoped exclusive core-owner latch是否足以排除provider reentry、multi-core和stale preserve-mask。
 
 如果能设计出既恢复内容又保持`_version`/alias/consumer identity的更强方案，请作为替代设计说明，但不要把未证明方案
 标成当前实现。
@@ -253,7 +256,10 @@ PASS要求：
 
 本轮不是实现测试，但executor已核对设计事实：
 
-- S4-3/S4-3A相关whole-core/live-return/KFSB/commit/pre-state/production-state/terminal targeted：`45 passed`；
+- live reference core probe：α=`6 tensors/33,984 B`、intermediate=`12/299,712 B`、all-node lA=
+  `18/471,984 B`、β container=`6×1`保持，logical total=`805,680 B`；
+- S4-3/S4-3A相关whole-core/live-return/KFSB/commit/pre-state/production-state/terminal targeted：
+  `45 passed in 8.43s`；
 - S4-4参考artifact相关targeted：`19 passed`；
 - CUDA探针：tensor content restore后`_version=0→1→2`；
 - S3 v2 raw=`18 rows / 20,747,422 bytes`；
@@ -266,8 +272,8 @@ PASS要求：
 ## 7. 建议外审操作
 
 ```bash
-git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..d9ddede332688c94859c11879532c40488d4124f
-git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..d9ddede332688c94859c11879532c40488d4124f
+git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..07b7e9cea040073f1b0cdaf66c71bdf68295556b
+git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..07b7e9cea040073f1b0cdaf66c71bdf68295556b
 
 source env.sh
 /home/lee/miniconda3/envs/boundflow/bin/python -m pytest -q \
@@ -280,6 +286,8 @@ source env.sh
 另外请用自己的短脚本：
 
 - 重算mutable inventory和memory ledger；
+- 独立区分`BatchedlA.from_net(get_splittable_activations)`与`gc_lA_from_net(net.nodes())`，核对当前fixture为6 export/
+  18 disposal而不是6/6；
 - 检查tamper编号1—48；
 - 用CUDA tensor验证commit+restore后的`_version`；
 - 亲读provider core/post确认clear/prune/post顺序；
