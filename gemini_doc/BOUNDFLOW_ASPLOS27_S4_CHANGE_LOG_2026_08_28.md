@@ -10,6 +10,21 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：刷新S4设计外审交接至whole-core transaction readiness v8
+
+- design-result commit更新为`751fc39580dae82267398d17c1c2bad551eca8f1`，冻结base仍为
+  `ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
+- 必读文档增至24份，加入S4-3 implementation-readiness；top-level任务增至18项，要求独立攻击prepared working-β、
+  prefix-only rollback、two-stage host packet、lease last-consumer和post/queue counter；
+- memory账同步为S4-2/S4-3=`540,926/608,990 B`，tamper minimum同步为71类；
+- evidence inventory加入true B3-C assembly/post/queue/fault probe与37项依赖回归；
+- 仍只交付设计审计材料，不新建S4 exchange、不开放production/formal/timing/performance。
+
+### 验证
+
+- handoff base/result commit、24份必读文档、18项top-level任务、18项末尾问题及ledger/tamper字段：提交前验证；
+- `git diff --check`、DocOps validation/lint在提交前执行。
+
 ## 2026-08-29：关闭S4-3 whole-core事务实施前歧义
 
 - 新增488行S4-3 implementation-readiness审计；亲读pinned provider/BoundFlow源码并在真实B3-C same-solver context中

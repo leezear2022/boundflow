@@ -1,12 +1,12 @@
 ---
-status: ready-for-external-design-audit-v7-policy-driver-readiness-frozen
+status: ready-for-external-design-audit-v8-whole-core-transaction-readiness-frozen
 date: 2026-08-29
 type: external-audit-handoff
 topic: boundflow
 slug: asplos27-s4-design-audit
 audit-kind: preregistration-and-implementation-blueprint
 base-commit: ebf45cc72438141d8f0b35dadfd5cf774d7e753f
-design-result-commit: 83d27b0f62db88fcf17b00daf36e865846ccc208
+design-result-commit: 751fc39580dae82267398d17c1c2bad551eca8f1
 execution-authority: false
 code-change-open: false
 performance-claimed: false
@@ -33,7 +33,7 @@ speedup或complete-query性能已经存在。
 7. S4-1A two-phase prepare、12-source private lease retention、16 base view和三阶段失败清理是否闭合；
 8. live B0/R phase probe把scratch合同从terminal disposal升级为variant-specific finalization v2是否成立；
 9. terminal logical/unique storage、view alias、B0 batch-24 residue与当前R batch-12 stale是否被正确区分；
-10. S4-4的stdlib raw/replay和68类fully re-signed tamper是否足以支持第三方独立审计；
+10. S4-4的stdlib raw/replay和71类fully re-signed tamper是否足以支持第三方独立审计；
 11. S4-1B0把site19根因收窄到`Ainput==0→center`、恢复selected-primal lowering是否数学成立；
 12. S4-1B0现场发现浮点NaN classifier会被TVM/CUDA错误化简后，改用IEEE-754 exponent位检查、独立cache
     key与module/launch receipt是否足以fail closed；
@@ -43,17 +43,18 @@ speedup或complete-query性能已经存在。
     修正后的`438,726 B` ledger是否共同关闭single-evaluation事务；
 15. S4-2 live policy/functional Adam审计是否正确关闭checkpoint、patience reachability、step/best/shadow memory、
     post-begin poison和20-worker formal口径；
-16. 是否同意在S3外审批准后仍按S4-0→1A→1B0→1B→1C→1D→2→3→4顺序实施；
-17. 是否发现必须在第一行S4代码开工前修正的blocker/major。
+16. S4-3 live诊断据此引入prepared working-β、prefix-only rollback、post/queue独立计数与细粒度latch是否正确；
+17. 是否同意在S3外审批准后仍按S4-0→1A→1B0→1B→1C→1D→2→3→4顺序实施；
+18. 是否发现必须在第一行S4代码开工前修正的blocker/major。
 
 ## 1. 审计范围和Git边界
 
 - branch：`feat/rvir-v4-production-state-ownership-v1`；
 - 本轮设计base：`ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
 - S4-0 live admission/lease、S4-3A scratch finalization、S4-1A prepare transaction、S4-1B0 ternary TIR、
-  S4-1B/1C selector/gradient/arena ABI、S4-1D evaluator transaction及S4-2 policy implementation-readiness全部设计结果：
-  `83d27b0f62db88fcf17b00daf36e865846ccc208`；
-- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..83d27b0f62db88fcf17b00daf36e865846ccc208`
+  S4-1B/1C selector/gradient/arena ABI、S4-1D evaluator、S4-2 policy及S4-3 whole-core transaction readiness全部设计结果：
+  `751fc39580dae82267398d17c1c2bad551eca8f1`；
+- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..751fc39580dae82267398d17c1c2bad551eca8f1`
   和下列S4文档的完整版本为准；
 - S3 formal实现/结果不在本轮重新验收，但它是S4设计输入；S3独立exchange仍等待审计；
 - `.docops/exchange/gc0-1-prereg-20260826`异步audit文件和`docs/CIBC_for_DAC.pdf`是用户保留的范围外dirty文件，
@@ -91,9 +92,10 @@ speedup或complete-query性能已经存在。
 18. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
 19. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_POLICY_DRIVER_IMPLEMENTATION_READINESS_2026_08_29.md`；
 20. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
-21. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
-22. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
-23. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
+21. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_29.md`；
+22. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
+23. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
+24. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
 
 ## 3. 已冻结的production事实，请独立复核
 
@@ -129,6 +131,7 @@ speedup或complete-query性能已经存在。
 - live commit path=`12`；
 - fixed candidate provider return constructor=`12`；
 - C路径provider bound callback=`0`，official postprocess=`1`；
+- query total domain add=`2`，candidate post domain add=`1`；
 - host `d`必须prune到history/depths/thresholds；
 - `pre_result.interm_bounds`必须clear。
 
@@ -139,7 +142,9 @@ speedup或complete-query性能已经存在。
 - S4-2 known subtotal=`540,926 bytes`（CUDA `540,870` + CPU `56`）；
 - full candidate=`34,008 bytes`；
 - candidate+rollback=`68,016 bytes`；
-- S4-3 known subtotal=`608,942 bytes`。
+- persistent upper/depths=`48 bytes`；
+- S4-3 known subtotal=`608,990 bytes`（CUDA `608,910` + CPU `80`）；
+- working-β location/sign=`72 bytes`为external retained liveness，不重复计入new allocation。
 
 旧S4-1D账`386,712 B`漏掉`49,152 B` residual scratch与`2,862 B` metadata，共`52,014 B`。这些是
 design-time logical bytes，不是实测peak allocated/reserved。请独立检查是否仍有重复计数、漏项或错误归属。
@@ -253,7 +258,7 @@ PASS要求：
 请重点攻击：
 
 1. existing device commit v1中commit copy和rollback copy是否确实都会增加PyTorch `_version`；
-2. `ABORTED_CLEAN`、`POISONED_NO_RETRY`、`COMMITTED_POST_FAILED_POISONED`是否覆盖全部边界；
+2. `PRECOMMIT_ABORTED_CLEAN`、`COMMIT_POISONED`、`POST_POISONED`、`QUEUE_POISONED`是否覆盖全部边界；
 3. provider constructor failure是否在commit前；
 4. official post failure是否必然在commit后；
 5. host packet prune和intermediate container clear是否属于同一logical transaction；
@@ -267,6 +272,10 @@ PASS要求：
     是否成立；
 13. R/C在native KFSB后normalize 36 path、B0仅observe residue是否是比“伪造三方scratch parity”更安全的设计；
 14. logical bytes、unique storage、view alias与attribute sentinel是否被正确区分，尤其clear attribute不等于立即free。
+15. current working-β `deepcopy`与temporary upper的allocator delta是否足以要求prepared bridge/persistent buffer；
+16. fault rollback是否必须只恢复committed prefix并禁止写untouched suffix；
+17. host packet的decision-stage `betas/history/depths`与final `thresholds/history/depths`是否应分列；
+18. official post=`1`、query-total add=`2`、candidate-post add=`1`是否必须来自三个独立observer counter。
 
 如果能设计出既恢复内容又保持`_version`/alias/consumer identity的更强方案，请作为替代设计说明，但不要把未证明方案
 标成当前实现。
@@ -306,7 +315,7 @@ PASS要求：
 
 PASS要求：
 
-- 68类攻击编号/分区完备且全部fully re-signed；
+- 71类攻击编号/分区完备且全部fully re-signed；
 - 攻击同步更新payload/file/summary/manifest，拒绝原因来自semantic invariant而非简单digest；
 - 外审另造至少3个未预注册攻击仍能被设计覆盖；
 - S4各级code/timing flag仍closed；
@@ -406,8 +415,14 @@ PASS要求：
   `1e2aab39a7f7049a09371fef6ec1e0a01dc1e2ec6b25ed7c4060b2cf78e2f0d6`；
 - 本次S4-1D evaluator依赖回归：`37 passed in 27.85s`；production code diff=`0`；
 - 本次S4-2 readiness依赖回归：`41 passed in 26.63s`；production code diff=`0`；
-- S4-2 arithmetic/reachability/link检查：`540,926/608,942 B`、checkpoint `[0,6,7,8,9]`、10-step
-  patience `>10`不可达、23份必读文档全部存在；
+- S4-2/S4-3 ledger检查：`540,926/608,990 B`、checkpoint `[0,6,7,8,9]`、10-step patience `>10`
+  不可达、24份必读文档全部存在；
+- true B3-C live assembly：intermediate container六key从entry到worker return保持；working-β allocator
+  delta/peak=`1,024/2,048 B`，assembly delta=`1,536 B`；12 intermediate和6 working α均exact alias source/candidate；
+- true B3-C official post=`1`，query-total domain add=`2`、candidate-post add=`1`；post CUDA allocated delta=`0`；
+- first-copy fault后current v1 copy seam=`13`，version delta为一条`+2`、11条untouched `+1`，证明prefix-only
+  restore与poison状态是必要修正；
+- S4-3 transition/ledger canonical hash=`833e8a9b...6ccaf5`；本轮依赖回归=`37 passed in 20.45s`；
 - existing live-return/device-commit targeted：`12 passed in 6.58s`；production code diff=`0`；
 - `git diff --check`、DocOps exchange validate/lint：PASS。
 
@@ -416,8 +431,8 @@ PASS要求：
 ## 7. 建议外审操作
 
 ```bash
-git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..83d27b0f62db88fcf17b00daf36e865846ccc208
-git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..83d27b0f62db88fcf17b00daf36e865846ccc208
+git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..751fc39580dae82267398d17c1c2bad551eca8f1
+git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..751fc39580dae82267398d17c1c2bad551eca8f1
 
 source env.sh
 /home/lee/miniconda3/envs/boundflow/bin/python -m pytest -q \
@@ -474,14 +489,16 @@ source env.sh
 6. emitter46/prepared48、β int8 metadata和七launch物理账是否准确？
 7. six-site V→gradient→terminal-lA alias是否有无法由phase state解决的lifetime冲突？
 8. net scratch是否必须成为第13+条production数值path，还是应保持为独立phase-aware lifetime/finalization transaction？
-9. post failure后是否有比`COMMITTED_POST_FAILED_POISONED`更严格、可实现的安全语义？
+9. commit/post/queue failure分别poison且prefix-only restore是否是可实现的最强安全语义？
 10. B0/R/C 18 fresh是否足够证明reference和candidate，不依赖历史`.pt`？
 11. stdlib raw schema是否缺dtype、negative-zero、NaN payload、alias或view metadata？
 12. executed-source inventory是否有更可靠的闭包算法？
 13. snapshot semantic truth、瞬时live observation和S4-1A prepared owner三段边界是否仍遗漏live alias/version race？
-14. 68类tamper还缺哪类可全重签semantic attack？
+14. 71类tamper还缺哪类可全重签semantic attack？
 15. S4-2是否仍遗漏optimizer/policy state、可达分支、失败owner或raw字段？
-16. 是否同意当前唯一执行顺序，不开放S4-P timing？
+16. prepared working-β共享immutable location/sign到post结束是否安全，还是必须为72 B metadata建persistent copy？
+17. query-total add=2与candidate-post add=1的receipt边界是否足以避免queue claim混淆？
+18. 是否同意当前唯一执行顺序，不开放S4-P timing？
 
 ## 9. 输出格式
 
