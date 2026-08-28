@@ -303,13 +303,18 @@ def generate(artifact: Path, source_capture: Path, model: Path) -> dict[str, obj
                         str(result),
                     ],
                     cwd=ROOT,
-                    check=True,
+                    check=False,
                     text=True,
                     capture_output=True,
                 )
-                (
-                    artifact / "logs" / f"r{replicate}-{run_index}-{order}.log"
-                ).write_text(process.stdout + process.stderr, encoding="utf-8")
+                log_path = artifact / "logs" / f"r{replicate}-{run_index}-{order}.log"
+                log_path.write_text(process.stdout + process.stderr, encoding="utf-8")
+                if process.returncode != 0:
+                    raise RuntimeError(
+                        "S3 v2 worker failed "
+                        f"replicate={replicate} order={order} "
+                        f"returncode={process.returncode} log={log_path}"
+                    )
                 records.append(v1.load_json(result))
     (artifact / "raw/workers.jsonl").write_text(
         "".join(v1.canonical(row) + "\n" for row in records), encoding="utf-8"

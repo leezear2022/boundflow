@@ -91,3 +91,17 @@ stage: s03
 
 - 静态检查与 source-exact：待下一提交；
 - 18-worker formal：尚未运行。
+
+## 2026-08-28：保留 v2 failed attempt A，并修复失败日志
+
+- 首次 v2 在完成 12 个 worker 后，第 13 个 `replicate=2/order=NDP` 收到 `SIGABRT`，没有生成 summary；
+- 同一 worker 独立复现成功：N/D/P=`104.54/57.46/31.36 ms`，未发现确定性语义或顺序错误；
+- failed attempt 原样移到 `resnet2b-p-anchor-v2-failed-attempt-a`，禁止续跑；
+- 修复 harness：subprocess 无论成功失败都先持久化 stdout/stderr，再按 return code fail closed；
+- 下一次从空 `v2` 目录完整执行 18 worker，协议与 estimator 不变。
+
+### 验证
+
+- 独立失败 worker reproduction：PASS；
+- failed-attempt-a：仅诊断证据，不形成 artifact verdict；
+- 完整 v2：待 source-exact 后重跑。
