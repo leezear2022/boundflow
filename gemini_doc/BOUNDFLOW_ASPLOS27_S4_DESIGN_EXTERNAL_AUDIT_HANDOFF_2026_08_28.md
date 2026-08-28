@@ -6,7 +6,7 @@ topic: boundflow
 slug: asplos27-s4-design-audit
 audit-kind: preregistration-and-implementation-blueprint
 base-commit: ebf45cc72438141d8f0b35dadfd5cf774d7e753f
-design-result-commit: fbf660ff1d92f2f7ebc7e64db3ec73f8320e5037
+design-result-commit: c4d54d1eca96e517ba3372bd5265860bc3366b24
 execution-authority: false
 code-change-open: false
 performance-claimed: false
@@ -41,8 +41,8 @@ speedup或complete-query性能已经存在。
 - branch：`feat/rvir-v4-production-state-ownership-v1`；
 - 本轮设计base：`ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
 - S4-0 live admission、S4-3A scratch finalization与S4-1B0 ternary endpoint纠正全部设计结果：
-  `fbf660ff1d92f2f7ebc7e64db3ec73f8320e5037`；
-- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..fbf660ff1d92f2f7ebc7e64db3ec73f8320e5037`
+  `c4d54d1eca96e517ba3372bd5265860bc3366b24`；
+- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..c4d54d1eca96e517ba3372bd5265860bc3366b24`
   和下列S4文档的完整版本为准；
 - S3 formal实现/结果不在本轮重新验收，但它是S4设计输入；S3独立exchange仍等待审计；
 - `.docops/exchange/gc0-1-prereg-20260826`异步audit文件和`docs/CIBC_for_DAC.pdf`是用户保留的范围外dirty文件，
@@ -67,15 +67,16 @@ speedup或complete-query性能已经存在。
 5. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_ADMISSION_PREFLIGHT_CORRECTION_2026_08_28.md`；
 6. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_ORDERED_BUFFER_ABI_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
 7. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_BOX_ENDPOINT_SUBGRADIENT_CLOSURE_2026_08_28.md`；
-8. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1BC_DAG_ADJOINT_PREFLIGHT_CORRECTION_2026_08_28.md`（历史v1）；
-9. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
-10. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
-11. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`；
-12. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
-13. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
-14. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
-15. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
-16. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
+8. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_ENDPOINT_IMPLEMENTATION_READINESS_2026_08_28.md`；
+9. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1BC_DAG_ADJOINT_PREFLIGHT_CORRECTION_2026_08_28.md`（历史v1）；
+10. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
+11. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
+12. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`；
+13. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
+14. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
+15. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
+16. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
+17. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
 
 ## 3. 已冻结的production事实，请独立复核
 
@@ -295,6 +296,9 @@ PASS要求：
 - S4-4 tamper inventory=`1..68`、order/worker=`6/18`；
 - Ainput exact class=`positive 8,689 / negative 9,137 / zero 606`；三元endpoint六dα overall max=
   `1.63912773132e-07`、active dβ max=`1.1920928955078125e-07`、sign mismatch均0；
+- formal in-memory CUDA/TIR pack/select逐位PASS，old binary误编码606 zero；selected hash=
+  `7e95e075...39b652`，derived-center hash=`d6164a06...f5b003`，extra center tensor=0；
+- nonfinite sentinel CUDA/TIR PASS：NaN/±Inf→`-128`→NaN，S4-1D final-finite gate前不发布result；
 - `git diff --check`、DocOps exchange validate/lint：PASS。
 
 这些只证明设计输入和历史基础设施仍存在，不证明S4-0—S4-4实现通过。
@@ -302,8 +306,8 @@ PASS要求：
 ## 7. 建议外审操作
 
 ```bash
-git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..fbf660ff1d92f2f7ebc7e64db3ec73f8320e5037
-git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..fbf660ff1d92f2f7ebc7e64db3ec73f8320e5037
+git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..c4d54d1eca96e517ba3372bd5265860bc3366b24
+git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..c4d54d1eca96e517ba3372bd5265860bc3366b24
 
 source env.sh
 /home/lee/miniconda3/envs/boundflow/bin/python -m pytest -q \
@@ -327,6 +331,7 @@ source env.sh
 - 独立复现旧二元endpoint的site19反例：约`1.156e-3/9`；再仅改zero→center，复核site19
   `4.2375177145e-08/0`及六site overall `<=1.63912773132e-07/0`；
 - 从formal Ainput独立统计positive/negative/zero，并亲读provider `center-abs*radius`与PyTorch zero-subgradient；
+- 复核新增center tensor是否确属多余；验证S4新symbol而非修改v1能保持S2/S3 artifact identity；
 - 检查tamper编号1—68；
 - 用CUDA tensor验证commit+restore后的`_version`；
 - 亲读provider core/post确认clear/prune/post顺序；
@@ -335,7 +340,7 @@ source env.sh
 ## 8. 外审必须回答的问题
 
 1. 是否存在blocker/major，使S4-0在S3批准后仍不能开工？
-2. 三元box endpoint是否完整解释旧site19反例；还需要独立coefficient-adjoint runtime还是只需把它保留为oracle？
+2. 三元box endpoint是否完整解释旧site19反例；derived-center且不新增tensor是否为正确最小ABI？
 3. six-site V→gradient→terminal-lA alias是否有无法由phase state解决的lifetime冲突？
 4. net scratch是否必须成为第13+条production数值path，还是应保持为独立phase-aware lifetime/finalization transaction？
 5. post failure后是否有比`COMMITTED_POST_FAILED_POISONED`更严格、可实现的安全语义？
