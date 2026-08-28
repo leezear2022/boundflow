@@ -10,6 +10,21 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：刷新S4设计外审交接至S4-1B construction readiness v13
+
+- design-result commit更新为`b34bf6721d3b890bea223aa7c3c372d6cc10609d`，冻结base仍为
+  `ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
+- 必读文档由28增至29，加入847行S4-1B construction package；top-level任务由44增至52，must-answer由43增至51；
+- AC3与memory账更新为S4-1B/full descriptor=`90/110`、scratch additional bytes=`0`、S4-1D/S4-2/S4-3=
+  `389,574/491,774/559,838 B`及alias-failure S4-1D=`463,302 B`；
+- evidence新增GPU storage identity/offset、descriptor set重算、S2 Torch/driver双memory diagnostic与construction hash；
+- 外审命令与Git范围更新到`b34bf67`；仍不新建S4 exchange、不开放production/formal/timing/performance。
+
+### 验证
+
+- handoff base/result commit、29份必读、52项top-level任务、51项must-answer、v13新增字段：提交前验证；
+- `git diff --check`、DocOps validation/lint在提交前执行。
+
 ## 2026-08-29：冻结S4-1B六站点施工包并纠正90/110-view与arena-slice物理账
 
 - 新增S4-1B construction package，冻结pass A 19-action、A26/A20 staged residual插入点、42-read+7-write
