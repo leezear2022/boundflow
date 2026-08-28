@@ -23,3 +23,29 @@ stage: s03
 - 文档格式与 DocOps lint：待运行；
 - 代码/性能：明确 deferred，待后续提交。
 
+## 2026-08-28：实现 direct-VJP optimizer wrapper
+
+- 新增 `asplos27_s3_optimizer_pipeline.py`；
+- 每个 sample 只建立一次 sample owner，逐 ordinal 直接执行 S2 `forward/backward`；
+- Adam、clamp、scheduler 和每轮 policy cut 保留在 host；
+- 新增聚合 receipt，固定 10/9、graph replay、direct VJP、无 autograd registry、无 fallback 与无 dense-A
+  saved state；
+- correctness capture 可选，计时路径不复制 step tensor 到 CPU。
+
+### 验证
+
+- 静态/专项/GPU correctness：待测试提交；
+- formal performance：仍关闭。
+
+## 2026-08-28：增加 S3 correctness 与 fail-closed 测试
+
+- 增加独立 native eager/autograd 10/9 trajectory oracle；
+- 逐 step 比较 lower、compressed dα、α before/after、Adam step/m/v 与符号；
+- 增加 receipt counter、saved-state、fallback 与 claim 篡改拒绝；
+- 静态断言 S3 hot wrapper 不经过旧 `_candidate_evaluate`、executor registry 或 `autograd.grad`。
+
+### 验证
+
+- targeted GPU：`4 passed in 10.86s`；
+- mypy：2 files clean；
+- full regression：待 formal source-exact 后运行。
