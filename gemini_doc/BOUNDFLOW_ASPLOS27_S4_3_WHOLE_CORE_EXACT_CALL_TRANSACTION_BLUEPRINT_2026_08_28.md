@@ -396,6 +396,11 @@ PREPARED
        └─ runtime fault
             → restore tensor content + host packet/container when possible
             → POISONED_NO_RETRY
+
+COMMITTED
+  └─ POSTPROCESSING
+       ├─ success → COMPLETED
+       └─ official post fault → COMMITTED_POST_FAILED_POISONED
 ```
 
 语义：
@@ -403,6 +408,8 @@ PREPARED
 - `ABORTED_CLEAN`：可以安全报告失败；live内容、identity、version均未变；
 - `COMMITTED`：可以进入official post；
 - `POISONED_NO_RETRY`：不能调用native fallback、不能重新commit、不能继续queue；只能终止并保留fault artifact。
+- `COMMITTED_POST_FAILED_POISONED`：12-path/host/container提交已经发生，official post没有形成合法queue result；不得把
+  它伪装成precommit clean abort，也不得自动回滚后重调post。当前query必须终止并冻结commit/post fault raw。
 
 不得把`POISONED_NO_RETRY`伪写成“rollback success”。
 
@@ -574,9 +581,12 @@ production verifier。
 15. `MID_COMMIT_FAILURE_POISONED`；
 16. `RETRY_AFTER_POISONED_FORBIDDEN`；
 17. `FALLBACK_AFTER_PARTIAL_COMMIT_FORBIDDEN`；
-18. `NET_SCRATCH_CONSUMER_UNRESOLVED`。
+18. `NET_SCRATCH_CONSUMER_UNRESOLVED`；
+19. `OFFICIAL_POST_FAILURE_AFTER_COMMIT_POISONED`；
+20. `QUEUE_CONTINUE_AFTER_POST_FAILURE_FORBIDDEN`。
 
-fault injection至少覆盖：第1/6/12条device copy、host packet replacement、container clear和post调用前边界。每案必须
+fault injection至少覆盖：第1/6/12条device copy、host packet replacement、container clear、post entry、post中段和
+post return前边界。每案必须
 记录内容、identity和`_version`的实际恢复范围，不得只断言tensor值相等。
 
 ## 15. 实现切分
@@ -609,6 +619,7 @@ S3外审批准且S4-0—S4-2依次关闭后，按短提交推进：
 - 12 live paths、host packet和intermediate container完成同一logical commit；
 - provider bound callbacks=0、constructor=12、post=1；
 - precommit失败clean，mid-commit失败明确poisoned且禁止fallback/retry；
+- official post失败明确为`COMMITTED_POST_FAILED_POISONED`，禁止继续queue或伪装clean rollback；
 - provider net scratch consumer audit无未决读取；
 - replay PASS，minimum 26类tamper全拒绝；
 - timing/performance/same-solver headline flag仍false。
@@ -623,6 +634,7 @@ S3外审批准且S4-0—S4-2依次关闭后，按短提交推进：
 - `pre_result.interm_bounds`副作用无法纳入transaction；
 - net scratch后续consumer无法证明或同步；
 - mid-commit失败后仍尝试native fallback/继续queue；
+- official post失败后回滚并重试、继续queue或报告clean abort；
 - 把content rollback误报为版本/identity完全回滚；
 - 为过门禁隐藏provider constructor、post、KFSB或host integration成本。
 

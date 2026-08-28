@@ -305,6 +305,10 @@ S4-3 whole-core exact-call的provider return constructor、official post、host 
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`。existing KFSB/
 commit可复用其数学与owner，但不能直接继承“完全原子”措辞。
 
+S4-4正式证据链、18 fresh B0/R/C六全排列、stdlib tensor raw/replay、40类fully re-signed tamper及
+`COMMITTED_POST_FAILED_POISONED`见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`。
+
 ## 8. 当前门禁
 
 本文只是implementation blueprint。S3 exchange仍为`ready_for_audit`，没有external approval；因此S4代码、GPU

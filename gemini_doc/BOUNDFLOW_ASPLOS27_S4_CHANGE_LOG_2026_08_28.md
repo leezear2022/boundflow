@@ -10,6 +10,28 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-28：冻结S4-4 formal artifact/stdlib replay/tamper关闭蓝图
+
+- 审计S3 v2 JSONL与RVIR five-fresh/whole-core/KFSB/live-return artifacts，确认旧`.pt`不能作为外部stdlib审计的
+  唯一raw，历史manifest链也不能证明新S4组合路径真正执行；
+- 冻结B0 original provider、R provider-independent RVIR native、C S4 compiled三方六全排列，共18个fresh subprocess；
+- 冻结标准库可解码`base64-ieee-bytes` tensor record、deterministic gzip、executed-source inventory与无本机路径泄漏；
+- 冻结pre-state、10/9/10 trajectory、terminal six-lA、KFSB 3/3/72、core/transaction/post/solver全层raw；
+- 新增stdlib-only semantic replayer，禁止import BoundFlow/PyTorch/TVM/Numpy/αβ-CROWN或复用production validator；
+- 新识别official post发生于commit后的failure边界，状态冻结为`COMMITTED_POST_FAILED_POISONED`，禁止伪装clean
+  rollback、重试或继续queue；
+- 冻结minimum 40类fully re-signed tamper、12项fault injection和外审独立重算要求；
+- 新增S4-4实施蓝图并回链S4-3、主预注册、evaluator ABI与README；仍无S4代码/formal运行/性能claim。
+
+### 验证
+
+- 现有artifact结构、raw格式、`.pt`依赖、S3 v2 20 MB JSONL与source/manifest绑定方式已独立盘点；
+- stdlib盘点确认S3 v2 raw=`18 rows / 20,747,422 bytes`，旧RVIR five-fresh=`10 .pt / 16,975,355 bytes`；
+- S3 v2与RVIR five-fresh/whole-core/live-return/KFSB/atomic artifact targeted：`19 passed in 19.09s`；
+- 文档自检首次把tamper执行步骤1—8误纳入攻击编号，修正解析范围后确认攻击inventory=`1..40`、
+  order/worker=`6/18`、蓝图=`703 lines`，PASS；该失败属于检查脚本选择范围，不是repo测试回归；
+- 交叉链接与`git diff --check`：PASS；DocOps change/validation、exchange validate与lint在提交前执行。
+
 ## 2026-08-28：冻结S4-3 whole-core exact-call事务与失败语义
 
 - 再次确认S3 exchange仍为`ready_for_audit/r001`、无audit产物，保持S4代码/correctness/timing关闭；

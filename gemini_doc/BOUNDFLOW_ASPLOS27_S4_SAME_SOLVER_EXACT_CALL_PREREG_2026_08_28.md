@@ -309,12 +309,18 @@ B0 original provider只作额外semantic control，不作为S4实现依赖。五
 
 ### S4-4：artifact/replay/tamper closure
 
+精确artifact tree、18-worker六全排列B0/R/C、stdlib tensor codec/replayer、pre/mid/post commit fault状态与40类
+fully re-signed tamper合同见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`。
+
 - raw-first，source commit、TVM submodule、三个外部仓库、model/property与全部code blob绑定；
-- five fresh R/C，必要时加B0 control；部分结果不得resume成formal；
+- 六个B0/R/C全排列triplet、18个fresh subprocess；部分结果不得resume成formal；
 - raw逐step保留，不只存summary digest；
-- replay从raw重算coverage、trajectory、whole-core、receipt与verdict；
-- 至少16类fully outer-resigned tamper，覆盖missing/extra/swapped state、active β、gradient、policy、ordinal、
-  terminal handoff、KFSB、commit、provider/fallback counter、source和claim flag；
+- tensor raw必须有不依赖`.pt`的stdlib可解码投影；replay不得import BoundFlow/PyTorch/TVM/αβ-CROWN；
+- replay从raw重算coverage、trajectory、whole-core、receipt、failure state与verdict；
+- 至少40类fully outer-resigned tamper，覆盖source/protocol、worker/process、state/trajectory、terminal handoff、KFSB、
+  transaction/provider/post、artifact/replay与claim flag；
+- official post发生于commit之后；post fault必须记录为`COMMITTED_POST_FAILED_POISONED`，禁止rollback/retry/queue继续；
 - targeted/full/static/DocOps全过后，才允许另写S4-P性能预注册。
 
 ## 4. Timing与性能门禁仍关闭

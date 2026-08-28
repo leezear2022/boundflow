@@ -1,6 +1,6 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
-最新动作（v11 S3外审/S4 whole-core事务冻结）：S3已正式交付DocOps exchange
+最新动作（v12 S3外审/S4 formal evidence冻结）：S3已正式交付DocOps exchange
 `asplos27-s3-optimizer-runtime-20260828`，状态=`ready_for_audit/r001`。S4只读普查确认production
 optimizer每step有六α source/8,496 stored元素（lower-only active/preserved各4,248）与一条active β；S3 P-only
 对应1,032 stored/516 active且β为空，不能直接作为whole-core exact-call。S4草案冻结compressed evaluator→
@@ -16,12 +16,18 @@ terminal bridge。S3外审批准前代码/timing关闭。见
 `BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`、
+`BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
 
 S4-3进一步确认exact-call不是薄adapter：真实事务还包含KFSB三次batch-24 child CROWN、12条return constructor、
 一次official post、host packet prune和`pre_result.interm_bounds` clear。现有device atomic v1在mid-commit故障时只能
 恢复tensor内容，无法恢复PyTorch `_version`；因此新合同明确使用`POISONED_NO_RETRY`，禁止partial commit后fallback/
 重试。candidate+rollback加入后已知logical subtotal=`488,760 bytes`，不等于实测peak显存。
+
+S4-4不沿用旧RVIR `.pt`作为唯一formal truth；冻结18个fresh subprocess覆盖B0/R/C六全排列，tensor以stdlib可解码
+IEEE raw投影保存，由不import BoundFlow/PyTorch/TVM的replayer独立重建summary。minimum 40类fully re-signed
+tamper覆盖source、trajectory、terminal/KFSB、transaction/provider/post和artifact；official post失败单列为
+`COMMITTED_POST_FAILED_POISONED`。
 
 最新执行（v8 S3，待合并外审）：S3 v2已把S2 prepared direct VJP接入ResNet2B P-anchor完整10次
 CROWN evaluation/9次Adam mutation本地wrapper。18 fresh稳健formal得到P/native order-median
