@@ -10,6 +10,21 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：刷新S4设计外审交接至S4-1B0 construction readiness v12
+
+- design-result commit更新为`5dd9d1c78de71773f3891377cb983afc031e41ea`，冻结base仍为
+  `ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
+- 必读文档由27增至28，加入S4-1B0 construction package；top-level任务由37增至44，must-answer由36增至43；
+- AC3补isolated/base view分层、`92,160 B`输出、conditional `438,726 B` ledger、arena phase proof、cache/receipt/
+  observation分层和warm无D2H门禁；
+- evidence加入本轮TIR identity、allocator probe和construction hash；外审命令与Git范围更新到最新冻结提交；
+- 仍不新建S4 exchange、不开放production/formal/timing/performance。
+
+### 验证
+
+- handoff base/result commit、28份必读、44项top-level任务、43项must-answer、v12新增字段：提交前验证；
+- `git diff --check`、DocOps validation/lint在提交前执行。
+
 ## 2026-08-29：冻结S4-1B0逐文件施工包并纠正isolated/production物理账
 
 - 亲读R31B2 binary pack、S2 binary select、现有cache/receipt与pinned provider midpoint源码，确认S4应新增独立

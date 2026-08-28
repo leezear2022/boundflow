@@ -1,12 +1,12 @@
 ---
-status: ready-for-external-design-audit-v11-s4-1a-construction-readiness-frozen
+status: ready-for-external-design-audit-v12-s4-1b0-construction-readiness-frozen
 date: 2026-08-29
 type: external-audit-handoff
 topic: boundflow
 slug: asplos27-s4-design-audit
 audit-kind: preregistration-and-implementation-blueprint
 base-commit: ebf45cc72438141d8f0b35dadfd5cf774d7e753f
-design-result-commit: 97c6199acdb06aa7f55cc984896e17ca3e881a8a
+design-result-commit: 5dd9d1c78de71773f3891377cb983afc031e41ea
 execution-authority: false
 code-change-open: false
 performance-claimed: false
@@ -65,6 +65,13 @@ speedup或complete-query性能已经存在。
 35. ticket→resource-owner→prepared的single logical owner adoption是否优于逐字段move，仍有无double/no-owner窗口；
 36. gradient/lower未初始化且first full-write前read-forbidden是否足够；upstream是否必须纳入initial content validation；
 37. 68 negative与5 positive+7 isolated fault formal是否足以关闭S4-1A，而不冒充provider mapping/global exclusivity。
+38. S4-1B0作为fixed backend lowering而不新增endpoint IR是否正确，是否仍有必须由IR表达的新solver/effect语义；
+39. isolated pack/select的5 view是否确与S4-1A 16 base view零重叠，`18,432+73,728=92,160 B`账是否完整；
+40. `438,726 B` production ledger是否确实隐含selected output复用coefficient arena，S4-1B phase/liveness proof是否充分；
+41. precompile lookup key、immutable module receipt、mutable cache observation、formal tensor sidecar四层是否正确；
+42. device source作为compile output不进入首次lookup key、但进入module receipt/cache value是否避免循环身份；
+43. warm path删除content hash/class count D2H是否正确，generation/descriptor/O(1) counter能否维持fail closed；
+44. 20 stable reason、16项test layout与5+1+5 future formal topology是否足以关闭S4-1B0。
 
 ## 1. 审计范围和Git边界
 
@@ -72,9 +79,9 @@ speedup或complete-query性能已经存在。
 - 本轮设计base：`ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
 - S4-0 live admission/lease、S4-3A scratch finalization、S4-1A prepare transaction、S4-1B0 ternary TIR、
   S4-1B/1C selector/gradient/arena ABI、S4-1D evaluator、S4-2 policy、S4-3 whole-core transaction及S4-4 formal
-  evidence readiness、S4-0 V4与S4-1A V5 construction readiness全部设计结果：
-  `97c6199acdb06aa7f55cc984896e17ca3e881a8a`；
-- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..97c6199acdb06aa7f55cc984896e17ca3e881a8a`
+  evidence readiness、S4-0 V4、S4-1A V5与S4-1B0 construction readiness全部设计结果：
+  `5dd9d1c78de71773f3891377cb983afc031e41ea`；
+- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..5dd9d1c78de71773f3891377cb983afc031e41ea`
   和下列S4文档的完整版本为准；
 - S3 formal实现/结果不在本轮重新验收，但它是S4设计输入；S3独立exchange仍等待审计；
 - `.docops/exchange/gc0-1-prereg-20260826`异步audit文件和`docs/CIBC_for_DAC.pdf`是用户保留的范围外dirty文件，
@@ -105,20 +112,21 @@ speedup或complete-query性能已经存在。
 11. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_BOX_ENDPOINT_SUBGRADIENT_CLOSURE_2026_08_28.md`；
 12. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_ENDPOINT_IMPLEMENTATION_READINESS_2026_08_28.md`；
 13. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_TIR_ABI_IMPLEMENTATION_READINESS_2026_08_28.md`；
-14. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1BC_DAG_ADJOINT_PREFLIGHT_CORRECTION_2026_08_28.md`（历史v1）；
-15. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
-16. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
-17. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1BC_SELECTOR_GRADIENT_TIR_IMPLEMENTATION_READINESS_2026_08_28.md`；
-18. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`；
-19. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_EVALUATOR_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`；
-20. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
-21. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_POLICY_DRIVER_IMPLEMENTATION_READINESS_2026_08_29.md`；
-22. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
-23. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_29.md`；
-24. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
-25. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
-26. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_EVIDENCE_IMPLEMENTATION_READINESS_2026_08_29.md`；
-27. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
+14. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`（权威施工合同）；
+15. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1BC_DAG_ADJOINT_PREFLIGHT_CORRECTION_2026_08_28.md`（历史v1）；
+16. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
+17. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；
+18. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1BC_SELECTOR_GRADIENT_TIR_IMPLEMENTATION_READINESS_2026_08_28.md`；
+19. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`；
+20. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_EVALUATOR_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`；
+21. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
+22. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_POLICY_DRIVER_IMPLEMENTATION_READINESS_2026_08_29.md`；
+23. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
+24. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_29.md`；
+25. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
+26. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
+27. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_EVIDENCE_IMPLEMENTATION_READINESS_2026_08_29.md`；
+28. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
 
 ## 3. 已冻结的production事实，请独立复核
 
@@ -161,6 +169,8 @@ speedup或complete-query性能已经存在。
 ### 3.4 known logical memory账
 
 - S4-1D correctness ledger=`438,726 bytes`；
+- 该ledger隐含S4-1B把`73,728-byte selected_endpoint`安全复用existing coefficient arena；phase proof未关闭时只
+  是conditional design ledger；
 - S4-2 current m/v/step、compressed best、best lower、`ret_0`和transition shadow新增=`102,200 bytes`；
 - S4-2 known subtotal=`540,926 bytes`（CUDA `540,870` + CPU `56`）；
 - full candidate=`34,008 bytes`；
@@ -241,9 +251,14 @@ PASS要求：
   else吞成center；
 - max-finite和min-subnormal反例是否证明midpoint operation order必须绑定`(lower+upper)*float32(0.5)`；
 - 独立pack/select的2 launch、5 unique tensor/view、6 argument occurrence、zero center tensor/view、zero workspace
-  物理账是否准确；
+  是否准确，且这5个view是否与S4-1A base零重叠；
+- isolated selector/selected output是否确为`18,432/73,728 B`、合计`92,160 B`；旧稿写existing/零新增是否应纠正；
+- production `438,726 B` ledger是否以selected output复用coefficient arena为条件；pass A capture→pass B E0→pass C
+  recompute的storage/generation/live-reader/stream proof若失败，是否必须加回`73,728 B`；
 - S4 cache key是否必须超出compute capability，绑定schema/symbol/TIR/target/shape/dtype/threads和三项policy；
-- cache hit后重验module receipt、旧binary cache key必须miss/拒绝是否足够防止历史模块冒充；
+- cache hit后重验module receipt、旧binary cache key必须miss/拒绝是否足够防止历史模块冒充；device source作为compile
+  output不进入首次lookup key、但进入immutable receipt是否正确；
+- mutable hit/miss count是否必须离开module identity；formal content/count sidecar是否必须离开warm receipt以避免D2H/sync；
 - A18/A20/A24/A26/A29五张binary selector若仍只有0/1，NaN是否会因`A>=0=false`静默选upper；把六张
   selector统一加入`-128` invalid sentinel是否必要且不改变normal zero branch语义；
 - S4 selector总bytes是否应为55,296、相对R31B2增加12,288，而不是“center为0所以总bytes不变”；
@@ -448,6 +463,12 @@ PASS要求：
 - 第一版nonfinite CUDA/TIR探针FAIL：浮点`x==x && abs(x)!=Inf`把NaN误归zero；该失败已保留而非删除；
 - 改用IEEE-754 float32 exponent位检查后边界探针PASS：`+0/-0`均为zero、正负subnormal保留符号、
   NaN/±Inf=`-128`、invalid输出canonical NaN；2 launch、5/5 DLPack pointer exact、workspace=0；
+- 本轮独立16-element SM89 TIR得到unscheduled/scheduled/device source hash=`1bbd8e...c394/19a068...c5b4/
+  b94c7f...c2eb`，只作diagnostic，不得复制进production receipt；
+- fresh allocator probe得到selector/selected/combined allocated delta=`18,432/73,728/92,160 B`，reserved
+  delta=`2,097,152 B`且两storage distinct；reserved不进入logical ledger；
+- S4-1B0 construction model冻结backend无新IR、20 reason、16 test和future `5+1+5` workers，hash=
+  `5056d302aa27785ab8a22bd8f5665ebef0a4aba2ca22bc72ce28581144dbcc2a`；
 - formal in-memory CUDA/TIR pack/select逐位PASS，old binary误编码606 zero；selected hash=
   `7e95e075...39b652`，本次真实lower/upper derived-center hash=`2a3b69e1...5f003`，extra center tensor/view=0；
 - old R31B2 module hash before/after均为`3871bf0e...be575`，S4 module/cache key均与旧binary隔离；
@@ -489,8 +510,8 @@ PASS要求：
 ## 7. 建议外审操作
 
 ```bash
-git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..97c6199acdb06aa7f55cc984896e17ca3e881a8a
-git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..97c6199acdb06aa7f55cc984896e17ca3e881a8a
+git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..5dd9d1c78de71773f3891377cb983afc031e41ea
+git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..5dd9d1c78de71773f3891377cb983afc031e41ea
 
 source env.sh
 /home/lee/miniconda3/envs/boundflow/bin/python -m pytest -q \
@@ -508,6 +529,11 @@ source env.sh
 另外请用自己的短脚本：
 
 - 重算mutable inventory和memory ledger；
+- 从S4-1B0施工包提取canonical JSON并重算`5056d3...cc2a`；确认backend-local dataclass不是新IR；
+- fresh分配18,432 int8和18,432 float32，独立核对logical/allocated/reserved并区分S4-1A base view；
+- 构造coefficient arena live reader/旧DLPack descriptor，攻击pass A→B→C alias proof；失败时要求ledger加73,728 B；
+- 构造cache entry：改变mutable hit count应保持module identity；篡改stored device source必须在hit revalidation拒绝；
+- 检查warm receipt没有tensor content hash/class count或隐式`.cpu()`同步；
 - 从S4-1A施工包提取完整canonical JSON并重算`8ad25c...09a9d`；
 - 构造same-pointer/shape different-stride view，先复现old key静默碰撞，再验证V5 lookup-before-cache拒绝；
 - 在parameter/gradient/output/view/roundtrip/receipt/adoption七点故障，并保留stable exception+traceback，检查allocated=entry；
@@ -583,6 +609,13 @@ source env.sh
 34. single resource-owner adoption是否真正避免double/no-owner；adoption fault怎样独立注入最可信？
 35. uninitialized gradient/lower的read-forbidden状态是否需要poison fill，若需要其kernel/bytes应归哪个阶段？
 36. 68 negative和12-process formal是否适当；是否同意S4-1A仍不得claim provider mapping/global exclusivity？
+37. 是否同意S4-1B0不新增endpoint IR，只用backend-local build/schedule metadata和existing compiler Schedule owner？
+38. isolated 5 view与S4-1A 16 base view是否零重叠，`92,160 B` output账是否正确？
+39. 是否同意`438,726 B`是conditional ledger；S4-1B phase alias未证时必须加回`73,728 B`？
+40. pass A selector capture→B selected E0→C coefficient recompute是否足以证明arena reuse，缺哪类reader/event门禁？
+41. lookup/module/cache-observation/formal-sidecar四层拆分是否正确，device source为何不能进入首次lookup key？
+42. warm路径删除content hash/class count是否会削弱fail closed；descriptor/generation/device poison/final-finite是否足够？
+43. 20 reason、16 test和future 5 positive+1 cache+5 fault是否足以关闭S4-1B0？
 
 ## 9. 输出格式
 
