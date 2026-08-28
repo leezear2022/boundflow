@@ -10,6 +10,34 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-29：关闭S4-2 policy driver实施前歧义
+
+- 新增S4-2 implementation-readiness审计，亲读pinned production源码并用live observer冻结10个ordinal的
+  keep-best/stop/patience/pruning/scheduler轨迹；fixed physical pruning为inactive，checkpoint ordinal精确为
+  `0,6,7,8,9`；
+- 纠正旧synthetic fixture：`iteration=10`、patience从0开始且源码条件为`patience>10`时该分支不可达；改用不同
+  program hash的sealed test-only policy（evaluation limit至少11），不伪装成fixed ResNet事实；
+- live optimizer ABI冻结two-group `batch_dim=2/0`、全部Adam defaults、7个CPU float32 step scalar=`28 B`；
+  functional Adam对9次×7 parameter的parameter/m/v/step共63组比较全部bit exact；
+- production best checkpoint inventory确认full α/β=`34,008 B`、intermediate=`299,712 B`、best lower/`ret_0`
+  各`24 B`；candidate只checkpoint active compressed α/β=`17,016 B`，preserved α由immutable lease恢复，fixed
+  intermediate bounds以identity/version/content guards替代clone；
+- 为validate-before-commit冻结parameter/m/v/step shadow=`51,076 B`；修正S4-2 known logical subtotal为
+  `540,926 B`（CUDA `540,870 B`+CPU `56 B`），S4-3 subtotal为`608,942 B`；这些仍不是peak-memory claim；
+- 删除S4-2“mutation失败可完整rollback”的错误承诺：pre-begin错误才clean reject，evaluator begin、shadow transition、
+  stable copy-commit或scheduler failure均进入`POISONED_NO_RETRY`，因为content copy-back不能恢复PyTorch `_version`
+  或hidden state；
+- formal口径从含糊five-fresh收紧为A/B 5对10 worker、B/C 5对10 worker，共20 fresh process；candidate full-IEEE
+  numeric payload下限=`1,341,776 B/run`，20 worker下限约`25.59 MiB`；
+- 同步S4-2/S4-3蓝图、S4-1D readiness、主预注册、evaluator ABI与README；S3外审前S4 production代码/formal/
+  timing/performance继续closed。
+
+### 验证
+
+- ledger独立重算：S4-2=`540,926 B`、S4-3=`608,942 B`，PASS；
+- branch reachability重算：10-step patience最大10，`>10`不可达；checkpoint=`[0,6,7,8,9]`，PASS；
+- live policy/functional Adam probes、定向回归、DocOps validation/lint在提交前执行。
+
 ## 2026-08-29：刷新S4设计外审交接至evaluator transaction v6
 
 - design-result commit更新为`52d7bd875466ae539eca34a552b4b5c7957d2437`，审计范围仍从冻结base

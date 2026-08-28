@@ -14,6 +14,11 @@ date: 2026-08-28
 
 ## 0. 结论
 
+> 2026-08-29 实施就绪修订：live observer、functional Adam 与源码可达性审计已完成。本文的事务失败语义、
+> checkpoint索引、optimizer ABI、fresh-worker口径及memory ledger以
+> `BOUNDFLOW_ASPLOS27_S4_2_POLICY_DRIVER_IMPLEMENTATION_READINESS_2026_08_29.md`为准；修正后的S4-2/S4-3
+> known logical subtotal为`540,926/608,942 B`。这仍是design，不开放production代码。
+
 S4-2不能直接复用`execute_rvir_v4_native_optimizer_trace`、S3 P-anchor循环或
 `execute_terminal_optimizer_with_lower_adjoint_handoff_v1`。这些路径已经证明10次CROWN evaluation、9次Adam
 mutation、two-group LR、clamp和lower数值可以对齐，但它们没有完整拥有production
@@ -55,7 +60,8 @@ GPU correctness和timing全部保持关闭。
 权威production源码为：
 
 ```text
-/home/lee/Codes/alpha-beta-CROWN/auto_LiRPA @5a098e8
+/home/lee/Codes/alpha-beta-CROWN @e5c7e17
+/home/lee/Codes/alpha-beta-CROWN/complete_verifier/auto_LiRPA @5a098e8
 auto_LiRPA/optimized_bounds.py::_get_optimized_bounds
 ```
 
@@ -72,7 +78,7 @@ evaluate bound
 → backward + Adam step                 # 非terminal iteration
 → beta nonnegative projection
 → alpha [0,1] projection
-→ scheduler.step()                     # production在terminal iteration也调用
+→ scheduler.step()                     # 当前fixed path在terminal iteration也调用；early exit则不调用
 → pruner.next_iter()
 ```
 
@@ -192,6 +198,7 @@ alpha_lr = 0.01
 beta_lr = 0.05
 lr_decay = 0.98
 adam_hyperparameters
+adam_param_group_abi                 # 含per-group batch_dim
 loss_reduction_id
 stop_criterion_id
 keep_best / patience / start_save_best
@@ -221,6 +228,7 @@ stop_predicate[6,1]
 stop_all
 timeout_predicate
 optimizer step/m/v
+transition shadow parameter/step/m/v
 parameter_version
 terminal_decision
 ```
@@ -291,8 +299,8 @@ exp_avg (m)
 exp_avg_sq (v)
 ```
 
-candidate m+v为8,508 float32=`34,032 bytes`。7个step scalar的device/dtype/bytes取决于pinned PyTorch
-functional Adam contract，必须在prepare receipt中逐项记录，不能把它们偷偷并入或排除memory claim。
+candidate m+v为8,508 float32=`34,032 bytes`。live production的7个step scalar均为CPU float32，合计`28 B`、
+9次update后值均为9。它们必须在prepare receipt中逐项记录，不能偷偷排除memory ledger。
 
 correctness实现优先使用一个固定版本的functional Adam transition或显式等价方程，prepared时创建m/v/step；禁止用
 “dummy zero-gradient step后再复位”的方式预热，因为那会制造不可审计的隐藏mutation。
@@ -305,21 +313,39 @@ eps=1e-8
 weight_decay=0
 amsgrad=false
 maximize=false
-foreach/capturable/differentiable/fused = live production values
+foreach=null
+capturable=false
+differentiable=false
+fused=null
+decoupled_weight_decay=false
+alpha_group.batch_dim=2
+beta_group.batch_dim=0
 ```
 
-最后四项不能靠当前环境默认值猜测；S4-2A必须从live production optimizer param groups/state冻结。
+这些项不能靠当前环境默认值猜测；S4-2A必须从live production optimizer param groups/state冻结。pinned
+torch 2.11.0+cu130上的live probe还证明functional Adam与production Adam在9次×7个parameter的parameter/m/v/step
+共63组比较上bit exact；正式实现仍需重跑并绑定source/env receipt。
 
 ### 4.3 correctness logical ledger
 
-S4-1D修正ledger为`438,726 bytes`。加入candidate m+v后，已知静态logical subtotal为：
+S4-1D修正ledger为`438,726 bytes`。S4-2还必须拥有current m/v、step、compressed best checkpoint、best lower、
+`ret_0`以及validate-before-commit shadow：
 
 ```text
-438,726 + 34,032 = 472,758 bytes
+S4-1D evaluator state                         438,726 B
+current Adam m/v                               34,032 B
+current step scalars (CPU)                         28 B
+compressed best α/β checkpoint                 17,016 B
+best lower                                         24 B
+ret_0 comparison reference                         24 B
+next parameter/m/v/step shadow                  51,076 B
+known S4-2 logical subtotal                    540,926 B
 ```
 
-该数仍排除model/fixed input、cuDNN/TVM workspace、allocator metadata、7个step scalar、best-state checkpoint、pruner
-mask和terminal bridge scratch。S4-2必须分项测量这些新增项，`472,758`不是peak显存claim。
+其中known CUDA logical=`540,870 B`，CPU logical=`56 B`。该数仍排除model/fixed input、cuDNN/TVM workspace、
+allocator metadata、policy/pruner masks和Python object。S4-2必须分项测量，`540,926`不是peak显存claim。fixed
+intermediate bounds为immutable prepared input，不复制production `299,712 B` best-intermediate clone；必须以
+object/storage/version/content guards及S4-3 official-post parity证明该ownership缩减合法。
 
 ## 5. sealed driver精确状态机
 
@@ -349,10 +375,13 @@ if early terminal:
     take admitted termination branch or fail closed for current fixed scope
 if ordinal < 9:
     write signed/masked gradients
-    Adam update exactly once
-    clamp α to [0,1], β to [0,+inf)
+    compute Adam next parameter/m/v/step into shadow exactly once
+    compute clamp α to [0,1], β to [0,+inf) in shadow
+    validate transition and next scheduler state
+    copy-commit shadow to stable prepared buffers
     increment parameter version
-production scheduler.step exactly once
+if no early exit:
+    production scheduler.step exactly once
 advance pruning state
 ```
 
@@ -408,6 +437,9 @@ evaluations = 10
 updates = 9
 stop_all[0:9] = false
 timeout[0:9] = false
+checkpoint ordinals = [0,6,7,8,9]
+physical pruning active[0:9] = false
+preserve/next-preserve mask = None
 best_iteration_by_domain = [9,9,9,9,9,9]
 post_state == restored_best_state == ordinal9 state
 ```
@@ -420,7 +452,7 @@ candidate必须用static D=6 mask语义逐步等价，不能因compiled shape固
 formal workload上stop/timeout/restore-to-earlier可能不触发。因此另加synthetic policy fixtures：
 
 - ordinal 3 stop-all；
-- patience超过10；
+- test-only sealed policy `evaluation_limit>=11`下patience超过10；固定10-step程序从0开始最多到10，该分支不可达；
 - timeout predicate；
 - partial preserve mask；
 - best winner来自不同ordinal/domain；
@@ -465,9 +497,11 @@ empty token/preserved α exact
 
 ## 8. atomicity、异常与terminal bridge
 
-- evaluator异常发生在Adam mutation前：parameter/m/v/LR/best/pruner/version全部rollback；
-- Adam transition或clamp异常：整ordinal rollback，不能留下部分parameter group更新；
-- scheduler异常：parameter update也必须rollback，保持ordinal原子性；
+- 只有evaluator begin和mutable staging之前的hash/ABI/pointer/version错误可`REJECTED_CLEAN`；
+- evaluator transaction begin后异常：run进入`POISONED_NO_RETRY`，stable parameter即使未改也不得重试；
+- functional Adam/clamp/scheduler-next-state先写out-of-place shadow；验证通过后才copy-commit到stable buffers；
+- shadow计算/验证、copy-commit或scheduler state失败：run进入`POISONED_NO_RETRY`；
+- 数值copy-back不能恢复PyTorch `_version`或hidden optimizer/scheduler state，因此不宣称rollback；
 - result hash/shape/sign/nonfinite异常在loss与mutation前拒绝；
 - terminal bridge只读terminal compressed state与immutable preserved source；
 - bridge输出必须dense→compressed exact round-trip；
@@ -512,8 +546,9 @@ performance_claimed = false
 
 ### 9.3 five-fresh与replay
 
-- A/B先five-fresh关闭driver extraction；
-- B/C再five-fresh关闭compiled trajectory；
+- A/B先`5 pairs = 10 fresh worker processes`关闭driver extraction；
+- B/C再`5 pairs = 10 fresh worker processes`关闭compiled trajectory；
+- 总计20个fresh worker，不能把一个process内重复调用算成fresh；
 - pair顺序预注册并交替，部分结果不得resume；
 - replay从raw重算全部数值最大差、policy decisions、Adam equations、scheduler计数和terminal round-trip；
 - source绑定BoundFlow commit、TVM submodule、production αβ-CROWN/auto_LiRPA、model/property与所有code blobs。
@@ -538,7 +573,7 @@ performance_claimed = false
 14. active β location/sign/token漂移；
 15. nonfinite lower/gradient/moment；
 16. evaluator launch重复或缺失；
-17. mutation失败后部分state残留；
+17. mutation失败后run未poison、仍可retry或部分state被继续消费；
 18. nonterminal lA出现或terminal lA缺失；
 19. terminal dense bridge重复/提前/round-trip不等；
 20. preserved α direction漂移；
@@ -568,7 +603,7 @@ S3外审批准、S4-0与S4-1D依次关闭后，S4-2按以下短提交执行：
 
 只有下列全部成立才关闭S4-2：
 
-- A/B live-policy parity与B/C compiled parity均five-fresh通过；
+- A/B live-policy parity与B/C compiled parity均5对/10 fresh worker通过，总计20 worker；
 - 10/9/10 evaluation/update/scheduler-call cardinalityexact；
 - lower/state/gradient/moments通过冻结容差且sign exact；
 - best/prune/stop/patience/timeout/restore decisions exact；

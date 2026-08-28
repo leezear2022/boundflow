@@ -314,7 +314,9 @@ S4-1D唯一prepared evaluator、修正后的438,726-byte logical correctness led
 
 S4-2 sealed driver的live keep-best/stop/patience/pruning、functional Adam、`10/9/10`
 evaluation/update/scheduler-call与trajectory artifact合同见
-`gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`。
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`。live policy、
+functional Adam bit-exact probe、failure poison、checkpoint可达性和`540,926 B`修正ledger见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_POLICY_DRIVER_IMPLEMENTATION_READINESS_2026_08_29.md`。
 
 S4-3 whole-core exact-call的provider return constructor、official post、host packet、intermediate-container、device commit
 以及`POISONED_NO_RETRY`失败语义见

@@ -232,14 +232,16 @@ rollback subtotal  = 34,008 bytes
 candidate + rollback = 68,016 bytes
 ```
 
-S4-1D evaluator加S4-2 Adam m/v的修正subtotal为`472,758 bytes`；加入candidate/rollback后：
+S4-2 implementation-readiness已补齐step、compressed best、`ret_0`和validate-before-commit shadow，修正后的
+known subtotal为`540,926 bytes`；加入candidate/rollback后：
 
 ```text
-known S4-3 logical subtotal = 472,758 + 68,016 = 540,774 bytes
+known S4-3 logical subtotal = 540,926 + 68,016 = 608,942 bytes
 ```
 
-这**不是peak memory claim**。它明确不含：provider working-beta deepcopy、step scalar、best checkpoint、KFSB child
-buffers、model/fixed inputs、cuDNN/TVM workspace、allocator metadata、post D2H输出及shared intermediate source storage。
+这**不是peak memory claim**。其中S4-2 step/shadow-step的56 B在CPU；它明确不含：provider working-beta
+deepcopy、policy/pruner masks、KFSB child buffers、model/fixed inputs、cuDNN/TVM workspace、allocator metadata、
+post D2H输出及shared intermediate source storage。
 
 ## 5. terminal export：禁止第11次CROWN
 

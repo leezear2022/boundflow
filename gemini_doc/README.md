@@ -20,6 +20,7 @@ terminal bridge。S3外审批准前代码/timing关闭。见
 `BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_1D_EVALUATOR_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`、
+`BOUNDFLOW_ASPLOS27_S4_2_POLICY_DRIVER_IMPLEMENTATION_READINESS_2026_08_29.md`、
 `BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`、
 `BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`、
@@ -49,7 +50,11 @@ S4-3进一步确认exact-call不是薄adapter：真实事务还包含KFSB三次b
 一次official post、host packet prune和`pre_result.interm_bounds` clear。现有device atomic v1在mid-commit故障时只能
 恢复tensor内容，无法恢复PyTorch `_version`；因此新合同明确使用`POISONED_NO_RETRY`，禁止partial commit后fallback/
 重试。S4-1D事务复核发现旧memory ledger漏掉residual scratch与compressed metadata共`52,014 B`；修正后
-S4-1D/S4-2/S4-3已知logical subtotal分别为`438,726/472,758/540,774 B`，都不等于实测peak显存。
+S4-2 live policy/functional Adam实施就绪审计进一步发现旧账只加了m/v，漏掉CPU step、compressed keep-best、
+`ret_0`和validate-before-commit shadow；同时mutation失败不能恢复PyTorch `_version`。因此失败统一为
+`POISONED_NO_RETRY`，fixed checkpoint ordinal为`0,6,7,8,9`，10-step程序中的`patience>10`不可达、改由独立
+sealed synthetic policy覆盖。S4-1D/S4-2/S4-3已知logical subtotal现为`438,726/540,926/608,942 B`，都不等于
+实测peak显存。
 
 S4-3A源码审计及live B0/R phase probe进一步关闭provider net scratch歧义：fixed candidate KFSB/post/queue/next-pre
 不读取net dynamic scratch作数值输入，因此production tensor commit仍是12条。reference terminal会move/gc六α、12个

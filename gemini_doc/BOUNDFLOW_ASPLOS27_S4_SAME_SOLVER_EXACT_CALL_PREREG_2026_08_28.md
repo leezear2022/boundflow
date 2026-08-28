@@ -286,9 +286,11 @@ evaluation/update=`10/9`，candidate evaluation=`10`，provider/native evaluatio
 
 精确实施合同见
 `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`。该合同进一步
-冻结production terminal ordinal仍调用一次scheduler：evaluation/parameter mutation/scheduler call分别为
-`10/9/10`，但第10次scheduler产生的post LR不被后续evaluation消费；同时要求从live pruner直接捕获preserve-mask，
-不得把formal workload上未触发的stop/prune/restore分支静默删除。
+冻结当前fixed live path的terminal ordinal调用一次scheduler：evaluation/parameter mutation/scheduler call分别为
+`10/9/10`，但early exit发生在scheduler之前，第10次scheduler不是所有policy path的无条件语义；其post LR不被后续
+evaluation消费。live pruner必须直接捕获preserve-mask，不得把formal workload上未触发的stop/prune/restore分支静默
+删除。live policy、functional Adam、failure poison与memory修正见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_POLICY_DRIVER_IMPLEMENTATION_READINESS_2026_08_29.md`。
 
 ### S4-3：whole-core exact-call correctness
 

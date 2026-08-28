@@ -225,14 +225,15 @@ existing source lease bytes    34,008 B  # 只延长lifetime，不是新增alloc
 该探针只说明ledger在本设计fixture中的物理可实例化性。`allocated/reserved`含allocator行为，不能与logical sum互换；
 fixed bounds和compiled workspace仍需implementation receipt单独披露。
 
-修正后的下游已知小计：
+修正后的S4-1D本阶段小计不变；下游S4-2实施就绪审计随后补齐了optimizer step、compressed best、`ret_0`和
+validate-before-commit shadow，故下游数字以2026-08-29修订为准：
 
 ```text
 S4-1D                                  438,726 B
-+ S4-2 Adam m/v                         34,032 B
-= S4-2 known subtotal                  472,758 B
++ S4-2 policy/optimizer additions      102,200 B
+= S4-2 known subtotal                  540,926 B
 + S4-3 candidate + rollback             68,016 B
-= S4-3 known subtotal                  540,774 B
+= S4-3 known subtotal                  608,942 B
 ```
 
 这些仍不是peak-memory claim。
