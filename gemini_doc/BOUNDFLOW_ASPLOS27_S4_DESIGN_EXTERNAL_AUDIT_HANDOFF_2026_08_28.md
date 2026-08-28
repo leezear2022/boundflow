@@ -1,12 +1,12 @@
 ---
-status: ready-for-external-design-audit-v15-s4-1d-construction-readiness-frozen
+status: ready-for-external-design-audit-v16-s4-2-construction-readiness-frozen
 date: 2026-08-29
 type: external-audit-handoff
 topic: boundflow
 slug: asplos27-s4-design-audit
 audit-kind: preregistration-and-implementation-blueprint
 base-commit: ebf45cc72438141d8f0b35dadfd5cf774d7e753f
-design-result-commit: 10bef37620080e7bb1eccdbb108084f2ea556a98
+design-result-commit: e6c8a786cd70e4c465fc0965095c1955a972a9a6
 execution-authority: false
 code-change-open: false
 performance-claimed: false
@@ -41,8 +41,8 @@ speedup或complete-query性能已经存在。
     views与base+emitter local 48口径是否完整；
 14. S4-1D read-only admission、post-begin `POISONED_NO_RETRY`、opaque result capability、12-worker六全排列
     full-IEEE raw和修正后的`389,574 B` ledger是否共同关闭single-evaluation事务；
-15. S4-2 live policy/functional Adam审计是否正确关闭checkpoint、patience reachability、step/best/shadow memory、
-    post-begin poison和20-worker formal口径；
+15. S4-2 live policy/functional Adam审计及施工修订是否正确关闭checkpoint、patience reachability、
+    step/best/shadow memory、post-begin poison和24-worker formal口径；
 16. S4-3 live诊断据此引入prepared working-β、prefix-only rollback、post/queue独立计数与细粒度latch是否正确；
 17. 是否同意在S3外审批准后仍按S4-0→1A→1B0→1B→1C→1D→2→3→4顺序实施；
 18. 是否发现必须在第一行S4代码开工前修正的blocker/major。
@@ -97,6 +97,18 @@ speedup或complete-query性能已经存在。
 67. component→execution→artifact 15-node seal DAG是否无环，result runtime ref是否正确排除于semantic root；
 68. 86类S4-1D negative、12-worker raw-first/replay/full-resign tamper是否足够且可机械实现；
 69. S4-1D通过后只开放S4-2而不提前暴露raw Tensor/支持re-arm，边界是否正确。
+70. S4-2用run-level evaluator family发行10个one-shot generation、完成9次controlled re-arm，而不复活已关闭的
+    S4-1D对象，是否是正确所有权边界；
+71. opaque result的exact policy consume是否真正禁止lower/gradient/lA raw Tensor逃逸，terminal child原子转移是否
+    还有consumer异常或异步引用缺口；
+72. evaluation-input version、optimizer mutation count与storage commit generation三轴拆分是否必要且充分，
+    terminal restore是否还需第四类version；
+73. 7 parameter+7m+7v+7step的28项commit cursor、scheduler后提交和partial failure poison是否诚实；
+74. terminal lA只允许与ordinal9 best state handoff、earlier-best稳定拒绝，是否正确关闭adjoint/state错配；
+75. 16-state/16-event/32-legal/224-invalid policy模型是否遗漏close、handoff、re-arm或terminal restore状态；
+76. A/B与B/C各6对、正反各3的24-worker topology是否为合理最小顺序平衡设计；
+77. A/B/C per-run raw floor=`2,837,288/2,871,296/1,511,936 B`及总计`60,550,896 B`是否正确，
+    `491,774 B`降为known base lower bound后还有哪些必须在实现前冻结的storage。
 
 ## 1. 审计范围和Git边界
 
@@ -104,9 +116,9 @@ speedup或complete-query性能已经存在。
 - 本轮设计base：`ebf45cc72438141d8f0b35dadfd5cf774d7e753f`；
 - S4-0 live admission/lease、S4-3A scratch finalization、S4-1A prepare transaction、S4-1B0 ternary TIR、
   S4-1B/1C selector/gradient/arena ABI、S4-1D evaluator、S4-2 policy、S4-3 whole-core transaction及S4-4 formal
-  evidence readiness、S4-0 V4、S4-1A V5、S4-1B0、S4-1B、S4-1C与S4-1D construction readiness全部设计结果：
-  `10bef37620080e7bb1eccdbb108084f2ea556a98`；
-- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..10bef37620080e7bb1eccdbb108084f2ea556a98`
+  evidence readiness、S4-0 V4、S4-1A V5、S4-1B0、S4-1B、S4-1C、S4-1D与S4-2 construction readiness
+  全部设计结果：`e6c8a786cd70e4c465fc0965095c1955a972a9a6`；
+- 审计范围以`ebf45cc72438141d8f0b35dadfd5cf774d7e753f..e6c8a786cd70e4c465fc0965095c1955a972a9a6`
   和下列S4文档的完整版本为准；
 - S3 formal实现/结果不在本轮重新验收，但它是S4设计输入；S3独立exchange仍等待审计；
 - `.docops/exchange/gc0-1-prereg-20260826`异步audit文件和`docs/CIBC_for_DAC.pdf`是用户保留的范围外dirty文件，
@@ -149,12 +161,13 @@ speedup或complete-query性能已经存在。
 23. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`（V1权威施工合同）；
 24. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`；
 25. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_POLICY_DRIVER_IMPLEMENTATION_READINESS_2026_08_29.md`；
-26. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
-27. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_29.md`；
-28. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
-29. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
-30. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_EVIDENCE_IMPLEMENTATION_READINESS_2026_08_29.md`；
-31. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
+26. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`（V1权威施工合同）；
+27. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`；
+28. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_29.md`；
+29. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`；
+30. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
+31. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_EVIDENCE_IMPLEMENTATION_READINESS_2026_08_29.md`；
+32. `gemini_doc/BOUNDFLOW_ASPLOS27_S4_CHANGE_LOG_2026_08_28.md`。
 
 ## 3. 已冻结的production事实，请独立复核
 
@@ -570,7 +583,19 @@ PASS要求：
 - 本次S4-1D construction依赖回归：`37 passed in 20.65s`；production code diff=`0`；
 - 本次S4-2 readiness依赖回归：`41 passed in 26.63s`；production code diff=`0`；
 - S4-2/S4-3 ledger检查：`491,774/559,838 B`、checkpoint `[0,6,7,8,9]`、10-step patience `>10`
-  不可达、24份必读文档全部存在；
+  不可达；本版32份必读文档全部存在；
+- S4-2 construction package=`1184 lines`、file hash=
+  `b473e31bd00df48499288f60b4f92b8230a69cc5a22ba6762972e5c8391524e3`；production code diff=`0`；
+- policy run机械模型=`16 states/16 events/32 legal/224 invalid`，canonical hash=
+  `75e0c1b7aa4fc9bd439d15af41f7c1b86c8c4c7f732ca6bb55108488fa743279`；
+- S4-2 formal修正为A/B与B/C各6对、正反各3，共24 fresh subprocess；A/B/C mandatory tensor floor=
+  `2,837,288/2,871,296/1,511,936 B`，`6A+12B+6C=60,550,896 B`；
+- result policy消费改为opaque exact path；10个one-shot evaluator generation、9次controlled re-arm、
+  evaluation-input/optimizer-mutation/storage-commit三轴和28项commit cursor进入施工合同；
+- terminal-best/lA门禁要求六domain均为ordinal9 best；earlier-best synthetic只验证restore，不能把ordinal9 lA交S4-3；
+- `491,774 B`降为known tensor/base lower bound，完整policy storage和peak必须在implementation receipt中补齐；
+- 本次S4-2 construction依赖回归=`36 passed, 1 deselected`；被排除的历史S2 artifact strict replay仅为
+  `4.245381964572069 vs 4.24538196457207`末位ULP，不改写冻结raw；
 - true B3-C live assembly：intermediate container六key从entry到worker return保持；working-β allocator
   delta/peak=`1,024/2,048 B`，assembly delta=`1,536 B`；12 intermediate和6 working α均exact alias source/candidate；
 - true B3-C official post=`1`，query-total domain add=`2`、candidate-post add=`1`；post CUDA allocated delta=`0`；
@@ -587,11 +612,11 @@ PASS要求：
 ## 7. 建议外审操作
 
 ```bash
-git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..10bef37620080e7bb1eccdbb108084f2ea556a98
-git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..10bef37620080e7bb1eccdbb108084f2ea556a98
+git diff --stat ebf45cc72438141d8f0b35dadfd5cf774d7e753f..e6c8a786cd70e4c465fc0965095c1955a972a9a6
+git diff --check ebf45cc72438141d8f0b35dadfd5cf774d7e753f..e6c8a786cd70e4c465fc0965095c1955a972a9a6
 
 source env.sh
-/home/lee/miniconda3/envs/boundflow/bin/python -m pytest -q \
+/home/lee/Codes/alpha-beta-CROWN/.venv/bin/python -m pytest -q \
   tests/test_rvir_v4_live_return.py \
   tests/test_rvir_v4_native_kfsb.py \
   tests/test_fsg4_b3_device_atomic_commit.py \
@@ -606,6 +631,12 @@ source env.sh
 另外请用自己的短脚本：
 
 - 重算mutable inventory和memory ledger；
+- 从S4-2施工包重建16-state/16-event transition表，确认32 legal、224 invalid及canonical hash；
+- 独立重算A/B/C per-run raw floor与`6A+12B+6C=60,550,896 B`，检查unprojected shadow/final restore未漏；
+- 攻击5-pair 3/2顺序不平衡与跨A/B、B/C复用B worker，确认24-worker inventory拒绝；
+- 构造earlier-best domain，确认policy restore可以测试但ordinal9 terminal lA不能进入S4-3；
+- 在28-item commit的parameter/m/v/step各区段注入fault，确认scheduler不提前commit且run poison；
+- 试图从opaque policy consume返回/保留raw Tensor或跨generation re-arm，确认exact type/retention gate拒绝；
 - 从S4-1B0施工包提取canonical JSON并重算`5056d3...cc2a`；确认backend-local dataclass不是新IR；
 - fresh分配18,432 int8和18,432 float32，独立核对logical/allocated/reserved并区分S4-1A base view；
 - 构造coefficient arena live reader/旧DLPack descriptor，攻击pass A→B→C alias proof；失败时要求ledger加73,728 B；
@@ -739,6 +770,15 @@ source env.sh
 66. 15-node seal DAG是否无循环；execution semantic root、result runtime ref、raw/summary/manifest边界是否正确？
 67. 86类S4-1D negative与至少12类fully re-signed tamper是否足够，外审还能构造哪类capability/raw/DAG攻击？
 68. 是否同意S4-1D success不回READY，10次re-arm只能由S4-2新合同拥有，而不是提前塞入evaluator？
+69. run-level evaluator family是否在不复活S4-1D one-shot的前提下正确保留module/arena/view owner并发行10代？
+70. opaque exact consume是否禁止raw Tensor escape；terminal consume原子转移child时如何审计consumer不保留source storage？
+71. evaluation-input、optimizer mutation与storage commit三轴是否完整；earlier-best restore需要怎样的version receipt？
+72. 28项commit cursor与scheduler-after-tensor顺序是否足够；哪个failure point仍可能被误写为clean reject？
+73. terminal-best/lA同轮次门禁是否必须；未来支持earlier-best应选择lA checkpoint还是restore后rerun？
+74. 16-state/32-transition模型与224 invalid组合是否完整；terminal handoff失败进入poison是否过强或不足？
+75. 24-worker 6-pair balanced topology是否合理；A/B/B/C的B worker必须独立重跑是否正确？
+76. `60,550,896 B` mandatory transition-tensor floor是否逐项成立；policy projection、source、receipt和完整storage
+    还应强制加入哪些raw/ledger字段？
 
 ## 9. 输出格式
 
