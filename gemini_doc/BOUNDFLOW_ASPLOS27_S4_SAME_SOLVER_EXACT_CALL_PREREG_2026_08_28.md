@@ -225,6 +225,11 @@ S4-1C通用gradient emitter与terminal lA phase见
 一个layout-parameterized `[D,S,F]→[D,W]` α模板实例化六site，site31增加sparse β；ordinal9在gradient消费后
 phase-safe复用effective arena保存六lA，禁止第11次CROWN。
 
+S4-1D single-evaluation closure见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`：唯一prepared evaluator
+组装S4-0/1A/1B/1C，five-fresh比较lower/六dα/六dβ/terminal lA，并以raw-first replay/tamper关闭；通过只开放
+S4-2 10/9 trajectory，timing仍关闭。
+
 交付：一个prepared evaluator在ordinal 0输入上返回lower、六dα、六dβ和receipt。
 
 门禁：

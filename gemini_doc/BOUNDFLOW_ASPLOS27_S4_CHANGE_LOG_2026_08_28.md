@@ -92,6 +92,26 @@ performance-claimed: false
 - `git diff --check`与文档关键字段检索：PASS；
 - DocOps change/validation与lint在提交前执行。
 
+## 2026-08-28：完成S4-1D all-state evaluator closure实施蓝图
+
+- 收束S4-0 admission、S4-1A buffers、S4-1B effective graph与S4-1C emitters为唯一prepared evaluator owner；
+- 冻结prepare/evaluate/rollback/result lease序列与component receipt hash链；
+- 独立汇总correctness logical ledger=`386,712 bytes`，明确排除model/fixed inputs/cuDNN workspace与S4-2 moments；
+- 冻结one logical evaluation=`2 coefficient pass + 1 effective graph + 6 α emitter + 1 β emitter`，不得隐藏实际kernel/copy；
+- 冻结five-fresh A/B/C三方、lower/gradient/lA容差、raw-first artifact/replay与20类closure negative gate；
+- 明确S4-1D不接Adam、不计时，通过只开放S4-2 production 10/9 trajectory；
+- 新增S4-1D closure蓝图并同步主ABI/预注册；仍无S4实现、GPU correctness或性能claim。
+
+### 验证
+
+- 独立重算logical ledger：parameters/gradients/signs/effective-or-lA/two-coefficient-arenas/scalars=
+  `17,016/17,016/55,296/149,856/147,456/72`，合计`386,712 bytes`，PASS；
+- S2/S3 pipeline、bounded-arena compiler、RVIR atomic copy-out与B4-A terminal handoff：
+  `24 passed in 16.85s`；
+- S4-0/1A/1B/1C/1D五份蓝图均存在且非空，1D implementation/timing/performance/S4-2门禁保持closed；
+- `git diff --check`与DocOps前关键字段检查：PASS；
+- DocOps change/validation与lint在提交前执行。
+
 ## 2026-08-28：完成S4-1C通用compressed gradient emitter实施蓝图
 
 - 逐项核对explicit ReLU与D1C staged residual边界，冻结pass C插入顺序为31→28→25→23→19→17；

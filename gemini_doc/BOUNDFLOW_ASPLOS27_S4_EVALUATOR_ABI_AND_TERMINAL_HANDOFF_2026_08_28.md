@@ -293,6 +293,9 @@ S3外审批准后：
 8. S4-4 artifact/replay/tamper；
 9. 另立S4-P timing，再决定是否开放compiled KFSB child batch。
 
+S4-1D唯一prepared evaluator、386,712-byte logical correctness ledger、five-fresh/raw/replay/tamper门禁见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`。
+
 ## 8. 当前门禁
 
 本文只是implementation blueprint。S3 exchange仍为`ready_for_audit`，没有external approval；因此S4代码、GPU
