@@ -10,6 +10,20 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-28：生成S4-0—S4-4设计外审交接
+
+- 以`ebf45cc..1d378eb`为精确设计范围，新增独立external design audit handoff；
+- 冻结AC1—AC8，覆盖IR边界、admission、all-state VJP、sealed policy、whole-core transaction、core/post、
+  stdlib artifact和tamper/claim；
+- 要求外审自建至少3个全重签攻击，并重点核对`_version`、net scratch、post-after-commit与executed-source closure；
+- 明确本轮是设计审计，不得因蓝图完整而推断S4实现、GPU correctness或性能已经存在；
+- 不创建新的DocOps exchange，不改变仍在等待结果的S3 exchange；该文件供用户下一轮手工交给外部模型。
+
+### 验证
+
+- handoff引用的base/result commit、11份S4设计文档、AC1—AC8及10个must-answer问题完整性在提交前核对；
+- `git diff --check`、DocOps change/validation/lint在提交前执行。
+
 ## 2026-08-28：冻结S4-4 formal artifact/stdlib replay/tamper关闭蓝图
 
 - 审计S3 v2 JSONL与RVIR five-fresh/whole-core/KFSB/live-return artifacts，确认旧`.pt`不能作为外部stdlib审计的
