@@ -137,8 +137,8 @@ def _validate_slot(slot: dict[str, Any], ordinal: int) -> tuple[str, str]:
     if (
         slot.get("alpha_live_is_leaf") is not True
         or slot.get("beta_live_is_leaf") is not True
-        or type(slot.get("alpha_live_requires_grad")) is not bool
-        or type(slot.get("beta_live_requires_grad")) is not bool
+        or slot.get("alpha_live_requires_grad") is not False
+        or slot.get("beta_live_requires_grad") is not True
         or slot.get("entry_content_capture_ordinal") != 1
         or slot.get("exit_content_capture_ordinal") != 2
     ):
@@ -150,7 +150,7 @@ def _validate_receipt(receipt: dict[str, Any], ordinal: int) -> dict[str, int]:
     if receipt.get("admission_hash") != _hash_payload(receipt, "admission_hash"):
         raise ValueError("S4 admission receipt hash differs")
     if receipt.get("exact_call_identity_hash") != canonical_hash(
-        f"asplos27-s4-formal:{ordinal:03d}"
+        {"exact_call_id": f"asplos27-s4-formal:{ordinal:03d}"}
     ):
         raise ValueError("S4 exact-call identity hash differs")
     slots = receipt.get("slots")
