@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+from collections import defaultdict
 import copy
 from dataclasses import dataclass, replace
 import gc
@@ -149,6 +150,31 @@ def test_formal_admission_counts_policy_and_claim_boundary(formal_fixture) -> No
     adoption._lease.close()
 
 
+def test_provider_source_readiness_is_recorded_not_rewritten(formal_fixture) -> None:
+    live = _live_sources(formal_fixture)
+    for layout in formal_fixture.plan.relu_layouts:
+        live[layout.alpha_path].requires_grad_(False)
+    _, prepared = _prepare(formal_fixture, live)
+    assert all(not slot.alpha_live_requires_grad for slot in prepared.receipt.slots)
+    assert all(slot.alpha_live_is_leaf for slot in prepared.receipt.slots)
+    assert all(slot.beta_live_requires_grad for slot in prepared.receipt.slots)
+    assert all(slot.beta_live_is_leaf for slot in prepared.receipt.slots)
+    prepared.close()
+
+
+def test_provider_source_readiness_drift_fails_closed(formal_fixture) -> None:
+    live = _live_sources(formal_fixture)
+    alpha_path = formal_fixture.plan.relu_layouts[0].alpha_path
+    live[alpha_path].requires_grad_(False)
+    _, prepared = _prepare(formal_fixture, live)
+    live[alpha_path].requires_grad_(True)
+    _assert_error(
+        "LIVE_SOURCE_READINESS_MISMATCH",
+        VerificationRejectionReason.DTYPE_OR_DEVICE_MISMATCH,
+        lambda: prepared.begin_buffer_prepare(live, exact_call_id=CALL_ID),
+    )
+
+
 def test_receipt_is_canonical_tensor_free_and_json_serializable(formal_fixture) -> None:
     _, prepared = _prepare(formal_fixture)
     payload = prepared.receipt.to_dict()
@@ -157,6 +183,34 @@ def test_receipt_is_canonical_tensor_free_and_json_serializable(formal_fixture) 
     assert "cuda_stream" not in encoded
     assert "data_ptr" not in encoded
     assert prepared.receipt.stable_hash() == prepared.receipt.admission_hash
+    prepared.close()
+
+
+def test_tensor_free_walker_accepts_immutable_dag_sharing(formal_fixture) -> None:
+    _, prepared = _prepare(formal_fixture)
+    shared_shape = prepared.receipt.slots[0].alpha_active_shape
+    changed_slot = replace(
+        prepared.receipt.slots[0],
+        alpha_active_shape=shared_shape,
+        alpha_preserved_shape=shared_shape,
+    )
+    provisional = replace(
+        prepared.receipt,
+        slots=(changed_slot,) + prepared.receipt.slots[1:],
+        admission_hash="0" * 64,
+    )
+    resigned = replace(
+        provisional,
+        admission_hash=hashlib.sha256(
+            json.dumps(
+                provisional._payload_without_hash(),
+                sort_keys=True,
+                separators=(",", ":"),
+                allow_nan=False,
+            ).encode("utf-8")
+        ).hexdigest(),
+    )
+    resigned.validate()
     prepared.close()
 
 
@@ -689,10 +743,22 @@ def test_provider_adapter_extracts_exact_builtin_structure(formal_fixture) -> No
     assert all(extracted[path] is live[path] for path in live)
 
 
+def test_provider_adapter_accepts_exact_stdlib_defaultdict_alpha_owner(
+    formal_fixture,
+) -> None:
+    live = _live_sources(formal_fixture)
+    result = _provider_result(live, formal_fixture)
+    result.alphas_by_layer._data = defaultdict(dict, result.alphas_by_layer._data)
+    extracted = extract_s4_live_mutable_sources_v1(result, TOPOLOGY)
+    assert tuple(sorted(extracted)) == tuple(sorted(live))
+    assert all(extracted[path] is live[path] for path in live)
+
+
 @pytest.mark.parametrize(
     ("mode", "detail"),
     [
         ("alpha_data_subclass", "LIVE_SOURCE_NESTED_CONTAINER_TYPE_MISMATCH"),
+        ("alpha_default_factory", "LIVE_SOURCE_NESTED_CONTAINER_TYPE_MISMATCH"),
         ("inner_alpha_subclass", "LIVE_SOURCE_NESTED_CONTAINER_TYPE_MISMATCH"),
         ("beta_tuple", "LIVE_SOURCE_NESTED_CONTAINER_TYPE_MISMATCH"),
         ("missing_sparse_val", "LIVE_SOURCE_NESTED_CONTAINER_TYPE_MISMATCH"),
@@ -710,6 +776,8 @@ def test_provider_adapter_rejects_unpinned_structure(
     first = TOPOLOGY[0]
     if mode == "alpha_data_subclass":
         result.alphas_by_layer._data = _DictSubclass(alpha_data)
+    elif mode == "alpha_default_factory":
+        result.alphas_by_layer._data = defaultdict(list, alpha_data)
     elif mode == "inner_alpha_subclass":
         alpha_data[first.provider_activation] = _DictSubclass(
             alpha_data[first.provider_activation]

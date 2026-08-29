@@ -15,6 +15,7 @@ process-local lease.
 
 from __future__ import annotations
 
+from collections import defaultdict
 from dataclasses import dataclass, fields, is_dataclass, replace
 import hashlib
 import json
@@ -186,37 +187,43 @@ def _snapshot_hash(snapshot: ProductionStateSnapshotV4) -> str:
     )
 
 
-def _tensor_free_walk(value: object, *, _seen: set[int] | None = None) -> None:
+def _tensor_free_walk(value: object, *, _ancestors: set[int] | None = None) -> None:
     if isinstance(value, torch.Tensor):
         _reject("RECEIPT_IDENTITY_MISMATCH")
     if value is None or isinstance(
         value, (str, int, float, bool, VerificationRejectionReason)
     ):
         return
-    seen = _seen if _seen is not None else set()
+    ancestors = _ancestors if _ancestors is not None else set()
     identity = id(value)
-    if identity in seen:
+    if identity in ancestors:
         _reject("RECEIPT_IDENTITY_MISMATCH")
-    seen.add(identity)
-    if isinstance(value, tuple):
-        for item in value:
-            _tensor_free_walk(item, _seen=seen)
-        return
-    if isinstance(value, list):
-        for item in value:
-            _tensor_free_walk(item, _seen=seen)
-        return
-    if type(value) is dict:
-        for key, item in value.items():
-            if not isinstance(key, str):
-                _reject("RECEIPT_IDENTITY_MISMATCH")
-            _tensor_free_walk(item, _seen=seen)
-        return
-    if is_dataclass(value) and getattr(type(value), "__dataclass_params__").frozen:
-        for item in fields(value):
-            _tensor_free_walk(object.__getattribute__(value, item.name), _seen=seen)
-        return
-    _reject("RECEIPT_IDENTITY_MISMATCH")
+    ancestors.add(identity)
+    try:
+        if isinstance(value, tuple):
+            for item in value:
+                _tensor_free_walk(item, _ancestors=ancestors)
+            return
+        if isinstance(value, list):
+            for item in value:
+                _tensor_free_walk(item, _ancestors=ancestors)
+            return
+        if type(value) is dict:
+            for key, item in value.items():
+                if not isinstance(key, str):
+                    _reject("RECEIPT_IDENTITY_MISMATCH")
+                _tensor_free_walk(item, _ancestors=ancestors)
+            return
+        if is_dataclass(value) and getattr(type(value), "__dataclass_params__").frozen:
+            for item in fields(value):
+                _tensor_free_walk(
+                    object.__getattribute__(value, item.name),
+                    _ancestors=ancestors,
+                )
+            return
+        _reject("RECEIPT_IDENTITY_MISMATCH")
+    finally:
+        ancestors.remove(identity)
 
 
 @dataclass(frozen=True)
@@ -667,6 +674,18 @@ def _rows_equal(
                 ),
                 semantic_path=left.semantic_path,
             )
+        if (left.requires_grad, left.is_leaf) != (
+            right.requires_grad,
+            right.is_leaf,
+        ):
+            _reject(
+                (
+                    "LIVE_SOURCE_READ_RACE"
+                    if read_race
+                    else "LIVE_SOURCE_READINESS_MISMATCH"
+                ),
+                semantic_path=left.semantic_path,
+            )
         if left.version != right.version:
             _reject(
                 (
@@ -781,6 +800,14 @@ class S4LiveMutableLeaseV1:
             ):
                 _reject(
                     "LIVE_SOURCE_STRIDE_OFFSET_MISMATCH",
+                    semantic_path=before.semantic_path,
+                )
+            if (before.requires_grad, before.is_leaf) != (
+                after.requires_grad,
+                after.is_leaf,
+            ):
+                _reject(
+                    "LIVE_SOURCE_READINESS_MISMATCH",
                     semantic_path=before.semantic_path,
                 )
             if before.version != after.version:
@@ -921,7 +948,11 @@ def extract_s4_live_mutable_sources_v1(
         beta_data = object.__getattribute__(beta_wrapper, "_data")
     except (AttributeError, TypeError) as error:
         _reject("LIVE_SOURCE_NESTED_CONTAINER_TYPE_MISMATCH", cause=error)
-    if type(alpha_data) is not dict or type(beta_data) is not dict:
+    alpha_container_admitted = type(alpha_data) is dict or (
+        type(alpha_data) is defaultdict
+        and object.__getattribute__(alpha_data, "default_factory") is dict
+    )
+    if not alpha_container_admitted or type(beta_data) is not dict:
         _reject("LIVE_SOURCE_NESTED_CONTAINER_TYPE_MISMATCH")
     result: dict[str, torch.Tensor] = {}
     for slot_ordinal, link in enumerate(topology):
@@ -1151,7 +1182,7 @@ def _slot_from_sources(
                 slot_ordinal=ordinal,
                 semantic_path=source.semantic_path,
             )
-        if not row.requires_grad or not row.is_leaf:
+        if not row.is_leaf:
             _reject(
                 "LIVE_SOURCE_READINESS_MISMATCH",
                 slot_ordinal=ordinal,
