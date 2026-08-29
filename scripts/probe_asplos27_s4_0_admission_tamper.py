@@ -190,7 +190,10 @@ def main() -> None:
     report = probe(args.artifact.resolve())
     payload = replay_tool.canonical(report) + "\n"
     if args.output is not None:
-        args.output.write_text(payload, encoding="utf-8")
+        output = args.output.resolve()
+        output.write_text(payload, encoding="utf-8")
+        if output.parent == args.artifact.resolve():
+            artifact_tool._write_manifest(args.artifact.resolve())
     print(payload, end="")
 
 
