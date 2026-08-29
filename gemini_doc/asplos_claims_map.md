@@ -1,10 +1,26 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-30 S4-0 formal candidate已通过，外审/performance仍关闭**：typed admission receipt、strict
+> provider extractor与ephemeral strong-ref lease已在5个fresh production provider进程闭合；独立重算
+> slot/path=6/12、alpha=8496/4248/4248、beta active=1/6、双capture=24 logical D2H/68,016 B，candidate
+> kernel/allocation=0/0。专项78 passed，formal negative registry=63（minimum 56），stdlib replay PASS，
+> fully outer-resigned tamper=10/10 rejected。当前状态只能记为
+> `FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT-S4-0`，不得升级VALIDATED；timing/performance/
+> same-solver/complete-query/10x均false，S4-1A仍关闭。
+
+> **2026-08-30 S3外审批准并关闭，S4只开放实现/正确性/share归因**：DocOps task=
+> `asplos27-s3-optimizer-runtime-20260828` Round 1达到`E2-DIRECT-LEGACY`。外审者在空目录亲自启动18个
+> fresh subprocess并独立重算，P/native geomean/worst=`3.2508402950x/3.2359575132x`；formal冻结数字仍为
+> `3.2438943700x/3.2246091003x`。状态升级为`VALIDATED-S3-3X-LOCAL-OPTIMIZER-V2`，v1继续为NO-GO。
+> 当前只开放S4 all-mutable-state same-solver implementation/correctness与真实share归因；S4 formal/timing/
+> performance、complete-query、跨模型、总体10x和ASPLOS-ready仍关闭。S4-4必须使用challenge+witness结构，
+> 不能再只依赖离线自洽artifact。
+
 > **2026-08-29 S3/S4执行证据信任边界修订，不新增claim**：S3影子预审构造了两类同步修改raw、重算summary并
 > 重签manifest的内部自洽artifact，证明既有10/10 tamper只关闭派生语义不一致攻击，不单独证明GPU物理执行真实性。
 > 现冻结E0 self-consistent、E1 challenge-bound、E2 independently-witnessed、E3 hardware-attested四级保证；当前
-> RTX 4060正式关闭至少需要外审者控制fresh run与独立重算的E2 procedural witness。S3继续
-> `PENDING-EXTERNAL-AUDIT`，S4代码/formal/timing仍关闭。见
+> RTX 4060正式关闭至少需要外审者控制fresh run与独立重算的E2 procedural witness；S3外审已按上方条目
+> 达到该级别。本段保留为证据边界定义，不再表示S3 pending。见
 > `BOUNDFLOW_EXECUTION_EVIDENCE_TRUST_AND_WITNESS_PLAN_2026_08_29.md`及
 > `BOUNDFLOW_EXECUTION_EVIDENCE_TRUST_CONSISTENCY_AUDIT_2026_08_29.md`。
 
@@ -14,7 +30,7 @@
 > fresh-process attestation一类只能报告`OFFLINE_UNATTESTABLE`。当前仍无S4 implementation、formal artifact、
 > correctness、performance或ASPLOS-ready claim，唯一下一动作仍是S3外审。
 
-> **2026-08-28 S3外审/S4预注册边界**：DocOps task=
+> **历史（已由2026-08-30 S3外审关闭取代）：2026-08-28 S3外审/S4预注册边界**：DocOps task=
 > `asplos27-s3-optimizer-runtime-20260828`现为`ready_for_audit/r001`；S4状态=
 > `DRAFT-PREREGISTERED-NOT-IMPLEMENTED-NOT-RUN`。production raw证明每step有六α source/8,496 stored元素，
 > lower-only active/preserved各4,248，并有一条`[6,1]` active β；S3 P-anchor对应1,032 stored/516 active且
@@ -46,14 +62,21 @@
 > `38,610,816 B`。`559,838 B`只是known base lower bound；当前没有S4-3 runtime、artifact、correctness、memory peak、
 > same-solver或performance claim。
 >
-> **2026-08-28 S3 optimizer/runtime内部结论**：状态=
-> `VALIDATED-S3-3X-LOCAL-OPTIMIZER-V2-PENDING-EXTERNAL-AUDIT`。source=`1766cbc`，ResNet2B
+> **2026-08-30 S3 optimizer/runtime正式结论**：状态=
+> `VALIDATED-S3-3X-LOCAL-OPTIMIZER-V2`。source=`1766cbc`，ResNet2B
 > P-anchor完整10 evaluation/9 Adam mutation wrapper的18 fresh稳健formal得到P/native order-median
 > geomean/worst=`3.2438943700x/3.2246091003x`、P/旧D2B=`1.8422164274x`；逐step lower/dα/α/Adam
-> state与sign通过，replay通过，10/10全重签篡改拒绝。可claim的范围仅为该本地冻结trajectory；v1
+> state与sign通过，replay通过；10/10探针仅证明outer-manifest-resigned且derived-semantics-inconsistent攻击被
+> E0 self-check拒绝，不证明coherent full resign后的物理执行真实性。外审者控制的18-process fresh run与独立
+> 重算提供E2 procedural witness。可claim的范围仅为该本地冻结trajectory；v1
 > `2.5695746x/0.7595405x` NO-GO必须并列披露。whole-wrapper dynamic allocated/reserved=
-> `13,824/0 B`，不claim 0/0。内部结果只支持提交S3外审和编写S4预注册草案；正式开放S4实现须以上方
-> 外审状态为准。不得claim same-solver性能、complete-query、跨模型、总体10x或ASPLOS-ready。
+> `13,824/0 B`，不claim 0/0。外审只开放S4实现/正确性与真实share归因；不得claim same-solver性能、
+> complete-query、跨模型、总体10x或ASPLOS-ready。
+
+> **历史tamper措辞的全局保证边界**：本图中早期“全重签/fully re-signed/full resign tamper拒绝”若未另列
+> auditor-controlled challenge或fresh execution witness，统一只解释为E0：artifact内部hash、派生字段和冻结语义
+> 自洽性检查能够拒绝对应已注册攻击；不得外推为攻击者同步修改raw、重算全部派生值并重签后仍能证明GPU物理
+> 执行真实性。各历史数字与当时的正确性结论不因此被撤销；后续触及单项时应补写其E0/E1/E2/E3等级。
 >
 > **历史（S2数值保留，selected-value CUDA Graph机制已由S3安全修复取代）：**
 > **2026-08-28 S2 coarse CROWN direct custom VJP结论**：状态=

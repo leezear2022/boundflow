@@ -10,6 +10,42 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-30：S4-0 five-fresh formal candidate闭合
+
+- 冻结formal代码源为`b3afde8`，真实provider worker绑定alpha-beta-CROWN/auto-LiRPA/vnncomp三个既定commit；
+- 5个fresh进程逐次在production exact-call入口完成admit→receipt serialize→lease close，并在provider core执行前
+  停止；candidate kernel/allocation、provider callback、buffer prepare、mutation均为0；
+- stdlib replay独立重算6 slot/12 path、alpha 8496/4248/4248、active beta 1/6、双capture 24次D2H/
+  68,016 B及全部canonical hash；
+- 原复合negative测试拆为独立case，专项总计78 passed；formal registry实际63类，高于minimum 56；
+- 10类攻击均重签receipt/worker/protocol/summary/manifest外层，semantic replay仍10/10拒绝；
+- targeted admission/artifact=`82 passed`，全量=`1966 passed, 3 skipped`，mypy clean、pylint 10.00；
+- artifact无`/home/lee`或`/tmp`路径泄漏，状态严格保持
+  `FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT-S4-0`；不形成timing/performance claim，不开放S4-1A。
+
+## 2026-08-30：real-provider exact defaultdict事实修正
+
+- 真实alpha-beta-CROWN provider现场类型为collections.defaultdict(default_factory=dict)，不是预注册中的dict；
+- beta top-level、nested alpha和beta collection仍为exact dict/dict/list；
+- runtime只接受exact stdlib defaultdict且factory必须为dict，任意subclass/custom Mapping继续fail closed；
+- 六条source alpha在core入口为leaf/requires-grad=false，六条beta为leaf/requires-grad=true；S4-0改为记录并
+  revalidate readiness，不原地开启梯度，candidate leaf parameter仍由S4-1A创建；
+- 这是provider事实修正，不开放S4-1A、timing或performance。
+
+## 2026-08-30：S4-0 local correctness实现
+
+- 新增production admission、tensor-free receipt、strict provider extractor、strong-ref one-shot lease与双capture；
+- 本地CUDA重算slot/path=6/12、alpha=8496/4248/4248、active beta=1/6、D2H=24/68016 B；
+- 专项最终63 passed，mypy clean、pylint 10.00/10；formal worker/replay/tamper与外审尚未关闭；
+- 本项是local correctness实现与事实修正，不形成timing或performance claim。
+
+## 2026-08-30：S4-0实施按真实snapshot修正deterministic准入
+
+- 实际加载冻结formal snapshot确认`optimizer_policy.deterministic=false`；
+- 删除S4-0 admission对`deterministic=true`的错误硬编码要求，改为按snapshot原值进入policy hash；
+- 同步修正construction package，保留lower-only、10-step和fix-intermediate等既有门禁；
+- 本项是correctness事实修正，不形成timing或performance claim。
+
 ## 2026-08-29：S4-4 external anchor升级为challenge+witness所有权
 
 - S3 coherent full-resign反例证明artifact内部hash/semantic闭包不等于执行真实性；

@@ -1,5 +1,5 @@
 ---
-status: diagnostic-complete-construction-ready-code-closed
+status: formal-candidate-pass-pending-external-audit
 date: 2026-08-29
 type: implementation-construction-package
 topic: boundflow
@@ -7,7 +7,7 @@ slug: asplos27-s4-0-implementation-construction-package
 stage: s04
 execution-authority: false
 code-change-open: false
-formal-run-open: false
+formal-run-open: completed
 timing-open: false
 performance-claimed: false
 same-solver-claimed: false
@@ -16,6 +16,21 @@ tenx-claimed: false
 ---
 
 # ASPLOS'27 S4-0：mutable-state admission逐文件施工包与V4边界修正
+
+> **2026-08-30 formal执行结果**：S4-0实现与本施工合同已经落成，5个fresh real-provider进程、63个
+> 独立negative case、stdlib semantic replay及10/10 fully outer-resigned tamper均通过。内部状态只能记为
+> `FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT-S4-0`；外审前不得写VALIDATED，也不开放S4-1A、timing或
+> performance。正式artifact位于`artifacts/asplos27-s4-admission/resnet2b-prop0-v1`。
+
+> **2026-08-30 real-provider容器事实修正**：现场探针确认alphas_by_layer._data的exact类型是stdlib
+> collections.defaultdict且default_factory is dict，不是此前写的builtins.dict；betas_by_layer._data、
+> nested alpha与beta collection仍分别是exact dict/dict/list。实现只增加这一具体stdlib类型白名单并检查factory，
+> 不接受任意dict subclass或Mapping，也不触发缺失key的default factory。本修正不放宽ownership边界。
+>
+> 同一现场探针还确认六条source alpha在update_bounds_core入口是leaf但requires_grad=false，六条source beta是
+> leaf且requires_grad=true。S4-0只记录并在双capture/后续revalidate中保持这一状态，不得原地改写；S4-1A才从
+> lower-active slice建立独立requires-grad candidate parameter。因此S4-0要求source is_leaf=true，但不硬编码
+> requires_grad=true。
 
 ## 0. 直接结论
 
@@ -45,8 +60,8 @@ pinned provider pre_result
   → nonserializable prepared wrapper
 ```
 
-S3 external exchange仍为`ready_for_audit`，无audit result。本文只关闭第一行代码开工前的接口/文件/测试歧义，
-**不开放S4-0 implementation、GPU formal或timing**。
+历史上本文只关闭第一行代码开工前的接口/文件/测试歧义；现S3已经外审批准，S4-0 implementation与GPU formal
+candidate也已按上方结果完成。**外审、S4-1A、timing与performance仍未开放/完成**。
 
 ## 1. 权威源码事实
 
@@ -407,7 +422,8 @@ lease/wrapper都实现`__copy__`、`__deepcopy__`、`__getstate__`、`__reduce__
 1. 显式检查snapshot type/schema/id，失败`SNAPSHOT_SCHEMA_VERSION_MISMATCH`；
 2. 调用`snapshot.validate()`；任何未被更细S4 precheck覆盖的异常统一包装为`SNAPSHOT_SEMANTIC_INVALID`；
 3. 显式检查plan type/schema，随后`plan.validate()`；剩余异常包装`PLAN_SEMANTIC_INVALID`；
-4. lower-only policy exact：lower=true、upper=false、fix_intermediate=true、deterministic=true；
+4. lower-only policy exact：lower=true、upper=false、fix_intermediate=true；`deterministic`按snapshot原值进入
+   policy hash，不硬编码。formal snapshot的`deterministic_opt=false`不是拒绝理由；
 5. topology item type/field/nonempty/unique；按plan layout canonicalize。
 
 不要复制整个V4/R31 validator；只加S4需要稳定分类的envelope和projection检查。
@@ -770,6 +786,14 @@ SHA256：
 - external audit前写VALIDATED。
 
 ## 16. 当前状态
+
+### 2026-08-30 实施事实修正
+
+- S3外审已经正式关闭为`VALIDATED-S3-3X-LOCAL-OPTIMIZER-V2`，S4-0实现与correctness门禁已经开放；
+- 真实formal snapshot的`optimizer_policy.deterministic=false`。S4-0必须把该值绑定进policy hash并保持
+  snapshot/plan一致，但不能把`true`硬编码为准入条件；
+- 本修正只纠正准入事实，不改变lower-only、10-step、fix-intermediate等冻结策略，也不开放timing或
+  performance claim。
 
 ```text
 S3 external audit                         = pending

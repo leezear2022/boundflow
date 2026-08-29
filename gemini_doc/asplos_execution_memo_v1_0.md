@@ -1,13 +1,26 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
-> **2026-08-29 S4-4施工合同已冻结，但唯一动作仍是S3外审**。formal固定为18 positive + 15 fault、共
+> **2026-08-30 S4-0当前指令：formal candidate已通过，唯一下一动作是外审，不进入S4-1A**。
+> production real-provider 5 fresh、六slot/12 path、alpha 8496/4248/4248、active beta 1/6、63类独立
+> negative、stdlib replay和10/10 fully outer-resigned tamper均已闭合，状态为
+> `FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT-S4-0`。外审批准前不得升级VALIDATED；S4-1A、TIR
+> evaluator、timing、performance与same-solver继续关闭。
+
+> **2026-08-30 当前唯一指令：S3外审已批准关闭，只开放S4 all-mutable-state implementation/correctness与
+> 真实share归因**。Round 1达到`E2-DIRECT-LEGACY`：外审者控制18-process fresh run并独立重算，formal数字未被
+> 推翻；S3状态=`VALIDATED-S3-3X-LOCAL-OPTIMIZER-V2`，v1继续NO-GO。S4必须先闭合六α+active β、三遍
+> A/V/VJP、terminal handoff和exact-call事务，现阶段不得计时或claim same-solver performance。S4-4 formal必须
+> 先接challenge+witness；complete-query、跨模型、10x、ASPLOS-ready继续关闭。下一执行入口为S4-0 mutable-state
+> admission实现，不得复活P-only候选冒充whole-core。
+
+> **历史（已由上方S3关闭指令取代）：2026-08-29 S4-4施工合同已冻结，但唯一动作仍是S3外审**。formal固定为18 positive + 15 fault、共
 > 33个独立进程，stdlib tensor index + content-addressed binary sidecar；纠正后的positive/fault/all semantic
 > occurrence floor=`61,586,208/24,209,400/85,795,608 B`，不是physical artifact size。seal DAG=
 > `16 nodes/36 edges`、hash=`01e179ea...491c`；tamper registry=96、hash=`5fdfa8bc...7d05`，其中95类
 > 必须拒绝，fresh-process attestation只能报告`OFFLINE_UNATTESTABLE`。这是design-only合同，不开放S4-4代码、
 > formal、timing或任何performance/ASPLOS claim。
 
-> **2026-08-28 当前唯一指令：完成S3独立外审；S4只允许预注册审阅，不允许代码或计时**。S3已正式
+> **历史（已由上方S3关闭指令取代）：2026-08-28 当前唯一指令：完成S3独立外审；S4只允许预注册审阅，不允许代码或计时**。S3已正式
 > 交付DocOps task=`asplos27-s3-optimizer-runtime-20260828`、round 1、status=`ready_for_audit`。
 > S4只读普查确认production每step有六α source/8,496 stored元素（lower-only active=4,248、preserved=
 > 4,248）和一条`[6,1]` active β，而S3 P-only覆盖1,032 stored/516 active α元素(`12.1469%`
@@ -44,11 +57,13 @@
 > tensor-occurrence floor=`38,610,816 B`；`559,838 B`仅为known base lower bound。这仍不改变当前唯一动作：
 > S3外审前S4-3代码/formal/timing关闭。
 >
-> **历史（等待上方S3外审关闭）：**
+> **历史（S3内部关闭，现已由2026-08-30外审关闭取代）：**
 > **2026-08-28 当前唯一指令：S3内部关闭，只开放S4 same-solver实现/正确性接入**。S3 v2在source
 > `1766cbc`的ResNet2B P-anchor完整10 evaluation/9 Adam mutation本地wrapper上，以18 fresh、六顺序各
 > 三重复得到P/native order-median geomean/worst=`3.2438943700x/3.2246091003x`，P/旧D2B=
-> `1.8422164274x`；逐step lower/dα/α/Adam state与sign通过，replay通过，10/10全重签篡改拒绝。v1
+> `1.8422164274x`；逐step lower/dα/α/Adam state与sign通过，replay通过。10/10探针只关闭
+> outer-manifest-resigned且derived-semantics-inconsistent的E0攻击；coherent full resign不在其保证内，物理执行
+> 真实性由随后外审者控制的18-process fresh run与独立重算提供E2 witness。v1
 > `2.5695746x/0.7595405x` NO-GO与三个崩溃尝试必须保留。whole-wrapper dynamic allocated/reserved=
 > `13,824/0 B`，非零项来自host Adam state，不得写成0/0。只允许S4接入同一αβ-CROWN host solver并先做
 > correctness/share归因；same-solver性能、complete-query、跨模型、总体10x与ASPLOS-ready仍关闭。
