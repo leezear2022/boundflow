@@ -3,6 +3,7 @@
 # pylint: disable=missing-function-docstring,missing-class-docstring
 # pylint: disable=protected-access,too-many-locals,redefined-outer-name
 # pylint: disable=broad-exception-caught
+# pylint: disable=unnecessary-lambda-assignment
 
 from __future__ import annotations
 
@@ -283,31 +284,35 @@ def test_live_mapping_requires_exact_builtin_dict(formal_fixture) -> None:
     )
 
 
-def test_snapshot_and_plan_envelopes_fail_closed(formal_fixture) -> None:
+@pytest.mark.parametrize(
+    ("mode", "detail"),
+    [
+        ("snapshot-schema", "SNAPSHOT_SCHEMA_VERSION_MISMATCH"),
+        ("snapshot-id", "SNAPSHOT_SCHEMA_VERSION_MISMATCH"),
+        ("plan-schema", "PLAN_SCHEMA_VERSION_MISMATCH"),
+    ],
+)
+def test_snapshot_and_plan_envelopes_fail_closed(formal_fixture, mode, detail) -> None:
     live = _live_sources(formal_fixture)
-    wrong_schema = replace(formal_fixture.snapshot, schema_version="wrong")
-    _assert_error(
-        "SNAPSHOT_SCHEMA_VERSION_MISMATCH",
-        VerificationRejectionReason.STATE_VERSION_MISMATCH,
-        lambda: _prepare(formal_fixture, live, snapshot=wrong_schema),
-    )
-    invalid_snapshot = replace(formal_fixture.snapshot, snapshot_id="")
-    _assert_error(
-        "SNAPSHOT_SCHEMA_VERSION_MISMATCH",
-        VerificationRejectionReason.STATE_VERSION_MISMATCH,
-        lambda: _prepare(formal_fixture, live, snapshot=invalid_snapshot),
-    )
-    invalid_plan = replace(formal_fixture.plan, schema_version="wrong")
-    _assert_error(
-        "PLAN_SCHEMA_VERSION_MISMATCH",
-        VerificationRejectionReason.STATE_VERSION_MISMATCH,
-        lambda: prepare_s4_mutable_state_admission_v1(
+    if mode == "snapshot-schema":
+        snapshot = replace(formal_fixture.snapshot, schema_version="wrong")
+        operation = lambda: _prepare(formal_fixture, live, snapshot=snapshot)
+    elif mode == "snapshot-id":
+        snapshot = replace(formal_fixture.snapshot, snapshot_id="")
+        operation = lambda: _prepare(formal_fixture, live, snapshot=snapshot)
+    else:
+        plan = replace(formal_fixture.plan, schema_version="wrong")
+        operation = lambda: prepare_s4_mutable_state_admission_v1(
             formal_fixture.snapshot,
             TOPOLOGY,
-            invalid_plan,
+            plan,
             live,
             exact_call_id=CALL_ID,
-        ),
+        )
+    _assert_error(
+        detail,
+        VerificationRejectionReason.STATE_VERSION_MISMATCH,
+        operation,
     )
 
 
@@ -381,22 +386,22 @@ def test_live_mapping_coverage_fails_closed(formal_fixture, mode) -> None:
     )
 
 
-def test_tensor_subclass_and_object_alias_fail_closed(formal_fixture) -> None:
+@pytest.mark.parametrize("mode", ["tensor-subclass", "object-alias"])
+def test_tensor_subclass_and_object_alias_fail_closed(formal_fixture, mode) -> None:
     live = _live_sources(formal_fixture)
-    first = next(iter(live))
-    live[first] = torch.nn.Parameter(live[first].detach())
+    if mode == "tensor-subclass":
+        first = next(iter(live))
+        live[first] = torch.nn.Parameter(live[first].detach())
+        detail = "LIVE_SOURCE_TENSOR_SUBCLASS_UNSUPPORTED"
+        reason = VerificationRejectionReason.DTYPE_OR_DEVICE_MISMATCH
+    else:
+        paths = list(live)
+        live[paths[1]] = live[paths[0]]
+        detail = "LIVE_SOURCE_OBJECT_ALIAS_CONFLICT"
+        reason = VerificationRejectionReason.UNSAFE_ALIAS_OR_LIFETIME
     _assert_error(
-        "LIVE_SOURCE_TENSOR_SUBCLASS_UNSUPPORTED",
-        VerificationRejectionReason.DTYPE_OR_DEVICE_MISMATCH,
-        lambda: _prepare(formal_fixture, live),
-    )
-
-    live = _live_sources(formal_fixture)
-    paths = list(live)
-    live[paths[1]] = live[paths[0]]
-    _assert_error(
-        "LIVE_SOURCE_OBJECT_ALIAS_CONFLICT",
-        VerificationRejectionReason.UNSAFE_ALIAS_OR_LIFETIME,
+        detail,
+        reason,
         lambda: _prepare(formal_fixture, live),
     )
 
@@ -464,72 +469,92 @@ def test_post_admission_live_drift_fails_closed(
     )
 
 
-def test_exact_call_thread_and_stream_identity_fail_closed(formal_fixture) -> None:
+@pytest.mark.parametrize("mode", ["exact-call", "owner-thread", "cuda-stream"])
+def test_exact_call_thread_and_stream_identity_fail_closed(
+    formal_fixture, mode
+) -> None:
     live, prepared = _prepare(formal_fixture)
-    _assert_error(
-        "EXACT_CALL_IDENTITY_MISMATCH",
-        VerificationRejectionReason.RECEIPT_IDENTITY_MISMATCH,
-        lambda: prepared.begin_buffer_prepare(live, exact_call_id="another-call"),
-    )
-
-    live, prepared = _prepare(formal_fixture)
-    caught: list[BaseException] = []
-
-    def cross_thread() -> None:
-        try:
-            prepared.begin_buffer_prepare(live, exact_call_id=CALL_ID)
-        except BaseException as error:  # pragma: no branch - required capture
-            caught.append(error)
-
-    thread = threading.Thread(target=cross_thread)
-    thread.start()
-    thread.join()
-    assert len(caught) == 1
-    assert isinstance(caught[0], S4MutableStateAdmissionError)
-    assert caught[0].detail_code == "LIVE_SOURCE_OWNER_THREAD_MISMATCH"
-
-    live, prepared = _prepare(formal_fixture)
-    other_stream = torch.cuda.Stream()
-    with torch.cuda.stream(other_stream):
+    if mode == "exact-call":
         _assert_error(
-            "LIVE_SOURCE_STREAM_MISMATCH",
-            VerificationRejectionReason.UNSAFE_ALIAS_OR_LIFETIME,
-            lambda: prepared.begin_buffer_prepare(live, exact_call_id=CALL_ID),
+            "EXACT_CALL_IDENTITY_MISMATCH",
+            VerificationRejectionReason.RECEIPT_IDENTITY_MISMATCH,
+            lambda: prepared.begin_buffer_prepare(live, exact_call_id="another-call"),
         )
+    elif mode == "owner-thread":
+        caught: list[BaseException] = []
+
+        def cross_thread() -> None:
+            try:
+                prepared.begin_buffer_prepare(live, exact_call_id=CALL_ID)
+            except BaseException as error:  # pragma: no branch - required capture
+                caught.append(error)
+
+        thread = threading.Thread(target=cross_thread)
+        thread.start()
+        thread.join()
+        assert len(caught) == 1
+        assert isinstance(caught[0], S4MutableStateAdmissionError)
+        assert caught[0].detail_code == "LIVE_SOURCE_OWNER_THREAD_MISMATCH"
+        assert caught[0].verification_reason == (
+            VerificationRejectionReason.UNSAFE_ALIAS_OR_LIFETIME
+        )
+    else:
+        other_stream = torch.cuda.Stream()
+        with torch.cuda.stream(other_stream):
+            _assert_error(
+                "LIVE_SOURCE_STREAM_MISMATCH",
+                VerificationRejectionReason.UNSAFE_ALIAS_OR_LIFETIME,
+                lambda: prepared.begin_buffer_prepare(live, exact_call_id=CALL_ID),
+            )
+    prepared.close()
 
 
-def test_lease_is_single_transfer_and_nonserializable(formal_fixture) -> None:
+@pytest.mark.parametrize(
+    "mode",
+    [
+        "copy",
+        "deepcopy",
+        "pickle",
+        "second-begin",
+        "second-transfer",
+        "after-close",
+    ],
+)
+def test_lease_is_single_transfer_and_nonserializable(formal_fixture, mode) -> None:
     live, prepared = _prepare(formal_fixture)
-    for operation in (
-        lambda: copy.copy(prepared),
-        lambda: copy.deepcopy(prepared),
-        lambda: pickle.dumps(prepared),
-    ):
+    if mode in {"copy", "deepcopy", "pickle"}:
+        operations = {
+            "copy": lambda: copy.copy(prepared),
+            "deepcopy": lambda: copy.deepcopy(prepared),
+            "pickle": lambda: pickle.dumps(prepared),
+        }
         _assert_error(
             "LIVE_LEASE_SERIALIZATION_FORBIDDEN",
             VerificationRejectionReason.RECEIPT_IDENTITY_MISMATCH,
-            operation,
+            operations[mode],
         )
+        prepared.close()
+        return
     adoption = prepared.begin_buffer_prepare(live, exact_call_id=CALL_ID)
-    _assert_error(
-        "LIVE_LEASE_ALREADY_TRANSFERRED",
-        VerificationRejectionReason.UNSAFE_ALIAS_OR_LIFETIME,
-        lambda: prepared.begin_buffer_prepare(live, exact_call_id=CALL_ID),
-    )
-    _assert_error(
-        "LIVE_LEASE_ALREADY_TRANSFERRED",
-        VerificationRejectionReason.UNSAFE_ALIAS_OR_LIFETIME,
-        lambda: adoption._lease.transfer_to_prepared_runtime(
+    if mode == "second-begin":
+        operation = lambda: prepared.begin_buffer_prepare(live, exact_call_id=CALL_ID)
+        detail = "LIVE_LEASE_ALREADY_TRANSFERRED"
+    elif mode == "second-transfer":
+        operation = lambda: adoption._lease.transfer_to_prepared_runtime(
             expected_admission_hash=adoption.receipt.admission_hash,
             exact_call_id=CALL_ID,
-        ),
+        )
+        detail = "LIVE_LEASE_ALREADY_TRANSFERRED"
+    else:
+        adoption._lease.close()
+        operation = lambda: adoption._lease.mark_commit_started(exact_call_id=CALL_ID)
+        detail = "LIVE_LEASE_ALREADY_CLOSED"
+    _assert_error(
+        detail,
+        VerificationRejectionReason.UNSAFE_ALIAS_OR_LIFETIME,
+        operation,
     )
     adoption._lease.close()
-    _assert_error(
-        "LIVE_LEASE_ALREADY_CLOSED",
-        VerificationRejectionReason.UNSAFE_ALIAS_OR_LIFETIME,
-        lambda: adoption._lease.mark_commit_started(exact_call_id=CALL_ID),
-    )
 
 
 def test_lease_holds_strong_tensor_ownership_until_close(formal_fixture) -> None:
