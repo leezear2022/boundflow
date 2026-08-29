@@ -3,6 +3,7 @@
 
 # pylint: disable=protected-access,too-many-locals
 # pylint: disable=unnecessary-lambda,missing-function-docstring
+# pylint: disable=wrong-import-position
 
 from __future__ import annotations
 
@@ -10,8 +11,13 @@ import argparse
 import json
 from pathlib import Path
 import shutil
+import sys
 import tempfile
 from typing import Any, Callable
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from scripts import replay_asplos27_s4_0_admission_stdlib as replay_tool
 from scripts import run_asplos27_s4_0_admission_artifact as artifact_tool
