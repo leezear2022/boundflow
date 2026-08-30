@@ -1,12 +1,14 @@
 # BoundFlow ASPLOS Claims Map
 
-> **2026-08-30 S4-0 formal candidate已通过，外审/performance仍关闭**：typed admission receipt、strict
+> **2026-08-30 S4-0外审批准关闭，S4-1A仅开放implementation/correctness**：typed admission receipt、strict
 > provider extractor与ephemeral strong-ref lease已在5个fresh production provider进程闭合；独立重算
 > slot/path=6/12、alpha=8496/4248/4248、beta active=1/6、双capture=24 logical D2H/68,016 B，candidate
 > kernel/allocation=0/0。专项78 passed，formal negative registry=63（minimum 56），stdlib replay PASS，
-> fully outer-resigned tamper=10/10 rejected。当前状态只能记为
-> `FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT-S4-0`，不得升级VALIDATED；timing/performance/
-> same-solver/complete-query/10x均false，S4-1A仍关闭。
+> 10/10 inner+outer-resigned、derived-semantics-inconsistent攻击被拒绝；外审自建coherent full resign同步伪造
+> source与全部派生语义后在E0 self-check被接受，因此该tamper不证明物理执行真实性。外审另行控制5个fresh
+> provider进程并独立核验外部仓库/source，保证等级为`E2-DIRECT-LEGACY`。当前状态=
+> `VALIDATED-S4-0-MUTABLE-STATE-ADMISSION`；只开放S4-1A implementation/correctness，timing/performance/
+> same-solver/complete-query/10x仍为false，S4-4不得再使用无challenge的legacy例外。
 
 > **2026-08-30 S3外审批准并关闭，S4只开放实现/正确性/share归因**：DocOps task=
 > `asplos27-s3-optimizer-runtime-20260828` Round 1达到`E2-DIRECT-LEGACY`。外审者在空目录亲自启动18个

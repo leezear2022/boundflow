@@ -1,5 +1,5 @@
 ---
-status: formal-candidate-pass-pending-external-audit
+status: validated-s4-0-mutable-state-admission
 date: 2026-08-30
 type: formal-closure-report
 topic: boundflow
@@ -11,17 +11,22 @@ timing-recorded: false
 
 # ASPLOS'27 S4-0 mutable-state admission正式候选报告
 
+> **2026-08-30外审关闭修订**：外审以0 blocker/0 major/2 minor判定approve-with-minor-correction；本文已
+> 接受并修正F1/F2，状态升级为`VALIDATED-S4-0-MUTABLE-STATE-ADMISSION`，保证等级为
+> `E2-DIRECT-LEGACY`。只开放S4-1A implementation/correctness，不开放timing或performance。
+
 ## 1. 结论
 
-S4-0已经从local correctness推进到可交外审的formal candidate：真实alpha-beta-CROWN provider、5个fresh
-独立进程、tensor-free receipt、进程内strong-ref lease、63类独立负向门禁、stdlib replay和10类全重签攻击均
-闭合。当前内部状态严格为：
+S4-0已经从local correctness推进并经外审批准关闭：真实alpha-beta-CROWN provider、5个fresh独立进程、
+tensor-free receipt、进程内strong-ref lease、63类独立负向门禁和stdlib replay均闭合。现有10类tamper准确
+限定为inner+outer-resigned、derived-semantics-inconsistent攻击；它们不能阻止coherent full resign。
+当前状态为：
 
 ```text
-FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT-S4-0
+VALIDATED-S4-0-MUTABLE-STATE-ADMISSION
 ```
 
-这不是性能结果，也不是S4-1A buffer/evaluator准入；外审批准前不得写`VALIDATED-S4-0`。
+这不是性能结果；它只准入S4-1A compressed buffer ownership的implementation/correctness。
 
 ## 2. 冻结源与产物
 
@@ -74,8 +79,10 @@ leaf/requires-grad=false，六beta是leaf/requires-grad=true；admission只记�
 | buffer prepare / mutation | 0 / 0 |
 | distinct raw / admission hashes | 5 / 5 |
 
-5个admission hash不同是预期行为：每个run ordinal进入不落raw字符串的exact-call identity hash。除run identity绑定
-字段外，source、protocol、provider结构和全部formal算术一致。
+5个admission hash不同是预期行为，但不能全部归因于run ordinal：exact-call identity hash是唯一直接绑定
+run ordinal的字段；`production_plan_hash`、`snapshot_hash`、`oracle_mapping_provenance_hash`和
+`plan_binding_projection_hash`的逐进程变化来自provider snapshot全量tensor metadata/history的正常数值变化。
+外审控制的fresh artifact确认admitted α/β slot及其content hash跨正式/外审共10个进程逐位一致。
 
 ## 5. 负向与篡改
 
@@ -86,12 +93,17 @@ negative registry为63个独立pytest node，全部明确断言stable detail cod
 
 tamper probe覆盖exact-call hash、copy count、claim flag、slot order、provider content、provider structure、lease
 close、provider execute counter、negative registry和worker ordinal。每个变体都重新签署内层receipt/worker及外层
-protocol/summary/manifest；semantic replay仍为10/10 rejected。
+protocol/summary/manifest，但保留至少一处与冻结派生语义不一致，因此semantic replay为10/10 rejected。
+
+外审自建第11类coherent full resign：同步伪造abcrown commit、5行raw source/source hash/raw hash、protocol、
+summary与manifest，E0 self-check接受。这是预期的自签闭包边界：现有replay证明artifact内部一致性，不证明物理
+执行真实性；本轮真实性由外审独立核验外部source并亲启5个fresh provider进程建立，故等级为
+`E2-DIRECT-LEGACY`。S4-4不得继续使用该legacy例外，必须落地challenge+witness。
 
 ## 6. 验证与边界
 
 已通过：targeted admission 78、artifact closure 4（合计82）、formal negative 63、5-fresh artifact generation、
-stdlib replay、10/10 tamper、mypy clean、pylint 10.00、无本机路径泄漏；全量为
+stdlib replay、10/10 derived-semantics-inconsistent tamper、mypy clean、pylint 10.00、无本机路径泄漏；全量为
 `1966 passed, 3 skipped, 6 warnings in 728.84s`，3个skip均为既有TVM/VNN-COMP环境边界。
 
 明确未证明：process-global query exclusivity、S4-1A buffer ownership、candidate TIR执行、optimizer mutation、
@@ -101,5 +113,6 @@ exact-call identity误按字符串直接hash的问题；修复为合同规定的
 
 ## 7. 下一步
 
-唯一下一动作是外部模型从raw和源码独立复核本报告。若外审批准，才可关闭
-`VALIDATED-S4-0-MUTABLE-STATE-ADMISSION`并开始S4-1A预注册/实现；若发现blocker，S4-1A继续关闭并回退修复。
+外审已经批准且F1/F2完成修正。下一动作只开放S4-1A：把六组α与active β转成候选侧persistent compressed
+buffers，并验证owner、layout、pointer、version、lease transfer与失败回滚。S4-1A timing/performance、TIR evaluator、
+same-solver、complete-query和10x继续关闭。

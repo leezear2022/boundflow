@@ -10,6 +10,17 @@ performance-claimed: false
 
 # ASPLOS'27 S4 修改记录
 
+## 2026-08-30：S4-0外审F1/F2修正并升级VALIDATED
+
+- 接受外审F1：原“10/10全重签拒绝”降精度为10/10 inner+outer-resigned、
+  derived-semantics-inconsistent攻击拒绝；coherent full resign同步修正source与全部派生语义时E0可接受；
+- 接受外审F2：5个admission hash差异除exact-call run identity外，还来自snapshot/plan/oracle/plan-binding对
+  per-process provider捕获内容的正常散列变化；外审fresh确认α/β slots及content hash跨10进程逐位一致；
+- 外审亲启5 fresh provider、独立重算AC1—AC7，通过专项82与全量1966/3，保证等级
+  `E2-DIRECT-LEGACY`；S4-4明确禁止继续使用legacy例外；
+- 状态升级为`VALIDATED-S4-0-MUTABLE-STATE-ADMISSION`，只开放S4-1A implementation/correctness；
+  timing/performance/same-solver/complete-query/10x继续关闭。
+
 ## 2026-08-30：S4-0 five-fresh formal candidate闭合
 
 - 冻结formal代码源为`b3afde8`，真实provider worker绑定alpha-beta-CROWN/auto-LiRPA/vnncomp三个既定commit；

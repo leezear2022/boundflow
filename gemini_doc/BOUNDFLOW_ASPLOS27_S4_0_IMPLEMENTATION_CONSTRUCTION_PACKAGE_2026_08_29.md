@@ -1,5 +1,5 @@
 ---
-status: formal-candidate-pass-pending-external-audit
+status: validated-s4-0-mutable-state-admission
 date: 2026-08-29
 type: implementation-construction-package
 topic: boundflow
@@ -8,6 +8,7 @@ stage: s04
 execution-authority: false
 code-change-open: false
 formal-run-open: completed
+external-audit: approved-with-minor-corrections-closed
 timing-open: false
 performance-claimed: false
 same-solver-claimed: false
@@ -17,10 +18,16 @@ tenx-claimed: false
 
 # ASPLOS'27 S4-0：mutable-state admission逐文件施工包与V4边界修正
 
-> **2026-08-30 formal执行结果**：S4-0实现与本施工合同已经落成，5个fresh real-provider进程、63个
-> 独立negative case、stdlib semantic replay及10/10 fully outer-resigned tamper均通过。内部状态只能记为
-> `FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT-S4-0`；外审前不得写VALIDATED，也不开放S4-1A、timing或
-> performance。正式artifact位于`artifacts/asplos27-s4-admission/resnet2b-prop0-v1`。
+> **2026-08-30外审关闭**：AC1—AC7通过，0 blocker/0 major；F1/F2措辞已修正，状态升级为
+> `VALIDATED-S4-0-MUTABLE-STATE-ADMISSION`。10/10 tamper只覆盖derived-semantics-inconsistent重签攻击；
+> coherent full resign在E0可接受。外审控制5-fresh执行与独立source核验形成`E2-DIRECT-LEGACY`保证。只开放
+> S4-1A implementation/correctness。
+
+> **2026-08-30 formal执行结果（历史candidate状态，已由上方外审关闭取代）**：S4-0实现与本施工合同已经
+> 落成，5个fresh real-provider进程、63个独立negative case、stdlib semantic replay及10/10 inner+outer-
+> resigned、derived-semantics-inconsistent tamper通过；coherent full resign不在这10类保证内。彼时内部状态为
+> `FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT-S4-0`。正式artifact位于
+> `artifacts/asplos27-s4-admission/resnet2b-prop0-v1`。
 
 > **2026-08-30 real-provider容器事实修正**：现场探针确认alphas_by_layer._data的exact类型是stdlib
 > collections.defaultdict且default_factory is dict，不是此前写的builtins.dict；betas_by_layer._data、

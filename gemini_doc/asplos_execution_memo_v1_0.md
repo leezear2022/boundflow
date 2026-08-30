@@ -1,10 +1,12 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
-> **2026-08-30 S4-0当前指令：formal candidate已通过，唯一下一动作是外审，不进入S4-1A**。
+> **2026-08-30 S4-0外审批准关闭；下一动作只开放S4-1A implementation/correctness**。
 > production real-provider 5 fresh、六slot/12 path、alpha 8496/4248/4248、active beta 1/6、63类独立
-> negative、stdlib replay和10/10 fully outer-resigned tamper均已闭合，状态为
-> `FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT-S4-0`。外审批准前不得升级VALIDATED；S4-1A、TIR
-> evaluator、timing、performance与same-solver继续关闭。
+> negative与stdlib replay已闭合。现有10/10 tamper准确口径是inner+outer-resigned且
+> derived-semantics-inconsistent攻击被拒绝；coherent full resign同步伪造source与全部派生语义时可被E0
+> self-check接受，物理真实性来自外审控制的5-fresh执行与独立source核验，等级=`E2-DIRECT-LEGACY`。状态=
+> `VALIDATED-S4-0-MUTABLE-STATE-ADMISSION`。只允许S4-1A compressed buffer ownership实现/正确性；TIR
+> evaluator执行、timing、performance与same-solver继续关闭，S4-4必须使用challenge+witness。
 
 > **2026-08-30 当前唯一指令：S3外审已批准关闭，只开放S4 all-mutable-state implementation/correctness与
 > 真实share归因**。Round 1达到`E2-DIRECT-LEGACY`：外审者控制18-process fresh run并独立重算，formal数字未被
