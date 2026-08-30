@@ -1,0 +1,100 @@
+{
+  "schema_version": "boundflow.asplos27-s4-1b0-negative-contract/v1",
+  "source_identity": {
+    "fixture_freeze_parent_commit": "ae3cf10602c4b60d4ccf09e4a35f6a7e0c7d1c00",
+    "construction_model_hash": "5056d302aa27785ab8a22bd8f5665ebef0a4aba2ca22bc72ce28581144dbcc2a"
+  },
+  "backend_file": "boundflow/backends/tvm/asplos27_s4_ternary_endpoint.py",
+  "test_file": "tests/test_asplos27_s4_ternary_endpoint.py",
+  "stable_reasons": [
+    {"ordinal": 1, "reason": "TERNARY_ENDPOINT_SCHEMA_MISMATCH", "phase": "spec"},
+    {"ordinal": 2, "reason": "TERNARY_ENDPOINT_POLICY_MISMATCH", "phase": "spec"},
+    {"ordinal": 3, "reason": "TERNARY_ENDPOINT_MIDPOINT_POLICY_MISMATCH", "phase": "spec"},
+    {"ordinal": 4, "reason": "TERNARY_ENDPOINT_NONFINITE_POLICY_MISMATCH", "phase": "spec"},
+    {"ordinal": 5, "reason": "TERNARY_ENDPOINT_SYMBOL_COLLISION", "phase": "build"},
+    {"ordinal": 6, "reason": "TERNARY_ENDPOINT_TIR_IDENTITY_MISMATCH", "phase": "build"},
+    {"ordinal": 7, "reason": "TERNARY_ENDPOINT_DEVICE_SOURCE_MISMATCH", "phase": "compile"},
+    {"ordinal": 8, "reason": "TERNARY_ENDPOINT_CACHE_KEY_MISMATCH", "phase": "cache"},
+    {"ordinal": 9, "reason": "TERNARY_ENDPOINT_CACHE_ENTRY_POISONED", "phase": "cache"},
+    {"ordinal": 10, "reason": "TERNARY_ENDPOINT_LEGACY_MODULE_COLLISION", "phase": "cache"},
+    {"ordinal": 11, "reason": "TERNARY_ENDPOINT_SHAPE_MISMATCH", "phase": "prepare"},
+    {"ordinal": 12, "reason": "TERNARY_ENDPOINT_DTYPE_MISMATCH", "phase": "prepare"},
+    {"ordinal": 13, "reason": "TERNARY_ENDPOINT_DEVICE_MISMATCH", "phase": "prepare"},
+    {"ordinal": 14, "reason": "TERNARY_ENDPOINT_LAYOUT_MISMATCH", "phase": "prepare"},
+    {"ordinal": 15, "reason": "TERNARY_ENDPOINT_ALIAS_MISMATCH", "phase": "prepare"},
+    {"ordinal": 16, "reason": "TERNARY_ENDPOINT_DLPACK_IDENTITY_MISMATCH", "phase": "prepare"},
+    {"ordinal": 17, "reason": "TERNARY_ENDPOINT_STREAM_IDENTITY_MISMATCH", "phase": "launch"},
+    {"ordinal": 18, "reason": "TERNARY_ENDPOINT_LAUNCH_COUNT_MISMATCH", "phase": "observation"},
+    {"ordinal": 19, "reason": "TERNARY_ENDPOINT_INVALID_SELECTOR_NOT_POISONED", "phase": "observation"},
+    {"ordinal": 20, "reason": "TERNARY_ENDPOINT_CLAIM_FLAG_MISMATCH", "phase": "observation"}
+  ],
+  "test_layout": [
+    "test_pack_cpu_bit_oracle_covers_signed_zero_subnormal_nonfinite",
+    "test_select_cpu_bit_oracle_covers_midpoint_and_canonical_nan",
+    "test_midpoint_operation_order_has_two_frozen_counterexamples",
+    "test_build_spec_and_schedule_are_generic_and_canonical",
+    "test_tir_module_exports_exact_new_symbols",
+    "test_cache_first_miss_then_exact_hit_compiles_once",
+    "test_cache_key_rejects_policy_schedule_target_and_legacy_collisions",
+    "test_cache_hit_rehashes_cached_device_source",
+    "test_cuda_boundary_pack_select_matches_bit_oracle",
+    "test_cuda_non_default_stream_and_five_dlpack_pointers_are_exact",
+    "test_cuda_invalid_selector_produces_canonical_nan",
+    "test_isolated_outputs_account_for_92160_logical_bytes",
+    "test_formal_ainput_inventory_is_8689_9137_606_0",
+    "test_old_binary_misclassifies_exactly_606_zero_entries",
+    "test_legacy_r31b2_and_s2_identities_are_unchanged",
+    "test_all_twenty_negative_reasons_are_stable"
+  ],
+  "cache_contract": {
+    "lookup_key_inputs": [
+      "module_receipt_schema",
+      "build_spec_hash",
+      "schedule_spec_hash",
+      "unscheduled_tir_hash",
+      "scheduled_tir_hash",
+      "target",
+      "compute_capability",
+      "tvm_commit",
+      "tvm_ffi_commit"
+    ],
+    "lookup_key_excludes": [
+      "device_source_hash",
+      "compile_count",
+      "miss_count",
+      "hit_count",
+      "tensor_content_hash",
+      "evaluation_ordinal"
+    ],
+    "hit_rehashes_cached_device_source": true,
+    "failed_compile_inserts_entry": false,
+    "fallback_on_failure": false
+  },
+  "identity_layers": [
+    "build_spec",
+    "schedule_spec",
+    "compiled_module_receipt",
+    "mutable_cache_observation",
+    "prepared_argument_descriptors",
+    "warm_launch_receipt",
+    "formal_tensor_observation"
+  ],
+  "formal_topology": {
+    "positive_workers": 5,
+    "cache_workers": 1,
+    "fault_workers": 5,
+    "total_fresh_processes": 11,
+    "raw_first": true,
+    "partial_resume_rejected": true,
+    "external_audit_required_for_validated": true
+  },
+  "scope": {
+    "isolated_backend": true,
+    "prepared_probe": true,
+    "production_evaluator_binding": false,
+    "s4_1a_ticket_consumption": false,
+    "optimizer": false,
+    "timing": false,
+    "performance": false
+  }
+}
