@@ -23,10 +23,22 @@ from check_asplos27_s4_1b0_design_contracts_stdlib import (
 
 TASK_ID = "asplos27-s4-1a-ordered-buffer-20260830"
 EXPECTED_BRANCH = "feat/rvir-v4-production-state-ownership-v1"
+EXPECTED_S4_1A_BASELINE_COMMIT = "f773370"
 REQUIRED_ANCESTORS = (
     "f773370",  # S4-1A formal validation
     "a66e383",  # S4-1B0 formal artifact contract freeze
     "44b01ab",  # construction-root contract checker
+)
+CRITICAL_PATHS = (
+    ".docops/s.md",
+    f".docops/exchange/{TASK_ID}",
+    "gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md",
+    "gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_IEEE_BIT_FIXTURES_V1_2026_08_30.json",
+    "gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_NEGATIVE_CONTRACT_V1_2026_08_30.json",
+    "gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_ABI_CONTRACT_V1_2026_08_30.json",
+    "gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_FORMAL_ARTIFACT_CONTRACT_V1_2026_08_30.json",
+    "scripts/check_asplos27_s4_1b0_design_contracts_stdlib.py",
+    "scripts/check_asplos27_s4_1b0_activation_gate_stdlib.py",
 )
 WAIT_STATUSES = {
     "in_progress": "s4-1a-exchange-in-progress",
@@ -101,7 +113,16 @@ def _run_git(root: Path, arguments: Sequence[str]) -> str:
     return completed.stdout.strip()
 
 
-def _validate_git_identity(root: Path) -> dict[str, Any]:
+def _enforce_publication_state(ahead: int, behind: int, dirty: Sequence[str]) -> None:
+    if ahead or behind:
+        raise GateError(
+            f"activation-head-upstream-diverged:ahead={ahead}:behind={behind}"
+        )
+    if dirty:
+        raise GateError(f"activation-critical-paths-dirty:{'|'.join(dirty)}")
+
+
+def _validate_git_identity(root: Path, require_published: bool) -> dict[str, Any]:
     branch = _run_git(root, ("branch", "--show-current"))
     if branch != EXPECTED_BRANCH:
         raise GateError(f"wrong-branch:{branch or 'detached'}")
@@ -117,9 +138,34 @@ def _validate_git_identity(root: Path) -> dict[str, Any]:
         )
         if completed.returncode:
             raise GateError(f"required-ancestor-missing:{ancestor}")
+    upstream = _run_git(root, ("rev-parse", "@{upstream}"))
+    divergence = _run_git(
+        root, ("rev-list", "--left-right", "--count", "HEAD...@{upstream}")
+    )
+    ahead_text, behind_text = divergence.split()
+    ahead, behind = int(ahead_text), int(behind_text)
+    dirty_output = _run_git(
+        root,
+        (
+            "status",
+            "--porcelain=v1",
+            "--untracked-files=all",
+            "--",
+            *CRITICAL_PATHS,
+        ),
+    )
+    dirty = [line for line in dirty_output.splitlines() if line]
+    if require_published:
+        _enforce_publication_state(ahead, behind, dirty)
     return {
         "branch": branch,
         "head": head,
+        "upstream": upstream,
+        "ahead": ahead,
+        "behind": behind,
+        "critical_paths_clean": not dirty,
+        "critical_path_changes": dirty,
+        "publication_required": require_published,
         "required_ancestors": list(REQUIRED_ANCESTORS),
     }
 
@@ -143,6 +189,23 @@ def _require_closed_exchange_files(
                 f"closed-exchange-file-missing:{path.relative_to(exchange_root)}"
             )
     return paths
+
+
+def _validate_request_document(
+    paths: Mapping[str, Path], state: Mapping[str, Any], expected_doc: str
+) -> dict[str, Any]:
+    request = _load_json(paths["request_json"])
+    if request.get("task") != TASK_ID or request.get("doc") != expected_doc:
+        raise GateError("request-task-or-doc-mismatch")
+    if request.get("round") != 0 or request.get("type") != "request":
+        raise GateError("request-round-or-type-mismatch")
+    if request.get("executor") != state.get("executor") or request.get(
+        "auditor"
+    ) != state.get("auditor"):
+        raise GateError("request-participant-mismatch")
+    if request.get("md_sha256") != _sha256(paths["request_md"]):
+        raise GateError("request-md-sha256-mismatch")
+    return request
 
 
 def _validate_delivery_document(
@@ -245,6 +308,7 @@ def _validate_closed_exchange(
     delivery_doc = f"{TASK_ID}/{round_name}/delivery"
     audit_doc = f"{TASK_ID}/{round_name}/audit"
     closure_doc = f"{TASK_ID}/closure"
+    request = _validate_request_document(paths, state, request_doc)
     delivery = _validate_delivery_document(paths, state, approved_round, delivery_doc)
     audit = _validate_audit_document(
         paths,
@@ -262,10 +326,45 @@ def _validate_closed_exchange(
         "audit_verdict": audit["verdict"],
         "blocking_finding_count": 0,
         "closure_resolution": closure["resolution"],
+        "request_md_sha256": request["md_sha256"],
         "delivery_md_sha256": delivery["md_sha256"],
         "audit_md_sha256": audit["md_sha256"],
         "closure_md_sha256": closure["md_sha256"],
     }
+
+
+def _validate_delivery_result_commit(
+    root: Path, exchange_root: Path, approved_round: int
+) -> dict[str, str]:
+    delivery = _load_json(exchange_root / f"r{approved_round:03d}" / "delivery.json")
+    result_commit = delivery.get("result_commit")
+    if not isinstance(result_commit, str) or not result_commit:
+        raise GateError("delivery-result-commit-missing")
+    resolved = _run_git(root, ("rev-parse", f"{result_commit}^{{commit}}"))
+    baseline = _run_git(
+        root, ("rev-parse", f"{EXPECTED_S4_1A_BASELINE_COMMIT}^{{commit}}")
+    )
+    baseline_check = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", baseline, resolved],
+        cwd=root,
+        check=False,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if baseline_check.returncode:
+        raise GateError("delivery-result-commit-does-not-contain-s4-1a-baseline")
+    head_check = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", resolved, "HEAD"],
+        cwd=root,
+        check=False,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if head_check.returncode:
+        raise GateError("delivery-result-commit-not-head-ancestor")
+    return {"declared": result_commit, "resolved": resolved, "baseline": baseline}
 
 
 def _validate_docops_state(values: Mapping[str, str], exchange_closed: bool) -> None:
@@ -306,7 +405,18 @@ def _closed_exchange_self_test() -> int:
         delivery_md.write_text("# Delivery\n", encoding="utf-8")
         audit_md.write_text("# Audit\n", encoding="utf-8")
         closure_md.write_text("# Closure\n", encoding="utf-8")
-        _write_json(root / "request.json", {"doc": f"{TASK_ID}/request"})
+        _write_json(
+            root / "request.json",
+            {
+                "doc": f"{TASK_ID}/request",
+                "type": "request",
+                "task": TASK_ID,
+                "round": 0,
+                "executor": "codex",
+                "auditor": "external-model",
+                "md_sha256": _sha256(request_md),
+            },
+        )
         delivery_doc = f"{TASK_ID}/r001/delivery"
         audit_doc = f"{TASK_ID}/r001/audit"
         closure_doc = f"{TASK_ID}/closure"
@@ -362,6 +472,22 @@ def _closed_exchange_self_test() -> int:
     return 2
 
 
+def _publication_state_self_test() -> int:
+    _enforce_publication_state(0, 0, ())
+    for ahead, behind, dirty, expected in (
+        (1, 0, (), "activation-head-upstream-diverged:ahead=1:behind=0"),
+        (0, 0, (" M critical.py",), "activation-critical-paths-dirty: M critical.py"),
+    ):
+        try:
+            _enforce_publication_state(ahead, behind, dirty)
+        except GateError as exc:
+            if str(exc) != expected:
+                raise GateError(f"self-test-wrong-publication-reason:{exc}") from exc
+        else:
+            raise GateError("self-test-invalid-publication-state-accepted")
+    return 3
+
+
 def _state_machine_self_test() -> dict[str, Any]:
     cases = [
         (
@@ -390,23 +516,27 @@ def _state_machine_self_test() -> dict[str, Any]:
         if actual != expected:
             raise GateError(f"self-test-mismatch:{state}:{actual}:{expected}")
     closed_cases = _closed_exchange_self_test()
+    publication_cases = _publication_state_self_test()
     return {
         "status": "PASS",
         "classifier_case_count": len(cases),
         "closed_exchange_case_count": closed_cases,
-        "case_count": len(cases) + closed_cases,
+        "publication_case_count": publication_cases,
+        "case_count": len(cases) + closed_cases + publication_cases,
     }
 
 
 def evaluate(root: Path) -> tuple[GateDecision, dict[str, Any]]:
     """Evaluate the full pre-activation gate without changing repository state."""
     design = validate_design_contracts(root, require_code_closed=True)
-    git_identity = _validate_git_identity(root)
     exchange_root = root / ".docops" / "exchange" / TASK_ID
     exchange_state = _load_json(exchange_root / "state.json")
     if exchange_state.get("task") != TASK_ID:
         raise GateError("exchange-task-mismatch")
     decision = _classify_exchange(exchange_state)
+    git_identity = _validate_git_identity(
+        root, require_published=decision.status == "PROCEED"
+    )
     docops = _parse_state_markdown(root / ".docops" / "s.md")
     if decision.status == "ERROR":
         raise GateError(decision.reason)
@@ -420,6 +550,9 @@ def evaluate(root: Path) -> tuple[GateDecision, dict[str, Any]]:
         "exchange_round": exchange_state["round"],
         "docops_blocker": docops.get("blk"),
         "docops_next": docops.get("next"),
+        "delivery_result_commit": _validate_delivery_result_commit(
+            root, exchange_root, int(exchange_state["round"])
+        ),
     }
     if decision.status == "PROCEED":
         evidence["closure"] = _validate_closed_exchange(exchange_root, exchange_state)

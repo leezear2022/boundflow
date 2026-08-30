@@ -105,3 +105,34 @@ git diff --check = PASS
 ```
 
 真实exchange仍无audit/closure，本批没有模拟其已批准，也没有解除DocOps blocker。
+
+## 7. 第三批：source与publication边界
+
+PROCEED额外要求：
+
+1. request JSON的task/doc/type/round/executor/auditor与真实`request.md` SHA一致；
+2. delivery `result_commit`可解析，包含冻结S4-1A formal基线`f773370`，且自身为HEAD祖先；
+3. HEAD与tracking upstream ahead/behind均为0；
+4. S4-1A exchange、DocOps state、四份S4-1B0合同、施工包和两个checker组成的critical path无tracked或
+   untracked修改。
+
+外审若要求修复，后续delivery可以是`f773370`的合法后继，不要求永远逐位等于旧commit。WAIT状态只披露
+publication/dirty信息；PROCEED才把不同步或critical dirty升级为ERROR，避免开发检查器本身时误报。
+
+```text
+checker SHA256 = 93e20eb86dec46955d0a0822b1a3a4dbd080aff5f7ceb10cb006a1907a2c3eee
+self-test = 10/10 PASS
+  classifier = 5
+  closed content chain = 2
+  publication clean/ahead/dirty = 3
+request Markdown SHA256 = a3fb97491d039cde0bfe9dd0d3c564fa22c36e8998e9eac9ccfa2d459cd32740
+delivery declared commit = f773370
+delivery resolved/baseline = f7733702cad8519cb32433ea759ce63c905f1539
+pre-edit HEAD/upstream divergence = 0/0
+real repository status = WAIT / exit 3
+Mypy = clean
+Pylint = 10.00/10
+git diff --check = PASS
+```
+
+本批仍只增强激活检查，不修改production、formal或performance claim。
