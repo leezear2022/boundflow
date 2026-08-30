@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import math
+import re
 import struct
 import sys
 from pathlib import Path
@@ -21,6 +22,9 @@ NEGATIVE_PATH = Path(
 ABI_PATH = Path("gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_ABI_CONTRACT_V1_2026_08_30.json")
 FORMAL_PATH = Path(
     "gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_FORMAL_ARTIFACT_CONTRACT_V1_2026_08_30.json"
+)
+CONSTRUCTION_PATH = Path(
+    "gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md"
 )
 
 EXPECTED_SCHEMAS = {
@@ -80,6 +84,29 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _canonical_hash(value: Mapping[str, Any]) -> str:
+    payload = json.dumps(
+        value, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def _extract_construction_model(path: Path) -> tuple[dict[str, Any], str]:
+    text = path.read_text(encoding="utf-8")
+    section_start = text.index("## 12. 可重算construction model")
+    section = text[section_start:]
+    match = re.search(r"```json\n(?P<model>\{.*?\})\n```", section, flags=re.DOTALL)
+    if match is None:
+        raise ValueError(f"{path}: section 12 canonical JSON block is missing")
+    model = json.loads(match.group("model"))
+    if not isinstance(model, dict):
+        raise TypeError(f"{path}: construction model must be an object")
+    hash_block = re.search(r"SHA256：\s*```text\s*([0-9a-f]{64})\s*```", section)
+    if hash_block is None:
+        raise ValueError(f"{path}: section 12 SHA256 block is missing")
+    return model, hash_block.group(1)
 
 
 def _u32(bits: str) -> int:
@@ -606,6 +633,189 @@ def _validate_formal(
     )
 
 
+# The source model and four derived contracts are intentionally explicit here.
+# pylint: disable=too-many-arguments,too-many-positional-arguments
+def _validate_construction_model(
+    checks: Checks,
+    model: Mapping[str, Any],
+    fixture: Mapping[str, Any],
+    negative: Mapping[str, Any],
+    abi: Mapping[str, Any],
+    formal: Mapping[str, Any],
+) -> None:
+    """Bind the authoritative markdown model to every machine contract."""
+    checks.equal(model["backend_file"], negative["backend_file"], "model backend path")
+    checks.equal(model["test_file"], negative["test_file"], "model test path")
+    checks.equal(
+        model["negative_reason_count"],
+        len(negative["stable_reasons"]),
+        "model reason count",
+    )
+    checks.equal(
+        model["symbols"],
+        [abi["constants"]["pack_symbol"], abi["constants"]["select_symbol"]],
+        "model symbols",
+    )
+    checks.equal(model["threads"], abi["constants"]["default_threads"], "model threads")
+
+    cache = model["cache"]
+    lookup_fields = abi["cache"]["lookup_key_fields"]
+    excludes = abi["cache"]["first_lookup_excludes"]
+    checks.equal(
+        "device_source_hash" in lookup_fields,
+        cache["device_source_in_lookup_key"],
+        "model device source lookup",
+    )
+    checks.require(
+        "device_source_hash" in excludes, "model device source explicitly excluded"
+    )
+    checks.equal(
+        negative["cache_contract"]["hit_rehashes_cached_device_source"],
+        cache["hit_rehashes_cached_source"],
+        "model cache source rehash",
+    )
+    checks.equal(
+        abi["module_receipt"]["mutable_cache_counts_in_receipt"],
+        cache["mutable_counts_in_module_receipt"],
+        "model immutable module receipt",
+    )
+    checks.equal(
+        all(
+            name in lookup_fields
+            for name in ("unscheduled_tir_hash", "scheduled_tir_hash")
+        ),
+        cache["precompile_tir_hashes_in_lookup_key"],
+        "model precompile TIR lookup hashes",
+    )
+
+    model_claims = model["claims"]
+    checks.equal(
+        fixture["claims"]["implementation_open"],
+        model_claims["implementation"],
+        "model fixture implementation claim",
+    )
+    checks.equal(
+        abi["claims"]["implementation_open"],
+        model_claims["implementation"],
+        "model ABI implementation claim",
+    )
+    checks.equal(
+        formal["claims"]["implementation_open"],
+        model_claims["implementation"],
+        "model formal implementation claim",
+    )
+    checks.equal(
+        abi["claims"]["performance"],
+        model_claims["performance"],
+        "model performance claim",
+    )
+    checks.equal(
+        abi["claims"]["production_correctness"],
+        model_claims["production_correctness"],
+        "model correctness claim",
+    )
+    checks.equal(
+        abi["storage"]["production_alias_claimed"],
+        model_claims["production_alias"],
+        "model alias claim",
+    )
+
+    model_formal = model["formal"]
+    for name in ("positive_workers", "cache_workers", "fault_workers"):
+        checks.equal(
+            formal["worker_topology"][name], model_formal[name], f"model formal {name}"
+        )
+    checks.equal(
+        negative["formal_topology"]["external_audit_required_for_validated"],
+        model_formal["status_requires_external_audit"],
+        "model external audit gate",
+    )
+
+    model_math = model["math"]
+    checks.equal(
+        model_math["invalid_output_bits"],
+        abi["constants"]["qnan_bits"],
+        "model invalid output bits",
+    )
+    checks.equal(
+        model_math["midpoint_policy"],
+        fixture["policies"]["midpoint_policy"],
+        "model midpoint policy",
+    )
+    checks.equal(
+        model_math["nonfinite_mask"],
+        abi["constants"]["nonfinite_mask"],
+        "model nonfinite mask",
+    )
+    selector_values = sorted(
+        {case["expected_selector"] for case in fixture["pack_cases"]}
+    )
+    checks.equal(
+        model_math["selector_values"], selector_values, "model selector values"
+    )
+
+    production = model["production"]
+    checks.require(
+        production["selected_output_alias_requires_s4_1b_phase_proof"] is True,
+        "model phase alias proof required",
+    )
+    checks.equal(
+        abi["warm_launch_receipt"]["synchronized_content_counts_allowed"],
+        production["warm_count_sync"],
+        "model warm count sync",
+    )
+    checks.equal(
+        "bit_preserving_content_hashes"
+        in abi["formal_observation"]["allowed_after_explicit_synchronize"],
+        not production["warm_content_hash"],
+        "model content hash deferred to formal",
+    )
+
+    scope = model["scope"]
+    checks.equal(
+        scope["backend_compile"],
+        negative["scope"]["isolated_backend"],
+        "model backend compile scope",
+    )
+    checks.equal(
+        scope["evaluator_binding"],
+        negative["scope"]["production_evaluator_binding"],
+        "model evaluator scope",
+    )
+    checks.equal(
+        scope["new_ir"], abi["tir_builder"]["new_top_level_ir"], "model new IR scope"
+    )
+    checks.equal(
+        scope["prepared_probe"],
+        negative["scope"]["prepared_probe"],
+        "model prepared probe scope",
+    )
+    checks.equal(scope["timing"], abi["claims"]["timing"], "model timing scope")
+
+    storage = model["storage"]
+    checks.equal(
+        storage["isolated_dlpack_views"],
+        abi["prepared_probe"]["prepare_dlpack_view_count"],
+        "model isolated views",
+    )
+    checks.equal(
+        storage["isolated_output_allocated_bytes"],
+        abi["storage"]["production_fixture_output_bytes"],
+        "model output bytes",
+    )
+    checks.equal(
+        storage["selected_output_bytes"],
+        abi["storage"]["production_fixture_selected_bytes"],
+        "model selected bytes",
+    )
+    checks.equal(
+        storage["selector_bytes"],
+        abi["storage"]["production_fixture_selector_bytes"],
+        "model selector bytes",
+    )
+    checks.equal(storage["s4_1a_base_view_overlap"], 0, "model S4-1A view overlap")
+
+
 def validate(root: Path, require_code_closed: bool) -> dict[str, Any]:
     """Validate every frozen asset and return a compact deterministic receipt."""
     checks = Checks()
@@ -617,11 +827,23 @@ def validate(root: Path, require_code_closed: bool) -> dict[str, Any]:
     negative = documents[NEGATIVE_PATH]
     abi = documents[ABI_PATH]
     formal = documents[FORMAL_PATH]
+    construction_model, documented_model_hash = _extract_construction_model(
+        root / CONSTRUCTION_PATH
+    )
+    computed_model_hash = _canonical_hash(construction_model)
     model_hashes = {
         document["source_identity"]["construction_model_hash"]
         for document in documents.values()
     }
     checks.equal(len(model_hashes), 1, "shared construction model hash")
+    checks.equal(
+        computed_model_hash,
+        documented_model_hash,
+        "construction model documented SHA256",
+    )
+    checks.equal(
+        model_hashes, {computed_model_hash}, "construction model JSON contract hashes"
+    )
     _validate_dependency_assets(
         checks, root, "ABI", abi["dependency_assets"], (FIXTURE_PATH, NEGATIVE_PATH)
     )
@@ -636,6 +858,9 @@ def validate(root: Path, require_code_closed: bool) -> dict[str, Any]:
     _validate_negative(checks, negative)
     _validate_abi(checks, fixture, negative, abi)
     _validate_formal(checks, fixture, negative, abi, formal)
+    _validate_construction_model(
+        checks, construction_model, fixture, negative, abi, formal
+    )
     if require_code_closed:
         for relative in CODE_CLOSED_PATHS:
             checks.require(
@@ -648,6 +873,7 @@ def validate(root: Path, require_code_closed: bool) -> dict[str, Any]:
         "schema": "boundflow.asplos27-s4-1b0-design-contract-check/v1",
         "check_count": checks.count,
         "construction_model_hash": next(iter(model_hashes)),
+        "construction_package_sha256": _sha256(root / CONSTRUCTION_PATH),
         "asset_sha256": {str(path): _sha256(root / path) for path in EXPECTED_SCHEMAS},
         "reason_count": len(negative["stable_reasons"]),
         "test_layout_count": len(negative["test_layout"]),
