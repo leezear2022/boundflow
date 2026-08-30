@@ -420,7 +420,9 @@ def _validate_delivery_result_commit(
     return {"declared": result_commit, "resolved": resolved, "baseline": baseline}
 
 
-def _validate_docops_state(values: Mapping[str, str], exchange_closed: bool) -> None:
+def _validate_docops_state(
+    values: Mapping[str, str], exchange_closed: bool, exchange_round: int
+) -> None:
     if values.get("st") != "s04" or values.get("stat") != "active":
         raise GateError("docops-stage-not-active-s04")
     if values.get("health") != "green":
@@ -435,7 +437,8 @@ def _validate_docops_state(values: Mapping[str, str], exchange_closed: bool) -> 
     else:
         if blocker != "external-audit-s4-1a-pending":
             raise GateError("open-exchange-without-s4-1a-audit-blocker")
-        if next_action != "wait-for-external-audit-s4-1a-round1":
+        expected_next = f"wait-for-external-audit-s4-1a-round{exchange_round}"
+        if next_action != expected_next:
             raise GateError("open-exchange-next-action-mismatch")
 
 
@@ -578,6 +581,47 @@ def _publication_state_self_test() -> int:
     return 3
 
 
+def _docops_state_self_test() -> int:
+    open_base = {
+        "st": "s04",
+        "stat": "active",
+        "health": "green",
+        "blk": "external-audit-s4-1a-pending",
+    }
+    for exchange_round in (1, 2):
+        _validate_docops_state(
+            {
+                **open_base,
+                "next": f"wait-for-external-audit-s4-1a-round{exchange_round}",
+            },
+            exchange_closed=False,
+            exchange_round=exchange_round,
+        )
+    try:
+        _validate_docops_state(
+            {**open_base, "next": "wait-for-external-audit-s4-1a-round1"},
+            exchange_closed=False,
+            exchange_round=2,
+        )
+    except GateError as exc:
+        if str(exc) != "open-exchange-next-action-mismatch":
+            raise GateError(f"self-test-wrong-docops-reason:{exc}") from exc
+    else:
+        raise GateError("self-test-stale-round-next-accepted")
+    _validate_docops_state(
+        {
+            "st": "s04",
+            "stat": "active",
+            "health": "green",
+            "blk": "none",
+            "next": "implement-s4-1b0",
+        },
+        exchange_closed=True,
+        exchange_round=2,
+    )
+    return 4
+
+
 def _state_machine_self_test() -> dict[str, Any]:
     cases = [
         (
@@ -607,12 +651,17 @@ def _state_machine_self_test() -> dict[str, Any]:
             raise GateError(f"self-test-mismatch:{state}:{actual}:{expected}")
     closed_cases = _closed_exchange_self_test()
     publication_cases = _publication_state_self_test()
+    docops_state_cases = _docops_state_self_test()
     return {
         "status": "PASS",
         "classifier_case_count": len(cases),
         "closed_exchange_case_count": closed_cases,
         "publication_case_count": publication_cases,
-        "case_count": len(cases) + closed_cases + publication_cases,
+        "docops_state_case_count": docops_state_cases,
+        "case_count": len(cases)
+        + closed_cases
+        + publication_cases
+        + docops_state_cases,
     }
 
 
@@ -630,7 +679,11 @@ def evaluate(root: Path) -> tuple[GateDecision, dict[str, Any]]:
     docops = _parse_state_markdown(root / ".docops" / "s.md")
     if decision.status == "ERROR":
         raise GateError(decision.reason)
-    _validate_docops_state(docops, exchange_closed=decision.status == "PROCEED")
+    _validate_docops_state(
+        docops,
+        exchange_closed=decision.status == "PROCEED",
+        exchange_round=int(exchange_state["round"]),
+    )
     evidence: dict[str, Any] = {
         "design_check_count": design["check_count"],
         "construction_model_hash": design["construction_model_hash"],

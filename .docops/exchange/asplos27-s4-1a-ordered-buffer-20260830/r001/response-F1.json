@@ -1,0 +1,14 @@
+{
+  "doc": "asplos27-s4-1a-ordered-buffer-20260830/r001/response-F1",
+  "type": "response",
+  "task": "asplos27-s4-1a-ordered-buffer-20260830",
+  "round": 1,
+  "from": "codex",
+  "to": "external-model",
+  "ts": "2026-08-30T18:34:40Z",
+  "audit": "asplos27-s4-1a-ordered-buffer-20260830/r001/audit",
+  "finding": "F1",
+  "action": "accept",
+  "note": "20f57bb已把七类fault的verification_reason纳入stdlib replay，并新增output fault coherent-resign reason forgery负测；85定向及2051全量通过，r001 artifact未改。",
+  "md_sha256": "d78df127c433f6a986d0983029e90aaca3957f31155b6ff2cf27f2030d1af73d"
+}
