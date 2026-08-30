@@ -7,9 +7,11 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import subprocess
 import sys
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -52,6 +54,10 @@ def _load_json(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise TypeError(f"{path}: top-level JSON must be an object")
     return payload
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _parse_state_markdown(path: Path) -> dict[str, str]:
@@ -118,31 +124,68 @@ def _validate_git_identity(root: Path) -> dict[str, Any]:
     }
 
 
-# Audit, closure, and state identities stay visible together for review.
-# pylint: disable=too-many-locals
-def _validate_closed_exchange(
-    exchange_root: Path, state: Mapping[str, Any]
-) -> dict[str, Any]:
-    approved_round = int(state["approved_round"])
-    round_name = f"r{approved_round:03d}"
-    audit_path = exchange_root / round_name / "audit.json"
-    audit_md_path = exchange_root / round_name / "audit.md"
-    closure_path = exchange_root / "closure.json"
-    closure_md_path = exchange_root / "closure.md"
-    for path in (audit_path, audit_md_path, closure_path, closure_md_path):
+def _require_closed_exchange_files(
+    exchange_root: Path, round_name: str
+) -> dict[str, Path]:
+    paths = {
+        "request_json": exchange_root / "request.json",
+        "request_md": exchange_root / "request.md",
+        "delivery_json": exchange_root / round_name / "delivery.json",
+        "delivery_md": exchange_root / round_name / "delivery.md",
+        "audit_json": exchange_root / round_name / "audit.json",
+        "audit_md": exchange_root / round_name / "audit.md",
+        "closure_json": exchange_root / "closure.json",
+        "closure_md": exchange_root / "closure.md",
+    }
+    for path in paths.values():
         if not path.is_file():
             raise GateError(
                 f"closed-exchange-file-missing:{path.relative_to(exchange_root)}"
             )
+    return paths
 
-    audit = _load_json(audit_path)
-    closure = _load_json(closure_path)
-    expected_audit_doc = f"{TASK_ID}/{round_name}/audit"
-    expected_closure_doc = f"{TASK_ID}/closure"
-    if audit.get("task") != TASK_ID or audit.get("doc") != expected_audit_doc:
+
+def _validate_delivery_document(
+    paths: Mapping[str, Path],
+    state: Mapping[str, Any],
+    approved_round: int,
+    expected_doc: str,
+) -> dict[str, Any]:
+    delivery = _load_json(paths["delivery_json"])
+    if delivery.get("task") != TASK_ID or delivery.get("doc") != expected_doc:
+        raise GateError("delivery-task-or-doc-mismatch")
+    if delivery.get("round") != approved_round:
+        raise GateError("delivery-round-mismatch")
+    if delivery.get("from") != state.get("executor") or delivery.get("to") != state.get(
+        "auditor"
+    ):
+        raise GateError("delivery-participant-mismatch")
+    if delivery.get("md_sha256") != _sha256(paths["delivery_md"]):
+        raise GateError("delivery-md-sha256-mismatch")
+    return delivery
+
+
+def _validate_audit_document(
+    paths: Mapping[str, Path],
+    state: Mapping[str, Any],
+    *,
+    approved_round: int,
+    expected_doc: str,
+    expected_delivery_doc: str,
+) -> dict[str, Any]:
+    audit = _load_json(paths["audit_json"])
+    if audit.get("task") != TASK_ID or audit.get("doc") != expected_doc:
         raise GateError("audit-task-or-doc-mismatch")
     if audit.get("round") != approved_round or audit.get("verdict") != "approve":
         raise GateError("audit-round-or-verdict-mismatch")
+    if audit.get("delivery") != expected_delivery_doc:
+        raise GateError("audit-delivery-link-mismatch")
+    if audit.get("from") != state.get("auditor") or audit.get("to") != state.get(
+        "executor"
+    ):
+        raise GateError("audit-participant-mismatch")
+    if audit.get("md_sha256") != _sha256(paths["audit_md"]):
+        raise GateError("audit-md-sha256-mismatch")
     findings = audit.get("findings")
     if not isinstance(findings, list):
         raise GateError("audit-findings-not-list")
@@ -153,8 +196,17 @@ def _validate_closed_exchange(
     ]
     if blocking:
         raise GateError(f"approved-audit-has-blocking-findings:{','.join(blocking)}")
+    return audit
 
-    if closure.get("task") != TASK_ID or closure.get("doc") != expected_closure_doc:
+
+def _validate_closure_document(
+    paths: Mapping[str, Path],
+    state: Mapping[str, Any],
+    approved_round: int,
+    expected_doc: str,
+) -> dict[str, Any]:
+    closure = _load_json(paths["closure_json"])
+    if closure.get("task") != TASK_ID or closure.get("doc") != expected_doc:
         raise GateError("closure-task-or-doc-mismatch")
     if (
         closure.get("round") != approved_round
@@ -163,17 +215,56 @@ def _validate_closed_exchange(
         raise GateError("closure-round-mismatch")
     if closure.get("resolution") != "approved":
         raise GateError("closure-resolution-not-approved")
+    if closure.get("from") != state.get("executor"):
+        raise GateError("closure-executor-mismatch")
+    if closure.get("md_sha256") != _sha256(paths["closure_md"]):
+        raise GateError("closure-md-sha256-mismatch")
+    return closure
+
+
+def _validate_registered_docs(
+    state: Mapping[str, Any], expected: Sequence[str]
+) -> None:
     docs = state.get("docs")
     if not isinstance(docs, list):
         raise GateError("exchange-docs-not-list")
-    for expected in (expected_audit_doc, expected_closure_doc):
-        if expected not in docs:
-            raise GateError(f"exchange-doc-not-registered:{expected}")
+    if len(docs) != len(set(docs)):
+        raise GateError("exchange-docs-contain-duplicates")
+    for document in expected:
+        if document not in docs:
+            raise GateError(f"exchange-doc-not-registered:{document}")
+
+
+def _validate_closed_exchange(
+    exchange_root: Path, state: Mapping[str, Any]
+) -> dict[str, Any]:
+    approved_round = int(state["approved_round"])
+    round_name = f"r{approved_round:03d}"
+    paths = _require_closed_exchange_files(exchange_root, round_name)
+    request_doc = f"{TASK_ID}/request"
+    delivery_doc = f"{TASK_ID}/{round_name}/delivery"
+    audit_doc = f"{TASK_ID}/{round_name}/audit"
+    closure_doc = f"{TASK_ID}/closure"
+    delivery = _validate_delivery_document(paths, state, approved_round, delivery_doc)
+    audit = _validate_audit_document(
+        paths,
+        state,
+        approved_round=approved_round,
+        expected_doc=audit_doc,
+        expected_delivery_doc=delivery_doc,
+    )
+    closure = _validate_closure_document(paths, state, approved_round, closure_doc)
+    _validate_registered_docs(
+        state, (request_doc, delivery_doc, audit_doc, closure_doc)
+    )
     return {
         "approved_round": approved_round,
         "audit_verdict": audit["verdict"],
         "blocking_finding_count": 0,
         "closure_resolution": closure["resolution"],
+        "delivery_md_sha256": delivery["md_sha256"],
+        "audit_md_sha256": audit["md_sha256"],
+        "closure_md_sha256": closure["md_sha256"],
     }
 
 
@@ -194,6 +285,81 @@ def _validate_docops_state(values: Mapping[str, str], exchange_closed: bool) -> 
             raise GateError("open-exchange-without-s4-1a-audit-blocker")
         if next_action != "wait-for-external-audit-s4-1a-round1":
             raise GateError("open-exchange-next-action-mismatch")
+
+
+def _write_json(path: Path, value: Mapping[str, Any]) -> None:
+    path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
+
+
+# The synthetic closed exchange keeps each linked document visible in one place.
+# pylint: disable=too-many-locals
+def _closed_exchange_self_test() -> int:
+    with tempfile.TemporaryDirectory(prefix="boundflow-s4-1b0-gate-") as raw_root:
+        root = Path(raw_root)
+        round_root = root / "r001"
+        round_root.mkdir(parents=True)
+        request_md = root / "request.md"
+        delivery_md = round_root / "delivery.md"
+        audit_md = round_root / "audit.md"
+        closure_md = root / "closure.md"
+        request_md.write_text("# Request\n", encoding="utf-8")
+        delivery_md.write_text("# Delivery\n", encoding="utf-8")
+        audit_md.write_text("# Audit\n", encoding="utf-8")
+        closure_md.write_text("# Closure\n", encoding="utf-8")
+        _write_json(root / "request.json", {"doc": f"{TASK_ID}/request"})
+        delivery_doc = f"{TASK_ID}/r001/delivery"
+        audit_doc = f"{TASK_ID}/r001/audit"
+        closure_doc = f"{TASK_ID}/closure"
+        delivery = {
+            "doc": delivery_doc,
+            "task": TASK_ID,
+            "round": 1,
+            "from": "codex",
+            "to": "external-model",
+            "md_sha256": _sha256(delivery_md),
+        }
+        audit = {
+            "doc": audit_doc,
+            "task": TASK_ID,
+            "round": 1,
+            "from": "external-model",
+            "to": "codex",
+            "verdict": "approve",
+            "delivery": delivery_doc,
+            "findings": [{"id": "I1", "severity": "info"}],
+            "md_sha256": _sha256(audit_md),
+        }
+        closure = {
+            "doc": closure_doc,
+            "task": TASK_ID,
+            "round": 1,
+            "approved_round": 1,
+            "from": "codex",
+            "resolution": "approved",
+            "md_sha256": _sha256(closure_md),
+        }
+        _write_json(round_root / "delivery.json", delivery)
+        _write_json(round_root / "audit.json", audit)
+        _write_json(root / "closure.json", closure)
+        state = {
+            "task": TASK_ID,
+            "status": "closed",
+            "round": 1,
+            "approved_round": 1,
+            "executor": "codex",
+            "auditor": "external-model",
+            "docs": [f"{TASK_ID}/request", delivery_doc, audit_doc, closure_doc],
+        }
+        _validate_closed_exchange(root, state)
+        audit_md.write_text("# Tampered Audit\n", encoding="utf-8")
+        try:
+            _validate_closed_exchange(root, state)
+        except GateError as exc:
+            if str(exc) != "audit-md-sha256-mismatch":
+                raise GateError(f"self-test-wrong-tamper-reason:{exc}") from exc
+        else:
+            raise GateError("self-test-audit-markdown-tamper-accepted")
+    return 2
 
 
 def _state_machine_self_test() -> dict[str, Any]:
@@ -223,7 +389,13 @@ def _state_machine_self_test() -> dict[str, Any]:
         actual = _classify_exchange(state)
         if actual != expected:
             raise GateError(f"self-test-mismatch:{state}:{actual}:{expected}")
-    return {"status": "PASS", "case_count": len(cases)}
+    closed_cases = _closed_exchange_self_test()
+    return {
+        "status": "PASS",
+        "classifier_case_count": len(cases),
+        "closed_exchange_case_count": closed_cases,
+        "case_count": len(cases) + closed_cases,
+    }
 
 
 def evaluate(root: Path) -> tuple[GateDecision, dict[str, Any]]:

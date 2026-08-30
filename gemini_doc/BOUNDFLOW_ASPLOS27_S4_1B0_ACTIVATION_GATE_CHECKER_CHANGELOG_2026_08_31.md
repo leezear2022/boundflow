@@ -72,3 +72,36 @@ git diff --check = PASS
 
 当前真实检查同时绑定分支、HEAD祖先、exchange round、DocOps blocker/next与200项设计合同。返回WAIT是当前
 正确结果，不属于测试失败；只有外审approved后再由executor执行exchange close并同步DocOps，才可能进入PROCEED。
+
+## 5. 第二批：闭合 delivery/audit/closure 内容链
+
+第一批只核对JSON身份与文件存在，尚未验证三份Markdown是否与各自JSON中的`md_sha256`一致。第二批增加：
+
+1. request、delivery、audit、closure的Markdown与JSON八个文件全部存在；
+2. delivery task/doc/round/from/to 与 exchange executor/auditor一致；
+3. audit task/doc/round/from/to/verdict 与 delivery link一致；
+4. closure task/doc/round/approved_round/from/resolution一致；
+5. delivery/audit/closure 三个`md_sha256`均从实际Markdown独立重算；
+6. exchange docs同时注册request/delivery/audit/closure，且无重复项；
+7. approved audit仍不得含blocker/major finding。
+
+内存自测新增一个完整合法closed exchange和一个只篡改`audit.md`的变体：前者通过，后者必须以
+`audit-md-sha256-mismatch`拒绝。该测试只使用自动清理的临时目录，不接触真实exchange。
+
+## 6. 第二批验证结果
+
+```text
+checker SHA256 = f643270b9975fedb7e5f1bed24e345810243eaf4edcf5c4dd551453421bb26ca
+classifier state cases = 5/5 PASS
+closed exchange content-chain cases = 2/2 PASS
+total self-test = 7/7 PASS
+audit Markdown tamper = rejected
+real repository status = WAIT
+real repository exit code = 3
+implementation/formal/timing authority = false/false/false
+Mypy = clean
+Pylint = 10.00/10
+git diff --check = PASS
+```
+
+真实exchange仍无audit/closure，本批没有模拟其已批准，也没有解除DocOps blocker。
