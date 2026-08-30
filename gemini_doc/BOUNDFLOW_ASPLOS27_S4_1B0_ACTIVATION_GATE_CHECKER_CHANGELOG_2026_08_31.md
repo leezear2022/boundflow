@@ -136,3 +136,34 @@ git diff --check = PASS
 ```
 
 本批仍只增强激活检查，不修改production、formal或performance claim。
+
+## 8. 第四批：批准内容语义白名单
+
+closed/approve不再只检查文件和链接，还必须满足：
+
+- request title/body/acceptance非空；
+- delivery type、changed files、claims和validation非空且无重复，所有validation result=`pass`；
+- audit type/summary非空，finding ID非空且唯一；
+- approved audit finding severity只允许`minor`或`info`，`blocker`、`major`和未知枚举全部拒绝；
+- closure type与note非空；
+- closed exchange rev至少为6且title非空。
+
+仓库内历史audit severity独立盘点为`blocker/major/minor/info`四类，因此批准态采用非阻塞白名单，而不是
+“只认得major/blocker、未知值放行”。
+
+```text
+checker SHA256 = bd9724eb1d7ea41f24ff81067152227d78a64cbf1969598ce1277de1d6a095b6
+self-test = 12/12 PASS
+  classifier = 5
+  closed content semantics = 4
+  publication = 3
+audit Markdown tamper = rejected
+unknown approved severity = rejected
+failed delivery validation = rejected
+real repository = WAIT / exit 3
+Mypy = clean
+Pylint = 10.00/10
+git diff --check = PASS
+```
+
+S4-1A真实外审仍未到，本批没有伪造approved状态。

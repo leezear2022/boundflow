@@ -72,6 +72,12 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _require_nonempty_string(value: Any, reason: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise GateError(reason)
+    return value
+
+
 def _parse_state_markdown(path: Path) -> dict[str, str]:
     values: dict[str, str] = {}
     for raw_line in path.read_text(encoding="utf-8").splitlines():
@@ -205,6 +211,13 @@ def _validate_request_document(
         raise GateError("request-participant-mismatch")
     if request.get("md_sha256") != _sha256(paths["request_md"]):
         raise GateError("request-md-sha256-mismatch")
+    _require_nonempty_string(request.get("title"), "request-title-empty")
+    _require_nonempty_string(request.get("request"), "request-body-empty")
+    acceptance = request.get("acceptance")
+    if not isinstance(acceptance, list) or not acceptance:
+        raise GateError("request-acceptance-empty")
+    if any(not isinstance(item, str) or not item.strip() for item in acceptance):
+        raise GateError("request-acceptance-item-invalid")
     return request
 
 
@@ -217,14 +230,37 @@ def _validate_delivery_document(
     delivery = _load_json(paths["delivery_json"])
     if delivery.get("task") != TASK_ID or delivery.get("doc") != expected_doc:
         raise GateError("delivery-task-or-doc-mismatch")
-    if delivery.get("round") != approved_round:
-        raise GateError("delivery-round-mismatch")
+    if delivery.get("round") != approved_round or delivery.get("type") != "delivery":
+        raise GateError("delivery-round-or-type-mismatch")
     if delivery.get("from") != state.get("executor") or delivery.get("to") != state.get(
         "auditor"
     ):
         raise GateError("delivery-participant-mismatch")
     if delivery.get("md_sha256") != _sha256(paths["delivery_md"]):
         raise GateError("delivery-md-sha256-mismatch")
+    changed_files = delivery.get("changed_files")
+    if not isinstance(changed_files, list) or not changed_files:
+        raise GateError("delivery-changed-files-empty")
+    if len(changed_files) != len(set(changed_files)):
+        raise GateError("delivery-changed-files-duplicate")
+    claims = delivery.get("claims")
+    if not isinstance(claims, list) or not claims:
+        raise GateError("delivery-claims-empty")
+    validations = delivery.get("validation")
+    if not isinstance(validations, list) or not validations:
+        raise GateError("delivery-validation-empty")
+    commands: list[str] = []
+    for item in validations:
+        if not isinstance(item, dict):
+            raise GateError("delivery-validation-item-invalid")
+        command = _require_nonempty_string(
+            item.get("cmd"), "delivery-validation-command-empty"
+        )
+        commands.append(command)
+        if item.get("result") != "pass":
+            raise GateError(f"delivery-validation-not-pass:{command}")
+    if len(commands) != len(set(commands)):
+        raise GateError("delivery-validation-command-duplicate")
     return delivery
 
 
@@ -239,8 +275,10 @@ def _validate_audit_document(
     audit = _load_json(paths["audit_json"])
     if audit.get("task") != TASK_ID or audit.get("doc") != expected_doc:
         raise GateError("audit-task-or-doc-mismatch")
-    if audit.get("round") != approved_round or audit.get("verdict") != "approve":
-        raise GateError("audit-round-or-verdict-mismatch")
+    if audit.get("round") != approved_round or audit.get("type") != "audit":
+        raise GateError("audit-round-or-type-mismatch")
+    if audit.get("verdict") != "approve":
+        raise GateError("audit-verdict-not-approve")
     if audit.get("delivery") != expected_delivery_doc:
         raise GateError("audit-delivery-link-mismatch")
     if audit.get("from") != state.get("auditor") or audit.get("to") != state.get(
@@ -249,16 +287,23 @@ def _validate_audit_document(
         raise GateError("audit-participant-mismatch")
     if audit.get("md_sha256") != _sha256(paths["audit_md"]):
         raise GateError("audit-md-sha256-mismatch")
+    _require_nonempty_string(audit.get("summary"), "audit-summary-empty")
     findings = audit.get("findings")
     if not isinstance(findings, list):
         raise GateError("audit-findings-not-list")
-    blocking = [
-        item.get("id", "unknown")
-        for item in findings
-        if isinstance(item, dict) and item.get("severity") in {"blocker", "major"}
-    ]
-    if blocking:
-        raise GateError(f"approved-audit-has-blocking-findings:{','.join(blocking)}")
+    finding_ids: list[str] = []
+    for item in findings:
+        if not isinstance(item, dict):
+            raise GateError("audit-finding-item-invalid")
+        finding_id = _require_nonempty_string(item.get("id"), "audit-finding-id-empty")
+        finding_ids.append(finding_id)
+        severity = item.get("severity")
+        if severity not in {"minor", "info"}:
+            raise GateError(
+                f"approved-audit-finding-severity-not-allowed:{finding_id}:{severity}"
+            )
+    if len(finding_ids) != len(set(finding_ids)):
+        raise GateError("audit-finding-id-duplicate")
     return audit
 
 
@@ -269,7 +314,11 @@ def _validate_closure_document(
     expected_doc: str,
 ) -> dict[str, Any]:
     closure = _load_json(paths["closure_json"])
-    if closure.get("task") != TASK_ID or closure.get("doc") != expected_doc:
+    if (
+        closure.get("task") != TASK_ID
+        or closure.get("doc") != expected_doc
+        or closure.get("type") != "closure"
+    ):
         raise GateError("closure-task-or-doc-mismatch")
     if (
         closure.get("round") != approved_round
@@ -282,6 +331,7 @@ def _validate_closure_document(
         raise GateError("closure-executor-mismatch")
     if closure.get("md_sha256") != _sha256(paths["closure_md"]):
         raise GateError("closure-md-sha256-mismatch")
+    _require_nonempty_string(closure.get("note"), "closure-note-empty")
     return closure
 
 
@@ -302,6 +352,9 @@ def _validate_closed_exchange(
     exchange_root: Path, state: Mapping[str, Any]
 ) -> dict[str, Any]:
     approved_round = int(state["approved_round"])
+    if not isinstance(state.get("rev"), int) or int(state["rev"]) < 6:
+        raise GateError("closed-exchange-revision-too-small")
+    _require_nonempty_string(state.get("title"), "closed-exchange-title-empty")
     round_name = f"r{approved_round:03d}"
     paths = _require_closed_exchange_files(exchange_root, round_name)
     request_doc = f"{TASK_ID}/request"
@@ -390,6 +443,20 @@ def _write_json(path: Path, value: Mapping[str, Any]) -> None:
     path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
 
 
+def _expect_closed_exchange_error(
+    root: Path, state: Mapping[str, Any], expected: str
+) -> None:
+    try:
+        _validate_closed_exchange(root, state)
+    except GateError as exc:
+        if str(exc) != expected:
+            raise GateError(
+                f"self-test-wrong-closed-exchange-reason:{exc}:expected:{expected}"
+            ) from exc
+    else:
+        raise GateError(f"self-test-closed-exchange-error-not-raised:{expected}")
+
+
 # The synthetic closed exchange keeps each linked document visible in one place.
 # pylint: disable=too-many-locals
 def _closed_exchange_self_test() -> int:
@@ -414,6 +481,9 @@ def _closed_exchange_self_test() -> int:
                 "round": 0,
                 "executor": "codex",
                 "auditor": "external-model",
+                "title": "Synthetic S4-1A audit",
+                "request": "Audit the synthetic delivery.",
+                "acceptance": ["AC1 synthetic closure"],
                 "md_sha256": _sha256(request_md),
             },
         )
@@ -422,14 +492,20 @@ def _closed_exchange_self_test() -> int:
         closure_doc = f"{TASK_ID}/closure"
         delivery = {
             "doc": delivery_doc,
+            "type": "delivery",
             "task": TASK_ID,
             "round": 1,
             "from": "codex",
             "to": "external-model",
+            "result_commit": EXPECTED_S4_1A_BASELINE_COMMIT,
+            "changed_files": ["synthetic.py"],
+            "claims": ["synthetic correctness only"],
+            "validation": [{"cmd": "synthetic-check", "result": "pass"}],
             "md_sha256": _sha256(delivery_md),
         }
         audit = {
             "doc": audit_doc,
+            "type": "audit",
             "task": TASK_ID,
             "round": 1,
             "from": "external-model",
@@ -437,15 +513,18 @@ def _closed_exchange_self_test() -> int:
             "verdict": "approve",
             "delivery": delivery_doc,
             "findings": [{"id": "I1", "severity": "info"}],
+            "summary": "Synthetic audit approved.",
             "md_sha256": _sha256(audit_md),
         }
         closure = {
             "doc": closure_doc,
+            "type": "closure",
             "task": TASK_ID,
             "round": 1,
             "approved_round": 1,
             "from": "codex",
             "resolution": "approved",
+            "note": "Synthetic round approved.",
             "md_sha256": _sha256(closure_md),
         }
         _write_json(round_root / "delivery.json", delivery)
@@ -453,23 +532,34 @@ def _closed_exchange_self_test() -> int:
         _write_json(root / "closure.json", closure)
         state = {
             "task": TASK_ID,
+            "title": "Synthetic S4-1A audit",
             "status": "closed",
             "round": 1,
             "approved_round": 1,
             "executor": "codex",
             "auditor": "external-model",
             "docs": [f"{TASK_ID}/request", delivery_doc, audit_doc, closure_doc],
+            "rev": 6,
         }
         _validate_closed_exchange(root, state)
         audit_md.write_text("# Tampered Audit\n", encoding="utf-8")
-        try:
-            _validate_closed_exchange(root, state)
-        except GateError as exc:
-            if str(exc) != "audit-md-sha256-mismatch":
-                raise GateError(f"self-test-wrong-tamper-reason:{exc}") from exc
-        else:
-            raise GateError("self-test-audit-markdown-tamper-accepted")
-    return 2
+        _expect_closed_exchange_error(root, state, "audit-md-sha256-mismatch")
+        audit_md.write_text("# Audit\n", encoding="utf-8")
+        audit["findings"] = [{"id": "X1", "severity": "unexpected"}]
+        _write_json(round_root / "audit.json", audit)
+        _expect_closed_exchange_error(
+            root,
+            state,
+            "approved-audit-finding-severity-not-allowed:X1:unexpected",
+        )
+        audit["findings"] = [{"id": "I1", "severity": "info"}]
+        _write_json(round_root / "audit.json", audit)
+        delivery["validation"] = [{"cmd": "synthetic-check", "result": "fail"}]
+        _write_json(round_root / "delivery.json", delivery)
+        _expect_closed_exchange_error(
+            root, state, "delivery-validation-not-pass:synthetic-check"
+        )
+    return 4
 
 
 def _publication_state_self_test() -> int:

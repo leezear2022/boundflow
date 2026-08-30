@@ -6,8 +6,8 @@ st: s04
 stat: active
 health: green
 pr: [60, 61, 62, 63, 64, 65, 66, 67, 68, 69]
-last_ch: ev020230
-last_va: ev020231
+last_ch: ev020245
+last_va: ev020246
 blk: external-audit-s4-1a-pending
 next: wait-for-external-audit-s4-1a-round1
-updated: 2026-08-30T18:10:49Z
+updated: 2026-08-30T18:14:50Z
