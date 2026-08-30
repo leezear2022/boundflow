@@ -118,7 +118,7 @@ def _accounting(row: dict[str, Any]) -> None:
 
 
 def _fault_detail(row: dict[str, Any]) -> None:
-    row["admission"]["error"]["detail_code"] = "BUFFER_PREPARE_MANIFEST_MISMATCH"
+    row["admission"]["error"]["detail_code"] = "BASE_DLPACK_VIEW_KEY_MISMATCH"
 
 
 def _fault_cleanup(row: dict[str, Any]) -> None:
