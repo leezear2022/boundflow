@@ -18,7 +18,7 @@ stage: s04
 
 ## Changes
 
-- `.docops/s.md`的health改为`yellow`；
+- `.docops/s.md`的health保持`green`，表示executor侧artifact与验证健康；
 - blocker改为`external-audit-s4-1a-pending`；
 - next改为`wait-for-external-audit-s4-1a-round1`；
 - production/test/script/artifact均不修改，S4-1B0代码门禁继续关闭。
