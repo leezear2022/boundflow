@@ -1,5 +1,14 @@
 # gemini_doc 导引（BoundFlow 工程文档索引）
 
+> **2026-08-30 S4-0 mutable-state admission外审批准关闭**：5 fresh真实provider、slot/path=6/12、alpha
+> stored/active/preserved=8496/4248/4248、active beta=1/6、63类negative与stdlib replay均闭合；外审控制的
+> 5-fresh复跑确认α/β slots及content hash跨10进程逐位一致。10/10 tamper只证明
+> derived-semantics-inconsistent重签攻击被拒绝；coherent full resign在E0可接受，物理真实性由外审独立source
+> 核验与fresh执行建立，保证等级=`E2-DIRECT-LEGACY`。状态=
+> `VALIDATED-S4-0-MUTABLE-STATE-ADMISSION`；只开放S4-1A implementation/correctness，所有timing/
+> performance/same-solver claim仍false。见
+> `BOUNDFLOW_ASPLOS27_S4_0_EXTERNAL_AUDIT_CLOSURE_2026_08_30.md`。
+
 > **2026-08-29 执行证据信任与外部见证协议已冻结、代码仍关闭**：新增
 > `BOUNDFLOW_EXECUTION_EVIDENCE_TRUST_AND_WITNESS_PLAN_2026_08_29.md`及独立change log。协议把保证拆为
 > E0内部自洽、E1 challenge绑定、E2独立见证、E3硬件证明；冻结audit challenge、execution witness、状态机和

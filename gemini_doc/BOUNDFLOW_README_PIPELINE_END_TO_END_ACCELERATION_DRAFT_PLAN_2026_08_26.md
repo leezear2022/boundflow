@@ -1,9 +1,9 @@
 # BoundFlow ASPLOS’27 production verification compiler 与 10× 端到端加速计划（v12 执行稿）
 
-status: s3-ready-for-external-audit-s4-prereg-draft
+status: validated-s4-0-s4-1a-correctness-open
 date: 2026-08-26
-updated: 2026-08-29
-revision: v15-s4-formal-evidence-construction
+updated: 2026-08-30
+revision: v18-s4-0-external-audit-closed
 supersedes-revision: v6-asplos27-ten-x
 supersedes-draft-at: 20f4741
 submission-target: ASPLOS-2027-September-cycle
@@ -13,9 +13,17 @@ paper-secondary-pillar: gpu-runtime-and-accelerator-systems
 performance-north-star: 10x-same-solver-complete-query
 performance-north-star-status: hypothesis-not-validated
 execution-authority: true
-code-change-open: false-pending-s3-external-audit
-external-audit: s3-ready-for-external-audit
+code-change-open: s4-1a-implementation-correctness-only
+external-audit: s3-approved-s4-0-approved-e2-direct-legacy
 performance-claimed: false
+
+> **2026-08-30 S4-0外审关闭修订（v18，不新增性能claim）**：外审控制5个fresh真实provider进程并独立
+> 核验source，AC1—AC7通过，0 blocker/0 major。F1已把10/10 tamper限定为inner+outer-resigned、
+> derived-semantics-inconsistent攻击；coherent full resign在E0可接受。F2已把admission hash差异拆为
+> exact-call ordinal与per-process snapshot/plan provenance两类。状态升级为
+> `VALIDATED-S4-0-MUTABLE-STATE-ADMISSION`，保证等级=`E2-DIRECT-LEGACY`；只开放S4-1A persistent
+> compressed α/active-β buffer implementation/correctness，timing/performance/same-solver/10x继续关闭，
+> S4-4必须使用challenge+witness。
 
 > **2026-08-29 S4-4 formal evidence施工收束（v15，不改10x北极星）**：S4-4正式合同冻结为
 > 18个positive + 15个fault、共33个独立进程；每个tensor用stdlib可解码index与content-addressed binary
