@@ -6,8 +6,8 @@ st: s04
 stat: active
 health: green
 pr: [60, 61, 62, 63, 64, 65, 66, 67, 68, 69]
-last_ch: ev019889
-last_va: ev019890
+last_ch: ev020000
+last_va: ev020001
 blk: none
-next: implement-s4-1a-persistent-compressed-alpha-beta-buffers
-updated: 2026-08-30T01:49:03Z
+next: external-audit-s4-1a-ordered-buffer-formal-candidate
+updated: 2026-08-30T03:06:56Z
