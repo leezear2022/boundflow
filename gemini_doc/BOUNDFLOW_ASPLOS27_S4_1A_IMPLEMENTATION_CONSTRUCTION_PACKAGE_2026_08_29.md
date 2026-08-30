@@ -1,5 +1,5 @@
 ---
-status: diagnostic-complete-construction-ready-code-closed
+status: formal-candidate-pass-pending-external-audit-s4-1a
 date: 2026-08-29
 type: implementation-construction-package
 topic: boundflow
@@ -17,6 +17,11 @@ tenx-claimed: false
 ---
 
 # ASPLOS'27 S4-1A：ordered mutable buffer逐文件施工包与V5事务修正
+
+> **2026-08-30执行注**：依赖S4-0已外审关闭；本合同代码、80项unit、5 positive + 7 isolated fault
+> fresh-process artifact、stdlib replay与10类tamper均已执行。当前内部状态为
+> `FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT-S4-1A`，不等于`VALIDATED`；本文后文的
+> “implementation/formal closed”是施工前历史快照，已由本注取代。S4-1B0及timing/performance仍关闭。
 
 ## 0. 直接结论
 

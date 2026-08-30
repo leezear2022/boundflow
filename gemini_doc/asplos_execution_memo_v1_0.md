@@ -1,5 +1,14 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-30 S4-1A已形成外审前formal candidate；下一动作仅为S4-1A独立外审**。
+> 真实αβ-CROWN exact-call上5个fresh正向进程均建立6 α+1 active β parameter、7 gradient、lower/upstream、
+> 16个独立storage/base DLPack view与5个empty β token；40/40 source/candidate二进制对逐字节一致。
+> 另7个fresh进程分别注入parameter/gradient/output/view/roundtrip/receipt/adoption故障，均stable fail-closed、
+> `__context__ is None`且candidate allocated delta回0。unit=`80 passed`、formal negative registry=`77`、
+> stdlib replay PASS、10/10 outer-resigned derived-semantic攻击拒绝。当前状态只能写
+> `FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT-S4-1A`；S4-1B0实现、evaluator、optimizer、timing、
+> performance与same-solver仍关闭。
+
 > **2026-08-30 S4-0外审批准关闭；下一动作只开放S4-1A implementation/correctness**。
 > production real-provider 5 fresh、六slot/12 path、alpha 8496/4248/4248、active beta 1/6、63类独立
 > negative与stdlib replay已闭合。现有10/10 tamper准确口径是inner+outer-resigned且

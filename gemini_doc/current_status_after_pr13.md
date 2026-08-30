@@ -1,5 +1,12 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-30 当前状态：S4-1A formal candidate待外审，后继代码关闭**。生产exact-call已实际完成ordered
+> compressed mutable buffer prepare：6 α+1 active β parameter、7 gradient、lower/upstream、16 storage/view、
+> 5 empty β token；5 positive的40/40 binary pair exact，7 isolated fault全部clean，negative registry=77，
+> replay和10/10 tamper通过。状态仅为
+> `FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT-S4-1A`，不是VALIDATED，也没有运行CROWN evaluator、
+> optimizer或计时。下一动作是独立外审；S4-1B0及之后全部closed。
+
 > **2026-08-29 S4-4 formal evidence施工合同已冻结，状态仍是design-only**。18 positive + 15 fault=
 > 33个独立进程；positive/fault/all semantic tensor-occurrence floor=
 > `61,586,208/24,209,400/85,795,608 B`。seal DAG=`16 nodes/36 edges`，96类tamper中95类必须

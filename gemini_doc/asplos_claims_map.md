@@ -1,5 +1,14 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-30 S4-1A external-audit candidate，不升级VALIDATED claim**：source=`bce26f0`，artifact=
+> `artifacts/asplos27-s4-1a-buffer/resnet2b-prop0-v1`。5 positive + 7 isolated fault fresh进程闭合本地
+> ordered buffer ownership；正向40/40 indexed raw-binary source/candidate exact，16/16 storage/view，empty β
+> physical=`0`，close后candidate allocated delta=`0`。七故障均clean abort；77个negative、stdlib replay与
+> 10/10 derived-semantics-inconsistent outer-resigned攻击通过。可主张的仍只是外审前mechanism/correctness
+> candidate；provider mapping stability、process-global exclusivity、CROWN numeric semantics、optimizer
+> trajectory、timing、performance、same-solver、complete-query和10x全部为false。只有外审批准后才可写
+> `VALIDATED-S4-1A-ORDERED-BUFFER-PREPARE`并另行开放S4-1B0。
+
 > **2026-08-30 S4-0外审批准关闭，S4-1A仅开放implementation/correctness**：typed admission receipt、strict
 > provider extractor与ephemeral strong-ref lease已在5个fresh production provider进程闭合；独立重算
 > slot/path=6/12、alpha=8496/4248/4248、beta active=1/6、双capture=24 logical D2H/68,016 B，candidate
