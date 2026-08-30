@@ -1,12 +1,15 @@
 """S4-1A formal artifact replay, tamper, and hygiene gates."""
 
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,protected-access,duplicate-code
 
 from __future__ import annotations
 
 import ast
 from pathlib import Path
+import shutil
 from typing import Any, cast
+
+import pytest
 
 from scripts import probe_asplos27_s4_1a_buffer_tamper as tamper_tool
 from scripts import replay_asplos27_s4_1a_buffer_stdlib as replay_tool
@@ -43,6 +46,21 @@ def test_s4_1a_buffer_artifact_outer_resigned_tamper_probe() -> None:
     assert report["rejected_count"] == 10
     assert all(item["outer_resign_completed"] for item in cases)
     assert all(item["semantic_recompute_rejected"] for item in cases)
+
+
+def test_s4_1a_replay_rejects_coherently_resigned_fault_reason(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "artifact"
+    shutil.copytree(ARTIFACT, target)
+
+    def forge_reason(row: dict[str, Any]) -> None:
+        row["admission"]["error"]["verification_reason"] = "RECEIPT_IDENTITY_MISMATCH"
+
+    tamper_tool._mutate_row(target, 7, forge_reason)
+    tamper_tool._resign(target)
+    with pytest.raises(ValueError, match="isolated fault cleanup differs"):
+        replay_tool.replay(target)
 
 
 def test_s4_1a_replay_has_stdlib_only_imports() -> None:

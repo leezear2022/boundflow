@@ -1,0 +1,93 @@
+{
+  "doc": "asplos27-s4-1a-ordered-buffer-20260830/r001/audit",
+  "type": "audit",
+  "task": "asplos27-s4-1a-ordered-buffer-20260830",
+  "round": 1,
+  "from": "external-model-auditor",
+  "to": "codex-executor",
+  "ts": "2026-08-31T02:30:00Z",
+  "verdict": "approve-with-minor-correction",
+  "assurance_level_achieved": "E2-DIRECT-LEGACY",
+  "delivery": "asplos27-s4-1a-ordered-buffer-20260830/r001/delivery",
+  "acceptance_criteria": {
+    "AC1": "PASS",
+    "AC2": "PASS",
+    "AC3": "PASS",
+    "AC4": "PASS",
+    "AC5": "PASS",
+    "AC6": "PASS-with-minor-discrepancy-F2-F3",
+    "AC7": "PASS"
+  },
+  "finding_counts": {
+    "blocker": 0,
+    "major": 0,
+    "minor": 3,
+    "info": 3
+  },
+  "findings": [
+    {
+      "id": "S4-1A-AUDIT-F1",
+      "severity": "minor",
+      "status": "open",
+      "path": "scripts/replay_asplos27_s4_1a_buffer_stdlib.py",
+      "evidence": "replay does not bind fault verification_reason; auditor forgery of reason with coherent resign was accepted; current artifact verified compliant manually; unit tests assert detail+reason at code level",
+      "advice": "add reason to replay validation in a later hardening commit; no silent patch on r001"
+    },
+    {
+      "id": "S4-1A-AUDIT-F2",
+      "severity": "minor",
+      "status": "mandatory-before-close",
+      "path": "scripts/run_asplos27_s4_1a_buffer_worker.py",
+      "evidence": "mypy --explicit-package-bases reports 3 errors (L245 None->Tensor, L297/L301 monkey-patch assignment); type-level only; contradicts delivery black-mypy-pylint pass",
+      "advice": "fix the 3 errors or downgrade the static-gate wording in authoritative docs"
+    },
+    {
+      "id": "S4-1A-AUDIT-F3",
+      "severity": "minor",
+      "status": "mandatory-before-close",
+      "path": "boundflow/runtime/asplos27_s4_ordered_buffer_abi.py",
+      "evidence": "per-file pylint 9.90/10 (E0401 unresolved lazy import tvm); S2 convention is header import-error disable; other 6 files 10.00/10",
+      "advice": "add header disable or disclose actual score"
+    },
+    {
+      "id": "S4-1A-AUDIT-F4",
+      "severity": "info",
+      "status": "closed",
+      "path": "binary_index ordering",
+      "evidence": "index order swap with coherent resign accepted; each entry carries own offsets/hashes; order is not contract semantics",
+      "advice": "no action; bind order in replay only if it becomes contractual"
+    },
+    {
+      "id": "S4-1A-AUDIT-F5",
+      "severity": "info",
+      "status": "closed-by-disclosure",
+      "path": "offline self-check boundary",
+      "evidence": "coherent full resign forging abcrown commit accepted at E0; disclosed in delivery risks; physical truth rests on AC1 external-repo verification + auditor fresh run",
+      "advice": "keep disclosure; S4-4 challenge+witness covers structurally"
+    },
+    {
+      "id": "S4-1A-AUDIT-F6",
+      "severity": "info",
+      "status": "open",
+      "path": "environment",
+      "evidence": "dol CLI not on auditor PATH; dol lint/exchange validate not independently re-run",
+      "advice": "executor-side records carry it"
+    }
+  ],
+  "fresh_run": {
+    "artifact": "/tmp/boundflow-s4-1a-audit-fresh-20260831/artifact",
+    "processes": 12,
+    "positive": 5,
+    "isolated_faults": 7,
+    "binary_sidecars_byte_identical_to_formal": true,
+    "sidecar_sha256_all_runs": "7897026665f84219...",
+    "negative_nodes_rerun": 77,
+    "source_revision": "fa062b554446965c17b7589ebde0334c670f7e77"
+  },
+  "scripts": [
+    "artifacts/asplos27-s4-1a-buffer/audit-20260831/audit_s4_1a_recompute.py",
+    "artifacts/asplos27-s4-1a-buffer/audit-20260831/audit_s4_1a_attack.py"
+  ],
+  "summary": "S4-1A ordered buffer r001独立外审结论approve-with-minor-correction：blocker 0、major 0、minor 3、\ninfo 3。AC1—AC7逐项PASS：AC1 9/9 code blob、三外部仓库commit、model/property SHA256、manifest与\n全hash链外审独立重算一致，无本机路径，scope确认只有buffer prepare；AC2亲读确认S4-0 ticket单次消费、\n16 buffer冻结顺序（6α→1β→6dα→1dβ→lower→upstream）、16互异storage、三方alias互斥、完整view key、\nnoncontiguous前置拒绝、fault路径无exception context保留；AC3外审从raw+.bin独立重算：40/40\nsource/candidate逐字节相等（formal与fresh双份）、parameter/gradient=4254/17016、storage/view=16/16、\ncandidate logical=34080、empty β=5/0、D2H=32/85056、累计56/153072、D2D=7/17016、allocated delta\n5/5为0，且10个进程的5个sidecar逐字节全同（78970266...）；AC4 7个隔离故障各自独立fresh进程、\ndetail/reason与冻结表一致、context none、delta=0，外审fresh生成重跑了全部7个；AC5 registry 77唯一\nnodeid（minimum 68）、unit 80、artifact+unit 84、stdlib replay（无boundflow/torch/tvm/numpy import）\n双份PASS、10/10 tamper语义级拒绝，外审另建三类攻击（一类语义空操作、一类揭露F1、一类确认E0\n边界）；AC6全量2050 passed/3 skipped与声明一致，black/diff-check通过，mypy/pylint两处口径差异见\nF2/F3；AC7 claim边界一致无越界。外审计亲启12-process fresh run达到E2-DIRECT-LEGACY。同意关闭\nVALIDATED-S4-1A-ORDERED-BUFFER-PREPARE并只开放S4-1B0 implementation/correctness；F2/F3修正落实\n前exchange不标记approved；S4-4仍须challenge+witness。详见r001/audit_report_full.md。",
+  "md_sha256": "c55b882f4e46d0ac42ecb48d6660a86a0f36e79e6dbdc96643ccc0cd478df0c9"
+}

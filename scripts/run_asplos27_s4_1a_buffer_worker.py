@@ -242,7 +242,7 @@ class _BufferObserver(admission_worker._AdmissionObserver):
         reserved_peak = int(torch.cuda.memory_reserved())
         prepared.close()
         parameters = ()
-        upstream_expected = None
+        del upstream_expected
         gc.collect()
         torch.cuda.synchronize()
         allocated_exit = int(torch.cuda.memory_allocated())
@@ -294,11 +294,11 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         raise ValueError("S4-1A fault name differs")
     _ACTIVE_FAULT = args.fault
     original = admission_worker._AdmissionObserver
-    admission_worker._AdmissionObserver = _BufferObserver
+    setattr(admission_worker, "_AdmissionObserver", _BufferObserver)
     try:
         result = admission_worker.run(args)
     finally:
-        admission_worker._AdmissionObserver = original
+        setattr(admission_worker, "_AdmissionObserver", original)
         _ACTIVE_FAULT = "none"
     result["schema_version"] = WORKER_SCHEMA
     protocol = result["protocol"]

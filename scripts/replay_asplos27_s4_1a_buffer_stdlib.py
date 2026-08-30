@@ -23,13 +23,37 @@ EXPECTED_CONSTRUCTION_HASH = (
     "8ad25c2abf1eb98c3b1097bf7acb46aba227f7e94f0c7c03169f39e8da409a9d"
 )
 EXPECTED_FAULTS = (
-    ("parameter", "BUFFER_PREPARE_MANIFEST_MISMATCH"),
-    ("gradient", "BUFFER_PREPARE_MANIFEST_MISMATCH"),
-    ("output", "BUFFER_PREPARE_RESOURCE_CONTEXT_RETAINED"),
-    ("view", "BASE_DLPACK_VIEW_COUNT_MISMATCH"),
-    ("roundtrip", "BASE_DLPACK_VIEW_KEY_MISMATCH"),
-    ("receipt", "BUFFER_PREPARE_VALIDATION_COPY_ACCOUNTING_MISMATCH"),
-    ("adoption", "BUFFER_PREPARE_ADOPTION_OWNER_MISMATCH"),
+    (
+        "parameter",
+        "BUFFER_PREPARE_MANIFEST_MISMATCH",
+        "RECEIPT_IDENTITY_MISMATCH",
+    ),
+    (
+        "gradient",
+        "BUFFER_PREPARE_MANIFEST_MISMATCH",
+        "RECEIPT_IDENTITY_MISMATCH",
+    ),
+    (
+        "output",
+        "BUFFER_PREPARE_RESOURCE_CONTEXT_RETAINED",
+        "UNSAFE_ALIAS_OR_LIFETIME",
+    ),
+    ("view", "BASE_DLPACK_VIEW_COUNT_MISMATCH", "RECEIPT_IDENTITY_MISMATCH"),
+    (
+        "roundtrip",
+        "BASE_DLPACK_VIEW_KEY_MISMATCH",
+        "RECEIPT_IDENTITY_MISMATCH",
+    ),
+    (
+        "receipt",
+        "BUFFER_PREPARE_VALIDATION_COPY_ACCOUNTING_MISMATCH",
+        "RECEIPT_IDENTITY_MISMATCH",
+    ),
+    (
+        "adoption",
+        "BUFFER_PREPARE_ADOPTION_OWNER_MISMATCH",
+        "UNSAFE_ALIAS_OR_LIFETIME",
+    ),
 )
 
 
@@ -354,7 +378,7 @@ def _derive_summary(
                 raise ValueError("S4-1A positive cleanup differs")
             receipt_hashes.append(str(receipt["receipt_hash"]))
         else:
-            fault, detail = EXPECTED_FAULTS[ordinal - 5]
+            fault, detail, reason = EXPECTED_FAULTS[ordinal - 5]
             error = payload.get("error")
             allocator = payload.get("allocator")
             if (
@@ -362,6 +386,7 @@ def _derive_summary(
                 or payload.get("exact_call_identity_hash") != expected_call_hash
                 or type(error) is not dict
                 or error.get("detail_code") != detail
+                or error.get("verification_reason") != reason
                 or error.get("context_is_none") is not True
                 or type(allocator) is not dict
                 or allocator.get("allocated_delta") != 0

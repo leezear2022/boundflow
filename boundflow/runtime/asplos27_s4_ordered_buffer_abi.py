@@ -10,6 +10,7 @@ deliberately contains no CROWN evaluator, optimizer, timing, or solver commit.
 # pylint: disable=too-many-locals,too-many-statements,too-many-branches
 # pylint: disable=protected-access,too-few-public-methods,unidiomatic-typecheck
 # pylint: disable=line-too-long,broad-exception-caught,missing-function-docstring
+# pylint: disable=import-error
 # pylint: disable=too-many-boolean-expressions,too-many-positional-arguments
 # pylint: disable=use-dict-literal
 
