@@ -1,0 +1,61 @@
+{
+  "doc": "asplos27-s4-1a-ordered-buffer-20260830/r001/delivery",
+  "type": "delivery",
+  "task": "asplos27-s4-1a-ordered-buffer-20260830",
+  "round": 1,
+  "from": "codex",
+  "to": "external-model",
+  "ts": "2026-08-30T03:09:50Z",
+  "base_commit": "3dca00f",
+  "result_commit": "f773370",
+  "changed_files": [
+    "boundflow/runtime/asplos27_s4_ordered_buffer_abi.py",
+    "tests/test_asplos27_s4_ordered_buffer_abi.py",
+    "scripts/run_asplos27_s4_1a_buffer_worker.py",
+    "scripts/run_asplos27_s4_1a_buffer_artifact.py",
+    "scripts/replay_asplos27_s4_1a_buffer_stdlib.py",
+    "scripts/probe_asplos27_s4_1a_buffer_tamper.py",
+    "tests/test_asplos27_s4_1a_buffer_artifact.py",
+    "artifacts/asplos27-s4-1a-buffer/resnet2b-prop0-v1",
+    "gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_EXTERNAL_AUDIT_HANDOFF_2026_08_30.md"
+  ],
+  "claims": [
+    "FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT-S4-1A; no performance claim; S4-1B0 remains closed"
+  ],
+  "validation": [
+    {
+      "cmd": "unit-80",
+      "result": "pass"
+    },
+    {
+      "cmd": "artifact-unit-84",
+      "result": "pass"
+    },
+    {
+      "cmd": "full-2050",
+      "result": "pass"
+    },
+    {
+      "cmd": "stdlib-replay",
+      "result": "pass"
+    },
+    {
+      "cmd": "outer-resigned-tamper-10-of-10",
+      "result": "pass"
+    },
+    {
+      "cmd": "black-mypy-pylint",
+      "result": "pass"
+    }
+  ],
+  "limitations": [
+    "No CROWN evaluator, optimizer trajectory, timing, same-solver, complete-query, 10x, or ASPLOS-ready claim"
+  ],
+  "risks": [
+    "E0 coherent full resign remains outside offline self-check; physical truth requires auditor-controlled fresh execution"
+  ],
+  "open_questions": [
+    "Do AC1-AC7 support VALIDATED-S4-1A-ORDERED-BUFFER-PREPARE and opening only S4-1B0 implementation/correctness?"
+  ],
+  "md_sha256": "540ab4da62630f28a6701a6b4d6b7626a060e44542a71fa00ba884be75b125a1"
+}
