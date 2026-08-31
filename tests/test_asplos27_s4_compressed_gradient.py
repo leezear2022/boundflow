@@ -1,7 +1,7 @@
 """S4-1C TIR compressed-gradient and terminal-copy gates."""
 
 # mypy: disable-error-code=import-untyped
-# pylint: disable=missing-function-docstring,too-many-locals,not-callable
+# pylint: disable=missing-function-docstring,too-many-locals,not-callable,import-error
 # pylint: disable=import-outside-toplevel
 
 from __future__ import annotations
@@ -125,8 +125,9 @@ def test_s4_gradient_poison_safe_index_beta_and_terminal_copy() -> None:
     upstream = torch.full((6, 1), -1.0, device=device)
     dalpha = torch.empty((6, 27), device=device)
     stream = torch.cuda.Stream(device=device)
+    indices[-1] = 1000
+    torch.cuda.synchronize(device)
     with torch.cuda.stream(stream):
-        indices[-1] = 1000
         compiled.executable[spec.dalpha_symbol](
             *map(
                 _view,
