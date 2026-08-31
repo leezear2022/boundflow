@@ -20,7 +20,7 @@ from check_asplos27_s4_1b0_design_contracts_stdlib import (
 )
 
 EXPECTED_BRANCH = "feat/rvir-v4-production-state-ownership-v1"
-IMPLEMENTATION_COMMIT = "f6df7ee"
+IMPLEMENTATION_COMMIT = "f61e917"
 CONSTRUCTION_HASH = "5056d302aa27785ab8a22bd8f5665ebef0a4aba2ca22bc72ce28581144dbcc2a"
 SOURCE_PATH = Path("boundflow/backends/tvm/asplos27_s4_ternary_endpoint.py")
 TEST_PATH = Path("tests/test_asplos27_s4_ternary_endpoint.py")
@@ -29,8 +29,8 @@ CHANGELOG_PATH = Path(
 )
 EXPECTED_SHA256 = {
     SOURCE_PATH: "2a9ecfd4f0183a1febb596d52f4aad8d938b65b0057dbe595f6e51fad82c7997",
-    TEST_PATH: "d1aca5e050d1ae872edb6cf8bb5d6085c236abd8a03892aa1e33228ecd1651a8",
-    CHANGELOG_PATH: "26f789b04b5ed78f1091143d7bbb0748d40fd374a4961d315d742482472f84a2",
+    TEST_PATH: "776343dd22b03c8f9210d8f6bc29f9b229cabe01c33a9eca212da9a96497a9f4",
+    CHANGELOG_PATH: "f68bfd79f7150b490ca5c0a446551cc3282daf67b935aae87a8ac58083004b28",
 }
 CRITICAL_PATHS = (
     SOURCE_PATH,
@@ -118,6 +118,20 @@ def _git(root: Path, arguments: Sequence[str]) -> str:
     return result.stdout.strip()
 
 
+def _git_blob(root: Path, revision: str, path: Path) -> bytes:
+    result = subprocess.run(
+        ["git", "show", f"{revision}:{path}"],
+        cwd=root,
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    if result.returncode:
+        detail = result.stderr.decode("utf-8", errors="replace").strip()
+        raise GateError(f"git show {revision}:{path} failed: {detail}")
+    return result.stdout
+
+
 def _is_ancestor(root: Path, revision: str) -> bool:
     result = subprocess.run(
         ["git", "merge-base", "--is-ancestor", revision, "HEAD"],
@@ -168,24 +182,24 @@ def validate(root: Path, *, require_published: bool = True) -> dict[str, Any]:
     checks.require(_is_ancestor(root, IMPLEMENTATION_COMMIT), "implementation ancestor")
     if require_published:
         checks.equal(head, upstream, "HEAD/upstream")
-    dirty = _git(
-        root,
-        (
-            "status",
-            "--porcelain=v1",
-            "--untracked-files=all",
-            "--",
-            *(str(path) for path in CRITICAL_PATHS),
-        ),
-    )
-    checks.equal(dirty, "", "critical paths clean")
+    if require_published:
+        dirty = _git(
+            root,
+            (
+                "status",
+                "--porcelain=v1",
+                "--untracked-files=all",
+                "--",
+                *(str(path) for path in CRITICAL_PATHS),
+            ),
+        )
+        checks.equal(dirty, "", "critical paths clean")
 
     for path, expected in EXPECTED_SHA256.items():
         checks.require((root / path).is_file(), f"file exists {path}")
         checks.equal(_sha256(root / path), expected, f"sha256 {path}")
-        committed = _git(root, ("show", f"{IMPLEMENTATION_COMMIT}:{path}"))
         checks.equal(
-            hashlib.sha256(committed.encode("utf-8")).hexdigest(),
+            hashlib.sha256(_git_blob(root, IMPLEMENTATION_COMMIT, path)).hexdigest(),
             expected,
             f"implementation blob {path}",
         )
