@@ -1,5 +1,13 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-31 S4-1B0 Round 1外审批准并正式关闭，只开放S4-1B production implementation/
+> correctness**。exchange=`asplos27-s4-1b0-ternary-20260831`，approved round=`1`，保证等级=
+> `E2-DIRECT-LEGACY`；AC1—AC7全部PASS，blocker/major/minor=`0/0/0`，3项info分别为历史9/10缺口
+> 已验证关闭、E0边界已披露、外审环境无dol CLI。executor侧`exchange validate`与`dol lint --soft`
+> 均PASS。当前状态=`VALIDATED-S4-1B0-TERNARY-ENDPOINT`；只允许进入S4-1B六site production
+> implementation/correctness，timing、performance、same-solver、complete-query、10x及S4-4 formal仍关闭，
+> S4-4继续强制challenge+witness。
+
 > **2026-08-31 S4-1B0 已形成 formal correctness candidate，下一动作仅为独立外审**。正式 artifact=
 > `artifacts/asplos27-s4-1b0-ternary/resnet2b-prop0-v1`，绑定已推送 source=`4e2a261`；5 positive+
 > 1 cache+5 fault 共11个fresh进程，5份`313,344 B` sidecar逐字节一致，selector=`8689/9137/606/0`，

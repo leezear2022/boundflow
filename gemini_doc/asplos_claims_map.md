@@ -1,5 +1,11 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-31 S4-1B0已外审关闭为`VALIDATED-S4-1B0-TERNARY-ENDPOINT`**：Round 1 AC1—AC7
+> 全PASS，blocker/major/minor=`0/0/0`，assurance=`E2-DIRECT-LEGACY`；外审亲启11-process fresh run、
+> 独立从`.bin`重算18,432项，并复测历史coefficient LSB缺口。3项info无强制修正；E0 coherent full
+> resign边界继续披露，S4-4仍须challenge+witness。当前只开放S4-1B六site production implementation/
+> correctness；timing、performance、same-solver、complete-query、10x和ASPLOS-ready仍为false。
+
 > **2026-08-31 S4-1B0 formal correctness candidate，仍不升级VALIDATED或性能claim**：source=`4e2a261`，
 > artifact=`artifacts/asplos27-s4-1b0-ternary/resnet2b-prop0-v1`；11个fresh进程闭合5 positive/1 cache/
 > 5 fault，5份positive二进制全同，selector=`8689/9137/606/0`，selected bitwise exact，stdlib replay

@@ -1,5 +1,10 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-31 当前状态：S4-1B0外审批准关闭，S4-1B implementation/correctness开放**。DocOps exchange
+> approved round 1并由executor正式close；AC1—AC7 PASS，0 blocker/major/minor，3 info均不阻塞，保证
+> 等级=`E2-DIRECT-LEGACY`。状态=`VALIDATED-S4-1B0-TERNARY-ENDPOINT`。下一工程动作是按冻结施工包
+> 接通六site production effective-value；所有timing/performance与S4-4 formal继续关闭。
+
 > **2026-08-31 当前状态：S4-1B0 formal candidate已完成，等待下一轮独立外审**。已推送source=
 > `4e2a261`；正式11-process artifact固定5 positive/1 cache/5 fault，5份positive sidecar逐字节一致，
 > stdlib replay PASS、重签篡改`10/10 rejected`，专项=`22 passed`、全量=`2073 passed, 3 skipped`。
