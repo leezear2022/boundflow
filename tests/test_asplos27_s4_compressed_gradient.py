@@ -45,6 +45,7 @@ def test_s4_gradient_module_has_exact_thirteen_symbol_inventory() -> None:
     )
     assert "0x7FC00000" in script or "2143289344" in script
     assert "threadIdx.x" in script and "blockIdx.x" in script
+    assert script.count("alloc_buffer") == 0
 
 
 def test_s4_all_six_dalpha_emitters_match_independent_formula() -> None:
