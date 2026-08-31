@@ -1,5 +1,13 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-31 S4-1B0 isolated backend 已形成 implementation/correctness candidate，下一只开放 formal
+> activation 与 11-process correctness artifact**。新增 generic ternary pack/select TIR、full-content cache/
+> immutable receipt、5-view prepared probe及20类stable reason；S4-1A/S4-1B0定向=`99 passed`，construction
+> hash=`5056d302...cc2a`由代码事实重建，全量=`2070 passed, 3 skipped`。当前状态仅为
+> `IMPLEMENTED-CORRECTNESS-CANDIDATE-S4-1B0-TERNARY-ENDPOINT`，不是external-audit validated。下一步须先
+> 固定实现提交并通过formal activation gate，再生成5 positive+1 cache+5 fault；evaluator、S4-1A ticket、
+> production alias、timing、performance、same-solver、complete-query与10x继续关闭。
+
 > **2026-08-31 当前唯一指令：S4-1A外审批准关闭，只实施S4-1B0 isolated ternary endpoint
 > correctness**。DocOps exchange round 2已approved并由executor close；F1—F3 hardening位于`20f57bb`，
 > 定向=`85 passed`、全量=`2051 passed, 3 skipped`。允许新增独立S4 ternary pack/select backend、cache、

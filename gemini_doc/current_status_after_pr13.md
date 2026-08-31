@@ -1,5 +1,10 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-31 当前状态：S4-1B0 isolated backend implementation/correctness candidate已完成，待固定提交后
+> 打开formal artifact**。generic ternary pack/select、full-content cache/receipt、5-view prepared probe和20类
+> negative已实现，S4-1A/S4-1B0定向=`99 passed`、全量=`2070 passed, 3 skipped`。本轮没有计时或性能claim；下一动作仅为formal activation
+> gate与11-process correctness artifact，之后统一交下一轮外审。S4-1B production及以后仍关闭。
+
 > **2026-08-31 当前状态：S4-1A已外审关闭，S4-1B0 implementation/correctness开放**。Round 1外审
 > AC1—AC7通过并给出3项minor；`20f57bb`关闭reason replay、mypy与Pylint口径，Round 2获批后exchange已
 > 正式close。状态=`VALIDATED-S4-1A-ORDERED-BUFFER-PREPARE`。下一动作严格限定为isolated ternary endpoint

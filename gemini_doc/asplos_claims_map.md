@@ -1,5 +1,13 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-31 S4-1B0 implementation/correctness candidate，不升级VALIDATED或性能claim**：独立generic
+> ternary pack/select TIR、immutable compiled receipt、source-rehash cache、5 caller-owned DLPack view与20类
+> stable reason已实现；冻结IEEE fixture、non-default stream、cache miss→hit和S4-1A联合定向=`99 passed`，
+> 全量=`2070 passed, 3 skipped`，
+> construction hash从代码事实重建为`5056d302...cc2a`。当前只允许以固定实现提交进入11-process formal
+> correctness artifact；production evaluator binding、optimizer、arena alias、timing、performance、same-solver、
+> complete-query、10x及ASPLOS-ready全部仍为false。
+
 > **2026-08-31 S4-1A外审批准并关闭，只开放S4-1B0 implementation/correctness**：DocOps task=
 > `asplos27-s4-1a-ordered-buffer-20260830`、approved round=`2`。Round 1外审亲启12-process fresh run并
 > 独立重算，AC1—AC7通过；F1 replay reason绑定、F2 mypy三处类型错误、F3逐文件Pylint口径已由
