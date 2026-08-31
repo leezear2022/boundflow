@@ -178,6 +178,7 @@ def _base_namespace(args: argparse.Namespace, result: Path) -> argparse.Namespac
         model=args.model,
         property=args.property,
         result=result,
+        prepare_static_request=bool(getattr(args, "prepare_static_request", False)),
     )
 
 

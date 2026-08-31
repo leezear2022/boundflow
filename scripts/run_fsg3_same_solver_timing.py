@@ -389,11 +389,73 @@ class _CoreObserver:  # pylint: disable=too-few-public-methods
         return wall, gpu
 
 
+class _HostPhaseObserver:
+    """Measure named host phases without changing their arguments or results."""
+
+    def __init__(self) -> None:
+        self._counts: dict[str, int] = {}
+        self._wall_ns: dict[str, int] = {}
+
+    @contextmanager
+    def instrument(self, bindings: Sequence[tuple[object, str, str]]) -> Iterator[None]:
+        originals: list[tuple[object, str, Any]] = []
+        names: set[str] = set()
+        try:
+            for owner, attribute, name in bindings:
+                if name in names:
+                    raise ValueError("FSG3 host phase name must be unique")
+                names.add(name)
+                original = getattr(owner, attribute)
+                if not callable(original):
+                    raise TypeError(f"FSG3 host phase is not callable: {name}")
+
+                def wrapped(
+                    *args: Any,
+                    _original: Any = original,
+                    _name: str = name,
+                    **kwargs: Any,
+                ) -> Any:
+                    started_ns = time.perf_counter_ns()
+                    try:
+                        return _original(*args, **kwargs)
+                    finally:
+                        elapsed_ns = time.perf_counter_ns() - started_ns
+                        self._counts[_name] = self._counts.get(_name, 0) + 1
+                        self._wall_ns[_name] = self._wall_ns.get(_name, 0) + elapsed_ns
+
+                originals.append((owner, attribute, original))
+                setattr(owner, attribute, wrapped)
+            yield
+        finally:
+            for owner, attribute, original in reversed(originals):
+                setattr(owner, attribute, original)
+
+    def snapshot(self, expected_names: Sequence[str]) -> dict[str, dict[str, int]]:
+        if set(expected_names) != set(self._counts) or any(
+            self._counts.get(name) != 1 for name in expected_names
+        ):
+            raise ValueError("FSG3 host phase count differs")
+        result = {
+            name: {
+                "call_count": self._counts[name],
+                "wall_ns": self._wall_ns[name],
+            }
+            for name in expected_names
+        }
+        if any(row["wall_ns"] <= 0 for row in result.values()):
+            raise ValueError("FSG3 host phase timing must be positive")
+        return result
+
+
 class _PostObserver:
     def __init__(self, profile_recorder: Optional[_ProfileRecorder] = None) -> None:
         self.last_result: Any = None
         self.count = 0
         self.profile_recorder = profile_recorder
+        self.inner_start_ns: Optional[int] = None
+        self.inner_end_ns: Optional[int] = None
+        self.outer_start_ns: Optional[int] = None
+        self.outer_end_ns: Optional[int] = None
 
     @contextmanager
     def instrument(
@@ -403,23 +465,35 @@ class _PostObserver:
         original_outer = bab_bootstrap_module.branch_and_bound_postprocess
 
         def wrapped(*args: Any, **kwargs: Any) -> Any:
-            result = original(*args, **kwargs)
+            if self.inner_start_ns is not None:
+                raise RuntimeError("FSG3 requires exactly one update_bounds_post")
+            self.inner_start_ns = time.perf_counter_ns()
+            try:
+                result = original(*args, **kwargs)
+            finally:
+                self.inner_end_ns = time.perf_counter_ns()
             self.last_result = result
             self.count += 1
             return result
 
         def wrapped_outer(*args: Any, **kwargs: Any) -> Any:
-            if self.profile_recorder is None:
-                return original_outer(*args, **kwargs)
-            with self.profile_recorder.span(
-                scope="post",
-                name="official_post_queue",
-                stack_layer="solver/runtime",
-                solver_phase="official_post_and_queue",
-                resource="host+cuda",
-                cache_state="process-hit",
-            ):
-                return original_outer(*args, **kwargs)
+            if self.outer_start_ns is not None:
+                raise RuntimeError("FSG3 requires exactly one postprocess stage")
+            self.outer_start_ns = time.perf_counter_ns()
+            try:
+                if self.profile_recorder is None:
+                    return original_outer(*args, **kwargs)
+                with self.profile_recorder.span(
+                    scope="post",
+                    name="official_post_queue",
+                    stack_layer="solver/runtime",
+                    solver_phase="official_post_and_queue",
+                    resource="host+cuda",
+                    cache_state="process-hit",
+                ):
+                    return original_outer(*args, **kwargs)
+            finally:
+                self.outer_end_ns = time.perf_counter_ns()
 
         stage_postprocess_module.update_bounds_post = wrapped
         bab_bootstrap_module.branch_and_bound_postprocess = wrapped_outer
@@ -428,6 +502,79 @@ class _PostObserver:
         finally:
             stage_postprocess_module.update_bounds_post = original
             bab_bootstrap_module.branch_and_bound_postprocess = original_outer
+
+    def timings(self) -> tuple[int, int]:
+        if (
+            self.count != 1
+            or self.inner_start_ns is None
+            or self.inner_end_ns is None
+            or self.outer_start_ns is None
+            or self.outer_end_ns is None
+        ):
+            raise ValueError("FSG3 post timing is incomplete")
+        inner_ns = self.inner_end_ns - self.inner_start_ns
+        outer_ns = self.outer_end_ns - self.outer_start_ns
+        if inner_ns <= 0 or outer_ns <= 0 or inner_ns > outer_ns:
+            raise ValueError("FSG3 post timing closure differs")
+        return inner_ns, outer_ns
+
+
+def _query_phase_timing(
+    *,
+    query_wall_ns: int,
+    solver_init_ns: int,
+    constraint_prepare_ns: int,
+    verify_started_ns: int,
+    verify_ended_ns: int,
+    core_started_ns: int,
+    core_ended_ns: int,
+    final_sync_ns: int,
+    update_bounds_post_ns: int,
+    official_post_queue_ns: int,
+) -> dict[str, int]:
+    """Build a fail-closed, exactly closed host/query phase ledger."""
+
+    if not verify_started_ns <= core_started_ns <= core_ended_ns <= verify_ended_ns:
+        raise ValueError("FSG3 query phase ordering differs")
+    values = {
+        "query_wall_ns": query_wall_ns,
+        "solver_init_ns": solver_init_ns,
+        "constraint_prepare_ns": constraint_prepare_ns,
+        "verify_wall_ns": verify_ended_ns - verify_started_ns,
+        "pre_core_ns": core_started_ns - verify_started_ns,
+        "core_wall_ns": core_ended_ns - core_started_ns,
+        "post_core_ns": verify_ended_ns - core_ended_ns,
+        "final_sync_ns": final_sync_ns,
+        "update_bounds_post_ns": update_bounds_post_ns,
+        "official_post_queue_ns": official_post_queue_ns,
+    }
+    nonnegative_names = {"solver_init_ns", "constraint_prepare_ns"}
+    if any(
+        value < 0 if name in nonnegative_names else value <= 0
+        for name, value in values.items()
+    ):
+        raise ValueError("FSG3 query phase timing must be positive")
+    if update_bounds_post_ns > official_post_queue_ns:
+        raise ValueError("FSG3 query post phase nesting differs")
+    verify_closure_ns = (
+        values["verify_wall_ns"]
+        - values["pre_core_ns"]
+        - values["core_wall_ns"]
+        - values["post_core_ns"]
+    )
+    query_unattributed_ns = (
+        query_wall_ns
+        - solver_init_ns
+        - constraint_prepare_ns
+        - values["verify_wall_ns"]
+        - final_sync_ns
+    )
+    if verify_closure_ns != 0 or query_unattributed_ns < 0:
+        raise ValueError("FSG3 query phase closure differs")
+    values["verify_closure_ns"] = verify_closure_ns
+    values["query_unattributed_ns"] = query_unattributed_ns
+    values["post_queue_residual_ns"] = official_post_queue_ns - update_bounds_post_ns
+    return values
 
 
 def _visited_domains(result: Any) -> tuple[int, ...]:
@@ -941,7 +1088,9 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
         ConfigBuilder,
         IOConstraints,
     )
+    import api as abcrown_api  # type: ignore[import-not-found]
     import arguments  # type: ignore[import-not-found]
+    import complete_verifier_func  # type: ignore[import-not-found]
     from activation_split import (  # type: ignore[import-not-found]
         bab_bootstrap,
         stage_postprocess,
@@ -957,6 +1106,7 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
         raise RuntimeError("FSG3 worker requires CUDA")
     configuration = FSG3Configuration(args.configuration)
     mode = FSG3Mode(args.mode)
+    prepare_static_request = bool(getattr(args, "prepare_static_request", False))
     torch.cuda.synchronize()
     torch.cuda.empty_cache()
     worker_preflight = _wait_for_worker_environment()
@@ -999,6 +1149,32 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
     provider = _ProviderObserver(core)
     post = _PostObserver(profile_recorder)
     queue = _QueueObserver(torch)
+    host_phases = _HostPhaseObserver()
+    static_query_bindings = (
+        ()
+        if prepare_static_request
+        else (
+            (ABCrownSolver, "_prepare_model", "prepare_model"),
+            (ABCrownSolver, "_prepare_runtime_spec", "prepare_runtime_spec"),
+            (ABCrownSolver, "_build_vnnlib_handler", "build_vnnlib_handler"),
+        )
+    )
+    host_phase_bindings = (
+        (ABCrownSolver, "_prepare_environment", "prepare_environment"),
+        *static_query_bindings,
+        (abcrown_api, "incomplete_verifier_core", "incomplete_verifier"),
+        (abcrown_api, "complete_verifier_core", "complete_verifier"),
+        (complete_verifier_func, "general_bab", "general_bab"),
+        (
+            bab_bootstrap,
+            "compute_first_iteration_decision",
+            "first_iteration_decision",
+        ),
+        (bab_bootstrap, "branch_and_bound_preprocess", "bab_preprocess"),
+        (bab_bootstrap, "branch_and_bound_solve", "bab_solve"),
+        (bab_bootstrap, "branch_and_bound_postprocess", "bab_postprocess"),
+    )
+    host_phase_names = tuple(binding[2] for binding in host_phase_bindings)
     executor: Any = None
     if configuration == FSG3Configuration.B2:
         executor = candidate_runner._LiveExecutor(
@@ -1037,6 +1213,39 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
             .set("solver/alpha-crown/iteration", 5)
             .set("solver/beta-crown/iteration", 10)
         )
+        prepared_request: Any = None
+        prepared_request_receipt: Mapping[str, object] | None = None
+        static_constraint_ns = 0
+        static_solver_ns = 0
+        static_total_prepare_ns = 0
+        solver: Any = None
+        constraints: Any = None
+        if prepare_static_request:
+            from boundflow.runtime.prepared_verification_request import (
+                prepare_verification_request_v1,
+            )
+
+            outer_prepare_started_ns = time.perf_counter_ns()
+            static_constraint_started_ns = time.perf_counter_ns()
+            constraints = IOConstraints(vnnlib_path=str(isolated_property))
+            static_constraint_ns = time.perf_counter_ns() - static_constraint_started_ns
+            static_solver_started_ns = time.perf_counter_ns()
+            solver = ABCrownSolver(str(args.model), config=config)
+            static_solver_ns = time.perf_counter_ns() - static_solver_started_ns
+            prepared_request = prepare_verification_request_v1(
+                solver=solver,
+                constraint=constraints,
+                device="cuda",
+                torch_module=torch,
+                config_context=abcrown_api._config_context,
+                copy_on_prune_handler=True,
+            )
+            static_total_prepare_ns = time.perf_counter_ns() - outer_prepare_started_ns
+            torch.cuda.synchronize()
+            worker_preflight = _wait_for_worker_environment()
+            torch.cuda.reset_peak_memory_stats()
+            environment_before = _nvidia_snapshot()
+            processes_before = _compute_processes()
         with ExitStack() as stack:
             if executor is not None:
                 stack.enter_context(
@@ -1047,6 +1256,7 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
                 )
             stack.enter_context(provider.instrument(BoundedModule))
             stack.enter_context(core.instrument(stage_solve))
+            stack.enter_context(host_phases.instrument(host_phase_bindings))
             stack.enter_context(post.instrument(stage_postprocess, bab_bootstrap))
             stack.enter_context(queue.instrument(BatchedDomainList))
             query_start_event = torch.cuda.Event(enable_timing=True)
@@ -1054,16 +1264,40 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
             stream = torch.cuda.current_stream()
             query_start_event.record(stream)
             query_started_ns = time.perf_counter_ns()
-            solver = ABCrownSolver(str(args.model), config=config)
-            solver_result = solver.verify(
-                constraints=IOConstraints(vnnlib_path=str(isolated_property))
-            )
+            if prepared_request is None:
+                solver_init_started_ns = time.perf_counter_ns()
+                solver = ABCrownSolver(str(args.model), config=config)
+                solver_init_ns = time.perf_counter_ns() - solver_init_started_ns
+                constraint_prepare_started_ns = time.perf_counter_ns()
+                constraints = IOConstraints(vnnlib_path=str(isolated_property))
+                constraint_prepare_ns = (
+                    time.perf_counter_ns() - constraint_prepare_started_ns
+                )
+            else:
+                solver_init_ns = 0
+                constraint_prepare_ns = 0
+                stack.enter_context(prepared_request.activate())
+            verify_started_ns = time.perf_counter_ns()
+            solver_result = solver.verify(constraints=constraints)
+            verify_ended_ns = time.perf_counter_ns()
             query_end_event.record(stream)
+            final_sync_started_ns = time.perf_counter_ns()
             torch.cuda.synchronize()
+            final_sync_ns = time.perf_counter_ns() - final_sync_started_ns
             query_wall_ns = time.perf_counter_ns() - query_started_ns
             query_gpu_ns = int(
                 round(query_start_event.elapsed_time(query_end_event) * 1e6)
             )
+            if prepared_request is not None:
+                receipt = prepared_request.receipt().to_dict()
+                receipt.update(
+                    {
+                        "constraint_prepare_ns": static_constraint_ns,
+                        "solver_init_ns": static_solver_ns,
+                        "total_static_request_prepare_ns": static_total_prepare_ns,
+                    }
+                )
+                prepared_request_receipt = receipt
     cold_outer_ns = time.perf_counter_ns() - cold_started_ns
     post_query_audit_ns = 0
     if executor is not None and executor.has_pending_device_audit:
@@ -1080,6 +1314,22 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
     core_wall_ns, core_gpu_ns = core.timings()
     if len(queue.events) != 1 or post.count != 1:
         raise ValueError("FSG3 post/queue event count differs")
+    if core.host_start_ns is None or core.host_end_ns is None:
+        raise ValueError("FSG3 core host timing is incomplete")
+    update_bounds_post_ns, official_post_queue_ns = post.timings()
+    host_phase_timings = host_phases.snapshot(host_phase_names)
+    query_phase_timing = _query_phase_timing(
+        query_wall_ns=query_wall_ns,
+        solver_init_ns=solver_init_ns,
+        constraint_prepare_ns=constraint_prepare_ns,
+        verify_started_ns=verify_started_ns,
+        verify_ended_ns=verify_ended_ns,
+        core_started_ns=core.host_start_ns,
+        core_ended_ns=core.host_end_ns,
+        final_sync_ns=final_sync_ns,
+        update_bounds_post_ns=update_bounds_post_ns,
+        official_post_queue_ns=official_post_queue_ns,
+    )
     post_validation_started_ns = time.perf_counter_ns()
     semantic = _semantic_result(
         solver_result=solver_result,
@@ -1231,6 +1481,9 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
             "post_query_audit_excluded_from_timing": True,
             "terminal_export_audit_ns": terminal_export_audit_ns,
             "terminal_export_audit_excluded_from_timing": True,
+            "query_phase_timing": query_phase_timing,
+            "host_phase_timings": host_phase_timings,
+            "prepared_verification_request": prepared_request_receipt,
             "device_commit_audits": (
                 [] if executor is None else executor.device_commit_audits
             ),

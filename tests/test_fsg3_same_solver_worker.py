@@ -133,6 +133,80 @@ def test_protocol_identity_is_common_across_configurations() -> None:
     assert len(identities) == 1
 
 
+def test_query_phase_timing_closes_and_rejects_invalid_nesting() -> None:
+    timing = runner._query_phase_timing(
+        query_wall_ns=1_000,
+        solver_init_ns=100,
+        constraint_prepare_ns=25,
+        verify_started_ns=10_000,
+        verify_ended_ns=10_700,
+        core_started_ns=10_200,
+        core_ended_ns=10_500,
+        final_sync_ns=150,
+        update_bounds_post_ns=40,
+        official_post_queue_ns=80,
+    )
+    assert timing == {
+        "query_wall_ns": 1_000,
+        "solver_init_ns": 100,
+        "constraint_prepare_ns": 25,
+        "verify_wall_ns": 700,
+        "pre_core_ns": 200,
+        "core_wall_ns": 300,
+        "post_core_ns": 200,
+        "final_sync_ns": 150,
+        "update_bounds_post_ns": 40,
+        "official_post_queue_ns": 80,
+        "verify_closure_ns": 0,
+        "query_unattributed_ns": 25,
+        "post_queue_residual_ns": 40,
+    }
+    with pytest.raises(ValueError, match="ordering"):
+        runner._query_phase_timing(
+            query_wall_ns=1_000,
+            solver_init_ns=100,
+            constraint_prepare_ns=25,
+            verify_started_ns=10_000,
+            verify_ended_ns=10_700,
+            core_started_ns=9_999,
+            core_ended_ns=10_500,
+            final_sync_ns=150,
+            update_bounds_post_ns=40,
+            official_post_queue_ns=80,
+        )
+
+
+def test_host_phase_observer_restores_targets_and_requires_one_call() -> None:
+    owner = SimpleNamespace(transform=lambda value: value + 1)
+    original = owner.transform
+    observer = runner._HostPhaseObserver()
+    with observer.instrument(((owner, "transform", "transform"),)):
+        assert owner.transform(4) == 5
+    assert owner.transform is original
+    snapshot = observer.snapshot(("transform",))
+    assert snapshot["transform"]["call_count"] == 1
+    assert snapshot["transform"]["wall_ns"] > 0
+
+    unused = runner._HostPhaseObserver()
+    with unused.instrument(((owner, "transform", "transform"),)):
+        pass
+    with pytest.raises(ValueError, match="count differs"):
+        unused.snapshot(("transform",))
+    with pytest.raises(ValueError, match="post phase nesting"):
+        runner._query_phase_timing(
+            query_wall_ns=1_000,
+            solver_init_ns=100,
+            constraint_prepare_ns=25,
+            verify_started_ns=10_000,
+            verify_ended_ns=10_700,
+            core_started_ns=10_200,
+            core_ended_ns=10_500,
+            final_sync_ns=150,
+            update_bounds_post_ns=81,
+            official_post_queue_ns=80,
+        )
+
+
 def test_worker_post_init_preflight_admission_is_recomputed() -> None:
     payload = {
         "worker_pid": os.getpid(),

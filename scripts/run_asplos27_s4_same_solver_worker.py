@@ -43,7 +43,7 @@ from scripts import run_rvir_v4_production_state_capture as capture_runner
 from scripts.run_rvir_v4_pre_state_artifact import TOPOLOGY
 
 WORKER_SCHEMA = "boundflow.asplos27-s4-same-solver-worker/v1"
-CONFIGURATIONS = ("B4-A", "S4")
+CONFIGURATIONS = ("B4-A", "S4", "S4-PREP")
 PLAN_TEMPLATE = (
     REPOSITORY_ROOT
     / "artifacts/asplos27-s4-exact-call-plan/resnet2b-prop0-v1/plan_template.json"
@@ -251,6 +251,7 @@ def _base_namespace(args: argparse.Namespace, result: Path) -> argparse.Namespac
         model=args.model,
         property=args.property,
         result=result,
+        prepare_static_request=args.configuration == "S4-PREP",
     )
 
 
@@ -260,7 +261,7 @@ def _worker(args: argparse.Namespace) -> None:
     receipts: list[dict[str, object]] = []
     with tempfile.TemporaryDirectory(prefix="boundflow-s4-same-solver-") as raw:
         base_result = Path(raw) / "b4a-worker.json"
-        if args.configuration == "S4":
+        if args.configuration in {"S4", "S4-PREP"}:
             with (
                 diagnostic._patch_attribute(
                     fsg3_timing, "POST_PREPARE_ENVIRONMENT_WINDOW", True
@@ -279,7 +280,7 @@ def _worker(args: argparse.Namespace) -> None:
         or base.get("schema_version") != b4a_worker.WORKER_SCHEMA
         or base.get("configuration") != "B4-A"
         or base.get("performance_claimed") is not False
-        or len(receipts) != int(args.configuration == "S4")
+        or len(receipts) != int(args.configuration in {"S4", "S4-PREP"})
     ):
         raise ValueError("S4 inherited same-solver envelope differs")
     run = base.get("run")
