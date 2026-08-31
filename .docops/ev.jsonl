@@ -20173,3 +20173,5 @@
 {"id":"ev020789","ts":"2026-08-31T11:52:08Z","ty":"va","st":"s04","pr":98,"result":"pass"}
 {"id":"ev020798","ts":"2026-08-31T11:54:54Z","ty":"ch","st":"s04","pr":99,"slug":"s4-1b-external-audit-closure"}
 {"id":"ev020799","ts":"2026-08-31T11:54:54Z","ty":"va","st":"s04","pr":99,"result":"pass"}
+{"id":"ev020861","ts":"2026-08-31T12:36:08Z","ty":"ch","st":"s04","pr":70,"slug":"s4-1c-compressed-gradient"}
+{"id":"ev020862","ts":"2026-08-31T12:36:08Z","ty":"va","st":"s04","pr":70,"result":"pass"}

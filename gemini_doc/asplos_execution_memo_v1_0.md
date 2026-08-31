@@ -1,5 +1,14 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-31 S4-1C compressed gradient/terminal-lA已形成implementation/correctness candidate，下一
+> 动作仅为独立外审**。固定源码=`dcbfe80,7110437,82a928a,ef8d704`：13个TIR symbol实现六dα、一dβ
+> 和六terminal copy；真实ResNet2B分别执行nonterminal/terminal=`17/23` action，七gradient直接写S4-1A
+> caller-owned buffer，六terminal lA原位复用单一37,464-element V arena。新增专项=`11 passed`、S4/R3
+> 联合=`200 passed`、全量=`2093 passed, 3 skipped`，四文件mypy clean、Pylint=`10.00/10`。当前只能写
+> `IMPLEMENTED-CORRECTNESS-CANDIDATE-S4-1C-COMPRESSED-GRADIENT`；S4-1D、optimizer 10/9、timing、
+> performance、same-solver、10x与ASPLOS-ready仍关闭。特别地，当前coefficient pass只在prepare核对旧R31
+> α/β与S4-1A clone内容相等；S4-1D必须直接改绑active buffer，不能把本轮证据升级为trajectory claim。
+
 > **2026-08-31 S4-1B Round 1外审批准并关闭，只开放S4-1C compressed gradient
 > implementation/correctness**。exchange=`asplos27-s4-1b-six-site-20260831`，approved round=`1`，
 > assurance=`E2-DIRECT-LEGACY`；AC1—AC7 PASS，blocker/major/minor=`0/0/1`。唯一mandatory minor为

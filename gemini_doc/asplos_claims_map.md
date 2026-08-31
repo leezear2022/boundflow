@@ -1,5 +1,13 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-31 S4-1C为外审前single-evaluation correctness candidate，不是VALIDATED或性能claim**：
+> source=`dcbfe80,7110437,82a928a,ef8d704`；六dα/一dβ/六copy共13个TIR symbol，Pass C动作数=
+> `17/23`，gradient occurrence/unique view/full descriptor union=`53/46/110`。production ResNet2B通过
+> 独立closed-form gradient复核，terminal lA复用一个`37,464 elements/149,856 B` arena，新增专项11、
+> 联合200、全量`2093 passed, 3 skipped`。可主张范围仅为实现、数学、动作顺序、buffer ownership与one-shot
+> lease correctness；external audit、optimizer trajectory、KFSB consumer、timing、performance、same-solver、
+> complete-query、10x和ASPLOS-ready均为false。
+
 > **2026-08-31 S4-1B外审批准关闭为`VALIDATED-S4-1B-SIX-SITE-VALUE`**：外审现场复现专项9、
 > 联合189、全量`2082 passed, 3 skipped`，独立确认19-action插入点、49参数ABI、六TIR selector、
 > coefficient/V arena ownership与六槽PyTorch oracle。唯一minor Pylint 9.80口径由`588144f`修复至
