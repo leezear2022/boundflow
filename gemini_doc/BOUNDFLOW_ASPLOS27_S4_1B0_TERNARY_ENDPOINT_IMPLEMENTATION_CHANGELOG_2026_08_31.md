@@ -66,6 +66,10 @@ optimizer 或 timing 路径。
 nonfinite、symbol/legacy/TIR/source/cache、shape/dtype/device/layout/alias/DLPack、stream/launch、invalid
 selector 与 claim flag 边界。
 
+formal activation 首次执行还发现：测试原先通过读取 contract 动态比较 reason tuple，但 15 个 reason 的完整
+字符串没有逐项出现在测试源码，无法满足“外部 stdlib 静态扫描每项 reason”的合同。现已增加显式
+`EXPECTED_STABLE_REASONS`，并同时与 backend tuple、contract JSON 三方比较；该修正不改变运行时语义。
+
 ## 4. 确定性验证
 
 在 `conda activate boundflow && source env.sh`、RTX 4060 Laptop / SM89 环境执行：
