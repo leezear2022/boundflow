@@ -6,6 +6,7 @@
 # pylint: disable=too-many-arguments,too-many-positional-arguments
 # pylint: disable=missing-function-docstring,too-many-boolean-expressions
 # pylint: disable=missing-class-docstring,too-few-public-methods
+# pylint: disable=too-many-branches
 
 from __future__ import annotations
 
@@ -38,6 +39,9 @@ from boundflow.backends.tvm.r3_full_lower_forward import (
 )
 from boundflow.runtime.asplos27_s4_ordered_buffer_abi import (
     PreparedS4MutableBuffersV1,
+)
+from boundflow.runtime.asplos27_s4_compact_coefficient import (
+    PreparedS4CompactCoefficientV1,
 )
 from boundflow.runtime.asplos27_s4_six_site_value import S4SixSiteValueResultV1
 from boundflow.runtime.r3_d2b_staged_backward import (
@@ -277,6 +281,7 @@ class PreparedS4GradientEmittersV1:
         evaluation_generation: int,
         state_version: int,
         compiled: CompiledS4CompressedGradientV1 | None = None,
+        compact_coefficient: PreparedS4CompactCoefficientV1 | None = None,
     ) -> None:
         import tvm
 
@@ -298,6 +303,7 @@ class PreparedS4GradientEmittersV1:
         self.compiled = compiled or S4_GRADIENT_MODULE_CACHE_V1.get(capability_name)
         self.compiled.validate()
         self.executor = executor
+        self.compact_coefficient = compact_coefficient
         self.value_result = value_result
         self.mutable_buffers = mutable_buffers
         self.resources = resources
@@ -370,12 +376,25 @@ class PreparedS4GradientEmittersV1:
         )
         self._validate_static_legality()
 
-        for spec, active in zip(S4_GRADIENT_SITE_SPECS_V1, self.active_alpha):
-            source = executor._tensor(f"relu/{spec.site_id}/alpha")[0, 0]
-            if production_tensor_sha256(active) != production_tensor_sha256(source):
+        if compact_coefficient is None:
+            for spec, active in zip(S4_GRADIENT_SITE_SPECS_V1, self.active_alpha):
+                source = executor._tensor(f"relu/{spec.site_id}/alpha")[0, 0]
+                if production_tensor_sha256(active) != production_tensor_sha256(source):
+                    _reject("S4_GRADIENT_STATE_VERSION_MISMATCH")
+            if production_tensor_sha256(self.active_beta) != production_tensor_sha256(
+                executor._tensor("relu/31/beta")
+            ):
                 _reject("S4_GRADIENT_STATE_VERSION_MISMATCH")
-        if production_tensor_sha256(self.active_beta) != production_tensor_sha256(
-            executor._tensor("relu/31/beta")
+        elif (
+            compact_coefficient.executor is not executor
+            or compact_coefficient.mutable_buffers is not mutable_buffers
+            or any(
+                left.data_ptr() != right.data_ptr()
+                for left, right in zip(
+                    compact_coefficient.active_alpha, self.active_alpha
+                )
+            )
+            or compact_coefficient.active_beta.data_ptr() != self.active_beta.data_ptr()
         ):
             _reject("S4_GRADIENT_STATE_VERSION_MISMATCH")
 
@@ -421,6 +440,49 @@ class PreparedS4GradientEmittersV1:
                 "state_version": state_version,
             }
         )
+
+    def rearm(
+        self,
+        value_result: S4SixSiteValueResultV1,
+        *,
+        evaluation_generation: int,
+        state_version: int,
+    ) -> None:
+        """Reuse prepared emitter views after a completed nonterminal generation."""
+
+        value_result.validate()
+        if (
+            self.phase != S4GradientPhase.COMPLETE
+            or self._terminal
+            or evaluation_generation <= self.evaluation_generation
+            or state_version <= self.state_version
+            or any(
+                left.data_ptr() != right.data_ptr()
+                for left, right in zip(value_result.values, self.value_result.values)
+            )
+        ):
+            self._poison("S4_GRADIENT_STATE_VERSION_MISMATCH")
+        self.value_result = value_result
+        self.evaluation_generation = evaluation_generation
+        self.state_version = state_version
+        self._actions.clear()
+        self._terminal = False
+        self._lease = None
+        self._value_receipt_hash = _canonical_hash(value_result.receipt.to_dict())
+        self._prepared_id = _canonical_hash(
+            {
+                "construction": S4_COMPRESSED_GRADIENT_CONSTRUCTION_HASH_V1,
+                "value": self._value_receipt_hash,
+                "buffers": self._mutable_buffer_receipt_hash,
+                "metadata": self._metadata_identity_hash,
+                "template": self.compiled.template_hash,
+                "schedule": self.compiled.scheduled_tir_hash,
+                "device": self.compiled.device_source_hash,
+                "evaluation_generation": evaluation_generation,
+                "state_version": state_version,
+            }
+        )
+        self.phase = S4GradientPhase.PREPARED
 
     def _poison(self, reason: str) -> NoReturn:
         self.phase = S4GradientPhase.POISONED
@@ -534,6 +596,7 @@ class PreparedS4GradientEmittersV1:
         s1 = executor.forward_executor.scratch_1
         bias = executor.forward_executor.bias_accumulator
         current = torch.cuda.current_stream(self.device)
+        compact = self.compact_coefficient
         try:
             with tvm_ffi.use_torch_stream(torch.cuda.stream(current)):
                 executor._launch_b1(
@@ -554,7 +617,10 @@ class PreparedS4GradientEmittersV1:
                 self._emit_beta(expected)
                 if terminal:
                     self._copy_terminal(31, expected)
-                executor._relu_coefficient("31", s1[:600])
+                if compact is None:
+                    executor._relu_coefficient("31", s1[:600])
+                else:
+                    compact.relu(31, s1[:600])
                 self._record("relu31_coefficient", expected)
                 executor._launch_b1(
                     R31B1_LINEAR14_SYMBOL,
@@ -569,7 +635,10 @@ class PreparedS4GradientEmittersV1:
                 self._emit_alpha(28, expected)
                 if terminal:
                     self._copy_terminal(28, expected)
-                executor._relu_coefficient("28", s0[:6144])
+                if compact is None:
+                    executor._relu_coefficient("28", s0[:6144])
+                else:
+                    compact.relu(28, s0[:6144])
                 self._record("relu28_coefficient", expected)
                 executor._launch_d2b(
                     R3D1C_RESIDUAL11_STAGE1,
@@ -581,26 +650,34 @@ class PreparedS4GradientEmittersV1:
                 self._emit_alpha(25, expected)
                 if terminal:
                     self._copy_terminal(25, expected)
-                executor._launch_d2b(
-                    R3D1C_RESIDUAL11_STAGE2,
-                    s0,
-                    executor._residual11_scratch,
-                    executor._tensor("relu/25/lower").reshape(6, 1024),
-                    executor._tensor("relu/25/upper").reshape(6, 1024),
-                    executor._tensor("relu/25/alpha"),
-                    executor.forward_executor.alpha_maps["25"],
-                    executor._tensor("param/layer1.1.conv1.weight"),
-                    executor._tensor("param/layer1.1.conv2.bias"),
-                    executor._tensor("param/layer1.1.conv1.bias"),
-                    bias,
-                    s1[:6144],
-                    bias,
-                )
+                if compact is None:
+                    executor._launch_d2b(
+                        R3D1C_RESIDUAL11_STAGE2,
+                        s0,
+                        executor._residual11_scratch,
+                        executor._tensor("relu/25/lower").reshape(6, 1024),
+                        executor._tensor("relu/25/upper").reshape(6, 1024),
+                        executor._tensor("relu/25/alpha"),
+                        executor.forward_executor.alpha_maps["25"],
+                        executor._tensor("param/layer1.1.conv1.weight"),
+                        executor._tensor("param/layer1.1.conv2.bias"),
+                        executor._tensor("param/layer1.1.conv1.bias"),
+                        bias,
+                        s1[:6144],
+                        bias,
+                    )
+                else:
+                    compact.residual11_stage2(
+                        s0, executor._residual11_scratch, s1[:6144], bias
+                    )
                 self._record("residual11_stage2", expected)
                 self._emit_alpha(23, expected)
                 if terminal:
                     self._copy_terminal(23, expected)
-                executor._relu_coefficient("23", s1[:6144])
+                if compact is None:
+                    executor._relu_coefficient("23", s1[:6144])
+                else:
+                    compact.relu(23, s1[:6144])
                 self._record("relu23_coefficient", expected)
                 executor._launch_d2b(
                     R3D1C_RESIDUAL6_STAGE1,
@@ -612,23 +689,28 @@ class PreparedS4GradientEmittersV1:
                 self._emit_alpha(19, expected)
                 if terminal:
                     self._copy_terminal(19, expected)
-                executor._launch_d2b(
-                    R3D1C_RESIDUAL6_STAGE2,
-                    s1,
-                    executor._residual6_scratch,
-                    executor._tensor("relu/19/lower").reshape(6, 1024),
-                    executor._tensor("relu/19/upper").reshape(6, 1024),
-                    executor._tensor("relu/19/alpha"),
-                    executor.forward_executor.alpha_maps["19"],
-                    executor._tensor("param/layer1.0.conv1.weight"),
-                    executor._tensor("param/layer1.0.shortcut.0.weight"),
-                    executor._tensor("param/layer1.0.conv2.bias"),
-                    executor._tensor("param/layer1.0.conv1.bias"),
-                    executor._tensor("param/layer1.0.shortcut.0.bias"),
-                    bias,
-                    s0[:12288],
-                    bias,
-                )
+                if compact is None:
+                    executor._launch_d2b(
+                        R3D1C_RESIDUAL6_STAGE2,
+                        s1,
+                        executor._residual6_scratch,
+                        executor._tensor("relu/19/lower").reshape(6, 1024),
+                        executor._tensor("relu/19/upper").reshape(6, 1024),
+                        executor._tensor("relu/19/alpha"),
+                        executor.forward_executor.alpha_maps["19"],
+                        executor._tensor("param/layer1.0.conv1.weight"),
+                        executor._tensor("param/layer1.0.shortcut.0.weight"),
+                        executor._tensor("param/layer1.0.conv2.bias"),
+                        executor._tensor("param/layer1.0.conv1.bias"),
+                        executor._tensor("param/layer1.0.shortcut.0.bias"),
+                        bias,
+                        s0[:12288],
+                        bias,
+                    )
+                else:
+                    compact.residual6_stage2(
+                        s1, executor._residual6_scratch, s0[:12288], bias
+                    )
                 self._record("residual6_stage2", expected)
                 self._emit_alpha(17, expected)
                 if terminal:

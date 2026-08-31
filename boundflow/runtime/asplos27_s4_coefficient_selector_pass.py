@@ -277,6 +277,51 @@ class PreparedS4CoefficientSelectorPassV1:
         self._compiled_pack = compiled
 
     @property
+    def has_compiled_binding(self) -> bool:
+        """Whether the persistent source/output DLPack bindings already exist."""
+
+        return self._compiled_pack is not None
+
+    def rearm(
+        self,
+        *,
+        evaluation_generation: int,
+        parameter_generation: int,
+        coefficient_generation: int,
+        selector_generation: int,
+    ) -> None:
+        """Start a new generation while retaining selector storage and views."""
+
+        generations = (
+            evaluation_generation,
+            parameter_generation,
+            coefficient_generation,
+            selector_generation,
+        )
+        if (
+            self.phase != S4SelectorPhase.SELECTORS_READY
+            or self._compiled_pack is None
+            or min(generations) <= 0
+            or len(set(generations)) != 4
+            or evaluation_generation <= self.evaluation_generation
+            or parameter_generation <= self.parameter_generation
+            or coefficient_generation <= self.coefficient_generation
+            or selector_generation <= self.selector_generation
+        ):
+            _reject("SELECTOR_GENERATION_MISMATCH")
+        self.evaluation_generation = evaluation_generation
+        self.parameter_generation = parameter_generation
+        self.coefficient_generation = coefficient_generation
+        self.selector_generation = selector_generation
+        self.phase = S4SelectorPhase.PREPARED
+        self._next_action = 0
+        self._expected_stream = None
+        self._captured_actions.clear()
+        self._invalid_selector_count = 0
+        self._compiled_pack_launch_count = 0
+        self._eager_pack_count = 0
+
+    @property
     def selectors(self) -> tuple[torch.Tensor, ...]:
         if self.phase != S4SelectorPhase.SELECTORS_READY:
             _reject("SELECTORS_NOT_READY")

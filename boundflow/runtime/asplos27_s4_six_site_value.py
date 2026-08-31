@@ -492,6 +492,20 @@ class PreparedS4SixSiteValueV1:
         result.validate()
         return result
 
+    def rearm(self) -> None:
+        """Reuse prepared VM/views for the next optimizer evaluation."""
+
+        if self.phase != S4SixSitePhase.COEFFICIENT_RECOMPUTE_READY:
+            self._poison("SIX_SITE_PHASE_MISMATCH")
+        self._result_owner = None
+        self.phase = S4SixSitePhase.PREPARED
+        self._phase_order = [self.phase.value]
+        self._expected_stream = None
+        self._selector_receipt_hash = ""
+        self._vm_invocation_count = 0
+        self._graph_submission_count = 0
+        self._output_pointer_exact_count = 0
+
     def close(self) -> None:
         self._result_owner = None
         self.argument_views = ()
