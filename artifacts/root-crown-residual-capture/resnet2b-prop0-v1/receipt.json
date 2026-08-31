@@ -1,0 +1,175 @@
+{
+  "backward_count": 4,
+  "forward_count": 5,
+  "node_call_counts": {
+    "/43": 5,
+    "/44": 5,
+    "/45": 5,
+    "/input-16": 5,
+    "/input-20": 5,
+    "/input-24": 5
+  },
+  "outer_call_count": 1,
+  "performance_claimed": false,
+  "schema_version": "boundflow.root-crown-residual-capture/v1",
+  "shapes": {
+    "entry_alpha_feature_indices": [
+      [
+        178
+      ],
+      [
+        178
+      ],
+      [
+        178
+      ]
+    ],
+    "entry_lower": [
+      1,
+      16,
+      8,
+      8
+    ],
+    "entry_lower_gradient": [
+      1,
+      16,
+      8,
+      8
+    ],
+    "entry_raw_alpha": [
+      2,
+      3,
+      1,
+      178
+    ],
+    "entry_raw_alpha_gradient": [
+      2,
+      3,
+      1,
+      178
+    ],
+    "entry_upper": [
+      1,
+      16,
+      8,
+      8
+    ],
+    "entry_upper_gradient": [
+      1,
+      16,
+      8,
+      8
+    ],
+    "incoming_lower_a": [
+      3,
+      1,
+      16,
+      8,
+      8
+    ],
+    "incoming_lower_a_gradient": [
+      3,
+      1,
+      16,
+      8,
+      8
+    ],
+    "inner_alpha_feature_indices": [
+      [
+        86
+      ],
+      [
+        86
+      ],
+      [
+        86
+      ]
+    ],
+    "inner_conv_bias": [
+      16
+    ],
+    "inner_conv_weight": [
+      16,
+      16,
+      3,
+      3
+    ],
+    "inner_lower": [
+      1,
+      16,
+      8,
+      8
+    ],
+    "inner_lower_gradient": [
+      1,
+      16,
+      8,
+      8
+    ],
+    "inner_raw_alpha": [
+      2,
+      3,
+      1,
+      86
+    ],
+    "inner_raw_alpha_gradient": [
+      2,
+      3,
+      1,
+      86
+    ],
+    "inner_upper": [
+      1,
+      16,
+      8,
+      8
+    ],
+    "inner_upper_gradient": [
+      1,
+      16,
+      8,
+      8
+    ],
+    "main_conv_bias": [
+      16
+    ],
+    "main_conv_weight": [
+      16,
+      16,
+      3,
+      3
+    ],
+    "output_bias": [
+      3,
+      1
+    ],
+    "output_bias_gradient": [
+      3,
+      1
+    ],
+    "output_lower_a": [
+      3,
+      1,
+      16,
+      8,
+      8
+    ],
+    "output_lower_a_gradient": [
+      3,
+      1,
+      16,
+      8,
+      8
+    ]
+  },
+  "solver_status": "verified",
+  "start_node": "/49",
+  "topology": [
+    "/45",
+    "/44",
+    "/43",
+    "/input-24",
+    "/input-20",
+    "/input-16"
+  ]
+}
