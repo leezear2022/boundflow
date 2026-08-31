@@ -179,6 +179,12 @@ def _base_namespace(args: argparse.Namespace, result: Path) -> argparse.Namespac
         property=args.property,
         result=result,
         prepare_static_request=bool(getattr(args, "prepare_static_request", False)),
+        attribute_root_incomplete=bool(
+            getattr(args, "attribute_root_incomplete", False)
+        ),
+        prepare_root_optimizer_warmup=bool(
+            getattr(args, "prepare_root_optimizer_warmup", False)
+        ),
     )
 
 

@@ -207,6 +207,30 @@ def test_host_phase_observer_restores_targets_and_requires_one_call() -> None:
         )
 
 
+def test_nested_phase_observer_closes_inclusive_and_exclusive_time() -> None:
+    owner = SimpleNamespace()
+    owner.inner = lambda value: value + 1
+    owner.outer = lambda value: owner.inner(value) * 2
+    original_inner = owner.inner
+    original_outer = owner.outer
+    observer = runner._NestedPhaseObserver()
+    with observer.instrument(((owner, "outer", "root"), (owner, "inner", "child"))):
+        assert owner.outer(4) == 10
+    assert owner.inner is original_inner
+    assert owner.outer is original_outer
+    snapshot = observer.snapshot(root_name="root", required_names=("root", "child"))
+    events = snapshot["events"]
+    assert isinstance(events, list)
+    assert [row["name"] for row in events] == ["root", "child"]
+    assert events[1]["parent_event_id"] == events[0]["event_id"]
+    assert events[0]["wall_ns"] >= events[1]["wall_ns"]
+    assert events[0]["exclusive_ns"] >= 0
+    aggregates = snapshot["aggregates"]
+    assert isinstance(aggregates, dict)
+    assert aggregates["root"]["call_count"] == 1
+    assert aggregates["child"]["call_count"] == 1
+
+
 def test_worker_post_init_preflight_admission_is_recomputed() -> None:
     payload = {
         "worker_pid": os.getpid(),

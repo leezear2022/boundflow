@@ -447,6 +447,115 @@ class _HostPhaseObserver:
         return result
 
 
+class _NestedPhaseObserver:
+    """Record inclusive/exclusive wall time for nested verifier transactions."""
+
+    def __init__(self) -> None:
+        self._stack: list[tuple[int, str]] = []
+        self._events: list[dict[str, int | str | None]] = []
+        self._next_event_id = 0
+
+    @contextmanager
+    def instrument(self, bindings: Sequence[tuple[object, str, str]]) -> Iterator[None]:
+        originals: list[tuple[object, str, Any]] = []
+        names: set[str] = set()
+        try:
+            for owner, attribute, name in bindings:
+                if name in names:
+                    raise ValueError("FSG3 nested phase name must be unique")
+                names.add(name)
+                original = getattr(owner, attribute)
+                if not callable(original):
+                    raise TypeError(f"FSG3 nested phase is not callable: {name}")
+
+                def wrapped(
+                    *args: Any,
+                    _original: Any = original,
+                    _name: str = name,
+                    **kwargs: Any,
+                ) -> Any:
+                    event_id = self._next_event_id
+                    self._next_event_id += 1
+                    parent_event_id = self._stack[-1][0] if self._stack else None
+                    parent_name = self._stack[-1][1] if self._stack else None
+                    self._stack.append((event_id, _name))
+                    started_ns = time.perf_counter_ns()
+                    try:
+                        return _original(*args, **kwargs)
+                    finally:
+                        wall_ns = time.perf_counter_ns() - started_ns
+                        popped = self._stack.pop()
+                        if popped != (event_id, _name):
+                            raise RuntimeError("FSG3 nested phase stack differs")
+                        self._events.append(
+                            {
+                                "event_id": event_id,
+                                "name": _name,
+                                "parent_event_id": parent_event_id,
+                                "parent_name": parent_name,
+                                "wall_ns": wall_ns,
+                            }
+                        )
+
+                originals.append((owner, attribute, original))
+                setattr(owner, attribute, wrapped)
+            yield
+        finally:
+            for owner, attribute, original in reversed(originals):
+                setattr(owner, attribute, original)
+
+    def snapshot(
+        self, *, root_name: str, required_names: Sequence[str]
+    ) -> dict[str, object]:
+        if self._stack:
+            raise ValueError("FSG3 nested phase stack is not empty")
+
+        def event_integer(row: Mapping[str, object], key: str) -> int:
+            value = row.get(key)
+            if not isinstance(value, int) or isinstance(value, bool):
+                raise TypeError("FSG3 nested phase integer differs")
+            return value
+
+        events = sorted(self._events, key=lambda row: event_integer(row, "event_id"))
+        counts = {
+            name: sum(row["name"] == name for row in events) for name in required_names
+        }
+        if counts.get(root_name) != 1 or any(value <= 0 for value in counts.values()):
+            raise ValueError("FSG3 nested phase cardinality differs")
+        child_ns: dict[int, int] = {}
+        for row in events:
+            parent = row["parent_event_id"]
+            if parent is not None:
+                parent_id = event_integer(row, "parent_event_id")
+                child_ns[parent_id] = child_ns.get(parent_id, 0) + event_integer(
+                    row, "wall_ns"
+                )
+        aggregates: dict[str, dict[str, int]] = {}
+        normalized_events: list[dict[str, int | str | None]] = []
+        for row in events:
+            event_id = event_integer(row, "event_id")
+            wall_ns = event_integer(row, "wall_ns")
+            exclusive_ns = wall_ns - child_ns.get(event_id, 0)
+            if wall_ns <= 0 or exclusive_ns < 0:
+                raise ValueError("FSG3 nested phase closure differs")
+            normalized = dict(row)
+            normalized["exclusive_ns"] = exclusive_ns
+            normalized_events.append(normalized)
+            name = str(row["name"])
+            aggregate = aggregates.setdefault(
+                name, {"call_count": 0, "inclusive_ns": 0, "exclusive_ns": 0}
+            )
+            aggregate["call_count"] += 1
+            aggregate["inclusive_ns"] += wall_ns
+            aggregate["exclusive_ns"] += exclusive_ns
+        return {
+            "schema_version": "boundflow.fsg3-nested-host-phases/v1",
+            "root_name": root_name,
+            "events": normalized_events,
+            "aggregates": dict(sorted(aggregates.items())),
+        }
+
+
 class _PostObserver:
     def __init__(self, profile_recorder: Optional[_ProfileRecorder] = None) -> None:
         self.last_result: Any = None
@@ -1091,6 +1200,7 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
     import api as abcrown_api  # type: ignore[import-not-found]
     import arguments  # type: ignore[import-not-found]
     import complete_verifier_func  # type: ignore[import-not-found]
+    import incomplete_verifier_func  # type: ignore[import-not-found]
     from activation_split import (  # type: ignore[import-not-found]
         bab_bootstrap,
         stage_postprocess,
@@ -1107,6 +1217,12 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
     configuration = FSG3Configuration(args.configuration)
     mode = FSG3Mode(args.mode)
     prepare_static_request = bool(getattr(args, "prepare_static_request", False))
+    attribute_root_incomplete = bool(getattr(args, "attribute_root_incomplete", False))
+    prepare_root_optimizer_warmup = bool(
+        getattr(args, "prepare_root_optimizer_warmup", False)
+    )
+    if prepare_root_optimizer_warmup and not prepare_static_request:
+        raise ValueError("FSG3 root optimizer warmup requires a prepared request")
     torch.cuda.synchronize()
     torch.cuda.empty_cache()
     worker_preflight = _wait_for_worker_environment()
@@ -1175,6 +1291,41 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
         (bab_bootstrap, "branch_and_bound_postprocess", "bab_postprocess"),
     )
     host_phase_names = tuple(binding[2] for binding in host_phase_bindings)
+    root_phases = _NestedPhaseObserver()
+    root_phase_bindings: tuple[tuple[object, str, str], ...] = (
+        (abcrown_api, "incomplete_verifier_core", "root_incomplete"),
+        (incomplete_verifier_func.SpecHandler, "__init__", "spec_handler_init"),
+        (incomplete_verifier_func.LiRPANet, "__init__", "lirpa_net_init"),
+        (BoundedModule, "forward", "bounded_nominal_forward"),
+        (incomplete_verifier_func.LiRPANet, "build", "lirpa_build"),
+        (BoundedModule, "init_alpha", "init_alpha"),
+        (BoundedModule, "compute_bounds", "compute_bounds"),
+        (incomplete_verifier_func.SpecHandler, "post_process", "post_process"),
+    )
+    if attribute_root_incomplete:
+        from auto_LiRPA import optimized_bounds  # type: ignore
+        from auto_LiRPA.operators.relu import BoundRelu  # type: ignore
+
+        root_phase_bindings += (
+            (BoundedModule, "_get_optimized_bounds", "optimized_bounds_transaction"),
+            (torch.autograd, "backward", "autograd_backward"),
+            (torch.optim.Adam, "step", "adam_step"),
+            (torch.optim.Optimizer, "zero_grad", "optimizer_zero_grad"),
+            (
+                torch.optim.lr_scheduler.ExponentialLR,
+                "step",
+                "scheduler_step",
+            ),
+            (BoundedModule, "_clear_and_set_new", "clear_intermediates"),
+            (optimized_bounds, "_update_best_ret", "update_best_ret"),
+            (
+                optimized_bounds,
+                "_update_optimizable_activations",
+                "update_best_alpha",
+            ),
+            (BoundRelu, "clip_alpha", "clip_alpha"),
+        )
+    root_phase_names = tuple(binding[2] for binding in root_phase_bindings)
     executor: Any = None
     if configuration == FSG3Configuration.B2:
         executor = candidate_runner._LiveExecutor(
@@ -1215,6 +1366,7 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
         )
         prepared_request: Any = None
         prepared_request_receipt: Mapping[str, object] | None = None
+        prepared_root_warmup_receipt: Mapping[str, object] | None = None
         static_constraint_ns = 0
         static_solver_ns = 0
         static_total_prepare_ns = 0
@@ -1240,6 +1392,16 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
                 config_context=abcrown_api._config_context,
                 copy_on_prune_handler=True,
             )
+            if prepare_root_optimizer_warmup:
+                from boundflow.runtime.prepared_root_optimizer_warmup import (
+                    prepare_root_optimizer_warmup_v1,
+                )
+
+                prepared_root_warmup_receipt = prepare_root_optimizer_warmup_v1(
+                    solver=solver,
+                    constraints=constraints,
+                    torch_module=torch,
+                ).to_dict()
             static_total_prepare_ns = time.perf_counter_ns() - outer_prepare_started_ns
             torch.cuda.synchronize()
             worker_preflight = _wait_for_worker_environment()
@@ -1257,6 +1419,8 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
             stack.enter_context(provider.instrument(BoundedModule))
             stack.enter_context(core.instrument(stage_solve))
             stack.enter_context(host_phases.instrument(host_phase_bindings))
+            if attribute_root_incomplete:
+                stack.enter_context(root_phases.instrument(root_phase_bindings))
             stack.enter_context(post.instrument(stage_postprocess, bab_bootstrap))
             stack.enter_context(queue.instrument(BatchedDomainList))
             query_start_event = torch.cuda.Event(enable_timing=True)
@@ -1318,6 +1482,13 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
         raise ValueError("FSG3 core host timing is incomplete")
     update_bounds_post_ns, official_post_queue_ns = post.timings()
     host_phase_timings = host_phases.snapshot(host_phase_names)
+    root_incomplete_timings = (
+        root_phases.snapshot(
+            root_name="root_incomplete", required_names=root_phase_names
+        )
+        if attribute_root_incomplete
+        else None
+    )
     query_phase_timing = _query_phase_timing(
         query_wall_ns=query_wall_ns,
         solver_init_ns=solver_init_ns,
@@ -1483,7 +1654,9 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
             "terminal_export_audit_excluded_from_timing": True,
             "query_phase_timing": query_phase_timing,
             "host_phase_timings": host_phase_timings,
+            "root_incomplete_timings": root_incomplete_timings,
             "prepared_verification_request": prepared_request_receipt,
+            "prepared_root_optimizer_warmup": prepared_root_warmup_receipt,
             "device_commit_audits": (
                 [] if executor is None else executor.device_commit_audits
             ),
