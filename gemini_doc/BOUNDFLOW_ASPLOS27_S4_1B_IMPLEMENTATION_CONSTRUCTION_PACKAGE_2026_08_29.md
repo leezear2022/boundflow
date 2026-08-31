@@ -20,6 +20,12 @@ construction-model-hash: a9b1d90df3cd122eb43491d327432ded52f957928d77e1dbcf2e728
 
 # ASPLOS'27 S4-1B：六站点 selected-value 实现施工包
 
+> **2026-08-31 implementation note**：冻结合同已按五个固定代码/测试文件实现，并在真实
+> ResNet2B/R31B2状态完成Pass A/Pass B correctness。状态仅为
+> `IMPLEMENTED-CORRECTNESS-CANDIDATE-S4-1B-SIX-SITE`；本注不修改上方历史预注册元数据或下方门禁，
+> 外审、S4-1C、timing与performance仍关闭。实现明细见
+> `BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_IMPLEMENTATION_CHANGELOG_2026_08_31.md`。
+
 ## 0. 直接结论
 
 S4-1B 的数学方向和复用路线不变：先执行一次 coefficient pass 捕获六张 selector，再用一张

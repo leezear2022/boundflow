@@ -1,5 +1,11 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-31 当前状态：S4-1B六站点production correctness实现完成，等待下一轮独立外审**。
+> source=`760fa0d`。已接通真实R31B2系数边界的19-action selector Pass A和42-read+7-write TVM Pass B；六selector为TIR
+> kernel，selected-input复用coefficient arena，六V槽复用单一arena，真实ResNet2B与PyTorch oracle通过。
+> 当前状态=`IMPLEMENTED-CORRECTNESS-CANDIDATE-S4-1B-SIX-SITE`，不是VALIDATED。下一动作仅为审计
+> 本批源码、结构门禁与correctness；S4-1C、timing/performance和same-solver仍关闭。
+
 > **2026-08-31 当前状态：S4-1B0外审批准关闭，S4-1B implementation/correctness开放**。DocOps exchange
 > approved round 1并由executor正式close；AC1—AC7 PASS，0 blocker/major/minor，3 info均不阻塞，保证
 > 等级=`E2-DIRECT-LEGACY`。状态=`VALIDATED-S4-1B0-TERNARY-ENDPOINT`。下一工程动作是按冻结施工包

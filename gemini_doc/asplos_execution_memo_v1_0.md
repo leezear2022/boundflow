@@ -1,5 +1,16 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-31 S4-1B六站点production implementation/correctness candidate已完成，下一动作是本批
+> 独立外审**。实现source=`760fa0d`；本批严格复用R31B2 coefficient propagation、D1C/D2B staged residual与S4-1B0 ternary
+> 语义：Pass A按冻结19-action顺序在真实系数边界生成`endpoint_ainput_v2+a18/a20/a24/a26/a29`，6个
+> selector全部由预绑定DLPack view的TIR pack kernel生成；Pass B为42-read+7-write Relax/TIR/cuDNN图，
+> 复用coefficient arena作为selected-input，单一37,464-element V arena持有V17/19/23/25/28/31。真实
+> ResNet2B冻结状态与独立PyTorch六槽oracle通过，S4相关联合回归=`189 passed`、全量=
+> `2082 passed, 3 skipped`，五个交付文件mypy clean、Pylint=`10.00/10`。当前只能写
+> `IMPLEMENTED-CORRECTNESS-CANDIDATE-S4-1B-SIX-SITE`，外审前不升级
+> VALIDATED；S4-1C gradient、optimizer、timing、performance、same-solver、complete-query、10x和
+> ASPLOS-ready仍关闭。
+
 > **2026-08-31 S4-1B0 Round 1外审批准并正式关闭，只开放S4-1B production implementation/
 > correctness**。exchange=`asplos27-s4-1b0-ternary-20260831`，approved round=`1`，保证等级=
 > `E2-DIRECT-LEGACY`；AC1—AC7全部PASS，blocker/major/minor=`0/0/0`，3项info分别为历史9/10缺口

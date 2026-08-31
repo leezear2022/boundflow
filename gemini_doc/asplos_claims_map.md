@@ -1,5 +1,15 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-31 S4-1B production implementation/correctness candidate，不升级VALIDATED或性能claim**：
+> source=`760fa0d`。新实现严格对应冻结的19-action Pass A与49-argument Pass B；六selector使用full-content-identified TIR
+> pack module，六站点图含6 cuDNN Conv、1 Gemm、1 ternary select、5 selected-ReLU和6 persistent copy。
+> production冻结ResNet2B实际复用两处staged residual scratch与coefficient arena phase alias，六V输出逐槽
+> 对独立PyTorch oracle通过；argument/S4-1B/full A-B-C descriptor账=`49/90/110`，V arena=
+> `37,464 elements/149,856 B`。联合定向=`189 passed`、全量=`2082 passed, 3 skipped`，静态检查
+> 通过。该证据只支持本地
+> implementation/correctness candidate；外审、S4-1C梯度、optimizer trajectory、formal timing、performance、
+> same-solver、complete-query、10x和ASPLOS-ready均为false。
+
 > **2026-08-31 S4-1B0已外审关闭为`VALIDATED-S4-1B0-TERNARY-ENDPOINT`**：Round 1 AC1—AC7
 > 全PASS，blocker/major/minor=`0/0/0`，assurance=`E2-DIRECT-LEGACY`；外审亲启11-process fresh run、
 > 独立从`.bin`重算18,432项，并复测历史coefficient LSB缺口。3项info无强制修正；E0 coherent full
