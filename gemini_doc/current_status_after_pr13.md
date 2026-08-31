@@ -1,5 +1,11 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-31 当前状态：S4-1B0 formal candidate已完成，等待下一轮独立外审**。已推送source=
+> `4e2a261`；正式11-process artifact固定5 positive/1 cache/5 fault，5份positive sidecar逐字节一致，
+> stdlib replay PASS、重签篡改`10/10 rejected`，专项=`22 passed`、全量=`2073 passed, 3 skipped`。
+> 本地只形成`FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT-S4-1B0`，不提前写VALIDATED。下一动作仅
+> 外审本批实现与formal证据；S4-1B production implementation/correctness、所有timing/performance继续关闭。
+
 > **2026-08-31 当前状态：S4-1B0 isolated backend implementation/correctness candidate已完成，待固定提交后
 > 打开formal artifact**。generic ternary pack/select、full-content cache/receipt、5-view prepared probe和20类
 > negative已实现，S4-1A/S4-1B0定向=`99 passed`、全量=`2070 passed, 3 skipped`。本轮没有计时或性能claim；下一动作仅为formal activation

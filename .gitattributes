@@ -3,3 +3,4 @@ artifacts/native-intermediate-refinement/**/logs/*.log -diff
 artifacts/rvir-v4-five-fresh/**/*.stdout.txt -diff
 artifacts/fsg3-same-solver-timing/**/logs/*.txt -diff
 artifacts/fsg4-b3-counter-diagnostic/**/events.jsonl -diff
+artifacts/asplos27-s4-1b0-ternary/**/module/device_source.cu whitespace=-blank-at-eof

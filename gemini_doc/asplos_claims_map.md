@@ -1,5 +1,13 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-31 S4-1B0 formal correctness candidate，仍不升级VALIDATED或性能claim**：source=`4e2a261`，
+> artifact=`artifacts/asplos27-s4-1b0-ternary/resnet2b-prop0-v1`；11个fresh进程闭合5 positive/1 cache/
+> 5 fault，5份positive二进制全同，selector=`8689/9137/606/0`，selected bitwise exact，stdlib replay
+> PASS，10/10 outer-resigned derived/determinism攻击拒绝，专项=`22 passed`、全量=`2073 passed,
+> 3 skipped`。形式证据只支持isolated ternary endpoint/cache/receipt/prepared-probe correctness；外审前
+> 状态=`FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT-S4-1B0`。production evaluator/optimizer/alias、
+> timing、performance、same-solver、complete-query、10x和ASPLOS-ready继续为false。
+
 > **2026-08-31 S4-1B0 implementation/correctness candidate，不升级VALIDATED或性能claim**：独立generic
 > ternary pack/select TIR、immutable compiled receipt、source-rehash cache、5 caller-owned DLPack view与20类
 > stable reason已实现；冻结IEEE fixture、non-default stream、cache miss→hit和S4-1A联合定向=`99 passed`，

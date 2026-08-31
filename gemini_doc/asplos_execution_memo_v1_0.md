@@ -1,5 +1,14 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-31 S4-1B0 已形成 formal correctness candidate，下一动作仅为独立外审**。正式 artifact=
+> `artifacts/asplos27-s4-1b0-ternary/resnet2b-prop0-v1`，绑定已推送 source=`4e2a261`；5 positive+
+> 1 cache+5 fault 共11个fresh进程，5份`313,344 B` sidecar逐字节一致，selector=`8689/9137/606/0`，
+> selected bitwise exact，stdlib replay PASS，coherent outer-resigned tamper=`10/10 rejected`，专项=
+> `22 passed`、全量=`2073 passed, 3 skipped`。第一次临时演练暴露coefficient LSB攻击仅`9/10`，已由
+> `4e2a261`补上fresh binary determinism与summary→raw回绑后从空目录重跑；失败数据未进入正式artifact。
+> 当前标签只能是`FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT-S4-1B0`；S4-1B production、timing、
+> performance、same-solver、complete-query与10x仍关闭。
+
 > **2026-08-31 S4-1B0 isolated backend 已形成 implementation/correctness candidate，下一只开放 formal
 > activation 与 11-process correctness artifact**。新增 generic ternary pack/select TIR、full-content cache/
 > immutable receipt、5-view prepared probe及20类stable reason；S4-1A/S4-1B0定向=`99 passed`，construction
