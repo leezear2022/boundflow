@@ -188,8 +188,10 @@ def validate(root: Path) -> dict[str, Any]:
             or row["run_ordinal"] != ordinal
         ):
             raise ReplayError("worker protocol or claim differs")
+    positive_binary_hashes = []
     for ordinal, row in enumerate(rows[:5]):
         _validate_binary(root / "raw/binary" / f"positive-{ordinal:02d}.bin", row)
+        positive_binary_hashes.append(row["binary"]["sha256"])
         if (
             len(row["descriptor_hashes"]) != 5
             or any(len(value) != 64 for value in row["descriptor_hashes"])
@@ -212,6 +214,8 @@ def validate(root: Path) -> dict[str, Any]:
             or receipt["performance_claimed"] is not False
         ):
             raise ReplayError("module receipt content identity differs")
+    if len(set(positive_binary_hashes)) != 1:
+        raise ReplayError("positive fresh-process binary determinism differs")
     cache = rows[5]
     if (
         cache["events"] != ["miss", "hit"]
@@ -241,6 +245,8 @@ def validate(root: Path) -> dict[str, Any]:
         or summary["selector_counts"]
         != {"positive": 8689, "negative": 9137, "zero": 606, "invalid": 0}
         or summary["fault_reasons"] != list(EXPECTED_REASONS)
+        or summary["positive_sidecar_sha256"] != positive_binary_hashes[0]
+        or summary["positive_sidecar_byte_count"] != 313344
         or summary["performance_claimed"] is not False
         or summary["timing_recorded"] is not False
         or summary["status"] != "FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT-S4-1B0"

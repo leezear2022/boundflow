@@ -20157,3 +20157,5 @@
 {"id":"ev020570","ts":"2026-08-31T02:08:47Z","ty":"va","st":"s04","pr":90,"result":"pass"}
 {"id":"ev020611","ts":"2026-08-31T02:20:34Z","ty":"ch","st":"s04","pr":91,"slug":"s4-1b0-formal-tooling"}
 {"id":"ev020612","ts":"2026-08-31T02:20:35Z","ty":"va","st":"s04","pr":91,"result":"pass"}
+{"id":"ev020627","ts":"2026-08-31T02:23:22Z","ty":"ch","st":"s04","pr":92,"slug":"harden-s4-1b0-replay-determinism"}
+{"id":"ev020628","ts":"2026-08-31T02:23:22Z","ty":"va","st":"s04","pr":92,"result":"pass"}

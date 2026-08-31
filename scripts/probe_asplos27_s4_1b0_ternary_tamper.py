@@ -77,7 +77,8 @@ def _binary_flip(root: Path, record_name: str) -> None:
     record = next(
         item for item in row["binary"]["index"] if item["name"] == record_name
     )
-    payload[record["offset"]] ^= 1
+    byte_offset = record["offset"] + (3 if record_name == "coefficient" else 0)
+    payload[byte_offset] ^= 0x80 if record_name == "coefficient" else 1
     path.write_bytes(payload)
     chunk = payload[record["offset"] : record["offset"] + record["byte_count"]]
     record["sha256"] = hashlib.sha256(chunk).hexdigest()
