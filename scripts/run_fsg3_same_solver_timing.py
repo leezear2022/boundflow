@@ -46,6 +46,7 @@ ALLOWED_GRAPHICS_PROCESSES = ("kwin_wayland",)
 WORKER_PREFLIGHT_TEMPERATURE_LIMIT_C = 50
 WORKER_PREFLIGHT_POLL_SECONDS = 5
 WORKER_PREFLIGHT_TIMEOUT_SECONDS = 900
+POST_PREPARE_ENVIRONMENT_WINDOW = False
 
 
 @dataclass
@@ -1009,6 +1010,15 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
             capture_payloads=False,
             profile_recorder=profile_recorder,
         )
+    if POST_PREPARE_ENVIRONMENT_WINDOW:
+        # Candidate-specific AOT compilation and persistent allocation are
+        # cold/setup costs, not query exposure.  Re-enter the same cool-idle
+        # gate and start NVIDIA counters only after preparation completes.
+        torch.cuda.synchronize()
+        worker_preflight = _wait_for_worker_environment()
+        torch.cuda.reset_peak_memory_stats()
+        environment_before = _nvidia_snapshot()
+        processes_before = _compute_processes()
 
     with tempfile.TemporaryDirectory(prefix="boundflow-fsg3-property-") as raw:
         isolated_property = Path(raw) / args.property.name

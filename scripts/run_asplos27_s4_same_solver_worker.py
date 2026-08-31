@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 from contextlib import contextmanager
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -24,24 +25,37 @@ if str(REPOSITORY_ROOT) not in sys.path:
 from boundflow.runtime.asplos27_s4_exact_call_bridge import (
     compile_s4_exact_call_assets_v1,
     execute_s4_exact_call_handoff_v1,
-    prepare_s4_exact_call_region_v1,
+    prepare_s4_exact_call_region_from_template_v1,
 )
+from boundflow.runtime.asplos27_s4_exact_call_plan_template import (
+    load_s4_exact_call_plan_template_v1,
+)
+from boundflow.runtime.asplos27_s4_optimizer_driver import execute_s4_optimizer_v1
 from boundflow.runtime.rvir_v4_live_return import live_targets_from_pre_result_v4
 from boundflow.runtime.rvir_v4_pre_state_initializer import (
     initialize_rvir_v4_native_pre_state,
 )
 from scripts import run_fsg4_b3_counter_diagnostic as diagnostic
 from scripts import run_fsg4_b4a_same_solver_worker as b4a_worker
+from scripts import run_fsg3_same_solver_timing as fsg3_timing
 from scripts import run_rvir_v4_live_return_capture as live_runner
 from scripts import run_rvir_v4_production_state_capture as capture_runner
 from scripts.run_rvir_v4_pre_state_artifact import TOPOLOGY
 
 WORKER_SCHEMA = "boundflow.asplos27-s4-same-solver-worker/v1"
 CONFIGURATIONS = ("B4-A", "S4")
-SOURCE_CAPTURE = (
+PLAN_TEMPLATE = (
     REPOSITORY_ROOT
-    / "artifacts/rvir-v4-pre-state/resnet2b-core-pre-state-v1/source_capture.pt"
+    / "artifacts/asplos27-s4-exact-call-plan/resnet2b-prop0-v1/plan_template.json"
 )
+
+
+def _canonical_hash(value: object) -> str:
+    return hashlib.sha256(
+        json.dumps(
+            value, sort_keys=True, separators=(",", ":"), allow_nan=False
+        ).encode()
+    ).hexdigest()
 
 
 def _warm_s4_runtime(
@@ -50,95 +64,49 @@ def _warm_s4_runtime(
     assets: Any,
     stream: Any,
 ) -> tuple[dict[str, object], Any]:
-    """Initialize exact production shapes before the timed host query."""
+    """Build and warm the region from an AOT template, without query state."""
 
-    import torch
-
-    from boundflow.runtime.native_alpha_beta_optimization_state import (
-        build_native_alpha_beta_scope,
-    )
-    from boundflow.runtime.rvir_v4_optimizer_mutation import (
-        production_optimizer_step_trace_from_payload_v4,
-    )
-    from boundflow.runtime.rvir_v4_production_state import (
-        production_snapshot_from_payload_v4,
-        ProductionTensorOwnership,
-        ProductionTensorRole,
-    )
-    from boundflow.runtime.task_executor import InputSpec
-
-    if not SOURCE_CAPTURE.is_file():
-        raise FileNotFoundError("S4 same-solver warmup source capture is absent")
+    if not PLAN_TEMPLATE.is_file():
+        raise FileNotFoundError("S4 same-solver AOT plan template is absent")
     cache = executor.prepared_core_cache
     template_hash = executor.prepared_core_template_hash
     template = cache._templates.get(template_hash)
     if template is None:
         raise ValueError("S4 same-solver prepared template is absent")
-    raw = torch.load(SOURCE_CAPTURE, map_location="cpu", weights_only=True)
-    snapshot = production_snapshot_from_payload_v4(raw["cores"][0]["pre_snapshot"])
-    production = production_optimizer_step_trace_from_payload_v4(
-        raw["optimizer_step_traces"][0]
+    plan_template = load_s4_exact_call_plan_template_v1(
+        PLAN_TEMPLATE, core_template=template, topology=TOPOLOGY
     )
-    device = torch.device(template.device)
-    mapping = initialize_rvir_v4_native_pre_state(snapshot, TOPOLOGY).to(
-        device=device, dtype=torch.float32
-    )
-
-    def one(role: Any) -> Any:
-        values = [item.value for item in snapshot.tensors if item.role == role]
-        if len(values) != 1:
-            raise ValueError("S4 same-solver warmup role cardinality differs")
-        return values[0].to(device)
-
-    input_spec = InputSpec.box(
-        value_name=template.program.graph.inputs[0],
-        lower=one(ProductionTensorRole.INPUT_LOWER),
-        upper=one(ProductionTensorRole.INPUT_UPPER),
-    )
-    objective = one(ProductionTensorRole.LINEAR_SPEC)
-    scope = build_native_alpha_beta_scope(
-        template.module,
-        input_spec,
-        linear_spec_C=objective,
-        relu_pre=mapping.relu_pre,
-        relu_split_state=mapping.splits,
-        policy=production.mutation_policy.to_native_policy(),
-    )
-    initial = mapping.to_native_state(scope)
-    live_sources = {
-        item.semantic_path: item.value.to(device).detach().clone().requires_grad_(True)
-        for item in snapshot.tensors
-        if item.ownership == ProductionTensorOwnership.MUTABLE_COPY_OUT
-    }
-    warm = execute_s4_exact_call_handoff_v1(
-        program=template.program,
-        module=template.module,
-        snapshot=snapshot,
-        mapping=mapping,
-        live_sources=live_sources,
-        exact_call_id="asplos27-s4-static-warmup",
-        input_spec=input_spec,
-        linear_spec_C=objective,
-        relu_pre=mapping.relu_pre,
-        initial_state=initial,
-        mutation_policy=production.mutation_policy,
-        schedule=executor.terminal_optimizer_schedule,
+    warm_region = prepare_s4_exact_call_region_from_template_v1(
+        core_template=template,
+        plan_template=plan_template,
+        exact_call_id="asplos27-s4-aot-static-warmup",
         topology=TOPOLOGY,
         stream=stream,
         assets=assets,
     )
-    prepared = prepare_s4_exact_call_region_v1(
-        program=template.program,
-        module=template.module,
-        snapshot=snapshot,
-        mapping=mapping,
-        live_sources=live_sources,
+    warm_run = execute_s4_optimizer_v1(warm_region.evaluator)
+    warm_payload: dict[str, object] = {
+        "schema_version": "boundflow.asplos27-s4-aot-static-warmup/v1",
+        "plan_template_hash": plan_template.stable_hash(),
+        "physical_plan_hash": warm_region.plan.stable_hash(),
+        "evaluation_count": warm_run.evaluation_count,
+        "mutation_count": warm_run.optimizer_mutation_count,
+        "source_capture_runtime_dependency": False,
+        "fallback_count": warm_run.fallback_count,
+        "performance_claimed": False,
+    }
+    warm_payload["receipt_hash"] = _canonical_hash(warm_payload)
+    warm_region.evaluator.close()
+    warm_region.buffers.close()
+    prepared = prepare_s4_exact_call_region_from_template_v1(
+        core_template=template,
+        plan_template=plan_template,
         exact_call_id="asplos27-s4-live-core-000001",
         topology=TOPOLOGY,
         stream=stream,
         assets=assets,
     )
-    return warm.receipt.to_dict(), prepared
+    return warm_payload, prepared
 
 
 @contextmanager
@@ -200,9 +168,12 @@ def _s4_candidate_executor(
                             torch.Tensor, inner_kwargs["linear_spec_C"]
                         )
                         snapshot = snapshots[0]
-                        mapping = initialize_rvir_v4_native_pre_state(
+                        signature_mapping = initialize_rvir_v4_native_pre_state(
                             snapshot, TOPOLOGY
-                        ).to(device=linear_spec_c.device, dtype=linear_spec_c.dtype)
+                        )
+                        mapping = signature_mapping.to(
+                            device=linear_spec_c.device, dtype=linear_spec_c.dtype
+                        )
                         live_sources = live_targets_from_pre_result_v4(
                             pre_result, TOPOLOGY
                         )
@@ -224,10 +195,15 @@ def _s4_candidate_executor(
                             assets=assets,
                             prevalidated_plan=inner_kwargs.get("prevalidated_plan"),
                             prepared_region=prepared_region,
+                            signature_mapping=signature_mapping,
                         )
                         payload = execution.receipt.to_dict()
                         payload["static_prepare_ns"] = static_prepare_ns
                         payload["static_prepare_excluded_from_query"] = True
+                        payload["source_capture_runtime_dependency"] = False
+                        payload["plan_template_relative_path"] = str(
+                            PLAN_TEMPLATE.relative_to(REPOSITORY_ROOT)
+                        )
                         payload["static_warmup_receipt_hash"] = warmup_receipt[
                             "receipt_hash"
                         ]
@@ -285,10 +261,18 @@ def _worker(args: argparse.Namespace) -> None:
     with tempfile.TemporaryDirectory(prefix="boundflow-s4-same-solver-") as raw:
         base_result = Path(raw) / "b4a-worker.json"
         if args.configuration == "S4":
-            with _s4_candidate_executor(receipts):
+            with (
+                diagnostic._patch_attribute(
+                    fsg3_timing, "POST_PREPARE_ENVIRONMENT_WINDOW", True
+                ),
+                _s4_candidate_executor(receipts),
+            ):
                 b4a_worker._worker(_base_namespace(args, base_result))
         else:
-            b4a_worker._worker(_base_namespace(args, base_result))
+            with diagnostic._patch_attribute(
+                fsg3_timing, "POST_PREPARE_ENVIRONMENT_WINDOW", True
+            ):
+                b4a_worker._worker(_base_namespace(args, base_result))
         base = json.loads(base_result.read_text(encoding="utf-8"))
     if (
         not isinstance(base, Mapping)

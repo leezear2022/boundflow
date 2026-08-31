@@ -20,7 +20,7 @@ import hashlib
 import json
 import math
 import time
-from typing import cast, Mapping
+from typing import Any, cast, Mapping
 
 import torch
 
@@ -51,6 +51,11 @@ from boundflow.ir.task import BFTaskModule
 from boundflow.ir.r3_bounded_arena import R31BBoundedArenaTraceV1
 from boundflow.runtime.asplos27_s4_all_state_evaluator import (
     PreparedS4AllStateEvaluatorV1,
+)
+from boundflow.runtime.asplos27_s4_exact_call_plan_template import (
+    instantiate_s4_physical_plan_v1,
+    PreparedS4ExactCallTemplateBuffersV1,
+    S4ExactCallPlanTemplateV1,
 )
 from boundflow.runtime.asplos27_s4_mutable_state_admission import (
     prepare_s4_mutable_state_admission_v1,
@@ -254,11 +259,12 @@ class PreparedS4ExactCallRegionV1:
     plan: R31FullRegionPlanV1
     trace: R31BBoundedArenaTraceV1
     executor: _PreparedS4R3ExecutorV1
-    buffers: PreparedS4MutableBuffersV1
+    buffers: Any
     evaluator: PreparedS4AllStateEvaluatorV1
     assets: S4ExactCallCompiledAssetsV1
     assets_hash: str
     stream: torch.cuda.Stream
+    plan_template: S4ExactCallPlanTemplateV1 | None = None
     used: bool = False
 
     def validate(self) -> None:
@@ -273,6 +279,10 @@ class PreparedS4ExactCallRegionV1:
             or self.used
         ):
             raise ValueError("S4 prepared exact-call region differs")
+        if self.plan_template is not None:
+            self.plan_template.validate()
+            if self.plan.source_state_hash != self.plan_template.stable_hash():
+                raise ValueError("S4 prepared AOT plan binding differs")
 
 
 def _runtime_sources(
@@ -381,6 +391,61 @@ def prepare_s4_exact_call_region_v1(
     return region
 
 
+def prepare_s4_exact_call_region_from_template_v1(
+    *,
+    core_template: Any,
+    plan_template: S4ExactCallPlanTemplateV1,
+    exact_call_id: str,
+    topology: tuple[ProductionReluTopologyV4, ...],
+    stream: torch.cuda.Stream,
+    assets: S4ExactCallCompiledAssetsV1,
+) -> PreparedS4ExactCallRegionV1:
+    """Prepare persistent execution from tensor-free AOT metadata only."""
+
+    assets.validate()
+    plan_template.validate(core_template=core_template, topology=topology)
+    if (
+        plan_template.compute_capability != assets.compute_capability
+        or str(stream.device) != plan_template.device
+    ):
+        raise ValueError("S4 AOT plan target differs")
+    plan, tensors = instantiate_s4_physical_plan_v1(
+        plan_template, core_template=core_template, topology=topology
+    )
+    trace = compile_r31b_bounded_arena_trace_v1(
+        core_template.program, core_template.module, plan
+    )
+    executor = _PreparedS4R3ExecutorV1(plan, trace, tensors, assets.d1c)
+    template_buffers = PreparedS4ExactCallTemplateBuffersV1(
+        plan, plan_template, exact_call_id=exact_call_id
+    )
+    buffers = cast(PreparedS4MutableBuffersV1, template_buffers)
+    evaluator = PreparedS4AllStateEvaluatorV1(
+        executor,
+        buffers,
+        exact_call_id=exact_call_id,
+        stream=stream,
+        compiled_compact=assets.compact,
+        compiled_selector=assets.selector,
+        compiled_value=assets.value,
+        compiled_gradient=assets.gradient,
+    )
+    region = PreparedS4ExactCallRegionV1(
+        exact_call_id=exact_call_id,
+        plan=plan,
+        trace=trace,
+        executor=executor,
+        buffers=template_buffers,
+        evaluator=evaluator,
+        assets=assets,
+        assets_hash=assets.stable_hash(),
+        stream=stream,
+        plan_template=plan_template,
+    )
+    region.validate()
+    return region
+
+
 def _dense_terminal_state(
     plan: R31FullRegionPlanV1,
     initial: NativeAlphaBetaOptimizationState,
@@ -452,6 +517,7 @@ class S4ExactCallExecutionReceiptV1:
 
     exact_call_id: str
     assets_hash: str
+    region_template_hash: str
     production_plan_hash: str
     trace_hash: str
     admission_hash: str
@@ -478,6 +544,7 @@ class S4ExactCallExecutionReceiptV1:
     def validate(self) -> None:
         hashes = (
             self.assets_hash,
+            self.region_template_hash,
             self.production_plan_hash,
             self.trace_hash,
             self.admission_hash,
@@ -544,6 +611,7 @@ def execute_s4_exact_call_handoff_v1(  # pylint: disable=too-many-arguments
     assets: S4ExactCallCompiledAssetsV1,
     prevalidated_plan: CorePlanInstanceV1 | None = None,
     prepared_region: PreparedS4ExactCallRegionV1 | None = None,
+    signature_mapping: ProductionNativePreStateV4 | None = None,
 ) -> S4ExactCallExecutionV1:
     """Execute S4 at the existing RVIR optimizer/handoff seam."""
 
@@ -637,6 +705,15 @@ def execute_s4_exact_call_handoff_v1(  # pylint: disable=too-many-arguments
             != S4_SITE_ORDER
         ):
             raise ValueError("S4 prepared exact-call region structure differs")
+        if prepared_region.plan_template is not None:
+            if signature_mapping is None:
+                raise ValueError("S4 prepared AOT signature mapping is absent")
+            prepared_region.plan_template.validate_dynamic_signature(
+                module=module,
+                snapshot=snapshot,
+                mapping=signature_mapping,
+                topology=topology,
+            )
         ir_prepare_ns = time.perf_counter_ns() - ir_started
         executor_started = time.perf_counter_ns()
         typed_relu_pre = cast(Mapping[str, IntervalState], relu_pre)
@@ -741,6 +818,11 @@ def execute_s4_exact_call_handoff_v1(  # pylint: disable=too-many-arguments
     receipt = S4ExactCallExecutionReceiptV1(
         exact_call_id=exact_call_id,
         assets_hash=assets_hash,
+        region_template_hash=(
+            prepared_region.plan_template.stable_hash()
+            if prepared_region is not None and prepared_region.plan_template is not None
+            else plan.stable_hash()
+        ),
         production_plan_hash=plan.stable_hash(),
         trace_hash=trace.stable_hash(),
         admission_hash=admission_hash,
@@ -768,6 +850,7 @@ def execute_s4_exact_call_handoff_v1(  # pylint: disable=too-many-arguments
 __all__ = [
     "compile_s4_exact_call_assets_v1",
     "execute_s4_exact_call_handoff_v1",
+    "prepare_s4_exact_call_region_from_template_v1",
     "prepare_s4_exact_call_region_v1",
     "PreparedS4ExactCallRegionV1",
     "S4ExactCallCompiledAssetsV1",

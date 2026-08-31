@@ -17,7 +17,12 @@ from boundflow.planner import plan_interval_ibp_v0
 from boundflow.runtime.asplos27_s4_exact_call_bridge import (
     compile_s4_exact_call_assets_v1,
     execute_s4_exact_call_handoff_v1,
+    prepare_s4_exact_call_region_from_template_v1,
     prepare_s4_exact_call_region_v1,
+)
+from boundflow.runtime.asplos27_s4_exact_call_plan_template import (
+    compile_s4_exact_call_plan_template_v1,
+    s4_exact_call_plan_template_from_dict_v1,
 )
 from boundflow.runtime.fsg4_b3_prepared_core import (
     instantiate_core_plan_v1,
@@ -70,9 +75,8 @@ def exact_call_case():
     production = production_optimizer_step_trace_from_payload_v4(
         raw["optimizer_step_traces"][0]
     )
-    mapping = initialize_rvir_v4_native_pre_state(snapshot, TOPOLOGY).to(
-        device=device, dtype=torch.float32
-    )
+    signature_mapping = initialize_rvir_v4_native_pre_state(snapshot, TOPOLOGY)
+    mapping = signature_mapping.to(device=device, dtype=torch.float32)
     program = import_onnx(str(MODEL), do_shape_infer=True, normalize=True)
     module = plan_interval_ibp_v0(program)
     module.bindings = cast(
@@ -180,6 +184,49 @@ def exact_call_case():
         prevalidated_plan=instance,
         prepared_region=prepared_region,
     )
+    major, minor = torch.cuda.get_device_capability(device)
+    plan_template = compile_s4_exact_call_plan_template_v1(
+        template_id="s4-exact-call-aot-test",
+        core_template=template,
+        snapshot=snapshot,
+        mapping=signature_mapping,
+        topology=TOPOLOGY,
+        compute_capability=f"sm_{major}{minor}",
+    )
+    plan_template = s4_exact_call_plan_template_from_dict_v1(plan_template.to_dict())
+    aot_live = {
+        path: value.detach().clone().requires_grad_(True)
+        for path, value in live_sources.items()
+    }
+    aot_stream = torch.cuda.Stream(device=device)
+    aot_region = prepare_s4_exact_call_region_from_template_v1(
+        core_template=template,
+        plan_template=plan_template,
+        exact_call_id="s4-rvir-exact-call-aot",
+        topology=TOPOLOGY,
+        stream=aot_stream,
+        assets=assets,
+    )
+    aot = execute_s4_exact_call_handoff_v1(
+        program=program,
+        module=module,
+        snapshot=snapshot,
+        mapping=mapping,
+        live_sources=aot_live,
+        exact_call_id="s4-rvir-exact-call-aot",
+        input_spec=input_spec,
+        linear_spec_C=objective,
+        relu_pre=mapping.relu_pre,
+        initial_state=instance.initial_state,
+        mutation_policy=production.mutation_policy,
+        schedule=schedule,
+        topology=TOPOLOGY,
+        stream=aot_stream,
+        assets=assets,
+        prevalidated_plan=instance,
+        prepared_region=aot_region,
+        signature_mapping=signature_mapping,
+    )
     control = execute_terminal_optimizer_with_lower_adjoint_handoff_v1(
         module,
         input_spec,
@@ -190,11 +237,11 @@ def exact_call_case():
         schedule=schedule,
         topology=TOPOLOGY,
     )
-    return candidate, prepared, control
+    return candidate, prepared, aot, control
 
 
 def test_s4_exact_call_matches_native_terminal_handoff(exact_call_case) -> None:
-    candidate, _prepared, control = exact_call_case
+    candidate, _prepared, _aot, control = exact_call_case
     candidate_result = candidate.handoff_result
     assert torch.allclose(
         candidate_result.optimizer_result.terminal_lower,
@@ -221,7 +268,7 @@ def test_s4_exact_call_matches_native_terminal_handoff(exact_call_case) -> None:
 
 
 def test_s4_exact_call_receipt_has_no_compile_or_fallback(exact_call_case) -> None:
-    candidate, _prepared, _control = exact_call_case
+    candidate, _prepared, _aot, _control = exact_call_case
     receipt = candidate.receipt
     receipt.validate()
     assert receipt.evaluation_count == 10
@@ -232,10 +279,23 @@ def test_s4_exact_call_receipt_has_no_compile_or_fallback(exact_call_case) -> No
 
 
 def test_s4_prepared_exact_call_matches_dynamic_bridge(exact_call_case) -> None:
-    candidate, prepared, _control = exact_call_case
+    candidate, prepared, _aot, _control = exact_call_case
     observed = prepared.handoff_result.optimizer_result.terminal_lower
     expected = candidate.handoff_result.optimizer_result.terminal_lower
     assert torch.allclose(observed, expected, atol=2e-4, rtol=2e-4)
     assert torch.equal(torch.sign(observed), torch.sign(expected))
     assert prepared.receipt.setup_ns < candidate.receipt.setup_ns
     assert prepared.receipt.compile_inside_exact_call_count == 0
+
+
+def test_s4_aot_template_exact_call_matches_snapshot_prepared_bridge(
+    exact_call_case,
+) -> None:
+    _candidate, prepared, aot, _control = exact_call_case
+    observed = aot.handoff_result.optimizer_result.terminal_lower
+    expected = prepared.handoff_result.optimizer_result.terminal_lower
+    assert torch.allclose(observed, expected, atol=2e-4, rtol=2e-4)
+    assert torch.equal(torch.sign(observed), torch.sign(expected))
+    assert aot.receipt.compile_inside_exact_call_count == 0
+    assert aot.receipt.fallback_count == 0
+    assert aot.receipt.region_template_hash != aot.receipt.production_plan_hash
