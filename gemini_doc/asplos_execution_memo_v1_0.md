@@ -1,5 +1,13 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-31 S4-1B Round 1外审批准并关闭，只开放S4-1C compressed gradient
+> implementation/correctness**。exchange=`asplos27-s4-1b-six-site-20260831`，approved round=`1`，
+> assurance=`E2-DIRECT-LEGACY`；AC1—AC7 PASS，blocker/major/minor=`0/0/1`。唯一mandatory minor为
+> selector runtime逐文件Pylint 9.80，与10.00声明不符；`588144f`仅补`import-error`禁用后实测恢复
+> `10.00/10`、专项9 passed、mypy clean。executor侧exchange validate与dol lint均PASS，状态=
+> `VALIDATED-S4-1B-SIX-SITE-VALUE`。当前只允许S4-1C的六dα、一active dβ、17/23-action与terminal-lA
+> correctness；S4-1D、optimizer、timing、performance、same-solver、10x和ASPLOS-ready继续关闭。
+
 > **2026-08-31 S4-1B六站点production implementation/correctness candidate已完成，下一动作是本批
 > 独立外审**。实现source=`760fa0d`；本批严格复用R31B2 coefficient propagation、D1C/D2B staged residual与S4-1B0 ternary
 > 语义：Pass A按冻结19-action顺序在真实系数边界生成`endpoint_ainput_v2+a18/a20/a24/a26/a29`，6个

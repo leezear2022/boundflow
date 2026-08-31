@@ -1,5 +1,10 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-31 当前状态：S4-1B外审批准关闭，S4-1C implementation/correctness开放**。Round 1
+> AC1—AC7 PASS；F1 Pylint口径由`588144f`关闭，exchange=`closed`、approved_round=`1`。状态=
+> `VALIDATED-S4-1B-SIX-SITE-VALUE`。下一工程动作是六dα+一active dβ、17/23-action Pass C和terminal
+> lA arena correctness；S4-1D、optimizer与所有timing/performance仍关闭。
+
 > **2026-08-31 当前状态：S4-1B六站点production correctness实现完成，等待下一轮独立外审**。
 > source=`760fa0d`。已接通真实R31B2系数边界的19-action selector Pass A和42-read+7-write TVM Pass B；六selector为TIR
 > kernel，selected-input复用coefficient arena，六V槽复用单一arena，真实ResNet2B与PyTorch oracle通过。

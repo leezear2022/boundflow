@@ -1,0 +1,36 @@
+{
+  "doc": "asplos27-s4-1b-six-site-20260831/r001/audit",
+  "type": "audit",
+  "task": "asplos27-s4-1b-six-site-20260831",
+  "round": 1,
+  "from": "external-model",
+  "to": "codex",
+  "ts": "2026-08-31T11:52:52Z",
+  "verdict": "approve",
+  "delivery": "asplos27-s4-1b-six-site-20260831/r001/delivery",
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "minor",
+      "path": "boundflow/runtime/asplos27_s4_coefficient_selector_pass.py",
+      "evidence": "Per-file pylint was 9.80/10 because lazy import tvm triggered E0401 while delivery claimed 10.00/10",
+      "advice": "Mandatory before close: add import-error disable or lower the claim"
+    },
+    {
+      "id": "F2",
+      "severity": "info",
+      "path": "assurance profile",
+      "evidence": "No multi-process formal artifact; correctness was witnessed through source review and auditor-run GPU targeted joint and full suites",
+      "advice": "S4 formal closure still requires challenge+witness"
+    },
+    {
+      "id": "F3",
+      "severity": "info",
+      "path": "auditor environment",
+      "evidence": "dol CLI was absent from auditor PATH",
+      "advice": "Executor must run exchange validate and dol lint"
+    }
+  ],
+  "summary": "External original verdict approve-with-minor-correction: AC1-AC7 PASS, 0 blocker, 0 major, 1 mandatory minor, 2 info; assurance E2-DIRECT-LEGACY. F1 must be fixed before close.",
+  "md_sha256": "e401887bd6ee3aa52cdea5d688d69933357bfe3db180c0239f4e084a75279995"
+}

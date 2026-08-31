@@ -1,5 +1,12 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-31 S4-1B外审批准关闭为`VALIDATED-S4-1B-SIX-SITE-VALUE`**：外审现场复现专项9、
+> 联合189、全量`2082 passed, 3 skipped`，独立确认19-action插入点、49参数ABI、六TIR selector、
+> coefficient/V arena ownership与六槽PyTorch oracle。唯一minor Pylint 9.80口径由`588144f`修复至
+> `10.00/10`；exchange已closed、approved_round=1、assurance=`E2-DIRECT-LEGACY`。该关闭只开放S4-1C
+> compressed gradient/terminal-lA implementation/correctness；不形成gradient、optimizer或性能claim，S4-4
+> 仍须challenge+witness。
+
 > **2026-08-31 S4-1B production implementation/correctness candidate，不升级VALIDATED或性能claim**：
 > source=`760fa0d`。新实现严格对应冻结的19-action Pass A与49-argument Pass B；六selector使用full-content-identified TIR
 > pack module，六站点图含6 cuDNN Conv、1 Gemm、1 ternary select、5 selected-ReLU和6 persistent copy。
