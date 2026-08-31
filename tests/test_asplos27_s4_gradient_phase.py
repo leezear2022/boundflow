@@ -283,3 +283,45 @@ def test_s4_gradient_receipt_rejects_claim_and_inventory_drift() -> None:
         ):
             changed.validate()
     buffers.close()
+
+
+@pytest.mark.parametrize("attack", ["metadata", "default_stream", "parameter"])
+def test_s4_gradient_runtime_rejects_identity_and_stream_attacks(attack: str) -> None:
+    _, stream, executor, buffers, value_result = _fixture()
+    resources = buffers._resources
+    assert resources is not None
+    if attack == "parameter":
+        with torch.no_grad():
+            resources._parameters[0][0, 0] += 0.125
+        with pytest.raises(
+            S4GradientRuntimeError, match="S4_GRADIENT_STATE_VERSION_MISMATCH"
+        ):
+            PreparedS4GradientEmittersV1(
+                executor,
+                value_result,
+                buffers,
+                evaluation_generation=1,
+                state_version=2,
+            )
+        buffers.close()
+        return
+    runtime = PreparedS4GradientEmittersV1(
+        executor,
+        value_result,
+        buffers,
+        evaluation_generation=1,
+        state_version=2,
+    )
+    if attack == "metadata":
+        runtime.beta_sign[0, 0] = -1
+        with torch.cuda.stream(stream):
+            with pytest.raises(
+                S4GradientRuntimeError, match="S4_GRADIENT_STATE_VERSION_MISMATCH"
+            ):
+                runtime.run(terminal=False)
+    else:
+        with pytest.raises(
+            S4GradientRuntimeError, match="S4_GRADIENT_CROSS_STREAM_USE"
+        ):
+            runtime.run(terminal=False)
+    buffers.close()
