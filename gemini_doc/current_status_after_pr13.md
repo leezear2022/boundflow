@@ -1,5 +1,11 @@
 # BoundFlow 当前状态：PR-13 Closure 之后
 
+> **2026-08-31 当前状态：S4-1A已外审关闭，S4-1B0 implementation/correctness开放**。Round 1外审
+> AC1—AC7通过并给出3项minor；`20f57bb`关闭reason replay、mypy与Pylint口径，Round 2获批后exchange已
+> 正式close。状态=`VALIDATED-S4-1A-ORDERED-BUFFER-PREPARE`。下一动作严格限定为isolated ternary endpoint
+> TVM/TIR、cache/receipt/prepared-probe、20类negative与correctness artifact；evaluator、optimizer、timing、
+> performance、same-solver和10x仍全部关闭。
+
 > **2026-08-30 当前状态：S4-1A formal candidate待外审，后继代码关闭**。生产exact-call已实际完成ordered
 > compressed mutable buffer prepare：6 α+1 active β parameter、7 gradient、lower/upstream、16 storage/view、
 > 5 empty β token；5 positive的40/40 binary pair exact，7 isolated fault全部clean，negative registry=77，

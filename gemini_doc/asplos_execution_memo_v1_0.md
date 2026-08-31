@@ -1,5 +1,12 @@
 # BoundFlow ASPLOS 执行备忘录 v1.0
 
+> **2026-08-31 当前唯一指令：S4-1A外审批准关闭，只实施S4-1B0 isolated ternary endpoint
+> correctness**。DocOps exchange round 2已approved并由executor close；F1—F3 hardening位于`20f57bb`，
+> 定向=`85 passed`、全量=`2051 passed, 3 skipped`。允许新增独立S4 ternary pack/select backend、cache、
+> immutable module receipt、caller-owned prepared probe、20类stable negative与11-process correctness
+> artifact。禁止接S4 evaluator/S4-1A ticket、禁止production arena alias、禁止计时和任何performance/
+> same-solver/complete-query/10x claim；S4-1B及以后仍关闭。
+
 > **2026-08-30 S4-1A已形成外审前formal candidate；下一动作仅为S4-1A独立外审**。
 > 真实αβ-CROWN exact-call上5个fresh正向进程均建立6 α+1 active β parameter、7 gradient、lower/upstream、
 > 16个独立storage/base DLPack view与5个empty β token；40/40 source/candidate二进制对逐字节一致。

@@ -1,5 +1,14 @@
 # BoundFlow ASPLOS Claims Map
 
+> **2026-08-31 S4-1A外审批准并关闭，只开放S4-1B0 implementation/correctness**：DocOps task=
+> `asplos27-s4-1a-ordered-buffer-20260830`、approved round=`2`。Round 1外审亲启12-process fresh run并
+> 独立重算，AC1—AC7通过；F1 replay reason绑定、F2 mypy三处类型错误、F3逐文件Pylint口径已由
+> `20f57bb`关闭。最终定向=`85 passed`、全量=`2051 passed, 3 skipped`、7交付文件mypy clean且逐文件
+> Pylint=`10.00/10`。状态升级为`VALIDATED-S4-1A-ORDERED-BUFFER-PREPARE`，保证等级仍限定为
+> `E2-DIRECT-LEGACY`。当前只开放S4-1B0 isolated ternary endpoint TVM/TIR implementation/correctness；
+> production evaluator binding、optimizer、formal timing、performance、same-solver、complete-query与10x继续
+> 关闭，S4-4仍须challenge+witness。
+
 > **2026-08-30 S4-1A external-audit candidate，不升级VALIDATED claim**：source=`bce26f0`，artifact=
 > `artifacts/asplos27-s4-1a-buffer/resnet2b-prop0-v1`。5 positive + 7 isolated fault fresh进程闭合本地
 > ordered buffer ownership；正向40/40 indexed raw-binary source/candidate exact，16/16 storage/view，empty β
