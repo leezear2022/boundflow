@@ -2,7 +2,7 @@
 """Fail-closed activation gate for S4-1B0 implementation/correctness."""
 
 # The sibling design checker intentionally exposes the same small CLI shape.
-# pylint: disable=duplicate-code
+# pylint: disable=duplicate-code,too-many-arguments,too-many-locals
 
 from __future__ import annotations
 
@@ -24,6 +24,12 @@ from check_asplos27_s4_1b0_design_contracts_stdlib import (
 TASK_ID = "asplos27-s4-1a-ordered-buffer-20260830"
 EXPECTED_BRANCH = "feat/rvir-v4-production-state-ownership-v1"
 EXPECTED_S4_1A_BASELINE_COMMIT = "f773370"
+CLOSURE_ADDENDUM_PATH = Path(
+    "gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_EXTERNAL_AUDIT_CLOSURE_CHANGELOG_2026_08_31.md"
+)
+EXPECTED_CLOSURE_ADDENDUM_SHA256 = (
+    "3718a3694d9bff4acea32c931053bd079fedeb45a0b49c062958ff638c2c6b21"
+)
 REQUIRED_ANCESTORS = (
     "f773370",  # S4-1A formal validation
     "a66e383",  # S4-1B0 formal artifact contract freeze
@@ -39,6 +45,7 @@ CRITICAL_PATHS = (
     "gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_FORMAL_ARTIFACT_CONTRACT_V1_2026_08_30.json",
     "scripts/check_asplos27_s4_1b0_design_contracts_stdlib.py",
     "scripts/check_asplos27_s4_1b0_activation_gate_stdlib.py",
+    CLOSURE_ADDENDUM_PATH.as_posix(),
 )
 WAIT_STATUSES = {
     "in_progress": "s4-1a-exchange-in-progress",
@@ -312,7 +319,10 @@ def _validate_closure_document(
     state: Mapping[str, Any],
     approved_round: int,
     expected_doc: str,
-) -> dict[str, Any]:
+    *,
+    closure_addendum: Path | None = None,
+    closure_addendum_sha256: str = EXPECTED_CLOSURE_ADDENDUM_SHA256,
+) -> tuple[dict[str, Any], str]:
     closure = _load_json(paths["closure_json"])
     if (
         closure.get("task") != TASK_ID
@@ -331,8 +341,25 @@ def _validate_closure_document(
         raise GateError("closure-executor-mismatch")
     if closure.get("md_sha256") != _sha256(paths["closure_md"]):
         raise GateError("closure-md-sha256-mismatch")
-    _require_nonempty_string(closure.get("note"), "closure-note-empty")
-    return closure
+    note = closure.get("note")
+    if isinstance(note, str) and note.strip():
+        return closure, "closure-note"
+    if closure_addendum is None:
+        raise GateError("closure-note-empty")
+    if not closure_addendum.is_file():
+        raise GateError("closure-addendum-missing")
+    if _sha256(closure_addendum) != closure_addendum_sha256:
+        raise GateError("closure-addendum-sha256-mismatch")
+    addendum = closure_addendum.read_text(encoding="utf-8")
+    required = (
+        "status: validated-s4-1a-ordered-buffer-prepare",
+        "approved-round: 2",
+        "performance-claimed: false",
+        "S4-1A=`VALIDATED-S4-1A-ORDERED-BUFFER-PREPARE`",
+    )
+    if any(item not in addendum for item in required):
+        raise GateError("closure-addendum-semantics-mismatch")
+    return closure, "versioned-closure-addendum"
 
 
 def _validate_registered_docs(
@@ -349,7 +376,11 @@ def _validate_registered_docs(
 
 
 def _validate_closed_exchange(
-    exchange_root: Path, state: Mapping[str, Any]
+    exchange_root: Path,
+    state: Mapping[str, Any],
+    *,
+    closure_addendum: Path | None = None,
+    closure_addendum_sha256: str = EXPECTED_CLOSURE_ADDENDUM_SHA256,
 ) -> dict[str, Any]:
     approved_round = int(state["approved_round"])
     if not isinstance(state.get("rev"), int) or int(state["rev"]) < 6:
@@ -370,7 +401,14 @@ def _validate_closed_exchange(
         expected_doc=audit_doc,
         expected_delivery_doc=delivery_doc,
     )
-    closure = _validate_closure_document(paths, state, approved_round, closure_doc)
+    closure, closure_note_source = _validate_closure_document(
+        paths,
+        state,
+        approved_round,
+        closure_doc,
+        closure_addendum=closure_addendum,
+        closure_addendum_sha256=closure_addendum_sha256,
+    )
     _validate_registered_docs(
         state, (request_doc, delivery_doc, audit_doc, closure_doc)
     )
@@ -379,6 +417,7 @@ def _validate_closed_exchange(
         "audit_verdict": audit["verdict"],
         "blocking_finding_count": 0,
         "closure_resolution": closure["resolution"],
+        "closure_note_source": closure_note_source,
         "request_md_sha256": request["md_sha256"],
         "delivery_md_sha256": delivery["md_sha256"],
         "audit_md_sha256": audit["md_sha256"],
@@ -447,10 +486,20 @@ def _write_json(path: Path, value: Mapping[str, Any]) -> None:
 
 
 def _expect_closed_exchange_error(
-    root: Path, state: Mapping[str, Any], expected: str
+    root: Path,
+    state: Mapping[str, Any],
+    expected: str,
+    *,
+    closure_addendum: Path | None = None,
+    closure_addendum_sha256: str = EXPECTED_CLOSURE_ADDENDUM_SHA256,
 ) -> None:
     try:
-        _validate_closed_exchange(root, state)
+        _validate_closed_exchange(
+            root,
+            state,
+            closure_addendum=closure_addendum,
+            closure_addendum_sha256=closure_addendum_sha256,
+        )
     except GateError as exc:
         if str(exc) != expected:
             raise GateError(
@@ -562,7 +611,34 @@ def _closed_exchange_self_test() -> int:
         _expect_closed_exchange_error(
             root, state, "delivery-validation-not-pass:synthetic-check"
         )
-    return 4
+        delivery["validation"] = [{"cmd": "synthetic-check", "result": "pass"}]
+        _write_json(round_root / "delivery.json", delivery)
+        closure["note"] = ""
+        _write_json(root / "closure.json", closure)
+        addendum = root / "closure-addendum.md"
+        addendum.write_text(
+            "status: validated-s4-1a-ordered-buffer-prepare\n"
+            "approved-round: 2\n"
+            "performance-claimed: false\n"
+            "S4-1A=`VALIDATED-S4-1A-ORDERED-BUFFER-PREPARE`\n",
+            encoding="utf-8",
+        )
+        addendum_sha256 = _sha256(addendum)
+        _validate_closed_exchange(
+            root,
+            state,
+            closure_addendum=addendum,
+            closure_addendum_sha256=addendum_sha256,
+        )
+        addendum.write_text("tampered\n", encoding="utf-8")
+        _expect_closed_exchange_error(
+            root,
+            state,
+            "closure-addendum-sha256-mismatch",
+            closure_addendum=addendum,
+            closure_addendum_sha256=addendum_sha256,
+        )
+    return 6
 
 
 def _publication_state_self_test() -> int:
@@ -698,7 +774,11 @@ def evaluate(root: Path) -> tuple[GateDecision, dict[str, Any]]:
         ),
     }
     if decision.status == "PROCEED":
-        evidence["closure"] = _validate_closed_exchange(exchange_root, exchange_state)
+        evidence["closure"] = _validate_closed_exchange(
+            exchange_root,
+            exchange_state,
+            closure_addendum=root / CLOSURE_ADDENDUM_PATH,
+        )
     return decision, evidence
 
 
