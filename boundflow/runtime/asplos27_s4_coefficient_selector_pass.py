@@ -12,7 +12,7 @@ failed attempt poisons the owner and cannot be retried.
 # pylint: disable=too-many-boolean-expressions
 # pylint: disable=too-many-arguments,duplicate-code
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements
-# pylint: disable=import-outside-toplevel
+# pylint: disable=import-error,import-outside-toplevel
 
 from __future__ import annotations
 
