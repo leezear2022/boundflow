@@ -12,8 +12,15 @@ from dataclasses import dataclass
 import torch
 
 from boundflow.backends.tvm.asplos27_s4_six_site_value import (
+    CompiledS4SelectorPackV1,
     CompiledS4SixSiteValueV1,
     compile_s4_six_site_value_v1,
+)
+from boundflow.backends.tvm.asplos27_s4_compact_coefficient import (
+    CompiledS4CompactCoefficientV1,
+)
+from boundflow.backends.tvm.asplos27_s4_compressed_gradient import (
+    CompiledS4CompressedGradientV1,
 )
 from boundflow.runtime.asplos27_s4_coefficient_selector_pass import (
     PreparedS4CoefficientSelectorPassV1,
@@ -127,7 +134,10 @@ class PreparedS4AllStateEvaluatorV1:
         *,
         exact_call_id: str,
         stream: torch.cuda.Stream,
+        compiled_compact: CompiledS4CompactCoefficientV1 | None = None,
+        compiled_selector: CompiledS4SelectorPackV1 | None = None,
         compiled_value: CompiledS4SixSiteValueV1 | None = None,
+        compiled_gradient: CompiledS4CompressedGradientV1 | None = None,
     ) -> None:
         import tvm_ffi
 
@@ -149,7 +159,10 @@ class PreparedS4AllStateEvaluatorV1:
         self.device = device
         self.stream = stream
         self.exact_call_id = exact_call_id
-        self.compact = PreparedS4CompactCoefficientV1(executor, buffers)
+        self.compact = PreparedS4CompactCoefficientV1(
+            executor, buffers, compiled=compiled_compact
+        )
+        self.compiled_selector = compiled_selector
         self.selector = PreparedS4CoefficientSelectorPassV1(
             device=device,
             exact_call_id=exact_call_id,
@@ -162,7 +175,9 @@ class PreparedS4AllStateEvaluatorV1:
             torch.cuda.stream(stream),
             tvm_ffi.use_torch_stream(torch.cuda.stream(stream)),
         ):
-            self.compact.capture_selectors(self.selector)
+            self.compact.capture_selectors(
+                self.selector, compiled_selector=self.compiled_selector
+            )
         stream.synchronize()
         read_arguments = _active_value_read_arguments(executor, buffers, self.selector)
         coefficient_arena = executor.forward_executor.scratch_1
@@ -186,6 +201,7 @@ class PreparedS4AllStateEvaluatorV1:
             buffers,
             evaluation_generation=0,
             state_version=0,
+            compiled=compiled_gradient,
             compact_coefficient=self.compact,
         )
         with torch.cuda.stream(stream):
@@ -226,7 +242,9 @@ class PreparedS4AllStateEvaluatorV1:
             tvm_ffi.use_torch_stream(torch.cuda.stream(self.stream)),
         ):
             self.value.begin_pass_a()
-            self.compact.capture_selectors(self.selector)
+            self.compact.capture_selectors(
+                self.selector, compiled_selector=self.compiled_selector
+            )
             self.value.adopt_selectors(self.selector)
             self.value.run_pass_b()
             value_result = self.value.handoff_to_coefficient_recompute()

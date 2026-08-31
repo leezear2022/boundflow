@@ -27,6 +27,9 @@ from boundflow.backends.tvm.asplos27_s4_compact_coefficient import (
     S4_COMPACT_RESIDUAL6_STAGE2,
     compile_s4_compact_coefficient_v1,
 )
+from boundflow.backends.tvm.asplos27_s4_six_site_value import (
+    CompiledS4SelectorPackV1,
+)
 from boundflow.backends.tvm.r3_d1c_wrapper_schedule import (
     R3D1C_RESIDUAL11_STAGE1,
     R3D1C_RESIDUAL6_STAGE1,
@@ -268,7 +271,12 @@ class PreparedS4CompactCoefficientV1:
             bias,
         )
 
-    def capture_selectors(self, owner: PreparedS4CoefficientSelectorPassV1) -> None:
+    def capture_selectors(
+        self,
+        owner: PreparedS4CoefficientSelectorPassV1,
+        *,
+        compiled_selector: CompiledS4SelectorPackV1 | None = None,
+    ) -> None:
         """Run Pass A from the active compact parameters."""
 
         executor = self.executor
@@ -283,7 +291,8 @@ class PreparedS4CompactCoefficientV1:
                     "pack_a20": executor._residual6_scratch,
                     "pack_a18": s0[:12288],
                     "pack_ainput": s1[:18432],
-                }
+                },
+                compiled=compiled_selector,
             )
         executor._launch_b2(R31B2_CLEAR_SYMBOL, s0, s1)
         owner.begin()

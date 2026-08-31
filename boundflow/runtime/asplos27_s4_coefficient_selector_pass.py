@@ -24,6 +24,10 @@ from typing import NoReturn
 
 import torch
 
+from boundflow.backends.tvm.asplos27_s4_six_site_value import (
+    CompiledS4SelectorPackV1,
+)
+
 S4_SELECTOR_PASS_SCHEMA = "boundflow.asplos27-s4-selector-pass/v1"
 
 S4_SELECTOR_ACTIONS = (
@@ -227,7 +231,12 @@ class PreparedS4CoefficientSelectorPassV1:
         self._compiled_pack_launch_count = 0
         self._eager_pack_count = 0
 
-    def bind_compiled_sources(self, sources: dict[str, torch.Tensor]) -> None:
+    def bind_compiled_sources(
+        self,
+        sources: dict[str, torch.Tensor],
+        *,
+        compiled: CompiledS4SelectorPackV1 | None = None,
+    ) -> None:
         """Prepare six source/output DLPack pairs before Pass A begins."""
 
         import tvm
@@ -249,7 +258,7 @@ class PreparedS4CoefficientSelectorPassV1:
             if self.device.index is not None
             else torch.cuda.current_device()
         )
-        compiled = compile_s4_selector_pack_v1(device_index=ordinal)
+        compiled = compiled or compile_s4_selector_pack_v1(device_index=ordinal)
         compiled.validate()
         backend_by_name = {
             name: (symbol, numel, policy)
