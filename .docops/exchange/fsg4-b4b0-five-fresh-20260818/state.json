@@ -1,0 +1,21 @@
+{
+  "task": "fsg4-b4b0-five-fresh-20260818",
+  "title": "FSG4 B4-B0 five-fresh production capture external audit",
+  "status": "closed",
+  "round": 2,
+  "executor": "codex",
+  "auditor": "external-model",
+  "approved_round": 2,
+  "docs": [
+    "fsg4-b4b0-five-fresh-20260818/request",
+    "fsg4-b4b0-five-fresh-20260818/r001/delivery",
+    "fsg4-b4b0-five-fresh-20260818/r001/audit",
+    "fsg4-b4b0-five-fresh-20260818/r001/response-F1",
+    "fsg4-b4b0-five-fresh-20260818/r002/delivery",
+    "fsg4-b4b0-five-fresh-20260818/r002/audit",
+    "fsg4-b4b0-five-fresh-20260818/closure"
+  ],
+  "rev": 10,
+  "created": "2026-08-18T05:21:50Z",
+  "updated": "2026-08-18T06:18:23Z"
+}

@@ -1,0 +1,374 @@
+{
+  "admission": {
+    "blockers": [
+      "gpu_infrastructure_ready"
+    ],
+    "g1_ready": false,
+    "gate_results": {
+      "competitor_environment_ready": true,
+      "frontend_observed_matrix_importable": true,
+      "gpu_infrastructure_ready": false,
+      "shared_non_unknown_workload_present": true
+    }
+  },
+  "amdahl_preregistration": {
+    "complete_query_target": 1.15,
+    "formula_projected": "1 / ((1 - s) + s / r)",
+    "formula_required": "s / (s + 1 / T - 1)",
+    "gpu_complete_query_share": null,
+    "gpu_queue_share": null,
+    "maximum_required_region_speedup": 10.0,
+    "performance_claimed": false,
+    "queue_target": 1.2,
+    "required_region_speedup": null,
+    "status": "not_auditable_gpu_unavailable"
+  },
+  "competitor": {
+    "alpha_beta_crown": {
+      "commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+      "dirty": false,
+      "interpreter_probe": {
+        "returncode": 0,
+        "stderr": "<ABCROWN_ROOT>/.venv/lib/python3.11/site-packages/torch/jit/_script.py:1488: DeprecationWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.\n  warnings.warn(\nW0806 02:25:43.441000 1870356 torch/utils/cpp_extension.py:140] No CUDA runtime is found, using CUDA_HOME='/opt/cuda'\n<ABCROWN_ROOT>/.venv/lib/python3.11/site-packages/torch/cuda/__init__.py:1061: UserWarning: Can't initialize NVML\n  raw_cnt = _raw_device_count_nvml()",
+        "stdout": "Adding complete_verifier to sys.path\nINFO     02:25:43     [tensor_storage.py:70] Hugepage enabled for branch-and-bound domains.\n{\"abcrown\": \"0.7.2\", \"auto_lirpa\": \"0.7.2\", \"cuda_available\": false, \"device_count\": 0, \"python\": \"3.11.15\", \"torch\": \"2.11.0+cu130\", \"torch_cuda_build\": \"13.0\"}"
+      },
+      "pyproject_sha256": "9aba4581158036b2a87a5822a6ab0644ef83826668560aa23aa1cf2e1af40a0f",
+      "python_identity": ".venv/bin/python",
+      "root_identity": "alpha-beta-CROWN",
+      "source_available": true,
+      "submodule_status": "5a098e8f9fb5786a428a024981d833d303921f2d auto_LiRPA (heads/master)",
+      "uv_lock_sha256": "3b5fe60f59e8a48bedbe0fb6b736881261ce76285f8c4dee9c5d45f94fd65d3b"
+    },
+    "performance_claimed": false,
+    "status": "ready",
+    "vendored_auto_lirpa": {
+      "boundconv_source_oracle": {
+        "dense_conv_transpose2d": true,
+        "onehot_to_dense": true,
+        "patches_path": true,
+        "path": "boundflow/3rdparty/auto_LiRPA/auto_LiRPA/operators/convolution.py",
+        "sha256": "ce819f3c5e52e70b49d061d7a193e9b96e19974d11e20ded1bc8d561298ea6d0"
+      },
+      "commit": "9d100ec070868440b48d34e2f1dd21b97aab9172",
+      "current_torch_declared_supported": false,
+      "current_torch_version": "2.12.1+cu132",
+      "declared_torch_lower_inclusive": "2.0.0",
+      "declared_torch_upper_exclusive": "2.9.0",
+      "dirty": false
+    }
+  },
+  "frontend": {
+    "average_pool_supported": false,
+    "claim_boundary": "only the three replayed NRIR-18 workloads; broader held-out model-family coverage remains pending",
+    "observed_workload_ops": {
+      "cifar10_resnet:000": [
+        "add",
+        "conv2d",
+        "flatten",
+        "linear",
+        "relu"
+      ],
+      "mnistfc:000": [
+        "flatten",
+        "linear",
+        "relu"
+      ],
+      "mnistfc:2": [
+        "flatten",
+        "linear",
+        "relu"
+      ],
+      "oval21:000": [
+        "conv2d",
+        "flatten",
+        "linear",
+        "relu"
+      ]
+    },
+    "performance_claimed": false,
+    "selected_crown_supported_ops": [
+      "add",
+      "concat",
+      "conv2d",
+      "flatten",
+      "linear",
+      "relu",
+      "reshape"
+    ],
+    "status": "validated_reduced",
+    "unsupported_observed_ops": {
+      "cifar10_resnet:000": [],
+      "mnistfc:000": [],
+      "mnistfc:2": [],
+      "oval21:000": []
+    }
+  },
+  "gpu": {
+    "asus_firmware": {
+      "dgpu_disable": "1",
+      "enable_queued_for_delayed_apply": true,
+      "gpu_mux_mode": "1"
+    },
+    "driver": {
+      "nvidia_device_nodes": [],
+      "nvidia_module_files": [
+        "/lib/modules/7.1.5-arch1-2/extramodules/nvidia.ko.zst"
+      ],
+      "nvidia_module_loaded": false,
+      "nvidia_pci_visible": false,
+      "nvidia_smi": {
+        "returncode": 9,
+        "stderr": "",
+        "stdout": "NVIDIA-SMI has failed because it couldn't communicate with the NVIDIA driver. Make sure that the latest NVIDIA driver is installed and running."
+      }
+    },
+    "host": {
+      "kernel": "7.1.5-arch1-2",
+      "machine": "x86_64",
+      "platform": "Linux-7.1.5-arch1-2-x86_64-with-glibc2.44"
+    },
+    "performance_claimed": false,
+    "status": "blocked_reboot_required",
+    "torch": {
+      "cuda_available": false,
+      "cuda_build": "13.2",
+      "device_count": 0,
+      "devices": [],
+      "version": "2.12.1+cu132"
+    },
+    "tvm": {
+      "cuda_enabled": true,
+      "import_error": null,
+      "tvm_ffi_error": null,
+      "tvm_ffi_importable": true,
+      "version": "0.23.dev0"
+    }
+  },
+  "limitations": [
+    "This G0 artifact makes no GPU performance, memory, or 40x claim.",
+    "The frontend result covers only workloads already present in the replayed NRIR-18 artifact.",
+    "A shared non-unknown workload must be frozen before G8 TTV/solved metrics have a denominator.",
+    "G1 Amdahl and physical-memory values remain unset until a real CUDA device is visible."
+  ],
+  "memory_reachability": {
+    "b80_allocated": null,
+    "b80_reserved": null,
+    "b_oom": null,
+    "performance_claimed": false,
+    "required_peak_budget_fraction": 0.8,
+    "status": "not_auditable_gpu_unavailable"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.nrir49-g0-admission/v1",
+  "solveability": {
+    "performance_claimed": false,
+    "qualification_candidate": {
+      "abcrown_result": {
+        "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+        "backend": "external_abcrown",
+        "execution_state": "completed",
+        "performance_claimed": false,
+        "schema_version": "boundflow.multiworkload-worker-result/v1",
+        "solver_status": "verified",
+        "success": true,
+        "worker_elapsed_ns": 46000052,
+        "workload_id": "mnistfc:2"
+      },
+      "native_result": {
+        "backend": "boundflow_native",
+        "clauses": [
+          {
+            "clause_index": 0,
+            "evaluated_nodes": 1,
+            "final_frontier_nodes": 0,
+            "query_clause_trace_hash": "d8ada2b440b5b4e5abaaf815b3e553752e7c543bf6f6f5694564d8dc82153bef",
+            "queue_status": "complete",
+            "root_lower": 0.9948081374168396,
+            "root_upper": 1.0189489126205444,
+            "status": "verified"
+          },
+          {
+            "clause_index": 1,
+            "evaluated_nodes": 1,
+            "final_frontier_nodes": 0,
+            "query_clause_trace_hash": "bdf9e5e9eca67ec57fb460dd4ed57a49ac192615282244261b7c7a4b6726bedc",
+            "queue_status": "complete",
+            "root_lower": 0.9923242926597595,
+            "root_upper": 1.0139018297195435,
+            "status": "verified"
+          },
+          {
+            "clause_index": 2,
+            "evaluated_nodes": 1,
+            "final_frontier_nodes": 0,
+            "query_clause_trace_hash": "76e62a9879144d731e38521db8817623903f6cc86500f4c00bcfc8ca756b041c",
+            "queue_status": "complete",
+            "root_lower": 0.9842786192893982,
+            "root_upper": 1.0056027173995972,
+            "status": "verified"
+          },
+          {
+            "clause_index": 3,
+            "evaluated_nodes": 1,
+            "final_frontier_nodes": 0,
+            "query_clause_trace_hash": "b4d0bbacdc210f67b64ba282c086c964ae01bbb5d769dd2d2f00be56dae3ebcc",
+            "queue_status": "complete",
+            "root_lower": 0.9949768781661987,
+            "root_upper": 1.0218034982681274,
+            "status": "verified"
+          },
+          {
+            "clause_index": 4,
+            "evaluated_nodes": 1,
+            "final_frontier_nodes": 0,
+            "query_clause_trace_hash": "feee2bfb95f6616fb82993ea35f4b76eb04240d1cfb2630ac5edae628407cc0e",
+            "queue_status": "complete",
+            "root_lower": 1.002520203590393,
+            "root_upper": 1.0364075899124146,
+            "status": "verified"
+          },
+          {
+            "clause_index": 5,
+            "evaluated_nodes": 1,
+            "final_frontier_nodes": 0,
+            "query_clause_trace_hash": "e6e046df2c1736fc4b253ec070a2d614d7d7c8a337bf9fb2371494ceaecb5872",
+            "queue_status": "complete",
+            "root_lower": 0.9901911020278931,
+            "root_upper": 1.0149848461151123,
+            "status": "verified"
+          },
+          {
+            "clause_index": 6,
+            "evaluated_nodes": 1,
+            "final_frontier_nodes": 0,
+            "query_clause_trace_hash": "c29ca54d125549784949475eb2080032e4de634768f9db0a0d5f74bd7b3d0e60",
+            "queue_status": "complete",
+            "root_lower": 0.9898760914802551,
+            "root_upper": 1.0187609195709229,
+            "status": "verified"
+          },
+          {
+            "clause_index": 7,
+            "evaluated_nodes": 1,
+            "final_frontier_nodes": 0,
+            "query_clause_trace_hash": "5a1ac5cced127b164c2657d493414cd860f1f9a17b1c890686f902ffe91d7dc5",
+            "queue_status": "complete",
+            "root_lower": 0.9932735562324524,
+            "root_upper": 1.013649821281433,
+            "status": "verified"
+          },
+          {
+            "clause_index": 8,
+            "evaluated_nodes": 1,
+            "final_frontier_nodes": 0,
+            "query_clause_trace_hash": "f483ecf2a02b8c6446eb81b29acc0eb219818a7b79ca08d7276e724cff3efc0c",
+            "queue_status": "complete",
+            "root_lower": 0.9944960474967957,
+            "root_upper": 1.0164152383804321,
+            "status": "verified"
+          }
+        ],
+        "completed_clause_count": 9,
+        "execution_ns": 17290361369,
+        "execution_state": "completed",
+        "pending_clause_indices": [],
+        "performance_claimed": false,
+        "primal_ops": [
+          "flatten",
+          "linear",
+          "relu",
+          "linear",
+          "relu",
+          "linear"
+        ],
+        "query_ir_hash": "9e64c957f95097ec46580f936576ba9cceddf9e6457c442ce27003cf8179e905",
+        "query_trace_hash": "0a794374cd7c6a704258a250361eeaa34b4ca8d5ed5e9f61c815a01a1fd0dab7",
+        "schema_version": "boundflow.multiworkload-worker-result/v1",
+        "setup_ns": 17348565,
+        "solver_status": "verified",
+        "success": true,
+        "unresolved_clause_indices": [],
+        "worker_elapsed_ns": 17308738029,
+        "workload_id": "mnistfc:2"
+      },
+      "performance_claimed": false,
+      "protocol": {
+        "abcrown_alpha_steps": 5,
+        "abcrown_beta_steps": 10,
+        "device": "cpu",
+        "native_alpha_steps": 5,
+        "native_max_nodes": 1,
+        "native_search_steps": 4,
+        "timeout_seconds": 30,
+        "torch_threads": 8
+      },
+      "selection_role": "solveability_qualification_only_not_performance_tuning",
+      "source": {
+        "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+        "abcrown_result_sha256": "45884ed3b35db5a3ec5adb3d013174d3083ad97876b53a699c7e442ce8ebeb5b",
+        "model_relative_path": "benchmarks/mnistfc/mnist-net_256x2.onnx",
+        "model_sha256": "3a5c9730d60bbf1f9b030e731b438436581efd7c00a28ab683c1ec4b6d3449c4",
+        "native_result_sha256": "89695d176504557de6d89bf083f42e3c4aa900d3ee6c8ab061296439a77aaa6a",
+        "property_relative_path": "benchmarks/mnistfc/prop_2_0.03.vnnlib",
+        "property_sha256": "0c36c00722b6c1701f4d5f17b9d28117711f351c6773e450653cc728a2dd224b",
+        "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf"
+      },
+      "status": "qualified_same_non_unknown",
+      "verdict": "verified",
+      "workload_id": "mnistfc:2"
+    },
+    "required_shared_non_unknown_count": 1,
+    "shared_non_unknown_workloads": [
+      "mnistfc:2"
+    ],
+    "source_artifact": "artifacts/multiworkload-competitor-e2e/vnncomp21-three-topology-cpu-v1",
+    "source_evidence_sha256": "ef24ab10eb144de9df97d697d81eee1e8ab3af603b12822aba56c325964c2dcb",
+    "status": "admitted",
+    "workload_solver_status": {
+      "cifar10_resnet:000": {
+        "boundflow_native": "unknown",
+        "external_abcrown": "unknown"
+      },
+      "mnistfc:000": {
+        "boundflow_native": "unknown",
+        "external_abcrown": "verified"
+      },
+      "mnistfc:2": {
+        "boundflow_native": "verified",
+        "external_abcrown": "verified"
+      },
+      "oval21:000": {
+        "boundflow_native": "unknown",
+        "external_abcrown": "verified"
+      }
+    }
+  },
+  "source": {
+    "branch": "feat/nrir49-gpu-selected-crown-opportunity-v1",
+    "commit": "c0ccfb51f2f81f516f0c1cfcd7fce8b4e89b767a",
+    "dirty": true,
+    "dirty_paths": [
+      ".docops/s.md",
+      "docops/ev.jsonl",
+      "docs/change_log.md",
+      "gemini_doc/BOUNDFLOW_GPU_COMPILER_ACCELERATION_RESEARCH_V1_CHANGELOG_2026_08_05.md",
+      "gemini_doc/BOUNDFLOW_GPU_COMPILER_ACCELERATION_RESEARCH_V1_PLAN_2026_08_05.md",
+      "gemini_doc/BOUNDFLOW_NRIR49_G0_GPU_OPPORTUNITY_ADMISSION_V1_CHANGELOG_2026_08_06.md",
+      "gemini_doc/BOUNDFLOW_NRIR49_G0_GPU_OPPORTUNITY_ADMISSION_V1_PLAN_2026_08_06.md",
+      "gemini_doc/README.md",
+      "gemini_doc/external_audit_gpu_compiler_plan_v1_2026_08_05.md",
+      "scripts/run_multiworkload_competitor_e2e_artifact.py",
+      "scripts/run_nrir49_g0_admission.py",
+      "tests/test_multiworkload_competitor_e2e_artifact.py",
+      "tests/test_nrir49_g0_admission.py"
+    ],
+    "probe_sha256": "136c288acd0e8c8980e77a8a7dca937b6847e14a4fd5add1ef2b23b7ba7b40ff"
+  },
+  "status": "blocked",
+  "user_boundconv_40x": {
+    "performance_claimed": false,
+    "sha256": null,
+    "source_identity": null,
+    "status": "not_auditable_source_missing"
+  }
+}

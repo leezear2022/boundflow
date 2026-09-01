@@ -1,0 +1,49 @@
+{
+  "all_rejected": true,
+  "case_count": 8,
+  "rejected_count": 8,
+  "report_hash": "a12c2593b159e928c024b54d37ef09e5602cc95955565bac42dacd69e0522b3e",
+  "results": [
+    {
+      "error": "B4-B3 CIBC protocol differs",
+      "name": "protocol-tolerance",
+      "rejected": true
+    },
+    {
+      "error": "B4-B3 CIBC worker differs: 0",
+      "name": "terminal-maximum",
+      "rejected": true
+    },
+    {
+      "error": "B4-B3 CIBC metric differs: 1:terminal_lower",
+      "name": "metric-allclose",
+      "rejected": true
+    },
+    {
+      "error": "B4-B3 CIBC worker differs: 2",
+      "name": "native-value-bridge",
+      "rejected": true
+    },
+    {
+      "error": "B4-B3 CIBC module identity differs",
+      "name": "module-identity",
+      "rejected": true
+    },
+    {
+      "error": "B4-B3 CIBC worker differs: 4",
+      "name": "local-parity",
+      "rejected": true
+    },
+    {
+      "error": "B4-B3 CIBC semantic replay differs",
+      "name": "summary-maximum",
+      "rejected": true
+    },
+    {
+      "error": "B4-B3 CIBC worker differs: 0",
+      "name": "worker-order",
+      "rejected": true
+    }
+  ],
+  "schema_version": "boundflow.fsg4-b4b3-cibc-five-fresh-tamper/v1"
+}

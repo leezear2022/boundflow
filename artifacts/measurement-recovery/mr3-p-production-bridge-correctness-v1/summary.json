@@ -1,0 +1,121 @@
+{
+  "atomic_rollback_probe_count": 1,
+  "candidate_backward_count": 45,
+  "candidate_forward_count": 50,
+  "fresh_process_count": 10,
+  "general_maximum_absolute_difference": 3.159046173095703e-06,
+  "multi_site_open": false,
+  "optimizer_maximum_absolute_difference": 3.159046173095703e-06,
+  "pair_count": 5,
+  "pair_metrics": [
+    {
+      "allclose": true,
+      "general_element_count": 72202,
+      "general_maximum_absolute_difference": 3.039836883544922e-06,
+      "metric_hash": "e73224a7851066af9694c9b5f5f990204a9daf5bac1bb85f79cf953f89786ab3",
+      "optimizer_element_count": 46440,
+      "optimizer_maximum_absolute_difference": 2.0265579223632812e-06,
+      "pair_index": 0,
+      "sign_exact": true
+    },
+    {
+      "allclose": true,
+      "general_element_count": 72202,
+      "general_maximum_absolute_difference": 2.1457672119140625e-06,
+      "metric_hash": "f3b4e984a44d405f135bf6a9aa3dc74aaf76189f063ce954ce94c4f9d8716704",
+      "optimizer_element_count": 46440,
+      "optimizer_maximum_absolute_difference": 4.76837158203125e-07,
+      "pair_index": 1,
+      "sign_exact": true
+    },
+    {
+      "allclose": true,
+      "general_element_count": 72202,
+      "general_maximum_absolute_difference": 2.3245811462402344e-06,
+      "metric_hash": "b1b261e4a91fe5193fb625a2a397ff17ea7e721b3ac05c32a5ee717ea7b1cb68",
+      "optimizer_element_count": 46440,
+      "optimizer_maximum_absolute_difference": 8.940696716308594e-07,
+      "pair_index": 2,
+      "sign_exact": true
+    },
+    {
+      "allclose": true,
+      "general_element_count": 72202,
+      "general_maximum_absolute_difference": 3.159046173095703e-06,
+      "metric_hash": "4000dd855d71c41adada6e03ec6d5e235474a8c2db158b848f0bf44424913a29",
+      "optimizer_element_count": 46440,
+      "optimizer_maximum_absolute_difference": 3.159046173095703e-06,
+      "pair_index": 3,
+      "sign_exact": true
+    },
+    {
+      "allclose": true,
+      "general_element_count": 72202,
+      "general_maximum_absolute_difference": 2.1457672119140625e-06,
+      "metric_hash": "8db7ae87795fcc5f934e3ddfcc4af5d14e3b5fe8025eb8416d597a7fdfbf8c2c",
+      "optimizer_element_count": 46440,
+      "optimizer_maximum_absolute_difference": 4.76837158203125e-07,
+      "pair_index": 4,
+      "sign_exact": true
+    }
+  ],
+  "performance_claimed": false,
+  "run_order": [
+    [
+      0,
+      0,
+      "provider"
+    ],
+    [
+      0,
+      1,
+      "bridge"
+    ],
+    [
+      1,
+      0,
+      "bridge"
+    ],
+    [
+      1,
+      1,
+      "provider"
+    ],
+    [
+      2,
+      0,
+      "provider"
+    ],
+    [
+      2,
+      1,
+      "bridge"
+    ],
+    [
+      3,
+      0,
+      "bridge"
+    ],
+    [
+      3,
+      1,
+      "provider"
+    ],
+    [
+      4,
+      0,
+      "provider"
+    ],
+    [
+      4,
+      1,
+      "bridge"
+    ]
+  ],
+  "schema_version": "boundflow.mr3-production-bridge-formal/v1",
+  "source_commit": "baddf7c9fb7d6881a4429de484847bcfe2b52368",
+  "status": "VALIDATED-MR3-P-PRODUCTION-BRIDGE-CORRECTNESS",
+  "summary_hash": "1ae9d2cb7a17cc373dbaaf8a1f13fc04d4dee7fd153ca4bd58154d0f7e77d40c",
+  "timing_open": false,
+  "timing_recorded": false
+}

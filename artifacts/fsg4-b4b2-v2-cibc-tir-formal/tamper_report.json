@@ -1,0 +1,59 @@
+{
+  "all_rejected": true,
+  "case_count": 10,
+  "rejected_count": 10,
+  "report_hash": "1fa49a8a4b9e3287455f93777f0d7858581127ce58e2f11f7e4048e74851699c",
+  "results": [
+    {
+      "error": "CIBC TIR protocol differs",
+      "name": "protocol-gate",
+      "rejected": true
+    },
+    {
+      "error": "CIBC TIR parity metric differs",
+      "name": "correctness-parity",
+      "rejected": true
+    },
+    {
+      "error": "CIBC TIR structural receipt differs",
+      "name": "tir-module-receipt",
+      "rejected": true
+    },
+    {
+      "error": "CIBC TIR structural receipt differs",
+      "name": "triton-config-receipt",
+      "rejected": true
+    },
+    {
+      "error": "CIBC TIR timing derivation differs",
+      "name": "timing-raw-groups",
+      "rejected": true
+    },
+    {
+      "error": "CIBC TIR timing derivation differs",
+      "name": "timing-derived-baseline-speedup",
+      "rejected": true
+    },
+    {
+      "error": "CIBC TIR timing derivation differs",
+      "name": "timing-derived-tir-median",
+      "rejected": true
+    },
+    {
+      "error": "CIBC TIR structural receipt differs",
+      "name": "kernel-inventory",
+      "rejected": true
+    },
+    {
+      "error": "CIBC TIR semantic replay differs",
+      "name": "summary-geomean",
+      "rejected": true
+    },
+    {
+      "error": "CIBC TIR timing row differs",
+      "name": "timing-order",
+      "rejected": true
+    }
+  ],
+  "schema_version": "boundflow.fsg4-b4b2-v2-cibc-tir-tamper/v1"
+}

@@ -1,0 +1,23 @@
+{
+  "code_revision": {
+    "boundflow/runtime/rvir_v4_optimizer_mutation.py": "ffe654002201ba1b09d47c251ca775b8885416661f02f8e4b646725b10a99b00",
+    "boundflow/runtime/rvir_v4_production_state.py": "0e2c929d054a24e714e048a0c7bb7cdb86ae3f435fef3983fe1f8dd12ea00e31",
+    "scripts/run_rvir_v4_optimizer_step_artifact.py": "6f711bed13632339b2a9cb60e1dbbc06d54f58042c8835d5f9474e1b0b7323d8",
+    "scripts/run_rvir_v4_production_state_capture.py": "32e9499c2775d9dc7042953b237ca25e4702e954e702fd29e5f69e8c223b5025"
+  },
+  "files": {
+    "README.md": "da5ef681ce8a345c89243b1c4107c1421ae2c04a4ae41699379980ff04953f8d",
+    "optimizer_step_trace.pt": "af5442445230fefda69719888310c97741bbb094854df42300747ba3e81e2437",
+    "production_capture.pt": "f42229dd06be8521865d14af4cc51450ec8bec4e792934b457c276aad50126dc",
+    "replay_stdout.txt": "32605e819ec76790f616905202ba536e629ff62da41167900e78301c8a887f08",
+    "summary.json": "2e43f0bb62b974b9667b75fe003ee7c52c367e2ba7e9a021421c33f11f239f9d",
+    "trace.json": "e290e5a4c92221c7e7bff92bf2f021c9d10d5b658475543b5a45432b6124a62b"
+  },
+  "manifest_hash": "e0fe4eff051acebdaec5ca23120f8b7482499d3ca48c12342070853a863f4d56",
+  "performance_claimed": false,
+  "schema_version": "boundflow.rvir-v4-optimizer-step-artifact/v1",
+  "source_git_head": "af8db0832360fc3ef029686a81e73f337286d8ae",
+  "status": "validated-step-capture-schema",
+  "summary_hash": "8ae8be3fc53f1571109f265ea96a9ddacf806c3c5596459574517df2783505b7",
+  "trace_hash": "fa070bb09265337b297e18fd38ff342ffa657fad75c447f340789a1cb5cc31f4"
+}

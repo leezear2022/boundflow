@@ -1,0 +1,29 @@
+{
+  "all_metrics_allclose": true,
+  "all_metrics_sign_exact": true,
+  "anchor_capture_counts": {
+    "performance-conv-8-candidate": 5,
+    "semantic-active-beta-gemm-14": 5
+  },
+  "capture_count": 10,
+  "coordinated_rewrite_integrity": "pending-separate-probe",
+  "element_comparison_count": 196380,
+  "instance_count": 6,
+  "maximum_absolute_difference": 6.109476089477539e-07,
+  "metric_comparison_count": 60,
+  "p_incoming_a_gradient_count": 5,
+  "performance_claimed": false,
+  "protocol_hash": "b95bc20c8dcaef8635741842b85d4d0bf9e41c9592c60896677907cd96914baf",
+  "receipt_count": 6,
+  "run_count": 5,
+  "s_incoming_a_micro_gate": "covered-by-targeted-test",
+  "s_native_beta_gradient_count": 5,
+  "schema_version": "boundflow.fsg4-b4b1-pytorch-reference-summary/v1",
+  "static_ir_hashes": {
+    "performance-conv-8-candidate": "f781e56c8d10163031ee1e344e03b2599b9164be4de68316bb2f1838467f6f67",
+    "semantic-active-beta-gemm-14": "f5085dde03dde87310b90153f343717417f524b4892f4b0de210206007854a08"
+  },
+  "status": "validated-b4b1-typed-pytorch-reference-pending-external-audit",
+  "summary_hash": "753a9558a7c36cb89f02963dcd08fc8e76fdfcd415f7dc5d969eea77dffc7a0b",
+  "tir_admitted": false
+}

@@ -1,0 +1,49 @@
+{
+  "all_rejected": true,
+  "case_count": 8,
+  "rejected_count": 8,
+  "report_hash": "c24eddc83084d687c83160bc5d72179f86014d118cb28b2ac2fca128a739e2a9",
+  "results": [
+    {
+      "error": "B4-C0 cumulative core protocol differs",
+      "name": "protocol-gate",
+      "rejected": true
+    },
+    {
+      "error": "B4-C0 cumulative core derivation differs: 0",
+      "name": "raw-timing-groups",
+      "rejected": true
+    },
+    {
+      "error": "B4-C0 cumulative core derivation differs: 1",
+      "name": "derived-median",
+      "rejected": true
+    },
+    {
+      "error": "B4-C0 cumulative core worker differs: 2",
+      "name": "receipt-bridge",
+      "rejected": true
+    },
+    {
+      "error": "B4-C0 cumulative core worker differs: 3",
+      "name": "semantic-maximum",
+      "rejected": true
+    },
+    {
+      "error": "B4-C0 cumulative core semantic replay differs",
+      "name": "memory-peak",
+      "rejected": true
+    },
+    {
+      "error": "B4-C0 cumulative core semantic replay differs",
+      "name": "summary-geomean",
+      "rejected": true
+    },
+    {
+      "error": "B4-C0 cumulative core worker differs: 5",
+      "name": "worker-order",
+      "rejected": true
+    }
+  ],
+  "schema_version": "boundflow.fsg4-b4c0-cumulative-core-tamper/v1"
+}

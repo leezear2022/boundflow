@@ -1,0 +1,20 @@
+{
+  "files": {
+    "protocol.json": "391e327bc292c4d61d608ae38dab5308c1d1f5525aaa6ef78c83239c93966703",
+    "raw/model_00_bc.json": "573c5c6ce625447fec41cb09a43dd0a93e5fa9251ed59addd27a8b5b8c8f2adf",
+    "raw/model_01_cb.json": "91dc8977a1b75402910de6583b5725397d46d7482f4c565ba60d68a303ec2e0b",
+    "raw/model_02_bc.json": "17c1aaac385c3791038089100d1aaaaa9b8f1d240b0f15f003c86b70b2fee94e",
+    "raw/model_03_cb.json": "27bf60d6d476ba70f07bb25a322061736b7c3f6c62f76c562a853f58e1d1d1e6",
+    "raw/model_04_bc.json": "854e981654a4223cd1848fac600a812cc17914e869cbc0f56cff2492f74121c4",
+    "raw/model_05_cb.json": "df2ce01cfb4fdc098971cf85d7eb2fc468d5a001d770cc0820b00390766f18fc",
+    "raw/operator_128.json": "b2a09f09efd512a3ec6ffd8d1eb65de887043d606dcdead86a2b87b351d43bd9",
+    "raw/operator_256.json": "edf8ece423887c99841b76ba76de46763321525d2bd672910f4ce146f9b8a335",
+    "raw/operator_64.json": "e134c755b59b440df19f6f36e02591ff30deae5f70f047f97b5bd454aba21c9e",
+    "summary.json": "f7d96b324012bd816b4fd7c65548bb84ea0b7a8edb89bae7e77500fc931ffd12"
+  },
+  "manifest_hash": "78df967521b9a57a6d5fcfdc55d39af85f5794b62b0f1ab16aeca44464d3b4e5",
+  "protocol_hash": "f083cd6bc16b007d17ba1f45850c0d89a8aead9139dd619288f3a11ae7924f5c",
+  "schema_version": "boundflow.cibc-ibp-horizontal-manifest/v1",
+  "source_git_head": "a52b1775e3b8185410e5600da0bde55b3b24102b",
+  "summary_hash": "baea55cb74a791275cad950bd93d266ccc5499f911e141e5757a2238266846e7"
+}

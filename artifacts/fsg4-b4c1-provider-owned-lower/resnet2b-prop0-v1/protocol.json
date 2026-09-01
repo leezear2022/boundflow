@@ -1,0 +1,41 @@
+{
+  "candidate_mode": "provider-owned-lower",
+  "code_revision": {
+    "boundflow/backends/tvm/cibc_dense_exact_conv.py": "ae246258b3d4125c4663f83ed0589578922a4fe742aa4ea60ca65b52195db7c6",
+    "boundflow/runtime/crown_ibp.py": "ca813fb6c106e7773794f9f17d87e2c1c3634d599574e4a8dd1cdca8d2aba7ea",
+    "boundflow/runtime/fsg4_b3_terminal_optimizer_schedule.py": "b53c2ccfc3c5c128b677e613aafed5bb1ecf38e05d3551141d07a9a0871794b8",
+    "boundflow/runtime/fsg4_b4b3_cibc_dense_tir.py": "7fd65c93e2a7e2508ff61ca66beccaf54d27de2e6c147c5f03635ddfe84b15ff",
+    "boundflow/runtime/fsg4_b4b3_cibc_exact_call.py": "218d386b75d527032702cee9d122095fe1f90ce0401b8d07bbb86129afb1014e",
+    "scripts/run_fsg4_b4c0_cumulative_core_artifact.py": "33713970f105f525fdc3574c9a5b369f47b8f6376ab4dfc6b113ce0d9e4996a9",
+    "scripts/run_fsg4_b4c0_cumulative_core_worker.py": "6878d61597a31904f056e9f2cdb2c073b0b435a41dfa176fba85375bc5d63e13",
+    "tests/test_fsg4_b4b3_cibc_exact_call.py": "7d60f127e9aa261a87783e4481815cfcc68c248fe40f5efde7a86be1a5703ce6"
+  },
+  "compile_excluded": true,
+  "correctness_capture_excluded": true,
+  "full_optimizer_runtime_included": true,
+  "groups_per_worker": 30,
+  "memory_ratio_gate": 1.05,
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "native_value_bridge_included": false,
+  "no_regression_geomean_gate": 1.0,
+  "orders": [
+    "BC",
+    "CB",
+    "BC",
+    "CB",
+    "BC",
+    "CB"
+  ],
+  "performance_claimed": false,
+  "protocol_hash": "bd2b6803139ae611785b899ba28e466340393ea5a47a4dd8e4586fbe3f716343",
+  "provider_owned_lower_included": true,
+  "research_geomean_gate": 1.05,
+  "run_count": 6,
+  "schema_version": "boundflow.fsg4-b4c0-cumulative-core-protocol/v1",
+  "semantic_atol": 0.0002,
+  "semantic_rtol": 0.0002,
+  "source_capture_sha256": "f42229dd06be8521865d14af4cc51450ec8bec4e792934b457c276aad50126dc",
+  "source_git_head": "01bb21586ddfcfb1f5e04c31fd2958090a6b7d5f",
+  "warmups_per_side": 3,
+  "worst_worker_gate": 0.98
+}

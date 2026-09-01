@@ -1,0 +1,38 @@
+# Delivery asplos27-s1-canonical-pipeline-20260828/r001/delivery
+
+- round: 1
+- from: codex -> to: external-model
+- base commit: 1822390
+- result commit: 5ea4934
+- ts: 2026-08-28T01:04:28Z
+
+## Changed files
+
+- boundflow/backends/tvm/cibc_ibp_conv.py
+- boundflow/backends/tvm/relax_interval_task_ops.py
+- boundflow/runtime/asplos27_s1_cibc_pipeline.py
+- scripts/run_asplos27_s1_cibc_worker.py
+- scripts/run_asplos27_s1_cibc_artifact.py
+- scripts/install_dev.sh
+- tests/test_asplos27_s1_cibc_pipeline.py
+- gemini_doc/BOUNDFLOW_ASPLOS27_S1_CANONICAL_CIBC_PIPELINE_FORMAL_CLOSURE_2026_08_28.md
+
+## Claims
+
+- S1 standalone IBP canonical Relax/TIR/prepared pipeline qualification only; performance_claimed=false
+
+## Validation
+
+- `targeted-full-static-replay-tamper` -> pass
+
+## Known limitations
+
+- single ResNet2B property; standalone IBP; static CUDA Graph; no same-solver/query/10x claim
+
+## Risks
+
+- 17-intermediate diagnostic not frozen as formal raw; external auditor must not promote it
+
+## Open questions
+
+- Do AC1-AC8 independently pass, allowing only S2 coarse CROWN/custom VJP?

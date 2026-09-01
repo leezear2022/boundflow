@@ -1,0 +1,256 @@
+{
+  "all_direct_semantic_pairs_passed": true,
+  "all_lineage_and_counter_gates_passed": true,
+  "all_terminal_export_pairs_passed": true,
+  "maximum_export_absolute_difference": 6.109476089477539e-06,
+  "pair_count": 5,
+  "pairs": [
+    {
+      "b3_activation": {
+        "activation_hash": "7b8dbd1fe28760c7128b5eb0eb54645a06dfc487f09476ace64d84bb0d071f20",
+        "fallback_dispatch_count": 0,
+        "native_backward_export_hash": "65258106946faf36fe4916c37e9c50cd25cef6c48d11d585f3b5ca19ad51305f",
+        "performance_claimed": false,
+        "provider_callback_count": 0,
+        "terminal_export_crown_rerun_count": 1,
+        "terminal_lower_adjoint_handoff_count": 0
+      },
+      "b4a_activation": {
+        "activation_hash": "5916ff45adc0fa51f988d5357521cd43ae3fe5a57caa27b89d8313b79d670e1c",
+        "assembly_hash": "d76e91fd4faa55e31b70dd155fad5fcc97458b4fe3ee101c800b98bc9ff8f39f",
+        "fallback_dispatch_count": 0,
+        "handoff_hash": "e99da71722c46d68f2fe1cf71306f3cfffe1a8a97e01e045402fecb9f72187c4",
+        "lineage_count": 6,
+        "lineage_hashes": {
+          "17": "695015b9b8983525aa66633545d45fe349d5449b38960007e2e55113dfc6c524",
+          "19": "7ab9ea6fadc40c8b7701234477b3e04ccaa354302fe9a61e3e4f543a49d00408",
+          "23": "251293622b3002533407dad059847ef016083b1e207a8c8377bf51d5ccd41097",
+          "25": "3050df5a8832e20e85398a1daf3630dec2f0c44b56f9edf568c611a67f612554",
+          "28": "e128485edbe8eacd50357217d0ce041068c5ca0ce24acb8f3530626af0412db7",
+          "31": "98bc89443785521bc9d1a004844071a11ba533489893b199a930216f4bf6061a"
+        },
+        "native_backward_export_hash": "6aaccbb7395b1388993c96a21dcfac4b70d0f3be703570e891accefe88eec749",
+        "performance_claimed": false,
+        "provider_callback_count": 0,
+        "terminal_export_crown_rerun_count": 0,
+        "terminal_lower_adjoint_handoff_count": 1
+      },
+      "environment_admitted": true,
+      "export_pair": {
+        "all_sign_exact": true,
+        "maximum_absolute_difference": 3.2186508178710938e-06,
+        "tensor_count": 19
+      },
+      "gpu_uuid": "GPU-0d3ee0a6-e7da-6b3b-69c4-2153bf99ae8f",
+      "pair_index": 0,
+      "performance_claimed": false,
+      "provider_fallback_zero": true,
+      "runtime_environment_hash": "fc3fcc6fd15160482b4654dd94f89bd4a818b03db1984f9a4e9068c07e832b78",
+      "schedule": [
+        "B3",
+        "B4-A"
+      ],
+      "semantic_failures": [],
+      "source_identity": "111486cb7f3cd84c3fa54b472b74518e6a5036d46c4e4b036ad5efe35de44d84"
+    },
+    {
+      "b3_activation": {
+        "activation_hash": "ce8fa499c6134ffac4304c72908198af9015e3550b08433959cc1e2f8e4468ea",
+        "fallback_dispatch_count": 0,
+        "native_backward_export_hash": "75ec27928cdb64a5af2a3cc5b0d9f5723bfc1c48d8545a89202c2c59566909fd",
+        "performance_claimed": false,
+        "provider_callback_count": 0,
+        "terminal_export_crown_rerun_count": 1,
+        "terminal_lower_adjoint_handoff_count": 0
+      },
+      "b4a_activation": {
+        "activation_hash": "5ca7a8fdb38453c41bcf442e02f89e488c6c2fcaa5c17a01b8ea32d2dfe9e06b",
+        "assembly_hash": "95f014100dd657abcd163ba31e6a9f7b40e50ff047d6b3f0cc23b8a5e323f263",
+        "fallback_dispatch_count": 0,
+        "handoff_hash": "8a70bd8808b60bf6f1d218130dd246b7721f16c43d527fc7cd8dec3c7ecce5dc",
+        "lineage_count": 6,
+        "lineage_hashes": {
+          "17": "695015b9b8983525aa66633545d45fe349d5449b38960007e2e55113dfc6c524",
+          "19": "7ab9ea6fadc40c8b7701234477b3e04ccaa354302fe9a61e3e4f543a49d00408",
+          "23": "251293622b3002533407dad059847ef016083b1e207a8c8377bf51d5ccd41097",
+          "25": "3050df5a8832e20e85398a1daf3630dec2f0c44b56f9edf568c611a67f612554",
+          "28": "e128485edbe8eacd50357217d0ce041068c5ca0ce24acb8f3530626af0412db7",
+          "31": "98bc89443785521bc9d1a004844071a11ba533489893b199a930216f4bf6061a"
+        },
+        "native_backward_export_hash": "e31d4f22e7adfff8f4b6fe381575a44d0986c7db280a1fc0806e680860f5b13d",
+        "performance_claimed": false,
+        "provider_callback_count": 0,
+        "terminal_export_crown_rerun_count": 0,
+        "terminal_lower_adjoint_handoff_count": 1
+      },
+      "environment_admitted": true,
+      "export_pair": {
+        "all_sign_exact": true,
+        "maximum_absolute_difference": 4.410743713378906e-06,
+        "tensor_count": 19
+      },
+      "gpu_uuid": "GPU-0d3ee0a6-e7da-6b3b-69c4-2153bf99ae8f",
+      "pair_index": 1,
+      "performance_claimed": false,
+      "provider_fallback_zero": true,
+      "runtime_environment_hash": "fc3fcc6fd15160482b4654dd94f89bd4a818b03db1984f9a4e9068c07e832b78",
+      "schedule": [
+        "B4-A",
+        "B3"
+      ],
+      "semantic_failures": [],
+      "source_identity": "111486cb7f3cd84c3fa54b472b74518e6a5036d46c4e4b036ad5efe35de44d84"
+    },
+    {
+      "b3_activation": {
+        "activation_hash": "5f5d6cc57eb02a1e71bde50808f568b1bcf828e7d515e93bfcf38ee080f87c4b",
+        "fallback_dispatch_count": 0,
+        "native_backward_export_hash": "29c63524bc31ba75eefce2d40b590ae634a27417e2e670faef8e5ad4ff495e73",
+        "performance_claimed": false,
+        "provider_callback_count": 0,
+        "terminal_export_crown_rerun_count": 1,
+        "terminal_lower_adjoint_handoff_count": 0
+      },
+      "b4a_activation": {
+        "activation_hash": "b61009bd4fbe5e7a2bd4239ceb4fcccf069ab22debb6fafb1ae1e96d78c49729",
+        "assembly_hash": "a4123d32e755cbf49041e886f543ab57f9c66b95f0f76286e7e59ca8567ba80e",
+        "fallback_dispatch_count": 0,
+        "handoff_hash": "9680a79b14dd4051954d2ff05a2af7112c13ebe825489b87a6030213ddd8976f",
+        "lineage_count": 6,
+        "lineage_hashes": {
+          "17": "695015b9b8983525aa66633545d45fe349d5449b38960007e2e55113dfc6c524",
+          "19": "7ab9ea6fadc40c8b7701234477b3e04ccaa354302fe9a61e3e4f543a49d00408",
+          "23": "251293622b3002533407dad059847ef016083b1e207a8c8377bf51d5ccd41097",
+          "25": "3050df5a8832e20e85398a1daf3630dec2f0c44b56f9edf568c611a67f612554",
+          "28": "e128485edbe8eacd50357217d0ce041068c5ca0ce24acb8f3530626af0412db7",
+          "31": "98bc89443785521bc9d1a004844071a11ba533489893b199a930216f4bf6061a"
+        },
+        "native_backward_export_hash": "3d51c9633fe070e33edfa0b69b23d00e898d04eec06b60002d4a1262d0b0210c",
+        "performance_claimed": false,
+        "provider_callback_count": 0,
+        "terminal_export_crown_rerun_count": 0,
+        "terminal_lower_adjoint_handoff_count": 1
+      },
+      "environment_admitted": true,
+      "export_pair": {
+        "all_sign_exact": true,
+        "maximum_absolute_difference": 4.470348358154297e-06,
+        "tensor_count": 19
+      },
+      "gpu_uuid": "GPU-0d3ee0a6-e7da-6b3b-69c4-2153bf99ae8f",
+      "pair_index": 2,
+      "performance_claimed": false,
+      "provider_fallback_zero": true,
+      "runtime_environment_hash": "fc3fcc6fd15160482b4654dd94f89bd4a818b03db1984f9a4e9068c07e832b78",
+      "schedule": [
+        "B3",
+        "B4-A"
+      ],
+      "semantic_failures": [],
+      "source_identity": "111486cb7f3cd84c3fa54b472b74518e6a5036d46c4e4b036ad5efe35de44d84"
+    },
+    {
+      "b3_activation": {
+        "activation_hash": "58ed2f4e7b77254fb4569059f0e6ad607ffa4d56c78fc83df9f8624fb585bf76",
+        "fallback_dispatch_count": 0,
+        "native_backward_export_hash": "70b0f4ee416d8e7eff098f97d0078bfd050c3f6ecf85c3cf58b0fec967fff3d8",
+        "performance_claimed": false,
+        "provider_callback_count": 0,
+        "terminal_export_crown_rerun_count": 1,
+        "terminal_lower_adjoint_handoff_count": 0
+      },
+      "b4a_activation": {
+        "activation_hash": "0f36603007924b7df0de1b4021eb03cf5f8a8dd48c91d001c08894f2db220d9f",
+        "assembly_hash": "492624b4cdfa062394c97d302fbba31b6770363913d1bdab580c6563a2e53cca",
+        "fallback_dispatch_count": 0,
+        "handoff_hash": "160b8388a710153bff8b108cbfe1f4767f641093ba52c370241585351d855031",
+        "lineage_count": 6,
+        "lineage_hashes": {
+          "17": "695015b9b8983525aa66633545d45fe349d5449b38960007e2e55113dfc6c524",
+          "19": "7ab9ea6fadc40c8b7701234477b3e04ccaa354302fe9a61e3e4f543a49d00408",
+          "23": "251293622b3002533407dad059847ef016083b1e207a8c8377bf51d5ccd41097",
+          "25": "3050df5a8832e20e85398a1daf3630dec2f0c44b56f9edf568c611a67f612554",
+          "28": "e128485edbe8eacd50357217d0ce041068c5ca0ce24acb8f3530626af0412db7",
+          "31": "98bc89443785521bc9d1a004844071a11ba533489893b199a930216f4bf6061a"
+        },
+        "native_backward_export_hash": "083d2ff2ff78749d7fa87b298eb14044cf0c1864b0332e99753e01cfa5ebe041",
+        "performance_claimed": false,
+        "provider_callback_count": 0,
+        "terminal_export_crown_rerun_count": 0,
+        "terminal_lower_adjoint_handoff_count": 1
+      },
+      "environment_admitted": true,
+      "export_pair": {
+        "all_sign_exact": true,
+        "maximum_absolute_difference": 4.649162292480469e-06,
+        "tensor_count": 19
+      },
+      "gpu_uuid": "GPU-0d3ee0a6-e7da-6b3b-69c4-2153bf99ae8f",
+      "pair_index": 3,
+      "performance_claimed": false,
+      "provider_fallback_zero": true,
+      "runtime_environment_hash": "fc3fcc6fd15160482b4654dd94f89bd4a818b03db1984f9a4e9068c07e832b78",
+      "schedule": [
+        "B4-A",
+        "B3"
+      ],
+      "semantic_failures": [],
+      "source_identity": "111486cb7f3cd84c3fa54b472b74518e6a5036d46c4e4b036ad5efe35de44d84"
+    },
+    {
+      "b3_activation": {
+        "activation_hash": "5208d5e7d4bc47068ac9b4acd357653d74194a097cf919513c4008e434d50af8",
+        "fallback_dispatch_count": 0,
+        "native_backward_export_hash": "e0e44c050bfc91ed63f3ea16e649d145041d231080f2c11cf4a15def0f5b4e60",
+        "performance_claimed": false,
+        "provider_callback_count": 0,
+        "terminal_export_crown_rerun_count": 1,
+        "terminal_lower_adjoint_handoff_count": 0
+      },
+      "b4a_activation": {
+        "activation_hash": "d41e1edd6622c314e9a5e3cbf75a22c875c375b264c0284245c4663732366a18",
+        "assembly_hash": "32b9ee13e49f1c5dfcf964965ceb8a19bbd9786184c11cf3f793a5fe1ac5691b",
+        "fallback_dispatch_count": 0,
+        "handoff_hash": "a8e90c68eb381e78f1233476d651e1a607afc4f7ac24e174ca8168b693dab16a",
+        "lineage_count": 6,
+        "lineage_hashes": {
+          "17": "695015b9b8983525aa66633545d45fe349d5449b38960007e2e55113dfc6c524",
+          "19": "7ab9ea6fadc40c8b7701234477b3e04ccaa354302fe9a61e3e4f543a49d00408",
+          "23": "251293622b3002533407dad059847ef016083b1e207a8c8377bf51d5ccd41097",
+          "25": "3050df5a8832e20e85398a1daf3630dec2f0c44b56f9edf568c611a67f612554",
+          "28": "e128485edbe8eacd50357217d0ce041068c5ca0ce24acb8f3530626af0412db7",
+          "31": "98bc89443785521bc9d1a004844071a11ba533489893b199a930216f4bf6061a"
+        },
+        "native_backward_export_hash": "7c2fd0dc62da151d85f64f631cd18ee9fd63065c8046572675f427fa3386dcb6",
+        "performance_claimed": false,
+        "provider_callback_count": 0,
+        "terminal_export_crown_rerun_count": 0,
+        "terminal_lower_adjoint_handoff_count": 1
+      },
+      "environment_admitted": true,
+      "export_pair": {
+        "all_sign_exact": true,
+        "maximum_absolute_difference": 6.109476089477539e-06,
+        "tensor_count": 19
+      },
+      "gpu_uuid": "GPU-0d3ee0a6-e7da-6b3b-69c4-2153bf99ae8f",
+      "pair_index": 4,
+      "performance_claimed": false,
+      "provider_fallback_zero": true,
+      "runtime_environment_hash": "fc3fcc6fd15160482b4654dd94f89bd4a818b03db1984f9a4e9068c07e832b78",
+      "schedule": [
+        "B3",
+        "B4-A"
+      ],
+      "semantic_failures": [],
+      "source_identity": "111486cb7f3cd84c3fa54b472b74518e6a5036d46c4e4b036ad5efe35de44d84"
+    }
+  ],
+  "performance_claimed": false,
+  "protocol_hash": "14c60e6eb4e3e564a471390ff422a4f09709c7f8698f680dc3bb70cfa1038ae8",
+  "report_hash": "1ebc2d842d771fb355cb7a9c6cad5b1f7a4a7933848ec9732ce7668fd2c1d17f",
+  "schema_version": "boundflow.fsg4-b4a-five-fresh-report/v1",
+  "source_git_head": "43d41172a7ab810621782f4a51955c677526ed88",
+  "timing_admitted": true,
+  "worker_count": 10
+}

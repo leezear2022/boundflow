@@ -1,0 +1,203 @@
+"""Correctness, ownership, and fail-closed gates for ASPLOS'27 S2."""
+
+# pylint: disable=missing-function-docstring,too-many-locals
+# pylint: disable=protected-access,duplicate-code,import-outside-toplevel
+
+from dataclasses import replace
+from pathlib import Path
+
+import pytest
+import torch
+
+from boundflow.frontends.onnx.frontend import import_onnx
+from boundflow.planner import plan_interval_ibp_v0
+from boundflow.runtime.asplos27_s2_crown_pipeline import (
+    PreparedS2CrownProgramV1,
+)
+from boundflow.runtime.r3_bounded_arena_trace_compiler import (
+    compile_r31b_bounded_arena_trace_v1,
+)
+from boundflow.runtime.r3_d2b_staged_backward import (
+    PreparedR3D2BStagedBackwardCandidateV1,
+)
+from boundflow.runtime.r3_structured_owner_custom_backward import (
+    _evaluate_full_region,
+    bind_r31_runtime_inputs_v1,
+    compile_r31_full_region_plan_v1,
+)
+from boundflow.runtime.rvir_v4_pre_state_initializer import (
+    initialize_rvir_v4_native_pre_state,
+)
+from boundflow.runtime.rvir_v4_production_state import (
+    production_snapshot_from_payload_v4,
+)
+from scripts.run_rvir_v4_pre_state_artifact import TOPOLOGY
+
+ROOT = Path(__file__).resolve().parents[1]
+CAPTURE = (
+    ROOT / "artifacts/rvir-v4-pre-state/resnet2b-core-pre-state-v1/source_capture.pt"
+)
+MODEL = ROOT.parent / "vnncomp2021/benchmarks/cifar10_resnet/onnx/resnet_2b.onnx"
+
+
+def _fixture():
+    if not MODEL.is_file() or not CAPTURE.is_file() or not torch.cuda.is_available():
+        pytest.skip("S2 frozen CUDA fixture is unavailable")
+    raw = torch.load(CAPTURE, map_location="cpu", weights_only=True)
+    snapshot = production_snapshot_from_payload_v4(raw["cores"][0]["pre_snapshot"])
+    mapping = initialize_rvir_v4_native_pre_state(snapshot, TOPOLOGY)
+    program = import_onnx(str(MODEL), do_shape_infer=True, normalize=True)
+    module = plan_interval_ibp_v0(program)
+    plan = compile_r31_full_region_plan_v1(module, snapshot, mapping, TOPOLOGY)
+    trace = compile_r31b_bounded_arena_trace_v1(program, module, plan)
+    tensors = bind_r31_runtime_inputs_v1(
+        plan, module, snapshot, device=torch.device("cuda:0")
+    )
+    return plan, trace, tensors
+
+
+def _candidate_vjp(prepared):  # type: ignore[no-untyped-def]
+    stream = torch.cuda.Stream(device=prepared.device)
+    with torch.cuda.stream(stream):
+        prepared.begin_sample()
+        prepared.begin_evaluation(0)
+        lower = prepared.forward()
+        gradient = prepared.backward(prepared.upstream_gradient)
+    stream.synchronize()
+    return lower.detach().clone(), gradient.detach().clone()
+
+
+def test_s2_matches_independent_native_and_previous_direct_vjp() -> None:
+    plan, trace, native_tensors = _fixture()
+    _, _, direct_tensors = _fixture()
+    _, _, candidate_tensors = _fixture()
+    native_alpha = native_tensors[plan.p_alpha_input_ordinal]
+    native_lower = _evaluate_full_region(plan, native_tensors)
+    native_gradient = torch.autograd.grad(-native_lower.sum(), native_alpha)[0]
+    direct = PreparedR3D2BStagedBackwardCandidateV1(plan, trace, direct_tensors)
+    direct_lower, direct_gradient = _candidate_vjp(direct)
+    candidate = PreparedS2CrownProgramV1(plan, trace, candidate_tensors)
+    stream = torch.cuda.Stream(device=candidate.device)
+    with torch.cuda.stream(stream):
+        candidate_lower, candidate_gradient = candidate.run_vjp()
+    stream.synchronize()
+    for expected_lower, expected_gradient in (
+        (native_lower, native_gradient),
+        (direct_lower, direct_gradient),
+    ):
+        assert torch.allclose(candidate_lower, expected_lower, atol=2e-4, rtol=2e-4)
+        assert torch.allclose(
+            candidate_gradient, expected_gradient, atol=2e-4, rtol=2e-4
+        )
+        assert torch.equal(torch.sign(candidate_lower), torch.sign(expected_lower))
+        assert torch.equal(
+            torch.sign(candidate_gradient), torch.sign(expected_gradient)
+        )
+
+
+def test_s2_receipt_proves_five_cudnn_calls_and_no_dense_saved_a() -> None:
+    plan, trace, tensors = _fixture()
+    prepared = PreparedS2CrownProgramV1(plan, trace, tensors)
+    stream = torch.cuda.Stream(device=prepared.device)
+    with torch.cuda.stream(stream):
+        prepared.run_vjp()
+    stream.synchronize()
+    receipt = prepared.execution_receipt()
+    assert receipt.cudnn_partition_function_count == 4
+    assert receipt.cudnn_conv_call_count == 5
+    assert receipt.selected_tir_count == 5
+    assert receipt.forward_graph_replay_count == 1
+    assert receipt.selected_graph_replay_count == 0
+    assert receipt.selected_vm_invocation_count == 1
+    assert receipt.selected_output_copy_count == 1
+    assert receipt.prepare_dlpack_view_count == 30
+    assert receipt.warm_dlpack_view_count == 0
+    assert receipt.active_beta is True
+    assert receipt.saved_dense_a_count == 0
+    assert receipt.saved_autograd_history is False
+    assert receipt.fallback_count == receipt.eager_candidate_count == 0
+    assert receipt.performance_claimed is False
+    assert receipt.output_pointer == prepared.pre25_value.data_ptr()
+
+
+def test_s2_receipt_rejects_resigned_semantic_and_claim_tamper() -> None:
+    plan, trace, tensors = _fixture()
+    prepared = PreparedS2CrownProgramV1(plan, trace, tensors)
+    stream = torch.cuda.Stream(device=prepared.device)
+    with torch.cuda.stream(stream):
+        prepared.run_vjp()
+    stream.synchronize()
+    receipt = prepared.execution_receipt()
+    mutations = (
+        replace(receipt, performance_claimed=True),
+        replace(receipt, cudnn_conv_call_count=4),
+        replace(receipt, forward_graph_replay_count=2),
+        replace(receipt, selected_vm_invocation_count=2),
+        replace(receipt, active_beta=False),
+        replace(receipt, saved_dense_a_count=1),
+        replace(receipt, fallback_count=1),
+        replace(receipt, selected_lowered_relax_ir_hash="0" * 63),
+    )
+    for changed in mutations:
+        with pytest.raises(ValueError, match="S2 CROWN execution receipt differs"):
+            changed.validate()
+
+
+def test_s2_rejects_default_stream_before_graph_launch() -> None:
+    plan, trace, tensors = _fixture()
+    prepared = PreparedS2CrownProgramV1(plan, trace, tensors)
+    before = prepared.selected_value.replay_count
+    with torch.cuda.stream(torch.cuda.default_stream(prepared.device)):
+        with pytest.raises(RuntimeError, match="non-default stream"):
+            prepared.selected_value.replay()
+    assert prepared.selected_value.replay_count == before
+
+
+def test_s2_immutable_state_mutation_is_rejected_before_vjp() -> None:
+    plan, trace, tensors = _fixture()
+    prepared = PreparedS2CrownProgramV1(plan, trace, tensors)
+    immutable = tensors[0]
+    if immutable is tensors[plan.p_alpha_input_ordinal]:
+        immutable = tensors[1]
+    immutable.add_(1.0)
+    stream = torch.cuda.Stream(device=prepared.device)
+    with torch.cuda.stream(stream):
+        with pytest.raises(ValueError, match="immutable version drifted"):
+            prepared.run_vjp()
+    assert prepared.selected_value.replay_count == 0
+
+
+def test_s2_formal_artifact_replays_and_passes_frozen_4x_gate() -> None:
+    from scripts import run_asplos27_s2_crown_artifact as artifact
+
+    root = Path("artifacts/asplos27-s2-crown-pipeline/resnet2b-p-anchor-v2")
+    if not root.is_dir():
+        pytest.skip("S2 formal artifact unavailable")
+    result = artifact.replay(root)
+    summary = artifact.load_json(root / "summary.json")
+    assert result["status"] == "replay-passed"
+    assert summary["status"] == "validated-s2-4x-canonical-crown"
+    assert summary["run_count"] == 6
+    assert summary["orders"] == ["NDP", "NPD", "DNP", "DPN", "PND", "PDN"]
+    assert summary["p_over_n_geomean"] >= 4.00
+    assert summary["p_over_n_worst"] >= 3.50
+    assert summary["p_over_d_geomean"] >= 0.90
+    assert summary["max_lower_abs_diff"] <= 2e-4
+    assert summary["max_gradient_abs_diff"] <= 2e-4
+    assert summary["lower_sign_exact"] is True
+    assert summary["gradient_sign_exact"] is True
+    assert summary["warm_dynamic_allocated_bytes"] == 0
+    assert summary["performance_claimed"] is False
+
+
+def test_s2_formal_artifact_rejects_ten_outer_resigned_attacks() -> None:
+    root = Path("artifacts/asplos27-s2-crown-pipeline/resnet2b-p-anchor-v2")
+    if not root.is_dir():
+        pytest.skip("S2 formal artifact unavailable")
+    report = __import__("json").loads(
+        (root / "tamper_report.json").read_text(encoding="utf-8")
+    )
+    assert report["case_count"] == report["rejected_count"] == 10
+    assert all(row["outer_resigned"] is True for row in report["rows"])
+    assert all(row["rejected"] is True for row in report["rows"])
+    assert report["performance_claimed"] is False

@@ -1,0 +1,43 @@
+{
+  "doc": "fsg4-b4a-formal-timing-20260818/r001/delivery",
+  "type": "delivery",
+  "task": "fsg4-b4a-formal-timing-20260818",
+  "round": 1,
+  "from": "codex",
+  "to": "external-model",
+  "ts": "2026-08-18T03:37:19Z",
+  "base_commit": "adc175b",
+  "result_commit": "d387a7c",
+  "changed_files": [
+    "scripts/run_fsg3_same_solver_timing.py",
+    "scripts/run_fsg4_b4a_same_solver_worker.py",
+    "scripts/run_fsg4_b4a_formal_timing.py",
+    "scripts/probe_fsg4_b4a_formal_timing_tamper.py",
+    "tests/test_fsg3_same_solver_worker.py",
+    "tests/test_fsg4_b4a_formal_timing.py",
+    "tests/test_fsg4_b4a_formal_timing_tamper.py",
+    "tests/test_fsg4_b4a_formal_timing_artifact.py",
+    "artifacts/fsg4-b4a-formal-timing/resnet2b-prop0-v5",
+    "artifacts/fsg4-b4a-formal-timing/resnet2b-prop0-v5-tamper-report.json",
+    "gemini_doc/change_2026-08-18_fsg4_b4a_formal_timing_internal_closure.md"
+  ],
+  "claims": [
+    "B4-A correctness/mechanism validated; preregistered performance gate is NO-GO; no performance claim and no cumulative admission"
+  ],
+  "validation": [
+    {
+      "cmd": "related73-full1356-replay-tamper-static-docops",
+      "result": "pass"
+    }
+  ],
+  "limitations": [
+    "kernel launch delta deferred; profile is attribution only; external audit required"
+  ],
+  "risks": [
+    "mobile GPU thermal telemetry required power-policy and interval-delta hardening; rejected v1-v4 are excluded"
+  ],
+  "open_questions": [
+    "Approve VALIDATED-NO-GO-B4-A-PERFORMANCE and permit only a separately preregistered B4-B decision?"
+  ],
+  "md_sha256": "5e88b81b2dc4a97f0c13f1a2b0aa7a69096b9e8a87da20f53958bd692b1e99a1"
+}

@@ -1,0 +1,36 @@
+{
+  "doc": "asplos27-s4-1b0-ternary-20260831/r001/audit",
+  "type": "audit",
+  "task": "asplos27-s4-1b0-ternary-20260831",
+  "round": 1,
+  "from": "external-model",
+  "to": "codex-executor",
+  "ts": "2026-08-31T04:34:20Z",
+  "verdict": "approve",
+  "delivery": "asplos27-s4-1b0-ternary-20260831/r001/delivery",
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "info",
+      "path": "artifacts/asplos27-s4-1b0-ternary/resnet2b-prop0-v1",
+      "evidence": "Historical 9-of-10 LSB gap independently retested and rejected by fresh-process binary determinism binding",
+      "advice": "No action required"
+    },
+    {
+      "id": "F2",
+      "severity": "info",
+      "path": "offline-self-check-boundary",
+      "evidence": "Coherent full resign remains accepted at E0 and is explicitly disclosed",
+      "advice": "Retain disclosure and require challenge+witness at S4-4"
+    },
+    {
+      "id": "F3",
+      "severity": "info",
+      "path": "external-auditor-environment",
+      "evidence": "dol CLI unavailable in auditor PATH",
+      "advice": "Executor records exchange validate and dol lint"
+    }
+  ],
+  "summary": "AC1-AC7 PASS; approve VALIDATED-S4-1B0-TERNARY-ENDPOINT at E2-DIRECT-LEGACY; only S4-1B production implementation/correctness opens; timing/performance remain closed",
+  "md_sha256": "b2d6653c71d0019daffd2fc29adf8290cae8e1faabe3072760abc9b87dfc72e6"
+}

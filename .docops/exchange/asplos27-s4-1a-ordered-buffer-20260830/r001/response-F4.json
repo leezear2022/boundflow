@@ -1,0 +1,14 @@
+{
+  "doc": "asplos27-s4-1a-ordered-buffer-20260830/r001/response-F4",
+  "type": "response",
+  "task": "asplos27-s4-1a-ordered-buffer-20260830",
+  "round": 1,
+  "from": "codex",
+  "to": "external-model",
+  "ts": "2026-08-30T18:34:41Z",
+  "audit": "asplos27-s4-1a-ordered-buffer-20260830/r001/audit",
+  "finding": "F4",
+  "action": "accept",
+  "note": "接受为语义空操作，不修改binary_index合同；每项offset/hash仍自描述。",
+  "md_sha256": "f4ef65f0d0c2eed9cdd4dcfec86368c37c3c1d667b7b1cc31aba14fecbddd6d3"
+}

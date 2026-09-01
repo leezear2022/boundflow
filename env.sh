@@ -18,6 +18,19 @@ add_to_library_path() {
     fi
 }
 
+# PyTorch's pip/conda CUDA wheels keep cuDNN under site-packages instead of the
+# system CUDA prefix.  TVM links its cuDNN runtime directly, so expose that
+# directory before importing libtvm.  The glob is version-independent and only
+# admits an existing conda-environment directory.
+if [[ -n "${CONDA_PREFIX:-}" ]] && command -v python >/dev/null 2>&1; then
+    boundflow_cudnn_root="$(python -c 'import pathlib, sysconfig; print(pathlib.Path(sysconfig.get_paths()["purelib"]) / "nvidia" / "cudnn")')"
+    if [[ -f "${boundflow_cudnn_root}/lib/libcudnn.so.9" ]]; then
+        export BOUNDFLOW_CUDNN_ROOT="${boundflow_cudnn_root}"
+        add_to_library_path "${boundflow_cudnn_root}/lib"
+    fi
+    unset boundflow_cudnn_root
+fi
+
 # Note: With pip install -e, explicit PYTHONPATH is less critical but still helpful for some tools
 # Add boundflow root, TVM python package, and auto_LiRPA to PYTHONPATH
 add_to_path "${BOUNDFLOW_ROOT}/boundflow/3rdparty/auto_LiRPA"

@@ -1,0 +1,20 @@
+{
+  "atol": 0.0002,
+  "code_revision": {
+    "boundflow/backends/tvm/r3_d1_residual6_staged.py": "dce8def1e581c91ba64000750e30063e31ae349c4259c3b41c56ba23e748a726",
+    "boundflow/runtime/r3_d1_residual6_staged.py": "4a6945065ef8f23def4d89ee55a92ce64d357091f517fc5c66108d28f8081b91",
+    "scripts/run_r3_d1_residual11_artifact.py": "0261a797d5bfbe17aa643e11e44976776ab8f65939e9d86129cb276035be0b5f",
+    "scripts/run_r3_d1_residual6_artifact.py": "1c2727ae158efc0ae6796d051754e624092df538f206ebe2b20f4d52ef360e3d",
+    "scripts/run_r3_d1_residual6_worker.py": "2da87562dddd21c587043b2df7222045976aff384236954e86d2373d6ac54eea"
+  },
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "performance_claimed": false,
+  "protocol_hash": "026c79b51b906a09cb9db743458597c281e823ded865a1cc75a48eff799e07c6",
+  "residual11_manifest_sha256": "8caec806af8c5e51ba51ad49b4b0ab54ca8cf4b2dd4ea2c8fd9c2751f3f8b7f0",
+  "run_count": 5,
+  "schema_version": "boundflow.r3-d1a-residual6-protocol/v1",
+  "sign_exact": true,
+  "source_capture_sha256": "f42229dd06be8521865d14af4cc51450ec8bec4e792934b457c276aad50126dc",
+  "source_git_head": "52fc62c3f1dfa563d8fde7e770a4e771d0ce5622",
+  "timing_forbidden": true
+}

@@ -1,0 +1,478 @@
+---
+status: draft-preregistered-pending-s3-external-approval
+date: 2026-08-28
+type: plan
+topic: boundflow
+slug: asplos27-s4-same-solver-exact-call
+stage: s04
+execution-authority: false
+code-change-open: false
+timing-open: false
+performance-claimed: false
+same-solver-claimed: false
+complete-query-claimed: false
+tenx-claimed: false
+---
+
+# ASPLOS'27 S4：production same-solver exact-call 接入预注册
+
+## 0. 直接结论
+
+S4不能把S3 `PreparedS2CrownProgramV1`直接塞进`stage_solve.update_bounds_core`后返回。当前S3只闭合了
+P-anchor的一条可变α，而冻结production core在每次evaluation里同时优化6条α和1条非空β；whole-core返回还
+需要terminal lA/intermediate bounds、KFSB、12-path atomic commit与queue/post语义。
+
+因此S4的正确路径冻结为：
+
+```text
+αβ-CROWN host solver
+  → RVIR update_bounds_core exact-call boundary（已有）
+  → production pre-state / topology / policy admission（已有）
+  → all-mutable-state compiled CROWN evaluation（S4-0—S4-1新增）
+  → existing host-owned production 10/9 mutation policy（S4-2接入）
+  → terminal lower/lA/intermediate handoff（S4-3）
+  → existing KFSB + atomic commit + queue/post（复用）
+```
+
+不新造solver execution IR。新增对象只能是typed runtime binding/evaluator receipt；静态图、合法性、计划与
+TIR继续复用现有Bound/Plan/Task/Schedule及R3/S2资产。
+
+本稿在S3独立外审批准前`execution-authority=false/code-change-open=false`。当前只允许审阅和修订合同，
+不允许实现、计时或升级claim。
+
+## 1. 已独立核对的production事实
+
+### 1.1 exact-call边界
+
+当前真实same-solver路径由`scripts/run_rvir_v4_live_return_capture.py::_LiveExecutor.instrument()`恰一次替换
+`activation_split.stage_solve.update_bounds_core`。existing owner链为：
+
+1. `_build_core_pre_snapshot`捕获live state；
+2. `initialize_rvir_v4_native_pre_state`按六条ReLU topology建立native state；
+3. `execute_rvir_v4_native_optimizer_trace`执行10 evaluation/9 update；
+4. `export_rvir_v4_native_backward`生成terminal lower/lA/intermediates；
+5. `evaluate_rvir_v4_native_kfsb`生成3组候选并选择branch；
+6. device/host atomic transaction提交12条live path；
+7. 原solver继续termination、queue与post。
+
+这条边界已经证明provider callback可为0、branch/commit可闭合；S4不重写它，只替换第3步中的CROWN
+evaluation primitive，并在第4步消费最后一次evaluation的terminal handoff。
+
+### 1.2 mutable-state覆盖差距
+
+冻结production optimizer trace的每个step包含以下六个α source tensor：
+
+| mutable path | shape | 元素数 | S3是否拥有 |
+|---|---:|---:|---|
+| `alpha/%2F45/%2F49` | `[2,1,6,178]` | 2136 | 否，S3中为冻结输入 |
+| `alpha/%2F48/%2F49` | `[2,1,6,27]` | 324 | 否 |
+| `alpha/%2Finput-12/%2F49` | `[2,1,6,132]` | 1584 | 否 |
+| `alpha/%2Finput-16/%2F49` | `[2,1,6,121]` | 1452 | 否 |
+| `alpha/%2Finput-24/%2F49` | `[2,1,6,86]` | 1032 | 是，P-anchor |
+| `alpha/%2Finput-4/%2F49` | `[2,1,6,164]` | 1968 | 否 |
+| `beta/%2Finput-28/0/value` | `[6,1]` | 6 | 否，唯一active β |
+
+production α source合计8,496 stored元素；lower-only实际optimizer-active的是每个source的`[0,0]`slice，合计
+4,248元素，另一方向4,248元素在copy-out中原样保留。P对应1,032 stored/516 active；两种口径下coverage都为
+`12.1468926554%`。这只是state element coverage，**不是时间share或Amdahl数字**。S3绑定的P β为
+`beta/%2Finput-20/0/value:[6,0]`，对active β覆盖为0/6。
+
+### 1.3 whole-core输出差距
+
+S3只返回terminal lower、terminal P α和局部receipt。production whole-core还必须产生：
+
+- 6条最终α与6条β的mutation state；
+- terminal lower `[6,1]`；
+- 6条lA与6组intermediate lower/upper；
+- 3组KFSB candidate与最终6-domain decision；
+- 12条device live target的atomic commit/rollback receipt；
+- host history/depth/threshold packet与queue/post结果。
+
+任一缺失都禁止exact-call admission。
+
+## 2. 关键设计决定
+
+### 2.1 接入点是sealed policy driver，不是whole optimizer wrapper
+
+S3的`execute_asplos27_s3_optimizer_v1`是资格实验：它只对一个α建立简化host Adam。S4 production接入不复用
+该简化loop作为owner，也不把任意callback塞进`execute_rvir_v4_native_optimizer_trace`。应从existing loop抽出sealed
+production policy driver，并只允许native-dense oracle与compiled-compressed candidate两个exact evaluator。
+
+```text
+PreparedProductionCrownEvaluationV1.evaluate(
+    evaluation_ordinal,
+    alpha_by_semantic_path,
+    beta_by_semantic_path,
+) -> ProductionCrownEvaluationResultV1
+
+ProductionCrownEvaluationResultV1:
+    lower
+    dalpha_by_semantic_path      # 六条lower-direction optimizer-slot shape [6,width]
+    dbeta_by_semantic_path       # 六条[6,q]，含唯一[6,1] active β与五条empty β
+    terminal_handoff_or_none     # 只允许ordinal 9拥有
+    execution_receipt
+```
+
+host policy driver继续唯一拥有两组Adam param group(`lrα=0.01/lrβ=0.05`)、decay=`0.98`、clamp、10/9
+ordinal、stop/patience/pruning/keep-best policy identity。candidate evaluator只做纯evaluation/VJP，不得修改
+optimizer state、policy或live solver object。
+
+candidate热路径直接优化production compressed lower-direction α与sparse β；RVIR dense native state只作oracle，并在
+ordinal 9后通过一次性round-trip-exact bridge供existing KFSB/commit消费。详细ABI、stored/active/preserved口径和
+terminal arena见`gemini_doc/BOUNDFLOW_ASPLOS27_S4_EVALUATOR_ABI_AND_TERMINAL_HANDOFF_2026_08_28.md`。
+六个active lower-α使用prepared contiguous parameter buffers，不要求把source的非leaf slice直接交给Adam；
+preserved direction不进入gradient ABI，并由prepare/commit receipt证明未变。
+
+接口必须是精确sealed类型或protocol+receipt双重校验，不接受任意callback；candidate模式不得回退到native
+`run_crown_ibp_mlp_from_forward_trace`、`autograd.backward`或provider `compute_bounds/update_bounds`。
+
+### 2.2 全state representation，不复制六个P特判
+
+R3 plan已经含六个`relu_layouts`和全部tensor specs；S4应把“动态参数集合”从单一
+`p_alpha_input_ordinal`推广为由production snapshot/topology/plan和瞬时live source共同闭合的有序mutable binding：
+
+- key=`semantic_path`；
+- shape/dtype/device/feature-index/beta-location/sign全部来自existing typed snapshot/layout；
+- α与β分别保持compressed representation；
+- empty β是合法零宽tensor，active β必须保持location/sign owner；
+- plan/schema中禁止ResNet2B名称、固定node id、固定shape或固定“6”作为通用机制条件；
+- formal fixture可以冻结上述六条路径，但只能作为实例证据。
+
+snapshot是CPU clone语义证据，不能证明live storage alias或Tensor `_version`；因此live mapping不进入IR、canonical
+receipt或artifact raw pointer。S4-0必须另建不可序列化strong-ref ephemeral lease，跨S4-1A pack保持到S4-3 commit/abort，
+并在两处从current provider mapping复核同一Python object/storage/version。snapshot alias group与live storage group必须分列。
+
+不得创建第二套VerificationGraph或optimizer IR。静态候选继续lower到现有Relax/TIR，runtime binding只负责
+把live state映射到已编译参数槽。
+
+### 2.3 forward/VJP必须一次闭合全部mutable state
+
+S4 candidate每个ordinal只允许一个logical CROWN evaluation。它必须同时产生相同lower与全部六α/六β梯度，
+禁止：
+
+- 先跑native full evaluation再只替换P梯度；
+- candidate和native各跑一次后拼接结果；
+- 对五条α或active β使用autograd/native shadow；
+- 把未覆盖梯度填零；
+- 逐site返回Python对象导致framework crossing重新进入热路径。
+
+实现可复用B4-B2 dense/sparse Linear/Conv TIR与S2 canonical Relax图，但所有site必须通过同一个compiled
+evaluation owner和persistent arena。若某site尚无compiled VJP，S4-1直接NO-GO并回到算子/region coverage，
+不能静默fallback。
+
+### 2.4 terminal handoff禁止第11次CROWN
+
+ordinal 9必须选择性导出terminal lower、lA及需要的intermediate bounds，复用已有B4-A
+`terminal lower/adjoint handoff`与native export assembly合同。S4 whole-core不允许在optimizer结束后为
+`export_rvir_v4_native_backward`再执行一次完整CROWN；若terminal handoff不完整，S4-3不准入。
+
+KFSB、atomic commit和queue/post继续由已有RVIR owner执行，不纳入compiled tensor region，也不因candidate
+路径改变顺序。
+
+### 2.5 all-state VJP物理实现冻结
+
+详细coverage与算法见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_ALL_STATE_VJP_FEASIBILITY_2026_08_28.md`。审计确认现有整图forward已经消费
+六α和active β，缺口是custom backward只导出P gradient，不是其余五site完全没有编译。
+
+S4-1固定复用当前两个coefficient arena，按“完整selector/sign pass → 三元endpoint selected-primal graph →
+第二次coefficient pass逐site即时压缩gradient”执行。旧二元endpoint在site19出现
+`0.0011564247542992234/9`，但zero→center三元规则已把六site设计误差压到`<=1.63912773132e-07`且sign exact。
+coefficient-program VJP仍是规范oracle。不得保存跨层float32 dense A，也不得串六个B4-B2单sitewrapper。
+B4-B2继续作为数学oracle/codegen资产；D1C/D2B scratch暴露site25/site19 incoming coefficient。
+
+S4-1内部顺序固定为1A all-state ABI、1B0 ternary endpoint closure、1B六site values、1C
+六dα/active dβ emitters、1D single-evaluation 6+6 six-permutation fresh closure。五步完成前S4-2继续关闭。
+
+terminal模式下，六site coefficient-adjoint slot可在本site gradient已消费后phase-safe改作terminal lA slot；lA
+总计37,464 float32/149,856 bytes。复制对象必须是ReLU transform前incoming A，handoff view必须绑定
+`[D,S,*feature]` spec轴。该alias必须由slot状态机验证，不能作为未经证明的memory优化。shared intermediate
+bounds来自入口`relu_pre`，不属于candidate输出。existing KFSB仍执行3次batch-24 child CROWN，S4-P必须单列其share。
+
+## 3. 分阶段门禁
+
+### S4-0：production signature admission（零candidate kernel/allocation）
+
+精确类型、compiler入口、reason映射和negative测试矩阵见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_MUTABLE_STATE_ADMISSION_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`。
+开工前V2/V3修正证据见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_ADMISSION_PREFLIGHT_CORRECTION_2026_08_28.md`与
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_LIVE_LEASE_IMPLEMENTATION_READINESS_2026_08_28.md`。第一行代码的V4权威施工合同见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_0_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`。S4-0只新增tensor-free typed
+runtime binding receipt和不可序列化ephemeral runtime lease，复用现有snapshot/topology/plan与GC0 rejection vocabulary；
+不得新增solver/execution IR或通过native dense initializer实现candidate admission。
+
+交付：typed mutable binding与coverage receipt，不实现TIR、不计时。
+
+必须机械证明：
+
+- snapshot mutable α key与compiled gradient key完全相等；
+- snapshot mutable β key与compiled gradient key完全相等；
+- feature index、shape、dtype、device、location/sign与split/history lineage一致；
+- plan/snapshot binding projection可独立重算；R31 `source_state_hash`只作dense oracle provenance，不冒充snapshot hash；
+- keyword-only `exact_call_id`非空并绑定receipt hash与private lease raw identity，禁止prepared wrapper跨exact call；
+- 只接受pinned provider真实使用的exact built-in `dict/list/Tensor`层级；dict subclass/custom Mapping必须在读取前拒绝，
+  不复用历史宽松`live_targets_from_pre_result_v4()`；
+- live path/shape/content与snapshot exact；ephemeral lease保证S4-0、S4-1A、S4-3看到同一Python object/raw
+  storage/version，empty zero-pointer不伪装alias；
+- receipt构造前后各采集一次live token，任一object/storage/version/content/stream变化均以
+  `LIVE_SOURCE_READ_RACE`拒绝；
+- 允许且必须披露content validation的D2H：12 tensors × 2 passes=`24`条logical copy、
+  `8,502 × 4 × 2 = 68,016 B`；candidate kernel/CUDA allocation保持0，这不是CUPTI物理transaction claim；
+- 每domain β width与history长度exact，不接受只匹配前缀；
+- stored α、optimizer-active lower direction与preserved direction分别计数并绑定；
+- preserved α direction在任一candidate mutation后digest不变；
+- P-only计划在当前fixture上明确拒绝，reason=`MUTABLE_STATE_COVERAGE_INCOMPLETE`；
+- active β缺失明确拒绝，reason=`ACTIVE_BETA_COVERAGE_INCOMPLETE`；
+- 不接受多余、重复、乱序、alias冲突binding、same-content clone替换、provider rebind、read race、exact-call错配或
+  lease重复transfer；minimum negative为56类，宽泛validator异常必须归一到冻结detail code而非解析英文错误文本；
+- performance/timing/same-solver flag全部false。
+
+GO：六α+六β全覆盖，active β=`1/1`，5 fresh real-provider worker、receipt stdlib replay、56类negative、live lease与
+plan projection关闭，且schema无模型特判。S4-0只证明local single-transfer与phase identity binding；process-global
+query exclusivity仍必须由S4-3 exact-call latch关闭。否则S4-1关闭。
+
+### S4-1：all-state single-evaluation compiled correctness
+
+S4-1A ordered buffer/lease/version ABI的精确实施蓝图见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_ORDERED_BUFFER_ABI_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`；V5第一行代码合同见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`。六lower-α与
+唯一active β必须是独立contiguous leaf parameter；五empty β只保留token；preserved α不得进入candidate GPU
+optimizer。S4-1A只做buffer prepare，不提前拥有evaluation/result lease、Adam、10/9 trajectory或terminal handoff；
+hot evaluator不得接受dict/callback/tensor override，warm DLPack view creation必须为0。
+prepare事务和失败清理见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_PREPARE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`：private lease必须
+恰好保留12条source Tensor（8,502元素/34,008 logical B，incremental allocation 0），但provider container/callback和
+lease外source引用为0；base view固定16/16；prepare失败clean close且retry/fallback/empty-cache均为0。
+V5不接受caller device/stream override；view key在lookup前绑定storage/shape/stride/offset/dtype/device，关闭existing
+`(data_ptr,shape)`碰撞。content validation使S4-1A产生`32`条logical D2H、`85,056 B`，与S4-0累计为
+`56/153,072 B`，不能写success无同步。single resource owner必须在retained traceback下清理到allocated delta 0；
+minimum negative=`68`，formal=`5 positive + 7 isolated fault`。S4-1A只证明local buffer owner，不证明provider mapping
+stability或process-global exclusivity。
+
+S4-1B0/1B三元endpoint纠正与六site graph见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_TERNARY_BOX_ENDPOINT_SUBGRADIENT_CLOSURE_2026_08_28.md`及
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EFFECTIVE_VALUE_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`：一个
+37,464-element persistent arena输出六个`V_i=d lower/dT_i`；Ainput为三元selector，A18/A20/A24/A26/A29
+保持二元bitmap，共55,296 int8；cross-layer saved float32 coefficient仍为0。
+
+S4-1C通用gradient emitter与terminal lA phase见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EMITTER_IMPLEMENTATION_BLUEPRINT_2026_08_28.md`：
+一个layout-parameterized `[D,S,F]→[D,W]` α模板实例化六site，site31增加sparse β；ordinal9在gradient消费后
+phase-safe复用coefficient-adjoint arena保存六lA，禁止第11次CROWN。
+
+S4-1D single-evaluation closure见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_ALL_STATE_EVALUATOR_CLOSURE_BLUEPRINT_2026_08_28.md`：唯一prepared evaluator
+组装S4-0/1A/1B/1C，以6个nonterminal加6个terminal fresh分别覆盖A/B/C六全排列，比较lower/六dα/六dβ/
+terminal lA，并以full-IEEE raw-first replay/tamper关闭；result为opaque sealed-consumer capability，不公开raw Tensor。
+通过只开放S4-2 10/9 trajectory，timing仍关闭。事务与完整raw冻结见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1D_EVALUATOR_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_28.md`。
+
+交付：一个prepared evaluator在ordinal 0输入上返回lower、六dα、六dβ和receipt。
+
+门禁：
+
+- 双独立oracle：production captured step与existing provider-independent native CROWN；
+- lower `atol=rtol=2e-4`；全部gradient `atol=rtol=2e-5`；sign exact；
+- key/shape/dtype/device exact；empty β保持empty，active β 6元素全部比较；
+- logical evaluation=`1`；provider/fallback/native-shadow/eager=`0`；
+- per-site Python dispatch、warm DLPack、dynamic output allocation=`0`；
+- saved/persistent dense A=`0`；terminal handoff在非terminal ordinal必须不存在；
+- six-site coefficient-adjoint arena、sign bitmap与compressed output必须分项披露bytes，禁止通过重命名隐藏内存；
+- coefficient arena恰为existing 2个；site25/site19从staged residual scratch即时导出，不得另跑native Conv；
+- five fresh correctness，任一site或元素不等价即NO-GO。
+
+S4-1不计时；通过只开放S4-2。
+
+### S4-2：production host-policy 10/9 trajectory
+
+把native oracle与S4-1 evaluator接入同一sealed production policy driver，不使用S3简化loop。candidate优化compressed
+lower-direction α/sparse β，oracle保留dense native representation；逐ordinal比较production-visible投影：
+
+- lower；
+- 六α、六β before/after；
+- 两param-group Adam step/m/v；
+- α/β learning rate与scheduler；
+- update/prune/keep-best/restore/stop predicate；
+- terminal state与mutation policy hash。
+
+还必须比较compressed→dense→compressed terminal bridge exact、preserved α direction无漂移；bridge只允许ordinal 9
+执行一次。
+
+门禁沿用production parity：lower/state max diff均`<=2e-4`，gradient内部门禁`<=2e-5`，sign exact；
+evaluation/update=`10/9`，candidate evaluation=`10`，provider/native evaluation=`0`。任何policy shortcut、固定
+10/9无条件展开或读取expected trace都拒绝。
+
+精确实施合同见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_SEALED_PRODUCTION_POLICY_DRIVER_BLUEPRINT_2026_08_28.md`。该合同进一步
+冻结当前fixed live path的terminal ordinal调用一次scheduler：evaluation/parameter mutation/scheduler call分别为
+`10/9/10`，但early exit发生在scheduler之前，第10次scheduler不是所有policy path的无条件语义；其post LR不被后续
+evaluation消费。live pruner必须直接捕获preserve-mask，不得把formal workload上未触发的stop/prune/restore分支静默
+删除。live policy、functional Adam、failure poison与memory修正见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_2_POLICY_DRIVER_IMPLEMENTATION_READINESS_2026_08_29.md`。
+
+### S4-3：whole-core exact-call correctness
+
+exact transaction、provider兼容对象、official post、host packet/intermediate-container副作用、device commit及失败语义的
+精确实施合同见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_EXACT_CALL_TRANSACTION_BLUEPRINT_2026_08_28.md`。特别注意，
+现有device atomic v1只能在mid-commit故障后恢复tensor内容，不能恢复PyTorch `_version`；因此S4-3必须把提交前
+clean abort与提交中`POISONED_NO_RETRY`分开，不得把后者写成可透明fallback的完全回滚。
+
+2026-08-29 live implementation-readiness修订见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_3_WHOLE_CORE_TRANSACTION_IMPLEMENTATION_READINESS_2026_08_29.md`：working-β必须
+prepared、rollback只恢复已提交prefix、terminal lease按KFSB/post最后consumer拆分；exclusive latch覆盖commit、official
+post和candidate queue add。2026-08-29扣除重复计算的residual arena slice后，known-new logical subtotal修正为
+CUDA=`559,758 B`、CPU=`80 B`、总计=`559,838 B`。
+
+provider net scratch的consumer/lifetime精确审计见
+`gemini_doc/BOUNDFLOW_ASPLOS27_S4_3A_PROVIDER_NET_SCRATCH_CONSUMER_AUDIT_2026_08_28.md`。冻结结论是：
+normal fixed path的candidate KFSB、official post、queue storage和candidate next-pre不把net dynamic scratch当数值输入。
+B0 terminal extraction会move/gc 36 path，但provider KFSB随后留下batch-24 residue；当前R则保留batch-12 stale scratch。
+S4以`ProviderNetScratchFinalizationPlanV2`让B0只observe residue、R/C在native KFSB后统一规范化36 path；六条
+split-layer export lA、18条all-node finalization和12条production tensor path分别计数。S4-v1使用query-scoped
+exclusive core-owner latch；candidate首次commit后，同一query禁止provider reentry、fallback或第二次core call。
+
+在同一`ABCrownSolver.verify`内比较：
+
+```text
+R：RVIR whole-call provider-independent reference
+C：RVIR + S4 compiled evaluation + existing host policy/export/KFSB/commit
+```
+
+B0 original provider只作额外semantic control，不作为S4实现依赖。五fresh顺序预注册后比较：
+
+- solver status/success、visited domains；
+- core lower/upper、6 lA、6 intermediate bounds；
+- terminal六α/六β；
+- KFSB三候选、child lower与最终decision；
+- history/depth/threshold、n_splits/n_verified；
+- 12-path atomic commit、rollback与queue/post；
+- exact-call=`1`，provider compute/update、fallback、native shadow=`0`；
+- terminal duplicate CROWN=`0`。
+- terminal lA lease=`1`且one-shot；六lA总37,464元素；hot handoff clone/dynamic allocation如实计数；
+- KFSB child CROWN=`3`、child batch=`24`、child lower元素=`72`，不得从scope中隐藏。
+- provider bound callbacks=`0`，但provider return constructor调用=`12`、official postprocess=`1`；三类计数不得合并；
+- query total domain add=`2`，其中candidate post domain add=`1`；两者必须由observer分别记录，不能相互推断；
+- host packet必须prune到history/depths/thresholds，`pre_result.interm_bounds`必须恰一次clear并纳入logical commit；
+- provider net scratch的下游consumer必须机械关闭；B0 KFSB residue与R/C normalized差异显式记录，禁止伪造disposal
+  parity；logical/unique storage与alias分列，scratch计数不得混入12条production tensor path；同一query的provider
+  reentry/multi-core必须fail closed；
+- validation/staging失败必须在live mutation前clean abort；mid-commit只可恢复committed prefix且仍进入
+  `COMMIT_POISONED`；post/queue故障分别进入`POST_POISONED/QUEUE_POISONED`，禁止native fallback、重试或继续。
+
+所有离散字段exact；有限浮点沿用已冻结容差。内部formal通过后只能写
+`FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT`；外审批准后的closure commit才可升级为
+`VALIDATED-S4-SAME-SOLVER-CORRECTNESS`，且仍不形成性能claim。
+
+### S4-4：artifact/replay/tamper closure
+
+精确artifact tree、18-worker六全排列B0/R/C、15个隔离fault worker、stdlib tensor codec/replayer、external trust
+anchor、pre/mid/post/queue fault状态与96类tamper合同见：
+
+- 总门禁：`gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_ARTIFACT_REPLAY_TAMPER_CLOSURE_BLUEPRINT_2026_08_28.md`；
+- 实施就绪修订：
+  `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_FORMAL_EVIDENCE_IMPLEMENTATION_READINESS_2026_08_29.md`；
+- 施工冻结合同：
+  `gemini_doc/BOUNDFLOW_ASPLOS27_S4_4_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`。
+
+- raw-first，source commit、TVM submodule、三个外部仓库、model/property、loaded core/native inventory与关键compiled
+  receipt绑定；artifact外trust anchor另绑manifest/semantic root/replayer；
+- 六个B0/R/C全排列triplet、18个positive subprocess，加15个隔离fault subprocess，总数33；部分结果不得resume成formal；
+- raw逐step保留，不只存summary digest；
+- tensor raw必须有不依赖`.pt`的stdlib可解码index + content-addressed binary payload；replay不得import
+  BoundFlow/PyTorch/TVM/αβ-CROWN；
+- replay从raw重算coverage、trajectory、whole-core、receipt、failure state与verdict；
+- 96类tamper按external-anchor/frozen-protocol/raw-semantics/execution-evidence分层；其中95类fully
+  outer-resigned攻击必须拒绝，fresh-process attestation只能诚实报告`OFFLINE_UNATTESTABLE`，不得伪造
+  artifact内密码学证明；覆盖
+  source/protocol、worker/process、state/trajectory、terminal handoff、KFSB、
+  transaction/provider/post、artifact/replay、scratch phase/finalization/storage alias、S4-0 live binding/exclusive ownership与
+  claim flag；
+- official post与candidate queue add均发生于commit之后；fault必须分别记录为`POST_POISONED/QUEUE_POISONED`，禁止
+  rollback/retry/fallback；
+- corrected semantic tensor-occurrence floor为positive/fault/all=
+  `61,586,208/24,209,400/85,795,608 B`；它是逻辑出现量，不是physical artifact size，worker-local
+  content dedup合法；
+- final evidence seal DAG固定为16 nodes/36 edges，hash=
+  `01e179ea504f94c3e9720d5f63b318e34e912738d30c21d690f283b857ac491c`；
+- targeted/full/static/DocOps全过后，才允许另写S4-P性能预注册。
+
+## 4. Timing与性能门禁仍关闭
+
+S4 correctness完成前不得复用S3 `3.2439x`作为same-solver预测，因为candidate从单P扩到六α+active β后，
+kernel数、workspace、VM/launch和region speedup都会变化。
+
+S4-P只能在正确性artifact关闭后预注册，并重新实测：
+
+- exact-call region真实query share `s`；
+- all-state compiled/reference region speedup `r`；
+- adapter/export/KFSB/commit integration overhead `h`；
+- `T = 1 / ((1-s)+s/r) / h`的query feasibility；
+- 同solver B0/R/C三方、fresh进程、GPU状态与最差pair。
+
+若新测`required_r >10x`或candidate必须重复native full evaluation，性能路线直接STOP；不得通过排除host policy、
+terminal export或commit来制造headline。
+
+## 5. Fail-closed拒绝清单
+
+至少覆盖以下稳定原因：
+
+1. `S3_EXTERNAL_APPROVAL_MISSING`；
+2. `MUTABLE_STATE_COVERAGE_INCOMPLETE`；
+3. `ACTIVE_BETA_COVERAGE_INCOMPLETE`；
+4. `MUTABLE_STATE_KEY_EXTRA`；
+5. `MUTABLE_STATE_KEY_DUPLICATE`；
+6. `STATE_SHAPE_MISMATCH`；
+7. `STATE_DTYPE_MISMATCH`；
+8. `STATE_DEVICE_MISMATCH`；
+9. `ALPHA_FEATURE_INDEX_MISMATCH`；
+10. `BETA_LOCATION_SIGN_MISMATCH`；
+11. `STATE_ALIAS_CONFLICT`；
+12. `POLICY_HASH_MISMATCH`；
+13. `EVALUATION_ORDINAL_MISMATCH`；
+14. `NONFINITE_LOWER_OR_GRADIENT`；
+15. `TERMINAL_HANDOFF_EARLY_OR_MISSING`；
+16. `TERMINAL_DUPLICATE_CROWN`；
+17. `PROVIDER_CALLBACK_OBSERVED`；
+18. `FALLBACK_OR_NATIVE_SHADOW_OBSERVED`；
+19. `KFSB_OR_BRANCH_DRIFT`；
+20. `ATOMIC_COMMIT_OR_ROLLBACK_DRIFT`；
+21. `CLAIM_FLAG_TRUE_BEFORE_FORMAL`。
+
+并追加：`ALPHA_MUTABLE_DIRECTION_MISMATCH`、`ALPHA_PRESERVED_DIRECTION_DRIFT`、
+`COMPRESSED_NATIVE_ROUND_TRIP_MISMATCH`、`DENSE_BRIDGE_BEFORE_TERMINAL`、`TERMINAL_SLOT_PHASE_MISMATCH`、
+`EFFECTIVE_VALUE_OVERWRITTEN_BEFORE_GRADIENT`、`TERMINAL_LA_INVENTORY_INCOMPLETE`、
+`TERMINAL_LA_LEASE_REUSED`、`INTERMEDIATE_SOURCE_VERSION_MISMATCH`、
+`HOT_HANDOFF_CLONE_OR_ALLOCATION_OBSERVED`。
+
+S4-3再追加：`PROVIDER_RETURN_CONSTRUCTOR_COUNT_MISMATCH`、`PROVIDER_POSTPROCESS_COUNT_MISMATCH`、
+`HOST_PACKET_SCHEMA_OR_PRUNE_MISMATCH`、`INTERMEDIATE_CONTAINER_NOT_CLEARED`、
+`MID_COMMIT_FAILURE_POISONED`、`RETRY_AFTER_POISONED_FORBIDDEN`、
+`FALLBACK_AFTER_PARTIAL_COMMIT_FORBIDDEN`、`NET_SCRATCH_CONSUMER_UNRESOLVED`。
+
+拒绝必须发生在对应evaluation launch、live mutation或commit之前；发生异常时existing live state必须保持原样。
+
+## 6. 建议提交序列
+
+S3外审批准后才允许：
+
+1. `docs: preregister ASPLOS27 S4 production exact-call`（批准后将本稿转execution-authority）；
+2. `feat(runtime): add production mutable-state binding coverage`（S4-0）；
+3. `test(runtime): close S4-0 coverage and negative gates`；
+4. `feat(compiler): compile all-state CROWN evaluation and VJP`（S4-1）；
+5. `test(runtime): close all-state single-evaluation correctness`；
+6. `feat(runtime): inject sealed evaluator into production optimizer policy`（S4-2）；
+7. `test(runtime): close six-alpha active-beta 10/9 trajectory`；
+8. `feat(adapter): route RVIR exact call through compiled evaluation`（S4-3）；
+9. `test(adapter): close whole-core five-fresh correctness`；
+10. `artifact: close S4 replay and tamper`（S4-4）；
+11. `docs: preregister S4-P same-solver timing`。
+
+每一级独立提交、独立门禁；不得把coverage、compiler、whole-core和timing揉进一个不可归因提交。
+
+## 7. 当前停止点
+
+DocOps task=`asplos27-s3-optimizer-runtime-20260828`当前为`ready_for_audit`。外审批准前，本稿只是一份
+基于仓库事实的预注册草案；S4代码、GPU correctness与timing均保持关闭。外审若指出S3 blocker/major，先处理
+finding并重开S3 round，不得绕到S4。

@@ -1,0 +1,89 @@
+{
+  "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+  "auto_lirpa_commit": "5a098e8f9fb5786a428a024981d833d303921f2d",
+  "code_revision": {
+    "boundflow/runtime/rvir_v4_atomic_copy_out.py": "00bb8d88ff8a21610dcbce2d8ae2a7c97a6c192fbf093c4f5c4028234756c170",
+    "boundflow/runtime/rvir_v4_live_return.py": "a7ad85c24f42b41d12871520c6e40212b8d25f0dabadd7dee0cd66f2bb451856",
+    "boundflow/runtime/rvir_v4_whole_core_truth.py": "ee59d642b24a6030c5554d2cff96dc211ae71ae63095ff68322959e6a4bb8efe",
+    "scripts/probe_rvir_v4_five_fresh_artifact_tamper.py": "59ab54313b3d922552ce76592d199a69c1e8f644adc2efa6077e27b7a1f301a8",
+    "scripts/run_rvir_v4_five_fresh_artifact.py": "00cd425f9a023024786c51e05dd39dd77899d5edec50cc90f01db7731f3741e3",
+    "scripts/run_rvir_v4_five_fresh_worker.py": "f1e3910339f46192c0aa398269e592a7f49ffa84266b2423b19ec9069fdd735c"
+  },
+  "files": {
+    "README.md": "78d1019274ad1ddf31bc84aad6ea10fbbdab1697f1bf6282aed6c48675bb366a",
+    "replay_stdout.txt": "205acf6be1594952de45e6891525094ef0262c5d0127ad7c773e3e30d8dbee95",
+    "run_00_original.pt": "40c63f4b6d8de3c8924dea2fa23404fd3f01e22788ac9928169dc2073fd66915",
+    "run_00_original.stdout.txt": "75b7dca67a0a495610d14b9c467b294e18a5c3eea0c992c912a837a0fbb2bd51",
+    "run_01_candidate.pt": "4b8a0b399583f1a10feb4fe71029913514501758f9eceac1700bbf1379cfa267",
+    "run_01_candidate.stdout.txt": "c3d33f6aebc633645528208d718add9f913f777a4d461dd6976e98cb81774091",
+    "run_02_candidate.pt": "fbfc4e256e71cd7192b7995c0ffd73226da216ed2f153412431df01ce6952e85",
+    "run_02_candidate.stdout.txt": "c32a519b330553b54884628f245140f77c4102b3f8b38cf77c1dd4c9ae4df952",
+    "run_03_original.pt": "cd54c460d7cf1816c5f241c8e8fa77f7c006d7da18e4ece58e42e8d67a76fe2b",
+    "run_03_original.stdout.txt": "68be47b08a4b081db47f1f65328821828631987c97008561fe338ae177e77f17",
+    "run_04_candidate.pt": "931cc1d9344ef566117b790f7c8192f07c0daba19efb8c672d9827b7da75a325",
+    "run_04_candidate.stdout.txt": "4e68fb9ba9d6aa797cabfeb98b912d32379d8b458401d314cac6cf163e639120",
+    "run_05_original.pt": "02b18958c62e73419ee05312d99e5cac4322d04138f37644487ba76b6535be1c",
+    "run_05_original.stdout.txt": "24ee43d31ecc8f40143e25f1e92cdfe5bd6a399177faf3e0f1202483554b9cf6",
+    "run_06_original.pt": "0144a84065a5b21f2702d57137ecf23ab4183a45e7f6452e279ebc05c94df0ee",
+    "run_06_original.stdout.txt": "1f66a24df3e460e769282c66420ed3d7b9b9ec9cdcaa3862bdfeef5dd906ac03",
+    "run_07_candidate.pt": "d7847f55687251507a5994e070fc1771cf11cb6dd90a650972b85bdc015a88de",
+    "run_07_candidate.stdout.txt": "14ee1980fd814e5305b34b67996c0c07f43846958340c7a2245574b2edcfbe27",
+    "run_08_original.pt": "35dd336d0f722028033f24ea5f2f9a75902e4d36ba7ab3ce1f62dfdb8a943fa9",
+    "run_08_original.stdout.txt": "ac1a568e1dc048de6dffbe4f80056b689ae8bccffe577e646929c2513529c82b",
+    "run_09_candidate.pt": "e53a523185e5754b009c83be17d91e1954b61c657f21af4b3b74b077ac7329c5",
+    "run_09_candidate.stdout.txt": "6d2dbcf4a4cf517998b321afdc8748302d264de7c18d151a5471071a406fe628",
+    "summary.json": "4b33f060909b3d628d0d0b44bd5e6cbf230e63e0c30d0927f60fb7e6e80d2242"
+  },
+  "manifest_hash": "a745532bf9beeb0835e41ef0680e30790039f4bc14ff0768d38872f0ca95023a",
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "performance_claimed": false,
+  "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+  "replay_contract": {
+    "atol": 0.0002,
+    "cold_isolated_property": true,
+    "discrete_structure_exact": true,
+    "fresh_process_per_run": true,
+    "pair_indices": [
+      [
+        0,
+        1
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        5,
+        4
+      ],
+      [
+        6,
+        7
+      ],
+      [
+        8,
+        9
+      ]
+    ],
+    "performance_claimed": false,
+    "rtol": 0.0002,
+    "sequence": [
+      "original",
+      "candidate",
+      "candidate",
+      "original",
+      "candidate",
+      "original",
+      "original",
+      "candidate",
+      "original",
+      "candidate"
+    ],
+    "sign_exact": true
+  },
+  "schema_version": "boundflow.rvir-v4-five-fresh-artifact/v1",
+  "source_git_head": "17d2d61df8648ceeac8b176a01192279c4b522b4",
+  "status": "validated-five-fresh-correctness",
+  "summary_hash": "cf0bec5aaa1fd90ecd26c8036ebb9a7f03d314b3c47bbd450df9676f16666adf",
+  "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf"
+}

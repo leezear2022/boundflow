@@ -1,0 +1,26 @@
+{
+  "activation_call_count": 394,
+  "effective_method_counts": {
+    "alpha_beta_crown": 394
+  },
+  "environment_boundary": "CPU correctness; no CUDA or performance claim",
+  "files": {
+    "activation_calls.jsonl": "b8dc6652d487dbe3fd2a00933443a1f20221221babc22ae2f4f4f32a58462c4d",
+    "online_execution.json": "e97ac17d177f83ea66daae74d81f8f495670e90c8e4d16fe5dc20f6f0b47fecc",
+    "online_queries.jsonl": "d1bd3ee0da380c374180394ab48c34c813eaed07664abe873e09e163d3d6141a",
+    "online_typed_ir.jsonl": "bee3a69dcee6a0ffeac6ac331973ccd1c5ab86e8bde3c83a84b71db67a9a9cdb",
+    "resnet_semantics.json": "a86056c3f0c9c5da9f33058f703a4270a2a486ee8f095cdc579dcc1dc627a85c"
+  },
+  "historical_source_digests": {
+    "official-simple-cnn-cuda-bab/queries.jsonl": "a2b8ae31c0881182e3ef98c02a22523a44a8a1e32328e98e35ee66e09750d9b7",
+    "official-simple-mlp-cuda-bab/queries.jsonl": "54e2948980cb54ff537857fa2ec771aa377a7e7656b69c2b8be0f588f1539d8f",
+    "vnncomp21-resnet2b-prop0/queries.jsonl": "6294560ad7dcf35a808add0e1dcadcd7c33277d049f2dc2bd1d7aafe676b8b90"
+  },
+  "performance_claimed": false,
+  "schema_version": "boundflow.real-verifier-ir-artifact/v2",
+  "semantics_owner": "external_verifier",
+  "workload_counts": {
+    "official-simple-mlp-cuda-bab": 343,
+    "vnncomp21-resnet2b-prop0": 51
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "code_revision": {
+    "boundflow/runtime/fsg3_same_solver_timing.py": "d123711b682bb7ba78d75fab464c00ebfd79c00f67d548a606b59cfe1554205e",
+    "boundflow/runtime/fsg4_b3_explicit_counters.py": "52b16dba189597152c10884f9c8ead455a40defe7aa279e62a1f07f18eea5fa8",
+    "boundflow/runtime/rvir_v4_atomic_copy_out.py": "00bb8d88ff8a21610dcbce2d8ae2a7c97a6c192fbf093c4f5c4028234756c170",
+    "boundflow/runtime/rvir_v4_live_return.py": "a7ad85c24f42b41d12871520c6e40212b8d25f0dabadd7dee0cd66f2bb451856",
+    "boundflow/runtime/rvir_v4_native_backward_export.py": "0222c8ae74a0e922ac486fb9f4284c1d5b16f9f534cc0922a31c432056c68b76",
+    "boundflow/runtime/rvir_v4_native_kfsb.py": "10b64b480b058107d12729f713aacf82356af8885458be5f1916639178062cf8",
+    "boundflow/runtime/rvir_v4_native_optimizer.py": "5bc7138101b5b9ee38677218c7921717057e1cee0ccd1895c2a1977e137348df",
+    "scripts/run_fsg3_same_solver_timing.py": "2dc7ce9dd5ea88b70a0f7686c2ed905715ed9ed5a4a16560bac37b7aa85115f0",
+    "scripts/run_fsg4_b3_counter_diagnostic.py": "44f8a71eae3052ac56980262c607f3cec81d659b76791b75eb7359777200eb21",
+    "scripts/run_rvir_v4_live_return_capture.py": "7424a78d6536982cdb315b8b31691edb2c3adf3d49feed6850132ddaa8956dbd"
+  },
+  "configuration": "B2",
+  "files": {
+    "events.jsonl": "0145757cb2d62ac159c4537e9ed5474dd85095153c7754000afa796ada5a0985",
+    "report.json": "aa3fb809c150441d3762bf11cd615b69fe26ff0f3e9d35e9599b9f7037f83f69",
+    "worker.json": "32ede6c75272460f0cf77868ac8f76ead853fe04bc87219fbd55773637124846"
+  },
+  "fsg3_reference_manifest_hash": "9089e2019eb5e98cac228151cb061c0f6aceefa0ad6c6b3e298584bcede21e85",
+  "fsg3_reference_summary_hash": "df852590d99be09962c1287e7166b421edb260416403a3c91545dca6e2e1318e",
+  "manifest_hash": "d55135e2fe097bd0dd10c5bc6b6ef7966b310e0ae02c0323a8856b3aeb5fca49",
+  "performance_claimed": false,
+  "report_hash": "1c7a5496b8bde2e6c6d5315b82c24807d4d4f8375ff89b7f04b90e283296d7c5",
+  "schema_version": "boundflow.fsg4-b3-counter-diagnostic-manifest/v1",
+  "source_git_head": "75dfd8103e8e3dfe824a63e15c2222f8742e28c1"
+}

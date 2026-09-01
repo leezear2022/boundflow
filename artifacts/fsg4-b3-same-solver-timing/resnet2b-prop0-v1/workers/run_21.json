@@ -1,0 +1,761 @@
+{
+  "diagnostics": {
+    "activation_receipt_hash": "722e4f2f22ef14e66de64b714c35a8486eefc16b1faccaeed3d4191b91af864a",
+    "allowed_graphics_processes": [
+      "kwin_wayland"
+    ],
+    "assembly_metadata": [
+      {
+        "assembly_hash": "0a410d68ea6bd3baffcfc7a8edc7cde6855fd81e960a781a41f99c61bcbfb015",
+        "b2_same_solver_timing_admitted": false,
+        "candidate_device_resident": true,
+        "fallback_dispatch_count": 0,
+        "final_decision": [
+          [
+            5,
+            27
+          ],
+          [
+            5,
+            32
+          ],
+          [
+            5,
+            90
+          ],
+          [
+            5,
+            90
+          ],
+          [
+            5,
+            32
+          ],
+          [
+            5,
+            90
+          ]
+        ],
+        "final_lower_metadata": {
+          "device": "cuda:0",
+          "dtype": "torch.float32",
+          "shape": [
+            6,
+            1
+          ]
+        },
+        "five_fresh_correctness_admitted": false,
+        "headline_content_digest_count": 0,
+        "lb_final_max": -0.3577542304992676,
+        "lb_final_min": -0.48797833919525146,
+        "live_return_assembly_admitted": true,
+        "live_target_paths": [
+          "alpha/%2F45/%2F49",
+          "alpha/%2F48/%2F49",
+          "alpha/%2Finput-12/%2F49",
+          "alpha/%2Finput-16/%2F49",
+          "alpha/%2Finput-24/%2F49",
+          "alpha/%2Finput-4/%2F49",
+          "beta/%2F39/0/value",
+          "beta/%2F44/0/value",
+          "beta/%2Finput-20/0/value",
+          "beta/%2Finput-28/0/value",
+          "beta/%2Finput-8/0/value",
+          "beta/%2Finput/0/value"
+        ],
+        "n_splits": 6,
+        "n_verified": 0,
+        "performance_claimed": false,
+        "plan_hash": "97ec085cf62acfccff1c7c39e9dd8a0bbca07aa1c76fd2e92de2540b74f69463",
+        "provider_compute_bounds_callback_count": 0,
+        "provider_core_callback_count": 0,
+        "provider_update_bounds_callback_count": 0,
+        "schema_version": "boundflow.fsg4-b3-device-live-return/v1",
+        "transaction_version": "46db51e4bdb0178b3d879cfad27e23b7e13ef89e3829322e8a877de0911ea822"
+      }
+    ],
+    "base_measurement_configuration": "B2",
+    "cold_outer_ns": 1445263006,
+    "cold_scope_includes_hook_setup": false,
+    "cold_total_is_compile_plus_query_composite": true,
+    "commit_receipts": [
+      {
+        "assembly_hash": "0a410d68ea6bd3baffcfc7a8edc7cde6855fd81e960a781a41f99c61bcbfb015",
+        "atomic_live_and_host_commit": true,
+        "candidate_d2h_copy_count": 0,
+        "candidate_device_resident": true,
+        "commit_hash": "59cb5c106ef0473d25996059d0d0136fa4131449e68102e79562f6e30a3d3d7c",
+        "committed_path_count": 12,
+        "committed_paths": [
+          "alpha/%2F45/%2F49",
+          "alpha/%2F48/%2F49",
+          "alpha/%2Finput-12/%2F49",
+          "alpha/%2Finput-16/%2F49",
+          "alpha/%2Finput-24/%2F49",
+          "alpha/%2Finput-4/%2F49",
+          "beta/%2F39/0/value",
+          "beta/%2F44/0/value",
+          "beta/%2Finput-20/0/value",
+          "beta/%2Finput-28/0/value",
+          "beta/%2Finput-8/0/value",
+          "beta/%2Finput/0/value"
+        ],
+        "content_audit_pending": true,
+        "core_instance_hash": "05d85b635fb4530f6888f36ff8f55ff17839df46e76709fc5934378177b584fc",
+        "device_rollback_backup_count": 12,
+        "fallback_dispatch_count": 0,
+        "host_candidate_version": "cd33dc23fe382c1969373ea9ec4c287c397e1ef5b95d3344e446aee1f7154d78",
+        "performance_claimed": false,
+        "plan_hash": "97ec085cf62acfccff1c7c39e9dd8a0bbca07aa1c76fd2e92de2540b74f69463",
+        "post_target_versions": [
+          [
+            "alpha/%2F45/%2F49",
+            1
+          ],
+          [
+            "alpha/%2F48/%2F49",
+            1
+          ],
+          [
+            "alpha/%2Finput-12/%2F49",
+            1
+          ],
+          [
+            "alpha/%2Finput-16/%2F49",
+            1
+          ],
+          [
+            "alpha/%2Finput-24/%2F49",
+            1
+          ],
+          [
+            "alpha/%2Finput-4/%2F49",
+            1
+          ],
+          [
+            "beta/%2F39/0/value",
+            1
+          ],
+          [
+            "beta/%2F44/0/value",
+            1
+          ],
+          [
+            "beta/%2Finput-20/0/value",
+            1
+          ],
+          [
+            "beta/%2Finput-28/0/value",
+            1
+          ],
+          [
+            "beta/%2Finput-8/0/value",
+            1
+          ],
+          [
+            "beta/%2Finput/0/value",
+            1
+          ]
+        ],
+        "pre_snapshot_hash": "415ff28334234936e15c52ef7058404b960924c18109f7b7d052c4880ed534d7",
+        "pre_target_versions": [
+          [
+            "alpha/%2F45/%2F49",
+            0
+          ],
+          [
+            "alpha/%2F48/%2F49",
+            0
+          ],
+          [
+            "alpha/%2Finput-12/%2F49",
+            0
+          ],
+          [
+            "alpha/%2Finput-16/%2F49",
+            0
+          ],
+          [
+            "alpha/%2Finput-24/%2F49",
+            0
+          ],
+          [
+            "alpha/%2Finput-4/%2F49",
+            0
+          ],
+          [
+            "beta/%2F39/0/value",
+            0
+          ],
+          [
+            "beta/%2F44/0/value",
+            0
+          ],
+          [
+            "beta/%2Finput-20/0/value",
+            0
+          ],
+          [
+            "beta/%2Finput-28/0/value",
+            0
+          ],
+          [
+            "beta/%2Finput-8/0/value",
+            0
+          ],
+          [
+            "beta/%2Finput/0/value",
+            0
+          ]
+        ],
+        "provider_callback_count": 0,
+        "provider_compute_bounds_callback_count": 0,
+        "provider_core_callback_count": 0,
+        "provider_update_bounds_callback_count": 0,
+        "schema_version": "boundflow.fsg4-b3-device-atomic-commit/v1",
+        "transaction_version": "46db51e4bdb0178b3d879cfad27e23b7e13ef89e3829322e8a877de0911ea822"
+      }
+    ],
+    "compute_processes_after": [
+      {
+        "name": "kwin_wayland",
+        "pid": 1508,
+        "used_memory_mib": 7
+      },
+      {
+        "name": "python",
+        "pid": 269664,
+        "used_memory_mib": 192
+      }
+    ],
+    "compute_processes_before": [
+      {
+        "name": "kwin_wayland",
+        "pid": 1508,
+        "used_memory_mib": 7
+      },
+      {
+        "name": "python",
+        "pid": 269664,
+        "used_memory_mib": 94
+      }
+    ],
+    "device_commit_audits": [
+      {
+        "audit_hash": "fc682158f8f6d812274cd762a6c66a0059fcab1df506c10361ac21ab9e35fde3",
+        "commit_hash": "59cb5c106ef0473d25996059d0d0136fa4131449e68102e79562f6e30a3d3d7c",
+        "committed_path_count": 12,
+        "content_audit_complete": true,
+        "headline_timing_excluded": true,
+        "path_digests": [
+          {
+            "before_sha256": "b1a61228dd59c22beaaa1117b6f00bfac5b824ccf2d96bc89628e3908998bc91",
+            "candidate_sha256": "301377cf061e47d0b980231c2371c9c3521629d82b8c850b0e382d534926acf9",
+            "changed": true,
+            "committed_sha256": "301377cf061e47d0b980231c2371c9c3521629d82b8c850b0e382d534926acf9",
+            "semantic_path": "alpha/%2F45/%2F49"
+          },
+          {
+            "before_sha256": "81d807edf887dbdddaea2000b4e360e0c2954ae31620c3063fddc555798ae0dd",
+            "candidate_sha256": "91cdc8b30fa4d2c0ab87b8edb454a08968f8439d51bbd4ec7a13f9ae5c2dd81b",
+            "changed": true,
+            "committed_sha256": "91cdc8b30fa4d2c0ab87b8edb454a08968f8439d51bbd4ec7a13f9ae5c2dd81b",
+            "semantic_path": "alpha/%2F48/%2F49"
+          },
+          {
+            "before_sha256": "4424d5d8cf9a042928f36edae2381e1163ae6124b1a868bc5467dc25acc9153a",
+            "candidate_sha256": "9d90c30ea38dc5293092bbbc92cd3258f46f3f09c47310091da924912c58c993",
+            "changed": true,
+            "committed_sha256": "9d90c30ea38dc5293092bbbc92cd3258f46f3f09c47310091da924912c58c993",
+            "semantic_path": "alpha/%2Finput-12/%2F49"
+          },
+          {
+            "before_sha256": "94e088d80517494f5f9c1510d837ae73ee57a043733f2b0fc61e6ea4a378f66b",
+            "candidate_sha256": "2c2b19d948e323118f39befdf318c6a9bba388e2d42ddc1510f43c841c62f0f6",
+            "changed": true,
+            "committed_sha256": "2c2b19d948e323118f39befdf318c6a9bba388e2d42ddc1510f43c841c62f0f6",
+            "semantic_path": "alpha/%2Finput-16/%2F49"
+          },
+          {
+            "before_sha256": "c886c34b3b2b2d692f48aa5b4cbfa2e94f5c4577368d6d0bde709cdedbc12419",
+            "candidate_sha256": "561c31f30802f88508964654a762c3412506067d8081bfd0139429cf81d0c4e8",
+            "changed": true,
+            "committed_sha256": "561c31f30802f88508964654a762c3412506067d8081bfd0139429cf81d0c4e8",
+            "semantic_path": "alpha/%2Finput-24/%2F49"
+          },
+          {
+            "before_sha256": "f074557c5d9caaf1ed17de707466262c0493a03df6398dd1381dba6e0b0c57cc",
+            "candidate_sha256": "c7ef98fbb938e6338d04e841404ecd6a1262c5b54ecb18f7375b849f0b1d37af",
+            "changed": true,
+            "committed_sha256": "c7ef98fbb938e6338d04e841404ecd6a1262c5b54ecb18f7375b849f0b1d37af",
+            "semantic_path": "alpha/%2Finput-4/%2F49"
+          },
+          {
+            "before_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+            "candidate_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+            "changed": false,
+            "committed_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+            "semantic_path": "beta/%2F39/0/value"
+          },
+          {
+            "before_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+            "candidate_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+            "changed": false,
+            "committed_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+            "semantic_path": "beta/%2F44/0/value"
+          },
+          {
+            "before_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+            "candidate_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+            "changed": false,
+            "committed_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+            "semantic_path": "beta/%2Finput-20/0/value"
+          },
+          {
+            "before_sha256": "82c14331f86c999d4ad98cd46b1b4e945b2f1e3b4362ae34121ee8bc388d9590",
+            "candidate_sha256": "c37214ac30d46cba1c6cc7671ddfe5bb39e6fb98ca14529661427ee29b165a76",
+            "changed": true,
+            "committed_sha256": "c37214ac30d46cba1c6cc7671ddfe5bb39e6fb98ca14529661427ee29b165a76",
+            "semantic_path": "beta/%2Finput-28/0/value"
+          },
+          {
+            "before_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+            "candidate_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+            "changed": false,
+            "committed_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+            "semantic_path": "beta/%2Finput-8/0/value"
+          },
+          {
+            "before_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+            "candidate_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+            "changed": false,
+            "committed_sha256": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+            "semantic_path": "beta/%2Finput/0/value"
+          }
+        ],
+        "performance_claimed": false,
+        "plan_hash": "97ec085cf62acfccff1c7c39e9dd8a0bbca07aa1c76fd2e92de2540b74f69463",
+        "post_query_synchronized": true,
+        "schema_version": "boundflow.fsg4-b3-device-atomic-commit/v1",
+        "transaction_version": "46db51e4bdb0178b3d879cfad27e23b7e13ef89e3829322e8a877de0911ea822"
+      }
+    ],
+    "environment_after": {
+      "driver_version": "610.57.04",
+      "hw_thermal_slowdown": "Not Active",
+      "hw_thermal_slowdown_counter_us": 0,
+      "memory_clock": "8001 MHz",
+      "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "performance_state": "P0",
+      "power_draw": "14.04 W",
+      "sm_clock": "1890 MHz",
+      "sw_power_cap": "Not Active",
+      "sw_power_cap_counter_us": 95012444,
+      "sw_thermal_slowdown": "Not Active",
+      "sw_thermal_slowdown_counter_us": 95012444,
+      "target_temperature": "87 C",
+      "temperature": "52 C",
+      "temperature_tlimit_margin": "35 C",
+      "total_memory": "8188 MiB",
+      "uuid": "GPU-0d3ee0a6-e7da-6b3b-69c4-2153bf99ae8f"
+    },
+    "environment_before": {
+      "driver_version": "610.57.04",
+      "hw_thermal_slowdown": "Not Active",
+      "hw_thermal_slowdown_counter_us": 0,
+      "memory_clock": "405 MHz",
+      "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "performance_state": "P8",
+      "power_draw": "3.84 W",
+      "sm_clock": "210 MHz",
+      "sw_power_cap": "Not Active",
+      "sw_power_cap_counter_us": 94226795,
+      "sw_thermal_slowdown": "Not Active",
+      "sw_thermal_slowdown_counter_us": 94226795,
+      "target_temperature": "87 C",
+      "temperature": "50 C",
+      "temperature_tlimit_margin": "37 C",
+      "total_memory": "8188 MiB",
+      "uuid": "GPU-0d3ee0a6-e7da-6b3b-69c4-2153bf99ae8f"
+    },
+    "five_fresh_manifest_file_sha256": "bf8b3ecccea992cce9dca56c963518510af8dc8d410c0d02b94513160189cb98",
+    "five_fresh_manifest_hash": "457ab1adc8488c5353ec66294583e7a2bedf2e92fca5901a72a41e8321df1573",
+    "fsg4_configuration": "B3",
+    "post_query_audit_excluded_from_timing": true,
+    "post_query_audit_ns": 5142395,
+    "post_validation_excluded_from_timing": true,
+    "pre_state_identities": [
+      {
+        "history_hash": "8921a052baa3a1444c468851f9a8be6429b23830982a61ee285b2cb2b115a08a",
+        "intermediate_bounds_hash": "3d990dc3942964507c31d1ace7d32f17b46a53bf7d51df98d0119c9a86912c53",
+        "snapshot_hash": "415ff28334234936e15c52ef7058404b960924c18109f7b7d052c4880ed534d7",
+        "topology_hash": "9be361625e492b1401a402fd19ad5d80ac06a977c74f137c7563e96de06bca35"
+      }
+    ],
+    "prepared_core_instance_hashes": [
+      "05d85b635fb4530f6888f36ff8f55ff17839df46e76709fc5934378177b584fc"
+    ],
+    "prepared_core_template_hashes": [
+      "cd831a3e56621c0ae7647aaeb283eb1f391981a21982f6f4fae4569321262f7d"
+    ],
+    "profile_counter_instrumentation": false,
+    "runtime_environment": {
+      "cudnn_version": 91900,
+      "driver_version": "610.57.04",
+      "gpu_total_memory": "8188 MiB",
+      "python_executable": "python",
+      "python_version": "3.11.15 (main, Jul 23 2026, 14:43:45) [Clang 22.1.3 ]",
+      "torch_cuda_version": "13.0",
+      "torch_version": "2.11.0+cu130"
+    },
+    "terminal_optimizer_schedule_hashes": [
+      "69af2bb2346f70bf690438b57b0e651c7f491d06007adfc1140538be79d60659"
+    ],
+    "typed_snapshot_hash": null,
+    "worker_preflight": {
+      "admitted": true,
+      "poll_seconds": 5,
+      "sample_count": 5,
+      "samples": [
+        {
+          "ac_powered": true,
+          "compute_processes": [
+            {
+              "name": "kwin_wayland",
+              "pid": 1508,
+              "used_memory_mib": 7
+            },
+            {
+              "name": "python",
+              "pid": 269664,
+              "used_memory_mib": 94
+            }
+          ],
+          "elapsed_ns": 108482601,
+          "gpu_snapshot": {
+            "driver_version": "610.57.04",
+            "hw_thermal_slowdown": "Not Active",
+            "hw_thermal_slowdown_counter_us": 0,
+            "memory_clock": "8001 MHz",
+            "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+            "performance_state": "P3",
+            "power_draw": "14.64 W",
+            "sm_clock": "1890 MHz",
+            "sw_power_cap": "Not Active",
+            "sw_power_cap_counter_us": 92593986,
+            "sw_thermal_slowdown": "Not Active",
+            "sw_thermal_slowdown_counter_us": 92593986,
+            "target_temperature": "87 C",
+            "temperature": "52 C",
+            "temperature_tlimit_margin": "35 C",
+            "total_memory": "8188 MiB",
+            "uuid": "GPU-0d3ee0a6-e7da-6b3b-69c4-2153bf99ae8f"
+          },
+          "independent_thermal_active": false,
+          "temperature_celsius": 52
+        },
+        {
+          "ac_powered": true,
+          "compute_processes": [
+            {
+              "name": "kwin_wayland",
+              "pid": 1508,
+              "used_memory_mib": 7
+            },
+            {
+              "name": "python",
+              "pid": 269664,
+              "used_memory_mib": 94
+            }
+          ],
+          "elapsed_ns": 5218179392,
+          "gpu_snapshot": {
+            "driver_version": "610.57.04",
+            "hw_thermal_slowdown": "Not Active",
+            "hw_thermal_slowdown_counter_us": 0,
+            "memory_clock": "8001 MHz",
+            "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+            "performance_state": "P0",
+            "power_draw": "13.35 W",
+            "sm_clock": "1890 MHz",
+            "sw_power_cap": "Not Active",
+            "sw_power_cap_counter_us": 92675649,
+            "sw_thermal_slowdown": "Not Active",
+            "sw_thermal_slowdown_counter_us": 92675649,
+            "target_temperature": "87 C",
+            "temperature": "52 C",
+            "temperature_tlimit_margin": "35 C",
+            "total_memory": "8188 MiB",
+            "uuid": "GPU-0d3ee0a6-e7da-6b3b-69c4-2153bf99ae8f"
+          },
+          "independent_thermal_active": false,
+          "temperature_celsius": 52
+        },
+        {
+          "ac_powered": true,
+          "compute_processes": [
+            {
+              "name": "kwin_wayland",
+              "pid": 1508,
+              "used_memory_mib": 7
+            },
+            {
+              "name": "python",
+              "pid": 269664,
+              "used_memory_mib": 94
+            }
+          ],
+          "elapsed_ns": 10325784634,
+          "gpu_snapshot": {
+            "driver_version": "610.57.04",
+            "hw_thermal_slowdown": "Not Active",
+            "hw_thermal_slowdown_counter_us": 0,
+            "memory_clock": "8001 MHz",
+            "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+            "performance_state": "P0",
+            "power_draw": "13.31 W",
+            "sm_clock": "1890 MHz",
+            "sw_power_cap": "Not Active",
+            "sw_power_cap_counter_us": 92675649,
+            "sw_thermal_slowdown": "Not Active",
+            "sw_thermal_slowdown_counter_us": 92675649,
+            "target_temperature": "87 C",
+            "temperature": "52 C",
+            "temperature_tlimit_margin": "35 C",
+            "total_memory": "8188 MiB",
+            "uuid": "GPU-0d3ee0a6-e7da-6b3b-69c4-2153bf99ae8f"
+          },
+          "independent_thermal_active": false,
+          "temperature_celsius": 52
+        },
+        {
+          "ac_powered": true,
+          "compute_processes": [
+            {
+              "name": "kwin_wayland",
+              "pid": 1508,
+              "used_memory_mib": 7
+            },
+            {
+              "name": "python",
+              "pid": 269664,
+              "used_memory_mib": 94
+            }
+          ],
+          "elapsed_ns": 15434426908,
+          "gpu_snapshot": {
+            "driver_version": "610.57.04",
+            "hw_thermal_slowdown": "Not Active",
+            "hw_thermal_slowdown_counter_us": 0,
+            "memory_clock": "8001 MHz",
+            "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+            "performance_state": "P0",
+            "power_draw": "13.31 W",
+            "sm_clock": "1890 MHz",
+            "sw_power_cap": "Not Active",
+            "sw_power_cap_counter_us": 92675649,
+            "sw_thermal_slowdown": "Not Active",
+            "sw_thermal_slowdown_counter_us": 92675649,
+            "target_temperature": "87 C",
+            "temperature": "52 C",
+            "temperature_tlimit_margin": "35 C",
+            "total_memory": "8188 MiB",
+            "uuid": "GPU-0d3ee0a6-e7da-6b3b-69c4-2153bf99ae8f"
+          },
+          "independent_thermal_active": false,
+          "temperature_celsius": 52
+        },
+        {
+          "ac_powered": true,
+          "compute_processes": [
+            {
+              "name": "kwin_wayland",
+              "pid": 1508,
+              "used_memory_mib": 7
+            },
+            {
+              "name": "python",
+              "pid": 269664,
+              "used_memory_mib": 94
+            }
+          ],
+          "elapsed_ns": 20566056904,
+          "gpu_snapshot": {
+            "driver_version": "610.57.04",
+            "hw_thermal_slowdown": "Not Active",
+            "hw_thermal_slowdown_counter_us": 0,
+            "memory_clock": "405 MHz",
+            "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+            "performance_state": "P8",
+            "power_draw": "3.84 W",
+            "sm_clock": "210 MHz",
+            "sw_power_cap": "Not Active",
+            "sw_power_cap_counter_us": 94226795,
+            "sw_thermal_slowdown": "Not Active",
+            "sw_thermal_slowdown_counter_us": 94226795,
+            "target_temperature": "87 C",
+            "temperature": "50 C",
+            "temperature_tlimit_margin": "37 C",
+            "total_memory": "8188 MiB",
+            "uuid": "GPU-0d3ee0a6-e7da-6b3b-69c4-2153bf99ae8f"
+          },
+          "independent_thermal_active": false,
+          "temperature_celsius": 50
+        }
+      ],
+      "temperature_limit_celsius": 50,
+      "timeout_seconds": 900,
+      "wait_ns": 20566300372,
+      "worker_pid": 269664
+    }
+  },
+  "performance_claimed": false,
+  "run": {
+    "activation": {
+      "assembly_count": 1,
+      "candidate_d2h_copy_count": 0,
+      "commit_receipt_count": 1,
+      "detailed_counts": null,
+      "device_commit_audit_count": 1,
+      "headline_content_digest_count": 0,
+      "performance_claimed": false,
+      "post_query_audit_excluded_from_timing": true,
+      "post_query_audit_ns": 5142395,
+      "prepared_core_instance_count": 1,
+      "prepared_core_template_count": 1,
+      "schema_version": "boundflow.fsg4-b3-timing-activation/v1",
+      "terminal_optimizer_schedule_count": 1
+    },
+    "block_index": 3,
+    "configuration": "B3",
+    "environment": {
+      "ac_powered": true,
+      "admitted": true,
+      "device_identity_stable": true,
+      "external_compute_processes": [],
+      "gpu_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "gpu_uuid": "GPU-0d3ee0a6-e7da-6b3b-69c4-2153bf99ae8f",
+      "hardware_thermal_slowdown": false,
+      "independent_thermal_slowdown": false,
+      "runtime_identity": "fc3fcc6fd15160482b4654dd94f89bd4a818b03db1984f9a4e9068c07e832b78",
+      "software_power_cap_signal": true,
+      "software_thermal_power_counters_coupled": true,
+      "software_thermal_signal": true,
+      "worker_overlap": false
+    },
+    "execution": {
+      "backend_kind": "torch-eager-reference",
+      "fallback_dispatch_count": 0,
+      "provider_compute_bounds_call_count": 0,
+      "provider_core_call_count": 0,
+      "provider_update_bounds_call_count": 0,
+      "replacement_mode": "b3_ir_graph_plan_schedule",
+      "typed_validation_count": 1
+    },
+    "metrics": {
+      "boundflow_compile_ns": 1965999,
+      "cold_total_ns": 1423585048,
+      "core_gpu_ns": 259732635,
+      "core_wall_ns": 259715739,
+      "peak_allocated_bytes": 333867520,
+      "peak_reserved_bytes": 387973120,
+      "post_validation_ns": 136697,
+      "query_gpu_ns": 1421574951,
+      "query_wall_ns": 1421619049
+    },
+    "mode": "control",
+    "performance_claimed": false,
+    "profile_closure_error": null,
+    "profile_residual_share": null,
+    "profile_spans": [],
+    "protocol_identity": "3aaf67f086a265e42e931d50f8e001bcf2b7fbb914b60d04f257e12374338737",
+    "run_id": "block-03-pos-03-B3-control",
+    "schema_version": "boundflow.fsg4-b3-same-solver-timing/v1",
+    "semantics": {
+      "batch_size": 6,
+      "depths": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "final_decision": [
+        [
+          5,
+          27
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ]
+      ],
+      "history_count": 6,
+      "lower_shape": [
+        6,
+        1
+      ],
+      "lower_values": [
+        -0.36195945739746094,
+        -0.41863489151000977,
+        -0.4712541103363037,
+        -0.3577542304992676,
+        -0.43862664699554443,
+        -0.48797833919525146
+      ],
+      "n_splits": 6,
+      "n_verified": 0,
+      "queue_accepted": 6,
+      "queue_after": 6,
+      "queue_before": 0,
+      "queue_input": 6,
+      "queue_pruned": 0,
+      "split_depth": 1,
+      "status": "verified",
+      "success": true,
+      "upper_positive_infinity_mask": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "upper_shape": [
+        6,
+        1
+      ],
+      "upper_values": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "visited_domains": [
+        6
+      ]
+    },
+    "sequence_position": 3,
+    "source_identity": "ba0f13d0b510ada62dc25fdb43dd7271625b543b1c5527160dd77664073473c7"
+  },
+  "schema_version": "boundflow.fsg4-b3-same-solver-worker-envelope/v1"
+}

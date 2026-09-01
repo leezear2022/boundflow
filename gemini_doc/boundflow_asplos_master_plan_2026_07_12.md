@@ -1,5 +1,128 @@
 # BoundFlow 面向 ASPLOS 的总体研发与论文执行计划 v1.0
 
+> **2026-08-28 S4设计覆盖**：当前唯一动作仍是S3独立外审，S4代码/timing关闭。S4-1B0只读根因已从
+> “DAG-adjoint原则性失败”收窄为input box `A==0`次梯度：三元lower/upper/center endpoint使六site dα与active
+> dβ全部闭合。coefficient VJP作为规范oracle、selected-primal作为优化lowering；详见S4-1B0 ternary合同与
+> same-solver prereg。本覆盖不升级任何implementation/performance claim。
+> S4-1B0 construction补充：backend lowering不新增IR；isolated 5-view module输出逻辑量=`92,160 B`，与S4-1A
+> base view无重叠。production ledger省去`73,728 B selected_endpoint`的前提是S4-1B另行关闭coefficient arena
+> phase alias/liveness；未关闭则加回内存账。warm路径不得做content/count D2H。
+> 2026-08-29 S4-1B construction继续冻结pass A 19-action、selected graph 42-read+7-write与prepared argument
+> descriptor=`90`（S4-1B）/`110`（full A/B/C）。D1C residual scratch经源码和GPU storage identity复核是两个
+> coefficient arena的offset slice，新增physical bytes为0；S4-1D/S4-2/S4-3 design subtotal相应修正为
+> `389,574/491,774/559,838 B`。这不升级correctness、memory peak或performance claim。
+> 2026-08-29 S4-1C construction进一步冻结完整Pass C：nonterminal=`10 coefficient+7 emitter=17` actions，
+> terminal插入6个lA copy后=`23`；site31先dα、再dβ、再覆盖V31为lA31。六lA仍复用单一V arena，完整
+> argument descriptor保持110，terminal copy新增0。S3批准和前序S4门禁前仍不得实现。
+> 2026-08-29 S4-1D construction把single-evaluation owner收束为opaque sealed-consumer capability；raw Tensor getter
+> 被反例否定，parent/child修正为9-state lifecycle。formal由5+5改为每fixture六全排列、12 fresh，minimum numeric
+> raw=`4,209,984 B`。这仍是implementation contract，不是formal结果。
+
+> **2026-08-25 R3-1b0最新覆盖**：exact trace/liveness已正式关闭为
+> `VALIDATED-R3-1B0-TRACE-LIVENESS`；当前只开放b1 compiled no-grad full-lower forward。b2 custom
+> VJP、b3 five-fresh、optimizer/timing均关闭。见
+> `gemini_doc/BOUNDFLOW_R3_1B0_TRACE_LIVENESS_FORMAL_CLOSURE_2026_08_25.md`。
+
+> **2026-08-25 R3路线最新覆盖**：R1-A已NO-GO，R3-0 compressed-alpha v2已关闭；R3-1 M0
+> Python rematerialization语义通过但因peak allocated=`1.1181179x`和compiled-region=0/5正式
+> NO-GO。R3-2A关闭。当前只开放R3-1b0 exact trace/liveness compiler，不写TIR、不计时。权威文档为
+> `gemini_doc/BOUNDFLOW_R3_1_M0_PYTHON_REMATERIALIZATION_FORMAL_NO_GO_CLOSURE_2026_08_25.md`与
+> `gemini_doc/BOUNDFLOW_R3_1B_BOUNDED_ARENA_COMPILED_RECURRENCE_PLAN_2026_08_25.md`。
+
+> **2026-08-25 R0/R1覆盖说明**：R0已完成；R1 scope/clock/query-local attribution已冻结为独立
+> pre-registration，尚无runner/artifact。下一动作仅实现R1-0 schema/calibration/topology tests。
+> same-solver传播必须按op type实测`q_B3,k`与exact production `G_query,k`，独立IBP
+> `2.45631x`不能作为query常数。R1-D route closure前R2与R3-0保持关闭。权威计划为
+> `gemini_doc/BOUNDFLOW_CIBC_R1_SCOPE_CLOCK_QUERY_LOCAL_ATTRIBUTION_PLAN_2026_08_25.md`。
+
+> **2026-08-25 当前恢复路线覆盖说明**：本历史总计划中的性能执行顺序，现由
+> `gemini_doc/BOUNDFLOW_FAILED_GATES_DIAGNOSIS_AND_RECOVERY_PLAN_2026_08_24.md`覆盖。当前先做R0
+> hygiene与R1 scope/clock协议冻结，再做CIBC-G1、same-solver eligible-IBP share/workload admission、
+> 数学可达的R2和B0/B3/cumulative candidate三方formal。query qualification/research与queue
+> research目标为B0-relative `1.00/1.15/1.20x`。R3仅开放设计评审；R3-1 mandatory backward，
+> R3-2拆为2A trajectory correctness和2B wrapper timing，R3-0实现关闭。该覆盖不撤销任何既有
+> NO-GO，也不升级CIBC/R3/ASPLOS claim。
+
+> **2026-08-23 FSG4/B4-B2 B2-4内部关闭**：P-anchor sparse-source Conv P0与12项
+> bounded candidate correctness已验证，ledger在timing前冻结。只开放B2-4外审；正式timing、
+> B2-5/B4-B3继续关闭。
+
+> **2026-08-23 FSG4/B4-B2 B2-3外审关闭**：独立外审`APPROVE`，最终=
+> `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-3-P-CONV-DENSE-CORRECTNESS`。只开放B2-4
+> P-anchor sparse-source schedule；timing/B2-5/B4-B3关闭。
+
+> **2026-08-23 FSG4/B4-B2 B2-3内部关闭**：P-anchor dense Conv TIR correctness已通过
+> 5 raw/20 metrics/92,190元素门禁，max diff=`2.384185791015625e-06`、sign exact，beta
+> gradient absent；状态=`VALIDATED-B4-B2-B2-3-P-CONV-DENSE-CORRECTNESS-PENDING-EXTERNAL-AUDIT`。
+> 只开放B2-3外审，B2-4/B2-5/timing/B4-B3关闭。
+
+> **2026-08-23 FSG4/B4-B2 B2-2外审关闭**：独立外审`APPROVE`，0 blocker/
+> major/minor；最终=`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS`。
+> 只开放B2-3 P-anchor Conv dense correctness，timing与后续阶段关闭。
+
+> **2026-08-23 FSG4/B4-B2 B2-2内部关闭**：S sparse-source TIR 5/5 raw correctness通过，
+> native dense alpha/beta/scaled-A workspace count=`0`，当前=
+> `VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS-PENDING-EXTERNAL-AUDIT`。只开放
+> B2-2外审；P-anchor、timing与后续阶段关闭。
+> 该待审状态已由上方外审关闭状态取代。
+
+> **2026-08-23 FSG4/B4-B2 B2-1外审关闭**：独立外审`APPROVE`，0 blocker/
+> 0 major；最终=`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-1-DENSE-LINEAR-CORRECTNESS`。
+> 只开放B2-2 S-anchor sparse-source fused forward/backward；timing、P-anchor、B2-4/B2-5、
+> B4-B3仍关闭。
+> 该B2-2待实施指令已由上方B2-2内部关闭状态取代。
+
+> **2026-08-23 FSG4/B4-B2 B2-1内部关闭**：S dense Linear TIR 5/5 raw correctness通过，
+> 当前=`VALIDATED-B4-B2-B2-1-DENSE-LINEAR-CORRECTNESS-PENDING-EXTERNAL-AUDIT`。
+> 只开放外审；B2-2 sparse-source与timing关闭。
+> 该待审状态已由上方外审关闭状态取代。
+
+> **2026-08-23 FSG4/B4-B2 B2-0外审关闭**：`APPROVE`，0 blocker/0 major，auditor现场
+> GPU复跑三hash逐位一致。最终=
+> `EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-0-ABI-PROBE`；下一唯一动作=B2-1。
+
+> **2026-08-23 FSG4/B4-B2 B2-0关闭更新**：状态=
+> `VALIDATED-B4-B2-B2-0-ABI-PROBE`。RTX 4060 identity TIR forward/backward已满足first-class
+> receipt、DLPack/current stream/cache/一阶autograd门禁；下一唯一动作=B2-1 S-anchor dense
+> correctness。尚无region融合、timing或performance claim。
+
+> **2026-08-23 FSG4/B4-B2预注册更新**：状态=
+> `PREREGISTERED-B4-B2-TYPED-CUDA-TIR-NOT-IMPLEMENTED`。下一唯一动作=B2-0 first-class
+> lowering/receipt/identity-TIR ABI probe；通过前不得实现region TIR或启动timing。
+> 该预注册状态已由上方B2-0关闭更新取代。
+
+> **2026-08-23 FSG4/B4-B1关闭更新**：Round 2独立外审已批准并关闭exchange，最终=
+> `EXTERNALLY-APPROVED-VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE`。只开放另行预注册B4-B2
+> typed CUDA/TIR candidate；该动作已由上方预注册完成状态取代。
+
+> **2026-08-16 FSG4/B4-A实现候选**：typed handoff/no-rerun路径与five-fresh runner已实现为
+> `IMPLEMENTED-B4-A-PENDING-CLEAN-SOURCE-FIVE-FRESH`。下一步只执行clean-source correctness；无性能
+> claim，B4-B/C/D与B5—B7关闭。
+
+> **2026-08-16 FSG4/B4-A预注册**：状态=`PREREGISTERED-B4-A-NOT-IMPLEMENTED`。只开放terminal
+> lower/lA typed handoff与no-rerun assembly；先过typed lineage、5 fresh correctness，后测B3/B4-A
+> core/query门禁。B4-B/C/D与B5—B7仍关闭。
+
+> **2026-08-16 FSG4/B4-0外审关闭**：Round 1外审批准并关闭为
+> `EXTERNALLY-APPROVED-VALIDATED-B4-0-OPPORTUNITY`。只开放B4-A terminal lower/lA handoff；下一步先
+> 预注册typed lineage/correctness/five-fresh门禁，B4-B/C/D与B5—B7不得提前混入。
+
+> **2026-08-16 FSG4/B4-0内部关闭**：source=`66154e4`formal attribution/replay/tamper已内部通过，
+> opportunity只准入B4-A/B候选而无性能claim。当前等待外审；批准后下一单变量为B4-A terminal
+> lower/lA handoff，B4-B/C/D与B5—B7不得提前混入。
+
+> **2026-08-16 FSG4/B4-0 Runner候选**：B3外审关闭后，B4-0 read-only profiler schema/runner已实现，
+> 状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-ARTIFACT`。下一步只允许生成fresh attribution artifact
+> 并关闭opportunity门禁；无B4 performance/B0 parity claim，B4-A/B/C/D与B5—B7仍关闭。
+
+> **2026-08-14 FSG4/B3-0关闭**：真实B2显式counter已以`VALIDATED-B2-COUNTERS`冻结；该状态仅证明
+> B3复用目标的物理分母，不是加速结论。下一动作B3-A PreparedCoreTemplate/CorePlanInstance，B3-B/C和
+> B4—B7继续按门禁关闭。
+
+> **2026-08-14 FSG4/B3预注册**：FSG3正式分母关闭后，下一阶段只允许IR/graph/Plan/Schedule复用。
+> PreparedCoreTemplate、terminal-only optimizer Schedule与device-resident AtomicCommitPlan按A/B/C
+> 顺序独立关闭；B4 TIR、B5 JIT、B6 runtime、B7 arena不得提前混入。当前尚无B3结果。
+
 > 状态：**顶层执行计划 v1.0；后续研究工作受本文门禁约束。**  
 > 基线日期：2026-07-12  
 > 原始计划代码基线：`263ea81`（PR-10 complete）；当前 integration base：`f194034`
@@ -23,6 +146,25 @@
 > VALIDATED-REDUCED：ResNet external-semantics initial-CROWN 等价恢复，activation external
 > exact call 完成 typed IR admission/dispatch artifact。该结果只修复集成语义，不撤销
 > IR-5 performance No-Go，不启动 IR-6，也不形成 verifier acceleration claim。
+
+> **2026-08-13 RVIR-v4修订**：完整production replacement正在按state ownership门禁重开。
+> V4-1已验证冻结post α/β/split state可由五层native IR独立复算lower；V4-2A仅验证双学习率与
+> 10 evaluation/9 update合同。重启后V4-2B typed raw step trace正式GPU工件、original replay与5类
+> 同步重签名tamper通过，以`VALIDATED-PRODUCTION-TRACE`关闭。V4-2C正式artifact进一步在真实native
+> scope恢复6组α/β/split，12/12 round-trip exact；original replay与6类双层重签名tamper通过，以
+> `VALIDATED-PRE-STATE-INITIALIZER`关闭。V4-2D formal native loop已独立执行10 evaluations/9
+> updates，逐step lower/α/β均过`2e-4`门禁，original replay与6类双层重签攻击通过，以
+> `VALIDATED-NATIVE-STEP-PARITY`关闭。V4-2E再以12-path atomic copy-out、失败回滚、正式replay及
+> 6类完全重签攻击关闭；V4-2整体达到`VALIDATED-OPTIMIZER-REPLACEMENT`。whole-core live integration
+> 尚待V4-3，故B2和后续B3—B7仍未准入，性能结论不变。
+
+> **2026-08-14 FSG3修订**：上述V4-3/B2门禁已由后续whole-core replacement与正式same-solver基线
+> 取代。source `a4ee291`完成B0/B1/B2六个全排列block、36个fresh RTX 4060进程；correctness、
+> environment、measurement与replay全过。B1 query wall=`0.995657x`，当前B2 query/core=
+> `0.908400x/0.516767x`（B0/candidate），显存ratio=`1.0`，故FSG3=
+> `VALIDATED-FSG3-B0-B1-B2-BASELINE`、B2=`MEASURED-B2-SLOWER`。这只建立未优化reference分母，
+> 不关闭B3—B7。下一门禁是FSG4/B3 IR/graph/Plan/Schedule复用；最终B7 vs B0的
+> `1.20x queue / 1.15x complete-query`仍未测试，ASPLOS-ready=NO。
 
 > **2026-08-04 P0 修订**：production Schedule-memory ownership audit 为 `NO_GO`。
 > Reduced residual path 能由 Schedule IR 控制 arena 与 region launch，但没有 materialization、
@@ -102,8 +244,24 @@
 > `1.023199/1.020221`。两条 clause 的 3/3 winner 均为 child refinement execute，queue share=
 > `32.1966%/31.1640%`；内部 selected-CROWN 占 parent=`71.7725%/72.7291%`，为唯一过门禁子类。
 > formal hash=`571c2e47…d177a4`，replay/tamper 通过。状态为 attribution `VALIDATED-REDUCED`，不是
-> speedup；全量 `996 passed, 37 skipped`。下一门禁只做 NRIR49 selected-CROWN execution，
-> ASPLOS-ready=NO。
+> speedup；全量 `996 passed, 37 skipped`。当时准入的下一门禁只做 NRIR49 selected-CROWN execution，
+> 该历史动作已由下段完成，不是当前指令；ASPLOS-ready=NO。
+
+> **2026-08-06 NRIR49A G1 GPU selected-CROWN-only Opportunity判定**：RTX 4060 Laptop五fresh workers的selected-CROWN
+> queue/complete share中位=`7.0986%/7.0523%`，paired perturbation中位=`0.999304/1.006747`。
+> 测量有效，但20%机会门槛失败；queue 1.20x和complete 1.15x均超过Amdahl无限加速上限。
+> 最大reserved仅1.353%物理显存，合法batch上限1、无OOM，memory path=`N/A`。summary hash=
+> `7eefe6a7…ab50`，replay/digest通过。G1以
+> `VALIDATED-NO-GO(selected-CROWN-only incremental optimization)`关闭，selected-CROWN G2/G3 gated off；
+> `1/(1-0.070986)=1.0764x`只是假设selected-CROWN region变为零耗时的deletion-only单区域上限，
+> 不是BoundFlow全栈上限；只停止selected-CROWN专属TIR/JIT/融合。正式artifact的
+> `next_route=gpu-winner-reselection`是冻结历史输出，已由
+> `gemini_doc/BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md`取代。FSG0
+> schema/replay合同已以20项定向测试和`1079 passed, 3 skipped`关闭，外部审计三项minor已修复；
+> FSG1 official B0 control亦已关闭。FSG2随后验证了no-original-callback initial-CROWN replacement，
+> 但真实24-call inventory显示production alpha/beta/split state ownership不完整，故完整B2
+> `NO-GO/not admitted`，FSG3—FSG5依赖门禁停止。该门禁不等于B3—B7各层潜力被逐项证伪；当前无
+> BoundFlow全栈GPU性能claim，ASPLOS-ready=NO。
 
 > **2026-08-04 NRIR-21 修订**：per-child exact-split objective refinement 的 IR/control、lineage
 > 与 replay 已实现，但固定 ResNet clauses 0/1 的最差 depth-2 leaf lower 相对 root-global 分别

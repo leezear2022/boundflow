@@ -1,0 +1,51 @@
+{
+  "doc": "asplos27-s4-1b-six-site-20260831/r001/delivery",
+  "type": "delivery",
+  "task": "asplos27-s4-1b-six-site-20260831",
+  "round": 1,
+  "from": "codex",
+  "to": "external-model",
+  "ts": "2026-08-31T05:13:18Z",
+  "base_commit": "2f03905",
+  "result_commit": "591621b",
+  "changed_files": [
+    "boundflow/backends/tvm/asplos27_s4_six_site_value.py",
+    "boundflow/runtime/asplos27_s4_coefficient_selector_pass.py",
+    "boundflow/runtime/asplos27_s4_six_site_value.py",
+    "tests/test_asplos27_s4_coefficient_selector_pass.py",
+    "tests/test_asplos27_s4_six_site_value.py",
+    "gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_IMPLEMENTATION_CHANGELOG_2026_08_31.md",
+    "gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B_SIX_SITE_EXTERNAL_AUDIT_HANDOFF_2026_08_31.md"
+  ],
+  "claims": [
+    "Implementation source 760fa0d: real R31B2 19-action Pass A, six prebound TIR selector pack kernels, 42-read+7-write Pass B, coefficient-arena selected-input alias, one 37464-element V arena, production ResNet2B six-slot correctness; performance_claimed=false"
+  ],
+  "validation": [
+    {
+      "cmd": "conda run -n boundflow pytest -q tests/test_asplos27_s4_coefficient_selector_pass.py tests/test_asplos27_s4_six_site_value.py",
+      "result": "pass"
+    },
+    {
+      "cmd": "S4/R3 combined 189 passed",
+      "result": "pass"
+    },
+    {
+      "cmd": "full tests 2082 passed 3 skipped",
+      "result": "pass"
+    },
+    {
+      "cmd": "black mypy pylint-10 diff-check dol-lint",
+      "result": "pass"
+    }
+  ],
+  "limitations": [
+    "No multi-process formal artifact; no S4-1C gradients, optimizer trajectory, timing, performance, same-solver, complete-query, 10x, or ASPLOS-ready claim"
+  ],
+  "risks": [
+    "External auditor must independently verify production action insertion points, compiled selector path, content hashes, stream identity and six-slot oracle; E0 coherent full-resign remains outside local self-check"
+  ],
+  "open_questions": [
+    "Does the evidence justify VALIDATED-S4-1B-SIX-SITE-VALUE and opening only S4-1C implementation/correctness?"
+  ],
+  "md_sha256": "5c3777a7d87eaa3917ade1afc1c2f683c51c3e7b867d7fca0a76e56960717621"
+}

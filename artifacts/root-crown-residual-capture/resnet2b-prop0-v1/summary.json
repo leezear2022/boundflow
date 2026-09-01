@@ -1,0 +1,14 @@
+{
+  "backward_count": 4,
+  "domain_count": 1,
+  "entry_alpha_feature_count": 178,
+  "evaluation_count": 5,
+  "forward_count": 5,
+  "full_vjp_output_count": 7,
+  "inner_alpha_feature_count": 86,
+  "next_action": "parameterize-residual-tir-spec-domain-and-full-vjp",
+  "performance_claimed": false,
+  "schema_version": "boundflow.root-crown-residual-capture-artifact/v1",
+  "spec_count": 3,
+  "tensor_field_count": 22
+}

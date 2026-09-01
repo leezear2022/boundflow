@@ -18,9 +18,13 @@ usage() {
 
 run_env() {
   local pythonpath="${ROOT_DIR}:${TVM_DIR}/python:${TVM_FFI_DIR}/python:${LIRPA_DIR}"
+  local cudnn_library_path=""
+  if [[ -n "${BOUNDFLOW_CUDNN_ROOT:-}" ]]; then
+    cudnn_library_path="${BOUNDFLOW_CUDNN_ROOT}/lib:"
+  fi
   PYTHONPATH="${pythonpath}${PYTHONPATH:+:${PYTHONPATH}}" \
     TVM_LIBRARY_PATH="${TVM_BUILD_DIR}" \
-    LD_LIBRARY_PATH="${TVM_BUILD_DIR}/lib:${TVM_BUILD_DIR}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" \
+    LD_LIBRARY_PATH="${cudnn_library_path}${TVM_BUILD_DIR}/lib:${TVM_BUILD_DIR}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" \
     BOUNDFLOW_QUIET=1 \
     "${CONDA_BIN}" run --no-capture-output -n "${ENV_NAME}" "$@"
 }
@@ -32,8 +36,24 @@ run_env_capture() {
 cuda_root() {
   if [[ -n "${CUDA_ROOT}" ]]; then
     printf '%s\n' "${CUDA_ROOT}"
+  elif command -v nvcc >/dev/null 2>&1; then
+    dirname "$(dirname "$(readlink -f "$(command -v nvcc)")")"
   else
-    run_env_capture python -c 'import os; print(os.environ["CONDA_PREFIX"])'
+    local conda_cuda_root
+    conda_cuda_root="$(run_env_capture python -c 'import os; print(os.environ["CONDA_PREFIX"])')"
+    if [[ ! -f "${conda_cuda_root}/include/cuda_runtime.h" ]]; then
+      echo "找不到CUDA开发头文件；请设置BOUNDFLOW_CUDA_ROOT。" >&2
+      exit 2
+    fi
+    printf '%s\n' "${conda_cuda_root}"
+  fi
+}
+
+cudnn_root() {
+  if [[ -n "${BOUNDFLOW_CUDNN_ROOT:-}" ]]; then
+    printf '%s\n' "${BOUNDFLOW_CUDNN_ROOT}"
+  else
+    run_env_capture python -c 'import pathlib, sysconfig; root = pathlib.Path(sysconfig.get_paths()["purelib"]) / "nvidia" / "cudnn"; assert (root / "include" / "cudnn.h").is_file() and (root / "lib" / "libcudnn.so.9").is_file(), root; print(root)'
   fi
 }
 
@@ -78,14 +98,16 @@ stage_tvm() {
   test -f "${TVM_FFI_DIR}/pyproject.toml" || stage_submodules
   local llvm_config
   local selected_cuda_root
+  local selected_cudnn_root
   local clang
   local clangxx
   # 静态链接 LLVM 后再由 HIDE_PRIVATE_SYMBOLS 隐藏，避免与 Triton 的 LLVM 冲突。
   llvm_config="${ROOT_DIR}/scripts/llvm-config-static.sh"
   selected_cuda_root="$(cuda_root)"
+  selected_cudnn_root="$(cudnn_root)"
   clang="$(run_env_capture which clang)"
   clangxx="$(run_env_capture which clang++)"
-  run_env cmake -S "${TVM_DIR}" -B "${TVM_BUILD_DIR}" -G Ninja \
+  BOUNDFLOW_CUDNN_ROOT="${selected_cudnn_root}" run_env cmake -S "${TVM_DIR}" -B "${TVM_BUILD_DIR}" -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_C_COMPILER="${clang}" \
     -DCMAKE_CXX_COMPILER="${clangxx}" \
@@ -94,10 +116,16 @@ stage_tvm() {
     -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
     -DUSE_LLVM="${llvm_config}" \
     -DUSE_CUDA="${selected_cuda_root}" \
+    -DUSE_CUBLAS=ON \
+    -DUSE_CUDNN="${selected_cudnn_root}" \
+    -DCUDA_CUDNN_LIBRARY="${selected_cudnn_root}/lib/libcudnn.so.9" \
     -DHIDE_PRIVATE_SYMBOLS=ON
-  run_env cmake --build "${TVM_BUILD_DIR}" --parallel "${JOBS}"
-  # Python 与 TVM C++ 构建都来自 TVM 锁定的同一个内嵌 tvm-ffi commit。
-  run_env python -m pip install --no-deps -e "${TVM_FFI_DIR}"
+  BOUNDFLOW_CUDNN_ROOT="${selected_cudnn_root}" run_env cmake --build "${TVM_BUILD_DIR}" --parallel "${JOBS}"
+  # Python 与 TVM C++ 构建都来自TVM锁定的同一个内嵌tvm-ffi commit。已有editable
+  # 安装可直接复用，避免每次TVM增量构建都在pip隔离环境里重复全量编译FFI。
+  if ! BOUNDFLOW_CUDNN_ROOT="${selected_cudnn_root}" run_env python -c 'import tvm_ffi' >/dev/null 2>&1; then
+    BOUNDFLOW_CUDNN_ROOT="${selected_cudnn_root}" run_env python -m pip install --no-build-isolation --no-deps -e "${TVM_FFI_DIR}"
+  fi
 }
 
 stage_auto_lirpa() {
@@ -108,9 +136,11 @@ stage_auto_lirpa() {
 
 stage_verify() {
   require_conda
+  local selected_cudnn_root
+  selected_cudnn_root="$(cudnn_root)"
   run_env bash "${ROOT_DIR}/scripts/setup_hooks.sh"
   run_env python "${ROOT_DIR}/scripts/env_doctor.py" --strict --json-out "${ROOT_DIR}/artifacts/env/boundflow-doctor.json"
-  run_env python -c 'import tvm; import triton'  # LLVM/符号隔离门禁
+  BOUNDFLOW_CUDNN_ROOT="${selected_cudnn_root}" run_env python -c 'import tvm; import triton; required=("relax.ext.cublas", "tvm.contrib.cublas.matmul", "relax.ext.cudnn", "tvm.contrib.cudnn.conv2d.forward"); missing=[name for name in required if tvm.get_global_func(name, allow_missing=True) is None]; assert not missing, missing'  # LLVM/符号隔离与S1/S2混合后端门禁
   run_env python "${ROOT_DIR}/scripts/smoke_tvm_cuda.py"
   run_env python -m pytest -q "${ROOT_DIR}/tests"
 }

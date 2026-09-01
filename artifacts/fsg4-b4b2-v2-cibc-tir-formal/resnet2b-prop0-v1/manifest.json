@@ -1,0 +1,22 @@
+{
+  "files": {
+    "protocol.json": "81c770070228f63d2ba03a0f8537e680f3a5ca9b6962282fe7c90574c3345acb",
+    "raw/correctness_00.json": "01e8e3757c8b6fce7383e9bb38593197c3ac5e8173cecf0b4dec19b536ba8094",
+    "raw/correctness_01.json": "e053cceef609f8d99e27700d423dc3b650f760487656f9a74c4b6166b7671371",
+    "raw/correctness_02.json": "be077fcd6cdd8d16332974fe9330708eba30a617c1e00647a4dd323a1bf5fb1e",
+    "raw/correctness_03.json": "99b0303fda99db47cddc7fd42dd3be0d471fd5b10979cd1b58610a57a44df444",
+    "raw/correctness_04.json": "1bc1c32baa26a767569970d9785b5a36574639c51015e66220b2eb0ea6cbaad8",
+    "raw/timing_00_btr.json": "765360d43f41e553f25bb7f288d46fb901f5ab6eaec481ba4c5a47dce1de7f07",
+    "raw/timing_01_brt.json": "3b7f8684584408bf1389147cf4b27664b6bc47a65a9ab0c0bc848b5971f47f77",
+    "raw/timing_02_tbr.json": "c6eb2f5644b83d38f3c2567c223aad072160874bc4d4bec7b7455554afb174f2",
+    "raw/timing_03_trb.json": "f25567ef7e8882f1a580f610fcc8e58fe17126c650d99b00338f258c383d9394",
+    "raw/timing_04_rbt.json": "5eaa977e713ea16e6b2a687cd99f965ec4e17716a52a6367911c39d1066ace37",
+    "raw/timing_05_rtb.json": "d335e2385890c6bd088cbcf86eb1990ca5964654e06a62621612312318215735",
+    "summary.json": "15b2f948bf699f44c7aad8d09010f28d7dde886d0e153dc3a5011d7b100d606b"
+  },
+  "manifest_hash": "b309f6e85d9eede4c852f637ad0628055c8abae25bb7fd96d2b11485bfa536c4",
+  "protocol_hash": "1412d5b8d9d2b824787a044158d16c02fa0b44fb20e193c92b577be62f49ef83",
+  "schema_version": "boundflow.fsg4-b4b2-v2-cibc-tir-manifest/v1",
+  "source_git_head": "5b2c9ba53e20a95ccd85ddae13e0d481f226c902",
+  "summary_hash": "dd58b77b0cb9bce3724ea251568f7c6b12be427ea5ccd8b3ef0be2dac95c9e6b"
+}

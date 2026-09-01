@@ -1,0 +1,42 @@
+{
+  "baseline_worker_medians_ms": [
+    81.80183348304126,
+    77.69798199296929,
+    79.23540251795202,
+    78.230002996861,
+    77.89780599705409,
+    82.09374999569263
+  ],
+  "candidate_worker_medians_ms": [
+    86.86000799934845,
+    82.48646452557296,
+    83.95948799443431,
+    83.10421151691116,
+    82.94940348423552,
+    87.87785351159982
+  ],
+  "maximum_absolute_difference": 7.152557373046875e-07,
+  "maximum_allocated_ratio": 1.0481830750500403,
+  "maximum_reserved_ratio": 1.0,
+  "native_value_bridge_included": true,
+  "no_regression_admitted": false,
+  "performance_claimed": false,
+  "provider_ownership_rewrite_admitted": true,
+  "research_speedup_admitted": false,
+  "run_count": 6,
+  "schema_version": "boundflow.fsg4-b4c0-cumulative-core-summary/v1",
+  "sign_exact": true,
+  "speedup_bootstrap_lower_95": 0.9377792526994357,
+  "speedup_geomean": 0.9403411451305688,
+  "speedup_worst_worker": 0.9341801911997806,
+  "status": "validated-no-go-b4-c0-native-value-bridge",
+  "summary_hash": "7a0b0505cfdd26f02e41cdaa6ebc8b69ea85f74499e41f5ac01a42925e2db9f9",
+  "worker_speedups": [
+    0.9417663590781027,
+    0.9419482631466268,
+    0.9437337507728079,
+    0.9413482369776375,
+    0.9391002553967555,
+    0.9341801911997806
+  ]
+}

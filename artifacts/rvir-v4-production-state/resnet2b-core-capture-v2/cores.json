@@ -1,0 +1,55 @@
+{
+  "cores": [
+    {
+      "alpha_feature_index_tensor_count": 16,
+      "alpha_feature_shape_tensor_count": 6,
+      "batch_size": 6,
+      "beta_value_tensor_count": 6,
+      "branching_decision": [
+        [
+          5,
+          27
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          90
+        ],
+        [
+          5,
+          32
+        ],
+        [
+          5,
+          90
+        ]
+      ],
+      "branching_points": null,
+      "changed_mutation_count": 7,
+      "core_id": 0,
+      "history_entry_count": 36,
+      "lower_sha256": "82f0f6cf13b3908a947f61fdfde2e93f19bca214859883f84b5e7c31239bd2ad",
+      "mutation_receipt_count": 12,
+      "n_splits": 6,
+      "n_verified": 0,
+      "post_snapshot_hash": "78bfa513bd101eb7a6bf8ba4e9f7d1b7f15bcce50c69e6f65227b80a47ed7d0c",
+      "pre_snapshot_hash": "d7f5b2f886f880c30f36be0823c52dd8597746f420847972a338df2f086a4336",
+      "result_shape": [
+        6,
+        1
+      ],
+      "split_depth": 1,
+      "tensor_count": 62,
+      "upper_sha256": "d706773b71eb69a5246f5f2be38a213fdd233883497f5474c5d95159a51c5506"
+    }
+  ],
+  "performance_claimed": false,
+  "schema_version": "boundflow.rvir-v4-production-capture-worker/v2"
+}

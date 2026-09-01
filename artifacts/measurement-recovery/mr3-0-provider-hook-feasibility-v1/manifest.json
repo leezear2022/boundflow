@@ -1,0 +1,21 @@
+{
+  "code_revision": {
+    "boundflow/runtime/mr3_provider_hook_feasibility.py": "9abfdeb2c6d7d3c1610e8f40531b6e15ae2222124ca9c132f80feba4242c8197",
+    "scripts/probe_mr3_provider_hook_feasibility_tamper.py": "bb3682563ea57e2405c3360021802c2ae261032e028d202f5fabb994dd04068c",
+    "scripts/run_mr3_provider_hook_feasibility.py": "32d51a877e0acf7580afd8bdc69605ad472003998a9ac95a40d7013f1d8930a6",
+    "tests/test_mr3_provider_hook_feasibility.py": "d30ba4d7df8d971ebf2cb7a85c8d199a88c42937ff9f7322fcecc90a97820375"
+  },
+  "files": {
+    "README.md": "4ec98c3bbc0d0b01eb7615ffbff95542707fe3679e903282004215d723b114a0",
+    "raw.json": "74293ddac126134baabf28366395dd62a232ca7b3d29a761dcd40b69d28d4495",
+    "replay_stdout.txt": "8c998f950d0e5fdc72b6501df4ed6aea63636e07281c70202e83996ab7203ac1",
+    "summary.json": "1bf080bc830d4cdb44f4379c09d873b3e992afa5583f8295f7c0604bfeabd0f7",
+    "tamper_report.json": "fe4915cdba02885f0acb1e19a442cfee2e51667b85c7fc5adb13c0711ddfd759"
+  },
+  "manifest_hash": "5610cb83a57da3e63555ecd5151d440642edf1c0794e789018ad77765ce7eb88",
+  "performance_claimed": false,
+  "schema_version": "boundflow.mr3-provider-hook-feasibility/v1",
+  "source_git_head": "8a63503c6f98357d68066be8ae2ea7a256b65b8f",
+  "status": "VALIDATED-MR3-0-PROVIDER-HOOK-FEASIBILITY",
+  "summary_hash": "c19dd2466243b3ddaa43d4313a6b2c3bd1c04f769622b9ac3c247a19f0eee785"
+}

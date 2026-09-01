@@ -1,0 +1,23 @@
+{
+  "files": {
+    "protocol.json": "1199c88ce9051c6f778f76695304a56304ae06ae2f716681ef4374df56a27861",
+    "raw/run-00-0-native.pt": "bee9339b65efa1386b67731610b444d0eaccb38e903d3d0a9ac0a458a3f79cb5",
+    "raw/run-00-1-candidate.pt": "ffa8a52b701a6c4beebcfcd83db2543cde28ab6fe0085a736dd0ce6a1508c676",
+    "raw/run-01-0-candidate.pt": "35ed456a54d975067a2c8800d4b52f7f7b7fed4e9cd3afa1d8fb614bfa05f041",
+    "raw/run-01-1-native.pt": "f66d7ddf9f8fc67535f35a6fe65add09c7644e7790626f08e9f1617d836539d6",
+    "raw/run-02-0-native.pt": "619008ccf46d5d4ff305f84db41ea4d4455865257eebb47e4583f7f030313e24",
+    "raw/run-02-1-candidate.pt": "bc6312ae84a856b98a6626fc3e13f008942486e31fb495e16ca5fc25b8606358",
+    "raw/run-03-0-candidate.pt": "d460c43d2b1d024b3336f800bc7e0dda517f45ebaf0dbc501f8a1a3bd5e99f87",
+    "raw/run-03-1-native.pt": "a143c3fd7150afefd69de889a472b867bad70200ca45f4bfca0de00631e6fa71",
+    "raw/run-04-0-native.pt": "d53eb60afbcd9ea2f156effaab22c5a2eadd0ea005a5651f58857c6d49824160",
+    "raw/run-04-1-candidate.pt": "ed292dd5684ec4ebad7e7aa4bd1b201e0b34072507fc0117de21e2ca7c053691",
+    "summary.json": "e138491f2d94f54b0182510d3ce7822d9bb684d8fbec3edbdfebfae33b4d0e60",
+    "tamper_report.json": "6f75d993d4ba68d2390ccaf6c3112a7a5d87696e90fe959b5c5e364ed9c168fc"
+  },
+  "manifest_hash": "cf4e4ab858dc7cfd47088212db38050813dc9f9b3beb5aa1cf3d98cbf21acb61",
+  "performance_claimed": false,
+  "protocol_hash": "38efd8302890b484b8dd0fa42def2eb5fd935cb27850d943852bffd5b7d15851",
+  "schema_version": "boundflow.r3-d0-microphysics-manifest/v1",
+  "source_git_head": "423206911599de5aee7a718ddee65cf527b48e28",
+  "summary_hash": "67f433d708fe544951d07425c8cb7644717072417d6e68287e5d2e82693c1e9b"
+}

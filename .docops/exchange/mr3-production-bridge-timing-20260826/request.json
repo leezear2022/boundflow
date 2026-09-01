@@ -1,0 +1,25 @@
+{
+  "doc": "mr3-production-bridge-timing-20260826/request",
+  "type": "request",
+  "task": "mr3-production-bridge-timing-20260826",
+  "round": 0,
+  "from": "codex",
+  "to": "external-model",
+  "executor": "codex",
+  "auditor": "external-model",
+  "ts": "2026-08-25T08:21:37Z",
+  "title": "MR3 production bridge timing NO-GO closure audit",
+  "request": "Independently audit the MR3 single-site P-anchor production outer exact-call timing implementation, frozen artifact, mechanical NO-GO classification, claim propagation, and regression evidence. Do not trust closure summary numbers; recompute from raw.",
+  "scope": "Commits d75f60f..4cbdb2e; timing worker/formal gates/tamper, frozen artifact, closure and authority docs. Exclude user-owned docs/CIBC_for_DAC.pdf and unrelated historical claims.",
+  "acceptance": [
+    "AC1 source/order: worker source 2d788ad, generator 5e7751c, PB/BP/PB/BP/PB/BP and 12 independent workers are exact; correctness prerequisite replays.",
+    "AC2 timing boundary: full beta-split optimized outer call is measured; compile/dummy warm/formal CPU copies/hash are excluded; host is headline and same-stream CUDA event diagnostic only.",
+    "AC3 semantics/ownership: six pairs independently pass frozen tolerance/sign, 10/9 launches, zero fallback/eager/native shadow/persistent dense A, and module receipt is stable.",
+    "AC4 arithmetic: independently recompute six host/event ratios, fixed-seed 10000 bootstrap lower, worst pair, absolute allocated/reserved ratios and all gate booleans from raw.",
+    "AC5 classification: status must be VALIDATED-NO-GO-MR3-P-PRODUCTION-BRIDGE-PHYSICS; performance_claimed and same_solver_complete_query_timing_open must remain false.",
+    "AC6 integrity: artifact replay passes, no local paths, and all 16 fully re-signed invalid variants are rejected without treating hashes as proof of arbitrary physical latency.",
+    "AC7 validation/claims: targeted 36 and 22, full 1743 passed/3 skipped, Black/mypy/pylint/DocOps pass; authority docs preserve CIBC 2.45631x and MR3 correctness while closing only this propagation route."
+  ],
+  "base_commit": "d75f60f",
+  "md_sha256": "63a906f2663415936dc5b3e7bfc420c611497a9600e11f2156f2a21b0035d65c"
+}

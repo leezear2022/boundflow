@@ -1,0 +1,26 @@
+{
+  "code_revision": {
+    "boundflow/runtime/fsg3_same_solver_timing.py": "d123711b682bb7ba78d75fab464c00ebfd79c00f67d548a606b59cfe1554205e",
+    "boundflow/runtime/fsg4_b3_explicit_counters.py": "99abf7bb29a2d0fea48da9a120e4d90d5132cd25a4cd02c5eaad5d6aa74037b9",
+    "boundflow/runtime/rvir_v4_atomic_copy_out.py": "00bb8d88ff8a21610dcbce2d8ae2a7c97a6c192fbf093c4f5c4028234756c170",
+    "boundflow/runtime/rvir_v4_live_return.py": "a7ad85c24f42b41d12871520c6e40212b8d25f0dabadd7dee0cd66f2bb451856",
+    "boundflow/runtime/rvir_v4_native_backward_export.py": "64b13c4d1896301e5a35e1e1049ba8f37aa7631f3fd0733f6c3c0de9a798ab6b",
+    "boundflow/runtime/rvir_v4_native_kfsb.py": "10b64b480b058107d12729f713aacf82356af8885458be5f1916639178062cf8",
+    "boundflow/runtime/rvir_v4_native_optimizer.py": "194be00c04999c39cb0888cbaef3f703f40c54415fcf23381ed3be53a4999e7c",
+    "scripts/run_fsg3_same_solver_timing.py": "7be9382b8e2ae08f88c0d8849937a13d5acfc970124ceabd1f3f21e8616aa02d",
+    "scripts/run_fsg4_b3_counter_diagnostic.py": "379f8e5a998076a287d4d3cece2c7e59528bc40a85f70c7d61b72f33e4ac7ffd",
+    "scripts/run_rvir_v4_live_return_capture.py": "bb5fb59529ed0a6d3354d4d85b5e1ba6b95bdab0fb99dacd2c2332cfad60c74d"
+  },
+  "files": {
+    "events.jsonl": "0145757cb2d62ac159c4537e9ed5474dd85095153c7754000afa796ada5a0985",
+    "report.json": "01082edf9759c694a9e02ffef9564890c8cf59c77c8c2c9f133fd396e8eb5afb",
+    "worker.json": "242697a17a65d355b9c1e9ba4e7350f16b043f0a7460d654d91bbc8d413bf813"
+  },
+  "fsg3_reference_manifest_hash": "9089e2019eb5e98cac228151cb061c0f6aceefa0ad6c6b3e298584bcede21e85",
+  "fsg3_reference_summary_hash": "df852590d99be09962c1287e7166b421edb260416403a3c91545dca6e2e1318e",
+  "manifest_hash": "ccf15ee17cb1ee74b95984a203cb4893e52d70becbc3ba2d3db70618490bb376",
+  "performance_claimed": false,
+  "report_hash": "4304ffe87ce09c6e14ff633ae72f469b6b1fb7c60d297179e74176a3a41ad68e",
+  "schema_version": "boundflow.fsg4-b3-counter-diagnostic-manifest/v1",
+  "source_git_head": "419536126504e2666a5db14681668b7d1add166a"
+}

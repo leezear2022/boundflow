@@ -1,0 +1,191 @@
+{
+  "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+  "auto_lirpa_commit": "5a098e8f9fb5786a428a024981d833d303921f2d",
+  "block_count": 6,
+  "code_revision": {
+    "boundflow/runtime/fsg3_same_solver_timing.py": "d123711b682bb7ba78d75fab464c00ebfd79c00f67d548a606b59cfe1554205e",
+    "boundflow/runtime/fsg4_b3_device_atomic_commit.py": "49b77fbe924ab36e6590bef1ac2813a2a8cdd96eeefc1af497dbd6672ad0f1da",
+    "boundflow/runtime/fsg4_b3_device_live_return.py": "722a06f0fc0327a82efd8f354eea6ca8ed0dfc5a531645ca23ec73190f86ba6e",
+    "boundflow/runtime/fsg4_b3_explicit_counters.py": "b54f1ea71f3e7fa545f2b065edbcaa5ad774e0ccf7916b3d63437bc17afbbf0b",
+    "boundflow/runtime/fsg4_b3_prepared_core.py": "3a52209ed45a393e68458a2ace7d666766da6f440ac0e09bb629fa657605a04d",
+    "boundflow/runtime/fsg4_b3_terminal_optimizer_schedule.py": "0ac4b72847399e1dbe53a7d89dfd463f52c061c932d4aed93f3b6459b266e778",
+    "boundflow/runtime/fsg4_b4a_terminal_lower_adjoint_handoff.py": "459e5192b04cb81a99c036983bd1f83f6ad54823b85727e98ffd9b3f81f45a29",
+    "boundflow/runtime/rvir_v4_atomic_copy_out.py": "00bb8d88ff8a21610dcbce2d8ae2a7c97a6c192fbf093c4f5c4028234756c170",
+    "boundflow/runtime/rvir_v4_live_return.py": "a7ad85c24f42b41d12871520c6e40212b8d25f0dabadd7dee0cd66f2bb451856",
+    "boundflow/runtime/rvir_v4_native_backward_export.py": "0222c8ae74a0e922ac486fb9f4284c1d5b16f9f534cc0922a31c432056c68b76",
+    "boundflow/runtime/rvir_v4_native_kfsb.py": "10b64b480b058107d12729f713aacf82356af8885458be5f1916639178062cf8",
+    "boundflow/runtime/rvir_v4_native_optimizer.py": "5bc7138101b5b9ee38677218c7921717057e1cee0ccd1895c2a1977e137348df",
+    "scripts/probe_fsg4_b4a_formal_timing_tamper.py": "f036e5b4efaa325652c4bd57a747f9f6bd396e5db10f997d0fde7c2efcfca0d9",
+    "scripts/run_fsg3_same_solver_timing.py": "48b8ec238a010e2f59f759760ec7f60ffc7cd7623e101bb2728779810749c996",
+    "scripts/run_fsg4_b3_counter_diagnostic.py": "4b6c0f4b1e96b49e62da4d5da7068064a0ed7bd702f24ff98fbb2a1621cd59b5",
+    "scripts/run_fsg4_b4a_correctness_pairs.py": "a71bfcc82e26c194618606674238e9bfd849562ef1b442744812258f0309c2c6",
+    "scripts/run_fsg4_b4a_formal_timing.py": "d75b077234a2ea0a3a3e5f6f9dc516f9e264edc9db1c58de4341b2bf2f63ee3d",
+    "scripts/run_fsg4_b4a_same_solver_worker.py": "0c0425f4762170724e91a1353a69b5b8411770a576faba5e01805cfb1bb1a64b",
+    "scripts/run_rvir_v4_live_return_capture.py": "04d8d7dadbb9e2dc78f329614b18a4f2cab97f916b9dd7346501fce6babd573e"
+  },
+  "core_wall_geomean_gate": 1.03,
+  "correctness_identity": {
+    "manifest_file_sha256": "503f304e526f0925a5cb97c4a98c8f1896abeb3c9dd53ab2021eaca3c5af8f79",
+    "manifest_hash": "19c03abf9925bd10dc292be34d47f07567b2e6c46857847a21c8598e619f56c7",
+    "source_git_head": "43d41172a7ab810621782f4a51955c677526ed88"
+  },
+  "formal_preflight_contract": {
+    "ac_power_required": true,
+    "exact_coupled_software_power_thermal_alias_allowed": true,
+    "external_compute_processes_forbidden": true,
+    "gpu_power_limit_watts": 55.0,
+    "independent_thermal_signal_must_be_inactive": true,
+    "nvidia_powerd_required_state": "inactive",
+    "poll_seconds": 5,
+    "software_thermal_signal_must_be_inactive": true,
+    "temperature_limit_celsius": 45,
+    "timeout_seconds": 900,
+    "worker_post_init_temperature_limit_celsius": 50,
+    "worker_subprocess_timeout_seconds": 1080
+  },
+  "gpu_power_limit_watts": 55.0,
+  "headline_mode": "control-only",
+  "model_name": "resnet_2b.onnx",
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "nvidia_powerd_state": "inactive",
+  "performance_claimed": false,
+  "profile_role": "attribution-only",
+  "property_name": "prop_0_eps_0.008.vnnlib",
+  "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+  "protocol_hash": "0aa4ed46bf7139f6a5e93782c867be7d5e916f07ee7c7a55cec19cf391d2f485",
+  "python_name": "python",
+  "query_wall_worst_pair_gate": 0.98,
+  "resume_policy": "accept-complete-source-bound-worker-only",
+  "schema_version": "boundflow.fsg4-b4a-formal-timing-protocol/v1",
+  "sequence": [
+    {
+      "block_index": 0,
+      "positions": [
+        {
+          "configuration": "B3",
+          "mode": "control"
+        },
+        {
+          "configuration": "B3",
+          "mode": "profile"
+        },
+        {
+          "configuration": "B4-A",
+          "mode": "control"
+        },
+        {
+          "configuration": "B4-A",
+          "mode": "profile"
+        }
+      ]
+    },
+    {
+      "block_index": 1,
+      "positions": [
+        {
+          "configuration": "B4-A",
+          "mode": "profile"
+        },
+        {
+          "configuration": "B3",
+          "mode": "control"
+        },
+        {
+          "configuration": "B3",
+          "mode": "profile"
+        },
+        {
+          "configuration": "B4-A",
+          "mode": "control"
+        }
+      ]
+    },
+    {
+      "block_index": 2,
+      "positions": [
+        {
+          "configuration": "B4-A",
+          "mode": "control"
+        },
+        {
+          "configuration": "B4-A",
+          "mode": "profile"
+        },
+        {
+          "configuration": "B3",
+          "mode": "control"
+        },
+        {
+          "configuration": "B3",
+          "mode": "profile"
+        }
+      ]
+    },
+    {
+      "block_index": 3,
+      "positions": [
+        {
+          "configuration": "B3",
+          "mode": "profile"
+        },
+        {
+          "configuration": "B4-A",
+          "mode": "control"
+        },
+        {
+          "configuration": "B4-A",
+          "mode": "profile"
+        },
+        {
+          "configuration": "B3",
+          "mode": "control"
+        }
+      ]
+    },
+    {
+      "block_index": 4,
+      "positions": [
+        {
+          "configuration": "B3",
+          "mode": "control"
+        },
+        {
+          "configuration": "B4-A",
+          "mode": "profile"
+        },
+        {
+          "configuration": "B4-A",
+          "mode": "control"
+        },
+        {
+          "configuration": "B3",
+          "mode": "profile"
+        }
+      ]
+    },
+    {
+      "block_index": 5,
+      "positions": [
+        {
+          "configuration": "B4-A",
+          "mode": "profile"
+        },
+        {
+          "configuration": "B3",
+          "mode": "profile"
+        },
+        {
+          "configuration": "B3",
+          "mode": "control"
+        },
+        {
+          "configuration": "B4-A",
+          "mode": "control"
+        }
+      ]
+    }
+  ],
+  "source_git_head": "46a8493557c49f327df4e70d7cdd7649227b14b9",
+  "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf",
+  "worker_count": 24
+}

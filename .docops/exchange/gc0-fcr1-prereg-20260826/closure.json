@@ -1,0 +1,12 @@
+{
+  "doc": "gc0-fcr1-prereg-20260826/closure",
+  "type": "closure",
+  "task": "gc0-fcr1-prereg-20260826",
+  "round": 1,
+  "from": "codex-executor",
+  "ts": "2026-08-26T00:15:44Z",
+  "resolution": "approved",
+  "approved_round": 1,
+  "note": "Round 1 approved with no blocker or major; F1-F4 accepted for the GC0-0 implementation/documentation change.",
+  "md_sha256": "349cdc7a577041b160093752b4fb7e8c43470e38952a59bf38700a6e817965f3"
+}

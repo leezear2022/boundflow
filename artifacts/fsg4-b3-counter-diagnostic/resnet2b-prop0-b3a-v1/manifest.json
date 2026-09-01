@@ -1,0 +1,28 @@
+{
+  "code_revision": {
+    "boundflow/runtime/fsg3_same_solver_timing.py": "d123711b682bb7ba78d75fab464c00ebfd79c00f67d548a606b59cfe1554205e",
+    "boundflow/runtime/fsg4_b3_explicit_counters.py": "a493b6c94e9c2d1b4b33ba29a149449d9c19c1e4d151374b0385c3d9ebf0620f",
+    "boundflow/runtime/fsg4_b3_prepared_core.py": "3a52209ed45a393e68458a2ace7d666766da6f440ac0e09bb629fa657605a04d",
+    "boundflow/runtime/rvir_v4_atomic_copy_out.py": "00bb8d88ff8a21610dcbce2d8ae2a7c97a6c192fbf093c4f5c4028234756c170",
+    "boundflow/runtime/rvir_v4_live_return.py": "a7ad85c24f42b41d12871520c6e40212b8d25f0dabadd7dee0cd66f2bb451856",
+    "boundflow/runtime/rvir_v4_native_backward_export.py": "64b13c4d1896301e5a35e1e1049ba8f37aa7631f3fd0733f6c3c0de9a798ab6b",
+    "boundflow/runtime/rvir_v4_native_kfsb.py": "10b64b480b058107d12729f713aacf82356af8885458be5f1916639178062cf8",
+    "boundflow/runtime/rvir_v4_native_optimizer.py": "5bc7138101b5b9ee38677218c7921717057e1cee0ccd1895c2a1977e137348df",
+    "scripts/run_fsg3_same_solver_timing.py": "7be9382b8e2ae08f88c0d8849937a13d5acfc970124ceabd1f3f21e8616aa02d",
+    "scripts/run_fsg4_b3_counter_diagnostic.py": "b2bec539a44d8a14cdaa61e2107cc7ef874d9277769e275bb04248f1b051f6a9",
+    "scripts/run_rvir_v4_live_return_capture.py": "e78fd6bb1652d28a7d039a8303054ae6d111b69bd0852d9bb8c1b934ab059f7d"
+  },
+  "configuration": "B3-A",
+  "files": {
+    "events.jsonl": "3117890847ce6d503da033ff38e4cdebfc8202cc47678f0978c78ca338858848",
+    "report.json": "bc3695e3a45ecb900ec4ea39ff08586555d2a1fd4517d438bea0c76114f79052",
+    "worker.json": "5dc804a380ae1304d784db08ebda2604e5326f5e5f7499ff99c335ae5818640a"
+  },
+  "fsg3_reference_manifest_hash": "9089e2019eb5e98cac228151cb061c0f6aceefa0ad6c6b3e298584bcede21e85",
+  "fsg3_reference_summary_hash": "df852590d99be09962c1287e7166b421edb260416403a3c91545dca6e2e1318e",
+  "manifest_hash": "205978cb69238598dfcb860922e3202677d5b1775f0bd6062218f0369e982c95",
+  "performance_claimed": false,
+  "report_hash": "89a3584dddb47d2a835bca689bdb0ba6b936d26fa5aff20a968c2323dc6cd05b",
+  "schema_version": "boundflow.fsg4-b3-counter-diagnostic-manifest/v1",
+  "source_git_head": "c7851c8bae1bc943aa9e3d458e5105deafc553f1"
+}

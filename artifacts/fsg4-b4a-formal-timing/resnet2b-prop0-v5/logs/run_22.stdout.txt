@@ -1,0 +1,153 @@
+Adding complete_verifier to sys.path
+INFO     11:23:23     [tensor_storage.py:70] Hugepage enabled for branch-and-bound domains.
+3072 inputs and 10 outputs in vnnlib
+Loading onnx $VNNCOMP_ROOT/benchmarks/cifar10_resnet/onnx/resnet_2b.onnx with quirks {}
+Finished onnx model loading in 0.0064 seconds
+Model: BoundedModule(
+  (/input-1): BoundInput(name=/input-1, inputs=[], perturbed=True)
+  (/17): BoundParams(name=/17, inputs=[], perturbed=False)
+  (/18): BoundParams(name=/18, inputs=[], perturbed=False)
+  (/19): BoundParams(name=/19, inputs=[], perturbed=False)
+  (/20): BoundParams(name=/20, inputs=[], perturbed=False)
+  (/21): BoundParams(name=/21, inputs=[], perturbed=False)
+  (/22): BoundParams(name=/22, inputs=[], perturbed=False)
+  (/23): BoundParams(name=/23, inputs=[], perturbed=False)
+  (/24): BoundParams(name=/24, inputs=[], perturbed=False)
+  (/25): BoundParams(name=/25, inputs=[], perturbed=False)
+  (/26): BoundParams(name=/26, inputs=[], perturbed=False)
+  (/27): BoundParams(name=/27, inputs=[], perturbed=False)
+  (/28): BoundParams(name=/28, inputs=[], perturbed=False)
+  (/29): BoundParams(name=/29, inputs=[], perturbed=False)
+  (/30): BoundParams(name=/30, inputs=[], perturbed=False)
+  (/31): BoundParams(name=/31, inputs=[], perturbed=False)
+  (/32): BoundParams(name=/32, inputs=[], perturbed=False)
+  (/input): BoundConv(name=/input, inputs=[/input-1, /17, /18], perturbed=True)
+  (/input-4): BoundRelu(name=/input-4, inputs=[/input], perturbed=True)
+  (/input-8): BoundConv(name=/input-8, inputs=[/input-4, /19, /20], perturbed=True)
+  (/input-12): BoundRelu(name=/input-12, inputs=[/input-8], perturbed=True)
+  (/37): BoundConv(name=/37, inputs=[/input-12, /21, /22], perturbed=True)
+  (/38): BoundConv(name=/38, inputs=[/input-4, /23, /24], perturbed=True)
+  (/39): BoundAdd(name=/39, inputs=[/37, /38], perturbed=True)
+  (/input-16): BoundRelu(name=/input-16, inputs=[/39], perturbed=True)
+  (/input-20): BoundConv(name=/input-20, inputs=[/input-16, /25, /26], perturbed=True)
+  (/input-24): BoundRelu(name=/input-24, inputs=[/input-20], perturbed=True)
+  (/43): BoundConv(name=/43, inputs=[/input-24, /27, /28], perturbed=True)
+  (/44): BoundAdd(name=/44, inputs=[/43, /input-16], perturbed=True)
+  (/45): BoundRelu(name=/45, inputs=[/44], perturbed=True)
+  (/46): BoundFlatten(name=/46, inputs=[/45], perturbed=True)
+  (/input-28): BoundLinear(name=/input-28, inputs=[/46, /29, /30], perturbed=True)
+  (/48): BoundRelu(name=/48, inputs=[/input-28], perturbed=True)
+  (/49): BoundLinear(name=/49, inputs=[/48, /31, /32], perturbed=True)
+)
+Original output in the first batch: tensor([[ 1.50501609, -3.74796200,  2.36145043,  1.75443733,  0.24119490,
+          1.70216727,  1.10977149, -0.08753152, -2.12495947, -2.71368599]],
+       device='cuda:0')
+Split layers:
+Nonlinear functions:
+   BoundRelu(name=/input-4, inputs=[/input], perturbed=True)
+   BoundRelu(name=/input-12, inputs=[/input-8], perturbed=True)
+   BoundRelu(name=/input-16, inputs=[/39], perturbed=True)
+   BoundRelu(name=/input-24, inputs=[/input-20], perturbed=True)
+   BoundRelu(name=/45, inputs=[/44], perturbed=True)
+   BoundRelu(name=/48, inputs=[/input-28], perturbed=True)
+build batch [1/1]
+layer /input-4 using sparse-features alpha with shape [164]; unstable size 164; total size 2048 ([1, 8, 16, 16])
+layer /input-4 start_node /input-8 using sparse-spec alpha [2, 133, 1, 164] with unstable size 132 total_size 1024 output_shape (16, 8, 8)
+layer /input-4 start_node /39 using sparse-spec alpha [2, 122, 1, 164] with unstable size 121 total_size 1024 output_shape (16, 8, 8)
+layer /input-4 start_node /input-20 using sparse-spec alpha [2, 87, 1, 164] with unstable size 86 total_size 1024 output_shape (16, 8, 8)
+layer /input-4 start_node /44 using sparse-spec alpha [2, 179, 1, 164] with unstable size 178 total_size 1024 output_shape (16, 8, 8)
+layer /input-4 start_node /input-28 using sparse-spec alpha [2, 28, 1, 164] with unstable size 27 total_size 100 output_shape torch.Size([100])
+layer /input-4 start_node /49 using full alpha [2, 9, 1, 164] with unstable size None total_size 9 output_shape 9
+layer /input-12 using sparse-features alpha with shape [132]; unstable size 132; total size 1024 ([1, 16, 8, 8])
+layer /input-12 start_node /39 using sparse-spec alpha [2, 122, 1, 132] with unstable size 121 total_size 1024 output_shape (16, 8, 8)
+layer /input-12 start_node /input-20 using sparse-spec alpha [2, 87, 1, 132] with unstable size 86 total_size 1024 output_shape (16, 8, 8)
+layer /input-12 start_node /44 using sparse-spec alpha [2, 179, 1, 132] with unstable size 178 total_size 1024 output_shape (16, 8, 8)
+layer /input-12 start_node /input-28 using sparse-spec alpha [2, 28, 1, 132] with unstable size 27 total_size 100 output_shape torch.Size([100])
+layer /input-12 start_node /49 using full alpha [2, 9, 1, 132] with unstable size None total_size 9 output_shape 9
+layer /input-16 using sparse-features alpha with shape [121]; unstable size 121; total size 1024 ([1, 16, 8, 8])
+layer /input-16 start_node /input-20 using sparse-spec alpha [2, 87, 1, 121] with unstable size 86 total_size 1024 output_shape (16, 8, 8)
+layer /input-16 start_node /44 using sparse-spec alpha [2, 179, 1, 121] with unstable size 178 total_size 1024 output_shape (16, 8, 8)
+layer /input-16 start_node /input-28 using sparse-spec alpha [2, 28, 1, 121] with unstable size 27 total_size 100 output_shape torch.Size([100])
+layer /input-16 start_node /49 using full alpha [2, 9, 1, 121] with unstable size None total_size 9 output_shape 9
+layer /input-24 using sparse-features alpha with shape [86]; unstable size 86; total size 1024 ([1, 16, 8, 8])
+layer /input-24 start_node /44 using sparse-spec alpha [2, 179, 1, 86] with unstable size 178 total_size 1024 output_shape (16, 8, 8)
+layer /input-24 start_node /input-28 using sparse-spec alpha [2, 28, 1, 86] with unstable size 27 total_size 100 output_shape torch.Size([100])
+layer /input-24 start_node /49 using full alpha [2, 9, 1, 86] with unstable size None total_size 9 output_shape 9
+layer /45 using sparse-features alpha with shape [178]; unstable size 178; total size 1024 ([1, 16, 8, 8])
+layer /45 start_node /input-28 using sparse-spec alpha [2, 28, 1, 178] with unstable size 27 total_size 100 output_shape torch.Size([100])
+layer /45 start_node /49 using full alpha [2, 9, 1, 178] with unstable size None total_size 9 output_shape 9
+layer /48 using sparse-features alpha with shape [27]; unstable size 27; total size 100 ([1, 100])
+layer /48 start_node /49 using full alpha [2, 9, 1, 27] with unstable size None total_size 9 output_shape 9
+Optimizable variables initialized.
+initial CROWN bounds (first 10 items): [-0.5429363250732422, 4.325180530548096, -0.5281863212585449, 0.8300071954727173, -0.5984463691711426, 0.10806667804718018, 0.6772154569625854, 2.727189540863037, 3.10526704788208]
+prune_after_crown optimization in use
+  original spec size = torch.Size([1, 9])
+  pruned spec size = torch.Size([1, 3])
+Using alpha-CROWN to initialize bounds.
+best_l after optimization: -1.5200746059417725
+alpha/beta optimization time: 0.4894599914550781
+initial alpha-crown bounds (first 10 items): [-0.4701540470123291, -0.49197161197662354, -0.5579489469528198]
+Global lower bound: -0.5579489469528198
+6 / 9 OR specs are verified.
+Verified OR indices (first 10 items): [1, 3, 5, 6, 7, 8]
+Verified OR lbs (first 10 items): [[inf], [inf], [inf], [inf], [inf], [inf]]
+Unverified OR indices (first 10 items): [0, 2, 4]
+Unverified OR lbs (first 10 items): [[-0.4701540470123291], [-0.49197161197662354], [-0.5579489469528198]]
+###### Verifying property Instance 0 ######
+Batch size: 3
+First 10 spec matrices
+C: tensor([[[-1.,  0.,  1.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]],
+
+        [[ 0.,  0.,  1., -1.,  0.,  0.,  0.,  0.,  0.,  0.]],
+
+        [[ 0.,  0.,  1.,  0.,  0., -1.,  0.,  0.,  0.,  0.]]], device='cuda:0')
+RHS: tensor([[0.],
+        [0.],
+        [0.]], device='cuda:0')
+OR spec sizes: tensor([1, 1, 1], device='cuda:0', dtype=torch.int32)
+Remaining timeout: 58.99190306663513
+Model prediction is: tensor([ 1.50501609, -3.74796200,  2.36145043,  1.75443733,  0.24119490,
+         1.70216727,  1.10977149, -0.08753152, -2.12495947, -2.71368599],
+       device='cuda:0')
+Activation BaB batch 1/1 
+build_with_refined_bounds batch [1/1]
+Optimizable variables initialized.
+all alpha initialized
+directly get lb and ub from refined bounds
+c shape: torch.Size([3, 1, 10])
+lA shapes: [torch.Size([3, 1, 8, 16, 16]), torch.Size([3, 1, 16, 8, 8]), torch.Size([3, 1, 16, 8, 8]), torch.Size([3, 1, 16, 8, 8]), torch.Size([3, 1, 16, 8, 8]), torch.Size([3, 1, 100])]
+(alpha-)CROWN with fixed intermediate bounds: tensor([[-0.47015405],
+        [-0.49197161],
+        [-0.55794895]], device='cuda:0') tensor([[inf],
+        [inf],
+        [inf]], device='cuda:0')
+Intermediate layers: /input,/input-8,/39,/input-20,/44,/input-28
+Keeping alphas for these layers: ['/49']
+Node /input-4 input 0: size torch.Size([8, 16, 16]) unstable 164
+Node /input-12 input 0: size torch.Size([16, 8, 8]) unstable 132
+Node /input-16 input 0: size torch.Size([16, 8, 8]) unstable 119
+Node /input-24 input 0: size torch.Size([16, 8, 8]) unstable 85
+Node /45 input 0: size torch.Size([16, 8, 8]) unstable 174
+Node /48 input 0: size torch.Size([100]) unstable 27
+-----------------
+# of unstable neurons: 701
+-----------------
+
+BaB round 1
+batch: 3
+splitting decisions: 
+split level 0: [/input-28, 17] [/input-28, 17] [/input-28, 31] 
+Time: get_branching_decision.update_bounds 0.0305    pickout 0.0015    branching_decision 0.0001    decision 0.0001    set_bounds 0.0005    prepare 0.0005    transfer 0.0000    finalize 0.0008    func 0.2549    
+Accumulated time: get_branching_decision.update_bounds 0.0305    bab_iteration 0.0000    pickout 0.0015    decision 0.0001    branching_decision 0.0001    set_bounds 0.0005    solve 0.0000    func 0.2549    prepare 0.0005    transfer 0.0000    finalize 0.0008    
+max lb -0.35775434970855713 min lb -0.4879782199859619
+Number of Verified Splits: 0 of 6
+Current worst splitting domains lb-rhs (depth):
+-0.48798 (1), -0.47125 (1), -0.43863 (1), -0.41864 (1), -0.36196 (1), -0.35775 (1), 
+Current (lb-rhs): -0.4879782199859619
+6 domains visited
+Length of domains: 6
+Cumulative time: 0.3283991813659668
+
+{"configuration":"B2","core_wall_ns":253455044,"environment_admitted":true,"performance_claimed":false,"query_wall_ns":1390723659,"run_id":"block-05-pos-02-B3-control"}
+{"configuration":"B3","core_wall_ns":253455044,"environment_admitted":true,"performance_claimed":false,"query_wall_ns":1390723659,"run_id":"block-05-pos-02-B3-control"}
+{"activation_hash":"4fbe7dde0f5275a1d72f435ad046502262cb2e918fd93984c5e2ce57796febc2","configuration":"B3","core_wall_ns":253455044,"mode":"control","performance_claimed":false,"query_wall_ns":1390723659}

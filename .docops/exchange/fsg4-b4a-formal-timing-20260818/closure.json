@@ -1,0 +1,12 @@
+{
+  "doc": "fsg4-b4a-formal-timing-20260818/closure",
+  "type": "closure",
+  "task": "fsg4-b4a-formal-timing-20260818",
+  "round": 1,
+  "from": "codex",
+  "ts": "2026-08-18T03:59:56Z",
+  "resolution": "approved",
+  "approved_round": 1,
+  "note": "Executor accepts round-1 approve-with-findings: B4-A closes as VALIDATED-NO-GO-B4-A-PERFORMANCE; immutable hash-bound raw is not rewritten; scoped Python diff-check and mypy scope are recorded. B4-A is excluded from cumulative performance baseline; only separately preregistered B4-B may follow.",
+  "md_sha256": "65d355c547d02394b62049fcdec3f544f716845beca1d84be0546ba6c3a9815b"
+}

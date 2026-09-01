@@ -1,0 +1,134 @@
+{
+  "b4_b3_admitted": true,
+  "baseline_bootstrap_lower_95": 4.737707934038285,
+  "baseline_over_tir_geomean": 4.898339978572916,
+  "baseline_over_tir_speedups": [
+    5.2120187275810945,
+    4.722309902105768,
+    4.686010915822886,
+    5.160161594819292,
+    4.939515692193669,
+    4.698747739999683
+  ],
+  "baseline_worst_worker": 4.686010915822886,
+  "correctness_worker_count": 5,
+  "maximum_absolute_difference": 1.9073486328125e-06,
+  "maximum_allocated_ratio": 0.45088566827697263,
+  "maximum_reserved_ratio": 1.0,
+  "performance_claimed": false,
+  "schema_version": "boundflow.fsg4-b4b2-v2-cibc-tir-summary/v1",
+  "sign_exact": true,
+  "status": "validated-b4-b2-v2-manual-tir",
+  "summary_hash": "dd58b77b0cb9bce3724ea251568f7c6b12be427ea5ccd8b3ef0be2dac95c9e6b",
+  "tir_port_admitted": true,
+  "tir_receipt": {
+    "backward_kernel_count": 1,
+    "device_source_hash": "ee24f60b8efe385ea7de52974c6be0612792003b766fe9fbd4f10c8139971d21",
+    "exported_symbols": [
+      "boundflow_cibc_horizontal_forward_v2",
+      "boundflow_cibc_horizontal_backward_v2"
+    ],
+    "forward_kernel_count": 1,
+    "global_workspace_bytes": 0,
+    "module_hash": "681def0238eae5861af69673488afacc05415717c394ad9a39c9f21c2369d072",
+    "plan_instance_reuses_dlpack_and_output_buffers": true,
+    "profiler_kernel_names": [
+      "boundflow_cibc_horizontal_forward_v2_kernel",
+      "boundflow_cibc_horizontal_backward_v2_kernel"
+    ],
+    "source_kernel_names": [
+      "boundflow_cibc_horizontal_forward_v2_kernel",
+      "boundflow_cibc_horizontal_backward_v2_kernel",
+      "boundflow_cibc_horizontal_forward_v2_kernel",
+      "boundflow_cibc_horizontal_backward_v2_kernel"
+    ]
+  },
+  "triton_over_tir_geomean": 1.6827270318064584,
+  "triton_over_tir_ratios": [
+    1.8200419057647697,
+    1.5688838046634832,
+    1.5950138640650864,
+    1.7860363524985667,
+    1.7705453838963476,
+    1.576333267506067
+  ],
+  "triton_receipt": {
+    "backward_kernel_count": 1,
+    "compilation": {
+      "backward": {
+        "assembly_hashes": {
+          "cubin": "71746e0f9c5ee6a97b31eed7b1a54e9777f150a9a113ea8ff35b1d2443735e9a",
+          "llir": "e33c4461143d838713bce997e38e0cf0cc86af75a27f97b245927ef33553867f",
+          "ptx": "2df315a8163eaa309e2dad1bc704731ba7bfa5c54a17fdf0d2e92540bcba688f",
+          "ttgir": "ad483c3429ebbb87ca4ff63c4f6d0441412fa0faca6d827fc256e7aba9bf3f5e",
+          "ttir": "2876eacdb762209305f7c522b14ba76b6d31a66b103b0aaa7356177e106e882e"
+        },
+        "compiled_hash": "20cb4bd72359bedc2c84ba6b8770e4719da587801e80dfd1f228913c6b2953a3",
+        "kernel_name": "_cibc_backward_kernel_v2",
+        "register_count": 80,
+        "source_hash": "1e7ab018a70022b6b8dfe83c570254a9a43eb35d930ebcd8ba357e183043a635",
+        "spill_count": 0
+      },
+      "forward": {
+        "assembly_hashes": {
+          "cubin": "f781b9703b3fc0bf41415fc6626fa84b2717f395cd5fec218eab71d02d31b705",
+          "llir": "b4db3f04c0f35fb357462701093891836f06f0c6445f613b1ef111ae8dec9ecc",
+          "ptx": "4438f5f4a00ac662a45084bb13b33ab35bdefa34205b7c4e148c31df4ee6e616",
+          "ttgir": "681c24210b2bd10f9953135e9e94a62e9d392ceaf36948c414db5ec732267d18",
+          "ttir": "1875fbdc7e34196c0da3709579f147fa8797bb938feaf61a5aba9ded2291b212"
+        },
+        "compiled_hash": "ed8c7ef23c3d7a63326b839a884f54b1aa1e7b6f6d25f1465da2538419659fc5",
+        "kernel_name": "_cibc_forward_kernel_v2",
+        "register_count": 114,
+        "source_hash": "fb2bff0c3161dbbe7fb94da1409d9bff9f5ed309baaf1aa5c39f62f2bf3d543e",
+        "spill_count": 0
+      }
+    },
+    "config": {
+      "block_k": 32,
+      "block_m": 32,
+      "num_warps": 4
+    },
+    "config_ordinal": 1,
+    "forward_kernel_count": 1,
+    "global_workspace_bytes": 0,
+    "profiler_kernel_names": [
+      "_cibc_forward_kernel_v2",
+      "_cibc_backward_kernel_v2"
+    ]
+  },
+  "triton_retention_bootstrap_lower_95": 1.6069511060812625,
+  "triton_retention_worst_worker": 1.5688838046634832,
+  "worker_medians_ms": [
+    {
+      "baseline_ms": 0.5176160037517548,
+      "tir_ms": 0.09931199997663498,
+      "triton_ms": 0.1807520017027855
+    },
+    {
+      "baseline_ms": 0.5259519815444946,
+      "tir_ms": 0.11137599870562553,
+      "triton_ms": 0.17473600059747696
+    },
+    {
+      "baseline_ms": 0.5413279831409454,
+      "tir_ms": 0.11552000045776367,
+      "triton_ms": 0.18425600230693817
+    },
+    {
+      "baseline_ms": 0.5309599936008453,
+      "tir_ms": 0.10289600118994713,
+      "triton_ms": 0.18377599865198135
+    },
+    {
+      "baseline_ms": 0.5318080186843872,
+      "tir_ms": 0.10766400024294853,
+      "triton_ms": 0.19062399864196777
+    },
+    {
+      "baseline_ms": 0.5343039929866791,
+      "tir_ms": 0.11371199786663055,
+      "triton_ms": 0.17924800515174866
+    }
+  ]
+}

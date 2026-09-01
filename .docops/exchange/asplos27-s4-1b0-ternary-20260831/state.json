@@ -1,0 +1,18 @@
+{
+  "task": "asplos27-s4-1b0-ternary-20260831",
+  "title": "S4-1B0 ternary endpoint formal correctness audit",
+  "status": "closed",
+  "round": 1,
+  "executor": "codex-executor",
+  "auditor": "external-model",
+  "approved_round": 1,
+  "docs": [
+    "asplos27-s4-1b0-ternary-20260831/request",
+    "asplos27-s4-1b0-ternary-20260831/r001/delivery",
+    "asplos27-s4-1b0-ternary-20260831/r001/audit",
+    "asplos27-s4-1b0-ternary-20260831/closure"
+  ],
+  "rev": 6,
+  "created": "2026-08-31T02:43:10Z",
+  "updated": "2026-08-31T04:34:20Z"
+}

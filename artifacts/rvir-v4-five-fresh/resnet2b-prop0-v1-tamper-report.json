@@ -1,0 +1,54 @@
+{
+  "all_rejected": true,
+  "artifact_source_git_head": "17d2d61df8648ceeac8b176a01192279c4b522b4",
+  "attack_count": 6,
+  "attacks": [
+    {
+      "inner_truth_resigned": true,
+      "name": "candidate-lA-full-resign",
+      "outer_artifact_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 whole-core numeric semantic parity differs: core.branch_trace.input.lAs._data./48"
+    },
+    {
+      "inner_truth_resigned": true,
+      "name": "original-lA-full-resign",
+      "outer_artifact_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 whole-core numeric semantic parity differs: core.branch_trace.input.lAs._data./48"
+    },
+    {
+      "inner_truth_resigned": true,
+      "name": "candidate-decision-cross-resign",
+      "outer_artifact_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 whole-core discrete parity differs: core.branch_trace.final_decision.decision[0][1]"
+    },
+    {
+      "inner_truth_resigned": false,
+      "name": "queue-accounting-outer-resign",
+      "outer_artifact_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 five-fresh queue accounting differs"
+    },
+    {
+      "inner_truth_resigned": false,
+      "name": "candidate-callback-outer-resign",
+      "outer_artifact_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 live-return atomic receipt differs"
+    },
+    {
+      "inner_truth_resigned": false,
+      "name": "sequence-order-outer-resign",
+      "outer_artifact_resigned": true,
+      "rejected": true,
+      "rejection": "RVIR-v4 five-fresh manifest differs"
+    }
+  ],
+  "clean_summary_hash": "cf0bec5aaa1fd90ecd26c8036ebb9a7f03d314b3c47bbd450df9676f16666adf",
+  "inner_truth_resigned_attack_count": 3,
+  "outer_artifact_resigned_attack_count": 6,
+  "performance_claimed": false,
+  "schema_version": "boundflow.rvir-v4-five-fresh-tamper-report/v1"
+}

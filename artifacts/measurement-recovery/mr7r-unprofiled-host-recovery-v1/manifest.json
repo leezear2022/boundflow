@@ -1,0 +1,19 @@
+{
+  "files": {
+    "pair_metrics.jsonl": "10c9ee520f7bb9d59a7d246a56aa085c9baa11ed5bc14292b7c2f0c859c01842",
+    "protocol.json": "63c0c595ce02e1a5652feffc4ca098be62cf098552eff4376400eeec418c7b78",
+    "raw.json": "f7121a38030de62fc901601b198c88dc550ae5643c76d45b57ed2a59392239fa",
+    "replay_stdout.txt": "b6e469ddc143ee41646998ad7278165a4fa7f127372198b555025859a1586c95",
+    "summary.json": "e1fb6d88acdf4b248af3f449fef4a795f0ea8122907830474ad43e842021482b",
+    "tamper_report.json": "1ec095ccf44608838983a9eee556b40a29e1563fe758a5979fa6a12c22d3651f"
+  },
+  "generator_commit": "5ba792e55b7d1c5e0c698b8390594fb119310174",
+  "manifest_hash": "24e7378df5d7c2034c2ea4714f2ceb82ca8788a3f807c3cff191d9d9b2375a6a",
+  "performance_claimed": false,
+  "protocol_hash": "b3f34cc3560cde422a58113a216bb46ddbbe41fcf042000e9a1e7b9c85248d86",
+  "raw_hash": "1cd206fe0bf4840f959e04ce4f17d73362186ed7a82cd2d20ef1678c4ee7526f",
+  "schema_version": "boundflow.mr7r-unprofiled-host-recovery-artifact/v1",
+  "source_commit": "0a1e79553e216ed5c34604a235d537288fcf8e19",
+  "status": "VALIDATED_MR7R_HOST_BOUNDARY_OPPORTUNITY",
+  "summary_hash": "28cb5ac21b8227c720ca1c19dc2c0120cb8afad3a2004dcb18ce4d4a607c977d"
+}

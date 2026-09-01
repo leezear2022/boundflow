@@ -1,0 +1,25 @@
+{
+  "code_revision": {
+    "boundflow/backends/tvm/mr5_generalized_crown_conv.py": "d1c307e517ab3d1038120e4259801199407f3369c5e98be039299cdd1a7f0095",
+    "boundflow/runtime/mr3_production_bridge_formal.py": "59e4deb9d3b64699694d8c99e90e529ff50df7770403b10caf3f0d3e7242fad6",
+    "boundflow/runtime/mr5_generalized_crown_conv.py": "d97638a320fad8fe6a5fcf79e496a4d89c6f16ce54fc155209f2153522c2dd90",
+    "boundflow/runtime/mr5_multi_conv_formal.py": "2f2d0dc926820b86838ed3341523c4b041ac7bc6192ba421076756e415b1f0d4",
+    "boundflow/runtime/mr5_multi_conv_production_bridge.py": "ffe37b3b904aa6d13140cb4e829602d6b2188f0b896ca53a57f0bc64d9ea4d13",
+    "scripts/probe_mr5_multi_conv_tamper.py": "bb7b605cc8f4859c13c41079cccf7d1ae9962088cf25227054b04eb803847f71",
+    "scripts/run_mr5_multi_conv_formal.py": "30b3aaf490da38ca352caa5d5625f8f4816ae47e9867da712f46b710afd41d2e",
+    "scripts/run_mr5_multi_conv_production_bridge_worker.py": "94f8aea0dd08f95a761059eb8f0c8112c932dc1069fb7bcdc234871c76756800",
+    "tests/test_mr5_generalized_crown_conv.py": "117879899aaed140cc39bd0c89af163784e8d883ba0a6b0916d191a38efbb82e",
+    "tests/test_mr5_multi_conv_formal.py": "4e641ec02f4471f60cd562ba52a88ecc3707d41f8f86f91d686634177bbaf797",
+    "tests/test_mr5_multi_conv_production_bridge.py": "4627bfea45b9b4303e44a13b57902cb9aa57bb19a190098d9498a9080c64fab7"
+  },
+  "files": {
+    "README.md": "2a127e681ef0459d63f0feb1c0c803488e45a5fceeb526c40044eefd17583c7f",
+    "raw.json.xz": "fff0915aadf74d559b0117c27c6ed80ecabb788fd03208b6b639d045e30d6872",
+    "replay_stdout.txt": "a0934ec1e11ae2bd86f9677ef27bfc98efde5485d5efbe1a4cb4d2fbef4ec384",
+    "summary.json": "f08935208d36d45c461efcc505b82982dffcb5345658e7ec4328b37bd178fa41",
+    "tamper_report.json": "9083b05796e716eb75dc92a8332d90705d8cfb19d568d3f9c50878149319f2c2"
+  },
+  "manifest_hash": "f70aa95a984e73150e4e323bfbad43c57ce32d29ec29815af5ea17176131d27b",
+  "schema_version": "boundflow.mr5-multi-conv-production-bridge-formal/v1",
+  "source_commit": "3e1a70933910c009019c59de4f44d233a75f7950"
+}

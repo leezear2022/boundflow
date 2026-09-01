@@ -1,0 +1,37 @@
+{
+  "code_revision": {
+    "boundflow/ir/differentiable_lower_region.py": "7ed6560566e7ff55e4989a0b2da95a70b9f03f52043bc96d7d913af0fae913c8",
+    "boundflow/runtime/fsg4_b4b1_pytorch_reference.py": "e083118d6719d50d2286f7ae45917678ec0aacf58846a56bbe4d4511db0e9794",
+    "boundflow/runtime/fsg4_b4b1_reference_capture.py": "351352b7d7b6d1162d942698b0f8ff265a43cd68e14e633ce28f398db4b726a1",
+    "boundflow/runtime/fsg4_b4b_production_region_capture.py": "bfb8e8f1783c2ed25dfff0cd55eedc424eb83c551931113f5f8fb9f689638493",
+    "scripts/run_fsg4_b4b1_pytorch_reference_artifact.py": "eca6489ea361e2264b84a4228af704e9242165b4f3a54c1cd409c48c455f6993",
+    "scripts/run_fsg4_b4b1_reference_five_fresh_artifact.py": "a57db1777c29631c13a01685b639e5603ef9c7440a87eee7b0757e2d58f913c4"
+  },
+  "files": {
+    "README.md": "45acafa535bed64fe1c0ceb068848555ffa1682430326873905dcad15763bddf",
+    "protocol.json": "b854252e9f02e41f7e5911f79ce8d256ef5f806db052dadf17b614c8b4179aa7",
+    "reference_records.jsonl": "fac2dd355ee5245a932615bcb755fc9ac36488a0d131e17b4994c913df39d2c0",
+    "replay_stdout.txt": "070538febe2c2fceb18675375408fb180a4e4bc399fca1103dcb85f43ec8896c",
+    "summary.json": "fbbe6d95230d5681da7c6e6a31771212d509ee0c416f85c6985d1a3514ed7921"
+  },
+  "manifest_hash": "31b41e6101bf06e8c91c1a86557b25a205a26398854c263f5058e0d2f1d8bbdf",
+  "performance_claimed": false,
+  "protocol_hash": "9bb832577fa3df865aa04a3b13dc1cc9d3ebd15c6c8a9e9f2b5224049b70663d",
+  "schema_version": "boundflow.fsg4-b4b1-pytorch-reference-artifact/v1",
+  "source_capture_artifact": {
+    "manifest_hash": "67ace9e4a28c84306ee881a41aad1f16d9eddb7e80471ad76b030d691d9b25f6",
+    "protocol_hash": "a28d465274ff25ea704a21f376c45700f731983c0726e06aae3d13d424013406",
+    "run_file_hashes": {
+      "run_00.pt": "5fafb48689b0579a22790974c661f215b651025c05da76b31d21b981c973c587",
+      "run_01.pt": "149261f60dd218333266150c3ede4abad7eaf0c451c391e7c832ed3c8826613c",
+      "run_02.pt": "b9bcc3a211eb53bb1aa58a91e397bc911402105471f234fe48df2e3261d2d91b",
+      "run_03.pt": "2d3cef3a501d28eb5f56fdbdeb246522d85356afe506aed2dd357ae12917d6ac",
+      "run_04.pt": "869ea8be94a98c77bb510f8bfd3daf58424d32113304529264cda2caddb42ddd"
+    },
+    "schema_version": "boundflow.fsg4-b4b1-reference-five-fresh-artifact/v1",
+    "summary_hash": "38db6fc1380630bdfaad815c44d64cb0a919a4f8c5c26cb85bd3070c91b42738"
+  },
+  "source_git_head": "2bc9638d7456c8db6f2a4e093be50c72dd5beaf4",
+  "summary_hash": "9489c70ff8cae22f46482e6e19f27c5eba04a7cad3f233d4cfaee72987674cc2",
+  "tir_admitted": false
+}

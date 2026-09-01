@@ -1,0 +1,77 @@
+{
+  "control_pair_count": 6,
+  "core_wall_geomean_gate": 1.03,
+  "core_wall_geomean_passed": false,
+  "correctness_passed": true,
+  "environment_passed": true,
+  "kernel_launch_delta": "DEFERRED-TO-B4-A-KERNEL-DELTA",
+  "measurement_auditable": true,
+  "metric_geomeans": {
+    "core_gpu_ns": 1.0189919319887064,
+    "core_wall_ns": 1.0189949992169265,
+    "peak_allocated_bytes": 1.0,
+    "peak_reserved_bytes": 1.0,
+    "query_gpu_ns": 1.0022597197712242,
+    "query_wall_ns": 1.0022597825638593
+  },
+  "metric_pair_ratios": {
+    "core_gpu_ns": [
+      1.0216193220103071,
+      1.0186470954866333,
+      1.037865610372554,
+      1.0165765496565193,
+      1.0001927220983136,
+      1.0194049170566604
+    ],
+    "core_wall_ns": [
+      1.021616992365494,
+      1.0186565141565094,
+      1.0378662482148024,
+      1.0165780728306277,
+      1.0001952774637546,
+      1.0194114684882396
+    ],
+    "peak_allocated_bytes": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "peak_reserved_bytes": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "query_gpu_ns": [
+      1.0061255156514917,
+      0.997851317773155,
+      1.0085682161482794,
+      1.0025217677050342,
+      0.9969449127966757,
+      1.001597913786172
+    ],
+    "query_wall_ns": [
+      1.0061283018275873,
+      0.9978510399034793,
+      1.0085660642559964,
+      1.0025197980798235,
+      0.996947022444439,
+      1.0015977809147918
+    ]
+  },
+  "performance_candidate_admitted": false,
+  "performance_claimed": false,
+  "profile_closed": true,
+  "profile_run_count": 12,
+  "query_wall_worst_pair": 0.996947022444439,
+  "query_wall_worst_pair_gate": 0.98,
+  "query_wall_worst_pair_passed": true,
+  "run_count": 24,
+  "status": "validated-no-go-b4a-performance",
+  "summary_hash": "46360e41e87917f2f5f801733fe6f13f10591cb63eff9b2675db37320a0bc3d7"
+}

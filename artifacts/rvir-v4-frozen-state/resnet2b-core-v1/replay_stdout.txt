@@ -1,0 +1,1 @@
+{"evidence_status":"validated_reduced_frozen_state_evaluation","lower_max_abs_diff":2.0265579223632812e-06,"performance_claimed":false,"status":"replay-passed","summary_hash":"3541318b226ffd28cad0862e1b43055cc701d0973144cb58f4e17122a49f60e9"}

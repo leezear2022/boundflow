@@ -1,0 +1,73 @@
+{
+  "boundary_absolute_ns_gate": 15000000,
+  "boundary_share_gate": 0.15,
+  "calibration_policy": "explicit-cpu-parent-correlation-no-temporal-share",
+  "clock_domain_policy": "host-and-device-ledgers-never-added",
+  "code_revision": {
+    "boundflow/runtime/mr7_launch_materialization_attribution.py": "d65f91cefa60c1b56d29ae1e4dccf61fd05d9d6813f1ce5b6fcf929b281ba6e4",
+    "scripts/probe_mr7_launch_materialization_tamper.py": "fbbf2d836f74f918c4f7ddafa353be9258794370c5cb5a193716368f4713de6a",
+    "scripts/run_mr7_launch_materialization_formal.py": "d3047e94a63997a742ed5e6591f2449d1b70bf340adc2f9f9a7c63d8d03774a0",
+    "scripts/run_mr7_launch_materialization_worker.py": "b88b0dfcec1f3b0eee2e2c7dbf13f93e12040f311bd92a4f1c94c8b518b7bef0",
+    "tests/test_mr7_launch_materialization_artifact.py": "39260c89754038813af2c10b531eb24b781016907d49e8a22319255a86bcb036",
+    "tests/test_mr7_launch_materialization_attribution.py": "c9b84f27c6f8e6bbbdd497508e1cbff47edc4c47c8ed7e476b62f5e45593c3ba"
+  },
+  "device_clock": "profiled-cupti-kernel-and-record-function-device-total",
+  "device_envelope_error_gate": 0.02,
+  "diagnostic_production_admitted": false,
+  "generator_commit": "fb2eb52a2b1926692dd0d4dca8781f698db9ebce",
+  "headline_host_clock": "unprofiled-host-perf-counter-ns",
+  "host_closure_error_gate": 0.02,
+  "kernel_share_gate": 0.5,
+  "maximum_required_region_speedup": 10.0,
+  "model_name": "resnet_2b.onnx",
+  "mr6_identity": {
+    "manifest_file_sha256": "ad0e469c5e8586ccac5d34ffa8f879afafd581468a86fe456764463b341b11fa",
+    "manifest_hash": "c597e67d5d15c851c46ef226c65b486dda1e0227c44cbc30b54238c81bfa4810",
+    "status": "VALIDATED-NO-GO-MR6-GUARD-DOMINANCE",
+    "summary_hash": "6af1382481b9d50860bb245a60ac4cb7e8bd0b864c94d6f78c019004aefeabdb"
+  },
+  "pair_count": 3,
+  "parity_candidate_speedup": 1.107412,
+  "performance_claimed": false,
+  "profile_control_cuda_event_ratio_gate": 1.1,
+  "property_name": "prop_0_eps_0.008.vnnlib",
+  "protocol_hash": "c062863452e5ef399f65defbdff3966eab28d022a39bbda119ad08a7abd2ef57",
+  "python_name": "python",
+  "research_candidate_speedup": 1.273523,
+  "resume_policy": "reject-any-existing-artifact",
+  "run_order": [
+    [
+      0,
+      0,
+      "control"
+    ],
+    [
+      0,
+      1,
+      "profile"
+    ],
+    [
+      1,
+      0,
+      "profile"
+    ],
+    [
+      1,
+      1,
+      "control"
+    ],
+    [
+      2,
+      0,
+      "control"
+    ],
+    [
+      2,
+      1,
+      "profile"
+    ]
+  ],
+  "schema_version": "boundflow.mr7-launch-materialization-protocol/v1",
+  "source_commit": "527618241861dab9d03dfd4b3c8229ef53b79b55",
+  "worker_count": 6
+}

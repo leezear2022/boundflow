@@ -1,0 +1,62 @@
+{
+  "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+  "code_revision": {
+    "artifacts/asplos27-s4-exact-call-plan/resnet2b-prop0-v1/plan_template.json": "fb4c9dbc1dbd225993779e3c8bff00dcd5a42fbd7516ef172d89616e7fbf4218",
+    "boundflow/backends/tvm/bab_input_domain.py": "aabba7e775ccd3e1a3362fb3f494facfab48e68b92b944396a2509af9a1aa0a3",
+    "boundflow/backends/tvm/bab_terminal_linear.py": "a5f11b3db42858b467944d35937816edf0a4a905f6dad94194b88b38c4387480",
+    "boundflow/backends/tvm/root_crown_projection.py": "99397d816262a3daa66789ee3516636981de5a885b1c6661e5207e6962a4d74b",
+    "boundflow/backends/tvm/root_crown_residual.py": "435d35b8c186a7af5bcf5149f8903f7ddaa3474917186b2997a0c0a4d9e9636f",
+    "boundflow/runtime/bab_four_segment_exact_call_bridge.py": "74b6c78b039628862d0da4ae3a6cd507a1af4d62095c9a4bf52603788dbfa9c0",
+    "boundflow/runtime/bab_four_segment_optimizer.py": "7df0d4446742e4bc8a4aa4a350491a08cf93fe716992f2350b6d651915e7fa45",
+    "boundflow/runtime/bab_full_region_owner.py": "3776e46987e9332f53374cae2ca01698f1229456c8acde68e9b0752411d37dda",
+    "boundflow/runtime/bab_input_domain_tir.py": "98967099057226fb30ec2a94d22877959b7e7ec4a65d2d8380bbfa359e019d53",
+    "boundflow/runtime/bab_terminal_tir.py": "80f85695e3434ce81dcd2136aca8c46d50db1d56aa59d2da2c1888c790855b67",
+    "boundflow/runtime/prepared_root_optimizer_warmup.py": "e828454b54cbf34388bb121f4756ea62107c12f6f91d30a23d761ccc5e911864",
+    "boundflow/runtime/root_crown_projection_tir.py": "00fe7a977bcefc093dca7634600aea449d92d9b19887fc25293fa00c31c0fc0a",
+    "boundflow/runtime/root_crown_residual_tir.py": "3d8ed1787dba29b967629b23c89a4909a5c21a82ea427efd2db4db14abaf7c74",
+    "scripts/run_asplos27_s4_same_solver_five_fresh.py": "674e49ca8bbca596cdccc3d397fcd97e1b53cf33737af969973ab65a7074989d",
+    "scripts/run_asplos27_s4_same_solver_worker.py": "4b8327e6c657c92f7d535127d3b32bb6e41c8f15c1090f4daaf86e7d79957436",
+    "scripts/run_bab4_rfactor_warm_five_fresh.py": "2320fe43dd6ab75b4606b60bac81aadb9a4433887ae089b5128cde9e4d6e2d9c",
+    "scripts/run_fsg3_same_solver_timing.py": "004521c19719e2889c70ea9cad9044f99f89736900feca8dbef9c6f1b464e2f7"
+  },
+  "control_configuration": "B4-A-WARM",
+  "core_research_gate": 1.2,
+  "environment_window": "post-static-prepare-cool-idle-to-query-end",
+  "fresh_process_per_worker": true,
+  "lower_atol": 0.0002,
+  "lower_sign_exact": true,
+  "max_environment_attempts": 8,
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "pair_orders": [
+    [
+      "B4-A-WARM",
+      "BAB4-WARM"
+    ],
+    [
+      "BAB4-WARM",
+      "B4-A-WARM"
+    ],
+    [
+      "B4-A-WARM",
+      "BAB4-WARM"
+    ],
+    [
+      "BAB4-WARM",
+      "B4-A-WARM"
+    ],
+    [
+      "B4-A-WARM",
+      "BAB4-WARM"
+    ]
+  ],
+  "performance_claimed": false,
+  "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+  "protocol_hash": "f63d51f66fff3c8f5afadb333c76173f16ff944e0ac71246713deb0016fa88ef",
+  "python_executable": "/home/lee/Codes/alpha-beta-CROWN/.venv/bin/python",
+  "query_parity_gate": 1.0,
+  "query_research_gate": 1.15,
+  "schema_version": "boundflow.bab4-rfactor-warm-five-fresh/v1",
+  "source_capture_runtime_dependency": false,
+  "source_git_head": "a2f382d86f77ac0975b3429495f4fdf0f219153f",
+  "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf"
+}

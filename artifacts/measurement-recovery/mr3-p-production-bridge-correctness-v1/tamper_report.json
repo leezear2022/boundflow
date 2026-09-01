@@ -1,0 +1,98 @@
+{
+  "case_count": 18,
+  "fully_resigned": true,
+  "rejected_count": 18,
+  "report_hash": "98aaf9a55f0c42f2af04b46938fbc5fd7ec3b6d7ba7b9dbda249af1471ca4066",
+  "results": [
+    {
+      "error": "MR3 formal raw provenance differs",
+      "name": "source_commit",
+      "rejected": true
+    },
+    {
+      "error": "MR3 formal raw provenance differs",
+      "name": "run_order",
+      "rejected": true
+    },
+    {
+      "error": "MR3 formal run order differs",
+      "name": "wrapper_mode",
+      "rejected": true
+    },
+    {
+      "error": "MR3 formal worker provenance/count differs",
+      "name": "worker_source",
+      "rejected": true
+    },
+    {
+      "error": "MR3 formal worker provenance/count differs",
+      "name": "model_digest",
+      "rejected": true
+    },
+    {
+      "error": "MR3 formal worker provenance/count differs",
+      "name": "timing_claim",
+      "rejected": true
+    },
+    {
+      "error": "MR3 formal solver result differs",
+      "name": "solver_verdict",
+      "rejected": true
+    },
+    {
+      "error": "MR3 bridge receipt differs",
+      "name": "forward_count",
+      "rejected": true
+    },
+    {
+      "error": "MR3 bridge receipt differs",
+      "name": "fallback_count",
+      "rejected": true
+    },
+    {
+      "error": "MR3 tensor numeric drift at region_states[0].lower_a[0]",
+      "name": "region_value",
+      "rejected": true
+    },
+    {
+      "error": "MR3 scalar numeric drift at evaluation_trajectory[0].aggregate_loss",
+      "name": "aggregate_loss",
+      "rejected": true
+    },
+    {
+      "error": "MR3 tensor numeric drift at mutation[0].gradient[0]",
+      "name": "gradient",
+      "rejected": true
+    },
+    {
+      "error": "MR3 tensor numeric drift at mutation[0].exp_avg[0]",
+      "name": "adam_moment",
+      "rejected": true
+    },
+    {
+      "error": "MR3 optimizer discrete drift at mutation[0].lr_used",
+      "name": "learning_rate",
+      "rejected": true
+    },
+    {
+      "error": "MR3 optimizer discrete drift at mutation[0].clamp_mask",
+      "name": "clamp_mask",
+      "rejected": true
+    },
+    {
+      "error": "MR3 tensor numeric drift at final_target_alpha_state[0]",
+      "name": "final_alpha",
+      "rejected": true
+    },
+    {
+      "error": "MR3 formal worker provenance/count differs",
+      "name": "atomic_commit",
+      "rejected": true
+    },
+    {
+      "error": "MR3 atomic rollback receipt differs",
+      "name": "rollback_pointer",
+      "rejected": true
+    }
+  ]
+}

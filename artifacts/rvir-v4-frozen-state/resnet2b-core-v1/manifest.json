@@ -1,0 +1,22 @@
+{
+  "code_revision": {
+    "boundflow/runtime/rvir_v4_frozen_state.py": "7a31c1106bf8ee7535b1dfbb314712304357ab99199208dbc7e1ff4a4b7245c4",
+    "boundflow/runtime/rvir_v4_production_state.py": "0e2c929d054a24e714e048a0c7bb7cdb86ae3f435fef3983fe1f8dd12ea00e31",
+    "scripts/run_rvir_v4_frozen_state_artifact.py": "03ec182d936d7cb25d4b6fce33fc578ad19263947e30de98683fe9242658070e"
+  },
+  "files": {
+    "README.md": "003c9c5170efd3f7720184449065056a1ac75bceedd1de1fe310a6eea7a07cbf",
+    "capture.pt": "99c2c0766621bc0c7db77e1aa4f9f262baa07ff2f9d64d742984a03de000df1e",
+    "execution.json": "fcf0374cea4bb2f078bd321f153c210152aa51b4bf6053ed6c53a7c4c3e72b2f",
+    "replay_stdout.txt": "de79218021d6e00a3a1c9eda9cf2fb08d4515ee994c63acc377a408ec99c2c5a",
+    "source.json": "82fbf1ccab5a3e436cb445fd92f22e9434b1f841ac01fedb7be1b83e86b0eecf",
+    "summary.json": "57011b66e54d433238758d3c2ee272b096e9b99932f7408cd48e51d6844c2714",
+    "topology.json": "d1d1da8b95058fca86f916018dcb436518d1164c5285b0617b6b36a131e1e52b"
+  },
+  "manifest_hash": "ba6ee2fc32109adc38326d58f7253a0cdeba2dd988ccb957f7a626d6544adf95",
+  "performance_claimed": false,
+  "schema_version": "boundflow.rvir-v4-frozen-state-artifact/v1",
+  "source_git_head": "c74a2049d3d2484aade7fd5b3dd805df53823d78",
+  "status": "validated_reduced_frozen_state_evaluation",
+  "summary_hash": "3541318b226ffd28cad0862e1b43055cc701d0973144cb58f4e17122a49f60e9"
+}

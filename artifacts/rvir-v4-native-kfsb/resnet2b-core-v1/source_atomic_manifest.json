@@ -1,0 +1,25 @@
+{
+  "code_revision": {
+    "boundflow/runtime/rvir_v4_atomic_copy_out.py": "a587941c32e9585f439b34a4346ff600729900b64a9b779431a07171911897ae",
+    "boundflow/runtime/rvir_v4_native_optimizer.py": "194be00c04999c39cb0888cbaef3f703f40c54415fcf23381ed3be53a4999e7c",
+    "scripts/run_rvir_v4_atomic_copy_out_artifact.py": "f7f1b0cd3072aa1dfb29470eed847d3e81e9011fa25c1b58662fb9531f8dbf90"
+  },
+  "commit_hash": "8925e836a982deeaa46a0c64ee8e8149f3af8c07a11d7ce701d9c809ce86fb71",
+  "copy_out_hash": "d93187516245ca8669e04e3e3f1f664267a6db26af8287283bdc6f3183e34194",
+  "files": {
+    "README.md": "1ff7c65f61bf5f31c389a517550d147530678ce0353512de5322c812cd5eeff8",
+    "commit.json": "016bd5ae0c0a396bf4ac8592b817e656583b1c852426eced86d040ac4a9d8ba7",
+    "copy_out.json": "d1b21e72007a97866a4773144735281d8807eff4097d94cdff81411e244a44eb",
+    "replay_stdout.txt": "9e9b7031d07ce8c15862e76e22995e476a9db70ba67f9efb93db468a27c241c4",
+    "source_capture.pt": "f42229dd06be8521865d14af4cc51450ec8bec4e792934b457c276aad50126dc",
+    "source_manifest.json": "0b4ae1a88294f48a2c4fcf0b085f8f3374047d856d24624683d0f73160388493",
+    "summary.json": "8cc5b7c6af09cb9023024859e30541322da03adf1744ad42ce6368a54c8a5c5f",
+    "topology.json": "d1d1da8b95058fca86f916018dcb436518d1164c5285b0617b6b36a131e1e52b"
+  },
+  "manifest_hash": "05a4786707bf88e031ac80f708d7f2d1e6ef6b2c17fffbce406bcc5be5f5b40a",
+  "performance_claimed": false,
+  "schema_version": "boundflow.rvir-v4-atomic-copy-out-artifact/v1",
+  "source_git_head": "fe7cdb68d20d2691e2795713bf6ec25a92efea3c",
+  "status": "validated-atomic-copy-out",
+  "summary_hash": "d250fd49ba6ba5a4f679a4398a463027fa3ff9a9761af5fa98a8f9e031876692"
+}

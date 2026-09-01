@@ -1,0 +1,89 @@
+{
+  "all_discrete_semantics_exact": true,
+  "candidate_configuration": "BAB4-GC-ROOT",
+  "control_configuration": "B4-A-GC",
+  "core_speedup_geomean": 1.2108423107300137,
+  "core_speedup_worst": 1.16987564821675,
+  "direct_root_backward_enabled": true,
+  "direct_root_intermediate_enabled": true,
+  "lower_max_abs_diff": 1.7285346984863281e-06,
+  "lower_sign_exact": true,
+  "pair_count": 3,
+  "peak_allocated_ratio_geomean": 1.0260594861099397,
+  "peak_allocated_ratio_worst": 1.0260594861099397,
+  "peak_reserved_ratio_geomean": 1.0256410256410255,
+  "peak_reserved_ratio_worst": 1.0256410256410255,
+  "performance_claimed": false,
+  "query_research_gate_qualified": false,
+  "query_speedup_geomean": 1.119954955878769,
+  "query_speedup_worst": 1.0945451257531975,
+  "root_speedup_geomean": 1.0959222558392934,
+  "root_speedup_worst": 1.0854829482661197,
+  "rows": [
+    {
+      "candidate_core_ns": 209934987,
+      "candidate_query_ns": 523790260,
+      "candidate_root_ns": 217766204,
+      "control_core_ns": 245597829,
+      "control_query_ns": 573312076,
+      "control_root_ns": 238666768,
+      "core_speedup": 1.16987564821675,
+      "discrete_semantics_exact": true,
+      "lower_max_abs_diff": 8.940696716308594e-07,
+      "lower_sign_exact": true,
+      "order": [
+        "B4-A-GC",
+        "BAB4-GC-ROOT"
+      ],
+      "pair": 0,
+      "peak_allocated_ratio": 1.0260594861099397,
+      "peak_reserved_ratio": 1.0256410256410255,
+      "query_speedup": 1.0945451257531975,
+      "root_speedup": 1.09597707824305
+    },
+    {
+      "candidate_core_ns": 209500818,
+      "candidate_query_ns": 517748376,
+      "candidate_root_ns": 217169556,
+      "control_core_ns": 251891726,
+      "control_query_ns": 582106469,
+      "control_root_ns": 240277833,
+      "core_speedup": 1.202342446223766,
+      "discrete_semantics_exact": true,
+      "lower_max_abs_diff": 1.7285346984863281e-06,
+      "lower_sign_exact": true,
+      "order": [
+        "BAB4-GC-ROOT",
+        "B4-A-GC"
+      ],
+      "pair": 1,
+      "peak_allocated_ratio": 1.0260594861099397,
+      "peak_reserved_ratio": 1.0256410256410255,
+      "query_speedup": 1.1243038046728706,
+      "root_speedup": 1.106406613457367
+    },
+    {
+      "candidate_core_ns": 202886013,
+      "candidate_query_ns": 512780058,
+      "candidate_root_ns": 220406413,
+      "control_core_ns": 256063096,
+      "control_query_ns": 585349758,
+      "control_root_ns": 239247403,
+      "core_speedup": 1.2621032480933025,
+      "discrete_semantics_exact": true,
+      "lower_max_abs_diff": 1.2516975402832031e-06,
+      "lower_sign_exact": true,
+      "order": [
+        "B4-A-GC",
+        "BAB4-GC-ROOT"
+      ],
+      "pair": 2,
+      "peak_allocated_ratio": 1.0260594861099397,
+      "peak_reserved_ratio": 1.0256410256410255,
+      "query_speedup": 1.1415220792381127,
+      "root_speedup": 1.0854829482661197
+    }
+  ],
+  "schema_version": "boundflow.bab4-root-gc-three-fresh/v1",
+  "summary_hash": "678fe300502301b89213958066d8c87f36982623e59e2a32bef3a71e10f2c398"
+}

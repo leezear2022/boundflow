@@ -1,0 +1,237 @@
+{
+  "schema_version": "boundflow.asplos27-s4-1b0-formal-artifact-contract/v1",
+  "source_identity": {
+    "freeze_parent_commit": "801bb93335a68ad65612e37e8a38ba5ecdee3f9f",
+    "construction_model_hash": "5056d302aa27785ab8a22bd8f5665ebef0a4aba2ca22bc72ce28581144dbcc2a"
+  },
+  "dependency_assets": [
+    {
+      "path": "gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_IEEE_BIT_FIXTURES_V1_2026_08_30.json",
+      "sha256": "33d0aa1db3380fdc30ff7a48eaa4d5d98f93806583493da40b5ddee4031e15d7"
+    },
+    {
+      "path": "gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_NEGATIVE_CONTRACT_V1_2026_08_30.json",
+      "sha256": "460415b9c4b415812edb5b89f1039e483eb24d1ee8b5cb486ca6a014c38557aa"
+    },
+    {
+      "path": "gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_ABI_CONTRACT_V1_2026_08_30.json",
+      "sha256": "5f977528d32790abbbf07cb4f95f44b6f0f73e83f532c8b6caa696d662b8b481"
+    }
+  ],
+  "proposed_paths": {
+    "artifact_root": "artifacts/asplos27-s4-1b0-ternary/resnet2b-prop0-v1",
+    "worker": "scripts/run_asplos27_s4_1b0_ternary_worker.py",
+    "generator": "scripts/run_asplos27_s4_1b0_ternary_artifact.py",
+    "replay": "scripts/replay_asplos27_s4_1b0_ternary_stdlib.py",
+    "tamper": "scripts/probe_asplos27_s4_1b0_ternary_tamper.py",
+    "artifact_test": "tests/test_asplos27_s4_1b0_ternary_artifact.py"
+  },
+  "artifact_schemas": {
+    "protocol": "boundflow.asplos27-s4-1b0-ternary-protocol/v1",
+    "worker": "boundflow.asplos27-s4-1b0-ternary-worker/v1",
+    "summary": "boundflow.asplos27-s4-1b0-ternary-summary/v1",
+    "manifest": "boundflow.asplos27-s4-1b0-ternary-manifest/v1",
+    "negative_registry": "boundflow.asplos27-s4-1b0-ternary-negative-registry/v1",
+    "binary_index": "boundflow.asplos27-s4-1b0-ternary-binary-index/v1"
+  },
+  "required_files": [
+    "README.md",
+    "protocol.json",
+    "negative_registry.json",
+    "module/unscheduled_tir.json",
+    "module/scheduled_tir.json",
+    "module/device_source.cu",
+    "module/receipt.json",
+    "raw/workers.jsonl",
+    "raw/binary/positive-00.bin",
+    "raw/binary/positive-01.bin",
+    "raw/binary/positive-02.bin",
+    "raw/binary/positive-03.bin",
+    "raw/binary/positive-04.bin",
+    "summary.json",
+    "logs/targeted-pytest.txt",
+    "manifest.json"
+  ],
+  "worker_topology": {
+    "positive_workers": 5,
+    "cache_workers": 1,
+    "fault_workers": 5,
+    "total_fresh_processes": 11,
+    "worker_sequence": [
+      "positive-00",
+      "positive-01",
+      "positive-02",
+      "positive-03",
+      "positive-04",
+      "cache-00",
+      "fault-classifier-policy",
+      "fault-cache-source",
+      "fault-descriptor-dlpack",
+      "fault-stream-launch",
+      "fault-invalid-selector-claim"
+    ],
+    "one_worker_row_per_process": true,
+    "raw_first": true,
+    "partial_resume_rejected": true
+  },
+  "positive_binary_sidecar": {
+    "numel": 18432,
+    "records": [
+      {"name": "coefficient", "dtype": "float32", "byte_count": 73728},
+      {"name": "lower", "dtype": "float32", "byte_count": 73728},
+      {"name": "upper", "dtype": "float32", "byte_count": 73728},
+      {"name": "selector", "dtype": "int8", "byte_count": 18432},
+      {"name": "selected", "dtype": "float32", "byte_count": 73728}
+    ],
+    "sidecar_byte_count": 313344,
+    "sidecar_per_positive_worker": true,
+    "binary_index_fields": [
+      "name",
+      "dtype",
+      "shape",
+      "offset",
+      "byte_count",
+      "sha256"
+    ]
+  },
+  "positive_worker_requirements": {
+    "production_fixture_reconstructed": true,
+    "module_rebuilt_or_exact_cache_loaded": true,
+    "pack_launch_count": 1,
+    "select_launch_count": 1,
+    "fallback_count": 0,
+    "eager_count": 0,
+    "native_shadow_count": 0,
+    "dlpack_pointer_exact": 5,
+    "selector_class_counts": {
+      "positive": 8689,
+      "negative": 9137,
+      "zero": 606,
+      "invalid": 0
+    },
+    "old_binary_zero_misclassified": 606,
+    "selected_bitwise_exact": true,
+    "canonical_qnan_payload_nonvacuous_in_positive": false,
+    "canonical_qnan_payload_evidence_source": "ieee-bit-fixture-and-invalid-selector-fault",
+    "timing_recorded": false,
+    "performance_claimed": false
+  },
+  "cache_worker_requirements": {
+    "fresh_cache": true,
+    "events": ["miss", "hit"],
+    "compile_count": 1,
+    "miss_count": 1,
+    "hit_count": 1,
+    "entry_count": 1,
+    "same_module_receipt_hash": true,
+    "cached_ir_and_source_rehashed_on_hit": true,
+    "tensor_retention_count": 0
+  },
+  "fault_workers": [
+    {
+      "name": "classifier-policy",
+      "reason_ordinals": [1, 2, 3, 4],
+      "representative_reason_ordinal": 3,
+      "required_cleanup": ["no_partial_cache_entry", "no_fallback", "no_retry"]
+    },
+    {
+      "name": "cache-source",
+      "reason_ordinals": [5, 6, 7, 8, 9, 10],
+      "representative_reason_ordinal": 7,
+      "required_cleanup": ["no_poisoned_cache_publish", "no_fallback", "no_retry"]
+    },
+    {
+      "name": "descriptor-dlpack",
+      "reason_ordinals": [11, 12, 13, 14, 15, 16],
+      "representative_reason_ordinal": 16,
+      "required_cleanup": ["no_launch", "no_retained_view", "no_fallback"]
+    },
+    {
+      "name": "stream-launch",
+      "reason_ordinals": [17, 18],
+      "representative_reason_ordinal": 17,
+      "required_cleanup": ["device_stream_restored", "no_retry", "no_native_shadow"]
+    },
+    {
+      "name": "invalid-selector-claim",
+      "reason_ordinals": [19, 20],
+      "representative_reason_ordinal": 19,
+      "required_cleanup": ["canonical_failure_receipt", "no_retry", "no_claim_upgrade"]
+    }
+  ],
+  "negative_registry_requirements": {
+    "reason_count": 20,
+    "ordinal_partition_exact": true,
+    "unique_reason_strings": true,
+    "each_reason_present_in_test_source": true,
+    "each_reason_mapped_to_one_fault_category": true,
+    "unit_tests_cover_all_reason_ordinals": true,
+    "formal_fault_workers_execute_all_reason_ordinals": false,
+    "each_formal_fault_worker_executes_one_representative_reason": true
+  },
+  "manifest_protocol": {
+    "canonical_json": "utf8-sort-keys-compact-separators-v1",
+    "manifest_binds_every_non_manifest_file": true,
+    "protocol_binds_code_blob_sha256": true,
+    "protocol_binds_source_revision": true,
+    "protocol_binds_external_commits": true,
+    "protocol_binds_model_property_sha256": true,
+    "protocol_binds_dependency_asset_sha256": true,
+    "protocol_binds_worker_sequence": true,
+    "protocol_binds_workers_jsonl_sha256": true,
+    "local_absolute_paths_forbidden": true
+  },
+  "stdlib_replay": {
+    "forbidden_imports": ["boundflow", "torch", "tvm", "tvm_ffi", "numpy"],
+    "recomputes": [
+      "manifest_inventory_and_hashes",
+      "protocol_and_source_identity",
+      "dependency_asset_hashes",
+      "worker_order_and_fresh_process_identity",
+      "binary_offsets_sizes_and_hashes",
+      "pack_ieee_classification",
+      "select_bit_semantics",
+      "selector_class_counts",
+      "old_binary_zero_misclassification",
+      "module_receipt_and_cache_observation",
+      "fault_reason_partition_and_cleanup",
+      "summary_and_claim_boundaries"
+    ],
+    "does_not_claim_hardware_authenticity": true
+  },
+  "outer_resigned_tamper_cases": [
+    "coefficient_binary_and_index",
+    "selector_binary_and_class_counts",
+    "selected_binary_and_expected_bits",
+    "midpoint_policy_and_counterexample",
+    "module_ir_or_device_source_and_receipt",
+    "cache_event_or_compile_count",
+    "descriptor_pointer_storage_inventory",
+    "worker_ordinal_or_sequence",
+    "fault_reason_or_cleanup",
+    "claim_status_or_performance_flag"
+  ],
+  "tamper_requirements": {
+    "case_count": 10,
+    "all_outer_hashes_resigned": true,
+    "expected_rejected": 10,
+    "semantic_recomputation_required": true,
+    "coherent_full_resign_e0_boundary_disclosed": true
+  },
+  "formal_status": {
+    "pass_pending_external_audit": "FORMAL-CANDIDATE-PASS-PENDING-EXTERNAL-AUDIT-S4-1B0",
+    "no_go": "FORMAL-NO-GO-S4-1B0-TERNARY-ENDPOINT",
+    "validated_before_external_audit_allowed": false
+  },
+  "claims": {
+    "implementation_open": false,
+    "production_correctness": false,
+    "formal_validated": false,
+    "timing": false,
+    "performance": false,
+    "same_solver": false,
+    "complete_query": false,
+    "tenx": false,
+    "asplos_ready": false
+  }
+}

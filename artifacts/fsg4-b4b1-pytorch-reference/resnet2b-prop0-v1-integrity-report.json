@@ -1,0 +1,32 @@
+{
+  "case_count": 2,
+  "performance_claimed": false,
+  "probe_code_sha256": "6336a0ad75d2eee2fdf74267b302fa70b671d688bd240e801c8c925a09cfce05",
+  "rejected_count": 2,
+  "report_hash": "7e53b7d77b16935ce12eab7a3bfcedcc678737a4e4ece54b0c456343cf0f6623",
+  "rows": [
+    {
+      "all_runs_rewritten": true,
+      "case": "all-run-incoming-bias-fully-resigned",
+      "derived_protocol_resigned": true,
+      "error": "FSG4/B4-B1 numerical semantics differ: semantic-active-beta-gemm-14",
+      "inner_capture_hashes_resigned": true,
+      "rejected_by_numerical_reference": true,
+      "source_manifest_resigned": true,
+      "source_summary_resigned": true
+    },
+    {
+      "all_runs_rewritten": true,
+      "case": "all-run-output-adjoint-fully-resigned",
+      "derived_protocol_resigned": true,
+      "error": "FSG4/B4-B1 numerical semantics differ: semantic-active-beta-gemm-14",
+      "inner_capture_hashes_resigned": true,
+      "rejected_by_numerical_reference": true,
+      "source_manifest_resigned": true,
+      "source_summary_resigned": true
+    }
+  ],
+  "schema_version": "boundflow.fsg4-b4b1-pytorch-reference-integrity/v1",
+  "source_artifact_manifest_hash": "67ace9e4a28c84306ee881a41aad1f16d9eddb7e80471ad76b030d691d9b25f6",
+  "tir_admitted": false
+}

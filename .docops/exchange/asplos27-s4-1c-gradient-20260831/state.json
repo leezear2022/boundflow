@@ -1,0 +1,16 @@
+{
+  "task": "asplos27-s4-1c-gradient-20260831",
+  "title": "S4-1C compressed gradient and terminal lA correctness",
+  "status": "ready_for_audit",
+  "round": 1,
+  "executor": "codex",
+  "auditor": "external-model",
+  "approved_round": null,
+  "docs": [
+    "asplos27-s4-1c-gradient-20260831/request",
+    "asplos27-s4-1c-gradient-20260831/r001/delivery"
+  ],
+  "rev": 3,
+  "created": "2026-08-31T12:37:59Z",
+  "updated": "2026-08-31T12:37:59Z"
+}

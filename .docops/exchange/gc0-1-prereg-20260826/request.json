@@ -1,0 +1,25 @@
+{
+  "doc": "gc0-1-prereg-20260826/request",
+  "type": "request",
+  "task": "gc0-1-prereg-20260826",
+  "round": 0,
+  "from": "codex-executor",
+  "to": "external-model-auditor",
+  "executor": "codex-executor",
+  "auditor": "external-model-auditor",
+  "ts": "2026-08-26T02:50:34Z",
+  "title": "GC0-1 Verification Capture Analysis Preregistration Audit",
+  "request": "Independently audit the documentation-only GC0-1 capture/analysis preregistration at exact result commit 8584495. Do not assume adapter, analysis pass, admitted region, artifact, lowering, runtime, timing, speedup, query/queue benefit, or ASPLOS readiness. Verify the plan is implementable, falsifiable, generic, correctly staged, and closes the GC0-0 audit findings without weakening them.",
+  "scope": "Exact diff 94166b6..8584495; GC0-1 preregistration plan/changelog, authority-document synchronization, and DocOps evidence only. No code implementation is in scope. User-owned docs/CIBC_for_DAC.pdf is outside scope.",
+  "acceptance": [
+    "Audit-AC1: verify exact parent/order and documentation-only diff; implementation/lowering/runtime/timing remain closed and the only allowed action after approval is bounded GC0-1 implementation/formal.",
+    "Audit-AC2: verify provider-neutral source snapshot, three adapters, deterministic ID, mapping/omission ledger, and capture receipt are generic and sufficient without model/site/shape constants or live-provider dependence.",
+    "Audit-AC3: verify A0-A8 algorithms for use-def, boundary, postdominator, effect SSA, residual/bias, alias/lifetime, dense lineage/VJP, and closure are deterministic, causal, independently recomputable, and correctly scoped to logical analysis.",
+    "Audit-AC4: verify shallow_policy_rejection and analysis_witness_rejection cannot be conflated; admitted positive proof witnesses are non-placeholder; all seven analysis reasons require schema-valid full causal witness graphs, closing GC0-0 F1/F2.",
+    "Audit-AC5: verify three positive adapter workloads, fifteen direct-through-capture negatives, at least fourteen full-analysis negatives, and four multi-reason cases are complete, non-overlapping where required, and do not overclaim production eligibility.",
+    "Audit-AC6: verify five-fresh metadata artifact, semantic replay from source snapshots, 16 fully re-signed tamper classes, path hygiene, deterministic hashes, and raw-first/no-resume protocol are independently auditable without performance measurement.",
+    "Audit-AC7: verify Plan-AC1 through Plan-AC7, GO/NO-GO/INVALID routes, exact sole successor GC0-2 preregistration, engineering validation, DocOps consistency, and absence of claim drift."
+  ],
+  "base_commit": "94166b6",
+  "md_sha256": "c26193cc21cb4177c4d4225019077f4dca375d9536d6222f9f1c12d048e47e5b"
+}

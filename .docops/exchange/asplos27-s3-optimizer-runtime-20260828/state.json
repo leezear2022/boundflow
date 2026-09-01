@@ -1,0 +1,16 @@
+{
+  "task": "asplos27-s3-optimizer-runtime-20260828",
+  "title": "ASPLOS27 S3 optimizer runtime formal audit",
+  "status": "ready_for_audit",
+  "round": 1,
+  "executor": "codex",
+  "auditor": "external-model",
+  "approved_round": null,
+  "docs": [
+    "asplos27-s3-optimizer-runtime-20260828/request",
+    "asplos27-s3-optimizer-runtime-20260828/r001/delivery"
+  ],
+  "rev": 3,
+  "created": "2026-08-28T11:28:37Z",
+  "updated": "2026-08-28T11:28:37Z"
+}

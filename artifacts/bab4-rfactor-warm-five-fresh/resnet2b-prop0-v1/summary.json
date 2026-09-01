@@ -1,0 +1,108 @@
+{
+  "all_discrete_semantics_exact": true,
+  "all_environment_admitted": true,
+  "candidate_assets_hash": "91ff4928e2acfda8d21583459f8735815ac2437e5c5d3f7d807b7cd5da4f9ff8",
+  "candidate_configuration": "BAB4-WARM",
+  "cold_break_even_queries": 376.74790126146587,
+  "control_configuration": "B4-A-WARM",
+  "core_research_gate_qualified": false,
+  "core_speedup_geomean": 1.1823825174135278,
+  "core_speedup_worst": 1.1652402779237243,
+  "lower_max_abs_diff": 2.562999725341797e-06,
+  "lower_sign_exact": true,
+  "mean_query_saved_ns": 24595941.4,
+  "mean_static_prepare_ns": 9266469302.0,
+  "pair_count": 5,
+  "pairs": [
+    {
+      "candidate_core_wall_ns": 207638697,
+      "candidate_query_wall_ns": 706588917,
+      "control_core_wall_ns": 241948973,
+      "control_query_wall_ns": 723285429,
+      "core_speedup": 1.1652402779237243,
+      "discrete_semantics_exact": true,
+      "lower_max_abs_diff": 5.364418029785156e-07,
+      "lower_sign_exact": true,
+      "order": [
+        "B4-A-WARM",
+        "BAB4-WARM"
+      ],
+      "pair_ordinal": 0,
+      "query_speedup": 1.023629739440139
+    },
+    {
+      "candidate_core_wall_ns": 210534908,
+      "candidate_query_wall_ns": 703715961,
+      "control_core_wall_ns": 248839263,
+      "control_query_wall_ns": 729775979,
+      "core_speedup": 1.1819382608037619,
+      "discrete_semantics_exact": true,
+      "lower_max_abs_diff": 1.3709068298339844e-06,
+      "lower_sign_exact": true,
+      "order": [
+        "BAB4-WARM",
+        "B4-A-WARM"
+      ],
+      "pair_ordinal": 1,
+      "query_speedup": 1.0370320121245622
+    },
+    {
+      "candidate_core_wall_ns": 213993074,
+      "candidate_query_wall_ns": 713205654,
+      "control_core_wall_ns": 250999319,
+      "control_query_wall_ns": 730751968,
+      "core_speedup": 1.1729319753591652,
+      "discrete_semantics_exact": true,
+      "lower_max_abs_diff": 1.3709068298339844e-06,
+      "lower_sign_exact": true,
+      "order": [
+        "B4-A-WARM",
+        "BAB4-WARM"
+      ],
+      "pair_ordinal": 2,
+      "query_speedup": 1.0246020399608329
+    },
+    {
+      "candidate_core_wall_ns": 211642966,
+      "candidate_query_wall_ns": 712115837,
+      "control_core_wall_ns": 257381310,
+      "control_query_wall_ns": 747123388,
+      "core_speedup": 1.216110862857592,
+      "discrete_semantics_exact": true,
+      "lower_max_abs_diff": 2.562999725341797e-06,
+      "lower_sign_exact": true,
+      "order": [
+        "BAB4-WARM",
+        "B4-A-WARM"
+      ],
+      "pair_ordinal": 3,
+      "query_speedup": 1.0491599107632261
+    },
+    {
+      "candidate_core_wall_ns": 215068668,
+      "candidate_query_wall_ns": 711619467,
+      "control_core_wall_ns": 252994378,
+      "control_query_wall_ns": 739288779,
+      "core_speedup": 1.1763423298832167,
+      "discrete_semantics_exact": true,
+      "lower_max_abs_diff": 1.1324882507324219e-06,
+      "lower_sign_exact": true,
+      "order": [
+        "B4-A-WARM",
+        "BAB4-WARM"
+      ],
+      "pair_ordinal": 4,
+      "query_speedup": 1.038882174087573
+    }
+  ],
+  "performance_claimed": false,
+  "protocol_hash": "27864a3c9f2b8e11901c9eb0d0394246668a24303f31e04d729639a66897c329",
+  "query_parity_qualified": true,
+  "query_research_gate_qualified": false,
+  "query_speedup_geomean": 1.0346170978103613,
+  "query_speedup_worst": 1.023629739440139,
+  "region_template_hash": "abb1b169fd5bc2ed1ceda970a83f9a10427d0c152590e8bdc5f001791f6fb2f5",
+  "schema_version": "boundflow.bab4-rfactor-warm-five-fresh/v1",
+  "summary_hash": "4725f1d5db74393884aed33b3ebb2329966df07f05d4b2c76a916086b67a716d",
+  "worker_count": 10
+}

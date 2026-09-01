@@ -1,0 +1,56 @@
+{
+  "all_probes_rejected": true,
+  "artifact_manifest_sha256": "7d7745e40a901c4f3a420188c42efa2f487248d2da992ca0c08730beb612fbe6",
+  "artifact_source_git_head": "af8db0832360fc3ef029686a81e73f337286d8ae",
+  "original_replay": {
+    "evaluation_count": 10,
+    "evidence_status": "validated-step-capture-schema",
+    "performance_claimed": false,
+    "status": "replay-passed",
+    "summary_hash": "8ae8be3fc53f1571109f265ea96a9ddacf806c3c5596459574517df2783505b7",
+    "trace_hash": "fa070bb09265337b297e18fd38ff342ffa657fad75c447f340789a1cb5cc31f4",
+    "update_count": 9
+  },
+  "performance_claimed": false,
+  "probe_code_sha256": "d4110e455d7fb06bbb473dbc1db489d98485ab53a7733a5f228a642b5995fa3a",
+  "probe_count": 5,
+  "probes": [
+    {
+      "expected_error": "trace/call state binding differs",
+      "name": "state-internal-rehash",
+      "outer_manifest_resigned": true,
+      "resigned_manifest_hash": "fa992c9daacdf79cdf73dde5be75d903d20be784acf2467d970757d85b69cb20",
+      "status": "rejected-as-expected"
+    },
+    {
+      "expected_error": "trace/call lower binding differs",
+      "name": "lower-internal-rehash",
+      "outer_manifest_resigned": true,
+      "resigned_manifest_hash": "6d0c75c8d38aae35a40f28cd6740db3f53b269e60f355e707b591e11d6f93334",
+      "status": "rejected-as-expected"
+    },
+    {
+      "expected_error": "trace/call lower binding differs",
+      "name": "call-result-resign",
+      "outer_manifest_resigned": true,
+      "resigned_manifest_hash": "2fc1b85fc38d3b6741f6910d4288e5b1f9b7ba696a9a97ee4601d0345626b6ca",
+      "status": "rejected-as-expected"
+    },
+    {
+      "expected_error": "trace/call lineage differs",
+      "name": "step-lineage-internal-rehash",
+      "outer_manifest_resigned": true,
+      "resigned_manifest_hash": "c344ecc8ad50d3070b9477f9c89228fd9efea509775163a7447aac57c443d32d",
+      "status": "rejected-as-expected"
+    },
+    {
+      "expected_error": "production mutation policy is not admitted",
+      "name": "policy-internal-rehash",
+      "outer_manifest_resigned": true,
+      "resigned_manifest_hash": "50d937a1df0d7f9d292ad9bf8524f3aaab9addd6c75a9c2fc2eddbb4a8f98ae5",
+      "status": "rejected-as-expected"
+    }
+  ],
+  "report_hash": "b11ca1da812df8ab81a1763d55241f87b58db0d6e5c468528df520ddd9bcab79",
+  "schema_version": "boundflow.rvir-v4-optimizer-step-tamper-report/v1"
+}

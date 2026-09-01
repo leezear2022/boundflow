@@ -1,0 +1,68 @@
+{
+  "doc": "asplos27-s4-1b0-ternary-20260831/r001/audit",
+  "type": "audit",
+  "task": "asplos27-s4-1b0-ternary-20260831",
+  "round": 1,
+  "from": "external-model-auditor",
+  "to": "codex-executor",
+  "ts": "2026-08-31T05:10:00Z",
+  "verdict": "approve",
+  "assurance_level_achieved": "E2-DIRECT-LEGACY",
+  "delivery": "asplos27-s4-1b0-ternary-20260831/r001/delivery",
+  "acceptance_criteria": {
+    "AC1": "PASS",
+    "AC2": "PASS",
+    "AC3": "PASS",
+    "AC4": "PASS",
+    "AC5": "PASS",
+    "AC6": "PASS",
+    "AC7": "PASS"
+  },
+  "finding_counts": {
+    "blocker": 0,
+    "major": 0,
+    "minor": 0,
+    "info": 3
+  },
+  "findings": [
+    {
+      "id": "S4-1B0-AUDIT-F1",
+      "severity": "info",
+      "status": "closed-verified",
+      "path": "artifacts/asplos27-s4-1b0-ternary/resnet2b-prop0-v1",
+      "evidence": "auditor LSB flip attack (sign-preserving) with coherent row/summary/manifest rebind rejected via fresh-process binary determinism binding; 4e2a261 fix verified; formal artifact generated after fix",
+      "advice": "none"
+    },
+    {
+      "id": "S4-1B0-AUDIT-F2",
+      "severity": "info",
+      "status": "closed-by-disclosure",
+      "path": "offline self-check boundary",
+      "evidence": "coherent full resign forging abcrown commit accepted at E0; disclosed in tamper report and delivery risks; physical truth via AC1 verification + auditor fresh run",
+      "advice": "keep disclosure; S4-4 challenge+witness covers structurally"
+    },
+    {
+      "id": "S4-1B0-AUDIT-F3",
+      "severity": "info",
+      "status": "open",
+      "path": "environment",
+      "evidence": "dol CLI not on auditor PATH; dol lint/exchange validate not independently re-run",
+      "advice": "executor-side records carry it"
+    }
+  ],
+  "fresh_run": {
+    "artifact": "/tmp/boundflow-s4-1b0-audit-fresh-20260831/artifact",
+    "processes": 11,
+    "positive": 5,
+    "cache": 1,
+    "faults": 5,
+    "sidecar_sha256": "a07aea90d2404b0e3c40f2af4aeaea169a1465b5feb24616c75cf882b5db5e6c",
+    "module_receipt_hash_matches_formal": true,
+    "only_diff_vs_formal": "source_revision (4e2a261 -> audit HEAD 97de3d3, doc-only delta, 7/7 code blobs identical)"
+  },
+  "scripts": [
+    "artifacts/asplos27-s4-1b0-ternary/audit-20260831/audit_s4_1b0_recompute.py"
+  ],
+  "summary": "S4-1B0 ternary endpoint r001独立外审结论approve：blocker/major/minor均为0，info 3。AC1—AC7逐项\nPASS。AC1：7/7 code blob、三外部commit、model/property SHA256、四份合同JSON绑定、manifest 15文件\n与外审独立重算一致，无本机路径，正式artifact确在4e2a261修复后生成；AC2：亲读TIR确认exponent-bit\nclassifier（无x==x）、±0归zero、f32两步舍入midpoint、canonical qNaN 0x7fc00000，PyTorch/bit双独立\noracle无TIR自比，20个stable reason与冻结负向合同逐字一致；AC3：外审从5份.bin原始字节独立重算\nselector计数8689/9137/606/0与18,432个selected逐元素bitwise exact，5份sidecar逐字节一致\n（a07aea90...）；AC4：cache真实miss→hit且只编译一次，5个fault由独立fresh PID真实触发、reason按\n冻结顺序、context none、reject-before-launch、fallback/eager/native-shadow=0；AC5：stdlib replay从raw\n语义重算（非只验hash）双份PASS，10/10注册tamper拒绝，外审LSB攻击被新determinism回绑拒绝，\ncoherent full resign在E0接受且已披露；AC6：targeted 22 passed、全量2073 passed/3 skipped现场复现，\nBlack/mypy/pylint/diff-check全部真实通过（7文件pylint逐文件10.00/10）；AC7：claim边界一致，无\nVALIDATED升级或性能越界。外审亲启11-process fresh generation达到E2-DIRECT-LEGACY（fresh与formal\n除source_revision外全字段一致）。同意关闭VALIDATED-S4-1B0-TERNARY-ENDPOINT并只开放S4-1B\nproduction implementation/correctness；S4-4仍须challenge+witness。详见r001/audit_report_full.md。",
+  "md_sha256": "293fd445f24cefba685b01424db94798d5afe640a827eb64e8f0850f857009c9"
+}

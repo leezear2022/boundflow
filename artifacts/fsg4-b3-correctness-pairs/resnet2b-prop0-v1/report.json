@@ -1,0 +1,162 @@
+{
+  "all_counter_gates_passed": true,
+  "all_direct_semantic_pairs_passed": true,
+  "all_environments_admitted": true,
+  "all_post_query_audits_passed": true,
+  "all_provider_fallback_zero": true,
+  "pair_count": 5,
+  "pairs": [
+    {
+      "b2_counter_gate_passed": true,
+      "b2_manifest_hash": "8f7681bd8ba8f0dd013b7fa915d38f5716a3df074f5d80bf1cfddf407037c004",
+      "b2_semantic_hash": "5b6481895b402ed2a5b1f6beccfbfb002dff2c44ef161374e9d48bba8a4c5ac9",
+      "b3c_audit": {
+        "assembly_hash": "da6249a31f986d95081cedf828be851e1c63dcf9b00e5f8f0010c26cde42d072",
+        "audit_hash": "261fb64830694e98bc8dc2e14afc920d8f3bcb294403f8b89c4b679a32b83cba",
+        "commit_hash": "53f0d0ff6af49ac3a7cd08d50805a4959229b15d80f93a54aef56ea281db88bd",
+        "headline_content_digest_count": 0,
+        "post_query_audit_ns": 5562266
+      },
+      "b3c_counter_gate_passed": true,
+      "b3c_manifest_hash": "0767caaf703b66a0190bfbffbb1d8e6c7856db951bf732356d4a55a94892725b",
+      "b3c_semantic_hash": "e37983b3a9b538bf0b04c2b26a8f09dea4652b355e9b82676c32a5ab85de3d92",
+      "environment_admitted": true,
+      "gpu_uuid": "GPU-0d3ee0a6-e7da-6b3b-69c4-2153bf99ae8f",
+      "pair_index": 0,
+      "performance_claimed": false,
+      "protocol_identity": "c9d1a9d044c1ee36df0042fbc0b14e7dd038daad316af7a716cc1e7f781004de",
+      "provider_fallback_zero": true,
+      "runtime_identity": "e7810627d5ab9b248cce87eba1c0490cf91ccb87b863f31593046bfc005d3ddd",
+      "schedule": [
+        "B2",
+        "B3-C"
+      ],
+      "semantic_failures": [],
+      "source_identity": "d43cda161a341a459a1c93437ba8b830824fd8d23db881ae4c8208931c4a5046",
+      "timing_admitted": false
+    },
+    {
+      "b2_counter_gate_passed": true,
+      "b2_manifest_hash": "2eabe7d695710c3047337b6774d7e11c17af5a3baebf8af75ebfe2f5933b8b93",
+      "b2_semantic_hash": "c534f8a5fde0845d1ce90bd375e40e9983b0ff8c7f03fe54e9d7319c9d2628bb",
+      "b3c_audit": {
+        "assembly_hash": "97484d937b77f1acc7eb4ead5f5102b48fe7e13e87da134288913b2f5716913a",
+        "audit_hash": "55ed9b5bc5273cb83b80fadc3d3e84dbb654c5e43906bcd066f73dd8734056bd",
+        "commit_hash": "2adeedbaea2dc22b1aecaa4300f2f2683d7074c2199830282ea696012cb51f6a",
+        "headline_content_digest_count": 0,
+        "post_query_audit_ns": 5482276
+      },
+      "b3c_counter_gate_passed": true,
+      "b3c_manifest_hash": "aa68b74ade476af8ff8c64fe1a2c6b64a209d69f1c81375f12d97731157a6e2d",
+      "b3c_semantic_hash": "edc3bee32d078f391a1713a273abdbab09136fcc959381c479cc5e822aa061b9",
+      "environment_admitted": true,
+      "gpu_uuid": "GPU-0d3ee0a6-e7da-6b3b-69c4-2153bf99ae8f",
+      "pair_index": 1,
+      "performance_claimed": false,
+      "protocol_identity": "c9d1a9d044c1ee36df0042fbc0b14e7dd038daad316af7a716cc1e7f781004de",
+      "provider_fallback_zero": true,
+      "runtime_identity": "e7810627d5ab9b248cce87eba1c0490cf91ccb87b863f31593046bfc005d3ddd",
+      "schedule": [
+        "B3-C",
+        "B2"
+      ],
+      "semantic_failures": [],
+      "source_identity": "d43cda161a341a459a1c93437ba8b830824fd8d23db881ae4c8208931c4a5046",
+      "timing_admitted": false
+    },
+    {
+      "b2_counter_gate_passed": true,
+      "b2_manifest_hash": "3464e6e56517d6eecf49c39b2b74d760ce9b5e753f4f44e5c2e4e62e6c02efae",
+      "b2_semantic_hash": "23ee20eb238d6b4c9bded927b3e8e006dd894845c233244ed090137a97f53ffa",
+      "b3c_audit": {
+        "assembly_hash": "22406b8b23d899c8bf9aadf0778fa9f4d754a9b28c69d588c5840faed1049850",
+        "audit_hash": "84bd285bfc5bd14bc8d71684a34c9d70aa3a7ec3f3797317c69801e494b66396",
+        "commit_hash": "dd90cf3e9861a0e35abf7bda9c8d2b60213a0ee195622f3f42fa1de4c3758c47",
+        "headline_content_digest_count": 0,
+        "post_query_audit_ns": 5833721
+      },
+      "b3c_counter_gate_passed": true,
+      "b3c_manifest_hash": "6f9e51ad59a8b854169538650d1292e2347c6c756d370cfbf67374d018819704",
+      "b3c_semantic_hash": "36c7e7bbc9952919beb760c059a9183490f003d89f5328fcc881b4eaf81b845c",
+      "environment_admitted": true,
+      "gpu_uuid": "GPU-0d3ee0a6-e7da-6b3b-69c4-2153bf99ae8f",
+      "pair_index": 2,
+      "performance_claimed": false,
+      "protocol_identity": "c9d1a9d044c1ee36df0042fbc0b14e7dd038daad316af7a716cc1e7f781004de",
+      "provider_fallback_zero": true,
+      "runtime_identity": "e7810627d5ab9b248cce87eba1c0490cf91ccb87b863f31593046bfc005d3ddd",
+      "schedule": [
+        "B2",
+        "B3-C"
+      ],
+      "semantic_failures": [],
+      "source_identity": "d43cda161a341a459a1c93437ba8b830824fd8d23db881ae4c8208931c4a5046",
+      "timing_admitted": false
+    },
+    {
+      "b2_counter_gate_passed": true,
+      "b2_manifest_hash": "2d4ef455798861629fae5359b86b7dc787f049d78cab5fa4c461f884cad04e41",
+      "b2_semantic_hash": "25eadad24480a3344f54eba1f0776d97b4a7b0890b358a08e85cc3eb3a312d67",
+      "b3c_audit": {
+        "assembly_hash": "73a3136023f73059a036affdfe875a86aa33ba0b0d68a3b64023ac89f81e4cc5",
+        "audit_hash": "04c006f4aad75a0aff8e57ed826d05f880ef2622557170ebc7c5e9b47ad6cde1",
+        "commit_hash": "40c275f619a946f88f40da32df255e12da82dff811293dc5dc84fd6230518530",
+        "headline_content_digest_count": 0,
+        "post_query_audit_ns": 6096958
+      },
+      "b3c_counter_gate_passed": true,
+      "b3c_manifest_hash": "9d5e2ddf970566346f41725f218df34617b70e260eb3733c686324137762e2d9",
+      "b3c_semantic_hash": "7143d6e0626e8cf77ea613a4130cdf2bdfd50f8d4e51375b24620d501e1369b2",
+      "environment_admitted": true,
+      "gpu_uuid": "GPU-0d3ee0a6-e7da-6b3b-69c4-2153bf99ae8f",
+      "pair_index": 3,
+      "performance_claimed": false,
+      "protocol_identity": "c9d1a9d044c1ee36df0042fbc0b14e7dd038daad316af7a716cc1e7f781004de",
+      "provider_fallback_zero": true,
+      "runtime_identity": "e7810627d5ab9b248cce87eba1c0490cf91ccb87b863f31593046bfc005d3ddd",
+      "schedule": [
+        "B3-C",
+        "B2"
+      ],
+      "semantic_failures": [],
+      "source_identity": "d43cda161a341a459a1c93437ba8b830824fd8d23db881ae4c8208931c4a5046",
+      "timing_admitted": false
+    },
+    {
+      "b2_counter_gate_passed": true,
+      "b2_manifest_hash": "d55135e2fe097bd0dd10c5bc6b6ef7966b310e0ae02c0323a8856b3aeb5fca49",
+      "b2_semantic_hash": "12eb435d45f7cd33f4ee6506713db4e77d83775f50d156115cf19507112d9d38",
+      "b3c_audit": {
+        "assembly_hash": "526f5f2991869a2ff88850c8d23b3f6cd3a2d72e4cf2b1a5dbbc6bba9f4d6dd5",
+        "audit_hash": "c8aaa6a3b2e3ec041ea9e89768d4bfe239e7bfb23477363dbf86514e1a52eb6f",
+        "commit_hash": "aedc07886909e5fbbc51c22ea863e670eb618ee0a27ea11d68cd63bc51415339",
+        "headline_content_digest_count": 0,
+        "post_query_audit_ns": 5616086
+      },
+      "b3c_counter_gate_passed": true,
+      "b3c_manifest_hash": "37a1c81e7f5b076802912eaeb7160e08cfa31590a6e12de7cbc7ae558ad5aa73",
+      "b3c_semantic_hash": "35b625cd8ed08e51a63e52846b680fd7693a854fb5b2168505764859eea19617",
+      "environment_admitted": true,
+      "gpu_uuid": "GPU-0d3ee0a6-e7da-6b3b-69c4-2153bf99ae8f",
+      "pair_index": 4,
+      "performance_claimed": false,
+      "protocol_identity": "c9d1a9d044c1ee36df0042fbc0b14e7dd038daad316af7a716cc1e7f781004de",
+      "provider_fallback_zero": true,
+      "runtime_identity": "e7810627d5ab9b248cce87eba1c0490cf91ccb87b863f31593046bfc005d3ddd",
+      "schedule": [
+        "B2",
+        "B3-C"
+      ],
+      "semantic_failures": [],
+      "source_identity": "d43cda161a341a459a1c93437ba8b830824fd8d23db881ae4c8208931c4a5046",
+      "timing_admitted": false
+    }
+  ],
+  "performance_claimed": false,
+  "protocol_hash": "241f9b7573b50b3bac11cee06937626c1141c271a78a51c9306daeee732051d6",
+  "report_hash": "0d649200f423875db23ee23660447f7f0a8b91ce91510f254d7b3bb8f8a2827d",
+  "schema_version": "boundflow.fsg4-b3-five-fresh-report/v1",
+  "source_git_head": "75dfd8103e8e3dfe824a63e15c2222f8742e28c1",
+  "timing_admitted": false,
+  "worker_count": 10
+}

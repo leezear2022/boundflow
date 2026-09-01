@@ -1,0 +1,18 @@
+{
+  "code_revision": {
+    "boundflow/runtime/root_crown_residual_capture.py": "ea86d3176d17809cc5d07401a21c6a146546d6f2a31c15daa97e1940ceb065f9",
+    "scripts/package_root_crown_residual_capture.py": "66a4e886f1772f24b49eb70f90968448d6bf4f1da81d3ad04701b882dffbdbf0",
+    "scripts/probe_root_crown_residual_capture.py": "deb4c1d82f5fe84bf1301af0f5f19ae23c2b4b75ec3c2dc2d5a5b1f1d3617cb1",
+    "tests/test_root_crown_residual_capture_artifact.py": "183327d70bfda506caae99af3939cc3e946a09c7bcc4b94adf1f668d66715dda"
+  },
+  "files": {
+    "capture.pt": "f84c2330d58349653de3f08fa986fa5be561e8a5b1a217ae9f4af4f31f021d2e",
+    "receipt.json": "c25d231e95b3a62b7e18c7f839bf1ad25fc3b166f020bd875013ca33c3dd3b41",
+    "summary.json": "b7ef18715ea9b6eb8417ff78c769fe2554af08433dddb5a7f198f8da784fd76e"
+  },
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "performance_claimed": false,
+  "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+  "schema_version": "boundflow.root-crown-residual-capture-artifact/v1",
+  "source_parent_revision": "47c84a16939b923655a47262aed2c01d762ecf2a"
+}

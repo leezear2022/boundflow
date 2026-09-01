@@ -65,6 +65,11 @@ class NativeAlphaBetaOptimizerPolicy:
     spec_reduce: SpecReduce = "mean"
     soft_tau: float = 1.0
     alpha_initialization_mode: AlphaInitializationMode = "constant"
+    beta_lr: Optional[float] = None
+
+    @property
+    def effective_beta_lr(self) -> float:
+        return self.lr if self.beta_lr is None else self.beta_lr
 
     def validate(self) -> None:
         if (
@@ -76,6 +81,7 @@ class NativeAlphaBetaOptimizerPolicy:
             or self.spec_reduce not in {"mean", "min", "softmin"}
             or self.alpha_initialization_mode not in {"constant", "adaptive"}
             or self.soft_tau <= 0.0
+            or self.effective_beta_lr <= 0.0
             or not all(
                 torch.isfinite(torch.tensor(value)).item()
                 for value in (
@@ -83,6 +89,7 @@ class NativeAlphaBetaOptimizerPolicy:
                     self.alpha_init,
                     self.beta_init,
                     self.soft_tau,
+                    self.effective_beta_lr,
                 )
             )
         ):
@@ -104,6 +111,8 @@ class NativeAlphaBetaOptimizerPolicy:
         # Compatibility: the historical constant policy keeps its exact v1 hash.
         if self.alpha_initialization_mode != "constant":
             payload["alpha_initialization_mode"] = self.alpha_initialization_mode
+        if self.beta_lr is not None:
+            payload["beta_lr"] = self.beta_lr
         return payload
 
     def stable_hash(self) -> str:
@@ -476,6 +485,7 @@ def optimize_native_alpha_beta_state(
         relu_split_state=dict(relu_split_state),
         steps=policy.steps,
         lr=policy.lr,
+        beta_lr=policy.beta_lr,
         alpha_init=policy.alpha_init,
         beta_init=policy.beta_init,
         warm_start_alpha=warm_alpha,

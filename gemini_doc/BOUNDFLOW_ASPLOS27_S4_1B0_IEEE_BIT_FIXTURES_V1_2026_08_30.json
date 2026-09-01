@@ -1,0 +1,88 @@
+{
+  "schema_version": "boundflow.asplos27-s4-1b0-ieee-fixtures/v1",
+  "source_identity": {
+    "fixture_freeze_parent_commit": "a7734ffd2b96331e6c8859b7884c1db8a6908489",
+    "construction_model_hash": "5056d302aa27785ab8a22bd8f5665ebef0a4aba2ca22bc72ce28581144dbcc2a",
+    "legacy_source_commit": "1766cbcbb95466f3c4d9afda448a5e1db9bfbe36"
+  },
+  "policies": {
+    "value_dtype": "float32",
+    "selector_dtype": "int8",
+    "nonfinite_policy": "ieee754-f32-exponent-bits-sentinel-minus-128-v1",
+    "endpoint_policy": "ternary-box-endpoint-v1",
+    "midpoint_policy": "add-then-mul-f32-half-v1",
+    "invalid_output_policy": "canonical-qnan-0x7fc00000-v1"
+  },
+  "pack_cases": [
+    {"name": "negative_quiet_nan_payload", "input_bits": "0xffc12345", "expected_selector": -128},
+    {"name": "negative_infinity", "input_bits": "0xff800000", "expected_selector": -128},
+    {"name": "negative_max_finite", "input_bits": "0xff7fffff", "expected_selector": -1},
+    {"name": "negative_one", "input_bits": "0xbf800000", "expected_selector": -1},
+    {"name": "negative_min_normal", "input_bits": "0x80800000", "expected_selector": -1},
+    {"name": "negative_min_subnormal", "input_bits": "0x80000001", "expected_selector": -1},
+    {"name": "negative_zero", "input_bits": "0x80000000", "expected_selector": 0},
+    {"name": "positive_zero", "input_bits": "0x00000000", "expected_selector": 0},
+    {"name": "positive_min_subnormal", "input_bits": "0x00000001", "expected_selector": 1},
+    {"name": "positive_min_normal", "input_bits": "0x00800000", "expected_selector": 1},
+    {"name": "positive_one", "input_bits": "0x3f800000", "expected_selector": 1},
+    {"name": "positive_max_finite", "input_bits": "0x7f7fffff", "expected_selector": 1},
+    {"name": "positive_infinity", "input_bits": "0x7f800000", "expected_selector": -128},
+    {"name": "positive_quiet_nan_payload", "input_bits": "0x7fc12345", "expected_selector": -128},
+    {"name": "positive_signaling_nan_payload", "input_bits": "0x7fa12345", "expected_selector": -128},
+    {"name": "positive_pi", "input_bits": "0x40490fdb", "expected_selector": 1}
+  ],
+  "select_cases": [
+    {"name": "positive_selects_lower", "selector": 1, "lower_bits": "0xbf800000", "upper_bits": "0x40000000", "expected_bits": "0xbf800000"},
+    {"name": "negative_selects_upper", "selector": -1, "lower_bits": "0xbf800000", "upper_bits": "0x40000000", "expected_bits": "0x40000000"},
+    {"name": "zero_regular_midpoint", "selector": 0, "lower_bits": "0xbf800000", "upper_bits": "0x40400000", "expected_bits": "0x3f800000"},
+    {"name": "zero_positive_overflow", "selector": 0, "lower_bits": "0x7f7fffff", "upper_bits": "0x7f7fffff", "expected_bits": "0x7f800000"},
+    {"name": "zero_negative_overflow", "selector": 0, "lower_bits": "0xff7fffff", "upper_bits": "0xff7fffff", "expected_bits": "0xff800000"},
+    {"name": "zero_positive_min_subnormal", "selector": 0, "lower_bits": "0x00000001", "upper_bits": "0x00000001", "expected_bits": "0x00000001"},
+    {"name": "zero_negative_min_subnormal", "selector": 0, "lower_bits": "0x80000001", "upper_bits": "0x80000001", "expected_bits": "0x80000001"},
+    {"name": "zero_opposite_signed_zero", "selector": 0, "lower_bits": "0x80000000", "upper_bits": "0x00000000", "expected_bits": "0x00000000"},
+    {"name": "zero_two_negative_zero", "selector": 0, "lower_bits": "0x80000000", "upper_bits": "0x80000000", "expected_bits": "0x80000000"},
+    {"name": "invalid_sentinel", "selector": -128, "lower_bits": "0x3f800000", "upper_bits": "0x40000000", "expected_bits": "0x7fc00000"},
+    {"name": "invalid_positive_two", "selector": 2, "lower_bits": "0x3f800000", "upper_bits": "0x40000000", "expected_bits": "0x7fc00000"},
+    {"name": "invalid_negative_two", "selector": -2, "lower_bits": "0x3f800000", "upper_bits": "0x40000000", "expected_bits": "0x7fc00000"},
+    {"name": "positive_preserves_nan_payload", "selector": 1, "lower_bits": "0x7fc12345", "upper_bits": "0x40000000", "expected_bits": "0x7fc12345"},
+    {"name": "negative_preserves_nan_payload", "selector": -1, "lower_bits": "0x3f800000", "upper_bits": "0xffc12345", "expected_bits": "0xffc12345"},
+    {"name": "zero_exact_cancel", "selector": 0, "lower_bits": "0x3f800000", "upper_bits": "0xbf800000", "expected_bits": "0x00000000"},
+    {"name": "zero_asymmetric", "selector": 0, "lower_bits": "0xc0400000", "upper_bits": "0x3f800000", "expected_bits": "0xbf800000"}
+  ],
+  "midpoint_reassociation_counterexamples": [
+    {"name": "max_finite", "input_bits": "0x7f7fffff", "add_then_mul_bits": "0x7f800000", "mul_then_add_bits": "0x7f7fffff"},
+    {"name": "min_subnormal", "input_bits": "0x00000001", "add_then_mul_bits": "0x00000001", "mul_then_add_bits": "0x00000000"}
+  ],
+  "shape_guard": {
+    "frozen_probe_numel": 16,
+    "mismatched_numel": 2,
+    "expected_result": "reject-before-launch"
+  },
+  "future_production_fixture_inventory": {
+    "numel": 18432,
+    "positive": 8689,
+    "negative": 9137,
+    "zero": 606,
+    "invalid": 0,
+    "old_binary_zero_misclassified": 606,
+    "status": "design-time-expectation-not-production-validation"
+  },
+  "observation": {
+    "device": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "compute_capability": [8, 9],
+    "torch": "2.12.1+cu132",
+    "tvm": "0.23.dev0",
+    "tvm_ffi": "0.1.3.dev11+gae346ec92",
+    "pack_case_count": 16,
+    "select_case_count": 16,
+    "dlpack_pointer_exact": 5,
+    "gpu_preflight_passed": true
+  },
+  "claims": {
+    "implementation_open": false,
+    "production_correctness": false,
+    "formal_validated": false,
+    "timing": false,
+    "performance": false
+  }
+}

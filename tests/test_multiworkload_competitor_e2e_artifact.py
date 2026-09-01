@@ -1,6 +1,6 @@
 """Contract and tamper tests for the frozen NRIR-18 artifact."""
 
-# pylint: disable=missing-function-docstring,duplicate-code
+# pylint: disable=missing-function-docstring,duplicate-code,import-outside-toplevel
 
 from __future__ import annotations
 
@@ -13,6 +13,7 @@ import pytest
 from scripts.run_multiworkload_competitor_e2e_artifact import (
     EVIDENCE_FILE,
     MANIFEST_FILE,
+    _onnx_inventory,
     canonical_hash,
     file_sha256,
     validate_evidence_structure,
@@ -83,3 +84,22 @@ def test_multiworkload_artifact_log_digests_are_semantically_linked() -> None:
         assert log_path.is_file()
         assert file_sha256(log_path) == record["log_sha256"]
         assert record["result"]["performance_claimed"] is False
+
+
+def test_symbolic_batch_requires_explicit_frozen_input_shape(tmp_path: Path) -> None:
+    import onnx
+    from onnx import TensorProto, helper
+
+    model_path = tmp_path / "symbolic.onnx"
+    graph = helper.make_graph(
+        [helper.make_node("Identity", ["input"], ["output"])],
+        "symbolic-batch",
+        [helper.make_tensor_value_info("input", TensorProto.FLOAT, [None, 4])],
+        [helper.make_tensor_value_info("output", TensorProto.FLOAT, [None, 4])],
+    )
+    onnx.save(helper.make_model(graph), model_path)
+    with pytest.raises(ValueError, match="static positive ONNX shapes"):
+        _onnx_inventory(model_path)
+    assert _onnx_inventory(model_path, (1, 4))[:2] == ((1, 4), 4)
+    with pytest.raises(ValueError, match="contradicts"):
+        _onnx_inventory(model_path, (1, 5))

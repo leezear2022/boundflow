@@ -1,0 +1,20 @@
+{
+  "files": {
+    "README.md": "5b883ee71d12a6bc07f065649d15ba94029e607434f2894f245f1aceaca69310",
+    "pair_metrics.jsonl": "b0baf4f39873fe50fbfd25deb8a4df6d343ae2108f786cd4f18d7074bc57a1f5",
+    "protocol.json": "f28aea2e2cace6dd357ddb1b787d5f3d501b417d8d46a758e3d58c792316c421",
+    "raw.json": "7c252588c5ee05fdc757683c549474c7ed50d7df4befa3fdb461e625d8502185",
+    "replay_stdout.txt": "573c7fc852664105aa6cc913d5aa8d29fc1ac97cb37bfff673c835842cb1f22b",
+    "summary.json": "4ca6194dc6bdb3916aea407bc7a0870b2d6ab50eb0c2c9bb0b0b3b6e01dd8aac",
+    "tamper_report.json": "456f7a6a11e93d72f9e7fbfbf7118d72c86b02ef176f5c3ac6fd1ba430e55fa6"
+  },
+  "generator_commit": "5e7751c6e4efffa99e723744ef08dd67f2ce5c03",
+  "manifest_hash": "a7e3b7f370b6951717e63110a16101c81b4620298d2a9d0d1abd88f79a18b4b6",
+  "performance_claimed": false,
+  "protocol_hash": "1073e21a6ba173af38e251b811905c8201f589ab719770425d2978f500ba6d35",
+  "raw_hash": "4318464ec5fa51cfdaabdeff93d66440af7c5ff13d6acff038937bfd9855d725",
+  "schema_version": "boundflow.mr3-production-bridge-timing-artifact/v1",
+  "source_commit": "2d788ad6608d7d4da9ac9937efa3cdeb11d36f27",
+  "status": "VALIDATED-NO-GO-MR3-P-PRODUCTION-BRIDGE-PHYSICS",
+  "summary_hash": "6fd90461be736ee627c46132e3d4eaa65cd3e47dd79a5c8f049cf025650bd3db"
+}

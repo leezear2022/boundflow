@@ -1,0 +1,49 @@
+{
+  "baseline_cuda_graph": true,
+  "candidate_cuda_graph": true,
+  "code_revision": {
+    "boundflow/backends/tvm/cibc_ibp_conv.py": "a7d6c2230fd3ebd971ce681f0ab01b22dc5bb79416ef6ab4eeeabd024ac4226f",
+    "boundflow/domains/interval.py": "93fd95474b2923a2a684abf799ebac541d7742cc7b17bd80bc49ff29fee5dab0",
+    "boundflow/runtime/cibc_ibp_conv.py": "a0c5197ad8d268a48cc0c38923e8ba398dc9967d1ebf61f7d86023366c7bf481",
+    "boundflow/runtime/cibc_ibp_graph.py": "8790692387206155a42af617960d39c827108e03e7513f11357063a7f5211507",
+    "scripts/run_cibc_ibp_horizontal_artifact.py": "58a8fb9c1592989ad4d49438e64e995f8a48d42bd29d3f3c38c33fed4ce04f95",
+    "scripts/run_cibc_ibp_horizontal_worker.py": "0fad716316aaf322c5b82a0f0001f07521f2552d964a93fc6de21dd34d4927a7",
+    "tests/test_cibc_ibp_conv.py": "976566d3c419400c53f5022c9a3e48c8909ea214cb1b48c2d7851df4648988ae",
+    "tests/test_cibc_ibp_graph.py": "67b0844915460e09968a5efcdd08d90be24554441122f992f0c06809bfff245a"
+  },
+  "group_count": 30,
+  "input_copy_included": true,
+  "model_geomean_gate": 1.5,
+  "model_orders": [
+    "BC",
+    "CB",
+    "BC",
+    "CB",
+    "BC",
+    "CB"
+  ],
+  "model_repeats": 100,
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "model_worst_gate": 1.2,
+  "operator_geomean_gate": 2.0,
+  "operator_orders": [
+    "BC",
+    "CB",
+    "BC"
+  ],
+  "operator_repeats": 500,
+  "operator_shape_count": 6,
+  "operator_worst_gate": 1.2,
+  "performance_claimed": false,
+  "protocol_hash": "f083cd6bc16b007d17ba1f45850c0d89a8aead9139dd619288f3a11ae7924f5c",
+  "schedules": [
+    64,
+    128,
+    256
+  ],
+  "schema_version": "boundflow.cibc-ibp-horizontal-protocol/v1",
+  "semantic_atol": 0.0003,
+  "semantic_rtol": 0.0003,
+  "source_capture_sha256": "f42229dd06be8521865d14af4cc51450ec8bec4e792934b457c276aad50126dc",
+  "source_git_head": "a52b1775e3b8185410e5600da0bde55b3b24102b"
+}

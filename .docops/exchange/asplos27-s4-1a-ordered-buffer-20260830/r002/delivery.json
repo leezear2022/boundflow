@@ -1,0 +1,64 @@
+{
+  "doc": "asplos27-s4-1a-ordered-buffer-20260830/r002/delivery",
+  "type": "delivery",
+  "task": "asplos27-s4-1a-ordered-buffer-20260830",
+  "round": 2,
+  "from": "codex",
+  "to": "external-model",
+  "ts": "2026-08-30T18:35:01Z",
+  "base_commit": "023232c",
+  "result_commit": "20f57bb",
+  "changed_files": [
+    "boundflow/runtime/asplos27_s4_ordered_buffer_abi.py",
+    "scripts/replay_asplos27_s4_1a_buffer_stdlib.py",
+    "scripts/run_asplos27_s4_1a_buffer_worker.py",
+    "tests/test_asplos27_s4_1a_buffer_artifact.py",
+    "gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_EXTERNAL_AUDIT_HARDENING_CHANGELOG_2026_08_31.md"
+  ],
+  "claims": [
+    "F1 closed: replay now binds frozen detail_code and verification_reason pairs; coherent-resign reason forgery is rejected.",
+    "F2 closed: worker passes the auditor's mypy --explicit-package-bases scope.",
+    "F3 closed: all seven delivered source files score 10.00/10 when checked per file.",
+    "No r001 artifact/raw/sidecar/manifest was modified; timing and performance claims remain false."
+  ],
+  "validation": [
+    {
+      "cmd": "pytest -q tests/test_asplos27_s4_ordered_buffer_abi.py tests/test_asplos27_s4_1a_buffer_artifact.py",
+      "result": "pass"
+    },
+    {
+      "cmd": "pytest -q tests",
+      "result": "pass"
+    },
+    {
+      "cmd": "mypy --explicit-package-bases <seven delivered source files>",
+      "result": "pass"
+    },
+    {
+      "cmd": "pylint <each of seven delivered source files>",
+      "result": "pass"
+    },
+    {
+      "cmd": "stdlib replay formal artifact",
+      "result": "pass"
+    },
+    {
+      "cmd": "black --check and git diff --check",
+      "result": "pass"
+    },
+    {
+      "cmd": "dol exchange validate and dol lint --soft",
+      "result": "pass"
+    }
+  ],
+  "limitations": [
+    "This hardening closes replay/static-gate findings only; it adds no execution, timing, speedup, same-solver, complete-query, or ASPLOS-ready claim."
+  ],
+  "risks": [
+    "The historical r001 protocol code_revision correctly identifies the originally audited blobs; the post-audit hardening commit is separately identified as 20f57bb."
+  ],
+  "open_questions": [
+    "Please verify F1-F3 closures and approve round 2 if no blocker or major remains."
+  ],
+  "md_sha256": "7b64b99d887044753f6a172a832c387c193fe5982466877cd14c9f2341b43f3c"
+}

@@ -178,7 +178,9 @@ def _branch_choices_from_relu_pre(
         if best_name[i] is None:
             out.append(None)
         else:
-            out.append((best_name[i], int(best_idx[i])))
+            selected_name = best_name[i]
+            assert selected_name is not None
+            out.append((selected_name, int(best_idx[i])))
     return out
 
 
@@ -436,12 +438,16 @@ def _is_infeasible_split_first_layer_convex_combo(
         c = c_vec[0]
         A = DenseLinearOperator(a.view(1, 1, -1), input_shape=input_shape)
         b = c.view(1, 1)
-        _lb, ub = spec.perturbation.concretize_affine(center=spec.center, A=A, b=b)
-        ub0 = float(ub.squeeze().detach().cpu().item())
-        if ub0 < -float(tol):
-            cert: Dict[str, Any] = {
+        _lb, ub = spec.perturbation.concretize_affine(
+            center=spec.center,
+            A=A,  # type: ignore[arg-type]
+            b=b,
+        )
+        single_ub_value = float(ub.squeeze().detach().cpu().item())
+        if single_ub_value < -float(tol):
+            single_certificate: Dict[str, Any] = {
                 "type": "single_halfspace_max_negative",
-                "max_value": float(ub0),
+                "max_value": single_ub_value,
                 "weights": [1.0],
                 "a": a.detach().cpu().tolist(),
                 "c": float(c.detach().cpu().item()),
@@ -457,7 +463,7 @@ def _is_infeasible_split_first_layer_convex_combo(
             return (
                 True,
                 f"infeasible: single halfspace has max<{ -float(tol):.2e}",
-                cert,
+                single_certificate,
             )
         return False, "ok", None
 
@@ -473,14 +479,18 @@ def _is_infeasible_split_first_layer_convex_combo(
             a.view(1, 1, -1), input_shape=input_shape
         )  # [B=1,K=1,I]
         b = c.view(1, 1)
-        _lb, ub = spec.perturbation.concretize_affine(center=spec.center, A=A, b=b)
-        ub0 = ub.squeeze()
-        val = float(ub0.detach().cpu().item())
+        _lb, ub = spec.perturbation.concretize_affine(
+            center=spec.center,
+            A=A,  # type: ignore[arg-type]
+            b=b,
+        )
+        ub_value = ub.squeeze()
+        val = float(ub_value.detach().cpu().item())
         if best is None or val < best[0]:
             best = (val, w.detach().clone(), a.detach().clone(), c.detach().clone())
         # Early exit: current convex combo already proves infeasible.
         if val < -float(tol):
-            cert: Dict[str, Any] = {
+            current_certificate: Dict[str, Any] = {
                 "type": "convex_combo_max_negative",
                 "max_value": float(val),
                 "weights": w.detach().cpu().tolist(),
@@ -499,16 +509,16 @@ def _is_infeasible_split_first_layer_convex_combo(
             return (
                 True,
                 f"infeasible: found convex-combo certificate with max<{ -float(tol):.2e}",
-                cert,
+                current_certificate,
             )
         opt.zero_grad(set_to_none=True)
-        ub0.backward()
+        ub_value.backward()
         opt.step()
 
     assert best is not None
     best_ub, best_w, best_a, best_c = best
     if best_ub < -float(tol):
-        cert: Dict[str, Any] = {
+        best_certificate: Dict[str, Any] = {
             "type": "convex_combo_max_negative",
             "max_value": float(best_ub),
             "weights": best_w.detach().cpu().tolist(),
@@ -527,7 +537,7 @@ def _is_infeasible_split_first_layer_convex_combo(
         return (
             True,
             f"infeasible: found convex-combo certificate with max<{ -float(tol):.2e}",
-            cert,
+            best_certificate,
         )
     return False, "ok", None
 
@@ -648,6 +658,7 @@ def run_alpha_beta_crown_mlp(
     relu_split_state: Optional[Dict[str, torch.Tensor]] = None,
     steps: int = 20,
     lr: float = 0.2,
+    beta_lr: Optional[float] = None,
     alpha_init: float = 0.5,
     beta_init: float = 0.0,
     warm_start_alpha: Optional[AlphaState] = None,
@@ -736,15 +747,27 @@ def run_alpha_beta_crown_mlp(
         per_batch_params=per_batch_params,
     )
 
-    params: List[torch.Tensor] = []
+    alpha_params: List[torch.Tensor] = []
+    beta_params: List[torch.Tensor] = []
     for k, a in alpha_state.alpha_by_relu_input.items():
         alpha_state.alpha_by_relu_input[k] = a.detach().clone().requires_grad_(True)
-        params.append(alpha_state.alpha_by_relu_input[k])
+        alpha_params.append(alpha_state.alpha_by_relu_input[k])
     for k, b in beta_state.beta_by_relu_input.items():
         beta_state.beta_by_relu_input[k] = b.detach().clone().requires_grad_(True)
-        params.append(beta_state.beta_by_relu_input[k])
+        beta_params.append(beta_state.beta_by_relu_input[k])
 
-    opt = torch.optim.Adam(params, lr=float(lr))
+    params = alpha_params + beta_params
+    if beta_lr is None:
+        opt = torch.optim.Adam(params, lr=float(lr))
+    else:
+        if beta_lr <= 0.0 or not torch.isfinite(torch.tensor(beta_lr)).item():
+            raise ValueError("beta_lr must be finite and >0")
+        parameter_groups: List[Dict[str, Any]] = []
+        if alpha_params:
+            parameter_groups.append({"params": alpha_params, "lr": float(lr)})
+        if beta_params:
+            parameter_groups.append({"params": beta_params, "lr": float(beta_lr)})
+        opt = torch.optim.Adam(parameter_groups)
 
     best_metric = None
     best_bounds: Optional[IntervalState] = None

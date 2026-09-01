@@ -1,0 +1,60 @@
+{
+  "doc": "asplos27-s1-s2-combined-20260828/r001/delivery",
+  "type": "delivery",
+  "task": "asplos27-s1-s2-combined-20260828",
+  "round": 1,
+  "from": "codex",
+  "to": "external-model",
+  "ts": "2026-08-28T04:49:36Z",
+  "base_commit": "d7adec6",
+  "result_commit": "cd1670c",
+  "changed_files": [
+    "boundflow/backends/tvm/asplos27_s2_selected_value.py",
+    "boundflow/runtime/asplos27_s2_crown_pipeline.py",
+    "scripts/run_asplos27_s2_crown_worker.py",
+    "scripts/run_asplos27_s2_crown_artifact.py",
+    "scripts/probe_asplos27_s2_crown_tamper.py",
+    "tests/test_asplos27_s2_crown_pipeline.py",
+    "artifacts/asplos27-s2-crown-pipeline/resnet2b-p-anchor-v2",
+    "gemini_doc/BOUNDFLOW_ASPLOS27_S2_FORMAL_CLOSURE_2026_08_28.md"
+  ],
+  "claims": [
+    "S1 closes canonical IBP plumbing; S2 closes only P-anchor single-evaluation coarse CROWN at 4.2453819646x geomean and 3.5407988567x worst with correctness and fail-closed receipts; only S3 preregistration opens"
+  ],
+  "validation": [
+    {
+      "cmd": "pytest -q tests/test_asplos27_s2_crown_pipeline.py",
+      "result": "pass"
+    },
+    {
+      "cmd": "pytest -q tests",
+      "result": "pass"
+    },
+    {
+      "cmd": "S2 artifact raw replay",
+      "result": "pass"
+    },
+    {
+      "cmd": "S2 ten resigned tamper probes",
+      "result": "pass"
+    },
+    {
+      "cmd": "black mypy pylint",
+      "result": "pass"
+    },
+    {
+      "cmd": "dol lint --soft",
+      "result": "pass"
+    }
+  ],
+  "limitations": [
+    "No optimizer 10/9, same-solver, complete-query, cross-model, overall 10x, or ASPLOS-ready claim"
+  ],
+  "risks": [
+    "PDN worst pair is 3.5407988567x and therefore close to the frozen 3.50x gate; audit it explicitly"
+  ],
+  "open_questions": [
+    "Do AC1-AC7 support both closures and opening only S3 preregistration?"
+  ],
+  "md_sha256": "be69bb0420f307c1f056305b0ea88a4416ff526334dd8dd4dde1ca0f84d26a56"
+}

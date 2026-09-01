@@ -1,0 +1,18 @@
+{
+  "task": "gc0-fcr1-prereg-20260826",
+  "title": "GC-0/FCR-1 Verification Graph ABI Correctness Preregistration Audit",
+  "status": "closed",
+  "round": 1,
+  "executor": "codex-executor",
+  "auditor": "external-model-auditor",
+  "approved_round": 1,
+  "docs": [
+    "gc0-fcr1-prereg-20260826/request",
+    "gc0-fcr1-prereg-20260826/r001/delivery",
+    "gc0-fcr1-prereg-20260826/r001/audit",
+    "gc0-fcr1-prereg-20260826/closure"
+  ],
+  "rev": 6,
+  "created": "2026-08-25T17:34:09Z",
+  "updated": "2026-08-26T00:15:44Z"
+}

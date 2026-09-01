@@ -1,0 +1,16 @@
+{
+  "task": "mr3-production-bridge-timing-20260826",
+  "title": "MR3 production bridge timing NO-GO closure audit",
+  "status": "ready_for_audit",
+  "round": 1,
+  "executor": "codex",
+  "auditor": "external-model",
+  "approved_round": null,
+  "docs": [
+    "mr3-production-bridge-timing-20260826/request",
+    "mr3-production-bridge-timing-20260826/r001/delivery"
+  ],
+  "rev": 3,
+  "created": "2026-08-25T08:21:37Z",
+  "updated": "2026-08-25T08:21:37Z"
+}

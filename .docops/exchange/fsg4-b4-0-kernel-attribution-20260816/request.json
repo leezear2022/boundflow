@@ -1,0 +1,25 @@
+{
+  "doc": "fsg4-b4-0-kernel-attribution-20260816/request",
+  "type": "request",
+  "task": "fsg4-b4-0-kernel-attribution-20260816",
+  "round": 0,
+  "from": "codex",
+  "to": "external-model",
+  "executor": "codex",
+  "auditor": "external-model",
+  "ts": "2026-08-15T17:15:54Z",
+  "title": "FSG4 B4-0 kernel attribution opportunity audit",
+  "request": "# FSG4/B4-0 Kernel Attribution 外部审计交接\n\n## 1. 审计目标\n\n请不要采信closure/summary中的数字；从formal raw独立判断B4-0是否可以关闭为\n`VALIDATED-B4-0-OPPORTUNITY`，以及是否只应开放B4-A cumulative candidate。\n\n审计对象：\n\n- source：`66154e485594e8a84ad1ce04d701d8543c1a7335`；\n- artifact：`artifacts/fsg4-b4-kernel-attribution/resnet2b-prop0-v1/`；\n- runner：`scripts/run_fsg4_b4_kernel_attribution.py`；\n- typed schema：`boundflow/runtime/fsg4_b4_kernel_attribution.py`；\n- prereg：`gemini_doc/BOUNDFLOW_FSG4_B4_CUMULATIVE_CUDA_TIR_FUSION_PLAN_2026_08_16.md`；\n- internal closure：`gemini_doc/change_2026-08-16_fsg4_b4_0_kernel_attribution_closure.md`。\n\n## 2. Acceptance criteria\n\n### AC1 — Source/protocol/raw identity\n\n- source/code revision、B3 manifest、模型/性质及外部仓库commit独立重算一致；\n- manifest、compressed file、uncompressed JSONL、canonical raw、worker/summary多层hash一致；\n- artifact零本机绝对路径泄漏。\n\n### AC2 — Fresh semantic pair\n\n- control/profile均为fresh B3 worker，顺序=`control,profile`；\n- discrete/sign exact；lower allclose使用protocol绑定的B3冻结`atol=rtol=2e-4`；\n- profile时间只作扰动披露，`performance_claimed=false`。\n\n### AC3 — 14-call phase closure\n\n- 从raw独立重建14个CROWN ordinal和4个forward ordinal；\n- 所有真实CUDA kernel均进入closure；correlation/temporal/unattributed计数与raw一致；\n- CUDA user annotation不得误算为kernel；stream、shape、phase parent与allocation delta可解析。\n\n### AC4 — Opportunity计算\n\n- 从raw独立聚合optimizer 10、terminal export 1、KFSB 3的kernel/materialization ledger；\n- 从B3 formal raw独立复算CROWN14/whole-core share比值；\n- 判断B4-A是否满足“消除一个完整重复CROWN call”，B4-B是否满足`>=5% B3 core`；\n- 明确kernel-sum和allocation delta不得升级为wall speedup或memory saving。\n\n### AC5 — Replay/tamper\n\n- root replay逐字段重建summary；\n- 独立重跑9类outer-resigned probe，或检查其确实更新内外层digest后仍被semantic replay拒绝。\n\n### AC6 — Regression/static/DocOps\n\n- B4 targeted=`15 passed`；B3/B4相关=`54 passed`；full=`1329 passed, 3 skipped`；\n- Black/Mypy/Pylint/diff check和`dol exchange validate`/`dol lint --soft`通过。\n\n### AC7 — Claim边界\n\n- B4-0只允许attribution/opportunity claim，无B4 speedup、B0 parity、memory saving或ASPLOS-ready；\n- approve后只开放B4-A，B4-B可设计但不得合并执行，B4-C/D与B5—B7继续关闭。\n\n## 3. 建议独立命令\n\n```bash\npython scripts/run_fsg4_b4_kernel_attribution.py replay \\\n  --artifact-dir artifacts/fsg4-b4-kernel-attribution/resnet2b-prop0-v1\n\npython scripts/run_fsg4_b4_kernel_attribution.py tamper \\\n  --artifact-dir artifacts/fsg4-b4-kernel-attribution/resnet2b-prop0-v1\n\npython -m pytest -q \\\n  tests/test_fsg4_b4_kernel_attribution.py \\\n  tests/test_fsg4_b4_kernel_attribution_runner.py\n```\n\n独立raw解析应优先使用Python标准库`gzip/json/hashlib`，避免调用被审计方summary helper。\n\n## 4. 审计输出格式\n\n请按AC1—AC7逐项给`PASS/FAIL`、证据与独立重算数字；findings分`blocker/major/minor/info`。最终verdict\n只能为`approve`、`approve-with-findings`或`reject`。若approve，请明确是否同意关闭\n`VALIDATED-B4-0-OPPORTUNITY`并只开放B4-A。\n",
+  "scope": "B4-0 formal raw attribution, replay, tamper, opportunity admission and claim boundary",
+  "acceptance": [
+    "AC1 source/protocol/raw identity",
+    "AC2 fresh semantic pair",
+    "AC3 14-call phase closure",
+    "AC4 opportunity calculation",
+    "AC5 replay and outer-resigned tamper",
+    "AC6 regression static and DocOps",
+    "AC7 claim boundary and next-route admission"
+  ],
+  "base_commit": "9adde46",
+  "md_sha256": "9be1bf5d1969e899135d4014561a5319db2eefa5ac3cfacdf41a5b4e6de372b2"
+}

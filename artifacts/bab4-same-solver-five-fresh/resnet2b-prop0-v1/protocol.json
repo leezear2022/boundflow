@@ -1,0 +1,64 @@
+{
+  "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+  "candidate_configuration": "BAB4",
+  "code_revision": {
+    "artifacts/asplos27-s4-exact-call-plan/resnet2b-prop0-v1/plan_template.json": "fb4c9dbc1dbd225993779e3c8bff00dcd5a42fbd7516ef172d89616e7fbf4218",
+    "boundflow/backends/tvm/bab_input_domain.py": "aabba7e775ccd3e1a3362fb3f494facfab48e68b92b944396a2509af9a1aa0a3",
+    "boundflow/backends/tvm/bab_terminal_linear.py": "a5f11b3db42858b467944d35937816edf0a4a905f6dad94194b88b38c4387480",
+    "boundflow/backends/tvm/root_crown_projection.py": "92e9b81ecdf5a537d3bc5f947f1ffeefb2bd5626eb5f244831f15827ea76b081",
+    "boundflow/backends/tvm/root_crown_residual.py": "4dfaa705739cb81afd5c7f42bb4de59a3c9f0c2b8da6525ec33c8f393dda6080",
+    "boundflow/runtime/asplos27_s4_exact_call_bridge.py": "8e5d6bb6b24cf32d746d5844efc7cb4d90c0fc4baa16e294a4967af1b3cbfbcc",
+    "boundflow/runtime/asplos27_s4_exact_call_plan_template.py": "12db20d77a0fb2b90549e2792056467d85887f50c816aa8f15daf98471bbd03b",
+    "boundflow/runtime/bab_four_segment_exact_call_bridge.py": "74b6c78b039628862d0da4ae3a6cd507a1af4d62095c9a4bf52603788dbfa9c0",
+    "boundflow/runtime/bab_four_segment_optimizer.py": "7df0d4446742e4bc8a4aa4a350491a08cf93fe716992f2350b6d651915e7fa45",
+    "boundflow/runtime/bab_full_region_owner.py": "3776e46987e9332f53374cae2ca01698f1229456c8acde68e9b0752411d37dda",
+    "boundflow/runtime/bab_input_domain_tir.py": "98967099057226fb30ec2a94d22877959b7e7ec4a65d2d8380bbfa359e019d53",
+    "boundflow/runtime/bab_terminal_tir.py": "80f85695e3434ce81dcd2136aca8c46d50db1d56aa59d2da2c1888c790855b67",
+    "boundflow/runtime/root_crown_projection_tir.py": "00fe7a977bcefc093dca7634600aea449d92d9b19887fc25293fa00c31c0fc0a",
+    "boundflow/runtime/root_crown_residual_tir.py": "3d8ed1787dba29b967629b23c89a4909a5c21a82ea427efd2db4db14abaf7c74",
+    "scripts/probe_bab4_same_solver_five_fresh_tamper.py": "22268728cb678f5cac11ed8de3e039d6e3eeb4831188aeba0ec0adbe235e9896",
+    "scripts/run_asplos27_s4_same_solver_five_fresh.py": "fb0e86cc121f218ebeb45f3a8deed86f5fb2fc64a9bcc09a8d4527c866dd5f94",
+    "scripts/run_asplos27_s4_same_solver_worker.py": "bd4e864808b11bf5ef03ee43b10facf67654e016cc0dc24c4d2f0b50823f2483",
+    "scripts/run_bab4_same_solver_five_fresh.py": "65b36392a5e7cf0ba66d30d34c32bf763adb28d1c852d00098bc5775cae07534",
+    "scripts/run_fsg3_same_solver_timing.py": "004521c19719e2889c70ea9cad9044f99f89736900feca8dbef9c6f1b464e2f7"
+  },
+  "core_research_gate": 1.2,
+  "environment_window": "post-static-prepare-cool-idle-to-query-end",
+  "fresh_process_per_worker": true,
+  "lower_atol": 0.0002,
+  "lower_sign_exact": true,
+  "max_environment_attempts": 8,
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "pair_orders": [
+    [
+      "B4-A",
+      "BAB4"
+    ],
+    [
+      "BAB4",
+      "B4-A"
+    ],
+    [
+      "B4-A",
+      "BAB4"
+    ],
+    [
+      "BAB4",
+      "B4-A"
+    ],
+    [
+      "B4-A",
+      "BAB4"
+    ]
+  ],
+  "performance_claimed": false,
+  "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+  "protocol_hash": "c04420a88eef984e300cf8c9b69bdc5095730caf8ef175b4bcc6fe095027bba2",
+  "python_executable": "/home/lee/Codes/alpha-beta-CROWN/.venv/bin/python",
+  "query_parity_gate": 1.0,
+  "query_research_gate": 1.15,
+  "schema_version": "boundflow.bab4-same-solver-five-fresh/v1",
+  "source_capture_runtime_dependency": false,
+  "source_git_head": "7bd28bdae4ac4f0093089d66510806ef09cf9028",
+  "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf"
+}

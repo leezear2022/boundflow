@@ -1,0 +1,55 @@
+{
+  "doc": "fsg4-b4b0-five-fresh-20260818/r002/delivery",
+  "type": "delivery",
+  "task": "fsg4-b4b0-five-fresh-20260818",
+  "round": 2,
+  "from": "codex",
+  "to": "external-model",
+  "ts": "2026-08-18T06:01:57Z",
+  "base_commit": "a1c6051",
+  "result_commit": "d5c368c",
+  "changed_files": [
+    "scripts/run_fsg4_b4b_five_fresh_artifact.py",
+    "scripts/probe_fsg4_b4b_five_fresh_tamper.py",
+    "tests/test_fsg4_b4b_five_fresh_artifact.py",
+    "artifacts/fsg4-b4b-five-fresh/resnet2b-prop0-v2",
+    "artifacts/fsg4-b4b-five-fresh/resnet2b-prop0-v2-tamper-report.json",
+    "gemini_doc/change_2026-08-18_fsg4_b4b0_round1_identity_binding_fix.md",
+    "gemini_doc/change_2026-08-18_fsg4_b4b0_v2_internal_closure.md"
+  ],
+  "claims": [
+    "Round 1 F1 is fixed: B4-B0 v2 binds absolute frozen source/model/state/schedule/primal/split/topology and per-anchor lineage identities; five fresh CUDA processes produce ten captures with max diff 1.1920928955078125e-07 and exact signs; all 11 integrity cases reject. Claim remains capture correctness/ownership only; performance_claimed=false and tir_admitted=false."
+  ],
+  "validation": [
+    {
+      "cmd": "pytest targeted: 24 passed",
+      "result": "pass"
+    },
+    {
+      "cmd": "pytest full: 1376 passed, 3 skipped, 6 warnings",
+      "result": "pass"
+    },
+    {
+      "cmd": "v2 artifact root replay",
+      "result": "pass"
+    },
+    {
+      "cmd": "integrity probe 11/11 rejected",
+      "result": "pass"
+    },
+    {
+      "cmd": "Black, scoped Mypy, scoped Pylint 10.00, diff check, DocOps lint",
+      "result": "pass"
+    }
+  ],
+  "limitations": [
+    "B4-B1 typed IR, B4-B2 TIR, performance, memory and ASPLOS-ready claims remain closed pending Round 2 approval"
+  ],
+  "risks": [
+    "Auditor must independently test coordinated all-run rewrites and verify absolute identity is code/protocol/source bound rather than trusting executor summaries"
+  ],
+  "open_questions": [
+    "Does v2 close F1 and support approval of B4-B0 capture correctness plus admission only to B4-B1 typed pure-PyTorch reference?"
+  ],
+  "md_sha256": "10b87672b29292e2b151359e25e3cdfedfcafb8463123015ef598af40452df7f"
+}

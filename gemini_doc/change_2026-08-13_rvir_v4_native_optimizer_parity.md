@@ -1,0 +1,79 @@
+# RVIR-v4 V4-2D Native Optimizer Parity 修改记录
+
+日期：2026-08-13
+
+## 目标
+
+在不读取production期望step、不调用provider的条件下，从V4-2C native pre-state独立执行固定ResNet2B
+的10次lower evaluation和9次Adam update，再将结果与V4-2B冻结GPU真值逐step比较。该切片只验证
+mutation语义，不执行solver copy-out，不开启B2计时。
+
+## 实现
+
+- 新增typed native optimizer step/trace/parity合同；
+- 固定两组Adam参数与α/β学习率`0.01/0.05`、每次update后`0.98`指数衰减；
+- 每轮使用V4-2C external intermediate bounds、dense α/β/split执行native CROWN lower；
+- loss严格使用production `reduction_sum`对应的`-lower.sum()`；update后α投影到`[0,1]`、β投影到
+  `[0,+∞)`；
+- executor签名不接收production trace；reference trace只在独立comparator中逐step映射为dense状态；
+- scope、policy、10/9 cardinality、LR schedule、tensor inventory、shape/dtype/finite/sign/allclose均
+  fail closed。
+
+## 当前边界
+
+capture-ready实测10/10 step全部allclose且sign exact：跨production GPU真值的lower/α/β全局最大绝对
+误差分别为`4.0531158447265625e-06`、`1.4662742614746094e-05`、
+`3.986060619354248e-07`，均低于`atol=rtol=2e-4`。native trace hash=
+`4e173c22...bc76`，parity hash=`a6b5df97...3959`。
+
+- focused RVIR-v4=`36 passed`；full=`1167 passed, 3 skipped`；
+- mypy两文件clean；Pylint两文件=`10.00/10`；
+- lower同步重签漂移与scope漂移均fail closed。
+
+formal artifact、完整同步重签名tamper及post-state atomic copy-out仍待后续门禁；因此V4-2D状态仅为
+`IMPLEMENTED-STEP-PARITY / FORMAL-ARTIFACT-PENDING`，`optimizer_replacement_admitted=false`、
+`b2_same_solver_timing_admitted=false`、`performance_claimed=false`保持不变。
+
+## Formal Runner 准备（同日）
+
+新增`run_rvir_v4_native_optimizer_artifact.py`：从V4-2C正式artifact重新校验source manifest/capture、
+ONNX digest和pre-state mapping，再独立执行native loop，输出逐step native trace、parity、summary、
+topology、replay stdout、源码revision与文件inventory。replay会重新执行10/9 loop并逐项比较，不信任
+序列化摘要。capture-ready focused=`4 passed`，mypy四文件clean，Pylint runner/test=`10.00/10`。
+
+runner需先进入clean commit再生成正式artifact；本段不改变V4-2D pending状态。
+
+## Tamper Probe 准备（同日）
+
+新增六类攻击：topology、initial upper-α、production step lower、production step α、optimizer policy、
+recorded parity。lower/α攻击同时更新独立call view，所有capture攻击均重算适用tensor/step/trace/
+snapshot hash、V4-2C source manifest与V4-2D outer manifest；direct semantic builder仍必须拒绝。
+临时报告实测6/6 outer provenance与semantic mutation两层fail closed；mypy clean，Pylint=`10.00/10`。
+probe先进入clean commit，再生成源码digest绑定的正式报告。
+
+## Replay Determinism 修正（同日）
+
+首次加入全量回归后，formal tamper test出现一次original replay假阴性：所有`2e-4` parity门禁仍通过，
+但CPU多线程reduction的末位漂移改变native tensor content hash，exact serialized replay因此拒绝。修正为
+evidence build期间临时固定`torch.set_num_threads(1)`并在结束后恢复调用方线程数；没有放宽数值容差。
+同一capture连续5次重建的native trace/parity/summary三组hash完全唯一（`unique=1`），lower/α/β最大
+误差=`4.5300e-06/1.4663e-05/3.9861e-07 <=2e-4`。旧artifact需由该clean修正提交重新生成。
+
+## Formal Closure（同日）
+
+- single-thread deterministic runner commit=`bba42ac`；artifact路径=
+  `artifacts/rvir-v4-native-optimizer/resnet2b-core-step-parity-v1/`；
+- original replay exit 0；10 evaluations/9 updates、provider callback=`0`，10/10 step allclose/sign exact；
+- lower/α/β最大绝对误差=`4.5299530029296875e-06`/
+  `1.4662742614746094e-05`/`3.986060619354248e-07 <=2e-4`；
+- native trace/parity/summary hash=`d53cc7fc...7c8c`/`2a74e735...2c44`/`0b28f9c9...b8aa`；
+  artifact manifest SHA256=`0b4ae1a8...8493`；
+- tamper report=`artifacts/rvir-v4-native-optimizer/resnet2b-core-step-parity-v1-tamper-report.json`，
+  topology/initial upper-α/production lower/production α/policy/recorded parity六类攻击均重算适用内部hash、
+  source/outer manifest，outer provenance与direct semantic两层6/6拒绝；报告SHA256=
+  `47af58e1...5e36`，report hash=`0e12b2d6...106c`；
+- formal focused=`5 passed`、expanded RVIR-v4=`38 passed`、full=`1169 passed, 3 skipped`；mypy六文件
+  clean，Pylint六文件=`10.00/10`。
+
+V4-2D由此以`VALIDATED-NATIVE-STEP-PARITY`关闭。该关闭证明独立mutation语义，但没有将terminal
+native state原子写回provider容器；下一门禁只允许V4-2E atomic copy-out。V4-2/B2与性能claim仍关闭。

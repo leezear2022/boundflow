@@ -1,0 +1,121 @@
+{
+  "atomic_rollback_probe_count": 1,
+  "candidate_backward_count": 135,
+  "candidate_forward_count": 150,
+  "fresh_process_count": 10,
+  "general_maximum_absolute_difference": 5.0067901611328125e-06,
+  "optimizer_maximum_absolute_difference": 2.562999725341797e-06,
+  "pair_count": 5,
+  "pair_metrics": [
+    {
+      "allclose": true,
+      "general_element_count": 379522,
+      "general_maximum_absolute_difference": 4.76837158203125e-06,
+      "metric_hash": "bdc66162172b1b02b0ad9269de0c18aad26d351a5714ff15e04478586aa8a3aa",
+      "optimizer_element_count": 46440,
+      "optimizer_maximum_absolute_difference": 2.5033950805664062e-06,
+      "pair_index": 0,
+      "sign_exact": true
+    },
+    {
+      "allclose": true,
+      "general_element_count": 379522,
+      "general_maximum_absolute_difference": 4.410743713378906e-06,
+      "metric_hash": "5fa36b8f30c256ea740130867e32e604998d08edcdd4234c01d806242dffd227",
+      "optimizer_element_count": 46440,
+      "optimizer_maximum_absolute_difference": 2.4437904357910156e-06,
+      "pair_index": 1,
+      "sign_exact": true
+    },
+    {
+      "allclose": true,
+      "general_element_count": 379522,
+      "general_maximum_absolute_difference": 4.410743713378906e-06,
+      "metric_hash": "292267281ae46c7a678cc1019fe03074feeed0e409426c9a03f83d1e94f8a741",
+      "optimizer_element_count": 46440,
+      "optimizer_maximum_absolute_difference": 2.562999725341797e-06,
+      "pair_index": 2,
+      "sign_exact": true
+    },
+    {
+      "allclose": true,
+      "general_element_count": 379522,
+      "general_maximum_absolute_difference": 5.0067901611328125e-06,
+      "metric_hash": "f901b754698fd0264d6b37a9f138e4138ce3c4d32f304c2820e84bfbad7d3d8c",
+      "optimizer_element_count": 46440,
+      "optimizer_maximum_absolute_difference": 2.5033950805664062e-06,
+      "pair_index": 3,
+      "sign_exact": true
+    },
+    {
+      "allclose": true,
+      "general_element_count": 379522,
+      "general_maximum_absolute_difference": 3.933906555175781e-06,
+      "metric_hash": "ac10979e739de36ee53646a865541c6504829fafa19180245839dbbf5fa9e77b",
+      "optimizer_element_count": 46440,
+      "optimizer_maximum_absolute_difference": 2.5033950805664062e-06,
+      "pair_index": 4,
+      "sign_exact": true
+    }
+  ],
+  "performance_claimed": false,
+  "run_order": [
+    [
+      0,
+      0,
+      "provider"
+    ],
+    [
+      0,
+      1,
+      "bridge"
+    ],
+    [
+      1,
+      0,
+      "bridge"
+    ],
+    [
+      1,
+      1,
+      "provider"
+    ],
+    [
+      2,
+      0,
+      "provider"
+    ],
+    [
+      2,
+      1,
+      "bridge"
+    ],
+    [
+      3,
+      0,
+      "bridge"
+    ],
+    [
+      3,
+      1,
+      "provider"
+    ],
+    [
+      4,
+      0,
+      "provider"
+    ],
+    [
+      4,
+      1,
+      "bridge"
+    ]
+  ],
+  "schema_version": "boundflow.mr5-multi-conv-production-bridge-formal/v1",
+  "site_count": 3,
+  "source_commit": "3e1a70933910c009019c59de4f44d233a75f7950",
+  "status": "VALIDATED-MR5-MULTI-CONV-PRODUCTION-BRIDGE-CORRECTNESS",
+  "summary_hash": "293c5c8b902cb7bfa813da03f3b4519a81dab6059b166264f3d98f68f616a718",
+  "timing_preregistration_open": true,
+  "timing_recorded": false
+}

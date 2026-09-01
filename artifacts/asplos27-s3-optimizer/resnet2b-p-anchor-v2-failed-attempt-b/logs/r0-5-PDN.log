@@ -1,0 +1,3 @@
+S3 optimizer worker replicate=0 order=PDN N=103566596.5 D=61910567.0 P=31494068.0 performance_claimed=false
+terminate called after throwing an instance of 'tvm::runtime::InternalError'
+  what():  Check failed: index > 0 (-15734508 vs. 0) : trying to free things that has not been allocated

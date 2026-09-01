@@ -1,0 +1,41 @@
+{
+  "rows": [
+    {
+      "native_preactivation": "17",
+      "provider_activation": "/input-4",
+      "provider_preactivation": "/input",
+      "provider_start_node": "/49"
+    },
+    {
+      "native_preactivation": "19",
+      "provider_activation": "/input-12",
+      "provider_preactivation": "/input-8",
+      "provider_start_node": "/49"
+    },
+    {
+      "native_preactivation": "23",
+      "provider_activation": "/input-16",
+      "provider_preactivation": "/39",
+      "provider_start_node": "/49"
+    },
+    {
+      "native_preactivation": "25",
+      "provider_activation": "/input-24",
+      "provider_preactivation": "/input-20",
+      "provider_start_node": "/49"
+    },
+    {
+      "native_preactivation": "28",
+      "provider_activation": "/45",
+      "provider_preactivation": "/44",
+      "provider_start_node": "/49"
+    },
+    {
+      "native_preactivation": "31",
+      "provider_activation": "/48",
+      "provider_preactivation": "/input-28",
+      "provider_start_node": "/49"
+    }
+  ],
+  "topology_hash": "9be361625e492b1401a402fd19ad5d80ac06a977c74f137c7563e96de06bca35"
+}

@@ -1,0 +1,123 @@
+{
+  "anchors": [
+    "semantic-active-beta-gemm-14",
+    "performance-conv-8-candidate"
+  ],
+  "atol": 0.0002,
+  "base_protocol": {
+    "anchor_count_per_run": 2,
+    "code_revision": {
+      "boundflow/runtime/crown_ibp.py": "cddbb8052f619c73fd73f918269650359ba4932c2ccda6a569c73ff60930e56c",
+      "boundflow/runtime/fsg4_b3_terminal_optimizer_schedule.py": "b53c2ccfc3c5c128b677e613aafed5bb1ecf38e05d3551141d07a9a0871794b8",
+      "boundflow/runtime/fsg4_b4b_production_region_capture.py": "bfb8e8f1783c2ed25dfff0cd55eedc424eb83c551931113f5f8fb9f689638493",
+      "scripts/probe_fsg4_b4b_five_fresh_tamper.py": "a5f047616a6673f9fe0cc2a023020261cb9afd433a8889cf6782bb62875f5ba0",
+      "scripts/run_fsg4_b4b_capture_worker.py": "dac03f6ee633ab541d0df480cef11ab70264ec33a4728849852ee0daff8fc2c0",
+      "scripts/run_fsg4_b4b_five_fresh_artifact.py": "101e158f6c71730b803b453cdc461d6de436c026eae012dc231411363ad058ce"
+    },
+    "default_cuda_stream_required": true,
+    "direct_semantic_atol": 0.0002,
+    "direct_semantic_rtol": 0.0002,
+    "evaluation_ordinal": 0,
+    "frozen_source_identity": {
+      "anchors": {
+        "performance-conv-8-candidate": {
+          "anchor_hash": "3063894b5b0520b3a873e2960524e06cbd3a70cf57316cdc3d7d47e0700a3a9b",
+          "lineage_hash": "47d1765d021d62cc3e3406654aadd59e8284ebd24e4077454ae0e2d8a0f59ec0",
+          "round_trip_receipt_hashes": {
+            "alpha/%2Finput-24/%2F49": "73479cdd8e084c8ddb8206dec185c15ca8b434a0ec0075ee0f4bb55f66d548d8",
+            "beta/%2Finput-20/0/value": "698bcdd537fde330b3ba69ebed13a3bbebde9caa9d395eb5e0696a65c8f24f1d"
+          },
+          "source_tensor_hashes": {
+            "alpha/%2Finput-24/%2F49": "c886c34b3b2b2d692f48aa5b4cbfa2e94f5c4577368d6d0bde709cdedbc12419",
+            "alpha_layout/%2Finput-24/feature_index/0": "cb9b04c511a5e2c838768c630f52a5f194566ef3ca99a589bc1caafbbb842d98",
+            "alpha_layout/%2Finput-24/feature_index/1": "5833fc3baae56b93b256638c58594f455610183976a2d48a603cf9a87aabd141",
+            "alpha_layout/%2Finput-24/feature_index/2": "35ec69f55f7ea1f377747aeea63bcbbda17db71f88fadb02142e216e1a73958a",
+            "alpha_layout/%2Finput-24/feature_shape": "b5e9e2a8e35a3bce0a4cafddf492ede29b04a3587c245d52d73c28a06605b879",
+            "beta/%2Finput-20/0/location": "6b9a1caf9bd833a963b559fd503671dccf8bec481afccd64e6b63334fdb7fce0",
+            "beta/%2Finput-20/0/sign": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5",
+            "beta/%2Finput-20/0/value": "a8996a25f846d01499084928153e8f9cb0d63a7b32f4ff1769d64ff51ad952b5"
+          }
+        },
+        "semantic-active-beta-gemm-14": {
+          "anchor_hash": "62e56f848d3237f5d144b5e0f84a488b92dc454ddbccf7c9315928648a5eb2ae",
+          "lineage_hash": "959398ff4013742a1d7d8454f7f0eb28e642949adefae927fa605db6a589672b",
+          "round_trip_receipt_hashes": {
+            "alpha/%2F48/%2F49": "c96fa510c12ddd7116b4f436648d5cfcb91690017ad3cfa2393e299c7d52aa49",
+            "beta/%2Finput-28/0/value": "a9d29b1d7863a8f2bceda6119b3e74eef8854d65fabc20eb1ef2aaf2c3e7f969"
+          },
+          "source_tensor_hashes": {
+            "alpha/%2F48/%2F49": "81d807edf887dbdddaea2000b4e360e0c2954ae31620c3063fddc555798ae0dd",
+            "alpha_layout/%2F48/feature_index/0": "f1a18154002639664110cccb4a1d6c8664168f21edaeaaaf4a17179a546ff7c6",
+            "alpha_layout/%2F48/feature_shape": "f6a3b6597e45ef2d039118370d773aff121eb3dcd5761e7e33a587b1d35f83ab",
+            "beta/%2Finput-28/0/location": "f89af9a3962c31360fb00e340c0c9bb8a5b8fcb7f2cd0d623643a1834765d6d2",
+            "beta/%2Finput-28/0/sign": "ec37d37a39b0113ef9e7f405155f2ef53160fa67db055c799813a92523036894",
+            "beta/%2Finput-28/0/value": "82c14331f86c999d4ad98cd46b1b4e945b2f1e3b4362ae34121ee8bc388d9590"
+          }
+        }
+      },
+      "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+      "primal_graph_hash": "02636a01e4b5a2d1f759dc7748bf80b3303efff2d5697790966f8e93679213e8",
+      "schedule_hash": "69af2bb2346f70bf690438b57b0e651c7f491d06007adfc1140538be79d60659",
+      "source_capture_sha256": "f42229dd06be8521865d14af4cc51450ec8bec4e792934b457c276aad50126dc",
+      "source_state_hash": "e3587dd9a8010d34bb65c1e415bb444917b48e23679855b2fe6ac54d23b4bff0",
+      "split_state_hash": "2a0c665bc72ca0edcb3e16fa23133f511a6ee0f4ba6cd58a87a2eeac523fe697",
+      "topology_hash": "9be361625e492b1401a402fd19ad5d80ac06a977c74f137c7563e96de06bca35"
+    },
+    "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+    "performance_claimed": false,
+    "process_isolation": "one-fresh-subprocess-per-capture",
+    "protocol_hash": "e5a0f13b84719478e267ab14ee903913aa1987875c1ec11bd2829c57e4e4ae8f",
+    "run_count": 5,
+    "run_indices": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "schema_version": "boundflow.fsg4-b4b0-five-fresh-protocol/v2",
+    "sign_exact": true,
+    "source_alias_pairs_required": [],
+    "source_capture_sha256": "f42229dd06be8521865d14af4cc51450ec8bec4e792934b457c276aad50126dc",
+    "source_git_head": "4a174235f127f66608a738a3f1a5dee336d719d1",
+    "tir_admitted": false
+  },
+  "base_protocol_hash": "e5a0f13b84719478e267ab14ee903913aa1987875c1ec11bd2829c57e4e4ae8f",
+  "code_revision": {
+    "boundflow/runtime/crown_ibp.py": "cddbb8052f619c73fd73f918269650359ba4932c2ccda6a569c73ff60930e56c",
+    "boundflow/runtime/fsg4_b3_terminal_optimizer_schedule.py": "b53c2ccfc3c5c128b677e613aafed5bb1ecf38e05d3551141d07a9a0871794b8",
+    "boundflow/runtime/fsg4_b4b1_reference_capture.py": "351352b7d7b6d1162d942698b0f8ff265a43cd68e14e633ce28f398db4b726a1",
+    "boundflow/runtime/fsg4_b4b_production_region_capture.py": "bfb8e8f1783c2ed25dfff0cd55eedc424eb83c551931113f5f8fb9f689638493",
+    "scripts/probe_fsg4_b4b1_reference_capture_integrity.py": "4615d485dd49ac560532fe0f7347fec5c1987ed4ab5328303c3dcbb7a9cbb52c",
+    "scripts/run_fsg4_b4b1_reference_capture_worker.py": "2b93595e88b9203d34bd6c5115077f7cb41e67647b12a27024fe8a90ca4283af",
+    "scripts/run_fsg4_b4b1_reference_five_fresh_artifact.py": "a57db1777c29631c13a01685b639e5603ef9c7440a87eee7b0757e2d58f913c4",
+    "scripts/run_fsg4_b4b_capture_worker.py": "dac03f6ee633ab541d0df480cef11ab70264ec33a4728849852ee0daff8fc2c0",
+    "scripts/run_fsg4_b4b_five_fresh_artifact.py": "101e158f6c71730b803b453cdc461d6de436c026eae012dc231411363ad058ce"
+  },
+  "evaluation_ordinal": 0,
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "performance_claimed": false,
+  "process_isolation": "one-fresh-subprocess-per-capture",
+  "protocol_hash": "a28d465274ff25ea704a21f376c45700f731983c0726e06aae3d13d424013406",
+  "required_amendment_values": [
+    "incoming_lower_bias",
+    "operator_bias",
+    "output_lower_a_gradient",
+    "output_bias_gradient",
+    "sparse_mapping_tensors"
+  ],
+  "rtol": 0.0002,
+  "run_count": 5,
+  "run_indices": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "schema_version": "boundflow.fsg4-b4b1-reference-five-fresh-protocol/v1",
+  "sign_exact": true,
+  "source_capture_sha256": "f42229dd06be8521865d14af4cc51450ec8bec4e792934b457c276aad50126dc",
+  "source_git_head": "4a174235f127f66608a738a3f1a5dee336d719d1",
+  "tir_admitted": false
+}

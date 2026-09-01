@@ -1,0 +1,19 @@
+{
+  "attack_count": 12,
+  "rejected": [
+    "candidate-lower",
+    "candidate-gradient",
+    "native-gradient",
+    "module-hash",
+    "launch-count",
+    "scratch-count",
+    "sign-bytes",
+    "saved-dense-a",
+    "warm-allocation",
+    "compiled-vjp",
+    "custom-vjp",
+    "dlpack-exact"
+  ],
+  "rejected_count": 12,
+  "status": "tamper-passed"
+}

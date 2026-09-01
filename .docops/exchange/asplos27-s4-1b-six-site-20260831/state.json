@@ -1,0 +1,18 @@
+{
+  "task": "asplos27-s4-1b-six-site-20260831",
+  "title": "ASPLOS27 S4-1B six-site production correctness",
+  "status": "closed",
+  "round": 1,
+  "executor": "codex",
+  "auditor": "external-model",
+  "approved_round": 1,
+  "docs": [
+    "asplos27-s4-1b-six-site-20260831/request",
+    "asplos27-s4-1b-six-site-20260831/r001/delivery",
+    "asplos27-s4-1b-six-site-20260831/r001/audit",
+    "asplos27-s4-1b-six-site-20260831/closure"
+  ],
+  "rev": 6,
+  "created": "2026-08-31T05:13:18Z",
+  "updated": "2026-08-31T11:53:19Z"
+}

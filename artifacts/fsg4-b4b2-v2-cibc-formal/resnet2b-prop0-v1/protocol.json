@@ -1,0 +1,52 @@
+{
+  "baseline": "public-pytorch-sparse-reconstruction-and-autograd-v1",
+  "bootstrap_lower_gate": 1.0,
+  "bootstrap_samples": 10000,
+  "bootstrap_seed": 20260824,
+  "calibration_repeats": 10,
+  "calibration_warmups": 3,
+  "candidate": "triton-horizontal-fused-forward-backward-v2",
+  "capture_identity": {
+    "manifest_hash": "67ace9e4a28c84306ee881a41aad1f16d9eddb7e80471ad76b030d691d9b25f6",
+    "manifest_sha256": "a52a26ab081bbeab816c1486fffd3568e6774ed6c9ea7619dee3a2e4ac0b86d9",
+    "relative_path": "artifacts/fsg4-b4b1-reference-five-fresh/resnet2b-prop0-v1",
+    "run_payload_sha256": [
+      "5fafb48689b0579a22790974c661f215b651025c05da76b31d21b981c973c587",
+      "149261f60dd218333266150c3ede4abad7eaf0c451c391e7c832ed3c8826613c",
+      "b9bcc3a211eb53bb1aa58a91e397bc911402105471f234fe48df2e3261d2d91b",
+      "2d3cef3a501d28eb5f56fdbdeb246522d85356afe506aed2dd357ae12917d6ac",
+      "869ea8be94a98c77bb510f8bfd3daf58424d32113304529264cda2caddb42ddd"
+    ]
+  },
+  "code_revision": {
+    "boundflow/runtime/fsg4_b4b2_cibc_triton.py": "91235f022cf9e79db16649f409f5145fbba231b4ef4113e453b096c0910bdb8d",
+    "gemini_doc/BOUNDFLOW_FSG4_B4B2_V2_CIBC_PARITY_FUSION_PLAN_2026_08_24.md": "e531f4386c3ae00160b82da8763c56ec9c6a8d18ad0a7288c4251cd808de8aa9",
+    "scripts/run_fsg4_b4b2_v2_cibc_artifact.py": "06a32d0f317d212c0e4c2f2da0b347cd3ef25b04916a7f03577c55ec10774ba4",
+    "scripts/run_fsg4_b4b2_v2_cibc_worker.py": "af7ae2e4ddec4b344fe6b51f6d5cb0bb7c866c41a0e8d5105cd3f2ea8df5cf61",
+    "tests/test_fsg4_b4b2_cibc_triton.py": "c27ea7a9801b1294b508bae8741b09996aaa7d852befaed4983f8e3612776de2"
+  },
+  "compile_and_calibration_excluded": true,
+  "config_count": 12,
+  "correctness_worker_count": 5,
+  "memory_ratio_gate": 1.05,
+  "parity_element_count": 12810,
+  "parity_tolerance": 0.0002,
+  "performance_claimed": false,
+  "protocol_hash": "84f1cf6cbda13aee9f77fac259e13686e202e4c4fd1d54be48607536f848527b",
+  "research_target": 2.0,
+  "schema_version": "boundflow.fsg4-b4b2-v2-cibc-protocol/v1",
+  "source_git_head": "77a15ebec0b0deb3798ad35553bde53c8295616b",
+  "speedup_geomean_gate": 1.2,
+  "timing_orders": [
+    "AB",
+    "BA",
+    "AB",
+    "BA",
+    "AB",
+    "BA"
+  ],
+  "timing_pairs": 30,
+  "timing_warmups": 10,
+  "timing_worker_count": 6,
+  "worst_worker_gate": 0.98
+}

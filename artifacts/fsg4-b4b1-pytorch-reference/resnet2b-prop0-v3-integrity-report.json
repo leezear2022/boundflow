@@ -1,0 +1,41 @@
+{
+  "case_count": 2,
+  "performance_claimed": false,
+  "probe_code_sha256": "154c90153d9fd2ac461957a1401c0d5184a59278dd239e956889fd95f731648b",
+  "reference_code_revision": {
+    "boundflow/ir/differentiable_lower_region.py": "7ed6560566e7ff55e4989a0b2da95a70b9f03f52043bc96d7d913af0fae913c8",
+    "boundflow/runtime/fsg4_b4b1_pytorch_reference.py": "b9cb7c27a09b5a5987c6eba5583ba74fa70865b32539de827f73f877ba8dfecd",
+    "boundflow/runtime/fsg4_b4b1_reference_capture.py": "351352b7d7b6d1162d942698b0f8ff265a43cd68e14e633ce28f398db4b726a1",
+    "boundflow/runtime/fsg4_b4b_production_region_capture.py": "bfb8e8f1783c2ed25dfff0cd55eedc424eb83c551931113f5f8fb9f689638493",
+    "scripts/run_fsg4_b4b1_pytorch_reference_artifact.py": "18c7854f770ef769e90aac26ecf7e661297e946e3fa4b6d4f53e9cc88ab652ec",
+    "scripts/run_fsg4_b4b1_reference_five_fresh_artifact.py": "a57db1777c29631c13a01685b639e5603ef9c7440a87eee7b0757e2d58f913c4"
+  },
+  "rejected_count": 2,
+  "report_hash": "50a12f577d60a8bf115ee8c40b248f88ecd451715a4b0b4a2f420dedc4aec964",
+  "rows": [
+    {
+      "all_runs_rewritten": true,
+      "case": "all-run-incoming-bias-fully-resigned",
+      "derived_protocol_resigned": true,
+      "error": "FSG4/B4-B1 numerical semantics differ: semantic-active-beta-gemm-14",
+      "inner_capture_hashes_resigned": true,
+      "rejected_by_numerical_reference": true,
+      "source_manifest_resigned": true,
+      "source_summary_resigned": true
+    },
+    {
+      "all_runs_rewritten": true,
+      "case": "all-run-output-adjoint-fully-resigned",
+      "derived_protocol_resigned": true,
+      "error": "FSG4/B4-B1 numerical semantics differ: semantic-active-beta-gemm-14",
+      "inner_capture_hashes_resigned": true,
+      "rejected_by_numerical_reference": true,
+      "source_manifest_resigned": true,
+      "source_summary_resigned": true
+    }
+  ],
+  "schema_version": "boundflow.fsg4-b4b1-pytorch-reference-integrity/v1",
+  "source_artifact_manifest_hash": "67ace9e4a28c84306ee881a41aad1f16d9eddb7e80471ad76b030d691d9b25f6",
+  "source_git_head": "e711e991bed54a16c881a2f2bbeb18d71de3c210",
+  "tir_admitted": false
+}

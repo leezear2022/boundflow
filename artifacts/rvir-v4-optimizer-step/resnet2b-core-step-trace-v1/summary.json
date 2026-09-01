@@ -1,0 +1,46 @@
+{
+  "adjacent_mutable_change_counts": [
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7
+  ],
+  "all_state_sources_cuda": true,
+  "b2_same_solver_timing_admitted": false,
+  "call_count": 24,
+  "core_count": 1,
+  "evaluation_count": 10,
+  "mutation_policy_hash": "d36c40126cb8e518c095203381ddc4365ff29198167dde47a3be7af71cc3c679",
+  "optimizer_replacement_admitted": false,
+  "optimizer_step_trace_count": 1,
+  "performance_claimed": false,
+  "phase_call_counts": {
+    "alpha_optimize": 1,
+    "beta_split": 11,
+    "initial_crown": 12,
+    "unclassified": 0
+  },
+  "solver_status": "verified",
+  "state_tensor_counts": [
+    24,
+    24,
+    24,
+    24,
+    24,
+    24,
+    24,
+    24,
+    24,
+    24
+  ],
+  "status": "validated-step-capture-schema",
+  "summary_hash": "8ae8be3fc53f1571109f265ea96a9ddacf806c3c5596459574517df2783505b7",
+  "trace_hash": "fa070bb09265337b297e18fd38ff342ffa657fad75c447f340789a1cb5cc31f4",
+  "update_count": 9,
+  "workload_id": "cifar10_resnet:000"
+}

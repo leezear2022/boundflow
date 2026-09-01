@@ -1,0 +1,36 @@
+{
+  "all_beta_split_calls_expose_plural_sparse_betas": true,
+  "b2_same_solver_timing_admitted": false,
+  "call_count": 24,
+  "core_alpha_feature_index_tensor_counts": [
+    16
+  ],
+  "core_alpha_feature_shape_tensor_counts": [
+    6
+  ],
+  "core_beta_value_tensor_counts": [
+    6
+  ],
+  "core_changed_mutation_counts": [
+    7
+  ],
+  "core_count": 1,
+  "core_history_entry_counts": [
+    36
+  ],
+  "core_mutation_receipt_counts": [
+    12
+  ],
+  "frozen_state_evaluation_admitted": false,
+  "optimizer_replacement_admitted": false,
+  "performance_claimed": false,
+  "phase_call_counts": {
+    "alpha_optimize": 1,
+    "beta_split": 11,
+    "initial_crown": 12,
+    "unclassified": 0
+  },
+  "status": "validated_corrected_capture",
+  "summary_hash": "9d1c71b02c42852d0e1a03ffec831b0a43a4c8d61003c125ad05371993d1dbdb",
+  "workload_id": "cifar10_resnet:000"
+}

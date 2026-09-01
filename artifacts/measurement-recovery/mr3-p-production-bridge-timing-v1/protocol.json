@@ -1,0 +1,95 @@
+{
+  "absolute_peak_memory_ratio_gate": 1.05,
+  "bootstrap_lower_gate": 1.0,
+  "bootstrap_samples": 10000,
+  "bootstrap_seed": 20260826,
+  "code_revision": {
+    "boundflow/runtime/mr3_production_bridge_timing.py": "03fe5d75986742b23ae35f2ba5007a0c64846e549480167b422373c014de0c29",
+    "scripts/probe_mr3_production_bridge_timing_tamper.py": "7cac2c96b0ef432cfaaca80c7f60a5c7489999734ff0d1faef0b8b2127261d3b",
+    "scripts/run_mr3_production_bridge_timing_formal.py": "1a53e0bfab7354669a79bc4614a4f00ba31bcda2e4255ef02fc0bc39bc22d976",
+    "scripts/run_mr3_production_bridge_timing_worker.py": "71f9240b501aca61139c5bbd24dc19df6d3e1e4e1be6c7a535512b198ad55ed7"
+  },
+  "correctness_identity": {
+    "manifest_file_sha256": "501814f7d9b4b95aa64a42616e339506326d6a7b18157aa68eb7b97fe839870b",
+    "manifest_hash": "6eb22a7ae1d778d293b24b8694330226fc2a888a5b63d84a0a114b4f495371c1",
+    "replay_status": "VALIDATED-MR3-P-PRODUCTION-BRIDGE-CORRECTNESS",
+    "summary_file_sha256": "b38b1d926e07cca57ba29b026922b26da1b7c4258cfae59bd079c4f27338caed"
+  },
+  "diagnostic_clock": "same-current-stream-cuda-event",
+  "generator_commit": "5e7751c6e4efffa99e723744ef08dd67f2ce5c03",
+  "headline_clock": "host-perf-counter-ns",
+  "host_geomean_gate": 1.05,
+  "model_name": "resnet_2b.onnx",
+  "pair_count": 6,
+  "performance_claimed": false,
+  "property_name": "prop_0_eps_0.008.vnnlib",
+  "protocol_hash": "1073e21a6ba173af38e251b811905c8201f589ab719770425d2978f500ba6d35",
+  "python_name": "python",
+  "resume_policy": "reject-any-existing-artifact",
+  "run_order": [
+    [
+      0,
+      0,
+      "provider"
+    ],
+    [
+      0,
+      1,
+      "bridge"
+    ],
+    [
+      1,
+      0,
+      "bridge"
+    ],
+    [
+      1,
+      1,
+      "provider"
+    ],
+    [
+      2,
+      0,
+      "provider"
+    ],
+    [
+      2,
+      1,
+      "bridge"
+    ],
+    [
+      3,
+      0,
+      "bridge"
+    ],
+    [
+      3,
+      1,
+      "provider"
+    ],
+    [
+      4,
+      0,
+      "provider"
+    ],
+    [
+      4,
+      1,
+      "bridge"
+    ],
+    [
+      5,
+      0,
+      "bridge"
+    ],
+    [
+      5,
+      1,
+      "provider"
+    ]
+  ],
+  "schema_version": "boundflow.mr3-production-bridge-timing-protocol/v1",
+  "source_commit": "2d788ad6608d7d4da9ac9937efa3cdeb11d36f27",
+  "worker_count": 12,
+  "worst_pair_gate": 0.98
+}

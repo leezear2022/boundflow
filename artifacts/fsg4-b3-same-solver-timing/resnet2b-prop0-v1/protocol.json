@@ -1,0 +1,272 @@
+{
+  "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+  "auto_lirpa_commit": "5a098e8f9fb5786a428a024981d833d303921f2d",
+  "block_count": 6,
+  "code_revision": {
+    "boundflow/runtime/fsg3_same_solver_timing.py": "d123711b682bb7ba78d75fab464c00ebfd79c00f67d548a606b59cfe1554205e",
+    "boundflow/runtime/fsg4_b3_device_atomic_commit.py": "49b77fbe924ab36e6590bef1ac2813a2a8cdd96eeefc1af497dbd6672ad0f1da",
+    "boundflow/runtime/fsg4_b3_device_live_return.py": "722a06f0fc0327a82efd8f354eea6ca8ed0dfc5a531645ca23ec73190f86ba6e",
+    "boundflow/runtime/fsg4_b3_explicit_counters.py": "b54f1ea71f3e7fa545f2b065edbcaa5ad774e0ccf7916b3d63437bc17afbbf0b",
+    "boundflow/runtime/fsg4_b3_prepared_core.py": "3a52209ed45a393e68458a2ace7d666766da6f440ac0e09bb629fa657605a04d",
+    "boundflow/runtime/fsg4_b3_same_solver_timing.py": "8eec7f67cb15a83d04f7121016d3511f3fa642940c00c1fd5b04a6a825749f3b",
+    "boundflow/runtime/fsg4_b3_terminal_optimizer_schedule.py": "0ac4b72847399e1dbe53a7d89dfd463f52c061c932d4aed93f3b6459b266e778",
+    "boundflow/runtime/rvir_v4_atomic_copy_out.py": "00bb8d88ff8a21610dcbce2d8ae2a7c97a6c192fbf093c4f5c4028234756c170",
+    "boundflow/runtime/rvir_v4_live_return.py": "a7ad85c24f42b41d12871520c6e40212b8d25f0dabadd7dee0cd66f2bb451856",
+    "boundflow/runtime/rvir_v4_native_backward_export.py": "0222c8ae74a0e922ac486fb9f4284c1d5b16f9f534cc0922a31c432056c68b76",
+    "boundflow/runtime/rvir_v4_native_kfsb.py": "10b64b480b058107d12729f713aacf82356af8885458be5f1916639178062cf8",
+    "boundflow/runtime/rvir_v4_native_optimizer.py": "5bc7138101b5b9ee38677218c7921717057e1cee0ccd1895c2a1977e137348df",
+    "scripts/probe_fsg4_b3_same_solver_artifact_tamper.py": "79e505abf19f6c67c8021ade1477e46c6df389825e2775fea5c39cbfa993e847",
+    "scripts/run_fsg3_same_solver_experiment.py": "a03cf1112c0c8322d7dfe36ce32b2f8e597f60e2bd3cce2c8fb12b5e09088be7",
+    "scripts/run_fsg3_same_solver_timing.py": "92b8a05d1c78c60e4b47de6853b361ba8c6ae6c1909546a42868b89e498f25b6",
+    "scripts/run_fsg4_b3_counter_diagnostic.py": "44f8a71eae3052ac56980262c607f3cec81d659b76791b75eb7359777200eb21",
+    "scripts/run_fsg4_b3_same_solver_experiment.py": "3a3c5890a9a8d8dc200ee64cc45b1c779a3a9ba45dfcdecf8d60564e796b61b0",
+    "scripts/run_fsg4_b3_same_solver_timing.py": "e6a3f0136aed87701e94d090b06e80ae9d0153e8402278889a43c22b6dfb201f",
+    "scripts/run_rvir_v4_live_return_capture.py": "7424a78d6536982cdb315b8b31691edb2c3adf3d49feed6850132ddaa8956dbd"
+  },
+  "control_counter_instrumentation": false,
+  "expected_sequence": [
+    [
+      0,
+      0,
+      "B0",
+      "control"
+    ],
+    [
+      0,
+      1,
+      "B0",
+      "profile"
+    ],
+    [
+      0,
+      2,
+      "B2",
+      "control"
+    ],
+    [
+      0,
+      3,
+      "B2",
+      "profile"
+    ],
+    [
+      0,
+      4,
+      "B3",
+      "control"
+    ],
+    [
+      0,
+      5,
+      "B3",
+      "profile"
+    ],
+    [
+      1,
+      0,
+      "B0",
+      "profile"
+    ],
+    [
+      1,
+      1,
+      "B0",
+      "control"
+    ],
+    [
+      1,
+      2,
+      "B3",
+      "profile"
+    ],
+    [
+      1,
+      3,
+      "B3",
+      "control"
+    ],
+    [
+      1,
+      4,
+      "B2",
+      "profile"
+    ],
+    [
+      1,
+      5,
+      "B2",
+      "control"
+    ],
+    [
+      2,
+      0,
+      "B2",
+      "control"
+    ],
+    [
+      2,
+      1,
+      "B2",
+      "profile"
+    ],
+    [
+      2,
+      2,
+      "B0",
+      "control"
+    ],
+    [
+      2,
+      3,
+      "B0",
+      "profile"
+    ],
+    [
+      2,
+      4,
+      "B3",
+      "control"
+    ],
+    [
+      2,
+      5,
+      "B3",
+      "profile"
+    ],
+    [
+      3,
+      0,
+      "B2",
+      "profile"
+    ],
+    [
+      3,
+      1,
+      "B2",
+      "control"
+    ],
+    [
+      3,
+      2,
+      "B3",
+      "profile"
+    ],
+    [
+      3,
+      3,
+      "B3",
+      "control"
+    ],
+    [
+      3,
+      4,
+      "B0",
+      "profile"
+    ],
+    [
+      3,
+      5,
+      "B0",
+      "control"
+    ],
+    [
+      4,
+      0,
+      "B3",
+      "control"
+    ],
+    [
+      4,
+      1,
+      "B3",
+      "profile"
+    ],
+    [
+      4,
+      2,
+      "B0",
+      "control"
+    ],
+    [
+      4,
+      3,
+      "B0",
+      "profile"
+    ],
+    [
+      4,
+      4,
+      "B2",
+      "control"
+    ],
+    [
+      4,
+      5,
+      "B2",
+      "profile"
+    ],
+    [
+      5,
+      0,
+      "B3",
+      "profile"
+    ],
+    [
+      5,
+      1,
+      "B3",
+      "control"
+    ],
+    [
+      5,
+      2,
+      "B2",
+      "profile"
+    ],
+    [
+      5,
+      3,
+      "B2",
+      "control"
+    ],
+    [
+      5,
+      4,
+      "B0",
+      "profile"
+    ],
+    [
+      5,
+      5,
+      "B0",
+      "control"
+    ]
+  ],
+  "five_fresh_manifest_file_sha256": "bf8b3ecccea992cce9dca56c963518510af8dc8d410c0d02b94513160189cb98",
+  "five_fresh_manifest_hash": "457ab1adc8488c5353ec66294583e7a2bedf2e92fca5901a72a41e8321df1573",
+  "formal_preflight_contract": {
+    "ac_power_required": true,
+    "exact_coupled_software_power_thermal_alias_allowed": true,
+    "external_compute_processes_forbidden": true,
+    "independent_thermal_signal_must_be_inactive": true,
+    "poll_seconds": 5,
+    "temperature_limit_celsius": 50,
+    "timeout_seconds": 900,
+    "worker_post_init_temperature_limit_celsius": 50,
+    "worker_subprocess_timeout_seconds": 1080
+  },
+  "model_name": "resnet_2b.onnx",
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "performance_claimed": false,
+  "profile_counter_instrumentation": "B2/B3-lightweight-no-journal",
+  "property_name": "prop_0_eps_0.008.vnnlib",
+  "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+  "protocol_hash": "8193010ee200d11ad12ea68c01462c5c1a5854078fa58d895ed745e12c3d642b",
+  "python_name": "python",
+  "resume_policy": "accept-complete-source-bound-worker-only",
+  "schema_version": "boundflow.fsg4-b3-same-solver-protocol/v1",
+  "source_git_head": "36e9069ca4f21183c9b36d74024de0ca8b20f59c",
+  "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf",
+  "worker_count": 36,
+  "worker_protocol_identity": "3aaf67f086a265e42e931d50f8e001bcf2b7fbb914b60d04f257e12374338737"
+}

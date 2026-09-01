@@ -1,0 +1,58 @@
+{
+  "doc": "asplos27-s4-1c-gradient-20260831/r001/delivery",
+  "type": "delivery",
+  "task": "asplos27-s4-1c-gradient-20260831",
+  "round": 1,
+  "from": "codex",
+  "to": "external-model",
+  "ts": "2026-08-31T12:37:59Z",
+  "base_commit": "93915fe",
+  "result_commit": "9bdc68f",
+  "changed_files": [
+    "boundflow/backends/tvm/asplos27_s4_compressed_gradient.py",
+    "boundflow/runtime/asplos27_s4_gradient_emitters.py",
+    "tests/test_asplos27_s4_compressed_gradient.py",
+    "tests/test_asplos27_s4_gradient_phase.py",
+    "gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_IMPLEMENTATION_CHANGELOG_2026_08_31.md",
+    "gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_COMPRESSED_GRADIENT_EXTERNAL_AUDIT_HANDOFF_2026_08_31.md"
+  ],
+  "claims": [
+    "IMPLEMENTED-CORRECTNESS-CANDIDATE-S4-1C-COMPRESSED-GRADIENT; no optimizer or performance claim"
+  ],
+  "validation": [
+    {
+      "cmd": "pytest new S4-1C tests",
+      "result": "pass"
+    },
+    {
+      "cmd": "pytest S4/R3 combined 200",
+      "result": "pass"
+    },
+    {
+      "cmd": "pytest full 2093 passed 3 skipped",
+      "result": "pass"
+    },
+    {
+      "cmd": "mypy four delivery files",
+      "result": "pass"
+    },
+    {
+      "cmd": "pylint four delivery files 10.00",
+      "result": "pass"
+    },
+    {
+      "cmd": "git diff check",
+      "result": "pass"
+    }
+  ],
+  "limitations": [
+    "single frozen-parameter evaluation only; S4-1D must bind coefficient kernels directly to active S4-1A buffers"
+  ],
+  "risks": [
+    "terminal consumer and 10/9 optimizer trajectory are not implemented"
+  ],
+  "open_questions": [
+    "Approve VALIDATED-S4-1C-COMPRESSED-GRADIENT and open only S4-1D implementation/correctness?"
+  ],
+  "md_sha256": "991ec538ffce3de6a1e468d96cd81d63dc54d9e1a3f348a227e69c2ad72d944e"
+}

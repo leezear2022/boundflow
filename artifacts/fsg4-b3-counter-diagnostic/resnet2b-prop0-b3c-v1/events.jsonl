@@ -1,0 +1,1484 @@
+{"amount":1,"counter":"template_compile_count","detail":"cold planner template compile","ordinal":0}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeTerminalOptimizerScheduleV1.validate","ordinal":1}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicCommitPlanV1.validate","ordinal":2}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":3}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":4}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":5}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":6}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":7}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":8}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":9}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":10}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":11}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":12}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":13}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":14}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":15}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":16}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":17}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":18}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":19}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":20}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":21}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":22}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":23}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":24}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":25}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":26}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":27}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":28}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":29}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":30}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":31}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":32}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":33}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":34}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":35}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":36}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":37}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":38}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":39}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":40}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":41}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":42}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":43}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":44}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":45}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":46}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":47}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":48}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":49}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":50}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":51}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":52}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":53}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":54}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":55}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":56}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":57}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":58}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":59}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":60}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":61}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":62}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":63}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":64}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":65}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":66}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":67}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":68}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":69}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":70}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":71}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":72}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":73}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":74}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":75}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":76}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":77}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":78}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":79}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":80}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":81}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":82}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":83}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":84}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":85}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":86}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":87}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":88}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":89}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":90}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":91}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":92}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":93}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":94}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":95}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":96}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":97}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":98}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":99}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":100}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":101}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":102}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":103}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":104}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":105}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":106}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":107}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":108}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":109}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":110}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":111}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":112}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":113}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":114}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":115}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":116}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":117}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":118}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":119}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":120}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":121}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":122}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":123}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":124}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":125}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":126}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionStateSnapshotV4.validate","ordinal":127}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":128}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":129}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":130}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":131}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":132}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":133}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":134}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":135}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":136}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":137}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":138}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":139}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":140}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":141}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":142}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":143}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":144}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":145}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":146}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":147}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":148}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":149}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":150}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":151}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":152}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":153}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":154}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":155}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":156}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":157}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":158}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":159}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":160}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":161}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":162}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":163}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":164}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":165}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":166}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":167}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":168}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":169}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":170}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":171}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":172}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":173}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":174}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":175}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":176}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":177}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":178}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":179}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":180}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":181}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":182}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":183}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":184}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":185}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":186}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":187}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":188}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":189}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionMutationPolicyV4.validate","ordinal":190}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionStateSnapshotV4.validate","ordinal":191}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":192}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":193}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":194}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":195}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":196}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":197}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":198}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":199}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":200}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":201}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":202}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":203}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":204}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":205}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":206}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":207}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":208}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":209}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":210}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":211}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":212}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":213}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":214}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":215}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":216}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":217}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":218}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":219}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":220}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":221}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":222}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":223}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":224}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":225}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":226}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":227}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":228}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":229}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":230}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":231}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":232}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":233}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":234}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":235}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":236}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":237}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":238}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":239}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":240}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":241}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":242}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":243}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":244}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":245}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":246}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":247}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":248}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":249}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":250}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":251}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":252}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":253}
+{"amount":1,"counter":"stable_hash_call_count","detail":"ProductionStateSnapshotV4.stable_hash","ordinal":254}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionStateSnapshotV4.validate","ordinal":255}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":256}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":257}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":258}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":259}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":260}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":261}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":262}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":263}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":264}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":265}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":266}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":267}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":268}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":269}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":270}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":271}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":272}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":273}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":274}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":275}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":276}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":277}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":278}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":279}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":280}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":281}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":282}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":283}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":284}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":285}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":286}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":287}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":288}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":289}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":290}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":291}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":292}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":293}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":294}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":295}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":296}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":297}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":298}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":299}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":300}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":301}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":302}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":303}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":304}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":305}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":306}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":307}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":308}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":309}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":310}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":311}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":312}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":313}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":314}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":315}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":316}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":317}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":318}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":319}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":320}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":321}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":322}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":323}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":324}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":325}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":326}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":327}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":328}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":329}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":330}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":331}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":332}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":333}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":334}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":335}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":336}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":337}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":338}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":339}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":340}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":341}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":342}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":343}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":344}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":345}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":346}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":347}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":348}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":349}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":350}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":351}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":352}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":353}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":354}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":355}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":356}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":357}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":358}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":359}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":360}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":361}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":362}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":363}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":364}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":365}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":366}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":367}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":368}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":369}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":370}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":371}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":372}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":373}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":374}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":375}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":376}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":377}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":378}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":379}
+{"amount":1,"counter":"template_hit_in_core_count","detail":"prepared core exact template cache hit","ordinal":380}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionStateSnapshotV4.validate","ordinal":381}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":382}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":383}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":384}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":385}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":386}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":387}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":388}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":389}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":390}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":391}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":392}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":393}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":394}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":395}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":396}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":397}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":398}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":399}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":400}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":401}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":402}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":403}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":404}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":405}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":406}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":407}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":408}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":409}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":410}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":411}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":412}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":413}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":414}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":415}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":416}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":417}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":418}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":419}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":420}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":421}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":422}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":423}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":424}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":425}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":426}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":427}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":428}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":429}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":430}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":431}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":432}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":433}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":434}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":435}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":436}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":437}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":438}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":439}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":440}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":441}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":442}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":443}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionMutationPolicyV4.validate","ordinal":444}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionStateSnapshotV4.validate","ordinal":445}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":446}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":447}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":448}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":449}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":450}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":451}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":452}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":453}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":454}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":455}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":456}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":457}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":458}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":459}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":460}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":461}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":462}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":463}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":464}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":465}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":466}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":467}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":468}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":469}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":470}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":471}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":472}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":473}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":474}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":475}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":476}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":477}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":478}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":479}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":480}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":481}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":482}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":483}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":484}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":485}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":486}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":487}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":488}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":489}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":490}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":491}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":492}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":493}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":494}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":495}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":496}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":497}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":498}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":499}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":500}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":501}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":502}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":503}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":504}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":505}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":506}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":507}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionMutationPolicyV4.validate","ordinal":508}
+{"amount":1,"counter":"scope_construction_count","detail":"prepared core dynamic scope construction","ordinal":509}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":510}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaOptimizationState.validate","ordinal":511}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":512}
+{"amount":1,"counter":"stable_hash_call_count","detail":"ProductionStateSnapshotV4.stable_hash","ordinal":513}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionStateSnapshotV4.validate","ordinal":514}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":515}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":516}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":517}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":518}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":519}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":520}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":521}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":522}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":523}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":524}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":525}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":526}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":527}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":528}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":529}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":530}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":531}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":532}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":533}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":534}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":535}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":536}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":537}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":538}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":539}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":540}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":541}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":542}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":543}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":544}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":545}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":546}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":547}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":548}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":549}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":550}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":551}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":552}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":553}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":554}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":555}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":556}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":557}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":558}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":559}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":560}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":561}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":562}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":563}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":564}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":565}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":566}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":567}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":568}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":569}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":570}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":571}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":572}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":573}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":574}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":575}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":576}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":577}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":578}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":579}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":580}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":581}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":582}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":583}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":584}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":585}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":586}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":587}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":588}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":589}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":590}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":591}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":592}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":593}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":594}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":595}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":596}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":597}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":598}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":599}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":600}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":601}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":602}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":603}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":604}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":605}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":606}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":607}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":608}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":609}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":610}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":611}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":612}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":613}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":614}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":615}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":616}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":617}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":618}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":619}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":620}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":621}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":622}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":623}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":624}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":625}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":626}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":627}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":628}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":629}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":630}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":631}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":632}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":633}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":634}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":635}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":636}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":637}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":638}
+{"amount":1,"counter":"stable_hash_call_count","detail":"ProductionMutationPolicyV4.stable_hash","ordinal":639}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionMutationPolicyV4.validate","ordinal":640}
+{"amount":1,"counter":"stable_hash_call_count","detail":"NativeAlphaBetaStateScope.stable_hash","ordinal":641}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":642}
+{"amount":1,"counter":"stable_hash_call_count","detail":"NativeAlphaBetaOptimizationState.stable_hash","ordinal":643}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":644}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaOptimizationState.validate","ordinal":645}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":646}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionStateSnapshotV4.validate","ordinal":647}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":648}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":649}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":650}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":651}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":652}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":653}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":654}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":655}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":656}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":657}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":658}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":659}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":660}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":661}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":662}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":663}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":664}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":665}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":666}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":667}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":668}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":669}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":670}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":671}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":672}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":673}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":674}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":675}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":676}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":677}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":678}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":679}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":680}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":681}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":682}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":683}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":684}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":685}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":686}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":687}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":688}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":689}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":690}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":691}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":692}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":693}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":694}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":695}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":696}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":697}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":698}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":699}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":700}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":701}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":702}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":703}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":704}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":705}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":706}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":707}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":708}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":709}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionMutationPolicyV4.validate","ordinal":710}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":711}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaOptimizationState.validate","ordinal":712}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":713}
+{"amount":1,"counter":"stable_hash_call_count","detail":"ProductionStateSnapshotV4.stable_hash","ordinal":714}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionStateSnapshotV4.validate","ordinal":715}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":716}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":717}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":718}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":719}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":720}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":721}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":722}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":723}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":724}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":725}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":726}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":727}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":728}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":729}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":730}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":731}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":732}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":733}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":734}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":735}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":736}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":737}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":738}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":739}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":740}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":741}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":742}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":743}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":744}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":745}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":746}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":747}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":748}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":749}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":750}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":751}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":752}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":753}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":754}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":755}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":756}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":757}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":758}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":759}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":760}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":761}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":762}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":763}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":764}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":765}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":766}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":767}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":768}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":769}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":770}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":771}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":772}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":773}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":774}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":775}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":776}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":777}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":778}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":779}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":780}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":781}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":782}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":783}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":784}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":785}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":786}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":787}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":788}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":789}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":790}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":791}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":792}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":793}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":794}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":795}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":796}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":797}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":798}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":799}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":800}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":801}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":802}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":803}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":804}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":805}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":806}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":807}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":808}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":809}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":810}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":811}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":812}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":813}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":814}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":815}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":816}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":817}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":818}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":819}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":820}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":821}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":822}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":823}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":824}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":825}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":826}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":827}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":828}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":829}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":830}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":831}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":832}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":833}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":834}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":835}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":836}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":837}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":838}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":839}
+{"amount":1,"counter":"stable_hash_call_count","detail":"ProductionMutationPolicyV4.stable_hash","ordinal":840}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionMutationPolicyV4.validate","ordinal":841}
+{"amount":1,"counter":"stable_hash_call_count","detail":"NativeAlphaBetaStateScope.stable_hash","ordinal":842}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":843}
+{"amount":1,"counter":"stable_hash_call_count","detail":"NativeAlphaBetaOptimizationState.stable_hash","ordinal":844}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":845}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaOptimizationState.validate","ordinal":846}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":847}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionStateSnapshotV4.validate","ordinal":848}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":849}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":850}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":851}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":852}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":853}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":854}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":855}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":856}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":857}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":858}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":859}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":860}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":861}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":862}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":863}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":864}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":865}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":866}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":867}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":868}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":869}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":870}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":871}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":872}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":873}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":874}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":875}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":876}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":877}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":878}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":879}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":880}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":881}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":882}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":883}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":884}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":885}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":886}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":887}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":888}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":889}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":890}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":891}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":892}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":893}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":894}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":895}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":896}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":897}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":898}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":899}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":900}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":901}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":902}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":903}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":904}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":905}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":906}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":907}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":908}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":909}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":910}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionMutationPolicyV4.validate","ordinal":911}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeTerminalOptimizerScheduleV1.validate","ordinal":912}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionMutationPolicyV4.validate","ordinal":913}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaOptimizationState.validate","ordinal":914}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":915}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionMutationPolicyV4.validate","ordinal":916}
+{"amount":1,"counter":"stable_hash_call_count","detail":"NativeAlphaBetaOptimizationState.stable_hash","ordinal":917}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":918}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaOptimizationState.validate","ordinal":919}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":920}
+{"amount":1,"counter":"stable_hash_call_count","detail":"NativeAlphaBetaOptimizationState.stable_hash","ordinal":921}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":922}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaOptimizationState.validate","ordinal":923}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":924}
+{"amount":1,"counter":"forward_trace_build_count","detail":"terminal optimizer forward trace","ordinal":925}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionMutationPolicyV4.validate","ordinal":926}
+{"amount":1,"counter":"optimizer_bound_evaluation_call_count","detail":"terminal optimizer CROWN evaluation","ordinal":927}
+{"amount":1,"counter":"optimizer_bound_evaluation_call_count","detail":"terminal optimizer CROWN evaluation","ordinal":928}
+{"amount":1,"counter":"optimizer_bound_evaluation_call_count","detail":"terminal optimizer CROWN evaluation","ordinal":929}
+{"amount":1,"counter":"optimizer_bound_evaluation_call_count","detail":"terminal optimizer CROWN evaluation","ordinal":930}
+{"amount":1,"counter":"optimizer_bound_evaluation_call_count","detail":"terminal optimizer CROWN evaluation","ordinal":931}
+{"amount":1,"counter":"optimizer_bound_evaluation_call_count","detail":"terminal optimizer CROWN evaluation","ordinal":932}
+{"amount":1,"counter":"optimizer_bound_evaluation_call_count","detail":"terminal optimizer CROWN evaluation","ordinal":933}
+{"amount":1,"counter":"optimizer_bound_evaluation_call_count","detail":"terminal optimizer CROWN evaluation","ordinal":934}
+{"amount":1,"counter":"optimizer_bound_evaluation_call_count","detail":"terminal optimizer CROWN evaluation","ordinal":935}
+{"amount":1,"counter":"optimizer_bound_evaluation_call_count","detail":"terminal optimizer CROWN evaluation","ordinal":936}
+{"amount":1,"counter":"stable_hash_call_count","detail":"NativeAlphaBetaStateScope.stable_hash","ordinal":937}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":938}
+{"amount":1,"counter":"stable_hash_call_count","detail":"NativeAlphaBetaOptimizationState.stable_hash","ordinal":939}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":940}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaOptimizationState.validate","ordinal":941}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":942}
+{"amount":1,"counter":"stable_hash_call_count","detail":"ProductionMutationPolicyV4.stable_hash","ordinal":943}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionMutationPolicyV4.validate","ordinal":944}
+{"amount":1,"counter":"stable_hash_call_count","detail":"NativeTerminalOptimizerScheduleV1.stable_hash","ordinal":945}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeTerminalOptimizerScheduleV1.validate","ordinal":946}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeTerminalOptimizerResultV1.validate","ordinal":947}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeTerminalOptimizerScheduleV1.validate","ordinal":948}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaOptimizationState.validate","ordinal":949}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":950}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeOptimizerForwardTraceV1.validate","ordinal":951}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaOptimizationState.validate","ordinal":952}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":953}
+{"amount":1,"counter":"stable_hash_call_count","detail":"NativeAlphaBetaStateScope.stable_hash","ordinal":954}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":955}
+{"amount":1,"counter":"stable_hash_call_count","detail":"NativeTerminalOptimizerScheduleV1.stable_hash","ordinal":956}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeTerminalOptimizerScheduleV1.validate","ordinal":957}
+{"amount":1,"counter":"optimizer_trace_call_count","detail":"one terminal-only production optimizer schedule","ordinal":958}
+{"amount":10,"counter":"optimizer_evaluation_count","detail":"terminal schedule evaluations","ordinal":959}
+{"amount":9,"counter":"optimizer_update_count","detail":"terminal schedule updates","ordinal":960}
+{"amount":1,"counter":"stable_hash_call_count","detail":"NativeTerminalOptimizerScheduleV1.stable_hash","ordinal":961}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeTerminalOptimizerScheduleV1.validate","ordinal":962}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaOptimizationState.validate","ordinal":963}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":964}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeOptimizerForwardTraceV1.validate","ordinal":965}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaOptimizationState.validate","ordinal":966}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":967}
+{"amount":1,"counter":"stable_hash_call_count","detail":"NativeAlphaBetaStateScope.stable_hash","ordinal":968}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":969}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeBackwardExportV4.validate","ordinal":970}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaOptimizationState.validate","ordinal":971}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":972}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeBackwardExportV4.validate","ordinal":973}
+{"amount":1,"counter":"kfsb_child_batch_count","detail":"one KFSB candidate child batch","ordinal":974}
+{"amount":1,"counter":"forward_trace_build_count","detail":"KFSB child forward trace","ordinal":975}
+{"amount":1,"counter":"kfsb_child_batch_count","detail":"one KFSB candidate child batch","ordinal":976}
+{"amount":1,"counter":"forward_trace_build_count","detail":"KFSB child forward trace","ordinal":977}
+{"amount":1,"counter":"kfsb_child_batch_count","detail":"one KFSB candidate child batch","ordinal":978}
+{"amount":1,"counter":"forward_trace_build_count","detail":"KFSB child forward trace","ordinal":979}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeKfsbEvaluationV4.validate","ordinal":980}
+{"amount":1,"counter":"kfsb_evaluation_call_count","detail":"one complete KFSB evaluation","ordinal":981}
+{"amount":3,"counter":"kfsb_candidate_count","detail":"materialized KFSB candidate splits","ordinal":982}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicCommitPlanV1.validate","ordinal":983}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionStateSnapshotV4.validate","ordinal":984}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":985}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":986}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":987}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":988}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":989}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":990}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":991}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":992}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":993}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":994}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":995}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":996}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":997}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":998}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":999}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1000}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1001}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1002}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1003}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1004}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1005}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1006}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1007}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1008}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1009}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1010}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1011}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1012}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1013}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1014}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1015}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1016}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1017}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1018}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1019}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1020}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1021}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1022}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1023}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1024}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1025}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1026}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1027}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1028}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1029}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1030}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1031}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1032}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1033}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1034}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1035}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1036}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1037}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1038}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1039}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1040}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1041}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1042}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1043}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1044}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1045}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1046}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaOptimizationState.validate","ordinal":1047}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeAlphaBetaStateScope.validate","ordinal":1048}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicCommitPlanV1.validate","ordinal":1049}
+{"amount":1,"counter":"stable_hash_call_count","detail":"ProductionStateSnapshotV4.stable_hash","ordinal":1050}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionStateSnapshotV4.validate","ordinal":1051}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1052}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1053}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1054}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1055}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1056}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1057}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1058}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1059}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1060}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1061}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1062}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1063}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1064}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1065}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1066}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1067}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1068}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1069}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1070}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1071}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1072}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1073}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1074}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1075}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1076}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1077}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1078}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1079}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1080}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1081}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1082}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1083}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1084}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1085}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1086}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1087}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1088}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1089}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1090}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1091}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1092}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1093}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1094}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1095}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1096}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1097}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1098}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1099}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1100}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1101}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1102}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1103}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1104}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1105}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1106}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1107}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1108}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1109}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1110}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1111}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1112}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1113}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1114}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1115}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1116}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1117}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1118}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1119}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1120}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1121}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1122}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1123}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1124}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1125}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1126}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1127}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1128}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1129}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1130}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1131}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1132}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1133}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1134}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1135}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1136}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1137}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1138}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1139}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1140}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1141}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1142}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1143}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1144}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1145}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1146}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1147}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1148}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1149}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1150}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1151}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1152}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1153}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1154}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1155}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1156}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1157}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1158}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1159}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1160}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1161}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1162}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1163}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1164}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1165}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1166}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1167}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1168}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1169}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1170}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1171}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1172}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1173}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1174}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1175}
+{"amount":1,"counter":"candidate_snapshot_materialization_count","detail":"device candidate path alpha/%2Finput-4/%2F49","ordinal":1176}
+{"amount":1,"counter":"candidate_snapshot_materialization_count","detail":"device candidate path beta/%2Finput/0/value","ordinal":1177}
+{"amount":1,"counter":"candidate_snapshot_materialization_count","detail":"device candidate path alpha/%2Finput-12/%2F49","ordinal":1178}
+{"amount":1,"counter":"candidate_snapshot_materialization_count","detail":"device candidate path beta/%2Finput-8/0/value","ordinal":1179}
+{"amount":1,"counter":"candidate_snapshot_materialization_count","detail":"device candidate path alpha/%2Finput-16/%2F49","ordinal":1180}
+{"amount":1,"counter":"candidate_snapshot_materialization_count","detail":"device candidate path beta/%2F39/0/value","ordinal":1181}
+{"amount":1,"counter":"candidate_snapshot_materialization_count","detail":"device candidate path alpha/%2Finput-24/%2F49","ordinal":1182}
+{"amount":1,"counter":"candidate_snapshot_materialization_count","detail":"device candidate path beta/%2Finput-20/0/value","ordinal":1183}
+{"amount":1,"counter":"candidate_snapshot_materialization_count","detail":"device candidate path alpha/%2F45/%2F49","ordinal":1184}
+{"amount":1,"counter":"candidate_snapshot_materialization_count","detail":"device candidate path beta/%2F44/0/value","ordinal":1185}
+{"amount":1,"counter":"candidate_snapshot_materialization_count","detail":"device candidate path alpha/%2F48/%2F49","ordinal":1186}
+{"amount":1,"counter":"candidate_snapshot_materialization_count","detail":"device candidate path beta/%2Finput-28/0/value","ordinal":1187}
+{"amount":1,"counter":"stable_hash_call_count","detail":"DeviceAtomicCommitPlanV1.stable_hash","ordinal":1188}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicTransactionV1.validate","ordinal":1189}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicCommitPlanV1.validate","ordinal":1190}
+{"amount":1,"counter":"stable_hash_call_count","detail":"DeviceAtomicCommitPlanV1.stable_hash","ordinal":1191}
+{"amount":1,"counter":"atomic_stage_call_count","detail":"one device atomic stage completed","ordinal":1192}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicTransactionV1.validate","ordinal":1193}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicCommitPlanV1.validate","ordinal":1194}
+{"amount":1,"counter":"stable_hash_call_count","detail":"DeviceAtomicCommitPlanV1.stable_hash","ordinal":1195}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeBackwardExportV4.validate","ordinal":1196}
+{"amount":1,"counter":"typed_validate_call_count","detail":"NativeKfsbEvaluationV4.validate","ordinal":1197}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceLiveCoreReturnAssemblyV1.validate","ordinal":1198}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicTransactionV1.validate","ordinal":1199}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicCommitPlanV1.validate","ordinal":1200}
+{"amount":1,"counter":"stable_hash_call_count","detail":"DeviceAtomicCommitPlanV1.stable_hash","ordinal":1201}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicCommitPlanV1.validate","ordinal":1202}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceLiveCoreReturnAssemblyV1.validate","ordinal":1203}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicTransactionV1.validate","ordinal":1204}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicCommitPlanV1.validate","ordinal":1205}
+{"amount":1,"counter":"stable_hash_call_count","detail":"DeviceAtomicCommitPlanV1.stable_hash","ordinal":1206}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicCommitPlanV1.validate","ordinal":1207}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicTransactionV1.validate","ordinal":1208}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicCommitPlanV1.validate","ordinal":1209}
+{"amount":1,"counter":"stable_hash_call_count","detail":"DeviceAtomicCommitPlanV1.stable_hash","ordinal":1210}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicCommitPlanV1.validate","ordinal":1211}
+{"amount":1,"counter":"live_tensor_copy_call_count","detail":"direct device copy (2, 1, 6, 178) cuda:0","ordinal":1212}
+{"amount":1,"counter":"live_tensor_copy_call_count","detail":"direct device copy (2, 1, 6, 27) cuda:0","ordinal":1213}
+{"amount":1,"counter":"live_tensor_copy_call_count","detail":"direct device copy (2, 1, 6, 132) cuda:0","ordinal":1214}
+{"amount":1,"counter":"live_tensor_copy_call_count","detail":"direct device copy (2, 1, 6, 121) cuda:0","ordinal":1215}
+{"amount":1,"counter":"live_tensor_copy_call_count","detail":"direct device copy (2, 1, 6, 86) cuda:0","ordinal":1216}
+{"amount":1,"counter":"live_tensor_copy_call_count","detail":"direct device copy (2, 1, 6, 164) cuda:0","ordinal":1217}
+{"amount":1,"counter":"live_tensor_copy_call_count","detail":"direct device copy (6, 0) cuda:0","ordinal":1218}
+{"amount":1,"counter":"live_tensor_copy_call_count","detail":"direct device copy (6, 0) cuda:0","ordinal":1219}
+{"amount":1,"counter":"live_tensor_copy_call_count","detail":"direct device copy (6, 0) cuda:0","ordinal":1220}
+{"amount":1,"counter":"live_tensor_copy_call_count","detail":"direct device copy (6, 1) cuda:0","ordinal":1221}
+{"amount":1,"counter":"live_tensor_copy_call_count","detail":"direct device copy (6, 0) cuda:0","ordinal":1222}
+{"amount":1,"counter":"live_tensor_copy_call_count","detail":"direct device copy (6, 0) cuda:0","ordinal":1223}
+{"amount":1,"counter":"stable_hash_call_count","detail":"DeviceAtomicCommitPlanV1.stable_hash","ordinal":1224}
+{"amount":1,"counter":"atomic_commit_call_count","detail":"one device atomic commit completed","ordinal":1225}
+{"amount":12,"counter":"device_rollback_backup_count","detail":"device transaction rollback backups","ordinal":1226}
+{"amount":12,"counter":"commit_copy_call_count","detail":"successful direct device commit copies","ordinal":1227}
+{"amount":12,"counter":"committed_mutable_path_count","detail":"device receipt-confirmed mutable paths","ordinal":1228}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceLiveCoreReturnAssemblyV1.validate","ordinal":1229}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicTransactionV1.validate","ordinal":1230}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicCommitPlanV1.validate","ordinal":1231}
+{"amount":1,"counter":"stable_hash_call_count","detail":"DeviceAtomicCommitPlanV1.stable_hash","ordinal":1232}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicCommitPlanV1.validate","ordinal":1233}
+{"amount":1,"counter":"stable_hash_call_count","detail":"DeviceAtomicCommitPlanV1.stable_hash","ordinal":1234}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceLiveCoreReturnAssemblyV1.validate","ordinal":1235}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicTransactionV1.validate","ordinal":1236}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicCommitPlanV1.validate","ordinal":1237}
+{"amount":1,"counter":"stable_hash_call_count","detail":"DeviceAtomicCommitPlanV1.stable_hash","ordinal":1238}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicCommitPlanV1.validate","ordinal":1239}
+{"amount":1,"counter":"stable_hash_call_count","detail":"DeviceAtomicCommitPlanV1.stable_hash","ordinal":1240}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicTransactionV1.validate","ordinal":1241}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicCommitPlanV1.validate","ordinal":1242}
+{"amount":1,"counter":"stable_hash_call_count","detail":"DeviceAtomicCommitPlanV1.stable_hash","ordinal":1243}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionStateSnapshotV4.validate","ordinal":1244}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1245}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1246}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1247}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1248}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1249}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1250}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1251}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1252}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1253}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1254}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1255}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1256}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1257}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1258}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1259}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1260}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1261}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1262}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1263}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1264}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1265}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1266}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1267}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1268}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1269}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1270}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1271}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1272}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1273}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1274}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1275}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1276}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1277}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1278}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1279}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1280}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1281}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1282}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1283}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1284}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1285}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1286}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1287}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1288}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1289}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1290}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1291}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1292}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1293}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1294}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1295}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1296}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1297}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1298}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1299}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1300}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1301}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1302}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1303}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1304}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1305}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1306}
+{"amount":1,"counter":"typed_validate_call_count","detail":"DeviceAtomicCommitPlanV1.validate","ordinal":1307}
+{"amount":1,"counter":"stable_hash_call_count","detail":"DeviceAtomicCommitPlanV1.stable_hash","ordinal":1308}
+{"amount":1,"counter":"stable_hash_call_count","detail":"ProductionStateSnapshotV4.stable_hash","ordinal":1309}
+{"amount":1,"counter":"typed_validate_call_count","detail":"ProductionStateSnapshotV4.validate","ordinal":1310}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1311}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1312}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1313}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1314}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1315}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1316}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1317}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1318}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1319}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1320}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1321}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1322}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1323}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1324}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1325}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1326}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1327}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1328}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1329}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1330}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1331}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1332}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1333}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1334}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1335}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1336}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1337}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1338}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1339}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1340}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1341}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1342}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1343}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1344}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1345}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1346}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1347}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1348}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1349}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1350}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1351}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1352}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1353}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1354}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1355}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1356}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1357}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1358}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1359}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1360}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1361}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1362}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1363}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1364}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1365}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1366}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1367}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1368}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1369}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1370}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1371}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1372}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1373}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1374}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1375}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1376}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1377}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1378}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1379}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1380}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1381}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1382}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1383}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1384}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1385}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1386}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1387}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1388}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1389}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1390}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1391}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1392}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1393}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1394}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1395}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1396}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1397}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1398}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1399}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1400}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1401}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1402}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1403}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1404}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1405}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1406}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1407}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1408}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1409}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1410}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1411}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1412}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1413}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1414}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1415}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1416}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1417}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1418}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1419}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1420}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1421}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1422}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1423}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1424}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1425}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1426}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1427}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1428}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1429}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1430}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1431}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1432}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1433}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"production-state tensor digest","ordinal":1434}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1435}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1436}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1437}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1438}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1439}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1440}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1441}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1442}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1443}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1444}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1445}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1446}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1447}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1448}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1449}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1450}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1451}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1452}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1453}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1454}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1455}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1456}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1457}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1458}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1459}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1460}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1461}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1462}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1463}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1464}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1465}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1466}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1467}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1468}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1469}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1470}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1471}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1472}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1473}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1474}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1475}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1476}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1477}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1478}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1479}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1480}
+{"amount":1,"counter":"tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1481}
+{"amount":1,"counter":"gpu_tensor_content_hash_count","detail":"post-query device transaction digest","ordinal":1482}
+{"amount":1,"counter":"stable_hash_call_count","detail":"DeviceAtomicCommitPlanV1.stable_hash","ordinal":1483}

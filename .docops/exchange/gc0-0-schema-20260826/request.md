@@ -1,0 +1,26 @@
+# GC0-0 Generic Verification Graph Schema Audit
+
+- task: gc0-0-schema-20260826
+- doc: gc0-0-schema-20260826/request
+- from: codex-executor -> to: external-model-auditor
+- executor: codex-executor / auditor: external-model-auditor
+- base commit: ad23d86ddd2d8dc95b4ad4dd74d6a02710a34bce
+- created: 2026-08-26T01:02:34Z
+
+## Original request
+
+Independently audit the GC0-0 generic verification graph schema at exact result commit 07f02fe. Do not assume capture, graph analysis, lowering, runtime execution, correctness formal, timing, speedup, query/queue benefit, or ASPLOS readiness. Recompute all mechanically checkable facts from source and tests; do not trust the changelog summary.
+
+## Scope
+
+Exact diff ad23d86ddd2d8dc95b4ad4dd74d6a02710a34bce..07f02fe; boundflow/ir/verification_graph.py, tests/test_gc0_verification_graph_schema.py, GC0-0 changelog, accepted prereg finding corrections, DocOps evidence, and authority-document synchronization. User-owned docs/CIBC_for_DAC.pdf is outside scope.
+
+## Acceptance criteria
+
+- Audit-AC1: verify exact source/order, approved parent closure, implementation-only GC0-0 scope, and absence of capture/analysis/lowering/runtime/timing/production changes.
+- Audit-AC2: verify typed schema completeness, exact 22 stable rejection reasons, exact disjoint 15-direct/7-analysis partition, and fail-closed exception identity.
+- Audit-AC3: verify schema is model/site/shape independent and three generic fixtures express empty-beta Conv, active-beta Linear, and multi-Conv 10/9 via canonical round-trip without production execution.
+- Audit-AC4: verify every direct negative covered maps to a stable reason; analysis-dependent reasons are not falsely claimed executed; rejected legality results require reasons and launch remains impossible.
+- Audit-AC5: verify canonical JSON, allow_nan=false, leaf/program/registry/module hashes, strict module round-trip, identity binding, and fully re-signed semantic tamper rejection.
+- Audit-AC6: verify the rule registry is the frozen eight-rule set but non-executable, all timing/performance/execution flags fail closed, and the source has no backend/runtime/timing dependency.
+- Audit-AC7: independently rerun targeted/related/full or proportionate regression plus Black/Mypy/Pylint/diff/DocOps validation; verify four prior audit findings are closed and no claim drift opens GC0-1 or performance.

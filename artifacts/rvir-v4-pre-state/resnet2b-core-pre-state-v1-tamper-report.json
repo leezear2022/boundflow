@@ -1,0 +1,74 @@
+{
+  "all_outer_provenance_gates_rejected": true,
+  "all_semantic_identity_gates_rejected": true,
+  "artifact_manifest_sha256": "daee2fa0d150cab40262b76fc45fba970e35b7f8092b61d5b8bfe4ca6d660218",
+  "artifact_source_git_head": "96c45a661e474e31bbad4e7e9a3dbc7b315a2e93",
+  "original_replay": {
+    "evidence_status": "validated-pre-state-initializer",
+    "mapping_hash": "cfcebf92fc58c269899d98cd65cc9454d7caa6051e2c9da46d415eda1fecf8df",
+    "native_state_hash": "e3587dd9a8010d34bb65c1e415bb444917b48e23679855b2fe6ac54d23b4bff0",
+    "performance_claimed": false,
+    "status": "replay-passed",
+    "summary_hash": "6702a39d5efb8c5b2e05723719b13243595b35eaaedf32eb5eafaf481daf899c"
+  },
+  "performance_claimed": false,
+  "probe_code_sha256": "848b35daa14a5f0008ecb1b2c061139bbef8cb61ca97890c2396116eee40853b",
+  "probe_count": 6,
+  "probes": [
+    {
+      "internal_hashes_recomputed": true,
+      "name": "topology-internal-rehash",
+      "outer_error": "RVIR-v4 pre-state topology differs",
+      "outer_manifest_resigned": true,
+      "semantic_error": "RVIR-v4 pre-state frozen identity differs",
+      "status": "rejected-as-expected"
+    },
+    {
+      "internal_hashes_recomputed": true,
+      "name": "alpha-index-internal-rehash",
+      "outer_error": "RVIR-v4 pre-state frozen source differs",
+      "outer_manifest_resigned": true,
+      "semantic_error": "RVIR-v4 pre-state frozen identity differs",
+      "source_manifest_resigned": true,
+      "status": "rejected-as-expected"
+    },
+    {
+      "internal_hashes_recomputed": true,
+      "name": "history-score-internal-rehash",
+      "outer_error": "RVIR-v4 pre-state frozen source differs",
+      "outer_manifest_resigned": true,
+      "semantic_error": "RVIR-v4 pre-state frozen identity differs",
+      "source_manifest_resigned": true,
+      "status": "rejected-as-expected"
+    },
+    {
+      "internal_hashes_recomputed": true,
+      "name": "intermediate-bound-internal-rehash",
+      "outer_error": "RVIR-v4 pre-state frozen source differs",
+      "outer_manifest_resigned": true,
+      "semantic_error": "RVIR-v4 pre-state frozen identity differs",
+      "source_manifest_resigned": true,
+      "status": "rejected-as-expected"
+    },
+    {
+      "internal_hashes_recomputed": true,
+      "name": "upper-alpha-internal-rehash",
+      "outer_error": "RVIR-v4 pre-state frozen source differs",
+      "outer_manifest_resigned": true,
+      "semantic_error": "RVIR-v4 pre-state snapshot/step-zero binding differs",
+      "source_manifest_resigned": true,
+      "status": "rejected-as-expected"
+    },
+    {
+      "internal_hashes_recomputed": true,
+      "name": "beta-location-history-internal-rehash",
+      "outer_error": "RVIR-v4 pre-state frozen source differs",
+      "outer_manifest_resigned": true,
+      "semantic_error": "RVIR-v4 pre-state frozen identity differs",
+      "source_manifest_resigned": true,
+      "status": "rejected-as-expected"
+    }
+  ],
+  "report_hash": "cfe3f9cd3d8d727b33525dff72dcb1632dba273e7963acbadbb054f864380033",
+  "schema_version": "boundflow.rvir-v4-pre-state-tamper-report/v1"
+}

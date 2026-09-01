@@ -1,0 +1,26 @@
+{
+  "task": "asplos27-s4-1a-ordered-buffer-20260830",
+  "title": "ASPLOS27 S4-1A ordered buffer formal audit",
+  "status": "closed",
+  "round": 2,
+  "executor": "codex",
+  "auditor": "external-model",
+  "approved_round": 2,
+  "docs": [
+    "asplos27-s4-1a-ordered-buffer-20260830/request",
+    "asplos27-s4-1a-ordered-buffer-20260830/r001/delivery",
+    "asplos27-s4-1a-ordered-buffer-20260830/r001/audit",
+    "asplos27-s4-1a-ordered-buffer-20260830/r001/response-F1",
+    "asplos27-s4-1a-ordered-buffer-20260830/r001/response-F2",
+    "asplos27-s4-1a-ordered-buffer-20260830/r001/response-F3",
+    "asplos27-s4-1a-ordered-buffer-20260830/r001/response-F4",
+    "asplos27-s4-1a-ordered-buffer-20260830/r001/response-F5",
+    "asplos27-s4-1a-ordered-buffer-20260830/r001/response-F6",
+    "asplos27-s4-1a-ordered-buffer-20260830/r002/delivery",
+    "asplos27-s4-1a-ordered-buffer-20260830/r002/audit",
+    "asplos27-s4-1a-ordered-buffer-20260830/closure"
+  ],
+  "rev": 15,
+  "created": "2026-08-30T03:09:32Z",
+  "updated": "2026-08-31T01:31:48Z"
+}

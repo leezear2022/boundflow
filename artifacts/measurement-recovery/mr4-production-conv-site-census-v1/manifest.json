@@ -1,0 +1,20 @@
+{
+  "files": {
+    "README.md": "1ea01479de99b67d70c4ea900ccc65c74097124906a794883d483a6ece51aca0",
+    "protocol.json": "3712395bb7974d213a5d3021bf6a1efc1e685225c0c7ba4c63c5fc53e3a4472f",
+    "raw.json": "bbee75d23638384a626df7a0ff7b79c189a70498f15dbeb5bb65431d0a167d4c",
+    "replay_stdout.txt": "12d565fb33bc23d5f64938391acff1612539b7cf1f88ba9015ef3635fce0c0c6",
+    "semantic_metrics.jsonl": "3525ce789b9c39822a7ae04d71fbfbf85d33666bb44dd27bef64bc9eea7362f3",
+    "summary.json": "5747bb386eb9541e74175567bdc6cdf56843c0920462a1f93163111801ae490c",
+    "tamper_report.json": "026be59f755a53c629cb567a5dd9e6f6e52fa7e705eb765ea553cbca0c935803"
+  },
+  "generator_commit": "ac5137862615ebc48ee2f609dc9906a447babdca",
+  "manifest_hash": "01a23006e3804db48058dc973568695df4c980c6d1cc43fe560f9c99503fcf1a",
+  "performance_claimed": false,
+  "protocol_hash": "6914ec1d94a5b18daab1f4ffe8a4ecc7dff63f6f63eccf4b747c894880571d7d",
+  "raw_hash": "9604c8de6aa2047f5bc1b2753a18a5a68394ed24bc4f4d9cb3a71de1c795fdab",
+  "schema_version": "boundflow.mr4-production-conv-site-census-artifact/v1",
+  "source_commit": "1fa4f0f952bae344a24b78aab8b3ca72e6bcd244",
+  "status": "OPEN-MR5-MULTI-CONV-PRODUCTION-BRIDGE-CORRECTNESS-PREREGISTRATION",
+  "summary_hash": "728b39629db5d9790c289f9b2ac9bbe913b7f2b8d2a59537ea658857a264279c"
+}

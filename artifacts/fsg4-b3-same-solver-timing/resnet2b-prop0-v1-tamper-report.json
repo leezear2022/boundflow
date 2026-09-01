@@ -1,0 +1,92 @@
+{
+  "all_rejected": true,
+  "artifact_source_git_head": "36e9069ca4f21183c9b36d74024de0ca8b20f59c",
+  "attack_count": 10,
+  "attacks": [
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "control-latency-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B3 derived replay differs: paired_runs.jsonl"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "delete-worker-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B3 partial worker cannot resume: 35"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "aggregate-order-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B3 worker aggregate differs"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "b3-activation-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B3 direct activation receipt differs"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "b3-profile-counter-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B3 profile counter differs: forward_trace_build_count:expected=4:observed=5"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "b3-fallback-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B3 fallback dispatch is forbidden"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "b3-semantic-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B3 derived replay differs: paired_runs.jsonl"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "formal-preflight-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG3 formal preflight admission differs"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "protocol-sequence-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B3 protocol differs"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "summary-ratio-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B3 derived replay differs: summary.json"
+    }
+  ],
+  "clean_summary_hash": "4c19afd43c18e0409932b86506efdaf6bfc3e07baabcc222dbe79c8149f99bac",
+  "outer_resigned_attack_count": 10,
+  "performance_claimed": false,
+  "report_hash": "b89ada48f40c5766bc0b93c1542d0a5aa7cc741fe250f9cb9efc5c38a2cae799",
+  "schema_version": "boundflow.fsg4-b3-same-solver-tamper-report/v1"
+}

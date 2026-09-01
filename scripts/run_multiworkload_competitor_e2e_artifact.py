@@ -87,6 +87,12 @@ def _parse_args() -> argparse.Namespace:
         subparser.add_argument("--search-steps", type=int, required=True)
         subparser.add_argument("--max-nodes", type=int, required=True)
         subparser.add_argument("--abcrown-root", type=Path)
+        subparser.add_argument(
+            "--input-shape",
+            type=int,
+            nargs="+",
+            help="materialize a symbolic ONNX input shape for a frozen worker run",
+        )
     return parser.parse_args()
 
 
@@ -173,23 +179,41 @@ def _native_code_revision() -> str:
     return canonical_hash({path: file_sha256(root / path) for path in paths})
 
 
-def _onnx_inventory(model_path: Path) -> tuple[tuple[int, ...], int, tuple[str, ...]]:
+def _onnx_inventory(
+    model_path: Path, input_shape_override: tuple[int, ...] | None = None
+) -> tuple[tuple[int, ...], int, tuple[str, ...]]:
     import onnx  # pylint: disable=import-outside-toplevel
 
     model = onnx.load(str(model_path), load_external_data=False)
     if len(model.graph.input) != 1 or len(model.graph.output) != 1:
         raise ValueError("NRIR-18 requires one ONNX input and one output")
 
-    def shape(value: Any) -> tuple[int, ...]:
-        dimensions = tuple(
+    def raw_shape(value: Any) -> tuple[int, ...]:
+        return tuple(
             int(dimension.dim_value) for dimension in value.type.tensor_type.shape.dim
         )
-        if not dimensions or any(dimension < 1 for dimension in dimensions):
-            raise ValueError("NRIR-18 requires static positive ONNX shapes")
-        return dimensions
 
-    input_shape = shape(model.graph.input[0])
-    output_shape = shape(model.graph.output[0])
+    input_dimensions = raw_shape(model.graph.input[0])
+    if input_shape_override is None:
+        input_shape = input_dimensions
+        if not input_shape or any(dimension < 1 for dimension in input_shape):
+            raise ValueError("NRIR-18 requires static positive ONNX shapes")
+    else:
+        input_shape = tuple(input_shape_override)
+        if (
+            len(input_shape) != len(input_dimensions)
+            or any(dimension < 1 for dimension in input_shape)
+            or any(
+                observed > 0 and observed != override
+                for observed, override in zip(input_dimensions, input_shape)
+            )
+        ):
+            raise ValueError("NRIR-18 input-shape override contradicts ONNX input")
+    output_shape = raw_shape(model.graph.output[0])
+    if not output_shape or any(dimension < 1 for dimension in output_shape[1:]):
+        raise ValueError("NRIR-18 requires a static positive ONNX output dimension")
+    if output_shape[0] < 1 and input_shape_override is not None:
+        output_shape = (input_shape[0], *output_shape[1:])
     if input_shape[0] != 1 or len(output_shape) != 2 or output_shape[0] != 1:
         raise ValueError("NRIR-18 requires batch-one model IO")
     return (
@@ -508,11 +532,21 @@ def _native_worker(args: argparse.Namespace) -> None:
     torch.set_num_threads(args.torch_threads)
     started_ns = time.perf_counter_ns()
     query = import_vnnlib_box_query(args.property, query_id=args.workload_id)
-    input_shape, output_dim, _ops = _onnx_inventory(args.model)
+    input_shape_override = (
+        tuple(args.input_shape) if args.input_shape is not None else None
+    )
+    input_shape, output_dim, _ops = _onnx_inventory(
+        args.model, input_shape_override=input_shape_override
+    )
     if len(query.output_names) != output_dim:
         raise ValueError("NRIR-18 native worker output dimension differs")
     tensors = materialize_vnnlib_box_query(query, input_shape=input_shape[1:])
-    program = import_onnx(str(args.model), do_shape_infer=True, normalize=True)
+    program = import_onnx(
+        str(args.model),
+        do_shape_infer=True,
+        input_shapes=[list(input_shape)] if input_shape_override is not None else None,
+        normalize=True,
+    )
     module = plan_interval_ibp_v0(program)
     input_spec = InputSpec.box(
         value_name=program.graph.inputs[0],

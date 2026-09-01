@@ -1,0 +1,43 @@
+{
+  "abcrown_commit": "e5c7e17bf0488843acb77b7519f59876717a49f4",
+  "auto_lirpa_commit": "5a098e8f9fb5786a428a024981d833d303921f2d",
+  "b3_formal_manifest_file_sha256": "d88eeecafcd6a7a9394cdf9654962a36497b1c7afd15d7862048b1c3ccd7db4a",
+  "b3_formal_manifest_hash": "d553a72ea5cae99c367f7c0120966bb36058966bc081241befba24455be2c1c9",
+  "b4_0_attribution_only": true,
+  "code_revision": {
+    "boundflow/runtime/fsg4_b3_device_atomic_commit.py": "49b77fbe924ab36e6590bef1ac2813a2a8cdd96eeefc1af497dbd6672ad0f1da",
+    "boundflow/runtime/fsg4_b3_device_live_return.py": "722a06f0fc0327a82efd8f354eea6ca8ed0dfc5a531645ca23ec73190f86ba6e",
+    "boundflow/runtime/fsg4_b3_terminal_optimizer_schedule.py": "0ac4b72847399e1dbe53a7d89dfd463f52c061c932d4aed93f3b6459b266e778",
+    "boundflow/runtime/fsg4_b4_kernel_attribution.py": "fde094c6e90da9c88bd4df71656add111f07a5d80a9709631c048c01500f9c60",
+    "boundflow/runtime/rvir_v4_native_backward_export.py": "0222c8ae74a0e922ac486fb9f4284c1d5b16f9f534cc0922a31c432056c68b76",
+    "boundflow/runtime/rvir_v4_native_kfsb.py": "10b64b480b058107d12729f713aacf82356af8885458be5f1916639178062cf8",
+    "scripts/run_fsg4_b3_counter_diagnostic.py": "44f8a71eae3052ac56980262c607f3cec81d659b76791b75eb7359777200eb21",
+    "scripts/run_fsg4_b3_same_solver_timing.py": "e6a3f0136aed87701e94d090b06e80ae9d0153e8402278889a43c22b6dfb201f",
+    "scripts/run_fsg4_b4_kernel_attribution.py": "123967fb19a039f5c64aaf117008dcd5c700966d0cd3592c80a3dca8937a22e5",
+    "scripts/run_rvir_v4_live_return_capture.py": "7424a78d6536982cdb315b8b31691edb2c3adf3d49feed6850132ddaa8956dbd"
+  },
+  "direct_semantic_atol": 0.0002,
+  "direct_semantic_rtol": 0.0002,
+  "model_name": "resnet_2b.onnx",
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "performance_claimed": false,
+  "profiler": {
+    "activities": [
+      "CPU",
+      "CUDA"
+    ],
+    "profile_memory": true,
+    "record_shapes": true,
+    "with_stack": false
+  },
+  "property_name": "prop_0_eps_0.008.vnnlib",
+  "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+  "protocol_hash": "2b14a2a8d457662f3fa7b230355eb39cd213d9d817e86d18d57a754dcb41c46b",
+  "schema_version": "boundflow.fsg4-b4-kernel-attribution-protocol/v1",
+  "source_git_head": "66154e485594e8a84ad1ce04d701d8543c1a7335",
+  "vnncomp_commit": "90419aadcf06cf543ce5c1706cae1059dc9fa6cf",
+  "worker_sequence": [
+    "control",
+    "profile"
+  ]
+}

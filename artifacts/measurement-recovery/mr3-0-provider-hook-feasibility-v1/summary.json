@@ -1,0 +1,43 @@
+{
+  "candidate_bridge_implementation_open": true,
+  "fresh_process_count": 4,
+  "inner_evaluation_count_per_run": 10,
+  "maximum_absolute_difference": 2.0265579223632812e-06,
+  "outer_exact_call_count_per_run": 1,
+  "pair_count": 2,
+  "pair_metrics": [
+    {
+      "allclose": true,
+      "element_count": 9600,
+      "maximum_absolute_difference": 2.0265579223632812e-06,
+      "metric_hash": "79f414f94076692cb631d6594e22201bb5f76863e23db0add2ccd8736dd02364",
+      "pair_index": 0,
+      "sign_exact": true
+    },
+    {
+      "allclose": true,
+      "element_count": 9600,
+      "maximum_absolute_difference": 1.6093254089355469e-06,
+      "metric_hash": "ed07e267512e3229de9174c6fcf09fca8ec0fa079891ad4573b6ea06c7bb54e1",
+      "pair_index": 1,
+      "sign_exact": true
+    }
+  ],
+  "pair_semantic_hashes": [
+    "79f414f94076692cb631d6594e22201bb5f76863e23db0add2ccd8736dd02364",
+    "ed07e267512e3229de9174c6fcf09fca8ec0fa079891ad4573b6ea06c7bb54e1"
+  ],
+  "performance_claimed": false,
+  "probe_conv_call_count": 20,
+  "probe_relu_call_count": 20,
+  "provider_conv": "/input-20",
+  "provider_relu": "/input-24",
+  "provider_start_node": "/49",
+  "same_solver_performance_open": false,
+  "schema_version": "boundflow.mr3-provider-hook-feasibility/v1",
+  "sign_exact": true,
+  "status": "VALIDATED-MR3-0-PROVIDER-HOOK-FEASIBILITY",
+  "summary_hash": "c19dd2466243b3ddaa43d4313a6b2c3bd1c04f769622b9ac3c247a19f0eee785",
+  "timing_open": false,
+  "timing_recorded": false
+}

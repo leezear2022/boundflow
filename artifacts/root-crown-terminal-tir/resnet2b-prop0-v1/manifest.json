@@ -1,0 +1,29 @@
+{
+  "code_revision": {
+    "boundflow/backends/tvm/root_crown_terminal_linear.py": "e1ed0aa317a80fbab342e8903678baff8544d16b74eabfb8edfef65d8824fdca",
+    "boundflow/runtime/root_crown_terminal_capture.py": "34c8653819cc489b2d175ea8d15631023cf7c6035d2cd1c8c2cc10965beaea63",
+    "boundflow/runtime/root_crown_terminal_live.py": "5279e022c29ed55b2291941944528b7ec6eb66adde63f2e4ba66eedf0a73a448",
+    "boundflow/runtime/root_crown_terminal_tir.py": "807407fc44ae26dbc07cf251b519fd33f6f77a22b397f0803dd11dbe4c135ed6",
+    "scripts/package_root_crown_terminal_five_pair.py": "a12b138be0b6e7dd158af49a2b10c238174c18128b4f4f318721e19e8c6f88dc",
+    "scripts/probe_root_crown_terminal_capture.py": "98aabf0e9c6dc50a0c6e747a18fd4ecd8a607968959d03a6c9c8289a4caf56ca",
+    "scripts/probe_root_crown_terminal_tir.py": "85b888c0ba818a9c150f983e640f3308cadcf97b3d61ccf0fcf6414d91e39831",
+    "scripts/run_root_crown_terminal_live_worker.py": "16549beb428352c41e1cec6933245ef9b06121d9f2e99c6b2569891092ae34d3",
+    "tests/test_root_crown_terminal_five_pair_artifact.py": "45c6630bacfa4af66b3a0dc04557395538a8d787b0bfbf3b7e5475c28342ab6c",
+    "tests/test_root_crown_terminal_tir.py": "c0eea26ad901505fc0216d30fa765d8f587e5dc4fa8d49c8f4c1bd0c25920f6b"
+  },
+  "files": {
+    "README.md": "da520357e2c2c483585b18023d35def11eb5a4b2ed90cf40bf1397f6d04c34f7",
+    "isolated_probe.json": "112eda140d8da4c163b3c0cec52f3d9b329997e31a247a3b27f7b693b4e8b1a3",
+    "summary.json": "267ccf4c3d9f7446d708a0fca47f1f934312d5b7dd8244f8b0a17d051536dfb1",
+    "workers.jsonl": "916544eb8b98665ce53a17644e033a738206950578a97cc451d585b9512ea12c"
+  },
+  "model_relative_path": "benchmarks/cifar10_resnet/onnx/resnet_2b.onnx",
+  "model_sha256": "791aa24d77917ecda16809fbbd48e7739616f88ebf74cf358b2d1bf911dc4a6d",
+  "performance_claimed": false,
+  "property_relative_path": "benchmarks/cifar10_resnet/vnnlib_properties_pgd_filtered/resnet2b_pgd_filtered/prop_0_eps_0.008.vnnlib",
+  "property_sha256": "89edf0665d74397670d0562d513db694a49a84edaf5cf3d64c9c6fa63c3769ff",
+  "raw_projection": true,
+  "raw_projection_excludes_local_environment_and_event_stream": true,
+  "schema_version": "boundflow.root-crown-terminal-five-pair/v1",
+  "source_parent_revision": "726f2d66c4bb9bbfeba3dd86d68300aa259496f0"
+}

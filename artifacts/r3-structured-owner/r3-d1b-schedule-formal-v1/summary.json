@@ -1,0 +1,43 @@
+{
+  "correctness_pass": true,
+  "d1b_schedule_qualification": true,
+  "d1c_wrapper_open": true,
+  "geomean_speedup": 58.06191100953053,
+  "isolated_gate_pass": true,
+  "isolated_opportunity_gate": 15.5,
+  "isolated_performance_claimed": true,
+  "metrics": [
+    {
+      "baseline_median_ms": 34.09203338623047,
+      "candidate_median_ms": 0.5995519757270813,
+      "speedup": 56.862515288831794
+    },
+    {
+      "baseline_median_ms": 34.07040023803711,
+      "candidate_median_ms": 0.581631988286972,
+      "speedup": 58.57724630720805
+    },
+    {
+      "baseline_median_ms": 34.916351318359375,
+      "candidate_median_ms": 0.5841920077800751,
+      "speedup": 59.768622051234885
+    },
+    {
+      "baseline_median_ms": 34.27123260498047,
+      "candidate_median_ms": 0.5990400016307831,
+      "speedup": 57.210257264428
+    },
+    {
+      "baseline_median_ms": 34.26150321960449,
+      "candidate_median_ms": 0.5913600027561188,
+      "speedup": 57.93679494711141
+    }
+  ],
+  "run_count": 5,
+  "schema_version": "boundflow.r3-d1b-schedule-summary/v1",
+  "summary_hash": "3a13ad4db7746f0dba98dcac0b84df930fd470c4f0f78475f71227f29660b95f",
+  "winner_schedule_kind": "two-kernel-serial-reduction",
+  "winner_threads_per_block": 256,
+  "worst_speedup": 56.862515288831794,
+  "wrapper_performance_claimed": false
+}

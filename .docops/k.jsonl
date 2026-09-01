@@ -6,3 +6,45 @@
 {"id":"P001","ty":"P","k":"token.mode","sc":"user","v":"short","cost":"long_doc:+2","st":"acc"}
 {"id":"C002","ty":"C","k":"doc.separate.microdocs","sc":"repo","v":"small plans and small changelogs require standalone docs","st":"acc"}
 {"id":"S001","ty":"S","k":"cmd.bash.python3","sc":"repo","v":"Bash:python3","st":"cand"}
+{"id":"L002","ty":"L","k":"fail.s01","sc":"repo","v":"same failure repeated 2 times","st":"cand"}
+{"id":"S002","ty":"S","k":"cmd.bash.asusctl","sc":"repo","v":"Bash:asusctl","st":"cand"}
+{"id":"S003","ty":"S","k":"cmd.bash.awk","sc":"repo","v":"Bash:awk","st":"cand"}
+{"id":"S004","ty":"S","k":"cmd.bash.bash","sc":"repo","v":"Bash:bash","st":"cand"}
+{"id":"S005","ty":"S","k":"cmd.bash.cat","sc":"repo","v":"Bash:cat","st":"cand"}
+{"id":"S006","ty":"S","k":"cmd.bash.command","sc":"repo","v":"Bash:command","st":"cand"}
+{"id":"S007","ty":"S","k":"cmd.bash.conda","sc":"repo","v":"Bash:conda","st":"cand"}
+{"id":"S008","ty":"S","k":"cmd.bash.date","sc":"repo","v":"Bash:date","st":"cand"}
+{"id":"S009","ty":"S","k":"cmd.bash.dol","sc":"repo","v":"Bash:dol","st":"cand"}
+{"id":"S010","ty":"S","k":"cmd.bash.dol.py","sc":"repo","v":"Bash:dol.py","st":"cand"}
+{"id":"S011","ty":"S","k":"cmd.bash.du","sc":"repo","v":"Bash:du","st":"cand"}
+{"id":"S012","ty":"S","k":"cmd.bash.env","sc":"repo","v":"Bash:env","st":"cand"}
+{"id":"S013","ty":"S","k":"cmd.bash.export","sc":"repo","v":"Bash:export","st":"cand"}
+{"id":"S014","ty":"S","k":"cmd.bash.find","sc":"repo","v":"Bash:find","st":"cand"}
+{"id":"S015","ty":"S","k":"cmd.bash.for","sc":"repo","v":"Bash:for","st":"cand"}
+{"id":"S016","ty":"S","k":"cmd.bash.gh","sc":"repo","v":"Bash:gh","st":"cand"}
+{"id":"S017","ty":"S","k":"cmd.bash.git","sc":"repo","v":"Bash:git","st":"cand"}
+{"id":"S018","ty":"S","k":"cmd.bash.head","sc":"repo","v":"Bash:head","st":"cand"}
+{"id":"S019","ty":"S","k":"cmd.bash.jq","sc":"repo","v":"Bash:jq","st":"cand"}
+{"id":"S020","ty":"S","k":"cmd.bash.ls","sc":"repo","v":"Bash:ls","st":"cand"}
+{"id":"S021","ty":"S","k":"cmd.bash.mktemp","sc":"repo","v":"Bash:mktemp","st":"cand"}
+{"id":"S022","ty":"S","k":"cmd.bash.mv","sc":"repo","v":"Bash:mv","st":"cand"}
+{"id":"S023","ty":"S","k":"cmd.bash.nl","sc":"repo","v":"Bash:nl","st":"cand"}
+{"id":"S024","ty":"S","k":"cmd.bash.nvidia.smi","sc":"repo","v":"Bash:nvidia-smi","st":"cand"}
+{"id":"S025","ty":"S","k":"cmd.bash.pgrep","sc":"repo","v":"Bash:pgrep","st":"cand"}
+{"id":"S026","ty":"S","k":"cmd.bash.ps","sc":"repo","v":"Bash:ps","st":"cand"}
+{"id":"S027","ty":"S","k":"cmd.bash.python","sc":"repo","v":"Bash:python","st":"cand"}
+{"id":"S028","ty":"S","k":"cmd.bash.rg","sc":"repo","v":"Bash:rg","st":"cand"}
+{"id":"S029","ty":"S","k":"cmd.bash.sed","sc":"repo","v":"Bash:sed","st":"cand"}
+{"id":"S030","ty":"S","k":"cmd.bash.set","sc":"repo","v":"Bash:set","st":"cand"}
+{"id":"S031","ty":"S","k":"cmd.bash.sha256sum","sc":"repo","v":"Bash:sha256sum","st":"cand"}
+{"id":"S032","ty":"S","k":"cmd.bash.source","sc":"repo","v":"Bash:source","st":"cand"}
+{"id":"S033","ty":"S","k":"cmd.bash.stat","sc":"repo","v":"Bash:stat","st":"cand"}
+{"id":"S034","ty":"S","k":"cmd.bash.systemctl","sc":"repo","v":"Bash:systemctl","st":"cand"}
+{"id":"S035","ty":"S","k":"cmd.bash.tail","sc":"repo","v":"Bash:tail","st":"cand"}
+{"id":"S036","ty":"S","k":"cmd.bash.test","sc":"repo","v":"Bash:test","st":"cand"}
+{"id":"S037","ty":"S","k":"cmd.bash.uptime","sc":"repo","v":"Bash:uptime","st":"cand"}
+{"id":"S038","ty":"S","k":"cmd.bash.uv","sc":"repo","v":"Bash:uv","st":"cand"}
+{"id":"S039","ty":"S","k":"cmd.bash.wc","sc":"repo","v":"Bash:wc","st":"cand"}
+{"id":"S040","ty":"S","k":"cmd.bash.while","sc":"repo","v":"Bash:while","st":"cand"}
+{"id":"S041","ty":"S","k":"cmd.apply.patch","sc":"repo","v":"apply_patch","st":"cand"}
+{"id":"L003","ty":"L","k":"gpu.parity.structure.numeric","sc":"repo","v":"GPU parity: exact discrete structure; finite raw floats use preregistered tolerances; bind raw payload and count numeric-derived hash differences","st":"cand"}

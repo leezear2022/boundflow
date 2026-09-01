@@ -1,0 +1,92 @@
+{
+  "command": {
+    "abcrown_root": "$ABCROWN_ROOT",
+    "benchmark_root": "$VNNCOMP_ROOT",
+    "block_index": 0,
+    "configuration": "B2",
+    "mode": "control",
+    "model": "$MODEL",
+    "property": "$PROPERTY",
+    "result": "workers/run_02.json",
+    "run_id": "block-00-pos-02-B2-control",
+    "sequence_position": 2,
+    "worker": "scripts/run_fsg4_b3_same_solver_timing.py"
+  },
+  "duration_ns": 5325605037,
+  "ended_monotonic_ns": 52930757130350,
+  "formal_preflight": {
+    "admitted": true,
+    "poll_seconds": 5,
+    "sample_count": 1,
+    "samples": [
+      {
+        "ac_powered": true,
+        "compute_processes": [
+          {
+            "name": "kwin_wayland",
+            "pid": 1508,
+            "used_memory_mib": 7
+          }
+        ],
+        "elapsed_ns": 109276416,
+        "gpu_snapshot": {
+          "driver_version": "610.57.04",
+          "hw_thermal_slowdown": "Not Active",
+          "hw_thermal_slowdown_counter_us": 0,
+          "memory_clock": "8001 MHz",
+          "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+          "performance_state": "P0",
+          "power_draw": "14.02 W",
+          "sm_clock": "1890 MHz",
+          "sw_power_cap": "Not Active",
+          "sw_power_cap_counter_us": 812933,
+          "sw_thermal_slowdown": "Not Active",
+          "sw_thermal_slowdown_counter_us": 812933,
+          "target_temperature": "87 C",
+          "temperature": "46 C",
+          "temperature_tlimit_margin": "41 C",
+          "total_memory": "8188 MiB",
+          "uuid": "GPU-0d3ee0a6-e7da-6b3b-69c4-2153bf99ae8f"
+        },
+        "independent_thermal_active": false,
+        "temperature_celsius": 46
+      }
+    ],
+    "temperature_limit_celsius": 50,
+    "timeout_seconds": 900,
+    "wait_ns": 109507981
+  },
+  "host_after": {
+    "ac_powered": true,
+    "cpu_governors": [
+      "performance"
+    ],
+    "load_average": [
+      1.55078125,
+      0.74462890625,
+      0.7177734375
+    ],
+    "monotonic_ns": 52930758720139
+  },
+  "host_before": {
+    "ac_powered": true,
+    "cpu_governors": [
+      "performance"
+    ],
+    "load_average": [
+      0.25830078125,
+      0.46533203125,
+      0.62744140625
+    ],
+    "monotonic_ns": 52925431362637
+  },
+  "index": 2,
+  "performance_claimed": false,
+  "result_file": "workers/run_02.json",
+  "returncode": 0,
+  "started_monotonic_ns": 52925431525313,
+  "stderr_file": "logs/run_02.stderr.txt",
+  "stdout_file": "logs/run_02.stdout.txt",
+  "timed_out": false,
+  "timeout_seconds": 1080
+}

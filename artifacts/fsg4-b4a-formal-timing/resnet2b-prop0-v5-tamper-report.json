@@ -1,0 +1,124 @@
+{
+  "all_rejected": true,
+  "artifact_source_git_head": "46a8493557c49f327df4e70d7cdd7649227b14b9",
+  "attack_count": 14,
+  "attacks": [
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "control-latency-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B4-A formal derived replay differs: paired_runs.jsonl"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "delete-worker-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B4-A partial worker cannot resume: 23"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "aggregate-order-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B4-A formal worker aggregate differs"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "candidate-activation-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B4-A formal activation differs"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "candidate-profile-counter-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B4-A formal physical profile counter differs"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "export-payload-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B4-A tensor pair numeric differs: terminal-lower"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "runtime-environment-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B4-A formal activation differs"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "environment-counter-delta-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B4-A formal worker environment projection differs"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "worker-protocol-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B4-A formal activation differs"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "formal-preflight-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B4-A strict preflight admission differs"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "power-policy-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B4-A strict preflight payload differs"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "protocol-sequence-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B4-A formal protocol differs"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "paired-ratio-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B4-A formal derived replay differs: paired_runs.jsonl"
+    },
+    {
+      "manifest_file_digest_resigned": true,
+      "manifest_hash_resigned": true,
+      "name": "summary-outer-resign",
+      "payload_modified": true,
+      "rejected": true,
+      "rejection": "FSG4/B4-A formal derived replay differs: summary.json"
+    }
+  ],
+  "clean_summary_hash": "46360e41e87917f2f5f801733fe6f13f10591cb63eff9b2675db37320a0bc3d7",
+  "outer_resigned_attack_count": 14,
+  "performance_claimed": false,
+  "report_hash": "e0458166faf6b6536a3d5dbcf1a306ae783c01558d56de571936054cc8f271c0",
+  "schema_version": "boundflow.fsg4-b4a-formal-timing-tamper-report/v1"
+}

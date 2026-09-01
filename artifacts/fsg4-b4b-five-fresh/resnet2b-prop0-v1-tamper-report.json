@@ -1,0 +1,74 @@
+{
+  "artifact_manifest_sha256": "b80167b732b5135b5f3232b9d8bbf6e227ee666a5de30f2f3621438b4a6adecb",
+  "attack_count": 9,
+  "performance_claimed": false,
+  "rejected_count": 9,
+  "report_hash": "727ae2ad5bfacc0ad0fae4a60dffe59f58445d2f4ea7973451bfa186ec7b7f5a",
+  "rows": [
+    {
+      "attack": "state-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B0 five-fresh discrete structure differs",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "attack": "start-node-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B production lineage differs",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "attack": "topology-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B0 five-fresh discrete structure differs",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "attack": "shape-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B captured tensor differs: incoming_lower_a",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "attack": "alpha-index-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B0 five-fresh discrete structure differs",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "attack": "beta-location-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B0 five-fresh discrete structure differs",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "attack": "gradient-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B0 tensor numeric differs: run-1:semantic-active-beta-gemm-14:gradient:native_alpha",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "attack": "alias-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B production capture differs",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "attack": "stream-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B production capture differs",
+      "outer_resigned": true,
+      "rejected": true
+    }
+  ],
+  "schema_version": "boundflow.fsg4-b4b0-five-fresh-tamper-report/v1",
+  "tir_admitted": false
+}

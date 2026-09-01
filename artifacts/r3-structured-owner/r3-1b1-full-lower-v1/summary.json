@@ -1,0 +1,45 @@
+{
+  "b1_closed": true,
+  "b2_open": true,
+  "candidate_lower": [
+    -0.3708958625793457,
+    -0.4221745729446411,
+    -0.4737401008605957,
+    -0.36605799198150635,
+    -0.4408513307571411,
+    -0.4903639554977417
+  ],
+  "coefficient_scratch_count": 2,
+  "compilation_receipt_hash": "b412872d0ab5713c6f20288b65d5a4848bb8d4672eec7af5b8a44aca63159bd2",
+  "compiled_region": true,
+  "custom_vjp": false,
+  "device_source_hash": "c4112b4055636259cde16514be7f58145bcfa316256121bdae4f1c60778e1ddf",
+  "dlpack_pointer_count": 70,
+  "dlpack_pointer_exact_count": 70,
+  "launch_count": 15,
+  "max_abs_diff": 3.814697265625e-06,
+  "module_hash": "003f38c0cccee27cd210014fadda9c7fa8f9b2fae2e93b853be0a3c3101649ba",
+  "native_lower": [
+    -0.3708930015563965,
+    -0.422172486782074,
+    -0.4737362861633301,
+    -0.3660600185394287,
+    -0.44085168838500977,
+    -0.49036359786987305
+  ],
+  "performance_claimed": false,
+  "production_plan_hash": "39d61775caac6d64a5a2d697073d0caa434d34bb2f054351f474700e9d61910f",
+  "python_visible_intermediate_coefficient_count": 0,
+  "r3_1_admitted": false,
+  "schema_version": "boundflow.r3-1b1-full-lower-summary/v1",
+  "scratch_capacity_elements": [
+    18432,
+    18432
+  ],
+  "sign_exact": true,
+  "status": "validated-r3-1b1-compiled-full-lower",
+  "summary_hash": "d7a6702c713c5606b31408e9e597e49dda805e901d949c34559ab33094d96f2e",
+  "timing_recorded": false,
+  "trace_hash": "a5279f8e76b722dbebd8df23a417f9de7b5d65c4dce5067035627be9137e20bc",
+  "warm_dynamic_allocated_bytes": 0
+}

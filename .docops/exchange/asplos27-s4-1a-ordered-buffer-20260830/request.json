@@ -1,0 +1,25 @@
+{
+  "doc": "asplos27-s4-1a-ordered-buffer-20260830/request",
+  "type": "request",
+  "task": "asplos27-s4-1a-ordered-buffer-20260830",
+  "round": 0,
+  "from": "codex",
+  "to": "external-auditor",
+  "executor": "codex",
+  "auditor": "external-model",
+  "ts": "2026-08-30T03:09:32Z",
+  "title": "ASPLOS27 S4-1A ordered buffer formal audit",
+  "request": "# ASPLOS'27 S4-1A ordered buffer 外部审计交接\n\ndate: 2026-08-30  \nrequested-verdict: approve-or-request-changes  \nrequested-close: VALIDATED-S4-1A-ORDERED-BUFFER-PREPARE  \nperformance-claimed: false\n\n## 1. 审计对象\n\n- branch：`feat/rvir-v4-production-state-ownership-v1`；\n- production code：`8834aa5`；unit：`29bcaa0`；\n- formal source：`bce26f0d8109f69d520dfe27a04fb9c2110b34b0`；\n- frozen artifact commit：`00893c5`；\n- artifact：`artifacts/asplos27-s4-1a-buffer/resnet2b-prop0-v1`；\n- tamper：`artifacts/asplos27-s4-1a-buffer/resnet2b-prop0-v1-tamper-report.json`；\n- contract：`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1A_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`。\n\n请不要采信changelog/summary聚合数字，应从raw、binary sidecar与源码独立重算。\n\n## 2. AC1：source与scope\n\n核对protocol绑定的9个code blob、formal source commit、αβ-CROWN/auto_LiRPA/VNN-COMP commit及model/property\nSHA256；artifact不得含本机路径。确认S4-1A只做buffer prepare，没有CROWN evaluator、TIR launch、optimizer、\nmutation、terminal、timing或performance路径。\n\n## 3. AC2：ordered physical owner\n\n亲读production实现，确认S4-0 ticket只消费一次；资源顺序为6 α parameter→1 active β parameter→6 dα→1 dβ→\nlower→upstream；5个empty β只有typed token。核对16个storage互异、candidate/source无alias、完整view key含\nstorage identity/pointer/nbytes、tensor pointer、shape/stride/offset/dtype/device，并在cache lookup前拒绝noncontiguous。\n\n## 4. AC3：5个fresh正向与二进制语义\n\n从`raw/workers.jsonl`和5个`.bin` sidecar独立重算：\n\n- 5/5真实production exact-call；\n- 每run 8组source/candidate，共40组逐字节相等；\n- parameter/gradient=`4,254/4,254` elements、`17,016/17,016 B`；\n- storage/view=`16/16`、candidate logical=`34,080 B`；\n- empty β token/physical=`5/0`；\n- S4-1A D2H=`32/85,056 B`、累计=`56/153,072 B`、D2D=`7/17,016 B`；\n- close后candidate allocated delta 5/5为0。\n\n## 5. AC4：7个fresh隔离故障\n\n逐个核对parameter、gradient、output、TVM view、roundtrip、receipt、adoption fault各在独立新进程执行；stable\ndetail/reason与冻结映射一致，`__context__ is None`、allocated delta=0、fallback/retry/empty-cache=0。建议外审至少\n亲启一个最早fault和一个最晚fault，并保留异常对象后复核candidate释放；最好重跑全部7个。\n\n## 6. AC5：unit、replay与tamper\n\n- negative registry应为77个唯一nodeid且逐项存在于测试源码，门槛为68；\n- unit应为80 passed，artifact+unit应为84 passed；\n- 全量应为`2050 passed, 3 skipped, 6 warnings`，3个skip均为既有环境边界；\n- stdlib replay不得import BoundFlow/PyTorch/TVM/Numpy；\n- 10类outer-resigned攻击应10/10拒绝，包括binary candidate、storage/view、empty β、D2H账、fault detail/cleanup、\n  claim、ordinal与negative registry；\n- 请自建至少一类未注册攻击，并说明是identity还是derived semantics拒绝；\n- coherent full resign的E0边界仍需明确，不得把tamper probe写成硬件真实性证明。\n\n## 7. AC6：回归与静态门禁\n\n建议运行：\n\n```bash\nsource /home/lee/miniconda3/etc/profile.d/conda.sh\nconda activate boundflow\nsource env.sh\npytest -q tests/test_asplos27_s4_ordered_buffer_abi.py \\\n  tests/test_asplos27_s4_1a_buffer_artifact.py\npytest -q tests/test_asplos27_s4_mutable_state_admission.py \\\n  tests/test_asplos27_s4_ordered_buffer_abi.py\npytest -q tests\npython scripts/replay_asplos27_s4_1a_buffer_stdlib.py \\\n  --artifact artifacts/asplos27-s4-1a-buffer/resnet2b-prop0-v1\npython scripts/probe_asplos27_s4_1a_buffer_tamper.py \\\n  --artifact artifacts/asplos27-s4-1a-buffer/resnet2b-prop0-v1\n```\n\n另核对Black、scoped Mypy、Pylint 10.00、`git diff --check`与`dol lint --soft`。\n\n## 8. AC7：判定与后继门禁\n\n批准只允许关闭`VALIDATED-S4-1A-ORDERED-BUFFER-PREPARE`，并另行开放S4-1B0\nimplementation/correctness。不得升级CROWN numeric、optimizer、same-solver、memory/performance、complete-query、\n10x或ASPLOS-ready claim；S4 timing保持关闭。\n\n请输出AC1—AC7逐项PASS/FAIL、独立数字、findings分级、不可现场复核项，以及是否批准executor关闭S4-1A并只开放\nS4-1B0。\n",
+  "scope": "S4-1A ordered compressed alpha/active-beta persistent buffer ownership and fresh-process correctness only",
+  "acceptance": [
+    "AC1 source and scope identity",
+    "AC2 ordered physical owner and DLPack key",
+    "AC3 five-fresh positive binary semantics",
+    "AC4 seven isolated clean faults",
+    "AC5 unit replay tamper evidence",
+    "AC6 regression and static gates",
+    "AC7 claim boundary and successor gate"
+  ],
+  "base_commit": "3dca00f",
+  "md_sha256": "a3fb97491d039cde0bfe9dd0d3c564fa22c36e8998e9eac9ccfa2d459cd32740"
+}

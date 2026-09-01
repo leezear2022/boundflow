@@ -1,0 +1,74 @@
+{
+  "all_outer_provenance_gates_rejected": true,
+  "all_semantic_mutation_gates_rejected": true,
+  "artifact_manifest_sha256": "b76ee57348f2311996e6b40f013b46acdf39171a3ddc12ae2be9fa0119800136",
+  "artifact_source_git_head": "fe7cdb68d20d2691e2795713bf6ec25a92efea3c",
+  "original_replay": {
+    "commit_hash": "8925e836a982deeaa46a0c64ee8e8149f3af8c07a11d7ce701d9c809ce86fb71",
+    "copy_out_hash": "d93187516245ca8669e04e3e3f1f664267a6db26af8287283bdc6f3183e34194",
+    "evidence_status": "validated-atomic-copy-out",
+    "performance_claimed": false,
+    "status": "replay-passed",
+    "summary_hash": "d250fd49ba6ba5a4f679a4398a463027fa3ff9a9761af5fa98a8f9e031876692"
+  },
+  "performance_claimed": false,
+  "probe_code_sha256": "659cc5b0eaf7ab044cb5e9c070a1223c10b33484505c6cbf7d5895150f4fe3a9",
+  "probe_count": 6,
+  "probes": [
+    {
+      "internal_hashes_recomputed": true,
+      "name": "topology-internal-rehash",
+      "outer_error": "RVIR-v4 atomic copy-out topology differs",
+      "outer_manifest_resigned": true,
+      "semantic_error": "RVIR-v4 pre-state frozen identity differs",
+      "status": "rejected-as-expected"
+    },
+    {
+      "internal_hashes_recomputed": true,
+      "name": "initial-upper-alpha-internal-rehash",
+      "outer_error": "RVIR-v4 atomic copy-out frozen source differs",
+      "outer_manifest_resigned": true,
+      "semantic_error": "RVIR-v4 pre-state frozen identity differs",
+      "source_manifest_resigned": true,
+      "status": "rejected-as-expected"
+    },
+    {
+      "internal_hashes_recomputed": true,
+      "name": "expected-post-alpha-internal-rehash",
+      "outer_error": "RVIR-v4 atomic copy-out frozen source differs",
+      "outer_manifest_resigned": true,
+      "semantic_error": "RVIR-v4 copy-out mutable numeric parity differs",
+      "source_manifest_resigned": true,
+      "status": "rejected-as-expected"
+    },
+    {
+      "internal_hashes_recomputed": true,
+      "name": "final-production-lower-cross-resign",
+      "outer_error": "RVIR-v4 atomic copy-out frozen source differs",
+      "outer_manifest_resigned": true,
+      "semantic_error": "RVIR-v4 copy-out final lower parity differs",
+      "source_manifest_resigned": true,
+      "status": "rejected-as-expected"
+    },
+    {
+      "internal_hashes_recomputed": true,
+      "name": "recorded-copy_out-full-resign",
+      "outer_error": "RVIR-v4 atomic copy-out semantic replay differs",
+      "outer_manifest_resigned": true,
+      "semantic_reexecution": true,
+      "status": "rejected-as-expected",
+      "summary_resigned": true
+    },
+    {
+      "internal_hashes_recomputed": true,
+      "name": "recorded-commit-full-resign",
+      "outer_error": "RVIR-v4 atomic copy-out semantic replay differs",
+      "outer_manifest_resigned": true,
+      "semantic_reexecution": true,
+      "status": "rejected-as-expected",
+      "summary_resigned": true
+    }
+  ],
+  "report_hash": "e15c5118eab27e27629fe08a91faaac755363626155702fe57b35136202a3abb",
+  "schema_version": "boundflow.rvir-v4-atomic-copy-out-tamper-report/v1"
+}

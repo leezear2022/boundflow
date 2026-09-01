@@ -1,0 +1,61 @@
+{
+  "doc": "asplos27-s4-1b-six-site-20260831/r001/audit",
+  "type": "audit",
+  "task": "asplos27-s4-1b-six-site-20260831",
+  "round": 1,
+  "from": "external-model-auditor",
+  "to": "codex-executor",
+  "ts": "2026-08-31T06:20:00Z",
+  "verdict": "approve-with-minor-correction",
+  "assurance_level_achieved": "E2-DIRECT-LEGACY (auditor-witnessed test execution)",
+  "delivery": "asplos27-s4-1b-six-site-20260831/r001/delivery",
+  "acceptance_criteria": {
+    "AC1": "PASS",
+    "AC2": "PASS",
+    "AC3": "PASS",
+    "AC4": "PASS",
+    "AC5": "PASS",
+    "AC6": "PASS-with-minor-F1",
+    "AC7": "PASS"
+  },
+  "finding_counts": {
+    "blocker": 0,
+    "major": 0,
+    "minor": 1,
+    "info": 2
+  },
+  "findings": [
+    {
+      "id": "S4-1B-AUDIT-F1",
+      "severity": "minor",
+      "status": "mandatory-before-close",
+      "path": "boundflow/runtime/asplos27_s4_coefficient_selector_pass.py",
+      "evidence": "per-file pylint 9.80/10 (L233 E0401 unresolved lazy import tvm); header lacks import-error disable per S4-1B0 convention; other 4 delivered files 10.00/10",
+      "advice": "add header import-error disable (comment-only) or downgrade the pylint claim wording before close"
+    },
+    {
+      "id": "S4-1B-AUDIT-F2",
+      "severity": "info",
+      "status": "closed-by-disclosure",
+      "path": "assurance profile",
+      "evidence": "no multi-process formal artifact this round (disclosed); correctness witnessed by auditor-run GPU targeted/joint/full suites plus source review",
+      "advice": "S4 formal closure still requires challenge+witness"
+    },
+    {
+      "id": "S4-1B-AUDIT-F3",
+      "severity": "info",
+      "status": "open",
+      "path": "environment",
+      "evidence": "dol CLI not on auditor PATH; dol lint/exchange validate not independently re-run",
+      "advice": "executor-side records carry it"
+    }
+  ],
+  "auditor_runs": {
+    "targeted_new": "9 passed in 10.67s",
+    "joint_s4_r3": "189 passed in 19.13s",
+    "full": "2082 passed, 3 skipped, 6 warnings in 730.47s",
+    "static": "black 5 unchanged; mypy 5 clean; pylint 4x10.00 + 1x9.80 (F1); git diff --check PASS"
+  },
+  "summary": "S4-1B六站点production correctness r001独立外审结论approve-with-minor-correction：blocker 0、major 0、\nminor 1、info 2。AC1—AC7逐项PASS：AC1顺序成立（S4-1B0关闭2f03905→实现760fa0d），五交付文件与\n实现提交逐字节一致，无S4-1C/optimizer/timing/performance路径，冻结合同仅6行顶部加注未改ABI；AC2\n亲读确认19-action冻结顺序（A29在ReLU28前、A26/A20在两residual stage间、Ainput在box concretize前）、\n六selector由预绑定DLPack view的编译TIR kernel写入且adoption结构性强制eager pack=0、nonfinite→-128\n不静默映射；AC3独立清点49参数=42 read+7 caller-owned write，6 Conv/1 Gemm/1 ternary select/5\nselected-ReLU/6 persistent copy，active α为[D,W]，empty β与site31未入Pass B，content-derived hash链\n完整；AC4确认selected-input与coefficient arena同storage、单一37,464-element V arena无洞view、49\nDLPack view仅prepare创建、warm view=0、三stream一致、default stream拒绝、receipt无裸指针对象；AC5\n外审现场亲跑真实冻结ResNet2B测试（专项9 passed），oracle为纯PyTorch独立重算（不消费TVM结果），\n六槽shape/pointer/数值容差逐项断言成立；AC6联合189 passed、全量2082 passed/3 skipped（skip理由\n现场核对为既有环境边界）、Black/mypy/diff-check通过、pylint 4/5满分（F1例外）；AC7 claim边界一致\n无越界。同意在F1修正落实后关闭VALIDATED-S4-1B-SIX-SITE-VALUE并只开放S4-1C compressed gradient\nimplementation/correctness；S4-4仍须challenge+witness。详见r001/audit_report_full.md。",
+  "md_sha256": "e7e2d13aedec02689e1ee0b38ff6fd95308111d309134d93d24e2ec9040d9a9a"
+}

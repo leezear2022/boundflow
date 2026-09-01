@@ -1,5 +1,578 @@
 # BoundFlow 修改记录（Change Log）
 
+## 2026-08-24：FSG4/B4-C0 Cumulative Core 正式 NO-GO
+
+- 6 fresh/180 groups geomean/lower/worst=`0.94034x/0.93778x/0.93418x`；
+- semantics sign exact、max diff=`7.15e-7`，memory=`1.04818/1.0`；
+- root replay与tamper `8/8 rejected`；
+- 状态=`VALIDATED-NO-GO-B4-C0-NATIVE-VALUE-BRIDGE`；
+- 只开放B4-C1 provider-owned lower path rewrite。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4C0_CUMULATIVE_CORE_FORMAL_CLOSURE_2026_08_24.md`
+
+## 2026-08-24：FSG4/B4-C0 Cumulative Core Artifact
+
+- 6 fresh BC/CB、180 raw groups与root统计/语义/receipt replay已实现；
+- no-regression门禁=`1.00x/lower>1/worst≥0.98/memory≤1.05`；research=`1.05x`；
+- NO-GO时只开放provider-owned lower path rewrite；
+- 下一步=clean-source formal。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4C0_CUMULATIVE_CORE_ARTIFACT_CHANGELOG_2026_08_24.md`
+
+## 2026-08-24：FSG4/B4-C0 Cumulative Core Runner
+
+- 双方3 warmups、30 interleaved groups与per-group 13项语义核对已实现；
+- compile/preparation排除，完整10/9 runtime与native-value bridge计入；
+- timing capture关闭状态由receipt显式冻结；
+- 单worker pilot ratio=`0.9360x`，仅验证runner，下一步=6 fresh formal。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4C0_CUMULATIVE_CORE_RUNNER_CHANGELOG_2026_08_24.md`
+
+## 2026-08-24：FSG4/B4-C0 Core Timing Runtime Prep
+
+- per-evaluation GPU finite `.item()`移出exact executor hot path；
+- timing模式关闭correctness-only evaluation-0 local parity同步；
+- shape/dtype/device/layout/stream门禁与correctness默认行为保持；
+- 下一步=6-fresh warmed/interleaved cumulative core timing。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4C0_CORE_TIMING_RUNTIME_PREP_CHANGELOG_2026_08_24.md`
+
+## 2026-08-24：FSG4/B4-B3 CIBC Five-fresh 正式关闭
+
+- 5 fresh、13 metrics/worker全部allclose/sign exact，max diff=`3.57628e-07`；
+- provider/forward/backward=`50/50/45`，fallback/eager/materialization=`0/0/0`；
+- native-value bridge=50显式冻结；root replay与tamper `8/8 rejected`；
+- 状态=`VALIDATED-B4-B3-CIBC-EXACT-CALL`，只开放累计core formal timing。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4B3_CIBC_FIVE_FRESH_FORMAL_CLOSURE_2026_08_24.md`
+
+## 2026-08-24：FSG4/B4-B3 CIBC Five-fresh Runner
+
+- 5 independent workers与BC/CB交错顺序已实现；
+- 冻结13项terminal state metrics、local parity、exact receipt与完整identity/hash链；
+- root replay从raw重算全部门禁；timing只作diagnostic；
+- 下一步=clean-source formal artifact。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4B3_CIBC_FIVE_FRESH_RUNNER_CHANGELOG_2026_08_24.md`
+
+## 2026-08-24：FSG4/B4-B3 CIBC Exact-call 实现
+
+- dense-native-α TIR接入production 10/9 optimizer，修复compressed/native α与incoming-bias梯度所有权；
+- receipt=`10 forward/9 backward`，fallback/eager/materialization=`0/0/0`，S-anchor显式unsupported；
+- smoke terminal lower及全部α/β allclose/sign exact，max diff=`3.57628e-07`；
+- 以显式native-value/candidate-gradient bridge维持Adam float32轨迹；bridge移除前无性能claim；
+- 下一步=clean-source 5 fresh correctness与root replay。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4B3_CIBC_EXACT_CALL_IMPLEMENTATION_CHANGELOG_2026_08_24.md`
+
+## 2026-08-24：FSG4/B4-B2 v2 Manual TVM TIR 正式关闭
+
+- CIBC式P-anchor横向融合下沉为手写TVM TIR，真实CUDA exact `1+1` kernels、workspace=0；
+- 5 correctness与6-worker三方formal全部通过，max diff=`1.90735e-06`且sign exact；
+- PyTorch/TIR geomean/lower/worst=`4.89834x/4.73771x/4.68601x`；
+- Triton/TIR geomean/lower/worst=`1.68273x/1.60695x/1.56888x`；
+- root semantic replay通过，outer-resigned tamper `10/10 rejected`；
+- 状态=`VALIDATED-B4-B2-V2-MANUAL-TIR`，只开放B4-B3 exact-call integration。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4B2_V2_MANUAL_TIR_FORMAL_CLOSURE_2026_08_24.md`
+
+## 2026-08-23：FSG4/B4-B2 B2-4 Sparse-source Conv TIR 内部关闭
+
+- compressed alpha=`[6,86]`直接进入TIR，empty beta保持absent；
+- P0 five raw + 12项bounded candidate共68 metrics/217,770元素全部allclose/sign exact，
+  max diff=`2.384185791015625e-06`；
+- 12个schedule/module hash唯一，ledger=`1660edca…07c6`且在timing前冻结；
+- targeted/related/full=`51/105/1465 passed`，3 skipped；静态与TVM rebuild全过；
+- 当前只开放B2-4外审；无timing/winner/performance claim，B2-5/B4-B3关闭。
+
+## 2026-08-23：FSG4/B4-B2 B2-3 外审关闭
+
+- Round 1=`APPROVE`，0 blocker/major/minor，2 info；
+- 独立float64、现场GPU、结构workspace、篡改与全量回归全部通过；
+- 最终=`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-3-P-CONV-DENSE-CORRECTNESS`；
+- 只开放B2-4 P-anchor sparse-source schedule；timing/B2-5/B4-B3关闭。
+
+## 2026-08-23：FSG4/B4-B2 B2-3 P-anchor Dense Conv TIR 内部关闭
+
+- 新增first-class dense Conv Template/Instance/Schedule/Module/Launch receipts及CUDA/TIR
+  forward/backward runtime；empty beta保持absent；
+- 5 raw/20 metrics/92,190元素全部allclose/sign exact，max diff=
+  `2.384185791015625e-06`，DLPack=`19/19`，fallback/eager=`0/0`；
+- scheduled TIR alloc-buffer结构门禁只准入`adjoint_conv`与`output_bias_delta`；
+- full=`1457 passed, 3 skipped`，状态=
+  `VALIDATED-B4-B2-B2-3-P-CONV-DENSE-CORRECTNESS-PENDING-EXTERNAL-AUDIT`；
+- 只开放B2-3外审，B2-4/B2-5/timing/B4-B3保持关闭。
+
+## 2026-08-18：FSG4/B4-B1a Five-Fresh 内部关闭
+
+- source=`4a17423`正式artifact完成5 fresh/10 captures、90 tensors/63,645 elements；
+- max diff=`0.0`、sign exact，root replay与8/8 outer-resigned完整性用例通过；
+- related=`30 passed`，full=`1382 passed, 3 skipped, 6 warnings`；
+- 状态=`VALIDATED-B4-B1A-FIVE-FRESH-CAPTURE-SUFFICIENCY`，只开放B4-B1 typed reference，
+  B4-B2/TIR/performance仍关闭。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4b1a_five_fresh_internal_closure.md`。
+
+## 2026-08-18：FSG4/B4-B1a Five-Fresh Runner 候选
+
+- 新增独立worker、five-fresh raw-first runner/root replay与8类完整性probe；
+- 5-process pilot聚合90 tensors/63,645 elements，max diff 0、sign exact，related=`28 passed`；
+- 状态=`IMPLEMENTED-B4-B1A-FIVE-FRESH-RUNNER-PENDING-FORMAL`，协调动态改写限制已披露；
+- typed IR/reference/TIR仍关闭。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4b1a_five_fresh_runner_candidate.md`。
+
+## 2026-08-18：FSG4/B4-B1a Capture Sufficiency Contract
+
+- 新增显式opt-in B4-B1 observer，捕获incoming/operator bias与region output adjoints；
+- 新reference capture在B4-B0 base上绑定sparse layout raw、bias/adjoint/presence/Conv attrs；
+- real CUDA payload生成/replay通过，related=`26 passed`，full=`1378 passed, 3 skipped, 6 warnings`；
+- 状态=`IMPLEMENTED-B4-B1A-CAPTURE-CONTRACT-PENDING-FIVE-FRESH`，typed IR/TIR仍未实现。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4b1a_capture_sufficiency_contract.md`。
+
+## 2026-08-18：FSG4/B4-B1 Typed PyTorch Reference 预注册
+
+- B4-B0 Round 2批准后，只开放B4-B1 typed pure-PyTorch reference；
+- 识别现有capture缺少incoming bias、operator bias与region output adjoints，禁止从target倒推；
+- 冻结B4-B1a capture amendment、typed IR、sparse α/β reconstruction、forward/gradient与负向门禁；
+- B4-B2/TIR/performance继续关闭。详见
+  `gemini_doc/BOUNDFLOW_FSG4_B4B1_TYPED_PYTORCH_REFERENCE_PREREGISTRATION_2026_08_18.md`与
+  `gemini_doc/change_2026-08-18_fsg4_b4b1_preregistration.md`。
+
+## 2026-08-18：FSG4/B4-B0 Round 2 外审关闭
+
+- Round 2独立外审=`approve`，0 blocker / 0 major / 0 minor / 0 info，F1关闭；
+- 审计方自建两类all-run全链重签变体，root replay均拒绝；raw/hash/identity独立重算通过；
+- exchange已由executor关闭，最终状态=`VALIDATED-B4-B0-EXTERNALLY-APPROVED`；
+- 只开放另行预注册的B4-B1 typed pure-PyTorch reference，B4-B2/TIR/performance仍关闭。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4b0_round2_external_closure.md`。
+
+## 2026-08-18：FSG4/B4-B0 v2 内部关闭
+
+- source=`422a3ee`，生成绝对身份绑定的5-fresh/10-capture v2 formal artifact；
+- max diff=`1.1920928955078125e-07`、sign exact，108 tensors / 664,744 elements；
+- Round 1两类coordinated rewrite纳入正式门禁，完整性负例=`11/11 rejected`；
+- 定向=`24 passed`，全量=`1376 passed, 3 skipped, 6 warnings`；
+- 状态=`VALIDATED-B4-B0-V2-PENDING-ROUND2-EXTERNAL-AUDIT`，B4-B1/TIR/performance仍关闭。
+  详见 `gemini_doc/change_2026-08-18_fsg4_b4b0_v2_internal_closure.md`。
+
+## 2026-08-18：FSG4/B4-B0 Round 1 Identity Binding 修复
+
+- 外审Round 1以1个major否决：全run协调改写topology/lineage并重签可绕过相对一致性；
+- v2 verifier新增绝对冻结source/topology/anchor/lineage身份及manifest↔protocol绑定；
+- 合法v1 replay保持，原9类+两类coordinated完整性负例=`11/11 rejected`，回归4 passed；
+- 状态=`IMPLEMENTED-B4-B0-R1-F1-IDENTITY-BINDING-PENDING-V2`，B4-B1/TIR仍关闭。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4b0_round1_identity_binding_fix.md`。
+
+## 2026-08-18：FSG4/B4-B0 Five-Fresh 内部关闭
+
+- source=`1dbb2de`，5个fresh CUDA进程生成10份S/P typed capture；
+- root replay比较108组tensor/664,744元素，max diff=`1.1920928955078125e-07`、sign exact；
+- state/start-node/topology/shape/alpha-index/beta-location/gradient/alias/stream九类全重签攻击
+  `9/9 rejected`；定向20、全量`1372 passed, 3 skipped, 6 warnings`；
+- 状态=`VALIDATED-B4-B0-FIVE-FRESH-PENDING-EXTERNAL-AUDIT`，B4-B1/TIR仍关闭。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4b0_five_fresh_internal_closure.md`。
+
+## 2026-08-18：FSG4/B4-B0 Five-Fresh Runner 候选
+
+- 补齐α-index/lookup、β-location/sign、round-trip、CUDA stream与alias typed ownership；
+- 新增安全raw payload replay、5-fresh worker/runner与9类outer-resigned tamper probe；
+- 单fresh CUDA worker和synthetic 5-run summary已过，formal artifact尚未运行；状态=
+  `IMPLEMENTED-B4-B0-FIVE-FRESH-RUNNER-PENDING-FORMAL-RUN`。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4b0_five_fresh_runner_candidate.md`。
+
+## 2026-08-18：FSG4/B4-B0 Evaluation-0 Live Observer 候选
+
+- 新增只在显式opt-in下启用的双锚点observer，默认B3/B4-A路径不变；
+- evaluation 0 backward后、首次optimizer step前冻结value/gradient，防止被后续mutation改写；
+- CPU production-state与real CUDA smoke通过，独立确认S/P锚点的真实gradient与Conv attrs；
+- related=`53 passed`，full=`1369 passed, 3 skipped, 6 warnings`，Mypy clean，Pylint 10.00/10；状态=
+  `IMPLEMENTED-B4-B0-LIVE-OBSERVER-PENDING-FIVE-FRESH`。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4b0_live_observer_candidate.md`。
+
+## 2026-08-18：FSG4/B4-B0 Typed Capture Contract 候选
+
+- 新增双锚点production differentiable-region capture schema与stable metadata/hash；
+- 分离production compressed α/β映射源、native dense输入/gradients与`relu_pre_add_coeff_l`；
+- 10项正/负测试、fixed related 46 passed、full=`1366 passed, 3 skipped`，Mypy clean，
+  Pylint 10.00/10；
+- 状态=`IMPLEMENTED-B4-B0-CAPTURE-CONTRACT-PENDING-LIVE-HOOK`，无live/TIR/performance claim。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4b_capture_contract_candidate.md`。
+
+## 2026-08-18：FSG4/B4-B Differentiable CUDA/TIR v1 预注册
+
+- 冻结active-beta `node31/Gemm_14`语义锚点和`node25/Conv_8`候选性能锚点；
+- B4-B0先在gradient-active optimizer evaluation 0做5 fresh read-only exact-call capture；
+- PR-12 plain-CROWN capability不放宽，B4-A不进入累计baseline，单shape speedup不外推；
+- 状态=`PREREGISTERED-B4-B-V1-NOT-IMPLEMENTED`。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4b_differentiable_cuda_tir_v1_preregistration.md`。
+
+## 2026-08-18：FSG4/B4-A 外部审计关闭
+
+- Round 1外审从formal raw独立复核AC1—AC7全PASS；0 blocker / 0 major / 1 minor / 1 info；
+- executor关闭exchange为`closed/approved`，最终状态=
+  `EXTERNALLY-APPROVED-VALIDATED-NO-GO-B4-A-PERFORMANCE`；
+- B4-A只保留correctness/mechanism evidence，约1.9% core改善不计入累计performance baseline；
+- 只开放单独B4-B预注册，不自动批准TIR实现。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4a_external_audit_closure.md`。
+
+## 2026-08-18：FSG4/B4-A 正式计时内部关闭
+
+- source=`46a8493`的v5完成24/24 fresh worker；correctness/environment/activation/profile全过；
+- core wall geomean=`1.018995x < 1.03x`，query worst=`0.996947x >= 0.98x`，memory无收益；
+- root replay与14/14 outer-resigned tamper通过，本机路径扫描与manifest SHA256复核通过；
+- 内部状态=`VALIDATED-NO-GO-B4-A-PERFORMANCE-PENDING-EXTERNAL-AUDIT`，下一步只做外审。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4a_formal_timing_internal_closure.md`。
+
+## 2026-08-18：FSG4/B4-A 环境计数区间耦合修复
+
+- source=`03043a3`的v4有19个worker admitted，run 19 raw因旧环境门禁比较累计绝对值而fail closed；
+- run 19 thermal/power counter已有`54579 µs`历史偏移，但worker区间增量严格同为`2062477 µs`；
+- coupling改为interval delta exact，formal replay从raw before/after重算环境投影；
+- tamper清单扩为14类；下一步验证、提交clean source并从position 0运行v5，无性能claim。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4a_environment_interval_coupling_fix.md`。
+
+## 2026-08-18：FSG4/B4-A GPU 功耗策略绑定
+
+- source=`be2fa96`的v3完成20个worker后，worker 20因执行期software thermal counter独立增长而
+  fail closed；v3不续跑、不形成ratio；
+- 正式协议、每worker preflight和replay绑定`nvidia-powerd=inactive`与
+  `enforced.power.limit=55.0 W`；
+- tamper清单扩为13类；下一步完成验证、提交clean source并从position 0运行v4，无性能claim。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4a_power_policy_binding.md`。
+
+## 2026-08-18：FSG4/B4-A Strict Preflight 加固
+
+- source=`ee73bc2`的v2完成5个worker后，worker 5因独立software thermal slowdown fail closed；
+- v2不续跑、不形成ratio，失败worker environment明确为`admitted=false`；
+- formal preflight加固为每worker前GPU `<=45°C`且software thermal完全inactive；
+- 固定related=`63 passed`、全量=`1353 passed, 3 skipped`；下一步clean source后从position 0运行v3，
+  无性能claim。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4a_strict_preflight_hardening.md`。
+
+## 2026-08-18：FSG4/B4-A Profile Counter 覆盖修复
+
+- source=`292a035`的正式v1在worker 3因B4-A profiler alias覆盖缺口fail closed，v1不进入结论；
+- 显式instrumentation新增B4-A forward、两类CROWN evaluation和terminal optimizer wrapper；
+- live diagnostic恢复forward=4、bound eval=10、optimizer=`1/10/9`、handoff/rerun=`1/0`；
+- tamper清单扩为12类，固定related=`62 passed`、全量=`1352 passed, 3 skipped`；下一步clean source后
+  从position 0运行v2，无性能claim。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4a_profile_counter_coverage_fix.md`。
+
+## 2026-08-18：FSG4/B4-A 正式计时 Runner 候选
+
+- 实现6 block、24 fresh worker的B3/B4-A control/profile正式runner与raw-first/resume；
+- root replay从raw重建correctness、activation、environment、profile、ratio与分类；
+- 新增12类outer-resigned latency/semantic/activation/protocol/preflight/derived-summary攻击探针；
+- 固定related=`46 passed`，Black/Mypy/Pylint及全量`1350 passed, 3 skipped`通过；状态=
+  `IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`，无性能claim。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4a_formal_timing_runner_candidate.md`。
+
+## 2026-08-18：FSG4/B4-A 独立正式计时预注册
+
+- 冻结6 block、B3/B4-A control/profile共24个fresh worker；
+- control门禁为core geomean `>=1.03x`、query worst pair `>=0.98x`，不复用correctness latency；
+- 冻结correctness/activation/environment/profile/replay/tamper与路径可移植合同；
+- 状态=`PREREGISTERED-B4-A-FORMAL-TIMING-NOT-IMPLEMENTED`。详见
+  `gemini_doc/change_2026-08-18_fsg4_b4a_formal_timing_preregistration.md`。
+
+## 2026-08-16：FSG4/B4-A Five-Fresh Correctness 内部关闭
+
+- source=`43d4117`按冻结顺序完成10/10 fresh worker、5/5 B3/B4-A direct pair；
+- 每pair从raw比较19个terminal export tensor，全局最大差=`6.109476e-06`且sign exact；
+- 5/5 handoff=1/rerun=0/lineage=6/provider-fallback=0，final semantics与root replay通过；
+- 状态=`INTERNALLY-VALIDATED-B4-A-FIVE-FRESH-CORRECTNESS`，无性能claim，只开放独立正式计时。详见
+  `gemini_doc/change_2026-08-16_fsg4_b4a_five_fresh_correctness_closure.md`。
+
+## 2026-08-16：FSG4/B4-A Terminal Lower/lA Handoff 实现候选
+
+- 实现typed terminal producer、one-shot handoff、no-CROWN export assembly与same-solver显式opt-in；
+- 完整content/lineage/export digest及raw float32 payload在query后排除计时audit绑定；
+- 新增5 fresh B3/B4-A交替runner与root replay；GPU smoke只支持机制/语义，不是性能claim；
+- 修复five-fresh worker解释器symlink被展开为裸Python的问题，失败发生在样本执行前且无半成品artifact；
+- 状态=`IMPLEMENTED-B4-A-PENDING-CLEAN-SOURCE-FIVE-FRESH`。详见
+  `gemini_doc/change_2026-08-16_fsg4_b4a_terminal_handoff_implementation.md`。
+
+## 2026-08-16：FSG4/B4-A Terminal Lower/lA Handoff 预注册
+
+- 冻结第10次optimizer evaluation同时产出terminal lower与六层lA、terminal export零CROWN重跑；
+- typed lineage绑定state/graph/split/topology、producer op ordinal/name及shape/dtype/device/layout/content；
+- 先过5 fresh correctness，再检验B3/B4-A core `>=1.03x`、query worst pair `>=0.98x`；
+- 状态=`PREREGISTERED-B4-A-NOT-IMPLEMENTED`，B4-B/TIR与B5—B7关闭。详见
+  `gemini_doc/change_2026-08-16_fsg4_b4a_terminal_handoff_preregistration.md`。
+
+## 2026-08-16：FSG4/B4-0 外部审计关闭
+
+- Round 1外审从formal raw独立重算AC1—AC7全部PASS，无blocker/major；exchange=`closed/approved`；
+- 审计方自建第10类全重签allocation-delta攻击仍被拒绝；
+- 两项minor转为B4-A shape-lineage与exchange related-file-list硬门禁；
+- 最终状态=`EXTERNALLY-APPROVED-VALIDATED-B4-0-OPPORTUNITY`，只开放B4-A。详见
+  `gemini_doc/change_2026-08-16_fsg4_b4_0_external_audit_closure.md`。
+
+## 2026-08-16：FSG4/B4-0 Kernel/Materialization Attribution 内部关闭
+
+- source=`66154e4`正式artifact包含270609 events、35367/35367 kernel phase closure和14-call exact marker；
+- semantic discrete/sign exact、max diff=`4.768e-7`；profile扰动不作性能结果；
+- CROWN14聚合9196 kernels/32618329 ns kernel-sum/57292800 B累计allocation delta，按B3冻结share约覆盖
+  67.72% core；B4-A满足消除完整重复terminal export CROWN call；
+- root replay与9/9 outer-resigned tamper通过，仍`performance_claimed=false`；
+- 状态=`INTERNALLY-VALIDATED-B4-0-OPPORTUNITY-PENDING-EXTERNAL-AUDIT`。详见
+  `gemini_doc/change_2026-08-16_fsg4_b4_0_kernel_attribution_closure.md`。
+
+## 2026-08-16：FSG4/B4-0 Kernel/Materialization Attribution Runner 候选
+
+- 新增typed raw profiler event与control/profile独立worker；
+- 显式区分CUDA user annotation和真实kernel，以correlation parent为主、temporal marker为fallback；
+- 确定性gzip raw绑定压缩/解压/canonical digest与行数，可重算phase、kernel、operator、materialization
+  及Amdahl门禁；
+- virtualenv解释器symlink保留与独立`import boundflow, torch`preflight已修复并fail closed；
+- control/profile semantic复用B3冻结typed tolerance并保持discrete/sign exact；新增9类outer-resigned
+  raw/semantic/protocol/summary tamper；
+- targeted=`15 passed`、B3/B4相关=`54 passed`、full=`1329 passed, 3 skipped`，静态检查通过；
+- 状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-ARTIFACT`，无B4性能声明。详见
+  `gemini_doc/change_2026-08-16_fsg4_b4_0_kernel_attribution_runner_candidate.md`。
+
+解释器修复记录：
+`gemini_doc/change_2026-08-16_fsg4_b4_0_worker_interpreter_symlink_fix.md`。
+
+语义与tamper修复记录：
+`gemini_doc/change_2026-08-16_fsg4_b4_0_semantic_replay_tamper_fix.md`。
+
+## 2026-08-16：FSG4/B4 Cumulative CUDA/TIR Fusion 预注册
+
+- 以externally approved B3为直接基线、B0为累计公平对照；
+- 从B3 raw重算optimizer-only与14-call lower-only CROWN的query share、Amdahl上限和追回B0所需
+  speedup，禁止再次把单区域优化外推为系统收益；
+- 冻结B4-0 attribution、B4-A terminal export fusion、B4-B differentiable lower-only TIR、B4-C
+  cumulative coverage与B4-D formal timing；
+- 状态=`PREREGISTERED-NOT-IMPLEMENTED`，下一唯一动作是B4-0，B5—B7继续关闭。详见
+  `gemini_doc/change_2026-08-16_fsg4_b4_cumulative_fusion_preregistration.md`。
+
+## 2026-08-15：FSG4/B3 正式计时外部审计关闭
+
+- Round 2外审不采信summary，从36个raw worker独立重算44项检查，AC1—AC7全PASS；
+- 无blocker/major/minor，仅两条无需处理的solver venv与原始日志info；
+- exchange由executor关闭为`closed/approved`，B3正式=
+  `EXTERNALLY-APPROVED-VALIDATED-REDUCED-B3`；
+- 只开放以B3为直接对照的B4 cumulative fusion candidate；B5—B7和最终system gate继续关闭。详见
+  `gemini_doc/change_2026-08-15_fsg4_b3_external_audit_closure.md`。
+
+## 2026-08-14：FSG4/B3 36-Process 正式计时关闭
+
+- source=`36e9069`完成六个B0/B2/B3全排列、36/36 fresh GPU worker；correctness、environment、
+  activation、measurement及18/18 closure通过；
+- B2/B3 core/query geomean=`1.071617x/1.006623x`，但B0/B3 query=`0.910001x`，故分类恰为
+  `VALIDATED-REDUCED-B3`，不是full B3或相对原始B0 speedup；
+- root replay逐字段重建同一summary，十类outer-resigned攻击`10/10 rejected`；
+- frozen=`6 passed`、targeted=`114 passed`、full=`1314 passed, 3 skipped`；
+- 下一唯一动作是外部审计；通过后只开放B4 cumulative candidate，B5—B7继续关闭。详见
+  `gemini_doc/change_2026-08-14_fsg4_b3_formal_timing_closure.md`。
+
+## 2026-08-14：FSG4/B3 36-Process 正式计时 Runner 实现候选
+
+- 实现B0/B2/B3六全排列、每配置6个control+6个profile、共36个独立进程的typed正式协议；
+- control不保留详细counter，B2/B3 profile使用轻量直接counter；B3每worker直接绑定prepared
+  template/instance/terminal Schedule/assembly/commit/post-audit activation receipts；
+- 实现raw-first/resume、formal preflight、path sanitization、root replay和十类outer-resigned tamper probe；
+- targeted=`108 passed`、full=`1308 passed, 3 skipped`、Black/mypy/Pylint通过；四个真实GPU worker
+  smoke只验证路径与结构，不形成性能样本；
+- 状态=`IMPLEMENTED-PENDING-CLEAN-SOURCE-FORMAL-RUN`。正式36-process artifact尚未运行，无B3
+  timing/speedup claim，B4—B7关闭。详见
+  `gemini_doc/change_2026-08-14_fsg4_b3_formal_timing_runner_candidate.md`。
+
+## 2026-08-14：FSG4/B3-0 正式 B2 Counter 基线关闭
+
+- source=`4195361`生成fresh GPU B2 control artifact，4625条event journal replay通过；
+- 固定counter实测：template=`1/0`、module/scope=`1/2`、optimizer=`10/9/10 snapshots`、forward=`5`、
+  KFSB=`3/3`、D2H/commit/backup/copy=`12/12/12/12`，provider/fallback全零；
+- 观察到tensor hash=`4417`、GPU hash=`45`、typed validate=`84`、stable hash=`10`；
+- 绑定FSG3 v5六个B2 control raw semantics，六类outer-resigned攻击6/6拒绝；
+- targeted=`25 passed`，full=`1248 passed, 3 skipped`，mypy clean，Pylint 10.00/10；
+- 状态=`VALIDATED-B2-COUNTERS`，无timing/performance claim；下一步B3-A PreparedCoreTemplate。详见
+  `gemini_doc/change_2026-08-14_fsg4_b3_explicit_counter_diagnostic_implementation.md`。
+
+## 2026-08-14：FSG4/B3-0 显式 Counter 诊断实现
+
+- 首次真实B2诊断在counter gate fail closed；唯一偏差为D2H观察`6/12`。确认不是物理路径缺失，而是
+  原计数seam只覆盖β `_replacement`、漏掉α `_project_alpha`中的6次GPU→CPU；补计数点且门槛保持12；
+- 修正后provisional artifact全部counter/replay通过，但发现同步重签worker semantic仍缺独立锚点；正式版
+  改为绑定FSG3 v5六个B2 control语义，并新增六类outer-resigned篡改探针；
+- provisional目录移至`/tmp/fsg4-b3-counter-provisional-2b8120f`保留；新锚定对其中raw worker完成
+  FSG3 B2 control 6/6语义比较，相关测试`21 passed`，等待新source正式rerun；
+- `e04bdd3` rerun因Python 3.11/3.12历史profile geomean重算出现`2.6e-9`表示差异而fail closed；改为
+  直接验证冻结FSG3 manifest、完整file digest、36-run顺序及raw B2 semantics，不重算无关性能summary；
+- 修正后相关测试`22 passed`，mypy clean，Pylint 10.00/10；
+- 新增26项typed counter与逐事件journal，不使用`sys.setprofile`；
+- 新增真实B2 control diagnostic runner，复用FSG3 environment/semantic/provider/fallback门禁；
+- 新增raw worker、journal、snapshot、code revision、manifest和replay的分层hash绑定；
+- 相关测试`17 passed`，全量回归`1243 passed, 3 skipped`，mypy clean，Pylint 10.00/10；fresh GPU
+  run尚待执行；
+- 本条记录当时状态=`IMPLEMENTED-RERUN-PENDING`，现已被上方B3-0正式关闭条目取代；当时没有有效正式
+  counter artifact、B3 candidate或performance claim。详细记录见
+  `gemini_doc/change_2026-08-14_fsg4_b3_explicit_counter_diagnostic_implementation.md`。
+
+## 2026-08-14：FSG4/B3 IR/Graph/Plan/Schedule Reuse 预注册
+
+- 从FSG3正式B2 profile冻结optimizer/atomic/KFSB/typed-pre/backward五区域成本；
+- 源码审计定位module binding move、10份optimizer trace clone、terminal forward重建、12-path
+  GPU→CPU digest/copy与重复validation；
+- B3拆为PreparedCoreTemplate、terminal-only optimizer Schedule、device-resident AtomicCommitPlan，
+  严禁混入B4 TIR、B5 JIT、B6 runtime或B7 arena；
+- 冻结physical counters、五fresh correctness、36-process B0/B2/B3计时及Go/Reduced/No-Go门禁；
+- 一次非claim cProfile因provider guard不兼容fail closed，无调用次数或性能结论；B3-0改用显式counter；
+- 该条为实现前`PREREGISTERED-NOT-IMPLEMENTED`历史状态，现已被上方B3-0关闭取代；仍无B3 speedup
+  claim。计划与预注册外审入口见
+  `gemini_doc/BOUNDFLOW_FSG4_B3_IR_GRAPH_PLAN_SCHEDULE_REUSE_PLAN_2026_08_14.md`、
+  `gemini_doc/fsg4_b3_preregistration_external_audit_handoff_2026_08_14.md`。
+
+## 2026-08-14：FSG3 B0/B1/B2 Same-Solver 正式基线关闭
+
+- 冻结source `a4ee291`生成六个全排列block、36个fresh GPU进程；correctness、environment、
+  closure、profile扰动与raw replay全部通过，summary hash=`df852590d…1318e`；
+- B1 query wall geomean=`0.995657x`；当前B2 reference query/core分别=`0.908400x/0.516767x`
+  （B0/candidate），即B2较慢而非加速；显存ratio=`1.0`、break-even=`not_reachable`；
+- B2 core归因以optimizer约44.0%、atomic commit约24.7%、KFSB约16.7%、typed pre-state约10.7%为主；
+- 新增artifact固定测试与8类outer-resigned tamper probe，全部fail closed；
+- 原始solver日志保持manifest绑定字节，新增FSG3 artifact log的`.gitattributes -diff`，不清洗raw；
+- FSG3定向=`33 passed`，全量=`1233 passed, 3 skipped`，Black/mypy/Pylint=`10.00/10`；
+- FSG3状态=`VALIDATED-FSG3-B0-B1-B2-BASELINE`，B2=`MEASURED-B2-SLOWER`；该结论不否定B3—B7，
+  下一门禁为FSG4/B3 IR/graph/Plan/Schedule复用，ASPLOS-ready仍为NO；
+- commit `5953c50`已推送，累计RVIR/FSG链以Draft PR `#60`提交到`main`；
+- 关闭记录与外审入口分别为
+  `gemini_doc/change_2026-08-14_fsg3_same_solver_formal_baseline.md`、
+  `gemini_doc/fsg3_same_solver_external_audit_handoff_2026_08_14.md`。
+
+## 2026-08-06：启动RVIR-v4 production-state ownership
+
+- 修正FSG2 beta inventory事实：provider字段为`node.sparse_betas`（复数），旧探针漏记不能证明
+  beta state为空；
+- 预注册双边界capture、typed tensor/history/optimizer ownership、frozen-state evaluation、mutation
+  replacement与whole-core门禁；
+- V4-3通过前B2及所有性能比较继续fail closed。
+- 新增RVIR-v4 typed production state：start-node alpha、plural SparseBeta四字段、history一致性、
+  alias与pre/post mutation closure；合同定向6项通过，真实capture仍待执行。
+
+## 2026-08-06：FSG2关闭并阻止非法B2—B7性能外推
+
+- 真实ResNet initial-CROWN native replacement通过，original/fallback=`0/0`；
+- production state inventory捕获24 calls，确认alpha嵌套state存在而显式beta/split ownership缺失；
+- FSG2以`VALIDATED-REDUCED initial-only`关闭，B2 `NO-GO/not admitted`，FSG3—FSG5依赖门禁停止；
+- 该结论不声称B3—B7各层潜力被证伪，完整记录见
+  `gemini_doc/change_2026-08-06_fsg2_replacement_boundary_and_downstream_gate.md`。
+
+## 2026-08-06：FSG2 production-state inventory与replay provenance
+
+- 新增冻结ResNet2B真实αβ-CROWN state ownership inventory runner，记录phase嵌套及digest-bound
+  alpha/beta/split输入；
+- 新增确定性fail-closed admission测试：局部initial-CROWN replacement不能授权same-solver B2
+  timing；
+- FSG2 initial-CROWN artifact replay现绑定生成时source revision。
+- State inventory区分kwargs key presence与实际tensor ownership，并同时记录pre/post beta、
+  intermediate/aux-reference bounds，避免空`intermediate_constr`被误判为split tensor state。
+
+## 2026-08-06：启动FSG2 RVIR-v3真替换合同
+
+- 明确RVIR-v2 exact-call只是passthrough，不计入B2 replacement；
+- v3冻结owned executable tensors、phase/polarity/ragged batch、α/β/split mutation receipt与
+  no-original-callback API；
+- 计划与claim边界见`gemini_doc/fsg2_rvir_v3_replacement_correctness_plan_2026_08_06.md`。
+- 新增`rvir_v3_replacement.py`：owned tensor digest、phase/polarity/ragged/mutation schema、独立
+  Torch affine reference backend、原子copy-out与no-provider-callback execution receipt；
+- 新增正反向合同测试，旧RVIR-v2入口保持不变。
+- 新增native plain-CROWN v3 backend与真实ResNet artifact runner；diagnostic在无original callback/
+  fallback下lower max diff=`7.15e-7`、sign=`9/9`，α/β/split production replacement仍未准入。
+
+## 2026-08-06：FSG1 official B0 full-stack baseline 正式关闭
+
+- 两workload各5 fresh control/profile pairs，10/10 semantic/closure/replay通过；
+- ResNet/MNIST observer perturbation median=`1.026200/1.001089<=1.05`；ResNet每profile
+  234 calls、6064 visited domains，MNIST每profile 1 call并自然verified；
+- summary/manifest hash=`1e5f2946…7d92`/`c9496d27…d1e`，全程
+  `performance_claimed=false`；当时下一步为FSG2 RVIR-v3 replacement correctness；
+- 详细关闭记录见`gemini_doc/fsg1_fixed_iteration_control_protocol_2026_08_06.md`；FSG2现已关闭。
+
+## 2026-08-06：FSG1 改用 official fixed-iteration 归因协议
+
+- 首轮 ResNet 60 秒 control/profile 出现 `150022/150018` visited-domain timeout 漂移，正式执行被
+  主动中止，未产出性能结论；
+- runner 现使用 αβ-CROWN 原生 `bab/max_iterations=16` 固定求解前缀，60 秒仅作保险丝；
+- 首次 fixed-16 smoke 又发现 auto batch 会随 observer 的显存状态改变，故关闭 auto enlargement；
+  batch64 的单 pair observer ratio=`1.060620>1.05`，故在正式候选前冻结 batch=256，
+  并固定/重置 seed；该 smoke 的 `18944/18954` 结果不采信；
+- batch256 diagnostic仍有`1.075754`扰动；observer phase识别由每call `inspect.stack()`改为轻量
+  `f_back`遍历，采集合同与solver执行不变；
+- 轻量observer diagnostic ratio=`1.032419<=1.05`，result exact、visited domains=`[6064]`、
+  profile calls=234；只准入正式采集，不形成性能claim；
+- iteration budget 进入 raw protocol、pair exact gate 和 semantic replay；详细记录见
+  `gemini_doc/fsg1_fixed_iteration_control_protocol_2026_08_06.md`。
+- 定向`10 passed`、全量`1089 passed, 3 skipped`、Black、mypy、Pylint 10.00/10及
+  `git diff --check`均通过；正式artifact仍须从提交后的clean revision生成。
+
+## 2026-08-06：FSG1 official B0 control runner 准备完成
+
+- 新增official control/profile worker，使用αβ-CROWN独立Python 3.11/Torch 2.11 CUDA环境；
+- 观测`BoundedModule.compute_bounds`的嵌套host/CUDA event、solver phase、stream和allocator peak，
+  observer退出后恢复原方法；
+- 新增raw→exclusive critical-path重建、control/profile semantic exact、扰动`<=1.05`门禁及B0证据派生；
+- 每个fresh worker使用独立VNNLIB临时副本，消除`.compiled`缓存造成的pair-order偏差；
+- 真实`mnistfc:2` smoke语义exact、profile/control ratio约`1.0148`、1个initial-CROWN call；只作
+  instrumentation准入，不形成正式性能claim；
+- 定向`10 passed`，全量`1089 passed, 3 skipped`，三个新文件mypy clean、Pylint 10.00/10；
+  正式五轮GPU artifact须在本代码提交后生成。
+
+## 2026-08-06：FSG0 外部审计三项 minor 全部关闭
+
+- 计划枚举已与代码规范统一：`alpha_optimize`、`setup/unclassified`、
+  `unclassified_residual/not_applicable`不再漂移；
+- FSG0测试用`cast`完成类型收窄，mypy现覆盖合同、runner与测试三个文件；
+- replay新增当前`git_head`校验，同步篡改manifest hash仍会fail closed；
+- 定向`20 passed`，全量`1079 passed, 3 skipped`，Black/mypy/Pylint 10.00/10与DocOps均通过；
+- 外部审计结论保持`APPROVE-WITH-MINOR`原文，三项finding由executor后续修复关闭；无性能claim。
+
+## 2026-08-06：GPU 编译器路线升级为 v1.2 full-stack overlay
+
+- 保留 NRIR49A/G1 的正式数据和冻结 artifact，但将结论收窄为仅关闭
+  selected-CROWN 单点增量优化，不再外推为 BoundFlow 全栈 GPU 上限；
+- 旧 G2—G4 保留历史/gated 语义；冻结 artifact 中的 `gpu-winner-reselection` 不改写，
+  但不再是当前指令；
+- FSG0 schema/critical-path/replay合同已以20项定向测试和`1079 passed, 3 skipped`回归关闭；当前
+  下一步是FSG1 official αβ-CROWN B0 full-stack baseline；目标是建立全栈分母，不是再找一个单点
+  winner；
+- 本次仅修正文档路线与 claim 边界，没有新的性能结果，不宣称 BoundFlow
+  已比 auto_LiRPA/αβ-CROWN 更快；
+- 详细记录：
+  `gemini_doc/BOUNDFLOW_GPU_COMPILER_ACCELERATION_RESEARCH_V1_CHANGELOG_2026_08_05.md`；
+  当前唯一入口：
+  `gemini_doc/BOUNDFLOW_FULL_STACK_GPU_BASELINE_ATTRIBUTION_V1_PLAN_2026_08_06.md`。
+
+## 2026-08-06：根据评审收紧 GPU 编译器计划的可证伪门禁
+
+- G1新增精确Amdahl反解；任一scope不可达或required region speedup `>10x`时，不启动latency G3；
+- benchmark矩阵硬性要求至少一个双方可solve的公开held-out workload，并在G1预判
+  `B80_alloc/B80_reserved/B_OOM` physical-memory可达性；
+- G8主比较冻结为RVIR exact-call合同内同一alpha-beta-CROWN host solver A/B，Planner claim缩为
+  GPU-context selector；
+- 增加GPU恢复/备用资源、frontend逐op覆盖和G2 qualification timebox；G1 chunk sweep保持只读；
+- 修正外部审计指出的PR-12J compile phase归属，不启动TIR实现。
+
+## 2026-08-05：新增 GPU 编译器加速诊断与执行计划
+
+- 基于当前 IR/runtime、PR-12/13 与 NRIR43/46/47/48 证据，确认 GPU 路线值得以新的
+  selected-CROWN production hypothesis 重开，但不覆盖历史 NO-GO；
+- 将 selected-objective/BoundConv TIR、流程级融合、physical arena、ragged batching、multi-stream
+  和条件 JIT/CUDA Graph 收敛为 G0—G8 依赖链；
+- 明确本会话无法访问 NVIDIA driver/GPU，用户报告的 BoundConv `40x` 尚未由当前分支独立复现；
+  40x源码缺失时禁止传播该claim但不阻塞独立GPU profiling，下一步只做环境/证据恢复和公平baseline；
+- 冻结 kernel→region→child→queue→complete-query 的评估层级、benchmark matrix、artifact/replay
+  合同、预注册 kill gate 和外部模型审计模板；
+- 详细记录：`gemini_doc/BOUNDFLOW_GPU_COMPILER_ACCELERATION_RESEARCH_V1_PLAN_2026_08_05.md`。
+
 ## 2026-08-05：预注册 NRIR46 Template/Instance compiler IR
 
 - Phase-B raw shards 将约 31.3 秒 trace 拆为 floor median 约 10.82 秒、两条 packed slice 各约
@@ -4720,3 +5293,686 @@
 **记录**
 - `gemini_doc/change_2026-08-05_nrir48_execution_cost_attribution.md`
 - `gemini_doc/BOUNDFLOW_TOP2_PRODUCTION_EXECUTION_COST_ATTRIBUTION_V1_CHANGELOG_2026_08_05.md`
+
+---
+
+## 2026-08-06：NRIR49 G0 GPU Opportunity Admission pre-reboot
+
+- 新增 fail-closed G0 admission runner/test/artifact，GPU 不可用时禁止生成 memory/Amdahl/performance
+  数值；
+- 当前 CUDA/PyTorch/TVM/FFI 软件栈存在，根因收敛为 ASUS `dgpu_disable=1`；enable 已 queued，需重启；
+- 独立 αβ-CROWN 官方锁定环境已建成，commit=`e5c7e17`、auto_LiRPA=`5a098e8`，import smoke PASS；
+- VNN-COMP 2021 `mnistfc:2` 在双方 30 秒 CPU qualification 中均整题 `verified`，solveability 门禁通过；
+- 正式 v7 artifact replay PASS，当前唯一 blocker=`gpu_infrastructure_ready`；`g1_ready=false`；
+- targeted `21 passed`、全量 `1014 passed, 37 skipped`、mypy clean、Pylint `10.00/10`；
+- 未修改 bound math/TIR/kernel/default policy，未产生性能 claim。
+- 新增 post-reboot 六门 CUDA 功能 smoke/replay；当前 pre-reboot dry-run 六项均 blocked、exit `2`，
+  不会把软件 build capability 误当作真实 GPU 可执行。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_NRIR49_G0_GPU_OPPORTUNITY_ADMISSION_V1_PLAN_2026_08_06.md`
+- `gemini_doc/BOUNDFLOW_NRIR49_G0_GPU_OPPORTUNITY_ADMISSION_V1_CHANGELOG_2026_08_06.md`
+
+---
+
+## 2026-08-06：NRIR49A G1 GPU Selected-CROWN Attribution NO-GO
+
+- RTX 4060 Laptop上完成clauses 2/3五fresh workers、五chunk Latin sweep与paired default32 control；
+- selected-CROWN queue/complete share中位=`7.0986%/7.0523%`，profile/control perturbation中位=
+  `0.999304/1.006747`；
+- 20%机会门槛失败，queue 1.20x与complete 1.15x目标均超过Amdahl无限区域加速上限；
+- 最大allocated/reserved仅占物理显存`0.996%/1.353%`，合法batch上限1、无OOM，memory path=`N/A`；
+- 60组结构exact，数值差异在预注册`2e-4`内；summary/manifest hash=`7eefe6a7…ab50`/
+  `d0272fe4…c81f`，独立replay与digest重算通过；
+- G1以`VALIDATED-NO-GO`关闭，selected-CROWN G2/G3 gated off；下一步重新归因GPU winner，
+  `performance_claimed=false`。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_NRIR49A_G1_GPU_ATTRIBUTION_V1_PLAN_2026_08_06.md`
+- `gemini_doc/BOUNDFLOW_NRIR49A_G1_GPU_ATTRIBUTION_V1_CHANGELOG_2026_08_06.md`
+- `gemini_doc/change_2026-08-06_nrir49a_g1_gpu_attribution_nogo.md`
+
+---
+
+## 2026-08-06：RVIR-v4 Corrected Production-State Capture 实现
+
+- 修正FSG2对singular beta字段的遗漏，生产capture只接受plural `node.sparse_betas`；
+- 新增start-node keyed alpha、SparseBeta val/loc/sign/bias、完整split history与optimizer policy的
+  digest-bound typed payload和pre/post mutation closure；
+- 同一真实GPU run观察24-call tree与`update_bounds_core`，诊断得到
+  `12 initial + 1 alpha + 11 beta`、1 core、36 history entries、6 beta tensors、12 mutation receipts；
+- `11 passed`、mypy clean、Pylint `10.00/10`，安全`weights_only=True`语义投影通过；
+- 当前仍是正式artifact生成前状态，V4-1/V4-2/B2均未准入，`performance_claimed=false`。
+- 正式artifact已绑定`6ecab7c`，summary/manifest hash=`86d3365c…a2ff2`/
+  `d8fe50fd…2deb4`；原样replay与外层digest重签后的tensor tamper拒绝均通过；
+- V4-0以`VALIDATED-CORRECTED-CAPTURE`关闭，V4-1准入；V4-2/B2仍关闭。
+- 后续V4-1映射审计发现v1遗漏sparse alpha的`alpha_indices`；v1降级为value/history capture并标记
+  superseded-for-V4-1，新增v2 alpha layout capture，V4-1准入暂时撤回等待v2正式证据。
+- v2诊断已捕获6个feature shape和16个coordinate index tensors并逐层exact；v1 replay兼容保留，
+  正式v2 artifact仍需从clean committed source生成。
+- v2正式artifact绑定`5865905`，summary/manifest hash=`9d1c71b0…d1dbdb`/
+  `eea6547a…e3199`；四层digest重签后的越界alpha-index tamper仍被semantic gate拒绝；V4-0重新
+  关闭并准入V4-1，V4-2/B2保持关闭。
+- V4-1 native frozen-state evaluator已接通真实ResNet2B core，6-child lower max diff=
+  `2.0265579223632812e-06`、sign=`6/6`、provider callback=0；当前为实现/诊断通过，正式artifact
+  尚待生成，V4-2/B2仍关闭。
+- 新增V4-1正式artifact runner，固定capture/source manifest/model digest与显式topology，replay重新
+  执行五层IR；待runner提交后从clean source生成工件。
+- 首次全量回归为`1089 passed, 39 skipped, 1 failed`；唯一失败定位为replay对CPU浮点执行投影做
+  整份JSON exact比较。修正为离散结构/hash/count exact、finite数值按预注册`2e-4`比较，并新增
+  容差内/外正负测试；重新冻结artifact并全量通过前不关闭V4-1。
+- V4-1正式artifact绑定`c74a204`，manifest/summary hash=`ba6ee2fc…adf95`/
+  `3541318b…60e9`；6-child lower max diff=`2.0265579223632812e-06`、sign=`6/6`、IR hashes=10、
+  replacement/original/fallback=`1/0/0`。原样replay、topology/state重签名篡改拒绝、容差内/外数值
+  正负测试全部通过；focused=`21 passed`，full=`1092 passed, 39 skipped`，mypy clean，Pylint
+  `10.00/10`。V4-1以`VALIDATED-REDUCED`关闭并准入V4-2预注册；B2仍关闭，无性能claim。
+
+**记录**
+- `gemini_doc/rvir_v4_production_state_ownership_plan_2026_08_06.md`
+- `gemini_doc/change_2026-08-06_rvir_v4_corrected_production_capture.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-2 Optimizer Mutation 预注册
+
+- 从正式capture与provider源码冻结production策略：10次evaluation、9次update、alpha/beta LR=
+  `0.01/0.05`、lower-only、fixed intermediate、batch-any stop；
+- 当前native实现只有统一lr、`steps+1` evaluation并重建IBP intermediate，不能直接宣称replacement；
+- V4-2拆成policy/iteration、逐step artifact、pre-state mapper、10-step mutation、atomic copy-out；
+- formal gate要求1 core/6 domains/12 receipts/7 changed、逐step与final数值`2e-4`、callback/fallback=
+  `0/0`及重签名tamper拒绝；
+- 当前CUDA因driver/library mismatch不可用，只阻塞正式step-trace artifact；下一动作是CPU可验证的
+  V4-2A typed policy合同。无optimizer parity或性能claim，B2保持关闭。
+- V4-2A开始实现独立alpha/beta Adam parameter groups与production iteration typed adapter；旧统一lr
+  payload保持兼容，非lower-only/fixed-intermediate/batch-any策略fail closed。验证完成前不升级claim。
+- 同步清理被触及optimizer模块的既有mypy narrowing/变量重名/linear-operator协议注解，不改变数值语义。
+- V4-2A以`VALIDATED-POLICY-CONTRACT`关闭：distinct Adam LR=`0.01/0.05`，production
+  evaluation/update=`10/9`，旧统一lr兼容及非法策略负向门禁通过；focused=`17 passed`，full=
+  `1100 passed, 39 skipped`，mypy clean，新/typed policy模块Pylint=`10.00/10`。V4-2总体与B2仍关闭。
+- 后续完成性审计发现原8字段policy未覆盖lr-decay/keep-best/loss-reduction/early-stop/pruning等controls；
+  V4-2A结论收窄为双LR与loop子合同。新增完整controls schema/live mapping/canonical hash与缺字段、cuts
+  负向门禁；V4-2B step trace必须绑定完整controls hash。
+- V4-2B controls schema第一切片通过`10 passed`、mypy clean、Pylint`10.00/10`；18字段全集、严格
+  payload类型、缺字段/cuts fail-closed。尚未接provider step trace，formal GPU artifact仍阻塞。
+
+**记录**
+- `gemini_doc/rvir_v4_optimizer_mutation_plan_2026_08_13.md`
+- `gemini_doc/change_2026-08-13_rvir_v4_optimizer_mutation_preregistration.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-2B Optimizer Step Trace 与生产捕获器
+
+- 新增10 evaluation/9 update typed trace，逐step绑定24个raw α/SparseBeta tensors、lower、
+  call lineage、真实Adam step ordinal及双LR `0.01/0.05 × 0.98**ordinal`；
+- production observer只在active core的outer optimized call中捕获，并hook真实Adam init/step；额外
+  parameter group、调用/step错序和缺失live controls均fail closed；
+- 新增正式GPU artifact generate/replay runner，绑定三仓/model/property/code/file digest、24-call
+  phase tree、core policy与raw trace语义；不生成CPU替代工件；
+- provider赋值链复核修正live `init_alpha=false/max_time=60.0 s`，并新增相反配置拒绝测试；
+- focused V4-2/V4-0=`31 passed`，首轮full=`1108 passed, 39 skipped`，mypy clean，
+  Pylint=`10.00/10`；正式GPU run仍因NVML mismatch/
+  CUDA error 803 fail closed，V4-2B/V4-2/B2保持未关闭，`performance_claimed=false`。
+
+**记录**
+- `gemini_doc/rvir_v4_optimizer_mutation_plan_2026_08_13.md`
+- `gemini_doc/change_2026-08-13_rvir_v4_optimizer_step_trace.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-2B Policy/Trace Cross-Binding Hardening
+
+- 固定production mutation policy从模式准入收紧为全部已知值exact admission；iteration、双LR、decay、
+  patience、pruning、max-time等任一漂移均fail closed；
+- 每step 24项state metadata和lower receipt分别与独立call-tree `pre_state/result[0]`交叉绑定；
+- 攻击者同步重算tensor/step/trace hash后修改mutable α或lower，仍被cross-view mismatch拒绝；
+- focused=`26 passed`、扩展RVIR-v4=`47 passed`、全量=`1118 passed, 39 skipped`、mypy clean、
+  Pylint=`10.00/10`；正式GPU artifact仍等待重启，V4-2B/V4-2/B2状态和
+  `performance_claimed=false`均不变。
+
+**记录**
+- `gemini_doc/rvir_v4_optimizer_mutation_plan_2026_08_13.md`
+- `gemini_doc/change_2026-08-13_rvir_v4_optimizer_trace_cross_binding.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-2B Formal Production Trace Closure
+
+- 重启后内核/NVIDIA/NVML恢复一致，external PyTorch `2.11.0+cu130`在RTX 4060 Laptop上正式运行；
+- 从`af8db08`的runner-enforced clean code paths生成1 core/24 calls、10 evaluations/9 observed
+  Adam updates、每步24 state的GPU artifact；9个相邻step均恰有7项mutable改变；
+- original semantic replay通过；state/lower/call-result/step-lineage/policy五类同步内部重哈希、文件
+  digest更新及manifest重签攻击均被指定语义门禁拒绝；
+- 与冻结capture-v2 cross-artifact parity确认source/protocol/call topology/tensor schema/history/policy/
+  branch/mutation exact；GPU float max diff=`6.0797e-06`、lower=`3.5763e-07`、sign exact，低于
+  `2e-4`；source-parity report=`c2b48275...8aec`；
+- artifact manifest SHA256=`7d7745e4...fbe6`，trace=`fa070bb0...31f4`，summary=
+  `8ae8be3f...05b7`，tamper report=`b11ca1da...ab79`且直接绑定probe code SHA256；
+- focused=`29 passed`，GPU恢复后全量=`1157 passed, 3 skipped`且无CUDA skip；Black/mypy clean、
+  Pylint=`10.00/10`；
+- V4-2B以`VALIDATED-PRODUCTION-TRACE`关闭，但V4-2/B2仍关闭，
+  `performance_claimed=false`；下一切片为V4-2C pre-state native initializer。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_optimizer_step_formal_closure.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-2C Pre-State Native Initializer
+
+- 抽取V4-1 topology/layout为共享typed mapper，并让V4-1 evaluator复用；
+- 正式pre-snapshot恢复6组dense α/β/split和external intermediate bounds；12项mutable path
+  mapped/full round-trip bit-exact，6组upper α plane显式copy-through；
+- 冻结snapshot/topology/history/intermediate/mapping五层身份；wrong start、重复topology、upper-plane
+  identity drift、step-0 mutable binding均fail closed；
+- focused=`11 passed`、full=`1162 passed, 3 skipped`、mypy clean、Pylint=`10.00/10`；
+- 状态仅为`IMPLEMENTED-MAPPER-READY / FORMAL-ARTIFACT-PENDING`，V4-2/B2与性能claim仍关闭。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_pre_state_initializer.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-2D Native Optimizer Parity
+
+- 新增provider-independent 10 evaluation/9 Adam update typed trace；
+- 固定双学习率、0.98衰减、sum reduction及α/β投影，production trace只进入独立comparator；
+- 逐step比较lower与dense α/β，scope/policy/cardinality/schema/numeric门禁fail closed；
+- single-thread formal 10/10 step allclose/sign exact，lower/α/β最大误差=
+  `4.5300e-06/1.4663e-05/3.9861e-07`；
+- 六类完全重签攻击在outer provenance与direct semantic两层6/6拒绝；manifest/tamper SHA256=
+  `0b4ae1a8...8493`/`47af58e1...5e36`；
+- focused=`5 passed`、expanded=`38 passed`、full=`1169 passed, 3 skipped`、mypy clean、
+  Pylint=`10.00/10`；
+- V4-2D以`VALIDATED-NATIVE-STEP-PARITY`关闭；atomic copy-out尚未完成，V4-2/B2和性能claim仍关闭。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_native_optimizer_parity.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-2E Atomic Copy-Out（实现中）
+
+- terminal dense α/β投影回6+6 production mutable paths，upper α copy-through；
+- 私有candidate逐path与真实post及final lower比较，max diff=`1.4663e-05/3.6135e-07/2.6226e-06`；
+- 正向12-path atomic commit、NaN/stale pre-write拒绝、第五次copy故障全回滚通过；
+- focused=`4 passed`、expanded=`9 passed`、full=`1173 passed, 3 skipped`、mypy clean、
+  Pylint=`10.00/10`；
+- 状态为`IMPLEMENTED-ATOMIC-COPY-OUT / FORMAL-ARTIFACT-PENDING`，V4-2/B2与性能claim仍关闭。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_atomic_copy_out.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-2C Formal Artifact Closure
+
+- 从clean runner `96c45a6`和V4-2B冻结source生成独立pre-state artifact，在真实ResNet2B native
+  module/scope恢复6组α/β/split与`NativeAlphaBetaOptimizationState`；
+- 12/12 mutable round-trip exact，mapping/native-state/summary hash=`cfcebf92...f8df`/
+  `e3587dd9...bff0`/`6702a39d...899c`；manifest SHA256=`daee2fa0...0218`；
+- topology/index/history/intermediate/upper-α/beta-location六类攻击全部重算内部hash及source/outer
+  manifest，外层provenance与内层semantic两级均6/6 fail closed；tamper report=`894c30c4...d858`；
+- focused=`8 passed`、full=`1164 passed, 3 skipped`、mypy clean、Pylint=`10.00/10`；
+- V4-2C以`VALIDATED-PRE-STATE-INITIALIZER`关闭；V4-2/B2和性能claim仍关闭，下一门禁为V4-2D
+  逐step native mutation parity。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_pre_state_initializer.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-2E / V4-2 Formal Closure
+
+- clean source `fe7cdb6`从冻结V4-2D capture重新执行pre-state初始化、10 evaluations/9 Adam updates、
+  12-path private staging与实际commit；1 core/6 domains/12 receipts/7 changed结构门禁全部通过；
+- post α/β/final lower最大误差=`1.4663e-05/3.6135e-07/2.6226e-06 <=2e-4`，sign exact，
+  callback/fallback=`0/0`；NaN/stale/fifth-copy fault负向测试保持pre-image；
+- original replay通过；topology、initial upper-α、expected post-α、final lower、recorded copy-out、
+  recorded commit六类完全重签攻击在provenance与semantic两层6/6拒绝；
+- manifest/tamper SHA256=`b76ee573...0136`/`621d5485...f70`；focused=`11 passed`、full=
+  `1175 passed, 3 skipped`、Black/mypy/Pylint通过；
+- V4-2E=`VALIDATED-ATOMIC-COPY-OUT`，V4-2=`VALIDATED-OPTIMIZER-REPLACEMENT`。这不是whole-core
+  live integration或性能结果；B2仍关闭，下一门禁为V4-3 whole-core replacement与5次fresh correctness。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_atomic_copy_out_formal_closure.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-3 Whole-Core Replacement 预注册
+
+- 冻结whole-core的bound/state/branch-input/core-result四层输出责任；
+- 执行顺序为truth artifact→native lA/intermediate→KFSB child evaluation→live return→5 fresh
+  correctness；
+- candidate禁止调用provider core、`compute_bounds`和`update_bounds`，三项callback必须`0/0/0`；
+- V4-3前不恢复B2计时，不引入TIR/JIT/fusion/runtime/memory变量。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_whole_core_preregistration.md`
+
+### Capture-ready进展
+
+- 完成whole-core/pre-KFSB/post truth observer、typed validator和external-provider rerun replay；
+- 两次fresh GPU truth的451个tensor在`2e-4`内一致，213,060个sign与最终decision exact；
+- V4-3A尚未关闭，待正式artifact和同步重签tamper suite。
+- 修正formal runner解析external venv Python symlink后丢失site-packages的问题。
+- 增加fresh-provider semantic comparator和六类whole-core truth同步重签tamper probe；正式artifact待按最终
+  runner commit重新生成。
+
+---
+
+## 2026-08-13：RVIR-v4 V4-3A Whole-Core Truth Formal Closure
+
+- source `bfdeefc`生成正式1 core/6 domain/24 call whole-core truth artifact；
+- 捕获6 intermediate、6 pre-KFSB lA、3 candidate child lowers、final decision与完整post/accounting；
+- 两次fresh semantic replay覆盖451 tensors/213,060 signs，最大差`8.8215e-06 <=2e-4`；
+- 五类full resign与一类字段删除攻击6/6拒绝；targeted=`12 passed`，full=`1180 passed, 3 skipped`；
+- V4-3A=`VALIDATED-WHOLE-CORE-TRUTH`，下一动作V4-3B；V4-3/B2/performance仍关闭。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_whole_core_truth_formal_closure.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-3B Native Backward Export（实现中）
+
+- 通用CROWN backward新增lower-adjoint export；
+- typed映射导出六层provider lA和12个shared-input intermediate bounds tensors；
+- capture-ready诊断lA/intermediate/final-lower最大差=`9.2387e-07/6.0797e-06/3.0994e-06`，sign exact；
+- provider core/compute_bounds/update_bounds/fallback=`0/0/0/0`；
+- 状态为`IMPLEMENTED-NATIVE-BACKWARD-EXPORT / FORMAL-ARTIFACT-PENDING`，V4-3/B2仍关闭。
+- artifact hardening增加lA/intermediate/lower三类full resign与topology/truth source两类outer resign。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_native_backward_export.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-3B Native Backward Export Formal Closure
+
+- source `762b642`生成正式native backward export artifact；
+- 六层lA/12 intermediate/final lower最大差=`9.2387e-07/6.0797e-06/3.0994e-06 <=2e-4`，sign exact；
+- provider core/compute_bounds/update_bounds/fallback=`0/0/0/0`；五类同步重签攻击5/5拒绝；
+- targeted=`9 passed`，full=`1183 passed, 3 skipped`；
+- V4-3B=`VALIDATED-NATIVE-BACKWARD-EXPORT`，下一动作V4-3C；V4-3/B2/performance仍关闭。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_native_backward_export_formal_closure.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-3C Native KFSB（实现中）
+
+- 六层unstable mask由native intermediate/split独立推导，逐元素exact，共4200 unstable；
+- 三组top-3候选共36项、72个child lower及最终六域decision由BoundFlow执行；
+- candidate/final exact，child lower sign exact，最大差`3.0994e-06`；
+- provider core/compute_bounds/update_bounds/fallback=`0/0/0/0`；
+- 当前为`IMPLEMENTED-NATIVE-KFSB / FORMAL-ARTIFACT-PENDING`，V4-3D/B2仍关闭。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_native_kfsb.md`
+
+---
+
+## 2026-08-13：RVIR-v4 V4-3C Native KFSB Formal Closure
+
+- source `a2097c0`生成正式native KFSB artifact；
+- 六层mask、三组candidate共36项与final decision exact；72个child lower sign exact，最大差
+  `3.0994e-06 <=2e-4`；
+- provider core/compute_bounds/update_bounds/fallback=`0/0/0/0`；六类evaluation full resign和两类
+  outer resign共8/8拒绝；
+- targeted=`16 passed`，full=`1187 passed, 3 skipped`；
+- V4-3C=`VALIDATED-NATIVE-KFSB`，下一动作V4-3D；V4-3E/B2/performance仍关闭。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_native_kfsb_formal_closure.md`
+# 2026-08-13 — RVIR-v4 V4-3D live return capture-ready
+
+- 新增真实provider-owned α/β与host packet联合原子提交/回滚、完整`UpdateBoundCoreReturn` assembly、
+  official post/queue接入和live GPU runner；
+- RTX 4060 candidate whole core以provider core/compute/update/fallback=`0/0/0/0`完整运行，451 tensor
+  语义比较最大差`1.0669231414794922e-05`、sign/decision exact；
+- 当前只到`FORMAL-ARTIFACT-PENDING`，V4-3E/B2/performance未准入；详见
+  `gemini_doc/change_2026-08-13_rvir_v4_live_return_assembly.md`。
+
+## 2026-08-13：RVIR-v4 V4-3D Live Return Formal Closure
+
+- source `dc7038a`生成真实CUDA whole-core live-return artifact，12/12 α/β paths与host packet原子提交；
+- provider core/compute/update/fallback=`0/0/0/0`，未修改official post/queue消费成功；
+- 451 tensors/213,060 signs最大差`1.0669e-05`、sign/decision exact；fresh replay与八类完全重签攻击
+  通过；
+- V4-3D=`VALIDATED-LIVE-RETURN`，下一动作V4-3E；V4-3整体/B2/performance仍关闭。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_live_return_formal_closure.md`
+
+## 2026-08-13：RVIR-v4 V4-3E Five-Fresh Harness（实现中）
+
+- 新增original/candidate fresh worker、目标post-add queue accounting与十进程formal orchestrator；
+- 冻结`O,C,C,O,C,O,O,C,O,C`顺序和五对映射，逐对验证完整core/post/state/branch/queue/termination；
+- 一个真实smoke pair通过，但当前仍为`FORMAL-RUN-PENDING`，V4-3/B2尚未关闭。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_five_fresh_correctness.md`
+
+## 2026-08-13：RVIR-v4 V4-3E / V4-3 Formal Closure
+
+- 严格运行`O,C,C,O,C,O,O,C,O,C`十个fresh GPU进程，五对correctness 5/5通过；
+- 合计2255 tensors/1,065,300 signs，最大差`1.0669e-05`，state/branch/queue/termination exact；
+- 六类重签攻击拒绝，V4-3=`VALIDATED-WHOLE-CORE-REPLACEMENT`；
+- 第三方solver原始stdout按字节纳入manifest，并以`.gitattributes -diff`保留其原始格式；
+- B2 same-solver timing现准入但未执行，仍无performance claim。
+
+**记录**
+- `gemini_doc/change_2026-08-13_rvir_v4_five_fresh_formal_closure.md`
+
+## 2026-08-13：FSG3/B2 Same-Solver Timing 预注册
+
+- 冻结B0 original、B1 typed passthrough、B2 whole-call reference replacement；
+- 冻结六个配置全排列block、每配置6 control+6 profile，共36个fresh GPU进程；
+- 分离cold total、process-hit query、whole core、GPU event、compile及post-measurement validation；
+- B2快慢只建立reference baseline，不提前关闭尚未实现的B3—B7；
+- 当前=`PREREGISTERED-NOT-RUN`，无performance claim。
+
+**记录**
+- `gemini_doc/fsg3_b2_same_solver_timing_preregistration_2026_08_13.md`
+- `gemini_doc/change_2026-08-13_fsg3_b2_timing_preregistration.md`
+
+## 2026-08-13：FSG3 Timing Schema 与 Replay
+
+- 新增36-run typed raw schema、严格顺序和B0/B1/B2物理counter合同；
+- replay重算control-only paired speedup、profile perturbation、semantic/environment门禁与break-even；
+- 新增结构及同步篡改负向测试；当前尚未执行真实GPU timing。
+
+**记录**
+- `gemini_doc/change_2026-08-13_fsg3_timing_schema_replay.md`
+
+## 2026-08-13：FSG3 Lower-Only Upper Sentinel Pre-Run Amendment
+
+- 在任何FSG3 real timing前修正预注册与已知production lower-only事实的冲突；
+- upper改为finite canonical payload + exact positive-infinity mask，NaN/`-inf`继续fail closed；
+- 不改变顺序、scope、统计或性能门禁。
+
+**记录**
+- `gemini_doc/change_2026-08-13_fsg3_lower_only_upper_sentinel_amendment.md`
+
+## 2026-08-13：FSG3 Real B0/B1/B2 Control Worker
+
+- 新增official same-solver B0/B1/B2 control worker和B2 precompiled reference path；
+- 计时scope内禁止V4-3完整truth CPU复制，semantic validation后置；
+- profile在分层span完成前fail closed，尚无正式performance claim。
+
+**记录**
+- `gemini_doc/change_2026-08-13_fsg3_real_control_worker.md`
+
+## 2026-08-13：FSG3 Profile Schema v2 Pre-Run Amendment
+
+- 将profile raw spans、monotonic interval、wall/CUDA duration纳入canonical payload和stable hash；
+- closure冻结为exact core scope，compile与official post/queue独立归因；
+- B0/B1/B2真实profile smoke通过layout与closure门禁；尚无正式performance claim。
+
+**记录**
+- `gemini_doc/change_2026-08-13_fsg3_profile_schema_v2_prerun_amendment.md`
+
+## 2026-08-13：FSG3 Profile Spans 与 36-Process Orchestrator
+
+- 实现B0/B1/B2互斥core spans、compile/post独立scope与runtime identity；
+- 实现固定顺序36 fresh process generation、完整日志、manifest与raw-only replay；
+- block-0 smoke六路语义/closure通过；环境因并行pytest与thermal evidence正确拒绝；
+- 当前仍无正式performance claim，下一步是在clean commit和冷却GPU上执行正式轮。
+
+**记录**
+- `gemini_doc/change_2026-08-13_fsg3_profile_orchestrator.md`
+
+## 2026-08-13：FSG3 Formal v1 Environment Abort / v2 Worker Preflight
+
+- formal v1连续7个worker均因post-init 52°C与software thermal counter增长而不准入，整轮fail-fast；
+- v1无manifest/性能主张，证据保留且不混入后续值；
+- v2把cool/idle gate补到fresh worker初始化后、计时前，并逐run持久化progress raw；
+- v2必须从position 0完整执行36-run。
+
+**记录**
+- `gemini_doc/change_2026-08-13_fsg3_formal_v1_environment_abort.md`
+
+## 2026-08-13：FSG3 Schema v3 功耗/温控耦合遥测
+
+- 修正RTX 4060 Laptop driver把SW power/thermal reason与counter严格镜像造成的环境误拒绝；
+- 保存power/thermal/HW thermal原始遥测，只允许exact coupled power alias，独立thermal仍fail closed；
+- worker PID和raw gate重算进入artifact replay；真实单worker及六路block-0 smoke环境全部准入；
+- 所有pilot/smoke仍为非正式合同证据，不形成性能主张。
+
+**记录**
+- `gemini_doc/change_2026-08-13_fsg3_coupled_power_thermal_telemetry.md`
+
+## 2026-08-14：FSG3 Formal v3 父进程 Timeout 中止
+
+- schema-v3正式尝试32/36环境准入后，父180秒timeout错误终止合法的900秒worker冷却等待；
+- 该轮无manifest/summary/performance claim，保留为aborted证据且禁止补跑或引用latency；
+- 父timeout改为1080秒并绑定manifest；超时时持久化partial logs与failed-worker evidence；
+- 下一正式attempt从position 0完整重启，温度、顺序、指标及统计门禁不变。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg3_formal_v3_parent_timeout_abort.md`
+
+## 2026-08-14：FSG3 Post-Init 温度门禁可达性
+
+- v4首个worker在GPU idle、independent thermal=false时完整900秒仍为47–54°C，45°C不可达；
+- v4以0/36、无performance claim中止，完整raw stdout/stderr保留；
+- timing/artifact schema升级v4，post-init上限改为inclusive 50°C，51°C继续拒绝；
+- thermal/event/process/device等门禁不变，非零退出新增结构化failed-worker evidence；
+- 下一正式attempt从position 0生成`resnet2b-prop0-v5`。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg3_post_init_temperature_feasibility.md`
+
+## 2026-08-14：FSG4/B3-A Prepared Core 实现候选
+
+- 新增typed静态`PreparedCoreTemplateV1`、动态`CorePlanInstanceV1`与exact cache；
+- B2默认路径不变，显式B3-A路径把module binding move移出core并复用一次构造的scope；
+- topology/device/dtype/mutable inventory/module/state drift全部fail closed；
+- 定向31项、mypy touched与Pylint 10.00/10通过，fresh GPU artifact尚待执行，无性能主张。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg4_b3a_prepared_core_candidate.md`
+
+## 2026-08-14：FSG4/B3-A Prepared Core 正式关闭
+
+- source `c7851c8`的fresh GPU artifact含5157条显式event；
+- template compile/hit 1/1、module move 0、scope 1，其余冻结结构与语义保持；
+- replay、六个冻结B2 control语义、6/6 tamper和1257项全量回归通过；
+- 状态`VALIDATED-B3-A-COUNTERS`，无timing/speedup；下一步B3-B。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg4_b3a_prepared_core_closure.md`
+
+## 2026-08-14：FSG4/B3-A 跨 HEAD Replay 修复
+
+- 修复historical-source verifier固定使用B2 code paths、漏检B3-A新增runtime文件的问题；
+- 改为按artifact configuration重算完整source inventory；
+- artifact和GPU证据不变，B3-A/B3-0跨HEAD replay及code-revision tamper继续fail closed。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg4_b3a_cross_head_replay_fix.md`
+
+## 2026-08-14：FSG4/B3-B Terminal Optimizer Schedule 实现候选
+
+- 新增first-class 10/9 terminal Schedule IR；formal逐step trace保留；
+- production只保存终态并把optimizer父forward trace交给backward；
+- CPU冻结case逐元素等价、负向门禁、42项定向、mypy与Pylint通过；
+- fresh GPU snapshots/forward counter尚待验证，无性能主张。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg4_b3b_terminal_schedule_candidate.md`
+
+## 2026-08-14：FSG4/B3-B Terminal Optimizer Schedule 正式关闭
+
+- source `42df2dc`的fresh GPU artifact含5157条event；
+- full optimizer snapshots 0、forward builds 4，其他B3-A结构与冻结语义保持；
+- replay、6/6 tamper、45项定向和1265项全量回归通过；
+- 状态`VALIDATED-B3-B-COUNTERS`，无timing/speedup；下一步B3-C。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg4_b3b_terminal_schedule_closure.md`
+
+## 2026-08-14：FSG4/B3-C Device-Resident Atomic Commit 实现候选
+
+- 新增first-class commit plan与dynamic transaction，冻结12条GPU mutable path及rollback顺序；
+- candidate、backup和commit保持CUDA驻留，tensor/host失败均完整回滚；
+- content SHA移到query同步后的headline timing之外；
+- CUDA/相关定向测试`10/50 passed`，mypy clean、Pylint 10.00/10；
+- 状态`IMPLEMENTED-PENDING-FRESH-GPU-ARTIFACT`，无性能主张。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg4_b3c_device_atomic_commit_candidate.md`
+
+## 2026-08-14：FSG4/B3-C Host Packet Version 边界修复
+
+- 首次fresh GPU run在mutation前因真实provider opaque host对象不可序列化而fail closed；
+- pre-host改为绑定完整key inventory并只版本化三项retained字段；candidate/post exact门禁不变；
+- 失败run没有生成artifact，必须从修复commit重新fresh运行。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg4_b3c_host_packet_version_fix.md`
+
+## 2026-08-14：FSG4/B3-C Device-Resident Atomic Commit 正式关闭
+
+- source `72bec5e`的fresh GPU artifact含1484条显式event；
+- candidate/commit/backup/copy=`12/12/12/12`，timed candidate D2H=`0`；
+- headline digest=`0`，24次GPU hash全部位于post-query audit；
+- 六个冻结B2 control语义、replay、6/6 tamper、定向54项和1279项全量回归通过；
+- 状态`VALIDATED-B3-C-COUNTERS`，无timing/speedup；下一步5 fresh pairs。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg4_b3c_device_atomic_commit_closure.md`
+- `gemini_doc/fsg4_b3c_device_commit_external_audit_handoff_2026_08_14.md`
+
+## 2026-08-14：FSG4/B3 五组 Fresh Correctness 预注册
+
+- 冻结5组、10个独立GPU进程及B2/B3-C交替顺序；
+- 冻结direct semantics、environment、provider/fallback、physical counter与post-query audit门禁；
+- raw-first支持只接受完整replay run的中断恢复；本阶段禁止performance ratio；
+- 5/5通过只开放36-process正式计时，B4—B7仍关闭。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B3_FIVE_FRESH_CORRECTNESS_PLAN_2026_08_14.md`
+- `gemini_doc/change_2026-08-14_fsg4_b3_five_fresh_correctness_preregistration.md`
+
+## 2026-08-14：FSG4/B3 五组 Fresh Correctness Runner 实现候选
+
+- 新增10独立子进程的交替pair runner、raw-first protocol与只接受完整run的resume；
+- root replay从raw重算5组direct semantics、environment、counter与audit；
+- 新增report/protocol/nested counter/semantic/audit/swap/delete七类重签名攻击；
+- static 5项、mypy与Pylint通过；待clean source正式运行。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg4_b3_five_fresh_runner_candidate.md`
+
+## 2026-08-14：FSG4/B3 五组 Fresh Correctness 正式关闭
+
+- source `75dfd81`按冻结交替顺序完成10/10独立fresh GPU worker；
+- 5/5 B2/B3-C direct semantic pair与environment/provider/counter/audit全部通过；
+- root replay从raw重算，七类outer-resigned攻击7/7拒绝；
+- B3定向56项与全量1289项回归通过；
+- 状态`VALIDATED-B3-FIVE-FRESH-CORRECTNESS`，只开放36-process正式计时，无performance claim。
+
+**记录**
+- `gemini_doc/change_2026-08-14_fsg4_b3_five_fresh_correctness_closure.md`
+- `gemini_doc/fsg4_b3_five_fresh_correctness_external_audit_handoff_2026_08_14.md`
+
+## 2026-08-18：FSG4/B4-B1 Typed PyTorch Reference 内部关闭
+
+- typed lower-region IR/instance从5 fresh raw重建双锚点；
+- pure-PyTorch forward/local VJP完成60 metrics/196,380 elements，max diff=`6.109e-7`且sign exact；
+- 两类协调all-run bias/adjoint全链重签由数值语义2/2拒绝；
+- v1执行策略缺口由deterministic v2修正，全量`1405 passed, 3 skipped`；
+- 状态`VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE-PENDING-EXTERNAL-AUDIT`，B4-B2/TIR仍关闭。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4B1_TYPED_PYTORCH_REFERENCE_PREREGISTRATION_2026_08_18.md`
+- `gemini_doc/change_2026-08-18_fsg4_b4b1_typed_reference_internal_closure.md`
+
+## 2026-08-23：FSG4/B4-B1 外审关闭与 B4-B2 预注册
+
+- B4-B1 Round 2独立外审关闭F1/F2，exchange=`closed/approved`；
+- 最终状态=`EXTERNALLY-APPROVED-VALIDATED-B4-B1-TYPED-PYTORCH-REFERENCE`；
+- B4-B2仅完成预注册，冻结dense→sparse-source ABI、first-class编译IR、custom backward、
+  five-fresh与6-worker物理门禁；
+- 当前无B4-B2 TIR或性能claim，下一步只做B2-0 identity-TIR ABI probe。
+- 上述预注册状态已由下方B2-0内部关闭记录取代。
+
+**记录**
+- `gemini_doc/change_2026-08-23_fsg4_b4b1_round2_external_closure.md`
+- `gemini_doc/BOUNDFLOW_FSG4_B4B2_TYPED_CUDA_TIR_PREREGISTRATION_PLAN_2026_08_23.md`
+- `gemini_doc/BOUNDFLOW_FSG4_B4B2_TYPED_CUDA_TIR_PREREGISTRATION_CHANGELOG_2026_08_23.md`
+
+## 2026-08-23：FSG4/B4-B2 B2-0 Identity TIR ABI 内部关闭
+
+- 新增first-class Template/Instance/Schedule/Module/Launch IR与canonical round-trip/hash门禁；
+- identity CUDA/TIR forward/backward通过一阶custom autograd，显式拒绝higher-order；
+- RTX 4060实测DLPack/current stream exact、cold miss→warm hit、launch 1/1、无alias/fallback；
+- targeted 12、B4-B相关66、full `1426 passed, 3 skipped`，静态检查全过；
+- 状态=`VALIDATED-B4-B2-B2-0-ABI-PROBE`，只开放B2-1 S-anchor dense correctness，
+  尚无region融合或性能claim。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_0_IDENTITY_TIR_CHANGELOG_2026_08_23.md`
+
+## 2026-08-23：FSG4/B4-B2 B2-0 外审关闭
+
+- 外审`APPROVE`，0 blocker/0 major、2 minor+3 info；
+- auditor现场RTX 4060复跑probe，template/schedule/module receipt hash逐位一致；
+- 最终状态=`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-0-ABI-PROBE`；
+- 只开放B2-1 S-anchor dense correctness；真实fallback计数与异常退出恢复随B2-1处理。
+
+**记录**
+- `gemini_doc/external_audit_b4b2_b2_0_identity_tir_probe_2026_08_23.md`
+- `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_0_EXTERNAL_AUDIT_CLOSURE_CHANGELOG_2026_08_23.md`
+
+## 2026-08-23：FSG4/B4-B2 B2-1 Dense Linear TIR 内部关闭
+
+- first-class S-anchor dense Linear Template/Instance/Schedule/Module/Launch IR完成；
+- CUDA/TIR forward/output-bias与native α/β backward在5 raw、20 metrics/36,750元素通过；
+- max diff=`8.642673492431641e-07`，allclose/sign exact；
+- targeted 23、B4-B相关76、full `1437 passed, 3 skipped`；
+- 真实fallback计数与异常退出状态恢复关闭B2-0外审minor；
+- 当前只开放B2-1外审，B2-2 sparse-source与timing关闭。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_1_DENSE_LINEAR_TIR_CHANGELOG_2026_08_23.md`
+- `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_1_EXTERNAL_AUDIT_HANDOFF_2026_08_23.md`
+
+## 2026-08-23：FSG4/B4-B2 B2-1 外审关闭
+
+- 外审`APPROVE`，0 blocker/0 major；独立float64重算与现场GPU复跑全通过；
+- B4-B related口径由`76`更正为`77 passed`；full仍为`1437 passed, 3 skipped`；
+- 最终=`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-1-DENSE-LINEAR-CORRECTNESS`；
+- 只开放B2-2 S-anchor sparse-source fused forward/backward，其余阶段仍关闭。
+
+**记录**
+- `gemini_doc/external_audit_b4b2_b2_1_dense_linear_tir_2026_08_23.md`
+- `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_1_EXTERNAL_AUDIT_CLOSURE_CHANGELOG_2026_08_23.md`
+
+## 2026-08-23：FSG4/B4-B2 B2-2 Sparse-source Linear TIR 内部关闭
+
+- compressed alpha `[6,27]`/beta `[6,1]`直接进入S-anchor TIR，返回compressed gradients；
+- 5 raw/20 metrics/31,590元素全过，max diff=`8.642673492431641e-07`；
+- scheduled TIR forbidden dense-state workspace count=`0`；
+- targeted 34、B4-B related 88、full `1448 passed, 3 skipped`；
+- 状态=`VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS-PENDING-EXTERNAL-AUDIT`；
+- 只开放B2-2外审，P-anchor/timing与后续阶段关闭。
+
+**记录**
+- `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_2_SPARSE_LINEAR_TIR_CHANGELOG_2026_08_23.md`
+- `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_2_EXTERNAL_AUDIT_HANDOFF_2026_08_23.md`
+
+## 2026-08-23：FSG4/B4-B2 B2-2 外审关闭
+
+- 外审`APPROVE`，0 blocker/major/minor，2 info；
+- 无 autograd float64独立重算、GPU runner、workspace结构、hash与全量回归全过；
+- 最终=`EXTERNALLY-APPROVED-VALIDATED-B4-B2-B2-2-SPARSE-SOURCE-CORRECTNESS`；
+- 只开放B2-3 P-anchor Conv dense correctness，timing/B2-4/B2-5/B4-B3关闭。
+
+**记录**
+- `gemini_doc/external_audit_b4b2_b2_2_sparse_linear_tir_2026_08_23.md`
+- `gemini_doc/BOUNDFLOW_FSG4_B4B2_B2_2_EXTERNAL_AUDIT_CLOSURE_CHANGELOG_2026_08_23.md`

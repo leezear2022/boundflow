@@ -1,0 +1,88 @@
+{
+  "artifact_manifest_sha256": "b330c13083e1d19bb572031ad1bfdf2746bb619c63ed61b52d3036905c45f282",
+  "attack_count": 11,
+  "performance_claimed": false,
+  "rejected_count": 11,
+  "report_hash": "c2a75f9081b877d20ac0016746b25e940d0966768dcdae5285a782be347c2a7d",
+  "rows": [
+    {
+      "attack": "state-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B0 frozen source identity differs",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "attack": "start-node-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B production lineage differs",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "attack": "topology-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B0 frozen source identity differs",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "attack": "shape-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B captured tensor differs: incoming_lower_a",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "attack": "alpha-index-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B0 frozen source identity differs",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "attack": "beta-location-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B0 frozen source identity differs",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "attack": "gradient-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B0 tensor numeric differs: run-1:semantic-active-beta-gemm-14:gradient:native_alpha",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "attack": "alias-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B production capture differs",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "attack": "stream-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B production capture differs",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "attack": "coordinated-all-runs-topology-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B0 frozen source identity differs",
+      "outer_resigned": true,
+      "rejected": true
+    },
+    {
+      "attack": "coordinated-all-runs-lineage-outer-resigned",
+      "exception_type": "ValueError",
+      "message": "FSG4/B4-B0 frozen source identity differs",
+      "outer_resigned": true,
+      "rejected": true
+    }
+  ],
+  "schema_version": "boundflow.fsg4-b4b0-five-fresh-tamper-report/v2",
+  "tir_admitted": false
+}

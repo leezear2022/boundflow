@@ -1,0 +1,1 @@
+{"core_truth_hash":"f3e043eba94c026cd8297717c4014aad635257a125d280dfbaccafe6b0d769ec","evidence_status":"validated-whole-core-truth","performance_claimed":false,"post_truth_hash":"64e70a71763ced80c7c4aed692c04b5d1d2e6716f56a978073799e46c10c175e","status":"replay-passed","summary_hash":"df69ae45b5a2993d36921ceee84e1b815dd3595e72853eec0694d75cabe0396c"}

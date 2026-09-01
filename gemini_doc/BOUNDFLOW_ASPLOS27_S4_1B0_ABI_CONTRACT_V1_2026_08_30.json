@@ -1,0 +1,264 @@
+{
+  "schema_version": "boundflow.asplos27-s4-1b0-abi-contract/v1",
+  "source_identity": {
+    "freeze_parent_commit": "c9bb3ab7f3577620a54cef1ce4f9e7b007383b35",
+    "construction_model_hash": "5056d302aa27785ab8a22bd8f5665ebef0a4aba2ca22bc72ce28581144dbcc2a"
+  },
+  "dependency_assets": [
+    {
+      "path": "gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_IEEE_BIT_FIXTURES_V1_2026_08_30.json",
+      "sha256": "33d0aa1db3380fdc30ff7a48eaa4d5d98f93806583493da40b5ddee4031e15d7"
+    },
+    {
+      "path": "gemini_doc/BOUNDFLOW_ASPLOS27_S4_1B0_NEGATIVE_CONTRACT_V1_2026_08_30.json",
+      "sha256": "460415b9c4b415812edb5b89f1039e483eb24d1ee8b5cb486ca6a014c38557aa"
+    }
+  ],
+  "constants": {
+    "schema": "boundflow.asplos27-s4-ternary-endpoint/v1",
+    "pack_symbol": "boundflow_s4_pack_ainput_endpoint_ternary",
+    "select_symbol": "boundflow_s4_select_input_endpoint_ternary",
+    "default_threads": 256,
+    "qnan_bits": "0x7fc00000",
+    "nonfinite_mask": "0x7f800000"
+  },
+  "build_spec": {
+    "type": "TernaryEndpointBuildSpecV1",
+    "fields": [
+      "schema_version",
+      "numel",
+      "value_dtype",
+      "selector_dtype",
+      "pack_symbol",
+      "select_symbol",
+      "endpoint_policy",
+      "midpoint_policy",
+      "nonfinite_policy",
+      "invalid_output_policy",
+      "target",
+      "compute_capability"
+    ],
+    "fixed_values": {
+      "value_dtype": "float32",
+      "selector_dtype": "int8",
+      "endpoint_policy": "ternary-box-endpoint-v1",
+      "midpoint_policy": "add-then-mul-f32-half-v1",
+      "nonfinite_policy": "ieee754-f32-exponent-bits-sentinel-minus-128-v1",
+      "invalid_output_policy": "canonical-qnan-0x7fc00000-v1"
+    },
+    "generic_constraints": {
+      "numel_positive": true,
+      "production_fixture_numel_is_generic_constant": false
+    }
+  },
+  "schedule_spec": {
+    "type": "TernaryEndpointScheduleSpecV1",
+    "fields": ["threads_per_block", "pack_block", "select_block"],
+    "fixed_values": {
+      "threads_per_block": 256,
+      "pack_block": "endpoint_selector",
+      "select_block": "selected_endpoint"
+    }
+  },
+  "tir_builder": {
+    "functions": [
+      "_build_pack_primfunc",
+      "_build_select_primfunc",
+      "_schedule_elementwise",
+      "build_ternary_endpoint_modules_v1"
+    ],
+    "returns": ["unscheduled_ir_module", "scheduled_ir_module"],
+    "primfunc_attrs": ["schema", "policy", "numel"],
+    "new_top_level_ir": false
+  },
+  "compiled_module": {
+    "type": "CompiledTernaryEndpointV1",
+    "fields": [
+      "executable",
+      "unscheduled_tir_json",
+      "scheduled_tir_json",
+      "device_source",
+      "unscheduled_tir_hash",
+      "scheduled_tir_hash",
+      "device_source_hash",
+      "exported_symbols",
+      "global_workspace_bytes",
+      "tvm_version"
+    ],
+    "fixed_values": {
+      "global_workspace_bytes": 0
+    },
+    "content_rehash_required": [
+      "unscheduled_tir_json",
+      "scheduled_tir_json",
+      "device_source"
+    ]
+  },
+  "module_receipt": {
+    "type": "TernaryEndpointModuleReceiptV1",
+    "fields": [
+      "build_spec_hash",
+      "schedule_spec_hash",
+      "unscheduled_tir_hash",
+      "scheduled_tir_hash",
+      "device_source_hash",
+      "cache_key",
+      "target",
+      "compute_capability",
+      "tvm_version",
+      "tvm_commit",
+      "tvm_ffi_commit",
+      "torch_version",
+      "exported_symbols",
+      "global_workspace_bytes",
+      "performance_claimed"
+    ],
+    "fixed_values": {
+      "performance_claimed": false
+    },
+    "mutable_cache_counts_in_receipt": false
+  },
+  "cache": {
+    "type": "TernaryEndpointModuleCacheV1",
+    "lookup_key_fields": [
+      "module_receipt_schema",
+      "build_spec_hash",
+      "schedule_spec_hash",
+      "unscheduled_tir_hash",
+      "scheduled_tir_hash",
+      "target",
+      "compute_capability",
+      "tvm_commit",
+      "tvm_ffi_commit"
+    ],
+    "entry_value_fields": ["compiled_module", "module_receipt"],
+    "first_lookup_excludes": [
+      "device_source_hash",
+      "compile_count",
+      "miss_count",
+      "hit_count",
+      "tensor_content_hash",
+      "evaluation_ordinal"
+    ],
+    "hit_revalidates": [
+      "compiled_ir_json_hashes",
+      "compiled_device_source_hash",
+      "module_receipt",
+      "expected_cache_key"
+    ],
+    "failure_inserts_partial_entry": false,
+    "failure_fallback": false
+  },
+  "cache_observation": {
+    "type": "TernaryEndpointCacheObservationV1",
+    "fields": [
+      "event",
+      "compile_count",
+      "miss_count",
+      "hit_count",
+      "entry_count",
+      "module_receipt_hash"
+    ],
+    "event_values": ["miss", "hit"]
+  },
+  "prepared_probe": {
+    "type": "PreparedTernaryEndpointProbeV1",
+    "caller_owned_tensor_roles": [
+      {"role": "coefficient", "dtype": "float32", "access": "read"},
+      {"role": "lower", "dtype": "float32", "access": "read"},
+      {"role": "upper", "dtype": "float32", "access": "read"},
+      {"role": "selector", "dtype": "int8", "access": "write"},
+      {"role": "selected", "dtype": "float32", "access": "write"}
+    ],
+    "descriptor_identity_fields": [
+      "role",
+      "storage_token",
+      "storage_offset",
+      "data_ptr",
+      "shape",
+      "stride",
+      "dtype",
+      "device"
+    ],
+    "unique_tensor_count": 5,
+    "prepare_dlpack_view_count": 5,
+    "argument_occurrence_count": 6,
+    "center_tensor_count": 0,
+    "status_tensor_count": 0,
+    "observes_current_device_and_stream": true,
+    "caller_provided_device_or_stream_identity": false,
+    "holds_s4_1a_ticket_or_lease": false
+  },
+  "warm_launch_receipt": {
+    "fields": [
+      "module_receipt_hash",
+      "cache_event",
+      "device_ordinal",
+      "stream_identity",
+      "evaluation_ordinal",
+      "parameter_state_version",
+      "selector_generation",
+      "prepared_descriptor_hashes",
+      "pack_launch_count",
+      "select_launch_count",
+      "argument_occurrence_count",
+      "warm_dlpack_view_creation_count",
+      "fallback_count",
+      "eager_count",
+      "native_shadow_count",
+      "timing_recorded",
+      "performance_claimed"
+    ],
+    "fixed_values": {
+      "pack_launch_count": 1,
+      "select_launch_count": 1,
+      "argument_occurrence_count": 6,
+      "warm_dlpack_view_creation_count": 0,
+      "fallback_count": 0,
+      "eager_count": 0,
+      "native_shadow_count": 0,
+      "timing_recorded": false,
+      "performance_claimed": false
+    },
+    "source_grouped_field_aliases": {
+      "device_ordinal / stream_identity": ["device_ordinal", "stream_identity"],
+      "evaluation_ordinal / parameter_state_version / selector_generation": ["evaluation_ordinal", "parameter_state_version", "selector_generation"],
+      "fallback/eager/native_shadow": ["fallback_count", "eager_count", "native_shadow_count"]
+    },
+    "synchronized_content_counts_allowed": false
+  },
+  "formal_observation": {
+    "allowed_after_explicit_synchronize": [
+      "coefficient_raw",
+      "lower_raw",
+      "upper_raw",
+      "selector_raw",
+      "selected_raw",
+      "bit_preserving_content_hashes",
+      "selector_class_counts",
+      "canonical_qnan_payload_counts",
+      "old_binary_zero_misclassification_count",
+      "independent_selected_output",
+      "descriptor_pointer_storage_inventory",
+      "allocator_diagnostic"
+    ],
+    "generic_validator_contains_resnet_counts": false
+  },
+  "storage": {
+    "generic_selector_bytes_formula": "numel",
+    "generic_selected_bytes_formula": "4*numel",
+    "production_fixture_numel": 18432,
+    "production_fixture_selector_bytes": 18432,
+    "production_fixture_selected_bytes": 73728,
+    "production_fixture_output_bytes": 92160,
+    "global_workspace_bytes": 0,
+    "production_alias_claimed": false
+  },
+  "claims": {
+    "implementation_open": false,
+    "production_correctness": false,
+    "formal_validated": false,
+    "timing": false,
+    "performance": false
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "atol": 0.0002,
+  "baseline_capture_sha256": "99c2c0766621bc0c7db77e1aa4f9f262baa07ff2f9d64d742984a03de000df1e",
+  "baseline_manifest_sha256": "8706e1176a9d29a232fcc8d455a88c7889920f34ad70c8fb75fd0c711142d255",
+  "baseline_replay": {
+    "call_count": 24,
+    "core_count": 1,
+    "evidence_status": "validated_corrected_capture",
+    "performance_claimed": false,
+    "status": "replay-passed",
+    "summary_hash": "9d1c71b02c42852d0e1a03ffec831b0a43a4c8d61003c125ad05371993d1dbdb"
+  },
+  "candidate_capture_sha256": "f42229dd06be8521865d14af4cc51450ec8bec4e792934b457c276aad50126dc",
+  "candidate_manifest_sha256": "7d7745e40a901c4f3a420188c42efa2f487248d2da992ca0c08730beb612fbe6",
+  "candidate_replay": {
+    "evaluation_count": 10,
+    "evidence_status": "validated-step-capture-schema",
+    "performance_claimed": false,
+    "status": "replay-passed",
+    "summary_hash": "8ae8be3fc53f1571109f265ea96a9ddacf806c3c5596459574517df2783505b7",
+    "trace_hash": "fa070bb09265337b297e18fd38ff342ffa657fad75c447f340789a1cb5cc31f4",
+    "update_count": 9
+  },
+  "parity": {
+    "call_count": 24,
+    "call_topology_schema_exact": true,
+    "core_structure_exact": true,
+    "mutation_path_changed_flags_exact": true,
+    "post_snapshot": {
+      "changed_content_digest_path_count": 17,
+      "finite_mask_exact": true,
+      "history_entry_count": 36,
+      "maximum_absolute_difference": 6.079673767089844e-06,
+      "maximum_relative_difference": 0.0003813397779595107,
+      "schema_history_policy_exact": true,
+      "sign_exact": true,
+      "tensor_path_count": 62
+    },
+    "pre_snapshot": {
+      "changed_content_digest_path_count": 10,
+      "finite_mask_exact": true,
+      "history_entry_count": 36,
+      "maximum_absolute_difference": 6.079673767089844e-06,
+      "maximum_relative_difference": 0.0003813397779595107,
+      "schema_history_policy_exact": true,
+      "sign_exact": true,
+      "tensor_path_count": 62
+    },
+    "result_finite_mask_exact": true,
+    "result_lower_maximum_absolute_difference": 3.5762786865234375e-07,
+    "result_lower_maximum_relative_difference": 7.328758329094853e-07,
+    "result_sign_exact": true,
+    "result_upper_maximum_absolute_difference": 0.0,
+    "result_upper_maximum_relative_difference": 0.0,
+    "source_protocol_solver_exact": true
+  },
+  "performance_claimed": false,
+  "report_hash": "c2b48275314223b19cddbbc1c36b591590c40a7a6f9f1c0af9cc662c19198aec",
+  "rtol": 0.0002,
+  "schema_version": "boundflow.rvir-v4-optimizer-step-source-parity/v1",
+  "status": "source-parity-passed",
+  "verifier_code_sha256": "a08b295efd374482c9077f966f941d2ecb3e092813d3142ea591146c973004ad"
+}

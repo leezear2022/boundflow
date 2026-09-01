@@ -1,0 +1,25 @@
+{
+  "doc": "asplos27-s4-1c-gradient-20260831/request",
+  "type": "request",
+  "task": "asplos27-s4-1c-gradient-20260831",
+  "round": 0,
+  "from": "codex",
+  "to": "external-auditor",
+  "executor": "codex",
+  "auditor": "external-model",
+  "ts": "2026-08-31T12:37:59Z",
+  "title": "S4-1C compressed gradient and terminal lA correctness",
+  "request": "# S4-1C compressed gradient 与 terminal lA 外审交接\n\ndate: 2026-08-31\nexecutor-verdict: implementation-correctness-candidate\nrequested-audit-verdict: approve / revise / reject\nperformance-claimed: false\nsource-commits: dcbfe80,7110437,82a928a,ef8d704\n\n## 1. 审计任务\n\n请不要采信本文汇总数字。独立阅读冻结施工合同、四个交付文件，现场运行GPU测试，并判断是否足以关闭\n`VALIDATED-S4-1C-COMPRESSED-GRADIENT`。本轮只审计single-evaluation dα/dβ、Pass C顺序、V/lA alias、\nterminal lease和fail-closed边界；不审计optimizer trajectory或性能。\n\n施工合同：\n`gemini_doc/BOUNDFLOW_ASPLOS27_S4_1C_IMPLEMENTATION_CONSTRUCTION_PACKAGE_2026_08_29.md`。\n\n## 2. 冻结源码范围\n\n1. `boundflow/backends/tvm/asplos27_s4_compressed_gradient.py`\n2. `boundflow/runtime/asplos27_s4_gradient_emitters.py`\n3. `tests/test_asplos27_s4_compressed_gradient.py`\n4. `tests/test_asplos27_s4_gradient_phase.py`\n\n实现提交依次为`dcbfe80`、`7110437`、`82a928a`、`ef8d704`。后续文档提交不应改变上述四文件blob。\n\n## 3. Acceptance criteria\n\n### AC1：范围与门禁顺序\n\n- S4-1B external audit已approved并closed后才出现本批代码；\n- 交付文件没有optimizer mutation、timing、performance或same-solver路径；\n- 施工包的公式、13-symbol、17/23-action和110 descriptor合同未事后修改。\n\n### AC2：TIR数学与非法输入\n\n- 对六个dα实例逐项推导并用独立公式重算：\n  `upstream[d,s] * A[d,s,f] * V[d,s,f]`；\n- 只在lower方向、ambiguous且A>=0时非零；alpha闭区间0/1合法；stable或A<0产生+0；\n- 检查A/V/bounds/alpha/upstream nonfinite、lower>upper、alpha越界和index越界都产生bits=\n  `0x7fc00000`，invalid index在read前被clamp；\n- dβ独立核对location=`17,17,31,17,17,31`、sign=`1,1,1,-1,-1,-1`及公式；非法location/sign\n  不被静默接受。\n\n### AC3：module与ABI identity\n\n- unscheduled/scheduled module各恰13个PrimFunc：6 dα + 1 dβ + 6 copy；\n- dα argument occurrence=48、dβ=5、总计53；unique emitter view=46；\n- 由实际TIR JSON/CUDA source重算三个hash，逐个symbol在device source存在；\n- global workspace=0、performance flag=false，identity/hash/symbol/claim篡改fail closed。\n\n### AC4：production 17/23-action顺序\n\n- nonterminal动作表与施工包17项逐字一致；terminal为23项；\n- site31必须先dα、再dβ、再copy、再transform；\n- site25/site19在对应residual stage1与stage2之间发射；\n- action换序、漏项、重复项、default/cross stream、metadata/state漂移在launch或commit前拒绝。\n\n### AC5：ownership与terminal handoff\n\n- 七个gradient直接写S4-1A caller-owned buffer，无dynamic output allocation；\n- 六个V/lA view只占一个37,464-element / 149,856-byte physical storage；\n- terminal copy发生在该site全部V reader之后，copy后保留spec轴；\n- terminal lease只能消费一次，nonterminal不能取得lease；\n- warm DLPack construction=0，saved dense A/dense gradient escape/fallback/native shadow全为0。\n\n### AC6：独立production correctness\n\n- 现场从冻结ResNet2B pre-state重建S4-0/1A/1B/1C链；\n- 在terminal覆盖前独立保存test-only V oracle，在覆盖后从terminal A、V oracle、bounds、indices、upstream\n  以不调用candidate TIR的公式重算六dα和dβ；\n- 核对全部gradient shape/sign/numeric，以及terminal shaped view和单storage identity；\n- 运行新增专项、S4/R3联合、全量tests及Black/mypy/Pylint/diff。\n\n### AC7：claim边界\n\n- 本轮最多形成S4-1C single-evaluation correctness/ownership claim；\n- 明确披露coefficient pass当前只在prepare核对R31原始α/β与S4-1A clone内容相等；S4-1D必须把\n  coefficient ABI直接改绑active buffers；\n- optimizer 10/9 trajectory、KFSB consumer integration、timing、performance、same-solver、complete-query、\n  10x和ASPLOS-ready保持false。\n\n## 4. Executor复现命令\n\n```bash\nconda activate boundflow\n\npytest -q \\\n  tests/test_asplos27_s4_compressed_gradient.py \\\n  tests/test_asplos27_s4_gradient_phase.py\n\npytest -q \\\n  tests/test_asplos27_s4_mutable_state_admission.py \\\n  tests/test_asplos27_s4_ordered_buffer_abi.py \\\n  tests/test_asplos27_s4_ternary_endpoint.py \\\n  tests/test_asplos27_s4_coefficient_selector_pass.py \\\n  tests/test_asplos27_s4_six_site_value.py \\\n  tests/test_asplos27_s4_compressed_gradient.py \\\n  tests/test_asplos27_s4_gradient_phase.py \\\n  tests/test_r3_d2b_staged_backward.py\n\npytest -q tests\nmypy <上述四个交付文件>\npylint <上述四个交付文件>\ngit diff --check\n```\n\nExecutor当前观测为新增专项`11 passed`、联合`200 passed`、全量`2093 passed, 3 skipped`。三个skip为\n既有TVM重复编译规避1项和冻结VNN-COMP checkout缺失2项；请审计方独立复现，不采信摘要。\n\n## 5. 预期审计产出\n\n请按AC1—AC7逐项给PASS/FAIL、blocker/major/minor/info、独立公式或脚本、现场命令和最终verdict。若\napprove，请明确是否同意关闭`VALIDATED-S4-1C-COMPRESSED-GRADIENT`，并且是否只开放S4-1D\noptimizer/evaluator implementation/correctness（timing继续关闭）。\n",
+  "scope": "single-evaluation dα/dβ, 17/23-action Pass C, V/lA alias, fail-closed correctness; no timing or performance",
+  "acceptance": [
+    "AC1 scope and gate order",
+    "AC2 TIR math and invalid input",
+    "AC3 module and ABI identity",
+    "AC4 production 17/23 action order",
+    "AC5 ownership and terminal handoff",
+    "AC6 independent production correctness",
+    "AC7 claim boundary"
+  ],
+  "base_commit": "93915fe",
+  "md_sha256": "89e9b8704025b9023e838b25a562605bf591ae83a581d5ff62b8258e00a820ed"
+}

@@ -1,0 +1,57 @@
+{
+  "d1a_residual6_correctness": true,
+  "d1b_schedule_qualification_open": true,
+  "d1c_wrapper_open": false,
+  "element_count": 122940,
+  "launch_count_per_run": 2,
+  "maximum_diff": 1.916179825922626e-06,
+  "metrics": [
+    {
+      "candidate_oracle_bias_diff": 1.6777612468210634e-06,
+      "candidate_oracle_output_diff": 5.20636509460104e-08,
+      "candidate_reference_bias_diff": 9.5367431640625e-07,
+      "candidate_reference_output_diff": 2.9802322387695312e-08,
+      "reference_oracle_bias_diff": 1.916179825922626e-06,
+      "reference_oracle_output_diff": 4.192402774938486e-08
+    },
+    {
+      "candidate_oracle_bias_diff": 1.6777612468210634e-06,
+      "candidate_oracle_output_diff": 5.20636509460104e-08,
+      "candidate_reference_bias_diff": 9.5367431640625e-07,
+      "candidate_reference_output_diff": 2.9802322387695312e-08,
+      "reference_oracle_bias_diff": 1.916179825922626e-06,
+      "reference_oracle_output_diff": 4.192402774938486e-08
+    },
+    {
+      "candidate_oracle_bias_diff": 1.6777612468210634e-06,
+      "candidate_oracle_output_diff": 5.20636509460104e-08,
+      "candidate_reference_bias_diff": 9.5367431640625e-07,
+      "candidate_reference_output_diff": 2.9802322387695312e-08,
+      "reference_oracle_bias_diff": 1.916179825922626e-06,
+      "reference_oracle_output_diff": 4.192402774938486e-08
+    },
+    {
+      "candidate_oracle_bias_diff": 1.6777612468210634e-06,
+      "candidate_oracle_output_diff": 5.20636509460104e-08,
+      "candidate_reference_bias_diff": 9.5367431640625e-07,
+      "candidate_reference_output_diff": 2.9802322387695312e-08,
+      "reference_oracle_bias_diff": 1.916179825922626e-06,
+      "reference_oracle_output_diff": 4.192402774938486e-08
+    },
+    {
+      "candidate_oracle_bias_diff": 1.6777612468210634e-06,
+      "candidate_oracle_output_diff": 5.20636509460104e-08,
+      "candidate_reference_bias_diff": 9.5367431640625e-07,
+      "candidate_reference_output_diff": 2.9802322387695312e-08,
+      "reference_oracle_bias_diff": 1.916179825922626e-06,
+      "reference_oracle_output_diff": 4.192402774938486e-08
+    }
+  ],
+  "performance_claimed": false,
+  "persistent_dense_a": false,
+  "run_count": 5,
+  "scratch_count": 1,
+  "sign_exact": true,
+  "summary_hash": "18acaf3419a5fedc33c4fa455cff5d88ed7aa0c7c7c5846959b9ec3ec631fa0c",
+  "timing_recorded": false
+}

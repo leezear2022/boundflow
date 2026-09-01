@@ -1,0 +1,1 @@
+{"evidence_status":"validated-live-return-result","fallback_dispatch_count":0,"max_abs_diff":1.0669231414794922e-05,"official_post_queue_consumed":true,"performance_claimed":false,"provider_callbacks":[0,0,0],"sign_element_count":213060,"status":"replay-passed","summary_hash":"4caeb541ec2f8d21fbdb7706c1c52ee20e247ff5e2b29acff0e8cb0846f39a6c","tensor_count":451}

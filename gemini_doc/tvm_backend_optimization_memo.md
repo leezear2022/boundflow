@@ -1,5 +1,10 @@
 # TVM 后端优化备忘（当前 baseline 与后续改进点）
 
+> **2026-08-25 R3-1b限定**：α-CROWN full-region下一TVM动作不是直接写融合kernel，而是先实现
+> R3-1b0 exact recurrence trace与两scratch liveness compiler。只有b0证明真实fanout schedule
+> `scratch<=2`后才开放compiled forward；timing和optimizer仍关闭。见
+> `BOUNDFLOW_R3_1B_BOUNDED_ARENA_COMPILED_RECURRENCE_PLAN_2026_08_25.md`。
+
 ## 背景与目标
 
 BoundFlow 目前的 TVM 后端目标是：在不牺牲正确性的前提下，把 verifier 的热点算子（尤其是 **interval IBP** 与后续 **CROWN/backward LiRPA** 的核心线性传播）逐步迁移到 TVM 上，并形成可持续迭代的性能闭环（benchmark + ablation）。
@@ -89,4 +94,3 @@ BoundFlow 目前的 TVM 后端目标是：在不牺牲正确性的前提下，�
 1. Phase 5A/5B/5E：先用 `relax_vm` 路径把 **TaskGraph + cache/reuse/batching + benchmark/ablation** 骨架做全。
 2. Phase 5E（进阶）：挑 1–2 个最重的 task（CNN 的 interval conv2d/linear），落 `call_tir + PrimFunc`。
 3. Phase 6：BaB 引入后，如果 profiling 显示 backward GEMM/conv 成为新热点，再评估 TileLang JIT。
-
