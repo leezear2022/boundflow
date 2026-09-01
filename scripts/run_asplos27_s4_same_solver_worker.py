@@ -52,11 +52,28 @@ WORKER_SCHEMA = "boundflow.asplos27-s4-same-solver-worker/v1"
 CONFIGURATIONS = (
     "B4-A",
     "B4-A-PREP",
+    "B4-A-WARM",
     "S4",
     "S4-PREP",
     "S4-ROOT-WARM",
     "BAB4",
+    "BAB4-WARM",
 )
+CANDIDATE_CONFIGURATIONS = frozenset(
+    {"S4", "S4-PREP", "S4-ROOT-WARM", "BAB4", "BAB4-WARM"}
+)
+FOUR_SEGMENT_CONFIGURATIONS = frozenset({"BAB4", "BAB4-WARM"})
+PREPARED_REQUEST_CONFIGURATIONS = frozenset(
+    {
+        "B4-A-PREP",
+        "B4-A-WARM",
+        "S4-PREP",
+        "S4-ROOT-WARM",
+        "BAB4",
+        "BAB4-WARM",
+    }
+)
+ROOT_WARMUP_CONFIGURATIONS = frozenset({"B4-A-WARM", "S4-ROOT-WARM", "BAB4-WARM"})
 PLAN_TEMPLATE = (
     REPOSITORY_ROOT
     / "artifacts/asplos27-s4-exact-call-plan/resnet2b-prop0-v1/plan_template.json"
@@ -361,9 +378,8 @@ def _base_namespace(args: argparse.Namespace, result: Path) -> argparse.Namespac
         model=args.model,
         property=args.property,
         result=result,
-        prepare_static_request=args.configuration
-        in {"B4-A-PREP", "S4-PREP", "S4-ROOT-WARM", "BAB4"},
-        prepare_root_optimizer_warmup=args.configuration == "S4-ROOT-WARM",
+        prepare_static_request=args.configuration in PREPARED_REQUEST_CONFIGURATIONS,
+        prepare_root_optimizer_warmup=args.configuration in ROOT_WARMUP_CONFIGURATIONS,
         attribute_root_incomplete=bool(
             getattr(args, "attribute_root_incomplete", False)
         ),
@@ -376,13 +392,14 @@ def _worker(args: argparse.Namespace) -> None:
     receipts: list[dict[str, object]] = []
     with tempfile.TemporaryDirectory(prefix="boundflow-s4-same-solver-") as raw:
         base_result = Path(raw) / "b4a-worker.json"
-        if args.configuration in {"S4", "S4-PREP", "S4-ROOT-WARM", "BAB4"}:
+        if args.configuration in CANDIDATE_CONFIGURATIONS:
             with (
                 diagnostic._patch_attribute(
                     fsg3_timing, "POST_PREPARE_ENVIRONMENT_WINDOW", True
                 ),
                 _s4_candidate_executor(
-                    receipts, four_segment=args.configuration == "BAB4"
+                    receipts,
+                    four_segment=args.configuration in FOUR_SEGMENT_CONFIGURATIONS,
                 ),
             ):
                 b4a_worker._worker(_base_namespace(args, base_result))
@@ -397,8 +414,7 @@ def _worker(args: argparse.Namespace) -> None:
         or base.get("schema_version") != b4a_worker.WORKER_SCHEMA
         or base.get("configuration") != "B4-A"
         or base.get("performance_claimed") is not False
-        or len(receipts)
-        != int(args.configuration in {"S4", "S4-PREP", "S4-ROOT-WARM", "BAB4"})
+        or len(receipts) != int(args.configuration in CANDIDATE_CONFIGURATIONS)
     ):
         raise ValueError("S4 inherited same-solver envelope differs")
     run = base.get("run")

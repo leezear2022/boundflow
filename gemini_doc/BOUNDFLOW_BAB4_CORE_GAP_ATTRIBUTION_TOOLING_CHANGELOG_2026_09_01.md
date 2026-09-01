@@ -83,3 +83,18 @@ BAB4 五组正式结果显示 complete-query geomean 为 `1.30018x`，但 core g
 
 旧 artifact 测试也改为按其冻结 source commit 读取 git blob，而不是要求当前工作树永远等于旧代码；旧
 raw/replay 仍保持不变。
+
+## 6. Warm-state 二次校正
+
+`B4-A-PREP ↔ BAB4` 五组诊断得到 query geomean `1.163729x`、core geomean `1.160650x`，但 raw
+phase ledger 暴露出新的不匹配：BAB4 在 query 外执行了四段 optimizer warmup，B4-A-PREP 没有执行
+原生 optimizer warmup。候选的 root incomplete 中位因此约为 `641.45 ms`，而 control 为
+`800.41 ms`；这部分约 `159 ms` 差异发生在 BAB4 exact-call core 之前，不能归因给四段 TIR。
+
+因此该五组只保留为诊断，不升级性能结论。新增两个配置：
+
+- `B4-A-WARM`：prepared request + 原生 root optimizer warmup + 原 B4-A executor；
+- `BAB4-WARM`：相同 prepared request + 相同原生 root optimizer warmup + BAB4 四段自身 warmup/executor。
+
+新增 `run_bab4_rfactor_warm_five_fresh.py`，以五组交替 fresh 进程比较上述配置。只有该完全匹配的
+warm-state 协议才能形成当前 BAB4 的 query/core 性能结论。

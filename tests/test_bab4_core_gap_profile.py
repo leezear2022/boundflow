@@ -14,6 +14,7 @@ from scripts.run_bab4_core_gap_profile import (
 )
 from scripts import run_asplos27_s4_same_solver_worker as live_worker
 from scripts import run_bab4_rfactor_prepared_five_fresh as prepared
+from scripts import run_bab4_rfactor_warm_five_fresh as warm
 
 
 def test_frozen_bab4_optimizer_samples_are_five_admitted_live_runs() -> None:
@@ -51,3 +52,29 @@ def test_rfactor_protocol_uses_matched_preparation_and_five_alternating_pairs() 
     assert prepared.CANDIDATE_CONFIGURATION == "BAB4"
     assert len(prepared.PAIR_ORDERS) == 5
     assert all(set(order) == {"B4-A-PREP", "BAB4"} for order in prepared.PAIR_ORDERS)
+
+
+def test_warm_matched_protocol_primes_native_root_on_both_sides() -> None:
+    for configuration in ("B4-A-WARM", "BAB4-WARM"):
+        args = argparse.Namespace(
+            configuration=configuration,
+            mode="control",
+            run_id="test",
+            block_index=0,
+            sequence_position=0,
+            benchmark_root=Path("benchmark"),
+            abcrown_root=Path("abcrown"),
+            model=Path("model.onnx"),
+            property=Path("property.vnnlib"),
+            attribute_root_incomplete=False,
+        )
+        namespace = live_worker._base_namespace(args, Path("result.json"))
+        assert namespace.prepare_static_request is True
+        assert namespace.prepare_root_optimizer_warmup is True
+    assert "B4-A-WARM" not in live_worker.CANDIDATE_CONFIGURATIONS
+    assert "BAB4-WARM" in live_worker.CANDIDATE_CONFIGURATIONS
+    assert "BAB4-WARM" in live_worker.FOUR_SEGMENT_CONFIGURATIONS
+
+    warm.configure()
+    assert len(warm.PAIR_ORDERS) == 5
+    assert all(set(order) == {"B4-A-WARM", "BAB4-WARM"} for order in warm.PAIR_ORDERS)
