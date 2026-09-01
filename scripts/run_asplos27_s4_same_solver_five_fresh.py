@@ -87,6 +87,46 @@ def _is_four_segment_candidate() -> bool:
     return CANDIDATE_CONFIGURATION.startswith("BAB4")
 
 
+def _validate_prepared_gc_receipt(
+    payload: Mapping[str, Any], configuration: str
+) -> None:
+    """Fail closed on the symmetric prepared-GC execution contract."""
+
+    if not configuration.endswith("-GC"):
+        return
+    diagnostics = _mapping(payload.get("diagnostics"), "diagnostics")
+    receipt = _mapping(
+        diagnostics.get("prepared_gc_isolation"), "prepared GC isolation"
+    )
+    expected = {
+        "schema_version": "boundflow.prepared-gc-isolation/v1",
+        "full_prepare_collection": True,
+        "prepared_old_generation_scan_excluded": True,
+        "query_collection_preserved": True,
+        "query_timing_excluded": True,
+        "query_collect_generation": 1,
+        "query_collect_call_count": 1,
+        "restored": True,
+        "performance_claimed": False,
+    }
+    if any(receipt.get(key) != value for key, value in expected.items()):
+        raise ValueError("S4 five-fresh prepared GC receipt differs")
+    for key in (
+        "prepare_collect_ns",
+        "query_collect_ns",
+        "restore_collect_ns",
+    ):
+        if _integer(receipt.get(key), f"prepared GC {key}") <= 0:
+            raise ValueError("S4 five-fresh prepared GC timing differs")
+    for key in (
+        "prepare_collected_object_count",
+        "query_collected_object_count",
+        "restore_collected_object_count",
+    ):
+        if _integer(receipt.get(key), f"prepared GC {key}") < 0:
+            raise ValueError("S4 five-fresh prepared GC accounting differs")
+
+
 def _geomean(values: list[float]) -> float:
     if not values or any(value <= 0.0 or not math.isfinite(value) for value in values):
         raise ValueError("S4 five-fresh geomean input differs")
@@ -142,6 +182,7 @@ def _validate_worker(
     environment = _mapping(run.get("environment"), "environment")
     if environment.get("admitted") is not True:
         raise ValueError("S4 five-fresh environment is not admitted")
+    _validate_prepared_gc_receipt(payload, configuration)
     receipts = payload.get("s4_exact_call_receipts")
     expected_count = int(configuration == CANDIDATE_CONFIGURATION)
     if not isinstance(receipts, list) or len(receipts) != expected_count:
@@ -308,6 +349,10 @@ def _summary(
         summary["candidate_assets_hash"] = next(iter(candidate_assets_hashes))
     if CONTROL_CONFIGURATION != "B4-A":
         summary["control_configuration"] = CONTROL_CONFIGURATION
+    if CONTROL_CONFIGURATION.endswith("-GC") and CANDIDATE_CONFIGURATION.endswith(
+        "-GC"
+    ):
+        summary["prepared_gc_isolation"] = True
     summary["summary_hash"] = _canonical_hash(summary)
     return summary
 
@@ -340,6 +385,10 @@ def _protocol(args: argparse.Namespace) -> dict[str, object]:
         payload["candidate_configuration"] = CANDIDATE_CONFIGURATION
     if CONTROL_CONFIGURATION != "B4-A":
         payload["control_configuration"] = CONTROL_CONFIGURATION
+    if CONTROL_CONFIGURATION.endswith("-GC") and CANDIDATE_CONFIGURATION.endswith(
+        "-GC"
+    ):
+        payload["prepared_gc_isolation"] = True
     payload["protocol_hash"] = _canonical_hash(payload)
     return payload
 

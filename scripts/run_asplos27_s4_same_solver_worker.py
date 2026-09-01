@@ -53,27 +53,34 @@ CONFIGURATIONS = (
     "B4-A",
     "B4-A-PREP",
     "B4-A-WARM",
+    "B4-A-GC",
     "S4",
     "S4-PREP",
     "S4-ROOT-WARM",
     "BAB4",
     "BAB4-WARM",
+    "BAB4-GC",
 )
 CANDIDATE_CONFIGURATIONS = frozenset(
-    {"S4", "S4-PREP", "S4-ROOT-WARM", "BAB4", "BAB4-WARM"}
+    {"S4", "S4-PREP", "S4-ROOT-WARM", "BAB4", "BAB4-WARM", "BAB4-GC"}
 )
-FOUR_SEGMENT_CONFIGURATIONS = frozenset({"BAB4", "BAB4-WARM"})
+FOUR_SEGMENT_CONFIGURATIONS = frozenset({"BAB4", "BAB4-WARM", "BAB4-GC"})
 PREPARED_REQUEST_CONFIGURATIONS = frozenset(
     {
         "B4-A-PREP",
         "B4-A-WARM",
+        "B4-A-GC",
         "S4-PREP",
         "S4-ROOT-WARM",
         "BAB4",
         "BAB4-WARM",
+        "BAB4-GC",
     }
 )
-ROOT_WARMUP_CONFIGURATIONS = frozenset({"B4-A-WARM", "S4-ROOT-WARM", "BAB4-WARM"})
+ROOT_WARMUP_CONFIGURATIONS = frozenset(
+    {"B4-A-WARM", "B4-A-GC", "S4-ROOT-WARM", "BAB4-WARM", "BAB4-GC"}
+)
+GC_ISOLATION_CONFIGURATIONS = frozenset({"B4-A-GC", "BAB4-GC"})
 PLAN_TEMPLATE = (
     REPOSITORY_ROOT
     / "artifacts/asplos27-s4-exact-call-plan/resnet2b-prop0-v1/plan_template.json"
@@ -380,6 +387,7 @@ def _base_namespace(args: argparse.Namespace, result: Path) -> argparse.Namespac
         result=result,
         prepare_static_request=args.configuration in PREPARED_REQUEST_CONFIGURATIONS,
         prepare_root_optimizer_warmup=args.configuration in ROOT_WARMUP_CONFIGURATIONS,
+        prepare_gc_isolation=args.configuration in GC_ISOLATION_CONFIGURATIONS,
         attribute_root_incomplete=bool(
             getattr(args, "attribute_root_incomplete", False)
         ),

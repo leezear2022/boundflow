@@ -227,6 +227,7 @@ def _b3_namespace(args: argparse.Namespace, result: Path) -> argparse.Namespace:
         prepare_root_optimizer_warmup=bool(
             getattr(args, "prepare_root_optimizer_warmup", False)
         ),
+        prepare_gc_isolation=bool(getattr(args, "prepare_gc_isolation", False)),
     )
 
 

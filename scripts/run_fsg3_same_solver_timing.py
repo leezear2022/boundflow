@@ -1224,6 +1224,7 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
     prepare_root_optimizer_warmup = bool(
         getattr(args, "prepare_root_optimizer_warmup", False)
     )
+    prepare_gc_isolation = bool(getattr(args, "prepare_gc_isolation", False))
     if prepare_root_optimizer_warmup and not prepare_static_request:
         raise ValueError("FSG3 root optimizer warmup requires a prepared request")
     torch.cuda.synchronize()
@@ -1421,7 +1422,19 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
             torch.cuda.reset_peak_memory_stats()
             environment_before = _nvidia_snapshot()
             processes_before = _compute_processes()
+        prepared_gc_receipt: Any = None
         with ExitStack() as stack:
+            if prepare_gc_isolation:
+                from boundflow.runtime.prepared_gc_isolation import (
+                    prepared_gc_isolation_v1,
+                )
+
+                prepared_gc_receipt = stack.enter_context(
+                    prepared_gc_isolation_v1(
+                        gc_module=complete_verifier_func.gc,
+                        complete_verifier_module=complete_verifier_func,
+                    )
+                )
             if executor is not None:
                 stack.enter_context(
                     executor.instrument(
@@ -1682,6 +1695,9 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
             "complete_prelude_timings": complete_prelude_timings,
             "prepared_verification_request": prepared_request_receipt,
             "prepared_root_optimizer_warmup": prepared_root_warmup_receipt,
+            "prepared_gc_isolation": (
+                None if prepared_gc_receipt is None else prepared_gc_receipt.to_dict()
+            ),
             "device_commit_audits": (
                 [] if executor is None else executor.device_commit_audits
             ),

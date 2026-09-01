@@ -25,7 +25,34 @@ def _payload(*, query_ns: int, core_ns: int, pre_core_ns: int, phase_ns: int):
     return {
         "run": {
             "environment": {"admitted": True},
-            "metrics": {"query_wall_ns": query_ns, "core_wall_ns": core_ns},
+            "metrics": {
+                "query_wall_ns": query_ns,
+                "core_wall_ns": core_ns,
+                "peak_allocated_bytes": 100,
+                "peak_reserved_bytes": 200,
+            },
+            "semantics": {
+                "status": "verified",
+                "success": True,
+                "visited_domains": [6],
+                "queue_before": 0,
+                "queue_input": 6,
+                "queue_accepted": 6,
+                "queue_pruned": 0,
+                "queue_after": 6,
+                "depths": [1] * 6,
+                "history_count": 6,
+                "lower_shape": [1],
+                "lower_values": [-1.0],
+                "upper_shape": [1],
+                "upper_values": [0.0],
+                "upper_positive_infinity_mask": [True],
+                "final_decision": [[1, 2]],
+                "split_depth": 1,
+                "batch_size": 6,
+                "n_verified": 0,
+                "n_splits": 6,
+            },
         },
         "diagnostics": {
             "query_phase_timing": {"pre_core_ns": pre_core_ns},
@@ -46,6 +73,9 @@ def test_complete_prelude_summary_uses_pairwise_candidate_minus_control() -> Non
     summary = profile._summarize(workers)
     assert summary["query_speedup_geomean"] == 1.25
     assert summary["core_speedup_geomean"] == 1.25
+    assert summary["all_discrete_semantics_exact"] is True
+    assert summary["lower_max_abs_diff"] == 0.0
+    assert summary["peak_allocated_ratio_geomean"] == 1.0
     medians = summary["candidate_minus_control_median_ms"]
     assert medians["pre_core_ms"] == 5e-6
     assert medians["gc_collect_inclusive_ms"] == 3e-6
