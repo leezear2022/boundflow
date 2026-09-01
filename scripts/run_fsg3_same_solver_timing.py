@@ -1218,6 +1218,9 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
     mode = FSG3Mode(args.mode)
     prepare_static_request = bool(getattr(args, "prepare_static_request", False))
     attribute_root_incomplete = bool(getattr(args, "attribute_root_incomplete", False))
+    attribute_complete_prelude = bool(
+        getattr(args, "attribute_complete_prelude", False)
+    )
     prepare_root_optimizer_warmup = bool(
         getattr(args, "prepare_root_optimizer_warmup", False)
     )
@@ -1326,6 +1329,16 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
             (BoundRelu, "clip_alpha", "clip_alpha"),
         )
     root_phase_names = tuple(binding[2] for binding in root_phase_bindings)
+    complete_prelude_phases = _NestedPhaseObserver()
+    complete_prelude_bindings: tuple[tuple[object, str, str], ...] = (
+        (abcrown_api, "complete_verifier_core", "complete_verifier"),
+        (ABCrownSolver, "bab", "complete_bab"),
+        (complete_verifier_func, "prepare_for_act_bab", "prepare_for_act_bab"),
+        (complete_verifier_func, "general_bab", "general_bab"),
+        (torch.cuda, "empty_cache", "cuda_empty_cache"),
+        (complete_verifier_func.gc, "collect", "gc_collect"),
+    )
+    complete_prelude_names = tuple(binding[2] for binding in complete_prelude_bindings)
     executor: Any = None
     if configuration == FSG3Configuration.B2:
         executor = candidate_runner._LiveExecutor(
@@ -1421,6 +1434,10 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
             stack.enter_context(host_phases.instrument(host_phase_bindings))
             if attribute_root_incomplete:
                 stack.enter_context(root_phases.instrument(root_phase_bindings))
+            if attribute_complete_prelude:
+                stack.enter_context(
+                    complete_prelude_phases.instrument(complete_prelude_bindings)
+                )
             stack.enter_context(post.instrument(stage_postprocess, bab_bootstrap))
             stack.enter_context(queue.instrument(BatchedDomainList))
             query_start_event = torch.cuda.Event(enable_timing=True)
@@ -1487,6 +1504,13 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
             root_name="root_incomplete", required_names=root_phase_names
         )
         if attribute_root_incomplete
+        else None
+    )
+    complete_prelude_timings = (
+        complete_prelude_phases.snapshot(
+            root_name="complete_verifier", required_names=complete_prelude_names
+        )
+        if attribute_complete_prelude
         else None
     )
     query_phase_timing = _query_phase_timing(
@@ -1655,6 +1679,7 @@ def _worker(args: argparse.Namespace) -> None:  # pylint: disable=too-many-local
             "query_phase_timing": query_phase_timing,
             "host_phase_timings": host_phase_timings,
             "root_incomplete_timings": root_incomplete_timings,
+            "complete_prelude_timings": complete_prelude_timings,
             "prepared_verification_request": prepared_request_receipt,
             "prepared_root_optimizer_warmup": prepared_root_warmup_receipt,
             "device_commit_audits": (

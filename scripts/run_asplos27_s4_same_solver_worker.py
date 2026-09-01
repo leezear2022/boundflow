@@ -383,6 +383,9 @@ def _base_namespace(args: argparse.Namespace, result: Path) -> argparse.Namespac
         attribute_root_incomplete=bool(
             getattr(args, "attribute_root_incomplete", False)
         ),
+        attribute_complete_prelude=bool(
+            getattr(args, "attribute_complete_prelude", False)
+        ),
     )
 
 
@@ -466,6 +469,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--model", type=Path, required=True)
     parser.add_argument("--property", type=Path, required=True)
     parser.add_argument("--result", type=Path, required=True)
+    parser.add_argument("--attribute-complete-prelude", action="store_true")
     return parser.parse_args()
 
 

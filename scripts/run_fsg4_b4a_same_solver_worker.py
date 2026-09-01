@@ -221,6 +221,9 @@ def _b3_namespace(args: argparse.Namespace, result: Path) -> argparse.Namespace:
         attribute_root_incomplete=bool(
             getattr(args, "attribute_root_incomplete", False)
         ),
+        attribute_complete_prelude=bool(
+            getattr(args, "attribute_complete_prelude", False)
+        ),
         prepare_root_optimizer_warmup=bool(
             getattr(args, "prepare_root_optimizer_warmup", False)
         ),
