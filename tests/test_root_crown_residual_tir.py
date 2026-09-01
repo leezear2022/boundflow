@@ -10,6 +10,7 @@ import pytest
 import torch
 
 from boundflow.backends.tvm.root_crown_residual import (
+    build_root_crown_residual_modules_v1,
     RootCrownResidualTemplateV1,
 )
 from boundflow.runtime.root_crown_residual_tir import (
@@ -92,3 +93,15 @@ def test_root_crown_residual_runtime_rejects_cpu_tensors() -> None:
     )
     with pytest.raises(ValueError, match="runtime tensor differs"):
         validate_root_crown_residual_tensors_v1(tensors, template)
+
+
+def test_root_crown_residual_forward_parallelizes_bias_reductions() -> None:
+    _unscheduled, scheduled, inventory = build_root_crown_residual_modules_v1(
+        _template()
+    )
+    script = scheduled.script(show_meta=False)
+    assert "entry_bias_delta_rf" in script
+    assert "inner_bias_delta_rf" in script
+    assert 'T.thread_binding(128, thread="threadIdx.x")' in script
+    assert ("entry_bias_delta.rf", (3, 1, 128)) in inventory
+    assert ("inner_bias_delta.rf", (3, 1, 128)) in inventory

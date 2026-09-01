@@ -200,6 +200,8 @@ class CompiledRootCrownProjectionTIRV1:
     scheduled_tir_hash: str
     device_source_hash: str
     workspace_inventory: tuple[tuple[str, tuple[int, ...]], ...]
+    forward_parallel_reduction_count: int
+    forward_bias_reduction_lanes: int
     tvm_version: str
 
 
@@ -910,6 +912,10 @@ def build_root_crown_projection_modules_v1(template: RootCrownProjectionTemplate
                 forward,
                 forward_blocks,
                 template.thread_extent,
+                parallel_reduction_blocks=(
+                    "entry_bias_delta",
+                    "inner_bias_delta",
+                ),
             ),
             template.backward_symbol: _schedule_function(
                 tvm,
@@ -943,6 +949,8 @@ def compile_root_crown_projection_tir_v1(
         scheduled_tir_hash=_canonical_hash(tvm.ir.save_json(scheduled)),
         device_source_hash=_canonical_hash("\n".join(sources)),
         workspace_inventory=inventory,
+        forward_parallel_reduction_count=2,
+        forward_bias_reduction_lanes=template.thread_extent,
         tvm_version=str(tvm.__version__),
     )
 

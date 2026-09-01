@@ -144,6 +144,8 @@ class CompiledRootCrownResidualTIRV1:
     scheduled_tir_hash: str
     device_source_hash: str
     workspace_inventory: tuple[tuple[str, tuple[int, ...]], ...]
+    forward_parallel_reduction_count: int
+    forward_bias_reduction_lanes: int
     tvm_version: str
 
 
@@ -828,9 +830,49 @@ def _workspace_inventory(module) -> tuple[tuple[str, tuple[int, ...]], ...]:
     return tuple(sorted(inventory))
 
 
-def _schedule_function(tvm, symbol: str, function, blocks, thread_extent: int):
+def _schedule_function(
+    tvm,
+    symbol: str,
+    function,
+    blocks,
+    thread_extent: int,
+    *,
+    parallel_reduction_blocks: tuple[str, ...] = (),
+):
     schedule = tvm.tir.Schedule(tvm.IRModule({symbol: function}))
+    parallel = set(parallel_reduction_blocks)
+    if len(parallel) != len(parallel_reduction_blocks):
+        raise ValueError("root CROWN parallel reduction inventory differs")
+    for block_name in parallel_reduction_blocks:
+        block = schedule.get_block(block_name, func_name=symbol)
+        loops = schedule.get_loops(block)
+        if len(loops) != 5:
+            raise ValueError("root CROWN bias reduction loop nest differs")
+        reduction = schedule.fuse(*loops[2:])
+        _reduction_outer, reduction_lane = schedule.split(
+            reduction, factors=[None, thread_extent]
+        )
+        partial = schedule.rfactor(reduction_lane, factor_axis=2)
+        partial_loops = schedule.get_loops(partial)
+        if len(partial_loops) != 4:
+            raise ValueError("root CROWN partial reduction loop nest differs")
+        schedule.reorder(
+            partial_loops[0],
+            partial_loops[1],
+            partial_loops[3],
+            partial_loops[2],
+        )
+        partial_spatial = schedule.fuse(partial_loops[0], partial_loops[1])
+        schedule.bind(partial_spatial, "blockIdx.x")
+        schedule.bind(partial_loops[3], "threadIdx.x")
+        final_loops = schedule.get_loops(block)
+        if len(final_loops) != 3:
+            raise ValueError("root CROWN final reduction loop nest differs")
+        final_spatial = schedule.fuse(*final_loops[:-1])
+        schedule.bind(final_spatial, "blockIdx.x")
     for block_name, spatial_count in blocks:
+        if block_name in parallel:
+            continue
         block = schedule.get_block(block_name, func_name=symbol)
         loops = schedule.get_loops(block)
         fused = schedule.fuse(*loops[:spatial_count])
@@ -885,6 +927,10 @@ def build_root_crown_residual_modules_v1(template: RootCrownResidualTemplateV1):
                 forward,
                 forward_blocks,
                 template.thread_extent,
+                parallel_reduction_blocks=(
+                    "entry_bias_delta",
+                    "inner_bias_delta",
+                ),
             ),
             template.backward_symbol: _schedule_function(
                 tvm,
@@ -918,6 +964,8 @@ def compile_root_crown_residual_tir_v1(
         scheduled_tir_hash=_canonical_hash(tvm.ir.save_json(scheduled)),
         device_source_hash=_canonical_hash("\n".join(sources)),
         workspace_inventory=inventory,
+        forward_parallel_reduction_count=2,
+        forward_bias_reduction_lanes=template.thread_extent,
         tvm_version=str(tvm.__version__),
     )
 

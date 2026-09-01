@@ -24,6 +24,7 @@ if str(REPOSITORY_ROOT) not in sys.path:
 ARTIFACT_SCHEMA = "boundflow.asplos27-s4-aot-five-fresh/v1"
 WORKER_SCHEMA = "boundflow.asplos27-s4-same-solver-worker/v1"
 CANDIDATE_CONFIGURATION = "S4"
+CONTROL_CONFIGURATION = "B4-A"
 PAIR_ORDERS: tuple[tuple[str, str], ...] = (
     ("B4-A", "S4"),
     ("S4", "B4-A"),
@@ -202,7 +203,9 @@ def _summary(
             configuration: workers[f"pair-{pair_ordinal:02d}/{configuration}"]
             for configuration in order
         }
-        control_run, _ = _validate_worker(rows["B4-A"], "B4-A")
+        control_run, _ = _validate_worker(
+            rows[CONTROL_CONFIGURATION], CONTROL_CONFIGURATION
+        )
         candidate_run, receipt = _validate_worker(
             rows[CANDIDATE_CONFIGURATION], CANDIDATE_CONFIGURATION
         )
@@ -297,6 +300,8 @@ def _summary(
     if CANDIDATE_CONFIGURATION == "BAB4":
         summary["candidate_configuration"] = CANDIDATE_CONFIGURATION
         summary["candidate_assets_hash"] = next(iter(candidate_assets_hashes))
+    if CONTROL_CONFIGURATION != "B4-A":
+        summary["control_configuration"] = CONTROL_CONFIGURATION
     summary["summary_hash"] = _canonical_hash(summary)
     return summary
 
@@ -327,6 +332,8 @@ def _protocol(args: argparse.Namespace) -> dict[str, object]:
     }
     if CANDIDATE_CONFIGURATION == "BAB4":
         payload["candidate_configuration"] = CANDIDATE_CONFIGURATION
+    if CONTROL_CONFIGURATION != "B4-A":
+        payload["control_configuration"] = CONTROL_CONFIGURATION
     payload["protocol_hash"] = _canonical_hash(payload)
     return payload
 

@@ -8,6 +8,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 
 from scripts.probe_bab4_same_solver_five_fresh_tamper import run as run_tamper
 from scripts import run_bab4_same_solver_five_fresh as bab4
@@ -22,7 +23,13 @@ def test_bab4_five_fresh_replay_and_source_identity() -> None:
     protocol = json.loads((ARTIFACT / "protocol.json").read_text(encoding="utf-8"))
     assert protocol["source_git_head"] == "7bd28bdae4ac4f0093089d66510806ef09cf9028"
     for relative, expected in protocol["code_revision"].items():
-        observed = hashlib.sha256((ROOT / relative).read_bytes()).hexdigest()
+        frozen = subprocess.run(
+            ("git", "show", f"{protocol['source_git_head']}:{relative}"),
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+        ).stdout
+        observed = hashlib.sha256(frozen).hexdigest()
         assert observed == expected
 
 

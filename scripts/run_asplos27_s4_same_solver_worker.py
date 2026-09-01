@@ -49,7 +49,14 @@ from scripts import run_rvir_v4_production_state_capture as capture_runner
 from scripts.run_rvir_v4_pre_state_artifact import TOPOLOGY
 
 WORKER_SCHEMA = "boundflow.asplos27-s4-same-solver-worker/v1"
-CONFIGURATIONS = ("B4-A", "S4", "S4-PREP", "S4-ROOT-WARM", "BAB4")
+CONFIGURATIONS = (
+    "B4-A",
+    "B4-A-PREP",
+    "S4",
+    "S4-PREP",
+    "S4-ROOT-WARM",
+    "BAB4",
+)
 PLAN_TEMPLATE = (
     REPOSITORY_ROOT
     / "artifacts/asplos27-s4-exact-call-plan/resnet2b-prop0-v1/plan_template.json"
@@ -355,7 +362,7 @@ def _base_namespace(args: argparse.Namespace, result: Path) -> argparse.Namespac
         property=args.property,
         result=result,
         prepare_static_request=args.configuration
-        in {"S4-PREP", "S4-ROOT-WARM", "BAB4"},
+        in {"B4-A-PREP", "S4-PREP", "S4-ROOT-WARM", "BAB4"},
         prepare_root_optimizer_warmup=args.configuration == "S4-ROOT-WARM",
         attribute_root_incomplete=bool(
             getattr(args, "attribute_root_incomplete", False)
