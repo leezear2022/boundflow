@@ -31,6 +31,12 @@ from boundflow.runtime.asplos27_s4_exact_call_plan_template import (
     load_s4_exact_call_plan_template_v1,
 )
 from boundflow.runtime.asplos27_s4_optimizer_driver import execute_s4_optimizer_v1
+from boundflow.runtime.bab_four_segment_exact_call_bridge import (
+    execute_bab_four_segment_exact_call_handoff_v1,
+)
+from boundflow.runtime.bab_four_segment_optimizer import (
+    PreparedBabFourSegmentOptimizerV1,
+)
 from boundflow.runtime.rvir_v4_live_return import live_targets_from_pre_result_v4
 from boundflow.runtime.rvir_v4_pre_state_initializer import (
     initialize_rvir_v4_native_pre_state,
@@ -43,7 +49,7 @@ from scripts import run_rvir_v4_production_state_capture as capture_runner
 from scripts.run_rvir_v4_pre_state_artifact import TOPOLOGY
 
 WORKER_SCHEMA = "boundflow.asplos27-s4-same-solver-worker/v1"
-CONFIGURATIONS = ("B4-A", "S4", "S4-PREP", "S4-ROOT-WARM")
+CONFIGURATIONS = ("B4-A", "S4", "S4-PREP", "S4-ROOT-WARM", "BAB4")
 PLAN_TEMPLATE = (
     REPOSITORY_ROOT
     / "artifacts/asplos27-s4-exact-call-plan/resnet2b-prop0-v1/plan_template.json"
@@ -109,9 +115,70 @@ def _warm_s4_runtime(
     return warm_payload, prepared
 
 
+def _warm_four_segment_runtime(
+    optimizer: PreparedBabFourSegmentOptimizerV1,
+    prepared_region: Any,
+) -> dict[str, object]:
+    """Warm module loading, DLPack views, and arenas with legal dummy state."""
+
+    import torch
+
+    with torch.no_grad():
+        for spec, tensor in zip(
+            prepared_region.plan.tensor_specs, prepared_region.executor.tensors
+        ):
+            if not spec.name.startswith("param/"):
+                tensor.zero_()
+                if spec.name == "input/upper" or spec.name.endswith("/upper"):
+                    tensor.fill_(1.0)
+    dummy: dict[str, torch.Tensor] = {}
+    for layout in prepared_region.plan.relu_layouts:
+        dummy[layout.alpha_path] = torch.full(
+            (2, 1, prepared_region.plan.domain_count, len(layout.alpha_flat_indices)),
+            0.5,
+            device=prepared_region.stream.device,
+            dtype=torch.float32,
+        )
+        dummy[layout.beta_path] = torch.zeros(
+            (prepared_region.plan.domain_count, len(layout.beta_locations[0])),
+            device=prepared_region.stream.device,
+            dtype=torch.float32,
+        )
+    optimizer.rebind(dummy)
+    started = time.perf_counter_ns()
+    run = optimizer.run(prepared_region.stream)
+    warm_ns = time.perf_counter_ns() - started
+    owner = optimizer.owner
+    owner.last_trace = None
+    owner.forward_count = 0
+    owner.backward_count = 0
+    for executor in (
+        owner.terminal_executor,
+        owner.residual_executor,
+        owner.projection_executor,
+        owner.input_executor,
+    ):
+        if executor is None:
+            raise ValueError("activation-BaB warmup compiled segment is absent")
+        executor.forward_launch_count = 0
+        executor.backward_launch_count = 0
+        executor.fallback_count = 0
+    return {
+        "schema_version": "boundflow.bab-four-segment-static-warmup/v1",
+        "warmup_ns": warm_ns,
+        "evaluation_count": run.evaluation_count,
+        "mutation_count": run.mutation_count,
+        "source_capture_runtime_dependency": False,
+        "fallback_count": run.fallback_count,
+        "performance_claimed": False,
+    }
+
+
 @contextmanager
 def _s4_candidate_executor(
     receipt_sink: list[dict[str, object]],
+    *,
+    four_segment: bool = False,
 ) -> Iterator[None]:
     """Replace only B4-A's optimizer/handoff producer with compiled S4."""
 
@@ -139,6 +206,16 @@ def _s4_candidate_executor(
                 stream = torch.cuda.Stream(device=device)
                 warmup_receipt, prepared_region = _warm_s4_runtime(
                     executor, assets=assets, stream=stream
+                )
+                four_optimizer = (
+                    PreparedBabFourSegmentOptimizerV1(prepared_region)
+                    if four_segment
+                    else None
+                )
+                four_warmup = (
+                    _warm_four_segment_runtime(four_optimizer, prepared_region)
+                    if four_optimizer is not None
+                    else None
                 )
                 static_prepare_ns = time.perf_counter_ns() - prepare_started
                 base_execute = executor.execute
@@ -177,26 +254,50 @@ def _s4_candidate_executor(
                         live_sources = live_targets_from_pre_result_v4(
                             pre_result, TOPOLOGY
                         )
-                        execution = execute_s4_exact_call_handoff_v1(
-                            program=program,
-                            module=module,
-                            snapshot=snapshot,
-                            mapping=mapping,
-                            live_sources=live_sources,
-                            exact_call_id="asplos27-s4-live-core-000001",
-                            input_spec=input_spec,
-                            linear_spec_C=linear_spec_c,
-                            relu_pre=inner_kwargs["relu_pre"],
-                            initial_state=inner_kwargs["initial_state"],
-                            mutation_policy=inner_kwargs["mutation_policy"],
-                            schedule=inner_kwargs["schedule"],
-                            topology=inner_kwargs["topology"],
-                            stream=stream,
-                            assets=assets,
-                            prevalidated_plan=inner_kwargs.get("prevalidated_plan"),
-                            prepared_region=prepared_region,
-                            signature_mapping=signature_mapping,
-                        )
+                        execution: Any
+                        if four_optimizer is None:
+                            execution = execute_s4_exact_call_handoff_v1(
+                                program=program,
+                                module=module,
+                                snapshot=snapshot,
+                                mapping=mapping,
+                                live_sources=live_sources,
+                                exact_call_id="asplos27-s4-live-core-000001",
+                                input_spec=input_spec,
+                                linear_spec_C=linear_spec_c,
+                                relu_pre=inner_kwargs["relu_pre"],
+                                initial_state=inner_kwargs["initial_state"],
+                                mutation_policy=inner_kwargs["mutation_policy"],
+                                schedule=inner_kwargs["schedule"],
+                                topology=inner_kwargs["topology"],
+                                stream=stream,
+                                assets=assets,
+                                prevalidated_plan=inner_kwargs.get("prevalidated_plan"),
+                                prepared_region=prepared_region,
+                                signature_mapping=signature_mapping,
+                            )
+                        else:
+                            prevalidated_plan = inner_kwargs.get("prevalidated_plan")
+                            if prevalidated_plan is None:
+                                raise ValueError(
+                                    "activation-BaB exact-call plan is absent"
+                                )
+                            execution = execute_bab_four_segment_exact_call_handoff_v1(
+                                module=module,
+                                live_sources=live_sources,
+                                exact_call_id="asplos27-s4-live-core-000001",
+                                input_spec=input_spec,
+                                linear_spec_C=linear_spec_c,
+                                relu_pre=inner_kwargs["relu_pre"],
+                                initial_state=inner_kwargs["initial_state"],
+                                mutation_policy=inner_kwargs["mutation_policy"],
+                                schedule=inner_kwargs["schedule"],
+                                topology=inner_kwargs["topology"],
+                                stream=stream,
+                                prevalidated_plan=prevalidated_plan,
+                                prepared_region=prepared_region,
+                                optimizer=four_optimizer,
+                            )
                         payload = execution.receipt.to_dict()
                         payload["static_prepare_ns"] = static_prepare_ns
                         payload["static_prepare_excluded_from_query"] = True
@@ -207,6 +308,8 @@ def _s4_candidate_executor(
                         payload["static_warmup_receipt_hash"] = warmup_receipt[
                             "receipt_hash"
                         ]
+                        if four_warmup is not None:
+                            payload["four_segment_static_warmup"] = four_warmup
                         receipt_sink.append(payload)
                         return execution.handoff_result
 
@@ -251,7 +354,8 @@ def _base_namespace(args: argparse.Namespace, result: Path) -> argparse.Namespac
         model=args.model,
         property=args.property,
         result=result,
-        prepare_static_request=args.configuration in {"S4-PREP", "S4-ROOT-WARM"},
+        prepare_static_request=args.configuration
+        in {"S4-PREP", "S4-ROOT-WARM", "BAB4"},
         prepare_root_optimizer_warmup=args.configuration == "S4-ROOT-WARM",
         attribute_root_incomplete=bool(
             getattr(args, "attribute_root_incomplete", False)
@@ -265,12 +369,14 @@ def _worker(args: argparse.Namespace) -> None:
     receipts: list[dict[str, object]] = []
     with tempfile.TemporaryDirectory(prefix="boundflow-s4-same-solver-") as raw:
         base_result = Path(raw) / "b4a-worker.json"
-        if args.configuration in {"S4", "S4-PREP", "S4-ROOT-WARM"}:
+        if args.configuration in {"S4", "S4-PREP", "S4-ROOT-WARM", "BAB4"}:
             with (
                 diagnostic._patch_attribute(
                     fsg3_timing, "POST_PREPARE_ENVIRONMENT_WINDOW", True
                 ),
-                _s4_candidate_executor(receipts),
+                _s4_candidate_executor(
+                    receipts, four_segment=args.configuration == "BAB4"
+                ),
             ):
                 b4a_worker._worker(_base_namespace(args, base_result))
         else:
@@ -284,7 +390,8 @@ def _worker(args: argparse.Namespace) -> None:
         or base.get("schema_version") != b4a_worker.WORKER_SCHEMA
         or base.get("configuration") != "B4-A"
         or base.get("performance_claimed") is not False
-        or len(receipts) != int(args.configuration in {"S4", "S4-PREP", "S4-ROOT-WARM"})
+        or len(receipts)
+        != int(args.configuration in {"S4", "S4-PREP", "S4-ROOT-WARM", "BAB4"})
     ):
         raise ValueError("S4 inherited same-solver envelope differs")
     run = base.get("run")

@@ -383,6 +383,7 @@ class BabFullRegionTraceV1:
     concrete: torch.Tensor
     input_bias: torch.Tensor
     final_lower: torch.Tensor
+    site_lower_adjoints_spec_first: tuple[tuple[str, torch.Tensor], ...]
 
 
 def _residual(
@@ -390,7 +391,7 @@ def _residual(
     entry_alpha: torch.Tensor,
     inner_alpha: torch.Tensor,
     static: BabResidualStaticV1,
-) -> tuple[torch.Tensor, torch.Tensor]:
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     shape = _shape3(static.entry_lower, name="residual bound")
     entry_dense = _dense_alpha_3d(entry_alpha, static.entry_coordinates, shape)
     entry_a, entry_intercept = _relu_terms(
@@ -414,7 +415,7 @@ def _residual(
         + inner_intercept.sum(dim=(-3, -2, -1))
         + (inner_a * static.inner_bias.view(1, 1, channels, 1, 1)).sum(dim=(-3, -2, -1))
     )
-    return entry_a + residual_a, bias
+    return entry_a + residual_a, bias, main_a
 
 
 def _projection(
@@ -422,7 +423,7 @@ def _projection(
     entry_alpha: torch.Tensor,
     inner_alpha: torch.Tensor,
     static: BabProjectionStaticV1,
-) -> tuple[torch.Tensor, torch.Tensor]:
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     shape = _shape3(static.entry_lower, name="projection bound")
     entry_dense = _dense_alpha_3d(entry_alpha, static.entry_coordinates, shape)
     entry_a, entry_intercept = _relu_terms(
@@ -459,7 +460,7 @@ def _projection(
         + (inner_a * static.inner_bias.view(1, 1, channels, 1, 1)).sum(dim=(-3, -2, -1))
         + (entry_a * static.skip_bias.view(1, 1, channels, 1, 1)).sum(dim=(-3, -2, -1))
     )
-    return main_output + skip_output, bias
+    return main_output + skip_output, bias, main_a
 
 
 def _input_domain(
@@ -553,7 +554,7 @@ def evaluate_bab_full_region_trace_v1(
         terminal_a.shape[0], terminal_a.shape[1], *residual_shape
     )
     if residual_executor is None:
-        residual_a, residual_bias = _residual(
+        residual_a, residual_bias, residual_main_a = _residual(
             residual_incoming,
             dynamic.residual_entry_alpha,
             dynamic.residual_inner_alpha,
@@ -581,8 +582,9 @@ def evaluate_bab_full_region_trace_v1(
             ),
             residual_executor,
         )
+        residual_main_a = residual_executor.last_main_a
     if projection_executor is None:
-        projection_a, projection_bias = _projection(
+        projection_a, projection_bias, projection_main_a = _projection(
             residual_a,
             dynamic.projection_entry_alpha,
             dynamic.projection_inner_alpha,
@@ -612,6 +614,7 @@ def evaluate_bab_full_region_trace_v1(
             ),
             projection_executor,
         )
+        projection_main_a = projection_executor.last_outer_a
     if input_executor is None:
         concrete, input_bias = _input_domain(
             projection_a, dynamic.input_alpha, static.input_domain
@@ -646,6 +649,14 @@ def evaluate_bab_full_region_trace_v1(
         concrete=concrete,
         input_bias=input_bias,
         final_lower=concrete + total_bias.transpose(0, 1),
+        site_lower_adjoints_spec_first=(
+            ("17", projection_a),
+            ("19", projection_main_a),
+            ("23", residual_a),
+            ("25", residual_main_a),
+            ("28", residual_incoming),
+            ("31", dynamic.terminal_incoming),
+        ),
     )
 
 
@@ -678,14 +689,16 @@ class _BabFullRegionFunction(torch.autograd.Function):
         ctx.owner = owner
         ctx.set_materialize_grads(False)
         owner.forward_count += 1
-        return evaluate_bab_full_region_trace_v1(
+        trace = evaluate_bab_full_region_trace_v1(
             dynamic,
             owner.static,
             terminal_executor=owner.terminal_executor,
             residual_executor=owner.residual_executor,
             projection_executor=owner.projection_executor,
             input_executor=owner.input_executor,
-        ).final_lower
+        )
+        owner.last_trace = trace
+        return trace.final_lower
 
     @staticmethod
     def backward(ctx: Any, lower_gradient: torch.Tensor) -> tuple[Any, ...]:
@@ -698,14 +711,16 @@ class _BabFullRegionFunction(torch.autograd.Function):
         )
         with torch.enable_grad():
             dynamic = BabFullRegionDynamicV1(*leaves)
-            lower = evaluate_bab_full_region_trace_v1(
+            trace = evaluate_bab_full_region_trace_v1(
                 dynamic,
                 ctx.owner.static,
                 terminal_executor=ctx.owner.terminal_executor,
                 residual_executor=ctx.owner.residual_executor,
                 projection_executor=ctx.owner.projection_executor,
                 input_executor=ctx.owner.input_executor,
-            ).final_lower
+            )
+            ctx.owner.last_trace = trace
+            lower = trace.final_lower
             gradients = torch.autograd.grad(
                 lower,
                 leaves,
@@ -799,6 +814,7 @@ class PreparedBabFullRegionOwnerV1:
         self.residual_executor = residual_executor
         self.projection_executor = projection_executor
         self.input_executor = input_executor
+        self.last_trace: BabFullRegionTraceV1 | None = None
         self.forward_count = 0
         self.backward_count = 0
 
