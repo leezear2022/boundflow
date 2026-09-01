@@ -67,12 +67,16 @@ class RootCrownSuffixLiveBridgeV1:
         self,
         terminal_template: RootCrownTerminalLinearTemplateV1,
         residual_template: RootCrownResidualTemplateV1,
+        expanded_executor: Any | None = None,
     ) -> None:
         self.terminal_template = terminal_template
         self.residual_template = residual_template
-        self.executor = RootCrownSuffixTIRExecutorV1(
-            terminal_template, residual_template
+        self.executor = (
+            RootCrownSuffixTIRExecutorV1(terminal_template, residual_template)
+            if expanded_executor is None
+            else expanded_executor.suffix
         )
+        self._expanded_executor = expanded_executor
         self.outer_call_count = 0
         self.terminal_relu_count = 0
         self.terminal_linear_count = 0
@@ -286,6 +290,7 @@ class RootCrownSuffixLiveBridgeV1:
                 or len(args) < 5
                 or args[1] is not None
                 or not torch.is_tensor(args[0])
+                or self._zero_bias is None
                 or args[0].data_ptr()
                 != self._terminal_pending.incoming_lower_a.data_ptr()
             ):
@@ -363,9 +368,16 @@ class RootCrownSuffixLiveBridgeV1:
             suffix = RootCrownSuffixTensorsV1(
                 self._terminal_current, self._residual_pending
             )
-            output_a, output_bias = execute_root_crown_suffix_tir_v1(
-                suffix, self.executor
-            )
+            zero_bias = self._zero_bias
+            if zero_bias is None:
+                raise RuntimeError("root CROWN suffix zero bias is absent")
+            if self._expanded_executor is None:
+                output_a, output_bias = execute_root_crown_suffix_tir_v1(
+                    suffix, self.executor
+                )
+            else:
+                output_a, _staged_bias = self._expanded_executor.stage_residual(suffix)
+                output_bias = zero_bias
             self._last_suffix = suffix
             self._terminal_current = None
             self._residual_pending = None
@@ -467,7 +479,9 @@ class RootCrownSuffixLiveBridgeV1:
             "terminal_linear_count": self.terminal_linear_count,
             "residual_entry_count": self.residual_entry_count,
             "residual_add_count": self.residual_add_count,
-            "cumulative_autograd_owner_count": self.residual_add_count,
+            "cumulative_autograd_owner_count": (
+                self.residual_add_count if self._expanded_executor is None else 0
+            ),
             "intermediate_autograd_owner_count": 0,
             "terminal_forward_launch_count": (
                 self.executor.terminal.forward_launch_count
