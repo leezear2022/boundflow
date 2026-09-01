@@ -229,7 +229,11 @@ def _summary(
         static_prepare_ns.append(
             _integer(receipt.get("static_prepare_ns"), "static prepare")
         )
-        template_hash = receipt.get("region_template_hash")
+        template_hash = receipt.get(
+            "production_plan_hash"
+            if CANDIDATE_CONFIGURATION == "BAB4"
+            else "region_template_hash"
+        )
         if not isinstance(template_hash, str) or len(template_hash) != 64:
             raise ValueError("S4 five-fresh template hash differs")
         template_hashes.add(template_hash)

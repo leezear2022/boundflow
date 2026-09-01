@@ -74,3 +74,11 @@ formal 生成只能从工具提交后的 clean tracked source 开始。历史用
 - DocOps lint。
 
 本轮按用户要求不发外审；artifact 与完整数字完成后再统一交给下一轮外审。
+
+## 4. 生成演练修正
+
+第一次生成已完成 10 个环境准入 worker，但旧汇总逻辑读取 S4 receipt 的
+`region_template_hash`；BAB4 receipt 的同一物理身份字段名为 `production_plan_hash`，导致
+汇总 fail closed。现已按 candidate schema 显式选择字段。已有 10 份 raw 经修正逻辑完整重算
+通过，证明没有第二个汇总问题；这批 raw 只用于验证修复，不作为最终 artifact。正式数据必须从
+包含该修复的新 source commit 重新运行。
