@@ -23,14 +23,15 @@ if str(REPOSITORY_ROOT) not in sys.path:
 
 ARTIFACT_SCHEMA = "boundflow.asplos27-s4-aot-five-fresh/v1"
 WORKER_SCHEMA = "boundflow.asplos27-s4-same-solver-worker/v1"
-PAIR_ORDERS = (
+CANDIDATE_CONFIGURATION = "S4"
+PAIR_ORDERS: tuple[tuple[str, str], ...] = (
     ("B4-A", "S4"),
     ("S4", "B4-A"),
     ("B4-A", "S4"),
     ("S4", "B4-A"),
     ("B4-A", "S4"),
 )
-CODE_PATHS = (
+CODE_PATHS: tuple[str, ...] = (
     "boundflow/runtime/asplos27_s4_exact_call_bridge.py",
     "boundflow/runtime/asplos27_s4_exact_call_plan_template.py",
     "scripts/generate_asplos27_s4_exact_call_plan_template.py",
@@ -135,7 +136,7 @@ def _validate_worker(
     if environment.get("admitted") is not True:
         raise ValueError("S4 five-fresh environment is not admitted")
     receipts = payload.get("s4_exact_call_receipts")
-    expected_count = int(configuration == "S4")
+    expected_count = int(configuration == CANDIDATE_CONFIGURATION)
     if not isinstance(receipts, list) or len(receipts) != expected_count:
         raise ValueError("S4 five-fresh receipt cardinality differs")
     receipt = None if not receipts else _mapping(receipts[0], "receipt")
@@ -148,6 +149,41 @@ def _validate_worker(
         or receipt.get("provider_callback_count") != 0
     ):
         raise ValueError("S4 five-fresh AOT activation differs")
+    if receipt is not None and CANDIDATE_CONFIGURATION == "BAB4":
+        receipt_core = {
+            key: value
+            for key, value in receipt.items()
+            if key
+            not in {
+                "receipt_hash",
+                "static_prepare_ns",
+                "static_prepare_excluded_from_query",
+                "source_capture_runtime_dependency",
+                "plan_template_relative_path",
+                "static_warmup_receipt_hash",
+                "four_segment_static_warmup",
+            }
+        }
+        warmup = _mapping(
+            receipt.get("four_segment_static_warmup"), "four-segment warmup"
+        )
+        if (
+            receipt.get("schema_version") != "boundflow.bab-four-segment-exact-call/v1"
+            or receipt.get("receipt_hash") != _canonical_hash(receipt_core)
+            or receipt.get("evaluation_count") != 10
+            or receipt.get("mutation_count") != 9
+            or receipt.get("compiled_segment_count") != 4
+            or receipt.get("compiled_forward_launch_count") != 76
+            or receipt.get("compiled_backward_launch_count") != 36
+            or warmup.get("schema_version")
+            != "boundflow.bab-four-segment-static-warmup/v1"
+            or warmup.get("evaluation_count") != 10
+            or warmup.get("mutation_count") != 9
+            or warmup.get("source_capture_runtime_dependency") is not False
+            or warmup.get("fallback_count") != 0
+            or warmup.get("performance_claimed") is not False
+        ):
+            raise ValueError("BAB4 five-fresh four-segment receipt differs")
     return run, receipt
 
 
@@ -159,6 +195,7 @@ def _summary(
     semantic_rows: list[dict[str, Any]] = []
     static_prepare_ns: list[int] = []
     template_hashes: set[str] = set()
+    candidate_assets_hashes: set[str] = set()
     pair_rows: list[dict[str, Any]] = []
     for pair_ordinal, order in enumerate(PAIR_ORDERS):
         rows = {
@@ -166,7 +203,9 @@ def _summary(
             for configuration in order
         }
         control_run, _ = _validate_worker(rows["B4-A"], "B4-A")
-        candidate_run, receipt = _validate_worker(rows["S4"], "S4")
+        candidate_run, receipt = _validate_worker(
+            rows[CANDIDATE_CONFIGURATION], CANDIDATE_CONFIGURATION
+        )
         assert receipt is not None
         control_metrics = _mapping(control_run.get("metrics"), "control metrics")
         candidate_metrics = _mapping(candidate_run.get("metrics"), "candidate metrics")
@@ -194,6 +233,11 @@ def _summary(
         if not isinstance(template_hash, str) or len(template_hash) != 64:
             raise ValueError("S4 five-fresh template hash differs")
         template_hashes.add(template_hash)
+        if CANDIDATE_CONFIGURATION == "BAB4":
+            assets_hash = receipt.get("assets_hash")
+            if not isinstance(assets_hash, str) or len(assets_hash) != 64:
+                raise ValueError("BAB4 five-fresh assets hash differs")
+            candidate_assets_hashes.add(assets_hash)
         pair_rows.append(
             {
                 "pair_ordinal": pair_ordinal,
@@ -209,6 +253,8 @@ def _summary(
         )
     if len(template_hashes) != 1:
         raise ValueError("S4 five-fresh template identity drifts")
+    if CANDIDATE_CONFIGURATION == "BAB4" and len(candidate_assets_hashes) != 1:
+        raise ValueError("BAB4 five-fresh compiled identity drifts")
     core_geomean = _geomean(core_speedups)
     query_geomean = _geomean(query_speedups)
     mean_static_prepare = sum(static_prepare_ns) / len(static_prepare_ns)
@@ -244,6 +290,9 @@ def _summary(
         "pairs": pair_rows,
         "performance_claimed": False,
     }
+    if CANDIDATE_CONFIGURATION == "BAB4":
+        summary["candidate_configuration"] = CANDIDATE_CONFIGURATION
+        summary["candidate_assets_hash"] = next(iter(candidate_assets_hashes))
     summary["summary_hash"] = _canonical_hash(summary)
     return summary
 
@@ -272,6 +321,8 @@ def _protocol(args: argparse.Namespace) -> dict[str, object]:
         "source_capture_runtime_dependency": False,
         "performance_claimed": False,
     }
+    if CANDIDATE_CONFIGURATION == "BAB4":
+        payload["candidate_configuration"] = CANDIDATE_CONFIGURATION
     payload["protocol_hash"] = _canonical_hash(payload)
     return payload
 
