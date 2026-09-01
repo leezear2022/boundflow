@@ -1,7 +1,7 @@
 """Activation-BaB full-owner correctness and 10/9 trajectory tests."""
 
 # pylint: disable=too-many-locals,missing-function-docstring
-# pylint: disable=no-value-for-parameter
+# pylint: disable=no-value-for-parameter,duplicate-code
 
 from __future__ import annotations
 

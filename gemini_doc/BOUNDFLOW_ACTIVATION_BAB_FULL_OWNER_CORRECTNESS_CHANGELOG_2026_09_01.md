@@ -122,6 +122,10 @@ optimizer 重放使用真实策略：α `lr=0.01`、β `lr=0.05`、Adam
 4. 四段接到本轮同一个 owner ABI，重放 10/9 correctness；
 5. TIR correctness 通过后才接 live bridge并计时。
 
+后续状态：terminal β-aware TIR 已实现，既有 residual/projection TIR 已复用并注入同一 owner；详见
+`BOUNDFLOW_ACTIVATION_BAB_BETA_TERMINAL_TIR_CHANGELOG_2026_09_01.md`。当前唯一未 compiled 的四段
+成员是 input Conv + L∞ concretization，full-region timing 仍关闭。
+
 ## 7. 验证
 
 - 新 owner 专项：`4 passed`；

@@ -11,6 +11,7 @@ boundary.
 # pylint: disable=too-many-positional-arguments,too-many-locals
 # pylint: disable=missing-function-docstring,abstract-method,arguments-differ
 # pylint: disable=too-many-boolean-expressions,not-callable
+# pylint: disable=import-outside-toplevel
 
 from __future__ import annotations
 
@@ -494,46 +495,122 @@ def _input_domain(
 def evaluate_bab_full_region_trace_v1(
     dynamic: BabFullRegionDynamicV1,
     static: BabFullRegionStaticV1,
+    *,
+    terminal_executor: Any | None = None,
+    residual_executor: Any | None = None,
+    projection_executor: Any | None = None,
 ) -> BabFullRegionTraceV1:
     """Evaluate the full activation-BaB region and expose an oracle trace."""
 
     static.validate(dynamic)
-    terminal_dense = _dense_alpha_1d(
-        dynamic.terminal_alpha,
-        static.terminal_coordinates,
-        dynamic.terminal_incoming.shape[-1],
-    )
-    relu_a, relu_intercept = _relu_terms(
-        dynamic.terminal_incoming,
-        static.terminal_lower,
-        static.terminal_upper,
-        terminal_dense,
-    )
-    beta_delta = torch.zeros_like(relu_a).scatter_add(
-        2,
-        static.beta_locations.unsqueeze(0).expand(relu_a.shape[0], -1, -1),
-        (-dynamic.beta * static.beta_signs)
-        .unsqueeze(0)
-        .expand(relu_a.shape[0], -1, -1),
-    )
-    terminal_linear_incoming = relu_a + beta_delta
-    terminal_a = terminal_linear_incoming.matmul(static.terminal_weight)
-    terminal_bias = relu_intercept.sum(dim=-1) + (
-        terminal_linear_incoming * static.terminal_bias
-    ).sum(dim=-1)
+    if terminal_executor is None:
+        terminal_dense = _dense_alpha_1d(
+            dynamic.terminal_alpha,
+            static.terminal_coordinates,
+            dynamic.terminal_incoming.shape[-1],
+        )
+        relu_a, relu_intercept = _relu_terms(
+            dynamic.terminal_incoming,
+            static.terminal_lower,
+            static.terminal_upper,
+            terminal_dense,
+        )
+        beta_delta = torch.zeros_like(relu_a).scatter_add(
+            2,
+            static.beta_locations.unsqueeze(0).expand(relu_a.shape[0], -1, -1),
+            (-dynamic.beta * static.beta_signs)
+            .unsqueeze(0)
+            .expand(relu_a.shape[0], -1, -1),
+        )
+        terminal_linear_incoming = relu_a + beta_delta
+        terminal_a = terminal_linear_incoming.matmul(static.terminal_weight)
+        terminal_bias = relu_intercept.sum(dim=-1) + (
+            terminal_linear_incoming * static.terminal_bias
+        ).sum(dim=-1)
+    else:
+        from boundflow.runtime.bab_terminal_tir import (
+            BabTerminalTensorsV1,
+            execute_bab_terminal_tir_v1,
+        )
+
+        terminal_a, terminal_bias = execute_bab_terminal_tir_v1(
+            BabTerminalTensorsV1(
+                incoming_lower_a=dynamic.terminal_incoming,
+                preactivation_lower=static.terminal_lower,
+                preactivation_upper=static.terminal_upper,
+                compressed_alpha=dynamic.terminal_alpha,
+                sparse_beta=dynamic.beta,
+                beta_location=static.beta_locations,
+                beta_sign=static.beta_signs,
+                linear_weight=static.terminal_weight,
+                linear_bias=static.terminal_bias,
+            ),
+            terminal_executor,
+        )
     residual_shape = _shape3(static.residual.entry_lower, name="residual bound")
-    residual_a, residual_bias = _residual(
-        terminal_a.reshape(terminal_a.shape[0], terminal_a.shape[1], *residual_shape),
-        dynamic.residual_entry_alpha,
-        dynamic.residual_inner_alpha,
-        static.residual,
+    residual_incoming = terminal_a.reshape(
+        terminal_a.shape[0], terminal_a.shape[1], *residual_shape
     )
-    projection_a, projection_bias = _projection(
-        residual_a,
-        dynamic.projection_entry_alpha,
-        dynamic.projection_inner_alpha,
-        static.projection,
-    )
+    if residual_executor is None:
+        residual_a, residual_bias = _residual(
+            residual_incoming,
+            dynamic.residual_entry_alpha,
+            dynamic.residual_inner_alpha,
+            static.residual,
+        )
+    else:
+        from boundflow.runtime.root_crown_residual_tir import (
+            execute_root_crown_residual_tir_v1,
+            RootCrownResidualTensorsV1,
+        )
+
+        residual_a, residual_bias = execute_root_crown_residual_tir_v1(
+            RootCrownResidualTensorsV1(
+                incoming_lower_a=residual_incoming,
+                entry_lower=static.residual.entry_lower,
+                entry_upper=static.residual.entry_upper,
+                entry_raw_alpha=dynamic.residual_entry_alpha,
+                main_conv_weight=static.residual.main_weight,
+                main_conv_bias=static.residual.main_bias,
+                inner_lower=static.residual.inner_lower,
+                inner_upper=static.residual.inner_upper,
+                inner_raw_alpha=dynamic.residual_inner_alpha,
+                inner_conv_weight=static.residual.inner_weight,
+                inner_conv_bias=static.residual.inner_bias,
+            ),
+            residual_executor,
+        )
+    if projection_executor is None:
+        projection_a, projection_bias = _projection(
+            residual_a,
+            dynamic.projection_entry_alpha,
+            dynamic.projection_inner_alpha,
+            static.projection,
+        )
+    else:
+        from boundflow.runtime.root_crown_projection_tir import (
+            execute_root_crown_projection_tir_v1,
+            RootCrownProjectionTensorsV1,
+        )
+
+        projection_a, projection_bias = execute_root_crown_projection_tir_v1(
+            RootCrownProjectionTensorsV1(
+                incoming_lower_a=residual_a,
+                entry_lower=static.projection.entry_lower,
+                entry_upper=static.projection.entry_upper,
+                entry_raw_alpha=dynamic.projection_entry_alpha,
+                main_outer_conv_weight=static.projection.outer_weight,
+                main_outer_conv_bias=static.projection.outer_bias,
+                inner_lower=static.projection.inner_lower,
+                inner_upper=static.projection.inner_upper,
+                inner_raw_alpha=dynamic.projection_inner_alpha,
+                main_inner_conv_weight=static.projection.inner_weight,
+                main_inner_conv_bias=static.projection.inner_bias,
+                skip_conv_weight=static.projection.skip_weight,
+                skip_conv_bias=static.projection.skip_bias,
+            ),
+            projection_executor,
+        )
     concrete, input_bias = _input_domain(
         projection_a, dynamic.input_alpha, static.input_domain
     )
@@ -580,7 +657,13 @@ class _BabFullRegionFunction(torch.autograd.Function):
         ctx.owner = owner
         ctx.set_materialize_grads(False)
         owner.forward_count += 1
-        return evaluate_bab_full_region_trace_v1(dynamic, owner.static).final_lower
+        return evaluate_bab_full_region_trace_v1(
+            dynamic,
+            owner.static,
+            terminal_executor=owner.terminal_executor,
+            residual_executor=owner.residual_executor,
+            projection_executor=owner.projection_executor,
+        ).final_lower
 
     @staticmethod
     def backward(ctx: Any, lower_gradient: torch.Tensor) -> tuple[Any, ...]:
@@ -594,7 +677,11 @@ class _BabFullRegionFunction(torch.autograd.Function):
         with torch.enable_grad():
             dynamic = BabFullRegionDynamicV1(*leaves)
             lower = evaluate_bab_full_region_trace_v1(
-                dynamic, ctx.owner.static
+                dynamic,
+                ctx.owner.static,
+                terminal_executor=ctx.owner.terminal_executor,
+                residual_executor=ctx.owner.residual_executor,
+                projection_executor=ctx.owner.projection_executor,
             ).final_lower
             gradients = torch.autograd.grad(
                 lower,
@@ -615,6 +702,12 @@ class BabFullRegionOwnerReceiptV1:
     saved_dense_coefficient_count: int = 0
     frozen_bound_gradient_count: int = 0
     fallback_count: int = 0
+    terminal_backend: str = "pytorch-reference"
+    terminal_forward_launch_count: int = 0
+    terminal_backward_launch_count: int = 0
+    compiled_segment_count: int = 0
+    compiled_forward_launch_count: int = 0
+    compiled_backward_launch_count: int = 0
     timing_recorded: bool = False
     performance_claimed: bool = False
 
@@ -627,6 +720,39 @@ class BabFullRegionOwnerReceiptV1:
             or self.saved_dense_coefficient_count
             or self.frozen_bound_gradient_count
             or self.fallback_count
+            or self.terminal_backend
+            not in {"pytorch-reference", "tvm-beta-terminal-v1"}
+            or (
+                self.terminal_backend == "pytorch-reference"
+                and (
+                    self.terminal_forward_launch_count
+                    or self.terminal_backward_launch_count
+                )
+            )
+            or (
+                self.terminal_backend == "tvm-beta-terminal-v1"
+                and (
+                    self.terminal_forward_launch_count < self.forward_count
+                    or self.terminal_backward_launch_count < self.backward_count
+                )
+            )
+            or self.compiled_segment_count not in {0, 1, 2, 3}
+            or (
+                self.compiled_segment_count == 0
+                and (
+                    self.compiled_forward_launch_count
+                    or self.compiled_backward_launch_count
+                )
+            )
+            or (
+                self.compiled_segment_count > 0
+                and (
+                    self.compiled_forward_launch_count
+                    < self.compiled_segment_count * self.forward_count
+                    or self.compiled_backward_launch_count
+                    < self.compiled_segment_count * self.backward_count
+                )
+            )
             or self.timing_recorded
             or self.performance_claimed
         ):
@@ -636,8 +762,18 @@ class BabFullRegionOwnerReceiptV1:
 class PreparedBabFullRegionOwnerV1:
     """Reusable correctness owner for a fixed production topology."""
 
-    def __init__(self, static: BabFullRegionStaticV1) -> None:
+    def __init__(
+        self,
+        static: BabFullRegionStaticV1,
+        *,
+        terminal_executor: Any | None = None,
+        residual_executor: Any | None = None,
+        projection_executor: Any | None = None,
+    ) -> None:
         self.static = static
+        self.terminal_executor = terminal_executor
+        self.residual_executor = residual_executor
+        self.projection_executor = projection_executor
         self.forward_count = 0
         self.backward_count = 0
 
@@ -648,9 +784,46 @@ class PreparedBabFullRegionOwnerV1:
         return _BabFullRegionFunction.apply(*dynamic.tensors(), self)
 
     def receipt(self) -> BabFullRegionOwnerReceiptV1:
+        backend = (
+            "pytorch-reference"
+            if self.terminal_executor is None
+            else "tvm-beta-terminal-v1"
+        )
+        executors = tuple(
+            value
+            for value in (
+                self.terminal_executor,
+                self.residual_executor,
+                self.projection_executor,
+            )
+            if value is not None
+        )
         result = BabFullRegionOwnerReceiptV1(
             forward_count=self.forward_count,
             backward_count=self.backward_count,
+            fallback_count=(
+                0
+                if self.terminal_executor is None
+                else int(self.terminal_executor.fallback_count)
+            ),
+            terminal_backend=backend,
+            terminal_forward_launch_count=(
+                0
+                if self.terminal_executor is None
+                else int(self.terminal_executor.forward_launch_count)
+            ),
+            terminal_backward_launch_count=(
+                0
+                if self.terminal_executor is None
+                else int(self.terminal_executor.backward_launch_count)
+            ),
+            compiled_segment_count=len(executors),
+            compiled_forward_launch_count=sum(
+                int(value.forward_launch_count) for value in executors
+            ),
+            compiled_backward_launch_count=sum(
+                int(value.backward_launch_count) for value in executors
+            ),
         )
         result.validate()
         return result
