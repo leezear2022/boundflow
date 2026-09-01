@@ -54,7 +54,6 @@ def test_root_crown_input_domain_template_is_static_and_deterministic() -> None:
 @pytest.mark.parametrize(
     "changed",
     (
-        {"spec_count": 4},
         {"domain_count": 2},
         {"output_channels": 16},
         {"input_height": 31},
@@ -71,6 +70,14 @@ def test_root_crown_input_domain_template_rejects_other_abi(
 ) -> None:
     with pytest.raises(ValueError, match="template differs"):
         replace(_template(), **changed).validate()  # type: ignore[arg-type]
+
+
+def test_root_crown_input_domain_accepts_dynamic_spec_count() -> None:
+    template = replace(_template(), spec_count=27)
+    template.validate()
+    assert template.incoming_shape == (27, 1, 8, 16, 16)
+    assert template.coefficient_shape == (27, 1, 3, 32, 32)
+    assert template.to_dict()["spec_count"] == 27
 
 
 def test_root_crown_input_domain_runtime_rejects_cpu_tensors() -> None:
@@ -90,13 +97,16 @@ def test_root_crown_input_domain_runtime_rejects_cpu_tensors() -> None:
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA is required")
-def test_root_crown_input_domain_streaming_tir_matches_pytorch_vjp() -> None:
+@pytest.mark.parametrize("spec_count", (3, 27))
+def test_root_crown_input_domain_streaming_tir_matches_pytorch_vjp(
+    spec_count: int,
+) -> None:
     torch.manual_seed(31)
-    template = _template()
+    template = replace(_template(), spec_count=spec_count)
     incoming = torch.randn(template.incoming_shape, device="cuda", requires_grad=True)
     lower = -torch.rand(template.bound_shape, device="cuda")
     upper = torch.rand(template.bound_shape, device="cuda")
-    raw_alpha = torch.rand((2, 3, 1, 164), device="cuda", requires_grad=True)
+    raw_alpha = torch.rand((2, spec_count, 1, 164), device="cuda", requires_grad=True)
     weight = torch.randn(template.weight_shape, device="cuda") * 0.1
     bias = torch.randn((8,), device="cuda") * 0.1
     center = torch.randn(template.input_shape, device="cuda") * 0.1
@@ -144,7 +154,7 @@ def test_root_crown_input_domain_streaming_tir_matches_pytorch_vjp() -> None:
     )
     transformed = incoming * slope
     coefficient = functional.conv_transpose2d(
-        transformed.reshape(3, 8, 16, 16),
+        transformed.reshape(spec_count, 8, 16, 16),
         weight,
         stride=2,
         padding=1,

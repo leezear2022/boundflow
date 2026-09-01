@@ -3,13 +3,14 @@
 
 # mypy: disable-error-code=import-untyped
 # pylint: disable=import-error,wrong-import-position,import-outside-toplevel
-# pylint: disable=too-many-locals,too-many-statements,protected-access
+# pylint: disable=too-many-locals,too-many-statements,protected-access,too-many-lines
 # pylint: disable=too-many-boolean-expressions
 
 from __future__ import annotations
 
 import argparse
 from contextlib import contextmanager, ExitStack
+from dataclasses import replace
 from functools import wraps
 import hashlib
 import inspect
@@ -19,6 +20,7 @@ import statistics
 import sys
 import tempfile
 import time
+from types import MethodType
 from typing import Any, Callable, cast, Iterator
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
@@ -36,6 +38,12 @@ from boundflow.runtime.root_crown_backward_general_live import (  # noqa: E402
 )
 from boundflow.runtime.root_crown_input_domain_live import (  # noqa: E402
     RootCrownInputDomainLiveBridgeV1,
+)
+from boundflow.runtime.root_crown_intermediate_dual_lane_tir import (  # noqa: E402
+    RootCrownIntermediateDualLaneTIRExecutorV1,
+)
+from boundflow.runtime.root_crown_intermediate_live import (  # noqa: E402
+    RootCrownIntermediateLiveBridgeV1,
 )
 from boundflow.runtime.root_crown_projection_live import (  # noqa: E402
     RootCrownProjectionLiveBridgeV1,
@@ -162,6 +170,31 @@ def _tensor_digest(tensor: Any) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
+def _coefficient_summary(value: Any) -> dict[str, object] | None:
+    """Describe Tensor/Patches/OneHot coefficient carriers without payload copies."""
+
+    if value is None:
+        return None
+    summary: dict[str, object] = {"kind": type(value).__name__}
+    shape = getattr(value, "shape", None)
+    if shape is not None:
+        summary["shape"] = list(shape)
+    patches = getattr(value, "patches", None)
+    if patches is not None:
+        summary["patches_shape"] = list(patches.shape)
+    for name in ("stride", "padding", "output_shape", "unstable_idx"):
+        field = getattr(value, name, None)
+        if field is None:
+            continue
+        if hasattr(field, "shape"):
+            summary[f"{name}_shape"] = list(field.shape)
+        elif isinstance(field, (bool, int, float, str)):
+            summary[name] = field
+        elif isinstance(field, (tuple, list)):
+            summary[name] = repr(field)
+    return summary
+
+
 class _RootComputeTransactionCaptureV1:
     """Capture the five optimized compute_bounds calls at their public seam."""
 
@@ -175,6 +208,103 @@ class _RootComputeTransactionCaptureV1:
         self.rows: list[dict[str, object]] = []
         self.backward_rows: list[dict[str, object]] = []
         self.intermediate_backward_rows: list[dict[str, object]] = []
+        self.intermediate_node_rows: list[dict[str, object]] = []
+
+    def _run_intermediate_backward(
+        self,
+        instance: Any,
+        original_backward: Callable[..., Any],
+        bound_node: Any,
+        args: tuple[Any, ...],
+        kwargs: dict[str, Any],
+    ) -> Any:
+        """Capture the exact node sequence and coefficient carriers for one start."""
+
+        import torch
+
+        originals = {node: node.bound_backward for node in instance.nodes()}
+        transaction = len(self.intermediate_backward_rows)
+
+        def replacement(
+            node: Any, original_node: Callable[..., Any]
+        ) -> Callable[..., Any]:
+            def observed(_self: Any, *node_args: Any, **node_kwargs: Any) -> Any:
+                result = original_node(*node_args, **node_kwargs)
+                outputs: list[object] = []
+                if isinstance(result, tuple) and result and isinstance(result[0], list):
+                    for pair in result[0]:
+                        if isinstance(pair, tuple) and len(pair) == 2:
+                            outputs.append(
+                                [
+                                    _coefficient_summary(pair[0]),
+                                    _coefficient_summary(pair[1]),
+                                ]
+                            )
+                start_name = str(getattr(bound_node, "name", ""))
+                selected_alpha = getattr(node, "alpha", {}).get(start_name)
+                alpha_indices = getattr(node, "alpha_indices", None)
+                serialized_indices = None
+                if (
+                    isinstance(alpha_indices, tuple)
+                    and len(alpha_indices) == 3
+                    and all(torch.is_tensor(value) for value in alpha_indices)
+                ):
+                    serialized_indices = [
+                        cast(Any, value).detach().cpu().tolist()
+                        for value in alpha_indices
+                    ]
+                self.intermediate_node_rows.append(
+                    {
+                        "transaction": transaction,
+                        "ordinal": len(self.intermediate_node_rows),
+                        "start_node_name": start_name,
+                        "node_name": str(getattr(node, "name", "")),
+                        "node_kind": type(node).__name__,
+                        "incoming_lower": _coefficient_summary(
+                            node_args[0] if node_args else None
+                        ),
+                        "incoming_upper": _coefficient_summary(
+                            node_args[1] if len(node_args) > 1 else None
+                        ),
+                        "outputs": outputs,
+                        "selected_alpha_shape": (
+                            list(selected_alpha.shape)
+                            if torch.is_tensor(selected_alpha)
+                            else None
+                        ),
+                        "selected_alpha_digest": (
+                            _tensor_digest(selected_alpha)
+                            if torch.is_tensor(selected_alpha)
+                            else None
+                        ),
+                        "alpha_indices": serialized_indices,
+                        "lower_bias_shape": (
+                            list(result[1].shape)
+                            if isinstance(result, tuple)
+                            and len(result) > 1
+                            and hasattr(result[1], "shape")
+                            else None
+                        ),
+                        "upper_bias_shape": (
+                            list(result[2].shape)
+                            if isinstance(result, tuple)
+                            and len(result) > 2
+                            and hasattr(result[2], "shape")
+                            else None
+                        ),
+                    }
+                )
+                return result
+
+            return observed
+
+        for node, original_node in originals.items():
+            node.bound_backward = MethodType(replacement(node, original_node), node)
+        try:
+            return original_backward(instance, *args, **kwargs)
+        finally:
+            for node, original_node in originals.items():
+                node.bound_backward = original_node
 
     @contextmanager
     def install(self, bounded_module_type: type[Any]) -> Iterator[None]:
@@ -266,7 +396,13 @@ class _RootComputeTransactionCaptureV1:
             # They remain native work and are not the replacement seam.  The
             # root transaction itself is the unique traversal from /49.
             if str(getattr(bound_node, "name", "")) != "/49":
-                result = original_backward(instance, *args, **kwargs)
+                result = self._run_intermediate_backward(
+                    instance,
+                    original_backward,
+                    bound_node,
+                    args,
+                    kwargs,
+                )
                 if not isinstance(result, tuple) or len(result) < 2:
                     raise ValueError("root intermediate backward result differs")
                 unstable = parameters.get("unstable_idx")
@@ -381,6 +517,8 @@ class _RootComputeTransactionCaptureV1:
             "backward_general_rows": self.backward_rows,
             "intermediate_backward_general_count": len(self.intermediate_backward_rows),
             "intermediate_backward_general_rows": self.intermediate_backward_rows,
+            "intermediate_node_call_count": len(self.intermediate_node_rows),
+            "intermediate_node_rows": self.intermediate_node_rows,
             "terminal_seed_max_abs_diff": max(
                 cast(float, row["terminal_seed_max_abs_diff"]) for row in self.rows
             ),
@@ -522,7 +660,9 @@ class _RootPriorBoundsAttributionV1:
         }
 
 
-def _prepare_root_pipeline(args: argparse.Namespace) -> tuple[Any, Any, Any, Any, int]:
+def _prepare_root_pipeline(
+    args: argparse.Namespace,
+) -> tuple[Any, Any, Any, Any, Any, int]:
     import torch
 
     residual = residual_template(args.residual_capture)
@@ -546,18 +686,35 @@ def _prepare_root_pipeline(args: argparse.Namespace) -> tuple[Any, Any, Any, Any
     ):
         raise ValueError("BAB4 cumulative root input capture differs")
     started_ns = time.perf_counter_ns()
+    root_input_template = input_template(evaluations[0])
     executor = RootCrownFullPipelineTIRExecutorV1(
-        terminal,
-        residual,
-        projection,
-        input_template(evaluations[0]),
+        terminal, residual, projection, root_input_template
     )
     suffix_bridge = RootCrownSuffixLiveBridgeV1(terminal, residual, executor)
     projection_bridge = RootCrownProjectionLiveBridgeV1(projection, executor)
     input_bridge = RootCrownInputDomainLiveBridgeV1(executor.input_template, executor)
     executor.prepare()
+    intermediate_executor = None
+    if (
+        args.shadow_root_intermediate
+        or args.replace_root_intermediate
+        or args.direct_root_intermediate
+    ):
+        intermediate_executor = RootCrownIntermediateDualLaneTIRExecutorV1(
+            replace(residual, spec_count=27),
+            replace(projection, spec_count=27),
+            replace(root_input_template, spec_count=27),
+        )
+        intermediate_executor.prepare()
     prepare_ns = time.perf_counter_ns() - started_ns
-    return executor, suffix_bridge, projection_bridge, input_bridge, prepare_ns
+    return (
+        executor,
+        suffix_bridge,
+        projection_bridge,
+        input_bridge,
+        intermediate_executor,
+        prepare_ns,
+    )
 
 
 def _worker(args: argparse.Namespace) -> None:
@@ -578,13 +735,16 @@ def _worker(args: argparse.Namespace) -> None:
     root_segment_observer: _RootSegmentAttributionV1 | None = None
     root_compute_capture: _RootComputeTransactionCaptureV1 | None = None
     root_direct_bridge: RootCrownBackwardGeneralLiveBridgeV1 | None = None
+    root_intermediate_bridge: RootCrownIntermediateLiveBridgeV1 | None = None
     root_prior_attribution: _RootPriorBoundsAttributionV1 | None = None
+    warm_intermediate_executor = None
     if candidate:
         (
             warm_executor,
             warm_suffix,
             warm_projection,
             warm_input_domain,
+            warm_intermediate_executor,
             root_warm_pipeline_prepare_ns,
         ) = _prepare_root_pipeline(args)
 
@@ -621,6 +781,7 @@ def _worker(args: argparse.Namespace) -> None:
                     nonlocal root_segment_observer
                     nonlocal root_compute_capture
                     nonlocal root_direct_bridge
+                    nonlocal root_intermediate_bridge
                     nonlocal root_prior_attribution
                     if root_query_install_count != 0:
                         raise RuntimeError("BAB4 cumulative root install count differs")
@@ -664,6 +825,27 @@ def _worker(args: argparse.Namespace) -> None:
                             warm_executor, suffix, projection, input_domain
                         )
                         stack.enter_context(root_direct_bridge.install(BoundedModule))
+                    if (
+                        args.shadow_root_intermediate
+                        or args.replace_root_intermediate
+                        or args.direct_root_intermediate
+                    ):
+                        if warm_intermediate_executor is None:
+                            raise RuntimeError("BAB4 root intermediate executor absent")
+                        root_intermediate_bridge = RootCrownIntermediateLiveBridgeV1(
+                            warm_intermediate_executor,
+                            input_domain,
+                            replace_output=(
+                                args.replace_root_intermediate
+                                or args.direct_root_intermediate
+                            ),
+                            execute_native=not args.direct_root_intermediate,
+                            suffix_bridge=suffix,
+                            projection_bridge=projection,
+                        )
+                        stack.enter_context(
+                            root_intermediate_bridge.install(BoundedModule)
+                        )
                     if args.attribute_root_prior_bounds:
                         root_prior_attribution = _RootPriorBoundsAttributionV1(suffix)
                         stack.enter_context(
@@ -694,6 +876,11 @@ def _worker(args: argparse.Namespace) -> None:
                     "backward_general": (
                         root_direct_bridge.receipt()
                         if root_direct_bridge is not None
+                        else None
+                    ),
+                    "intermediate": (
+                        root_intermediate_bridge.receipt()
+                        if root_intermediate_bridge is not None
                         else None
                     ),
                 }
@@ -743,6 +930,15 @@ def _worker(args: argparse.Namespace) -> None:
             "root_direct_backward_enabled": bool(
                 candidate and args.direct_root_backward
             ),
+            "root_intermediate_shadow_enabled": bool(
+                candidate and args.shadow_root_intermediate
+            ),
+            "root_intermediate_replace_enabled": bool(
+                candidate and args.replace_root_intermediate
+            ),
+            "root_intermediate_direct_enabled": bool(
+                candidate and args.direct_root_intermediate
+            ),
             "root_prior_bounds_attribution": root_prior_bounds_attribution,
             "root_prior_bounds_attribution_enabled": bool(
                 candidate and args.attribute_root_prior_bounds
@@ -777,9 +973,23 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--attribute-root-segments", action="store_true")
     parser.add_argument("--capture-root-compute-transaction", action="store_true")
     parser.add_argument("--direct-root-backward", action="store_true")
+    parser.add_argument("--shadow-root-intermediate", action="store_true")
+    parser.add_argument("--replace-root-intermediate", action="store_true")
+    parser.add_argument("--direct-root-intermediate", action="store_true")
     parser.add_argument("--attribute-root-prior-bounds", action="store_true")
     parser.add_argument("--result", type=Path, required=True)
-    return parser.parse_args()
+    args = parser.parse_args()
+    intermediate_modes = sum(
+        bool(value)
+        for value in (
+            args.shadow_root_intermediate,
+            args.replace_root_intermediate,
+            args.direct_root_intermediate,
+        )
+    )
+    if intermediate_modes > 1:
+        parser.error("root intermediate modes are exclusive")
+    return args
 
 
 def main() -> None:

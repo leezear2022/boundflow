@@ -96,7 +96,6 @@ class RootCrownInputDomainTemplateV1:
 
     def validate(self) -> None:
         geometry = (
-            self.spec_count,
             self.domain_count,
             self.output_channels,
             self.output_height,
@@ -137,7 +136,7 @@ class RootCrownInputDomainTemplateV1:
             or self.target != "cuda"
             or self.forward_symbol != ROOT_INPUT_DOMAIN_FORWARD_SYMBOL
             or self.backward_symbol != ROOT_INPUT_DOMAIN_BACKWARD_SYMBOL
-            or geometry != (3, 1, 8, 16, 16, 3, 32, 32)
+            or geometry != (1, 8, 16, 16, 3, 32, 32)
         ):
             raise ValueError("root CROWN input-domain template differs")
 
@@ -351,24 +350,28 @@ def _forward_primfunc(template: RootCrownInputDomainTemplateV1):
     )
 
 
-def _streaming_forward_primfunc():  # pylint: disable=too-many-statements
+def _streaming_forward_primfunc(
+    template: RootCrownInputDomainTemplateV1,
+):  # pylint: disable=too-many-statements
     """One-kernel forward: generate each input coefficient and reduce immediately."""
 
     from tvm.script import tir as T
 
+    spec_count = template.spec_count
+
     @T.prim_func
     def forward(
-        incoming: T.Buffer((3, 1, 8, 16, 16), "float32"),
-        lower: T.Buffer((1, 8, 16, 16), "float32"),
-        upper: T.Buffer((1, 8, 16, 16), "float32"),
-        raw_alpha: T.Buffer((2, 3, 1, 164), "float32"),
-        alpha_map: T.Buffer((8, 16, 16), "int32"),
-        weight: T.Buffer((8, 3, 3, 3), "float32"),
-        operator_bias: T.Buffer((8,), "float32"),
-        input_center: T.Buffer((1, 3, 32, 32), "float32"),
-        input_radius: T.Buffer((1, 3, 32, 32), "float32"),
-        concrete_lower: T.Buffer((1, 3), "float32"),
-        output_bias: T.Buffer((3, 1), "float32"),
+        incoming_handle: T.handle,
+        lower_handle: T.handle,
+        upper_handle: T.handle,
+        raw_alpha_handle: T.handle,
+        alpha_map_handle: T.handle,
+        weight_handle: T.handle,
+        operator_bias_handle: T.handle,
+        input_center_handle: T.handle,
+        input_radius_handle: T.handle,
+        concrete_lower_handle: T.handle,
+        output_bias_handle: T.handle,
     ):
         T.func_attr(
             {
@@ -377,12 +380,27 @@ def _streaming_forward_primfunc():  # pylint: disable=too-many-statements
                 "boundflow.schema_version": "root-crown-input-domain-streaming-forward/v2",
             }
         )
+        incoming = T.match_buffer(
+            incoming_handle, (spec_count, 1, 8, 16, 16), "float32"
+        )
+        lower = T.match_buffer(lower_handle, (1, 8, 16, 16), "float32")
+        upper = T.match_buffer(upper_handle, (1, 8, 16, 16), "float32")
+        raw_alpha = T.match_buffer(raw_alpha_handle, (2, spec_count, 1, 164), "float32")
+        alpha_map = T.match_buffer(alpha_map_handle, (8, 16, 16), "int32")
+        weight = T.match_buffer(weight_handle, (8, 3, 3, 3), "float32")
+        operator_bias = T.match_buffer(operator_bias_handle, (8,), "float32")
+        input_center = T.match_buffer(input_center_handle, (1, 3, 32, 32), "float32")
+        input_radius = T.match_buffer(input_radius_handle, (1, 3, 32, 32), "float32")
+        concrete_lower = T.match_buffer(
+            concrete_lower_handle, (1, spec_count), "float32"
+        )
+        output_bias = T.match_buffer(output_bias_handle, (spec_count, 1), "float32")
         coefficient = T.alloc_buffer((1,), "float32", scope="local")
         concrete_sum = T.alloc_buffer((1,), "float32", scope="local")
         bias_sum = T.alloc_buffer((1,), "float32", scope="local")
         partial = T.alloc_buffer((2, 128), "float32", scope="shared")
         reduction = T.alloc_buffer((2,), "float32", scope="local")
-        for block_x in T.thread_binding(3, thread="blockIdx.x"):
+        for block_x in T.thread_binding(spec_count, thread="blockIdx.x"):
             for thread_x in T.thread_binding(128, thread="threadIdx.x"):
                 concrete_sum[0] = T.float32(0)
                 for flat in T.serial(thread_x, 3072, step=128):
@@ -539,26 +557,32 @@ def _streaming_forward_primfunc():  # pylint: disable=too-many-statements
     return forward
 
 
-def _streaming_backward_primfunc():  # pylint: disable=too-many-statements
+def _streaming_backward_primfunc(
+    template: RootCrownInputDomainTemplateV1,
+):  # pylint: disable=too-many-statements
     """One-kernel VJP with coefficient recomputation and compressed-alpha output."""
 
     from tvm.script import tir as T
 
+    spec_count = template.spec_count
+    element_count = spec_count * 2048
+    block_count = (element_count + 127) // 128
+
     @T.prim_func
     def backward(
-        incoming: T.Buffer((3, 1, 8, 16, 16), "float32"),
-        lower: T.Buffer((1, 8, 16, 16), "float32"),
-        upper: T.Buffer((1, 8, 16, 16), "float32"),
-        raw_alpha: T.Buffer((2, 3, 1, 164), "float32"),
-        alpha_map: T.Buffer((8, 16, 16), "int32"),
-        weight: T.Buffer((8, 3, 3, 3), "float32"),
-        operator_bias: T.Buffer((8,), "float32"),
-        input_center: T.Buffer((1, 3, 32, 32), "float32"),
-        input_radius: T.Buffer((1, 3, 32, 32), "float32"),
-        concrete_gradient: T.Buffer((1, 3), "float32"),
-        bias_gradient: T.Buffer((3, 1), "float32"),
-        incoming_gradient: T.Buffer((3, 1, 8, 16, 16), "float32"),
-        alpha_gradient: T.Buffer((2, 3, 1, 164), "float32"),
+        incoming_handle: T.handle,
+        lower_handle: T.handle,
+        upper_handle: T.handle,
+        raw_alpha_handle: T.handle,
+        alpha_map_handle: T.handle,
+        weight_handle: T.handle,
+        operator_bias_handle: T.handle,
+        input_center_handle: T.handle,
+        input_radius_handle: T.handle,
+        concrete_gradient_handle: T.handle,
+        bias_gradient_handle: T.handle,
+        incoming_gradient_handle: T.handle,
+        alpha_gradient_handle: T.handle,
     ):
         T.func_attr(
             {
@@ -567,12 +591,33 @@ def _streaming_backward_primfunc():  # pylint: disable=too-many-statements
                 "boundflow.schema_version": "root-crown-input-domain-streaming-backward/v2",
             }
         )
+        incoming = T.match_buffer(
+            incoming_handle, (spec_count, 1, 8, 16, 16), "float32"
+        )
+        lower = T.match_buffer(lower_handle, (1, 8, 16, 16), "float32")
+        upper = T.match_buffer(upper_handle, (1, 8, 16, 16), "float32")
+        raw_alpha = T.match_buffer(raw_alpha_handle, (2, spec_count, 1, 164), "float32")
+        alpha_map = T.match_buffer(alpha_map_handle, (8, 16, 16), "int32")
+        weight = T.match_buffer(weight_handle, (8, 3, 3, 3), "float32")
+        operator_bias = T.match_buffer(operator_bias_handle, (8,), "float32")
+        input_center = T.match_buffer(input_center_handle, (1, 3, 32, 32), "float32")
+        input_radius = T.match_buffer(input_radius_handle, (1, 3, 32, 32), "float32")
+        concrete_gradient = T.match_buffer(
+            concrete_gradient_handle, (1, spec_count), "float32"
+        )
+        bias_gradient = T.match_buffer(bias_gradient_handle, (spec_count, 1), "float32")
+        incoming_gradient = T.match_buffer(
+            incoming_gradient_handle, (spec_count, 1, 8, 16, 16), "float32"
+        )
+        alpha_gradient = T.match_buffer(
+            alpha_gradient_handle, (2, spec_count, 1, 164), "float32"
+        )
         coefficient = T.alloc_buffer((1,), "float32", scope="local")
         adjoint = T.alloc_buffer((1,), "float32", scope="local")
-        for block_x in T.thread_binding(48, thread="blockIdx.x"):
+        for block_x in T.thread_binding(block_count, thread="blockIdx.x"):
             for thread_x in T.thread_binding(128, thread="threadIdx.x"):
                 flat = block_x * 128 + thread_x
-                if flat < 6144:
+                if flat < element_count:
                     output_w = flat % 16
                     output_h = flat // 16 % 16
                     output_channel = flat // 256 % 8
@@ -766,14 +811,14 @@ def build_root_crown_input_domain_modules_v1(
     import tvm
 
     forward = _forward_primfunc(template)
-    backward = _streaming_backward_primfunc()
+    backward = _streaming_backward_primfunc(template)
     unscheduled = tvm.IRModule(
         {template.forward_symbol: forward, template.backward_symbol: backward}
     )
     scheduled = tvm.IRModule(
         {
-            template.forward_symbol: _streaming_forward_primfunc(),
-            template.backward_symbol: _streaming_backward_primfunc(),
+            template.forward_symbol: _streaming_forward_primfunc(template),
+            template.backward_symbol: _streaming_backward_primfunc(template),
         }
     )
     return unscheduled, scheduled, _workspace_inventory(scheduled)

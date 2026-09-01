@@ -110,6 +110,8 @@ def _run_worker(
             command.append("--attribute-root-segments")
         if args.direct_root_backward and configuration == CANDIDATE:
             command.append("--direct-root-backward")
+        if args.direct_root_intermediate and configuration == CANDIDATE:
+            command.append("--direct-root-intermediate")
         completed = subprocess.run(
             command,
             cwd=REPOSITORY_ROOT,
@@ -162,6 +164,7 @@ def _summarize(
     }
     memory: dict[str, list[float]] = {name: [] for name in ("allocated", "reserved")}
     direct_modes: list[bool] = []
+    direct_intermediate_modes: list[bool] = []
     for pair, order in enumerate(PAIR_ORDERS):
         control = workers[(pair, CONTROL)]
         candidate = workers[(pair, CANDIDATE)]
@@ -221,15 +224,35 @@ def _summarize(
                 or backward.get("fallback_count") != 0
             ):
                 raise ValueError("BAB4 direct backward activation differs")
+        direct_intermediate = candidate.get("root_intermediate_direct_enabled") is True
+        direct_intermediate_modes.append(direct_intermediate)
+        if direct_intermediate:
+            intermediate = _mapping(
+                receipts.get("intermediate"), "intermediate receipt"
+            )
+            intermediate_executor = _mapping(
+                intermediate.get("executor"), "intermediate executor receipt"
+            )
+            if (
+                intermediate.get("mode") != "direct"
+                or intermediate.get("call_count") != 5
+                or intermediate.get("native_execution_count") != 0
+                or intermediate.get("fallback_count") != 0
+                or intermediate_executor.get("call_count") != 5
+            ):
+                raise ValueError("BAB4 direct intermediate activation differs")
         rows.append(row)
     if any(direct_modes) != all(direct_modes):
         raise ValueError("BAB4 cumulative root direct mode differs across pairs")
+    if any(direct_intermediate_modes) != all(direct_intermediate_modes):
+        raise ValueError("BAB4 intermediate direct mode differs across pairs")
     result: dict[str, object] = {
         "schema_version": "boundflow.bab4-root-gc-three-fresh/v1",
         "pair_count": len(rows),
         "control_configuration": CONTROL,
         "candidate_configuration": CANDIDATE,
         "direct_root_backward_enabled": all(direct_modes),
+        "direct_root_intermediate_enabled": all(direct_intermediate_modes),
         "rows": rows,
         "all_discrete_semantics_exact": True,
         "lower_max_abs_diff": max(
@@ -266,6 +289,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--max-environment-attempts", type=int, default=6)
     parser.add_argument("--attribute-root-segments", action="store_true")
     parser.add_argument("--direct-root-backward", action="store_true")
+    parser.add_argument("--direct-root-intermediate", action="store_true")
     return parser.parse_args()
 
 
