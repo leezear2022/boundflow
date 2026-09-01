@@ -81,6 +81,12 @@ def _integer(value: object, label: str) -> int:
     return value
 
 
+def _is_four_segment_candidate() -> bool:
+    """Return whether the configured candidate uses the BAB4 receipt family."""
+
+    return CANDIDATE_CONFIGURATION.startswith("BAB4")
+
+
 def _geomean(values: list[float]) -> float:
     if not values or any(value <= 0.0 or not math.isfinite(value) for value in values):
         raise ValueError("S4 five-fresh geomean input differs")
@@ -150,7 +156,7 @@ def _validate_worker(
         or receipt.get("provider_callback_count") != 0
     ):
         raise ValueError("S4 five-fresh AOT activation differs")
-    if receipt is not None and CANDIDATE_CONFIGURATION == "BAB4":
+    if receipt is not None and _is_four_segment_candidate():
         receipt_core = {
             key: value
             for key, value in receipt.items()
@@ -234,13 +240,13 @@ def _summary(
         )
         template_hash = receipt.get(
             "production_plan_hash"
-            if CANDIDATE_CONFIGURATION == "BAB4"
+            if _is_four_segment_candidate()
             else "region_template_hash"
         )
         if not isinstance(template_hash, str) or len(template_hash) != 64:
             raise ValueError("S4 five-fresh template hash differs")
         template_hashes.add(template_hash)
-        if CANDIDATE_CONFIGURATION == "BAB4":
+        if _is_four_segment_candidate():
             assets_hash = receipt.get("assets_hash")
             if not isinstance(assets_hash, str) or len(assets_hash) != 64:
                 raise ValueError("BAB4 five-fresh assets hash differs")
@@ -260,7 +266,7 @@ def _summary(
         )
     if len(template_hashes) != 1:
         raise ValueError("S4 five-fresh template identity drifts")
-    if CANDIDATE_CONFIGURATION == "BAB4" and len(candidate_assets_hashes) != 1:
+    if _is_four_segment_candidate() and len(candidate_assets_hashes) != 1:
         raise ValueError("BAB4 five-fresh compiled identity drifts")
     core_geomean = _geomean(core_speedups)
     query_geomean = _geomean(query_speedups)
@@ -297,7 +303,7 @@ def _summary(
         "pairs": pair_rows,
         "performance_claimed": False,
     }
-    if CANDIDATE_CONFIGURATION == "BAB4":
+    if _is_four_segment_candidate():
         summary["candidate_configuration"] = CANDIDATE_CONFIGURATION
         summary["candidate_assets_hash"] = next(iter(candidate_assets_hashes))
     if CONTROL_CONFIGURATION != "B4-A":
@@ -330,7 +336,7 @@ def _protocol(args: argparse.Namespace) -> dict[str, object]:
         "source_capture_runtime_dependency": False,
         "performance_claimed": False,
     }
-    if CANDIDATE_CONFIGURATION == "BAB4":
+    if _is_four_segment_candidate():
         payload["candidate_configuration"] = CANDIDATE_CONFIGURATION
     if CONTROL_CONFIGURATION != "B4-A":
         payload["control_configuration"] = CONTROL_CONFIGURATION
@@ -453,6 +459,27 @@ def _manifest(root: Path) -> dict[str, object]:
     return result
 
 
+def _load_workers(root: Path) -> dict[str, Mapping[str, Any]]:
+    """Load the complete frozen worker matrix from a raw-first artifact."""
+
+    return {
+        f"pair-{pair_ordinal:02d}/{configuration}": _mapping(
+            json.loads(
+                (
+                    root
+                    / "raw"
+                    / f"pair-{pair_ordinal:02d}"
+                    / configuration
+                    / "worker.json"
+                ).read_text(encoding="utf-8")
+            ),
+            "artifact worker",
+        )
+        for pair_ordinal, order in enumerate(PAIR_ORDERS)
+        for configuration in order
+    }
+
+
 def _generate(args: argparse.Namespace) -> None:
     root = args.output.resolve()
     root.mkdir(parents=True, exist_ok=False)
@@ -494,22 +521,7 @@ def _replay(args: argparse.Namespace) -> None:
     expected_manifest = _manifest(root)
     if manifest_raw != expected_manifest:
         raise ValueError("S4 five-fresh manifest differs")
-    workers = {
-        f"pair-{pair_ordinal:02d}/{configuration}": _mapping(
-            json.loads(
-                (
-                    root
-                    / "raw"
-                    / f"pair-{pair_ordinal:02d}"
-                    / configuration
-                    / "worker.json"
-                ).read_text(encoding="utf-8")
-            ),
-            "replay worker",
-        )
-        for pair_ordinal, order in enumerate(PAIR_ORDERS)
-        for configuration in order
-    }
+    workers = _load_workers(root)
     recomputed = _summary(protocol, workers)
     if summary_raw != recomputed:
         raise ValueError("S4 five-fresh summary differs")
@@ -527,6 +539,37 @@ def _replay(args: argparse.Namespace) -> None:
     )
 
 
+def _finalize(args: argparse.Namespace) -> None:
+    """Finalize a complete raw-first run after a summary-only interruption."""
+
+    root = args.artifact.resolve()
+    summary_path = root / "summary.json"
+    manifest_path = root / "manifest.json"
+    if summary_path.exists() or manifest_path.exists():
+        raise FileExistsError("S4 five-fresh artifact is already finalized")
+    protocol = _mapping(
+        json.loads((root / "protocol.json").read_text(encoding="utf-8")),
+        "protocol",
+    )
+    if protocol.get("schema_version") != ARTIFACT_SCHEMA or protocol.get(
+        "protocol_hash"
+    ) != _canonical_hash(
+        {key: value for key, value in protocol.items() if key != "protocol_hash"}
+    ):
+        raise ValueError("S4 five-fresh finalize protocol differs")
+    summary = _summary(protocol, _load_workers(root))
+    summary_path.write_text(
+        json.dumps(summary, sort_keys=True, indent=2, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    manifest = _manifest(root)
+    manifest_path.write_text(
+        json.dumps(manifest, sort_keys=True, indent=2, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    print(json.dumps(summary, sort_keys=True, separators=(",", ":")))
+
+
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -540,6 +583,8 @@ def _parse_args() -> argparse.Namespace:
     generate.add_argument("--max-environment-attempts", type=int, default=4)
     replay = subparsers.add_parser("replay")
     replay.add_argument("--artifact", type=Path, required=True)
+    finalize = subparsers.add_parser("finalize")
+    finalize.add_argument("--artifact", type=Path, required=True)
     return parser.parse_args()
 
 
@@ -554,8 +599,10 @@ def main() -> None:
         for name in ("benchmark_root", "abcrown_root", "model", "property"):
             setattr(args, name, getattr(args, name).resolve())
         _generate(args)
-    else:
+    elif args.command == "replay":
         _replay(args)
+    else:
+        _finalize(args)
 
 
 if __name__ == "__main__":

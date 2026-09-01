@@ -76,5 +76,6 @@ def test_warm_matched_protocol_primes_native_root_on_both_sides() -> None:
     assert "BAB4-WARM" in live_worker.FOUR_SEGMENT_CONFIGURATIONS
 
     warm.configure()
+    assert warm.implementation._is_four_segment_candidate() is True
     assert len(warm.PAIR_ORDERS) == 5
     assert all(set(order) == {"B4-A-WARM", "BAB4-WARM"} for order in warm.PAIR_ORDERS)

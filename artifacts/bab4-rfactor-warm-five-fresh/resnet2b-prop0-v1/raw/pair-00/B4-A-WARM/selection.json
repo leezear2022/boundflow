@@ -1,0 +1,11 @@
+{
+  "all_attempts_preserved": true,
+  "attempts": [
+    {
+      "attempt": 0,
+      "environment_admitted": true,
+      "worker_sha256": "49e17520d0f7e9382e9807c1f5526af2f9888115da7da7325fff9301e4e4d5f7"
+    }
+  ],
+  "selected_attempt": 0
+}

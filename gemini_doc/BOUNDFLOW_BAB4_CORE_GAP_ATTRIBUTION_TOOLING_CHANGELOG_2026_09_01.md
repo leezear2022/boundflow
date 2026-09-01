@@ -98,3 +98,46 @@ phase ledger 暴露出新的不匹配：BAB4 在 query 外执行了四段 optimi
 
 新增 `run_bab4_rfactor_warm_five_fresh.py`，以五组交替 fresh 进程比较上述配置。只有该完全匹配的
 warm-state 协议才能形成当前 BAB4 的 query/core 性能结论。
+
+## 7. 完全匹配五组正式结果
+
+`B4-A-WARM ↔ BAB4-WARM` 在 RTX 4060 Laptop GPU 上完成 5 对交替、10 个 fresh 进程：
+
+| 指标 | 结果 |
+|---|---:|
+| complete-query geomean | `1.034617x` |
+| complete-query worst pair | `1.023630x` |
+| exact-call core geomean | `1.182383x` |
+| exact-call core worst pair | `1.165240x` |
+| lower max abs diff | `2.5629997e-6` |
+| 候选额外 static prepare 均值 | `9.266469 s` |
+| query 平均节省 | `24.595941 ms` |
+| cold break-even | `376.748` queries |
+
+5/5 environment admitted、discrete semantics exact、lower sign exact。raw replay PASS。结论降精度为：
+
+- BAB4 rfactor 在完全匹配 warm state 下达到 query parity，且 5/5 都快；
+- core 有约 18.2% 收益，但没有达到冻结的 `1.20x` core research gate；
+- complete query 只有约 3.46% 收益，没有达到 `1.15x` research gate；
+- `performance_claimed=false` 保持，旧 `1.30018x` 与中间 `1.16373x` 不再作为公平 headline。
+
+中位时间账说明损失发生在集成传播而非正确性：
+
+| scope | B4-A-WARM | BAB4-WARM | 观察 |
+|---|---:|---:|---|
+| query | `730.752 ms` | `711.619 ms` | 候选快约 19 ms |
+| core | `250.999 ms` | `211.643 ms` | 候选快约 39 ms |
+| pre-core | `479.498 ms` | `497.113 ms` | 候选反而慢约 17.6 ms |
+| root incomplete | `239.447 ms` | `238.300 ms` | 基本相同，warm state 已匹配 |
+| four-segment optimizer | N/A | `42.414 ms` | 仍是候选主热区之一 |
+| rebind + handoff | N/A | `18.509 ms` | typed runtime 集成成本 |
+| peak allocated | `318.401 MiB` | `320.018 MiB` | 候选多约 1.62 MiB |
+| peak reserved | `390 MiB` | `394 MiB` | 候选多 4 MiB |
+
+rfactor 本身相对旧 artifact 的 optimizer geomean 从 `46.851 ms` 降到 `42.468 ms`，约 `1.1032x`；
+此前单次 `1.276x` 诊断高估了稳定收益。下一步应先归因并消除约 17.6 ms pre-core/集成损失，再继续减少
+residual/projection 的多 kernel launch 和中间 materialization，而不是宣称当前已经达到论文性能门槛。
+
+冻结 artifact：`artifacts/bab4-rfactor-warm-five-fresh/resnet2b-prop0-v1`。stdlib replay PASS，
+`summary_hash=4725f1d5db74393884aed33b3ebb2329966df07f05d4b2c76a916086b67a716d`。专项 50 passed；
+全量回归 `2218 passed, 3 skipped`，三个 skip 均为既有环境边界。
