@@ -103,6 +103,10 @@ artifact 仍是本地诊断输入，不形成性能或 formal claim。
 这一步的研究价值不是“又加一个 kernel”，而是把 verification-specific split state、compressed
 α/β、frozen-bound ownership 和整图 generate-and-consume 放进同一个 TVM/TIR transaction。
 
+后续状态：上述 full-owner correctness 已在
+`BOUNDFLOW_ACTIVATION_BAB_FULL_OWNER_CORRECTNESS_CHANGELOG_2026_09_01.md` 实现并本地验证；当前
+下一刀已推进为版本化 TVM/TIR lowering，仍未开放 timing 或 performance claim。
+
 ## 7. 本地验证
 
 - 真实 external αβ-CROWN CUDA probe：PASS，四段 `10/9`、active β `[6,1]`；
