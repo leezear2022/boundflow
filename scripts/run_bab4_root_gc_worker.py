@@ -4,19 +4,22 @@
 # mypy: disable-error-code=import-untyped
 # pylint: disable=import-error,wrong-import-position,import-outside-toplevel
 # pylint: disable=too-many-locals,too-many-statements,protected-access
+# pylint: disable=too-many-boolean-expressions
 
 from __future__ import annotations
 
 import argparse
-from contextlib import ExitStack
+from contextlib import contextmanager, ExitStack
 from functools import wraps
+import hashlib
+import inspect
 import json
 from pathlib import Path
 import statistics
 import sys
 import tempfile
 import time
-from typing import Any, Callable, cast
+from typing import Any, Callable, cast, Iterator
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 if str(REPOSITORY_ROOT) not in sys.path:
@@ -27,6 +30,9 @@ from boundflow.backends.tvm.root_crown_terminal_linear import (  # noqa: E402
 )
 from boundflow.runtime.root_crown_full_pipeline_tir import (  # noqa: E402
     RootCrownFullPipelineTIRExecutorV1,
+)
+from boundflow.runtime.root_crown_backward_general_live import (  # noqa: E402
+    RootCrownBackwardGeneralLiveBridgeV1,
 )
 from boundflow.runtime.root_crown_input_domain_live import (  # noqa: E402
     RootCrownInputDomainLiveBridgeV1,
@@ -149,6 +155,373 @@ class _RootSegmentAttributionV1:
         }
 
 
+def _tensor_digest(tensor: Any) -> str:
+    """Hash one diagnostic tensor without retaining a solver graph."""
+
+    payload = tensor.detach().contiguous().cpu().numpy().tobytes()
+    return hashlib.sha256(payload).hexdigest()
+
+
+class _RootComputeTransactionCaptureV1:
+    """Capture the five optimized compute_bounds calls at their public seam."""
+
+    def __init__(
+        self,
+        executor: RootCrownFullPipelineTIRExecutorV1,
+        suffix_bridge: RootCrownSuffixLiveBridgeV1,
+    ) -> None:
+        self.executor = executor
+        self.suffix_bridge = suffix_bridge
+        self.rows: list[dict[str, object]] = []
+        self.backward_rows: list[dict[str, object]] = []
+        self.intermediate_backward_rows: list[dict[str, object]] = []
+
+    @contextmanager
+    def install(self, bounded_module_type: type[Any]) -> Iterator[None]:
+        """Patch only compute_bounds and capture calls owned by the root bridge."""
+
+        import torch
+
+        original = bounded_module_type.compute_bounds
+        signature = inspect.signature(original)
+        original_backward = bounded_module_type.backward_general
+        backward_signature = inspect.signature(original_backward)
+
+        @wraps(original)
+        def captured(instance: Any, *args: Any, **kwargs: Any) -> Any:
+            if not self.suffix_bridge._active:
+                return original(instance, *args, **kwargs)
+            bound = signature.bind(instance, *args, **kwargs)
+            bound.apply_defaults()
+            parameters = bound.arguments
+            specification = parameters.get("C")
+            if not torch.is_tensor(specification):
+                raise TypeError("root compute transaction specification differs")
+            result = original(instance, *args, **kwargs)
+            nodes = {str(getattr(node, "name", "")): node for node in instance.nodes()}
+            final = nodes.get("/49")
+            suffix = self.suffix_bridge._last_suffix
+            concrete = self.executor.input_domain._concrete_lower
+            pipeline_bias = self.executor._final_bias
+            if (
+                final is None
+                or len(getattr(final, "inputs", ())) != 3
+                or suffix is None
+                or concrete is None
+                or pipeline_bias is None
+                or not isinstance(result, tuple)
+                or not result
+                or not torch.is_tensor(result[0])
+            ):
+                raise ValueError("root compute transaction state differs")
+            final_weight = final.inputs[1].lower
+            final_bias = final.inputs[2].lower
+            if not torch.is_tensor(final_weight) or not torch.is_tensor(final_bias):
+                raise TypeError("root compute transaction final affine differs")
+            terminal_seed = torch.matmul(specification, final_weight).transpose(0, 1)
+            captured_seed = suffix.terminal.incoming_lower_a
+            final_bias_term = torch.matmul(specification, final_bias)
+            direct_lower = concrete + pipeline_bias.transpose(0, 1) + final_bias_term
+            returned_lower = result[0]
+            seed_diff = float(
+                (terminal_seed - captured_seed).abs().max().detach().cpu().item()
+            )
+            lower_diff = float(
+                (direct_lower - returned_lower).abs().max().detach().cpu().item()
+            )
+            self.rows.append(
+                {
+                    "ordinal": len(self.rows),
+                    "method": str(parameters.get("method")),
+                    "bound_lower": bool(parameters.get("bound_lower")),
+                    "bound_upper": bool(parameters.get("bound_upper")),
+                    "return_A": bool(parameters.get("return_A")),
+                    "average_A": bool(parameters.get("average_A")),
+                    "need_A_only": bool(parameters.get("need_A_only")),
+                    "final_node_name": parameters.get("final_node_name"),
+                    "specification_shape": list(specification.shape),
+                    "specification_digest": _tensor_digest(specification),
+                    "terminal_seed_shape": list(terminal_seed.shape),
+                    "terminal_seed_max_abs_diff": seed_diff,
+                    "returned_lower_shape": list(returned_lower.shape),
+                    "direct_lower_max_abs_diff": lower_diff,
+                    "returned_lower_requires_grad": bool(returned_lower.requires_grad),
+                    "returned_upper_is_none": result[1] is None,
+                    "result_arity": len(result),
+                }
+            )
+            return result
+
+        @wraps(original_backward)
+        def captured_backward(instance: Any, *args: Any, **kwargs: Any) -> Any:
+            if not self.suffix_bridge._active:
+                return original_backward(instance, *args, **kwargs)
+            bound = backward_signature.bind(instance, *args, **kwargs)
+            bound.apply_defaults()
+            parameters = bound.arguments
+            specification = parameters.get("C")
+            bound_node = parameters.get("bound_node")
+            # ``check_prior_bounds`` may issue nested backward traversals for
+            # intermediate nodes while the outer root transaction is active.
+            # They remain native work and are not the replacement seam.  The
+            # root transaction itself is the unique traversal from /49.
+            if str(getattr(bound_node, "name", "")) != "/49":
+                result = original_backward(instance, *args, **kwargs)
+                if not isinstance(result, tuple) or len(result) < 2:
+                    raise ValueError("root intermediate backward result differs")
+                unstable = parameters.get("unstable_idx")
+                if isinstance(unstable, tuple):
+                    unstable_count = int(unstable[0].numel())
+                elif torch.is_tensor(unstable):
+                    unstable_count = int(unstable.numel())
+                elif unstable is None:
+                    unstable_count = None
+                else:
+                    unstable_count = len(unstable)
+                self.intermediate_backward_rows.append(
+                    {
+                        "ordinal": len(self.intermediate_backward_rows),
+                        "bound_node_name": str(getattr(bound_node, "name", "")),
+                        "bound_node_kind": type(bound_node).__name__,
+                        "specification_kind": type(specification).__name__,
+                        "specification_shape": (
+                            list(cast(Any, specification).shape)
+                            if hasattr(specification, "shape")
+                            else None
+                        ),
+                        "bound_lower": bool(parameters.get("bound_lower")),
+                        "bound_upper": bool(parameters.get("bound_upper")),
+                        "unstable_count": unstable_count,
+                        "returned_lower_shape": (
+                            list(result[0].shape)
+                            if torch.is_tensor(result[0])
+                            else None
+                        ),
+                        "returned_upper_shape": (
+                            list(result[1].shape)
+                            if torch.is_tensor(result[1])
+                            else None
+                        ),
+                        "returned_lower_requires_grad": (
+                            bool(result[0].requires_grad)
+                            if torch.is_tensor(result[0])
+                            else False
+                        ),
+                        "returned_upper_requires_grad": (
+                            bool(result[1].requires_grad)
+                            if torch.is_tensor(result[1])
+                            else False
+                        ),
+                    }
+                )
+                return result
+            if not torch.is_tensor(specification):
+                raise TypeError("root backward transaction specification differs")
+            result = original_backward(instance, *args, **kwargs)
+            if (
+                not isinstance(result, tuple)
+                or len(result) != 2
+                or not torch.is_tensor(result[0])
+            ):
+                raise ValueError("root backward transaction result differs")
+            self.backward_rows.append(
+                {
+                    "ordinal": len(self.backward_rows),
+                    "bound_node_name": str(getattr(bound_node, "name", "")),
+                    "start_node_name": str(
+                        getattr(
+                            parameters.get("start_backpropagation_at_node"),
+                            "name",
+                            "",
+                        )
+                    ),
+                    "bound_lower": bool(parameters.get("bound_lower")),
+                    "bound_upper": bool(parameters.get("bound_upper")),
+                    "average_A": bool(parameters.get("average_A")),
+                    "need_A_only": bool(parameters.get("need_A_only")),
+                    "unstable_idx_is_none": parameters.get("unstable_idx") is None,
+                    "update_mask_is_none": parameters.get("update_mask") is None,
+                    "output_constraints_is_none": (
+                        parameters.get("apply_output_constraints_to") is None
+                    ),
+                    "initial_As_is_none": parameters.get("initial_As") is None,
+                    "initial_lb_is_none": parameters.get("initial_lb") is None,
+                    "initial_ub_is_none": parameters.get("initial_ub") is None,
+                    "specification_shape": list(specification.shape),
+                    "specification_digest": _tensor_digest(specification),
+                    "returned_lower_shape": list(result[0].shape),
+                    "returned_upper_is_none": result[1] is None,
+                }
+            )
+            return result
+
+        bounded_module_type.compute_bounds = captured
+        bounded_module_type.backward_general = captured_backward
+        try:
+            yield
+        finally:
+            bounded_module_type.backward_general = original_backward
+            bounded_module_type.compute_bounds = original
+
+    def receipt(self) -> dict[str, object]:
+        """Return diagnostic evidence without upgrading a performance claim."""
+
+        if (
+            len(self.rows) != 5
+            or len(self.backward_rows) != 5
+            or [row["ordinal"] for row in self.rows] != list(range(5))
+            or [row["ordinal"] for row in self.backward_rows] != list(range(5))
+        ):
+            raise ValueError("root compute transaction capture count differs")
+        return {
+            "schema_version": "boundflow.root-compute-transaction-capture/v1",
+            "evaluation_count": len(self.rows),
+            "rows": self.rows,
+            "backward_general_count": len(self.backward_rows),
+            "backward_general_rows": self.backward_rows,
+            "intermediate_backward_general_count": len(self.intermediate_backward_rows),
+            "intermediate_backward_general_rows": self.intermediate_backward_rows,
+            "terminal_seed_max_abs_diff": max(
+                cast(float, row["terminal_seed_max_abs_diff"]) for row in self.rows
+            ),
+            "direct_lower_max_abs_diff": max(
+                cast(float, row["direct_lower_max_abs_diff"]) for row in self.rows
+            ),
+            "diagnostic_only": True,
+            "included_in_performance_claim": False,
+            "performance_claimed": False,
+        }
+
+
+class _RootPriorBoundsAttributionV1:
+    """Attribute repeated intermediate-bound construction by production node."""
+
+    def __init__(self, suffix_bridge: RootCrownSuffixLiveBridgeV1) -> None:
+        self.suffix_bridge = suffix_bridge
+        self.rows: list[dict[str, object]] = []
+        self._events: list[tuple[Any, Any]] = []
+
+    @contextmanager
+    def install(self, bounded_module_type: type[Any]) -> Iterator[None]:
+        """Observe only intermediate bounds inside the admitted root transaction."""
+
+        import torch
+
+        original = bounded_module_type.compute_intermediate_bounds
+        signature = inspect.signature(original)
+
+        @wraps(original)
+        def captured(instance: Any, *args: Any, **kwargs: Any) -> Any:
+            if not self.suffix_bridge._active:
+                return original(instance, *args, **kwargs)
+            bound = signature.bind(instance, *args, **kwargs)
+            bound.apply_defaults()
+            node = bound.arguments.get("node")
+            stream = torch.cuda.current_stream()
+            started = torch.cuda.Event(enable_timing=True)
+            finished = torch.cuda.Event(enable_timing=True)
+            host_started_ns = time.perf_counter_ns()
+            started.record(stream)
+            result = original(instance, *args, **kwargs)
+            finished.record(stream)
+            host_ns = time.perf_counter_ns() - host_started_ns
+            lower = getattr(node, "lower", None)
+            upper = getattr(node, "upper", None)
+            self.rows.append(
+                {
+                    "ordinal": len(self.rows),
+                    "node_name": str(getattr(node, "name", "")),
+                    "node_kind": type(node).__name__,
+                    "prior_checked": bool(bound.arguments.get("prior_checked")),
+                    "host_ns": host_ns,
+                    "lower_shape": (
+                        list(lower.shape) if torch.is_tensor(lower) else None
+                    ),
+                    "upper_shape": (
+                        list(upper.shape) if torch.is_tensor(upper) else None
+                    ),
+                    "lower_requires_grad": (
+                        bool(lower.requires_grad) if torch.is_tensor(lower) else False
+                    ),
+                    "upper_requires_grad": (
+                        bool(upper.requires_grad) if torch.is_tensor(upper) else False
+                    ),
+                    "lower_digest": (
+                        _tensor_digest(lower) if torch.is_tensor(lower) else None
+                    ),
+                    "upper_digest": (
+                        _tensor_digest(upper) if torch.is_tensor(upper) else None
+                    ),
+                }
+            )
+            self._events.append((started, finished))
+            return result
+
+        bounded_module_type.compute_intermediate_bounds = captured
+        try:
+            yield
+        finally:
+            bounded_module_type.compute_intermediate_bounds = original
+
+    def receipt(self) -> dict[str, object]:
+        """Synchronize events and aggregate repeated value/gradient ownership."""
+
+        import torch
+
+        torch.cuda.synchronize()
+        by_node: dict[str, dict[str, object]] = {}
+        for row, (started, finished) in zip(self.rows, self._events):
+            row["cuda_ns"] = round(float(started.elapsed_time(finished)) * 1_000_000)
+            name = cast(str, row["node_name"])
+            aggregate = by_node.setdefault(
+                name,
+                {
+                    "node_kind": row["node_kind"],
+                    "call_count": 0,
+                    "host_total_ns": 0,
+                    "cuda_total_ns": 0,
+                    "lower_digests": set(),
+                    "upper_digests": set(),
+                    "lower_requires_grad": False,
+                    "upper_requires_grad": False,
+                },
+            )
+            aggregate["call_count"] = cast(int, aggregate["call_count"]) + 1
+            aggregate["host_total_ns"] = cast(int, aggregate["host_total_ns"]) + cast(
+                int, row["host_ns"]
+            )
+            aggregate["cuda_total_ns"] = cast(int, aggregate["cuda_total_ns"]) + cast(
+                int, row["cuda_ns"]
+            )
+            cast(set[object], aggregate["lower_digests"]).add(row["lower_digest"])
+            cast(set[object], aggregate["upper_digests"]).add(row["upper_digest"])
+            aggregate["lower_requires_grad"] = bool(
+                aggregate["lower_requires_grad"] or row["lower_requires_grad"]
+            )
+            aggregate["upper_requires_grad"] = bool(
+                aggregate["upper_requires_grad"] or row["upper_requires_grad"]
+            )
+        serializable: dict[str, object] = {}
+        for name, aggregate in sorted(by_node.items()):
+            item = dict(aggregate)
+            item["lower_distinct_digest_count"] = len(
+                cast(set[object], item.pop("lower_digests"))
+            )
+            item["upper_distinct_digest_count"] = len(
+                cast(set[object], item.pop("upper_digests"))
+            )
+            serializable[name] = item
+        return {
+            "schema_version": "boundflow.root-prior-bounds-attribution/v1",
+            "call_count": len(self.rows),
+            "rows": self.rows,
+            "by_node": serializable,
+            "diagnostic_only": True,
+            "included_in_performance_claim": False,
+            "performance_claimed": False,
+        }
+
+
 def _prepare_root_pipeline(args: argparse.Namespace) -> tuple[Any, Any, Any, Any, int]:
     import torch
 
@@ -203,6 +576,9 @@ def _worker(args: argparse.Namespace) -> None:
     root_query_pipeline_prepare_ns = 0
     root_exact_warmup_reset_ns = 0
     root_segment_observer: _RootSegmentAttributionV1 | None = None
+    root_compute_capture: _RootComputeTransactionCaptureV1 | None = None
+    root_direct_bridge: RootCrownBackwardGeneralLiveBridgeV1 | None = None
+    root_prior_attribution: _RootPriorBoundsAttributionV1 | None = None
     if candidate:
         (
             warm_executor,
@@ -243,6 +619,9 @@ def _worker(args: argparse.Namespace) -> None:
                     nonlocal root_exact_warmup_reset_ns
                     nonlocal suffix, projection, input_domain
                     nonlocal root_segment_observer
+                    nonlocal root_compute_capture
+                    nonlocal root_direct_bridge
+                    nonlocal root_prior_attribution
                     if root_query_install_count != 0:
                         raise RuntimeError("BAB4 cumulative root install count differs")
                     with ExitStack() as warm_stack:
@@ -275,6 +654,21 @@ def _worker(args: argparse.Namespace) -> None:
                         root_segment_observer.install(
                             warm_executor, suffix, projection, input_domain
                         )
+                    if args.capture_root_compute_transaction:
+                        root_compute_capture = _RootComputeTransactionCaptureV1(
+                            warm_executor, suffix
+                        )
+                        stack.enter_context(root_compute_capture.install(BoundedModule))
+                    if args.direct_root_backward:
+                        root_direct_bridge = RootCrownBackwardGeneralLiveBridgeV1(
+                            warm_executor, suffix, projection, input_domain
+                        )
+                        stack.enter_context(root_direct_bridge.install(BoundedModule))
+                    if args.attribute_root_prior_bounds:
+                        root_prior_attribution = _RootPriorBoundsAttributionV1(suffix)
+                        stack.enter_context(
+                            root_prior_attribution.install(BoundedModule)
+                        )
                     stack.enter_context(suffix.install(BoundedModule))
                     stack.enter_context(projection.install(BoundedModule))
                     stack.enter_context(input_domain.install(BoundedModule))
@@ -297,6 +691,11 @@ def _worker(args: argparse.Namespace) -> None:
                     "suffix": suffix.receipt(),
                     "projection": projection.receipt(),
                     "input_domain": input_domain.receipt(),
+                    "backward_general": (
+                        root_direct_bridge.receipt()
+                        if root_direct_bridge is not None
+                        else None
+                    ),
                 }
             else:
                 root_receipts = None
@@ -304,6 +703,12 @@ def _worker(args: argparse.Namespace) -> None:
 
     root_segment_attribution = (
         root_segment_observer.receipt() if root_segment_observer is not None else None
+    )
+    root_compute_transaction_capture = (
+        root_compute_capture.receipt() if root_compute_capture is not None else None
+    )
+    root_prior_bounds_attribution = (
+        root_prior_attribution.receipt() if root_prior_attribution is not None else None
     )
 
     if root_query_install_count != int(candidate):
@@ -330,6 +735,17 @@ def _worker(args: argparse.Namespace) -> None:
             "root_segment_attribution": root_segment_attribution,
             "root_segment_attribution_enabled": bool(
                 candidate and args.attribute_root_segments
+            ),
+            "root_compute_transaction_capture": root_compute_transaction_capture,
+            "root_compute_transaction_capture_enabled": bool(
+                candidate and args.capture_root_compute_transaction
+            ),
+            "root_direct_backward_enabled": bool(
+                candidate and args.direct_root_backward
+            ),
+            "root_prior_bounds_attribution": root_prior_bounds_attribution,
+            "root_prior_bounds_attribution_enabled": bool(
+                candidate and args.attribute_root_prior_bounds
             ),
             "performance_claimed": False,
         }
@@ -359,6 +775,9 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--input-capture", type=Path, default=DEFAULT_INPUT_CAPTURE)
     parser.add_argument("--attribute-root-segments", action="store_true")
+    parser.add_argument("--capture-root-compute-transaction", action="store_true")
+    parser.add_argument("--direct-root-backward", action="store_true")
+    parser.add_argument("--attribute-root-prior-bounds", action="store_true")
     parser.add_argument("--result", type=Path, required=True)
     return parser.parse_args()
 

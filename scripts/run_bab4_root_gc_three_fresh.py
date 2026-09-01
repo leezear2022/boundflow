@@ -108,6 +108,8 @@ def _run_worker(
         ]
         if args.attribute_root_segments:
             command.append("--attribute-root-segments")
+        if args.direct_root_backward and configuration == CANDIDATE:
+            command.append("--direct-root-backward")
         completed = subprocess.run(
             command,
             cwd=REPOSITORY_ROOT,
@@ -159,6 +161,7 @@ def _summarize(
         scope: [] for scope in ("query", "root", "core")
     }
     memory: dict[str, list[float]] = {name: [] for name in ("allocated", "reserved")}
+    direct_modes: list[bool] = []
     for pair, order in enumerate(PAIR_ORDERS):
         control = workers[(pair, CONTROL)]
         candidate = workers[(pair, CANDIDATE)]
@@ -207,12 +210,26 @@ def _summarize(
             or warmup_input_receipt.get("fallback_count") != 0
         ):
             raise ValueError("BAB4 cumulative root production activation differs")
+        backward_receipt = receipts.get("backward_general")
+        direct_mode = candidate.get("root_direct_backward_enabled") is True
+        direct_modes.append(direct_mode)
+        if direct_mode:
+            backward = _mapping(backward_receipt, "backward receipt")
+            if (
+                backward.get("call_count") != 5
+                or backward.get("native_deque_traversal_count") != 0
+                or backward.get("fallback_count") != 0
+            ):
+                raise ValueError("BAB4 direct backward activation differs")
         rows.append(row)
+    if any(direct_modes) != all(direct_modes):
+        raise ValueError("BAB4 cumulative root direct mode differs across pairs")
     result: dict[str, object] = {
         "schema_version": "boundflow.bab4-root-gc-three-fresh/v1",
         "pair_count": len(rows),
         "control_configuration": CONTROL,
         "candidate_configuration": CANDIDATE,
+        "direct_root_backward_enabled": all(direct_modes),
         "rows": rows,
         "all_discrete_semantics_exact": True,
         "lower_max_abs_diff": max(
@@ -248,6 +265,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--input-capture", type=Path, required=True)
     parser.add_argument("--max-environment-attempts", type=int, default=6)
     parser.add_argument("--attribute-root-segments", action="store_true")
+    parser.add_argument("--direct-root-backward", action="store_true")
     return parser.parse_args()
 
 

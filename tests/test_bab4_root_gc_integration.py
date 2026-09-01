@@ -47,3 +47,41 @@ def test_root_segment_attribution_is_opt_in_and_non_claiming() -> None:
     assert source.index("warm_executor.reset_after_exact_warmup_v1()") < source.index(
         "root_segment_observer.install("
     )
+
+
+def test_root_compute_transaction_capture_is_opt_in_and_non_claiming() -> None:
+    source = Path(worker.__file__).read_text(encoding="utf-8")
+    assert (
+        'parser.add_argument("--capture-root-compute-transaction", action="store_true")'
+        in source
+    )
+    assert '"schema_version": "boundflow.root-compute-transaction-capture/v1"' in source
+    assert '"included_in_performance_claim": False' in source
+    assert source.index("warm_executor.reset_after_exact_warmup_v1()") < source.index(
+        "root_compute_capture.install(BoundedModule)"
+    )
+
+
+def test_root_direct_backward_is_opt_in_and_keeps_prior_bounds_native() -> None:
+    source = Path(worker.__file__).read_text(encoding="utf-8")
+    bridge = (
+        Path(__file__).parents[1]
+        / "boundflow/runtime/root_crown_backward_general_live.py"
+    ).read_text(encoding="utf-8")
+    assert (
+        'parser.add_argument("--direct-root-backward", action="store_true")' in source
+    )
+    assert '"replacement_seam": "BoundedModule.backward_general:/49"' in bridge
+    assert '"native_deque_traversal_count": 0' in bridge
+    assert "check_prior_bounds" not in bridge
+
+
+def test_root_prior_bound_attribution_is_opt_in_and_non_claiming() -> None:
+    source = Path(worker.__file__).read_text(encoding="utf-8")
+    assert (
+        'parser.add_argument("--attribute-root-prior-bounds", action="store_true")'
+        in source
+    )
+    assert '"schema_version": "boundflow.root-prior-bounds-attribution/v1"' in source
+    assert '"diagnostic_only": True' in source
+    assert '"included_in_performance_claim": False' in source
