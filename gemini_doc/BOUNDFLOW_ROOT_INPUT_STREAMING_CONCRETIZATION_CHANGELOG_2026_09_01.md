@@ -121,7 +121,11 @@ ASPLOS 最终性能 claim。
 被 fail-closed 冻结。它证明了 verification-specific generate-and-consume/recompute 机制可以传播到
 complete query，但不是通用 Conv lowering。
 
-下一刀应继续按真实 trace 扩大同一 owner，而不是增加外审流程：捕获并评估下一段
-`/input-8 → /input-4` 的 Conv/residual 事务，先算 dense A materialization、kernel share 和所需
-region speedup；只有 Amdahl 可达且独立 oracle 闭合时才扩 TIR。与此同时应增加 5-pair 或更多
-系统噪声诊断，解释第三个 control 的重复性慢点。
+更正：本轮复核完整 topology 后确认，projection owner 已经覆盖
+`/input-16 → /39 → /37,/38 → /input-12 → /input-8 → /input-4`，所以旧稿把
+`/input-8 → /input-4` 写成“下一段”是不准确的，不能重复施工。
+
+真正尚未接管的是 complete verifier 后半段的 activation-BaB `update_bounds_core`：它使用
+`spec=1, domain=6`、10 次 evaluation、9 次 optimizer mutation，并携带 active β。下一刀改为
+捕获和实现这一个完整事务；与此同时应增加 5-pair 或更多系统噪声诊断，解释第三个 control 的
+重复性慢点。
