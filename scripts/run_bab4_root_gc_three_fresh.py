@@ -3,6 +3,7 @@
 
 # pylint: disable=too-many-locals,too-many-statements,wrong-import-position
 # pylint: disable=protected-access,duplicate-code,too-many-boolean-expressions
+# pylint: disable=too-many-branches
 
 from __future__ import annotations
 
@@ -112,6 +113,8 @@ def _run_worker(
             command.append("--direct-root-backward")
         if args.direct_root_intermediate and configuration == CANDIDATE:
             command.append("--direct-root-intermediate")
+        if args.direct_root_sparse_patches and configuration == CANDIDATE:
+            command.append("--direct-root-sparse-patches")
         completed = subprocess.run(
             command,
             cwd=REPOSITORY_ROOT,
@@ -165,6 +168,7 @@ def _summarize(
     memory: dict[str, list[float]] = {name: [] for name in ("allocated", "reserved")}
     direct_modes: list[bool] = []
     direct_intermediate_modes: list[bool] = []
+    direct_sparse_patches_modes: list[bool] = []
     for pair, order in enumerate(PAIR_ORDERS):
         control = workers[(pair, CONTROL)]
         candidate = workers[(pair, CANDIDATE)]
@@ -241,11 +245,29 @@ def _summarize(
                 or intermediate_executor.get("call_count") != 5
             ):
                 raise ValueError("BAB4 direct intermediate activation differs")
+        direct_sparse_patches = (
+            candidate.get("root_sparse_patches_direct_enabled") is True
+        )
+        direct_sparse_patches_modes.append(direct_sparse_patches)
+        if direct_sparse_patches:
+            sparse = _mapping(receipts.get("sparse_patches"), "sparse Patches receipt")
+            counts = _mapping(sparse.get("call_count_by_spec"), "sparse Patches counts")
+            if (
+                sparse.get("mode") != "direct"
+                or sparse.get("call_count") != 5
+                or counts.get("178") != 4
+                or counts.get("175") != 1
+                or sparse.get("native_execution_count") != 0
+                or sparse.get("fallback_count") != 0
+            ):
+                raise ValueError("BAB4 direct sparse Patches activation differs")
         rows.append(row)
     if any(direct_modes) != all(direct_modes):
         raise ValueError("BAB4 cumulative root direct mode differs across pairs")
     if any(direct_intermediate_modes) != all(direct_intermediate_modes):
         raise ValueError("BAB4 intermediate direct mode differs across pairs")
+    if any(direct_sparse_patches_modes) != all(direct_sparse_patches_modes):
+        raise ValueError("BAB4 sparse Patches direct mode differs across pairs")
     result: dict[str, object] = {
         "schema_version": "boundflow.bab4-root-gc-three-fresh/v1",
         "pair_count": len(rows),
@@ -253,6 +275,7 @@ def _summarize(
         "candidate_configuration": CANDIDATE,
         "direct_root_backward_enabled": all(direct_modes),
         "direct_root_intermediate_enabled": all(direct_intermediate_modes),
+        "direct_root_sparse_patches_enabled": all(direct_sparse_patches_modes),
         "rows": rows,
         "all_discrete_semantics_exact": True,
         "lower_max_abs_diff": max(
@@ -290,6 +313,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--attribute-root-segments", action="store_true")
     parser.add_argument("--direct-root-backward", action="store_true")
     parser.add_argument("--direct-root-intermediate", action="store_true")
+    parser.add_argument("--direct-root-sparse-patches", action="store_true")
     return parser.parse_args()
 
 

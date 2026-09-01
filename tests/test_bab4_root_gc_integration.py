@@ -85,3 +85,26 @@ def test_root_prior_bound_attribution_is_opt_in_and_non_claiming() -> None:
     assert '"schema_version": "boundflow.root-prior-bounds-attribution/v1"' in source
     assert '"diagnostic_only": True' in source
     assert '"included_in_performance_claim": False' in source
+
+
+def test_root_sparse_patches_replacement_is_opt_in_and_non_claiming() -> None:
+    source = Path(worker.__file__).read_text(encoding="utf-8")
+    bridge = (
+        Path(__file__).parents[1]
+        / "boundflow/runtime/root_crown_sparse_patches_live.py"
+    ).read_text(encoding="utf-8")
+    backend = (
+        Path(__file__).parents[1]
+        / "boundflow/backends/tvm/root_crown_sparse_patches_seed.py"
+    ).read_text(encoding="utf-8")
+    for mode in ("shadow", "replace", "direct"):
+        assert (
+            f'parser.add_argument("--{mode}-root-sparse-patches", '
+            'action="store_true")'
+        ) in source
+    assert '"replacement_seam": "BoundedModule.backward_general:/44"' in bridge
+    assert '"performance_claimed": False' in bridge
+    assert '"dense_seed_external_allocation": False' in backend
+    assert source.index("warm_executor.reset_after_exact_warmup_v1()") < source.index(
+        "root_sparse_patches_bridge.install(BoundedModule)"
+    )

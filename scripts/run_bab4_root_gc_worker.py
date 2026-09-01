@@ -48,6 +48,12 @@ from boundflow.runtime.root_crown_intermediate_live import (  # noqa: E402
 from boundflow.runtime.root_crown_projection_live import (  # noqa: E402
     RootCrownProjectionLiveBridgeV1,
 )
+from boundflow.runtime.root_crown_sparse_patches_dual_lane_tir import (  # noqa: E402
+    RootCrownSparsePatchesDualLaneTIRExecutorV1,
+)
+from boundflow.runtime.root_crown_sparse_patches_live import (  # noqa: E402
+    RootCrownSparsePatchesLiveBridgeV1,
+)
 from boundflow.runtime.root_crown_suffix_live import (  # noqa: E402
     RootCrownSuffixLiveBridgeV1,
 )
@@ -662,7 +668,7 @@ class _RootPriorBoundsAttributionV1:
 
 def _prepare_root_pipeline(
     args: argparse.Namespace,
-) -> tuple[Any, Any, Any, Any, Any, int]:
+) -> tuple[Any, Any, Any, Any, Any, Any, int]:
     import torch
 
     residual = residual_template(args.residual_capture)
@@ -706,6 +712,21 @@ def _prepare_root_pipeline(
             replace(root_input_template, spec_count=27),
         )
         intermediate_executor.prepare()
+    sparse_patches_executors = None
+    if (
+        args.shadow_root_sparse_patches
+        or args.replace_root_sparse_patches
+        or args.direct_root_sparse_patches
+    ):
+        sparse_patches_executors = {}
+        for spec_count in (178, 175):
+            sparse_executor = RootCrownSparsePatchesDualLaneTIRExecutorV1(
+                replace(residual, spec_count=spec_count),
+                replace(projection, spec_count=spec_count),
+                replace(root_input_template, spec_count=spec_count),
+            )
+            sparse_executor.prepare()
+            sparse_patches_executors[spec_count] = sparse_executor
     prepare_ns = time.perf_counter_ns() - started_ns
     return (
         executor,
@@ -713,6 +734,7 @@ def _prepare_root_pipeline(
         projection_bridge,
         input_bridge,
         intermediate_executor,
+        sparse_patches_executors,
         prepare_ns,
     )
 
@@ -736,8 +758,10 @@ def _worker(args: argparse.Namespace) -> None:
     root_compute_capture: _RootComputeTransactionCaptureV1 | None = None
     root_direct_bridge: RootCrownBackwardGeneralLiveBridgeV1 | None = None
     root_intermediate_bridge: RootCrownIntermediateLiveBridgeV1 | None = None
+    root_sparse_patches_bridge: RootCrownSparsePatchesLiveBridgeV1 | None = None
     root_prior_attribution: _RootPriorBoundsAttributionV1 | None = None
     warm_intermediate_executor = None
+    warm_sparse_patches_executors = None
     if candidate:
         (
             warm_executor,
@@ -745,6 +769,7 @@ def _worker(args: argparse.Namespace) -> None:
             warm_projection,
             warm_input_domain,
             warm_intermediate_executor,
+            warm_sparse_patches_executors,
             root_warm_pipeline_prepare_ns,
         ) = _prepare_root_pipeline(args)
 
@@ -782,6 +807,7 @@ def _worker(args: argparse.Namespace) -> None:
                     nonlocal root_compute_capture
                     nonlocal root_direct_bridge
                     nonlocal root_intermediate_bridge
+                    nonlocal root_sparse_patches_bridge
                     nonlocal root_prior_attribution
                     if root_query_install_count != 0:
                         raise RuntimeError("BAB4 cumulative root install count differs")
@@ -846,6 +872,29 @@ def _worker(args: argparse.Namespace) -> None:
                         stack.enter_context(
                             root_intermediate_bridge.install(BoundedModule)
                         )
+                    if (
+                        args.shadow_root_sparse_patches
+                        or args.replace_root_sparse_patches
+                        or args.direct_root_sparse_patches
+                    ):
+                        if warm_sparse_patches_executors is None:
+                            raise RuntimeError(
+                                "BAB4 root sparse Patches executors absent"
+                            )
+                        root_sparse_patches_bridge = RootCrownSparsePatchesLiveBridgeV1(
+                            warm_sparse_patches_executors,
+                            input_domain,
+                            replace_output=(
+                                args.replace_root_sparse_patches
+                                or args.direct_root_sparse_patches
+                            ),
+                            execute_native=not args.direct_root_sparse_patches,
+                            suffix_bridge=suffix,
+                            projection_bridge=projection,
+                        )
+                        stack.enter_context(
+                            root_sparse_patches_bridge.install(BoundedModule)
+                        )
                     if args.attribute_root_prior_bounds:
                         root_prior_attribution = _RootPriorBoundsAttributionV1(suffix)
                         stack.enter_context(
@@ -881,6 +930,11 @@ def _worker(args: argparse.Namespace) -> None:
                     "intermediate": (
                         root_intermediate_bridge.receipt()
                         if root_intermediate_bridge is not None
+                        else None
+                    ),
+                    "sparse_patches": (
+                        root_sparse_patches_bridge.receipt()
+                        if root_sparse_patches_bridge is not None
                         else None
                     ),
                 }
@@ -939,6 +993,15 @@ def _worker(args: argparse.Namespace) -> None:
             "root_intermediate_direct_enabled": bool(
                 candidate and args.direct_root_intermediate
             ),
+            "root_sparse_patches_shadow_enabled": bool(
+                candidate and args.shadow_root_sparse_patches
+            ),
+            "root_sparse_patches_replace_enabled": bool(
+                candidate and args.replace_root_sparse_patches
+            ),
+            "root_sparse_patches_direct_enabled": bool(
+                candidate and args.direct_root_sparse_patches
+            ),
             "root_prior_bounds_attribution": root_prior_bounds_attribution,
             "root_prior_bounds_attribution_enabled": bool(
                 candidate and args.attribute_root_prior_bounds
@@ -976,6 +1039,9 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--shadow-root-intermediate", action="store_true")
     parser.add_argument("--replace-root-intermediate", action="store_true")
     parser.add_argument("--direct-root-intermediate", action="store_true")
+    parser.add_argument("--shadow-root-sparse-patches", action="store_true")
+    parser.add_argument("--replace-root-sparse-patches", action="store_true")
+    parser.add_argument("--direct-root-sparse-patches", action="store_true")
     parser.add_argument("--attribute-root-prior-bounds", action="store_true")
     parser.add_argument("--result", type=Path, required=True)
     args = parser.parse_args()
@@ -989,6 +1055,16 @@ def _parse_args() -> argparse.Namespace:
     )
     if intermediate_modes > 1:
         parser.error("root intermediate modes are exclusive")
+    sparse_patches_modes = sum(
+        bool(value)
+        for value in (
+            args.shadow_root_sparse_patches,
+            args.replace_root_sparse_patches,
+            args.direct_root_sparse_patches,
+        )
+    )
+    if sparse_patches_modes > 1:
+        parser.error("root sparse Patches modes are exclusive")
     return args
 
 
