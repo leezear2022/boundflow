@@ -1,6 +1,6 @@
 # BAB4 prepared-runtime GC isolation 修改记录
 
-status: diagnostic-qualified-formal-open
+status: formal-validated-reduced
 date: 2026-09-01
 external-audit-requested: false
 performance-claimed: false
@@ -50,3 +50,31 @@ young-generation collection、完整恢复和计时外最终 full collection。
 
 因此开放 `B4-A-GC` 对 `BAB4-GC` 的五对正式 artifact。正式生成器会把 GC receipt 作为 replay
 语义的一部分 fail closed；该阶段仍不把 `1.062499x` 诊断数升级为最终性能 claim。
+
+## 4. 五对正式结果
+
+正式 raw-first artifact：
+`artifacts/bab4-gc-five-fresh/resnet2b-prop0-v1`，源码锚点 `83cdc9d`。
+
+- complete-query 几何平均 `1.0630537637159618x`，最差 `1.0399144399031852x`；
+- core 几何平均 `1.1805908944152954x`，最差 `1.1346220344834408x`；
+- 五对 query 全部快于对照，query parity 通过，`1.15x` research gate 未通过；
+- lower 最大误差 `1.2516975402832031e-06`，sign/discrete semantics 全部一致；
+- peak allocated/reserved 比值均固定为 `1.0050776x/1.0102564x`，未形成 memory claim；
+- query 内 GC 候选减对照的中位差为 `-0.001812 ms`，证明旧的约 `11 ms` 扫描差已消除；
+- 查询外 prepare/restore full-GC 候选额外中位成本为 `12.879/13.232 ms`；
+- 候选静态准备均值约 `9.299 s`，按本 artifact 平均 query 节省量计算，冷启动 break-even
+  约 `273.84` queries；
+- replay 重算 `PASS`，summary hash 为
+  `604629e91be8f3491a4725bf27b6d13815bbc5a734b39803c3021c9dd10bd5ed`；
+- raw stdout/stderr 与 protocol 中的本机前缀已替换为 `$ABCROWN_VENV/$VNNCOMP_ROOT`，重签后的
+  上游 stdout 行尾空格也已规范化；最终 manifest hash 为
+  `15254277166fd8a24fb272a6ea5dacba7e9fd282e70df40d5307c8d4108d64d3`，host-path scan、
+  `git diff --check` 与重签后 replay 均 `PASS`。
+- artifact/GC/归因专项 `12 passed`；全量回归 `2225 passed, 4 skipped`，四项 skip 均为
+  TVM 重复编译规避或冻结 VNN-COMP/cuDNN 环境边界；
+- touched files mypy clean，Pylint `10.00/10`，`git diff --check` 与 DocOps lint 通过。
+
+与先前 fully-warm matched 正式基线的 query `1.034617x` 相比，本机制把完整查询收益提高到
+`1.063054x`。结论只能关闭为“GC 扫描隔离有效、complete-query parity 保持”，不能升级为
+`1.15x` 完整查询研究性能，也不改变 `performance_claimed=false`。

@@ -1,0 +1,109 @@
+{
+  "all_discrete_semantics_exact": true,
+  "all_environment_admitted": true,
+  "candidate_assets_hash": "91ff4928e2acfda8d21583459f8735815ac2437e5c5d3f7d807b7cd5da4f9ff8",
+  "candidate_configuration": "BAB4-GC",
+  "cold_break_even_queries": 273.8361385301171,
+  "control_configuration": "B4-A-GC",
+  "core_research_gate_qualified": false,
+  "core_speedup_geomean": 1.1805908944152954,
+  "core_speedup_worst": 1.1346220344834408,
+  "lower_max_abs_diff": 1.2516975402832031e-06,
+  "lower_sign_exact": true,
+  "mean_query_saved_ns": 33958865.4,
+  "mean_static_prepare_ns": 9299164570.0,
+  "pair_count": 5,
+  "pairs": [
+    {
+      "candidate_core_wall_ns": 207949869,
+      "candidate_query_wall_ns": 536653493,
+      "control_core_wall_ns": 240737332,
+      "control_query_wall_ns": 572768401,
+      "core_speedup": 1.1576700344062252,
+      "discrete_semantics_exact": true,
+      "lower_max_abs_diff": 8.940696716308594e-07,
+      "lower_sign_exact": true,
+      "order": [
+        "B4-A-GC",
+        "BAB4-GC"
+      ],
+      "pair_ordinal": 0,
+      "query_speedup": 1.0672965115685924
+    },
+    {
+      "candidate_core_wall_ns": 213136097,
+      "candidate_query_wall_ns": 548096154,
+      "control_core_wall_ns": 241828912,
+      "control_query_wall_ns": 569973105,
+      "core_speedup": 1.1346220344834408,
+      "discrete_semantics_exact": true,
+      "lower_max_abs_diff": 1.2516975402832031e-06,
+      "lower_sign_exact": true,
+      "order": [
+        "BAB4-GC",
+        "B4-A-GC"
+      ],
+      "pair_ordinal": 1,
+      "query_speedup": 1.0399144399031852
+    },
+    {
+      "candidate_core_wall_ns": 203489679,
+      "candidate_query_wall_ns": 541011484,
+      "control_core_wall_ns": 242003507,
+      "control_query_wall_ns": 565874747,
+      "core_speedup": 1.189266739174521,
+      "discrete_semantics_exact": true,
+      "lower_max_abs_diff": 1.0132789611816406e-06,
+      "lower_sign_exact": true,
+      "order": [
+        "B4-A-GC",
+        "BAB4-GC"
+      ],
+      "pair_ordinal": 2,
+      "query_speedup": 1.045956996728003
+    },
+    {
+      "candidate_core_wall_ns": 208248886,
+      "candidate_query_wall_ns": 537586441,
+      "control_core_wall_ns": 250107379,
+      "control_query_wall_ns": 577316819,
+      "core_speedup": 1.2010022420960274,
+      "discrete_semantics_exact": true,
+      "lower_max_abs_diff": 7.748603820800781e-07,
+      "lower_sign_exact": true,
+      "order": [
+        "BAB4-GC",
+        "B4-A-GC"
+      ],
+      "pair_ordinal": 3,
+      "query_speedup": 1.0739050968735278
+    },
+    {
+      "candidate_core_wall_ns": 201890875,
+      "candidate_query_wall_ns": 530648020,
+      "control_core_wall_ns": 246805447,
+      "control_query_wall_ns": 577856847,
+      "core_speedup": 1.2224695494533866,
+      "discrete_semantics_exact": true,
+      "lower_max_abs_diff": 8.940696716308594e-07,
+      "lower_sign_exact": true,
+      "order": [
+        "B4-A-GC",
+        "BAB4-GC"
+      ],
+      "pair_ordinal": 4,
+      "query_speedup": 1.0889644834630685
+    }
+  ],
+  "performance_claimed": false,
+  "prepared_gc_isolation": true,
+  "protocol_hash": "cc63666459b49ada1dbbd7416229c7ea3dd51d7c7806e540ce09797b904fad5e",
+  "query_parity_qualified": true,
+  "query_research_gate_qualified": false,
+  "query_speedup_geomean": 1.0630537637159618,
+  "query_speedup_worst": 1.0399144399031852,
+  "region_template_hash": "abb1b169fd5bc2ed1ceda970a83f9a10427d0c152590e8bdc5f001791f6fb2f5",
+  "schema_version": "boundflow.bab4-gc-five-fresh/v1",
+  "summary_hash": "604629e91be8f3491a4725bf27b6d13815bbc5a734b39803c3021c9dd10bd5ed",
+  "worker_count": 10
+}
