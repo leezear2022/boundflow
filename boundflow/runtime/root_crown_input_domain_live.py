@@ -91,6 +91,7 @@ class RootCrownInputDomainLiveBridgeV1:
         self._upper_d: torch.Tensor | None = None
         self._zero_coefficients: bool | None = None
         self._static_admitted = False
+        self.exact_warmup_reuse_count = 0
 
     @staticmethod
     def _eligible(instance: Any, kwargs: Mapping[str, Any]) -> bool:
@@ -344,6 +345,30 @@ class RootCrownInputDomainLiveBridgeV1:
         ):
             raise ValueError("root CROWN input-domain live activation count differs")
 
+    def reset_after_exact_warmup_v1(self) -> None:
+        """Keep exact model/property admission and clear warm execution counters."""
+
+        self.validate()
+        if (
+            self.exact_warmup_reuse_count != 0
+            or not self._static_admitted
+            or self._input_center is None
+            or self._input_radius is None
+            or self._upper_d is None
+            or self._zero_coefficients is None
+            or self._active
+            or self._pending is not None
+        ):
+            raise ValueError("root CROWN input-domain warm reuse state differs")
+        self.outer_call_count = 0
+        self.relu_replacement_count = 0
+        self.conv_replacement_count = 0
+        self.concretize_replacement_count = 0
+        self.deferred_dense_a_count = 0
+        self.fallback_count = 0
+        self._last_pending = None
+        self.exact_warmup_reuse_count = 1
+
     def receipt(self) -> dict[str, object]:
         """Return compiler identities and actual production activation counters."""
 
@@ -363,6 +388,7 @@ class RootCrownInputDomainLiveBridgeV1:
             "conv_replacement_count": self.conv_replacement_count,
             "concretize_replacement_count": self.concretize_replacement_count,
             "deferred_dense_a_count": self.deferred_dense_a_count,
+            "exact_warmup_reuse_count": self.exact_warmup_reuse_count,
             "dense_input_a_external_materialization_count": 0,
             "forward_launch_count": self.executor.input_domain.forward_launch_count,
             "backward_launch_count": self.executor.input_domain.backward_launch_count,

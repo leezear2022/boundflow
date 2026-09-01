@@ -68,6 +68,7 @@ class RootCrownFullPipelineTIRExecutorV1:
         self.projection_stage_count = 0
         self.consume_count = 0
         self.fallback_count = 0
+        self.exact_warmup_reset_count = 0
         self._staged_expanded: RootCrownExpandedSuffixTensorsV1 | None = None
         self._staged_a: torch.Tensor | None = None
         self._staged_bias: torch.Tensor | None = None
@@ -128,6 +129,64 @@ class RootCrownFullPipelineTIRExecutorV1:
             device="cuda",
         )
         self.prepare_count = 1
+
+    def reset_after_exact_warmup_v1(self) -> None:
+        """Reuse prepared modules while starting a fresh measured transaction."""
+
+        suffix = self.expanded.suffix
+        modules = (
+            suffix.terminal,
+            suffix.residual,
+            self.expanded.projection,
+            self.input_domain,
+        )
+        if (
+            self.prepare_count != 1
+            or self.exact_warmup_reset_count != 0
+            or self.projection_stage_count != 5
+            or self.consume_count != 5
+            or self.expanded.residual_stage_count != 5
+            or self.expanded.consume_count != 5
+            or suffix.stage_count != 5
+            or suffix.consume_count != 5
+            or any(
+                module.forward_launch_count != 5
+                or module.backward_launch_count != 4
+                or module.fallback_count != 0
+                for module in modules
+            )
+            or any(
+                value is not None
+                for value in (
+                    self._staged_expanded,
+                    self._staged_a,
+                    self._staged_bias,
+                    self.expanded._staged_suffix,
+                    self.expanded._staged_a,
+                    self.expanded._staged_bias,
+                    suffix._staged_tensors,
+                    suffix._staged_a,
+                    suffix._staged_bias,
+                )
+            )
+        ):
+            raise ValueError("root CROWN exact warmup reset precondition differs")
+        self.projection_stage_count = 0
+        self.consume_count = 0
+        self.fallback_count = 0
+        self.expanded.residual_stage_count = 0
+        self.expanded.consume_count = 0
+        self.expanded.fallback_count = 0
+        suffix.stage_count = 0
+        suffix.consume_count = 0
+        suffix.fallback_count = 0
+        for module in modules:
+            module.forward_launch_count = 0
+            module.backward_launch_count = 0
+            module.fallback_count = 0
+            module.pointer_count = 0
+            module.pointer_exact_count = 0
+        self.exact_warmup_reset_count = 1
 
     def stage_terminal(
         self, tensors: RootCrownTerminalTensorsV1

@@ -93,6 +93,7 @@ class RootCrownSuffixLiveBridgeV1:
         self._upper_d: dict[str, torch.Tensor] = {}
         self._zero_coefficients: dict[str, bool] = {}
         self._static_admitted = False
+        self.exact_warmup_reuse_count = 0
 
     @staticmethod
     def _eligible(instance: Any, kwargs: Mapping[str, Any]) -> bool:
@@ -453,6 +454,36 @@ class RootCrownSuffixLiveBridgeV1:
         ):
             raise ValueError("root CROWN suffix activation count differs")
 
+    def reset_after_exact_warmup_v1(self) -> None:
+        """Retain admitted immutable state and reset one warm transaction."""
+
+        self.validate()
+        if (
+            self.exact_warmup_reuse_count != 0
+            or not self._static_admitted
+            or set(self._upper_d) != {"terminal", "entry", "inner"}
+            or set(self._zero_coefficients) != {"terminal", "entry", "inner"}
+            or self._active
+            or any(
+                value is not None
+                for value in (
+                    self._terminal_pending,
+                    self._terminal_current,
+                    self._residual_pending,
+                )
+            )
+        ):
+            raise ValueError("root CROWN suffix warm reuse state differs")
+        self.outer_call_count = 0
+        self.terminal_relu_count = 0
+        self.terminal_linear_count = 0
+        self.residual_entry_count = 0
+        self.residual_add_count = 0
+        self.bypassed_main_call_count = 0
+        self.fallback_count = 0
+        self._last_suffix = None
+        self.exact_warmup_reuse_count = 1
+
     def receipt(self) -> dict[str, object]:
         """Return activation, compiler identity and boundary counters."""
 
@@ -496,6 +527,7 @@ class RootCrownSuffixLiveBridgeV1:
                 self.executor.residual.backward_launch_count
             ),
             "bypassed_main_call_count": self.bypassed_main_call_count,
+            "exact_warmup_reuse_count": self.exact_warmup_reuse_count,
             "fallback_count": 0,
             "performance_claimed": False,
         }

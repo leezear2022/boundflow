@@ -83,6 +83,7 @@ class RootCrownProjectionLiveBridgeV1:
         self._entry_zero_coefficients: bool | None = None
         self._inner_zero_coefficients: bool | None = None
         self._static_admitted = False
+        self.exact_warmup_reuse_count = 0
 
     @staticmethod
     def _eligible(instance: Any, kwargs: Mapping[str, Any]) -> bool:
@@ -285,9 +286,10 @@ class RootCrownProjectionLiveBridgeV1:
                     output_a, _staged_bias = self._expanded_executor.stage_projection(
                         expanded_tensors
                     )
-                    output_bias = self._zero_bias
-                    if output_bias is None:
+                    zero_bias = self._zero_bias
+                    if zero_bias is None:
                         raise RuntimeError("root CROWN projection zero bias is absent")
+                    output_bias = zero_bias
                 else:
                     output_a, output_bias = execute_root_crown_expanded_suffix_tir_v1(
                         expanded_tensors, self._expanded_executor
@@ -375,6 +377,30 @@ class RootCrownProjectionLiveBridgeV1:
         ):
             raise ValueError("root CROWN projection live activation count differs")
 
+    def reset_after_exact_warmup_v1(self) -> None:
+        """Preserve static admission and clear one completed warm transaction."""
+
+        self.validate()
+        if (
+            self.exact_warmup_reuse_count != 0
+            or not self._static_admitted
+            or self._entry_upper_d is None
+            or self._inner_upper_d is None
+            or self._entry_zero_coefficients is None
+            or self._inner_zero_coefficients is None
+            or self._active
+            or self._pending is not None
+        ):
+            raise ValueError("root CROWN projection warm reuse state differs")
+        self.outer_call_count = 0
+        self.entry_replacement_count = 0
+        self.add_replacement_count = 0
+        self.skip_carrier_count = 0
+        self.bypassed_main_call_count = 0
+        self.fallback_count = 0
+        self._last_tensors = None
+        self.exact_warmup_reuse_count = 1
+
     def receipt(self) -> dict[str, object]:
         """Return actual activation and compiler identities."""
 
@@ -395,6 +421,7 @@ class RootCrownProjectionLiveBridgeV1:
             "add_replacement_count": self.add_replacement_count,
             "skip_carrier_count": self.skip_carrier_count,
             "bypassed_main_call_count": self.bypassed_main_call_count,
+            "exact_warmup_reuse_count": self.exact_warmup_reuse_count,
             "forward_launch_count": self.executor.forward_launch_count,
             "backward_launch_count": self.executor.backward_launch_count,
             "fallback_count": 0,
