@@ -82,3 +82,7 @@ formal 生成只能从工具提交后的 clean tracked source 开始。历史用
 汇总 fail closed。现已按 candidate schema 显式选择字段。已有 10 份 raw 经修正逻辑完整重算
 通过，证明没有第二个汇总问题；这批 raw 只用于验证修复，不作为最终 artifact。正式数据必须从
 包含该修复的新 source commit 重新运行。
+
+第一次完整 artifact 演练的 replay 已 PASS；tamper 第 4 类测试暴露探针自身把列表型
+`visited_domains` 当标量修改。已改为追加伪造 domain id。由于 tamper 脚本也属于 protocol 的
+`CODE_PATHS`，该演练 artifact 同样不升级为最终证据，必须在探针修复提交后重新生成。

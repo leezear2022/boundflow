@@ -60,7 +60,7 @@ def _mutations() -> tuple[tuple[str, Mutation], ...]:
         payload["run"]["semantics"]["lower_values"][0] += 1.0
 
     def discrete(payload: dict[str, Any]) -> None:
-        payload["run"]["semantics"]["visited_domains"] += 1
+        payload["run"]["semantics"]["visited_domains"].append(999)
 
     def environment(payload: dict[str, Any]) -> None:
         payload["run"]["environment"]["admitted"] = False
