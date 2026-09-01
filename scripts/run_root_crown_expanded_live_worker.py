@@ -2,12 +2,13 @@
 """Run fresh control or terminal+residual+projection root CROWN execution."""
 
 # pylint: disable=import-error,wrong-import-position,import-outside-toplevel
-# pylint: disable=too-many-locals,protected-access,duplicate-code
+# pylint: disable=too-many-locals,too-many-statements,protected-access,duplicate-code
 # mypy: disable-error-code=import-untyped
 
 from __future__ import annotations
 
 import argparse
+from contextlib import ExitStack
 import json
 from pathlib import Path
 import sys
@@ -21,6 +22,12 @@ if str(REPOSITORY_ROOT) not in sys.path:
 
 from boundflow.backends.tvm.root_crown_projection import (  # noqa: E402
     RootCrownProjectionTemplateV1,
+)
+from boundflow.runtime.root_crown_full_pipeline_tir import (  # noqa: E402
+    RootCrownFullPipelineTIRExecutorV1,
+)
+from boundflow.runtime.root_crown_input_domain_live import (  # noqa: E402
+    RootCrownInputDomainLiveBridgeV1,
 )
 from boundflow.backends.tvm.root_crown_terminal_linear import (  # noqa: E402
     RootCrownTerminalLinearTemplateV1,
@@ -36,6 +43,9 @@ from boundflow.runtime.root_crown_suffix_live import (  # noqa: E402
 )
 from scripts import run_asplos27_s4_same_solver_worker as s4_worker  # noqa: E402
 from scripts.probe_root_crown_residual_tir import _coordinates  # noqa: E402
+from scripts.probe_root_crown_input_domain_tir import (  # noqa: E402
+    _template as input_template,
+)
 from scripts.run_root_crown_residual_live_worker import (  # noqa: E402
     DEFAULT_CAPTURE as DEFAULT_RESIDUAL_CAPTURE,
     _template as residual_template,
@@ -44,6 +54,9 @@ from scripts.run_root_crown_terminal_live_worker import FEATURE_INDICES  # noqa:
 
 DEFAULT_PROJECTION_CAPTURE = REPOSITORY_ROOT / (
     "artifacts/root-crown-projection-capture/resnet2b-prop0-v1/capture.pt"
+)
+DEFAULT_INPUT_CAPTURE = REPOSITORY_ROOT / (
+    "artifacts/root-crown-input-capture/resnet2b-prop0-v1/capture.pt"
 )
 
 
@@ -86,6 +99,7 @@ def _worker(args: argparse.Namespace) -> None:
     suffix = None
     projection = None
     expanded = None
+    input_domain = None
     prepare_ns = 0
     if args.mode != "control":
         residual = residual_template(args.residual_capture)
@@ -100,7 +114,33 @@ def _worker(args: argparse.Namespace) -> None:
         )
         projection_template = _projection_template(args.projection_capture)
         started = time.perf_counter_ns()
-        if args.mode == "candidate-single":
+        if args.mode == "candidate-full":
+            import torch
+
+            input_payload = torch.load(
+                args.input_capture, map_location="cpu", weights_only=True
+            )
+            input_evaluations = cast(
+                list[dict[str, Any]], input_payload.get("evaluations")
+            )
+            if (
+                input_payload.get("schema_version")
+                != "boundflow.root-crown-input-tensors/v1"
+                or len(input_evaluations) != 5
+            ):
+                raise ValueError("root CROWN input-domain live capture differs")
+            full = RootCrownFullPipelineTIRExecutorV1(
+                terminal,
+                residual,
+                projection_template,
+                input_template(input_evaluations[0]),
+            )
+            expanded = full
+            suffix = RootCrownSuffixLiveBridgeV1(terminal, residual, full)
+            projection = RootCrownProjectionLiveBridgeV1(projection_template, full)
+            input_domain = RootCrownInputDomainLiveBridgeV1(full.input_template, full)
+            full.prepare()
+        elif args.mode == "candidate-single":
             expanded = RootCrownExpandedSuffixTIRExecutorV1(
                 terminal, residual, projection_template
             )
@@ -131,7 +171,11 @@ def _worker(args: argparse.Namespace) -> None:
         if suffix is None or projection is None:
             s4_worker._worker(namespace)
         else:
-            with suffix.install(BoundedModule), projection.install(BoundedModule):
+            with ExitStack() as stack:
+                stack.enter_context(suffix.install(BoundedModule))
+                stack.enter_context(projection.install(BoundedModule))
+                if input_domain is not None:
+                    stack.enter_context(input_domain.install(BoundedModule))
                 s4_worker._worker(namespace)
         base = json.loads(base_result.read_text(encoding="utf-8"))
     base["root_expanded_mode"] = args.mode
@@ -140,6 +184,9 @@ def _worker(args: argparse.Namespace) -> None:
     base["root_suffix_receipt"] = None if suffix is None else suffix.receipt()
     base["root_projection_receipt"] = (
         None if projection is None else projection.receipt()
+    )
+    base["root_input_domain_receipt"] = (
+        None if input_domain is None else input_domain.receipt()
     )
     base["root_expanded_receipt"] = (
         None
@@ -150,7 +197,8 @@ def _worker(args: argparse.Namespace) -> None:
             "residual_stage_count": expanded.residual_stage_count,
             "consume_count": expanded.consume_count,
             "fallback_count": expanded.fallback_count,
-            "cumulative_autograd_owner_count": expanded.consume_count,
+            "cumulative_autograd_owner_count": 1,
+            "custom_autograd_invocation_count": expanded.consume_count,
             "performance_claimed": False,
         }
     )
@@ -184,7 +232,7 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--mode",
-        choices=("control", "candidate", "candidate-single"),
+        choices=("control", "candidate", "candidate-single", "candidate-full"),
         required=True,
     )
     parser.add_argument("--run-id", required=True)
@@ -200,6 +248,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--projection-capture", type=Path, default=DEFAULT_PROJECTION_CAPTURE
     )
+    parser.add_argument("--input-capture", type=Path, default=DEFAULT_INPUT_CAPTURE)
     parser.add_argument("--result", type=Path, required=True)
     return parser.parse_args()
 

@@ -71,7 +71,7 @@ def _semantic_difference(left: dict[str, Any], right: dict[str, Any]) -> float:
 def _command(
     args: argparse.Namespace, mode: str, pair: int, sequence: int, result: Path
 ) -> list[str]:
-    return [
+    command = [
         str(args.python),
         str(WORKER),
         "--mode",
@@ -97,14 +97,18 @@ def _command(
         "--result",
         str(result),
     ]
+    if args.input_capture is not None:
+        command.extend(("--input-capture", str(args.input_capture)))
+    return command
 
 
 def _run(args: argparse.Namespace) -> dict[str, object]:
     args.output.mkdir(parents=True, exist_ok=True)
+    candidate_mode = args.candidate_mode
     orders = (
-        ("control", "candidate-single"),
-        ("candidate-single", "control"),
-        ("control", "candidate-single"),
+        ("control", candidate_mode),
+        (candidate_mode, "control"),
+        ("control", candidate_mode),
     )
     rows: list[dict[str, object]] = []
     for pair, order in enumerate(orders):
@@ -123,7 +127,7 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
             )
             payloads[mode] = json.loads(result.read_text(encoding="utf-8"))
         control = payloads["control"]
-        candidate = payloads["candidate-single"]
+        candidate = payloads[candidate_mode]
         row: dict[str, object] = {
             "pair": pair,
             "order": list(order),
@@ -138,6 +142,7 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
         rows.append(row)
     summary: dict[str, object] = {
         "schema_version": "boundflow.root-crown-expanded-three-fresh/v1",
+        "candidate_mode": candidate_mode,
         "pair_count": len(rows),
         "rows": rows,
         "maximum_lower_absolute_difference": max(
@@ -169,6 +174,12 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--property", type=Path, required=True)
     parser.add_argument("--residual-capture", type=Path, required=True)
     parser.add_argument("--projection-capture", type=Path, required=True)
+    parser.add_argument("--input-capture", type=Path)
+    parser.add_argument(
+        "--candidate-mode",
+        choices=("candidate-single", "candidate-full"),
+        default="candidate-single",
+    )
     parser.add_argument("--output", type=Path, required=True)
     return parser.parse_args()
 

@@ -281,9 +281,17 @@ class RootCrownProjectionLiveBridgeV1:
                 expanded_tensors = RootCrownExpandedSuffixTensorsV1(
                     self._expanded_executor.staged_suffix, tensors
                 )
-                output_a, output_bias = execute_root_crown_expanded_suffix_tir_v1(
-                    expanded_tensors, self._expanded_executor
-                )
+                if hasattr(self._expanded_executor, "stage_projection"):
+                    output_a, _staged_bias = self._expanded_executor.stage_projection(
+                        expanded_tensors
+                    )
+                    output_bias = self._zero_bias
+                    if output_bias is None:
+                        raise RuntimeError("root CROWN projection zero bias is absent")
+                else:
+                    output_a, output_bias = execute_root_crown_expanded_suffix_tir_v1(
+                        expanded_tensors, self._expanded_executor
+                    )
             self._last_tensors = tensors
             self._pending = None
             self.add_replacement_count += 1
