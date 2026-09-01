@@ -499,6 +499,7 @@ def evaluate_bab_full_region_trace_v1(
     terminal_executor: Any | None = None,
     residual_executor: Any | None = None,
     projection_executor: Any | None = None,
+    input_executor: Any | None = None,
 ) -> BabFullRegionTraceV1:
     """Evaluate the full activation-BaB region and expose an oracle trace."""
 
@@ -611,9 +612,29 @@ def evaluate_bab_full_region_trace_v1(
             ),
             projection_executor,
         )
-    concrete, input_bias = _input_domain(
-        projection_a, dynamic.input_alpha, static.input_domain
-    )
+    if input_executor is None:
+        concrete, input_bias = _input_domain(
+            projection_a, dynamic.input_alpha, static.input_domain
+        )
+    else:
+        from boundflow.runtime.bab_input_domain_tir import (
+            BabInputDomainTensorsV1,
+            execute_bab_input_domain_tir_v1,
+        )
+
+        concrete, input_bias = execute_bab_input_domain_tir_v1(
+            BabInputDomainTensorsV1(
+                incoming_lower_a=projection_a,
+                preactivation_lower=static.input_domain.lower,
+                preactivation_upper=static.input_domain.upper,
+                raw_alpha=dynamic.input_alpha,
+                operator_weight=static.input_domain.weight,
+                operator_bias=static.input_domain.bias,
+                input_center=static.input_domain.center,
+                input_radius=static.input_domain.radius,
+            ),
+            input_executor,
+        )
     total_bias = terminal_bias + residual_bias + projection_bias + input_bias
     return BabFullRegionTraceV1(
         terminal_a=terminal_a,
@@ -663,6 +684,7 @@ class _BabFullRegionFunction(torch.autograd.Function):
             terminal_executor=owner.terminal_executor,
             residual_executor=owner.residual_executor,
             projection_executor=owner.projection_executor,
+            input_executor=owner.input_executor,
         ).final_lower
 
     @staticmethod
@@ -682,6 +704,7 @@ class _BabFullRegionFunction(torch.autograd.Function):
                 terminal_executor=ctx.owner.terminal_executor,
                 residual_executor=ctx.owner.residual_executor,
                 projection_executor=ctx.owner.projection_executor,
+                input_executor=ctx.owner.input_executor,
             ).final_lower
             gradients = torch.autograd.grad(
                 lower,
@@ -736,7 +759,7 @@ class BabFullRegionOwnerReceiptV1:
                     or self.terminal_backward_launch_count < self.backward_count
                 )
             )
-            or self.compiled_segment_count not in {0, 1, 2, 3}
+            or self.compiled_segment_count not in {0, 1, 2, 3, 4}
             or (
                 self.compiled_segment_count == 0
                 and (
@@ -769,11 +792,13 @@ class PreparedBabFullRegionOwnerV1:
         terminal_executor: Any | None = None,
         residual_executor: Any | None = None,
         projection_executor: Any | None = None,
+        input_executor: Any | None = None,
     ) -> None:
         self.static = static
         self.terminal_executor = terminal_executor
         self.residual_executor = residual_executor
         self.projection_executor = projection_executor
+        self.input_executor = input_executor
         self.forward_count = 0
         self.backward_count = 0
 
@@ -795,6 +820,7 @@ class PreparedBabFullRegionOwnerV1:
                 self.terminal_executor,
                 self.residual_executor,
                 self.projection_executor,
+                self.input_executor,
             )
             if value is not None
         )
